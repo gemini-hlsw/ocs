@@ -1,5 +1,8 @@
 #include "StatusDatabase.h"
+
 #include <giapi/giapi.h>
+#include "AlarmStatusItem.h"
+
 namespace giapi {
 
 log4cxx::LoggerPtr StatusDatabase::logger(log4cxx::Logger::getLogger("giapi.StatusDatabase"));
@@ -20,46 +23,58 @@ StatusDatabase& StatusDatabase::Instance() {
 	return *INSTANCE;
 }
 
-int StatusDatabase::setStatusValueAsInt(const char * name, int value) {
-	StatusItem* statusItem = getOrMakeStatusItem(name);
+int StatusDatabase::createStatusItem(const char* name) {
+
+	if (getStatusItem(name) != 0) {
+		//status item already present. 
+		LOG4CXX_WARN(logger, "A status item with the name " << name << " already created. No action");
+		return status::GIAPI_NOK;
+	}
+	LOG4CXX_INFO(logger, "Creating a Status Item for " << name);
+	//make a new status item and store it in the map. 
+	StatusItem *item = new StatusItem(name);
+	_map[name] = item;
+	return status::GIAPI_OK;
+
+}
+
+int StatusDatabase::createAlarmStatusItem(const char* name) {
+
+	if (getStatusItem(name) != 0) {
+		//status item already present. 
+		LOG4CXX_DEBUG(logger, "StatusDatabase::createAlarmStatusItem. A status item "
+				" with the name " << name << " already created. No action");
+		return status::GIAPI_NOK;
+	}
+
+	//make a new status item and store it in the map. 
+	StatusItem *item = new AlarmStatusItem(name);
+	_map[name] = item;
+	return status::GIAPI_OK;
+
+}
+
+int StatusDatabase::setStatusValueAsInt(const char* name, int value) {
+	StatusItem* statusItem = getStatusItem(name);
 	if (statusItem == 0) {
 		return status::GIAPI_NOK;
 	}
 	return statusItem->setValueAsInt(value);
 }
 
-int StatusDatabase::setStatusValueAsString(const char *name, const char * value) {
-	StatusItem* statusItem = getOrMakeStatusItem(name);
+int StatusDatabase::setStatusValueAsString(const char* name, const char * value) {
+	StatusItem* statusItem = getStatusItem(name);
 	if (statusItem == 0) {
 		return status::GIAPI_NOK;
 	}
 	return statusItem->setValueAsString(value);
 }
 
-StatusItem * StatusDatabase::getStatusItem(const char * name) {
+StatusItem * StatusDatabase::getStatusItem(const char* name) {
 	if (name == 0) {
 		return (StatusItem *)0; //NULL
 	}
 	return _map[name];
-}
-
-StatusItem * StatusDatabase::getOrMakeStatusItem(const char * name) {
-
-	if (name == 0) {
-		return (StatusItem *)0;  //We can't make a null status item
-	}
-	
-	StatusItem * statusItem = getStatusItem(name);
-
-	if (statusItem == 0) {
-		//No status item found. Make a new one
-		LOG4CXX_INFO(logger, "StatusDatabase::updateStatusItem: No Status item associated to: "
-				<< name << "...making new instance");
-		statusItem = new StatusItem(name); 
-		_map[name] = statusItem;
-	}
-	return statusItem;
-
 }
 
 }

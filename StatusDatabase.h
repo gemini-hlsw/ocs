@@ -29,13 +29,33 @@ class StatusDatabase {
 private:
 	StringStatusMap _map;
 	static StatusDatabase * INSTANCE;
-	StatusItem* getOrMakeStatusItem(const char *name);
 public:
 	static StatusDatabase & Instance(); //TODO: Synchronize
 	StatusDatabase();
 	virtual ~StatusDatabase();
 
-	//void makeStatusItem(const char *name, Type type);
+	/**
+	 * Create an status item in the database
+	 *  
+	 * @param name The name of the status item that will be 
+	 * 	           created. If an status item with the same name already exists, 
+	 *             the method will return giapi::status::NOK
+	 * @return giapi::status::OK if the item was sucessfully created, 
+	 *         giapi::status::NOK if there is an error. 
+	 */
+	int createStatusItem(const char *name);
+
+	/**
+	 * Create an alarm status item in the status database
+	 * 
+	 * @param name The name of the alarm status item that will be 
+	 * 	           created. If an status item with the same name already exists, 
+	 *             the method will return giapi::status::NOK
+	 * @return giapi::status::OK if the item was sucessfully created, 
+	 *         giapi::status::NOK if there is an error. 
+	 */
+	int createAlarmStatusItem(const char *name);
+
 	int setStatusValueAsInt(const char *name, int value);
 	int setStatusValueAsString(const char *name, const char *value);
 

@@ -6,7 +6,7 @@ namespace giapi {
  * This is the public status sender interface. These methods
  * are used by client programs to interact with the status sender. 
  * Instances of status senders are obtained through the  
- * @{link StatusFactory}. 
+ * {@link StatusFactory}. 
  * 
  * @see StatusFactory
  */

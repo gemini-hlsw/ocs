@@ -25,9 +25,19 @@ int StatusUtil::setValueAsInt(const char* name, int value) {
 	return database.setStatusValueAsInt(name, value);
 }
 
-int StatusUtil::setValueAsString(const char *name, const char *value) {
+int StatusUtil::setValueAsString(const char* name, const char *value) {
 	StatusDatabase& database = StatusDatabase::Instance();
 	return database.setStatusValueAsString(name, value);
+}
+
+int StatusUtil::createStatusItem(const char* name) {
+	StatusDatabase& database = StatusDatabase::Instance();
+	return database.createStatusItem(name);
+}
+
+int StatusUtil::createAlarmStatusItem(const char* name) {
+	StatusDatabase& database = StatusDatabase::Instance();
+	return database.createAlarmStatusItem(name);
 }
 
 }

@@ -1,16 +1,39 @@
 #ifndef STATUSUTIL_H_
 #define STATUSUTIL_H_
-
+#include <giapi/giapi.h>
 #include <giapi/giapiexcept.h>
 
 namespace giapi {
 
 /**
- * A collection of utility mechanisms to deal with status in GIAPI
+ * A collection of utility mechanisms to deal with status in the GIAPI
  */
 class StatusUtil {
 
 public:
+	/**
+	 * Create an status item in the GIAPI framework. 
+	 *  
+	 * @param name The name of the status item that will be 
+	 * 	           created. If an status item with the same name already exists, 
+	 *             the method will return giapi::status::NOK
+	 * @return giapi::status::OK if the item was sucessfully created, 
+	 *         giapi::status::NOK if there is an error. 
+	 */
+	static int createStatusItem(const char * name);
+
+	/**
+	 * Create an alarm status item in the GIAPI framework. An alarm 
+	 * status item is a status item that can add Severity, Cause and a message  
+	 *  
+	 * @param name The name of the alarm status item that will be 
+	 * 	           created. If an status item with the same name already exists, 
+	 *             the method will return giapi::status::NOK
+	 * @return giapi::status::OK if the item was sucessfully created, 
+	 *         giapi::status::NOK if there is an error. 
+	 */
+	static int createAlarmStatusItem(const char *name);
+	
 	/**
 	 * Post all pending status to Gemini. Pending statuses are those
 	 * whose value has changed since last time posted by GIAPI.
@@ -52,8 +75,9 @@ public:
 	 *         already set to the new value. The StatusItem will not 
 	 *         be marked as dirty in this case. 
 	 *         giapi::status::GIAPI_NOK  if there is a problem setting the 
-	 *         value so the operation was aborted. This can happen for instance
-	 *         if the <code>name</code> is set to NULL  
+	 *         value and the operation was aborted. This can happen for instance
+	 *         if there is no StatusItem associated to the <code>name</code> or
+	 *         if <code>name</code> is set to NULL  
 	 */
 	static int setValueAsInt(const char *name, int value);
 
@@ -67,8 +91,9 @@ public:
 	 *         already set to the new value. The StatusItem will not 
 	 *         be marked as dirty in this case. 
 	 *         giapi::status::GIAPI_NOK  if there is a problem setting the 
-	 *         value so the operation was aborted. This can happen for instance
-	 *         if the <code>name</code> is set to NULL  
+	 *         value and the operation was aborted. This can happen for instance
+	 *         if there is no StatusItem associated to the <code>name</code> or
+	 *         if <code>name</code> is set to NULL  
 	 */
 
 	static int setValueAsChar(const char *name, char value);
@@ -84,9 +109,9 @@ public:
 	 *         already set to the new value. The StatusItem will not 
 	 *         be marked as dirty in this case. 
 	 *         giapi::status::GIAPI_NOK  if there is a problem setting the 
-	 *         value so the operation was aborted. This can happen for instance
-	 *         if the <code>name</code> is set to NULL. The StatusItem will not
-	 *         be marked as dirty in this case. 
+	 *         value and the operation was aborted. This can happen for instance
+	 *         if there is no StatusItem associated to the <code>name</code> or
+	 *         if <code>name</code> is set to NULL  
 	 * 			  
 	 */
 	static int setValueAsString(const char *name, const char *value);
@@ -101,10 +126,30 @@ public:
 	 *         already set to the new value. The StatusItem will not 
 	 *         be marked as dirty in this case. 
 	 *         giapi::status::GIAPI_NOK  if there is a problem setting the 
-	 *         value so the operation was aborted. This can happen for instance
-	 *         if the <code>name</code> is set to NULL  
+	 *         value and the operation was aborted. This can happen for instance
+	 *         if there is no StatusItem associated to the <code>name</code> or
+	 *         if <code>name</code> is set to NULL    
 	 */
 	static int setValueAsDouble(const char *name, double value);
+	
+	/**
+	 * Set the alarm for the specified status alarm item. 
+	 * 
+	 * @param name Name of the alarm item. The alarm items should have been 
+	 *             initialized by a call to {@link #createAlarmStatusItem()}
+	 *             
+	 * @param alarm::Severity the alarm severity. 
+	 * @param alarm::Cause the cause of the alarm 
+	 * 
+	 * @return giapi::status::OK if alarm was sucessfully set 
+	 *         giapi::status::NOK if there was an error setting the alarm 
+	 *         
+	 * @throw InvalidOperation if the given <code>name</code> is 
+	 *        not an Alarm Status Item. 
+	 */
+	static int setAlarm(const char *name, 
+			alarm::Severity severity, 
+			alarm::Cause cause, const char *message) throw (InvalidOperation);
 
 private:
 	StatusUtil();
