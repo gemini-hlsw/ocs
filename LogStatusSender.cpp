@@ -14,7 +14,6 @@ LogStatusSender::~LogStatusSender() {
 }
 
 int LogStatusSender::postStatus(const char* name) const throw (PostException) {
-	LOG4CXX_INFO(logger, "Posting Status");
 	
 	StatusItem * statusItem = StatusDatabase::Instance().getStatusItem(name);
 

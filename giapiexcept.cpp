@@ -5,14 +5,19 @@ PostException::PostException() :
 	runtime_error("PostException") {
 }
 
-PostException::PostException(const char * message) :
+PostException::PostException(const std::string & message) :
 	runtime_error(message) {
 
 }
 
-//const char * PostException::what() const throw() {
-//	return "giapi::post_exception: "
-//		"failed while attempting to post event";
-//}
+InvalidOperation::InvalidOperation() :
+	logic_error("Invalid Operation") {
+}
+
+InvalidOperation::InvalidOperation(const std::string & message) :
+	logic_error(message) {
+	
+}
+
 
 }

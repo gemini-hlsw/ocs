@@ -2,11 +2,13 @@
 #define STATUSUTIL_H_
 #include <giapi/giapi.h>
 #include <giapi/giapiexcept.h>
-
+//$Id$
 namespace giapi {
 
 /**
- * A collection of utility mechanisms to deal with status in the GIAPI
+ * A collection of utility mechanisms to handle status information and 
+ * alarms in the GIAPI.
+ * 
  */
 class StatusUtil {
 
@@ -24,7 +26,7 @@ public:
 
 	/**
 	 * Create an alarm status item in the GIAPI framework. An alarm 
-	 * status item is a status item that can add Severity, Cause and a message  
+	 * status item is a status item that adds Severity, Cause and a Message  
 	 *  
 	 * @param name The name of the alarm status item that will be 
 	 * 	           created. If an status item with the same name already exists, 
@@ -33,7 +35,7 @@ public:
 	 *         giapi::status::NOK if there is an error. 
 	 */
 	static int createAlarmStatusItem(const char *name);
-	
+
 	/**
 	 * Post all pending status to Gemini. Pending statuses are those
 	 * whose value has changed since last time posted by GIAPI.
@@ -131,25 +133,28 @@ public:
 	 *         if <code>name</code> is set to NULL    
 	 */
 	static int setValueAsDouble(const char *name, double value);
-	
+
 	/**
 	 * Set the alarm for the specified status alarm item. 
 	 * 
 	 * @param name Name of the alarm item. The alarm items should have been 
-	 *             initialized by a call to {@link #createAlarmStatusItem()}
+	 *             initialized by a call to {@link #createAlarmStatusItem()}. 
+	 *             Failing to do so will return an error. 
 	 *             
-	 * @param alarm::Severity the alarm severity. 
-	 * @param alarm::Cause the cause of the alarm 
+	 * @param severity the alarm severity.
+	 * @param cause the cause of the alarm 
+	 * @param message Optional message to describe the alarm
 	 * 
 	 * @return giapi::status::OK if alarm was sucessfully set 
-	 *         giapi::status::NOK if there was an error setting the alarm 
-	 *         
-	 * @throw InvalidOperation if the given <code>name</code> is 
-	 *        not an Alarm Status Item. 
+	 *         giapi::status::NOK if there was an error setting the alarm (for
+	 *         instance, the alarm item hasn't been created or the name doesn't
+	 *         correspond to an alarm status item).  
+	 * 
+	 * @see alarm::Severity
+	 * @see alarm::Cause
 	 */
-	static int setAlarm(const char *name, 
-			alarm::Severity severity, 
-			alarm::Cause cause, const char *message) throw (InvalidOperation);
+	static int setAlarm(const char *name, alarm::Severity severity,
+			alarm::Cause cause, const char *message = 0);
 
 private:
 	StatusUtil();

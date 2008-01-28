@@ -4,6 +4,8 @@
 
 #include <log4cxx/logger.h>
 
+#include <giapi/giapi.h>
+#include <giapi/giapiexcept.h>
 #include "StatusItem.h"
 
 //hash_map is an extension of STL. Will make its namespace visible here. 
@@ -58,6 +60,28 @@ public:
 
 	int setStatusValueAsInt(const char *name, int value);
 	int setStatusValueAsString(const char *name, const char *value);
+
+	/**
+	 * Set the alarm for the specified status alarm item. 
+	 * 
+	 * @param name Name of the alarm item. The alarm items should have been 
+	 *             initialized by a call to {@link #createAlarmStatusItem()}
+	 *             
+	 * @param severity the alarm severity.
+	 * @param cause the cause of the alarm 
+	 * @param message Optional message to describe the alarm
+	 * 
+	 * @return giapi::status::OK if alarm was sucessfully set 
+	 *         giapi::status::NOK if there was an error setting the alarm. This 
+	 *         happens for instance if the alarm status item has not been 
+	 *         created or the name is associated to an status item without 
+	 *         alarms).
+	 *        
+	 * @see alarm::Severity
+	 * @see alarm::Cause
+	 */
+	int setAlarm(const char *name, alarm::Severity severity,
+			alarm::Cause cause, const char *message = 0);
 
 	//get a status item from the database
 	StatusItem* getStatusItem(const char *name);

@@ -56,6 +56,23 @@ namespace giapi {
 			OTHER
 		} Cause;
 	}
+	
+	
+	namespace type {
+		/**
+		 * The different types supported by the elements
+		 * stored in status/commands
+		 */
+		typedef enum {
+			VOID, //Uninitialized. Can't operate if the type is set to VOID
+			INT,
+			CHAR,
+			STRING,
+			BOOL,
+			DOUBLE
+		} Type;
+		
+	}
 }
 
 #endif /*GIAPI_H_*/

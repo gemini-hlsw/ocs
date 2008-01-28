@@ -46,7 +46,7 @@ int StatusDatabase::createAlarmStatusItem(const char* name) {
 				" with the name " << name << " already created. No action");
 		return status::GIAPI_NOK;
 	}
-
+	LOG4CXX_INFO(logger, "Creating an Alarm Status Item for " << name);
 	//make a new status item and store it in the map. 
 	StatusItem *item = new AlarmStatusItem(name);
 	_map[name] = item;
@@ -75,6 +75,29 @@ StatusItem * StatusDatabase::getStatusItem(const char* name) {
 		return (StatusItem *)0; //NULL
 	}
 	return _map[name];
+}
+
+int StatusDatabase::setAlarm(const char *name, alarm::Severity severity,
+		alarm::Cause cause, const char* message)  {
+	
+	StatusItem * statusItem = getStatusItem(name);
+	if (statusItem == 0) {
+		return status::GIAPI_NOK;
+	}
+	
+	AlarmStatusItem* alarmStatusItem = dynamic_cast<AlarmStatusItem*>(statusItem);
+	
+	if (alarmStatusItem == 0) {
+		LOG4CXX_WARN(logger, name << " is not an alarm status item, aborting operation");
+		return status::GIAPI_NOK;
+	}
+	
+	//set the values in the alarm item
+	alarmStatusItem->setAlarmState(severity, cause, message);
+	
+	return status::GIAPI_OK;
+	
+
 }
 
 }

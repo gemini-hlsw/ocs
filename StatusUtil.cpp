@@ -40,4 +40,11 @@ int StatusUtil::createAlarmStatusItem(const char* name) {
 	return database.createAlarmStatusItem(name);
 }
 
+int StatusUtil::setAlarm(const char *name,
+		alarm::Severity severity, alarm::Cause cause, 
+		const char *message) {
+	StatusDatabase& database = StatusDatabase::Instance(); 
+	return database.setAlarm(name, severity, cause, message);
+}
+
 }

@@ -58,7 +58,7 @@ void StatusItem::clearChanged() {
 
 void StatusItem::_mark() {
 
-	LOG4CXX_DEBUG(logger, "Marking status item as dirty");
+	LOG4CXX_DEBUG(logger, "Marking dirty status item " << getName());
 	_changedFlag = true;
 	time_t currentTime = time(0);
 	_time = (currentTime == (time_t)-1) ? 0 : (unsigned long)currentTime;
