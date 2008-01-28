@@ -1,7 +1,9 @@
-#include "giapi/StatusUtil.h"
-#include "giapi/StatusFactory.h"
-#include "giapi/StatusSender.h"
 #include "StatusDatabase.h"
+
+#include <giapi/StatusUtil.h>
+#include <giapi/StatusFactory.h>
+#include <giapi/StatusSender.h>
+
 
 namespace giapi {
 
@@ -30,14 +32,14 @@ int StatusUtil::setValueAsString(const char* name, const char *value) {
 	return database.setStatusValueAsString(name, value);
 }
 
-int StatusUtil::createStatusItem(const char* name) {
+int StatusUtil::createStatusItem(const char* name, const type::Type type) {
 	StatusDatabase& database = StatusDatabase::Instance();
-	return database.createStatusItem(name);
+	return database.createStatusItem(name, type);
 }
 
-int StatusUtil::createAlarmStatusItem(const char* name) {
+int StatusUtil::createAlarmStatusItem(const char* name, const type::Type type) {
 	StatusDatabase& database = StatusDatabase::Instance();
-	return database.createAlarmStatusItem(name);
+	return database.createAlarmStatusItem(name, type);
 }
 
 int StatusUtil::setAlarm(const char *name,

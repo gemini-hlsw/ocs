@@ -1,8 +1,8 @@
 #include "AlarmStatusItem.h"
 
 namespace giapi {
-AlarmStatusItem::AlarmStatusItem(const char *name) :
-	StatusItem(name) {
+AlarmStatusItem::AlarmStatusItem(const char *name, const type::Type type) :
+	StatusItem(name, type) {
 	_message = 0;
 	_severity = alarm::NO_ALARM;
 	_cause = alarm::NO_CAUSE;

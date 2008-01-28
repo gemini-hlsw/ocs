@@ -1,15 +1,19 @@
 #include "StatusItem.h"
-#include "giapi/giapi.h"
+
+#include <giapi/giapi.h>
+#include <giapi/giapiexcept.h>
+
 #include <time.h>
 
 namespace giapi {
 
 log4cxx::LoggerPtr StatusItem::logger(log4cxx::Logger::getLogger("giapi.StatusItem"));
 
-StatusItem::StatusItem(const char *name) :
+StatusItem::StatusItem(const char *name, const type::Type type) :
 	KvPair(name) {
 	_time = 0;
 	_changedFlag = false;
+	_type = type;
 }
 
 StatusItem::~StatusItem() {
@@ -17,30 +21,32 @@ StatusItem::~StatusItem() {
 
 int StatusItem::setValueAsInt(int value) {
 
-	//find out if the value is different from what we 
-	//already have
-	if (!_value.empty() && _value.type() == typeid(int)) {
-		LOG4CXX_DEBUG(logger, "Types match. Analyze equality");
-		if (value == getValueAsInt()) {
-			LOG4CXX_DEBUG(logger, "Values match. Won't mark as dirty");
-			return status::GIAPI_WARNING;
-		}
+	//If the type is not integer, return error. 
+	if (_type != type::INT) {
+		LOG4CXX_WARN(logger, "Can't set an int value in the status item : " << getName());
+		return status::ERROR;
 	}
+	//Figure out if this is a new value
+	if (!_value.empty() && value == getValueAsInt()) {
+		LOG4CXX_DEBUG(logger, "Values match. Won't mark as dirty. Item " << getName());
+		return status::WARNING;
+	}
+	//set the value
 	_mark();
 	return KvPair::setValueAsInt(value);
 }
 
 int StatusItem::setValueAsString(const char* value) {
 
-	//find out if the value is different from what we 
-	//already have
-
-	if (!_value.empty() && _value.type() == typeid(const char *)) {
-		LOG4CXX_DEBUG(logger, "Types match. Analyze equality");
-		if (strcmp(value, getValueAsString()) == 0) {
-			LOG4CXX_DEBUG(logger, "Values match. Won't mark as dirty");
-			return status::GIAPI_WARNING;
-		}
+	//If the type is not an string, return error. 
+	if (_type != type::STRING) {
+		LOG4CXX_WARN(logger, "Can't set a string value in the status item : " << getName());
+		return status::ERROR;
+	}
+	//Figure out if this is a new value
+	if (!_value.empty() && strcmp(value, getValueAsString()) == 0) {
+		LOG4CXX_DEBUG(logger, "Values match. Won't mark as dirty. Item " << getName());
+		return status::WARNING;
 	}
 	_mark();
 	return KvPair::setValueAsString(value);
@@ -58,11 +64,10 @@ void StatusItem::clearChanged() {
 
 void StatusItem::_mark() {
 
-	LOG4CXX_DEBUG(logger, "Marking dirty status item " << getName());
 	_changedFlag = true;
 	time_t currentTime = time(0);
 	_time = (currentTime == (time_t)-1) ? 0 : (unsigned long)currentTime;
-	LOG4CXX_DEBUG(logger, "Timestamp set to " << _time);
+	LOG4CXX_DEBUG(logger, "Marking dirty status item " << getName() << " at " << _time);
 
 }
 

@@ -19,12 +19,12 @@ int LogStatusSender::postStatus(const char* name) const throw (PostException) {
 
 	if (statusItem == 0) {
 		LOG4CXX_WARN(logger, "No status item found for " << name << ". Not posting");
-		return status::GIAPI_NOK;
+		return status::ERROR;
 	}
 	
 	if (!statusItem->isChanged()) {
 		LOG4CXX_WARN(logger, "Status Item " << name << " hasn't changed since last post. Not posting");
-		return status::GIAPI_WARNING;;
+		return status::WARNING;;
 	}
 	
 	const std::type_info& typeInfo = statusItem->getType();
@@ -40,11 +40,11 @@ int LogStatusSender::postStatus(const char* name) const throw (PostException) {
 		LOG4CXX_INFO(logger, "Post Status Item " << statusItem->getName() 
 						<< " Value : " << statusItem->getValueAsString());
 	}
-	return status::GIAPI_OK;
+	return status::OK;
 }
 
 int LogStatusSender::postStatus() const throw (PostException) {
-	return status::GIAPI_NOK;
+	return status::ERROR;
 }
 
 }

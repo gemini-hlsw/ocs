@@ -18,10 +18,10 @@ public:
 	 * whose value has changed since last time posted by GIAPI. A status
 	 * item is marked as "dirty" every time a new value is set. 
 	 * 
-	 * @return giapi::status::GIAPI_OK if the post suceeded. 
-	 *         giapi::status::GIAPI_WARNING if there is no status item pending
+	 * @return giapi::status::OK if the post suceeded. 
+	 *         giapi::status::WARNING if there is no status item pending
 	 *         for sending  
-	 *         giapi::status::GIAPI_NOK if there is some error in the attempt
+	 *         giapi::status::ERROR if there is some error in the attempt
 	 *         to send  
 	 * @throws PostException in case there is a problem with the underlying 
 	 *         mechanisms to execute the post. 
@@ -34,11 +34,11 @@ public:
 	 * item is marked as "dirty" every time a new value is set. 
 	 * 
 	 * @args   name The name of the status item to be posted
-	 * @return giapi::status::GIAPI_OK if the post suceeds. 
-	 *         giapi::status::GIAPI_WARNING if the status item value has not 
+	 * @return giapi::status::OK if the post suceeds. 
+	 *         giapi::status::WARNING if the status item value has not 
 	 *         changed since last post, therefore there is no need to send it
 	 *         again.   
-	 *         giapi::status::GIAPI_NOK if there is no information associated
+	 *         giapi::status::ERROR if there is no information associated
 	 *         to the specified status item or the <code>name</code> 
 	 *         parameter is NULL
 	 * @throws PostException in case there is a problem with the underlying 
@@ -49,8 +49,15 @@ public:
 	virtual ~StatusSender();
 
 protected:
+	/**
+	 * Protected default constructor. StatusSender concrete objectes 
+	 * are constructed using a {@link StatusFactory}.
+	 * 
+	 * @see StatusFactory 
+	 */
 	StatusSender();
 };
+
 
 }
 

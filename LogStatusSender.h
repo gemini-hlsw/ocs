@@ -3,12 +3,14 @@
 
 #include <log4cxx/logger.h>
 
-#include "giapi/StatusSender.h"
-#include "giapi/giapiexcept.h"
+#include <giapi/StatusSender.h>
+#include <giapi/giapiexcept.h>
 #include "StatusItem.h"
 
 namespace giapi {
-
+/**
+ * A Status Sender that logs the post commands
+ */
 class LogStatusSender : public StatusSender {
 	/**
 	 * Logging facility

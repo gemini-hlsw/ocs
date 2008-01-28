@@ -3,10 +3,14 @@
 
 #include <log4cxx/logger.h>
 
-#include "giapi/StatusSender.h"
-#include "giapi/giapiexcept.h"
+#include <giapi/StatusSender.h>
+#include <giapi/giapiexcept.h>
 
 namespace giapi {
+/**
+ * A Status Sender that uses JMS as the underlying communication
+ * mechanism
+ */
 class JmsStatusSender : public StatusSender {
 	/**
 	 * Logging facility

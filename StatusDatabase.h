@@ -8,21 +8,32 @@
 #include <giapi/giapiexcept.h>
 #include "StatusItem.h"
 
-//hash_map is an extension of STL. Will make its namespace visible here. 
+//hash_map is an extension of STL widely available on gnu compilers, fortunately 
+//Will make its namespace visible here. 
 using namespace __gnu_cxx;
 
 namespace giapi {
-
-struct eqstr {
-	bool operator()(const char *s1, const char *s2) const {
-		return strcmp(s1, s2) == 0;
-	}
-};
-
-typedef hash_map<const char *, StatusItem *, hash<const char *>, eqstr>
-		StringStatusMap;
-
+/**
+ * The status database is a repository of all the status items in the system.
+ * Provides mechanisms to handle different operation over the stored items
+ */
 class StatusDatabase {
+	/**
+	 * A comparator for strings to be used in the definition of the 
+	 * hash_table the database uses internally
+	 */
+	struct eqstr {
+		bool operator()(const char *s1, const char *s2) const {
+			return strcmp(s1, s2) == 0;
+		}
+	};
+    /**
+     * Type definition for the hash_table that will map strings to 
+     * StatusItems
+     */
+	typedef hash_map<const char *, StatusItem *, hash<const char *>, eqstr>
+			StringStatusMap;
+
 	/**
 	 * Logging facility
 	 */
@@ -31,34 +42,84 @@ class StatusDatabase {
 private:
 	StringStatusMap _map;
 	static StatusDatabase * INSTANCE;
-public:
-	static StatusDatabase & Instance(); //TODO: Synchronize
+	/**
+	 * Private constructor
+	 */
 	StatusDatabase();
-	virtual ~StatusDatabase();
+public:
+	/**
+	 * Get the unique instance of the database
+	 * 
+	 * @return The StatusDatabase singleton object
+	 */
+	static StatusDatabase & Instance();
 
 	/**
 	 * Create an status item in the database
 	 *  
 	 * @param name The name of the status item that will be 
 	 * 	           created. If an status item with the same name already exists, 
-	 *             the method will return giapi::status::NOK
+	 *             the method will return giapi::status::ERROR
+	 * @param type Type information for the values to be stored in this 
+	 *             item. 
+	 * 
 	 * @return giapi::status::OK if the item was sucessfully created, 
-	 *         giapi::status::NOK if there is an error. 
+	 *         giapi::status::ERROR if there is an error. 
 	 */
-	int createStatusItem(const char *name);
+	int createStatusItem(const char *name, const type::Type type);
 
 	/**
 	 * Create an alarm status item in the status database
 	 * 
 	 * @param name The name of the alarm status item that will be 
 	 * 	           created. If an status item with the same name already exists, 
-	 *             the method will return giapi::status::NOK
+	 *             the method will return giapi::status::ERROR
+	 * @param type Type information for the values to be stored in this 
+	 *             item. 
+	 * 
 	 * @return giapi::status::OK if the item was sucessfully created, 
-	 *         giapi::status::NOK if there is an error. 
+	 *         giapi::status::ERROR if there is an error. 
 	 */
-	int createAlarmStatusItem(const char *name);
+	int createAlarmStatusItem(const char *name, const type::Type type);
 
+	/**
+	 * Set the value of the given status item to the provided 
+	 * integer value.
+	 * 
+	 * @param name Name of the status item whose value will be set
+	 * @param value Integer value to store in the status item. 
+	 * 
+	 * @return giapi::status::OK if the value was set correctly 
+	 *         giapi::status::WARNING if the current status value is
+	 *         already set to the new value. The StatusItem will not 
+	 *         be marked as dirty in this case. 
+	 *         giapi::status::ERROR  if there is a problem setting the 
+	 *         value and the operation was aborted. This can happen if the 
+	 *         type of the status item was not defined as type::INTEGER, 
+	 *         if there is no StatusItem associated to the <code>name</code> or
+	 *         if <code>name</code> is set to NULL  
+	 */
 	int setStatusValueAsInt(const char *name, int value);
+
+	/**
+	 * Set the value of the given status item to the provided 
+	 * string value.
+	 * 
+	 * @param name Name of the status item whose value will be set
+	 * @param value String value to store in the status item. 
+	 * 
+	 * @return giapi::status::OK if the value was set correctly. The 
+	 *         StatusItem is marked dirty. 
+	 *         giapi::status::WARNING if the current status value is
+	 *         already set to the new value. The StatusItem will not 
+	 *         be marked as dirty in this case. 
+	 *         giapi::status::ERROR  if there is a problem setting the 
+	 *         value and the operation was aborted. This can happen if the 
+	 *         type of the status item was not defined as type::STRING, 
+	 *         if there is no StatusItem associated to the <code>name</code> or
+	 *         if <code>name</code> is set to NULL  
+	 * 			  
+	 */
 	int setStatusValueAsString(const char *name, const char *value);
 
 	/**
@@ -72,7 +133,7 @@ public:
 	 * @param message Optional message to describe the alarm
 	 * 
 	 * @return giapi::status::OK if alarm was sucessfully set 
-	 *         giapi::status::NOK if there was an error setting the alarm. This 
+	 *         giapi::status::ERROR if there was an error setting the alarm. This 
 	 *         happens for instance if the alarm status item has not been 
 	 *         created or the name is associated to an status item without 
 	 *         alarms).
@@ -83,8 +144,17 @@ public:
 	int setAlarm(const char *name, alarm::Severity severity,
 			alarm::Cause cause, const char *message = 0);
 
-	//get a status item from the database
+	/**
+	 * Return the status item associated to the given key, if found.
+	 * 
+	 * @param name Name of the status item to retrieve
+	 * 
+	 * @return the StatusItem object associated to the name, or 
+	 * NULL if not found
+	 */ 
 	StatusItem* getStatusItem(const char *name);
+
+	virtual ~StatusDatabase();
 
 };
 }

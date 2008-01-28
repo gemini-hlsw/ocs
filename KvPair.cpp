@@ -1,7 +1,5 @@
 #include "KvPair.h"
-
-#include <iostream>
-#include "giapi/giapi.h"
+#include <giapi/giapi.h>
 
 namespace giapi {
 
@@ -14,16 +12,15 @@ KvPair::~KvPair() {
 
 int KvPair::setValueAsInt(int value) {
 	_value = value;
-	return status::GIAPI_OK;
+	return status::OK;
 }
 
 int KvPair::setValueAsString(const char * value) {
 	_value = value;
-	return status::GIAPI_OK;
+	return status::OK;
 }
 
 int KvPair::getValueAsInt() const {
-	//TODO: Catch exception and throw a GIAPI specific one?.
 	return boost::any_cast<int>(_value);
 }
 

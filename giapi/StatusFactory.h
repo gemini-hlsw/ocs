@@ -6,7 +6,8 @@ namespace giapi {
 /**
  * This is the class that instantiates the {@link StatusSender} concrete
  * classes as requested. The specific {@link StatusSender} that will
- * be retrieved will depend on the type specified to the getter methods. 
+ * be retrieved will depend on the type specified to the getter methods,
+ * defined by the {@link StatusSenderType} enumerated type.
  * 
  */
 class StatusFactory {
@@ -37,8 +38,8 @@ public:
 	 * 
 	 * @return the singleton instance of this factory.
 	 */
-	static StatusFactory& Instance(void); //TODO: must be synchronized
-
+	static StatusFactory& Instance(void); 
+	
 	/**
 	 * Return the default StatusSender instance. The default status sender is 
 	 * defined internally by the implementing class. Several calls to this
@@ -46,7 +47,7 @@ public:
 	 *   
 	 * @return the default StatusSender
 	 */
-	virtual StatusSender& getStatusSender(void) = 0; //TODO: Must be synchronized
+	virtual StatusSender& getStatusSender(void) = 0;
 	
 	/**
 	 * Return the StatusSender specified by the <code>type</code>. Several 
@@ -55,13 +56,17 @@ public:
 	 *   
 	 * @return StatusSender associated to the type. 
 	 */
-	virtual StatusSender& getStatusSender(const StatusSenderType type) = 0; //TODO: must be Synchronized
+	virtual StatusSender& getStatusSender(const StatusSenderType type) = 0; 
 private:
 	/**
 	 * Internal instance of this factory
 	 */
 	static StatusFactory *INSTANCE;
 protected:
+	/**
+	 * Protected default constructor, instantiated internally by the 
+	 * Instance() method
+	 */
 	StatusFactory();
 	virtual ~StatusFactory();
 };

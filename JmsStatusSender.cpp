@@ -1,6 +1,5 @@
-#include <giapi/giapi.h>
-
 #include "JmsStatusSender.h"
+#include <giapi/giapi.h>
 
 
 namespace giapi {
@@ -15,12 +14,12 @@ JmsStatusSender::~JmsStatusSender() {
 
 int JmsStatusSender::postStatus(const char* name) const throw (PostException) {
 	LOG4CXX_ERROR(logger, "JmsStatusSender::postStatus unimplemented");
-	return status::GIAPI_NOK;
+	return status::ERROR;
 }
 
 int JmsStatusSender::postStatus() const throw (PostException) {
 	LOG4CXX_ERROR(logger, "JmsStatusSender::postStatus unimplemented");
-	return status::GIAPI_NOK;
+	return status::ERROR;
 }
 
 }

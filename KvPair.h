@@ -1,11 +1,10 @@
 #ifndef KVPAIR_H_
 #define KVPAIR_H_
 #include <boost/any.hpp>
-//TODO: Make the boost libraries to be available for the distro. 
 
 #include <typeinfo>
 /**
- * 
+ * A class that holds a key associated to a value. 
  */
 namespace giapi {
 
@@ -24,15 +23,51 @@ public:
 	 * Returns the type information associated to the 
 	 * value stored in this pair. The type information
 	 * is defined based on the last value stored in the object. 
+	 * If the value has not been set, the type of the stored 
+	 * item is void. 
 	 */
 	const std::type_info & getType() const;
 
-	//setters
+	/**
+	 * Set the value to the given int. Previous value is replaced,
+	 * no matter what type it was. Subclasses can specialize this 
+	 * behavior providing extra validations.
+	 * 
+	 * @param value the new integer value.
+	 * 
+	 * @return status::OK. Subclasses can return different
+	 *         values. See their specific documentation
+	 */
 	virtual int setValueAsInt(int value);
+
+	/**
+	 * Set the value to the given string. Previous value is replaced,
+	 * no matter what type it was. Subclasses can specialize this 
+	 * behavior providing extra validations.
+	 * 
+	 * @param value the new string value.
+	 * 
+	 * @return status::OK. Subclasses can return different
+	 *         values. See their specific documentation
+	 */
 	virtual int setValueAsString(const char * value);
 
-	//getters. Getters might throw bad_cast exceptions 
+	/**
+	 * Returns the value stored as an integer.
+	 *  
+	 * @return integer stored
+	 * 
+	 * @throws bad_cast exception if the stored item is not an integer
+	 */
 	int getValueAsInt() const;
+
+	/**
+	 * Returns the value stored as a string.
+	 *  
+	 * @return string stored
+	 * 
+	 * @throws bad_cast exception if the stored item is not a string
+	 */
 	const char * getValueAsString() const;
 
 };

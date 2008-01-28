@@ -5,6 +5,11 @@
 #include <giapi/giapi.h>
 
 namespace giapi {
+/**
+ * An Alarm Status Item is a Status Item that adds a severity, a cause
+ * and an optional message when an exceptional condition happens in any
+ * of the subsytems that might require user's attention.
+ */
 class AlarmStatusItem : public StatusItem {
 private:
 	const char * _message; //description of the cause of the alarm
@@ -12,12 +17,17 @@ private:
 	alarm::Cause _cause; //alarm cause
 
 public:
-	AlarmStatusItem(const char *name);
+	/**
+	 * Constructor. Initializes the status item with the
+	 * given (unique) <code>name</name>. The status item will store
+	 * a value of the given <code>type</code>
+	 */
+	AlarmStatusItem(const char *name, const type::Type type);
 	virtual ~AlarmStatusItem();
 
 	/**
 	 * Set the alarm state of this item. Once set, the
-	 * internal state of the item is marked as "dirty", 
+	 * internal state of the item is marked as dirty, 
 	 * therefore subsequent post invokations will cause
 	 * this item to be published. If the alarm severity
 	 * is set to alarm::NO_ALARM, the cause and message
@@ -37,6 +47,10 @@ public:
 	void setAlarmState(alarm::Severity severity, alarm::Cause cause,
 			const char * message = 0);
 	
+	/**
+	 * Reset the alarm information. The status item is in a 
+	 * no-alarm state after this call
+	 */
 	void reset();
 
 	/**
