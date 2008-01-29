@@ -3,6 +3,7 @@
 
 
 namespace giapi {
+
 	namespace status {
 		/**
 		 * GIAPI Status. Used for GIAPI calls to report status of the 
@@ -84,6 +85,36 @@ namespace giapi {
 			 */
 			BAD
 		} Health;
+	}
+	
+	namespace command {
+		typedef int ActionId;
+		
+		typedef enum {
+			TEST,
+			REBOOT,
+			INIT,
+			DATUM,
+			PARK,
+			VERIFY,
+			END_VERIFY,
+			GUIDE,
+			END_GUIDE,
+			APPLY, 
+			OBSERVE,
+			END_OBSERVE,
+			PAUSE,
+			CONTINUE,
+			STOP,
+			ABORT
+		} SequenceCommand;
+		
+		typedef enum {
+			PRESET,
+			START,
+			PRESET_START,
+			CANCEL
+		} Activity;
 	}
 }
 
