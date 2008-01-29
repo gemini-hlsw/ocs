@@ -2,6 +2,7 @@
 
 #include <giapi/giapi.h>
 #include "AlarmStatusItem.h"
+#include "HealthStatusItem.h"
 
 namespace giapi {
 
@@ -27,7 +28,8 @@ int StatusDatabase::createStatusItem(const char* name, const type::Type type) {
 
 	if (getStatusItem(name) != 0) {
 		//status item already present. 
-		LOG4CXX_WARN(logger, "A status item with the name " << name << " already created. No further action performed");
+		LOG4CXX_DEBUG(logger, "StatusDatabase::createStatusItem. A status item "
+				" with the name " << name << " already created. No action");
 		return status::ERROR;
 	}
 	LOG4CXX_DEBUG(logger, "Creating a Status Item for " << name);
@@ -52,7 +54,41 @@ int StatusDatabase::createAlarmStatusItem(const char* name,
 	StatusItem *item = new AlarmStatusItem(name, type);
 	_map[name] = item;
 	return status::OK;
+}
 
+int StatusDatabase::createHealthStatusItem(const char* name) {
+
+	if (getStatusItem(name) != 0) {
+		//status item already present. 
+		LOG4CXX_DEBUG(logger, "StatusDatabase::createHealthStatusItem. A status item "
+				" with the name " << name << " already created. No action");
+		return status::ERROR;
+	}
+
+	LOG4CXX_DEBUG(logger, "Creating a Health Status Item for " << name);
+	//make a new status item and store it in the map. 
+	StatusItem *item = new HealthStatusItem(name);
+	_map[name] = item;
+	return status::OK;
+}
+
+int StatusDatabase::setHealth(const char *name, const health::Health health) {
+	StatusItem * statusItem = getStatusItem(name);
+	if (statusItem == 0) {
+		return status::ERROR;
+	}
+
+	HealthStatusItem* healthStatusItem =
+			dynamic_cast<HealthStatusItem*>(statusItem);
+
+	if (healthStatusItem == 0) {
+		LOG4CXX_WARN(logger, name << " is not a health status item, aborting operation");
+		return status::ERROR;
+	}
+
+	//set the values in the alarm item
+	healthStatusItem->setHealth(health);
+	return status::OK;
 }
 
 int StatusDatabase::setStatusValueAsInt(const char* name, int value) {
@@ -78,8 +114,8 @@ StatusItem * StatusDatabase::getStatusItem(const char* name) {
 	return _map[name];
 }
 
-int StatusDatabase::setAlarm(const char *name, alarm::Severity severity,
-		alarm::Cause cause, const char* message) {
+int StatusDatabase::setAlarm(const char *name, const alarm::Severity severity,
+		const alarm::Cause cause, const char* message) {
 
 	StatusItem * statusItem = getStatusItem(name);
 	if (statusItem == 0) {
@@ -98,7 +134,26 @@ int StatusDatabase::setAlarm(const char *name, alarm::Severity severity,
 	alarmStatusItem->setAlarmState(severity, cause, message);
 
 	return status::OK;
+}
 
+int StatusDatabase::clearAlarm(const char *name) {
+	StatusItem * statusItem = getStatusItem(name);
+	if (statusItem == 0) {
+		return status::ERROR;
+	}
+
+	AlarmStatusItem* alarmStatusItem =
+			dynamic_cast<AlarmStatusItem*>(statusItem);
+
+	if (alarmStatusItem == 0) {
+		LOG4CXX_WARN(logger, name << " is not an alarm status item, aborting operation");
+		return status::ERROR;
+	}
+
+	//set the values in the alarm item
+	alarmStatusItem->clearAlarmState();
+
+	return status::OK;
 }
 
 }

@@ -51,7 +51,7 @@ public:
 	 * Reset the alarm information. The status item is in a 
 	 * no-alarm state after this call
 	 */
-	void reset();
+	void clearAlarmState();
 
 	/**
 	 * Return the (optional) message associated 

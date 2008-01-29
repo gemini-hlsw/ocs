@@ -43,6 +43,22 @@ public:
 	static int createAlarmStatusItem(const char *name, const type::Type type);
 
 	/**
+	 * Create a health status item in the GIAPI framework. A health status 
+	 * item provides the overall operational status of a system or subsystem. 
+	 * The health can be: health::GOOD, health::WARNING or health::BAD. 
+	 * </p>
+	 * The default state for health after creation is health::GOOD.   
+	 *  
+	 * @param name The name of the health status item that will be 
+	 * 	           created. If an status item with the same name already exists, 
+	 *             the method will return giapi::status::ERROR
+	 * 
+	 * @return giapi::status::OK if the item was sucessfully created, 
+	 *         giapi::status::ERROR if there is an error. 
+	 */
+	static int createHealthStatusItem(const char *name);
+	
+	/**
 	 * Post all pending status to Gemini. Pending statuses are those
 	 * whose value has changed since last time posted by GIAPI.
 	 * 
@@ -171,11 +187,47 @@ public:
 	 *         instance, the alarm item hasn't been created or the name doesn't
 	 *         correspond to an alarm status item).  
 	 * 
-	 * @see alarm::Severity
-	 * @see alarm::Cause
+	 * @see giapi::alarm::Severity
+	 * @see giapi::alarm::Cause
 	 */
 	static int setAlarm(const char *name, alarm::Severity severity,
 			alarm::Cause cause, const char *message = 0);
+	
+	/**
+	 * Clear the alarm state of the alarm status item specified 
+	 * by name. 
+	 * 
+	 * @param name Name of the alarm item. The alarm items should have been 
+	 *             initialized by a call to {@link #createAlarmStatusItem()}. 
+	 *             Failing to do so will return an error
+	 * @return giapi::status::OK if the alarm was cleared
+	 *         giapi::status::ERROR if there was an error clearing the alarm
+	 *         (for instance, the alarm has not been created, or the name is
+	 *         not associated to an alarm status item)
+	 */
+	static int clearAlarm(const char *name);
+	
+	/**
+	 * Set the health value for the given health status item
+	 * 
+	 * @param name Name of the health item. The health item must have been 
+	 *             initialized by a call to {@link #createHealthStatusItem()}. 
+	 *             Failing to do so will return an error. 
+	 *             
+	 * @param health the health state of the health status item specified by 
+	 *               name
+	 * 
+	 * @return giapi::status::OK if the health was sucessfully set 
+	 *         giapi::status::ERROR if there was an error setting the health 
+	 *         (for instance, the health status item hasn't been created or
+	 *         the name doesn't correspond to a health status item).  
+	 * 
+	 * @see giapi::health::Health
+	 * 
+	 */
+	static int setHealth(const char *name, const health::Health health);
+
+	
 
 private:
 	StatusUtil();

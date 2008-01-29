@@ -27,10 +27,10 @@ class StatusDatabase {
 			return strcmp(s1, s2) == 0;
 		}
 	};
-    /**
-     * Type definition for the hash_table that will map strings to 
-     * StatusItems
-     */
+	/**
+	 * Type definition for the hash_table that will map strings to 
+	 * StatusItems
+	 */
 	typedef hash_map<const char *, StatusItem *, hash<const char *>, eqstr>
 			StringStatusMap;
 
@@ -81,6 +81,42 @@ public:
 	 *         giapi::status::ERROR if there is an error. 
 	 */
 	int createAlarmStatusItem(const char *name, const type::Type type);
+
+	/**
+	 * Create a health status item in the status database. A health status 
+	 * item provides the overall operational status of a system or subsystem. 
+	 * The health can be: health::GOOD, health::WARNING or health::BAD. 
+	 * </p>
+	 * The default state for health after creation is health::GOOD.   
+	 *  
+	 * @param name The name of the health status item that will be 
+	 * 	           created. If an status item with the same name already exists, 
+	 *             the method will return giapi::status::ERROR
+	 * 
+	 * @return giapi::status::OK if the item was sucessfully created, 
+	 *         giapi::status::ERROR if there is an error. 
+	 */
+	int createHealthStatusItem(const char *name);
+
+	/**
+	 * Set the health value for the given health status item
+	 * 
+	 * @param name Name of the health item. The health item must have been 
+	 *             initialized by a call to {@link #createHealthStatusItem()}. 
+	 *             Failing to do so will return an error. 
+	 *             
+	 * @param health the health state of the health status item specified by 
+	 *               name
+	 * 
+	 * @return giapi::status::OK if the health was sucessfully set 
+	 *         giapi::status::ERROR if there was an error setting the health 
+	 *         (for instance, the health status item hasn't been created or
+	 *         the name doesn't correspond to a health status item).  
+	 * 
+	 * @see giapi::health::Health
+	 * 
+	 */
+	int setHealth(const char *name, const health::Health health);
 
 	/**
 	 * Set the value of the given status item to the provided 
@@ -141,8 +177,22 @@ public:
 	 * @see alarm::Severity
 	 * @see alarm::Cause
 	 */
-	int setAlarm(const char *name, alarm::Severity severity,
-			alarm::Cause cause, const char *message = 0);
+	int setAlarm(const char *name, const alarm::Severity severity,
+			const alarm::Cause cause, const char *message = 0);
+
+	/**
+	 * Clear the alarm state of the alarm status item specified 
+	 * by name. 
+	 * 
+	 * @param name Name of the alarm item. The alarm items should have been 
+	 *             initialized by a call to {@link #createAlarmStatusItem()}. 
+	 *             Failing to do so will return an error
+	 * @return giapi::status::OK if the alarm was cleared
+	 *         giapi::status::ERROR if there was an error clearing the alarm
+	 *         (for instance, the alarm has not been created, or the name is
+	 *         not associated to an alarm status item)
+	 */
+	int clearAlarm(const char *name);
 
 	/**
 	 * Return the status item associated to the given key, if found.
@@ -151,7 +201,7 @@ public:
 	 * 
 	 * @return the StatusItem object associated to the name, or 
 	 * NULL if not found
-	 */ 
+	 */
 	StatusItem* getStatusItem(const char *name);
 
 	virtual ~StatusDatabase();

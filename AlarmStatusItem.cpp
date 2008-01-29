@@ -26,7 +26,7 @@ void AlarmStatusItem::setAlarmState(alarm::Severity severity,
 	_mark(); //mark the status item as dirty and set the timestamp
 }
 
-void AlarmStatusItem::reset() {
+void AlarmStatusItem::clearAlarmState() {
 	_message = 0;
 	_severity = alarm::NO_ALARM;
 	_cause = alarm::NO_CAUSE;

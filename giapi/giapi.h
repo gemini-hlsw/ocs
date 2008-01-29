@@ -63,7 +63,27 @@ namespace giapi {
 			BOLEAN,
 			DOUBLE
 		} Type;
-		
+	}
+	
+	namespace health {
+		/**
+		 * Health values
+		 */
+		typedef enum  {
+			/**
+			 * Good health. The system/suybsystem is normal 
+			 */
+			GOOD,
+			/**
+			 * Warning health. The system/subsystem is operating, but
+			 * not normally. 
+			 */
+			WARNING,
+			/**
+			 * Bad health. The system/subsystem is not operating.
+			 */
+			BAD
+		} Health;
 	}
 }
 

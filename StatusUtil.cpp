@@ -42,11 +42,28 @@ int StatusUtil::createAlarmStatusItem(const char* name, const type::Type type) {
 	return database.createAlarmStatusItem(name, type);
 }
 
+int StatusUtil::createHealthStatusItem(const char* name) {
+	StatusDatabase& database = StatusDatabase::Instance();
+	return database.createHealthStatusItem(name);
+}
+
+int StatusUtil::setHealth(const char *name, const health::Health health) {
+	StatusDatabase& database = StatusDatabase::Instance();
+	return database.setHealth(name, health);
+	
+}
+
 int StatusUtil::setAlarm(const char *name,
-		alarm::Severity severity, alarm::Cause cause, 
+		const alarm::Severity severity, const alarm::Cause cause, 
 		const char *message) {
 	StatusDatabase& database = StatusDatabase::Instance(); 
 	return database.setAlarm(name, severity, cause, message);
 }
+
+int StatusUtil::clearAlarm(const char *name) {
+	StatusDatabase& database = StatusDatabase::Instance(); 
+	return database.clearAlarm(name);
+}
+
 
 }
