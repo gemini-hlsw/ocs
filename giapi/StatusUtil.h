@@ -180,12 +180,15 @@ public:
 	 *             
 	 * @param severity the alarm severity.
 	 * @param cause the cause of the alarm 
-	 * @param message Optional message to describe the alarm
+	 * @param message Optional message to describe the alarm. This argument is
+	 *        mandatory if the cause is alarm::ALARM_CAUSE_OTHER. 
 	 * 
 	 * @return giapi::status::OK if alarm was sucessfully set 
 	 *         giapi::status::ERROR if there was an error setting the alarm (for
 	 *         instance, the alarm item hasn't been created or the name doesn't
-	 *         correspond to an alarm status item).  
+	 *         correspond to an alarm status item). giapi::status::ERROR is 
+	 *         returned also if no message is specified when the cause is 
+	 *         set to alarm::ALARM_CAUSE_OTHER.
 	 * 
 	 * @see giapi::alarm::Severity
 	 * @see giapi::alarm::Cause

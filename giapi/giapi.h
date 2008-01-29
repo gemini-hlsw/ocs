@@ -23,30 +23,30 @@ namespace giapi {
 			/**
 			 * No alarm. 
 			 */
-			NO_ALARM,
+			ALARM_OK,
 			/**
 			 * A WARNING is an alarm that subsystems see as important and should
 			 * be brought to the attention of the users. The subsystems should
 			 * be able to continue despite warning events. 
 			 */
-			WARNING,
+			ALARM_WARNING,
 			/**
 			 * A FAILURE indicates that a component is in a state that will not
 			 * allow to continue operations. 
 			 */
-			FAILURE
+			ALARM_FAILURE
 		} Severity;
 		
 		/**
 		 * Cause of the alarm
 		 */
 		typedef enum {
-			NO_CAUSE,
-			HIHI,
-			HIGH,
-			LOW,
-			LOLO,
-			OTHER
+			ALARM_CAUSE_OK,
+			ALARM_CAUSE_HIHI,
+			ALARM_CAUSE_HI,
+			ALARM_CAUSE_LOLO,
+			ALARM_CAUSE_LO,
+			ALARM_CAUSE_OTHER
 		} Cause;
 	}
 	

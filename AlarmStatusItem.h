@@ -30,21 +30,29 @@ public:
 	 * internal state of the item is marked as dirty, 
 	 * therefore subsequent post invokations will cause
 	 * this item to be published. If the alarm severity
-	 * is set to alarm::NO_ALARM, the cause and message
+	 * is set to alarm::ALARM_OK, the cause and message
 	 * are automatically reset no matter what values are
 	 * specified in the method parameters
+	 * <p/>
+	 * In addition, the cause is alarm::ALARM_CAUSE_OTHER, 
+	 * the message argument is mandatory. 
 	 * 
 	 * @param severity the severity of the alarm. If there 
 	 * is no alarm condition, the value must be set
-	 * to alarm::NO_ALARM. If set to alarm::NO_ALARM, the 
+	 * to alarm::ALARM_OK. If set to alarm::ALARM_OK, the 
 	 * cause and message arguments are discarded. 
 	 * @param cause the cause of the alarm. If there is 
 	 * no alarm condition, the value must be set 
-	 * to alarm::NO_CAUSE
+	 * to alarm::ALARM_CAUSE_OK
 	 * @param message the (optional) alarm message for this 
 	 * status item
+	 * 
+	 * @return status::OK if the alarm was set properly
+	 *         status::ERROR if the message was not set and the cause
+	 *         is specified as alarm::ALARM_CAUSE_OTHER
+	 * 
 	 */
-	void setAlarmState(alarm::Severity severity, alarm::Cause cause,
+	int setAlarmState(alarm::Severity severity, alarm::Cause cause,
 			const char * message = 0);
 	
 	/**

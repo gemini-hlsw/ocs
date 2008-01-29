@@ -131,9 +131,7 @@ int StatusDatabase::setAlarm(const char *name, const alarm::Severity severity,
 	}
 
 	//set the values in the alarm item
-	alarmStatusItem->setAlarmState(severity, cause, message);
-
-	return status::OK;
+	return alarmStatusItem->setAlarmState(severity, cause, message);
 }
 
 int StatusDatabase::clearAlarm(const char *name) {
