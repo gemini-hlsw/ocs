@@ -8,7 +8,6 @@
 
 #include <tr1/memory>
 
-
 namespace giapi {
 /**
  * Interface for sequence command handlers
@@ -20,9 +19,9 @@ public:
 	/**
 	 * 
 	 */
-	virtual std::tr1::shared_ptr<HandlerResponse> handle(command::ActionId id, 
-			std::tr1::shared_ptr<Request> request,
-			std::tr1::shared_ptr<Configuration> config) = 0;
+	virtual pHandlerResponse handle(command::ActionId id, 
+			pRequest request,
+			pConfiguration config) = 0;
 
 protected:
 	/**
@@ -32,6 +31,8 @@ protected:
 	SequenceCommandHandler();
 
 };
+
+typedef std::tr1::shared_ptr<SequenceCommandHandler> pSequenceCommandHandler;
 
 }
 

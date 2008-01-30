@@ -2,9 +2,10 @@
 #define COMMANDUTIL_H_
 
 #include <giapi/giapi.h>
-#include <giapi/SequenceCommandHandler.h>
 
-#include <tr1/memory>
+#include <giapi/SequenceCommandHandler.h>
+#include <giapi/HandlerResponse.h>
+
 /**
  * A collection of utility methods to deal with Commands. 
  */
@@ -15,7 +16,7 @@ public:
 
 	//TODO: All these calls will interact with the GMP. Hence
 	//they might need to throw connection exceptions of some sort. 
-	
+
 	/**
 	 * Associates the given handler to the sequence command specified. 
 	 * 
@@ -33,8 +34,7 @@ public:
 	 *         returns giapi::status::ERROR. 
 	 */
 	static int subscribeSequenceCommand(command::SequenceCommand id,
-			command::Activity activities[],
-			std::tr1::shared_ptr<SequenceCommandHandler> handler);
+			command::Activity activities[], pSequenceCommandHandler handler);
 
 	/**
 	 * Associates the given handler to the configuration prefix specified and
@@ -62,8 +62,7 @@ public:
 	 *         returns giapi::status::ERROR. 
 	 */
 	static int subscribeApply(const char* prefix,
-			command::Activity activities[],
-			std::tr1::shared_ptr<SequenceCommandHandler> handler);
+			command::Activity activities[], pSequenceCommandHandler handler);
 
 	/**
 	 * Post completion information to the GMP for actions that do not complete
@@ -76,15 +75,14 @@ public:
 	 * @param id the original ActionId associated to the actions for which we 
 	 *        are reporting completion info. 
 	 * @param response contains the completion state associated to the action
-	 *        id. Valid response type are only COMPLETED and ERROR. 
-	 * @param errorMsg error description, in case the response is ERROR. 
+	 *        id. Valid response type are only COMPLETED and ERROR. In case 
+	 *        the response is ERROR, a message should be provided. 
 	 * 
 	 * @return giapi::status::OK if the subscription suceeds. Otherwise, it
 	 *         returns giapi::status::ERROR. 
 	 */
 	static int postCompletionInfo(command::ActionId id,
-			std::tr1::shared_ptr<HandlerResponse> response,
-			const char * errorMsg);
+			pHandlerResponse response);
 
 private:
 	CommandUtil();

@@ -1,9 +1,9 @@
 #ifndef HANDLERRESPONSE_H_
 #define HANDLERRESPONSE_H_
+#include <tr1/memory>
 
 namespace giapi
 {
-
 class HandlerResponse
 {
 	typedef enum {
@@ -20,6 +20,8 @@ public:
 	const char* getMessage() const;
 	
 };
+
+typedef std::tr1::shared_ptr<HandlerResponse> pHandlerResponse;
 
 }
 

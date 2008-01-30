@@ -1,14 +1,11 @@
 #include "giapi/HandlerResponse.h"
 
-namespace giapi
-{
+namespace giapi {
 
-HandlerResponse::HandlerResponse()
-{
+HandlerResponse::HandlerResponse() {
 }
 
-HandlerResponse::~HandlerResponse()
-{
+HandlerResponse::~HandlerResponse() {
 }
 
 }
