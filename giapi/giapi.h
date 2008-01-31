@@ -9,18 +9,18 @@ namespace giapi {
 		 * GIAPI Status. Used for GIAPI calls to report status of the 
 		 * different library calls to the invoker. 
 		 */
-		typedef enum {
+		enum Status {
 			ERROR = -1, //Errors that don't have a status
 			OK = 0, //Success
 			WARNING, //Some warning condition 
-		} Status;
+		};
 	}
 	
 	namespace alarm {
 		/**
 		 * Alarm severity.
 		 */
-		typedef enum {
+		enum Severity {
 			/**
 			 * No alarm. 
 			 */
@@ -36,19 +36,19 @@ namespace giapi {
 			 * allow to continue operations. 
 			 */
 			ALARM_FAILURE
-		} Severity;
+		};
 		
 		/**
 		 * Cause of the alarm
 		 */
-		typedef enum {
+		enum Cause {
 			ALARM_CAUSE_OK,
 			ALARM_CAUSE_HIHI,
 			ALARM_CAUSE_HI,
 			ALARM_CAUSE_LOLO,
 			ALARM_CAUSE_LO,
 			ALARM_CAUSE_OTHER
-		} Cause;
+		};
 	}
 	
 	
@@ -57,20 +57,20 @@ namespace giapi {
 		 * The different types supported by the elements
 		 * stored in status/commands
 		 */
-		typedef enum {
+		enum Type {
 			INT,
 			CHAR,
 			STRING,
 			BOLEAN,
 			DOUBLE
-		} Type;
+		};
 	}
 	
 	namespace health {
 		/**
 		 * Health values
 		 */
-		typedef enum  {
+		enum Health  {
 			/**
 			 * Good health. The system/suybsystem is normal 
 			 */
@@ -84,13 +84,13 @@ namespace giapi {
 			 * Bad health. The system/subsystem is not operating.
 			 */
 			BAD
-		} Health;
+		};
 	}
 	
 	namespace command {
 		typedef int ActionId;
 		
-		typedef enum {
+		enum SequenceCommand {
 			TEST,
 			REBOOT,
 			INIT,
@@ -107,14 +107,14 @@ namespace giapi {
 			CONTINUE,
 			STOP,
 			ABORT
-		} SequenceCommand;
+		};
 		
-		typedef enum {
+		enum Activity {
 			PRESET,
 			START,
 			PRESET_START,
 			CANCEL
-		} Activity;
+		};
 		
 	}
 }
