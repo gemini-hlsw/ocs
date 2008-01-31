@@ -115,6 +115,7 @@ namespace giapi {
 			PRESET_START,
 			CANCEL
 		} Activity;
+		
 	}
 }
 

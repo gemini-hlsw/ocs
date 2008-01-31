@@ -3,7 +3,6 @@
 
 #include <giapi/giapi.h>
 #include <giapi/HandlerResponse.h>
-#include <giapi/Request.h>
 #include <giapi/Configuration.h>
 
 #include <tr1/memory>
@@ -20,12 +19,13 @@ public:
 	 * 
 	 */
 	virtual pHandlerResponse handle(command::ActionId id, 
-			pRequest request,
+			command::SequenceCommand sequenceCommand,
+			command::Activity activity,
 			pConfiguration config) = 0;
 
 protected:
 	/**
-	 * Protected constructor. This is a pure abstract class that can not 
+	 * Protected constructor. This is an abstract class that can not 
 	 * be instantiated
 	 */
 	SequenceCommandHandler();
