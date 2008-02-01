@@ -116,6 +116,16 @@ namespace giapi {
 			CANCEL
 		};
 		
+		enum ActivitySet {
+			SET_PRESET,
+			SET_START,
+			SET_PRESET_START,
+			SET_CANCEL,
+			SET_PRESET_CANCEL,
+			SET_START_CANCEL,
+			SET_PRESET_START_CANCEL
+		};
+		
 	}
 }
 

@@ -10,13 +10,13 @@ CommandUtil::~CommandUtil() {
 }
 
 int CommandUtil::subscribeSequenceCommand(command::SequenceCommand id,
-		command::Activity activities[], pSequenceCommandHandler handler) {
+		command::ActivitySet activities, pSequenceCommandHandler handler) {
 	return LogCommandUtil::Instance().subscribeSequenceCommand(id, activities, handler);
 
 }
 
 int CommandUtil::subscribeApply(const char* prefix,
-		command::Activity activities[], pSequenceCommandHandler handler) {
+		command::ActivitySet activities, pSequenceCommandHandler handler) {
 	return LogCommandUtil::Instance().subscribeApply(prefix, activities, handler);
 }
 

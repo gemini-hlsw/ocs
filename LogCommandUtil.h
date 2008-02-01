@@ -18,9 +18,9 @@ class LogCommandUtil {
 
 public:
 	int subscribeSequenceCommand(command::SequenceCommand id,
-			command::Activity activities[], pSequenceCommandHandler handler);
+			command::ActivitySet activities, pSequenceCommandHandler handler);
 
-	int subscribeApply(const char* prefix, command::Activity activities[],
+	int subscribeApply(const char* prefix, command::ActivitySet activities,
 			pSequenceCommandHandler handler);
 
 	int postCompletionInfo(command::ActionId id, pHandlerResponse response);

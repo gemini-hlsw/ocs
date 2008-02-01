@@ -19,22 +19,29 @@ public:
 
 	/**
 	 * Associates the given handler to the sequence command specified. 
+	 * <p/>
+	 * The <code>ActivitySet</code> argument allows different handlers for 
+	 * different activities. For instance, one handler can implement only 
+	 * <b>preset</b> and another <b>start</b>.
 	 * 
 	 * @param id The <code>SequenceCommand</code> enumerated type that 
 	 *        identifies the sequence command to which a handler will be 
 	 *        associated. 
-	 * @param activities Array of Activity enumerated types that supports
-	 *        the usage of different handlers for different activities. 
+	 * @param activities Enumerated type representing the set of Activities 
+	 *        the handler will be associated with for the given sequence
+	 *        command.
 	 * @param handler. Pointer to a concrete implementation of a 
 	 *        SequenceCommandHandler that will be associated to the given
 	 *        sequence command and actions. The most recently registered
 	 *        sequence command handler for a sequence command will be used. 
 	 * 
 	 * @return giapi::status::OK if the subscription suceeds. Otherwise, it
-	 *         returns giapi::status::ERROR. 
+	 *         returns giapi::status::ERROR.
+	 *
+	 * @see command::Activity 
 	 */
 	static int subscribeSequenceCommand(command::SequenceCommand id,
-			command::Activity activities[], pSequenceCommandHandler handler);
+			command::ActivitySet activities, pSequenceCommandHandler handler);
 
 	/**
 	 * Associates the given handler to the configuration prefix specified and
@@ -44,25 +51,27 @@ public:
 	 * to the registered handlers and pass each the part of the configuration
 	 * that is registered to handle.
 	 * </p>
-	 * The <code>Activity</code> array allows different handlers for different
-	 * activities. For instance, one handler can implement only <b>preset</b> 
-	 * and another <b>start</b>.
+	 * The <code>ActivitySet</code> argument allows different handlers for 
+	 * different activities. For instance, one handler can implement only 
+	 * <b>preset</b> and another <b>start</b>.
 	 * 
 	 * @param id The <code>SequenceCommand</code> enumerated type that 
 	 *        identifies the sequence command to which a handler will be 
 	 *        associated. 
-	 * @param activities Array of Activity enumerated types that supports
-	 *        the usage of different handlers for different activities. 
+	 * @param activities Enumerated type representing the set of Activities 
+	 *        the handler will be associated with for the given prefix.
 	 * @param handler. Pointer to a concrete implementation of a 
 	 *        SequenceCommandHandler that will be associated to the given
 	 *        sequence command and actions. The most recently registered
 	 *        sequence command handler for a sequence command will be used. 
 	 * 
 	 * @return giapi::status::OK if the subscription suceeds. Otherwise, it
-	 *         returns giapi::status::ERROR. 
+	 *         returns giapi::status::ERROR.
+	 * 
+	 * @see command::Activity 
 	 */
 	static int subscribeApply(const char* prefix,
-			command::Activity activities[], pSequenceCommandHandler handler);
+			command::ActivitySet activities, pSequenceCommandHandler handler);
 
 	/**
 	 * Post completion information to the GMP for actions that do not complete

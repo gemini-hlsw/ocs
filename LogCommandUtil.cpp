@@ -5,13 +5,11 @@ log4cxx::LoggerPtr LogCommandUtil::logger(log4cxx::Logger::getLogger("giapi.LogC
 
 LogCommandUtil* LogCommandUtil::INSTANCE = 0;
 
-
 LogCommandUtil::LogCommandUtil() {
-	
+
 }
 
-LogCommandUtil::~LogCommandUtil()
-{
+LogCommandUtil::~LogCommandUtil() {
 }
 
 LogCommandUtil& LogCommandUtil::Instance() {
@@ -22,13 +20,13 @@ LogCommandUtil& LogCommandUtil::Instance() {
 }
 
 int LogCommandUtil::subscribeSequenceCommand(command::SequenceCommand id,
-		command::Activity activities[], pSequenceCommandHandler handler) {
+		command::ActivitySet activities, pSequenceCommandHandler handler) {
 	LOG4CXX_INFO(logger, "Registering handler to sequence command ");
 	return giapi::status::OK;
 }
 
-int LogCommandUtil::subscribeApply(const char* prefix, command::Activity activities[],
-		pSequenceCommandHandler handler) {
+int LogCommandUtil::subscribeApply(const char* prefix,
+		command::ActivitySet activities, pSequenceCommandHandler handler) {
 	LOG4CXX_INFO(logger, "Registering handler to apply prefix " << prefix);
 	return giapi::status::OK;
 }
