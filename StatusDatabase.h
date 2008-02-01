@@ -1,12 +1,14 @@
 #ifndef STATUSDATABASE_H_
 #define STATUSDATABASE_H_
 #include <ext/hash_map>
+#include <memory>
 
 #include <log4cxx/logger.h>
 
 #include <giapi/giapi.h>
 #include <giapi/giapiexcept.h>
 #include "StatusItem.h"
+
 
 //hash_map is an extension of STL widely available on gnu compilers, fortunately 
 //Will make its namespace visible here. 
@@ -41,7 +43,7 @@ class StatusDatabase {
 
 private:
 	StringStatusMap _map;
-	static StatusDatabase * INSTANCE;
+	static std::auto_ptr<StatusDatabase> INSTANCE;
 	/**
 	 * Private constructor
 	 */
