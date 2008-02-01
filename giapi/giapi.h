@@ -127,6 +127,9 @@ namespace giapi {
 		};
 		
 	}
+	struct TCSContext{
+		
+	};
 }
 
 #endif /*GIAPI_H_*/
