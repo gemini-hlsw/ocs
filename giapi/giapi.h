@@ -127,8 +127,81 @@ namespace giapi {
 		};
 		
 	}
-	struct TCSContext{
-		
+	namespace log {
+		enum Level {
+				ALL,
+				INFO,
+				WARNING,
+				SEVERE
+		};
+	}
+	
+	namespace data {
+		enum ObservationEvent {
+			/**
+			 * Event sent as instrument starts preparation for starting
+			 * acquisition of a dataset. 
+			 */
+			OBS_PREP,
+			/**
+			 * Event sent just before data acquisition starts. 
+			 */
+			OBS_START_ACQ,
+			/**
+			 * Event sent when the requested acquisition has completed. 
+			 */
+			OBS_END_ACQ,
+			/**
+			 * Event indicates that data is being transferred from the 
+			 * detector or other activities needed to write data.
+			 */
+			OBS_START_READOUT,
+			/**
+			 * Event indicates readout or write preparations have completed 
+			 */
+			OBS_END_READOUT,
+			/**
+			 * Event indicates that the instrument has started writing 
+			 * the dataset to GSDN 
+			 */
+			OBS_START_DSET_WRITE,
+			/**
+			 * Event indicates that the instrument has completed writing 
+			 * the dataset to GSDN 
+			 */
+			OBS_END_DSET_WRITE
+		};
+	}
+	/**
+	 * The TCS Context structure.
+	 */
+	struct TCSContext {
+		double time;      //Time stamp (TAI) at next tick
+		double x,y,z;     //Cartesian elements of mount pre-flexure az/el
+		//Telescope Parameters structure
+		struct Tel {
+			double fl;    //Telescope flocal length (mm) 
+			double rma;   //Rotator mechanical angle (rads)
+			double an;    //Azimuth axis tilt NS (rads)
+			double aw;    //Azimuth axis tilt EW (rads)
+			double pnpae; //Az/El nonperpendicularity (rads)
+			double ca;    //Net left-right(horizontal) collimation (rads)
+			double ce;    //Net up-down(vertical) collimation (rads)
+		} tel;
+		double aoprms[15]; //Target independent apparent to observed parameters
+		double m2xy[3][2]; //M2 tip/tilt (3 chop states)
+		//Point Origin structure
+		struct PO {
+			double mx; //Mount point origin in X
+			double my; //Mount point origin in Y
+			double ax; //Source chop A pointing origin in X
+			double ay; //Source chop A pointing origin in Y
+			double bx; //Source chop B pointing origin in X
+			double by; //Source chop B pointing origin in Y
+			double cx; //Source chop C pointing origin in X
+			double cy; //Source chop C pointing origin in Y
+		} po;
+		double ao2t[6]; //Optical distortion coefficients (Not used to date)
 	};
 }
 
