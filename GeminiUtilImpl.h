@@ -19,7 +19,7 @@ public:
 
 	int subscribeEPICSStatus(const char *name, pEPICSStatusHandler handler);
 
-	int unsubscribeEPISCSStatus(const char *name);
+	int unsubscribeEPICSStatus(const char *name);
 
 	int postPCSUpdate(double zernikes[], int size);
 

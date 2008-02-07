@@ -203,6 +203,11 @@ namespace giapi {
 		} po;
 		double ao2t[6]; //Optical distortion coefficients (Not used to date)
 	};
+	/**
+	 * Definition of a long with 64 bits. This works in GCC 4.X under Linux, 
+	 * but needs to be reviewed if used under different compilers/platforms
+	 */
+	typedef long long long64;
 }
 
 #endif /*GIAPI_H_*/

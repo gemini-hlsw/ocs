@@ -23,7 +23,7 @@ int GeminiUtilImpl::subscribeEPICSStatus(const char *name,
 
 }
 
-int GeminiUtilImpl::unsubscribeEPISCSStatus(const char *name) {
+int GeminiUtilImpl::unsubscribeEPICSStatus(const char *name) {
 	LOG4CXX_INFO(logger, "Unsubscribe epics status " << name);
 	return status::OK;
 }

@@ -8,7 +8,9 @@ class ServicesUtil {
 public:
 	static void systemLog(log::Level level, const char *msg);
 
-	static long getObservatoryTime();
+	static long64 getObservatoryTime();
+	
+	static const char * getProperty(const char *key);
 
 private:
 	ServicesUtil();

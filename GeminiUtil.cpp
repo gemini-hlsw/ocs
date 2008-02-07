@@ -17,8 +17,8 @@ int GeminiUtil::subscribeEPICSStatus(const char *name, pEPICSStatusHandler handl
 	return GeminiUtilImpl::Instance().subscribeEPICSStatus(name, handler);
 }
 	
-int GeminiUtil::unsubscribeEPISCSStatus(const char *name) {
-	return GeminiUtilImpl::Instance().unsubscribeEPISCSStatus(name);
+int GeminiUtil::unsubscribeEPICSStatus(const char *name) {
+	return GeminiUtilImpl::Instance().unsubscribeEPICSStatus(name);
 }
 	
 int GeminiUtil::postPCSUpdate(double zernikes[], int size) {
