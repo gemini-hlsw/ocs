@@ -2,7 +2,7 @@
 #include "StatusFactoryImpl.h"
 
 namespace giapi {
-StatusFactory* StatusFactory::INSTANCE = 0;
+std::auto_ptr<StatusFactory> StatusFactory::INSTANCE(new StatusFactoryImpl());
 
 StatusFactory::StatusFactory() {
 }
@@ -11,9 +11,6 @@ StatusFactory::~StatusFactory() {
 }
 
 StatusFactory& StatusFactory::Instance() {
-	if (INSTANCE == 0) {
-		INSTANCE = new StatusFactoryImpl();
-	}
 	return *INSTANCE;
 }
 

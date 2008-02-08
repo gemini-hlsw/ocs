@@ -1,6 +1,7 @@
 #ifndef STATUSFACTORY_H_
 #define STATUSFACTORY_H_
 #include <giapi/StatusSender.h>
+#include <tr1/memory>
 
 namespace giapi {
 /**
@@ -56,19 +57,24 @@ public:
 	 *   
 	 * @return StatusSender associated to the type. 
 	 */
-	virtual StatusSender& getStatusSender(const StatusSenderType type) = 0; 
+	virtual StatusSender& getStatusSender(const StatusSenderType type) = 0;
+	
+	/**
+	 * Destructor. 
+	 */
+	virtual ~StatusFactory();
 private:
 	/**
 	 * Internal instance of this factory
 	 */
-	static StatusFactory *INSTANCE;
+	static std::auto_ptr<StatusFactory> INSTANCE;
 protected:
 	/**
 	 * Protected default constructor, instantiated internally by the 
 	 * Instance() method
 	 */
 	StatusFactory();
-	virtual ~StatusFactory();
+	
 };
 
 }
