@@ -12,9 +12,10 @@ StatusFactoryImpl::StatusFactoryImpl() {
 
 StatusFactoryImpl::~StatusFactoryImpl() {
 	for (int i = 0; i < StatusFactory::Elements; i++) {
-		delete senders[i];
+		if (senders[i] != 0) {
+			delete senders[i];
+		}
 	}
-
 }
 
 StatusSender& StatusFactoryImpl::getStatusSender(StatusSenderType type) {
