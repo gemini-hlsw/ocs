@@ -8,6 +8,13 @@ namespace giapi
 class EPICSStatusHandler
 {
 public:
+	
+	/**
+	 * Callback invoked when the EPICS status item
+	 * is updated. 
+	 */
+	void update(const char * name);
+	
 	EPICSStatusHandler();
 	virtual ~EPICSStatusHandler();
 };
