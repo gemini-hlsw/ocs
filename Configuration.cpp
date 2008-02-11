@@ -1,14 +1,11 @@
 #include "giapi/Configuration.h"
 
-namespace giapi
-{
+namespace giapi {
 
-Configuration::Configuration()
-{
+Configuration::Configuration() {
 }
 
-Configuration::~Configuration()
-{
+Configuration::~Configuration() {
 }
 
 }
