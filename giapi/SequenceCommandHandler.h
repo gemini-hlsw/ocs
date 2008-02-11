@@ -9,7 +9,10 @@
 
 namespace giapi {
 /**
- * Interface definition for sequence command handlers
+ * Interface definition for sequence command handlers.
+ *
+ * @see CommandUtil::subscribeApply
+ * @see CommandUtil::subscribeCommand 
  */
 class SequenceCommandHandler {
 public:
@@ -38,10 +41,9 @@ public:
 	 * @see CommandUtil::subscribeApply
 	 * @see CommandUtil::subscribeCommand 
 	 */
-	virtual pHandlerResponse handle(command::ActionId id, 
+	virtual pHandlerResponse handle(command::ActionId id,
 			command::SequenceCommand sequenceCommand,
-			command::Activity activity,
-			pConfiguration config) = 0;
+			command::Activity activity, pConfiguration config) = 0;
 
 	/**
 	 * Virtual destructor
@@ -58,7 +60,6 @@ protected:
 	SequenceCommandHandler();
 
 };
-
 
 /**
  * Definition of a smart pointer to a sequence command handler.
