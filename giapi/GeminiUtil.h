@@ -11,15 +11,6 @@ namespace giapi {
  */
 class GeminiUtil {
 public:
-	
-	/**
-	 * TODO:Do I initialize the epics status items here, so they will
-	 * be in a database of some sort?
-	 * 
-	 * 
-	 */
-	static int initEPICSStatus(const char *name, type::Type type);
-	
 	/**
 	 * Register a handler to receive updates when the specified EPICS status 
 	 * item is updated.
