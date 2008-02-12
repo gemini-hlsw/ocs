@@ -58,11 +58,11 @@ namespace giapi {
 		 * stored in status/commands
 		 */
 		enum Type {
+			BOOLEAN,
 			INT,
-			CHAR,
+			FLOAT,
+			DOUBLE,
 			STRING,
-			BOLEAN,
-			DOUBLE
 		};
 	}
 	
