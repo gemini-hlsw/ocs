@@ -55,9 +55,10 @@ public:
 	 * different activities. For instance, one handler can implement only 
 	 * <b>preset</b> and another <b>start</b>.
 	 * 
-	 * @param id The <code>SequenceCommand</code> enumerated type that 
-	 *        identifies the sequence command to which a handler will be 
-	 *        associated. 
+	 * @param prefix The configuration prefix this handler will take care 
+	 *        of. When a configuration is received by the system, it will 
+	 *        be split and the part indicated by this prefix will be  
+	 *        passed to the handler.  
 	 * @param activities Enumerated type representing the set of Activities 
 	 *        the handler will be associated with for the given prefix.
 	 * @param handler. Pointer to a concrete implementation of a 
@@ -77,7 +78,7 @@ public:
 	 * Post completion information to the GMP for actions that do not complete
 	 * immediately. This case is triggered when a {@link SequenceCommandHandler}
 	 * returns <b>STARTED</b> in the {@link HandlerResponse}. The system will, 
-	 * when the actions complete sucessfully or with an error, notify the 
+	 * when the actions complete successfully or with an error, notify the 
 	 * GMP of the completion status of the actions associated with the 
 	 * original <code>ActionId</code>, using this call. 
 	 * 
@@ -87,7 +88,7 @@ public:
 	 *        id. Valid response type are only COMPLETED and ERROR. In case 
 	 *        the response is ERROR, a message should be provided. 
 	 * 
-	 * @return giapi::status::OK if the subscription suceeds. Otherwise, it
+	 * @return giapi::status::OK if the post suceeds. Otherwise, it
 	 *         returns giapi::status::ERROR. 
 	 */
 	static int postCompletionInfo(command::ActionId id,
