@@ -1,5 +1,5 @@
 #include "ServicesUtilImpl.h"
-#include <time.h>
+#include <sys/time.h>
 namespace giapi {
 
 log4cxx::LoggerPtr ServicesUtilImpl::logger(log4cxx::Logger::getLogger("giapi.ServicesUtilImpl"));
