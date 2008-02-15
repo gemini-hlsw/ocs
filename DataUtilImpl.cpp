@@ -19,7 +19,7 @@ DataUtilImpl& DataUtilImpl::Instance() {
 int DataUtilImpl::postObservationEvent(data::ObservationEvent event,
 		const char * datalabel) {
 
-	char *eventName;
+	char *eventName = "UNKNOWN";
 
 	switch (event) {
 	case data::OBS_END_ACQ:
