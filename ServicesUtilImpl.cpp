@@ -31,7 +31,7 @@ void ServicesUtilImpl::systemLog(log::Level level, const char *msg) {
 }
 
 long64 ServicesUtilImpl::getObservatoryTime() {
-	long64 time;
+	long64 time = 0;
 	struct timeval tv;
 	if (gettimeofday(&tv, NULL) == 0) {
 		//convert the structure to milliseconds
