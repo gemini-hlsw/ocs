@@ -56,9 +56,9 @@ int DataUtilImpl::postAncillaryFileEvent(const char * filename,
 }
 
 int DataUtilImpl::postIntermediateFileEvent(const char * filename,
-		const char * datalabel) {
+		const char * datalabel, const char * hint) {
 	LOG4CXX_INFO(logger, "postIntermediateFileEvent: Filename " << filename
-			<< " datalabel " << datalabel);
+			<< " datalabel " << datalabel << " hint " << hint);
 	return status::OK;
 }
 

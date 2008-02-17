@@ -21,7 +21,7 @@ public:
 	int postAncillaryFileEvent(const char * filename, const char * datalabel);
 
 	int postIntermediateFileEvent(const char * filename,
-					const char * datalabel);
+					const char * datalabel, const char * hint);
 
 	virtual ~DataUtilImpl();
 

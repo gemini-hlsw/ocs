@@ -19,8 +19,8 @@ int DataUtil::postAncillaryFileEvent(const char * filename,
 }
 
 int DataUtil::postIntermediateFileEvent(const char * filename,
-		const char * datalabel) {
-	return DataUtilImpl::Instance().postIntermediateFileEvent(filename, datalabel);
+		const char * datalabel, const char * hint) {
+	return DataUtilImpl::Instance().postIntermediateFileEvent(filename, datalabel, hint);
 }
 
 }
