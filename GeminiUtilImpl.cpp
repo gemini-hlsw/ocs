@@ -16,14 +16,14 @@ GeminiUtilImpl& GeminiUtilImpl::Instance() {
 	return *INSTANCE;
 }
 
-int GeminiUtilImpl::subscribeEPICSStatus(const char *name,
-		pEPICSStatusHandler handler) {
+int GeminiUtilImpl::subscribeEpicsStatus(const char *name,
+		pEpicsStatusHandler handler) {
 	LOG4CXX_INFO(logger, "Subscribe epics status " << name);
 	return status::OK;
 
 }
 
-int GeminiUtilImpl::unsubscribeEPICSStatus(const char *name) {
+int GeminiUtilImpl::unsubscribeEpicsStatus(const char *name) {
 	LOG4CXX_INFO(logger, "Unsubscribe epics status " << name);
 	return status::OK;
 }

@@ -16,6 +16,9 @@ public:
 	 * is updated. Instrument code will use this
 	 * method to access the monitored epics 
 	 * status item values
+	 * 
+	 * @param item A smart pointer to the epics status item being 
+	 *             monitored
 	 */
 	virtual void channelChanged(pEpicsStatusItem item) = 0;
 
@@ -23,7 +26,7 @@ public:
 	virtual ~EpicsStatusHandler();
 };
 
-typedef std::tr1::shared_ptr<EpicsStatusHandler> pEPICSStatusHandler;
+typedef std::tr1::shared_ptr<EpicsStatusHandler> pEpicsStatusHandler;
 
 }
 

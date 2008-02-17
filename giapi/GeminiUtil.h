@@ -1,7 +1,7 @@
 #ifndef GEMINIINTERACTIONUTIL_H_
 #define GEMINIINTERACTIONUTIL_H_
 
-#include <giapi/EPICSStatusHandler.h>
+#include <giapi/EpicsStatusHandler.h>
 #include <giapi/giapi.h>
 
 namespace giapi {
@@ -21,14 +21,15 @@ public:
 	 *  
 	 * @param name Name of the EPICS status item that will be monitored.
 	 * @param handler Handler that will be called when an update is 
-	 *        published.
+	 *        published.The most recently registered epics status handler will 
+	 *        be used. 
 	 * 
 	 * @return status::OK if the subscription was successful, 
 	 *         status::ERROR if there is a problem with the subscription 
 	 *         (for instance, the epics channel name is invalid)    
 	 */
-	static int subscribeEPICSStatus(const char *name,
-			pEPICSStatusHandler handler);
+	static int subscribeEpicsStatus(const char *name,
+			pEpicsStatusHandler handler);
 
 	/**
 	 * Unregister any handlers that might be associated to the given EPICS
@@ -37,10 +38,10 @@ public:
 	 * @param name Name of the EPICS status item that no longer will be 
 	 * monitored
 	 * 
-	 * @return status::OK if the registration was successful, otherwise
+	 * @return status::OK if the deregistration was successful, otherwise
 	 *         returns status::ERROR. 
 	 */
-	static int unsubscribeEPICSStatus(const char *name);
+	static int unsubscribeEpicsStatus(const char *name);
 
 	/**
 	 * Offload wavefront corrections to the Primary Control System (PCS). 

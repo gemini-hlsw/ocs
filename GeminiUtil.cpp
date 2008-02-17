@@ -13,12 +13,12 @@ GeminiUtil::~GeminiUtil()
 }
 
 
-int GeminiUtil::subscribeEPICSStatus(const char *name, pEPICSStatusHandler handler) {
-	return GeminiUtilImpl::Instance().subscribeEPICSStatus(name, handler);
+int GeminiUtil::subscribeEpicsStatus(const char *name, pEpicsStatusHandler handler) {
+	return GeminiUtilImpl::Instance().subscribeEpicsStatus(name, handler);
 }
 	
-int GeminiUtil::unsubscribeEPICSStatus(const char *name) {
-	return GeminiUtilImpl::Instance().unsubscribeEPICSStatus(name);
+int GeminiUtil::unsubscribeEpicsStatus(const char *name) {
+	return GeminiUtilImpl::Instance().unsubscribeEpicsStatus(name);
 }
 	
 int GeminiUtil::postPCSUpdate(double zernikes[], int size) {

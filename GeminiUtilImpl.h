@@ -17,9 +17,9 @@ class GeminiUtilImpl {
 public:
 	static GeminiUtilImpl& Instance();
 
-	int subscribeEPICSStatus(const char *name, pEPICSStatusHandler handler);
+	int subscribeEpicsStatus(const char *name, pEpicsStatusHandler handler);
 
-	int unsubscribeEPICSStatus(const char *name);
+	int unsubscribeEpicsStatus(const char *name);
 
 	int postPCSUpdate(double zernikes[], int size);
 
