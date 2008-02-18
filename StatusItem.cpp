@@ -65,10 +65,14 @@ void StatusItem::clearChanged() {
 void StatusItem::_mark() {
 
 	_changedFlag = true;
-	time_t currentTime = time(0);
-	_time = (currentTime == (time_t)-1) ? 0 : (unsigned long)currentTime;
-	LOG4CXX_DEBUG(logger, "Marking dirty status item " << getName() << " at " << _time);
-
+	struct timeval tv;
+	if (gettimeofday(&tv, NULL) == 0) {
+		//convert the structure to milliseconds
+		_time = ((long long)tv.tv_sec)*1000 + (long long)tv.tv_usec/1000;
+		LOG4CXX_DEBUG(logger, "Marking dirty status item " << getName() << " at " << _time);
+	} else {
+		LOG4CXX_WARN(logger, "Can't set timestamp on status item " << getName());
+	}
 }
 
 }

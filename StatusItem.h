@@ -18,7 +18,7 @@ class StatusItem : public KvPair {
 	static log4cxx::LoggerPtr logger;
 private:
 	bool _changedFlag; //Set when attribute is changed
-	unsigned long _time; //timestamp
+	long64 _time; //timestamp
 	type::Type _type; //Type of the values stored in this status item
 protected:
 	/**
