@@ -4,31 +4,11 @@
 
 #include sources list and objects built from there
 -include sources.mk
-
-# Compiler is always gcc for now
-CXX := g++
-
-RM := rm -rf
-
-MKDIRHIER  := mkdir -p
-
-LN := ln -s
-
-CP := cp -f
+-include common.mk
 
 #Version and minor version
 V := 0
 MV := 1.0
-
-LOG4CXX_BASE := /Users/anunez/Projects/workspaces/external/apache-log4cxx/dist
-LOG4CXX_INCLUDE := $(LOG4CXX_BASE)/include
-LOG4CXX_LIB := $(LOG4CXX_BASE)/lib
-
-INSTALL_DIR := /Users/anunez/test/giapi
-GIAPI_INCLUDE_DIR := $(INSTALL_DIR)/include/giapi
-GIAPI_LIB_DIR := $(INSTALL_DIR)/lib
-
-
 
 LIBRARY_NAME := libgiapi-glue-cc
 
@@ -48,19 +28,11 @@ endif
 # This directory things
 INC_DIRS := -I. -I./external -I$(LOG4CXX_INCLUDE) 
 
-# Libraries
+# Directory for libraries
 LIB_DIRS := -L$(LOG4CXX_LIB)
 
+# Libraries
 LIBS := -llog4cxx
-
-# Rule for building objects
-%.o: %.cpp
-	@echo 'Building file: $<'
-	@echo 'Invoking $(OS) C++ Compiler'
-	$(CXX) $(INC_DIRS) -O3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
-	@echo 'Finished building: $<'
-	@echo ' '
-
 
 # All Target
 all: libgiapi-glue-cc 
