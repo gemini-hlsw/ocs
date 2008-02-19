@@ -37,7 +37,7 @@ public:
 	 * @param type Type information for the values to be stored in the status 
 	 *             item. 
 	 * 
-	 * @return giapi::status::OK if the item was sucessfully created, 
+	 * @return giapi::status::OK if the item was successfully created, 
 	 *         giapi::status::ERROR if there is an error. 
 	 */
 	static int createAlarmStatusItem(const char *name, const type::Type type);
@@ -53,7 +53,7 @@ public:
 	 * 	           created. If an status item with the same name already exists, 
 	 *             the method will return giapi::status::ERROR
 	 * 
-	 * @return giapi::status::OK if the item was sucessfully created, 
+	 * @return giapi::status::OK if the item was successfully created, 
 	 *         giapi::status::ERROR if there is an error. 
 	 */
 	static int createHealthStatusItem(const char *name);
@@ -62,9 +62,9 @@ public:
 	 * Post all pending status to Gemini. Pending statuses are those
 	 * whose value has changed since last time posted by GIAPI.
 	 * 
-	 * @return giapi::status::OK if the post suceeded. 
-	 *         giapi::status::WARNING if there is no status item pending
-	 *         for sending  
+	 * @return giapi::status::OK if the post succeeded. 
+	 *         giapi::status::WARNING if there is no status items pending
+	 *         to send  
 	 *         giapi::status::ERROR if there is some error in the attempt
 	 *         to send  
 	 * 
@@ -74,12 +74,12 @@ public:
 	static int postStatus() throw (PostException);
 
 	/**
-	 * Post specified status to Gemini. The status will be sent only
+	 * Post the specified status item to Gemini. The status will be sent only
 	 * if it has changed since the last time it was posted. 
 	 * 
 	 * @args   name The name of the status item to be posted
 	 * 
-	 * @return giapi::status::OK if the post suceeds. 
+	 * @return giapi::status::OK if the post succeeds. 
 	 *         giapi::status::WARNING if the status item value has not 
 	 *         changed since last post, therefore there is no need to send it
 	 *         again.   
@@ -183,7 +183,7 @@ public:
 	 * @param message Optional message to describe the alarm. This argument is
 	 *        mandatory if the cause is alarm::ALARM_CAUSE_OTHER. 
 	 * 
-	 * @return giapi::status::OK if alarm was sucessfully set 
+	 * @return giapi::status::OK if alarm was successfully set 
 	 *         giapi::status::ERROR if there was an error setting the alarm (for
 	 *         instance, the alarm item hasn't been created or the name doesn't
 	 *         correspond to an alarm status item). giapi::status::ERROR is 

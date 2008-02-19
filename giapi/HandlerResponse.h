@@ -2,7 +2,18 @@
 #define HANDLERRESPONSE_H_
 #include <tr1/memory>
 
+
 namespace giapi {
+
+/**
+ * forward declaration
+ */
+class HandlerResponse;
+/**
+ * Definition of a smart pointer to a HandlerResponse instance 
+ */
+typedef std::tr1::shared_ptr<HandlerResponse> pHandlerResponse;
+
 /**
  * Handler response. Contains an enumerated response type 
  * and a message when an error is produced. 
@@ -12,7 +23,7 @@ public:
 	/**
 	 * Definition of the different response types
 	 */
-	 enum Response {
+	enum Response {
 		/**
 		 * Preset Accepted.
 		 */
@@ -32,41 +43,58 @@ public:
 	};
 
 	/**
-	 * Constructor. Takes the response type as the argument
+	 * Static factory initializer. Takes as an argument
+	 * the type of the response
 	 */
-	HandlerResponse(const Response response);
+
+	static pHandlerResponse create(const Response response);
 
 	/**
-	 * Constructor for error Handler response.
-	 * The Response type is set to ERROR and the message is 
-	 * stored.  
+	 * Static factory initializer for error HandlerResponse. 
+	 * The response type is set to ERROR and the message is 
+	 * stored. 
 	 */
-	HandlerResponse(const char * msg);
+	static pHandlerResponse create(const char * msg);
 
 	/**
 	 * Return the response type. 
 	 */
 	const Response getResponse() const;
-	
+
 	/**
 	 * Return the message associated to this handler
 	 * response. If the response type is not ERROR, 
 	 * the return value is NULL. 
 	 */
 	const char* getMessage() const;
-	
+
 	virtual ~HandlerResponse();
 
 private:
+	/**
+	 * Private Constructor. Takes the response type as the argument
+	 */
+	HandlerResponse(const Response response);
+
+	/**
+	 * Private Constructor for error Handler response.
+	 * The Response type is set to ERROR and the message is 
+	 * stored.  
+	 */
+	HandlerResponse(const char * msg);
+	/**
+	 * The error message 
+	 */
 	const char * _message;
+	
+	/**
+	 * The response type
+	 */
 	Response _response;
 
 };
 
-/**
- * Definition of a smart pointer to a HandlerResponse instance 
- */
-typedef std::tr1::shared_ptr<HandlerResponse> pHandlerResponse;
+
 
 }
 

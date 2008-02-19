@@ -55,6 +55,31 @@ private:
 	 * in the form of smart pointers. 
 	 */
 	Configuration();
+public:
+	/**
+	 * Keyword for the Argument in the OBSERVE sequence command
+	 */
+	static const char * DATA_LABEL;
+	/**
+	 * Keyword for the Argument in the REBOOT sequence command
+	 */
+	static const char * REBOOT_OPT;
+	
+	/**
+	 * GMP Reboot argument in the REBOOT sequence command
+	 */
+	static const char * GMP;
+	/**
+	 * Reboot argument in the REBOOT sequence command
+	 */
+	static const char * REBOOT;
+	/**
+	 * No argument in the REBOOT sequence command
+	 */
+	static const char * NONE;
+	
+	
+	
 };
 
 /**

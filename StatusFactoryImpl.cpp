@@ -21,15 +21,15 @@ StatusFactoryImpl::~StatusFactoryImpl() {
 StatusSender& StatusFactoryImpl::getStatusSender(StatusSenderType type) {
 	if (senders[type] == 0) {
 		switch (type) {
-		case LogSender:
+		case LOG_SENDER:
 			senders[type] = new LogStatusSender();
 			break;
-		case JMSSender:
+		case JMS_SENDER:
 			senders[type] = new JmsStatusSender();
 			break;
 		default:
-			//TODO: Log invalid status type
-			break;
+			//return the default sender
+			return getStatusSender();
 		}
 	}
 	return *(senders[type]);

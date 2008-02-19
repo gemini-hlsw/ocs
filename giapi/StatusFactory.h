@@ -18,18 +18,18 @@ public:
 	 */
 	enum StatusSenderType {
 		/**
-		 * A LogSender logs the post commands, but doesn't really send
+		 * A LOG_SENDER logs the post commands, but doesn't really send
 		 * items outside the current environment
 		 */
-		LogSender,
+		LOG_SENDER,
 		/**
-		 * A JMSSender uses JMS technology to braodcast status information
+		 * A JMS_SENDER uses JMS technology to broadcast status information
 		 * to the Gemini Master Process (GMP). 
 		 */
-		JMSSender,
+		JMS_SENDER,
 		/**
 		 * Auxiliary item to be used as the count of items in this 
-		 * enumeration
+		 * enumeration. Should not be used as a valid StatusSenderType!!
 		 */
 		Elements
 	};
@@ -54,6 +54,8 @@ public:
 	 * Return the StatusSender specified by the <code>type</code>. Several 
 	 * calls to this method with the same argument will return a reference 
 	 * to the same object
+	 * 
+	 * @param type the Status Sender type that will be retrieved by this call
 	 *   
 	 * @return StatusSender associated to the type. 
 	 */

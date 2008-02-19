@@ -10,7 +10,7 @@ namespace giapi {
 class StatusFactoryImpl : public StatusFactory {
 private:
 	StatusSender* senders[StatusFactory::Elements];
-	static const StatusSenderType DEFAULT_SENDER = LogSender;
+	static const StatusSenderType DEFAULT_SENDER = LOG_SENDER;
 public:
 	/**
 	 * Default constructor
