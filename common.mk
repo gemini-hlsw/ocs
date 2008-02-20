@@ -30,13 +30,16 @@ INSTALL_DIR := /Users/anunez/test/giapi
 GIAPI_INCLUDE_DIR := $(INSTALL_DIR)/include/giapi
 GIAPI_LIB_DIR := $(INSTALL_DIR)/lib
 
+#External libraries dependencies, used during build
+EXTERNAL_LIB := /Users/anunez/Projects/workspaces/giapi-external
+
 #Log4cxx stuff
-LOG4CXX_BASE := /Users/anunez/Projects/eclipse/workspaces/apache-log4cxx/dist
+LOG4CXX_BASE := $(EXTERNAL_LIB)/log4cxx
 LOG4CXX_INCLUDE := $(LOG4CXX_BASE)/include
 LOG4CXX_LIB := $(LOG4CXX_BASE)/lib
 
 #CPPUnit stuff
-CPPUNIT_BASE := /Users/anunez/Projects/extra/cppunit-1.12.0/dist
+CPPUNIT_BASE := $(EXTERNAL_LIB)/cppunit
 CPPUNIT_INCLUDE := $(CPPUNIT_BASE)/include
 CPPUNIT_LIB := $(CPPUNIT_BASE)/lib
 
