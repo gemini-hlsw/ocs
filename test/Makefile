@@ -9,7 +9,7 @@
 
 #Set the LD_LIBRARY_PATH to run the tests
 ifneq ($(UNAME),Darwin)
-	DYLD_LIBRARY_PATH := ../:$(LOG4CXX_LIB)
+	DYLD_LIBRARY_PATH := ../:$(LOG4CXX_LIB):$(CPPUNIT_LIB)
 else
 	LD_LIBRARY_PATH := ../
 endif

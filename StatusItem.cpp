@@ -3,7 +3,7 @@
 #include <giapi/giapi.h>
 #include <giapi/giapiexcept.h>
 
-#include <time.h>
+#include <sys/time.h>
 
 namespace giapi {
 

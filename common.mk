@@ -31,7 +31,7 @@ GIAPI_INCLUDE_DIR := $(INSTALL_DIR)/include/giapi
 GIAPI_LIB_DIR := $(INSTALL_DIR)/lib
 
 #External libraries dependencies, used during build
-EXTERNAL_LIB := /Users/anunez/Projects/workspaces/giapi-external
+EXTERNAL_LIB := /Users/anunez/Projects/giapi/giapi-external
 
 #Log4cxx stuff
 LOG4CXX_BASE := $(EXTERNAL_LIB)/log4cxx
