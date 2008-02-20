@@ -12,7 +12,7 @@ MV := 1.0
 
 LIBRARY_NAME := libgiapi-glue-cc
 
-ifeq ($(UNAME),Darwin)
+ifneq ($(UNAME),Darwin)
 	LIBRARY_NAME_LN := $(LIBRARY_NAME).dylib
 	LIBRARY_NAME := $(LIBRARY_NAME).dylib.$(V).$(MV)
 else
@@ -47,6 +47,7 @@ install: libgiapi-glue-cc install-shared-lib install-headers
 
 # Tool invocations
 libgiapi-glue-cc: $(OBJS) 
+	@echo 'Building on $(UNAME)'
 	@echo 'Building target: $@'
 	@echo 'Invoking: $(OS) C++ Linker'
 	$(MKLIB) $(LIB_DIRS) -o $(LIBRARY_NAME) $(OBJS) $(LIBS)
