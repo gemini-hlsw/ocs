@@ -11,6 +11,14 @@ LN := ln -s
 
 CP := cp -f
 
+#Common definition depending ton the operating system
+ifneq ($(UNAME),Darwin)
+	OS := MacOS X
+	MKLIB = $(CXX) -dynamiclib
+else
+	OS := Linux
+	MKLIB = $(CXX) -shared
+endif
 
 #Installation directory
 INSTALL_DIR := /Users/anunez/test/giapi

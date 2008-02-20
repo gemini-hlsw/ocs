@@ -13,13 +13,9 @@ MV := 1.0
 LIBRARY_NAME := libgiapi-glue-cc
 
 ifneq ($(UNAME),Darwin)
-	OS := MacOS X
-	MKLIB = $(CXX) -dynamiclib 
 	LIBRARY_NAME_LN := $(LIBRARY_NAME).dylib
 	LIBRARY_NAME := $(LIBRARY_NAME).dylib.$(V).$(MV)
 else
-	OS := Linux
-	MKLIB = $(CXX) -shared
 	LIBRARY_NAME_LN := $(LIBRARY_NAME).so
 	LIBRARY_NAME := $(LIBRARY_NAME).so.$(V).$(MV)
 endif
