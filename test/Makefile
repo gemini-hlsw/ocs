@@ -8,23 +8,22 @@
 
 
 #Set the LD_LIBRARY_PATH to run the tests
-ifneq ($(UNAME),Darwin)
+ifeq ($(UNAME),Darwin)
 	DYLD_LIBRARY_PATH := ../:$(LOG4CXX_LIB):$(CPPUNIT_LIB)
 else
-	LD_LIBRARY_PATH := ../
+	LD_LIBRARY_PATH := ../:$(LOG4CXX_LIB):$(CPPUNIT_LIB)
 endif
 
 #Includes to build
 INC_DIRS := -I../  -I$(CPPUNIT_INCLUDE) 
 # Libraries
-LIB_DIRS := -L$(CPPUNIT_LIB) -L$(LOG4CXX_LIB) -L$(GIAPI_LIB_DIR)
+LIB_DIRS := -L$(CPPUNIT_LIB) -L$(LOG4CXX_LIB) -L../
 LIBS := -lcppunit -lgiapi-glue-cc -llog4cxx
 
 EXE_NAME := libgiapi-test
 
 # Tool invocations
 all: libgiapi-test
-	@ echo "DYLD_LIBRARY_PATH $(DYLD_LIBRARY_PATH)"
 	@ echo "Runnnin unit testing"
 	@./$(EXE_NAME)
 

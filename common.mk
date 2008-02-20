@@ -17,7 +17,7 @@ BUILD_BASE = $(shell pwd)
 
 
 #Common definition depending ton the operating system
-ifneq ($(UNAME),Darwin)
+ifeq ($(UNAME),Darwin)
 	OS := MacOS X
 	MKLIB = $(CXX) -dynamiclib
 else
@@ -26,12 +26,12 @@ else
 endif
 
 #Installation directory
-INSTALL_DIR := /Users/anunez/test/giapi
+INSTALL_DIR := /home/ppkamik/arturo/giapi/install
 GIAPI_INCLUDE_DIR := $(INSTALL_DIR)/include/giapi
 GIAPI_LIB_DIR := $(INSTALL_DIR)/lib
 
 #External libraries dependencies, used during build
-EXTERNAL_LIB := /Users/anunez/Projects/giapi/giapi-external
+EXTERNAL_LIB := /home/ppkamik/arturo/giapi/external
 
 #Log4cxx stuff
 LOG4CXX_BASE := $(EXTERNAL_LIB)/log4cxx
