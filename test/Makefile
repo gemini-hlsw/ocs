@@ -24,6 +24,7 @@ EXE_NAME := libgiapi-test
 
 # Tool invocations
 all: libgiapi-test
+	@ echo "Build Base $(DYLD_LIBRARY_PATH)"
 	@ echo "Runnnin unit testing"
 	@./$(EXE_NAME)
 

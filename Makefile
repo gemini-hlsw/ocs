@@ -30,8 +30,17 @@ LIB_DIRS := -L$(LOG4CXX_LIB)
 # Libraries
 LIBS := -llog4cxx
 
+# Sub-directories
+SUBDIRS :=  test
+
 # All Target
-all: libgiapi-glue-cc 
+all: libgiapi-glue-cc
+	@for subdir in $(SUBDIRS); \
+        do \
+          echo "Making $@ in $$subdir ..."; \
+          ( cd $$subdir && $(MAKE) $@ ) || exit 1; \
+        done
+	
 
 # Install Target
 install: libgiapi-glue-cc install-shared-lib install-headers
@@ -42,12 +51,19 @@ libgiapi-glue-cc: $(OBJS)
 	@echo 'Invoking: $(OS) C++ Linker'
 	$(MKLIB) $(LIB_DIRS) -o $(LIBRARY_NAME) $(OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
+	@echo 'Making symlink'
+	$(LN) $(LIBRARY_NAME) $(LIBRARY_NAME_LN)
 	@echo ' '
 	
 	
 clean:
-	-$(RM) $(OBJS)$(CPP_DEPS)$(LIBRARIES) $(LIBRARY_NAME)
+	-$(RM) $(OBJS)$(CPP_DEPS)$(LIBRARIES) $(LIBRARY_NAME) $(LIBRARY_NAME_LN)
 	-@echo ' '
+	@for subdir in $(SUBDIRS); \
+        do \
+          echo "Making $@ in $$subdir ..."; \
+          ( cd $$subdir && $(MAKE) $@ ) || exit 1; \
+        done
 	
 	
 #Make include directory	

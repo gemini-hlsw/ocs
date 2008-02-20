@@ -11,6 +11,11 @@ LN := ln -s
 
 CP := cp -f
 
+MAKE := make
+
+BUILD_BASE = $(shell pwd)
+
+
 #Common definition depending ton the operating system
 ifneq ($(UNAME),Darwin)
 	OS := MacOS X
