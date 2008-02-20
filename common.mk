@@ -13,10 +13,8 @@ CP := cp -f
 
 MAKE := make
 
-UNAME := $(shell uname) 
-
 #Common definition depending ton the operating system
-ifneq ($(UNAME),Darwin)
+ifeq ($(shell uname | grep -c "Darwin"),1) 
 	OS := MacOS X
 	MKLIB = $(CXX) -dynamiclib
 else

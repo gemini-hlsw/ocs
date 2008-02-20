@@ -12,7 +12,7 @@ MV := 1.0
 
 LIBRARY_NAME := libgiapi-glue-cc
 
-ifneq ($(UNAME),Darwin)
+ifeq ($(shell uname | grep -c "Darwin"),1) 
 	LIBRARY_NAME_LN := $(LIBRARY_NAME).dylib
 	LIBRARY_NAME := $(LIBRARY_NAME).dylib.$(V).$(MV)
 else
