@@ -52,6 +52,7 @@ libgiapi-glue-cc: $(OBJS)
 	$(MKLIB) $(LIB_DIRS) -o $(LIBRARY_NAME) $(OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo 'Making symlink'
+	-$(RM) $(LIBRARY_NAME_LN)
 	$(LN) $(LIBRARY_NAME) $(LIBRARY_NAME_LN)
 	@echo ' '
 	
