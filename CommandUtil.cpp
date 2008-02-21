@@ -11,17 +11,43 @@ CommandUtil::~CommandUtil() {
 
 int CommandUtil::subscribeSequenceCommand(command::SequenceCommand id,
 		command::ActivitySet activities, pSequenceCommandHandler handler) {
+	//Uninitialized sequence command handler
+	if (handler == 0) {
+		return giapi::status::ERROR;
+	}
 	return LogCommandUtil::Instance().subscribeSequenceCommand(id, activities, handler);
 
 }
 
 int CommandUtil::subscribeApply(const char* prefix,
 		command::ActivitySet activities, pSequenceCommandHandler handler) {
+	//Uninitialized sequence command handler
+	if (handler == 0) {
+		return giapi::status::ERROR;
+	}
 	return LogCommandUtil::Instance().subscribeApply(prefix, activities, handler);
 }
 
 int CommandUtil::postCompletionInfo(command::ActionId id,
 		pHandlerResponse response) {
+	//Uninitialized handler response for completion info
+	if (response == 0) {
+		return giapi::status::ERROR;
+	}
+	//Invalid responses for completion info.
+	//Validates the response is either COMPLETED or ERROR. If
+	//ERROR, check whether we have a message or not
+	switch (response->getResponse()) {
+		case HandlerResponse::COMPLETED:
+			break; //all right
+		case HandlerResponse::ERROR:
+			if (response->getMessage() != 0)
+				break; //all right
+		default:
+			//in all the other cases, return error
+			return giapi::status::ERROR;
+	}
+
 	return LogCommandUtil::Instance().postCompletionInfo(id, response);
 }
 
