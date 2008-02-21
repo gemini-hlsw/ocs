@@ -85,8 +85,7 @@ int StatusDatabase::setHealth(const char *name, const health::Health health) {
 	}
 
 	//set the values in the alarm item
-	healthStatusItem->setHealth(health);
-	return status::OK;
+	return healthStatusItem->setHealth(health);
 }
 
 int StatusDatabase::setStatusValueAsInt(const char* name, int value) {
@@ -147,9 +146,7 @@ int StatusDatabase::clearAlarm(const char *name) {
 	}
 
 	//set the values in the alarm item
-	alarmStatusItem->clearAlarmState();
-
-	return status::OK;
+	return alarmStatusItem->clearAlarmState();
 }
 
 }

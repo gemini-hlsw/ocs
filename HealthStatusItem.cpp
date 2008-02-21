@@ -15,7 +15,7 @@ HealthStatusItem::~HealthStatusItem()
 
 int HealthStatusItem::setHealth(health::Health health) {
 	
-	return StatusItem::setValueAsInt(health);
+	return setValueAsInt(health);
 	
 }
 

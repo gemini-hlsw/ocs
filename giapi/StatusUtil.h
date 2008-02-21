@@ -189,6 +189,8 @@ public:
 	 *         correspond to an alarm status item). giapi::status::ERROR is 
 	 *         returned also if no message is specified when the cause is 
 	 *         set to alarm::ALARM_CAUSE_OTHER.
+	 *         giapi::status::WARNING if the values for alarm, cause and 
+	 *         message are the same since the last post. 
 	 * 
 	 * @see giapi::alarm::Severity
 	 * @see giapi::alarm::Cause
@@ -221,6 +223,8 @@ public:
 	 *               name
 	 * 
 	 * @return giapi::status::OK if the health was sucessfully set 
+	 *         giapi::status::WARNING if the new value for health is the 
+	 *         same since the last post operation. 
 	 *         giapi::status::ERROR if there was an error setting the health 
 	 *         (for instance, the health status item hasn't been created or
 	 *         the name doesn't correspond to a health status item).  
