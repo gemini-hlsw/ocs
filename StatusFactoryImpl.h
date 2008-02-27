@@ -1,6 +1,7 @@
 #ifndef STATUSFACTORYIMPL_H_
 #define STATUSFACTORYIMPL_H_
-#include <giapi/StatusFactory.h>
+#include "StatusFactory.h"
+#include "StatusSender.h"
 
 namespace giapi {
 /**

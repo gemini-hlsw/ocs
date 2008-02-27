@@ -1,6 +1,6 @@
 #include "LogStatusSender.h"
 
-#include <giapi/StatusSender.h>
+#include "StatusSender.h"
 
 namespace giapi {
 

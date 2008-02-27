@@ -2,9 +2,9 @@
 #define LOGSTATUSSENDER_H_
 
 #include <log4cxx/logger.h>
-
-#include <giapi/StatusSender.h>
 #include <giapi/giapiexcept.h>
+
+#include "StatusSender.h"
 #include "StatusItem.h"
 
 namespace giapi {

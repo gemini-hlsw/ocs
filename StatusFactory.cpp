@@ -1,4 +1,4 @@
-#include <giapi/StatusFactory.h>
+#include "StatusFactory.h"
 #include "StatusFactoryImpl.h"
 
 namespace giapi {

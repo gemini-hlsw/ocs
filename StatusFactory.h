@@ -1,7 +1,8 @@
 #ifndef STATUSFACTORY_H_
 #define STATUSFACTORY_H_
-#include <giapi/StatusSender.h>
 #include <tr1/memory>
+
+#include "StatusSender.h"
 
 namespace giapi {
 /**

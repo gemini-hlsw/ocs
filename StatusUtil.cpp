@@ -1,8 +1,8 @@
 #include "StatusDatabase.h"
 
 #include <giapi/StatusUtil.h>
-#include <giapi/StatusFactory.h>
-#include <giapi/StatusSender.h>
+#include "StatusFactory.h"
+#include "StatusSender.h"
 
 
 namespace giapi {

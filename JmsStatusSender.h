@@ -3,7 +3,7 @@
 
 #include <log4cxx/logger.h>
 
-#include <giapi/StatusSender.h>
+#include "StatusSender.h"
 #include <giapi/giapiexcept.h>
 
 namespace giapi {
