@@ -45,6 +45,13 @@ public:
 	virtual const vector<const char *> & getKeys() = 0;
 	
 	/**
+	 * Return the number of parameters contained in this configuration. 
+	 * 
+	 * @return number of parameters contained in this configuration. 
+	 */
+	virtual int getSize() const = 0;
+	
+	/**
 	 * Destructor. 
 	 */
 	virtual ~Configuration();
