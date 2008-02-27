@@ -4,7 +4,6 @@
 #include "StatusFactory.h"
 #include "StatusSender.h"
 
-
 namespace giapi {
 
 StatusUtil::StatusUtil() {

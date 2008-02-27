@@ -26,10 +26,10 @@ int StatusItem::setValueAsInt(int value) {
 		LOG4CXX_WARN(logger, "Can't set an int value in the status item : " << getName());
 		return status::ERROR;
 	}
-	//Figure out if this is a new value
+	//Figure out if this is a new value. If they are the same, return immediately
 	if (!_value.empty() && value == getValueAsInt()) {
 		LOG4CXX_DEBUG(logger, "Values match. Won't mark as dirty. Item " << getName());
-		return status::WARNING;
+		return status::OK;
 	}
 	//set the value
 	_mark();
@@ -43,10 +43,10 @@ int StatusItem::setValueAsString(const char* value) {
 		LOG4CXX_WARN(logger, "Can't set a string value in the status item : " << getName());
 		return status::ERROR;
 	}
-	//Figure out if this is a new value
+	//Figure out if this is a new value. If they are the same, return immediately
 	if (!_value.empty() && strcmp(value, getValueAsString()) == 0) {
 		LOG4CXX_DEBUG(logger, "Values match. Won't mark as dirty. Item " << getName());
-		return status::WARNING;
+		return status::OK;
 	}
 	_mark();
 	return KvPair::setValueAsString(value);

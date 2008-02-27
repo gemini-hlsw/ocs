@@ -146,7 +146,8 @@ int StatusDatabase::clearAlarm(const char *name) {
 	}
 
 	//set the values in the alarm item
-	return alarmStatusItem->clearAlarmState();
+	alarmStatusItem->clearAlarmState();
+	return status::OK;
 }
 
 }

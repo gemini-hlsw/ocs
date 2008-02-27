@@ -63,8 +63,6 @@ public:
 	 * whose value has changed since last time posted by GIAPI.
 	 * 
 	 * @return giapi::status::OK if the post succeeded. 
-	 *         giapi::status::WARNING if there is no status items pending
-	 *         to send  
 	 *         giapi::status::ERROR if there is some error in the attempt
 	 *         to send  
 	 * 
@@ -80,9 +78,6 @@ public:
 	 * @args   name The name of the status item to be posted
 	 * 
 	 * @return giapi::status::OK if the post succeeds. 
-	 *         giapi::status::WARNING if the status item value has not 
-	 *         changed since last post, therefore there is no need to send it
-	 *         again.   
 	 *         giapi::status::ERROR if there is no information associated
 	 *         to the specified status item or the <code>name</code> 
 	 *         parameter is NULL
@@ -100,9 +95,6 @@ public:
 	 * @param value Integer value to store in the status item. 
 	 * 
 	 * @return giapi::status::OK if the value was set correctly 
-	 *         giapi::status::WARNING if the current status value is
-	 *         already set to the new value. The StatusItem will not 
-	 *         be marked as dirty in this case. 
 	 *         giapi::status::ERROR  if there is a problem setting the 
 	 *         value and the operation was aborted. This can happen if the 
 	 *         type of the status item was not defined as type::INTEGER, 
@@ -119,9 +111,6 @@ public:
 	 * @param value char value to store in the status item. 
 	 * 
 	 * @return giapi::status::OK if the value was set correctly 
-	 *         giapi::status::WARNING if the current status value is
-	 *         already set to the new value. The StatusItem will not 
-	 *         be marked as dirty in this case. 
 	 *         giapi::status::ERROR  if there is a problem setting the 
 	 *         value and the operation was aborted. This can happen if the 
 	 *         type of the status item was not defined as type::CHAR, 
@@ -140,9 +129,6 @@ public:
 	 * 
 	 * @return giapi::status::OK if the value was set correctly. The 
 	 *         StatusItem is marked dirty. 
-	 *         giapi::status::WARNING if the current status value is
-	 *         already set to the new value. The StatusItem will not 
-	 *         be marked as dirty in this case. 
 	 *         giapi::status::ERROR  if there is a problem setting the 
 	 *         value and the operation was aborted. This can happen if the 
 	 *         type of the status item was not defined as type::STRING, 
@@ -160,9 +146,6 @@ public:
 	 * @param value double value to store in the status item. 
 	 * 
 	 * @return giapi::status::OK if the value was set correctly 
-	 *         giapi::status::WARNING if the current status value is
-	 *         already set to the new value. The StatusItem will not 
-	 *         be marked as dirty in this case. 
 	 *         giapi::status::ERROR  if there is a problem setting the 
 	 *         value and the operation was aborted. This can happen if the 
 	 *         type of the status item was not defined as type::DOUBLE, 
@@ -189,8 +172,6 @@ public:
 	 *         correspond to an alarm status item). giapi::status::ERROR is 
 	 *         returned also if no message is specified when the cause is 
 	 *         set to alarm::ALARM_CAUSE_OTHER.
-	 *         giapi::status::WARNING if the values for alarm, cause and 
-	 *         message are the same since the last post. 
 	 * 
 	 * @see giapi::alarm::Severity
 	 * @see giapi::alarm::Cause
@@ -223,8 +204,6 @@ public:
 	 *               name
 	 * 
 	 * @return giapi::status::OK if the health was sucessfully set 
-	 *         giapi::status::WARNING if the new value for health is the 
-	 *         same since the last post operation. 
 	 *         giapi::status::ERROR if there was an error setting the health 
 	 *         (for instance, the health status item hasn't been created or
 	 *         the name doesn't correspond to a health status item).  

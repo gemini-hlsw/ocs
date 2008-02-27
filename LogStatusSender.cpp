@@ -21,10 +21,10 @@ int LogStatusSender::postStatus(const char* name) const throw (PostException) {
 		LOG4CXX_WARN(logger, "No status item found for " << name << ". Not posting");
 		return status::ERROR;
 	}
-	
+	//value hasn't changed since last post, return immediately. 
 	if (!statusItem->isChanged()) {
 		LOG4CXX_WARN(logger, "Status Item " << name << " hasn't changed since last post. Not posting");
-		return status::WARNING;;
+		return status::OK;
 	}
 	
 	const std::type_info& typeInfo = statusItem->getType();

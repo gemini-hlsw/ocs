@@ -51,8 +51,6 @@ public:
 	 * @return status::OK if the alarm was set properly
 	 *         status::ERROR if the message was not set and the cause
 	 *         is specified as alarm::ALARM_CAUSE_OTHER
-	 *         status::WARNING if the values didn't change since last
-	 *         post. The alarm will not be marked dirty in this case. 
 	 * 
 	 */
 	int setAlarmState(alarm::Severity severity, alarm::Cause cause,
@@ -61,11 +59,8 @@ public:
 	/**
 	 * Reset the alarm information. The status item is in a 
 	 * no-alarm state after this call
-	 * 
-	 * @return status::OK if the alarm was cleared
-	 *         status::WARNING if the alarm was already in a clear state
 	 */
-	int clearAlarmState();
+	void clearAlarmState();
 
 	/**
 	 * Return the (optional) message associated 

@@ -47,9 +47,6 @@ public:
 	 * @param value Integer value to store in the status item. 
 	 * 
 	 * @return giapi::status::OK if the value was set correctly 
-	 *         giapi::status::WARNING if the current status value is
-	 *         already set to the new value. The StatusItem will not 
-	 *         be marked as dirty in this case. 
 	 *         giapi::status::ERROR  if there is a problem setting the 
 	 *         value and the operation was aborted. This can happen if the 
 	 *         type of the status item was not defined as type::INTEGER
@@ -63,9 +60,6 @@ public:
 	 * @param value String value to store in the status item. 
 	 * 
 	 * @return giapi::status::OK if the value was set correctly 
-	 *         giapi::status::WARNING if the current status value is
-	 *         already set to the new value. The StatusItem will not 
-	 *         be marked as dirty in this case. 
 	 *         giapi::status::ERROR  if there is a problem setting the 
 	 *         value and the operation was aborted. This can happen if the 
 	 *         type of the status item was not defined as type::INTEGER

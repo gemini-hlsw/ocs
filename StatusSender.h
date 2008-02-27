@@ -19,8 +19,6 @@ public:
 	 * item is marked as "dirty" every time a new value is set. 
 	 * 
 	 * @return giapi::status::OK if the post suceeded. 
-	 *         giapi::status::WARNING if there is no status item pending
-	 *         for sending  
 	 *         giapi::status::ERROR if there is some error in the attempt
 	 *         to send  
 	 * @throws PostException in case there is a problem with the underlying 
@@ -35,9 +33,6 @@ public:
 	 * 
 	 * @args   name The name of the status item to be posted
 	 * @return giapi::status::OK if the post suceeds. 
-	 *         giapi::status::WARNING if the status item value has not 
-	 *         changed since last post, therefore there is no need to send it
-	 *         again.   
 	 *         giapi::status::ERROR if there is no information associated
 	 *         to the specified status item or the <code>name</code> 
 	 *         parameter is NULL

@@ -12,7 +12,6 @@ namespace giapi {
 		enum Status {
 			ERROR = -1, //Errors that don't have a status
 			OK = 0, //Success
-			WARNING, //Some warning condition 
 		};
 	}
 	
