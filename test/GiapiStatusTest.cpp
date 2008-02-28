@@ -114,7 +114,7 @@ void GiapiStatusTest::testPostStatusItem() {
 	//Value has not been set. Not posting, return OK immediately
 	CPPUNIT_ASSERT( StatusUtil::postStatus("test-item-2") == giapi::status::OK);
 	//This is an error. No such status item
-	CPPUNIT_ASSERT( StatusUtil::postStatus("test-item-3") == giapi::status::ERROR);
+	CPPUNIT_ASSERT( StatusUtil::postStatus("test-item-3") == giapi::status::ERROR);	
 }
 
 
@@ -136,6 +136,19 @@ void GiapiStatusTest::testPostHealth() {
 	CPPUNIT_ASSERT( StatusUtil::postStatus("health-item-3") == giapi::status::ERROR);
 }
 
+
+void GiapiStatusTest::testPostAll() {
+	//will mark a few items dirty first
+	CPPUNIT_ASSERT( StatusUtil::setValueAsInt("test-item", 99) == giapi::status::OK);
+	CPPUNIT_ASSERT( StatusUtil::setHealth("health-item", giapi::health::WARNING) == giapi::status::OK);
+	CPPUNIT_ASSERT( StatusUtil::setAlarm("alarm-item", giapi::alarm::ALARM_FAILURE, giapi::alarm::ALARM_CAUSE_LO) == giapi::status::OK);
+	
+	//All the pending values should be posted
+	CPPUNIT_ASSERT( StatusUtil::postStatus() == giapi::status::OK);
+	//Ok too, but this shouldn't post anything
+	CPPUNIT_ASSERT( StatusUtil::postStatus() == giapi::status::OK);
+	
+}
 
 
 

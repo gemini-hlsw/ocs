@@ -22,6 +22,7 @@ class GiapiStatusTest : public CppUnit::TestFixture {
 	CPPUNIT_TEST(testPostStatusItem);
 	CPPUNIT_TEST(testPostAlarms);
 	CPPUNIT_TEST(testPostHealth);
+	CPPUNIT_TEST(testPostAll);
 	
 	CPPUNIT_TEST_SUITE_END();
 	
@@ -46,6 +47,7 @@ public:
 	void testPostStatusItem();
 	void testPostAlarms();
 	void testPostHealth();
+	void testPostAll();
 	
 	virtual ~GiapiStatusTest();
 	

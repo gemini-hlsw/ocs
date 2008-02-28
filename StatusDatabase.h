@@ -1,6 +1,7 @@
 #ifndef STATUSDATABASE_H_
 #define STATUSDATABASE_H_
 #include <ext/hash_map>
+#include <vector>
 #include <memory>
 
 #include <log4cxx/logger.h>
@@ -43,6 +44,7 @@ class StatusDatabase {
 
 private:
 	StringStatusMap _map;
+	vector<StatusItem *> _statusItemList;
 	static std::auto_ptr<StatusDatabase> INSTANCE;
 	/**
 	 * Private constructor
@@ -199,6 +201,8 @@ public:
 	 * NULL if not found
 	 */
 	StatusItem* getStatusItem(const char *name);
+	
+	const vector<StatusItem *>& getStatusItems();
 
 	virtual ~StatusDatabase();
 

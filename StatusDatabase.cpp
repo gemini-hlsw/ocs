@@ -34,6 +34,7 @@ int StatusDatabase::createStatusItem(const char* name, const type::Type type) {
 	//make a new status item and store it in the map. 
 	StatusItem *item = new StatusItem(name, type);
 	_map[name] = item;
+	_statusItemList.push_back(item);
 	return status::OK;
 
 }
@@ -51,6 +52,7 @@ int StatusDatabase::createAlarmStatusItem(const char* name,
 	//make a new status item and store it in the map. 
 	StatusItem *item = new AlarmStatusItem(name, type);
 	_map[name] = item;
+	_statusItemList.push_back(item);
 	return status::OK;
 }
 
@@ -67,6 +69,7 @@ int StatusDatabase::createHealthStatusItem(const char* name) {
 	//make a new status item and store it in the map. 
 	StatusItem *item = new HealthStatusItem(name);
 	_map[name] = item;
+	_statusItemList.push_back(item);
 	return status::OK;
 }
 
@@ -149,5 +152,11 @@ int StatusDatabase::clearAlarm(const char *name) {
 	alarmStatusItem->clearAlarmState();
 	return status::OK;
 }
+
+const vector<StatusItem *>& StatusDatabase::getStatusItems() {
+	return _statusItemList;
+}
+
+
 
 }
