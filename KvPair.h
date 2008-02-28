@@ -53,6 +53,18 @@ public:
 	virtual int setValueAsString(const char * value);
 
 	/**
+	 * Set the value to the given double. Previous value is replaced,
+	 * no matter what type it was. Subclasses can specialize this 
+	 * behavior providing extra validations.
+	 * 
+	 * @param value the new double value.
+	 * 
+	 * @return status::OK. Subclasses can return different
+	 *         values. See their specific documentation
+	 */
+	virtual int setValueAsDouble(double value);
+
+	/**
 	 * Returns the value stored as an integer.
 	 *  
 	 * @return integer stored
@@ -60,6 +72,15 @@ public:
 	 * @throws bad_cast exception if the stored item is not an integer
 	 */
 	int getValueAsInt() const;
+
+	/**
+	 * Returns the value stored as a double.
+	 *  
+	 * @return double stored
+	 * 
+	 * @throws bad_cast exception if the stored item is not a double
+	 */
+	double getValueAsDouble() const;
 
 	/**
 	 * Returns the value stored as a string.

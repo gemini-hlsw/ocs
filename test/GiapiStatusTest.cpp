@@ -6,18 +6,21 @@ using namespace giapi;
 CPPUNIT_TEST_SUITE_REGISTRATION( GiapiStatusTest );
 
 GiapiStatusTest::~GiapiStatusTest() {
-	
+
 }
 
 void GiapiStatusTest::setUp() {
 	//Initialize a few status items
 	StatusUtil::createStatusItem("test-item", giapi::type::INT);
+	StatusUtil::createStatusItem("test-item-double", giapi::type::DOUBLE);
 	StatusUtil::createAlarmStatusItem("alarm-item", giapi::type::DOUBLE);
 	StatusUtil::createHealthStatusItem("health-item");
-	
+
 	//Set a few values there
 	StatusUtil::setValueAsInt("test-item", 37);
-	StatusUtil::setAlarm("alarm-item", giapi::alarm::ALARM_WARNING, giapi::alarm::ALARM_CAUSE_HIHI);
+	StatusUtil::setValueAsDouble("test-item-double", 56.92);
+	StatusUtil::setAlarm("alarm-item", giapi::alarm::ALARM_WARNING,
+			giapi::alarm::ALARM_CAUSE_HIHI);
 	StatusUtil::setHealth("health-item", giapi::health::WARNING);
 }
 
@@ -31,7 +34,6 @@ void GiapiStatusTest::testCreateStatusItem() {
 	//should work  fine. 
 	CPPUNIT_ASSERT( StatusUtil::createStatusItem("test-item-2", giapi::type::INT) == giapi::status::OK );
 }
-
 
 void GiapiStatusTest::testCreateAlarmStatusItem() {
 	//should return error, test-item already exists
@@ -56,17 +58,21 @@ void GiapiStatusTest::testSetValuesStatusItem() {
 	CPPUNIT_ASSERT(StatusUtil::setValueAsString("test-item", "Value") == giapi::status::ERROR);
 	//OK. Value didn't change since last post
 	CPPUNIT_ASSERT(StatusUtil::setValueAsInt("test-item", 48) == giapi::status::OK);
-}
 
+	//should work. test-item-double is a double
+	CPPUNIT_ASSERT( StatusUtil::setValueAsDouble("test-item-double", 335.293) == giapi::status::OK );
+	//should work. no changes since last time
+	CPPUNIT_ASSERT( StatusUtil::setValueAsDouble("test-item-double", 335.293) == giapi::status::OK );
+}
 
 void GiapiStatusTest::testSetValuesAlarms() {
 
 	//should work. 
 	CPPUNIT_ASSERT( StatusUtil::setAlarm("alarm-item", giapi::alarm::ALARM_FAILURE, giapi::alarm::ALARM_CAUSE_HI) == giapi::status::OK );
 	//shouldn't work. alarm-item-3 doesn't exists
-	CPPUNIT_ASSERT( StatusUtil::setAlarm("alarm-item-3", giapi::alarm::ALARM_FAILURE, giapi::alarm::ALARM_CAUSE_HIHI)  == giapi::status::ERROR);
+	CPPUNIT_ASSERT( StatusUtil::setAlarm("alarm-item-3", giapi::alarm::ALARM_FAILURE, giapi::alarm::ALARM_CAUSE_HIHI) == giapi::status::ERROR);
 	//shouldn't work. test-item is not an alarm
-	CPPUNIT_ASSERT( StatusUtil::setAlarm("test-item", giapi::alarm::ALARM_WARNING, giapi::alarm::ALARM_CAUSE_HIHI)  == giapi::status::ERROR );
+	CPPUNIT_ASSERT( StatusUtil::setAlarm("test-item", giapi::alarm::ALARM_WARNING, giapi::alarm::ALARM_CAUSE_HIHI) == giapi::status::ERROR );
 	//OK. Value didn't change since last post
 	CPPUNIT_ASSERT( StatusUtil::setAlarm("alarm-item", giapi::alarm::ALARM_FAILURE, giapi::alarm::ALARM_CAUSE_HI) == giapi::status::OK);
 
@@ -95,9 +101,9 @@ void GiapiStatusTest::testClearAlarms() {
 }
 
 void GiapiStatusTest::testSetValuesHealth() {
-	
+
 	//should work. 
-	CPPUNIT_ASSERT( StatusUtil::setHealth("health-item", giapi::health::BAD) == giapi::status::OK) ;
+	CPPUNIT_ASSERT( StatusUtil::setHealth("health-item", giapi::health::BAD) == giapi::status::OK);
 	//shouldn't work. health-item-3 doesn't exists
 	CPPUNIT_ASSERT( StatusUtil::setHealth("health-item-3", giapi::health::BAD) == giapi::status::ERROR );
 	//shouldn't work. test-item is not a Health Status Item
@@ -106,17 +112,14 @@ void GiapiStatusTest::testSetValuesHealth() {
 	CPPUNIT_ASSERT( StatusUtil::setHealth("health-item", giapi::health::BAD) == giapi::status::OK);
 }
 
-
-
 void GiapiStatusTest::testPostStatusItem() {
 	//Value has been set. This should be OK
 	CPPUNIT_ASSERT( StatusUtil::postStatus("test-item") == giapi::status::OK);
 	//Value has not been set. Not posting, return OK immediately
 	CPPUNIT_ASSERT( StatusUtil::postStatus("test-item-2") == giapi::status::OK);
 	//This is an error. No such status item
-	CPPUNIT_ASSERT( StatusUtil::postStatus("test-item-3") == giapi::status::ERROR);	
+	CPPUNIT_ASSERT( StatusUtil::postStatus("test-item-3") == giapi::status::ERROR);
 }
-
 
 void GiapiStatusTest::testPostAlarms() {
 	//Value has been set. This should be OK
@@ -136,19 +139,16 @@ void GiapiStatusTest::testPostHealth() {
 	CPPUNIT_ASSERT( StatusUtil::postStatus("health-item-3") == giapi::status::ERROR);
 }
 
-
 void GiapiStatusTest::testPostAll() {
 	//will mark a few items dirty first
 	CPPUNIT_ASSERT( StatusUtil::setValueAsInt("test-item", 99) == giapi::status::OK);
 	CPPUNIT_ASSERT( StatusUtil::setHealth("health-item", giapi::health::WARNING) == giapi::status::OK);
 	CPPUNIT_ASSERT( StatusUtil::setAlarm("alarm-item", giapi::alarm::ALARM_FAILURE, giapi::alarm::ALARM_CAUSE_LO) == giapi::status::OK);
-	
+
 	//All the pending values should be posted
 	CPPUNIT_ASSERT( StatusUtil::postStatus() == giapi::status::OK);
 	//Ok too, but this shouldn't post anything
 	CPPUNIT_ASSERT( StatusUtil::postStatus() == giapi::status::OK);
-	
+
 }
-
-
 

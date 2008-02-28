@@ -23,6 +23,9 @@ public:
 	
 	virtual int postStatus() const throw (PostException);
 	virtual int postStatus(const char* name) const throw (PostException);
+	
+private:
+	int postStatus(StatusItem *item) const throw (PostException);;
 };
 
 }

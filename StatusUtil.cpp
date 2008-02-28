@@ -31,6 +31,11 @@ int StatusUtil::setValueAsString(const char* name, const char *value) {
 	return database.setStatusValueAsString(name, value);
 }
 
+int StatusUtil::setValueAsDouble(const char* name, double value) {
+	StatusDatabase& database = StatusDatabase::Instance();
+	return database.setStatusValueAsDouble(name, value);
+}
+
 int StatusUtil::createStatusItem(const char* name, const type::Type type) {
 	StatusDatabase& database = StatusDatabase::Instance();
 	return database.createStatusItem(name, type);

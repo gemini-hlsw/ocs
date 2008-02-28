@@ -107,6 +107,15 @@ int StatusDatabase::setStatusValueAsString(const char* name, const char * value)
 	return statusItem->setValueAsString(value);
 }
 
+int StatusDatabase::setStatusValueAsDouble(const char* name, double value) {
+	StatusItem* statusItem = getStatusItem(name);
+	if (statusItem == 0) {
+		return status::ERROR;
+	}
+	return statusItem->setValueAsDouble(value);
+}
+
+
 StatusItem * StatusDatabase::getStatusItem(const char* name) {
 	if (name == 0) {
 		return (StatusItem *)0; //NULL

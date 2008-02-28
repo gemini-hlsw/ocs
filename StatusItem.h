@@ -62,9 +62,22 @@ public:
 	 * @return giapi::status::OK if the value was set correctly 
 	 *         giapi::status::ERROR  if there is a problem setting the 
 	 *         value and the operation was aborted. This can happen if the 
-	 *         type of the status item was not defined as type::INTEGER
+	 *         type of the status item was not defined as type::STRING
 	 */
 	virtual int setValueAsString(const char * value);
+
+	/**
+	 * Set the value of the item to the provided 
+	 * double value.
+	 * 
+	 * @param value Double value to store in the status item. 
+	 * 
+	 * @return giapi::status::OK if the value was set correctly 
+	 *         giapi::status::ERROR  if there is a problem setting the 
+	 *         value and the operation was aborted. This can happen if the 
+	 *         type of the status item was not defined as type::DOUBLE
+	 */
+	virtual int setValueAsDouble(double value);
 
 	/**
 	 * Return true if the status item is changed since last time 

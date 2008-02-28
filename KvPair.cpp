@@ -20,12 +20,21 @@ int KvPair::setValueAsString(const char * value) {
 	return status::OK;
 }
 
+int KvPair::setValueAsDouble(double value) {
+	_value = value;
+	return status::OK;
+}
+
 int KvPair::getValueAsInt() const {
 	return boost::any_cast<int>(_value);
 }
 
 const char * KvPair::getValueAsString() const {
 	return boost::any_cast<const char *>(_value);
+}
+
+double KvPair::getValueAsDouble() const {
+	return boost::any_cast<double>(_value);
 }
 
 const char * KvPair::getName() const {

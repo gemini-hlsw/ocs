@@ -155,6 +155,26 @@ public:
 	 * 			  
 	 */
 	int setStatusValueAsString(const char *name, const char *value);
+	
+	
+	/**
+	 * Set the value of the given status item to the provided 
+	 * double value.
+	 * 
+	 * @param name Name of the status item whose value will be set
+	 * @param value Double value to store in the status item. 
+	 * 
+	 * @return giapi::status::OK if the value was set correctly. The 
+	 *         StatusItem is marked dirty. 
+	 *         giapi::status::ERROR  if there is a problem setting the 
+	 *         value and the operation was aborted. This can happen if the 
+	 *         type of the status item was not defined as type::DOUBLE, 
+	 *         if there is no StatusItem associated to the <code>name</code> or
+	 *         if <code>name</code> is set to NULL  
+	 * 			  
+	 */
+	int setStatusValueAsDouble(const char *name, double value);
+
 
 	/**
 	 * Set the alarm for the specified status alarm item. 

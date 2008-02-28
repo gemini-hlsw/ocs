@@ -52,6 +52,23 @@ int StatusItem::setValueAsString(const char* value) {
 	return KvPair::setValueAsString(value);
 }
 
+int StatusItem::setValueAsDouble(double value) {
+
+	//If the type is not double, return error. 
+	if (_type != type::DOUBLE) {
+		LOG4CXX_WARN(logger, "Can't set a double value in the status item : " << getName());
+		return status::ERROR;
+	}
+	//Figure out if this is a new value. If they are the same, return immediately
+	if (!_value.empty() && value == getValueAsDouble()) {
+		LOG4CXX_DEBUG(logger, "Values match. Won't mark as dirty. Item " << getName());
+		return status::OK;
+	}
+	//set the value
+	_mark();
+	return KvPair::setValueAsDouble(value);
+}
+
 bool StatusItem::isChanged() const {
 	return _changedFlag;
 }
