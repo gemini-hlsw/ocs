@@ -24,7 +24,7 @@ EXE_NAME := libgiapi-test
 
 # Tool invocations
 all: libgiapi-test
-	@ echo "Runnnin unit testing"
+	@ echo "Running unit testing"
 	@./$(EXE_NAME)
 
 libgiapi-test: $(OBJS) 

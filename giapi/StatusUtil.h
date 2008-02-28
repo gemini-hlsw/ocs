@@ -105,23 +105,6 @@ public:
 
 	/**
 	 * Set the value of the given status item to the provided 
-	 * char value.
-	 * 
-	 * @param name Name of the status item whose value will be set
-	 * @param value char value to store in the status item. 
-	 * 
-	 * @return giapi::status::OK if the value was set correctly 
-	 *         giapi::status::ERROR  if there is a problem setting the 
-	 *         value and the operation was aborted. This can happen if the 
-	 *         type of the status item was not defined as type::CHAR, 
-	 *         if there is no StatusItem associated to the <code>name</code> or
-	 *         if <code>name</code> is set to NULL  
-	 */
-
-	static int setValueAsChar(const char *name, char value);
-
-	/**
-	 * Set the value of the given status item to the provided 
 	 * string value.
 	 * 
 	 * @param name Name of the status item whose value will be set
