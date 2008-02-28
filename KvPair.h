@@ -3,6 +3,7 @@
 #include <boost/any.hpp>
 
 #include <typeinfo>
+#include <ostream>
 /**
  * A class that holds a key associated to a value. 
  */
@@ -90,7 +91,12 @@ public:
 	 * @throws bad_cast exception if the stored item is not a string
 	 */
 	const char * getValueAsString() const;
-
+	
+	
+	/**
+	 * Overloaded << operator for logging/debug purposes
+	 */
+	friend std::ostream& operator<< (std::ostream& os, const KvPair& pair);
 };
 
 }

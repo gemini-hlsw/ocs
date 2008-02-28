@@ -53,23 +53,10 @@ int LogStatusSender::postStatus(StatusItem *statusItem) const
 		return status::OK;
 	}
 
-	const std::type_info& typeInfo = statusItem->getType();
-
 	statusItem->clearChanged(); //mark clean, so it can be posted again
-	//Post It. Basically, log 
-	if (typeInfo == typeid(int)) {
-		LOG4CXX_INFO(logger, "Post Status Item " << statusItem->getName()
-				<< " Value : " << statusItem->getValueAsInt());
-	}
-	if (typeInfo == typeid(const char *)) {
-		LOG4CXX_INFO(logger, "Post Status Item " << statusItem->getName()
-				<< " Value : " << statusItem->getValueAsString());
-	}
-	if (typeInfo == typeid(double)) {
-		LOG4CXX_INFO(logger, "Post Status Item " << statusItem->getName()
-				<< " Value : " << statusItem->getValueAsDouble());
-	}
-
+	//Post It. Basically, log
+	LOG4CXX_INFO(logger, "Post Status Item " << *statusItem);
+	
 	return status::OK;
 }
 

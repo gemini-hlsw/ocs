@@ -45,4 +45,27 @@ const std::type_info& KvPair::getType() const {
 	return _value.type();
 }
 
+std::ostream& operator<< (std::ostream& os, const KvPair& pair) {
+
+	os << "[name = " << pair.getName() << ", value = ";
+	const std::type_info& typeInfo = pair.getType();
+
+	if (typeInfo == typeid(int)) {
+		os << pair.getValueAsInt();
+	}
+	if (typeInfo == typeid(const char *)) {
+		os << pair.getValueAsString();
+	}
+	if (typeInfo == typeid(double)) {
+		os << pair.getValueAsDouble();
+	}
+	if (typeInfo == typeid(void)) {
+		os << "void";
+	}
+
+	os << "]";
+
+	return os;
+}
+
 }
