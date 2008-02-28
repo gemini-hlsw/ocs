@@ -23,12 +23,12 @@ int StatusItem::setValueAsInt(int value) {
 
 	//If the type is not integer, return error. 
 	if (_type != type::INT) {
-		LOG4CXX_WARN(logger, "Can't set an int value in the status item : " << getName());
+		LOG4CXX_WARN(logger, "Can't set an int value in the status item : " << *this);
 		return status::ERROR;
 	}
 	//Figure out if this is a new value. If they are the same, return immediately
 	if (!_value.empty() && value == getValueAsInt()) {
-		LOG4CXX_DEBUG(logger, "Values match. Won't mark as dirty. Item " << getName());
+		LOG4CXX_DEBUG(logger, "Values match. Won't mark as dirty. Item " << *this);
 		return status::OK;
 	}
 	//set the value
@@ -40,12 +40,12 @@ int StatusItem::setValueAsString(const char* value) {
 
 	//If the type is not an string, return error. 
 	if (_type != type::STRING) {
-		LOG4CXX_WARN(logger, "Can't set a string value in the status item : " << getName());
+		LOG4CXX_WARN(logger, "Can't set a string value in the status item : " << *this);
 		return status::ERROR;
 	}
 	//Figure out if this is a new value. If they are the same, return immediately
 	if (!_value.empty() && strcmp(value, getValueAsString()) == 0) {
-		LOG4CXX_DEBUG(logger, "Values match. Won't mark as dirty. Item " << getName());
+		LOG4CXX_DEBUG(logger, "Values match. Won't mark as dirty. Item " << *this);
 		return status::OK;
 	}
 	_mark();
@@ -56,12 +56,12 @@ int StatusItem::setValueAsDouble(double value) {
 
 	//If the type is not double, return error. 
 	if (_type != type::DOUBLE) {
-		LOG4CXX_WARN(logger, "Can't set a double value in the status item : " << getName());
+		LOG4CXX_WARN(logger, "Can't set a double value in the status item : " << *this);
 		return status::ERROR;
 	}
 	//Figure out if this is a new value. If they are the same, return immediately
 	if (!_value.empty() && value == getValueAsDouble()) {
-		LOG4CXX_DEBUG(logger, "Values match. Won't mark as dirty. Item " << getName());
+		LOG4CXX_DEBUG(logger, "Values match. Won't mark as dirty. Item " << *this);
 		return status::OK;
 	}
 	//set the value
@@ -86,9 +86,9 @@ void StatusItem::_mark() {
 	if (gettimeofday(&tv, NULL) == 0) {
 		//convert the structure to milliseconds
 		_time = ((long long)tv.tv_sec)*1000 + (long long)tv.tv_usec/1000;
-		LOG4CXX_DEBUG(logger, "Marking dirty status item " << getName() << " at " << _time);
+		LOG4CXX_DEBUG(logger, "Marking dirty status item " << *this << " at " << _time);
 	} else {
-		LOG4CXX_WARN(logger, "Can't set timestamp on status item " << getName());
+		LOG4CXX_WARN(logger, "Can't set timestamp on status item " << *this);
 	}
 }
 
