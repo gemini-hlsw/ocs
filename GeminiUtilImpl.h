@@ -23,7 +23,7 @@ public:
 
 	int postPCSUpdate(double zernikes[], int size);
 
-	int getTCSContext(TCSContext& ctx) const;
+	int getTCSContext(TcsContext& ctx) const;
 
 	virtual ~GeminiUtilImpl();
 private:

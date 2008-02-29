@@ -54,21 +54,21 @@ public:
 	 * @return status::OK if the zernikes were offloaded to the PCS 
 	 *         or status::ERROR if there was a problem in the offload 
 	 */
-	static int postPCSUpdate(double zernikes[], int size);
+	static int postPcsUpdate(double zernikes[], int size);
 
 	/**
 	 * Provides the TCS Context information at the time of the call. 
 	 * The TCS Context provides information about the TCS that 
 	 * are needed to perform WCS conversions.
 	 * 
-	 * @param ctx Reference to the <code>TCSContext</code> structure. 
+	 * @param ctx Reference to the <code>TcsContext</code> structure. 
 	 *        The content of this structure will be filled up by 
 	 *        this call. 
 	 * 
-	 * @return status::OK if the TCSContext was filled up properly. 
-	 *         status::ERROR if there was an error getting the TCSContext. 
+	 * @return status::OK if the TcsContext was filled up properly. 
+	 *         status::ERROR if there was an error getting the TcsContext. 
 	 */
-	static int getTCSContext(TCSContext& ctx);
+	static int getTcsContext(TcsContext& ctx);
 
 private:
 	GeminiUtil();

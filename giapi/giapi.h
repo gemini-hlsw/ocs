@@ -174,7 +174,7 @@ namespace giapi {
 	/**
 	 * The TCS Context structure.
 	 */
-	struct TCSContext {
+	struct TcsContext {
 		double time;      //Time stamp (TAI) at next tick
 		double x,y,z;     //Cartesian elements of mount pre-flexure az/el
 		//Telescope Parameters structure

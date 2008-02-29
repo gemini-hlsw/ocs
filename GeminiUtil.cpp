@@ -21,11 +21,11 @@ int GeminiUtil::unsubscribeEpicsStatus(const char *name) {
 	return GeminiUtilImpl::Instance().unsubscribeEpicsStatus(name);
 }
 	
-int GeminiUtil::postPCSUpdate(double zernikes[], int size) {
+int GeminiUtil::postPcsUpdate(double zernikes[], int size) {
 	return GeminiUtilImpl::Instance().postPCSUpdate(zernikes, size);
 }
 	
-int GeminiUtil::getTCSContext(TCSContext& ctx) {
+int GeminiUtil::getTcsContext(TcsContext& ctx) {
 	return GeminiUtilImpl::Instance().getTCSContext(ctx);
 }
 

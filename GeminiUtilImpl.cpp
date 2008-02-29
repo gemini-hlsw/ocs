@@ -42,7 +42,7 @@ int GeminiUtilImpl::postPCSUpdate(double zernikes[], int size) {
 
 }
 
-int GeminiUtilImpl::getTCSContext(TCSContext& ctx) const {
+int GeminiUtilImpl::getTCSContext(TcsContext& ctx) const {
 	LOG4CXX_INFO(logger, "Get TCSContext ");
 	ctx.tel.fl = 0.4334;
 	return status::OK;
