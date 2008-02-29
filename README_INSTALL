@@ -1,0 +1,99 @@
+28 February 2008 AN
+
+Builiding the GIAPI C++ Language Glue requires some work since it depends
+on third party products that must be fetched and installed. I expect the build 
+method will improve in the future though. 
+
+1. Required tools
+
+The library was compiled for Linux using the following tools:
+
+*	g++ (GCC) 4.1.1 20070105 (Red Hat 4.1.1-52)
+*	GNU Make 3.81
+*	GNU ld version 2.17.50.0.6-2.el5 20061020
+*	RedHat Enterprise Linux 5 Desktop, Linux kernel 2.6.18-53.1.6.el5, 32-bit
+
+The library must be compiled with GCC version 4.0 or above. 
+
+2. Set up the environment.
+
+When builidng, you need to set up the following variables in the config.mk
+file:
+
+INSTALL_DIR The directory where you want to have the library and headers 
+            installed to. 
+
+EXTERNAL_LIB The directory that contains the dependencies required to build 
+             the GIAPI C++ Language Glue. 
+
+The config.mk contains values for these two variables. Please adjust them
+to your needs. 
+
+3. Install dependencies
+
+The following are the libraries that need to be compiled and installed in the
+system before building the GIAPI C++:
+
+* Apache Log4cxx. Obtained from svn at http://svn.apache.org/repos/asf/logging/log4cxx/trunk
+  The head revision used for building was 619418
+  This library needs to be available in the EXTERNAL_LIB/log4cxx directory
+  
+* CPP Unit 1.12. Can be obtained from http://cppunit.sourceforge.net/cppunit-wiki
+  This library needs to be available in the EXTERNAL_LIB/cppunit directory
+  
+4. Building the library
+
+Once the external libraries are installed and the config.mk has been updated
+with the right directory names, the system can be built just by typing 'make' 
+in the top level directory of the source tree. 
+
+If everything goes well, the system should build the libraries and run the
+automatically the unit tests provided. To install the library into the 
+directory declared in the config.mk file, just type:
+
+  make install
+
+That will put the library and header files in the INSTALL_DIR directory. 
+Headers will be in INSTALL_DIR/include and the library will be in INSTALL_DIR/lib
+
+5. Linking with the library
+
+In order for an executable to find the required libraries to link with during 
+run time, the system must be configured so that the libraries can be found. 
+Methods available: (Do at least one of the following)
+
+   a) Add library directories to be included during dynamic linking to the file 
+      /etc/ld.so.conf
+
+      Sample: /etc/ld.so.conf
+          /usr/X11R6/lib
+          /usr/lib
+          ...
+          ..
+          /usr/lib/sane
+          /usr/lib/mysql
+          /opt/lib
+
+      Add the INSTALL_DIR/lib library path to this file and then execute the 
+      command (as root) ldconfig to configure the linker run-time bindings.
+      See man page for command ldconfig.
+
+      OR
+
+   b) Add specified directory to library cache: (as root)
+      ldconfig -n INSTALL_DIR/lib
+
+      This will NOT permanently configure the system to include this directory.
+      The information will be lost upon system reboot.
+
+      OR
+
+   c) Specify the environment variable LD_LIBRARY_PATH to point to the directory
+      paths containing the shared object library. This will specify to the run 
+      time loader that the library paths will be used during execution to 
+      resolve dependencies.
+
+      This instructs the run time loader to look in the path described by the 
+      environment variable LD_LIBRARY_PATH, to resolve shared libraries. 
+      This will include the path LD_LIBRARY_PATH/lib
+      

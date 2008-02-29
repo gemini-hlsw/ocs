@@ -1,3 +1,5 @@
+#Directories used to build and install the GIAPI C++ language glue. 
+
 #Installation directory
 INSTALL_DIR := /Users/anunez/giapi/install
 

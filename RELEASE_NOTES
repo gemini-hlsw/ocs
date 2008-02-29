@@ -1,0 +1,21 @@
+Release Notes - Gemini Instrument Application Programmer Interface 
+
+Version Release 1: GIAPI Logging C++. February 29, 2008 
+
+  * [GIAPI-23] - Add postStatus to Logging C++ Language Glue
+  * [GIAPI-24] - Add alarm support to Logging C++ Language Glue
+  * [GIAPI-25] - Add health support to Logging C++ Language Glue
+  * [GIAPI-26] - Add private status extensions to Logging C++ Language API
+  * [GIAPI-27] - Add private command support to C++ Logging Language Glue
+  * [GIAPI-28] - Add sequence command methods to Logging C++ Language Glue
+  * [GIAPI-29] - Add subscribeEPICStatus/unsubscribeEPICSStatus to Logging C++ Language Glue
+  * [GIAPI-30] - Add postPCSUpdate to Logging C++ Language Glue
+  * [GIAPI-31] - Add getTCSContext to Logging C++ Language Glue
+  * [GIAPI-32] - Add Process Logging to C++ Language Glue
+  * [GIAPI-33] - Add System Logging to C++ Language Glue
+  * [GIAPI-34] - Add getObservatoryTime to Logging C++ Language Glue
+  * [GIAPI-35] - Add postObservationEvent to Logging C++ Language Glue
+  * [GIAPI-36] - Add postAncillaryFileEvent to Logging C++ Language Glue
+  * [GIAPI-37] - Add postIntermediateFileEvent to Logging C++ Language Glue
+  
+  

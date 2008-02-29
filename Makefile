@@ -14,7 +14,7 @@ LIBRARY_NAME := libgiapi-glue-cc
 
 ifeq ($(shell uname | grep -c "Darwin"),1) 
 	LIBRARY_NAME_LN := $(LIBRARY_NAME).dylib
-	LIBRARY_NAME := $(LIBRARY_NAME).dylib.$(V).$(MV)
+	LIBRARY_NAME := $(LIBRARY_NAME).$(V).$(MV).dylib
 else
 	LIBRARY_NAME_LN := $(LIBRARY_NAME).so
 	LIBRARY_NAME := $(LIBRARY_NAME).so.$(V).$(MV)
@@ -90,6 +90,8 @@ install-shared-lib: libgiapi-glue-cc make-lib-dir
 	-$(RM) $(GIAPI_LIB_DIR)/$(LIBRARY_NAME_LN)
 	cd $(GIAPI_LIB_DIR); \
     $(LN) $(LIBRARY_NAME) $(LIBRARY_NAME_LN)
+    
+dist: install-shared-lib
 
 #Get the public headers in GIAPI
 GIAPI_PUBLIC_HEADERS = $(wildcard giapi/*.h)

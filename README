@@ -1,0 +1,22 @@
+28 February 2008 AN
+
+This is the GIAPI C++ Language glue library.
+
+The GIAPI C++ Language glue API  is one of the Language binding options used by 
+instrument code to integrate with Gemini.  The C++ API is implemented as a 
+shared library in C++. The API sits between the instrument code and the 
+Gemini Master Process (GMP).
+
+The GIAPI C++ API library is included with any process that the builder creates 
+that must communicate with Gemini. Which processes in the instrument must link 
+with and use the C++ API is an instrument design decision. 
+
+The communication protocol between the C++ API and the GMP is encapsulated 
+within the GIAPI implementation.
+
+Details about the usage of the API can be found in the Gemini Observatory 
+ICD50 - GIAPI C++ Language Glue API
+
+Good luck, 
+
+--arturo
