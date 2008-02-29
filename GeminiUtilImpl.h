@@ -21,9 +21,9 @@ public:
 
 	int unsubscribeEpicsStatus(const char *name);
 
-	int postPCSUpdate(double zernikes[], int size);
+	int postPcsUpdate(double zernikes[], int size);
 
-	int getTCSContext(TcsContext& ctx) const;
+	int getTcsContext(TcsContext& ctx) const;
 
 	virtual ~GeminiUtilImpl();
 private:

@@ -28,7 +28,7 @@ int GeminiUtilImpl::unsubscribeEpicsStatus(const char *name) {
 	return status::OK;
 }
 
-int GeminiUtilImpl::postPCSUpdate(double zernikes[], int size) {
+int GeminiUtilImpl::postPcsUpdate(double zernikes[], int size) {
 	
 	std::string str;
 	for (int i = 0; i < size; i++) {
@@ -42,7 +42,7 @@ int GeminiUtilImpl::postPCSUpdate(double zernikes[], int size) {
 
 }
 
-int GeminiUtilImpl::getTCSContext(TcsContext& ctx) const {
+int GeminiUtilImpl::getTcsContext(TcsContext& ctx) const {
 	LOG4CXX_INFO(logger, "Get TCSContext ");
 	ctx.tel.fl = 0.4334;
 	return status::OK;
