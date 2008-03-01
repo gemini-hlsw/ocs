@@ -47,7 +47,7 @@ Once the external libraries are installed and the config.mk has been updated
 with the right directory names, the system can be built just by typing 'make' 
 in the top level directory of the source tree. 
 
-If everything goes well, the system should build the libraries and run the
+If everything goes well, the system should build the libraries and run 
 automatically the unit tests provided. To install the library into the 
 directory declared in the config.mk file, just type:
 

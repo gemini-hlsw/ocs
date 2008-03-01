@@ -17,6 +17,17 @@ within the GIAPI implementation.
 Details about the usage of the API can be found in the Gemini Observatory 
 ICD50 - GIAPI C++ Language Glue API
 
+The headers to access the GIAPI C++ interface are in the headers directory. The
+library shared object is in the lib directory of the binary distribution. 
+
+At this point in the development of GIAPI, the only external library required
+to use the library is 
+
+* Apache Log4cxx.(from svn at http://svn.apache.org/repos/asf/logging/log4cxx/trunk)
+
+This library is included in the binary distribution along with 
+the GIAPI library; that should make the linking a bit easier.   
+
 Good luck, 
 
 --arturo
