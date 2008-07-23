@@ -1,5 +1,6 @@
 #include <giapi/CommandUtil.h>
 #include "LogCommandUtil.h"
+#include "JmsCommandUtil.h"
 
 namespace giapi {
 
@@ -15,7 +16,7 @@ int CommandUtil::subscribeSequenceCommand(command::SequenceCommand id,
 	if (handler == 0) {
 		return giapi::status::ERROR;
 	}
-	return LogCommandUtil::Instance().subscribeSequenceCommand(id, activities, handler);
+	return JmsCommandUtil::Instance().subscribeSequenceCommand(id, activities, handler);
 
 }
 

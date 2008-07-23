@@ -5,10 +5,11 @@
 #include sources list and objects built from there
 -include sources.mk
 -include common.mk
+-include gmp/sources.mk
 
 #Version and minor version
 V := 0
-MV := 1.0
+MV := 2.0
 
 LIBRARY_NAME := libgiapi-glue-cc
 
@@ -22,13 +23,13 @@ endif
 
 
 # This directory things
-INC_DIRS := -I. -I./external -I$(LOG4CXX_INCLUDE) 
+INC_DIRS := -I. -I./external -I$(LOG4CXX_INCLUDE) -I$(ACTIVEMQ_INCLUDE) -I$(APR_INCLUDE)
 
 # Directory for libraries
-LIB_DIRS := -L$(LOG4CXX_LIB)
+LIB_DIRS := -L$(LOG4CXX_LIB) -L$(ACTIVEMQ_LIB)
 
 # Libraries
-LIBS := -llog4cxx
+LIBS := -llog4cxx -lactivemq-cpp
 
 # Sub-directories
 SUBDIRS :=  test

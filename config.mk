@@ -4,4 +4,8 @@
 INSTALL_DIR := /Users/anunez/giapi/install
 
 #External libraries dependencies, used during build
-EXTERNAL_LIB := /Users/anunez/Projects/giapi/giapi-external
+EXTERNAL_LIB := /Users/anunez/Projects/aspen/giapi/giapi-external
+
+#Default system include directory. 
+SYSTEM_INCLUDE_DIR := /usr/include
+

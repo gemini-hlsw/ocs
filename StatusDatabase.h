@@ -8,12 +8,10 @@
 
 #include <giapi/giapi.h>
 #include <giapi/giapiexcept.h>
+
+#include <util/giapiMaps.h>
+
 #include "StatusItem.h"
-
-
-//hash_map is an extension of STL widely available on gnu compilers, fortunately 
-//Will make its namespace visible here. 
-using namespace __gnu_cxx;
 
 namespace giapi {
 /**
@@ -22,25 +20,16 @@ namespace giapi {
  */
 class StatusDatabase {
 	/**
-	 * A comparator for strings to be used in the definition of the 
-	 * hash_table the database uses internally
+	 * Logging facility
 	 */
-	struct eqstr {
-		bool operator()(const char *s1, const char *s2) const {
-			return strcmp(s1, s2) == 0;
-		}
-	};
+	static log4cxx::LoggerPtr logger;
+	
 	/**
 	 * Type definition for the hash_table that will map strings to 
 	 * StatusItems
 	 */
-	typedef hash_map<const char *, StatusItem *, hash<const char *>, eqstr>
+	typedef hash_map<const char *, StatusItem *, hash<const char *>, util::eqcharptr>
 			StringStatusMap;
-
-	/**
-	 * Logging facility
-	 */
-	static log4cxx::LoggerPtr logger;
 
 private:
 	StringStatusMap _map;

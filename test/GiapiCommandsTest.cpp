@@ -42,7 +42,7 @@ void GiapiCommandsTest::testPostCompletionInfo() {
 	//Post completion info. This should work
 	CPPUNIT_ASSERT(CommandUtil::postCompletionInfo(action, response) == giapi::status::OK);
 	pHandlerResponse response2;
-	//Post completion info. This should not work, the answer is not initialize
+	//Post completion info. This should not work, the answer is not initialized
 	CPPUNIT_ASSERT(CommandUtil::postCompletionInfo(action, response2) == giapi::status::ERROR);
 	response2 = HandlerResponse::create(HandlerResponse::STARTED);
 	//Post completion info. This should not work, the answer is not valid 

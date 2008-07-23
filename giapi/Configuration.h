@@ -18,7 +18,7 @@ namespace giapi {
  * This interface provides mechanisms to:
  * a) get the value associated to a given parameter (identified by key) 
  * b) get all the keys present in the configuration. 
- */ 
+ */
 class Configuration {
 
 public:
@@ -33,7 +33,7 @@ public:
 	 *         configuration. 
 	 */
 	virtual const char * getValue(const char * key) = 0;
-	
+
 	/**
 	 * Return the keys contained in the configuration. If the configuration 
 	 * does not contain any key, a reference to an empty vector is returned.
@@ -42,22 +42,29 @@ public:
 	 *         contained in the configuration. An empty list is returned
 	 *         if no keys are present. 
 	 */
-	virtual const vector<const char *> & getKeys() = 0;
-	
+	virtual vector<const char *> getKeys() const = 0;
+
 	/**
 	 * Return the number of parameters contained in this configuration. 
 	 * 
 	 * @return number of parameters contained in this configuration. 
 	 */
 	virtual int getSize() const = 0;
-	
+
+	/**
+	 * Set the value for the specified key
+	 * @param key The target key
+	 * @param value The value to be set
+	 */
+	virtual void setValue(const char * key, const char * value) = 0;
+
 	/**
 	 * Destructor. 
 	 */
 	virtual ~Configuration();
-private:
+protected:
 	/**
-	 * Private constructor. Configurations are built internally by the
+	 * Protected constructor. Configurations are built internally by the
 	 * GIAPI and passed to a <code>SequenceCommandHandler</code> for its use
 	 * in the form of smart pointers. 
 	 */
@@ -71,7 +78,7 @@ public:
 	 * Keyword for the Argument in the REBOOT sequence command
 	 */
 	static const char * REBOOT_OPT;
-	
+
 	/**
 	 * GMP Reboot argument in the REBOOT sequence command
 	 */
@@ -84,9 +91,7 @@ public:
 	 * No argument in the REBOOT sequence command
 	 */
 	static const char * NONE;
-	
-	
-	
+
 };
 
 /**

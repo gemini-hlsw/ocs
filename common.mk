@@ -16,7 +16,7 @@ CP := cp -f
 
 MAKE := make
 
-#Common definition depending ton the operating system
+#Common definition depending on the operating system
 ifeq ($(shell uname | grep -c "Darwin"),1) 
 	OS := MacOS X
 	MKLIB = $(CXX) -dynamiclib
@@ -39,6 +39,15 @@ LOG4CXX_LIB := $(LOG4CXX_BASE)/lib
 CPPUNIT_BASE := $(EXTERNAL_LIB)/cppunit
 CPPUNIT_INCLUDE := $(CPPUNIT_BASE)/include
 CPPUNIT_LIB := $(CPPUNIT_BASE)/lib
+
+#ActiveMQ-cpp stuff
+ACTIVEMQ_BASE := $(EXTERNAL_LIB)/activemq-cpp
+ACTIVEMQ_INCLUDE := $(ACTIVEMQ_BASE)/include/activemq-cpp-2.2
+ACTIVEMQ_LIB := $(ACTIVEMQ_BASE)/lib
+
+#APR libs
+APR_INCLUDE:= $(SYSTEM_INCLUDE_DIR)/apr-1
+
 
 # Rule for building objects
 %.o: %.cpp

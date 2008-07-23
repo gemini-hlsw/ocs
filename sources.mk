@@ -7,6 +7,7 @@ OBJS += \
 ./AlarmStatusItem.o \
 ./CommandUtil.o \
 ./Configuration.o \
+./ConfigurationFactory.o \
 ./DataUtil.o \
 ./DataUtilImpl.o \
 ./EpicsStatusHandler.o \
@@ -15,6 +16,7 @@ OBJS += \
 ./GeminiUtilImpl.o \
 ./HandlerResponse.o \
 ./HealthStatusItem.o \
+./JmsCommandUtil.o \
 ./JmsStatusSender.o \
 ./KvPair.o \
 ./LogCommandUtil.o \
@@ -34,6 +36,7 @@ CPP_DEPS += \
 ./AlarmStatusItem.d \
 ./CommandUtil.d \
 ./Configuration.d \
+./ConfigurationFactory. \
 ./DataUtil.d \
 ./DataUtilImpl.d \
 ./EpicsStatusHandler.d \
@@ -42,6 +45,7 @@ CPP_DEPS += \
 ./GeminiUtilImpl.d \
 ./HandlerResponse.d \
 ./HealthStatusItem.d \
+./JmsCommandUtil.d \
 ./JmsStatusSender.d \
 ./KvPair.d \
 ./LogCommandUtil.d \

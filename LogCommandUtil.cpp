@@ -1,5 +1,7 @@
 #include "LogCommandUtil.h"
 
+#include <gmp/JmsUtil.h>
+
 namespace giapi {
 log4cxx::LoggerPtr LogCommandUtil::logger(log4cxx::Logger::getLogger("giapi.LogCommandUtil"));
 
@@ -21,7 +23,7 @@ LogCommandUtil& LogCommandUtil::Instance() {
 
 int LogCommandUtil::subscribeSequenceCommand(command::SequenceCommand id,
 		command::ActivitySet activities, pSequenceCommandHandler handler) {
-	LOG4CXX_INFO(logger, "Registering handler to sequence command ");
+	LOG4CXX_INFO(logger, "Registering handler to sequence command " << gmp::JmsUtil::getTopic(id));
 	return giapi::status::OK;
 }
 
