@@ -25,7 +25,7 @@ public:
 	 */
 	enum Response {
 		/**
-		 * Preset Accepted.
+		 * Actions Accepted.
 		 */
 		ACCEPTED,
 		/**
