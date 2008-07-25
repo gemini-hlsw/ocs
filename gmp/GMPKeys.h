@@ -5,6 +5,11 @@
 
 namespace gmp {
 
+
+/**
+ * This class defines static constants that are used to exchange messages 
+ * with the GMP
+ */
 class GMPKeys {
 public:
 	//General purpose keys

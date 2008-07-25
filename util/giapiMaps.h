@@ -2,8 +2,8 @@
 #define GIAPIMAPS_H_
 
 /**
- * Contains a collection of definitions that allow the use of the GIAPI datastrucures in 
- * hash maps. 
+ * Contains a collection of definitions that allow the use of the GIAPI 
+ * datastructures/types in hash maps. 
  */
 
 #include <ext/hash_map>
