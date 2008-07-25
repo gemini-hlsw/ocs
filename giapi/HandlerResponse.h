@@ -54,7 +54,7 @@ public:
 	 * The response type is set to ERROR and the message is 
 	 * stored. 
 	 */
-	static pHandlerResponse create(const char * msg);
+	static pHandlerResponse createError(const char * msg);
 
 	/**
 	 * Return the response type. 

@@ -3,9 +3,6 @@
 #include <activemq/core/ActiveMQConnectionFactory.h>
 #include <cms/MapMessage.h>
 
-#include <decaf/lang/Thread.h>
-#include <decaf/lang/Integer.h>
-
 #include <giapi/Configuration.h>
 #include <ConfigurationFactory.h>
 
@@ -70,8 +67,6 @@ SequenceCommandConsumer::~SequenceCommandConsumer() {
 
 void SequenceCommandConsumer::onMessage(const Message* message) {
 
-	unsigned long threadId = Thread::getId();
-	LOG4CXX_DEBUG(logger, "Received message on thread. id " << threadId);
 	try {
 		const MapMessage* mapMessage =
 		dynamic_cast< const MapMessage* >( message );
@@ -83,17 +78,18 @@ void SequenceCommandConsumer::onMessage(const Message* message) {
 		//get the activity Id;
 		command::Activity activity = JmsUtil::getActivity(mapMessage->getStringProperty(GMPKeys::GMP_ACTIVITY_PROP));
 
+		LOG4CXX_DEBUG(logger, "Received Sequence command: " << JmsUtil::getTopic(_sequenceCommand) << " Activity : " << mapMessage->getStringProperty(GMPKeys::GMP_ACTIVITY_PROP) );
+
 		//build a configuration object
 		pConfiguration config = ConfigurationFactory::getConfiguration();
 
 		for (std::vector< std:: string>::iterator i = names.begin(); i != names.end(); i++) {
-			LOG4CXX_INFO(logger, "Key = " << *i << " Value = " << mapMessage->getString(*i));
 			config->setValue((*i).c_str(), (mapMessage->getString(*i)).c_str());
 		}
 
 		pHandlerResponse response = _handler->handle(actionId, _sequenceCommand, activity, config);
 
-		LOG4CXX_DEBUG(logger, "Response received " << JmsUtil::getHandlerResponse(response));
+		LOG4CXX_DEBUG(logger, "Replying to sequence command: " << JmsUtil::getHandlerResponse(response));
 
 		const Destination* destination = message->getCMSReplyTo();
 
@@ -169,6 +165,5 @@ void SequenceCommandConsumer::cleanup() {
 	} catch (CMSException& e) {e.printStackTrace();}
 	_session = NULL;
 }
-
 
 }

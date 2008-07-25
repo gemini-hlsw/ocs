@@ -1,5 +1,14 @@
 Release Notes - Gemini Instrument Application Programmer Interface 
 
+
+Version Release 2: GIAPI Basic Sequence Command. July 25, 2008
+
+  * [GIAPI-14] - Initial Logging GMP into OSGi container
+  * [GIAPI-15] - Add logging service to GMP
+  * [GIAPI-17] - Add logging support for commands from Gemini
+  * [GIAPI-54] - Add sequence commands methods to Logging GMP
+  * [GIAPI-82] - Sequence Command Handler support
+ 
 Version Release 1: GIAPI Logging C++. February 29, 2008 
 
   * [GIAPI-23] - Add postStatus to Logging C++ Language Glue

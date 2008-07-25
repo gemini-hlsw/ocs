@@ -1,8 +1,8 @@
-28 February 2008 AN
+25 July 2008 AN
 
 Builiding the GIAPI C++ Language Glue requires some work since it depends
 on third party products that must be fetched and installed. I expect the build 
-method will improve in the future though. 
+method to improve in the future though. 
 
 1. Required tools
 
@@ -26,7 +26,10 @@ INSTALL_DIR The directory where you want to have the library and headers
 EXTERNAL_LIB The directory that contains the dependencies required to build 
              the GIAPI C++ Language Glue. 
 
-The config.mk contains values for these two variables. Please adjust them
+SYSTEM_INCLUDE_DIR The directory where standard libraries are located.
+                    Usually /usr/lib
+
+The config.mk contains values for these three variables. Please adjust them
 to your needs. 
 
 3. Install dependencies
@@ -34,22 +37,44 @@ to your needs.
 The following are the libraries that need to be compiled and installed in the
 system before building the GIAPI C++:
 
+* Active MQ CPP CMS. Obtained from http://activemq.apache.org/cms/download.html
+  This library needs to be available in the EXTERNAL_LIB/activemq directory
+  
+* APR and APR Util: This library is required to compile Active MQ CPP CMS and it
+  usually comes installed on Linux systems. If not, please install it. You can
+  get them from the APR site at http://apr.apache.org/ 
+ 
+  To build the GIAPI, the APR headers need to be available. The APR_INCLUDE variable
+  defined in the common.mk file is used to find these headers. In my system they
+  were installed on /usr/include/apr-1 
+
 * Apache Log4cxx. Obtained from svn at http://svn.apache.org/repos/asf/logging/log4cxx/trunk
   The head revision used for building was 619418
   This library needs to be available in the EXTERNAL_LIB/log4cxx directory
   
 * CPP Unit 1.12. Can be obtained from http://cppunit.sourceforge.net/cppunit-wiki
-  This library needs to be available in the EXTERNAL_LIB/cppunit directory
+  This library needs to be installed in the EXTERNAL_LIB/cppunit directory
   
 4. Building the library
 
 Once the external libraries are installed and the config.mk has been updated
-with the right directory names, the system can be built just by typing 'make' 
+with the right directory names, the system can be built just by typing:
+
+  make
+ 
 in the top level directory of the source tree. 
 
-If everything goes well, the system should build the libraries and run 
-automatically the unit tests provided. To install the library into the 
-directory declared in the config.mk file, just type:
+If everything goes well, the system should build the libraries. To run the
+the unit tests provided you have to have a GMP Broker up and running. Please 
+refer to the GMP documentation for instructions about how to do this. Once
+the GMP is running, type
+  
+  make tests   
+
+to run the unit tests for the GIAPI library. 
+
+To install the library into the directory declared in the config.mk file, 
+just type:
 
   make install
 

@@ -8,7 +8,7 @@ pHandlerResponse HandlerResponse::create(const Response response) {
 }
 
 
-pHandlerResponse HandlerResponse::create(const char * msg) {
+pHandlerResponse HandlerResponse::createError(const char * msg) {
 	pHandlerResponse response(new HandlerResponse(msg));
 	return response;
 }

@@ -35,13 +35,15 @@ LIBS := -llog4cxx -lactivemq-cpp
 SUBDIRS :=  test
 
 # All Target
-all: libgiapi-glue-cc
+all: libgiapi-glue-cc 
+
+# Test target
+test: libgiapi-glue-cc
 	@for subdir in $(SUBDIRS); \
         do \
           echo "Making $@ in $$subdir ..."; \
-          ( cd $$subdir && $(MAKE) $@ ) || exit 1; \
+          ( cd $$subdir && $(MAKE) ) || exit 1; \
         done
-	
 
 # Install Target
 install: libgiapi-glue-cc install-shared-lib install-headers

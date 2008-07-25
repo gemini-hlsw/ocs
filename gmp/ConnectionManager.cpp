@@ -39,24 +39,25 @@ ConnectionManager::ConnectionManager() {
 			delete connectionFactory;
 			connectionFactory = NULL;
 		}
+
+		//TODO: Sleep for a while and try to reconnect. 
 		e.printStackTrace();
 	}
 }
 
 ConnectionManager::~ConnectionManager() {
-	
+
 	LOG4CXX_DEBUG(logger, "Destroying connection manager");
-	
+
 	//TODO: We need to close sessions, destinations, producers and consumers.
-	
+
 	try {
 		_connection->close();
-	} catch (CMSException&  e) {
+	} catch (CMSException& e) {
 		LOG4CXX_WARN(logger, "Problem closing connection");
 		e.printStackTrace();
 	}
-	
-	
+
 }
 
 ConnectionManager& ConnectionManager::Instance() {
@@ -66,10 +67,12 @@ ConnectionManager& ConnectionManager::Instance() {
 void ConnectionManager::onException(const CMSException & ex AMQCPP_UNUSED) {
 	LOG4CXX_ERROR(logger, "CMS Exception occured ");
 	ex.printStackTrace();
+	//TODO: Sleep for a while and try to reconnect
+	
 }
 
-Session* ConnectionManager::createSession() throw ( CMSException )  {
-	return _connection->createSession( Session::AUTO_ACKNOWLEDGE );
+Session* ConnectionManager::createSession() throw (CMSException ) {
+	return _connection->createSession(Session::AUTO_ACKNOWLEDGE);
 }
 
 }

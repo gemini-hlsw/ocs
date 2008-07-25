@@ -36,9 +36,9 @@ public:
 
 	/**
 	 * Return the keys contained in the configuration. If the configuration 
-	 * does not contain any key, a reference to an empty vector is returned.
+	 * does not contain any key, an empty vector is returned.
 	 * 
-	 * @return reference to a vector of strings representing the keys 
+	 * @return a vector of strings representing the keys 
 	 *         contained in the configuration. An empty list is returned
 	 *         if no keys are present. 
 	 */
