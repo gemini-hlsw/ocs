@@ -45,17 +45,15 @@ SequenceCommandConsumer::SequenceCommandConsumer(command::SequenceCommand id,
 		std::cout.flush();
 		std::cerr.flush();
 
-		// Indicate we are ready for messages.
+		// Indicate we are ready to consume sequence commands
 		latch.countDown();
-
-		// Wait while asynchronous messages come in.
-		//		doneLatch.await( waitMillis );
 
 	} catch (CMSException& e) {
 
-		// Indicate we are ready for messages.
+		// In case of exception, waiting clients should be unlocked
 		latch.countDown();
-
+		//clean anyresources that might have been allocated
+		cleanup();
 		e.printStackTrace();
 	}
 }
