@@ -8,10 +8,10 @@ method to improve in the future though.
 
 The library was compiled for Linux using the following tools:
 
-*	g++ (GCC) 4.1.1 20070105 (Red Hat 4.1.1-52)
+*	g++ (GCC) 4.1.2 20071124 (Red Hat 4.1.2-42)
 *	GNU Make 3.81
 *	GNU ld version 2.17.50.0.6-2.el5 20061020
-*	RedHat Enterprise Linux 5 Desktop, Linux kernel 2.6.18-53.1.6.el5, 32-bit
+*	RedHat Enterprise Linux 5 Server, Linux kernel 2.6.18-92.1.6.el5, 64-bit
 
 The library must be compiled with GCC version 4.0 or above. 
 
@@ -37,19 +37,28 @@ to your needs.
 The following are the libraries that need to be compiled and installed in the
 system before building the GIAPI C++:
 
+* APR and APR Util: These libraries are required to compile  Active MQ CPP CMS,
+  log4cxx and the GIAPI (see next dependencies). 
+  They usually come installed on Linux systems. If not, please 
+  install them. You can get them from the APR site at http://apr.apache.org/. 
+  In Redhat Enterprise 5 they were already present, but the development 
+  libraries were missing (We need those if we want to compile the other 
+  dependencies and the GIAPI). 
+  
+  I used yum to install them (as root):
+  
+     yum install apr-devel.x86_64 
+     yum install apr-util-devel.x86_64
+ 
+  As we said, to build the GIAPI, the APR headers need to be available. 
+  The APR_INCLUDE variable defined in the common.mk file is used to find these
+  headers. 
+  In my system they were installed on /usr/include/apr-1 
+
 * Active MQ CPP CMS. Obtained from http://activemq.apache.org/cms/download.html
   This library needs to be available in the EXTERNAL_LIB/activemq directory
   
-* APR and APR Util: This library is required to compile Active MQ CPP CMS and it
-  usually comes installed on Linux systems. If not, please install it. You can
-  get them from the APR site at http://apr.apache.org/ 
- 
-  To build the GIAPI, the APR headers need to be available. The APR_INCLUDE variable
-  defined in the common.mk file is used to find these headers. In my system they
-  were installed on /usr/include/apr-1 
-
-* Apache Log4cxx. Obtained from svn at http://svn.apache.org/repos/asf/logging/log4cxx/trunk
-  The head revision used for building was 619418
+* Apache Log4cxx 0.10.0. Obtained from http://logging.apache.org/log4cxx/download.html
   This library needs to be available in the EXTERNAL_LIB/log4cxx directory
   
 * CPP Unit 1.12. Can be obtained from http://cppunit.sourceforge.net/cppunit-wiki

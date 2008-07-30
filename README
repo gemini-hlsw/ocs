@@ -30,13 +30,15 @@ library shared object is in the lib directory of the binary distribution.
 At this point in the development of GIAPI, the external libraries required
 to use the library are
 
-* Apache Active MQ CMS (C++ Messagin system) version 2.2 (from http://activemq.apache.org/cms)
-* Apache Log4cxx.(from svn at http://svn.apache.org/repos/asf/logging/log4cxx/trunk)
+* Apache Active MQ CMS (C++ Messaging system) version 2.2 
+  (from http://activemq.apache.org/cms)
+* Apache Log4cxx.
+  (from svn at http://svn.apache.org/repos/asf/logging/log4cxx/trunk)
 
 Unfortunately, I could not get a 64-bit machine on time to provide a compiled 
-version of the GIAPI that will run directly on our target platform, so the only solution
-at this time is to compile the code from the source. Please see the README_INSTALL document
-for instructions.    
+version of the GIAPI that will run directly on our target platform, so the only 
+solution at this time is to compile the code from the source. 
+Please see the README_INSTALL document for instructions.    
 
 Good luck, 
 

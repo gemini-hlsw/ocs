@@ -53,6 +53,6 @@ APR_INCLUDE:= $(SYSTEM_INCLUDE_DIR)/apr-1
 %.o: %.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking $(OS) C++ Compiler'
-	$(CXX) $(INC_DIRS) -O3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
+	$(CXX) $(INC_DIRS) -O3 -Wall -fPIC -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '

@@ -51,7 +51,7 @@ int CommandUtil::postCompletionInfo(command::ActionId id,
 			return giapi::status::ERROR;
 	}
 
-	return LogCommandUtil::Instance().postCompletionInfo(id, response);
+	return JmsCommandUtil::Instance().postCompletionInfo(id, response);
 }
 
 }

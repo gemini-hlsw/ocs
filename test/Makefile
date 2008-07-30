@@ -9,13 +9,13 @@
 
 
 #Set the LD_LIBRARY_PATH to run the tests
-LD_LIBRARY_PATH := ../:$(LOG4CXX_LIB):$(CPPUNIT_LIB)
+LD_LIBRARY_PATH := ../:$(LOG4CXX_LIB):$(CPPUNIT_LIB):$(ACTIVEMQ_LIB)
 
 #Includes to build
 INC_DIRS := -I../  -I$(CPPUNIT_INCLUDE) 
 # Libraries
-LIB_DIRS := -L$(CPPUNIT_LIB) -L$(LOG4CXX_LIB) -L../
-LIBS := -lcppunit -lgiapi-glue-cc -llog4cxx
+LIB_DIRS := -L$(CPPUNIT_LIB) -L$(LOG4CXX_LIB) -L$(ACTIVEMQ_LIB) -L../
+LIBS := -lcppunit -lgiapi-glue-cc -llog4cxx -lactivemq-cpp
 
 EXE_NAME := libgiapi-test
 

@@ -29,6 +29,7 @@ JmsCommandUtil::JmsCommandUtil() {
 
 JmsCommandUtil::~JmsCommandUtil() {
 
+	LOG4CXX_DEBUG(logger, "Destroying JmsCommandUtil");
 	delete _commandHolderMap[command::TEST];
 	delete _commandHolderMap[command::REBOOT];
 	delete _commandHolderMap[command::INIT];
@@ -65,7 +66,7 @@ int JmsCommandUtil::subscribeSequenceCommand(command::SequenceCommand id,
 			!= giapi::status::ERROR) {
 		//Create a consumer for this sequence commands and activities. 
 		gmp::pSequenceCommandConsumer consumer =
-			gmp::SequenceCommandConsumer::create(id, activities, handler);
+				gmp::SequenceCommandConsumer::create(id, activities, handler);
 		//Store this consumer for the associated sequence command/activities; 
 		//use that info to control future registers to the same sequence command
 		//and destroy consumers that are no longer in
@@ -82,17 +83,24 @@ int JmsCommandUtil::subscribeSequenceCommand(command::SequenceCommand id,
 	return giapi::status::ERROR;
 }
 
+int JmsCommandUtil::postCompletionInfo(command::ActionId id,
+		pHandlerResponse response) {
+
+	//TODO: Implement this
+	return giapi::status::OK;
+
+}
 
 ////////////////////// ActivityHolder implementation ////////////////////////////
 
 log4cxx::LoggerPtr ActivityHolder::logger(log4cxx::Logger::getLogger("giapi.ActivityHolder"));
 
 ActivityHolder::ActivityHolder() {
-
 }
 
 ActivityHolder::~ActivityHolder() {
-
+	LOG4CXX_DEBUG(logger, "Destroying ActivityHolder for sequence command");
+	_activityConsumerMap.clear();
 }
 
 void ActivityHolder::registerConsumer(command::ActivitySet set,
