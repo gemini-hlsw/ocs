@@ -14,6 +14,21 @@
 
 namespace giapi {
 
+
+/**
+ * The ActivityHolder class is a container that is used to keep track
+ * of the different <code>gmp::SequenceCommandConsumer</code> objects
+ * associated to each <code>command::Activity</code> element.
+ * 
+ * The ActivityHolder is in charge of having a <i>unique</i> 
+ * <code>gmp::SequenceCommandConsumer</code> for each
+ * <code>command::Activity</code>. If a new consumer is registered
+ * for an Activity, the old one is discarded (and deleted
+ * if nobody else is using it) 
+ * 
+ * The CommandUtil class associates an <code>ActivityHolder</code> to 
+ * each <code>command::SequenceCommand</code>. 
+ */
 class ActivityHolder {
 	/**
 	 * Logging facility
@@ -24,15 +39,11 @@ public:
 
 	ActivityHolder();
 
-	gmp::SequenceCommandConsumer * getConsumer(command::Activity activity);
-
 	void registerConsumer(command::ActivitySet set,
-			gmp::SequenceCommandConsumer * consumer);
+			gmp::pSequenceCommandConsumer consumer);
 
 	void registerConsumer(command::Activity activity,
-			gmp::SequenceCommandConsumer * consumer);
-
-	void unregisterConsumer(command::Activity activity);
+			gmp::pSequenceCommandConsumer consumer);
 
 	virtual ~ActivityHolder();
 
@@ -41,18 +52,10 @@ private:
 	 * Type definition for the hash_table that will map command Ids to 
 	 * the JMS Topic associated to them.
 	 */
-	typedef hash_map<command::Activity, gmp::SequenceCommandConsumer *>
+	typedef hash_map<command::Activity, gmp::pSequenceCommandConsumer>
 			ActivityConsumerMap;
 
 	ActivityConsumerMap _activityConsumerMap;
-
-	/**
-	 * Determine whether the consumer associated to the  activity is the same
-	 * as the one specified in the <code>consumer</code> argument
-	 */
-	bool sameConsumer(command::Activity activity,
-			gmp::SequenceCommandConsumer * consumer);
-
 };
 
 class JmsCommandUtil {
@@ -82,10 +85,6 @@ private:
 	 */
 	static std::auto_ptr<JmsCommandUtil> INSTANCE;
 	JmsCommandUtil();
-
-	void storeConsumerPointer(gmp::SequenceCommandConsumer * consumer,
-			command::SequenceCommand sequenceCommand,
-			command::ActivitySet activities);
 
 	typedef hash_map<command::SequenceCommand, ActivityHolder *>
 			CommandHolderMap;

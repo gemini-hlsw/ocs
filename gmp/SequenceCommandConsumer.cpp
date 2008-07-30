@@ -65,6 +65,15 @@ SequenceCommandConsumer::~SequenceCommandConsumer() {
 	cleanup();
 }
 
+pSequenceCommandConsumer SequenceCommandConsumer::create(
+		command::SequenceCommand id, command::ActivitySet activities,
+		pSequenceCommandHandler handler) {
+
+	pSequenceCommandConsumer consumer(new SequenceCommandConsumer(id,
+			activities, handler));
+	return consumer;
+}
+
 void SequenceCommandConsumer::onMessage(const Message* message) {
 
 	try {

@@ -37,7 +37,9 @@ int CommandUtil::postCompletionInfo(command::ActionId id,
 	}
 	//Invalid responses for completion info.
 	//Validates the response is either COMPLETED or ERROR. If
-	//ERROR, check whether we have a message or not
+	//ERROR, check whether we have a message or not. It is 
+	//an error to generate an ERROR response without an error
+	//message
 	switch (response->getResponse()) {
 		case HandlerResponse::COMPLETED:
 			break; //all right

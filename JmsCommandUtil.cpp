@@ -63,29 +63,23 @@ int JmsCommandUtil::subscribeSequenceCommand(command::SequenceCommand id,
 
 	if (LogCommandUtil::Instance().subscribeSequenceCommand(id, activities, handler)
 			!= giapi::status::ERROR) {
-		gmp::SequenceCommandConsumer* consumer =
-				new gmp::SequenceCommandConsumer(id, activities, handler);
-		//Store this consumer and the associated sequence command/activities; use that info to control
-		//future registers to the same sequence command and destroy consumers that are no longer in
-		//use
-		storeConsumerPointer(consumer, id, activities);
-
+		//Create a consumer for this sequence commands and activities. 
+		gmp::pSequenceCommandConsumer consumer =
+			gmp::SequenceCommandConsumer::create(id, activities, handler);
+		//Store this consumer for the associated sequence command/activities; 
+		//use that info to control future registers to the same sequence command
+		//and destroy consumers that are no longer in
+		//use. If we don't do this, the consumer will be automatically 
+		//destroyed, since it's a smart pointer, and no references would be
+		//held to it. 
+		ActivityHolder * holder = _commandHolderMap[id];
+		if (holder != NULL) {
+			holder->registerConsumer(activities, consumer);
+		}
 		return giapi::status::OK;
 	}
 
 	return giapi::status::ERROR;
-}
-
-void JmsCommandUtil::storeConsumerPointer(
-		gmp::SequenceCommandConsumer * consumer,
-		command::SequenceCommand sequenceCommand, command::ActivitySet set) {
-	ActivityHolder * holder = _commandHolderMap[sequenceCommand];
-	holder->registerConsumer(set, consumer);
-}
-
-gmp::SequenceCommandConsumer * ActivityHolder::getConsumer(
-		command::Activity activity) {
-	return _activityConsumerMap[activity];
 }
 
 
@@ -101,14 +95,11 @@ ActivityHolder::~ActivityHolder() {
 
 }
 
-void ActivityHolder::unregisterConsumer(command::Activity activity) {
-	_activityConsumerMap[activity] = NULL;
-}
-
 void ActivityHolder::registerConsumer(command::ActivitySet set,
-		gmp::SequenceCommandConsumer * consumer) {
+		gmp::pSequenceCommandConsumer consumer) {
 
-	//Decompose the set in the actual activities it involves.
+	//Decompose the set in the actual activities it involves. Store a 
+	//reference of the consumer in each activity that is represented in the set
 	//TODO: We might want to improve the handling of PRESET_START, 
 	//so if already register to PRESET or START, it could de-register those handlers...
 	//Likewise, if already registered for PRESET_START, and then a register to PRESET happens, 
@@ -143,44 +134,11 @@ void ActivityHolder::registerConsumer(command::ActivitySet set,
 }
 
 void ActivityHolder::registerConsumer(command::Activity activity,
-		gmp::SequenceCommandConsumer * consumer) {
-	//first, let's see if there is a consumer already registered, and save it 
-	gmp::SequenceCommandConsumer * oldConsumer = getConsumer(activity);
+		gmp::pSequenceCommandConsumer consumer) {
 	//store the new consumer in the map for this activity
 	_activityConsumerMap[activity] = consumer;
-
-	if (oldConsumer == NULL) {
-		//we are cool, nothing has been registered before. 
-		return;
-	}
-
-	//if we are here, there is an old consumer. Let's see if we can destroy it. 
-	//We can destroy it if it's not used in any other of the activities. 
-	if (sameConsumer(command::PRESET, oldConsumer)) {
-		return;
-	}
-	if (sameConsumer(command::START, oldConsumer)) {
-		return;
-	}
-	if (sameConsumer(command::PRESET_START, oldConsumer)) {
-		return;
-	}
-	if (sameConsumer(command::CANCEL, oldConsumer)) {
-		return;
-	}
-
-	delete oldConsumer;
-
+	//thanks to the magic of the smart pointers, if there was an old consumer,
+	//that is not referenced anywhere else, then it will be destroyed 
+	//automatically. Yeee!!
 }
-
-bool ActivityHolder::sameConsumer(command::Activity activity,
-		gmp::SequenceCommandConsumer * consumer) {
-
-	if (consumer == getConsumer(activity)) {
-		return true; // the same consumer is stored. 
-	}
-	return false;
-
-}
-
 }
