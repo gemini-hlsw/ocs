@@ -22,7 +22,7 @@ ifeq ($(shell uname | grep -c "Darwin"),1)
 	MKLIB = $(CXX) -dynamiclib
 else
 	OS := Linux
-	MKLIB = $(CXX) -shared
+	MKLIB = $(CXX) -shared -fPIC
 endif
 
 #Giapi Install directories
