@@ -56,14 +56,26 @@ system before building the GIAPI C++:
   In my system they were installed on /usr/include/apr-1 
 
 * Active MQ CPP CMS. Obtained from http://activemq.apache.org/cms/download.html
-  This library needs to be available in the EXTERNAL_LIB/activemq directory
+  This library needs to be available in the EXTERNAL_LIB/activemq directory 
+  In my development environment, I declare EXTERNAL_LIB/activemq as a symlink 
+  to the place I define to install active mq using the 'configure --prefix' 
+  command
   
-* Apache Log4cxx 0.10.0. Obtained from http://logging.apache.org/log4cxx/download.html
+* Apache Log4cxx. Obtained via SVN from
+  http://svn.apache.org/repos/asf/logging/log4cxx/trunk
+  The revision number I used to build this release is 681215
+
   This library needs to be available in the EXTERNAL_LIB/log4cxx directory
+  Same as with active mq,  I declare EXTERNAL_LIB/log4cxx as a symlink 
+  to the place I define to install log4cxx using the 'configure --prefix' 
+  command
   
-* CPP Unit 1.12. Can be obtained from http://cppunit.sourceforge.net/cppunit-wiki
+* CPP Unit 1.12.1. Can be obtained from http://cppunit.sourceforge.net/cppunit-wiki
   This library needs to be installed in the EXTERNAL_LIB/cppunit directory
-  
+  Same as with everything else,  I declare EXTERNAL_LIB/log4cxx as a symlink 
+  to the place I define to install log4cxx using the 'configure --prefix' 
+  command
+   
 4. Building the library
 
 Once the external libraries are installed and the config.mk has been updated
