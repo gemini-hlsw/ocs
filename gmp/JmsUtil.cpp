@@ -5,9 +5,10 @@ namespace gmp {
 
 log4cxx::LoggerPtr JmsUtil::logger(log4cxx::Logger::getLogger("gmp:JmsUtil"));
 
-std::auto_ptr<JmsUtil> JmsUtil::INSTANCE(new JmsUtil());
+std::auto_ptr<JmsUtil> JmsUtil::INSTANCE(0);
 
 JmsUtil::JmsUtil() {
+	LOG4CXX_DEBUG(logger, "Initializing the JMS Util dictionaries");
 	JmsUtil::activityMap[GMPKeys::GMP_ACTIVITY_PRESET] = giapi::command::PRESET;
 	JmsUtil::activityMap[GMPKeys::GMP_ACTIVITY_START] = giapi::command::START;
 	JmsUtil::activityMap[GMPKeys::GMP_ACTIVITY_PRESET_START] = giapi::command::PRESET_START;
@@ -39,16 +40,23 @@ JmsUtil::JmsUtil() {
 JmsUtil::~JmsUtil() {
 }
 
+JmsUtil& JmsUtil::Instance() {
+	if (INSTANCE.get() == 0) {
+		INSTANCE.reset(new JmsUtil());
+	}
+	return *INSTANCE;
+}
+
 std::string JmsUtil::getTopic(command::SequenceCommand id) {
-	return INSTANCE->sequenceCommandMap[id];
+	return Instance().sequenceCommandMap[id];
 }
 
 command::Activity JmsUtil::getActivity(const std::string &id) {
-	return (command::Activity)INSTANCE->activityMap[id];
+	return (command::Activity)Instance().activityMap[id];
 }
 	
 std::string JmsUtil::getHandlerResponse(pHandlerResponse response) {
-	return INSTANCE->handlerResponseMap[response->getResponse()];
+	return Instance().handlerResponseMap[response->getResponse()];
 }
 
 
