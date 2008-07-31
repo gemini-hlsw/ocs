@@ -18,11 +18,12 @@ Details about the usage of the API can be found in the Gemini Observatory
 ICD50 - GIAPI C++ Language Glue API
 
 The GIAPI C++ API was compiled with GCC version 4.1 on RedHat Enterprise 
-Linux 5 Desktop. The following are tools used to build the GIAPI C++ API: 
-*  g++ (GCC) 4.1.1 20070105 (Red Hat 4.1.1-52)  
-* GNU Make 3.81 
-* GNU ld version 2.17.50.0.6-2.el5 20061020 
-* RedHat Enterprise Linux 5 Desktop, Linux kernel 2.6.18-53.1.6.el5, 32-bit 
+Linux 5 Server for 64 bits. The following are tools used to build the 
+GIAPI C++ API: 
+*   g++ (GCC) 4.1.2 20071124 (Red Hat 4.1.2-42)
+*   GNU Make 3.81
+*   GNU ld version 2.17.50.0.6-2.el5 20061020
+*   RedHat Enterprise Linux 5 Server, Linux kernel 2.6.18-92.1.6.el5, 64-bit
 
 The headers to access the GIAPI C++ interface are in the headers directory. The
 library shared object is in the lib directory of the binary distribution. 
@@ -34,11 +35,9 @@ to use the library are
   (from http://activemq.apache.org/cms)
 * Apache Log4cxx.
   (from svn at http://svn.apache.org/repos/asf/logging/log4cxx/trunk)
-
-Unfortunately, I could not get a 64-bit machine on time to provide a compiled 
-version of the GIAPI that will run directly on our target platform, so the only 
-solution at this time is to compile the code from the source. 
-Please see the README_INSTALL document for instructions.    
+  
+Compiled versions of these libraries are available in the distribution 
+package of the GIAPI (under the 'lib' directory). 
 
 Good luck, 
 

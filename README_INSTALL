@@ -1,4 +1,4 @@
-25 July 2008 AN
+31 July 2008 AN
 
 Builiding the GIAPI C++ Language Glue requires some work since it depends
 on third party products that must be fetched and installed. I expect the build 
@@ -141,5 +141,4 @@ Methods available: (Do at least one of the following)
 
       This instructs the run time loader to look in the path described by the 
       environment variable LD_LIBRARY_PATH, to resolve shared libraries. 
-      This will include the path LD_LIBRARY_PATH/lib
       
