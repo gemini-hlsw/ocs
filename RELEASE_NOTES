@@ -1,7 +1,8 @@
 Release Notes - Gemini Instrument Application Programmer Interface 
 
 
-Version Release 2: GIAPI Basic Sequence Command. July 25, 2008
+Version Release 2: GIAPI First Gemini Master Process and basic infraestructure
+                   for sequence commands. July 25, 2008
 
   * [GIAPI-14] - Initial Logging GMP into OSGi container
   * [GIAPI-15] - Add logging service to GMP
