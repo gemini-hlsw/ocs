@@ -73,6 +73,11 @@ private:
 	 * The JMS Connection to the broker
 	 */
 	std::tr1::shared_ptr<Connection> _connection;
+
+	/**
+	 * Initialize the communication to the broker
+	 */
+	void startup();
 };
 
 }

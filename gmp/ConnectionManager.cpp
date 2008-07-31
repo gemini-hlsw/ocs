@@ -10,6 +10,25 @@ std::auto_ptr<ConnectionManager>
 
 ConnectionManager::ConnectionManager() {
 
+}
+
+ConnectionManager::~ConnectionManager() {
+
+	LOG4CXX_DEBUG(logger, "Destroying connection manager");
+	//TODO: We need to close sessions, destinations, producers and consumers.
+	try {
+		if (_connection.get() != 0) {
+			_connection->close();
+		}
+	} catch (CMSException& e) {
+		LOG4CXX_WARN(logger, "Problem closing connection");
+		e.printStackTrace();
+	}
+
+}
+
+void ConnectionManager::startup()  {
+
 	ConnectionFactory* connectionFactory= NULL;
 
 	std::string brokerURI = "tcp://127.0.0.1:61616"
@@ -39,36 +58,26 @@ ConnectionManager::ConnectionManager() {
 			delete connectionFactory;
 			connectionFactory = NULL;
 		}
-
-		//TODO: Sleep for a while and try to reconnect. 
+		//TODO: Sleep for a while and try to reconnect, maybe?.
+		//For now, just print a stack trace and exit the program
 		e.printStackTrace();
+		exit(1);
 	}
-}
-
-ConnectionManager::~ConnectionManager() {
-
-	LOG4CXX_DEBUG(logger, "Destroying connection manager");
-
-	//TODO: We need to close sessions, destinations, producers and consumers.
-
-	try {
-		_connection->close();
-	} catch (CMSException& e) {
-		LOG4CXX_WARN(logger, "Problem closing connection");
-		e.printStackTrace();
-	}
-
 }
 
 ConnectionManager& ConnectionManager::Instance() {
+	//if not connected, try to reconnect:
+	if (INSTANCE->_connection.get() == 0) {
+		INSTANCE->startup();
+	}
 	return *INSTANCE;
 }
 
-void ConnectionManager::onException(const CMSException & ex AMQCPP_UNUSED) {
-	LOG4CXX_ERROR(logger, "CMS Exception occured ");
+void ConnectionManager::onException(const CMSException & ex) {
+	LOG4CXX_ERROR(logger, "Communication Exception occured ");
 	ex.printStackTrace();
-	//TODO: Sleep for a while and try to reconnect
-	
+	//TODO: Sleep for a while and try to reconnect. For now just exit
+	exit(1);
 }
 
 Session* ConnectionManager::createSession() throw (CMSException ) {
