@@ -16,7 +16,7 @@ using namespace gmp;
 using namespace decaf::lang;
 
 namespace gmp {
-log4cxx::LoggerPtr SequenceCommandConsumer::logger(log4cxx::Logger::getLogger("jms.MessageConsumer"));
+log4cxx::LoggerPtr SequenceCommandConsumer::logger(log4cxx::Logger::getLogger("jms.SequenceCommandConsumer"));
 
 SequenceCommandConsumer::SequenceCommandConsumer(command::SequenceCommand id,
 		command::ActivitySet activities, pSequenceCommandHandler handler) {
@@ -34,11 +34,11 @@ SequenceCommandConsumer::SequenceCommandConsumer(command::SequenceCommand id,
 		_sequenceCommand = id;
 
 		// Create the Topic destination 
-		_destination = _session->createTopic( JmsUtil::getTopic(id) );
+		_destination = pDestination(_session->createTopic( JmsUtil::getTopic(id) ));
 
 		LOG4CXX_DEBUG(logger, "Starting consumer for topic " << JmsUtil::getTopic(id));
 		// Create a MessageConsumer from the Session to the Topic or Queue
-		_consumer = _session->createConsumer( _destination );
+		_consumer = pMessageConsumer(_session->createConsumer( _destination.get() ));
 
 		_consumer->setMessageListener( this );
 	} catch (CMSException& e) {
@@ -49,7 +49,7 @@ SequenceCommandConsumer::SequenceCommandConsumer(command::SequenceCommand id,
 }
 
 SequenceCommandConsumer::~SequenceCommandConsumer() {
-	LOG4CXX_DEBUG(logger, "Destroying Sequence Command Consumer for " << JmsUtil::getTopic(_sequenceCommand));
+	LOG4CXX_DEBUG(logger, "Destroying Sequence Command Consumer " << _sequenceCommand);
 	cleanup();
 }
 
@@ -95,10 +95,10 @@ void SequenceCommandConsumer::onMessage(const Message* message) {
 			return;
 		}
 
-		MessageProducer * producer = _session->createProducer(destination);
+		pMessageProducer producer = pMessageProducer(_session->createProducer(destination));
 
 		MapMessage *reply = _session->createMapMessage();
-		
+
 		JmsUtil::makeHandlerResponseMsg(reply, response);
 
 		producer->send(reply);
@@ -110,15 +110,13 @@ void SequenceCommandConsumer::onMessage(const Message* message) {
 		//Probably is destroyed as part of destroying the message, handled directly by the JMS provider. 
 		//Confirm!
 		//delete destination;
-		//Destroy the producer used to reply 
+		//Close the producer used to reply 
 		producer->close();
-		delete producer;
 
 	} catch (CMSException& e) {
 		e.printStackTrace();
 	}
 }
-
 
 void SequenceCommandConsumer::cleanup() {
 	//*************************************************
@@ -126,27 +124,16 @@ void SequenceCommandConsumer::cleanup() {
 	// you destroy their sessions and connection.
 	//*************************************************
 
-	// Destroy resources.
-	try {
-		if( _destination != NULL ) delete _destination;
-	} catch (CMSException& e) {e.printStackTrace();}
-	_destination = NULL;
-
-	try {
-		if( _consumer != NULL ) delete _consumer;
-	} catch (CMSException& e) {e.printStackTrace();}
-	_consumer = NULL;
-
 	// Close open resources.
 	try {
-		if( _session != NULL ) _session->close();
+		if( _consumer.get() != 0 ) _consumer->close();
 	} catch (CMSException& e) {e.printStackTrace();}
 
-	// Now Destroy them
 	try {
-		if( _session != NULL ) delete _session;
+		if( _session.get() != 0 ) _session->close();
 	} catch (CMSException& e) {e.printStackTrace();}
-	_session = NULL;
+
+	//destruction of the objects is automatic since we are using smart pointers
 }
 
 }

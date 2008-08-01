@@ -1,7 +1,7 @@
 #include "CompletionInfoProducer.h"
 #include <gmp/ConnectionManager.h>
-#include <gmp/JmsUtil.h>
 #include <gmp/GMPKeys.h>
+#include <gmp/JmsUtil.h>
 
 namespace gmp {
 log4cxx::LoggerPtr CompletionInfoProducer::logger(log4cxx::Logger::getLogger("gmp.CompletionInfoProducer"));
@@ -10,11 +10,12 @@ CompletionInfoProducer::CompletionInfoProducer() {
 	try {
 		ConnectionManager& manager = ConnectionManager::Instance();
 		//create an auto-acknowledged session
-		_session = manager.createSession();
+		_session = pSession(manager.createSession());
+		
 		//We will use a queue to send this messages to the GMP
-		_destination = _session->createQueue(GMPKeys::GMP_COMPLETION_INFO);
+		_destination = pDestination(_session->createQueue(GMPKeys::GMP_COMPLETION_INFO));
 		//Instantiate the message producer for this destination
-		_producer = _session->createProducer(_destination);
+		_producer = pMessageProducer(_session->createProducer(_destination.get()));
 	} catch (CMSException& e) {
 		//clean anyresources that might have been allocated
 		cleanup();
@@ -34,27 +35,16 @@ pCompletionInfoProducer CompletionInfoProducer::create() {
 
 
 void CompletionInfoProducer::cleanup() {
-	// Destroy resources.
-	try {
-		if( _destination != NULL ) delete _destination;
-	} catch (CMSException& e) {e.printStackTrace();}
-	_destination = NULL;
-
-	try {
-		if( _producer != NULL ) delete _producer;
-	} catch (CMSException& e) {e.printStackTrace();}
-	_producer = NULL;
-
 	// Close open resources.
+	
 	try {
-		if( _session != NULL ) _session->close();
+		if( _producer.get() != 0 ) _producer->close();
 	} catch (CMSException& e) {e.printStackTrace();}
 
-	// Now Destroy them
 	try {
-		if( _session != NULL ) delete _session;
+		if( _session.get() != 0 ) _session->close();
 	} catch (CMSException& e) {e.printStackTrace();}
-	_session = NULL;
+
 }
 
 int CompletionInfoProducer::postCompletionInfo(command::ActionId id,

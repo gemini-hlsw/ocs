@@ -9,6 +9,9 @@
 #include <cms/ExceptionListener.h>
 #include <activemq/util/Config.h>
 
+#include <gmp/JmsUtil.h>
+#include <util/JmsSmartPointers.h>
+
 namespace gmp {
 
 using namespace cms;
@@ -49,7 +52,7 @@ public:
 	 * 
 	 * @return A new Session object from the current connection. 
 	 */
-	Session* createSession() throw (CMSException );
+	pSession createSession() throw (CMSException );
 
 	/**
 	 * Handles the exceptions that might happen with the connection
@@ -72,7 +75,7 @@ private:
 	/**
 	 * The JMS Connection to the broker
 	 */
-	std::tr1::shared_ptr<Connection> _connection;
+	pConnection _connection;
 
 	/**
 	 * Initialize the communication to the broker

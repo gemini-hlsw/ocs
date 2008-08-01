@@ -38,6 +38,7 @@ JmsUtil::JmsUtil() {
 }
 
 JmsUtil::~JmsUtil() {
+	LOG4CXX_DEBUG(logger, "Destroying the JMS Util dictionaries");
 }
 
 JmsUtil& JmsUtil::Instance() {

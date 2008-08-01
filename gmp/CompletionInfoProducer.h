@@ -3,6 +3,7 @@
 
 #include <giapi/giapi.h>
 #include <giapi/HandlerResponse.h>
+#include <util/JmsSmartPointers.h>
 
 #include <cms/Session.h>
 #include <cms/Destination.h>
@@ -47,6 +48,9 @@ public:
 	 */
 	int postCompletionInfo(command::ActionId id, pHandlerResponse response);
 
+	/**
+	 * Static factory to instantiate producers referenced via smart pointers
+	 */
 	static pCompletionInfoProducer create();
 
 private:
@@ -54,18 +58,18 @@ private:
 	/** 
 	 * The JMS Session associated to this producer. 
 	 */
-	Session* _session;
+	pSession _session;
 
 	/**
 	 * The virtual channel to where this producer will send messages to
 	 */
-	Destination* _destination;
+	pDestination _destination;
 
 	/**
 	 * The message producer in charge of sending completion information
 	 * messages. Runs on its own session
 	 */
-	MessageProducer* _producer;
+	pMessageProducer _producer;
 
 	/**
 	 * Destroy any allocated resources and closes communication channels

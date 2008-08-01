@@ -44,7 +44,7 @@ void ConnectionManager::startup()  {
 		ConnectionFactory::createCMSConnectionFactory( brokerURI );
 
 		// Create a Connection
-		_connection = std::tr1::shared_ptr<Connection>(connectionFactory->createConnection());
+		_connection = pConnection(connectionFactory->createConnection());
 
 		delete connectionFactory;
 		connectionFactory = NULL;
@@ -80,8 +80,15 @@ void ConnectionManager::onException(const CMSException & ex) {
 	exit(1);
 }
 
-Session* ConnectionManager::createSession() throw (CMSException ) {
-	return _connection->createSession(Session::AUTO_ACKNOWLEDGE);
+pSession ConnectionManager::createSession() throw (CMSException ) {
+	
+	pSession session(static_cast<Session*>(0));
+	try {
+		session.reset(_connection->createSession(Session::AUTO_ACKNOWLEDGE));
+	} catch (CMSException &e) {
+		throw; //just retrow the exception
+	}
+	return session;
 }
 
 }

@@ -45,7 +45,6 @@ JmsCommandUtil::~JmsCommandUtil() {
 	delete _commandHolderMap[command::CONTINUE];
 	delete _commandHolderMap[command::STOP];
 	delete _commandHolderMap[command::ABORT];
-
 }
 
 JmsCommandUtil& JmsCommandUtil::Instance() {

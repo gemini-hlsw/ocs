@@ -10,6 +10,7 @@
 #include <giapi/giapi.h>
 #include <giapi/SequenceCommandHandler.h>
 #include <giapi/HandlerResponse.h>
+#include <util/JmsSmartPointers.h>
 
 #include <log4cxx/logger.h>
 #include <tr1/memory>
@@ -105,20 +106,20 @@ private:
 	 * own session, since they need to operate in different execution 
 	 * threads
 	 */
-	Session* _session;
+	pSession _session;
 
 	/**
 	 * The virtual channel from where this consumer will get the messages.
 	 * The destination is obtained based on the sequence command we have
 	 * interest on
 	 */
-	Destination* _destination;
+	pDestination _destination;
 
 	/**
 	 * The consumer instance for this object. Each consumer runs on its 
 	 * own JMS Session
 	 */
-	MessageConsumer* _consumer;
+	pMessageConsumer _consumer;
 
 	/**
 	 * The handler to be invoked when a sequence command is received
