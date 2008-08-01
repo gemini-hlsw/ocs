@@ -1,7 +1,9 @@
 #ifndef LOGCOMMANDUTIL_H_
 #define LOGCOMMANDUTIL_H_
 
+#include <tr1/memory>
 #include <log4cxx/logger.h>
+
 #include <giapi/giapi.h>
 #include <giapi/SequenceCommandHandler.h>
 #include <giapi/HandlerResponse.h>
@@ -29,7 +31,7 @@ public:
 	virtual ~LogCommandUtil();
 	
 private:
-	static LogCommandUtil * INSTANCE;
+	static std::auto_ptr<LogCommandUtil> INSTANCE;
 	LogCommandUtil();
 };
 

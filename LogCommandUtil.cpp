@@ -5,7 +5,7 @@
 namespace giapi {
 log4cxx::LoggerPtr LogCommandUtil::logger(log4cxx::Logger::getLogger("giapi.LogCommandUtil"));
 
-LogCommandUtil* LogCommandUtil::INSTANCE = 0;
+std::auto_ptr<LogCommandUtil> LogCommandUtil::INSTANCE(0);
 
 LogCommandUtil::LogCommandUtil() {
 
@@ -15,8 +15,8 @@ LogCommandUtil::~LogCommandUtil() {
 }
 
 LogCommandUtil& LogCommandUtil::Instance() {
-	if (INSTANCE == 0) {
-		INSTANCE = new LogCommandUtil();
+	if (INSTANCE.get() == 0) {
+		INSTANCE.reset(new LogCommandUtil());
 	}
 	return *INSTANCE;
 }
