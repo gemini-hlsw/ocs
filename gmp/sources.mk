@@ -7,13 +7,15 @@ OBJS += \
 ./gmp/ConnectionManager.o \
 ./gmp/GMPKeys.o \
 ./gmp/JmsUtil.o \
-./gmp/SequenceCommandConsumer.o 
+./gmp/SequenceCommandConsumer.o \
+./gmp/CompletionInfoProducer.o
 
 CPP_DEPS += \
 ./gmp/ConnectionManager.d \
 ./gmp/GMPKeys.d \
 ./gmp/JmsUtil.d \
-./gmp/SequenceCommandConsumer.d
+./gmp/SequenceCommandConsumer.d \
+./gmp/CompletionInfoProducer.o
 
 # Each subdirectory must supply rules for building sources it contributes
 gmp/%.o: ../gmp/%.cpp
