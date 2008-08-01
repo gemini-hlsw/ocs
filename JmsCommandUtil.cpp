@@ -5,10 +5,10 @@ namespace giapi {
 
 log4cxx::LoggerPtr JmsCommandUtil::logger(log4cxx::Logger::getLogger("giapi.JmsCommandUtil"));
 
-std::auto_ptr<JmsCommandUtil> JmsCommandUtil::INSTANCE(new JmsCommandUtil());
+std::auto_ptr<JmsCommandUtil> JmsCommandUtil::INSTANCE(0);
 
 JmsCommandUtil::JmsCommandUtil() {
-
+	_completionInfoProducer = gmp::CompletionInfoProducer::create();
 	_commandHolderMap[command::TEST] = new ActivityHolder();
 	_commandHolderMap[command::REBOOT] = new ActivityHolder();
 	_commandHolderMap[command::INIT] = new ActivityHolder();
@@ -28,7 +28,6 @@ JmsCommandUtil::JmsCommandUtil() {
 }
 
 JmsCommandUtil::~JmsCommandUtil() {
-
 	LOG4CXX_DEBUG(logger, "Destroying JmsCommandUtil");
 	delete _commandHolderMap[command::TEST];
 	delete _commandHolderMap[command::REBOOT];
@@ -50,6 +49,9 @@ JmsCommandUtil::~JmsCommandUtil() {
 }
 
 JmsCommandUtil& JmsCommandUtil::Instance() {
+	if (INSTANCE.get() == 0) {
+		INSTANCE.reset(new JmsCommandUtil());
+	}
 	return *INSTANCE;
 }
 
@@ -86,8 +88,11 @@ int JmsCommandUtil::subscribeSequenceCommand(command::SequenceCommand id,
 int JmsCommandUtil::postCompletionInfo(command::ActionId id,
 		pHandlerResponse response) {
 
-	//TODO: Implement this
-	return giapi::status::OK;
+	if (LogCommandUtil::Instance().postCompletionInfo(id, response) !=
+		giapi::status::ERROR) {
+		return _completionInfoProducer->postCompletionInfo(id, response);
+	}
+	return giapi::status::ERROR;
 
 }
 

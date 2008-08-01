@@ -4,6 +4,8 @@
 #include <string>
 
 #include <log4cxx/logger.h>
+#include <cms/Session.h>
+#include <cms/Message.h>
 
 #include <giapi/giapi.h>
 #include <giapi/HandlerResponse.h>
@@ -11,6 +13,7 @@
 #include <util/giapiMaps.h>
 
 using namespace giapi;
+using namespace cms;
 namespace gmp {
 
 /**
@@ -47,6 +50,25 @@ public:
 	 * as an argument. 
 	 */
 	static std::string getHandlerResponse(pHandlerResponse response);
+	
+	
+	/**
+	 * Build a JMS message representing a HandlerResponse in the GIAPI
+	 * using the given session as an argument
+	 * 
+	 * Note this call does not allocate new objects permanently, it
+	 * just adds the details of the response into the msg arguments
+	 * 
+	 * @param msg The map message that will be used to construct the 
+	 * message representing the handler response. 
+	 * @param response A smart pointer to the HandlerResponse that will
+	 * be converted to JMS
+	 * @return the original message, with the information about the
+	 * handler response. 
+	 */
+	static Message * makeHandlerResponseMsg(MapMessage *msg, 
+			pHandlerResponse response);
+
 
 	virtual ~JmsUtil();
 private:

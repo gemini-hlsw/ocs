@@ -6,6 +6,9 @@ const std::string GMPKeys::GMP_SEPARATOR = ":";
 const std::string GMPKeys::GMP_SEQUENCE_COMMAND_PREFIX = GMP_PREFIX
 		+ GMP_SEPARATOR + "SC" + GMP_SEPARATOR;
 
+const std::string GMPKeys::GMP_COMPLETION_INFO = GMP_PREFIX + GMP_SEPARATOR + "COMPLETION_INFO";
+
+
 const std::string GMPKeys::GMP_ACTIVITY_PROP = "GMP_ACTIVITY_PROP";
 const std::string GMPKeys::GMP_ACTIONID_PROP = "GMP_ACTIONID";
 

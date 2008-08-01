@@ -17,6 +17,9 @@ public:
 	const static std::string GMP_SEPARATOR;
 	const static std::string GMP_SEQUENCE_COMMAND_PREFIX;
 	
+	//Specific Message topics or queues
+	const static std::string GMP_COMPLETION_INFO;
+	
 	//Message Properties
 	const static std::string GMP_ACTIONID_PROP;
 	const static std::string GMP_ACTIVITY_PROP;

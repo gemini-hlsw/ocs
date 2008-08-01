@@ -59,5 +59,21 @@ std::string JmsUtil::getHandlerResponse(pHandlerResponse response) {
 	return Instance().handlerResponseMap[response->getResponse()];
 }
 
+Message * JmsUtil::makeHandlerResponseMsg(MapMessage * msg, 
+		pHandlerResponse response) {
+	msg->setString(GMPKeys::GMP_HANDLER_RESPONSE_KEY,
+			getHandlerResponse(response));
+
+	//If this is an error, then put the error message in the response 
+	if (response->getResponse() == HandlerResponse::ERROR) {
+		if (response->getMessage() != NULL) {
+			msg->setString(GMPKeys::GMP_HANDLER_RESPONSE_ERROR_KEY,
+					response->getMessage());
+		}
+	}
+	return msg;
+}
+
+
 
 }

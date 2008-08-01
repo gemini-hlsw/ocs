@@ -100,11 +100,6 @@ private:
 	 */
 	static log4cxx::LoggerPtr logger;
 
-	/**
-	 * A mutex, used to know when the consumer is ready to process messages
-	 */
-	CountDownLatch latch;
-
 	/** 
 	 * The JMS Session associated to this consumer. Each consumer has its
 	 * own session, since they need to operate in different execution 
@@ -134,13 +129,6 @@ private:
 	 * The sequence command that is handled by this consumer
 	 */
 	command::SequenceCommand _sequenceCommand;
-
-	/**
-	 * A private method to build a message to provide the  reply
-	 * when a sequence command is received. This method might be
-	 * moved to an utility class later.
-	 */
-	Message * _buildReply(pHandlerResponse response);
 
 	/**
 	 * Close and destroy associated JMS resources used by this consumer

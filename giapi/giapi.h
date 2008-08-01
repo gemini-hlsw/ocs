@@ -11,7 +11,7 @@ namespace giapi {
 		 */
 		enum Status {
 			ERROR = -1, //Errors that don't have a status
-			OK = 0, //Success
+			OK = 0 //Success
 		};
 	}
 	
@@ -61,7 +61,7 @@ namespace giapi {
 			INT,
 			FLOAT,
 			DOUBLE,
-			STRING,
+			STRING
 		};
 	}
 	

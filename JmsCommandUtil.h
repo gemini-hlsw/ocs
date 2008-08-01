@@ -8,6 +8,7 @@
 #include <giapi/HandlerResponse.h>
 
 #include <gmp/SequenceCommandConsumer.h>
+#include <gmp/CompletionInfoProducer.h>
 
 #include <util/giapiMaps.h>
 
@@ -118,6 +119,12 @@ private:
 			CommandHolderMap;
 
 	CommandHolderMap _commandHolderMap;
+	
+	/**
+	 * Completion Info Producer in charge of sending 
+	 * completion information back to the GMP
+	 */ 
+	gmp::pCompletionInfoProducer _completionInfoProducer;
 
 };
 

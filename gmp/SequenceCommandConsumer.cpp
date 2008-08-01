@@ -19,8 +19,7 @@ namespace gmp {
 log4cxx::LoggerPtr SequenceCommandConsumer::logger(log4cxx::Logger::getLogger("jms.MessageConsumer"));
 
 SequenceCommandConsumer::SequenceCommandConsumer(command::SequenceCommand id,
-		command::ActivitySet activities, pSequenceCommandHandler handler) :
-	latch(1) {
+		command::ActivitySet activities, pSequenceCommandHandler handler) {
 
 	_handler = handler;
 
@@ -42,16 +41,7 @@ SequenceCommandConsumer::SequenceCommandConsumer(command::SequenceCommand id,
 		_consumer = _session->createConsumer( _destination );
 
 		_consumer->setMessageListener( this );
-		std::cout.flush();
-		std::cerr.flush();
-
-		// Indicate we are ready to consume sequence commands
-		latch.countDown();
-
 	} catch (CMSException& e) {
-
-		// In case of exception, waiting clients should be unlocked
-		latch.countDown();
 		//clean anyresources that might have been allocated
 		cleanup();
 		e.printStackTrace();
@@ -107,7 +97,9 @@ void SequenceCommandConsumer::onMessage(const Message* message) {
 
 		MessageProducer * producer = _session->createProducer(destination);
 
-		Message* reply = _buildReply(response);
+		MapMessage *reply = _session->createMapMessage();
+		
+		JmsUtil::makeHandlerResponseMsg(reply, response);
 
 		producer->send(reply);
 
@@ -118,7 +110,6 @@ void SequenceCommandConsumer::onMessage(const Message* message) {
 		//Probably is destroyed as part of destroying the message, handled directly by the JMS provider. 
 		//Confirm!
 		//delete destination;
-
 		//Destroy the producer used to reply 
 		producer->close();
 		delete producer;
@@ -128,21 +119,6 @@ void SequenceCommandConsumer::onMessage(const Message* message) {
 	}
 }
 
-Message * SequenceCommandConsumer::_buildReply(pHandlerResponse response) {
-
-	MapMessage *msg = _session->createMapMessage();
-	msg->setString(GMPKeys::GMP_HANDLER_RESPONSE_KEY,
-			JmsUtil::getHandlerResponse(response));
-
-	//If this is an error, then put the error message in the response 
-	if (response->getResponse() == HandlerResponse::ERROR) {
-		if (response->getMessage() != NULL) {
-			msg->setString(GMPKeys::GMP_HANDLER_RESPONSE_ERROR_KEY,
-					response->getMessage());
-		}
-	}
-	return msg;
-}
 
 void SequenceCommandConsumer::cleanup() {
 	//*************************************************
