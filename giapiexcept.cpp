@@ -1,12 +1,23 @@
 #include <giapi/giapiexcept.h> 
 
 namespace giapi {
-PostException::PostException() :
-	runtime_error("PostException") {
+
+GiapiException::GiapiException() throw() {
 }
 
-PostException::PostException(const std::string & message) :
-	runtime_error(message) {
+GiapiException::GiapiException(const GiapiException & ex) throw() {
+	*this = ex;
+}
+
+GiapiException::~GiapiException() throw() {
+	
+}
+
+PostException::PostException() : GiapiException() {
+	
+}
+
+PostException::PostException(const std::string & message) {
 
 }
 

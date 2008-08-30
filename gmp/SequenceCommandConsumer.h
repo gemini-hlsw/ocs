@@ -135,6 +135,18 @@ private:
 	 * Close and destroy associated JMS resources used by this consumer
 	 */
 	void cleanup();
+	
+	/**
+	 * Return an appropriate selector to be used by the message
+	 * consumer based on the activity set
+	 * 
+	 * @param activities The activity set that the returned selector will
+	 *                   match
+	 * 
+	 * @return a string representing the selector that matches the activity
+	 *         set
+	 */
+	std::string buildSelector(command::ActivitySet activities);
 
 };
 

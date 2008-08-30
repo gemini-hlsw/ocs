@@ -36,9 +36,12 @@ SequenceCommandConsumer::SequenceCommandConsumer(command::SequenceCommand id,
 		// Create the Topic destination 
 		_destination = pDestination(_session->createTopic( JmsUtil::getTopic(id) ));
 
-		LOG4CXX_DEBUG(logger, "Starting consumer for topic " << JmsUtil::getTopic(id));
+		const std::string selector = buildSelector(activities); 
+		
+		
+		LOG4CXX_DEBUG(logger, "Starting consumer for topic " << JmsUtil::getTopic(id) << "/" <<  selector);
 		// Create a MessageConsumer from the Session to the Topic or Queue
-		_consumer = pMessageConsumer(_session->createConsumer( _destination.get() ));
+		_consumer = pMessageConsumer(_session->createConsumer( _destination.get(), selector ));
 
 		_consumer->setMessageListener( this );
 	} catch (CMSException& e) {
@@ -67,7 +70,7 @@ void SequenceCommandConsumer::onMessage(const Message* message) {
 	try {
 		const MapMessage* mapMessage =
 		dynamic_cast< const MapMessage* >( message );
-
+		
 		std::vector< std::string > names = mapMessage->getMapNames();
 
 		//get the Action Id
@@ -116,6 +119,44 @@ void SequenceCommandConsumer::onMessage(const Message* message) {
 	} catch (CMSException& e) {
 		e.printStackTrace();
 	}
+}
+
+
+std::string SequenceCommandConsumer::buildSelector(command::ActivitySet activities) {
+	std::string selector = GMPKeys::GMP_ACTIVITY_PROP + " IN ('";
+
+	switch (activities) {
+		case command::SET_PRESET:
+			 selector += GMPKeys::GMP_ACTIVITY_PRESET + "'";
+			 break;
+		case command::SET_PRESET_START:
+			selector += GMPKeys::GMP_ACTIVITY_PRESET + "','"
+					+ GMPKeys::GMP_ACTIVITY_START + "','"
+					+ GMPKeys::GMP_ACTIVITY_PRESET_START + "'";
+			break;
+		case command::SET_CANCEL:
+			selector += GMPKeys::GMP_ACTIVITY_CANCEL + "'";
+			break;
+		case command::SET_PRESET_CANCEL:
+			selector += GMPKeys::GMP_ACTIVITY_PRESET + "','"
+					+ GMPKeys::GMP_ACTIVITY_CANCEL +"'";
+			break;
+		case command::SET_START_CANCEL:
+			selector += GMPKeys::GMP_ACTIVITY_START + "','"
+					+ GMPKeys::GMP_ACTIVITY_CANCEL +"'";
+			break;
+		case command::SET_PRESET_START_CANCEL:
+			selector += GMPKeys::GMP_ACTIVITY_PRESET + "','"
+					+ GMPKeys::GMP_ACTIVITY_START + "','"
+					+ GMPKeys::GMP_ACTIVITY_PRESET_START + "','"
+					+ GMPKeys::GMP_ACTIVITY_CANCEL + "'";
+			break;
+		default:
+			break;
+	}
+	
+	selector += ")";
+	return selector;
 }
 
 void SequenceCommandConsumer::cleanup() {
