@@ -1,5 +1,14 @@
 Release Notes - Gemini Instrument Application Programmer Interface 
 
+Version Release 3: Provides functionality to test init sequence command from 
+                   end to end. GIAPI released in 64-bits binary format. 
+                   01 September, 2008
+
+  * [GIAPI-16] - Add initial GMP Testing framework
+  * [GIAPI-18] - Add support for Sequence Command other than Apply and Reboot
+  * [GIAPI-65] - Add Sequence Command methods to Full GMP
+  * [GIAPI-70] - End to End support and testing of init Sequence Command
+  
 
 Version Release 2: GIAPI First Gemini Master Process and basic infraestructure
                    for sequence commands. July 25, 2008
