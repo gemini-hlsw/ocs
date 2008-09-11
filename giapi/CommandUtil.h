@@ -19,7 +19,7 @@ public:
 	 * <p/>
 	 * The <code>ActivitySet</code> argument allows different handlers for
 	 * different activities. For instance, one handler can implement only
-	 * <b>preset</b> and another <b>start</b>.
+	 * <b>PRESET</b> and another <b>START</b>.
 	 *
 	 * @param id The <code>SequenceCommand</code> enumerated type that
 	 *        identifies the sequence command to which a handler will be
@@ -35,10 +35,14 @@ public:
 	 * @return giapi::status::OK if the subscription succeeds. Otherwise, it
 	 *         returns giapi::status::ERROR.
 	 *
+	 * @throws GiapiException if a problem occurs when trying to execute
+	 *        the subscription
+	 *
 	 * @see command::Activity
 	 */
 	static int subscribeSequenceCommand(command::SequenceCommand id,
-			command::ActivitySet activities, pSequenceCommandHandler handler);
+			command::ActivitySet activities,
+			pSequenceCommandHandler handler) throw (GiapiException);
 
 	/**
 	 * Associates the given handler to the configuration prefix specified and
@@ -66,10 +70,14 @@ public:
 	 * @return giapi::status::OK if the subscription succeeds. Otherwise, it
 	 *         returns giapi::status::ERROR.
 	 *
+	 * @throws GiapiException if a problem occurs when trying to execute
+	 *        the subscription
+	 *
 	 * @see command::Activity
 	 */
 	static int subscribeApply(const char* prefix,
-			command::ActivitySet activities, pSequenceCommandHandler handler);
+			command::ActivitySet activities,
+			pSequenceCommandHandler handler) throw (GiapiException);
 
 	/**
 	 * Post completion information to the GMP for actions that do not complete

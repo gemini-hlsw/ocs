@@ -61,7 +61,8 @@ int JmsCommandUtil::subscribeApply(const char * prefix,
 }
 
 int JmsCommandUtil::subscribeSequenceCommand(command::SequenceCommand id,
-		command::ActivitySet activities, pSequenceCommandHandler handler) {
+		command::ActivitySet activities,
+		pSequenceCommandHandler handler) throw (CommunicationException) {
 
 	if (LogCommandUtil::Instance().subscribeSequenceCommand(id, activities, handler)
 			!= giapi::status::ERROR) {
@@ -71,7 +72,7 @@ int JmsCommandUtil::subscribeSequenceCommand(command::SequenceCommand id,
 		//Store this consumer for the associated sequence command/activities;
 		//use that info to control future registers to the same sequence command
 		//and destroy consumers that are no longer in
-		//use. If we don't do this, the consumer will be automatically
+		//use. If we don't do this, the consumer will be immediately
 		//destroyed, since it's a smart pointer, and no references would be
 		//held to it.
 		ActivityHolder * holder = _commandHolderMap[id];

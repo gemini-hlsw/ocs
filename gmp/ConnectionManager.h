@@ -25,8 +25,8 @@ using namespace cms;
  * exchange messages with the GMP.
  *
  * The connection manager knows how to find the GMP and how to establish a
- * connection to it. In addition, it handles communication exceptions
- * to the GMP server, taking measures in case of problems.
+ * connection to it. Details of the internal communication to the Gemini
+ * Master Process are hidden from the client code.
  */
 
 class ConnectionManager : public ExceptionListener {

@@ -8,6 +8,7 @@
 #include <cms/Session.h>
 
 #include <giapi/giapi.h>
+#include <giapi/giapiexcept.h>
 #include <giapi/SequenceCommandHandler.h>
 #include <giapi/HandlerResponse.h>
 #include <util/JmsSmartPointers.h>
@@ -36,27 +37,27 @@ typedef std::tr1::shared_ptr<SequenceCommandConsumer> pSequenceCommandConsumer;
  * of receiving and processing sequence commands. Whenever
  * a sequence command is delivered through the GMP, an instance
  * of this class registered for that particular sequence command
- * will react, processing the sequence command and invoking 
+ * will react, processing the sequence command and invoking
  * the appropriate SequenceCommandHandler specified through
  * the CommandUtil::subscribeSequenceCommand() method in the GIAPI
- * 
+ *
  * @see CommandUtil::subscribeSequenceCommand()
  */
 class SequenceCommandConsumer : public MessageListener {
 
 public:
 	/**
-	 * Static factory to construct a sequence command consumer. 
+	 * Static factory to construct a sequence command consumer.
 	 * The returned object is a smart pointer reference to a sequence command
 	 * consumer.
-	 * 
-	 * The arguments specifiy what sequence command and
+	 *
+	 * The arguments specify what sequence command and
 	 * activities this consumer will take care of, and the client
 	 * sequence command handler that needs to be invoked whenever
-	 * the corresponding sequence command is received. 
-	 * 
+	 * the corresponding sequence command is received.
+	 *
 	 * @param id the command::SequenceCommand this consumer will process
-	 * @param activities the set of Activity elements (represented by 
+	 * @param activities the set of Activity elements (represented by
 	 * the enumerated type, command::ActivitySet) that this consumer
 	 * will process.
 	 * @param handler The pSequenceCommandHandler, a smart pointer containing
@@ -65,7 +66,8 @@ public:
 	 * Activity.
 	 */
 	static pSequenceCommandConsumer create(command::SequenceCommand id,
-			command::ActivitySet activities, pSequenceCommandHandler handler);
+			command::ActivitySet activities,
+			pSequenceCommandHandler handler) throw (CommunicationException);
 
 	/**
 	 * Destructor. Cleans up all the resources instantiated by this consumer
@@ -79,13 +81,13 @@ public:
 
 private:
 	/**
-	 * Constructor. The arguments specifiy what sequence command and
+	 * Constructor. The arguments specify what sequence command and
 	 * activities this consumer will take care of, and the client
 	 * sequence command handler that needs to be invoked whenever
-	 * the corresponding sequence command is received. 
-	 * 
+	 * the corresponding sequence command is received.
+	 *
 	 * @param id the command::SequenceCommand this consumer will process
-	 * @param activities the set of Activity elements (represented by 
+	 * @param activities the set of Activity elements (represented by
 	 * the enumerated type, command::ActivitySet) that this consumer
 	 * will process.
 	 * @param handler The pSequenceCommandHandler, a smart pointer containing
@@ -94,16 +96,17 @@ private:
 	 * Activity.
 	 */
 	SequenceCommandConsumer(command::SequenceCommand id,
-			command::ActivitySet activities, pSequenceCommandHandler handler);
+			command::ActivitySet activities,
+			pSequenceCommandHandler handler) throw (CommunicationException);
 
 	/**
 	 * Logging facility
 	 */
 	static log4cxx::LoggerPtr logger;
 
-	/** 
+	/**
 	 * The JMS Session associated to this consumer. Each consumer has its
-	 * own session, since they need to operate in different execution 
+	 * own session, since they need to operate in different execution
 	 * threads
 	 */
 	pSession _session;
@@ -116,7 +119,7 @@ private:
 	pDestination _destination;
 
 	/**
-	 * The consumer instance for this object. Each consumer runs on its 
+	 * The consumer instance for this object. Each consumer runs on its
 	 * own JMS Session
 	 */
 	pMessageConsumer _consumer;
@@ -135,14 +138,14 @@ private:
 	 * Close and destroy associated JMS resources used by this consumer
 	 */
 	void cleanup();
-	
+
 	/**
 	 * Return an appropriate selector to be used by the message
 	 * consumer based on the activity set
-	 * 
+	 *
 	 * @param activities The activity set that the returned selector will
 	 *                   match
-	 * 
+	 *
 	 * @return a string representing the selector that matches the activity
 	 *         set
 	 */

@@ -73,8 +73,10 @@ ConnectionManager& ConnectionManager::Instance() throw (GmpException) {
 void ConnectionManager::onException(const CMSException & ex) {
 	LOG4CXX_ERROR(logger, "Communication Exception occurred ");
 	ex.printStackTrace();
-	//TODO: Invoke a handler in the client code if existent. For now just exit
-	exit(1);
+
+	//reset the connection, so next time it will try to reconnect...
+	_connection.reset(static_cast<Connection *>(0));
+	//TODO: Invoke a handler in the client code if exists.
 }
 
 pSession ConnectionManager::createSession() throw (CMSException ) {

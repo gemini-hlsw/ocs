@@ -101,7 +101,8 @@ class JmsCommandUtil {
 public:
 
 	int subscribeSequenceCommand(command::SequenceCommand id,
-			command::ActivitySet activities, pSequenceCommandHandler handler);
+			command::ActivitySet activities,
+			pSequenceCommandHandler handler) throw (CommunicationException);
 
 	int subscribeApply(const char* prefix, command::ActivitySet activities,
 			pSequenceCommandHandler handler);

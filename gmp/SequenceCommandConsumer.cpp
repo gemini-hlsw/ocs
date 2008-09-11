@@ -19,7 +19,8 @@ namespace gmp {
 log4cxx::LoggerPtr SequenceCommandConsumer::logger(log4cxx::Logger::getLogger("jms.SequenceCommandConsumer"));
 
 SequenceCommandConsumer::SequenceCommandConsumer(command::SequenceCommand id,
-		command::ActivitySet activities, pSequenceCommandHandler handler) {
+		command::ActivitySet activities,
+		pSequenceCommandHandler handler) throw (CommunicationException) {
 
 	_handler = handler;
 
@@ -33,21 +34,21 @@ SequenceCommandConsumer::SequenceCommandConsumer(command::SequenceCommand id,
 		//Store the sequence command this processor is associated with
 		_sequenceCommand = id;
 
-		// Create the Topic destination 
+		// Create the Topic destination
 		_destination = pDestination(_session->createTopic( JmsUtil::getTopic(id) ));
 
-		const std::string selector = buildSelector(activities); 
-		
-		
+		const std::string selector = buildSelector(activities);
+
+
 		LOG4CXX_DEBUG(logger, "Starting consumer for topic " << JmsUtil::getTopic(id) << "/" <<  selector);
 		// Create a MessageConsumer from the Session to the Topic or Queue
 		_consumer = pMessageConsumer(_session->createConsumer( _destination.get(), selector ));
 
 		_consumer->setMessageListener( this );
 	} catch (CMSException& e) {
-		//clean anyresources that might have been allocated
+		//clean any resources that might have been allocated
 		cleanup();
-		e.printStackTrace();
+		throw CommunicationException("Trouble initializing sequence command producer: " + e.getMessage());
 	}
 }
 
@@ -58,7 +59,7 @@ SequenceCommandConsumer::~SequenceCommandConsumer() {
 
 pSequenceCommandConsumer SequenceCommandConsumer::create(
 		command::SequenceCommand id, command::ActivitySet activities,
-		pSequenceCommandHandler handler) {
+		pSequenceCommandHandler handler) throw (CommunicationException) {
 
 	pSequenceCommandConsumer consumer(new SequenceCommandConsumer(id,
 			activities, handler));
@@ -70,7 +71,7 @@ void SequenceCommandConsumer::onMessage(const Message* message) {
 	try {
 		const MapMessage* mapMessage =
 		dynamic_cast< const MapMessage* >( message );
-		
+
 		std::vector< std::string > names = mapMessage->getMapNames();
 
 		//get the Action Id
@@ -110,10 +111,10 @@ void SequenceCommandConsumer::onMessage(const Message* message) {
 		delete reply;
 
 		//TODO: If I destroy this destination, the program exits.... :/
-		//Probably is destroyed as part of destroying the message, handled directly by the JMS provider. 
+		//Probably is destroyed as part of destroying the message, handled directly by the JMS provider.
 		//Confirm!
 		//delete destination;
-		//Close the producer used to reply 
+		//Close the producer used to reply
 		producer->close();
 
 	} catch (CMSException& e) {
@@ -154,7 +155,7 @@ std::string SequenceCommandConsumer::buildSelector(command::ActivitySet activiti
 		default:
 			break;
 	}
-	
+
 	selector += ")";
 	return selector;
 }

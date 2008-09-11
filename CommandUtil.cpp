@@ -11,7 +11,8 @@ CommandUtil::~CommandUtil() {
 }
 
 int CommandUtil::subscribeSequenceCommand(command::SequenceCommand id,
-		command::ActivitySet activities, pSequenceCommandHandler handler) {
+		command::ActivitySet activities,
+		pSequenceCommandHandler handler) throw (GiapiException){
 	//Uninitialized sequence command handler
 	if (handler == 0) {
 		return giapi::status::ERROR;
@@ -21,7 +22,8 @@ int CommandUtil::subscribeSequenceCommand(command::SequenceCommand id,
 }
 
 int CommandUtil::subscribeApply(const char* prefix,
-		command::ActivitySet activities, pSequenceCommandHandler handler) {
+		command::ActivitySet activities,
+		pSequenceCommandHandler handler) throw (GiapiException){
 	//Uninitialized sequence command handler
 	if (handler == 0) {
 		return giapi::status::ERROR;
