@@ -30,14 +30,14 @@ int CommandUtil::subscribeApply(const char* prefix,
 }
 
 int CommandUtil::postCompletionInfo(command::ActionId id,
-		pHandlerResponse response) {
+		pHandlerResponse response) throw (GiapiException) {
 	//Uninitialized handler response for completion info
 	if (response == 0) {
 		return giapi::status::ERROR;
 	}
 	//Invalid responses for completion info.
 	//Validates the response is either COMPLETED or ERROR. If
-	//ERROR, check whether we have a message or not. It is 
+	//ERROR, check whether we have a message or not. It is
 	//an error to generate an ERROR response without an error
 	//message
 	switch (response->getResponse()) {

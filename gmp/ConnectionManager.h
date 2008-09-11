@@ -3,6 +3,7 @@
 
 #include <log4cxx/logger.h>
 #include <tr1/memory>
+#include <giapi/giapiexcept.h>
 
 #include <cms/Connection.h>
 #include <cms/Session.h>
@@ -17,14 +18,14 @@ namespace gmp {
 using namespace cms;
 
 /**
- * Connection Manager is a singleton that provides a unique communication 
+ * Connection Manager is a singleton that provides a unique communication
  * point to the broker.
- * 
- * Using the connection manager, clients can start JMS Sessions to 
- * exchange messages with the GMP. 
- * 
- * The connection manager knows how to find the GMP and how to establish a 
- * connection to it. In addition, it handles communication exceptions 
+ *
+ * Using the connection manager, clients can start JMS Sessions to
+ * exchange messages with the GMP.
+ *
+ * The connection manager knows how to find the GMP and how to establish a
+ * connection to it. In addition, it handles communication exceptions
  * to the GMP server, taking measures in case of problems.
  */
 
@@ -39,18 +40,18 @@ public:
 
 	/**
 	 * Get the unique instance of the Connection Manager
-	 * 
+	 *
 	 * @return The ConnectionManager singleton object
 	 */
-	static ConnectionManager & Instance();
+	static ConnectionManager & Instance() throw (GmpException);
 
 	/**
 	 * Creates a new JMS Session for clients to interact with
-	 * the GMP broker. It does not keep ownership of the newly 
+	 * the GMP broker. It does not keep ownership of the newly
 	 * allocated object. It is responsibility of the callers to
 	 * release and destroy the returned object
-	 * 
-	 * @return A new Session object from the current connection. 
+	 *
+	 * @return A new Session object from the current connection.
 	 */
 	pSession createSession() throw (CMSException );
 
@@ -59,7 +60,7 @@ public:
 	 * to the broker
 	 */
 	virtual void onException(const CMSException& ex AMQCPP_UNUSED);
-	
+
 	/**
 	 * Destructor. Close and delete the connection to the broker
 	 */
@@ -80,7 +81,7 @@ private:
 	/**
 	 * Initialize the communication to the broker
 	 */
-	void startup();
+	void startup() throw (GmpException);
 };
 
 }

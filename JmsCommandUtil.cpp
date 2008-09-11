@@ -7,7 +7,7 @@ log4cxx::LoggerPtr JmsCommandUtil::logger(log4cxx::Logger::getLogger("giapi.JmsC
 
 std::auto_ptr<JmsCommandUtil> JmsCommandUtil::INSTANCE(0);
 
-JmsCommandUtil::JmsCommandUtil() {
+JmsCommandUtil::JmsCommandUtil() throw (CommunicationException) {
 	_completionInfoProducer = gmp::CompletionInfoProducer::create();
 	_commandHolderMap[command::TEST] = new ActivityHolder();
 	_commandHolderMap[command::REBOOT] = new ActivityHolder();
@@ -47,7 +47,7 @@ JmsCommandUtil::~JmsCommandUtil() {
 	delete _commandHolderMap[command::ABORT];
 }
 
-JmsCommandUtil& JmsCommandUtil::Instance() {
+JmsCommandUtil& JmsCommandUtil::Instance() throw (CommunicationException){
 	if (INSTANCE.get() == 0) {
 		INSTANCE.reset(new JmsCommandUtil());
 	}
@@ -65,15 +65,15 @@ int JmsCommandUtil::subscribeSequenceCommand(command::SequenceCommand id,
 
 	if (LogCommandUtil::Instance().subscribeSequenceCommand(id, activities, handler)
 			!= giapi::status::ERROR) {
-		//Create a consumer for this sequence commands and activities. 
+		//Create a consumer for this sequence commands and activities.
 		gmp::pSequenceCommandConsumer consumer =
 				gmp::SequenceCommandConsumer::create(id, activities, handler);
-		//Store this consumer for the associated sequence command/activities; 
+		//Store this consumer for the associated sequence command/activities;
 		//use that info to control future registers to the same sequence command
 		//and destroy consumers that are no longer in
-		//use. If we don't do this, the consumer will be automatically 
+		//use. If we don't do this, the consumer will be automatically
 		//destroyed, since it's a smart pointer, and no references would be
-		//held to it. 
+		//held to it.
 		ActivityHolder * holder = _commandHolderMap[id];
 		if (holder != NULL) {
 			holder->registerConsumer(activities, consumer);
@@ -85,7 +85,7 @@ int JmsCommandUtil::subscribeSequenceCommand(command::SequenceCommand id,
 }
 
 int JmsCommandUtil::postCompletionInfo(command::ActionId id,
-		pHandlerResponse response) {
+		pHandlerResponse response) throw (PostException) {
 
 	if (LogCommandUtil::Instance().postCompletionInfo(id, response) !=
 		giapi::status::ERROR) {
@@ -110,12 +110,12 @@ ActivityHolder::~ActivityHolder() {
 void ActivityHolder::registerConsumer(command::ActivitySet set,
 		gmp::pSequenceCommandConsumer consumer) {
 
-	//Decompose the set in the actual activities it involves. Store a 
+	//Decompose the set in the actual activities it involves. Store a
 	//reference of the consumer in each activity that is represented in the set
-	//TODO: We might want to improve the handling of PRESET_START, 
+	//TODO: We might want to improve the handling of PRESET_START,
 	//so if already register to PRESET or START, it could de-register those handlers...
-	//Likewise, if already registered for PRESET_START, and then a register to PRESET happens, 
-	//the system might remove the handler of PRESET_START altogheter, or move it to START alone. 
+	//Likewise, if already registered for PRESET_START, and then a register to PRESET happens,
+	//the system might remove the handler of PRESET_START altogether, or move it to START alone.
 	switch (set) {
 	case command::SET_PRESET:
 		registerConsumer(command::PRESET, consumer);
@@ -150,7 +150,7 @@ void ActivityHolder::registerConsumer(command::Activity activity,
 	//store the new consumer in the map for this activity
 	_activityConsumerMap[activity] = consumer;
 	//thanks to the magic of the smart pointers, if there was an old consumer,
-	//that is not referenced anywhere else, then it will be destroyed 
+	//that is not referenced anywhere else, then it will be destroyed
 	//automatically. Yeee!!
 }
 }

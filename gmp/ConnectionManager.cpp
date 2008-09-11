@@ -27,7 +27,7 @@ ConnectionManager::~ConnectionManager() {
 
 }
 
-void ConnectionManager::startup()  {
+void ConnectionManager::startup() throw (GmpException) {
 
 	ConnectionFactory* connectionFactory= NULL;
 
@@ -58,14 +58,11 @@ void ConnectionManager::startup()  {
 			delete connectionFactory;
 			connectionFactory = NULL;
 		}
-		//TODO: Sleep for a while and try to reconnect, maybe?.
-		//For now, just print a stack trace and exit the program
-		e.printStackTrace();
-		exit(1);
+		throw GmpException("Problem connecting to GMP. " + e.getMessage());
 	}
 }
 
-ConnectionManager& ConnectionManager::Instance() {
+ConnectionManager& ConnectionManager::Instance() throw (GmpException) {
 	//if not connected, try to reconnect:
 	if (INSTANCE->_connection.get() == 0) {
 		INSTANCE->startup();
@@ -74,20 +71,16 @@ ConnectionManager& ConnectionManager::Instance() {
 }
 
 void ConnectionManager::onException(const CMSException & ex) {
-	LOG4CXX_ERROR(logger, "Communication Exception occured ");
+	LOG4CXX_ERROR(logger, "Communication Exception occurred ");
 	ex.printStackTrace();
-	//TODO: Sleep for a while and try to reconnect. For now just exit
+	//TODO: Invoke a handler in the client code if existent. For now just exit
 	exit(1);
 }
 
 pSession ConnectionManager::createSession() throw (CMSException ) {
-	
+
 	pSession session(static_cast<Session*>(0));
-	try {
-		session.reset(_connection->createSession(Session::AUTO_ACKNOWLEDGE));
-	} catch (CMSException &e) {
-		throw; //just retrow the exception
-	}
+	session.reset(_connection->createSession(Session::AUTO_ACKNOWLEDGE));
 	return session;
 }
 

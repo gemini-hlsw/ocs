@@ -6,20 +6,20 @@
 namespace gmp {
 log4cxx::LoggerPtr CompletionInfoProducer::logger(log4cxx::Logger::getLogger("gmp.CompletionInfoProducer"));
 
-CompletionInfoProducer::CompletionInfoProducer() {
+CompletionInfoProducer::CompletionInfoProducer() throw (CommunicationException) {
 	try {
 		ConnectionManager& manager = ConnectionManager::Instance();
 		//create an auto-acknowledged session
 		_session = pSession(manager.createSession());
-		
+
 		//We will use a queue to send this messages to the GMP
 		_destination = pDestination(_session->createQueue(GMPKeys::GMP_COMPLETION_INFO));
 		//Instantiate the message producer for this destination
 		_producer = pMessageProducer(_session->createProducer(_destination.get()));
 	} catch (CMSException& e) {
-		//clean anyresources that might have been allocated
+		//clean any resources that might have been allocated
 		cleanup();
-		e.printStackTrace();
+		throw CommunicationException("Trouble initializing completion info producer :" + e.getMessage());
 	}
 }
 
@@ -28,7 +28,7 @@ CompletionInfoProducer::~CompletionInfoProducer() {
 	cleanup();
 }
 
-pCompletionInfoProducer CompletionInfoProducer::create() {
+pCompletionInfoProducer CompletionInfoProducer::create() throw (CommunicationException) {
 	pCompletionInfoProducer producer(new CompletionInfoProducer());
 	return producer;
 }
@@ -36,7 +36,7 @@ pCompletionInfoProducer CompletionInfoProducer::create() {
 
 void CompletionInfoProducer::cleanup() {
 	// Close open resources.
-	
+
 	try {
 		if( _producer.get() != 0 ) _producer->close();
 	} catch (CMSException& e) {e.printStackTrace();}
@@ -48,10 +48,10 @@ void CompletionInfoProducer::cleanup() {
 }
 
 int CompletionInfoProducer::postCompletionInfo(command::ActionId id,
-		pHandlerResponse response) {
-	
+		pHandlerResponse response) throw (PostException) {
+
 	MapMessage * reply = NULL;
-	
+
 	try {
 		reply = _session->createMapMessage();
 		JmsUtil::makeHandlerResponseMsg(reply, response);
@@ -59,13 +59,10 @@ int CompletionInfoProducer::postCompletionInfo(command::ActionId id,
 		reply->setIntProperty(GMPKeys::GMP_ACTIONID_PROP, id);
 		//send the reply
 		_producer->send(reply);
-		//delete allocated objects
 	} catch (CMSException &e) {
 		LOG4CXX_WARN(logger, "Problem posting completion info: " + e.getMessage());
-		e.printStackTrace();
 		if (reply != NULL) delete reply;
-		//return error
-		return giapi::status::ERROR;
+		throw PostException("Problem posting completion info : " + e.getMessage());
 	}
 	//if we are here, everything went okay. Destroy the reply and return OK
 	if (reply != NULL) delete reply;
