@@ -13,19 +13,21 @@ GeminiUtil::~GeminiUtil()
 }
 
 
-int GeminiUtil::subscribeEpicsStatus(const char *name, pEpicsStatusHandler handler) {
+int GeminiUtil::subscribeEpicsStatus(const char *name,
+		pEpicsStatusHandler handler) throw (GiapiException){
 	return GeminiUtilImpl::Instance().subscribeEpicsStatus(name, handler);
 }
-	
-int GeminiUtil::unsubscribeEpicsStatus(const char *name) {
+
+int GeminiUtil::unsubscribeEpicsStatus(const char *name) throw (GiapiException){
 	return GeminiUtilImpl::Instance().unsubscribeEpicsStatus(name);
 }
-	
-int GeminiUtil::postPcsUpdate(double zernikes[], int size) {
+
+int GeminiUtil::postPcsUpdate(double zernikes[],
+		int size) throw (GiapiException) {
 	return GeminiUtilImpl::Instance().postPcsUpdate(zernikes, size);
 }
-	
-int GeminiUtil::getTcsContext(TcsContext& ctx) {
+
+int GeminiUtil::getTcsContext(TcsContext& ctx) throw (GiapiException) {
 	return GeminiUtilImpl::Instance().getTcsContext(ctx);
 }
 
