@@ -1,7 +1,7 @@
 #Some common definitions for Making targets are here
 
 #Include the configuration
--include config.mk
+-include conf/config.mk
 
 # Compiler is always gcc for now
 CXX := g++

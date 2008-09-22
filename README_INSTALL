@@ -18,7 +18,7 @@ The library must be compiled with GCC version 4.0 or above.
 2. Set up the environment.
 
 When builidng, you need to set up the following variables in the config.mk
-file:
+file (located in the 'conf' directory):
 
 INSTALL_DIR The directory where you want to have the library and headers 
             installed to. 

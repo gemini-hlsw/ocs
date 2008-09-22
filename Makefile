@@ -3,8 +3,8 @@
 #
 
 #include sources list and objects built from there
+-include conf/common.mk
 -include sources.mk
--include common.mk
 -include gmp/sources.mk
 
 #Version and minor version
