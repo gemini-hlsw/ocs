@@ -15,7 +15,7 @@ CPP_DEPS += \
 ./gmp/GMPKeys.d \
 ./gmp/JmsUtil.d \
 ./gmp/SequenceCommandConsumer.d \
-./gmp/CompletionInfoProducer.o
+./gmp/CompletionInfoProducer.d
 
 # Each subdirectory must supply rules for building sources it contributes
 gmp/%.o: ../gmp/%.cpp

@@ -32,11 +32,11 @@ OBJS += \
 ./src/StatusUtil.o \
 ./src/giapiexcept.o 
 
-CPP_DEPS += \
+CPP_DEPS +=  \
 ./src/AlarmStatusItem.d \
 ./src/CommandUtil.d \
 ./src/Configuration.d \
-./src/ConfigurationFactory. \
+./src/ConfigurationFactory.d \
 ./src/DataUtil.d \
 ./src/DataUtilImpl.d \
 ./src/EpicsStatusHandler.d \

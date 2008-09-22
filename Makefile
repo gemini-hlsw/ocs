@@ -62,7 +62,7 @@ libgiapi-glue-cc: $(OBJS)
 	
 	
 clean:
-	-$(RM) $(OBJS)$(CPP_DEPS)$(LIBRARIES) $(LIBRARY_NAME) $(LIBRARY_NAME_LN)
+	-$(RM) $(OBJS) $(CPP_DEPS) $(LIBRARIES) $(LIBRARY_NAME) $(LIBRARY_NAME_LN)
 	-@echo ' '
 	@for subdir in $(SUBDIRS); \
         do \
