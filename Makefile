@@ -4,7 +4,7 @@
 
 #include sources list and objects built from there
 -include conf/common.mk
--include sources.mk
+-include src/sources.mk
 -include gmp/sources.mk
 
 #Version and minor version
@@ -23,7 +23,7 @@ endif
 
 
 # This directory things
-INC_DIRS := -I. -I./external -I$(LOG4CXX_INCLUDE) -I$(ACTIVEMQ_INCLUDE) -I$(APR_INCLUDE)
+INC_DIRS := -I. -I./external -I./src -I$(LOG4CXX_INCLUDE) -I$(ACTIVEMQ_INCLUDE) -I$(APR_INCLUDE)
 
 # Directory for libraries
 LIB_DIRS := -L$(LOG4CXX_LIB) -L$(ACTIVEMQ_LIB)
