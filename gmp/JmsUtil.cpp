@@ -13,12 +13,12 @@ JmsUtil::JmsUtil() {
 	JmsUtil::activityMap[GMPKeys::GMP_ACTIVITY_START] = giapi::command::START;
 	JmsUtil::activityMap[GMPKeys::GMP_ACTIVITY_PRESET_START] = giapi::command::PRESET_START;
 	JmsUtil::activityMap[GMPKeys::GMP_ACTIVITY_CANCEL] = giapi::command::CANCEL;
-	
+
 	JmsUtil::handlerResponseMap[HandlerResponse::ACCEPTED] = GMPKeys::GMP_HANDLER_RESPONSE_ACCEPTED;
 	JmsUtil::handlerResponseMap[HandlerResponse::STARTED] = GMPKeys::GMP_HANDLER_RESPONSE_STARTED;
 	JmsUtil::handlerResponseMap[HandlerResponse::COMPLETED] = GMPKeys::GMP_HANDLER_RESPONSE_COMPLETED;
 	JmsUtil::handlerResponseMap[HandlerResponse::ERROR] = GMPKeys::GMP_HANDLER_RESPONSE_ERROR;
-	
+
 	JmsUtil::sequenceCommandMap[command::TEST] = GMPKeys::GMP_SEQUENCE_COMMAND_TEST;
 	JmsUtil::sequenceCommandMap[command::REBOOT] = GMPKeys::GMP_SEQUENCE_COMMAND_REBOOT;
 	JmsUtil::sequenceCommandMap[command::INIT] = GMPKeys::GMP_SEQUENCE_COMMAND_INIT;
@@ -52,20 +52,24 @@ std::string JmsUtil::getTopic(command::SequenceCommand id) {
 	return Instance().sequenceCommandMap[id];
 }
 
+std::string JmsUtil::getTopic(const std::string &prefix) {
+	return GMPKeys::GMP_SEQUENCE_COMMAND_APPLY + GMPKeys::GMP_SEPARATOR + prefix;
+}
+
 command::Activity JmsUtil::getActivity(const std::string &id) {
 	return (command::Activity)Instance().activityMap[id];
 }
-	
+
 std::string JmsUtil::getHandlerResponse(pHandlerResponse response) {
 	return Instance().handlerResponseMap[response->getResponse()];
 }
 
-Message * JmsUtil::makeHandlerResponseMsg(MapMessage * msg, 
+Message * JmsUtil::makeHandlerResponseMsg(MapMessage * msg,
 		pHandlerResponse response) {
 	msg->setString(GMPKeys::GMP_HANDLER_RESPONSE_KEY,
 			getHandlerResponse(response));
 
-	//If this is an error, then put the error message in the response 
+	//If this is an error, then put the error message in the response
 	if (response->getResponse() == HandlerResponse::ERROR) {
 		if (response->getMessage() != NULL) {
 			msg->setString(GMPKeys::GMP_HANDLER_RESPONSE_ERROR_KEY,

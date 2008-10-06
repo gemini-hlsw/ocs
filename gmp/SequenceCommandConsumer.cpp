@@ -21,6 +21,22 @@ log4cxx::LoggerPtr SequenceCommandConsumer::logger(log4cxx::Logger::getLogger("j
 SequenceCommandConsumer::SequenceCommandConsumer(command::SequenceCommand id,
 		command::ActivitySet activities,
 		pSequenceCommandHandler handler) throw (CommunicationException) {
+	init( JmsUtil::getTopic(id), activities, handler );
+
+}
+
+SequenceCommandConsumer::SequenceCommandConsumer(const char * prefix,
+		command::ActivitySet activities,
+		pSequenceCommandHandler handler) throw (CommunicationException) {
+
+	init( JmsUtil::getTopic(prefix), activities, handler );
+
+}
+
+void SequenceCommandConsumer::init(
+		const string & topic,
+		command::ActivitySet activities,
+		pSequenceCommandHandler handler) throw (CommunicationException) {
 
 	_handler = handler;
 
@@ -31,16 +47,15 @@ SequenceCommandConsumer::SequenceCommandConsumer(command::SequenceCommand id,
 		//create an auto-acknowledged session
 		_session = manager.createSession();
 
-		//Store the sequence command this processor is associated with
-		_sequenceCommand = id;
+		//This consumers receives the APPLY sequence command
+		_sequenceCommand = giapi::command::APPLY;
 
 		// Create the Topic destination
-		_destination = pDestination(_session->createTopic( JmsUtil::getTopic(id) ));
+		_destination = pDestination(_session->createTopic( topic ));
 
 		const std::string selector = buildSelector(activities);
 
-
-		LOG4CXX_DEBUG(logger, "Starting consumer for topic " << JmsUtil::getTopic(id) << "/" <<  selector);
+		LOG4CXX_DEBUG(logger, "Starting consumer for topic " << topic << "/" <<  selector);
 		// Create a MessageConsumer from the Session to the Topic or Queue
 		_consumer = pMessageConsumer(_session->createConsumer( _destination.get(), selector ));
 
@@ -50,7 +65,10 @@ SequenceCommandConsumer::SequenceCommandConsumer(command::SequenceCommand id,
 		cleanup();
 		throw CommunicationException("Trouble initializing sequence command producer: " + e.getMessage());
 	}
+
+
 }
+
 
 SequenceCommandConsumer::~SequenceCommandConsumer() {
 	LOG4CXX_DEBUG(logger, "Destroying Sequence Command Consumer " << _sequenceCommand);
@@ -65,6 +83,19 @@ pSequenceCommandConsumer SequenceCommandConsumer::create(
 			activities, handler));
 	return consumer;
 }
+
+
+pSequenceCommandConsumer SequenceCommandConsumer::create(
+		const char * prefix, command::ActivitySet activities,
+		pSequenceCommandHandler handler) throw (CommunicationException) {
+
+	pSequenceCommandConsumer consumer(new SequenceCommandConsumer(prefix,
+			activities, handler));
+	return consumer;
+}
+
+
+
 
 void SequenceCommandConsumer::onMessage(const Message* message) {
 

@@ -105,7 +105,7 @@ public:
 			pSequenceCommandHandler handler) throw (CommunicationException);
 
 	int subscribeApply(const char* prefix, command::ActivitySet activities,
-			pSequenceCommandHandler handler);
+			pSequenceCommandHandler handler) throw (CommunicationException);
 
 	int postCompletionInfo(command::ActionId id,
 			pHandlerResponse response) throw (PostException);

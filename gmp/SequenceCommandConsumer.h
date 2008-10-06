@@ -70,6 +70,30 @@ public:
 			pSequenceCommandHandler handler) throw (CommunicationException);
 
 	/**
+	 * Static factory to construct a sequence command consumer for
+	 * a given prefix (associated to an APPLY sequence command)
+	 * The returned object is a smart pointer reference to a sequence command
+	 * consumer.
+	 *
+	 * The arguments specify what prefix and
+	 * activities this consumer will take care of, and the client
+	 * sequence command handler that needs to be invoked whenever
+	 * the corresponding prefix is received.
+	 *
+	 * @param prefix Configuration prefix this consumer will process
+	 * @param activities the set of Activity elements (represented by
+	 * the enumerated type, command::ActivitySet) that this consumer
+	 * will process.
+	 * @param handler The pSequenceCommandHandler, a smart pointer containing
+	 * the client implementation of a SequenceCommandHandler object that will
+	 * be invoked when this consumer receives the selected SequenceCommand and
+	 * Activity.
+	 */
+	static pSequenceCommandConsumer create(const char * prefix,
+			command::ActivitySet activities,
+			pSequenceCommandHandler handler) throw (CommunicationException);
+
+	/**
 	 * Destructor. Cleans up all the resources instantiated by this consumer
 	 */
 	virtual ~SequenceCommandConsumer();
@@ -97,6 +121,36 @@ private:
 	 */
 	SequenceCommandConsumer(command::SequenceCommand id,
 			command::ActivitySet activities,
+			pSequenceCommandHandler handler) throw (CommunicationException);
+
+	 /**
+	 * Special constructor for the Apply Sequence Command Consumer.
+	 * The arguments specify the prefix and the
+	 * activities this consumer will take care of, and the client
+	 * sequence command handler that needs to be invoked whenever
+	 * the corresponding prefix is received.
+	 *
+	 * @param prefix The configuration prefix this consumer will process
+	 * @param activities the set of Activity elements (represented by
+	 * the enumerated type, command::ActivitySet) that this consumer
+	 * will process.
+	 * @param handler The pSequenceCommandHandler, a smart pointer containing
+	 * the client implementation of a SequenceCommandHandler object that will
+	 * be invoked when this consumer receives the selected SequenceCommand and
+	 * Activity.
+	 */
+	SequenceCommandConsumer(const char * prefix,
+			command::ActivitySet activities,
+			pSequenceCommandHandler handler) throw (CommunicationException);
+
+	/**
+	 * Takes care of the initialization of a SequenceCommandConsumer
+	 * using the given topic and set of activities. Associates the consumer
+	 * with the given handler.
+	 *
+	 * This method is used by the constructor of this class.
+	 */
+	void init(const string & topic, command::ActivitySet activities,
 			pSequenceCommandHandler handler) throw (CommunicationException);
 
 	/**

@@ -55,8 +55,22 @@ JmsCommandUtil& JmsCommandUtil::Instance() throw (CommunicationException){
 }
 
 int JmsCommandUtil::subscribeApply(const char * prefix,
-		command::ActivitySet activities, pSequenceCommandHandler handler) {
-	LOG4CXX_INFO(logger, "subscribeApply method not implemented yet." << prefix);
+		command::ActivitySet activities,
+		pSequenceCommandHandler handler) throw (CommunicationException) {
+
+	if (LogCommandUtil::Instance().subscribeApply(prefix, activities, handler)
+			!= giapi::status::ERROR) {
+		//Create a consumer for this prefix and activities
+		gmp::pSequenceCommandConsumer consumer =
+			gmp::SequenceCommandConsumer::create(prefix, activities, handler);
+
+		//store this consumer....
+
+		//TODO: Where do we store these consumers? They could be a lot!
+
+		return giapi::status::OK;
+	}
+
 	return giapi::status::ERROR;
 }
 

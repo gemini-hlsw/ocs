@@ -28,7 +28,7 @@ int CommandUtil::subscribeApply(const char* prefix,
 	if (handler == 0) {
 		return giapi::status::ERROR;
 	}
-	return LogCommandUtil::Instance().subscribeApply(prefix, activities, handler);
+	return JmsCommandUtil::Instance().subscribeApply(prefix, activities, handler);
 }
 
 int CommandUtil::postCompletionInfo(command::ActionId id,
