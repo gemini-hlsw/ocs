@@ -121,9 +121,8 @@ private:
 	static std::auto_ptr<JmsCommandUtil> INSTANCE;
 	JmsCommandUtil() throw (CommunicationException);
 
-	typedef hash_map<command::SequenceCommand, ActivityHolder *>
+	typedef hash_map<const std::string, ActivityHolder *, hash<std::string>, util::eqstr>
 			CommandHolderMap;
-
 	CommandHolderMap _commandHolderMap;
 
 	/**

@@ -1,5 +1,7 @@
 #include "JmsCommandUtil.h"
 #include "LogCommandUtil.h"
+#include <gmp/JmsUtil.h>
+
 
 namespace giapi {
 
@@ -9,42 +11,20 @@ std::auto_ptr<JmsCommandUtil> JmsCommandUtil::INSTANCE(0);
 
 JmsCommandUtil::JmsCommandUtil() throw (CommunicationException) {
 	_completionInfoProducer = gmp::CompletionInfoProducer::create();
-	_commandHolderMap[command::TEST] = new ActivityHolder();
-	_commandHolderMap[command::REBOOT] = new ActivityHolder();
-	_commandHolderMap[command::INIT] = new ActivityHolder();
-	_commandHolderMap[command::DATUM] = new ActivityHolder();
-	_commandHolderMap[command::PARK] = new ActivityHolder();
-	_commandHolderMap[command::VERIFY] = new ActivityHolder();
-	_commandHolderMap[command::END_VERIFY] = new ActivityHolder();
-	_commandHolderMap[command::GUIDE] = new ActivityHolder();
-	_commandHolderMap[command::END_GUIDE] = new ActivityHolder();
-	_commandHolderMap[command::APPLY] = new ActivityHolder();
-	_commandHolderMap[command::OBSERVE] = new ActivityHolder();
-	_commandHolderMap[command::END_OBSERVE] = new ActivityHolder();
-	_commandHolderMap[command::PAUSE] = new ActivityHolder();
-	_commandHolderMap[command::CONTINUE] = new ActivityHolder();
-	_commandHolderMap[command::STOP] = new ActivityHolder();
-	_commandHolderMap[command::ABORT] = new ActivityHolder();
 }
 
 JmsCommandUtil::~JmsCommandUtil() {
 	LOG4CXX_DEBUG(logger, "Destroying JmsCommandUtil");
-	delete _commandHolderMap[command::TEST];
-	delete _commandHolderMap[command::REBOOT];
-	delete _commandHolderMap[command::INIT];
-	delete _commandHolderMap[command::DATUM];
-	delete _commandHolderMap[command::PARK];
-	delete _commandHolderMap[command::VERIFY];
-	delete _commandHolderMap[command::END_VERIFY];
-	delete _commandHolderMap[command::GUIDE];
-	delete _commandHolderMap[command::END_GUIDE];
-	delete _commandHolderMap[command::APPLY];
-	delete _commandHolderMap[command::OBSERVE];
-	delete _commandHolderMap[command::END_OBSERVE];
-	delete _commandHolderMap[command::PAUSE];
-	delete _commandHolderMap[command::CONTINUE];
-	delete _commandHolderMap[command::STOP];
-	delete _commandHolderMap[command::ABORT];
+
+	//destroy all the activity holders
+	CommandHolderMap :: const_iterator it;
+	for (it = _commandHolderMap.begin(); it != _commandHolderMap.end(); it++ ) {
+		ActivityHolder * tmp = (*it).second;
+		LOG4CXX_DEBUG(logger, "Destroying activity holder ");
+		if (tmp != NULL) {
+			delete tmp;
+		}
+	}
 }
 
 JmsCommandUtil& JmsCommandUtil::Instance() throw (CommunicationException){
@@ -65,9 +45,12 @@ int JmsCommandUtil::subscribeApply(const char * prefix,
 			gmp::SequenceCommandConsumer::create(prefix, activities, handler);
 
 		//store this consumer....
-
-		//TODO: Where do we store these consumers? They could be a lot!
-
+		ActivityHolder * holder = _commandHolderMap[ gmp::JmsUtil::getTopic(prefix)];
+		if (holder == NULL) {
+			holder = new ActivityHolder();
+			_commandHolderMap[ gmp::JmsUtil::getTopic(prefix) ]  = holder;
+		}
+		holder->registerConsumer(activities, consumer);
 		return giapi::status::OK;
 	}
 
@@ -89,10 +72,12 @@ int JmsCommandUtil::subscribeSequenceCommand(command::SequenceCommand id,
 		//use. If we don't do this, the consumer will be immediately
 		//destroyed, since it's a smart pointer, and no references would be
 		//held to it.
-		ActivityHolder * holder = _commandHolderMap[id];
-		if (holder != NULL) {
-			holder->registerConsumer(activities, consumer);
+		ActivityHolder * holder = _commandHolderMap[ gmp::JmsUtil::getTopic(id)];
+		if (holder == NULL) {
+			holder = new ActivityHolder();
+			_commandHolderMap[ gmp::JmsUtil::getTopic(id) ]  = holder;
 		}
+		holder->registerConsumer(activities, consumer);
 		return giapi::status::OK;
 	}
 

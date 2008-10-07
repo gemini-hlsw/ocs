@@ -21,6 +21,7 @@ log4cxx::LoggerPtr SequenceCommandConsumer::logger(log4cxx::Logger::getLogger("j
 SequenceCommandConsumer::SequenceCommandConsumer(command::SequenceCommand id,
 		command::ActivitySet activities,
 		pSequenceCommandHandler handler) throw (CommunicationException) {
+	_sequenceCommand = id;
 	init( JmsUtil::getTopic(id), activities, handler );
 
 }
@@ -28,7 +29,7 @@ SequenceCommandConsumer::SequenceCommandConsumer(command::SequenceCommand id,
 SequenceCommandConsumer::SequenceCommandConsumer(const char * prefix,
 		command::ActivitySet activities,
 		pSequenceCommandHandler handler) throw (CommunicationException) {
-
+    _sequenceCommand = giapi::command::APPLY;
 	init( JmsUtil::getTopic(prefix), activities, handler );
 
 }
@@ -46,9 +47,6 @@ void SequenceCommandConsumer::init(
 
 		//create an auto-acknowledged session
 		_session = manager.createSession();
-
-		//This consumers receives the APPLY sequence command
-		_sequenceCommand = giapi::command::APPLY;
 
 		// Create the Topic destination
 		_destination = pDestination(_session->createTopic( topic ));
@@ -110,7 +108,7 @@ void SequenceCommandConsumer::onMessage(const Message* message) {
 		//get the activity Id;
 		command::Activity activity = JmsUtil::getActivity(mapMessage->getStringProperty(GMPKeys::GMP_ACTIVITY_PROP));
 
-		LOG4CXX_DEBUG(logger, "Received Sequence command: " << JmsUtil::getTopic(_sequenceCommand) << " Activity : " << mapMessage->getStringProperty(GMPKeys::GMP_ACTIVITY_PROP) );
+		LOG4CXX_DEBUG(logger, "Received Sequence command (" << actionId << "): " << JmsUtil::getTopic(_sequenceCommand) << " Activity : " << mapMessage->getStringProperty(GMPKeys::GMP_ACTIVITY_PROP) );
 
 		//build a configuration object
 		pConfiguration config = ConfigurationFactory::getConfiguration();
@@ -121,7 +119,7 @@ void SequenceCommandConsumer::onMessage(const Message* message) {
 
 		pHandlerResponse response = _handler->handle(actionId, _sequenceCommand, activity, config);
 
-		LOG4CXX_DEBUG(logger, "Replying to sequence command: " << JmsUtil::getHandlerResponse(response));
+		LOG4CXX_DEBUG(logger, "Replying to sequence command:(" << actionId << "): " << JmsUtil::getHandlerResponse(response));
 
 		const Destination* destination = message->getCMSReplyTo();
 
