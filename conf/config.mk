@@ -9,3 +9,5 @@ EXTERNAL_LIB := /home/anunez/Projects/giapi/giapi-external
 #Default system include directory. 
 SYSTEM_INCLUDE_DIR := /usr/include
 
+#Directory where distribution files are going to be stored
+DISTRIBUTION_DIR := /home/anunez/Projects/giapi/dist

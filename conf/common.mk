@@ -14,7 +14,11 @@ LN := ln -s
 
 CP := cp -f
 
+CPDIR := cp -r 
+
 MAKE := make
+
+MOVE := mv
 
 #Common definition depending on the operating system
 ifeq ($(shell uname | grep -c "Darwin"),1) 
@@ -26,7 +30,8 @@ else
 endif
 
 #Giapi Install directories
-GIAPI_INCLUDE_DIR := $(INSTALL_DIR)/include/giapi
+GIAPI_INCLUDE_BASE := $(INSTALL_DIR)/include
+GIAPI_INCLUDE_DIR := $(GIAPI_INCLUDE_BASE)/giapi
 GIAPI_LIB_DIR := $(INSTALL_DIR)/lib
 
 
@@ -48,6 +53,14 @@ ACTIVEMQ_LIB := $(ACTIVEMQ_BASE)/lib
 #APR libs
 APR_INCLUDE:= $(SYSTEM_INCLUDE_DIR)/apr-1
 
+#Extra distribution files to be included in the package for distribution
+EXTRA_DIST_FILES := README RELEASE_NOTES
+
+#Name to be used for the GIAPI distribution package
+DIST_PACKAGE_NAME := giapi-dist
+
+#Temporary directory to make distribution
+TMP_DIST_DIR := /tmp/$(DIST_PACKAGE_NAME)
 
 # Rule for building objects
 %.o: %.cpp

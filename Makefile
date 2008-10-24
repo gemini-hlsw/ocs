@@ -87,6 +87,21 @@ make-lib-dir:
          chmod 755 $(GIAPI_LIB_DIR); \
     fi
 
+#Make distribution directory
+make-dist-dir:
+	@ if [ ! -d $(DISTRIBUTION_DIR) ] ; then \
+         echo "Creating: $(DISTRIBUTION_DIR)"; \
+         $(MKDIRHIER) $(DISTRIBUTION_DIR); \
+         chmod 755 $(DISTRIBUTION_DIR); \
+    fi
+
+
+make-tmp-dist-dir:
+	@ $(RM) -f $(TMP_DIST_DIR)
+	@ $(MKDIRHIER) $(TMP_DIST_DIR)
+	@ chmod 755 $(TMP_DIST_DIR)
+
+
 install-shared-lib: libgiapi-glue-cc make-lib-dir
 	@ echo "Installing $(LIBRARY_NAME)"
 	@ $(CP) $(LIBRARY_NAME) $(GIAPI_LIB_DIR)/$(LIBRARY_NAME)
@@ -94,7 +109,6 @@ install-shared-lib: libgiapi-glue-cc make-lib-dir
 	cd $(GIAPI_LIB_DIR); \
     $(LN) $(LIBRARY_NAME) $(LIBRARY_NAME_LN)
     
-dist: install-shared-lib
 
 #Get the public headers in GIAPI
 GIAPI_PUBLIC_HEADERS = $(wildcard giapi/*.h)
@@ -103,7 +117,18 @@ GIAPI_PUBLIC_HEADERS = $(wildcard giapi/*.h)
 INC_TARGETS= $(GIAPI_PUBLIC_HEADERS:giapi/%.h=$(GIAPI_INCLUDE_DIR)/%.h)	
 
 install-headers: make-include-dir $(INC_TARGETS) 
-	
+
+dist: install make-dist-dir make-tmp-dist-dir
+	@ echo "Preparing distribution package... please wait."
+	@ $(CPDIR) $(GIAPI_LIB_DIR) $(TMP_DIST_DIR)
+	@ $(CPDIR) $(GIAPI_INCLUDE_BASE) $(TMP_DIST_DIR)
+	@ $(CP) $(EXTRA_DIST_FILES) $(TMP_DIST_DIR)
+	@ $(CP) -P $(LOG4CXX_LIB)/lib* $(TMP_DIST_DIR)/lib
+	@ $(CP) -P $(ACTIVEMQ_LIB)/lib* $(TMP_DIST_DIR)/lib
+	@ tar -C /tmp -zcf $(DISTRIBUTION_DIR)/$(DIST_PACKAGE_NAME)-${V}.${MV}.tgz $(DIST_PACKAGE_NAME)
+	@ $(RM) $(TMP_DIST_DIR)
+	@ echo "Distribution package generated at $(DISTRIBUTION_DIR)/$(DIST_PACKAGE_NAME)-${V}.${MV}.tgz"
+	 
 #Rule to copy the public headers. 
 $(GIAPI_INCLUDE_DIR)/%h : giapi/%h
 	@ echo "Installing include file: $<"
