@@ -1,5 +1,15 @@
 Release Notes - Gemini Instrument Application Programmer Interface 
 
+
+Version Release 4: Add support for the apply sequence command. GIAPI released 
+                   conforming the Gemini RPM framework
+                   24 October, 2008
+  
+  * [GIAPI-80] - Add support for Apply Sequence command to full GMP
+  * [GIAPI-20] - Add support for Apply Sequence command testing
+  * [GIAPI-99] - Add exceptions to C++ Language glue  
+
+
 Version Release 3: Provides functionality to test init sequence command from 
                    end to end. GIAPI released in 64-bits binary format. 
                    01 September, 2008
@@ -10,7 +20,7 @@ Version Release 3: Provides functionality to test init sequence command from
   * [GIAPI-70] - End to End support and testing of init Sequence Command
   
 
-Version Release 2: GIAPI First Gemini Master Process and basic infraestructure
+Version Release 2: GIAPI First Gemini Master Process and basic infrastructure
                    for sequence commands. July 25, 2008
 
   * [GIAPI-14] - Initial Logging GMP into OSGi container
@@ -25,7 +35,8 @@ Version Release 1: GIAPI Logging C++. February 29, 2008
   * [GIAPI-24] - Add alarm support to Logging C++ Language Glue
   * [GIAPI-25] - Add health support to Logging C++ Language Glue
   * [GIAPI-28] - Add sequence command methods to Logging C++ Language Glue
-  * [GIAPI-29] - Add subscribeEPICStatus/unsubscribeEPICSStatus to Logging C++ Language Glue
+  * [GIAPI-29] - Add subscribeEPICStatus/unsubscribeEPICSStatus to Logging C++ 
+                 Language Glue
   * [GIAPI-30] - Add postPCSUpdate to Logging C++ Language Glue
   * [GIAPI-31] - Add getTCSContext to Logging C++ Language Glue
   * [GIAPI-32] - Add Process Logging to C++ Language Glue
