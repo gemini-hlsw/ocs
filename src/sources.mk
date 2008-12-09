@@ -1,6 +1,7 @@
 ################################################################################
 # Automatically-generated file. Do not edit!
 ################################################################################
+-include src/services/sources.mk
 
 # Add inputs and outputs from these tool invocations to the build variables 
 OBJS += \
@@ -22,8 +23,6 @@ OBJS += \
 ./src/LogCommandUtil.o \
 ./src/LogStatusSender.o \
 ./src/SequenceCommandHandler.o \
-./src/ServicesUtil.o \
-./src/ServicesUtilImpl.o \
 ./src/StatusDatabase.o \
 ./src/StatusFactory.o \
 ./src/StatusFactoryImpl.o \
@@ -51,8 +50,6 @@ CPP_DEPS +=  \
 ./src/LogCommandUtil.d \
 ./src/LogStatusSender.d \
 ./src/SequenceCommandHandler.d \
-./src/ServicesUtil.d \
-./src/ServicesUtilImpl.d \
 ./src/StatusDatabase.d \
 ./src/StatusFactory.d \
 ./src/StatusFactoryImpl.d \
