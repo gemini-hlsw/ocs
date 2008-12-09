@@ -5,7 +5,6 @@
 #include sources list and objects built from there
 -include conf/common.mk
 -include src/sources.mk
--include gmp/sources.mk
 
 #Version and minor version
 V := 0

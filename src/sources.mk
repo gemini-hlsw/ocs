@@ -2,6 +2,8 @@
 # Automatically-generated file. Do not edit!
 ################################################################################
 -include src/services/sources.mk
+-include src/gmp/sources.mk
+
 
 # Add inputs and outputs from these tool invocations to the build variables 
 OBJS += \
