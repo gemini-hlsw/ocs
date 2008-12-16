@@ -3,13 +3,9 @@
 ################################################################################
 
 # Add inputs and outputs from these tool invocations to the build variables 
-OBJS += \
-./src/services/ServicesUtil.o \
-./src/services/ServicesUtilImpl.o 
+OBJS += $(patsubst %.cpp,%.o,$(wildcard ./src/services/*.cpp))
 
-CPP_DEPS += \
-./src/services/ServicesUtil.d \
-./src/services/ServicesUtilImpl.d 
+CPP_DEPS += $(patsubst %.cpp,%.d,$(wildcard ./src/services/*.cpp))
 
 # Each subdirectory must supply rules for building sources it contributes
 src/services/%.o: ../src/services/%.cpp

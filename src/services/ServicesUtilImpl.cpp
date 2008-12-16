@@ -7,13 +7,14 @@ log4cxx::LoggerPtr ServicesUtilImpl::logger(log4cxx::Logger::getLogger("giapi.Se
 std::auto_ptr<ServicesUtilImpl>
 		ServicesUtilImpl::INSTANCE(new ServicesUtilImpl());
 
-ServicesUtilImpl::ServicesUtilImpl() {
+ServicesUtilImpl::ServicesUtilImpl() throw (CommunicationException) {
+	_producer = RequestProducer::create();
 }
 
 ServicesUtilImpl::~ServicesUtilImpl() {
 }
 
-ServicesUtilImpl& ServicesUtilImpl::Instance() {
+ServicesUtilImpl& ServicesUtilImpl::Instance() throw (CommunicationException) {
 	return *INSTANCE;
 }
 
@@ -45,8 +46,10 @@ long64 ServicesUtilImpl::getObservatoryTime() {
 }
 
 const char * ServicesUtilImpl::getProperty(const char *key) {
-	LOG4CXX_INFO(logger, "Property requested for key " << key << " UNKNOWN Value");
-	return "UNKNOWN";
+	LOG4CXX_INFO(logger, "Property requested for key: " << key);
+
+	return _producer->getProperty(key).c_str();
+
 }
 
 }

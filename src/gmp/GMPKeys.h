@@ -7,7 +7,7 @@ namespace gmp {
 
 
 /**
- * This class defines static constants that are used to exchange messages 
+ * This class defines static constants that are used to exchange messages
  * with the GMP
  */
 class GMPKeys {
@@ -16,14 +16,14 @@ public:
 	const static std::string GMP_PREFIX;
 	const static std::string GMP_SEPARATOR;
 	const static std::string GMP_SEQUENCE_COMMAND_PREFIX;
-	
+
 	//Specific Message topics or queues
 	const static std::string GMP_COMPLETION_INFO;
-	
+
 	//Message Properties
 	const static std::string GMP_ACTIONID_PROP;
 	const static std::string GMP_ACTIVITY_PROP;
-	
+
 	//Message Keywords
 
 	//Activity keywords
@@ -31,18 +31,18 @@ public:
 	const static std::string GMP_ACTIVITY_START;
 	const static std::string GMP_ACTIVITY_PRESET_START;
 	const static std::string GMP_ACTIVITY_CANCEL;
-	
+
 	//Handler Responses
 	const static std::string GMP_HANDLER_RESPONSE_ACCEPTED;
 	const static std::string GMP_HANDLER_RESPONSE_STARTED;
 	const static std::string GMP_HANDLER_RESPONSE_COMPLETED;
 	const static std::string GMP_HANDLER_RESPONSE_ERROR;
-	
+
 	//Handler Response Keys
 	const static std::string GMP_HANDLER_RESPONSE_KEY;
 	const static std::string GMP_HANDLER_RESPONSE_ERROR_KEY;
-	
-	
+
+
 	//Sequence Command Keys
 	const static std::string GMP_SEQUENCE_COMMAND_TEST;
 	const static std::string GMP_SEQUENCE_COMMAND_REBOOT;
@@ -60,12 +60,19 @@ public:
 	const static std::string GMP_SEQUENCE_COMMAND_CONTINUE;
 	const static std::string GMP_SEQUENCE_COMMAND_STOP;
 	const static std::string GMP_SEQUENCE_COMMAND_ABORT;
-		
-														
-	
-	
+
+	//Utility Method keys
+	const static std::string GMP_UTIL_REQUEST_DESTINATION;
+	//type of the request
+	const static std::string GMP_UTIL_REQUEST_TYPE;
+	//A property request
+	const static int GMP_UTIL_REQUEST_PROPERTY;
+	//Property keyword
+	const static std::string GMP_UTIL_PROPERTY;
+
+
 	virtual ~GMPKeys();
-	
+
 private:
 	GMPKeys();
 };

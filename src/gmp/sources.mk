@@ -3,19 +3,9 @@
 ################################################################################
 
 # Add inputs and outputs from these tool invocations to the build variables 
-OBJS += \
-./src/gmp/ConnectionManager.o \
-./src/gmp/GMPKeys.o \
-./src/gmp/JmsUtil.o \
-./src/gmp/SequenceCommandConsumer.o \
-./src/gmp/CompletionInfoProducer.o
+OBJS += $(patsubst %.cpp,%.o,$(wildcard ./src/gmp/*.cpp))
 
-CPP_DEPS += \
-./src/gmp/ConnectionManager.d \
-./src/gmp/GMPKeys.d \
-./src/gmp/JmsUtil.d \
-./src/gmp/SequenceCommandConsumer.d \
-./src/gmp/CompletionInfoProducer.d
+CPP_DEPS += $(patsubst %.cpp,%.d,$(wildcard ./src/gmp/*.cpp))
 
 # Each subdirectory must supply rules for building sources it contributes
 src/gmp/%.o: ../src/gmp/%.cpp

@@ -7,6 +7,7 @@
 #include <cms/Destination.h>
 #include <cms/MessageProducer.h>
 #include <cms/Connection.h>
+#include <tr1/memory>
 
 using namespace cms;
 /**
