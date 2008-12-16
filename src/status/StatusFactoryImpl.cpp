@@ -1,6 +1,6 @@
 #include "StatusFactoryImpl.h"
-#include "LogStatusSender.h"
-#include "JmsStatusSender.h"
+#include <status/senders/LogStatusSender.h>
+#include <status/senders/JmsStatusSender.h>
 
 namespace giapi {
 

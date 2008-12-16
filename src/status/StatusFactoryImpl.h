@@ -1,7 +1,7 @@
 #ifndef STATUSFACTORYIMPL_H_
 #define STATUSFACTORYIMPL_H_
 #include "StatusFactory.h"
-#include "StatusSender.h"
+#include <status/senders/StatusSender.h>
 
 namespace giapi {
 /**
@@ -20,20 +20,20 @@ public:
 	virtual ~StatusFactoryImpl();
 
 	/**
-	 * Return the default StatusSender instance. The default status sender is 
+	 * Return the default StatusSender instance. The default status sender is
 	 * defined internally by the implementing class. Several calls to this
 	 * method will return a reference to the same object.
-	 *   
+	 *
 	 * @return the default StatusSender
 	 */
 	virtual StatusSender& getStatusSender();
 
 	/**
-	 * Return the StatusSender specified by the <code>type</code>. Several 
-	 * calls to this method with the same argument will return a reference 
+	 * Return the StatusSender specified by the <code>type</code>. Several
+	 * calls to this method with the same argument will return a reference
 	 * to the same object
-	 *   
-	 * @return StatusSender associated to the type. 
+	 *
+	 * @return StatusSender associated to the type.
 	 */
 	virtual StatusSender& getStatusSender(StatusSenderType type);
 

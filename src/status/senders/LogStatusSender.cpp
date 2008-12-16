@@ -1,6 +1,6 @@
 #include "LogStatusSender.h"
-#include "StatusItem.h"
-#include "StatusDatabase.h"
+#include <status/StatusItem.h>
+#include <status/StatusDatabase.h>
 #include <giapi/giapi.h>
 
 #include <vector>
@@ -31,7 +31,7 @@ int LogStatusSender::postStatus() const throw (PostException) {
 	//get the status items
 
 	const vector<StatusItem *>& items = StatusDatabase::Instance().getStatusItems();
-	//and post the ones that haven't changed. Clear their status 
+	//and post the ones that haven't changed. Clear their status
 	for (vector<StatusItem *>::const_iterator it = items.begin(); it
 			!=items.end(); ++it) {
 		StatusItem * item = *it;
@@ -48,7 +48,7 @@ int LogStatusSender::postStatus(StatusItem *statusItem) const
 	if (statusItem == 0)
 		return giapi::status::ERROR;
 
-	//value hasn't changed since last post, return immediately. 
+	//value hasn't changed since last post, return immediately.
 	if (!statusItem->isChanged()) {
 		return status::OK;
 	}
@@ -56,7 +56,7 @@ int LogStatusSender::postStatus(StatusItem *statusItem) const
 	statusItem->clearChanged(); //mark clean, so it can be posted again
 	//Post It. Basically, log
 	LOG4CXX_INFO(logger, "Post Status Item " << *statusItem);
-	
+
 	return status::OK;
 }
 
