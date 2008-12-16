@@ -28,7 +28,7 @@ INC_DIRS := -I. -I./external -I./src -I$(LOG4CXX_INCLUDE) -I$(ACTIVEMQ_INCLUDE) 
 LIB_DIRS := -L$(LOG4CXX_LIB) -L$(ACTIVEMQ_LIB)
 
 # Libraries
-LIBS := -llog4cxx -lactivemq-cpp
+LIBS := -llog4cxx -lactivemq-cpp -lapr-1
 
 # Sub-directories
 SUBDIRS :=  test
