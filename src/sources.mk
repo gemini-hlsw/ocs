@@ -1,7 +1,9 @@
 ################################################################################
-# Automatically-generated file. Do not edit!
+# Include here all the source.mk files from directories with source files
+# for this project
 ################################################################################
 -include src/services/sources.mk
+-include src/status/sources.mk
 -include src/gmp/sources.mk
 
 
