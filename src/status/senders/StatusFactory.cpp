@@ -2,15 +2,15 @@
 #include "StatusFactoryImpl.h"
 
 namespace giapi {
-std::auto_ptr<StatusFactory> StatusFactory::INSTANCE(new StatusFactoryImpl());
+std::auto_ptr<StatusSenderFactory> StatusSenderFactory::INSTANCE(new StatusSenderFactoryImpl());
 
-StatusFactory::StatusFactory() {
+StatusSenderFactory::StatusSenderFactory() {
 }
 
-StatusFactory::~StatusFactory() {
+StatusSenderFactory::~StatusSenderFactory() {
 }
 
-StatusFactory& StatusFactory::Instance() {
+StatusSenderFactory& StatusSenderFactory::Instance() {
 	return *INSTANCE;
 }
 

@@ -12,7 +12,7 @@ namespace giapi {
  * defined by the {@link StatusSenderType} enumerated type.
  *
  */
-class StatusFactory {
+class StatusSenderFactory {
 public:
 	/**
 	 * The different type of Status Senders available
@@ -40,7 +40,7 @@ public:
 	 *
 	 * @return the singleton instance of this factory.
 	 */
-	static StatusFactory& Instance(void);
+	static StatusSenderFactory& Instance(void);
 
 	/**
 	 * Return the default StatusSender instance. The default status sender is
@@ -65,18 +65,18 @@ public:
 	/**
 	 * Destructor.
 	 */
-	virtual ~StatusFactory();
+	virtual ~StatusSenderFactory();
 private:
 	/**
 	 * Internal instance of this factory
 	 */
-	static std::auto_ptr<StatusFactory> INSTANCE;
+	static std::auto_ptr<StatusSenderFactory> INSTANCE;
 protected:
 	/**
 	 * Protected default constructor, instantiated internally by the
 	 * Instance() method
 	 */
-	StatusFactory();
+	StatusSenderFactory();
 
 };
 

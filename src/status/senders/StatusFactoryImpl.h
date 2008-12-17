@@ -8,16 +8,16 @@ namespace giapi {
  * Concrete implementation of the status factory interface.
  * Provide mechanisms to retrieve status senders
  */
-class StatusFactoryImpl : public StatusFactory {
+class StatusSenderFactoryImpl : public StatusSenderFactory {
 private:
-	StatusSender* senders[StatusFactory::Elements];
+	StatusSender* senders[StatusSenderFactory::Elements];
 	static const StatusSenderType DEFAULT_SENDER = LOG_SENDER;
 public:
 	/**
 	 * Default constructor
 	 */
-	StatusFactoryImpl();
-	virtual ~StatusFactoryImpl();
+	StatusSenderFactoryImpl();
+	virtual ~StatusSenderFactoryImpl();
 
 	/**
 	 * Return the default StatusSender instance. The default status sender is

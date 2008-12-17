@@ -4,21 +4,21 @@
 
 namespace giapi {
 
-StatusFactoryImpl::StatusFactoryImpl() {
-	for (int i = 0; i < StatusFactory::Elements; i++) {
+StatusSenderFactoryImpl::StatusSenderFactoryImpl() {
+	for (int i = 0; i < StatusSenderFactory::Elements; i++) {
 		senders[i] = 0;
 	}
 }
 
-StatusFactoryImpl::~StatusFactoryImpl() {
-	for (int i = 0; i < StatusFactory::Elements; i++) {
+StatusSenderFactoryImpl::~StatusSenderFactoryImpl() {
+	for (int i = 0; i < StatusSenderFactory::Elements; i++) {
 		if (senders[i] != 0) {
 			delete senders[i];
 		}
 	}
 }
 
-StatusSender& StatusFactoryImpl::getStatusSender(StatusSenderType type) {
+StatusSender& StatusSenderFactoryImpl::getStatusSender(StatusSenderType type) {
 	if (senders[type] == 0) {
 		switch (type) {
 		case LOG_SENDER:
@@ -35,7 +35,7 @@ StatusSender& StatusFactoryImpl::getStatusSender(StatusSenderType type) {
 	return *(senders[type]);
 }
 
-StatusSender& StatusFactoryImpl::getStatusSender() {
+StatusSender& StatusSenderFactoryImpl::getStatusSender() {
 	return getStatusSender(DEFAULT_SENDER);
 }
 

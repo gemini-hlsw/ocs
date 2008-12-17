@@ -13,12 +13,12 @@ StatusUtil::~StatusUtil() {
 }
 
 int StatusUtil::postStatus(const char* name) throw (GiapiException) {
-	StatusSender & sender = StatusFactory::Instance().getStatusSender();
+	StatusSender & sender = StatusSenderFactory::Instance().getStatusSender();
 	return sender.postStatus(name);
 }
 
 int StatusUtil::postStatus() throw (GiapiException) {
-	StatusSender & sender = StatusFactory::Instance().getStatusSender();
+	StatusSender & sender = StatusSenderFactory::Instance().getStatusSender();
 	return sender.postStatus();
 }
 
