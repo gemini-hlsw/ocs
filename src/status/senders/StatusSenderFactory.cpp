@@ -1,5 +1,5 @@
-#include "StatusFactory.h"
-#include "StatusFactoryImpl.h"
+#include "StatusSenderFactory.h"
+#include "StatusSenderFactoryImpl.h"
 
 namespace giapi {
 std::auto_ptr<StatusSenderFactory> StatusSenderFactory::INSTANCE(new StatusSenderFactoryImpl());

@@ -3,7 +3,7 @@
 #include <giapi/StatusUtil.h>
 #include <status/senders/StatusSender.h>
 
-#include <status/senders/StatusFactory.h>
+#include <status/senders/StatusSenderFactory.h>
 
 namespace giapi {
 

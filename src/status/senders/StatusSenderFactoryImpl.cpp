@@ -1,4 +1,4 @@
-#include "StatusFactoryImpl.h"
+#include "StatusSenderFactoryImpl.h"
 #include <status/senders/LogStatusSender.h>
 #include <status/senders/JmsStatusSender.h>
 
