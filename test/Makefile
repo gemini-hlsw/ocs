@@ -4,8 +4,8 @@
 
 #include sources list and objects built from there
 -include sources.mk
--include ../config.mk
--include ../common.mk
+-include ../conf/config.mk
+-include ../conf/common.mk
 
 
 #Set the LD_LIBRARY_PATH to run the tests
@@ -35,3 +35,9 @@ clean:
 	-$(RM) $(OBJS)$(CPP_DEPS)$(LIBRARIES) $(EXE_NAME)
 	-@echo ' '
 	
+%.o: %.cpp
+	@echo 'Building file: $<'
+	@echo 'Invoking $(OS) C++ Compiler'
+	$(CXX) $(INC_DIRS) -O3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
+	@echo 'Finished building: $<'
+	@echo ' ' 

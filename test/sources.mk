@@ -1,10 +1,4 @@
 
-OBJS += \
-./GiapiCommandsTest.o \
-./GiapiStatusTest.o \
-./giapi-test.o 
+OBJS += $(patsubst %.cpp,%.o,$(wildcard ./*.cpp))
 
-CPP_DEPS += \
-./GiapiCommandsTest.d \
-./GiapiStatusTest.d \
-./giapi-test.d 
+CPP_DEPS += $(patsubst %.cpp,%.d,$(wildcard ./*.cpp))

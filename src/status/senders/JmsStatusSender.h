@@ -3,7 +3,7 @@
 
 #include <log4cxx/logger.h>
 
-#include "StatusSender.h"
+#include <status/senders/AbstractStatusSender.h>
 #include <giapi/giapiexcept.h>
 
 namespace giapi {
@@ -11,7 +11,7 @@ namespace giapi {
  * A Status Sender that uses JMS as the underlying communication
  * mechanism
  */
-class JmsStatusSender : public StatusSender {
+class JmsStatusSender : public AbstractStatusSender {
 	/**
 	 * Logging facility
 	 */
@@ -20,8 +20,8 @@ class JmsStatusSender : public StatusSender {
 public:
 	JmsStatusSender();
 	virtual ~JmsStatusSender();
-	virtual int postStatus(const char* statusItem) const throw (PostException);
-	virtual int postStatus() const throw (PostException);
+protected:
+	virtual int postStatus(StatusItem *item) const throw (PostException);
 
 };
 

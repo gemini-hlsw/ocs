@@ -1,6 +1,8 @@
 #ifndef STATUSSENDER_H_
 #define STATUSSENDER_H_
 #include <giapi/giapiexcept.h>
+#include <tr1/memory>
+
 namespace giapi {
 /**
  * This is the public status sender interface. These methods
@@ -46,13 +48,17 @@ public:
 protected:
 	/**
 	 * Protected default constructor. StatusSender concrete objects
-	 * are constructed using a {@link StatusFactory}.
+	 * are constructed using a {@link StatusSenderFactory}.
 	 *
-	 * @see StatusFactory
+	 * @see StatusSenderFactory
 	 */
 	StatusSender();
 };
 
+/**
+ * Definition of a smart pointer to a StatusSender instance
+ */
+typedef std::tr1::shared_ptr<StatusSender> pStatusSender;
 
 }
 

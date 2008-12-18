@@ -49,7 +49,7 @@ public:
 	 *
 	 * @return the default StatusSender
 	 */
-	virtual StatusSender& getStatusSender(void) = 0;
+	virtual pStatusSender getStatusSender(void) = 0;
 
 	/**
 	 * Return the StatusSender specified by the <code>type</code>. Several
@@ -60,7 +60,7 @@ public:
 	 *
 	 * @return StatusSender associated to the type.
 	 */
-	virtual StatusSender& getStatusSender(const StatusSenderType type) = 0;
+	virtual pStatusSender getStatusSender(const StatusSenderType type) = 0;
 
 	/**
 	 * Destructor.

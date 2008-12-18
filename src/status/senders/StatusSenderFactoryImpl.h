@@ -10,8 +10,8 @@ namespace giapi {
  */
 class StatusSenderFactoryImpl : public StatusSenderFactory {
 private:
-	StatusSender* senders[StatusSenderFactory::Elements];
-	static const StatusSenderType DEFAULT_SENDER = LOG_SENDER;
+	pStatusSender senders[StatusSenderFactory::Elements];
+	static const StatusSenderType DEFAULT_SENDER = JMS_SENDER;
 public:
 	/**
 	 * Default constructor
@@ -26,7 +26,7 @@ public:
 	 *
 	 * @return the default StatusSender
 	 */
-	virtual StatusSender& getStatusSender();
+	virtual pStatusSender getStatusSender();
 
 	/**
 	 * Return the StatusSender specified by the <code>type</code>. Several
@@ -35,7 +35,7 @@ public:
 	 *
 	 * @return StatusSender associated to the type.
 	 */
-	virtual StatusSender& getStatusSender(StatusSenderType type);
+	virtual pStatusSender getStatusSender(StatusSenderType type);
 
 };
 }

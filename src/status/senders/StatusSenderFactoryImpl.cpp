@@ -6,36 +6,34 @@ namespace giapi {
 
 StatusSenderFactoryImpl::StatusSenderFactoryImpl() {
 	for (int i = 0; i < StatusSenderFactory::Elements; i++) {
-		senders[i] = 0;
+		senders[i] = pStatusSender((StatusSender *)0);
 	}
 }
 
 StatusSenderFactoryImpl::~StatusSenderFactoryImpl() {
 	for (int i = 0; i < StatusSenderFactory::Elements; i++) {
-		if (senders[i] != 0) {
-			delete senders[i];
-		}
+		senders[i] = pStatusSender((StatusSender *)0);
 	}
 }
 
-StatusSender& StatusSenderFactoryImpl::getStatusSender(StatusSenderType type) {
+pStatusSender StatusSenderFactoryImpl::getStatusSender(StatusSenderType type) {
 	if (senders[type] == 0) {
 		switch (type) {
 		case LOG_SENDER:
-			senders[type] = new LogStatusSender();
+			senders[type] = pStatusSender(new LogStatusSender());
 			break;
 		case JMS_SENDER:
-			senders[type] = new JmsStatusSender();
+			senders[type] = pStatusSender(new JmsStatusSender());
 			break;
 		default:
 			//return the default sender
 			return getStatusSender();
 		}
 	}
-	return *(senders[type]);
+	return (senders[type]);
 }
 
-StatusSender& StatusSenderFactoryImpl::getStatusSender() {
+pStatusSender StatusSenderFactoryImpl::getStatusSender() {
 	return getStatusSender(DEFAULT_SENDER);
 }
 

@@ -31,7 +31,7 @@ void GiapiStatusTest::tearDown() {
 void GiapiStatusTest::testCreateStatusItem() {
 	//should return errror, test-item already exists
 	CPPUNIT_ASSERT( StatusUtil::createStatusItem("test-item", giapi::type::INT) == giapi::status::ERROR );
-	//should work  fine. 
+	//should work  fine.
 	CPPUNIT_ASSERT( StatusUtil::createStatusItem("test-item-2", giapi::type::INT) == giapi::status::OK );
 }
 
@@ -45,7 +45,7 @@ void GiapiStatusTest::testCreateAlarmStatusItem() {
 void GiapiStatusTest::testCreateHealthStatusItem() {
 	//should return error, health-item already exists
 	CPPUNIT_ASSERT(StatusUtil::createHealthStatusItem("health-item") == giapi::status::ERROR );
-	//should work  fine. 
+	//should work  fine.
 	CPPUNIT_ASSERT( StatusUtil::createHealthStatusItem("health-item-2") == giapi::status::OK );
 }
 
@@ -67,7 +67,7 @@ void GiapiStatusTest::testSetValuesStatusItem() {
 
 void GiapiStatusTest::testSetValuesAlarms() {
 
-	//should work. 
+	//should work.
 	CPPUNIT_ASSERT( StatusUtil::setAlarm("alarm-item", giapi::alarm::ALARM_FAILURE, giapi::alarm::ALARM_CAUSE_HI) == giapi::status::OK );
 	//shouldn't work. alarm-item-3 doesn't exists
 	CPPUNIT_ASSERT( StatusUtil::setAlarm("alarm-item-3", giapi::alarm::ALARM_FAILURE, giapi::alarm::ALARM_CAUSE_HIHI) == giapi::status::ERROR);
@@ -96,13 +96,13 @@ void GiapiStatusTest::testClearAlarms() {
 	CPPUNIT_ASSERT( StatusUtil::clearAlarm("alarm-item-3") == giapi::status::ERROR);
 	//clearing the alarm state. Error since the alarm item is not an alarm
 	CPPUNIT_ASSERT( StatusUtil::clearAlarm("test-item") == giapi::status::ERROR);
-	//clearing the alarm state. OK since the alarm is already cleared since the last post operation. 
+	//clearing the alarm state. OK since the alarm is already cleared since the last post operation.
 	CPPUNIT_ASSERT( StatusUtil::clearAlarm("alarm-item") == giapi::status::OK);
 }
 
 void GiapiStatusTest::testSetValuesHealth() {
 
-	//should work. 
+	//should work.
 	CPPUNIT_ASSERT( StatusUtil::setHealth("health-item", giapi::health::BAD) == giapi::status::OK);
 	//shouldn't work. health-item-3 doesn't exists
 	CPPUNIT_ASSERT( StatusUtil::setHealth("health-item-3", giapi::health::BAD) == giapi::status::ERROR );

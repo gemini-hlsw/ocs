@@ -13,50 +13,12 @@ LogStatusSender::LogStatusSender() {
 }
 
 LogStatusSender::~LogStatusSender() {
+	LOG4CXX_DEBUG(logger, "Destroying LogStatus Sender");
 }
-
-int LogStatusSender::postStatus(const char* name) const throw (PostException) {
-
-	StatusItem * statusItem = StatusDatabase::Instance().getStatusItem(name);
-
-	if (statusItem == 0) {
-		LOG4CXX_WARN(logger, "No status item found for " << name << ". Not posting");
-		return status::ERROR;
-	}
-
-	return postStatus(statusItem);
-}
-
-int LogStatusSender::postStatus() const throw (PostException) {
-	//get the status items
-
-	const vector<StatusItem *>& items = StatusDatabase::Instance().getStatusItems();
-	//and post the ones that haven't changed. Clear their status
-	for (vector<StatusItem *>::const_iterator it = items.begin(); it
-			!=items.end(); ++it) {
-		StatusItem * item = *it;
-		postStatus(item);
-	}
-	return status::OK;
-}
-
-//******AUXILIARY METHODS
 
 int LogStatusSender::postStatus(StatusItem *statusItem) const
 		throw (PostException) {
-
-	if (statusItem == 0)
-		return giapi::status::ERROR;
-
-	//value hasn't changed since last post, return immediately.
-	if (!statusItem->isChanged()) {
-		return status::OK;
-	}
-
-	statusItem->clearChanged(); //mark clean, so it can be posted again
-	//Post It. Basically, log
 	LOG4CXX_INFO(logger, "Post Status Item " << *statusItem);
-
 	return status::OK;
 }
 
