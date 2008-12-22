@@ -10,13 +10,13 @@ namespace giapi {
  */
 class HandlerResponse;
 /**
- * Definition of a smart pointer to a HandlerResponse instance 
+ * Definition of a smart pointer to a HandlerResponse instance
  */
 typedef std::tr1::shared_ptr<HandlerResponse> pHandlerResponse;
 
 /**
- * Handler response. Contains an enumerated response type 
- * and a message when an error is produced. 
+ * Handler response. Contains an enumerated response type
+ * and a message when an error is produced.
  */
 class HandlerResponse {
 public:
@@ -50,21 +50,21 @@ public:
 	static pHandlerResponse create(const Response response);
 
 	/**
-	 * Static factory initializer for error HandlerResponse. 
-	 * The response type is set to ERROR and the message is 
-	 * stored. 
+	 * Static factory initializer for error HandlerResponse.
+	 * The response type is set to ERROR and the message is
+	 * stored.
 	 */
 	static pHandlerResponse createError(const char * msg);
 
 	/**
-	 * Return the response type. 
+	 * Return the response type.
 	 */
 	const Response getResponse() const;
 
 	/**
 	 * Return the message associated to this handler
-	 * response. If the response type is not ERROR, 
-	 * the return value is NULL. 
+	 * response. If the response type is not ERROR,
+	 * the return value is NULL.
 	 */
 	const char* getMessage() const;
 
@@ -78,15 +78,15 @@ private:
 
 	/**
 	 * Private Constructor for error Handler response.
-	 * The Response type is set to ERROR and the message is 
-	 * stored.  
+	 * The Response type is set to ERROR and the message is
+	 * stored.
 	 */
 	HandlerResponse(const char * msg);
 	/**
-	 * The error message 
+	 * The error message
 	 */
-	const char * _message;
-	
+	char * _message;
+
 	/**
 	 * The response type
 	 */
