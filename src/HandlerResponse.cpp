@@ -22,11 +22,18 @@ HandlerResponse::HandlerResponse(const Response response) {
 
 HandlerResponse::HandlerResponse(const char * msg) {
 	_response = HandlerResponse::ERROR;
-	_message = msg;
+	if (msg != NULL) {
+		_message = new char[sizeof(msg) + 1];
+		strcpy(_message, msg);
+	}
 }
 
 
 HandlerResponse::~HandlerResponse() {
+
+	if (_message != NULL) {
+		delete[] _message;
+	}
 }
 
 const char * HandlerResponse::getMessage() const {
