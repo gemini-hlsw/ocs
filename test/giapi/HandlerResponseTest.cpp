@@ -71,7 +71,7 @@ void HandlerResponseTest::testCopyConstructor() {
 }
 
 void HandlerResponseTest::testAssignment() {
-	pHandlerResponse response = HandlerResponse::createError("DEMO_2");
+	pHandlerResponse response = HandlerResponse::createError("DEMO_2_AND_VERY_LONG_STRING");
 
 	//construct a copy of the current response, by assignment
 	pHandlerResponse otherResponse = response;
@@ -81,7 +81,7 @@ void HandlerResponseTest::testAssignment() {
 
 	//and check everything is consistent
 	CPPUNIT_ASSERT(otherResponse->getResponse() == HandlerResponse::ERROR);
-	CPPUNIT_ASSERT(strcmp(otherResponse->getMessage(), "DEMO_2") == 0);
+	CPPUNIT_ASSERT(strcmp(otherResponse->getMessage(), "DEMO_2_AND_VERY_LONG_STRING") == 0);
 
 	CPPUNIT_ASSERT(response->getResponse() == HandlerResponse::ACCEPTED);
 	CPPUNIT_ASSERT(response->getMessage() == NULL);
