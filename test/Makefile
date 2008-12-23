@@ -6,6 +6,7 @@
 -include sources.mk
 -include ../conf/config.mk
 -include ../conf/common.mk
+-include giapi/sources.mk
 
 
 #Set the LD_LIBRARY_PATH to run the tests
