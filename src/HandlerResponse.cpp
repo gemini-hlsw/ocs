@@ -15,7 +15,7 @@ pHandlerResponse HandlerResponse::createError(const char * msg) {
 
 HandlerResponse::HandlerResponse(const Response response) {
 	_response = response;
-	_message = 0;
+	_message = NULL;
 }
 
 
@@ -23,7 +23,7 @@ HandlerResponse::HandlerResponse(const Response response) {
 HandlerResponse::HandlerResponse(const char * msg) {
 	_response = HandlerResponse::ERROR;
 	if (msg != NULL) {
-		_message = new char[sizeof(msg) + 1];
+		_message = new char[strlen(msg) + 1];
 		strcpy(_message, msg);
 	}
 }
