@@ -22,7 +22,7 @@ public:
 	/**
 	 * Get the singleton instance of the ServiceUtil implementation
 	 */
-	static ServicesUtilImpl& Instance() throw (CommunicationException);
+	static ServicesUtilImpl& Instance();
 
 	void systemLog(log::Level level, const char *msg);
 
@@ -33,7 +33,7 @@ public:
 	 * are no value associated to that key, an empty string
 	 * is returned.
 	 */
-	const char * getProperty(const char *key);
+	const char * getProperty(const char *key) throw (CommunicationException);
 
 	/**
 	 * Destructor
@@ -46,12 +46,18 @@ private:
 	/**
 	 * Private constructor
 	 */
-	ServicesUtilImpl() throw (CommunicationException);
+	ServicesUtilImpl();
 
 	/**
 	 * Smart pointer to the RequestProducer object
 	 */
 	pRequestProducer _producer;
+	
+	/**
+	 * Accessor to the request producer which is 
+	 * lazily initialized
+	 */
+	pRequestProducer getRequestProducer() throw (CommunicationException);
 };
 
 }
