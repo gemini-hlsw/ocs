@@ -18,10 +18,8 @@ int KvPair::setValueAsInt(int value) {
 
 int KvPair::setValueAsString(const char * value) {
 
-	//remove previous string.
-	if (_buff != NULL) {
-		delete[] _buff;
-	}
+	//store pointer to the previous buffer
+	char *oldBuff = _buff;
 
 	//maybe this can be optimized by pre-allocating a buffer, and only
 	//making it bigger when needed?
@@ -30,6 +28,10 @@ int KvPair::setValueAsString(const char * value) {
 
 	_value = (const char *)_buff;
 
+	//now removes the old buffer, now that the value has been changed
+	if (oldBuff != NULL) {
+		delete[] oldBuff;
+	}
 
 	return status::OK;
 }
