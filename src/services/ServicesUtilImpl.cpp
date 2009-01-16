@@ -4,17 +4,19 @@ namespace giapi {
 
 log4cxx::LoggerPtr ServicesUtilImpl::logger(log4cxx::Logger::getLogger("giapi.ServicesUtilImpl"));
 
-std::auto_ptr<ServicesUtilImpl>
-		ServicesUtilImpl::INSTANCE(new ServicesUtilImpl());
+std::auto_ptr<ServicesUtilImpl> ServicesUtilImpl::INSTANCE(0);
 
-ServicesUtilImpl::ServicesUtilImpl() {
-	_producer = pRequestProducer(0);
+ServicesUtilImpl::ServicesUtilImpl() throw (CommunicationException) {
+	_producer = RequestProducer::create();
 }
 
 ServicesUtilImpl::~ServicesUtilImpl() {
 }
 
-ServicesUtilImpl& ServicesUtilImpl::Instance() {
+ServicesUtilImpl& ServicesUtilImpl::Instance() throw (CommunicationException) {
+	if (INSTANCE.get() == 0) {
+		INSTANCE.reset(new ServicesUtilImpl());
+	}
 	return *INSTANCE;
 }
 
@@ -48,16 +50,8 @@ long64 ServicesUtilImpl::getObservatoryTime() {
 const char * ServicesUtilImpl::getProperty(const char *key) throw (CommunicationException) {
 	LOG4CXX_INFO(logger, "Property requested for key: " << key);
 
-	return getRequestProducer()->getProperty(key).c_str();
+	return _producer->getProperty(key).c_str();
 
-}
-
-
-pRequestProducer ServicesUtilImpl::getRequestProducer() throw (CommunicationException) {
-	if (_producer.get() == 0) {
-		_producer = RequestProducer::create();
-	}
-	return _producer;
 }
 
 }

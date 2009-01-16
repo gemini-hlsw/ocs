@@ -22,7 +22,7 @@ public:
 	/**
 	 * Get the singleton instance of the ServiceUtil implementation
 	 */
-	static ServicesUtilImpl& Instance();
+	static ServicesUtilImpl& Instance() throw (CommunicationException) ;
 
 	void systemLog(log::Level level, const char *msg);
 
@@ -46,18 +46,13 @@ private:
 	/**
 	 * Private constructor
 	 */
-	ServicesUtilImpl();
+	ServicesUtilImpl() throw (CommunicationException) ;
 
 	/**
 	 * Smart pointer to the RequestProducer object
 	 */
 	pRequestProducer _producer;
-	
-	/**
-	 * Accessor to the request producer which is 
-	 * lazily initialized
-	 */
-	pRequestProducer getRequestProducer() throw (CommunicationException);
+
 };
 
 }
