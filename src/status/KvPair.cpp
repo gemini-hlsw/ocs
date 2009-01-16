@@ -5,6 +5,7 @@ namespace giapi {
 
 KvPair::KvPair(const char * name) {
 	_name = name;
+	_buff = NULL;
 }
 
 KvPair::~KvPair() {
@@ -16,7 +17,20 @@ int KvPair::setValueAsInt(int value) {
 }
 
 int KvPair::setValueAsString(const char * value) {
-	_value = value;
+
+	//remove previous string.
+	if (_buff != NULL) {
+		delete[] _buff;
+	}
+
+	//maybe this can be optimized by pre-allocating a buffer, and only
+	//making it bigger when needed?
+	_buff = new char[strlen(value) + 1];
+	strcpy(_buff, value);
+
+	_value = (const char *)_buff;
+
+
 	return status::OK;
 }
 
