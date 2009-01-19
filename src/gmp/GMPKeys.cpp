@@ -48,6 +48,8 @@ const std::string GMPKeys::GMP_UTIL_REQUEST_TYPE = "REQUEST_TYPE";
 const int GMPKeys::GMP_UTIL_REQUEST_PROPERTY = 0;
 const std::string GMPKeys::GMP_UTIL_PROPERTY = "PROPERTY";
 
+const std::string GMPKeys::GMP_STATUS_DESTINATION = GMP_PREFIX + GMP_SEPARATOR + "STATUS_DESTINATION";
+
 
 
 

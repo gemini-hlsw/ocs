@@ -12,7 +12,7 @@ namespace giapi {
  */
 class AlarmStatusItem : public StatusItem {
 private:
-	const char * _message; //description of the cause of the alarm
+	char * _message; //description of the cause of the alarm
 	alarm::Severity _severity; //alarm severity
 	alarm::Cause _cause; //alarm cause
 	bool _initialized; //initialized
@@ -28,61 +28,61 @@ public:
 
 	/**
 	 * Set the alarm state of this item. Once set, the
-	 * internal state of the item is marked as dirty, 
+	 * internal state of the item is marked as dirty,
 	 * therefore subsequent post invokations will cause
 	 * this item to be published. If the alarm severity
 	 * is set to alarm::ALARM_OK, the cause and message
 	 * are automatically reset no matter what values are
 	 * specified in the method parameters
 	 * <p/>
-	 * In addition, the cause is alarm::ALARM_CAUSE_OTHER, 
-	 * the message argument is mandatory. 
-	 * 
-	 * @param severity the severity of the alarm. If there 
+	 * In addition, the cause is alarm::ALARM_CAUSE_OTHER,
+	 * the message argument is mandatory.
+	 *
+	 * @param severity the severity of the alarm. If there
 	 * is no alarm condition, the value must be set
-	 * to alarm::ALARM_OK. If set to alarm::ALARM_OK, the 
-	 * cause and message arguments are discarded. 
-	 * @param cause the cause of the alarm. If there is 
-	 * no alarm condition, the value must be set 
+	 * to alarm::ALARM_OK. If set to alarm::ALARM_OK, the
+	 * cause and message arguments are discarded.
+	 * @param cause the cause of the alarm. If there is
+	 * no alarm condition, the value must be set
 	 * to alarm::ALARM_CAUSE_OK
-	 * @param message the (optional) alarm message for this 
+	 * @param message the (optional) alarm message for this
 	 * status item
-	 * 
+	 *
 	 * @return status::OK if the alarm was set properly
 	 *         status::ERROR if the message was not set and the cause
 	 *         is specified as alarm::ALARM_CAUSE_OTHER
-	 * 
+	 *
 	 */
 	int setAlarmState(alarm::Severity severity, alarm::Cause cause,
 			const char * message = 0);
-	
+
 	/**
-	 * Reset the alarm information. The status item is in a 
+	 * Reset the alarm information. The status item is in a
 	 * no-alarm state after this call
 	 */
 	void clearAlarmState();
 
 	/**
-	 * Return the (optional) message associated 
+	 * Return the (optional) message associated
 	 * to the alarm item. If no message is defined
 	 * the method returns NULL
-	 * 
-	 * @return the message associated to the alarm item 
+	 *
+	 * @return the message associated to the alarm item
 	 * or NULL if there is no one.
 	 */
 	const char * getMessage() const;
 
 	/**
 	 * Return the severity of the alarm
-	 * 
+	 *
 	 * @return Alarm severity
 	 */
 	alarm::Severity getSeverity() const;
 
 	/**
 	 * Return the cause of the alarm
-	 * 
-	 * @return the alarm cause. 
+	 *
+	 * @return the alarm cause.
 	 */
 	alarm::Cause getCause() const;
 

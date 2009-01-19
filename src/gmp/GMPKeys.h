@@ -71,6 +71,9 @@ public:
 	const static std::string GMP_UTIL_PROPERTY;
 
 
+	//Status
+	const static std::string GMP_STATUS_DESTINATION;
+
 	virtual ~GMPKeys();
 
 private:

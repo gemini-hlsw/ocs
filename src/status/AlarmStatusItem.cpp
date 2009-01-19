@@ -33,6 +33,9 @@ int AlarmStatusItem::setAlarmState(alarm::Severity severity,
 		_initialized = true;
 	}
 
+	//original pointer to the message stored here
+	char * oldMsg = _message;
+
 	_severity = severity;
 	//if the severity is NO_ALARM, the other arguments aren't considered
 	if (_severity == alarm::ALARM_OK) {
@@ -40,9 +43,19 @@ int AlarmStatusItem::setAlarmState(alarm::Severity severity,
 		_message = 0;
 	} else {
 		_cause = cause;
-		_message = message;
+		if (message != NULL) {
+			_message = new char[strlen(message) + 1];
+			strcpy(_message, message);
+		} else {
+			_message = 0;
+		}
 	}
 	_mark(); //mark the status item as dirty and set the timestamp
+
+	if (oldMsg != NULL) {
+		delete[] oldMsg;
+	}
+
 	return giapi::status::OK;
 }
 
@@ -51,7 +64,7 @@ void AlarmStatusItem::clearAlarmState() {
 	//state accordingly if necessary. This can't return error.
 	if (setAlarmState(alarm::ALARM_OK, alarm::ALARM_CAUSE_OK, (const char *)0)
 			== status::ERROR) {
-		//This shouldn't happen. 
+		//This shouldn't happen.
 		throw InvalidOperation("AlarmStatusItem::clearAlarmState - Couldn't clear alarm item");
 	}
 }

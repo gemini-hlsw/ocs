@@ -10,7 +10,7 @@
 
 namespace giapi {
 /**
- * A Command util that class that logs the requests.
+ * A Command util class that logs the requests.
  */
 class LogCommandUtil {
 	/**
@@ -29,7 +29,7 @@ public:
 
 	static LogCommandUtil& Instance();
 	virtual ~LogCommandUtil();
-	
+
 private:
 	static std::auto_ptr<LogCommandUtil> INSTANCE;
 	LogCommandUtil();
