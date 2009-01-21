@@ -1,7 +1,8 @@
 #ifndef ALARMSTATUSITEM_H_
 #define ALARMSTATUSITEM_H_
 
-#include "StatusItem.h"
+#include <status/StatusItem.h>
+#include <status/StatusVisitor.h>
 #include <giapi/giapi.h>
 
 namespace giapi {
@@ -85,6 +86,12 @@ public:
 	 * @return the alarm cause.
 	 */
 	alarm::Cause getCause() const;
+
+
+	/**
+	 * The accept interface for the visitor pattern
+	 */
+	void accept(StatusVisitor &);
 
 };
 }

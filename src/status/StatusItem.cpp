@@ -21,7 +21,7 @@ StatusItem::~StatusItem() {
 
 int StatusItem::setValueAsInt(int value) {
 
-	//If the type is not integer, return error. 
+	//If the type is not integer, return error.
 	if (_type != type::INT) {
 		LOG4CXX_WARN(logger, "Can't set an int value in the status item : " << *this);
 		return status::ERROR;
@@ -38,7 +38,7 @@ int StatusItem::setValueAsInt(int value) {
 
 int StatusItem::setValueAsString(const char* value) {
 
-	//If the type is not an string, return error. 
+	//If the type is not an string, return error.
 	if (_type != type::STRING) {
 		LOG4CXX_WARN(logger, "Can't set a string value in the status item : " << *this);
 		return status::ERROR;
@@ -54,7 +54,7 @@ int StatusItem::setValueAsString(const char* value) {
 
 int StatusItem::setValueAsDouble(double value) {
 
-	//If the type is not double, return error. 
+	//If the type is not double, return error.
 	if (_type != type::DOUBLE) {
 		LOG4CXX_WARN(logger, "Can't set a double value in the status item : " << *this);
 		return status::ERROR;
@@ -90,6 +90,11 @@ void StatusItem::_mark() {
 	} else {
 		LOG4CXX_WARN(logger, "Can't set timestamp on status item " << *this);
 	}
+}
+
+
+void StatusItem::accept(StatusVisitor &visitor) {
+	visitor.visitStatusItem(this);
 }
 
 }

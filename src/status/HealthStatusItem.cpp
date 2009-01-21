@@ -6,7 +6,7 @@ namespace giapi
 HealthStatusItem::HealthStatusItem(const char* name)
 : StatusItem(name, type::INT)
 {
-	
+
 }
 
 HealthStatusItem::~HealthStatusItem()
@@ -14,9 +14,13 @@ HealthStatusItem::~HealthStatusItem()
 }
 
 int HealthStatusItem::setHealth(health::Health health) {
-	
+
 	return setValueAsInt(health);
-	
+
+}
+
+void HealthStatusItem::accept(StatusVisitor & visitor) {
+	visitor.visitHealthItem(this);
 }
 
 }

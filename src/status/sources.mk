@@ -1,6 +1,4 @@
-################################################################################
-# Automatically-generated file. Do not edit!
-################################################################################
+
 -include src/status/senders/sources.mk
 
 # Add inputs and outputs from these tool invocations to the build variables 

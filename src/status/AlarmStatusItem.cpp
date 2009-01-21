@@ -81,4 +81,8 @@ alarm::Cause AlarmStatusItem::getCause() const {
 	return _cause;
 }
 
+void AlarmStatusItem::accept(StatusVisitor & visitor) {
+	visitor.visitAlarmItem(this);
+}
+
 }
