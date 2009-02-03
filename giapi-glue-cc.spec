@@ -2,7 +2,7 @@
 %define gemopt opt
 %define name giapi-glue-cc
 %define version 0
-%define release 4
+%define release 5
 %define repository gemini
 
 %define debug_package %{nil}
