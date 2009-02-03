@@ -65,7 +65,7 @@ public:
 	 *         value and the operation was aborted. This can happen if the
 	 *         type of the status item was not defined as type::STRING
 	 */
-	virtual int setValueAsString(const char * value);
+	virtual int setValueAsString(const std::string value);
 
 	/**
 	 * Set the value of the item to the provided
@@ -90,6 +90,12 @@ public:
 	 * Mark the status item as "clean"
 	 */
 	void clearChanged();
+
+	/**
+	 * Return the status type (type of the value in this status item)
+	 * for this status item
+	 */
+	const type::Type getStatusType() const;
 
 
 	/**

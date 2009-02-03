@@ -5,7 +5,6 @@ namespace giapi {
 
 KvPair::KvPair(const char * name) {
 	_name = name;
-	_buff = NULL;
 }
 
 KvPair::~KvPair() {
@@ -16,23 +15,9 @@ int KvPair::setValueAsInt(int value) {
 	return status::OK;
 }
 
-int KvPair::setValueAsString(const char * value) {
+int KvPair::setValueAsString(const std::string value) {
 
-	//store pointer to the previous buffer
-	char *oldBuff = _buff;
-
-	//maybe this can be optimized by pre-allocating a buffer, and only
-	//making it bigger when needed?
-	_buff = new char[strlen(value) + 1];
-	strcpy(_buff, value);
-
-	_value = (const char *)_buff;
-
-	//now removes the old buffer, now that the value has been changed
-	if (oldBuff != NULL) {
-		delete[] oldBuff;
-	}
-
+	_value = value;
 	return status::OK;
 }
 
@@ -45,8 +30,8 @@ int KvPair::getValueAsInt() const {
 	return boost::any_cast<int>(_value);
 }
 
-const char * KvPair::getValueAsString() const {
-	return boost::any_cast<const char *>(_value);
+const std::string KvPair::getValueAsString() const {
+	return boost::any_cast<std::string>(_value);
 }
 
 double KvPair::getValueAsDouble() const {
@@ -69,7 +54,7 @@ std::ostream& operator<< (std::ostream& os, const KvPair& pair) {
 	if (typeInfo == typeid(int)) {
 		os << pair.getValueAsInt();
 	}
-	if (typeInfo == typeid(const char *)) {
+	if (typeInfo == typeid(std::string)) {
 		os << pair.getValueAsString();
 	}
 	if (typeInfo == typeid(double)) {

@@ -14,6 +14,22 @@ StatusItem::StatusItem(const char *name, const type::Type type) :
 	_time = 0;
 	_changedFlag = false;
 	_type = type;
+	//initial values for each type:
+	switch (_type) {
+	case type::BOOLEAN:
+		_value = false;
+		break;
+	case type::DOUBLE:
+	case type::FLOAT:
+		_value = 0.0;
+		break;
+	case type::INT:
+		_value = 0;
+		break;
+	case type::STRING:
+		_value = std::string(" ");
+		break;
+	}
 }
 
 StatusItem::~StatusItem() {
@@ -36,7 +52,7 @@ int StatusItem::setValueAsInt(int value) {
 	return KvPair::setValueAsInt(value);
 }
 
-int StatusItem::setValueAsString(const char* value) {
+int StatusItem::setValueAsString(const std::string value) {
 
 	//If the type is not an string, return error.
 	if (_type != type::STRING) {
@@ -44,10 +60,11 @@ int StatusItem::setValueAsString(const char* value) {
 		return status::ERROR;
 	}
 	//Figure out if this is a new value. If they are the same, return immediately
-	if (!_value.empty() && strcmp(value, getValueAsString()) == 0) {
+	if (!_value.empty() && (value == getValueAsString())) {
 		LOG4CXX_DEBUG(logger, "Values match. Won't mark as dirty. Item " << *this);
 		return status::OK;
 	}
+
 	_mark();
 	return KvPair::setValueAsString(value);
 }
@@ -95,6 +112,10 @@ void StatusItem::_mark() {
 
 void StatusItem::accept(StatusVisitor &visitor) {
 	visitor.visitStatusItem(this);
+}
+
+const type::Type StatusItem::getStatusType() const {
+	return _type;
 }
 
 }

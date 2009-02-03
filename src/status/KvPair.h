@@ -11,15 +11,11 @@ namespace giapi {
 
 class KvPair {
 private:
-	char * _buff;
 protected:
 	KvPair(const char *name);
 	boost::any _value;
 	const char * _name;
 
-public:
-	virtual ~KvPair();
-	const char* getName() const;
 	/**
 	 * Returns the type information associated to the
 	 * value stored in this pair. The type information
@@ -28,6 +24,9 @@ public:
 	 * item is void.
 	 */
 	const std::type_info & getType() const;
+public:
+	virtual ~KvPair();
+	const char* getName() const;
 
 	/**
 	 * Set the value to the given int. Previous value is replaced,
@@ -51,7 +50,7 @@ public:
 	 * @return status::OK. Subclasses can return different
 	 *         values. See their specific documentation
 	 */
-	virtual int setValueAsString(const char * value);
+	virtual int setValueAsString(const std::string value);
 
 	/**
 	 * Set the value to the given double. Previous value is replaced,
@@ -90,7 +89,7 @@ public:
 	 *
 	 * @throws bad_cast exception if the stored item is not a string
 	 */
-	const char * getValueAsString() const;
+	const std::string getValueAsString() const;
 
 
 	/**

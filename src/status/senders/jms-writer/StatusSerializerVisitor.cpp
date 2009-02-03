@@ -81,26 +81,43 @@ void StatusSerializerVisitor::visitHealthItem(HealthStatusItem * item)
 void StatusSerializerVisitor::writeHeader(int offset, StatusItem *item)
 		throw (CMSException) {
 
-	const std::type_info& typeInfo = item->getType();
+	const type::Type type = item->getStatusType();
+	std::string value;
 
-	if (typeInfo == typeid(int)) {
+	switch (type) {
+	case type::INT:
 		_msg->writeByte(offset);
 		//the name now...
 		_msg->writeUTF(item->getName());
 		//and finally the value
 		_msg->writeInt(item->getValueAsInt());
-	} else if (typeInfo == typeid(double)) {
+		break;
+	case type::DOUBLE:
+		//fall-through the float case
+	case type::FLOAT:
 		_msg->writeByte(offset + 1);
 		//the name now...
 		_msg->writeUTF(item->getName());
 		//and finally the value
 		_msg->writeDouble(item->getValueAsDouble());
-	} else if (typeInfo == typeid(const char *)) {
+		break;
+	case type::STRING:
 		_msg->writeByte(offset + 3);
 		//the name now...
 		_msg->writeUTF(item->getName());
 		//and finally the value
-		_msg->writeUTF(item->getValueAsString());
+	    value = item->getValueAsString();
+	    //writeUTF method doesn't work with an empty string.
+	    //in that case, send one whitespace instead
+		if (value == "") {
+			value = " ";
+		}
+		_msg->writeUTF(value);
+		break;
+	case type::BOOLEAN:
+		//TODO: Add the boolean handling when
+		//supported by the GIAPI
+		break;
 	}
 
 }
