@@ -69,11 +69,21 @@ PostException::PostException(const std::string & message) throw() :
 	CommunicationException(message){
 }
 
-InvalidOperation::InvalidOperation() {
+InvalidOperation::InvalidOperation() throw() : GiapiException() {
 }
 
-InvalidOperation::InvalidOperation(const std::string & message) {
-	GiapiException::setMessage(message);
+InvalidOperation::InvalidOperation(const std::string & message) throw() :
+	GiapiException(message) {
 }
+
+TimeoutException::TimeoutException() throw() : GiapiException() {
+}
+
+TimeoutException::TimeoutException(const std::string & message) throw() :
+	GiapiException(message) {
+
+}
+
+
 
 }

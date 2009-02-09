@@ -64,8 +64,8 @@ void RequestProducer::cleanup() {
 	}
 }
 
-std::string RequestProducer::getProperty(std::string key, long timeout)
-		throw (CommunicationException) {
+std::string RequestProducer::getProperty(const std::string &key, long timeout)
+		throw (CommunicationException, TimeoutException) {
 
 	//prepare a message to the GMP, requesting the property
 
@@ -92,18 +92,20 @@ std::string RequestProducer::getProperty(std::string key, long timeout)
 			(timeout > 0) ? tmpConsumer->receive(timeout) :
 				tmpConsumer->receive();
 
-		if (reply != NULL) {
-			TextMessage *mm = (TextMessage *)reply;
-			answer = mm->getText();
-		} else {
-			answer = "";
-		}
 		tmpConsumer->close();
 		delete tmpConsumer;
 
 		tmpQueue->destroy();
 		delete tmpQueue;
 
+		if (reply != NULL) {
+			TextMessage *mm = (TextMessage *)reply;
+			answer = mm->getText();
+		} else { //timeout. Delete original request, and throw an exception
+			if (request != NULL)
+				delete request;
+			throw TimeoutException("Time out while waiting for property " + key);
+		}
 	} catch (CMSException &e) {
 		LOG4CXX_WARN(logger, "Problem sending utility request: " + e.getMessage());
 		if (request != NULL)

@@ -39,7 +39,8 @@ public:
 	static pRequestProducer create() throw (CommunicationException);
 
 
-	std::string getProperty(std::string key, long timeout = 0) throw (CommunicationException);
+	std::string getProperty(const std::string &key, long timeout = 0)
+		throw (CommunicationException, TimeoutException);
 
 private:
 

@@ -20,7 +20,7 @@ ServicesUtilImpl& ServicesUtilImpl::Instance() throw (CommunicationException) {
 	return *INSTANCE;
 }
 
-void ServicesUtilImpl::systemLog(log::Level level, const std::string msg) {
+void ServicesUtilImpl::systemLog(log::Level level, const std::string &msg) {
 	switch (level) {
 	case log::INFO:LOG4CXX_INFO(logger, msg)
 		break;
@@ -47,10 +47,11 @@ long64 ServicesUtilImpl::getObservatoryTime() {
 	return time;
 }
 
-const std::string ServicesUtilImpl::getProperty(const std::string key) throw (CommunicationException) {
+const std::string ServicesUtilImpl::getProperty(const std::string &key, long timeout)
+	throw (CommunicationException, TimeoutException) {
 	LOG4CXX_INFO(logger, "Property requested for key: " << key);
 
-	return _producer->getProperty(key);
+	return _producer->getProperty(key, timeout);
 
 }
 

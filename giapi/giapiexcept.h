@@ -139,14 +139,34 @@ public:
 	/**
 	 * Default constructor
 	 */
-	InvalidOperation();
+	InvalidOperation() throw ();
 	/**
 	 * Constructor that will take as an argument a message used
 	 * to describe the reason why the operation is invalid
 	 */
-	InvalidOperation(const std::string& message);
+	InvalidOperation(const std::string& message) throw();
 
 };
+
+
+/**
+ * A timeout exception. Thrown when an operation exceeds the
+ * maximum expected time for it to complete.
+ */
+class TimeoutException: public GiapiException {
+public:
+	/**
+	 * Default constructor
+	 */
+	TimeoutException() throw();
+	/**
+	 * Constructor that will take as an argument a message used
+	 * to describe the reason why the timeout happened
+	 */
+	TimeoutException(const std::string &message) throw();
+
+};
+
 
 }
 

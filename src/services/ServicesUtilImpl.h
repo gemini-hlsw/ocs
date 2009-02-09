@@ -24,7 +24,7 @@ public:
 	 */
 	static ServicesUtilImpl& Instance() throw (CommunicationException) ;
 
-	void systemLog(log::Level level, const std::string msg);
+	void systemLog(log::Level level, const std::string &msg);
 
 	long64 getObservatoryTime();
 
@@ -33,7 +33,8 @@ public:
 	 * are no value associated to that key, an empty string
 	 * is returned.
 	 */
-	const std::string getProperty(const std::string key) throw (CommunicationException);
+	const std::string getProperty(const std::string &key, long timeout)
+			throw (CommunicationException, TimeoutException);
 
 	/**
 	 * Destructor

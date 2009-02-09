@@ -8,6 +8,7 @@
 namespace giapi {
 
 class ServicesUtil {
+
 public:
 	/**
 	 * Logs a message that will be merged into an instrument-wide
@@ -20,7 +21,7 @@ public:
 	 * @throws GiapiException if there is an error accessing the GMP to log
 	 *         the message.
 	 */
-	static void systemLog(log::Level level, const std::string msg) throw (GiapiException);
+	static void systemLog(log::Level level, const std::string &msg) throw (GiapiException);
 
 	/**
 	 * Returns the current observatory time in milliseconds. The granularity
@@ -40,13 +41,17 @@ public:
 	 *
 	 * @param key the name of the GIAPI property
 	 *
-	 * @return the string value of the GIAPI property, or the default value
+	 * @timeout time in milliseconds to wait for the property to be retrieved.
+	 * If not specified, the call will block until the GMP replies back.
+	 *
+	 * @return the string value of the GIAPI property, or an empty string
 	 *         if there is no property with that key.
 	 *
 	 * @throws GiapiException if there is an error accessing the GMP to get the
 	 *         property
 	 */
-	static const std::string getProperty(const std::string key) throw (GiapiException);
+	static const std::string getProperty(const std::string &key,
+			                             long timeout = 0) throw (GiapiException);
 
 private:
 	ServicesUtil();
