@@ -89,7 +89,7 @@ public:
 	 * be invoked when this consumer receives the selected SequenceCommand and
 	 * Activity.
 	 */
-	static pSequenceCommandConsumer create(const char * prefix,
+	static pSequenceCommandConsumer create(const std::string & prefix,
 			command::ActivitySet activities,
 			pSequenceCommandHandler handler) throw (CommunicationException);
 
@@ -139,7 +139,7 @@ private:
 	 * be invoked when this consumer receives the selected SequenceCommand and
 	 * Activity.
 	 */
-	SequenceCommandConsumer(const char * prefix,
+	SequenceCommandConsumer(const std::string & prefix,
 			command::ActivitySet activities,
 			pSequenceCommandHandler handler) throw (CommunicationException);
 
@@ -150,7 +150,7 @@ private:
 	 *
 	 * This method is used by the constructor of this class.
 	 */
-	void init(const string & topic, command::ActivitySet activities,
+	void init(const std::string & topic, command::ActivitySet activities,
 			pSequenceCommandHandler handler) throw (CommunicationException);
 
 	/**

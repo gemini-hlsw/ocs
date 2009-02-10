@@ -22,7 +22,7 @@ public:
 	int subscribeSequenceCommand(command::SequenceCommand id,
 			command::ActivitySet activities, pSequenceCommandHandler handler);
 
-	int subscribeApply(const char* prefix, command::ActivitySet activities,
+	int subscribeApply(const std::string &prefix, command::ActivitySet activities,
 			pSequenceCommandHandler handler);
 
 	int postCompletionInfo(command::ActionId id, pHandlerResponse response);

@@ -34,7 +34,7 @@ JmsCommandUtil& JmsCommandUtil::Instance() throw (CommunicationException){
 	return *INSTANCE;
 }
 
-int JmsCommandUtil::subscribeApply(const char * prefix,
+int JmsCommandUtil::subscribeApply(const std::string & prefix,
 		command::ActivitySet activities,
 		pSequenceCommandHandler handler) throw (CommunicationException) {
 

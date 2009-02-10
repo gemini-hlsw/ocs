@@ -1,6 +1,7 @@
 #ifndef EPICSSTATUSITEM_H_
 #define EPICSSTATUSITEM_H_
 #include <tr1/memory>
+#include <string>
 
 #include <giapi/giapi.h>
 

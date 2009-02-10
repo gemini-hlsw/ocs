@@ -32,7 +32,7 @@ public:
 	 *         the given Observation Event
 	 */
 	static int postObservationEvent(data::ObservationEvent event,
-			const char * datalabel) throw (GiapiException);
+			const std::string & datalabel) throw (GiapiException);
 
 	/**
 	 * Send an ancillary file event associated to the given datalabel
@@ -48,8 +48,8 @@ public:
 	 * @throws GiapiException if there is an error accessing the GMP to post
 	 *         the given Ancillary File Event
 	 */
-	static int postAncillaryFileEvent(const char * filename,
-			const char * datalabel) throw (GiapiException);
+	static int postAncillaryFileEvent(const std::string & filename,
+			const std::string & datalabel) throw (GiapiException);
 	/**
 	 * Send an intermediate file event associated to the given datalabel
 	 * to the GMP and with the given hint.
@@ -66,9 +66,9 @@ public:
 	 * @throws GiapiException if there is an error accessing the GMP to
 	 *         post the given Intermediate File Event
 	 */
-	static int postIntermediateFileEvent(const char * filename,
-			const char * datalabel,
-			const char * hint) throw (GiapiException);
+	static int postIntermediateFileEvent(const std::string & filename,
+			const std::string & datalabel,
+			const std::string & hint) throw (GiapiException);
 
 private:
 	DataUtil();

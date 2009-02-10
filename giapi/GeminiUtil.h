@@ -1,5 +1,6 @@
 #ifndef GEMINIINTERACTIONUTIL_H_
 #define GEMINIINTERACTIONUTIL_H_
+#include <string>
 
 #include <giapi/EpicsStatusHandler.h>
 #include <giapi/giapi.h>

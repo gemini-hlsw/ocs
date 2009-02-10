@@ -17,7 +17,7 @@ DataUtilImpl& DataUtilImpl::Instance() {
 }
 
 int DataUtilImpl::postObservationEvent(data::ObservationEvent event,
-		const char * datalabel) {
+		const std::string & datalabel) {
 
 	char *eventName = "UNKNOWN";
 
@@ -48,15 +48,15 @@ int DataUtilImpl::postObservationEvent(data::ObservationEvent event,
 	return status::OK;
 }
 
-int DataUtilImpl::postAncillaryFileEvent(const char * filename,
-		const char * datalabel) {
+int DataUtilImpl::postAncillaryFileEvent(const std::string & filename,
+		const std::string & datalabel) {
 	LOG4CXX_INFO(logger, "postAncilliaryFileEvent: Filename " << filename
 			<< " datalabel " << datalabel);
 	return status::OK;
 }
 
-int DataUtilImpl::postIntermediateFileEvent(const char * filename,
-		const char * datalabel, const char * hint) {
+int DataUtilImpl::postIntermediateFileEvent(const std::string & filename,
+		const std::string & datalabel, const std::string & hint) {
 	LOG4CXX_INFO(logger, "postIntermediateFileEvent: Filename " << filename
 			<< " datalabel " << datalabel << " hint " << hint);
 	return status::OK;

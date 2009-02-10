@@ -21,7 +21,7 @@ int CommandUtil::subscribeSequenceCommand(command::SequenceCommand id,
 
 }
 
-int CommandUtil::subscribeApply(const char* prefix,
+int CommandUtil::subscribeApply(const std::string & prefix,
 		command::ActivitySet activities,
 		pSequenceCommandHandler handler) throw (GiapiException){
 	//Uninitialized sequence command handler

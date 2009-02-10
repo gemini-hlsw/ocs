@@ -16,12 +16,12 @@ public:
 	static DataUtilImpl& Instance();
 
 	int postObservationEvent(data::ObservationEvent event,
-			const char * datalabel);
+			const std::string & datalabel);
 
-	int postAncillaryFileEvent(const char * filename, const char * datalabel);
+	int postAncillaryFileEvent(const std::string & filename, const std::string & datalabel);
 
-	int postIntermediateFileEvent(const char * filename,
-					const char * datalabel, const char * hint);
+	int postIntermediateFileEvent(const std::string & filename,
+					const std::string & datalabel, const std::string & hint);
 
 	virtual ~DataUtilImpl();
 

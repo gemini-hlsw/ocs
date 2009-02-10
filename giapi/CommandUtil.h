@@ -1,6 +1,8 @@
 #ifndef COMMANDUTIL_H_
 #define COMMANDUTIL_H_
 
+#include <string>
+
 #include <giapi/giapi.h>
 #include <giapi/giapiexcept.h>
 #include <giapi/SequenceCommandHandler.h>
@@ -75,7 +77,7 @@ public:
 	 *
 	 * @see command::Activity
 	 */
-	static int subscribeApply(const char* prefix,
+	static int subscribeApply(const std::string & prefix,
 			command::ActivitySet activities,
 			pSequenceCommandHandler handler) throw (GiapiException);
 

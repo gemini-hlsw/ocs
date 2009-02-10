@@ -27,7 +27,7 @@ int LogCommandUtil::subscribeSequenceCommand(command::SequenceCommand id,
 	return giapi::status::OK;
 }
 
-int LogCommandUtil::subscribeApply(const char* prefix,
+int LogCommandUtil::subscribeApply(const std::string & prefix,
 		command::ActivitySet activities, pSequenceCommandHandler handler) {
 	LOG4CXX_INFO(logger, "Registering handler to apply prefix " << prefix);
 	return giapi::status::OK;

@@ -26,7 +26,7 @@ SequenceCommandConsumer::SequenceCommandConsumer(command::SequenceCommand id,
 
 }
 
-SequenceCommandConsumer::SequenceCommandConsumer(const char * prefix,
+SequenceCommandConsumer::SequenceCommandConsumer(const std::string & prefix,
 		command::ActivitySet activities,
 		pSequenceCommandHandler handler) throw (CommunicationException) {
     _sequenceCommand = giapi::command::APPLY;
@@ -35,7 +35,7 @@ SequenceCommandConsumer::SequenceCommandConsumer(const char * prefix,
 }
 
 void SequenceCommandConsumer::init(
-		const string & topic,
+		const std::string & topic,
 		command::ActivitySet activities,
 		pSequenceCommandHandler handler) throw (CommunicationException) {
 
@@ -84,7 +84,7 @@ pSequenceCommandConsumer SequenceCommandConsumer::create(
 
 
 pSequenceCommandConsumer SequenceCommandConsumer::create(
-		const char * prefix, command::ActivitySet activities,
+		const std::string &prefix, command::ActivitySet activities,
 		pSequenceCommandHandler handler) throw (CommunicationException) {
 
 	pSequenceCommandConsumer consumer(new SequenceCommandConsumer(prefix,

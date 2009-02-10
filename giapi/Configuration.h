@@ -3,51 +3,52 @@
 #include <tr1/memory>
 
 #include <vector>
+#include <string>
 
 using namespace std;
 
 namespace giapi {
 
 /**
- * Configuration interface. 
+ * Configuration interface.
  * <p/>
- * A configuration is made up of parameters. Each parameter has a key and a 
- * value. The OCS commands an instrument by demanding that the instrument 
+ * A configuration is made up of parameters. Each parameter has a key and a
+ * value. The OCS commands an instrument by demanding that the instrument
  * match a specified configuration.
  * <p/>
  * This interface provides mechanisms to:
- * a) get the value associated to a given parameter (identified by key) 
- * b) get all the keys present in the configuration. 
+ * a) get the value associated to a given parameter (identified by key)
+ * b) get all the keys present in the configuration.
  */
 class Configuration {
 
 public:
 	/**
 	 * Return the value associated to the given key. The key is the name
-	 * of the parameter associated to the value, like inst:filterA. 
-	 * 
+	 * of the parameter associated to the value, like inst:filterA.
+	 *
 	 * @param key the name of the parameter whose value we need to retrieve
-	 * 
-	 * @return the value associated to the given key or <code>NULL</code> 
-	 *         if there is no value associated for the key in the current 
-	 *         configuration. 
+	 *
+	 * @return the value associated to the given key or <code>NULL</code>
+	 *         if there is no value associated for the key in the current
+	 *         configuration.
 	 */
-	virtual const char * getValue(const char * key) = 0;
+	virtual const std::string  getValue(const std::string & key) = 0;
 
 	/**
-	 * Return the keys contained in the configuration. If the configuration 
+	 * Return the keys contained in the configuration. If the configuration
 	 * does not contain any key, an empty vector is returned.
-	 * 
-	 * @return a vector of strings representing the keys 
+	 *
+	 * @return a vector of strings representing the keys
 	 *         contained in the configuration. An empty list is returned
-	 *         if no keys are present. 
+	 *         if no keys are present.
 	 */
-	virtual vector<const char *> getKeys() const = 0;
+	virtual vector<std::string> getKeys() const = 0;
 
 	/**
-	 * Return the number of parameters contained in this configuration. 
-	 * 
-	 * @return number of parameters contained in this configuration. 
+	 * Return the number of parameters contained in this configuration.
+	 *
+	 * @return number of parameters contained in this configuration.
 	 */
 	virtual int getSize() const = 0;
 
@@ -56,17 +57,17 @@ public:
 	 * @param key The target key
 	 * @param value The value to be set
 	 */
-	virtual void setValue(const char * key, const char * value) = 0;
+	virtual void setValue(const std::string & key, const std::string & value) = 0;
 
 	/**
-	 * Destructor. 
+	 * Destructor.
 	 */
 	virtual ~Configuration();
 protected:
 	/**
 	 * Protected constructor. Configurations are built internally by the
 	 * GIAPI and passed to a <code>SequenceCommandHandler</code> for its use
-	 * in the form of smart pointers. 
+	 * in the form of smart pointers.
 	 */
 	Configuration();
 public:
@@ -95,9 +96,9 @@ public:
 };
 
 /**
- * A smart pointer to Configurations. GIAPI return configurations in the 
+ * A smart pointer to Configurations. GIAPI return configurations in the
  * form of smart pointers to configurations, to help keep track of object
- * creation/destruction. 
+ * creation/destruction.
  */
 typedef std::tr1::shared_ptr<Configuration> pConfiguration;
 }

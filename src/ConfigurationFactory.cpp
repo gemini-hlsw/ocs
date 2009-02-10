@@ -10,8 +10,8 @@ ConfigurationImpl::~ConfigurationImpl() {
 
 }
 
-vector<const char *> ConfigurationImpl::getKeys() const {
-	std::vector<const char *> keys(_configMap.size());
+vector<std::string> ConfigurationImpl::getKeys() const {
+	std::vector<std::string> keys(_configMap.size());
 
 	StringStringMap::const_iterator iter;
 	iter = _configMap.begin();
@@ -25,11 +25,11 @@ int ConfigurationImpl::getSize() const {
 	return _configMap.size();
 }
 
-const char * ConfigurationImpl::getValue(const char * key) {
+const std::string ConfigurationImpl::getValue(const std::string &key) {
 	return _configMap[key];
 }
 
-void ConfigurationImpl::setValue(const char * key, const char * value) {
+void ConfigurationImpl::setValue(const std::string &key, const std::string &value) {
 	_configMap[key] = value;
 }
 
@@ -42,9 +42,9 @@ ConfigurationFactory::~ConfigurationFactory() {
 }
 
 pConfiguration ConfigurationFactory::getConfiguration() {
-	
+
 	pConfiguration config(new ConfigurationImpl());
-	
+
 	return config;
 }
 
