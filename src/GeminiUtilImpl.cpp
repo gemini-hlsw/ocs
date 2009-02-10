@@ -16,27 +16,27 @@ GeminiUtilImpl& GeminiUtilImpl::Instance() {
 	return *INSTANCE;
 }
 
-int GeminiUtilImpl::subscribeEpicsStatus(const char *name,
+int GeminiUtilImpl::subscribeEpicsStatus(const std::string &name,
 		pEpicsStatusHandler handler) {
 	LOG4CXX_INFO(logger, "Subscribe epics status " << name);
 	return status::OK;
 
 }
 
-int GeminiUtilImpl::unsubscribeEpicsStatus(const char *name) {
+int GeminiUtilImpl::unsubscribeEpicsStatus(const std::string &name) {
 	LOG4CXX_INFO(logger, "Unsubscribe epics status " << name);
 	return status::OK;
 }
 
 int GeminiUtilImpl::postPcsUpdate(double zernikes[], int size) {
-	
+
 	std::string str;
 	for (int i = 0; i < size; i++) {
 		char z[25];
 		sprintf(z, "%.2f ", zernikes[i]);
 		str.append(z);
 	}
-	
+
 	LOG4CXX_INFO(logger, "postPCSUpdate: " << str);
 	return status::OK;
 

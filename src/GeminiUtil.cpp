@@ -13,12 +13,12 @@ GeminiUtil::~GeminiUtil()
 }
 
 
-int GeminiUtil::subscribeEpicsStatus(const char *name,
+int GeminiUtil::subscribeEpicsStatus(const std::string &name,
 		pEpicsStatusHandler handler) throw (GiapiException){
 	return GeminiUtilImpl::Instance().subscribeEpicsStatus(name, handler);
 }
 
-int GeminiUtil::unsubscribeEpicsStatus(const char *name) throw (GiapiException){
+int GeminiUtil::unsubscribeEpicsStatus(const std::string &name) throw (GiapiException){
 	return GeminiUtilImpl::Instance().unsubscribeEpicsStatus(name);
 }
 

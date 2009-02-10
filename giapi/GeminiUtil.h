@@ -32,7 +32,7 @@ public:
 	 * @throws GiapiException if there is an error accessing the GMP to
 	 *         subscribe this handler to monitor the given EPICS channel item
 	 */
-	static int subscribeEpicsStatus(const char *name,
+	static int subscribeEpicsStatus(const std::string &name,
 			pEpicsStatusHandler handler) throw (GiapiException);
 
 	/**
@@ -48,7 +48,7 @@ public:
 	 * @throws GiapiException if there is an error accessing the GMP to
 	 *         unregister to receive updates for the given epics status item.
 	 */
-	static int unsubscribeEpicsStatus(const char *name) throw (GiapiException);
+	static int unsubscribeEpicsStatus(const std::string &name) throw (GiapiException);
 
 	/**
 	 * Offload wavefront corrections to the Primary Control System (PCS).
