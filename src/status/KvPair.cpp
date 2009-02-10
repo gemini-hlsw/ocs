@@ -3,7 +3,7 @@
 
 namespace giapi {
 
-KvPair::KvPair(const char * name) {
+KvPair::KvPair(const std::string & name) {
 	_name = name;
 }
 
@@ -15,7 +15,7 @@ int KvPair::setValueAsInt(int value) {
 	return status::OK;
 }
 
-int KvPair::setValueAsString(const std::string value) {
+int KvPair::setValueAsString(const std::string &value) {
 
 	_value = value;
 	return status::OK;
@@ -38,7 +38,7 @@ double KvPair::getValueAsDouble() const {
 	return boost::any_cast<double>(_value);
 }
 
-const char * KvPair::getName() const {
+const std::string & KvPair::getName() const {
 	return _name;
 }
 

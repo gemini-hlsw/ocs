@@ -47,7 +47,7 @@ public:
 	 * status item will be sent only if it has been modified
 	 * since the last time it was posted.
 	 */
-	virtual int postStatus(const char* name) const throw (PostException);
+	virtual int postStatus(const std::string &name) const throw (PostException);
 
 protected:
 	/**

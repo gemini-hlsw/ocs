@@ -37,7 +37,7 @@ public:
 	 * given (unique) <code>name</name>. The status item will store
 	 * a value of the given <code>type</code>
 	 */
-	StatusItem(const char *name, const type::Type type);
+	StatusItem(const std::string &name, const type::Type type);
 
 	virtual ~StatusItem();
 
@@ -65,7 +65,7 @@ public:
 	 *         value and the operation was aborted. This can happen if the
 	 *         type of the status item was not defined as type::STRING
 	 */
-	virtual int setValueAsString(const std::string value);
+	virtual int setValueAsString(const std::string &value);
 
 	/**
 	 * Set the value of the item to the provided

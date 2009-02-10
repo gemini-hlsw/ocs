@@ -19,7 +19,7 @@ AbstractStatusSender::AbstractStatusSender() {
 AbstractStatusSender::~AbstractStatusSender() {
 }
 
-int AbstractStatusSender::postStatus(const char* name) const
+int AbstractStatusSender::postStatus(const std::string &name) const
 		throw (PostException) {
 
 	StatusItem * statusItem = StatusDatabase::Instance().getStatusItem(name);

@@ -20,7 +20,7 @@ namespace giapi
 class HealthStatusItem : public giapi::StatusItem
 {
 public:
-	HealthStatusItem(const char* name);
+	HealthStatusItem(const std::string & name);
 	virtual ~HealthStatusItem();
 
 	/**

@@ -41,7 +41,7 @@ public:
 	 * @throws PostException in case there is a problem with the underlying
 	 *         mechanisms to execute the post.
 	 */
-	virtual int postStatus(const char* name) const throw (PostException) = 0;
+	virtual int postStatus(const std::string & name) const throw (PostException) = 0;
 
 	virtual ~StatusSender();
 

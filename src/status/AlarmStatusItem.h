@@ -13,7 +13,7 @@ namespace giapi {
  */
 class AlarmStatusItem : public StatusItem {
 private:
-	char * _message; //description of the cause of the alarm
+	std::string _message; //description of the cause of the alarm
 	alarm::Severity _severity; //alarm severity
 	alarm::Cause _cause; //alarm cause
 	bool _initialized; //initialized
@@ -24,7 +24,7 @@ public:
 	 * given (unique) <code>name</name>. The status item will store
 	 * a value of the given <code>type</code>
 	 */
-	AlarmStatusItem(const char *name, const type::Type type);
+	AlarmStatusItem(const std::string &name, const type::Type type);
 	virtual ~AlarmStatusItem();
 
 	/**
@@ -55,7 +55,7 @@ public:
 	 *
 	 */
 	int setAlarmState(alarm::Severity severity, alarm::Cause cause,
-			const char * message = 0);
+			const std::string & message = std::string());
 
 	/**
 	 * Reset the alarm information. The status item is in a
@@ -71,7 +71,7 @@ public:
 	 * @return the message associated to the alarm item
 	 * or NULL if there is no one.
 	 */
-	const char * getMessage() const;
+	const std::string & getMessage() const;
 
 	/**
 	 * Return the severity of the alarm

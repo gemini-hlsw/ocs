@@ -22,16 +22,16 @@ StatusDatabase& StatusDatabase::Instance() {
 	return *INSTANCE;
 }
 
-int StatusDatabase::createStatusItem(const char* name, const type::Type type) {
+int StatusDatabase::createStatusItem(const std::string & name, const type::Type type) {
 
 	if (getStatusItem(name) != 0) {
-		//status item already present. 
+		//status item already present.
 		LOG4CXX_DEBUG(logger, "StatusDatabase::createStatusItem. A status item "
 				" with the name " << name << " already created. No action");
 		return status::ERROR;
 	}
 	LOG4CXX_DEBUG(logger, "Creating a Status Item for " << name);
-	//make a new status item and store it in the map. 
+	//make a new status item and store it in the map.
 	StatusItem *item = new StatusItem(name, type);
 	_map[name] = item;
 	_statusItemList.push_back(item);
@@ -39,41 +39,41 @@ int StatusDatabase::createStatusItem(const char* name, const type::Type type) {
 
 }
 
-int StatusDatabase::createAlarmStatusItem(const char* name,
+int StatusDatabase::createAlarmStatusItem(const std::string &name,
 		const type::Type type) {
 
 	if (getStatusItem(name) != 0) {
-		//status item already present. 
+		//status item already present.
 		LOG4CXX_DEBUG(logger, "StatusDatabase::createAlarmStatusItem. A status item "
 				" with the name " << name << " already created. No action");
 		return status::ERROR;
 	}
 	LOG4CXX_DEBUG(logger, "Creating an Alarm Status Item for " << name);
-	//make a new status item and store it in the map. 
+	//make a new status item and store it in the map.
 	StatusItem *item = new AlarmStatusItem(name, type);
 	_map[name] = item;
 	_statusItemList.push_back(item);
 	return status::OK;
 }
 
-int StatusDatabase::createHealthStatusItem(const char* name) {
+int StatusDatabase::createHealthStatusItem(const std::string & name) {
 
 	if (getStatusItem(name) != 0) {
-		//status item already present. 
+		//status item already present.
 		LOG4CXX_DEBUG(logger, "StatusDatabase::createHealthStatusItem. A status item "
 				" with the name " << name << " already created. No action");
 		return status::ERROR;
 	}
 
 	LOG4CXX_DEBUG(logger, "Creating a Health Status Item for " << name);
-	//make a new status item and store it in the map. 
+	//make a new status item and store it in the map.
 	StatusItem *item = new HealthStatusItem(name);
 	_map[name] = item;
 	_statusItemList.push_back(item);
 	return status::OK;
 }
 
-int StatusDatabase::setHealth(const char *name, const health::Health health) {
+int StatusDatabase::setHealth(const std::string &name, const health::Health health) {
 	StatusItem * statusItem = getStatusItem(name);
 	if (statusItem == 0) {
 		return status::ERROR;
@@ -91,7 +91,7 @@ int StatusDatabase::setHealth(const char *name, const health::Health health) {
 	return healthStatusItem->setHealth(health);
 }
 
-int StatusDatabase::setStatusValueAsInt(const char* name, int value) {
+int StatusDatabase::setStatusValueAsInt(const std::string & name, int value) {
 	StatusItem* statusItem = getStatusItem(name);
 	if (statusItem == 0) {
 		return status::ERROR;
@@ -99,7 +99,7 @@ int StatusDatabase::setStatusValueAsInt(const char* name, int value) {
 	return statusItem->setValueAsInt(value);
 }
 
-int StatusDatabase::setStatusValueAsString(const char* name, const char * value) {
+int StatusDatabase::setStatusValueAsString(const std::string & name, const std::string & value) {
 	StatusItem* statusItem = getStatusItem(name);
 	if (statusItem == 0) {
 		return status::ERROR;
@@ -107,7 +107,7 @@ int StatusDatabase::setStatusValueAsString(const char* name, const char * value)
 	return statusItem->setValueAsString(value);
 }
 
-int StatusDatabase::setStatusValueAsDouble(const char* name, double value) {
+int StatusDatabase::setStatusValueAsDouble(const std::string & name, double value) {
 	StatusItem* statusItem = getStatusItem(name);
 	if (statusItem == 0) {
 		return status::ERROR;
@@ -116,15 +116,15 @@ int StatusDatabase::setStatusValueAsDouble(const char* name, double value) {
 }
 
 
-StatusItem * StatusDatabase::getStatusItem(const char* name) {
-	if (name == 0) {
+StatusItem * StatusDatabase::getStatusItem(const std::string & name) {
+	if (name.empty()) {
 		return (StatusItem *)0; //NULL
 	}
 	return _map[name];
 }
 
-int StatusDatabase::setAlarm(const char *name, const alarm::Severity severity,
-		const alarm::Cause cause, const char* message) {
+int StatusDatabase::setAlarm(const std::string &name, const alarm::Severity severity,
+		const alarm::Cause cause, const std::string & message) {
 
 	StatusItem * statusItem = getStatusItem(name);
 	if (statusItem == 0) {
@@ -143,7 +143,7 @@ int StatusDatabase::setAlarm(const char *name, const alarm::Severity severity,
 	return alarmStatusItem->setAlarmState(severity, cause, message);
 }
 
-int StatusDatabase::clearAlarm(const char *name) {
+int StatusDatabase::clearAlarm(const std::string &name) {
 	StatusItem * statusItem = getStatusItem(name);
 	if (statusItem == 0) {
 		return status::ERROR;

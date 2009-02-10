@@ -1,5 +1,7 @@
 #ifndef STATUSUTIL_H_
 #define STATUSUTIL_H_
+#include <string>
+
 #include <giapi/giapi.h>
 #include <giapi/giapiexcept.h>
 //$Id$
@@ -25,7 +27,7 @@ public:
 	 * @return giapi::status::OK if the item was sucessfully created,
 	 *         giapi::status::ERROR if there is an error.
 	 */
-	static int createStatusItem(const char * name, const type::Type type);
+	static int createStatusItem(const std::string & name, const type::Type type);
 
 	/**
 	 * Create an alarm status item in the GIAPI framework. An alarm
@@ -40,7 +42,7 @@ public:
 	 * @return giapi::status::OK if the item was successfully created,
 	 *         giapi::status::ERROR if there is an error.
 	 */
-	static int createAlarmStatusItem(const char *name, const type::Type type);
+	static int createAlarmStatusItem(const std::string &name, const type::Type type);
 
 	/**
 	 * Create a health status item in the GIAPI framework. A health status
@@ -56,7 +58,7 @@ public:
 	 * @return giapi::status::OK if the item was successfully created,
 	 *         giapi::status::ERROR if there is an error.
 	 */
-	static int createHealthStatusItem(const char *name);
+	static int createHealthStatusItem(const std::string &name);
 
 	/**
 	 * Post all pending status to Gemini. Pending statuses are those
@@ -85,7 +87,7 @@ public:
 	 * @throws GiapiException in case there is a problem with the underlying
 	 *         mechanisms to execute the post.
 	 */
-	static int postStatus(const char* name) throw (GiapiException);
+	static int postStatus(const std::string &name) throw (GiapiException);
 
 	/**
 	 * Set the value of the given status item to the provided
@@ -101,7 +103,7 @@ public:
 	 *         if there is no StatusItem associated to the <code>name</code> or
 	 *         if <code>name</code> is set to NULL
 	 */
-	static int setValueAsInt(const char *name, int value);
+	static int setValueAsInt(const std::string &name, int value);
 
 	/**
 	 * Set the value of the given status item to the provided
@@ -119,7 +121,7 @@ public:
 	 *         if <code>name</code> is set to NULL
 	 *
 	 */
-	static int setValueAsString(const char *name, const char *value);
+	static int setValueAsString(const std::string &name, const std::string &value);
 
 	/**
 	 * Set the value of the given status item to the provided
@@ -135,7 +137,7 @@ public:
 	 *         if there is no StatusItem associated to the <code>name</code> or
 	 *         if <code>name</code> is set to NULL
 	 */
-	static int setValueAsDouble(const char *name, double value);
+	static int setValueAsDouble(const std::string &name, double value);
 
 	/**
 	 * Set the alarm for the specified status alarm item.
@@ -159,8 +161,8 @@ public:
 	 * @see giapi::alarm::Severity
 	 * @see giapi::alarm::Cause
 	 */
-	static int setAlarm(const char *name, alarm::Severity severity,
-			alarm::Cause cause, const char *message = 0);
+	static int setAlarm(const std::string &name, alarm::Severity severity,
+			alarm::Cause cause, const std::string & message = std::string());
 
 	/**
 	 * Clear the alarm state of the alarm status item specified
@@ -174,7 +176,7 @@ public:
 	 *         (for instance, the alarm has not been created, or the name is
 	 *         not associated to an alarm status item)
 	 */
-	static int clearAlarm(const char *name);
+	static int clearAlarm(const std::string &name);
 
 	/**
 	 * Set the health value for the given health status item
@@ -194,7 +196,7 @@ public:
 	 * @see giapi::health::Health
 	 *
 	 */
-	static int setHealth(const char *name, const health::Health health);
+	static int setHealth(const std::string &name, const health::Health health);
 
 
 

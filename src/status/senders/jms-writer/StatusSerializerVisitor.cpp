@@ -64,7 +64,7 @@ void StatusSerializerVisitor::visitAlarmItem(AlarmStatusItem * alarm)
 	}
 
 	//check if there is any message for this alarm
-	if (alarm->getMessage() != NULL) {
+	if (!(alarm->getMessage().empty())) {
 		_msg->writeBoolean(true); //there is a message
 		_msg->writeUTF(alarm->getMessage());
 	} else {

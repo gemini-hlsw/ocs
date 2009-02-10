@@ -9,7 +9,7 @@ namespace giapi {
 
 log4cxx::LoggerPtr StatusItem::logger(log4cxx::Logger::getLogger("giapi.StatusItem"));
 
-StatusItem::StatusItem(const char *name, const type::Type type) :
+StatusItem::StatusItem(const std::string &name, const type::Type type) :
 	KvPair(name) {
 	_time = 0;
 	_changedFlag = false;
@@ -52,7 +52,7 @@ int StatusItem::setValueAsInt(int value) {
 	return KvPair::setValueAsInt(value);
 }
 
-int StatusItem::setValueAsString(const std::string value) {
+int StatusItem::setValueAsString(const std::string &value) {
 
 	//If the type is not an string, return error.
 	if (_type != type::STRING) {

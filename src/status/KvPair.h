@@ -12,9 +12,9 @@ namespace giapi {
 class KvPair {
 private:
 protected:
-	KvPair(const char *name);
+	KvPair(const std::string &name);
 	boost::any _value;
-	const char * _name;
+	std::string _name;
 
 	/**
 	 * Returns the type information associated to the
@@ -26,7 +26,7 @@ protected:
 	const std::type_info & getType() const;
 public:
 	virtual ~KvPair();
-	const char* getName() const;
+	const std::string & getName() const;
 
 	/**
 	 * Set the value to the given int. Previous value is replaced,
@@ -50,7 +50,7 @@ public:
 	 * @return status::OK. Subclasses can return different
 	 *         values. See their specific documentation
 	 */
-	virtual int setValueAsString(const std::string value);
+	virtual int setValueAsString(const std::string &value);
 
 	/**
 	 * Set the value to the given double. Previous value is replaced,

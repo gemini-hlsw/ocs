@@ -3,7 +3,7 @@
 namespace giapi
 {
 
-HealthStatusItem::HealthStatusItem(const char* name)
+HealthStatusItem::HealthStatusItem(const std::string &name)
 : StatusItem(name, type::INT)
 {
 
