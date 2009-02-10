@@ -2,8 +2,8 @@
 #define GIAPIMAPS_H_
 
 /**
- * Contains a collection of definitions that allow the use of the GIAPI 
- * datastructures/types in hash maps. 
+ * Contains a collection of definitions that allow the use of the GIAPI
+ * datastructures/types in hash maps.
  */
 
 #include <ext/hash_map>
@@ -12,8 +12,8 @@
 
 using namespace giapi;
 
-//hash_map is an extension of STL widely available on gnu compilers, fortunately 
-//Will make its namespace visible here. 
+//hash_map is an extension of STL widely available on gnu compilers, fortunately
+//Will make its namespace visible here.
 using namespace __gnu_cxx;
 
 namespace __gnu_cxx {
@@ -54,33 +54,23 @@ struct eqstr {
 	}
 };
 
-/**
- * A comparator for char * to be used in the definition of  
- * hash_tables
- */
-struct eqcharptr {
-	bool operator()(const char *s1, const char *s2) const {
-		return strcmp(s1, s2) == 0;
-	}
-};
-
 }
 
 /**
- * Type definition for the hash_table that will map strings to 
+ * Type definition for the hash_table that will map strings to
  * Action Ids.
  */
 typedef hash_map<const std::string, command::ActionId, hash<std::string>, util::eqstr>
 		StringActionIdMap;
 
 /**
- * Type definition for the hash_table that will map Responses  to 
+ * Type definition for the hash_table that will map Responses  to
  * the string that represent them
  */
 typedef hash_map<HandlerResponse::Response, std::string> ResponseStringMap;
 
 /**
- * Type definition for the hash_table that will map command Ids to 
+ * Type definition for the hash_table that will map command Ids to
  * a string
  */
 typedef hash_map<command::SequenceCommand, std::string>
