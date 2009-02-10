@@ -8,35 +8,28 @@ pHandlerResponse HandlerResponse::create(const Response response) {
 }
 
 
-pHandlerResponse HandlerResponse::createError(const char * msg) {
+pHandlerResponse HandlerResponse::createError(const std::string & msg) {
 	pHandlerResponse response(new HandlerResponse(msg));
 	return response;
 }
 
 HandlerResponse::HandlerResponse(const Response response) {
 	_response = response;
-	_message = NULL;
 }
 
 
 
-HandlerResponse::HandlerResponse(const char * msg) {
+HandlerResponse::HandlerResponse(const std::string & msg) {
 	_response = HandlerResponse::ERROR;
-	if (msg != NULL) {
-		_message = new char[strlen(msg) + 1];
-		strcpy(_message, msg);
-	}
+	_message = msg;
 }
 
 
 HandlerResponse::~HandlerResponse() {
 
-	if (_message != NULL) {
-		delete[] _message;
-	}
 }
 
-const char * HandlerResponse::getMessage() const {
+const std::string HandlerResponse::getMessage() const {
 	return _message;
 }
 

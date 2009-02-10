@@ -71,10 +71,8 @@ Message * JmsUtil::makeHandlerResponseMsg(MapMessage * msg,
 
 	//If this is an error, then put the error message in the response
 	if (response->getResponse() == HandlerResponse::ERROR) {
-		if (response->getMessage() != NULL) {
-			msg->setString(GMPKeys::GMP_HANDLER_RESPONSE_ERROR_KEY,
-					response->getMessage());
-		}
+		msg->setString(GMPKeys::GMP_HANDLER_RESPONSE_ERROR_KEY,
+				response->getMessage());
 	}
 	return msg;
 }

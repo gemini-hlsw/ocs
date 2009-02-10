@@ -1,7 +1,7 @@
 #ifndef HANDLERRESPONSE_H_
 #define HANDLERRESPONSE_H_
 #include <tr1/memory>
-
+#include <string>
 
 namespace giapi {
 
@@ -54,7 +54,7 @@ public:
 	 * The response type is set to ERROR and the message is
 	 * stored.
 	 */
-	static pHandlerResponse createError(const char * msg);
+	static pHandlerResponse createError(const std::string &msg);
 
 	/**
 	 * Return the response type.
@@ -63,10 +63,10 @@ public:
 
 	/**
 	 * Return the message associated to this handler
-	 * response. If the response type is not ERROR,
-	 * the return value is NULL.
+	 * response. An empty string is returned for responses
+	 * other than ERROR
 	 */
-	const char* getMessage() const;
+	const std::string getMessage() const;
 
 	virtual ~HandlerResponse();
 
@@ -81,11 +81,11 @@ private:
 	 * The Response type is set to ERROR and the message is
 	 * stored.
 	 */
-	HandlerResponse(const char * msg);
+	HandlerResponse(const std::string &msg);
 	/**
 	 * The error message
 	 */
-	char * _message;
+	std::string _message;
 
 	/**
 	 * The response type

@@ -39,7 +39,7 @@ void HandlerResponseTest::testConstructHandler() {
 
 	response = HandlerResponse::createError("Example Message");
 	CPPUNIT_ASSERT(response->getResponse() == HandlerResponse::ERROR);
-	CPPUNIT_ASSERT(strcmp(response->getMessage(), "Example Message") == 0);
+	CPPUNIT_ASSERT(response->getMessage() == "Example Message");
 
 	char * msg = new char[16];
 	strcpy(msg, "Another Message");
@@ -48,7 +48,7 @@ void HandlerResponseTest::testConstructHandler() {
 	delete msg;
 	//the error message shouldn't be affected
 	CPPUNIT_ASSERT(response->getResponse() == HandlerResponse::ERROR);
-	CPPUNIT_ASSERT(strcmp(response->getMessage(), "Another Message") == 0);
+	CPPUNIT_ASSERT(response->getMessage() == "Another Message");
 
 }
 
@@ -64,10 +64,10 @@ void HandlerResponseTest::testCopyConstructor() {
 
 	//and check everything is consistent
 	CPPUNIT_ASSERT(otherResponse->getResponse() == HandlerResponse::ERROR);
-	CPPUNIT_ASSERT(strcmp(otherResponse->getMessage(), "DEMO") == 0);
+	CPPUNIT_ASSERT(otherResponse->getMessage() == "DEMO");
 
 	CPPUNIT_ASSERT(response->getResponse() == HandlerResponse::ACCEPTED);
-	CPPUNIT_ASSERT(response->getMessage() == NULL);
+	CPPUNIT_ASSERT(response->getMessage().empty());
 }
 
 void HandlerResponseTest::testAssignment() {
@@ -81,10 +81,10 @@ void HandlerResponseTest::testAssignment() {
 
 	//and check everything is consistent
 	CPPUNIT_ASSERT(otherResponse->getResponse() == HandlerResponse::ERROR);
-	CPPUNIT_ASSERT(strcmp(otherResponse->getMessage(), "DEMO_2_AND_VERY_LONG_STRING") == 0);
+	CPPUNIT_ASSERT(otherResponse->getMessage() == "DEMO_2_AND_VERY_LONG_STRING");
 
 	CPPUNIT_ASSERT(response->getResponse() == HandlerResponse::ACCEPTED);
-	CPPUNIT_ASSERT(response->getMessage() == NULL);
+	CPPUNIT_ASSERT(response->getMessage().empty());
 
 }
 

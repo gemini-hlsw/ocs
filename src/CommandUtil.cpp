@@ -46,7 +46,7 @@ int CommandUtil::postCompletionInfo(command::ActionId id,
 		case HandlerResponse::COMPLETED:
 			break; //all right
 		case HandlerResponse::ERROR:
-			if (response->getMessage() != 0)
+			if (!(response->getMessage().empty()))
 				break; //all right
 		default:
 			//in all the other cases, return error
