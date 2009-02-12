@@ -9,8 +9,8 @@
 #include <giapi/HandlerResponse.h>
 #include <giapi/giapiexcept.h>
 
-#include <gmp/SequenceCommandConsumer.h>
-#include <gmp/CompletionInfoProducer.h>
+#include "SequenceCommandConsumer.h"
+#include "CompletionInfoProducer.h"
 
 #include <util/giapiMaps.h>
 

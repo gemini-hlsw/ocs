@@ -1,4 +1,4 @@
-#include "giapi/Configuration.h"
+#include <giapi/Configuration.h>
 
 namespace giapi {
 

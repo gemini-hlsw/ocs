@@ -4,12 +4,13 @@
 #include <cms/MapMessage.h>
 
 #include <giapi/Configuration.h>
-#include <ConfigurationFactory.h>
+#include <gmp/ConnectionManager.h>
+#include <gmp/JmsUtil.h>
+#include <gmp/GMPKeys.h>
 
-#include "ConnectionManager.h"
 
-#include "JmsUtil.h"
-#include "GMPKeys.h"
+#include "ConfigurationFactory.h"
+
 
 using namespace gmp;
 
