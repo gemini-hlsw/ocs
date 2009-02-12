@@ -1,5 +1,13 @@
 Release Notes - Gemini Instrument Application Programmer Interface 
 
+Version Release 5: Support for Status publishing and Properties
+
+  * [GIAPI-103] - Add getProperty mechanism to Logging GMP
+  * [GIAPI-104] - Add property handling mechanism to full GMP to provide support to the getProperty Methods
+  * [GIAPI-53] - Add postStatus logging to Logging GMP
+  * [GIAPI-64] - Add postStatus to Full GIAPI
+  * [GIAPI-81] - Add infrastructure support for status posting and private receiving of status
+
 
 Version Release 4: Add support for the apply sequence command. GIAPI released 
                    conforming the Gemini RPM framework
