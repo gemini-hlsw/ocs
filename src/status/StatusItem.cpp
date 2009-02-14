@@ -12,7 +12,7 @@ log4cxx::LoggerPtr StatusItem::logger(log4cxx::Logger::getLogger("giapi.StatusIt
 StatusItem::StatusItem(const std::string &name, const type::Type type) :
 	KvPair(name) {
 	_time = 0;
-	_changedFlag = false;
+	_changedFlag = true; //initially, the items are dirty.
 	_type = type;
 	//initial values for each type:
 	switch (_type) {

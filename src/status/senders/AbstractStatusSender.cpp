@@ -51,7 +51,7 @@ int AbstractStatusSender::doPost(StatusItem * statusItem) const throw (PostExcep
 
 	//value hasn't changed since last post, return immediately.
 	if (!statusItem->isChanged()) {
-		return status::OK;
+		return status::ERROR;
 	}
 
 	statusItem->clearChanged(); //mark clean, so it can be posted again

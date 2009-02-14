@@ -1,6 +1,8 @@
 #ifndef DATAUTIL_H_
 #define DATAUTIL_H_
 
+#include <string>
+
 #include <giapi/giapi.h>
 #include <giapi/giapiexcept.h>
 

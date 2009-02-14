@@ -81,8 +81,9 @@ public:
 	 *
 	 * @return giapi::status::OK if the post succeeds.
 	 *         giapi::status::ERROR if there is no information associated
-	 *         to the specified status item or the <code>name</code>
-	 *         parameter is NULL
+	 *         to the specified status item or if the status item is not posted
+	 *         to the GMP since it has not changed since the last time it
+	 *         was posted
 	 *
 	 * @throws GiapiException in case there is a problem with the underlying
 	 *         mechanisms to execute the post.
@@ -100,8 +101,7 @@ public:
 	 *         giapi::status::ERROR  if there is a problem setting the
 	 *         value and the operation was aborted. This can happen if the
 	 *         type of the status item was not defined as type::INTEGER,
-	 *         if there is no StatusItem associated to the <code>name</code> or
-	 *         if <code>name</code> is set to NULL
+	 *         or if there is no StatusItem associated to the <code>name</code>
 	 */
 	static int setValueAsInt(const std::string &name, int value);
 
@@ -116,9 +116,8 @@ public:
 	 *         StatusItem is marked dirty.
 	 *         giapi::status::ERROR  if there is a problem setting the
 	 *         value and the operation was aborted. This can happen if the
-	 *         type of the status item was not defined as type::STRING,
-	 *         if there is no StatusItem associated to the <code>name</code> or
-	 *         if <code>name</code> is set to NULL
+	 *         type of the status item was not defined as type::STRING or
+	 *         if there is no StatusItem associated to the <code>name</code>
 	 *
 	 */
 	static int setValueAsString(const std::string &name, const std::string &value);
@@ -133,9 +132,8 @@ public:
 	 * @return giapi::status::OK if the value was set correctly
 	 *         giapi::status::ERROR  if there is a problem setting the
 	 *         value and the operation was aborted. This can happen if the
-	 *         type of the status item was not defined as type::DOUBLE,
-	 *         if there is no StatusItem associated to the <code>name</code> or
-	 *         if <code>name</code> is set to NULL
+	 *         type of the status item was not defined as type::DOUBLE or
+	 *         if there is no StatusItem associated to the <code>name</code>
 	 */
 	static int setValueAsDouble(const std::string &name, double value);
 
