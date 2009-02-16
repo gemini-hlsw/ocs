@@ -1,10 +1,10 @@
-#include <test/GiapiCommandsTest.h>
+#include "GiapiCommandsTest.h"
 
 #include <giapi/giapi.h>
 #include <giapi/CommandUtil.h>
-using namespace giapi;
 
-CPPUNIT_TEST_SUITE_REGISTRATION( GiapiCommandsTest );
+namespace giapi {
+
 GiapiCommandsTest::GiapiCommandsTest() {
 }
 
@@ -16,13 +16,13 @@ void GiapiCommandsTest::setUp() {
 }
 
 void GiapiCommandsTest::tearDown() {
-	
+
 }
 
 void GiapiCommandsTest::testAddHandler() {
 	//Add a handler to the DATUM sequence command
 	CPPUNIT_ASSERT(CommandUtil::subscribeSequenceCommand(command::DATUM, command::SET_PRESET_START, _handler) == giapi::status::OK);
-	
+
 	pSequenceCommandHandler handler;
 	//Add an uninitialized handler to the REBOOT sequence command
 	CPPUNIT_ASSERT(CommandUtil::subscribeSequenceCommand(command::REBOOT, command::SET_PRESET_START, handler) == giapi::status::ERROR);
@@ -45,20 +45,21 @@ void GiapiCommandsTest::testPostCompletionInfo() {
 	//Post completion info. This should not work, the answer is not initialized
 	CPPUNIT_ASSERT(CommandUtil::postCompletionInfo(action, response2) == giapi::status::ERROR);
 	response2 = HandlerResponse::create(HandlerResponse::STARTED);
-	//Post completion info. This should not work, the answer is not valid 
+	//Post completion info. This should not work, the answer is not valid
 	CPPUNIT_ASSERT(CommandUtil::postCompletionInfo(action, response2) == giapi::status::ERROR);
 	response2 = HandlerResponse::create(HandlerResponse::ERROR);
-	//Post completion info. This should not work, Error response without message 
+	//Post completion info. This should not work, Error response without message
 	CPPUNIT_ASSERT(CommandUtil::postCompletionInfo(action, response2) == giapi::status::ERROR);
 }
-
+}
 
 
 ///// Sequence Command Handler for testing
 
+using namespace giapi;
 
 MyHandler::MyHandler() {
-	
+
 }
 
 MyHandler::~MyHandler() {
@@ -67,7 +68,7 @@ MyHandler::~MyHandler() {
 
 giapi::pHandlerResponse MyHandler::handle(giapi::command::ActionId id,
 				giapi::command::SequenceCommand sequenceCommand,
-				giapi::command::Activity activity, 
+				giapi::command::Activity activity,
 				giapi::pConfiguration config) {
 	return HandlerResponse::create(HandlerResponse::ACCEPTED);
 }

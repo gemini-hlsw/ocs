@@ -3,7 +3,7 @@
 #include <giapi/StatusUtil.h>
 using namespace giapi;
 
-CPPUNIT_TEST_SUITE_REGISTRATION( GiapiStatusTest );
+namespace giapi {
 
 GiapiStatusTest::~GiapiStatusTest() {
 
@@ -149,6 +149,8 @@ void GiapiStatusTest::testPostAll() {
 	CPPUNIT_ASSERT( StatusUtil::postStatus() == giapi::status::OK);
 	//Ok too, but this shouldn't post anything
 	CPPUNIT_ASSERT( StatusUtil::postStatus() == giapi::status::OK);
+
+}
 
 }
 

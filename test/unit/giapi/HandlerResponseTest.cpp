@@ -5,11 +5,11 @@
  *      Author: anunez
  */
 
-#include <test/giapi/HandlerResponseTest.h>
 #include <giapi/HandlerResponse.h>
-using namespace giapi;
 
-CPPUNIT_TEST_SUITE_REGISTRATION( HandlerResponseTest );
+#include "HandlerResponseTest.h"
+
+namespace giapi {
 
 HandlerResponseTest::HandlerResponseTest() {
 
@@ -88,4 +88,4 @@ void HandlerResponseTest::testAssignment() {
 
 }
 
-
+}

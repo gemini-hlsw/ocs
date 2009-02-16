@@ -4,6 +4,8 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
+namespace giapi {
+
 class GiapiCommandsTest : public CppUnit::TestFixture {
 
 	CPPUNIT_TEST_SUITE( GiapiCommandsTest );
@@ -11,7 +13,7 @@ class GiapiCommandsTest : public CppUnit::TestFixture {
 	CPPUNIT_TEST(testAddApplyHandler);
 	CPPUNIT_TEST(testPostCompletionInfo);
 	CPPUNIT_TEST_SUITE_END();
-		
+
 public:
 
 	void setUp();
@@ -28,18 +30,21 @@ private:
 	giapi::pSequenceCommandHandler _handler;
 };
 
+}
 
 class MyHandler: public giapi::SequenceCommandHandler {
 public:
 	giapi::pHandlerResponse handle(giapi::command::ActionId id,
 				giapi::command::SequenceCommand sequenceCommand,
-				giapi::command::Activity activity, 
+				giapi::command::Activity activity,
 				giapi::pConfiguration config);
 	static giapi::pSequenceCommandHandler create();
 	virtual ~MyHandler();
 private:
 	MyHandler();
 };
+
+
 
 
 #endif /*GIAPICOMMANDSTEST_H_*/

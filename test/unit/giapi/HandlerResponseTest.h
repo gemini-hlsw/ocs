@@ -10,6 +10,7 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
+namespace giapi {
 
 class HandlerResponseTest : public CppUnit::TestFixture {
 	CPPUNIT_TEST_SUITE( HandlerResponseTest );
@@ -32,7 +33,7 @@ public:
 	HandlerResponseTest();
 	virtual ~HandlerResponseTest();
 };
-
+}
 #endif /* HANDLERRESPONSETEST_H_ */
 
 
