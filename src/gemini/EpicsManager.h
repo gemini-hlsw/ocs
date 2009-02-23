@@ -1,9 +1,3 @@
-/*
- * EpicsChannelsManager.h
- *
- *  Created on: Feb 17, 2009
- *      Author: anunez
- */
 
 #ifndef EPICSCHANNELSMANAGER_H_
 #define EPICSCHANNELSMANAGER_H_

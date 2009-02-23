@@ -62,17 +62,6 @@ private:
 	pSession _session;
 
 	/**
-	 * The virtual channel to where this producer will send messages to
-	 */
-	pDestination _destination;
-
-	/**
-	 * The message producer in charge of sending requests down to
-	 * the GMP. Runs on its own session
-	 */
-	pMessageProducer _producer;
-
-	/**
 	 * Close open resources and destroy connections
 	 */
 	void cleanup();
