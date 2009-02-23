@@ -16,9 +16,8 @@
 #include <log4cxx/logger.h>
 #include <tr1/memory>
 
-using namespace giapi;
 
-namespace gmp {
+namespace giapi {
 
 using namespace cms;
 using namespace decaf::util::concurrent;

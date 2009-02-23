@@ -12,12 +12,13 @@
 #include "ConfigurationFactory.h"
 
 
-using namespace gmp;
 
 using namespace decaf::lang;
+using namespace gmp;
 
-namespace gmp {
-log4cxx::LoggerPtr SequenceCommandConsumer::logger(log4cxx::Logger::getLogger("jms.SequenceCommandConsumer"));
+
+namespace giapi {
+log4cxx::LoggerPtr SequenceCommandConsumer::logger(log4cxx::Logger::getLogger("giapi::SequenceCommandConsumer"));
 
 SequenceCommandConsumer::SequenceCommandConsumer(command::SequenceCommand id,
 		command::ActivitySet activities,
@@ -115,7 +116,7 @@ void SequenceCommandConsumer::onMessage(const Message* message) {
 		pConfiguration config = ConfigurationFactory::getConfiguration();
 
 		for (std::vector< std:: string>::iterator i = names.begin(); i != names.end(); i++) {
-			config->setValue((*i).c_str(), (mapMessage->getString(*i)).c_str());
+			config->setValue((*i), (mapMessage->getString(*i)));
 		}
 
 		pHandlerResponse response = _handler->handle(actionId, _sequenceCommand, activity, config);

@@ -41,8 +41,8 @@ int JmsCommandUtil::subscribeApply(const std::string & prefix,
 	if (LogCommandUtil::Instance().subscribeApply(prefix, activities, handler)
 			!= giapi::status::ERROR) {
 		//Create a consumer for this prefix and activities
-		gmp::pSequenceCommandConsumer consumer =
-			gmp::SequenceCommandConsumer::create(prefix, activities, handler);
+		pSequenceCommandConsumer consumer =
+			SequenceCommandConsumer::create(prefix, activities, handler);
 
 		//store this consumer....
 		ActivityHolder * holder = _commandHolderMap[ gmp::JmsUtil::getTopic(prefix)];
@@ -64,8 +64,8 @@ int JmsCommandUtil::subscribeSequenceCommand(command::SequenceCommand id,
 	if (LogCommandUtil::Instance().subscribeSequenceCommand(id, activities, handler)
 			!= giapi::status::ERROR) {
 		//Create a consumer for this sequence commands and activities.
-		gmp::pSequenceCommandConsumer consumer =
-				gmp::SequenceCommandConsumer::create(id, activities, handler);
+		pSequenceCommandConsumer consumer =
+				SequenceCommandConsumer::create(id, activities, handler);
 		//Store this consumer for the associated sequence command/activities;
 		//use that info to control future registers to the same sequence command
 		//and destroy consumers that are no longer in
@@ -108,7 +108,7 @@ ActivityHolder::~ActivityHolder() {
 }
 
 void ActivityHolder::registerConsumer(command::ActivitySet set,
-		gmp::pSequenceCommandConsumer consumer) {
+		pSequenceCommandConsumer consumer) {
 
 	//Decompose the set in the actual activities it involves. Store a
 	//reference of the consumer in each activity that is represented in the set
@@ -146,7 +146,7 @@ void ActivityHolder::registerConsumer(command::ActivitySet set,
 }
 
 void ActivityHolder::registerConsumer(command::Activity activity,
-		gmp::pSequenceCommandConsumer consumer) {
+		pSequenceCommandConsumer consumer) {
 	//store the new consumer in the map for this activity
 	_activityConsumerMap[activity] = consumer;
 	//thanks to the magic of the smart pointers, if there was an old consumer,

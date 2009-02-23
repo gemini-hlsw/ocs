@@ -53,7 +53,7 @@ public:
 	 * registered is the one that will be used.
 	 */
 	void registerConsumer(command::ActivitySet set,
-			gmp::pSequenceCommandConsumer consumer);
+			pSequenceCommandConsumer consumer);
 
 	/**
 	 * Associate the <code>consumer</code> to the
@@ -68,7 +68,7 @@ public:
 	 */
 
 	void registerConsumer(command::Activity activity,
-			gmp::pSequenceCommandConsumer consumer);
+			pSequenceCommandConsumer consumer);
 
 	/**
 	 * Destructor. Removes all the associations, releasing
@@ -81,7 +81,7 @@ private:
 	 * Type definition for the hash_table that will map command Ids to
 	 * the JMS Topic associated to them.
 	 */
-	typedef hash_map<command::Activity, gmp::pSequenceCommandConsumer>
+	typedef hash_map<command::Activity, pSequenceCommandConsumer>
 			ActivityConsumerMap;
 
 	ActivityConsumerMap _activityConsumerMap;
