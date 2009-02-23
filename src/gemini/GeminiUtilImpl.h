@@ -5,6 +5,8 @@
 #include <log4cxx/logger.h>
 #include <giapi/giapi.h>
 #include <giapi/EpicsStatusHandler.h>
+#include <gemini/EpicsManager.h>
+
 
 namespace giapi {
 
@@ -15,9 +17,9 @@ class GeminiUtilImpl {
 	static log4cxx::LoggerPtr logger;
 
 public:
-	static GeminiUtilImpl& Instance();
+	static GeminiUtilImpl& Instance() throw (GiapiException);
 
-	int subscribeEpicsStatus(const std::string &name, pEpicsStatusHandler handler);
+	int subscribeEpicsStatus(const std::string &name, pEpicsStatusHandler handler) throw (GiapiException);
 
 	int unsubscribeEpicsStatus(const std::string &name);
 
@@ -28,7 +30,9 @@ public:
 	virtual ~GeminiUtilImpl();
 private:
 	static std::auto_ptr<GeminiUtilImpl> INSTANCE;
-	GeminiUtilImpl();
+
+	pEpicsManager _epicsMgr;
+	GeminiUtilImpl() throw (GiapiException);
 
 };
 

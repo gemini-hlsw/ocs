@@ -1,26 +1,30 @@
 #include "GeminiUtilImpl.h"
-
+#include "JmsEpicsManager.h"
 namespace giapi {
 
 log4cxx::LoggerPtr GeminiUtilImpl::logger(log4cxx::Logger::getLogger("giapi.GeminiUtilImpl"));
 
-std::auto_ptr<GeminiUtilImpl> GeminiUtilImpl::INSTANCE(new GeminiUtilImpl());
+std::auto_ptr<GeminiUtilImpl> GeminiUtilImpl::INSTANCE(0);
 
-GeminiUtilImpl::GeminiUtilImpl() {
+GeminiUtilImpl::GeminiUtilImpl() throw (GiapiException) {
+	_epicsMgr = JmsEpicsManager::create();
 }
 
 GeminiUtilImpl::~GeminiUtilImpl() {
+	_epicsMgr.reset();
 }
 
-GeminiUtilImpl& GeminiUtilImpl::Instance() {
+GeminiUtilImpl& GeminiUtilImpl::Instance() throw (GiapiException) {
+	if (INSTANCE.get() == 0) {
+		INSTANCE.reset(new GeminiUtilImpl());
+	}
 	return *INSTANCE;
 }
 
 int GeminiUtilImpl::subscribeEpicsStatus(const std::string &name,
-		pEpicsStatusHandler handler) {
+		pEpicsStatusHandler handler) throw (GiapiException) {
 	LOG4CXX_INFO(logger, "Subscribe epics status " << name);
-	return status::OK;
-
+	return _epicsMgr->subscribeEpicsStatus(name, handler);
 }
 
 int GeminiUtilImpl::unsubscribeEpicsStatus(const std::string &name) {

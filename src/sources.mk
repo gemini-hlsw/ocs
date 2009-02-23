@@ -6,6 +6,7 @@
 -include src/services/sources.mk
 -include src/status/sources.mk
 -include src/gmp/sources.mk
+-include src/gemini/sources.mk
 
 
 # Add inputs and outputs from these tool invocations to the build variables 

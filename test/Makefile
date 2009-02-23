@@ -10,14 +10,18 @@
 # Tool invocations
 all: unit
 
-SUBDIRS = unit benchmarks
+SUBDIRS = unit benchmarks integration
 
 unit::  
 	@-cd unit; make
 
 benchmarks::  
 	@-cd benchmarks; make
-	
+
+integration::  
+	@-cd integration; make
+
+		
 
 clean:
 	@for subdir in $(SUBDIRS); \

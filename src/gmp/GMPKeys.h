@@ -74,6 +74,11 @@ public:
 	//Status
 	const static std::string GMP_STATUS_DESTINATION;
 
+
+	//Gemini Utility Keys
+	const static std::string GMP_GEMINI_EPICS_REQUEST_DESTINATION;
+	const static std::string GMP_GEMINI_EPICS_CHANNEL_PROPERTY;
+
 	virtual ~GMPKeys();
 
 private:
