@@ -9,6 +9,7 @@
 #define JMSEPICSMANAGER_H_
 
 #include "EpicsManager.h"
+#include "EpicsConfiguration.h"
 
 #include <cms/Session.h>
 #include <cms/Destination.h>
@@ -17,14 +18,17 @@
 #include <util/JmsSmartPointers.h>
 #include <util/giapiMaps.h>
 
-#include <log4cxx/logger.h>
 
-#include <set>
+#include <log4cxx/logger.h>
 
 using namespace cms;
 
 namespace giapi {
 
+/**
+ * An EpicsManager that uses JMS as the underlying
+ * communication mechanism
+ */
 class JmsEpicsManager: public EpicsManager {
 public:
 
@@ -32,9 +36,6 @@ public:
 			pEpicsStatusHandler handler) throw (GiapiException);
 
 	int unsubscribeEpicsStatus(const std::string &name) throw (GiapiException);
-
-	std::set<std::string> getValidEpicsChannels(long timeot)
-			throw (CommunicationException, TimeoutException);
 
 	static pEpicsManager create() throw (CommunicationException);
 
@@ -44,22 +45,20 @@ public:
 
 private:
 
-	void init() throw (CommunicationException);
 	/**
 	 * Logging facility
 	 */
 	static log4cxx::LoggerPtr logger;
 
 	/**
-	 * A set of valid epics channels; obtained from the GMP
-	 */
-
-	std::set<std::string> _epicsChannels;
-
-	/**
 	 * The JMS Session associated to this producer.
 	 */
 	pSession _session;
+		
+	/**
+	 * The Epics Configuration object
+	 */
+	pEpicsConfiguration _epicsConfiguration;
 
 	/**
 	 * Close open resources and destroy connections

@@ -9,6 +9,7 @@
 
 #include <gmp/ConnectionManager.h>
 #include <gmp/GMPKeys.h>
+#include "JmsEpicsConfiguration.h"
 
 using namespace gmp;
 
@@ -23,20 +24,25 @@ JmsEpicsManager::JmsEpicsManager() throw (CommunicationException) {
 		//create an auto-acknowledged session
 		_session = pSession(manager.createSession());
 
-		//Attempt to initialize the valid epics status channels
-		init();
+		_epicsConfiguration = JmsEpicsConfiguration::create(_session);
+		
+		//attempt to initialize the configuration 
+		_epicsConfiguration->init();
 
 	} catch (CMSException& e) {
 		//clean any resources that might have been allocated
 		cleanup();
 		throw CommunicationException("Trouble initializing request producer :"
 				+ e.getMessage());
+	} catch (TimeoutException &e) {
+		LOG4CXX_WARN(logger, "Can't get valid epics channel names, trying later...")
 	}
 }
 
 void JmsEpicsManager::cleanup() {
 	// Close open resources.
 	try {
+		_epicsConfiguration.release();
 		if (_session.get() != 0)
 		_session->close();
 	} catch (CMSException& e) {
@@ -45,81 +51,7 @@ void JmsEpicsManager::cleanup() {
 }
 
 JmsEpicsManager::~JmsEpicsManager() {
-	// TODO Auto-generated destructor stub
-}
 
-void JmsEpicsManager::init() throw (CommunicationException) {
-	//get the valid epics channels
-	try {
-		_epicsChannels = getValidEpicsChannels(1000);
-	} catch (TimeoutException &ex) {
-		LOG4CXX_WARN(logger, "Can not get list of valid Epics channels from the GMP. Will attempt next time.");
-		_epicsChannels.clear();
-	}
-}
-
-std::set<std::string> JmsEpicsManager::getValidEpicsChannels(long timeout)
-		throw (CommunicationException, TimeoutException) {
-
-	Message *request= NULL;
-
-	std::set<std::string> channels;
-
-	try {
-
-		//We will use a queue to send the request to the GMP
-		pDestination dest = pDestination(_session->createQueue(
-						GMPKeys::GMP_GEMINI_EPICS_REQUEST_DESTINATION));
-		//Instantiate the message producer for this destination
-		pMessageProducer producer = pMessageProducer(_session->createProducer(
-						dest.get()));
-
-		request = _session->createMessage();
-		request->setBooleanProperty(GMPKeys::GMP_GEMINI_EPICS_CHANNEL_PROPERTY,
-				true);
-
-		//create temporary objects to get the answer
-		TemporaryQueue* tmpQueue = _session->createTemporaryQueue();
-		pMessageConsumer tmpConsumer = pMessageConsumer(
-				_session->createConsumer(tmpQueue));
-
-		request->setCMSReplyTo(tmpQueue);
-
-		//send the reply
-		producer->send(request);
-		//close the producer
-		producer->close();
-
-		//and wait for the response.
-		Message *reply = (timeout> 0) ? tmpConsumer->receive(timeout)
-		: tmpConsumer->receive();
-		
-		tmpConsumer->close();
-		
-		tmpQueue->destroy();
-		delete tmpQueue;
-		delete request;
-
-		if (reply != NULL) {
-			MapMessage *mm = (MapMessage *) reply;
-			//get the values and store them in the map
-			std::vector<std::string> mapNames = mm->getMapNames();
-			for (std::vector<std::string>::iterator it = mapNames.begin(); it
-					!= mapNames.end(); it++) {
-				channels.insert(*it);
-			}
-		} else { //timeout.
-			throw TimeoutException(
-					"Time out trying to get valid Epics Channel names ");
-		}
-	} catch (CMSException &e) {
-		LOG4CXX_WARN(logger, "Problem getting valid epics channel :" + e.getMessage());
-		if (request != NULL) delete request;
-		throw PostException("Problem getting valid epics channel : "
-				+ e.getMessage());
-	}
-
-	return channels;
 }
 
 pEpicsManager JmsEpicsManager::create() throw (CommunicationException) {
@@ -130,12 +62,12 @@ pEpicsManager JmsEpicsManager::create() throw (CommunicationException) {
 int JmsEpicsManager::subscribeEpicsStatus(const std::string & name,
 		pEpicsStatusHandler handler) throw (GiapiException) {
 
-	if (_epicsChannels.empty()) { //not initialized
+	if (!(_epicsConfiguration->isInitialized())) { 
 		//attempt to initialize it
-		init();
+		_epicsConfiguration->init();
 	}
 
-	if (_epicsChannels.find(name) != _epicsChannels.end() ) {
+	if (_epicsConfiguration->hasChannel(name)) {
 		//epics channel found
 		return status::OK;
 	} else {
