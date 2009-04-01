@@ -17,6 +17,17 @@ using namespace cms;
 namespace gmp {
 
 /**
+ * An auxiliary function object to convert lower case text to upper case.
+ */
+struct upper {
+  int operator()(int c)
+  {
+    return std::toupper((unsigned char)c);
+  }
+};
+
+
+/**
  * This class contains static methods to perform translations between
  * the messaging system representation to actual objects and types
  * used by the GIAPI
@@ -46,6 +57,15 @@ public:
 	 */
 
 	static std::string getTopic(const std::string & prefix);
+
+
+	/**
+	 * Get the messaging topic from where the updates for the
+	 * given channel name will be received. Clients will use this
+	 * topic to register when they are interested to receive updates
+	 * about a particular epics channel.
+	 */
+	static std::string getEpicsChannelTopic(const std::string &channelName);
 
 
 	/**

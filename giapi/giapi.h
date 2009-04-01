@@ -6,37 +6,37 @@ namespace giapi {
 
 	namespace status {
 		/**
-		 * GIAPI Status. Used for GIAPI calls to report status of the 
-		 * different library calls to the invoker. 
+		 * GIAPI Status. Used for GIAPI calls to report status of the
+		 * different library calls to the invoker.
 		 */
 		enum Status {
 			ERROR = -1, //Errors that don't have a status
 			OK = 0 //Success
 		};
 	}
-	
+
 	namespace alarm {
 		/**
 		 * Alarm severity.
 		 */
 		enum Severity {
 			/**
-			 * No alarm. 
+			 * No alarm.
 			 */
 			ALARM_OK,
 			/**
 			 * A WARNING is an alarm that subsystems see as important and should
 			 * be brought to the attention of the users. The subsystems should
-			 * be able to continue despite warning events. 
+			 * be able to continue despite warning events.
 			 */
 			ALARM_WARNING,
 			/**
 			 * A FAILURE indicates that a component is in a state that will not
-			 * allow to continue operations. 
+			 * allow to continue operations.
 			 */
 			ALARM_FAILURE
 		};
-		
+
 		/**
 		 * Cause of the alarm
 		 */
@@ -49,8 +49,8 @@ namespace giapi {
 			ALARM_CAUSE_OTHER
 		};
 	}
-	
-	
+
+
 	namespace type {
 		/**
 		 * The different types supported by the elements
@@ -61,22 +61,24 @@ namespace giapi {
 			INT,
 			FLOAT,
 			DOUBLE,
-			STRING
+			STRING,
+			BYTE,
+			SHORT
 		};
 	}
-	
+
 	namespace health {
 		/**
 		 * Health values
 		 */
 		enum Health  {
 			/**
-			 * Good health. The system/suybsystem is normal 
+			 * Good health. The system/suybsystem is normal
 			 */
 			GOOD,
 			/**
 			 * Warning health. The system/subsystem is operating, but
-			 * not normally. 
+			 * not normally.
 			 */
 			WARNING,
 			/**
@@ -85,10 +87,10 @@ namespace giapi {
 			BAD
 		};
 	}
-	
+
 	namespace command {
 		typedef int ActionId;
-		
+
 		enum SequenceCommand {
 			TEST,
 			REBOOT,
@@ -99,7 +101,7 @@ namespace giapi {
 			END_VERIFY,
 			GUIDE,
 			END_GUIDE,
-			APPLY, 
+			APPLY,
 			OBSERVE,
 			END_OBSERVE,
 			PAUSE,
@@ -107,14 +109,14 @@ namespace giapi {
 			STOP,
 			ABORT
 		};
-		
+
 		enum Activity {
 			PRESET,
 			START,
 			PRESET_START,
 			CANCEL
 		};
-		
+
 		enum ActivitySet {
 			SET_PRESET,
 			SET_START,
@@ -124,7 +126,7 @@ namespace giapi {
 			SET_START_CANCEL,
 			SET_PRESET_START_CANCEL
 		};
-		
+
 	}
 	namespace log {
 		enum Level {
@@ -134,39 +136,39 @@ namespace giapi {
 				SEVERE
 		};
 	}
-	
+
 	namespace data {
 		enum ObservationEvent {
 			/**
 			 * Event sent as instrument starts preparation for starting
-			 * acquisition of a dataset. 
+			 * acquisition of a dataset.
 			 */
 			OBS_PREP,
 			/**
-			 * Event sent just before data acquisition starts. 
+			 * Event sent just before data acquisition starts.
 			 */
 			OBS_START_ACQ,
 			/**
-			 * Event sent when the requested acquisition has completed. 
+			 * Event sent when the requested acquisition has completed.
 			 */
 			OBS_END_ACQ,
 			/**
-			 * Event indicates that data is being transferred from the 
+			 * Event indicates that data is being transferred from the
 			 * detector or other activities needed to write data.
 			 */
 			OBS_START_READOUT,
 			/**
-			 * Event indicates readout or write preparations have completed 
+			 * Event indicates readout or write preparations have completed
 			 */
 			OBS_END_READOUT,
 			/**
-			 * Event indicates that the instrument has started writing 
-			 * the dataset to GSDN 
+			 * Event indicates that the instrument has started writing
+			 * the dataset to GSDN
 			 */
 			OBS_START_DSET_WRITE,
 			/**
-			 * Event indicates that the instrument has completed writing 
-			 * the dataset to GSDN 
+			 * Event indicates that the instrument has completed writing
+			 * the dataset to GSDN
 			 */
 			OBS_END_DSET_WRITE
 		};
@@ -179,7 +181,7 @@ namespace giapi {
 		double x,y,z;     //Cartesian elements of mount pre-flexure az/el
 		//Telescope Parameters structure
 		struct Tel {
-			double fl;    //Telescope flocal length (mm) 
+			double fl;    //Telescope flocal length (mm)
 			double rma;   //Rotator mechanical angle (rads)
 			double an;    //Azimuth axis tilt NS (rads)
 			double aw;    //Azimuth axis tilt EW (rads)
@@ -204,9 +206,9 @@ namespace giapi {
 	};
 	/**
 	 * Definition of a long with 64 bits. Since 64-bit signed integers are
-	 * not part of the ANSI C++ standard, this definition is compiler 
-	 * specific.  
-	 * This works in GCC 4.X under Linux. 
+	 * not part of the ANSI C++ standard, this definition is compiler
+	 * specific.
+	 * This works in GCC 4.X under Linux.
 	 */
 	typedef long long long64;
 }

@@ -56,6 +56,15 @@ std::string JmsUtil::getTopic(const std::string &prefix) {
 	return GMPKeys::GMP_SEQUENCE_COMMAND_APPLY + GMPKeys::GMP_SEPARATOR + prefix;
 }
 
+std::string JmsUtil::getEpicsChannelTopic(const std::string &channelName) {
+
+	std::string s = channelName;
+	std::transform(s.begin(), s.end(), s.begin(), upper());
+	return GMPKeys::GMP_EPICS_TOPIC_PREFIX + s;
+
+}
+
+
 command::Activity JmsUtil::getActivity(const std::string &id) {
 	return (command::Activity)Instance().activityMap[id];
 }

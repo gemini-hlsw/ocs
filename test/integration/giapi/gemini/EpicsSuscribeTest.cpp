@@ -23,15 +23,17 @@ void EpicsSubscribeTest::setUp() {
 }
 
 void EpicsSubscribeTest::tearDown() {
-
 }
 
 void EpicsSubscribeTest::testSubscribeEpics() {
-
 	CPPUNIT_ASSERT( GeminiUtil::subscribeEpicsStatus("tcs:context", _handler) == giapi::status::OK );
+	CPPUNIT_ASSERT( GeminiUtil::subscribeEpicsStatus("random-channel", _handler) == giapi::status::ERROR );
+}
 
+void EpicsSubscribeTest::testUnsubscribeEpics() {
+	CPPUNIT_ASSERT( GeminiUtil::unsubscribeEpicsStatus("tcs:context") == giapi::status::OK );
 
-
+	CPPUNIT_ASSERT( GeminiUtil::unsubscribeEpicsStatus("random-channel") == giapi::status::ERROR );
 }
 
 }

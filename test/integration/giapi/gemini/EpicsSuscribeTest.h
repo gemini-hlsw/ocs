@@ -20,6 +20,8 @@ class EpicsSubscribeTest : public CppUnit::TestFixture {
 	CPPUNIT_TEST_SUITE( EpicsSubscribeTest );
 
 	CPPUNIT_TEST ( testSubscribeEpics );
+	CPPUNIT_TEST ( testUnsubscribeEpics );
+
 
 	CPPUNIT_TEST_SUITE_END();
 
@@ -28,6 +30,8 @@ public:
 	virtual ~EpicsSubscribeTest();
 
 	void testSubscribeEpics();
+
+	void testUnsubscribeEpics();
 
 	void setUp();
 

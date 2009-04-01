@@ -8,8 +8,9 @@
 #ifndef JMSEPICSMANAGER_H_
 #define JMSEPICSMANAGER_H_
 
-#include "EpicsManager.h"
-#include "EpicsConfiguration.h"
+#include <gemini/epics/EpicsManager.h>
+#include <gemini/epics/EpicsConfiguration.h>
+#include <gemini/epics/jms/EpicsConsumer.h>
 
 #include <cms/Session.h>
 #include <cms/Destination.h>
@@ -54,11 +55,21 @@ private:
 	 * The JMS Session associated to this producer.
 	 */
 	pSession _session;
-		
+
 	/**
 	 * The Epics Configuration object
 	 */
 	pEpicsConfiguration _epicsConfiguration;
+
+
+	/**
+	 * Type definition for the hash_table that will map EPICS channel names to
+	 * the consumer that is receiving the updates
+	 */
+	typedef hash_map<std::string, pEpicsConsumer> EpicsConsumersMap;
+
+	EpicsConsumersMap _epicsConsumersMap;
+
 
 	/**
 	 * Close open resources and destroy connections

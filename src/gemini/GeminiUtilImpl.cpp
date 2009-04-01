@@ -1,5 +1,5 @@
 #include "GeminiUtilImpl.h"
-#include "JmsEpicsManager.h"
+#include <gemini/epics/jms/JmsEpicsManager.h>
 namespace giapi {
 
 log4cxx::LoggerPtr GeminiUtilImpl::logger(log4cxx::Logger::getLogger("giapi.GeminiUtilImpl"));
@@ -11,6 +11,7 @@ GeminiUtilImpl::GeminiUtilImpl() throw (GiapiException) {
 }
 
 GeminiUtilImpl::~GeminiUtilImpl() {
+	LOG4CXX_DEBUG(logger,  "Destroying Gemini Util Implementation");
 	_epicsMgr.reset();
 }
 
@@ -29,7 +30,7 @@ int GeminiUtilImpl::subscribeEpicsStatus(const std::string &name,
 
 int GeminiUtilImpl::unsubscribeEpicsStatus(const std::string &name) {
 	LOG4CXX_INFO(logger, "Unsubscribe epics status " << name);
-	return status::OK;
+	return _epicsMgr->unsubscribeEpicsStatus(name);
 }
 
 int GeminiUtilImpl::postPcsUpdate(double zernikes[], int size) {

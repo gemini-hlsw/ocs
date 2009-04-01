@@ -4,10 +4,10 @@
 #include <giapi/giapiexcept.h>
 #include <util/giapiMaps.h>
 #include <util/JmsSmartPointers.h>
-#include "EpicsConfiguration.h"
+#include <gemini/epics/EpicsConfiguration.h>
 
 #include <log4cxx/logger.h>
- 
+
 #include <set>
 #include <string>
 
@@ -25,29 +25,29 @@ public:
 	 * Factory constructor, using smart pointers
 	 */
 	static pEpicsConfiguration create(pSession session);
-			
+
 	/**
 	 * Initialize the configuration. This requires access to the
 	 * GMP to get the values.
 	 */
 	void init() throw (CommunicationException, TimeoutException);
-	
-	
+
+
 	/**
 	 * Return true if this epics configuration was correctly initialized
 	 * and contains information from the valid epics channels from the GMP
 	 */
 	bool isInitialized() const;
-	
-	
+
+
 	/**
 	 * Return true if the given channel name is an available channel
 	 * in the configuration
 	 */
 	bool hasChannel(const std::string &channel);
-	
+
 	/**
-	 * Constructor. Takes as an argument an already initialized session. 
+	 * Constructor. Takes as an argument an already initialized session.
 	 */
 	JmsEpicsConfiguration(pSession session);
 

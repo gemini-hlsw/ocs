@@ -5,11 +5,11 @@
  *      Author: anunez
  */
 
-#include <gemini/JmsEpicsManager.h>
+#include "JmsEpicsManager.h"
 
 #include <gmp/ConnectionManager.h>
 #include <gmp/GMPKeys.h>
-#include "JmsEpicsConfiguration.h"
+#include <gemini/epics/jms/JmsEpicsConfiguration.h>
 
 using namespace gmp;
 
@@ -25,8 +25,8 @@ JmsEpicsManager::JmsEpicsManager() throw (CommunicationException) {
 		_session = pSession(manager.createSession());
 
 		_epicsConfiguration = JmsEpicsConfiguration::create(_session);
-		
-		//attempt to initialize the configuration 
+
+		//attempt to initialize the configuration
 		_epicsConfiguration->init();
 
 	} catch (CMSException& e) {
@@ -51,7 +51,9 @@ void JmsEpicsManager::cleanup() {
 }
 
 JmsEpicsManager::~JmsEpicsManager() {
-
+	LOG4CXX_DEBUG(logger, "Destroying JMS Epics Manager")
+	//cleaning epics maps
+	_epicsConsumersMap.clear();
 }
 
 pEpicsManager JmsEpicsManager::create() throw (CommunicationException) {
@@ -62,23 +64,36 @@ pEpicsManager JmsEpicsManager::create() throw (CommunicationException) {
 int JmsEpicsManager::subscribeEpicsStatus(const std::string & name,
 		pEpicsStatusHandler handler) throw (GiapiException) {
 
-	if (!(_epicsConfiguration->isInitialized())) { 
+	if (!(_epicsConfiguration->isInitialized())) {
 		//attempt to initialize it
 		_epicsConfiguration->init();
 	}
 
 	if (_epicsConfiguration->hasChannel(name)) {
-		//epics channel found
+		//epics channel found, let's create a consumer
+		pEpicsConsumer consumer = EpicsConsumer::create(name, handler);
+		//and store it for further reference.(otherwise it would just die immediately)
+		_epicsConsumersMap[name] =  consumer;
 		return status::OK;
 	} else {
 		//not found
+		LOG4CXX_WARN(logger, "Requested subscription to unauthorized EPICS channel: " + name);
 		return status::ERROR;
 	}
 }
 
 int JmsEpicsManager::unsubscribeEpicsStatus(const std::string & name)
 		throw (GiapiException) {
-	return 0;
+
+	if (_epicsConfiguration->hasChannel(name)) {
+		_epicsConsumersMap.erase(name);
+		return status::OK;
+	} else {
+		LOG4CXX_WARN(logger, "Requested un-subscription from unauthorized EPICS channel: " + name);
+		return status::ERROR;
+	}
+
+
 }
 
 }

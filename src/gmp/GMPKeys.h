@@ -76,6 +76,7 @@ public:
 
 
 	//Gemini Utility Keys
+	const static std::string GMP_EPICS_TOPIC_PREFIX;
 	const static std::string GMP_GEMINI_EPICS_REQUEST_DESTINATION;
 	const static std::string GMP_GEMINI_EPICS_CHANNEL_PROPERTY;
 

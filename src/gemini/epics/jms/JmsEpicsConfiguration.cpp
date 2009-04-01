@@ -12,12 +12,12 @@ JmsEpicsConfiguration::JmsEpicsConfiguration(pSession session)  {
 }
 
 JmsEpicsConfiguration::~JmsEpicsConfiguration() {
-	
+
 }
 
 void JmsEpicsConfiguration::init() throw (CommunicationException, TimeoutException)  {
 	//request the channles
-	requestChannels(1000); 
+	requestChannels(1000);
 }
 
 bool JmsEpicsConfiguration::isInitialized() const {
@@ -25,7 +25,7 @@ bool JmsEpicsConfiguration::isInitialized() const {
 }
 
 bool JmsEpicsConfiguration::hasChannel(const std::string & channel) {
-	return (_epicsChannels.find(channel) != _epicsChannels.end()); 
+	return (_epicsChannels.find(channel) != _epicsChannels.end());
 }
 
 
@@ -36,7 +36,7 @@ pEpicsConfiguration JmsEpicsConfiguration::create(pSession session) {
 
 
 void JmsEpicsConfiguration::requestChannels(long timeout) throw (CommunicationException, TimeoutException) {
-	
+
 	Message *request= NULL;
 
 	try {
@@ -73,7 +73,6 @@ void JmsEpicsConfiguration::requestChannels(long timeout) throw (CommunicationEx
 		tmpQueue->destroy();
 		delete tmpQueue;
 		delete request;
-
 		if (reply != NULL) {
 			MapMessage *mm = (MapMessage *) reply;
 			//get the values and store them in the map
@@ -81,6 +80,7 @@ void JmsEpicsConfiguration::requestChannels(long timeout) throw (CommunicationEx
 			for (std::vector<std::string>::iterator it = mapNames.begin(); it
 					!= mapNames.end(); it++) {
 				_epicsChannels.insert(*it);
+				LOG4CXX_DEBUG(logger, "Authorizing Epics channel: " + *it);
 			}
 		} else { //timeout.
 			throw TimeoutException(

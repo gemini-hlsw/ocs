@@ -5,10 +5,15 @@
 #include <log4cxx/logger.h>
 #include <giapi/giapi.h>
 #include <giapi/EpicsStatusHandler.h>
-#include <gemini/EpicsManager.h>
+#include <gemini/epics/EpicsManager.h>
 
 
 namespace giapi {
+
+/**
+ * This is the delegate class used to implement the behavior
+ * described in the Gemini Util class.
+ */
 
 class GeminiUtilImpl {
 	/**
