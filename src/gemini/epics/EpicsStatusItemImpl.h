@@ -24,6 +24,19 @@ public:
 
 	int getCount() const;
 
+
+	const std::string getDataAsString(int index) const throw (InvalidOperation);
+
+	int getDataAsInt(int index) const throw (InvalidOperation);
+
+	float getDataAsFloat(int index) const throw (InvalidOperation);
+
+	double getDataAsDouble(int index) const throw (InvalidOperation);
+
+	unsigned char getDataAsByte(int index) const throw (InvalidOperation);
+
+
+
 	/**
 	 * Create a new EpicsStatusItem via a smart pointer.
 	 */
@@ -71,6 +84,13 @@ private:
 	 * Data size
 	 */
 	int _size;
+
+
+	/**
+	 * Auxiliary method to validate that an index is in the
+	 * appropriate range, i.e, 0 <= index < _nElements
+	 */
+	void validateIndex(int index) const throw (InvalidOperation);
 
 };
 

@@ -55,6 +55,70 @@ type::Type EpicsStatusItemImpl::getType() const {
 }
 
 
+const std::string  EpicsStatusItemImpl::getDataAsString(int index) const
+		throw (InvalidOperation) {
+
+	if (_type != type::STRING)
+		throw InvalidOperation("EPICS status item does not contain string data");
+
+	validateIndex(index);
+
+	int curpos = 0;
+	for (int i = 0; i < index; i++) {
+		curpos += strlen((char *)_data + curpos) + 1;
+	}
+
+	return std::string((char *)_data + curpos);
+}
+
+int EpicsStatusItemImpl::getDataAsInt(int index) const throw (InvalidOperation) {
+	if (_type != type::INT)
+		throw InvalidOperation("EPICS status item does not contain integer data");
+
+	validateIndex(index);
+
+	int * data = (int *)_data;
+	return data[index];
+}
+
+float EpicsStatusItemImpl::getDataAsFloat(int index) const throw (InvalidOperation) {
+	if (_type != type::FLOAT)
+		throw InvalidOperation("EPICS status item does not contain float data");
+
+	validateIndex(index);
+
+	float * data = (float *)_data;
+	return data[index];
+}
+
+double EpicsStatusItemImpl::getDataAsDouble(int index) const throw (InvalidOperation) {
+	if (_type != type::DOUBLE)
+		throw InvalidOperation("EPICS status item does not contain double data");
+
+	validateIndex(index);
+
+	double * data = (double *)_data;
+	return data[index];
+}
+
+unsigned char EpicsStatusItemImpl::getDataAsByte(int index) const throw (InvalidOperation) {
+	if (_type != type::BYTE)
+		throw InvalidOperation("EPICS status item does not contain byte data");
+
+	validateIndex(index);
+
+	unsigned char * data = (unsigned char *)_data;
+	return data[index];
+}
+
+
+
+
+
+void EpicsStatusItemImpl::validateIndex(int index) const throw (InvalidOperation) {
+	if (index >= _nElements || index < 0)
+		throw InvalidOperation("Index out of range to get element from EPICS status item");
+}
 
 
 
