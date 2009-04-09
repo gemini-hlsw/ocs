@@ -118,6 +118,16 @@ void StatusSerializerVisitor::writeHeader(int offset, StatusItem *item)
 		//TODO: Add the boolean handling when
 		//supported by the GIAPI
 		break;
+
+	case type::BYTE:
+		//TODO: Add the Byte handler when/if supported by the GIAPI
+		break;
+
+	case type::SHORT:
+		//TODO: Add the Byte handler when/if supported by the GIAPI
+		break;
+
+
 	}
 
 }
