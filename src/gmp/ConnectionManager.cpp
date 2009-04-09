@@ -1,9 +1,13 @@
 #include "ConnectionManager.h"
 
 #include <activemq/core/ActiveMQConnectionFactory.h>
+#include <decaf/util/concurrent/CountDownLatch.h>
 
 namespace gmp {
 log4cxx::LoggerPtr ConnectionManager::logger(log4cxx::Logger::getLogger("giapi.gmp.ConnectionManager"));
+
+//Time to wait (in seconds) to attempt a new connection in case the connection is lost
+int ConnectionManager::RETRY_TIMEOUT = 10;
 
 std::auto_ptr<ConnectionManager>
 		ConnectionManager::INSTANCE(new ConnectionManager());
@@ -24,8 +28,20 @@ ConnectionManager::~ConnectionManager() {
 		LOG4CXX_WARN(logger, "Problem closing connection");
 		e.printStackTrace();
 	}
+	//release all the references to the objects stored
+	_errorHandlersFunctions.clear();
+	_errorHandlerObjects.clear();
 
 }
+
+void ConnectionManager::registerOperation(giapi_error_handler op) {
+	_errorHandlersFunctions.insert(op);
+}
+
+void ConnectionManager::registerHandler(pGiapiErrorHandler handler) {
+	_errorHandlerObjects.insert(handler);
+}
+
 
 void ConnectionManager::startup() throw (GmpException) {
 
@@ -73,10 +89,52 @@ ConnectionManager& ConnectionManager::Instance() throw (GmpException) {
 void ConnectionManager::onException(const CMSException & ex) {
 	LOG4CXX_ERROR(logger, "Communication Exception occurred ");
 	ex.printStackTrace();
-
+	if (_connection.get() != 0) {
+		_connection->close();
+	}
 	//reset the connection, so next time it will try to reconnect...
 	_connection.reset(static_cast<Connection *>(0));
-	//TODO: Invoke a handler in the client code if exists.
+	//start a reconnection loop...
+	decaf::util::concurrent::CountDownLatch lock(1);
+	LOG4CXX_INFO(logger, "Waiting " << RETRY_TIMEOUT << " to attempt reconnection...");
+	lock.await(RETRY_TIMEOUT * 1000);
+
+	LOG4CXX_INFO(logger, "Attempting reconnection...");
+
+	bool connected = false;
+	while (!connected) {
+		try {
+			startup();
+			connected = true;
+		} catch (GmpException &e) {
+			LOG4CXX_INFO(logger, "Problem attempting reconnection.. " << e.getMessage());
+			LOG4CXX_INFO(logger, "Waiting " << RETRY_TIMEOUT << " seconds before attempting reconnection");
+			lock.await(RETRY_TIMEOUT * 1000);
+		}
+	}
+
+	LOG4CXX_INFO(logger, "Connection recovered. Invoking user provided error handlers");
+
+	//functions first...
+	std::set<giapi_error_handler>::const_iterator it = _errorHandlersFunctions.begin();
+
+	while (it != _errorHandlersFunctions.end()) {
+		//invoke this handler
+		(*it)();
+		it++;
+	}
+
+	//now the objects...
+	std::set<pGiapiErrorHandler>::const_iterator itObject =
+			_errorHandlerObjects.begin();
+
+	while (itObject != _errorHandlerObjects.end()) {
+		//invoke this handler
+		pGiapiErrorHandler handler = *itObject;
+		handler->onError();
+		itObject++;
+	}
+
 }
 
 pSession ConnectionManager::createSession() throw (CMSException ) {

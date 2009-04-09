@@ -3,7 +3,7 @@
 
 #include <log4cxx/logger.h>
 #include <tr1/memory>
-#include <giapi/giapiexcept.h>
+#include <set>
 
 #include <cms/Connection.h>
 #include <cms/Session.h>
@@ -11,9 +11,14 @@
 #include <activemq/util/Config.h>
 
 #include <gmp/JmsUtil.h>
+#include <giapi/giapiexcept.h>
+#include <giapi/giapi.h>
+#include <giapi/GiapiErrorHandler.h>
+
 #include <util/JmsSmartPointers.h>
 
 namespace gmp {
+
 
 using namespace cms;
 
@@ -66,6 +71,11 @@ public:
 	 */
 	virtual ~ConnectionManager();
 
+
+	void registerOperation(giapi_error_handler  op);
+
+	void registerHandler(pGiapiErrorHandler handler);
+
 private:
 	ConnectionManager();
 	/**
@@ -78,10 +88,20 @@ private:
 	 */
 	pConnection _connection;
 
+	std::set<giapi_error_handler> _errorHandlersFunctions;
+
+	std::set<pGiapiErrorHandler> _errorHandlerObjects;
+
 	/**
 	 * Initialize the communication to the broker
 	 */
 	void startup() throw (GmpException);
+
+	/**
+	 * Timeout to use to retry a connection to the GMP in
+	 * case the connection fails.
+	 */
+	static int RETRY_TIMEOUT;
 };
 
 }

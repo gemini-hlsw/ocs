@@ -211,6 +211,12 @@ namespace giapi {
 	 * This works in GCC 4.X under Linux.
 	 */
 	typedef long long long64;
+
+	/**
+	 * Definition of an error handler. GIAPI error handlers can be registered
+	 * in the GIAPI using the GiapiUtil class.
+	 */
+	typedef void (*giapi_error_handler)(void);
 }
 
 
