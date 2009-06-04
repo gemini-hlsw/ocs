@@ -1,7 +1,7 @@
 Release Notes - Gemini Instrument Application Programmer Interface 
 
 Version Release 6: Support to get EPICS information via simulated channels. 
-Add fault tolerance mechanisms to GIAPI. 
+Add fault tolerance mechanisms to GIAPI. April 09, 2009
 
 ** New Features
     * [GIAPI-106] - Add fault tolerance capabilities to Full GMP
@@ -13,7 +13,7 @@ Add fault tolerance mechanisms to GIAPI.
     * [GIAPI-107] - Remove char * from public C++ interface
     * [GIAPI-108] - Add timeout to getProperty methods
 
-Version Release 5: Support for Status publishing and Properties
+Version Release 5: Support for Status publishing and Properties. February 04, 2009
 
   * [GIAPI-103] - Add getProperty mechanism to Logging GMP
   * [GIAPI-104] - Add property handling mechanism to full GMP to provide support to the getProperty Methods
