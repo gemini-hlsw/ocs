@@ -5,6 +5,8 @@
 #include <log4cxx/logger.h>
 #include <giapi/giapi.h>
 
+#include <data/JmsObsEventProducer.h>
+
 namespace giapi {
 
 class DataUtilImpl {
@@ -13,21 +15,23 @@ class DataUtilImpl {
 	 */
 	static log4cxx::LoggerPtr logger;
 public:
-	static DataUtilImpl& Instance();
+	static DataUtilImpl& Instance() throw (CommunicationException);
 
-	int postObservationEvent(data::ObservationEvent event,
-			const std::string & datalabel);
+	int postObservationEvent(data::ObservationEvent event, const std::string & datalabel) throw (CommunicationException);
 
-	int postAncillaryFileEvent(const std::string & filename, const std::string & datalabel);
+	int postAncillaryFileEvent(const std::string & filename, const std::string & datalabel) throw (CommunicationException);
 
 	int postIntermediateFileEvent(const std::string & filename,
-					const std::string & datalabel, const std::string & hint);
+					const std::string & datalabel, const std::string & hint) throw (CommunicationException);
 
 	virtual ~DataUtilImpl();
 
 private:
 	static std::auto_ptr<DataUtilImpl> INSTANCE;
-	DataUtilImpl();
+
+	pJmsObsEventProducer pObsEventProducer;
+
+	DataUtilImpl() throw (CommunicationException);
 };
 
 }

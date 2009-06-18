@@ -80,6 +80,12 @@ public:
 	const static std::string GMP_GEMINI_EPICS_REQUEST_DESTINATION;
 	const static std::string GMP_GEMINI_EPICS_CHANNEL_PROPERTY;
 
+
+	//Gemini Data Util Keys
+	const static std::string GMP_DATA_OBSEVENT_DESTINATION;
+	const static std::string GMP_DATA_OBSEVENT_NAME;
+	const static std::string GMP_DATA_OBSEVENT_FILENAME;
+
 	virtual ~GMPKeys();
 
 private:
