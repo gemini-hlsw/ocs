@@ -1,5 +1,21 @@
 Release Notes - Gemini Instrument Application Programmer Interface 
 
+Version Release 7: Added Observation event support and reboot testing 
+                   functionality. July 21, 2009 
+
+** New Features
+    * [GIAPI-19] - Add support for Reboot testing
+    * [GIAPI-61] - Add postObservationEvent to Logging GMP
+    * [GIAPI-69] - End to End Support and Testing of reboot Sequence Command
+    * [GIAPI-95] - Enable postObservationEvent support within Gemini 
+                   infrastructure
+
+* Improvements
+    * [GIAPI-112] - Allow "fast" handler to complete successfully, even if they 
+                    send complete information before a response has been sent
+                    to the invoker client. 
+
+
 Version Release 6: Support to get EPICS information via simulated channels. 
 Add fault tolerance mechanisms to GIAPI. April 09, 2009
 
