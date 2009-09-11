@@ -42,7 +42,6 @@ public:
 	const static std::string GMP_HANDLER_RESPONSE_KEY;
 	const static std::string GMP_HANDLER_RESPONSE_ERROR_KEY;
 
-
 	//Sequence Command Keys
 	const static std::string GMP_SEQUENCE_COMMAND_TEST;
 	const static std::string GMP_SEQUENCE_COMMAND_REBOOT;
@@ -70,16 +69,16 @@ public:
 	//Property keyword
 	const static std::string GMP_UTIL_PROPERTY;
 
-
 	//Status
 	const static std::string GMP_STATUS_DESTINATION;
 
-
-	//Gemini Utility Keys
+	//Gemini Service Keys - EPICS Monitoring
 	const static std::string GMP_EPICS_TOPIC_PREFIX;
 	const static std::string GMP_GEMINI_EPICS_REQUEST_DESTINATION;
 	const static std::string GMP_GEMINI_EPICS_CHANNEL_PROPERTY;
 
+	//Gemini Service Keys - PCS Update
+	const static std::string GMP_PCS_UPDATE_DESTINATION;
 
 	//Gemini Data Util Keys
 	const static std::string GMP_DATA_OBSEVENT_DESTINATION;

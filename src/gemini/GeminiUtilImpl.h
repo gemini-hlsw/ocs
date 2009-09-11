@@ -6,7 +6,7 @@
 #include <giapi/giapi.h>
 #include <giapi/EpicsStatusHandler.h>
 #include <gemini/epics/EpicsManager.h>
-
+#include <gemini/pcs/PcsUpdater.h>
 
 namespace giapi {
 
@@ -36,7 +36,16 @@ public:
 private:
 	static std::auto_ptr<GeminiUtilImpl> INSTANCE;
 
+	/**
+	 * Manager of Epics subscriptions
+	 */
 	pEpicsManager _epicsMgr;
+
+	/**
+	 * The PCS updater object
+	 */
+	gemini::pcs::pPcsUpdater _pcsUpdater;
+
 	GeminiUtilImpl() throw (GiapiException);
 
 };
