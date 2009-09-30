@@ -1,6 +1,6 @@
 31 July 2008 AN
 
-Builiding the GIAPI C++ Language Glue requires some work since it depends
+Building the GIAPI C++ Language Glue requires some work since it depends
 on third party products that must be fetched and installed. I expect the build 
 method to improve in the future though. 
 
@@ -17,7 +17,7 @@ The library must be compiled with GCC version 4.0 or above.
 
 2. Set up the environment.
 
-When builidng, you need to set up the following variables in the config.mk
+When building, you need to set up the following variables in the config.mk
 file (located in the 'conf' directory):
 
 INSTALL_DIR The directory where you want to have the library and headers 

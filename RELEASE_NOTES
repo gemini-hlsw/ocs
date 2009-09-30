@@ -1,5 +1,19 @@
 Release Notes - Gemini Instrument Application Programmer Interface 
 
+Version Release 8: Implementation of postPCSUpdate method to offload corrections
+to the Primary Control System. Added C library (in a separate package) to interface
+with the secondary . September 30, 2009 
+
+** New Features
+    * [GIAPI-58] - Add postPCSUpdate to Logging GMP
+    * [GIAPI-90] - C library for access to Synchro Bus (in a separate package)
+    * [GIAPI-93] - Enable postPCSUpdate Post Functionality
+
+** Improvement
+    * [GIAPI-113] - Improved handling multiple responses for the APPLY sequence command
+                    in the GMP. Added test cases to verify fixes. 
+
+
 Version Release 7: Added Observation event support and reboot testing 
                    functionality. July 21, 2009 
 
