@@ -37,6 +37,11 @@ int StatusUtil::setValueAsDouble(const std::string &name, double value) {
 	return database.setStatusValueAsDouble(name, value);
 }
 
+int StatusUtil::setValueAsFloat(const std::string &name, float value) {
+	StatusDatabase& database = StatusDatabase::Instance();
+	return database.setStatusValueAsFloat(name, value);
+}
+
 int StatusUtil::createStatusItem(const std::string &name, const type::Type type) {
 	StatusDatabase& database = StatusDatabase::Instance();
 	return database.createStatusItem(name, type);

@@ -64,6 +64,20 @@ public:
 	 */
 	virtual int setValueAsDouble(double value);
 
+
+	/**
+	 * Set the value to the given float. Previous value is replaced,
+	 * no matter what type it was. Subclasses can specialize this
+	 * behavior providing extra validations.
+	 *
+	 * @param value the new float value.
+	 *
+	 * @return status::OK. Subclasses can return different
+	 *         values. See their specific documentation
+	 */
+	virtual int setValueAsFloat(float value);
+
+
 	/**
 	 * Returns the value stored as an integer.
 	 *
@@ -81,6 +95,16 @@ public:
 	 * @throws bad_cast exception if the stored item is not a double
 	 */
 	double getValueAsDouble() const;
+
+	/**
+	 * Returns the value stored as a float.
+	 *
+	 * @return float stored
+	 *
+	 * @throws bad_cast exception if the stored item is not a float
+	 */
+	float getValueAsFloat() const;
+
 
 	/**
 	 * Returns the value stored as a string.

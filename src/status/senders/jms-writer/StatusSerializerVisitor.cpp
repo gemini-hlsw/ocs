@@ -93,13 +93,20 @@ void StatusSerializerVisitor::writeHeader(int offset, StatusItem *item)
 		_msg->writeInt(item->getValueAsInt());
 		break;
 	case type::DOUBLE:
-		//fall-through the float case
-	case type::FLOAT:
 		_msg->writeByte(offset + 1);
 		//the name now...
 		_msg->writeUTF(item->getName());
 		//and finally the value
 		_msg->writeDouble(item->getValueAsDouble());
+		break;
+	case type::FLOAT:
+		_msg->writeByte(offset + 2);
+		//the name now...
+		_msg->writeUTF(item->getName());
+		//and finally the value
+		_msg->writeFloat(item->getValueAsFloat());
+		break;
+
 		break;
 	case type::STRING:
 		_msg->writeByte(offset + 3);

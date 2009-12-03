@@ -16,7 +16,6 @@ int KvPair::setValueAsInt(int value) {
 }
 
 int KvPair::setValueAsString(const std::string &value) {
-
 	_value = value;
 	return status::OK;
 }
@@ -25,6 +24,12 @@ int KvPair::setValueAsDouble(double value) {
 	_value = value;
 	return status::OK;
 }
+
+int KvPair::setValueAsFloat(float value) {
+	_value = value;
+	return status::OK;
+}
+
 
 int KvPair::getValueAsInt() const {
 	return boost::any_cast<int>(_value);
@@ -37,6 +42,11 @@ const std::string KvPair::getValueAsString() const {
 double KvPair::getValueAsDouble() const {
 	return boost::any_cast<double>(_value);
 }
+
+float KvPair::getValueAsFloat() const {
+	return boost::any_cast<float>(_value);
+}
+
 
 const std::string & KvPair::getName() const {
 	return _name;
@@ -59,6 +69,9 @@ std::ostream& operator<< (std::ostream& os, const KvPair& pair) {
 	}
 	if (typeInfo == typeid(double)) {
 		os << pair.getValueAsDouble();
+	}
+	if (typeInfo == typeid(float)) {
+		os << pair.getValueAsFloat();
 	}
 	if (typeInfo == typeid(void)) {
 		os << "void";

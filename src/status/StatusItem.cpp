@@ -20,8 +20,10 @@ StatusItem::StatusItem(const std::string &name, const type::Type type) :
 		_value = false;
 		break;
 	case type::DOUBLE:
-	case type::FLOAT:
 		_value = 0.0;
+		break;
+	case type::FLOAT:
+		_value = (float)0.0;
 		break;
 	case type::INT:
 		_value = 0;
@@ -85,6 +87,25 @@ int StatusItem::setValueAsDouble(double value) {
 	_mark();
 	return KvPair::setValueAsDouble(value);
 }
+
+int StatusItem::setValueAsFloat(float value) {
+	//If the type is not float, return an error
+	if (_type != type::FLOAT) {
+		LOG4CXX_WARN(logger, "Can't set a float value in the status item : " << *this);
+		return status::ERROR;
+	}
+
+	//Figure out if this is a new value. If they are the same, return immediately
+	if (!_value.empty() && value == getValueAsFloat()) {
+		LOG4CXX_DEBUG(logger, "Values match. Won't mark as dirty. Item " << *this);
+		return status::OK;
+	}
+	//set the value
+	_mark();
+	return KvPair::setValueAsFloat(value);
+
+}
+
 
 bool StatusItem::isChanged() const {
 	return _changedFlag;

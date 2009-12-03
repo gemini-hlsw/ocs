@@ -12,7 +12,7 @@ log4cxx::LoggerPtr JmsStatusSender::logger(log4cxx::Logger::getLogger(
 		"giapi.JmsStatusSender"));
 
 JmsStatusSender::JmsStatusSender() throw (CommunicationException) {
-	LOG4CXX_DEBUG(logger, "Constructing JMS Status sender")
+	LOG4CXX_DEBUG(logger, "Constructing JMS Status sender");
 	try {
 		ConnectionManager& manager = ConnectionManager::Instance();
 		//create an auto-acknowledged session
@@ -34,7 +34,7 @@ JmsStatusSender::JmsStatusSender() throw (CommunicationException) {
 }
 
 JmsStatusSender::~JmsStatusSender() {
-	LOG4CXX_DEBUG(logger, "Destroying JMS Status sender")
+	LOG4CXX_DEBUG(logger, "Destroying JMS Status sender");
 	cleanup();
 }
 

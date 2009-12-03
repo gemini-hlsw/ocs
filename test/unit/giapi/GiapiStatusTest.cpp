@@ -13,12 +13,14 @@ void GiapiStatusTest::setUp() {
 	//Initialize a few status items
 	StatusUtil::createStatusItem("test-item", giapi::type::INT);
 	StatusUtil::createStatusItem("test-item-double", giapi::type::DOUBLE);
+	StatusUtil::createStatusItem("test-item-float", giapi::type::FLOAT);
 	StatusUtil::createAlarmStatusItem("alarm-item", giapi::type::DOUBLE);
 	StatusUtil::createHealthStatusItem("health-item");
 
 	//Set a few values there
 	StatusUtil::setValueAsInt("test-item", 37);
 	StatusUtil::setValueAsDouble("test-item-double", 56.92);
+	StatusUtil::setValueAsFloat("test-item-float", (float)31.5);
 	StatusUtil::setAlarm("alarm-item", giapi::alarm::ALARM_WARNING,
 			giapi::alarm::ALARM_CAUSE_HIHI);
 	StatusUtil::setHealth("health-item", giapi::health::WARNING);
@@ -63,6 +65,19 @@ void GiapiStatusTest::testSetValuesStatusItem() {
 	CPPUNIT_ASSERT( StatusUtil::setValueAsDouble("test-item-double", 335.293) == giapi::status::OK );
 	//should work. no changes since last time
 	CPPUNIT_ASSERT( StatusUtil::setValueAsDouble("test-item-double", 335.293) == giapi::status::OK );
+
+	//should work. test-item-float is a float
+	CPPUNIT_ASSERT( StatusUtil::setValueAsFloat("test-item-float", 16.75f) == giapi::status::OK );
+	//should work. no changes since last time
+	CPPUNIT_ASSERT( StatusUtil::setValueAsFloat("test-item-float", 16.75f) == giapi::status::OK );
+
+	//should not work. test-item-float is a float
+	CPPUNIT_ASSERT( StatusUtil::setValueAsInt("test-item-float", 16) == giapi::status::ERROR );
+	//should not work. test-item-float is a float
+	CPPUNIT_ASSERT( StatusUtil::setValueAsDouble("test-item-float", 16.75) == giapi::status::ERROR );
+
+
+
 }
 
 void GiapiStatusTest::testSetValuesAlarms() {

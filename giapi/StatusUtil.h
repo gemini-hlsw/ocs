@@ -24,7 +24,7 @@ public:
 	 * @param type Type information for the values to be stored in the status
 	 *             item.
 	 *
-	 * @return giapi::status::OK if the item was sucessfully created,
+	 * @return giapi::status::OK if the item was successfully created,
 	 *         giapi::status::ERROR if there is an error.
 	 */
 	static int createStatusItem(const std::string & name, const type::Type type);
@@ -138,6 +138,22 @@ public:
 	static int setValueAsDouble(const std::string &name, double value);
 
 	/**
+	 * Set the value of the given status item to the provided
+	 * float value.
+	 *
+	 * @param name Name of the status item whose value will be set
+	 * @param value float value to store in the status item.
+	 *
+	 * @return giapi::status::OK if the value was set correctly
+	 *         giapi::status::ERROR  if there is a problem setting the
+	 *         value and the operation was aborted. This can happen if the
+	 *         type of the status item was not defined as type::FLOAT or
+	 *         if there is no StatusItem associated to the <code>name</code>
+	 */
+	static int setValueAsFloat(const std::string &name, float value);
+
+
+	/**
 	 * Set the alarm for the specified status alarm item.
 	 *
 	 * @param name Name of the alarm item. The alarm items should have been
@@ -186,7 +202,7 @@ public:
 	 * @param health the health state of the health status item specified by
 	 *               name
 	 *
-	 * @return giapi::status::OK if the health was sucessfully set
+	 * @return giapi::status::OK if the health was successfully set
 	 *         giapi::status::ERROR if there was an error setting the health
 	 *         (for instance, the health status item hasn't been created or
 	 *         the name doesn't correspond to a health status item).

@@ -115,6 +115,14 @@ int StatusDatabase::setStatusValueAsDouble(const std::string & name, double valu
 	return statusItem->setValueAsDouble(value);
 }
 
+int StatusDatabase::setStatusValueAsFloat(const std::string & name, float value) {
+	StatusItem * statusItem = getStatusItem(name);
+	if (statusItem == 0) {
+		return status::ERROR;
+	}
+	return statusItem->setValueAsFloat(value);
+}
+
 
 StatusItem * StatusDatabase::getStatusItem(const std::string & name) {
 	if (name.empty()) {
