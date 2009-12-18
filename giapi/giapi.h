@@ -177,17 +177,19 @@ namespace giapi {
 	 * The TCS Context structure.
 	 */
 	struct TcsContext {
-		double time;      //Time stamp (TAI) at next tick
+		double time;      //Gemini raw time
 		double x,y,z;     //Cartesian elements of mount pre-flexure az/el
 		//Telescope Parameters structure
 		struct Tel {
-			double fl;    //Telescope flocal length (mm)
+			double fl;    //Telescope focal length (mm)
 			double rma;   //Rotator mechanical angle (rads)
 			double an;    //Azimuth axis tilt NS (rads)
 			double aw;    //Azimuth axis tilt EW (rads)
 			double pnpae; //Az/El nonperpendicularity (rads)
 			double ca;    //Net left-right(horizontal) collimation (rads)
 			double ce;    //Net up-down(vertical) collimation (rads)
+			double pox;   //Pointing origin x-component (mm)
+			double poy;   //Pointing origin y-component (mm)
 		} tel;
 		double aoprms[15]; //Target independent apparent to observed parameters
 		double m2xy[3][2]; //M2 tip/tilt (3 chop states)

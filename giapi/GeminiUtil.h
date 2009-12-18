@@ -75,14 +75,17 @@ public:
 	 * @param ctx Reference to the <code>TcsContext</code> structure.
 	 *        The content of this structure will be filled up by
 	 *        this call.
+	 * @param timeout time in milliseconds to wait for the TCS context to be
+	 *        retrieved. If not specified, the call will block until the
+	 *        GMP replies back.
 	 *
 	 * @return status::OK if the TcsContext was filled up properly.
 	 *         status::ERROR if there was an error getting the TcsContext
 	 *
 	 * @throws GiapiException if there is an error accessing the GMP to
-	 *         obtain the TCS Context
+	 *         obtain the TCS Context, or a timeout occurs.
 	 */
-	static int getTcsContext(TcsContext& ctx) throw (GiapiException);
+	static int getTcsContext(TcsContext& ctx, long timeout) throw (GiapiException);
 
 private:
 	GeminiUtil();

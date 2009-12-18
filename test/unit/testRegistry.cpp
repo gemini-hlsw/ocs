@@ -14,3 +14,5 @@ CPPUNIT_TEST_SUITE_REGISTRATION( giapi::GiapiStatusTest );
 #include <giapi/GiapiCommandsTest.h>
 CPPUNIT_TEST_SUITE_REGISTRATION( giapi::GiapiCommandsTest );
 
+#include <giapi/GiapiGeminiTest.h>
+CPPUNIT_TEST_SUITE_REGISTRATION( giapi::GiapiGeminiTest );

@@ -80,6 +80,9 @@ public:
 	//Gemini Service Keys - PCS Update
 	const static std::string GMP_PCS_UPDATE_DESTINATION;
 
+	//Gemini Service Key - TCS Context
+	const static std::string GMP_TCS_CONTEXT_DESTINATION;
+
 	//Gemini Data Util Keys
 	const static std::string GMP_DATA_OBSEVENT_DESTINATION;
 	const static std::string GMP_DATA_OBSEVENT_NAME;

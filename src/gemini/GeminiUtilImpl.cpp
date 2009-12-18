@@ -1,6 +1,7 @@
 #include "GeminiUtilImpl.h"
 #include <gemini/epics/jms/JmsEpicsManager.h>
 #include <gemini/pcs/jms/JmsPcsUpdater.h>
+#include <gemini/tcs/jms/JmsTcsFetcher.h>
 namespace giapi {
 
 log4cxx::LoggerPtr GeminiUtilImpl::logger(log4cxx::Logger::getLogger("giapi.GeminiUtilImpl"));
@@ -10,6 +11,7 @@ std::auto_ptr<GeminiUtilImpl> GeminiUtilImpl::INSTANCE(0);
 GeminiUtilImpl::GeminiUtilImpl() throw (GiapiException) {
 	_epicsMgr = JmsEpicsManager::create();
 	_pcsUpdater = gemini::pcs::jms::JmsPcsUpdater::create();
+	_tcsFetcher = gemini::tcs::jms::JmsTcsFetcher::create();
 }
 
 GeminiUtilImpl::~GeminiUtilImpl() {
@@ -48,10 +50,8 @@ int GeminiUtilImpl::postPcsUpdate(double zernikes[], int size) {
 	return _pcsUpdater->postPcsUpdate(zernikes, size);
 }
 
-int GeminiUtilImpl::getTcsContext(TcsContext& ctx) const {
-	LOG4CXX_INFO(logger, "Get TCSContext ");
-	ctx.tel.fl = 0.4334;
-	return status::OK;
+int GeminiUtilImpl::getTcsContext(TcsContext& ctx, long timeout) const throw (GiapiException) {
+	return _tcsFetcher->fetch(ctx, timeout);
 }
 
 }

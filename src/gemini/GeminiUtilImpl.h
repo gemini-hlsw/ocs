@@ -7,6 +7,7 @@
 #include <giapi/EpicsStatusHandler.h>
 #include <gemini/epics/EpicsManager.h>
 #include <gemini/pcs/PcsUpdater.h>
+#include <gemini/tcs/TcsFetcher.h>
 
 namespace giapi {
 
@@ -30,7 +31,7 @@ public:
 
 	int postPcsUpdate(double zernikes[], int size);
 
-	int getTcsContext(TcsContext& ctx) const;
+	int getTcsContext(TcsContext& ctx, long timeout) const throw (GiapiException);
 
 	virtual ~GeminiUtilImpl();
 private:
@@ -45,6 +46,11 @@ private:
 	 * The PCS updater object
 	 */
 	gemini::pcs::pPcsUpdater _pcsUpdater;
+
+	/**
+	 * The TCS fetcher object
+	 */
+	gemini::tcs::pTcsFetcher _tcsFetcher;
 
 	GeminiUtilImpl() throw (GiapiException);
 

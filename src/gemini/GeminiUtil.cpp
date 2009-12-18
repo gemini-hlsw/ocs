@@ -27,8 +27,8 @@ int GeminiUtil::postPcsUpdate(double zernikes[],
 	return GeminiUtilImpl::Instance().postPcsUpdate(zernikes, size);
 }
 
-int GeminiUtil::getTcsContext(TcsContext& ctx) throw (GiapiException) {
-	return GeminiUtilImpl::Instance().getTcsContext(ctx);
+int GeminiUtil::getTcsContext(TcsContext& ctx, long timeout) throw (GiapiException) {
+	return GeminiUtilImpl::Instance().getTcsContext(ctx, timeout);
 }
 
 }
