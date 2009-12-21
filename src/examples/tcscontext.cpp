@@ -14,7 +14,59 @@
 
 using namespace giapi;
 
+/**
+ * Show the raw data in the context, useful to write simulation data.
+ */
+void showRawTcsContext(TcsContext &ctx) {
 
+	//skip time, since we will simulate that.
+	std::cout << ctx.x << " ";
+	std::cout << ctx.y << " ";
+	std::cout << ctx.z << " ";
+
+	std::cout << ctx.tel.fl << " ";
+	std::cout << ctx.tel.rma << " ";
+	std::cout << ctx.tel.an << " ";
+	std::cout << ctx.tel.aw << " ";
+	std::cout << ctx.tel.pnpae << " ";
+	std::cout << ctx.tel.ca << " ";
+	std::cout << ctx.tel.ce << " ";
+
+	//no pox, no poy
+
+	for (int i = 0; i < 15; i++) {
+		if (i == 12) {
+			continue; // don't write this zero value
+		}
+		std::cout << ctx.aoprms[i] << " ";
+	}
+
+	for (int x = 0; x < 3; x++) {
+		for (int y = 0; y < 2; y++) {
+			std::cout << ctx.m2xy[x][y] << " ";
+		}
+	}
+
+	std::cout << ctx.po.mx << " ";
+	std::cout << ctx.po.my << " ";
+	std::cout << ctx.po.ax << " ";
+	std::cout << ctx.po.ay << " ";
+	std::cout << ctx.po.bx << " ";
+	std::cout << ctx.po.by << " ";
+	std::cout << ctx.po.cx << " ";
+	std::cout << ctx.po.cy << " ";
+
+	for (int i = 0; i < 6; i++) {
+		std::cout << ctx.ao2t[i] << " ";
+	}
+
+	std::cout << std::endl;
+
+}
+
+/**
+ * Show a formatted version of the tcs context
+ */
 void showTcsContext(TcsContext &ctx) {
 	int const FORMAT_WIDTH = 14;
 	std::cout << "=================" << std::endl;
