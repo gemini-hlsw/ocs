@@ -8,7 +8,7 @@
 
 #Version and minor version
 V := 0
-MV := 8.0
+MV := 9.0
 
 LIBRARY_NAME := libgiapi-glue-cc
 
