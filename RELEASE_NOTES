@@ -1,5 +1,20 @@
 Release Notes - Gemini Instrument Application Programmer Interface 
 
+Version Release 9: Implementation of the getTCSContext method and simulation
+mechanism for testing. Added support for floating point values for status
+items. Implemented simulation mode for PCS Updater in the GMP. Synchrobus
+C library now is documented in doxygen (in a separate module) 
+
+** New Feature
+    * [GIAPI-114] - Add support for float values in status
+    * [GIAPI-59] - Add getTCSContext to Logging GMP
+    * [GIAPI-22] - Provide simulated getTCSContext testing capability in GMP
+
+** Improvements 
+    * [GIAPI-58] - Added simulation mode to PCS Updater 
+    
+    
+    
 Version Release 8: Implementation of postPCSUpdate method to offload corrections
 to the Primary Control System. Added C library (in a separate package) to interface
 with the secondary . September 30, 2009 
