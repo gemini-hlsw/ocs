@@ -17,6 +17,9 @@ seq-command: seq-command.o
 tcscontext: tcscontext.o
 	$(CXX) $(LIB_DIRS) $(LIBS) -o $@  $<
 
+pcsupdater: pcsupdater.o
+	$(CXX) $(LIB_DIRS) $(LIBS) -o $@  $<
+
 obsevent: obsevent.o
 	$(CXX) $(LIB_DIRS) $(LIBS) -o $@  $<
 
@@ -39,4 +42,4 @@ run:
 	
 	
 clean: 
-	-$(RM) *.o *.d seq-command tcscontext obsevent epicssubscription
+	-$(RM) *.o *.d seq-command tcscontext obsevent epicssubscription pcsupdater
