@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
 		//Wait until is killed
 		lock.await();
 	} catch (GmpException &e) {
-		std::cerr << "Is the GMP up?" << std::endl;
+		std::cerr << e.getMessage() <<  ". Is the GMP up?" << std::endl;
 	}
 	return 0;
 }

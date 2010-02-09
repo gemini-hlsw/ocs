@@ -4,11 +4,11 @@
 
 INC_DIRS= -I../../ -I$(ACTIVEMQ_INCLUDE) -I$(APR_INCLUDE)
 
-LIB_DIRS= -L../../ -L$(ACTIVEMQ_LIB) -L$(LOG4CXX_LIB)
+LIB_DIRS= -L../../ -L$(ACTIVEMQ_LIB) -L$(LOG4CXX_LIB) -L$(APR_LIB)
 
-LIBS= -lgiapi-glue-cc -lactivemq-cpp -llog4cxx
+LIBS= -lgiapi-glue-cc -lactivemq-cpp -llog4cxx -lapr-1
 
-LD_LIBRARY_PATH := ../../:$(LOG4CXX_LIB):$(CPPUNIT_LIB):$(ACTIVEMQ_LIB)
+LD_LIBRARY_PATH := ../../:$(LOG4CXX_LIB):$(CPPUNIT_LIB):$(ACTIVEMQ_LIB):$(APR_LIB)
 
 all: seq-command tcscontext obsevent epicssubscription
 

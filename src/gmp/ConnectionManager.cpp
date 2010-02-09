@@ -2,6 +2,7 @@
 
 #include <activemq/core/ActiveMQConnectionFactory.h>
 #include <decaf/util/concurrent/CountDownLatch.h>
+#include <activemq/library/ActiveMQCPP.h>
 
 namespace gmp {
 log4cxx::LoggerPtr ConnectionManager::logger(log4cxx::Logger::getLogger("giapi.gmp.ConnectionManager"));
@@ -45,14 +46,20 @@ void ConnectionManager::registerHandler(pGiapiErrorHandler handler) {
 
 void ConnectionManager::startup() throw (GmpException) {
 
+	activemq::library::ActiveMQCPP::initializeLibrary();
+
 	ConnectionFactory* connectionFactory= NULL;
 
-	std::string brokerURI = "tcp://127.0.0.1:61616"
-		"?wireFormat=openwire"
-		"&transport.useAsyncSend=true";
-	//        "&transport.commandTracingEnabled=true"
-	//        "&transport.tcpTracingEnabled=true";
-	//        "&wireFormat.tightEncodingEnabled=true";
+    std::string brokerURI =
+        "failover:(tcp://127.0.0.1:61616"
+        "?wireFormat=openwire"
+//        "&transport.useInactivityMonitor=false"
+//        "&connection.alwaysSyncSend=true"
+//        "&connection.useAsyncSend=true"
+//        "&transport.commandTracingEnabled=true"
+//        "&transport.tcpTracingEnabled=true"
+//        "&wireFormat.tightEncodingEnabled=true"
+        ")";
 
 	try {
 		// Create a ConnectionFactory

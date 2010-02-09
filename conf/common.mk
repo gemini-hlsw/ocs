@@ -47,11 +47,13 @@ CPPUNIT_LIB := $(CPPUNIT_BASE)/lib
 
 #ActiveMQ-cpp stuff
 ACTIVEMQ_BASE := $(EXTERNAL_LIB)/activemq-cpp
-ACTIVEMQ_INCLUDE := $(ACTIVEMQ_BASE)/include/activemq-cpp-2.2
+ACTIVEMQ_INCLUDE := $(ACTIVEMQ_BASE)/include/activemq-cpp-3.1.0
 ACTIVEMQ_LIB := $(ACTIVEMQ_BASE)/lib
 
 #APR libs
-APR_INCLUDE:= $(SYSTEM_INCLUDE_DIR)/apr-1
+APR_BASE:=$(EXTERNAL_LIB)/apr
+APR_INCLUDE:= $(APR_BASE)/include/apr-1
+APR_LIB:=$(APR_BASE)/lib
 
 #Extra distribution files to be included in the package for distribution
 EXTRA_DIST_FILES := README RELEASE_NOTES
