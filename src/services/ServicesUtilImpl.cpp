@@ -8,6 +8,7 @@ std::auto_ptr<ServicesUtilImpl> ServicesUtilImpl::INSTANCE(0);
 
 ServicesUtilImpl::ServicesUtilImpl() throw (CommunicationException) {
 	_producer = RequestProducer::create();
+	_logProducer = JmsLogProducer::create();
 }
 
 ServicesUtilImpl::~ServicesUtilImpl() {
@@ -20,15 +21,17 @@ ServicesUtilImpl& ServicesUtilImpl::Instance() throw (CommunicationException) {
 	return *INSTANCE;
 }
 
-void ServicesUtilImpl::systemLog(log::Level level, const std::string &msg) {
+void ServicesUtilImpl::systemLog(log::Level level, const std::string &msg)
+	throw (CommunicationException) {
+
+	_logProducer->postLog(level, msg);
+
 	switch (level) {
 	case log::INFO:LOG4CXX_INFO(logger, msg)
 		break;
 	case log::WARNING:LOG4CXX_WARN(logger, msg)
 		break;
 	case log::SEVERE:LOG4CXX_ERROR(logger, msg)
-		break;
-	case log::ALL:LOG4CXX_INFO(logger, msg)
 		break;
 	}
 }

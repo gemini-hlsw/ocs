@@ -130,11 +130,15 @@ namespace giapi {
 	}
 	namespace log {
 		enum Level {
-				ALL,
-				INFO,
+				Level_begin,
+
+				INFO = Level_begin,
 				WARNING,
-				SEVERE
+				SEVERE,
+
+				Level_end
 		};
+
 	}
 
 	namespace data {

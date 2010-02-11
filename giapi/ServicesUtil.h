@@ -7,6 +7,10 @@
 
 namespace giapi {
 
+/**
+ * The Service Util class provides general purpose services to the instruments,
+ * including Logging, Time and Configuration information
+ */
 class ServicesUtil {
 
 public:

@@ -8,6 +8,7 @@
 #include <giapi/giapiexcept.h>
 
 #include <services/RequestProducer.h>
+#include <services/JmsLogProducer.h>
 
 namespace giapi {
 
@@ -24,7 +25,11 @@ public:
 	 */
 	static ServicesUtilImpl& Instance() throw (CommunicationException) ;
 
-	void systemLog(log::Level level, const std::string &msg);
+	/**
+	 * Sends the logging information to the GMP
+	 */
+	void systemLog(log::Level level, const std::string &msg)
+		throw (CommunicationException);
 
 	long64 getObservatoryTime();
 
@@ -53,6 +58,12 @@ private:
 	 * Smart pointer to the RequestProducer object
 	 */
 	pRequestProducer _producer;
+
+	/**
+	 * Smart pointer to the Log Producer object
+	 */
+	pJmsLogProducer _logProducer;
+
 
 };
 

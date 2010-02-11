@@ -69,6 +69,10 @@ public:
 	//Property keyword
 	const static std::string GMP_UTIL_PROPERTY;
 
+	//Logging Service Keys
+	const static std::string GMP_SERVICES_LOG_DESTINATION;
+	const static std::string GMP_SERVICES_LOG_LEVEL;
+
 	//Status
 	const static std::string GMP_STATUS_DESTINATION;
 
