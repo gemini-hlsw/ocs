@@ -27,22 +27,47 @@ int main(int argc, char **argv) {
 
 		std::cout << "Starting Observation Event Example" << std::endl;
 
-		decaf::util::concurrent::CountDownLatch lock(1);
-
 		signal(SIGABRT, terminate);
 		signal(SIGTERM, terminate);
 		signal(SIGINT, terminate);
 
-		DataUtil::postObservationEvent(data::OBS_PREP, "S2009020201-1");
-		DataUtil::postObservationEvent(data::OBS_START_ACQ, "S2009020201-1");
-		DataUtil::postObservationEvent(data::OBS_END_ACQ, "S2009020201-1");
-		DataUtil::postObservationEvent(data::OBS_START_READOUT, "S2009020201-1");
-		DataUtil::postObservationEvent(data::OBS_END_READOUT, "S2009020201-1");
-		DataUtil::postObservationEvent(data::OBS_START_DSET_WRITE, "S2009020201-1");
-		DataUtil::postObservationEvent(data::OBS_END_DSET_WRITE, "S2009020201-1");
+		if (DataUtil::postObservationEvent(data::OBS_PREP, "S2009020201-1") == status::ERROR) {
+			std::cout << "ERROR posting OBS_PREP" << std::endl;
+		}
 
-		//Wait until is killed
-		lock.await();
+		if (DataUtil::postObservationEvent(data::OBS_START_ACQ, "S2009020201-1") == status::ERROR) {
+			std::cout << "ERROR posting OBS_PREP" << std::endl;
+		}
+
+		if (DataUtil::postObservationEvent(data::OBS_END_ACQ, "S2009020201-1") == status::ERROR) {
+			std::cout << "ERROR posting OBS_PREP" << std::endl;
+		}
+
+		if (DataUtil::postObservationEvent(data::OBS_START_READOUT, "S2009020201-1") == status::ERROR) {
+			std::cout << "ERROR posting OBS_PREP" << std::endl;
+		}
+
+		if (DataUtil::postObservationEvent(data::OBS_END_READOUT, "S2009020201-1") == status::ERROR) {
+			std::cout << "ERROR posting OBS_PREP" << std::endl;
+		}
+
+		if (DataUtil::postObservationEvent(data::OBS_START_DSET_WRITE, "S2009020201-1") == status::ERROR) {
+			std::cout << "ERROR posting OBS_PREP" << std::endl;
+		}
+
+		if (DataUtil::postObservationEvent(data::OBS_END_DSET_WRITE, "S2009020201-1") == status::ERROR) {
+			std::cout << "ERROR posting OBS_PREP" << std::endl;
+		}
+
+		if (DataUtil::postObservationEvent(data::OBS_END_DSET_WRITE, "") == status::ERROR) {
+			std::cout << "This is an expected error, the dataset label was empty. No message was sent to GMP" << std::endl;
+		}
+
+		if (DataUtil::postObservationEvent(data::OBS_END_DSET_WRITE, " ") == status::ERROR) {
+			std::cout << "This is an expected error, the dataset label was empty. No message was sent to GMP" << std::endl;
+		}
+
+
 	} catch (GmpException &e) {
 		std::cerr << e.getMessage() <<  ". Is the GMP up?" << std::endl;
 	}

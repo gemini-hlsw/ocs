@@ -9,9 +9,12 @@
 
 #include <gmp/GMPKeys.h>
 
-using namespace gmp;
+#include <util/StringUtil.h>
 
+using namespace gmp;
 namespace giapi {
+
+using namespace util;
 
 JmsObsEventProducer::JmsObsEventProducer() throw (CommunicationException) :
 	JmsProducer(GMPKeys::GMP_DATA_OBSEVENT_DESTINATION) {
@@ -28,7 +31,7 @@ pJmsObsEventProducer JmsObsEventProducer::create()
 }
 
 int JmsObsEventProducer::postEvent(data::ObservationEvent event,
-		const std::string &fileName) throw (CommunicationException) {
+		const std::string &dataLabel) throw (CommunicationException) {
 
 	std::string eventName = "UNKNOWN";
 
@@ -58,20 +61,27 @@ int JmsObsEventProducer::postEvent(data::ObservationEvent event,
 		return status::ERROR;
 	}
 
-	LOG4CXX_INFO(logger, "Observation Event: " << eventName << " datalabel: " << fileName);
+	/* If the string is empty, this is an error */
+	if (StringUtil::isEmpty(dataLabel)) {
+		LOG4CXX_WARN(logger, "The datalabel cannot be empty for observation event "<< eventName);
+		return status::ERROR;
+	}
+
+	LOG4CXX_INFO(logger, "Observation Event: " << eventName << " datalabel: " << dataLabel);
+
 
 	Message * msg;
 	try {
 		msg = _session->createMessage();
 
 		msg->setStringProperty(GMPKeys::GMP_DATA_OBSEVENT_NAME, eventName);
-		msg->setStringProperty(GMPKeys::GMP_DATA_OBSEVENT_FILENAME, fileName);
+		msg->setStringProperty(GMPKeys::GMP_DATA_OBSEVENT_FILENAME, dataLabel);
 
 		_producer->send(msg);
 
 	} catch (CMSException &e) {
 		throw CommunicationException("Problem sending observation event "
-				+ eventName + " associated to filename: " + fileName);
+				+ eventName + " associated to filename: " + dataLabel);
 	}
 
 	return status::OK;
