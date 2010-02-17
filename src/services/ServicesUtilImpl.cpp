@@ -33,6 +33,8 @@ void ServicesUtilImpl::systemLog(log::Level level, const std::string &msg)
 		break;
 	case log::SEVERE:LOG4CXX_ERROR(logger, msg)
 		break;
+	default:
+		return; //do nothing.
 	}
 }
 
