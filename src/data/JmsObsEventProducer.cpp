@@ -70,7 +70,7 @@ int JmsObsEventProducer::postEvent(data::ObservationEvent event,
 	LOG4CXX_INFO(logger, "Observation Event: " << eventName << " datalabel: " << dataLabel);
 
 
-	Message * msg;
+	Message * msg = NULL;
 	try {
 		msg = _session->createMessage();
 
@@ -79,7 +79,13 @@ int JmsObsEventProducer::postEvent(data::ObservationEvent event,
 
 		_producer->send(msg);
 
+		/* Destroy the message */
+		delete msg;
+
 	} catch (CMSException &e) {
+		if (msg != NULL) {
+			delete msg;
+		}
 		throw CommunicationException("Problem sending observation event "
 				+ eventName + " associated to filename: " + dataLabel);
 	}
