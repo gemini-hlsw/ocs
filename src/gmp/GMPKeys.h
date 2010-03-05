@@ -92,6 +92,13 @@ public:
 	const static std::string GMP_DATA_OBSEVENT_NAME;
 	const static std::string GMP_DATA_OBSEVENT_FILENAME;
 
+	const static std::string GMP_DATA_FILEEVENT_DESTINATION;
+	const static std::string GMP_DATA_FILEEVENT_TYPE;
+	const static std::string GMP_DATA_FILEEVENT_FILENAME;
+	const static std::string GMP_DATA_FILEEVENT_DATALABEL;
+	const static std::string GMP_DATA_FILEEVENT_HINT;
+
+
 	virtual ~GMPKeys();
 
 private:

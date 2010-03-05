@@ -6,6 +6,7 @@
 #include <giapi/giapi.h>
 
 #include <data/JmsObsEventProducer.h>
+#include <data/JmsFileEventsProducer.h>
 
 namespace giapi {
 
@@ -30,6 +31,8 @@ private:
 	static std::auto_ptr<DataUtilImpl> INSTANCE;
 
 	pJmsObsEventProducer pObsEventProducer;
+
+	pJmsFileEventsProducer pFileEventsProducer;
 
 	DataUtilImpl() throw (CommunicationException);
 };

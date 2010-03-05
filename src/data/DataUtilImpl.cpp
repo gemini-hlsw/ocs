@@ -8,10 +8,12 @@ std::auto_ptr<DataUtilImpl> DataUtilImpl::INSTANCE(0);
 
 DataUtilImpl::DataUtilImpl() throw (CommunicationException) {
 	pObsEventProducer = JmsObsEventProducer::create();
+	pFileEventsProducer = JmsFileEventsProducer::create();
 }
 
 DataUtilImpl::~DataUtilImpl() {
 	pObsEventProducer.release(); //just to make sure the object is destroyed.
+	pFileEventsProducer.release();
 }
 
 DataUtilImpl& DataUtilImpl::Instance() throw (CommunicationException) {
@@ -30,16 +32,17 @@ int DataUtilImpl::postObservationEvent(data::ObservationEvent event,
 
 int DataUtilImpl::postAncillaryFileEvent(const std::string & filename,
 		const std::string & datalabel) throw (CommunicationException) {
-	LOG4CXX_INFO(logger, "postAncilliaryFileEvent: Filename " << filename
-			<< " datalabel " << datalabel);
-	return status::OK;
+//	LOG4CXX_INFO(logger, "postAncilliaryFileEvent: Filename " << filename
+//			<< " datalabel " << datalabel);
+
+	return pFileEventsProducer->postAncillaryFileEvent(filename, datalabel);
 }
 
 int DataUtilImpl::postIntermediateFileEvent(const std::string & filename,
 		const std::string & datalabel, const std::string & hint) throw (CommunicationException) {
-	LOG4CXX_INFO(logger, "postIntermediateFileEvent: Filename " << filename
-			<< " datalabel " << datalabel << " hint " << hint);
-	return status::OK;
+//	LOG4CXX_INFO(logger, "postIntermediateFileEvent: Filename " << filename
+//			<< " datalabel " << datalabel << " hint " << hint);
+	return pFileEventsProducer->postIntermediateFileEvent(filename, datalabel, hint);
 }
 
 }
