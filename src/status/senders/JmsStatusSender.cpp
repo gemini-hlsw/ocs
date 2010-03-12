@@ -18,12 +18,11 @@ JmsStatusSender::JmsStatusSender() throw (CommunicationException) {
 		//create an auto-acknowledged session
 		_session = pSession(manager.createSession());
 
-		//We will use a queue to send requests to the GMP
-		_destination = pDestination(_session->createTopic(
-				GMPKeys::GMP_STATUS_DESTINATION));
+//		//We will use a queue to send requests to the GMP
+//		_destination = pDestination(_session->createTopic(
+//				GMPKeys::GMP_STATUS_DESTINATION));
 		//Instantiate the message producer for this destination
-		_producer = pMessageProducer(_session->createProducer(
-				_destination.get()));
+		_producer = pMessageProducer(_session->createProducer(NULL));
 	} catch (CMSException& e) {
 		//clean any resources that might have been allocated
 		cleanup();
@@ -52,8 +51,14 @@ int JmsStatusSender::postStatus(StatusItem * statusItem) const
 		StatusSerializerVisitor serializer(msg);
 		statusItem->accept(serializer);
 
+		//Create the destination...
+		//We will use a topic to send the status to the JMS Broker
+		Destination * destination = _session->createTopic(
+				GMPKeys::GMP_STATUS_DESTINATION_PREFIX + statusItem->getName());
 		//and dispatch the message
-		_producer->send(msg);
+		_producer->send(destination, msg);
+
+		delete destination;
 
 	} catch (CMSException &ex) {
 		LOG4CXX_WARN(logger, "Problem posting status: " + ex.getMessage());

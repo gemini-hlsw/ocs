@@ -74,7 +74,7 @@ public:
 	const static std::string GMP_SERVICES_LOG_LEVEL;
 
 	//Status
-	const static std::string GMP_STATUS_DESTINATION;
+	const static std::string GMP_STATUS_DESTINATION_PREFIX;
 
 	//Gemini Service Keys - EPICS Monitoring
 	const static std::string GMP_EPICS_TOPIC_PREFIX;
