@@ -5,20 +5,21 @@
 namespace giapi {
 log4cxx::LoggerPtr LogCommandUtil::logger(log4cxx::Logger::getLogger("giapi.LogCommandUtil"));
 
-std::auto_ptr<LogCommandUtil> LogCommandUtil::INSTANCE(0);
+pLogCommandUtil LogCommandUtil::INSTANCE(static_cast<LogCommandUtil *>(0));
 
 LogCommandUtil::LogCommandUtil() {
 
 }
 
 LogCommandUtil::~LogCommandUtil() {
+	LOG4CXX_DEBUG(logger, "Destroying Log Command Util Service");
 }
 
-LogCommandUtil& LogCommandUtil::Instance() {
+pLogCommandUtil LogCommandUtil::Instance() {
 	if (INSTANCE.get() == 0) {
 		INSTANCE.reset(new LogCommandUtil());
 	}
-	return *INSTANCE;
+	return INSTANCE;
 }
 
 int LogCommandUtil::subscribeSequenceCommand(command::SequenceCommand id,

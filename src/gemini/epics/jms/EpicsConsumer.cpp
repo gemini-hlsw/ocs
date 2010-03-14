@@ -1,10 +1,3 @@
-/*
- * EpicsConsumer.cpp
- *
- *  Created on: Mar 23, 2009
- *      Author: anunez
- */
-
 #include "EpicsConsumer.h"
 #include <gmp/ConnectionManager.h>
 
@@ -94,10 +87,6 @@ void EpicsConsumer::onMessage(const cms::Message * message) {
 		pEpicsStatusItem item = JmsEpicsFactory::buildEpicsStatusItem(bytesMessage);
 		_handler->channelChanged(item);
 	}
-
-
-
-
 }
 
 }

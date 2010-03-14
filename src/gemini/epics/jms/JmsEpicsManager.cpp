@@ -1,10 +1,3 @@
-/*
- * JmsEpicsManager.cpp
- *
- *  Created on: Feb 18, 2009
- *      Author: anunez
- */
-
 #include "JmsEpicsManager.h"
 
 #include <gmp/ConnectionManager.h>

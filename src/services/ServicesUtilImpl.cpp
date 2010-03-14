@@ -4,7 +4,7 @@ namespace giapi {
 
 log4cxx::LoggerPtr ServicesUtilImpl::logger(log4cxx::Logger::getLogger("giapi.ServicesUtilImpl"));
 
-std::auto_ptr<ServicesUtilImpl> ServicesUtilImpl::INSTANCE(0);
+pServicesUtilImpl ServicesUtilImpl::INSTANCE(static_cast<ServicesUtilImpl *>(0));
 
 ServicesUtilImpl::ServicesUtilImpl() throw (CommunicationException) {
 	_producer = RequestProducer::create();
@@ -12,13 +12,14 @@ ServicesUtilImpl::ServicesUtilImpl() throw (CommunicationException) {
 }
 
 ServicesUtilImpl::~ServicesUtilImpl() {
+	LOG4CXX_DEBUG(logger, "Destroying Services Util");
 }
 
-ServicesUtilImpl& ServicesUtilImpl::Instance() throw (CommunicationException) {
+pServicesUtilImpl ServicesUtilImpl::Instance() throw (CommunicationException) {
 	if (INSTANCE.get() == 0) {
 		INSTANCE.reset(new ServicesUtilImpl());
 	}
-	return *INSTANCE;
+	return INSTANCE;
 }
 
 void ServicesUtilImpl::systemLog(log::Level level, const std::string &msg)

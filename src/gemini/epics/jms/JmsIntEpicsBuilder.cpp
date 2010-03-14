@@ -1,10 +1,3 @@
-/*
- * JmsIntEpicsBuilder.cpp
- *
- *  Created on: Mar 31, 2009
- *      Author: anunez
- */
-
 #include "JmsIntEpicsBuilder.h"
 #include <gemini/epics/EpicsStatusItemImpl.h>
 

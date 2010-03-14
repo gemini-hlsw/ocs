@@ -1,9 +1,3 @@
-/*
- * JmsLogProducer.cpp
- * Implementation of the
- *
- */
-
 #include "JmsLogProducer.h"
 #include <gmp/GMPKeys.h>
 

@@ -12,6 +12,10 @@
 
 namespace giapi {
 
+class ServicesUtilImpl;
+
+typedef std::tr1::shared_ptr<ServicesUtilImpl> pServicesUtilImpl;
+
 class ServicesUtilImpl {
 	/**
 	 * Logging facility
@@ -23,7 +27,7 @@ public:
 	/**
 	 * Get the singleton instance of the ServiceUtil implementation
 	 */
-	static ServicesUtilImpl& Instance() throw (CommunicationException) ;
+	static pServicesUtilImpl Instance() throw (CommunicationException) ;
 
 	/**
 	 * Sends the logging information to the GMP
@@ -47,7 +51,7 @@ public:
 	virtual ~ServicesUtilImpl();
 
 private:
-	static std::auto_ptr<ServicesUtilImpl> INSTANCE;
+	static pServicesUtilImpl INSTANCE;
 
 	/**
 	 * Private constructor

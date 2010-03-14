@@ -1,10 +1,3 @@
-/*
- * JmsFloatEpicsBuilder.cpp
- *
- *  Created on: Mar 31, 2009
- *      Author: anunez
- */
-
 #include "JmsFloatEpicsBuilder.h"
 #include <gemini/epics/EpicsStatusItemImpl.h>
 

@@ -15,6 +15,8 @@ namespace giapi {
  * This is the delegate class used to implement the behavior
  * described in the Gemini Util class.
  */
+class GeminiUtilImpl;
+typedef std::tr1::shared_ptr<GeminiUtilImpl> pGeminiUtilImpl;
 
 class GeminiUtilImpl {
 	/**
@@ -23,7 +25,7 @@ class GeminiUtilImpl {
 	static log4cxx::LoggerPtr logger;
 
 public:
-	static GeminiUtilImpl& Instance() throw (GiapiException);
+	static pGeminiUtilImpl Instance() throw (GiapiException);
 
 	int subscribeEpicsStatus(const std::string &name, pEpicsStatusHandler handler) throw (GiapiException);
 
@@ -35,7 +37,7 @@ public:
 
 	virtual ~GeminiUtilImpl();
 private:
-	static std::auto_ptr<GeminiUtilImpl> INSTANCE;
+	static pGeminiUtilImpl INSTANCE;
 
 	/**
 	 * Manager of Epics subscriptions

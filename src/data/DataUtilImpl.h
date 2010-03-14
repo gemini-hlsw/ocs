@@ -10,13 +10,16 @@
 
 namespace giapi {
 
+class DataUtilImpl;
+typedef std::tr1::shared_ptr<DataUtilImpl> pDataUtilImpl;
+
 class DataUtilImpl {
 	/**
 	 * Logging facility
 	 */
 	static log4cxx::LoggerPtr logger;
 public:
-	static DataUtilImpl& Instance() throw (CommunicationException);
+	static pDataUtilImpl Instance() throw (CommunicationException);
 
 	int postObservationEvent(data::ObservationEvent event, const std::string & datalabel) throw (CommunicationException);
 
@@ -28,7 +31,7 @@ public:
 	virtual ~DataUtilImpl();
 
 private:
-	static std::auto_ptr<DataUtilImpl> INSTANCE;
+	static pDataUtilImpl INSTANCE;
 
 	pJmsObsEventProducer pObsEventProducer;
 

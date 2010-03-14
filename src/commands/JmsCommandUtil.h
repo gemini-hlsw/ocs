@@ -91,6 +91,10 @@ private:
  * Implements the Command Util Interface using JMS as the underlying
  * communication mechanism
  */
+class JmsCommandUtil;
+
+typedef std::tr1::shared_ptr<JmsCommandUtil> pJmsCommandUtil;
+
 class JmsCommandUtil {
 
 	/**
@@ -110,7 +114,7 @@ public:
 	int postCompletionInfo(command::ActionId id,
 			pHandlerResponse response) throw (PostException);
 
-	static JmsCommandUtil& Instance() throw (CommunicationException);
+	static pJmsCommandUtil Instance() throw (CommunicationException);
 
 	virtual ~JmsCommandUtil();
 
@@ -118,7 +122,7 @@ private:
 	/**
 	 * Internal instance of this utility class
 	 */
-	static std::auto_ptr<JmsCommandUtil> INSTANCE;
+	static pJmsCommandUtil INSTANCE;
 	JmsCommandUtil() throw (CommunicationException);
 
 	typedef hash_map<const std::string, ActivityHolder *, hash<std::string>, util::eqstr>

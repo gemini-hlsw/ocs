@@ -17,7 +17,7 @@ int CommandUtil::subscribeSequenceCommand(command::SequenceCommand id,
 	if (handler == 0) {
 		return giapi::status::ERROR;
 	}
-	return JmsCommandUtil::Instance().subscribeSequenceCommand(id, activities, handler);
+	return JmsCommandUtil::Instance()->subscribeSequenceCommand(id, activities, handler);
 
 }
 
@@ -28,7 +28,7 @@ int CommandUtil::subscribeApply(const std::string & prefix,
 	if (handler == 0) {
 		return giapi::status::ERROR;
 	}
-	return JmsCommandUtil::Instance().subscribeApply(prefix, activities, handler);
+	return JmsCommandUtil::Instance()->subscribeApply(prefix, activities, handler);
 }
 
 int CommandUtil::postCompletionInfo(command::ActionId id,
@@ -53,7 +53,7 @@ int CommandUtil::postCompletionInfo(command::ActionId id,
 			return giapi::status::ERROR;
 	}
 
-	return JmsCommandUtil::Instance().postCompletionInfo(id, response);
+	return JmsCommandUtil::Instance()->postCompletionInfo(id, response);
 }
 
 }

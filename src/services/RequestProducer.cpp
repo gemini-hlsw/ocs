@@ -84,6 +84,8 @@ std::string RequestProducer::getProperty(const std::string &key, long timeout)
 
 		//send the reply
 		_producer->send(request);
+		//destroy the request, not needed anymore
+		delete request;
 
 		//and wait for the response.
 		Message *reply =
@@ -99,9 +101,7 @@ std::string RequestProducer::getProperty(const std::string &key, long timeout)
 		if (reply != NULL) {
 			TextMessage *mm = (TextMessage *)reply;
 			answer = mm->getText();
-		} else { //timeout. Delete original request, and throw an exception
-			if (request != NULL)
-				delete request;
+		} else { //timeout. Throw an exception
 			throw TimeoutException("Time out while waiting for property " + key);
 		}
 	} catch (CMSException &e) {
@@ -111,9 +111,6 @@ std::string RequestProducer::getProperty(const std::string &key, long timeout)
 		throw PostException("Problem sending utility request : "
 				+ e.getMessage());
 	}
-	//if we are here, everything went okay. Destroy the reply and return OK
-	if (request != NULL)
-		delete request;
 
 	return answer;
 }

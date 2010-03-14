@@ -12,6 +12,10 @@ namespace giapi {
 /**
  * A Command util class that logs the requests.
  */
+
+class LogCommandUtil;
+typedef std::tr1::shared_ptr<LogCommandUtil> pLogCommandUtil;
+
 class LogCommandUtil {
 	/**
 	 * Logging facility
@@ -27,11 +31,11 @@ public:
 
 	int postCompletionInfo(command::ActionId id, pHandlerResponse response);
 
-	static LogCommandUtil& Instance();
+	static pLogCommandUtil Instance();
 	virtual ~LogCommandUtil();
 
 private:
-	static std::auto_ptr<LogCommandUtil> INSTANCE;
+	static pLogCommandUtil INSTANCE;
 	LogCommandUtil();
 };
 

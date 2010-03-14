@@ -4,7 +4,7 @@ namespace giapi {
 
 log4cxx::LoggerPtr DataUtilImpl::logger(log4cxx::Logger::getLogger("giapi.DataUtilImpl"));
 
-std::auto_ptr<DataUtilImpl> DataUtilImpl::INSTANCE(0);
+pDataUtilImpl DataUtilImpl::INSTANCE(static_cast<DataUtilImpl *>(0));
 
 DataUtilImpl::DataUtilImpl() throw (CommunicationException) {
 	pObsEventProducer = JmsObsEventProducer::create();
@@ -12,15 +12,16 @@ DataUtilImpl::DataUtilImpl() throw (CommunicationException) {
 }
 
 DataUtilImpl::~DataUtilImpl() {
+	LOG4CXX_DEBUG(logger, "Destroying Data Util Service");
 	pObsEventProducer.release(); //just to make sure the object is destroyed.
 	pFileEventsProducer.release();
 }
 
-DataUtilImpl& DataUtilImpl::Instance() throw (CommunicationException) {
+pDataUtilImpl DataUtilImpl::Instance() throw (CommunicationException) {
 	if (INSTANCE.get() == 0) {
 		INSTANCE.reset(new DataUtilImpl());
 	}
-	return *INSTANCE;
+	return INSTANCE;
 }
 
 int DataUtilImpl::postObservationEvent(data::ObservationEvent event,

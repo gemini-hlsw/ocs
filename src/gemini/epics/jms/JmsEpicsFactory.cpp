@@ -1,9 +1,3 @@
-/*
- * JmsEpicsFactory.cpp
- *
- *  Created on: Mar 30, 2009
- *      Author: anunez
- */
 
 #include "JmsEpicsFactory.h"
 

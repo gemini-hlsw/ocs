@@ -7,38 +7,37 @@ namespace giapi {
 
 log4cxx::LoggerPtr JmsCommandUtil::logger(log4cxx::Logger::getLogger("giapi.JmsCommandUtil"));
 
-std::auto_ptr<JmsCommandUtil> JmsCommandUtil::INSTANCE(0);
+pJmsCommandUtil JmsCommandUtil::INSTANCE(static_cast<JmsCommandUtil *>(0));
 
 JmsCommandUtil::JmsCommandUtil() throw (CommunicationException) {
 	_completionInfoProducer = gmp::CompletionInfoProducer::create();
 }
 
 JmsCommandUtil::~JmsCommandUtil() {
-	LOG4CXX_DEBUG(logger, "Destroying JmsCommandUtil");
+	LOG4CXX_DEBUG(logger, "Destroying Jms Command Util Service");
 
 	//destroy all the activity holders
 	CommandHolderMap :: const_iterator it;
 	for (it = _commandHolderMap.begin(); it != _commandHolderMap.end(); it++ ) {
 		ActivityHolder * tmp = (*it).second;
-		LOG4CXX_DEBUG(logger, "Destroying activity holder ");
 		if (tmp != NULL) {
 			delete tmp;
 		}
 	}
 }
 
-JmsCommandUtil& JmsCommandUtil::Instance() throw (CommunicationException){
+pJmsCommandUtil JmsCommandUtil::Instance() throw (CommunicationException){
 	if (INSTANCE.get() == 0) {
 		INSTANCE.reset(new JmsCommandUtil());
 	}
-	return *INSTANCE;
+	return INSTANCE;
 }
 
 int JmsCommandUtil::subscribeApply(const std::string & prefix,
 		command::ActivitySet activities,
 		pSequenceCommandHandler handler) throw (CommunicationException) {
 
-	if (LogCommandUtil::Instance().subscribeApply(prefix, activities, handler)
+	if (LogCommandUtil::Instance()->subscribeApply(prefix, activities, handler)
 			!= giapi::status::ERROR) {
 		//Create a consumer for this prefix and activities
 		pSequenceCommandConsumer consumer =
@@ -61,7 +60,7 @@ int JmsCommandUtil::subscribeSequenceCommand(command::SequenceCommand id,
 		command::ActivitySet activities,
 		pSequenceCommandHandler handler) throw (CommunicationException) {
 
-	if (LogCommandUtil::Instance().subscribeSequenceCommand(id, activities, handler)
+	if (LogCommandUtil::Instance()->subscribeSequenceCommand(id, activities, handler)
 			!= giapi::status::ERROR) {
 		//Create a consumer for this sequence commands and activities.
 		pSequenceCommandConsumer consumer =
@@ -87,7 +86,7 @@ int JmsCommandUtil::subscribeSequenceCommand(command::SequenceCommand id,
 int JmsCommandUtil::postCompletionInfo(command::ActionId id,
 		pHandlerResponse response) throw (PostException) {
 
-	if (LogCommandUtil::Instance().postCompletionInfo(id, response) !=
+	if (LogCommandUtil::Instance()->postCompletionInfo(id, response) !=
 		giapi::status::ERROR) {
 		return _completionInfoProducer->postCompletionInfo(id, response);
 	}

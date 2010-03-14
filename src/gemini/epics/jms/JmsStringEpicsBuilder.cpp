@@ -1,22 +1,13 @@
-/*
- * JmsStringEpicsBuilder.cpp
- *
- *  Created on: Mar 31, 2009
- *      Author: anunez
- */
-
 #include "JmsStringEpicsBuilder.h"
 #include <gemini/epics/EpicsStatusItemImpl.h>
 
 namespace giapi {
 
 JmsStringEpicsBuilder::JmsStringEpicsBuilder(BytesMessage *bm) : JmsEpicsBuilder(bm) {
-	// TODO Auto-generated constructor stub
 
 }
 
 JmsStringEpicsBuilder::~JmsStringEpicsBuilder() {
-	// TODO Auto-generated destructor stub
 }
 
 pEpicsStatusItem JmsStringEpicsBuilder::getEpicsStatusItem() {

@@ -1,10 +1,3 @@
-/*
- * JmsObsEventProducer.cpp
- *
- *  Created on: Jun 10, 2009
- *      Author: anunez
- */
-
 #include <data/JmsObsEventProducer.h>
 
 #include <gmp/GMPKeys.h>

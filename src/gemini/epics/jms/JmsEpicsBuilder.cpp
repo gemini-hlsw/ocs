@@ -1,10 +1,3 @@
-/*
- * JmsEpicsBuilderBase.cpp
- *
- *  Created on: Mar 31, 2009
- *      Author: anunez
- */
-
 #include "JmsEpicsBuilder.h"
 
 namespace giapi {

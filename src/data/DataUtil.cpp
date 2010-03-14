@@ -10,17 +10,17 @@ DataUtil::~DataUtil() {
 
 int DataUtil::postObservationEvent(data::ObservationEvent event,
 		const std::string & datalabel) throw (GiapiException) {
-	return DataUtilImpl::Instance().postObservationEvent(event, datalabel);
+	return DataUtilImpl::Instance()->postObservationEvent(event, datalabel);
 }
 
 int DataUtil::postAncillaryFileEvent(const std::string & filename,
 		const std::string & datalabel) throw (GiapiException) {
-	return DataUtilImpl::Instance().postAncillaryFileEvent(filename, datalabel);
+	return DataUtilImpl::Instance()->postAncillaryFileEvent(filename, datalabel);
 }
 
 int DataUtil::postIntermediateFileEvent(const std::string & filename,
 		const std::string & datalabel, const std::string & hint) throw (GiapiException) {
-	return DataUtilImpl::Instance().postIntermediateFileEvent(filename, datalabel, hint);
+	return DataUtilImpl::Instance()->postIntermediateFileEvent(filename, datalabel, hint);
 }
 
 }

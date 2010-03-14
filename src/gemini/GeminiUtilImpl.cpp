@@ -6,7 +6,7 @@ namespace giapi {
 
 log4cxx::LoggerPtr GeminiUtilImpl::logger(log4cxx::Logger::getLogger("giapi.GeminiUtilImpl"));
 
-std::auto_ptr<GeminiUtilImpl> GeminiUtilImpl::INSTANCE(0);
+pGeminiUtilImpl GeminiUtilImpl::INSTANCE(static_cast<GeminiUtilImpl *>(0));
 
 GeminiUtilImpl::GeminiUtilImpl() throw (GiapiException) {
 	_epicsMgr = JmsEpicsManager::create();
@@ -15,15 +15,17 @@ GeminiUtilImpl::GeminiUtilImpl() throw (GiapiException) {
 }
 
 GeminiUtilImpl::~GeminiUtilImpl() {
-	LOG4CXX_DEBUG(logger,  "Destroying Gemini Util Implementation");
+	LOG4CXX_DEBUG(logger,  "Destroying Gemini Util Service");
 	_epicsMgr.reset();
+	_pcsUpdater.reset();
+	_tcsFetcher.reset();
 }
 
-GeminiUtilImpl& GeminiUtilImpl::Instance() throw (GiapiException) {
+pGeminiUtilImpl GeminiUtilImpl::Instance() throw (GiapiException) {
 	if (INSTANCE.get() == 0) {
 		INSTANCE.reset(new GeminiUtilImpl());
 	}
-	return *INSTANCE;
+	return INSTANCE;
 }
 
 int GeminiUtilImpl::subscribeEpicsStatus(const std::string &name,

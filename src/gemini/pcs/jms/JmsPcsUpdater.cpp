@@ -27,7 +27,7 @@ int JmsPcsUpdater::postPcsUpdate(double zernikes[], int size)
 	if (size <= 0)
 		return status::ERROR;
 
-	BytesMessage * msg;
+	BytesMessage * msg = NULL;
 	try {
 		msg = _session->createBytesMessage();
 		//first, the size
@@ -37,8 +37,13 @@ int JmsPcsUpdater::postPcsUpdate(double zernikes[], int size)
 			msg->writeDouble(zernikes[i]);
 		}
 		_producer->send(msg);
+		
+		delete msg;
 
 	} catch (CMSException &e) {
+		if (msg != NULL) {
+			delete msg;
+		}
 		throw CommunicationException("Problem posting updates to the PCS: " + e.getMessage());
 	}
 	return status::OK;

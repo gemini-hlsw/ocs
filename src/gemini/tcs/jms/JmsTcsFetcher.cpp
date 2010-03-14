@@ -34,7 +34,7 @@ pTcsFetcher JmsTcsFetcher::create() throw (CommunicationException) {
 int JmsTcsFetcher::fetch(TcsContext & ctx, long timeout)
 		throw (CommunicationException, TimeoutException) {
 
-	Message * request;
+	Message * request = NULL;
 	try {
 		//an empty message to make the request. We don't need to provide any data.
 		request = _session->createMessage();
@@ -46,6 +46,8 @@ int JmsTcsFetcher::fetch(TcsContext & ctx, long timeout)
 		request->setCMSReplyTo(tmpQueue);
 		//send the request
 		_producer->send(request);
+		//delete the request, not needed anymore
+		delete request;
 
 		//and wait for the response, timing out if necessary.
 		Message *reply = (timeout > 0) ? tmpConsumer->receive(timeout)
@@ -59,12 +61,13 @@ int JmsTcsFetcher::fetch(TcsContext & ctx, long timeout)
 
 		if (reply != NULL) {
 			return _buildTcsContext(ctx, reply);
-		} else { //timeout. Delete original request, and throw an exception
-			if (request != NULL)
-				delete request;
+		} else { //timeout .Throw an exception
 			throw TimeoutException("Time out while waiting for TCSContext");
 		}
 	} catch (CMSException &e) {
+		if (request != NULL) {
+			delete request;
+		}
 		throw CommunicationException("Problem fetching the TCS Context "
 				+ e.getMessage());
 	}
