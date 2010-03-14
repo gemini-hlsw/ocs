@@ -23,7 +23,7 @@ public:
 	virtual void channelChanged(pEpicsStatusItem item) = 0;
 
 	
-	virtual ~EpicsStatusHandler();
+	virtual ~EpicsStatusHandler() {};
 };
 
 typedef std::tr1::shared_ptr<EpicsStatusHandler> pEpicsStatusHandler;
