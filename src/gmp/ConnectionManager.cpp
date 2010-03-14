@@ -3,6 +3,7 @@
 #include <activemq/core/ActiveMQConnectionFactory.h>
 #include <decaf/util/concurrent/CountDownLatch.h>
 #include <activemq/library/ActiveMQCPP.h>
+#include <decaf/io/IOException.h>
 
 namespace gmp {
 log4cxx::LoggerPtr ConnectionManager::logger(log4cxx::Logger::getLogger("giapi.gmp.ConnectionManager"));
@@ -14,7 +15,8 @@ std::auto_ptr<ConnectionManager>
 		ConnectionManager::INSTANCE(new ConnectionManager());
 
 ConnectionManager::ConnectionManager() {
-
+	//Initialize the ActiveMQ Library before it is used
+	activemq::library::ActiveMQCPP::initializeLibrary();
 }
 
 ConnectionManager::~ConnectionManager() {
@@ -23,7 +25,7 @@ ConnectionManager::~ConnectionManager() {
 	//TODO: We need to close sessions, destinations, producers and consumers.
 	try {
 		if (_connection.get() != 0) {
-			_connection->close();
+			_connection->stop();
 		}
 	} catch (CMSException& e) {
 		LOG4CXX_WARN(logger, "Problem closing connection");
@@ -32,7 +34,8 @@ ConnectionManager::~ConnectionManager() {
 	//release all the references to the objects stored
 	_errorHandlersFunctions.clear();
 	_errorHandlerObjects.clear();
-
+	//TODO: shut down the ActiveMQ library 
+	//activemq::library::ActiveMQCPP::shutdownLibrary();
 }
 
 void ConnectionManager::registerOperation(giapi_error_handler op) {
@@ -46,41 +49,29 @@ void ConnectionManager::registerHandler(pGiapiErrorHandler handler) {
 
 void ConnectionManager::startup() throw (GmpException) {
 
-	activemq::library::ActiveMQCPP::initializeLibrary();
-
-	ConnectionFactory* connectionFactory= NULL;
-
     std::string brokerURI =
         "failover:(tcp://127.0.0.1:61616"
         "?wireFormat=openwire"
 //        "&transport.useInactivityMonitor=false"
 //        "&connection.alwaysSyncSend=true"
-        "&connection.useAsyncSend=true"
+//        "&connection.useAsyncSend=true"
 //        "&transport.commandTracingEnabled=true"
 //        "&transport.tcpTracingEnabled=true"
 //        "&wireFormat.tightEncodingEnabled=true"
         ")";
 
 	try {
-		// Create a ConnectionFactory
-		connectionFactory =
-		ConnectionFactory::createCMSConnectionFactory( brokerURI );
+		std::auto_ptr<ConnectionFactory> connectionFactory(
+				ConnectionFactory::createCMSConnectionFactory( brokerURI ));
 
 		// Create a Connection
-		_connection = pConnection(connectionFactory->createConnection());
-
-		delete connectionFactory;
-		connectionFactory = NULL;
+		_connection.reset(connectionFactory->createConnection());
 
 		_connection->start();
 
 		_connection->setExceptionListener(this);
 
 	} catch (CMSException& e) {
-		if (connectionFactory != NULL) {
-			delete connectionFactory;
-			connectionFactory = NULL;
-		}
 		throw GmpException("Problem connecting to GMP. " + e.getMessage());
 	}
 }
@@ -97,7 +88,7 @@ void ConnectionManager::onException(const CMSException & ex) {
 	LOG4CXX_ERROR(logger, "Communication Exception occurred ");
 	ex.printStackTrace();
 	if (_connection.get() != 0) {
-		_connection->close();
+		_connection->stop();
 	}
 	//reset the connection, so next time it will try to reconnect...
 	_connection.reset(static_cast<Connection *>(0));
