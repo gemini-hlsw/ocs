@@ -47,7 +47,7 @@ CPPUNIT_LIB := $(CPPUNIT_BASE)/lib
 
 #ActiveMQ-cpp stuff
 ACTIVEMQ_BASE := $(EXTERNAL_LIB)/activemq-cpp
-ACTIVEMQ_INCLUDE := $(ACTIVEMQ_BASE)/include/activemq-cpp-3.1.0
+ACTIVEMQ_INCLUDE := $(ACTIVEMQ_BASE)/include/activemq-cpp-3.1.1
 ACTIVEMQ_LIB := $(ACTIVEMQ_BASE)/lib
 
 #APR libs

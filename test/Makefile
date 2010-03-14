@@ -21,8 +21,9 @@ benchmarks::
 integration::  
 	@-cd integration; make
 
-		
-
+dummy:: 
+	echo $(shell find $(SUBDIRS) -name *.o)
+	echo $(wildcard **/*.o)
 clean:
 	@for subdir in $(SUBDIRS); \
 	do \
