@@ -5,7 +5,7 @@ namespace gmp {
 
 log4cxx::LoggerPtr JmsUtil::logger(log4cxx::Logger::getLogger("gmp:JmsUtil"));
 
-std::auto_ptr<JmsUtil> JmsUtil::INSTANCE(0);
+pJmsUtil JmsUtil::INSTANCE(static_cast<JmsUtil *>(0));
 
 JmsUtil::JmsUtil() {
 	LOG4CXX_DEBUG(logger, "Initializing the JMS Util dictionaries");
@@ -41,15 +41,15 @@ JmsUtil::~JmsUtil() {
 	LOG4CXX_DEBUG(logger, "Destroying the JMS Util dictionaries");
 }
 
-JmsUtil& JmsUtil::Instance() {
+pJmsUtil JmsUtil::Instance() {
 	if (INSTANCE.get() == 0) {
 		INSTANCE.reset(new JmsUtil());
 	}
-	return *INSTANCE;
+	return INSTANCE;
 }
 
 std::string JmsUtil::getTopic(command::SequenceCommand id) {
-	return Instance().sequenceCommandMap[id];
+	return Instance()->sequenceCommandMap[id];
 }
 
 std::string JmsUtil::getTopic(const std::string &prefix) {
@@ -66,11 +66,11 @@ std::string JmsUtil::getEpicsChannelTopic(const std::string &channelName) {
 
 
 command::Activity JmsUtil::getActivity(const std::string &id) {
-	return (command::Activity)Instance().activityMap[id];
+	return (command::Activity)Instance()->activityMap[id];
 }
 
 std::string JmsUtil::getHandlerResponse(pHandlerResponse response) {
-	return Instance().handlerResponseMap[response->getResponse()];
+	return Instance()->handlerResponseMap[response->getResponse()];
 }
 
 Message * JmsUtil::makeHandlerResponseMsg(MapMessage * msg,

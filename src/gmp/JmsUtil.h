@@ -2,6 +2,7 @@
 #define JMSUTIL_H_
 
 #include <string>
+#include <tr1/memory>
 
 #include <log4cxx/logger.h>
 #include <cms/Session.h>
@@ -26,6 +27,8 @@ struct upper {
   }
 };
 
+class JmsUtil;
+typedef std::tr1::shared_ptr<JmsUtil> pJmsUtil;
 
 /**
  * This class contains static methods to perform translations between
@@ -128,14 +131,14 @@ private:
 	 *
 	 * @return The JmsUtil singleton object
 	 */
-	static JmsUtil & Instance();
+	static pJmsUtil Instance();
 
 	/**
 	 * The singleton instance of this utility class.
 	 * Private since it's used internally only, through the
 	 * static methods
 	 */
-	static std::auto_ptr<JmsUtil> INSTANCE;
+	static pJmsUtil INSTANCE;
 };
 
 }
