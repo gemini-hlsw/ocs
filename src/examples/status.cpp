@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <signal.h>
+#include <ctime>
 
 #include <decaf/util/concurrent/CountDownLatch.h>
 
@@ -23,6 +24,10 @@ void terminate(int signal) {
 
 int main(int argc, char **argv) {
 
+	clock_t start, finish;
+	double time;
+	double throughput;
+	int nReps = 10000;
 	try {
 
 		std::cout << "Starting Status Example" << std::endl;
@@ -37,12 +42,19 @@ int main(int argc, char **argv) {
 		StatusUtil::createStatusItem("gpi:status1", type::INT);
 
 		StatusUtil::createStatusItem("gpi:status2", type::INT);
-
-		for (int i = 0; i < 100000; i++) {
+	
+		start = clock();
+		for (int i = 0; i < nReps; i++) {
 			StatusUtil::setValueAsInt("gpi:status1", i);
-			StatusUtil::setValueAsInt("gpi:status2", 100000-i);
+			StatusUtil::setValueAsInt("gpi:status2", nReps-i);
 			StatusUtil::postStatus();
 		}
+		finish = clock();
+		time = (double(finish) - double(start)) / CLOCKS_PER_SEC;
+		throughput = double(nReps * 2) / time;
+
+		std::cout << "Elapsed Time: " << time << " [sec]" << std::endl;
+		std::cout << "Throughput  : " << throughput << " [msg/sec]" << std::endl;
 
 
 	} catch (GmpException &e) {
