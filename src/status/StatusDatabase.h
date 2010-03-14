@@ -10,10 +10,18 @@
 #include <giapi/giapiexcept.h>
 
 #include <util/giapiMaps.h>
+#include <tr1/memory>
 
 #include "StatusItem.h"
 
 namespace giapi {
+
+
+class StatusDatabase;
+
+typedef std::tr1::shared_ptr<StatusDatabase> pStatusDatabase; 
+
+
 /**
  * The status database is a repository of all the status items in the system.
  * Provides mechanisms to handle different operation over the stored items
@@ -34,7 +42,7 @@ class StatusDatabase {
 private:
 	StringStatusMap _map;
 	vector<StatusItem *> _statusItemList;
-	static std::auto_ptr<StatusDatabase> INSTANCE;
+	static pStatusDatabase INSTANCE;
 	/**
 	 * Private constructor
 	 */
@@ -45,7 +53,7 @@ public:
 	 *
 	 * @return The StatusDatabase singleton object
 	 */
-	static StatusDatabase & Instance();
+	static pStatusDatabase Instance();
 
 	/**
 	 * Create an status item in the database

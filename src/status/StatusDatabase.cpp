@@ -8,7 +8,7 @@ namespace giapi {
 
 log4cxx::LoggerPtr StatusDatabase::logger(log4cxx::Logger::getLogger("giapi.StatusDatabase"));
 
-std::auto_ptr<StatusDatabase> StatusDatabase::INSTANCE(new StatusDatabase());
+pStatusDatabase StatusDatabase::INSTANCE(new StatusDatabase());
 
 StatusDatabase::StatusDatabase() {
 }
@@ -18,8 +18,8 @@ StatusDatabase::~StatusDatabase() {
 	LOG4CXX_DEBUG(logger, "Cleaning database...");
 }
 
-StatusDatabase& StatusDatabase::Instance() {
-	return *INSTANCE;
+pStatusDatabase StatusDatabase::Instance() {
+	return INSTANCE;
 }
 
 int StatusDatabase::createStatusItem(const std::string & name, const type::Type type) {

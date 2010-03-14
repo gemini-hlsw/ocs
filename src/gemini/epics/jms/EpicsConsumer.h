@@ -13,7 +13,10 @@
 #include <giapi/giapiexcept.h>
 #include <util/JmsSmartPointers.h>
 
+#include <gmp/ConnectionManager.h>
+
 using namespace cms;
+using namespace gmp;
 
 namespace giapi {
 
@@ -94,6 +97,11 @@ private:
 	 * The handler to be invoked whenever an EPICS update is received
 	 */
 	pEpicsStatusHandler _handler;
+	
+	/**
+	 * The Connection Manager
+	 */
+	pConnectionManager _connectionManager;
 
 	/**
 	 * The EPICS channel name this consumer is monitoring.

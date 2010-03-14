@@ -12,7 +12,6 @@
 
 #include <gemini/epics/jms/JmsEpicsFactory.h>
 
-using namespace gmp;
 
 namespace giapi {
 
@@ -25,10 +24,10 @@ EpicsConsumer::EpicsConsumer(const std::string &channelName,
 	_channelName = channelName;
 	try {
 
-		ConnectionManager& manager = ConnectionManager::Instance();
+		_connectionManager = ConnectionManager::Instance();
 
 		//create an auto-acknowledged session
-		_session = manager.createSession();
+		_session = _connectionManager->createSession();
 
 		std::string topic = JmsUtil::getEpicsChannelTopic(channelName);
 

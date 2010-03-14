@@ -16,10 +16,12 @@
 #include <cms/Session.h>
 #include <cms/Destination.h>
 #include <cms/MessageProducer.h>
+#include <gmp/ConnectionManager.h>
 
 #include <log4cxx/logger.h>
 
 using namespace cms;
+using namespace gmp;
 
 namespace giapi {
 
@@ -65,6 +67,11 @@ private:
 	 */
 	pMessageProducer _producer;
 
+	
+	/**
+	 * The connection manager
+	 */
+	pConnectionManager _connectionManager;
 
 	/**
 	 * Close open resources and destroy connections

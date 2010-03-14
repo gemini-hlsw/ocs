@@ -14,7 +14,6 @@
 
 
 using namespace decaf::lang;
-using namespace gmp;
 
 
 namespace giapi {
@@ -45,10 +44,10 @@ void SequenceCommandConsumer::init(
 
 	try {
 
-		ConnectionManager& manager = ConnectionManager::Instance();
+		_connectionManager = ConnectionManager::Instance();
 
 		//create an auto-acknowledged session
-		_session = manager.createSession();
+		_session = _connectionManager->createSession();
 
 		// Create the Topic destination
 		_destination = pDestination(_session->createTopic( topic ));

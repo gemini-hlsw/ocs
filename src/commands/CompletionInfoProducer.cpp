@@ -8,9 +8,9 @@ log4cxx::LoggerPtr CompletionInfoProducer::logger(log4cxx::Logger::getLogger("gm
 
 CompletionInfoProducer::CompletionInfoProducer() throw (CommunicationException) {
 	try {
-		ConnectionManager& manager = ConnectionManager::Instance();
+		_connectionManager = ConnectionManager::Instance();
 		//create an auto-acknowledged session
-		_session = pSession(manager.createSession());
+		_session = _connectionManager->createSession();
 
 		//We will use a queue to send this messages to the GMP
 		_destination = pDestination(_session->createQueue(GMPKeys::GMP_COMPLETION_INFO));

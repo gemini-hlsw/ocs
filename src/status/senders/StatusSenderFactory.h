@@ -5,6 +5,10 @@
 #include <status/senders/StatusSender.h>
 
 namespace giapi {
+
+class StatusSenderFactory;
+typedef std::tr1::shared_ptr<StatusSenderFactory> pStatusSenderFactory;
+
 /**
  * This is the class that instantiates the {@link StatusSender} concrete
  * classes as requested. The specific {@link StatusSender} that will
@@ -40,7 +44,7 @@ public:
 	 *
 	 * @return the singleton instance of this factory.
 	 */
-	static StatusSenderFactory& Instance(void);
+	static pStatusSenderFactory Instance(void);
 
 	/**
 	 * Return the default StatusSender instance. The default status sender is
@@ -70,7 +74,7 @@ private:
 	/**
 	 * Internal instance of this factory
 	 */
-	static std::auto_ptr<StatusSenderFactory> INSTANCE;
+	static pStatusSenderFactory INSTANCE;
 protected:
 	/**
 	 * Protected default constructor, instantiated internally by the

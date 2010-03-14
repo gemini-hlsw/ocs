@@ -22,7 +22,7 @@ AbstractStatusSender::~AbstractStatusSender() {
 int AbstractStatusSender::postStatus(const std::string &name) const
 		throw (PostException) {
 
-	StatusItem * statusItem = StatusDatabase::Instance().getStatusItem(name);
+	StatusItem * statusItem = StatusDatabase::Instance()->getStatusItem(name);
 
 	if (statusItem == 0) {
 		LOG4CXX_WARN(logger, "No status item found for " << name << ". Not posting");
@@ -35,7 +35,7 @@ int AbstractStatusSender::postStatus(const std::string &name) const
 int AbstractStatusSender::postStatus() const throw (PostException) {
 	//get the status items
 	const vector<StatusItem *>& items =
-			StatusDatabase::Instance().getStatusItems();
+			StatusDatabase::Instance()->getStatusItems();
 	//and post the ones that haven't changed. Clear their status
 	for (vector<StatusItem *>::const_iterator it = items.begin(); it
 			!= items.end(); ++it) {

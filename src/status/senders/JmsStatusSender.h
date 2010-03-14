@@ -14,6 +14,9 @@
 #include <cms/MessageProducer.h>
 
 #include <util/JmsSmartPointers.h>
+#include <gmp/ConnectionManager.h>
+
+using namespace gmp;
 
 namespace giapi {
 /**
@@ -53,6 +56,11 @@ private:
 	 * the GMP. Runs on its own session
 	 */
 	pMessageProducer _producer;
+	
+	/**
+	 * The connection manager associated to this sender
+	 */
+	pConnectionManager _connectionManager;
 
 	/**
 	 * Close open resources and destroy connections

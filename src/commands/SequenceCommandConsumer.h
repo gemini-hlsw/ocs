@@ -12,10 +12,12 @@
 #include <giapi/SequenceCommandHandler.h>
 #include <giapi/HandlerResponse.h>
 #include <util/JmsSmartPointers.h>
+#include <gmp/ConnectionManager.h>
 
 #include <log4cxx/logger.h>
 #include <tr1/memory>
 
+using namespace gmp;
 
 namespace giapi {
 
@@ -186,6 +188,11 @@ private:
 	 * The sequence command that is handled by this consumer
 	 */
 	command::SequenceCommand _sequenceCommand;
+	
+	/**
+	 * The connection manager
+	 */
+	pConnectionManager _connectionManager;
 
 	/**
 	 * Close and destroy associated JMS resources used by this consumer

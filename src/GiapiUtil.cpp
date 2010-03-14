@@ -17,8 +17,8 @@ void GiapiUtil::registerGmpErrorHandler(giapi_error_handler handler)
 		throw (CommunicationException) {
 
 	try {
-		ConnectionManager& manager = ConnectionManager::Instance();
-		manager.registerOperation(handler);
+		pConnectionManager manager = ConnectionManager::Instance();
+		manager->registerOperation(handler);
 	} catch (CMSException& e) {
 		throw CommunicationException(
 				"Trouble using GIAPI Utility facilities "
@@ -32,8 +32,8 @@ void GiapiUtil::registerGmpErrorHandler(pGiapiErrorHandler handler)
 		throw (CommunicationException) {
 
 	try {
-		ConnectionManager& manager = ConnectionManager::Instance();
-		manager.registerHandler(handler);
+		pConnectionManager manager = ConnectionManager::Instance();
+		manager->registerHandler(handler);
 	} catch (CMSException& e) {
 		throw CommunicationException(
 				"Trouble using GIAPI Utility facilities "

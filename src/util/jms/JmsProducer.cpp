@@ -8,7 +8,6 @@
 #include <util/jms/JmsProducer.h>
 #include <gmp/ConnectionManager.h>
 
-using namespace gmp;
 
 namespace giapi {
 namespace util {
@@ -21,9 +20,9 @@ log4cxx::LoggerPtr JmsProducer::logger(log4cxx::Logger::getLogger(
 JmsProducer::JmsProducer(const std::string& queueName) throw (CommunicationException){
 
 	try {
-		ConnectionManager& manager = ConnectionManager::Instance();
+		_connectionManager = ConnectionManager::Instance();
 		//create an auto-acknowledged session
-		_session = pSession(manager.createSession());
+		_session = _connectionManager->createSession();
 
 		//We will use a topic to send data
 		_destination = pDestination(_session->createTopic(

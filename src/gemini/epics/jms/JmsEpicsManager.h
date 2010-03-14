@@ -18,11 +18,12 @@
 
 #include <util/JmsSmartPointers.h>
 #include <util/giapiMaps.h>
-
+#include <gmp/ConnectionManager.h>
 
 #include <log4cxx/logger.h>
 
 using namespace cms;
+using namespace gmp;
 
 namespace giapi {
 
@@ -55,6 +56,11 @@ private:
 	 * The JMS Session associated to this producer.
 	 */
 	pSession _session;
+	
+	/**
+	 * The connection manager
+	 */
+	pConnectionManager _connectionManager;
 
 	/**
 	 * The Epics Configuration object

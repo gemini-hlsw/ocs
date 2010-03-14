@@ -14,14 +14,11 @@ log4cxx::LoggerPtr JmsStatusSender::logger(log4cxx::Logger::getLogger(
 JmsStatusSender::JmsStatusSender() throw (CommunicationException) {
 	LOG4CXX_DEBUG(logger, "Constructing JMS Status sender");
 	try {
-		ConnectionManager& manager = ConnectionManager::Instance();
+		_connectionManager = ConnectionManager::Instance();
 		//create an auto-acknowledged session
-		_session = pSession(manager.createSession());
+		_session = _connectionManager->createSession();
 
-//		//We will use a queue to send requests to the GMP
-//		_destination = pDestination(_session->createTopic(
-//				GMPKeys::GMP_STATUS_DESTINATION));
-		//Instantiate the message producer for this destination
+		//Instantiate the message producer
 		_producer = pMessageProducer(_session->createProducer(NULL));
 	} catch (CMSException& e) {
 		//clean any resources that might have been allocated

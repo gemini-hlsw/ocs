@@ -10,6 +10,7 @@
 
 #include <giapi/giapiexcept.h>
 #include <util/JmsSmartPointers.h>
+#include <gmp/ConnectionManager.h>
 
 #include <cms/Session.h>
 #include <cms/Destination.h>
@@ -17,9 +18,12 @@
 
 #include <log4cxx/logger.h>
 
+using namespace gmp;
+
 namespace giapi {
 namespace util {
 namespace jms {
+
 
 
 class JmsProducer {
@@ -42,6 +46,11 @@ protected:
 	 * the GMP. Runs on its own session
 	 */
 	pMessageProducer _producer;
+	
+	/**
+	 * The connection manager
+	 */
+	pConnectionManager _connectionManager;
 
 	/**
 	 * Logging facility

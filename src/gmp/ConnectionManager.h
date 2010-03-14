@@ -22,6 +22,10 @@ namespace gmp {
 
 using namespace cms;
 
+class ConnectionManager; 
+
+typedef std::tr1::shared_ptr<ConnectionManager> pConnectionManager; 
+
 /**
  * Connection Manager is a singleton that provides a unique communication
  * point to the broker.
@@ -48,7 +52,7 @@ public:
 	 *
 	 * @return The ConnectionManager singleton object
 	 */
-	static ConnectionManager & Instance() throw (GmpException);
+	static pConnectionManager Instance() throw (GmpException);
 
 	/**
 	 * Creates a new JMS Session for clients to interact with
@@ -81,7 +85,7 @@ private:
 	/**
 	 * The singleton instance to the connection manager
 	 */
-	static std::auto_ptr<ConnectionManager> INSTANCE;
+	static pConnectionManager INSTANCE;
 
 	/**
 	 * The JMS Connection to the broker

@@ -9,8 +9,6 @@
 #include <gmp/ConnectionManager.h>
 #include <gmp/GMPKeys.h>
 
-using namespace gmp;
-
 namespace giapi {
 
 log4cxx::LoggerPtr RequestProducer::logger(log4cxx::Logger::getLogger(
@@ -18,9 +16,9 @@ log4cxx::LoggerPtr RequestProducer::logger(log4cxx::Logger::getLogger(
 
 RequestProducer::RequestProducer() throw (CommunicationException) {
 	try {
-		ConnectionManager& manager = ConnectionManager::Instance();
+		_connectionManager = ConnectionManager::Instance();
 		//create an auto-acknowledged session
-		_session = pSession(manager.createSession());
+		_session = _connectionManager->createSession();
 
 		//We will use a queue to send requests to the GMP
 		_destination = pDestination(_session->createQueue(

@@ -13,6 +13,8 @@
 #include <log4cxx/logger.h>
 #include <tr1/memory>
 
+#include <gmp/ConnectionManager.h>
+
 using namespace giapi;
 using namespace cms;
 
@@ -72,6 +74,11 @@ private:
 	 * messages. Runs on its own session
 	 */
 	pMessageProducer _producer;
+	
+	/**
+	 * The connection Manager
+	 */
+	pConnectionManager _connectionManager;
 
 	/**
 	 * Destroy any allocated resources and closes communication channels

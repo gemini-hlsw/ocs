@@ -2,7 +2,7 @@
 #include "StatusSenderFactoryImpl.h"
 
 namespace giapi {
-std::auto_ptr<StatusSenderFactory> StatusSenderFactory::INSTANCE(new StatusSenderFactoryImpl());
+pStatusSenderFactory StatusSenderFactory::INSTANCE(new StatusSenderFactoryImpl());
 
 StatusSenderFactory::StatusSenderFactory() {
 }
@@ -10,8 +10,8 @@ StatusSenderFactory::StatusSenderFactory() {
 StatusSenderFactory::~StatusSenderFactory() {
 }
 
-StatusSenderFactory& StatusSenderFactory::Instance() {
-	return *INSTANCE;
+pStatusSenderFactory StatusSenderFactory::Instance() {
+	return INSTANCE;
 }
 
 }

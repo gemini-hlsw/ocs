@@ -11,8 +11,7 @@ log4cxx::LoggerPtr ConnectionManager::logger(log4cxx::Logger::getLogger("giapi.g
 //Time to wait (in seconds) to attempt a new connection in case the connection is lost
 int ConnectionManager::RETRY_TIMEOUT = 10;
 
-std::auto_ptr<ConnectionManager>
-		ConnectionManager::INSTANCE(new ConnectionManager());
+pConnectionManager ConnectionManager::INSTANCE(new ConnectionManager());
 
 ConnectionManager::ConnectionManager() {
 	//Initialize the ActiveMQ Library before it is used
@@ -22,20 +21,21 @@ ConnectionManager::ConnectionManager() {
 ConnectionManager::~ConnectionManager() {
 
 	LOG4CXX_DEBUG(logger, "Destroying connection manager");
-	//TODO: We need to close sessions, destinations, producers and consumers.
 	try {
 		if (_connection.get() != 0) {
 			_connection->stop();
 		}
-	} catch (CMSException& e) {
-		LOG4CXX_WARN(logger, "Problem closing connection");
-		e.printStackTrace();
+	}catch (CMSException &e) {
+		LOG4CXX_WARN(logger, "Problem closing JMS Connection");
 	}
 	//release all the references to the objects stored
 	_errorHandlersFunctions.clear();
 	_errorHandlerObjects.clear();
-	//TODO: shut down the ActiveMQ library 
+	//TODO: shut down the ActiveMQ library (with CMS3.1.1 this
+	//call is throwing an IOException
 	//activemq::library::ActiveMQCPP::shutdownLibrary();
+	LOG4CXX_DEBUG(logger, "Connection manager destroyed");
+
 }
 
 void ConnectionManager::registerOperation(giapi_error_handler op) {
@@ -76,12 +76,12 @@ void ConnectionManager::startup() throw (GmpException) {
 	}
 }
 
-ConnectionManager& ConnectionManager::Instance() throw (GmpException) {
+pConnectionManager ConnectionManager::Instance() throw (GmpException) {
 	//if not connected, try to reconnect:
 	if (INSTANCE->_connection.get() == 0) {
 		INSTANCE->startup();
 	}
-	return *INSTANCE;
+	return INSTANCE;
 }
 
 void ConnectionManager::onException(const CMSException & ex) {
@@ -137,8 +137,7 @@ void ConnectionManager::onException(const CMSException & ex) {
 
 pSession ConnectionManager::createSession() throw (CMSException ) {
 
-	pSession session(static_cast<Session*>(0));
-	session.reset(_connection->createSession(Session::AUTO_ACKNOWLEDGE));
+	pSession session(_connection->createSession(Session::AUTO_ACKNOWLEDGE));
 	return session;
 }
 

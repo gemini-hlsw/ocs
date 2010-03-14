@@ -11,7 +11,6 @@
 #include <gmp/GMPKeys.h>
 #include <gemini/epics/jms/JmsEpicsConfiguration.h>
 
-using namespace gmp;
 
 namespace giapi {
 
@@ -20,9 +19,9 @@ log4cxx::LoggerPtr JmsEpicsManager::logger(log4cxx::Logger::getLogger(
 
 JmsEpicsManager::JmsEpicsManager() throw (CommunicationException) {
 	try {
-		ConnectionManager& manager = ConnectionManager::Instance();
+		_connectionManager = ConnectionManager::Instance();
 		//create an auto-acknowledged session
-		_session = pSession(manager.createSession());
+		_session = _connectionManager->createSession();
 
 		_epicsConfiguration = JmsEpicsConfiguration::create(_session);
 
