@@ -53,7 +53,7 @@ public:
 private:
 
 	void cleanup() {
-		printf("Destroying Thread");
+		printf("Destroying Wroker Thread");
 	}
 };
 
@@ -86,7 +86,7 @@ public:
 		if (id % 2 == 1)
 			return HandlerResponse::create(HandlerResponse::COMPLETED);
 		else {
-			printf("About to start working thread\n");
+			printf("Starting worker thread\n");
 
 			if (thread != NULL) {
 				thread->join();// this is where  code must be smarter than
@@ -108,7 +108,6 @@ public:
 	}
 
 	virtual ~MyHandler() {
-		printf("Destroying MyHandler");
 		delete worker;
 		if (thread != NULL) {
 			thread->join();
