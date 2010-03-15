@@ -8,7 +8,7 @@
 
 #Version and minor version
 V := 0
-MV := 9.0
+MV := 10.0
 
 LIBRARY_NAME := libgiapi-glue-cc
 
@@ -124,6 +124,7 @@ dist: install make-dist-dir make-tmp-dist-dir
 	@ $(CP) $(EXTRA_DIST_FILES) $(TMP_DIST_DIR)
 	@ $(CP) -P $(LOG4CXX_LIB)/lib* $(TMP_DIST_DIR)/lib
 	@ $(CP) -P $(ACTIVEMQ_LIB)/lib* $(TMP_DIST_DIR)/lib
+	@ $(CP) -P $(APR_LIB)/lib* $(TMP_DIST_DIR)/lib
 	@ tar -C /tmp -zcf $(DISTRIBUTION_DIR)/$(DIST_PACKAGE_NAME)-${V}.${MV}.tgz $(DIST_PACKAGE_NAME)
 	@ $(RM) $(TMP_DIST_DIR)
 	@ echo "Distribution package generated at $(DISTRIBUTION_DIR)/$(DIST_PACKAGE_NAME)-${V}.${MV}.tgz"
