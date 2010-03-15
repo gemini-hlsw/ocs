@@ -34,9 +34,9 @@ JmsStatusSender::~JmsStatusSender() {
 	cleanup();
 }
 
-int JmsStatusSender::postStatus(StatusItem * statusItem) const
+int JmsStatusSender::postStatus(pStatusItem statusItem) const
 		throw (PostException) {
-	LOG4CXX_DEBUG(logger, "Post Status Item " << *statusItem);
+	LOG4CXX_DEBUG(logger, "Post Status Item " << statusItem->getName());
 
 	BytesMessage *msg = NULL;
 

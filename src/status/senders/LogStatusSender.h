@@ -22,7 +22,7 @@ public:
 	virtual ~LogStatusSender();
 
 protected:
-	virtual int postStatus(StatusItem *item) const throw (PostException);
+	virtual int postStatus(pStatusItem item) const throw (PostException);
 };
 
 }

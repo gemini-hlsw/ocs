@@ -60,7 +60,7 @@ protected:
 	 * invoked so implementors can assume the Status Item can be posted
 	 * immediately.
 	 */
-	virtual int postStatus(StatusItem *item) const throw (PostException) = 0;
+	virtual int postStatus(pStatusItem item) const throw (PostException) = 0;
 
 private:
 	/**
@@ -69,7 +69,7 @@ private:
 	 * and will send it to the underlying post mechanism defined by
 	 * implementing classes of the postStatus(StatusItem *item) method.
 	 */
-	int doPost(StatusItem *item) const throw (PostException);
+	int doPost(pStatusItem item) const throw (PostException);
 	/*
 	 * Logging facility
 	 */

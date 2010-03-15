@@ -56,8 +56,6 @@ system before building the GIAPI C++:
   
 * Apache Log4cxx version 0.10.0. Obtained from
   http://logging.apache.org/log4cxx/
-  The revision number I used to build this release is 693855
-
   This library needs to be available in the EXTERNAL_LIB/log4cxx directory
   Same as with active mq,  I declare EXTERNAL_LIB/log4cxx as a symlink 
   to the place I define to install log4cxx using the 'configure --prefix' 

@@ -36,12 +36,12 @@ class StatusDatabase {
 	 * Type definition for the hash_table that will map strings to
 	 * StatusItems pointers
 	 */
-	typedef hash_map<const std::string, StatusItem *,  hash<std::string>, util::eqstr >
+	typedef hash_map<const std::string, pStatusItem,  hash<std::string>, util::eqstr >
 			StringStatusMap;
 
 private:
 	StringStatusMap _map;
-	vector<StatusItem *> _statusItemList;
+	vector<pStatusItem> _statusItemList;
 	static pStatusDatabase INSTANCE;
 	/**
 	 * Private constructor
@@ -235,9 +235,9 @@ public:
 	 * @return the StatusItem object associated to the name, or
 	 * NULL if not found
 	 */
-	StatusItem* getStatusItem(const std::string &name);
+	pStatusItem getStatusItem(const std::string &name);
 
-	const vector<StatusItem *>& getStatusItems();
+	const vector<pStatusItem>& getStatusItems();
 
 	virtual ~StatusDatabase();
 

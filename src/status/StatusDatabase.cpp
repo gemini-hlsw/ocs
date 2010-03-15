@@ -14,8 +14,9 @@ StatusDatabase::StatusDatabase() {
 }
 
 StatusDatabase::~StatusDatabase() {
-	//TODO: Remove all the objects
-	LOG4CXX_DEBUG(logger, "Cleaning database...");
+	LOG4CXX_DEBUG(logger, "Cleaning database...");	
+	_statusItemList.clear();
+	_map.clear();
 }
 
 pStatusDatabase StatusDatabase::Instance() {
@@ -24,7 +25,7 @@ pStatusDatabase StatusDatabase::Instance() {
 
 int StatusDatabase::createStatusItem(const std::string & name, const type::Type type) {
 
-	if (getStatusItem(name) != 0) {
+	if (getStatusItem(name).get() != 0) {
 		//status item already present.
 		LOG4CXX_DEBUG(logger, "StatusDatabase::createStatusItem. A status item "
 				" with the name " << name << " already created. No action");
@@ -32,7 +33,7 @@ int StatusDatabase::createStatusItem(const std::string & name, const type::Type 
 	}
 	LOG4CXX_DEBUG(logger, "Creating a Status Item for " << name);
 	//make a new status item and store it in the map.
-	StatusItem *item = new StatusItem(name, type);
+	pStatusItem item(new StatusItem(name, type));
 	_map[name] = item;
 	_statusItemList.push_back(item);
 	return status::OK;
@@ -42,7 +43,7 @@ int StatusDatabase::createStatusItem(const std::string & name, const type::Type 
 int StatusDatabase::createAlarmStatusItem(const std::string &name,
 		const type::Type type) {
 
-	if (getStatusItem(name) != 0) {
+	if (getStatusItem(name).get() != 0) {
 		//status item already present.
 		LOG4CXX_DEBUG(logger, "StatusDatabase::createAlarmStatusItem. A status item "
 				" with the name " << name << " already created. No action");
@@ -50,7 +51,7 @@ int StatusDatabase::createAlarmStatusItem(const std::string &name,
 	}
 	LOG4CXX_DEBUG(logger, "Creating an Alarm Status Item for " << name);
 	//make a new status item and store it in the map.
-	StatusItem *item = new AlarmStatusItem(name, type);
+	pStatusItem item(new AlarmStatusItem(name, type));
 	_map[name] = item;
 	_statusItemList.push_back(item);
 	return status::OK;
@@ -58,7 +59,7 @@ int StatusDatabase::createAlarmStatusItem(const std::string &name,
 
 int StatusDatabase::createHealthStatusItem(const std::string & name) {
 
-	if (getStatusItem(name) != 0) {
+	if (getStatusItem(name).get() != 0) {
 		//status item already present.
 		LOG4CXX_DEBUG(logger, "StatusDatabase::createHealthStatusItem. A status item "
 				" with the name " << name << " already created. No action");
@@ -67,20 +68,20 @@ int StatusDatabase::createHealthStatusItem(const std::string & name) {
 
 	LOG4CXX_DEBUG(logger, "Creating a Health Status Item for " << name);
 	//make a new status item and store it in the map.
-	StatusItem *item = new HealthStatusItem(name);
+	pStatusItem item(new HealthStatusItem(name));
 	_map[name] = item;
 	_statusItemList.push_back(item);
 	return status::OK;
 }
 
 int StatusDatabase::setHealth(const std::string &name, const health::Health health) {
-	StatusItem * statusItem = getStatusItem(name);
-	if (statusItem == 0) {
+	pStatusItem statusItem = getStatusItem(name);
+	if (statusItem.get() == 0) {
 		return status::ERROR;
 	}
 
 	HealthStatusItem* healthStatusItem =
-			dynamic_cast<HealthStatusItem*>(statusItem);
+			dynamic_cast<HealthStatusItem*>(statusItem.get());
 
 	if (healthStatusItem == 0) {
 		LOG4CXX_WARN(logger, name << " is not a health status item, aborting operation");
@@ -92,41 +93,41 @@ int StatusDatabase::setHealth(const std::string &name, const health::Health heal
 }
 
 int StatusDatabase::setStatusValueAsInt(const std::string & name, int value) {
-	StatusItem* statusItem = getStatusItem(name);
-	if (statusItem == 0) {
+	pStatusItem statusItem = getStatusItem(name);
+	if (statusItem.get() == 0) {
 		return status::ERROR;
 	}
 	return statusItem->setValueAsInt(value);
 }
 
 int StatusDatabase::setStatusValueAsString(const std::string & name, const std::string & value) {
-	StatusItem* statusItem = getStatusItem(name);
-	if (statusItem == 0) {
+	pStatusItem statusItem = getStatusItem(name);
+	if (statusItem.get() == 0) {
 		return status::ERROR;
 	}
 	return statusItem->setValueAsString(value);
 }
 
 int StatusDatabase::setStatusValueAsDouble(const std::string & name, double value) {
-	StatusItem* statusItem = getStatusItem(name);
-	if (statusItem == 0) {
+	pStatusItem statusItem = getStatusItem(name);
+	if (statusItem.get() == 0) {
 		return status::ERROR;
 	}
 	return statusItem->setValueAsDouble(value);
 }
 
 int StatusDatabase::setStatusValueAsFloat(const std::string & name, float value) {
-	StatusItem * statusItem = getStatusItem(name);
-	if (statusItem == 0) {
+	pStatusItem statusItem = getStatusItem(name);
+	if (statusItem.get() == 0) {
 		return status::ERROR;
 	}
 	return statusItem->setValueAsFloat(value);
 }
 
 
-StatusItem * StatusDatabase::getStatusItem(const std::string & name) {
+pStatusItem StatusDatabase::getStatusItem(const std::string & name) {
 	if (name.empty()) {
-		return (StatusItem *)0; //NULL
+		return pStatusItem((StatusItem *)0); //NULL
 	}
 	return _map[name];
 }
@@ -134,13 +135,13 @@ StatusItem * StatusDatabase::getStatusItem(const std::string & name) {
 int StatusDatabase::setAlarm(const std::string &name, const alarm::Severity severity,
 		const alarm::Cause cause, const std::string & message) {
 
-	StatusItem * statusItem = getStatusItem(name);
-	if (statusItem == 0) {
+	pStatusItem statusItem = getStatusItem(name);
+	if (statusItem.get() == 0) {
 		return status::ERROR;
 	}
 
 	AlarmStatusItem* alarmStatusItem =
-			dynamic_cast<AlarmStatusItem*>(statusItem);
+			dynamic_cast<AlarmStatusItem*>(statusItem.get());
 
 	if (alarmStatusItem == 0) {
 		LOG4CXX_WARN(logger, name << " is not an alarm status item, aborting operation");
@@ -152,13 +153,13 @@ int StatusDatabase::setAlarm(const std::string &name, const alarm::Severity seve
 }
 
 int StatusDatabase::clearAlarm(const std::string &name) {
-	StatusItem * statusItem = getStatusItem(name);
-	if (statusItem == 0) {
+	pStatusItem statusItem = getStatusItem(name);
+	if (statusItem.get() == 0) {
 		return status::ERROR;
 	}
 
 	AlarmStatusItem* alarmStatusItem =
-			dynamic_cast<AlarmStatusItem*>(statusItem);
+			dynamic_cast<AlarmStatusItem*>(statusItem.get());
 
 	if (alarmStatusItem == 0) {
 		LOG4CXX_WARN(logger, name << " is not an alarm status item, aborting operation");
@@ -170,7 +171,7 @@ int StatusDatabase::clearAlarm(const std::string &name) {
 	return status::OK;
 }
 
-const vector<StatusItem *>& StatusDatabase::getStatusItems() {
+const vector<pStatusItem>& StatusDatabase::getStatusItems() {
 	return _statusItemList;
 }
 

@@ -2,6 +2,7 @@
 #define STATUSITEM_H_
 #include <log4cxx/logger.h>
 #include <giapi/giapi.h>
+#include <tr1/memory>
 #include "StatusVisitor.h"
 #include "KvPair.h"
 
@@ -117,6 +118,8 @@ public:
 	virtual void accept(StatusVisitor &);
 };
 
+typedef std::tr1::shared_ptr<StatusItem> pStatusItem;
+ 
 }
 
 #endif /*STATUSITEM_H_*/

@@ -22,9 +22,9 @@ AbstractStatusSender::~AbstractStatusSender() {
 int AbstractStatusSender::postStatus(const std::string &name) const
 		throw (PostException) {
 
-	StatusItem * statusItem = StatusDatabase::Instance()->getStatusItem(name);
+	pStatusItem statusItem = StatusDatabase::Instance()->getStatusItem(name);
 
-	if (statusItem == 0) {
+	if (statusItem.get() == 0) {
 		LOG4CXX_WARN(logger, "No status item found for " << name << ". Not posting");
 		return status::ERROR;
 	}
@@ -34,19 +34,19 @@ int AbstractStatusSender::postStatus(const std::string &name) const
 
 int AbstractStatusSender::postStatus() const throw (PostException) {
 	//get the status items
-	const vector<StatusItem *>& items =
+	const vector<pStatusItem> items =
 			StatusDatabase::Instance()->getStatusItems();
 	//and post the ones that haven't changed. Clear their status
-	for (vector<StatusItem *>::const_iterator it = items.begin(); it
+	for (vector<pStatusItem>::const_iterator it = items.begin(); it
 			!= items.end(); ++it) {
-		StatusItem * item = *it;
+		pStatusItem item = *it;
 		doPost(item);
 	}
 	return status::OK;
 }
 
-int AbstractStatusSender::doPost(StatusItem * statusItem) const throw (PostException) {
-	if (statusItem == 0)
+int AbstractStatusSender::doPost(pStatusItem statusItem) const throw (PostException) {
+	if (statusItem.get() == 0)
 		return giapi::status::ERROR;
 
 	//value hasn't changed since last post, return immediately.

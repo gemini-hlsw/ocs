@@ -16,9 +16,9 @@ LogStatusSender::~LogStatusSender() {
 	LOG4CXX_DEBUG(logger, "Destroying LogStatus Sender");
 }
 
-int LogStatusSender::postStatus(StatusItem *statusItem) const
+int LogStatusSender::postStatus(pStatusItem statusItem) const
 		throw (PostException) {
-	LOG4CXX_INFO(logger, "Post Status Item " << *statusItem);
+	LOG4CXX_INFO(logger, "Post Status Item " << statusItem->getName());
 	return status::OK;
 }
 

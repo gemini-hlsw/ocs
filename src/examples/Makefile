@@ -10,7 +10,7 @@ LIBS= -lgiapi-glue-cc -lactivemq-cpp -llog4cxx -lapr-1
 
 LD_LIBRARY_PATH := ../../:$(LOG4CXX_LIB):$(CPPUNIT_LIB):$(ACTIVEMQ_LIB):$(APR_LIB)
 
-all: seq-command tcscontext obsevent epicssubscription logging fileevents status
+all: seq-command tcscontext pcsupdater obsevent epicssubscription logging fileevents status
 
 seq-command: seq-command.o
 
@@ -52,4 +52,4 @@ run:
 	
 	
 clean: 
-	-$(RM) *.o *.d seq-command tcscontext obsevent epicssubscription pcsupdater logging fileevents status
+	-$(RM) *.o *.d seq-command pcsupdater tcscontext obsevent epicssubscription pcsupdater logging fileevents status
