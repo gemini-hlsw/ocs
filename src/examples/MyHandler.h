@@ -84,14 +84,8 @@ public:
 		}
 
 		if (id % 2 == 1)
-//			return HandlerResponse::createError(
-//					"This crap didn't work.I refuse to execute your order");
 			return HandlerResponse::create(HandlerResponse::COMPLETED);
 		else {
-			//			Thread* thread = new Thread( worker);
-			//			thread->start();
-
-
 			printf("About to start working thread\n");
 
 			if (thread != NULL) {
@@ -103,14 +97,6 @@ public:
 			thread = new Thread( worker );
 			worker->setId(id);
 			thread->start();
-//			//fake a fast handler
-//			CommandUtil::postCompletionInfo(id, HandlerResponse::create(
-//							HandlerResponse::COMPLETED));
-//			CountDownLatch lock(1);
-//						lock.await(100);
-
-
-
 			return HandlerResponse::create(HandlerResponse::STARTED);
 		}
 
