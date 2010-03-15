@@ -1,5 +1,14 @@
 Release Notes - Gemini Instrument Application Programmer Interface 
 
+Version Release 10: Implementation of the postAncillaryFileEvent, 
+postIntermediateFileEvent and systemLog methods. Several improvements
+to performance and fault tolerance
+
+** New Feature
+    * [GIAPI-60] - Add Systems Logging functionality to the GMP
+    * [GIAPI-62] - Add postAncillaryFileEvent to GMP
+    * [GIAPI-63] - Add postIntermediateFileEvent to GMP
+
 Version Release 9: Implementation of the getTCSContext method and simulation
 mechanism for testing. Added support for floating point values for status
 items. Implemented simulation mode for PCS Updater in the GMP. Synchrobus
