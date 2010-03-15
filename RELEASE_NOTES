@@ -2,7 +2,7 @@ Release Notes - Gemini Instrument Application Programmer Interface
 
 Version Release 10: Implementation of the postAncillaryFileEvent, 
 postIntermediateFileEvent and systemLog methods. Several improvements
-to performance and fault tolerance
+to performance and fault tolerance. March 15, 2010
 
 ** New Feature
     * [GIAPI-60] - Add Systems Logging functionality to the GMP
@@ -12,7 +12,7 @@ to performance and fault tolerance
 Version Release 9: Implementation of the getTCSContext method and simulation
 mechanism for testing. Added support for floating point values for status
 items. Implemented simulation mode for PCS Updater in the GMP. Synchrobus
-C library now is documented in doxygen (in a separate module) 
+C library now is documented in doxygen (in a separate module). December 23, 2009
 
 ** New Feature
     * [GIAPI-114] - Add support for float values in status
