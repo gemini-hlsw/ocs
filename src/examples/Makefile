@@ -10,7 +10,7 @@ LIBS= -lgiapi-glue-cc -lactivemq-cpp -llog4cxx -lapr-1
 
 LD_LIBRARY_PATH := ../../:$(LOG4CXX_LIB):$(CPPUNIT_LIB):$(ACTIVEMQ_LIB):$(APR_LIB)
 
-all: seq-command tcscontext pcsupdater obsevent epicssubscription logging fileevents status
+all: seq-command tcscontext pcsupdater obsevent epicssubscription logging fileevents status services
 
 seq-command: seq-command.o
 
@@ -32,6 +32,10 @@ logging: logging.o
 status: status.o
 	$(CXX) $(LIB_DIRS) $(LIBS) -o $@  $<
 
+services: services.o
+	$(CXX) $(LIB_DIRS) $(LIBS) -o $@  $<
+
+
 
 epicssubscription: epicssubscription.o EpicsHandlerDemo.o
 	$(CXX) $(LIB_DIRS) $(LIBS) -o $@  $+
@@ -40,7 +44,7 @@ epicssubscription: epicssubscription.o EpicsHandlerDemo.o
 %.o: %.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking $(OS) C++ Compiler'
-	$(CXX) $(INC_DIRS) -O3 -Wall -fPIC -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
+	$(CXX) $(INC_DIRS) -g -O0 -Wall -fPIC -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
@@ -52,4 +56,4 @@ run:
 	
 	
 clean: 
-	-$(RM) *.o *.d seq-command pcsupdater tcscontext obsevent epicssubscription pcsupdater logging fileevents status
+	-$(RM) *.o *.d seq-command pcsupdater tcscontext obsevent epicssubscription pcsupdater logging fileevents status services
