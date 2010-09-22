@@ -12,7 +12,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include <iostream>
-
+#include <sys/time.h>
 
 namespace benchmark {
 
@@ -28,14 +28,17 @@ namespace benchmark {
 	public:
 
 		void runBenchmark() {
-			clock_t start, finish;
-			start = clock();
+			struct timeval start, finish;
+			long seconds, useconds;
+			gettimeofday(&start, NULL);
 			for (int i = 0; i < ITERATIONS; i++) {
 				this->run();
 			}
-			finish = clock();
+			gettimeofday(&finish, NULL);
+			seconds  = finish.tv_sec  - start.tv_sec;
+                	useconds = finish.tv_usec - start.tv_usec;
 
-			double elapsed = ( ( (double)(finish - start) ) /CLOCKS_PER_SEC );
+                	double elapsed = seconds + useconds/1000000.0;
 
 			std::cout << std::endl << typeid (TARGET).name() << " Benchmark Time = "
 					<< elapsed << " seconds " << std::endl;

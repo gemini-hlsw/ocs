@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include <signal.h>
-#include <ctime>
+#include <sys/time.h>
 
 #include <decaf/util/concurrent/CountDownLatch.h>
 
@@ -23,8 +23,8 @@ void terminate(int signal) {
 }
 
 int main(int argc, char **argv) {
-
-	clock_t start, finish;
+ 	struct timeval start, end;
+    	long seconds, useconds;    
 	double time;
 	double throughput;
 	int nReps = 10000;
@@ -43,14 +43,19 @@ int main(int argc, char **argv) {
 
 		StatusUtil::createStatusItem("gpi:status2", type::INT);
 	
-		start = clock();
+    		gettimeofday(&start, NULL);
 		for (int i = 0; i < nReps; i++) {
 			StatusUtil::setValueAsInt("gpi:status1", i);
 			StatusUtil::setValueAsInt("gpi:status2", nReps-i);
 			StatusUtil::postStatus();
 		}
-		finish = clock();
-		time = (double(finish) - double(start)) / CLOCKS_PER_SEC;
+    		gettimeofday(&end, NULL);
+
+    		seconds  = end.tv_sec  - start.tv_sec;
+    		useconds = end.tv_usec - start.tv_usec;
+
+    		time = seconds + useconds/1000000.0;
+
 		throughput = double(nReps * 2) / time;
 
 		std::cout << "Elapsed Time: " << time << " [sec]" << std::endl;
