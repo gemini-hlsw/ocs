@@ -11,7 +11,7 @@
 #include <giapi/GiapiErrorHandler.h>
 #include <giapi/StatusUtil.h>
 #include <giapi/GiapiUtil.h>
-
+#include <src/util/TimeUtil.h>
 
 using namespace giapi;
 
@@ -23,8 +23,7 @@ void terminate(int signal) {
 }
 
 int main(int argc, char **argv) {
- 	struct timeval start, end;
-    	long seconds, useconds;    
+    util::TimeUtil timer;
 	double time;
 	double throughput;
 	int nReps = 10000;
@@ -43,18 +42,14 @@ int main(int argc, char **argv) {
 
 		StatusUtil::createStatusItem("gpi:status2", type::INT);
 	
-    		gettimeofday(&start, NULL);
+        timer.startTimer();
 		for (int i = 0; i < nReps; i++) {
 			StatusUtil::setValueAsInt("gpi:status1", i);
 			StatusUtil::setValueAsInt("gpi:status2", nReps-i);
 			StatusUtil::postStatus();
 		}
-    		gettimeofday(&end, NULL);
-
-    		seconds  = end.tv_sec  - start.tv_sec;
-    		useconds = end.tv_usec - start.tv_usec;
-
-    		time = seconds + useconds/1000000.0;
+        timer.stopTimer();
+    	time = timer.getElapsedTime(util::TimeUtil::MSEC)/1000.0;
 
 		throughput = double(nReps * 2) / time;
 

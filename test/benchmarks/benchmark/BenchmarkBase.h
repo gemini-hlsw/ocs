@@ -13,6 +13,7 @@
 
 #include <iostream>
 #include <sys/time.h>
+#include <src/util/TimeUtil.h>
 
 namespace benchmark {
 
@@ -28,17 +29,14 @@ namespace benchmark {
 	public:
 
 		void runBenchmark() {
-			struct timeval start, finish;
-			long seconds, useconds;
-			gettimeofday(&start, NULL);
+            giapi::util::TimeUtil timer;
+            timer.startTimer();
 			for (int i = 0; i < ITERATIONS; i++) {
 				this->run();
 			}
-			gettimeofday(&finish, NULL);
-			seconds  = finish.tv_sec  - start.tv_sec;
-                	useconds = finish.tv_usec - start.tv_usec;
+            timer.stopTimer();
 
-                	double elapsed = seconds + useconds/1000000.0;
+            double elapsed = timer.getElapsedTime(giapi::util::TimeUtil::MSEC)/1000.0;
 
 			std::cout << std::endl << typeid (TARGET).name() << " Benchmark Time = "
 					<< elapsed << " seconds " << std::endl;
