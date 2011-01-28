@@ -2,7 +2,7 @@
 -include ../../conf/config.mk
 -include ../../conf/common.mk
 
-INC_DIRS= -I../../ -I$(ACTIVEMQ_INCLUDE) -I$(APR_INCLUDE)
+INC_DIRS= -I../../ -I../ -I$(ACTIVEMQ_INCLUDE) -I$(APR_INCLUDE) -I$(LOG4CXX_INCLUDE)
 
 LIB_DIRS= -L../../ -L$(ACTIVEMQ_LIB) -L$(LOG4CXX_LIB) -L$(APR_LIB)
 
@@ -10,7 +10,7 @@ LIBS= -lgiapi-glue-cc -lactivemq-cpp -llog4cxx -lapr-1
 
 LD_LIBRARY_PATH := ../../:$(LOG4CXX_LIB):$(CPPUNIT_LIB):$(ACTIVEMQ_LIB):$(APR_LIB)
 
-all: seq-command tcscontext pcsupdater obsevent epicssubscription logging fileevents status services
+all: stresstest seq-command tcscontext pcsupdater obsevent epicssubscription logging fileevents status services
 
 seq-command: seq-command.o
 
@@ -30,6 +30,9 @@ logging: logging.o
 	$(CXX) $(LIB_DIRS) $(LIBS) -o $@  $<
 
 status: status.o
+	$(CXX) $(LIB_DIRS) $(LIBS) -o $@  $<
+
+stresstest: stresstest.o
 	$(CXX) $(LIB_DIRS) $(LIBS) -o $@  $<
 
 services: services.o
@@ -56,4 +59,4 @@ run:
 	
 	
 clean: 
-	-$(RM) *.o *.d seq-command pcsupdater tcscontext obsevent epicssubscription pcsupdater logging fileevents status services
+	-$(RM) *.o *.d stresstest seq-command pcsupdater tcscontext obsevent epicssubscription pcsupdater logging fileevents status services

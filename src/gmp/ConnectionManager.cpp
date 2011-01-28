@@ -1,4 +1,6 @@
 #include "ConnectionManager.h"
+#include <src/util/PropertiesUtil.h>
+#include <src/util/StringUtil.h>
 
 #include <activemq/core/ActiveMQConnectionFactory.h>
 #include <decaf/util/concurrent/CountDownLatch.h>
@@ -49,8 +51,12 @@ void ConnectionManager::registerHandler(pGiapiErrorHandler handler) {
 
 void ConnectionManager::startup() throw (GmpException) {
 
+    std::string hostname = giapi::util::PropertiesUtil::Instance().getProperty("gmp.hostname");
+    if(giapi::util::StringUtil::isEmpty(hostname)){
+        hostname = std::string("localhost");
+    }
     std::string brokerURI =
-        "failover:(tcp://127.0.0.1:61616"
+        "failover:(tcp://"+hostname+":61616"
         "?wireFormat=openwire"
 //        "&transport.useInactivityMonitor=false"
 //        "&connection.alwaysSyncSend=true"
