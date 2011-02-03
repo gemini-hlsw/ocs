@@ -30,6 +30,7 @@ int main(int argc, char **argv) {
 	double time;
 	double throughput;
 	int nReps = 10000;
+	int nVars = 10;
 	try {
 
 		std::cout << "Starting Status Example" << std::endl;
@@ -37,30 +38,37 @@ int main(int argc, char **argv) {
 		signal(SIGABRT, terminate);
 		signal(SIGTERM, terminate);
 		signal(SIGINT, terminate);
-
-
+        
 		decaf::util::concurrent::CountDownLatch lock(1);
-		StatusUtil::createStatusItem("gpi:status1", type::INT);
-		StatusUtil::createAlarmStatusItem("gpi:alarm1", type::INT);
-		StatusUtil::createHealthStatusItem("gpi:health1");
+        for(int j=0;j<nVars;j++){
+            std::ostringstream oss;
+            oss<<j;
+            StatusUtil::createStatusItem("gpi:status"+oss.str(), type::INT);
+            StatusUtil::createAlarmStatusItem("gpi:alarm"+oss.str(), type::INT);
+            StatusUtil::createHealthStatusItem("gpi:health"+oss.str());
+        }
 	
         timer.startTimer();
 		for (int i = 0; i < nReps; i++) {
-			StatusUtil::setValueAsInt("gpi:status1", i);
-            StatusUtil::setValueAsInt("gpi:alarm1", nReps-i);
-            if(i%2==0){
-                StatusUtil::setAlarm("gpi:alarm1",giapi::alarm::ALARM_FAILURE,giapi::alarm::ALARM_CAUSE_HI,"Alarm message here!");
-                StatusUtil::setHealth("gpi:health1",giapi::health::WARNING);
-            }else{
-                StatusUtil::setAlarm("gpi:alarm1",giapi::alarm::ALARM_OK,giapi::alarm::ALARM_CAUSE_OK,"");
-                StatusUtil::setHealth("gpi:health1",giapi::health::GOOD);
+            for(int j=0;j<nVars;j++){
+                std::ostringstream oss;
+                oss<<j;
+                StatusUtil::setValueAsInt("gpi:status"+oss.str(), i);
+                StatusUtil::setValueAsInt("gpi:alarm"+oss.str(), nReps-i);
+                if(i%2==0){//alternate between alarm and no alarm, and between warning and good.
+                    StatusUtil::setAlarm("gpi:alarm"+oss.str(),giapi::alarm::ALARM_FAILURE,giapi::alarm::ALARM_CAUSE_HI,"Alarm message here!");
+                    StatusUtil::setHealth("gpi:health"+oss.str(),giapi::health::WARNING);
+                }else{
+                    StatusUtil::setAlarm("gpi:alarm"+oss.str(),giapi::alarm::ALARM_OK,giapi::alarm::ALARM_CAUSE_OK,"");
+                    StatusUtil::setHealth("gpi:health"+oss.str(),giapi::health::GOOD);
+                }
             }
             StatusUtil::postStatus();
 		}
         timer.stopTimer();
     	time = timer.getElapsedTime(util::TimeUtil::MSEC)/1000.0;
 
-		throughput = double(nReps * 3) / time;
+		throughput = double(nReps * 3 * nVars) / time;
 
 		std::cout << "Elapsed Time: " << time << " [sec]" << std::endl;
 		std::cout << "Throughput  : " << throughput << " [msg/sec]" << std::endl;
