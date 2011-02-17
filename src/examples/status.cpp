@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
     util::TimeUtil timer;
 	double time;
 	double throughput;
-	int nReps = 10000;
+	int nReps = 1000;
 	try {
 
 		std::cout << "Starting Status Example" << std::endl;
