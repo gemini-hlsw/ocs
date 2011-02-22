@@ -23,7 +23,7 @@ GIAPI C++ API:
 *   g++ (GCC) 4.1.2 20080704 (Red Hat 4.1.2-46)
 *   GNU Make 3.81
 *   GNU ld version 2.17.50.0.6-12.el5 20061020
-*   RedHat Enterprise Linux 5 Server, Linux kernel 2.6.18-164.6.1.el5, 64-bit
+*   RedHat Enterprise Linux 5 Server, Linux kernel 2.6.18-194.26.1.el5, 64-bit
 
 The headers to access the GIAPI C++ interface are in the include directory. The
 library shared object is in the lib directory of the binary distribution. In
@@ -34,7 +34,7 @@ shared object library is installed at /gemsoft/lib
 At this point in the development of GIAPI, the external libraries required
 to use the library are
 
-* Apache Active MQ CMS (C++ Messaging system) version 3.1.1 
+* Apache Active MQ CMS (C++ Messaging system) version 3.2.4 
   (from http://activemq.apache.org/cms)
 * Apache Log4cxx version 0.10.0.
   (from http://logging.apache.org/log4cxx)
