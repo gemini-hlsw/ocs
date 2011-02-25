@@ -1,5 +1,8 @@
 Release Notes - Gemini Instrument Application Programmer Interface 
 
+Versioni Release 11: Added configuration file to allow C++ client code
+to locate the GMP server in a remote location
+
 Version Release 10: Implementation of the postAncillaryFileEvent, 
 postIntermediateFileEvent and systemLog methods. Several improvements
 to performance and fault tolerance. March 15, 2010
