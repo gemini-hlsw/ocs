@@ -25,10 +25,11 @@ log4cxx::LoggerPtr PropertiesUtil::logger(log4cxx::Logger::getLogger("giapi.util
             log4cxx::helpers::InputStreamPtr inputStream = new log4cxx::helpers::FileInputStream(log4cxx::File(fileName));
             properties.load(inputStream);
         } catch(const log4cxx::helpers::IOException& ie) {
-            logger->info(std::string("Could not read configuration file [") + fileName + std::string("]. Using defaults. Please set the environment variable GMP_CONFIGURATION to point to your configuration file, or place a gmp.properties file in the current directory."));
+            LOG4CXX_WARN(logger, std::string("Could not read configuration file [") + fileName + std::string("]. Using defaults. Please set the environment variable GMP_CONFIGURATION to point to your configuration file, or place a gmp.properties file in the current directory."));
             return;
         }
     } 
+
     log4cxx::LogString PropertiesUtil::getProperty(const log4cxx::LogString& propName){
         return properties.getProperty(propName);
     }
