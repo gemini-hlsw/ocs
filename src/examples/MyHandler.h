@@ -82,9 +82,8 @@ public:
 						<< "}" << std::endl;
 			}
 		}
-
-		if (id % 2 == 1)
-			return HandlerResponse::create(HandlerResponse::COMPLETED);
+        if(activity == 0)
+			return HandlerResponse::create(HandlerResponse::ACCEPTED);
 		else {
 			printf("Starting worker thread\n");
 
