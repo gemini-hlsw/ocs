@@ -13,6 +13,7 @@ using namespace decaf::util::concurrent;
 using namespace decaf::util;
 using namespace decaf::lang;
 using namespace giapi;
+using namespace giapi::command;
 
 /**
  * Example Sequence command handler implementation.
@@ -25,11 +26,10 @@ private:
 
 public:
 
-	virtual giapi::pHandlerResponse handle(giapi::command::ActionId id,
-			giapi::command::SequenceCommand sequenceCommand,
-			giapi::command::Activity activity, giapi::pConfiguration config) {
-
-		if (config != NULL && config->getSize() > 0) {
+	void printConfiguration(giapi::pConfiguration config)
+    {
+        // Print the configuration if it was sent
+        if (config != NULL && config->getSize() > 0) {
 			std::vector<std::string> keys = config->getKeys();
 			std::vector<std::string>::iterator it = keys.begin();
 			printf("Configuration\n");
@@ -38,10 +38,23 @@ public:
 						<< "}" << std::endl;
 			}
 		}
+    }
 
-		if (id % 2 == 1)
+    virtual giapi::pHandlerResponse handle(giapi::command::ActionId id, giapi::command::SequenceCommand sequenceCommand, giapi::command::Activity activity, giapi::pConfiguration config)
+    {
+        printConfiguration(config);
+
+        // if the Activity is PRESET or CANCEL return ACCPETED
+		if (activity == PRESET || activity == CANCEL) {
+			printf("Response to caller %i\n", HandlerResponse::ACCEPTED);
+			return HandlerResponse::create(HandlerResponse::ACCEPTED);
+		}
+
+		// For other activities return half of the time COMPLETED and half STARTED and later COMPLETED
+		if (id % 2 == 1) {
+			printf("Response to caller %i\n", HandlerResponse::COMPLETED);
 			return HandlerResponse::create(HandlerResponse::COMPLETED);
-		else {
+		} else {
 			printf("Starting worker thread for %i\n", id);
 
 			if (thread != NULL) {

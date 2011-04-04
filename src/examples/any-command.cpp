@@ -38,7 +38,6 @@ int main(int argc, char **argv) {
 
 	// Set of Commands that require a configuration
 	multimap<SequenceCommand, ActivitySet> with_config_handler;
-	//with_config_handler.insert(std::make_pair(REBOOT, SET_PRESET_START_CANCEL));
 	with_config_handler.insert(std::make_pair(OBSERVE, SET_PRESET_START_CANCEL));
 
 	try {
