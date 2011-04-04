@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
 				with_config_handler.begin(); it
 				!= with_config_handler.end(); ++it) {
 			// Reuse APPLY handler
-			pSequenceCommandHandler handler = ApplyHandler::create();
+			pSequenceCommandHandler handler = GenericHandler::create();
 			CommandUtil::subscribeSequenceCommand((*it).first, (*it).second,
 					handler);
 		}
