@@ -53,7 +53,7 @@ public:
 private:
 
 	void cleanup() {
-		printf("Destroying Wroker Thread");
+		printf("Destroying Worker Thread");
 	}
 };
 
@@ -83,7 +83,7 @@ public:
 			}
 		}
 
-		printf("Starting worker thread\n");
+		printf("Starting worker thread on id %i\n", id);
 
 		if (thread != NULL) {
 			thread->join();// this is where  code must be smarter than
