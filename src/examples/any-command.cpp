@@ -21,24 +21,21 @@ using namespace giapi::command;
 int main(int argc, char **argv) {
 
 	// Set of Commands that use the standard handler
-	multimap<SequenceCommand, ActivitySet> standard_handler;
-	standard_handler.insert(std::make_pair(TEST, SET_PRESET_START_CANCEL));
-	standard_handler.insert(std::make_pair(INIT, SET_PRESET_START_CANCEL));
-	standard_handler.insert(std::make_pair(DATUM, SET_PRESET_START_CANCEL));
-	standard_handler.insert(std::make_pair(PARK, SET_PRESET_START_CANCEL));
-	standard_handler.insert(std::make_pair(VERIFY, SET_PRESET_START_CANCEL));
-	standard_handler.insert(std::make_pair(END_VERIFY, SET_PRESET_START_CANCEL));
-	standard_handler.insert(std::make_pair(GUIDE, SET_PRESET_START_CANCEL));
-	standard_handler.insert(std::make_pair(END_GUIDE, SET_PRESET_START_CANCEL));
-	standard_handler.insert(std::make_pair(END_OBSERVE, SET_PRESET_START_CANCEL));
-	standard_handler.insert(std::make_pair(PAUSE, SET_PRESET_START_CANCEL));
-	standard_handler.insert(std::make_pair(CONTINUE, SET_PRESET_START_CANCEL));
-	standard_handler.insert(std::make_pair(STOP, SET_PRESET_START_CANCEL));
-	standard_handler.insert(std::make_pair(ABORT, SET_PRESET_START_CANCEL));
-
-	// Set of Commands that require a configuration
-	multimap<SequenceCommand, ActivitySet> with_config_handler;
-	with_config_handler.insert(std::make_pair(OBSERVE, SET_PRESET_START_CANCEL));
+	multimap<SequenceCommand, ActivitySet> commands_set;
+	commands_set.insert(std::make_pair(TEST, SET_PRESET_START_CANCEL));
+	commands_set.insert(std::make_pair(INIT, SET_PRESET_START_CANCEL));
+	commands_set.insert(std::make_pair(DATUM, SET_PRESET_START_CANCEL));
+	commands_set.insert(std::make_pair(PARK, SET_PRESET_START_CANCEL));
+	commands_set.insert(std::make_pair(VERIFY, SET_PRESET_START_CANCEL));
+	commands_set.insert(std::make_pair(END_VERIFY, SET_PRESET_START_CANCEL));
+	commands_set.insert(std::make_pair(GUIDE, SET_PRESET_START_CANCEL));
+	commands_set.insert(std::make_pair(END_GUIDE, SET_PRESET_START_CANCEL));
+	commands_set.insert(std::make_pair(END_OBSERVE, SET_PRESET_START_CANCEL));
+	commands_set.insert(std::make_pair(PAUSE, SET_PRESET_START_CANCEL));
+	commands_set.insert(std::make_pair(CONTINUE, SET_PRESET_START_CANCEL));
+	commands_set.insert(std::make_pair(STOP, SET_PRESET_START_CANCEL));
+	commands_set.insert(std::make_pair(ABORT, SET_PRESET_START_CANCEL));
+	commands_set.insert(std::make_pair(OBSERVE, SET_PRESET_START_CANCEL));
 
 	try {
 
@@ -48,23 +45,14 @@ int main(int argc, char **argv) {
 		decaf::util::concurrent::CountDownLatch lock(1);
 
 		for (multimap<SequenceCommand, ActivitySet>::iterator it =
-				standard_handler.begin(); it
-				!= standard_handler.end(); ++it) {
+				commands_set.begin(); it
+				!= commands_set.end(); ++it) {
 			pSequenceCommandHandler handler = GenericHandler::create();
 			CommandUtil::subscribeSequenceCommand((*it).first, (*it).second,
 					handler);
 		}
 
-		for (multimap<SequenceCommand, ActivitySet>::iterator it =
-				with_config_handler.begin(); it
-				!= with_config_handler.end(); ++it) {
-			// Reuse APPLY handler
-			pSequenceCommandHandler handler = GenericHandler::create();
-			CommandUtil::subscribeSequenceCommand((*it).first, (*it).second,
-					handler);
-		}
-
-		pSequenceCommandHandler handler = ApplyHandler::create();
+		pSequenceCommandHandler handler = GenericHandler::create();
 		CommandUtil::subscribeApply("gpi", SET_PRESET_START_CANCEL, handler);
 
 		//Wait until is killed
