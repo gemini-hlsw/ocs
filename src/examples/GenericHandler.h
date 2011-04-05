@@ -51,7 +51,7 @@ public:
 		}
 
 		// For other activities return half of the time COMPLETED and half STARTED and later COMPLETED
-		if (id % 2 == 1) {
+		if (random() % 2 == 1) {
 			printf("Response to caller %i\n", HandlerResponse::COMPLETED);
 			return HandlerResponse::create(HandlerResponse::COMPLETED);
 		} else {
@@ -88,6 +88,7 @@ private:
 	GenericHandler() {
 		worker = new WorkerThread();
 		thread = NULL;
+        srandom(time(NULL));
 	}
 };
 
