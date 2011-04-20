@@ -18,7 +18,19 @@
 using namespace giapi;
 using namespace giapi::command;
 
+decaf::util::concurrent::CountDownLatch endLock(1);
+
+void terminate(int signal) {
+    std::cout << "Exiting... " << std::endl;
+    endLock.countDown();
+    //exit(0);
+}
+
 int main(int argc, char **argv) {
+
+    signal(SIGABRT, terminate);
+    signal(SIGTERM, terminate);
+    signal(SIGINT, terminate);
 
 	// Set of Commands that use the standard handler
 	multimap<SequenceCommand, ActivitySet> commands_set;
@@ -42,7 +54,6 @@ int main(int argc, char **argv) {
 		std::cout << "Starting Accepting Any Sequence Commands Example"
 				<< std::endl;
 
-		decaf::util::concurrent::CountDownLatch lock(1);
 
 		for (multimap<SequenceCommand, ActivitySet>::iterator it =
 				commands_set.begin(); it
@@ -56,7 +67,7 @@ int main(int argc, char **argv) {
 		CommandUtil::subscribeApply("gpi", SET_PRESET_START_CANCEL, handler);
 
 		//Wait until is killed
-		lock.await();
+		endLock.await();
 	} catch (GmpException &e) {
 		std::cerr << "Is the GMP up?... Exiting" << std::endl;
 
