@@ -1,10 +1,10 @@
 #Directories used to build and install the GIAPI C++ language glue. 
 
 #Installation directory
-INSTALL_DIR := /home/anunez/Projects/giapi/install
+INSTALL_DIR := /Users/cquiroz/Projects/giapi/giapi-glue-cc/install
 
 #External libraries dependencies, used during build
-EXTERNAL_LIB := /home/anunez/Projects/giapi/giapi-external
+EXTERNAL_LIB := /Users/cquiroz/Projects/giapi/giapi-glue-cc/external
 
 #Directory where distribution files are going to be stored
-DISTRIBUTION_DIR := /home/anunez/Projects/giapi/dist
+DISTRIBUTION_DIR := /Users/cquiroz/Projects/giapi/giapi-glue-cc/dist

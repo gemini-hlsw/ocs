@@ -2,13 +2,13 @@
 -include ../../conf/config.mk
 -include ../../conf/common.mk
 
-INC_DIRS= -I../../ -I../ -I$(ACTIVEMQ_INCLUDE) -I$(APR_INCLUDE) -I$(LOG4CXX_INCLUDE)
+INC_DIRS= -I../../ -I../ -I$(ACTIVEMQ_INCLUDE) -I$(APR_INCLUDE) -I$(LOG4CXX_INCLUDE) -I$(CURLPP_INCLUDE)
 
-LIB_DIRS= -L../../ -L$(ACTIVEMQ_LIB) -L$(LOG4CXX_LIB) -L$(APR_LIB)
+LIB_DIRS= -L../../ -L$(ACTIVEMQ_LIB) -L$(LOG4CXX_LIB) -L$(APR_LIB) -L$(CURLPP_LIB)
 
-LIBS= -lgiapi-glue-cc -lactivemq-cpp -llog4cxx -lapr-1
+LIBS= -lgiapi-glue-cc -lactivemq-cpp -llog4cxx -lapr-1 -lcurlpp -lcurl
 
-LD_LIBRARY_PATH := ../../:$(LOG4CXX_LIB):$(CPPUNIT_LIB):$(ACTIVEMQ_LIB):$(APR_LIB)
+LD_LIBRARY_PATH := ../../:$(LOG4CXX_LIB):$(CPPUNIT_LIB):$(ACTIVEMQ_LIB):$(APR_LIB):$(CURLPP_LIB)
 
 all: stresstest seq-command tcscontext pcsupdater obsevent epicssubscription logging fileevents status services apply-command any-command obsacq
 
@@ -43,14 +43,13 @@ apply-command: apply-command.o
 
 any-command: any-command.o
 	$(CXX) $(LIB_DIRS) $(LIBS) -o $@  $<
-	
+
 obsacq: obsacq.o
 	$(CXX) $(LIB_DIRS) $(LIBS) -o $@  $<
 
 epicssubscription: epicssubscription.o EpicsHandlerDemo.o
 	$(CXX) $(LIB_DIRS) $(LIBS) -o $@  $+
 
-	
 %.o: %.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking $(OS) C++ Compiler'
@@ -63,7 +62,7 @@ epicssubscription: epicssubscription.o EpicsHandlerDemo.o
 
 run: 
 	@echo $(LD_LIBRARY_PATH)
-	
-	
+
+
 clean: 
 	-$(RM) *.o *.d stresstest seq-command pcsupdater tcscontext obsevent epicssubscription pcsupdater logging fileevents status services apply-command any-command obsacq

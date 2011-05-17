@@ -67,6 +67,12 @@ system before building the GIAPI C++:
   to the place I define to install cppunit using the 'configure --prefix' 
   command. CPP Unit 1.12.0 available as an RPM package from EPEL repositories
   can also be used.
+
+* cURLpp 0.7.3 Can be obtained from http://curlpp.org/
+  This library needs to be installed in the EXTERNAL_LIB/curlpp directory
+  Same as with everything else, I declare EXTERNAL_LIB/curlpp as a symlink 
+  to the place I define to install cppunit using the 'configure --prefix --without-boost' 
+  command.
    
 4. Building the library
 
