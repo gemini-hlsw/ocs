@@ -34,7 +34,6 @@ GIAPI_INCLUDE_BASE := $(INSTALL_DIR)/include
 GIAPI_INCLUDE_DIR := $(GIAPI_INCLUDE_BASE)/giapi
 GIAPI_LIB_DIR := $(INSTALL_DIR)/lib
 
-
 #Log4cxx stuff
 LOG4CXX_BASE := $(EXTERNAL_LIB)/log4cxx
 LOG4CXX_INCLUDE := $(LOG4CXX_BASE)/include
@@ -55,6 +54,11 @@ APR_BASE:=$(EXTERNAL_LIB)/apr
 APR_INCLUDE:= $(APR_BASE)/include/apr-1
 APR_LIB:=$(APR_BASE)/lib
 
+#cURLpp
+CURLPP_BASE:=$(EXTERNAL_LIB)/curlpp
+CURLPP_INCLUDE:= $(CURLPP_BASE)/include/
+CURLPP_LIB:=$(CURLPP_BASE)/lib
+
 #Extra distribution files to be included in the package for distribution
 EXTRA_DIST_FILES := README RELEASE_NOTES
 
@@ -68,6 +72,6 @@ TMP_DIST_DIR := /tmp/$(DIST_PACKAGE_NAME)
 %.o: %.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking $(OS) C++ Compiler'
-	$(CXX) $(INC_DIRS) -O3 -Wall -fPIC -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
+	$(CXX) $(INC_DIRS) -g -O0 -Wall -fPIC -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
