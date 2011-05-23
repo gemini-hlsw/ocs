@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
 
 	try {
 
-		std::cout << "Starting Accepting Any Sequence Commands Example"
+		std::cout << "Starting Observe Simulator Example"
 				<< std::endl;
 
 

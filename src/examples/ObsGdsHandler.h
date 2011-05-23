@@ -9,6 +9,7 @@
 #include <decaf/util/concurrent/CountDownLatch.h>
 #include <decaf/util/concurrent/TimeUnit.h>
 #include <giapi/DataUtil.h>
+#include <giapi/StatusUtil.h>
 
 using namespace decaf::util::concurrent;
 using namespace decaf::util;
@@ -43,12 +44,24 @@ class WorkerThread: public Runnable {
             if(DataUtil::postObservationEvent(data::OBS_PREP, "S20110427-01") == status::ERROR){
                 cout << "ERROR posting " << data::OBS_PREP << endl;
             }
+            
+            decaf::util::concurrent::TimeUnit::SECONDS.sleep(1);
+            
+            StatusUtil::createStatusItem("gpi:status1", type::STRING);
+            StatusUtil::setValueAsString("gpi:status1", "117");
+            StatusUtil::postStatus();
 
             decaf::util::concurrent::TimeUnit::SECONDS.sleep(1);
             if(DataUtil::postObservationEvent(data::OBS_START_ACQ, "S20110427-01") == status::ERROR){
                 cout << "ERROR posting " << data::OBS_START_ACQ << endl;
             }
 
+            decaf::util::concurrent::TimeUnit::SECONDS.sleep(1);
+            
+            StatusUtil::createStatusItem("gpi:status2", type::STRING);
+            StatusUtil::setValueAsString("gpi:status2", "42");
+            StatusUtil::postStatus();
+            
             decaf::util::concurrent::TimeUnit::SECONDS.sleep(1);
             if(DataUtil::postObservationEvent(data::OBS_END_ACQ, "S20110427-01") == status::ERROR){
                 cout << "ERROR posting " << data::OBS_END_ACQ << endl;
