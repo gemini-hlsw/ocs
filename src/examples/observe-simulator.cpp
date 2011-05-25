@@ -8,6 +8,8 @@
 #include <utility>
 
 #include <decaf/util/concurrent/CountDownLatch.h>
+#include <decaf/util/concurrent/TimeUnit.h>
+
 
 #include <giapi/CommandUtil.h>
 #include <giapi/SequenceCommandHandler.h>
@@ -22,7 +24,8 @@ decaf::util::concurrent::CountDownLatch endLock(1);
 void terminate(int signal) {
     std::cout << "Exiting... " << std::endl;
     endLock.countDown();
-    //exit(0);
+    decaf::util::concurrent::TimeUnit::SECONDS.sleep(1);
+    exit(0);
 }
 
 int main(int argc, char **argv) {
