@@ -98,7 +98,7 @@ void postXMLRequest() {
 	    header.push_back(buf);
 
 	    using namespace curlpp::Options;
-	    request.setOpt(new Url("http://172.16.12.65:12345/"));
+	    request.setOpt(new Url("http://localhost:12345/"));
 	    request.setOpt(new Verbose(true));
 	    request.setOpt(new HttpHeader(header));
 	    request.setOpt(new Post(true));
@@ -150,7 +150,10 @@ int main(int argc, char **argv) {
 		string newLocation = copyDataFile(dataLocation);
 		postEvent(data::OBS_PREP, 1);
 		postEvent(data::OBS_START_ACQ, 2);
-		postEvent(data::OBS_END_ACQ, 1);
+		postEvent(data::OBS_END_ACQ, 2);
+		postEvent(data::OBS_START_READOUT, 1);
+		postEvent(data::OBS_END_READOUT, 1);
+		postEvent(data::OBS_START_DSET_WRITE, 1);
 		postEvent(data::OBS_END_DSET_WRITE, 1);
 	} catch (GmpException &e) {
 		std::cerr << e.getMessage() << ". Is the GMP up?" << std::endl;
