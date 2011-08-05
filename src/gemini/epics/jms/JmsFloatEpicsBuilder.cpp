@@ -15,7 +15,7 @@ JmsFloatEpicsBuilder::~JmsFloatEpicsBuilder() {
 pEpicsStatusItem JmsFloatEpicsBuilder::getEpicsStatusItem() {
 
 	int size = _nElements * sizeof(float);
-	char * data = (char *) malloc(size);
+	char * data = new char[_nElements];
 	for (int i = 0; i < _nElements; i++) {
 		float val = _message->readFloat();
 		memcpy(data + i * sizeof(float), &val, sizeof(float));
@@ -23,7 +23,7 @@ pEpicsStatusItem JmsFloatEpicsBuilder::getEpicsStatusItem() {
 	pEpicsStatusItem item = EpicsStatusItemImpl::create(_name, type::FLOAT,
 			_nElements, data, size);
 	//destroy the local memory
-	delete data;
+	delete[] data;
 	return item;
 }
 

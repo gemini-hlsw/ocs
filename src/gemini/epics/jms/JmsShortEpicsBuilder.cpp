@@ -14,7 +14,7 @@ JmsShortEpicsBuilder::~JmsShortEpicsBuilder() {
 pEpicsStatusItem JmsShortEpicsBuilder::getEpicsStatusItem() {
 
 	int size = _nElements * sizeof(short int);
-	char * data = (char *) malloc(size);
+	char * data = new char[_nElements];
 	for (int i = 0; i < _nElements; i++) {
 		short int val = _message->readShort();
 		memcpy(data + i * sizeof(short int), &val, sizeof(short int));
@@ -22,7 +22,7 @@ pEpicsStatusItem JmsShortEpicsBuilder::getEpicsStatusItem() {
 	pEpicsStatusItem item = EpicsStatusItemImpl::create(_name, type::SHORT,
 			_nElements, data, size);
 	//destroy the local memory
-	delete data;
+	delete[] data;
 	return item;
 }
 

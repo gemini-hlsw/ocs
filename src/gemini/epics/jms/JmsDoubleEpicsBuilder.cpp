@@ -14,7 +14,7 @@ JmsDoubleEpicsBuilder::~JmsDoubleEpicsBuilder() {
 pEpicsStatusItem JmsDoubleEpicsBuilder::getEpicsStatusItem() {
 
 	int size = _nElements * sizeof(double);
-	char * data = (char *) malloc(size);
+	char * data = new char[_nElements];
 	for (int i = 0; i < _nElements; i++) {
 		double val = _message->readDouble();
 		memcpy(data + i * sizeof(double), &val, sizeof(double));
@@ -22,7 +22,7 @@ pEpicsStatusItem JmsDoubleEpicsBuilder::getEpicsStatusItem() {
 	pEpicsStatusItem item = EpicsStatusItemImpl::create(_name, type::DOUBLE,
 			_nElements, data, size);
 	//destroy the local memory
-	delete data;
+	delete[] data;
 	return item;
 }
 
