@@ -11,8 +11,7 @@ log4cxx::LoggerPtr StatusItem::logger(log4cxx::Logger::getLogger("giapi.StatusIt
 
 StatusItem::StatusItem(const std::string &name, const type::Type type) :
 	KvPair(name) {
-	_time = 0;
-	_changedFlag = true; //initially, the items are dirty.
+	_mark(); //initially, the items are dirty, and the timestamp is now.
 	_type = type;
 	//initial values for each type:
 	switch (_type) {
@@ -137,6 +136,10 @@ void StatusItem::accept(StatusVisitor &visitor) {
 
 const type::Type StatusItem::getStatusType() const {
 	return _type;
+}
+
+const long64 StatusItem::getTimestamp() const {
+	return _time;
 }
 
 }

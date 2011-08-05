@@ -113,6 +113,11 @@ public:
 
 
 	/**
+	 * Return the timestamp for this status item
+	 */
+	const long64 getTimestamp() const;
+
+	/**
 	 * The accept interface for the visitor pattern
 	 */
 	virtual void accept(StatusVisitor &);

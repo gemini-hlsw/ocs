@@ -91,6 +91,8 @@ void StatusSerializerVisitor::writeHeader(int offset, StatusItem *item)
 		_msg->writeUTF(item->getName());
 		//and finally the value
 		_msg->writeInt(item->getValueAsInt());
+        //and then the timestamp
+        _msg->writeLong(item->getTimestamp());
 		break;
 	case type::DOUBLE:
 		_msg->writeByte(offset + 1);
@@ -98,6 +100,8 @@ void StatusSerializerVisitor::writeHeader(int offset, StatusItem *item)
 		_msg->writeUTF(item->getName());
 		//and finally the value
 		_msg->writeDouble(item->getValueAsDouble());
+        //and then the timestamp
+        _msg->writeLong(item->getTimestamp());
 		break;
 	case type::FLOAT:
 		_msg->writeByte(offset + 2);
@@ -105,6 +109,8 @@ void StatusSerializerVisitor::writeHeader(int offset, StatusItem *item)
 		_msg->writeUTF(item->getName());
 		//and finally the value
 		_msg->writeFloat(item->getValueAsFloat());
+        //and then the timestamp
+        _msg->writeLong(item->getTimestamp());
 		break;
 
 		break;
@@ -120,6 +126,8 @@ void StatusSerializerVisitor::writeHeader(int offset, StatusItem *item)
 			value = " ";
 		}
 		_msg->writeUTF(value);
+        //and then the timestamp
+        _msg->writeLong(item->getTimestamp());
 		break;
 	case type::BOOLEAN:
 		//TODO: Add the boolean handling when
