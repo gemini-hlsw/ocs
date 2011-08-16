@@ -1,6 +1,11 @@
 Release Notes - Gemini Instrument Application Programmer Interface 
 
-Versioni Release 11: Added configuration file to allow C++ client code
+Version Release 12: Added timestamps to Status Items
+
+** New Feature
+    * [GIAPI-379] - Add timestamp to status items
+
+Version Release 11: Added configuration file to allow C++ client code
 to locate the GMP server in a remote location
 
 Version Release 10: Implementation of the postAncillaryFileEvent, 
