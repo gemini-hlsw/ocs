@@ -39,7 +39,7 @@ char *initObservation = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \
         </params>\
 </methodCall>";
 
-char *storeKeyword = "<methodCall>\
+/*char *storeKeyword = "<methodCall>\
     <methodName>HeaderReceiver.storeKeyword</methodName>\
     <params>\
         <param>\
@@ -58,7 +58,33 @@ char *storeKeyword = "<methodCall>\
             </value>\
         </param>\
     </params>\
+</methodCall>";*/
+char *storeKeyword=" <methodCall>\
+        <methodName>HeaderReceiver.storeKeywords</methodName>\
+        <params>\
+                <param>\
+                        <value>\
+                                <string>S20110427-01</string>\
+                        </value>\
+                </param>\
+                <param>\
+                <value>\
+                <array><data>\
+                <value>\
+                <string>INTKEY,INT,1</string>\
+                </value>\
+                <value>\
+                <string>DBLKEY,DOUBLE,1.0</string>\
+                </value>\
+                <value>\
+                <string>STRKEY,STRING,uno</string>\
+                </value>\
+                </data></array>\
+                </value>\
+                </param>\
+        </params>\
 </methodCall>";
+
 char *xmlRequest=NULL;
 size_t readData(char *buffer, size_t size, size_t nitems) {
   strncpy(buffer, xmlRequest, size * nitems);
@@ -98,7 +124,7 @@ void postXMLRequest() {
 	    header.push_back(buf);
 
 	    using namespace curlpp::Options;
-	    request.setOpt(new Url("http://localhost:12345/"));
+	    request.setOpt(new Url("http://localhost:8888/xmlrpc"));
 	    request.setOpt(new Verbose(true));
 	    request.setOpt(new HttpHeader(header));
 	    request.setOpt(new Post(true));
