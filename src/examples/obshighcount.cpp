@@ -27,7 +27,7 @@
 using namespace giapi;
 using namespace std;
 
-char *initObservation = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \
+const char *initObservation = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \
     <methodCall>\
         <methodName>HeaderReceiver.initObservation</methodName>\
         <params>\
@@ -44,7 +44,7 @@ char *initObservation = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \
         </params>\
 </methodCall>";
 
-char *storeKeyword = "<methodCall>\
+const char *storeKeyword = "<methodCall>\
     <methodName>HeaderReceiver.storeKeywords</methodName>\
         <params>\
             <param>\
@@ -138,11 +138,6 @@ char *storeKeyword = "<methodCall>\
             </param>\
     </params>\
 </methodCall>";
-char *xmlRequest=NULL;
-size_t readData(char *buffer, size_t size, size_t nitems) {
-  strncpy(buffer, xmlRequest, size * nitems);
-  return size * nitems;
-}
 
 string copyDataFile(string dataLocation, std::string dataLabel) {
     string newLocation(dataLocation);
@@ -159,7 +154,7 @@ string copyDataFile(string dataLocation, std::string dataLabel) {
     return newLocation;
 }
 
-void postXMLRequest(std::string dataLabel, char* xml) {
+void postXMLRequest(std::string dataLabel, const char* xml) {
     try {
         curlpp::Cleanup cleaner;
         curlpp::Easy request;
@@ -179,7 +174,6 @@ void postXMLRequest(std::string dataLabel, char* xml) {
 
         request.setOpt(new Url("http://localhost:8001/xmlrpc"));
         request.setOpt(new HttpHeader(header));
-        request.setOpt(new Verbose(true));
         request.setOpt(new Post(true));
         request.setOpt(new InfileSize(size));
         request.setOpt(new ReadStream(&instream));
@@ -217,7 +211,6 @@ int main(int argc, char **argv) {
             signal(SIGTERM, terminate);
             signal(SIGINT, terminate);
 
-            xmlRequest=initObservation;
             time_t seconds;
             seconds = time(NULL);
 
@@ -236,15 +229,14 @@ int main(int argc, char **argv) {
             cout << endl << "time to post xmlrpc req:" << dif << " [ms]" << endl;
             
             string dataLocation = ServicesUtil::getProperty("DHS_SCIENCE_DATA_PATH", 1000);
-            cout << dataLocation << endl;
             
-            for (int i = 0; i < STATUS_ITEMS_COUNT; i++) {
+            for (int i = 0; i <= STATUS_ITEMS_COUNT; i++) {
                 std::stringstream ss;
                 ss << "S" << i;
                 StatusUtil::createStatusItem(ss.str(), type::INT);
             }
                 
-            for (int i = 0; i < STATUS_ITEMS_COUNT; i++) {
+            for (int i = 0; i <= STATUS_ITEMS_COUNT; i++) {
                     std::stringstream ss;
                     ss << "S" << i;
                     StatusUtil::setValueAsInt(ss.str(), i);
