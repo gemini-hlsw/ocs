@@ -16,6 +16,8 @@
 #include <giapi/DataUtil.h>
 #include <giapi/ServicesUtil.h>
 #include <src/util/TimeUtil.h>
+#include <src/util/PropertiesUtil.h>
+#include <src/util/StringUtil.h>
 
 #include <curlpp/cURLpp.hpp>
 #include <curlpp/Easy.hpp>
@@ -171,8 +173,12 @@ void postXMLRequest(std::string dataLabel, const char* xml) {
         sprintf(buf, "Content-Length: %d", size);
         header.push_back(buf);
         using namespace curlpp::Options;
+        std::string hostname = giapi::util::PropertiesUtil::Instance().getProperty("gmp.hostname");
+        if(giapi::util::StringUtil::isEmpty(hostname)){
+            hostname = std::string("localhost");
+        }
 
-        request.setOpt(new Url("http://localhost:8001/xmlrpc"));
+        request.setOpt(new Url("http://"+hostname+":8888/xmlrpc"));
         request.setOpt(new HttpHeader(header));
         request.setOpt(new Post(true));
         request.setOpt(new InfileSize(size));
