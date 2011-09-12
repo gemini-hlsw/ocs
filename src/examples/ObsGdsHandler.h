@@ -62,7 +62,7 @@ class WorkerThread: public Runnable {
         }
 
         virtual void run() {
-            string datalabel = config->getValue("gpi:observe.DATA_LABEL");
+            string datalabel = config->getValue("DATA_LABEL");
 
             std::cout<<"label: "<<datalabel<<std::endl;
 
@@ -98,7 +98,19 @@ class WorkerThread: public Runnable {
             if(DataUtil::postObservationEvent(data::OBS_END_ACQ, datalabel) == status::ERROR){
                 cout << "ERROR posting " << data::OBS_END_ACQ << endl;
             }
+            decaf::util::concurrent::TimeUnit::SECONDS.sleep(1);
+            if(DataUtil::postObservationEvent(data::OBS_START_READOUT, datalabel) == status::ERROR){
+                cout << "ERROR posting " << data::OBS_START_READOUT << endl;
+            }
+            decaf::util::concurrent::TimeUnit::SECONDS.sleep(1);
+            if(DataUtil::postObservationEvent(data::OBS_END_READOUT, datalabel) == status::ERROR){
+                cout << "ERROR posting " << data::OBS_END_READOUT << endl;
+            }
 
+            decaf::util::concurrent::TimeUnit::SECONDS.sleep(1);
+            if(DataUtil::postObservationEvent(data::OBS_START_DSET_WRITE, datalabel) == status::ERROR){
+                cout << "ERROR posting " << data::OBS_START_DSET_WRITE << endl;
+            }
             decaf::util::concurrent::TimeUnit::SECONDS.sleep(1);
             if(DataUtil::postObservationEvent(data::OBS_END_DSET_WRITE, datalabel) == status::ERROR){
                 cout << "ERROR posting " << data::OBS_END_DSET_WRITE << endl;
