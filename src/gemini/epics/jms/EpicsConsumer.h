@@ -40,12 +40,12 @@ typedef std::tr1::shared_ptr<EpicsConsumer> pEpicsConsumer;
 class EpicsConsumer: public MessageListener {
 
 public:
-	virtual ~EpicsConsumer();
+	virtual ~EpicsConsumer() throw ();
 
 	/**
 	 * Invoked by the JMS whenever a new message is received
 	 */
-	virtual void onMessage(const Message* message);
+	virtual void onMessage(const Message* message) throw();
 
 	/**
 	 * Static factory to create consumers for different EPICS channels

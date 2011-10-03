@@ -69,7 +69,7 @@ void SequenceCommandConsumer::init(
 }
 
 
-SequenceCommandConsumer::~SequenceCommandConsumer() {
+SequenceCommandConsumer::~SequenceCommandConsumer() throw (){
 	LOG4CXX_DEBUG(logger, "Destroying Sequence Command Consumer " << _sequenceCommand);
 	cleanup();
 }
@@ -96,7 +96,7 @@ pSequenceCommandConsumer SequenceCommandConsumer::create(
 
 
 
-void SequenceCommandConsumer::onMessage(const Message* message) {
+void SequenceCommandConsumer::onMessage(const Message* message) throw (){
 
 	try {
 		const MapMessage* mapMessage =

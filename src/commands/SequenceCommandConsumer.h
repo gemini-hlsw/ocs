@@ -97,12 +97,12 @@ public:
 	/**
 	 * Destructor. Cleans up all the resources instantiated by this consumer
 	 */
-	virtual ~SequenceCommandConsumer();
+	virtual ~SequenceCommandConsumer() throw ();
 
 	/**
 	 * Invoked by the JMS whenever a new message is received
 	 */
-	virtual void onMessage(const Message* message);
+	virtual void onMessage(const Message* message) throw ();
 
 private:
 	/**

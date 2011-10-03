@@ -49,7 +49,7 @@ pEpicsConsumer EpicsConsumer::create(const std::string &channelName,
 
 }
 
-EpicsConsumer::~EpicsConsumer() {
+EpicsConsumer::~EpicsConsumer() throw() {
 	LOG4CXX_DEBUG(logger, "Destroying EPICS Consumer for channel " << _channelName);
 	cleanup();
 }
@@ -78,7 +78,7 @@ void EpicsConsumer::cleanup() {
 	//destruction of the objects is automatic since we are using smart pointers
 }
 
-void EpicsConsumer::onMessage(const cms::Message * message) {
+void EpicsConsumer::onMessage(const cms::Message * message) throw() {
 
 	const BytesMessage* bytesMessage =
 			dynamic_cast< const BytesMessage* >( message );
