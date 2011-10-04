@@ -25,7 +25,7 @@ void terminate(int signal) {
     std::cout << "Exiting... " << std::endl;
     endLock.countDown();
     decaf::util::concurrent::TimeUnit::SECONDS.sleep(1);
-    exit(0);
+//    exit(0);
 }
 
 int main(int argc, char **argv) {
