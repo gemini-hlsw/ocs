@@ -34,8 +34,8 @@ public:
 
 	void init() {
 		pEpicsStatusHandler handler = EpicsHandlerDemo::create();
-		GeminiUtil::subscribeEpicsStatus("ws:wsFilter.VALL", handler);
-		GeminiUtil::subscribeEpicsStatus("ws:cpWf", handler);
+		GeminiUtil::subscribeEpicsStatus("gpi:ws:wsFilter.VALL", handler);
+		GeminiUtil::subscribeEpicsStatus("gpi:ws:cpWf", handler);
 	}
 
 	~Example() {
