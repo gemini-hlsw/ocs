@@ -1,12 +1,20 @@
 Release Notes - Gemini Instrument Application Programmer Interface 
 
+Version Release 13: Upgrade to ActiveMQ 3.4.0
+
+** Improvements 
+    * [GIAPI-670] - Upgrade version of ActiveMQ CMS
+
+
 Version Release 12: Added timestamps to Status Items
 
 ** New Feature
     * [GIAPI-379] - Add timestamp to status items
 
+
 Version Release 11: Added configuration file to allow C++ client code
 to locate the GMP server in a remote location
+
 
 Version Release 10: Implementation of the postAncillaryFileEvent, 
 postIntermediateFileEvent and systemLog methods. Several improvements
@@ -16,6 +24,7 @@ to performance and fault tolerance. March 15, 2010
     * [GIAPI-60] - Add Systems Logging functionality to the GMP
     * [GIAPI-62] - Add postAncillaryFileEvent to GMP
     * [GIAPI-63] - Add postIntermediateFileEvent to GMP
+
 
 Version Release 9: Implementation of the getTCSContext method and simulation
 mechanism for testing. Added support for floating point values for status
@@ -28,9 +37,9 @@ C library now is documented in doxygen (in a separate module). December 23, 2009
     * [GIAPI-22] - Provide simulated getTCSContext testing capability in GMP
 
 ** Improvements 
-    * [GIAPI-58] - Added simulation mode to PCS Updater 
-    
-    
+    * [GIAPI-58] - Added simulation mode to PCS Updater     
+
+
     
 Version Release 8: Implementation of postPCSUpdate method to offload corrections
 to the Primary Control System. Added C library (in a separate package) to interface
