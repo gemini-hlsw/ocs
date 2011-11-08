@@ -46,11 +46,11 @@ private:
 	 */
 	enum DataType {
 		SHORT = 1,
-		INT,
-		DOUBLE,
-		FLOAT,
-		STRING,
-		BYTE
+		INT = 5,
+		DOUBLE = 6,
+		FLOAT =2,
+		STRING = 0,
+		BYTE = 4
 	};
 
 };
