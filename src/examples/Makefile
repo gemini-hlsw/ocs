@@ -10,7 +10,7 @@ LIBS= -lgiapi-glue-cc -lactivemq-cpp -llog4cxx -lapr-1 -lcurlpp -lcurl
 
 LD_LIBRARY_PATH := ../../:$(LOG4CXX_LIB):$(CPPUNIT_LIB):$(ACTIVEMQ_LIB):$(APR_LIB):$(CURLPP_LIB)
 
-all: stresstest seq-command tcscontext pcsupdater obsevent epicssubscription logging fileevents status services apply-command any-command observe-simulator gpisimulator obshighcount
+all: stresstest seq-command tcscontext pcsupdater obsevent epicssubscription logging fileevents status services apply-command any-command observe-simulator gpisimulator obshighcount engineering
 
 seq-command: seq-command.o
 
@@ -42,6 +42,9 @@ apply-command: apply-command.o
 	$(CXX) $(LIB_DIRS) $(LIBS) -o $@  $<
 
 any-command: any-command.o
+	$(CXX) $(LIB_DIRS) $(LIBS) -o $@  $<
+
+engineering: engineering.o
 	$(CXX) $(LIB_DIRS) $(LIBS) -o $@  $<
 
 gpisimulator: gpisimulator.o
