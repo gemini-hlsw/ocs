@@ -107,7 +107,8 @@ namespace giapi {
 			PAUSE,
 			CONTINUE,
 			STOP,
-			ABORT
+			ABORT,
+            ENGINEERING
 		};
 
 		enum Activity {

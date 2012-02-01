@@ -59,6 +59,7 @@ public:
 	const static std::string GMP_SEQUENCE_COMMAND_CONTINUE;
 	const static std::string GMP_SEQUENCE_COMMAND_STOP;
 	const static std::string GMP_SEQUENCE_COMMAND_ABORT;
+	const static std::string GMP_SEQUENCE_COMMAND_ENGINEERING;
 
 	//Utility Method keys
 	const static std::string GMP_UTIL_REQUEST_DESTINATION;
