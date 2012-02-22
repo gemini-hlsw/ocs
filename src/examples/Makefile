@@ -10,7 +10,7 @@ LIBS= -lgiapi-glue-cc -lactivemq-cpp -llog4cxx -lapr-1 -lcurlpp -lcurl
 
 LD_LIBRARY_PATH := ../../:$(LOG4CXX_LIB):$(CPPUNIT_LIB):$(ACTIVEMQ_LIB):$(APR_LIB):$(CURLPP_LIB)
 
-all: stresstest seq-command tcscontext pcsupdater obsevent epicssubscription logging fileevents status services apply-command any-command observe-simulator gpisimulator obshighcount engineering
+all: stresstest seq-command tcscontext pcsupdater obsevent epicssubscription logging fileevents status services apply-command any-command observe-simulator gpisimulator gpiobssimulator obshighcount engineering
 
 seq-command: seq-command.o
 
@@ -50,6 +50,9 @@ engineering: engineering.o
 gpisimulator: gpisimulator.o
 	$(CXX) $(LIB_DIRS) $(LIBS) -o $@  $<
 
+gpiobssimulator: gpiobssimulator.o
+	$(CXX) $(LIB_DIRS) $(LIBS) -o $@  $<
+
 obshighcount: obshighcount.o
 	$(CXX) $(LIB_DIRS) $(LIBS) -o $@  $<
 
@@ -74,4 +77,4 @@ run:
 
 
 clean: 
-	-$(RM) *.o *.d stresstest seq-command pcsupdater tcscontext obsevent epicssubscription pcsupdater logging fileevents status services apply-command any-command obsacq
+	-$(RM) *.o *.d stresstest seq-command pcsupdater tcscontext obsevent epicssubscription pcsupdater logging fileevents status services apply-command any-command obsacq gpisimulator gpiobssimulator engineering
