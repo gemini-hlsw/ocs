@@ -47,6 +47,10 @@ main(int argc, char **argv)
 
         std:: cout << "Science Path: " << sciencePath << std::endl;
 
+        std:: string permanentSciencePath = ServicesUtil::getProperty("DHS_PERMANENT_SCIENCE_DATA_PATH", 1000);
+
+        std:: cout << "Permanent Science Path: " << permanentSciencePath << std::endl;
+
         std:: string intermediatePath = ServicesUtil::getProperty("DHS_INTERMEDIATE_DATA_PATH", 1000);
 
         std:: cout << "Intermediate Data Path: " << intermediatePath << std::endl;
