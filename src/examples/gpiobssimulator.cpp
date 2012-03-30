@@ -27,15 +27,26 @@
 using namespace giapi;
 using namespace std;
 
-const char *initObservation = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \
+const char *openObservation = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \
     <methodCall>\
-        <methodName>HeaderReceiver.initObservation</methodName>\
+        <methodName>HeaderReceiver.openObservation</methodName>\
         <params>\
                 <param>\
                         <value>\
                                 <string>GS-2006B-Q-57</string>\
                         </value>\
                 </param>\
+                <param>\
+                        <value>\
+                                <string>%s</string>\
+                        </value>\
+                </param>\
+        </params>\
+</methodCall>";
+const char *closeObservation = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \
+    <methodCall>\
+        <methodName>HeaderReceiver.closeObservation</methodName>\
+        <params>\
                 <param>\
                         <value>\
                                 <string>%s</string>\
@@ -221,8 +232,9 @@ int main(int argc, char **argv) {
 
             struct timeval start, end;
             gettimeofday (&start, NULL);
-            //postXMLRequest(dataLabel, initObservation);
+            //postXMLRequest(dataLabel, openObservation);
             //postXMLRequest(dataLabel, storeKeyword);
+            //postXMLRequest(dataLabel, closeObservation);
             gettimeofday (&end, NULL);
             double dif = (end.tv_sec - start.tv_sec) * 1000.0 + (end.tv_usec - start.tv_usec) / 1000.0;
             

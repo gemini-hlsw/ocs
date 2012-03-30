@@ -27,9 +27,9 @@
 using namespace giapi;
 using namespace std;
 
-const char *initObservation = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \
+const char *openObservation = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \
     <methodCall>\
-        <methodName>HeaderReceiver.initObservation</methodName>\
+        <methodName>HeaderReceiver.openObservation</methodName>\
         <params>\
                 <param>\
                         <value>\
@@ -44,6 +44,17 @@ const char *initObservation = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \
         </params>\
 </methodCall>";
 
+const char *closeObservation = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \
+    <methodCall>\
+        <methodName>HeaderReceiver.closeObservation</methodName>\
+        <params>\
+                <param>\
+                        <value>\
+                                <string>%s</string>\
+                        </value>\
+                </param>\
+        </params>\
+</methodCall>";
 const char *storeKeyword = "<methodCall>\
     <methodName>HeaderReceiver.storeKeywords</methodName>\
         <params>\
@@ -172,7 +183,7 @@ void postXMLRequest(std::string dataLabel, const char* xml) {
         header.push_back(buf);
         using namespace curlpp::Options;
 
-        request.setOpt(new Url("http://localhost:8001/xmlrpc"));
+        request.setOpt(new Url("http://172.16.11.154:8888/xmlrpc"));
         request.setOpt(new HttpHeader(header));
         request.setOpt(new Post(true));
         request.setOpt(new InfileSize(size));
@@ -221,7 +232,7 @@ int main(int argc, char **argv) {
 
             struct timeval start, end;
             gettimeofday (&start, NULL);
-            postXMLRequest(dataLabel, initObservation);
+            postXMLRequest(dataLabel, openObservation);
             postXMLRequest(dataLabel, storeKeyword);
             gettimeofday (&end, NULL);
             double dif = (end.tv_sec - start.tv_sec) * 1000.0 + (end.tv_usec - start.tv_usec) / 1000.0;
@@ -251,6 +262,7 @@ int main(int argc, char **argv) {
             postEvent(data::OBS_END_READOUT, 1, dataLabel);
             postEvent(data::OBS_START_DSET_WRITE, 200, dataLabel);
             postEvent(data::OBS_END_DSET_WRITE, 1, dataLabel);
+            postXMLRequest(dataLabel, closeObservation);
             
 
     } catch (GmpException &e) {
