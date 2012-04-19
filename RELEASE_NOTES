@@ -1,5 +1,10 @@
 Release Notes - Gemini Instrument Application Programmer Interface 
 
+Version Release 13.1: New Epics Service Interface
+** New Feature
+    * [GIAPI-795] - New Epics Service interface
+
+
 Version Release 13: Upgrade to ActiveMQ 3.4.0
 
 ** Improvements 
