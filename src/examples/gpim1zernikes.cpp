@@ -22,9 +22,9 @@ int main(int argc, char **argv) {
 
     double zernikes[20];
     // Values taken from an actual offload event
-    zernikes[0]  =  0.0;
-    zernikes[1]  =  0.0;
-    zernikes[2]  =  0.0;
+    zernikes[0]  =  0.1;
+    zernikes[1]  =  0.2;
+    zernikes[2]  =  0.3;
     zernikes[3]  =  1.4269236999098212E-4;
     zernikes[4]  = -1.173403870780021E-5;
     zernikes[5]  =  7.754975740681402E-6;
