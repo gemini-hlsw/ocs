@@ -154,7 +154,6 @@ string copyDataFile(string dataLocation, std::string dataLabel) {
     string newLocation(dataLocation);
     newLocation.append("/");
     newLocation.append(dataLabel);
-    newLocation.append(".fits");
 
     cout << "TempFile : " << newLocation << endl;
 
