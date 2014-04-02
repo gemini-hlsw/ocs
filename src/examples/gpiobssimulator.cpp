@@ -170,6 +170,7 @@ void postXMLRequest(std::string dataLabel, const char* xml) {
         curlpp::Easy request;
 
         std::list<std::string> header;
+
         header.push_back("Content-Type: text/xml");
 
         char *xmlRequest = new char[dataLabel.size() + strlen(xml)];
