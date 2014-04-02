@@ -32,7 +32,7 @@ public:
    * @throws GiapiException if there is an error accessing the GMP
    *         or a timeout occurs.
    */
-  virtual pEpicsStatusItem getChannel(const std::string &name) throw (GiapiException) = 0;
+  virtual pEpicsStatusItem getChannel(const std::string &name, long timeout) throw (GiapiException) = 0;
 
   /**
    * Destructor

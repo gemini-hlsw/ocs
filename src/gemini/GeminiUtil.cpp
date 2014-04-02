@@ -31,8 +31,8 @@ int GeminiUtil::getTcsContext(TcsContext& ctx, long timeout) throw (GiapiExcepti
 	return GeminiUtilImpl::Instance()->getTcsContext(ctx, timeout);
 }
 
-pEpicsStatusItem GeminiUtil::getChannel(const std::string &name) throw (GiapiException)  {
-  return GeminiUtilImpl::Instance()->getChannel(name);
+pEpicsStatusItem GeminiUtil::getChannel(const std::string &name, long timeout) throw (GiapiException)  {
+  return GeminiUtilImpl::Instance()->getChannel(name, timeout);
 }
 
 }

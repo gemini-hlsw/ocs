@@ -36,7 +36,7 @@ public:
 
 	int getTcsContext(TcsContext& ctx, long timeout) const throw (GiapiException);
 
-	pEpicsStatusItem getChannel(const std::string &name) throw (GiapiException);
+	pEpicsStatusItem getChannel(const std::string &name, long timeout) throw (GiapiException);
 
 	virtual ~GeminiUtilImpl();
 private:

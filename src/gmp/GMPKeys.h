@@ -88,6 +88,9 @@ public:
 	//Gemini Service Key - TCS Context
 	const static std::string GMP_TCS_CONTEXT_DESTINATION;
 
+	//Gemini Service Key - EPICS get
+	const static std::string GMP_GEMINI_EPICS_GET_DESTINATION;
+
 	//Gemini Data Util Keys
 	const static std::string GMP_DATA_OBSEVENT_DESTINATION;
 	const static std::string GMP_DATA_OBSEVENT_NAME;
@@ -107,5 +110,6 @@ private:
 };
 
 }
+
 
 #endif /*GMPKEYS_H_*/

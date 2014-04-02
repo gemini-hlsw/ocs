@@ -8,7 +8,7 @@ JmsEpicsBuilder::JmsEpicsBuilder(BytesMessage * bm) {
 
 	//Read the common elements to all types of messages.
 	//First, the name
-	_name = _message->readUTF();
+	_name = _message->readUTF(); 
 	//number of elements.
 	_nElements = _message->readInt();
 

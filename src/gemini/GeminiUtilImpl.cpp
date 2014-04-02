@@ -60,8 +60,9 @@ int GeminiUtilImpl::getTcsContext(TcsContext& ctx, long timeout) const throw (Gi
 	return _tcsFetcher->fetch(ctx, timeout);
 }
 
-pEpicsStatusItem GeminiUtilImpl::getChannel(const std::string &name) throw (GiapiException)  {
-	return _epicsFetcher->getChannel(name);
+pEpicsStatusItem GeminiUtilImpl::getChannel(const std::string &name, long timeout) throw (GiapiException)  {
+	std::cout << "Destroying " << std::endl;
+	return _epicsFetcher->getChannel(name, timeout);
 }
 
 }

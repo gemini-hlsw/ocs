@@ -18,7 +18,7 @@ public:
    */
   static pEpicsFetcher create() throw (CommunicationException);
 
-  virtual pEpicsStatusItem getChannel(const std::string &name) throw (GiapiException);
+  virtual pEpicsStatusItem getChannel(const std::string &name, long timeout) throw (GiapiException);
 
 private:
 

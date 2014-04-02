@@ -101,7 +101,7 @@ public:
 	 * @throws GiapiException if there is an error accessing the GMP
 	 *         or a timeout occurs.
 	 */
-	static pEpicsStatusItem getChannel(const std::string &name) throw (GiapiException);
+	static pEpicsStatusItem getChannel(const std::string &name, long timeout) throw (GiapiException);
 
 private:
 	GeminiUtil();

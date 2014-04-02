@@ -34,13 +34,11 @@ pEpicsConfiguration JmsEpicsConfiguration::create(pSession session) {
 	return conf;
 }
 
-
 void JmsEpicsConfiguration::requestChannels(long timeout) throw (CommunicationException, TimeoutException) {
 
 	Message *request= NULL;
 
 	try {
-
 		//We will use a queue to send the request to the GMP
 		pDestination dest = pDestination(_session->createQueue(
 						gmp::GMPKeys::GMP_GEMINI_EPICS_REQUEST_DESTINATION));
