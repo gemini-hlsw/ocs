@@ -102,7 +102,6 @@ public:
 	const static std::string GMP_DATA_FILEEVENT_DATALABEL;
 	const static std::string GMP_DATA_FILEEVENT_HINT;
 
-
 	virtual ~GMPKeys();
 
 private:
