@@ -6,6 +6,7 @@
 #include <giapi/giapi.h>
 #include <giapi/EpicsStatusHandler.h>
 #include <gemini/epics/EpicsManager.h>
+#include <gemini/epics/EpicsFetcher.h>
 #include <gemini/pcs/PcsUpdater.h>
 #include <gemini/tcs/TcsFetcher.h>
 
@@ -35,6 +36,8 @@ public:
 
 	int getTcsContext(TcsContext& ctx, long timeout) const throw (GiapiException);
 
+	pEpicsStatusItem getChannel(const std::string &name) throw (GiapiException);
+
 	virtual ~GeminiUtilImpl();
 private:
 	static pGeminiUtilImpl INSTANCE;
@@ -53,6 +56,11 @@ private:
 	 * The TCS fetcher object
 	 */
 	gemini::tcs::pTcsFetcher _tcsFetcher;
+
+	/**
+	 * The EPICS fetcher object
+	 */
+	gemini::epics::pEpicsFetcher _epicsFetcher;
 
 	GeminiUtilImpl() throw (GiapiException);
 

@@ -2,6 +2,8 @@
 #include <gemini/epics/jms/JmsEpicsManager.h>
 #include <gemini/pcs/jms/JmsPcsUpdater.h>
 #include <gemini/tcs/jms/JmsTcsFetcher.h>
+#include <gemini/epics/jms/JmsEpicsFetcher.h>
+
 namespace giapi {
 
 log4cxx::LoggerPtr GeminiUtilImpl::logger(log4cxx::Logger::getLogger("giapi.GeminiUtilImpl"));
@@ -12,6 +14,7 @@ GeminiUtilImpl::GeminiUtilImpl() throw (GiapiException) {
 	_epicsMgr = JmsEpicsManager::create();
 	_pcsUpdater = gemini::pcs::jms::JmsPcsUpdater::create();
 	_tcsFetcher = gemini::tcs::jms::JmsTcsFetcher::create();
+	_epicsFetcher = gemini::epics::JmsEpicsFetcher::create();
 }
 
 GeminiUtilImpl::~GeminiUtilImpl() {
@@ -19,6 +22,7 @@ GeminiUtilImpl::~GeminiUtilImpl() {
 	_epicsMgr.reset();
 	_pcsUpdater.reset();
 	_tcsFetcher.reset();
+	_epicsFetcher.reset();
 }
 
 pGeminiUtilImpl GeminiUtilImpl::Instance() throw (GiapiException) {
@@ -54,6 +58,10 @@ int GeminiUtilImpl::postPcsUpdate(double zernikes[], int size) {
 
 int GeminiUtilImpl::getTcsContext(TcsContext& ctx, long timeout) const throw (GiapiException) {
 	return _tcsFetcher->fetch(ctx, timeout);
+}
+
+pEpicsStatusItem GeminiUtilImpl::getChannel(const std::string &name) throw (GiapiException)  {
+	return _epicsFetcher->getChannel(name);
 }
 
 }

@@ -1,5 +1,10 @@
 Release Notes - Gemini Instrument Application Programmer Interface 
 
+Version Release 14 : New Epics Service Interface
+** New Feature
+    * [GIAPI-1035] - Add method getChannel to retrieve an EPICS channel
+
+
 Version Release 13.1: New Epics Service Interface
 ** New Feature
     * [GIAPI-795] - New Epics Service interface
