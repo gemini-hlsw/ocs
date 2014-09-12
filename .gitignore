@@ -20,7 +20,7 @@ project/plugins/project/
 .worksheet
 
 # Idea specific
-idea/
+app/**/idea
 *.iml
 *.ipr
 
