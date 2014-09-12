@@ -30,9 +30,10 @@ bundle/edu.gemini.services.server/src/main/resources/edu/gemini/services/server/
 bundle/edu.gemini.services.server/src/main/scala/edu/gemini/services/server/util/24408334e14c4c6ca38b20b445384c25e9c4a8a9-privatekey.p12
 project/OcsCredentials.scala
 
-# Reinclude packages named "target"
+# Reinclude packages named "target" and bundles that end in ".log"
 !/bundle/edu.gemini.pit/src/main/scala/edu/gemini/pit/ui/view/target
 !/bundle/edu.gemini.pot/src/main/java/edu/gemini/spModel/target
 !/bundle/edu.gemini.pot/src/main/resources/edu/gemini/spModel/target
 !/bundle/edu.gemini.pot/src/test/java/edu/gemini/spModel/target
 !/bundle/edu.gemini.pot/src/test/scala/edu/gemini/spModel/target
+!/bundle/edu.gemini.sp.vcs.log
