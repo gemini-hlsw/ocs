@@ -1,0 +1,13 @@
+<!--
+  Schema definition for proposal metadata (used by software tools).
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <xsd:complexType name="Meta">
+        <xsd:sequence>
+            <xsd:element name="attachment" type="xsd:string"/>
+        </xsd:sequence>
+        <xsd:attribute name="band3optionChosen" type="xsd:boolean" use="required"/>
+    </xsd:complexType>
+
+</xsd:schema>

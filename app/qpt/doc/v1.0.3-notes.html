@@ -1,0 +1,189 @@
+
+<html>
+<head><title>QPT 1.0.3 Release Notes</title></head>
+<link rel="stylesheet" href="/doc/styles.css"></link>
+<body>
+
+<h1>QPT 1.0.3 Release Notes</h1>
+
+QPT release 1.0.3 addresses 18 issues, described below. 
+Release notes for the previous release are available <a href="v1.0.2-notes.html">here</a>. 
+
+<p>
+<i style="color: green">
+This is a somewhat half-baked release because we had some unexpected database work
+that took our attention away from QPT for most of the semester. You will see a few
+new features and should notice that the UI is generally smoother, and you will see 
+half-complete features that hint at things to
+come. For instance, you can select multiple visits in the plan visualizer, but
+can't drag them (yet). You can also open a plan directly from the web, but you 
+cannot specify a template that way (yet). There should be a follow-on release 
+early in 07A to complete these features.
+</p>
+<p>
+This is a major update that will require you to re-install the entire QPT application
+including the application launcher, so please read the instructions below! If you 
+have never installed QPT, please see <a href="install.html"><i>Running QPT</i></a>.
+</p>
+
+</i>
+
+<h2>Upgrading to QPT 1.0.3</h2>
+
+<h3>Step 1. Update the OSGi Launcher.</h3>
+
+First you need to update the OSGi application launcher. These instructions assume
+that you had previously installed <code>launcher.jar</code> in <code>~/.ocs</code>:
+
+<pre>
+$ cd ~/.ocs
+$ rm launcher.jar
+$ curl -O http://sbfmaps.cl.gemini.edu:9999/runtime/launcher/launcher.jar
+...
+$ cd
+</pre>
+If you don't have <code>curl</code>, use your web browser or <code>wget</code>:
+<pre>
+$ wget http://sbfmaps.cl.gemini.edu:9999/runtime/launcher/launcher.jar
+</pre>
+
+<h3>Step 2 - Uninstall and Re-install the QPT application.</h3>
+
+<!--You should do this <i>or</i> Option 2 below.-->
+
+<pre>
+$ launcher -a:qpt -u
+$ launcher -h:sbfmaps.cl.gemini.edu -i:qpt -v
+</pre>
+You are now upgraded and can start QPT via
+<pre>
+$ launcher -a:qpt
+</pre>
+
+<!--
+<h3>Step 2 - Option 2: Install QPT while retaining the old version.</h3>
+
+<i>You should do this <b>or</b> Option 1 above.</i>
+To install the new version while retaining the previous version, you can provide an 
+alias for the new version and use the alias to launch.
+
+<pre>
+$ launcher -h:sbfmaps.cl.gemini.edu -i:qpt -v <span style="color:red">-a:qpt-1.0.3</span>
+</pre>
+You are now upgraded and can start QPT via
+<pre>
+$ launcher <span style="color:red">-a:qpt-1.0.3</span>
+</pre>
+--> 
+
+As always, please direct questions and comments to <code>rnorris@gemini.edu</code> and cc: the QC groups if
+appropriate.
+
+</div>
+
+<h2>New and Notable</h2>
+
+<h3>[IN PROGRESS: QPT-50, 84] Enhanced Selection Handling</h3>
+The user interface's handling of selected objects had been greatly improved and is
+now more consistent and predictable. Basically, when you click on something, all related
+objects in other views will be selected, including multiple selections when
+appropriate. For example, if you click on a candidate observation with mutiple split
+visits scheduled, all visits will be selected in the Visits view and in the
+visualizer. Problem marker selection seems to work intuitively now.
+
+The Properties view has been enhanced to support this as well; if multiple objects are 
+selected, the properties view will show the properties these objects have in common. 
+This remains work in progress, but hopefully you will find that the UI feels more
+solid.
+
+<h3>[IN PROGRESS: QPT-40, 159] GQPT Weighting</h3>
+A preliminary weighting algorithm has been added. It appears as a new column called 
+"Score" in the Candidate Observations list. The scores themselves are meaningful 
+only in the sense that a higher number reflects a higher scheduling score based 
+on the candidate's flags and priority; a score of 3000 <i>does not</i> mean that the
+observation is twice as important as one with a score of 1500.
+<p>
+You can sort on this column if you want to experiment with this scoring system,
+or simply <i>ignore this column if it's not useful</i>, and send me an email if
+you have a specific complaint. This is very much work in progress.
+
+<h3>[IN PROGRESS: QPT-157] New Candidate Observation Flags</h3>
+Candidate observations are now annotated with the following additional flags. These
+were intended mostly for use by the automatic plan filling algorithm, but may be
+useful for queue coordinators as well. They appear in the Properties view but do not
+affect the candidates' visual appearance in the Candidate Observations view.
+<ul>
+<li><code>SETS_EARLY</code> indicates that the target sets within the first three
+hours of the night. This flag is an intrinsic property of the plan and will be the
+same for all variants.
+<li><code>PARTIAL</code> indicates that the target is <i>partially</i> blocked;
+i.e., there is not enough time left in the current variant to schedule all remaining
+steps, but there is at least enough time available for setup + step 1. This flag
+will likely change from variant to variant.
+</ul>
+
+<h3>[QPT-118, 119] Cloning and Re-Ordering of Variants</h3>
+The Variants view now has additional toolbar buttons to allow the user to clone
+and re-order variants. Cloning a variant will add an identical copy called "Copy of
+..." to the list (note that you may need to scroll down to see it). The up and
+down arrows allow you to re-order variants.
+
+<h3>[QPT-121, 170] PI Priority and Science Band in Candidate List</h3>
+The Candidate Observation view now has a new column called <i>P</i> for PI Priority,
+with single-letter values <code>L</code>, <code>M</code>, <code>H</code>, and 
+<code>T</code> (for Low, Medium, High, and ToO). There is also an "SB" column
+for Science Band, which is from 1 through 4 (with 4 being the bad weather queue).
+
+
+<h3>Other Minor and Self-Explanatory Changes</h3>
+
+<ul>
+<li>[QPT-192] Target names in plan document are now truncated with elipsis at 20 characters.
+<li>[QPT-191] Problem markers are now filtered by the current variant.
+<li>[QPT-165] Elevation warning/error are now at 80&deg; and 85&deg;
+<li>[QPT-156] 	 An elevation of > 85&deg; is no longer considered a hard constraint
+violation when calculating schedulability.
+<li>[QPT-158] 	 Fix functor/model versioning problem. This was an internal issue
+related to the Update Software command.		
+<li>[QPT-154] 	 Published plan now uses unambiguous language in its title. "Night 
+of July 15 &rarr; 16", for example.
+<li>[QPT-153] 	 QPT now remember your site. Whenever you create a new plan, QPT will
+default to the last site you used.		
+<li>[QPT-155] 	 Browser title bar now contains the UTC date.
+<li>[QPT-49] 	 Visits grabbed off-center no longer jump when you begin dragging.
+</ul>
+
+
+
+<h2>JIRA Release Manifest</h2>
+
+Release Notes - Queue Planning Tool - Version 1.0.3
+    
+<h3>Bug</h3>
+<ul>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-50'>QPT-50</a>] - Initial click doesn't always select row in table views</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-184'>QPT-184</a>] - RiseTransitSet fails for targets that never rise above airmass 2</li>
+</ul>
+    
+<h3>Improvement</h3>
+<ul>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-49'>QPT-49</a>] - Fix drag offset problem</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-84'>QPT-84</a>] - Improve marker selection</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-118'>QPT-118</a>] - Allow re-ordering of variants</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-119'>QPT-119</a>] - Allow copying of variants</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-121'>QPT-121</a>] - Show PI Priority in candidate list</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-153'>QPT-153</a>] - QPT Should Guess your Site</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-154'>QPT-154</a>] - Improve Date Displays in Published Plan</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-155'>QPT-155</a>] - UTC Date in Browser Title Bar</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-156'>QPT-156</a>] - Exclude > 85&deg; from elevation constraint calc</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-157'>QPT-157</a>] - Add PARTIAL flag</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-158'>QPT-158</a>] - Fix functor/model versioning problem</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-159'>QPT-159</a>] - Add preliminary scoring function</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-165'>QPT-165</a>] - Change elevation warning to 80, error to 85+</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-170'>QPT-170</a>] - Add SB to candidate list</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-191'>QPT-191</a>] - Problems should be filtered by variant</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-192'>QPT-192</a>] - Truncate target names in report table</li>
+</ul>
+                
+</body>
+</html>

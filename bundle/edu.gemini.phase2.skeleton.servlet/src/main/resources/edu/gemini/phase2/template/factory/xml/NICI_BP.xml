@@ -1,0 +1,824 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
+
+<document>
+  <container kind="program" type="Program" version="2014A-1" subtype="basic" key="6154007b-d738-4a9c-a2c6-6a68d73125e0" name="NICI-BP">
+    <paramset name="Science Program" kind="dataObj">
+      <param name="title" value="NICI PHASE I/II MAPPING BPS"/>
+      <param name="programMode" value="QUEUE"/>
+      <param name="tooType" value="none"/>
+      <param name="programStatus" value="PHASE2"/>
+      <param name="nextObsId" value="1"/>
+      <paramset name="piInfo">
+        <param name="firstName" value=""/>
+        <param name="lastName" value=""/>
+        <param name="email" value=""/>
+        <param name="phone" value=""/>
+      </paramset>
+      <param name="queueBand" value="1"/>
+      <param name="isLibrary" value="true"/>
+      <paramset name="timeAcct"/>
+      <param name="awardedTime" value="0.0" units="hours"/>
+      <param name="fetched" value="yes"/>
+      <param name="completed" value="false"/>
+      <param name="notifyPi" value="NO"/>
+    </paramset>
+    <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="29988926-fa84-4551-bc5d-722b1c4ac11a" name="Note">
+      <paramset name="Note" kind="dataObj">
+        <param name="title" value="Observing Notes TEMPLATE"/>
+        <param name="NoteText">
+          <value>Q-XXX -- NICI 
+
+This Observing Note template contains several categories of issues which commonly arise with NICI observations, with multiple options for each category.   The goal is to tailor the Note so that Contact Scientists, Queue Coordinators, and Observers can quickly understand the essential requirements of the program.
+
+Customize the Note to an individual program as follows:
+  1.  For each category, identify the option required by the program.
+  2.  Delete the other options.
+  3.  Edit details such as the occulting spot size.  Please AVOID making small changes to the existing
+       text that may be difficult for readers to notice.
+  4.  If none of the options match the program requirements, write a BRIEF description of your own.  If this is
+       required, it may mean that your observing strategy is non-standard, and should be carefully
+       discussed with your NGO and Contact Scientist. 
+
+-----
+
+SCHEDULING
+-Schedule all targets according to the hour angle constraints.  Note that a range such as "1.5 - 2.5 hours" can be either east or west of the meridian.
+
+HOUR ANGLE / AIRMASS LIMITS
+-HA specified for each target.   Important to provide proper field rotation during observation.
+-Airmass limits for good AO correction only, field rotation not an issue
+
+CASS ROTATOR  
+-Fixed mode with 180 deg default for all targets.
+-Fixed mode with special CR angles.
+-Follow mode for all targets.
+-Mix of Follow and Fixed mode.
+
+OBSERVING MODE
+-Coronagraphic ASDI or ADI with the FXXXX occulting spot.
+-Coronagraphic imaging with CassRot in Follow mode
+-Non-coronagraphic imaging with CassRot in Follow mode
+
+ACQUISITION
+-Accurate centering on coronagraph spot is required for all targets.
+-Clear mask, no science camera acquistion images required.
+
+BRIGHT COMPANIONS  
+-All targets have been previously observed and are known not to have bright companions.
+-Abort observation if companion with r &lt; XX arcsec and dmag &lt; xx is detected during acquisition.
+-Execute alternate observation which dithers off mask if companion with r &lt; XX arcsec and dmag &lt; xx is detected during acquisition.
+-Observe even if bright companion detected.
+
+CORE/HALO LIMIT
+-C/H must be &gt; XXX for all targets.  Abort observation if C/H is below the limit.
+-C/H requirement specified in Note for each target.  Abort observation if C/H is below the limit.
+
+SATURATION LIMIT  
+-ASDI observations should not be allowed to saturate in the core; reduce Exposure Time &amp; increase Coadds if necessary.
+-ADI observations with broadband H filter are expected to saturate on brighter targets; do not reduce Exposure Time.
+-No constraint.
+
+DITHERING
+-None
+-Dithering with FP Mask tracking star: After each offset one needs to re-acquire the star under the mask, acq steps are in the sequence.
+-Dithering with FP Mask tracking star: no re-acquisition needed after offset. 
+-Dithering with FP Mask frozen:  no re-acquisition needed after offset.
+
+FLATS
+-None, relies on library flats.
+-Included in observing sequence, execute before slewing to next target.
+-Templates included in program, execute at end of observing BEFORE FP MASK IS MOVED.
+-Templates included in program, execute at end of night or during day
+
+DARKS
+-None, relies on library darks.
+-Templates included in program, execute at end of night or during day.
+</value>
+        </param>
+      </paramset>
+    </container>
+    <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="99a48cf7-21d9-4357-b2ad-698881f0c060" name="Note">
+      <paramset name="Note" kind="dataObj">
+        <param name="title" value="Next libID = 5"/>
+        <param name="NoteText" value=""/>
+      </paramset>
+    </container>
+    <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="1edbc187-a750-4ea5-b39e-acaf4d5d3372" name="Note">
+      <paramset name="Note" kind="dataObj">
+        <param name="title" value="Setting up NICI observations"/>
+        <param name="NoteText" value="Tom to provide text"/>
+      </paramset>
+    </container>
+    <container kind="group" type="Group" version="2009A-1" subtype="group" key="4a11cdeb-6399-409d-8ce4-c9c7c8e9b15c" name="Group">
+      <paramset name="Group" kind="dataObj">
+        <param name="title" value="Standard Imaging"/>
+        <param name="GroupType" value="TYPE_FOLDER"/>
+        <param name="libraryId" value=""/>
+      </paramset>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="94d71d96-334b-477f-848e-8a6cd1b3d0f1" name="NICI-BP-1">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Science target, small dithers"/>
+          <param name="libraryId" value="1"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2009B-1" subtype="NICI" key="49b162c0-2303-433f-8169-07e1986975a9" name="NICI">
+          <paramset name="NICI" kind="dataObj">
+            <param name="exposureTime" value="0.38"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="focalPlaneMask" value="CLEAR"/>
+            <param name="pupilMask" value="NINETY_FIVE_PERCENT"/>
+            <param name="cassRotator" value="FOLLOW"/>
+            <param name="cassRotatorFixedAngle" value="180.0"/>
+            <param name="cassRotatorFollowAngle" value="0.0"/>
+            <param name="imagingMode" value="MANUAL"/>
+            <param name="dichroicWheel" value="H5050_BEAMSPLITTER"/>
+            <param name="channel1Fw" value="KS"/>
+            <param name="channel2Fw" value="H"/>
+            <param name="exposures" value="1"/>
+            <param name="wellDepth" value="NORMAL"/>
+            <param name="dhsMode" value="SAVE"/>
+            <param name="issPort" value="SIDE_LOOKING"/>
+            <param name="focs" value="OUT"/>
+            <param name="pupilImager" value="OPEN"/>
+            <param name="spiderMask" value="UPDATE"/>
+            <param name="SMRAngle" value="0.0"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="43e8df6a-f68f-4beb-a45f-06cba23a05c1" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="2ebdef0b-0939-4eca-a52a-6e5955a5e28f" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="a9996d41-babc-4992-a2df-a5e2a4a43d40" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NICI" key="1c0c345e-568a-48f3-b32f-ddca34930225" name="NICI Sequence">
+            <paramset name="NICI Sequence" kind="dataObj">
+              <param name="title" value="NICI: Photometric calibration"/>
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="0.38"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="163276ee-ed00-46cb-9063-036099706ab2" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="SCIENCE"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NICI" key="fbeb1972-dc1d-472b-af21-8e1cb4964772" name="NICI Sequence">
+            <paramset name="NICI Sequence" kind="dataObj">
+              <param name="coadds" value="6"/>
+              <param name="exposureTime" value="10.0"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="nicioffset" key="d8ca0bfc-7c1d-494a-ba04-ebe411800928" name="NICI Offset">
+              <paramset name="NICI Offset" kind="dataObj">
+                <param name="title" value="NICI Offset"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                    <param name="fpmw" value="false"/>
+                  </paramset>
+                  <paramset name="Offset1" sequence="1">
+                    <param name="p" value="-2.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                    <param name="fpmw" value="false"/>
+                  </paramset>
+                  <paramset name="Offset2" sequence="2">
+                    <param name="p" value="-2.0"/>
+                    <param name="q" value="-2.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                    <param name="fpmw" value="false"/>
+                  </paramset>
+                  <paramset name="Offset3" sequence="3">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="-2.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                    <param name="fpmw" value="false"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="74abe02f-2d3f-40ab-a0cc-06a5c9da65da" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="3"/>
+                  <param name="class" value="SCIENCE"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NICI" key="6cd0a643-77a0-4931-ab7b-56aacd01d1a8" name="NICI Sequence">
+            <paramset name="NICI Sequence" kind="dataObj">
+              <param name="title" value="NICI: Photometric calibration"/>
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="0.38"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="19f2412e-ad05-4cb1-9f30-4046b569d4c4" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="SCIENCE"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="59b20aaa-0d98-4d33-ad05-fc20d618b2b5" name="NICI-BP-2">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Science target, large dithers"/>
+          <param name="libraryId" value="2"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2009B-1" subtype="NICI" key="52fe92c7-4464-4aed-b934-63ea8e185569" name="NICI">
+          <paramset name="NICI" kind="dataObj">
+            <param name="exposureTime" value="0.38"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="focalPlaneMask" value="CLEAR"/>
+            <param name="pupilMask" value="NINETY_FIVE_PERCENT"/>
+            <param name="cassRotator" value="FOLLOW"/>
+            <param name="cassRotatorFixedAngle" value="180.0"/>
+            <param name="cassRotatorFollowAngle" value="0.0"/>
+            <param name="imagingMode" value="MANUAL"/>
+            <param name="dichroicWheel" value="H5050_BEAMSPLITTER"/>
+            <param name="channel1Fw" value="KS"/>
+            <param name="channel2Fw" value="H"/>
+            <param name="exposures" value="1"/>
+            <param name="wellDepth" value="NORMAL"/>
+            <param name="dhsMode" value="SAVE"/>
+            <param name="issPort" value="SIDE_LOOKING"/>
+            <param name="focs" value="OUT"/>
+            <param name="pupilImager" value="OPEN"/>
+            <param name="spiderMask" value="UPDATE"/>
+            <param name="SMRAngle" value="0.0"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="1b8a46f7-00ef-4163-a8ca-33350e3cbbd6" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="0e9c0902-907f-4c9b-a559-293a5489159f" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="d04de011-d8bc-41c2-b0dc-51d33d066947" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NICI" key="80f089fa-6311-4cc8-8094-3dbe7e0a3e1e" name="NICI Sequence">
+            <paramset name="NICI Sequence" kind="dataObj">
+              <param name="title" value="NICI: Photometric calibration"/>
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="0.38"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="6e3556d1-6c20-4d55-884d-6b38a307bb9b" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="SCIENCE"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NICI" key="a864e5cf-7763-4610-895c-82427607c4df" name="NICI Sequence">
+            <paramset name="NICI Sequence" kind="dataObj">
+              <param name="coadds" value="6"/>
+              <param name="exposureTime" value="10.0"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="nicioffset" key="b0b4067d-6398-4e42-a1ce-299a792354b8" name="NICI Offset">
+              <paramset name="NICI Offset" kind="dataObj">
+                <param name="title" value="NICI Offset"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                    <param name="fpmw" value="false"/>
+                  </paramset>
+                  <paramset name="Offset1" sequence="1">
+                    <param name="p" value="-20.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="off"/>
+                    <param name="fpmw" value="false"/>
+                  </paramset>
+                  <paramset name="Offset2" sequence="2">
+                    <param name="p" value="-20.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="off"/>
+                    <param name="fpmw" value="false"/>
+                  </paramset>
+                  <paramset name="Offset3" sequence="3">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                    <param name="fpmw" value="false"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="c90ab283-cd2e-428b-a4d9-4e843cc0f358" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="3"/>
+                  <param name="class" value="SCIENCE"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NICI" key="91f9810e-ae63-4e8b-9b9f-659608364ed9" name="NICI Sequence">
+            <paramset name="NICI Sequence" kind="dataObj">
+              <param name="title" value="NICI: Photometric calibration"/>
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="0.38"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="d3425dc4-6915-47c5-9f81-308aee6e06ba" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="SCIENCE"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+    </container>
+    <container kind="group" type="Group" version="2009A-1" subtype="group" key="6a78a3f2-2658-4502-8ba8-8afadab9fbbc" name="Group">
+      <paramset name="Group" kind="dataObj">
+        <param name="title" value="Coronagraphic/ADI"/>
+        <param name="GroupType" value="TYPE_FOLDER"/>
+        <param name="libraryId" value=""/>
+      </paramset>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="3be8ece3-36a9-43b7-95f6-548cba106e75" name="NICI-BP-3">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Acquisition"/>
+          <param name="libraryId" value="3"/>
+          <param name="priority" value="HIGH"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2009B-1" subtype="NICI" key="d741cd16-ced6-4194-89b8-60aede722aee" name="NICI">
+          <paramset name="NICI" kind="dataObj">
+            <param name="exposureTime" value="0.38"/>
+            <param name="posAngle" value="180"/>
+            <param name="coadds" value="1"/>
+            <param name="focalPlaneMask" value="MASK_4"/>
+            <param name="pupilMask" value="NINETY_FIVE_PERCENT"/>
+            <param name="cassRotator" value="FIXED"/>
+            <param name="cassRotatorFixedAngle" value="180.0"/>
+            <param name="cassRotatorFollowAngle" value="0.0"/>
+            <param name="imagingMode" value="MANUAL"/>
+            <param name="dichroicWheel" value="H5050_BEAMSPLITTER"/>
+            <param name="channel1Fw" value="KS"/>
+            <param name="channel2Fw" value="H"/>
+            <param name="exposures" value="1"/>
+            <param name="wellDepth" value="NORMAL"/>
+            <param name="dhsMode" value="SAVE"/>
+            <param name="issPort" value="SIDE_LOOKING"/>
+            <param name="focs" value="OUT"/>
+            <param name="pupilImager" value="OPEN"/>
+            <param name="spiderMask" value="UPDATE"/>
+            <param name="SMRAngle" value="0.0"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="5412ef61-7a8a-42cb-879c-81f6bdd5d2e0" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="055e8601-4dff-4396-8e32-b6f272dd3585" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="c08dcf58-aa9d-4c65-8335-f1033dee1f70" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009B-1" subtype="nicioffset" key="d8bc1c2e-baee-4bb8-b301-a3dff8fa6250" name="NICI Offset">
+            <paramset name="NICI Offset" kind="dataObj">
+              <param name="title" value="NICI Offset"/>
+              <paramset name="offsets">
+                <paramset name="Offset0" sequence="0">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                  <param name="fpmw" value="true"/>
+                  <param name="d" value="0.0"/>
+                </paramset>
+              </paramset>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NICI" key="91ed3a4a-d6cc-4587-a62a-13fcdfc61d7c" name="NICI Sequence">
+              <paramset name="NICI Sequence" kind="dataObj">
+                <param name="exposureTime" value="0.38"/>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="6e2c535f-ea5f-49d2-9d27-797b732c3133" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="10"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="6cd6684b-cad2-439e-b879-2b883465269d" name="NICI-BP-4">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Science"/>
+          <param name="libraryId" value="4"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2009B-1" subtype="NICI" key="f1bf7998-5340-483b-80d9-b54e124838cb" name="NICI">
+          <paramset name="NICI" kind="dataObj">
+            <param name="exposureTime" value="1.0"/>
+            <param name="posAngle" value="180"/>
+            <param name="coadds" value="10"/>
+            <param name="focalPlaneMask" value="MASK_4"/>
+            <param name="pupilMask" value="NINETY_FIVE_PERCENT"/>
+            <param name="cassRotator" value="FIXED"/>
+            <param name="cassRotatorFixedAngle" value="180.0"/>
+            <param name="cassRotatorFollowAngle" value="0.0"/>
+            <param name="imagingMode" value="MANUAL"/>
+            <param name="dichroicWheel" value="H5050_BEAMSPLITTER"/>
+            <param name="channel1Fw" value="KS"/>
+            <param name="channel2Fw" value="H"/>
+            <param name="exposures" value="1"/>
+            <param name="wellDepth" value="NORMAL"/>
+            <param name="dhsMode" value="SAVE"/>
+            <param name="issPort" value="SIDE_LOOKING"/>
+            <param name="focs" value="OUT"/>
+            <param name="pupilImager" value="OPEN"/>
+            <param name="spiderMask" value="UPDATE"/>
+            <param name="SMRAngle" value="0.0"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="20016185-1397-4196-9284-a42a9c5b5784" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="Note on Flats"/>
+            <param name="NoteText">
+              <value>Automatic flat configurations are not implemented for NICI. Please copy or replace the Flats iterator with the appropriate sequence from the NICI OT library.  Delete the NICI:Flats iterator if flats are not desired.</value>
+            </param>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="98f932dc-b0c8-43c5-8185-73b0fbdccdd3" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="e54a6899-22e9-44b9-88fb-502dd2b87c5a" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="124419c2-64f9-417d-a5de-b3369f2d3167" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009B-1" subtype="nicioffset" key="f1a9bd9e-d30b-49a2-be94-0f74b3ee380f" name="NICI Offset">
+            <paramset name="NICI Offset" kind="dataObj">
+              <param name="title" value="NICI Offset"/>
+              <paramset name="offsets">
+                <paramset name="Offset0" sequence="0">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                  <param name="fpmw" value="true"/>
+                  <param name="d" value="0.0"/>
+                </paramset>
+              </paramset>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NICI" key="d6044038-51bc-4fd5-8b26-5b6ec6d6faed" name="NICI Sequence">
+              <paramset name="NICI Sequence" kind="dataObj">
+                <param name="title" value="NICI: Short Exp"/>
+                <param name="coadds" value="10"/>
+                <param name="exposureTime" value="1.0"/>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="a4b9b56f-3996-4ca1-8d5f-f67842323f48" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="2"/>
+                  <param name="class" value="SCIENCE"/>
+                </paramset>
+              </container>
+            </container>
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NICI" key="666df9e4-74aa-4e0c-b707-bbe1b84f3856" name="NICI Sequence">
+              <paramset name="NICI Sequence" kind="dataObj">
+                <param name="title" value="NICI: Long Exp"/>
+                <param name="coadds" value="3"/>
+                <param name="exposureTime" value="20.0"/>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="181c15fa-38b8-4454-b3c8-b5da92cf0872" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="20"/>
+                  <param name="class" value="SCIENCE"/>
+                </paramset>
+              </container>
+            </container>
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NICI" key="6aad9f6b-15b6-4b96-b1d0-2932972c183e" name="NICI Sequence">
+              <paramset name="NICI Sequence" kind="dataObj">
+                <param name="title" value="NICI: Short Exp"/>
+                <param name="coadds" value="10"/>
+                <param name="exposureTime" value="1.0"/>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="f502d970-b711-4f22-a66e-7837f9efa0dd" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="2"/>
+                  <param name="class" value="SCIENCE"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NICI" key="8d2fd3a1-aebd-4ce0-ba1e-4a471f09fc59" name="NICI Sequence">
+            <paramset name="NICI Sequence" kind="dataObj">
+              <param name="title" value="NICI: Flats"/>
+              <param name="exposureTime" value="1.0"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="GemFlat" key="b4dc16ba-fb98-487e-af53-3f6fe4020d12" name="Manual Flat/Arc">
+              <paramset name="Manual Flat/Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="PARTNER_CAL"/>
+                <param name="coadds" value="10"/>
+                <param name="exposureTime" value="3.0"/>
+                <param name="lamp" value="IR_GREY_BODY_HIGH"/>
+                <param name="shutter" value="CLOSED"/>
+                <param name="filter" value="NIR"/>
+                <param name="diffuser" value="IR"/>
+              </paramset>
+            </container>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="GemFlat" key="dba6e5b5-632e-46a1-9d81-2b31278e2af2" name="Manual Flat/Arc">
+              <paramset name="Manual Flat/Arc" kind="dataObj">
+                <param name="repeatCount" value="2"/>
+                <param name="class" value="PARTNER_CAL"/>
+                <param name="coadds" value="10"/>
+                <param name="exposureTime" value="3.0"/>
+                <param name="lamp" value="IR_GREY_BODY_HIGH"/>
+                <param name="shutter" value="OPEN"/>
+                <param name="filter" value="NIR"/>
+                <param name="diffuser" value="IR"/>
+              </paramset>
+            </container>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="GemFlat" key="7b19425d-4ee1-4728-9b92-91e35d73c0b7" name="Manual Flat/Arc">
+              <paramset name="Manual Flat/Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="PARTNER_CAL"/>
+                <param name="coadds" value="10"/>
+                <param name="exposureTime" value="3.0"/>
+                <param name="lamp" value="IR_GREY_BODY_HIGH"/>
+                <param name="shutter" value="CLOSED"/>
+                <param name="filter" value="NIR"/>
+                <param name="diffuser" value="IR"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+    </container>
+  </container>
+  <container kind="versions" type="versions" version="1.0">
+    <paramset name="node">
+      <param name="key" value="f502d970-b711-4f22-a66e-7837f9efa0dd"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="94d71d96-334b-477f-848e-8a6cd1b3d0f1"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="80f089fa-6311-4cc8-8094-3dbe7e0a3e1e"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f1bf7998-5340-483b-80d9-b54e124838cb"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a864e5cf-7763-4610-895c-82427607c4df"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a4b9b56f-3996-4ca1-8d5f-f67842323f48"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d04de011-d8bc-41c2-b0dc-51d33d066947"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="1b8a46f7-00ef-4163-a8ca-33350e3cbbd6"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e54a6899-22e9-44b9-88fb-502dd2b87c5a"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="0e9c0902-907f-4c9b-a559-293a5489159f"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6154007b-d738-4a9c-a2c6-6a68d73125e0"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="7"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b0b4067d-6398-4e42-a1ce-299a792354b8"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b4dc16ba-fb98-487e-af53-3f6fe4020d12"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d741cd16-ced6-4194-89b8-60aede722aee"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="98f932dc-b0c8-43c5-8185-73b0fbdccdd3"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="52fe92c7-4464-4aed-b934-63ea8e185569"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="1edbc187-a750-4ea5-b39e-acaf4d5d3372"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3be8ece3-36a9-43b7-95f6-548cba106e75"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="59b20aaa-0d98-4d33-ad05-fc20d618b2b5"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="43e8df6a-f68f-4beb-a45f-06cba23a05c1"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f1a9bd9e-d30b-49a2-be94-0f74b3ee380f"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="124419c2-64f9-417d-a5de-b3369f2d3167"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6e3556d1-6c20-4d55-884d-6b38a307bb9b"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c08dcf58-aa9d-4c65-8335-f1033dee1f70"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="91ed3a4a-d6cc-4587-a62a-13fcdfc61d7c"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a9996d41-babc-4992-a2df-a5e2a4a43d40"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="055e8601-4dff-4396-8e32-b6f272dd3585"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5412ef61-7a8a-42cb-879c-81f6bdd5d2e0"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7b19425d-4ee1-4728-9b92-91e35d73c0b7"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="74abe02f-2d3f-40ab-a0cc-06a5c9da65da"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d8ca0bfc-7c1d-494a-ba04-ebe411800928"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="49b162c0-2303-433f-8169-07e1986975a9"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d6044038-51bc-4fd5-8b26-5b6ec6d6faed"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6a78a3f2-2658-4502-8ba8-8afadab9fbbc"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="8d2fd3a1-aebd-4ce0-ba1e-4a471f09fc59"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c90ab283-cd2e-428b-a4d9-4e843cc0f358"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6cd6684b-cad2-439e-b879-2b883465269d"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="fbeb1972-dc1d-472b-af21-8e1cb4964772"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="99a48cf7-21d9-4357-b2ad-698881f0c060"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2ebdef0b-0939-4eca-a52a-6e5955a5e28f"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="1c0c345e-568a-48f3-b32f-ddca34930225"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="dba6e5b5-632e-46a1-9d81-2b31278e2af2"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="181c15fa-38b8-4454-b3c8-b5da92cf0872"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="91f9810e-ae63-4e8b-9b9f-659608364ed9"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6e2c535f-ea5f-49d2-9d27-797b732c3133"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6cd0a643-77a0-4931-ab7b-56aacd01d1a8"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d3425dc4-6915-47c5-9f81-308aee6e06ba"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="29988926-fa84-4551-bc5d-722b1c4ac11a"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6aad9f6b-15b6-4b96-b1d0-2932972c183e"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4a11cdeb-6399-409d-8ce4-c9c7c8e9b15c"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="20016185-1397-4196-9284-a42a9c5b5784"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d8bc1c2e-baee-4bb8-b301-a3dff8fa6250"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="666df9e4-74aa-4e0c-b707-bbe1b84f3856"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="163276ee-ed00-46cb-9063-036099706ab2"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="19f2412e-ad05-4cb1-9f30-4046b569d4c4"/>
+      <param name="b59ce3e2-a3d9-4386-846e-a20b82b03178" value="1"/>
+    </paramset>
+  </container>
+</document>

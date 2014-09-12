@@ -1,0 +1,45 @@
+<conf>
+    <smtp>smtp.cl.gemini.edu</smtp>
+
+    <bcc>cquiroz@gemini.edu</bcc>
+
+    <type name="DirectorTime">
+        <dir>/home/software/phase1/test/directors_time/proposals/2014B</dir>
+        <to>cquiroz@gemini.edu</to>
+    </type>
+
+    <type name="PoorWeather">
+        <dir>/home/software/phase1/test/poor_weather/proposals/2014B</dir>
+        <to>cquiroz@gemini.edu</to>
+    </type>
+
+    <type name="DemoScience">
+        <dir>/home/software/phase1/test/demo_science/proposals/2014B</dir>
+        <to>cquiroz@gemini.edu</to>
+    </type>
+
+    <type name="SystemVerification">
+        <dir>/home/software/phase1/test/system_verification/proposals/2014B</dir>
+        <to>cquiroz@gemini.edu</to>
+    </type>
+
+    <filetranslation>
+        <translation>
+            <from>System Verification</from>
+            <to>SV</to>
+        </translation>
+        <translation>
+            <from>Poor Weather</from>
+            <to>PW</to>
+        </translation>
+        <translation>
+            <from>Directors Time</from>
+            <to>DT</to>
+        </translation>
+        <translation>
+            <from>Demo Science</from>
+            <to>DS</to>
+        </translation>
+    </filetranslation>
+
+</conf>

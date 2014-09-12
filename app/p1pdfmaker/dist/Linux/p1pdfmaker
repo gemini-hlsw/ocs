@@ -1,0 +1,69 @@
+#!/bin/bash
+
+# Resolve symlinks. Borrowed from InstallAnywhere startup script.
+# Fixed using HelpDesk 143 - from greimel
+PRG=$0
+while [ -h "$PRG" ]; do
+    ls=`/bin/ls -ld "$PRG"`
+    link=`/usr/bin/expr "$ls" : '.*-> \(.*\)$'`
+    if /usr/bin/expr "$link" : '\/' > /dev/null; then
+        PRG="$link"
+    else
+        PRG="`/usr/bin/dirname $PRG`/$link"
+    fi
+done
+
+# Fully resolve the application home.
+APP_HOME=`dirname "$PRG"`
+_CWD=`pwd`
+cd ${APP_HOME}
+#APP_HOME=`pwd`
+#cd ${_CWD}
+
+
+usage() {
+    echo "p1pdfmaker [-r] [-p output_dir] SETTINGS"
+    echo "    -c ar|au|br|ca|cl|gs|uk|uh|us - partner country"
+    echo "    -p output_dir - (optional) output folder for resulting pdf files, default is the current directory"
+    echo "    -r - (optional) recursively search input directory"
+    echo "    -x input_dir - input directory"
+    exit 1
+}
+
+COUNTRY=
+PDFOUT=
+RECURSIVE=
+XMLIN=
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -c|-country|-partner)
+            COUNTRY="-Dc=$2"
+            shift
+            shift
+            ;;
+        -p|-pdfout)
+            PDFOUT="-Dp=$2"
+            shift
+            shift
+            ;;
+        -r|-recursive)
+            RECURSIVE=-Dr
+            shift
+            ;;
+        -x|-xmlin)
+            XMLIN="-Dx=$2"
+            shift
+            shift
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
+
+[ -z "$COUNTRY" ] && usage
+[ -z "$PDFOUT" ] && PDFOUT="-Dp=${_CWD}"
+[ -z "$XMLIN" ] && usage
+
+$APP_HOME/jre/bin/java -Xmx1024M $COUNTRY $PDFOUT $RECURSIVE $XMLIN -Dedu.gemini.osgi.main.app=p1pdfmaker -jar edu-gemini-osgi-main_2.10-4.2.1.jar  $@

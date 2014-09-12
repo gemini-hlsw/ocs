@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal tacCategory="Extragalactic" schemaVersion="1.0.0">
+    <meta>
+        <attachment>/Users/swalker/2012B-GuideStar.pdf</attachment>
+    </meta>
+    <semester half="B" year="2012"/>
+    <title>Molecular Hydrogen Excitation in Actively Star-forming Dwarf Galaxies</title>
+    <abstract>We propose to observe a small sample of weak-continuum , dwarf galaxies to investigate the excitation of molecular hydrogen in massive star-forming complexes.  In the usable fraction of our previous allocation we were able to observe one of our targets, NGC5461.  This dataset unambiguously shows that the gas is excited in low density photo-dissociation regions, contrary to the widespread assumption in the literature that the H2 in galaxies is predominantly shock excited.  The weakness of the dwarf galaxy continua permits detection of the higher level H2 transitions which are essential to determine the gas excitation and relative contributions of thermal and UV-excited gas. </abstract>
+    <keywords>
+        <keyword>Starburst galaxies</keyword>
+        <keyword>Emission-line, Be stars</keyword>
+        <keyword>Dwarf galaxies</keyword>
+        <keyword>Distances and redshifts</keyword>
+    </keywords>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Phil</firstName>
+            <lastName>Puxley</lastName>
+            <status>PhD</status>
+            <email>ppuxley@gemini.edu</email>
+            <phone>+56 51 555555</phone>
+            <address>
+                <institution>Gemini Observatory</institution>
+                <address>Casilla 603
+La Serena</address>
+                <country>Chile</country>
+            </address>
+        </pi>
+        <coi id="investigator-1">
+            <firstName>Matt</firstName>
+            <lastName>Mountain</lastName>
+            <status>PhD</status>
+            <email>mmountain@gemini.edu</email>
+            <phone>+56 51 555555</phone>
+            <institution>Gemini Observatory</institution>
+        </coi>
+        <coi id="investigator-2">
+            <firstName>Doug</firstName>
+            <lastName>Simons</lastName>
+            <status>PhD</status>
+            <email></email>
+            <phone></phone>
+            <institution>Gemini Observatory</institution>
+        </coi>
+        <coi id="investigator-3">
+            <firstName>Fred</firstName>
+            <lastName>Chaffee</lastName>
+            <status>PhD</status>
+            <email></email>
+            <phone></phone>
+            <institution>Gemini Observatory</institution>
+        </coi>
+    </investigators>
+    <targets>
+        <sidereal epoch="J2000" id="target-0">
+            <name>Haro2</name>
+            <degDeg>
+                <ra>158.13333333333333</ra>
+                <dec>54.40097222222222</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="B">13.199999809265137</magnitude>
+                <magnitude system="Vega" band="V">13.399999618530273</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-1">
+            <name>IIZw40</name>
+            <degDeg>
+                <ra>88.92791666984559</ra>
+                <dec>3.3852777777777776</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="B">14.220000267028809</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-2">
+            <name>NGC 5253</name>
+            <degDeg>
+                <ra>204.983292</ra>
+                <dec>-31.640031</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="U">10.630000114440918</magnitude>
+                <magnitude system="Vega" band="B">11.170000076293945</magnitude>
+                <magnitude system="Vega" band="V">10.4399995803833</magnitude>
+                <magnitude system="Vega" band="R">11.0</magnitude>
+                <magnitude system="Vega" band="J">9.048999786376953</magnitude>
+                <magnitude system="Vega" band="H">8.50100040435791</magnitude>
+                <magnitude system="Vega" band="K">8.286999702453613</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-3">
+            <name>Haro3</name>
+            <degDeg>
+                <ra>161.3420833349228</ra>
+                <dec>55.96055555555556</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="B">12.899999618530273</magnitude>
+            </magnitudes>
+        </sidereal>
+    </targets>
+    <conditions>
+        <condition id="condition-0">
+            <name>CC 50%/Clear, IQ Any, SB Any/Bright, WV Any, AM ≤ 2.00</name>
+            <maxAirmass>2.0</maxAirmass>
+            <cc>50%/Clear</cc>
+            <iq>Any</iq>
+            <sb>Any/Bright</sb>
+            <wv>Any</wv>
+        </condition>
+        <condition id="condition-1">
+            <name>CC 50%/Clear, IQ 70%/Good, SB Any/Bright, WV Any, AM ≤ 2.00</name>
+            <maxAirmass>2.0</maxAirmass>
+            <cc>50%/Clear</cc>
+            <iq>70%/Good</iq>
+            <sb>Any/Bright</sb>
+            <wv>Any</wv>
+        </condition>
+        <condition id="condition-2">
+            <name>CC 70%/Cirrus, IQ 85%/Poor, SB 50%/Dark, WV Any, AM ≤ 2.00</name>
+            <maxAirmass>2.0</maxAirmass>
+            <cc>70%/Cirrus</cc>
+            <iq>85%/Poor</iq>
+            <sb>50%/Dark</sb>
+            <wv>Any</wv>
+        </condition>
+    </conditions>
+    <blueprints>
+        <gnirs>
+            <spectroscopy id="blueprint-0">
+                <name>GNIRS Spectroscopy NGS 0.05&quot;/pix 32 l/mm grating SXD 0.15 arcsec</name>
+                <altair>
+                    <ngs fieldLens="false"/>
+                </altair>
+                <pixelScale>0.05&quot;/pix</pixelScale>
+                <disperser>32 l/mm grating</disperser>
+                <crossDisperser>SXD</crossDisperser>
+                <fpu>0.15 arcsec</fpu>
+            </spectroscopy>
+        </gnirs>
+        <gmosN>
+            <regime>optical</regime>
+            <longslit id="blueprint-1">
+                <name>GMOS-N LongSlit B600 RG610 (&gt; 615 nm) 1.0 arcsec slit</name>
+                <filter>RG610 (&gt; 615 nm)</filter>
+                <disperser>B600</disperser>
+                <fpu>1.0 arcsec slit</fpu>
+            </longslit>
+        </gmosN>
+    </blueprints>
+    <observations>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 3">
+            <time units="hr">3.0</time>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-1" target="target-1" band="Band 3">
+            <time units="hr">2.0</time>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 3">
+            <time units="hr">2.5</time>
+        </observation>
+        <observation blueprint="blueprint-1" condition="condition-2" target="target-2" band="Band 1/2">
+            <time units="hr">2.0</time>
+        </observation>
+        <observation blueprint="blueprint-1" condition="condition-2" target="target-3" band="Band 1/2">
+            <time units="hr">3.0</time>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-1" target="target-1" band="Band 1/2">
+            <time units="hr">8.0</time>
+        </observation>
+    </observations>
+    <proposalClass>
+        <queue tooOption="Standard">
+            <ngo>
+                <request>
+                    <time units="hr">12.0</time>
+                    <minTime units="hr">10.0</minTime>
+                </request>
+                <partner>gs</partner>
+            </ngo>
+            <ngo>
+                <request>
+                    <time units="hr">1.0</time>
+                    <minTime units="hr">1.0</minTime>
+                </request>
+                <partner>us</partner>
+            </ngo>
+            <band3request>
+                <time units="hr">8.0</time>
+                <minTime units="hr">2.0</minTime>
+            </band3request>
+        </queue>
+        <!--
+        <special>
+            <submission>
+                <request>
+                    <time units="hr">1.0</time>
+                    <minTime units="hr">1.0</minTime>
+                </request>
+                <type>System Verification</type>
+            </submission>
+        </special>
+        -->
+        <!--
+        <queue tooOption="Standard">
+            <exchange>
+                <request>
+                    <time units="hr">12.0</time>
+                    <minTime units="hr">10.0</minTime>
+                </request>
+                <partner>keck</partner>
+            </exchange>
+            <band3request>
+                <time units="hr">8.0</time>
+                <minTime units="hr">2.0</minTime>
+            </band3request>
+        </queue>
+        -->
+        <!--
+        <exchange>
+            <partner>keck</partner>
+            <ngo>
+                <request>
+                    <time units="hr">1.0</time>
+                    <minTime units="hr">1.0</minTime>
+                </request>
+                <partner>gs</partner>
+            </ngo>
+        </exchange>
+        -->
+    </proposalClass>
+</proposal>

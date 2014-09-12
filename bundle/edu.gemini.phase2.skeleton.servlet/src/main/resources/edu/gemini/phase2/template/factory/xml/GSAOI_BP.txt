@@ -1,0 +1,15 @@
+Instrument : GSAOI
+Blueprint : GSAOI_BP.xml
+Version Nov 27, 2012 - updated by Rodrigo C
+
+Observations identified by LibraryIDs indicated with {}.
+
+# DEFINITIONS
+PI = Phase I
+
+INCLUDE {1, 2, 3} IN target-specific Scheduling Group
+   SCI={1},{2},{3}
+
+SET FILTERS from PI into any GSAOI ITERATOR that includes a Filter configuration
+
+Note: Flat, Darks and Phot. std sequences removed.

@@ -1,0 +1,121 @@
+<jxb:bindings version="2.0"
+              xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+              xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <!-- Custom bindings for NIRI -->
+    <jxb:bindings schemaLocation="../xsd/Niri.xsd" node="/xsd:schema">
+        <!-- NiriCamera => Niri.Camera -->
+        <jxb:bindings node="./xsd:simpleType[@name='NiriCamera']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='f/6 (0.12&quot;/pix, 120&quot; FoV)']">
+                <jxb:typesafeEnumMember name="F6"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='f/14 (0.05&quot;/pix, 51&quot; FoV)']">
+                <jxb:typesafeEnumMember name="F14"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='f/32 (0.02&quot;/pix, 22&quot; FoV)']">
+                <jxb:typesafeEnumMember name="F32"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+        <!-- NiriFilter => Niri.Filter -->
+        <jxb:bindings node="./xsd:simpleType[@name='NiriFilter']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='Y (1.02 um)']">
+                <jxb:typesafeEnumMember name="BBF_Y"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='J (1.25 um)']">
+                <jxb:typesafeEnumMember name="BBF_J"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='H (1.65 um)']">
+                <jxb:typesafeEnumMember name="BBF_H"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='K (2.20 um)']">
+                <jxb:typesafeEnumMember name="BBF_K"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='K(prime) (2.12 um)']">
+                <jxb:typesafeEnumMember name="BBF_KPRIME"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='K(short) (2.15 um)']">
+                <jxb:typesafeEnumMember name="BBF_KSHORT"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='L(prime) (3.780 um)']">
+                <jxb:typesafeEnumMember name="BBF_LPRIME"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='M(prime) (4.68 um)']">
+                <jxb:typesafeEnumMember name="BBF_MPRIME"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Jcont (1.065 um)']">
+                <jxb:typesafeEnumMember name="J_CONTINUUM_106"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='HeI (1.083 um)']">
+                <jxb:typesafeEnumMember name="NBF_HEI"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Pa(gamma) (1.094 um)']">
+                <jxb:typesafeEnumMember name="NBF_PAGAMMA"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='J-continuum (1.122 um)']">
+                <jxb:typesafeEnumMember name="J_CONTINUUM_122"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='J-continuum (1.207 um)']">
+                <jxb:typesafeEnumMember name="NBF_H"/> <!-- that's right, NBF_H -->
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Pa(beta) (1.282 um)']">
+                <jxb:typesafeEnumMember name="NBF_PABETA"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='CH4(short) (1.56 um)']">
+                <jxb:typesafeEnumMember name="NBF_CH4SHORT"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='H-continuum (1.570 um)']">
+                <jxb:typesafeEnumMember name="NBF_HCONT"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='[FeII] (1.644 um)']">
+                <jxb:typesafeEnumMember name="NBF_FEII"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='CH4(long) (1.70 um)']">
+                <jxb:typesafeEnumMember name="NBF_CH4LONG"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='H2O ice (2.045 um)']">
+                <jxb:typesafeEnumMember name="NBF_H2O_2045"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='HeI (2p2s) (2.059 um)']">
+                <jxb:typesafeEnumMember name="NBF_HE12P2S"/> <!-- yes, HE1 not HEI-->
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='K-continuum (2.09 um)']">
+                <jxb:typesafeEnumMember name="NBF_KCONT1"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='H2 1-0 S(1) (2.122 um)']">
+                <jxb:typesafeEnumMember name="NBF_H210"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Br(gamma) (2.166 um)']">
+                <jxb:typesafeEnumMember name="NBF_BRGAMMA"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='H2 2-1 S(1) (2.248 um)']">
+                <jxb:typesafeEnumMember name="NBF_H221"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='K-continuum (2.27 um)']">
+                <jxb:typesafeEnumMember name="NBF_KCONT2"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='CH4 ice (2.275 um)']">
+                <jxb:typesafeEnumMember name="NBF_CH4ICE"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='CO 2-0 (bh) (2.294 um)']">
+                <jxb:typesafeEnumMember name="NBF_CO20"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='CO 3-1 (bh) (2.323 um)']">
+                <jxb:typesafeEnumMember name="NBF_CO31"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='H2O ice (3.050 um)']">
+                <jxb:typesafeEnumMember name="NBF_H2O"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='hydrocarbon (3.295 um)']">
+                <jxb:typesafeEnumMember name="NBF_HC"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Br(alpha) cont (3.990 um)']">
+                <jxb:typesafeEnumMember name="NBF_BRACONT"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Br(alpha) (4.052 um)']">
+                <jxb:typesafeEnumMember name="NBF_BRA"/>
+            </jxb:bindings>
+        </jxb:bindings>
+    </jxb:bindings>
+
+</jxb:bindings>

@@ -1,0 +1,78 @@
+<jxb:bindings version="2.0"
+              xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+              xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <!-- Custom bindings for GSAOI -->
+    <jxb:bindings schemaLocation="../xsd/Gsaoi.xsd" node="/xsd:schema">
+        <!-- GsaoiFilter => Gsaoi.Filter -->
+        <jxb:bindings node="./xsd:simpleType[@name='GsaoiFilter']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='Z (1.015 um)']">
+                <jxb:typesafeEnumMember name="Z"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='J (1.250 um)']">
+                <jxb:typesafeEnumMember name="J"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='H (1.635 um)']">
+                <jxb:typesafeEnumMember name="H"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='K(prime) (2.120 um)']">
+                <jxb:typesafeEnumMember name="K_PRIME"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='K(short) (2.150 um)']">
+                <jxb:typesafeEnumMember name="K_SHORT"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='K (2.200 um)']">
+                <jxb:typesafeEnumMember name="K"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='HeI (1.083 um)']">
+                <jxb:typesafeEnumMember name="HEI"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Pa(gamma) (1.094 um)']">
+                <jxb:typesafeEnumMember name="PA_GAMMA"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='J-continuum (1.207 um)']">
+                <jxb:typesafeEnumMember name="J_CONTINUUM"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Pa(beta) (1.282 um)']">
+                <jxb:typesafeEnumMember name="PA_BETA"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='H-continuum (1.570 um)']">
+                <jxb:typesafeEnumMember name="H_CONTINUUM"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='CH4(short) (1.580 um)']">
+                <jxb:typesafeEnumMember name="CH4_SHORT"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='[FeII] (1.644 um)']">
+                <jxb:typesafeEnumMember name="FE_II"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='CH4(long) (1.690 um)']">
+                <jxb:typesafeEnumMember name="CH4_LONG"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='H2O ice (2.000 um)']">
+                <jxb:typesafeEnumMember name="H20_ICE"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='HeI (2p2s) (2.058 um)']">
+                <jxb:typesafeEnumMember name="HEI_2P2S"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Ks-continuum (2.093 um)']">
+                <jxb:typesafeEnumMember name="K_CONTINUUM1"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Br(gamma) (2.166 um)']">
+                <jxb:typesafeEnumMember name="BR_GAMMA"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Kl-continuum (2.270 um)']">
+                <jxb:typesafeEnumMember name="K_CONTINUUM2"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='H2 1-0 S(1) (2.122 um)']">
+                <jxb:typesafeEnumMember name="H2_1_0_S_1"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='H2 2-1 S(1) (2.248 um)']">
+                <jxb:typesafeEnumMember name="H2_2_1_S_1"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='CO (2.360 um)']">
+                <jxb:typesafeEnumMember name="CO"/>
+            </jxb:bindings>
+        </jxb:bindings>
+    </jxb:bindings>
+
+</jxb:bindings>

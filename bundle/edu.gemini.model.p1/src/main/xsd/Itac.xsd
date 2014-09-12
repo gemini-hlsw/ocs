@@ -1,0 +1,56 @@
+<!--
+  Schema definition for itac elements.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:include schemaLocation="Time.xsd"/>
+    <xsd:include schemaLocation="Submission.xsd"/>
+
+    <!--
+      ITAC information. If accepted, it will include an acceptance element with
+      additional information.  An optional comment may appear regardless.
+    -->
+    <xsd:complexType name="Itac">
+        <xsd:sequence>
+            <xsd:choice minOccurs="0">
+                <xsd:element name="accept" type="ItacAccept"/>
+                <xsd:element name="reject" type="ItacReject"/>
+            </xsd:choice>
+            <xsd:element name="ngoauthority" type="NgoPartner" minOccurs="0"/>
+            <xsd:element name="comment"      type="xsd:string" minOccurs="0"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!--
+      ITAC information for accepted proposals.
+    -->
+    <xsd:complexType name="ItacAccept">
+        <xsd:sequence>
+            <xsd:element name="programId" type="ProgramId"/>
+            <xsd:element name="contact"   type="xsd:token" minOccurs="0"/>
+            <xsd:element name="email"     type="xsd:token" minOccurs="0"/>
+            <xsd:element name="band"      type="ScienceBand"/>
+            <xsd:element name="award"     type="TimeAmount"/>
+            <xsd:element name="rollover"  type="xsd:boolean" default="false"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="ItacReject"/>
+
+    <!--
+      A valid Gemini program id conforms to the given pattern.
+    -->
+    <xsd:simpleType name="ProgramId">
+        <xsd:restriction base="xsd:token">
+            <xsd:pattern value="G[NS]-\d{4}[AB]-([QC]|DD|DS|SV|LP|FT)+-\d+"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      Science Bands are 1-4.
+    -->
+    <xsd:simpleType name="ScienceBand">
+        <xsd:restriction base="xsd:positiveInteger">
+            <xsd:maxInclusive value="4"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+</xsd:schema>

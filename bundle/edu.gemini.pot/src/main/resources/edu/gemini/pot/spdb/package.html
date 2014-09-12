@@ -1,0 +1,14 @@
+<html>
+<body>
+This package defines the Science Program Database Service.  The
+Science Program lifecycle is controlled by this service.  It is used to
+create new programs, fetch existing programs, and query programs.
+<p>
+Clients are most concerned with the
+<code>{@link edu.gemini.pot.spdb.IDBDatabase}</code> interface.  The
+database service proxy implements this interface, as does the local
+<code>{@link edu.gemini.pot.spdb.DBDatabase}</code> implementation object.
+Clients are programmed to look for this interface in the lookup service,
+and use it for creating/fetching Science Programs.
+</body>
+</html>

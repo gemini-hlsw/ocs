@@ -1,0 +1,106 @@
+<!--
+  Schema definition for T-ReCS blueprints.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:include schemaLocation="Instrument.xsd"/>
+
+    <!-- Options for Trecs Blueprint. -->
+    <xsd:complexType name="TrecsBlueprintChoice">
+        <xsd:sequence>
+            <xsd:choice>
+                <xsd:element name="null"         type="TrecsBlueprintNull"/>
+                <xsd:element name="imaging"      type="TrecsBlueprintImaging"/>
+                <xsd:element name="spectroscopy" type="TrecsBlueprintSpectroscopy"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- Trecs null. Empty blueprint, not available in PIT. -->
+    <xsd:complexType name="TrecsBlueprintNull"/>
+
+    <!--
+      Trecs Blueprint base type.
+    -->
+    <xsd:complexType name="TrecsBlueprintBase">
+        <xsd:complexContent>
+            <xsd:extension base="BlueprintBase"/>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!-- Trecs Imaging Blueprint. Contains multiple filter options. -->
+    <xsd:complexType name="TrecsBlueprintImaging">
+        <xsd:complexContent>
+            <xsd:extension base="TrecsBlueprintBase">
+                <xsd:sequence>
+                    <xsd:element name="filter" type="TrecsFilter" maxOccurs="unbounded"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      Trecs Spectroscopy Blueprint base type. Allows a single filter and
+      multiple disperser options.
+    -->
+    <xsd:complexType name="TrecsBlueprintSpectroscopy">
+        <xsd:complexContent>
+            <xsd:extension base="TrecsBlueprintBase">
+                <xsd:sequence>
+                    <xsd:element name="disperser"      type="TrecsDisperser"/>
+                    <xsd:element name="fpu"            type="TrecsFpu"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+   <!--
+      Trecs Filter options (for imaging only).
+    -->
+    <xsd:simpleType name="TrecsFilter">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="N (broad 10 um)"/>
+            <xsd:enumeration value="Si-1 (7.73 um)"/>
+            <xsd:enumeration value="Si-2 (8.74 um)"/>
+            <xsd:enumeration value="Si-3 (9.69 um)"/>
+            <xsd:enumeration value="Si-4 (10.38 um)"/>
+            <xsd:enumeration value="Si-5 (11.66 um)"/>
+            <xsd:enumeration value="Si-6 (12.33 um)"/>
+            <xsd:enumeration value="[Ar III] (8.99 um)"/>
+            <xsd:enumeration value="[S IV] (10.52 um)"/>
+            <xsd:enumeration value="[Ne II] (12.81 um)"/>
+            <xsd:enumeration value="PAH (8.6 um)"/>
+            <xsd:enumeration value="PAH (11.3 um)"/>
+            <xsd:enumeration value="Qa (18.30 um)"/>
+            <xsd:enumeration value="Qb (24.56 um)"/>
+            <xsd:enumeration value="Q (broad 20.8 um)"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      Trecs disperser options.
+    -->
+    <xsd:simpleType name="TrecsDisperser">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="Low Res 10um Grating"/>
+            <xsd:enumeration value="Low Res 20um Grating"/>
+            <xsd:enumeration value="High Res Grating"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      Trecs FPU options.
+    -->
+    <xsd:simpleType name="TrecsFpu">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="0.21 arcsec slit"/>
+            <xsd:enumeration value="0.26 arcsec slit"/>
+            <xsd:enumeration value="0.31 arcsec slit"/>
+            <xsd:enumeration value="0.35 arcsec slit"/>
+            <xsd:enumeration value="0.65 arcsec slit"/>
+            <xsd:enumeration value="0.70 arcsec slit"/>
+            <xsd:enumeration value="1.30 arcsec slit"/>
+            <xsd:enumeration value="Occulting bar"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+</xsd:schema>

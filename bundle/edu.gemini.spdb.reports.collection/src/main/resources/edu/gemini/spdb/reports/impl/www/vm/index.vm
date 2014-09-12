@@ -1,0 +1,71 @@
+
+#set ($title="SPDB Reports - Home")
+
+<html>
+	<head>
+		<title>$title</title>
+		<link rel="stylesheet" href="styles.css"></link>
+	</head>
+	<body>
+		
+		#parse("/edu/gemini/spdb/reports/impl/www/vm/nav.vm")
+
+		<h2>Welcome</h2>
+		
+		<div>
+		Welcome to the SPDB report tool. This tool will let you generate a 
+		variety of reports in real-time using data from the live Gemini 
+		databases.
+		</div>
+
+		<h3>Ad-Hoc Reports</h3>
+
+		#if ($tableManager.Empty)
+			<div>
+			No tables are available for ad-hoc reporting right now, probably because the system is
+			undergoing maintenance. Please try back later.
+			</div>
+		#else		
+			The following tables are available for ad-hoc reporting:
+			<ul>
+			#foreach($e in $tableManager.entrySet())
+				#set($table=$e.Value)
+				<li><a href="query.vm?ACTION=SELECT_TABLE&SID=$e.Key"><B>$escaper.escape($table.DisplayName)</B></a>
+				- $escaper.escape($table.ShortDescription)</li>
+			#end
+			</ul>
+		#end
+				
+		<h3>Batch Reports</h3>
+		#if ($reportManager.Empty)
+			<div>
+			No batch reports are available right now, probably because the system is
+			undergoing maintenance. Please try back later.
+			</div>
+		#else
+			<div>The reports server has a collection of pre-defined reports that are generated
+			automatically on a daily basis. Public reports are also made available on the Gemini website.
+			</div>
+			<div>The following batch reports are available for online viewing:</div>
+			<ul>
+			#foreach($reg in $reportManager.Registrations)
+				<li><b>$reg.Report.Class.SimpleName</b>
+				#if($reg.Report.isPublic())
+					(public)
+				#end
+				#if($reg.Files.isEmpty())
+					- pending
+				#else
+					<table style="margin-bottom: 6pt">
+					#foreach($file in $reg.Files)
+						<tr><td width="350"><a href="/batch/$file.Name">$file.Name</a></td><td nowrap>$escaper.longToDate($file.lastModified())</td>
+					#end
+					</table>
+				#end
+				</li>
+			#end
+			</ul>
+		#end
+					
+	</body>
+</html>

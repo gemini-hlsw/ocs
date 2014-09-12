@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal tacCategory="Extragalactic" schemaVersion="1.0.0">
+    <meta band3optionChosen="true">
+        <attachment>PW_2012B_002.pdf</attachment>
+    </meta>
+    <semester half="B" year="2012"/>
+    <title>Poor Weather Cosomolgy with SN Ia</title>
+    <abstract>We propose to use band 4 time on Gemini South to observe relatively bright supernovae in poor conditions. This time will allow us to spectroscopically confirm many SNe Ia, to be used for cosmological distance indicators.  Furthermore, the spectra obtained will allow classification of all types of  SNe which will in turn contribute to our understanding of the diverse mechanisms driving stellar explosions. </abstract>
+    <keywords>
+        <keyword>Supernovae</keyword>
+    </keywords>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Steven</firstName>
+            <lastName>Margheim</lastName>
+            <status>PhD</status>
+            <email>smargheim@gemini.edu</email>
+            <phone>x694</phone>
+            <address>
+                <institution>Gemini Observatory - South</institution>
+                <address>Gemini Observatory
+Colina El Pino s/n
+La Serena</address>
+                <country>Chile</country>
+            </address>
+        </pi>
+        <coi id="investigator-1">
+            <firstName>Armin</firstName>
+            <lastName>Rest</lastName>
+            <status>PhD</status>
+            <email>arest@physics.harvard.edu</email>
+            <phone></phone>
+            <institution>Space Telescope Science Institute</institution>
+        </coi>
+        <coi id="investigator-2">
+            <firstName>Stephen</firstName>
+            <lastName>Smartt</lastName>
+            <status>PhD</status>
+            <email>s.smartt@qub.ac.uk</email>
+            <phone></phone>
+            <institution>Queen's University of Belfast</institution>
+        </coi>
+    </investigators>
+    <targets>
+        <too id="target-0">
+            <name>SN ToO</name>
+        </too>
+        <too id="target-1">
+            <name>SN ToO</name>
+        </too>
+    </targets>
+    <conditions>
+        <condition id="condition-0">
+            <name>CC 80%/Cloudy, IQ Any, SB Any/Bright, WV Any</name>
+            <cc>80%/Cloudy</cc>
+            <iq>Any</iq>
+            <sb>Any/Bright</sb>
+            <wv>Any</wv>
+        </condition>
+        <condition id="condition-1">
+            <name>CC Any, IQ Any, SB 50%/Dark, WV Any</name>
+            <cc>Any</cc>
+            <iq>Any</iq>
+            <sb>50%/Dark</sb>
+            <wv>Any</wv>
+        </condition>
+        <condition id="condition-2">
+            <name>CC 70%/Cirrus, IQ Any, SB 50%/Dark, WV Any</name>
+            <cc>70%/Cirrus</cc>
+            <iq>Any</iq>
+            <sb>50%/Dark</sb>
+            <wv>Any</wv>
+        </condition>
+    </conditions>
+    <blueprints>
+        <gmosS>
+            <regime>optical</regime>
+            <longslit id="blueprint-0">
+                <name>GMOS-S Longslit R400 None 1.5 arcsec slit</name>
+                <filter>None</filter>
+                <disperser>R400</disperser>
+                <fpu>1.5 arcsec slit</fpu>
+            </longslit>
+        </gmosS>
+    </blueprints>
+    <observations>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-1" band="Band 1/2">
+            <time units="hr">3.375</time>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-1" target="target-0" band="Band 1/2">
+            <time units="hr">6.75</time>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-2" target="target-0" band="Band 1/2">
+            <time units="hr">3.375</time>
+        </observation>
+    </observations>
+    <proposalClass>
+        <special key="98034a4a-2476-43f8-a043-3f96bd57a68d">
+            <submission>
+                <request>
+                    <time units="hr">13.5</time>
+                    <minTime units="hr">13.5</minTime>
+                </request>
+                <response>
+                    <receipt>
+                        <timestamp>2012-09-12T15:22:24.000Z</timestamp>
+                        <id>PW-2012B-002</id>
+                    </receipt>
+                </response>
+                <type>Poor Weather</type>
+            </submission>
+        </special>
+    </proposalClass>
+</proposal>

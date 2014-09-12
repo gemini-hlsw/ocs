@@ -1,0 +1,24 @@
+<jxb:bindings version="2.0"
+              xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+              xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <!-- Custom bindings for Texes -->
+    <jxb:bindings schemaLocation="../xsd/Texes.xsd" node="/xsd:schema">
+        <!-- TexesDisperser => Texes.Disperser -->
+        <jxb:bindings node="./xsd:simpleType[@name='TexesDisperser']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='Echelon + 32 l/mm echelle']">
+                <jxb:typesafeEnumMember name="E_D_32_LMM"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Echelon + 75 l/mm grating']">
+                <jxb:typesafeEnumMember name="E_D_75_LMM"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='32 l/mm echelle']">
+                <jxb:typesafeEnumMember name="D_32_LMM"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='75 l/mm grating']">
+                <jxb:typesafeEnumMember name="D_75_LMM"/>
+            </jxb:bindings>
+        </jxb:bindings>
+    </jxb:bindings>
+
+</jxb:bindings>

@@ -1,0 +1,133 @@
+
+<html>
+<head><title>QPT Installation Guide</title></head>
+<link rel="stylesheet" href="/doc/styles.css"></link>
+<body>
+
+<h1>QPT Installation Guide</h1>
+
+This document explains how to install QPT. Please glance over the
+document before you begin, just so you know what to expect.
+<p>
+<span style="color:#A00000">If you are upgrading from a previous version of QPT,
+see <a href="#update"><i>Updating QPT</i></a> below.</span>
+
+<h2>Installing QPT</h2>
+
+<h3>1. Verify that Java is installed.</h3>
+
+First, you need to ensure that you have Java 1.6 installed. It comes with the OT distribution
+for Linux and Windows (in <code>jre/bin</code>), and is available as a system update for the Mac. Verify that it is working
+as follows:
+
+<pre>
+$ java -version
+java version "1.6.0_15"
+Java(TM) SE Runtime Environment (build 1.6.0_15-b03-226)
+Java HotSpot(TM) 64-Bit Server VM (build 14.1-b02-92, mixed mode)
+</pre>
+
+If you're using the OT distribution, you may need to type the full path.
+If you're using a Mac and have just installed Java 1.6, you may need to change
+a symbolic link to get it working. Go to
+<code>/System/Library/Frameworks/JavaVM.framework/Versions</code> and change the
+<code>CurrentJDK</code> link to point to <code>1.6</code>. You need to be root
+or use <code>sudo</code> to do this.
+
+<h3>2. Download the OSGi Launcher.</h3>
+
+Next you need to download the OSGi application launcher, which you will use to install
+and run the QPT. You should create a <code>.ocs</code> directory in you home directory
+and put the file there:
+
+<pre>
+$ mkdir ~/.ocs
+$ cd ~/.ocs
+$ curl -O http://build.cl.gemini.edu:9999/runtime/launcher/launcher.jar
+...
+$ cd
+</pre>
+If you don't have <code>curl</code>, use your web browser or <code>wget</code>.
+<p>
+I recommend creating an alias to make it simpler to run the launcher. You should add this to
+your standard list of shell aliases. Try it out on its own and you should see a pithy error
+message.
+
+<pre>
+$ alias launcher='java -Xmx512m -jar ~/.ocs/launcher.jar'
+$ launcher
+Sorry, what application are we talking about? You need -a or -i, or both.
+Let me help you. Try: java -jar launcher.jar -?
+</pre>
+
+This may seem like a lot of work, but you only have to do it once. It will allow
+you to download and run any of the HLPG OSGi-based programs.
+
+
+<h3><a name="step3"></a>3. Install and run QPT.</h3>
+
+First, use the launcher to install the application definition.
+
+<pre>
+$ launcher -h:build.cl.gemini.edu -i:qpt -v
+</pre>
+
+Now we can run QPT. The first time you run it, it will download all its components
+from <code>build.cl.gemini.edu</code>, so it may take a little while to get going the first
+time, especially in the north.
+
+<pre>
+$ launcher -a:qpt
+
+Welcome to Oscar.
+=================
+
+...
+</pre>
+
+<p>
+
+There is also a quiet mode that suppresses console output (actually it just redirects
+it to some files under <code>~/.ocs</code>.
+<pre>
+$ launcher -a:qpt -n &
+</pre>
+
+<h2><a name="update"></a>Updating QPT</h2>
+
+To update QPT, just run it and select Help > Update Software. QPT will refresh the
+application logic from the server and restart.
+If this process fails for some reason, you can kill the process and try to restart
+QPT. If it won't start up, you can just re-install
+(see below).
+
+<h2>Updating QPT while Preserving the Previous Version</h2>
+If you wish to update QPT and retain your previous version just in case, you may simply
+rename the application cache directory under <code>~/ocs/<i>hostname</i>/</code>. Be sure
+QPT is not running.
+<pre>
+$ cd ~/.ocs
+$ cd <i>hostname</i>
+$ ls
+qpt
+$ mv qpt qpt-1.0.0
+</pre>
+You may then run this older version by specifying the new name:
+<pre>
+$ launcher -a:qpt-1.0.0
+</pre>
+To install the new version, go to <a href="#step3">step 3<a> of the installation instructions above.
+
+
+<h2>Re-Installing QPT</h2>
+
+If your QPT stops functioning for some reason (this can happen due to a failed software update,
+for instance), you can easily reinstall it. Simply type
+<pre>
+launcher -a:qpt -u
+</pre>
+and then jump to <a href="#step3">step 3<a> of the installation instructions above.
+
+
+</body>
+</html>

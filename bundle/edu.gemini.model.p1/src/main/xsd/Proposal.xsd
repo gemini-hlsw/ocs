@@ -1,0 +1,146 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" jaxb:version="1.0">
+    <xsd:include schemaLocation="Keyword.xsd"/>
+    <xsd:include schemaLocation="Investigator.xsd"/>
+    <xsd:include schemaLocation="Target.xsd"/>
+    <xsd:include schemaLocation="Flamingos2.xsd"/>
+    <xsd:include schemaLocation="GmosS.xsd"/>
+    <xsd:include schemaLocation="GmosN.xsd"/>
+    <xsd:include schemaLocation="Gnirs.xsd"/>
+    <xsd:include schemaLocation="Graces.xsd"/>
+    <xsd:include schemaLocation="Gsaoi.xsd"/>
+    <xsd:include schemaLocation="Gpi.xsd"/>
+    <xsd:include schemaLocation="Keck.xsd"/>
+    <xsd:include schemaLocation="Michelle.xsd"/>
+    <xsd:include schemaLocation="Nici.xsd"/>
+    <xsd:include schemaLocation="Niri.xsd"/>
+    <xsd:include schemaLocation="Nifs.xsd"/>
+    <xsd:include schemaLocation="Subaru.xsd"/>
+    <xsd:include schemaLocation="Dssi.xsd"/>
+    <xsd:include schemaLocation="Texes.xsd"/>
+    <xsd:include schemaLocation="Trecs.xsd"/>
+    <xsd:include schemaLocation="Visitor.xsd"/>
+    <xsd:include schemaLocation="Submission.xsd"/>
+    <xsd:include schemaLocation="Meta.xsd"/>
+    <xsd:include schemaLocation="ProposalClass.xsd"/>
+    <xsd:include schemaLocation="Observation.xsd"/>
+
+    <xsd:element name="proposal">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="meta"          type="Meta"/>
+                <xsd:element name="semester"      type="Semester"/>
+                <xsd:element name="title"         type="xsd:token"/>
+                <xsd:element name="abstract"      type="xsd:string"/>
+                <xsd:element name="scheduling"    type="xsd:string" minOccurs="0"/>
+                <xsd:element name="keywords"      type="Keywords"/>
+                <xsd:element name="investigators" type="Investigators"/>
+                <xsd:element name="targets"       type="Targets"/>
+                <xsd:element name="conditions"    type="Conditions"/>
+
+                <!-- Blueprint names must exist and be unique. -->
+                <xsd:element name="blueprints"    type="Blueprints"/>
+
+                <!--
+                  Observations tie together targets, conditions, and blueprints
+                  by their name keys along with a time amount.
+                -->
+                <xsd:element name="observations" type="Observations"/>
+
+                <!-- Proposal class, which specifies the proposal type as well as time allocation submissions -->
+                <xsd:element name="proposalClass" type="ProposalClassChoice"/>
+
+            </xsd:sequence>
+            <xsd:attribute name="schemaVersion" type="SchemaVersion" use="required"/>
+            <xsd:attribute name="tacCategory"   type="TacCategory"   use="optional"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <!--
+      Schema version must be a series of non-negative integral values separated
+      by periods.
+    -->
+    <xsd:simpleType name="SchemaVersion">
+        <xsd:restriction base="xsd:token">
+            <xsd:pattern value="(\d+\.)*\d+"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+        Semester is a year plus either spring or fall
+    -->
+    <xsd:complexType name="Semester">
+        <xsd:attribute name="year" type="xsd:int"        use="required"/>
+        <xsd:attribute name="half" type="SemesterOption" use="required"/>
+    </xsd:complexType>
+
+    <!--
+      Semester is either Spring or Fall
+    -->
+    <xsd:simpleType name="SemesterOption">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="A"/>
+            <xsd:enumeration value="B"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+
+    <!--
+      A proposal has a TAC category of Solar System, Galactic, or Extragalactic.
+    -->
+    <xsd:simpleType name="TacCategory">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="Solar System"/>
+            <xsd:enumeration value="Galactic"/>
+            <xsd:enumeration value="Extragalactic"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      A classical program visitor to the telescope.  Must refer to an
+      investigator with a matching id.
+    -->
+    <xsd:complexType name="Visitor">
+        <xsd:attribute name="ref" type="InvestigatorRef">
+            <xsd:annotation>
+                <xsd:appinfo>
+                    <jaxb:property><jaxb:baseType name="Investigator"/></jaxb:property>
+                </xsd:appinfo>
+            </xsd:annotation>
+         </xsd:attribute>
+    </xsd:complexType>
+
+    <!--
+      A collection blueprints, which must have unique names.
+    -->
+    <xsd:complexType name="Blueprints">
+        <xsd:choice minOccurs="0" maxOccurs="unbounded">
+            <xsd:element name="flamingos2" type="Flamingos2BlueprintChoice"/>
+            <xsd:element name="gmosN"      type="GmosNBlueprintChoice"/>
+            <xsd:element name="gmosS"      type="GmosSBlueprintChoice"/>
+            <xsd:element name="gnirs"      type="GnirsBlueprintChoice"/>
+            <xsd:element name="gsaoi"      type="GsaoiBlueprintChoice"/>
+            <xsd:element name="graces"     type="GracesBlueprintChoice"/>
+            <xsd:element name="gpi"        type="GpiBlueprintChoice"/>
+            <xsd:element name="keck"       type="KeckBlueprint"/>
+            <xsd:element name="michelle"   type="MichelleBlueprintChoice"/>
+            <xsd:element name="nici"       type="NiciBlueprintChoice"/>
+            <xsd:element name="nifs"       type="NifsBlueprintChoice"/>
+            <xsd:element name="niri"       type="NiriBlueprintChoice"/>
+            <xsd:element name="subaru"     type="SubaruBlueprint"/>
+            <xsd:element name="dssi"       type="DssiBlueprintChoice"/>
+            <xsd:element name="texes"      type="TexesBlueprintChoice"/>
+            <xsd:element name="trecs"      type="TrecsBlueprintChoice"/>
+            <xsd:element name="visitor"    type="VisitorBlueprintChoice"/>
+        </xsd:choice>
+    </xsd:complexType>
+
+    <!--
+      A list of zero or more observations.
+    -->
+    <xsd:complexType name="Observations">
+        <xsd:sequence>
+            <xsd:element name="observation" type="Observation" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+</xsd:schema>

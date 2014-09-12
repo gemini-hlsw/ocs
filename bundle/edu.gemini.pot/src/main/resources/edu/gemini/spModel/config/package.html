@@ -1,0 +1,40 @@
+<html>
+<body>
+This package provides configuration support for the Planned Observing
+Track.  Configurations come into play during observation execution time
+and are used by Observation Executors and Principle System Agents.
+Configurations describe a desired state of the system and are composed
+in a hierarchy.  In particular, an
+
+<code>{@link jsky.app.ot.data.config.IConfig}</code>
+
+(<i>configuration</i>) instance is made up of one or more <i>system
+configuration</i> instances (
+
+<code>{@link jsky.app.ot.data.config.ISysConfig}</code>
+
+).  Each
+system configuration is destined for a particular system (say an instrument
+or telescope control system).  The system configuration, in turn, is
+composed of one or more
+
+<code>{@link jsky.app.ot.data.config.IParameter}</code>
+
+instances.
+<i>Parameter</i>s describe the desired state of a single controllable
+entity.  They are the atomic units in the hierarchy.
+
+<p>Additionally, an interface (
+
+<code>{@link jsky.app.ot.nsp.model.config.IConfigBuilder}</code>
+
+) is provided to allow clients such as
+the Observation Executor to step through the configurations that can be
+produced by a science program node.  An instance of an object implementing
+this interface is associated with the program node as a "user" object.
+(See <code>{@link edu.gemini.pot.sp.ISPRemoteNode}</code>.)  The interface
+provides <code>Iterator</code>-like methods for stepping through the
+available configurations.
+</body>
+</html>
+

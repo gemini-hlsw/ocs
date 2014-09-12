@@ -1,0 +1,13 @@
+<!--
+  Schema definition for Site.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <xsd:simpleType name="Site">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="Gemini South"/>
+            <xsd:enumeration value="Gemini North"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+</xsd:schema>

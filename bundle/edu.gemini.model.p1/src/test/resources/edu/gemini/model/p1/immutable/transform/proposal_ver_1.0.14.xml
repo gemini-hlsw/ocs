@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="1.0.14" tacCategory="Galactic">
+    <meta band3optionChosen="false"/>
+    <semester half="A" year="2013"/>
+    <title>Observation with GSAOI</title>
+    <abstract></abstract>
+    <scheduling></scheduling>
+    <keywords/>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Principal</firstName>
+            <lastName>Investigator</lastName>
+            <status>PhD</status>
+            <email></email>
+            <address>
+                <institution></institution>
+                <address></address>
+                <country></country>
+            </address>
+        </pi>
+    </investigators>
+    <targets/>
+    <conditions/>
+    <blueprints>
+        <gsaoi>
+            <Gsaoi id="blueprint-0">
+                <name>Gsaoi K(short) (2.150 um) </name>
+                <filter>K(short) (2.150 um)</filter>
+            </Gsaoi>
+        </gsaoi>
+    </blueprints>
+    <observations>
+        <observation blueprint="blueprint-0" band="Band 1/2"/>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None"/>
+    </proposalClass>
+</proposal>

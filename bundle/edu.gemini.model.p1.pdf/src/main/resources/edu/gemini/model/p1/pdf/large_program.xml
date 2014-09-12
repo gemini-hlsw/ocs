@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal tacCategory="Solar System" schemaVersion="2014.2.1">
+    <meta band3optionChosen="false">
+        <attachment>/Users/cquiroz/pitexport.pdf</attachment>
+    </meta>
+    <semester half="B" year="2014"/>
+    <title>abc</title>
+    <abstract>abstract </abstract>
+    <scheduling></scheduling>
+    <keywords>
+        <keyword>Astrobiology</keyword>
+    </keywords>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Principal</firstName>
+            <lastName>Investigator</lastName>
+            <status>PhD</status>
+            <email>a@a.com</email>
+            <phone></phone>
+            <address>
+                <institution>Arizona State University</institution>
+                <address>Department of Physics and Astronomy
+Box 871504
+Tempe
+AZ
+85287-1504</address>
+                <country>USA</country>
+            </address>
+        </pi>
+    </investigators>
+    <targets>
+        <sidereal epoch="J2000" id="target-0">
+            <name>vega</name>
+            <degDeg>
+                <ra>279.23473479</ra>
+                <dec>38.78368896</dec>
+            </degDeg>
+            <properMotion deltaDec="286.23" deltaRA="200.94"/>
+            <magnitudes>
+                <magnitude system="Vega" band="B">0.029999999329447746</magnitude>
+                <magnitude system="Vega" band="V">0.029999999329447746</magnitude>
+                <magnitude system="Vega" band="R">0.10000000149011612</magnitude>
+                <magnitude system="Vega" band="J">-0.18000000715255737</magnitude>
+                <magnitude system="Vega" band="H">-0.029999999329447746</magnitude>
+                <magnitude system="Vega" band="K">0.12999999523162842</magnitude>
+            </magnitudes>
+        </sidereal>
+    </targets>
+    <conditions>
+        <condition id="condition-0">
+            <name>CC Any, IQ Any, SB Any/Bright, WV Any</name>
+            <cc>Any</cc>
+            <iq>Any</iq>
+            <sb>Any/Bright</sb>
+            <wv>Any</wv>
+        </condition>
+    </conditions>
+    <blueprints>
+        <gmosN>
+            <regime>optical</regime>
+            <mos id="blueprint-0">
+                <name>GMOS-N MOS 0.75 arcsec slit R831 g + GG455 (506 nm) </name>
+                <visitor>false</visitor>
+                <filter>g + GG455 (506 nm)</filter>
+                <disperser>R831</disperser>
+                <nodAndShuffle>false</nodAndShuffle>
+                <preimaging>false</preimaging>
+                <fpu>0.75 arcsec slit</fpu>
+            </mos>
+        </gmosN>
+    </blueprints>
+    <observations>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>0</percentage>
+                    <evaluation>Failure</evaluation>
+                </guiding>
+                <visibility>Limited</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+    </observations>
+    <proposalClass>
+        <large tooOption="None" key="47a4b90a-1053-4ad8-99a8-1fe1d53f77ef">
+            <itac>
+                <comment>An Itac comment</comment>
+            </itac>
+            <submission>
+                <request>
+                    <time units="hr">4.0</time>
+                    <minTime units="hr">4.0</minTime>
+                    <totalLPTime units="hr">20.0</totalLPTime>
+                </request>
+                <response>
+                    <receipt>
+                        <timestamp>2014-01-21T19:20:46.000Z</timestamp>
+                        <id>LP-2014B-051</id>
+                        <contact>phase1help@gemini.edu.</contact>
+                    </receipt>
+                    <accept>
+                        <email>test@test.com</email>
+                        <ranking>3.0</ranking>
+                        <recommend units="hr">1.0</recommend>
+                        <minRecommend units="hr">1.0</minRecommend>
+                        <poorWeather>true</poorWeather>
+                    </accept>
+                    <comment>TAC comment</comment>
+                </response>
+            </submission>
+        </large>
+    </proposalClass>
+</proposal>

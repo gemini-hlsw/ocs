@@ -1,0 +1,1552 @@
+// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
+// Observatory Control System, Gemini Telescopes Project.
+// See the file COPYRIGHT for complete details.
+//
+// $Id: EdCompInstGMOS.java 46768 2012-07-16 18:58:53Z rnorris $
+//
+package jsky.app.ot.gemini.gmos;
+
+import edu.gemini.mask.ObjectTable;
+import edu.gemini.pot.sp.ISPObservation;
+import edu.gemini.pot.sp.ISPNode;
+import edu.gemini.pot.sp.ISPSeqComponent;
+import edu.gemini.spModel.core.Site;
+import edu.gemini.spModel.data.YesNoType;
+import edu.gemini.spModel.gemini.gmos.*;
+import edu.gemini.spModel.gemini.gmos.GmosCommonType.*;
+import edu.gemini.spModel.gemini.gmos.GmosNorthType.DisperserNorth;
+import edu.gemini.spModel.gemini.gmos.GmosNorthType.FilterNorth;
+import edu.gemini.spModel.gemini.seqcomp.SeqRepeatOffset;
+import edu.gemini.spModel.guide.GuideOption;
+import edu.gemini.spModel.guide.StandardGuideOptions;
+import edu.gemini.spModel.target.TelescopePosWatcher;
+import edu.gemini.spModel.target.WatchablePos;
+import edu.gemini.spModel.target.env.GuideProbeTargets;
+import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.obsComp.TargetObsComp;
+import edu.gemini.spModel.target.offset.OffsetPos;
+import edu.gemini.spModel.target.offset.OffsetPosList;
+import edu.gemini.spModel.target.offset.OffsetPosListWatcher;
+import edu.gemini.spModel.target.offset.OffsetPosSelection;
+import edu.gemini.spModel.telescope.IssPort;
+import edu.gemini.spModel.telescope.PosAngleConstraint;
+import edu.gemini.spModel.type.SpTypeUtil;
+import edu.gemini.spModel.util.SPTreeUtil;
+import jsky.app.ot.OTOptions;
+import jsky.app.ot.StaffBean$;
+import jsky.app.ot.editor.type.SpTypeComboBoxModel;
+import jsky.app.ot.editor.type.SpTypeComboBoxRenderer;
+import jsky.app.ot.gemini.editor.EdCompInstBase;
+import jsky.app.ot.gemini.parallacticangle.ParallacticInstEditor;
+import jsky.app.ot.nsp.SPTreeEditUtil;
+import jsky.app.ot.tpe.TelescopePosEditor;
+import jsky.app.ot.tpe.TpeManager;
+import jsky.catalog.skycat.SkycatCatalog;
+import jsky.navigator.NavigatorManager;
+import jsky.util.gui.*;
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
+import java.awt.event.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.util.List;
+
+/**
+ * This is the editor for the GMOS South instrument component.
+ */
+public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompInstBase<T>
+        implements DropDownListBoxWidgetWatcher, ActionListener,
+        TelescopePosWatcher, TableWidgetWatcher, ChangeListener, FocusListener,
+        ParallacticInstEditor {
+
+    // Allowed central wavelength (lambda_cent) range in nanometers
+    protected static final int MIN_LAMBDA_CENT = 350;
+    protected static final int MAX_LAMBDA_CENT = 1100;
+
+    /**
+     * The OIWFS guide tag.
+     */
+    private static final String OIWFS = "OIWFS";
+
+    /**
+     * Listeners for property changes that affect the parallactic angle components.
+     */
+    final PropertyChangeListener updateParallacticAnglePCL;
+    final PropertyChangeListener relativeTimeMenuPCL;
+
+//    /**
+//     * Value assigned to WFS tags to indicate that the WFS is parked (inactive).
+//     */
+//    public static final String PARKED = "park";
+//
+//    /**
+//     * Value assigned to WFS tags to indicate that the WFS is frozen (not moving).
+//     */
+//    public static final String FROZEN = "freeze";
+
+    @Override
+    public void focusGained(FocusEvent focusEvent) {
+        //do nothing
+    }
+
+    private void reinitializeNodAndShuffleOffset() {
+        final int drUi    = _w.detectorRows.getIntegerValue(-1);
+        final int drModel = getDataObject().getNsDetectorRows();
+        if (drUi != drModel) {
+            _w.detectorRows.deleteWatcher(this);
+            _w.detectorRows.setValue(drModel);
+            _w.detectorRows.addWatcher(this);
+        }
+
+        final String soUi    = _w.shuffleOffset.getValue();
+        final String soModel = getDataObject().getShuffleOffsetAsString();
+        if (!soUi.equals(soModel)) {
+            _w.shuffleOffset.deleteWatcher(this);
+            _w.shuffleOffset.setValue(getDataObject().getShuffleOffsetAsString());
+            _w.shuffleOffset.addWatcher(this);
+        }
+    }
+
+    @Override
+    public void focusLost(FocusEvent focusEvent) {
+        _checkNSValues();
+        // When leaving focus of _w.shuffleOffset or detectorRows, show the
+        // values that were actually stored in the model (which may differ
+        // due to yBin).
+        if (focusEvent.getSource() == _w.shuffleOffset) {
+            reinitializeNodAndShuffleOffset();
+        } else if (focusEvent.getSource() == _w.detectorRows) {
+            reinitializeNodAndShuffleOffset();
+        }
+    }
+
+    /**
+     * Local class used to hold a table of information used to check for valid
+     * filter, grating and wavelength combinations.
+     */
+    protected static class GMOSInfo {
+        final Enum type;
+        final int lambda1;
+        final int lambda2;
+
+        public GMOSInfo(Enum type, int lambda1, int lambda2) {
+            this.type = type;
+            this.lambda1 = lambda1;
+            this.lambda2 = lambda2;
+        }
+    }
+
+    // GMOS filter info for the mask making software
+    private static final GMOSInfo[] FILTER_INFO = new GMOSInfo[]{
+            //                 filter              lambda1   lambda2
+            new GMOSInfo(FilterNorth.g_G0301, 398, 552),
+            new GMOSInfo(FilterNorth.r_G0303, 562, 698),
+            new GMOSInfo(FilterNorth.i_G0302, 706, 850),
+            new GMOSInfo(FilterNorth.z_G0304, 848, 1100),
+            new GMOSInfo(FilterNorth.GG455_G0305, 460, 1100),
+            new GMOSInfo(FilterNorth.OG515_G0306, 520, 1100),
+            new GMOSInfo(FilterNorth.RG610_G0307, 615, 1100)
+    };
+
+    // GMOS grating info for the mask making software
+    private static final GMOSInfo[] GRATING_INFO = new GMOSInfo[]{
+            //                 grating             lambda1   lambda2
+            new GMOSInfo(DisperserNorth.B1200_G5301, 300, 1100),
+            new GMOSInfo(DisperserNorth.R831_G5302, 498, 1100),
+            new GMOSInfo(DisperserNorth.B600_G5303, 320, 1100),
+            new GMOSInfo(DisperserNorth.R600_G5304, 530, 1100),
+            new GMOSInfo(DisperserNorth.R400_G5305, 520, 1100),
+            new GMOSInfo(DisperserNorth.R150_G5306, 430, 1100)
+    };
+
+
+    // The GUI layout panel
+    protected final GmosForm _w;
+    private final GmosOffsetPosTableWidget<OffsetPos> _offsetTable;
+
+    // Custom ROIs
+    private final GmosCustomROITableWidget _customROITable;
+
+    // Used to load a custom focal plane mask
+    private static JFileChooser _fileChooser;
+
+    // Current nod & shuffle offset position being edited
+    private OffsetPos _curPos;
+
+    // Nod & Shuffle position list being edited
+    private OffsetPosList<OffsetPos> _opl;
+
+    private final ActionListener oiwfsBoxListener = new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            final GuideOption opt = (GuideOption) _w.oiwfsBox.getSelectedItem();
+            final List<OffsetPos> selList = OffsetPosSelection.apply(getNode()).selectedPositions(_opl);
+            for (OffsetPos selPos : selList) {
+                selPos.setLink(GmosOiwfsGuideProbe.instance, opt);
+            }
+            _offsetTable.reinit(getNode(), _opl);
+        }
+    };
+
+    // Don't do this.  You can't enforce it in subsequent iterator steps
+    // anyway.  If you're in the iterator and you type in 300.1, it is going
+    // to try to apply that to the gmos static component but it won't accept
+    // a fractional exposure time (unless setExposureTime is overridden)
+//    @Override
+//    protected boolean isForceIntegerExposureTime() {
+//        return true;
+//    }
+
+    @Override
+    protected double getDefaultExposureTime() {
+        return 300.;
+    }
+
+    /**
+     * The constructor initializes the user interface.
+     */
+    public EdCompInstGMOS() {
+        _w = new GmosForm();
+        _offsetTable = _w.offsetTable;
+        _customROITable = _w.customROITable;
+
+        // JBuilder9 didn't like this line, so put it outside the GUI file
+        _w.tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+
+        // OT-493: hide gmmps/mask features when off-site, for now
+        // TODO: revisit this
+//        if (!OTOptions.isStaffAndHasPreferredSite()) {
+        _w.focalPlaneMaskPlotButton.setVisible(false);
+        _w.ccdSlowHighButton.setVisible(false);
+//        }
+
+        // add action listeners
+        _w.posAngle180.addActionListener(this);
+        _w.focalPlaneBuiltInButton.addActionListener(this);
+        _w.focalPlaneMaskButton.addActionListener(this);
+        _w.focalPlaneMaskPlotButton.addActionListener(this);
+        _w.ccdSlowLowButton.addActionListener(this);
+        _w.ccdFastLowButton.addActionListener(this);
+        _w.ccdSlowHighButton.addActionListener(this);
+        _w.ccdFastHighButton.addActionListener(this);
+        _w.ccd3AmpButton.addActionListener(this);
+        _w.ccd6AmpButton.addActionListener(this);
+        _w.ccd12AmpButton.addActionListener(this);
+        _w.transFollowXYButton.addActionListener(this);
+        _w.transFollowXYZButton.addActionListener(this);
+        _w.transFollowZButton.addActionListener(this);
+        _w.transNoFollowButton.addActionListener(this);
+
+        _w.transDtaSpinner.setModel(new SpinnerNumberModel(1, DTAX.getMinimumXOffset().intValue(), DTAX.getMaximumXOffset().intValue(), 1));
+        _w.transDtaSpinner.addChangeListener(this);
+
+        _w.noROIButton.addActionListener(this);
+        _w.ccd2Button.addActionListener(this);
+        _w.centralSpectrumButton.addActionListener(this);
+        _w.centralStampButton.addActionListener(this);
+        _w.customButton.addActionListener(this);
+        _w.customROITable.addWatcher(this);
+        _w.xMin.addWatcher(this);
+        _w.yMin.addWatcher(this);
+        _w.xRange.addWatcher(this);
+        _w.yRange.addWatcher(this);
+        _w.customROINewButton.addActionListener(this);
+        _w.customROIPasteButton.addActionListener(this);
+        _w.customROIRemoveButton.addActionListener(this);
+        _w.customROIRemoveAllButton.addActionListener(this);
+
+        final String[] customROIColNames = new String[]{"Xmin", "Ymin", "Xrange", "Yrange"};
+        _customROITable.setColumnHeaders(customROIColNames);
+        _customROITable.setBackground(_w.getBackground());
+        _customROITable.getTableHeader().setFont(_customROITable.getFont().deriveFont(Font.BOLD));
+
+
+        _w.upLookingButton.addActionListener(this);
+        _w.sideLookingButton.addActionListener(this);
+
+        _w.newButton.addActionListener(this);
+        _w.removeAllButton.addActionListener(this);
+        _w.removeButton.addActionListener(this);
+
+        // initialize the combo boxes
+        initListBox(_w.disperserComboBox, getDisperserClass(), new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                getDataObject().setDisperser((Enum) _w.disperserComboBox.getSelectedItem());
+                _updateDisperser();
+                _checkDisperserValue();
+            }
+        });
+
+
+        initListBox(_w.filterComboBox, getFilterClass(), new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                getDataObject().setFilter((Enum) _w.filterComboBox.getSelectedItem());
+                _checkDisperserValue();
+
+            }
+        });
+
+        initListBox(_w.detectorManufacturerComboBox, getDetectorManufacturerClass(), new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                final DetectorManufacturer selectedDetectorManufacturer =
+                        (DetectorManufacturer) _w.detectorManufacturerComboBox.getSelectedItem();
+                if (selectedDetectorManufacturer != getDataObject().getDetectorManufacturer()) {
+                    getDataObject().setDetectorManufacturer((DetectorManufacturer) _w.detectorManufacturerComboBox.getSelectedItem());
+//                    _instGMOS.initializeDetectorManufacturerValues();
+
+                    _updateControlVisibility();
+                    _updateReadoutCharacteristics();
+                    _updateNodAndShuffle();
+                    _updateCCD();
+                }
+            }
+        });
+
+        final String[] fpUnits = _getFPUnits();
+        _w.builtinComboBox.setChoices(fpUnits);
+        _w.builtinComboBox.setMaximumRowCount(fpUnits.length);
+
+        final String[] slitWidths = _getCustomMaskSlitWidths();
+        _w.customSlitWidthComboBox.setChoices(slitWidths);
+        _w.customSlitWidthComboBox.setMaximumRowCount(slitWidths.length);
+
+        final String[] binChoices = _getBinnings();
+        _w.xBinComboBox.setChoices(binChoices);
+        _w.yBinComboBox.setChoices(binChoices);
+
+        _w.orderComboBox.setChoices(_getOrders());
+
+        _w.builtinComboBox.addWatcher(this);
+        _w.customSlitWidthComboBox.addWatcher(this);
+        _w.xBinComboBox.addWatcher(this);
+        _w.yBinComboBox.addWatcher(this);
+        _w.orderComboBox.addWatcher(this);
+
+        _w.centralWavelength.addWatcher(this);
+        _w.focalPlaneMask.addWatcher(this);
+
+        _w.xOffset.addWatcher(this);
+        _w.yOffset.addWatcher(this);
+        _w.offsetTable.addWatcher(this);
+
+        final String[] colNames = new String[]{"#", "p", "q", OIWFS};
+        _offsetTable.setColumnHeaders(colNames);
+        _offsetTable.setBackground(_w.getBackground());
+        _offsetTable.getTableHeader().setFont(_offsetTable.getFont().deriveFont(Font.BOLD));
+        _w.oiwfsBox.setChoices(StandardGuideOptions.instance.getAll());
+        _w.oiwfsBox.addActionListener(oiwfsBoxListener);
+
+//        _w.nsNoRadioButton.addActionListener(this);  // XXX for GmosGUI
+//        _w.nsYesRadioButton.addActionListener(this); // XXX for GmosGUI
+        _w.nsCheckButton.addActionListener(this);
+
+        _w.electronicOffsetCheckBox.addActionListener(this);
+        _w.shuffleOffset.addWatcher(this);
+        _w.shuffleOffset.addFocusListener(this);
+        _w.detectorRows.addFocusListener(this);
+        _w.detectorRows.addWatcher(this);
+        _w.numNSCycles.addWatcher(this);
+
+        _w.preImgCheckButton.addActionListener(this);
+
+        _clearWarning(_w.warning1);
+        _clearWarning(_w.warning2);
+        _clearWarning(_w.warning3);
+        _clearWarning(_w.warning4);
+        _clearWarning(_w.warningCustomROI);
+
+        _w.detectorManufacturerComboBox.setEnabled(OTOptions.isStaffGlobally()); // REL-1194
+        StaffBean$.MODULE$.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                _w.detectorManufacturerComboBox.setEnabled(isEnabled() && OTOptions.isStaffGlobally()); // REL-1194
+            }
+        });
+
+        addCustomRoiPasteKeyBinding();
+
+        // Create the property change listeners for the parallactic angle panel.
+        updateParallacticAnglePCL = new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                _w.parallacticAnglePanel.updateParallacticAngleMode();
+            }
+        };
+        relativeTimeMenuPCL = new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                _w.parallacticAnglePanel.rebuildRelativeTimeMenu();
+            }
+        };
+    }
+
+    private Site getSite() {
+        // each GMOS is associated with a single site.
+        return getDataObject().getSite().iterator().next();
+    }
+
+    protected Class getFilterClass() {
+        return FilterNorth.class;
+    }
+
+    protected Class getDisperserClass() {
+        return DisperserNorth.class;
+    }
+
+    protected Class getDetectorManufacturerClass() {
+        return GmosCommonType.DetectorManufacturer.class;
+    }
+
+    //This method will initialize the DropDownListBox with the elements
+    //indicated in Enum class, and will configure the widget to show all the
+    //available options.
+    private <E extends Enum<E>> void initListBox(JComboBox widget, Class<E> c, ActionListener l) {
+        final SpTypeComboBoxModel<E> model = new SpTypeComboBoxModel<E>(c);
+        widget.setModel(model);
+        widget.setRenderer(new SpTypeComboBoxRenderer());
+        widget.setMaximumRowCount(c.getEnumConstants().length);
+        if (l != null) widget.addActionListener(l);
+    }
+
+    /**
+     * Return an array of mask names
+     */
+    protected String[] _getFPUnits() {
+        return SpTypeUtil.getFormattedDisplayValueAndDescriptions(GmosNorthType.FPUnitNorth.class);
+    }
+
+    /**
+     * Return an array of order names
+     */
+    private String[] _getOrders() {
+        return SpTypeUtil.getFormattedDisplayValueAndDescriptions(Order.class);
+    }
+
+    /**
+     * Return an array of binning names
+     */
+    private String[] _getBinnings() {
+        return SpTypeUtil.getFormattedDisplayValueAndDescriptions(Binning.class);
+    }
+
+    /**
+     * Return an array of possible slit widths for custom masks
+     */
+    private String[] _getCustomMaskSlitWidths() {
+        return SpTypeUtil.getFormattedDisplayValueAndDescriptions(CustomSlitWidth.class);
+    }
+
+
+    /**
+     * Return the window containing the editor
+     */
+    public JPanel getWindow() {
+        return _w;
+    }
+
+    /**
+     * Set the data object corresponding to this editor.
+     */
+    protected void init() {
+        super.init();
+        _curPos = null;
+        _opl = null;
+
+        _updateFilter();
+        _updateExposureTime();
+        _updateDisperser();
+        _updatePosAngleConstraint();
+        _updateFPU();
+        _updateCCD();
+        _updateStageDetails();
+        _updateBuiltinROIDetails();
+        _updatePort();
+        _updateNodAndShuffle();
+        _updatePreimaging();
+        _checkDisperserValue();
+
+        _updateControlVisibility();
+        _updateReadoutCharacteristics();
+
+        _updateCustomSlitWidth();
+
+
+        _w.parallacticAnglePanel.init(this, getSite());
+
+        // If the position angle mode or FPU mode properties change, force an update on the parallactic angle mode.
+        getDataObject().addPropertyChangeListener(InstGmosCommon.POSITION_ANGLE_MODE_PROP.getName(), updateParallacticAnglePCL);
+        getDataObject().addPropertyChangeListener(InstGmosCommon.FPU_MODE_PROP.getName(),            updateParallacticAnglePCL);
+
+        // Add a watcher to the data object for the disperser to rebuild the parallactic angle "Set To" menu
+        // when it is changed, as it may trigger changes in setup time for GMOS.
+        // (See subclasses for similiar property change listener for FPU.)
+        getDataObject().addPropertyChangeListener(InstGmosCommon.DISPERSER_PROP_NAME, relativeTimeMenuPCL);
+
+        getDataObject().addPropertyChangeListener(InstGmosCommon.POS_ANGLE_CONSTRAINT_PROP.getName(), new PropertyChangeListener() {
+            @Override public void propertyChange(PropertyChangeEvent evt) {
+                final PosAngleConstraint pac = (PosAngleConstraint) evt.getNewValue();
+                _w.posAngle180.setSelected(pac == PosAngleConstraint.FIXED_180);
+            }
+        });
+    }
+
+    // Initialize controls based on gmos specific information.
+    protected void _updateControlVisibility() {
+        _w.transFollowXYZButton.setVisible(false);
+        _w.transFollowZButton.setVisible(false);
+
+        DetectorManufacturer det = getDataObject().getDetectorManufacturer();
+        if (det == GmosCommonType.DetectorManufacturer.E2V) {
+            _w.ccd3AmpButton.setVisible(true);
+            _w.ccd6AmpButton.setVisible(true);
+            _w.ccd12AmpButton.setVisible(false);
+            _w.noROIButton.setText("Full Frame Readout");
+            _w.ccd2Button.setText("CCD2: 2.5' x 5.5' imaging FOV");
+            _w.centralSpectrumButton.setText("Central Spectrum: spectroscopy of central 75\" FOV");
+            _w.centralStampButton.setText("Central Stamp: 22\" x 22\" imaging FOV");
+            _w.customButton.setText("Custom ROI");
+        } else {// HAMAMATSU:
+            if (OTOptions.isStaff(getProgram().getProgramID())) {
+                _w.ccd3AmpButton.setVisible(false);
+                _w.ccd6AmpButton.setVisible(true);
+                _w.ccd12AmpButton.setVisible(true);
+            } else {
+                _w.ccd3AmpButton.setVisible(false);
+                _w.ccd6AmpButton.setVisible(false);
+                _w.ccd12AmpButton.setVisible(false);
+            }
+            _w.noROIButton.setText("Full Frame Readout");
+            _w.ccd2Button.setText("CCD2: 2.75' x 5.5' imaging FOV");
+            _w.centralSpectrumButton.setText("Central Spectrum: spectroscopy of central 80\" FOV");
+            _w.centralStampButton.setText("Central Stamp: 24\" x 24\" imaging FOV");
+            _w.customButton.setText("Custom ROI");
+        }
+        if (OTOptions.isStaff(getProgram().getProgramID())) {
+            _w.customButton.setEnabled(true);
+            _w.customROINewButton.setEnabled(true);
+            _w.customROIPasteButton.setEnabled(true);
+            _w.customROIRemoveButton.setEnabled(true);
+            _w.customROIRemoveAllButton.setEnabled(true);
+            _w.xMin.setEditable(true);
+            _w.yMin.setEditable(true);
+            _w.xRange.setEditable(true);
+            _w.yRange.setEditable(true);
+        } else {
+            _w.customButton.setEnabled(false);
+            _w.customROINewButton.setEnabled(false);
+            _w.customROIPasteButton.setEnabled(false);
+            _w.customROIRemoveButton.setEnabled(false);
+            _w.customROIRemoveAllButton.setEnabled(false);
+            _w.xMin.setEditable(false);
+            _w.yMin.setEditable(false);
+            _w.xRange.setEditable(false);
+            _w.yRange.setEditable(false);
+        }
+
+    }
+
+    // Display the current filter settings
+    private void _updateFilter() {
+        _w.filterComboBox.getModel().setSelectedItem(getDataObject().getFilter());
+    }
+
+    // Display the current exposure time settings
+    private void _updateExposureTime() {
+        _w.exposureTime.setValue(getDataObject().getExposureTimeAsString());
+    }
+
+
+    // Display the current CCD readout details settings
+    private void _updateCCD() {
+        _w.xBinComboBox.setValue(_getBinningIndex(getDataObject().getCcdXBinning()));
+        _w.yBinComboBox.setValue(_getBinningIndex(getDataObject().getCcdYBinning()));
+
+        final AmpReadMode s = getDataObject().getAmpReadMode();
+        final AmpGain g = getDataObject().getGainChoice();
+        final DetectorManufacturer detectorManufacturer = getDataObject().getDetectorManufacturer();
+
+        boolean slowHighVisible = OTOptions.isStaff(getProgram().getProgramID());
+        if ((s == AmpReadMode.SLOW) && (g == AmpGain.LOW)) {
+            _w.ccdSlowLowButton.setSelected(true);
+        } else if ((s == AmpReadMode.SLOW) && (g == AmpGain.HIGH)) {
+            slowHighVisible = true;
+            _w.ccdSlowHighButton.setSelected(true);
+        } else if ((s == AmpReadMode.FAST) && (g == AmpGain.LOW)) {
+            _w.ccdFastLowButton.setSelected(true);
+        } else if ((s == AmpReadMode.FAST) && (g == AmpGain.HIGH)) {
+            _w.ccdFastHighButton.setSelected(true);
+        }
+        _w.ccdSlowHighButton.setVisible(slowHighVisible);
+        _w.ccdSlowHighButton.setEnabled(isEnabled() && OTOptions.isStaff(getProgram().getProgramID()));
+
+        _w.detectorManufacturerComboBox.setSelectedItem(detectorManufacturer);
+
+        _updateReadoutCharacteristics();
+
+        final Enum c = getDataObject().getAmpCount();
+        if ((c == GmosCommonType.AmpCount.THREE))
+            _w.ccd3AmpButton.setSelected(true);
+        else if ((c == GmosCommonType.AmpCount.SIX))
+            _w.ccd6AmpButton.setSelected(true);
+        else if (c == GmosCommonType.AmpCount.TWELVE)
+            _w.ccd12AmpButton.setSelected(true);
+    }
+
+    // Display the current translation stage details settings
+    private void _updateStageDetails() {
+        final StageMode m = (StageMode) getDataObject().getStageMode();
+        if ((m == GmosNorthType.StageModeNorth.FOLLOW_XY) || (m == GmosSouthType.StageModeSouth.FOLLOW_XY)) {
+            _w.transFollowXYButton.setSelected(true);
+        } else if ((m == GmosNorthType.StageModeNorth.FOLLOW_XYZ) || (m == GmosSouthType.StageModeSouth.FOLLOW_XYZ)) {
+            _w.transFollowXYZButton.setSelected(true);
+        } else if ((m == GmosNorthType.StageModeNorth.FOLLOW_Z_ONLY) || (m == GmosSouthType.StageModeSouth.FOLLOW_Z_ONLY)) {
+            _w.transFollowZButton.setSelected(true);
+        } else if ((m == GmosNorthType.StageModeNorth.NO_FOLLOW) || (m == GmosSouthType.StageModeSouth.NO_FOLLOW)) {
+            _w.transNoFollowButton.setSelected(true);
+        }
+
+        _w.transDtaSpinner.setValue(getDataObject().getDtaXOffset().intValue());
+    }
+
+    // Display the current value for any builtin ROI
+    private void _updateBuiltinROIDetails() {
+        final BuiltinROI roi = getDataObject().getBuiltinROI();
+        if (roi == BuiltinROI.FULL_FRAME) {
+            _w.noROIButton.setSelected(true);
+        } else if (roi == BuiltinROI.CCD2) {
+            _w.ccd2Button.setSelected(true);
+        } else if (roi == BuiltinROI.CENTRAL_SPECTRUM) {
+            _w.centralSpectrumButton.setSelected(true);
+        } else if (roi == BuiltinROI.CENTRAL_STAMP) {
+            _w.centralStampButton.setSelected(true);
+        } else if (roi == BuiltinROI.CUSTOM) {
+            _w.customButton.setSelected(true);
+        }
+        try {
+            _customROITable.reinit(
+                    getDataObject().getCustomROIs(),
+                    getDataObject().getCcdXBinning(),
+                    getDataObject().getCcdYBinning(),
+                    getDataObject().getDetectorManufacturer());
+        } catch (IllegalArgumentException e) {
+            _setWarning(_w.warningCustomROI, e.getMessage());
+        }
+        _w.xMin.setValue(1);
+        _w.yMin.setValue(1);
+        _w.xRange.setValue(1);
+        _w.yRange.setValue(1);
+    }
+
+    // Display the current ISS port settings
+    private void _updatePort() {
+        final IssPort port = getDataObject().getIssPort();
+        if (port == IssPort.SIDE_LOOKING) {
+            _w.sideLookingButton.setSelected(true);
+        } else if (port == IssPort.UP_LOOKING) {
+            _w.upLookingButton.setSelected(true);
+        }
+    }
+
+    // Display the current position angle settings
+    private void _updatePosAngleConstraint() {
+        final PosAngleConstraint pac = getDataObject().getPosAngleConstraint();
+        final boolean selected = pac == PosAngleConstraint.FIXED_180;
+        _w.posAngle180.removeActionListener(this);
+        _w.posAngle180.setSelected(selected);
+        _w.posAngle180.addActionListener(this);
+    }
+
+    // Display the current FPU settings
+    private void _updateFPU() {
+        _w.builtinComboBox.setValue(getDataObject().getFPUnit().ordinal());
+
+        final FPUnitMode fpUnitMode = getDataObject().getFPUnitMode();
+        _w.focalPlaneMask.setText(getDataObject().getFPUnitCustomMask());
+
+        final boolean enabled = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
+
+        if (fpUnitMode == FPUnitMode.CUSTOM_MASK) {
+            _w.focalPlaneMask.setEnabled(enabled);
+            _w.builtinComboBox.setEnabled(false);
+
+            _w.focalPlaneMaskButton.setSelected(true);
+            _w.focalPlaneMaskPlotButton.setEnabled(enabled);
+            _w.customSlitWidthComboBox.setEnabled(true);
+        } else {
+            _w.focalPlaneMask.setEnabled(false);
+            _w.builtinComboBox.setEnabled(enabled);
+
+            _w.focalPlaneBuiltInButton.setSelected(true);
+            _w.focalPlaneMaskPlotButton.setEnabled(false);
+            _w.customSlitWidthComboBox.setEnabled(false);
+        }
+    }
+
+    /**
+     * Display the current Disperser settings
+     */
+    protected void _updateDisperser() {
+        _w.disperserComboBox.getModel().setSelectedItem(getDataObject().getDisperser());
+        _w.centralWavelength.setValue(String.valueOf(getDataObject().getDisperserLambda()));
+        _w.orderComboBox.setValue(getDataObject().getDisperserOrder().ordinal());
+        if (isMirror()) {
+            _w.orderComboBox.setEnabled(false);
+            _w.orderLabel.setEnabled(false);
+            _w.centralWavelength.setEnabled(false);
+            _w.centralWavelengthLabel.setEnabled(false);
+            _w.preImgCheckButton.setEnabled(true);
+//            _w.centralWavelengthUnits.setEnabled(false); // XXX for GmosGUI
+        } else {
+            final boolean enabled = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
+            _w.orderComboBox.setEnabled(enabled);
+            _w.orderLabel.setEnabled(enabled);
+            _w.centralWavelength.setEnabled(enabled);
+//            _w.centralWavelengthUnits.setEnabled(enabled); // XXX for GmosGUI
+            _w.centralWavelengthLabel.setEnabled(enabled);
+            _w.preImgCheckButton.setEnabled(false);
+            getDataObject().setMosPreimaging(YesNoType.NO);
+            _updatePreimaging();
+        }
+    }
+
+    private boolean isMirror() {
+        return ((GmosCommonType.Disperser) getDataObject().getDisperser()).isMirror();
+    }
+
+    @Override
+    protected void updateEnabledState(boolean enabled) {
+        super.updateEnabledState(enabled);
+        _w.preImgCheckButton.setEnabled(enabled && isMirror());
+
+        final boolean customMask = (getDataObject().getFPUnitMode() == FPUnitMode.CUSTOM_MASK);
+        _w.builtinComboBox.setEnabled(enabled && !customMask);
+        _w.focalPlaneMask.setEnabled(enabled && customMask);
+        _w.customSlitWidthComboBox.setEnabled(enabled && customMask);
+
+        _w.parallacticAnglePanel.updateEnabledState(enabled);
+
+    }
+
+    protected void _updateCustomSlitWidth() {
+        _w.customSlitWidthComboBox.deleteWatcher(this);
+        CustomSlitWidth csw = getDataObject().getCustomSlitWidth();
+        if (csw == null) csw = CustomSlitWidth.OTHER;
+        _w.customSlitWidthComboBox.setSelectedIndex(csw.ordinal());
+        _w.customSlitWidthComboBox.addWatcher(this);
+    }
+
+    // Return the combo box index for the given Binning value
+    private int _getBinningIndex(Binning b) {
+        if (b == Binning.ONE)
+            return 0;
+        if (b == Binning.TWO)
+            return 1;
+        if (b == Binning.FOUR)
+            return 2;
+        return 0;
+    }
+
+    //
+    // Update the science field of view based upon the camera and mask
+    // settings.
+    //
+    //private void _updateScienceFOV() {
+    /*
+     double[] scienceArea = getDataObject().getScienceArea();
+     _w.scienceFOV.setText(scienceArea[0] + " x " + scienceArea[1]);
+    */
+    //}
+
+
+    // Update the nod & shuffle tab with the current values from the data object
+    private void _updateNodAndShuffle() {
+        if (getDataObject().useNS()) {
+            // Nod & Shuffle enabled
+
+//            _w.nsYesRadioButton.setSelected(true); // XXX for GmosGUI
+            _w.nsCheckButton.setSelected(true);
+
+            _w.tabbedPane.setEnabledAt(_w.tabbedPane.indexOfComponent(_w.nsPanel), true);
+
+            // Get the current offset list and fill in the table widget
+            _opl = getDataObject().getPosList();
+            if (_opl == null) {
+                _opl = getDataObject().getPosList(); // shouldn't happen, but did after undo...
+            }
+
+            _opl.addWatcher(offsetListWatcher);
+            _offsetTable.reinit(getNode(), _opl);
+
+            // add default offset positions at (0,0) and (0,10), if the table is empty
+            if (_opl.size() == 0) {
+                _opl.addPosition(0., 0.);
+                _opl.addPosition(0., 10.);
+            }
+
+            // only allow 2 nod offset positions for now
+            _w.newButton.setEnabled(_opl.size() < 2);
+
+            // update the WFS menus when the target list changes
+            final TargetObsComp obsComp = getContextTargetObsCompDataObject();
+            if (obsComp != null) {
+                obsComp.addPropertyChangeListener(TargetObsComp.TARGET_ENV_PROP, targetListWatcher);
+            }
+
+            _w.shuffleOffset.setValue(getDataObject().getShuffleOffsetAsString());
+            _w.detectorRows.setValue(Integer.toString(getDataObject().getNsDetectorRows()));
+            _w.numNSCycles.setValue(Integer.toString(getDataObject().getNsNumCycles()));
+            _w.totalTime.setText(Double.toString(getDataObject().getTotalIntegrationTime()));
+
+            _checkNSValues();
+
+            _offsetTable.selectPos(_opl.getPositionAt(0));
+        } else {
+            // Nod & Shuffle disabled
+
+//            _w.nsNoRadioButton.setSelected(true); // XXX for GmosGUI
+            _w.nsCheckButton.setSelected(false);
+
+            _w.tabbedPane.setEnabledAt(_w.tabbedPane.indexOfComponent(_w.nsPanel), false);
+            if (_w.tabbedPane.getSelectedComponent() == _w.nsPanel)
+                _w.tabbedPane.setSelectedIndex(0);
+        }
+    }
+
+
+    private void _updatePreimaging() {
+        _w.preImgCheckButton.setSelected(getDataObject().isMosPreimaging() == YesNoType.YES);
+    }
+
+
+    /**
+     * Check the selected nod & shuffle settings and display a warning if needed.
+     */
+    private void _checkNSValues() {
+        _clearWarning(_w.warning2);
+        _clearWarning(_w.warning4);
+
+        String msg = null;
+        if (_opl != null) {
+            final InstGmosCommon.UseElectronicOffsettingRuling ruling;
+            if (!primaryOiwfsStarExists()) {
+                msg = "Electronic offsetting requires a GMOS OIWFS to be defined.";
+            } else {
+                ruling = InstGmosCommon.checkUseElectronicOffsetting(getDataObject(), _opl);
+                if (!ruling.allow) msg = ruling.message;
+            }
+        }
+        if (getDataObject().isUseElectronicOffsetting()) {
+            _w.electronicOffsetCheckBox.setSelected(true);
+            _w.electronicOffsetCheckBox.setEnabled(true);
+            if (msg != null) {
+                _setWarning(_w.warning2, msg);
+            }
+        } else {
+            _w.electronicOffsetCheckBox.setSelected(false);
+            _w.electronicOffsetCheckBox.setEnabled(msg == null);
+        }
+
+        final int ybin = getDataObject().getCcdYBinning().getValue();
+        if (ybin != 1) {
+            final int rows = getDataObject().getNsDetectorRows();
+            if (rows % ybin != 0) {
+                _setWarning(_w.warning2, "The number of shuffled rows should be a multiple of the Y-binning (" + ybin + ")");
+                _setWarning(_w.warning4, "The number of shuffled rows should be a multiple of the Y-binning (" + ybin + ")");
+            }
+        }
+    }
+
+    /**
+     * Check that the dta x offset and binning are agreeable.  Not sure where to put this error.
+     */
+    private void _checkDTAXAndBinning() {
+        _clearWarning(_w.warning3);
+        final int ybin = getDataObject().getCcdYBinning().getValue();
+        if (ybin != 1) {
+            final int dtxoffset = getDataObject().getDtaXOffset().intValue();
+            if (dtxoffset % ybin != 0)
+                _setWarning(_w.warning3, "The DTA X offset should be a multiple of the Y-binning (" + ybin + ")");
+        }
+    }
+
+    private boolean primaryOiwfsStarExists() {
+        final TargetEnvironment env = getContextTargetEnv();
+        if (env == null) return false;
+
+        for (GuideProbeTargets targets : env.getPrimaryGuideProbeTargets(GmosOiwfsGuideProbe.instance)) {
+            return !targets.getPrimary().isEmpty();
+        }
+        return false;
+    }
+
+    /**
+     * Show the given OffsetPos
+     */
+    protected void showPos(OffsetPos op) {
+        _w.xOffset.setValue(op.getXAxisAsString());
+        _w.yOffset.setValue(op.getYAxisAsString());
+        _w.oiwfsBox.removeActionListener(oiwfsBoxListener);
+        _w.oiwfsBox.setValue(_offsetTable.getGuideOption(op));
+        _w.oiwfsBox.addActionListener(oiwfsBoxListener);
+    }
+
+    /**
+     * A table row was selected, so show the selected position.
+     *
+     * @see TableWidgetWatcher
+     */
+    public void tableRowSelected(TableWidget twe, int rowIndex) {
+        if (twe == _offsetTable) {
+            if (_curPos != null)
+                _curPos.deleteWatcher(this);
+            _curPos = _offsetTable.getSelectedPos();
+            _curPos.addWatcher(this);
+            showPos(_curPos);
+        } else if (twe == _customROITable) {
+            showROI(_customROITable.getSelectedROI());
+            _clearWarning(_w.warningCustomROI);
+        }
+
+    }
+
+    protected void showROI(ROIDescription rDesc) {
+        _w.xMin.setValue(rDesc.getXStart());
+        _w.yMin.setValue(rDesc.getYStart());
+        _w.xRange.setValue(rDesc.getXSize(getDataObject().getCcdXBinning()));
+        _w.yRange.setValue(rDesc.getYSize(getDataObject().getCcdYBinning()));
+    }
+
+    /**
+     * As part of the TableWidgetWatcher interface, this method must
+     * be supported, though we don't care about TableWidget actions.
+     *
+     * @see TableWidgetWatcher
+     */
+    public void tableAction(TableWidget twe, int colIndex, int rowIndex) {
+    }
+
+
+    /**
+     * Return the position angle text box and implements similar method for parallactic angle feature.
+     */
+    public TextBoxWidget getPosAngleTextBox() {
+        return _w.posAngle;
+    }
+    @Override public JTextField getPosAngleTextField() { return _w.posAngle; }
+
+    /**
+     * Return the exposure time text box
+     */
+    public TextBoxWidget getExposureTimeTextBox() {
+        return _w.exposureTime;
+    }
+
+    /**
+     * Return the coadds text box.
+     */
+    public TextBoxWidget getCoaddsTextBox() {
+        return null;
+    }
+
+    /**
+     * Handle action events (for checkbuttons).
+     */
+    public void actionPerformed(ActionEvent evt) {
+        final Object w = evt.getSource();
+        final boolean enabled = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
+
+        if (w == _w.posAngle180) {
+            if (_w.posAngle180.isSelected()) {
+                getDataObject().setPosAngleConstraint(PosAngleConstraint.FIXED_180);
+            } else {
+                getDataObject().setPosAngleConstraint(PosAngleConstraint.FIXED);
+            }
+            _w.posAngle.setEnabled(enabled);
+        } else if (w == _w.focalPlaneBuiltInButton) {
+            getDataObject().setFPUnitMode(FPUnitMode.BUILTIN);
+            _w.builtinComboBox.setEnabled(enabled);
+            _w.focalPlaneMask.setEnabled(false);
+            _w.focalPlaneMaskPlotButton.setEnabled(false);
+            _updateFPU();
+        } else if (w == _w.focalPlaneMaskButton) {
+            getDataObject().setFPUnitMode(FPUnitMode.CUSTOM_MASK);
+            getDataObject().setFPUnitCustomMask(_w.focalPlaneMask.getText());
+            _w.builtinComboBox.setEnabled(false);
+            _w.focalPlaneMask.setEnabled(enabled);
+            _w.focalPlaneMaskPlotButton.setEnabled(enabled);
+            _updateFPU();
+        } else if (w == _w.focalPlaneMaskPlotButton) {
+            _plotFocalPlaneMask();
+        } else if (w == _w.ccdSlowLowButton) {
+            getDataObject().setAmpReadMode(AmpReadMode.SLOW);
+            getDataObject().setGainChoice(AmpGain.LOW);
+//            getDataObject().setGainReadCombo(AmpGainReadCombo.SLOW_LOW);
+            _updateReadoutCharacteristics();
+        } else if (w == _w.ccdSlowHighButton) {
+            getDataObject().setAmpReadMode(AmpReadMode.SLOW);
+            getDataObject().setGainChoice(AmpGain.HIGH);
+//            getDataObject().setEngineeringGainReadCombo(GmosCommonType.EngineeringAmpGainReadCombo.SLOW_HIGH);
+            _updateReadoutCharacteristics();
+        } else if (w == _w.ccdFastLowButton) {
+            getDataObject().setAmpReadMode(AmpReadMode.FAST);
+            getDataObject().setGainChoice(AmpGain.LOW);
+//            getDataObject().setGainReadCombo(AmpGainReadCombo.FAST_LOW);
+            _updateReadoutCharacteristics();
+        } else if (w == _w.ccdFastHighButton) {
+            getDataObject().setAmpReadMode(AmpReadMode.FAST);
+            getDataObject().setGainChoice(AmpGain.HIGH);
+//            getDataObject().setGainReadCombo(AmpGainReadCombo.FAST_HIGH);
+            _updateReadoutCharacteristics();
+        } else if (w == _w.ccd3AmpButton) {
+            getDataObject().setAmpCount("Three");
+            _updateReadoutCharacteristics();
+        } else if (w == _w.ccd6AmpButton) {
+            getDataObject().setAmpCount("Six");
+            _updateReadoutCharacteristics();
+        } else if (w == _w.ccd12AmpButton) {
+            getDataObject().setAmpCount("Twelve");
+            _updateReadoutCharacteristics();
+        } else if (w == _w.transFollowXYButton) {
+            getDataObject().setStageMode("Follow in XY");
+        } else if (w == _w.transFollowXYZButton) {
+            getDataObject().setStageMode("Follow in XYZ(focus)");
+        } else if (w == _w.transFollowZButton) {
+            getDataObject().setStageMode("Follow in Z Only");
+        } else if (w == _w.transNoFollowButton) {
+            getDataObject().setStageMode("Do Not Follow");
+        } else if (w == _w.noROIButton) {
+            getDataObject().setBuiltinROI(BuiltinROI.FULL_FRAME);
+        } else if (w == _w.ccd2Button) {
+            getDataObject().setBuiltinROI(BuiltinROI.CCD2);
+        } else if (w == _w.centralSpectrumButton) {
+            getDataObject().setBuiltinROI(BuiltinROI.CENTRAL_SPECTRUM);
+        } else if (w == _w.centralStampButton) {
+            getDataObject().setBuiltinROI(BuiltinROI.CENTRAL_STAMP);
+        } else if (w == _w.customButton) {
+            getDataObject().setBuiltinROI(BuiltinROI.CUSTOM);
+        } else if (w == _w.upLookingButton) {
+            getDataObject().setIssPort(IssPort.UP_LOOKING);
+        } else if (w == _w.sideLookingButton) {
+            getDataObject().setIssPort(IssPort.SIDE_LOOKING);
+        } else if (w == _w.newButton) {
+            if (_curPos == null)
+                _opl.addPosition();
+            else
+                _opl.addPosition(_opl.getPositionIndex(_curPos) + 1);
+//        } else if (w == _w.nsNoRadioButton) { // XXX for GmosGUI
+//            getDataObject().setUseNS(false);
+//            try {
+//                _progData.updateOffsetInfoList();
+//            } catch (RemoteException e) {
+//                DialogUtil.error(e);
+//            }
+//            _updateNodAndShuffle();
+//            if (_w.tabbedPane.getSelectedComponent() == _w.nsPanel)
+//                _w.tabbedPane.setSelectedIndex(0);
+//        } else if (w == _w.nsYesRadioButton) { // XXX for GmosGUI
+//            getDataObject().setUseNS(true);
+//            try {
+//                _progData.updateOffsetInfoList();
+//            } catch (RemoteException e) {
+//                DialogUtil.error(e);
+//            }
+//            _removeOffsetNodes();
+//            _updateNodAndShuffle();
+//            if (_w.tabbedPane.getSelectedComponent() != _w.nsPanel)
+//                _w.tabbedPane.setSelectedComponent(_w.nsPanel);
+        } else if (w == _w.nsCheckButton) {
+            if (_w.nsCheckButton.isSelected()) {
+                getDataObject().setUseNS(true);
+                _removeOffsetNodes();
+                _updateNodAndShuffle();
+                if (_w.tabbedPane.getSelectedComponent() != _w.nsPanel) {
+                    _w.tabbedPane.setSelectedComponent(_w.nsPanel);
+                }
+            } else {
+                getDataObject().setUseNS(false);
+                _updateNodAndShuffle();
+                if (_w.tabbedPane.getSelectedComponent() == _w.nsPanel) {
+                    _w.tabbedPane.setSelectedIndex(0);
+                }
+            }
+        } else if (w == _w.electronicOffsetCheckBox) {
+            final boolean useEO = _w.electronicOffsetCheckBox.isSelected();
+            getDataObject().setUseElectronicOffsetting(useEO);
+        } else if (w == _w.removeAllButton) {
+            _opl.removeAllPositions();
+        } else if (w == _w.removeButton) {
+            if (_curPos != null)
+                _opl.removePosition(_curPos);
+        } else if (w == _w.preImgCheckButton) {
+            final boolean isPreimg = _w.preImgCheckButton.isSelected();
+            getDataObject().setMosPreimaging(isPreimg ? YesNoType.YES : YesNoType.NO);
+        } else if (w == _w.customROINewButton) {
+            if (_customROITable.getCustomROIs().size() >= 5 ||
+                    (!getDataObject().getDetectorManufacturer().equals(GmosCommonType.DetectorManufacturer.HAMAMATSU) &&
+                            _customROITable.getCustomROIs().size() >= 4)) {
+                //raise popup and do NOT add a new custom ROI
+                DialogUtil.error("You cannot declare more than 5 custom ROIs for HAMAMATSU CCDs or 4 for E2V CCDs");
+            } else {
+                try {
+                    _customROITable.addROI(
+                            _w.xMin.getIntegerValue(1),
+                            _w.yMin.getIntegerValue(1),
+                            _w.xRange.getIntegerValue(1) * getDataObject().getCcdXBinning().getValue(),
+                            _w.yRange.getIntegerValue(1) * getDataObject().getCcdYBinning().getValue());
+                    getDataObject().setCustomROIs(_customROITable.getCustomROIs());
+                } catch (IllegalArgumentException e) {
+                    _setWarning(_w.warningCustomROI, e.getMessage());
+                }
+            }
+        } else if (w == _w.customROIPasteButton) {
+            int maxRows = getDataObject().getDetectorManufacturer().equals(GmosCommonType.DetectorManufacturer.HAMAMATSU) ? 5 : 4;
+            if (_customROITable.paste(maxRows)) {
+                getDataObject().setCustomROIs(_customROITable.getCustomROIs());
+            }
+        } else if (w == _w.customROIRemoveButton) {
+            _customROITable.removeSelectedROI();
+            getDataObject().setCustomROIs(_customROITable.getCustomROIs());
+        } else if (w == _w.customROIRemoveAllButton) {
+            _customROITable.removeAllROIs();
+            getDataObject().setCustomROIs(_customROITable.getCustomROIs());
+        }
+    }
+
+    // REL-1056: enable paste of table data
+    private void addCustomRoiPasteKeyBinding() {
+        KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_V, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+        _customROITable.getInputMap().put(stroke, "paste");
+        AbstractAction action = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                int maxRows = getDataObject().getDetectorManufacturer().equals(GmosCommonType.DetectorManufacturer.HAMAMATSU) ? 5 : 4;
+                _customROITable.paste(maxRows);
+            }
+        };
+        _customROITable.registerKeyboardAction(action, "Paste", stroke, JComponent.WHEN_FOCUSED);
+    }
+
+    private void _updateReadoutCharacteristics() {
+        _w.ccdGainLabel.setText(getDataObject().getMeanGain());
+        _w.meanReadNoiseLabel.setText(getDataObject().getMeanReadNoise());
+        _w.ampCountLabel.setText(getDataObject().getAmpCount().toString().toLowerCase());
+    }
+
+
+    /**
+     * Called when the value in the DTA-X spinner is changed.
+     */
+    public void stateChanged(ChangeEvent evt) {
+        final int i = (Integer) (_w.transDtaSpinner.getValue());
+        getDataObject().setDtaXOffset(DTAX.valueOf(i));
+        _checkDTAXAndBinning();
+    }
+
+
+    // Remove any offset nodes in the SP tree (offset nodes are not allowed when using nod & shuffle)
+    private void _removeOffsetNodes() {
+        try {
+            final ISPObservation obsNode = getContextObservation();
+            final List l = SPTreeUtil.findSeqComponents(obsNode, SeqRepeatOffset.SP_TYPE);
+            for (Object aL : l) {
+                final ISPNode sc = (ISPSeqComponent) aL;
+                SPTreeEditUtil.removeNode(sc);
+            }
+        } catch (Exception e) {
+            DialogUtil.error(e);
+        }
+    }
+
+//    /**
+//     * Get the selected position.
+//     */
+//    public OffsetPos getSelectedPos() {
+//        return _offsetTable.getSelectedPos();
+//    }
+
+    /**
+     * Return the FPUnit for the given index
+     */
+    protected FPUnit _getFPUnitByIndex(int index) {
+        return GmosNorthType.FPUnitNorth.getFPUnitByIndex(index);
+    }
+
+//    /**
+//     * Return the Filter for the given index
+//     */
+//    protected Filter _getFilterByIndex(int index) {
+//        return FilterNorth.getFilterByIndex(index);
+//    }
+//
+//    /**
+//     * Return the Disperser for the given index
+//     */
+//    protected Disperser _getDisperserByIndex(int index) {
+//        return DisperserNorth.getDisperserByIndex(index);
+//    }
+
+    /**
+     * Return the Order for the given index
+     */
+    protected Order _getOrderByIndex(int index) {
+        return Order.getOrderByIndex(index);
+    }
+
+    /**
+     * Return the Binning for the given index
+     */
+    protected Binning _getBinningByIndex(int index) {
+        return Binning.getBinningByIndex(index);
+    }
+
+
+    /**
+     * Called when an item in a DropDownListBoxWidget is selected.
+     */
+    public void dropDownListBoxAction(DropDownListBoxWidget ddlbw, int index, String val) {
+        if (ddlbw == _w.builtinComboBox) {
+            getDataObject().setFPUnit((Enum) _getFPUnitByIndex(index));
+        } else if (ddlbw == _w.xBinComboBox) {
+            getDataObject().setCcdXBinning(_getBinningByIndex(index));
+        } else if (ddlbw == _w.yBinComboBox) {
+            getDataObject().setCcdYBinning(_getBinningByIndex(index));
+            // Also check that the dta x offset and binning are agreeable
+            _checkNSValues();
+            _checkDTAXAndBinning();
+        } else if (ddlbw == _w.orderComboBox) {
+            getDataObject().setDisperserOrder(_getOrderByIndex(index));
+        } else if (ddlbw == _w.customSlitWidthComboBox) {
+            getDataObject().setCustomSlitWidth(CustomSlitWidth.getByIndex(index));
+        }
+    }
+
+
+    /**
+     * A key was pressed in the given TextBoxWidget.
+     */
+    public void textBoxKeyPress(TextBoxWidget tbwe) {
+        super.textBoxKeyPress(tbwe);
+
+        if (tbwe == _w.exposureTime) {
+            // parent class sets the exposure time, we just need to
+            // update the total integration time
+            _w.totalTime.setText(Double.toString(getDataObject().getTotalIntegrationTime()));
+        } else if (tbwe == _w.centralWavelength) {
+            final double lambda_cent;
+            try {
+                lambda_cent = Double.parseDouble(tbwe.getValue());
+            } catch (NumberFormatException e) {
+                return;
+            }
+            if (_checkWavelength(lambda_cent)) {
+                getDataObject().setDisperserLambda(lambda_cent);
+            }
+        } else if (tbwe == _w.focalPlaneMask) {
+            getDataObject().setFPUnitCustomMask(_w.focalPlaneMask.getText());
+        } else if (tbwe == _w.xOffset) {
+            final double nVal = _w.xOffset.getDoubleValue(0.0);
+            if (_curPos == null)
+                return;
+            _curPos.deleteWatcher(this);
+            _curPos.setXY(nVal, _curPos.getYaxis(), getContextIssPort());
+            _curPos.addWatcher(this);
+            _checkNSValues();
+        } else if (tbwe == _w.yOffset) {
+            final double nVal = _w.yOffset.getDoubleValue(0.0);
+            if (_curPos == null)
+                return;
+            _curPos.deleteWatcher(this);
+            _curPos.setXY(_curPos.getXaxis(), nVal, getContextIssPort());
+            _curPos.addWatcher(this);
+            _checkNSValues();
+        } else if (tbwe == _w.shuffleOffset) {
+            final double value;
+            try {
+                value = Double.parseDouble(tbwe.getValue());
+            } catch (NumberFormatException e) {
+                return;
+            }
+            getDataObject().setShuffleOffset(value);
+            // the detector rows value was calculated from the shuffle offset value
+            _w.detectorRows.setValue(Integer.toString(getDataObject().getNsDetectorRows()));
+            _checkNSValues();
+        } else if (tbwe == _w.detectorRows) {
+            final int value;
+            try {
+                value = Integer.parseInt(tbwe.getValue());
+            } catch (NumberFormatException e) {
+                return;
+            }
+            getDataObject().setNsDetectorRows(value);
+            // The shuffle offset value was calculated from the detector rows value
+            _w.shuffleOffset.setValue(getDataObject().getShuffleOffsetAsString());
+            _checkNSValues();
+        } else if (tbwe == _w.numNSCycles) {
+            final int value;
+            try {
+                value = Integer.parseInt(tbwe.getValue());
+            } catch (NumberFormatException e) {
+                return;
+            }
+            getDataObject().setNsNumCycles(value);
+            // The total integration time  value was calculated from the Nod & Shuffle cycles value
+            _w.totalTime.setText(Double.toString(getDataObject().getTotalIntegrationTime()));
+        } else if (tbwe == _w.xMin || tbwe == _w.yMin || tbwe == _w.xRange || tbwe == _w.yRange) {
+            final int sel = _customROITable.getSelectedRow();
+            if (sel >= 0 && sel < _customROITable.getRowCount()) {
+                //only update if valid
+                _customROITable.deleteWatcher(this);
+                try {
+                    Integer.parseInt(_w.xMin.getValue());
+                    Integer.parseInt(_w.yMin.getValue());
+                    Integer.parseInt(_w.xRange.getValue());
+                    Integer.parseInt(_w.yRange.getValue());
+                    _customROITable.updateSelectedROI(_w.xMin.getIntegerValue(0),
+                            _w.yMin.getIntegerValue(0),
+                            _w.xRange.getIntegerValue(0) * getDataObject().getCcdXBinning().getValue(),
+                            _w.yRange.getIntegerValue(0) * getDataObject().getCcdYBinning().getValue());
+                    getDataObject().setCustomROIs(_customROITable.getCustomROIs());
+                    _clearWarning(_w.warningCustomROI);
+                } catch (NumberFormatException e) {
+                    _setWarning(_w.warningCustomROI, "Cannot parse number, " + e.getMessage());
+                } catch (IllegalArgumentException e) {
+                    _setWarning(_w.warningCustomROI, e.getMessage());
+                }
+                _customROITable.selectRowAt(sel);
+                _customROITable.addWatcher(this);
+            }
+        }
+    }
+
+    /**
+     * A return key was pressed in the given TextBoxWidget.
+     */
+    public void textBoxAction(TextBoxWidget tbwe) {
+    }
+
+
+    // -- Implement the TelescopePosWatcher interface --
+
+    /**
+     * The current position location has changed.
+     *
+     * @see edu.gemini.spModel.target.TelescopePosWatcher
+     * @param tp
+     */
+    public void telescopePosLocationUpdate(WatchablePos tp) {
+        telescopePosGenericUpdate(tp);
+    }
+
+
+    /**
+     * The current position has been changed in some way.
+     *
+     * @see TelescopePosWatcher
+     * @param tp
+     */
+    public void telescopePosGenericUpdate(WatchablePos tp) {
+        if (tp != _curPos) {
+            // This shouldn't happen ...
+            System.out.println(getClass().getName() + ": received a position " +
+                    " update for a position other than the current one: " + tp);
+            return;
+        }
+        showPos(_curPos);
+//        _progData.setInstChanged(true);
+    }
+
+    private final OffsetPosListWatcher<OffsetPos> offsetListWatcher = new OffsetPosListWatcher<OffsetPos>() {
+        /**
+         * The position list has been reset, or changed so much that the client should
+         * start from scratch.
+         */
+        public void posListReset(OffsetPosList<OffsetPos> tpl) {
+            // nod offset position list reset
+//            _progData.setInstChanged(true);
+            // only allow 2 nod offset positions for now
+            _w.newButton.setEnabled(tpl.size() < 2);
+            _checkNSValues();
+        }
+
+        /**
+         * A position has been added to the position list.
+         */
+        public void posListAddedPosition(OffsetPosList<OffsetPos> tpl, List<OffsetPos> newPosList) {
+            // only allow 2 nod offset positions for now
+            final int n = tpl.size();
+            _w.newButton.setEnabled(n < 2);
+
+            // if a third position is added in the TPE, delete it and use the x,y for the second position
+            if (n == 3) {
+                final OffsetPos opNew = tpl.getPositionAt(2);
+                final OffsetPos opOld = tpl.getPositionAt(1);
+                tpl.removePosition(opNew);
+                opOld.setXY(opNew.getXaxis(), opNew.getYaxis(), getContextIssPort());
+
+                // TPE REFACTOR -- this won't work unless we commit first
+                final TelescopePosEditor tpe = TpeManager.get();
+                if (tpe != null) tpe.reset(getNode());
+            }
+        }
+
+        public void posListRemovedPosition(OffsetPosList<OffsetPos> tpl, List<OffsetPos> rmPosList) {
+            // removed an instrument nod offset position
+//            _progData.setInstChanged(true);
+            // only allow 2 nod offset positions for now
+            _w.newButton.setEnabled(tpl.size() < 2);
+            _checkNSValues();
+        }
+
+        public void posListPropertyUpdated(OffsetPosList<OffsetPos> tpl, String propertyName, Object oldValue, Object newValue) {
+            // ignore, irrelevant
+        }
+
+    };
+
+    private final PropertyChangeListener targetListWatcher = new PropertyChangeListener() {
+        public void propertyChange(PropertyChangeEvent evt) {
+            _checkNSValues();
+        }
+    };
+
+
+    protected void _setWarning(JLabel label, String s) {
+        if (label == null) return;
+        label.setText("Warning: " + s);
+        label.setVisible(true);
+    }
+
+    protected void _clearWarning(JLabel label) {
+        if (label == null) return;
+        label.setVisible(false);
+        label.setText(" ");
+    }
+
+    /**
+     * Return true if the given value is valid for the central wavelength
+     * and display an error or warning message if needed.
+     */
+    protected boolean _checkWavelength(double lambda_cent) {
+        _clearWarning(_w.warning1);
+        if (lambda_cent < MIN_LAMBDA_CENT || lambda_cent > MAX_LAMBDA_CENT) {
+            _setWarning(_w.warning1, "Central wavelength outside useful range for GMOS ("
+                    + MIN_LAMBDA_CENT + ", " + MAX_LAMBDA_CENT + ")");
+            return false;
+        }
+
+        final Disperser disperser = (GmosCommonType.Disperser) getDataObject().getDisperser();
+        if (disperser == DisperserNorth.B1200_G5301 && lambda_cent > 595.) {
+            _setWarning(_w.warning1, "Central wavelength too large (max 595), GMOS camera overfilled");
+            return true;
+        }
+        if (disperser == DisperserNorth.R831_G5302 && lambda_cent > 860.) {
+            _setWarning(_w.warning1, "Central wavelength too large (max 860), GMOS camera overfilled");
+            return true;
+        }
+
+        final Filter filter = (GmosCommonType.Filter) getDataObject().getFilter();
+        double lambda1_filter = 0., lambda2_filter = 0.;
+        boolean found = false;
+        for (GMOSInfo aFILTER_INFO : FILTER_INFO) {
+            if (filter == aFILTER_INFO.type) {
+                lambda1_filter = aFILTER_INFO.lambda1;
+                lambda2_filter = aFILTER_INFO.lambda2;
+                found = true;
+            }
+        }
+
+        if (found) {
+            for (GMOSInfo aGRATING_INFO : GRATING_INFO) {
+                if (disperser == aGRATING_INFO.type) {
+                    final double lambda1_grating = aGRATING_INFO.lambda1;
+                    final double lambda2_grating = aGRATING_INFO.lambda2;
+                    final double minVal = Math.max(lambda1_filter, lambda1_grating);
+                    final double maxVal = Math.min(lambda2_filter, lambda2_grating);
+                    if (lambda_cent < minVal || lambda_cent > maxVal) {
+                        _setWarning(_w.warning1, "Central wavelength outside wavelength range ("
+                                + minVal + ", " + maxVal + ")");
+                    }
+                    break;
+                }
+            }
+        }
+
+        return true;
+    }
+
+
+    /**
+     * Check the selected disperser value and display a warning if needed.
+     */
+    protected void _checkDisperserValue() {
+        _clearWarning(_w.warning1);
+        final Disperser disperser = (Disperser) getDataObject().getDisperser();
+        final Filter filter = (Filter) getDataObject().getFilter();
+
+        if (filter == FilterNorth.g_G0301
+                && (disperser == DisperserNorth.R831_G5302
+                || disperser == DisperserNorth.R600_G5304
+                || disperser == DisperserNorth.R400_G5305)) {
+            _setWarning(_w.warning1, "Grating-filter combination gives very small wavelength coverage");
+            return;
+        }
+
+        _checkWavelength(getDataObject().getDisperserLambda());
+    }
+
+
+    // Create and return a new file chooser for selecting a mask file
+    private static JFileChooser _makeFileChooser() {
+        final JFileChooser _fileChooser = new JFileChooser(new File("."));
+
+        final ExampleFileFilter fitsFilter = new ExampleFileFilter(new String[]{
+                "fits", "fits.gz", "fits.Z"}, "FITS Files");
+        _fileChooser.addChoosableFileFilter(fitsFilter);
+
+        _fileChooser.setFileFilter(fitsFilter);
+
+        return _fileChooser;
+    }
+
+    // Get the name of an MDF file from the user. This is a FITS file containing a FITS table.
+    // Plot the table as a catalog using a predefined catalog header.
+    private void _plotFocalPlaneMask() {
+        if (_fileChooser == null) {
+            _fileChooser = _makeFileChooser();
+        }
+        final int option = _fileChooser.showOpenDialog(null);
+        if (option == JFileChooser.APPROVE_OPTION && _fileChooser.getSelectedFile() != null) {
+            _plotFocalPlaneMask(_fileChooser.getSelectedFile().getAbsolutePath());
+        }
+    }
+
+    // Load a FITS object table file, display the table, and plot the
+    // objects on the image
+    private void _plotFocalPlaneMask(String filename) {
+        final SkycatCatalog catalog;
+        try {
+            catalog = ObjectTable.makeCatalog(filename);
+        } catch (Exception e) {
+            DialogUtil.error(_w, e);
+            return;
+        }
+        if (catalog != null) {
+
+            // TPE REFACTOR -- what is this?
+            TelescopePosEditor tpe = TpeManager.get();
+            if (tpe == null) {
+                tpe = TpeManager.open();
+                tpe.reset(getNode());
+            }
+            tpe.getImageWidget().openCatalogWindow();
+            tpe.getImageWidget().openCatalogWindow(catalog);
+
+            // This makes sure the ObjectTableDisplay component is reused for query results
+            ((ObjectTable) catalog.getTable()).makeComponent(NavigatorManager.get());
+        }
+    }
+}
+

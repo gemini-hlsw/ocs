@@ -1,0 +1,85 @@
+<!--
+  This DTD describes the content of a file that will describe a sequence from
+  the Gemini Observing Tool.  
+
+  $Id: Seq.dtd 4336 2004-01-20 07:57:42Z gillies $
+
+  This file can contain a number of steps and
+  each step can contain multiple system configurations.
+-->
+
+<!-- The SEQ_DTD_VERSION is updated whenever the structure or content
+     of the DTD is altered.
+-->
+<!ENTITY SEQ_DTD_VERSION "0.1">
+
+<!-- The sequence is the top level element containing all the
+     information for an observation's OT sequence.
+     A sequence is any number of steps or param elements in any
+     order.
+
+     The sequence is required to have a version attribute set to
+     the value of the DTD used in the document.
+-->
+<!ELEMENT sequence (step|param)*>
+<!ATTLIST sequence
+          version   CDATA #FIXED "&SEQ_DTD_VERSION;"
+>
+
+<!-- The step consists of one configuration step in the entire
+     sequence.  Typically, a step will contain an instrument
+     OBSERVE that generates some data in an instrument.
+
+     A step consists of any number of system or param elements
+     in any order.
+
+     A step can have an optional name.
+-->
+<!ELEMENT step (system|param)*>
+<!ATTLIST step
+          name   CDATA #IMPLIED
+>
+
+
+<!-- A system element consists of the configuration for a step
+     for a single system.  The set of systems is determined by the
+     observatory.
+
+     A system element has a required name attribute.  
+
+     A system element consists of paramset elements or param
+     elements in any order.
+-->
+<!ELEMENT system (paramset|param)*>
+<!ATTLIST system
+          name   CDATA #REQUIRED
+>
+
+<!-- A paramset is a configuration part that groups 
+     param elements that belong together as a unit.
+
+     A paramset is just some number of param elements.
+-->
+<!ELEMENT paramset (param*)>
+<!ATTLIST paramset
+          name   CDATA #REQUIRED
+>
+
+<!-- A param element is a single thing with a name and values.
+
+     The param must value a name.  Some param elements have no
+     values.  A param can be accompanied by a units attribute.   
+     
+-->
+<!ELEMENT param EMPTY>
+<!ATTLIST param
+          name   CDATA #REQUIRED
+          value  CDATA #IMPLIED
+          units  CDATA #IMPLIED
+>
+
+<!-- A value is simply PCDATA -->
+<!--
+<!ELEMENT value (#PCDATA)>
+-->
+

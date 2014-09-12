@@ -1,0 +1,823 @@
+<!--  *****     *****     *****     ******     *****     *****     *****
+
+   Document Type Declaration for Phase 1 Proposal Information.
+   This DTD describes the set of proposals accepted by the Gemini
+   Multi-Observatory Phase 1 Tool.
+
+   An instance of this DTD is required as part of submitting a proposal to
+   the Gemini 8-m Telescopes Project.  The Gemini proposal DTD is more
+   restrictive than this DTD.  It is described in Gemini.dtd.
+
+   Authors:  Kim Gillies       (Gemini Observatory)
+             Shane Walker      (Gemini Observatory)
+             Arturo Nunez      (Gemini Observatory)
+             Lorraine Callahan (Gemini 8-m Telescopes Project)
+             Darrell Denlinger (Gemini 8-m Telescopes Project)
+
+   $Id: AstronomyPhase1.dtd 909 2004-10-27 19:08:06Z brighton $
+
+   For a description of changes between versions see the "CHANGES" document.
+
+   The goals of this DTD are the following:
+   1.  To provide a common specification of proposals that will satisfy the
+       needs of many observatories.
+   2.  To provide a description that can specify a multi-observatory
+       proposal in a single document.  This should allow a proposal to be
+       written once and sent to more than one observatory while still
+       allowing observatory-specific differences.
+
+   Rather than specify a single format that observatories must
+   adopt, the DTD describes a flexible document with many features.
+   Observatories, can use the parts in the common part of the document and
+   then add their own extensions.
+
+   VC: The VC comments are validity constraints.  These are things that
+       must be true, but that must be constrained by the tool writing the
+       proposal, not the DTD.  Generally, these are comments about what
+       the context should look like when it isn't reasonable to specify
+       it in the DTD.  Future schemas should allow many of these
+       restrictions to be handled in the parser.
+-->
+
+<!-- The PHASE1_DTD_VERSION is updated whenever the structure or content
+     of the DTD is altered.
+-->
+<!ENTITY PHASE1_DTD_VERSION "1.2">
+
+<!--========================================================================-->
+<!-- Some basic elements and entities used in multiple places. -->
+
+<!--Most time units should be specified as one of the values in
+    entity timeUnits
+-->
+<!ENTITY % timeUnits 'units (nights|hours|minutes|seconds) "nights"'>
+<!ENTITY % xtimeUnits '(nights|hours|minutes|seconds) "nights"'>
+
+<!--Each date is a year month and day element-->
+<!--VC: Applications must ensure that the date content is in the
+        correct format
+ -->
+<!ENTITY % dateFormat "(year, month, day)">
+<!--VC: All dates should be in the format YYYY-MM-DD. -->
+<!ELEMENT date %dateFormat;>
+<!ELEMENT dateRange (startDate, endDate)>
+<!ELEMENT startDate %dateFormat;>
+<!ELEMENT endDate %dateFormat;>
+<!ELEMENT year (#PCDATA)>
+<!ELEMENT month (#PCDATA)>
+<!ELEMENT day (#PCDATA)>
+
+<!--Comments are associated with several other elements. -->
+<!ELEMENT comment (#PCDATA)>
+
+<!--Attachments are optional.  An attachment can be the name of a
+    file.  The types of attachments are restricted.
+    Attributes:
+    name: is the name of the attachment in the text (e.g. Figure 1)
+    src:  is the file name or URL of the attachment (e.g. figure.eps)
+    type: is the type of the attachment (e.g. EPS )
+-->
+<!ELEMENT attachment EMPTY>
+<!ATTLIST attachment
+          name CDATA #REQUIRED
+          src  CDATA #REQUIRED
+          type (rtf|eps|ps|gif|txt|jpg|tex|pdf) #REQUIRED
+>
+
+<!--Some items can have attachements or text entered in a program -->
+<!ELEMENT embeddedText (#PCDATA)>
+
+<!--Elements like science justification are text and/or attachements. -->
+<!ENTITY % textOrAttachments "(embeddedText?, attachment*)">
+
+<!--========================================================================-->
+<!--  *****     *****     *****     ******     *****     *****     *****
+    PHASE1DOCUMENT ELEMENT
+    A phase1Document element is the root of every phase1 document.  The
+    document consists of a common part, where all the information that is
+    common to all the proposals is kept, and zero or more observatories.
+    Each observatory goes with one destination for the proposal.
+    Attributes:
+    created:      the date when the document was created (YYYY-MM-DD)
+    lastModified: the date when the document was last modified (YYYY-MM-DD)
+    proposalKey:  an optional key, typically a string, that uniquely identifies this proposal.
+                  The value of this key should be appropriate as a primary key in a database.
+    version:      the version of the DTD used to construct this document
+                  The DTD version is not the CVS version.  The number to the
+                  left of the decimal will be changed if the DTD changes
+                  such that older documents are not compatible.
+-->
+<!ELEMENT phase1Document (common, observatory*)>
+<!ATTLIST phase1Document
+          dtdVersion   CDATA #IMPLIED
+          created      CDATA #IMPLIED
+          proposalKey  CDATA "not present"
+          lastModified CDATA #IMPLIED
+>
+
+<!-- Future Use
+          xmlns    CDATA #FIXED "http://www.gemini.edu/NET/p1/v1"
+          xmlns:P1 CDATA #FIXED "http://www.gemini.edu/NET/p1/v1"
+-->
+
+<!--========================================================================-->
+<!--  *****     *****     *****     ******     *****     *****     *****
+    COMMON ELEMENT
+    The common element consists of the parts of the proposal that are
+    the same for all the proposals within the document.
+-->
+<!ELEMENT common
+          (title,
+           abstract,
+           scienceJustification,
+           keywords?,
+           investigators,
+           targetCatalog)>
+
+<!--Title and abstract are text -->
+<!ELEMENT title (#PCDATA)>
+<!ELEMENT abstract (#PCDATA)>
+
+<!--The scienceJustification is common to all observatories.  It can be
+    embedded text and zero or more attachements. The scienceJustification
+    describes the proposal's scientific case. -->
+<!ELEMENT scienceJustification %textOrAttachments;>
+
+<!--The keywords are defined here.  It is assumed that the set of keywords
+    for each category is available to the Phase 1 viewer from the
+    AstronomyPhase1 data file.  One category is required for the keywords.
+-->
+<!ELEMENT keywords (keyword+)>
+<!ATTLIST keywords
+          category (none|solarSystem|galactic|extraGalactic) "none"
+>
+
+<!--VC: keyword value should a keyword for the category. -->
+<!ELEMENT keyword (#PCDATA)>
+
+<!--========================================================================-->
+<!--  *****     *****     *****     ******     *****     *****     *****
+    INVESTIGATORS ELEMENT
+    The investigators element contains contact information for the PI and
+    CoIs.  The PI must have complete contact information including his
+    associated site information.  CoIs only need a name, and contact
+    information.
+-->
+<!ELEMENT investigators (pi, coi*)>
+
+<!-- The pi and coi are defined here.
+     The pi must have complete contact information including his
+     associated site information.  CoIs only need a name, institution,
+     and contact information.
+-->
+
+<!-- The principal investigator has full contact and site information -->
+<!ELEMENT pi (name, contact, site)>
+<!ATTLIST pi
+   status (phd | gradThesis | gradNoThesis | other ) "phd"
+   visiting ( true | false ) "false"
+   principalContact ( true | false ) "true"
+>
+
+<!-- The co-investigator just has contact information -->
+<!ELEMENT coi (name, contact, institution)>
+<!ATTLIST coi
+   visiting ( true | false ) "false"
+   principalContact ( true | false ) "false"
+>
+
+<!-- The investigator's name. -->
+<!ELEMENT name (first,last)>
+<!ELEMENT first (#PCDATA)>
+<!ELEMENT last (#PCDATA)>
+
+<!-- Contact is an email, phone, and fax information.  This can
+     be any number of phones, emails, or faxes.
+ -->
+<!ELEMENT contact (email | phone | fax)*>
+
+<!-- Other investigator contact information.
+     The fax number is optional.  The investigator may have one or
+     more email addresses.
+-->
+<!ELEMENT email (#PCDATA)>
+<!ELEMENT phone (#PCDATA)>
+<!ELEMENT fax (#PCDATA)>
+
+<!-- A site contains all the address information for an institution.
+     A database of site information is available in the common data file.
+     The contact information for the site should be someone at the
+     institution who fields general requests for information.  -->
+<!ELEMENT site (institution, address+, country, contact)>
+
+<!-- The investigator's institution and address. An address can
+     span multiple lines. At the moment the address is not broken
+     up into more detail than this although it may be needed in the future.
+-->
+<!ELEMENT institution (#PCDATA)>
+<!ELEMENT address (#PCDATA)>
+<!ELEMENT country (#PCDATA)>
+
+<!--========================================================================-->
+<!--  *****     *****     *****     ******     *****     *****     *****
+   TARGETCATALOG ELEMENT
+   targetCatalog is a list of targets or objects.  The various observatory
+   sections reference some or all of the targets.  The target element
+   description is in the target.mod module.
+-->
+<!-- The targetCatalog consists of 1 or more targets. -->
+<!ELEMENT targetCatalog (target*)>
+
+<!--========================================================================-->
+<!--  *****     *****     *****     ******     *****     *****     *****
+    OBSERVATORY ELEMENT
+    An observatory element contains information related to observing
+    some of the targets at a specific observatory.  Observatory-specific
+    information is present only within the observatory element.  There is
+    one observatory element for each observatory receiving the proposal.
+    The common element is followed by one observatory element for each
+    observatory receiving the proposal.
+
+    The observatory element consists of the site contact information
+    (from the investigator module) and the list of observations.
+    These entities are following by optional observingMode, requirements,
+    proposalSupport, scheduling, technicalJustification, resourceList, and
+    any observatory extensions and constraints.
+
+    The proposalSupport, scheduling, requirements, and technicalJustification
+    components can be optionally added here to add information specific to a
+    single observatory.   Some observatories may not use these features.
+-->
+<!ELEMENT observatory (site,
+                       obsList,
+                       observingMode?,
+                       requirements?,
+                       proposalSupport?,
+                       scheduling?,
+                       technicalJustification?,
+                       resourceList?,
+                       extension*,
+                       constraint*)
+>
+<!--The observatoryId is present to allow authoring tools to easily
+    determine which observatories are present in the proposal.
+-->
+<!--VC: observatoryId should be an ENTITY defined by an observatory DTD. -->
+<!ATTLIST observatory
+          observatoryId CDATA #REQUIRED
+>
+
+<!--The obsList element is the observatory-specific list of observations.
+    Tied to the observation list are: an optional totalTime, an optional
+    requestedTime, a list of constraints, and a list of resources.  Either
+    the entire obsList can be tied to constraints or resources or they can
+    be tied to individual observations.  An example constraint is a site
+    quality requirement.  At the obsList level this constraint applies to
+    all the observations. -->
+<!ELEMENT obsList (totalTime?,
+                   requestedTime?,
+                   constraintRef*,
+                   resourceRef*,
+                   observation*)>
+
+<!--The totalTime element is the sum of the expTotalTime values over
+    all observations.  This value can be computed, but is included
+    since many backend systems or databases find it useful
+    Typically, readers will ignore this value on input.
+ -->
+<!ELEMENT totalTime (#PCDATA)>
+<!ATTLIST totalTime
+          %timeUnits;
+>
+
+<!--The principal investigator may wish to request a time for the obsList,
+    obsList, taking into consideration factors not reflected in the totalTime.
+ -->
+<!--Some observatories may wish to have their proposers specify an
+    estimate for the total time the obsList should require rather than
+    specify times for each observation.  This could be used in classical
+    proposals. Note: This was called totalTime in versions 1.15 and earlier.
+ -->
+<!ELEMENT requestedTime (#PCDATA)>
+<!ATTLIST requestedTime
+          %timeUnits;
+>
+
+<!--A constraintRef is used to refer to a constraint, which is an
+    observatory-specific element that is tied to an observation.
+    Constraints are defined later in the observatory element.
+ -->
+<!ELEMENT constraintRef EMPTY>
+<!ATTLIST constraintRef
+          constraintId IDREF #REQUIRED
+>
+
+<!-- The resourceRef is used in the obsList to tie an observation to one
+     or more resources. Resources are defined in the resources.mod
+     module.
+-->
+<!ELEMENT resourceRef EMPTY>
+<!ATTLIST resourceRef resourceId IDREF #REQUIRED>
+
+<!--An observation element associates items that are used for one
+    proposed observation.  Each observatory section of the proposal has
+    one obsList, which contains zero or more observations.
+    An observation can be tied to zero or more constraints and targets.
+    Optionally, resources may be tied to specific observation.
+    Observatories may wish to specify an exposure time and a total
+    time (exposure + overhead) with each observation.
+-->
+<!ELEMENT observation (constraintRef*,
+                       resourceRef*,
+                       targetRef*,
+                       expTime?,
+                       expTotalTime?)>
+
+<!--A targetRef is used to refer to a target in the targetCatalog in common -->
+<!ELEMENT targetRef EMPTY>
+<!ATTLIST targetRef
+          targetId IDREF #REQUIRED
+>
+
+<!--expTime is an optional item in the observation.  It is the observer's
+    estimate of the time the observation requires. This could come from
+    other online tools such as an integration time calculator.
+-->
+<!ELEMENT expTime (#PCDATA)>
+<!ATTLIST expTime
+          %timeUnits;
+>
+
+<!--expTotalTime is an optional item in the observation.  It is the
+    observer's estimate of the time the observation requires plus any
+    observatory overheads. This is usually calculated by the tool used
+    to generate the proposal.
+-->
+<!ELEMENT expTotalTime (#PCDATA)>
+<!ATTLIST expTotalTime
+          %timeUnits;
+>
+
+<!--========================================================================-->
+<!--  *****     *****     *****     ******     *****     *****     *****
+   Start of optional observatory elements.
+-->
+
+<!--========================================================================-->
+<!--  *****     *****     *****     ******     *****     *****     *****
+    OBSERVING MODE ELEMENT
+    Observing Mode can be set to queue or classical.
+-->
+<!ELEMENT observingMode EMPTY>
+<!ATTLIST observingMode
+          mode (queue|classical) "queue"
+>
+
+<!--========================================================================-->
+<!--  *****     *****     *****     ******     *****     *****     *****
+    REQUIREMENTS ELEMENT
+    Requirements contains items the observer needs from the observatory.
+-->
+<!ELEMENT requirements (staffSupport?, travelNeeds?)>
+
+<!--staffSupport is used to indicate that a classical observer needs
+    staff assistance on site.
+-->
+<!ELEMENT staffSupport (#PCDATA)>
+<!ATTLIST staffSupport
+          need (none|firstNight|everyNight) "none"
+>
+
+<!--travelNeeds is an observer-specific travel needs or information -->
+<!ELEMENT travelNeeds (#PCDATA)>
+
+<!--========================================================================-->
+<!--  *****     *****     *****     ******     *****     *****     *****
+   PROPOSAL SUPPORT ELEMENT
+   proposalSupport is items relating to publications and allocations
+   that promote or support the current proposal.
+-->
+<!ELEMENT proposalSupport (publication*, allocation*)>
+<!ELEMENT publication (#PCDATA)>
+<!ELEMENT allocation (allocationReference,
+                      awardedTime,
+                      percentUsefulTime,
+                      comment)>
+<!ELEMENT allocationReference (#PCDATA)>
+<!ELEMENT awardedTime (#PCDATA)>
+<!ATTLIST awardedTime
+          %timeUnits;
+>
+<!ELEMENT percentUsefulTime (#PCDATA)>
+
+<!--========================================================================-->
+<!--  *****     *****     *****     ******     *****     *****     *****
+   SCHEDULING ELEMENT
+   Proposal time allocation information occurs in the scheduling element.
+   This element contains a number of optional items related to
+   scheduling the proposal.
+-->
+<!ELEMENT scheduling
+          (minimumUsefulAllocation?,
+           futureTimeRequirements?,
+           optimalDates?,
+           impossibleDates?,
+           syncObservingDates?)
+>
+
+<!--minimumUsefulAllocation can be used to specify the minimum amount of
+    useful time for the proposal.  This is usually found in classical
+    proposals.
+-->
+<!ELEMENT minimumUsefulAllocation (#PCDATA)>
+<!ATTLIST minimumUsefulAllocation
+          %timeUnits;
+>
+
+<!--futureTimeRequirements indicates that the proposal spans multiple
+    scheduling periods.  The amount of time needed is specified along
+    with the value's units.
+-->
+<!ELEMENT futureTimeRequirements (#PCDATA)>
+<!ATTLIST futureTimeRequirements
+          %timeUnits;
+>
+
+<!--optimalDates indicate when the observer would prefer the proposal to
+    be scheduled. Everything other than impossibleDates are still okay.
+-->
+<!ELEMENT optimalDates
+     (dateRange*, comment?)>
+
+<!--impossibleDates are dates that can not be used for the proposal.
+    A comment can be included to give a reason for the impossible dates.
+ -->
+<!ELEMENT impossibleDates
+     (dateRange*, comment?)>
+
+<!--This item indicates dates or date ranges when observations must be
+    synchronous with observations at other observatories.  The comment
+    explains the synchronous needs.
+-->
+<!ELEMENT syncObservingDates
+     (dateRange*, comment?)>
+
+<!--========================================================================-->
+<!--Technical justification is an optional entry for an observatory.  The
+    technical justification depends on the equipment at a specific observatory
+    and describes how the observatory equipment will satisfy the science goals
+    in the scienceJustification.
+    In includes embedded text and zero or more attachements. -->
+<!ELEMENT technicalJustification %textOrAttachments;>
+
+<!--========================================================================-->
+<!--resourceList contains a a list of resources used to satisfy the
+    science goals.  The list contains observatory equipment.  The
+    available equipment list usually comes from an observatory data file.
+    Resources are defined in the resources.dtd module.
+-->
+
+<!ELEMENT resourceList (resourceCategory)*>
+
+<!ELEMENT resourceCategory (resourceType, resource*)>
+<!ELEMENT resourceType (#PCDATA)>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+   Each observatory provides a definition of their available resources
+   in an observatory data file (defined in this DTD).  An authoring tool
+   selects some of those resources and includes them in the observatory
+   element as a resourceList.  A resource has a category (e.g. instrument
+   or facility).  It can also have components (e.g. camera, filter) and
+   the components have values (e.g. GG485 filter).
+-->
+<!ELEMENT resource (resourceName, resourceNickname?, resourceComp*)>
+<!-- Resources must have an ID that is used to tie resources to
+     observations. -->
+<!-- VC: resource ID's must be unique within the program.  Authoring
+         tools must generate unique observatory-specific ID's
+         (e.g. gemResource1). -->
+<!ATTLIST resource
+          id ID #REQUIRED
+>
+
+<!ELEMENT resourceName (#PCDATA)>
+<!ELEMENT resourceNickname (#PCDATA)>
+<!ELEMENT resourceComp (resourceCompType, (resourceComp* | resourceCompName*))>
+
+<!-- The component type is something like "Camera" or "Filter". -->
+<!ELEMENT resourceCompType (#PCDATA)>
+<!-- The resourceCompName is something like "blue" or "GG485". -->
+<!ELEMENT resourceCompName (#PCDATA)>
+
+<!--========================================================================-->
+<!--  *****     *****     *****     ******     *****     *****     *****
+     The extension element wraps elements that are specific to one
+     observatory.  The AstronomyPhase1 allows anything as long as it's
+     wrapped in an extension.  Extensions contain new observatory-specific
+     information that does not depend upon and is not tied to information
+     in other elements (i.e. no IDs).  Extensions are removed from the
+     default namespace.
+-->
+<!ELEMENT extension ANY>
+<!ATTLIST extension
+          type  CDATA #REQUIRED
+>
+
+
+<!--========================================================================-->
+<!--  *****     *****     *****     ******     *****     *****     *****
+     The constraint element wraps elements that are specific to one
+     observatory.  The AstronomyPhase1 DTD allows anything as long as it's
+     wrapped in a constraint.  Constraints contain new observatory-specific
+     information that is tied to either observation elements or the obsList
+     through ID references.  This allows, for example, resources to be
+     tied to individual observations if needed. Constraints are removed
+     from the default namespace.  The name is text that gives the user
+     a hint about how the constraint is used.
+-->
+<!ELEMENT constraint ANY>
+<!ATTLIST constraint
+          id    ID    #REQUIRED
+          type  CDATA #REQUIRED
+          name  CDATA  "no name"
+>
+
+<!--========================================================================-->
+<!--  *****     *****     *****     ******     *****     *****     *****
+    PHASE1 DOCUMENT DATA ELEMENT
+    Document element for creating common data for Phase 1 authoring programs.
+    This element should be the the root element of the data file.  The
+    data file contains the list of keywords and a catalog of site data.
+    The data file included in the distribution is called
+    AstronomyPhase1Data.xml.
+-->
+<!ELEMENT astronomyPhase1Data (keywords+, site*)>
+<!ATTLIST astronomyPhase1Data
+          lastModified CDATA #IMPLIED
+          version      CDATA #FIXED "1.1"
+>
+
+<!--========================================================================-->
+<!--This element must be included in each observatory's data file so that
+    a tool can learn about proposal submission details.-->
+<!ELEMENT submissionDetails
+          (semesterTitle,
+           semesterLimits,
+           dueDate,
+           urlData+)
+>
+
+<!--semesterTitle is a text name for the submission period.  Something like
+    "Fall Observing Period".-->
+<!ELEMENT semesterTitle (#PCDATA)>
+<!--semesterLimits indicates the first and last date of the submission
+    period.-->
+<!ELEMENT semesterLimits (dateRange)>
+<!--dueDate is the date when all proposals must be submitted.-->
+<!ELEMENT dueDate (date)>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    Each observatory must have one or more valid urlData entries
+    for submission and fetch of proposals. -->
+<!ELEMENT submissionUrls (urlData)*>
+
+<!--Each urlData should consist of at least one submission URL and
+    one retrieval URL. The hint can be used to place information that can
+    identify a specific urlData element -->
+<!ELEMENT urlData (submitUrl | fetchUrl)*>
+<!ATTLIST urlData
+          hint CDATA #IMPLIED>
+
+<!-- A submitUrl has a type (currently we only support Rfc1867) that is
+     used by the submission process to find the correct code to post.
+-->
+<!ELEMENT submitUrl (#PCDATA)>
+<!ATTLIST submitUrl
+          type CDATA "Rfc1867">
+
+<!-- A fetchUrl has a type (we currently only support Jar) that is used
+     by the submission process to find the correct code to post.
+-->
+<!ELEMENT fetchUrl (#PCDATA)>
+<!ATTLIST fetchUrl
+          type CDATA "Jar">
+
+<!-- This element can be included in an observatory's data file if the
+     observatory uses the expTotalTime, totalTime feature. overheads
+     is used by the authoring tools to calculate exposure time overheads
+     dependent upon the use of a resource (usually an instrument).
+     If no instrument is present, the default value is used.
+     The overhead id should match the resource id of the instrument.  One
+     id should be called "default".  This overhead is used when there is no
+     other match.  The resourceId is not an IDREF so that the two are not
+     too tightly coupled.
+-->
+<!ELEMENT resourceOverheads (overhead*)>
+<!ELEMENT overhead (#PCDATA)>
+<!ATTLIST overhead
+          resourceId CDATA #REQUIRED
+          %timeUnits;
+>
+
+
+<!--========================================================================-->
+<!--This element can be included in an observatory's data file to enable
+    authoring tools to determine which features of the AstronomyPhase1.dtd
+    the proposal uses.
+-->
+<!ELEMENT astronomyPhase1Options EMPTY>
+<!ATTLIST astronomyPhase1Options
+          usesKeywords (true|false) "true"
+          usesObservingMode (true|false) "true"
+          usesProposalSupport (true|false) "true"
+          usesScheduling (true|false) "true"
+          usesTechnicalJustification (true|false) "true"
+          usesResourceList (true|false) "true"
+          usesExtensions (true|false) "true"
+          usesConstraints (true|false) "true"
+>
+
+<!--========================================================================-->
+
+<!--A target has a name and can be one of five types.
+    namedSystem - only has a name.  Information will be found in a catalog.
+    conicSystem - the position will be calculated from the orbital elements.
+    hmsdegSystem - one of the coordinate systems that use hours of time
+                   for the first coordinate and degrees of arc for the second.
+    degdegSystem - one of the coordinate systems that use degrees of
+                   arc for both coordinates.
+    nonSidSystem - a simple way of specifying the approximate position of a
+                   non-sidereal object at a specific time and date.
+
+    Each target has a name and an optional PCDATA element containing
+    brightness information.
+-->
+<!ELEMENT targetName (#PCDATA)>
+<!ELEMENT targetBrightness (#PCDATA)>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    Targets are shared data for all the observatory obslist entities.
+    Targets should have an "ID" that can be referenced in observations.
+-->
+<!-- VC: Target ID values must be unique in the proposal.  Authoring tools
+         should name their target id values as "targetX" where X is a
+         number starting with 1 (e.g. target1, target2) -->
+<!-- VC: A proposal with duplicate target ID values is invalid. -->
+<!ELEMENT target (targetName, targetBrightness?,
+                  (namedSystem |
+                   conicSystem |
+                  hmsdegSystem |
+                  degdegSystem |
+                  nonSidSystem ))>
+<!ATTLIST target
+          id ID #REQUIRED
+          type ( science | guide | wfs | oiwfs ) "science"
+>
+
+<!-- A namedSystem is an object with a name that can be
+     looked up in a catalog. It has a type of major or minor -->
+<!ELEMENT namedSystem EMPTY>
+<!ATTLIST namedSystem type ( major |
+                             minor |
+                             planetarySatellite ) "major"
+>
+
+<!-- A conicSystem is represented by its orbital elements.  Its
+     type can be minor planet, comet, or planetary satellite.
+     All values are text.  Correctness is up to programs, not the DTD.
+     The elements can be specified in three variants since major planets,
+     minor planets, and comets respectively tend to use different options
+     (communication of Patrick Wallace).
+         element set     1              2              3
+
+         epoch           t0             t0             T
+         orbinc          i              i              i
+         anode           Omega          Omega          Omega
+         perih           curly pi       omega          omega
+         aorq            a              a              q
+         e               e              e              e
+         aorl            L              M              -
+         dm              n              -              -
+
+     where:
+
+         t0           is the epoch of the elements (MJD, TT)
+         T              "    epoch of perihelion (MJD, TT)
+         i              "    inclination (radians)
+         Omega          "    longitude of the ascending node (degrees)
+         curly pi       "    longitude of perihelion (degrees)
+         omega          "    argument of perihelion (degrees)
+         a              "    mean distance (AU)
+         q              "    perihelion distance (AU)
+         e              "    eccentricity
+         L              "    longitude (degrees)
+         M              "    mean anomaly (degrees)
+         n              "    daily motion (degrees)
+-->
+<!ELEMENT conicSystem (epoch,
+                       inclination,
+                       anode,
+                       perihelion,
+                       aorq,
+                       e,
+                       LorM?,
+                       n?)>
+<!ATTLIST conicSystem type ( major |
+                             minor |
+                             comet ) "comet"
+>
+
+<!-- The epoch of the orbital elements or epoch of perihelion (t0, T) -->
+<!ELEMENT epoch (#PCDATA)>
+<!ATTLIST epoch units CDATA #FIXED "years">
+
+<!-- The inclination of the orbit (i) -->
+<!ELEMENT inclination (#PCDATA)>
+<!ATTLIST inclination units CDATA #FIXED "degrees">
+
+<!-- The longitude of the ascending node -->
+<!ELEMENT anode (#PCDATA)>
+<!ATTLIST anode units CDATA #FIXED "degrees">
+
+<!-- The argument of perihelion (Omega)-->
+<!ELEMENT perihelion (#PCDATA)>
+<!ATTLIST perihelion units CDATA #FIXED "degrees">
+
+<!-- The mean distance (a) or perihelion distance (q) -->
+<!ELEMENT aorq (#PCDATA)>
+<!ATTLIST aorq units CDATA #FIXED "au">
+
+<!-- Orbital eccentricity -->
+<!ELEMENT e (#PCDATA)>
+
+<!-- The longitude (L) or mean anomaly (M) -->
+<!ELEMENT LorM (#PCDATA)>
+<!ATTLIST LorM units CDATA #FIXED "degrees">
+
+<!-- The mean daily motion -->
+<!ELEMENT n (#PCDATA)>
+<!ATTLIST n units CDATA #FIXED "degrees-day">
+
+<!-- c1 and c2 are the two coordinates in the other systems. -->
+<!ELEMENT c1 (#PCDATA)>
+<!ELEMENT c2 (#PCDATA)>
+
+<!-- Target data is optional data that can provide additional data for
+     targets specified with radec or altaz systems. -->
+<!ELEMENT targetData (epoch?,
+                      pm1?,
+                      pm2?,
+                      rv?,
+                      parallax?,
+                      differentialTracking?)>
+
+<!-- Proper motion of C1 and c2 -->
+<!ELEMENT pm1 (#PCDATA)>
+<!ATTLIST pm1
+          units ( sec-year | arcsec-year ) "arcsec-year"
+>
+<!ELEMENT pm2 (#PCDATA)>
+<!ATTLIST pm2 units CDATA #FIXED "arcsec-year">
+<!-- Radial velocity of the target -->
+<!ELEMENT rv (#PCDATA)>
+<!ATTLIST rv units CDATA #FIXED "km-sec">
+<!-- Parallax of the target -->
+<!ELEMENT parallax (#PCDATA)>
+<!ATTLIST parallax units CDATA #FIXED "arcsec">
+<!-- TAI at which the tracking rates result in no tracking errors. -->
+<!ELEMENT differentialTracking (taizDate, taizTime, c1Rate, c2Rate)>
+<!-- Date and time when rate1 and rate2 are valid -->
+<!ELEMENT taizDate (#PCDATA)>
+<!ELEMENT taizTime (#PCDATA)>
+<!-- Differential tracking rates in C1 and C2 -->
+<!ELEMENT c1Rate (#PCDATA)>
+<!ELEMENT c2Rate (#PCDATA)>
+
+<!-- The radecSystem has its c1 position in hours, minutes, seconds.  Its
+     C2 is in degrees, arc minutes, and arc seconds.  -->
+<!ELEMENT hmsdegSystem (c1, c2, targetData?)>
+<!ATTLIST hmsdegSystem type (J2000 |
+                             B1950 |
+                             apparent |
+                             polarMount |
+                             JNNNN |
+                             BNNNN) "J2000"
+>
+
+<!-- The nonSidSystem has its c1 position in hours, minutes, seconds.  Its
+     C2 is in degrees, minutes, and seconds.  A date says when the
+     C1 C2 are accurate. -->
+<!ELEMENT nonSidSystem (c1, c2, taizDate, taizTime?)>
+<!ATTLIST nonSidSystem type (J2000 |
+                             B1950 |
+                             apparent) "J2000"
+>
+
+<!-- The altaz System has its c1 and c2 positions in degrees,
+     minutes, seconds. -->
+<!ELEMENT degdegSystem (c1, c2, targetData?)>
+<!ATTLIST degdegSystem type (galactic |
+                             altaz |
+                             altazMount) "altaz"
+>
+

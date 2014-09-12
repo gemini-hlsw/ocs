@@ -1,0 +1,218 @@
+<!--
+  Schema definition for NGO-related elements.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" jaxb:version="1.0">
+    <xsd:include schemaLocation="Investigator.xsd"/>
+    <xsd:include schemaLocation="Time.xsd"/>
+    <xsd:include schemaLocation="Itac.xsd"/>
+
+    <!--
+      The submissions key is set when the PI submits the proposal.
+    -->
+    <xsd:simpleType name="SubmissionsKey">
+        <xsd:restriction base="xsd:token">
+            <xsd:pattern value="[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+
+    <!--
+      All submissions include a request and a response.
+    -->
+    <xsd:complexType name="Submission">
+        <xsd:sequence>
+            <xsd:element name="request"  type="SubmissionRequest"/>
+            <xsd:element name="response" type="SubmissionResponse" minOccurs="0"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!--
+      Partner submissions include a partner lead.
+    -->
+    <xsd:complexType name="PartnerSubmission">
+        <xsd:complexContent>
+            <xsd:extension base="Submission">
+                <xsd:attribute name="partnerLead" type="InvestigatorRef" use="required">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <jaxb:property><jaxb:baseType name="Investigator"/></jaxb:property>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:attribute>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      An NGO submission ties an NGO partner with request and tac information.
+    -->
+    <xsd:complexType name="NgoSubmission">
+        <xsd:complexContent>
+            <xsd:extension base="PartnerSubmission">
+                <xsd:sequence>
+                    <xsd:element name="partner" type="NgoPartner"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      An exchange submission ties an exchange partner with request and tac
+      information.
+    -->
+    <xsd:complexType name="ExchangeSubmission">
+        <xsd:complexContent>
+            <xsd:extension base="PartnerSubmission">
+                <xsd:sequence>
+                    <xsd:element name="partner" type="ExchangePartner"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      A special submission comes at any time during the semester.
+    -->
+    <xsd:complexType name="SpecialSubmission">
+        <xsd:complexContent>
+            <xsd:extension base="Submission">
+                <xsd:sequence>
+                    <xsd:element name="type" type="SpecialProposalType"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      A large program submission. It has no partners.
+    -->
+    <xsd:complexType name="LargeProgramSubmission">
+        <xsd:complexContent>
+            <xsd:extension base="Submission"/>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      A Fast turnaround submission. It has no partners.
+    -->
+    <xsd:complexType name="FastTurnaroundSubmission">
+        <xsd:complexContent>
+            <xsd:extension base="Submission"/>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      A request includes a time amount, a minimum requested time amount, and
+      a designated lead for the partner.
+      timeFirstSemester, minTimeFirstSemester are optional
+    -->
+    <xsd:complexType name="SubmissionRequest">
+        <xsd:sequence>
+            <xsd:element name="time"                 type="TimeAmount"/>
+            <xsd:element name="minTime"              type="TimeAmount"/>
+            <xsd:element name="totalLPTime"          type="TimeAmount" minOccurs="0"/>
+            <xsd:element name="minTotalLPTime"       type="TimeAmount" minOccurs="0"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!--
+      The partner response to the request for time.
+    -->
+    <xsd:complexType name="SubmissionResponse">
+        <xsd:sequence>
+            <xsd:element name="receipt" type="SubmissionReceipt"/>
+            <xsd:choice minOccurs="0">
+                <xsd:element name="accept" type="SubmissionAccept"/>
+                <xsd:element name="reject" type="SubmissionReject"/>
+            </xsd:choice>
+            <xsd:element name="comment" type="xsd:string" minOccurs="0"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!--
+      A submission receipt contains the timestamp and the partner's
+      designated proposal id.
+    -->
+    <xsd:complexType name="SubmissionReceipt">
+        <xsd:sequence>
+            <xsd:element name="timestamp" type="xsd:dateTime"/>
+            <xsd:element name="id"        type="xsd:token"/>
+            <xsd:element name="contact"   type="xsd:token" minOccurs="0"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+
+    <!--
+      When accepted by an NGO or exchange partner, a proposal must contain
+
+      id             - the partner specific ID for the proposal
+      ranking        - partner ranking (a non-negative decimal where 0.0 is the highest)
+      recommended    - partner recommended time
+      minRecommended - partner's estimation of minimum usable time
+      poorWeather    - whether to consider the proposal for poor weather band 4
+      comment        - any TAC comments the partner wishes to include
+    -->
+    <xsd:complexType name="SubmissionAccept">
+        <xsd:sequence>
+            <xsd:element name="email"        type="xsd:token"/>
+            <xsd:element name="ranking"      type="Ranking"/>
+            <xsd:element name="recommend"    type="TimeAmount"/>
+            <xsd:element name="minRecommend" type="TimeAmount"/>
+            <xsd:element name="poorWeather"  type="xsd:boolean"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!--
+      If rejected, nothing else included.
+    -->
+    <xsd:complexType name="SubmissionReject"/>
+
+    <!--
+      A ranking is a non-zero decimal amount where 0 is the highest ranking.
+    -->
+    <xsd:simpleType name="Ranking">
+        <xsd:restriction base="xsd:decimal">
+            <xsd:minInclusive value="0"/>
+            <xsd:pattern value="\d+(\.\d+)?"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      NGO partners.
+    -->
+    <xsd:simpleType name="NgoPartner">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="ar"/>
+            <xsd:enumeration value="au"/>
+            <xsd:enumeration value="br"/>
+            <xsd:enumeration value="ca"/>
+            <xsd:enumeration value="cl"/>
+            <xsd:enumeration value="us"/>
+            <xsd:enumeration value="uh"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      Exchange time partners.
+    -->
+    <xsd:simpleType name="ExchangePartner">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="keck"/>
+            <xsd:enumeration value="subaru"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      A proposal is one of normal Phase 1 science, demo science, director's
+      discretionary time, poor weather, or system verification.
+    -->
+    <xsd:simpleType name="SpecialProposalType">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="Demo Science"/>
+            <xsd:enumeration value="Directors Time"/>
+            <xsd:enumeration value="Poor Weather"/>
+            <xsd:enumeration value="System Verification"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+</xsd:schema>

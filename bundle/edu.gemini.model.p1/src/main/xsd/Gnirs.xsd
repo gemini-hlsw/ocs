@@ -1,0 +1,136 @@
+<!--
+  Schema definition for GNIRS blueprints.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:include schemaLocation="Instrument.xsd"/>
+    <xsd:include schemaLocation="Altair.xsd"/>
+
+    <!-- Options for GNIRS Blueprint. -->
+    <xsd:complexType name="GnirsBlueprintChoice">
+        <xsd:sequence>
+            <xsd:choice>
+                <xsd:element name="null"         type="GnirsBlueprintNull"/>
+                <xsd:element name="imaging"      type="GnirsBlueprintImaging"/>
+                <xsd:element name="spectroscopy" type="GnirsBlueprintSpectroscopy"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- GNIRS Null. Empty blueprint, not available in PIT. -->
+    <xsd:complexType name="GnirsBlueprintNull"/>
+
+    <!--
+      GNIRS Blueprint base type.
+    -->
+    <xsd:complexType name="GnirsBlueprintBase">
+        <xsd:complexContent>
+        <xsd:extension base="BlueprintBase">
+            <xsd:sequence>
+                <xsd:element name="altair"     type="AltairChoice"/>
+                <xsd:element name="pixelScale" type="GnirsPixelScale"/>
+            </xsd:sequence>
+        </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!-- GNIRS Imaging Blueprint. Contains multiple filter options. -->
+    <xsd:complexType name="GnirsBlueprintImaging">
+        <xsd:complexContent>
+            <xsd:extension base="GnirsBlueprintBase">
+                <xsd:sequence>
+                    <xsd:element name="filter" type="GnirsFilter"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      GNIRS Spectroscopy Blueprint base type. Allows a single filter and
+      multiple disperser options.
+    -->
+    <xsd:complexType name="GnirsBlueprintSpectroscopy">
+        <xsd:complexContent>
+            <xsd:extension base="GnirsBlueprintBase">
+                <xsd:sequence>
+                    <xsd:element name="disperser"         type="GnirsDisperser"/>
+                    <xsd:element name="crossDisperser"    type="GnirsCrossDisperser"/>
+                    <xsd:element name="fpu"               type="GnirsFpu"/>
+                    <xsd:element name="centralWavelength" type="GnirsCentralWavelength"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      GNIRS Pixel Scale options.
+    -->
+    <xsd:simpleType name="GnirsPixelScale">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="0.15&quot;/pix"/>
+            <xsd:enumeration value="0.05&quot;/pix"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+   <!--
+      GNIRS Filter options (for imaging only).
+    -->
+    <xsd:simpleType name="GnirsFilter">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="Y (1.03um)"/>
+            <xsd:enumeration value="X (1.10um)"/>
+            <xsd:enumeration value="J (1.25um)"/>
+            <xsd:enumeration value="H (1.65um)"/>
+            <xsd:enumeration value="K (2.20um)"/>
+            <xsd:enumeration value="H2 (2.122um)"/>
+            <xsd:enumeration value="PAH (3.295um)"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      GNIRS disperser options.
+    -->
+    <xsd:simpleType name="GnirsDisperser">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="10 l/mm grating"/>
+            <xsd:enumeration value="32 l/mm grating"/>
+            <xsd:enumeration value="111 l/mm grating"/>
+         </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      GNIRS cross-disperser options.
+    -->
+    <xsd:simpleType name="GnirsCrossDisperser">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="None"/>
+            <xsd:enumeration value="SXD"/>
+            <xsd:enumeration value="LXD"/>
+         </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      GNIRS FPU options.
+    -->
+    <xsd:simpleType name="GnirsFpu">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="0.10 arcsec"/>
+            <xsd:enumeration value="0.15 arcsec"/>
+            <xsd:enumeration value="0.20 arcsec"/>
+            <xsd:enumeration value="0.30 arcsec"/>
+            <xsd:enumeration value="0.45 arcsec"/>
+            <xsd:enumeration value="0.675 arcsec"/>
+            <xsd:enumeration value="1.0 arcsec"/>
+         </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      GNIRS Central Wavelength options.
+    -->
+    <xsd:simpleType name="GnirsCentralWavelength">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="&lt; 2.5um"/>
+            <xsd:enumeration value="&gt;=2.5um"/>
+         </xsd:restriction>
+    </xsd:simpleType>
+
+</xsd:schema>

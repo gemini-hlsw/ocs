@@ -1,0 +1,84 @@
+<!--
+  Schema definition for instrument elements.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <!--
+      Blueprint base type.
+    -->
+    <xsd:complexType name="BlueprintBase">
+        <xsd:sequence>
+            <xsd:element name="name" type="xsd:token"/>
+            <!-- REL-1062 Attribute to identify visitor instruments -->
+            <xsd:element name="visitor" type="xsd:boolean" minOccurs="1" maxOccurs="1" default="false"/>
+        </xsd:sequence>
+        <xsd:attribute name="id"      type="BlueprintId" use="required"/>
+    </xsd:complexType>
+
+    <xsd:simpleType name="BlueprintId">
+        <xsd:restriction base="xsd:ID">
+            <xsd:pattern value="blueprint-\d+"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="BlueprintRef">
+        <xsd:restriction base="xsd:IDREF">
+            <xsd:pattern value="blueprint-\d+"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      All valid wavelength regimes.  Instruments support a restricted set of
+      options.
+    -->
+    <xsd:simpleType name="WavelengthRegime">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="optical">
+                <xsd:annotation>
+                    <xsd:appinfo>
+                        <label>optical (0.3-1um)</label>
+                        <min>0.3</min>
+                        <max>1.0</max>
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="nearIR_1">
+                <xsd:annotation>
+                    <xsd:appinfo>
+                        <label>near-IR (1-2.5um)</label>
+                        <min>1.0</min>
+                        <max>2.5</max>
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="nearIR_3">
+                <xsd:annotation>
+                    <xsd:appinfo>
+                        <label>near-IR (3-5um)</label>
+                        <min>3.0</min>
+                        <max>5.0</max>
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="midIR_7">
+                <xsd:annotation>
+                    <xsd:appinfo>
+                        <label>mid-IR (7-12um)</label>
+                        <min>7.0</min>
+                        <max>12.0</max>
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="midIR_18">
+                <xsd:annotation>
+                    <xsd:appinfo>
+                        <label>mid-IR (18-25um)</label>
+                        <min>18.0</min>
+                        <max>25.0</max>
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+</xsd:schema>

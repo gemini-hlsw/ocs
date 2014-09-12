@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal tacCategory="Galactic" schemaVersion="2013.2.1">
+    <meta band3optionChosen="true">
+    </meta>
+    <semester half="B" year="2013"/>
+    <title>My proposal</title>
+    <abstract>My abstract</abstract>
+    <scheduling></scheduling>
+    <keywords>
+        <keyword>Brown dwarfs</keyword>
+        <keyword>Binaries</keyword>
+    </keywords>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Principal</firstName>
+            <lastName>Investigator</lastName>
+            <status>PhD</status>
+            <email>test@test.com</email>
+            <phone></phone>
+            <address>
+                <institution>Centro Regional de Investigaciones (CRICYT)</institution>
+                <address>Casilla de Correo 131
+5500 Mendoza</address>
+                <country>Argentina</country>
+            </address>
+        </pi>
+    </investigators>
+    <targets>
+        <sidereal epoch="J2000" id="target-0">
+            <name>sirius</name>
+            <degDeg>
+                <ra>101.28715535</ra>
+                <dec>-16.71611587</dec>
+            </degDeg>
+            <properMotion deltaDec="-1223.07" deltaRA="-546.01"/>
+            <magnitudes>
+                <magnitude system="Vega" band="B">-1.4600000381469727</magnitude>
+                <magnitude system="Vega" band="V">-1.4700000286102295</magnitude>
+                <magnitude system="Vega" band="J">-1.3910000324249268</magnitude>
+                <magnitude system="Vega" band="H">-1.3910000324249268</magnitude>
+                <magnitude system="Vega" band="K">-1.3899999856948853</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-1">
+            <name>vega</name>
+            <degDeg>
+                <ra>279.23473479</ra>
+                <dec>38.78368896</dec>
+            </degDeg>
+            <properMotion deltaDec="286.23" deltaRA="200.94"/>
+            <magnitudes>
+                <magnitude system="Vega" band="B">0.029999999329447746</magnitude>
+                <magnitude system="Vega" band="V">0.029999999329447746</magnitude>
+                <magnitude system="Vega" band="R">0.10000000149011612</magnitude>
+                <magnitude system="Vega" band="J">-0.18000000715255737</magnitude>
+                <magnitude system="Vega" band="H">-0.029999999329447746</magnitude>
+                <magnitude system="Vega" band="K">0.12999999523162842</magnitude>
+            </magnitudes>
+        </sidereal>
+    </targets>
+    <conditions>
+        <condition id="condition-0">
+            <name>CC Any, IQ Any, SB Any/Bright, WV Any</name>
+            <cc>Any</cc>
+            <iq>Any</iq>
+            <sb>Any/Bright</sb>
+            <wv>Any</wv>
+        </condition>
+    </conditions>
+    <blueprints>
+        <visitor>
+            <visitor id="blueprint-0">
+                <name>Visitor - Gemini South - Camera in the south</name>
+                <visitor>true</visitor>
+                <site>Gemini South</site>
+                <custom-name>Camera in the south</custom-name>
+            </visitor>
+        </visitor>
+        <visitor>
+            <visitor id="blueprint-1">
+                <name>Visitor - Gemini North - My instrument</name>
+                <visitor>true</visitor>
+                <site>Gemini North</site>
+                <custom-name>My instrument</custom-name>
+            </visitor>
+        </visitor>
+    </blueprints>
+    <observations>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-1" condition="condition-0" target="target-1" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Limited</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None">
+            <itac>
+                <comment>An Itac comment</comment>
+            </itac>
+            <ngo partnerLead="investigator-0">
+                <request>
+                    <time units="hr">1.0</time>
+                    <minTime units="hr">1.0</minTime>
+                </request>
+                <partner>cl</partner>
+            </ngo>
+            <ngo partnerLead="investigator-0">
+                <request>
+                    <time units="hr">1.0</time>
+                    <minTime units="hr">1.0</minTime>
+                </request>
+                <partner>br</partner>
+            </ngo>
+        </queue>
+    </proposalClass>
+</proposal>

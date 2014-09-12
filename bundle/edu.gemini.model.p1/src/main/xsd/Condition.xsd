@@ -1,0 +1,106 @@
+<!--
+  Schema definition for observing conditions elements.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <!--
+      TODO: wavelength regime seems more appropriate in the instrument?
+      It isn't really a conditions constraint so much as an influence on
+      picking the appropriate conditions for an observation?
+    -->
+
+    <!--
+      A conditions list contains 0 or more conditions elements.
+    -->
+    <xsd:complexType name="Conditions">
+        <xsd:sequence>
+            <xsd:element name="condition" type="Condition" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!--
+      Named conditions constraints contain a max airmass limit which defaults
+      to 2.0, and CC, IQ, SB, and WV limits which default to 100%/Any.
+    -->
+    <xsd:complexType name="Condition">
+        <xsd:sequence>
+            <xsd:element name="name"       type="xsd:token"/>
+            <xsd:element name="maxAirmass" type="Airmass" default="2.0" minOccurs="0"/>
+            <xsd:element name="cc"         type="CloudCover"/>
+            <xsd:element name="iq"         type="ImageQuality"/>
+            <xsd:element name="sb"         type="SkyBackground"/>
+            <xsd:element name="wv"         type="WaterVapor"/>
+        </xsd:sequence>
+        <xsd:attribute name="id" type="ConditionId" use="required"/>
+    </xsd:complexType>
+
+    <xsd:simpleType name="ConditionId">
+        <xsd:restriction base="xsd:ID">
+            <xsd:pattern value="condition-\d+"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="ConditionRef">
+        <xsd:restriction base="xsd:IDREF">
+            <xsd:pattern value="condition-\d+"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      Airmass value.
+    -->
+    <xsd:simpleType name="Airmass">
+        <xsd:restriction base="xsd:decimal">
+            <xsd:minInclusive value="1"/>
+            <xsd:maxExclusive value="3"/>  <!-- TODO: is there a max? -->
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      Cloud Cover options.
+    -->
+    <xsd:simpleType name="CloudCover">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="50%/Clear"/>
+            <xsd:enumeration value="70%/Cirrus"/>
+            <xsd:enumeration value="80%/Cloudy"/>
+            <xsd:enumeration value="Any"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      Image Quality options.
+    -->
+    <xsd:simpleType name="ImageQuality">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="20%/Best"/>
+            <xsd:enumeration value="70%/Good"/>
+            <xsd:enumeration value="85%/Poor"/>
+            <xsd:enumeration value="Any"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      Sky Background options.
+    -->
+    <xsd:simpleType name="SkyBackground">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="20%/Darkest"/>
+            <xsd:enumeration value="50%/Dark"/>
+            <xsd:enumeration value="80%/Grey"/>
+            <xsd:enumeration value="Any/Bright"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      Water Vapor options.
+    -->
+    <xsd:simpleType name="WaterVapor">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="20%/Low"/>
+            <xsd:enumeration value="50%/Median"/>
+            <xsd:enumeration value="80%/High"/>
+            <xsd:enumeration value="Any"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+</xsd:schema>

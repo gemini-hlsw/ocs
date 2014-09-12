@@ -1,0 +1,70 @@
+<!--  *****     *****     *****     ******     *****     *****     *****
+
+   Document Type Declaration for XML Description of OT external
+   Phase 2 Proposal Information.
+   Specific Gemini phase1 data contained.
+
+   Authors:  Kim Gillies  (Gemini 8-m Telescopes Project)
+
+   $Id: SpXML.dtd 2 2004-01-20 07:57:42Z gillies $
+
+-->
+<!ENTITY OT1_DTD_VERSION "1.0">
+
+<!-- The document entry point. -->
+<!ELEMENT spDocument (program|plan)>
+
+<!-- A program item.  Some spItems have special status -->
+<!ELEMENT program (phase1+, av*, spItem*)>
+<!ATTLIST program
+          name    CDATA #REQUIRED
+          type    CDATA #REQUIRED
+          subtype CDATA #REQUIRED
+>
+
+<!-- A phase1 item.  Some spItems have special status -->
+<!ELEMENT phase1 (av*, spItem*, proposal+, p1summary+)>
+<!ATTLIST phase11
+          name    CDATA #REQUIRED
+          type    CDATA #REQUIRED
+          subtype CDATA #REQUIRED
+>
+
+<!-- The original proposal -->
+<!ELEMENT proposal (CDATA)>
+<!-- The Phase 1 HTML Summary -->
+<!ELEMENT p1summary (CDATA)>
+
+<!-- A plan item.  Some spItems have special status -->
+<!ELEMENT plan (av*, spItem*)>
+<!ATTLIST plan
+          name    CDATA #REQUIRED
+          type    CDATA #REQUIRED
+          subtype CDATA #REQUIRED
+>
+
+<!-- Misc science program item.  An item is its attribute/values followed
+     by its children as spItems.
+-->
+<!ELEMENT spItem  (av*, spItem*)>
+<!ATTLIST spItem
+          name    CDATA #REQUIRED
+          type    CDATA #REQUIRED
+          subtype CDATA #REQUIRED
+>
+
+<!-- An attribute/value list -->
+<!ELEMENT av (value*)>
+
+<!ATTLIST av
+          name    CDATA #REQUIRED
+>
+
+<!-- A Value -->
+<!ELEMENT value (#PCDATA)>
+<!-- Currently not supporting type and units
+<!ATTLIST value
+          type   #IMPLIED
+          units  #IMPLIED
+>
+-->

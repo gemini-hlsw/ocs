@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="2013.2.1">
+    <meta band3optionChosen="false"/>
+    <semester half="B" year="2013"/>
+    <title></title>
+    <abstract></abstract>
+    <scheduling></scheduling>
+    <keywords/>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Principal</firstName>
+            <lastName>Investigator</lastName>
+            <status>PhD</status>
+            <email></email>
+            <address>
+                <institution></institution>
+                <address></address>
+                <country></country>
+            </address>
+        </pi>
+    </investigators>
+    <targets/>
+    <conditions/>
+    <blueprints>
+        <dssi>
+            <Dssi id="blueprint-0">
+                <name>DSSI</name>
+                <visitor>true</visitor>
+            </Dssi>
+        </dssi>
+        <gmosN>
+            <regime>optical</regime>
+            <longslit id="blueprint-0">
+                <name>GMOS-N LongSlit B1200 GG455 (&gt; 460 nm) 0.25 arcsec slit</name>
+                <visitor>false</visitor>
+                <filter>GG455 (&gt; 460 nm)</filter>
+                <disperser>B1200</disperser>
+                <fpu>0.25 arcsec slit</fpu>
+            </longslit>
+        </gmosN>
+    </blueprints>
+    <observations>
+        <observation blueprint="blueprint-0" enabled="true" band="Band 1/2"/>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None"/>
+    </proposalClass>
+</proposal>

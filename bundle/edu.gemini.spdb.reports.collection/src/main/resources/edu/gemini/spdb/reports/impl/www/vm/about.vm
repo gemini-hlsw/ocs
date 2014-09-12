@@ -1,0 +1,23 @@
+
+#set ($title="SPDB Reports - About")
+
+<html>
+	<head>
+		<title>$title</title>
+		<link rel="stylesheet" href="styles.css"></link>
+	</head>
+	<body>
+		
+	  #parse("/edu/gemini/spdb/reports/impl/www/vm/nav.vm")
+
+		<div>
+		Not much to say.
+		</div>
+		
+		<div>
+		Mail <a href="mailto:rnorris@gemini.edu">Rob Norris</a> 
+		if you have any comments or questions.
+		</div>
+					
+	</body>
+</html>

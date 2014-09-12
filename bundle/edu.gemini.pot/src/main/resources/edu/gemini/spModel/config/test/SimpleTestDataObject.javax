@@ -1,0 +1,90 @@
+// Copyright 2000
+// Association for Universities for Research in Astronomy, Inc.
+// Observatory Control System, Gemini Telescopes Project.
+// See the file COPYRIGHT for complete details.
+//
+// $Id: SimpleTestDataObject.javax 46768 2012-07-16 18:58:53Z rnorris $
+//
+
+package jsky.app.ot.nsp.model.config.test;
+
+import jsky.app.ot.nsp.model.config.IConfigBuilder;
+import jsky.app.ot.nsp.model.config.ISysConfig;
+import jsky.app.ot.nsp.model.config.IConfigProvider;
+
+import edu.gemini.pot.sp.ISPFactory;
+import edu.gemini.pot.sp.ISPObsComponent;
+import edu.gemini.pot.sp.ISPSeqComponent;
+import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.pot.sp.SPUnknownIDException;
+
+import java.io.Serializable;
+
+
+
+public class SimpleTestDataObject implements Serializable, IConfigProvider
+{
+   private ISysConfig _sysConfig;
+
+
+   public static ISPObsComponent createObsComponent(ISPFactory fact, 
+						    String progID,
+						    String broadType, 
+						    String narrowType, 
+						    ISysConfig sc)
+      throws SPUnknownIDException
+   {
+      // Create the observation component.
+      SPComponentType compType = new SPComponentType(broadType, narrowType);
+      ISPObsComponent obsComp  = fact.createObsComponent(progID, compType);
+
+      // Create and add the test data object.
+      TestDataObject tdo = new TestDataObject();
+      tdo.setSysConfig(sc);
+      obsComp.setDataObject(tdo);
+
+      // Add the correct parameter builder.
+      SimpleObsCompCB cb = new SimpleObsCompCB(obsComp);
+      obsComp.putUserObject(IConfigBuilder.USER_OBJ_KEY, cb);
+      return obsComp;
+   }
+
+
+   public static ISPSeqComponent createSeqComponent(ISPFactory fact, 
+						    String progID,
+						    String broadType, 
+						    String narrowType, 
+						    ISysConfig sc)
+      throws SPUnknownIDException
+   {
+      // Create the sequence component.
+      SPComponentType compType = new SPComponentType(broadType, narrowType);
+      ISPSeqComponent seqComp  = fact.createSeqComponent(progID, compType);
+
+      // Create and add the test data object.
+      TestDataObject tdo = new TestDataObject();
+      tdo.setSysConfig(sc);
+      seqComp.setDataObject(tdo);
+
+      // Add the correct parameter builder.
+      TestDataObjectSeqCompCB cb = new TestDataObjectSeqCompCB(seqComp);
+      seqComp.putUserObject(IConfigBuilder.USER_OBJ_KEY, cb);
+      return seqComp;
+   }
+
+
+   public TestDataObject()
+   {
+   }
+
+   public ISysConfig getSysConfig()
+   {
+      return (ISysConfig) _sysConfig.clone();
+   }
+
+   public void setSysConfig(ISysConfig sysConfig)
+   {
+      _sysConfig = (ISysConfig) sysConfig.clone();
+   }
+
+}

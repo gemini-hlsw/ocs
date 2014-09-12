@@ -1,0 +1,99 @@
+<!--
+  Schema definition for investigator elements.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+
+    <!--
+      An investigator list consists of a "pi" followed by 0 or more "coi"
+      elements.
+    -->
+    <xsd:complexType name="Investigators">
+        <xsd:sequence minOccurs="0">
+            <xsd:element name="pi"  type="PrincipalInvestigator"/>
+            <xsd:element name="coi" type="CoInvestigator" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!--
+      A principal investigator is an investigator with a designated "site".
+    -->
+    <xsd:complexType name="PrincipalInvestigator">
+        <xsd:complexContent>
+            <xsd:extension base="Investigator">
+                <xsd:sequence>
+                    <xsd:element name="address" type="InstitutionAddress"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      A co-investigator is an investigator with an institution name.
+    -->
+    <xsd:complexType name="CoInvestigator">
+        <xsd:complexContent>
+            <xsd:extension base="Investigator">
+                <xsd:sequence>
+                    <xsd:element name="institution" type="xsd:token"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      An investigator in general has:
+        - first name
+        - last name
+        - status (Phd, Grad Thesis, Grad No Thesis, or Other)
+        - email (one or more)
+        - phone (zero or more)
+        - fax (zero or more)
+    -->
+    <xsd:complexType name="Investigator">
+        <xsd:sequence>
+            <xsd:element name="firstName"  type="xsd:token"/>
+            <xsd:element name="lastName"   type="xsd:token"/>
+            <xsd:element name="status"     type="InvestigatorStatus"/>
+            <xsd:element name="email"      type="xsd:token"/>
+            <xsd:element name="phone"      type="xsd:token"   minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:attribute name="id" type="InvestigatorId" use="optional"/>
+    </xsd:complexType>
+
+    <xsd:simpleType name="InvestigatorId">
+        <xsd:restriction base="xsd:ID">
+            <xsd:pattern value="investigator-\d+"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="InvestigatorRef">
+        <xsd:restriction base="xsd:IDREF">
+            <xsd:pattern value="investigator-\d+"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      Valid investigator status options.
+    -->
+    <xsd:simpleType name="InvestigatorStatus">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="PhD"/>
+            <xsd:enumeration value="Grad Thesis"/>
+            <xsd:enumeration value="Grad No Thesis"/>
+            <xsd:enumeration value="Other"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      A site is an institution name, an optional address and an optional
+      country.
+    -->
+    <xsd:complexType name="InstitutionAddress">
+        <xsd:sequence>
+            <xsd:element name="institution" type="xsd:token"/>
+            <xsd:element name="address"     type="xsd:string" minOccurs="0"/>
+            <xsd:element name="country"     type="xsd:token"  minOccurs="0"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:schema>

@@ -1,0 +1,1125 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.4.2_07" class="java.beans.XMLDecoder"> 
+ <object class="com.ktauber.form.model.FormModel"> 
+  <void property="contentType"> 
+   <string>form/swing</string> 
+  </void> 
+  <void property="root"> 
+   <object class="com.ktauber.form.model.FormRoot"> 
+    <void method="add"> 
+     <object class="com.ktauber.form.model.FormWindow"> 
+      <string>javax.swing.JFrame</string> 
+      <object class="com.ktauber.form.model.FormLayoutManager"> 
+       <class>java.awt.BorderLayout</class> 
+      </object> 
+      <void method="setProperty"> 
+       <string>$size</string> 
+       <object class="java.awt.Dimension"> 
+        <int>555</int> 
+        <int>485</int> 
+       </object> 
+      </void> 
+      <void method="setProperty"> 
+       <string>title</string> 
+       <string>Mask Dialog</string> 
+      </void> 
+      <void method="add"> 
+       <object class="com.ktauber.form.model.FormContainer"> 
+        <string>javax.swing.JPanel</string> 
+        <object class="com.ktauber.form.model.FormLayoutManager"> 
+         <class>java.awt.BorderLayout</class> 
+        </object> 
+        <void method="setProperty"> 
+         <string>border</string> 
+         <object class="com.jgoodies.forms.factories.Borders" field="DIALOG_BORDER"/> 
+        </void> 
+        <void method="setProperty"> 
+         <string>preferredSize</string> 
+         <object class="java.awt.Dimension"> 
+          <int>560</int> 
+          <int>442</int> 
+         </object> 
+        </void> 
+        <void property="name"> 
+         <string>dialogPane</string> 
+        </void> 
+        <void method="add"> 
+         <object class="com.ktauber.form.model.FormContainer"> 
+          <string>javax.swing.JPanel</string> 
+          <object class="com.ktauber.form.model.FormLayoutManager"> 
+           <class>com.jgoodies.forms.layout.FormLayout</class> 
+           <void method="setProperty"> 
+            <string>$columnSpecs</string> 
+            <string>right:default, labelcompgap, default, unrelgap, right:default, labelcompgap, max(default;50dlu), labelcompgap, default:grow</string> 
+           </void> 
+           <void method="setProperty"> 
+            <string>$rowSpecs</string> 
+            <string>default, linegap, default, linegap, default, pargap, default</string> 
+           </void> 
+          </object> 
+          <void method="setProperty"> 
+           <string>preferredSize</string> 
+           <object class="java.awt.Dimension"> 
+            <int>486</int> 
+            <int>390</int> 
+           </object> 
+          </void> 
+          <void property="name"> 
+           <string>contentPane</string> 
+          </void> 
+          <void method="add"> 
+           <object class="com.ktauber.form.model.FormComponent"> 
+            <string>javax.swing.JLabel</string> 
+            <void method="setProperty"> 
+             <string>text</string> 
+             <string>Instrument</string> 
+            </void> 
+            <void property="name"> 
+             <string>label2</string> 
+            </void> 
+           </object> 
+           <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+            <class>com.jgoodies.forms.layout.CellConstraints</class> 
+            <void method="setProperty"> 
+             <string>gridX</string> 
+             <int>1</int> 
+            </void> 
+            <void method="setProperty"> 
+             <string>gridY</string> 
+             <int>1</int> 
+            </void> 
+           </object> 
+          </void> 
+          <void method="add"> 
+           <object class="com.ktauber.form.model.FormComponent"> 
+            <string>javax.swing.JComboBox</string> 
+            <void method="setProperty"> 
+             <string>model</string> 
+             <object class="javax.swing.DefaultComboBoxModel"> 
+              <void property="selectedItem"> 
+               <string>GMOS-N</string> 
+              </void> 
+              <void method="addElement"> 
+               <string>GMOS-N</string> 
+              </void> 
+              <void method="addElement"> 
+               <string>GMOS-S</string> 
+              </void> 
+             </object> 
+            </void> 
+            <void property="name"> 
+             <string>instrument</string> 
+            </void> 
+            <void method="auxiliary"> 
+             <void method="setProperty"> 
+              <string>JavaCodeGenerator.variableModifiers</string> 
+              <int>0</int> 
+             </void> 
+            </void> 
+           </object> 
+           <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+            <class>com.jgoodies.forms.layout.CellConstraints</class> 
+            <void method="setProperty"> 
+             <string>gridX</string> 
+             <int>3</int> 
+            </void> 
+            <void method="setProperty"> 
+             <string>gridY</string> 
+             <int>1</int> 
+            </void> 
+           </object> 
+          </void> 
+          <void method="add"> 
+           <object class="com.ktauber.form.model.FormComponent"> 
+            <string>javax.swing.JLabel</string> 
+            <void method="setProperty"> 
+             <string>text</string> 
+             <string>Central Wavelength</string> 
+            </void> 
+            <void property="name"> 
+             <string>label5</string> 
+            </void> 
+           </object> 
+           <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+            <class>com.jgoodies.forms.layout.CellConstraints</class> 
+            <void method="setProperty"> 
+             <string>gridX</string> 
+             <int>5</int> 
+            </void> 
+            <void method="setProperty"> 
+             <string>gridY</string> 
+             <int>1</int> 
+            </void> 
+           </object> 
+          </void> 
+          <void method="add"> 
+           <object class="com.ktauber.form.model.FormComponent"> 
+            <string>jsky.app.ot.gui.NumberBoxWidget</string>
+            <void property="name"> 
+             <string>wavelength</string> 
+            </void> 
+            <void method="auxiliary"> 
+             <void method="setProperty"> 
+              <string>JavaCodeGenerator.variableModifiers</string> 
+              <int>0</int> 
+             </void> 
+            </void> 
+           </object> 
+           <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+            <class>com.jgoodies.forms.layout.CellConstraints</class> 
+            <void method="setProperty"> 
+             <string>gridX</string> 
+             <int>7</int> 
+            </void> 
+            <void method="setProperty"> 
+             <string>gridY</string> 
+             <int>1</int> 
+            </void> 
+           </object> 
+          </void> 
+          <void method="add"> 
+           <object class="com.ktauber.form.model.FormComponent"> 
+            <string>javax.swing.JLabel</string> 
+            <void method="setProperty"> 
+             <string>text</string> 
+             <string>Filter</string> 
+            </void> 
+            <void property="name"> 
+             <string>label3</string> 
+            </void> 
+           </object> 
+           <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+            <class>com.jgoodies.forms.layout.CellConstraints</class> 
+            <void method="setProperty"> 
+             <string>gridX</string> 
+             <int>1</int> 
+            </void> 
+            <void method="setProperty"> 
+             <string>gridY</string> 
+             <int>3</int> 
+            </void> 
+           </object> 
+          </void> 
+          <void method="add"> 
+           <object class="com.ktauber.form.model.FormComponent"> 
+            <string>javax.swing.JLabel</string> 
+            <void method="setProperty"> 
+             <string>text</string> 
+             <string>Disperser</string> 
+            </void> 
+            <void property="name"> 
+             <string>label4</string> 
+            </void> 
+           </object> 
+           <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+            <class>com.jgoodies.forms.layout.CellConstraints</class> 
+            <void method="setProperty"> 
+             <string>gridX</string> 
+             <int>5</int> 
+            </void> 
+            <void method="setProperty"> 
+             <string>gridY</string> 
+             <int>3</int> 
+            </void> 
+           </object> 
+          </void> 
+          <void method="add"> 
+           <object class="com.ktauber.form.model.FormComponent"> 
+            <string>jsky.app.ot.gui.DropDownListBoxWidget</string>
+            <void property="name"> 
+             <string>filter</string> 
+            </void> 
+            <void method="auxiliary"> 
+             <void method="setProperty"> 
+              <string>JavaCodeGenerator.variableModifiers</string> 
+              <int>0</int> 
+             </void> 
+            </void> 
+           </object> 
+           <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+            <class>com.jgoodies.forms.layout.CellConstraints</class> 
+            <void method="setProperty"> 
+             <string>gridX</string> 
+             <int>3</int> 
+            </void> 
+            <void method="setProperty"> 
+             <string>gridY</string> 
+             <int>3</int> 
+            </void> 
+           </object> 
+          </void> 
+          <void method="add"> 
+           <object class="com.ktauber.form.model.FormComponent"> 
+            <string>jsky.app.ot.gui.DropDownListBoxWidget</string>
+            <void property="name"> 
+             <string>disperser</string> 
+            </void> 
+            <void method="auxiliary"> 
+             <void method="setProperty"> 
+              <string>JavaCodeGenerator.variableModifiers</string> 
+              <int>0</int> 
+             </void> 
+            </void> 
+           </object> 
+           <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+            <class>com.jgoodies.forms.layout.CellConstraints</class> 
+            <void method="setProperty"> 
+             <string>gridX</string> 
+             <int>7</int> 
+            </void> 
+            <void method="setProperty"> 
+             <string>gridY</string> 
+             <int>3</int> 
+            </void> 
+           </object> 
+          </void> 
+          <void method="add"> 
+           <object class="com.ktauber.form.model.FormComponent"> 
+            <string>javax.swing.JLabel</string> 
+            <void method="setProperty"> 
+             <string>text</string> 
+             <string>Number of Masks</string> 
+            </void> 
+            <void property="name"> 
+             <string>label14</string> 
+            </void> 
+           </object> 
+           <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+            <class>com.jgoodies.forms.layout.CellConstraints</class> 
+            <void method="setProperty"> 
+             <string>gridX</string> 
+             <int>1</int> 
+            </void> 
+            <void method="setProperty"> 
+             <string>gridY</string> 
+             <int>5</int> 
+            </void> 
+           </object> 
+          </void> 
+          <void method="add"> 
+           <object class="com.ktauber.form.model.FormComponent"> 
+            <string>javax.swing.JLabel</string> 
+            <void method="setProperty"> 
+             <string>text</string> 
+             <string>Shuffle Mode</string> 
+            </void> 
+            <void property="name"> 
+             <string>label1</string> 
+            </void> 
+           </object> 
+           <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+            <class>com.jgoodies.forms.layout.CellConstraints</class> 
+            <void method="setProperty"> 
+             <string>gridX</string> 
+             <int>5</int> 
+            </void> 
+            <void method="setProperty"> 
+             <string>gridY</string> 
+             <int>5</int> 
+            </void> 
+           </object> 
+          </void> 
+          <void method="add"> 
+           <object class="com.ktauber.form.model.FormComponent"> 
+            <string>javax.swing.JComboBox</string> 
+            <void method="setProperty"> 
+             <string>model</string> 
+             <object class="javax.swing.DefaultComboBoxModel"> 
+              <void property="selectedItem"> 
+               <string>No Shuffle</string> 
+              </void> 
+              <void method="addElement"> 
+               <string>No Shuffle</string> 
+              </void> 
+              <void method="addElement"> 
+               <string>Microshuffle Mode</string> 
+              </void> 
+              <void method="addElement"> 
+               <string>Band Shuffling</string> 
+              </void> 
+             </object> 
+            </void> 
+            <void property="name"> 
+             <string>shuffleMode</string> 
+            </void> 
+            <void method="auxiliary"> 
+             <void method="setProperty"> 
+              <string>JavaCodeGenerator.variableModifiers</string> 
+              <int>0</int> 
+             </void> 
+            </void> 
+           </object> 
+           <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+            <class>com.jgoodies.forms.layout.CellConstraints</class> 
+            <void method="setProperty"> 
+             <string>gridX</string> 
+             <int>7</int> 
+            </void> 
+            <void method="setProperty"> 
+             <string>gridY</string> 
+             <int>5</int> 
+            </void> 
+           </object> 
+          </void> 
+          <void method="add"> 
+           <object class="com.ktauber.form.model.FormContainer"> 
+            <string>javax.swing.JTabbedPane</string> 
+            <object class="com.ktauber.form.model.FormLayoutManager"> 
+             <class>javax.swing.JTabbedPane</class> 
+            </object> 
+            <void method="auxiliary"> 
+             <void method="setProperty"> 
+              <string>JavaCodeGenerator.variableModifiers</string> 
+              <int>0</int> 
+             </void> 
+            </void> 
+            <void property="name"> 
+             <string>shufflePane</string> 
+            </void> 
+            <void method="add"> 
+             <object class="com.ktauber.form.model.FormContainer"> 
+              <string>javax.swing.JPanel</string> 
+              <object class="com.ktauber.form.model.FormLayoutManager"> 
+               <class>com.jgoodies.forms.layout.FormLayout</class> 
+               <void method="setProperty"> 
+                <string>$columnSpecs</string> 
+                <string>default</string> 
+               </void> 
+               <void method="setProperty"> 
+                <string>$rowSpecs</string> 
+                <string>default</string> 
+               </void> 
+              </object> 
+              <void method="auxiliary"> 
+               <void method="setProperty"> 
+                <string>JavaCodeGenerator.variableModifiers</string> 
+                <int>0</int> 
+               </void> 
+              </void> 
+              <void property="name"> 
+               <string>noShufflePanel</string> 
+              </void> 
+             </object> 
+             <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+              <null/> 
+              <void method="setProperty"> 
+               <string>title</string> 
+               <string>No Shuffle</string> 
+              </void> 
+             </object> 
+            </void> 
+            <void method="add"> 
+             <object class="com.ktauber.form.model.FormContainer"> 
+              <string>javax.swing.JPanel</string> 
+              <object class="com.ktauber.form.model.FormLayoutManager"> 
+               <class>com.jgoodies.forms.layout.FormLayout</class> 
+               <void method="setProperty"> 
+                <string>$columnSpecs</string> 
+                <string>0dlu, labelcompgap, right:default, labelcompgap, max(default;50dlu):grow</string> 
+               </void> 
+               <void method="setProperty"> 
+                <string>$rowSpecs</string> 
+                <string>0dlu, linegap, default, linegap, default, linegap, default, linegap, default</string> 
+               </void> 
+              </object> 
+              <void method="auxiliary"> 
+               <void method="setProperty"> 
+                <string>JavaCodeGenerator.variableModifiers</string> 
+                <int>0</int> 
+               </void> 
+              </void> 
+              <void property="name"> 
+               <string>microShufflePanel</string> 
+              </void> 
+              <void method="add"> 
+               <object class="com.ktauber.form.model.FormComponent"> 
+                <string>javax.swing.JLabel</string> 
+                <void method="setProperty"> 
+                 <string>text</string> 
+                 <string>Slit Length (arcsec)</string> 
+                </void> 
+                <void property="name"> 
+                 <string>label6</string> 
+                </void> 
+               </object> 
+               <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+                <class>com.jgoodies.forms.layout.CellConstraints</class> 
+                <void method="setProperty"> 
+                 <string>gridX</string> 
+                 <int>3</int> 
+                </void> 
+                <void method="setProperty"> 
+                 <string>gridY</string> 
+                 <int>3</int> 
+                </void> 
+               </object> 
+              </void> 
+              <void method="add"> 
+               <object class="com.ktauber.form.model.FormComponent"> 
+                <string>jsky.app.ot.gui.NumberBoxWidget</string>
+                <void property="name"> 
+                 <string>slitLength</string> 
+                </void> 
+                <void method="auxiliary"> 
+                 <void method="setProperty"> 
+                  <string>JavaCodeGenerator.variableModifiers</string> 
+                  <int>0</int> 
+                 </void> 
+                </void> 
+               </object> 
+               <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+                <class>com.jgoodies.forms.layout.CellConstraints</class> 
+                <void method="setProperty"> 
+                 <string>gridX</string> 
+                 <int>5</int> 
+                </void> 
+                <void method="setProperty"> 
+                 <string>gridY</string> 
+                 <int>3</int> 
+                </void> 
+               </object> 
+              </void> 
+              <void method="add"> 
+               <object class="com.ktauber.form.model.FormComponent"> 
+                <string>javax.swing.JLabel</string> 
+                <void method="setProperty"> 
+                 <string>text</string> 
+                 <string>Shuffle Amount (arcsec)</string> 
+                </void> 
+                <void property="name"> 
+                 <string>label7</string> 
+                </void> 
+               </object> 
+               <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+                <class>com.jgoodies.forms.layout.CellConstraints</class> 
+                <void method="setProperty"> 
+                 <string>gridX</string> 
+                 <int>3</int> 
+                </void> 
+                <void method="setProperty"> 
+                 <string>gridY</string> 
+                 <int>5</int> 
+                </void> 
+               </object> 
+              </void> 
+              <void method="add"> 
+               <object class="com.ktauber.form.model.FormComponent"> 
+                <string>jsky.app.ot.gui.NumberBoxWidget</string>
+                <void property="name"> 
+                 <string>microShuffleAmountArcsec</string> 
+                </void> 
+                <void method="auxiliary"> 
+                 <void method="setProperty"> 
+                  <string>JavaCodeGenerator.variableModifiers</string> 
+                  <int>0</int> 
+                 </void> 
+                </void> 
+               </object> 
+               <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+                <class>com.jgoodies.forms.layout.CellConstraints</class> 
+                <void method="setProperty"> 
+                 <string>gridX</string> 
+                 <int>5</int> 
+                </void> 
+                <void method="setProperty"> 
+                 <string>gridY</string> 
+                 <int>5</int> 
+                </void> 
+               </object> 
+              </void> 
+              <void method="add"> 
+               <object class="com.ktauber.form.model.FormComponent"> 
+                <string>javax.swing.JLabel</string> 
+                <void method="setProperty"> 
+                 <string>text</string> 
+                 <string>Shuffle Amount (unbinned pixels)</string> 
+                </void> 
+                <void property="name"> 
+                 <string>label8</string> 
+                </void> 
+               </object> 
+               <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+                <class>com.jgoodies.forms.layout.CellConstraints</class> 
+                <void method="setProperty"> 
+                 <string>gridX</string> 
+                 <int>3</int> 
+                </void> 
+                <void method="setProperty"> 
+                 <string>gridY</string> 
+                 <int>7</int> 
+                </void> 
+               </object> 
+              </void> 
+              <void method="add"> 
+               <object class="com.ktauber.form.model.FormComponent"> 
+                <string>jsky.app.ot.gui.NumberBoxWidget</string>
+                <void property="name"> 
+                 <string>microShuffleAmountPixels</string> 
+                </void> 
+                <void method="auxiliary"> 
+                 <void method="setProperty"> 
+                  <string>JavaCodeGenerator.variableModifiers</string> 
+                  <int>0</int> 
+                 </void> 
+                </void> 
+               </object> 
+               <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+                <class>com.jgoodies.forms.layout.CellConstraints</class> 
+                <void method="setProperty"> 
+                 <string>gridX</string> 
+                 <int>5</int> 
+                </void> 
+                <void method="setProperty"> 
+                 <string>gridY</string> 
+                 <int>7</int> 
+                </void> 
+               </object> 
+              </void> 
+              <void method="add"> 
+               <object class="com.ktauber.form.model.FormComponent"> 
+                <string>javax.swing.JButton</string> 
+                <void method="setProperty"> 
+                 <string>text</string> 
+                 <string>Reset to Default Settings</string> 
+                </void> 
+                <void property="name"> 
+                 <string>microResetButton</string> 
+                </void> 
+                <void method="auxiliary"> 
+                 <void method="setProperty"> 
+                  <string>JavaCodeGenerator.variableModifiers</string> 
+                  <int>0</int> 
+                 </void> 
+                </void> 
+               </object> 
+               <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+                <class>com.jgoodies.forms.layout.CellConstraints</class> 
+                <void method="setProperty"> 
+                 <string>gridX</string> 
+                 <int>5</int> 
+                </void> 
+                <void method="setProperty"> 
+                 <string>gridY</string> 
+                 <int>9</int> 
+                </void> 
+                <void method="setProperty"> 
+                 <string>hAlign</string> 
+                 <object class="com.jgoodies.forms.layout.CellConstraints" field="RIGHT"/> 
+                </void> 
+               </object> 
+              </void> 
+             </object> 
+             <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+              <null/> 
+              <void method="setProperty"> 
+               <string>title</string> 
+               <string>Microshuffle Mode Settings</string> 
+              </void> 
+             </object> 
+            </void> 
+            <void method="add"> 
+             <object class="com.ktauber.form.model.FormContainer"> 
+              <string>javax.swing.JPanel</string> 
+              <object class="com.ktauber.form.model.FormLayoutManager"> 
+               <class>com.jgoodies.forms.layout.FormLayout</class> 
+               <void method="setProperty"> 
+                <string>$columnSpecs</string> 
+                <string>0dlu, labelcompgap, right:default, labelcompgap, max(default;50dlu):grow</string> 
+               </void> 
+               <void method="setProperty"> 
+                <string>$rowSpecs</string> 
+                <string>0dlu, linegap, default, linegap, default, linegap, default, linegap, default, linegap, default, pargap, default, linegap, default</string> 
+               </void> 
+              </object> 
+              <void method="auxiliary"> 
+               <void method="setProperty"> 
+                <string>JavaCodeGenerator.variableModifiers</string> 
+                <int>0</int> 
+               </void> 
+              </void> 
+              <void property="name"> 
+               <string>bandShufflePanel</string> 
+              </void> 
+              <void method="add"> 
+               <object class="com.ktauber.form.model.FormComponent"> 
+                <string>javax.swing.JLabel</string> 
+                <void method="setProperty"> 
+                 <string>text</string> 
+                 <string>Band Size (unbinned pixels)</string> 
+                </void> 
+                <void property="name"> 
+                 <string>label9</string> 
+                </void> 
+               </object> 
+               <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+                <class>com.jgoodies.forms.layout.CellConstraints</class> 
+                <void method="setProperty"> 
+                 <string>gridX</string> 
+                 <int>3</int> 
+                </void> 
+                <void method="setProperty"> 
+                 <string>gridY</string> 
+                 <int>3</int> 
+                </void> 
+               </object> 
+              </void> 
+              <void method="add"> 
+               <object class="com.ktauber.form.model.FormComponent"> 
+                <string>jsky.app.ot.gui.NumberBoxWidget</string>
+                <void property="name"> 
+                 <string>bandSize</string> 
+                </void> 
+                <void method="auxiliary"> 
+                 <void method="setProperty"> 
+                  <string>JavaCodeGenerator.variableModifiers</string> 
+                  <int>0</int> 
+                 </void> 
+                </void> 
+               </object> 
+               <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+                <class>com.jgoodies.forms.layout.CellConstraints</class> 
+                <void method="setProperty"> 
+                 <string>gridX</string> 
+                 <int>5</int> 
+                </void> 
+                <void method="setProperty"> 
+                 <string>gridY</string> 
+                 <int>3</int> 
+                </void> 
+               </object> 
+              </void> 
+              <void method="add"> 
+               <object class="com.ktauber.form.model.FormComponent"> 
+                <string>javax.swing.JLabel</string> 
+                <void method="setProperty"> 
+                 <string>text</string> 
+                 <string>Bands y Offset (unbinned pix)</string> 
+                </void> 
+                <void property="name"> 
+                 <string>label10</string> 
+                </void> 
+               </object> 
+               <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+                <class>com.jgoodies.forms.layout.CellConstraints</class> 
+                <void method="setProperty"> 
+                 <string>gridX</string> 
+                 <int>3</int> 
+                </void> 
+                <void method="setProperty"> 
+                 <string>gridY</string> 
+                 <int>5</int> 
+                </void> 
+               </object> 
+              </void> 
+              <void method="add"> 
+               <object class="com.ktauber.form.model.FormComponent"> 
+                <string>jsky.app.ot.gui.NumberBoxWidget</string>
+                <void property="name"> 
+                 <string>bandsYOffset</string> 
+                </void> 
+                <void method="auxiliary"> 
+                 <void method="setProperty"> 
+                  <string>JavaCodeGenerator.variableModifiers</string> 
+                  <int>0</int> 
+                 </void> 
+                </void> 
+               </object> 
+               <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+                <class>com.jgoodies.forms.layout.CellConstraints</class> 
+                <void method="setProperty"> 
+                 <string>gridX</string> 
+                 <int>5</int> 
+                </void> 
+                <void method="setProperty"> 
+                 <string>gridY</string> 
+                 <int>5</int> 
+                </void> 
+               </object> 
+              </void> 
+              <void method="add"> 
+               <object class="com.ktauber.form.model.FormComponent"> 
+                <string>javax.swing.JLabel</string> 
+                <void method="setProperty"> 
+                 <string>text</string> 
+                 <string>Shuffle Amount (arcsec)</string> 
+                </void> 
+                <void property="name"> 
+                 <string>label11</string> 
+                </void> 
+               </object> 
+               <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+                <class>com.jgoodies.forms.layout.CellConstraints</class> 
+                <void method="setProperty"> 
+                 <string>gridX</string> 
+                 <int>3</int> 
+                </void> 
+                <void method="setProperty"> 
+                 <string>gridY</string> 
+                 <int>7</int> 
+                </void> 
+               </object> 
+              </void> 
+              <void method="add"> 
+               <object class="com.ktauber.form.model.FormComponent"> 
+                <string>jsky.app.ot.gui.NumberBoxWidget</string>
+                <void property="name"> 
+                 <string>bandShuffleAmountArcsec</string> 
+                </void> 
+                <void method="auxiliary"> 
+                 <void method="setProperty"> 
+                  <string>JavaCodeGenerator.variableModifiers</string> 
+                  <int>0</int> 
+                 </void> 
+                </void> 
+               </object> 
+               <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+                <class>com.jgoodies.forms.layout.CellConstraints</class> 
+                <void method="setProperty"> 
+                 <string>gridX</string> 
+                 <int>5</int> 
+                </void> 
+                <void method="setProperty"> 
+                 <string>gridY</string> 
+                 <int>7</int> 
+                </void> 
+               </object> 
+              </void> 
+              <void method="add"> 
+               <object class="com.ktauber.form.model.FormComponent"> 
+                <string>javax.swing.JLabel</string> 
+                <void method="setProperty"> 
+                 <string>text</string> 
+                 <string>Shuffle Amount (unbinned pixels)</string> 
+                </void> 
+                <void property="name"> 
+                 <string>label12</string> 
+                </void> 
+               </object> 
+               <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+                <class>com.jgoodies.forms.layout.CellConstraints</class> 
+                <void method="setProperty"> 
+                 <string>gridX</string> 
+                 <int>3</int> 
+                </void> 
+                <void method="setProperty"> 
+                 <string>gridY</string> 
+                 <int>9</int> 
+                </void> 
+               </object> 
+              </void> 
+              <void method="add"> 
+               <object class="com.ktauber.form.model.FormComponent"> 
+                <string>jsky.app.ot.gui.NumberBoxWidget</string>
+                <void property="name"> 
+                 <string>bandShuffleAmountPixels</string> 
+                </void> 
+                <void method="auxiliary"> 
+                 <void method="setProperty"> 
+                  <string>JavaCodeGenerator.variableModifiers</string> 
+                  <int>0</int> 
+                 </void> 
+                </void> 
+               </object> 
+               <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+                <class>com.jgoodies.forms.layout.CellConstraints</class> 
+                <void method="setProperty"> 
+                 <string>gridX</string> 
+                 <int>5</int> 
+                </void> 
+                <void method="setProperty"> 
+                 <string>gridY</string> 
+                 <int>9</int> 
+                </void> 
+               </object> 
+              </void> 
+              <void method="add"> 
+               <object class="com.ktauber.form.model.FormComponent"> 
+                <string>javax.swing.JButton</string> 
+                <void method="setProperty"> 
+                 <string>text</string> 
+                 <string>Reset to Default Settings</string> 
+                </void> 
+                <void property="name"> 
+                 <string>bandResetButton</string> 
+                </void> 
+                <void method="auxiliary"> 
+                 <void method="setProperty"> 
+                  <string>JavaCodeGenerator.variableModifiers</string> 
+                  <int>0</int> 
+                 </void> 
+                </void> 
+               </object> 
+               <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+                <class>com.jgoodies.forms.layout.CellConstraints</class> 
+                <void method="setProperty"> 
+                 <string>gridX</string> 
+                 <int>5</int> 
+                </void> 
+                <void method="setProperty"> 
+                 <string>gridY</string> 
+                 <int>11</int> 
+                </void> 
+                <void method="setProperty"> 
+                 <string>hAlign</string> 
+                 <object class="com.jgoodies.forms.layout.CellConstraints" field="RIGHT"/> 
+                </void> 
+               </object> 
+              </void> 
+              <void method="add"> 
+               <object class="com.ktauber.form.model.FormComponent"> 
+                <string>javax.swing.JLabel</string> 
+                <void method="setProperty"> 
+                 <string>text</string> 
+                 <string>Title</string> 
+                </void> 
+                <void property="name"> 
+                 <string>label13</string> 
+                </void> 
+                <void method="auxiliary"> 
+                 <void method="setProperty"> 
+                  <string>JavaCodeGenerator.variableModifiers</string> 
+                  <int>0</int> 
+                 </void> 
+                </void> 
+               </object> 
+               <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+                <class>com.jgoodies.forms.layout.CellConstraints</class> 
+                <void method="setProperty"> 
+                 <string>gridX</string> 
+                 <int>3</int> 
+                </void> 
+                <void method="setProperty"> 
+                 <string>gridY</string> 
+                 <int>13</int> 
+                </void> 
+                <void method="setProperty"> 
+                 <string>gridWidth</string> 
+                 <int>3</int> 
+                </void> 
+                <void method="setProperty"> 
+                 <string>hAlign</string> 
+                 <object class="com.jgoodies.forms.layout.CellConstraints" field="CENTER"/> 
+                </void> 
+               </object> 
+              </void> 
+              <void method="add"> 
+               <object class="com.ktauber.form.model.FormContainer"> 
+                <string>javax.swing.JScrollPane</string> 
+                <object class="com.ktauber.form.model.FormLayoutManager"> 
+                 <class>javax.swing.JScrollPane</class> 
+                </object> 
+                <void method="auxiliary"> 
+                 <void method="setProperty"> 
+                  <string>JavaCodeGenerator.variableModifiers</string> 
+                  <int>0</int> 
+                 </void> 
+                </void> 
+                <void property="name"> 
+                 <string>scrollPane1</string> 
+                </void> 
+                <void method="add"> 
+                 <object class="com.ktauber.form.model.FormComponent"> 
+                  <string>javax.swing.JTable</string> 
+                  <void property="name"> 
+                   <string>bandTable</string> 
+                  </void> 
+                  <void method="auxiliary"> 
+                   <void method="setProperty"> 
+                    <string>JavaCodeGenerator.variableModifiers</string> 
+                    <int>0</int> 
+                   </void> 
+                  </void> 
+                 </object> 
+                </void> 
+               </object> 
+               <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+                <class>com.jgoodies.forms.layout.CellConstraints</class> 
+                <void method="setProperty"> 
+                 <string>gridX</string> 
+                 <int>3</int> 
+                </void> 
+                <void method="setProperty"> 
+                 <string>gridY</string> 
+                 <int>15</int> 
+                </void> 
+                <void method="setProperty"> 
+                 <string>gridWidth</string> 
+                 <int>3</int> 
+                </void> 
+               </object> 
+              </void> 
+             </object> 
+             <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+              <null/> 
+              <void method="setProperty"> 
+               <string>title</string> 
+               <string>Band Shuffle Settings</string> 
+              </void> 
+             </object> 
+            </void> 
+           </object> 
+           <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+            <class>com.jgoodies.forms.layout.CellConstraints</class> 
+            <void method="setProperty"> 
+             <string>gridX</string> 
+             <int>1</int> 
+            </void> 
+            <void method="setProperty"> 
+             <string>gridY</string> 
+             <int>7</int> 
+            </void> 
+            <void method="setProperty"> 
+             <string>gridWidth</string> 
+             <int>9</int> 
+            </void> 
+           </object> 
+          </void> 
+          <void method="add"> 
+           <object class="com.ktauber.form.model.FormComponent"> 
+            <string>javax.swing.JSpinner</string> 
+            <void method="setProperty"> 
+             <string>model</string> 
+             <object class="javax.swing.SpinnerNumberModel"> 
+              <int>1</int> 
+              <int>1</int> 
+              <null/> 
+              <int>1</int> 
+             </object> 
+            </void> 
+            <void property="name"> 
+             <string>numMasks</string> 
+            </void> 
+            <void method="auxiliary"> 
+             <void method="setProperty"> 
+              <string>JavaCodeGenerator.variableModifiers</string> 
+              <int>0</int> 
+             </void> 
+            </void> 
+           </object> 
+           <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+            <class>com.jgoodies.forms.layout.CellConstraints</class> 
+            <void method="setProperty"> 
+             <string>gridX</string> 
+             <int>3</int> 
+            </void> 
+            <void method="setProperty"> 
+             <string>gridY</string> 
+             <int>5</int> 
+            </void> 
+           </object> 
+          </void> 
+         </object> 
+         <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+          <class>java.lang.String</class> 
+          <void method="setProperty"> 
+           <string>value</string> 
+           <string>Center</string> 
+          </void> 
+         </object> 
+        </void> 
+        <void method="add"> 
+         <object class="com.ktauber.form.model.FormContainer"> 
+          <string>javax.swing.JPanel</string> 
+          <object class="com.ktauber.form.model.FormLayoutManager"> 
+           <class>com.jgoodies.forms.layout.FormLayout</class> 
+           <void method="setProperty"> 
+            <string>$columnSpecs</string> 
+            <string>glue, button, relgap, button</string> 
+           </void> 
+           <void method="setProperty"> 
+            <string>$rowSpecs</string> 
+            <string>pref</string> 
+           </void> 
+          </object> 
+          <void method="setProperty"> 
+           <string>border</string> 
+           <object class="com.jgoodies.forms.factories.Borders" field="BUTTON_BAR_GAP_BORDER"/> 
+          </void> 
+          <void property="name"> 
+           <string>buttonBar</string> 
+          </void> 
+          <void method="add"> 
+           <object class="com.ktauber.form.model.FormComponent"> 
+            <string>javax.swing.JButton</string> 
+            <void method="setProperty"> 
+             <string>text</string> 
+             <string>Make Mask Files</string> 
+            </void> 
+            <void property="name"> 
+             <string>makeMaskFilesButton</string> 
+            </void> 
+            <void method="auxiliary"> 
+             <void method="setProperty"> 
+              <string>JavaCodeGenerator.variableModifiers</string> 
+              <int>0</int> 
+             </void> 
+            </void> 
+           </object> 
+           <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+            <class>com.jgoodies.forms.layout.CellConstraints</class> 
+            <void method="setProperty"> 
+             <string>gridX</string> 
+             <int>2</int> 
+            </void> 
+            <void method="setProperty"> 
+             <string>gridY</string> 
+             <int>1</int> 
+            </void> 
+           </object> 
+          </void> 
+          <void method="add"> 
+           <object class="com.ktauber.form.model.FormComponent"> 
+            <string>javax.swing.JButton</string> 
+            <void method="setProperty"> 
+             <string>text</string> 
+             <string>Cancel</string> 
+            </void> 
+            <void property="name"> 
+             <string>cancelButton</string> 
+            </void> 
+            <void method="auxiliary"> 
+             <void method="setProperty"> 
+              <string>JavaCodeGenerator.variableModifiers</string> 
+              <int>0</int> 
+             </void> 
+            </void> 
+           </object> 
+           <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+            <class>com.jgoodies.forms.layout.CellConstraints</class> 
+            <void method="setProperty"> 
+             <string>gridX</string> 
+             <int>4</int> 
+            </void> 
+            <void method="setProperty"> 
+             <string>gridY</string> 
+             <int>1</int> 
+            </void> 
+           </object> 
+          </void> 
+         </object> 
+         <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+          <class>java.lang.String</class> 
+          <void method="setProperty"> 
+           <string>value</string> 
+           <string>South</string> 
+          </void> 
+         </object> 
+        </void> 
+       </object> 
+       <object class="com.ktauber.form.model.FormLayoutConstraints"> 
+        <class>java.lang.String</class> 
+        <void method="setProperty"> 
+         <string>value</string> 
+         <string>Center</string> 
+        </void> 
+       </object> 
+      </void> 
+      <void property="name"> 
+       <string>this</string> 
+      </void> 
+     </object> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+</java> 

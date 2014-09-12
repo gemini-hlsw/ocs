@@ -1,0 +1,75 @@
+<jxb:bindings version="2.0"
+              xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+              xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <!-- Custom bindings for conditions -->
+    <jxb:bindings schemaLocation="../xsd/Condition.xsd" node="/xsd:schema">
+
+        <!-- CloudCover -->
+        <jxb:bindings node="./xsd:simpleType[@name='CloudCover']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='50%/Clear']">
+                <jxb:typesafeEnumMember name="cc50"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='70%/Cirrus']">
+                <jxb:typesafeEnumMember name="cc70"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='80%/Cloudy']">
+                <jxb:typesafeEnumMember name="cc80"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Any']">
+                <jxb:typesafeEnumMember name="cc100"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+        <!-- ImageQuality -->
+        <jxb:bindings node="./xsd:simpleType[@name='ImageQuality']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='20%/Best']">
+                <jxb:typesafeEnumMember name="iq20"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='70%/Good']">
+                <jxb:typesafeEnumMember name="iq70"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='85%/Poor']">
+                <jxb:typesafeEnumMember name="iq85"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Any']">
+                <jxb:typesafeEnumMember name="iq100"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+        <!-- SkyBackground -->
+        <jxb:bindings node="./xsd:simpleType[@name='SkyBackground']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='20%/Darkest']">
+                <jxb:typesafeEnumMember name="sb20"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='50%/Dark']">
+                <jxb:typesafeEnumMember name="sb50"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='80%/Grey']">
+                <jxb:typesafeEnumMember name="sb80"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Any/Bright']">
+                <jxb:typesafeEnumMember name="sb100"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+        <!-- WaterVapor -->
+        <jxb:bindings node="./xsd:simpleType[@name='WaterVapor']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='20%/Low']">
+                <jxb:typesafeEnumMember name="wv20"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='50%/Median']">
+                <jxb:typesafeEnumMember name="wv50"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='80%/High']">
+                <jxb:typesafeEnumMember name="wv80"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Any']">
+                <jxb:typesafeEnumMember name="wv100"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+
+    </jxb:bindings>
+
+</jxb:bindings>

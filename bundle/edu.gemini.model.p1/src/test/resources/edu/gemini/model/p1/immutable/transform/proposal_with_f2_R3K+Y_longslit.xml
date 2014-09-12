@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="2013.2.1">
+    <meta band3optionChosen="false"/>
+    <semester half="B" year="2013"/>
+    <title></title>
+    <abstract></abstract>
+    <scheduling></scheduling>
+    <keywords/>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Principal</firstName>
+            <lastName>Investigator</lastName>
+            <status>PhD</status>
+            <email></email>
+            <address>
+                <institution></institution>
+                <address></address>
+                <country></country>
+            </address>
+        </pi>
+    </investigators>
+    <targets/>
+    <conditions/>
+    <blueprints>
+        <flamingos2>
+            <longslit id="blueprint-0">
+                <name>Flamingos2 Longslit R3K Y (1.020 um) 2-pix longslit</name>
+                <visitor>false</visitor>
+                <filter>Y (1.020 um)</filter>
+                <disperser>R3K</disperser>
+                <fpu>2-pix longslit</fpu>
+            </longslit>
+        </flamingos2>
+        <gmosN>
+            <regime>optical</regime>
+            <ifu id="blueprint-1">
+                <name>GMOS-N IFU R831 OG515 (&gt; 520 nm) IFU 1 slit</name>
+                <filter>OG515 (&gt; 520 nm)</filter>
+                <disperser>R831</disperser>
+                <fpu>IFU 1 slit</fpu>
+            </ifu>
+        </gmosN>
+    </blueprints>
+    <observations>
+        <observation blueprint="blueprint-0" enabled="true" band="Band 1/2"/>
+        <observation blueprint="blueprint-1" enabled="true" band="Band 1/2"/>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None"/>
+    </proposalClass>
+</proposal>

@@ -1,0 +1,2 @@
+The email agent could not locate the observing database running
+at @SITE_HOST@.

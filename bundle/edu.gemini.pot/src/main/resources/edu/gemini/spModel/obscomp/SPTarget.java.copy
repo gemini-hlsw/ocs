@@ -1,0 +1,927 @@
+// Copyright 1997-2000
+// Association for Universities for Research in Astronomy, Inc.,
+// Observatory Control System, Gemini Telescopes Project.
+// See the file COPYRIGHT for complete details.
+//
+// $Id: SPTarget.java.copy 4726 2004-05-14 16:50:12Z brighton $
+//
+package jsky.app.ot.nsp.model.obscomp;
+
+import jsky.app.ot.nsp.model.SPTypeBase;
+
+import jsky.app.ot.nsp.model.util.targets.HMS;
+import jsky.app.ot.nsp.model.util.targets.ICoordinate;
+import jsky.app.ot.nsp.model.util.targets.ITarget;
+import jsky.app.ot.nsp.model.util.targets.CoordinateParam;
+import jsky.app.ot.nsp.model.util.targets.ConicTarget;
+import jsky.app.ot.nsp.model.util.targets.DegDegTarget;
+import jsky.app.ot.nsp.model.util.targets.HmsDegTarget;
+import jsky.app.ot.nsp.model.util.targets.TypeBase;
+import jsky.app.ot.nsp.model.util.targets.CoordinateParam.Units;
+import jsky.app.ot.nsp.model.util.targets.CoordinateTypes.*;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * A data object that describes a telescope position and includes methods
+ * for extracting positions.
+ *
+ * <h3>Fields of a SpTelescopePos Value</h3>
+ * Each SPTarget is an attribute that consists of a set of 5 values
+ * at the given indices:
+ * <pre>
+ *    Index  Field
+ *        0  tag   - one of "Base", "User", or a site-specific guide star 
+ *                   tag name like "PWFS1"
+ *        1  name  - arbitrary name of the position (e.g., a tag from a
+ *                   position in a guide star catalog)
+ *        2  xaxis - the x axis of the position (e.g., the RA)
+ *        3  yaxis - the y axis of the position (e.g., the Dec)
+ *        4  coordinate system - (currently only FK5/J2000 is supported)
+ * </pre>
+ * The name of the attribute is always the same as the name of the tag.
+ * Therefore, each tag must be unique.
+ */
+public final class SPTarget extends TelescopePos
+   implements Serializable
+{
+   /**
+    * TargetType property options.
+    */
+   public static final class TargetType extends SPTypeBase
+   {
+      public static final int _SCIENCE  = 0;
+      public static final int _BASE     = 1;
+      public static final int _WFS      = 2;
+      public static final int _OIWFS    = 3;
+      public static final int _GUIDE    = 4;
+      public static final int _USER     = 5;
+
+      public static final TargetType SCIENCE =
+                      new TargetType(_SCIENCE, "Science");
+
+      public static final TargetType BASE =
+                      new TargetType(_BASE, "Base");
+
+      public static final TargetType WFS     =
+                      new TargetType(_WFS, "Wave Front Sensor");
+
+      public static final TargetType OIWFS   =
+                      new TargetType(_OIWFS, "On-Instrument WFS");
+
+      public static final TargetType GUIDE   =
+                      new TargetType(_GUIDE, "Guide Star");
+
+      public static final TargetType USER   =
+                      new TargetType(_USER, "User Object");
+
+      public static final TargetType[] TYPES = new TargetType[] {
+         SCIENCE,
+	 BASE,
+         WFS,
+         OIWFS,
+         GUIDE,
+	 USER
+      };
+
+      private TargetType(int type, String name)
+      {
+         super(type, name);
+      }
+   }
+
+   // for serialization
+   private static final long serialVersionUID = 1L;
+
+   //
+   // A position can have one of the following tags.  "Guide" and "User"
+   // tags have a numeric suffix appended to them to make them unique.
+   //
+   public static final String   BASE_TAG  = "Base";
+   public static final String   USER_TAG  = "User";
+   public static String[] GUIDE_TAGS = {"PWFS1", "PWFS2", "OIWFS"};
+
+   // Indices of the the fields of a position
+   public static final int TAG_INDEX		=  0;
+   public static final int NAME_INDEX		=  1;
+   public static final int COORD_SYS_INDEX	=  2;
+   public static final int EPOCH_INDEX	        =  3;
+   public static final int XAXIS_INDEX		=  4;
+   public static final int YAXIS_INDEX		=  5;
+   public static final int REQUIRED_FIELDS      =  6;
+
+   // The ICoordinates
+   public static final TypeBase DEFAULT_TARGET_TYPE = HmsDegTarget.SystemType.J2000;
+
+   // Position is valid.
+   boolean _isValid = false;
+
+   /**
+    * Override clone to make sure the position is copied properly.
+    */
+   public Object clone()
+   {
+      SPTarget ntarget = null;
+      try {
+	 ntarget = (SPTarget) super.clone();
+      } catch (CloneNotSupportedException ex) {
+	 // Should not happen
+	 throw new UnsupportedOperationException();
+      }
+
+      // _isValid is immutable
+
+      return ntarget;
+   }
+
+   /**
+    * Override equals to return true if both instances are the same.
+    */
+   /*
+   public boolean equals(Object obj)
+   {
+      if (obj == null) return false;
+      if (obj == this) return true;
+
+      if (!(obj instanceof SPTarget)) return false;
+
+      SPTarget sys = (SPTarget)obj;
+   */
+
+   /**
+    * Create a SPTarget object, bound to an attribute with the same name
+    * as its tag.  SPTarget objects are created
+    * by the SpTelescopePosList.
+    */
+   protected SPTarget(String tag)
+   {
+      this(tag, (ITarget)null);
+   }
+
+   /**
+    * Create a SPTarget object, bound to an attribute with the same name
+    * as its tag.  
+    */
+   protected SPTarget(String tag, ITarget target)
+   {
+      super(tag, target);
+
+      if (target == null) {
+	 // Create an empty target
+	 _target   = new HmsDegTarget();
+	 _isValid  = false;
+      }
+   }
+
+   // -------  Various create methods that create a tagged Target --------
+
+   /**
+    * Create a default base position using the HmsDegTarget.
+    */
+   public static SPTarget createDefaultBasePosition()
+   {
+      return createDefaultBasePosition(HmsDegTarget.DEFAULT_SYSTEM_TYPE);
+   }
+
+   /**
+    * Create a SPTarget object, bound to an attribute with the same name
+    * as its tag.  
+    */
+   protected SPTarget(String tag, TypeBase tb)
+   {
+      super(tag, null);
+      ITarget target = SPTarget.createTarget(tb);
+      setTarget(target);
+   }
+
+   /**
+    * Hack for the SpTelescopeObsComp.  It needs to always be created
+    * with a base position, so it calls this method in the constructor.
+    */
+   public static SPTarget createDefaultBasePosition(TypeBase type)
+   {
+      ITarget target = createTarget(type);
+      if (target == null) return null;
+
+      return new SPTarget(BASE_TAG, target);
+   }
+
+   /**
+    * A public factory method to create an SPTarget.
+    */
+   public static SPTarget createPosition(String tag, TypeBase type)
+   {
+      return new SPTarget(tag, type);
+   }
+
+   /**
+    * A public factory method to create an SPTarget.
+    */
+   public static SPTarget createPosition(String tag)
+   {
+      return new SPTarget(tag, DEFAULT_TARGET_TYPE);
+   }
+
+   /**
+    * A public factory method to create a default target.
+    */
+   public static ITarget createTarget()
+   {
+      return SPTarget.createTarget(DEFAULT_TARGET_TYPE);
+   }
+
+   /**
+    * A public factory method to create target instances.
+    */
+   public static ITarget createTarget(TypeBase type)
+   {
+      ITarget target = null;
+      // Based on instance create the right target
+      if (type instanceof HmsDegTarget.SystemType) {
+	 target = new HmsDegTarget((HmsDegTarget.SystemType)type);
+      } else
+      if (type instanceof DegDegTarget.SystemType) {
+	 target = new DegDegTarget((DegDegTarget.SystemType)type);
+      } else
+      if (type instanceof ConicTarget.SystemType) {
+	 target = new ConicTarget((ConicTarget.SystemType)type);
+      }
+      return target;
+   }
+
+   /**
+    * A public factory method to create a target instance based
+    * upon the String name of the coordinate system.
+    */
+   public static ITarget createTarget(String coordSys)
+   {
+      // Cycle through each known target type looking for matches
+      // First HmsDegTarget
+      {
+	 HmsDegTarget.SystemType[] types = HmsDegTarget.SystemType.TYPES;
+	 for (int i=0; i<types.length; i++) {
+	    if (coordSys.equals(types[i].getName())) {
+	       return new HmsDegTarget(types[i]);
+	    }
+	 }
+      }
+      // Then DegDeg
+      {
+	 DegDegTarget.SystemType[] types = DegDegTarget.SystemType.TYPES;
+	 for (int i=0; i<types.length; i++) {
+	    if (coordSys.equals(types[i].getName())) {
+	       return new DegDegTarget(types[i]);
+	    }
+	 }
+      }
+      // Finally Conic
+      {
+	 ConicTarget.SystemType[] types = ConicTarget.SystemType.TYPES;
+	 for (int i=0; i<types.length; i++) {
+	    if (coordSys.equals(types[i].getName())) {
+	       return new ConicTarget(types[i]);
+	    }
+	 }
+      }
+
+      return null;
+   }
+
+   /**
+    * Set the list of tags that represent guide stars.  For instance,
+    * for Gemini, the set of tags are "PWFS1", "PWFS2", "OIWFS".
+    */
+   public static void setGuideStarTags(String[] tags)
+   {
+      GUIDE_TAGS = tags;
+   }
+
+   /**
+    * Get the list of tags that represent guide stars.
+    */
+   public static String[] getGuideStarTags()
+   {
+      return GUIDE_TAGS;
+   }
+
+   //
+   // Set the tag, thus changing the attribute name.  This method should only
+   // be available to SpTelescopePosList, not general clients.
+   //
+   void setTag(String newTag)
+   {
+      synchronized (this) {
+	 _tag = newTag;
+      }
+      _notifyOfGenericUpdate();
+   }
+
+   /**
+    * Set the name.
+    */
+   public void setName(String name)
+   {
+      synchronized (this) {
+	 _target.setName(name);
+      }
+      _notifyOfGenericUpdate();
+   }
+
+
+   /**
+    * Get the name.
+    */
+   public String getName()
+   {
+      return _target.getName();
+   }
+
+
+   /**
+    * Allow setting x and y axes without notifying observers.
+    */
+   public synchronized void noNotifySetXY(double xaxis, double yaxis)
+   {
+      _target.getC1().setAs(xaxis, Units.DEGREES);
+      _target.getC2().setAs(yaxis, Units.DEGREES);
+
+      /*
+      if (_tag.equals(BASE_TAG)) {
+	 SpObsData od = _spItem.getObsData();
+	 if (od != null) od.setBasePos(xaxis, yaxis);
+      }
+      */
+   }
+
+   /**
+    * Allow setting x and y axes without notifying observers.
+    */
+   public synchronized void noNotifySetXYFromString(String xaxisStr, 
+						    String yaxisStr)
+   {
+      _updateXYFromString(xaxisStr, yaxisStr);
+
+      /*
+      if (_tag.equals(BASE_TAG)) {
+	 SpObsData od = _spItem.getObsData();
+	 if (od != null) od.setBasePos(_xaxis, _yaxis);
+      }
+      */
+   }
+
+   //
+   // Set the x and y axes from a string, without notifying observers or
+   // modifying any attributes.
+   //
+   private synchronized void _updateXYFromString(String xaxisStr, 
+						 String yaxisStr)
+   {
+      try {
+	 _target.setC1C2(xaxisStr, yaxisStr);
+	 _isValid = true;
+      } catch (IllegalArgumentException ex) {
+	 // Bad coordinate so set to something easy
+	 _target.getC1().setAs(0.0, Units.DEGREES);
+	 _target.getC2().setAs(0.0, Units.DEGREES);
+	 _isValid = false;
+      }
+   }
+
+
+   /**
+    * Set the xaxis and the yaxis.
+    */
+   public void setXY(double xaxis, double yaxis)
+   {
+      noNotifySetXY(xaxis, yaxis);
+      _notifyOfLocationUpdate();
+   }
+
+   /**
+    * Set the xaxis and the yaxis.
+    */
+   public void setXYFromString(String xaxisStr, String yaxisStr)
+   {
+      noNotifySetXYFromString(xaxisStr, yaxisStr);
+      _notifyOfLocationUpdate();
+   }
+
+   /**
+    * Is this position valid?
+    */
+   public boolean isValid()
+   {
+      return _isValid;
+   }
+
+   /**
+    * Set the Coordinate System with an int (presumably from the coordinate
+    * system static constants).
+    */
+   public void setCoordSys(TypeBase systemOption)
+      throws IllegalArgumentException
+   {
+      _target.setSystemOption(systemOption);
+
+      _notifyOfGenericUpdate();
+   }
+
+   /**
+    * Set the Coordinate System with a string.
+    */
+   public void setCoordSys(String coordSysString)
+      throws IllegalArgumentException
+   {
+      TypeBase newCoordSys = null;
+
+      TypeBase[] options = _target.getSystemOptions();
+      for (int i=0; i<options.length; i++) {
+	 if (coordSysString.equals(options[i].getName())) {
+	    newCoordSys = options[i];
+	    break;
+	 }
+      }
+
+      if (newCoordSys == null) return;
+
+      setCoordSys(newCoordSys);
+
+      _notifyOfGenericUpdate();
+   }
+
+   /**
+    * Get coordinate system used by this position.
+    */
+   public TypeBase getCoordSys()
+   {
+      return _target.getSystemOption();
+   }
+
+   /**
+    * Get coordinate system used by this position as a String.
+    */
+   public String getCoordSysAsString()
+   {
+      return _target.getSystemOption().getName();
+   }
+
+   /**
+    * Is this the "base" position?
+    */
+   public synchronized boolean isBasePosition()
+   {
+      return _tag.equals(BASE_TAG);
+   }
+
+   /**
+    * Is this the "base" position?
+    */
+   public static boolean isBasePositionTag(String tag)
+   {
+      return tag.equals(BASE_TAG);
+   }
+
+   /**
+    * Is this a guide star?
+    */
+   public synchronized boolean isGuidePosition()
+   {
+      return isGuidePositionTag(_tag);
+   }
+
+   /**
+    * Is this tag a guide star tag?
+    */
+   public static boolean isGuidePositionTag(String tag)
+   {
+      for (int i=0; i<GUIDE_TAGS.length; ++i) {
+	 if (tag.equals(GUIDE_TAGS[i])) return true;
+      }
+      return false;
+   }
+
+   /**
+    * Is this a "user" position?
+    */
+   public synchronized boolean isUserPosition()
+   {
+      return _tag.startsWith(USER_TAG);
+   }
+
+   /**
+    * Is this a "user" position?
+    */
+   public static boolean isUserPositionTag(String tag)
+   {
+      return tag.startsWith(USER_TAG);
+   }
+
+   /**
+    * Get the index of the User tag, its unique number suffix.
+    */
+   public static int getUserPositionIndex(String tag)
+   {
+      String index = tag.substring(USER_TAG.length());
+      return Integer.parseInt(index);
+   }
+
+   // ----- Specialized methods for an HmsDegTarget ----------
+   /**
+    * Get the proper motion RA.
+    */
+   public String getPropMotionRA()
+   {
+      String res = "0";
+      if (_target instanceof HmsDegTarget) {
+	 HmsDegTarget t = (HmsDegTarget)_target;
+	 res = t.getPM1().getStringValue();
+      }
+      return res;
+   }
+
+   /**
+    * Set the proper motion ra as a string.
+    */
+   public void setPropMotionRA(String newValue)
+   {
+      if (_target instanceof HmsDegTarget) {
+	 HmsDegTarget t = (HmsDegTarget)_target;
+	 PM1 pm1 = new PM1(newValue);
+	 t.setPM1(pm1);
+	 _notifyOfGenericUpdate();
+      } else {
+	 throw new IllegalArgumentException();
+      }
+   }
+
+   /**
+    * Get the proper motion Dec.
+    */
+   public String getPropMotionDec()
+   {
+      String res = "0";
+      if (_target instanceof HmsDegTarget) {
+	 HmsDegTarget t = (HmsDegTarget)_target;
+	 res = t.getPM2().getStringValue();
+      }
+      return res;
+   }
+
+   /**
+    * Set the proper motion Dec as a string.
+    */
+   public void setPropMotionDec(String newValue)
+   {
+      if (_target instanceof HmsDegTarget) {
+	 HmsDegTarget t = (HmsDegTarget)_target;
+	 PM2 pm2 = new PM2(newValue);
+	 t.setPM2(pm2);
+	 _notifyOfGenericUpdate();
+      } else {
+	 throw new IllegalArgumentException();
+      }
+   }
+
+   /**
+    * Get the tracking system.
+    */
+   public String getTrackingSystem()
+   {
+      return getCoordSysAsString();
+   }
+
+   /**
+    * Set the tracking system as a string.
+    */
+   public void setTrackingSystem(String trackSys)
+   {
+      setCoordSys(trackSys);
+      _notifyOfGenericUpdate();
+   }
+
+   /**
+    * Get the tracking epoch.
+    */
+   public String getTrackingEpoch()
+   {
+      String res = "2000";
+      Epoch e = _target.getEpoch();
+      if (e == null) return res;
+
+      return Double.toString(e.getValue());
+   }
+
+   /**
+    * Set the tracking epoch as a string.
+    */
+   public void setTrackingEpoch(String trackEpoch)
+   {
+      if (trackEpoch == null) return;
+
+      Epoch e = new Epoch(trackEpoch);
+      _target.setEpoch(e);
+      _notifyOfGenericUpdate();
+   }
+
+   /**
+    * Get the tracking parallax.
+    */
+   public String getTrackingParallax()
+   {
+      String res = "0";
+      if (_target instanceof HmsDegTarget) {
+	 HmsDegTarget t = (HmsDegTarget)_target;
+	 res = t.getParallax().getStringValue();
+      }
+      return res;
+   }
+
+   /**
+    * Set the tracking parallax as a string.
+    */
+   public void setTrackingParallax(String newValue)
+   {
+      if (_target instanceof HmsDegTarget) {
+	 HmsDegTarget t = (HmsDegTarget)_target;
+	 Parallax p = new Parallax(newValue);
+	 t.setParallax(p);
+	 _notifyOfGenericUpdate();
+      } else {
+	 throw new IllegalArgumentException();
+      }
+   }
+
+   /**
+    * Get the tracking radial velocity.
+    */
+   public String getTrackingRadialVelocity()
+   {
+      String res = "0";
+      if (_target instanceof HmsDegTarget) {
+	 HmsDegTarget t = (HmsDegTarget)_target;
+	 res = t.getRV().getStringValue();
+      }
+      return res;
+   }
+
+   /**
+    * Set the tracking radial velocity as a string.
+    */
+   public void setTrackingRadialVelocity(String newValue)
+   {
+      if (_target instanceof HmsDegTarget) {
+	 HmsDegTarget t = (HmsDegTarget)_target;
+	 RV rv = new RV(newValue);
+	 t.setRV(rv);
+	 _notifyOfGenericUpdate();
+      } else {
+	 throw new IllegalArgumentException();
+      }
+   }
+
+   /**
+    * Get the tracking effective wavelength.
+    */
+   public String getTrackingEffectiveWavelength()
+   {
+      String res = "";
+      if (_target instanceof HmsDegTarget) {
+	 HmsDegTarget t = (HmsDegTarget)_target;
+	 EffWavelength ew = t.getEffWavelength();
+	 if (ew == HmsDegTarget.AUTO_EFF_WAVELENGTH) {
+	    res = "auto";
+	 } else {
+	    res = Double.toString(ew.getValue());
+	 }
+      }
+      return res;
+   }
+
+   /**
+    * Set the tracking effective wavelength as a string.
+    */
+   public void setTrackingEffectiveWavelength(String newValue)
+   {
+      if (_target instanceof HmsDegTarget) {
+	 HmsDegTarget t = (HmsDegTarget)_target;
+	 EffWavelength ew = new EffWavelength(newValue);
+	 t.setEffWavelength(ew);
+	 _notifyOfGenericUpdate();
+      } else {
+	 throw new IllegalArgumentException();
+      }
+   }
+
+   /**
+    * A helper routine to determine if a tag is a valid SPTarget
+    * tag.
+    */
+   public static boolean isValidTag(String tag)
+   {
+      // Is it the base position
+      if (isBasePositionTag(tag)) return true;
+
+      // Is it a guide star tag
+      if (isGuidePositionTag(tag)) return true;
+
+      // Is it a user tag
+      if (isUserPositionTag(tag)) return true;
+
+      return false;
+   }
+      
+   /**
+    * Create a new SPTarget based upon the system dependent List
+    * of Strings.
+    * @throws IllegalArgumentException when a parameter is malformed or
+    * not appropriate.
+    */
+   public static SPTarget spTargetFromStringList(List l)
+      throws IllegalArgumentException
+   {
+      int MINIMUM_REQUIRED_MEMBERS = 4;
+      // Minimum test
+      if (l.size() < MINIMUM_REQUIRED_MEMBERS) return null;
+
+      String tag = (String)l.remove(0);
+      System.out.println("Tag: " + tag);
+
+      if (!isValidTag(tag)) return null;
+
+      // Attempt to get an ITarget
+      ITarget itarget = iTargetFromStringList(l);
+      if (itarget == null) {
+	 System.out.println("Failed to create target: " + tag);
+	 return null;
+      }
+
+      return new SPTarget(tag, itarget);
+   }
+
+   /**
+    * Create a new ITarget based upon the system dependent List
+    * of Strings.
+    * <p>
+    * This routine assumes a tag has already been removed.
+    *
+    * @throws IllegalArgumentException when a parameter is malformed or
+    * not appropriate.
+    */
+   public static ITarget iTargetFromStringList(List l)
+      throws IllegalArgumentException
+   {
+      int MINIMUM_REQUIRED_MEMBERS = 3;
+      // Minimum test
+      if (l.size() < MINIMUM_REQUIRED_MEMBERS) return null;
+
+      // Order is name, system, epoch
+      String name = (String)l.remove(0);
+      String system = (String)l.remove(0);
+      String epoch = (String)l.remove(0);
+
+      System.out.println(name + "," + system + "," + epoch);
+
+      // Attempt to get an ITarget
+      ITarget itarget = createTarget(system);
+      if (itarget == null) {
+	 System.out.println("Failed to create target: " + system);
+	 return null;
+      }
+
+      // Set the name
+      itarget.setName(name);
+
+      // Based on instance create the right target
+      if (itarget instanceof HmsDegTarget) {
+	 // Add HmsDegTarget list items
+	 System.out.println("HmsDeg");
+         HmsDegTarget t = (HmsDegTarget)itarget;
+
+	 // Order is ra, dec, pm1, pm2, parallax, rv, eff w
+         String c1 = (String)l.remove(0);
+         String c2 = (String)l.remove(0);
+         // This can throw IllegalArgumentException
+         t.setC1C2(c1, c2);
+
+         PM1 pm1 = new PM1();
+         pm1.fromString((String)l.remove(0));
+         t.setPM1(pm1);
+         PM2 pm2 = new PM2();
+         pm2.fromString((String)l.remove(0));
+         t.setPM2(pm2);
+
+	 Parallax p = new Parallax();
+	 p.fromString((String)l.remove(0));
+	 t.setParallax(p);
+
+	 RV rv = new RV();
+	 rv.fromString((String)l.remove(0));
+         t.setRV(rv);
+
+	 EffWavelength eff = new EffWavelength();
+	 eff.fromString((String)l.remove(0));
+	 t.setEffWavelength(eff);
+
+      } else
+      if (itarget instanceof ConicTarget) {
+	 // Addd ConicTarget items
+	 System.out.println("Conic");
+      }
+
+      return itarget;
+   }
+
+   /**
+    * Write the position to a coordinate system dependent List
+    * of values.
+    * 
+    * Order is:
+    * 0: tag
+    * 1: name
+    * 2: coordinate system name (TypeBase)
+    * 3: epoch
+    * Following this is system dependent.
+    */
+   public List toStringList()
+   {
+      List result = new ArrayList();
+
+      ITarget target = getTarget();
+
+      // Based on instance create the right target
+      if (target instanceof HmsDegTarget) {
+	 HmsDegTarget t = (HmsDegTarget)target;
+	 result.add(getTag());
+	 result.add(getName());
+	 result.add(t.getSystemOption().getName());
+	 result.add(t.getEpoch().toString());
+	 result.add(t.c1ToString());
+	 result.add(t.c2ToString());
+	 result.add(t.getPM1().toString());
+	 result.add(t.getPM2().toString());
+	 result.add(t.getParallax().toString());
+	 result.add(t.getRV().toString());
+	 result.add(t.getEffWavelength().toString());
+      } else
+      if (target instanceof DegDegTarget) {
+	 DegDegTarget t = (DegDegTarget)target;
+	 result.add(getTag());
+	 result.add(getName());
+	 result.add(t.getSystemOption().getName());
+	 result.add(t.getEpoch().toString());
+	 result.add(t.c1ToString());
+	 result.add(t.c2ToString());
+      } else
+      if (target instanceof ConicTarget) {
+	 ConicTarget t = (ConicTarget)target;
+	 result.add(getTag());
+	 result.add(getName());
+	 result.add(t.getSystemOption().getName());
+	 result.add(t.getEpoch().toString());
+	 result.add(t.getANode().toString());
+	 result.add(t.getAQ().toString());
+	 result.add(Double.toString(t.getE()));
+	 result.add(t.getInclination().toString());
+	 result.add(t.getLM().toString());
+	 result.add(t.getN().toString());
+	 result.add(t.getPerihelion().toString());
+      }
+      return result;
+   }
+
+   /**
+    * Standard debugging method.
+    */
+   public void dump()
+   {
+      System.out.println("Tag=" + getTag());
+      _target.dump();
+   }
+
+   /**
+    * Write the position to a coordinate system dependent List
+    * of values.
+    * 
+    * Order is:
+    * 0: tag
+    * 1: name
+    * 2: coordinate system name (TypeBase)
+    * 3: epoch
+    * Following this is system dependent.
+    */
+   static List toStringList(SPTarget pos)
+   {
+      return pos.toStringList();
+   }
+
+   /**
+    * Standard debugging method.
+    */
+   public synchronized String toString()
+   {
+      return "tag=" + getTag() + " [" + _target.toString() + "]";
+   }
+
+}

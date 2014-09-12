@@ -1,0 +1,58 @@
+149,2011/11/28 00:16:04 HST
+#,NIFS GCAL Calibration Configurations:,,,,,,,,,,,
+#,,,,,,,,,,,,
+#,"V 1.4 - BM, 2011nov25",,,,,,,,,,,
+#,changes:,,,,,,,,,,,
+#,Removed "Arc darks", bug fix,,,,,,,,,,,
+#,,,,,,,,,,,,
+#,,,,,,,,,,,,
+#,"V 1.33 - GG, 2011nov21",,,,,,,,,,,
+#,changes:,,,,,,,,,,,
+#,Bug fixes,,,,,,,,,,,
+#,,,,,,,,,,,,
+#,"V 1.3 - GG, 2011oct15",,,,,,,,,,,
+#,changes:,,,,,,,,,,,
+#,"Added ""same as disperser"" to filter",,,,,,,,,,,
+#,,,,,,,,,,,,
+#,"V 1.2 - GG, 2011sep21",,,,,,,,,,,
+#,changes:,,,,,,,,,,,
+#,Minor typos fixes,,,,,,,,,,,
+#,,,,,,,,,,,,
+#,,,,,,,,,,,,
+#,"V 1.1 - GG, 2011sep18",,,,,,,,,,,
+#,,,,,,,,,,,,
+#,"For a daytime Calibration set at each wavelength, take: 1) Lamps on flats, 2) Lamps off flats, 3) Arc darks, 4) Ronchi calibration masks, 5) Clear Array frame (Clear array is to get rid of image persistence from the Ronchi mask frames).  NOTE: Observations Are defined in that order to minimize the number of FPU moves in NIFS and increase the efficiency.",,,,,,,,,,,
+#,Arcs for NIFS observations should ALWAYS be taken with the science at night!  (not as daytime calibs).,,,,,,,,,,,
+#,"The Filter and Central Wavelength should be matched to the science observations, as these can be customized by the PI.",,,,,,,,,,,
+#,"If the science observation is made with an occulting disk, this should also be used for the flat fields. This is an uncommon mode.",,,,,,,,,,,
+#,,,,,,,,,,,,
+#,,,,,,,,,,,,
+# NIFS,,,,,# GCAL,,,,,,,
+Disperser,Filter,Focal Plane Mask,Central Wavelength,,Calibration Observe,Calibration Filter,Calibration Diffuser,Calibration Lamps,Calibration Shutter,Calibration Exposure Time,Calibration Coadds,Calibration Basecal
+#,,,,,,,,,,,,
+# K band,,,,,,,,,,,,
+$K.*,$HK Filter|Same as Disperser,$Clear|.*Occulting Disk,2.00 - 2.41,,5,none,IR,IR grey body - high,Open,5.3,1,Day
+$K.*,$HK Filter|Same as Disperser,$Clear|.*Occulting Disk,2.00 - 2.41,,5,none,IR,IR grey body - high,Closed,5.3,1,Day
+$K.*,$HK Filter|Same as Disperser,Ronche Cal Mask,2.00 - 2.41,,2,none,IR,IR grey body - high,open,5.3,1,Day
+$K.*,$HK Filter|Same as Disperser,Ronche Cal Mask,2.00 - 2.41,,1,none,IR,IR grey body - high,closed,5.3,1,Day
+#,,,,,,,,,,,,
+# H band,,,,,,,,,,,,
+H grating,$JH Filter|Same as Disperser,$Clear|.*Occulting Disk,1.49 - 1.78,,5,ND4.0,IR,Quartz Halogen,closed,8,1,Day
+H grating,$JH Filter|Same as Disperser,$Clear|.*Occulting Disk,1.49 - 1.78,,5,ND4.0,IR,IR grey body - high,closed,8,1,Day
+H grating,$JH Filter|Same as Disperser,Ronche Cal Mask,1.49 - 1.78,,2,ND4.0,IR,Quartz Halogen,closed,8,1,Day
+H grating,$JH Filter|Same as Disperser,Ronche Cal Mask,1.49 - 1.78,,1,ND4.0,IR,IR grey body - high,closed,5.3,1,Day
+#,,,,,,,,,,,,
+#,,,,,,,,,,,,
+# J band ,,,,,,,,,,,,
+J grating,$ZJ Filter|Same as Disperser,$Clear|.*Occulting Disk,1.15 - 1.33,,5,ND2.0,IR,Quartz Halogen,closed,40,1,Day
+J grating,$ZJ Filter|Same as Disperser,Clear,1.15 - 1.33,,5,ND2.0,IR,IR grey body - high,closed,40,1,Day
+J grating,$ZJ Filter|Same as Disperser,Ronche Cal Mask,1.15 - 1.33,,2,ND2.0,IR,Quartz Halogen,closed,40,1,Day
+J grating,$ZJ Filter|Same as Disperser,Ronche Cal Mask,1.15 - 1.33,,1,ND2.0,IR,IR grey body - high,closed,5.3,1,Day
+#,,,,,,,,,,,,
+#,,,,,,,,,,,,
+# Z band ,,,,,,,,,,,,
+Z grating,$ZJ Filter|Same as Disperser,$Clear|.*Occulting Disk,0.94 - 1.15,,5,ND1.0,visible,Quartz Halogen,closed,8,1,Day
+Z grating,$ZJ Filter|Same as Disperser,Clear,0.94 - 1.15,,5,ND1.0,visible,IR grey body - high,closed,8,1,Day
+Z grating,$ZJ Filter|Same as Disperser,Ronche Cal Mask,0.94 - 1.15,,2,ND1.0,visible,Quartz Halogen,closed,8,1,Day
+Z grating,$ZJ Filter|Same as Disperser,Ronche Cal Mask,0.94 - 1.15,,1,ND1.0,visible,IR grey body - high,closed,5.3,1,Day
+#,,,,,,,,,,,,

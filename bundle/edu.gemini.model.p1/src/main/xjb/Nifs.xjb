@@ -1,0 +1,40 @@
+<jxb:bindings version="2.0"
+              xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+              xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <!-- Custom bindings for NIFS -->
+    <jxb:bindings schemaLocation="../xsd/Nifs.xsd" node="/xsd:schema">
+
+        <!-- NifsDisperser => NIFSParams.Disperser -->
+        <jxb:bindings node="./xsd:simpleType[@name='NifsDisperser']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='Z (0.94 - 1.15um)']">
+                <jxb:typesafeEnumMember name="Z"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='J (1.15 - 1.33um)']">
+                <jxb:typesafeEnumMember name="J"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='H (1.49 - 1.80um)']">
+                <jxb:typesafeEnumMember name="H"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='K (1.99 - 2.40um)']">
+                <jxb:typesafeEnumMember name="K"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+        <!-- NifsOccultingDisk => NIFSParams.Mask -->
+        <jxb:bindings node="./xsd:simpleType[@name='NifsOccultingDisk']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='None']">
+                <jxb:typesafeEnumMember name="CLEAR"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.2&quot;']">
+                <jxb:typesafeEnumMember name="OD_2"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.5&quot;']">
+                <jxb:typesafeEnumMember name="OD_5"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+    </jxb:bindings>
+
+</jxb:bindings>
+

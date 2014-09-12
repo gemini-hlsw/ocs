@@ -1,0 +1,130 @@
+
+<html>
+<head><title>QPT 1.0.5 Release Notes</title></head>
+<link rel="stylesheet" href="/doc/styles.css"></link>
+<body>
+
+<h1>QPT 1.0.5 Release Notes</h1>
+
+QPT 1.0.5 addresses 12 issues and one fault report, described below. 
+Release notes for the previous release are available <a href="v1.0.4-notes.html">here</a>. 
+
+<p>The QPT documentation index is available <a href="index.html">here</a>.
+
+<p>
+To install this release of QPT, please <b style="color:red">do not</b> use the 
+Update command in the Help menu. Install and run it using an alias as follows.
+
+<table style="padding:10px">
+	<tr><td style="text-align:right;color:red">To install &rarr;</td>
+		<td><code>launcher -h:sbfmaps.cl.gemini.edu -i:qpt -a:qpt-1.0.5 -v</code></td>
+	</tr>
+	<tr><td style="text-align:right;color:red">To run &rarr;</td>
+		<td><code>launcher -a:qpt-1.0.5</code></td>
+	</tr>
+	<tr><td style="text-align:right;color:red">To uninstall &rarr;</td>
+		<td><code>launcher -a:qpt-1.0.5 -u</code></td>
+	</tr>
+</table>
+
+As always, the first time you run QPT it will download necessary components. This may
+take several minutes, especially in the north. Your previous installation of QPT should 
+continue to function normally.
+<p>
+Please direct questions and comments to <code>rnorris@gemini.edu</code> and cc:<code>gillies@gemini.edu</code>
+and the QC groups (if appropriate).
+
+</div>
+
+<h2>New and Notable</h2>
+
+<h3>[QPT-57] - Visualizer now allows selection and dragging of multiple visits</h3>
+You can now select multiple visits in the visualizer and drag them around. Shift+click to select a range, or Ctrl+click (Cmd+click on Mac) to select/deselect individual visits. There is also a Select All item in the Edit menu, and a Compact Selected Visits item in the Visits menu (this item will remove any empty space between selected visits, pushing them to the left as needed).
+
+<h3>[QPT-175] - Finally! Copy and Paste!</h3>
+Visits can now be cut, copied, and pasted between variants within the same plan. Pasting works the same as with a text editor; if there is anything selected when you paste, it will be replaced by what's on the clipboard. If you try to paste a visit for an observation that's already scheduled, you will be prompted to skip, replace, or cancel.
+
+<h3>[QPT-211] - Candidate observations requiring dark time are scored higher</h3>
+The scoring algorithm now takes the SB bucket into consideration and assigns higher scores to candidate observations that have a tighter SB constraint. So during dark time, obs that can be postponed until dark time is over will be scored lower than those that need to be observed now. In some cases the differential may be high enough to cause an obs to "jump" into a higher band, but the scoring algorithm takes a lot of things into account so it's not easy to predict when this will happen. Please keep an eye on this feature and let me know if the effect here seems to be too strong or too weak. 
+
+<h3>[QPT-234] - New "Show All" option for Candidate Observations</h3>
+The Candidate menu now has a Show All option, which will temporarily disable all filters and show all observations in the Candidate Observations view. Deselecting this option restores the previous set of filters.
+
+<h3>[QPT-239] - Variants can now have a Wind Constraint</h3>
+The variant editor now allows you to specify an azimuth position and range (i.e.,  45&deg;&plusmn;10&deg;) for the likely wind direction. QPT will then issue a warning if you schedule a visit that requires will require you to point into the wind.
+
+<h3>[QPT-257] - New Find Candidate command</h3>
+There is a very cool new Find Candidate command that allows you to locate any observation in the database by typing part of its name. If the observation is not visible in QPT, it tells you why. You can select an observation from the list and reveal it in QPT (if it's not visible, QPT will turn off whatever filters are making it hidden). Hopefully this will solve the "why isn't this observation showing up?" problem.
+
+<div class="figure"><img src="images/find.gif" width="454" height="323" alt="Find"></div>
+
+<h3>[QPT-238] - New Merge Command</h3>
+This command imports all the variants from another plan (same site/night), which can be useful during training or a time crunch if you have one person working on some variants and another person working on the rest. This command is located in the Plan menu.
+
+<h3>[FR-6836] - Cisco VPN Support (Mac OS X)</h3>
+The Cisco VPN client uses a distinct private IP address for the client side of the tunnel, which messes up a few things that QPT (and the OT) needs to do. So QPT now includes a specific hack that locates and talks to the Cisco software (if present and running) to determine the correct address to use for self-identification. This happens automatically, but note the following: <b style="color:red">the VPN must be running before you start QPT</b>; client address interrogation happens only once, at startup. If you forget to start the VPN first, just quit QPT and restart. Also note that if the VPN is connected, you will only be able to see databases on the VPN interface; databases on the local network will not be visible (this is normally only a problem for developers working on QPT). Further note that you will get network exceptions from QPT when you're on the VPN because it is never possible to see both databases at once (i.e, you can see GN or GS but not both, due to the way the VPN is set up). These exceptions are harmless and can be ignored.
+
+<!--
+<h3>Other Significant Improvements</h3>
+<ul>
+</ul>
+-->
+
+<h3>Other Significant Bug Fixes</h3>
+<ul>
+<li>[QPT-206] - Finally fixed the jagged moon curve bug.
+<li>[QPT-233] - Visualizer now displays UTC/LST when the corresponding option is selected in the Visit menu.
+</ul>
+
+<h3>Other Minor and Self-Explanatory Changes Worth Mentioning</h3>
+<ul>
+<li>Refresh (F5) command moved to the Plan menu.
+<li>Update Software command was removed for now; it was too dangerous.
+</ul>
+
+
+<h2>JIRA Release Manifest</h2>
+
+
+<h3>        Bug
+</h3>
+<ul>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-206'>QPT-206</a>] -         Plot lines are sometimes jagged
+</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-233'>QPT-233</a>] -         Visualizer should display LST/UTC along with visit list
+</li>
+</ul>
+    
+<h3>        Improvement
+</h3>
+<ul>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-57'>QPT-57</a>] -         Allow multi-select in visualizer
+</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-175'>QPT-175</a>] -         Allow copy/drag allocs between variants
+</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-211'>QPT-211</a>] -         Weighting alg should make dark time more significant
+</li>
+</ul>
+    
+<h3>        New Feature
+</h3>
+<ul>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-42'>QPT-42</a>] -         Add MOS mask list to report.
+</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-234'>QPT-234</a>] -         Add &quot;show all&quot; option for candidates
+</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-238'>QPT-238</a>] -         Add feature to merge plans
+</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-239'>QPT-239</a>] -         Add wind constraint
+</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-256'>QPT-256</a>] -         Add support for Band 3 &quot;success&quot; times
+</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-257'>QPT-257</a>] -         Add &quot;why isn't X visible?&quot; command
+</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-258'>QPT-258</a>] -         Distinguish QC markers from observer markers; hide QC markers in published plan
+</li>
+</ul>
+
+
+</body>
+</html>

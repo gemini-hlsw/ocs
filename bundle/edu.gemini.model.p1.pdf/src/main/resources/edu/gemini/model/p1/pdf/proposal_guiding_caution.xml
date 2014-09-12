@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="1.0.0">
+    <meta band3optionChosen="true"/>
+    <semester half="B" year="2012"/>
+    <title></title>
+    <abstract></abstract>
+    <keywords/>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Principal</firstName>
+            <lastName>Investigator</lastName>
+            <status>PhD</status>
+            <email></email>
+            <address>
+                <institution></institution>
+                <address></address>
+                <country></country>
+            </address>
+        </pi>
+    </investigators>
+    <targets>
+        <sidereal epoch="J2000" id="target-0">
+            <name>vega</name>
+            <degDeg>
+                <ra>279.23473479</ra>
+                <dec>38.78368896</dec>
+            </degDeg>
+            <properMotion deltaDec="286.23" deltaRA="200.94"/>
+            <magnitudes>
+                <magnitude system="Vega" band="B">0.029999999329447746</magnitude>
+                <magnitude system="Vega" band="V">0.029999999329447746</magnitude>
+                <magnitude system="Vega" band="R">0.10000000149011612</magnitude>
+                <magnitude system="Vega" band="J">-0.18000000715255737</magnitude>
+                <magnitude system="Vega" band="H">-0.029999999329447746</magnitude>
+                <magnitude system="Vega" band="K">0.12999999523162842</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-1">
+            <name>vega</name>
+            <degDeg>
+                <ra>279.23473479</ra>
+                <dec>38.78368896</dec>
+            </degDeg>
+            <properMotion deltaDec="286.23" deltaRA="200.94"/>
+            <magnitudes>
+                <magnitude system="Vega" band="B">0.029999999329447746</magnitude>
+                <magnitude system="Vega" band="V">0.029999999329447746</magnitude>
+                <magnitude system="Vega" band="R">0.10000000149011612</magnitude>
+                <magnitude system="Vega" band="J">-0.18000000715255737</magnitude>
+                <magnitude system="Vega" band="H">-0.029999999329447746</magnitude>
+                <magnitude system="Vega" band="K">0.12999999523162842</magnitude>
+            </magnitudes>
+        </sidereal>
+    </targets>
+    <conditions>
+        <condition id="condition-0">
+            <name>CC Any, IQ Any, SB Any/Bright, WV Any</name>
+            <cc>Any</cc>
+            <iq>Any</iq>
+            <sb>Any/Bright</sb>
+            <wv>Any</wv>
+        </condition>
+        <condition id="condition-1">
+            <name>CC 70%/Cirrus, IQ 85%/Poor, SB Any/Bright, WV 50%/Median</name>
+            <cc>70%/Cirrus</cc>
+            <iq>85%/Poor</iq>
+            <sb>Any/Bright</sb>
+            <wv>50%/Median</wv>
+        </condition>
+    </conditions>
+    <blueprints>
+        <gmosS>
+            <regime>optical</regime>
+            <imaging id="blueprint-0">
+                <name>GMOS-S Imaging HeII (468 nm)</name>
+                <filter>HeII (468 nm)</filter>
+            </imaging>
+        </gmosS>
+    </blueprints>
+    <observations>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 3">
+            <time units="hr">3.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>58</percentage>
+                    <evaluation>Caution</evaluation>
+                </guiding>
+                <visibility>Bad</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None">
+            <band3request>
+                <time units="hr">0.0</time>
+                <minTime units="hr">0.0</minTime>
+            </band3request>
+        </queue>
+    </proposalClass>
+</proposal>

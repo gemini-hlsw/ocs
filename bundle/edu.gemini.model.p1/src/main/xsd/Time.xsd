@@ -1,0 +1,22 @@
+<!--
+  Schema definition for time elements.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <xsd:complexType name="TimeAmount">
+        <xsd:simpleContent>
+            <xsd:extension base="xsd:decimal">
+                <xsd:attribute name="units" type="TimeUnit" default="hr"/>
+            </xsd:extension>
+        </xsd:simpleContent>
+    </xsd:complexType>
+
+
+    <xsd:simpleType name="TimeUnit">
+        <xsd:restriction base="xsd:token">
+<!--            <xsd:enumeration value="min"/> -->
+            <xsd:enumeration value="hr"/>
+            <xsd:enumeration value="night"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+</xsd:schema>

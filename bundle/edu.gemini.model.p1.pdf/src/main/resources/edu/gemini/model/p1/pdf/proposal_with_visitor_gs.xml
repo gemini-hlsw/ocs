@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="2013.2.1">
+    <meta band3optionChosen="false"/>
+    <semester year="2013" half="B"/>
+    <title/>
+    <abstract/>
+    <scheduling/>
+    <keywords/>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Principal</firstName>
+            <lastName>Investigator</lastName>
+            <status>PhD</status>
+            <email/>
+            <address>
+                <institution/>
+                <address/>
+                <country/>
+            </address>
+        </pi>
+    </investigators>
+    <targets/>
+    <conditions/>
+    <blueprints>
+        <visitor>
+            <visitor id="blueprint-0">
+                <name>Visitor - Gemini South - Super Camera</name>
+                <visitor>true</visitor>
+                <site>Gemini South</site>
+                <custom-name>Super Camera</custom-name>
+            </visitor>
+        </visitor>
+    </blueprints>
+    <observations>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>0</percentage>
+                    <evaluation>Failure</evaluation>
+                </guiding>
+                <visibility>Limited</visibility>
+                <gsa>6</gsa>
+            </meta>
+        </observation>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None"/>
+    </proposalClass>
+</proposal>

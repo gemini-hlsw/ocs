@@ -1,0 +1,1006 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+<configuration>
+    <obslog version="1.2">Third Release with AQ/Time</obslog>
+    <!-- This group is entries that can be used in any instrument row -->
+
+    <entry key="instrument">
+        <heading>Instrument</heading>
+        <property>instrument</property>
+        <sequenceName>instrument:instrument</sequenceName>
+    </entry>
+
+    <entry key="observationid" visible="false">
+        <heading>Observation ID</heading>
+        <property>observationID</property>
+        <sequenceName>ocs:observationId</sequenceName>
+    </entry>
+
+    <entry key="datasetid">
+        <heading>Dataset ID</heading>
+        <property>datasetID</property>
+        <sequenceName>obslog:datasetId</sequenceName>
+    </entry>
+
+     <entry key="datasetcomments" visible="false">
+        <heading>Dataset Comments</heading>
+        <property>datasetComments</property>
+        <sequenceName>obslog:datasetComments</sequenceName>
+    </entry>
+
+    <entry key="filename">
+        <heading>File Numbers</heading>
+        <property>fileNumbers</property>
+        <sequenceName>obsLog:filename</sequenceName>
+    </entry>
+
+    <entry key="datalabels">
+        <heading>Data Labels</heading>
+        <property>dataLabels</property>
+        <sequenceName>observe:dataLabel</sequenceName>
+    </entry>
+
+    <entry key="datasetut">
+        <heading>Dataset UT</heading>
+        <property>datasetUT</property>
+        <sequenceName>obsLog:ut</sequenceName>
+    </entry>
+
+    <entry key="targetname">
+        <heading>Target Name</heading>
+        <property>targetName</property>
+        <sequenceName>observe:object</sequenceName>
+    </entry>
+
+    <entry key="comment" visible="false">
+        <heading>Comment</heading>
+        <property>comment</property>
+        <sequenceName>obsLog:comment</sequenceName>
+    </entry>
+
+    <entry key="qastate">
+        <heading>QA State</heading>
+        <property>datasetQA</property>
+        <sequenceName>obsLog:datasetqa</sequenceName>
+    </entry>
+
+    <entry key="observe_class">
+        <heading>Observe Class</heading>
+        <property>observeClass</property>
+        <sequenceName>observe:class</sequenceName>
+    </entry>
+
+    <entry key="observe_chargeclass">
+        <heading>Charge Class</heading>
+        <property>chargeClass</property>
+        <sequenceName>observe:chargeclass</sequenceName>
+    </entry>
+
+    <entry key="time_noncharged">
+        <heading>Non-Charged Time</heading>
+        <property>noncharged</property>
+        <sequenceName>obslog:noncharged</sequenceName>
+    </entry>
+
+    <entry key="time_partner">
+         <heading>Partner Time</heading>
+         <property>partnercharged</property>
+         <sequenceName>obslog:partnercharged</sequenceName>
+     </entry>
+
+    <entry key="time_program">
+         <heading>Program Time</heading>
+         <property>programcharged</property>
+         <sequenceName>obslog:programcharged</sequenceName>
+     </entry>
+
+    <entry key="time_correction">
+         <heading>Correction Total</heading>
+         <property>correction</property>
+         <sequenceName>obslog:correction</sequenceName>
+     </entry>
+
+    <entry key="visit_starttime">
+        <heading>Visit Start</heading>
+        <property>visitStartTime</property>
+        <sequenceName>obslog:visitstart</sequenceName>
+    </entry>
+
+    <entry key="visit_endtime">
+        <heading>Visit End</heading>
+        <property>visitEndTime</property>
+        <sequenceName>obslog:visitend</sequenceName>
+    </entry>
+
+    <entry key="observe_exposuretime">
+        <heading>Exposure Time</heading>
+        <property>exposureTime</property>
+        <sequenceName>observe:exposureTime</sequenceName>
+    </entry>
+
+    <entry key="observe_observetype" visible="false">
+        <heading>Observe Type</heading>
+        <property>type</property>
+        <sequenceName>observe:observeType</sequenceName>
+    </entry>
+
+    <entry key="observe_status" visible="false">
+        <heading>Observe Status</heading>
+        <property>observeStatus</property>
+        <sequenceName>observe:status</sequenceName>
+    </entry>
+
+    <!-- GMOS entries -->
+
+    <entry key="gmos_filter">
+        <heading>Filters</heading>
+        <property>filter</property>
+        <sequenceName>instrument:filter</sequenceName>
+    </entry>
+
+    <entry key="gmos_disperser">
+        <heading>Disperser</heading>
+        <property>disperser</property>
+        <sequenceName>instrument:disperser</sequenceName>
+    </entry>
+
+    <entry key="gmos_lambda" visible="false">
+        <heading>Lamda</heading>
+        <property>wavelength</property>
+        <sequenceName>instrument:disperserLambda</sequenceName>
+    </entry>
+
+    <entry key="gmos_mask">
+        <heading>Mask</heading>
+        <property>mask</property>
+        <sequenceName>instrument:fpu</sequenceName>
+    </entry>
+
+    <entry key="gmos_roi">
+        <heading>ROI</heading>
+        <property>roi</property>
+        <sequenceName>instrument:builtinROI</sequenceName>
+    </entry>
+
+    <entry key="gmos_fpumode" visible="false">
+        <heading>FPU Mode</heading>
+        <property>fpuMode</property>
+        <sequenceName>instrument:fpuMode</sequenceName>
+    </entry>
+
+    <entry key="gmos_fpucustommask" visible="false">
+        <heading>FPU Custom Mask</heading>
+        <property>fpuCustomMask</property>
+        <sequenceName>instrument:fpuCustomMask</sequenceName>
+    </entry>
+
+
+    <!-- Flamingos2 Entries -->
+    <entry key="flamingos2_filter">
+        <heading>Filter</heading>
+        <property>filter</property>
+        <sequenceName>instrument:filter</sequenceName>
+    </entry>
+
+    <entry key="flamingos2_disperser">
+        <heading>Disperser</heading>
+        <property>disperser</property>
+        <sequenceName>instrument:disperser</sequenceName>
+    </entry>
+
+    <entry key="flamingos2_lyotwheel">
+        <heading>Lyot</heading>
+        <property>lyotWheel</property>
+        <sequenceName>instrument:lyotWheel</sequenceName>
+    </entry>
+
+    <entry key="flamingos2_fpu">
+        <heading>Mask (FPU)</heading>
+        <property>fpu</property>
+        <sequenceName>instrument:fpu</sequenceName>
+    </entry>
+
+    <entry key="flamingos2_readmode">
+        <heading>Read Mode</heading>
+        <property>readMode</property>
+        <sequenceName>instrument:readMode</sequenceName>
+    </entry>
+
+
+    <!-- GNIRS Entries -->
+    <entry key="gnirs_filter">
+        <heading>Filters</heading>
+        <property>filter</property>
+        <sequenceName>instrument:filter</sequenceName>
+    </entry>
+
+    <entry key="gnirs_slitwidth">
+        <heading>Slit</heading>
+        <property>slitwidth</property>
+        <sequenceName>instrument:slitWidth</sequenceName>
+    </entry>
+
+    <entry key="gnirs_decker">
+        <heading>Decker</heading>
+        <property>decker</property>
+        <sequenceName>instrument:decker</sequenceName>
+    </entry>
+
+    <entry key="gnirs_disperser">
+        <heading>Grating/Wavelength</heading>
+        <property>disperser</property>
+        <sequenceName>instrument:disperser</sequenceName>
+    </entry>
+
+    <entry key="gnirs_centralwavelength" visible="false">
+        <heading>Central Wavelength</heading>
+        <property>wavelength</property>
+        <sequenceName>instrument:centralWavelength</sequenceName>
+    </entry>
+
+    <entry key="gnirs_exposuretime">
+        <heading>ExpTime/LNR/Coadds</heading>
+        <property>exposureTime</property>
+        <sequenceName>observe:exposureTime</sequenceName>
+    </entry>
+
+    <entry key="gnirs_coadds" visible="false">
+        <heading>Coadds</heading>
+        <property>coadds</property>
+        <sequenceName>observe:coadds</sequenceName>
+    </entry>
+
+    <entry key="gnirs_pixelscale" visible="false">
+        <heading>Pixel Scale</heading>
+        <property>pixelScale</property>
+        <sequenceName>instrument:pixelScale</sequenceName>
+    </entry>
+
+    <entry key="gnirs_crossdispersed" visible="false">
+        <heading>Cross Dispersed</heading>
+        <property>crossDispersed</property>
+        <sequenceName>instrument:crossDispersed</sequenceName>
+    </entry>
+
+    <entry key="gnirs_readmode" visible="false">
+        <heading>Read Mode</heading>
+        <property>readMode</property>
+        <sequenceName>instrument:readMode</sequenceName>
+    </entry>
+
+    <entry key="gnirs_acquisitionmirror">
+        <heading>ACQ</heading>
+        <property>acqMirror</property>
+        <sequenceName>instrument:acquisitionMirror</sequenceName>
+    </entry>
+
+    <entry key="gnirs_camera">
+        <heading>Camera/Prism</heading>
+        <property>camera</property>
+        <sequenceName>instrument:camera</sequenceName>
+    </entry>
+
+    <entry key="gnirs_wollaston">
+        <heading>Wollaston Prism</heading>
+        <property>wollaston</property>
+        <sequenceName>instrument:wollastonPrism</sequenceName>
+    </entry>
+
+    <!-- GSAOI Entries -->
+
+    <entry key="gsaoi_filter">
+        <heading>Filter</heading>
+        <property>filter</property>
+        <sequenceName>instrument:filter</sequenceName>
+    </entry>
+
+     <entry key="gsaoi_readmode">
+        <heading>Read Mode</heading>
+        <property>readMode</property>
+        <sequenceName>instrument:readMode</sequenceName>
+    </entry>
+
+    <entry key="gsaoi_coadds">
+        <heading>Coadds</heading>
+        <property>coadds</property>
+        <sequenceName>observe:coadds</sequenceName>
+    </entry>
+
+
+    <!-- TReCS Entries -->
+
+    <entry key="trecs_filter">
+        <heading>Filter</heading>
+        <property>filter</property>
+        <sequenceName>instrument:filter</sequenceName>
+    </entry>
+
+    <entry key="trecs_obsmode">
+        <heading>ObsMode</heading>
+        <property>obsMode</property>
+        <sequenceName>instrument:obsMode</sequenceName>
+    </entry>
+
+    <entry key="trecs_disperser">
+        <heading>Disperser/lambda_c</heading>
+        <property>disperser</property>
+        <sequenceName>instrument:disperser</sequenceName>
+    </entry>
+
+    <entry key="trecs_disperserlambda" visible="false">
+        <heading>Wavelength</heading>
+        <property>wavelength</property>
+        <sequenceName>instrument:disperserLambda</sequenceName>
+    </entry>
+
+    <entry key="trecs_slit">
+        <heading>Slit(")</heading>
+        <property>slit</property>
+        <sequenceName>instrument:mask</sequenceName>
+    </entry>
+
+    <entry key="trecs_timeonsource">
+        <heading>Time On Source</heading>
+        <property>exposureTime</property>
+        <sequenceName>instrument:timeOnSource</sequenceName>
+    </entry>
+
+    <!-- Michelle Entries -->
+    <entry key="mich_disperser">
+        <heading>Disperser/lambda_c</heading>
+        <property>disperser</property>
+        <sequenceName>instrument:disperser</sequenceName>
+    </entry>
+
+    <entry key="mich_filter">
+        <heading>Filter</heading>
+        <property>filter</property>
+        <sequenceName>instrument:filter</sequenceName>
+    </entry>
+
+    <entry key="mich_disperserlambda" visible="false">
+        <heading>Wavelength</heading>
+        <property>wavelength</property>
+        <sequenceName>instrument:disperserLambda</sequenceName>
+    </entry>
+
+    <entry key="mich_slit">
+        <heading>Slit(")</heading>
+        <property>slit</property>
+        <sequenceName>instrument:mask</sequenceName>
+    </entry>
+
+    <entry key="mich_timeonsource">
+        <heading>Time On Source</heading>
+        <property>exposureTime</property>
+        <sequenceName>instrument:timeOnSource</sequenceName>
+    </entry>
+
+    <!-- NIRI Entries -->
+
+    <entry key="niri_filter">
+        <heading>Filter</heading>
+        <property>filter</property>
+        <sequenceName>instrument:filter</sequenceName>
+    </entry>
+
+    <entry key="niri_disperser">
+        <heading>Disperser</heading>
+        <property>disperser</property>
+        <sequenceName>instrument:disperser</sequenceName>
+    </entry>
+
+    <entry key="niri_readmode">
+        <heading>Read Mode</heading>
+        <property>readmode</property>
+        <sequenceName>instrument:readMode</sequenceName>
+    </entry>
+
+    <entry key="niri_mask">
+        <heading>Mask</heading>
+        <property>mask</property>
+        <sequenceName>instrument:mask</sequenceName>
+    </entry>
+
+    <entry key="niri_camera">
+        <heading>Camera</heading>
+        <property>camera</property>
+        <sequenceName>instrument:camera</sequenceName>
+    </entry>
+
+    <entry key="niri_coadds">
+        <heading>Coadds</heading>
+        <property>coadds</property>
+        <sequenceName>observe:coadds</sequenceName>
+    </entry>
+
+    <entry key="niri_roi">
+        <heading>ROI</heading>
+        <property>roi</property>
+        <sequenceName>instrument:builtinROI</sequenceName>
+    </entry>
+
+    <!-- AcqCamera Entries -->
+
+    <entry key="acq_colorfilter">
+        <heading>Color Filter</heading>
+        <property>colorFilter</property>
+        <sequenceName>instrument:colorFilter</sequenceName>
+    </entry>
+
+    <entry key="acq_ndfilter">
+        <heading>ND Filter</heading>
+        <property>ndFilter</property>
+        <sequenceName>instrument:ndFilter</sequenceName>
+    </entry>
+
+    <entry key="acq_lens">
+        <heading>Lens</heading>
+        <property>lens</property>
+        <sequenceName>instrument:lens</sequenceName>
+    </entry>
+
+    <!-- bHROS Entries -->
+    <entry key="bhros_fiber">
+        <heading>Fibre</heading>
+        <property>fibre</property>
+        <sequenceName>instrument:EntranceFibre</sequenceName>
+    </entry>
+
+    <entry key="bhros_ccdgain">
+        <heading>CCDgain/speed</heading>
+        <property>gain</property>
+        <sequenceName>instrument:CCDGain</sequenceName>
+    </entry>
+
+    <entry key="bhros_ccdspeed" visible="false">
+        <heading>CCDSpeed</heading>
+        <property>speed</property>
+        <sequenceName>instrument:CCDSpeed</sequenceName>
+    </entry>
+
+    <entry key="bhros_filter">
+        <heading>Post-Slit Filter</heading>
+        <property>filter</property>
+        <sequenceName>instrument:PostSlitFilter</sequenceName>
+    </entry>
+
+    <entry key="bhros_wavelength">
+        <heading>Central Wavelength(nm)</heading>
+        <property>wavelength</property>
+        <sequenceName>instrument:CentralWavelength</sequenceName>
+    </entry>
+
+    <entry key="bhros_hartmannflap">
+        <heading>Hartmann Flap</heading>
+        <property>flap</property>
+        <sequenceName>instrument:HartmannFlap</sequenceName>
+    </entry>
+
+    <!-- NIFS Entries -->
+
+    <entry key="nifs_filter">
+        <heading>Filter</heading>
+        <property>filter</property>
+        <sequenceName>instrument:filter</sequenceName>
+    </entry>
+
+     <entry key="nifs_disperser">
+        <heading>Disperser</heading>
+        <property>disperser</property>
+        <sequenceName>instrument:disperser</sequenceName>
+    </entry>
+
+    <entry key="nifs_disperserlambda" visible="false">
+        <heading>Wavelength</heading>
+        <property>wavelength</property>
+        <sequenceName>instrument:centralWavelength</sequenceName>
+    </entry>
+
+     <entry key="nifs_readmode">
+        <heading>Read Mode</heading>
+        <property>readmode</property>
+        <sequenceName>instrument:readMode</sequenceName>
+    </entry>
+
+    <entry key="nifs_mask">
+        <heading>Mask</heading>
+        <property>mask</property>
+        <sequenceName>instrument:mask</sequenceName>
+    </entry>
+
+    <entry key="nifs_coadds">
+        <heading>Coadds</heading>
+        <property>coadds</property>
+        <sequenceName>observe:coadds</sequenceName>
+    </entry>
+
+    <entry key="nifs_engreadmode" visible="false">
+        <heading>Eng Readmode</heading>
+        <property>engreadmode</property>
+        <sequenceName>instrument:engineeringReadMode</sequenceName>
+    </entry>
+
+    <entry key="nifs_numsamples" visible="false">
+        <heading>Eng Num Samples</heading>
+        <property>numsamples</property>
+        <sequenceName>instrument:numberOfSamples</sequenceName>
+    </entry>
+
+     <entry key="nifs_period" visible="false">
+        <heading>Eng Period</heading>
+        <property>period</property>
+        <sequenceName>instrument:period</sequenceName>
+    </entry>
+
+     <entry key="nifs_numberofperiods"  visible="false">
+        <heading>Eng Num Periods</heading>
+        <property>numperiods</property>
+        <sequenceName>instrument:numberOfPeriods</sequenceName>
+    </entry>
+
+     <entry key="nifs_numresets" visible="false">
+        <heading>Eng Num Resets</heading>
+        <property>numresets</property>
+        <sequenceName>instrument:numberOfResets</sequenceName>
+    </entry>
+
+    <entry key="nifs_imagingmirror">
+        <heading>Acq</heading>
+        <property>imagingMirror</property>
+        <sequenceName>instrument:imagingMirror</sequenceName>
+    </entry>
+
+    <!-- NICI Entries -->
+
+    <entry key="nici_focalPlaneMask">
+        <heading>Focal Plane Mask</heading>
+        <property>focalPlaneMask</property>
+        <sequenceName>instrument:focalPlaneMask</sequenceName>
+    </entry>
+
+    <entry key="nici_pupilMask">
+        <heading>Pupil Mask</heading>
+        <property>pupilMask</property>
+        <sequenceName>instrument:pupilMask</sequenceName>
+    </entry>
+
+    <entry key="nici_redFilter">
+        <heading>Red Filter</heading>
+        <property>channel1Fw</property>
+        <sequenceName>instrument:channel1Fw</sequenceName>
+    </entry>
+
+    <entry key="nici_blueFilter">
+        <heading>Blue Filter</heading>
+        <property>channel2Fw</property>
+        <sequenceName>instrument:channel2Fw</sequenceName>
+    </entry>
+
+    <entry key="nici_coadds">
+        <heading>Coadds</heading>
+        <property>coadds</property>
+        <sequenceName>observe:coadds</sequenceName>
+    </entry>
+
+    <entry key="nici_ndr">
+        <heading>NDR</heading>
+        <property>nonDestructiveReads</property>
+        <sequenceName>instrument:nonDestructiveReads</sequenceName>
+    </entry>
+
+    <!-- Visitor Entries -->
+    <entry key="visitor_name">
+        <heading>Name</heading>
+        <property>name</property>
+        <sequenceName>instrument:name</sequenceName>
+    </entry>
+
+    <!-- Gpi Entries -->
+    <entry key="gpi_obs_mode">
+        <heading>Observing Mode</heading>
+        <property>obsMode</property>
+        <sequenceName>instrument:observingMode</sequenceName>
+    </entry>
+
+    <entry key="gpi_disperser">
+        <heading>Disperser</heading>
+        <property>disperser</property>
+        <sequenceName>instrument:disperser</sequenceName>
+    </entry>
+
+    <entry key="gpi_half_wave_plate_angle">
+        <heading>Polarization Angle</heading>
+        <property>halfWavePlateAngle</property>
+        <sequenceName>instrument:halfWavePlateAngle</sequenceName>
+    </entry>
+
+    <entry key="gpi_adc">
+        <heading>ADC</heading>
+        <property>adc</property>
+        <sequenceName>instrument:adc</sequenceName>
+    </entry>
+
+    <entry key="gpi_apodizer">
+        <heading>Apodizer</heading>
+        <property>apodizer</property>
+        <sequenceName>instrument:apodizer</sequenceName>
+    </entry>
+
+    <entry key="gpi_fpm">
+        <heading>FPM</heading>
+        <property>fpm</property>
+        <sequenceName>instrument:fpm</sequenceName>
+    </entry>
+
+    <entry key="gpi_lyot">
+        <heading>Lyot</heading>
+        <property>lyot</property>
+        <sequenceName>instrument:lyot</sequenceName>
+    </entry>
+
+    <entry key="gpi_filter">
+        <heading>Filter</heading>
+        <property>filter</property>
+        <sequenceName>instrument:filter</sequenceName>
+    </entry>
+
+    <entry key="gpi_coadds">
+        <heading>Coadds</heading>
+        <property>coadds</property>
+        <sequenceName>instrument:coadds</sequenceName>
+    </entry>
+
+    <entry key="gpi_cal_sphere">
+        <heading>Cal Sphere</heading>
+        <property>calSourceWhiteLightLamp</property>
+        <sequenceName>instrument:calSourceWhiteLightLamp</sequenceName>
+    </entry>
+
+    <entry key="gpi_asu">
+        <heading>Artificial Source Unit</heading>
+        <property>calSourceWhiteLightLamp</property>
+        <sequenceName>instrument:calSourceWhiteLightLamp</sequenceName>
+    </entry>
+
+    <entry key="gpi_pupil">
+        <heading>Pupil Camera</heading>
+        <property>pupil</property>
+        <sequenceName>instrument:pupilCamera</sequenceName>
+    </entry>
+
+    <entry key="gpi_ir_laser">
+        <heading>IR Laser</heading>
+        <property>irLaser</property>
+        <sequenceName>instrument:irLaserLamp</sequenceName>
+    </entry>
+
+    <entry key="gpi_visible_laser">
+        <heading>Visible Laser</heading>
+        <property>visibleLaser</property>
+        <sequenceName>instrument:visibleLaserLamp</sequenceName>
+    </entry>
+
+    <entry key="gpi_white_light">
+        <heading>White Light</heading>
+        <property>whiteLight</property>
+        <sequenceName>instrument:superContinuumLamp</sequenceName>
+    </entry>
+
+    <!-- Weather Entries -->
+
+    <entry visible="false" key="w_localtime">
+        <heading>UTC Time</heading>
+        <property>time</property>
+    </entry>
+
+    <entry key="w_temperature">
+        <heading>Temperature(C)</heading>
+        <property>temperature</property>
+    </entry>
+
+    <entry key="w_windspeed">
+        <heading>Wind Speed(m/s)</heading>
+        <property>windSpeed</property>
+    </entry>
+
+    <entry key="w_winddirection">
+        <heading>Wind Direction(deg)</heading>
+        <property>windDirection</property>
+    </entry>
+
+    <entry key="w_pressure">
+        <heading>Barometric Pressure(mb)</heading>
+        <property>barometricPressure</property>
+    </entry>
+
+    <entry key="w_humidity">
+        <heading>Relative Humidity(%)</heading>
+        <property>relativeHumidity</property>
+    </entry>
+
+    <entry key="w_watervapor">
+        <heading>Water Vapor(mm)</heading>
+        <property>waterVapor</property>
+    </entry>
+
+    <entry key="w_dimm">
+        <heading>Dimm</heading>
+        <property>dimm</property>
+    </entry>
+
+    <logEntry key="WEATHER">
+        <entry key="w_localtime"/>
+        <entry key="w_temperature"/>
+        <entry key="w_windspeed"/>
+        <entry key="w_winddirection"/>
+        <entry key="w_pressure"/>
+        <entry key="w_humidity"/>
+        <entry key="w_watervapor"/>
+        <entry key="w_dimm"/>
+        <entry key="comment"/>
+    </logEntry>
+
+    <logEntry key="Flamingos2">
+        <entry key="observationid"/>
+        <entry key="datasetut"/>
+        <entry key="datalabels"/>
+        <entry key="filename"/>
+        <entry key="targetname"/>
+        <entry key="flamingos2_filter"/>
+        <entry key="flamingos2_disperser"/>
+        <entry key="flamingos2_lyotwheel"/>
+        <entry key="flamingos2_fpu"/>
+        <entry key="flamingos2_readmode"/>
+        <entry key="observe_exposuretime"/>
+    </logEntry>
+
+    <logEntry key="GMOS">
+        <entry key="observationid"/>
+        <entry key="datasetut"/>
+        <entry key="datalabels"/>
+        <entry key="filename"/>
+        <entry key="targetname"/>
+        <entry key="gmos_filter"/>
+        <entry key="gmos_disperser"/>
+        <entry key="gmos_lambda"/>
+        <entry key="gmos_mask"/>
+        <entry key="observe_exposuretime"/>
+        <entry key="gmos_roi"/>
+        <entry key="comment"/>
+        <entry key="observe_status"/>
+        <entry key="gmos_fpumode"/>
+        <entry key="gmos_fpucustommask"/>
+        <entry key="datasetcomments"/>
+    </logEntry>
+
+    <logEntry key="GNIRS">
+        <entry key="observationid"/>
+        <entry key="datalabels"/>
+        <entry key="filename"/>
+        <entry key="datasetut"/>
+        <entry key="targetname"/>
+        <entry key="gnirs_filter"/>
+        <entry key="gnirs_slitwidth"/>
+        <entry key="gnirs_disperser"/>
+        <entry key="gnirs_camera"/>
+        <entry key="gnirs_centralwavelength"/>
+        <entry key="gnirs_exposuretime"/>
+        <entry key="gnirs_acquisitionmirror"/>
+        <entry key="comment"/>
+        <entry key="observe_observetype"/>
+        <entry key="gnirs_pixelscale"/>
+        <entry key="gnirs_coadds"/>
+        <entry key="gnirs_crossdispersed"/>
+        <entry key="gnirs_readmode"/>
+        <entry key="observe_status"/>
+        <entry key="datasetcomments"/>
+    </logEntry>
+
+    <logEntry key="GSAOI">
+        <entry key="observationid"/>
+        <entry key="datasetut"/>
+        <entry key="datalabels"/>
+        <entry key="filename"/>
+        <entry key="targetname"/>
+        <entry key="gsaoi_filter"/>
+        <entry key="observe_exposuretime"/>
+        <entry key="gsaoi_readmode"/>
+        <entry key="gsaoi_coadds"/>
+        <entry key="comment"/>
+        <entry key="observe_status"/>
+        <entry key="datasetcomments"/>
+    </logEntry>
+
+    <logEntry key="TReCS">
+        <entry key="observationid"/>
+        <entry key="datasetut"/>
+        <entry key="datalabels"/>
+        <entry key="filename"/>
+        <entry key="targetname"/>
+        <entry key="trecs_disperser"/>
+        <entry key="trecs_filter"/>
+        <entry key="trecs_slit"/>
+        <entry key="trecs_obsmode"/>
+        <entry key="trecs_timeonsource"/>
+        <entry key="comment"/>
+        <entry key="observe_status"/>
+        <entry key="trecs_disperserlambda"/>
+        <entry key="datasetcomments"/>
+    </logEntry>
+
+    <logEntry key="NIRI">
+        <entry key="observationid"/>
+        <entry key="datasetut"/>
+        <entry key="datalabels"/>
+        <entry key="filename"/>
+        <entry key="targetname"/>
+        <entry key="niri_filter"/>
+        <entry key="niri_disperser"/>
+        <entry key="niri_camera"/>
+        <entry key="niri_mask"/>
+        <entry key="niri_readmode"/>
+        <entry key="observe_exposuretime"/>
+        <entry key="niri_coadds"/>
+        <entry key="niri_roi"/>
+        <entry key="comment"/>
+        <entry key="observe_status"/>
+        <entry key="datasetcomments"/>
+    </logEntry>
+
+    <logEntry key="Michelle">
+        <entry key="observationid"/>
+        <entry key="datasetut"/>
+        <entry key="datalabels"/>
+        <entry key="filename"/>
+        <entry key="targetname"/>
+        <entry key="mich_disperser"/>
+        <entry key="mich_filter"/>
+        <entry key="mich_slit"/>
+        <entry key="mich_timeonsource"/>
+        <entry key="comment"/>
+        <entry key="observe_status"/>
+        <entry key="mich_disperserlambda"/>
+        <etnry key="datasetcomments"/>
+    </logEntry>
+
+    <logEntry key="AcqCam">
+        <entry key="observationid"/>
+        <entry key="datasetut"/>
+        <entry key="datalabels"/>
+        <entry key="filename"/>
+        <entry key="targetname"/>
+        <entry key="acq_colorfilter"/>
+        <entry key="acq_ndfilter"/>
+        <entry key="acq_lens"/>
+        <entry key="observe_exposuretime"/>
+        <entry key="comment"/>
+        <entry key="observe_status"/>
+        <entry key="datasetcomments"/>
+    </logEntry>
+
+    <logEntry key="BHROS">
+        <entry key="observationid"/>
+        <entry key="datasetut"/>
+        <entry key="datalabels"/>
+        <entry key="filename"/>
+        <entry key="targetname"/>
+        <entry key="bhros_wavelength"/>
+        <entry key="observe_exposuretime"/>
+        <entry key="bhros_filter"/>
+        <entry key="bhros_fiber"/>
+        <entry key="bhros_ccdgain"/>
+        <entry key="comment"/>
+        <entry key="bhros_ccdspeed"/>
+        <entry key="observe_status"/>
+        <entry key="datasetcomments"/>
+    </logEntry>
+
+    <logEntry key="NIFS">
+        <entry key="observationid"/>
+        <entry key="datasetut"/>
+        <entry key="datalabels"/>
+        <entry key="filename"/>
+        <entry key="targetname"/>
+        <entry key="nifs_filter"/>
+        <entry key="nifs_disperser"/>
+        <entry key="nifs_disperserlambda"/>
+        <entry key="nifs_mask"/>
+        <entry key="nifs_readmode"/>
+        <entry key="observe_exposuretime"/>
+        <entry key="nifs_coadds"/>
+        <entry key="nifs_imagingmirror"/>
+        <entry key="comment"/>
+        <entry key="observe_status"/>
+        <entry key="nifs_engreadmode"/>
+        <entry key="nifs_numsamples"/>
+        <entry key="nifs_period"/>
+        <entry key="nifs_numberofperiods"/>
+        <entry key="nifs_numresets"/>
+        <entry key="datasetcomments"/>
+    </logEntry>
+
+    <logEntry key="NICI">
+        <entry key="observationid"/>
+        <entry key="datasetut"/>
+        <entry key="datalabels"/>
+        <entry key="filename"/>
+        <entry key="targetname"/>
+        <entry key="nici_focalPlaneMask"/>
+        <entry key="nici_pupilMask"/>
+        <entry key="nici_redFilter"/>
+        <entry key="nici_blueFilter"/>
+        <entry key="observe_exposuretime"/>
+        <entry key="nici_coadds"/>
+        <entry key="nici_ndr"/>
+        <entry key="comment"/>
+        <entry key="observe_status"/>
+        <entry key="datasetcomments"/>
+    </logEntry>
+
+    <logEntry key="QA">
+        <entry key="datalabels"/>
+        <entry key="filename"/>
+        <entry key="instrument"/>
+        <entry key="qastate"/>
+        <entry key="observe_class"/>
+        <entry key="datasetut"/>
+        <entry key="comment"/>
+        <entry key="observationid"/>
+    </logEntry>
+
+    <logEntry key="TA">
+        <entry key="observationid"/>
+        <entry key="visit_starttime"/>
+        <entry key="visit_endtime"/>
+        <entry key="datalabels"/>
+        <entry key="filename"/>
+        <entry key="observe_class"/>
+        <entry key="observe_chargeclass"/>
+        <entry key="time_noncharged"/>
+        <entry key="time_partner"/>
+        <entry key="time_program"/>
+        <entry key="comment"/>
+    </logEntry>
+
+    <logEntry key="Visitor">
+        <entry key="observationid"/>
+        <entry key="datasetut"/>
+        <entry key="datalabels"/>
+        <entry key="filename"/>
+        <entry key="targetname"/>
+        <entry key="visitor_name"/>
+        <entry key="observe_exposuretime"/>
+        <entry key="comment"/>
+        <entry key="observe_status"/>
+        <entry key="datasetcomments"/>
+    </logEntry>
+
+    <logEntry key="GPI">
+        <entry key="observationid"/>
+        <entry key="datasetut"/>
+        <entry key="datalabels"/>
+        <entry key="filename"/>
+        <entry key="targetname"/>
+        <entry key="gpi_obs_mode"/>
+        <entry key="gpi_disperser"/>
+        <entry key="gpi_half_wave_plate_angle"/>
+        <entry key="gpi_adc"/>
+        <!--entry key="gpi_apodizer"/>
+        <entry key="gpi_fpm"/>
+        <entry key="gpi_lyot"/>
+        <entry key="gpi_filter"/-->
+        <entry key="gpi_cal_sphere"/>
+        <entry key="gpi_asu"/>
+        <entry key="gpi_coadds"/>
+        <entry key="gpi_pupil"/>
+        <entry key="gpi_ir_laser"/>
+        <entry key="gpi_visible_laser"/>
+        <entry key="gpi_white_light"/>
+        <entry key="observe_exposuretime"/>
+        <entry key="comment"/>
+        <entry key="observe_status"/>
+        <entry key="datasetcomments"/>
+    </logEntry>
+
+</configuration>

@@ -1,0 +1,3367 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
+
+<document>
+  <container kind="program" type="Program" version="2014A-1" subtype="basic" key="4a786fd7-7464-4d28-a40f-33b9aa95375b" name="NIFS-BP">
+    <paramset name="Science Program" kind="dataObj">
+      <param name="title" value="NIFS PHASE I/II MAPPING BPS"/>
+      <param name="programMode" value="QUEUE"/>
+      <param name="tooType" value="none"/>
+      <param name="programStatus" value="PHASE2"/>
+      <param name="nextObsId" value="1"/>
+      <paramset name="piInfo">
+        <param name="firstName" value=""/>
+        <param name="lastName" value=""/>
+        <param name="email" value=""/>
+        <param name="phone" value=""/>
+      </paramset>
+      <param name="queueBand" value="1"/>
+      <param name="isLibrary" value="true"/>
+      <paramset name="timeAcct"/>
+      <param name="awardedTime" value="0.0" units="hours"/>
+      <param name="fetched" value="yes"/>
+      <param name="completed" value="false"/>
+      <param name="notifyPi" value="NO"/>
+    </paramset>
+    <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="137bdbbe-efd8-440f-8871-71acd3f341ad" name="Note">
+      <paramset name="Note" kind="dataObj">
+        <param name="title" value="Next libID = 23"/>
+        <param name="NoteText" value=""/>
+      </paramset>
+    </container>
+    <container kind="group" type="Group" version="2009A-1" subtype="group" key="62fd93db-0521-436d-8b48-944ec4cdbf61" name="Group">
+      <paramset name="Group" kind="dataObj">
+        <param name="title" value="Spectroscopy BP"/>
+        <param name="GroupType" value="TYPE_FOLDER"/>
+        <param name="libraryId" value=""/>
+      </paramset>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="dfe11324-c32c-4dac-a70a-06e87d8db3f6" name="NIFS-BP-1">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Acq: Before Standard"/>
+          <param name="libraryId" value="1"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="1c5a0762-c520-4e99-af30-8213312f7128" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2010A-1" subtype="NIFS" key="f910355a-1c20-4b25-8044-029d6947e925" name="NIFS">
+          <paramset name="NIFS" kind="dataObj">
+            <param name="exposureTime" value="5.3"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="imagingMirror" value="OUT"/>
+            <param name="disperser" value="K"/>
+            <param name="filter" value="SAME_AS_DISPERSER"/>
+            <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
+            <param name="centralWavelength" value="2.2"/>
+            <param name="mask" value="CLEAR"/>
+            <param name="maskOffset" value="0.0"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="86e70195-55a8-454a-aed5-acf4960f62fc" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="a39b5544-697d-44db-933b-a9d3783230b4" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="f80079ce-77ac-40d3-9c27-ff7b91236280" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="4efa4e71-fd2f-453d-871b-b25486012fb3" name="Offset">
+            <paramset name="Offset" kind="dataObj">
+              <paramset name="offsets">
+                <paramset name="Offset0" sequence="0">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset1" sequence="1">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset2" sequence="2">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset3" sequence="3">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset4" sequence="4">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+              </paramset>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="01824d6a-38fc-4446-985c-e87319e15b01" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="ACQ_CAL"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="4be66da9-9b08-4528-a9f0-2b13c8acbe77" name="NIFS-BP-2">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Obs: Before Standard"/>
+          <param name="libraryId" value="2"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="61990e53-a0d7-4ac2-b04a-3b02a814b98d" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2010A-1" subtype="NIFS" key="ce3f30b2-fb3c-46ef-8928-094ad59a577e" name="NIFS">
+          <paramset name="NIFS" kind="dataObj">
+            <param name="exposureTime" value="10.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="imagingMirror" value="OUT"/>
+            <param name="disperser" value="K"/>
+            <param name="filter" value="SAME_AS_DISPERSER"/>
+            <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
+            <param name="centralWavelength" value="2.2"/>
+            <param name="mask" value="CLEAR"/>
+            <param name="maskOffset" value="0.0"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="80dc27c2-bb2f-4cfe-b6fb-95c65cba2d65" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="0ee2cc8a-61e0-4a3c-94fc-61431bdc2f5e" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="ccc185e0-6279-4743-9a32-5186141e31d7" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="80d28b88-6ea3-47b9-af4e-ae55dbdd337c" name="Offset">
+            <paramset name="Offset" kind="dataObj">
+              <paramset name="offsets">
+                <paramset name="Offset4" sequence="0">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset0" sequence="1">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="5.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset2" sequence="2">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset1" sequence="3">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset3" sequence="4">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="5.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset6" sequence="5">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+              </paramset>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="5c36b142-b483-4994-9930-fe6c0f0d9463" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="PARTNER_CAL"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="e378d626-1f8b-4878-b390-b9ce8c8cda71" name="NIFS-BP-3">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Acq: H&lt;=9"/>
+          <param name="libraryId" value="3"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2010A-1" subtype="NIFS" key="6b82716a-52cb-45d5-afa7-13e83e0a3e7e" name="NIFS">
+          <paramset name="NIFS" kind="dataObj">
+            <param name="exposureTime" value="5.3"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="imagingMirror" value="OUT"/>
+            <param name="disperser" value="K"/>
+            <param name="filter" value="SAME_AS_DISPERSER"/>
+            <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
+            <param name="centralWavelength" value="2.2"/>
+            <param name="mask" value="CLEAR"/>
+            <param name="maskOffset" value="0.0"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="7aefbd3c-6d38-4f28-b2ac-a91a655249ee" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="af87f544-8b1e-4564-bb27-f571d0e425a6" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="006f2755-7c5e-49a6-9e7f-d5554e3c48f7" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="617d1d47-ff08-4c8a-9b1a-f094fab71e56" name="Offset">
+            <paramset name="Offset" kind="dataObj">
+              <paramset name="offsets">
+                <paramset name="Offset0" sequence="0">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset1" sequence="1">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset2" sequence="2">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset3" sequence="3">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset4" sequence="4">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+              </paramset>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="ed80b03b-1a2d-44b5-8ae4-26e162e15af6" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="ACQ"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="d4e176e2-6324-4695-9b03-fe75db4fe48c" name="NIFS-BP-4">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Acq: 9&lt;H&lt;=12"/>
+          <param name="libraryId" value="4"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="9cd6f15a-a686-4d0e-88c3-45b036bf1ece" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="ACQUISITION INSTRUCTIONS"/>
+            <param name="NoteText">
+              <value>1) Run first TWO steps
+
+2) Run 'gacq 2 sky=1' and follow the instructions
+
+3) Run 'gacq 3 sky=1' and iterate until centered</value>
+            </param>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2010A-1" subtype="NIFS" key="d8f361bd-03bc-4179-ac87-2fa0d5f7b688" name="NIFS">
+          <paramset name="NIFS" kind="dataObj">
+            <param name="exposureTime" value="20.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="imagingMirror" value="OUT"/>
+            <param name="disperser" value="K"/>
+            <param name="filter" value="SAME_AS_DISPERSER"/>
+            <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
+            <param name="centralWavelength" value="2.2"/>
+            <param name="mask" value="CLEAR"/>
+            <param name="maskOffset" value="0.0"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="290b244a-1373-4355-b6f4-07c4bf1ff9cf" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="f8c73378-b965-4c77-a924-995ab0e18a1e" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="4856a965-9b76-4c2e-be82-1f80d59ae9ce" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="1d6e37dc-f99a-4f74-9815-c9db25db4d77" name="Offset">
+            <paramset name="Offset" kind="dataObj">
+              <paramset name="offsets">
+                <paramset name="Offset0" sequence="0">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="5.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset1" sequence="1">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset2" sequence="2">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset3" sequence="3">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset4" sequence="4">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+              </paramset>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="bb814111-b5b7-4927-8e1d-839ab06ea596" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="ACQ"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="c3326b57-96f5-4975-bdd5-96990ceb13bf" name="NIFS-BP-5">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Acq: H &gt;12"/>
+          <param name="libraryId" value="5"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="762209ee-a70b-44d8-8558-9cec5e338fa1" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="ACQUISITION INSTRUCTIONS"/>
+            <param name="NoteText">
+              <value>1) Run first TWO steps
+
+2) Run 'gacq 2 sky=1' and follow the instructions
+
+3) Run 'gacq 3 sky=1' and iterate until centered</value>
+            </param>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2010A-1" subtype="NIFS" key="e41375ba-333d-41c6-9657-8cf84efebb6f" name="NIFS">
+          <paramset name="NIFS" kind="dataObj">
+            <param name="exposureTime" value="20.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="imagingMirror" value="IN"/>
+            <param name="disperser" value="K"/>
+            <param name="filter" value="SAME_AS_DISPERSER"/>
+            <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
+            <param name="centralWavelength" value="2.2"/>
+            <param name="mask" value="CLEAR"/>
+            <param name="maskOffset" value="0.0"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="421f51bd-2889-4d6f-93b9-4db2ad8a9ecc" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="948d302a-3686-4645-b144-42150360b73f" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="b9917c5c-dbe2-40a5-9f21-dd3f4bf28308" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="4c37783d-b56b-4395-8f4c-d9ce7dd9a199" name="Offset">
+            <paramset name="Offset" kind="dataObj">
+              <paramset name="offsets">
+                <paramset name="Offset0" sequence="0">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="5.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset1" sequence="1">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset2" sequence="2">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset3" sequence="3">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset4" sequence="4">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+              </paramset>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="4a2b7afd-9984-4f8f-a004-a68738c75750" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="ACQ"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="759e520f-9ccf-4914-9cf6-00716f83fe10" name="NIFS-BP-6">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Acq Coron: H&lt;=9"/>
+          <param name="libraryId" value="11"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="6e181005-7477-49b2-9538-9174186cc3d8" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="ACQUISITION INSTRUCTIONS"/>
+            <param name="NoteText" value="See http://internal.gemini.edu/science/instruments/NIFS/Operation_Procedures/NIFS_Occulting_Disk_Observations.html"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="AO" version="2006B-1" subtype="Altair" key="4e4120e0-c61d-49ea-9854-e51637084ad8" name="Altair Adaptive Optics">
+          <paramset name="Altair Adaptive Optics" kind="dataObj">
+            <param name="wavelength" value="WAVELENGTH_1UM"/>
+            <param name="adc" value="OFF"/>
+            <param name="cassRotator" value="FOLLOWING"/>
+            <param name="ndFilter" value="OUT"/>
+            <param name="mode" value="NGS"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2010A-1" subtype="NIFS" key="af3bee51-a6da-48de-a955-1303f6a1dcf2" name="NIFS">
+          <paramset name="NIFS" kind="dataObj">
+            <param name="exposureTime" value="5.3"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="imagingMirror" value="OUT"/>
+            <param name="disperser" value="K"/>
+            <param name="filter" value="SAME_AS_DISPERSER"/>
+            <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
+            <param name="centralWavelength" value="2.2"/>
+            <param name="mask" value="CLEAR"/>
+            <param name="maskOffset" value="0.0"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="b4e372b4-1bda-48cd-93f9-df5a583de61e" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="4c53ef08-923b-44ed-a9ce-81c12a6700b6" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="55ec4d69-0996-410f-a0de-12d5db98cd4c" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="dc78cba2-ad6e-4090-94c9-1978f14d2a55" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="exposureTime" value="5.3"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="b8f4ae95-b3ba-436f-866a-eb9c39ce8311" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="ACQ"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="4ce78a4f-e693-4933-b7ea-4537f3572278" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="exposureTime" value="15.0"/>
+              <param name="mask" value="OD_2"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="GemFlat" key="6cfa7730-00b9-4dd5-bafa-5a1ca65bfdc7" name="Manual Flat/Arc">
+              <paramset name="Manual Flat/Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="ACQ"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+                <param name="lamp" value="IR_GREY_BODY_HIGH"/>
+                <param name="shutter" value="OPEN"/>
+                <param name="filter" value="NONE"/>
+                <param name="diffuser" value="IR"/>
+              </paramset>
+            </container>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="0cc5a1f2-ff72-499b-8b04-bba2996fefba" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="5"/>
+                <param name="class" value="ACQ"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="51063ded-aa4b-4d92-9336-cc71ad2a772f" name="NIFS-BP-7">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Acq Coron: H&gt;9"/>
+          <param name="libraryId" value="12"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="3e0f9c5c-6c9c-419e-82d7-5b4a2c3d4bf1" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="ACQUISITION INSTRUCTIONS"/>
+            <param name="NoteText" value="See http://internal.gemini.edu/science/instruments/NIFS/Operation_Procedures/NIFS_Occulting_Disk_Observations.html"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="AO" version="2006B-1" subtype="Altair" key="f13e1aaf-65b7-4a21-836c-cb21a80f4270" name="Altair Adaptive Optics">
+          <paramset name="Altair Adaptive Optics" kind="dataObj">
+            <param name="wavelength" value="WAVELENGTH_1UM"/>
+            <param name="adc" value="OFF"/>
+            <param name="cassRotator" value="FOLLOWING"/>
+            <param name="ndFilter" value="OUT"/>
+            <param name="mode" value="NGS"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2010A-1" subtype="NIFS" key="7fcbfe8b-beda-4b30-b7f3-bdf4d590e77b" name="NIFS">
+          <paramset name="NIFS" kind="dataObj">
+            <param name="exposureTime" value="5.3"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="imagingMirror" value="OUT"/>
+            <param name="disperser" value="K"/>
+            <param name="filter" value="SAME_AS_DISPERSER"/>
+            <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
+            <param name="centralWavelength" value="2.2"/>
+            <param name="mask" value="CLEAR"/>
+            <param name="maskOffset" value="0.0"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="3adfe65d-7ef7-48b2-87b1-8d599c0047e7" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="6444bf1c-6bc5-4767-8fd1-9b64c534e042" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="a976758d-42a5-4607-abcd-1a89cd926068" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="83d1d477-27c4-455b-9dae-4e20bb5df79f" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="exposureTime" value="5.3"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="205c091a-a0bc-425b-8878-f2eb14f0d7fb" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="ACQ"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="94abf4ab-cf5c-42b0-919c-d06b0076626f" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="exposureTime" value="30.0"/>
+              <param name="mask" value="OD_2"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="GemFlat" key="c21ca812-ce6e-487e-a1fb-bd7426a0df59" name="Manual Flat/Arc">
+              <paramset name="Manual Flat/Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="ACQ"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+                <param name="lamp" value="IR_GREY_BODY_HIGH"/>
+                <param name="shutter" value="OPEN"/>
+                <param name="filter" value="NONE"/>
+                <param name="diffuser" value="IR"/>
+              </paramset>
+            </container>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="8e0b2286-08ba-4e80-b54d-fe31702ba60e" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="5"/>
+                <param name="class" value="ACQ"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="88009f6a-3e76-4cb0-b431-f0f9375ac89a" name="NIFS-BP-8">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Obs: Science Target -  - Single Wavelength + Offset to Sky"/>
+          <param name="libraryId" value="6"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2010A-1" subtype="NIFS" key="0acb7a53-d83d-499b-b3bd-338fe45c54af" name="NIFS">
+          <paramset name="NIFS" kind="dataObj">
+            <param name="exposureTime" value="80.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="imagingMirror" value="OUT"/>
+            <param name="disperser" value="K"/>
+            <param name="filter" value="SAME_AS_DISPERSER"/>
+            <param name="readMode" value="MEDIUM_OBJECT_SPEC"/>
+            <param name="centralWavelength" value="2.2"/>
+            <param name="mask" value="CLEAR"/>
+            <param name="maskOffset" value="0.0"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="7d8664e0-cdca-45bd-84b0-bb346b9c231c" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="17ddb8fd-e3f6-4673-8661-040605161433" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="e846c3da-a6d1-40d6-97e2-2f7351f5fa09" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="repeat" key="8c79c1bf-bfa8-4687-a8ce-b056c086fd17" name="Repeat">
+            <paramset name="Repeat" kind="dataObj">
+              <param name="repeatCount" value="3"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="bbe298bf-9b4d-436f-a5fd-02507609598d" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset1" sequence="1">
+                    <param name="p" value="30.0"/>
+                    <param name="q" value="30.0"/>
+                    <param name="defaultGuideOption" value="off"/>
+                  </paramset>
+                  <paramset name="Offset3" sequence="2">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="70cb7df1-b2db-4d7a-8c6a-f058a662c365" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="SCIENCE"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="95334938-2ccc-4a63-a715-0e72df9a9988" name="Offset">
+            <paramset name="Offset" kind="dataObj">
+              <paramset name="offsets">
+                <paramset name="Offset0" sequence="0">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+              </paramset>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="deae43fa-7289-4502-a9f2-5d92318e1456" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="705fb3e5-5732-4579-81fe-93246bcb839d" name="NIFS-BP-9">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Obs: Coron. Science Target"/>
+          <param name="libraryId" value="13"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2010A-1" subtype="NIFS" key="742aa9f3-8d7f-4fb2-b194-b16fcf575959" name="NIFS">
+          <paramset name="NIFS" kind="dataObj">
+            <param name="exposureTime" value="80.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="imagingMirror" value="OUT"/>
+            <param name="disperser" value="K"/>
+            <param name="filter" value="SAME_AS_DISPERSER"/>
+            <param name="readMode" value="MEDIUM_OBJECT_SPEC"/>
+            <param name="centralWavelength" value="2.2"/>
+            <param name="mask" value="OD_2"/>
+            <param name="maskOffset" value="0.0"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="0ee73c8e-b11c-4e2e-b932-fee1c211251e" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="ddc2c715-e785-4324-921c-ab6048bf4508" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="af9dc917-286f-44d7-b04b-b92f975e07b3" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="repeat" key="56ed1b91-2ca9-4a35-8f80-0d49b44842ed" name="Repeat">
+            <paramset name="Repeat" kind="dataObj">
+              <param name="repeatCount" value="3"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="8ada7938-03f3-4079-924b-8777adce9491" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset1" sequence="1">
+                    <param name="p" value="30.0"/>
+                    <param name="q" value="30.0"/>
+                    <param name="defaultGuideOption" value="off"/>
+                  </paramset>
+                  <paramset name="Offset3" sequence="2">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="a20e90dc-aaa5-4118-8e87-d0399440613c" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="SCIENCE"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="9c3cd57e-be22-437f-b783-2381fb01f526" name="Offset">
+            <paramset name="Offset" kind="dataObj">
+              <paramset name="offsets">
+                <paramset name="Offset0" sequence="0">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+              </paramset>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="0ffb87af-91b2-41c6-8127-52b45a1f7bac" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="PARTNER_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="425b6f29-70ae-4e4e-af91-426f17145aeb" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="mask" value="CLEAR"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="2fe30c28-fe32-4783-bf3c-41048578fce2" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="cdbcfa8c-5c6a-4829-8abf-e97562356fa6" name="NIFS-BP-10">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Acq: After Standard"/>
+          <param name="libraryId" value="7"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="f44eccd9-58fd-4e0e-9b4f-998518fdfe9a" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2010A-1" subtype="NIFS" key="624147bc-81fe-4448-a012-bebd7409ab93" name="NIFS">
+          <paramset name="NIFS" kind="dataObj">
+            <param name="exposureTime" value="5.3"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="imagingMirror" value="OUT"/>
+            <param name="disperser" value="K"/>
+            <param name="filter" value="SAME_AS_DISPERSER"/>
+            <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
+            <param name="centralWavelength" value="2.2"/>
+            <param name="mask" value="CLEAR"/>
+            <param name="maskOffset" value="0.0"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="501540cf-f400-4bfe-9e8e-62857858ce98" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="8279f6bb-ed0c-4cdc-a5c2-777cfb93565f" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="29d8c31b-f8ec-436a-9066-4d2b4600cb1d" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="0a2f2268-42d3-42a1-af27-5dc5c7161895" name="Offset">
+            <paramset name="Offset" kind="dataObj">
+              <paramset name="offsets">
+                <paramset name="Offset0" sequence="0">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset1" sequence="1">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset2" sequence="2">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset3" sequence="3">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset4" sequence="4">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+              </paramset>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="d2abfa18-ded0-4a82-91ae-8841f185a1d6" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="ACQ_CAL"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="13bc6b19-e158-4a78-a702-f6e4a59bf57c" name="NIFS-BP-11">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Obs: After Standard"/>
+          <param name="libraryId" value="8"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="550fe81c-7b1c-47d5-81c5-67b6659e0bdd" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2010A-1" subtype="NIFS" key="cf8228b5-4977-4ec2-9a1e-0aadadf9219b" name="NIFS">
+          <paramset name="NIFS" kind="dataObj">
+            <param name="exposureTime" value="10.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="imagingMirror" value="OUT"/>
+            <param name="disperser" value="K"/>
+            <param name="filter" value="SAME_AS_DISPERSER"/>
+            <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
+            <param name="centralWavelength" value="2.2"/>
+            <param name="mask" value="CLEAR"/>
+            <param name="maskOffset" value="0.0"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="5bdfe02f-9f0a-458c-87f9-b3fc07ee3118" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="aa50fe16-0aac-45e3-ba69-5e767130d916" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="991deef7-d8d7-488b-a8f0-9517a74a5734" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="c80e4714-2a74-4dd2-9fb4-d6bfdf84cf99" name="Offset">
+            <paramset name="Offset" kind="dataObj">
+              <paramset name="offsets">
+                <paramset name="Offset4" sequence="0">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset0" sequence="1">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="5.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset2" sequence="2">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset1" sequence="3">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset3" sequence="4">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="5.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset6" sequence="5">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+              </paramset>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="aeec34c1-ede3-4738-b484-cd22a3da57e6" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="PARTNER_CAL"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+    </container>
+    <container kind="group" type="Group" version="2009A-1" subtype="group" key="66218dcd-d7fb-4674-b5cd-06385e69c953" name="Group">
+      <paramset name="Group" kind="dataObj">
+        <param name="title" value="Daytime Calibration"/>
+        <param name="GroupType" value="TYPE_FOLDER"/>
+        <param name="libraryId" value=""/>
+      </paramset>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="23ba29e7-5659-4b52-86b7-11cf3a2d032b" name="NIFS-BP-12">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Dark Medium Object 80 sec"/>
+          <param name="libraryId" value="9"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="6df2de9c-43e2-4a7d-bac8-e00ac2a480e3" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="0a3b3e8c-8bda-49c6-8153-12934b07b382" name="Targets">
+          <paramset name="Targets" kind="dataObj">
+            <paramset name="targetEnv">
+              <paramset name="base">
+                <param name="name" value="Dark"/>
+                <param name="system" value="J2000"/>
+                <param name="epoch" value="2000.0" units="years"/>
+                <param name="brightness" value=""/>
+                <param name="c1" value="00:00:00.000"/>
+                <param name="c2" value="00:00:00.00"/>
+                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+                <param name="parallax" value="0.0" units="arcsecs"/>
+                <param name="rv" value="0.0" units="km/sec"/>
+                <param name="wavelength" value="-1.0" units="angstroms"/>
+              </paramset>
+              <paramset name="guideEnv">
+                <param name="active">
+                  <value sequence="0">NIFS OIWFS</value>
+                  <value sequence="1">PWFS1</value>
+                  <value sequence="2">PWFS2</value>
+                </param>
+                <param name="selected"/>
+              </paramset>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2010A-1" subtype="NIFS" key="0966d75a-682f-4161-b0a1-e10f22ca6c92" name="NIFS">
+          <paramset name="NIFS" kind="dataObj">
+            <param name="exposureTime" value="80.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="imagingMirror" value="OUT"/>
+            <param name="disperser" value="K"/>
+            <param name="filter" value="SAME_AS_DISPERSER"/>
+            <param name="readMode" value="MEDIUM_OBJECT_SPEC"/>
+            <param name="centralWavelength" value="2.2"/>
+            <param name="mask" value="BLOCKED"/>
+            <param name="maskOffset" value="0.0"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="6fd8a33c-5ca5-45f4-a4f5-0e16b4ce15cc" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="0ee20d66-1a4f-4390-ba34-005bcfc7bf4d" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="7694d4f1-b9b8-45a5-b502-e3e4e22adfb1" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="dark" key="6aae0110-65a5-4f2c-89d0-3151af881c77" name="Manual Dark">
+            <paramset name="Manual Dark" kind="dataObj">
+              <param name="repeatCount" value="5"/>
+              <param name="class" value="DAY_CAL"/>
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="80.0"/>
+            </paramset>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="82cfed68-6201-4394-9cb5-c7d1f63086fb" name="NIFS-BP-13">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Dark Bright Object 10 sec"/>
+          <param name="libraryId" value="15"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="3597e995-d88d-4640-97f7-8c9ffefbce0c" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="6481ac8e-e041-46d3-8731-7475c2a38d21" name="Targets">
+          <paramset name="Targets" kind="dataObj">
+            <paramset name="targetEnv">
+              <paramset name="base">
+                <param name="name" value="Dark"/>
+                <param name="system" value="J2000"/>
+                <param name="epoch" value="2000.0" units="years"/>
+                <param name="brightness" value=""/>
+                <param name="c1" value="00:00:00.000"/>
+                <param name="c2" value="00:00:00.00"/>
+                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+                <param name="parallax" value="0.0" units="arcsecs"/>
+                <param name="rv" value="0.0" units="km/sec"/>
+                <param name="wavelength" value="-1.0" units="angstroms"/>
+              </paramset>
+              <paramset name="guideEnv">
+                <param name="active">
+                  <value sequence="0">NIFS OIWFS</value>
+                  <value sequence="1">PWFS1</value>
+                  <value sequence="2">PWFS2</value>
+                </param>
+                <param name="selected"/>
+              </paramset>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2010A-1" subtype="NIFS" key="76cdecc1-ac44-4937-b314-0b7ac11c8394" name="NIFS">
+          <paramset name="NIFS" kind="dataObj">
+            <param name="exposureTime" value="10.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="imagingMirror" value="OUT"/>
+            <param name="disperser" value="K"/>
+            <param name="filter" value="SAME_AS_DISPERSER"/>
+            <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
+            <param name="centralWavelength" value="2.2"/>
+            <param name="mask" value="BLOCKED"/>
+            <param name="maskOffset" value="0.0"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="f390e6a8-760c-4c9b-8cdb-7bd52de62e25" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="412100bb-2463-4848-b930-e580e41b0de8" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="231bd2db-4a2a-4277-8fc7-aff7946802ba" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="dark" key="b8979574-7747-42c3-9fa3-1a790b250e1c" name="Manual Dark">
+            <paramset name="Manual Dark" kind="dataObj">
+              <param name="repeatCount" value="5"/>
+              <param name="class" value="DAY_CAL"/>
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="10.0"/>
+            </paramset>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="188017ef-e88e-4717-9bd9-cd4f2a542126" name="NIFS-BP-14">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Dark Faint Object 600 sec"/>
+          <param name="libraryId" value="16"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="f5ec09fa-e1c6-4a2c-86a5-a1002b03cfce" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="ba9a712a-77ba-44a2-b672-fdd772ce113b" name="Targets">
+          <paramset name="Targets" kind="dataObj">
+            <paramset name="targetEnv">
+              <paramset name="base">
+                <param name="name" value="Dark"/>
+                <param name="system" value="J2000"/>
+                <param name="epoch" value="2000.0" units="years"/>
+                <param name="brightness" value=""/>
+                <param name="c1" value="00:00:00.000"/>
+                <param name="c2" value="00:00:00.00"/>
+                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+                <param name="parallax" value="0.0" units="arcsecs"/>
+                <param name="rv" value="0.0" units="km/sec"/>
+                <param name="wavelength" value="-1.0" units="angstroms"/>
+              </paramset>
+              <paramset name="guideEnv">
+                <param name="active">
+                  <value sequence="0">NIFS OIWFS</value>
+                  <value sequence="1">PWFS1</value>
+                  <value sequence="2">PWFS2</value>
+                </param>
+                <param name="selected"/>
+              </paramset>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2010A-1" subtype="NIFS" key="88d81bb6-23d4-4f2e-8fa1-0dad51898bdb" name="NIFS">
+          <paramset name="NIFS" kind="dataObj">
+            <param name="exposureTime" value="600.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="imagingMirror" value="OUT"/>
+            <param name="disperser" value="K"/>
+            <param name="filter" value="SAME_AS_DISPERSER"/>
+            <param name="readMode" value="FAINT_OBJECT_SPEC"/>
+            <param name="centralWavelength" value="2.2"/>
+            <param name="mask" value="BLOCKED"/>
+            <param name="maskOffset" value="0.0"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="8c3bb182-7266-40aa-9033-ef2085e40515" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="d9a55c2b-160d-4750-a92c-370b629c3673" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="5a0e50be-e024-4106-ae39-554f2b8b2133" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="dark" key="76f94441-0169-4bf0-8274-d05faec5ad3e" name="Manual Dark">
+            <paramset name="Manual Dark" kind="dataObj">
+              <param name="repeatCount" value="5"/>
+              <param name="class" value="DAY_CAL"/>
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="600.0"/>
+            </paramset>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="c0d50b56-4434-4f97-8bc0-193f0811c6bd" name="NIFS-BP-15">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Z-band Calibrations"/>
+          <param name="libraryId" value="19"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="06ef2477-ae3d-4ff2-9fb9-2898f44fb058" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="3b75605b-3918-45e1-8534-9a6909a2a247" name="Targets">
+          <paramset name="Targets" kind="dataObj">
+            <paramset name="targetEnv">
+              <paramset name="base">
+                <param name="name" value="GCALflats"/>
+                <param name="system" value="J2000"/>
+                <param name="epoch" value="2000.0" units="years"/>
+                <param name="brightness" value=""/>
+                <param name="c1" value="00:00:00.000"/>
+                <param name="c2" value="00:00:00.00"/>
+                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+                <param name="parallax" value="0.0" units="arcsecs"/>
+                <param name="rv" value="0.0" units="km/sec"/>
+                <param name="wavelength" value="-1.0" units="angstroms"/>
+              </paramset>
+              <paramset name="guideEnv">
+                <param name="active">
+                  <value sequence="0">NIFS OIWFS</value>
+                  <value sequence="1">PWFS1</value>
+                  <value sequence="2">PWFS2</value>
+                </param>
+                <param name="selected"/>
+              </paramset>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2010A-1" subtype="NIFS" key="fd3e9679-d35c-45ec-a2be-c16a2c401459" name="NIFS">
+          <paramset name="NIFS" kind="dataObj">
+            <param name="exposureTime" value="5.3"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="imagingMirror" value="OUT"/>
+            <param name="disperser" value="Z"/>
+            <param name="filter" value="SAME_AS_DISPERSER"/>
+            <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
+            <param name="centralWavelength" value="1.05"/>
+            <param name="mask" value="CLEAR"/>
+            <param name="maskOffset" value="0.0"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="863d9341-3992-469b-b5ae-2da8c61bab26" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="d1fbf830-baed-4116-a82f-127211840279" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="36365490-c31f-4c37-a656-de96491b7fa4" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="96c6b2a7-702e-4d05-aed6-b7e3cc40af91" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Lamps on/off Flats x5"/>
+              <param name="exposureTime" value="5.3"/>
+              <param name="mask" value="CLEAR"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="c2df27e3-0794-49b5-90fa-1c0cbc5786b3" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="b5f1df18-ce6a-4908-9b23-747b0ee1e4b1" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Arc Darks x2"/>
+              <param name="exposureTime" value="5.3"/>
+              <param name="mask" value="BLOCKED"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="dark" key="97868143-f55b-4e6b-863f-e8e1e8ee5a37" name="Manual Dark">
+              <paramset name="Manual Dark" kind="dataObj">
+                <param name="repeatCount" value="2"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="5.3"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="2263fc72-0e16-4a87-a508-bf4da28e75e6" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Ronchi Mask x2"/>
+              <param name="mask" value="RONCHE"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="b8de5fee-d97f-43e2-abbe-dd219a1f6f26" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="affe1a4f-173c-4cb3-8187-a79eee7a346d" name="NIFS-BP-16">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="J-band Calibrations"/>
+          <param name="libraryId" value="18"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="7c0658fc-79e7-4939-b68a-e5e58baa2661" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="fd50dbc1-692a-4727-9be9-0cc79cbe1314" name="Targets">
+          <paramset name="Targets" kind="dataObj">
+            <paramset name="targetEnv">
+              <paramset name="base">
+                <param name="name" value="GCALflats"/>
+                <param name="system" value="J2000"/>
+                <param name="epoch" value="2000.0" units="years"/>
+                <param name="brightness" value=""/>
+                <param name="c1" value="00:00:00.000"/>
+                <param name="c2" value="00:00:00.00"/>
+                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+                <param name="parallax" value="0.0" units="arcsecs"/>
+                <param name="rv" value="0.0" units="km/sec"/>
+                <param name="wavelength" value="-1.0" units="angstroms"/>
+              </paramset>
+              <paramset name="guideEnv">
+                <param name="active">
+                  <value sequence="0">NIFS OIWFS</value>
+                  <value sequence="1">PWFS1</value>
+                  <value sequence="2">PWFS2</value>
+                </param>
+                <param name="selected"/>
+              </paramset>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2010A-1" subtype="NIFS" key="68fc171a-64b6-4e57-9dbe-5a9434ae5346" name="NIFS">
+          <paramset name="NIFS" kind="dataObj">
+            <param name="exposureTime" value="40.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="imagingMirror" value="OUT"/>
+            <param name="disperser" value="J"/>
+            <param name="filter" value="SAME_AS_DISPERSER"/>
+            <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
+            <param name="centralWavelength" value="1.25"/>
+            <param name="mask" value="CLEAR"/>
+            <param name="maskOffset" value="0.0"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="edce6db7-0a7d-40bd-9c61-eab3804c9199" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="b0f2456f-05bc-496b-8144-9125dd0ac9a4" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="a2b867e7-0d42-4753-84a5-b0ff439c2a96" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="885a9786-3bbc-4b51-b6b5-f4c85c748fcd" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Lamps on/off Flats x5"/>
+              <param name="exposureTime" value="40.0"/>
+              <param name="mask" value="CLEAR"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="647b203f-c113-402b-848e-bbfd1c030974" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="4d996bba-5aaf-4830-9d49-fc3651db7a6e" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Arc Darks x2"/>
+              <param name="exposureTime" value="10.0"/>
+              <param name="mask" value="BLOCKED"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="dark" key="fa1de0fb-de16-43cd-b647-d10f3b0ca67a" name="Manual Dark">
+              <paramset name="Manual Dark" kind="dataObj">
+                <param name="repeatCount" value="2"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="f282124a-c933-46d9-b1f9-ba2d08d46fda" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Ronchi Mask x2"/>
+              <param name="mask" value="RONCHE"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="b6b0ee2e-423f-4a89-8ac2-7c0a84b8b130" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="bcebf803-cb0c-464d-9cd0-47e7585c8c81" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Clear Array"/>
+              <param name="mask" value="RONCHE"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="GemFlat" key="7349033a-be14-477c-906b-bbeee9204a15" name="Manual Flat/Arc">
+              <paramset name="Manual Flat/Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="5.3"/>
+                <param name="lamp" value="IR_GREY_BODY_HIGH"/>
+                <param name="shutter" value="CLOSED"/>
+                <param name="filter" value="ND_20"/>
+                <param name="diffuser" value="IR"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="26d4cfd9-1867-450c-b751-7335a859460d" name="NIFS-BP-17">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="H-band Calibrations"/>
+          <param name="libraryId" value="17"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="5d39f3b5-73f8-4db4-b80e-3292df59207f" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="73bf71a3-779a-47ae-9092-0280c39c079f" name="Targets">
+          <paramset name="Targets" kind="dataObj">
+            <paramset name="targetEnv">
+              <paramset name="base">
+                <param name="name" value="GCALflats"/>
+                <param name="system" value="J2000"/>
+                <param name="epoch" value="2000.0" units="years"/>
+                <param name="brightness" value=""/>
+                <param name="c1" value="00:00:00.000"/>
+                <param name="c2" value="00:00:00.00"/>
+                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+                <param name="parallax" value="0.0" units="arcsecs"/>
+                <param name="rv" value="0.0" units="km/sec"/>
+                <param name="wavelength" value="-1.0" units="angstroms"/>
+              </paramset>
+              <paramset name="guideEnv">
+                <param name="active">
+                  <value sequence="0">NIFS OIWFS</value>
+                  <value sequence="1">PWFS1</value>
+                  <value sequence="2">PWFS2</value>
+                </param>
+                <param name="selected"/>
+              </paramset>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2010A-1" subtype="NIFS" key="5cf92d13-2404-4735-85fc-a9c6fceaafa6" name="NIFS">
+          <paramset name="NIFS" kind="dataObj">
+            <param name="exposureTime" value="10.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="imagingMirror" value="OUT"/>
+            <param name="disperser" value="H"/>
+            <param name="filter" value="SAME_AS_DISPERSER"/>
+            <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
+            <param name="centralWavelength" value="1.65"/>
+            <param name="mask" value="CLEAR"/>
+            <param name="maskOffset" value="0.0"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="9f1b2216-5fd6-4eeb-91e4-7edb167fe951" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="e4bb8e16-1e92-4daf-8721-923a9de6601c" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="63ba0ae8-4144-434e-b0f0-e742ef2dacc1" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="428a9d2d-e641-4edc-8ae0-ea005af4e365" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Lamps on/off Flats x5"/>
+              <param name="mask" value="CLEAR"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="9596c7a4-844c-4a23-b228-adffa314c9be" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="41f75cec-d944-4fec-8364-a7e32bfecf11" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Arc Dark x2"/>
+              <param name="exposureTime" value="10.0"/>
+              <param name="mask" value="BLOCKED"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="dark" key="401c9df2-c339-44dc-9dfb-7d3bfa278d1e" name="Manual Dark">
+              <paramset name="Manual Dark" kind="dataObj">
+                <param name="repeatCount" value="2"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="76a9acab-7ecb-4054-b3d5-9d59fb96d5e5" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Ronchi Mask x2"/>
+              <param name="mask" value="RONCHE"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="389e02f9-4970-4886-b76b-790316fac1ec" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="6a31d64c-73d0-4abc-912c-54d15568f086" name="NIFS-BP-18">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="K-band Calibrations"/>
+          <param name="libraryId" value="10"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="ff63854f-a20b-458b-a618-67bdfb97b8c6" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="c94e7a7a-df59-4c12-832f-410e88d7b2c1" name="Targets">
+          <paramset name="Targets" kind="dataObj">
+            <paramset name="targetEnv">
+              <paramset name="base">
+                <param name="name" value="GCALflats"/>
+                <param name="system" value="J2000"/>
+                <param name="epoch" value="2000.0" units="years"/>
+                <param name="brightness" value=""/>
+                <param name="c1" value="00:00:00.000"/>
+                <param name="c2" value="00:00:00.00"/>
+                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+                <param name="parallax" value="0.0" units="arcsecs"/>
+                <param name="rv" value="0.0" units="km/sec"/>
+                <param name="wavelength" value="-1.0" units="angstroms"/>
+              </paramset>
+              <paramset name="guideEnv">
+                <param name="active">
+                  <value sequence="0">NIFS OIWFS</value>
+                  <value sequence="1">PWFS1</value>
+                  <value sequence="2">PWFS2</value>
+                </param>
+                <param name="selected"/>
+              </paramset>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2010A-1" subtype="NIFS" key="d40d7335-30de-4b3c-8c01-ec811af5c302" name="NIFS">
+          <paramset name="NIFS" kind="dataObj">
+            <param name="exposureTime" value="30.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="imagingMirror" value="OUT"/>
+            <param name="disperser" value="K"/>
+            <param name="filter" value="SAME_AS_DISPERSER"/>
+            <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
+            <param name="centralWavelength" value="2.2"/>
+            <param name="mask" value="CLEAR"/>
+            <param name="maskOffset" value="0.0"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="2dcfcca4-3b5c-459b-b77b-96a2e42a3828" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="f3540f16-df9b-41a3-b9f9-fff808380b29" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="84e779d7-4678-450c-a0bb-ca7308121c46" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="35812358-12f0-4650-bba2-19ad9b012902" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Lamps on/off Flats x5"/>
+              <param name="mask" value="CLEAR"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="c7f3d1b3-85b3-49cc-a39e-0c2ce1aae7f4" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="5732a4d4-2c4d-4be7-b9c5-ab6d40054a68" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Arc Darks x2"/>
+              <param name="mask" value="BLOCKED"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="dark" key="367d31c9-8c4d-4783-b19e-7314ba9e4c16" name="Manual Dark">
+              <paramset name="Manual Dark" kind="dataObj">
+                <param name="repeatCount" value="2"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="30.0"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="4e368d95-d557-41d7-8a3c-35624261f96f" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Ronchi Mask x2"/>
+              <param name="mask" value="RONCHE"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="dcabf245-dbf0-48d8-9f1f-dae08e137bb1" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="df2d7f32-e281-4a2e-a4ae-f9a051c4fdd4" name="NIFS-BP-19">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Coron Z-band Calibrations, Coronagraph in the 2nd NIFS iterator"/>
+          <param name="libraryId" value="20"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="7f377198-9436-4ad7-ad9f-4aab5a8a8084" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="66afad1b-70c9-4579-b317-77517c68c52a" name="Targets">
+          <paramset name="Targets" kind="dataObj">
+            <paramset name="targetEnv">
+              <paramset name="base">
+                <param name="name" value="GCALflats"/>
+                <param name="system" value="J2000"/>
+                <param name="epoch" value="2000.0" units="years"/>
+                <param name="brightness" value=""/>
+                <param name="c1" value="00:00:00.000"/>
+                <param name="c2" value="00:00:00.00"/>
+                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+                <param name="parallax" value="0.0" units="arcsecs"/>
+                <param name="rv" value="0.0" units="km/sec"/>
+                <param name="wavelength" value="-1.0" units="angstroms"/>
+              </paramset>
+              <paramset name="guideEnv">
+                <param name="active">
+                  <value sequence="0">NIFS OIWFS</value>
+                  <value sequence="1">PWFS1</value>
+                  <value sequence="2">PWFS2</value>
+                </param>
+                <param name="selected"/>
+              </paramset>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2010A-1" subtype="NIFS" key="3834b318-5a52-470b-be8d-7c71b1ba4443" name="NIFS">
+          <paramset name="NIFS" kind="dataObj">
+            <param name="exposureTime" value="30.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="imagingMirror" value="OUT"/>
+            <param name="disperser" value="Z"/>
+            <param name="filter" value="SAME_AS_DISPERSER"/>
+            <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
+            <param name="centralWavelength" value="1.05"/>
+            <param name="mask" value="CLEAR"/>
+            <param name="maskOffset" value="0.0"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="e1fcfcee-071f-4264-8b46-e80e2689c589" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="4cbda883-a851-4334-8d7d-c782180fdc5e" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="56fff029-7e50-4455-9d28-061e8cf32420" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="f3159ad3-2230-4649-b3ef-1d8cb0100d99" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Lamps on/off Flats x5"/>
+              <param name="mask" value="CLEAR"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="6edf25ca-fe6f-4405-8c1c-a63fa671b0f4" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="bc53a888-2cdd-42cb-8e5f-749f61174ca3" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Lamps on/off Flats x5 WITH Coronagraph IN"/>
+              <param name="mask" value="OD_5"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="99610c29-d1b9-45df-808f-f4d53d88a949" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="b18edb48-7b69-45bc-8d4d-601112913783" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Arc Darks x2"/>
+              <param name="mask" value="BLOCKED"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="dark" key="ac8fc119-b9c1-4e5d-9e14-ada528b77cc2" name="Manual Dark">
+              <paramset name="Manual Dark" kind="dataObj">
+                <param name="repeatCount" value="2"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="5.3"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="e2d4f364-e025-4143-b597-b2f3dc572079" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Ronchi Mask x2"/>
+              <param name="mask" value="RONCHE"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="1ba04fc1-1b34-4d30-b2bf-403005af2c7d" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="5602f4e7-bd30-4be0-9f8e-6c19b61f3afe" name="NIFS-BP-20">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Coron J-band Calibrations, Coronagraph in the 2nd NIFS iterator"/>
+          <param name="libraryId" value="21"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="4066cd69-cc48-4fa6-881d-1c238acb25fe" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="8b12fc98-1303-4819-8dfe-06dfe1cb978d" name="Targets">
+          <paramset name="Targets" kind="dataObj">
+            <paramset name="targetEnv">
+              <paramset name="base">
+                <param name="name" value="GCALflats"/>
+                <param name="system" value="J2000"/>
+                <param name="epoch" value="2000.0" units="years"/>
+                <param name="brightness" value=""/>
+                <param name="c1" value="00:00:00.000"/>
+                <param name="c2" value="00:00:00.00"/>
+                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+                <param name="parallax" value="0.0" units="arcsecs"/>
+                <param name="rv" value="0.0" units="km/sec"/>
+                <param name="wavelength" value="-1.0" units="angstroms"/>
+              </paramset>
+              <paramset name="guideEnv">
+                <param name="active">
+                  <value sequence="0">NIFS OIWFS</value>
+                  <value sequence="1">PWFS1</value>
+                  <value sequence="2">PWFS2</value>
+                </param>
+                <param name="selected"/>
+              </paramset>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2010A-1" subtype="NIFS" key="eaf62805-12fb-4ee5-a207-b07c924215a8" name="NIFS">
+          <paramset name="NIFS" kind="dataObj">
+            <param name="exposureTime" value="30.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="imagingMirror" value="OUT"/>
+            <param name="disperser" value="J"/>
+            <param name="filter" value="SAME_AS_DISPERSER"/>
+            <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
+            <param name="centralWavelength" value="1.25"/>
+            <param name="mask" value="CLEAR"/>
+            <param name="maskOffset" value="0.0"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="f9723c49-34d4-4a94-9278-4e055b24a8db" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="89ae2776-12d5-4a99-b302-47a8ae07aebe" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="33729626-d0e5-4d02-9321-f8cd7fbc0fdb" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="f4fe519d-dd98-4227-875e-835cb3f58abc" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Lamps on/off Flats x5"/>
+              <param name="mask" value="CLEAR"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="3a5b1448-a21c-494b-9550-35c986e8f482" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="40698bda-f27e-4b6e-bd48-8f638d883307" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Lamps on/off Flats x5 WITH Coronagraph IN"/>
+              <param name="mask" value="OD_5"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="d6b7441c-d4cf-415c-b403-f923a2777576" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="55a9ecad-c935-4265-b5b5-306871792e69" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Arc Darks x2"/>
+              <param name="mask" value="BLOCKED"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="dark" key="f6e83d2e-e590-4996-b545-3755f0b10993" name="Manual Dark">
+              <paramset name="Manual Dark" kind="dataObj">
+                <param name="repeatCount" value="2"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="220f1cd3-779e-4ab8-bd4b-66c2bbbcf3c7" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Ronchi Mask x2"/>
+              <param name="mask" value="RONCHE"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="c40a0193-69b4-45d1-b2fc-627d183b43f6" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="ba8fe785-aae6-4f34-a63a-1e6e8d522cc3" name="NIFS-BP-21">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Coron H-band Calibrations, Coronagraph in the 2nd NIFS iterator"/>
+          <param name="libraryId" value="22"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="352bc67e-27df-4cc3-9067-2259c8017863" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="151d2d26-41e8-438e-b552-e077f999ca3a" name="Targets">
+          <paramset name="Targets" kind="dataObj">
+            <paramset name="targetEnv">
+              <paramset name="base">
+                <param name="name" value="GCALflats"/>
+                <param name="system" value="J2000"/>
+                <param name="epoch" value="2000.0" units="years"/>
+                <param name="brightness" value=""/>
+                <param name="c1" value="00:00:00.000"/>
+                <param name="c2" value="00:00:00.00"/>
+                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+                <param name="parallax" value="0.0" units="arcsecs"/>
+                <param name="rv" value="0.0" units="km/sec"/>
+                <param name="wavelength" value="-1.0" units="angstroms"/>
+              </paramset>
+              <paramset name="guideEnv">
+                <param name="active">
+                  <value sequence="0">NIFS OIWFS</value>
+                  <value sequence="1">PWFS1</value>
+                  <value sequence="2">PWFS2</value>
+                </param>
+                <param name="selected"/>
+              </paramset>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2010A-1" subtype="NIFS" key="506b95ac-000b-4774-9aa5-5dd5c6f708b8" name="NIFS">
+          <paramset name="NIFS" kind="dataObj">
+            <param name="exposureTime" value="30.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="imagingMirror" value="OUT"/>
+            <param name="disperser" value="H"/>
+            <param name="filter" value="SAME_AS_DISPERSER"/>
+            <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
+            <param name="centralWavelength" value="1.65"/>
+            <param name="mask" value="CLEAR"/>
+            <param name="maskOffset" value="0.0"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="866026cf-1811-40fb-94db-d4cb5d65dd99" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="5b2863ab-af21-4192-afaf-bdf8cdb359ed" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="932db820-036c-4d89-a82d-f38b211035cc" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="a196fecd-5802-4129-94c2-f43fb848e9cf" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Lamps on/off Flats x5"/>
+              <param name="mask" value="CLEAR"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="fb0dc8c2-e11c-494a-ae18-87d095b775a4" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="765c288b-70cf-4aea-9473-10e032b3825f" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Lamps on/off Flats x5 WITH Coronagraph IN"/>
+              <param name="mask" value="OD_5"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="05c1764f-698e-4faf-ac63-555636ce2cbe" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="afa731b5-be93-4109-831e-c8c1ba1d1f22" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Arc Darks x2"/>
+              <param name="mask" value="BLOCKED"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="dark" key="61adf0ac-d804-4879-b390-9e63c3e02b6a" name="Manual Dark">
+              <paramset name="Manual Dark" kind="dataObj">
+                <param name="repeatCount" value="2"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="7abadc51-1719-4573-a6a1-9098eea0b6a4" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Ronchi Mask x2"/>
+              <param name="mask" value="RONCHE"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="818cbb5c-4665-431f-9090-580e6da976e6" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="1120a69a-e4d0-4ab2-88a1-1b7b0d56c6d6" name="NIFS-BP-22">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Coron K-band Calibrations, Coronagraph in the 2nd NIFS iterator"/>
+          <param name="libraryId" value="14"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="a598c9c7-13e2-4427-8f21-78728ac290bf" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="5dfd81b2-1cba-44a1-b423-8a14d7508500" name="Targets">
+          <paramset name="Targets" kind="dataObj">
+            <paramset name="targetEnv">
+              <paramset name="base">
+                <param name="name" value="GCALflats"/>
+                <param name="system" value="J2000"/>
+                <param name="epoch" value="2000.0" units="years"/>
+                <param name="brightness" value=""/>
+                <param name="c1" value="00:00:00.000"/>
+                <param name="c2" value="00:00:00.00"/>
+                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+                <param name="parallax" value="0.0" units="arcsecs"/>
+                <param name="rv" value="0.0" units="km/sec"/>
+                <param name="wavelength" value="-1.0" units="angstroms"/>
+              </paramset>
+              <paramset name="guideEnv">
+                <param name="active">
+                  <value sequence="0">NIFS OIWFS</value>
+                  <value sequence="1">PWFS1</value>
+                  <value sequence="2">PWFS2</value>
+                </param>
+                <param name="selected"/>
+              </paramset>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2010A-1" subtype="NIFS" key="5ab0c424-123f-4a84-b31a-3fbbf886b375" name="NIFS">
+          <paramset name="NIFS" kind="dataObj">
+            <param name="exposureTime" value="30.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="imagingMirror" value="OUT"/>
+            <param name="disperser" value="K"/>
+            <param name="filter" value="SAME_AS_DISPERSER"/>
+            <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
+            <param name="centralWavelength" value="2.2"/>
+            <param name="mask" value="CLEAR"/>
+            <param name="maskOffset" value="0.0"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="6e68fe3a-1601-42ec-b0db-1aa5b661861e" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="c1932d8e-f565-409b-bdd1-cacf3dbc183f" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="8c540f68-7f96-4bfc-9316-ca6e58acb78e" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="99a7c6ca-267a-4d53-9816-e2cd93e09568" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Lamps on/off Flats x5"/>
+              <param name="mask" value="CLEAR"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="cc2c099a-a4ab-4b13-9dc6-3dd66e44c615" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="863c0f24-d63e-49f5-a546-955f810a6d8a" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Lamps on/off Flats x5 WITH Coronagraph IN"/>
+              <param name="mask" value="OD_5"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="20792253-c949-434c-893a-f0735cc39f78" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="dde74eca-a058-49a2-9ef5-1b1452b03b64" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Arc Darks x2"/>
+              <param name="mask" value="BLOCKED"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="dark" key="7bf7f877-a0b8-4445-b544-dd7a905f2ff9" name="Manual Dark">
+              <paramset name="Manual Dark" kind="dataObj">
+                <param name="repeatCount" value="2"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="30.0"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIFS" key="93dbe9c5-2a54-42d3-b246-b4b5bf9fabac" name="NIFS Sequence">
+            <paramset name="NIFS Sequence" kind="dataObj">
+              <param name="title" value="NIFS: Ronchi Mask x2"/>
+              <param name="mask" value="RONCHE"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="ec04a745-0689-40b3-8476-7557e1e19808" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+    </container>
+  </container>
+  <container kind="versions" type="versions" version="1.0">
+    <paramset name="node">
+      <param name="key" value="89ae2776-12d5-4a99-b302-47a8ae07aebe"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c3326b57-96f5-4975-bdd5-96990ceb13bf"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5bdfe02f-9f0a-458c-87f9-b3fc07ee3118"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6aae0110-65a5-4f2c-89d0-3151af881c77"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5732a4d4-2c4d-4be7-b9c5-ab6d40054a68"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7694d4f1-b9b8-45a5-b502-e3e4e22adfb1"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5d39f3b5-73f8-4db4-b80e-3292df59207f"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="bcebf803-cb0c-464d-9cd0-47e7585c8c81"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3597e995-d88d-4640-97f7-8c9ffefbce0c"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="0cc5a1f2-ff72-499b-8b04-bba2996fefba"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c0d50b56-4434-4f97-8bc0-193f0811c6bd"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="61adf0ac-d804-4879-b390-9e63c3e02b6a"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d8f361bd-03bc-4179-ac87-2fa0d5f7b688"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9596c7a4-844c-4a23-b228-adffa314c9be"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7d8664e0-cdca-45bd-84b0-bb346b9c231c"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4ce78a4f-e693-4933-b7ea-4537f3572278"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="41f75cec-d944-4fec-8364-a7e32bfecf11"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="33729626-d0e5-4d02-9321-f8cd7fbc0fdb"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f4fe519d-dd98-4227-875e-835cb3f58abc"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6e181005-7477-49b2-9538-9174186cc3d8"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="1ba04fc1-1b34-4d30-b2bf-403005af2c7d"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="afa731b5-be93-4109-831e-c8c1ba1d1f22"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f80079ce-77ac-40d3-9c27-ff7b91236280"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="76cdecc1-ac44-4937-b314-0b7ac11c8394"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b0f2456f-05bc-496b-8144-9125dd0ac9a4"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7bf7f877-a0b8-4445-b544-dd7a905f2ff9"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="8c3bb182-7266-40aa-9033-ef2085e40515"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a39b5544-697d-44db-933b-a9d3783230b4"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="0966d75a-682f-4161-b0a1-e10f22ca6c92"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7f377198-9436-4ad7-ad9f-4aab5a8a8084"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4856a965-9b76-4c2e-be82-1f80d59ae9ce"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="389e02f9-4970-4886-b76b-790316fac1ec"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3adfe65d-7ef7-48b2-87b1-8d599c0047e7"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="617d1d47-ff08-4c8a-9b1a-f094fab71e56"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="290b244a-1373-4355-b6f4-07c4bf1ff9cf"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="84e779d7-4678-450c-a0bb-ca7308121c46"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="8c79c1bf-bfa8-4687-a8ce-b056c086fd17"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="1c5a0762-c520-4e99-af30-8213312f7128"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ac8fc119-b9c1-4e5d-9e14-ada528b77cc2"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="647b203f-c113-402b-848e-bbfd1c030974"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="af3bee51-a6da-48de-a955-1303f6a1dcf2"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="62fd93db-0521-436d-8b48-944ec4cdbf61"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="20792253-c949-434c-893a-f0735cc39f78"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="866026cf-1811-40fb-94db-d4cb5d65dd99"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5a0e50be-e024-4106-ae39-554f2b8b2133"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a196fecd-5802-4129-94c2-f43fb848e9cf"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="97868143-f55b-4e6b-863f-e8e1e8ee5a37"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="73bf71a3-779a-47ae-9092-0280c39c079f"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="cf8228b5-4977-4ec2-9a1e-0aadadf9219b"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="425b6f29-70ae-4e4e-af91-426f17145aeb"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="762209ee-a70b-44d8-8558-9cec5e338fa1"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3a5b1448-a21c-494b-9550-35c986e8f482"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="94abf4ab-cf5c-42b0-919c-d06b0076626f"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="991deef7-d8d7-488b-a8f0-9517a74a5734"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="8c540f68-7f96-4bfc-9316-ca6e58acb78e"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="deae43fa-7289-4502-a9f2-5d92318e1456"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4c37783d-b56b-4395-8f4c-d9ce7dd9a199"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="0ee73c8e-b11c-4e2e-b932-fee1c211251e"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d2abfa18-ded0-4a82-91ae-8841f185a1d6"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="fd3e9679-d35c-45ec-a2be-c16a2c401459"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ff63854f-a20b-458b-a618-67bdfb97b8c6"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="fa1de0fb-de16-43cd-b647-d10f3b0ca67a"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="cc2c099a-a4ab-4b13-9dc6-3dd66e44c615"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="352bc67e-27df-4cc3-9067-2259c8017863"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="88009f6a-3e76-4cb0-b431-f0f9375ac89a"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9f1b2216-5fd6-4eeb-91e4-7edb167fe951"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="82cfed68-6201-4394-9cb5-c7d1f63086fb"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c40a0193-69b4-45d1-b2fc-627d183b43f6"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4e4120e0-c61d-49ea-9854-e51637084ad8"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5c36b142-b483-4994-9930-fe6c0f0d9463"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="76a9acab-7ecb-4054-b3d5-9d59fb96d5e5"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="863c0f24-d63e-49f5-a546-955f810a6d8a"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="bb814111-b5b7-4927-8e1d-839ab06ea596"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6df2de9c-43e2-4a7d-bac8-e00ac2a480e3"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="66218dcd-d7fb-4674-b5cd-06385e69c953"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="367d31c9-8c4d-4783-b19e-7314ba9e4c16"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ba8fe785-aae6-4f34-a63a-1e6e8d522cc3"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="401c9df2-c339-44dc-9dfb-7d3bfa278d1e"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f9723c49-34d4-4a94-9278-4e055b24a8db"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e846c3da-a6d1-40d6-97e2-2f7351f5fa09"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="501540cf-f400-4bfe-9e8e-62857858ce98"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="1d6e37dc-f99a-4f74-9815-c9db25db4d77"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="40698bda-f27e-4b6e-bd48-8f638d883307"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="af9dc917-286f-44d7-b04b-b92f975e07b3"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="dc78cba2-ad6e-4090-94c9-1978f14d2a55"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b8de5fee-d97f-43e2-abbe-dd219a1f6f26"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="8ada7938-03f3-4079-924b-8777adce9491"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d6b7441c-d4cf-415c-b403-f923a2777576"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="765c288b-70cf-4aea-9473-10e032b3825f"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6481ac8e-e041-46d3-8731-7475c2a38d21"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="68fc171a-64b6-4e57-9dbe-5a9434ae5346"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b6b0ee2e-423f-4a89-8ac2-7c0a84b8b130"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b5f1df18-ce6a-4908-9b23-747b0ee1e4b1"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6e68fe3a-1601-42ec-b0db-1aa5b661861e"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2fe30c28-fe32-4783-bf3c-41048578fce2"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="205c091a-a0bc-425b-8878-f2eb14f0d7fb"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="df2d7f32-e281-4a2e-a4ae-f9a051c4fdd4"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="0acb7a53-d83d-499b-b3bd-338fe45c54af"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5cf92d13-2404-4735-85fc-a9c6fceaafa6"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="fd50dbc1-692a-4727-9be9-0cc79cbe1314"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="818cbb5c-4665-431f-9090-580e6da976e6"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d40d7335-30de-4b3c-8c01-ec811af5c302"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4e368d95-d557-41d7-8a3c-35624261f96f"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b9917c5c-dbe2-40a5-9f21-dd3f4bf28308"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e378d626-1f8b-4878-b390-b9ce8c8cda71"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3e0f9c5c-6c9c-419e-82d7-5b4a2c3d4bf1"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="51063ded-aa4b-4d92-9336-cc71ad2a772f"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f3159ad3-2230-4649-b3ef-1d8cb0100d99"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="93dbe9c5-2a54-42d3-b246-b4b5bf9fabac"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e2d4f364-e025-4143-b597-b2f3dc572079"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="220f1cd3-779e-4ab8-bd4b-66c2bbbcf3c7"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="95334938-2ccc-4a63-a715-0e72df9a9988"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2dcfcca4-3b5c-459b-b77b-96a2e42a3828"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="17ddb8fd-e3f6-4673-8661-040605161433"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4efa4e71-fd2f-453d-871b-b25486012fb3"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="af87f544-8b1e-4564-bb27-f571d0e425a6"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6cfa7730-00b9-4dd5-bafa-5a1ca65bfdc7"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5b2863ab-af21-4192-afaf-bdf8cdb359ed"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="231bd2db-4a2a-4277-8fc7-aff7946802ba"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c21ca812-ce6e-487e-a1fb-bd7426a0df59"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="0a2f2268-42d3-42a1-af27-5dc5c7161895"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3b75605b-3918-45e1-8534-9a6909a2a247"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7fcbfe8b-beda-4b30-b7f3-bdf4d590e77b"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7abadc51-1719-4573-a6a1-9098eea0b6a4"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b8979574-7747-42c3-9fa3-1a790b250e1c"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="8e0b2286-08ba-4e80-b54d-fe31702ba60e"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="151d2d26-41e8-438e-b552-e077f999ca3a"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9c3cd57e-be22-437f-b783-2381fb01f526"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f390e6a8-760c-4c9b-8cdb-7bd52de62e25"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="80dc27c2-bb2f-4cfe-b6fb-95c65cba2d65"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="948d302a-3686-4645-b144-42150360b73f"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4d996bba-5aaf-4830-9d49-fc3651db7a6e"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="421f51bd-2889-4d6f-93b9-4db2ad8a9ecc"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="006f2755-7c5e-49a6-9e7f-d5554e3c48f7"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ddc2c715-e785-4324-921c-ab6048bf4508"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="29d8c31b-f8ec-436a-9066-4d2b4600cb1d"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6fd8a33c-5ca5-45f4-a4f5-0e16b4ce15cc"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="bbe298bf-9b4d-436f-a5fd-02507609598d"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="705fb3e5-5732-4579-81fe-93246bcb839d"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="bc53a888-2cdd-42cb-8e5f-749f61174ca3"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="759e520f-9ccf-4914-9cf6-00716f83fe10"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ec04a745-0689-40b3-8476-7557e1e19808"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="86e70195-55a8-454a-aed5-acf4960f62fc"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="99610c29-d1b9-45df-808f-f4d53d88a949"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b8f4ae95-b3ba-436f-866a-eb9c39ce8311"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a598c9c7-13e2-4427-8f21-78728ac290bf"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f910355a-1c20-4b25-8044-029d6947e925"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="dfe11324-c32c-4dac-a70a-06e87d8db3f6"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b4e372b4-1bda-48cd-93f9-df5a583de61e"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="dcabf245-dbf0-48d8-9f1f-dae08e137bb1"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4be66da9-9b08-4528-a9f0-2b13c8acbe77"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="0ffb87af-91b2-41c6-8127-52b45a1f7bac"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ccc185e0-6279-4743-9a32-5186141e31d7"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="55a9ecad-c935-4265-b5b5-306871792e69"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="56fff029-7e50-4455-9d28-061e8cf32420"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="412100bb-2463-4848-b930-e580e41b0de8"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="624147bc-81fe-4448-a012-bebd7409ab93"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a20e90dc-aaa5-4118-8e87-d0399440613c"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="99a7c6ca-267a-4d53-9816-e2cd93e09568"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="137bdbbe-efd8-440f-8871-71acd3f341ad"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b18edb48-7b69-45bc-8d4d-601112913783"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="0a3b3e8c-8bda-49c6-8153-12934b07b382"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7c0658fc-79e7-4939-b68a-e5e58baa2661"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="26d4cfd9-1867-450c-b751-7335a859460d"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="63ba0ae8-4144-434e-b0f0-e742ef2dacc1"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f6e83d2e-e590-4996-b545-3755f0b10993"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5602f4e7-bd30-4be0-9f8e-6c19b61f3afe"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9cd6f15a-a686-4d0e-88c3-45b036bf1ece"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f5ec09fa-e1c6-4a2c-86a5-a1002b03cfce"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="863d9341-3992-469b-b5ae-2da8c61bab26"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="edce6db7-0a7d-40bd-9c61-eab3804c9199"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5dfd81b2-1cba-44a1-b423-8a14d7508500"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="35812358-12f0-4650-bba2-19ad9b012902"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6444bf1c-6bc5-4767-8fd1-9b64c534e042"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2263fc72-0e16-4a87-a508-bf4da28e75e6"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="88d81bb6-23d4-4f2e-8fa1-0dad51898bdb"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="76f94441-0169-4bf0-8274-d05faec5ad3e"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a976758d-42a5-4607-abcd-1a89cd926068"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="8b12fc98-1303-4819-8dfe-06dfe1cb978d"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e1fcfcee-071f-4264-8b46-e80e2689c589"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4cbda883-a851-4334-8d7d-c782180fdc5e"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4c53ef08-923b-44ed-a9ce-81c12a6700b6"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6b82716a-52cb-45d5-afa7-13e83e0a3e7e"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="36365490-c31f-4c37-a656-de96491b7fa4"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="23ba29e7-5659-4b52-86b7-11cf3a2d032b"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="0ee2cc8a-61e0-4a3c-94fc-61431bdc2f5e"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f282124a-c933-46d9-b1f9-ba2d08d46fda"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="aeec34c1-ede3-4738-b484-cd22a3da57e6"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4066cd69-cc48-4fa6-881d-1c238acb25fe"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f3540f16-df9b-41a3-b9f9-fff808380b29"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7aefbd3c-6d38-4f28-b2ac-a91a655249ee"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="06ef2477-ae3d-4ff2-9fb9-2898f44fb058"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d9a55c2b-160d-4750-a92c-370b629c3673"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3834b318-5a52-470b-be8d-7c71b1ba4443"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4a786fd7-7464-4d28-a40f-33b9aa95375b"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="5"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="1120a69a-e4d0-4ab2-88a1-1b7b0d56c6d6"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5ab0c424-123f-4a84-b31a-3fbbf886b375"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6edf25ca-fe6f-4405-8c1c-a63fa671b0f4"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="cdbcfa8c-5c6a-4829-8abf-e97562356fa6"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="80d28b88-6ea3-47b9-af4e-ae55dbdd337c"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4a2b7afd-9984-4f8f-a004-a68738c75750"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f13e1aaf-65b7-4a21-836c-cb21a80f4270"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="aa50fe16-0aac-45e3-ba69-5e767130d916"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="70cb7df1-b2db-4d7a-8c6a-f058a662c365"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="55ec4d69-0996-410f-a0de-12d5db98cd4c"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="885a9786-3bbc-4b51-b6b5-f4c85c748fcd"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="eaf62805-12fb-4ee5-a207-b07c924215a8"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="01824d6a-38fc-4446-985c-e87319e15b01"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="61990e53-a0d7-4ac2-b04a-3b02a814b98d"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e4bb8e16-1e92-4daf-8721-923a9de6601c"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6a31d64c-73d0-4abc-912c-54d15568f086"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="742aa9f3-8d7f-4fb2-b194-b16fcf575959"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c2df27e3-0794-49b5-90fa-1c0cbc5786b3"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="428a9d2d-e641-4edc-8ae0-ea005af4e365"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="05c1764f-698e-4faf-ac63-555636ce2cbe"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c94e7a7a-df59-4c12-832f-410e88d7b2c1"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ce3f30b2-fb3c-46ef-8928-094ad59a577e"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ed80b03b-1a2d-44b5-8ae4-26e162e15af6"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7349033a-be14-477c-906b-bbeee9204a15"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e41375ba-333d-41c6-9657-8cf84efebb6f"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="8279f6bb-ed0c-4cdc-a5c2-777cfb93565f"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f8c73378-b965-4c77-a924-995ab0e18a1e"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="0ee20d66-1a4f-4390-ba34-005bcfc7bf4d"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f44eccd9-58fd-4e0e-9b4f-998518fdfe9a"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="550fe81c-7b1c-47d5-81c5-67b6659e0bdd"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ba9a712a-77ba-44a2-b672-fdd772ce113b"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d4e176e2-6324-4695-9b03-fe75db4fe48c"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c1932d8e-f565-409b-bdd1-cacf3dbc183f"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a2b867e7-0d42-4753-84a5-b0ff439c2a96"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="188017ef-e88e-4717-9bd9-cd4f2a542126"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="affe1a4f-173c-4cb3-8187-a79eee7a346d"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="506b95ac-000b-4774-9aa5-5dd5c6f708b8"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="fb0dc8c2-e11c-494a-ae18-87d095b775a4"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="13bc6b19-e158-4a78-a702-f6e4a59bf57c"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c80e4714-2a74-4dd2-9fb4-d6bfdf84cf99"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="66afad1b-70c9-4579-b317-77517c68c52a"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="56ed1b91-2ca9-4a35-8f80-0d49b44842ed"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d1fbf830-baed-4116-a82f-127211840279"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="96c6b2a7-702e-4d05-aed6-b7e3cc40af91"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="83d1d477-27c4-455b-9dae-4e20bb5df79f"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c7f3d1b3-85b3-49cc-a39e-0c2ce1aae7f4"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="dde74eca-a058-49a2-9ef5-1b1452b03b64"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="932db820-036c-4d89-a82d-f38b211035cc"/>
+      <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
+    </paramset>
+  </container>
+</document>

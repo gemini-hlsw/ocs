@@ -1,0 +1,564 @@
+<?xml version="1.0"?>
+<!DOCTYPE UIInfos PUBLIC "-//Gemini Observatory//DTD for UIInfo//EN" "UIInfo.dtd">
+<!--
+  This document describes user interface and display information for the
+  Gemini Observing Tool (OT). An element is defined for each OT science
+  program node type that corresponds to the jsky.app.ot.nsp.UIInfo class.
+-->
+
+<UIInfos version="0.1">
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.gemini.obscomp.SPProgram"
+            name="Gemini Science Program"
+            type="scienceProgram"
+            imageKey="program_small.png"
+            shortDescription="Program information taken from the Phase 1 proposal."
+            uiClassName="jsky.app.ot.gemini.editor.EdProgram"/>
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.obscomp.SPGroup"
+            name="Observation Group"
+            type="group"
+            imageKey="obsGroup.gif"
+            shortDescription="You may group observations for scheduling purposes, or simply to help you organize your science program. Observations in a Scheduling Group will be scheduled together according to your instructions. Observations in an Organizational Folder will be scheduled independently."
+            uiClassName="jsky.app.ot.editor.EdObsGroup"/>
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.conflict.ConflictFolder"
+            name="Conflict Folder"
+            type="conflictFolder"
+            imageKey="conflictFolder.gif"
+            shortDescription=""
+            uiClassName="jsky.app.ot.editor.conflict.EdConflictFolder"/>
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.template.TemplateFolder"
+            name="Template Folder"
+            type="templateFolder"
+            imageKey="template.gif"
+            shortDescription="This folder contains template groups for creating observations as specified in your Phase 1 document. View the targets and conditions associated with a Phase 1 resource by clicking on the template group name."
+            uiClassName="jsky.app.ot.editor.template.EdTemplateFolder"/>
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.template.TemplateGroup"
+            name="Template Group"
+            type="templateGroup"
+            imageKey="eclipse/templateGroup.png"
+            shortDescription="This is a template group for observations based on a single Phase I resource. The list below specifies targets and conditions to which this template may be applied."
+            uiClassName="jsky.app.ot.editor.template.EdTemplateGroup"/>
+
+    <!--
+    <UIInfo
+            dataObject="edu.gemini.spModel.template.TemplateParameters"
+            name="Template Parameters"
+            type="templateParameters"
+            imageKey="eclipse/templateObservation.gif"
+            shortDescription="This is a set of template parameters."
+            uiClassName="jsky.app.ot.editor.template.EdTemplateParameters"/>
+    -->
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.obs.SPObservation"
+            name="Observation"
+            type="observation"
+            imageKey="observation.gif"
+            shortDescription="An observation is the smallest entity that can be scheduled and observed."
+            uiClassName="jsky.app.ot.gemini.editor.EdObservation2"/>
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.obscomp.SPNote"
+            name="Program Note"
+            type="note"
+            imageKey="post-it-note18.gif"
+            shortDescription="Enter notes for the operator/astronomer here."
+            uiClassName="jsky.app.ot.editor.EdNote"/>
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.obscomp.SchedNote"
+            name="Scheduling Note"
+            type="schedNote"
+            imageKey="post-it-note-blue18.gif"
+            shortDescription="Enter scheduling notes for the operator/astronomer here."
+            uiClassName="jsky.app.ot.editor.EdNote"/>
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.obscomp.ProgramNote"
+            name="Private Planning Note"
+            type="programNote"
+            imageKey="post-it-note-red18.gif"
+            shortDescription="Enter Gemini internal notes here."
+            uiClassName="jsky.app.ot.editor.EdNote"/>
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.obscomp.SPDataOnly"
+            name="Data Node"
+            type="data"
+            imageKey="component.gif"
+            shortDescription="A container for data only."
+            visible="false"
+            expert="true"/>
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.gemini.obscomp.SPSiteQuality"
+            name="Observing Conditions"
+            type="siteQuality"
+            imageKey="component.gif"
+            shortDescription="This component describes the conditions under which this observation can be observed."
+            uiClassName="jsky.app.ot.gemini.editor.EdCompSiteQuality"/>
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.target.obsComp.TargetObsComp"
+            name="Target Environment"
+            type="targetEnv"
+            imageKey="component.gif"
+            shortDescription="Use this component to enter the base position and wave front sensor targets for this observation."
+            uiClassName="jsky.app.ot.gemini.editor.targetComponent.EdCompTargetList"/>
+
+    <UIInfo
+            site="GN"
+            dataObject="edu.gemini.spModel.gemini.altair.InstAltair"
+            name="Altair Adaptive Optics"
+            type="ao"
+            imageKey="component.gif"
+            shortDescription="The Altair Adaptive Optics system is configured with this component."
+            uiClassName="jsky.app.ot.gemini.altair.EdCompInstAltair"/>
+
+    <UIInfo
+            id="Gems"
+            site="GS"
+            dataObject="edu.gemini.spModel.gemini.gems.Gems"
+            name="GeMS Adaptive Optics"
+            type="ao"
+            imageKey="component.gif"
+            shortDescription="The GeMS Adaptive Optics system is configured with this component."
+            uiClassName="jsky.app.ot.gemini.gems.GemsEditor"/>
+
+    <UIInfo
+            site="GS"
+            dataObject="edu.gemini.spModel.gemini.gsaoi.Gsaoi"
+            requires="Gems"
+            name="GSAOI"
+            type="instrument"
+            imageKey="component.gif"
+            shortDescription="The GSAOI instrument is configured with this component."
+            uiClassName="jsky.app.ot.gemini.gsaoi.GsaoiEditor"/>
+
+    <UIInfo
+            site="GS"
+            dataObject="edu.gemini.spModel.gemini.gsaoi.GsaoiSeqConfig"
+            name="GSAOI Sequence Component"
+            type="iterComp"
+            imageKey="seqcomp.gif"
+            shortDescription="Iterate over GSAOI configurations with this component."
+            uiClassName="jsky.app.ot.editor.EdIterGenericConfig"/>
+
+    <UIInfo
+            onsite="true"
+            dataObject="edu.gemini.spModel.gemini.acqcam.InstAcqCam"
+            name="Acquisition Camera"
+            type="instrument"
+            imageKey="component.gif"
+            shortDescription="The Acquisition Camera instrument is configured with this component."
+            uiClassName="jsky.app.ot.gemini.acqcam.EdCompInstAcqCam"/>
+
+    <UIInfo
+            onsite="true"
+            dataObject="edu.gemini.spModel.gemini.acqcam.SeqConfigAcqCam"
+            name="Acquisition Camera Sequence Component"
+            type="iterComp"
+            imageKey="seqcomp.gif"
+            shortDescription="Iterate over Acquisition Camera configurations with this component."
+            uiClassName="jsky.app.ot.editor.EdIterGenericConfig"/>
+
+    <UIInfo
+            site="GN"
+            dataObject="edu.gemini.spModel.gemini.gmos.InstGmosNorth"
+            name="Gemini Multi-Object Spectrograph (North)"
+            type="instrument"
+            imageKey="component.gif"
+            shortDescription="The GMOS North instrument is configured with this component."
+            uiClassName="jsky.app.ot.gemini.gmos.EdCompInstGMOSNorth"/>
+
+    <UIInfo
+            site="GN"
+            dataObject="edu.gemini.spModel.gemini.gmos.SeqConfigGmosNorth"
+            name="GMOS North Sequence Component"
+            type="iterComp"
+            imageKey="seqcomp.gif"
+            shortDescription="Iterate over GMOS North configurations with this component."
+            uiClassName="jsky.app.ot.editor.EdIterGenericConfig"/>
+
+
+    <UIInfo
+            site="GS"
+            dataObject="edu.gemini.spModel.gemini.gmos.InstGmosSouth"
+            name="Gemini Multi-Object Spectrograph (South)"
+            type="instrument"
+            imageKey="component.gif"
+            shortDescription="The GMOS South instrument is configured with this component."
+            uiClassName="jsky.app.ot.gemini.gmos.EdCompInstGMOSSouth"/>
+
+    <UIInfo
+            site="GS"
+            dataObject="edu.gemini.spModel.gemini.gmos.SeqConfigGmosSouth"
+            name="GMOS South Sequence Component"
+            type="iterComp"
+            imageKey="seqcomp.gif"
+            shortDescription="Iterate over GMOS South configurations with this component."
+            uiClassName="jsky.app.ot.editor.EdIterGenericConfig"/>
+
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.gemini.gpol.SeqConfigGPOL"
+            name="GPOL Sequence Component"
+            type="iterComp"
+            imageKey="seqcomp.gif"
+            shortDescription="Iterate over GPOL configurations with this component."
+            uiClassName="jsky.app.ot.gemini.gpol.EdIterGPOL"/>
+
+    <UIInfo
+            site="GN"
+            dataObject="edu.gemini.spModel.gemini.niri.InstNIRI"
+            name="Near Infrared Imager Instrument"
+            type="instrument"
+            imageKey="component.gif"
+            shortDescription="The NIRI instrument is configured with this component."
+            uiClassName="jsky.app.ot.gemini.niri.EdCompInstNIRI"/>
+
+    <UIInfo
+            site="GN"
+            dataObject="edu.gemini.spModel.gemini.niri.SeqConfigNIRI"
+            name="NIRI Sequence Component"
+            type="iterComp"
+            imageKey="seqcomp.gif"
+            shortDescription="Iterate over NIRI configurations with this component."
+            uiClassName="jsky.app.ot.editor.EdIterGenericConfig"/>
+
+    <UIInfo
+            site="GS"
+            dataObject="edu.gemini.spModel.gemini.bhros.InstBHROS"
+            name="bHROS Echelle Spectrograph"
+            type="instrument"
+            imageKey="component.gif"
+            shortDescription="The bHROS instrument is configured with this component."
+            uiClassName="jsky.app.ot.gemini.bhros.EdCompInstBHROS"/>
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.obslog.ObsQaLog"
+            name="Observation Log"
+            type="obsLog"
+            imageKey="component.gif"
+            shortDescription="Use this component to view and edit the observing log."
+            uiClassName="jsky.app.ot.gemini.obslog.EdCompObslog"/>
+
+    <UIInfo
+            site="GS"
+            dataObject="edu.gemini.spModel.gemini.bhros.SeqConfigBHROS"
+            name="bHROS Sequence Component"
+            type="iterComp"
+            imageKey="seqcomp.gif"
+            shortDescription="Iterate over bHROS configurations with this component."
+            uiClassName="jsky.app.ot.editor.EdIterGenericConfig"/>
+
+    <UIInfo
+            site="GN"
+            dataObject="edu.gemini.spModel.gemini.nifs.InstNIFS"
+            name="Near-infrared Integral-Field Spectrograph"
+            type="instrument"
+            imageKey="component.gif"
+            shortDescription="The NIFS instrument is configured with this component."
+            uiClassName="jsky.app.ot.gemini.nifs.EdCompInstNIFS"/>
+
+    <UIInfo
+            site="GN"
+            dataObject="edu.gemini.spModel.gemini.nifs.InstEngNifs"
+            name="NIFS Engineering Component"
+            type="engComp"
+            imageKey="component.gif"
+            shortDescription="NIFS engineering information is configured with this component."
+            uiClassName="jsky.app.ot.gemini.nifs.EdCompInstEngNifs"/>
+
+    <UIInfo
+            site="GN"
+            dataObject="edu.gemini.spModel.gemini.nifs.SeqConfigNIFS"
+            name="NIFS Sequence Component"
+            type="iterComp"
+            imageKey="seqcomp.gif"
+            shortDescription="Iterate over NIFS configurations with this component."
+            uiClassName="jsky.app.ot.editor.EdIterGenericConfig"/>
+
+    <UIInfo
+            site="GS"
+            dataObject="edu.gemini.spModel.gemini.phoenix.InstPhoenix"
+            name="Phoenix"
+            type="instrument"
+            imageKey="component.gif"
+            shortDescription="The Phoenix instrument is configured with this component."
+            uiClassName="jsky.app.ot.gemini.phoenix.EdCompInstPhoenix"/>
+
+    <UIInfo
+            site="GN"
+            dataObject="edu.gemini.spModel.gemini.texes.InstTexes"
+            name="Texes"
+            type="instrument"
+            imageKey="component.gif"
+            shortDescription="The Texes instrument is configured with this component."
+            uiClassName="jsky.app.ot.gemini.texes.EdCompInstTexes"/>
+
+    <UIInfo
+            site="GS"
+            dataObject="edu.gemini.spModel.gemini.trecs.InstTReCS"
+            name="T-ReCS Instrument"
+            type="instrument"
+            imageKey="component.gif"
+            shortDescription="The T-ReCS instrument is configured with this component."
+            uiClassName="jsky.app.ot.gemini.trecs.EdCompInstTReCS"/>
+
+    <UIInfo
+            site="GS"
+            dataObject="edu.gemini.spModel.gemini.trecs.SeqConfigTReCS"
+            name="T-ReCS Sequence Component"
+            type="iterComp"
+            imageKey="seqcomp.gif"
+            shortDescription="Iterate over T-ReCS configurations with this component."
+            uiClassName="jsky.app.ot.editor.EdIterGenericConfig"/>
+
+    <UIInfo
+            site="GS"
+            dataObject="edu.gemini.spModel.gemini.trecs.InstEngTReCS"
+            name="TReCS Engineering Component"
+            type="engComp"
+            imageKey="component.gif"
+            shortDescription="TReCS engineering information is configured with this component."
+            uiClassName="jsky.app.ot.gemini.trecs.EdCompInstEngTReCS"/>
+
+    <UIInfo
+            site="GN"
+            dataObject="edu.gemini.spModel.gemini.michelle.InstMichelle"
+            name="Michelle Instrument"
+            type="instrument"
+            imageKey="component.gif"
+            shortDescription="The Michelle instrument is configured with this component."
+            uiClassName="jsky.app.ot.gemini.michelle.EdCompInstMichelle"/>
+
+    <UIInfo
+            site="GN"
+            dataObject="edu.gemini.spModel.gemini.michelle.SeqConfigMichelle"
+            name="Michelle Sequence Component"
+            type="iterComp"
+            imageKey="seqcomp.gif"
+            shortDescription="Iterate over Michelle configurations with this component."
+            uiClassName="jsky.app.ot.editor.EdIterGenericConfig"/>
+
+    <UIInfo
+            site="GN"
+            dataObject="edu.gemini.spModel.gemini.gnirs.InstGNIRS"
+            name="Near-IR Spectrograph"
+            type="instrument"
+            imageKey="component.gif"
+            shortDescription="The GNIRS instrument is configured with this component."
+            uiClassName="jsky.app.ot.gemini.gnirs.EdCompInstGNIRS"/>
+
+    <UIInfo
+            site="GN"
+            dataObject="edu.gemini.spModel.gemini.gnirs.SeqConfigGNIRS"
+            name="GNIRS Sequence Component"
+            type="iterComp"
+            imageKey="seqcomp.gif"
+            shortDescription="Iterate over GNIRS configurations with this component."
+            uiClassName="jsky.app.ot.editor.EdIterGenericConfig"/>
+
+    <UIInfo
+            site="GS"
+            dataObject="edu.gemini.spModel.gemini.flamingos2.Flamingos2"
+            name="Flamingos2 Instrument"
+            type="instrument"
+            imageKey="component.gif"
+            shortDescription="The Flamingos2 instrument is configured with this component."
+            uiClassName="jsky.app.ot.gemini.flamingos2.Flamingos2Editor"/>
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.gemini.visitor.VisitorInstrument"
+            name="Visitor Instrument"
+            type="instrument"
+            imageKey="component.gif"
+            shortDescription="Visitor instruments are configured with this component."
+            uiClassName="jsky.app.ot.gemini.visitor.VisitorEditor"/>
+    <!--
+      uiClassName="jsky.app.ot.gemini.flamingos2.EdCompInstFlamingos2"/>
+    -->
+
+    <UIInfo
+            site="GS"
+            dataObject="edu.gemini.spModel.gemini.flamingos2.SeqConfigFlamingos2"
+            name="Flamingos2 Sequence Component"
+            type="iterComp"
+            imageKey="seqcomp.gif"
+            shortDescription="Iterate over Flamingos2 configurations with this component."
+            uiClassName="jsky.app.ot.editor.EdIterGenericConfig"/>
+
+    <UIInfo
+            site="GS"
+            dataObject="edu.gemini.spModel.gemini.gpi.Gpi"
+            name="GPI Instrument"
+            type="instrument"
+            imageKey="component.gif"
+            shortDescription="The GPI instrument is configured with this component."
+            uiClassName="jsky.app.ot.gemini.gpi.GpiEditor"/>
+
+    <UIInfo
+            site="GS"
+            dataObject="edu.gemini.spModel.gemini.gpi.SeqConfigGpi"
+            name="GPI Sequence Component"
+            type="iterComp"
+            imageKey="seqcomp.gif"
+            shortDescription="Iterate over GPI configurations with this component."
+            uiClassName="jsky.app.ot.editor.EdIterGenericConfig"/>
+
+    <!-- See OT-103
+    <UIInfo
+            site="GS"
+            dataObject="edu.gemini.spModel.gemini.gpi.SeqRepeatGpiOffset"
+            name="(GPI) Offset Sequence Component"
+            type="iterComp"
+            imageKey="seqcomp.gif"
+            shortDescription="Configure offset based patterns with this component."
+            uiClassName="jsky.app.ot.gemini.gpi.GpiOffsetPosListEditor"/>
+     -->
+
+    <UIInfo
+            site="GS"
+            dataObject="edu.gemini.spModel.gemini.nici.InstNICI"
+            name="NICI Instrument"
+            type="instrument"
+            imageKey="component.gif"
+            shortDescription="The NICI instrument is configured with this component."
+            uiClassName="jsky.app.ot.gemini.nici.EdCompInstNICI"/>
+
+    <UIInfo
+            site="GS"
+            dataObject="edu.gemini.spModel.gemini.nici.SeqConfigNICI"
+            name="NICI Sequence Component"
+            type="iterComp"
+            imageKey="seqcomp.gif"
+            shortDescription="Iterate over NICI configurations with this component."
+            uiClassName="jsky.app.ot.editor.EdIterGenericConfig"/>
+
+
+    <!--
+      <UIInfo
+        dataObject="jsky.app.ot.gemini.seqcomp.SeqConfigCalUnit"
+        name="Calibration Unit Sequence Component"
+        type="iterComp"
+        imageKey="seqcomp.gif"
+        shortDescription="Iterate over Calibration Unit configurations with this component."
+        uiClassName="jsky.app.ot.editor.EdIterGenericConfig"/>
+    -->
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.seqcomp.SeqBase"
+            name="Base Sequence Component"
+            type="seqBase"
+            imageKey="seqcomp.gif"
+            shortDescription="This component contains the sequence of operations that generates the observation science data."
+            uiClassName="jsky.app.ot.editor.seq.EdIteratorFolder"/>
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.seqcomp.SeqDataProc"
+            name="Data Processing Graph"
+            type="dataProc"
+            imageKey="Graph_small.gif"
+            shortDescription="This component is used to construct a data processing graph."
+            uiClassName="jsky.app.ot.editor.EdDataProc"/>
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.seqcomp.SeqRepeatObserve"
+            name="Observe Sequence Component"
+            type="iterObs"
+            imageKey="seqobs.gif"
+            shortDescription="Configure this component to generate the specified number of exposures."
+            uiClassName="jsky.app.ot.editor.EdIterObserve"/>
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.gemini.seqcomp.SeqRepeatSmartGcalObs$Flat"
+            name="Smart Flat Sequence Component"
+            type="iterObs"
+            imageKey="seqobs.gif"
+            shortDescription="This will insert automatically configured flat calibrations into the sequence."
+            uiClassName="jsky.app.ot.gemini.editor.EdIterSmartGcalObs"/>
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.gemini.seqcomp.SeqRepeatSmartGcalObs$Arc"
+            name="Smart Arc Sequence Component"
+            type="iterObs"
+            imageKey="seqobs.gif"
+            shortDescription="This will insert automatically configured arc calibrations into the sequence."
+            uiClassName="jsky.app.ot.gemini.editor.EdIterSmartGcalObs"/>
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.gemini.seqcomp.SeqRepeatSmartGcalObs$BaselineNight"
+            name="Cal Unit Smart Baseline Night Component"
+            type="iterObs"
+            imageKey="seqobs.gif"
+            shortDescription="This will insert the night baseline calibration images into the sequence."
+            uiClassName="jsky.app.ot.gemini.editor.EdIterSmartGcalObs"/>
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.gemini.seqcomp.SeqRepeatSmartGcalObs$BaselineDay"
+            name="Cal Unit Smart Baseline Day Component"
+            type="iterObs"
+            imageKey="seqobs.gif"
+            shortDescription="This will insert the day baseline calibration images into the sequence."
+            uiClassName="jsky.app.ot.gemini.editor.EdIterSmartGcalObs"/>
+
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.seqcomp.SeqRepeatBiasObs"
+            name="Bias Sequence Component"
+            type="iterObs"
+            imageKey="seqobs.gif"
+            shortDescription="Configure this component to generate bias exposures."
+            uiClassName="jsky.app.ot.editor.EdIterBiasObs"/>
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.seqcomp.SeqRepeatDarkObs"
+            name="Dark Sequence Component"
+            type="iterObs"
+            imageKey="seqobs.gif"
+            shortDescription="Configure this component to generate dark exposures."
+            uiClassName="jsky.app.ot.editor.EdIterDarkObs"/>
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.gemini.seqcomp.SeqRepeatFlatObs"
+            name="Cal Unit Flat/Arc Sequence Component"
+            type="iterObs"
+            imageKey="seqobs.gif"
+            shortDescription="Configure the Calibration Unit with this component."
+            uiClassName="jsky.app.ot.gemini.editor.EdIterFlatObs"/>
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.gemini.seqcomp.SeqRepeatOffset"
+            name="Offset Sequence Component"
+            type="iterComp"
+            imageKey="seqcomp.gif"
+            shortDescription="Configure offset based patterns with this component."
+            uiClassName="jsky.app.ot.gemini.editor.offset.StandardOffsetPosListEditor"/>
+
+    <UIInfo
+            site="GS"
+            dataObject="edu.gemini.spModel.gemini.nici.SeqRepeatNiciOffset"
+            name="(NICI) Offset Sequence Component"
+            type="iterComp"
+            imageKey="seqcomp.gif"
+            shortDescription="Configure offset based patterns with this component."
+            uiClassName="jsky.app.ot.gemini.nici.NiciOffsetPosListEditor"/>
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.seqcomp.SeqRepeat"
+            name="Repeat Sequence Component"
+            type="iterComp"
+            imageKey="seqcomp.gif"
+            shortDescription="Repeat exposures or other sequence components."
+            uiClassName="jsky.app.ot.editor.EdIterRepeat"/>
+</UIInfos>

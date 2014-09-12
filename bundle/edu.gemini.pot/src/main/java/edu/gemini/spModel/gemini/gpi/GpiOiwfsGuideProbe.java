@@ -1,0 +1,52 @@
+package edu.gemini.spModel.gemini.gpi;
+
+import edu.gemini.shared.util.immutable.None;
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.guide.*;
+import edu.gemini.spModel.obs.context.ObsContext;
+
+import java.awt.geom.Area;
+
+/**
+ * The GPI OIWFS guider (not actually used, see GPI.getConsumedGuideProbes()).
+ */
+public enum GpiOiwfsGuideProbe implements GuideProbe {
+    instance;
+
+    public String getKey() {
+        return "GPI OIWFS";
+    }
+
+    public String toString() {
+        return getKey();
+    }
+
+    public Type getType() {
+        return Type.OIWFS;
+    }
+
+    public String getDisplayName() {
+        return "GPI OIWFS";
+    }
+
+    public String getSequenceProp() {
+        return "guideWithOIWFS";
+    }
+
+    public GuideOptions getGuideOptions() {
+        return StandardGuideOptions.instance;
+    }
+
+    public Option<GuideProbeGroup> getGroup() {
+        return None.instance();
+    }
+
+    // GPI does not have an OIWFS patrol field, return empty area
+    final private static PatrolField patrolField = new PatrolField(new Area());
+    @Override public PatrolField getPatrolField() {
+        return patrolField;
+    }
+    @Override public PatrolField getCorrectedPatrolField(ObsContext ctx) {
+        return patrolField;
+    }
+}

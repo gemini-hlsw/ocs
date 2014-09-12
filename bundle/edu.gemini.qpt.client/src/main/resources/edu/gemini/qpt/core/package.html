@@ -1,0 +1,26 @@
+<html>
+<body>
+QPT Model Classes
+<p>
+The Schedule is the root object of the QPT model. The schedule owns an SP Mini-Model, which is an 
+in-memory, immutable representation of the state of the SPDB. The following invariants apply:
+<ul>
+<li>A schedule's mini-model may change, but may never be null.
+<li>When the mini-model changes, allocs can become invalid for several reasons:
+	<ul>
+		<li>The associated obs has been deleted, or all steps have been executed. 
+		    In this case the alloc must also be deleted.
+		<li>The associated obs steps have been partially executed. In this case the step
+		    boundaries must be adjusted.
+		<li>In all cases, alloc durations must be re-calculated if the alloc is not
+		    deleted.
+	</ul>
+	Each variant is responsible for repairing these problems when it sees the mini-model
+	change, and must preserve the validity of all allocs during this process; the 
+	variant must manage the update and repair process such that, for example, the UI can
+	repaint a partially-repaired variant without errors. A local obsId to Obs cache map
+	is a possible solution.
+</ul>
+
+</body>
+</html>

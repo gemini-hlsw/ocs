@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
+
+<document>
+  <container kind="program" type="Program" version="2014A-1" subtype="basic" key="638d91fe-a7aa-4aa8-a1b5-bf044ecf26fd" name="GN-TEXES-BP">
+    <paramset name="Science Program" kind="dataObj">
+      <param name="title" value="TEXES PHASE I/II MAPPING BPS"/>
+      <param name="programMode" value="QUEUE"/>
+      <param name="tooType" value="none"/>
+      <param name="programStatus" value="PHASE2"/>
+      <param name="nextObsId" value="1"/>
+      <paramset name="piInfo">
+        <param name="firstName" value=""/>
+        <param name="lastName" value=""/>
+        <param name="email" value=""/>
+        <param name="phone" value=""/>
+      </paramset>
+      <param name="queueBand" value="1"/>
+      <param name="isLibrary" value="true"/>
+      <paramset name="timeAcct"/>
+      <param name="awardedTime" value="0.0" units="hours"/>
+      <param name="fetched" value="yes"/>
+      <param name="completed" value="false"/>
+      <param name="notifyPi" value="NO"/>
+    </paramset>
+    <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="57aa5b05-f129-4b7f-9e21-a0cad0f515c4" name="Note">
+      <paramset name="Note" kind="dataObj">
+        <param name="title" value="Next libID = 4"/>
+        <param name="NoteText" value=""/>
+      </paramset>
+    </container>
+    <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="cc455cf7-d311-45b9-a6be-a4d4552e3ae2" name="Note">
+      <paramset name="Note" kind="dataObj">
+        <param name="title" value="General TEXES Notes"/>
+        <param name="NoteText">
+          <value>There are two choices of cross-disperser for TEXES, which affects the slit length and 
+the wavelength coverage at a given central wavelength. The different options for 
+resolution and slit length are:
+
+Echelon + 32 l/mm ?chelle (R~85,000)  - 4 arcsec slit length
+Echelon + 75 l/mm grating (R~85,000)  - 1.7 arcsec slit length
+32 l/mm ?chelle                 (R~10,000)  - 20 arcsec slit length
+75 l/mm grating                 (R~4,000)   -  20 arcsec slit length
+
+You should have one observation per wavelength/wavenumber setting and per target.
+
+Please define before and after standards for each target in the program.
+Usually asteroids are used as the standards.  The OT is able to calculate the 
+positions of most bright asteroids given the object name or the asteroid number in the 
+JPL Horizons database.
+
+********************************************
+
+For each (siderial) target you must choose guide stars.  For TEXES guide stars can be 
+selected down to a radius of 3.8 arc-minutes from the target due to the small slit size 
+of TEXES.  If at all possible guide stars should be brighter than R magnitude of 13.5; 
+guide stars fainter than R of 15 are very likely unusable.  The maximum practical radius 
+for a guide star is about 6.9 arc-minutes.  PWFS2 is used for all TEXES observations.
+
+In the example science observations the target has a guide star chosen right at the inner 
+limit, and a second guide star is given as a backup.  In normal cases where the guide 
+star is not right at the limit one only needs to define one PWFS guide star.  When the best 
+guide star is very close to either the inner or outer radii allowed it is a good idea to define 
+a backup guide star in case the position of the first guide star is slightly inaccurate, or
+there is a high relative proper motion of the target and the guide star, and the guide star 
+proves impossible to use.
+
+For non-siderial targets either orbital elements in the "Target" tab or a note containing 
+an ephemeris covering the period of the TEXES run must be provided.  In such cases the 
+guide star will be chosen at the time the observations are taken.
+
+***********************************************
+
+NOTE:  SLIT POSITION ANGLE
+
+For most targets the default value of the slit position, north-south, is as good as any other 
+orientation, and there is no need to change it from the template value.
+
+TEXES is often used in slit-scan mode if the target is bright enough.  Please contact the TEXES team 
+for planning such observations.  Such details are not indicated in the OT template.
+
+</value>
+        </param>
+      </paramset>
+    </container>
+    <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="4873ed44-47c6-4d9e-8558-d10c0ca7a182" name="GN-TEXES-BP-2">
+      <paramset name="Observation" kind="dataObj">
+        <param name="title" value="Before Standard"/>
+        <param name="libraryId" value="1"/>
+        <param name="priority" value="LOW"/>
+        <param name="tooOverrideRapid" value="false"/>
+        <param name="phase2Status" value="PI_TO_COMPLETE"/>
+        <param name="qaState" value="UNDEFINED"/>
+        <param name="overrideQaState" value="false"/>
+      </paramset>
+      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="fc0fa660-3eef-4730-be6f-128ad7e3e843" name="Note">
+        <paramset name="Note" kind="dataObj">
+          <param name="title" value="Position Angle"/>
+          <param name="NoteText">
+            <value>Since the control of the slit is not actually done via the OT when the observations are taken, 
+you need to work with John Lacy or Matt Richter or others of the TEXES team to specify the 
+slit angle(s) that you want.</value>
+          </param>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="bb57b165-e535-4597-9255-d7e5fa4586e0" name="Observing Conditions">
+        <paramset name="Observing Conditions" kind="dataObj">
+          <param name="CloudCover" value="ANY"/>
+          <param name="ImageQuality" value="ANY"/>
+          <param name="SkyBackground" value="ANY"/>
+          <param name="WaterVapor" value="ANY"/>
+          <param name="ElevationConstraintType" value="NONE"/>
+          <param name="ElevationConstraintMin" value="0.0"/>
+          <param name="ElevationConstraintMax" value="0.0"/>
+          <paramset name="timing-window-list"/>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Texes" key="75b860df-8ea2-42d5-8839-5a87a50b85cf" name="Texes">
+        <paramset name="Texes" kind="dataObj">
+          <param name="exposureTime" value="10.0"/>
+          <param name="posAngle" value="0"/>
+          <param name="coadds" value="1"/>
+          <param name="disperser" value="D_32_LMM"/>
+          <param name="wavelength" value="10.0"/>
+        </paramset>
+      </container>
+      <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="85d4a345-02c4-4958-af73-3b8fe487db4a" name="Observing Log">
+        <paramset name="Observing Log" kind="dataObj">
+          <paramset name="obsQaRecord"/>
+        </paramset>
+      </container>
+      <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="cc571b81-4933-484b-b8ea-92bc396d6d53" name="Observation Exec Log">
+        <paramset name="Observation Exec Log" kind="dataObj">
+          <paramset name="obsExecRecord">
+            <paramset name="datasets"/>
+            <paramset name="events"/>
+            <paramset name="configMap"/>
+          </paramset>
+        </paramset>
+      </container>
+      <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="1d4fdc6f-fc99-4d36-8db5-1813b51df3d5" name="Sequence">
+        <paramset name="Sequence" kind="dataObj"/>
+        <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="7828a67b-e26c-4ed9-9e49-8832478c41c7" name="Offset">
+          <paramset name="Offset" kind="dataObj">
+            <paramset name="offsets">
+              <paramset name="Offset0" sequence="0">
+                <param name="p" value="0.0"/>
+                <param name="q" value="0.0"/>
+                <param name="defaultGuideOption" value="on"/>
+              </paramset>
+            </paramset>
+          </paramset>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="d819e364-ccf2-4ff4-8653-927bbf0c41b7" name="Observe">
+            <paramset name="Observe" kind="dataObj">
+              <param name="repeatCount" value="1"/>
+              <param name="class" value="PROG_CAL"/>
+            </paramset>
+          </container>
+        </container>
+      </container>
+    </container>
+    <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="cefc4047-c637-4ed3-87a2-16828cffba2f" name="GN-TEXES-BP-1">
+      <paramset name="Observation" kind="dataObj">
+        <param name="title" value="Science Observation"/>
+        <param name="libraryId" value="2"/>
+        <param name="priority" value="LOW"/>
+        <param name="tooOverrideRapid" value="false"/>
+        <param name="phase2Status" value="PI_TO_COMPLETE"/>
+        <param name="qaState" value="UNDEFINED"/>
+        <param name="overrideQaState" value="false"/>
+      </paramset>
+      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="91338fe0-c70d-4193-973f-b41a347a5f9d" name="Note">
+        <paramset name="Note" kind="dataObj">
+          <param name="title" value="Position Angle"/>
+          <param name="NoteText">
+            <value>Since the control of the slit is not actually done via the OT when the observations are taken, 
+you need to work with John Lacy or Matt Richter or others of the TEXES team to specify the 
+slit angle(s) that you want.</value>
+          </param>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Texes" key="d1593eec-a9c7-4e69-b284-b8f072e8fc83" name="Texes">
+        <paramset name="Texes" kind="dataObj">
+          <param name="exposureTime" value="1800.0"/>
+          <param name="posAngle" value="0"/>
+          <param name="coadds" value="1"/>
+          <param name="disperser" value="D_32_LMM"/>
+          <param name="wavelength" value="10.0"/>
+        </paramset>
+      </container>
+      <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="a18a12ee-8191-41c7-a1d2-17845cc08c16" name="Observing Log">
+        <paramset name="Observing Log" kind="dataObj">
+          <paramset name="obsQaRecord"/>
+        </paramset>
+      </container>
+      <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="435e4f14-ecef-419d-8215-941bc76f99fe" name="Observation Exec Log">
+        <paramset name="Observation Exec Log" kind="dataObj">
+          <paramset name="obsExecRecord">
+            <paramset name="datasets"/>
+            <paramset name="events"/>
+            <paramset name="configMap"/>
+          </paramset>
+        </paramset>
+      </container>
+      <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="e23e723b-89a2-4088-942d-d8d9d160b217" name="Sequence">
+        <paramset name="Sequence" kind="dataObj"/>
+        <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="3ebbb98a-48e9-4469-964f-66e4c025fbed" name="Offset">
+          <paramset name="Offset" kind="dataObj">
+            <paramset name="offsets">
+              <paramset name="Offset0" sequence="0">
+                <param name="p" value="0.0"/>
+                <param name="q" value="0.0"/>
+                <param name="defaultGuideOption" value="on"/>
+              </paramset>
+            </paramset>
+          </paramset>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="32890400-b425-46a6-9a7c-df1bbb20d305" name="Observe">
+            <paramset name="Observe" kind="dataObj">
+              <param name="repeatCount" value="1"/>
+              <param name="class" value="SCIENCE"/>
+            </paramset>
+          </container>
+        </container>
+      </container>
+    </container>
+    <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="f2827259-20d0-42fc-b7b6-5416d0b9c539" name="GN-TEXES-BP-3">
+      <paramset name="Observation" kind="dataObj">
+        <param name="title" value="After Standard"/>
+        <param name="libraryId" value="3"/>
+        <param name="priority" value="LOW"/>
+        <param name="tooOverrideRapid" value="false"/>
+        <param name="phase2Status" value="PI_TO_COMPLETE"/>
+        <param name="qaState" value="UNDEFINED"/>
+        <param name="overrideQaState" value="false"/>
+      </paramset>
+      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="dec83e19-a2dc-490f-b0b7-bcefda8767b9" name="Note">
+        <paramset name="Note" kind="dataObj">
+          <param name="title" value="Position Angle"/>
+          <param name="NoteText">
+            <value>Since the control of the slit is not actually done via the OT when the observations are taken, 
+you need to work with John Lacy or Matt Richter or others of the TEXES team to specify the 
+slit angle(s) that you want.</value>
+          </param>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="def60064-25c9-4240-9b72-36f927cb768d" name="Observing Conditions">
+        <paramset name="Observing Conditions" kind="dataObj">
+          <param name="CloudCover" value="ANY"/>
+          <param name="ImageQuality" value="ANY"/>
+          <param name="SkyBackground" value="ANY"/>
+          <param name="WaterVapor" value="ANY"/>
+          <param name="ElevationConstraintType" value="NONE"/>
+          <param name="ElevationConstraintMin" value="0.0"/>
+          <param name="ElevationConstraintMax" value="0.0"/>
+          <paramset name="timing-window-list"/>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Texes" key="8145edc0-22eb-4324-9e3e-2420d9bdf67f" name="Texes">
+        <paramset name="Texes" kind="dataObj">
+          <param name="exposureTime" value="10.0"/>
+          <param name="posAngle" value="0"/>
+          <param name="coadds" value="1"/>
+          <param name="disperser" value="D_32_LMM"/>
+          <param name="wavelength" value="10.0"/>
+        </paramset>
+      </container>
+      <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="03039629-f594-4d16-aaa8-03a4d19219da" name="Observing Log">
+        <paramset name="Observing Log" kind="dataObj">
+          <paramset name="obsQaRecord"/>
+        </paramset>
+      </container>
+      <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="09e01ebd-8176-46ca-aec5-8c57fea838c2" name="Observation Exec Log">
+        <paramset name="Observation Exec Log" kind="dataObj">
+          <paramset name="obsExecRecord">
+            <paramset name="datasets"/>
+            <paramset name="events"/>
+            <paramset name="configMap"/>
+          </paramset>
+        </paramset>
+      </container>
+      <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="c7113905-7c73-4002-84a0-ffa98187a832" name="Sequence">
+        <paramset name="Sequence" kind="dataObj"/>
+        <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="079e543a-f2ca-40ba-a0da-353b3eadd1a5" name="Offset">
+          <paramset name="Offset" kind="dataObj">
+            <paramset name="offsets">
+              <paramset name="Offset0" sequence="0">
+                <param name="p" value="0.0"/>
+                <param name="q" value="0.0"/>
+                <param name="defaultGuideOption" value="on"/>
+              </paramset>
+            </paramset>
+          </paramset>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="630969ad-18e5-4f0c-bb06-e82300c07cc7" name="Observe">
+            <paramset name="Observe" kind="dataObj">
+              <param name="repeatCount" value="1"/>
+              <param name="class" value="PROG_CAL"/>
+            </paramset>
+          </container>
+        </container>
+      </container>
+    </container>
+  </container>
+  <container kind="versions" type="versions" version="1.0">
+    <paramset name="node">
+      <param name="key" value="f2827259-20d0-42fc-b7b6-5416d0b9c539"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7828a67b-e26c-4ed9-9e49-8832478c41c7"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="fc0fa660-3eef-4730-be6f-128ad7e3e843"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="09e01ebd-8176-46ca-aec5-8c57fea838c2"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d1593eec-a9c7-4e69-b284-b8f072e8fc83"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="bb57b165-e535-4597-9255-d7e5fa4586e0"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d819e364-ccf2-4ff4-8653-927bbf0c41b7"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="638d91fe-a7aa-4aa8-a1b5-bf044ecf26fd"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="91338fe0-c70d-4193-973f-b41a347a5f9d"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="57aa5b05-f129-4b7f-9e21-a0cad0f515c4"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="435e4f14-ecef-419d-8215-941bc76f99fe"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="cc571b81-4933-484b-b8ea-92bc396d6d53"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4873ed44-47c6-4d9e-8558-d10c0ca7a182"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a18a12ee-8191-41c7-a1d2-17845cc08c16"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="cefc4047-c637-4ed3-87a2-16828cffba2f"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="03039629-f594-4d16-aaa8-03a4d19219da"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="079e543a-f2ca-40ba-a0da-353b3eadd1a5"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3ebbb98a-48e9-4469-964f-66e4c025fbed"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="630969ad-18e5-4f0c-bb06-e82300c07cc7"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="85d4a345-02c4-4958-af73-3b8fe487db4a"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="1d4fdc6f-fc99-4d36-8db5-1813b51df3d5"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c7113905-7c73-4002-84a0-ffa98187a832"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="8145edc0-22eb-4324-9e3e-2420d9bdf67f"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e23e723b-89a2-4088-942d-d8d9d160b217"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="75b860df-8ea2-42d5-8839-5a87a50b85cf"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="32890400-b425-46a6-9a7c-df1bbb20d305"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="dec83e19-a2dc-490f-b0b7-bcefda8767b9"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="cc455cf7-d311-45b9-a6be-a4d4552e3ae2"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="def60064-25c9-4240-9b72-36f927cb768d"/>
+      <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="1"/>
+    </paramset>
+  </container>
+</document>

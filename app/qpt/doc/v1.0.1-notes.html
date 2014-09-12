@@ -1,0 +1,138 @@
+
+<html>
+<head><title>QPT 1.0.1 Release Notes</title></head>
+<link rel="stylesheet" href="/doc/styles.css"></link>
+<body>
+
+<h1>QPT 1.0.1 Release Notes</h1>
+
+QPT release 1.0.1 addresses 31 issues, described below.
+
+<p>
+To update QPT, just run it and select Help > Software Update. QPT will refresh the application logic 
+from the server and restart. If you cannot connect to the database or have other issues, quit and 
+restart QPT. For troubleshooting hints and other update options, see
+the second half of <a href="install.html"><i>Running QPT</i></a>.
+
+<p>
+
+As always, please direct questions and comments to <code>rnorris@gemini.edu</code> and cc: the QC groups if
+appropriate.
+
+<h2>New and Notable</h2>
+
+<h3>[QPT-107] Integrated Plan Publishing</h3>
+Publishing a queue plan is now fully automatic, and preview <i>should</i> now work on all platforms.
+On OS X and Windows QPT uses native browser support. On *nix systems QPT will attempt to run <code>firefox</code>.
+<p>
+Plans are written to
+<pre>staff@internal.gemini.edu:/export/web/docs/internal/html/science/</pre>
+which is published to the web at
+<pre><a href="http://internal.gemini.edu/science/">http://internal.gemini.edu/science/</a></pre>
+and are placed in subdirectories in the form 
+<pre>GNqueue/qpt-plans/2006/06/16/20060616.html</pre>
+In
+addition, GS plans are published to the home directory of <code>dataproc@chamaeleon</code> using the 
+same subdirectory scheme. This is simply a backup in case connectivity to GN is lost.
+<p>
+Plans are staged in your temporary directory (usually <code>/tmp</code> on *nix systems), and are opened
+directly from that location in preview mode. The files are not used after publishing is complete, and 
+may be deleted freely (this will happen automatically at reboot).
+
+<h3>[QPT-88, QPT-100] Support for Band 4 and Non-Queue Programs</h3>
+
+QPT now shows Band 4 programs, as well as Non-Queue programs (which appear in Band 0). These types are not
+visible by default but are available under the View menu. Note that these additional programs increase the 
+memory overhead and query time for QPT; you may notice that database synchronization is slightly slower.
+
+<h3>[QPT-101] New <code>info</code> Level Problem Markers</h3>
+
+In addition to the previous <code>error</code> and <code>warning</code> marker levels, there is now a new
+<code>info</code> level that includes the former "over-qualified" warning. Markers
+at <code>info</code> level are simply hints for the QC and do not appear in the published plan.
+
+<h3>[QPT-80, 96, 97, 127] Improved Instrument Config Support</h3>
+
+QPT now includes NIRI filters in the Instruments view, and GMOS dispersers now work as
+advertised. Instrument configuration information now appears in the Visits view and in the
+published report.
+
+<h3>[QPT-62] Candidate Observation Table is Sortable</h3>
+
+You can now sort the table in the Candidate Observations view by clicking on any table header. Clicking
+again reverses the sort order.
+
+<h3>Other Minor and Self-Explanatory Changes</h3>
+
+<ul>
+<li>[QPT-135]	Skipped steps are now handled correctly.
+<li>[QPT-134]	QPT now uses the Command key rather than Ctrl for text edit commands on Max OS X.
+<li>[QPT-133]	Comment-only variants now appear in the plan, without the elevation plot and visit table.	 
+<li>[QPT-129]	The window dimming effect for modal dialogs has been disabled in X11. It was ugly.
+<li>[QPT-128]	All times are site-local based on the plan, rather than being based on the site where QPT is running.
+<li>[QPT-125]	Published plans now include an "end of variant" line in each visit table.
+<li>[QPT-124]	The expression <code>$variant.Comment</code> no longer shows up in the published plan.	 
+<li>[QPT-123]	Empty variants (except those with a comment, see QPT-133) are not published.
+<li>[QPT-120]	The observation time slot in the Properties view now correctly reports the end time.
+<li>[QPT-116]	Sky background % bin is now shown in Visits table and published plan.
+<li>[QPT-112]	Published plan now includes UT date in title.
+<li>[QPT-111]	QPT now uses 24-hour time in all views and in the published report.
+<li>[QPT-108]	Published report now uses relative URLs for image files.
+<li>[QPT-105]	Properties view now shows min &bull; mean &bull; max for all time-varying values.
+<li>[QPT-103]	Sky background % bin is now shown in Properties view. 
+<li>[QPT-102]	Band 1, 2, 3, 4 filters now have accelerator keys.
+<li>[QPT-99]	Steps are now labeled starting at 1 instead of 0.
+<li>[QPT-95]	Visits view and published plan tables now include the columns from the old GN ASCII report.
+<li>[QPT-93]	Visit step numbers are now indicated in some views to disambiguate markers.
+<li>[QPT-91]	Observations with no target are no longer excluded, and are given an artificial target at RA = DEC = 0.
+<li>[QPT-90]	Observations with no site constraints are no longer excluded, and are given an empty set of constraints.
+<li>[QPT-83]	Properties view has been re-ordered slightly to require less scrolling in normal usage. 
+</ul>
+
+<h2>JIRA Release Manifest</h2>
+
+<h3>Bug</h3>
+<ul>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-80'>QPT-80</a>] - Need to serialize inst/config</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-108'>QPT-108</a>] - Use relative URL for images in published schedule</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-120'>QPT-120</a>] - Time slot is 0-sized</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-127'>QPT-127</a>] - GMOS Disperser doesn't work</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-128'>QPT-128</a>] - All times should default to site local (not vm local)</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-129'>QPT-129</a>] - Get rid of dimmed background effect .. doesnt work on linux</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-135'>QPT-135</a>] - Skipped steps are handled incorrectly</li>
+</ul>
+    
+<h3>Improvement</h3>
+<ul>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-83'>QPT-83</a>] - Improve properties view</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-88'>QPT-88</a>] - Show non-queue programs</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-90'>QPT-90</a>] - Missing constraint means Any for all</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-91'>QPT-91</a>] - Missing Target is OK</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-93'>QPT-93</a>] - Indicate steps in visit toString()</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-95'>QPT-95</a>] - Add stuff from ASCII report</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-96'>QPT-96</a>] - Show config for all instruments</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-97'>QPT-97</a>] - Add NIRI inst config</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-99'>QPT-99</a>] - Label step offsets at 1</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-100'>QPT-100</a>] - Add support for band 4</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-101'>QPT-101</a>] - Add INFO level QC-only markers</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-102'>QPT-102</a>] - Add cmd+1/2/3/4 keys for band filters</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-103'>QPT-103</a>] - Indicate % or bin % for lunar magnitude</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-105'>QPT-105</a>] - Show man/max/mean for all airmass, lunar brightness, etc</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-107'>QPT-107</a>] - Publish to Server</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-111'>QPT-111</a>] - Report should use 24h time</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-112'>QPT-112</a>] - Add UT date to top of plan</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-116'>QPT-116</a>] - Add sky brightness bin to plan</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-123'>QPT-123</a>] - Don't publish empty variants</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-124'>QPT-124</a>] - Ensure $variant.Comment doesn't show up</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-125'>QPT-125</a>] - Add end of variant line in HTML plan</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-133'>QPT-133</a>] - Show "comment-only" variants in published plan</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-134'>QPT-134</a>] - Map Cmd to edit commands</li>
+</ul>
+    
+<h3>New Feature</h3>
+<ul>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-62'>QPT-62</a>] - Allow sorting in obs list</li>
+</ul>
+    
+</body>
+</html>

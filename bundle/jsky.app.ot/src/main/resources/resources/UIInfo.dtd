@@ -1,0 +1,64 @@
+<!--
+  This DTD describes the content of the UIInfo.xml file, which contains
+  OT user interface information.
+
+  $Id: UIInfo.dtd 18488 2009-03-05 20:43:11Z swalker $
+-->
+
+<!-- The UIINFO_DTD_VERSION is updated whenever the structure or content
+     of the DTD is altered.
+-->
+<!ENTITY UIINFO_DTD_VERSION "0.1">
+
+<!-- UIInfos is the top level element containing a list of UIInfo elements.
+
+     The root element is required to have a version attribute set to
+     the value of the DTD used in the document.
+-->
+<!ELEMENT UIInfos (UIInfo)+>
+<!ATTLIST UIInfos
+          version   CDATA #FIXED "&UIINFO_DTD_VERSION;"
+>
+
+<!-- A UIInfo element describes the contents of the UIInfo class.
+     There is one attribute for each class member variable, plus a dataObject
+     attribute, which is used to map the UIInfo object to a SP program node
+     data object type.
+
+     Attributes:
+
+     dataObject        used to map the UIInfo object to a SP program node
+     name              name used for UI display
+     id                name to uniquely identify a UIInfo object
+     type              identifies the type of the node (see constants in UIInfo class)
+     imageKey          used to get an Icon for UI display
+     shortDescription  a short description of the item
+     uiClassName       editor class name used for UI
+     toolTipText       the UI may pop up this tooltip over the item
+     readOnly          the read-only state of this component (default: false)
+     visible           true if item should be visible to SP viewer (default: true)
+     expert            true if this item is considered an expert item (default: false)
+     site              optional string describing the telescope site (for Gemini: "north" or "south")
+     onsite            set to "true" if item is only allowed on-site
+     requires          list of related UIInfo element ids required by this one
+
+-->
+<!ELEMENT UIInfo EMPTY>
+<!ATTLIST UIInfo
+          dataObject       CDATA #REQUIRED
+          name             CDATA #REQUIRED
+          id               CDATA #IMPLIED
+          type             CDATA #IMPLIED
+          imageKey         CDATA #IMPLIED
+          shortDescription CDATA #IMPLIED
+          uiClassName      CDATA #IMPLIED
+          toolTipText      CDATA #IMPLIED
+          readOnly         CDATA #IMPLIED
+          visible          CDATA #IMPLIED
+          expert           CDATA #IMPLIED
+          site             CDATA #IMPLIED
+          onsite           CDATA #IMPLIED
+          requires         CDATA #IMPLIED
+>
+
+

@@ -1,0 +1,21 @@
+1,2013/10/04 12:00:00 HST
+#,GPI ARC Calibrations,,,,,,,,,
+,,,,,,,,,,
+Mode,Disperser,,Calibration Lamps,Calibration Shutter,Calibration Filter,Calibration Diffuser,Calibration Observe,Calibration Exposure Time,Calibration Coadds,Calibration Basecal
+Coronograph Y-band,Prism,,Ar arc,Open,ND4-5,IR,1,1.5,1,Night
+Coronograph J-band,Prism,,Ar arc,Open,ND4-5,IR,1,1.5,1,Night
+Coronograph H-band,Prism,,Ar arc+Xe arc,Open,ND4-5,IR,1,1.5,1,Night
+Coronograph K1-band,Prism,,Ar arc+Xe arc,Open,ND4-5,IR,1,1.5,1,Night
+Coronograph K2-band,Prism,,Ar arc+Xe arc,Open,ND4-5,IR,1,1.5,1,Night
+H_LIWA,Prism,,Ar arc+Xe arc,Open,ND4-5,IR,1,1.5,1,Night
+H_star,Prism,,Ar arc+Xe arc,Open,ND4-5,IR,1,1.5,1,Night
+Non Redundant Mask Y,Prism,,Ar arc,Open,ND4-5,IR,1,1.5,1,Night
+Non Redundant Mask J,Prism,,Ar arc,Open,ND4-5,IR,1,1.5,1,Night
+Non Redundant Mask J,Prism,,Ar arc+Xe arc,Open,ND4-5,IR,1,1.5,1,Night
+Non Redundant Mask K1,Prism,,Ar arc+Xe arc,Open,ND4-5,IR,1,1.5,1,Night
+Non Redundant Mask K2,Prism,,Ar arc+Xe arc,Open,ND4-5,IR,1,1.5,1,Night
+Y direct,Prism,,Ar arc,Open,ND4-5,IR,1,1.5,1,Night
+J direct,Prism,,Ar arc,Open,ND4-5,IR,1,1.5,1,Night
+H direct,Prism,,Ar arc+Xe arc,Open,ND4-5,IR,1,1.5,1,Night
+K1 direct,Prism,,Ar arc+Xe arc,Open,ND4-5,IR,1,1.5,1,Night
+K2 direct,Prism,,Ar arc+Xe arc,Open,ND4-5,IR,1,1.5,1,Night

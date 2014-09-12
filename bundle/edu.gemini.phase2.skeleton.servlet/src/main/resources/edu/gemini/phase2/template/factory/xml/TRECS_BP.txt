@@ -1,0 +1,36 @@
+Instrument : T-ReCS
+Blueprints : TRECS_BP.xml
+Version May 15, 2012 - updated by Bryan M
+
+PI = Phase I
+{} = Library ID
+
+**** IF MODE == IMAGING ****
+INCLUDE {1} {2} {3} from 'Imaging BP' into a target-specific Scheduling Group
+	SET FILTER FROM PI into TRECS
+  	ADD NOTE "NOTE: Imaging" to group
+
+
+**** IF MODE == SPECTROSCOPY *****
+
+INCLUDE {5}{7}{9} as SCI, {4}{6}{8} as ACQ  into a target-specific Scheduling Group
+# The ordering of observations in the scheduling group should be:
+  Note
+  Before standard acq
+  Before standard spec
+  SCI acq
+  SCI spec
+  After standard acq
+  After standard spec
+
+  	ADD NOTE "NOTE: Spectroscopy" to group
+
+	IN SCI observations SET DISPERSER FROM PI in T-ReCS component
+
+ 	IF DISPERSER == "Low Res 10um Grating" OR "High Res Grating"
+	   SET FILTER == N (broad 10um) in all observations
+ 	IF DISPERSER == "Low Res 20um Grating" 
+	   SET FILTER == Q (broad 20.8um) in all observations
+
+	EXCEPT WHERE SLIT == Imaging in ACQ 
+	       SET FOCAL PLANE MASK (slit) FROM PI

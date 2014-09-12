@@ -1,0 +1,69 @@
+Gemini Phase I Schema Changes
+
+# Version 2015.1.1 - 2015A
+##########################
+
+* Added ProposalClass for Fast-turnaround
+* Removed GS as an allowed partner
+
+# Version 2014.2.1 - 2014B
+##########################
+
+* Added ProposalClass for Large Programs
+* Subaru Instrument includes a Visitor option
+* Subaru Blueprint has an element to support custom names for Visitors
+
+# Version 2015.1.1 - 2015A
+##########################
+
+* Added GMOS-N 0.25" long slit
+* Added GMOS-N 0.25" N&S slit
+
+# Version 2014.1.2 - 2014A SV
+#############################
+
+* Added Graces.xsd schema for the GRACES blueprint. Includes the elements GracesBlueprintChoice, GracesBlueprintNull, GracesBlueprint
+ and the fiber mode GracesFiberMode. GRACES is included in the options for Blueprints and referred from Proposal.xsd
+
+# Version 2014.1.1 - 2014A
+##########################
+
+* Added Gpi.xsd schema for the GPI blueprint and components. This includes the element GpiBlueprintChoice, GpiBlueprintNull
+ GpiBlueprint, GpiObservingMode and GpiDisperser. GPI is included in the options for Blueprints and referred from Proposal.xsd
+* Added 'Lya395 (395 nm)' filter to GmosS.xsd file
+* Two new disperser options for Texes, 'Echelon + 32 l/mm echelle' and 'Echelon + 75 l/mm grating' in Texes.xsd
+* Removed FPU option '0.25 arcsec slit' in GmosN.xsd/GmosNFpu
+* New element in GnirsBlueprintSpectroscopy for centralWavelength, see Gnirs.xsd
+* In Flamingos2.xsd removed the narrow band filters 'F1056 (1.056 um)' and 'F1063 (1.063 um)'
+* Form GmosS and GmosN MOS Spectroscopy mode add an new MOS FPU element, see GmosS.xsd and GmosN.xsd
+
+# Version 2013.2.1 - 2013B
+##########################
+
+* Change version number schema to Year (yyyy).Semester (1-2).version
+* Added Texes.xsd schema, Texes blueprint and Texes disperser. Texes is included in the options for Blueprints
+and referred from Proposal.xsd
+* Added Dssi.xsd schema and DSSI blueprint. DSSI is included in the options for Blueprints
+and referred from Proposal.xsd
+* Added Visitor.xsd schema and Visitor blueprint. Visitor is included in the options for Blueprints
+and referred from Proposal.xsd. Visitor instruments must specify the site and must give a free format name.
+* New optional visitor element on Instrument to indicate if the selected Instrument is a visitor
+
+# Version 1.0.14 - 2013A
+########################
+
+* Added Gsoai.xsd schema for the GSOAI blueprint and filters. This includes the element GsaoiBlueprintChoice, GsaoiBlueprintNull
+ GsaoiBlueprint and GsaoiFilter. GSOAI is included in the options for Blueprints and referred from Proposal.xsd
+* UK partner was removed from Submissions.xsd
+* Added Y filter to GNIRS in the file Gnirs.xsd
+* Added ngoauthority to Itac element on file Itac.xsd
+* Semester element has no fixed values for year and semester attributes in Proposal.xsd
+* Proposal attribute schemaVersion han no fixed value in Proposal.xsd
+* Added enabled attribute to the Observation element set as default to true
+* Renamed Keyword 'Herbig-Haro stars' to 'Herbig-Haro objects'
+* The meta/band3optionChosen attribute is marked as mandatory
+
+# Version 1.0.13 - 2012B
+########################
+
+* Initial published version

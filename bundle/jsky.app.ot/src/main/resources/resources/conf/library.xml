@@ -1,0 +1,561 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<spDocument>
+  <item name="new" type="lb" subtype="none">
+    <av name=".gui.filename">
+      <value>GemLibrary1.ot</value>
+    </av>
+    <av name="title">
+      <value>Gemini Library Example</value>
+    </av>
+    <item name="new" type="lf" subtype="none">
+      <av name="title">
+        <value>Photometric Standard Stars</value>
+      </av>
+      <av name=".gui.collapsed">
+        <value>false</value>
+      </av>
+      <item name="new" type="no" subtype="none">
+        <av name=".unique">
+          <value>false</value>
+        </av>
+        <av name="note">
+          <value>This section of the library contains useful standard stars.
+
+There will be an accurate target component for each with source position as well as pre-selected wavefront sensors, where appropriate.
+</value>
+        </av>
+        <av name="title">
+          <value>Standards</value>
+        </av>
+      </item>
+      <item name="new" type="lf" subtype="none">
+        <av name="title">
+          <value>UKIRT near-IR standards</value>
+        </av>
+        <av name=".gui.collapsed">
+          <value>true</value>
+        </av>
+        <item name="new" type="no" subtype="none">
+          <av name=".unique">
+            <value>false</value>
+          </av>
+          <av name="note">
+            <value>Standards in this section are on the UKIRT system as defined by the UKIRT bright standards. 1 sigma errors are shown in parentheses. (MM. Casali and T.G. Hawarden JCMT-UKIRT Newsletter, No. 3, August 1992, p33).
+
+</value>
+          </av>
+          <av name="title">
+            <value>UKIRT standards</value>
+          </av>
+        </item>
+        <item name="new" type="lf" subtype="none">
+          <av name="title">
+            <value>Star FS1</value>
+          </av>
+          <av name=".gui.collapsed">
+            <value>false</value>
+          </av>
+          <item name="new" type="no" subtype="none">
+            <av name="note">
+              <value>K=12.967 (0.021)
+J-K = 0.462 (0.011)
+H-K = (0.081 (0.012)
+
+Other names for FS1: 
+G158-100
+
+Spectral type:
+
+Ref:
+Turnshek et al 1990 AJ, 99, 1243</value>
+            </av>
+            <av name="title">
+              <value>properties</value>
+            </av>
+          </item>
+          <item name="new" type="oc" subtype="targetList">
+            <av name="PWFS1">
+              <value>PWFS1</value>
+              <value>GSC0527100293</value>
+              <value>0:34:10.195</value>
+              <value>-12:08:55.39</value>
+              <value>FK5 (J2000)</value>
+            </av>
+            <av name="Base">
+              <value>Base</value>
+              <value>FS1</value>
+              <value>0:33:54.4</value>
+              <value>-12:07:57</value>
+              <value>FK5 (J2000)</value>
+            </av>
+            <av name=".gui.selectedTelescopePos">
+              <value>Base</value>
+            </av>
+            <av name=".unique">
+              <value>true</value>
+            </av>
+            <av name="PWFS2">
+              <value>PWFS2</value>
+              <value>GSC0527100319</value>
+              <value>0:33:52.13</value>
+              <value>-12:04:11.71</value>
+              <value>FK5 (J2000)</value>
+            </av>
+          </item>
+        </item>
+        <item name="new" type="lf" subtype="none">
+          <av name="title">
+            <value>Star FS2</value>
+          </av>
+          <av name=".gui.collapsed">
+            <value>true</value>
+          </av>
+          <item name="new" type="no" subtype="none">
+            <av name="note">
+              <value>K=10.466(0.003)
+J-K=0.247(0.003)
+H-K=0.038(0.003)
+
+Other names for FS2:
+SA92-342, HIP4297
+
+Spectral type: G5
+
+Ref:
+Landolt 1983. AJ, 88, 439</value>
+            </av>
+            <av name="title">
+              <value>properties</value>
+            </av>
+          </item>
+          <item name="new" type="oc" subtype="targetList">
+            <av name="PWFS1">
+              <value>PWFS1</value>
+              <value>GSC0001200057</value>
+              <value>0:54:51.55</value>
+              <value>0:51:01.66</value>
+              <value>FK5 (J2000)</value>
+            </av>
+            <av name="Base">
+              <value>Base</value>
+              <value>FS2</value>
+              <value>0:55:01.40</value>
+              <value>0:47:22.36</value>
+              <value>FK5 (J2000)</value>
+              <value>-4.17</value>
+              <value>-50.65</value>
+              <value>FK5 (J2000)</value>
+              <value>1991.25</value>
+              <value>10.0</value>
+            </av>
+            <av name=".gui.selectedTelescopePos">
+              <value>Base</value>
+            </av>
+            <av name=".unique">
+              <value>true</value>
+            </av>
+            <av name="PWFS2">
+              <value>PWFS2</value>
+              <value>GSC0001200214</value>
+              <value>0:55:09.893</value>
+              <value>0:43:13.08</value>
+              <value>FK5 (J2000)</value>
+            </av>
+          </item>
+        </item>
+      </item>
+      <item name="new" type="lf" subtype="none">
+        <av name="title">
+          <value>Landolt standards</value>
+        </av>
+        <av name=".gui.collapsed">
+          <value>true</value>
+        </av>
+        <item name="new" type="no" subtype="none">
+          <av name="note">
+            <value>Optical standards within 2 degrees of the celestial equator taken from Landolt 1983. AJ, 88, 439
+
+</value>
+          </av>
+          <av name="title">
+            <value>Landolt equatorial standards</value>
+          </av>
+        </item>
+        <item name="new" type="lf" subtype="none">
+          <av name="title">
+            <value>Star SA110-450</value>
+          </av>
+          <av name=".gui.collapsed">
+            <value>false</value>
+          </av>
+          <item name="new" type="no" subtype="none">
+            <av name="note">
+              <value>V=11.585
+B-V=+0.950
+
+</value>
+            </av>
+            <av name="title">
+              <value>properties</value>
+            </av>
+          </item>
+          <item name="new" type="oc" subtype="targetList">
+            <av name="PWFS1">
+              <value>PWFS1</value>
+              <value>GSC0044700537</value>
+              <value>18:43:59.261</value>
+              <value>0:26:54.56</value>
+              <value>FK5 (J2000)</value>
+            </av>
+            <av name="Base">
+              <value>Base</value>
+              <value>SA110-450</value>
+              <value>18:43:52.2</value>
+              <value>+00:22:59.1</value>
+              <value>FK5 (J2000)</value>
+            </av>
+            <av name=".gui.selectedTelescopePos">
+              <value>PWFS2</value>
+            </av>
+            <av name=".unique">
+              <value>true</value>
+            </av>
+            <av name="PWFS2">
+              <value>PWFS2</value>
+              <value>GSC0044700060</value>
+              <value>18:43:42.528</value>
+              <value>0:19:35.08</value>
+              <value>FK5 (J2000)</value>
+            </av>
+          </item>
+        </item>
+        <item name="new" type="lf" subtype="none">
+          <av name="title">
+            <value>Star SA111-773</value>
+          </av>
+          <item name="new" type="no" subtype="none">
+            <av name="note">
+              <value>V=8.963
+B-V=+0.206</value>
+            </av>
+            <av name="title">
+              <value>properties</value>
+            </av>
+          </item>
+          <item name="new" type="oc" subtype="targetList">
+            <av name="PWFS1">
+              <value>PWFS1</value>
+              <value>GSC0047801667</value>
+              <value>19:37:00.746</value>
+              <value>0:08:16.15</value>
+              <value>FK5 (J2000)</value>
+            </av>
+            <av name="Base">
+              <value>Base</value>
+              <value>SA111-773</value>
+              <value>19:37:15.7</value>
+              <value>0:10:57.8</value>
+              <value>FK5 (J2000)</value>
+            </av>
+            <av name=".gui.selectedTelescopePos">
+              <value>PWFS2</value>
+            </av>
+            <av name=".unique">
+              <value>true</value>
+            </av>
+            <av name="PWFS2">
+              <value>PWFS2</value>
+              <value>GSC0047801240</value>
+              <value>19:37:11.544</value>
+              <value>0:14:26.56</value>
+              <value>FK5 (J2000)</value>
+            </av>
+          </item>
+        </item>
+      </item>
+    </item>
+    <item name="new" type="lf" subtype="none">
+      <av name="title">
+        <value>Telescope position sequences</value>
+      </av>
+      <av name=".gui.collapsed">
+        <value>true</value>
+      </av>
+      <item name="new" type="lf" subtype="none">
+        <av name="title">
+          <value>NIRI mosaics</value>
+        </av>
+        <av name=".gui.collapsed">
+          <value>true</value>
+        </av>
+        <item name="new" type="lf" subtype="none">
+          <av name="title">
+            <value>3x3 mosaic</value>
+          </av>
+          <av name=".gui.collapsed">
+            <value>false</value>
+          </av>
+          <item name="new" type="if" subtype="none">
+            <item name="new" type="no" subtype="none">
+              <av name=".unique">
+                <value>false</value>
+              </av>
+              <av name="note">
+                <value>Generates a 3x3 mosaic pattern with 40 arcsec spacing in a spiral sequence.
+
+Use the position editor from the sequence iterator to visualise the pattern.
+
+It was created with the sequence iterator,
+a 40 arcsec spacing in p and q, and an initial offset of 40 arcsec in p and q. The order of observation was changed with the sequence arrow buttons.</value>
+              </av>
+              <av name="title">
+                <value>sequence info</value>
+              </av>
+            </item>
+            <item name="new" type="ic" subtype="offset">
+              <av name="offsetPositions">
+                <value>Offset4</value>
+                <value>Offset3</value>
+                <value>Offset2</value>
+                <value>Offset1</value>
+                <value>Offset0</value>
+                <value>Offset5</value>
+                <value>Offset6</value>
+                <value>Offset7</value>
+                <value>Offset8</value>
+              </av>
+              <av name="Offset8">
+                <value>-40.0</value>
+                <value>-40.0</value>
+              </av>
+              <av name="Offset7">
+                <value>0.0</value>
+                <value>-40.0</value>
+              </av>
+              <av name="Offset6">
+                <value>40.0</value>
+                <value>-40.0</value>
+              </av>
+              <av name="Offset5">
+                <value>40.0</value>
+                <value>0.0</value>
+              </av>
+              <av name=".gui.selectedOffsetPos">
+                <value>Offset4</value>
+              </av>
+              <av name="Offset4">
+                <value>0.0</value>
+                <value>0.0</value>
+              </av>
+              <av name="title">
+                <value>3x3 mosaic</value>
+              </av>
+              <av name="Offset3">
+                <value>-40.0</value>
+                <value>0.0</value>
+              </av>
+              <av name="Offset2">
+                <value>-40.0</value>
+                <value>40.0</value>
+              </av>
+              <av name="Offset1">
+                <value>0.0</value>
+                <value>40.0</value>
+              </av>
+              <av name="Offset0">
+                <value>40.0</value>
+                <value>40.0</value>
+              </av>
+            </item>
+          </item>
+        </item>
+        <item name="new" type="lf" subtype="none">
+          <av name="title">
+            <value>5 dice mosaic</value>
+          </av>
+          <av name=".gui.collapsed">
+            <value>false</value>
+          </av>
+          <item name="new" type="if" subtype="none">
+            <item name="new" type="no" subtype="none">
+              <av name=".unique">
+                <value>false</value>
+              </av>
+              <av name="note">
+                <value>Generates a mosaic pattern with 10 arcsec spacing in the shape of a #5 dice.
+
+Use the position editor from the sequence iterator to visualise the pattern.
+
+It was created with the sequence iterator,
+a 10 arcsec spacing in p and q, and an initial offset of 10 arcsec in p and q. The order of observation was changed with the sequence arrow buttons. The unwanted positions were removed by selecting them in the iterator window and using the remove button.</value>
+              </av>
+              <av name="title">
+                <value>sequence info</value>
+              </av>
+            </item>
+            <item name="new" type="ic" subtype="offset">
+              <av name="offsetPositions">
+                <value>Offset4</value>
+                <value>Offset0</value>
+                <value>Offset2</value>
+                <value>Offset8</value>
+                <value>Offset6</value>
+              </av>
+              <av name="Offset4">
+                <value>0.0</value>
+                <value>0.0</value>
+              </av>
+              <av name="Offset2">
+                <value>-10.0</value>
+                <value>10.0</value>
+              </av>
+              <av name=".gui.selectedOffsetPos">
+                <value>Offset8</value>
+              </av>
+              <av name="Offset0">
+                <value>10.0</value>
+                <value>10.0</value>
+              </av>
+              <av name="Offset8">
+                <value>-10.0</value>
+                <value>-10.0</value>
+              </av>
+              <av name="title">
+                <value>5 dice</value>
+              </av>
+              <av name="Offset6">
+                <value>10.0</value>
+                <value>-10.0</value>
+              </av>
+            </item>
+          </item>
+        </item>
+      </item>
+    </item>
+    <item name="new" type="lf" subtype="none">
+      <av name="title">
+        <value>Instrument configurations &amp; sequences</value>
+      </av>
+      <av name=".gui.collapsed">
+        <value>true</value>
+      </av>
+      <item name="new" type="lf" subtype="none">
+        <av name="title">
+          <value>NIRI</value>
+        </av>
+        <av name=".gui.collapsed">
+          <value>true</value>
+        </av>
+        <item name="new" type="lf" subtype="none">
+          <av name="title">
+            <value>Quick JHK observation</value>
+          </av>
+          <item name="new" type="no" subtype="none">
+            <av name="note">
+              <value>This item takes a quick observation with J, H and K filters at the base position wih a sky offset by 90 arcsec.
+
+The sequence folder contains both a NIRI iterator and an offset iterator:
+
+The NIRI iterator configures an observation in the J, H and K filters with exposure time x coadds of
+60s x 1, 60s x 1 and 30s x 2 respectively.
+
+The offset iterator takes the first exposure at the nominal (0,0) position then offsets the telescope 90arcsec W for the second exposure.
+
+Note how the nesting of the iterators means that both exposures are taken before the filter is changed.
+
+The NIRI component is used to set up the position angle and camera which are not changed by the iterator.</value>
+            </av>
+            <av name="title">
+              <value>a description</value>
+            </av>
+          </item>
+          <item name="new" type="ob" subtype="none">
+            <av name="chainedToPrev">
+              <value>false</value>
+            </av>
+            <av name="chainedToNext">
+              <value>false</value>
+            </av>
+            <item name="new" type="oc" subtype="inst.NIRI">
+              <av name="exposureTime">
+                <value>30</value>
+              </av>
+              <av name="filter">
+                <value>J</value>
+              </av>
+              <av name="camera">
+                <value>f/6  (0.12 arcsec/pix)</value>
+              </av>
+              <av name="coadds">
+                <value>2</value>
+              </av>
+              <av name=".unique">
+                <value>true</value>
+              </av>
+            </item>
+            <item name="new" type="if" subtype="none">
+              <item name="new" type="ic" subtype="instNIRI">
+                <av name="filterIter">
+                  <value>J</value>
+                  <value>H</value>
+                  <value>K</value>
+                </av>
+                <av name="exposureTimeIter">
+                  <value>60</value>
+                  <value>60</value>
+                  <value>30</value>
+                </av>
+                <av name="coaddsIter">
+                  <value>1</value>
+                  <value>1</value>
+                  <value>2</value>
+                </av>
+                <av name="iterConfigList">
+                  <value>filterIter</value>
+                  <value>exposureTimeIter</value>
+                  <value>coaddsIter</value>
+                </av>
+                <item name="new" type="ic" subtype="offset">
+                  <av name="offsetPositions">
+                    <value>Offset0</value>
+                    <value>Offset1</value>
+                  </av>
+                  <av name="Offset1">
+                    <value>-90.0</value>
+                    <value>0.0</value>
+                  </av>
+                  <av name=".gui.selectedOffsetPos">
+                    <value>Offset1</value>
+                  </av>
+                  <av name="Offset0">
+                    <value>0.0</value>
+                    <value>0.0</value>
+                  </av>
+                  <av name="title">
+                    <value>on-off pattern</value>
+                  </av>
+                  <item name="new" type="ic" subtype="observe">
+                    <av name="repeatCount">
+                      <value>1</value>
+                    </av>
+                  </item>
+                </item>
+              </item>
+            </item>
+          </item>
+        </item>
+        <item name="new" type="lf" subtype="none">
+          <av name="title">
+            <value>Empty library folder</value>
+          </av>
+        </item>
+      </item>
+      <item name="new" type="lf" subtype="none">
+        <av name="title">
+          <value>Michelle</value>
+        </av>
+      </item>
+    </item>
+  </item>

@@ -1,0 +1,109 @@
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+        "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+
+    <include file="struts-default.xml"/>
+
+    <constant name="struts.objectFactory" value="guice"/>
+    <constant name="guice.module" value="edu.gemini.obslog.actions.GuiceModule"/>
+
+    <package name="default" extends="struts-default">
+
+        <interceptors>
+            <interceptor-stack name="obslogStack">
+                <interceptor-ref name="validationWorkflowStack"/>
+            </interceptor-stack>
+        </interceptors>
+
+        <!-- Default interceptor stack. -->
+        <default-interceptor-ref name="defaultStack"/>
+
+        <action name="openLog" class="edu.gemini.obslog.actions.ListPlanAction">
+            <result name="success" type="dispatcher">openLog.jsp</result>
+            <result name="error" type="dispatcher">error.jsp</result>
+        </action>
+
+        <action name="fetchPlan" class="edu.gemini.obslog.actions.FetchPlanAction">
+            <result name="success" type="dispatcher">showPlanSegments.jsp</result>
+            <result name="error" type="dispatcher">error.jsp</result>
+        </action>
+
+        <action name="fetchToday" class="edu.gemini.obslog.actions.FetchPlanAction">
+            <result name="success" type="dispatcher">showPlanSegments.jsp</result>
+            <result name="error" type="dispatcher">error.jsp</result>
+        </action>
+
+        <action name="fetchProgram" class="edu.gemini.obslog.actions.FetchProgramAction">
+            <result name="success" type="dispatcher">showProgSegments.jsp</result>
+            <result name="error" type="dispatcher">error.jsp</result>
+        </action>
+
+        <action name="fetchObservation" class="edu.gemini.obslog.actions.FetchObservationAction">
+            <result name="success" type="dispatcher">showObservationInfo.jsp</result>
+            <result name="error" type="dispatcher">error.jsp</result>
+        </action>
+
+        <action name="fetchLogFromObservation" class="edu.gemini.obslog.actions.FetchPlanFromObservationAction">
+            <result name="success" type="redirect">
+                <param name="location">fetchPlan.action?planID=${planID}</param>
+            </result>
+            <result name="error" type="dispatcher">error.jsp</result>
+        </action>
+
+        <action name="fetchPlanTADisplay" class="edu.gemini.obslog.actions.FetchPlanTADisplayAction">
+            <result name="success" type="dispatcher">showTASegments.jsp</result>
+            <result name="error" type="dispatcher">error.jsp</result>
+        </action>
+
+        <action name="showLogInfo" class="edu.gemini.obslog.actions.ShowInformationAction">
+            <result name="success" type="dispatcher">logInfoInput.jsp</result>
+            <result name="error" type="dispatcher">error.jsp</result>
+        </action>
+
+        <action name="storeLogInfo" class="edu.gemini.obslog.actions.StoreInformationAction">
+            <result name="success" type="redirect">
+                <param name="location">fetchPlan.action?planID=${planID}</param>
+            </result>
+            <result name="error" type="dispatcher">error.jsp</result>
+        </action>
+
+        <action name="updateComment" class="edu.gemini.obslog.actions.UpdateCommentAction">
+            <result name="success" type="dispatcher">updateCommentResult.jsp</result>
+            <result name="error" type="dispatcher">error.jsp</result>
+        </action>
+
+        <action name="textExportPlan" class="edu.gemini.obslog.actions.TextExportPlanAction">
+            <result name="success">textExportResult.jsp</result>
+            <result name="error" type="dispatcher">error.jsp</result>
+        </action>
+
+        <action name="textSplitExportPlan" class="edu.gemini.obslog.actions.TextJorgeExportPlanAction">
+            <result name="success">textExportResult.jsp</result>
+            <result name="error" type="dispatcher">error.jsp</result>
+        </action>
+
+        <action name="textExportQAPlan" class="edu.gemini.obslog.actions.TextExportQAPlanAction">
+            <result name="success" type="dispatcher">textExportResult.jsp</result>
+            <result name="error" type="dispatcher">error.jsp</result>
+        </action>
+
+        <action name="textExportTAPlan" class="edu.gemini.obslog.actions.TextExportTAPlanAction">
+            <result name="success" type="dispatcher">textExportResult.jsp</result>
+            <result name="error" type="dispatcher">error.jsp</result>
+        </action>
+
+        <action name="fetchPlanQADisplay" class="edu.gemini.obslog.actions.FetchPlanQADisplayAction">
+            <result name="success" type="dispatcher">showPlanQASegment.jsp</result>
+            <result name="error" type="dispatcher">error.jsp</result>
+        </action>
+
+        <action name="bulkQAEdit3" class="edu.gemini.obslog.actions.SetQAStateAction">
+            <result name="success" type="redirect">fetchPlanQADisplay.action?planID=${planID}</result>
+            <result name="error" type="dispatcher">error.jsp</result>
+        </action>
+
+    </package>
+
+</struts>

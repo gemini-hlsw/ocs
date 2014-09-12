@@ -1,0 +1,179 @@
+<html>
+<head>
+<style>
+
+.graph {
+    position: relative; /* IE is dumb */
+    width: 200px;
+    border: 1px solid #999999;
+    padding: 1px;
+}
+
+.graph .bar {
+    display: block;
+    position: relative;
+    background: #cccccc;
+    text-align: center;
+    color: #333;
+    height: 10pt;
+    line-height: 9pt;
+}
+
+.graph .bar span { position: absolute; left: 1em; }
+
+a {
+	color: #336699;
+}
+
+body, td {
+	font-family: helvetica, arial, sans-serif;
+	font-size: 9pt;
+	padding-left: 5px;
+	padding-right: 5px;
+	padding-top: 1px;
+	padding-bottom: 1px;
+}
+
+div {
+	margin-bottom: 8pt;
+}
+
+th {
+	background-color: #6699AA;
+	color: white;
+	font-family: lucida grande, arial;
+	font-size: 9pt;
+}
+
+dt {
+	font-weight: bold;
+}
+
+table {
+}
+
+code {
+	font-family: andale mono, monaco, courier new, courier, fixed;
+	font-size: 9pt;
+	color: #336699;
+}
+
+pre {
+	font-family: andale mono, monaco, courier new, courier, fixed;
+	font-size: 9pt;
+	color: #336699;
+	padding-left: 10px;
+}
+
+h1 {
+	font-family: lucida grande, arial;
+	font-size: 14pt;
+	color: white;
+	background-color: #336699;
+	padding: 10px;
+}
+
+h2 {
+	font-family: lucida grande, arial;
+	font-size: 12pt;
+	xxborder-top: 1px solid #cccccc;
+	padding-top: 8pt;
+}
+
+h3 {
+	font-family: lucida grande, arial;
+	font-size: 10pt;
+}
+th {
+	font-size: 8pt;
+	text-align: left;
+	padding-left: 2pt;
+	padding-right: 2pt;
+	border-top: 1px solid white;
+	border-left: 1px solid white;
+}
+td {
+	font-size: 8pt;
+}
+
+td.header {
+	background-color: #cccccc;
+	border-top: 1px solid white;
+	border-left: 1px solid white;
+	font-style: bold;
+}
+
+td.spacer {
+	background-color: #cccccc;
+	border-left: 1px solid white;
+}
+
+dl {
+	font-size: 8pt;
+}
+
+</style>
+<title>Template Summary for $dbm.getSiteName($db) $semester</title>
+</head>
+	<body>
+
+		<h1>Template Summary for $dbm.getSiteName($db) $semester
+		<br><span style="font-size: 8pt; font-style:italic; font-weight: normal">Last updated
+					${now.toGMTString()}</span>
+		</h1>
+
+		<div>
+		This report shows information about all the science program templates in the observing database.
+		</div>
+
+		<div>
+		This report is generated daily. See the header above for the current timestamp.
+		</div>
+
+		<table cellspacing="0">
+		#set($cols = $query.Groups.size() + $query.OutputColumns.size())
+
+		<tr>
+		#if($query.Groups.size() > 0)
+			<th colspan="$query.Groups.size()">&nbsp;</th>
+		#end
+		#foreach($col in $query.OutputColumns)
+			<th nowrap>$escaper.escape($col.Caption)</th>
+		#end
+		</tr>
+
+		#foreach ($row in $results)
+		    #set($i = 0)
+		    #foreach ($groupValue in $row.GroupValues)
+	    		#set ($group=$query.Groups.get($i))
+		    	#if ($row.GroupIndex >=0 && $i >= $row.GroupIndex)
+		    		<tr>
+		    		#if ($i > 0)
+			    		#foreach ($dummy in [1..$i])
+			    			<td class="spacer">&nbsp;</td>
+			    		#end
+			    	#end
+		    		#set($span = $cols - $i)
+		    		<td class="header" colspan="$span">$escaper.escape($group.Column.format($groupValue))</td>
+		    		</tr>
+		    	#end
+		    	#set($i = $i + 1)
+		    #end
+			<tr>
+				#foreach ($val in $row.GroupValues)
+					<td class="spacer">&nbsp;</th>
+				#end
+			    #set($i = 0)
+				#foreach ($val in $row.Values)
+					#if($velocityCount == 7)
+					<td>$escaper.escape($query.OutputColumns.get($i).format($val))</td>
+					#else
+					<td nowrap>$escaper.escape($query.OutputColumns.get($i).format($val))</td>
+					#end
+				    #set($i = $i + 1)
+				#end
+			</tr>
+		#end
+		</table>
+	</body>
+</html>

@@ -1,0 +1,42 @@
+<!--
+  Schema definition for Texes blueprints.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:include schemaLocation="Instrument.xsd"/>
+
+    <!-- Options for Texes Blueprint. -->
+    <xsd:complexType name="TexesBlueprintChoice">
+        <xsd:sequence>
+            <xsd:choice>
+                <xsd:element name="null"       type="TexesBlueprintNull"/>
+                <xsd:element name="Texes"      type="TexesBlueprint"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- Texes null. Empty blueprint, not available in PIT. -->
+    <xsd:complexType name="TexesBlueprintNull"/>
+
+    <!--
+      Texes Blueprint base type.
+    -->
+    <xsd:complexType name="TexesBlueprint">
+        <xsd:complexContent>
+            <xsd:extension base="BlueprintBase">
+                <xsd:sequence>
+                    <xsd:element name="disperser"  type="TexesDisperser"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:simpleType name="TexesDisperser">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="Echelon + 32 l/mm echelle"/>
+            <xsd:enumeration value="Echelon + 75 l/mm grating"/>
+            <xsd:enumeration value="32 l/mm echelle"/>
+            <xsd:enumeration value="75 l/mm grating"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+</xsd:schema>

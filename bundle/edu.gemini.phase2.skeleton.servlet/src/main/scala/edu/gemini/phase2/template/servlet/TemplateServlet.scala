@@ -1,0 +1,100 @@
+package edu.gemini.phase2.template.servlet
+
+import edu.gemini.phase2.core.model.TemplateFolderExpansion
+import edu.gemini.phase2.template.factory.api.{TemplateFolderExpansionFactory, TemplateFactory}
+import edu.gemini.spModel.pio.ParamSet
+import edu.gemini.spModel.pio.xml.{PioXmlUtil, PioXmlFactory}
+import edu.gemini.spModel.template.TemplateFolder
+
+import org.apache.commons.fileupload.FileItem
+import org.apache.commons.fileupload.disk.DiskFileItemFactory
+import org.apache.commons.fileupload.servlet.ServletFileUpload
+
+import java.io.{OutputStreamWriter, BufferedOutputStream}
+import java.util.logging.{Level, Logger}
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse, HttpServlet}
+
+import scala.io.Source
+import scala.collection.JavaConverters._
+
+object TemplateServlet {
+  val LOG = Logger.getLogger(getClass.getName)
+
+  def templateFolderExpansionXml(exp: TemplateFolderExpansion): String =
+    PioXmlUtil.toXmlString(exp.toParamSet(new PioXmlFactory))
+
+  def templateFolder(xml: String): Either[Failure, TemplateFolder] =
+    try {
+      val pset = PioXmlUtil.read(xml).asInstanceOf[ParamSet]
+      val fold = new TemplateFolder()
+      fold.setParamSet(pset)
+      Right(fold)
+    } catch {
+      case ex: Exception =>
+        LOG.log(Level.WARNING, "Problem parsing TemplateFolder param set", ex)
+        Left(Failure.badRequest("Could not read the Phase 1 template definition."))
+    }
+}
+
+final class TemplateServlet(templateFactory: TemplateFactory) extends HttpServlet {
+  import TemplateServlet.{LOG, templateFolder, templateFolderExpansionXml}
+
+  override def doGet(req: HttpServletRequest, res: HttpServletResponse) {
+    send(Left(Failure.badRequest("Post a template folder to obtain the corresponding template groups and baseline calibrations")), res)
+  }
+
+  override def doPut(req: HttpServletRequest, res: HttpServletResponse) {
+    doPost(req, res)
+  }
+
+  override def doPost(req: HttpServletRequest, res: HttpServletResponse) {
+    send(for {
+      l <- items(req).right
+      x <- templateFolderXml(l).right
+      f <- templateFolder(x).right
+      p <- expandTemplates(f).right
+    } yield p, res)
+  }
+
+  private val up = new ServletFileUpload(new DiskFileItemFactory)
+
+  private def items(req: HttpServletRequest): Either[Failure, List[FileItem]] =
+    if (!ServletFileUpload.isMultipartContent(req))
+      Left(Failure.badRequest("Template folder not found in post."))
+    else
+      Right(up.parseRequest(req).asScala.toList map {
+        a => a.asInstanceOf[FileItem]
+      })
+
+  private def readItem[T](paramName: String, items: List[FileItem], map: FileItem => T): Either[Failure, T] =
+    for {
+      it <- (items find {
+        _.getFieldName == paramName
+      }).toRight(Failure.badRequest("Missing '%s' param.".format(paramName))).right
+    } yield map(it)
+
+  private def templateFolderXml(items: List[FileItem]): Either[Failure, String] =
+    readItem("folder", items, it => Source.fromInputStream(it.getInputStream, "UTF-8").mkString)
+
+  private def expandTemplates(folder: TemplateFolder): Either[Failure, TemplateFolderExpansion] =
+    TemplateFolderExpansionFactory.expand(folder, templateFactory).left map { msg =>
+      Failure.badRequest(msg)
+    }
+
+  private def send(e: Either[Failure, TemplateFolderExpansion], res: HttpServletResponse) {
+    e.left foreach { failure => res.sendError(failure.code, failure.error) }
+    e.right foreach { exp => send(templateFolderExpansionXml(exp), res) }
+  }
+
+  private def send(xml: String, res: HttpServletResponse) {
+    res.setContentType("text/xml; charset=UTF-8")
+    val w = new OutputStreamWriter(new BufferedOutputStream(res.getOutputStream), "UTF-8")
+    try {
+      w.write(xml)
+    } catch {
+      case ex: Exception => LOG.log(Level.WARNING, "problem sending response", ex)
+    } finally {
+      w.close()
+    }
+  }
+}

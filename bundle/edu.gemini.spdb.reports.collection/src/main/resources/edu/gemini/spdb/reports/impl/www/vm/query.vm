@@ -1,0 +1,215 @@
+#set ($title = "SPDB Query - $query.Table.DisplayName")
+<html>
+	<head>
+		<title>$title</title>
+		<link rel="stylesheet" href="styles.css"></link>
+	</head>
+	<body>
+
+    #parse("/edu/gemini/spdb/reports/impl/www/vm/nav.vm")
+
+		<h2>Output Columns</h2>
+		<blockquote>
+			<div>
+			Adjust the column order as desired, and hide any columns you do not
+			wish to see in your report.
+			</div>
+			<table style="padding: 0px; margin: 0px">			
+			#foreach ($col in $query.OutputColumns)
+				<tr>
+					<td>$velocityCount</td>
+					<td><b>$escaper.escape($col.Caption)</b></td>
+					<td>
+						#if ($velocityCount > 1)
+							<a href="javascript:location.replace('query.vm?ACTION=EDIT_OUTPUT_COLUMN&SID=$col.name()&SUB_ACTION=MOVE_UP')">Up</a>
+						#else
+							&nbsp;
+						#end
+					</td>
+					<td>
+						#if ($velocityCount < $query.OutputColumns.size())
+							<a href="javascript:location.replace('query.vm?ACTION=EDIT_OUTPUT_COLUMN&SID=$col.name()&SUB_ACTION=MOVE_DOWN')">Down</a>
+						#else
+							&nbsp;
+						#end
+					</td>
+					<td>
+						<a href="javascript:location.replace('query.vm?ACTION=EDIT_OUTPUT_COLUMN&SID=$col.name()&SUB_ACTION=DELETE')">Delete</a>
+					</td>					
+				</tr>
+			#end			
+			
+			#if ($query.OutputColumns.size() < $query.Table.Columns.size())
+				<tr><td colspan="4">&nbsp;</td></tr>
+				#foreach ($col in $query.Table.Columns)
+					#if	(!$query.OutputColumns.contains($col))
+					<tr>
+						<td>&nbsp;</td>
+						<td><span style="color: #cccccc;font-weight: bold;">$escaper.escape($col.Caption)</span></td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>
+							<a href="javascript:location.replace('query.vm?ACTION=EDIT_OUTPUT_COLUMN&SID=$col.name()&SUB_ACTION=ADD')">Add</a>
+						</td>					
+					</tr>
+					#end
+				#end
+			#end			
+			</table>
+		</blockquote>
+		
+		<h2>Sorting</h2>
+		<blockquote>
+			<div>
+			Add sort columns as desired. You may sort on as many columns as you
+			like, in either ascending or descending order. You may also specify 
+			whether you want empty values to sort first, or last.
+			</div>
+			
+			<table style="padding: 0px; margin: 0px">			
+			#foreach ($sort in $query.Sorts)
+				#set ($col = $sort.Column)
+				<tr>
+					<td>$velocityCount</td>
+					<td><b>$escaper.escape($col.Caption)</b></td>										
+					
+					#if ($sort.Order.toString().equals("ASC"))
+					<td><B>Asc</B></td>
+					<td><a href="javascript:location.replace('query.vm?ACTION=EDIT_SORT_COLUMN&SID=$col.name()&SUB_ACTION=FLIP_ORDER')">Desc</a></td>
+					#else
+					<td><a href="javascript:location.replace('query.vm?ACTION=EDIT_SORT_COLUMN&SID=$col.name()&SUB_ACTION=FLIP_ORDER')">Asc</a></td>
+					<td><B>Desc</B></td>
+					#end					
+					
+					#if ($sort.NullPolicy.toString().equals("NULL_FIRST"))
+					<td><B>Empty First</B></td>
+					<td><a href="javascript:location.replace('query.vm?ACTION=EDIT_SORT_COLUMN&SID=$col.name()&SUB_ACTION=FLIP_POLICY')">Empty Last</a></td>
+					#else
+					<td><a href="javascript:location.replace('query.vm?ACTION=EDIT_SORT_COLUMN&SID=$col.name()&SUB_ACTION=FLIP_POLICY')">Empty First</a></td>
+					<td><B>Empty Last</B></td>
+					#end					
+
+					<td>
+						#if ($velocityCount > 1)
+							<a href="javascript:location.replace('query.vm?ACTION=EDIT_SORT_COLUMN&SID=$col.name()&SUB_ACTION=MOVE_UP')">Up</a>
+						#else
+							&nbsp;
+						#end
+					</td>
+					<td>
+						#if ($velocityCount < $query.Sorts.size())
+							<a href="javascript:location.replace('query.vm?ACTION=EDIT_SORT_COLUMN&SID=$col.name()&SUB_ACTION=MOVE_DOWN')">Down</a>
+						#else
+							&nbsp;
+						#end
+					</td>
+					<td>
+						<a href="javascript:location.replace('query.vm?ACTION=EDIT_SORT_COLUMN&SID=$col.name()&SUB_ACTION=DELETE')">Delete</a>
+					</td>						
+				</tr>
+			#end			
+			
+			#if ($query.Sorts.size() < $query.Table.Columns.size())
+				<tr><td colspan="4">&nbsp;</td></tr>
+				#foreach ($col in $query.Table.Columns)
+					#if	(!$query.containsSort($col.name()))
+					<tr>
+						<td>&nbsp;</td>
+						<td><span style="color: #cccccc;font-weight: bold;">$escaper.escape($col.Caption)</span></td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>
+							<a href="javascript:location.replace('query.vm?ACTION=EDIT_SORT_COLUMN&SID=$col.name()&SUB_ACTION=ADD')">Add</a>
+						</td>					
+					</tr>
+					#end
+				#end
+			#end			
+			
+			</table>
+		</blockquote>
+
+		<h2>Grouping</h2>
+		<blockquote>
+			<div>
+			Add groups as desired. You may group on as many columns as you
+			like, in either ascending or descending order. You may also specify 
+			whether you want empty values to group first, or last.
+			</div>
+			
+			<table style="padding: 0px; margin: 0px">			
+			#foreach ($sort in $query.Groups)
+				#set ($col = $sort.Column)
+				<tr>
+					<td>$velocityCount</td>
+					<td><b>$escaper.escape($col.Caption)</b></td>										
+					
+					#if ($sort.Order.toString().equals("ASC"))
+					<td><B>Asc</B></td>
+					<td><a href="javascript:location.replace('query.vm?ACTION=EDIT_GROUP&SID=$col.name()&SUB_ACTION=FLIP_ORDER')">Desc</a></td>
+					#else
+					<td><a href="javascript:location.replace('query.vm?ACTION=EDIT_GROUP&SID=$col.name()&SUB_ACTION=FLIP_ORDER')">Asc</a></td>
+					<td><B>Desc</B></td>
+					#end					
+					
+					#if ($sort.NullPolicy.toString().equals("NULL_FIRST"))
+					<td><B>Empty First</B></td>
+					<td><a href="javascript:location.replace('query.vm?ACTION=EDIT_GROUP&SID=$col.name()&SUB_ACTION=FLIP_POLICY')">Empty Last</a></td>
+					#else
+					<td><a href="javascript:location.replace('query.vm?ACTION=EDIT_GROUP&SID=$col.name()&SUB_ACTION=FLIP_POLICY')">Empty First</a></td>
+					<td><B>Empty Last</B></td>
+					#end					
+
+					<td>
+						#if ($velocityCount > 1)
+							<a href="javascript:location.replace('query.vm?ACTION=EDIT_GROUP&SID=$col.name()&SUB_ACTION=MOVE_UP')">Up</a>
+						#else
+							&nbsp;
+						#end
+					</td>
+					<td>
+						#if ($velocityCount < $query.Groups.size())
+							<a href="javascript:location.replace('query.vm?ACTION=EDIT_GROUP&SID=$col.name()&SUB_ACTION=MOVE_DOWN')">Down</a>
+						#else
+							&nbsp;
+						#end
+					</td>
+					<td>
+						<a href="javascript:location.replace('query.vm?ACTION=EDIT_GROUP&SID=$col.name()&SUB_ACTION=DELETE')">Delete</a>
+					</td>						
+				</tr>
+			#end			
+			
+			#if ($query.Groups.size() < $query.Table.Columns.size())
+				<tr><td colspan="4">&nbsp;</td></tr>
+				#foreach ($col in $query.Table.Columns)
+					#if	(!$query.containsGroup($col.name()))
+					<tr>
+						<td>&nbsp;</td>
+						<td><span style="color: #cccccc;font-weight: bold;">$escaper.escape($col.Caption)</span></td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>
+							<a href="javascript:location.replace('query.vm?ACTION=EDIT_GROUP&SID=$col.name()&SUB_ACTION=ADD')">Add</a>
+						</td>					
+					</tr>
+					#end
+				#end
+			#end			
+			
+			</table>
+		</blockquote>
+
+		
+	</body>
+</html>
+
+

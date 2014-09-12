@@ -1,0 +1,62 @@
+
+a {
+	color: #999999;
+}
+
+body, td {
+	font-family: helvetica, arial, sans-serif;
+	font-size: 9pt;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+div {
+	margin-bottom: 8pt;
+}
+
+th {
+	background-color: #6699AA;
+	color: white;
+	font-family: lucida grande, arial;
+	font-size: 9pt;
+}
+
+dt {
+	font-weight: bold;
+}
+
+table {
+}
+
+code {
+	font-family: andale mono, monaco, courier new, courier, fixed;
+	font-size: 9pt;
+	color: #336699;
+}
+
+pre {
+	font-family: andale mono, monaco, courier new, courier, fixed;
+	font-size: 9pt;
+	color: #336699;
+	padding-left: 10px;
+}
+
+h1 {
+	font-family: lucida grande, arial;
+	font-size: 14pt;
+	color: white;
+	background-color: #336699;
+	padding: 10px;
+}
+
+h2 {
+	font-family: lucida grande, arial;
+	font-size: 12pt;
+	xxborder-top: 1px solid #cccccc;
+	padding-top: 8pt;
+}
+
+h3 {
+	font-family: lucida grande, arial;
+	font-size: 10pt;
+}

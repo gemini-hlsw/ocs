@@ -1,0 +1,61 @@
+# Creates the ODB state file.
+#
+# Schedule
+#     Daily at 3:07, 7:07, 11:07, 15:07, 19:07, and 23:07
+#
+7 3,7,11,15,19,23 * * * /usr/bin/curl -sS http://localhost:8442/cron/odbState >> /home/software/cron.out 2>&1
+
+#
+# Sends obs status change emails. (DISABLED FOR NOW)
+#
+# Schedule
+#     Daily at 3:11, 7:11, 11:11, 15:11, 19:11, and 23:11
+#11 3,7,11,15,19,23 * * * /usr/bin/curl -sS http://localhost:8442/cron/obsStatus >> /home/software/cron.out 2>&1
+
+#
+# Generates semester status overview charts.
+#
+# Schedule
+#       Daily at 8:07
+#
+7 8 * * * /usr/bin/curl -sS http://localhost:8442/cron/semesterStatus >> /home/software/cron.out 2>&1
+
+#
+# Generates the tigra table chart.
+#
+# Schedule
+#       Daily at 8:15
+#
+15 8 * * * /usr/bin/curl -sS http://localhost:8442/cron/tigraTable >> /home/software/cron.out 2>&1
+
+#
+# Gathers weather info for observing log
+#
+# Schedule
+#       Daily every 2 hours between 2 in the afternoon and 10 in the morning
+#
+0 0,2,4,6,8,10,14,16,18,20,22 * * * /usr/bin/curl -sS http://localhost:8442/cron/weather >> /home/software/cron.out 2>&1
+
+#
+# Generates the ExecHoursSouth.txt
+#
+# Schedule
+#       Daily at 8:17
+#
+17 8 * * * /usr/bin/curl -sS http://localhost:8442/cron/execHours >> /home/software/cron.out 2>&1
+
+#
+# Acrhives the database
+#
+# Schedule
+#       Daily at 8:30
+#
+30 8 * * * /usr/bin/curl -sS http://localhost:8442/cron/archive >> /home/software/cron.out 2>&1
+
+#
+# Reports
+#
+# Schedule
+#       Daily at 8:20
+#
+20 8 * * * /usr/bin/curl -sS http://localhost:8442/cron/reports >> /home/software/cron.out 2>&1

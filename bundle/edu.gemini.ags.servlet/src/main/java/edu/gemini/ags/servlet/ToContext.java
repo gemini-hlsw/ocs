@@ -1,0 +1,291 @@
+package edu.gemini.ags.servlet;
+
+import edu.gemini.skycalc.Angle;
+import edu.gemini.skycalc.DDMMSS;
+import edu.gemini.skycalc.HHMMSS;
+import edu.gemini.skycalc.Offset;
+import edu.gemini.shared.util.immutable.Option;
+
+import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.spModel.core.Site;
+import edu.gemini.spModel.data.ISPDataObject;
+import edu.gemini.spModel.gemini.altair.AltairParams;
+import edu.gemini.spModel.gemini.altair.InstAltair;
+import edu.gemini.spModel.gemini.gems.Gems;
+import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
+import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
+import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
+import edu.gemini.spModel.gemini.inst.InstRegistry;
+import edu.gemini.spModel.gemini.michelle.InstMichelle;
+import edu.gemini.spModel.gemini.michelle.MichelleParams;
+import edu.gemini.spModel.gemini.nifs.InstNIFS;
+import edu.gemini.spModel.gemini.niri.InstNIRI;
+import edu.gemini.spModel.gemini.niri.Niri;
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions;
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.CloudCover;
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.ImageQuality;
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.SkyBackground;
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.WaterVapor;
+import edu.gemini.spModel.gemini.trecs.InstTReCS;
+import edu.gemini.spModel.gemini.trecs.TReCSParams;
+import edu.gemini.spModel.guide.GuideProbeUtil;
+import edu.gemini.spModel.obs.context.ObsContext;
+import edu.gemini.spModel.obscomp.SPInstObsComp;
+import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.obsComp.TargetObsComp;
+import edu.gemini.spModel.target.system.*;
+import edu.gemini.spModel.telescope.PosAngleConstraint;
+import edu.gemini.spModel.telescope.PosAngleConstraintAware;
+
+import javax.servlet.http.HttpServletRequest;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Implements a function, more or less: <code>HttpServletRequest => ObsContext</code>..
+ * Really it is a partial function, but since this is Java we handle that with
+ * an Exception which carries along with it an explanation of why we can't
+ * make the ObsContext.  Doing the best we can without being able to declare
+ * this:
+ *
+ * <code>HttpServletRequest => Either[String, ObsContext]</code>
+ *
+ * <p>
+ * Example request:
+ * http://localhost:12000/ags?ra=00:00:00&dec=00:00:00&&cc=CC50&iq=IQ20&sb=SB50&inst=GMOS&pac=NONE
+ * </p>
+ */
+public enum ToContext {
+    instance;
+
+    public static final class RequestException extends Exception {
+        public RequestException(String message) {
+            super(message);
+        }
+    }
+
+    private static interface ParseOp<T> {
+        T apply(String s) throws Exception;
+    }
+
+    public static final String RA  = "ra";
+    private static final ParseOp<Angle> RA_OP = new ParseOp<Angle>() {
+        // depending on the locale the PIT will use dots or commas as decimal separator, replace any commas with dots
+        public Angle apply(String s) throws Exception { return HHMMSS.parse(s.replace(',','.')); }
+    };
+
+    public static final String DEC = "dec";
+    private static final ParseOp<Angle> DEC_OP = new ParseOp<Angle>() {
+        // depending on the locale the PIT will use dots or commas as decimal separator, replace any commas with dots
+        public Angle apply(String s) throws Exception { return DDMMSS.parse(s.replace(',','.')); }
+    };
+
+    public static final String TARGET_TYPE = "targetType";
+    enum TargetType { sidereal, nonsidereal }
+    private static final ParseOp<TargetType> TARGET_TYPE_OP = new ParseOp<TargetType>() {
+        public TargetType apply(String s) { return TargetType.valueOf(s); }
+    };
+
+    public static final String POS_ANGLE_CONSTRAINT = "pac";
+    private static final ParseOp<PosAngleConstraint> POS_ANGLE_CONSTRAINT_OP = new ParseOp<PosAngleConstraint>() {
+        public PosAngleConstraint apply(String s) { return PosAngleConstraint.valueOf(s); }
+    };
+
+    public static final String CC = "cc";
+    private static final ParseOp<Option<CloudCover>> CC_OP = new ParseOp<Option<CloudCover>>() {
+        public Option<CloudCover> apply(String s) { return CloudCover.read(s); }
+    };
+
+    public static final String IQ = "iq";
+    private static final ParseOp<Option<ImageQuality>> IQ_OP = new ParseOp<Option<ImageQuality>>() {
+        public Option<ImageQuality> apply(String s) { return ImageQuality.read(s); }
+    };
+
+    public static final String SB = "sb";
+    private static final ParseOp<Option<SkyBackground>> SB_OP = new ParseOp<Option<SkyBackground>>() {
+        public Option<SkyBackground> apply(String s) { return SkyBackground.read(s); }
+    };
+
+    public static final String INST = "inst";
+    private static final ParseOp<Option<SPInstObsComp>> INST_OP = new ParseOp<Option<SPInstObsComp>>() {
+        public Option<SPInstObsComp> apply(String s) {
+            // There is no Speckle or Visitor in the spModel so we simulate it as Texes
+            if ("Speckle".equalsIgnoreCase(s)) {
+                return InstRegistry.instance.prototype("Texes");
+            } else {
+                return InstRegistry.instance.prototype(s);
+            }
+        }
+    };
+
+    public static final String ALTAIR = "altair";
+    private static final ParseOp<AltairParams.Mode> ALTAIR_OP = new ParseOp<AltairParams.Mode>() {
+        public AltairParams.Mode apply(String s) { return modeFromAgsServletParameter(s); }
+    };
+
+    public static final String NIRI_CAMERA = "niriCamera";
+    private static final ParseOp<Niri.Camera> NIRI_CAMERA_OP = new ParseOp<Niri.Camera>() {
+        public Niri.Camera apply(String s) { return Niri.Camera.valueOf(s); }
+    };
+
+
+    static String enc(HttpServletRequest req) {
+        return req.getCharacterEncoding() == null ? "UTF-8" : req.getCharacterEncoding();
+    }
+
+    private <T> T parse(HttpServletRequest req, String param, ParseOp<T> op, T defaultVal) throws RequestException {
+        String str = req.getParameter(param);
+
+        try {
+            if (str == null) return defaultVal;
+            return op.apply(URLDecoder.decode(str, enc(req)));
+        } catch (Exception ex) {
+            throw new RequestException("Couldn't parse '" + param + "': " + str);
+        }
+    }
+
+    private <T> T parse(HttpServletRequest req, String param, ParseOp<T> op) throws RequestException {
+        T res = parse(req, param, op, null);
+        if (res == null) throw new RequestException("Missing '" + param + "' parameter");
+        return res;
+    }
+
+    private <T> T parseOption(HttpServletRequest req, String param, ParseOp<Option<T>> op) throws RequestException {
+        Option<T> o = parse(req, param, op);
+        if (o.isEmpty()) {
+            throw new RequestException("Couldn't parse '" + param + "'");
+        }
+        return o.getValue();
+    }
+
+    private TargetEnvironment targetEnv(HttpServletRequest req) throws RequestException {
+        Angle ra  = parse(req, RA,  RA_OP);
+        Angle dec = parse(req, DEC, DEC_OP);
+        TargetType tt = parse(req, TARGET_TYPE, TARGET_TYPE_OP, TargetType.sidereal);
+
+        double raDeg  = ra.toDegrees().getMagnitude();
+        double decDeg = dec.toDegrees().getMagnitude();
+
+        SPTarget t;
+        switch (tt) {
+            // Here we just need an SPTarget with a contained NonSiderealTarget
+            // instance, which is insanely complex, stupid, and useless.  In
+            // the end, this is just used to determine whether it is a
+            // non-sidereal target or not in order to pick the right guider.
+            case nonsidereal:
+                NonSiderealTarget nst = new NonSiderealTarget(HmsDegTarget.SystemType.J2000) {
+                    @Override public String getPosition() { return ""; }
+                    @Override public String getShortSystemName() { return ""; }
+                    @Override public void dump() { }
+                    @Override public TypeBase[] getSystemOptions() {
+                        return new TypeBase[] { HmsDegTarget.SystemType.J2000 };
+                    }
+                };
+                t = new SPTarget(nst);
+                t.setXY(raDeg, decDeg);
+                break;
+            default:
+                t = new SPTarget(raDeg, decDeg);
+        }
+        return TargetEnvironment.create(t);
+    }
+
+    private Conditions conds(HttpServletRequest req) throws RequestException {
+        CloudCover    cc = parseOption(req, CC, CC_OP);
+        ImageQuality  iq = parseOption(req, IQ, IQ_OP);
+        SkyBackground sb = parseOption(req, SB, SB_OP);
+        return new Conditions(cc, iq, sb, WaterVapor.ANY);
+    }
+
+    public ObsContext apply(HttpServletRequest req) throws RequestException {
+        TargetEnvironment env   = targetEnv(req);
+        Conditions conds        = conds(req);
+        SPInstObsComp inst      = parseOption(req, INST, INST_OP);
+        final Option<Site> site = ObsContext.getSiteFromInstrument(inst);
+
+        // --- instrument pos angle constraint aware?
+        if (inst instanceof PosAngleConstraintAware) {
+            PosAngleConstraint pac = parse(req, POS_ANGLE_CONSTRAINT, POS_ANGLE_CONSTRAINT_OP);
+            ((PosAngleConstraintAware) inst).setPosAngleConstraint(pac);
+        } // otherwise pac is ignored!
+
+        // --- instrument configurable with Altair?
+        InstAltair altair = null;
+        if (inst instanceof InstGNIRS ||
+            inst instanceof InstNIRI ||
+            inst instanceof InstNIFS ||
+            inst instanceof InstGmosNorth) {
+            altair = getAltair(req);
+        } // otherwise altair is ignored
+
+        // --- instrument is NIRI?
+        if (inst instanceof InstNIRI) {
+            Niri.Camera camera = parse(req, NIRI_CAMERA, NIRI_CAMERA_OP, Niri.Camera.DEFAULT);
+            ((InstNIRI) inst).setCamera(camera);
+        } // otherwise niri camera is ignored
+
+        // --- set chop mode by default for Michelle (impacts selected estimation strategy)
+        if (inst instanceof InstMichelle) {
+            ((InstMichelle) inst).setChopMode(new Some<MichelleParams.ChopMode>(MichelleParams.ChopMode.CHOP));
+        }
+
+        // --- set chop mode by default for TReCS (impacts selected estimation strategy)
+        if (inst instanceof InstTReCS) {
+            ((InstTReCS) inst).setObsMode(TReCSParams.ObsMode.CHOP);
+        }
+
+        List<ISPDataObject> dataObjects = new ArrayList<ISPDataObject>();
+        TargetObsComp toc = new TargetObsComp();
+        toc.setTargetEnvironment(env);
+
+        dataObjects.add(toc);
+        dataObjects.add(inst);
+        if (altair != null) dataObjects.add(altair);
+        if (inst instanceof Gsaoi) {
+            dataObjects.add(new Gems());
+        }
+
+        env = env.setActiveGuiders(GuideProbeUtil.instance.getAvailableGuiders(dataObjects));
+
+        return ObsContext.create(env, inst, site, conds, Collections.<Offset>emptySet(), altair);
+    }
+
+    private InstAltair getAltair(HttpServletRequest req) throws RequestException {
+        AltairParams.Mode mode = parse(req, ALTAIR, ALTAIR_OP, null);
+        // if no altair parameter was or the value is "NO" mode will be null
+        if (mode == null) {
+            return null;
+        }
+        InstAltair altair = new InstAltair();
+        altair.setMode(mode);
+        return altair;
+    }
+
+    /**
+     * Translates the parameter values for "altair" used by the PIT into the AltairParams.Mode values
+     * used in the OT.
+     * @param paramName
+     * @return
+     */
+    private static AltairParams.Mode modeFromAgsServletParameter(String paramName) {
+        if (paramName.equals("NO")) {
+            return null;
+        } else if (paramName.equals("NGS")) {
+            return AltairParams.Mode.NGS;
+        } else if (paramName.equals("NGS_FL")) {
+            return AltairParams.Mode.NGS_FL;
+        } else if (paramName.equals("LGS")) {
+            return AltairParams.Mode.LGS;
+        } else if (paramName.equals("LGS_P1")) {
+            return AltairParams.Mode.LGS_P1;
+        } else if (paramName.equals("LGS_OI")) {
+            return AltairParams.Mode.LGS_OI;
+        } else {
+            throw new IllegalArgumentException("unknown value " + paramName + " for altair mode");
+        }
+    }
+
+}

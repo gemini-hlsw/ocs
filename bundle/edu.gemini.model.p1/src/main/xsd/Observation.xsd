@@ -1,0 +1,115 @@
+<!--
+  Schema definition for observation elements.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" jaxb:version="1.0">
+    <xsd:include schemaLocation="Condition.xsd"/>
+    <xsd:include schemaLocation="GuideStar.xsd"/>
+    <xsd:include schemaLocation="Instrument.xsd"/>
+    <xsd:include schemaLocation="Time.xsd"/>
+
+    <!--
+      An observation is a grouping of target, condition, and blueprint
+      references (which must exist in their respective lists), together with
+      a requested time amount.
+
+      Guide stars may optionally be specified.
+    -->
+    <xsd:complexType name="Observation">
+
+        <xsd:sequence>
+            <xsd:element name="time"  type="TimeAmount"/>
+            <xsd:element name="guide" type="GuideGroup"          minOccurs="0"/>
+            <xsd:element name="meta"  type="ObservationMetaData" minOccurs="0"/>
+        </xsd:sequence>
+
+        <xsd:attribute name="band"      type="Band"/>
+        <!-- REL-658 Added an invisible enabled attribute to each observation -->
+        <xsd:attribute name="enabled"   type="xsd:boolean" default="true"/>
+
+        <xsd:attribute name="target"    type="TargetRef"    use="required">
+            <xsd:annotation>
+                <xsd:appinfo>
+                    <jaxb:property><jaxb:baseType name="Target"/></jaxb:property>
+                </xsd:appinfo>
+            </xsd:annotation>
+        </xsd:attribute>
+
+        <xsd:attribute name="condition" type="ConditionRef" use="required">
+            <xsd:annotation>
+                <xsd:appinfo>
+                    <jaxb:property><jaxb:baseType name="Condition"/></jaxb:property>
+                </xsd:appinfo>
+            </xsd:annotation>
+        </xsd:attribute>
+
+        <xsd:attribute name="blueprint" type="BlueprintRef" use="required">
+            <xsd:annotation>
+                <xsd:appinfo>
+                    <jaxb:property><jaxb:baseType name="BlueprintBase"/></jaxb:property>
+                </xsd:appinfo>
+            </xsd:annotation>
+        </xsd:attribute>
+
+    </xsd:complexType>
+
+    <!-- Science bands are 1/2 or 3 -->
+    <xsd:simpleType name="Band">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="Band 1/2"/>
+            <xsd:enumeration value="Band 3"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:complexType name="ObservationMetaData">
+        <xsd:sequence>
+            <xsd:element name="guiding"    type="GuidingEstimation"      minOccurs="0"/>
+            <xsd:element name="visibility" type="TargetVisibility"       minOccurs="0"/>
+            <xsd:element name="gsa"        type="xsd:nonNegativeInteger" minOccurs="0"/>
+        </xsd:sequence>
+        <xsd:attribute name="ck" type="CheckSum" use="required"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="GuidingEstimation">
+        <xsd:sequence>
+            <xsd:element name="percentage" type="Percentage"/>
+            <xsd:element name="evaluation" type="GuidingEvaluation"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:simpleType name="Percentage">
+        <xsd:restriction base="xsd:int">
+            <xsd:minInclusive value="0"/>
+            <xsd:maxInclusive value="100"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="GuidingEvaluation">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="Success"/>
+            <xsd:enumeration value="Caution"/>
+            <!-- Added a warning level out of REL-640 -->
+            <xsd:enumeration value="Warning"/>
+            <xsd:enumeration value="Failure"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="TargetVisibility">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="Good"/>
+            <xsd:enumeration value="Limited"/>
+            <xsd:enumeration value="Bad"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      CheckSum that can be used to validate the success calculation.  Prevents
+      manual manipulation of the metadata.
+    -->
+    <xsd:simpleType name="CheckSum">
+        <xsd:restriction base="xsd:token">
+            <xsd:pattern value="[0-9a-f]*"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+</xsd:schema>
+

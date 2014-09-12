@@ -1,0 +1,19 @@
+Instrument : TEXES
+Blueprints : TEXES_BP.xml
+Version May 17, 2013 - updated by Bryan M
+
+Observations identified by LibraryIDs indicated with {}.
+
+Template library:
+{2} Science observation
+{1} {3} Standard observations - Phase-I science target and conditions are
+not copied into these
+
+INCLUDE top-level program note "General TEXES Notes"
+
+INCLUDE {1}, {2}, and {3} IN target-specific Scheduling Group
+The ordering is important, it should be the same as in the library, eg
+    {1} Before Standard
+    {2} Science Observation
+    {3} After Standard
+SET DISPERSER from Phase-I (in all observations)

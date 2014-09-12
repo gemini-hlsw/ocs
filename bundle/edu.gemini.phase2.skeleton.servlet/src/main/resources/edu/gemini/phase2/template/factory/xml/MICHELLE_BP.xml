@@ -1,0 +1,1428 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
+
+<document>
+  <container kind="program" type="Program" version="2014A-1" subtype="basic" key="b56a32dd-7e2d-4a58-acca-7df603f56780" name="MICHELLE-BP">
+    <paramset name="Science Program" kind="dataObj">
+      <param name="title" value="MICHELLE PHASE I/II MAPPING BPS"/>
+      <param name="programMode" value="QUEUE"/>
+      <param name="tooType" value="none"/>
+      <param name="programStatus" value="PHASE2"/>
+      <param name="nextObsId" value="1"/>
+      <paramset name="piInfo">
+        <param name="firstName" value="Marie"/>
+        <param name="lastName" value="Lemoine-Busserolle"/>
+        <param name="email" value=""/>
+        <param name="phone" value=""/>
+      </paramset>
+      <param name="contactPerson" value="mbusserolle@gemini.edu"/>
+      <param name="queueBand" value="1"/>
+      <param name="isLibrary" value="true"/>
+      <paramset name="timeAcct"/>
+      <param name="awardedTime" value="0.0" units="hours"/>
+      <param name="fetched" value="yes"/>
+      <param name="completed" value="false"/>
+      <param name="notifyPi" value="NO"/>
+    </paramset>
+    <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="45fefe53-5647-4a4c-b0b9-8238d7594e73" name="Note">
+      <paramset name="Note" kind="dataObj">
+        <param name="title" value="Polarimetry "/>
+        <param name="NoteText">
+          <value>- Total Time On-source
+
+As with the normal mode imaging observations, the "total on-source time" is for the entire observation.  The time 
+is divided between the four wave-plate positions, so the time per wave-plate position is 1/4 of the requested 
+time.</value>
+        </param>
+      </paramset>
+    </container>
+    <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="e39e61ff-ed17-421e-9920-e6b0ee316f17" name="Note">
+      <paramset name="Note" kind="dataObj">
+        <param name="title" value="README FOR SPECTROSCOPY"/>
+        <param name="NoteText">
+          <value>1.  BLOCKING FILTER CHOICE: In spectroscopy the blocking filter is set automatically.  Although the instrument component contains a place for a filter to be entered, the filter chosen will be overridden by the automatic choice.  Thus it is best to set the filter to "None", although the value does not matter.
+
+2. CHOP/NOD AND STARE/NOD: The selection of these depends on grating and they are hard-wired in, as explained below.   The offset iterator is not used with Michelle, so DO NOT put it into a sequence of spectroscopy observations.
+
+	For spectroscopy using the lowN and lowQ gratings data are always obtained in chop/nod mode. The allowed range for chop throw / nod distance is 5" - 15".  If the slit position angle and the chop angle are the same the chop and nod will be along the 40" slit. For example, with the default throw of 15" the nod will be +/- 7.5" along slit.  If the PI desires an 10" nod perpendicular to the slit the above two angles should differ by 90 degrees and the throw should be set to 10", in which case the nods will be +/- 5" perpendicular to the slit. Nod throws of less than 5 arc-seconds should be avoided so that the guide star moves off the PWFS2 field during the nod.
+	
+	For the medium resolution gratings (MedN1 or MedN2) and the echelle, spectra are always obtained in stare/nod mode.  The nod distance is set by the "Chop Throw" in the Michelle component (NOT by the Nod Iterator). As above, if the position angle and chop angle are identical the nod is along the slit. For a 10" "chop throw" the nod will be 10" from the starting position, and the spectrum of the point source will appear in the starting row and 10" (50 rows) above it.   Nods less than 5 arc-seconds should be avoided so that the guide star moves off the PWFS2 field during the nod. 
+	For spatially extended sources observed at high spectral resolution, one may want a much larger nod (to blank sky) than the example above.  In general one should pick the smallest NOD that is feasible, because the sky cancellation is found to be a bit better for smaller NODs than for larger NODs.  
+
+3. CALIBRATION STARS OR ASTEROIDS:  Two standard stars must be defined for each science target, one that would be observed before and one that would be observed after the science target. The standard that is observed is chosen at the discretion of the observer.
+
+In the higher resolution spectral modes asteroids may be used instead of stars as calibration targets.  The higher the resolution and the longer the wavelength the more likely that an asteroid is the best choice as a calibrator.  However if one's target is at high ecliptic latitudes a proper airmass match may not be possible.
+
+4. Each spectroscopic observation must have an associated imaging acquisition observation, using the Si-5 filter and a 1.0 second  on-source time.
+
+5. Due to the possibility of objects moving out of the slit during long spectroscopic observations we have imposed the following limits for 'on-source' integration times for each grating:
+
+	lowN and lowQ grating  -  limit for a single on-source integration = 600 sec
+	medN1, medN2, and echelle grating  -  limit for a single on-source integration = 1800 sec
+
+If you need to integrate longer on your targets please use multiple observations with the above limits in place. For example, if you need to integrate for 2400 sec on-source with the lowN grating, please setup a sequence that contains four steps of 600 sec on-source each.
+
+6. For lowN spectroscopy the central wavelength should normally be set to 9.5 microns.  (This used to be 10.5 microns, but the 
+loss of a channel in Michelle requires that the value be changed to get the maximum spectral coverage.)  For lowQ spectroscopy the chosen central wavelength is set to 19.8 microns by befault but PIs should check with their contact scientist to see whether this needs to be adjusted in light of the loss of the one channel in Michelle.
+
+7. The slit position angle is set using the "position angle" field in the OT and must be 0-180 degrees.
+
+8. Each target has a "peakup" observation. We peak up on spectra of sufficiently bright objects, to ensure that they are well centered in the slit. By peaking up, we mean that you move the telescope in small steps perpendicular to the slit and look for where the maximum signal is attained. All observations for which the target is bright (small-aperture N band brightness more than 4.9 mag or ~400 mJy)  should have extra peakup observations set up in the OT with an offset iterator to automatically step through several positions. The position of the spectroscopic hotspot has been seen to vary. This is a crucial piece of information for optimal spectroscopic observations. The positions of the hotspots for different observing modes need to be determined. This is performed by performing peak-up with the slit rotated at 0 or 90 degrees.
+
+9. For medN1, medN2, lowN and lowQ grating, the filter is set to  none. For the echelle grating, please select the appropriate filter which match your central wavelength.
+
+10. Note that spectroscopic observations are most clearly organized in groups, as in this template.</value>
+        </param>
+      </paramset>
+    </container>
+    <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="4c44ad67-f0e6-4f6f-b653-a8ba631c9e5d" name="Note">
+      <paramset name="Note" kind="dataObj">
+        <param name="title" value="Using asteroids as standards"/>
+        <param name="NoteText">
+          <value>Asteroids are often used as standards for higher resolution spectroscopy in the mid-infrared 
+because they are brighter than most standard stars at longer wavelengths.
+
+To use an asteroid as a standard one MUST select the "Non-siderial target" option in the "System" field of the target conponent (rather than J2000 or B1950 for example), and then .put in the seven orbital elements in the "Non-siderial Details" tab in the target conponent.  There are a number of possibilities for these orbital elements.  The JPL Horzons web page allows one to get the elements for many asteroids which can then be copied into the fields in the tab.  The position of the target can be left as 0 hours RA and 0 degrees DEC because these values will have to be inserted on the night that the observations are taken.
+
+No guide stars need to be defined for asteroid observations.  The guide star will be selected when the position of the asteroid is known, just before the observation is taken.  This example has a dummy guide star defined just to avoid having an error flag.
+
+Note that asteroids have a strongly declining brightness at wavelengths below 10 microns, so particularly for wavelengths of less than 8 microns one should see if a standard star is available that is bright enough to use.  Your contact scientist can help you decide between these alternatives.  For longer wavelengths, and especially in Q-band, asteroids are prefered as standards.
+
+The OT library file
+
+GN-MICHELLE-Asteroids
+
+contains proper template observations for all asteroids larger than 50 km, so PIs should use one of these if at all possible.  The templates have the proper orbital elements so using them avoids mistakes in copying the orbital elements into the fields in the OT.
+
+With more recent changes in the OT one can update the asteroid position by simply specifying the date and time 
+in the OT, as the OT itself sends a query to the JPL Horizons web page server.  But this need not be done by the PI unless they have a known period for a time critical observation.  Normally the update of the position and selection of a proper guide star would be donbe by the queue coordinator or the observer.
+</value>
+        </param>
+      </paramset>
+    </container>
+    <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="9d11c4ec-10f7-4acd-be39-470b97710092" name="Note">
+      <paramset name="Note" kind="dataObj">
+        <param name="title" value="Next libID = 13"/>
+        <param name="NoteText" value=""/>
+      </paramset>
+    </container>
+    <container kind="group" type="Group" version="2009A-1" subtype="group" key="c436a699-ab2c-401b-8e4a-2d61aef5de8a" name="Group">
+      <paramset name="Group" kind="dataObj">
+        <param name="title" value="Imaging BP"/>
+        <param name="GroupType" value="TYPE_SCHEDULING"/>
+        <param name="libraryId" value=""/>
+      </paramset>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="3b95ed55-3d13-434c-85f4-aa55ab7c2b86" name="MICHELLE-BP-1">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Imaging before-Std"/>
+          <param name="libraryId" value="1"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2009B-2" subtype="Michelle" key="615bdf49-e483-4af2-b770-d8bc0c623db1" name="Michelle">
+          <paramset name="Michelle" kind="dataObj">
+            <param name="exposureTime" value="0.02"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="disperser" value="MIRROR"/>
+            <param name="mask" value="MASK_IMAGING"/>
+            <param name="filter" value="N_PRIME"/>
+            <param name="timeOnSource" value="60.0"/>
+            <param name="nodInterval" value="30.0"/>
+            <param name="nodOrientation" value="PARALLEL"/>
+            <param name="chopAngle" value="30.0"/>
+            <param name="chopThrow" value="15.0"/>
+            <param name="autoConfigure" value="YES"/>
+            <param name="polarimetry" value="NO"/>
+            <param name="nexp" value="50"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="14ae58de-2cc2-46ae-8aa2-7583e86b00ea" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="9a16ea02-aff2-46f9-b6ca-28189cab83bc" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="f7800958-da5d-4838-8a10-6db400cc86c7" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Michelle" key="02ee8caa-30bb-46f3-be77-244e8e97a48b" name="Michelle Sequence">
+            <paramset name="Michelle Sequence" kind="dataObj">
+              <param name="filter" value="N_PRIME"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="2cc2dd22-c5e4-497b-b7fb-9033d22d8090" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="PARTNER_CAL"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="1a7a2f5d-d595-4cd6-be98-6ecb151d5498" name="MICHELLE-BP-2">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Imaging science"/>
+          <param name="libraryId" value="2"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2009B-2" subtype="Michelle" key="c7e38d44-4d01-46b1-ac38-feac872f4902" name="Michelle">
+          <paramset name="Michelle" kind="dataObj">
+            <param name="exposureTime" value="0.02"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="disperser" value="MIRROR"/>
+            <param name="mask" value="MASK_IMAGING"/>
+            <param name="filter" value="SI_2"/>
+            <param name="timeOnSource" value="60.0"/>
+            <param name="nodInterval" value="30.0"/>
+            <param name="nodOrientation" value="PARALLEL"/>
+            <param name="chopAngle" value="30.0"/>
+            <param name="chopThrow" value="15.0"/>
+            <param name="autoConfigure" value="YES"/>
+            <param name="polarimetry" value="NO"/>
+            <param name="nexp" value="50"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="d71a9180-8c61-4de8-9bb7-d6e5e9b70174" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="offsets pattern"/>
+            <param name="NoteText" value="If offsets pattern is not needed, please delete the offsets iterator."/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="f5854b8f-d07e-483c-b377-b2d1e8a603f6" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="2d68e8ce-d105-4305-8cde-7d8f2f2bb13e" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="f0dd4849-4c38-4c47-8053-03e21d493865" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Michelle" key="e7a07d38-424c-4750-aef0-cc47103b0022" name="Michelle Sequence">
+            <paramset name="Michelle Sequence" kind="dataObj">
+              <param name="filter" value="SI_2"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="df305ad7-31b7-437c-8eef-630c20c40383" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <paramset name="offsets">
+                  <paramset name="Offset2" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset0" sequence="1">
+                    <param name="p" value="5.0"/>
+                    <param name="q" value="5.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset1" sequence="2">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="5.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset3" sequence="3">
+                    <param name="p" value="5.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset4" sequence="4">
+                    <param name="p" value="5.0"/>
+                    <param name="q" value="-5.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset5" sequence="5">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="-5.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="cfa77b86-8377-46be-8453-62caba869cc2" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="SCIENCE"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="7bc59372-4ad3-478d-b9ab-79c245c7cec2" name="MICHELLE-BP-3">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Imaging after-Std"/>
+          <param name="libraryId" value="3"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2009B-2" subtype="Michelle" key="64306316-b3b7-40a8-8a4c-cc9508642b1d" name="Michelle">
+          <paramset name="Michelle" kind="dataObj">
+            <param name="exposureTime" value="0.02"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="disperser" value="MIRROR"/>
+            <param name="mask" value="MASK_IMAGING"/>
+            <param name="filter" value="N_PRIME"/>
+            <param name="timeOnSource" value="60.0"/>
+            <param name="nodInterval" value="30.0"/>
+            <param name="nodOrientation" value="PARALLEL"/>
+            <param name="chopAngle" value="30.0"/>
+            <param name="chopThrow" value="15.0"/>
+            <param name="autoConfigure" value="YES"/>
+            <param name="polarimetry" value="NO"/>
+            <param name="nexp" value="50"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="b6d8a1ee-f82d-409e-b428-016ddf113481" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="5e8834fb-da39-4e82-b2b7-1f88716e3f04" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="9904cbda-a09d-40c6-ab7a-c2dacb6620cf" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Michelle" key="0787e243-7364-4642-a130-5eac3bd77a53" name="Michelle Sequence">
+            <paramset name="Michelle Sequence" kind="dataObj">
+              <param name="filter" value="N_PRIME"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="b039d865-d300-47c5-9ae4-94d5534f3966" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="PARTNER_CAL"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+    </container>
+    <container kind="group" type="Group" version="2009A-1" subtype="group" key="ec7364ac-b566-4fff-9b36-d71b541cdb9a" name="Group">
+      <paramset name="Group" kind="dataObj">
+        <param name="title" value="Spectroscopy BP"/>
+        <param name="GroupType" value="TYPE_SCHEDULING"/>
+        <param name="libraryId" value=""/>
+      </paramset>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="c5f58fa2-a830-4042-b05d-fcf1037412ae" name="MICHELLE-BP-4">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Acquisition of before-Std"/>
+          <param name="libraryId" value="4"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2009B-2" subtype="Michelle" key="e1bd86a0-922b-4cb0-8d4d-36ecce4b38b4" name="Michelle">
+          <paramset name="Michelle" kind="dataObj">
+            <param name="exposureTime" value="0.02"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="1"/>
+            <param name="disperser" value="MIRROR"/>
+            <param name="mask" value="MASK_IMAGING"/>
+            <param name="filter" value="SI_5"/>
+            <param name="timeOnSource" value="1.0"/>
+            <param name="nodInterval" value="30.0"/>
+            <param name="nodOrientation" value="PARALLEL"/>
+            <param name="chopAngle" value="30.0"/>
+            <param name="chopThrow" value="15.0"/>
+            <param name="autoConfigure" value="YES"/>
+            <param name="polarimetry" value="NO"/>
+            <param name="nexp" value="50"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="ad503748-3ae8-41ad-9352-e20f7ff9a8aa" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="48c33c1b-faeb-4c02-8ed1-e87c4c058149" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="a0b4863b-0c4c-49c6-841f-86438b264667" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="5d1586a6-8d08-47a6-9787-5c56a374ffda" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="ab7f0c5b-0f31-4152-be6a-c2a0185db82a" name="Observe">
+            <paramset name="Observe" kind="dataObj">
+              <param name="repeatCount" value="5"/>
+              <param name="class" value="ACQ_CAL"/>
+            </paramset>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="5b2587eb-3a5a-4c7e-962f-f9f0c9e0e7ce" name="MICHELLE-BP-5">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Peakup of before-std"/>
+          <param name="libraryId" value="5"/>
+          <param name="priority" value="HIGH"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2009B-2" subtype="Michelle" key="1148f3da-a155-465b-b03b-77a9a21bac81" name="Michelle">
+          <paramset name="Michelle" kind="dataObj">
+            <param name="exposureTime" value="0.02"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="1"/>
+            <param name="disperser" value="LOW_RES_10"/>
+            <param name="disperserLambda" value="9.5"/>
+            <param name="mask" value="MASK_2"/>
+            <param name="filter" value="NONE"/>
+            <param name="timeOnSource" value="1.0"/>
+            <param name="nodInterval" value="30.0"/>
+            <param name="nodOrientation" value="PARALLEL"/>
+            <param name="chopAngle" value="90.0"/>
+            <param name="chopThrow" value="15.0"/>
+            <param name="autoConfigure" value="YES"/>
+            <param name="polarimetry" value="NO"/>
+            <param name="chopMode" value="CHOP"/>
+            <param name="nexp" value="50"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="6af02863-4d0e-4944-b4cf-5b550d2520e7" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="0edf3c68-a77f-4578-b3b3-9ade69ecc251" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="68ac2ee7-9db4-40a5-a7ef-bffdb0deff00" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="d062ca8b-f74e-4822-8606-a2ca1674e38f" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="7dc4ad3a-7bd5-4f4c-9ad8-660d68d74102" name="Offset">
+            <paramset name="Offset" kind="dataObj">
+              <paramset name="offsets">
+                <paramset name="Offset3" sequence="0">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset4" sequence="1">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.2"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset6" sequence="2">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="-0.2"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset11" sequence="3">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="-0.4"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+              </paramset>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="080b6942-c7b5-4c7b-a20a-c1a218bb0fbd" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="PARTNER_CAL"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="c24957a1-5947-41db-9f77-af97a5ef07f2" name="MICHELLE-BP-6">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Spectroscopy of before-Std"/>
+          <param name="libraryId" value="6"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2009B-2" subtype="Michelle" key="486c2c86-a275-494f-be6e-e6057504af90" name="Michelle">
+          <paramset name="Michelle" kind="dataObj">
+            <param name="exposureTime" value="0.02"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="1"/>
+            <param name="disperser" value="LOW_RES_10"/>
+            <param name="disperserLambda" value="9.5"/>
+            <param name="mask" value="MASK_2"/>
+            <param name="filter" value="NONE"/>
+            <param name="timeOnSource" value="60.0"/>
+            <param name="nodInterval" value="30.0"/>
+            <param name="nodOrientation" value="PARALLEL"/>
+            <param name="chopAngle" value="90.0"/>
+            <param name="chopThrow" value="15.0"/>
+            <param name="autoConfigure" value="YES"/>
+            <param name="polarimetry" value="NO"/>
+            <param name="nexp" value="50"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="7f5da781-3383-4c13-bfb5-038538a2a1ad" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="cd05cf4a-600f-4719-bbd2-5ed9e138875e" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="39653ca7-d51d-4624-93d4-4453bf77fa8a" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="4559f482-fbed-45d0-9c94-f452c579db59" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="abb18650-9f45-4b83-b5ac-021934fc8875" name="Observe">
+            <paramset name="Observe" kind="dataObj">
+              <param name="repeatCount" value="1"/>
+              <param name="class" value="PARTNER_CAL"/>
+            </paramset>
+          </container>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="GemFlat" key="5fe91e6d-1a5d-48da-b718-a1f3b78286d6" name="Manual Flat/Arc">
+            <paramset name="Manual Flat/Arc" kind="dataObj">
+              <param name="repeatCount" value="1"/>
+              <param name="class" value="PARTNER_CAL"/>
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="10.0"/>
+              <param name="lamp" value="IR_GREY_BODY_LOW"/>
+              <param name="shutter" value="OPEN"/>
+              <param name="filter" value="NONE"/>
+              <param name="diffuser" value="IR"/>
+            </paramset>
+          </container>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="bias" key="9c686807-2b7e-4771-991b-65aee80bff49" name="Manual Bias">
+            <paramset name="Manual Bias" kind="dataObj">
+              <param name="repeatCount" value="1"/>
+              <param name="class" value="PARTNER_CAL"/>
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="10.0"/>
+            </paramset>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="2819adf2-4b57-48db-923e-29cdb6dc54e7" name="MICHELLE-BP-7">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Acquisition of science target"/>
+          <param name="libraryId" value="7"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2009B-2" subtype="Michelle" key="3ae4493c-4192-4ead-a633-d11091f2d2b3" name="Michelle">
+          <paramset name="Michelle" kind="dataObj">
+            <param name="exposureTime" value="0.02"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="1"/>
+            <param name="disperser" value="MIRROR"/>
+            <param name="mask" value="MASK_IMAGING"/>
+            <param name="filter" value="SI_5"/>
+            <param name="timeOnSource" value="1.0"/>
+            <param name="nodInterval" value="30.0"/>
+            <param name="nodOrientation" value="PARALLEL"/>
+            <param name="chopAngle" value="30.0"/>
+            <param name="chopThrow" value="15.0"/>
+            <param name="autoConfigure" value="YES"/>
+            <param name="polarimetry" value="NO"/>
+            <param name="nexp" value="50"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="4a0e9569-e4f1-4579-acdc-d1fca64a81ff" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="4cc1216a-d6a2-411c-aaed-69a2daf4323e" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="91d44baa-0784-4597-8588-51fc6e6e0f80" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="332d3e6d-107b-4283-98ba-1d67845dd589" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="ee07bb33-29a3-4354-a6a6-9dd9f9f6bd5d" name="Observe">
+            <paramset name="Observe" kind="dataObj">
+              <param name="repeatCount" value="5"/>
+              <param name="class" value="ACQ"/>
+            </paramset>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="4cd1fbf1-98e3-44a1-af5f-a858df54d003" name="MICHELLE-BP-8">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Peakup of science target"/>
+          <param name="libraryId" value="8"/>
+          <param name="priority" value="HIGH"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2009B-2" subtype="Michelle" key="7b1f9e18-79d9-48db-af4f-1c0004c2e803" name="Michelle">
+          <paramset name="Michelle" kind="dataObj">
+            <param name="exposureTime" value="0.02"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="1"/>
+            <param name="disperser" value="LOW_RES_10"/>
+            <param name="disperserLambda" value="9.5"/>
+            <param name="mask" value="MASK_2"/>
+            <param name="filter" value="NONE"/>
+            <param name="timeOnSource" value="1.0"/>
+            <param name="nodInterval" value="30.0"/>
+            <param name="nodOrientation" value="PARALLEL"/>
+            <param name="chopAngle" value="90.0"/>
+            <param name="chopThrow" value="15.0"/>
+            <param name="autoConfigure" value="YES"/>
+            <param name="polarimetry" value="NO"/>
+            <param name="chopMode" value="CHOP"/>
+            <param name="nexp" value="50"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="76189681-279b-4c69-9c41-986b28cd1fa6" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="707aef73-bc28-42de-988a-2e2b446e1897" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="7a458364-0e90-40cf-ae7c-65a75e9a8658" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="2d54a0be-7e5f-4eac-bc28-9b5698f4e6bd" name="Offset">
+            <paramset name="Offset" kind="dataObj">
+              <paramset name="offsets">
+                <paramset name="Offset3" sequence="0">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset4" sequence="1">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.2"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset6" sequence="2">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="-0.2"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset11" sequence="3">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="-0.4"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+              </paramset>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="d51cc2bd-ad0d-43b3-a6ad-8c3b9918c339" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="PARTNER_CAL"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="3981f3b4-a06f-485c-bd36-29fc4d457412" name="MICHELLE-BP-9">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Spectroscopy of science target"/>
+          <param name="libraryId" value="9"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2009B-2" subtype="Michelle" key="d4e8cb21-de85-4e57-894a-275338d79b27" name="Michelle">
+          <paramset name="Michelle" kind="dataObj">
+            <param name="exposureTime" value="0.02"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="1"/>
+            <param name="disperser" value="LOW_RES_10"/>
+            <param name="disperserLambda" value="9.5"/>
+            <param name="mask" value="MASK_2"/>
+            <param name="filter" value="NONE"/>
+            <param name="timeOnSource" value="600.0"/>
+            <param name="nodInterval" value="30.0"/>
+            <param name="nodOrientation" value="PARALLEL"/>
+            <param name="chopAngle" value="90.0"/>
+            <param name="chopThrow" value="15.0"/>
+            <param name="autoConfigure" value="YES"/>
+            <param name="polarimetry" value="NO"/>
+            <param name="nexp" value="50"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="2db0231c-dd8f-48d0-9d93-db7dc4757c31" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="On source time"/>
+            <param name="NoteText">
+              <value>- lowN and lowQ grating  -  limit for a single on-source integration = 600 sec
+       For on-source time &gt; 600s, Please keep the exposure of 600s and increase the number of observe.
+       For instance, for an on-source time of 1800 sec. Note that  there should be 3 'observe' steps in the sequence, each one will have 600 sec on-source after the observer "peaks up" the source in the slit.
+
+- medN1, medN2, and echelle grating  -  limit for a single on-source integration = 1800 sec
+       For on-source time &gt; 1800s, Please keep the exposure of 600s and increase the number of observe.
+       For instance, for an on-source time of 5400 sec. Note that  there should be 3 'observe' steps in the sequence, each one will have 1800 sec on-source after the observer "peaks up" the source in the slit.</value>
+            </param>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="858e92ee-9710-4e60-9e28-7c9bc211e383" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="a9568f39-6154-4714-a248-837e0b5d9b87" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="6544279d-effa-4896-8093-ce54415b43ac" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="66fcd219-7916-4dea-8e23-87096098d33a" name="Observe">
+            <paramset name="Observe" kind="dataObj">
+              <param name="repeatCount" value="1"/>
+              <param name="class" value="SCIENCE"/>
+            </paramset>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="082803e3-1747-4a73-b961-c36df57adb54" name="MICHELLE-BP-10">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Acquisition of after-Std"/>
+          <param name="libraryId" value="10"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2009B-2" subtype="Michelle" key="4cb994c5-ab3a-4b60-a556-c17b4967dd83" name="Michelle">
+          <paramset name="Michelle" kind="dataObj">
+            <param name="exposureTime" value="0.02"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="1"/>
+            <param name="disperser" value="MIRROR"/>
+            <param name="mask" value="MASK_IMAGING"/>
+            <param name="filter" value="SI_5"/>
+            <param name="timeOnSource" value="1.0"/>
+            <param name="nodInterval" value="30.0"/>
+            <param name="nodOrientation" value="PARALLEL"/>
+            <param name="chopAngle" value="30.0"/>
+            <param name="chopThrow" value="15.0"/>
+            <param name="autoConfigure" value="YES"/>
+            <param name="polarimetry" value="NO"/>
+            <param name="nexp" value="50"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="42db9de8-abf1-438b-a9d8-b6c3943fffae" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="b33f4f57-6055-4527-81dd-6e3498f07c80" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="ab8630e3-1591-4b62-a615-24bc20e8d7c6" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="83f06015-068e-4eb8-8b14-b63333987fe2" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="d5d6fe2b-42dd-48ff-aff9-0362a9978fe9" name="Observe">
+            <paramset name="Observe" kind="dataObj">
+              <param name="repeatCount" value="5"/>
+              <param name="class" value="ACQ_CAL"/>
+            </paramset>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="8d88be4b-3f18-4dc8-bc6e-24fabbd3094d" name="MICHELLE-BP-11">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Peakup of after-std"/>
+          <param name="libraryId" value="11"/>
+          <param name="priority" value="HIGH"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2009B-2" subtype="Michelle" key="a96955d9-ddd9-4b6a-8078-ef0ef14d1a33" name="Michelle">
+          <paramset name="Michelle" kind="dataObj">
+            <param name="exposureTime" value="0.02"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="1"/>
+            <param name="disperser" value="LOW_RES_10"/>
+            <param name="disperserLambda" value="9.5"/>
+            <param name="mask" value="MASK_2"/>
+            <param name="filter" value="NONE"/>
+            <param name="timeOnSource" value="1.0"/>
+            <param name="nodInterval" value="30.0"/>
+            <param name="nodOrientation" value="PARALLEL"/>
+            <param name="chopAngle" value="90.0"/>
+            <param name="chopThrow" value="15.0"/>
+            <param name="autoConfigure" value="YES"/>
+            <param name="polarimetry" value="NO"/>
+            <param name="chopMode" value="CHOP"/>
+            <param name="nexp" value="50"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="02a0049d-ef08-4c33-9ef4-776aaa5b027c" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="e7374785-2e5b-4b55-9c8f-0fd25c8d7d78" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="9028596f-e59b-4c8c-bfab-be7dffbc6490" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="789a2e8c-ef01-4651-bab9-ce452b1651bc" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="6020e30d-df4c-4e99-8822-9e4d7d085f06" name="Offset">
+            <paramset name="Offset" kind="dataObj">
+              <paramset name="offsets">
+                <paramset name="Offset3" sequence="0">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset4" sequence="1">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.2"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset6" sequence="2">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="-0.2"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset11" sequence="3">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="-0.4"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+              </paramset>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="32c4cdb0-5458-456f-907c-462c064d7611" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="PARTNER_CAL"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="82c91be8-0ca5-436f-86f8-93fe2355437e" name="MICHELLE-BP-12">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Spectroscopy of after-Std"/>
+          <param name="libraryId" value="12"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2009B-2" subtype="Michelle" key="343af8b8-e12c-44f4-a75c-7cf8aec01904" name="Michelle">
+          <paramset name="Michelle" kind="dataObj">
+            <param name="exposureTime" value="0.02"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="1"/>
+            <param name="disperser" value="LOW_RES_10"/>
+            <param name="disperserLambda" value="9.5"/>
+            <param name="mask" value="MASK_2"/>
+            <param name="filter" value="NONE"/>
+            <param name="timeOnSource" value="60.0"/>
+            <param name="nodInterval" value="30.0"/>
+            <param name="nodOrientation" value="PARALLEL"/>
+            <param name="chopAngle" value="90.0"/>
+            <param name="chopThrow" value="15.0"/>
+            <param name="autoConfigure" value="YES"/>
+            <param name="polarimetry" value="NO"/>
+            <param name="nexp" value="50"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="e8a59562-aaa7-4f35-9932-cc6f053f7b20" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="61ee5944-4eb9-4dfe-9114-7d3b18585c7b" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="3c5fd439-e402-41c6-8367-7cdae52f2468" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="770b6181-39db-48b3-9f78-4613d16a8691" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="bd642b19-6fd2-4b47-9786-0853cf565dae" name="Observe">
+            <paramset name="Observe" kind="dataObj">
+              <param name="repeatCount" value="1"/>
+              <param name="class" value="PARTNER_CAL"/>
+            </paramset>
+          </container>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="GemFlat" key="40708bda-f88d-4eab-b86a-3d29d78ffb20" name="Manual Flat/Arc">
+            <paramset name="Manual Flat/Arc" kind="dataObj">
+              <param name="repeatCount" value="1"/>
+              <param name="class" value="PARTNER_CAL"/>
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="10.0"/>
+              <param name="lamp" value="IR_GREY_BODY_LOW"/>
+              <param name="shutter" value="OPEN"/>
+              <param name="filter" value="NONE"/>
+              <param name="diffuser" value="IR"/>
+            </paramset>
+          </container>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="bias" key="2570aba6-1420-45ea-aa40-4252a005501f" name="Manual Bias">
+            <paramset name="Manual Bias" kind="dataObj">
+              <param name="repeatCount" value="1"/>
+              <param name="class" value="PARTNER_CAL"/>
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="10.0"/>
+            </paramset>
+          </container>
+        </container>
+      </container>
+    </container>
+  </container>
+  <container kind="versions" type="versions" version="1.0">
+    <paramset name="node">
+      <param name="key" value="02a0049d-ef08-4c33-9ef4-776aaa5b027c"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7dc4ad3a-7bd5-4f4c-9ad8-660d68d74102"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4cb994c5-ab3a-4b60-a556-c17b4967dd83"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3b95ed55-3d13-434c-85f4-aa55ab7c2b86"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="cd05cf4a-600f-4719-bbd2-5ed9e138875e"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4a0e9569-e4f1-4579-acdc-d1fca64a81ff"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="770b6181-39db-48b3-9f78-4613d16a8691"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c24957a1-5947-41db-9f77-af97a5ef07f2"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4c44ad67-f0e6-4f6f-b653-a8ba631c9e5d"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="66fcd219-7916-4dea-8e23-87096098d33a"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="8d88be4b-3f18-4dc8-bc6e-24fabbd3094d"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="0edf3c68-a77f-4578-b3b3-9ade69ecc251"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="40708bda-f88d-4eab-b86a-3d29d78ffb20"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e8a59562-aaa7-4f35-9932-cc6f053f7b20"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4559f482-fbed-45d0-9c94-f452c579db59"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="39653ca7-d51d-4624-93d4-4453bf77fa8a"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f5854b8f-d07e-483c-b377-b2d1e8a603f6"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ab8630e3-1591-4b62-a615-24bc20e8d7c6"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ee07bb33-29a3-4354-a6a6-9dd9f9f6bd5d"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d062ca8b-f74e-4822-8606-a2ca1674e38f"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="32c4cdb0-5458-456f-907c-462c064d7611"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="858e92ee-9710-4e60-9e28-7c9bc211e383"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2db0231c-dd8f-48d0-9d93-db7dc4757c31"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9904cbda-a09d-40c6-ab7a-c2dacb6620cf"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c7e38d44-4d01-46b1-ac38-feac872f4902"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e39e61ff-ed17-421e-9920-e6b0ee316f17"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6020e30d-df4c-4e99-8822-9e4d7d085f06"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ab7f0c5b-0f31-4152-be6a-c2a0185db82a"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3c5fd439-e402-41c6-8367-7cdae52f2468"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a0b4863b-0c4c-49c6-841f-86438b264667"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f7800958-da5d-4838-8a10-6db400cc86c7"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="64306316-b3b7-40a8-8a4c-cc9508642b1d"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="82c91be8-0ca5-436f-86f8-93fe2355437e"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9028596f-e59b-4c8c-bfab-be7dffbc6490"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2819adf2-4b57-48db-923e-29cdb6dc54e7"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6544279d-effa-4896-8093-ce54415b43ac"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="abb18650-9f45-4b83-b5ac-021934fc8875"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2d54a0be-7e5f-4eac-bc28-9b5698f4e6bd"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="1148f3da-a155-465b-b03b-77a9a21bac81"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e7a07d38-424c-4750-aef0-cc47103b0022"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2570aba6-1420-45ea-aa40-4252a005501f"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="91d44baa-0784-4597-8588-51fc6e6e0f80"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5d1586a6-8d08-47a6-9787-5c56a374ffda"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="42db9de8-abf1-438b-a9d8-b6c3943fffae"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9a16ea02-aff2-46f9-b6ca-28189cab83bc"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c5f58fa2-a830-4042-b05d-fcf1037412ae"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7b1f9e18-79d9-48db-af4f-1c0004c2e803"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="0787e243-7364-4642-a130-5eac3bd77a53"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4cd1fbf1-98e3-44a1-af5f-a858df54d003"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="02ee8caa-30bb-46f3-be77-244e8e97a48b"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4cc1216a-d6a2-411c-aaed-69a2daf4323e"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2d68e8ce-d105-4305-8cde-7d8f2f2bb13e"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="df305ad7-31b7-437c-8eef-630c20c40383"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ad503748-3ae8-41ad-9352-e20f7ff9a8aa"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="68ac2ee7-9db4-40a5-a7ef-bffdb0deff00"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9d11c4ec-10f7-4acd-be39-470b97710092"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5fe91e6d-1a5d-48da-b718-a1f3b78286d6"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e7374785-2e5b-4b55-9c8f-0fd25c8d7d78"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="080b6942-c7b5-4c7b-a20a-c1a218bb0fbd"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3981f3b4-a06f-485c-bd36-29fc4d457412"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d71a9180-8c61-4de8-9bb7-d6e5e9b70174"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d4e8cb21-de85-4e57-894a-275338d79b27"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="082803e3-1747-4a73-b961-c36df57adb54"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a9568f39-6154-4714-a248-837e0b5d9b87"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e1bd86a0-922b-4cb0-8d4d-36ecce4b38b4"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="615bdf49-e483-4af2-b770-d8bc0c623db1"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="486c2c86-a275-494f-be6e-e6057504af90"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d51cc2bd-ad0d-43b3-a6ad-8c3b9918c339"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="332d3e6d-107b-4283-98ba-1d67845dd589"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="343af8b8-e12c-44f4-a75c-7cf8aec01904"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6af02863-4d0e-4944-b4cf-5b550d2520e7"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ec7364ac-b566-4fff-9b36-d71b541cdb9a"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="83f06015-068e-4eb8-8b14-b63333987fe2"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d5d6fe2b-42dd-48ff-aff9-0362a9978fe9"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="61ee5944-4eb9-4dfe-9114-7d3b18585c7b"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7a458364-0e90-40cf-ae7c-65a75e9a8658"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="789a2e8c-ef01-4651-bab9-ce452b1651bc"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7bc59372-4ad3-478d-b9ab-79c245c7cec2"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a96955d9-ddd9-4b6a-8078-ef0ef14d1a33"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9c686807-2b7e-4771-991b-65aee80bff49"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="cfa77b86-8377-46be-8453-62caba869cc2"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="707aef73-bc28-42de-988a-2e2b446e1897"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3ae4493c-4192-4ead-a633-d11091f2d2b3"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="48c33c1b-faeb-4c02-8ed1-e87c4c058149"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="1a7a2f5d-d595-4cd6-be98-6ecb151d5498"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="76189681-279b-4c69-9c41-986b28cd1fa6"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7f5da781-3383-4c13-bfb5-038538a2a1ad"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b039d865-d300-47c5-9ae4-94d5534f3966"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="45fefe53-5647-4a4c-b0b9-8238d7594e73"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c436a699-ab2c-401b-8e4a-2d61aef5de8a"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5e8834fb-da39-4e82-b2b7-1f88716e3f04"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5b2587eb-3a5a-4c7e-962f-f9f0c9e0e7ce"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b56a32dd-7e2d-4a58-acca-7df603f56780"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="8"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b6d8a1ee-f82d-409e-b428-016ddf113481"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="bd642b19-6fd2-4b47-9786-0853cf565dae"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2cc2dd22-c5e4-497b-b7fb-9033d22d8090"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="14ae58de-2cc2-46ae-8aa2-7583e86b00ea"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f0dd4849-4c38-4c47-8053-03e21d493865"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b33f4f57-6055-4527-81dd-6e3498f07c80"/>
+      <param name="1a5ceb41-14a3-4c05-bb60-0fee0fd9637e" value="1"/>
+    </paramset>
+  </container>
+</document>

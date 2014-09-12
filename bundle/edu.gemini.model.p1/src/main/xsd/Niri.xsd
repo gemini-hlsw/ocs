@@ -1,0 +1,83 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:include schemaLocation="Instrument.xsd"/>
+    <xsd:include schemaLocation="Altair.xsd"/>
+
+    <xsd:complexType name="NiriBlueprintChoice">
+        <xsd:sequence>
+            <!-- <xsd:element name="regime" type="NiriWavelengthRegime"/>-->
+            <xsd:choice>
+                <xsd:element name="null" type="NiriBlueprintNull"/>
+                <xsd:element name="niri" type="NiriBlueprint"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- NIRI Null. Empty blueprint, not available in PIT. -->
+    <xsd:complexType name="NiriBlueprintNull"/>
+
+    <xsd:complexType name="NiriBlueprint">
+        <xsd:complexContent>
+            <xsd:extension base="BlueprintBase">
+                <xsd:sequence>
+                    <xsd:element name="altair" type="AltairChoice"/>
+                    <xsd:element name="camera" type="NiriCamera"/>
+                    <xsd:element name="filter" type="NiriFilter" maxOccurs="unbounded"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:simpleType name="NiriCamera">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="f/6 (0.12&quot;/pix, 120&quot; FoV)"/>
+            <xsd:enumeration value="f/14 (0.05&quot;/pix, 51&quot; FoV)"/>
+            <xsd:enumeration value="f/32 (0.02&quot;/pix, 22&quot; FoV)"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="NiriFilter">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="Y (1.02 um)"/>
+            <xsd:enumeration value="J (1.25 um)"/>
+            <xsd:enumeration value="H (1.65 um)"/>
+            <xsd:enumeration value="K (2.20 um)"/>
+            <xsd:enumeration value="K(prime) (2.12 um)"/>
+            <xsd:enumeration value="K(short) (2.15 um)"/>
+            <xsd:enumeration value="L(prime) (3.780 um)"/>
+            <xsd:enumeration value="M(prime) (4.68 um)"/>
+            <xsd:enumeration value="Jcont (1.065 um)"/>
+            <xsd:enumeration value="HeI (1.083 um)"/>
+            <xsd:enumeration value="Pa(gamma) (1.094 um)"/>
+            <xsd:enumeration value="J-continuum (1.122 um)"/>
+            <xsd:enumeration value="J-continuum (1.207 um)"/>
+            <xsd:enumeration value="Pa(beta) (1.282 um)"/>
+            <xsd:enumeration value="CH4(short) (1.56 um)"/>
+            <xsd:enumeration value="H-continuum (1.570 um)"/>
+            <xsd:enumeration value="[FeII] (1.644 um)"/>
+            <xsd:enumeration value="CH4(long) (1.70 um)"/>
+            <xsd:enumeration value="H2O ice (2.045 um)"/>
+            <xsd:enumeration value="HeI (2p2s) (2.059 um)"/>
+            <xsd:enumeration value="K-continuum (2.09 um)"/>
+            <xsd:enumeration value="H2 1-0 S(1) (2.122 um)"/>
+            <xsd:enumeration value="Br(gamma) (2.166 um)"/>
+            <xsd:enumeration value="H2 2-1 S(1) (2.248 um)"/>
+            <xsd:enumeration value="K-continuum (2.27 um)"/>
+            <xsd:enumeration value="CH4 ice (2.275 um)"/>
+            <xsd:enumeration value="CO 2-0 (bh) (2.294 um)"/>
+            <xsd:enumeration value="CO 3-1 (bh) (2.323 um)"/>
+            <xsd:enumeration value="H2O ice (3.050 um)"/>
+            <xsd:enumeration value="hydrocarbon (3.295 um)"/>
+            <xsd:enumeration value="Br(alpha) cont (3.990 um)"/>
+            <xsd:enumeration value="Br(alpha) (4.052 um)"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+    <xsd:simpleType name="NiriWavelengthRegime">
+        <xsd:restriction base="WavelengthRegime">
+            <xsd:enumeration value="nearIR_1"/>
+            <xsd:enumeration value="nearIR_3"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    -->
+</xsd:schema>

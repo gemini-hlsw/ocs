@@ -1,0 +1,39 @@
+<proposal schemaVersion="2014.1.1">
+    <meta band3optionChosen="false"/>
+    <semester year="2014" half="A"/>
+    <title/>
+    <abstract/>
+    <scheduling/>
+    <keywords/>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Principal</firstName>
+            <lastName>Investigator</lastName>
+            <status>PhD</status>
+            <email/>
+            <address>
+                <institution/>
+                <address/>
+                <country/>
+            </address>
+        </pi>
+    </investigators>
+    <targets/>
+    <conditions/>
+    <blueprints>
+        <gpi>
+            <Gpi id="blueprint-0">
+                <name>GPI Coronograph Y-band Prism</name>
+                <visitor>false</visitor>
+                <observingMode>Coronograph Y-band</observingMode>
+                <disperser>Prism</disperser>
+            </Gpi>
+        </gpi>
+    </blueprints>
+    <observations>
+        <observation band="Band 1/2" enabled="true" blueprint="blueprint-0"/>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None"/>
+    </proposalClass>
+</proposal>

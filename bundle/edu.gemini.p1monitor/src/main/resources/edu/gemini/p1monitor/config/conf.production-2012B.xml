@@ -1,0 +1,14 @@
+<conf>
+    <smtp>smtp.cl.gemini.edu</smtp>
+
+    <bcc>swalker@gemini.edu</bcc>
+    <bcc>cquiroz@gemini.edu</bcc>
+
+
+    <filetranslation>
+        <translation>
+            <from>Demo Science</from>
+            <to>DS</to>
+        </translation>
+    </filetranslation>
+</conf>

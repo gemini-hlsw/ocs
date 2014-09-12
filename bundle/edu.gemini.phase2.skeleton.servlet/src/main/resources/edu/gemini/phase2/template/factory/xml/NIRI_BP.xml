@@ -1,0 +1,1972 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
+
+<document>
+  <container kind="program" type="Program" version="2014A-1" subtype="basic" key="2b8c8aa4-3f96-4df3-96b8-6a57480762a1" name="BP-NIRI">
+    <paramset name="Science Program" kind="dataObj">
+      <param name="title" value="NIRI PHASE I/II MAPPING BPS"/>
+      <param name="programMode" value="QUEUE"/>
+      <param name="tooType" value="none"/>
+      <param name="programStatus" value="PHASE2"/>
+      <param name="nextObsId" value="1"/>
+      <paramset name="piInfo">
+        <param name="firstName" value=""/>
+        <param name="lastName" value=""/>
+        <param name="email" value=""/>
+        <param name="phone" value=""/>
+      </paramset>
+      <param name="queueBand" value="1"/>
+      <param name="isLibrary" value="true"/>
+      <paramset name="timeAcct"/>
+      <param name="awardedTime" value="0.0" units="hours"/>
+      <param name="fetched" value="true"/>
+      <param name="completed" value="false"/>
+      <param name="notifyPi" value="NO"/>
+    </paramset>
+    <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="4395e351-fb7d-4b17-b554-596d24459131" name="Note">
+      <paramset name="Note" kind="dataObj">
+        <param name="title" value="OVERVIEW"/>
+        <param name="NoteText">
+          <value>
+0. Are you willing to be contacted by phone by the nightime observer?
+    If YES, please include the appropriate standardized note from the NIRI Library
+
+1. Have finding charts been submitted?
+
+2. Is it possible that some objects may saturate?
+    If YES, please include the appropriate standardized note from the NIRI Library
+
+3. Are there unusual observing constraints (delivered FWHM/cloud cover/airmass/hour angle/scheduling) ?
+    If YES, please include the appropriate standardized note from the NIRI Library
+
+4. Will the sky be measured from dithered on-source exposures or from separate sky offsets?
+
+5. Do any observations have a non-standard acquisition?
+    If YES, please include the appropriate standardized note from the NIRI Library
+
+6. Is this a non-sidereal target?
+    If YES, please include the appropriate standardized note from the NIRI Library
+
+7. Are any observations taken with the Cass rotator fixed?
+    If YES, please include the appropriate standardized note from the NIRI Library
+
+8. Do any observations have a faint guide star?
+    If YES, please include the appropriate standardized note from the NIRI Library
+
+9. Have photometric standards been included?
+
+10. Are any Partner standards requested?
+
+11. Have the daytime darks been defined?
+
+12. Do you have any special advice for the observer?
+      If YES, please include the appropriate standardized note from the NIRI Library
+</value>
+        </param>
+      </paramset>
+    </container>
+    <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="e2cf736c-6451-4aa9-a1f6-32363d7d8c89" name="Note">
+      <paramset name="Note" kind="dataObj">
+        <param name="title" value="Next libID = 14"/>
+        <param name="NoteText" value=""/>
+      </paramset>
+    </container>
+    <container kind="group" type="Group" version="2009A-1" subtype="group" key="cf745c08-2bf3-4a7e-9f27-b400bf5b9dc7" name="Group">
+      <paramset name="Group" kind="dataObj">
+        <param name="title" value="NIRI f/6"/>
+        <param name="GroupType" value="TYPE_FOLDER"/>
+        <param name="libraryId" value="NIRI: f/6"/>
+      </paramset>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="f9a36416-7ea5-417d-a9df-4315e8ce4e93" name="BP-NIRI-1">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="NIRI f/6 Sparse Field / Point Source"/>
+          <param name="libraryId" value="1"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2007B-1" subtype="NIRI" key="cdd1cec4-eead-4e77-af9e-ee48de9c837b" name="NIRI">
+          <paramset name="NIRI" kind="dataObj">
+            <param name="exposureTime" value="60.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="camera" value="F6"/>
+            <param name="disperser" value="NONE"/>
+            <param name="mask" value="MASK_IMAGING"/>
+            <param name="filter" value="BBF_J"/>
+            <param name="beamSplitter" value="f6"/>
+            <param name="readMode" value="IMAG_SPEC_NB"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="builtinROI" value="FULL_FRAME"/>
+            <param name="fastModeExposures" value="1"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="7ad194b4-6e30-4065-a740-96e36eda3270" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="4b4cab82-8fdb-4917-9878-063b2c4c36a0" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="6e6c4799-64ef-4f6d-be01-007044718924" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIRI" key="80828144-da40-4f24-8471-697c14804493" name="NIRI Sequence">
+            <paramset name="NIRI Sequence" kind="dataObj">
+              <param name="title" value="NIRI Sequence"/>
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="60.0"/>
+              <param name="filter" value="BBF_J"/>
+              <param name="readMode" value="IMAG_SPEC_NB"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="f3d15eb1-629e-4240-a19b-2c5f26e0af76" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="Offsets"/>
+                <paramset name="offsets">
+                  <paramset name="Offset4" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset0" sequence="1">
+                    <param name="p" value="12.0"/>
+                    <param name="q" value="12.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset1" sequence="2">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="12.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset2" sequence="3">
+                    <param name="p" value="-12.0"/>
+                    <param name="q" value="12.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset3" sequence="4">
+                    <param name="p" value="-12.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset5" sequence="5">
+                    <param name="p" value="12.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset6" sequence="6">
+                    <param name="p" value="12.0"/>
+                    <param name="q" value="-12.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset7" sequence="7">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="-12.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset8" sequence="8">
+                    <param name="p" value="-12.0"/>
+                    <param name="q" value="-12.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="b54edce7-c106-43af-8c2a-61b5ef428698" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="SCIENCE"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="4b3df13a-25b2-49bf-aa19-d252550e889f" name="BP-NIRI-2">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="NIRI f/6 Crowded Field / Extended Object"/>
+          <param name="libraryId" value="2"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2007B-1" subtype="NIRI" key="1839e25b-00b3-48b1-bcc7-425ba5945bc3" name="NIRI">
+          <paramset name="NIRI" kind="dataObj">
+            <param name="exposureTime" value="60.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="camera" value="F6"/>
+            <param name="disperser" value="NONE"/>
+            <param name="mask" value="MASK_IMAGING"/>
+            <param name="filter" value="BBF_J"/>
+            <param name="beamSplitter" value="f6"/>
+            <param name="readMode" value="IMAG_SPEC_NB"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="builtinROI" value="FULL_FRAME"/>
+            <param name="fastModeExposures" value="1"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="597dde4e-9f68-4497-b38e-2804fc245f59" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="ae70095f-f618-4eba-b56a-f5c893e16833" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="7f639266-4256-4eaf-ab1c-002a4c6a3d4a" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIRI" key="9eae6b09-ffa8-4229-b6ce-d6bccf2ddfb3" name="NIRI Sequence">
+            <paramset name="NIRI Sequence" kind="dataObj">
+              <param name="title" value="NIRI Sequence"/>
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="60.0"/>
+              <param name="filter" value="BBF_J"/>
+              <param name="readMode" value="IMAG_SPEC_NB"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="2c3752d8-5604-4286-92d0-defb8475149d" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="Offsets: src"/>
+                <paramset name="offsets">
+                  <paramset name="Offset4" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset0" sequence="1">
+                    <param name="p" value="6.0"/>
+                    <param name="q" value="6.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset2" sequence="2">
+                    <param name="p" value="-6.0"/>
+                    <param name="q" value="6.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset6" sequence="3">
+                    <param name="p" value="6.0"/>
+                    <param name="q" value="-6.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset8" sequence="4">
+                    <param name="p" value="-6.0"/>
+                    <param name="q" value="-6.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="969b02ed-9fbf-4ddd-965c-e9618068ca2b" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="SCIENCE"/>
+                </paramset>
+              </container>
+            </container>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="ee2f5426-990c-4115-ac83-b9a8c5afc83b" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="Offsets: sky"/>
+                <paramset name="offsets">
+                  <paramset name="Offset4" sequence="0">
+                    <param name="p" value="150.0"/>
+                    <param name="q" value="150.0"/>
+                    <param name="defaultGuideOption" value="off"/>
+                  </paramset>
+                  <paramset name="Offset0" sequence="1">
+                    <param name="p" value="180.0"/>
+                    <param name="q" value="180.0"/>
+                    <param name="defaultGuideOption" value="off"/>
+                  </paramset>
+                  <paramset name="Offset2" sequence="2">
+                    <param name="p" value="120.0"/>
+                    <param name="q" value="180.0"/>
+                    <param name="defaultGuideOption" value="off"/>
+                  </paramset>
+                  <paramset name="Offset6" sequence="3">
+                    <param name="p" value="180.0"/>
+                    <param name="q" value="120.0"/>
+                    <param name="defaultGuideOption" value="off"/>
+                  </paramset>
+                  <paramset name="Offset8" sequence="4">
+                    <param name="p" value="120.0"/>
+                    <param name="q" value="120.0"/>
+                    <param name="defaultGuideOption" value="off"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="fd2f7df7-6d40-445e-90ee-ffa183c9d920" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="SCIENCE"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="19a0472b-b883-4f65-b3a9-45a0972a9034" name="BP-NIRI-3">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="NIRI f/6 Phot Std"/>
+          <param name="libraryId" value="3"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="1f0b55ca-db49-4031-941a-df187ff58b0f" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="PERCENT_50"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2007B-1" subtype="NIRI" key="8450d3f8-cd6a-4897-a09d-86fa5d50d64a" name="NIRI">
+          <paramset name="NIRI" kind="dataObj">
+            <param name="exposureTime" value="1.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="10"/>
+            <param name="camera" value="F6"/>
+            <param name="disperser" value="NONE"/>
+            <param name="mask" value="MASK_IMAGING"/>
+            <param name="filter" value="BBF_J"/>
+            <param name="beamSplitter" value="f6"/>
+            <param name="readMode" value="IMAG_1TO25"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="builtinROI" value="FULL_FRAME"/>
+            <param name="fastModeExposures" value="1"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="6cecfca0-2a4b-4c9d-91ba-2175a995cf1c" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="649265f2-3c7f-4e17-878a-ab9fb4353012" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="dd4558f5-8bc0-4524-9404-832b273877ae" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIRI" key="591b631e-90a2-48ed-81bf-f0331141b98f" name="NIRI Sequence">
+            <paramset name="NIRI Sequence" kind="dataObj">
+              <param name="coadds" value="10"/>
+              <param name="exposureTime" value="1.0"/>
+              <param name="filter" value="BBF_J"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="d1e9992f-1c89-47ab-b453-745698564fd9" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <paramset name="offsets">
+                  <paramset name="Offset4" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset0" sequence="1">
+                    <param name="p" value="30.0"/>
+                    <param name="q" value="30.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset1" sequence="2">
+                    <param name="p" value="-30.0"/>
+                    <param name="q" value="30.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset2" sequence="3">
+                    <param name="p" value="-30.0"/>
+                    <param name="q" value="-30.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset3" sequence="4">
+                    <param name="p" value="30.0"/>
+                    <param name="q" value="-30.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="188de1c2-03a7-4dd2-8cec-65862891bbec" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="PARTNER_CAL"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="6ef5e27d-d974-42bd-a911-6c18e93818b3" name="BP-NIRI-4">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="NIRI f/6 Flats &amp; Darks"/>
+          <param name="libraryId" value="4"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="a22a046a-3d74-4acc-ac1d-aec67ec9f576" name="Targets">
+          <paramset name="Targets" kind="dataObj">
+            <paramset name="targetEnv">
+              <paramset name="base">
+                <param name="name" value="GCAL"/>
+                <param name="system" value="J2000"/>
+                <param name="epoch" value="2000.0" units="years"/>
+                <param name="brightness" value=""/>
+                <param name="c1" value="00:00:00.000"/>
+                <param name="c2" value="00:00:00.00"/>
+                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+                <param name="parallax" value="0.0" units="arcsecs"/>
+                <param name="rv" value="0.0" units="km/sec"/>
+                <param name="wavelength" value="-1.0" units="angstroms"/>
+              </paramset>
+              <paramset name="guideEnv">
+                <param name="active">
+                  <value sequence="0">NIRI OIWFS</value>
+                  <value sequence="1">PWFS1</value>
+                  <value sequence="2">PWFS2</value>
+                </param>
+                <param name="selected"/>
+              </paramset>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2007B-1" subtype="NIRI" key="993ca9ea-3a4c-4bbd-889d-b0e04929d058" name="NIRI">
+          <paramset name="NIRI" kind="dataObj">
+            <param name="exposureTime" value="60.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="camera" value="F6"/>
+            <param name="disperser" value="NONE"/>
+            <param name="mask" value="MASK_IMAGING"/>
+            <param name="filter" value="BBF_J"/>
+            <param name="beamSplitter" value="f6"/>
+            <param name="readMode" value="IMAG_SPEC_NB"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="builtinROI" value="FULL_FRAME"/>
+            <param name="fastModeExposures" value="1"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="d9011628-6c7a-497c-9ec3-c16c35656091" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="bc1d11e6-adf1-475e-95dd-27ea5b981472" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="ef91773d-e60b-4fe2-8140-6cd0da56ae06" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIRI" key="f6f07559-410c-4a45-bcb7-f394697fd8fe" name="NIRI Sequence">
+            <paramset name="NIRI Sequence" kind="dataObj">
+              <param name="title" value="NIRI: Flats"/>
+              <param name="filter" value="BBF_J"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="edad5a3e-5725-4df4-b5c6-945836bbcbee" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIRI" key="22d4c7d6-3af1-44b8-a178-35259ce92b52" name="NIRI Sequence">
+            <paramset name="NIRI Sequence" kind="dataObj">
+              <param name="readMode" value="IMAG_SPEC_NB"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="dark" key="c5809e74-25d0-4210-a7ce-08ee797030e6" name="Manual Dark">
+              <paramset name="Manual Dark" kind="dataObj">
+                <param name="repeatCount" value="10"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="60.0"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+    </container>
+    <container kind="group" type="Group" version="2009A-1" subtype="group" key="cc64672a-39ab-4ac0-93ca-f4e3fe461998" name="Group">
+      <paramset name="Group" kind="dataObj">
+        <param name="title" value="NIRI f/14"/>
+        <param name="GroupType" value="TYPE_FOLDER"/>
+        <param name="libraryId" value="NIRI f/14"/>
+      </paramset>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="2edd9ccc-465c-49e8-b281-bc108f7c2072" name="BP-NIRI-5">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="NIRI f/14 Sparse Field / Point Source"/>
+          <param name="libraryId" value="5"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2007B-1" subtype="NIRI" key="341856f6-1d05-4998-a308-d9e3092fc2bd" name="NIRI">
+          <paramset name="NIRI" kind="dataObj">
+            <param name="exposureTime" value="60.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="camera" value="F14"/>
+            <param name="disperser" value="NONE"/>
+            <param name="mask" value="MASK_IMAGING"/>
+            <param name="filter" value="BBF_J"/>
+            <param name="beamSplitter" value="f6"/>
+            <param name="readMode" value="IMAG_SPEC_NB"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="builtinROI" value="FULL_FRAME"/>
+            <param name="fastModeExposures" value="1"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="5174c912-515e-4f58-ae77-a97627163dff" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="5dd3d379-0076-46ec-ba05-b3c075407444" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="79f3660e-c5f7-432f-81f8-1a3f59f6a709" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIRI" key="4cf6cbe5-4899-488d-9e24-c93702805e4e" name="NIRI Sequence">
+            <paramset name="NIRI Sequence" kind="dataObj">
+              <param name="title" value="NIRI Sequence"/>
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="60.0"/>
+              <param name="filter" value="BBF_J"/>
+              <param name="readMode" value="IMAG_SPEC_NB"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="42b73d9c-8395-420e-a621-7f81a346284a" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="Offsets"/>
+                <paramset name="offsets">
+                  <paramset name="Offset4" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset0" sequence="1">
+                    <param name="p" value="5.0"/>
+                    <param name="q" value="5.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset1" sequence="2">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="5.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset2" sequence="3">
+                    <param name="p" value="-5.0"/>
+                    <param name="q" value="5.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset3" sequence="4">
+                    <param name="p" value="-5.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset5" sequence="5">
+                    <param name="p" value="5.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset6" sequence="6">
+                    <param name="p" value="5.0"/>
+                    <param name="q" value="-5.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset7" sequence="7">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="-5.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset8" sequence="8">
+                    <param name="p" value="-5.0"/>
+                    <param name="q" value="-5.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="66923176-4779-4094-81ad-d0582b9d33d1" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="SCIENCE"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="d990632a-33d3-4e31-a84d-7f6494a4692d" name="BP-NIRI-6">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="NIRI f/14 Crowded Field / Extended Object"/>
+          <param name="libraryId" value="6"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2007B-1" subtype="NIRI" key="b416cbce-b94e-4516-8f61-450d85b14a9a" name="NIRI">
+          <paramset name="NIRI" kind="dataObj">
+            <param name="exposureTime" value="60.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="camera" value="F14"/>
+            <param name="disperser" value="NONE"/>
+            <param name="mask" value="MASK_IMAGING"/>
+            <param name="filter" value="BBF_J"/>
+            <param name="beamSplitter" value="f6"/>
+            <param name="readMode" value="IMAG_SPEC_NB"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="builtinROI" value="FULL_FRAME"/>
+            <param name="fastModeExposures" value="1"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="41bf3a13-d248-45be-b41e-d7baa7d911af" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="3e1c2743-ee17-45eb-8cf1-7fbcc4b72194" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="398cbd12-9fbe-430e-81e4-816f6b20f2c6" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIRI" key="b5e866f0-7e42-4c81-8cb0-9ce0435f4a16" name="NIRI Sequence">
+            <paramset name="NIRI Sequence" kind="dataObj">
+              <param name="title" value="NIRI Sequence"/>
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="60.0"/>
+              <param name="filter" value="BBF_J"/>
+              <param name="readMode" value="IMAG_SPEC_NB"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="07059544-9fee-4986-8469-56f3315e3ba0" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="Offsets: src"/>
+                <paramset name="offsets">
+                  <paramset name="Offset4" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset0" sequence="1">
+                    <param name="p" value="2.5"/>
+                    <param name="q" value="2.5"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset2" sequence="2">
+                    <param name="p" value="-2.5"/>
+                    <param name="q" value="2.5"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset6" sequence="3">
+                    <param name="p" value="2.5"/>
+                    <param name="q" value="-2.5"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset8" sequence="4">
+                    <param name="p" value="-2.5"/>
+                    <param name="q" value="-2.5"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="e00d1f18-6336-45b9-94cb-49441daa13d1" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="SCIENCE"/>
+                </paramset>
+              </container>
+            </container>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="2c3c680b-0862-4c9b-afec-2268fac9e262" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="Offsets: sky"/>
+                <paramset name="offsets">
+                  <paramset name="Offset4" sequence="0">
+                    <param name="p" value="78.0"/>
+                    <param name="q" value="78.0"/>
+                    <param name="defaultGuideOption" value="off"/>
+                  </paramset>
+                  <paramset name="Offset0" sequence="1">
+                    <param name="p" value="90.0"/>
+                    <param name="q" value="90.0"/>
+                    <param name="defaultGuideOption" value="off"/>
+                  </paramset>
+                  <paramset name="Offset2" sequence="2">
+                    <param name="p" value="66.0"/>
+                    <param name="q" value="90.0"/>
+                    <param name="defaultGuideOption" value="off"/>
+                  </paramset>
+                  <paramset name="Offset6" sequence="3">
+                    <param name="p" value="90.0"/>
+                    <param name="q" value="66.0"/>
+                    <param name="defaultGuideOption" value="off"/>
+                  </paramset>
+                  <paramset name="Offset8" sequence="4">
+                    <param name="p" value="66.0"/>
+                    <param name="q" value="66.0"/>
+                    <param name="defaultGuideOption" value="off"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="beac4456-73ce-4b46-88a8-ad95fac92aa3" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="SCIENCE"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="bc9751dd-a7cb-4486-8db1-9acf8d0ea233" name="BP-NIRI-7">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="NIRI f/14 Phot Std"/>
+          <param name="libraryId" value="7"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="d6432180-9309-4765-867f-5d2453e4189e" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="PERCENT_50"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2007B-1" subtype="NIRI" key="2524b841-f403-4fa9-8b4e-0588feb60dd8" name="NIRI">
+          <paramset name="NIRI" kind="dataObj">
+            <param name="exposureTime" value="5.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="camera" value="F14"/>
+            <param name="disperser" value="NONE"/>
+            <param name="mask" value="MASK_IMAGING"/>
+            <param name="filter" value="BBF_J"/>
+            <param name="beamSplitter" value="f6"/>
+            <param name="readMode" value="IMAG_1TO25"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="builtinROI" value="FULL_FRAME"/>
+            <param name="fastModeExposures" value="1"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="7243fea8-dc8b-4e41-ba05-7feb1ef547d7" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="227cefb3-64f8-4d43-b9ca-7c5e2269b3d0" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="ed3eecf8-cd92-4b27-8ab8-1b08d6afed4b" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIRI" key="025e2b0d-45b5-4cf4-bca2-1f31aaa5b453" name="NIRI Sequence">
+            <paramset name="NIRI Sequence" kind="dataObj">
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="5.0"/>
+              <param name="filter" value="BBF_J"/>
+              <param name="readMode" value="IMAG_1TO25"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="f1d7d56a-5619-4c10-80ed-21e38bc374a8" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <paramset name="offsets">
+                  <paramset name="Offset4" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset0" sequence="1">
+                    <param name="p" value="12.0"/>
+                    <param name="q" value="12.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset1" sequence="2">
+                    <param name="p" value="-12.0"/>
+                    <param name="q" value="12.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset2" sequence="3">
+                    <param name="p" value="-12.0"/>
+                    <param name="q" value="-12.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset3" sequence="4">
+                    <param name="p" value="12.0"/>
+                    <param name="q" value="-12.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="51ae3c63-6541-440c-a0aa-ab749ebd9ef2" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="PARTNER_CAL"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="a6cb02f8-004a-4251-98aa-82067890d364" name="BP-NIRI-8">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="NIRI f/14 Flats &amp; Darks"/>
+          <param name="libraryId" value="8"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="fd2dca63-bad1-443c-b23f-284308174c11" name="Targets">
+          <paramset name="Targets" kind="dataObj">
+            <paramset name="targetEnv">
+              <paramset name="base">
+                <param name="name" value="GCAL"/>
+                <param name="system" value="J2000"/>
+                <param name="epoch" value="2000.0" units="years"/>
+                <param name="brightness" value=""/>
+                <param name="c1" value="00:00:00.000"/>
+                <param name="c2" value="00:00:00.00"/>
+                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+                <param name="parallax" value="0.0" units="arcsecs"/>
+                <param name="rv" value="0.0" units="km/sec"/>
+                <param name="wavelength" value="-1.0" units="angstroms"/>
+              </paramset>
+              <paramset name="guideEnv">
+                <param name="active">
+                  <value sequence="0">NIRI OIWFS</value>
+                  <value sequence="1">PWFS1</value>
+                  <value sequence="2">PWFS2</value>
+                </param>
+                <param name="selected"/>
+              </paramset>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2007B-1" subtype="NIRI" key="24664efe-2eea-4fcb-876c-ce1b74da50ed" name="NIRI">
+          <paramset name="NIRI" kind="dataObj">
+            <param name="exposureTime" value="60.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="camera" value="F14"/>
+            <param name="disperser" value="NONE"/>
+            <param name="mask" value="MASK_IMAGING"/>
+            <param name="filter" value="BBF_J"/>
+            <param name="beamSplitter" value="f6"/>
+            <param name="readMode" value="IMAG_SPEC_NB"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="builtinROI" value="FULL_FRAME"/>
+            <param name="fastModeExposures" value="1"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="0547be13-6163-4389-bfe8-bed2a4ca74ec" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="bbeb3548-bf7c-4b20-9f27-433527a6b7ff" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="c59d7864-d06b-4f2d-8d0e-adc2ed8fca70" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIRI" key="ccf3bfda-a9ae-4972-b7ae-8279c35b9c49" name="NIRI Sequence">
+            <paramset name="NIRI Sequence" kind="dataObj">
+              <param name="title" value="NIRI: Flats"/>
+              <param name="filter" value="BBF_J"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="3134d4c8-9f07-4a1c-8589-6287e0271cf9" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIRI" key="1aa58339-c20d-4894-a1fd-af6df33880c5" name="NIRI Sequence">
+            <paramset name="NIRI Sequence" kind="dataObj">
+              <param name="readMode" value="IMAG_SPEC_NB"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="dark" key="636e817b-202c-4da0-8cdf-6abed180e8c1" name="Manual Dark">
+              <paramset name="Manual Dark" kind="dataObj">
+                <param name="repeatCount" value="10"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="60.0"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+    </container>
+    <container kind="group" type="Group" version="2009A-1" subtype="group" key="170b6315-e007-4867-a73a-70e952c93e3b" name="Group">
+      <paramset name="Group" kind="dataObj">
+        <param name="title" value="NIRI f/32"/>
+        <param name="GroupType" value="TYPE_FOLDER"/>
+        <param name="libraryId" value="NIRI f/32"/>
+      </paramset>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="4772caaf-6931-4bf6-ae1f-b36decca510e" name="BP-NIRI-9">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="NIRI f/32 Acquisition"/>
+          <param name="libraryId" value="9"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2007B-1" subtype="NIRI" key="29ddab73-57aa-4d90-bcd1-3842b6476570" name="NIRI">
+          <paramset name="NIRI" kind="dataObj">
+            <param name="exposureTime" value="10.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="camera" value="F32"/>
+            <param name="disperser" value="NONE"/>
+            <param name="mask" value="MASK_IMAGING"/>
+            <param name="filter" value="BBF_J"/>
+            <param name="beamSplitter" value="f6"/>
+            <param name="readMode" value="IMAG_1TO25"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="builtinROI" value="FULL_FRAME"/>
+            <param name="fastModeExposures" value="1"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="470bd546-a91c-4b66-8f46-ae8386cc0e5a" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="21559fd6-ec90-4b45-8e4e-657a7efe9590" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="a4836368-be45-4070-9773-c058da6a9bb9" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="a4b900d8-6a09-42a3-abf5-7ebc14d46528" name="Offset">
+            <paramset name="Offset" kind="dataObj">
+              <param name="title" value="Offset: 0,0"/>
+              <paramset name="offsets">
+                <paramset name="Offset0" sequence="0">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="0.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+              </paramset>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="a0256533-5a4d-4486-9433-2c0f62eb83f5" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="ACQ"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="e54a17d7-7a01-48b4-a9ab-9cf5a6305e81" name="BP-NIRI-10">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="NIRI f/32 Sparse Field / Point Source"/>
+          <param name="libraryId" value="10"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2007B-1" subtype="NIRI" key="65ebfff0-193f-4d5c-ab45-a59204a3eac2" name="NIRI">
+          <paramset name="NIRI" kind="dataObj">
+            <param name="exposureTime" value="60.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="camera" value="F32"/>
+            <param name="disperser" value="NONE"/>
+            <param name="mask" value="MASK_IMAGING"/>
+            <param name="filter" value="BBF_J"/>
+            <param name="beamSplitter" value="f6"/>
+            <param name="readMode" value="IMAG_SPEC_NB"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="builtinROI" value="FULL_FRAME"/>
+            <param name="fastModeExposures" value="1"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="5ee0ed43-e317-47b6-bd05-e621e02b584d" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="d625c35b-2379-4eaa-8677-1b558146db7f" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="4a378d2c-7622-4bfd-a4fa-c827f9906138" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIRI" key="4f3936a8-a590-4a31-ace7-96c27dae49e6" name="NIRI Sequence">
+            <paramset name="NIRI Sequence" kind="dataObj">
+              <param name="title" value="NIRI Sequence"/>
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="60.0"/>
+              <param name="filter" value="BBF_J"/>
+              <param name="readMode" value="IMAG_SPEC_NB"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="6e7bc092-f93b-40d2-91aa-69e5d7f3b3e9" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="Offsets: Sparse Field / Point Source"/>
+                <paramset name="offsets">
+                  <paramset name="Offset4" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset0" sequence="1">
+                    <param name="p" value="2.2"/>
+                    <param name="q" value="2.2"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset1" sequence="2">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="2.2"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset2" sequence="3">
+                    <param name="p" value="-2.2"/>
+                    <param name="q" value="2.2"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset3" sequence="4">
+                    <param name="p" value="-2.2"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset5" sequence="5">
+                    <param name="p" value="2.2"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset6" sequence="6">
+                    <param name="p" value="2.2"/>
+                    <param name="q" value="-2.2"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset7" sequence="7">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="-2.2"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset8" sequence="8">
+                    <param name="p" value="-2.2"/>
+                    <param name="q" value="-2.2"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="77a23583-3b6c-430f-9fc8-9f34e065efe6" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="SCIENCE"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="b25adb11-a798-4aee-9050-f322e18897be" name="BP-NIRI-11">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="NIRI f/32 Crowded Field / Extended Object"/>
+          <param name="libraryId" value="11"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2007B-1" subtype="NIRI" key="caf29074-4ba7-4a3a-adb5-5e22ec9923e2" name="NIRI">
+          <paramset name="NIRI" kind="dataObj">
+            <param name="exposureTime" value="60.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="camera" value="F32"/>
+            <param name="disperser" value="NONE"/>
+            <param name="mask" value="MASK_IMAGING"/>
+            <param name="filter" value="BBF_J"/>
+            <param name="beamSplitter" value="f6"/>
+            <param name="readMode" value="IMAG_SPEC_NB"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="builtinROI" value="FULL_FRAME"/>
+            <param name="fastModeExposures" value="1"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="471b2a65-011a-40c4-a28c-2c6812e6c662" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="8d9b2164-f1a2-4754-b16b-43655295524d" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="6325a8d9-103b-443f-8afe-6990cc37bb71" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIRI" key="aaddf8d6-9250-4c3a-b31c-b25706cc92c1" name="NIRI Sequence">
+            <paramset name="NIRI Sequence" kind="dataObj">
+              <param name="title" value="NIRI Sequence"/>
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="60.0"/>
+              <param name="filter" value="BBF_J"/>
+              <param name="readMode" value="IMAG_SPEC_NB"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="d1433ace-8f8c-4949-95f5-30a93f71381d" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="Offsets: src"/>
+                <paramset name="offsets">
+                  <paramset name="Offset4" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset0" sequence="1">
+                    <param name="p" value="1.1"/>
+                    <param name="q" value="1.1"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset2" sequence="2">
+                    <param name="p" value="-1.1"/>
+                    <param name="q" value="1.1"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset6" sequence="3">
+                    <param name="p" value="1.1"/>
+                    <param name="q" value="-1.1"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset8" sequence="4">
+                    <param name="p" value="-1.1"/>
+                    <param name="q" value="-1.1"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="e9b2dbd4-b7e6-4b44-8cd5-155e30af4de1" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="SCIENCE"/>
+                </paramset>
+              </container>
+            </container>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="9f2fb819-32d7-44a8-9b7a-687af0c73b87" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="Offsets: sky"/>
+                <paramset name="offsets">
+                  <paramset name="Offset4" sequence="0">
+                    <param name="p" value="38.0"/>
+                    <param name="q" value="38.0"/>
+                    <param name="defaultGuideOption" value="off"/>
+                  </paramset>
+                  <paramset name="Offset0" sequence="1">
+                    <param name="p" value="44.0"/>
+                    <param name="q" value="44.0"/>
+                    <param name="defaultGuideOption" value="off"/>
+                  </paramset>
+                  <paramset name="Offset2" sequence="2">
+                    <param name="p" value="32.0"/>
+                    <param name="q" value="44.0"/>
+                    <param name="defaultGuideOption" value="off"/>
+                  </paramset>
+                  <paramset name="Offset6" sequence="3">
+                    <param name="p" value="44.0"/>
+                    <param name="q" value="32.0"/>
+                    <param name="defaultGuideOption" value="off"/>
+                  </paramset>
+                  <paramset name="Offset8" sequence="4">
+                    <param name="p" value="32.0"/>
+                    <param name="q" value="32.0"/>
+                    <param name="defaultGuideOption" value="off"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="af61555c-4c4e-4c88-9608-3581e7a24db1" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="SCIENCE"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="61d5b9fd-941c-4ab2-af69-5a548516dcd3" name="BP-NIRI-12">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="NIRI f/32 Phot Std"/>
+          <param name="libraryId" value="12"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="daed42b7-0d12-42cb-9b03-96882b2ced3e" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="PERCENT_50"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2007B-1" subtype="NIRI" key="ead954d4-9864-4c2f-b11f-499b52802448" name="NIRI">
+          <paramset name="NIRI" kind="dataObj">
+            <param name="exposureTime" value="5.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="camera" value="F32"/>
+            <param name="disperser" value="NONE"/>
+            <param name="mask" value="MASK_IMAGING"/>
+            <param name="filter" value="BBF_J"/>
+            <param name="beamSplitter" value="f6"/>
+            <param name="readMode" value="IMAG_1TO25"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="builtinROI" value="FULL_FRAME"/>
+            <param name="fastModeExposures" value="1"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="4c624a53-c472-4ef5-811a-be9c7afe00ef" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="ba853e51-238a-411f-81c4-9f30fbe1c000" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="97eb1135-e760-4efd-9acb-351fca3275ae" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIRI" key="f95ab91d-e9c2-43d8-81fd-495f2832bb4a" name="NIRI Sequence">
+            <paramset name="NIRI Sequence" kind="dataObj">
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="5.0"/>
+              <param name="filter" value="BBF_J"/>
+              <param name="readMode" value="IMAG_1TO25"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="7945b7f4-c563-4d74-8be1-98e1273c0061" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <paramset name="offsets">
+                  <paramset name="Offset4" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset0" sequence="1">
+                    <param name="p" value="6.0"/>
+                    <param name="q" value="6.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset1" sequence="2">
+                    <param name="p" value="-6.0"/>
+                    <param name="q" value="6.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset2" sequence="3">
+                    <param name="p" value="-6.0"/>
+                    <param name="q" value="-6.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset3" sequence="4">
+                    <param name="p" value="6.0"/>
+                    <param name="q" value="-6.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="1ec27a0d-0ed5-4bd5-a785-a8dfc2a3b021" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="PARTNER_CAL"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="b7c65ada-4d25-4f30-8bfb-3aec84d44570" name="BP-NIRI-13">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="NIRI f/32 Flats &amp; Darks"/>
+          <param name="libraryId" value="13"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="f19f81e2-e757-423b-add2-433abfbe1118" name="Targets">
+          <paramset name="Targets" kind="dataObj">
+            <paramset name="targetEnv">
+              <paramset name="base">
+                <param name="name" value="GCAL"/>
+                <param name="system" value="J2000"/>
+                <param name="epoch" value="2000.0" units="years"/>
+                <param name="brightness" value=""/>
+                <param name="c1" value="00:00:00.000"/>
+                <param name="c2" value="00:00:00.00"/>
+                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+                <param name="parallax" value="0.0" units="arcsecs"/>
+                <param name="rv" value="0.0" units="km/sec"/>
+                <param name="wavelength" value="-1.0" units="angstroms"/>
+              </paramset>
+              <paramset name="guideEnv">
+                <param name="active">
+                  <value sequence="0">NIRI OIWFS</value>
+                  <value sequence="1">PWFS1</value>
+                  <value sequence="2">PWFS2</value>
+                </param>
+                <param name="selected"/>
+              </paramset>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2007B-1" subtype="NIRI" key="9163464d-aac0-4269-a2c7-1829e9881448" name="NIRI">
+          <paramset name="NIRI" kind="dataObj">
+            <param name="exposureTime" value="60.0"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="camera" value="F32"/>
+            <param name="disperser" value="NONE"/>
+            <param name="mask" value="MASK_IMAGING"/>
+            <param name="filter" value="BBF_J"/>
+            <param name="beamSplitter" value="f6"/>
+            <param name="readMode" value="IMAG_SPEC_NB"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="builtinROI" value="FULL_FRAME"/>
+            <param name="fastModeExposures" value="1"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="ed512b34-b190-46cd-a1be-692e4d56457a" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="d936a923-759b-4177-84f6-84964b8fab0a" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="eabb65a4-2b56-4966-a2e2-d2b15efc82f3" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIRI" key="c5ee922f-4bfe-4d21-a0d0-64f875e44cfb" name="NIRI Sequence">
+            <paramset name="NIRI Sequence" kind="dataObj">
+              <param name="title" value="NIRI: Flats"/>
+              <param name="filter" value="BBF_J"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="1371b433-869c-4b97-a61d-4a76c7a7d4ef" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="NIRI" key="ed2ff7de-0afc-4567-b5b8-8077291d39f0" name="NIRI Sequence">
+            <paramset name="NIRI Sequence" kind="dataObj">
+              <param name="readMode" value="IMAG_SPEC_NB"/>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="dark" key="0d660ae3-d520-47e3-bb0f-8571aea55bc4" name="Manual Dark">
+              <paramset name="Manual Dark" kind="dataObj">
+                <param name="repeatCount" value="10"/>
+                <param name="class" value="DAY_CAL"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="60.0"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+    </container>
+  </container>
+  <container kind="versions" type="versions" version="1.0">
+    <paramset name="node">
+      <param name="key" value="a4836368-be45-4070-9773-c058da6a9bb9"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="8d9b2164-f1a2-4754-b16b-43655295524d"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="bc9751dd-a7cb-4486-8db1-9acf8d0ea233"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3e1c2743-ee17-45eb-8cf1-7fbcc4b72194"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="1ec27a0d-0ed5-4bd5-a785-a8dfc2a3b021"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="591b631e-90a2-48ed-81bf-f0331141b98f"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5dd3d379-0076-46ec-ba05-b3c075407444"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5ee0ed43-e317-47b6-bd05-e621e02b584d"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4772caaf-6931-4bf6-ae1f-b36decca510e"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9163464d-aac0-4269-a2c7-1829e9881448"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="1839e25b-00b3-48b1-bcc7-425ba5945bc3"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ed512b34-b190-46cd-a1be-692e4d56457a"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7f639266-4256-4eaf-ab1c-002a4c6a3d4a"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f3d15eb1-629e-4240-a19b-2c5f26e0af76"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b54edce7-c106-43af-8c2a-61b5ef428698"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ed3eecf8-cd92-4b27-8ab8-1b08d6afed4b"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7945b7f4-c563-4d74-8be1-98e1273c0061"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c5809e74-25d0-4210-a7ce-08ee797030e6"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5174c912-515e-4f58-ae77-a97627163dff"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="cf745c08-2bf3-4a7e-9f27-b400bf5b9dc7"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f9a36416-7ea5-417d-a9df-4315e8ce4e93"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6ef5e27d-d974-42bd-a911-6c18e93818b3"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ed2ff7de-0afc-4567-b5b8-8077291d39f0"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="66923176-4779-4094-81ad-d0582b9d33d1"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6e7bc092-f93b-40d2-91aa-69e5d7f3b3e9"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="969b02ed-9fbf-4ddd-965c-e9618068ca2b"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e54a17d7-7a01-48b4-a9ab-9cf5a6305e81"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b25adb11-a798-4aee-9050-f322e18897be"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="51ae3c63-6541-440c-a0aa-ab749ebd9ef2"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b5e866f0-7e42-4c81-8cb0-9ce0435f4a16"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="07059544-9fee-4986-8469-56f3315e3ba0"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="aaddf8d6-9250-4c3a-b31c-b25706cc92c1"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="65ebfff0-193f-4d5c-ab45-a59204a3eac2"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ae70095f-f618-4eba-b56a-f5c893e16833"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d625c35b-2379-4eaa-8677-1b558146db7f"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ccf3bfda-a9ae-4972-b7ae-8279c35b9c49"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c59d7864-d06b-4f2d-8d0e-adc2ed8fca70"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7243fea8-dc8b-4e41-ba05-7feb1ef547d7"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="597dde4e-9f68-4497-b38e-2804fc245f59"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="af61555c-4c4e-4c88-9608-3581e7a24db1"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="80828144-da40-4f24-8471-697c14804493"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="0d660ae3-d520-47e3-bb0f-8571aea55bc4"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="025e2b0d-45b5-4cf4-bca2-1f31aaa5b453"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d990632a-33d3-4e31-a84d-7f6494a4692d"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4b3df13a-25b2-49bf-aa19-d252550e889f"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="1f0b55ca-db49-4031-941a-df187ff58b0f"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c5ee922f-4bfe-4d21-a0d0-64f875e44cfb"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ead954d4-9864-4c2f-b11f-499b52802448"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ee2f5426-990c-4115-ac83-b9a8c5afc83b"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="61d5b9fd-941c-4ab2-af69-5a548516dcd3"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4cf6cbe5-4899-488d-9e24-c93702805e4e"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6325a8d9-103b-443f-8afe-6990cc37bb71"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6cecfca0-2a4b-4c9d-91ba-2175a995cf1c"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="993ca9ea-3a4c-4bbd-889d-b0e04929d058"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d9011628-6c7a-497c-9ec3-c16c35656091"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="fd2f7df7-6d40-445e-90ee-ffa183c9d920"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9eae6b09-ffa8-4229-b6ce-d6bccf2ddfb3"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="bc1d11e6-adf1-475e-95dd-27ea5b981472"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6e6c4799-64ef-4f6d-be01-007044718924"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2c3c680b-0862-4c9b-afec-2268fac9e262"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="bbeb3548-bf7c-4b20-9f27-433527a6b7ff"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4395e351-fb7d-4b17-b554-596d24459131"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f19f81e2-e757-423b-add2-433abfbe1118"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ba853e51-238a-411f-81c4-9f30fbe1c000"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4a378d2c-7622-4bfd-a4fa-c827f9906138"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f1d7d56a-5619-4c10-80ed-21e38bc374a8"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d936a923-759b-4177-84f6-84964b8fab0a"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="341856f6-1d05-4998-a308-d9e3092fc2bd"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="29ddab73-57aa-4d90-bcd1-3842b6476570"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="24664efe-2eea-4fcb-876c-ce1b74da50ed"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e00d1f18-6336-45b9-94cb-49441daa13d1"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="beac4456-73ce-4b46-88a8-ad95fac92aa3"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="dd4558f5-8bc0-4524-9404-832b273877ae"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f95ab91d-e9c2-43d8-81fd-495f2832bb4a"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b7c65ada-4d25-4f30-8bfb-3aec84d44570"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="21559fd6-ec90-4b45-8e4e-657a7efe9590"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="398cbd12-9fbe-430e-81e4-816f6b20f2c6"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2524b841-f403-4fa9-8b4e-0588feb60dd8"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d6432180-9309-4765-867f-5d2453e4189e"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="471b2a65-011a-40c4-a28c-2c6812e6c662"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="42b73d9c-8395-420e-a621-7f81a346284a"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="22d4c7d6-3af1-44b8-a178-35259ce92b52"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a6cb02f8-004a-4251-98aa-82067890d364"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="79f3660e-c5f7-432f-81f8-1a3f59f6a709"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2c3752d8-5604-4286-92d0-defb8475149d"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9f2fb819-32d7-44a8-9b7a-687af0c73b87"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="470bd546-a91c-4b66-8f46-ae8386cc0e5a"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="636e817b-202c-4da0-8cdf-6abed180e8c1"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="cc64672a-39ab-4ac0-93ca-f4e3fe461998"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ef91773d-e60b-4fe2-8140-6cd0da56ae06"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3134d4c8-9f07-4a1c-8589-6287e0271cf9"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4f3936a8-a590-4a31-ace7-96c27dae49e6"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f6f07559-410c-4a45-bcb7-f394697fd8fe"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e9b2dbd4-b7e6-4b44-8cd5-155e30af4de1"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a4b900d8-6a09-42a3-abf5-7ebc14d46528"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="1aa58339-c20d-4894-a1fd-af6df33880c5"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2b8c8aa4-3f96-4df3-96b8-6a57480762a1"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="0547be13-6163-4389-bfe8-bed2a4ca74ec"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="8450d3f8-cd6a-4897-a09d-86fa5d50d64a"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="edad5a3e-5725-4df4-b5c6-945836bbcbee"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="97eb1135-e760-4efd-9acb-351fca3275ae"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b416cbce-b94e-4516-8f61-450d85b14a9a"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4c624a53-c472-4ef5-811a-be9c7afe00ef"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e2cf736c-6451-4aa9-a1f6-32363d7d8c89"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="caf29074-4ba7-4a3a-adb5-5e22ec9923e2"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="daed42b7-0d12-42cb-9b03-96882b2ced3e"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="41bf3a13-d248-45be-b41e-d7baa7d911af"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2edd9ccc-465c-49e8-b281-bc108f7c2072"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7ad194b4-6e30-4065-a740-96e36eda3270"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="649265f2-3c7f-4e17-878a-ab9fb4353012"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="1371b433-869c-4b97-a61d-4a76c7a7d4ef"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="170b6315-e007-4867-a73a-70e952c93e3b"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a22a046a-3d74-4acc-ac1d-aec67ec9f576"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4b4cab82-8fdb-4917-9878-063b2c4c36a0"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d1e9992f-1c89-47ab-b453-745698564fd9"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="188de1c2-03a7-4dd2-8cec-65862891bbec"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="eabb65a4-2b56-4966-a2e2-d2b15efc82f3"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a0256533-5a4d-4486-9433-2c0f62eb83f5"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d1433ace-8f8c-4949-95f5-30a93f71381d"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="cdd1cec4-eead-4e77-af9e-ee48de9c837b"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="227cefb3-64f8-4d43-b9ca-7c5e2269b3d0"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="fd2dca63-bad1-443c-b23f-284308174c11"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="19a0472b-b883-4f65-b3a9-45a0972a9034"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="77a23583-3b6c-430f-9fc8-9f34e065efe6"/>
+      <param name="9b8180d4-e4d4-4f71-9e12-1db3efbf5cd0" value="1"/>
+    </paramset>
+  </container>
+</document>

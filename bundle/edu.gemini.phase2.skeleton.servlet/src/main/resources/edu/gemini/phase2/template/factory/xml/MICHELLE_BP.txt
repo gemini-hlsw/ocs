@@ -1,0 +1,31 @@
+Instrument: Michelle
+Blueprint : MICHELLE_BP.xml
+Version May 10, updated by Bryan M
+
+**** IF MODE == IMAGING ****
+
+INCLUDE {1} - {3} in a Target Group
+	SET FILTER FROM PI INTO MICHELLE ITERATOR
+	SET POLARIMETRY FROM PI
+	IF POLARIMETRY == YES INCLUDE note 'Polarimetry' at top 
+	level of the program (only neeed once)
+
+**** IF MODE == SPECTROSCOPY ****
+
+INCLUDE note 'README FOR SPECTROSCOPY' at top level of program (only
+needed once)
+INCLUDE {4} - {12} in a Target Group
+	SET FPM FROM PI 
+	SET DISPERSER FROM PI
+	
+IF DISPERSER FROM PI == LowN OR LowQ, 
+	SET TOTAL ON-SOURCE TIME TO 600.0 in bp10
+ELSE
+	SET TOTAL ON-SOURCE TIME TO 1800.0 in bp10
+	INCLUDE note 'Using asteroids as standards' at top level of
+	program (only needed once)
+
+
+
+
+	

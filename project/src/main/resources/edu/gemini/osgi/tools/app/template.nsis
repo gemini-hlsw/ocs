@@ -1,0 +1,51 @@
+
+# Defines in the form
+# !define VAR "..."
+# will be inserted above for VERSION, ID, NAME
+
+Name "${NAME} ${VERSION}"
+
+OutFile "${EXE}.exe"
+
+ShowInstDetails show
+ShowUninstDetails show
+
+InstallDir "$PROGRAMFILES\Gemini\${NAME} ${VERSION}"
+InstallDirRegKey HKEY_LOCAL_MACHINE "SOFTWARE\Gemini 8.1m HLPG\${NAME} ${VERSION}" ""
+
+DirText "Where would you like to install ${NAME}?"
+
+ComponentText "This will install ${NAME} ${VERSION}."
+
+Section "-pre"
+	SetOutPath "$INSTDIR"
+	File /r *
+SectionEnd
+
+Section "Default Installation"
+    CreateShortCut "$SMPROGRAMS\Gemini\${NAME}\${NAME} ${VERSION}.lnk" "$INSTDIR\jre\bin\javaw.exe" "${APP_VM_ARGS} -jar ${APP_JAR} ${APP_ARGS}" "$INSTDIR\${ICON}"
+SectionEnd
+
+Section "-post"
+
+	# Set up the uninstaller.
+	WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\Gemini 8.1m HLPG\${NAME} ${VERSION}" "" "$INSTDIR"
+	WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\${NAME} ${VERSION}" "DisplayName" "${NAME} ${VERSION} (remove only)"
+	WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\${NAME} ${VERSION}" "UninstallString" '"$INSTDIR\uninst.exe"'
+	WriteUninstaller "$INSTDIR\uninst.exe"
+
+SectionEnd
+
+UninstallText "This will uninstall ${NAME} ${VERSION}."
+
+Section Uninstall
+
+	DeleteRegKey HKEY_LOCAL_MACHINE "SOFTWARE\Gemini 8.1m HLPG\${NAME} ${VERSION}"
+	DeleteRegKey HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${NAME} ${VERSION}"
+	RMDIR /r "$INSTDIR"
+
+	RMDIR /r "$SMPROGRAMS\Gemini\${NAME}\${NAME} ${VERSION}.lnk"
+
+SectionEnd
+
+

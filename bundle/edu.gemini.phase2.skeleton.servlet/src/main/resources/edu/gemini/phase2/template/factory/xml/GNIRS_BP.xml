@@ -1,0 +1,3537 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
+
+<document>
+  <container kind="program" type="Program" version="2014A-1" subtype="basic" key="f3475742-dd60-42fa-a140-61190961ebef" name="GN-GNIRS-BP">
+    <paramset name="Science Program" kind="dataObj">
+      <param name="title" value="GNIRS PHASE I/II MAPPING BPS"/>
+      <param name="programMode" value="QUEUE"/>
+      <param name="tooType" value="none"/>
+      <param name="programStatus" value="PHASE2"/>
+      <param name="nextObsId" value="1"/>
+      <paramset name="piInfo">
+        <param name="firstName" value="Rachel"/>
+        <param name="lastName" value="Mason"/>
+        <param name="email" value=""/>
+        <param name="phone" value="974-2558"/>
+        <param name="affiliate" value="GEMINI_STAFF"/>
+      </paramset>
+      <param name="contactPerson" value="rmason@gemini.edu, mbusserolle@gemini.edu"/>
+      <param name="queueBand" value="1"/>
+      <param name="isLibrary" value="true"/>
+      <paramset name="timeAcct"/>
+      <param name="awardedTime" value="0.0" units="hours"/>
+      <param name="fetched" value="yes"/>
+      <param name="completed" value="false"/>
+      <param name="notifyPi" value="NO"/>
+    </paramset>
+    <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="c5738902-a553-43cc-a787-114ca3dc103e" name="Note">
+      <paramset name="Note" kind="dataObj">
+        <param name="title" value="Next libID = 23"/>
+        <param name="NoteText" value=""/>
+      </paramset>
+    </container>
+    <container kind="group" type="Group" version="2009A-1" subtype="group" key="6233b13c-ed83-4eb0-b454-db6d50962c59" name="Group">
+      <paramset name="Group" kind="dataObj">
+        <param name="title" value="Imaging BP"/>
+        <param name="GroupType" value="TYPE_FOLDER"/>
+        <param name="libraryId" value=""/>
+      </paramset>
+      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="96965e35-1e4c-418a-af84-463b0d40cd93" name="Note">
+        <paramset name="Note" kind="dataObj">
+          <param name="title" value="Centering and dithering"/>
+          <param name="NoteText">
+            <value>The acquisition script will center the target in the middle of the rectangular portion of the GNIRS field. 
+
+The semicircular portion of the field is below the rectangle. The template science dither patterns are centered at (p,q)=(-3,0) and are small enough to fit in the field of view of the new Y-MK, J-MK and H-MK photometric filters (see www.gemini.edu/sciops/instruments/gnirs/imaging).</value>
+          </param>
+        </paramset>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="49d420b0-0a51-493f-a475-fa9316c8196b" name="GN-GNIRS-BP-237">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Acq: Imaging before standard Bright target"/>
+          <param name="libraryId" value="16"/>
+          <param name="priority" value="MEDIUM"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="38b286d1-afee-4a97-82b8-639ba78e2c0d" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="6201259d-1ae8-455f-a57d-59df200f5d18" name="GNIRS">
+          <paramset name="GNIRS" kind="dataObj">
+            <param name="exposureTime" value="3.0"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="3"/>
+            <param name="pixelScale" value="PS_015"/>
+            <param name="disperser" value="D_32"/>
+            <param name="slitWidth" value="ACQUISITION"/>
+            <param name="crossDispersed" value="NO"/>
+            <param name="wollastonPrism" value="NO"/>
+            <param name="readMode" value="VERY_BRIGHT"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="centralWavelength" value="1.25"/>
+            <param name="acquisitionMirror" value="IN"/>
+            <param name="camera" value="SHORT_BLUE"/>
+            <param name="decker" value="ACQUISITION"/>
+            <param name="filter" value="J"/>
+            <param name="issPort" value="SIDE_LOOKING"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="6cb49ce3-ff6e-4dc7-b9c8-f1bb033b5818" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="0cc1fc9b-8199-42fd-aaf5-c42eb89dc7ac" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="9e7cea6c-25c5-4207-bfa7-a28c19ce82df" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="8e8462a0-e252-49f8-a395-89042d64d17e" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Image of keyhole"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="decker" value="ACQUISITION"/>
+              <param name="exposureTime" value="3.0"/>
+              <param name="filter" value="J"/>
+              <param name="slitWidth" value="ACQUISITION"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="01d95bbb-f04c-4eb1-977c-54eaed55c360" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <paramset name="offsets">
+                  <paramset name="Offset3" sequence="0">
+                    <param name="p" value="10.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="a33e6e52-b046-4f89-9348-47ed5cbfde28" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="ACQ_CAL"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="acf599ec-37ca-413b-b005-075e55ccbbae" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: GNIRS Sequence (centering the target)"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="decker" value="ACQUISITION"/>
+              <param name="exposureTime" value="0.8"/>
+              <param name="filter" value="J"/>
+              <param name="readMode" value="BRIGHT"/>
+              <param name="slitWidth" value="ACQUISITION"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="f9701718-72e2-44d8-80c6-8882f219d4fe" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <paramset name="offsets">
+                  <paramset name="Offset3" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset4" sequence="1">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset5" sequence="2">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="a8cf4df1-88a0-4e84-8727-cd9a221f49d8" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="ACQ_CAL"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="77d3932b-c578-4894-a9d6-d65ebaa7091d" name="GN-GNIRS-BP-238">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Obs: Imaging before standard"/>
+          <param name="libraryId" value="17"/>
+          <param name="priority" value="MEDIUM"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="71cbe674-9d5f-4c97-83f9-07cffc6d61ba" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="9e61fbf4-67e8-4536-a549-61ca3a0b608b" name="GNIRS">
+          <paramset name="GNIRS" kind="dataObj">
+            <param name="exposureTime" value="1.0"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="10"/>
+            <param name="pixelScale" value="PS_015"/>
+            <param name="disperser" value="D_32"/>
+            <param name="slitWidth" value="ACQUISITION"/>
+            <param name="crossDispersed" value="NO"/>
+            <param name="wollastonPrism" value="NO"/>
+            <param name="readMode" value="VERY_BRIGHT"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="centralWavelength" value="1.25"/>
+            <param name="acquisitionMirror" value="IN"/>
+            <param name="camera" value="SHORT_BLUE"/>
+            <param name="decker" value="ACQUISITION"/>
+            <param name="filter" value="J"/>
+            <param name="issPort" value="SIDE_LOOKING"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="2b515e75-1db7-4f46-bd65-eda7b7dce5ca" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="380eaa5c-d376-42a4-99e3-dbbabee8b922" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="ea5db477-b460-42ea-8de9-04b66ed12efb" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="d8238dc0-4d4e-4c31-a79b-ed67b65c31d6" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="decker" value="ACQUISITION"/>
+              <param name="filter" value="J"/>
+              <param name="slitWidth" value="ACQUISITION"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="repeat" key="c8713b43-f46c-4191-815f-325cb0679b9a" name="Repeat">
+              <paramset name="Repeat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+              </paramset>
+              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="4039f13a-7751-4044-a0a5-0e3583660292" name="Offset">
+                <paramset name="Offset" kind="dataObj">
+                  <paramset name="offsets">
+                    <paramset name="Offset0" sequence="0">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="3.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset1" sequence="1">
+                      <param name="p" value="-6.0"/>
+                      <param name="q" value="3.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset2" sequence="2">
+                      <param name="p" value="-6.0"/>
+                      <param name="q" value="-3.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset3" sequence="3">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="-3.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                  </paramset>
+                </paramset>
+                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="91928023-5308-490a-838a-2f5b57b916ab" name="Observe">
+                  <paramset name="Observe" kind="dataObj">
+                    <param name="repeatCount" value="1"/>
+                    <param name="class" value="PARTNER_CAL"/>
+                  </paramset>
+                </container>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="fbe1e4c2-b358-4a09-b65a-050e26d3cbf5" name="GN-GNIRS-BP-239">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Acq: Imaging  Faint target"/>
+          <param name="libraryId" value="18"/>
+          <param name="priority" value="MEDIUM"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="5313319b-1e1e-498c-9822-41e704546cf3" name="GNIRS">
+          <paramset name="GNIRS" kind="dataObj">
+            <param name="exposureTime" value="12.0"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="2"/>
+            <param name="pixelScale" value="PS_015"/>
+            <param name="disperser" value="D_32"/>
+            <param name="slitWidth" value="ACQUISITION"/>
+            <param name="crossDispersed" value="NO"/>
+            <param name="wollastonPrism" value="NO"/>
+            <param name="readMode" value="BRIGHT"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="centralWavelength" value="1.25"/>
+            <param name="acquisitionMirror" value="IN"/>
+            <param name="camera" value="SHORT_BLUE"/>
+            <param name="decker" value="ACQUISITION"/>
+            <param name="filter" value="J"/>
+            <param name="issPort" value="SIDE_LOOKING"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="659e5ff2-10c6-4f74-89a4-1a44c96b645b" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="05fc92a2-1753-4832-ba2c-6a84d78677cc" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="27b7238b-d66b-49f4-b79d-37d58e0f2c95" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="348b70c8-12c9-4fa2-b06d-c94b44a09714" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: GNIRS Sequence (acquisition)"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="decker" value="ACQUISITION"/>
+              <param name="filter" value="J"/>
+              <param name="slitWidth" value="ACQUISITION"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="76d21c8a-650c-4ed7-b522-a2d1d04e93ad" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <paramset name="offsets">
+                  <paramset name="Offset1" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="10.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset2" sequence="1">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset3" sequence="2">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset4" sequence="3">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset5" sequence="4">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="77fdce7f-c3f7-442b-a1d7-eabf5a7c5bf9" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="e08bcb85-cc31-4c03-99b8-9dc9cd7991dd" name="GN-GNIRS-BP-240">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Obs: Imaging science w/ flats"/>
+          <param name="libraryId" value="19"/>
+          <param name="priority" value="MEDIUM"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="abc8bcec-d3db-4917-884c-fa353b4a8b58" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="FLATS TAKEN IMMEDIATELY FOLLOWING SCIENCE"/>
+            <param name="NoteText">
+              <value>The acquisition mirror used for imaging does not go into position reproducibly. For this reason, GCAL flats must be taken at night immediately after the science observations (unless the PI intends to use sky flats). Flats have been embedded in the science template for each filter.   </value>
+            </param>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="83063881-5ec0-4f13-9a83-01bab501ec64" name="GNIRS">
+          <paramset name="GNIRS" kind="dataObj">
+            <param name="exposureTime" value="30.0"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="2"/>
+            <param name="pixelScale" value="PS_015"/>
+            <param name="disperser" value="D_32"/>
+            <param name="slitWidth" value="ACQUISITION"/>
+            <param name="crossDispersed" value="NO"/>
+            <param name="wollastonPrism" value="NO"/>
+            <param name="readMode" value="BRIGHT"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="centralWavelength" value="1.25"/>
+            <param name="acquisitionMirror" value="IN"/>
+            <param name="camera" value="SHORT_BLUE"/>
+            <param name="decker" value="ACQUISITION"/>
+            <param name="filter" value="J"/>
+            <param name="issPort" value="SIDE_LOOKING"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="7b7e42f6-fb7a-4abb-bd2f-341b194e7d01" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="9a7e5e27-8378-47f5-8021-06178efb753c" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="08537c05-1383-41c5-9bf7-82581cd89fd5" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="127d894e-d6a9-4b63-9c76-a0b65a358038" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Science Sequence"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="decker" value="ACQUISITION"/>
+              <param name="filter" value="J"/>
+              <param name="slitWidth" value="ACQUISITION"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="repeat" key="ba3e80a2-d9ad-402e-bfd3-6e54cc393c8c" name="Repeat">
+              <paramset name="Repeat" kind="dataObj">
+                <param name="repeatCount" value="2"/>
+              </paramset>
+              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="a9e4e0ce-10b9-4e71-aff6-0d9514d2dade" name="Offset">
+                <paramset name="Offset" kind="dataObj">
+                  <paramset name="offsets">
+                    <paramset name="Offset0" sequence="0">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="0.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset1" sequence="1">
+                      <param name="p" value="-3.0"/>
+                      <param name="q" value="3.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset2" sequence="2">
+                      <param name="p" value="-6.0"/>
+                      <param name="q" value="3.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset3" sequence="3">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="3.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset4" sequence="4">
+                      <param name="p" value="-6.0"/>
+                      <param name="q" value="0.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset5" sequence="5">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="-3.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset9" sequence="6">
+                      <param name="p" value="-3.0"/>
+                      <param name="q" value="-3.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset6" sequence="7">
+                      <param name="p" value="-6.0"/>
+                      <param name="q" value="-3.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset7" sequence="8">
+                      <param name="p" value="-3.0"/>
+                      <param name="q" value="0.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                  </paramset>
+                </paramset>
+                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="310e6c2d-c6f3-4b48-8e85-ac7f17eae713" name="Observe">
+                  <paramset name="Observe" kind="dataObj">
+                    <param name="repeatCount" value="1"/>
+                    <param name="class" value="SCIENCE"/>
+                  </paramset>
+                </container>
+              </container>
+            </container>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="BaselineNight" key="0b6e6c96-1731-4fe6-8743-3e068d12246a" name="Night Baseline GCAL">
+              <paramset name="Night Baseline GCAL" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="257b14db-539a-4ba5-a7e8-b4ba9603fb0c" name="GN-GNIRS-BP-241">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Acq: Imaging after standard Bright target"/>
+          <param name="libraryId" value="20"/>
+          <param name="priority" value="MEDIUM"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="07e787fd-7e26-4dcf-8532-e313c399e1eb" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="2bb18862-269e-4e1a-aadd-78a7a143cadd" name="GNIRS">
+          <paramset name="GNIRS" kind="dataObj">
+            <param name="exposureTime" value="3.0"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="3"/>
+            <param name="pixelScale" value="PS_015"/>
+            <param name="disperser" value="D_32"/>
+            <param name="slitWidth" value="ACQUISITION"/>
+            <param name="crossDispersed" value="NO"/>
+            <param name="wollastonPrism" value="NO"/>
+            <param name="readMode" value="BRIGHT"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="centralWavelength" value="1.25"/>
+            <param name="acquisitionMirror" value="IN"/>
+            <param name="camera" value="SHORT_BLUE"/>
+            <param name="decker" value="ACQUISITION"/>
+            <param name="filter" value="J"/>
+            <param name="issPort" value="SIDE_LOOKING"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="a650fb68-5227-4c6a-b2d0-82ca86923b38" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="4578c170-7b71-4ab9-9dec-d3fa8dd844b1" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="4a41b159-5422-454d-b54c-5b0546381e94" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="d11a9be2-8af7-4edd-9fdf-292965d2ffcb" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Image of keyhole"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="decker" value="ACQUISITION"/>
+              <param name="exposureTime" value="3.0"/>
+              <param name="filter" value="J"/>
+              <param name="slitWidth" value="ACQUISITION"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="81799fb6-7c0c-413f-bdba-fc9129745905" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <paramset name="offsets">
+                  <paramset name="Offset3" sequence="0">
+                    <param name="p" value="10.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="040ce9e4-7e37-4718-a92c-fcbc7d141bf7" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="ACQ_CAL"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="9d8d928f-fb64-4cb1-a34a-7e53c8d8941b" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: GNIRS Sequence (centering the target)"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="decker" value="ACQUISITION"/>
+              <param name="exposureTime" value="0.8"/>
+              <param name="filter" value="J"/>
+              <param name="readMode" value="BRIGHT"/>
+              <param name="slitWidth" value="ACQUISITION"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="385ace6c-f0dc-4330-8769-c43c5d03c2fd" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <paramset name="offsets">
+                  <paramset name="Offset3" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset4" sequence="1">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                  <paramset name="Offset5" sequence="2">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="cef1022c-d4e8-4ec8-8db0-897496891694" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="ACQ_CAL"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="33da304a-0a03-4e9e-8f96-e7f93dee8bf0" name="GN-GNIRS-BP-242">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Obs: Imaging after standard"/>
+          <param name="libraryId" value="21"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="82406eed-4245-4a9d-8654-5a697d63c829" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="284ade96-dd91-44b8-884e-0a19e0e41223" name="GNIRS">
+          <paramset name="GNIRS" kind="dataObj">
+            <param name="exposureTime" value="1.0"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="10"/>
+            <param name="pixelScale" value="PS_015"/>
+            <param name="disperser" value="D_32"/>
+            <param name="slitWidth" value="ACQUISITION"/>
+            <param name="crossDispersed" value="NO"/>
+            <param name="wollastonPrism" value="NO"/>
+            <param name="readMode" value="VERY_BRIGHT"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="centralWavelength" value="1.25"/>
+            <param name="acquisitionMirror" value="IN"/>
+            <param name="camera" value="SHORT_BLUE"/>
+            <param name="decker" value="ACQUISITION"/>
+            <param name="filter" value="J"/>
+            <param name="issPort" value="SIDE_LOOKING"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="361aa7b9-41b9-4a27-8556-4ef66d44c2ef" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="6b91f4e3-5240-45ae-92eb-814dd158577b" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="e62283be-2a37-4477-92a2-c15bca56105a" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="affa96de-e4a6-4550-b041-90980aa77c6f" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="decker" value="ACQUISITION"/>
+              <param name="filter" value="J"/>
+              <param name="slitWidth" value="ACQUISITION"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="repeat" key="fa398f40-685b-45f8-bef5-b1e472e3c677" name="Repeat">
+              <paramset name="Repeat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+              </paramset>
+              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="ff52aeb9-2c10-4abb-aaf8-cce282d7ff38" name="Offset">
+                <paramset name="Offset" kind="dataObj">
+                  <paramset name="offsets">
+                    <paramset name="Offset0" sequence="0">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="3.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset1" sequence="1">
+                      <param name="p" value="-6.0"/>
+                      <param name="q" value="3.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset2" sequence="2">
+                      <param name="p" value="-6.0"/>
+                      <param name="q" value="-3.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset3" sequence="3">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="-3.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                  </paramset>
+                </paramset>
+                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="5e26d143-17d3-4f2e-8b8c-8ce70dd3d654" name="Observe">
+                  <paramset name="Observe" kind="dataObj">
+                    <param name="repeatCount" value="1"/>
+                    <param name="class" value="PARTNER_CAL"/>
+                  </paramset>
+                </container>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+    </container>
+    <container kind="group" type="Group" version="2009A-1" subtype="group" key="853c89d1-d4e7-4df4-b754-42b49badd331" name="Group">
+      <paramset name="Group" kind="dataObj">
+        <param name="title" value="Spectroscopy BP"/>
+        <param name="GroupType" value="TYPE_FOLDER"/>
+        <param name="libraryId" value=""/>
+      </paramset>
+      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="e92da57c-3a34-4d0a-873a-2950c14785c3" name="Note">
+        <paramset name="Note" kind="dataObj">
+          <param name="title" value="NOTE1: Calibrations for high spectral resolution observations"/>
+          <param name="NoteText">
+            <value>
+GCAL configurations have been updated for calibrations in the R~6000 and R~18000 modes, but not for every possible central wavelength. For central wavelengths substantially different from those given in the library templates, please add a note to your program informing your contact scientist, and we will check the flat/arc configurations ahead of taking on-sky data for your program. 
+
+Some wavelength regions contain only a few faint arc lines. In these cases it can be useful to take extra arc spectra during the day in case the fainter lines in the nighttime arcs are compromised by pattern noise (which can't be cleaned out without also removing the arc lines). Some wavelength settings may have no useful arc lines at all, in which case it will be necessary to use sky lines for wavelength calibration. 
+
+Arc spectra are not taken in the L and M bands.
+</value>
+          </param>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="792a548e-64fc-4461-815c-ad2a8008e5e3" name="Note">
+        <paramset name="Note" kind="dataObj">
+          <param name="title" value="NOTE2: Bad pixels in XD mode"/>
+          <param name="NoteText">
+            <value>
+The GNIRS detector contains a few small regions of bad pixels (see this web page: www.gemini.edu/sciops/instruments/nirs/N20100812S0080.jpg). The bad pixels lie between the XD orders in the most heavily-used, low-resolution XD modes (0.05"/pix + 10 l/mm; 0.15"/pix + 32 l/mm). However, the exact placement of the orders in the higher-resolution modes depends on the grating central wavelength. If the presence of these bad pixels could affect your science in these modes, please advise your contact scientist as you prepare your phase II program. The CS will be able to take arc spectra that show exactly where the bad pixels will lie, and help you adjust your central wavelength to avoid them.</value>
+          </param>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="f4257ab2-41ce-4f81-8dd5-8e2c06673ae1" name="Note">
+        <paramset name="Note" kind="dataObj">
+          <param name="title" value="NOTE3: Differential refraction and XD mode"/>
+          <param name="NoteText">
+            <value>
+Because of the large wavelength coverage of the XD modes, differential refraction can cause light to be lost from the slit in certain circumstances. If you are interested in the whole 0.9 - 2.5 um wavelength range and are using a very narrow slit and/or expect your target to be observed at high airmass, you may wish to consider adding a note to the observer to observe the target at the mean parallactic angle at the time of the observations.
+
+This web page gives more details: www.gemini.edu/sciops/instruments/gnirs/longslit-amp-xd-spectroscopy/observing-strategies#refraction</value>
+          </param>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="50a37281-a1ef-44b0-b33e-587b27537c28" name="Note">
+        <paramset name="Note" kind="dataObj">
+          <param name="title" value="ACQ README"/>
+          <param name="NoteText">
+            <value>EVERY GNIRS OBSERVATION MUST HAVE AN ASSOCIATED ACQUISITION OBSERVATION, defined by the PI during the phase II process. The acquisition process is described on this web page: www.gemini.edu/sciops/instruments/gnirs/longslit-amp-xd-spectroscopy/acquisition. 
+
+Briefly, we distinguish four main types of acquisition method, depending on the brightness of the target:
+
+1) Very bright objects (H &lt; 11.5): narrowband filter, no sky subtraction (for H &lt; 7, the ND100X filter can be used to avoid saturation, but see the warning about filter shifts on this web page: www.gemini.edu/sciops/instruments/gnirs/spectroscopy/acquisition)
+
+2) Bright objects (11.5 &lt; H &lt; 16): broadband filter, no sky subtraction
+
+3) Faint objects (16 &lt; H &lt;20): broadband filter, sky subtraction
+
+4) Very faint objects (H &gt; 20): blind offset from nearby reference star
+
+The OT uses the target brightness from the PIT (if any) to choose the appropriate acquisition observation for each science observation (standard stars are assumed to use the "very bright object" type). Please double-check that this is indeed the most suitable option; for example, the PIT magnitudes for extended objects may be very different from what GNIRS sees. Examples of all acquisition types can be cut-and-pasted from the GNIRS OT library.
+
+The OT templates are generated with the appropriate instrument configuration. The criteria are listed below, in case changes are made by the PI. Target-specific changes may need to be made as follows:
+
+1) in the images of the field, set the exposure time and coadds to for your particular brightness of science target (see www.gemini.edu/sciops/instruments/gnirs/longslit-amp-xd-spectroscopy/acquisition for recommendations).  If your target is extended, double, or in a crowded field, you may need to change the size of the [faint target] sky offset from its default 2". Acquisitions normally use the H or H2 filter, but others are possible; see the above web page.
+
+2) make sure that blind offset acquisitions contain sky offsets if necessary (as in the "faint target" example)
+
+3) if applicable, add a note for the observer with any special acquisition instructions. Don't forget to upload a finding chart if necessary.
+
+
+GNIRS configuration:
+
+1) In the GNIRS component:
+   - all fields except the read mode, Texp and coadds should match the spectroscopy observation
+   - "deep" well depth should be used for thermal IR acquisitions in the PAH filter
+   - all other fields are either set in the "Sequence" or not relevant for acquisition imaging 
+
+2) In the Sequence:
+   - in the initial slit image, the FPU and decker should match the spectroscopy configuration. The filter should only be changed if you intend to acquire the target in a filter other than H or H2.
+  - in the final slit image, the FPU and decker should be the same as in the initial slit image, and the exposure time, coadds and sky offset as for the images of the target field
+  - in all steps, the read mode should be appropriate for the exposure time (see www.gemini.edu/sciops/instruments/gnirs/longslit-amp-xd-spectroscopy/acquisition)
+  - if this acquisition is intended to be used for a baseline telluric standard, the observe class should be "Acquisition Calibration"</value>
+          </param>
+        </paramset>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="735bcc2d-3d7e-4182-90c2-f9d382ecd36e" name="GN-GNIRS-BP-243">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Acq: &quot;Before&quot; standard"/>
+          <param name="libraryId" value="5"/>
+          <param name="priority" value="MEDIUM"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="bdabf914-f215-4429-b4bf-c94b8455f7f9" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="a2ebfe4f-8dd8-45f5-a139-5220632c0f58" name="GNIRS">
+          <paramset name="GNIRS" kind="dataObj">
+            <param name="title" value="GNIRS"/>
+            <param name="exposureTime" value="3.0"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="1"/>
+            <param name="pixelScale" value="PS_015"/>
+            <param name="disperser" value="D_32"/>
+            <param name="slitWidth" value="SW_4"/>
+            <param name="crossDispersed" value="SXD"/>
+            <param name="wollastonPrism" value="NO"/>
+            <param name="readMode" value="BRIGHT"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="centralWavelength" value="1.65"/>
+            <param name="acquisitionMirror" value="IN"/>
+            <param name="camera" value="SHORT_BLUE"/>
+            <param name="decker" value="SHORT_CAM_X_DISP"/>
+            <param name="filter" value="ORDER_4"/>
+            <param name="issPort" value="SIDE_LOOKING"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="01275057-ae5e-481a-a724-720966f1dbe0" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="Filter selection"/>
+            <param name="NoteText">
+              <value>The initial slit image is taken in the H band filter as exposure times in the narrowband H2 filter used to image bright targets are prohibitively long for slit imaging. The images of the target field and of the target through the slit are taken in the H2 filter.</value>
+            </param>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="38bfba2d-e279-4d7e-ad86-a21b2a714868" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="dfd01201-0cdb-4218-b439-172d704cf9fc" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="c363f33d-7eb8-4d5b-88f4-6e456c9d2aa5" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="86d1061c-ff18-4817-bb30-ef45bd7ddd61" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Slit image"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="coadds" value="1"/>
+              <param name="decker" value="SHORT_CAM_X_DISP"/>
+              <param name="exposureTime" value="3.0"/>
+              <param name="filter" value="ORDER_4"/>
+              <param name="readMode" value="BRIGHT"/>
+              <param name="slitWidth" value="SW_4"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="94ddfe28-364d-409d-b5e5-0e0cd892152d" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="slit image"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="10.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="off"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="b2d80bc2-3095-4170-a7b7-599ba049a035" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="ACQ_CAL"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="7589bc27-ec6d-457d-9192-afadc6f2d042" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Field Images"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="coadds" value="25"/>
+              <param name="decker" value="ACQUISITION"/>
+              <param name="exposureTime" value="0.2"/>
+              <param name="filter" value="H2"/>
+              <param name="readMode" value="VERY_BRIGHT"/>
+              <param name="slitWidth" value="ACQUISITION"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="f9b30cca-074f-4207-a0b8-cc6aa759cc75" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="target field"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="3fa983de-d0a8-44f8-98cf-c856fe49ec6d" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="2"/>
+                  <param name="class" value="ACQ_CAL"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="af55054e-e24e-4b5a-a80d-691bb3eac900" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Images of target through slit"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="coadds" value="25"/>
+              <param name="decker" value="SHORT_CAM_X_DISP"/>
+              <param name="exposureTime" value="0.2"/>
+              <param name="filter" value="H2"/>
+              <param name="readMode" value="VERY_BRIGHT"/>
+              <param name="slitWidth" value="SW_4"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="ac76a3dc-e27f-4678-9ad8-e75803657fca" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="field images (through slit)"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="cc4d1778-ceb6-4bfd-b242-827b47e04449" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="2"/>
+                  <param name="class" value="ACQ_CAL"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="571f9304-8355-42f2-b103-aea346bf3e7b" name="GN-GNIRS-BP-244">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Obs: &quot;Before&quot; standard spectrum"/>
+          <param name="libraryId" value="6"/>
+          <param name="priority" value="MEDIUM"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="e92734cd-8f77-4f0c-914f-afc009793067" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="d530b657-5c31-4966-9671-36dff1e09e59" name="GNIRS">
+          <paramset name="GNIRS" kind="dataObj">
+            <param name="exposureTime" value="10.0"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="1"/>
+            <param name="pixelScale" value="PS_015"/>
+            <param name="disperser" value="D_32"/>
+            <param name="slitWidth" value="SW_4"/>
+            <param name="crossDispersed" value="SXD"/>
+            <param name="wollastonPrism" value="NO"/>
+            <param name="readMode" value="BRIGHT"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="centralWavelength" value="1.65"/>
+            <param name="acquisitionMirror" value="OUT"/>
+            <param name="camera" value="SHORT_BLUE"/>
+            <param name="decker" value="ACQUISITION"/>
+            <param name="filter" value="ORDER_5"/>
+            <param name="issPort" value="SIDE_LOOKING"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="eba10dca-e172-474f-a6a5-dacab2db8fb8" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="89e710de-6b80-40c8-8942-df172bb48087" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="09b47602-4b3c-4a2c-8874-9d210e62fecc" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="5d33bb68-937e-45c5-adba-c0bc3938380f" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="10.0"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="repeat" key="96a2d2f8-f179-4dcb-80b0-18655751b80a" name="Repeat">
+              <paramset name="Repeat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+              </paramset>
+              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="55350b5d-9e5f-4f5a-b395-dc90159e2711" name="Offset">
+                <paramset name="Offset" kind="dataObj">
+                  <param name="title" value="ABBA offset sequence"/>
+                  <paramset name="offsets">
+                    <paramset name="Offset0" sequence="0">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="1.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset1" sequence="1">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="-2.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset2" sequence="2">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="-2.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset3" sequence="3">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="1.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                  </paramset>
+                </paramset>
+                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="3d8a4d35-df68-4228-9104-2525bbe083f1" name="Observe">
+                  <paramset name="Observe" kind="dataObj">
+                    <param name="repeatCount" value="1"/>
+                    <param name="class" value="PARTNER_CAL"/>
+                  </paramset>
+                </container>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="69a5656b-ae60-47e8-96d9-8fa2bae7bdd9" name="GN-GNIRS-BP-254">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Acq with ND filter: (H &lt; 7 target)"/>
+          <param name="libraryId" value="22"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="2d76c9d1-4185-442b-ba28-f0a5914bfcf2" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="cf279668-6935-49a1-bd3f-8c642f9915e1" name="GNIRS">
+          <paramset name="GNIRS" kind="dataObj">
+            <param name="title" value="GNIRS"/>
+            <param name="exposureTime" value="3.0"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="1"/>
+            <param name="pixelScale" value="PS_015"/>
+            <param name="disperser" value="D_111"/>
+            <param name="slitWidth" value="SW_4"/>
+            <param name="crossDispersed" value="NO"/>
+            <param name="wollastonPrism" value="NO"/>
+            <param name="readMode" value="BRIGHT"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="centralWavelength" value="1.65"/>
+            <param name="acquisitionMirror" value="IN"/>
+            <param name="camera" value="SHORT_BLUE"/>
+            <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
+            <param name="filter" value="ORDER_4"/>
+            <param name="issPort" value="SIDE_LOOKING"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="219edd71-5c24-40e8-a044-0b46b9f91e23" name="Targets">
+          <paramset name="Targets" kind="dataObj">
+            <paramset name="targetEnv">
+              <paramset name="base">
+                <param name="name" value="my object  (H&lt;7)"/>
+                <param name="system" value="J2000"/>
+                <param name="epoch" value="2000.0" units="years"/>
+                <param name="brightness" value="18.7 i"/>
+                <param name="c1" value="23:13:01.700"/>
+                <param name="c2" value="20:56:10.00"/>
+                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+                <param name="parallax" value="0.0" units="arcsecs"/>
+                <param name="rv" value="0.0" units="km/sec"/>
+                <param name="wavelength" value="-1.0" units="angstroms"/>
+                <paramset name="magnitudeList">
+                  <paramset name="magnitude">
+                    <param name="band" value="K"/>
+                    <param name="val" value="4.0"/>
+                    <param name="error" value="0.0"/>
+                    <param name="system" value="Vega"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <paramset name="guideEnv">
+                <param name="active">
+                  <value sequence="0">GNIRS OIWFS</value>
+                  <value sequence="1">PWFS1</value>
+                  <value sequence="2">PWFS2</value>
+                </param>
+                <param name="selected"/>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <paramset name="guider">
+                    <param name="key" value="PWFS2"/>
+                    <param name="primary" value="0"/>
+                    <paramset name="spTarget">
+                      <param name="name" value="GSC0171801174"/>
+                      <param name="system" value="J2000"/>
+                      <param name="epoch" value="2000.0" units="years"/>
+                      <param name="brightness" value=""/>
+                      <param name="c1" value="23:13:26.220"/>
+                      <param name="c2" value="20:56:17.77"/>
+                      <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+                      <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+                      <param name="parallax" value="0.0" units="arcsecs"/>
+                      <param name="rv" value="0.0" units="km/sec"/>
+                      <param name="wavelength" value="-1.0" units="angstroms"/>
+                      <paramset name="magnitudeList">
+                        <paramset name="magnitude">
+                          <param name="band" value="V"/>
+                          <param name="val" value="12.4"/>
+                          <param name="error" value="0.42"/>
+                          <param name="system" value="Vega"/>
+                        </paramset>
+                      </paramset>
+                    </paramset>
+                  </paramset>
+                </paramset>
+              </paramset>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="8bf0b7b2-6e0c-44f7-88b1-20a5ef39bdec" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="Filter selection"/>
+            <param name="NoteText">
+              <value>The initial slit image is taken in the H band filter as exposure times in the narrowband H2 filter used to image bright targets are prohibitively long for slit imaging. The images of the target field and of the target through the slit are taken in the H2 filter combined wth the ND100X filter. </value>
+            </param>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="2b24adb9-3f16-40e5-98f6-482c5c026f8f" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="89bf6670-533e-4a2c-be57-3b1e7c60a9b7" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="72d31060-1b9c-49af-9f7d-79e98ff20681" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="432da6b5-39cd-4e94-ad9f-156a5ef8f632" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Slit image"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="centralWavelength" value="1.65"/>
+              <param name="coadds" value="1"/>
+              <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
+              <param name="exposureTime" value="3.0"/>
+              <param name="filter" value="ORDER_4"/>
+              <param name="readMode" value="BRIGHT"/>
+              <param name="slitWidth" value="SW_4"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="1356f282-6dc5-4989-b491-83ece2616624" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="slit image"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="10.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="1431ea09-dd5b-4007-97f0-d791a7f0255f" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="85f72ee7-35f3-4d35-b64a-5cf300af6054" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Field Images"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="coadds" value="5"/>
+              <param name="decker" value="ACQUISITION"/>
+              <param name="exposureTime" value="1.0"/>
+              <param name="filter" value="H2_plus_ND100X"/>
+              <param name="readMode" value="BRIGHT"/>
+              <param name="slitWidth" value="ACQUISITION"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="9c83286a-29df-46dd-bba8-f56fa3fba273" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="target field"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="82278dd7-1302-4987-ae31-ad7316d0d88e" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="2"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="44d2572b-eb02-4938-983c-7c4c55bca8ed" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Images of target through slit"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="coadds" value="5"/>
+              <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
+              <param name="exposureTime" value="1.0"/>
+              <param name="filter" value="H2_plus_ND100X"/>
+              <param name="readMode" value="BRIGHT"/>
+              <param name="slitWidth" value="SW_4"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="54307fed-a45d-4d5f-b0f1-1efe692cb6d8" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="field images (through slit)"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="67c6dfc0-d73e-4952-83ee-7bb186222297" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="2"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="4f5ab8f6-1535-4874-bf45-97cca4556656" name="GN-GNIRS-BP-245">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Acq: Very bright target (7 &lt; H &lt; 11.5)"/>
+          <param name="libraryId" value="7"/>
+          <param name="priority" value="MEDIUM"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="aa39d3c9-3c02-4050-bf7e-08a3bda1caa0" name="GNIRS">
+          <paramset name="GNIRS" kind="dataObj">
+            <param name="title" value="GNIRS"/>
+            <param name="exposureTime" value="3.0"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="1"/>
+            <param name="pixelScale" value="PS_015"/>
+            <param name="disperser" value="D_111"/>
+            <param name="slitWidth" value="SW_4"/>
+            <param name="crossDispersed" value="NO"/>
+            <param name="wollastonPrism" value="NO"/>
+            <param name="readMode" value="BRIGHT"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="centralWavelength" value="1.65"/>
+            <param name="acquisitionMirror" value="IN"/>
+            <param name="camera" value="SHORT_BLUE"/>
+            <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
+            <param name="filter" value="ORDER_4"/>
+            <param name="issPort" value="SIDE_LOOKING"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="54b3f5be-e021-4bd6-8f88-2b57f6c7ad66" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="Filter selection"/>
+            <param name="NoteText">
+              <value>The initial slit image is taken in the H band filter as exposure times in the narrowband H2 filter used to image bright targets are prohibitively long for slit imaging. The images of the target field and of the target through the slit are taken in the H2 filter. </value>
+            </param>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="59215564-ef33-40dd-b6c0-fd006e2abab4" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="41992e10-b492-4856-96f3-c5a6df86cb74" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="dc86e944-e6ba-4924-87ee-db721ee77946" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="48bd8eef-0305-4e7a-a086-223fd5edb2d5" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Slit image"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="coadds" value="1"/>
+              <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
+              <param name="exposureTime" value="3.0"/>
+              <param name="filter" value="ORDER_4"/>
+              <param name="readMode" value="BRIGHT"/>
+              <param name="slitWidth" value="SW_4"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="9b4ac110-6794-4c5e-80f3-ab2861902835" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="slit image"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="10.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="off"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="b259fcad-8181-4e84-9b0e-95b0b7f9681f" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="b243dfb4-67da-4f0e-8b61-d55a96d7743e" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Field Images"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="coadds" value="25"/>
+              <param name="decker" value="ACQUISITION"/>
+              <param name="exposureTime" value="0.2"/>
+              <param name="filter" value="H2"/>
+              <param name="readMode" value="VERY_BRIGHT"/>
+              <param name="slitWidth" value="ACQUISITION"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="01f3b0d3-6e72-47f2-9329-7668aae85c9d" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="target field"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="88e5098f-64f7-40e3-9cb9-06bd2e4ba03d" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="2"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="85ef68b0-41cf-4ee0-864c-60694f0f0423" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Images of target through slit"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="coadds" value="25"/>
+              <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
+              <param name="exposureTime" value="0.2"/>
+              <param name="filter" value="H2"/>
+              <param name="readMode" value="VERY_BRIGHT"/>
+              <param name="slitWidth" value="SW_4"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="d667cb41-9510-40f5-a0d7-cffeb056feeb" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="field images (through slit)"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="de61f06f-2cde-4f59-b5c3-e17c3fef338f" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="2"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="f73d0de9-6f70-45d3-97bd-401846e8cfbc" name="GN-GNIRS-BP-246">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Acq: Bright target (11.5 &lt; H &lt; 16)"/>
+          <param name="libraryId" value="8"/>
+          <param name="priority" value="MEDIUM"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="59b7c5f1-135d-438b-8646-1c6e7cf52245" name="GNIRS">
+          <paramset name="GNIRS" kind="dataObj">
+            <param name="title" value="GNIRS"/>
+            <param name="exposureTime" value="3.0"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="1"/>
+            <param name="pixelScale" value="PS_015"/>
+            <param name="disperser" value="D_111"/>
+            <param name="slitWidth" value="SW_4"/>
+            <param name="crossDispersed" value="NO"/>
+            <param name="wollastonPrism" value="NO"/>
+            <param name="readMode" value="BRIGHT"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="centralWavelength" value="1.65"/>
+            <param name="acquisitionMirror" value="IN"/>
+            <param name="camera" value="SHORT_BLUE"/>
+            <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
+            <param name="filter" value="ORDER_4"/>
+            <param name="issPort" value="SIDE_LOOKING"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="f332b570-9cf7-444e-8999-7930ff639cdc" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="d3d92146-46a7-44c4-8f0d-760bc11a67d4" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="473b4a81-7981-4a56-b0d8-054cd55f36c6" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="9b17bcf5-fea1-40ba-9c79-972828670c6a" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Slit image"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="coadds" value="1"/>
+              <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
+              <param name="exposureTime" value="3.0"/>
+              <param name="filter" value="ORDER_4"/>
+              <param name="readMode" value="BRIGHT"/>
+              <param name="slitWidth" value="SW_4"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="99fb04a1-7cd4-4056-bcbd-465425c9912d" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="slit image"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="10.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="off"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="616c4fd9-9644-45a1-9f65-853731ed2a10" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="77bd33d8-c8fb-44c2-98d5-2e0c5f8a24e6" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Field Images"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="coadds" value="5"/>
+              <param name="decker" value="ACQUISITION"/>
+              <param name="exposureTime" value="1.0"/>
+              <param name="filter" value="ORDER_4"/>
+              <param name="readMode" value="BRIGHT"/>
+              <param name="slitWidth" value="ACQUISITION"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="8d408d0c-ccb2-4d05-880b-3df47cdfcc2c" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="target field"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="3fcda885-14ca-4e58-9164-974b44ffee8a" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="2"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="8d6fbfbc-3200-401a-8a5a-0565bb6207d7" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Images of target through slit"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="coadds" value="5"/>
+              <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
+              <param name="exposureTime" value="1.0"/>
+              <param name="filter" value="ORDER_4"/>
+              <param name="readMode" value="BRIGHT"/>
+              <param name="slitWidth" value="SW_4"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="3c69a053-468b-40d3-9b17-6d2d343429ee" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="field images (through slit)"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="df391369-9c79-4285-9411-453a43402131" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="2"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="f0d9f4a2-c4ff-43c4-8b6c-a4698e3c723e" name="GN-GNIRS-BP-247">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Acq: Faint target (16 &lt; H &lt; 20)"/>
+          <param name="libraryId" value="9"/>
+          <param name="priority" value="MEDIUM"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="2fbc54b1-ba3c-406a-a8e9-8e69e8d625ee" name="GNIRS">
+          <paramset name="GNIRS" kind="dataObj">
+            <param name="title" value="GNIRS"/>
+            <param name="exposureTime" value="3.0"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="1"/>
+            <param name="pixelScale" value="PS_015"/>
+            <param name="disperser" value="D_111"/>
+            <param name="slitWidth" value="SW_4"/>
+            <param name="crossDispersed" value="NO"/>
+            <param name="wollastonPrism" value="NO"/>
+            <param name="readMode" value="BRIGHT"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="centralWavelength" value="1.65"/>
+            <param name="acquisitionMirror" value="IN"/>
+            <param name="camera" value="SHORT_BLUE"/>
+            <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
+            <param name="filter" value="ORDER_4"/>
+            <param name="issPort" value="SIDE_LOOKING"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="a2231a5b-8690-401f-9cca-ba2ff07ca978" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="7cdf7c66-c914-4b2a-b5da-0893e3bc8059" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="4d48ad0c-7b76-478e-a4ac-a083a7ae5168" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="e4ce7de2-9886-4d67-a49c-e41c23cf247f" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Slit image"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="coadds" value="1"/>
+              <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
+              <param name="exposureTime" value="3.0"/>
+              <param name="filter" value="ORDER_4"/>
+              <param name="readMode" value="BRIGHT"/>
+              <param name="slitWidth" value="SW_4"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="44cbd8ec-27c7-40ab-a50c-9898174196f0" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="slit image"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="10.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="off"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="2b62e15f-5c2e-4e52-98e5-72cb5b2101db" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="22ea5a54-de10-49a3-a29e-4335e35ee645" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Field Images (w/ sky offset)"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="coadds" value="6"/>
+              <param name="decker" value="ACQUISITION"/>
+              <param name="exposureTime" value="3.0"/>
+              <param name="filter" value="ORDER_4"/>
+              <param name="readMode" value="BRIGHT"/>
+              <param name="slitWidth" value="ACQUISITION"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="a2f70798-37a6-4d5b-ae1a-1a7d717ac9e1" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="sky image"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="2.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="d5395f33-6615-499f-8687-5ba14fa4e94d" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="10bd5cda-8ce0-48ed-91ab-da8ee25afc19" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="field images"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="c88f1c60-5ecb-4823-9c7e-db05d158294e" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="2"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="cc0dea24-ba61-4fe0-b7d8-66594519c065" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Images of field through slit (w/ sky offset)"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="coadds" value="6"/>
+              <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
+              <param name="exposureTime" value="3.0"/>
+              <param name="filter" value="ORDER_4"/>
+              <param name="readMode" value="BRIGHT"/>
+              <param name="slitWidth" value="SW_4"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="6a4bfa40-26dc-40eb-9a78-0de4c0b46e18" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="sky image (through slit)"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="2.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="4fbbcccd-1bdf-4d79-b32c-37d87e7f70fa" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="9819d413-a41e-4e79-abeb-10cfa881f9f9" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="field images (through slit)"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="be0f38ce-0027-41a8-8f64-49a55f7dd167" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="2"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="622ece34-8049-4bed-af8c-e541da6a3347" name="GN-GNIRS-BP-248">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Acq: Blind offset target (H &gt; 20)"/>
+          <param name="libraryId" value="10"/>
+          <param name="priority" value="MEDIUM"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="d3ebaec3-3c1c-4163-878a-4f6e33677dac" name="GNIRS">
+          <paramset name="GNIRS" kind="dataObj">
+            <param name="title" value="GNIRS"/>
+            <param name="exposureTime" value="3.0"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="1"/>
+            <param name="pixelScale" value="PS_015"/>
+            <param name="disperser" value="D_111"/>
+            <param name="slitWidth" value="SW_4"/>
+            <param name="crossDispersed" value="NO"/>
+            <param name="wollastonPrism" value="NO"/>
+            <param name="readMode" value="BRIGHT"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="centralWavelength" value="1.65"/>
+            <param name="acquisitionMirror" value="IN"/>
+            <param name="camera" value="SHORT_BLUE"/>
+            <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
+            <param name="filter" value="ORDER_4"/>
+            <param name="issPort" value="SIDE_LOOKING"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="2d7b8059-cc38-4c10-893a-f94157a5d19d" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="Description"/>
+            <param name="NoteText">
+              <value>
+This observation must contain a "User"  (reference) star which will be placed in the slit, and then the telescope offset to the faint science target. The reference star must be able to use the same guide star as the science target and both must have accurate coordinates. See this web page for more details: 
+
+www.gemini.edu/sciops/telescopes-and-sites/acquisition-hardware-and-techniques/acquisition-techniques
+
+In this example the reference star is H=12.9 mag, so the rest of the acquisition is set up following the "Bright target" acquisition template. Note that the target component in the associated spectroscopy observation must be the same as that in the acquisition observation (i.e., must include the reference star). See the Blind Offset group in the Complete Examples section of this library for an example.</value>
+            </param>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="13f6583c-7531-4bdd-889b-ff21c0479ad5" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="095adab0-1d0d-4b8b-9884-72c9a6c56456" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="bb718411-b574-49d0-8bb7-689b3a30955c" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="8b7e30c3-c26a-4ed4-bdb1-8d7424bc78e9" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Slit image"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="coadds" value="1"/>
+              <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
+              <param name="exposureTime" value="3.0"/>
+              <param name="filter" value="ORDER_4"/>
+              <param name="readMode" value="BRIGHT"/>
+              <param name="slitWidth" value="SW_4"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="c14cdf39-6c06-4871-a00d-f4ae5e4b56d8" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="slit image"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="10.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="off"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="f27f9983-ad16-4be6-9e80-2957cebd4280" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="74862b6a-6d46-47aa-bf07-d7902c06eed6" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Field Images"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="coadds" value="8"/>
+              <param name="decker" value="ACQUISITION"/>
+              <param name="exposureTime" value="0.6"/>
+              <param name="filter" value="ORDER_4"/>
+              <param name="readMode" value="BRIGHT"/>
+              <param name="slitWidth" value="ACQUISITION"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="59f61b4b-1fc0-452c-bdba-6fc56e91def5" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="target field"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="19bba723-a59b-4b76-ad3b-018e8ce55cff" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="2"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="9325121e-be9d-41fd-8e54-846fa2524ff1" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Images of target through slit"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="coadds" value="8"/>
+              <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
+              <param name="exposureTime" value="0.6"/>
+              <param name="filter" value="ORDER_4"/>
+              <param name="readMode" value="BRIGHT"/>
+              <param name="slitWidth" value="SW_4"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="405f5fcf-143e-4c48-8704-bd0c8b8cd198" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="field images (through slit)"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="9292a203-ca99-43c0-9529-7253073a2a7f" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="2"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="25c5cdb2-bb98-403a-93ed-6b688543ce17" name="GN-GNIRS-BP-249">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Acq: Faint extended target (16 &lt; H &lt; 20)"/>
+          <param name="libraryId" value="11"/>
+          <param name="priority" value="MEDIUM"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="549e250f-b7e6-4e62-b967-7f8ed08e8afa" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="Possible uses"/>
+            <param name="NoteText" value="This template might be used for placing a long slit along the long axis of a galaxy or across a large planet."/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="db784763-35fe-4ee7-8df0-e8a172548cea" name="GNIRS">
+          <paramset name="GNIRS" kind="dataObj">
+            <param name="title" value="GNIRS"/>
+            <param name="exposureTime" value="3.0"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="1"/>
+            <param name="pixelScale" value="PS_015"/>
+            <param name="disperser" value="D_111"/>
+            <param name="slitWidth" value="SW_5"/>
+            <param name="crossDispersed" value="NO"/>
+            <param name="wollastonPrism" value="NO"/>
+            <param name="readMode" value="BRIGHT"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="centralWavelength" value="1.65"/>
+            <param name="acquisitionMirror" value="IN"/>
+            <param name="camera" value="SHORT_BLUE"/>
+            <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
+            <param name="filter" value="ORDER_4"/>
+            <param name="issPort" value="SIDE_LOOKING"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="2250d529-47fe-4c8a-9d37-d24fea71011d" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="c599c13d-d933-47be-8fee-01867cfc51b6" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="a0c9d638-a6ca-4753-a559-d3231d1758df" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="269119c1-c8ad-4dd5-a577-21e1e2684ead" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Slit image"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="coadds" value="1"/>
+              <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
+              <param name="exposureTime" value="3.0"/>
+              <param name="filter" value="ORDER_4"/>
+              <param name="readMode" value="BRIGHT"/>
+              <param name="slitWidth" value="SW_5"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="5d5990fb-ca30-427d-9c44-5cd969af8641" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="slit image"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="30.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="off"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="e6d3cabe-347f-4199-99d8-2624d9e7dafa" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="d677029f-5373-45a7-9b75-ff0274482fa5" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Field Images (w/ sky offset)"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="coadds" value="24"/>
+              <param name="decker" value="ACQUISITION"/>
+              <param name="exposureTime" value="3.0"/>
+              <param name="filter" value="ORDER_4"/>
+              <param name="readMode" value="BRIGHT"/>
+              <param name="slitWidth" value="ACQUISITION"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="741f2b29-a1cc-4076-aa6f-e784072a05cb" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="sky image"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="30.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="663a1485-1ffd-4704-b26d-f9d125cf2b1d" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="cc87682e-892b-4d67-bb88-d0fc86a67543" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="field images"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="d5398f51-6a0b-47cd-bff9-edef61640932" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="2"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="27b5a5bc-60cf-469f-b96a-f8cfd25e5630" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Images of field through slit (w/ sky offset)"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="coadds" value="24"/>
+              <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
+              <param name="exposureTime" value="3.0"/>
+              <param name="filter" value="ORDER_4"/>
+              <param name="readMode" value="BRIGHT"/>
+              <param name="slitWidth" value="SW_4"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="b96f2670-0b8b-468e-998b-fa828c3f2d74" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="sky image (through slit)"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="30.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="a394a56a-6b37-4567-a2a4-17b44b1cedd6" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="ecb8786b-102d-452e-82a0-638416e9867e" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="field images (through slit)"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="b7990d94-8069-4dc8-8ef4-3bf495c8964f" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="2"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="7e57024d-b404-4aa2-bb84-46155368229f" name="GN-GNIRS-BP-250">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Obs: Science target"/>
+          <param name="libraryId" value="12"/>
+          <param name="priority" value="MEDIUM"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="226e62dc-6a34-454b-9183-fc1d86220f00" name="GNIRS">
+          <paramset name="GNIRS" kind="dataObj">
+            <param name="exposureTime" value="300.0"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="1"/>
+            <param name="pixelScale" value="PS_015"/>
+            <param name="disperser" value="D_32"/>
+            <param name="slitWidth" value="SW_4"/>
+            <param name="crossDispersed" value="SXD"/>
+            <param name="wollastonPrism" value="NO"/>
+            <param name="readMode" value="VERY_FAINT"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="centralWavelength" value="1.65"/>
+            <param name="acquisitionMirror" value="OUT"/>
+            <param name="camera" value="SHORT_BLUE"/>
+            <param name="decker" value="ACQUISITION"/>
+            <param name="filter" value="ORDER_5"/>
+            <param name="issPort" value="SIDE_LOOKING"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="973fdba9-6bf6-489b-a1ce-b7be21f92323" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="0e58731d-9e8d-4e1c-8289-127e7e2d35be" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="72f95b7f-8c98-4e89-822b-84f4673da8e6" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="40e3a2e3-fc12-4fd6-b332-50f11f5629ea" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="300.0"/>
+              <param name="readMode" value="VERY_FAINT"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="repeat" key="e0a47e6d-e7bc-415e-8eff-a22603fd0f80" name="Repeat">
+              <paramset name="Repeat" kind="dataObj">
+                <param name="repeatCount" value="2"/>
+              </paramset>
+              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="c19d5c6d-88b2-4a20-b94f-11b3029ff8c9" name="Offset">
+                <paramset name="Offset" kind="dataObj">
+                  <param name="title" value="ABBA offset sequence"/>
+                  <paramset name="offsets">
+                    <paramset name="Offset0" sequence="0">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="-1.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset1" sequence="1">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="2.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset2" sequence="2">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="2.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset3" sequence="3">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="-1.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                  </paramset>
+                </paramset>
+                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="c464cb95-369c-48d4-bb11-2ddacd6797da" name="Observe">
+                  <paramset name="Observe" kind="dataObj">
+                    <param name="repeatCount" value="1"/>
+                    <param name="class" value="SCIENCE"/>
+                  </paramset>
+                </container>
+              </container>
+            </container>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="BaselineNight" key="9b9c0ac0-4dea-41dd-b516-b0841d8e3718" name="Night Baseline GCAL">
+              <paramset name="Night Baseline GCAL" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="41c83814-981c-4eee-b2a6-cea3a8b36552" name="GN-GNIRS-BP-251">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Acq: &quot;After&quot; standard"/>
+          <param name="libraryId" value="13"/>
+          <param name="priority" value="MEDIUM"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="a635d33b-9187-454f-8a74-898b93cdcc91" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="f8d3a38a-6686-4241-9a42-db1afd12b8eb" name="GNIRS">
+          <paramset name="GNIRS" kind="dataObj">
+            <param name="title" value="GNIRS"/>
+            <param name="exposureTime" value="3.0"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="1"/>
+            <param name="pixelScale" value="PS_015"/>
+            <param name="disperser" value="D_32"/>
+            <param name="slitWidth" value="SW_4"/>
+            <param name="crossDispersed" value="SXD"/>
+            <param name="wollastonPrism" value="NO"/>
+            <param name="readMode" value="BRIGHT"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="centralWavelength" value="1.65"/>
+            <param name="acquisitionMirror" value="IN"/>
+            <param name="camera" value="SHORT_BLUE"/>
+            <param name="decker" value="SHORT_CAM_X_DISP"/>
+            <param name="filter" value="ORDER_4"/>
+            <param name="issPort" value="SIDE_LOOKING"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="1bc84a0c-66cd-441d-ae00-79a197e5459b" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="Filter selection"/>
+            <param name="NoteText">
+              <value>The initial slit image is taken in the H band filter as exposure times in the narrowband H2 filter used to image bright targets are prohibitively long for slit imaging. The images of the target field and of the target through the slit are taken in the H2 filter.</value>
+            </param>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="715a6cd5-176e-495d-ac21-06e71ae5154c" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="52f26d79-6620-4a10-bc35-73568e1b8acb" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="88ba8eb5-cf17-4c8c-8ccc-3683a85b8690" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="8d284a5b-56c5-4cc3-9448-cd25584524c3" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Slit image"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="coadds" value="1"/>
+              <param name="decker" value="SHORT_CAM_X_DISP"/>
+              <param name="exposureTime" value="3.0"/>
+              <param name="filter" value="ORDER_4"/>
+              <param name="readMode" value="BRIGHT"/>
+              <param name="slitWidth" value="SW_4"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="88a342c3-d6a8-4068-82a7-31fca480d7ba" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="slit image"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="10.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="off"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="ea5c8d2e-e4ac-491d-a4e3-be26b0881302" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="ACQ_CAL"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="4b5aa9c3-4cef-426e-b169-b25130172de0" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Field Images"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="coadds" value="25"/>
+              <param name="decker" value="ACQUISITION"/>
+              <param name="exposureTime" value="0.2"/>
+              <param name="filter" value="H2"/>
+              <param name="readMode" value="VERY_BRIGHT"/>
+              <param name="slitWidth" value="ACQUISITION"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="8410b0ce-21ec-4f72-a27a-e1ad30891bbd" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="target field"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="ea9cf74c-fcfb-46b8-a4d4-9ef2f420debe" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="2"/>
+                  <param name="class" value="ACQ_CAL"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="1da8fee4-06b2-48ba-bae3-4206a24a4a14" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Images of target through slit"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="coadds" value="25"/>
+              <param name="decker" value="SHORT_CAM_X_DISP"/>
+              <param name="exposureTime" value="0.2"/>
+              <param name="filter" value="H2"/>
+              <param name="readMode" value="VERY_BRIGHT"/>
+              <param name="slitWidth" value="SW_4"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="11b2ba06-0b3b-4c0b-bff8-327dd797f022" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="field images (through slit)"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="e0bfa816-8acd-4503-8765-74b899ad0923" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="2"/>
+                  <param name="class" value="ACQ_CAL"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="0feee6f4-43d7-49f9-80b5-b9eaaa43635f" name="GN-GNIRS-BP-252">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Obs: &quot;After&quot; standard spectrum"/>
+          <param name="libraryId" value="14"/>
+          <param name="priority" value="MEDIUM"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="d48962d7-044c-4f81-bb2b-8fa721a9ed4e" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="cbcd2174-a699-4019-ba60-ba0d35fab9b2" name="GNIRS">
+          <paramset name="GNIRS" kind="dataObj">
+            <param name="exposureTime" value="10.0"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="1"/>
+            <param name="pixelScale" value="PS_015"/>
+            <param name="disperser" value="D_32"/>
+            <param name="slitWidth" value="SW_4"/>
+            <param name="crossDispersed" value="SXD"/>
+            <param name="wollastonPrism" value="NO"/>
+            <param name="readMode" value="BRIGHT"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="centralWavelength" value="1.65"/>
+            <param name="acquisitionMirror" value="OUT"/>
+            <param name="camera" value="SHORT_BLUE"/>
+            <param name="decker" value="ACQUISITION"/>
+            <param name="filter" value="ORDER_5"/>
+            <param name="issPort" value="SIDE_LOOKING"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="c835212d-12b1-4e28-9d84-5b37b2879972" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="9a252484-231f-42a6-9b48-4ed4214869ee" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="2707bb7d-1866-4183-a215-b183787c8d5d" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="a31a7588-1ccb-4207-bcba-ea744008269c" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="10.0"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="repeat" key="fde91567-e8e9-4851-b019-b778891c332e" name="Repeat">
+              <paramset name="Repeat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+              </paramset>
+              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="54220ad4-8698-4c92-bdf8-4ef0fe15ced7" name="Offset">
+                <paramset name="Offset" kind="dataObj">
+                  <param name="title" value="ABBA offset sequence"/>
+                  <paramset name="offsets">
+                    <paramset name="Offset0" sequence="0">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="1.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset1" sequence="1">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="-2.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset2" sequence="2">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="-2.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset3" sequence="3">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="1.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                  </paramset>
+                </paramset>
+                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="13e604e7-d900-49c7-bcdf-342b345c6c17" name="Observe">
+                  <paramset name="Observe" kind="dataObj">
+                    <param name="repeatCount" value="1"/>
+                    <param name="class" value="PARTNER_CAL"/>
+                  </paramset>
+                </container>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="773e7793-2e42-47a9-8465-87d86bbb9389" name="GN-GNIRS-BP-253">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Daytime pinhole observations"/>
+          <param name="libraryId" value="15"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="559f81a5-c974-4d76-822b-a19e02ed28a4" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="22554f2a-8996-41cb-80d3-5795cc4190a8" name="Targets">
+          <paramset name="Targets" kind="dataObj">
+            <paramset name="targetEnv">
+              <paramset name="base">
+                <param name="name" value="Pinhole"/>
+                <param name="system" value="J2000"/>
+                <param name="epoch" value="2000.0" units="years"/>
+                <param name="brightness" value=""/>
+                <param name="c1" value="00:00:00.000"/>
+                <param name="c2" value="00:00:00.00"/>
+                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+                <param name="parallax" value="0.0" units="arcsecs"/>
+                <param name="rv" value="0.0" units="km/sec"/>
+                <param name="wavelength" value="-1.0" units="angstroms"/>
+              </paramset>
+              <paramset name="guideEnv">
+                <param name="active">
+                  <value sequence="0">GNIRS OIWFS</value>
+                  <value sequence="1">PWFS1</value>
+                  <value sequence="2">PWFS2</value>
+                </param>
+                <param name="selected"/>
+              </paramset>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2014A-1" subtype="GNIRS" key="1a6da644-5577-4801-951d-70e7a6c8ef68" name="GNIRS">
+          <paramset name="GNIRS" kind="dataObj">
+            <param name="exposureTime" value="5.0"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="20"/>
+            <param name="pixelScale" value="PS_015"/>
+            <param name="disperser" value="D_32"/>
+            <param name="slitWidth" value="PINHOLE_3"/>
+            <param name="crossDispersed" value="SXD"/>
+            <param name="wollastonPrism" value="NO"/>
+            <param name="readMode" value="BRIGHT"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="centralWavelength" value="1.65"/>
+            <param name="acquisitionMirror" value="OUT"/>
+            <param name="camera" value="SHORT_BLUE"/>
+            <param name="decker" value="ACQUISITION"/>
+            <param name="filter" value="ORDER_5"/>
+            <param name="issPort" value="SIDE_LOOKING"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="6340f8d6-538e-488e-bbff-59c4cb32e909" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="Daytime pinhole flats for tracing spectra"/>
+            <param name="NoteText">
+              <value>
+Pinhole flats are used for tracing the XD spectral orders. As with the flats and arcs embedded in the science observation, the GNIRS configuration of the pinhole flats should match that of the science observation, with the exception that the FPU should be pinhole 0.3 (for the 0.15"/pix camera) or pinhole 0.1 (for the 0.05"/pix camera). Template observations for most GNIRS XD configurations are available in the "CALIBRATION TEMPLATES" section at the bottom of this library, and can be cut-and-pasted into your program.
+
+REM 20110126</value>
+            </param>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="36ffd9d6-22b8-4fc9-a751-d07b121690ee" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="ab95d5fb-80fc-4727-a7f7-8c1ee0e54098" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="ea5a5104-0034-4ced-8b4d-ff4568887d85" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="BaselineDay" key="96ddbcaa-5909-4780-a9d1-8c4d186b5a59" name="Day Baseline GCAL">
+            <paramset name="Day Baseline GCAL" kind="dataObj">
+              <param name="repeatCount" value="1"/>
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="10.0"/>
+            </paramset>
+          </container>
+        </container>
+      </container>
+    </container>
+  </container>
+  <container kind="versions" type="versions" version="1.0">
+    <paramset name="node">
+      <param name="key" value="c88f1c60-5ecb-4823-9c7e-db05d158294e"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e08bcb85-cc31-4c03-99b8-9dc9cd7991dd"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="219edd71-5c24-40e8-a044-0b46b9f91e23"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="616c4fd9-9644-45a1-9f65-853731ed2a10"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9e7cea6c-25c5-4207-bfa7-a28c19ce82df"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="1431ea09-dd5b-4007-97f0-d791a7f0255f"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="cc0dea24-ba61-4fe0-b7d8-66594519c065"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="405f5fcf-143e-4c48-8704-bd0c8b8cd198"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6b91f4e3-5240-45ae-92eb-814dd158577b"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="77bd33d8-c8fb-44c2-98d5-2e0c5f8a24e6"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7e57024d-b404-4aa2-bb84-46155368229f"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6cb49ce3-ff6e-4dc7-b9c8-f1bb033b5818"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="cef1022c-d4e8-4ec8-8db0-897496891694"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="05fc92a2-1753-4832-ba2c-6a84d78677cc"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a31a7588-1ccb-4207-bcba-ea744008269c"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="54220ad4-8698-4c92-bdf8-4ef0fe15ced7"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="8d284a5b-56c5-4cc3-9448-cd25584524c3"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="0e58731d-9e8d-4e1c-8289-127e7e2d35be"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a2ebfe4f-8dd8-45f5-a139-5220632c0f58"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a8cf4df1-88a0-4e84-8727-cd9a221f49d8"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ab95d5fb-80fc-4727-a7f7-8c1ee0e54098"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="773e7793-2e42-47a9-8465-87d86bbb9389"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ba3e80a2-d9ad-402e-bfd3-6e54cc393c8c"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d11a9be2-8af7-4edd-9fdf-292965d2ffcb"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="310e6c2d-c6f3-4b48-8e85-ac7f17eae713"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9e61fbf4-67e8-4536-a549-61ca3a0b608b"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="49d420b0-0a51-493f-a475-fa9316c8196b"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="76d21c8a-650c-4ed7-b522-a2d1d04e93ad"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d5395f33-6615-499f-8687-5ba14fa4e94d"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a33e6e52-b046-4f89-9348-47ed5cbfde28"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4039f13a-7751-4044-a0a5-0e3583660292"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ff52aeb9-2c10-4abb-aaf8-cce282d7ff38"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="96a2d2f8-f179-4dcb-80b0-18655751b80a"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3fcda885-14ca-4e58-9164-974b44ffee8a"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5d33bb68-937e-45c5-adba-c0bc3938380f"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f3475742-dd60-42fa-a140-61190961ebef"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="8d408d0c-ccb2-4d05-880b-3df47cdfcc2c"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="08537c05-1383-41c5-9bf7-82581cd89fd5"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="09b47602-4b3c-4a2c-8874-9d210e62fecc"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e92da57c-3a34-4d0a-873a-2950c14785c3"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="fde91567-e8e9-4851-b019-b778891c332e"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9a7e5e27-8378-47f5-8021-06178efb753c"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="59b7c5f1-135d-438b-8646-1c6e7cf52245"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="01d95bbb-f04c-4eb1-977c-54eaed55c360"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="cc87682e-892b-4d67-bb88-d0fc86a67543"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="be0f38ce-0027-41a8-8f64-49a55f7dd167"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e0bfa816-8acd-4503-8765-74b899ad0923"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="361aa7b9-41b9-4a27-8556-4ef66d44c2ef"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="973fdba9-6bf6-489b-a1ce-b7be21f92323"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="88ba8eb5-cf17-4c8c-8ccc-3683a85b8690"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="cbcd2174-a699-4019-ba60-ba0d35fab9b2"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="cf279668-6935-49a1-bd3f-8c642f9915e1"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="af55054e-e24e-4b5a-a80d-691bb3eac900"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="8bf0b7b2-6e0c-44f7-88b1-20a5ef39bdec"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b7990d94-8069-4dc8-8ef4-3bf495c8964f"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d3ebaec3-3c1c-4163-878a-4f6e33677dac"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f73d0de9-6f70-45d3-97bd-401846e8cfbc"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="72f95b7f-8c98-4e89-822b-84f4673da8e6"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b2d80bc2-3095-4170-a7b7-599ba049a035"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a2f70798-37a6-4d5b-ae1a-1a7d717ac9e1"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="01275057-ae5e-481a-a724-720966f1dbe0"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="715a6cd5-176e-495d-ac21-06e71ae5154c"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="432da6b5-39cd-4e94-ad9f-156a5ef8f632"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="54b3f5be-e021-4bd6-8f88-2b57f6c7ad66"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="40e3a2e3-fc12-4fd6-b332-50f11f5629ea"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4d48ad0c-7b76-478e-a4ac-a083a7ae5168"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c14cdf39-6c06-4871-a00d-f4ae5e4b56d8"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4b5aa9c3-4cef-426e-b169-b25130172de0"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9c83286a-29df-46dd-bba8-f56fa3fba273"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="bdabf914-f215-4429-b4bf-c94b8455f7f9"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="bb718411-b574-49d0-8bb7-689b3a30955c"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ea5db477-b460-42ea-8de9-04b66ed12efb"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ea9cf74c-fcfb-46b8-a4d4-9ef2f420debe"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9d8d928f-fb64-4cb1-a34a-7e53c8d8941b"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="36ffd9d6-22b8-4fc9-a751-d07b121690ee"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="59215564-ef33-40dd-b6c0-fd006e2abab4"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="55350b5d-9e5f-4f5a-b395-dc90159e2711"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6340f8d6-538e-488e-bbff-59c4cb32e909"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e0a47e6d-e7bc-415e-8eff-a22603fd0f80"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="88a342c3-d6a8-4068-82a7-31fca480d7ba"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="eba10dca-e172-474f-a6a5-dacab2db8fb8"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="41c83814-981c-4eee-b2a6-cea3a8b36552"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f8d3a38a-6686-4241-9a42-db1afd12b8eb"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c599c13d-d933-47be-8fee-01867cfc51b6"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a0c9d638-a6ca-4753-a559-d3231d1758df"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6201259d-1ae8-455f-a57d-59df200f5d18"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c464cb95-369c-48d4-bb11-2ddacd6797da"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="acf599ec-37ca-413b-b005-075e55ccbbae"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="38bfba2d-e279-4d7e-ad86-a21b2a714868"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="0b6e6c96-1731-4fe6-8743-3e068d12246a"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7b7e42f6-fb7a-4abb-bd2f-341b194e7d01"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="10bd5cda-8ce0-48ed-91ab-da8ee25afc19"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5313319b-1e1e-498c-9822-41e704546cf3"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f27f9983-ad16-4be6-9e80-2957cebd4280"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2b515e75-1db7-4f46-bd65-eda7b7dce5ca"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="df391369-9c79-4285-9411-453a43402131"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="8410b0ce-21ec-4f72-a27a-e1ad30891bbd"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4f5ab8f6-1535-4874-bf45-97cca4556656"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="07e787fd-7e26-4dcf-8532-e313c399e1eb"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6a4bfa40-26dc-40eb-9a78-0de4c0b46e18"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="559f81a5-c974-4d76-822b-a19e02ed28a4"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="41992e10-b492-4856-96f3-c5a6df86cb74"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2d7b8059-cc38-4c10-893a-f94157a5d19d"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="01f3b0d3-6e72-47f2-9329-7668aae85c9d"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="8b7e30c3-c26a-4ed4-bdb1-8d7424bc78e9"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="095adab0-1d0d-4b8b-9884-72c9a6c56456"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e6d3cabe-347f-4199-99d8-2624d9e7dafa"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4a41b159-5422-454d-b54c-5b0546381e94"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="85ef68b0-41cf-4ee0-864c-60694f0f0423"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a2231a5b-8690-401f-9cca-ba2ff07ca978"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ea5c8d2e-e4ac-491d-a4e3-be26b0881302"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7589bc27-ec6d-457d-9192-afadc6f2d042"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4fbbcccd-1bdf-4d79-b32c-37d87e7f70fa"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="52f26d79-6620-4a10-bc35-73568e1b8acb"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="380eaa5c-d376-42a4-99e3-dbbabee8b922"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5e26d143-17d3-4f2e-8b8c-8ce70dd3d654"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="741f2b29-a1cc-4076-aa6f-e784072a05cb"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="48bd8eef-0305-4e7a-a086-223fd5edb2d5"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="040ce9e4-7e37-4718-a92c-fcbc7d141bf7"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="fbe1e4c2-b358-4a09-b65a-050e26d3cbf5"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="aa39d3c9-3c02-4050-bf7e-08a3bda1caa0"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b243dfb4-67da-4f0e-8b61-d55a96d7743e"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="27b7238b-d66b-49f4-b79d-37d58e0f2c95"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2b62e15f-5c2e-4e52-98e5-72cb5b2101db"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3fa983de-d0a8-44f8-98cf-c856fe49ec6d"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="385ace6c-f0dc-4330-8769-c43c5d03c2fd"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="affa96de-e4a6-4550-b041-90980aa77c6f"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="1a6da644-5577-4801-951d-70e7a6c8ef68"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ecb8786b-102d-452e-82a0-638416e9867e"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3c69a053-468b-40d3-9b17-6d2d343429ee"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="663a1485-1ffd-4704-b26d-f9d125cf2b1d"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c5738902-a553-43cc-a787-114ca3dc103e"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a394a56a-6b37-4567-a2a4-17b44b1cedd6"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e92734cd-8f77-4f0c-914f-afc009793067"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="fa398f40-685b-45f8-bef5-b1e472e3c677"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="81799fb6-7c0c-413f-bdba-fc9129745905"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="82406eed-4245-4a9d-8654-5a697d63c829"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b96f2670-0b8b-468e-998b-fa828c3f2d74"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6233b13c-ed83-4eb0-b454-db6d50962c59"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="659e5ff2-10c6-4f74-89a4-1a44c96b645b"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="96965e35-1e4c-418a-af84-463b0d40cd93"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="571f9304-8355-42f2-b103-aea346bf3e7b"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="473b4a81-7981-4a56-b0d8-054cd55f36c6"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b259fcad-8181-4e84-9b0e-95b0b7f9681f"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="622ece34-8049-4bed-af8c-e541da6a3347"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="8e8462a0-e252-49f8-a395-89042d64d17e"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9b9c0ac0-4dea-41dd-b516-b0841d8e3718"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="33da304a-0a03-4e9e-8f96-e7f93dee8bf0"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="1356f282-6dc5-4989-b491-83ece2616624"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4578c170-7b71-4ab9-9dec-d3fa8dd844b1"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d530b657-5c31-4966-9671-36dff1e09e59"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="257b14db-539a-4ba5-a7e8-b4ba9603fb0c"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9b4ac110-6794-4c5e-80f3-ab2861902835"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="77d3932b-c578-4894-a9d6-d65ebaa7091d"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="71cbe674-9d5f-4c97-83f9-07cffc6d61ba"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="44d2572b-eb02-4938-983c-7c4c55bca8ed"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="de61f06f-2cde-4f59-b5c3-e17c3fef338f"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="27b5a5bc-60cf-469f-b96a-f8cfd25e5630"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2250d529-47fe-4c8a-9d37-d24fea71011d"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d667cb41-9510-40f5-a0d7-cffeb056feeb"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ac76a3dc-e27f-4678-9ad8-e75803657fca"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="88e5098f-64f7-40e3-9cb9-06bd2e4ba03d"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="50a37281-a1ef-44b0-b33e-587b27537c28"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="82278dd7-1302-4987-ae31-ad7316d0d88e"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="22554f2a-8996-41cb-80d3-5795cc4190a8"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3d8a4d35-df68-4228-9104-2525bbe083f1"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="96ddbcaa-5909-4780-a9d1-8c4d186b5a59"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e4ce7de2-9886-4d67-a49c-e41c23cf247f"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="1da8fee4-06b2-48ba-bae3-4206a24a4a14"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="13e604e7-d900-49c7-bcdf-342b345c6c17"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f4257ab2-41ce-4f81-8dd5-8e2c06673ae1"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c835212d-12b1-4e28-9d84-5b37b2879972"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="8d6fbfbc-3200-401a-8a5a-0565bb6207d7"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="44cbd8ec-27c7-40ab-a50c-9898174196f0"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="72d31060-1b9c-49af-9f7d-79e98ff20681"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d8238dc0-4d4e-4c31-a79b-ed67b65c31d6"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="0feee6f4-43d7-49f9-80b5-b9eaaa43635f"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2bb18862-269e-4e1a-aadd-78a7a143cadd"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9b17bcf5-fea1-40ba-9c79-972828670c6a"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="348b70c8-12c9-4fa2-b06d-c94b44a09714"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d3d92146-46a7-44c4-8f0d-760bc11a67d4"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="cc4d1778-ceb6-4bfd-b242-827b47e04449"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a635d33b-9187-454f-8a74-898b93cdcc91"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9292a203-ca99-43c0-9529-7253073a2a7f"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="89bf6670-533e-4a2c-be57-3b1e7c60a9b7"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="38b286d1-afee-4a97-82b8-639ba78e2c0d"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c8713b43-f46c-4191-815f-325cb0679b9a"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="77fdce7f-c3f7-442b-a1d7-eabf5a7c5bf9"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="89e710de-6b80-40c8-8942-df172bb48087"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="83063881-5ec0-4f13-9a83-01bab501ec64"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="99fb04a1-7cd4-4056-bcbd-465425c9912d"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="19bba723-a59b-4b76-ad3b-018e8ce55cff"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e62283be-2a37-4477-92a2-c15bca56105a"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="59f61b4b-1fc0-452c-bdba-6fc56e91def5"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="dc86e944-e6ba-4924-87ee-db721ee77946"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="735bcc2d-3d7e-4182-90c2-f9d382ecd36e"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f9701718-72e2-44d8-80c6-8882f219d4fe"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a650fb68-5227-4c6a-b2d0-82ca86923b38"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c363f33d-7eb8-4d5b-88f4-6e456c9d2aa5"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="54307fed-a45d-4d5f-b0f1-1efe692cb6d8"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="22ea5a54-de10-49a3-a29e-4335e35ee645"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d5398f51-6a0b-47cd-bff9-edef61640932"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f0d9f4a2-c4ff-43c4-8b6c-a4698e3c723e"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="abc8bcec-d3db-4917-884c-fa353b4a8b58"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c19d5c6d-88b2-4a20-b94f-11b3029ff8c9"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="67c6dfc0-d73e-4952-83ee-7bb186222297"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="549e250f-b7e6-4e62-b967-7f8ed08e8afa"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2b24adb9-3f16-40e5-98f6-482c5c026f8f"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="85f72ee7-35f3-4d35-b64a-5cf300af6054"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9a252484-231f-42a6-9b48-4ed4214869ee"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="284ade96-dd91-44b8-884e-0a19e0e41223"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="74862b6a-6d46-47aa-bf07-d7902c06eed6"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2d76c9d1-4185-442b-ba28-f0a5914bfcf2"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="127d894e-d6a9-4b63-9c76-a0b65a358038"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="853c89d1-d4e7-4df4-b754-42b49badd331"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="91928023-5308-490a-838a-2f5b57b916ab"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f332b570-9cf7-444e-8999-7930ff639cdc"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="94ddfe28-364d-409d-b5e5-0e0cd892152d"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="0cc1fc9b-8199-42fd-aaf5-c42eb89dc7ac"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d48962d7-044c-4f81-bb2b-8fa721a9ed4e"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="269119c1-c8ad-4dd5-a577-21e1e2684ead"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="226e62dc-6a34-454b-9183-fc1d86220f00"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5d5990fb-ca30-427d-9c44-5cd969af8641"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="db784763-35fe-4ee7-8df0-e8a172548cea"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2fbc54b1-ba3c-406a-a8e9-8e69e8d625ee"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a9e4e0ce-10b9-4e71-aff6-0d9514d2dade"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7cdf7c66-c914-4b2a-b5da-0893e3bc8059"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f9b30cca-074f-4207-a0b8-cc6aa759cc75"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9325121e-be9d-41fd-8e54-846fa2524ff1"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9819d413-a41e-4e79-abeb-10cfa881f9f9"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ea5a5104-0034-4ced-8b4d-ff4568887d85"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="11b2ba06-0b3b-4c0b-bff8-327dd797f022"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="25c5cdb2-bb98-403a-93ed-6b688543ce17"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d677029f-5373-45a7-9b75-ff0274482fa5"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2707bb7d-1866-4183-a215-b183787c8d5d"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="69a5656b-ae60-47e8-96d9-8fa2bae7bdd9"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="13f6583c-7531-4bdd-889b-ff21c0479ad5"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="86d1061c-ff18-4817-bb30-ef45bd7ddd61"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="dfd01201-0cdb-4218-b439-172d704cf9fc"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="1bc84a0c-66cd-441d-ae00-79a197e5459b"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="792a548e-64fc-4461-815c-ad2a8008e5e3"/>
+      <param name="fa6ecf65-2969-4a34-bff7-a9181980cefd" value="1"/>
+    </paramset>
+  </container>
+</document>

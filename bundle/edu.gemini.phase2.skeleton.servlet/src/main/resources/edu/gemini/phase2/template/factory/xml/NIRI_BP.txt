@@ -1,0 +1,121 @@
+Instrument : NIRI
+Blueprints : NIRI_BP.xml
+Version June 12, 2012 - updated by Bryan M
+
+Observations identified by LibraryIDs indicated with {}.
+
+# DEFINITIONS
+AO = Adaptive Optics
+PI = Phase I
+
+### IMAGING MODE
+
+If CAMERA == F/6
+   INCLUDE {1,2,3,4} IN target-specific Scheduling Group
+   SCI={1},{2}
+   STD={3}
+   DAY={4}
+
+IF CAMERA == F/14 
+   INCLUDE {5,6,7,8} IN target-specific Scheduling Group
+   SCI={5},{6}
+   STD={7}
+   DAY={8}
+
+IF CAMERA = F/32 
+   INCLUDE {9,10,11,12,13} IN target-specific Scheduling Group
+   ACQ={9}
+   SCI={10}{11}
+   STD={12}
+   DAY={13}
+
+# AO Mode
+# In NGS mode target and standards use the same Altair guide mode.
+# In LGS mode the target uses the mode from PI, standards use NGS+FieldsLens
+# Altair components must not be added to the DAY observations
+IF AO mode != None AND NOT DAY ({4}, {8}, {13})
+    ADD Altair Adaptive Optics component AND 
+    SET Guide Star Type based on:
+      IF AO in PI includes "Natural Guide Star" (NGS mode) THEN SET
+      for ALL in the group:
+        AO=Altair Natural Guidestar => Natural Guide Star
+        AO=Altair Natural Guidestar w/ Field Lens => Laser Guide Star
+	with Field Lens
+      IF AO in PI includes "Laser Guide Star" (LGS mode) THEN SET for
+      ACQ and SCI:
+          AO=Altair Laser Guidestar => Laser Guide Star + AOWFS
+          AO=Altair Laser Guidestar w/ PWFS1 => Laser Guide Star + PWFS1
+        AND SET for STD:
+          SET Guide Star Type=Natural Guide Star with Field Lens
+
+# Filters
+FOR SCI, STD, OBSERVATIONS:
+SET FILTERS(S) from Phase-I in top-level (first) NIRI iterator.
+
+FOR DAY OBSERVATIONS:
+IF WAVE(FILTER) < 3um, SET FILTERS(S) from Phase-I in top-level
+(first) NIRI iterator. 
+#In DAY observations the any iterators containing the Dark exposure must not
+iterate over filters.
+
+FOR ACQ OBSERVATIONS:
+SET first FILTER from Phase-I in NIRI static component.
+
+# Exposure times and coadds
+FOR SCI observations:
+SET EXPOSURE TIME and COADDS in Iterator/Static component from
+spreadsheet NIRI_exptimes.xls.
+
+FOR STD and ACQ, DON'T set EXPOSURE TIME, it will be taken from the template.
+
+# Dark exposures
+IN DAY OBSERVATIONS:
+FOR EACH UNIQUE COMBINATION OF EXPOSURE TIME AND COADD in SCI, create
+a NIRI Sequence with a Manual Dark beneath. The NUMBER of observes,
+EXPOSURE TIME, and COADDs are set in the Dark component. The READ MODE
+is set in the iterator, see below, based on the exposure time. The
+NUMBER of observes is always 10 (10X). One iterator is present in the 
+BP libraries, more may be added.
+
+# Dark example
+# JHK f/6 imaging
+# J: 60sec, 1 coadd => Read Mode = Low Background (1-2.5um: Faint Object...)
+# H: 15sec, 4 coadds => Read Mode = Medium Background (1-2.5um: JHK and ...)
+# K: 30sec, 2 coadds => Read Mode = Medium Background (3-5um: Imaging/Spect...)
+# 
+# In the calibration observation created from {4} the sequence is
+# NIRI Flats
+#   Filter
+#      J
+#      H
+#      K
+#      - Flat
+# NIRI sequence
+#    Read mode
+#      1-2.5um: Faint Object Narrow-band Imaging/Spectroscopy
+#      - Manual Dark (10x observe, 60 sec, 1 coadds)
+# NIRI sequence
+#    Read mode
+#      1-2.5um: JHK and Bright Object Narrow-band Imaging/Spectroscopy
+#      - Manual Dark (10x observe, 15 sec, 4 coadds)
+#      - Manual Dark (10x observe, 30 sec, 2 coadds)
+  
+
+# Read Mode
+IN ALL ITERATORS AND STATIC COMPONENTS EXCEPT the FLATS sequences in
+DAY observations:
+IF Exptime >= 45s:   SET  Read Mode = Low Background (1-2.5um: Faint Object...)
+ELSEIF Exptime >= 1.0s:  SET Read Mode = Medium Background (1-2.5um:
+JHK and Bright Object...)
+ELSE:                 SET Read Mode = High Background (3-5um: Imaging/Spectroscopy)
+
+# Well depth
+IF WAVE (see NIRI_exptimes.xls) > 3micron (equally FILTER(S) includes H20
+Ice, hydrocarbon, L(prime), Br(alpha) cont, Br(alpha), M(prime)): SET
+Deep well (3-5 um)
+ELSE SET Shallow Well (1-2.5 um)  (default)
+
+# DO NOT ADD 'OVERVIEW' NOTE UNTIL WE CAN PUT IT AT THE TOP-LEVEL
+#Top-level note 'OVERVIEW' should be included in all programs
+
+Note: on instantiation, do not add a target component to the STD observation.

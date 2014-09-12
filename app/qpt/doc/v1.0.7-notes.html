@@ -1,0 +1,108 @@
+
+<html>
+<head><title>QPT 1.0.7 Release Notes</title></head>
+<link rel="stylesheet" href="/doc/styles.css"></link>
+<body>
+
+<h1>QPT 1.0.7 Release Notes</h1>
+
+<font color="red">
+NOTE 2: Windows users please see QPT-267 below before installing!
+</font>
+<p>
+QPT 1.0.7 addresses 11 issues, described below. 
+Release notes for the previous release are available <a href="v1.0.5-tabano-notes.html">here</a>. 
+
+<p>The QPT documentation index is available <a href="index.html">here</a>.
+
+<p>
+To install and run this release of QPT:
+
+<table style="padding:10px">
+	<tr><td style="text-align:right;color:red">To install &rarr;</td>
+		<td><code>launcher -i:qpt -a:qpt-2008B -h:sbfmaps.cl.gemini.edu -p:9999</code></td>
+	</tr>
+	<tr><td style="text-align:right;color:red">To run &rarr;</td>
+		<td><code>launcher -a:qpt-2008B</code></td>
+	</tr>
+	<tr><td style="text-align:right;color:red">To uninstall &rarr;</td>
+		<td><code>launcher -a:qpt-2008B -u</code></td>
+	</tr>
+</table>
+
+As always, the first time you run QPT it will download necessary components. This may
+take several minutes, especially in the north. Your previous installation of QPT should 
+continue to function normally.
+
+</div>
+
+<h2>New and Notable</h2>
+<h3>[QPT-149] Improved sequence summary text</h3>
+The sequence summary in the properties view now indicates the step type in addition to time and repeat count. This should make it
+a little easier to decide where to split an visit.
+
+<h3>[SCT-336/QPT-271] Improved handling of long observations</h3>
+To make it easier to deal with gigantic observations, 
+when you create a new visit by dragging a candidate observation into the 
+Plan Visualizer, the visit will automatically be truncated to the current "drag limit" (10 hours by default; there are menu commands
+to adjust this). You can then shorten/lengthen the visit normally, with less of the initial overlapping mess.
+Because QPT
+now truncates observations without telling you, there is a new QC-only warning for visits that have remaining steps (this warning
+doesn't appear on the published plan).
+
+<h3>[QPT-267] - QPT now runs correcly on Windows XP</h3>
+The old launcher relied on some file locking functionality that fails spectacularly on Windows, so it's now enabled only
+for real operating systems. Windows users will need to download the new 
+<a href="http://sbfmaps.cl.gemini.edu:9997/runtime/launcher/launcher.jar">launcher.jar</a> before
+installing QPT. Please make a backup of your old one first.
+
+<h3>Other Significant Improvements</h3>
+<ul>
+<li>[SCT-330/QPT-272] - Instrument configurations are now ordered more reasonably.
+<li>[SCT-356/QPT-277] - There are now forward/backward navigation buttons in the calendar control.
+</ul>
+
+<h3>Significant Bug Fixes</h3>
+<ul>
+<li>[QPT-270] - Splitting a long observation would sometimes cause QPT to hang. This has been fixed.
+<li>[SCT-329/QPT-274] - The visualizer now indicates the displayed timezone.
+<li>[SCT-355/QPT-275] - Updated observing conditions (in the OT) are now seen on refresh in QPT.
+<li>[SCT-318/QPT-276] - The Save command is now enabled for new plans (so you don't have to select Save As).
+</ul>
+
+
+<h2>JIRA Release Manifest</h2>
+<h3>        Bug
+</h3>
+<ul>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-267'>QPT-267</a>] -         QPT doesn't run reliably on Windows
+</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-269'>QPT-269</a>] -         Published report timezone should be constant
+</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-270'>QPT-270</a>] -         Splitting very long visits sometimes fails
+</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-275'>QPT-275</a>] -         QPT stale observing conditions
+</li>
+</ul>
+    
+<h3>        Improvement
+</h3>
+<ul>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-149'>QPT-149</a>] -         Show step type in seq summary
+</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-179'>QPT-179</a>] -         Uroll sequence to show all filters
+</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-271'>QPT-271</a>] -         More gracefully handling of long observations
+</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-272'>QPT-272</a>] -         Fix order of instrument components in published
+</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-274'>QPT-274</a>] -         Add time axis label for QPT elevation plot
+</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-276'>QPT-276</a>] -         QPT save hot-key triggers Save-As if plan not yet saved
+</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-277'>QPT-277</a>] -         Show previous month in QPT import from web dialog
+</li>
+</ul>
+
+</body>
+</html>

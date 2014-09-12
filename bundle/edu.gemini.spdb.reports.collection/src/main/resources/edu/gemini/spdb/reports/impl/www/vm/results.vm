@@ -1,0 +1,78 @@
+#set ($title = "SPDB Report - $escaper.escape($query.Table.DisplayName)")
+#set ($results = $queryManager.runQuery($query, $database))
+<html>
+	<head>
+		<title>$title</title>
+		<link rel="stylesheet" href="styles.css"></link>
+		<style>
+			th {
+				font-size: 8pt;
+				text-align: left;
+				padding-left: 2pt;
+				padding-right: 2pt;
+				border-top: 1px solid white;
+				border-left: 1px solid white;
+			}
+			td {
+				font-size: 8pt;
+			}
+			
+			td.header {
+				background-color: #cccccc;
+				border-top: 1px solid white;
+				border-left: 1px solid white;
+				font-style: bold;
+			}
+
+			td.spacer {
+				background-color: #cccccc;
+				border-left: 1px solid white;
+			}
+			
+		</style>
+	</head>
+	<body>
+    #parse("/edu/gemini/spdb/reports/impl/www/vm/nav.vm")
+		<table cellspacing="0">
+		#set($cols = $query.Groups.size() + $query.OutputColumns.size())
+
+		<tr>
+		#if($query.Groups.size() > 0)
+			<th colspan="$query.Groups.size()">&nbsp;</th>	
+		#end	
+		#foreach($col in $query.OutputColumns)
+			<th nowrap>$escaper.escape($col.Caption)</th>
+		#end	
+		</tr>
+		
+		#foreach ($row in $results.iterator())
+		    #set($i = 0)
+		    #foreach ($groupValue in $row.GroupValues)
+	    		#set ($group=$query.Groups.get($i))
+		    	#if ($row.GroupIndex >=0 && $i >= $row.GroupIndex)
+		    		<tr>
+		    		#if ($i > 0)
+			    		#foreach ($dummy in [1..$i])
+			    			<td class="spacer">&nbsp;</td>
+			    		#end
+			    	#end
+		    		#set($span = $cols - $i)
+		    		<td class="header" colspan="$span">$escaper.escape($group.Column.format($groupValue))</td>
+		    		</tr>
+		    	#end
+		    	#set($i = $i + 1)
+		    #end
+			<tr>
+				#foreach ($val in $row.GroupValues)
+					<td class="spacer">&nbsp;</th>
+				#end				
+			    #set($i = 0)
+				#foreach ($val in $row.Values)
+					<td nowrap>$escaper.escape($query.OutputColumns.get($i).format($val))</td>
+				    #set($i = $i + 1)
+				#end
+			</tr>
+		#end
+		</table>
+	</body>
+</html>

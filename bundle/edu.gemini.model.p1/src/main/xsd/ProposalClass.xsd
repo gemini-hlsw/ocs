@@ -1,0 +1,174 @@
+<!--
+  Schema definition for proposal classes and their related submissions.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" jaxb:version="1.0">
+    <xsd:include schemaLocation="Submission.xsd"/>
+    <xsd:include schemaLocation="Proposal.xsd"/>
+    <xsd:include schemaLocation="Investigator.xsd"/>
+
+    <!--
+        There are four classes of proposals, which differ in their time allocation options and available
+        instruments. Some types have additional options.
+    -->
+    <xsd:complexType name="ProposalClassChoice">
+        <xsd:choice minOccurs="1" maxOccurs="1">
+            <xsd:element name="queue"           type="QueueProposalClass"/>
+            <xsd:element name="classical"       type="ClassicalProposalClass"/>
+            <xsd:element name="special"         type="SpecialProposalClass"/>
+            <xsd:element name="exchange"        type="ExchangeProposalClass"/>
+            <xsd:element name="large"           type="LargeProgramClass"/>
+            <xsd:element name="fastTurnaround"  type="FastTurnaroundProgramClass"/>
+        </xsd:choice>
+    </xsd:complexType>
+
+
+    <!-- All proposal classes have an itac, comment and submission key. -->
+    <xsd:complexType name="ProposalClass">
+        <xsd:sequence>
+            <xsd:element name="itac" type="Itac" minOccurs="0"/>
+            <xsd:element name="comment" type="xsd:string" minOccurs="0"/>
+        </xsd:sequence>
+        <xsd:attribute name="key" type="SubmissionsKey" use="optional"/>
+    </xsd:complexType>
+
+
+    <!--
+       Normal Gemini proposals (Queue and Classical) hve either a list of NGO submissions or a single exchange
+       submission. This is an abstract type.
+    -->
+    <xsd:complexType name="GeminiNormalProposalClass">
+        <xsd:complexContent>
+            <xsd:extension base="ProposalClass">
+                <xsd:sequence>
+                    <xsd:choice>
+                        <xsd:sequence>
+                            <xsd:element name="ngo"  type="NgoSubmission" minOccurs="1" maxOccurs="unbounded"/>
+                        </xsd:sequence>
+                        <xsd:element name="exchange" type="ExchangeSubmission"/>
+                    </xsd:choice>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+
+    <!--
+        A Gemini queue proposal is a normal proposal (see above) with an optional band 3 request and a TOO option.
+        Only Gemini instruments may be used for proposals of this type, and observations may be marked for band 3 only
+        if band3request is provided; note that these checks are independent of schema validation. This is the default
+        type for new proposals.
+    -->
+    <xsd:complexType name="QueueProposalClass">
+        <xsd:complexContent>
+            <xsd:extension base="GeminiNormalProposalClass">
+                <xsd:sequence>
+                    <xsd:element name="band3request" type="SubmissionRequest" minOccurs="0" maxOccurs="1"/>
+                </xsd:sequence>
+                <xsd:attribute name="tooOption" type="TooOption" use="required"/>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+        A Gemini classical proposal is a normal proposal (see above) with a list of visitors. Only Gemini instruments
+        may be used for proposals of this type; note that this check is independent of schema validation.
+    -->
+    <xsd:complexType name="ClassicalProposalClass">
+        <xsd:complexContent>
+            <xsd:extension base="GeminiNormalProposalClass">
+                <xsd:sequence>
+                    <xsd:element name="visitor" type="Visitor" minOccurs="0" maxOccurs="unbounded"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+        A Gemini special proposal has a type and a special submission that doesn't go to partners.  Only Gemini
+        instruments may be used for proposals of this type; note that this check is independent of schema
+        validation.
+    -->
+    <xsd:complexType name="SpecialProposalClass">
+        <xsd:complexContent>
+            <xsd:extension base="ProposalClass">
+                <xsd:sequence>
+                    <xsd:element name="submission" type="SpecialSubmission"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+        An exchange proposal has a list of NGO submissions (you can't request Keck time from an exchange partner ...
+        can you?).  Only exchange instruments may be used for proposals of this type; note that this check is
+        independent of schema validation.
+    -->
+    <xsd:complexType name="ExchangeProposalClass">
+        <xsd:complexContent>
+            <xsd:extension base="ProposalClass">
+                <xsd:sequence>
+                    <xsd:element name="partner" type="ExchangePartner"/>
+                    <xsd:element name="ngo"  type="NgoSubmission" minOccurs="1" maxOccurs="unbounded"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+        A large proposal has a list of NGO submissions.
+    -->
+    <xsd:complexType name="LargeProgramClass">
+        <xsd:complexContent>
+            <xsd:extension base="ProposalClass">
+                <xsd:sequence>
+                    <xsd:element name="submission" type="LargeProgramSubmission"/>
+                </xsd:sequence>
+                <xsd:attribute name="tooOption" type="TooOption" use="required"/>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+        A large proposal has a list of NGO submissions.
+    -->
+    <xsd:complexType name="FastTurnaroundProgramClass">
+        <xsd:complexContent>
+            <xsd:extension base="ProposalClass">
+                <xsd:sequence>
+                    <xsd:element name="submission"   type="FastTurnaroundSubmission"/>
+                    <xsd:element name="band3request" type="SubmissionRequest" minOccurs="0" maxOccurs="1"/>
+                    <xsd:element name="partnerAffiliation" type="NgoPartner" minOccurs="0" maxOccurs="1"/>
+                </xsd:sequence>
+                <xsd:attribute name="tooOption" type="TooOption" use="required"/>
+                <xsd:attribute name="reviewer" type="InvestigatorRef" use="optional">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <jaxb:property><jaxb:baseType name="Investigator"/></jaxb:property>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attribute name="mentor" type="InvestigatorRef" use="optional">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <jaxb:property><jaxb:baseType name="Investigator"/></jaxb:property>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:attribute>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+        Gemini queue proposals must specify a TOO option, for dealing with targets of opportunity. Note that the TOO
+        option must be None if there are no TOO targets in the proposal, and must be Standard or Rapid if there are
+        one or more TOO targets. Validation of this constraint is independent of schema validation.
+    -->
+    <xsd:simpleType name="TooOption">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="None"/>
+            <xsd:enumeration value="Standard"/>
+            <xsd:enumeration value="Rapid"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+</xsd:schema>

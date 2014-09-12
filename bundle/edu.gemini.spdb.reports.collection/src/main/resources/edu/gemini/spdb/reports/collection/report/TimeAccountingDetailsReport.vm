@@ -1,0 +1,19 @@
+# Time Accounting Details Report for $siteName $semester
+# Generated at $now.toGMTString()
+# Columns: #foreach($col in $query.OutputColumns)
+#if($velocityCount > 1)
+,#end$col.Caption#end
+
+#foreach($row in $results)
+#if($row.GroupIndex >= 0)
+
+# #foreach($cell in $row.GroupValues)
+#if($velocityCount > 1)
+,#end#set($i = $velocityCount - 1)$query.Groups.get($i).Column.format($cell)#end
+
+#end
+#foreach($cell in $row.Values)
+#if($velocityCount > 1)
+,#end#set($i = $velocityCount - 1)$query.OutputColumns.get($i).format($cell)#end
+
+#end

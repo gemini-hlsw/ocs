@@ -1,0 +1,127 @@
+<jxb:bindings version="2.0"
+              xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+              xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <!-- Custom bindings for Nici -->
+    <jxb:bindings schemaLocation="../xsd/Nici.xsd" node="/xsd:schema">
+
+        <!-- NiciDichroic => NiciParams. -->
+        <jxb:bindings node="./xsd:simpleType[@name='NiciDichroic']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='H 50/50 Beamsplitter']">
+                <jxb:typesafeEnumMember name="H5050_BEAMSPLITTER"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='H Methane Dichroic']">
+                <jxb:typesafeEnumMember name="CH4_H_DICHROIC"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='H/K Dichroic']">
+                <jxb:typesafeEnumMember name="H_K_DICHROIC"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+        <!-- NiciRedFilter => NiciParams.Channel1FW -->
+        <jxb:bindings node="./xsd:simpleType[@name='NiciRedFilter']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='CH4 H 1% S']">
+                <jxb:typesafeEnumMember name="CH4H1S"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='CH4 H 1% Sp']">
+                <jxb:typesafeEnumMember name="CH4H1SP"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='CH4 H 1% L']">
+                <jxb:typesafeEnumMember name="CH4H1L"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='CH4 H 4% S']">
+                <jxb:typesafeEnumMember name="CH4H4S"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='CH4 H 4% L']">
+                <jxb:typesafeEnumMember name="CH4H4L"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='CH4 K 5% L']">
+                <jxb:typesafeEnumMember name="K_CH4"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='CH4 H 6.5% L']">
+                <jxb:typesafeEnumMember name="CH4H65L"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='H2O Ice L']">
+                <jxb:typesafeEnumMember name="H20"/>  <!-- yes H20, not H2O -->
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Ks (2.15 um)']">
+                <jxb:typesafeEnumMember name="KS"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='K (2.20 um)']">
+                <jxb:typesafeEnumMember name="K"/>
+            </jxb:bindings>
+            <jxb:bindings node='./xsd:enumeration[@value="K&apos; (2.12 um)"]'>
+                <jxb:typesafeEnumMember name="K_PRIMMA"/>
+            </jxb:bindings>
+            <jxb:bindings node='./xsd:enumeration[@value="L&apos; (3.78 um)"]'>
+                <jxb:typesafeEnumMember name="L_PRIMMA"/>
+            </jxb:bindings>
+            <jxb:bindings node='./xsd:enumeration[@value="M&apos; (4.68 um)"]'>
+                <jxb:typesafeEnumMember name="M_PRIMMA"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Kcont (2.27 um)']">
+                <jxb:typesafeEnumMember name="K_CONT"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+        <!-- NiciBlueFilter => NiciParams. -->
+        <jxb:bindings node="./xsd:simpleType[@name='NiciBlueFilter']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='CH4 H 1% S']">
+                <jxb:typesafeEnumMember name="CH4H1S"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='CH4 H 1% Sp']">
+                <jxb:typesafeEnumMember name="CH4H1SP"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='CH4 H 1% L']">
+                <jxb:typesafeEnumMember name="CH4H1L"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='CH4 H 4% S']">
+                <jxb:typesafeEnumMember name="CH4H4S"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='CH4 H 4% L']">
+                <jxb:typesafeEnumMember name="CH4H4L"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='CH4 K 5% S']">
+                <jxb:typesafeEnumMember name="K_CH4"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='CH4 H 6.5% S']">
+                <jxb:typesafeEnumMember name="CH4H65S"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='J (1.25 um)']">
+                <jxb:typesafeEnumMember name="J"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='H (1.65 um)']">
+                <jxb:typesafeEnumMember name="H"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='[FeII] (1.644 um)']">
+                <jxb:typesafeEnumMember name="FE_II"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='H2 1-0 S(1) (2.122 um)']">
+                <jxb:typesafeEnumMember name="H210S1"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Br-gamma (2.169 um)']">
+                <jxb:typesafeEnumMember name="BR_GAMMA"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+        <!-- NiciFpm => NiciParams. -->
+        <jxb:bindings node="./xsd:simpleType[@name='NiciFpm']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='0.90 arcsec']">
+                <jxb:typesafeEnumMember name="MASK_1"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.65 arcsec']">
+                <jxb:typesafeEnumMember name="MASK_2"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.46 arcsec']">
+                <jxb:typesafeEnumMember name="MASK_3"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.32 arcsec']">
+                <jxb:typesafeEnumMember name="MASK_4"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.22 arcsec']">
+                <jxb:typesafeEnumMember name="MASK_5"/>
+            </jxb:bindings>
+        </jxb:bindings>
+    </jxb:bindings>
+
+</jxb:bindings>

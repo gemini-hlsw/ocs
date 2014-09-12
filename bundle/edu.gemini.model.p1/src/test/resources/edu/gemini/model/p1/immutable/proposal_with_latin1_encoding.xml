@@ -1,0 +1,228 @@
+<proposal schemaVersion="2013.2.1" tacCategory="Galactic">
+    <meta band3optionChosen="true">
+        <attachment>gs_2013B_028.pdf</attachment>
+    </meta>
+    <semester year="2013" half="B" />
+    <title>Extremely Low Mass White Dwarf Pulsators</title>
+    <abstract>ZZ Ceti stars are pulsating white dwarfs (WDs) with hydrogen-dominated atmospheres and are observed in a narrow temperature range, about 1500K wide. The actual position of the instability strip depends on the mass; the higher the mass, the hotter the stars start to pulsate. However, there are a couple variables with temperature and mass determined from low S/N spectra that would be outside the instability strip. When we compared their Galex colors with models, we found out that these objects are much less massive than previously thought. In fact, these stars are most likely to be the blue edge of the extremely low mass WDs (Hermes et al. 2012, 2013). The goal of this proposal is to obtain S/N~100 spectra to determine the atmospheric parameters of these two stars, in order to confirm their low mass nature or if additional parameters are placing the stars outside the strip. Extremely low mass WDs are themselves important objects, as they are the resulting products of binary evolution. </abstract>
+    <scheduling />
+    <keywords>
+        <keyword>White dwarfs</keyword>
+    </keywords>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Principal</firstName>
+            <lastName>Investigator</lastName>
+            <status>PhD</status>
+            <email>kepler@if.ufrgs.br</email>
+            <phone>+555133086556</phone>
+            <address>
+                <institution>Universidade Federal do Rio Grande do Sul (UFRGS)</institution>
+                <address>Departamento de Astronomia - IF
+Av. Bento Gonçalves, 9500
+Campus do Vale
+91540-000 - Porto Alegre - RS</address>
+                <country>Brazil</country>
+            </address>
+        </pi>
+        <coi id="investigator-1">
+            <firstName>Alejandro</firstName>
+            <lastName>Corsico</lastName>
+            <status>PhD</status>
+            <email>acorsico@fcaglp.fcaglp.unlp.edu.ar</email>
+            <phone />
+            <institution>Observatorio Astronomico de La Plata</institution>
+        </coi>
+        <coi id="investigator-2">
+            <firstName>Atsuko</firstName>
+            <lastName>Nitta</lastName>
+            <status>PhD</status>
+            <email>anitta@gemini.edu</email>
+            <phone />
+            <institution>Gemini Observatory - North</institution>
+        </coi>
+        <coi id="investigator-3">
+            <firstName>Barbara</firstName>
+            <lastName>Castanheira</lastName>
+            <status>PhD</status>
+            <email>barbara@astro.as.utexas.edu</email>
+            <phone />
+            <institution>University of Texas</institution>
+        </coi>
+        <coi id="investigator-4">
+            <firstName>Alejandra</firstName>
+            <lastName>Romero</lastName>
+            <status>PhD</status>
+            <email>aromero@fcaglp.unlp.edu.ar</email>
+            <phone />
+            <institution>Universidade Federal do Rio Grande do Sul (UFRGS)</institution>
+        </coi>
+        <coi id="investigator-5">
+            <firstName>Leamdro</firstName>
+            <lastName>Althaus</lastName>
+            <status>PhD</status>
+            <email>atlhaus@fcaglp.fcaglp.unl.edu.ar</email>
+            <phone />
+            <institution>Universidad Nacional de La Plata</institution>
+        </coi>
+    </investigators>
+    <targets>
+        <sidereal epoch="J2000" id="target-0">
+            <name>SDSS J235040.74-005430.8</name>
+            <degDeg>
+                <ra>357.66975000699364</ra>
+                <dec>-0.908555555343628</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude band="B" system="Vega">18.100000381469727</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-1">
+            <name>SDSS J235040.74-005430.8</name>
+            <degDeg>
+                <ra>357.66975000699364</ra>
+                <dec>-0.908555555343628</dec>
+            </degDeg>
+            <magnitudes />
+        </sidereal>
+        <sidereal epoch="J2000" id="target-2">
+            <name>SDSS J094000.27+005207.1</name>
+            <degDeg>
+                <ra>145.0011250000447</ra>
+                <dec>0.8686388888623979</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude band="B" system="Vega">18.1200008392334</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-3">
+            <name>SDSS J094000.27+005207.1</name>
+            <degDeg>
+                <ra>145.0011250000447</ra>
+                <dec>0.8686388888623979</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude band="B" system="Vega">18.100000381469727</magnitude>
+            </magnitudes>
+        </sidereal>
+    </targets>
+    <conditions>
+        <condition id="condition-0">
+            <name>CC 50%/Clear, IQ 70%/Good, SB 50%/Dark, WV Any</name>
+            <cc>50%/Clear</cc>
+            <iq>70%/Good</iq>
+            <sb>50%/Dark</sb>
+            <wv>Any</wv>
+        </condition>
+        <condition id="condition-1">
+            <name>CC 70%/Cirrus, IQ Any, SB 80%/Grey, WV Any</name>
+            <cc>70%/Cirrus</cc>
+            <iq>Any</iq>
+            <sb>80%/Grey</sb>
+            <wv>Any</wv>
+        </condition>
+    </conditions>
+    <blueprints>
+        <gmosS>
+            <regime>optical</regime>
+            <longslit id="blueprint-0">
+                <name>GMOS-S Longslit B600 None 1.0 arcsec slit</name>
+                <visitor>false</visitor>
+                <filter>None</filter>
+                <disperser>B600</disperser>
+                <fpu>1.0 arcsec slit</fpu>
+            </longslit>
+        </gmosS>
+        <gmosS>
+            <regime>optical</regime>
+            <longslit id="blueprint-1">
+                <name>GMOS-S Longslit B600 None 1.5 arcsec slit</name>
+                <visitor>false</visitor>
+                <filter>None</filter>
+                <disperser>B600</disperser>
+                <fpu>1.5 arcsec slit</fpu>
+            </longslit>
+        </gmosS>
+    </blueprints>
+    <observations>
+        <observation band="Band 1/2" enabled="true" target="target-1" condition="condition-0" blueprint="blueprint-0">
+            <time units="hr">2.5</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>42</percentage>
+                    <evaluation>Warning</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation band="Band 1/2" enabled="true" target="target-2" condition="condition-0" blueprint="blueprint-0">
+            <time units="hr">2.5</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>42</percentage>
+                    <evaluation>Warning</evaluation>
+                </guiding>
+                <visibility>Limited</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation band="Band 3" enabled="true" target="target-0" condition="condition-1" blueprint="blueprint-1">
+            <time units="hr">5.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>36</percentage>
+                    <evaluation>Warning</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation band="Band 3" enabled="true" target="target-3" condition="condition-1" blueprint="blueprint-1">
+            <time units="hr">5.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>28</percentage>
+                    <evaluation>Warning</evaluation>
+                </guiding>
+                <visibility>Limited</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None" key="c5d5133f-ea56-40dc-a23c-ef07cf27b060">
+            <ngo partnerLead="investigator-0">
+                <request>
+                    <time units="hr">2.0</time>
+                    <minTime units="hr">2.0</minTime>
+                </request>
+                <response>
+                    <receipt>
+                        <timestamp>2013-03-30T14:04:24.000Z</timestamp>
+                        <id>BR-2013B-008</id>
+                    </receipt>
+                </response>
+                <partner>br</partner>
+            </ngo>
+            <ngo partnerLead="investigator-1">
+                <request>
+                    <time units="hr">1.0</time>
+                    <minTime units="hr">1.0</minTime>
+                </request>
+                <partner>ar</partner>
+            </ngo>
+            <ngo partnerLead="investigator-2">
+                <request>
+                    <time units="hr">2.0</time>
+                    <minTime units="hr">2.0</minTime>
+                </request>
+                <response><receipt><timestamp>2013-04-02T17:45:23Z</timestamp><id>GSTAFF-2013B-028</id></receipt></response><partner>gs</partner>
+            </ngo>
+            <band3request>
+                <time units="hr">10.0</time>
+                <minTime units="hr">5.0</minTime>
+            </band3request>
+        </queue>
+    </proposalClass>
+</proposal>

@@ -1,0 +1,38 @@
+<proposal schemaVersion="2014.1.1">
+    <meta band3optionChosen="false"/>
+    <semester year="2014" half="A"/>
+    <title/>
+    <abstract/>
+    <scheduling/>
+    <keywords/>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Principal</firstName>
+            <lastName>Investigator</lastName>
+            <status>PhD</status>
+            <email/>
+            <address>
+                <institution/>
+                <address/>
+                <country/>
+            </address>
+        </pi>
+    </investigators>
+    <targets/>
+    <conditions/>
+    <blueprints>
+        <graces>
+            <Graces id="blueprint-0">
+                <name>Graces 1 fiber (target, R~50000)</name>
+                <visitor>false</visitor>
+                <fiberMode>1 fiber (target, R~50000)</fiberMode>
+            </Graces>
+        </graces>
+    </blueprints>
+    <observations>
+        <observation band="Band 1/2" enabled="true" blueprint="blueprint-0"/>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None"/>
+    </proposalClass>
+</proposal>

@@ -1,0 +1,87 @@
+<!--
+  Schema definition for GNIRS blueprints.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:include schemaLocation="Instrument.xsd"/>
+    <xsd:include schemaLocation="Altair.xsd"/>
+
+    <!-- Options for GNIRS Blueprint. -->
+    <xsd:complexType name="MichelleBlueprintChoice">
+        <xsd:sequence>
+            <xsd:choice>
+                <xsd:element name="null"         type="MichelleBlueprintNull"/>
+                <xsd:element name="imaging"      type="MichelleBlueprintImaging"/>
+                <xsd:element name="spectroscopy" type="MichelleBlueprintSpectroscopy"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- Michelle Null. Empty blueprint, not available in PIT. -->
+    <xsd:complexType name="MichelleBlueprintNull"/>
+
+    <!-- Michell Imaging Blueprint.  Contains multiple filter options. -->
+    <xsd:complexType name="MichelleBlueprintImaging">
+        <xsd:complexContent>
+            <xsd:extension base="BlueprintBase">
+                <xsd:sequence>
+                    <xsd:element name="filter" type="MichelleFilter" maxOccurs="unbounded"/>
+                    <xsd:element name="polarimetry" type="MichellePolarimetry"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:simpleType name="MichelleFilter">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="N' (11.2 um)"/>
+            <xsd:enumeration value="Qa (18.1 um)"/>
+            <xsd:enumeration value="Si-1 (7.7 um)"/>
+            <xsd:enumeration value="Si-2 (8.7 um)"/>
+            <xsd:enumeration value="Si-3 (9.7 um)"/>
+            <xsd:enumeration value="Si-4 (10.4 um)"/>
+            <xsd:enumeration value="Si-5 (11.7 um)"/>
+            <xsd:enumeration value="Si-6 (12.3 um)"/>
+            <xsd:enumeration value="NeII (12.8 um)"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="MichellePolarimetry">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="YES"/>
+            <xsd:enumeration value="NO"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:complexType name="MichelleBlueprintSpectroscopy">
+        <xsd:complexContent>
+            <xsd:extension base="BlueprintBase">
+                <xsd:sequence>
+                    <xsd:element name="fpu" type="MichelleFpu"/>
+                    <xsd:element name="disperser" type="MichelleDisperser"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:simpleType name="MichelleFpu">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="0.201 arcsec"/>
+            <xsd:enumeration value="0.402 arcsec"/>
+            <xsd:enumeration value="0.603 arcsec"/>
+            <xsd:enumeration value="0.804 arcsec"/>
+            <xsd:enumeration value="1.210 arcsec"/>
+            <xsd:enumeration value="1.610 arcsec"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="MichelleDisperser">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="LowN"/>
+            <xsd:enumeration value="LowQ"/>
+            <xsd:enumeration value="MedN1"/>
+            <xsd:enumeration value="MedN2"/>
+            <xsd:enumeration value="Echelle"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+</xsd:schema>

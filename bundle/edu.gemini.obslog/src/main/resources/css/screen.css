@@ -1,0 +1,211 @@
+
+body {
+	font: 1em   Verdana, Arial, Helvetica, sans-serif;
+	background: #e6e6e6;
+}
+
+p {
+font-size: .9em; }
+
+h1 {
+	font-weight: lighter;
+	font-size: 1.4em;
+	font-variant: small-caps;
+}
+
+h2 {
+font-size: 1.2em;
+	font-weight: lighter;
+}
+
+h3 {
+font-size: 1.0em;
+	font-weight: lighter;
+}
+
+#header {
+	background-color: #69c;
+	border-top: 1px solid #666;
+	border-bottom: 1px solid #666;
+	padding-left: 20px;
+}
+
+#header ul{
+	margin: 0px 0em 0px 0em;
+	padding: .2em 0;
+	list-style-type: none;
+	color: #FFF;
+	width: 100%;
+	text-align: center;
+	font-size: .75em;
+	background-color: #69c;
+}
+
+#header ul li{
+	display: inline;
+}
+#header ul li a{
+	text-decoration: none;
+	background-color: #036;
+	color: #fff;
+	padding: .2em 1em;
+	border-right: 1px solid #fff;
+}
+#header ul li a:hover{
+	background-color: #369;
+	color: white;
+}
+
+#winput {
+        font-size: .8em;
+}
+
+#winput fieldset {
+	border: #000000 solid 1px;
+	background: #def
+	padding: 20px;
+	width: 60%;
+}
+
+#winput legend {
+	border: #000000 solid 1px;
+	background-color: #69c;
+	font-size: .75em;
+	padding: 5px 15px 5px 15px;
+	font-weight: bolder;
+}
+
+#winput label {
+	float: left;
+	text-align: right;
+	background: #69c;
+	width: 12em;
+	height: 1.3em;
+}
+
+.submit-button {
+	clear:  both;
+	margin-top: 10px;
+}
+
+.inbox {
+	background: white;
+	font-size: 1em;
+	margin: 4px;
+	padding: 3px;
+	width: 25em;
+}
+
+table.log {
+	border: 1px solid #666;
+	width: 100%;
+	margin: 20px 0 20px 0;
+	font-size: .7em;
+}
+table.log th, td {
+	padding: 2px 4px 2px 4px;
+	text-align: left;
+	vertical-align: top;
+}
+
+table.log caption {
+        padding: 2px 4px 2px 4px;
+        font-size: 1.4em;
+        font-weight: lighter;
+        text-align: left;
+}
+
+table.log thead tr {
+ 	background-color: #69c;
+	font-weight: bolder;
+	text-align: left;
+}
+
+table.log tbody.odd {
+  background-color: #fffff3
+}
+
+table.log textarea {
+  background-color: #ffffff;
+	width: 100%;
+	border-spacing: 0;
+}
+table.log tbody.even {
+  background-color: #def;
+	text-align: left;
+}
+
+table.log td.comtd {
+  background-color: #def;
+	text-align: left;
+	border-style: solid;
+	border-color: black;
+	padding: 0;
+	display: table-cell;
+}
+
+div.obsinfo {
+	font-size: .7em;
+	background: #e2e2e2;
+}
+
+div.obsinfo legend {
+	font-weight: bolder;
+	background: #69c;
+	border: 1px solid black;
+	padding: .25em 1em .25em 1em;
+}
+
+div.obsinfo td {
+	width: 20em;
+}
+
+div.obsinfo dl {
+	display: inline;
+}
+
+div.obsinfo dt {
+	font-weight: bolder;
+}
+
+div.exportlinks {
+	background-color: #e2e2e2;
+	border: 1px dotted #999;
+	padding: 2px 4px 2px 4px;
+	margin: -10px 0 10px 0;
+	width: 79%;
+	font-size: .8em;
+}
+
+div.carea {
+	background: inherit;
+}
+
+div.carea img {
+}
+
+div.carea textarea {
+	direction: ltr;
+	color: black;
+	background: white;
+}
+
+span.export {
+	padding: 0 4px 1px 20px;
+	display:inline; display:inline-block;
+	cursor: pointer;
+}
+
+span.excel {
+	background-image: url(../img/ico_file_excel.png);
+}
+span.csv {
+	background-image: url(../img/ico_file_csv.png);
+}
+span.xml {
+	background-image: url(../img/ico_file_xml.png);
+}
+
+.instructions {
+	font-size: .8em;
+}

@@ -1,0 +1,80 @@
+package edu.gemini.epics.isd.impl;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+import gov.aps.jca.CAException;
+import gov.aps.jca.Context;
+
+public class Apply {
+
+	enum State { IDLE, START, BUSY }
+	
+	private final ProcessVariable<String> apply;
+	private final ProcessVariable<Short> result;
+	private final ProcessVariable<Short> clid;
+	private final ProcessVariable<Short> cClid;
+
+	private final ProcessVariable<String> error;
+	private final ProcessVariable<String> omss;
+
+	private State state = State.IDLE;
+//	private int clientId;
+	
+	public Apply(Context ctx, String root) throws CAException {
+		
+		apply = new ProcessVariable<String>(ctx, root + ".DIR");
+		apply.addPropertyChangeListener(listener);
+		
+		result = new ProcessVariable<Short>(ctx, root + "C.VAL");
+		result.addPropertyChangeListener(listener);
+		
+		clid = new ProcessVariable<Short>(ctx, root + ".clid");
+		clid.addPropertyChangeListener(listener);
+		
+		cClid = new ProcessVariable<Short>(ctx, root + "C.clid");
+		cClid.addPropertyChangeListener(listener);
+
+		error = new ProcessVariable<String>(ctx, root + ".error");
+		error.addPropertyChangeListener(listener);
+		
+		omss = new ProcessVariable<String>(ctx, root + "C.OMSS");
+		omss.addPropertyChangeListener(listener);
+		
+	}
+	
+	
+	public void apply() throws CAException {
+		state = State.START;
+		apply.put("START");
+	}
+	
+	private PropertyChangeListener listener = new PropertyChangeListener() {
+	
+		public void propertyChange(PropertyChangeEvent pce) {
+			System.out.println(pce.getSource() + ": " + pce.getOldValue() + " => " + pce.getNewValue());
+
+			if (pce.getSource() == result) {
+				short rs = result.get();
+				switch (state) {
+				
+				case START:
+					if (rs > 0) state = State.BUSY;
+					System.out.println("** BUSY");
+					break;
+						
+				case BUSY:
+					if (rs == 0) state = State.IDLE;
+					System.out.println("** IDLE");
+					break;
+					
+				case IDLE:
+					// do nothing. not our baby.
+					
+				}
+			}
+		}
+	
+	};
+	
+}

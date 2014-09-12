@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal tacCategory="Extragalactic" schemaVersion="1.0.0">
+    <meta>
+        <attachment>/Users/swalker/dev/ocs2/osgi/src/bundle/edu.gemini.model.p1.submit/trunk/src-test/edu/gemini/model/p1/submit/GeminiDemo_12B.pdf</attachment>
+    </meta>
+    <semester half="B" year="2012"/>
+    <title>Molecular Hydrogen Excitation in Actively Star-forming Dwarf Galaxies</title>
+    <abstract>We propose to observe a small sample of weak-continuum, dwarf galaxies to investigate the excitation of molecular hydrogen in massive star-forming complexes.  In the usable fraction of our previous allocation we were able to observe one of our targets, NGC5461.  This dataset unambiguously shows that the gas is excited in low density photo-dissociation regions, contrary to the widespread assumption in the literature that the H2 in galaxies is predominantly shock excited.  The weakness of the dwarf galaxy continua permits detection of the higher level H2 transitions which are essential to determine the gas excitation and relative contributions of thermal and UV-excited gas. </abstract>
+    <keywords>
+        <keyword>Dwarf galaxies</keyword>
+        <keyword>Emission lines</keyword>
+        <keyword>Starburst galaxies</keyword>
+    </keywords>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Phil</firstName>
+            <lastName>Puxley</lastName>
+            <status>PhD</status>
+            <email>ppuxley@gemini.edu</email>
+            <phone>+56 51 555555</phone>
+            <address>
+                <institution>Gemini Observatory</institution>
+                <address>Casilla 603
+La Serena</address>
+                <country>Chile</country>
+            </address>
+        </pi>
+        <coi id="investigator-1">
+            <firstName>Matt</firstName>
+            <lastName>Mountain</lastName>
+            <status>PhD</status>
+            <email>mmountain@gemini.edu</email>
+            <phone>+56 51 555556</phone>
+            <institution>Gemini Observatory</institution>
+        </coi>
+        <coi id="investigator-2">
+            <firstName>Doug</firstName>
+            <lastName>Simons</lastName>
+            <status>PhD</status>
+            <email>dsimons@gemini.edu</email>
+            <phone>1 808 974 5556</phone>
+            <institution>Gemini Observatory</institution>
+        </coi>
+        <coi id="investigator-3">
+            <firstName>Fred</firstName>
+            <lastName>Chaffee</lastName>
+            <status>PhD</status>
+            <email></email>
+            <phone>1 808 974 5557</phone>
+            <institution>Gemini Observatory</institution>
+        </coi>
+    </investigators>
+    <targets>
+        <sidereal epoch="J2000" id="target-0">
+            <name>Haro3</name>
+            <degDeg>
+                <ra>161.3420833349228</ra>
+                <dec>55.96055555555556</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="B">12.899999618530273</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-1">
+            <name>IIZw40</name>
+            <degDeg>
+                <ra>88.92791666984559</ra>
+                <dec>3.3852777777777776</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="B">14.220000267028809</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-2">
+            <name>Haro2</name>
+            <degDeg>
+                <ra>158.13333333333333</ra>
+                <dec>54.40097222222222</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="B">13.199999809265137</magnitude>
+                <magnitude system="Vega" band="V">13.399999618530273</magnitude>
+            </magnitudes>
+        </sidereal>
+    </targets>
+    <conditions>
+        <condition id="condition-0">
+            <name>CC 50%/Clear, IQ 70%/Good, SB Any/Bright, WV Any</name>
+            <cc>50%/Clear</cc>
+            <iq>70%/Good</iq>
+            <sb>Any/Bright</sb>
+            <wv>Any</wv>
+        </condition>
+    </conditions>
+    <blueprints>
+        <gnirs>
+            <spectroscopy id="blueprint-0">
+                <name>GNIRS Spectroscopy  0.15&quot;/pix 111 l/mm grating None 0.30 arcsec</name>
+                <altair>
+                    <none/>
+                </altair>
+                <pixelScale>0.15&quot;/pix</pixelScale>
+                <disperser>111 l/mm grating</disperser>
+                <crossDisperser>None</crossDisperser>
+                <fpu>0.30 arcsec</fpu>
+            </spectroscopy>
+        </gnirs>
+    </blueprints>
+    <observations>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 1/2">
+            <time units="hr">3.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>0</percentage>
+                    <evaluation>Failure</evaluation>
+                </guiding>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-1" band="Band 1/2">
+            <time units="hr">8.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-2" band="Band 1/2">
+            <time units="hr">2.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+            </meta>
+        </observation>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None">
+            <ngo partnerLead="investigator-0">
+                <request>
+                    <time units="hr">13.0</time>
+                    <minTime units="hr">12.0</minTime>
+                </request>
+                <partner>gs</partner>
+            </ngo>
+        </queue>
+    </proposalClass>
+</proposal>

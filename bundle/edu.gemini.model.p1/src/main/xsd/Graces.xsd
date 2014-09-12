@@ -1,0 +1,43 @@
+<!--
+  Schema definition for GRACES blueprints.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:include schemaLocation="Instrument.xsd"/>
+
+    <!-- Options for GRACES Blueprint. -->
+    <xsd:complexType name="GracesBlueprintChoice">
+        <xsd:sequence>
+            <xsd:choice>
+                <xsd:element name="null"     type="GracesBlueprintNull"/>
+                <xsd:element name="Graces"    type="GracesBlueprint"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- GRACES null. Empty blueprint, not available in PIT. -->
+    <xsd:complexType name="GracesBlueprintNull"/>
+
+    <!--
+      GRACES Blueprint.
+    -->
+    <xsd:complexType name="GracesBlueprint">
+        <xsd:complexContent>
+            <xsd:extension base="BlueprintBase">
+                <xsd:sequence>
+                    <xsd:element name="fiberMode" type="GracesFiberMode" maxOccurs="1"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      GRACES Filter options.
+    -->
+    <xsd:simpleType name="GracesFiberMode">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="1 fiber (target, R~50000)"/>
+            <xsd:enumeration value="2 fibers (target + sky, R~30000)"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+</xsd:schema>

@@ -1,0 +1,227 @@
+<!--
+  Schema definition for GMOS blueprints.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:include schemaLocation="Instrument.xsd"/>
+    <xsd:include schemaLocation="Altair.xsd"/>
+
+    <!-- Options for GMOS-N Blueprint. -->
+    <xsd:complexType name="GmosNBlueprintChoice">
+        <xsd:sequence>
+            <xsd:element name="regime" type="GmosNWavelengthRegime" fixed="optical"/>
+            <xsd:choice>
+                <xsd:element name="null"       type="GmosNBlueprintNull"/>
+                <xsd:element name="imaging"    type="GmosNBlueprintImaging"/>
+                <xsd:element name="longslit"   type="GmosNBlueprintLongslit"/>
+                <xsd:element name="longslitNs" type="GmosNBlueprintLongslitNs"/>
+                <xsd:element name="mos"        type="GmosNBlueprintMos"/>
+                <xsd:element name="ifu"        type="GmosNBlueprintIfu"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:simpleType name="GmosNWavelengthRegime">
+        <xsd:restriction base="WavelengthRegime">
+            <xsd:enumeration value="optical"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!-- GMOS-N Null. Empty blueprint, not available in PIT. -->
+    <xsd:complexType name="GmosNBlueprintNull"/>
+
+    <!--
+      GMOS-N Blueprint base type.
+    -->
+    <xsd:complexType name="GmosNBlueprintBase">
+        <xsd:complexContent>
+            <xsd:extension base="BlueprintBase">
+                <xsd:sequence>
+                    <xsd:element name="altair" type="AltairChoice"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!-- GMOS-N Imaging Blueprint. Contains multiple filter options. -->
+    <xsd:complexType name="GmosNBlueprintImaging">
+        <xsd:complexContent>
+            <xsd:extension base="GmosNBlueprintBase">
+                <xsd:sequence>
+                    <xsd:element name="filter" type="GmosNFilter" maxOccurs="unbounded"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      GMOS-N Spectroscopy Blueprint base type. Allows a single filter and
+      multiple disperser options.
+    -->
+    <xsd:complexType name="GmosNBlueprintSpectroscopyBase">
+        <xsd:complexContent>
+            <xsd:extension base="GmosNBlueprintBase">
+                <xsd:sequence>
+                    <xsd:element name="filter"    type="GmosNFilter"/>
+                    <xsd:element name="disperser" type="GmosNDisperser"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      GMOS-N Longslit Spectroscopy (no nod and shuffle) Blueprint.
+    -->
+    <xsd:complexType name="GmosNBlueprintLongslit">
+        <xsd:complexContent>
+            <xsd:extension base="GmosNBlueprintSpectroscopyBase">
+                <xsd:sequence>
+                    <xsd:element name="fpu" type="GmosNFpu"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      GMOS-N Longslit Spectroscopy with Nod and Shuffle Blueprint.
+    -->
+    <xsd:complexType name="GmosNBlueprintLongslitNs">
+        <xsd:complexContent>
+            <xsd:extension base="GmosNBlueprintSpectroscopyBase">
+                <xsd:sequence>
+                    <xsd:element name="fpu" type="GmosNFpuNs"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      GMOS-N MOS Blueprint type. Extends the spectroscopy base with
+      a "preimaging" boolean.
+    -->
+    <xsd:complexType name="GmosNBlueprintMos">
+        <xsd:complexContent>
+            <xsd:extension base="GmosNBlueprintSpectroscopyBase">
+                <xsd:sequence>
+                    <xsd:element name="nodAndShuffle" type="xsd:boolean"/>
+                    <xsd:element name="preimaging"    type="xsd:boolean"/>
+                    <xsd:element name="fpu"           type="GmosNMOSFpu"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      GMOS-N IFU Spectroscopy Blueprint.  At GN, GMOS cannot do IFU N&S.
+    -->
+    <xsd:complexType name="GmosNBlueprintIfu">
+        <xsd:complexContent>
+            <xsd:extension base="GmosNBlueprintSpectroscopyBase">
+                <xsd:sequence>
+                    <xsd:element name="fpu" type="GmosNFpuIfu"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      GMOS-N Disperser options.
+    -->
+    <xsd:simpleType name="GmosNDisperser">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="B1200"/>
+            <xsd:enumeration value="R831"/>
+            <xsd:enumeration value="B600"/>
+            <xsd:enumeration value="R600"/>
+            <xsd:enumeration value="R400"/>
+            <xsd:enumeration value="R150"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      GMOS-N Filter options.  Contains all filters, both those relevant for
+      Imaging and Spectroscopy.
+    -->
+    <xsd:simpleType name="GmosNFilter">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="None"/>
+            <xsd:enumeration value="GG455 (&gt; 460 nm)"/>
+            <xsd:enumeration value="OG515 (&gt; 520 nm)"/>
+            <xsd:enumeration value="RG610 (&gt; 615 nm)"/>
+            <xsd:enumeration value="g + GG455 (506 nm)"/>
+            <xsd:enumeration value="g + OG515 (536 nm)"/>
+            <xsd:enumeration value="r + RG610 (657 nm)"/>
+            <xsd:enumeration value="i + CaT (815 nm)"/>
+            <xsd:enumeration value="z + CaT (890 nm)"/>
+            <xsd:enumeration value="g (475 nm)"/>
+            <xsd:enumeration value="r (630 nm)"/>
+            <xsd:enumeration value="i (780 nm)"/>
+            <xsd:enumeration value="CaT (860 nm)"/>
+            <xsd:enumeration value="z (925 nm)"/>
+            <xsd:enumeration value="Z (876 nm)"/>
+            <xsd:enumeration value="Y (1010 nm)"/>
+            <xsd:enumeration value="HeII (468 nm)"/>
+            <xsd:enumeration value="HeIIC (478 nm)"/>
+            <xsd:enumeration value="OIII (499 nm)"/>
+            <xsd:enumeration value="OIIIC (514 nm)"/>
+            <xsd:enumeration value="Ha (656 nm)"/>
+            <xsd:enumeration value="HaC (662 nm)"/>
+            <xsd:enumeration value="SII (672 nm)"/>
+            <xsd:enumeration value="DS920 (920 nm)"/>
+            <xsd:enumeration value="User-supplied"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      GMOS-N FPU options for longslit non-nod and shuffle observations.
+    -->
+    <xsd:simpleType name="GmosNFpu">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="0.25 arcsec slit"/>
+            <xsd:enumeration value="0.5 arcsec slit"/>
+            <xsd:enumeration value="0.75 arcsec slit"/>
+            <xsd:enumeration value="1.0 arcsec slit"/>
+            <xsd:enumeration value="1.5 arcsec slit"/>
+            <xsd:enumeration value="2.0 arcsec slit"/>
+            <xsd:enumeration value="5.0 arcsec slit"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      GMOS-N FPU options for MOS observations.
+    -->
+    <xsd:simpleType name="GmosNMOSFpu">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="0.5 arcsec slit"/>
+            <xsd:enumeration value="0.75 arcsec slit"/>
+            <xsd:enumeration value="1.0 arcsec slit"/>
+            <xsd:enumeration value="1.5 arcsec slit"/>
+            <xsd:enumeration value="2.0 arcsec slit"/>
+            <xsd:enumeration value="5.0 arcsec slit"/>
+            <xsd:enumeration value="Other"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      GMOS-N FPU options for longslit nod and shuffle observations.
+    -->
+    <xsd:simpleType name="GmosNFpuNs">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="0.25 arcsec slit"/>
+            <xsd:enumeration value="0.5 arcsec slit"/>
+            <xsd:enumeration value="0.75 arcsec slit"/>
+            <xsd:enumeration value="1.0 arcsec slit"/>
+            <xsd:enumeration value="1.5 arcsec slit"/>
+            <xsd:enumeration value="2.0 arcsec slit"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      GMOS-N FPU options for IFU spectroscopy.
+    -->
+    <xsd:simpleType name="GmosNFpuIfu">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="IFU 2 slits"/>
+            <xsd:enumeration value="IFU 1 slit"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+</xsd:schema>

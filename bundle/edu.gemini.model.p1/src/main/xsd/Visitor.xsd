@@ -1,0 +1,35 @@
+<!--
+  Schema definition for Visitor blueprints.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:include schemaLocation="Instrument.xsd"/>
+    <xsd:include schemaLocation="Site.xsd"/>
+
+    <!-- Options for Visitor Blueprint. -->
+    <xsd:complexType name="VisitorBlueprintChoice">
+        <xsd:sequence>
+            <xsd:choice>
+                <xsd:element name="null"    type="VisitorBlueprintNull"/>
+                <xsd:element name="visitor" type="VisitorBlueprint"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- Visitor null. Empty blueprint, not available in PIT. -->
+    <xsd:complexType name="VisitorBlueprintNull"/>
+
+    <!--
+      Visitor Blueprint base type.
+    -->
+    <xsd:complexType name="VisitorBlueprint">
+        <xsd:complexContent>
+            <xsd:extension base="BlueprintBase">
+                <xsd:sequence>
+                    <xsd:element name="site"        type="Site" minOccurs="1" maxOccurs="1"/>
+                    <xsd:element name="custom-name" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+</xsd:schema>

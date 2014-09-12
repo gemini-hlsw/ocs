@@ -1,0 +1,907 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal tacCategory="Galactic" schemaVersion="2014.2.2">
+    <meta band3optionChosen="true">
+        <attachment>/home/astephens/bin/PIT/test-proposals/GeminiAttachment.pdf</attachment>
+    </meta>
+    <semester half="B" year="2014"/>
+    <title>2014B SV Queue Test Proposal</title>
+    <abstract>This proposal is used to for testing template generation. </abstract>
+    <scheduling></scheduling>
+    <keywords>
+        <keyword>Globular clusters</keyword>
+    </keywords>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Andrew</firstName>
+            <lastName>Stephens</lastName>
+            <status>PhD</status>
+            <email>astephens@gemini.edu</email>
+            <phone>808-974-2611</phone>
+            <address>
+                <institution>Gemini Observatory - North</institution>
+                <address>Gemini Observatory
+670 N. Aohoku Place
+Hilo
+HI
+96720</address>
+                <country>USA</country>
+            </address>
+        </pi>
+    </investigators>
+    <targets>
+        <sidereal epoch="J2000" id="target-0">
+            <name>M 79</name>
+            <degDeg>
+                <ra>81.04412</ra>
+                <dec>-24.52425</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="I">9.0</magnitude>
+                <magnitude system="Vega" band="Y">9.0</magnitude>
+                <magnitude system="Vega" band="J">9.0</magnitude>
+                <magnitude system="Vega" band="H">9.0</magnitude>
+                <magnitude system="Vega" band="K">9.0</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-1">
+            <name>NGC 1851</name>
+            <degDeg>
+                <ra>78.52817</ra>
+                <dec>-40.04656</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="I">7.0</magnitude>
+                <magnitude system="Vega" band="Y">7.0</magnitude>
+                <magnitude system="Vega" band="J">7.0</magnitude>
+                <magnitude system="Vega" band="H">7.0</magnitude>
+                <magnitude system="Vega" band="K">7.0</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-2">
+            <name>M15</name>
+            <degDeg>
+                <ra>322.49304</ra>
+                <dec>12.167</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="B">3.0</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-3">
+            <name>M 2</name>
+            <degDeg>
+                <ra>323.36258</ra>
+                <dec>-0.82325</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="V">6.25</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-4">
+            <name>Pal 2</name>
+            <degDeg>
+                <ra>71.52463</ra>
+                <dec>31.3815</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="B">15.0</magnitude>
+                <magnitude system="Vega" band="J">8.87600040435791</magnitude>
+                <magnitude system="Vega" band="H">8.005000114440918</magnitude>
+                <magnitude system="Vega" band="K">7.679999828338623</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-5">
+            <name>Pal 13</name>
+            <degDeg>
+                <ra>346.68533</ra>
+                <dec>12.772</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="B">15.600000381469727</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-6">
+            <name>NGC 288</name>
+            <degDeg>
+                <ra>13.1885</ra>
+                <dec>-26.58261</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="B">10.0</magnitude>
+                <magnitude system="Vega" band="V">8.130000114440918</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-7">
+            <name>Pal 13</name>
+            <degDeg>
+                <ra>346.68533</ra>
+                <dec>12.772</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="B">15.600000381469727</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-8">
+            <name>M 30</name>
+            <degDeg>
+                <ra>325.09217</ra>
+                <dec>-23.17986</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="V">7.099999904632568</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-9">
+            <name>M 72</name>
+            <degDeg>
+                <ra>313.36542</ra>
+                <dec>-12.53731</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="B">9.949999809265137</magnitude>
+                <magnitude system="Vega" band="V">8.960000038146973</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-10">
+            <name>NGC 7078</name>
+            <degDeg>
+                <ra>322.49304</ra>
+                <dec>12.167</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="B">3.0</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-11">
+            <name>NGC 6934</name>
+            <degDeg>
+                <ra>308.54737</ra>
+                <dec>7.40447</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="B">10.479999542236328</magnitude>
+                <magnitude system="Vega" band="V">9.75</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-12">
+            <name>NGC 6934</name>
+            <degDeg>
+                <ra>308.54737</ra>
+                <dec>7.40447</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="B">10.479999542236328</magnitude>
+                <magnitude system="Vega" band="V">9.75</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-13">
+            <name>NGC 2419</name>
+            <degDeg>
+                <ra>114.53546</ra>
+                <dec>38.88192</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="V">10.050000190734863</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-14">
+            <name>Pal 12</name>
+            <degDeg>
+                <ra>326.66183</ra>
+                <dec>-21.25261</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="V">11.890000343322754</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-15">
+            <name>NGC 7006</name>
+            <degDeg>
+                <ra>315.372771</ra>
+                <dec>16.187914</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="V">10.460000038146973</magnitude>
+                <magnitude system="Vega" band="J">9.555000305175781</magnitude>
+                <magnitude system="Vega" band="H">9.02299976348877</magnitude>
+                <magnitude system="Vega" band="K">9.003000259399414</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-16">
+            <name>NGC 7492</name>
+            <degDeg>
+                <ra>347.11117</ra>
+                <dec>-15.61147</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="V">10.479999542236328</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-17">
+            <name>NGC 6981</name>
+            <degDeg>
+                <ra>313.36542</ra>
+                <dec>-12.53731</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="B">9.949999809265137</magnitude>
+                <magnitude system="Vega" band="V">8.960000038146973</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-18">
+            <name>Pal 2</name>
+            <degDeg>
+                <ra>71.52463</ra>
+                <dec>31.3815</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="B">15.0</magnitude>
+                <magnitude system="Vega" band="J">8.87600040435791</magnitude>
+                <magnitude system="Vega" band="H">8.005000114440918</magnitude>
+                <magnitude system="Vega" band="K">7.679999828338623</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-19">
+            <name>NGC 7492</name>
+            <degDeg>
+                <ra>347.11117</ra>
+                <dec>-15.61147</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="V">10.479999542236328</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-20">
+            <name>M5</name>
+            <degDeg>
+                <ra>229.63842</ra>
+                <dec>2.08103</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="B">7.340000152587891</magnitude>
+                <magnitude system="Vega" band="V">5.949999809265137</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-21">
+            <name>M 2</name>
+            <degDeg>
+                <ra>323.36258</ra>
+                <dec>-0.82325</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="V">6.25</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-22">
+            <name>M 2</name>
+            <degDeg>
+                <ra>323.36258</ra>
+                <dec>-0.82325</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="V">6.25</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-23">
+            <name>M 72</name>
+            <degDeg>
+                <ra>313.36542</ra>
+                <dec>-12.53731</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="B">9.949999809265137</magnitude>
+                <magnitude system="Vega" band="V">8.960000038146973</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-24">
+            <name>M 75</name>
+            <degDeg>
+                <ra>301.520171</ra>
+                <dec>-21.922261</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="B">10.029999732971191</magnitude>
+                <magnitude system="Vega" band="V">8.260000228881836</magnitude>
+                <magnitude system="Vega" band="J">6.926000118255615</magnitude>
+                <magnitude system="Vega" band="H">6.433000087738037</magnitude>
+                <magnitude system="Vega" band="K">6.2829999923706055</magnitude>
+            </magnitudes>
+        </sidereal>
+    </targets>
+    <conditions>
+        <condition id="condition-0">
+            <name>CC 50%/Clear, IQ 70%/Good, SB Any/Bright, WV Any</name>
+            <cc>50%/Clear</cc>
+            <iq>70%/Good</iq>
+            <sb>Any/Bright</sb>
+            <wv>Any</wv>
+        </condition>
+        <condition id="condition-1">
+            <name>CC 70%/Cirrus, IQ 85%/Poor, SB 50%/Dark, WV Any</name>
+            <cc>70%/Cirrus</cc>
+            <iq>85%/Poor</iq>
+            <sb>50%/Dark</sb>
+            <wv>Any</wv>
+        </condition>
+    </conditions>
+    <blueprints>
+        <gpi>
+            <Gpi id="blueprint-0">
+                <name>GPI H direct Wollaston</name>
+                <visitor>false</visitor>
+                <observingMode>H direct</observingMode>
+                <disperser>Wollaston</disperser>
+            </Gpi>
+        </gpi>
+        <gpi>
+            <Gpi id="blueprint-1">
+                <name>GPI Coronograph K1-band Prism</name>
+                <visitor>false</visitor>
+                <observingMode>Coronograph K1-band</observingMode>
+                <disperser>Prism</disperser>
+            </Gpi>
+        </gpi>
+        <graces>
+            <Graces id="blueprint-2">
+                <name>Graces 2 fibers (target + sky, R~30000)</name>
+                <visitor>true</visitor>
+                <fiberMode>2 fibers (target + sky, R~30000)</fiberMode>
+            </Graces>
+        </graces>
+        <graces>
+            <Graces id="blueprint-3">
+                <name>Graces 1 fiber (target, R~50000)</name>
+                <visitor>true</visitor>
+                <fiberMode>1 fiber (target, R~50000)</fiberMode>
+            </Graces>
+        </graces>
+        <gmosN>
+            <regime>optical</regime>
+            <longslit id="blueprint-4">
+                <name>GMOS-N LongSlit Altair Laser Guidestar R831 User-supplied 0.5 arcsec slit</name>
+                <visitor>false</visitor>
+                <altair>
+                    <lgs oiwfs="false" aowfs="true" pwfs1="false"/>
+                </altair>
+                <filter>User-supplied</filter>
+                <disperser>R831</disperser>
+                <fpu>0.5 arcsec slit</fpu>
+            </longslit>
+        </gmosN>
+        <gmosN>
+            <regime>optical</regime>
+            <imaging id="blueprint-5">
+                <name>GMOS-N Imaging Altair Laser Guidestar w/ PWFS1 Z (876 nm)+Y (1010 nm)</name>
+                <visitor>false</visitor>
+                <altair>
+                    <lgs oiwfs="false" aowfs="false" pwfs1="true"/>
+                </altair>
+                <filter>Z (876 nm)</filter>
+                <filter>Y (1010 nm)</filter>
+            </imaging>
+        </gmosN>
+        <gnirs>
+            <spectroscopy id="blueprint-6">
+                <name>GNIRS Spectroscopy  0.15&quot;/pix 32 l/mm grating SXD 0.675 arcsec &lt; 2.5um</name>
+                <visitor>false</visitor>
+                <altair>
+                    <none/>
+                </altair>
+                <pixelScale>0.15&quot;/pix</pixelScale>
+                <disperser>32 l/mm grating</disperser>
+                <crossDisperser>SXD</crossDisperser>
+                <fpu>0.675 arcsec</fpu>
+                <centralWavelength>&lt; 2.5um</centralWavelength>
+            </spectroscopy>
+        </gnirs>
+        <gmosS>
+            <regime>optical</regime>
+            <ifu id="blueprint-7">
+                <name>GMOS-S IFU R831 None IFU 1 slit</name>
+                <visitor>false</visitor>
+                <filter>None</filter>
+                <disperser>R831</disperser>
+                <fpu>IFU 1 slit</fpu>
+            </ifu>
+        </gmosS>
+        <flamingos2>
+            <longslit id="blueprint-8">
+                <name>Flamingos2 Longslit HK HK (1.871 um) 6-pix longslit</name>
+                <visitor>false</visitor>
+                <filter>HK (1.871 um)</filter>
+                <disperser>HK</disperser>
+                <fpu>6-pix longslit</fpu>
+            </longslit>
+        </flamingos2>
+        <visitor>
+            <visitor id="blueprint-9">
+                <name>Visitor - Gemini South - GS Cam</name>
+                <visitor>true</visitor>
+                <site>Gemini South</site>
+                <custom-name>GS Cam</custom-name>
+            </visitor>
+        </visitor>
+        <gmosS>
+            <regime>optical</regime>
+            <longslitNs id="blueprint-10">
+                <name>GMOS-S LongSlit N+S B1200 None 0.75 arcsec slit</name>
+                <visitor>false</visitor>
+                <filter>None</filter>
+                <disperser>B1200</disperser>
+                <fpu>0.75 arcsec slit</fpu>
+            </longslitNs>
+        </gmosS>
+        <gmosN>
+            <regime>optical</regime>
+            <ifu id="blueprint-11">
+                <name>GMOS-N IFU None R150 None IFU 2 slits</name>
+                <visitor>false</visitor>
+                <altair>
+                    <none/>
+                </altair>
+                <filter>None</filter>
+                <disperser>R150</disperser>
+                <fpu>IFU 2 slits</fpu>
+            </ifu>
+        </gmosN>
+        <gmosN>
+            <regime>optical</regime>
+            <mos id="blueprint-12">
+                <name>GMOS-N MOS N+S None 0.5 arcsec slit B600 None +Pre</name>
+                <visitor>false</visitor>
+                <altair>
+                    <none/>
+                </altair>
+                <filter>None</filter>
+                <disperser>B600</disperser>
+                <nodAndShuffle>true</nodAndShuffle>
+                <preimaging>true</preimaging>
+                <fpu>0.5 arcsec slit</fpu>
+            </mos>
+        </gmosN>
+        <niri>
+            <niri id="blueprint-13">
+                <name>NIRI None f/6 (0.12&quot;/pix, 120&quot; FoV) J (1.25 um)+H (1.65 um)+K (2.20 um)</name>
+                <visitor>false</visitor>
+                <altair>
+                    <none/>
+                </altair>
+                <camera>f/6 (0.12&quot;/pix, 120&quot; FoV)</camera>
+                <filter>J (1.25 um)</filter>
+                <filter>H (1.65 um)</filter>
+                <filter>K (2.20 um)</filter>
+            </niri>
+        </niri>
+        <gmosS>
+            <regime>optical</regime>
+            <mos id="blueprint-14">
+                <name>GMOS-S MOS 1.0 arcsec slit B600 RG780 (&gt; 780 nm) +Pre</name>
+                <visitor>false</visitor>
+                <filter>RG780 (&gt; 780 nm)</filter>
+                <disperser>B600</disperser>
+                <nodAndShuffle>false</nodAndShuffle>
+                <preimaging>true</preimaging>
+                <fpu>1.0 arcsec slit</fpu>
+            </mos>
+        </gmosS>
+        <gmosN>
+            <regime>optical</regime>
+            <longslit id="blueprint-15">
+                <name>GMOS-N LongSlit None B600 None 1.0 arcsec slit</name>
+                <visitor>false</visitor>
+                <altair>
+                    <none/>
+                </altair>
+                <filter>None</filter>
+                <disperser>B600</disperser>
+                <fpu>1.0 arcsec slit</fpu>
+            </longslit>
+        </gmosN>
+        <gsaoi>
+            <Gsaoi id="blueprint-16">
+                <name>GSAOI K (2.200 um)</name>
+                <visitor>false</visitor>
+                <filter>K (2.200 um)</filter>
+            </Gsaoi>
+        </gsaoi>
+        <visitor>
+            <visitor id="blueprint-17">
+                <name>Visitor - Gemini North - DSSI</name>
+                <visitor>true</visitor>
+                <site>Gemini North</site>
+                <custom-name>DSSI</custom-name>
+            </visitor>
+        </visitor>
+        <niri>
+            <niri id="blueprint-18">
+                <name>NIRI Altair Natural Guidestar f/32 (0.02&quot;/pix, 22&quot; FoV) K (2.20 um)</name>
+                <visitor>false</visitor>
+                <altair>
+                    <ngs fieldLens="false"/>
+                </altair>
+                <camera>f/32 (0.02&quot;/pix, 22&quot; FoV)</camera>
+                <filter>K (2.20 um)</filter>
+            </niri>
+        </niri>
+        <nifs>
+            <ao id="blueprint-19">
+                <name>NIFS LGS None Z (0.94 - 1.15um)</name>
+                <visitor>false</visitor>
+                <disperser>Z (0.94 - 1.15um)</disperser>
+                <altair>
+                    <lgs oiwfs="false" aowfs="false" pwfs1="false"/>
+                </altair>
+                <occultingDisk>None</occultingDisk>
+            </ao>
+        </nifs>
+        <gnirs>
+            <imaging id="blueprint-20">
+                <name>GNIRS Imaging None 0.15&quot;/pix Y (1.03um)</name>
+                <visitor>false</visitor>
+                <altair>
+                    <none/>
+                </altair>
+                <pixelScale>0.15&quot;/pix</pixelScale>
+                <filter>Y (1.03um)</filter>
+            </imaging>
+        </gnirs>
+        <gmosS>
+            <regime>optical</regime>
+            <imaging id="blueprint-21">
+                <name>GMOS-S Imaging g (475 nm)+r (630 nm)+i (780 nm)+z (925 nm)+Z (876 nm)+Y (1010 nm)</name>
+                <visitor>false</visitor>
+                <filter>g (475 nm)</filter>
+                <filter>r (630 nm)</filter>
+                <filter>i (780 nm)</filter>
+                <filter>z (925 nm)</filter>
+                <filter>Z (876 nm)</filter>
+                <filter>Y (1010 nm)</filter>
+            </imaging>
+        </gmosS>
+        <gmosN>
+            <regime>optical</regime>
+            <imaging id="blueprint-22">
+                <name>GMOS-N Imaging None g (475 nm)+r (630 nm)+i (780 nm)+z (925 nm)+Z (876 nm)+Y (1010 nm)</name>
+                <visitor>false</visitor>
+                <altair>
+                    <none/>
+                </altair>
+                <filter>g (475 nm)</filter>
+                <filter>r (630 nm)</filter>
+                <filter>i (780 nm)</filter>
+                <filter>z (925 nm)</filter>
+                <filter>Z (876 nm)</filter>
+                <filter>Y (1010 nm)</filter>
+            </imaging>
+        </gmosN>
+        <flamingos2>
+            <imaging id="blueprint-23">
+                <name>Flamingos2 Imaging Ks (2.157 um)</name>
+                <visitor>false</visitor>
+                <filter>Ks (2.157 um)</filter>
+            </imaging>
+        </flamingos2>
+    </blueprints>
+    <observations>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-1" condition="condition-0" target="target-1" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-2" condition="condition-1" target="target-2" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-3" condition="condition-1" target="target-3" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-4" condition="condition-0" target="target-4" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>44</percentage>
+                    <evaluation>Warning</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-5" condition="condition-0" target="target-5" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>36</percentage>
+                    <evaluation>Warning</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-6" condition="condition-0" target="target-7" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-7" condition="condition-0" target="target-9" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-8" condition="condition-0" target="target-12" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-9" condition="condition-0" target="target-6" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-10" condition="condition-0" target="target-8" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-11" condition="condition-0" target="target-11" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-12" condition="condition-0" target="target-10" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>9</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-13" condition="condition-0" target="target-13" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>30</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-14" condition="condition-0" target="target-14" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>36</percentage>
+                    <evaluation>Warning</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-15" condition="condition-0" target="target-15" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>94</percentage>
+                    <evaluation>Caution</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-16" condition="condition-0" target="target-16" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>0</percentage>
+                    <evaluation>Failure</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-17" condition="condition-0" target="target-17" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-18" condition="condition-0" target="target-18" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>0</percentage>
+                    <evaluation>Failure</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-19" condition="condition-0" target="target-19" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-20" condition="condition-0" target="target-21" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-21" condition="condition-0" target="target-22" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-22" condition="condition-0" target="target-23" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-23" condition="condition-0" target="target-24" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None">
+            <ngo partnerLead="investigator-0">
+                <request>
+                    <time units="hr">4.0</time>
+                    <minTime units="hr">2.0</minTime>
+                </request>
+                <partner>uh</partner>
+            </ngo>
+            <ngo partnerLead="investigator-0">
+                <request>
+                    <time units="hr">4.0</time>
+                    <minTime units="hr">2.0</minTime>
+                </request>
+                <partner>ar</partner>
+            </ngo>
+            <ngo partnerLead="investigator-0">
+                <request>
+                    <time units="hr">4.0</time>
+                    <minTime units="hr">2.0</minTime>
+                </request>
+                <partner>au</partner>
+            </ngo>
+            <ngo partnerLead="investigator-0">
+                <request>
+                    <time units="hr">4.0</time>
+                    <minTime units="hr">2.0</minTime>
+                </request>
+                <partner>br</partner>
+            </ngo>
+            <ngo partnerLead="investigator-0">
+                <request>
+                    <time units="hr">4.0</time>
+                    <minTime units="hr">2.0</minTime>
+                </request>
+                <partner>ca</partner>
+            </ngo>
+            <ngo partnerLead="investigator-0">
+                <request>
+                    <time units="hr">4.0</time>
+                    <minTime units="hr">2.0</minTime>
+                </request>
+                <partner>cl</partner>
+            </ngo>
+            <ngo partnerLead="investigator-0">
+                <request>
+                    <time units="hr">4.0</time>
+                    <minTime units="hr">2.0</minTime>
+                </request>
+                <partner>us</partner>
+            </ngo>
+            <ngo partnerLead="investigator-0">
+                <request>
+                    <time units="hr">4.0</time>
+                    <minTime units="hr">2.0</minTime>
+                </request>
+                <partner>gs</partner>
+            </ngo>
+            <band3request>
+                <time units="hr">50.0</time>
+                <minTime units="hr">30.0</minTime>
+            </band3request>
+        </queue>
+    </proposalClass>
+</proposal>

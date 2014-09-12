@@ -1,0 +1,251 @@
+
+<html>
+<head><title>QPT 1.0.4 Release Notes</title></head>
+<link rel="stylesheet" href="/doc/styles.css"></link>
+<body>
+
+<h1>QPT 1.0.4 Release Notes</h1>
+
+QPT release 1.0.4 addresses 61 issues, described below. 
+Release notes for the previous release are available <a href="v1.0.3-notes.html">here</a>. 
+
+<p>The QPT documentation index is available <a href="index.html">here</a>.
+
+</i>
+
+<p>
+To update QPT, just run it and select Help > Software Update. QPT will refresh the application logic 
+from the server and restart. If you cannot connect to the database or have other issues, quit and 
+restart QPT. For troubleshooting hints and other update options, see
+the second half of <a href="install.html"><i>Running QPT</i></a>.
+
+<p>
+
+As always, please direct questions and comments to <code>rnorris@gemini.edu</code> and cc: the QC groups if
+appropriate.
+
+</div>
+
+<h2>New and Notable</h2>
+
+<h3>[QPT-60, 77] - Support for custom elevation constraints</h3>
+Elevation constraints (hour angle and airmass) from the OT are now recognized by QPT
+when present; airmass 2 is used if no custom constraint is given.
+
+<h3>[QPT-92] - New menu items to filter programs by type</h3>
+New menu items under the Candidate menu (see below) allow you to select which types
+of programs are shown. QPT shows types <code>Q</code> and <code>DD</code> by default.
+
+<h3>[QPT-110] - User-selectable time display preference</h3>
+New menu items under the Visit menu (see below) allow you to select whether you want
+to see times in local time, local sidereal time, or UTC.
+
+<h3>[QPT-113, 115, 164, 209] - Scheduling groups now indicated visually</h3>
+Scheduling groups are now indicated by colored bars in the Visit view, the 
+Visualizer, and in the published plan. Visits that belong to the same scheduling
+group are marked with the same color. QPT issues a warning if you schedule an 
+observation by itself when it belongs to a scheduling group.
+
+<h3>[QPT-117, 166, 167, 168] - Improved instrument config information</h3>
+QPT config  now includes GNIRS central wavelength, disperser, slit; 
+TReCS central wavelength, disperser, mask; GMOS FPU, disperser, filter, custom mask
+name; Flamingos2 FPU, custom mask name; and NIRI filter.
+
+<h3>[QPT-122, 126, 172, 181, 200] Improved Visualizer Interaction</h3>
+<ul>
+<li>There are now keyboard commands to nudge selected visits, and to
+change the nudge quantum size.
+<li>You can now toggle the "snap to adjacent visit" behavior with the F2 key.
+<li>There is now an elevation curve preview function that shows the elevation and
+sky background curves for the selected candidate observation.
+<li>You can now toggle between elevation and airmass scales in the visualizer.
+<li>The visualizer now shows the sky background curve for the selected visit (or
+candidate observation, if preview is enabled). Higher is brighter. There is a scale 
+on the right and horizontal lines indicating the 20/50/80% buckets.
+<li>You no longer have to drag a visit off the schedule to remove it; you can just
+select it and hit delete (backspace).
+</ul>
+
+<h3>[QPT-136] - New over-allocation warnings</h3>
+QPT now warns you if programs are over-allocated via a <code>OVER_ALLOCATED</code>
+candidate flag and an over-allocation error in the Problems view.
+
+<h3>[QPT-164] - Visualizer and published plan now indicate obs class</h3>
+Calibration observations are now drawn with a crosshatch pattern so you can quickly
+distinguish these from science observations.
+
+<h3>[QPT-182, 212] - Constraints relaxed during acquisition</h3>
+Site constraints are now ignored during setup time. Flags, warnings, and errors now
+apply only to the non-setup sequence time. So this means you no longer get a warning
+if you start an acquisition during twilight.
+
+<h3>[QPT-196] - New command: Toggle Setup Time</h3>
+It is now possible to turn off the setup time for an observation visit, which can
+be useful when scheduling multiple observations of the same target. This action
+is suggested (via an info (<code>i</code>) message) if the previous scheduled 
+observation has the same target and instrument. QPT will generate an Error message
+if there is no such prior observation.
+
+<h3>[QPT-207, 217] - Menu re-organization and real Help menu</h3>
+Menu functions are now divided into Plan, Candidate, and Visit menus to make it 
+a little clearer which menu items affect what part of the plan. Also, the Help
+menu now links to QPT documentation (such as it is).
+
+
+<h3>Other Significant Improvements</h3>
+<ul>
+<li>[QPT-82] - Visualizer now includes a little moon to indicate phase and illumination.
+<li>[QPT-89] - QPT now warns you when observations are ready/ongoing but have no remaining steps.
+<li>[QPT-109] - "Underqualified" flags/warnings now indicate which constraint is violated
+<li>[QPT-186] - QPT now warns you when a plan includes unused extra semesters.
+<li>[QPT-202] - Weighting algorithm now treats PI weights as relative rather than absolute values.
+</ul>
+
+<h3>Other Significant Bug Fixes</h3>
+<ul>
+<li>[QPT-193] - Refresh problems fixed
+<li>[QPT-194] - Candidate selection problems fixed
+<li>[QPT-195] - Program View now correctly shows obs title.
+<li>[QPT-197] - Cmd+Q now works correctly in OS X
+<li>[QPT-206] - Jagged plot lines fixed
+<li>[QPT-214] - Offset labels fixed
+<li>[QPT-216] - Save and Save As commands are now enabled/disabled correctly
+</ul>
+
+<h3>Other Minor and Self-Explanatory Changes Worth Mentioning</h3>
+<ul>
+<li>[QPT-17] - Remaining plan time is now shown in the Properties view.
+<li>[QPT-178] - Directories were not visible in file open/save dialogs. This has been fixed.
+<li>[QPT-183] - Version number is now shown in title bar.
+<li>[QPT-185] - Visualizer no longer flickers when you start a drag action.
+<li>[QPT-188] - View focus no longer bounces around when switching tabs.
+<li>[QPT-189] - RA Distro Histogram vertical scaling slightly improved.
+<li>[QPT-190] - Property view now clears correctly when a plan is closed.
+<li>[QPT-199] - Menu items are correctly disabled on startup.
+<li>[QPT-201] - Updated zenith warning (&gt; 85&deg;) and error (&gt; 87&deg;). 
+<li>[QPT-203] - Visit splitting gets closer to a 50/50 split now, when possible.
+<li>[QPT-204] - Improved propogation of selection between views.
+<li>[QPT-210] - Updated lunar proximity warnings (&lt; 15&deg;) and warning (&lt; 5&deg;).
+<li>[QPT-213] - Added versioning information to QPT files.
+<li>[QPT-220] - Fixed ugly scrollbar problem in OS X.
+</ul>
+
+<h3>Last-minute changes since RC1</h3>
+For more information on these changes, please email me. I don't have time now to 
+write better descriptions.
+<ul>
+<li> Bug
+	<ul>
+    <li>  [QPT-221] - All *_CNS flags should mean gray/crossed and score = 0
+    <li>  [QPT-223] - Typo in config error dialog
+    <li>  [QPT-224] - Shearing problem when dragging on Linix/Win32.
+    <li>  [QPT-226] - Group constraint should not consider non-QPT obs types
+    <li>  [QPT-227] - Non-repeating timing windows don't close
+    <li>  [QPT-230] - Obs with open-ended timing windows show up with duration of -1ms
+    <li>  [QPT-231] - No way to remove default instruments from a plan
+    </ul>
+
+<li> Improvement
+    <ul>
+    <li> [QPT-222] - Timing window constraint met should increase score
+    <li> [QPT-225] - LGS default elevation constraint is 40¡
+    <li> [QPT-229] - Obs with timing constraints should be indicated prominently
+    <li> [QPT-232] - Over-allocation should be warning (not error)
+	</ul>
+<li> New Feature
+    <ul>
+    <li> [QPT-228] - Should be able to move allocs with unmodified arrow keys
+	</ul>
+</ul>
+
+<h2>JIRA Release Manifest</h2>
+
+Release Notes - Queue Planning Tool - Version 1.0.4
+    
+<h3>Bug</h3>
+<ul>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-160'>QPT-160</a>] - Allow user to configure browser path</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-161'>QPT-161</a>] - QPT Doesn't Exit Cleanly</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-178'>QPT-178</a>] - File dialog hides dirs in linux</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-182'>QPT-182</a>] - SB constraints should be ignored during acquisition</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-185'>QPT-185</a>] - Fix flicker on drag gesture recognition in visualizer</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-188'>QPT-188</a>] - View focus bounces around when changing tabs</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-189'>QPT-189</a>] - RA Distro Histogram vertical scaling needs help</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-190'>QPT-190</a>] - Property View sometimes doesn't clear itself</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-193'>QPT-193</a>] - Cloned Obs may not show up in program view</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-194'>QPT-194</a>] - Selection issue with multiple obs from same program</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-197'>QPT-197</a>] - Cmd+Q Causes Violent Exit in OS X</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-199'>QPT-199</a>] - Most menu items should initiall be disabled.</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-202'>QPT-202</a>] - Weighting algorithm should normalize PI weights</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-203'>QPT-203</a>] - SplitAction ignores last plan step.</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-204'>QPT-204</a>] - Selection propogation should be synchronous</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-206'>QPT-206</a>] - Plot lines are sometimes jagged</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-213'>QPT-213</a>] - Need to add versioning info to serialized files</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-214'>QPT-214</a>] - Labels become offset in Visualizer</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-215'>QPT-215</a>] - Variants appear empty when plan re-opened</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-216'>QPT-216</a>] - Dirty flag propagation issue</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-219'>QPT-219</a>] - Program view doesn't follow marker selection and doesn't clear properly on close</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-220'>QPT-220</a>] - Scrollbars are rendered wrong in OS X</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-221'>QPT-221</a>] - All *_CNS flags should mean gray/crossed and score = 0</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-223'>QPT-223</a>] - Typo in config error dialog</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-224'>QPT-224</a>] - Shearing problem when dragging on Linix/Win32.</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-226'>QPT-226</a>] - Group constraint should not consider non-QPT obs types</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-227'>QPT-227</a>] - Non-repeating timing windows don't close</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-230'>QPT-230</a>] - Obs with open-ended timing windows show up with duration of -1ms</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-231'>QPT-231</a>] - No way to remove default instruments from a plan</li>
+</ul>
+    
+<h3>Improvement</h3>
+<ul>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-17'>QPT-17</a>] - Show remaining time</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-46'>QPT-46</a>] - Add UT time to alloc table</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-71'>QPT-71</a>] - Add timing constraints to mini-model</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-72'>QPT-72</a>] - Add warnings for timing constraint violations</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-77'>QPT-77</a>] - Change LOW_IN_SKY flag to elevation constraint violated</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-89'>QPT-89</a>] - Collect and report config errors</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-92'>QPT-92</a>] - Filter programs by type</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-98'>QPT-98</a>] - Improve split warning</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-109'>QPT-109</a>] - Improve "underqualified" warning</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-110'>QPT-110</a>] - Improve time displays</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-113'>QPT-113</a>] - Indicate group in printed plan</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-115'>QPT-115</a>] - Improve Visualizer</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-117'>QPT-117</a>] - Add GMOS masks to inst config</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-122'>QPT-122</a>] - Allow user to move alloc with arrow keys</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-126'>QPT-126</a>] - Disable snap on ctrl+drag</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-164'>QPT-164</a>] - Indicate obs class in visualizer and plan</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-166'>QPT-166</a>] - Add GNIRS config</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-167'>QPT-167</a>] - Add TReCS Config</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-168'>QPT-168</a>] - Improve GMOS Config</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-172'>QPT-172</a>] - Show elevation curve from candidate selection</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-174'>QPT-174</a>] - Make "drag off" more tolerant</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-180'>QPT-180</a>] - Add constraints to visits table</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-181'>QPT-181</a>] - Toggle airmass/elevation display in visualizer</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-186'>QPT-186</a>] - Should warn when saving with unused semesters.</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-195'>QPT-195</a>] - Add Obs Titles to Prog View</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-200'>QPT-200</a>] - Show SB Curve During Drag</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-201'>QPT-201</a>] - Update Zenith Warning</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-205'>QPT-205</a>] - Improve nudge performance</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-207'>QPT-207</a>] - Improve Menu Organization</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-210'>QPT-210</a>] - Change lunar prox. warnings to 15/5 deg</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-212'>QPT-212</a>] - Relax all constraints other than 17.5deg elevation for setup</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-222'>QPT-222</a>] - Timing window constraint met should increase score</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-225'>QPT-225</a>] - LGS default elevation constraint is 40¡</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-229'>QPT-229</a>] - Obs with timing constraints should be indicated prominently</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-232'>QPT-232</a>] - Over-allocation should be warning (not error)</li>
+</ul>
+    
+<h3>New Feature</h3>
+<ul>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-60'>QPT-60</a>] - HA/Elevation Constraint Warning</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-82'>QPT-82</a>] - Add lunar brightness to visualizer</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-136'>QPT-136</a>] - Add over-allocation warning</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-183'>QPT-183</a>] - Show version information somewhere</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-196'>QPT-196</a>] - Chop off Acq Time if target doesn't change</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-198'>QPT-198</a>] - Add Keyboard Delete</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-209'>QPT-209</a>] - Indicate scheduling groups somehow</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-217'>QPT-217</a>] - Add link to Help</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-228'>QPT-228</a>] - Should be able to move allocs with unmodified arrow keys</li>
+</ul>
+     
+</body>
+</html>

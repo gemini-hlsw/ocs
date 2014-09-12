@@ -1,0 +1,45 @@
+<!--
+  Schema definition for guide star elements.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:include schemaLocation="Target.xsd"/>
+
+    <!--
+      A guide group is a collection of guideStar where each guideStar is
+      associated with a unique guider.  For example, there can only be one
+      GMOS OIWFS guide star in the group.
+    -->
+    <xsd:complexType name="GuideGroup">
+        <xsd:sequence>
+            <xsd:element name="guideStar" type="GuideStar" minOccurs="0" maxOccurs="unbounded">
+                <xsd:key name="GuiderKey">
+                    <xsd:selector xpath="guider"/>
+                    <xsd:field    xpath="."/>
+                </xsd:key>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!--
+      A guide star is a tuple of guider and target reference.  The target
+      reference is constrained to refer to an existing target in the catalog
+      in the proposal schema.
+    -->
+    <xsd:complexType name="GuideStar">
+        <xsd:sequence>
+            <xsd:element name="guider"    type="Guider"/>
+        </xsd:sequence>
+        <xsd:attribute name="target" type="TargetRef"/>
+    </xsd:complexType>
+
+    <!--
+      Guide star guider options.
+    -->
+    <xsd:simpleType name="Guider">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="GMOS OIWFS"/>
+            <xsd:enumeration value="PWFS1"/>
+            <xsd:enumeration value="PWFS2"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+</xsd:schema>

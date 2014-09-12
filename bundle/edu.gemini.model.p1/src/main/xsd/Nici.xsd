@@ -1,0 +1,107 @@
+<!--
+  Schema definition for NICI blueprints.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:include schemaLocation="Instrument.xsd"/>
+
+    <!-- Options for NICI Blueprint. -->
+    <xsd:complexType name="NiciBlueprintChoice">
+        <xsd:sequence>
+            <xsd:choice>
+                <xsd:element name="null"          type="NiciBlueprintNull"/>
+                <xsd:element name="standard"      type="NiciBlueprintStandard"/>
+                <xsd:element name="coronagraphic" type="NiciBlueprintCoronagraphic"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- NICI null. Empty blueprint, not available in PIT. -->
+    <xsd:complexType name="NiciBlueprintNull"/>
+
+    <!--
+      NICI Blueprint base type.
+    -->
+    <xsd:complexType name="NiciBlueprintBase">
+        <xsd:complexContent>
+            <xsd:extension base="BlueprintBase">
+                <xsd:sequence>
+                    <xsd:element name="dichroic"   type="NiciDichroic"/>
+                    <xsd:element name="redFilter"  type="NiciRedFilter"  minOccurs="0" maxOccurs="unbounded"/>
+                    <xsd:element name="blueFilter" type="NiciBlueFilter" minOccurs="0" maxOccurs="unbounded"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="NiciBlueprintStandard">
+        <xsd:complexContent>
+            <xsd:extension base="NiciBlueprintBase"/>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="NiciBlueprintCoronagraphic">
+        <xsd:complexContent>
+            <xsd:extension base="NiciBlueprintBase">
+                <xsd:sequence>
+                    <xsd:element name="fpm" type="NiciFpm"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:simpleType name="NiciDichroic">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="Open"/>
+            <xsd:enumeration value="Mirror"/>
+            <xsd:enumeration value="H 50/50 Beamsplitter"/>
+            <xsd:enumeration value="H Methane Dichroic"/>
+            <xsd:enumeration value="H/K Dichroic"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="NiciRedFilter">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="CH4 H 1% S"/>
+            <xsd:enumeration value="CH4 H 1% Sp"/>
+            <xsd:enumeration value="CH4 H 1% L"/>
+            <xsd:enumeration value="CH4 H 4% S"/>
+            <xsd:enumeration value="CH4 H 4% L"/>
+            <xsd:enumeration value="CH4 K 5% L"/>
+            <xsd:enumeration value="CH4 H 6.5% L"/>
+            <xsd:enumeration value="H2O Ice L"/>
+            <xsd:enumeration value="Ks (2.15 um)"/>
+            <xsd:enumeration value="K (2.20 um)"/>
+            <xsd:enumeration value="K' (2.12 um)"/>
+            <xsd:enumeration value="L' (3.78 um)"/>
+            <xsd:enumeration value="M' (4.68 um)"/>
+            <xsd:enumeration value="Kcont (2.27 um)"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="NiciBlueFilter">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="CH4 H 1% S"/>
+            <xsd:enumeration value="CH4 H 1% Sp"/>
+            <xsd:enumeration value="CH4 H 1% L"/>
+            <xsd:enumeration value="CH4 H 4% S"/>
+            <xsd:enumeration value="CH4 H 4% L"/>
+            <xsd:enumeration value="CH4 K 5% S"/>
+            <xsd:enumeration value="CH4 H 6.5% S"/>
+            <xsd:enumeration value="J (1.25 um)"/>
+            <xsd:enumeration value="H (1.65 um)"/>
+            <xsd:enumeration value="[FeII] (1.644 um)"/>
+            <xsd:enumeration value="H2 1-0 S(1) (2.122 um)"/>
+            <xsd:enumeration value="Br-gamma (2.169 um)"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="NiciFpm">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="0.90 arcsec"/>
+            <xsd:enumeration value="0.65 arcsec"/>
+            <xsd:enumeration value="0.46 arcsec"/>
+            <xsd:enumeration value="0.32 arcsec"/>
+            <xsd:enumeration value="0.22 arcsec"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+</xsd:schema>

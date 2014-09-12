@@ -1,0 +1,38 @@
+## Included navigation
+<style>
+	h1 a {
+		color: white;
+		font-size: 10pt;
+		padding-right: 15px;
+		text-decoration: none;
+	}
+	h1 .stub {
+		color: #cccccc;
+		font-size: 10pt;
+		padding-right: 15px;
+		text-decoration: none;
+	}
+</style>
+<h1>
+	$title
+	#if($interactive)
+		<br>
+		<a href="index.vm">Home</a>
+	
+		#if ($report)
+		<a href="report.vm">Report</a>
+		#end
+		
+		#if ($query)
+		<a href="query.vm">Query</a>
+		#end
+	
+		#if ($query && $database)
+		<a href="results.vm">Results</a>
+		#end
+	
+		#if ($query && $database)
+		<a href="text.vm">Plain Text</a>
+		#end
+	#end	
+</h1>

@@ -1,0 +1,221 @@
+<!--
+ This DTD describes the second generation of the Gemini Observing Tool/Phase 1
+ program export/import interchange format. No Namespace version
+ 
+ $Id: SpXML2.dtd 4888 2004-08-02 22:56:25Z shane $
+ 
+ Author: Kim Gillies, Gemini Observatory
+ 
+ This file can contain a root level phase1 or phase2 document.
+ 
+-->
+ 
+<!--
+The GEMINI_P1P2_DTD_VERSION is updated whenever the structure or data
+types of the DTD are altered.
+-->
+<!ENTITY GEMINI_P1P2_DTD_VERSION "0.91">
+ 
+<!--
+The document is the root element containing all the information for the Phase1
+or Phase II document. A document is any number of containers in any order.
+ 
+The document is required to have a version attribute set to the value of the
+DTD used for the document instance.  Processesors can take action based upon
+the version of the document.
+ 
+A P1/P2 document consists of a number of containers containing paramset
+elements or other containers.
+ 
+The containers are purely structure elements and are there to indicate
+to the reader/writer what program items should be created.
+ 
+The paramset elements contain the content of the database data objects.
+ 
+The container element and the paramset element each have a set of
+attributes as described below.
+-->
+<!ELEMENT document (container*)>
+<!ATTLIST document
+         version   CDATA #FIXED "&GEMINI_P1P2_DTD_VERSION;"
+         xmlns     CDATA #FIXED "http://ftp.gemini.edu/dtds/p1p2"
+>
+ 
+<!--
+The container elements indicate the structure of the program and provide
+information as attributes that are used by the reader/writer
+to interact with a database and to construct the program.  The containers
+implement the composite pattern.
+ 
+The container element can include one or more attributes that can help the
+processor of the file.  They are described here:
+ 
+kind - The container is required to have a kind.  The kind can be whatever
+is required by the processing program.  For a Gemini program, the kind values
+are things like: program, observation, phase1, obsComp and seqComp.
+ 
+A container contains three attributes that are used to give the reader program
+information about the database object that should be created.  The attributes
+are type, subtype, and version.  The three attributes make a tuple that should
+uniquely identify the configuration for the reader.
+ 
+In the OT, the container is generally the configuration of a data object.
+The type and subtype identify the data object which then uses the version
+to handle the configuration in a version-specific way (if needed).  It's
+possible for different versions of an observation to be handled differently.
+The type, subtype, and version are used to create the correct object
+which is then initialized by the contained paramset elements.  Note that a
+container can contain paramset elements and other containers, but a paramset
+element can only contain param elements or other paramset elements.
+ 
+The container attributes related to construction and initialization are:
+ 
+kind     - the kind is a hint to the reader suggesting the type of object
+          held by the container.
+type     - the paramset can have a type that indicates a broad category
+          (like "instrument").
+subtype  - the paramset can have a subtype that indicates a refinement
+          within the broad category (like "niri").
+version  - the version is a string that indicates the version of the
+          type/subtype configuration. (like "2003B")
+ 
+A fourth optional attribute is key.
+key      - the key is a 128 byte string that uniquely identifies the database
+          instance.
+ 
+name     - a name can optionally be provided to help the reader.  For instance,
+          with the observation, this includes the observation ID.
+ 
+The kind and type attributes are required; the others are optional.
+ 
+The container element has one more optional attribute called sequence.
+ 
+sequence - containers sometimes must be ordered within a parent container.
+          The sequence attribute is to be used to provide this ordering
+          to readers.  Possible values are "0", "1", "2", ...  The lower
+          values should be displayed first when shown in a list.
+ 
+Note:  It is assumed that the reader/writer will make its attributes available
+      to the created data object as needed.
+-->
+<!ENTITY % containerAttributes
+      "kind     CDATA #REQUIRED
+       type     CDATA #REQUIRED
+       subtype  CDATA #IMPLIED
+       name     CDATA #IMPLIED
+       version  CDATA #REQUIRED
+       sequence CDATA #IMPLIED
+       key      CDATA #IMPLIED">
+ 
+<!ELEMENT container (paramset | container)*>
+<!ATTLIST container %containerAttributes;>
+ 
+ 
+<!--
+A paramset is an element that groups the state of a data object as param
+elements and other paramset elements.  The relationship between
+paramset and contained paramset and param elements is parent-child.
+ 
+A paramset is some number of param elements or other paramsets in any order.
+ 
+The paramset can include one or more attributes that can help the
+processor of the file.
+ 
+name - The paramset is required to have a name.  The name can be whatever
+      is required by the processing program.  This attribute is the only
+      required paramset attribute.  It is not required that the name be
+      unique within the scope of its parent.
+ 
+kind - The paramset can have a kind attribute that serves as a hint to the
+      reader about what the paramset is.  For example, this is usually only
+      set on the first parameset and is set to 'dataObj'.
+ 
+The paramset can have one or more attributes to describe how the program
+should present or handle the contained information.
+ 
+editable - the paramset (and all its children) can be read-only if
+          editable is set to false.  The default value is true.  By
+          default all paramsets are editable.  This attribute is not
+          required.
+access   - a paramset (and all its children) can be public or private.  If
+          the access is private, the reading program should not display
+          the information to the user unless the program is permitted.
+          Values can be public or private.  This attribute is used by the
+          Gemini Science Archive to determine which parts of a Phase 2
+          program can be exposed to GSA users.  By default, access is
+          public and access should be assumed to be public unless
+          explicitly set to private.  A writer is not required to attach
+          an access attribute to every paramset.
+sequence - paramsets sometimes must be ordered within a parent container.
+          The sequence attribute is to be used to provide this ordering
+          to readers.  Possible values are "0", "1", "2", ...  The lower
+          values should be displayed first when shown in a list.
+ 
+Paramsets have two attributes to allow them to be shared within a program.
+This is just like the ID and IDREF attributes in the XML spec, but the
+values are not checked by the parser.
+ 
+id       - the paramset is marked with a string id value that can be
+          referenced elsewhere in the program.
+ref      - one paramset can refer the another "id" value.  The behavior
+          is that the paramset should contain the same children as the
+          referenced paramset.
+-->
+<!ENTITY % paramsetAttributes
+       "name    CDATA #REQUIRED
+       kind     CDATA #IMPLIED
+       editable (true|false) 'true'
+       access   (public|private) 'public'
+       sequence CDATA #IMPLIED
+       ref      CDATA #IMPLIED
+       id       CDATA #IMPLIED">
+<!ELEMENT paramset (paramset|param)*>
+<!ATTLIST paramset %paramsetAttributes;>
+ 
+<!--
+A param element is a single thing with a name and value.
+ 
+The param has a name.  Some param elements have no values.  A param can
+be accompanied by a "units" attribute.
+ 
+ 
+name     - a param is required to have a name that describes what the
+          value is.  It is not required that param names be unique within
+          the parent container.
+value    - the value is one value for the named
+          param. This attribute is optional.  Generally, it is preferred
+          that the value be entered as a child.
+ 
+          Multiple values should be represented as multiple value children
+          elements.
+units    - a param can have units that may be optionally included.  The
+          units are strings that will be defined (TBD).
+ 
+Optionally, the param can define its value as zero or more value children
+elements.  For longer element values, this is convenient beacuse attributes
+are more restrictive about their content.
+ 
+A param should not have a value parameter and a value child at the same
+time.  This is an error but is not checked for in the schema.
+-->
+<!ELEMENT param (value)*>
+<!ATTLIST param
+         name     CDATA #REQUIRED
+         value    CDATA #IMPLIED
+         units    CDATA #IMPLIED
+>
+ 
+<!--
+A param element is a single thing with a name and value.
+ 
+The value is one of the parameter values.  With arrays, there can be more
+than one value and their order should be specified with a sequence attribute.
+ 
+sequence - Values sometimes must be ordered within the param.  Possible values
+          are "0", "1", "2", ...  This is the proper way to specify an ordered
+          sequence of values of the same type.
+-->
+<!ELEMENT value (#PCDATA)>
+<!ATTLIST value
+         sequence  CDATA #IMPLIED
+>

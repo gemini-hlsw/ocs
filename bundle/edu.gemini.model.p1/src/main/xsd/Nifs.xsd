@@ -1,0 +1,64 @@
+<!--
+  Schema definition for NIFS blueprints.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:include schemaLocation="Instrument.xsd"/>
+    <xsd:include schemaLocation="Altair.xsd"/>
+
+    <!-- Options for NIFS Blueprint. -->
+    <xsd:complexType name="NifsBlueprintChoice">
+        <xsd:sequence>
+            <xsd:choice>
+                <xsd:element name="null"  type="NifsBlueprintNull"/>
+                <xsd:element name="nonAo" type="NifsBlueprint"/>
+                <xsd:element name="ao"    type="NifsBlueprintAo"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="NifsBlueprintNull"/>
+
+    <xsd:complexType name="NifsBlueprintBase">
+        <xsd:complexContent>
+            <xsd:extension base="BlueprintBase">
+                <xsd:sequence>
+                    <xsd:element name="disperser" type="NifsDisperser"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:simpleType name="NifsDisperser">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="Z (0.94 - 1.15um)"/>
+            <xsd:enumeration value="J (1.15 - 1.33um)"/>
+            <xsd:enumeration value="H (1.49 - 1.80um)"/>
+            <xsd:enumeration value="K (1.99 - 2.40um)"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:complexType name="NifsBlueprint">
+        <xsd:complexContent>
+            <xsd:extension base="NifsBlueprintBase"/>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="NifsBlueprintAo">
+        <xsd:complexContent>
+            <xsd:extension base="NifsBlueprintBase">
+                <xsd:sequence>
+                    <xsd:element name="altair"        type="AltairChoice"/>
+                    <xsd:element name="occultingDisk" type="NifsOccultingDisk"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:simpleType name="NifsOccultingDisk">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="None"/>
+            <xsd:enumeration value="0.2&quot;"/>
+            <xsd:enumeration value="0.5&quot;"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+</xsd:schema>

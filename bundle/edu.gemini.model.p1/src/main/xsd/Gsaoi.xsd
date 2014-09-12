@@ -1,0 +1,63 @@
+<!--
+  Schema definition for GSAOI blueprints.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:include schemaLocation="Instrument.xsd"/>
+
+    <!-- Options for GSAOI Blueprint. -->
+    <xsd:complexType name="GsaoiBlueprintChoice">
+        <xsd:sequence>
+            <xsd:choice>
+                <xsd:element name="null"     type="GsaoiBlueprintNull"/>
+                <xsd:element name="Gsaoi"    type="GsaoiBlueprint"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- GSAOI null. Empty blueprint, not available in PIT. -->
+    <xsd:complexType name="GsaoiBlueprintNull"/>
+
+    <!--
+      GSAOI Blueprint with Laser Guide Star GEMS    .
+    -->
+    <xsd:complexType name="GsaoiBlueprint">
+        <xsd:complexContent>
+            <xsd:extension base="BlueprintBase">
+                <xsd:sequence>
+                    <xsd:element name="filter" type="GsaoiFilter" maxOccurs="unbounded"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      GSAOI Filter options..
+    -->
+    <xsd:simpleType name="GsaoiFilter">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="Z (1.015 um)"/>
+            <xsd:enumeration value="J (1.250 um)"/>
+            <xsd:enumeration value="H (1.635 um)"/>
+            <xsd:enumeration value="K(prime) (2.120 um)"/>
+            <xsd:enumeration value="K(short) (2.150 um)"/>
+            <xsd:enumeration value="K (2.200 um)"/>
+            <xsd:enumeration value="HeI (1.083 um)"/>
+            <xsd:enumeration value="Pa(gamma) (1.094 um)"/>
+            <xsd:enumeration value="J-continuum (1.207 um)"/>
+            <xsd:enumeration value="Pa(beta) (1.282 um)"/>
+            <xsd:enumeration value="H-continuum (1.570 um)"/>
+            <xsd:enumeration value="CH4(short) (1.580 um)"/>
+            <xsd:enumeration value="[FeII] (1.644 um)"/>
+            <xsd:enumeration value="CH4(long) (1.690 um)"/>
+            <xsd:enumeration value="H2O ice (2.000 um)"/>
+            <xsd:enumeration value="HeI (2p2s) (2.058 um)"/>
+            <xsd:enumeration value="Ks-continuum (2.093 um)"/>
+            <xsd:enumeration value="Br(gamma) (2.166 um)"/>
+            <xsd:enumeration value="Kl-continuum (2.270 um)"/>
+            <xsd:enumeration value="H2 1-0 S(1) (2.122 um)"/>
+            <xsd:enumeration value="H2 2-1 S(1) (2.248 um)"/>
+            <xsd:enumeration value="CO (2.360 um)"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+</xsd:schema>

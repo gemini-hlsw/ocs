@@ -1,0 +1,18 @@
+<jxb:bindings version="2.0"
+              xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+              xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <!-- Custom bindings for GRACES -->
+    <jxb:bindings schemaLocation="../xsd/Graces.xsd" node="/xsd:schema">
+        <!-- GracesFiberMode => Graces.GracesFiberMode -->
+        <jxb:bindings node="./xsd:simpleType[@name='GracesFiberMode']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='1 fiber (target, R~50000)']">
+                <jxb:typesafeEnumMember name="ONE_FIBER"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='2 fibers (target + sky, R~30000)']">
+                <jxb:typesafeEnumMember name="TWO_FIBER"/>
+            </jxb:bindings>
+        </jxb:bindings>
+    </jxb:bindings>
+
+</jxb:bindings>

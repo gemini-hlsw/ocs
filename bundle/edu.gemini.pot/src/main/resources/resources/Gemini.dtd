@@ -1,0 +1,392 @@
+<!--  *****     *****     *****     ******     *****     *****     *****
+
+   Document Type Declaration for Gemini 8-m Telescopes
+   Phase 1 Proposal Information.
+
+   Authors:  Kim Gillies  (Gemini Observatory)
+             Shane Walker (Gemini Observatory)
+             Arturo Nunez (Gemini Observatory)
+
+   $Id: Gemini.dtd 909 2004-10-27 19:08:06Z brighton $
+
+-->
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+   Entities that define the Gemini site information.
+-->
+
+<!-- This is the version of the Gemini DTD         -->
+<!ENTITY GEMINI_DTD_VERSION "2.1">
+
+<!-- Entities defining the full and short Gemini partner country names -->
+<!--<!ENTITY % geminiAR "Argentina">-->
+<!--<!ENTITY % geminiAU "Australia">-->
+<!--<!ENTITY % geminiBR "Brazil">-->
+<!--<!ENTITY % geminiCA "Canada">-->
+<!--<!ENTITY % geminiCH "Chile">-->
+<!--<!ENTITY % geminiST "Gemini Staff">-->
+<!--<!ENTITY % geminiUH "University of Hawaii">-->
+<!--<!ENTITY % geminiUH-short "UH">-->
+<!--<!ENTITY % geminiUK "United Kingdom">-->
+<!--<!ENTITY % geminiUK-short "UK">-->
+<!--<!ENTITY % geminiUS "United States">-->
+<!--<!ENTITY % geminiUS-short "USA">-->
+
+<!-- This entity is a short-cut for the partner names that should be used for specifying partner names -->
+<!--<!ENTITY % partners-short "( %geminiAR; |-->
+<!--                             %geminiAU; |-->
+<!--                             %geminiBR; |-->
+<!--                             %geminiCA; |-->
+<!--                             %geminiCH; |-->
+<!--                             %geminiST; |-->
+<!--                             %geminiUK-short; |-->
+<!--                             %geminiUS-short; |-->
+<!--                             %geminiUH-short; )" >-->
+
+<!-- These entities define the normal units for specifying a proposal time.  The two differ by default value -->
+<!ENTITY % timeUnits-hours   "units (nights|hours) 'hours'">
+<!ENTITY % timeUnits-nights  "units (nights|hours) 'nights'">
+
+<!-- Gemini Telescopes Project Northern Operations Center -->
+<!ENTITY geminiNorthInstitution "<institution>Gemini Observatory, Northern Operations Center</institution>">
+<!ENTITY geminiNorthAddress     "<address>670 A'Ohoku Place</address><address>Hilo, HI 96720</address>">
+<!ENTITY geminiNorthCountry     "<country>USA</country>">
+<!ENTITY geminiNorthPhone       "<phone>808-974-2500</phone>">
+<!ENTITY geminiNorthFax         "<fax>808-935-9235</fax>">
+<!ENTITY geminiNorthEmail       "<email>phase1@gemini.edu</email>">
+<!ENTITY geminiNorthSite "&geminiNorthInstitution;
+                          &geminiNorthAddress;
+                          &geminiNorthCountry;
+                          <contact>
+                          &geminiNorthPhone;
+                          &geminiNorthFax;
+                          &geminiNorthEmail;
+                          </contact>">
+
+<!-- Gemini Telescopes Project Southern Operations Center -->
+<!ENTITY geminiSouthInstitution "<institution>Gemini Observatory, Southern Operations Center</institution>">
+<!ENTITY geminiSouthAddress     "<address>c/o AURA, Casilla 603</address><address>La Serena</address>">
+<!ENTITY geminiSouthCountry     "<country>Chile</country>">
+<!ENTITY geminiSouthPhone       "<phone>56-51-205-600</phone>">
+<!ENTITY geminiSouthFax         "<fax>56-51-205-650</fax>">
+<!ENTITY geminiSouthEmail       "<email>phase1@gemini.edu</email>">
+<!ENTITY geminiSouthSite "&geminiSouthInstitution;
+                         &geminiSouthAddress;
+                         &geminiSouthCountry;
+                         <contact>
+                         &geminiSouthPhone;
+                         &geminiSouthFax;
+                         &geminiSouthEmail;
+                         </contact>">
+
+
+<!-- This entity is used as the observatoryId for the Gemini
+     north and south facilities. -->
+<!ENTITY geminiId "gemini" >
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    geminiObsConditionsConstraint ELEMENT
+    This constraint defines the observing conditions needed for the entire
+    obsList or a single observation within the obsList.  See the Gemini
+    web site for the meaning of the numbers for the observing condition
+    attributes.
+-->
+<!--VC: A Gemini proposal must include at least one
+        geminiObsConditionsConstraint with the name="global" in the parent
+        constraint element.  Other geminiObsConditionsConstraints can be added
+        and referenced as needed.
+-->
+<!ELEMENT geminiObsConditionsConstraint EMPTY>
+<!ATTLIST geminiObsConditionsConstraint
+          imageQuality (Any|20|70|85) "Any"
+          skyBackground (Any|20|50|80) "Any"
+          cloudCover (Any|20|50|70|90) "Any"
+          waterVapor (Any|20|50|80) "Any"
+>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    geminiSubDetailsExtension ELEMENT
+    This extension element adds Gemini-specific proposal information
+    indicating the partners receiving the proposal (which may be >1 for joing proposals).
+
+    The geminiReceivedDate is added by Gemini when the proposal is received.
+    The semesterTitle, semesterLimits, and dueDate are retrieved from the
+    Gemini data file and should be reproduced in the output file.
+
+    The submissions element is included to indicate the complete set of partners
+    receiving the proposal.
+-->
+<!--VC: A Gemini proposal must include one and only one geminiSubDetailsExtension.
+-->
+<!ELEMENT geminiSubDetailsExtension (semesterTitle?,
+                                     semesterLimits?,
+                                     dueDate?,
+                                     geminiReceivedDate?,
+                                     submissions)>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    submissions ELEMENT
+    Element submissions should have the totalPartnerTime and at least one partner through
+    the partnerSubmission element.
+-->
+<!ELEMENT submissions (submissionTotalRequestedTime,
+                       submissionTotalMinimumRequestedTime,
+                       partnerSubmission+)>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    submissionTotalRequestedTime ELEMENT
+    submissionTotalRequestedTime is the amount of time requested from all partners.
+    It is the sum of all the requested times in the partnerSubmission elements.
+-->
+<!ELEMENT submissionTotalRequestedTime (#PCDATA)>
+<!ATTLIST submissionTotalRequestedTime
+          %timeUnits-hours;
+>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    submissionTotalMinimumRequestedTime ELEMENT
+    submissionTotalMinimumRequestedTime is the total minimum time requested from all partners.
+    It is the sum of all the minimum requested times in the partnerSubmission elements.
+-->
+<!ELEMENT submissionTotalMinimumRequestedTime (#PCDATA)>
+<!ATTLIST submissionTotalMinimumRequestedTime
+          %timeUnits-hours;
+>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    partnerSubmission ELEMENT
+    One of these elements is included in the geminiSubDetailsExtension for every partner receiving the
+    proposal.  Note that for Gemini, every proposal is looked at like a joing proposal and there is no
+    affiliated country until a single NGO is assigned at Phase 2.  Each submitted partner has a requested
+    time and a minimum time.
+    NOTE: The partnerReferenceNumber has been added to the partnerSubmission to allow NGOs to submit
+          all the information needed at upload without creating new elements in the proposal.
+    NOTE: the submissionFlag and submissionStatus are information used by PIT to track the location of a
+          joing proposal and the success or failure of a specific submission.
+-->
+<!--VC: The name of the partner should be the value of one of the entities in 'partners-short'.
+-->
+<!--VC: The partnerRefernceNumber is initially empty, but should be written before passing the proposal
+        to Gemini.
+-->
+<!ELEMENT partnerSubmission (submissionRequestedTime,
+                             submissionMinimumRequestedTime,
+                             partnerProposalContact?,
+                             partnerReferenceNumber)>
+<!--<!ATTLIST partnerSubmission-->
+<!--          partnerName %partners-short; #REQUIRED-->
+<!--          submissionFlag (true|false) "false"-->
+<!--          submissionStatus (submitted|failed|pending) "pending"-->
+<!-->-->
+<!ATTLIST partnerSubmission
+          partnerName CDATA #REQUIRED
+          submissionFlag (true|false) "false"
+          submissionStatus (submitted|failed|pending) "pending"
+>
+
+
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    submissionRequestedTime ELEMENT
+    submissionRequestedTime is the amount of time requested from one partner.
+-->
+<!ELEMENT submissionRequestedTime (#PCDATA)>
+<!ATTLIST submissionRequestedTime
+          %timeUnits-hours;
+>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    submissionMinimumRequestedTime ELEMENT
+    submissionMinimumRequestedTime is the minimum useful time requested from a
+    specific partner.
+-->
+<!ELEMENT submissionMinimumRequestedTime (#PCDATA)>
+<!ATTLIST submissionMinimumRequestedTime
+          %timeUnits-hours;
+>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    partnerProposalContact ELEMENT
+    partnerProposalContact is the first and last name of one of the investigators who is
+    specified by the proposer to be the contact from a specific partner in a proposal.  The
+    partnerProposalContact is primarily useful for joint proposals where each participating
+    partner may have a different contact during Phase 1.  Be default, the partnerProposalContact
+    is the PI.
+-->
+<!--VC: For non-joint proposals, the partnerProposalContact should be the PI. -->
+<!ELEMENT partnerProposalContact (name)>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    partnerReferenceNumber ELEMENT
+    partnerReferenceNumber is a partner-defined string that is unique to there set of proposals.
+-->
+<!--VC: Gemini requires that partnerReferenceNumbers be unique during each semester. -->
+<!ELEMENT partnerReferenceNumber (#PCDATA)>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    geminiTACExtension ELEMENT
+    This extension element adds information added by partner TAC committees
+    rating the proposals.
+    NOTE: partnerReferenceNumber is optionally retained here for one semester to
+          ensure backward compatability.
+-->
+<!--VC: A single Gemini proposal can go to multiple partners so a proposal should have
+        more than one geminiTACExtention; one for each partner.
+-->
+<!ELEMENT geminiTACExtension (partnerReferenceNumber?,
+                              partnerRanking,
+                              partnerRecommendedTime,
+                              partnerMinimumTime,
+                              partnerReceivedDate,
+                              partnerSupportEmail,
+                              partnerComment?)>
+<!--<!ATTLIST geminiTACExtension-->
+<!--          partnerName %partners-short; #REQUIRED-->
+<!-->-->
+<!ATTLIST geminiTACExtension
+          partnerName CDATA #REQUIRED
+>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    partnerRanking ELEMENT
+    partnerRanking is an integer ranking the proposal with a range of 1 to the number of proposals.
+-->
+<!ELEMENT partnerRanking (#PCDATA)>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    partnerRecommendedTime ELEMENT
+    partnerRecommendedTime the amount of time the TAC suggests should
+    be allocated to the proposal.
+-->
+<!ELEMENT partnerRecommendedTime (#PCDATA)>
+<!ATTLIST partnerRecommendedTime
+          %timeUnits-hours;
+>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    partnerMinimumTime ELEMENT
+    partnerMinimumTime is the minimum amount of time to allocate if the
+    full time cannot be scheduled as suggested by the NTAC.
+-->
+<!ELEMENT partnerMinimumTime (#PCDATA)>
+<!ATTLIST partnerMinimumTime
+          %timeUnits-hours;
+>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    partnerRecievedData ELEMENT
+    partnerReceivedDate indicated when the proposal was received by the partner.
+-->
+<!ELEMENT partnerReceivedDate (date)>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    partnerSupportEmail ELEMENT
+    partnerSupportEmail is the email address of the support person responsible
+    for this proposal within the partner country.
+-->
+<!ELEMENT partnerSupportEmail (#PCDATA)>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    partnerComment ELEMENT
+    partnerComment is additional information that can be added by
+    he partner country TAC.  It is not required.
+-->
+<!ELEMENT partnerComment (embeddedText)>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    geminiITACExtension ELEMENT
+    This extension element adds information added by the ITAC committee
+    rating the set of all proposals.
+-->
+<!ELEMENT geminiITACExtension (geminiReferenceNumber,
+                               geminiContactScientist?,
+                               geminiContactScientistEmail,
+                               queueScientificBand?,
+                               geminiSchedDates?,
+                               timeAwarded,
+                               ITACComment?,
+                               geminiComment?)>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    geminiReferenceNumber ELEMENT
+    geminiReferenceNumber is a Gemini specified reference number for the
+    proposal.  It's added by Gemini, not the partner TAC.
+-->
+<!--VC: The geminiReferenceNumber must be unique across the entire set of proposals. -->
+<!ELEMENT geminiReferenceNumber (#PCDATA)>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    geminiContactScientist ELEMENT
+    This is the name of the Gemini contact scientist for this proposal.  Note
+    this is kept largely for compatibility.  The new email element is now the
+    relevant info.
+-->
+<!ELEMENT geminiContactScientist (#PCDATA)>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    geminiContactScientistEmail ELEMENT
+    This is the email address of the Gemini contact scientist for this proposal.
+-->
+<!ELEMENT geminiContactScientistEmail (#PCDATA)>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    queueScientificBand ELEMENT
+    This element is a small number, 1-5 or so, indicating the schedule band for this
+    proposal as indicated by the ITAC/Gemini.
+-->
+<!ELEMENT queueScientificBand (#PCDATA)>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    geminiSchedDates ELEMENT
+    If a date range for a proposal is generated during the ITAC, it can be added here.
+    This element is optional and there can be at most one.
+-->
+<!ELEMENT geminiSchedDates (dateRange*)>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    timeAwarded ELEMENT
+    This is the number of hours or nights (for classical) finally awarded for this
+    proposal.
+-->
+<!ELEMENT timeAwarded (#PCDATA)>
+<!ATTLIST timeAwarded
+          %timeUnits-hours;
+>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    geminiComment ELEMENT
+    geminiComment is an optional comment Gemini associates with the proposal after or before ITAC.
+-->
+<!ELEMENT geminiComment (embeddedText)>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    ITACComment element
+    ITACComment is an optional comment the ITAC can add to a proposal.
+-->
+<!ELEMENT ITACComment (embeddedText)>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    geminiReceivedData ELEMENT
+    geminiReceivedDate indicates when the proposal was received by Gemini.
+    It's added by Gemini, not the partner TAC.
+-->
+<!ELEMENT geminiReceivedDate (date)>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+    siteInfo ELEMENT
+    siteInfo defines the address and contact information for the
+    person currently responsible for  Gemini Phase 1 questions and issues.
+-->
+<!ELEMENT siteInfo (site)>
+
+<!--  *****     *****     *****     ******     *****     *****     *****
+   geminiData ELEMENT
+   This is the root element for the Gemini data file.  The data file is
+   used by authoring tools to provide correct data to users.
+-->
+<!ELEMENT geminiData (astronomyPhase1Options,
+                      submissionDetails,
+                      resourceOverheads,
+                      resourceList,
+                      siteInfo)>
+<!ATTLIST geminiData lastModified CDATA #REQUIRED>

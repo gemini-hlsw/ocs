@@ -1,0 +1,116 @@
+<!--
+  This DTD describes the content of the DataProc.xml file, which 
+  describes data processing recipes for the Gemini Observing Tool (OT).
+
+  $Id: DataProc.dtd 4336 2004-01-20 07:57:42Z gillies $
+-->
+
+<!-- The DATAPROC_DTD_VERSION is updated whenever the structure or content
+     of the DTD is altered.
+-->
+<!ENTITY DATAPROC_DTD_VERSION "0.1">
+
+
+<!-- recipes is the top level element containing a list of recipe elements.
+     The root element is required to have a version attribute set to
+     the version of the DTD used in the document.
+-->
+<!ELEMENT recipes (recipe)+>
+<!ATTLIST recipes
+          version   CDATA #FIXED "&DATAPROC_DTD_VERSION;"
+>
+
+
+<!-- A recipe element describes a data processing operation or recipe
+     and may contain inputs, outputs, and params items.
+     Attributes:
+     name              name used for UI display
+     task              the name of the (IRAF) task to execute
+     id                short name or id of the recipe
+     desc              a short description of the recipe
+-->
+<!ELEMENT recipe (inputs*, outputs*, params*)>
+<!ATTLIST recipe
+          name             CDATA #REQUIRED
+          task             CDATA #REQUIRED
+          id               CDATA #REQUIRED
+          desc             CDATA #REQUIRED
+>
+
+
+<!-- An inputs element may contain one or more input elements describing the recipe's input
+     sources.
+-->
+<!ELEMENT inputs (input+)>
+
+<!-- An input element describes one recipe input source.
+     Attributes:
+     name              name used for UI display
+     desc              a short description of the input source
+-->
+<!ELEMENT input EMPTY>
+<!ATTLIST input
+          name             CDATA #IMPLIED
+          desc             CDATA #IMPLIED
+>
+
+
+
+<!-- An outputs element may contain one or more output elements describing the recipe's outputs.
+-->
+<!ELEMENT outputs (output*)>
+
+<!-- An output element describes one recipe output.
+     Attributes:
+     name              name used for UI display
+     desc              a short description of the output
+-->
+<!ELEMENT output EMPTY>
+<!ATTLIST output
+          name             CDATA #IMPLIED
+          desc             CDATA #IMPLIED
+>
+
+
+
+<!-- An params element may contain one or more param elements describing the recipe's parameters.
+-->
+<!ELEMENT params (param+)>
+
+<!-- An param element describes one recipe parameter.
+     Attributes:
+     type              the type of the parameter: one of: "string", "decimal", "integer", "choice",
+                       or "boolean", where "choice" means one of the items described in the "choice" 
+                       element. "boolean" is interpreted as a choice of "yes" and "no".
+
+     name              name used for UI display
+     value	       the default value
+     desc              a short description of the parameter
+     level	       the OLDP parameter level (1, 2, or 3)
+                       1:  OLDP must set this parameter, it is required for execution
+                       2:  Default value from the script is usually ok and should be
+                           visible to the OLDP user, but the user might need to reconfigure the value
+                       3:  Should normally be hidden from the OLDP user, "expert" 
+-->
+<!ELEMENT param (choice*)>
+<!ATTLIST param
+          type             (String|double|int|boolean|choice) "String"
+          name             CDATA #REQUIRED
+          value            CDATA #IMPLIED
+          desc             CDATA #REQUIRED
+          level            (1|2|3) "1"
+>
+
+
+<!-- An choice element describes one choice for a recipe parameter. This element should
+     only be used with parameters of type "choice".
+     Attributes:
+     name              name used for UI display
+     desc              a short description of the choice
+-->
+<!ELEMENT choice EMPTY>
+<!ATTLIST choice
+          name             CDATA #REQUIRED
+          desc             CDATA #IMPLIED
+>
+

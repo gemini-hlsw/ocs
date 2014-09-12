@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0" xmlns:fo="http://www.w3.org/1999/xhtml">
+
+    <!-- Gets a nice string with meta information about observation -->
+    <xsl:template name="get-obs-meta-information">
+        <xsl:param name="meta"/>
+        <xsl:if test="$meta/guiding[evaluation!='Success']">
+            <xsl:if test="$meta/guiding/percentage &gt; 50">
+                <xsl:text>Some PAs do not have suitable guide stars (</xsl:text>
+                <xsl:value-of select="$meta/guiding/percentage"/>
+                <xsl:text>%)&#160;</xsl:text>
+            </xsl:if>
+            <xsl:if test="$meta/guiding/percentage &lt;= 50 and $meta/guiding/percentage &gt; 0">
+                <xsl:text>Many PAs do not have suitable guide stars (</xsl:text>
+                <xsl:value-of select="$meta/guiding/percentage"/>
+                <xsl:text>%). Review if a specific PA is required.&#160;</xsl:text>
+            </xsl:if>
+            <xsl:if test="$meta/guiding/percentage = 0">
+                <xsl:text>Guiding is problematic</xsl:text>
+                <!--xsl:value-of select="$meta/guiding/evaluation"/-->
+                <xsl:text>&#160;(</xsl:text>
+                <xsl:value-of select="$meta/guiding/percentage"/>
+                <xsl:text>%)&#160;</xsl:text>
+            </xsl:if>
+        </xsl:if>
+        <xsl:if test="$meta[visibility!='Good']">
+            <xsl:if test="$meta/guiding[evaluation!='Success']">
+                <xsl:text>;&#160;</xsl:text>
+            </xsl:if>
+            <xsl:text>Visibility is&#160;</xsl:text>
+            <xsl:choose>
+                <xsl:when test="$meta/visibility = 'Limited'">limited</xsl:when>
+                <xsl:when test="$meta/visibility = 'Bad'">bad</xsl:when>
+            </xsl:choose>
+        </xsl:if>
+        <xsl:if test="$meta[gsa > 0]">
+            <xsl:if test="$meta/guiding[evaluation!='Success'] or $meta[visibility!='Good']">
+                <xsl:text>;&#160;</xsl:text>
+            </xsl:if>
+            <xsl:value-of select="$meta/gsa"/>
+            <xsl:text>&#160; duplicate datasets in the GSA</xsl:text>
+        </xsl:if>
+    </xsl:template>
+
+    <!-- Prints a problems summary -->
+    <xsl:template name="get-obs-problems-summary">
+        <xsl:variable name="guiding-problems"    select="count(/proposal/observations/observation/meta/guiding[evaluation!='Success'])"/>
+        <xsl:variable name="visibility-problems" select="count(/proposal/observations/observation/meta[visibility!='Good'])"/>
+        <xsl:variable name="gsa-problems"        select="count(/proposal/observations/observation/meta[gsa>0])"/>
+        <xsl:text>The submitted proposal has </xsl:text>
+        <xsl:if test="$visibility-problems > 0">
+            <xsl:value-of select="$visibility-problems"/>
+            <xsl:choose>
+                <xsl:when test="$visibility-problems = 1"><xsl:text> observation that has</xsl:text></xsl:when>
+                <xsl:otherwise><xsl:text> observations that have</xsl:text></xsl:otherwise>
+            </xsl:choose>
+            <xsl:text> poor visibility this semester</xsl:text>
+        </xsl:if>
+        <xsl:if test="$guiding-problems > 0">
+            <xsl:if test="$visibility-problems > 0 and $gsa-problems > 0">, </xsl:if>
+            <xsl:if test="$visibility-problems > 0 and $gsa-problems = 0">, and </xsl:if>
+            <xsl:value-of select="$guiding-problems"/>
+            <xsl:choose>
+                <xsl:when test="$guiding-problems = 1"><xsl:text> observation</xsl:text></xsl:when>
+                <xsl:otherwise><xsl:text> observations</xsl:text></xsl:otherwise>
+            </xsl:choose>
+            <xsl:text> with a low probability of suitable guide stars</xsl:text>
+        </xsl:if>
+        <xsl:if test="$gsa-problems > 0">
+            <xsl:if test="$guiding-problems > 0 or $visibility-problems > 0">, and </xsl:if>
+            <xsl:value-of select="$gsa-problems"/>
+            <xsl:choose>
+                <xsl:when test="$gsa-problems = 1"><xsl:text> observation</xsl:text></xsl:when>
+                <xsl:otherwise><xsl:text> observations</xsl:text></xsl:otherwise>
+            </xsl:choose>
+            <xsl:text> with duplicate datasets in the GSA</xsl:text>
+        </xsl:if>
+        <xsl:text>.</xsl:text>
+    </xsl:template>
+
+    <!-- Calculates total observation time in hours -->
+    <xsl:template name="get-total-observation-time">
+        <xsl:variable name="minutes" select="sum(/proposal/observations/observation[@band !='Band 3']/time[@units='min'])"/>
+        <xsl:variable name="hours"   select="sum(/proposal/observations/observation[@band !='Band 3']/time[@units='hr'])"/>
+        <xsl:variable name="nights"  select="sum(/proposal/observations/observation[@band !='Band 3']/time[@units='night'])"/>
+        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 8), '0.0')"/>
+    </xsl:template>
+
+    <!-- Calculates total observation time for a given blueprint in hrs -->
+    <xsl:template name="get-total-blueprint-observation-time">
+        <xsl:param name="blueprintRef"/>
+        <xsl:variable name="minutes" select="sum(/proposal/observations/observation[@blueprint=$blueprintRef and @band !='Band 3']/time[@units='min'])"/>
+        <xsl:variable name="hours"   select="sum(/proposal/observations/observation[@blueprint=$blueprintRef and @band !='Band 3']/time[@units='hr'])"/>
+        <xsl:variable name="nights"  select="sum(/proposal/observations/observation[@blueprint=$blueprintRef and @band !='Band 3']/time[@units='night'])"/>
+        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 8), '0.0')"/>
+    </xsl:template>
+
+    <!-- Calculates total observation time for a given blueprint in hrs -->
+    <xsl:template name="get-total-instrument-observation-time">
+        <xsl:param name="instrument"/>
+        <xsl:call-template name="get-total-instrument-observation-time-calc">
+            <xsl:with-param name="blueprintList" select="$instrument/*"/>
+        </xsl:call-template>
+    </xsl:template>
+
+
+    <xsl:template name="get-total-instrument-observation-time-calc">
+        <xsl:param name="blueprintList"/>
+        <xsl:choose>
+            <xsl:when test="$blueprintList">
+                <xsl:variable name="recursive_result">
+                    <xsl:call-template name="get-total-instrument-observation-time-calc">
+                        <xsl:with-param name="blueprintList" select="$blueprintList[position() > 1]"/>
+                    </xsl:call-template>
+                </xsl:variable>
+                <xsl:variable name="this_result">
+                    <xsl:call-template name="get-total-blueprint-observation-time">
+                        <xsl:with-param name="blueprintRef" select="$blueprintList[1]/@id"/>
+                    </xsl:call-template>
+                </xsl:variable>
+                <xsl:value-of select="format-number($this_result + $recursive_result, '0.0')"/>
+            </xsl:when>
+            <xsl:otherwise><xsl:value-of select="0"/></xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <!-- Calculates total requested time for all ngos in hours -->
+    <xsl:template name="get-ngo-total-requested-time">
+        <xsl:variable name="minutes" select="sum(/proposal/proposalClass//request/time[@units='min'])"/>
+        <xsl:variable name="hours"   select="sum(/proposal/proposalClass//request/time[@units='hr'])"/>
+        <xsl:variable name="nights"  select="sum(/proposal/proposalClass//request/time[@units='night'])"/>
+        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 10), '0.0')"/>
+    </xsl:template>
+
+    <!-- Calculates total minimal requested time for all ngos in hours -->
+    <xsl:template name="get-ngo-total-min-requested-time">
+        <xsl:variable name="minutes" select="sum(/proposal/proposalClass//request/minTime[@units='min'])"/>
+        <xsl:variable name="hours"   select="sum(/proposal/proposalClass//request/minTime[@units='hr'])"/>
+        <xsl:variable name="nights"  select="sum(/proposal/proposalClass//request/minTime[@units='night'])"/>
+        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 10), '0.0')"/>
+    </xsl:template>
+
+    <!-- Calculates total accepted/recommended time for all ngos in hours -->
+    <xsl:template name="get-ngo-total-accepted-time">
+        <xsl:variable name="minutes" select="sum(/proposal/proposalClass//accept/recommend[@units='min'])"/>
+        <xsl:variable name="hours"   select="sum(/proposal/proposalClass//accept/recommend[@units='hr'])"/>
+        <xsl:variable name="nights"  select="sum(/proposal/proposalClass//accept/recommend[@units='night'])"/>
+        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 10), '0.0')"/>
+    </xsl:template>
+
+    <!-- Calculates total minimal accepted/recommended time for all ngos in hours -->
+    <xsl:template name="get-ngo-total-min-accepted-time">
+        <xsl:variable name="minutes" select="sum(/proposal/proposalClass//accept/minRecommend[@units='min'])"/>
+        <xsl:variable name="hours"   select="sum(/proposal/proposalClass//accept/minRecommend[@units='hr'])"/>
+        <xsl:variable name="nights"  select="sum(/proposal/proposalClass//accept/minRecommend[@units='night'])"/>
+        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 10), '0.0')"/>
+    </xsl:template>
+
+    <!-- Calculates total time requested for an LP -->
+    <xsl:template name="get-lp-total-requested-time">
+        <xsl:variable name="minutes" select="sum(/proposal/proposalClass//request/totalLPTime[@units='min'])"/>
+        <xsl:variable name="hours"   select="sum(/proposal/proposalClass//request/totalLPTime[@units='hr'])"/>
+        <xsl:variable name="nights"  select="sum(/proposal/proposalClass//request/totalLPTime[@units='night'])"/>
+        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 10), '0.0')"/>
+    </xsl:template>
+
+    <!-- Calculates min total time requested for an LP -->
+    <xsl:template name="get-min-lp-total-requested-time">
+        <xsl:variable name="minutes" select="sum(/proposal/proposalClass//request/minTotalLPTime[@units='min'])"/>
+        <xsl:variable name="hours"   select="sum(/proposal/proposalClass//request/minTotalLPTime[@units='hr'])"/>
+        <xsl:variable name="nights"  select="sum(/proposal/proposalClass//request/minTotalLPTime[@units='night'])"/>
+        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 10), '0.0')"/>
+    </xsl:template>
+
+    <!-- Creates a nice name for the instrument names used in the xml blueprints -->
+    <xsl:template name="get-inst-name">
+        <xsl:param name="inst"/>
+        <xsl:choose>
+            <xsl:when test="$inst = 'flamingos2'">Flamingos2</xsl:when>
+            <xsl:when test="$inst = 'gmosN'">GMOS North</xsl:when>
+            <xsl:when test="$inst = 'gmosS'">GMOS South</xsl:when>
+            <xsl:when test="$inst = 'gnirs'">GNIRS</xsl:when>
+            <xsl:when test="$inst = 'gsaoi'">GSAOI</xsl:when>
+            <xsl:when test="$inst = 'graces'">GRACES</xsl:when>
+            <xsl:when test="$inst = 'gpi'">GPI</xsl:when>
+            <xsl:when test="$inst = 'michelle'">Michelle</xsl:when>
+            <xsl:when test="$inst = 'nici'">NICI</xsl:when>
+            <xsl:when test="$inst = 'nifs'">NIFS</xsl:when>
+            <xsl:when test="$inst = 'niri'">NIRI</xsl:when>
+            <xsl:when test="$inst = 'dssi'">DSSI</xsl:when>
+            <xsl:when test="$inst = 'texes'">Texes</xsl:when>
+            <xsl:when test="$inst = 'trecs'">TReCS</xsl:when>
+            <xsl:otherwise>?<xsl:value-of select="$inst"/>?</xsl:otherwise>
+        </xsl:choose>
+
+    </xsl:template>
+
+    <!-- Creates a nice name for visitor instruments -->
+    <xsl:template name="get-visitor-inst-name">
+        <xsl:param name="visitor"/>
+        <xsl:value-of select="$visitor/name"/>
+    </xsl:template>
+
+    <!-- Gets the telescope name for an instrument -->
+    <xsl:template name="get-inst-telescope-name">
+        <xsl:param name="inst"/>
+        <xsl:choose>
+            <xsl:when test="$inst = 'flamingos2'">Gemini South</xsl:when>
+            <xsl:when test="$inst = 'gmosN'">Gemini North</xsl:when>
+            <xsl:when test="$inst = 'gmosS'">Gemini South</xsl:when>
+            <xsl:when test="$inst = 'gnirs'">Gemini North</xsl:when>
+            <xsl:when test="$inst = 'gsaoi'">Gemini South</xsl:when>
+            <xsl:when test="$inst = 'graces'">Gemini North</xsl:when>
+            <xsl:when test="$inst = 'gpi'">Gemini South</xsl:when>
+            <xsl:when test="$inst = 'michelle'">Gemini North</xsl:when>
+            <xsl:when test="$inst = 'nici'">Gemini South</xsl:when>
+            <xsl:when test="$inst = 'nifs'">Gemini North</xsl:when>
+            <xsl:when test="$inst = 'niri'">Gemini North</xsl:when>
+            <xsl:when test="$inst = 'dssi'">Gemini North</xsl:when>
+            <xsl:when test="$inst = 'texes'">Gemini North</xsl:when>
+            <xsl:when test="$inst = 'trecs'">Gemini South</xsl:when>
+            <xsl:when test="$inst = 'subaru'">Subaru</xsl:when>
+            <xsl:when test="$inst = 'keck'">Keck</xsl:when>
+            <xsl:otherwise>?<xsl:value-of select="$inst"/>?</xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <!-- Creates a nice name for the partners -->
+    <xsl:template name="get-partner-name">
+        <xsl:param name="partner"/>
+        <xsl:choose>
+            <xsl:when test="$partner = 'ar'">Argentina</xsl:when>
+            <xsl:when test="$partner = 'au'">Australia</xsl:when>
+            <xsl:when test="$partner = 'br'">Brazil</xsl:when>
+            <xsl:when test="$partner = 'ca'">Canada</xsl:when>
+            <xsl:when test="$partner = 'cl'">Chile</xsl:when>
+            <xsl:when test="$partner = 'gs'">Gemini Staff</xsl:when>
+            <xsl:when test="$partner = 'uk'">UK</xsl:when>
+            <xsl:when test="$partner = 'us'">USA</xsl:when>
+            <xsl:when test="$partner = 'uh'">Univ. Hawaii</xsl:when>
+            <xsl:when test="$partner = 'keck'">Keck</xsl:when>
+            <xsl:when test="$partner = 'subaru'">Subaru</xsl:when>
+            <xsl:otherwise>$partner</xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <xsl:template name="target-ra-to-hms">
+        <xsl:param name="target"/>
+        <xsl:call-template name="convert-target-coords">
+            <xsl:with-param name="target" select="$target"/>
+            <xsl:with-param name="coord-part" select="'ra'"/>
+        </xsl:call-template>
+    </xsl:template>
+
+    <xsl:template name="target-dec-to-dms">
+        <xsl:param name="target"/>
+        <xsl:call-template name="convert-target-coords">
+            <xsl:with-param name="target" select="$target"/>
+            <xsl:with-param name="coord-part" select="'dec'"/>
+        </xsl:call-template>
+    </xsl:template>
+
+    <xsl:template name="convert-target-coords">
+        <xsl:param name="target"/>
+        <xsl:param name="coord-part"/>
+        <xsl:choose>
+            <xsl:when test="name($target)='sidereal'">
+                <xsl:choose>
+                    <xsl:when test="$target/hmsDms">
+                        <xsl:value-of select="$target/hmsDms/*[name()=$coord-part]"/>
+                    </xsl:when>
+                    <xsl:when test="$target/degDeg">
+                        <xsl:choose>
+                            <xsl:when test="$coord-part='ra'">
+                                <xsl:call-template name="deg-to-hms">
+                                    <xsl:with-param name="degrees"><xsl:value-of select="$target/degDeg/ra"/></xsl:with-param>
+                                </xsl:call-template>
+                            </xsl:when>
+                            <xsl:when test="$coord-part='dec'">
+                                <xsl:call-template name="deg-to-dms">
+                                    <xsl:with-param name="degrees"><xsl:value-of select="$target/degDeg/dec"/></xsl:with-param>
+                                </xsl:call-template>
+                            </xsl:when>
+                        </xsl:choose>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        ???
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:when>
+            <xsl:when test="name($target)='nonsidereal'">
+                <xsl:choose>
+                    <xsl:when test="$target/ephemeris/hmsDms">
+                        <xsl:value-of select="$target/ephemeris/hmsDms/*[name()=$coord-part]"/>
+                    </xsl:when>
+                    <xsl:when test="$target/ephemeris/degDeg">
+                        <xsl:choose>
+                            <xsl:when test="$coord-part='ra'">
+                                <xsl:call-template name="deg-to-hms">
+                                    <xsl:with-param name="degrees"><xsl:value-of select="$target/ephemeris/degDeg/ra"/></xsl:with-param>
+                                </xsl:call-template>
+                            </xsl:when>
+                            <xsl:when test="$coord-part='dec'">
+                                <xsl:call-template name="deg-to-dms">
+                                    <xsl:with-param name="degrees"><xsl:value-of select="$target/ephemeris/degDeg/dec"/></xsl:with-param>
+                                </xsl:call-template>
+                            </xsl:when>
+                        </xsl:choose>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        ???
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:when>
+            <xsl:when test="name($target)='too'">
+                <!-- no coordinates for too, blank -->
+            </xsl:when>
+        </xsl:choose>
+    </xsl:template>
+
+    <!-- Convert degrees to HMS -->
+    <xsl:template name="deg-to-hms">
+        <xsl:param name="degrees"/>
+        <xsl:choose>
+            <xsl:when test="$degrees &lt; 0">
+                <xsl:text>-</xsl:text>
+                <xsl:call-template name="deg-to-hms">
+                    <xsl:with-param name="degrees" select="-$degrees"/>
+                </xsl:call-template>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:variable name="hrs" select="($degrees div 360) * 24"/>
+                <xsl:variable name="min" select="($hrs - floor($hrs)) * 60"/>
+                <xsl:variable name="sec" select="($min - floor($min)) * 60"/>
+                <xsl:value-of select="format-number(floor($hrs), '00')"/>
+                <xsl:text>:</xsl:text>
+                <xsl:value-of select="format-number(floor($min), '00')"/>
+                <xsl:text>:</xsl:text>
+                <xsl:value-of select="format-number($sec, '00.000')"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <!-- Convert degrees to DMS -->
+    <xsl:template name="deg-to-dms">
+        <xsl:param name="degrees"/>
+        <xsl:choose>
+            <xsl:when test="$degrees &lt; 0">
+                <xsl:text>-</xsl:text>
+                <xsl:call-template name="deg-to-dms">
+                    <xsl:with-param name="degrees" select="-$degrees"/>
+                </xsl:call-template>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:variable name="deg" select="$degrees"/>
+                <xsl:variable name="min" select="($deg - floor($deg)) * 60"/>
+                <xsl:variable name="sec" select="($min - floor($min)) * 60"/>
+                <xsl:value-of select="format-number(floor($deg), '00')"/>
+                <xsl:text>:</xsl:text>
+                <xsl:value-of select="format-number(floor($min), '00')"/>
+                <xsl:text>:</xsl:text>
+                <xsl:value-of select="format-number($sec, '00.000')"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <!-- Creates a comma separated list for all magnitudes -->
+    <xsl:template name="get-magnitudes">
+        <xsl:param name="magnitudes"/>
+        <xsl:for-each select="$magnitudes/magnitude">
+            <xsl:value-of select="format-number(., '#.00')"/>
+            &#160;<xsl:value-of select="@band"/>
+            &#160;<xsl:value-of select="@system"/>
+            <xsl:if test="position()!=last()">, </xsl:if>
+        </xsl:for-each>
+    </xsl:template>
+
+    <!-- helper to replace all occurrences of a string with another one -->
+    <xsl:template name="string-replace-all">
+        <xsl:param name="text" />
+        <xsl:param name="replace" />
+        <xsl:param name="by" />
+        <xsl:choose>
+            <xsl:when test="contains($text, $replace)">
+                <xsl:value-of select="substring-before($text,$replace)" />
+                <xsl:value-of select="$by" />
+                <xsl:call-template name="string-replace-all">
+                    <xsl:with-param name="text"
+                                    select="substring-after($text,$replace)" />
+                    <xsl:with-param name="replace" select="$replace" />
+                    <xsl:with-param name="by" select="$by" />
+                </xsl:call-template>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="$text" />
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <xsl:template name="investigator-name">
+        <xsl:param name="id"/>
+        <xsl:for-each select="//investigators/pi[@id=$id]">
+            <xsl:value-of select="firstName"/>
+            <xsl:text>&#160;</xsl:text>
+            <xsl:value-of select="lastName"/>
+        </xsl:for-each>
+        <xsl:for-each select="//investigators/coi[@id=$id]">
+            <xsl:value-of select="firstName"/>
+            <xsl:text>&#160;</xsl:text>
+            <xsl:value-of select="lastName"/>
+        </xsl:for-each>
+    </xsl:template>
+
+</xsl:stylesheet>

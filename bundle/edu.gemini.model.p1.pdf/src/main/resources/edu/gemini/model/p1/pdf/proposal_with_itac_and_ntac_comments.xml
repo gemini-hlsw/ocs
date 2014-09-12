@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal tacCategory="Galactic" schemaVersion="1.0.14">
+    <meta band3optionChosen="false">
+        <attachment>/home/sdr/ausgo/atac/ATAC13A/gem13a/xml/au_2013A_007.pdf</attachment>
+    </meta>
+    <semester half="A" year="2013"/>
+    <title>Gemini MCAO Observations of WISE Y dwarfs</title>
+    <abstract>The NASA WISE satellite has delivered an unparalleled harvest of new ultra-cool Y-type brown dwarfs. It has more than fulfilled its key goal of detecting the coldest of brown dwarfs, at effective temperatures of less than 500K. We propose to exploit the capabilities of the Gemini MCAO system to obtain diffraction-limited, wide-field data on these targets for both measurements of their binary fraction and astrometric measurements of their distances. The observations proposed here (especially if combined with proposed SV observations) will allow us to demonstrate GeMS's utility for a larger program of these fundamental observations. </abstract>
+    <scheduling>WISE0713 – 2 x 1h epochs. One epoch in each of the months Feb and Mar. 
+
+UGPS0722 – 4 x 15m epochs. One epoch in each fortnight of Feb and Mar. 
+
+WISE1541 – 3 x 2h epochs. One in each of the periods Mar-Apr, May-Jun, and Jul. 
+
+WISE1639 – 4 x 1h epochs. One in each of the months Apr, May, Jun &amp; Jul.</scheduling>
+    <keywords>
+        <keyword>Brown dwarfs</keyword>
+        <keyword>Astrometry</keyword>
+        <keyword>Binaries</keyword>
+    </keywords>
+    <investigators>
+        <pi id="investigator-1">
+            <firstName>Chris</firstName>
+            <lastName>Tinney</lastName>
+            <status>PhD</status>
+            <email>c.tinney@unsw.edu.au</email>
+            <address>
+                <institution>University of New South Wales</institution>
+                <address>Department of Astrophysics
+School of Physics
+Sydney
+New South Wales 2052</address>
+                <country>Australia</country>
+            </address>
+        </pi>
+        <coi id="investigator-2">
+            <firstName>Chris</firstName>
+            <lastName>Gelino</lastName>
+            <status>PhD</status>
+            <email>cgelino@ipac.caltech.edu</email>
+            <phone></phone>
+            <institution>Infrared Processing and Analysis Center (IPAC)</institution>
+        </coi>
+        <coi id="investigator-3">
+            <firstName>Graeme</firstName>
+            <lastName>Salter</lastName>
+            <status>PhD</status>
+            <email>g.salter@unsw.edu.au</email>
+            <phone></phone>
+            <institution>University of New South Wales</institution>
+        </coi>
+        <coi id="investigator-4">
+            <firstName>Davy</firstName>
+            <lastName>Kirkpatrick</lastName>
+            <status>PhD</status>
+            <email>davy@ipac.caltech.edu</email>
+            <phone></phone>
+            <institution>Infrared Processing and Analysis Center (IPAC)</institution>
+        </coi>
+        <coi id="investigator-5">
+            <firstName>Jacqueline</firstName>
+            <lastName>Faherty</lastName>
+            <status>PhD</status>
+            <email>jfaherty17@gmail.com</email>
+            <phone></phone>
+            <institution>Universidad de Chile</institution>
+        </coi>
+        <coi id="investigator-6">
+            <firstName>Mike</firstName>
+            <lastName>Cushing</lastName>
+            <status>PhD</status>
+            <email>Michael.Cushing@utoledo.edu</email>
+            <phone></phone>
+            <institution>University of Toledo</institution>
+        </coi>
+    </investigators>
+    <targets>
+        <sidereal epoch="J2000" id="target-0">
+            <name>WISE163941.20-684749.0</name>
+            <degDeg>
+                <ra>249.92500000000001136868377216160297393798828125</ra>
+                <dec>-48.7955555555555520186317153275012969970703125</dec>
+            </degDeg>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-1">
+            <name>WISE154151.460-225025.00</name>
+            <degDeg>
+                <ra>235.461829169591254640181432478129863739013671875</ra>
+                <dec>-22.846308333079019092792805167846381664276123046875</dec>
+            </degDeg>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-2">
+            <name>UGPSJ072227.51-054031.2</name>
+            <degDeg>
+                <ra>110.614625000953680000748136080801486968994140625</ra>
+                <dec>-5.6752777777777776435641499119810760021209716796875</dec>
+            </degDeg>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-3">
+            <name>WISEJ071322.55-291751.9</name>
+            <degDeg>
+                <ra>108.351666665077203788314363919198513031005859375</ra>
+                <dec>-29.29361111111111171112497686408460140228271484375</dec>
+            </degDeg>
+        </sidereal>
+    </targets>
+    <conditions>
+        <condition id="condition-0">
+            <name>CC 50%/Clear, IQ 70%/Good, SB Any/Bright, WV Any</name>
+            <cc>50%/Clear</cc>
+            <iq>70%/Good</iq>
+            <sb>Any/Bright</sb>
+            <wv>Any</wv>
+        </condition>
+    </conditions>
+    <blueprints>
+        <gsaoi>
+            <Gsaoi id="blueprint-0">
+                <name>GSAOI CH4(short) (1.580 um)</name>
+                <visitor>false</visitor>
+                <filter>CH4(short) (1.580 um)</filter>
+            </Gsaoi>
+        </gsaoi>
+    </blueprints>
+    <observations>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" enabled="true" band="Band 1/2">
+            <time units="hr">4.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-1" enabled="true" band="Band 1/2">
+            <time units="hr">8.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-2" enabled="false" band="Band 1/2">
+            <time units="hr">0.25</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-3" enabled="true" band="Band 1/2">
+            <time units="hr">4.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None" key="8bd827c0-7a1d-431b-b39b-03ad8131924b">
+            <itac>
+                <accept>
+                    <programId>GS-2013A-Q-4</programId>
+                    <contact>rcarrasco@gemini.edu,smargheim@gemini.edu</contact>
+                    <email>No partner lead email assigned.</email>
+                    <band>1</band>
+                    <award units="hr">15.8</award>
+                    <rollover>false</rollover>
+                </accept>
+                <comment>ITAC Comment
+7.8h from AU + 6.0h from US + 2.0h from CL in Band 1. Including overheads this should be enough for the requested epochs in Feb-May when GSAOI is scheduled, except for UGPSJ0722 which was removed.
+Gemini Comment
+GSAOI availability is restricted in 13A and the allocation was reduced. 0722 was removed, it is expected that 2 epochs can be obtained on the remaining three targets for a total time of 15.8h. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+This program is in
+band 1, however it is not accepted for rollover into future semesters if not
+completed in 13A.</comment>
+            </itac>
+            <ngo partnerLead="investigator-2">
+                <request>
+                    <time units="hr">4.33</time>
+                    <minTime units="hr">2.0</minTime>
+                </request>
+                <response>
+                    <receipt>
+                        <timestamp>2012-09-27T15:17:09.000-10:00</timestamp>
+                        <id>2013A0322R1</id>
+                    </receipt>
+                    <accept>
+                        <email>jrajagopal@noao.edu</email>
+                        <ranking>22</ranking>
+                        <recommend units="hr">6</recommend>
+                        <minRecommend units="hr">6</minRecommend>
+                        <poorWeather>false</poorWeather>
+                    </accept>
+                    <comment>US Time Allocated: 6 hrs (South)
+
+Technical Review Comment (jrajagopal@noao.edu): Proposal does not
+have specific Strehl requirements: chosen tip-tilt configs show
+average strehl of about 26%. S/N calculation was difficult to
+reproduce. For example, H=20 with blackbody spectrum at 400 K and all
+other parameters as in proposal, produced lower S/N (~30) than quoted
+(~60). Overheads are not explicitly included except in one out of the
+four targets. Depending on read-out mode chosen, for the longer (&gt;
+1 hr) integrations, read-out and acquisition can add up to an hour
+for each epoch per target. Suggest increasing time request (this
+partner) to 6 hours. ---- Run Info: GSAOI CH4(short) (1.580 um), ToO
+= None, Band 3 = N Time Requested: 4.3 hours Time Recommended: 6.0
+hours Conditions Requested: IQ=70, SB=any, WV=any, CC=50 Recommended
+Changes: None</comment>
+                </response>
+                <partner>us</partner>
+            </ngo>
+            <ngo partnerLead="investigator-5">
+                <request>
+                    <time units="hr">4.33</time>
+                    <minTime units="hr">2.0</minTime>
+                </request>
+                <response>
+                    <receipt>
+                        <timestamp>2012-09-27T15:17:36.000-10:00</timestamp>
+                        <id>CL-2013A-012</id>
+                    </receipt>
+                    <accept>
+                        <email>mmorag@conicyt.cl, costa@das.uchile.cl</email>
+                        <ranking>8.0</ranking>
+                        <recommend units="hr">2.0</recommend>
+                        <minRecommend units="hr">2.0</minRecommend>
+                        <poorWeather>false</poorWeather>
+                    </accept>
+                    <comment>grade: 2.41
+band 2
+Joint USA, Australia ?? ??Gemini MCAO Observations of WISE Y-dwarfsPI proposes to observe a small sample of Y-brown dwarf detected by WISE withGeMS/GSAOI to: i) deliver astrometric distance; ii) measurement of their binaryfraction; iii) to demonstrate GeMS utility to observe this type of objects.Detection and study of very cold brown dwarf have became a very important astrophysicaltopic during the last few years.?? WISE satellite has been identified thousand of browndwarfs. Only a few of these objects correspond to a class of Y-brown dwarfs. Understandingthe nature of these object can help to close the gap between the coolest brown dwarf andJupiter and hence put constrains in the formation theories. The majority of the objectsare faint and the need of and 8-meter telescope is justified.However, the proposal presents several problems:It is not clear what is the resolution needed to resolve the systems into binaries.Note that astrometric distances are essential to measure the luminosity. Therefore, theastrometric stability is essential for this program. Unfortunately, it is not clear howgood will be the astrometric performance provided by GeMS. What is the astrometricaccuracy required by the program? It is not mentioned in the proposal. This point iscrucial for the success of the program since GeMS introduces distortions in the GSAOIfield of view. It is not clear if the distortions are varying with time, position ofthe target on the sky, etc (information is not provided in the Gemini web page).The use of the larger FoV provide by GSAOI is not well justified or at leastit is not clearly explained in the proposal. If the idea is to map the astrometricaccuracy and stability, then crowded fields will be better to use.Multiple visits. Two targets requires visits in May, June and July. However,GeMS and GSAOI are available only between February and April 2013, as explained in the2013A call for proposal.Technical justification does not include the overheads (acquisition, readouttime, offsets, etc). The inclusion of the overheads will increase the totaltime required to ~27 hours.Three objects are not visible during the time Feb-Apr when the laser is offeredSome of the multiple visits are not possible for the same reason.</comment>
+                </response>
+                <partner>cl</partner>
+            </ngo>
+            <ngo partnerLead="investigator-1">
+                <request>
+                    <time units="hr">4.34</time>
+                    <minTime units="hr">2.0</minTime>
+                </request>
+                <response>
+                    <receipt>
+                        <timestamp>2012-09-27T15:17:08.000-10:00</timestamp>
+                        <id>G/2013A/007</id>
+                    </receipt>
+                    <accept>
+                        <email>sdr@aao.gov.au</email>
+                        <ranking>13.0</ranking>
+                        <recommend units="hr">7.8</recommend>
+                        <minRecommend units="hr">4.0</minRecommend>
+                        <poorWeather>false</poorWeather>
+                    </accept>
+                    <comment>ATAC liked the science behind this proposal, however several members felt that a better explanation of the synergy between this program and the corresponding Magellan program was needed. While this is designed as a pilot study, what are the (potential) advantages and disadvantages of GeMS/GSAOI over Fourstar on Magellan? Is the possibility of resolving brown dwarf binaries the only advantage? It seemed unlikely that the binary fraction could be measured adequately from just four targets; a much larger sample would be needed to do this; the number of targets for this part of the project should be explicitly stated.</comment>
+                </response>
+                <partner>au</partner>
+            </ngo>
+        </queue>
+    </proposalClass>
+</proposal>

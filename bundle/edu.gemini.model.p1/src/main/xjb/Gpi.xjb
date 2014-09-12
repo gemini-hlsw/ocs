@@ -1,0 +1,73 @@
+<jxb:bindings version="2.0"
+              xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+              xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <!-- Custom bindings for GPI -->
+    <jxb:bindings schemaLocation="../xsd/Gpi.xsd" node="/xsd:schema">
+        <!-- GpiObservingMode => Gpi.ObservingMode -->
+        <jxb:bindings node="./xsd:simpleType[@name='GpiObservingMode']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='Coronograph Y-band']">
+                <jxb:typesafeEnumMember name="CORON_Y_BAND"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Coronograph J-band']">
+                <jxb:typesafeEnumMember name="CORON_J_BAND"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Coronograph H-band']">
+                <jxb:typesafeEnumMember name="CORON_H_BAND"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Coronograph K1-band']">
+                <jxb:typesafeEnumMember name="CORON_K1_BAND"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Coronograph K2-band']">
+                <jxb:typesafeEnumMember name="CORON_K2_BAND"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Non Redundant Mask Y']">
+                <jxb:typesafeEnumMember name="NRM_Y"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Non Redundant Mask J']">
+                <jxb:typesafeEnumMember name="NRM_J"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Non Redundant Mask H']">
+                <jxb:typesafeEnumMember name="NRM_H"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Non Redundant Mask K1']">
+                <jxb:typesafeEnumMember name="NRM_K1"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Non Redundant Mask K2']">
+                <jxb:typesafeEnumMember name="NRM_K2"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='H_LIWA']">
+                <jxb:typesafeEnumMember name="H_LIWA"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='H_STAR']">
+                <jxb:typesafeEnumMember name="H_STAR"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Y direct']">
+                <jxb:typesafeEnumMember name="DIRECT_Y_BAND"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='J direct']">
+                <jxb:typesafeEnumMember name="DIRECT_J_BAND"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='H direct']">
+                <jxb:typesafeEnumMember name="DIRECT_H_BAND"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='K1 direct']">
+                <jxb:typesafeEnumMember name="DIRECT_K1_BAND"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='K2 direct']">
+                <jxb:typesafeEnumMember name="DIRECT_K2_BAND"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+        <!-- GpiDisperser => Gpi.Disperser -->
+        <jxb:bindings node="./xsd:simpleType[@name='GpiDisperser']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='Prism']">
+                <jxb:typesafeEnumMember name="PRISM"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Wollaston']">
+                <jxb:typesafeEnumMember name="WOLLASTON"/>
+            </jxb:bindings>
+        </jxb:bindings>
+    </jxb:bindings>
+
+</jxb:bindings>

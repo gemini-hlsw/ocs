@@ -1,0 +1,447 @@
+149,2011/11/28 00:16:04 HST
+#0,,,,,,,,,,,,,,,,,,
+#,,V 1.7,"GG, 2011nov28",,,,,,,,,,,,,,,
+#,,changes:,,,,,,,,,,,,,,,,
+#,,"all slits supported (Longslit, NS, MOS); Bug fixes",,,,,,,,,,,,,,,,
+#,,,,,,,,,,,,,,,,,,
+#,,V 1.5,"GG, 2011oct13",,,,,,,,,,,,,,,
+#,,changes:,,,,,,,,,,,,,,,,
+#,,Any filter ($.*) for IFU,,,,,,,,,,,,,,,,
+#,,"Used regular expressions for Longslit and N and S, and IFU ",,,,,,,,,,,,,,,,
+#,,,,,,,,,,,,,,,,,,
+#,,V 1.44,,,,,,,,,,,,,,,,
+#,,"GG, 2011Sep15",,,,,,,,,,,,,,,,
+#,,changes:,,,,,,,,,,,,,,,,
+#,,Filled Calibration Basecal column,,,,,,,,,,,,,,,,
+#,,Used Longslit.* and N and S *  for FPU,,,,,,,,,,,,,,,,
+#,,,,,,,,,,,,,,,,,,
+#,,V 1.3,,,,,,,,,,,,,,,,
+#,,"GG, 2011Ago17",,,,,,,,,,,,,,,,
+#,,,,,,,,,,,,,,,,,,
+#,,,,,,,,,,,,,,,,,,
+#,,Recommended GCAL configurations and Exp. Times for GMOS calibrations:,,,,,,,,,,,,,,,,
+#,,Spectroscopic Arcs:  R150 R400 B600 R600 R831 B1200,,,,,,,,,,,,,,,,
+#,,,,,,,,,,,,,,,,,,
+#,,Note the following:,,,,,,,,,,,,,,,,
+#,,,,,,,,,,,,,,,,,,
+#,,"All CuAr Arcs are taken with GCALlamp=CuAr, GCALdiffuser=VISIBLE",,,,,,,,,,,,,,,,
+#,,The choice of filter within GMOS is not considered except for IFU-2 configurations,,,,,,,,,,,,,,,,
+#,,The Readout is Slow and the Gain is Low and the three best amps were used for GCALflats,,,,,,,,,,,,,,,,
+#,,"For High gain, use 2x the exposure time from Low gain",,,,,,,,,,,,,,,,
+#,,,,,,,,,,,,,,,,,,
+#,,,,,,,,,,,,,,,,,,
+#,,,,,,,,,,,,,,,,,,
+#,,,,,,,,,,,,,,,,,,
+#,,,,,,,,,,,,,,,,,,
+#,,,,,,,,,,,,,,,,,,
+#  Instrument Configuration from OT,,,,,,,,,,,GCAL configuration,,,,,,,
+Disperser,Filter,Focal Plane Unit,Xbin,Ybin,Central Wavelength,Order ,Gain,,/=>/,,Calibration Observe,Calibration Filter,Calibration Diffuser,Calibration Lamps,Calibration Shutter,Calibration Exposure Time,Calibration Coadds,Calibration Basecal
+,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,
+R150_G5326,$.*one|.*G.*,$.*arcsec.*,1,1,400-950,1,Low,,,,1,        None,Visible,CuAr arc,Closed,1,1,Day
+R150_G5326,$.*one|.*G.*,$.*arcsec.*,2,1,400-950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,15,1,Day
+R150_G5326,$.*one|.*G.*,$.*arcsec.*,1,2,400-950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,15,1,Day
+R150_G5326,$.*one|.*G.*,$.*arcsec.*,2,2,400-950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,8,1,Day
+R150_G5326,$.*one|.*G.*,$.*arcsec.*,4,1,400-950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,8,1,Day
+R150_G5326,$.*one|.*G.*,$.*arcsec.*,1,4,400-950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,8,1,Day
+R150_G5326,$.*one|.*G.*,$.*arcsec.*,4,2,400-950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,4,1,Day
+R150_G5326,$.*one|.*G.*,$.*arcsec.*,2,4,400-950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,4,1,Day
+R150_G5326,$.*one|.*G.*,$.*arcsec.*,4,4,400-950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,2,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+R150_G5326,$.*,IFU *,1,1,400-950,1,Low,,,,1,         None,Visible,CuAr arc,Closed,10,1,Day
+R150_G5326,$.*,IFU *,2,1,400-950,1,Low,,,,1,         None,Visible,CuAr arc,Closed,5,1,Day
+R150_G5326,$.*,IFU *,4,1,400-950,1,Low,,,,1,         None,Visible,CuAr arc,Closed,3,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+# ,,,,,,,,,,,,,,,,,,Day
+#,,,,,,,,,,,,,,,,,,Day
+R400_G5325,$.*one|.*G.*,$.*arcsec.*,1,1,400-950,1,Low,,,,1,        None,Visible,CuAr arc,Closed,2,1,Day
+R400_G5325,$.*one|.*G.*,$.*arcsec.*,2,1,400-950,1,Low,,,,1,        None,Visible,CuAr arc,Closed,1,1,Day
+R400_G5325,$.*one|.*G.*,$.*arcsec.*,1,2,400-950,1,Low,,,,1,        None,Visible,CuAr arc,Closed,1,1,Day
+R400_G5325,$.*one|.*G.*,$.*arcsec.*,2,2,400-950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,15,1,Day
+R400_G5325,$.*one|.*G.*,$.*arcsec.*,4,1,400-950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,15,1,Day
+R400_G5325,$.*one|.*G.*,$.*arcsec.*,1,4,400-950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,15,1,Day
+R400_G5325,$.*one|.*G.*,$.*arcsec.*,4,2,400-950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,8,1,Day
+R400_G5325,$.*one|.*G.*,$.*arcsec.*,2,4,400-950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,8,1,Day
+R400_G5325,$.*one|.*G.*,$.*arcsec.*,4,4,400-950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,4,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+R400_G5325,$.*,IFU *,1,1,400-950,1,Low,,,,1,         None,Visible,CuAr arc,Closed,20,1,Day
+R400_G5325,$.*,IFU *,2,1,400-950,1,Low,,,,1,         None,Visible,CuAr arc,Closed,10,1,Day
+R400_G5325,$.*,IFU *,4,1,400-950,1,Low,,,,1,         None,Visible,CuAr arc,Closed,5,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+# ,,,,,,,,,,,,,,,,,,Day
+#,,,,,,,,,,,,,,,,,,Day
+B600_G5323,none,$.*arcsec.*,1,1,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,45,1,Day
+B600_G5323,none,$.*arcsec.*,2,1,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,30,1,Day
+B600_G5323,none,$.*arcsec.*,1,2,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,30,1,Day
+B600_G5323,none,$.*arcsec.*,2,2,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,20,1,Day
+B600_G5323,none,$.*arcsec.*,4,1,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,20,1,Day
+B600_G5323,none,$.*arcsec.*,1,4,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,20,1,Day
+B600_G5323,none,$.*arcsec.*,4,2,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,10,1,Day
+B600_G5323,none,$.*arcsec.*,2,4,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,10,1,Day
+B600_G5323,none,$.*arcsec.*,4,4,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,5,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+B600_G5323,$.*,IFU *,1,1,400 - 555,1,Low,,,,1,         None,Visible,CuAr arc,Closed,180,1,Day
+B600_G5323,$.*,IFU *,2,1,400 - 555,1,Low,,,,1,         None,Visible,CuAr arc,Closed,180,1,Day
+B600_G5323,$.*,IFU *,4,1,400 - 555,1,Low,,,,1,         None,Visible,CuAr arc,Closed,120,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+B600_G5323,none,$.*arcsec.*,1,1,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,15,1,Day
+B600_G5323,none,$.*arcsec.*,2,1,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,8,1,Day
+B600_G5323,none,$.*arcsec.*,1,2,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,8,1,Day
+B600_G5323,none,$.*arcsec.*,2,2,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,4,1,Day
+B600_G5323,none,$.*arcsec.*,4,1,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,4,1,Day
+B600_G5323,none,$.*arcsec.*,1,4,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,4,1,Day
+B600_G5323,none,$.*arcsec.*,4,2,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,2,1,Day
+B600_G5323,none,$.*arcsec.*,2,4,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,2,1,Day
+B600_G5323,none,$.*arcsec.*,4,4,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,1,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+B600_G5323,$.*,IFU *,1,1,555 - 610,1,Low,,,,1,         None,Visible,CuAr arc,Closed,90,1,Day
+B600_G5323,$.*,IFU *,2,1,555 - 610,1,Low,,,,1,         None,Visible,CuAr arc,Closed,60,1,Day
+B600_G5323,$.*,IFU *,4,1,555 - 610,1,Low,,,,1,         None,Visible,CuAr arc,Closed,30,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+B600_G5323,none,$.*arcsec.*,1,1,610 - 950,1,Low,,,,1,        None,Visible,CuAr arc,Closed,3,1,Day
+B600_G5323,none,$.*arcsec.*,2,1,610 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,40,1,Day
+B600_G5323,none,$.*arcsec.*,1,2,610 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,40,1,Day
+B600_G5323,none,$.*arcsec.*,2,2,610 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,20,1,Day
+B600_G5323,none,$.*arcsec.*,4,1,610 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,20,1,Day
+B600_G5323,none,$.*arcsec.*,1,4,610 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,20,1,Day
+B600_G5323,none,$.*arcsec.*,4,2,610 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,10,1,Day
+B600_G5323,none,$.*arcsec.*,2,4,610 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,10,1,Day
+B600_G5323,none,$.*arcsec.*,4,4,610 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,5,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+B600_G5323,$.*,IFU *,1,1,610 - 950,1,Low,,,,1,         None,Visible,CuAr arc,Closed,30,1,Day
+B600_G5323,$.*,IFU *,2,1,610 - 950,1,Low,,,,1,         None,Visible,CuAr arc,Closed,15,1,Day
+B600_G5323,$.*,IFU *,4,1,610 - 950,1,Low,,,,1,         None,Visible,CuAr arc,Closed,8,1,Day
+# ,,,,,,,,,,,,,,,,,,Day
+#,,,,,,,,,,,,,,,,,,Day
+R600_G5324,none,$.*arcsec.*,1,1,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,45,1,Day
+R600_G5324,none,$.*arcsec.*,2,1,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,30,1,Day
+R600_G5324,none,$.*arcsec.*,1,2,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,30,1,Day
+R600_G5324,none,$.*arcsec.*,2,2,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,20,1,Day
+R600_G5324,none,$.*arcsec.*,4,1,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,20,1,Day
+R600_G5324,none,$.*arcsec.*,1,4,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,20,1,Day
+R600_G5324,none,$.*arcsec.*,4,2,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,10,1,Day
+R600_G5324,none,$.*arcsec.*,2,4,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,10,1,Day
+R600_G5324,none,$.*arcsec.*,4,4,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,5,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+R600_G5324,$.*,IFU *,1,1,400 - 555,1,Low,,,,1,         None,Visible,CuAr arc,Closed,180,1,Day
+R600_G5324,$.*,IFU *,2,1,400 - 555,1,Low,,,,1,         None,Visible,CuAr arc,Closed,180,1,Day
+R600_G5324,$.*,IFU *,4,1,400 - 555,1,Low,,,,1,         None,Visible,CuAr arc,Closed,120,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+R600_G5324,none,$.*arcsec.*,1,1,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,15,1,Day
+R600_G5324,none,$.*arcsec.*,2,1,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,8,1,Day
+R600_G5324,none,$.*arcsec.*,1,2,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,8,1,Day
+R600_G5324,none,$.*arcsec.*,2,2,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,4,1,Day
+R600_G5324,none,$.*arcsec.*,4,1,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,4,1,Day
+R600_G5324,none,$.*arcsec.*,1,4,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,4,1,Day
+R600_G5324,none,$.*arcsec.*,4,2,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,2,1,Day
+R600_G5324,none,$.*arcsec.*,2,4,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,2,1,Day
+R600_G5324,none,$.*arcsec.*,4,4,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,1,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+R600_G5324,$.*,IFU *,1,1,555 - 610,1,Low,,,,1,         None,Visible,CuAr arc,Closed,90,1,Day
+R600_G5324,$.*,IFU *,2,1,555 - 610,1,Low,,,,1,         None,Visible,CuAr arc,Closed,60,1,Day
+R600_G5324,$.*,IFU *,4,1,555 - 610,1,Low,,,,1,         None,Visible,CuAr arc,Closed,30,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+R600_G5324,none,$.*arcsec.*,1,1,610 - 950,1,Low,,,,1,        None,Visible,CuAr arc,Closed,3,1,Day
+R600_G5324,none,$.*arcsec.*,2,1,610 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,40,1,Day
+R600_G5324,none,$.*arcsec.*,1,2,610 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,40,1,Day
+R600_G5324,none,$.*arcsec.*,2,2,610 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,20,1,Day
+R600_G5324,none,$.*arcsec.*,4,1,610 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,20,1,Day
+R600_G5324,none,$.*arcsec.*,1,4,610 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,20,1,Day
+R600_G5324,none,$.*arcsec.*,4,2,610 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,10,1,Day
+R600_G5324,none,$.*arcsec.*,2,4,610 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,10,1,Day
+R600_G5324,none,$.*arcsec.*,4,4,610 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,5,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+R600_G5324,$.*,IFU *,1,1,610 - 950,1,Low,,,,1,         None,Visible,CuAr arc,Closed,30,1,Day
+R600_G5324,$.*,IFU *,2,1,610 - 950,1,Low,,,,1,         None,Visible,CuAr arc,Closed,15,1,Day
+R600_G5324,$.*,IFU *,4,1,610 - 950,1,Low,,,,1,         None,Visible,CuAr arc,Closed,8,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+#,,,,,,,,,,,,,,,,,,Day
+#,,,,,,,,,,,,,,,,,,Day
+R831_G5322,none,$.*arcsec.*,1,1,400 - 590,1,Low,,,,1,        None,Visible,CuAr arc,Closed,180,1,Day
+R831_G5322,none,$.*arcsec.*,2,1,400 - 590,1,Low,,,,1,        None,Visible,CuAr arc,Closed,120,1,Day
+R831_G5322,none,$.*arcsec.*,1,2,400 - 590,1,Low,,,,1,        None,Visible,CuAr arc,Closed,120,1,Day
+R831_G5322,none,$.*arcsec.*,2,2,400 - 590,1,Low,,,,1,        None,Visible,CuAr arc,Closed,60,1,Day
+R831_G5322,none,$.*arcsec.*,4,1,400 - 590,1,Low,,,,1,        None,Visible,CuAr arc,Closed,60,1,Day
+R831_G5322,none,$.*arcsec.*,1,4,400 - 590,1,Low,,,,1,        None,Visible,CuAr arc,Closed,60,1,Day
+R831_G5322,none,$.*arcsec.*,4,2,400 - 590,1,Low,,,,1,        None,Visible,CuAr arc,Closed,30,1,Day
+R831_G5322,none,$.*arcsec.*,2,4,400 - 590,1,Low,,,,1,        None,Visible,CuAr arc,Closed,30,1,Day
+R831_G5322,none,$.*arcsec.*,4,4,400 - 590,1,Low,,,,1,        None,Visible,CuAr arc,Closed,15,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+R831_G5322,$.*,IFU *,1,1,400 - 590,1,Low,,,,1,         None,Visible,CuAr arc,Closed,300,1,Day
+R831_G5322,$.*,IFU *,2,1,400 - 590,1,Low,,,,1,         None,Visible,CuAr arc,Closed,180,1,Day
+R831_G5322,$.*,IFU *,4,1,400 - 590,1,Low,,,,1,         None,Visible,CuAr arc,Closed,120,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+R831_G5322,none,$.*arcsec.*,1,1,590 - 650,1,Low,,,,1,        None,Visible,CuAr arc,Closed,30,1,Day
+R831_G5322,none,$.*arcsec.*,2,1,590 - 650,1,Low,,,,1,        None,Visible,CuAr arc,Closed,15,1,Day
+R831_G5322,none,$.*arcsec.*,1,2,590 - 650,1,Low,,,,1,        None,Visible,CuAr arc,Closed,15,1,Day
+R831_G5322,none,$.*arcsec.*,2,2,590 - 650,1,Low,,,,1,        None,Visible,CuAr arc,Closed,8,1,Day
+R831_G5322,none,$.*arcsec.*,4,1,590 - 650,1,Low,,,,1,        None,Visible,CuAr arc,Closed,8,1,Day
+R831_G5322,none,$.*arcsec.*,1,4,590 - 650,1,Low,,,,1,        None,Visible,CuAr arc,Closed,8,1,Day
+R831_G5322,none,$.*arcsec.*,4,2,590 - 650,1,Low,,,,1,        None,Visible,CuAr arc,Closed,4,1,Day
+R831_G5322,none,$.*arcsec.*,2,4,590 - 650,1,Low,,,,1,        None,Visible,CuAr arc,Closed,4,1,Day
+R831_G5322,none,$.*arcsec.*,4,4,590 - 650,1,Low,,,,1,        None,Visible,CuAr arc,Closed,2,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+R831_G5322,$.*,IFU *,1,1,590 - 650,1,Low,,,,1,         None,Visible,CuAr arc,Closed,90,1,Day
+R831_G5322,$.*,IFU *,2,1,590 - 650,1,Low,,,,1,         None,Visible,CuAr arc,Closed,45,1,Day
+R831_G5322,$.*,IFU *,4,1,590 - 650,1,Low,,,,1,         None,Visible,CuAr arc,Closed,20,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+R831_G5322,none,$.*arcsec.*,1,1,650 - 950,1,Low,,,,1,        None,Visible,CuAr arc,Closed,2,1,Day
+R831_G5322,none,$.*arcsec.*,2,1,650 - 950,1,Low,,,,1,        None,Visible,CuAr arc,Closed,1,1,Day
+R831_G5322,none,$.*arcsec.*,1,2,650 - 950,1,Low,,,,1,        None,Visible,CuAr arc,Closed,1,1,Day
+R831_G5322,none,$.*arcsec.*,2,2,650 - 950,1,Low,,,,1,        None,Visible,CuAr arc,Closed,1,1,Day
+R831_G5322,none,$.*arcsec.*,4,1,650 - 950,1,Low,,,,1,        None,Visible,CuAr arc,Closed,1,1,Day
+R831_G5322,none,$.*arcsec.*,1,4,650 - 950,1,Low,,,,1,        None,Visible,CuAr arc,Closed,1,1,Day
+R831_G5322,none,$.*arcsec.*,4,2,650 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,10,1,Day
+R831_G5322,none,$.*arcsec.*,2,4,650 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,10,1,Day
+R831_G5322,none,$.*arcsec.*,4,4,650 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,5,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+R831_G5322,$.*,IFU *,1,1,650 - 950,1,Low,,,,1,         None,Visible,CuAr arc,Closed,30,1,Day
+R831_G5322,$.*,IFU *,2,1,650 - 950,1,Low,,,,1,         None,Visible,CuAr arc,Closed,15,1,Day
+R831_G5322,$.*,IFU *,4,1,650 - 950,1,Low,,,,1,         None,Visible,CuAr arc,Closed,8,1,Day
+# ,,,,,,,,,,,,,,,,,,Day
+#,,,,,,,,,,,,,,,,,,Day
+B1200_G5321,none,$.*arcsec.*,1,1,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,90,1,Day
+B1200_G5321,none,$.*arcsec.*,2,1,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,60,1,Day
+B1200_G5321,none,$.*arcsec.*,1,2,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,60,1,Day
+B1200_G5321,none,$.*arcsec.*,2,2,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,40,1,Day
+B1200_G5321,none,$.*arcsec.*,4,1,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,40,1,Day
+B1200_G5321,none,$.*arcsec.*,1,4,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,40,1,Day
+B1200_G5321,none,$.*arcsec.*,4,2,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,20,1,Day
+B1200_G5321,none,$.*arcsec.*,2,4,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,20,1,Day
+B1200_G5321,none,$.*arcsec.*,4,4,400 - 555,1,Low,,,,1,        None,Visible,CuAr arc,Closed,10,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+B1200_G5321,$.*,IFU *,1,1,400 - 555,1,Low,,,,1,         None,Visible,CuAr arc,Closed,360,1,Day
+B1200_G5321,$.*,IFU *,2,1,400 - 555,1,Low,,,,1,         None,Visible,CuAr arc,Closed,360,1,Day
+B1200_G5321,$.*,IFU *,4,1,400 - 555,1,Low,,,,1,         None,Visible,CuAr arc,Closed,240,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+B1200_G5321,none,$.*arcsec.*,1,1,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,30,1,Day
+B1200_G5321,none,$.*arcsec.*,2,1,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,16,1,Day
+B1200_G5321,none,$.*arcsec.*,1,2,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,16,1,Day
+B1200_G5321,none,$.*arcsec.*,2,2,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,8,1,Day
+B1200_G5321,none,$.*arcsec.*,4,1,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,8,1,Day
+B1200_G5321,none,$.*arcsec.*,1,4,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,8,1,Day
+B1200_G5321,none,$.*arcsec.*,4,2,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,4,1,Day
+B1200_G5321,none,$.*arcsec.*,2,4,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,4,1,Day
+B1200_G5321,none,$.*arcsec.*,4,4,555 - 610,1,Low,,,,1,        None,Visible,CuAr arc,Closed,2,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+B1200_G5321,$.*,IFU *,1,1,555 - 610,1,Low,,,,1,         None,Visible,CuAr arc,Closed,180,1,Day
+B1200_G5321,$.*,IFU *,2,1,555 - 610,1,Low,,,,1,         None,Visible,CuAr arc,Closed,120,1,Day
+B1200_G5321,$.*,IFU *,4,1,555 - 610,1,Low,,,,1,         None,Visible,CuAr arc,Closed,60,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+B1200_G5321,none,$.*arcsec.*,1,1,610 - 950,1,Low,,,,1,        None,Visible,CuAr arc,Closed,6,1,Day
+B1200_G5321,none,$.*arcsec.*,2,1,610 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,80,1,Day
+B1200_G5321,none,$.*arcsec.*,1,2,610 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,80,1,Day
+B1200_G5321,none,$.*arcsec.*,2,2,610 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,40,1,Day
+B1200_G5321,none,$.*arcsec.*,4,1,610 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,40,1,Day
+B1200_G5321,none,$.*arcsec.*,1,4,610 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,40,1,Day
+B1200_G5321,none,$.*arcsec.*,4,2,610 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,20,1,Day
+B1200_G5321,none,$.*arcsec.*,2,4,610 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,20,1,Day
+B1200_G5321,none,$.*arcsec.*,4,4,610 - 950,1,Low,,,,1,       GMOS balance,Visible,CuAr arc,Closed,10,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+B1200_G5321,$.*,IFU *,1,1,610 - 950,1,Low,,,,1,         None,Visible,CuAr arc,Closed,60,1,Day
+B1200_G5321,$.*,IFU *,2,1,610 - 950,1,Low,,,,1,         None,Visible,CuAr arc,Closed,30,1,Day
+B1200_G5321,$.*,IFU *,4,1,610 - 950,1,Low,,,,1,         None,Visible,CuAr arc,Closed,16,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+R150_G5326,$.*one|.*G.*,$.*arcsec.*,1,1,400 - 950,1,High,,,,1,        None,Visible,CuAr arc,Closed,2,1,Day
+R150_G5326,$.*one|.*G.*,$.*arcsec.*,2,1,400 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,30,1,Day
+R150_G5326,$.*one|.*G.*,$.*arcsec.*,1,2,400 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,30,1,Day
+R150_G5326,$.*one|.*G.*,$.*arcsec.*,2,2,400 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,16,1,Day
+R150_G5326,$.*one|.*G.*,$.*arcsec.*,4,1,400 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,16,1,Day
+R150_G5326,$.*one|.*G.*,$.*arcsec.*,1,4,400 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,16,1,Day
+R150_G5326,$.*one|.*G.*,$.*arcsec.*,4,2,400 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,8,1,Day
+R150_G5326,$.*one|.*G.*,$.*arcsec.*,2,4,400 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,8,1,Day
+R150_G5326,$.*one|.*G.*,$.*arcsec.*,4,4,400 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,4,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+R150_G5326,$.*,IFU *,1,1,400 - 950,1,High,,,,1,         None,Visible,CuAr arc,Closed,20,1,Day
+R150_G5326,$.*,IFU *,2,1,400 - 950,1,High,,,,1,         None,Visible,CuAr arc,Closed,10,1,Day
+R150_G5326,$.*,IFU *,4,1,400 - 950,1,High,,,,1,         None,Visible,CuAr arc,Closed,6,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+# ,,,,,,,,,,,,,,,,,,Day
+#,,,,,,,,,,,,,,,,,,Day
+R400_G5325,$.*one|.*G.*,$.*arcsec.*,1,1,400 - 950,1,High,,,,1,        None,Visible,CuAr arc,Closed,4,1,Day
+R400_G5325,$.*one|.*G.*,$.*arcsec.*,2,1,400 - 950,1,High,,,,1,        None,Visible,CuAr arc,Closed,2,1,Day
+R400_G5325,$.*one|.*G.*,$.*arcsec.*,1,2,400 - 950,1,High,,,,1,        None,Visible,CuAr arc,Closed,2,1,Day
+R400_G5325,$.*one|.*G.*,$.*arcsec.*,2,2,400 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,30,1,Day
+R400_G5325,$.*one|.*G.*,$.*arcsec.*,4,1,400 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,30,1,Day
+R400_G5325,$.*one|.*G.*,$.*arcsec.*,1,4,400 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,30,1,Day
+R400_G5325,$.*one|.*G.*,$.*arcsec.*,4,2,400 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,16,1,Day
+R400_G5325,$.*one|.*G.*,$.*arcsec.*,2,4,400 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,16,1,Day
+R400_G5325,$.*one|.*G.*,$.*arcsec.*,4,4,400 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,8,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+R400_G5325,$.*,IFU *,1,1,400 - 950,1,High,,,,1,         None,Visible,CuAr arc,Closed,40,1,Day
+R400_G5325,$.*,IFU *,2,1,400 - 950,1,High,,,,1,         None,Visible,CuAr arc,Closed,20,1,Day
+R400_G5325,$.*,IFU *,4,1,400 - 950,1,High,,,,1,         None,Visible,CuAr arc,Closed,10,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+# ,,,,,,,,,,,,,,,,,,Day
+#,,,,,,,,,,,,,,,,,,Day
+B600_G5323,none,$.*arcsec.*,1,1,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,90,1,Day
+B600_G5323,none,$.*arcsec.*,2,1,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,60,1,Day
+B600_G5323,none,$.*arcsec.*,1,2,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,60,1,Day
+B600_G5323,none,$.*arcsec.*,2,2,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,40,1,Day
+B600_G5323,none,$.*arcsec.*,4,1,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,40,1,Day
+B600_G5323,none,$.*arcsec.*,1,4,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,40,1,Day
+B600_G5323,none,$.*arcsec.*,4,2,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,20,1,Day
+B600_G5323,none,$.*arcsec.*,2,4,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,20,1,Day
+B600_G5323,none,$.*arcsec.*,4,4,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,10,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+B600_G5323,$.*,IFU *,1,1,400 - 555,1,High,,,,1,         None,Visible,CuAr arc,Closed,360,1,Day
+B600_G5323,$.*,IFU *,2,1,400 - 555,1,High,,,,1,         None,Visible,CuAr arc,Closed,360,1,Day
+B600_G5323,$.*,IFU *,4,1,400 - 555,1,High,,,,1,         None,Visible,CuAr arc,Closed,240,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+B600_G5323,none,$.*arcsec.*,1,1,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,30,1,Day
+B600_G5323,none,$.*arcsec.*,2,1,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,16,1,Day
+B600_G5323,none,$.*arcsec.*,1,2,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,16,1,Day
+B600_G5323,none,$.*arcsec.*,2,2,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,8,1,Day
+B600_G5323,none,$.*arcsec.*,4,1,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,8,1,Day
+B600_G5323,none,$.*arcsec.*,1,4,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,8,1,Day
+B600_G5323,none,$.*arcsec.*,4,2,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,4,1,Day
+B600_G5323,none,$.*arcsec.*,2,4,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,4,1,Day
+B600_G5323,none,$.*arcsec.*,4,4,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,2,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+B600_G5323,$.*,IFU *,1,1,555 - 610,1,High,,,,1,         None,Visible,CuAr arc,Closed,180,1,Day
+B600_G5323,$.*,IFU *,2,1,555 - 610,1,High,,,,1,         None,Visible,CuAr arc,Closed,120,1,Day
+B600_G5323,$.*,IFU *,4,1,555 - 610,1,High,,,,1,         None,Visible,CuAr arc,Closed,60,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+B600_G5323,none,$.*arcsec.*,1,1,610 - 950,1,High,,,,1,        None,Visible,CuAr arc,Closed,6,1,Day
+B600_G5323,none,$.*arcsec.*,2,1,610 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,80,1,Day
+B600_G5323,none,$.*arcsec.*,1,2,610 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,80,1,Day
+B600_G5323,none,$.*arcsec.*,2,2,610 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,40,1,Day
+B600_G5323,none,$.*arcsec.*,4,1,610 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,40,1,Day
+B600_G5323,none,$.*arcsec.*,1,4,610 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,40,1,Day
+B600_G5323,none,$.*arcsec.*,4,2,610 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,20,1,Day
+B600_G5323,none,$.*arcsec.*,2,4,610 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,20,1,Day
+B600_G5323,none,$.*arcsec.*,4,4,610 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,10,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+B600_G5323,$.*,IFU *,1,1,610 - 950,1,High,,,,1,         None,Visible,CuAr arc,Closed,60,1,Day
+B600_G5323,$.*,IFU *,2,1,610 - 950,1,High,,,,1,         None,Visible,CuAr arc,Closed,30,1,Day
+B600_G5323,$.*,IFU *,4,1,610 - 950,1,High,,,,1,         None,Visible,CuAr arc,Closed,16,1,Day
+# ,,,,,,,,,,,,,,,,,,Day
+#,,,,,,,,,,,,,,,,,,Day
+R600_G5324,none,$.*arcsec.*,1,1,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,90,1,Day
+R600_G5324,none,$.*arcsec.*,2,1,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,60,1,Day
+R600_G5324,none,$.*arcsec.*,1,2,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,60,1,Day
+R600_G5324,none,$.*arcsec.*,2,2,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,40,1,Day
+R600_G5324,none,$.*arcsec.*,4,1,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,40,1,Day
+R600_G5324,none,$.*arcsec.*,1,4,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,40,1,Day
+R600_G5324,none,$.*arcsec.*,4,2,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,20,1,Day
+R600_G5324,none,$.*arcsec.*,2,4,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,20,1,Day
+R600_G5324,none,$.*arcsec.*,4,4,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,10,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+R600_G5324,$.*,IFU *,1,1,400 - 555,1,High,,,,1,         None,Visible,CuAr arc,Closed,360,1,Day
+R600_G5324,$.*,IFU *,2,1,400 - 555,1,High,,,,1,         None,Visible,CuAr arc,Closed,360,1,Day
+R600_G5324,$.*,IFU *,4,1,400 - 555,1,High,,,,1,         None,Visible,CuAr arc,Closed,240,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+R600_G5324,none,$.*arcsec.*,1,1,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,30,1,Day
+R600_G5324,none,$.*arcsec.*,2,1,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,16,1,Day
+R600_G5324,none,$.*arcsec.*,1,2,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,16,1,Day
+R600_G5324,none,$.*arcsec.*,2,2,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,8,1,Day
+R600_G5324,none,$.*arcsec.*,4,1,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,8,1,Day
+R600_G5324,none,$.*arcsec.*,1,4,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,8,1,Day
+R600_G5324,none,$.*arcsec.*,4,2,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,4,1,Day
+R600_G5324,none,$.*arcsec.*,2,4,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,4,1,Day
+R600_G5324,none,$.*arcsec.*,4,4,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,2,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+R600_G5324,$.*,IFU *,1,1,555 - 610,1,High,,,,1,         None,Visible,CuAr arc,Closed,180,1,Day
+R600_G5324,$.*,IFU *,2,1,555 - 610,1,High,,,,1,         None,Visible,CuAr arc,Closed,120,1,Day
+R600_G5324,$.*,IFU *,4,1,555 - 610,1,High,,,,1,         None,Visible,CuAr arc,Closed,60,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+R600_G5324,none,$.*arcsec.*,1,1,610 - 950,1,High,,,,1,        None,Visible,CuAr arc,Closed,6,1,Day
+R600_G5324,none,$.*arcsec.*,2,1,610 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,80,1,Day
+R600_G5324,none,$.*arcsec.*,1,2,610 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,80,1,Day
+R600_G5324,none,$.*arcsec.*,2,2,610 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,40,1,Day
+R600_G5324,none,$.*arcsec.*,4,1,610 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,40,1,Day
+R600_G5324,none,$.*arcsec.*,1,4,610 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,40,1,Day
+R600_G5324,none,$.*arcsec.*,4,2,610 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,20,1,Day
+R600_G5324,none,$.*arcsec.*,2,4,610 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,20,1,Day
+R600_G5324,none,$.*arcsec.*,4,4,610 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,10,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+R600_G5324,$.*,IFU *,1,1,610 - 950,1,High,,,,1,         None,Visible,CuAr arc,Closed,60,1,Day
+R600_G5324,$.*,IFU *,2,1,610 - 950,1,High,,,,1,         None,Visible,CuAr arc,Closed,30,1,Day
+R600_G5324,$.*,IFU *,4,1,610 - 950,1,High,,,,1,         None,Visible,CuAr arc,Closed,16,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+#,,,,,,,,,,,,,,,,,,Day
+#,,,,,,,,,,,,,,,,,,Day
+R831_G5322,none,$.*arcsec.*,1,1,400 - 590,1,High,,,,1,        None,Visible,CuAr arc,Closed,360,1,Day
+R831_G5322,none,$.*arcsec.*,2,1,400 - 590,1,High,,,,1,        None,Visible,CuAr arc,Closed,240,1,Day
+R831_G5322,none,$.*arcsec.*,1,2,400 - 590,1,High,,,,1,        None,Visible,CuAr arc,Closed,240,1,Day
+R831_G5322,none,$.*arcsec.*,2,2,400 - 590,1,High,,,,1,        None,Visible,CuAr arc,Closed,120,1,Day
+R831_G5322,none,$.*arcsec.*,4,1,400 - 590,1,High,,,,1,        None,Visible,CuAr arc,Closed,120,1,Day
+R831_G5322,none,$.*arcsec.*,1,4,400 - 590,1,High,,,,1,        None,Visible,CuAr arc,Closed,120,1,Day
+R831_G5322,none,$.*arcsec.*,4,2,400 - 590,1,High,,,,1,        None,Visible,CuAr arc,Closed,60,1,Day
+R831_G5322,none,$.*arcsec.*,2,4,400 - 590,1,High,,,,1,        None,Visible,CuAr arc,Closed,60,1,Day
+R831_G5322,none,$.*arcsec.*,4,4,400 - 590,1,High,,,,1,        None,Visible,CuAr arc,Closed,30,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+R831_G5322,$.*,IFU *,1,1,400 - 590,1,High,,,,1,         None,Visible,CuAr arc,Closed,600,1,Day
+R831_G5322,$.*,IFU *,2,1,400 - 590,1,High,,,,1,         None,Visible,CuAr arc,Closed,360,1,Day
+R831_G5322,$.*,IFU *,4,1,400 - 590,1,High,,,,1,         None,Visible,CuAr arc,Closed,240,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+R831_G5322,none,$.*arcsec.*,1,1,590 - 650,1,High,,,,1,        None,Visible,CuAr arc,Closed,60,1,Day
+R831_G5322,none,$.*arcsec.*,2,1,590 - 650,1,High,,,,1,        None,Visible,CuAr arc,Closed,30,1,Day
+R831_G5322,none,$.*arcsec.*,1,2,590 - 650,1,High,,,,1,        None,Visible,CuAr arc,Closed,30,1,Day
+R831_G5322,none,$.*arcsec.*,2,2,590 - 650,1,High,,,,1,        None,Visible,CuAr arc,Closed,16,1,Day
+R831_G5322,none,$.*arcsec.*,4,1,590 - 650,1,High,,,,1,        None,Visible,CuAr arc,Closed,16,1,Day
+R831_G5322,none,$.*arcsec.*,1,4,590 - 650,1,High,,,,1,        None,Visible,CuAr arc,Closed,16,1,Day
+R831_G5322,none,$.*arcsec.*,4,2,590 - 650,1,High,,,,1,        None,Visible,CuAr arc,Closed,8,1,Day
+R831_G5322,none,$.*arcsec.*,2,4,590 - 650,1,High,,,,1,        None,Visible,CuAr arc,Closed,8,1,Day
+R831_G5322,none,$.*arcsec.*,4,4,590 - 650,1,High,,,,1,        None,Visible,CuAr arc,Closed,4,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+R831_G5322,$.*,IFU *,1,1,590 - 650,1,High,,,,1,         None,Visible,CuAr arc,Closed,180,1,Day
+R831_G5322,$.*,IFU *,2,1,590 - 650,1,High,,,,1,         None,Visible,CuAr arc,Closed,90,1,Day
+R831_G5322,$.*,IFU *,4,1,590 - 650,1,High,,,,1,         None,Visible,CuAr arc,Closed,40,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+R831_G5322,none,$.*arcsec.*,1,1,650 - 950,1,High,,,,1,        None,Visible,CuAr arc,Closed,4,1,Day
+R831_G5322,none,$.*arcsec.*,2,1,650 - 950,1,High,,,,1,        None,Visible,CuAr arc,Closed,2,1,Day
+R831_G5322,none,$.*arcsec.*,1,2,650 - 950,1,High,,,,1,        None,Visible,CuAr arc,Closed,2,1,Day
+R831_G5322,none,$.*arcsec.*,2,2,650 - 950,1,High,,,,1,        None,Visible,CuAr arc,Closed,2,1,Day
+R831_G5322,none,$.*arcsec.*,4,1,650 - 950,1,High,,,,1,        None,Visible,CuAr arc,Closed,2,1,Day
+R831_G5322,none,$.*arcsec.*,1,4,650 - 950,1,High,,,,1,        None,Visible,CuAr arc,Closed,2,1,Day
+R831_G5322,none,$.*arcsec.*,4,2,650 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,20,1,Day
+R831_G5322,none,$.*arcsec.*,2,4,650 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,20,1,Day
+R831_G5322,none,$.*arcsec.*,4,4,650 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,10,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+R831_G5322,$.*,IFU *,1,1,650 - 950,1,High,,,,1,         None,Visible,CuAr arc,Closed,60,1,Day
+R831_G5322,$.*,IFU *,2,1,650 - 950,1,High,,,,1,         None,Visible,CuAr arc,Closed,30,1,Day
+R831_G5322,$.*,IFU *,4,1,650 - 950,1,High,,,,1,         None,Visible,CuAr arc,Closed,16,1,Day
+# ,,,,,,,,,,,,,,,,,,Day
+#,,,,,,,,,,,,,,,,,,Day
+B1200_G5321,none,$.*arcsec.*,1,1,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,180,1,Day
+B1200_G5321,none,$.*arcsec.*,2,1,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,120,1,Day
+B1200_G5321,none,$.*arcsec.*,1,2,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,120,1,Day
+B1200_G5321,none,$.*arcsec.*,2,2,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,80,1,Day
+B1200_G5321,none,$.*arcsec.*,4,1,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,80,1,Day
+B1200_G5321,none,$.*arcsec.*,1,4,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,80,1,Day
+B1200_G5321,none,$.*arcsec.*,4,2,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,40,1,Day
+B1200_G5321,none,$.*arcsec.*,2,4,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,40,1,Day
+B1200_G5321,none,$.*arcsec.*,4,4,400 - 555,1,High,,,,1,        None,Visible,CuAr arc,Closed,20,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+B1200_G5321,$.*,IFU *,1,1,400 - 555,1,High,,,,1,         None,Visible,CuAr arc,Closed,720,1,Day
+B1200_G5321,$.*,IFU *,2,1,400 - 555,1,High,,,,1,         None,Visible,CuAr arc,Closed,720,1,Day
+B1200_G5321,$.*,IFU *,4,1,400 - 555,1,Low,,,,1,         None,Visible,CuAr arc,Closed,480,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+B1200_G5321,none,$.*arcsec.*,1,1,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,60,1,Day
+B1200_G5321,none,$.*arcsec.*,2,1,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,32,1,Day
+B1200_G5321,none,$.*arcsec.*,1,2,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,32,1,Day
+B1200_G5321,none,$.*arcsec.*,2,2,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,16,1,Day
+B1200_G5321,none,$.*arcsec.*,4,1,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,16,1,Day
+B1200_G5321,none,$.*arcsec.*,1,4,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,16,1,Day
+B1200_G5321,none,$.*arcsec.*,4,2,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,8,1,Day
+B1200_G5321,none,$.*arcsec.*,2,4,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,8,1,Day
+B1200_G5321,none,$.*arcsec.*,4,4,555 - 610,1,High,,,,1,        None,Visible,CuAr arc,Closed,4,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+B1200_G5321,$.*,IFU *,1,1,555 - 610,1,High,,,,1,         None,Visible,CuAr arc,Closed,360,1,Day
+B1200_G5321,$.*,IFU *,2,1,555 - 610,1,High,,,,1,         None,Visible,CuAr arc,Closed,240,1,Day
+B1200_G5321,$.*,IFU *,4,1,555 - 610,1,High,,,,1,         None,Visible,CuAr arc,Closed,120,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+B1200_G5321,none,$.*arcsec.*,1,1,610 - 950,1,High,,,,1,        None,Visible,CuAr arc,Closed,12,1,Day
+B1200_G5321,none,$.*arcsec.*,2,1,610 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,160,1,Day
+B1200_G5321,none,$.*arcsec.*,1,2,610 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,160,1,Day
+B1200_G5321,none,$.*arcsec.*,2,2,610 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,80,1,Day
+B1200_G5321,none,$.*arcsec.*,4,1,610 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,80,1,Day
+B1200_G5321,none,$.*arcsec.*,1,4,610 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,80,1,Day
+B1200_G5321,none,$.*arcsec.*,4,2,610 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,40,1,Day
+B1200_G5321,none,$.*arcsec.*,2,4,610 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,40,1,Day
+B1200_G5321,none,$.*arcsec.*,4,4,610 - 950,1,High,,,,1,       GMOS balance,Visible,CuAr arc,Closed,20,1,Day
+#,,,,,,,,,,,,,,,,,,Day
+B1200_G5321,$.*,IFU *,1,1,610 - 950,1,High,,,,1,         None,Visible,CuAr arc,Closed,120,1,Day
+B1200_G5321,$.*,IFU *,2,1,610 - 950,1,High,,,,1,         None,Visible,CuAr arc,Closed,60,1,Day
+B1200_G5321,$.*,IFU *,4,1,610 - 950,1,High,,,,1,         None,Visible,CuAr arc,Closed,32,1,Day

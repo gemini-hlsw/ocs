@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<!DOCTYPE catalog PUBLIC "-//JSky//DTD for Catalog Access//EN" "AstroCat.dtd">
+<!--
+  This document describes the query arguments and access method for an astronomical catalog.
+-->
+
+
+ <catalog 
+   id="jplHorizons" 
+   name="JPL Horizons" 
+   description="Accessed via JPL Horizons On-Line Ephemeris System"
+   type="catalog"
+   protocol="http"
+   host="localhost"
+   path="/cgi-bin/jpl/jplHorizons">
+   <params>
+     <param 
+       id="name" 
+       name="Name (or JPL Number)"
+       description="Asteroid OR comet name fragment"/>
+     <param 
+       id="site" 
+       name="Site (lat, lon, alt(in km))"
+       description="north or south for Gemini, otherwise lat,lon,alt(in km)"/>
+     <param 
+       id="start" 
+       name="Start Time (yyyy-mm-dd hh:mm)"
+       description="Start date in the format yyyy-mm-dd hh:mm"/>
+     <param 
+       id="end" 
+       name="End Time (yyyy-mm-dd hh:mm)"
+       description="End date in the format yyyy-mm-dd hh:mm"/>
+     <param 
+       id="interval" 
+       name="Time Interval (ex: 10m, 1h, 1d)"
+       description="Time interval (for example: 10m, 1h, 1d)"/>
+     <param 
+       id="EPOCH" 
+       name="EPOCH: Julian Date of osculating elements"/>
+     <param 
+       id="EC" 
+       name="EC: Eccentricity"/>
+     <param 
+       id="QR" 
+       name="QR: Perihelion distance (AU)"/>
+     <param 
+       id="TP" 
+       name="TP: Perihelion Julian Date"/>
+     <param 
+       id="OM" 
+       name="OM: Longitude of Ascending Node (DEG) wrt ecliptic/equinox"/>
+     <param 
+       id="W" 
+       name="W: Argument of Perihelion (DEG) wrt ecliptic/equinox"/>
+     <param 
+       id="IN" 
+       name="IN: Inclination of orbit plane (DEG) wrt ecliptic"/>
+     <param 
+       id="MA" 
+       name="MA: Mean anomaly (DEG)"/>
+     <param 
+       id="A" 
+       name="A: Semi-major axis (AU)"/>
+     <param 
+       id="N" 
+       name="N: Mean motion (DEG/DAY)"/>
+   </params>
+ </catalog>

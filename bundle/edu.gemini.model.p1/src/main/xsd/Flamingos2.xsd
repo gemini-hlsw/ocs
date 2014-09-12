@@ -1,0 +1,120 @@
+<!--
+  Schema definition for Flamingos2 blueprints.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:include schemaLocation="Instrument.xsd"/>
+
+    <!-- Options for Flamingos2 Blueprint. -->
+    <xsd:complexType name="Flamingos2BlueprintChoice">
+        <xsd:sequence>
+            <xsd:choice>
+                <xsd:element name="null"     type="Flamingos2BlueprintNull"/>
+                <xsd:element name="imaging"  type="Flamingos2BlueprintImaging"/>
+                <xsd:element name="longslit" type="Flamingos2BlueprintLongslit"/>
+                <xsd:element name="mos"      type="Flamingos2BlueprintMos"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- Flamingos2 null. Empty blueprint, not available in PIT. -->
+    <xsd:complexType name="Flamingos2BlueprintNull"/>
+
+    <!--
+      Flamingos2 Blueprint base type.
+    -->
+    <xsd:complexType name="Flamingos2BlueprintBase">
+        <xsd:complexContent>
+            <xsd:extension base="BlueprintBase">
+                <xsd:sequence>
+                    <xsd:element name="filter" type="Flamingos2Filter" maxOccurs="unbounded"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!-- Flamingos2 Imaging Blueprint. Contains multiple filter options. -->
+    <xsd:complexType name="Flamingos2BlueprintImaging">
+        <xsd:complexContent>
+            <xsd:extension base="Flamingos2BlueprintBase"/>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      Flamingos2 Spectroscopy Blueprint base type.
+    -->
+    <xsd:complexType name="Flamingos2BlueprintSpectroscopyBase">
+        <xsd:complexContent>
+            <xsd:extension base="Flamingos2BlueprintBase">
+                <xsd:sequence>
+                    <xsd:element name="disperser" type="Flamingos2Disperser"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      Flamingos2 spectroscopy mode longslit.
+    -->
+    <xsd:complexType name="Flamingos2BlueprintLongslit">
+        <xsd:complexContent>
+            <xsd:extension base="Flamingos2BlueprintSpectroscopyBase">
+                <xsd:sequence>
+                    <xsd:element name="fpu" type="Flamingos2Fpu"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      Flamingos2 spectroscopy mode mos.
+    -->
+    <xsd:complexType name="Flamingos2BlueprintMos">
+        <xsd:complexContent>
+            <xsd:extension base="Flamingos2BlueprintSpectroscopyBase">
+                <xsd:sequence>
+                    <xsd:element name="preimaging" type="xsd:boolean"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      Flamingos2 Filter options..
+    -->
+    <xsd:simpleType name="Flamingos2Filter">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="Y (1.020 um)"/>
+            <xsd:enumeration value="J-lo (1.122 um)"/>
+            <xsd:enumeration value="J (1.255 um)"/>
+            <xsd:enumeration value="H (1.631 um)"/>
+            <xsd:enumeration value="Ks (2.157 um)"/>
+            <xsd:enumeration value="JH (1.390 um)"/>
+            <xsd:enumeration value="HK (1.871 um)"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      Flamingos2 disperser options.
+    -->
+    <xsd:simpleType name="Flamingos2Disperser">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="JH"/>
+            <xsd:enumeration value="HK"/>
+            <xsd:enumeration value="R3K"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      Flamingos 2FPU options.
+    -->
+    <xsd:simpleType name="Flamingos2Fpu">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="1-pix longslit"/>
+            <xsd:enumeration value="2-pix longslit"/>
+            <xsd:enumeration value="3-pix longslit"/>
+            <xsd:enumeration value="4-pix longslit"/>
+            <xsd:enumeration value="6-pix longslit"/>
+            <xsd:enumeration value="8-pix longslit"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+</xsd:schema>

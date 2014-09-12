@@ -1,0 +1,82 @@
+<jxb:bindings version="2.0"
+              xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+              xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <!-- Custom bindings for Michelle -->
+    <jxb:bindings schemaLocation="../xsd/Michelle.xsd" node="/xsd:schema">
+
+        <!-- MichelleFilter => MichelleParams.Filter -->
+        <jxb:bindings node="./xsd:simpleType[@name='MichelleFilter']/xsd:restriction">
+            <jxb:bindings node='./xsd:enumeration[@value="N&apos; (11.2 um)"]'>
+                <jxb:typesafeEnumMember name="N_PRIME"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Qa (18.1 um)']">
+                <jxb:typesafeEnumMember name="QA"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Si-1 (7.7 um)']">
+                <jxb:typesafeEnumMember name="SI_1"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Si-2 (8.7 um)']">
+                <jxb:typesafeEnumMember name="SI_2"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Si-3 (9.7 um)']">
+                <jxb:typesafeEnumMember name="SI_3"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Si-4 (10.4 um)']">
+                <jxb:typesafeEnumMember name="SI_4"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Si-5 (11.7 um)']">
+                <jxb:typesafeEnumMember name="SI_5"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Si-6 (12.3 um)']">
+                <jxb:typesafeEnumMember name="SI_6"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='NeII (12.8 um)']">
+                <jxb:typesafeEnumMember name="F128B2"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+        <!-- MichelleFpu => MichelleParams.Mask -->
+        <jxb:bindings node="./xsd:simpleType[@name='MichelleFpu']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='0.201 arcsec']">
+                <jxb:typesafeEnumMember name="MASK_1"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.402 arcsec']">
+                <jxb:typesafeEnumMember name="MASK_2"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.603 arcsec']">
+                <jxb:typesafeEnumMember name="MASK_3"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.804 arcsec']">
+                <jxb:typesafeEnumMember name="MASK_4"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='1.210 arcsec']">
+                <jxb:typesafeEnumMember name="MASK_6"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='1.610 arcsec']">
+                <jxb:typesafeEnumMember name="MASK_8"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+        <!-- MichelleFilter => MichelleParams.Disperser -->
+        <jxb:bindings node="./xsd:simpleType[@name='MichelleDisperser']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='LowN']">
+                <jxb:typesafeEnumMember name="LOW_RES_10"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='LowQ']">
+                <jxb:typesafeEnumMember name="LOW_RES_20"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='MedN1']">
+                <jxb:typesafeEnumMember name="MED_RES"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='MedN2']">
+                <jxb:typesafeEnumMember name="HIGH_RES"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Echelle']">
+                <jxb:typesafeEnumMember name="ECHELLE"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+    </jxb:bindings>
+
+</jxb:bindings>

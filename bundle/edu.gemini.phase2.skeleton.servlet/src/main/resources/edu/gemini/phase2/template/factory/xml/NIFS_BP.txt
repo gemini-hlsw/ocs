@@ -1,0 +1,123 @@
+Instrument : NIFS
+Blueprints : NIFS_BP.xml
+Version June 15, 2012 - updated by Atsuko N and Bryan M
+
+Observations identified by LibraryIDs indicated with {}.
+
+# DEFINITIONS
+AO = Adaptive Optics
+PI = Phase I
+
+TARGET BRIGHTNESS = TB
+Use H mag from target information if available
+    Bright target (H <= 9) = BT
+    Moderate target (9 < H <= 12) = MT
+    Faint target (12 < H <= 20) = FT
+    Blind acquisition target (H > 20) = BAT
+
+# General Info about the names used in the Acq/Obs
+#
+# In acq.
+#
+# H<=9 =  NO SKY
+# 9<H<=12 = SKY SUBTRACTION
+# 12<H<=20 =  FLIP MIRROR IN.
+#
+# In science observations.
+#
+# BRIGHT = BRIGHT READ MODE
+# MEDIUM = MEDIUM READ MODE
+# FAINT = FAINT READ MODE
+#
+
+# Select acquisition and science observation
+IF OCCULTING DISK == None
+   IF target information contains a H magnitude
+      if BT then ACQ={3}   # Bright Object
+      if MT then ACQ={4}   # Medium Object
+      if FT then ACQ={5}   # Faint Object
+      else ACQ={4}         # Moderate Object, blind offset
+   ELSE ACQ={4}
+   SCI={6}
+ELSEIF OCCULTING DISK != None
+   IF target information contains a H magnitude
+      if BT then ACQ={11}   # Bright Object
+      if MT then ACQ={12}   # Medium Object
+      if FT then ACQ={12}   # Faint Object
+      else ACQ={12}         # Very faint
+   ELSE ACQ={12}
+   SCI={13}
+
+### Target Group
+INCLUDE {1},{2},ACQ,SCI,{7},{8} in target-specific Scheduling Group
+
+# AO Mode
+# In NGS mode target and standards use the same Altair guide mode.
+# In LGS mode the target uses the mode from PI, standards use NGS+FieldsLens
+# Altair components are not added to dark and general daytime observations
+  IF AO mode != None AND NOT {9}, {14} - {22}
+    ADD Altair Adaptive Optics component AND 
+    SET Guide Star Type based on:
+      IF AO in PI includes "Natural Guide Star" (NGS mode) THEN SET for ALL in the group:
+        AO=Altair Natural Guidestar => Natural Guide Star
+        AO=Altair Natural Guidestar w/ Field Lens => Laser Guide Star with Field Lens
+      IF AO in PI includes "Laser Guide Star" (LGS mode) THEN SET for ACQ and SCI:
+         AO=Altair Laser Guidestar => Laser Guide Star + AOWFS
+         AO=Altair Laser Guidestar w/ PWFS1 => Laser Guide Star + PWFS1
+       AND SET for {1} {2} {7} {8}
+         SET Guide Star Type=Natural Guide Star with Field Lens
+
+    IF OCCULTING DISK != None SET FOCAL PLANE MASK FROM OCCULTING DISK IN PI
+        Note, for ACQ the FPM is set in the second NIFS
+          iterator, not in the static component/first NIFS iterator.
+        None => Do not set, will be Clear or a filter for coronagraphy
+        0.2" => 0.2 arcsec Occulting Disk
+        0.5" => 0.5 arcsec Occulting Disk     
+
+# Disperser
+  SET DISPERSER from PI (all observations)
+  IF DISPERSER = Z
+        SET FILTER = ZJ (Same as Disperser displayed in the OT)
+        SET CENTRAL WAVELENGTH = 1.05
+  IF DISPERSER = J
+        SET FILTER = ZJ (Same as Disperser displayed in the OT)
+        SET CENTRAL WAVELENGTH = 1.25
+  IF DISPERSER = H
+        SET FILTER = JH (Same as Disperser displayed in the OT)
+        SET CENTRAL WAVELENGTH = 1.65
+  IF DISPERSER = K
+        SET FILTER = HK (Same as Disperser displayed in the OT)
+        SET CENTRAL WAVELENGTH = 2.20
+
+# Read mode and Exposure time for science observation SCI
+  FOR OBSERVATION DERIVED FROM SCI
+     IF BT THEN SET Read Mode = Bright Object, Exposure Time=10
+     ELSE IF FT OR BAT THEN SET Read Mode = Faint Object, Exposure Time=600
+     ELSE SET Read Mode = Medium Object, Exposure Time=80
+
+### DARKS to match science - taken the morning after science
+### observations
+### Put one in each template group/target group
+IF BT THEN INCLUDE {15} in target-specific Scheduling Group
+ELSE IF FT OR BAT THEN INCLUDE {16} in target-specific Scheduling Group
+ELSE INCLUDE {9} (MT) in target-specific Scheduling Group
+
+
+### GENERAL DAYTIME - but taken after science or in the morning
+### One goes in each template group/target group
+IF OCCULTING DISK from PI == None
+      IF DISPERSER = Z THEN INCLUDE {19} in target-specific Scheduling Group
+      IF DISPERSER = J THEN INCLUDE {18} in target-specific Scheduling Group
+      IF DISPERSER = H THEN INCLUDE {17} in target-specific Scheduling Group
+      IF DISPERSER = K THEN INCLUDE {10} in target-specific Scheduling Group
+ELSE
+      IF DISPERSER = Z THEN INCLUDE {20} in target-specific Scheduling Group
+      IF DISPERSER = J THEN INCLUDE {21} in target-specific Scheduling Group
+      IF DISPERSER = H THEN INCLUDE {22} in target-specific Scheduling Group
+      IF DISPERSER = K THEN INCLUDE {14} in target-specific Scheduling Group
+      SET MASK in 2nd NIFS iterator (Lamps on/off Flats x5 WITH Coronagraph IN)
+         0.2" from PI => 0.2 arcsec Occulting Disk
+         0.5" from PI => 0.5 arcsec Occulting Disk     
+
+IF BAT (Blind acquisition target), add an empty User target to the
+Target Component on instantiation.

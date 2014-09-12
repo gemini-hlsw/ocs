@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal tacCategory="Galactic" schemaVersion="1.0.0">
+    <meta band3optionChosen="false">
+        <attachment>PW_2012B_001.pdf</attachment>
+    </meta>
+    <semester half="B" year="2012"/>
+    <title>Monitoring [O I] for Long Term Correlation with H-Alpha and Continnuum</title>
+    <abstract>We propose to observe the UXOR RR Tau as a part of Gemini's Poor Weather Program to investigate a newly discovered secondary mechanism of variability. UXORs have a charactersitic variability that on the order of 2-7 days but the newly observed variability is occurs over ~100 days. Evidence of this variation was found with photometric monitoring using narrowband filters. The large difference in timescale between the two variabilities strongly suggests that the physical cause for each differs. Spectrscopic follow up is necessary in order to understand the underlying physical driver of the long term variablity. We are interested in observing the characteristics of the [O I] and H-Alpha lines over the course of a season. We suspect that the long term variations is caused by a circumstellar wind. </abstract>
+    <keywords>
+        <keyword>Variable stars</keyword>
+        <keyword>Pre-main sequence stars</keyword>
+        <keyword>Emission lines</keyword>
+        <keyword>Dust</keyword>
+        <keyword>Circumstellar matter</keyword>
+    </keywords>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Alexa</firstName>
+            <lastName>Villaume</lastName>
+            <status>Other</status>
+            <email>avillaume@bennington.edu</email>
+            <phone>808-345-5637</phone>
+            <address>
+                <institution>Bennington College</institution>
+                <address>1 College Drive
+Bennington, VT 05201</address>
+                <country>USA</country>
+            </address>
+        </pi>
+        <coi id="investigator-1">
+            <firstName>Hugh</firstName>
+            <lastName>Crowl</lastName>
+            <status>PhD</status>
+            <email>hcrowl@bennington.edu</email>
+            <phone></phone>
+            <institution>Bennington College</institution>
+        </coi>
+        <coi id="investigator-2">
+            <firstName>Bernadette</firstName>
+            <lastName>Rodgers</lastName>
+            <status>PhD</status>
+            <email>brodgers@gemini.edu</email>
+            <phone></phone>
+            <institution>Gemini South</institution>
+        </coi>
+    </investigators>
+    <targets>
+        <sidereal epoch="J2000" id="target-0">
+            <name>RR Tau</name>
+            <degDeg>
+                <ra>84.87715</ra>
+                <dec>26.374158</dec>
+            </degDeg>
+            <properMotion deltaDec="0.0" deltaRA="0.3"/>
+            <magnitudes>
+                <magnitude system="Vega" band="B">12.09000015258789</magnitude>
+                <magnitude system="Vega" band="V">11.279999732971191</magnitude>
+                <magnitude system="Vega" band="R">11.300000190734863</magnitude>
+                <magnitude system="Vega" band="J">9.6850004196167</magnitude>
+                <magnitude system="Vega" band="H">8.416000366210938</magnitude>
+                <magnitude system="Vega" band="K">7.388999938964844</magnitude>
+            </magnitudes>
+        </sidereal>
+    </targets>
+    <conditions>
+        <condition id="condition-0">
+            <name>CC 70%/Cirrus, IQ Any, SB Any/Bright, WV Any, AM ≤ 2.00</name>
+            <maxAirmass>2.0</maxAirmass>
+            <cc>70%/Cirrus</cc>
+            <iq>Any</iq>
+            <sb>Any/Bright</sb>
+            <wv>Any</wv>
+        </condition>
+    </conditions>
+    <blueprints>
+        <gmosN>
+            <regime>optical</regime>
+            <longslit id="blueprint-0">
+                <name>GMOS-N LongSlit R600 r (630 nm) 1.0 arcsec slit</name>
+                <filter>r (630 nm)</filter>
+                <disperser>R600</disperser>
+                <fpu>1.0 arcsec slit</fpu>
+            </longslit>
+        </gmosN>
+    </blueprints>
+    <observations>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 1/2">
+            <time units="hr">0.43</time>
+            <meta ck="">
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 1/2">
+            <time units="hr">0.43</time>
+            <meta ck="">
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 1/2">
+            <time units="hr">0.43</time>
+            <meta ck="">
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 1/2">
+            <time units="hr">0.43</time>
+            <meta ck="">
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 1/2">
+            <time units="hr">0.43</time>
+            <meta ck="">
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 1/2">
+            <time units="hr">0.43</time>
+            <meta ck="">
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 1/2">
+            <time units="hr">0.43</time>
+            <meta ck="">
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 1/2">
+            <time units="hr">0.43</time>
+            <meta ck="">
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 1/2">
+            <time units="hr">0.43</time>
+            <meta ck="">
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 1/2">
+            <time units="hr">0.43</time>
+            <meta ck="">
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 1/2">
+            <time units="hr">0.43</time>
+            <meta ck="">
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 1/2">
+            <time units="hr">0.43</time>
+            <meta ck="">
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 1/2">
+            <time units="hr">0.43</time>
+            <meta ck="">
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 1/2">
+            <time units="hr">0.43</time>
+            <meta ck="">
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 1/2">
+            <time units="hr">0.43</time>
+            <meta ck="">
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 1/2">
+            <time units="hr">0.43</time>
+            <meta ck="">
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 1/2">
+            <time units="hr">0.43</time>
+            <meta ck="">
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 1/2">
+            <time units="hr">0.43</time>
+            <meta ck="">
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 1/2">
+            <time units="hr">0.43</time>
+            <meta ck="">
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 1/2">
+            <time units="hr">0.43</time>
+            <meta ck="">
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+    </observations>
+    <proposalClass>
+        <special key="06a3d63f-f4b2-456e-bc74-2c536472aa8a">
+            <submission>
+                <request>
+                    <time units="hr">8.6</time>
+                    <minTime units="hr">5.0</minTime>
+                </request>
+                <response>
+                    <receipt>
+                        <timestamp>2012-08-18T22:15:13.000Z</timestamp>
+                        <id>PW-2012B-001</id>
+                    </receipt>
+                </response>
+                <type>Poor Weather</type>
+            </submission>
+        </special>
+    </proposalClass>
+</proposal>

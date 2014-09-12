@@ -1,0 +1,32 @@
+<!--
+  Schema definition for Subaru.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:include schemaLocation="Instrument.xsd"/>
+
+    <!-- Options for the Subaru Blueprint. -->
+    <xsd:complexType name="SubaruBlueprint">
+        <xsd:complexContent>
+            <xsd:extension base="BlueprintBase">
+                <xsd:sequence>
+                    <xsd:element name="instrument" type="SubaruInstrument"/>
+                    <xsd:element name="custom-name" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:simpleType name="SubaruInstrument">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="COMICS"/>
+            <xsd:enumeration value="FOCAS"/>
+            <xsd:enumeration value="FMOS"/>
+            <xsd:enumeration value="HDS"/>
+            <xsd:enumeration value="IRCS"/>
+            <xsd:enumeration value="MOIRCS"/>
+            <xsd:enumeration value="Suprime Cam"/>
+            <xsd:enumeration value="Hyper Suprime Cam"/>
+            <xsd:enumeration value="Visitor"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+</xsd:schema>

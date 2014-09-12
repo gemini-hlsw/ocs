@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="2014.2.1">
+    <meta band3optionChosen="false"/>
+    <semester half="B" year="2014"/>
+    <title></title>
+    <abstract></abstract>
+    <scheduling></scheduling>
+    <keywords/>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Principal</firstName>
+            <lastName>Investigator</lastName>
+            <status>PhD</status>
+            <email></email>
+            <address>
+                <institution></institution>
+                <address></address>
+                <country></country>
+            </address>
+        </pi>
+    </investigators>
+    <targets/>
+    <conditions/>
+    <blueprints>
+        <gmosN>
+            <regime>optical</regime>
+            <mos id="blueprint-0">
+                <name>GMOS-N MOS 0.75 arcsec slit R400 RG610 (&gt; 615 nm) +Pre</name>
+                <visitor>false</visitor>
+                <filter>RG610 (&gt; 615 nm)</filter>
+                <disperser>R400</disperser>
+                <nodAndShuffle>false</nodAndShuffle>
+                <preimaging>true</preimaging>
+                <fpu>0.75 arcsec slit</fpu>
+            </mos>
+        </gmosN>
+    </blueprints>
+    <observations>
+        <observation blueprint="blueprint-0" enabled="true" band="Band 1/2"/>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None"/>
+    </proposalClass>
+</proposal>

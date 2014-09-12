@@ -1,0 +1,100 @@
+<jxb:bindings version="2.0"
+              xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+              xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <!-- Custom bindings for T-ReCS -->
+    <jxb:bindings schemaLocation="../xsd/Trecs.xsd" node="/xsd:schema">
+
+        <!-- TrecsFilter => TreCSParams.CrossDisperser -->
+        <jxb:bindings node="./xsd:simpleType[@name='TrecsFilter']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='N (broad 10 um)']">
+                <jxb:typesafeEnumMember name="N"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Si-1 (7.73 um)']">
+                <jxb:typesafeEnumMember name="SI_1"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Si-2 (8.74 um)']">
+                <jxb:typesafeEnumMember name="SI_2"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Si-3 (9.69 um)']">
+                <jxb:typesafeEnumMember name="SI_3"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Si-4 (10.38 um)']">
+                <jxb:typesafeEnumMember name="SI_4"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Si-5 (11.66 um)']">
+                <jxb:typesafeEnumMember name="SI_5"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Si-6 (12.33 um)']">
+                <jxb:typesafeEnumMember name="SI_6"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='[Ar III] (8.99 um)']">
+                <jxb:typesafeEnumMember name="AR_III"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='[S IV] (10.52 um)']">
+                <jxb:typesafeEnumMember name="S_IV"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='[Ne II] (12.81 um)']">
+                <jxb:typesafeEnumMember name="NE_II"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='PAH (8.6 um)']">
+                <jxb:typesafeEnumMember name="PAH_8_6"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='PAH (11.3 um)']">
+                <jxb:typesafeEnumMember name="PAH_11_3"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Qa (18.30 um)']">
+                <jxb:typesafeEnumMember name="QA"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Qb (24.56 um)']">
+                <jxb:typesafeEnumMember name="QB"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Q (broad 20.8 um)']">
+                <jxb:typesafeEnumMember name="Q"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+        <!-- TrecsDisperser => TreCSParams.Disperser -->
+        <jxb:bindings node="./xsd:simpleType[@name='TrecsDisperser']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='Low Res 10um Grating']">
+                <jxb:typesafeEnumMember name="LOW_RES_10"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Low Res 20um Grating']">
+                <jxb:typesafeEnumMember name="LOW_RES_20"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='High Res Grating']">
+                <jxb:typesafeEnumMember name="HIGH_RES"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+        <!-- TrecsFpu => TreCSParams.Mask -->
+        <jxb:bindings node="./xsd:simpleType[@name='TrecsFpu']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='0.21 arcsec slit']">
+                <jxb:typesafeEnumMember name="MASK_1"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.26 arcsec slit']">
+                <jxb:typesafeEnumMember name="MASK_2"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.31 arcsec slit']">
+                <jxb:typesafeEnumMember name="MASK_3"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.35 arcsec slit']">
+                <jxb:typesafeEnumMember name="MASK_4"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.65 arcsec slit']">
+                <jxb:typesafeEnumMember name="MASK_5"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.70 arcsec slit']">
+                <jxb:typesafeEnumMember name="MASK_6"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='1.30 arcsec slit']">
+                <jxb:typesafeEnumMember name="MASK_7"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Occulting bar']">
+                <jxb:typesafeEnumMember name="OCCULTING_BAR"/>
+            </jxb:bindings>
+        </jxb:bindings>
+    </jxb:bindings>
+
+
+</jxb:bindings>

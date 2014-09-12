@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
+
+<document>
+  <container kind="program" type="Program" version="2014A-1" subtype="basic" key="8cb94378-4312-4c80-bf31-cfb499213980" name="VISITOR-BP">
+    <paramset name="Science Program" kind="dataObj">
+      <param name="title" value="VISITOR INSTRUMENT PHASE I/II MAPPING BPS"/>
+      <param name="programMode" value="QUEUE"/>
+      <param name="tooType" value="none"/>
+      <param name="programStatus" value="PHASE2"/>
+      <param name="nextObsId" value="1"/>
+      <paramset name="piInfo">
+        <param name="firstName" value=""/>
+        <param name="lastName" value=""/>
+        <param name="email" value=""/>
+        <param name="phone" value=""/>
+      </paramset>
+      <param name="queueBand" value="1"/>
+      <param name="isLibrary" value="true"/>
+      <paramset name="timeAcct"/>
+      <param name="awardedTime" value="0.0" units="hours"/>
+      <param name="fetched" value="yes"/>
+      <param name="completed" value="false"/>
+      <param name="notifyPi" value="NO"/>
+    </paramset>
+    <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="3bcbd49f-4345-4b5a-8ae0-f789b9bfb294" name="Note">
+      <paramset name="Note" kind="dataObj">
+        <param name="title" value="Next libID = 2"/>
+        <param name="NoteText" value=""/>
+      </paramset>
+    </container>
+    <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="82afc875-b577-42e4-af8c-c0a02403dfe7" name="VISITOR-BP-1">
+      <paramset name="Observation" kind="dataObj">
+        <param name="title" value="Visitor Instrument Observation"/>
+        <param name="libraryId" value="1"/>
+        <param name="priority" value="LOW"/>
+        <param name="tooOverrideRapid" value="false"/>
+        <param name="phase2Status" value="PI_TO_COMPLETE"/>
+        <param name="qaState" value="UNDEFINED"/>
+        <param name="overrideQaState" value="false"/>
+      </paramset>
+      <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Visitor" key="2f19cf5b-8398-4a21-8db8-41b517192db9" name="Visitor Instrument">
+        <paramset name="Visitor Instrument" kind="dataObj">
+          <param name="title" value="Visitor Instrument: "/>
+          <param name="exposureTime" value="10.0"/>
+          <param name="posAngle" value="0"/>
+          <param name="coadds" value="1"/>
+          <param name="name" value=""/>
+          <param name="wavelength" value="0.0"/>
+        </paramset>
+      </container>
+      <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="4b666eb5-bffa-48d2-a25b-8ff999ce78ca" name="Observing Log">
+        <paramset name="Observing Log" kind="dataObj">
+          <paramset name="obsQaRecord"/>
+        </paramset>
+      </container>
+      <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="6ca2dc97-43b3-4859-9549-cb09348f8d30" name="Observation Exec Log">
+        <paramset name="Observation Exec Log" kind="dataObj">
+          <paramset name="obsExecRecord">
+            <paramset name="datasets"/>
+            <paramset name="events"/>
+            <paramset name="configMap"/>
+          </paramset>
+        </paramset>
+      </container>
+      <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="43a17412-43f3-4df3-9278-fde884175cbd" name="Sequence">
+        <paramset name="Sequence" kind="dataObj"/>
+        <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="5d10fe08-22a2-4b62-8fee-be986d69a37c" name="Offset">
+          <paramset name="Offset" kind="dataObj">
+            <paramset name="offsets">
+              <paramset name="Offset0" sequence="0">
+                <param name="p" value="0.0"/>
+                <param name="q" value="0.0"/>
+                <param name="defaultGuideOption" value="on"/>
+              </paramset>
+            </paramset>
+          </paramset>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="fd9e8b54-e499-49d7-8f98-26eb36775464" name="Observe">
+            <paramset name="Observe" kind="dataObj">
+              <param name="repeatCount" value="1"/>
+              <param name="class" value="SCIENCE"/>
+            </paramset>
+          </container>
+        </container>
+      </container>
+    </container>
+  </container>
+  <container kind="versions" type="versions" version="1.0">
+    <paramset name="node">
+      <param name="key" value="6ca2dc97-43b3-4859-9549-cb09348f8d30"/>
+      <param name="9d0ad4ed-79a1-4d1c-8d52-a099553d5c2e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="8cb94378-4312-4c80-bf31-cfb499213980"/>
+      <param name="9d0ad4ed-79a1-4d1c-8d52-a099553d5c2e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5d10fe08-22a2-4b62-8fee-be986d69a37c"/>
+      <param name="9d0ad4ed-79a1-4d1c-8d52-a099553d5c2e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="82afc875-b577-42e4-af8c-c0a02403dfe7"/>
+      <param name="9d0ad4ed-79a1-4d1c-8d52-a099553d5c2e" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3bcbd49f-4345-4b5a-8ae0-f789b9bfb294"/>
+      <param name="9d0ad4ed-79a1-4d1c-8d52-a099553d5c2e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="43a17412-43f3-4df3-9278-fde884175cbd"/>
+      <param name="9d0ad4ed-79a1-4d1c-8d52-a099553d5c2e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="fd9e8b54-e499-49d7-8f98-26eb36775464"/>
+      <param name="9d0ad4ed-79a1-4d1c-8d52-a099553d5c2e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4b666eb5-bffa-48d2-a25b-8ff999ce78ca"/>
+      <param name="9d0ad4ed-79a1-4d1c-8d52-a099553d5c2e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2f19cf5b-8398-4a21-8db8-41b517192db9"/>
+      <param name="9d0ad4ed-79a1-4d1c-8d52-a099553d5c2e" value="1"/>
+    </paramset>
+  </container>
+</document>

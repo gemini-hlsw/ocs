@@ -1,0 +1,172 @@
+
+<html>
+<head><title>QPT 1.0.2 Release Notes</title></head>
+<link rel="stylesheet" href="/doc/styles.css"></link>
+<body>
+
+<h1>QPT 1.0.2 Release Notes</h1>
+
+QPT release 1.0.2 addresses 21 issues, described below. 
+Release notes for the previous release are available <a href="v1.0.1-notes.html">here</a>. 
+
+<p>
+To update QPT, just run it and select Help > Software Update. QPT will refresh the application logic 
+from the server and restart. If you cannot connect to the database or have other issues, quit and 
+restart QPT. For troubleshooting hints and other update options, see
+the second half of <a href="install.html"><i>Running QPT</i></a>.
+
+<p>
+
+As always, please direct questions and comments to <code>rnorris@gemini.edu</code> and cc: the QC groups if
+appropriate.
+
+<h2>New and Notable</h2>
+
+<h3>[QPT-139, 140, 141, 142] Improved Accuracy &amp; Performance</h3>
+
+Rise/Transit/Set calculationsa are now correct, as are sky brightness calculations. I hope. QPT now uses
+an incremental zero-finder and aggressive caching to locate and remember transitions such as rise/set 
+times, which has dramatically lowered the CPU usage of QPT.
+
+<h3>[QPT-28, 61, 65, 130] Improved Visualizer and Published Report</h3>
+
+The published report now inserts sunrise/set, twilights, and midnight (with LST and lunar illumination) into 
+each visit table. The visualizer now shows twilights, and treats twilight-scheduled visits as warning
+conditions rather than errors.
+
+<h3>[QPT-75, 143, 151] Improved Treatment of Observation Flags</h3>
+
+Candidate observations are analyzed and given a set of flags that reflect the observations' 
+suitability for scheduling in the currently-selected variant. The color and icon decorations in
+the Candidate Observations view are determined based on the "worst" of the present flags.
+Following are descriptions of all supported flags.
+
+<p>
+
+The following flags are intrinsic properties of the observations and do not depend on anything
+that happens within QPT. They will be the same in all variants.
+<ul>
+<li><code>INACTIVE</code> indicates that the observation belongs to an inactive science program.
+These observations are rendered in light gray.
+<li><code>IN_PROGRESS</code> indicates that the observation's status is "In Progress", normally 
+meaning that one or more steps has been executed but the observation is not yet complete. Icons 
+for these observations are decorated with a green "Play Button".
+</ul>
+
+The following flags are influenced by the currently available set of instruments and configurations,
+and will be the same in all variants. Selecting and de-selecting items in the Instruments view can 
+cause these flags to change.
+<ul>
+<li><code>INSTRUMENT_UNAVAILABLE</code> indicates that the required instrument is not available.
+The observation is rendered in light gray and the icon is decorated with a diagonal slash.
+<li><code>CONFIG_UNAVAILABLE</code> indicates that the required instrument is available but the
+desired configuration option is not.  The observation is rendered in light gray and the icon is 
+decorated with a diagonal slash.
+</ul>
+
+The following flags are influenced by the current variant's site conditions, and will differ from
+variant to variant. Editing a variant's site conditions can cause these flags to change.
+<ul>
+<li><code>UNDER_QUALIFIED</code> indicates that the variant conditions are not good enough to observe.
+The observation is rendered in light gray and the icon is decorated with a diagonal slash.
+<li><code>OVER_QUALIFIED</code> indicates that the variant conditions are better than required.
+The observation is rendered in dark gray with a slightly faded out icon.
+</ul>
+
+The following flags are influenced by the targets' positions on the given night, and will be the
+same in all variants.
+<ul>
+<li><code>LOW_IN_SKY</code> indicates that the target never rises high enough to satisfy its
+elevation constraint (although it may be observable during twilight). The observation is rendered in light gray and the icon is 
+decorated with a diagonal slash.
+<li><code>NOT_DARK_ENOUGH</code> indicates that it never gets dark enough to satisfy the observation's
+sky brightness constraint. The observation is rendered in light gray and the icon is 
+decorated with a diagonal slash.
+<li><code>UNSCHEDULABLE</code> means that if the target is high enough to observe, the sky is
+too bright, or vice versa, or it means that there exists a time slot that meets elevation and
+brightness constraints but is too short to set up and execute the first step of the sequence.
+The observation is rendered in light gray and the icon is decorated with a diagonal slash.
+</ul> 
+
+The following flags are influenced by the current state of a variant's list of scheduled
+visits. Adding, removing, or rearranging visits can cause these flags to change.
+<ul>
+<li><code>SCHEDULED</code> indicates that the observation appears on the visualizer and in the
+list of scheduled visits. The observation's icon is decorated with a little blue and white clock,
+and the observation is no longer draggable.
+<li><code>BLOCKED</code> indicates that the observation is schedulable, but all time slots that
+satisfy elevation and sky brightness constraints are occupied by other visits; i.e., you need to
+move something out of the way. These observations are rendered in light gray.
+</ul>
+
+<p>
+
+<h3>[QPT-106] Import Another Semester</h3>
+
+QPT automatically shows observations from the current semester (determined by plan date), as well
+as plans with rollover status from the previous two semesters. These observations are always 
+available.
+<p>
+It is now possible to import complete additional semesters. This can be useful during the "gray" time
+in between semesters and perhaps for other special needs. In any case, you can import any extra
+semesters that exist in the database. You can also remove an added semester as long as none of
+its observations appear in the schedule.
+
+<h3>[QPT-146] Default Open/Save Directory</h3>
+QPT now remembers where you last opened/saved a plan file and will use the last location
+as the default.
+
+<h3>[QPT-137] HTML Anchors in Generated Plan</h3>
+The generated plan document now contains <code>&lt;A NAME="..."&gt;</code> anchors for each
+variant in the form <code>CC70IQ70WV-</code> (for example). "Any" is represented as <code>A</code> and
+unconstrained by <code>-</code>.
+
+
+<h3>Other Minor and Self-Explanatory Changes</h3>
+
+<ul>
+<li>[QPT-144, 145, 152] UTC date issues at GS have been resolved.
+<li>[QPT-138] Note text is now compressed to save memory.
+<li>[QPT-87] The File > Close command no longer closes the plan if a triggered Save action is cancelled.
+<li>[QPT-150] Non-queue programs now appear in the correct science band, and do not appear if there is no band set.
+</ul>
+
+
+
+<h2>JIRA Release Manifest</h2>
+
+<h3>Bug</h3>
+<ul>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-87'>QPT-87</a>] - Close > Save > Cancel should do nothing</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-139'>QPT-139</a>] - Rise/Transit/Set Calculations are wrong</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-140'>QPT-140</a>] - Sky Brightness Calculations are Wrong</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-142'>QPT-142</a>] - Equation Solver May Not Return</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-144'>QPT-144</a>] - GS tonight.html is wrong</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-145'>QPT-145</a>] - UT date is wrong for GS on published plan</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-148'>QPT-148</a>] - Obs don't get re-filtered after changing variant</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-150'>QPT-150</a>] - Non-Queue programs should not be in band 0</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-152'>QPT-152</a>] - Plan at GS is publish on wrong day</li>
+</ul>
+    
+<h3>Improvement</h3>
+<ul>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-28'>QPT-28</a>] - Twilight scheduling should be warning, not an error</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-75'>QPT-75</a>] - Add flag for sky too bright</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-106'>QPT-106</a>] - Add ability to import another semester</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-138'>QPT-138</a>] - Compress note text</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-141'>QPT-141</a>] - Improve Flag Calculation Performance</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-143'>QPT-143</a>] - Add Unschedulable flag</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-146'>QPT-146</a>] - Remember Directory</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-151'>QPT-151</a>] - Improve Filter to match flags</li>
+</ul>
+    
+<h3>New Feature</h3>
+<ul>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-61'>QPT-61</a>] - Add Ephemeris Information to Report</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-65'>QPT-65</a>] - show twilights, sunset, sunrise on visualizer</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-130'>QPT-130</a>] - Add sunset/rise and twilights to published schedule</li>
+<li>[<a href='http://hlservices.gemini.edu:8080/jira/browse/QPT-137'>QPT-137</a>] - Embed <a name=...> tags in variant headers</li>
+</ul>
+        
+</body>
+</html>

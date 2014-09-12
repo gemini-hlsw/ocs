@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal tacCategory="Extragalactic" schemaVersion="1.0.0">
+    <meta>
+        <attachment>ar_2012B_007.pdf</attachment>
+    </meta>
+    <semester half="B" year="2012"/>
+    <title>Understanding the complex gas kinematics of compact, rapidly growing galaxies in the local Universe</title>
+    <abstract>Studying the mechanisms governing enhanced star formation in dwarf galaxies is essential to understand how they assemble and evolve. A rare subset of local starbursting dwarfs that look clumpy and highly turbulent can provide new insights on how disks are assembled in the modern Universe. As in early galaxies, gas accretion - induced by mergers or gravitational instabilities - and strong SNe feedback, have been suggested as common drivers as well. However, essential pieces of information are missing. Here we propose to obtain unbiased, 2D high quality spectroscopic observations with GMOS-IFU. These deep, high S/N data tracing both star formation and gas kinematics, are intended to spatially resolve - at kpc scales - the main kinematic components identified in Halpha, including narrow and broad emission. </abstract>
+    <keywords>
+        <keyword>Evolution</keyword>
+        <keyword>Interacting galaxies</keyword>
+        <keyword>Starburst galaxies</keyword>
+        <keyword>Emission lines</keyword>
+        <keyword>Star clusters</keyword>
+        <keyword>H II regions</keyword>
+    </keywords>
+    <investigators>
+        <pi id="investigator-1">
+            <firstName>Guillermo</firstName>
+            <lastName>Hagele</lastName>
+            <status>PhD</status>
+            <email>ghagele@fcaglp.unlp.edu.ar</email>
+            <phone></phone>
+            <address>
+                <institution>Observatorio Astronomico de La Plata</institution>
+                <address>Paseo del Bosque
+1900 La Plata
+Prov. de Buenos Aires</address>
+                <country>Argentina</country>
+            </address>
+        </pi>
+        <coi id="investigator-2">
+            <firstName>Guilllermo</firstName>
+            <lastName>Bosch</lastName>
+            <status>PhD</status>
+            <email>guille@fcaglp.unlp.edu.ar</email>
+            <phone></phone>
+            <institution>Observatorio Astronomico de La Plata</institution>
+        </coi>
+        <coi id="investigator-3">
+            <firstName>Monica</firstName>
+            <lastName>Cardaci</lastName>
+            <status>PhD</status>
+            <email>mcardaci@fcaglp.unlp.edu.ar</email>
+            <phone></phone>
+            <institution>Observatorio Astronomico de La Plata</institution>
+        </coi>
+        <coi id="investigator-4">
+            <firstName>Veronica</firstName>
+            <lastName>Firpo</lastName>
+            <status>PhD</status>
+            <email>vfirpo@fcaglp.unlp.edu.ar</email>
+            <phone></phone>
+            <institution>Observatorio Astronomico de La Plata</institution>
+        </coi>
+        <coi id="investigator-5">
+            <firstName>Enrique</firstName>
+            <lastName>Perez-Montero</lastName>
+            <status>PhD</status>
+            <email>epm@iaa.es</email>
+            <phone></phone>
+            <institution>IAA - Granada</institution>
+        </coi>
+        <coi id="investigator-6">
+            <firstName>Jose Maria</firstName>
+            <lastName>Vilchez</lastName>
+            <status>PhD</status>
+            <email>jvm@iaa.es</email>
+            <phone></phone>
+            <institution>IAA - Granada</institution>
+        </coi>
+        <coi id="investigator-7">
+            <firstName>Ana</firstName>
+            <lastName>Monreal-Ibero</lastName>
+            <status>PhD</status>
+            <email>ami@iaa.es</email>
+            <phone></phone>
+            <institution>IAA - Granada</institution>
+        </coi>
+        <coi id="investigator-8">
+            <firstName>Ricardo</firstName>
+            <lastName>Amorin</lastName>
+            <status>PhD</status>
+            <email>amorin@iaa.es</email>
+            <phone></phone>
+            <institution>IAA - Granada</institution>
+        </coi>
+    </investigators>
+    <targets>
+        <sidereal epoch="J2000" id="target-0">
+            <name>SDSS J0839</name>
+            <degDeg>
+                <ra>129.68166666030884925930877216160297393798828125</ra>
+                <dec>38.89722222222221859055935055948793888092041015625</dec>
+            </degDeg>
+        </sidereal>
+    </targets>
+    <conditions>
+        <condition id="condition-0">
+            <name>CC 50%/Clear, IQ 20%/Best, SB 50%/Dark, WV Any, AM ≤ 1.40</name>
+            <maxAirmass>1.4</maxAirmass>
+            <cc>70%/Cirrus</cc>
+            <iq>20%/Best</iq>
+            <sb>80%/Grey</sb>
+            <wv>Any</wv>
+        </condition>
+    </conditions>
+    <blueprints>
+        <gmosN>
+            <regime>optical</regime>
+            <ifu id="blueprint-0">
+                <name>GMOS-N IFU R831 OG515 (&gt; 520 nm) IFU 1 slit</name>
+                <altair>
+                    <none></none>
+                </altair>
+                <filter>OG515 (&gt; 520 nm)</filter>
+                <disperser>R831</disperser>
+                <fpu>IFU 1 slit</fpu>
+            </ifu>
+        </gmosN>
+    </blueprints>
+    <observations>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" band="Band 1/2">
+            <time units="hr">3.6</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>69</percentage>
+                    <evaluation>Caution</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None" key="604c87d8-9bf8-96a8-0642-f70604c87d89">
+            <itac>
+                <accept>
+                    <programId>GN-2012B-Q-20</programId>
+                    <contact>anitta@gemini.edu, rschiavon@gemini.edu</contact>
+                    <email>No partner lead email assigned.</email>
+                    <band>1</band>
+                    <award units="hr">3.600000000000000088817841970012523233890533447265625</award>
+                    <rollover>false</rollover>
+                </accept>
+                <comment>ITAC Comment
+
+Gemini Comment
+This program is in band 1, however it is not accepted for rollover into future semesters if not completed in 12B.</comment>
+            </itac>
+            <ngo partnerLead="investigator-1">
+                <request>
+                    <time units="hr">3.6</time>
+                    <minTime units="hr">3.6</minTime>
+                </request>
+                <response>
+                    <receipt>
+                        <timestamp>2012-03-30T07:57:27.000-10:00</timestamp>
+                        <id>AR-2012B-007</id>
+                    </receipt>
+                    <accept>
+                        <email>asmith@fcaglp.unlp.edu.ar,ferrero.gabriel@gmail.com</email>
+                        <ranking>3.0</ranking>
+                        <recommend units="hr">3.6</recommend>
+                        <minRecommend units="hr">3.6</minRecommend>
+                        <poorWeather>false</poorWeather>
+                    </accept>
+                </response>
+                <partner>ar</partner>
+            </ngo>
+        </queue>
+    </proposalClass>
+</proposal>

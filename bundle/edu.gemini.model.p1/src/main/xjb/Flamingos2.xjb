@@ -1,0 +1,69 @@
+<jxb:bindings version="2.0"
+              xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+              xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <!-- Custom bindings for Flamingos2 -->
+    <jxb:bindings schemaLocation="../xsd/Flamingos2.xsd" node="/xsd:schema">
+
+        <!-- Flamingos2Filter => Flamingos2.Filter -->
+        <jxb:bindings node="./xsd:simpleType[@name='Flamingos2Filter']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='Y (1.020 um)']">
+                <jxb:typesafeEnumMember name="Y"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='J-lo (1.122 um)']">
+                <jxb:typesafeEnumMember name="J_LOW"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='J (1.255 um)']">
+                <jxb:typesafeEnumMember name="J"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='H (1.631 um)']">
+                <jxb:typesafeEnumMember name="H"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Ks (2.157 um)']">
+                <jxb:typesafeEnumMember name="K_SHORT"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='JH (1.390 um)']">
+                <jxb:typesafeEnumMember name="JH"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='HK (1.871 um)']">
+                <jxb:typesafeEnumMember name="HK"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+        <!-- Flamingos2Disperser => Flamingos2.Disperser -->
+        <jxb:bindings node="./xsd:simpleType[@name='Flamingos2Disperser']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='JH']">
+                <jxb:typesafeEnumMember name="R1200JH"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='HK']">
+                <jxb:typesafeEnumMember name="R1200HK"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='R3K']">
+                <jxb:typesafeEnumMember name="R3000"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+        <!-- Flamingos2Fpu => Flamingos2.FPUnit -->
+        <jxb:bindings node="./xsd:simpleType[@name='Flamingos2Fpu']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='1-pix longslit']">
+                <jxb:typesafeEnumMember name="LONGSLIT_1"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='2-pix longslit']">
+                <jxb:typesafeEnumMember name="LONGSLIT_2"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='3-pix longslit']">
+                <jxb:typesafeEnumMember name="LONGSLIT_3"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='4-pix longslit']">
+                <jxb:typesafeEnumMember name="LONGSLIT_4"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='6-pix longslit']">
+                <jxb:typesafeEnumMember name="LONGSLIT_6"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='8-pix longslit']">
+                <jxb:typesafeEnumMember name="LONGSLIT_8"/>
+            </jxb:bindings>
+        </jxb:bindings>
+    </jxb:bindings>
+
+</jxb:bindings>

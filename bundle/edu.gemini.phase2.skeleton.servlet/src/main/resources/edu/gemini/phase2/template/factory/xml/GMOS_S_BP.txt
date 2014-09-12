@@ -1,0 +1,133 @@
+Instrument : GMOS-S
+Blueprint templates: GMOS_S_BP.xml
+
+Last update: 2013 November 10, Bryan Miller
+
+Target and conditions information from the Phase I observations only
+needs to be entered into the template science observations. Daytime
+calibrations must have special target names and flux standard
+observations must not include target components.
+
+The OT libraries have different acquisition observations for different
+acquisition strategies (point source, blind offset, 2 targets,
+extended source).  The template library uses a standard point source
+acquisition as the default.
+
+Observations are now identified by library IDs, indicated with {}
+
+Phase I = PI
+
+**** IF MODE == IMAGING ****
+INCLUDE BP{1}
+        Put FILTERS from PI into the GMOS ITERATOR and set the
+        exposure time for each filter from 
+        http://dmt.gemini.edu/docushare/dsweb/Get/Document-333602/GMOS_img_exptimes.xlsx
+                
+**** IF MODE == SPECTROSCOPY ****
+
+IF SPECTROSCOPY MODE == LONGSLIT
+        INCLUDE FROM 'LONGSLIT BP' IN
+            Target Group: {2} - {3}
+            Baseline Folder: {4} - {8}
+        For spec observations: {3}, {4}, {6}-{8}
+            SET DISPERSER FROM PI
+            SET FILTER FROM PI
+            SET FPU FROM PI
+        For acquisitions: {2}, {5}
+            if FPU!=None in the OT inst. iterators, then SET FPU FROM PI
+
+IF SPECTROSCOPY MODE == LONGSLIT N&S
+        INCLUDE FROM 'LONGSLIT N&S BP' IN
+            Target group: {9} - {10} 
+            Baseline folder: {11} - {16}
+        For spec observations: {10}, {11}, {13}-{15}    
+            SET DISPERSER FROM PI
+            SET FILTER FROM PI
+            SET FPU FROM PI
+        For acquisitions: {9}, {12}
+            if FPU!=None in the OT inst. iterators, then SET FPU FROM PI
+        
+IF SPECTROSCOPY MODE == MOS
+        INCLUDE FROM 'MOS BP' IN
+            Target group: {20}, {21} - {23}
+              IF PRE-IMAGING REQ == YES
+                INCLUDE {18}, {17}
+              IF PRE-IMAGING REQ == NO
+                INCLUDE {19}
+            Baseline folder: {24}-{26}
+        For spec observations: {20}, {21}, {23}, {25}, {26}
+                SET DISPERSER FROM PI
+                SET FILTER FROM PI
+                For {20}, {21}
+                    SET MOS "Slit Width" from PI
+                For {25}, {26} 
+                    SET FPU (built-in longslit) using the width specified in PI
+        For standard acquisition: {24}
+            if FPU!=None in the OT inst. iterators, then SET FPU (built-in longslit) using the width specified in PI
+        For acquisitions: {18}, {19} and mask image {22}
+            No actions needed
+
+IF SPECTROSCOPY MODE == MOS N&S
+        INCLUDE IN
+            Target group: {29}, {22}, {31}, {32}
+              IF PRE-IMAGING REQ == YES
+                INCLUDE {17}, {27}
+              IF PRE-IMAGING REQ == NO
+                INCLUDE {28}
+            Baseline folder: {30}, {33}-{35}
+       For spec observations: {29}, {31}, {32}, {34}, {35}
+            SET DISPERSER FROM PI
+            SET FILTER FROM PI
+            For {29}, {31}
+                SET MOS "Slit Width" from PI
+            For {34}, {35} 
+                SET FPU (built-in longslit) using the width specified in PI
+        For standard acquisition: {33}
+            if FPU!=None in the OT inst. iterators, then SET FPU (built-in longslit) using the width specified in PI
+        For acquisitions: {27}, {28}; mask image {22}; and N&S dark {30}
+            No actions needed
+
+IF SPECTROSCOPY MODE == IFU
+        INCLUDE FROM 'IFU BP' IN,
+            Target group: {36}-{37}
+            Baseline folder: {38}-{42}
+        Where FPU!=None in BP (static and iterator), SET FPU from PI
+            IFU acq obs have an iterator titled "Field image" with
+                FPU=None, the FPU must not be set here.
+            IF FPU = 'IFU 1 SLIT' in PI then SET FPU='IFU Right Slit (red)' in OT
+        If not acq SET DISPERSER FROM PI
+        For filter changes below, do not adjust exposure times.
+        If acq ({36}, {41})
+           If filter from PI != None, SET FILTER in static component 
+             to ugriz filter closest in central
+             wavelength to the filter from PI
+           else SET FILTER=r (as in BP)
+        else SET FILTER FROM PI
+            IF FPU = "IFU 2 slits" in PI:
+	        IF FILTER=None, SET FILTER=r_G0326
+                SET CENTRAL WAVELENGTHS TO THE FILTER EFF WAVELENGTH
+                 AND EFF WAVELENGTH + 5nm (if iteration over wavelength)
+                See http://www.gemini.edu/node/10637
+
+IF SPECTROSCOPY MODE == IFU N&S
+        INCLUDE FROM 'IFU N&S BP' IN, 
+            Target group: {43}-{44}
+            Baseline folder: {45}-{50}
+        Where FPU!=None in BP (static and iterator), SET FPU from PI
+            IFU acq obs have an iterator titled "Field image" with
+                FPU=None, the FPU must not be set here.
+            IF FPU = 'IFU 1 SLIT' in PI then SET FPU='IFU N & S Right Slit (red)' in OT
+        If not acq SET DISPERSER FROM PI
+        For filter changes below, do not adjust exposure times.
+        If acq ({43}, {49})
+           If filter from PI != None, SET FILTER in static component
+             to ugriz filter closest in central wavelength to the filter 
+             from PI
+           else SET FILTER=r (as in BP)
+        else SET FILTER FROM PI
+            IF FPU = 'IFU 2 slits' in PI (IFU or IFU N&S mode):
+	        IF FILTER=None, SET FILTER=r_G0326
+                SET CENTRAL WAVELENGTHS TO THE FILTER EFF WAVELENGTH
+                 AND EFF WAVELENGTH + 5nm (if iteration over wavelength)
+                See http://www.gemini.edu/node/10637
+

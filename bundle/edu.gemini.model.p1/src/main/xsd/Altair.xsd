@@ -1,0 +1,33 @@
+<!--
+  Schema definition for Altair adaptive optics configuration.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:include schemaLocation="Instrument.xsd"/>
+
+    <!-- Options for Altair. -->
+    <xsd:complexType name="AltairChoice">
+        <xsd:sequence>
+            <xsd:choice>
+                <xsd:element name="none" type="AltairNone"/>
+                <xsd:element name="lgs"  type="AltairLGS"/>
+                <xsd:element name="ngs"  type="AltairNGS"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- None and LGS have no attributes. -->
+    <xsd:complexType name="AltairNone"/>
+
+    <!-- LGS has a PWFS1 guider option. -->
+    <xsd:complexType name="AltairLGS">
+        <xsd:attribute name="pwfs1" type="xsd:boolean" use="optional"/>
+        <xsd:attribute name="aowfs" type="xsd:boolean" use="optional"/>
+        <xsd:attribute name="oiwfs" type="xsd:boolean" use="optional"/>
+    </xsd:complexType>
+
+    <!-- NGS has a lens option. -->
+    <xsd:complexType name="AltairNGS">
+        <xsd:attribute name="fieldLens" type="xsd:boolean"/>
+    </xsd:complexType>
+
+</xsd:schema>

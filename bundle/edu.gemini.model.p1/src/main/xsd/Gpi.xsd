@@ -1,0 +1,68 @@
+<!--
+  Schema definition for GPI blueprints.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:include schemaLocation="Instrument.xsd"/>
+
+    <!-- Options for GPI Blueprint. -->
+    <xsd:complexType name="GpiBlueprintChoice">
+        <xsd:sequence>
+            <xsd:choice>
+                <xsd:element name="null"   type="GpiBlueprintNull"/>
+                <xsd:element name="Gpi"    type="GpiBlueprint"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- GPI null. Empty blueprint, not available in PIT. -->
+    <xsd:complexType name="GpiBlueprintNull"/>
+
+    <!--
+      GPI Blueprint
+    -->
+    <xsd:complexType name="GpiBlueprint">
+        <xsd:complexContent>
+            <xsd:extension base="BlueprintBase">
+                <xsd:sequence>
+                    <xsd:element name="observingMode" type="GpiObservingMode" maxOccurs="1" minOccurs="0"/>
+                    <xsd:element name="disperser"     type="GpiDisperser"     maxOccurs="1" minOccurs="0"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      GPI Observing Mode options
+    -->
+    <xsd:simpleType name="GpiObservingMode">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="Coronograph Y-band"/>
+            <xsd:enumeration value="Coronograph J-band"/>
+            <xsd:enumeration value="Coronograph H-band"/>
+            <xsd:enumeration value="Coronograph K1-band"/>
+            <xsd:enumeration value="Coronograph K2-band"/>
+            <xsd:enumeration value="H_STAR"/>
+            <xsd:enumeration value="H_LIWA"/>
+            <xsd:enumeration value="Y direct"/>
+            <xsd:enumeration value="J direct"/>
+            <xsd:enumeration value="H direct"/>
+            <xsd:enumeration value="K1 direct"/>
+            <xsd:enumeration value="K2 direct"/>
+            <xsd:enumeration value="Non Redundant Mask Y"/>
+            <xsd:enumeration value="Non Redundant Mask J"/>
+            <xsd:enumeration value="Non Redundant Mask H"/>
+            <xsd:enumeration value="Non Redundant Mask K1"/>
+            <xsd:enumeration value="Non Redundant Mask K2"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      GPI Disperser options
+    -->
+    <xsd:simpleType name="GpiDisperser">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="Prism"/>
+            <xsd:enumeration value="Wollaston"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+</xsd:schema>

@@ -1,0 +1,74 @@
+
+<html>
+<head><title>QPT Troubleshooting Guide</title></head>
+<link rel="stylesheet" href="/doc/styles.css"></link>
+<body>
+
+<h1>QPT Troubleshooting Guide</h1>
+
+This document outlines some common problems and their solutions. For more help,
+please email <a href="mailto:rnorris@gemini.edu">Rob Norris</a>.
+
+<h2>QPT won't start.</h2>
+
+If QPT won't start, the easiest solution is to re-install:
+<pre>
+$ launcher -a:qpt -u
+$ launcher -h:build.cl.gemini.edu -i:qpt -v
+</pre>
+
+<h2>I can't preview the nightly plan.</h2>
+
+First, be sure that your web browser isn't minimized or living on another virtual
+desktop; if your browser is configured to re-use widows, the plan may have opened
+in a window that's not visible. On Windows and Mac OS X, QPT uses some built-in
+functionality to open the plan
+preview using your default web browser, but on Unix QPT will try to open the
+plan using the <code>firefox</code> command. So if you don't have Firefox
+installed, you're out of luck at the moment.
+<p>
+Note that the plan previews are written to the <code>/tmp</code> directory on
+Unix, so in the worst case you can simply open the plan files manually. The
+<code>file://</code> URL Will look something like this, with the proper date
+values, obviously.
+<pre>
+file:///tmp/GSqueue/qpt-plans/2007/01/08/20070108.html
+</pre>
+
+<h2>Why isn't a particular program or observation showing up?</h2>
+
+First, look at the filters you have selected under the View menu; it is possible
+that what you are looking for has simply been hidden. If not, keep reading.
+In order to show up in QPT, science programs must meet <b>all</b> of the following
+criteria:
+<ul>
+<li>The program must <b>not</b> be marked as complete.
+<li>The program must have a well-formed ID.
+<li>The program must be of one of the following types:
+	<code>Q</code>,
+	<code>C</code>,
+	<code>SV</code>,
+	<code>DD</code>, or
+	<code>DS</code>.
+<li>The program must have a numeric queue band, even if it is not a type-<code>Q</code> program.
+<li>The program must be long to the plan night's semester, <b>or</b> belong to a semester added
+via the Add Semester command, <b>or</b> be a rollover program from one of the two
+previous semesters.
+</ul>
+If the program is qualified as described above, each observation must meet the
+following additional criteria:
+<ul>
+<li>The observation must have an obs class of <code>SCIENCE</code>, <code>PARTNER_CAL</code> or <code>PROGRAM_CAL</code>.
+<li>The observation must have an obs status of <code>READY</code> or <code>ONGOING</code>.
+<li>The observation must have at least one unexecuted sequence step.
+</ul>
+
+<h2>The visualizer looks weird; curves are jagged or labels are offset from visits.</h2>
+
+Thare are a few display bugs that I haven't been able to isolate. If this happens,
+try resizing your window. Normally this will reset all the cached shapes and fix
+any drawing problems you might be seeing.
+
+
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta name="generator" content="HTML Tidy for Mac OS X (vers 1st December 2004), see www.w3.org" />
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+	<title>QPT Reference</title>
+	<link rel="stylesheet" href="/doc/styles.css" type="text/css" media="screen" title="no title" charset="utf-8" />
+</head>
+
+<body>
+	<h1>QPT Reference Manual</h1>
+
+	<p><em>This is interim reference documentation for Gemini QPT version 1.0.5 (<a href="../v1.0.5-notes.html" title="Release Notes">Release Notes</a>).</em></p>
+
+	<p>This documentation is intended for Gemini queue coordinaters and others who are generally familiar with the way things work at Gemini. It is not intended for external distribution and at this time likely contains errors and omissions. Please report any issues to <a href="mailto:rnorris@gemini.edu?subject=QPT%20Reference%20Manual">Rob Norris</a>.</p>
+
+	<p>For installation instructions, see <a href="../install.html" title="Running QPT"><em>Running QPT</em></a>.</p>
+
+	<h2>Overview</h2>
+
+	<p>QPT is a Java-based desktop application that allows queue coordinators to produce nightly observing plans using a visual drag-and-drop interface. QPT performs all the routine constraint calculations automatically, allowing the user to build high-quality plans confidently, without worrying about things like accidentally pointing at the moon.</p>
+
+	<p>Constructed plans are published to the internal webserver for use by nightly observers. (<a href="example/20060720.html" id="" title="Example" name="">Example</a>)</p>
+
+	<p class="figure"><a href="images/screenshot.png"><img src="images/screenshot.png" width="500" height="392" alt="Screenshot" /></a></p>
+
+	<h2>Concepts</h2>
+
+	<p>This section introduces concepts and terminology that you will need to understand in order to make sense of the rest of this document. It goes into more detail than you probably need right now, but skim it anyway.</p>
+
+	<dl>
+		<dt>Plans and Instrument Configurations</dt>
+
+		<dd>
+			<p>QPT constructs an observing <strong>plan</strong> for a specific night. Multi-night plans are not supported (yet). Each plan specifies the set of <strong>instruments</strong>* (and <strong>configurations</strong> in the case of instruments with changeable components) that will be available.</p>
+
+			<p class="figure"><a href="images/instruments.png"><img src="images/instruments.png" width="218" height="135" alt="Instruments View" /></a></p>
+
+			<p>QPT saves each plan as a single XML file that has no other dependencies and may be shared like any other file.</p>
+
+			<p>QPT <strong>publishes</strong> plans directly to the internal webserver as HTML documents with elevation charts.</p>
+
+			<p>*<em>It is likely that this terminology will change to <strong>system</strong> or something like that, because some of the items in the instrument list (such as Altair and GCAL) are not really instruments.</em></p>
+		</dd>
+
+		<dt>Variants</dt>
+
+		<dd>
+			<p>Each Plan consists of one or more Plan <strong>Variants</strong>. A variant represents a plan contingency for a particular set of environmental conditions (such as CC = 50% /IQ = 20% / WV = 50%). By default a new plan will contain eleven common variants, although the user may edit these freely.</p>
+
+			<p class="figure"><a href="images/variants.png"><img src="images/variants.png" width="218" height="135" alt="Variants" /></a></p>
+
+			<p>At any time, only one variant is active in QPT. This is the <strong>current variant</strong>.</p>
+		</dd>
+
+		<dt>Candidate Observations and Observation Flags</dt>
+
+		<dd>
+			Each plan has a set of <strong>candidate observations</strong> that are available for scheduling. An observation is included in this set if <em>all</em> of the following conditions apply:
+
+			<ul>
+				<li>The science program must be incomplete (i.e., not marked complete).</li>
+
+				<li>The science program must be of type <code>Q</code>, <code>C</code>, <code>SV</code>, <code>DD</code>, or <code>DS</code>.</li>
+
+				<li>The science program must be assigned to the current semester (based on the UT date of the plan) or must be a rollover program from either of the two preceding semesters. Additional semesters may be added via the <strong>Add Semester</strong> command described below.</li>
+
+				<li>The science program must have a numeric science band.</li>
+
+				<li>The observation must be a partner calibration, program calibration, or a science observation.</li>
+
+				<li>The observation's status must be <code>READY</code> or <code>ONGOING</code>.</li>
+
+				<li>The observation must have at least one unexecuted sequence step.</li>
+			</ul>
+
+			<p>QPT displays the list of candidate observations, filtered and decorated based on the plan and current variant.</p>
+
+			<p class="figure"><a href="images/candidates.png"><img src="images/candidates.png" width="218" height="225" alt="Candidates" /></a></p>
+		</dd>
+
+		<dd>
+			Candidate observations are analyzed and given a set of <strong>flags</strong> that reflect the observations' suitability for scheduling in the currently-selected variant. The color and icon decorations in the Candidate Observations view are determined based on the "worst" of the present flags. Following are descriptions of all supported flags.
+
+			<p>The following flags are intrinsic properties of the observation and do not depend on anything that happens within QPT. They will be the same in all variants on all nights.</p>
+
+			<ul>
+				<li><code>INACTIVE</code> indicates that the observation belongs to an inactive science program. These observations are rendered in light gray.</li>
+
+				<li><code>IN_PROGRESS</code> indicates that the observation's status is "In Progress", normally meaning that one or more steps has been executed but the observation is not yet complete. Icons for these observations are decorated with a green "Play Button".</li>
+
+				<li><code>OVER_ALLOCATED</code> indicates that the program has no remaining time.</li>
+
+				<li><code>SCHED_GROUP</code> indicates that the observation is part of a scheduling group.</li>
+			
+			</ul>The following flags are influenced by the currently available set of instruments and configurations, and will be the same in all variants. Selecting and de-selecting items in the Instruments view can cause these flags to change.
+
+			<ul>
+				<li><code>INSTRUMENT_UNAVAILABLE</code> indicates that a required instrument is not available. The observation is rendered in light gray and the icon is decorated with a diagonal slash.</li>
+
+				<li><code>CONFIG_UNAVAILABLE</code> indicates that the required instrument is available but the desired configuration option is not. The observation is rendered in light gray and the icon is decorated with a diagonal slash.</li>
+			</ul>The following flags are influenced by the current variant's site conditions, and will differ from variant to variant. Editing a variant's site conditions can cause these flags to change.
+
+			<ul>
+				<li><code>CC_UQUAL</code> indicates that the variant's cloud cover condition isn't restrictive enough for this observation. The observation is rendered in light gray and the icon is decorated with a diagonal slash.</li>
+				
+				<li><code>WV_UQUAL</code> indicates that the variant's water vapor condition isn't restrictive enough for this observation. The observation is rendered in light gray and the icon is decorated with a diagonal slash.</li>
+				
+				<li><code>IQ_UQUAL</code> indicates that the variant's image quality condition isn't restrictive enough for this observation. The observation is rendered in light gray and the icon is decorated with a diagonal slash.</li>
+
+				<li><code>OVER_QUALIFIED</code> indicates that the variant conditions are better than required. The observation is rendered in dark gray with a slightly faded out icon.</li>
+
+			</ul>The following flags are influenced by the targets' positions on the given night, and will be the same in all variants.
+
+			<ul>
+
+				<li><code>SETS_EARLY</code> indicates that the target sets below its elevation constraint during the first three hours of the night.
+
+				<li><code>BACKGROUND_CNS</code> indicates that the observation's sky brightness constraint cannot be satisfied. The observation is rendered in light gray and the icon is decorated with a diagonal slash.</li>
+
+				<li><code>ELEVATION_CNS</code> indicates that the observation's elevation (airmass or hour angle) constraint cannot be satisfied. The observation is rendered in light gray and the icon is decorated with a diagonal slash.</li>
+
+				<li><code>TIMING_CNS</code> indicates that the observation's timing window constraint(s) cannot be satisfied. The observation is rendered in light gray and the icon is decorated with a diagonal slash.</li>
+
+				<li><code>MULTI_CNS</code> indicates that although all constraints can be satisfied, they can't be satisfied at the same time (long enough to execute at least the first sequence step). The observation is rendered in light gray and the icon is decorated with a diagonal slash.</li>
+
+
+			</ul>The following flags are influenced by the current state of a variant's list of scheduled visits. Adding, removing, or rearranging visits can cause these flags to change.
+
+			<ul>
+				<li><code>SCHEDULED</code> indicates that the observation appears on the visualizer and in the list of scheduled visits. The observation's icon is decorated with a little blue and white clock, and the observation is no longer draggable.</li>
+
+				<li><code>BLOCKED</code> indicates that the observation is schedulable (at least the first step), but only if you move something out of the way. The observation is rendered in light gray.</li>
+
+				<li><code>SETUP_BLOCKED</code> is a corner case and indicates that at least the first step of the observation is schedulable, but only if you skip the setup (possible if some cases).</li>
+
+				<li><code>PARTIALLY_BLOCKED</code> indicates that the observation is schedulable, but not the entire sequence.</li>
+			
+
+			</ul>
+		</dd>
+
+		<dt>Visits and Problems</dt>
+
+		<dd>
+			<p>A <strong>visit</strong> is a scheduled observation or portion thereof. More precisely, a visit is a span of sequence steps scheduled to begin at a specific time in a specific variant. An observation is normally scheduled as a single visit, but may be split into multiple visits in the same night or across several nights.</p>
+
+			<p class="figure"><a href="images/visits.png"><img src="images/visits.png" width="306" height="215" alt="Visits" /></a></p>
+
+			<p>A visit may have <strong>problems</strong>, which are indicated by color coding in the Schedule Visualizer and by decorations on the observation's icon in the Scheduled Visits view. Errors normally indicate constraint violations (sky too bright, airmass too high, etc.) and are drawn in red. Warnings normally indicate that an error condition could arise if the observer falls behind schedule.</p>
+		</dd>
+
+		<dt>Comments</dt>
+
+		<dd>QPT allows the user to attach a <strong>comment</strong> to the top level of the plan, to each variant, and to each visit. These comments are arbitrary HTML text and will appear verbatim in the published plan. (<a href="example/20060720.html" id="" title="Example" name="">Example</a>)</dd>
+	</dl>
+
+	<h2>Menu Command Highlights</h2>
+
+	<dl>
+		<dt>File &gt; New Plan...</dt>
+
+		<dd>
+			<p>This command closes the current plan if one is open (prompting to save if needed, etc.) and displays the New Plan dialog.</p>
+
+			<p class="figure"><a href="images/new_plan.png"><img src="images/new_plan.png" width="214" height="136" alt="New Plan" /></a></p>
+
+			<p>To create a new plan, select the site and the night for the new plan (tonight is chosen by default).</p>
+
+			<p>If you wish base this plan on another plan (normally last night's), click the Template button and select the QPT file that you wish to use as a template. The new plan will be constructed based on the template as follows:</p>
+
+			<ul>
+				<li>Variants, instruments/configurations, and comments will be copied over directly.</li>
+
+				<li>All visits will be moved forward such that they will appear at the same distance from sunset.</li>
+
+				<li>A Refresh operation will be performed (see below).</li>
+			</ul>
+		</dd>
+
+		<dt>File &gt; Open...</dt>
+
+		<dd>This behaves as expected, but note that it performs a Refresh operation (see below) after opening the plan.</dd>
+
+		<dt>File &gt; Open from Web...</dt>
+
+		<dd>This command opens a plan by fetching its plan from the web server rather than by opening a local QPT file. It brings up a dialog similar to the New Plan dialog to allow you to select a date. Otherwise it is identical to the normal Open command. This command is half-baked and needs to be improved.</dd>
+
+		<dt>File &gt; Publish...</dt>
+
+		<dd>
+			<p>This command publishes the current plan as an HTML document.</p>
+
+			<p class="figure"><a href="images/publish_plan.png"><img src="images/publish_plan.png" width="131" height="60" alt="Publish Plan" /></a></p>
+
+			<p>QPT first writes the plan document to temprary storage. If you have chosen "Preview Locally," the local plan document will be opened in your web browser. If you have selected "Publish to the Web," the plan will be copied to <code>internal.gemini.edu</code> and the published plan will be opened in your web browser. You will not be warned if you are about to overwrite and existing plan; this command assumes you know what you are doing.</p>
+		</dd>
+
+		<dt>View Menu</dt>
+
+		<dd>
+			The View menu allows you to filter the candidate observations you see in the Candidate Observations view. The following filters are based directly on the flags described above. If any of the following flags are present, the observation will be hidden unless the flag is checked in the View menu. It makes more sense than you might think at this point.
+
+			<ul>
+				<li>Over-Qualified (selected by default)</li>
+
+				<li>Blocked (selected by default)</li>
+
+				<li>Under-Qualified</li>
+
+				<li>Unavailable Inst/Config</li>
+
+				<li>Unschedulable</li>
+
+				<li>Not Dark Enough</li>
+
+				<li>Low in Sky</li>
+			</ul>The remaining filters are based on intrinsic properties of the observations' science programs and should be fairly obvious.
+
+			<ul>
+				<li>Inactive Programs</li>
+
+				<li>Science Observations (selected by default)</li>
+
+				<li>Calibration Observations</li>
+
+				<li>Science Band 1 (selected by default)</li>
+
+				<li>Science Band 2 (selected by default)</li>
+
+				<li>Science Band 3 (selected by default)</li>
+
+				<li>Science Band 4</li>
+			</ul>
+		</dd>
+
+		<dt>Tools &gt; Shorter / Longer / Maintain Spacing</dt>
+
+		<dd>
+			These commands allow you to make a visit longer or shorter by adding or removing sequence steps from the plan, with the following constaints:
+
+			<ul>
+				<li>The first visit to an observation must begin with the first unexecuted sequence step.</li>
+
+				<li>A subsequent visits must continue where the preceding one left off.</li>
+
+				<li>A visit must always contain at least one step.</li>
+
+				<li>A visit may not continue past the end of the sequence.</li>
+			</ul>The Longer / Shorter commands will preserve these constraints if possible, and will become disabled if this is not possible. If a non-terminal visit is made longer or shorter, steps will be taken from or added to the subsequent visit. By default the spacing between visits is preserved when this happens; this is the most natural behavior. This behavior can be turned off by de-selecting the Maintain Spacing option. It's easier to just play with it than for me to explain it.
+		</dd>
+
+		<dt>Tools &gt; Split / Join</dt>
+
+		<dd>
+			Any visit with more than one scheduled step may be split into two (or more) smaller visits. This is sometimes necessary in order to account for re-acquisition (the setup time re-appears in each sub-visit) or in order to "sneak in" another observation in the middle. Split and Join operate as follows:
+
+			<ul>
+				<li>A visit of <em>n &gt; 1</em> steps will be split into at least <em>2</em> and at most <em>n-1</em> sub-visits. QPT will attempt to make all sub-visits equal in length and no longer than two hours.</li>
+
+				<li>Sub-visits may be resized via Longer / Shorter, as described above.</li>
+
+				<li>Adjoining sub-visits may be joined together into a single visit.</li>
+			</ul>
+		</dd>
+
+		<dt>Tools &gt; Refresh</dt>
+
+		<dd>
+			The Refresh command synchronizes QPT's internal database snapshot with the current state of the SPDB. Normally you will not need to do this, but if for example you change something in the OT, it won't show up in QPT until you perform a refresh. Refresh performs the following actions:
+
+			<ol>
+				<li>All target information is recalculated for all observations.</li>
+
+				<li>If an observation was deleted, all associated visits are deleted.</li>
+
+				<li>If all steps in a visit were executed, the visit is deleted.</li>
+
+				<li>If some steps were executed, steps are removed from the beginning of the visit.</li>
+
+				<li>If steps were deleted from the end of the sequence, they are removed from the end of the visit.</li>
+
+				<li>If step sizes changed, the visit's duration will be adjusted accordingly.</li>
+			</ol>Note that an implicit refresh is performed when a plan file is opened; QPT always reflects the current state of the SPDB.
+		</dd>
+
+		<dt>Tools &gt; Add / Remove Semester</dt>
+
+		<dd>
+			<p>QPT automatically shows observations from the current semester (determined by plan date), as well as plans with rollover status from the previous two semesters. These observations are always available.</p>
+
+			<p>It is now possible to import complete additional semesters. This can be useful during the "gray" time in between semesters and perhaps for other special needs. In any case, you can import any extra semesters that exist in the database. You can also remove an added semester as long as none of its observations appear in the schedule.</p>
+		</dd>
+		
+		<dt>Help &gt; Update Software...</dt>
+		<dd>This command updates QPT to the latest version. You normally only need to do this in response to an email announcing that a new version is available. Note that this doesn't always work correctly; see <a href="../install.html" title="Running QPT"><em>Running QPT</em></a> for more information if you have problems.</dd>
+		
+	</dl>
+	
+	<h2>User Interface Views</h2>
+	
+	
+	
+</body>
+</html>

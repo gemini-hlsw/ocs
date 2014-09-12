@@ -1,0 +1,101 @@
+<jxb:bindings version="2.0"
+              xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+              xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <!-- Custom bindings for GNIRS -->
+    <jxb:bindings schemaLocation="../xsd/Gnirs.xsd" node="/xsd:schema">
+
+        <!-- GnirsCrossDisperser => GNIRSParams.CrossDisperser -->
+        <jxb:bindings node="./xsd:simpleType[@name='GnirsCrossDisperser']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='None']">
+                <jxb:typesafeEnumMember name="NO"/>
+            </jxb:bindings>
+            <!-- Other values map correctly. -->
+        </jxb:bindings>
+
+        <!-- GnirsPixelScale => GNIRSParams.SlitWidth -->
+        <jxb:bindings node="./xsd:simpleType[@name='GnirsPixelScale']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='0.15&quot;/pix']">
+                <jxb:typesafeEnumMember name="PS_015"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.05&quot;/pix']">
+                <jxb:typesafeEnumMember name="PS_005"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+        <!-- GnirsFpu => GNIRSParams.SlitWidth -->
+        <jxb:bindings node="./xsd:simpleType[@name='GnirsFpu']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='0.10 arcsec']">
+                <jxb:typesafeEnumMember name="SW_1"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.15 arcsec']">
+                <jxb:typesafeEnumMember name="SW_2"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.20 arcsec']">
+                <jxb:typesafeEnumMember name="SW_3"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.30 arcsec']">
+                <jxb:typesafeEnumMember name="SW_4"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.45 arcsec']">
+                <jxb:typesafeEnumMember name="SW_5"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.675 arcsec']">
+                <jxb:typesafeEnumMember name="SW_6"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='1.0 arcsec']">
+                <jxb:typesafeEnumMember name="SW_7"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+        <!-- GnirsDisperser => GNIRSParams.Disperser -->
+        <jxb:bindings node="./xsd:simpleType[@name='GnirsDisperser']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='10 l/mm grating']">
+                <jxb:typesafeEnumMember name="D_10"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='32 l/mm grating']">
+                <jxb:typesafeEnumMember name="D_32"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='111 l/mm grating']">
+                <jxb:typesafeEnumMember name="D_111"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+        <!-- GnirsFilter => GNIRSParams.Filter -->
+        <jxb:bindings node="./xsd:simpleType[@name='GnirsFilter']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='Y (1.03um)']">
+                <jxb:typesafeEnumMember name="Y"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='X (1.10um)']">
+                <jxb:typesafeEnumMember name="ORDER_6"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='J (1.25um)']">
+                <jxb:typesafeEnumMember name="ORDER_5"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='H (1.65um)']">
+                <jxb:typesafeEnumMember name="ORDER_4"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='K (2.20um)']">
+                <jxb:typesafeEnumMember name="ORDER_3"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='H2 (2.122um)']">
+                <jxb:typesafeEnumMember name="H2"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='PAH (3.295um)']">
+                <jxb:typesafeEnumMember name="PAH"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+        <!-- GnirsCentralWavelength => GNIRSParams.Wavelength -->
+        <jxb:bindings node="./xsd:simpleType[@name='GnirsCentralWavelength']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='&lt; 2.5um']">
+                <jxb:typesafeEnumMember name="LT_25"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='&gt;=2.5um']">
+                <jxb:typesafeEnumMember name="GTE_25"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+    </jxb:bindings>
+
+</jxb:bindings>

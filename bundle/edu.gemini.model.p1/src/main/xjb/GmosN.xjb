@@ -1,0 +1,186 @@
+<jxb:bindings version="2.0"
+              xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+              xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <!-- Custom bindings for GmosN -->
+    <jxb:bindings schemaLocation="../xsd/GmosN.xsd" node="/xsd:schema">
+
+        <!-- GmosNDisperser => GmosNorthType.DisperserNorth -->
+        <jxb:bindings node="./xsd:simpleType[@name='GmosNDisperser']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='B1200']">
+                <jxb:typesafeEnumMember name="B1200_G5301"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='R831']">
+                <jxb:typesafeEnumMember name="R831_G5302"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='B600']">
+                <jxb:typesafeEnumMember name="B600_G5307"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='R600']">
+                <jxb:typesafeEnumMember name="R600_G5304"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='R400']">
+                <jxb:typesafeEnumMember name="R400_G5305"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='R150']">
+                <jxb:typesafeEnumMember name="R150_G5306"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+        <!-- GmosNFilter => GmosNorthType.FilterNorth -->
+        <jxb:bindings node="./xsd:simpleType[@name='GmosNFilter']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='GG455 (&gt; 460 nm)']">
+                <jxb:typesafeEnumMember name="GG455_G0305"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='OG515 (&gt; 520 nm)']">
+                <jxb:typesafeEnumMember name="OG515_G0306"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='RG610 (&gt; 615 nm)']">
+                <jxb:typesafeEnumMember name="RG610_G0307"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='g + GG455 (506 nm)']">
+                <jxb:typesafeEnumMember name="g_G0301_GG455_G0305"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='g + OG515 (536 nm)']">
+                <jxb:typesafeEnumMember name="g_G0301_OG515_G0306"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='r + RG610 (657 nm)']">
+                <jxb:typesafeEnumMember name="r_G0303_RG610_G0307"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='i + CaT (815 nm)']">
+                <jxb:typesafeEnumMember name="i_G0302_CaT_G0309"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='z + CaT (890 nm)']">
+                <jxb:typesafeEnumMember name="z_G0304_CaT_G0309"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='g (475 nm)']">
+                <jxb:typesafeEnumMember name="g_G0301"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='r (630 nm)']">
+                <jxb:typesafeEnumMember name="r_G0303"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='i (780 nm)']">
+                <jxb:typesafeEnumMember name="i_G0302"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='CaT (860 nm)']">
+                <jxb:typesafeEnumMember name="CaT_G0309"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='z (925 nm)']">
+                <jxb:typesafeEnumMember name="z_G0304"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Z (876 nm)']">
+                <jxb:typesafeEnumMember name="Z_G0322"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Y (1010 nm)']">
+                <jxb:typesafeEnumMember name="Y_G0323"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='HeII (468 nm)']">
+                <jxb:typesafeEnumMember name="HeII_G0320"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='HeIIC (478 nm)']">
+                <jxb:typesafeEnumMember name="HeIIC_G0321"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='OIII (499 nm)']">
+                <jxb:typesafeEnumMember name="OIII_G0318"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='OIIIC (514 nm)']">
+                <jxb:typesafeEnumMember name="OIIIC_G0319"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Ha (656 nm)']">
+                <jxb:typesafeEnumMember name="Ha_G0310"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='HaC (662 nm)']">
+                <jxb:typesafeEnumMember name="HaC_G0311"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='SII (672 nm)']">
+                <jxb:typesafeEnumMember name="SII_G0317"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='DS920 (920 nm)']">
+                <jxb:typesafeEnumMember name="DS920_G0312"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+        <!-- GmosNFpu => GmosNorthType.FPUnitNorth -->
+        <jxb:bindings node="./xsd:simpleType[@name='GmosNFpu']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='0.5 arcsec slit']">
+                <jxb:typesafeEnumMember name="LONGSLIT_2"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.25 arcsec slit']">
+                <jxb:typesafeEnumMember name="LONGSLIT_1"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.75 arcsec slit']">
+                <jxb:typesafeEnumMember name="LONGSLIT_3"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='1.0 arcsec slit']">
+                <jxb:typesafeEnumMember name="LONGSLIT_4"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='1.5 arcsec slit']">
+                <jxb:typesafeEnumMember name="LONGSLIT_5"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='2.0 arcsec slit']">
+                <jxb:typesafeEnumMember name="LONGSLIT_6"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='5.0 arcsec slit']">
+                <jxb:typesafeEnumMember name="LONGSLIT_7"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+        <!-- GmosNMOSFpu => GmosNorthType.FPUnitNorth -->
+        <jxb:bindings node="./xsd:simpleType[@name='GmosNMOSFpu']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='0.5 arcsec slit']">
+                <jxb:typesafeEnumMember name="LONGSLIT_2"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.75 arcsec slit']">
+                <jxb:typesafeEnumMember name="LONGSLIT_3"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='1.0 arcsec slit']">
+                <jxb:typesafeEnumMember name="LONGSLIT_4"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='1.5 arcsec slit']">
+                <jxb:typesafeEnumMember name="LONGSLIT_5"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='2.0 arcsec slit']">
+                <jxb:typesafeEnumMember name="LONGSLIT_6"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='5.0 arcsec slit']">
+                <jxb:typesafeEnumMember name="LONGSLIT_7"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Other']">
+                <jxb:typesafeEnumMember name="CUSTOM_MASK"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+        <!-- GmosNFpuNs => GmosNorthType.FPUnitNorth -->
+        <jxb:bindings node="./xsd:simpleType[@name='GmosNFpuNs']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='0.25 arcsec slit']">
+                <jxb:typesafeEnumMember name="NS_O"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.5 arcsec slit']">
+                <jxb:typesafeEnumMember name="NS_1"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.75 arcsec slit']">
+                <jxb:typesafeEnumMember name="NS_2"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='1.0 arcsec slit']">
+                <jxb:typesafeEnumMember name="NS_3"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='1.5 arcsec slit']">
+                <jxb:typesafeEnumMember name="NS_4"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='2.0 arcsec slit']">
+                <jxb:typesafeEnumMember name="NS_5"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+        <!-- GmosNFpuIfu => GmosNorthType.FPUnitNorth -->
+        <jxb:bindings node="./xsd:simpleType[@name='GmosNFpuIfu']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='IFU 2 slits']">
+                <jxb:typesafeEnumMember name="IFU_1"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='IFU 1 slit']">
+                <jxb:typesafeEnumMember name="IFU_3"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+    </jxb:bindings>
+</jxb:bindings>

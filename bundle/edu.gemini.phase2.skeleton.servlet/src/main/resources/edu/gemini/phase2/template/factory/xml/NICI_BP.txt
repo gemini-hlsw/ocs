@@ -1,0 +1,27 @@
+Instrument : NICI
+Blueprints : NICI_BP.xml
+Version June 2, 2012 - updated by Bryan M
+ 
+PI = Phase I
+{} = Library ID
+
+**** IF MODE == Standard ****
+INCLUDE {1},{2} in target-specific Scheduling Group for each filter or
+red/blue channel filter pair in PI (probably not possible to
+implement in 12B, just first filter or filter pair)
+        SET DICHROIC FROM PI
+        SET RED CHANNEL FILTER FROM PI if defined ELSE SET to "Block"
+        SET BLUE CHANNEL FILTER FROM PI if defined ELSE SET to "Block"
+
+
+**** IF MODE == Coronagraphic ****
+INCLUDE {3},{4}  in target-specific Scheduling Group
+        SET DICHROIC FROM PI
+        SET RED CHANNEL FILTER FROM PI if defined ELSE SET to "Block"
+        SET BLUE CHANNEL FILTER FROM PI if defined ELSE SET to "Block"
+        SET FPM FROM PI
+
+Notes:
+Do not copy to template group, leave out until they can be place at the top program level.
+#1) Add note "Setting up NICI observations" to top of all programs
+#2) Add note "Observing Notes TEMPLATE" to top of all programs

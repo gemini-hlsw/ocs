@@ -1,0 +1,57 @@
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:fo="http://www.w3.org/1999/XSL/Format"
+                version="1.0">
+
+    <us-letter>
+        <fo:layout-master-set>
+            <fo:simple-page-master master-name="first"
+                                   page-height="11.0in"
+                                   page-width="8.5in"
+                                   margin-top="1cm"
+                                   margin-bottom="2cm"
+                                   margin-left="2.5cm"
+                                   margin-right="2.5cm">
+                <fo:region-body margin-top="1.5cm" margin-bottom="1.5cm"/>
+                <fo:region-before extent="2cm"/>
+            </fo:simple-page-master>
+
+            <fo:simple-page-master master-name="rest"
+                                   page-height="11.0in"
+                                   page-width="8.5in"
+                                   margin-top="0.75cm"
+                                   margin-bottom="0.65cm"
+                                   margin-left="2.5cm"
+                                   margin-right="2.5cm">
+                <fo:region-body margin-top="1.5cm" margin-bottom="0.65cm"/>
+                <fo:region-before extent="1cm"/>
+            </fo:simple-page-master>
+        </fo:layout-master-set>
+    </us-letter>
+
+    <a4>
+        <fo:layout-master-set>
+            <fo:simple-page-master master-name="first"
+                                   page-height="297mm"
+                                   page-width="210mm"
+                                   margin-top="1cm"
+                                   margin-bottom="2cm"
+                                   margin-left="2.5cm"
+                                   margin-right="2.5cm">
+                <fo:region-body margin-top="1.5cm" margin-bottom="1.5cm"/>
+                <fo:region-before extent="2cm"/>
+            </fo:simple-page-master>
+
+            <fo:simple-page-master master-name="rest"
+                                   page-height="297mm"
+                                   page-width="210mm"
+                                   margin-top="0.75cm"
+                                   margin-bottom="0.65cm"
+                                   margin-left="2.5cm"
+                                   margin-right="2.5cm">
+                <fo:region-body margin-top="1.5cm" margin-bottom="0.65cm"/>
+                <fo:region-before extent="1cm"/>
+            </fo:simple-page-master>
+        </fo:layout-master-set>
+    </a4>
+
+</xsl:stylesheet>
