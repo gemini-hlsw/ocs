@@ -1,0 +1,183 @@
+ump the contents of the target to System.out.
+    */
+   public void dump()
+   {
+      System.out.println(getPosition());
+      System.out.println("pm1=" + getPM1() + ",pm2=" + getPM2());
+      System.out.println("p=" + getParallax() + ",rv=" + getRV() +
+                         ",eW=" + getEffWavelength());
+   }
+
+   /**
+    * Convenience method for printing out a position.
+    */
+   public String toString()
+   {
+      return getPosition();
+   }
+
+
+   /**
+    * Gets the available options for this coordinate system.
+    */
+   public TypeBase[] getSystemOptions()
+   {
+      SystemType[] stA = new SystemType[ SystemType.TYPES.length ];
+      System.arraycopy( SystemType.TYPES, 0, stA, 0, SystemType.TYPES.length );
+      return stA;
+   }
+
+
+   /**
+    * Return a new coordinate system object as J2000.
+    * Part of Interface ICoordinate
+    */
+   public HmsDegTarget getTargetAsJ2000()
+   {
+      // Make a copy for returning
+      HmsDegTarget j2ksys = (HmsDegTarget)this.clone();
+
+      // First check to see if this coordinate is already J2000(FK5)
+      if (j2ksys.getSystemOption() == SystemType.J2000) {
+      }
+      int etype = j2ksys.getSystemOption().getTypeCode();
+      Epoch epoch = j2ksys.getEpoch();
+
+      switch(etype) {
+      case SystemType._J2000:
+	 // Already in J2000(FK5)
+	 break;
+      case SystemType._B1950:
+	 // Convert from B1950 to FK5(J2000)
+	 j2ksys = _convertB1950toJ2000(j2ksys);
+	 break;
+      case SystemType._JNNNN:
+	 // JNNN must be precessed to J2000
+	 if (epoch == DEFAULT_EPOCH_2000) {
+	    // They made a mistake, so just return it as J2000
+	    return j2ksys;
+	 }
+	 j2ksys = _convertFk5E0toE1(epoch.getValue(), 2000.0, j2ksys);
+	 break;
+      case SystemType._BNNNN:
+	 if (epoch != DEFAULT_EPOCH_1950) {
+	    // First precess BNNNN to B1950 before changing systems
+	    j2ksys = _convertFk4E0toE1(epoch.getValue(), 1950.0, j2ksys);
+	 }
+	 // Convert from B1950 to FK5(J2000)
+	 j2ksys = _convertB1950toJ2000(j2ksys);
+	 break;
+      case SystemType._APPARENT:
+	 break;
+      }
+      // Copy the object name
+      j2ksys.setName(getName());
+      return j2ksys;
+   }
+
+   // Helper method to do the conversion from B1950 to J2000
+   private HmsDegTarget _convertB1950toJ2000(HmsDegTarget in)
+   {
+      // Get the input position in degrees
+      double ra = in.getC1().getAs(Units.DEGREES);
+      double dec = in.getC2().getAs(Units.DEGREES);
+      Point2D.Double input = new Point2D.Double(ra, dec);
+
+      // Convert the coordinate from FK4 to FK5
+      Point2D.Double result = wcscon.fk425(input);
+      
+      // Set the result
+      in.setSystemOption(SystemType.J2000);
+      in.getC1().setAs(result.getX(), Units.DEGREES);
+      in.getC2().setAs(result.getY(), Units.DEGREES);
+      return in;
+   }
+
+   // Helper method to do the Fk5 precession of epoch0 to epoch1
+   private HmsDegTarget _convertFk5E0toE1(double epoch0, double epoch1, 
+					  HmsDegTarget in)
+   {
+      double ra = in.getC1().getAs(Units.DEGREES);
+      double dec = in.getC2().getAs(Units.DEGREES);
+      Point2D.Double input = new Point2D.Double(ra, dec);
+
+      Point2D.Double result = wcscon.fk5prec(epoch0, epoch1, input);
+      
+      in.getC1().setAs(result.getX(), Units.DEGREES);
+      in.getC2().setAs(result.getY(), Units.DEGREES);
+      return in;
+   }
+
+   // Helper method to do the Fk4 precession of epoch0 to epoch1
+   private HmsDegTarget _convertFk4E0toE1(double epoch0, double epoch1, 
+					  HmsDegTarget in)
+   {
+      double ra = in.getC1().getAs(Units.DEGREES);
+      double dec = in.getC2().getAs(Units.DEGREES);
+      Point2D.Double input = new Point2D.Double(ra, dec);
+
+      Point2D.Double result = wcscon.fk4prec(epoch0, epoch1, input);
+      
+      in.getC1().setAs(result.getX(), Units.DEGREES);
+      in.getC2().setAs(result.getY(), Units.DEGREES);
+      return in;
+   }
+
+
+   /**
+    * Set the position using a J2000 HmsDegTarget
+    */
+   public void setTargetWithJ2000(HmsDegTarget in)
+      throws IllegalArgumentException
+   {
+      // First check to see what system "this" is using.
+      int etype = getSystemOption().getTypeCode();
+
+      // Copy the coordinates in this object
+      _ra = (HMS)in._ra.clone();
+      _dec = (DMS)in._dec.clone();
+
+      switch(etype) {
+      case SystemType._J2000:
+	 // Already in J2000(FK5) - may be new coordinates
+	 break;
+      case SystemType._B1950:
+	 // Convert from FK5(J2000) to B1950
+	 _convertJ2000toB1950(this);
+	 break;
+      case SystemType._JNNNN:
+	 // Convert the J2000 to JNNNN based on internal epoch
+	 _convertFk5E0toE1(2000.0, _epoch.getValue(), this);
+	 break;
+      case SystemType._BNNNN:
+	 // First convert from FK5(J2000) to B1950
+	 _convertJ2000toB1950(this);
+	 // It must be converted to BNNNN based on internal epoch
+	 _convertFk4E0toE1(1950.0, _epoch.getValue(), this);
+	 break;
+      case SystemType._APPARENT:
+	 break;
+      }
+      // Copy the object name
+      setName(in.getName());
+   }
+
+   // Helper method to do the conversion from J2000 to B1950 
+   private HmsDegTarget _convertJ2000toB1950(HmsDegTarget in)
+   {
+      // Get the RA and Dec as degrees and create a new Point2D
+      double ra = in.getC1().getAs(Units.DEGREES);
+      double dec = in.getC2().getAs(Units.DEGREES);
+      Point2D.Double input = new Point2D.Double(ra, dec);
+
+      // Convert from FK5 to FK4
+      Point2D.Double result = wcscon.fk524(input);
+
+      // Set the system with the results
+      in.setSystemOption(SystemType.B1950);
+      in.getC1().setAs(result.getX(), Units.DEGREES);
+      in.getC2().setAs(result.getY(), Units.DEGREES);
+      return in;
+   }
+
+}

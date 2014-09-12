@@ -1,0 +1,13 @@
+#!/bin/sh
+# 
+# $Id: demo 4726 2004-05-14 16:50:12Z brighton $
+
+CLASS=jsky.app.ot.nsp.model.util.targets.Demo
+
+TOP=../../../../../../..
+. ${TOP}/conf/config.sh
+
+CLASSPATH=${CLASSES_DIR}${SEP}${JSKY_PATH}
+export CLASSPATH
+
+exec java ${JVMFLAGS} -cp ${CLASSPATH} ${CLASS} ${@+"$@"}

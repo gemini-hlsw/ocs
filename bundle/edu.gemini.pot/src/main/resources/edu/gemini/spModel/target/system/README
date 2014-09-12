@@ -1,0 +1,177 @@
+Version: $Id: README 4726 2004-05-14 16:50:12Z brighton $
+
+Java Coordinates/Targets Package Review
+
+Hi Allan and Jeremy,
+
+  The enclosed package is for your review.  As with most things I do,
+this may be a little over-engineered, but I think it's a good start and
+providing a general coordinate facility with the features that most of
+us seem to need.  This document is the "design document".  If we continue
+on with this, I'll write something a bit more convincing.
+
+The Package
+  Everything needed is enclosed in this packages.  I've arbitrarily
+created a package called "targets" and copied all the classes needed
+for this stand-alone demo into this package.  So you will find a
+modified wcscon.java (with simple angle stuff removed as we discussed),
+slasubs.java and something called AngleMath, which has the parts of
+wcscon and some other utility methods.  A future package name can be
+decided.
+  The number of classes is about doubled because I've written fairly
+extensive unit tests for each of the classes.  The unit tests use the
+JUnit package (http://xprogramming.com/software.htm).  I've found this
+to be indispensable for writing this code. Running the "test" script
+will run the entire suite of 75 tests.
+  I've included a demo file, Demo.java, which shows how to use most
+of the features of the packages.
+
+Features
+* All classes serializable.
+* Classes support cloneable.
+* First class parameters (values+units).
+* Coordinate formatting with seconds precision and separators.
+* Coordinate Systems: J2000, B1950, JNNNN, BNNNN, GalacticII working.
+    future: Az/Alt, Hipparcos, Apparent?, Other Super Galactic?
+* Fully tested using JUnit.
+
+Building
+  I've hacked our Java environment to work for this stand-alone
+package.  This is only tested on Solaris, so if you are on a PC,
+it may not work.
+  1.  Edit conf/gemini_env
+      a.  Set the JAVAC,JAVADOC, and JRE variables to something
+          correct for your system.
+      b.  Set HLPG_INSTALL_BASE to the file system location where
+          this packages is unpacked.
+      c.  You may have to change SEP to ;
+
+Testing
+  After setting the variables, you should be able to cd to targets and
+type "./test" or "demo".
+
+Building
+  After setting the variables, everything else "should" be okay.  
+cd to targets (the source) and type make clean then make to freshen things.  
+The "lib" directory includes the required junit.jar file.
+
+Design
+  This explanation roughly follows the Demo.java file.
+
+  I've tried to make things as flexible and lightweight as possible
+providing classes that are useful alone as well as when bundled to
+form more complex classes.
+
+CoordinateParam
+  Coordinate systems are defined by many, related parameters.  A parameter
+is a value with some Units.  The class CoordinateParam serves as a 
+base class for a single parameter.  CoordinateParam.Units contains
+the common units used for parameters in the targets package. Example
+Units are ARCSECS, AU, DEGREES.  Units is like an enumeration in C++.
+
+  Class CoordinateTypes creates a number of CoordinateParam subclasses
+for common target parameters.  For instance: PM1, PM2 for proper
+motions; RV for radial velocity; Parallax for parallax; etc.
+
+  Coordinate systems include instances of the CoordinateParam subclasses
+as needed to represent their information.
+
+Coordinate Formatting
+  There are two coordinate format classes HMSFormat and DMSFormat.
+HMSFormat handles parsing (String to double) and formatting 
+(double to String) for hours:minutes:seconds sexagesimal values.
+HMSFormat will place  a double between 0 and 24 hours.
+  DMSFormat handles coordinates in degrees:minutes:seconds (of arc).
+This format object does not limit or clamp the value the double when
+read or written (unlike HMSFormat--this should probably be fixed). So
+a double like 1500.0 will be formatted as 1500:00:00.0.
+  All format objects derive from the abstract base class CoordinateFormat
+and must implement three methods: format, parse(double), 
+and parse(double, double, double).  Higher level objects use
+CoordinateFormat rather than subclasses.
+  CoordinateFormat subclasses support setting a precision for the
+seconds output during format.  For instance precision 2 looks like:
+12:00:00.00, while precision 4 is: 12:00:00.0000.  
+  CoordinateFormat also supports different separators as used in SEA.
+The FormatSeparator class extends TypeBase to provide an enumerated
+type for different separators.  DMSFormat and HMSFormat format their
+output depending on which separator is set.
+
+HMS, DMSLong, DMS
+  A CoordinateSystem is made up of instances of CoordinateParam subclasses.
+HMS, DMSLong, and DMS represent coordinate parameters.  An equatorial
+coordinate system uses two coordinates: an HMS and a DMS.
+  As with other CoordinateParams, these three are a double value and
+a Unit, along with a bunch of appropriate convenience methods.
+  HMS is for a coordinate in time units. DMS is a coordinate in
+arc units limiting its value between +/-90.  DMSLong is a coordinate in
+arc units limiting its value between 0-360.
+  These three classes implement the ICoordinate interface.  The
+ICoordinate interface contains methods that let a client use a coordinate
+without knowing its exact type.  Coordinate system objects contain
+methods for using ICoordinate implementations.
+  The HMS, DMSLong, and DMS each contain an HMSFormat or DMSFormat as
+a shared class variable.  So a client program can change the format
+for all instances of HMS if needed.  A client can also change the
+format object for a specific HMS, DMS, or DMSLong instance.
+
+
+HmsDegTarget, DegDegTarget, ConicTarget
+
+  These three classes collect parameters into coordinate systems.
+HmsDegTarget supports coordinate systems that typically use one
+time coordinate and one arc-based coordinate.  Through the system option,
+the system can be: J2000, B1960, JNNNN, or BNNNN.  Future versions should
+have apparent and Hipparcos system options.
+  DegDegTarget supports coordinate systems with two arc-based coordinates--
+a DMSLong for longitude and a DMS for latitude.  The only system option
+currently supported is galactic, but may have az/alt in the future.
+  ConicTarget supports the representation of objects with orbital
+elements.  All the CoordinateParam instances are collected, but I've
+not written the meat to do the conversion of orbital elements to J2000.
+This depends on a lot of astrometry code that's not yet present in Java.
+  All coordinate systems extend CoordinateSystem as an abstract base class.  
+It has three abstract methods that must be implemented.
+  Coordinate systems implement the ICoordinateSystem interface.  Several
+methods exist, but the most important ones are:
+  HmsDegTarget getTargetAsJ2000();
+and
+  setTargetWithJ2000(HmsDegTarget);
+
+  These two methods can be used to get at a coordinate system in a
+single way without knowing internal, specialized methods.
+
+  HmsDegTarget also supports a number of convenience methods that use
+Ra/Dec rather than c1/c2.
+
+  These lower-level coordinate system classes allow the caller to
+get at internal object references and allow callers to change internal
+used objects.  They are not immutable.  Often, however, these light
+weight classes are what is needed.
+
+HmsDegTargetW, DegDegTargetW
+  HmsDegTargetW and DegDegTargetW wrap an HmsDegTarget and DegDegTarget,
+respectively.  The "W" is for wrap (better name?).  These two classes
+provide immutability and property change events.  They also implement
+the ICoordinateSystem interface so client code should not see a difference
+between the wrapper classes and the wrapped class (unless they depend
+on getting internals).
+  I've not written ConicTargetW yet.
+  I think this is a pretty good way of providing a more functional 
+interface when needed.  It's not unlike the way Collection classes
+provide synchronized versions.
+
+
+Deficiencies
+  I guess set and get with J2000 need to copy more of the internal state
+besides just the two positions and epoch.  This shouldn't be too hard.
+Since I'm not using them, I haven't yet done it.
+  The HmsDegTarget needs to do what is needed with the internal state to
+provide the best positions.  I've not seen the entire calculation anywhere
+yet.  Chris Mayer or Pat Wallace would know.  It's probably in slalib, too.
+
+I guess that's it for now.  I'm going to have to set this aside for
+a bit of time.  Please take a look at the code and make suggestions
+for adding in the other features we need.
+
+Kim

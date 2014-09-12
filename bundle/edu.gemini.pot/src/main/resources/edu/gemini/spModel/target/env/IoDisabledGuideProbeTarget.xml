@@ -1,0 +1,31 @@
+<paramset name="targetEnv">
+    <paramset name="base">
+      <param name="name" value="BaseName"/>
+      <param name="system" value="J2000"/>
+      <param name="epoch" value="2000.0" units="years"/>
+      <param name="c1" value="10:00:00.000"/>
+      <param name="c2" value="-20:00:00.00"/>
+      <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+      <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+      <param name="parallax" value="0.0" units="arcsecs"/>
+      <param name="rv" value="0.0" units="km/sec"/>
+      <param name="wavelength" value="-1.0" units="angstroms"/>
+    </paramset>
+    <paramset name="guider">
+      <param name="key" value="PWFS2"/>
+      <param name="enabled" value="false"/>
+      <param name="primary" value="0"/>
+      <paramset name="spTarget">
+        <param name="name" value="GSC001"/>
+        <param name="system" value="J2000"/>
+        <param name="epoch" value="2000.0" units="years"/>
+        <param name="c1" value="10:40:48.960"/>
+        <param name="c2" value="-59:44:35.23"/>
+        <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+        <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+        <param name="parallax" value="0.0" units="arcsecs"/>
+        <param name="rv" value="0.0" units="km/sec"/>
+        <param name="wavelength" value="-1.0" units="angstroms"/>
+      </paramset>
+    </paramset>
+</paramset>
