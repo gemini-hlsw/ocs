@@ -52,7 +52,7 @@ public class AddSemesterAction extends RefreshAction {
 			SharedIcons.ADD_SEMESTER, options, options[0]); 
 				
 		if (extra != null) {
-			sched.addExtraSemseter(extra);
+			sched.addExtraSemester(extra);
 			super.asyncActionPerformed(e);
 		}
 		
