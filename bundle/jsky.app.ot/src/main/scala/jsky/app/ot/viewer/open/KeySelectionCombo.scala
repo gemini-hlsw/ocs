@@ -11,8 +11,8 @@ import scala.swing.ListView.Renderer
 import scala.swing.Reactions._
 import scala.swing.event.SelectionEvent
 
-class KeySelectionCombo(auth: KeyChain, keyChangedOp: edu.gemini.shared.util.immutable.ApplyOp[Option[(Peer, Key)]]) extends ComboBox(List.empty[Option[(Peer, Key)]]) {
-  private object Model extends DefaultComboBoxModel {
+class KeySelectionCombo(auth: KeyChain, keyChangedOp: edu.gemini.shared.util.immutable.ApplyOp[Option[(Peer, Key)]]) extends ComboBox[Option[(Peer, Key)]](List.empty[Option[(Peer, Key)]]) {
+  private object Model extends DefaultComboBoxModel[Option[(Peer, Key)]] {
     def allKeys: List[(Peer, Key)] =
       auth.keys.unsafeRun.fold(_ => List.empty[(Peer, Key)], _.toList.flatMap {
         case (p, s) => Stream.continually(p).zip(s).toList
@@ -34,7 +34,7 @@ class KeySelectionCombo(auth: KeyChain, keyChangedOp: edu.gemini.shared.util.imm
       removeAllElements()
 
       val ks = allKeys.sortBy(k => keyDisplay(k).toLowerCase).map(Some(_))
-      (Option.empty[(Peer, Key)] :: ks).foreach { addElement }
+      (Option.empty[(Peer, Key)] :: ks).foreach { x: Option[(Peer, Key)] => addElement(x) }
 
       val sel = auth.selection.unsafeRun.fold(_ => None, identity)
       setSelectedItem(sel)
