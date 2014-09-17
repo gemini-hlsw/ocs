@@ -52,9 +52,9 @@ public class OutlineNode extends DefaultMutableTreeNode {
 
     @SuppressWarnings("unchecked")
     void childChanged(TriState childSelected) {
-        TriState oldSelected = selected;
-
         if (!adjusting) {
+            TriState oldSelected = selected;
+
             // If we only have one child, then our selected state is the child's state.
             // If the child is INDEFINITE, then this node must also be indefinite.
             if (getChildCount() == 1 || childSelected == TriState.INDEFINITE)
@@ -90,13 +90,13 @@ public class OutlineNode extends DefaultMutableTreeNode {
                 else
                     selected = TriState.INDEFINITE;
             }
-        }
 
-        // If we have changed selected or we have a different value than the parent now, invoke recursively up the tree.
-        // We do not need to invoke downwards.
-        OutlineNode parent = (OutlineNode) getParent();
-        if (parent != null && (!oldSelected.equals(selected) || !selected.equals(parent.getSelected())))
-            ((OutlineNode) getParent()).childChanged(selected);
+            // If we have changed selected or we have a different value than the parent now, invoke recursively up the tree.
+            // We do not need to invoke downwards.
+            OutlineNode parent = (OutlineNode) getParent();
+            if (parent != null && (!oldSelected.equals(selected) || !selected.equals(parent.getSelected())))
+                parent.childChanged(selected);
+        }
     }
 
 
