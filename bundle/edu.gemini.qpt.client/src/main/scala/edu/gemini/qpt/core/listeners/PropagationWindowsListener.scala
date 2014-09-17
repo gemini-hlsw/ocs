@@ -11,7 +11,7 @@ import scala.collection.JavaConverters._
 
 
 /**
- * Listener for model changes which adds markers for missing propagation windows.
+ * Listener for model changes which adds markers for observations without clearance windows.
  */
 class PropagationWindowsListener extends MarkerModelListener[Variant] {
 
@@ -23,7 +23,7 @@ class PropagationWindowsListener extends MarkerModelListener[Variant] {
     // Check if there are any laser observations for which we don't have clearance windows.
     val lgsAllocs = variant.getAllocs.asScala.filter(_.getObs.getLGS)
     lgsAllocs.filter(a => hasNoClearanceWindows(a.getObs)).foreach { a =>
-      markerManager.addMarker(true, this, Marker.Severity.Error, "Target has no clearance windows.", variant, a)
+      markerManager.addMarker(false, this, Marker.Severity.Error, "LGS observation has no clearance windows.", variant, a)
     }
   }
 
