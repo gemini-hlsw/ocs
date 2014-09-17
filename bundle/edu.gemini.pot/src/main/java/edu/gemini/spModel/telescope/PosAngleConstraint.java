@@ -14,7 +14,6 @@ import java.util.List;
 public enum PosAngleConstraint {
     /** No constraint on adjusting pos angle. */
     UNKNOWN() {
-        @Override
         public ImList<Angle> steps(Angle start, Angle stepSize) {
             int deg = (int) Math.round(stepSize.toPositive().toDegrees().getMagnitude());
             int stepCount = (deg == 0) ? 1 : 360 / deg;
@@ -32,7 +31,6 @@ public enum PosAngleConstraint {
 
     /** The provided pos angle only. */
     FIXED() {
-        @Override
         public ImList<Angle> steps(Angle start, Angle stepSize) {
             return ImCollections.singletonList(start);
         }
@@ -40,14 +38,10 @@ public enum PosAngleConstraint {
 
     /** The provided pos angle, or the pos angle plus 180 deg. */
     FIXED_180() {
-        @Override
         public ImList<Angle> steps(Angle start, Angle stepSize) {
             return DefaultImList.create(start, start.add(Angle.ANGLE_PI));
         }
     },
-
-    /** Any pos angle that is reachable by the guide probe. */
-    UNBOUNDED,
 
     /** A pos angle aligned with the parallactic angle. */
 //    PARALLACTIC,
@@ -62,5 +56,5 @@ public enum PosAngleConstraint {
      * the FIXED constraint would provide just a single angle, the start
      * angle.  A NONE constraint will step through the entire range.
      */
-    public ImList<Angle> steps(Angle start, Angle stepSize) { return ImCollections.emptyList(); }
+    public abstract ImList<Angle> steps(Angle start, Angle stepSize);
 }
