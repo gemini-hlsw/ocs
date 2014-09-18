@@ -27,7 +27,8 @@ public class Listeners {
 		new TruncatedAllocListener(),
         new TargetEnvironmentListener(),
         new ParallacticAngleListener(),
-        new AgsAnalysisListener()
+        new AgsAnalysisListener(),
+        new PropagationWindowsListener()
 	);
 	
 	
