@@ -13,7 +13,7 @@ class RootSpec extends SpecificationWithJUnit {
     }
     "include Texes" in {
       val root = new Root(Semester(2015, A))
-      root.choices must contain (Instrument.Texes)
+      root.choices must not contain (Instrument.Texes)
     }
     "include Speckles" in {
       val root = new Root(Semester(2015, A))
