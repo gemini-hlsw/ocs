@@ -34,7 +34,7 @@ class PropagationWindowsListener extends MarkerModelListener[Variant] {
   // check if qpt obs object is missing clearance windows
   private def hasNoClearanceWindows(obs: Obs): Boolean = {
     val lttsObs = Option(LttsServicesClient.getInstance.getObservation(obs))
-    lttsObs.isEmpty || hasNoClearanceWindows(lttsObs.get)
+    lttsObs.forall(hasNoClearanceWindows)
   }
 
   // check if the LTTS obs object is missing clearance windows
