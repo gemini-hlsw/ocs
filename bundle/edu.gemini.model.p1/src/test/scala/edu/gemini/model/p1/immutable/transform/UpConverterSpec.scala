@@ -20,7 +20,7 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
 
           val proposal = ProposalIo.read(result.toString())
           proposal.meta.band3OptionChosen must beFalse
-          proposal.title must beEqualTo("Observation with Texes")
+          proposal.title must beEqualTo("Observation with GSAOI")
           proposal.abstrakt must beEmpty
           proposal.scheduling must beEmpty
           proposal.keywords must beEmpty
@@ -34,8 +34,8 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
           // Check the instruments
           proposal.blueprints.headOption.foreach {
             i =>
-              i.name must beEqualTo("Texes 32 l/mm echelle")
-              i.visitor must beTrue
+              i.name must beEqualTo("GSAOI K(short) (2.150 um)")
+              i.visitor must beFalse
           }
 
           proposal.semester must beEqualTo(Semester(2015, SemesterOption.A))
