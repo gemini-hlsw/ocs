@@ -51,6 +51,7 @@ package object immutable {
     val BR = mutable.NgoPartner.BR
     val CA = mutable.NgoPartner.CA
     val CL = mutable.NgoPartner.CL
+    val KR = mutable.NgoPartner.KR
     val US = mutable.NgoPartner.US
     val UH = mutable.NgoPartner.UH
   }

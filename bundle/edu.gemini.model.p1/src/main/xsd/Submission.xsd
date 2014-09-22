@@ -187,6 +187,7 @@
             <xsd:enumeration value="br"/>
             <xsd:enumeration value="ca"/>
             <xsd:enumeration value="cl"/>
+            <xsd:enumeration value="kr"/>
             <xsd:enumeration value="us"/>
             <xsd:enumeration value="uh"/>
         </xsd:restriction>

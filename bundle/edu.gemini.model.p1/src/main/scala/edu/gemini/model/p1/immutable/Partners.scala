@@ -10,6 +10,7 @@ object Partners {
     NgoPartner.BR -> "Brazil",
     NgoPartner.CA -> "Canada",
     NgoPartner.CL -> "Chile",
+    NgoPartner.KR -> "Korea",
     NgoPartner.US -> "United States",
     NgoPartner.UH -> "University of Hawaii",
     ExchangePartner.KECK -> Site.Keck.name,
