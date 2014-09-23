@@ -663,7 +663,8 @@ trait OcsBundle {
     project.in(file("bundle/edu.gemini.p1monitor")).dependsOn(
       bundle_edu_gemini_model_p1,
       bundle_edu_gemini_model_p1_pdf,
-      bundle_edu_gemini_util_pdf
+      bundle_edu_gemini_util_pdf,
+      bundle_edu_gemini_util_osgi
     )
 
   lazy val bundle_edu_gemini_pit = 
