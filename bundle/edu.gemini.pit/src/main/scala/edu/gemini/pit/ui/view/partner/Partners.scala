@@ -12,6 +12,7 @@ object PartnersFlags {
     NgoPartner.BR -> SharedIcons.FLAG_BR,
     NgoPartner.CA -> SharedIcons.FLAG_CA,
     NgoPartner.CL -> SharedIcons.FLAG_CL,
+    NgoPartner.KR -> SharedIcons.FLAG_KR,
     NgoPartner.US -> SharedIcons.FLAG_US,
     NgoPartner.UH -> SharedIcons.FLAG_UH,
     ExchangePartner.KECK -> SharedIcons.FLAG_KECK,

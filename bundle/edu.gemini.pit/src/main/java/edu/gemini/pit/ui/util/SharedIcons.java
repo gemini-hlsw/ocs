@@ -40,6 +40,7 @@ public interface SharedIcons {
     Icon FLAG_BR = new SharedIcon("br.png");
     Icon FLAG_CA = new SharedIcon("ca.png");
     Icon FLAG_CL = new SharedIcon("cl.png");
+    Icon FLAG_KR = new SharedIcon("kr.png");
     Icon FLAG_GEMINI = new SharedIcon("gemini.png");
     Icon FLAG_JP = new SharedIcon("jp.png");
     Icon FLAG_KECK = new SharedIcon("keck.png");
