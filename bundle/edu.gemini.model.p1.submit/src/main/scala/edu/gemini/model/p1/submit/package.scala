@@ -16,6 +16,7 @@ package object submit {
     Ngo(BR)                      -> "http://www.lna.br/cgi-bin/gemini/xmlbackend.cgi",
     Ngo(CA)                      -> "http://gemini.astrosci.ca:80/cgi-bin/xmlbackend.cgi",
     Ngo(CL)                      -> "http://geminicyt.conicyt.cl/cgi-bin/gemini/xmlbackend.cgi",
+    Ngo(KR)                      -> "http://phase1.gemini.edu/cgi-bin/gemini/kr/xmlbackend.cgi",
     Ngo(US)                      -> "http://www.noao.edu/cgi-bin/gemini/xmlbackend.cgi",
     Ngo(UH)                      -> "http://www.ifa.hawaii.edu/cgi-bin/gemini/xmlbackend.cgi",
     Exchange(KECK)               -> "http://phase1.gemini.edu/cgi-bin/gemini/keck/xmlbackend.cgi",
