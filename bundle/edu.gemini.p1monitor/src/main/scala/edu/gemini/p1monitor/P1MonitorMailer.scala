@@ -9,10 +9,12 @@ import edu.gemini.model.p1.immutable._
 import edu.gemini.model.p1.immutable
 import edu.gemini.p1monitor.P1Monitor._
 
+import scalaz._
+import Scalaz._
+
 class P1MonitorMailer(cfg: P1MonitorConfig) {
   val LOG = Logger.getLogger(this.getClass.getName)
   val sender = new InternetAddress("noreply@gemini.edu")
-
 
   def notify(dirName: String, files: ProposalFileGroup) {
     val proposal = files.xml.map(ProposalIo.read)
@@ -104,6 +106,7 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
     val string = propClass match {
       case pc: SpecialProposalClass       => pc.sub.response.map(_.receipt.id).mkString(" ")
       case ft: FastTurnaroundProgramClass => ft.sub.response.map(_.receipt.id).mkString(" ")
+      case q:  QueueProposalClass         => ~q.subs.left.getOrElse(Nil).map(_.response.map(_.receipt.id).mkString(" ")).headOption
       case _                              => ""
     }
     string.trim
@@ -112,12 +115,16 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
   private def getTypeString(propClass: ProposalClass): String = propClass match {
       case pc: immutable.SpecialProposalClass       => pc.sub.specialType.value()
       case ft: immutable.FastTurnaroundProgramClass => "Fast Turnaround"
-      case _ => ""
+      case q: immutable.QueueProposalClass          => "Queue"
+      case _                                        => ""
     }
 
   private def getTypeName(propClass: ProposalClass): String = propClass match {
       case pc: immutable.SpecialProposalClass       => pc.sub.specialType
       case ft: immutable.FastTurnaroundProgramClass => "FT"
+      case q:  immutable.QueueProposalClass         => ~q.subs.left.getOrElse(Nil).collect {
+          case s if cfg.map.keys.toList.contains(s.partner.value()) => s.partner.value().toUpperCase
+        }.headOption
       case _                                        => ""
     }
 
