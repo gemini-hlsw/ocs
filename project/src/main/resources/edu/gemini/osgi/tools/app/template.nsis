@@ -23,7 +23,8 @@ Section "-pre"
 SectionEnd
 
 Section "Default Installation"
-    CreateShortCut "$SMPROGRAMS\Gemini\${NAME}\${NAME} ${VERSION}.lnk" "$INSTDIR\jre\bin\javaw.exe" "${APP_VM_ARGS} -jar ${APP_JAR} ${APP_ARGS}" "$INSTDIR\${ICON}"
+	SetShellVarContext all
+	CreateShortCut "$SMPROGRAMS\Gemini\${NAME}\${NAME} ${VERSION}.lnk" "$INSTDIR\jre\bin\javaw.exe" "${APP_VM_ARGS} -jar ${APP_JAR} ${APP_ARGS}" "$INSTDIR\${ICON}"
 SectionEnd
 
 Section "-post"
@@ -40,11 +41,12 @@ UninstallText "This will uninstall ${NAME} ${VERSION}."
 
 Section Uninstall
 
+	SetShellVarContext all
 	DeleteRegKey HKEY_LOCAL_MACHINE "SOFTWARE\Gemini 8.1m HLPG\${NAME} ${VERSION}"
 	DeleteRegKey HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${NAME} ${VERSION}"
 	RMDIR /r "$INSTDIR"
 
-	RMDIR /r "$SMPROGRAMS\Gemini\${NAME}\${NAME} ${VERSION}.lnk"
+	DELETE "$SMPROGRAMS\Gemini\${NAME}\${NAME} ${VERSION}.lnk"
 
 SectionEnd
 
