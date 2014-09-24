@@ -58,7 +58,7 @@ object Proposal {
   // but I'll add this check anyway for unit testing and non-OSGi usage
   lazy val currentSchemaVersion = Option(System.getProperty("edu.gemini.model.p1.schemaVersion")) match {
     case Some(x:String) => x
-    case x => sys.error("Should set schemaVersion property")
+    case x              => sys.error("Should set schemaVersion property")
   }
 
   lazy val empty = apply(
