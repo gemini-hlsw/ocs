@@ -12,7 +12,7 @@ ocsAppManifest := {
   val pv = pitVersion.value.toBundleVersion
   Application(
     id = "p1-monitor",
-    name = "Phase I PDF Maker Tool",
+    name = "Phase 1 Monitor Tool",
     version = pitVersion.value.toString,
     configs = List(
       common(ov, pv),

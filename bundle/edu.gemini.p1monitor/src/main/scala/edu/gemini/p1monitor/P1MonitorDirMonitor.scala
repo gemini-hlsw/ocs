@@ -111,19 +111,16 @@ class P1MonitorDirMonitor(cfg: P1MonitorConfig) extends DirListener {
     require (src != null)
     require (dest != null)
     src match {
-      case s if src.exists() && src != dest => {
-        LOG.info(s"Copy file ${src} to ${dest}")
+      case s if src.exists() && src != dest =>
+        LOG.info(s"Copy file $src to $dest")
         new FileOutputStream(dest).getChannel().transferFrom(new FileInputStream(src).getChannel, 0, Long.MaxValue)
         Some(dest)
-      }
-      case s if src.exists() && src == dest => {
-        LOG.info(s"Destination for ${src}, ${dest} already in place")
+      case s if src.exists() && src == dest =>
+        LOG.info(s"Destination for $src, $dest already in place")
         Some(s)
-      }
-      case _ => {
-        LOG.info(s"It seems src does not exist: ${src}")
+      case _                                =>
+        LOG.info(s"It seems src does not exist: $src")
         None
-      }
     }
   }
 
