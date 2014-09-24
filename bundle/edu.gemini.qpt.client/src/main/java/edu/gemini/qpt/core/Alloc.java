@@ -575,6 +575,16 @@ public final class Alloc extends Interval implements Commentable {
 		return builder.toString();
 	}
 
+    @Override
+    public int hashCode() {
+        int hash = 17;
+        hash = hash * 37 + variant.hashCode();
+        hash = hash * 37 + obs.hashCode();
+        hash = hash * 37 + firstStep;
+        hash = hash * 37 + lastStep;
+        return hash;
+    }
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof Alloc && super.equals(obj)) {
@@ -587,6 +597,20 @@ public final class Alloc extends Interval implements Commentable {
 		}
 		return false;
 	}
+
+    @Override
+    public int compareTo(Interval a) {
+        // NOTE: Alloc extends Interval and inherits its compareTo(Interval) method. We have to override the compareTo
+        // from Interval here in order to make sure that Alloc objects stored in an AllocSet in a Variant are not
+        // identified as equal (and consequently removed from the set) just because they cover the same interval.
+        // This also addresses the problems mentioned in REL-615 and REL-1436 which were all caused by this faulty
+        // comparison of Allocs.
+        int diff = super.compareTo(a);
+        if (diff == 0) {
+          diff = hashCode() - a.hashCode();
+        }
+        return diff;
+    }
 
 	///
 	/// CTOR HELPER
