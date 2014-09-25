@@ -22,9 +22,11 @@ class Activator extends BundleActivator {
     val config: P1MonitorConfig = new P1MonitorConfig(context)
     monitor = new P1MonitorDirMonitor(config)
 
+    val servletUrl = "/fetch"
+
     tracker = Some(track[HttpService, HttpService](context) { httpRef: HttpService =>
         try {
-          httpRef.registerServlet("/fetch", new FetchServlet(config), new Hashtable[Any, Any](), null)
+          httpRef.registerServlet(servletUrl, new FetchServlet(config), new Hashtable[Any, Any](), null)
           monitor.startMonitoring()
         } catch {
           case ex: ServletException => LOG.log(Level.SEVERE, "Trouble setting up web application.", ex)
@@ -33,7 +35,8 @@ class Activator extends BundleActivator {
 
         httpRef
       } {
-        x: HttpService =>
+        httpRef: HttpService =>
+          httpRef.unregister(servletUrl)
           monitor.stopMonitoring()
       })
     tracker.foreach(_.open())
