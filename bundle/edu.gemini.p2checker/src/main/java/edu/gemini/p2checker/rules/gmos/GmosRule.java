@@ -1662,6 +1662,31 @@ public class GmosRule implements IRule {
     };
 
     /**
+     * REL-1249: Warn if IFU observations have a spatial binning.
+     * This rules fires for any IFU observations that do not use the mirror and has a y binning != 1.
+     */
+    private static IConfigRule IFU_NO_SPATIAL_BINNING_RULE = new IConfigRule() {
+        private static final String errMsg = "IFU observations generally should not be binned in the spatial direction (y)";
+
+        @Override
+        public Problem check(Config config, int step, ObservationElements elems, Object state) {
+            if (getFPU(config).isIFU() && !getDisperser(config).isMirror() && getYBinning(config) != Binning.ONE) {
+
+                return new Problem(WARNING, PREFIX + "IFU_NO_SPATIAL_BINNING_RULE", errMsg,
+                        SequenceRule.getInstrumentOrSequenceNode(step, elems));
+
+            }
+
+            return null;
+        }
+
+        @Override
+        public IConfigMatcher getMatcher() {
+            return IConfigMatcher.ALWAYS;
+        }
+    };
+
+    /**
      * Register all the GMOS rules to apply
      */
     static {
@@ -1701,6 +1726,7 @@ public class GmosRule implements IRule {
         GMOS_RULES.add(MAX_ROI_RULE);
         GMOS_RULES.add(ROI_OVERLAP_RULE);
         GMOS_RULES.add(CUSTOM_ROI_NOT_DECLARED_RULE);
+        GMOS_RULES.add(IFU_NO_SPATIAL_BINNING_RULE);
         GMOS_RULES.add(new MdfMaskNameRule(Problem.Type.ERROR));
         GMOS_RULES.add(new MdfMaskNameRule(Problem.Type.WARNING));
     }
