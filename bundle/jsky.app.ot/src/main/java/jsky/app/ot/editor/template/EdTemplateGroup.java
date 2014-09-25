@@ -143,7 +143,6 @@ class ParamsListTable extends JTable {
 
 class ParamsListTableModel extends AbstractTableModel implements PropertyChangeListener {
 
-    private TemplateFolder templateFolder;
     private ISPTemplateGroup templateGroupNode;
 
     // We need to listen to remote events
@@ -169,7 +168,6 @@ class ParamsListTableModel extends AbstractTableModel implements PropertyChangeL
 
         // New State
         templateGroupNode = tgn;
-        templateFolder = (TemplateFolder) tgn.getParent().getDataObject();
         eventManager.setRootNode(templateGroupNode);
 
         // Initialize our list
@@ -226,9 +224,9 @@ class ParamsListTableModel extends AbstractTableModel implements PropertyChangeL
         final TemplateParameters ps = getEntryAt(rowIndex).getValue();
         switch (columnIndex) {
             case 0:
-                return templateFolder.getTargets().get(ps.getTargetId());
+                return ps.getTarget();
             case 1:
-                return templateFolder.getSiteQualities().get(ps.getSiteQualityId()).conditions();
+                return ps.getSiteQuality().conditions();
             case 2:
                 return ps.getTime();
             default:

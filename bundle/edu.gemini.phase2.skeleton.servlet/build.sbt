@@ -21,11 +21,15 @@ osgiSettings
 
 ocsBundleSettings
 
-OsgiKeys.bundleActivator := Some("edu.gemini.phase2.skeleton.servlet.osgi.Activator")
+OsgiKeys.bundleActivator := Some("edu.gemini.phase2.osgi.Activator")
 
 OsgiKeys.bundleSymbolicName := name.value
 
 OsgiKeys.dynamicImportPackage := Seq("")
+
+OsgiKeys.privatePackage := Seq(
+  "edu.gemini.phase2.*"
+)
 
 OsgiKeys.exportPackage := Seq(
   "edu.gemini.phase2.template.factory.api",

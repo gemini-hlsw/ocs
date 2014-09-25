@@ -49,13 +49,12 @@ public class InstantiationFunctor extends DBAbstractFunctor {
         try {
             List<ISPGroup> newGroups = new ArrayList<ISPGroup>();
             final ISPProgram prog = db.lookupProgram(node.getProgramKey());
-            final TemplateFolder templateFolderData = (TemplateFolder) prog.getTemplateFolder().getDataObject();
             for (Map.Entry<ISPTemplateGroup, Set<ISPTemplateParameters>> e : selection.entrySet()) {
                 for (ISPTemplateParameters ps : e.getValue()) {
                     final ISPTemplateGroup templateGroup = e.getKey();
                     final TemplateParameters templateParametersData = (TemplateParameters) ps.getDataObject();
-                    final SPSiteQuality siteQualityData = templateFolderData.getSiteQualities().get(templateParametersData.getSiteQualityId());
-                    final SPTarget targetData = templateFolderData.getTargets().get(templateParametersData.getTargetId());
+                    final SPSiteQuality siteQualityData = templateParametersData.getSiteQuality();
+                    final SPTarget targetData = templateParametersData.getTarget();
                     final ISPGroup grp = instantiate(db.getFactory(), prog, templateGroup, siteQualityData, targetData);
                     newGroups.add(grp);
                 }

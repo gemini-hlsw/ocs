@@ -3,13 +3,13 @@ package edu.gemini.phase2.skeleton.servlet
 import edu.gemini.phase2.core.model.{TemplateFolderExpansion, SkeletonStatus, SkeletonShell}
 import edu.gemini.phase2.core.odb.SkeletonStoreResult._
 import edu.gemini.phase2.core.odb.SkeletonStoreService
-import edu.gemini.phase2.skeleton.factory.SkeletonFactory
+import edu.gemini.phase2.skeleton.factory.{SpProgramFactory, Phase1FolderFactory}
 import edu.gemini.phase2.template.factory.api.{TemplateFolderExpansionFactory, TemplateFactory}
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.spModel.core.{StandardProgramId, ProgramId, SPProgramID}
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.rich.pot.spdb._
-import edu.gemini.spModel.template.TemplateFolder
+import edu.gemini.spModel.template.Phase1Folder
 
 import org.apache.commons.fileupload.FileItem
 import org.apache.commons.fileupload.disk.DiskFileItemFactory
@@ -23,7 +23,6 @@ import scala.collection.JavaConverters._
 import scala.io.Source
 import scala.xml.{XML, Elem}
 import edu.gemini.model.p1.immutable.{ProposalConversion, ProposalIo, Proposal}
-import scala.Either
 import edu.gemini.phase2.skeleton.auxfile.SkeletonAuxfileWriter
 import edu.gemini.spModel.obscomp.SPNote
 import edu.gemini.auxfile.copier.AuxFileCopier
@@ -190,9 +189,11 @@ final class SkeletonServlet(odb: IDBDatabaseService, templateFactory: TemplateFa
     }
 
   private def makeSkeleton(id: StandardProgramId, p: Proposal): Either[Failure, SkeletonShell] =
-    SkeletonFactory.makeSkeleton(id.toSp, p).left map { Failure.badRequest }
+    (for {
+      f <- Phase1FolderFactory.create(p).right
+    } yield new SkeletonShell(id.toSp, SpProgramFactory.create(p), f)).left map { Failure.badRequest }
 
-  private def expandTemplates(folder: TemplateFolder): Either[Failure, TemplateFolderExpansion] =
+  private def expandTemplates(folder: Phase1Folder): Either[Failure, TemplateFolderExpansion] =
     TemplateFolderExpansionFactory.expand(folder, templateFactory).left map { msg =>
       Failure.badRequest(msg)
     }

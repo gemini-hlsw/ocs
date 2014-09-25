@@ -4,6 +4,7 @@ import edu.gemini.pot.sp.*;
 import static edu.gemini.pot.sp.SPComponentBroadType.AO;
 import static edu.gemini.pot.sp.SPComponentBroadType.INSTRUMENT;
 import edu.gemini.shared.util.TimeValue;
+import edu.gemini.shared.util.immutable.ApplyOp;
 import edu.gemini.shared.util.immutable.Pair;
 import edu.gemini.shared.util.immutable.Tuple2;
 import edu.gemini.spModel.core.SPProgramID;
@@ -19,8 +20,7 @@ import edu.gemini.spModel.obs.ObsTimesService;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.ProgramNote;
 import edu.gemini.spModel.target.SPTarget;
-import edu.gemini.spModel.template.TemplateFolder;
-import edu.gemini.spModel.template.TemplateGroup;
+import edu.gemini.spModel.template.TemplateParameters;
 import edu.gemini.spModel.time.ChargeClass;
 import edu.gemini.spModel.too.Too;
 import edu.gemini.spModel.too.TooType;
@@ -262,18 +262,14 @@ public class ReportUtils {
     }
 
     static List<Tuple2<SPSiteQuality, TimeValue>> getTemplateConditions(ISPProgram progShell) {
-        List<Tuple2<SPSiteQuality, TimeValue>> results = new ArrayList<Tuple2<SPSiteQuality, TimeValue>>();
+        final List<Tuple2<SPSiteQuality, TimeValue>> results = new ArrayList<Tuple2<SPSiteQuality, TimeValue>>();
 
-        ISPTemplateFolder ifolder = progShell.getTemplateFolder();
-        if (ifolder != null) {
-            TemplateFolder folder = (TemplateFolder) ifolder.getDataObject();
-            Map<String, SPSiteQuality> sq = folder.getSiteQualities();
-            for (TemplateFolder.Phase1Group group : folder.getGroups()) {
-                for (TemplateGroup.Args arg : group.argsList) {
-                    results.add(new Pair(sq.get(arg.getSiteQualityId()), arg.getTime()));
-                }
+        final ISPTemplateFolder folder = progShell.getTemplateFolder();
+        TemplateParameters.foreach(folder, new ApplyOp<TemplateParameters>() {
+            @Override public void apply(TemplateParameters tp) {
+                results.add(new Pair(tp.getSiteQuality(), tp.getTime()));
             }
-        }
+        });
         return results;
     }
 
@@ -391,17 +387,14 @@ public class ReportUtils {
     }
 
     private static Set<Integer> getTemplateRaHours(ISPProgram progShell) {
-        Set<Integer> hourSet = new TreeSet<Integer>();
-        ISPTemplateFolder ifolder = progShell.getTemplateFolder();
-        if (ifolder != null) {
-            TemplateFolder folder = (TemplateFolder) ifolder.getDataObject();
-            for (SPTarget target : folder.getTargets().values()) {
-                try {
-                    hourSet.add(getRaHours(target));
-                } catch (Exception ex) {
-                }
+        final Set<Integer> hourSet = new TreeSet<Integer>();
+        final ISPTemplateFolder folder = progShell.getTemplateFolder();
+        TemplateParameters.foreach(folder, new ApplyOp<TemplateParameters>() {
+            @Override
+            public void apply(TemplateParameters tp) {
+                hourSet.add(getRaHours(tp.getTarget()));
             }
-        }
+        });
         return hourSet;
     }
 

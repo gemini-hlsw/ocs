@@ -9,7 +9,7 @@ import edu.gemini.shared.skyobject.Magnitude.Band.H
 import scala.collection.JavaConverters._
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 
-case class Flamingos2Longslit(blueprint:SpFlamingos2BlueprintLongslit, exampleTarget:SPTarget) extends Flamingos2Base[SpFlamingos2BlueprintLongslit] {
+case class Flamingos2Longslit(blueprint:SpFlamingos2BlueprintLongslit, exampleTarget: Option[SPTarget]) extends Flamingos2Base[SpFlamingos2BlueprintLongslit] {
 
 //
 //  **** IF INSTRUMENT MODE == SPECTROSCOPY ***
@@ -33,10 +33,10 @@ case class Flamingos2Longslit(blueprint:SpFlamingos2BlueprintLongslit, exampleTa
 //              Put FILTERS from PI into F2 ITERATOR
 //
 
-  val acq = Option(exampleTarget.getMagnitude(H).getOrNull).map(_.getBrightness) match {
-    case Some(h) if (h <= 12) => Seq(13)
-    case Some(h) if (h >  12) => Seq(14)
-    case _                    => Seq(13, 14)
+  val acq = exampleTarget.flatMap(t => Option(t.getMagnitude(H).getOrNull)).map(_.getBrightness) match {
+    case Some(h) if h <= 12 => Seq(13)
+    case Some(h) if h >  12 => Seq(14)
+    case _                  => Seq(13, 14)
   }
 
   val targetGroup = Seq(11,12) ++ acq ++ Seq(15,16,17,18)

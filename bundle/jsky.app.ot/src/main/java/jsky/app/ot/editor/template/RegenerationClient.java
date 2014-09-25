@@ -7,7 +7,7 @@ import edu.gemini.spModel.pio.PioNode;
 import edu.gemini.spModel.pio.xml.PioXmlException;
 import edu.gemini.spModel.pio.xml.PioXmlFactory;
 import edu.gemini.spModel.pio.xml.PioXmlUtil;
-import edu.gemini.spModel.template.TemplateFolder;
+import edu.gemini.spModel.template.Phase1Folder;
 import edu.gemini.util.ssl.apache.HttpsSupport;
 
 import org.apache.commons.httpclient.methods.MultipartPostMethod;
@@ -84,7 +84,7 @@ public final class RegenerationClient {
     private static final String ENC = "UTF-8";
 
     public static String getUrl(Peer peer) {
-        return String.format("https://%s:%d/template", peer.host, peer.port);
+        return String.format("https://%s:%d/%s", peer.host, peer.port, TEMPLATE_SERVLET);
     }
 
     private static String decode(String msg) {
@@ -96,7 +96,7 @@ public final class RegenerationClient {
         }
     }
 
-    public static Result expand(TemplateFolder folder, Peer peer, int timeoutMs) {
+    public static Result expand(Phase1Folder folder, Peer peer, int timeoutMs) {
         // Setup to post the template folder XML.
         MultipartPostMethod post;
         post = new MultipartPostMethod(getUrl(peer));
@@ -163,18 +163,18 @@ public final class RegenerationClient {
         }
     }
 
-    private static FilePart makeFilePart(TemplateFolder folder) {
+    private static FilePart makeFilePart(Phase1Folder folder) {
         try {
-            ParamSet ps = folder.getParamSet(new PioXmlFactory());
-            String  xml = PioXmlUtil.toXmlString(ps);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream(xml.length() * 2 + 1);
-            OutputStreamWriter w = new OutputStreamWriter(baos, ENC);
+            final ParamSet ps = folder.getParamSet(new PioXmlFactory());
+            final String  xml = PioXmlUtil.toXmlString(ps);
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream(xml.length() * 2 + 1);
+            final OutputStreamWriter w = new OutputStreamWriter(baos, ENC);
             w.write(xml);
             w.close();
 
-            ByteArrayPartSource baps = new ByteArrayPartSource("folder", baos.toByteArray());
+            final ByteArrayPartSource baps = new ByteArrayPartSource("folder", baos.toByteArray());
 
-            FilePart fp = new FilePart("folder", baps);
+            final FilePart fp = new FilePart("folder", baps);
             fp.setContentType("text/xml");
             return fp;
         } catch (Exception ex) {

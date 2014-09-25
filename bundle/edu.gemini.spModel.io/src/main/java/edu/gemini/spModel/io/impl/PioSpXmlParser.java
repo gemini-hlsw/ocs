@@ -15,6 +15,7 @@ import edu.gemini.spModel.io.impl.migration.to2009B.To2009B;
 import edu.gemini.spModel.io.impl.migration.to2010B.ToGnirsAtGn;
 import edu.gemini.spModel.io.impl.migration.to2014A.AddMissingStaticInstrumentParams;
 import edu.gemini.spModel.io.impl.migration.to2014A.To2014A;
+import edu.gemini.spModel.io.impl.migration.to2015A.To2015A;
 import edu.gemini.spModel.io.impl.migration.toPalote.Grillo2Palote;
 import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obscomp.SPGroup;
@@ -203,10 +204,11 @@ public final class PioSpXmlParser {
 
     // Parse the top level document element
     private ISPRootNode _parseDocument(Document doc) throws Exception {
+        // Mutate pre-2015A template folders to be readable.
+        To2015A.updateProgram(doc);
+
         // We will special case the Phase 1 container.
         Container p1Container = null;
-        Container p2Container = null;
-        Version p2Version = null;
 
         scala.collection.immutable.Map<SPNodeKey, VersionVector<LifespanId, Integer>> versions = JavaVersionMapOps.emptyVersionMap();
 
@@ -221,8 +223,6 @@ public final class PioSpXmlParser {
                 versions = VersionVectorPio.toVersions(c);
             } else if (SpIOTags.PROGRAM.equalsIgnoreCase(kind)) {
                 root = _makeProgramNode(c, c.getName(), key(c));
-                p2Container = c;
-                p2Version = p2Container.getVersion();
             } else if (kind.equals(SpIOTags.NIGHTLY_PLAN)) {
                 root = _makeNightlyRecordNode(c, c.getName(), key(c));
             } else {
