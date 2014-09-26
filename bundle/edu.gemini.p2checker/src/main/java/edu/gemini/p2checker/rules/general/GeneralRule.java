@@ -8,6 +8,7 @@ import edu.gemini.p2checker.api.IRule;
 import edu.gemini.p2checker.api.ObservationElements;
 import edu.gemini.p2checker.api.P2Problems;
 import edu.gemini.pot.sp.*;
+import edu.gemini.shared.util.immutable.ApplyOp;
 import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.MapOp;
 import edu.gemini.shared.util.immutable.Option;
@@ -40,14 +41,12 @@ import edu.gemini.spModel.target.offset.OffsetPosList;
 import edu.gemini.spModel.target.system.CoordinateParam;
 import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.target.system.NonSiderealTarget;
-import edu.gemini.spModel.template.TemplateFolder;
-import edu.gemini.spModel.template.TemplateGroup;
+import edu.gemini.spModel.template.TemplateParameters;
 import edu.gemini.spModel.too.Too;
 import edu.gemini.spModel.too.TooType;
 
 
 import java.util.*;
-import java.util.logging.Level;
 
 /**
  * General Rules are rules that are not instrument-specific
@@ -592,33 +591,33 @@ public class GeneralRule implements IRule {
 
         private static final String BOGUS_TARGET_MESSAGE =
                 "The target position does not match the Phase 1 coordinates. " +
-                        "Sometimes offsets may be needed to reach a guide star. A new target " +
-                        "must be approved by the local Gemini Head of Science Operations";
+                "Sometimes offsets may be needed to reach a guide star. A new target " +
+                "must be approved by the local Gemini Head of Science Operations";
 
         private static final String BOGUS_CONDS_MESSAGE = "Conditions have to be the same (or worse) than defined in the phase 1 proposal.";
 
-        public IP2Problems check(ObservationElements elements)  {
+        public IP2Problems check(final ObservationElements elements)  {
             final P2Problems ps = new P2Problems();
             final ISPTemplateFolder templateFolderNode = elements.getProgramNode().getTemplateFolder();
             if (templateFolderNode != null) {
 
-                final TemplateFolder templateFolder = (TemplateFolder) templateFolderNode.getDataObject();
                 final SPTarget obsTarget = getObsTarget(elements);
                 if (obsTarget != null) {
 
                     // We're going to drive this off the target, so we first want to narrow it
-                    // down to the triples that correspond with this target.
-                    final List<Triple> matchingTargetTriples = new ArrayList<Triple>();
-                    for (final TemplateFolder.Phase1Group g : templateFolder.getGroups()) {
-                        for (TemplateGroup.Args a : g.argsList) {
-                            final SPTarget p1Target = templateFolder.getTargets().get(a.getTargetId());
-                            if (_areTargetsEquals(p1Target, obsTarget, elements) || _isTooTarget(p1Target, elements))
-                                matchingTargetTriples.add(new Triple(g.blueprintId, a.getTargetId(), a.getSiteQualityId()));
+                    // down to the TemplateParameters that correspond with this target.
+                    final List<TemplateParameters> matchingParams = new ArrayList<TemplateParameters>();
+                    TemplateParameters.foreach(templateFolderNode, new ApplyOp<TemplateParameters>() {
+                        @Override public void apply(TemplateParameters tp) {
+                            final SPTarget p1Target = tp.getTarget();
+                            if (_areTargetsEquals(p1Target, obsTarget, elements) || _isTooTarget(p1Target, elements)) {
+                                matchingParams.add(tp);
+                            }
                         }
-                    }
+                    });
 
                     // If there are none, the target is bogus
-                    if (matchingTargetTriples.isEmpty()) {
+                    if (matchingParams.isEmpty()) {
                         // REL-1113
                         ps.addError(PREFIX + "TEMPLATE_RULE", BOGUS_TARGET_MESSAGE, elements.getTargetObsComponentNode().getOrNull());
                         // UX-1583. Since there was no matching p1 target, we
@@ -628,8 +627,8 @@ public class GeneralRule implements IRule {
                         // Now see if we can't find a match for conditions
                         outer:
                         for (; ; ) {
-                            for (final Triple t : matchingTargetTriples) {
-                                final SPSiteQuality expected = templateFolder.getSiteQualities().get(t.siteQualityId);
+                            for (final TemplateParameters t : matchingParams) {
+                                final SPSiteQuality expected = t.getSiteQuality();
                                 final SPSiteQuality actual = elements.getSiteQuality().getOrNull();
                                 if (isAcceptable(expected, actual))
                                     break outer;

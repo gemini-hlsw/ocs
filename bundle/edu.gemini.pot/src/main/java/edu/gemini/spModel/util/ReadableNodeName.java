@@ -8,7 +8,6 @@ import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.obscomp.SPNote;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
-import edu.gemini.spModel.template.TemplateFolder;
 import edu.gemini.spModel.template.TemplateParameters;
 
 /**
@@ -103,20 +102,16 @@ public final class ReadableNodeName {
         // Truly awful formatting of a template parameters node
         @Override public void visitTemplateParameters(ISPTemplateParameters node) {
             final TemplateParameters tp = (TemplateParameters) node.getDataObject();
-            final ISPTemplateFolder tfn = node.getProgram().getTemplateFolder();
             result = "Template Parameters";
-            if (tfn != null) {
-                final TemplateFolder tf = (TemplateFolder) tfn.getDataObject();
-                final SPTarget      t = tf.getTargets().get(tp.getTargetId());
-                final SPSiteQuality c = tf.getSiteQualities().get(tp.getSiteQualityId());
-                final TimeValue     v = tp.getTime();
-                if ((t != null) && (c != null) && (v != null)) {
-                    final String ts = t.getName();
-                    final String cs = c.conditions().toString();
-                    final String vs = v.toString(2);
-                    if (ts != null) {
-                        result = String.format("%s, %s, %s", ts, cs, vs);
-                    }
+            final SPTarget      t = tp.getTarget();
+            final SPSiteQuality c = tp.getSiteQuality();
+            final TimeValue     v = tp.getTime();
+            if ((t != null) && (c != null) && (v != null)) {
+                final String ts = t.getName();
+                final String cs = c.conditions().toString();
+                final String vs = v.toString(2);
+                if (ts != null) {
+                    result = String.format("%s, %s, %s", ts, cs, vs);
                 }
             }
         }

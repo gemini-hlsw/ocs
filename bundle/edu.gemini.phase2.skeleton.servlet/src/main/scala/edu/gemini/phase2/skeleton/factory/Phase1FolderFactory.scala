@@ -5,95 +5,83 @@ import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import scala.collection.JavaConverters._
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.model.p1.immutable._
-import edu.gemini.spModel.template.{TemplateGroup, SpBlueprint, TemplateFolder}
+import edu.gemini.spModel.template._
 import edu.gemini.spModel.gemini.gnirs.blueprint.SpGnirsBlueprintSpectroscopy
 import edu.gemini.spModel.gemini.nifs.blueprint.SpNifsBlueprintAo
 import edu.gemini.shared.util.TimeValue
 import edu.gemini.spModel.gemini.flamingos2.blueprint.SpFlamingos2BlueprintLongslit
 
-object TemplateFolderFactory {
+object Phase1FolderFactory {
 
-  case class ObsQuad(bName: String, tName: String, sName: String, time: TimeValue)
+  case class ObsQuad(bName: String, target: SPTarget, siteQuality: SPSiteQuality, time: TimeValue)
 
   object Folder {
-    def empty = new Folder(new Namer, Map.empty, Map.empty, Map.empty, Nil)
+    def empty = new Folder(new Namer, Map.empty, Nil)
   }
 
   implicit def RightProjection[A,B](v: Either[A,B]): Either.RightProjection[A,B] = v.right
 
   case class Folder(namer: Namer,
                     bMap: Map[String, SpBlueprint],
-                    tMap: Map[String, SPTarget],
-                    sMap: Map[String, SPSiteQuality],
                     oList: List[ObsQuad]) {
 
     def add(o: Observation, time: Long): Either[String, Folder] =
       for {
-        blueprint   <- extractBlueprint(o).right
+        blueprintE  <- extractBlueprintEntry(o).right
         target      <- extractTarget(o, time).right
         siteQuality <- extractSiteQuality(o).right
         timeValue   <- extractObsTime(o).right
       } yield Folder(namer,
-                bMap + blueprint,
-                tMap + target,
-                sMap + siteQuality,
-                ObsQuad(blueprint._1, target._1, siteQuality._1, timeValue) :: oList)
+                bMap + blueprintE,
+                ObsQuad(blueprintE._1, target, siteQuality, timeValue) :: oList)
 
-    private def extractBlueprint(o: Observation): Either[String, (String, SpBlueprint)] =
+    private def extractBlueprintEntry(o: Observation): Either[String, (String, SpBlueprint)] =
       for {
         b1 <- o.blueprint.toRight("Observation missing instrument resources").right
         b2 <- SpBlueprintFactory.create(b1).right
         bn = namer.nameOf(b1)
-      } yield (bn -> bMap.getOrElse(bn, b2))
+      } yield bn -> bMap.getOrElse(bn, b2)
 
-    private def extractTarget(o: Observation, time: Long): Either[String, (String, SPTarget)] =
+    private def extractTarget(o: Observation, time: Long): Either[String, SPTarget] =
       for {
         t1 <- o.target.toRight("Observation missing target").right
         t2 <- SpTargetFactory.create(t1, time).right
-        tn = namer.nameOf(t1)
-      } yield (tn -> tMap.getOrElse(tn, t2))
+      } yield t2
 
-    private def extractSiteQuality(o: Observation): Either[String, (String, SPSiteQuality)] =
+    private def extractSiteQuality(o: Observation): Either[String, SPSiteQuality] =
       for {
         s1 <- o.condition.toRight("Observation missing conditions").right
         s2 <- SpSiteQualityFactory.create(s1).right
-        sn = namer.nameOf(s1)
-      } yield (sn -> sMap.getOrElse(sn, s2))
+      } yield s2
 
     private def extractObsTime(o: Observation): Either[String, TimeValue] =
       for {
         time <- o.time.toRight("Observation missing time").right
       } yield new TimeValue(time.toHours.hours, TimeValue.Units.hours)
 
-    def toTemplateFolder: TemplateFolder = {
 
+    def toPhase1Folder: Phase1Folder = {
       val groups = oList.groupBy(_.bName).toList map {
         case (blueprintId, args) =>
-          val templateArgs = args map { arg => new TemplateGroup.Args(arg.tName, arg.sName, arg.time) }
-          new TemplateFolder.Phase1Group(blueprintId, templateArgs.asJava)
+          val templateArgs = args map { arg => new TemplateParameters(arg.target, arg.siteQuality, arg.time)}
+          new Phase1Group(blueprintId, templateArgs.asJava)
       }
 
-      // Some kinds of blueprints need to be parameterized by the H-magnitidude of their targets, which
-      // kind of sucks. Sorry.
+      // Some kinds of blueprints need to be parameterized by the H-magnitude of
+      // their targets, which kind of sucks. Sorry.
 
       val groups0 = groups.flatMap { pig =>
         bMap(pig.blueprintId) match {
-          case _:SpGnirsBlueprintSpectroscopy => GnirsSpectroscopyPartitioner.partition(pig, tMap)
-          case _:SpNifsBlueprintAo => NifsAoPartitioner.partition(pig, tMap)
-          case _:SpFlamingos2BlueprintLongslit => F2LongslitPartitioner.partition(pig, tMap)
-          case _ => List(pig)
+          case _: SpGnirsBlueprintSpectroscopy  => GnirsSpectroscopyPartitioner.partition(pig)
+          case _: SpNifsBlueprintAo             => NifsAoPartitioner.partition(pig)
+          case _: SpFlamingos2BlueprintLongslit => F2LongslitPartitioner.partition(pig)
+          case _                                => List(pig)
         }
       }
 
-      new TemplateFolder(
-        bMap.asJava,
-        tMap.asJava,
-        sMap.asJava,
-        groups0.asJava
-      )
+      new Phase1Folder(bMap.asJava, groups0.asJava)
     }
   }
-
 
 
   // If there is an itac acceptance, then use its band assignment.  Otherwise
@@ -107,7 +95,7 @@ object TemplateFolderFactory {
       case _ => Band.BAND_1_2
     }
 
-  def create(proposal: Proposal): Either[String, TemplateFolder] = {
+  def create(proposal: Proposal): Either[String, Phase1Folder] = {
     val empty: Either[String, Folder] = Right(Folder.empty)
 
     val b       = band(proposal)
@@ -116,16 +104,15 @@ object TemplateFolderFactory {
       e.right flatMap { _.add(obs, time) }
     }
 
-    efolder.right map { _.toTemplateFolder }
+    efolder.right map { _.toPhase1Folder }
   }
-
 }
 
 
 trait Partitioner {
-  def partition(pig:TemplateFolder.Phase1Group, tMap:Map[String, SPTarget]):List[TemplateFolder.Phase1Group] = {
-    val argsLists = pig.argsList.asScala.toList.groupBy(args => bucket(tMap(args.getTargetId))).map(_._2.asJava).toList
-    argsLists.map(args => new TemplateFolder.Phase1Group(pig.blueprintId, args))
+  def partition(pig: Phase1Group): List[Phase1Group] = {
+    val argsLists = pig.argsList.asScala.toList.groupBy(args => bucket(args.getTarget)).map(_._2.asJava).toList
+    argsLists.map(args => new Phase1Group(pig.blueprintId, args))
   }
   def bucket(t:SPTarget):Int
 }

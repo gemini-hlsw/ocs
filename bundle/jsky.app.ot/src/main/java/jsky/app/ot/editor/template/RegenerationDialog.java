@@ -8,7 +8,7 @@ import edu.gemini.pot.sp.*;
 
 import edu.gemini.pot.spdb.IDBDatabaseService;
 import edu.gemini.spModel.core.Peer;
-import edu.gemini.spModel.template.TemplateFolder;
+import edu.gemini.spModel.template.Phase1Folder;
 import jsky.app.ot.OT;
 import jsky.app.ot.editor.template.RegenerationClient.Result;
 import jsky.app.ot.userprefs.observer.ObservingPeer;
@@ -41,7 +41,7 @@ public final class RegenerationDialog extends JDialog {
 
     // Make a multi-line label by doctoring a JTextArea until it works more or
     // less like a text label.
-    private static JTextArea makeNote(final int rows, final int cols, final int reduction) {
+    private static JTextArea makeNote(final int rows, final int cols) {
         return new JTextArea() {{
                         setColumns(cols);
                         setRows(rows);
@@ -49,7 +49,6 @@ public final class RegenerationDialog extends JDialog {
                         setOpaque(false);
                         setLineWrap(true);
                         setWrapStyleWord(true);
-//                        setFont(smallerFont(this, reduction));
                         setHighlighter(null); // turn off selection
                     }};
     }
@@ -97,7 +96,7 @@ public final class RegenerationDialog extends JDialog {
         public BaselineOption getBaselineOption() {
             return baselineCheck.isSelected() ? BaselineOption.ADD : BaselineOption.SKIP;
         }
-    };
+    }
 
     public static final class AddOptionGroup implements OptionGroup {
         public String getNoteText() {
@@ -130,7 +129,7 @@ public final class RegenerationDialog extends JDialog {
         public BaselineOption getBaselineOption() {
             return baselineCheck.isSelected() ? BaselineOption.ADD : BaselineOption.SKIP;
         }
-    };
+    }
 
     public static final class BaselineOptionGroup implements OptionGroup {
         public String getNoteText() {
@@ -151,11 +150,10 @@ public final class RegenerationDialog extends JDialog {
         public BaselineOption getBaselineOption() {
             return BaselineOption.ADD;
         }
-    };
+    }
 
     private static final class OptionPanel extends JPanel {
         private static final Insets NEW_GROUP  = new Insets(10,0,0,0);
-        private static final Insets INDENT     = new Insets(0,16,0,0);
         private static final Insets INDENTOPTS = new Insets(0,19,0,0);
 
         private final OptionGroup[] optionGroups = new OptionGroup[] {
@@ -242,13 +240,13 @@ public final class RegenerationDialog extends JDialog {
 
     private final OptionPanel options;
     private final JLabel  statusIcon   = new JLabel(Resources.getIcon("eclipse/lightbulb.gif"));
-    private final JTextArea statusMsg  = makeNote(0, 35, 1);
+    private final JTextArea statusMsg  = makeNote(0, 35);
 
     private final JButton actionButton = new JButton("Regenerate");
     private final JButton closeButton  = new JButton("Cancel");
 
     private final ISPProgram program;
-    private final TemplateFolder folder;
+    private final Phase1Folder folder;
 
     private SwingWorker<Boolean, String> worker;
 
@@ -333,7 +331,7 @@ public final class RegenerationDialog extends JDialog {
         }
     }
 
-    private static final JPanel mkVerticalStrut(final int height) {
+    private static JPanel mkVerticalStrut(final int height) {
         return new JPanel() {
             public Dimension getMinimumSize()   { return new Dimension(0, height); }
             public Dimension getMaximumSize()   { return getMinimumSize();         }
@@ -341,7 +339,7 @@ public final class RegenerationDialog extends JDialog {
         };
     }
 
-    private RegenerationDialog(ISPProgram program, TemplateFolder folder) {
+    private RegenerationDialog(ISPProgram program, Phase1Folder folder) {
         if (folder == null) throw new IllegalArgumentException("folder is null");
         this.program = program;
         this.folder  = folder;
@@ -430,7 +428,7 @@ public final class RegenerationDialog extends JDialog {
             return;
         }
 
-        final TemplateFolder folder     = (TemplateFolder) spFolder.getDataObject();
+        final Phase1Folder folder = Phase1Folder.extract(spFolder);
         final RegenerationDialog dialog = new RegenerationDialog(program, folder);
 
         dialog.pack();

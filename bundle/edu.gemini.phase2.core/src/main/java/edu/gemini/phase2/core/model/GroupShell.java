@@ -4,8 +4,9 @@ import edu.gemini.pot.sp.*;
 import edu.gemini.spModel.obscomp.SPGroup;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
-import edu.gemini.spModel.template.TemplateFolder;
+import edu.gemini.spModel.template.Phase1Group;
 import edu.gemini.spModel.template.TemplateGroup;
+import edu.gemini.spModel.template.TemplateParameters;
 
 
 import java.util.Collection;
@@ -48,7 +49,7 @@ public final class GroupShell extends BaseGroupShell {
 
     public ISPGroup toSp(ISPFactory factory, ISPProgram prog)  {
         try {
-            ISPGroup sp = factory.createGroup(prog, null);
+            final ISPGroup sp = factory.createGroup(prog, null);
             sp.setDataObject(group);
             sp.setObsComponents(ObsComponentShell.spList(factory, prog, obsComponents));
             sp.setObservations(ObservationShell.spList(factory, prog, observations));
@@ -58,12 +59,12 @@ public final class GroupShell extends BaseGroupShell {
         }
     }
 
-    public TemplateGroupShell toTemplateGroupShell(TemplateFolder.Phase1Group pig) {
+    public TemplateGroupShell toTemplateGroupShell(Phase1Group pig) {
         return toTemplateGroupShell(pig.blueprintId, pig.argsList);
     }
 
-    public TemplateGroupShell toTemplateGroupShell(String blueprintId, Collection<TemplateGroup.Args> argList) {
-        TemplateGroup dataObj = new TemplateGroup();
+    public TemplateGroupShell toTemplateGroupShell(String blueprintId, Collection<TemplateParameters> argList) {
+        final TemplateGroup dataObj = new TemplateGroup();
         dataObj.setBlueprintId(blueprintId);
         dataObj.setTitle(group.getTitle());
         return new TemplateGroupShell(dataObj, argList, obsComponents, observations);
@@ -75,11 +76,9 @@ public final class GroupShell extends BaseGroupShell {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
 
-        GroupShell that = (GroupShell) o;
+        final GroupShell that = (GroupShell) o;
+        return group.equals(that.group);
 
-        if (!group.equals(that.group)) return false;
-
-        return true;
     }
 
     @Override

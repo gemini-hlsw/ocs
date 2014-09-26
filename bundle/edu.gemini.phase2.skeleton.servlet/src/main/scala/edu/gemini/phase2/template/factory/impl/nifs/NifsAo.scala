@@ -13,10 +13,10 @@ import edu.gemini.pot.sp.ISPObservation
 import edu.gemini.phase2.template.factory.impl._
 import edu.gemini.spModel.rich.pot.sp._
 
-case class NifsAo(blueprint: SpNifsBlueprintAo, exampleTarget: SPTarget) extends NifsBase[SpNifsBlueprintAo] {
+case class NifsAo(blueprint: SpNifsBlueprintAo, exampleTarget: Option[SPTarget]) extends NifsBase[SpNifsBlueprintAo] {
   import blueprint._
 
-  val tb = Option(exampleTarget.getMagnitude(Band.H).getOrNull).map(_.getBrightness).map(TargetBrightness(_))
+  val tb = exampleTarget.flatMap(t => Option(t.getMagnitude(Band.H).getOrNull)).map(_.getBrightness).map(TargetBrightness(_))
 
   // # Select acquisition and science observation
   // IF OCCULTING DISK == None
@@ -87,7 +87,7 @@ case class NifsAo(blueprint: SpNifsBlueprintAo, exampleTarget: SPTarget) extends
     else
       super.addAltair(m)(o)
 
-  
+
   altair.mode.foreach { m =>
 
       if (m.isNGS)

@@ -6,14 +6,12 @@ import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.target.SPTarget;
-import edu.gemini.spModel.template.TemplateFolder;
 import edu.gemini.spModel.template.TemplateGroup;
 import edu.gemini.spModel.template.TemplateParameters;
 import edu.gemini.spModel.too.TooType;
 import edu.gemini.spdb.reports.IColumn;
 import edu.gemini.spdb.reports.util.AbstractTable;
 
-import java.rmi.RemoteException;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -23,7 +21,6 @@ public class TemplateSummaryTable extends AbstractTable {
 	@SuppressWarnings("unused")
 	private static final Logger LOGGER = Logger.getLogger(TemplateSummaryTable.class.getName());
 	private static final long serialVersionUID = 1L;
-	private static final float MS_PER_HOUR = 1000 * 60 * 60;
 	private static final String DESC = "Templates";
 	private static final String CAPTION = "Template Summary";
 
@@ -79,58 +76,50 @@ public class TemplateSummaryTable extends AbstractTable {
 	public List<Map<IColumn, Object>> getRows(Object domainObject) {
 		List<Map<IColumn, Object>> rows = new ArrayList<Map<IColumn, Object>>();
 
-//		try {
+        // Domain is Science Program
+        final ISPProgram programShell = (ISPProgram) domainObject;
 
-			// Domain is Science Program
-			final ISPProgram programShell = (ISPProgram) domainObject;
+        // Find the SPProgramID. If we can't find the ID, it's not a real
+        // science program and we can skip it.
+        SPProgramID programID = programShell.getProgramID();
+        if (programID == null) {
+            LOGGER.fine("Program has no id: " + programShell);
+            return Collections.emptyList();
+        }
+        final SPProgram progDataObj = (SPProgram) programShell.getDataObject();
 
-			// Find the SPProgramID. If we can't find the ID, it's not a real
-			// science program and we can skip it.
-			SPProgramID programID = programShell.getProgramID();
-			if (programID == null) {
-				LOGGER.fine("Program has no id: " + programShell);
-				return Collections.emptyList();
-			}
-            final SPProgram progDataObj = (SPProgram) programShell.getDataObject();
+        // Get the Queue band. If it's missing or invalid, log and punt.
+        final String sband = progDataObj.getQueueBand();
+        final int band;
+        try {
+            band = Integer.parseInt(sband); // doesn't throw NPE
+        } catch (NumberFormatException nfe) {
+            LOGGER.fine("Program " + programID + " has invalid queue band: " + sband);
+            return Collections.emptyList();
+        }
 
-			// Get the Queue band. If it's missing or invalid, log and punt.
-			final String sband = progDataObj.getQueueBand();
-			final int band;
-			try {
-				band = Integer.parseInt(sband); // doesn't throw NPE
-			} catch (NumberFormatException nfe) {
-				LOGGER.fine("Program " + programID + " has invalid queue band: " + sband);
-				return Collections.emptyList();
-			}
+        TooType tooType = progDataObj.getTooType();
 
-            TooType tooType = progDataObj.getTooType();
+        // See if the program conatains a template folder.
+        ISPTemplateFolder ispTemplateFolder = programShell.getTemplateFolder();
+        if (ispTemplateFolder == null) {
+            LOGGER.fine("No template folder in " + programID);
+            return Collections.emptyList();
+        }
+        for(ISPTemplateGroup ispTemplateGroup : ispTemplateFolder.getTemplateGroups()) {
+            TemplateGroup templateGroup = (TemplateGroup)ispTemplateGroup.getDataObject();
+            String templateId = templateGroup.getVersionToken().toString();
+            for(ISPTemplateParameters ispTemplateParameters : ispTemplateGroup.getTemplateParameters()) {
+                String instConfig = templateGroup.getTitle().replace(",", "");
 
-            // See if the program conatains a template folder.
-            ISPTemplateFolder ispTemplateFolder = programShell.getTemplateFolder();
-            if (ispTemplateFolder == null) {
-                LOGGER.fine("No template folder in " + programID);
-                return Collections.emptyList();
+                TemplateParameters ps = (TemplateParameters)ispTemplateParameters.getDataObject();
+                SPTarget target = ps.getTarget();
+                SPSiteQuality.Conditions conditions = ps.getSiteQuality().conditions();
+                TimeValue time = ps.getTime();
+
+                appendRows(rows, programID, band, tooType, templateId, target, conditions, time, instConfig);
             }
-            TemplateFolder templateFolder = (TemplateFolder) ispTemplateFolder.getDataObject();
-            for(ISPTemplateGroup ispTemplateGroup : ispTemplateFolder.getTemplateGroups()) {
-                TemplateGroup templateGroup = (TemplateGroup)ispTemplateGroup.getDataObject();
-                String templateId = templateGroup.getVersionToken().toString();
-                for(ISPTemplateParameters ispTemplateParameters : ispTemplateGroup.getTemplateParameters()) {
-                    String instConfig = templateGroup.getTitle().replace(",", "");
-
-                    TemplateParameters ps = (TemplateParameters)ispTemplateParameters.getDataObject();
-                    SPTarget target = templateFolder.getTargets().get(ps.getTargetId());
-                    SPSiteQuality.Conditions conditions = templateFolder.getSiteQualities().get(ps.getSiteQualityId()).conditions();
-                    TimeValue time = ps.getTime();
-
-                    appendRows(rows, programID, band, tooType, templateId, target, conditions, time, instConfig);
-                }
-            }
-
-//		} catch (RemoteException e) {
-//			// TODO: handle
-//			e.printStackTrace();
-//		}
+        }
 		return rows;
 
 	}
