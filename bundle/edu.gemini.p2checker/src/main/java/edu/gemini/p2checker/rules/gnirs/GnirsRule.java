@@ -6,12 +6,10 @@ import edu.gemini.p2checker.rules.altair.AltairRule;
 import edu.gemini.p2checker.util.AbstractConfigRule;
 import edu.gemini.p2checker.util.SequenceRule;
 import edu.gemini.spModel.config2.Config;
-import edu.gemini.spModel.data.AbstractDataObject;
-import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams.*;
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
-import edu.gemini.spModel.obsseq.Sequence;
+import scala.Option;
 
 
 import java.util.ArrayList;
@@ -389,6 +387,30 @@ public class GnirsRule implements IRule {
         }
     };
 
+    /**
+     * REL-1811: Warn if there are P-offsets for a slit spectroscopy observation.
+     * Warn if FPU = *arcsec.
+     */
+    private static IConfigRule NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE = new IConfigRule() {
+
+        private static final String MSG = "P-offsets will move the slit off of the target.";
+
+        public Problem check(Config config, int step, ObservationElements elems, Object state) {
+            GNIRSParams.SlitWidth fpu = (GNIRSParams.SlitWidth) SequenceRule.getInstrumentItem(config, InstGNIRS.SLIT_WIDTH_PROP);
+            if (fpu != null && fpu.isSlitSpectroscopy()) {
+                Option<Double> p = SequenceRule.getPOffset(config);
+                if (p.isDefined() && Double.compare(p.get(), 0.0) != 0) {
+                    return new Problem(WARNING, PREFIX + "NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE", MSG,
+                            SequenceRule.getInstrumentOrSequenceNode(step, elems));
+                }
+            }
+            return null;
+        }
+
+        public IConfigMatcher getMatcher() {
+            return SequenceRule.SCIENCE_NIGHTTIME_CAL_MATCHER;
+        }
+    };
 
 
     static {
@@ -406,6 +428,7 @@ public class GnirsRule implements IRule {
         }
         GNIRS_RULES.add(ACQUISITION_FILTER_RULE);
         GNIRS_RULES.add(ALTAIR_RULE);
+        GNIRS_RULES.add(NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE);
     }
 
     public IP2Problems check(ObservationElements elements)  {

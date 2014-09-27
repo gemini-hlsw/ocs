@@ -714,10 +714,10 @@ public class NiriRule implements IRule {
 
             if (camera == null) return null; //can't check without camera
 
-            Double p = SequenceRule.getPOffset(config);
-            Double q = SequenceRule.getQOffset(config);
+            scala.Option<Double> p = SequenceRule.getPOffset(config);
+            scala.Option<Double> q = SequenceRule.getQOffset(config);
 
-            if (p == null || q == null) {
+            if (p.isEmpty() || q.isEmpty()) {
                 //warn always in the sequence node
                 //check whether there are more than one observe
                 Integer repeatCount = SequenceRule.getStepCount(config);
@@ -729,7 +729,7 @@ public class NiriRule implements IRule {
                 if (minOffset == null) return null; // no entry in the map for this camera
 
                 NiriState s = (NiriState) state;
-                s.cameraOffsetState.recordState(p, q, minOffset);
+                s.cameraOffsetState.recordState(p.get(), q.get(), minOffset);
             }
             return null;
         }
@@ -755,9 +755,8 @@ public class NiriRule implements IRule {
 
             //If disperser != none and p-offsets != 0
             if (disperser != Niri.Disperser.NONE) {
-                Double p = SequenceRule.getPOffset(config);
-                if (p == null) return null;
-                if (Double.compare(p, 0.0) != 0) {
+                scala.Option<Double> p = SequenceRule.getPOffset(config);
+                if (p.isDefined() && Double.compare(p.get(), 0.0) != 0) {
                     return new Problem(WARNING, PREFIX+"SPECTROSCOPY_P_OFFSET_RULE", MESSAGE, elems.getSeqComponentNode());
                 }
             }
@@ -1172,10 +1171,10 @@ public class NiriRule implements IRule {
             }
             //check the offset. If they are the same as the previous known state,
             //issue a problem
-            Double p = SequenceRule.getPOffset(config);
-            if (p == null) p = 0.0;
-            Double q = SequenceRule.getQOffset(config);
-            if (q == null) q = 0.0;
+            scala.Option<Double> pOpt = SequenceRule.getPOffset(config);
+            scala.Option<Double> qOpt = SequenceRule.getQOffset(config);
+            double p = pOpt.isDefined() ? pOpt.get() : 0.0;
+            double q = qOpt.isDefined() ? qOpt.get() : 0.0;
             if (niristate.offsetState.checkPQ(p, q)) {
                 return new Problem(WARNING, PREFIX+"OFFSET_RULE", MESSAGE, elems.getSeqComponentNode());
             }

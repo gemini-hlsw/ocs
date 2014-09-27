@@ -528,10 +528,10 @@ public class GmosRule implements IRule {
             }
             gsds.ruleInEffect = true;
 
-            Double p = SequenceRule.getPOffset(config);
-            if (p == null) p = 0.0;
-            Double q = SequenceRule.getQOffset(config);
-            if (q == null) q = 0.0;
+            Option<Double> pOpt = SequenceRule.getPOffset(config);
+            Option<Double> qOpt = SequenceRule.getQOffset(config);
+            Double p = pOpt.isDefined() ? pOpt.get() : 0.0;
+            Double q = qOpt.isDefined() ? qOpt.get() : 0.0;
 
             if (step == 0) {
                 gsds.p = p;
@@ -1627,6 +1627,41 @@ public class GmosRule implements IRule {
         }
     };
 
+    /**
+     * REL-1811: Warn if there are P-offsets for a slit spectroscopy observation.
+     * Warn for FPUs = (*arcsec or Custom Mask).
+     */
+    private static IConfigRule NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE = new IConfigRule() {
+
+        private static final String MSG = "P-offsets will move the slit off of the target.";
+
+        public Problem check(Config config, int step, ObservationElements elems, Object state) {
+            if (isCustomMask(config) || isSlitMask(config)) {
+                Option<Double> p = SequenceRule.getPOffset(config);
+                if (p.isDefined() && Double.compare(p.get(), 0.0) != 0) {
+                    return new Problem(WARNING, PREFIX + "NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE", MSG,
+                            SequenceRule.getInstrumentOrSequenceNode(step, elems));
+                }
+            }
+            return null;
+        }
+
+        public IConfigMatcher getMatcher() {
+            return SequenceRule.SCIENCE_NIGHTTIME_CAL_MATCHER;
+        }
+
+        private boolean isCustomMask(Config config) {
+            GmosCommonType.FPUnitMode fpuMode =
+                    (GmosCommonType.FPUnitMode) SequenceRule.getInstrumentItem(config, InstGmosCommon.FPU_MODE_PROP);
+            return fpuMode == GmosCommonType.FPUnitMode.CUSTOM_MASK;
+        }
+        private boolean isSlitMask(Config config) {
+            GmosCommonType.FPUnit fpu = getFPU(config);
+            return fpu != null && (fpu.isSpectroscopic() || fpu.isNSslit());
+        }
+
+    };
+
     private static IRule UNUSED_CUSTOM_ROI_RULE = new IRule() {
         private static final String warnMsg = "Custom ROIs are declared but not used in any step";
         private IConfigRule rule = new AbstractConfigRule() {
@@ -1733,6 +1768,7 @@ public class GmosRule implements IRule {
         GMOS_RULES.add(ROI_OVERLAP_RULE);
         GMOS_RULES.add(CUSTOM_ROI_NOT_DECLARED_RULE);
         GMOS_RULES.add(IFU_NO_SPATIAL_BINNING_RULE);
+        GMOS_RULES.add(NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE);
         GMOS_RULES.add(new MdfMaskNameRule(Problem.Type.ERROR));
         GMOS_RULES.add(new MdfMaskNameRule(Problem.Type.WARNING));
     }

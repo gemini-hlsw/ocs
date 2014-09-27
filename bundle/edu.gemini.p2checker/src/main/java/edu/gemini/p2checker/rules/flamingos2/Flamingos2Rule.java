@@ -82,12 +82,37 @@ public class Flamingos2Rule implements IRule {
         }
     }
 
+    /**
+     * REL-1811: Warn if there are P-offsets for a slit spectroscopy observation.
+     * Warn for FPU = (*arcsec or Custom Mask)
+     */
+    private static IConfigRule NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE = new IConfigRule() {
+
+        private static final String MSG = "P-offsets will move the slit off of the target.";
+
+        public Problem check(Config config, int step, ObservationElements elems, Object state) {
+            Flamingos2.FPUnit fpu = (Flamingos2.FPUnit) SequenceRule.getInstrumentItem(config, Flamingos2.FPU_PROP);
+            if (fpu != null && (fpu.isLongslit() || fpu == Flamingos2.FPUnit.CUSTOM_MASK)) {
+                Option<Double> p = SequenceRule.getPOffset(config);
+                if (p.isDefined() && Double.compare(p.get(), 0.0) != 0) {
+                    return new Problem(WARNING, PREFIX + "NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE", MSG,
+                            SequenceRule.getInstrumentOrSequenceNode(step, elems));
+                }
+            }
+            return null;
+        }
+
+        public IConfigMatcher getMatcher() {
+            return SequenceRule.SCIENCE_NIGHTTIME_CAL_MATCHER;
+        }
+    };
 
     /**
      * Register all the Flamingos 2 rules to apply.
      */
     static {
         FLAM2_RULES.add(EXPOSURE_TIME_RULE);
+        FLAM2_RULES.add(NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE);
         FLAM2_RULES.add(new MdfMaskNameRule(Problem.Type.ERROR));
         FLAM2_RULES.add(new MdfMaskNameRule(Problem.Type.WARNING));
     }
