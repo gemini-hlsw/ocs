@@ -12,7 +12,6 @@ import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -193,4 +192,36 @@ public class GmosRuleTest extends AbstractRuleTest {
         gmosComponent.setDataObject(gmosDataObject);
     }
 
+    private boolean hasProblem(Problem.Type t, String id, List<Problem> problems) {
+        for (Problem p : problems) {
+            if (p.getId().equals(id) && p.getType() == t) return true;
+        }
+        return false;
+    }
+
+    @Test
+    public void testIfuNoSpatialBinning() throws Exception {
+        final GmosRule gmos = new GmosRule();
+        final String id     = "GmosRule_IFU_NO_SPATIAL_BINNING_RULE";
+
+        addSimpleScienceObserve();
+        final InstGmosNorth gmosDataObject = (InstGmosNorth) gmosComponent.getDataObject();
+
+        for (GmosNorthType.FPUnitNorth fpu : GmosNorthType.FPUnitNorth.values()) {
+            for (GmosNorthType.DisperserNorth d : GmosNorthType.DisperserNorth.values()) {
+                for (GmosCommonType.Binning b : GmosCommonType.Binning.values()) {
+                    gmosDataObject.setFPUnitNorth(fpu);
+                    gmosDataObject.setDisperserNorth(d);
+                    gmosDataObject.setCcdYBinning(b);
+                    gmosComponent.setDataObject(gmosDataObject);
+
+                    final ObservationElements elems = new ObservationElements(obs);
+                    boolean shouldWarn = fpu.isIFU() && !d.isMirror() && b != GmosCommonType.Binning.ONE;
+
+                    final String msg = String.format("id=%s: fpu=%s, disperser=%s, ybin=%s", id, fpu.displayValue(), d.displayValue(), b.displayValue());
+                    assertEquals(msg, shouldWarn, hasProblem(Problem.Type.WARNING, id, gmos.check(elems).getProblems()));
+                }
+            }
+        }
+    }
 }
