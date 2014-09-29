@@ -24,6 +24,7 @@ SectionEnd
 
 Section "Default Installation"
 	SetShellVarContext all
+	CreateDirectory "$SMPROGRAMS\Gemini\${NAME}\"
 	CreateShortCut "$SMPROGRAMS\Gemini\${NAME}\${NAME} ${VERSION}.lnk" "$INSTDIR\jre\bin\javaw.exe" "${APP_VM_ARGS} -jar ${APP_JAR} ${APP_ARGS}" "$INSTDIR\${ICON}"
 SectionEnd
 
