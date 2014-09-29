@@ -215,10 +215,9 @@ public class GmosRuleTest extends AbstractRuleTest {
                     gmosDataObject.setCcdYBinning(b);
                     gmosComponent.setDataObject(gmosDataObject);
 
-                    final ObservationElements elems = new ObservationElements(obs);
-                    boolean shouldWarn = fpu.isIFU() && !d.isMirror() && b != GmosCommonType.Binning.ONE;
-
                     final String msg = String.format("id=%s: fpu=%s, disperser=%s, ybin=%s", id, fpu.displayValue(), d.displayValue(), b.displayValue());
+                    final boolean shouldWarn = fpu.isIFU() && !d.isMirror() && b != GmosCommonType.Binning.ONE;
+                    final ObservationElements elems = new ObservationElements(obs);
                     assertEquals(msg, shouldWarn, hasProblem(Problem.Type.WARNING, id, gmos.check(elems).getProblems()));
                 }
             }
