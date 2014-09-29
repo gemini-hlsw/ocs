@@ -12,9 +12,9 @@ object AppBuilder {
     MacOS   -> MacDistHandler,
     Test    -> TestDistHandler,
     Windows -> WinDistHandler,
-    Linux32 -> new GenericUnixDistHandler(true, Some("linux/JRE32_1.6")),
-    Linux64 -> new GenericUnixDistHandler(true, Some("linux/JRE1.6")) /*,
-    Solaris -> new GenericUnixDistHandler(true, Some("solaris/JRE1.6")) */)
+    Linux32 -> new GenericUnixDistHandler(true, Some("linux/JRE32_1.7")),
+    Linux64 -> new GenericUnixDistHandler(true, Some("linux/JRE64_1.7"))
+  )
 
   val LoggingPatternProp = "java.util.logging.FileHandler.pattern"
 }

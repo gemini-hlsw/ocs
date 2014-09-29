@@ -12,7 +12,7 @@ object WinDistHandler extends DistHandler {
     // Vals in this class attempt to mirror those in proj/ot/appbuild.xml as closely as is reasonable
 
     val winstage = mkdir(wd, "staging")
-    val winjre = jreDir.map(jreDir => new File(new File(jreDir, "windows"), "JRE1.6"))
+    val winjre = jreDir.map(jreDir => new File(new File(jreDir, "windows"), "JRE1.7"))
 
     // Some helpers
     def exec(as: String*) {
