@@ -1,5 +1,6 @@
 package jsky.app.ot.editor.template;
 
+import edu.gemini.pot.client.SPDB;
 import edu.gemini.pot.sp.*;
 import edu.gemini.shared.gui.ButtonFlattener;
 import edu.gemini.shared.gui.text.AbstractDocumentListener;
@@ -356,7 +357,27 @@ final class EdTemplateGroupFooter extends JPanel {
     // Action to add a new template group parameter triplet.
     private final Action addAction = new AbstractAction("", Resources.getIcon("eclipse/add.gif")) {
         public void actionPerformed(ActionEvent evt) {
-            System.out.println("add");
+            // Where? After the last selected row I suppose (if any) or else
+            // at the end.
+            final int[] sel = paramTable.getSelectedRows();
+            final int where = (sel.length == 0) ?
+                              templateGroup.getTemplateParameters().size() :
+                              sel[sel.length-1] + 1;
+
+            // Make a new blank template parameters object.
+            final ISPTemplateParameters newParams;
+            try {
+                newParams = SPDB.get().getFactory().createTemplateParameters(program, null);
+                newParams.setDataObject(new TemplateParameters(new SPTarget(), new SPSiteQuality(), new TimeValue(0.0, TimeValue.Units.hours)));
+                templateGroup.addTemplateParameters(where, newParams);
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override public void run() {
+                        paramTable.getSelectionModel().setSelectionInterval(where, where);
+                    }
+                });
+            } catch (SPException ex) {
+                DialogUtil.error(ex);
+            }
         }
     };
 
