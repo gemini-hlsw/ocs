@@ -12,6 +12,7 @@ import edu.gemini.spModel.template.SpBlueprint;
 import edu.gemini.spModel.template.TemplateFolder;
 import edu.gemini.spModel.template.TemplateGroup;
 import edu.gemini.spModel.template.TemplateParameters;
+import edu.gemini.spModel.util.ReadableNodeName;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.StaffBean;
 import jsky.app.ot.editor.OtItemEditor;
@@ -26,6 +27,8 @@ import jsky.util.gui.SingleSelectComboBox;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
@@ -34,9 +37,9 @@ import java.awt.*;
 import static java.awt.GridBagConstraints.*;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -61,8 +64,8 @@ public class EdTemplateGroup extends OtItemEditor<ISPTemplateGroup, TemplateGrou
 class TemplateGroupPanel extends JPanel {
 
     private final EdTemplateGroupHeader header = new EdTemplateGroupHeader();
-    private final ParamsListTable table = new ParamsListTable();
-    private final EdTemplateGroupFooter footer = new EdTemplateGroupFooter();
+    private final ParamsListTable table        = new ParamsListTable();
+    private final EdTemplateGroupFooter footer = new EdTemplateGroupFooter(table);
 
     public TemplateGroupPanel() {
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -343,28 +346,60 @@ class EdTemplateGroupHeader extends JPanel {
 }
 
 
-class EdTemplateGroupFooter extends JPanel {
+final class EdTemplateGroupFooter extends JPanel {
+    private final JTable paramTable;
 
     private ISPProgram program;
 
     private ISPTemplateGroup templateGroup;
 
     // Action to add a new template group parameter triplet.
-    private final ActionListener addAction = new ActionListener() {
+    private final Action addAction = new AbstractAction("", Resources.getIcon("eclipse/add.gif")) {
         public void actionPerformed(ActionEvent evt) {
             System.out.println("add");
         }
     };
 
     // Action to remove a template group parameter triplet.
-    private final ActionListener removeAction = new ActionListener() {
+    private final Action removeAction = new AbstractAction("", Resources.getIcon("eclipse/remove.gif")) {
+
+        // Confirm the delete with a horrible JOptionPane.  This may be annoying
+        // but it would be easy to accidentally remove template parameters and
+        // difficult to get them back.
+        private boolean confirmDelete(java.util.List<ISPTemplateParameters> sel) {
+            final String message = (sel.size() == 1) ?
+                                   String.format("Delete the template observation %s?", ReadableNodeName.format(sel.get(0))) :
+                                   String.format("Delete %d template observations?", sel.size());
+            final String cancelOption = "Cancel";
+            final String[] options    = {"Yes, delete", cancelOption};
+            return JOptionPane.showOptionDialog(
+                        paramTable,
+                        message,
+                        "Confirm Delete",
+                        JOptionPane.OK_CANCEL_OPTION,
+                        JOptionPane.QUESTION_MESSAGE,
+                        null,
+                        options,
+                        cancelOption) == 0;
+        }
+
         public void actionPerformed(ActionEvent evt) {
-            System.out.println("remove");
+            final java.util.List<ISPTemplateParameters> sel = getSelectedParameters();
+            if ((sel.size() > 0) && confirmDelete(sel)) {
+                final java.util.List<ISPTemplateParameters> all = templateGroup.getTemplateParameters();
+                if (all.removeAll(sel)) {
+                    try {
+                        templateGroup.setTemplateParameters(all);
+                    } catch (SPException ex) {
+                        DialogUtil.error(ex);
+                    }
+                }
+            }
         }
     };
 
     // Action to instantiate templates
-    private final AbstractAction instantiateAction = new AbstractAction("Apply...") {
+    private final Action instantiateAction = new AbstractAction("Apply...") {
         public void actionPerformed(ActionEvent evt) {
             try {
                 InstantiationDialog.open(getParent(), program, templateGroup);
@@ -375,7 +410,7 @@ class EdTemplateGroupFooter extends JPanel {
     };
 
     // Action to fork a template group
-    private final AbstractAction splitAction = new AbstractAction("Split...") {
+    private final Action splitAction = new AbstractAction("Split...") {
         public void actionPerformed(ActionEvent evt) {
             try {
                 SplitDialog.open(getParent(), templateGroup);
@@ -385,7 +420,9 @@ class EdTemplateGroupFooter extends JPanel {
         }
     };
 
-    public EdTemplateGroupFooter() {
+    public EdTemplateGroupFooter(JTable paramTable) {
+        this.paramTable = paramTable;
+
         setLayout(new GridBagLayout());
         StaffBean.addPropertyChangeListener(new PropertyChangeListener() {
             @Override public void propertyChange(PropertyChangeEvent evt) {
@@ -394,10 +431,35 @@ class EdTemplateGroupFooter extends JPanel {
         });
     }
 
+    // Handle selection updates in the editor for "staff".
+    private final ListSelectionListener staffSelectionListener = new ListSelectionListener() {
+        @Override public void valueChanged(ListSelectionEvent evt) {
+            if (!evt.getValueIsAdjusting()) handleSelectionUpdate();
+        }
+    };
+
+    // A list of ISPTemplateParameter corresponding to the selected rows, if any.
+    private java.util.List<ISPTemplateParameters> getSelectedParameters() {
+        final java.util.List<ISPTemplateParameters> sel = new ArrayList<ISPTemplateParameters>();
+        for (int r : paramTable.getSelectedRows()) {
+            sel.add(templateGroup.getTemplateParameters().get(r));
+        }
+        return sel;
+    }
+
+    private void handleSelectionUpdate() {
+        removeAction.setEnabled(paramTable.getSelectedRowCount() > 0);
+    }
+
     private void updateLayout() {
-        removeAll();
+        cleanup();
         final SPProgramID pid = (program == null) ? null : program.getProgramID();
         if ((pid != null) && OTOptions.isStaff(pid)) staffLayout(); else piLayout();
+    }
+
+    private void cleanup() {
+        paramTable.getSelectionModel().removeListSelectionListener(staffSelectionListener);
+        removeAll();
     }
 
     private void piLayout() {
@@ -412,14 +474,11 @@ class EdTemplateGroupFooter extends JPanel {
         final Insets zero = new Insets(0,0,0,0);
 
         final JPanel editActions = new JPanel(new GridBagLayout());
-        final JButton add    = new JButton(Resources.getIcon("eclipse/add.gif")) {{
-            ButtonFlattener.flatten(this);
-            addActionListener(addAction);
-        }};
-        final JButton remove = new JButton(Resources.getIcon("eclipse/remove.gif")) {{
-            ButtonFlattener.flatten(this);
-            addActionListener(removeAction);
-        }};
+        final JButton add    = new JButton(addAction);
+        ButtonFlattener.flatten(add);
+        final JButton remove = new JButton(removeAction);
+        ButtonFlattener.flatten(remove);
+
         editActions.add(add,          new GridBagConstraints(
             0, 0, 1, 1, 0.0, 0.0, CENTER, NONE, zero, 0, 0
         ));
@@ -444,6 +503,9 @@ class EdTemplateGroupFooter extends JPanel {
         add(templateActions, new GridBagConstraints(
             0, 1, 1, 1, 1.0, 0.0, CENTER, HORIZONTAL, zero, 0, 0
         ));
+
+        paramTable.getSelectionModel().addListSelectionListener(staffSelectionListener);
+        handleSelectionUpdate();
     }
 
     public void init(ISPProgram program, ISPTemplateGroup templateGroup) {
