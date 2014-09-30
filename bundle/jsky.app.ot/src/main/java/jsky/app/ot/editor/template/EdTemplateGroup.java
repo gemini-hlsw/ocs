@@ -5,8 +5,10 @@ import edu.gemini.pot.sp.*;
 import edu.gemini.shared.gui.ButtonFlattener;
 import edu.gemini.shared.gui.text.AbstractDocumentListener;
 import edu.gemini.shared.util.TimeValue;
+import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
+import edu.gemini.spModel.pio.xml.PioXmlFactory;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.system.NonSiderealTarget;
 import edu.gemini.spModel.template.SpBlueprint;
@@ -357,29 +359,61 @@ final class EdTemplateGroupFooter extends JPanel {
     // Action to add a new template group parameter triplet.
     private final Action addAction = new AbstractAction("", Resources.getIcon("eclipse/add.gif")) {
         public void actionPerformed(ActionEvent evt) {
-            // Where? After the last selected row I suppose (if any) or else
-            // at the end.
-            final int[] sel = paramTable.getSelectedRows();
-            final int where = (sel.length == 0) ?
-                              templateGroup.getTemplateParameters().size() :
-                              sel[sel.length-1] + 1;
-
-            // Make a new blank template parameters object.
-            final ISPTemplateParameters newParams;
-            try {
-                newParams = SPDB.get().getFactory().createTemplateParameters(program, null);
-                newParams.setDataObject(new TemplateParameters(new SPTarget(), new SPSiteQuality(), new TimeValue(0.0, TimeValue.Units.hours)));
-                templateGroup.addTemplateParameters(where, newParams);
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override public void run() {
-                        paramTable.getSelectionModel().setSelectionInterval(where, where);
-                    }
-                });
-            } catch (SPException ex) {
-                DialogUtil.error(ex);
-            }
+            addNewParameters(new Function1<Option<TemplateParameters>, TemplateParameters>() {
+                @Override public TemplateParameters apply(Option<TemplateParameters> ignored) {
+                    // Always make a new blank template parameters object.
+                    return TemplateParameters.newEmpty();
+                }
+            });
         }
     };
+
+    // Action to duplicate a selected template group parameter triplet.
+    private final Action dupAction = new AbstractAction("", Resources.getIcon("eclipse/duplicate.gif")) {
+        public void actionPerformed(ActionEvent evt) {
+            // Supply a function that will duplicate the provided prototypical
+            // template parameters instance (if any) or make a new one otherwise
+            addNewParameters(new Function1<Option<TemplateParameters>, TemplateParameters>() {
+                @Override public TemplateParameters apply(Option<TemplateParameters> tp) {
+                    return tp.map(new MapOp<TemplateParameters, TemplateParameters>() {
+                        @Override public TemplateParameters apply(TemplateParameters proto) {
+                            return new TemplateParameters(proto.getParamSet(new PioXmlFactory()));
+                        }
+                    }).getOrElse(TemplateParameters.newEmpty());
+                }
+            });
+        }
+    };
+
+    private void addNewParameters(Function1<Option<TemplateParameters>, TemplateParameters> cons) {
+        // Where? After the last selected row I suppose (if any) or else
+        // at the end.
+        final int[] sel = paramTable.getSelectedRows();
+        final int where = (sel.length == 0) ?
+                          templateGroup.getTemplateParameters().size() :
+                          sel[sel.length-1] + 1;
+
+        // If there is a single selected template parameter, it serves as the
+        // prototype.
+        final Option<TemplateParameters> proto = (sel.length == 1) ?
+                new Some<TemplateParameters>((TemplateParameters) templateGroup.getTemplateParameters().get(sel[0]).getDataObject()) :
+                None.<TemplateParameters>instance();
+
+        // Make a new template parameters object with the provided constructor.
+        final ISPTemplateParameters newParams;
+        try {
+            newParams = SPDB.get().getFactory().createTemplateParameters(program, null);
+            newParams.setDataObject(cons.apply(proto));
+            templateGroup.addTemplateParameters(where, newParams);
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override public void run() {
+                    paramTable.getSelectionModel().setSelectionInterval(where, where);
+                }
+            });
+        } catch (SPException ex) {
+            DialogUtil.error(ex);
+        }
+    }
 
     // Action to remove a template group parameter triplet.
     private final Action removeAction = new AbstractAction("", Resources.getIcon("eclipse/remove.gif")) {
@@ -469,7 +503,9 @@ final class EdTemplateGroupFooter extends JPanel {
     }
 
     private void handleSelectionUpdate() {
-        removeAction.setEnabled(paramTable.getSelectedRowCount() > 0);
+        final int selCount = paramTable.getSelectedRowCount();
+        removeAction.setEnabled(selCount > 0);
+        dupAction.setEnabled(selCount == 1);
     }
 
     private void updateLayout() {
@@ -489,25 +525,29 @@ final class EdTemplateGroupFooter extends JPanel {
         add(new JButton(splitAction), new GBC(1, 0));
     }
 
+    private JButton flatButton(Action a) {
+        final JButton b = new JButton(a);
+        ButtonFlattener.flatten(b);
+        return b;
+    }
+
     private void staffLayout() {
         setBorder(BorderFactory.createEmptyBorder(2, 0, 10, 0));
 
         final Insets zero = new Insets(0,0,0,0);
 
         final JPanel editActions = new JPanel(new GridBagLayout());
-        final JButton add    = new JButton(addAction);
-        ButtonFlattener.flatten(add);
-        final JButton remove = new JButton(removeAction);
-        ButtonFlattener.flatten(remove);
-
-        editActions.add(add,          new GridBagConstraints(
+        editActions.add(flatButton(addAction), new GridBagConstraints(
             0, 0, 1, 1, 0.0, 0.0, CENTER, NONE, zero, 0, 0
         ));
-        editActions.add(remove,       new GridBagConstraints(
+        editActions.add(flatButton(removeAction), new GridBagConstraints(
             1, 0, 1, 1, 0.0, 0.0, CENTER, NONE, zero, 0, 0
         ));
+        editActions.add(flatButton(dupAction), new GridBagConstraints(
+            2, 0, 1, 1, 0.0, 0.0, CENTER, NONE, new Insets(0, 20, 0, 0), 0, 0
+        ));
         editActions.add(new JPanel(), new GridBagConstraints(
-            2, 0, 1, 1, 1.0, 0.0, CENTER, HORIZONTAL, zero, 0, 0
+            3, 0, 1, 1, 1.0, 0.0, CENTER, HORIZONTAL, zero, 0, 0
         ));
 
         final JPanel templateActions = new JPanel(new GridBagLayout());

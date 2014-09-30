@@ -25,6 +25,10 @@ public final class TemplateParameters extends AbstractDataObject {
     public static final String VERSION = "2015A-1";
     public static final String PARAM_TIME = "time";
 
+    public static TemplateParameters newEmpty() {
+        return new TemplateParameters(new SPTarget(), new SPSiteQuality(), TimeValue.ZERO_HOURS);
+    }
+
     private SPTarget target;
     private SPSiteQuality conditions;
     private TimeValue time;
