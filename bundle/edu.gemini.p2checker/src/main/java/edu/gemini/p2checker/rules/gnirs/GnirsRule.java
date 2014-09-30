@@ -5,6 +5,7 @@ import edu.gemini.p2checker.api.*;
 import edu.gemini.p2checker.rules.altair.AltairRule;
 import edu.gemini.p2checker.util.AbstractConfigRule;
 import edu.gemini.p2checker.util.SequenceRule;
+import edu.gemini.skycalc.Offset;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams.*;
@@ -399,7 +400,7 @@ public class GnirsRule implements IRule {
             GNIRSParams.SlitWidth fpu = (GNIRSParams.SlitWidth) SequenceRule.getInstrumentItem(config, InstGNIRS.SLIT_WIDTH_PROP);
             if (fpu != null && fpu.isSlitSpectroscopy()) {
                 Option<Double> p = SequenceRule.getPOffset(config);
-                if (p.isDefined() && Double.compare(p.get(), 0.0) != 0) {
+                if (p.isDefined() && !Offset.isZero(p.get())) {
                     return new Problem(WARNING, PREFIX + "NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE", MSG,
                             SequenceRule.getInstrumentOrSequenceNode(step, elems));
                 }

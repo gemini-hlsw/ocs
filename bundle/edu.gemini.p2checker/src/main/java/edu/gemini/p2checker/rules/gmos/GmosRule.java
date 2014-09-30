@@ -11,6 +11,7 @@ import edu.gemini.p2checker.util.AbstractConfigRule;
 import edu.gemini.p2checker.util.SequenceRule;
 import edu.gemini.pot.sp.ISPProgramNode;
 import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.skycalc.Offset;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
@@ -539,7 +540,7 @@ public class GmosRule implements IRule {
                 return null;
             }
 
-            if ((p.compareTo(gsds.p) != 0) || (q.compareTo(gsds.q) != 0)) {
+            if (!Offset.areEqual(p, gsds.p) || !Offset.areEqual(q, gsds.q)) {
                 gsds.foundTwoDifferentPositions = true;
             }
             return null;
@@ -1638,7 +1639,7 @@ public class GmosRule implements IRule {
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
             if (isCustomMask(config) || isSlitMask(config)) {
                 Option<Double> p = SequenceRule.getPOffset(config);
-                if (p.isDefined() && Double.compare(p.get(), 0.0) != 0) {
+                if (p.isDefined() && !Offset.isZero(p.get())) {
                     return new Problem(WARNING, PREFIX + "NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE", MSG,
                             SequenceRule.getInstrumentOrSequenceNode(step, elems));
                 }

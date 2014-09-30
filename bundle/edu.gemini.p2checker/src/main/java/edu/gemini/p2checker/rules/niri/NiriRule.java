@@ -8,6 +8,7 @@ import edu.gemini.p2checker.util.AbstractConfigRule;
 import edu.gemini.p2checker.util.SequenceRule;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.skycalc.Offset;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
@@ -756,7 +757,7 @@ public class NiriRule implements IRule {
             //If disperser != none and p-offsets != 0
             if (disperser != Niri.Disperser.NONE) {
                 scala.Option<Double> p = SequenceRule.getPOffset(config);
-                if (p.isDefined() && Double.compare(p.get(), 0.0) != 0) {
+                if (p.isDefined() && !Offset.isZero(p.get())) {
                     return new Problem(WARNING, PREFIX+"SPECTROSCOPY_P_OFFSET_RULE", MESSAGE, elems.getSeqComponentNode());
                 }
             }
@@ -940,8 +941,7 @@ public class NiriRule implements IRule {
          * stored in the state.
          */
         boolean checkPQ(Double p, Double q) {
-            if (lastP != null && lastQ != null
-                    && lastP.compareTo(p) == 0 && lastQ.compareTo(q) == 0) {
+            if (Offset.areEqual(lastP, p) && Offset.areEqual(lastQ, q)) {
                 return true;
             }
             lastP = p;

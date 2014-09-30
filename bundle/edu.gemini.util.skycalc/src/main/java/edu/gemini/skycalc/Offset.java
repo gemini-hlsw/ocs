@@ -9,6 +9,9 @@ package edu.gemini.skycalc;
  * base position and a second position.
  */
 public final class Offset {
+    /** Min value for two offsets to be different in arc seconds; this value should be used for comparisons of offsets. */
+    private static final double MIN_VALUE = 0.000001;
+
     private static final Angle ZERO_ARCSECS = new Angle(0, Angle.Unit.ARCSECS);
 
     /**
@@ -69,6 +72,23 @@ public final class Offset {
         double d = Math.sqrt(p*p + q*q);
         return new Angle(d, unit);
     }
+
+    /**
+     * Checks if the size of an offset value in arcseconds can be considered to be zero.
+     * Helper method to improve legibility.
+     * @param a
+     * @return
+     */
+    public static boolean isZero(double a) { return Math.abs(a) < MIN_VALUE; }
+
+    /**
+     * Checks if ttwo offset values in arcseconds can be considered equal.
+     * Helper method to improve legibility.
+     * @param a
+     * @param b
+     * @return
+     */
+    public static boolean areEqual(double a, double b) { return Math.abs(a - b) < MIN_VALUE; }
 
     public String toString() {
         return String.format("%f x %f", p.getMagnitude(), q.getMagnitude());

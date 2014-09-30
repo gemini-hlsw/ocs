@@ -6,6 +6,7 @@ import edu.gemini.p2checker.rules.gems.GemsGuideStarRule;
 import edu.gemini.p2checker.util.MdfConfigRule;
 import edu.gemini.p2checker.util.AbstractConfigRule;
 import edu.gemini.p2checker.util.SequenceRule;
+import edu.gemini.skycalc.Offset;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
@@ -94,7 +95,7 @@ public class Flamingos2Rule implements IRule {
             Flamingos2.FPUnit fpu = (Flamingos2.FPUnit) SequenceRule.getInstrumentItem(config, Flamingos2.FPU_PROP);
             if (fpu != null && (fpu.isLongslit() || fpu == Flamingos2.FPUnit.CUSTOM_MASK)) {
                 Option<Double> p = SequenceRule.getPOffset(config);
-                if (p.isDefined() && Double.compare(p.get(), 0.0) != 0) {
+                if (p.isDefined() && !Offset.isZero(p.get())) {
                     return new Problem(WARNING, PREFIX + "NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE", MSG,
                             SequenceRule.getInstrumentOrSequenceNode(step, elems));
                 }
