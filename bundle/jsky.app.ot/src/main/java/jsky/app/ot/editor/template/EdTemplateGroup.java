@@ -357,7 +357,9 @@ final class EdTemplateGroupFooter extends JPanel {
     private ISPTemplateGroup templateGroup;
 
     // Action to add a new template group parameter triplet.
-    private final Action addAction = new AbstractAction("", Resources.getIcon("eclipse/add.gif")) {
+    private final Action addAction = new AbstractAction("Add", Resources.getIcon("eclipse/add.gif")) {
+        { putValue(Action.SHORT_DESCRIPTION, "Add a new empty template observation."); }
+
         public void actionPerformed(ActionEvent evt) {
             addNewParameters(new Function1<Option<TemplateParameters>, TemplateParameters>() {
                 @Override public TemplateParameters apply(Option<TemplateParameters> ignored) {
@@ -369,7 +371,9 @@ final class EdTemplateGroupFooter extends JPanel {
     };
 
     // Action to duplicate a selected template group parameter triplet.
-    private final Action dupAction = new AbstractAction("", Resources.getIcon("eclipse/duplicate.gif")) {
+    private final Action dupAction = new AbstractAction("Duplicate", Resources.getIcon("eclipse/duplicate.gif")) {
+        { putValue(Action.SHORT_DESCRIPTION, "Duplicate the selected template observation."); }
+
         public void actionPerformed(ActionEvent evt) {
             // Supply a function that will duplicate the provided prototypical
             // template parameters instance (if any) or make a new one otherwise
@@ -416,7 +420,8 @@ final class EdTemplateGroupFooter extends JPanel {
     }
 
     // Action to remove a template group parameter triplet.
-    private final Action removeAction = new AbstractAction("", Resources.getIcon("eclipse/remove.gif")) {
+    private final Action deleteAction = new AbstractAction("Delete", Resources.getIcon("eclipse/remove.gif")) {
+        { putValue(Action.SHORT_DESCRIPTION, "Delete the selected template observation(s)."); }
 
         // Confirm the delete with a horrible JOptionPane.  This may be annoying
         // but it would be easy to accidentally remove template parameters and
@@ -504,7 +509,7 @@ final class EdTemplateGroupFooter extends JPanel {
 
     private void handleSelectionUpdate() {
         final int selCount = paramTable.getSelectedRowCount();
-        removeAction.setEnabled(selCount > 0);
+        deleteAction.setEnabled(selCount > 0);
         dupAction.setEnabled(selCount == 1);
     }
 
@@ -526,9 +531,10 @@ final class EdTemplateGroupFooter extends JPanel {
     }
 
     private JButton flatButton(Action a) {
-        final JButton b = new JButton(a);
-        ButtonFlattener.flatten(b);
-        return b;
+        return new JButton(a) {{
+            setHideActionText(true);
+            ButtonFlattener.flatten(this);
+        }};
     }
 
     private void staffLayout() {
@@ -540,7 +546,7 @@ final class EdTemplateGroupFooter extends JPanel {
         editActions.add(flatButton(addAction), new GridBagConstraints(
             0, 0, 1, 1, 0.0, 0.0, CENTER, NONE, zero, 0, 0
         ));
-        editActions.add(flatButton(removeAction), new GridBagConstraints(
+        editActions.add(flatButton(deleteAction), new GridBagConstraints(
             1, 0, 1, 1, 0.0, 0.0, CENTER, NONE, zero, 0, 0
         ));
         editActions.add(flatButton(dupAction), new GridBagConstraints(
