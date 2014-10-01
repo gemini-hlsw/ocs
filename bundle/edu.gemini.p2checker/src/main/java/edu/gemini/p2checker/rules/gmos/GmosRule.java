@@ -1658,7 +1658,7 @@ public class GmosRule implements IRule {
         }
         private boolean isSlitMask(Config config, ObservationElements elems) {
             GmosCommonType.FPUnit fpu = getFPU(config, elems);
-            return fpu != null && (fpu.isSpectroscopic() || fpu.isNSslit());
+            return fpu.isSpectroscopic() || fpu.isNSslit();
         }
 
     };
