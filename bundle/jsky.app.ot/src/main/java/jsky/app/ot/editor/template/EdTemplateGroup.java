@@ -19,10 +19,8 @@ import edu.gemini.spModel.util.ReadableNodeName;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.StaffBean;
 import jsky.app.ot.editor.OtItemEditor;
-import jsky.app.ot.util.PropertyChangeMultiplexer;
 import jsky.app.ot.util.Resources;
 import jsky.app.ot.viewer.SPDragDropObject;
-import jsky.app.ot.viewer.SPEventManager;
 import jsky.app.ot.viewer.SPTree;
 import jsky.app.ot.viewer.SPViewer;
 import jsky.util.gui.DialogUtil;
@@ -44,8 +42,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 public class EdTemplateGroup extends OtItemEditor<ISPTemplateGroup, TemplateGroup> {
 
@@ -86,7 +82,7 @@ class TemplateGroupPanel extends JPanel {
 
     public void selectParameters(ISPTemplateParameters params) {
         for (int row=0; row<table.getModel().getRowCount(); ++row) {
-            final ISPTemplateParameters tp = table.getModel().getEntryAt(row).getKey();
+            final ISPTemplateParameters tp = table.getModel().getParametersAt(row);
             if (tp.getNodeKey().equals(params.getNodeKey())) {
                 table.getSelectionModel().setSelectionInterval(row, row);
                 break;
@@ -145,7 +141,7 @@ class ParamsListTable extends JTable {
             final int[] indices = getSelectedRows();
             final ISPNode[] nodes = new ISPNode[indices.length];
             for (int i = 0; i < indices.length; i++)
-                nodes[i] = model.getEntryAt(indices[i]).getKey();
+                nodes[i] = model.getParametersAt(indices[i]);
             return nodes;
         }
 
@@ -153,53 +149,69 @@ class ParamsListTable extends JTable {
 
 }
 
-class ParamsListTableModel extends AbstractTableModel implements PropertyChangeListener {
+class ParamsListTableModel extends AbstractTableModel {
 
     private ISPTemplateGroup templateGroupNode;
 
-    // We need to listen to remote events
-    private PropertyChangeMultiplexer relay;
-    private SPEventManager eventManager;
+    private final PropertyChangeListener structureListener = new PropertyChangeListener() {
+        @Override public void propertyChange(PropertyChangeEvent evt) {
+            refreshList();
+        }
+    };
 
-    // We keep a map from each node to its data object, for efficiency
-    private final LinkedHashMap<ISPTemplateParameters, TemplateParameters> data =
-            new LinkedHashMap<ISPTemplateParameters, TemplateParameters>();
+    private final PropertyChangeListener contentListener = new PropertyChangeListener() {
+        @Override public void propertyChange(PropertyChangeEvent evt) {
+            if ((evt.getSource() instanceof ISPTemplateParameters) &&
+                (SPUtil.getDataObjectPropertyName().equals(evt.getPropertyName()))) {
+                refreshItem((ISPTemplateParameters) evt.getSource());
+            }
+        }
+    };
+
+    // We keep a List of Pair (shell, data object), for efficiency
+    private final java.util.List<Pair<ISPTemplateParameters, TemplateParameters>> data =
+            new ArrayList<Pair<ISPTemplateParameters, TemplateParameters>>();
 
     public void setTemplateGroupNode(ISPTemplateGroup tgn) {
+        if (templateGroupNode != null) {
+            templateGroupNode.removeCompositeChangeListener(contentListener);
+            templateGroupNode.removeStructureChangeListener(structureListener);
+        }
 
         // For now don't handle null
         if (tgn == null)
             throw new IllegalArgumentException("Template group cannot be null.");
 
-        // Set up remote cripe here if we need to
-        if (relay == null) {
-            relay = new PropertyChangeMultiplexer();
-            relay.addPropertyChangeListener(this);
-            eventManager = new SPEventManager(relay);
-        }
-
         // New State
         templateGroupNode = tgn;
-        eventManager.setRootNode(templateGroupNode);
 
         // Initialize our list
         refreshList();
 
+        templateGroupNode.addCompositeChangeListener(contentListener);
+        templateGroupNode.addStructureChangeListener(structureListener);
+    }
+
+    private static Pair<ISPTemplateParameters, TemplateParameters> pair(ISPTemplateParameters tp) {
+        return new Pair<ISPTemplateParameters, TemplateParameters>(tp, (TemplateParameters) tp.getDataObject());
     }
 
     private void refreshList() {
         data.clear();
         if (templateGroupNode != null) {
             for (ISPTemplateParameters psNode : templateGroupNode.getTemplateParameters()) {
-                final TemplateParameters ps = (TemplateParameters) psNode.getDataObject();
-                data.put(psNode, ps);
+                data.add(pair(psNode));
             }
         }
-        fireTableDataChanged(); // Should this be on the event dispatch thread?
+        fireTableDataChanged();
     }
 
-    public void propertyChange(PropertyChangeEvent evt) {
-        refreshList();
+    private void refreshItem(ISPTemplateParameters tp) {
+        final int index = indexOf(tp);
+        if (index >= 0) {
+            data.set(index, pair(tp));
+            fireTableRowsUpdated(index, index);
+        }
     }
 
     public int getRowCount() {
@@ -224,16 +236,21 @@ class ParamsListTableModel extends AbstractTableModel implements PropertyChangeL
         }
     }
 
-    public Map.Entry<ISPTemplateParameters, TemplateParameters> getEntryAt(int rowIndex) {
+    public int indexOf(ISPTemplateParameters tp) {
         int i = 0;
-        for (Map.Entry<ISPTemplateParameters, TemplateParameters> e : data.entrySet())
-            if (i++ == rowIndex)
-                return e;
-        throw new ArrayIndexOutOfBoundsException(rowIndex);
+        for (Pair<ISPTemplateParameters, TemplateParameters> p : data) {
+            if (p._1().getNodeKey().equals(tp.getNodeKey())) return i;
+            ++i;
+        }
+        return -1;
+    }
+
+    public ISPTemplateParameters getParametersAt(int rowIndex) {
+        return data.get(rowIndex)._1();
     }
 
     public Object getValueAt(int rowIndex, int columnIndex) {
-        final TemplateParameters ps = getEntryAt(rowIndex).getValue();
+        final TemplateParameters ps = data.get(rowIndex)._2();
         switch (columnIndex) {
             case 0:
                 return ps.getTarget();
@@ -351,6 +368,7 @@ class EdTemplateGroupHeader extends JPanel {
 
 final class EdTemplateGroupFooter extends JPanel {
     private final JTable paramTable;
+    private final JPanel parametersEditor;
 
     private ISPProgram program;
 
@@ -481,7 +499,8 @@ final class EdTemplateGroupFooter extends JPanel {
     };
 
     public EdTemplateGroupFooter(JTable paramTable) {
-        this.paramTable = paramTable;
+        this.paramTable       = paramTable;
+        this.parametersEditor = new JPanel(new BorderLayout());
 
         setLayout(new GridBagLayout());
         StaffBean.addPropertyChangeListener(new PropertyChangeListener() {
@@ -511,6 +530,11 @@ final class EdTemplateGroupFooter extends JPanel {
         final int selCount = paramTable.getSelectedRowCount();
         deleteAction.setEnabled(selCount > 0);
         dupAction.setEnabled(selCount == 1);
+
+        parametersEditor.removeAll();
+        parametersEditor.add(new TemplateParametersEditor(getSelectedParameters()).peer(), BorderLayout.CENTER);
+        parametersEditor.validate();
+        parametersEditor.repaint();
     }
 
     private void updateLayout() {
@@ -567,8 +591,11 @@ final class EdTemplateGroupFooter extends JPanel {
         add(editActions,     new GridBagConstraints(
             0, 0, 1, 1, 1.0, 0.0, EAST, HORIZONTAL, zero, 0, 0
         ));
+        add(parametersEditor, new GridBagConstraints(
+            0, 1, 1, 1, 1.0, 1.0, CENTER, BOTH, zero, 0, 0
+        ));
         add(templateActions, new GridBagConstraints(
-            0, 1, 1, 1, 1.0, 0.0, CENTER, HORIZONTAL, zero, 0, 0
+            0, 2, 1, 1, 1.0, 0.0, CENTER, HORIZONTAL, zero, 0, 0
         ));
 
         paramTable.getSelectionModel().addListSelectionListener(staffSelectionListener);
