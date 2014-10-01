@@ -9,7 +9,7 @@ import java.util.jar.{Manifest, JarFile}
 object AppBuilder {
 
   val Instances = Map(
-    MacOS   -> MacDistHandler,
+    MacOS   -> MacDistHandler(Some("osx/JRE1.7"), "jre1.7.0"),
     Test    -> TestDistHandler,
     Windows -> WinDistHandler,
     Linux32 -> new GenericUnixDistHandler(true, Some("linux/JRE32_1.7")),

@@ -66,7 +66,7 @@ def mac(pv: Version) = AppConfig(
   distribution = List(MacOS),
   icon=Some(file("app/pit/dist/MacOS/PIT.icns")),
   props = Map(
-    "org.osgi.framework.storage" -> "$USER_HOME/Library/Caches/edu.gemini.PIT/felix-cache"
+    "org.osgi.framework.storage" -> "$CachesDirectory/edu.gemini.PIT/felix-cache"
   )
 ) extending List(common(pv))
 
