@@ -3,10 +3,10 @@ package jsky.app.ot.editor.template;
 import edu.gemini.pot.client.SPDB;
 import edu.gemini.pot.sp.*;
 import edu.gemini.shared.gui.ButtonFlattener;
+import edu.gemini.shared.gui.ThinBorder;
 import edu.gemini.shared.gui.text.AbstractDocumentListener;
 import edu.gemini.shared.util.TimeValue;
 import edu.gemini.shared.util.immutable.*;
-import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.pio.xml.PioXmlFactory;
 import edu.gemini.spModel.target.SPTarget;
@@ -64,19 +64,22 @@ class TemplateGroupPanel extends JPanel {
 
     private final EdTemplateGroupHeader header = new EdTemplateGroupHeader();
     private final ParamsListTable table        = new ParamsListTable();
-    private final EdTemplateGroupFooter footer = new EdTemplateGroupFooter(table);
+    private final EdTemplateParameters params  = new EdTemplateParameters(table);
+    private final EdTemplateGroupFooter footer = new EdTemplateGroupFooter();
 
     public TemplateGroupPanel() {
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
         setLayout(new BorderLayout());
         add(header, BorderLayout.NORTH);
-        add(new JScrollPane(table), BorderLayout.CENTER);
+        add(params, BorderLayout.CENTER);
         add(footer, BorderLayout.SOUTH);
     }
 
     public void init(ISPProgram root, ISPTemplateGroup templateGroupNode, TemplateGroup templateGroup) {
         table.getModel().setTemplateGroupNode(templateGroupNode);
         header.init(templateGroupNode, templateGroup);
+        params.init(root, templateGroupNode);
         footer.init(root, templateGroupNode);
     }
 
@@ -307,72 +310,29 @@ class ParamsListTableCellRenderer extends DefaultTableCellRenderer {
 
 }
 
-class EdTemplateGroupHeader extends JPanel {
-
-    private TemplateGroup templateGroup;
-
-    private final JLabel resource = new JLabel();
-    private final JComboBox status = new SingleSelectComboBox() {{
-        setChoices(TemplateGroup.Status.values());
-        setMaximumRowCount(TemplateGroup.Status.values().length);
-    }};
-
-    private final JTextField title = new JTextField() {{
-        getDocument().addDocumentListener(new AbstractDocumentListener() {
-            public void textChanged(DocumentEvent docEvent, String newText) {
-                if (templateGroup != null) {
-                    templateGroup.setTitle(newText);
-                }
-            }
-        });
-    }};
-
-    public EdTemplateGroupHeader() {
-
-        setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
-        setLayout(new GridBagLayout());
-
-        add(new JLabel("Resource:") {{
-            setFont(getFont().deriveFont(Font.BOLD));
-        }}, new GBC(0, 0, false));
-        add(resource, new GBC(1, 0, true));
-
-        add(new JLabel("Title:") {{
-            setFont(getFont().deriveFont(Font.BOLD));
-        }}, new GBC(0, 1, false));
-        add(title, new GBC(1, 1, false));
-
-        add(new JLabel("Target/condition pairs may be dragged to other template groups.") {{
-            setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
-        }}, new GBC(0, 3, 2, 1, null));
-
-    }
-
-    public void init(ISPTemplateGroup templateGroupNode, TemplateGroup templateGroup) {
-        this.templateGroup = templateGroup;
-
-        // Walk around and gather some information
-        final ISPTemplateFolder templateFolderNode = (ISPTemplateFolder) templateGroupNode.getParent();
-        final TemplateFolder templateFolder = (TemplateFolder) templateFolderNode.getDataObject();
-        final SpBlueprint blueprint = templateFolder.getBlueprints().get(templateGroup.getBlueprintId());
-
-        // Update our UI
-        resource.setText(blueprint.toString());
-        title.setText(templateGroup.getTitle());
-        status.setSelectedItem(templateGroup.getStatus());
-
-    }
-
-}
-
-
-final class EdTemplateGroupFooter extends JPanel {
+final class EdTemplateParameters extends JPanel {
     private final JTable paramTable;
-    private final JPanel parametersEditor;
+    private final JScrollPane scrollPane;
+    private final JPanel paramEditor;
 
     private ISPProgram program;
-
     private ISPTemplateGroup templateGroup;
+
+    EdTemplateParameters(JTable paramTable) {
+        this.paramTable  = paramTable;
+        this.scrollPane  = new JScrollPane(paramTable);
+        this.paramEditor = new JPanel(new BorderLayout()) {{
+            setBorder(BorderFactory.createMatteBorder( 0, 0,  1, 0, Color.LIGHT_GRAY));
+        }};
+        setLayout(new BorderLayout());
+
+        StaffBean.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override public void propertyChange(PropertyChangeEvent evt) {
+                updateLayout();
+            }
+        });
+    }
+
 
     // Action to add a new template group parameter triplet.
     private final Action addAction = new AbstractAction("Add", Resources.getIcon("eclipse/add.gif")) {
@@ -476,40 +436,6 @@ final class EdTemplateGroupFooter extends JPanel {
         }
     };
 
-    // Action to instantiate templates
-    private final Action instantiateAction = new AbstractAction("Apply...") {
-        public void actionPerformed(ActionEvent evt) {
-            try {
-                InstantiationDialog.open(getParent(), program, templateGroup);
-            } catch (Exception e) {
-                DialogUtil.error(e);
-            }
-        }
-    };
-
-    // Action to fork a template group
-    private final Action splitAction = new AbstractAction("Split...") {
-        public void actionPerformed(ActionEvent evt) {
-            try {
-                SplitDialog.open(getParent(), templateGroup);
-            } catch (Exception e) {
-                DialogUtil.error(e);
-            }
-        }
-    };
-
-    public EdTemplateGroupFooter(JTable paramTable) {
-        this.paramTable       = paramTable;
-        this.parametersEditor = new JPanel(new BorderLayout());
-
-        setLayout(new GridBagLayout());
-        StaffBean.addPropertyChangeListener(new PropertyChangeListener() {
-            @Override public void propertyChange(PropertyChangeEvent evt) {
-                updateLayout();
-            }
-        });
-    }
-
     // Handle selection updates in the editor for "staff".
     private final ListSelectionListener staffSelectionListener = new ListSelectionListener() {
         @Override public void valueChanged(ListSelectionEvent evt) {
@@ -531,16 +457,16 @@ final class EdTemplateGroupFooter extends JPanel {
         deleteAction.setEnabled(selCount > 0);
         dupAction.setEnabled(selCount == 1);
 
-        parametersEditor.removeAll();
-        parametersEditor.add(new TemplateParametersEditor(getSelectedParameters()).peer(), BorderLayout.CENTER);
-        parametersEditor.validate();
-        parametersEditor.repaint();
+        paramEditor.removeAll();
+        paramEditor.add(new TemplateParametersEditor(getSelectedParameters()).peer(), BorderLayout.CENTER);
+        paramEditor.validate();
+        paramEditor.repaint();
     }
+
 
     private void updateLayout() {
         cleanup();
-        final SPProgramID pid = (program == null) ? null : program.getProgramID();
-        if ((pid != null) && OTOptions.isStaff(pid)) staffLayout(); else piLayout();
+        if (OTOptions.isStaff(program)) staffLayout(); else piLayout();
     }
 
     private void cleanup() {
@@ -549,9 +475,7 @@ final class EdTemplateGroupFooter extends JPanel {
     }
 
     private void piLayout() {
-        setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-        add(new JButton(instantiateAction), new GBC(0, 0));
-        add(new JButton(splitAction), new GBC(1, 0));
+        add(scrollPane, BorderLayout.CENTER);
     }
 
     private JButton flatButton(Action a) {
@@ -562,41 +486,33 @@ final class EdTemplateGroupFooter extends JPanel {
     }
 
     private void staffLayout() {
-        setBorder(BorderFactory.createEmptyBorder(2, 0, 10, 0));
-
         final Insets zero = new Insets(0,0,0,0);
 
-        final JPanel editActions = new JPanel(new GridBagLayout());
-        editActions.add(flatButton(addAction), new GridBagConstraints(
-            0, 0, 1, 1, 0.0, 0.0, CENTER, NONE, zero, 0, 0
-        ));
-        editActions.add(flatButton(deleteAction), new GridBagConstraints(
-            1, 0, 1, 1, 0.0, 0.0, CENTER, NONE, zero, 0, 0
-        ));
-        editActions.add(flatButton(dupAction), new GridBagConstraints(
-            2, 0, 1, 1, 0.0, 0.0, CENTER, NONE, new Insets(0, 20, 0, 0), 0, 0
-        ));
-        editActions.add(new JPanel(), new GridBagConstraints(
-            3, 0, 1, 1, 1.0, 0.0, CENTER, HORIZONTAL, zero, 0, 0
-        ));
+        final JPanel editActions = new JPanel(new GridBagLayout()) {{
+            add(flatButton(addAction), new GridBagConstraints(
+                0, 0, 1, 1, 0.0, 0.0, CENTER, NONE, zero, 0, 0
+            ));
+            add(flatButton(deleteAction), new GridBagConstraints(
+                1, 0, 1, 1, 0.0, 0.0, CENTER, NONE, zero, 0, 0
+            ));
+            add(flatButton(dupAction), new GridBagConstraints(
+                2, 0, 1, 1, 0.0, 0.0, CENTER, NONE, new Insets(0, 20, 0, 0), 0, 0
+            ));
+            add(new JPanel(), new GridBagConstraints(
+                3, 0, 1, 1, 1.0, 0.0, CENTER, HORIZONTAL, zero, 0, 0
+            ));
+        }};
 
-        final JPanel templateActions = new JPanel(new GridBagLayout());
-        templateActions.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(1, 0, 0, 0, Color.LIGHT_GRAY),
-                BorderFactory.createEmptyBorder(10, 0, 0, 0)
-        ));
-        templateActions.add(new JButton(instantiateAction), new GBC(0,0));
-        templateActions.add(new JButton(splitAction),       new GBC(1,0));
+        final JPanel tablePanel = new JPanel(new BorderLayout()) {{
+            setBorder(BorderFactory.createCompoundBorder(
+                    new ThinBorder(ThinBorder.RAISED),
+                    BorderFactory.createEmptyBorder(1, 1, 1, 1)));
+            add(scrollPane, BorderLayout.CENTER);
+            add(editActions, BorderLayout.SOUTH);
+        }};
 
-        add(editActions,     new GridBagConstraints(
-            0, 0, 1, 1, 1.0, 0.0, EAST, HORIZONTAL, zero, 0, 0
-        ));
-        add(parametersEditor, new GridBagConstraints(
-            0, 1, 1, 1, 1.0, 1.0, CENTER, BOTH, zero, 0, 0
-        ));
-        add(templateActions, new GridBagConstraints(
-            0, 2, 1, 1, 1.0, 0.0, CENTER, HORIZONTAL, zero, 0, 0
-        ));
+        add(tablePanel,  BorderLayout.CENTER);
+        add(paramEditor, BorderLayout.SOUTH);
 
         paramTable.getSelectionModel().addListSelectionListener(staffSelectionListener);
         handleSelectionUpdate();
@@ -606,6 +522,101 @@ final class EdTemplateGroupFooter extends JPanel {
         this.program = program;
         this.templateGroup = templateGroup;
         updateLayout();
+    }
+}
+
+class EdTemplateGroupHeader extends JPanel {
+
+    private TemplateGroup templateGroup;
+
+    private final JLabel resource = new JLabel();
+    private final JComboBox status = new SingleSelectComboBox() {{
+        setChoices(TemplateGroup.Status.values());
+        setMaximumRowCount(TemplateGroup.Status.values().length);
+    }};
+
+    private final JTextField title = new JTextField() {{
+        getDocument().addDocumentListener(new AbstractDocumentListener() {
+            public void textChanged(DocumentEvent docEvent, String newText) {
+                if (templateGroup != null) {
+                    templateGroup.setTitle(newText);
+                }
+            }
+        });
+    }};
+
+    public EdTemplateGroupHeader() {
+        setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+        setLayout(new GridBagLayout());
+
+        add(new JLabel("Resource:") {{
+            setFont(getFont().deriveFont(Font.BOLD));
+        }}, new GBC(0, 0, false));
+        add(resource, new GBC(1, 0, true));
+
+        add(new JLabel("Title:") {{
+            setFont(getFont().deriveFont(Font.BOLD));
+        }}, new GBC(0, 1, false));
+        add(title, new GBC(1, 1, false));
+
+        add(new JLabel("Target/condition pairs may be dragged to other template groups.") {{
+            setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
+        }}, new GBC(0, 3, 2, 1, null));
+    }
+
+    public void init(ISPTemplateGroup templateGroupNode, TemplateGroup templateGroup) {
+        this.templateGroup = templateGroup;
+
+        // Walk around and gather some information
+        final ISPTemplateFolder templateFolderNode = (ISPTemplateFolder) templateGroupNode.getParent();
+        final TemplateFolder templateFolder = (TemplateFolder) templateFolderNode.getDataObject();
+        final SpBlueprint blueprint = templateFolder.getBlueprints().get(templateGroup.getBlueprintId());
+
+        // Update our UI
+        resource.setText(blueprint.toString());
+        title.setText(templateGroup.getTitle());
+        status.setSelectedItem(templateGroup.getStatus());
+    }
+}
+
+
+final class EdTemplateGroupFooter extends JPanel {
+    private ISPProgram program;
+    private ISPTemplateGroup templateGroup;
+
+    EdTemplateGroupFooter() {
+        setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+
+        // Action to instantiate templates
+        final Action instantiateAction = new AbstractAction("Apply...") {
+            public void actionPerformed(ActionEvent evt) {
+                try {
+                    InstantiationDialog.open(getParent(), program, templateGroup);
+                } catch (Exception e) {
+                    DialogUtil.error(e);
+                }
+            }
+        };
+
+        // Action to fork a template group
+        final Action splitAction = new AbstractAction("Split...") {
+            public void actionPerformed(ActionEvent evt) {
+                try {
+                    SplitDialog.open(getParent(), templateGroup);
+                } catch (Exception e) {
+                    DialogUtil.error(e);
+                }
+            }
+        };
+
+        setLayout(new GridBagLayout());
+        add(new JButton(instantiateAction), new GBC(0, 0));
+        add(new JButton(splitAction),       new GBC(2, 0));
+    }
+
+    public void init(ISPProgram program, ISPTemplateGroup templateGroup) {
+        this.program = program;
+        this.templateGroup = templateGroup;
     }
 }
 
