@@ -204,6 +204,23 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
             @Override public ObservingMode correspondingH() { return this; }
         },
 
+        // Unblocked Modes
+        UNBLOCKED_Y("Y Unblocked", Filter.Y, false, Apodizer.APOD_Y, FPM.SCIENCE, Lyot.LYOT_080m12_03, 0.5, 6.5) {
+            @Override public ObservingMode correspondingH() { return this; }
+        },
+        UNBLOCKED_J("J Unblocked", Filter.J, false, Apodizer.APOD_J, FPM.SCIENCE, Lyot.LYOT_080m12_04, 0.5, 6.5) {
+            @Override public ObservingMode correspondingH() { return this; }
+        },
+        UNBLOCKED_H("H Unblocked", Filter.H, false, Apodizer.APOD_H, FPM.SCIENCE, Lyot.LYOT_080m12_04, 0.5, 6.5) {
+            @Override public ObservingMode correspondingH() { return this; }
+        },
+        UNBLOCKED_K1("K1 Unblocked", Filter.K1, false, Apodizer.APOD_K1, FPM.SCIENCE, Lyot.LYOT_080m12_06_03, 0.5, 6.5) {
+            @Override public ObservingMode correspondingH() { return this; }
+        },
+        UNBLOCKED_K2("K2 Unblocked", Filter.K2, false, Apodizer.APOD_K1, FPM.SCIENCE, Lyot.LYOT_080m12_07, 0.5, 6.5) {
+            @Override public ObservingMode correspondingH() { return this; }
+        },
+
         // Deprecated modes
         // Y_coron dark
         /*CORON_Y_BAND_DARK("Coronograph Y-band dark", Filter.Y, false, Apodizer.APOD_Y, FPM.FPM_Y, Lyot.BLANK, 0.5, 3.0),
