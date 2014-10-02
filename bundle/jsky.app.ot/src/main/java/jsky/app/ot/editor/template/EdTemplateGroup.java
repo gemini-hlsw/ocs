@@ -301,7 +301,8 @@ class ParamsListTableCellRenderer extends DefaultTableCellRenderer {
             label.setIcon(ICON_CONDS);
 
         } else if (value instanceof TimeValue) {
-            label.setText(String.format("%.2f hrs", ((TimeValue) value).getTimeAmount()));
+            final TimeValue time = (TimeValue) value;
+            label.setText(String.format("%.2f %s", time.getTimeAmount(), time.getTimeUnits().name()));
             label.setIcon(ICON_TIME);
         }
 
