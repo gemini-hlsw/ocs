@@ -18,7 +18,7 @@ import scala.Option;
 /**
  * Flamingos 2 rule.
  */
-public class Flamingos2Rule implements IRule {
+public final class Flamingos2Rule implements IRule {
     private static final Collection<IConfigRule> FLAM2_RULES = new ArrayList<IConfigRule>();
     private static final String PREFIX = "Flamingos2Rule_";
 
@@ -92,9 +92,9 @@ public class Flamingos2Rule implements IRule {
         private static final String MSG = "P-offsets will move the slit off of the target.";
 
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            Flamingos2.FPUnit fpu = (Flamingos2.FPUnit) SequenceRule.getInstrumentItem(config, Flamingos2.FPU_PROP);
-            if (fpu != null && (fpu.isLongslit() || fpu == Flamingos2.FPUnit.CUSTOM_MASK)) {
-                Option<Double> p = SequenceRule.getPOffset(config);
+            final Flamingos2.FPUnit fpu = (Flamingos2.FPUnit) SequenceRule.getInstrumentItem(config, Flamingos2.FPU_PROP);
+            if (fpu.isLongslit() || fpu == Flamingos2.FPUnit.CUSTOM_MASK) {
+                final Option<Double> p = SequenceRule.getPOffset(config);
                 if (p.isDefined() && !Offset.isZero(p.get())) {
                     return new Problem(WARNING, PREFIX + "NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE", MSG,
                             SequenceRule.getInstrumentOrSequenceNode(step, elems));

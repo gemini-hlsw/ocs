@@ -79,16 +79,16 @@ public final class Offset {
      * @param a
      * @return
      */
-    public static boolean isZero(double a) { return Math.abs(a) < MIN_VALUE; }
+    public static boolean isZero(final double a) { return Math.abs(a) < MIN_VALUE; }
 
     /**
-     * Checks if ttwo offset values in arcseconds can be considered equal.
+     * Checks if two offset values in arcseconds can be considered equal.
      * Helper method to improve legibility.
      * @param a
      * @param b
      * @return
      */
-    public static boolean areEqual(double a, double b) { return Math.abs(a - b) < MIN_VALUE; }
+    public static boolean areEqual(final double a, final double b) { return Math.abs(a - b) < MIN_VALUE; }
 
     public String toString() {
         return String.format("%f x %f", p.getMagnitude(), q.getMagnitude());

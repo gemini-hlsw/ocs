@@ -32,7 +32,7 @@ import scala.Option;
 /**
  * GMOS Rule set
  */
-public class GmosRule implements IRule {
+public final class GmosRule implements IRule {
     private static final String PREFIX = "GmosRule_";
     private static Collection<IConfigRule> GMOS_RULES = new ArrayList<IConfigRule>();
 
@@ -529,10 +529,10 @@ public class GmosRule implements IRule {
             }
             gsds.ruleInEffect = true;
 
-            Option<Double> pOpt = SequenceRule.getPOffset(config);
-            Option<Double> qOpt = SequenceRule.getQOffset(config);
-            Double p = pOpt.isDefined() ? pOpt.get() : 0.0;
-            Double q = qOpt.isDefined() ? qOpt.get() : 0.0;
+            final Option<Double> pOpt = SequenceRule.getPOffset(config);
+            final Option<Double> qOpt = SequenceRule.getQOffset(config);
+            final double p = pOpt.isDefined() ? pOpt.get() : 0.0;
+            final double q = qOpt.isDefined() ? qOpt.get() : 0.0;
 
             if (step == 0) {
                 gsds.p = p;
@@ -1638,7 +1638,7 @@ public class GmosRule implements IRule {
 
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
             if (isCustomMask(config) || isSlitMask(config, elems)) {
-                Option<Double> p = SequenceRule.getPOffset(config);
+                final Option<Double> p = SequenceRule.getPOffset(config);
                 if (p.isDefined() && !Offset.isZero(p.get())) {
                     return new Problem(WARNING, PREFIX + "NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE", MSG,
                             SequenceRule.getInstrumentOrSequenceNode(step, elems));
@@ -1651,13 +1651,13 @@ public class GmosRule implements IRule {
             return SequenceRule.SCIENCE_NIGHTTIME_CAL_MATCHER;
         }
 
-        private boolean isCustomMask(Config config) {
-            GmosCommonType.FPUnitMode fpuMode =
+        private boolean isCustomMask(final Config config) {
+            final GmosCommonType.FPUnitMode fpuMode =
                     (GmosCommonType.FPUnitMode) SequenceRule.getInstrumentItem(config, InstGmosCommon.FPU_MODE_PROP);
             return fpuMode == GmosCommonType.FPUnitMode.CUSTOM_MASK;
         }
-        private boolean isSlitMask(Config config, ObservationElements elems) {
-            GmosCommonType.FPUnit fpu = getFPU(config, elems);
+        private boolean isSlitMask(final Config config, final ObservationElements elems) {
+            final GmosCommonType.FPUnit fpu = getFPU(config, elems);
             return fpu.isSpectroscopic() || fpu.isNSslit();
         }
 

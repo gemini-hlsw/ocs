@@ -397,9 +397,9 @@ public class GnirsRule implements IRule {
         private static final String MSG = "P-offsets will move the slit off of the target.";
 
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            GNIRSParams.SlitWidth fpu = (GNIRSParams.SlitWidth) SequenceRule.getInstrumentItem(config, InstGNIRS.SLIT_WIDTH_PROP);
-            if (fpu != null && fpu.isSlitSpectroscopy()) {
-                Option<Double> p = SequenceRule.getPOffset(config);
+            final GNIRSParams.SlitWidth fpu = (GNIRSParams.SlitWidth) SequenceRule.getInstrumentItem(config, InstGNIRS.SLIT_WIDTH_PROP);
+            if (fpu.isSlitSpectroscopy()) {
+                final Option<Double> p = SequenceRule.getPOffset(config);
                 if (p.isDefined() && !Offset.isZero(p.get())) {
                     return new Problem(WARNING, PREFIX + "NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE", MSG,
                             SequenceRule.getInstrumentOrSequenceNode(step, elems));

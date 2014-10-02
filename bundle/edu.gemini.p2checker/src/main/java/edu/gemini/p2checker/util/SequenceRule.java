@@ -119,13 +119,13 @@ public class SequenceRule implements IRule {
         return ObsClass.parseType(obsClassStr);
     }
 
-    public static Option<Double> getPOffset(Config config) {
+    public static Option<Double> getPOffset(final Config config) {
         return Option.apply(
                 _getDoubleValue((String) SequenceRule.getItem(config, String.class, P_OFFSET_KEY))
         );
     }
 
-    public static Option<Double> getQOffset(Config config) {
+    public static Option<Double> getQOffset(final Config config) {
         return Option.apply(
                 _getDoubleValue((String) SequenceRule.getItem(config, String.class, Q_OFFSET_KEY))
         );

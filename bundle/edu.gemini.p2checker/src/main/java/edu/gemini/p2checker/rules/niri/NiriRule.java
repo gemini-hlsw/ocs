@@ -36,7 +36,7 @@ import java.util.Map;
 /**
  * NIRI Rule set
  */
-public class NiriRule implements IRule {
+public final class NiriRule implements IRule {
     private static final String PREFIX = "NiriRule_";
     private static Collection<IConfigRule> NIRI_RULES = new ArrayList<IConfigRule>();
 
@@ -715,8 +715,8 @@ public class NiriRule implements IRule {
 
             if (camera == null) return null; //can't check without camera
 
-            scala.Option<Double> p = SequenceRule.getPOffset(config);
-            scala.Option<Double> q = SequenceRule.getQOffset(config);
+            final scala.Option<Double> p = SequenceRule.getPOffset(config);
+            final scala.Option<Double> q = SequenceRule.getQOffset(config);
 
             if (p.isEmpty() || q.isEmpty()) {
                 //warn always in the sequence node
@@ -1171,10 +1171,10 @@ public class NiriRule implements IRule {
             }
             //check the offset. If they are the same as the previous known state,
             //issue a problem
-            scala.Option<Double> pOpt = SequenceRule.getPOffset(config);
-            scala.Option<Double> qOpt = SequenceRule.getQOffset(config);
-            double p = pOpt.isDefined() ? pOpt.get() : 0.0;
-            double q = qOpt.isDefined() ? qOpt.get() : 0.0;
+            final scala.Option<Double> pOpt = SequenceRule.getPOffset(config);
+            final scala.Option<Double> qOpt = SequenceRule.getQOffset(config);
+            final double p = pOpt.isDefined() ? pOpt.get() : 0.0;
+            final double q = qOpt.isDefined() ? qOpt.get() : 0.0;
             if (niristate.offsetState.checkPQ(p, q)) {
                 return new Problem(WARNING, PREFIX+"OFFSET_RULE", MESSAGE, elems.getSeqComponentNode());
             }
