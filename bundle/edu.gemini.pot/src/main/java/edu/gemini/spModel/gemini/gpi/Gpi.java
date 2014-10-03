@@ -158,23 +158,23 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         },
 
         // Y_direct
-        DIRECT_Y_BAND("Y direct", Filter.Y, true, Apodizer.CLEAR, FPM.SCIENCE, Lyot.OPEN, 5.5, 8.0) {
+        DIRECT_Y_BAND("Y direct", Filter.Y, true, Apodizer.CLEAR, FPM.SCIENCE, Lyot.OPEN, 5.5, 7.5) {
             @Override public ObservingMode correspondingH() { return DIRECT_H_BAND; }
         },
         // J_direct
-        DIRECT_J_BAND("J direct", Filter.J, true, Apodizer.CLEAR, FPM.SCIENCE, Lyot.OPEN, 5.5, 8.0) {
+        DIRECT_J_BAND("J direct", Filter.J, true, Apodizer.CLEAR, FPM.SCIENCE, Lyot.OPEN, 5.5, 7.5) {
             @Override public ObservingMode correspondingH() { return DIRECT_H_BAND; }
         },
         // H_direct
-        DIRECT_H_BAND("H direct", Filter.H, true, Apodizer.CLEAR, FPM.SCIENCE, Lyot.OPEN, 5.5, 8.0) {
+        DIRECT_H_BAND("H direct", Filter.H, true, Apodizer.CLEAR, FPM.SCIENCE, Lyot.OPEN, 5.5, 7.5) {
             @Override public ObservingMode correspondingH() { return this; }
         },
         // K1_direct
-        DIRECT_K1_BAND("K1 direct", Filter.K1, true, Apodizer.CLEAR, FPM.SCIENCE, Lyot.OPEN, 5.5, 8.0) {
+        DIRECT_K1_BAND("K1 direct", Filter.K1, true, Apodizer.CLEAR, FPM.SCIENCE, Lyot.OPEN, 5.5, 7.5) {
             @Override public ObservingMode correspondingH() { return DIRECT_H_BAND; }
         },
         // K2_direct
-        DIRECT_K2_BAND("K2 direct", Filter.K2, true, Apodizer.CLEAR, FPM.SCIENCE, Lyot.OPEN, 5.5, 8.0) {
+        DIRECT_K2_BAND("K2 direct", Filter.K2, true, Apodizer.CLEAR, FPM.SCIENCE, Lyot.OPEN, 5.5, 7.5) {
             @Override public ObservingMode correspondingH() { return DIRECT_H_BAND; }
         },
 
@@ -205,19 +205,19 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         },
 
         // Unblocked Modes
-        UNBLOCKED_Y("Y Unblocked", Filter.Y, false, Apodizer.APOD_Y, FPM.SCIENCE, Lyot.LYOT_080m12_03, 0.5, 6.5) {
+        UNBLOCKED_Y("Y Unblocked", Filter.Y, false, Apodizer.APOD_Y, FPM.SCIENCE, Lyot.LYOT_080m12_03, 4.0, 6.5) {
             @Override public ObservingMode correspondingH() { return this; }
         },
-        UNBLOCKED_J("J Unblocked", Filter.J, false, Apodizer.APOD_J, FPM.SCIENCE, Lyot.LYOT_080m12_04, 0.5, 6.5) {
+        UNBLOCKED_J("J Unblocked", Filter.J, false, Apodizer.APOD_J, FPM.SCIENCE, Lyot.LYOT_080m12_04, 4.0, 6.5) {
             @Override public ObservingMode correspondingH() { return this; }
         },
-        UNBLOCKED_H("H Unblocked", Filter.H, false, Apodizer.APOD_H, FPM.SCIENCE, Lyot.LYOT_080m12_04, 0.5, 6.5) {
+        UNBLOCKED_H("H Unblocked", Filter.H, false, Apodizer.APOD_H, FPM.SCIENCE, Lyot.LYOT_080m12_04, 4.0, 6.5) {
             @Override public ObservingMode correspondingH() { return this; }
         },
-        UNBLOCKED_K1("K1 Unblocked", Filter.K1, false, Apodizer.APOD_K1, FPM.SCIENCE, Lyot.LYOT_080m12_06_03, 0.5, 6.5) {
+        UNBLOCKED_K1("K1 Unblocked", Filter.K1, false, Apodizer.APOD_K1, FPM.SCIENCE, Lyot.LYOT_080m12_06_03, 4.0, 6.5) {
             @Override public ObservingMode correspondingH() { return this; }
         },
-        UNBLOCKED_K2("K2 Unblocked", Filter.K2, false, Apodizer.APOD_K1, FPM.SCIENCE, Lyot.LYOT_080m12_07, 0.5, 6.5) {
+        UNBLOCKED_K2("K2 Unblocked", Filter.K2, false, Apodizer.APOD_K1, FPM.SCIENCE, Lyot.LYOT_080m12_07, 4.0, 6.5) {
             @Override public ObservingMode correspondingH() { return this; }
         },
 
