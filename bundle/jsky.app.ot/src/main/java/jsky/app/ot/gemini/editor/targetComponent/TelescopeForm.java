@@ -193,9 +193,6 @@ public class TelescopeForm extends JPanel {
                 //---- primaryButton ----
                 primaryButton.setText("Primary");
                 primaryButton.setToolTipText("Select guide star option");
-//				buttonsPanel.add(primaryButton, new GridBagConstraints(5, 0, 1, 1, 0.0, 0.0,
-//					GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-//					new Insets(0, 10, 0, 0), 0, 0));
 
                 //======== spacerPanel ========
                 {
@@ -738,7 +735,6 @@ public class TelescopeForm extends JPanel {
                         GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                         new Insets(0, 0, 0, 0), 0, 0));
                 }
-                //extrasFolder.add(nonsiderealPW, "nonsidereal");
             }
             coordinatesPanel.add(extrasFolder, BorderLayout.SOUTH);
         }
@@ -751,37 +747,6 @@ public class TelescopeForm extends JPanel {
         autoGuideStarButton         = guidingControls.autoGuideStarButton().peer();
         manualGuideStarButton       = guidingControls.manualGuideStarButton().peer();
         autoGuideStarGuiderSelector = guidingControls.autoGuideStarGuiderSelector();
-
-        /*
-        //======== controlsPanel ========
-        {
-            controlsPanel.setLayout(new GridLayout(1, 3, 5, 5));
-
-            //---- setBaseButton ----
-            setBaseButton.setToolTipText("Set the base position to the center of the image displayed in the position editor");
-            setBaseButton.setMargin(new Insets(2, 2, 2, 2));
-            setBaseButton.setText("Set Base From Image");
-            controlsPanel.add(setBaseButton);
-
-            //---- manualGuideStarButton ----
-            manualGuideStarButton.setMargin(new Insets(2, 2, 2, 2));
-            manualGuideStarButton.setText("Manual GS...");
-            manualGuideStarButton.setToolTipText("Query a guide star catalog, review candidates, and select");
-            controlsPanel.add(manualGuideStarButton);
-
-            //---- autoGuideStarButton ----
-            autoGuideStarButton.setMargin(new Insets(2, 2, 2, 2));
-            autoGuideStarButton.setText("Auto GS");
-            autoGuideStarButton.setToolTipText("Have the OT automatically select the best guide star for your observation");
-            controlsPanel.add(autoGuideStarButton);
-
-            //---- autoGuideStar guider selector ----
-            //controlsPanel.add(autoGuideStarGuiderSelector);
-        }
-        add(controlsPanel, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
-            GridBagConstraints.WEST, GridBagConstraints.VERTICAL,
-            new Insets(5, 0, 0, 0), 0, 0));
-        */
 
         //---- planetButtonGroup ----
         ButtonGroup planetButtonGroup = new ButtonGroup();
