@@ -4,13 +4,13 @@ package edu.gemini.p2checker.rules.gnirs;
 import edu.gemini.p2checker.api.*;
 import edu.gemini.p2checker.rules.altair.AltairRule;
 import edu.gemini.p2checker.util.AbstractConfigRule;
+import edu.gemini.p2checker.util.NoPOffsetWithSlitRule;
 import edu.gemini.p2checker.util.SequenceRule;
-import edu.gemini.skycalc.Offset;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams.*;
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
-import scala.Option;
+import scala.runtime.AbstractFunction2;
 
 
 import java.util.ArrayList;
@@ -392,26 +392,16 @@ public class GnirsRule implements IRule {
      * REL-1811: Warn if there are P-offsets for a slit spectroscopy observation.
      * Warn if FPU = *arcsec.
      */
-    private static IConfigRule NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE = new IConfigRule() {
-
-        private static final String MSG = "P-offsets will move the slit off of the target.";
-
-        public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            final GNIRSParams.SlitWidth fpu = (GNIRSParams.SlitWidth) SequenceRule.getInstrumentItem(config, InstGNIRS.SLIT_WIDTH_PROP);
-            if (fpu.isSlitSpectroscopy()) {
-                final Option<Double> p = SequenceRule.getPOffset(config);
-                if (p.isDefined() && !Offset.isZero(p.get())) {
-                    return new Problem(WARNING, PREFIX + "NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE", MSG,
-                            SequenceRule.getInstrumentOrSequenceNode(step, elems));
-                }
+    private static IConfigRule NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE = new NoPOffsetWithSlitRule(
+        PREFIX,
+        new AbstractFunction2<Config, ObservationElements, Boolean>() {
+            public Boolean apply(Config config, ObservationElements elems){
+                return
+                    ((GNIRSParams.SlitWidth) SequenceRule.getInstrumentItem(config, InstGNIRS.SLIT_WIDTH_PROP)).
+                    isSlitSpectroscopy();
             }
-            return null;
         }
-
-        public IConfigMatcher getMatcher() {
-            return SequenceRule.SCIENCE_NIGHTTIME_CAL_MATCHER;
-        }
-    };
+    );
 
 
     static {

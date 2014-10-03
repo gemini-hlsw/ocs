@@ -3,17 +3,18 @@ package edu.gemini.p2checker.rules.flamingos2;
 
 import edu.gemini.p2checker.api.*;
 import edu.gemini.p2checker.rules.gems.GemsGuideStarRule;
-import edu.gemini.p2checker.util.MdfConfigRule;
 import edu.gemini.p2checker.util.AbstractConfigRule;
+import edu.gemini.p2checker.util.MdfConfigRule;
+import edu.gemini.p2checker.util.NoPOffsetWithSlitRule;
 import edu.gemini.p2checker.util.SequenceRule;
-import edu.gemini.skycalc.Offset;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
+import scala.Option;
+import scala.runtime.AbstractFunction2;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import scala.Option;
 
 /**
  * Flamingos 2 rule.
@@ -87,26 +88,15 @@ public final class Flamingos2Rule implements IRule {
      * REL-1811: Warn if there are P-offsets for a slit spectroscopy observation.
      * Warn for FPU = (*arcsec or Custom Mask)
      */
-    private static IConfigRule NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE = new IConfigRule() {
-
-        private static final String MSG = "P-offsets will move the slit off of the target.";
-
-        public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            final Flamingos2.FPUnit fpu = (Flamingos2.FPUnit) SequenceRule.getInstrumentItem(config, Flamingos2.FPU_PROP);
-            if (fpu.isLongslit() || fpu == Flamingos2.FPUnit.CUSTOM_MASK) {
-                final Option<Double> p = SequenceRule.getPOffset(config);
-                if (p.isDefined() && !Offset.isZero(p.get())) {
-                    return new Problem(WARNING, PREFIX + "NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE", MSG,
-                            SequenceRule.getInstrumentOrSequenceNode(step, elems));
-                }
+    private static IConfigRule NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE = new NoPOffsetWithSlitRule(
+        PREFIX,
+        new AbstractFunction2<Config, ObservationElements, Boolean>() {
+            public Boolean apply(Config config, ObservationElements elems) {
+                final Flamingos2.FPUnit fpu = (Flamingos2.FPUnit) SequenceRule.getInstrumentItem(config, Flamingos2.FPU_PROP);
+                return fpu.isLongslit() || fpu == Flamingos2.FPUnit.CUSTOM_MASK;
             }
-            return null;
         }
-
-        public IConfigMatcher getMatcher() {
-            return SequenceRule.SCIENCE_NIGHTTIME_CAL_MATCHER;
-        }
-    };
+    );
 
     /**
      * Register all the Flamingos 2 rules to apply.

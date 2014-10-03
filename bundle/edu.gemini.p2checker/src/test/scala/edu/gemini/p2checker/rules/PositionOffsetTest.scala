@@ -3,16 +3,16 @@ package edu.gemini.p2checker.rules
 import edu.gemini.p2checker.api.{IRule, ObservationElements}
 import edu.gemini.p2checker.rules.altair.AltairRule
 import edu.gemini.p2checker.rules.gmos.GmosRule
-import edu.gemini.p2checker.util.PositionOffsetChecker
+import edu.gemini.p2checker.util.{NoPOffsetWithSlitRule, PositionOffsetChecker}
 import edu.gemini.pot.sp.ISPObsComponent
-import edu.gemini.spModel.gemini.altair.{InstAltair, AltairParams}
-import edu.gemini.spModel.gemini.seqcomp.SeqRepeatOffset
-
-import org.junit.Assert._
-import org.junit.{Test, Before}
-import scala.collection.JavaConverters._
-import edu.gemini.spModel.gemini.gmos.{InstGmosSouth, GmosSouthType, GmosNorthType, InstGmosNorth}
+import edu.gemini.spModel.gemini.altair.{AltairParams, InstAltair}
+import edu.gemini.spModel.gemini.gmos.{GmosNorthType, GmosSouthType, InstGmosNorth, InstGmosSouth}
 import edu.gemini.spModel.gemini.niri.InstNIRI
+import edu.gemini.spModel.gemini.seqcomp.SeqRepeatOffset
+import org.junit.Assert._
+import org.junit.{Before, Test}
+
+import scala.collection.JavaConverters._
 
 /**
  * Some support methods and test cases related to checks that deal with offset positions.
@@ -145,10 +145,10 @@ class PositionOffsetTest extends AbstractRuleTest {
   }
 
   // ==== GMOS North/South: Warn if P offsets are used with slit spectroscopy
-  import GmosNorthType.{FPUnitNorth => GmosFpuNorth}
-  import GmosSouthType.{FPUnitSouth => GmosFpuSouth}
+  import edu.gemini.spModel.gemini.gmos.GmosNorthType.{FPUnitNorth => GmosFpuNorth}
+  import edu.gemini.spModel.gemini.gmos.GmosSouthType.{FPUnitSouth => GmosFpuSouth}
   val gmosRule = new GmosRule()
-  val pOffsetInvalidMsg = "P-offsets will move the slit off of the target."
+  val pOffsetInvalidMsg = NoPOffsetWithSlitRule.Message
 
   // no p-offset is always ok
   @Test def testGMOSNNoOffsetWithSlitOk(): Unit = {

@@ -4,10 +4,11 @@
 package edu.gemini.p2checker.rules.gmos;
 
 import edu.gemini.p2checker.api.*;
-import edu.gemini.p2checker.rules.general.GeneralRule;
-import edu.gemini.p2checker.util.MdfConfigRule;
 import edu.gemini.p2checker.rules.altair.AltairRule;
+import edu.gemini.p2checker.rules.general.GeneralRule;
 import edu.gemini.p2checker.util.AbstractConfigRule;
+import edu.gemini.p2checker.util.MdfConfigRule;
+import edu.gemini.p2checker.util.NoPOffsetWithSlitRule;
 import edu.gemini.p2checker.util.SequenceRule;
 import edu.gemini.pot.sp.ISPProgramNode;
 import edu.gemini.pot.sp.SPComponentType;
@@ -22,11 +23,13 @@ import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.offset.OffsetPos;
-import static edu.gemini.spModel.gemini.gmos.GmosCommonType.Binning;
+import scala.Option;
+import scala.runtime.AbstractFunction2;
 
 import java.beans.PropertyDescriptor;
 import java.util.*;
-import scala.Option;
+
+import static edu.gemini.spModel.gemini.gmos.GmosCommonType.Binning;
 
 
 /**
@@ -1632,36 +1635,26 @@ public final class GmosRule implements IRule {
      * REL-1811: Warn if there are P-offsets for a slit spectroscopy observation.
      * Warn for FPUs = (*arcsec or Custom Mask).
      */
-    private static IConfigRule NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE = new IConfigRule() {
-
-        private static final String MSG = "P-offsets will move the slit off of the target.";
-
-        public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            if (isCustomMask(config) || isSlitMask(config, elems)) {
-                final Option<Double> p = SequenceRule.getPOffset(config);
-                if (p.isDefined() && !Offset.isZero(p.get())) {
-                    return new Problem(WARNING, PREFIX + "NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE", MSG,
-                            SequenceRule.getInstrumentOrSequenceNode(step, elems));
-                }
+    private static IConfigRule NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE = new NoPOffsetWithSlitRule(
+        PREFIX,
+        new AbstractFunction2<Config, ObservationElements, Boolean>() {
+            public Boolean apply(Config config, ObservationElements elems) {
+                return isCustomMask(config) || isSlitMask(config, elems);
             }
-            return null;
+
+            private boolean isCustomMask(final Config config) {
+                final GmosCommonType.FPUnitMode fpuMode =
+                        (GmosCommonType.FPUnitMode) SequenceRule.getInstrumentItem(config, InstGmosCommon.FPU_MODE_PROP);
+                return fpuMode == GmosCommonType.FPUnitMode.CUSTOM_MASK;
+            }
+
+            private boolean isSlitMask(final Config config, final ObservationElements elems) {
+                final GmosCommonType.FPUnit fpu = getFPU(config, elems);
+                return fpu.isSpectroscopic() || fpu.isNSslit();
+            }
         }
 
-        public IConfigMatcher getMatcher() {
-            return SequenceRule.SCIENCE_NIGHTTIME_CAL_MATCHER;
-        }
-
-        private boolean isCustomMask(final Config config) {
-            final GmosCommonType.FPUnitMode fpuMode =
-                    (GmosCommonType.FPUnitMode) SequenceRule.getInstrumentItem(config, InstGmosCommon.FPU_MODE_PROP);
-            return fpuMode == GmosCommonType.FPUnitMode.CUSTOM_MASK;
-        }
-        private boolean isSlitMask(final Config config, final ObservationElements elems) {
-            final GmosCommonType.FPUnit fpu = getFPU(config, elems);
-            return fpu.isSpectroscopic() || fpu.isNSslit();
-        }
-
-    };
+    );
 
     private static IRule UNUSED_CUSTOM_ROI_RULE = new IRule() {
         private static final String warnMsg = "Custom ROIs are declared but not used in any step";
