@@ -943,7 +943,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 name = target.getSolarObject().getHorizonsId();
             }
 
-            if (name.length() != 0) {
+            if (!name.isEmpty()) {
                 _resolveNonSidereal(name, operationType, listener);
             }
         } else { //use standard catalogs.
@@ -1918,13 +1918,19 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         } else if (w == _w.timeRangePlotButton) {
             _resolveName(HorizonsAction.Type.PLOT_EPHEMERIS, null);
         } else if (w == _w.updateRaDecButton) {
-            // REL-343: Force nonsidereal target name resolution on coordinate updates
-            _resolveName(HorizonsAction.Type.GET_ORBITAL_ELEMENTS, new ResolveNameListener() {
-                @Override
-                public void nameResolved() {
-                    _resolveName(HorizonsAction.Type.UPDATE_POSITION, null);
-                }
-            });
+            // REL-1063 Fix OT nonsidereal Solar System Object Horizons name resolution
+            if (_curPos.getTarget() instanceof NamedTarget) {
+                // For named objects like Moon, Saturn, etc don't get the orbital elements, just the position
+                _resolveName(HorizonsAction.Type.UPDATE_POSITION, null);
+            } else {
+                // REL-343: Force nonsidereal target name resolution on coordinate updates
+                _resolveName(HorizonsAction.Type.GET_ORBITAL_ELEMENTS, new ResolveNameListener() {
+                    @Override
+                    public void nameResolved() {
+                        _resolveName(HorizonsAction.Type.UPDATE_POSITION, null);
+                    }
+                });
+            }
         } else if (w == _w.calendarTime) {
             Object o = _w.calendarTime.getSelectedItem();
             if (o instanceof TimeConfig) {
