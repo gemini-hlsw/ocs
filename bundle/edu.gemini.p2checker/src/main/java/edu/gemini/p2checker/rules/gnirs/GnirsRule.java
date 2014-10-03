@@ -4,14 +4,13 @@ package edu.gemini.p2checker.rules.gnirs;
 import edu.gemini.p2checker.api.*;
 import edu.gemini.p2checker.rules.altair.AltairRule;
 import edu.gemini.p2checker.util.AbstractConfigRule;
+import edu.gemini.p2checker.util.NoPOffsetWithSlitRule;
 import edu.gemini.p2checker.util.SequenceRule;
 import edu.gemini.spModel.config2.Config;
-import edu.gemini.spModel.data.AbstractDataObject;
-import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams.*;
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
-import edu.gemini.spModel.obsseq.Sequence;
+import scala.runtime.AbstractFunction2;
 
 
 import java.util.ArrayList;
@@ -389,6 +388,20 @@ public class GnirsRule implements IRule {
         }
     };
 
+    /**
+     * REL-1811: Warn if there are P-offsets for a slit spectroscopy observation.
+     * Warn if FPU = *arcsec.
+     */
+    private static IConfigRule NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE = new NoPOffsetWithSlitRule(
+        PREFIX,
+        new AbstractFunction2<Config, ObservationElements, Boolean>() {
+            public Boolean apply(Config config, ObservationElements elems){
+                return
+                    ((GNIRSParams.SlitWidth) SequenceRule.getInstrumentItem(config, InstGNIRS.SLIT_WIDTH_PROP)).
+                    isSlitSpectroscopy();
+            }
+        }
+    );
 
 
     static {
@@ -406,6 +419,7 @@ public class GnirsRule implements IRule {
         }
         GNIRS_RULES.add(ACQUISITION_FILTER_RULE);
         GNIRS_RULES.add(ALTAIR_RULE);
+        GNIRS_RULES.add(NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE);
     }
 
     public IP2Problems check(ObservationElements elements)  {

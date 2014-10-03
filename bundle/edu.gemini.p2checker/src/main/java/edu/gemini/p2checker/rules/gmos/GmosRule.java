@@ -4,13 +4,15 @@
 package edu.gemini.p2checker.rules.gmos;
 
 import edu.gemini.p2checker.api.*;
-import edu.gemini.p2checker.rules.general.GeneralRule;
-import edu.gemini.p2checker.util.MdfConfigRule;
 import edu.gemini.p2checker.rules.altair.AltairRule;
+import edu.gemini.p2checker.rules.general.GeneralRule;
 import edu.gemini.p2checker.util.AbstractConfigRule;
+import edu.gemini.p2checker.util.MdfConfigRule;
+import edu.gemini.p2checker.util.NoPOffsetWithSlitRule;
 import edu.gemini.p2checker.util.SequenceRule;
 import edu.gemini.pot.sp.ISPProgramNode;
 import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.skycalc.Offset;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
@@ -21,17 +23,19 @@ import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.offset.OffsetPos;
-import static edu.gemini.spModel.gemini.gmos.GmosCommonType.Binning;
+import scala.Option;
+import scala.runtime.AbstractFunction2;
 
 import java.beans.PropertyDescriptor;
 import java.util.*;
-import scala.Option;
+
+import static edu.gemini.spModel.gemini.gmos.GmosCommonType.Binning;
 
 
 /**
  * GMOS Rule set
  */
-public class GmosRule implements IRule {
+public final class GmosRule implements IRule {
     private static final String PREFIX = "GmosRule_";
     private static Collection<IConfigRule> GMOS_RULES = new ArrayList<IConfigRule>();
 
@@ -528,10 +532,10 @@ public class GmosRule implements IRule {
             }
             gsds.ruleInEffect = true;
 
-            Double p = SequenceRule.getPOffset(config);
-            if (p == null) p = 0.0;
-            Double q = SequenceRule.getQOffset(config);
-            if (q == null) q = 0.0;
+            final Option<Double> pOpt = SequenceRule.getPOffset(config);
+            final Option<Double> qOpt = SequenceRule.getQOffset(config);
+            final double p = pOpt.isDefined() ? pOpt.get() : 0.0;
+            final double q = qOpt.isDefined() ? qOpt.get() : 0.0;
 
             if (step == 0) {
                 gsds.p = p;
@@ -539,7 +543,7 @@ public class GmosRule implements IRule {
                 return null;
             }
 
-            if ((p.compareTo(gsds.p) != 0) || (q.compareTo(gsds.q) != 0)) {
+            if (!Offset.areEqual(p, gsds.p) || !Offset.areEqual(q, gsds.q)) {
                 gsds.foundTwoDifferentPositions = true;
             }
             return null;
@@ -1627,6 +1631,31 @@ public class GmosRule implements IRule {
         }
     };
 
+    /**
+     * REL-1811: Warn if there are P-offsets for a slit spectroscopy observation.
+     * Warn for FPUs = (*arcsec or Custom Mask).
+     */
+    private static IConfigRule NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE = new NoPOffsetWithSlitRule(
+        PREFIX,
+        new AbstractFunction2<Config, ObservationElements, Boolean>() {
+            public Boolean apply(Config config, ObservationElements elems) {
+                return isCustomMask(config) || isSlitMask(config, elems);
+            }
+
+            private boolean isCustomMask(final Config config) {
+                final GmosCommonType.FPUnitMode fpuMode =
+                        (GmosCommonType.FPUnitMode) SequenceRule.getInstrumentItem(config, InstGmosCommon.FPU_MODE_PROP);
+                return fpuMode == GmosCommonType.FPUnitMode.CUSTOM_MASK;
+            }
+
+            private boolean isSlitMask(final Config config, final ObservationElements elems) {
+                final GmosCommonType.FPUnit fpu = getFPU(config, elems);
+                return fpu.isSpectroscopic() || fpu.isNSslit();
+            }
+        }
+
+    );
+
     private static IRule UNUSED_CUSTOM_ROI_RULE = new IRule() {
         private static final String warnMsg = "Custom ROIs are declared but not used in any step";
         private IConfigRule rule = new AbstractConfigRule() {
@@ -1733,6 +1762,7 @@ public class GmosRule implements IRule {
         GMOS_RULES.add(ROI_OVERLAP_RULE);
         GMOS_RULES.add(CUSTOM_ROI_NOT_DECLARED_RULE);
         GMOS_RULES.add(IFU_NO_SPATIAL_BINNING_RULE);
+        GMOS_RULES.add(NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE);
         GMOS_RULES.add(new MdfMaskNameRule(Problem.Type.ERROR));
         GMOS_RULES.add(new MdfMaskNameRule(Problem.Type.WARNING));
     }

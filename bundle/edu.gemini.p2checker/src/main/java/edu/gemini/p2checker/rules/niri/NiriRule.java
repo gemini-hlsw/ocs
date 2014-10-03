@@ -8,6 +8,7 @@ import edu.gemini.p2checker.util.AbstractConfigRule;
 import edu.gemini.p2checker.util.SequenceRule;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.skycalc.Offset;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
@@ -35,7 +36,7 @@ import java.util.Map;
 /**
  * NIRI Rule set
  */
-public class NiriRule implements IRule {
+public final class NiriRule implements IRule {
     private static final String PREFIX = "NiriRule_";
     private static Collection<IConfigRule> NIRI_RULES = new ArrayList<IConfigRule>();
 
@@ -714,10 +715,10 @@ public class NiriRule implements IRule {
 
             if (camera == null) return null; //can't check without camera
 
-            Double p = SequenceRule.getPOffset(config);
-            Double q = SequenceRule.getQOffset(config);
+            final scala.Option<Double> p = SequenceRule.getPOffset(config);
+            final scala.Option<Double> q = SequenceRule.getQOffset(config);
 
-            if (p == null || q == null) {
+            if (p.isEmpty() || q.isEmpty()) {
                 //warn always in the sequence node
                 //check whether there are more than one observe
                 Integer repeatCount = SequenceRule.getStepCount(config);
@@ -729,7 +730,7 @@ public class NiriRule implements IRule {
                 if (minOffset == null) return null; // no entry in the map for this camera
 
                 NiriState s = (NiriState) state;
-                s.cameraOffsetState.recordState(p, q, minOffset);
+                s.cameraOffsetState.recordState(p.get(), q.get(), minOffset);
             }
             return null;
         }
@@ -755,9 +756,8 @@ public class NiriRule implements IRule {
 
             //If disperser != none and p-offsets != 0
             if (disperser != Niri.Disperser.NONE) {
-                Double p = SequenceRule.getPOffset(config);
-                if (p == null) return null;
-                if (Double.compare(p, 0.0) != 0) {
+                scala.Option<Double> p = SequenceRule.getPOffset(config);
+                if (p.isDefined() && !Offset.isZero(p.get())) {
                     return new Problem(WARNING, PREFIX+"SPECTROSCOPY_P_OFFSET_RULE", MESSAGE, elems.getSeqComponentNode());
                 }
             }
@@ -941,8 +941,7 @@ public class NiriRule implements IRule {
          * stored in the state.
          */
         boolean checkPQ(Double p, Double q) {
-            if (lastP != null && lastQ != null
-                    && lastP.compareTo(p) == 0 && lastQ.compareTo(q) == 0) {
+            if (Offset.areEqual(lastP, p) && Offset.areEqual(lastQ, q)) {
                 return true;
             }
             lastP = p;
@@ -1172,10 +1171,10 @@ public class NiriRule implements IRule {
             }
             //check the offset. If they are the same as the previous known state,
             //issue a problem
-            Double p = SequenceRule.getPOffset(config);
-            if (p == null) p = 0.0;
-            Double q = SequenceRule.getQOffset(config);
-            if (q == null) q = 0.0;
+            final scala.Option<Double> pOpt = SequenceRule.getPOffset(config);
+            final scala.Option<Double> qOpt = SequenceRule.getQOffset(config);
+            final double p = pOpt.isDefined() ? pOpt.get() : 0.0;
+            final double q = qOpt.isDefined() ? qOpt.get() : 0.0;
             if (niristate.offsetState.checkPQ(p, q)) {
                 return new Problem(WARNING, PREFIX+"OFFSET_RULE", MESSAGE, elems.getSeqComponentNode());
             }

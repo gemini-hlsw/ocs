@@ -13,6 +13,7 @@ import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.seqcomp.SeqConfigNames;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.pot.sp.ISPProgramNode;
+import scala.Option;
 
 
 import java.util.*;
@@ -51,12 +52,32 @@ public class SequenceRule implements IRule {
     // sequence is the wrapper, "Double.class".  double.class.isInstance(obj)
     // returns false for objs of type Double.class.
     private static final Map<Class, Class> PRIMITIVE_MAP = new HashMap<Class, Class>();
+
+    // Matcher for science observations only.
     public static final IConfigMatcher SCIENCE_MATCHER = new IConfigMatcher() {
         public boolean matches(Config config, int step, ObservationElements elems) {
             ObsClass obsClass = getObsClass(config);
             return obsClass == ObsClass.SCIENCE;
         }
     };
+
+    // Matcher for science observations and nighttime calibrations.
+    public static final IConfigMatcher SCIENCE_NIGHTTIME_CAL_MATCHER = new IConfigMatcher() {
+        public boolean matches(Config config, int step, ObservationElements elems) {
+            ObsClass obsClass = getObsClass(config);
+            if (obsClass == null)
+                return false;
+            switch(obsClass) {
+                case SCIENCE:
+                case PARTNER_CAL:
+                case PROG_CAL:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+    };
+
 
     static {
         PRIMITIVE_MAP.put(boolean.class, Boolean.class);
@@ -98,12 +119,16 @@ public class SequenceRule implements IRule {
         return ObsClass.parseType(obsClassStr);
     }
 
-    public static Double getPOffset(Config config) {
-        return _getDoubleValue((String) SequenceRule.getItem(config, String.class, P_OFFSET_KEY));
+    public static Option<Double> getPOffset(final Config config) {
+        return Option.apply(
+                _getDoubleValue((String) SequenceRule.getItem(config, String.class, P_OFFSET_KEY))
+        );
     }
 
-    public static Double getQOffset(Config config) {
-        return _getDoubleValue((String) SequenceRule.getItem(config, String.class, Q_OFFSET_KEY));
+    public static Option<Double> getQOffset(final Config config) {
+        return Option.apply(
+                _getDoubleValue((String) SequenceRule.getItem(config, String.class, Q_OFFSET_KEY))
+        );
     }
 
     public static Integer getStepCount(Config config) {
