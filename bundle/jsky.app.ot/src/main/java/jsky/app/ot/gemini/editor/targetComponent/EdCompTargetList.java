@@ -115,7 +115,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     // If true, ignore change events for the current position
     private boolean _ignorePosUpdate = false;
 
-
     // Set to true if the base position has changed.
     private boolean _basePosChanged = false;
 
@@ -943,7 +942,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 name = target.getSolarObject().getHorizonsId();
             }
 
-            if (name.length() != 0) {
+            if (!name.isEmpty()) {
                 _resolveNonSidereal(name, operationType, listener);
             }
         } else { //use standard catalogs.
@@ -1230,7 +1229,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         String originalUrls[] = null;
                         if (cat instanceof SkycatCatalog) {
                             SkycatCatalog skycat = (SkycatCatalog) cat;
-                            if (skycat.getShortName().indexOf(SIMBAD_CATALOG_SHORTNAME) >= 0) {
+                            if (skycat.getShortName().contains(SIMBAD_CATALOG_SHORTNAME)) {
                                 skycat.addCatalogFilter(FullMimeSimbadCatalogFilter.getFilter());
                                 int n = skycat.getConfigEntry().getNumURLs();
                                 String[] urls = new String[n];
@@ -1249,7 +1248,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         //Return the URLs to the previous state
                         if (cat instanceof SkycatCatalog) {
                             SkycatCatalog skycat = (SkycatCatalog) cat;
-                            if (skycat.getShortName().indexOf(SIMBAD_CATALOG_SHORTNAME) >= 0) {
+                            if (skycat.getShortName().contains(SIMBAD_CATALOG_SHORTNAME)) {
                                 skycat.getConfigEntry().setURLs(originalUrls);
                             }
                         }
@@ -1337,23 +1336,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     public void afterApply() {
         _basePosChanged = false;
     }
-
-//    /**
-//     * Return the data object corresponding to this editor
-//     */
-//    public ISPDataObject getDataObject() {
-//        return _targetObsComp;
-//    }
-//
-//    /**
-//     * Set the data object corresponding to this editor.
-//     */
-//    public void setDataObject(ISPDataObject o) {
-//        TargetObsComp comp = (TargetObsComp) o;
-////        _progData.setTargetComponent(comp);
-//        _tpTable.reinit(_progData);
-//        setTargetObsComp(comp);
-//    }
 
     /**
      * Initialize the editor with the given science program root
@@ -1918,13 +1900,19 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         } else if (w == _w.timeRangePlotButton) {
             _resolveName(HorizonsAction.Type.PLOT_EPHEMERIS, null);
         } else if (w == _w.updateRaDecButton) {
-            // REL-343: Force nonsidereal target name resolution on coordinate updates
-            _resolveName(HorizonsAction.Type.GET_ORBITAL_ELEMENTS, new ResolveNameListener() {
-                @Override
-                public void nameResolved() {
-                    _resolveName(HorizonsAction.Type.UPDATE_POSITION, null);
-                }
-            });
+            // REL-1063 Fix OT nonsidereal Solar System Object Horizons name resolution
+            if (_curPos.getTarget() instanceof NamedTarget) {
+                // For named objects like Moon, Saturn, etc don't get the orbital elements, just the position
+                _resolveName(HorizonsAction.Type.UPDATE_POSITION, null);
+            } else {
+                // REL-343: Force nonsidereal target name resolution on coordinate updates
+                _resolveName(HorizonsAction.Type.GET_ORBITAL_ELEMENTS, new ResolveNameListener() {
+                    @Override
+                    public void nameResolved() {
+                        _resolveName(HorizonsAction.Type.UPDATE_POSITION, null);
+                    }
+                });
+            }
         } else if (w == _w.calendarTime) {
             Object o = _w.calendarTime.getSelectedItem();
             if (o instanceof TimeConfig) {
@@ -1945,7 +1933,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 _w.calendarDate.revalidate();
                 _w.calendarDate.repaint();
 
-
                 //_w.calendarDate.set
             } else if (o instanceof String) {
                 //just update the time document
@@ -1963,24 +1950,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     DialogUtil.error("Couldn't find a Planet called " + cmd);
                 }
             }
-        }
-    }
-
-    /**
-     * True if the given name is considered as an Id. An id is an integer for
-     * this kind of business (that's the ID for asteroids, at least).
-     *
-     * @param name the Object name to be analyzed
-     * @return true if the <code>name</name> is considered as an Id, false
-     *         otherwise.
-     */
-    private boolean _nameIsId(String name) {
-        try {
-            Integer.parseInt(name);
-            return true;
-        } catch (NumberFormatException ex) {
-            //not an integer
-            return false;
         }
     }
 
