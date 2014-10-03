@@ -8,8 +8,7 @@ name := "edu.gemini.qpt.client"
 
 unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/org-apache-velocity_2.10-1.4.0.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/org-jdesktop-swingx_2.10-1.6.4.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/org.scala-lang.scala-swing_2.10.1.v20130302-092018-VFINAL-33e32179fd.jar")
+  new File(baseDirectory.value, "../../lib/bundle/org-jdesktop-swingx_2.10-1.6.4.jar")
 )
 
 osgiSettings
@@ -33,4 +32,3 @@ OsgiKeys.exportPackage := Seq(
 
 OsgiKeys.additionalHeaders += 
   ("Import-Package" -> "!javax.mail.util,*")
-

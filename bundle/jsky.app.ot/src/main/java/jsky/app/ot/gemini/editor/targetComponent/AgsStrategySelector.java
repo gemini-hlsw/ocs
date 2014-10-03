@@ -272,7 +272,7 @@ public final class AgsStrategySelector implements ActionListener {
         }
     }
 
-    final class ComboBox extends JComboBox implements AgsSelectionEditor, ActionListener {
+    final class ComboBox extends JComboBox<String> implements AgsSelectionEditor, ActionListener {
         public ComboBox() {
             AgsStrategySelector.this.addView(this);
 

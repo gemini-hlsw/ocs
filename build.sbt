@@ -12,31 +12,31 @@ version in ThisBuild := ocsVersion.value.toOsgiVersion
 scalaVersion in ThisBuild := "2.10.4"
 
 // Note that this is not a standard setting; it's used for building IDEA modules.
-javaVersion in ThisBuild := "1.6" 
+javaVersion in ThisBuild := "1.7" 
 
 scalacOptions in ThisBuild ++= Seq(
-  // "-deprecation",           
+  // "-deprecation",
   "-encoding", "UTF-8",  // yes, this is 2 args
-  "-feature",                
+  "-feature",
   "-language:existentials",
   "-language:higherKinds",
   "-language:implicitConversions",
   "-language:reflectiveCalls", // TODO: turn this off
   "-language:postfixOps",      // TODO: turn this off
-  "-target:jvm-1.6",
+  "-target:jvm-1.7",
   "-unchecked",
-  // "-Xfatal-warnings",      
+  // "-Xfatal-warnings",
   "-Xlint",
   "-Yno-adapted-args", 
-  "-Ywarn-all"             
+  "-Ywarn-all"
   // "-Ywarn-dead-code"        // N.B. doesn't work well with bottom
   // "-Ywarn-numeric-widen",   
   // "-Ywarn-value-discard"   
 )
 
 javacOptions in ThisBuild ++= Seq(
-  "-source", "1.6",
-  "-target", "1.6",
+  "-source", "1.7",
+  "-target", "1.7",
   "-Xlint:all,-serial,-path,-deprecation,-unchecked,-fallthrough" // TOOD: turn all on except maybe -serial and -path
 )
 

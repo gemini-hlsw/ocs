@@ -343,7 +343,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         renderer = new ListView.Renderer[Band3Option] {
           val delegate = renderer
 
-          def componentFor(list: ListView[_], isSelected: Boolean, focused: Boolean, a: Band3Option, index: Int) = {
+          def componentFor(list: ListView[_ <: Band3Option], isSelected: Boolean, focused: Boolean, a: Band3Option, index: Int) = {
             val c = delegate.componentFor(list, isSelected, focused, a, index)
             val t = Option(a).map(_.toString).getOrElse("Select")
             c.peer.asInstanceOf[JLabel].setText(t)
@@ -517,21 +517,21 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         p <- m
       } yield p.investigators.pi).get
 
-    def updateComboBoxModel(peer: JComboBox, reviewers:List[Investigator]) {
+    def updateComboBoxModel(peer: JComboBox[Investigator], reviewers: List[Investigator]) {
       // Re-populate combo-box model
-      val cbModel = new DefaultComboBoxModel()
+      val cbModel = new DefaultComboBoxModel[Investigator]()
       reviewers.foreach(cbModel.addElement)
       peer.setModel(cbModel)
     }
 
-    def selectedInvestigator(model: ComboBoxModel): Option[Investigator] = model.getSelectedItem match {
+    def selectedInvestigator(model: ComboBoxModel[Investigator]): Option[Investigator] = model.getSelectedItem match {
       case x: Investigator => Some(x)
       case _               => None
     }
 
     case class InvestigatorRenderer[A](delegate: ListView.Renderer[A], combo: ComboBox[A]) extends ListView.Renderer[A] {
 
-      def componentFor(list: ListView[_], isSelected: Boolean, focused: Boolean, a: A, index: Int) = {
+      def componentFor(list: ListView[_ <: A], isSelected: Boolean, focused: Boolean, a: A, index: Int) = {
         val c = delegate.componentFor(list, isSelected, focused, a, index)
         if (reviewer.peer.getItemCount > 0) {
           c.peer.asInstanceOf[JLabel].setText(stringValue(a))
@@ -553,7 +553,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
     // Reviewer control set
     object reviewer extends ComboBox[Investigator](Seq.empty) with Bound.Self[Proposal] {
       border = BorderFactory.createEmptyBorder(0, 0, 0, 0)
-      val cbModel = new DefaultComboBoxModel()
+      val cbModel = new DefaultComboBoxModel[Investigator]()
       peer.setModel(cbModel)
       updateP1Model(model.map(_.investigators.pi))
 
@@ -625,7 +625,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
     // Mentor control set
     object mentor extends ComboBox[Investigator](Seq.empty) with Bound.Self[Proposal] {
       border = BorderFactory.createEmptyBorder(0, 0, 0, 0)
-      val cbModel = new DefaultComboBoxModel()
+      val cbModel = new DefaultComboBoxModel[Investigator]()
       peer.setModel(cbModel)
 
       val pcLens = Proposal.proposalClass

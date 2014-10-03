@@ -46,7 +46,7 @@ def common(pv: Version) = AppConfig(
     BundleSpec("slf4j.jdk14",                  Version(1, 6, 4)),
     BundleSpec("org.scala-lang.scala-actors",  Version(2, 10, 1)),
     BundleSpec("org.scala-lang.scala-reflect", Version(2, 10, 1)),
-    BundleSpec("org.scala-lang.scala-swing",   Version(2, 10, 1)),
+    BundleSpec("org.scala-lang.scala-swing",   Version(2, 0, 0)),
     BundleSpec("org.apache.commons.logging",   Version(1, 1, 0))
   )
 ) extending List()
@@ -66,7 +66,7 @@ def mac(pv: Version) = AppConfig(
   distribution = List(MacOS),
   icon=Some(file("app/pit/dist/MacOS/PIT.icns")),
   props = Map(
-    "org.osgi.framework.storage" -> "$USER_HOME/Library/Caches/edu.gemini.PIT/felix-cache"
+    "org.osgi.framework.storage" -> "$CachesDirectory/edu.gemini.PIT/felix-cache"
   )
 ) extending List(common(pv))
 
