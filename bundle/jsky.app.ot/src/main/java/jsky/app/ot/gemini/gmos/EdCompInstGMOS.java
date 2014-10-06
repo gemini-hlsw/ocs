@@ -29,7 +29,6 @@ import edu.gemini.spModel.target.offset.OffsetPosList;
 import edu.gemini.spModel.target.offset.OffsetPosListWatcher;
 import edu.gemini.spModel.target.offset.OffsetPosSelection;
 import edu.gemini.spModel.telescope.IssPort;
-import edu.gemini.spModel.telescope.PosAngleConstraint;
 import edu.gemini.spModel.type.SpTypeUtil;
 import edu.gemini.spModel.util.SPTreeUtil;
 import jsky.app.ot.OTOptions;
@@ -37,7 +36,6 @@ import jsky.app.ot.StaffBean$;
 import jsky.app.ot.editor.type.SpTypeComboBoxModel;
 import jsky.app.ot.editor.type.SpTypeComboBoxRenderer;
 import jsky.app.ot.gemini.editor.EdCompInstBase;
-import jsky.app.ot.gemini.parallacticangle.ParallacticInstEditor;
 import jsky.app.ot.nsp.SPTreeEditUtil;
 import jsky.app.ot.tpe.TelescopePosEditor;
 import jsky.app.ot.tpe.TpeManager;
@@ -60,8 +58,7 @@ import java.util.List;
  */
 public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompInstBase<T>
         implements DropDownListBoxWidgetWatcher, ActionListener,
-        TelescopePosWatcher, TableWidgetWatcher, ChangeListener, FocusListener,
-        ParallacticInstEditor {
+        TelescopePosWatcher, TableWidgetWatcher, ChangeListener, FocusListener {
 
     // Allowed central wavelength (lambda_cent) range in nanometers
     protected static final int MIN_LAMBDA_CENT = 350;
@@ -76,7 +73,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
      * Listeners for property changes that affect the parallactic angle components.
      */
     final PropertyChangeListener updateParallacticAnglePCL;
-    final PropertyChangeListener relativeTimeMenuPCL;
 
 //    /**
 //     * Value assigned to WFS tags to indicate that the WFS is parked (inactive).
@@ -94,7 +90,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
     }
 
     private void reinitializeNodAndShuffleOffset() {
-        final int drUi    = _w.detectorRows.getIntegerValue(-1);
+        final int drUi = _w.detectorRows.getIntegerValue(-1);
         final int drModel = getDataObject().getNsDetectorRows();
         if (drUi != drModel) {
             _w.detectorRows.deleteWatcher(this);
@@ -102,7 +98,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
             _w.detectorRows.addWatcher(this);
         }
 
-        final String soUi    = _w.shuffleOffset.getValue();
+        final String soUi = _w.shuffleOffset.getValue();
         final String soModel = getDataObject().getShuffleOffsetAsString();
         if (!soUi.equals(soModel)) {
             _w.shuffleOffset.deleteWatcher(this);
@@ -165,7 +161,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
 
 
     // The GUI layout panel
-    protected final GmosForm _w;
+    protected final GmosForm<T> _w;
     private final GmosOffsetPosTableWidget<OffsetPos> _offsetTable;
 
     // Custom ROIs
@@ -209,7 +205,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
      * The constructor initializes the user interface.
      */
     public EdCompInstGMOS() {
-        _w = new GmosForm();
+        _w = new GmosForm<T>();
         _offsetTable = _w.offsetTable;
         _customROITable = _w.customROITable;
 
@@ -224,7 +220,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
 //        }
 
         // add action listeners
-        _w.posAngle180.addActionListener(this);
         _w.focalPlaneBuiltInButton.addActionListener(this);
         _w.focalPlaneMaskButton.addActionListener(this);
         _w.focalPlaneMaskPlotButton.addActionListener(this);
@@ -372,13 +367,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         updateParallacticAnglePCL = new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
-                _w.parallacticAnglePanel.updateParallacticAngleMode();
-            }
-        };
-        relativeTimeMenuPCL = new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                _w.parallacticAnglePanel.rebuildRelativeTimeMenu();
+                _w.posAnglePanel.updateParallacticControls();
             }
         };
     }
@@ -458,7 +447,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         _updateFilter();
         _updateExposureTime();
         _updateDisperser();
-        _updatePosAngleConstraint();
         _updateFPU();
         _updateCCD();
         _updateStageDetails();
@@ -473,24 +461,20 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
 
         _updateCustomSlitWidth();
 
+        _w.posAnglePanel.init(this, getSite());
 
-        _w.parallacticAnglePanel.init(this, getSite());
 
         // If the position angle mode or FPU mode properties change, force an update on the parallactic angle mode.
         getDataObject().addPropertyChangeListener(InstGmosCommon.POSITION_ANGLE_MODE_PROP.getName(), updateParallacticAnglePCL);
-        getDataObject().addPropertyChangeListener(InstGmosCommon.FPU_MODE_PROP.getName(),            updateParallacticAnglePCL);
+        getDataObject().addPropertyChangeListener(InstGmosCommon.FPU_MODE_PROP.getName(), updateParallacticAnglePCL);
+        getDataObject().addPropertyChangeListener(InstGmosCommon.DISPERSER_PROP_NAME, updateParallacticAnglePCL);
+    }
 
-        // Add a watcher to the data object for the disperser to rebuild the parallactic angle "Set To" menu
-        // when it is changed, as it may trigger changes in setup time for GMOS.
-        // (See subclasses for similiar property change listener for FPU.)
-        getDataObject().addPropertyChangeListener(InstGmosCommon.DISPERSER_PROP_NAME, relativeTimeMenuPCL);
-
-        getDataObject().addPropertyChangeListener(InstGmosCommon.POS_ANGLE_CONSTRAINT_PROP.getName(), new PropertyChangeListener() {
-            @Override public void propertyChange(PropertyChangeEvent evt) {
-                final PosAngleConstraint pac = (PosAngleConstraint) evt.getNewValue();
-                _w.posAngle180.setSelected(pac == PosAngleConstraint.FIXED_180);
-            }
-        });
+    @Override protected void cleanup() {
+        super.cleanup();
+        getDataObject().removePropertyChangeListener(InstGmosCommon.POSITION_ANGLE_MODE_PROP.getName(), updateParallacticAnglePCL);
+        getDataObject().removePropertyChangeListener(InstGmosCommon.FPU_MODE_PROP.getName(), updateParallacticAnglePCL);
+        getDataObject().removePropertyChangeListener(InstGmosCommon.DISPERSER_PROP_NAME, updateParallacticAnglePCL);
     }
 
     // Initialize controls based on gmos specific information.
@@ -650,14 +634,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         }
     }
 
-    // Display the current position angle settings
-    private void _updatePosAngleConstraint() {
-        final PosAngleConstraint pac = getDataObject().getPosAngleConstraint();
-        final boolean selected = pac == PosAngleConstraint.FIXED_180;
-        _w.posAngle180.removeActionListener(this);
-        _w.posAngle180.setSelected(selected);
-        _w.posAngle180.addActionListener(this);
-    }
 
     // Display the current FPU settings
     private void _updateFPU() {
@@ -725,9 +701,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         _w.builtinComboBox.setEnabled(enabled && !customMask);
         _w.focalPlaneMask.setEnabled(enabled && customMask);
         _w.customSlitWidthComboBox.setEnabled(enabled && customMask);
-
-        _w.parallacticAnglePanel.updateEnabledState(enabled);
-
     }
 
     protected void _updateCustomSlitWidth() {
@@ -948,14 +921,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
 
 
     /**
-     * Return the position angle text box and implements similar method for parallactic angle feature.
-     */
-    public TextBoxWidget getPosAngleTextBox() {
-        return _w.posAngle;
-    }
-    @Override public JTextField getPosAngleTextField() { return _w.posAngle; }
-
-    /**
      * Return the exposure time text box
      */
     public TextBoxWidget getExposureTimeTextBox() {
@@ -976,14 +941,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         final Object w = evt.getSource();
         final boolean enabled = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
 
-        if (w == _w.posAngle180) {
-            if (_w.posAngle180.isSelected()) {
-                getDataObject().setPosAngleConstraint(PosAngleConstraint.FIXED_180);
-            } else {
-                getDataObject().setPosAngleConstraint(PosAngleConstraint.FIXED);
-            }
-            _w.posAngle.setEnabled(enabled);
-        } else if (w == _w.focalPlaneBuiltInButton) {
+        if (w == _w.focalPlaneBuiltInButton) {
             getDataObject().setFPUnitMode(FPUnitMode.BUILTIN);
             _w.builtinComboBox.setEnabled(enabled);
             _w.focalPlaneMask.setEnabled(false);
@@ -1352,8 +1310,8 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
     /**
      * The current position location has changed.
      *
-     * @see edu.gemini.spModel.target.TelescopePosWatcher
      * @param tp
+     * @see edu.gemini.spModel.target.TelescopePosWatcher
      */
     public void telescopePosLocationUpdate(WatchablePos tp) {
         telescopePosGenericUpdate(tp);
@@ -1363,8 +1321,8 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
     /**
      * The current position has been changed in some way.
      *
-     * @see TelescopePosWatcher
      * @param tp
+     * @see TelescopePosWatcher
      */
     public void telescopePosGenericUpdate(WatchablePos tp) {
         if (tp != _curPos) {

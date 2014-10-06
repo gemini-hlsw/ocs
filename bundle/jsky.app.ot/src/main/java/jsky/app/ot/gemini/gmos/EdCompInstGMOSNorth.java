@@ -1,6 +1,8 @@
 package jsky.app.ot.gemini.gmos;
 
+import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
+import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
 
 /**
  * Class EdCompInstGMOSNorth. This class is of not much use currently, because EdCompInstGMOS has everything set-up for
@@ -19,6 +21,10 @@ public class EdCompInstGMOSNorth extends EdCompInstGMOS<InstGmosNorth> {
 
         // Add the property change listeners defined in InstGmosCommon.
         getDataObject().addPropertyChangeListener(InstGmosNorth.FPUNIT_PROP.getName(), updateParallacticAnglePCL);
-        getDataObject().addPropertyChangeListener(InstGmosNorth.FPUNIT_PROP.getName(), relativeTimeMenuPCL);
+    }
+
+    @Override protected void cleanup() {
+        super.cleanup();
+        getDataObject().removePropertyChangeListener(InstGmosNorth.FPUNIT_PROP.getName(), updateParallacticAnglePCL);
     }
 }

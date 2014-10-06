@@ -13,13 +13,23 @@ import java.util.List;
  */
 public enum PosAngleConstraint {
     /** No constraint on adjusting pos angle. */
-    UNKNOWN,
+    UNKNOWN() {
+        @Override
+        public String description() {
+            return "No constraint on adjusting position angle";
+        }
+    },
 
     /** The provided pos angle only. */
     FIXED() {
         @Override
         public ImList<Angle> steps(Angle start, Angle stepSize) {
             return ImCollections.singletonList(start);
+        }
+
+        @Override
+        public String description() {
+            return "Fixed position angle for guide star search";
         }
     },
 
@@ -29,13 +39,27 @@ public enum PosAngleConstraint {
         public ImList<Angle> steps(Angle start, Angle stepSize) {
             return DefaultImList.create(start, start.add(Angle.ANGLE_PI));
         }
+
+        @Override
+        public String description() {
+            return "Allow 180\u00ba change for guide star search";
+        }
     },
 
     /** The unbounded case, where we want to allow for any angle accessible
      * by the guide probe.
      */
-    UNBOUNDED,
+    UNBOUNDED() {
+        @Override
+        public String description() {
+            return "Find best position angle for guide star search";
+        }
+    },
 
+    PARALLACTIC_ANGLE() {
+        @Override
+        public String description() { return "Use average parallactic angle"; }
+    }
     ;
 
     /**
@@ -58,4 +82,12 @@ public enum PosAngleConstraint {
 
         return DefaultImList.create(res);
     }
+
+    /**
+     * Description of the constraint for use in creating GUI combo boxes.
+     */
+    public abstract String description();
+
+    @Override
+    public String toString() { return description(); }
 }

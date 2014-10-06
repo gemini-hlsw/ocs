@@ -32,7 +32,6 @@ import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
 import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.inst.ElectronicOffsetProvider;
-import edu.gemini.spModel.inst.PositionAngleMode;
 import edu.gemini.spModel.obs.plannedtime.CommonStepCalculator;
 import edu.gemini.spModel.obs.plannedtime.ExposureCalculator;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;
@@ -41,7 +40,6 @@ import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTimeGroup;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.Category;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
 import edu.gemini.spModel.obscomp.InstConstants;
-import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
@@ -720,7 +718,6 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         EXPOSURE_TIME_PROP = initProp("exposureTime", query_no, iter_yes);
         POS_ANGLE_PROP     = initProp("posAngle", query_no, iter_no);
         POS_ANGLE_CONSTRAINT_PROP = initProp("posAngleConstraint", query_no, iter_no);
-//        POS_ANGLE_CONSTRAINT_PROP.setDisplayName("Allow \u00b1 180\u00ba change for guide star selection");
 
         USE_ELECTRONIC_OFFSETTING_PROP = initProp("useElectronicOffsetting", query_no, iter_no);
 //        ELECTRONIC_OFFSET_PROP = initProp("electronicOffset", query_no, iter_no);
@@ -1403,15 +1400,11 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     }
 
     /**
-     * This needs to be overridden to support the PosAngleConstraint.
+     * This needs to be overridden to support the PosAngleConstraintAware.
      */
     @Override
-    public void setPositionAngleMode(PositionAngleMode newValue) {
-        PositionAngleMode oldValue = getPositionAngleMode();
-        super.setPositionAngleMode(newValue);
-
-        if (!oldValue.equals(newValue) && newValue == PositionAngleMode.MEAN_PARALLACTIC_ANGLE)
-            setPosAngleConstraint(PosAngleConstraint.FIXED_180);
+    public String getPosAngleConstraintDescriptorKey() {
+        return POS_ANGLE_CONSTRAINT_PROP.getName();
     }
 
         // REL-814 Preserve the FPU Custom Mask Name

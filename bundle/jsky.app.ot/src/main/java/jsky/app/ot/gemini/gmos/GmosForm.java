@@ -3,7 +3,9 @@ package jsky.app.ot.gemini.gmos;
 import com.jgoodies.forms.factories.DefaultComponentFactory;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
-import jsky.app.ot.gemini.parallacticangle.ParallacticAnglePanel;
+import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.spModel.gemini.gmos.InstGmosCommon;
+import jsky.app.ot.gemini.parallacticangle.PositionAnglePanel;
 import jsky.util.gui.DropDownListBoxWidget;
 import jsky.util.gui.NumberBoxWidget;
 import jsky.util.gui.TextBoxWidget;
@@ -15,7 +17,7 @@ import java.awt.*;
  * Created by JFormDesigner on Tue Nov 08 20:52:19 CET 2005
  *
  * JFormDesigner use deprecated. Update this file manually, and hopefully one
- * day let's do it in a way that is easy to mantain!!
+ * day let's do it in a way that is easy to maintain!!
  */
 
 
@@ -23,7 +25,7 @@ import java.awt.*;
 /**
  * @author User #1
  */
-public class GmosForm extends JPanel {
+public class GmosForm<T extends InstGmosCommon> extends JPanel {
     public GmosForm() {
         initComponents();
     }
@@ -50,9 +52,7 @@ public class GmosForm extends JPanel {
         detectorManufacturerComboBox = new JComboBox();
         warning1 = new JLabel();
         goodiesFormsSeparator4 = compFactory.createSeparator("Position Angle");
-        posAngle = new NumberBoxWidget();
         label4 = new JLabel();
-        posAngle180 = new JCheckBox();
         goodiesFormsSeparator5 = compFactory.createSeparator("Focal Plane Unit");
         focalPlaneBuiltInButton = new JRadioButton();
         builtinComboBox = new DropDownListBoxWidget();
@@ -256,42 +256,10 @@ public class GmosForm extends JPanel {
             // ---- Position Angle ----
             panel3.add(goodiesFormsSeparator4, cc.xywh(1, 11, 3, 1));
 
-            JPanel posAnglePanel = new JPanel(new GridBagLayout());
-            posAngle.setColumns(4);
-            posAngle.setToolTipText("Set the position angle in degrees east of north");
-            posAnglePanel.add(posAngle, new GridBagConstraints() {{
-                gridx      = 0;
-                gridy      = 0;
-                weightx    = 1.0;
-                fill       = HORIZONTAL;
-                insets     = new Insets(0, 11, 0, 0); // 10, 11
-                anchor     = WEST;
-            }});
-
-            label4.setText("deg E of N");
-            label4.setLabelFor(posAngle);
-            posAnglePanel.add(label4, new GridBagConstraints() {{
-                gridx      = 1;
-                gridy      = 0;
-                //weightx    = 1.0;
-                insets     = new Insets(0, 5, 0, 0); // 10, 5
-                anchor     = WEST;
-                //fill       = HORIZONTAL;
-            }});
-            posAngle180.setText("Allow 180\u00ba change for guide star search");
-            posAngle180.setToolTipText("Allow guide star search to adjust pos angle \u00b1180\u00ba");
-            posAnglePanel.add(posAngle180, new GridBagConstraints() {{
-                gridx = 2;
-                gridy = 0;
-                insets = new Insets(0, 20, 0, 0);
-                anchor = EAST;
-            }});
-            panel3.add(posAnglePanel, cc.xywh(1, 13, 3, 1));
-
-            // Create the parallactic angle panel and an empty panel underneath to absorb all vertical space.
-            parallacticAnglePanel = new ParallacticAnglePanel();
-            panel3.add(parallacticAnglePanel, new CellConstraints(1, 15, 3, 3, CellConstraints.LEFT, CellConstraints.DEFAULT, new Insets( 0, 11, 0, 0)));
-
+            posAnglePanel = PositionAnglePanel.apply(SPComponentType.INSTRUMENT_GMOS);
+            panel3.add(posAnglePanel.peer(),
+                       new CellConstraints(1, 13, 3, 3, CellConstraints.LEFT, CellConstraints.DEFAULT, new Insets(0, 5, 0, 0)));
+                    //cc.xywh(1, 13, 3, 3));
 
             // ---- Focal Plane Unit ----
             panel3.add(goodiesFormsSeparator5, cc.xywh(5, 11, 3, 1));
@@ -903,8 +871,6 @@ public class GmosForm extends JPanel {
     protected JComboBox detectorManufacturerComboBox;
     JLabel warning1;
     private JComponent goodiesFormsSeparator4;
-    NumberBoxWidget posAngle;
-    JCheckBox posAngle180;
     private JComponent goodiesFormsSeparator5;
     JRadioButton focalPlaneBuiltInButton;
     DropDownListBoxWidget builtinComboBox;
@@ -989,10 +955,7 @@ public class GmosForm extends JPanel {
     private JLabel totalTimeUnitsLabel;
     JTextField totalTime;
     JLabel warning2;
-    // JFormDesigner - End of variables declaration  //GEN-END:variables
     JLabel warning4;
-    JLabel readNoiseLabelLabel;
-    JLabel readNoiseLabel;
 
-    ParallacticAnglePanel parallacticAnglePanel;
+    PositionAnglePanel<T, EdCompInstGMOS<T> > posAnglePanel;
 }
