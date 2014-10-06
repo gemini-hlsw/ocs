@@ -1,8 +1,6 @@
 package jsky.app.ot.gemini.gmos;
 
-import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
-import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
 
 /**
  * Class EdCompInstGMOSNorth. This class is of not much use currently, because EdCompInstGMOS has everything set-up for

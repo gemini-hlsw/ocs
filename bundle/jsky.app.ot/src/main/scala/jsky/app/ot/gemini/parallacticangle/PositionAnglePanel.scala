@@ -1,7 +1,6 @@
 package jsky.app.ot.gemini.parallacticangle
 
 import java.awt.{CardLayout, Color}
-import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 import java.text.NumberFormat
 import java.util.Locale
 import javax.swing._
