@@ -402,5 +402,15 @@ public abstract class SPInstObsComp extends AbstractDataObject {
     public edu.gemini.skycalc.Angle pwfs2VignettingClearance() {
         return edu.gemini.skycalc.Angle.ANGLE_0DEGREES;
     }
+
+    /**
+     * Restore data items when a template reapply happens
+     * Implementations can provide an instrument-specific restore capabilities
+     * @param oldData Reference to the previous version of the instrument
+     */
+    public void restoreScienceDetails(SPInstObsComp oldData) {
+        setPosAngle(oldData.getPosAngle());
+    }
+
 }
 

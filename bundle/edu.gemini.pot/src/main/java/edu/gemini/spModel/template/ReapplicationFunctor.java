@@ -128,7 +128,8 @@ public class ReapplicationFunctor extends DBAbstractFunctor {
             if (newInstrument != null) {
                 final SPInstObsComp oldData = (SPInstObsComp) oldInstrument.getDataObject();
                 final SPInstObsComp newData = (SPInstObsComp) newInstrument.getDataObject();
-                newData.setPosAngle(oldData.getPosAngle());
+                // REL-814 Delegate to the instrument the decision of what data to restore
+                newData.restoreScienceDetails(oldData);
                 newInstrument.setDataObject(newData);
             }
         }
