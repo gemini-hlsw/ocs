@@ -2017,4 +2017,15 @@ public abstract class InstGmosCommon<
         if (!oldValue.equals(newValue) && newValue == PositionAngleMode.MEAN_PARALLACTIC_ANGLE)
             setPosAngleConstraint(PosAngleConstraint.FIXED_180);
     }
+
+    // REL-814 Preserve the FPU Custom Mask Name
+    @Override
+    public void restoreScienceDetails(SPInstObsComp oldData) {
+        super.restoreScienceDetails(oldData);
+        if (oldData instanceof InstGmosCommon) {
+            InstGmosCommon oldGmos = (InstGmosCommon)oldData;
+            setFPUnitCustomMask(oldGmos.getFPUnitCustomMask());
+        }
+    }
+
 }

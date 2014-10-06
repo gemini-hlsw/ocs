@@ -32,15 +32,15 @@ class ReapplicationFunctorTest {
   val db = DBLocalDatabase.createTransient()
   val fact = db.getFactory.asInstanceOf[MemFactory]
   val id = "GS-2015A-Q-1"
+  val templateProgram = MemProgram.create(TEMPLATE_KEY, SPProgramID.toProgramID(id), dbUuid)
 
   /**
    * Verify that changes to PA are now overwritten on re-apply
    */
-  @Test
-  def testReApplyPA() {
+  @Before
+  def before() {
     // Build the template
     val templateProg = new SPProgram
-    val templateProgram = MemProgram.create(TEMPLATE_KEY, SPProgramID.toProgramID(id), dbUuid)
     templateProgram.setDataObject(templateProg)
 
     val templateFolder = fact.createTemplateFolder(templateProgram, TEMPLATE_FOLDER_KEY)
@@ -57,6 +57,8 @@ class ReapplicationFunctorTest {
     tGmos.setPosAngle(120)
     // Disperser on template is mirror
     tGmos.setDisperser(DisperserNorth.MIRROR)
+    // Set a custom MDF name
+    tGmos.setFPUnitCustomMask("Custom name on the template")
 
     val tObscomp = fact.doCreateObsComponent(templateProgram, tGmos.getType, KEY)
     tObscomp.setDataObject(tGmos)
@@ -85,6 +87,8 @@ class ReapplicationFunctorTest {
     gmos.setPosAngle(99)
     // Disperser is different too
     gmos.setDisperser(DisperserNorth.B1200_G5301)
+    // Override the custom MDF name
+    gmos.setFPUnitCustomMask("Custom name on the observation")
 
     val obscomp = fact.doCreateObsComponent(templateProgram, gmos.getType, KEY)
     obscomp.setDataObject(gmos)
@@ -94,16 +98,37 @@ class ReapplicationFunctorTest {
 
     // Put the program on the DB
     db.put(templateProgram)
+  }
 
+  /**
+   * Verify that changes to PA are now overwritten on re-apply
+   */
+  @Test
+  def testReApplyPA() {
     // Run the reapply
     val functor = new ReapplicationFunctor(UserRolePrivileges.STAFF)
     functor.add(templateProgram.getAllObservations.get(0))
     functor.execute(db, null, new java.util.HashSet[Principal])
 
-    val gmosAfterReaaply = db.lookupObservationByID(new SPObservationID(SPProgramID.toProgramID("GS-2015A-Q-1"), 2)).getObsComponents.get(0).getDataObject.asInstanceOf[InstGmosNorth]
+    val gmosAfterReaaply = db.lookupObservationByID(new SPObservationID(SPProgramID.toProgramID(id), 2)).getObsComponents.get(0).getDataObject.asInstanceOf[InstGmosNorth]
     // Check that the Position Angle was preserved
     assertEquals(99, gmosAfterReaaply.getPosAngle, 0)
     // But the Disperser was reset
     assertEquals(DisperserNorth.MIRROR, gmosAfterReaaply.getDisperser)
+  }
+
+  /**
+   * REL-814 Verify that changes to custom MDF Mask are now overwritten on re-apply
+   */
+  @Test
+  def testReApplyCustomMDF() {
+    // Run the reapply
+    val functor = new ReapplicationFunctor(UserRolePrivileges.STAFF)
+    functor.add(templateProgram.getAllObservations.get(0))
+    functor.execute(db, null, new java.util.HashSet[Principal])
+
+    val gmosAfterReaaply = db.lookupObservationByID(new SPObservationID(SPProgramID.toProgramID(id), 2)).getObsComponents.get(0).getDataObject.asInstanceOf[InstGmosNorth]
+    // Check that the Custom Mask name is preserved
+    assertEquals("Custom name on the observation", gmosAfterReaaply.getFPUnitCustomMask)
   }
 }
