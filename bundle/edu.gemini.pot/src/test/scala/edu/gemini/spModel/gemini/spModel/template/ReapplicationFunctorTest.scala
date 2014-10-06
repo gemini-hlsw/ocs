@@ -3,18 +3,16 @@ package edu.gemini.spModel.gemini.spModel.template
 import java.security.Principal
 
 import edu.gemini.pot.sp._
-import edu.gemini.pot.sp.memImpl.{MemObsComponent, MemTemplateGroup, MemProgram, MemFactory}
+import edu.gemini.pot.sp.memImpl.{MemTemplateGroup, MemProgram, MemFactory}
 import edu.gemini.pot.spdb.DBLocalDatabase
-import edu.gemini.spModel.config.IConfigBuilder
 import edu.gemini.spModel.core.SPProgramID
+import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.DisperserNorth
-import edu.gemini.spModel.gemini.gmos.{InstGMOSCB, InstGmosNorth}
-import edu.gemini.spModel.gemini.obscomp.{SPProgram, SPSiteQuality}
+import edu.gemini.spModel.gemini.gmos.InstGmosNorth
+import edu.gemini.spModel.gemini.obscomp.SPProgram
 import edu.gemini.spModel.gemini.security.UserRolePrivileges
-import edu.gemini.spModel.obs.{ObsPhase2Status, SPObservation}
-import edu.gemini.spModel.obscomp.SPInstObsComp
+import edu.gemini.spModel.obs.SPObservation
 import edu.gemini.spModel.template.ReapplicationFunctor
-import edu.gemini.spModel.too.{TooType, Too}
 import org.junit._
 import org.junit.Assert._
 import java.util.UUID
@@ -24,8 +22,10 @@ class ReapplicationFunctorTest {
   val TEMPLATE_KEY = new SPNodeKey("6d026d22-d642-4f50-8f99-ab666e286d45")
   val TEMPLATE_FOLDER_KEY = new SPNodeKey("6d026d22-d642-4f50-8f99-ab666e286d48")
   val TEMPLATE_GROUP_KEY = new SPNodeKey("6d026d22-d642-4f50-8f99-ab666e286d49")
-  val TEMPLATE_OBS_KEY = new SPNodeKey("6d026d22-d642-4f50-8f99-ab666e286d46")
-  val KEY = new SPNodeKey("2f7a8b79-1d10-416a-baf3-9b982f77da53")
+  val TEMPLATE_GMOS_OBS_KEY = new SPNodeKey("6d026d22-d642-4f50-8f99-ab666e286d46")
+  val TEMPLATE_F2_OBS_KEY = new SPNodeKey("6d026d22-d642-4f50-8f99-ab666e286d43")
+  val GMOS_OBSERVATION_KEY = new SPNodeKey("2f7a8b79-1d10-416a-baf3-9b982f77da53")
+  val F2_OBSERVATION_KEY = new SPNodeKey("2f7a8b79-1d10-416a-baf3-9b982f77da51")
 
   val dbUuid = UUID.randomUUID
 
@@ -49,9 +49,10 @@ class ReapplicationFunctorTest {
     val templateGroup = new MemTemplateGroup(templateProgram, TEMPLATE_GROUP_KEY)
 
     // The template observation with GMOS-N
-    val templateObs = fact.createObservation(templateProgram, TEMPLATE_OBS_KEY)
+    val templateGmosObs = fact.createObservation(templateProgram, TEMPLATE_GMOS_OBS_KEY)
 
-    val tObscomps = new java.util.ArrayList[ISPObsComponent]
+    // Add GMOS Observation Template
+    val tGmosObscomps = new java.util.ArrayList[ISPObsComponent]
     val tGmos = new InstGmosNorth
     // The template sets the position angle to 120
     tGmos.setPosAngle(120)
@@ -60,28 +61,44 @@ class ReapplicationFunctorTest {
     // Set a custom MDF name
     tGmos.setFPUnitCustomMask("Custom name on the template")
 
-    val tObscomp = fact.doCreateObsComponent(templateProgram, tGmos.getType, KEY)
-    tObscomp.setDataObject(tGmos)
+    val tGmosObscomp = fact.doCreateObsComponent(templateProgram, tGmos.getType, TEMPLATE_GMOS_OBS_KEY)
+    tGmosObscomp.setDataObject(tGmos)
 
-    tObscomps.add(tObscomp)
-    templateObs.setObsComponents(tObscomps)
+    tGmosObscomps.add(tGmosObscomp)
+    templateGmosObs.setObsComponents(tGmosObscomps)
+    templateGroup.addObservation(templateGmosObs)
 
-    templateGroup.addObservation(templateObs)
+    // Add F2 Observation Template
+    val templatef2Obs = fact.createObservation(templateProgram, TEMPLATE_F2_OBS_KEY)
+
+    val tf2Obscomps = new java.util.ArrayList[ISPObsComponent]
+    val tf2 = new Flamingos2
+    // The template sets the position angle to 120
+    tf2.setPosAngle(150)
+    // Set a custom fpu mask name
+    tf2.setFpuCustomMask("Custom mask on the template")
+
+    val tf2Obscomp = fact.doCreateObsComponent(templateProgram, tf2.getType, TEMPLATE_F2_OBS_KEY)
+    tf2Obscomp.setDataObject(tf2)
+
+    tf2Obscomps.add(tf2Obscomp)
+    templatef2Obs.setObsComponents(tf2Obscomps)
+    templateGroup.addObservation(templatef2Obs)
+
     templateFolder.addTemplateGroup(templateGroup)
 
-    // Build an observation
-    val obs = fact.createObservation(templateProgram, KEY)
+    // Build an observation with GMOS
+    val gmosObs = fact.createObservation(templateProgram, GMOS_OBSERVATION_KEY)
 
-    val spObs = new SPObservation
-    spObs.setTitle("Test Observation")
+    val gmosSpObs = new SPObservation
+    gmosSpObs.setTitle("Test Observation")
     // Simulate it was created out of the template
-    spObs.setOriginatingTemplate(TEMPLATE_OBS_KEY)
+    gmosSpObs.setOriginatingTemplate(TEMPLATE_GMOS_OBS_KEY)
 
-    obs.setDataObject(spObs)
-    obs.setSeqComponent(fact.createSeqComponent(templateProgram, SPComponentType.OBSERVER_OBSERVE, KEY))
-    templateProgram.addObservation(obs)
+    gmosObs.setDataObject(gmosSpObs)
+    gmosObs.setSeqComponent(fact.createSeqComponent(templateProgram, SPComponentType.OBSERVER_OBSERVE, GMOS_OBSERVATION_KEY))
 
-    val obscomps = new java.util.ArrayList[ISPObsComponent]
+    val gmosObscomps = new java.util.ArrayList[ISPObsComponent]
     val gmos = new InstGmosNorth
     // The observation position angle is different
     gmos.setPosAngle(99)
@@ -90,11 +107,38 @@ class ReapplicationFunctorTest {
     // Override the custom MDF name
     gmos.setFPUnitCustomMask("Custom name on the observation")
 
-    val obscomp = fact.doCreateObsComponent(templateProgram, gmos.getType, KEY)
-    obscomp.setDataObject(gmos)
+    val gmosObscomp = fact.doCreateObsComponent(templateProgram, gmos.getType, GMOS_OBSERVATION_KEY)
+    gmosObscomp.setDataObject(gmos)
 
-    obscomps.add(obscomp)
-    obs.setObsComponents(obscomps)
+    gmosObscomps.add(gmosObscomp)
+    gmosObs.setObsComponents(gmosObscomps)
+
+    // Build an observation with F2
+    val f2Obs = fact.createObservation(templateProgram, F2_OBSERVATION_KEY)
+
+    val f2SpObs = new SPObservation
+    f2SpObs.setTitle("Test Observation")
+    // Simulate it was created out of the template
+    f2SpObs.setOriginatingTemplate(TEMPLATE_F2_OBS_KEY)
+
+    f2Obs.setDataObject(f2SpObs)
+    f2Obs.setSeqComponent(fact.createSeqComponent(templateProgram, SPComponentType.OBSERVER_OBSERVE, F2_OBSERVATION_KEY))
+
+    val f2Obscomps = new java.util.ArrayList[ISPObsComponent]
+    val f2 = new Flamingos2
+    // The observation position angle is different
+    f2.setPosAngle(99)
+    // Override the custom MDF name
+    f2.setFpuCustomMask("Custom name on the f2 observation")
+
+    val f2Obscomp = fact.doCreateObsComponent(templateProgram, f2.getType, F2_OBSERVATION_KEY)
+    f2Obscomp.setDataObject(f2)
+
+    f2Obscomps.add(f2Obscomp)
+    f2Obs.setObsComponents(f2Obscomps)
+
+    templateProgram.addObservation(gmosObs)
+    templateProgram.addObservation(f2Obs)
 
     // Put the program on the DB
     db.put(templateProgram)
@@ -108,9 +152,10 @@ class ReapplicationFunctorTest {
     // Run the reapply
     val functor = new ReapplicationFunctor(UserRolePrivileges.STAFF)
     functor.add(templateProgram.getAllObservations.get(0))
+    functor.add(templateProgram.getAllObservations.get(1))
     functor.execute(db, null, new java.util.HashSet[Principal])
 
-    val gmosAfterReaaply = db.lookupObservationByID(new SPObservationID(SPProgramID.toProgramID(id), 2)).getObsComponents.get(0).getDataObject.asInstanceOf[InstGmosNorth]
+    val gmosAfterReaaply = db.lookupObservationByID(new SPObservationID("GS-2015A-Q-1-3")).getObsComponents.get(0).getDataObject.asInstanceOf[InstGmosNorth]
     // Check that the Position Angle was preserved
     assertEquals(99, gmosAfterReaaply.getPosAngle, 0)
     // But the Disperser was reset
@@ -125,10 +170,27 @@ class ReapplicationFunctorTest {
     // Run the reapply
     val functor = new ReapplicationFunctor(UserRolePrivileges.STAFF)
     functor.add(templateProgram.getAllObservations.get(0))
+    functor.add(templateProgram.getAllObservations.get(1))
     functor.execute(db, null, new java.util.HashSet[Principal])
 
-    val gmosAfterReaaply = db.lookupObservationByID(new SPObservationID(SPProgramID.toProgramID(id), 2)).getObsComponents.get(0).getDataObject.asInstanceOf[InstGmosNorth]
+    val gmosAfterReapply = db.lookupObservationByID(new SPObservationID("GS-2015A-Q-1-3")).getObsComponents.get(0).getDataObject.asInstanceOf[InstGmosNorth]
     // Check that the Custom Mask name is preserved
-    assertEquals("Custom name on the observation", gmosAfterReaaply.getFPUnitCustomMask)
+    assertEquals("Custom name on the observation", gmosAfterReapply.getFPUnitCustomMask)
+  }
+
+  /**
+   * REL-814 Verify that changes to custom MDF Mask are now overwritten on re-apply
+   */
+  @Test
+  def testReApplyCustomMaskNameF2() {
+    // Run the reapply
+    val functor = new ReapplicationFunctor(UserRolePrivileges.STAFF)
+    functor.add(templateProgram.getAllObservations.get(0))
+    functor.add(templateProgram.getAllObservations.get(1))
+    functor.execute(db, null, new java.util.HashSet[Principal])
+
+    val f2AfterReaaply = db.lookupObservationByID(new SPObservationID("GS-2015A-Q-1-4")).getObsComponents.get(0).getDataObject.asInstanceOf[Flamingos2]
+    // Check that the Custom Mask name is preserved
+    assertEquals("Custom name on the f2 observation", f2AfterReaaply.getFpuCustomMask)
   }
 }

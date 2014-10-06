@@ -124,10 +124,10 @@ public class ReapplicationFunctor extends DBAbstractFunctor {
 
         // Restore the position angle, if any
         if (oldInstrument != null) {
-            final ISPObsComponent newInstrument = findInstrument(obs);
+            ISPObsComponent newInstrument = findInstrument(obs);
             if (newInstrument != null) {
-                final SPInstObsComp oldData = (SPInstObsComp) oldInstrument.getDataObject();
-                final SPInstObsComp newData = (SPInstObsComp) newInstrument.getDataObject();
+                SPInstObsComp oldData = (SPInstObsComp) oldInstrument.getDataObject();
+                SPInstObsComp newData = (SPInstObsComp) newInstrument.getDataObject();
                 // REL-814 Delegate to the instrument the decision of what data to restore
                 newData.restoreScienceDetails(oldData);
                 newInstrument.setDataObject(newData);
