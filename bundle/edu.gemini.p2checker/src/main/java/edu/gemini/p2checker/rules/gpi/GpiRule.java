@@ -20,7 +20,7 @@ import java.util.*;
  */
 public class GpiRule implements IRule {
     private static final String PREFIX = "GpiRule_";
-    private static final Collection<IConfigRule> GPI_RULES = new ArrayList<IConfigRule>();
+    private static final Collection<IConfigRule> GPI_RULES = new ArrayList<>();
 
     public static final IConfigMatcher ANY_MATCHER = new IConfigMatcher() {
         public boolean matches(Config config, int step, ObservationElements elems) {
@@ -40,7 +40,7 @@ public class GpiRule implements IRule {
                 Gpi inst = (Gpi) elems.getInstrument();
                 if (inst != null) {
                     if (inst.getObservingMode().isEmpty() || !inst.getObservingMode().getValue().isFilterIterable()) {
-                        return new Problem(ERROR, PREFIX+"FILTER_ITER_RULE",
+                        return new Problem(ERROR, PREFIX + "FILTER_ITER_RULE",
                                 MESSAGE, SequenceRule.getInstrumentOrSequenceNode(step, elems, config));
                     }
                 }
