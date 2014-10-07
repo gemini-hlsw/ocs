@@ -10,7 +10,7 @@ ocsAppManifest := {
   val v = ocsVersion.value.toBundleVersion
   Application(
     id = "ot",
-    name = "Observing Tool",
+    name = "OT",
     version = ocsVersion.value.toString,
     configs = List(
       common(v),

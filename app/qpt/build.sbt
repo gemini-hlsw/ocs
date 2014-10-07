@@ -12,7 +12,7 @@ ocsAppManifest := {
   val v = ocsVersion.value.toBundleVersion
   Application(
     id = "qpt",
-    name = "Queue Planning Tool",
+    name = "QPT",
     version = ocsVersion.value.toString,
     configs = List(
       common(v),
