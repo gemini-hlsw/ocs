@@ -43,8 +43,6 @@ public class LchWindowController implements GTableController<Schedule, LchWindow
             Element e = new Element();
             long wStart = window.getStart().getTime();
             long wEnd = window.getEnd().getTime();
-            long aStart = alloc.getStart();
-            long aEnd = alloc.getEnd();
             e.overlap = alloc.overlaps(new Interval(wStart, wEnd), Interval.Overlap.EITHER);
             e.targetType = window.getTargetType();
             e.targetName = window.getTargetName();

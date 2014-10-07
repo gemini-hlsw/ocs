@@ -229,7 +229,15 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 		}
 	}
 
-	// Package-protected, called by Alloc::remove()
+    public SortedSet<Interval> getAllocIntervals() {
+        synchronized (allocs) {
+            SortedSet<Interval> ts = new TreeSet<>();
+            for (Alloc a : allocs) ts.add(a.getInterval());
+            return ts;
+        }
+    }
+
+    // Package-protected, called by Alloc::remove()
 	void removeAlloc(Alloc alloc, boolean force) throws AbandonedSuccessorException {
 		SortedSet<Alloc> prev = Collections.unmodifiableSortedSet(new TreeSet<Alloc>(getAllocs()));
 		if (!force) Variants.tryRemove(prev, alloc);
@@ -269,7 +277,7 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 		SortedSet<Alloc> ret = new TreeSet<Alloc>();
 		synchronized (allocs) {
 			for (Alloc a: allocs) {
-				if (b.overlaps(a, olap))
+				if (b.overlaps(a.getInterval(), olap))
 					ret.add(a);
 			}
 		}
@@ -808,7 +816,7 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 					// However all such slots may be covered by existing allocs at
 					// this point, so we need to subtract them out and see if
 					// there is enough space remaining.
-					constrainedUnion.remove(getAllocs());
+					constrainedUnion.remove(getAllocIntervals());
 
 					// Find largest interval
 					long maxInterval = -1;
@@ -832,7 +840,7 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 							// Set up constrainedUnionWithoutSetup
 							for (Interval i: new ArrayList<Interval>(constrainedUnionWithoutSetup.getIntervals()))
 								constrainedUnionWithoutSetup.remove(new Interval(i.getStart(), i.getStart() + setupTime));
-							constrainedUnionWithoutSetup.remove(getAllocs());
+							constrainedUnionWithoutSetup.remove(getAllocIntervals());
 
 							// And see if there is time for step 1
 							for (Interval i: constrainedUnionWithoutSetup) {
