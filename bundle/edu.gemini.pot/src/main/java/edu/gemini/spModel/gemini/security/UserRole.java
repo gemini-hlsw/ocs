@@ -23,6 +23,8 @@ public final class UserRole implements Principal, Serializable {
 
     public static final UserRole NGO_CL = new UserRole("NGO/CL", "NGO-Chile", CHILE, UserRolePrivileges.NGO);
 
+    public static final UserRole NGO_KR = new UserRole("NGO/KR", "NGO-Korea", KOREA, UserRolePrivileges.NGO);
+
     public static final UserRole NGO_AU = new UserRole("NGO/AU", "NGO-Australia", AUSTRALIA, UserRolePrivileges.NGO);
 
     public static final UserRole NGO_AR = new UserRole("NGO/AR", "NGO-Argentina", ARGENTINA, UserRolePrivileges.NGO);
@@ -55,10 +57,10 @@ public final class UserRole implements Principal, Serializable {
     private final String _displayName;
 
     // Note that INVALID_USER is not included in this array so that one can't login as "unauthenticated user"
-    public static final UserRole[] ALL_ROLES = new UserRole[]{PI, NGO_US, NGO_UK, NGO_CA, NGO_CL, NGO_AU, NGO_AR, NGO_BR, NGO_UH, SUBARU, STAFF, STAFF_ONLY, ACL};
+    public static final UserRole[] ALL_ROLES = new UserRole[]{PI, NGO_US, NGO_UK, NGO_CA, NGO_CL, NGO_KR, NGO_AU, NGO_AR, NGO_BR, NGO_UH, SUBARU, STAFF, STAFF_ONLY, ACL};
 
     // This is the list of ROLES that should be generally visible in the correct order (PI-alphabetical?)
-    public static final UserRole[] ROLES = new UserRole[]{PI, NGO_AR, NGO_AU, NGO_BR, NGO_CA, NGO_CL, NGO_UH, NGO_UK, NGO_US, SUBARU, STAFF};
+    public static final UserRole[] ROLES = new UserRole[]{PI, NGO_AR, NGO_AU, NGO_BR, NGO_CA, NGO_CL, NGO_KR, NGO_UH, NGO_UK, NGO_US, SUBARU, STAFF};
 
     /**
      * Create a UserRole that is also a Principal.
