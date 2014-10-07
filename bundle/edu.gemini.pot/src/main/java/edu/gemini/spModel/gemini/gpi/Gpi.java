@@ -41,6 +41,7 @@ import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.seqcomp.SeqConfigNames;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
+import edu.gemini.spModel.target.obsComp.TargetObsCompConstants;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
 import edu.gemini.spModel.type.*;
 
@@ -58,6 +59,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     // for serialization
     private static final long serialVersionUID = 4L;
 
+    private static final String GUIDING_PATH = TargetObsCompConstants.CONFIG_NAME + ":" + TargetObsCompConstants.GUIDE_WITH_OIWFS_PROP;
 
     private static boolean equal(double d1, double d2) {
         return Math.abs(d1 - d2) < 0.00001;
@@ -1424,6 +1426,12 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         ItemKey obsClassKey = new ItemKey(CalDictionary.OBS_KEY, InstConstants.OBS_CLASS_PROP);
         ItemKey obsTypeKey = new ItemKey(CalDictionary.OBS_KEY, InstConstants.OBSERVE_TYPE_PROP);
         for (Config c:steps) {
+            if (p == 0  && q == 0) {
+                c.putItem(new ItemKey(GUIDING_PATH), StandardGuideOptions.instance.getDefaultActive());
+            } else {
+                c.putItem(new ItemKey(GUIDING_PATH), StandardGuideOptions.instance.getDefaultInactive());
+            }
+
             if (c.containsItem(obsClassKey)) {
                 // REL-1736 If the sequence is a calibration acquisition, set the ASU on
                 if (c.getItemValue(obsClassKey).equals("acqCal")) {
@@ -1431,6 +1439,9 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
                     ItemKey scKey = new ItemKey(new ItemKey(InstConstants.INSTRUMENT_NAME_PROP), SUPER_CONTINUUM_LAMP_PROP.getName());
                     c.putItem(asuKey, CALIBRATION_ARTIFICIAL_SOURCE_ATTENUATION);
                     c.putItem(scKey, ArtificialSource.ON);
+
+                    // REL-1743 Set guiding to off if it is an acquisition sequence
+                    c.putItem(new ItemKey(GUIDING_PATH), StandardGuideOptions.instance.getDefaultOff());
                 }
             }
             if (c.containsItem(obsTypeKey)) {
@@ -1441,6 +1452,9 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
                     c.putItem(useAoKey, Boolean.FALSE);
                     ItemKey calAoKey = new ItemKey(new ItemKey(InstConstants.INSTRUMENT_NAME_PROP), USE_CAL_PROP.getName());
                     c.putItem(calAoKey, Boolean.FALSE);
+
+                    // REL-1743 Set guiding to off if it is a calibration sequence
+                    c.putItem(new ItemKey(GUIDING_PATH), StandardGuideOptions.instance.getDefaultOff());
                 }
             }
 
@@ -1449,12 +1463,6 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
             }
             if (c.containsItem(OffsetPosBase.TEL_Q_KEY)) {
                 q = Double.parseDouble(c.getItemValue(OffsetPosBase.TEL_Q_KEY).toString());
-            }
-            String guidingPath = "telescope:guideWithOIWFS";
-            if (p == 0  && q == 0) {
-                c.putItem(new ItemKey(guidingPath), StandardGuideOptions.instance.getDefaultActive());
-            } else {
-                c.putItem(new ItemKey(guidingPath), StandardGuideOptions.instance.getDefaultInactive());
             }
         }
 
