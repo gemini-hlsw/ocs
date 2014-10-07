@@ -1424,6 +1424,13 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         ItemKey obsClassKey = new ItemKey(CalDictionary.OBS_KEY, InstConstants.OBS_CLASS_PROP);
         ItemKey obsTypeKey = new ItemKey(CalDictionary.OBS_KEY, InstConstants.OBSERVE_TYPE_PROP);
         for (Config c:steps) {
+            String guidingPath = "telescope:guideWithOIWFS";
+            if (p == 0  && q == 0) {
+                c.putItem(new ItemKey(guidingPath), StandardGuideOptions.instance.getDefaultActive());
+            } else {
+                c.putItem(new ItemKey(guidingPath), StandardGuideOptions.instance.getDefaultInactive());
+            }
+
             if (c.containsItem(obsClassKey)) {
                 // REL-1736 If the sequence is a calibration acquisition, set the ASU on
                 if (c.getItemValue(obsClassKey).equals("acqCal")) {
@@ -1431,6 +1438,9 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
                     ItemKey scKey = new ItemKey(new ItemKey(InstConstants.INSTRUMENT_NAME_PROP), SUPER_CONTINUUM_LAMP_PROP.getName());
                     c.putItem(asuKey, CALIBRATION_ARTIFICIAL_SOURCE_ATTENUATION);
                     c.putItem(scKey, ArtificialSource.ON);
+
+                    // REL-1743 Set guiding to off if it is an acquisition sequence
+                    c.putItem(new ItemKey(guidingPath), StandardGuideOptions.instance.getDefaultOff());
                 }
             }
             if (c.containsItem(obsTypeKey)) {
@@ -1441,6 +1451,9 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
                     c.putItem(useAoKey, Boolean.FALSE);
                     ItemKey calAoKey = new ItemKey(new ItemKey(InstConstants.INSTRUMENT_NAME_PROP), USE_CAL_PROP.getName());
                     c.putItem(calAoKey, Boolean.FALSE);
+
+                    // REL-1743 Set guiding to off if it is a calibration sequence
+                    c.putItem(new ItemKey(guidingPath), StandardGuideOptions.instance.getDefaultOff());
                 }
             }
 
@@ -1449,12 +1462,6 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
             }
             if (c.containsItem(OffsetPosBase.TEL_Q_KEY)) {
                 q = Double.parseDouble(c.getItemValue(OffsetPosBase.TEL_Q_KEY).toString());
-            }
-            String guidingPath = "telescope:guideWithOIWFS";
-            if (p == 0  && q == 0) {
-                c.putItem(new ItemKey(guidingPath), StandardGuideOptions.instance.getDefaultActive());
-            } else {
-                c.putItem(new ItemKey(guidingPath), StandardGuideOptions.instance.getDefaultInactive());
             }
         }
 
