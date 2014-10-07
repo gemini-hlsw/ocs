@@ -359,21 +359,6 @@ public final class Alloc implements Comparable<Alloc>, Commentable, PioSerializa
         return cor;
     }
 
-//	public Double get(Circumstance circ, long time) {
-//		if (!contains(time)) throw new IllegalArgumentException("Time out of range: " + new Date(time));
-//		long offset = time - getStart();
-//		return circumstances.get(circ)[(int) (offset / QUANTUM)];
-//	}
-
-	///
-	/// PROTECTED COPY CLONER
-	///
-
-	protected Alloc create(long newStart, long newEnd) {
-		throw new UnsupportedOperationException();
-//		return new Alloc(variant, obs, newStart, firstStep, lastStep);
-	}
-
 	///
 	/// MARKER MANAGER DELEGATE METHODS
 	///
