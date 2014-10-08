@@ -770,7 +770,7 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 				// us whether the Obs is in fact schedulable in theory.
 				Union<Interval> constrainedUnion = constrainedUnionCache.get(obs);
 				if (constrainedUnion == null) {
-					constrainedUnion = new Union<Interval>(owner.getBlocks());
+					constrainedUnion = new Union<>(owner.getBlockIntervals());
 					constrainedUnion.intersect(visibleUnion);
 					constrainedUnion.intersect(darkUnion);
 					constrainedUnion.intersect(timingUnion);
