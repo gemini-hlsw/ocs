@@ -408,7 +408,7 @@ public abstract class SPInstObsComp extends AbstractDataObject {
      * Implementations can provide an instrument-specific restore capabilities
      * @param oldData Reference to the previous version of the instrument
      */
-    public void restoreScienceDetails(SPInstObsComp oldData) {
+    public void restoreScienceDetails(final SPInstObsComp oldData) {
         setPosAngle(oldData.getPosAngle());
     }
 

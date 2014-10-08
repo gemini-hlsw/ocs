@@ -1416,10 +1416,10 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
 
         // REL-814 Preserve the FPU Custom Mask Name
     @Override
-    public void restoreScienceDetails(SPInstObsComp oldData) {
+    public void restoreScienceDetails(final SPInstObsComp oldData) {
         super.restoreScienceDetails(oldData);
         if (oldData instanceof Flamingos2) {
-            Flamingos2 oldF2 = (Flamingos2)oldData;
+            final Flamingos2 oldF2 = (Flamingos2)oldData;
             setFpuCustomMask(oldF2.getFpuCustomMask());
         }
     }

@@ -2020,10 +2020,10 @@ public abstract class InstGmosCommon<
 
     // REL-814 Preserve the FPU Custom Mask Name
     @Override
-    public void restoreScienceDetails(SPInstObsComp oldData) {
+    public void restoreScienceDetails(final SPInstObsComp oldData) {
         super.restoreScienceDetails(oldData);
         if (oldData instanceof InstGmosCommon) {
-            InstGmosCommon oldGmos = (InstGmosCommon)oldData;
+            final InstGmosCommon oldGmos = (InstGmosCommon)oldData;
             setFPUnitCustomMask(oldGmos.getFPUnitCustomMask());
         }
     }

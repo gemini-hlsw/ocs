@@ -116,7 +116,7 @@ public class ReapplicationFunctor extends DBAbstractFunctor {
         }
     }
 
-    private static void restoreScienceDetails(ISPObservation obs, ISPObsComponent oldTarget, ISPObsComponent oldConditions, ISPObsComponent oldInstrument) throws SPNodeNotLocalException, SPTreeStateException {
+    private static void restoreScienceDetails(final ISPObservation obs, final ISPObsComponent oldTarget, final ISPObsComponent oldConditions, final ISPObsComponent oldInstrument) throws SPNodeNotLocalException, SPTreeStateException {
 
         // Restore old target and conditions if not already present
         addIfNotPresent(obs, oldTarget);
@@ -124,10 +124,10 @@ public class ReapplicationFunctor extends DBAbstractFunctor {
 
         // Restore the position angle, if any
         if (oldInstrument != null) {
-            ISPObsComponent newInstrument = findInstrument(obs);
+            final ISPObsComponent newInstrument = findInstrument(obs);
             if (newInstrument != null) {
-                SPInstObsComp oldData = (SPInstObsComp) oldInstrument.getDataObject();
-                SPInstObsComp newData = (SPInstObsComp) newInstrument.getDataObject();
+                final SPInstObsComp oldData = (SPInstObsComp) oldInstrument.getDataObject();
+                final SPInstObsComp newData = (SPInstObsComp) newInstrument.getDataObject();
                 // REL-814 Delegate to the instrument the decision of what data to restore
                 newData.restoreScienceDetails(oldData);
                 newInstrument.setDataObject(newData);
