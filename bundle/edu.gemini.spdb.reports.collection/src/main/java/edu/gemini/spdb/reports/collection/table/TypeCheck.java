@@ -11,7 +11,8 @@ import java.util.Set;
 public final class TypeCheck {
     private TypeCheck() {}
 
-    private static final Set<ProgramType> SCIENCE_TYPES = new HashSet<ProgramType>(
+    // set of program types that are relevant for internal reports
+    private static final Set<ProgramType> SCIENCE_TYPES = new HashSet<>(
    		Arrays.asList(new ProgramType[] {
                    ProgramType.Classical$.MODULE$,
                    ProgramType.DirectorsTime$.MODULE$,
@@ -22,14 +23,26 @@ public final class TypeCheck {
                    ProgramType.SystemVerification$.MODULE$,
            }));
 
-    public static boolean isScienceType(SPProgramID pid) {
+    // a set of program types that are relevant for external reports
+    private static final Set<ProgramType> QUEUE_TYPES = new HashSet<>(
+            Arrays.asList(new ProgramType[] {
+                    ProgramType.LargeProgram$.MODULE$,
+                    ProgramType.FastTurnaround$.MODULE$,
+                    ProgramType.Queue$.MODULE$,
+            }));
+
+    public static boolean isScienceType(final SPProgramID pid) { return isAnyOf(pid, SCIENCE_TYPES); }
+
+    public static boolean isQueueType(final SPProgramID pid) { return isAnyOf(pid, QUEUE_TYPES); }
+
+    private static boolean isAnyOf(final SPProgramID pid, final Set<ProgramType> types) {
         if (pid == null) return false;
 
         final ProgramType pt = ProgramType$.MODULE$.readOrNull(pid);
-        return (pt != null) && SCIENCE_TYPES.contains(pt);
+        return (pt != null) && types.contains(pt);
     }
 
-    public static boolean is(SPProgramID pid, ProgramType pt) {
+    public static boolean is(final SPProgramID pid, final ProgramType pt) {
         return ProgramType$.MODULE$.readOrNull(pid) == pt;
     }
 }
