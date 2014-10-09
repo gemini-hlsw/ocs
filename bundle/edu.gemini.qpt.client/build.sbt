@@ -31,4 +31,4 @@ OsgiKeys.exportPackage := Seq(
   "edu.gemini.qpt.ui.html")
 
 OsgiKeys.additionalHeaders += 
-  ("Import-Package" -> "!javax.mail.util,*")
+  ("Import-Package" -> "!javax.mail.util,edu.gemini.spModel.gemini.altair,edu.gemini.spModel.target.obsComp,*")
