@@ -233,6 +233,7 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
 			new BooleanPreferenceAction(VIEW_BAND_4, VIEW_ALL, "Science Band 4", KeyEvent.VK_4),
 			null,
             new BooleanPreferenceAction(VIEW_SP_LP, VIEW_ALL, StructuredProgramID.Type.LP.getDescription()),
+            new BooleanPreferenceAction(VIEW_SP_FT, VIEW_ALL, StructuredProgramID.Type.FT.getDescription()),
 			new BooleanPreferenceAction(VIEW_SP_Q, VIEW_ALL, StructuredProgramID.Type.Q.getDescription()),
 			new BooleanPreferenceAction(VIEW_SP_C, VIEW_ALL, StructuredProgramID.Type.C.getDescription()),
 			new BooleanPreferenceAction(VIEW_SP_SV, VIEW_ALL, StructuredProgramID.Type.SV.getDescription()),
