@@ -25,6 +25,9 @@ class Activator extends BundleActivator {
   // We will run as Superuser
   val user = java.util.Collections.singleton[Principal](StaffPrincipal.Gemini)
 
+  // Some old activators that we delegate to
+  var oldActivators: List[BundleActivator] = Nil
+
   // See each service's entry point for an example invocation via curl
   def services(c: BundleContext): Map[String, Job] =
      Map("monitor"        -> OdbMonitor.monitor,
@@ -39,16 +42,36 @@ class Activator extends BundleActivator {
   var tracker: ServiceTracker[HttpService, HttpService] = null
 
   def start(ctx: BundleContext): Unit = {
+
+    // The old reports activators
+    oldActivators = List(
+      new edu.gemini.spdb.reports.osgi.Activator,
+      new edu.gemini.weather.impl.Activator,
+      new edu.gemini.epics.impl.Activator,
+      new edu.gemini.spdb.reports.collection.osgi.Activator
+    )
+    oldActivators.foreach(_.start(ctx))
+
+    // Cron
     tracker = track[HttpService, HttpService](ctx) { http =>
       val file = ExternalStorage.getExternalDataFile(ctx, "cron") <| (_.mkdirs)
       val servlet = new CronServlet(ctx, services(ctx), file, user)
       http <| (_.registerServlet(alias, servlet, null, null))
     }(_.unregister(alias))
     tracker.open()
+
   }
 
-  def stop(p1: BundleContext): Unit =
+  def stop(ctx: BundleContext): Unit = {
+
+    // Cron
     tracker.close()
+
+    // Old activators
+    oldActivators.foreach(_.stop(ctx))
+    oldActivators = Nil
+
+  }
 
 }
 
