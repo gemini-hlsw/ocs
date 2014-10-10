@@ -199,11 +199,11 @@ public final class NiriRule implements IRule {
     private static class EngineeringRule extends AbstractConfigRule {
 
         private PropertyDescriptor _deviceProperty;
-        private Enum _expectedValue;
+        private Enum<?> _expectedValue;
         private String _message;
         private Problem.Type _problemType;
 
-        public EngineeringRule(PropertyDescriptor deviceProp, Enum expectedValue, String message, Problem.Type probType) {
+        public EngineeringRule(PropertyDescriptor deviceProp, Enum<?> expectedValue, String message, Problem.Type probType) {
             _deviceProperty = deviceProp;
             _expectedValue = expectedValue;
             _message = message;
@@ -211,7 +211,7 @@ public final class NiriRule implements IRule {
         }
 
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            Enum device = (Enum) SequenceRule.getInstrumentItem(config, _deviceProperty);
+            Enum<?> device = (Enum<?>) SequenceRule.getInstrumentItem(config, _deviceProperty);
             if (device == _expectedValue) {
                 return new Problem(_problemType, PREFIX+"EngineeringRule", _message,
                         SequenceRule.getInstrumentOrSequenceNode(step, elems));
@@ -941,7 +941,7 @@ public final class NiriRule implements IRule {
          * stored in the state.
          */
         boolean checkPQ(Double p, Double q) {
-            if (Offset.areEqual(lastP, p) && Offset.areEqual(lastQ, q)) {
+            if (lastP != null && lastQ != null && Offset.areEqual(lastP, p) && Offset.areEqual(lastQ, q)) {
                 return true;
             }
             lastP = p;
