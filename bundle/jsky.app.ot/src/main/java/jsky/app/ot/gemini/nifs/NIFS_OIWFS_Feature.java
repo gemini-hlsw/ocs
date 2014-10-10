@@ -7,15 +7,25 @@
 package jsky.app.ot.gemini.nifs;
 
 import diva.util.java2d.Polygon2D;
+import edu.gemini.shared.util.immutable.None;
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.skycalc.Angle;
+import edu.gemini.skycalc.Offset;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.nifs.InstNIFS;
+import edu.gemini.spModel.gemini.nifs.NifsOiwfsGuideProbe;
+import edu.gemini.spModel.guide.PatrolField;
+import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
+import edu.gemini.spModel.target.offset.OffsetPosList;
+import edu.gemini.spModel.target.offset.OffsetUtil;
 import jsky.app.ot.gemini.inst.OIWFS_FeatureBase;
 import jsky.app.ot.tpe.TpeImageInfo;
 
 import java.awt.*;
 import java.awt.geom.*;
+import java.util.Set;
 
 
 /**
@@ -32,8 +42,6 @@ public class NIFS_OIWFS_Feature extends OIWFS_FeatureBase {
     // Used to rotate figures by the position angle
     protected AffineTransform _posAngleTrans = new AffineTransform();
 
-    private AltairParams.FieldLens fieldLens = AltairParams.Mode.NGS.fieldLens();
-
     /**
      * Construct the feature with its name and description.
      */
@@ -43,13 +51,10 @@ public class NIFS_OIWFS_Feature extends OIWFS_FeatureBase {
 
     /** Return true if the display needs to be updated because values changed. */
     protected boolean _needsUpdate(SPInstObsComp inst, TpeImageInfo tii) {
-        if (super._needsUpdate(inst, tii)) return true;
-
-        if (fieldLens != getFieldLens()) {
-            fieldLens = getFieldLens();
-            return true;
-        }
-        return false;
+        // Needs to take into account offset position list updates to work
+        // as intended.  Unclear whether it is worth the effort to maintain
+        // the old offset lists when the calculation isn't that slow anyway.
+        return true;
     }
 
     /**
@@ -73,13 +78,66 @@ public class NIFS_OIWFS_Feature extends OIWFS_FeatureBase {
         InstNIFS inst = _iw.getContext().instrument().orNull(InstNIFS.SP_TYPE);
         if (inst == null) return;
 
+        addOffsetConstrainedPatrolField(basePosX, basePosY);
+        addPatrolField(offsetPosX + translateX, offsetPosY + translateY);
+
         _posAngleTrans.setToIdentity();
-        // OT-497: rotate 90 deg clockwise
         _posAngleTrans.rotate(-_posAngle+Math.toRadians(90.), offsetPosX + translateX, offsetPosY + translateY);
 
         Point2D.Double p = new Point2D.Double(offsetPosX + translateX, offsetPosY + translateY);
         _addGuideFields(p);
         _addPickoffProbe(p);
+    }
+
+
+    /**
+     * Add the OIWFS patrol field to the list of figures to display.
+     */
+    protected void addPatrolField(double xc, double yc) {
+        for (ObsContext ctx : _iw.getMinimalObsContext()) {
+            // get scaled and offset f2 oiwfs patrol field
+            PatrolField patrolField = NifsOiwfsGuideProbe.instance.getCorrectedPatrolField(ctx);
+            // rotation, scaling and transformation to match screen coordinates
+            Angle rotation = new Angle(-_posAngle, Angle.Unit.RADIANS);
+            Point2D.Double translation = new Point2D.Double(xc, yc);
+            setTransformationToScreen(rotation, _pixelsPerArcsec, translation);
+
+            // set patrol field for in Range check (this should probably be done using the inRange check provided by the guide probe)
+            Area _patrolField = patrolField.getArea();
+            transformToScreen(_patrolField);
+
+            // draw patrol field
+            addPatrolField(patrolField);
+        }
+    }
+
+
+    /**
+     * Add the OIWFS patrol field to the list of figures to display.
+     *
+     * @param xc the X screen coordinate for the base position to use
+     * @param yc the Y screen coordinate for the base position to use
+     */
+    protected void addOffsetConstrainedPatrolField(double xc, double yc) {
+        // get offsets
+
+        // ******************************
+        // TODO: What does _iw.getProgData().getOffsetPosLists() translate to?
+        // TODO: Presumably something like _iw.getContext().offsets().... ?
+        // FOR ORIGINAL CHANGE SEE: http://sbfsvn01.cl.gemini.edu:8060/changelog/Software?cs=48008
+        // ******************************
+
+        Option<OffsetPosList[]> myPosListA = None.instance(); // TODO :: _iw.getProgData().getOffsetPosLists();
+        Set<Offset> offsets = OffsetUtil.getSciencePositions(myPosListA);
+
+        if (_iw.getMinimalObsContext().isEmpty()) return;
+        PatrolField patrolField = NifsOiwfsGuideProbe.instance.getCorrectedPatrolField(_iw.getMinimalObsContext().getValue());
+        // rotation, scaling and transformation to match screen coordinates
+        Angle rotation = new Angle(-_posAngle, Angle.Unit.RADIANS);
+        Point2D.Double translation = new Point2D.Double(xc, yc);
+        setTransformationToScreen(rotation, _pixelsPerArcsec, translation);
+
+        addOffsetConstrainedPatrolField(patrolField, offsets);
     }
 
     // draw the circles for the three guide fields at the given location
