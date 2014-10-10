@@ -129,20 +129,6 @@ public abstract class AbstractQueueProgramStatusExternalReport extends BundleVel
         return true;
     }
 
-    public static final Comparator<SemesterInfo> SITE_COMPARATOR = new Comparator<SemesterInfo>() {
-        public int compare(SemesterInfo si1, SemesterInfo si2) {
-            String site1 = si1.getSite();
-            String site2 = si2.getSite();
-
-            if (site1 == null) {
-                return (site2 == null) ? 0 : -1;
-            } else if (site2 == null) {
-                return 1;
-            }
-            return site1.compareTo(site2);
-        }
-    };
-
     public class SemesterInfo extends ArrayList<IRow> {
 
         private static final long serialVersionUID = 1L;
@@ -172,9 +158,9 @@ public abstract class AbstractQueueProgramStatusExternalReport extends BundleVel
             return "#"; // don't ask. velocity can go fuck itself
         }
 
-        public String getFileName(int i) {
-            return AbstractQueueProgramStatusExternalReport.this.getFileName(getSiteAbbrev(), getSemester(i));
-        }
+//        public String getFileName(int i) {
+//            return AbstractQueueProgramStatusExternalReport.this.getFileName(getSiteAbbrev(), getSemester(i));
+//        }
 
         public String getSemester(int i) {
             // Here we take advantage of integer division, which actually
@@ -184,17 +170,17 @@ public abstract class AbstractQueueProgramStatusExternalReport extends BundleVel
             return (year * 2 + i) / 2 + (i % 2 == 0 ? "A" : "B");
         }
 
-        public String getSemesterAbbrev(int i) {
-            return getSemester(i);  // REL-818 (was previously abbreviated, but off by one)
-        }
+//        public String getSemesterAbbrev(int i) {
+//            return getSemester(i);  // REL-818 (was previously abbreviated, but off by one)
+//        }
 
         public IDBDatabaseService getDb() {
             return db;
         }
 
-        public int getMaxBand() {
-            return maxBand;
-        }
+//        public int getMaxBand() {
+//            return maxBand;
+//        }
 
 
         // Privateish stuff
