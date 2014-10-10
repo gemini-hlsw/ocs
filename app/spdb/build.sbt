@@ -124,7 +124,10 @@ def common(version: Version) = AppConfig(
     BundleSpec("org.scalaz.concurrent",                  Version(7, 0, 5)),
     BundleSpec("slf4j.api",                              Version(1, 6, 4)),
     BundleSpec("slf4j.jdk14",                            Version(1, 6, 4)),
-    BundleSpec("org.apache.commons.logging",             Version(1, 1, 0))
+    BundleSpec("org.apache.commons.logging",             Version(1, 1, 0)),
+    BundleSpec("com.cosylab.epics.caj",                  Version(1, 0, 2)),
+    BundleSpec("edu.gemini.shared.ca",                   version),
+    BundleSpec("edu.gemini.spdb.reports.collection",     version)
   )
 ) extending List(common_credentials(version))
 
@@ -400,11 +403,6 @@ def odbproduction(version: Version) = AppConfig(
   props = Map(
     "edu.gemini.smartgcal.host"       -> "gsodb",
     "edu.gemini.smartgcal.svnRootUrl" -> "http://source.gemini.edu/gcal/trunk/calibrations"
-  ),
-  bundles = List(
-    BundleSpec(50, "com.cosylab.epics.caj",              Version(1, 0, 2)),
-    BundleSpec(50, "edu.gemini.shared.ca",               version),
-    BundleSpec(50, "edu.gemini.spdb.reports.collection", version)
   )
 ) extending List(with_remote_gogo(version), odbproduction_credentials(version))
 
