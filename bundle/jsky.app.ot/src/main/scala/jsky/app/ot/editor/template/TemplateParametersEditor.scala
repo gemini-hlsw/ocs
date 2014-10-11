@@ -1,20 +1,21 @@
 package jsky.app.ot.editor.template
 
-import javax.swing.BorderFactory
-
 import edu.gemini.pot.sp.ISPTemplateParameters
 import edu.gemini.shared.util.TimeValue
 import edu.gemini.spModel.`type`.ObsoletableSpType
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{PercentageContainer, ImageQuality, CloudCover, SkyBackground, WaterVapor}
+import edu.gemini.spModel.target.system.ConicTarget
 import edu.gemini.spModel.template.TemplateParameters
+
+import javax.swing.BorderFactory
 
 import scala.collection.JavaConverters._
 import scala.swing.event.{EditDone, SelectionChanged}
 import scala.swing._
 import scala.swing.ListView.Renderer
 import scala.swing.GridBagPanel.Anchor.East
-import scala.swing.GridBagPanel.Fill.{Horizontal, Vertical}
+import scala.swing.GridBagPanel.Fill.Horizontal
 
 import scalaz._
 
@@ -47,7 +48,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       shell.setDataObject(up(obj))
     }
 
-  trait InitWidget {
+  trait InitWidget extends Component {
     def init(ps: Iterable[TemplateParameters]): Unit
   }
 
@@ -57,6 +58,57 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
     def init(ps: Iterable[TemplateParameters]): Unit =
       containedWidgets.foreach(_.init(ps))
   }
+
+  case class Row(label: String, widget: InitWidget, units: Option[InitWidget] = None)
+
+  trait ColumnPanel extends InitWidgetContainer { self: GridBagPanel =>
+    private val LabelInsets  = new Insets(0, 0, VGap, LabelGap)
+    private val WidgetInsets = new Insets(0, 0, VGap, 0)
+    private val UnitsInsets  = new Insets(0, LabelGap, VGap, 0)
+
+    def nextY(): Int = (-1 :: layout.values.toList.map(_.gridy)).max + 1
+
+    def layoutRow(r: Row): Unit = layoutRow(r.label, r.widget, r.units)
+
+    def layoutRow(text: String, c: Component, units: Option[Component] = None): Unit = {
+      val y = nextY()
+      layout(new Label(text)) = new Constraints {
+        gridx  = 0
+        gridy  = y
+        anchor = East
+        insets = LabelInsets
+      }
+      layout(c) = new Constraints {
+        gridx  = 1
+        gridy  = y
+        fill   = Horizontal
+        insets = WidgetInsets
+      }
+      units.foreach { u =>
+        layout(u) = new Constraints {
+          gridx  = 2
+          gridy  = y
+          fill   = Horizontal
+          insets = UnitsInsets
+        }
+      }
+    }
+
+//    def pushUp(): Unit =
+//      layout(new BorderPanel) = new Constraints {
+//        gridy   = nextY()
+//        weighty = 1.0
+//        fill    = GridBagPanel.Fill.Both
+//      }
+
+    def layoutRows(): Unit = rows.foreach(layoutRow)
+
+    def rows: Iterable[Row]
+
+    def containedWidgets: Iterable[InitWidget] =
+      rows.flatMap { r => r.widget :: r.units.toList }
+  }
+
 
   class BoundTextField[A](cols: Int)(
       read: String => A,
@@ -112,7 +164,62 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
   }
 
 
-  object ConditionsPanel extends GridBagPanel with InitWidgetContainer {
+  object TargetPanel extends GridBagPanel with InitWidgetContainer {
+    // TODO: There's currently no way to distinguish a real sidereal target at
+    // (0,0) from an ToO target.  This may be fixed when SpTarget is upgraded
+    // to contain a spModel.core target.  For now, ToO == Sidereal.
+    trait TargetType { def display: String}
+    case object Sidereal extends TargetType    { val display = "Sidereal"     }
+    case object NonSidereal extends TargetType { val display = "Non-Sidereal" }
+
+    private val AllTargetTypes = List(Sidereal, NonSidereal)
+
+    object CoordinatesPanel extends GridBagPanel with ColumnPanel {
+      val nameField = new BoundTextField[String](10)(
+        read = identity,
+        show = identity,
+        get  = _.getTarget.getName,
+        set  = (tp, name) => {
+          val newTarget = tp.getTarget
+          newTarget.setName(name)
+          tp.copy(newTarget)
+        }
+      )
+
+      val typeCombo = new BoundNullableCombo[TargetType](AllTargetTypes)(
+        show = _.display,
+        get  = { tp =>
+          val target = tp.getTarget
+          if (target.getTarget.isInstanceOf[ConicTarget]) NonSidereal
+          else Sidereal
+        },
+        set  = { (tp, targetType) =>
+//          val target = tp.getTarget
+//          targetType match {
+//            case Sidereal =>
+//          }
+          tp
+        }
+      )
+
+      val rows = List(
+        Row("Name", nameField),
+        Row("Type", typeCombo)
+      )
+
+      layoutRows()
+    }
+
+    layout(CoordinatesPanel) = new Constraints {
+      gridx   = 0
+      gridy   = 0
+    }
+
+    def containedWidgets: Iterable[InitWidget] = List(CoordinatesPanel)
+  }
+
+
+  object ConditionsPanel extends GridBagPanel with ColumnPanel {
     border = BorderFactory.createEmptyBorder(0, 20, 0, 20)
 
     private def mkCombo[A >: Null <: PercentageContainer](opts: Seq[A])(get: SPSiteQuality => A, set: (SPSiteQuality, A) => Unit): BoundNullableCombo[A] = {
@@ -136,50 +243,23 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       )
     }
 
-    private def addCombo(n: String, c: ComboBox[_], y: Int): Unit = {
-      layout(new Label(n)) = new Constraints {
-        gridx  = 0
-        gridy  = y
-        anchor = East
-        insets = new Insets(0, 0, VGap, LabelGap)
-      }
-      layout(c) = new Constraints {
-        gridx  = 1
-        gridy  = y
-        insets = new Insets(0, 0, VGap, 0)
-        fill   = Horizontal
-      }
-    }
-
-    val all = List(
-      "CC" -> mkCombo(CloudCover.values   )(_.getCloudCover,    _.setCloudCover(_)   ),
-      "IQ" -> mkCombo(ImageQuality.values )(_.getImageQuality,  _.setImageQuality(_) ),
-      "SB" -> mkCombo(SkyBackground.values)(_.getSkyBackground, _.setSkyBackground(_)),
-      "WV" -> mkCombo(WaterVapor.values   )(_.getWaterVapor,    _.setWaterVapor(_)   )
+    val rows = List(
+      Row("CC", mkCombo(CloudCover.values   )(_.getCloudCover,    _.setCloudCover(_)   )),
+      Row("IQ", mkCombo(ImageQuality.values )(_.getImageQuality,  _.setImageQuality(_) )),
+      Row("SB", mkCombo(SkyBackground.values)(_.getSkyBackground, _.setSkyBackground(_))),
+      Row("WV", mkCombo(WaterVapor.values   )(_.getWaterVapor,    _.setWaterVapor(_)   ))
     )
 
-    all.zipWithIndex.foreach { case ((n,c), y) => addCombo(n, c, y) }
-
-    def containedWidgets: Iterable[InitWidget] = all.map(_._2)
+    layoutRows()
   }
 
-  object TimePanel extends GridBagPanel with InitWidgetContainer {
-    layout(new Label("Time")) = new Constraints {
-      gridx  = 0
-      insets = new Insets(0, 0, 0, LabelGap)
-    }
-
+  object TimePanel extends GridBagPanel with ColumnPanel {
     val timeField = new BoundTextField[Double](5)(
       read = _.toDouble,
       show = timeAmount => f"$timeAmount%.2f",
       get  = _.getTime.getTimeAmount,
       set  = (tp, timeAmount) => tp.copy(new TimeValue(timeAmount, tp.getTime.getTimeUnits))
     )
-
-    layout(timeField) = new Constraints {
-      gridx  = 1
-      insets = new Insets(0, 0, 0, LabelGap)
-    }
 
     import TimeValue.Units._
     val unitsCombo = new BoundNullableCombo[TimeValue.Units](Seq(hours, nights))(
@@ -188,44 +268,38 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       set  = (tp, units) => tp.copy(new TimeValue(tp.getTime.getTimeAmount, units))
     )
 
-    layout(unitsCombo) = new Constraints {
-      gridx = 2
-    }
-
-    // push everything up
-    layout(new BorderPanel) = new Constraints {
-      gridx     = 0
-      gridy     = 1
-      weighty   = 1.0
-      gridwidth = 3
-      fill      = Vertical
-    }
-
-    def containedWidgets: Iterable[InitWidget] = List(timeField, unitsCombo)
-  }
-
-  layout(ConditionsPanel) = new Constraints {
-    gridx   = 1
-    weighty = 1.0
-    fill    = Vertical
-  }
-
-  layout(TimePanel) = new Constraints {
-    gridx   = 2
-    weighty = 1.0
-    fill    = Vertical
-  }
-
-  // push everything to the left
-  layout(new BorderPanel) = new Constraints {
-    gridx   = 3
-    weightx = 1.0
-    fill    = Horizontal
+    val rows = List(
+      Row("Time", timeField, Some(unitsCombo))
+    )
+    layoutRows()
   }
 
   {
-    val ps = load
-    List(ConditionsPanel, TimePanel).foreach(_.init(ps))
+    def layoutBorder(x: Int): Unit =
+      layout(new BorderPanel) = new Constraints {
+        gridx   = x
+        weightx = 1.0
+        fill    = Horizontal
+      }
+
+    def layoutContent(p: Panel, x: Int): Unit =
+      layout(p) = new Constraints {
+        gridx   = x
+        weighty = 1.0
+        fill    = GridBagPanel.Fill.None
+        anchor  = GridBagPanel.Anchor.North
+      }
+
+    layoutBorder(0)
+
+    val params = load
+    val pans   = List(TargetPanel, ConditionsPanel, TimePanel)
+    pans.zipWithIndex.foreach {
+      case (p, x) =>
+        layoutContent(p, x + 1)
+        p.init(params)
+    }
+
+    layoutBorder(pans.length + 1)
   }
 }
-
