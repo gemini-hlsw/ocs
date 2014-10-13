@@ -49,37 +49,57 @@ public class OutlineNode extends DefaultMutableTreeNode {
 			((OutlineNode) getParent()).childChanged(this.selected);
 	}
 
-	@SuppressWarnings("unchecked") 
-	void childChanged(TriState childSelected) {
-		if (!adjusting) {			
-			outer: switch (selected) {
 
-			// If we are currently in a definited select state, our new state will
-			// be indefinite if there is more than one child, or the same as the one
-			// and only child if there is only one.
-			case SELECTED:
-			case UNSELECTED:
-                // REL-293: Should be able to deselect oiwfs without deselecting parent inst
-//				selected = (getChildCount() == 1) ? childSelected : TriState.INDEFINITE;
+    @SuppressWarnings("unchecked")
+    void childChanged(TriState childSelected) {
+        if (!adjusting) {
+            TriState oldSelected = selected;
+
+            // If we only have one child, then our selected state is the child's state.
+            // If the child is INDEFINITE, then this node must also be indefinite.
+            if (getChildCount() == 1 || childSelected == TriState.INDEFINITE)
+                selected = childSelected;
+
+            // If this node is in a definite state and the child is in the opposite state, we must
+            // move to an indefinite state.
+            else if ((selected == TriState.SELECTED   && childSelected == TriState.UNSELECTED) ||
+                     (selected == TriState.UNSELECTED && childSelected == TriState.SELECTED))
                 selected = TriState.INDEFINITE;
-				break;
 
-			// If our current state is indefinite and the child is definite, we need
-			// to look at all the children.
-			case INDEFINITE:
-				if (childSelected == TriState.INDEFINITE) break; // easy out
-				TriState state =childSelected;
-				for (OutlineNode node: (List<OutlineNode>) children) {
-					if (node.getSelected() != state)
-						break outer; // still indefinite
-				}
-				selected = state;
-				
-			}
-			
-		}
-	}
-	
+            // Otherwise, if this node is indefinite, and the child is definite, we cannot know what
+            // to do unless we consider all child nodes.
+            else if (selected == TriState.INDEFINITE) {
+                boolean allSelected   = true;
+                boolean allUnselected = true;
+                for (OutlineNode node : (List<OutlineNode>) children) {
+                    if (!node.getSelected().equals(TriState.SELECTED))
+                        allSelected   = false;
+                    if (!node.getSelected().equals(TriState.UNSELECTED))
+                        allUnselected = false;
+                    if (!allSelected && !allUnselected)
+                        break;
+                }
+
+                // Four cases to consider. Ignore the case where allSelected and allUnselected are both true,
+                // as this should never happen if there are children nodes since we know the child node triggering
+                // this call is not INDEFINITE, and thus will trigger one of the two branches in the loop above.
+                if (allSelected)
+                    selected = TriState.SELECTED;
+                else if (allUnselected)
+                    selected = TriState.UNSELECTED;
+                else
+                    selected = TriState.INDEFINITE;
+            }
+
+            // If we have changed selected or we have a different value than the parent now, invoke recursively up the tree.
+            // We do not need to invoke downwards.
+            OutlineNode parent = (OutlineNode) getParent();
+            if (parent != null && (!oldSelected.equals(selected) || !selected.equals(parent.getSelected())))
+                parent.childChanged(selected);
+        }
+    }
+
+
 	@Override
 	public String toString() {
 		if (userObject instanceof DisplayableSpType) {

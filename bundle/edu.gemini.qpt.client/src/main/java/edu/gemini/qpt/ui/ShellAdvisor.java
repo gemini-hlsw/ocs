@@ -233,6 +233,7 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
 			new BooleanPreferenceAction(VIEW_BAND_4, VIEW_ALL, "Science Band 4", KeyEvent.VK_4),
 			null,
             new BooleanPreferenceAction(VIEW_SP_LP, VIEW_ALL, StructuredProgramID.Type.LP.getDescription()),
+            new BooleanPreferenceAction(VIEW_SP_FT, VIEW_ALL, StructuredProgramID.Type.FT.getDescription()),
 			new BooleanPreferenceAction(VIEW_SP_Q, VIEW_ALL, StructuredProgramID.Type.Q.getDescription()),
 			new BooleanPreferenceAction(VIEW_SP_C, VIEW_ALL, StructuredProgramID.Type.C.getDescription()),
 			new BooleanPreferenceAction(VIEW_SP_SV, VIEW_ALL, StructuredProgramID.Type.SV.getDescription()),
@@ -270,12 +271,12 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
 			new ToggleSetupRequiredAction(shell),
 			new CompactAction(shell),
 			null,
-			new EnumBoxAction<TimePreference>(TimePreference.BOX, TimePreference.LOCAL, "Local Time"),
-			new EnumBoxAction<TimePreference>(TimePreference.BOX, TimePreference.UNIVERSAL, "Universal Time"),
-			new EnumBoxAction<TimePreference>(TimePreference.BOX, TimePreference.SIDEREAL, "Sidereal Time"),
+			new EnumBoxAction<>(TimePreference.BOX, TimePreference.LOCAL, "Local Time"),
+			new EnumBoxAction<>(TimePreference.BOX, TimePreference.UNIVERSAL, "Universal Time"),
+			new EnumBoxAction<>(TimePreference.BOX, TimePreference.SIDEREAL, "Sidereal Time"),
 			null,
-			new EnumBoxAction<ElevationPreference>(ElevationPreference.BOX, ElevationPreference.ELEVATION, "Elevation"),
-			new EnumBoxAction<ElevationPreference>(ElevationPreference.BOX, ElevationPreference.AIRMASS, "Airmass")
+			new EnumBoxAction<>(ElevationPreference.BOX, ElevationPreference.ELEVATION, "Elevation"),
+			new EnumBoxAction<>(ElevationPreference.BOX, ElevationPreference.AIRMASS, "Airmass")
 
 
 		);
@@ -318,14 +319,14 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
 
 		try {
 
-			final Class applicationClass = Class.forName("com.apple.eawt.Application");
-			final Class applicationEventClass = Class.forName("com.apple.eawt.ApplicationEvent");
-			final Class applicationListenerClass = Class.forName("com.apple.eawt.ApplicationListener");
+			final Class<?> applicationClass = Class.forName("com.apple.eawt.Application");
+			final Class<?> applicationEventClass = Class.forName("com.apple.eawt.ApplicationEvent");
+			final Class<?> applicationListenerClass = Class.forName("com.apple.eawt.ApplicationListener");
 
-			Object app = applicationClass.getMethod("getApplication").invoke(null);
+			final Object app = applicationClass.getMethod("getApplication").invoke(null);
 			applicationClass.getMethod("removeAboutMenuItem").invoke(app);
 			applicationClass.getMethod("addApplicationListener", applicationListenerClass).invoke(app,
-				Proxy.newProxyInstance(getClass().getClassLoader(), new Class[] { applicationListenerClass },
+				Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { applicationListenerClass },
 					new InvocationHandler() {
 						public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 							if (method.getName().equals("handleQuit")) {

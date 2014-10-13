@@ -29,8 +29,10 @@ public class InstViewAdvisor implements IViewAdvisor, PropertyChangeListener {
 
 	private final JTree tree = ElementFactory.createTree();
 	private Schedule model;
+    private IViewContext context;
 	
 	public void open(final IViewContext context) {
+        this.context = context;
 
 		// Set up the tree control.
 		tree.setModel(new DefaultTreeModel(getRoot(null)));
@@ -42,7 +44,6 @@ public class InstViewAdvisor implements IViewAdvisor, PropertyChangeListener {
 		tree.setToggleClickCount(Integer.MAX_VALUE); // don't expand on multi-clicks
 		
 		tree.getModel().addTreeModelListener(new TreeModelListener() {
-		
 			public void treeStructureChanged(TreeModelEvent e) {
 				updateSchedule();
 			}
@@ -58,61 +59,12 @@ public class InstViewAdvisor implements IViewAdvisor, PropertyChangeListener {
 			public void treeNodesChanged(TreeModelEvent e) {
 				updateSchedule();
 			}
-		
-			@SuppressWarnings("unchecked")
-			private void updateSchedule() {
-				
-				if (model != null) {
-					
-					synchronized (this) {
-						
-						// This is inefficient but it's cleaner than figuring out all the
-						// corner cases for various kinds of modifications.
-						Set<Enum> facilities = new HashSet<Enum>();
-						Enumeration e = ((OutlineNode) ((DefaultTreeModel) tree.getModel()).getRoot()).breadthFirstEnumeration();
-						while (e.hasMoreElements()) {
-							OutlineNode n = (OutlineNode) e.nextElement();
-							if (n.getSelected() != TriState.UNSELECTED) {
-								Object o = n.getUserObject();
-								if (o != null && o instanceof Enum) {
-                                    if (o instanceof Inst) {
-                                        facilities.add(((Inst)o).getValue());
-                                    } else {
-                                        facilities.add((Enum) o);
-                                    }
-                                }
-							}
-						}
-						
-						// If facilities haven't changed, don't reset them. This will
-						// happen when the model is first opened and the UI is initializing.
-						if (facilities.equals(model.getFacilities()))
-							return;
-						
-						// This can take a moment, so show a busy cursor.
-						try {
-							context.getShell().getPeer().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-							model.setFacilities(facilities);
-						} finally {
-							context.getShell().getPeer().setCursor(Cursor.getDefaultCursor());
-						}
-						
-						
-					}
-					
-				}
-			}
-			
 		});
 		
 		// Scroll pane
 		JScrollPane scroll = new JScrollPane(tree);
-		
 		scroll.getViewport().setPreferredSize(new Dimension(tree.getPreferredSize().width, tree.getRowHeight() * 8));	
-		scroll.getViewport().setMinimumSize(new Dimension(tree.getPreferredSize().width,  tree.getRowHeight() * 8));	
-		
-
-		
+		scroll.getViewport().setMinimumSize(new Dimension(tree.getPreferredSize().width,  tree.getRowHeight() * 8));
 		scroll.setBorder(BorderFactory.createEmptyBorder());
 		
 		// And the context.
@@ -121,7 +73,6 @@ public class InstViewAdvisor implements IViewAdvisor, PropertyChangeListener {
 		
 		// Listen for model changes
 		context.getShell().addPropertyChangeListener(this);
-		
 	}
 
 	public void close(IViewContext context) {
@@ -132,22 +83,26 @@ public class InstViewAdvisor implements IViewAdvisor, PropertyChangeListener {
 		tree.requestFocus();
 	}
 
+    // Rebuild the entire tree for the specified schedule.
 	@SuppressWarnings("unchecked")
-	private OutlineNode getRoot(Schedule sched) {		
+	private OutlineNode getRoot(Schedule sched) {
 		if (sched == null) return new OutlineNode();
 		OutlineNode root = new OutlineNode();
 		for (final Inst i: Inst.values()) {
 			if (!i.existsAtSite(sched.getSite())) continue;
+
 			OutlineNode inode = new OutlineNode(i);
 			inode.setSelected(sched.hasFacility(i.getValue()));
 			root.add(inode);
+
 			Map<String, OutlineNode> categoryNodes = new TreeMap<String, OutlineNode>();			
 			for (Enum option: i.getOptions()) {
 				OutlineNode optionNode = new OutlineNode(option);
+
 				String category = Inst.getCategory(option);
-				if (category == null) {
+				if (category == null)
 					inode.add(optionNode);
-				} else {
+				else {
 					OutlineNode categoryNode = categoryNodes.get(category);
 					if (categoryNode == null) {
 						categoryNode = new OutlineNode(category);
@@ -165,10 +120,52 @@ public class InstViewAdvisor implements IViewAdvisor, PropertyChangeListener {
 	public void propertyChange(PropertyChangeEvent evt) {
 		if (IShell.PROP_MODEL.equals(evt.getPropertyName())) {
 			synchronized (this) {
-				model = (Schedule) evt.getNewValue();			
-				((DefaultTreeModel) tree.getModel()).setRoot(getRoot(model));
+				Schedule newModel = (Schedule) evt.getNewValue();
+
+                // REL-1301: Only rebuild the entire tree when the model has just been instantiated.
+                // Note that if a new plan is created, this will happen as well automatically.
+                // This preserves the tree selections after refreshes.
+                if (model == null)
+                    ((DefaultTreeModel) tree.getModel()).setRoot(getRoot(newModel));
+                model = newModel;
+                updateSchedule();
 			}
 		}
 	}
-	
+
+    private void updateSchedule() {
+        if (model != null) {
+            synchronized (this) {
+                // This is inefficient but it's cleaner than figuring out all the
+                // corner cases for various kinds of modifications.
+                Set<Enum> facilities = new HashSet<Enum>();
+                Enumeration e = ((OutlineNode) tree.getModel().getRoot()).breadthFirstEnumeration();
+                while (e.hasMoreElements()) {
+                    OutlineNode n = (OutlineNode) e.nextElement();
+                    if (n.getSelected() != TriState.UNSELECTED) {
+                        Object o = n.getUserObject();
+                        if (o != null && o instanceof Enum) {
+                            if (o instanceof Inst)
+                                facilities.add(((Inst)o).getValue());
+                            else
+                                facilities.add((Enum) o);
+                        }
+                    }
+                }
+
+                // If facilities haven't changed, don't reset them. This will
+                // happen when the model is first opened and the UI is initializing.
+                if (facilities.equals(model.getFacilities()))
+                    return;
+
+                // This can take a moment, so show a busy cursor.
+                try {
+                    context.getShell().getPeer().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                    model.setFacilities(facilities);
+                } finally {
+                    context.getShell().getPeer().setCursor(Cursor.getDefaultCursor());
+                }
+            }
+        }
+    }
 }

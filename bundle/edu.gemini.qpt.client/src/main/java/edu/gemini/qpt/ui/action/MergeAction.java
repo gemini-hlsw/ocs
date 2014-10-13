@@ -77,7 +77,7 @@ public class MergeAction extends AbstractOpenAction implements PropertyChangeLis
 
 				// First merge in any extra semesters. Duplicates will be ignored
 				for (String semester: other.getExtraSemesters())
-					current.addExtraSemseter(semester);
+					current.addExtraSemester(semester);
 
 				// And the facilities.
 				for (Enum<?> facility: other.getFacilities())
