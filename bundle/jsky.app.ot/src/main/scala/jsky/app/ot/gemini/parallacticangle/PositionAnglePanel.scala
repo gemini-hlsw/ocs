@@ -1,12 +1,11 @@
 package jsky.app.ot.gemini.parallacticangle
 
-import java.awt.{CardLayout, Color}
+import java.awt.CardLayout
 import java.text.NumberFormat
 import java.util.Locale
-import javax.swing._
-import javax.swing.plaf.basic.BasicComboBoxRenderer
 
 import edu.gemini.pot.sp.{SPComponentType, ISPObsComponent}
+import edu.gemini.shared.gui.EnableDisableComboBox
 import edu.gemini.skycalc.Angle
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.inst.{ParallacticAngleSupport, PositionAngleMode}
@@ -18,7 +17,6 @@ import jsky.app.ot.editor.OtItemEditor
 import jsky.app.ot.tpe.AgsClient
 import jsky.app.ot.util.OtColor
 
-import scala.collection.JavaConverters._
 import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing._
 import scala.swing.event.{SelectionChanged, ValueChanged}
@@ -40,62 +38,7 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
 
 
   private object ui {
-
-    /**
-     * This is an ugly way to do it, but I don't see another way to use Scala ComboBoxes and
-     * to add the items dynamically at runtime.
-     */
-    object positionAngleConstraintComboBox extends ComboBox[PosAngleConstraint](Nil) {
-      private var enabledItems = scala.collection.mutable.Set[PosAngleConstraint](options: _*)
-
-      def reset(): Unit =
-        options.foreach(enabledItems.add)
-
-      // Custom model does not allow multiple selections and does not allow disabled items to be selected.
-      private object enabledDisabledComboBoxModel extends DefaultComboBoxModel(options.asJavaCollection.toArray) {
-        var selection: Option[PosAngleConstraint] = options.find(enabledItems.contains)
-
-        override
-        def getSelectedItem: Object = selection.orNull
-
-        override
-        def setSelectedItem(item: Object): Unit = {
-          Try {
-            val pacItem = item.asInstanceOf[PosAngleConstraint]
-            if (enabledItems.contains(pacItem))
-              selection = Some(pacItem)
-          }
-        }
-      }
-      peer.setModel(enabledDisabledComboBoxModel)
-
-      // Custom renderer shows disabled items as being greyed out.
-      private object enabledDisabledComboBoxRenderer extends BasicComboBoxRenderer {
-        private val disabledColor = Color.lightGray
-
-        override
-        def getListCellRendererComponent(list: JList, value: Object, index: Int, isSelected: Boolean, cellHasFocus: Boolean): java.awt.Component = {
-          val c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
-          val pac = value.asInstanceOf[PosAngleConstraint]
-          if (!enabledItems.contains(pac)) {
-            c.setBackground(if (isSelected) UIManager.getColor("ComboBox.background") else super.getBackground)
-            c.setForeground(disabledColor)
-          }
-          else {
-            c.setBackground(super.getBackground)
-            c.setForeground(super.getForeground)
-          }
-          c
-        }
-      }
-      peer.setRenderer(enabledDisabledComboBoxRenderer)
-
-      def disable(pac: PosAngleConstraint): Unit =
-        enabledItems -= pac
-      def enable(pac: PosAngleConstraint): Unit =
-        enabledItems += pac
-    }
-
+    val positionAngleConstraintComboBox = new EnableDisableComboBox[PosAngleConstraint](options)
     layout(positionAngleConstraintComboBox) = new Constraints() {
       anchor = Anchor.NorthWest
       insets = new Insets(0, 0, 0, 15)
@@ -107,8 +50,6 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
     }
 
 
-
-    //object positionAngleTextField extends FormattedTextField(numberFormatter) {
     object positionAngleTextField extends TextField {
       private val defaultBackground = background
       private val badBackground     = OtColor.LIGHT_SALMON
