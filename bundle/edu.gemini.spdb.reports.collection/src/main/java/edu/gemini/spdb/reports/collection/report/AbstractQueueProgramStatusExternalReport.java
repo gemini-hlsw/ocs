@@ -158,10 +158,6 @@ public abstract class AbstractQueueProgramStatusExternalReport extends BundleVel
             return "#"; // don't ask. velocity can go fuck itself
         }
 
-//        public String getFileName(int i) {
-//            return AbstractQueueProgramStatusExternalReport.this.getFileName(getSiteAbbrev(), getSemester(i));
-//        }
-
         public String getSemester(int i) {
             // Here we take advantage of integer division, which actually
             // does what want in this case. Works for all values of i.
@@ -170,18 +166,9 @@ public abstract class AbstractQueueProgramStatusExternalReport extends BundleVel
             return (year * 2 + i) / 2 + (i % 2 == 0 ? "A" : "B");
         }
 
-//        public String getSemesterAbbrev(int i) {
-//            return getSemester(i);  // REL-818 (was previously abbreviated, but off by one)
-//        }
-
         public IDBDatabaseService getDb() {
             return db;
         }
-
-//        public int getMaxBand() {
-//            return maxBand;
-//        }
-
 
         // Privateish stuff
 
