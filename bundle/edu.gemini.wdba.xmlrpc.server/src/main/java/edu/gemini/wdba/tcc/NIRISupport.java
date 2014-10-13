@@ -1,10 +1,12 @@
 package edu.gemini.wdba.tcc;
 
+import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.niri.InstNIRI;
 import edu.gemini.spModel.gemini.niri.Niri;
 import edu.gemini.spModel.gemini.niri.NiriOiwfsGuideProbe;
 
 import edu.gemini.spModel.gemini.niri.Niri.Camera;
+import edu.gemini.wdba.session.Mode;
 import edu.gemini.wdba.tcc.ObservationEnvironment.AoAspect;
 
 import java.util.Collections;
@@ -134,10 +136,15 @@ public class NIRISupport implements ITccInstrumentSupport {
     private static final class PointOrigKey {
         private final Camera camera;
         private final AoAspect ao;
+        private final AltairParams.Mode mode;
 
-        PointOrigKey(Camera camera, AoAspect ao) {
+        /**
+         * If mode is null, assume all modes should match. Otherwise, must match on a specific mode.
+         */
+        PointOrigKey(Camera camera, AoAspect ao, AltairParams.Mode mode) {
             this.camera = camera;
             this.ao     = ao;
+            this.mode   = mode;
         }
 
         @Override
@@ -149,14 +156,16 @@ public class NIRISupport implements ITccInstrumentSupport {
 
             if (ao != that.ao) return false;
             if (camera != that.camera) return false;
+            if (mode != null && that.mode != null && mode != that.mode) return false;
 
             return true;
         }
 
         @Override
         public int hashCode() {
-            int result = camera.hashCode();
-            result = 31 * result + ao.hashCode();
+            int result = camera != null ? camera.hashCode() : 0;
+            result = 31 * result + (ao != null ? ao.hashCode() : 0);
+            result = 31 * result + (mode != null ? mode.hashCode() : 0);
             return result;
         }
     }
@@ -169,20 +178,30 @@ public class NIRISupport implements ITccInstrumentSupport {
         define(m, Camera.F6,  AoAspect.none, "nirif6p");
         define(m, Camera.F14, AoAspect.none, "nirif14p");
         define(m, Camera.F14, AoAspect.ngs,  "ngs2niri_f14");
-        define(m, Camera.F14, AoAspect.lgs,  "lgs2niri_f14");
         define(m, Camera.F32, AoAspect.none, "nirif32p");
         define(m, Camera.F32, AoAspect.ngs,  "ngs2niri_f32");
-        define(m, Camera.F32, AoAspect.lgs,  "lgs2niri_f32");
+
+        define(m, Camera.F14, AoAspect.lgs, AltairParams.Mode.LGS,    "lgs2niri_f14");
+        define(m, Camera.F14, AoAspect.lgs, AltairParams.Mode.LGS_OI, "lgs2niri_f14");
+        define(m, Camera.F14, AoAspect.lgs, AltairParams.Mode.LGS_P1, "lgs2niri_f14_p1");
+
+        define(m, Camera.F32, AoAspect.lgs, AltairParams.Mode.LGS,    "lgs2niri_f32");
+        define(m, Camera.F32, AoAspect.lgs, AltairParams.Mode.LGS_OI, "lgs2niri_f32");
+        define(m, Camera.F32, AoAspect.lgs, AltairParams.Mode.LGS_P1, "lgs2niri_f32_p1");
 
         POINT_ORIG_MAP = Collections.unmodifiableMap(m);
     }
 
-    private static void define(Map<PointOrigKey, String> m, Camera c, AoAspect ao, String val) {
-        m.put(new PointOrigKey(c, ao), val);
+    private static void define(Map<PointOrigKey, String> m, Camera c, AoAspect ao, AltairParams.Mode mode, String val) {
+        m.put(new PointOrigKey(c, ao, mode), val);
     }
 
-    private static String lookupPointOrig(Camera c, AoAspect ao) {
-        String val = POINT_ORIG_MAP.get(new PointOrigKey(c, ao));
+    private static void define(Map<PointOrigKey, String> m, Camera c, AoAspect ao, String val) {
+        define(m, c, ao, null, val);
+    }
+
+    private static String lookupPointOrig(Camera c, AoAspect ao, AltairParams.Mode mode) {
+        String val = POINT_ORIG_MAP.get(new PointOrigKey(c, ao, mode));
         return val == null ? "unknown" : val;
     }
 
@@ -192,10 +211,11 @@ public class NIRISupport implements ITccInstrumentSupport {
      * @return String that is the name of a TCC config file.  See WDBA-5.
      */
     public String getTccConfigInstrumentOrigin() {
-        InstNIRI inst = (InstNIRI) _oe.getInstrument();
-        Camera   c    = inst.getCamera();
-        AoAspect ao   = _oe.getAoAspect();
-        return lookupPointOrig(c, ao);
+        InstNIRI inst          = (InstNIRI) _oe.getInstrument();
+        Camera   c             = inst.getCamera();
+        AoAspect ao            = _oe.getAoAspect();
+        AltairParams.Mode mode = _oe.getAltairConfig().getMode();
+        return lookupPointOrig(c, ao, mode);
     }
 
     /**

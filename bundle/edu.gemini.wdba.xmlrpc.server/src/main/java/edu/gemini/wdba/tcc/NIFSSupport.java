@@ -1,5 +1,6 @@
 package edu.gemini.wdba.tcc;
 
+import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.nifs.InstNIFS;
 import edu.gemini.spModel.gemini.nifs.NIFSParams;
 import edu.gemini.spModel.gemini.nifs.NifsOiwfsGuideProbe;
@@ -85,13 +86,13 @@ public class NIFSSupport implements ITccInstrumentSupport {
      * Support for instrument origins.
      *
      * @return String that is the name of a TCC config file.  See WDBA-5.
-     *         Changed for WDBA-19 to account for  Altair.
+     *         Changed for WDBA-19 to account for Altair.
      */
     public String getTccConfigInstrumentOrigin() {
         // Updated for SCI-0289-a.
         switch (_oe.getAoAspect()) {
             case ngs : return "ngs2nifs";
-            case lgs : return "lgs2nifs";
+            case lgs : return _oe.getAltairConfig().getMode().equals(AltairParams.Mode.LGS_P1) ? "lgs2nifs_p1" : "lgs2nifs";
             default  : return "nifs";
         }
     }

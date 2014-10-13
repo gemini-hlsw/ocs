@@ -1,5 +1,6 @@
 package edu.gemini.wdba.tcc;
 
+import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
 import edu.gemini.spModel.gemini.gnirs.GnirsOiwfsGuideProbe;
@@ -87,7 +88,7 @@ public class GNIRSSupport implements ITccInstrumentSupport {
         // Updates for SCI-0289-a
         switch (_oe.getAoAspect()) {
             case ngs : return "ngs2gnirs";
-            case lgs : return "lgs2gnirs";
+            case lgs : return _oe.getAltairConfig().getMode().equals(AltairParams.Mode.LGS_P1) ? "lgs2gnirs_p1" : "lgs2gnirs";
             default  : return "gnirs";
         }
     }

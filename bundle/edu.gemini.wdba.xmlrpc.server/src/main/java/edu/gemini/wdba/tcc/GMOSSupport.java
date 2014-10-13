@@ -1,5 +1,6 @@
 package edu.gemini.wdba.tcc;
 
+import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import edu.gemini.spModel.gemini.gmos.InstGmosCommon;
 import edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe;
@@ -84,8 +85,8 @@ public class GMOSSupport implements ITccInstrumentSupport {
 
         InstGmosCommon inst = (InstGmosCommon) _oe.getInstrument();
         switch (_oe.getAoAspect()) {
-            case lgs : return "lgs2gmos";
             case ngs : return "ngs2gmos";
+            case lgs : return _oe.getAltairConfig().getMode().equals(AltairParams.Mode.LGS_P1) ? "lgs2gmos_p1" : "lgs2gmos";
             default:
                 return ((GmosCommonType.FPUnit) inst.getFPUnit()).isIFU() ? "gmos_ifu" : "gmos";
         }
