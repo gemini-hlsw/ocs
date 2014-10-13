@@ -57,13 +57,10 @@ public class LGSTargetTable extends AbstractTable {
 
 	}
 
-	private static final String SHORT_DESCRIPTION = "Current list of ready LGS targets for Space Command.";
-	private static final String DISPLAY_NAME = "LGS Target List";
-
 	private int id = 0;
 
 	public LGSTargetTable() {
-		super(Domain.OBSERVATION, Columns.values(), DISPLAY_NAME, SHORT_DESCRIPTION);
+		super(Domain.OBSERVATION, Columns.values());
 	}
 
 	public List<Map<IColumn, Object>> getRows(Object node) {

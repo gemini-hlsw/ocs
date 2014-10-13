@@ -45,8 +45,6 @@ public class TimeAccountingDetailsTable extends AbstractTable {
 	private static final Logger LOGGER = Logger.getLogger(TimeAccountingDetailsTable.class.getName());
 	private static final long serialVersionUID = 1L;
 	private static final float MS_PER_HOUR = 1000 * 60 * 60;
-	private static final String DISPLAY_NAME = "Time Accounting Details";
-	private static final String SHORT_DESCRIPTION = "Nightly time charges by program/account.";
 
 	public static enum Columns implements IColumn {
 
@@ -81,7 +79,7 @@ public class TimeAccountingDetailsTable extends AbstractTable {
 	}
 
 	public TimeAccountingDetailsTable() {
-		super(Domain.PROGRAM, Columns.values(), DISPLAY_NAME, SHORT_DESCRIPTION);
+		super(Domain.PROGRAM, Columns.values());
 	}
 
 	public List<Map<IColumn, Object>> getRows(Object domainObject) {

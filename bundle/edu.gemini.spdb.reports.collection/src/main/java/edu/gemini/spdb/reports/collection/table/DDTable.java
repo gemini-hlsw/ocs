@@ -31,8 +31,6 @@ public class DDTable extends AbstractTable {
 	private static final Logger LOGGER = Logger.getLogger(DDTable.class.getName());
 	private static final long serialVersionUID = 1L;
 	private static final float MS_PER_HOUR = 1000 * 60 * 60;
-	private static final String DISPLAY_NAME = "Director's Discretionary time";
-	private static final String SHORT_DESCRIPTION = "Director's Discretionary time.";
 
 	public static enum Columns implements IColumn {
 
@@ -72,7 +70,7 @@ public class DDTable extends AbstractTable {
 	}
 
 	public DDTable() {
-		super(ITable.Domain.PROGRAM, Columns.values(), DISPLAY_NAME, SHORT_DESCRIPTION);
+		super(ITable.Domain.PROGRAM, Columns.values());
 	}
 
 	public List<Map<IColumn, Object>> getRows(final Object node) {
