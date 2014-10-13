@@ -239,9 +239,15 @@ def fnussber(version: Version) = AppConfig(
   id = "fnussber",
   distribution = List(TestDistro),
   vmargs = List(
-    "-Xmx3000M",
+    "-Xmx2000M",
     "-XX:MaxPermSize=196M",
-    "-Dedu.gemini.site=north"
+    "-Dedu.gemini.site=north",
+    "-Dcron.*.edu.gemini.dbTools.html.ftpHost=localhost",
+    "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/Users/fnussber/.spdb/sftp",
+    "-Dcron.reports.edu.gemini.spdb.reports.public.host=localhost",
+    "-Dcron.reports.edu.gemini.spdb.reports.public.remotedir=/Users/fnussber/.spdb/cron",
+    "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=localhost",
+    "-Dcron.archive.edu.gemini.dbTools.html.ftpDestDir=/Users/fnussber/.spdb/cron"
   ),
   props = Map(
     "edu.gemini.smartgcal.host"     -> "localhost",
