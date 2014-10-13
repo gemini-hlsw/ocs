@@ -1,14 +1,7 @@
 package edu.gemini.spdb.reports.collection.table;
 
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.logging.Logger;
 
 import edu.gemini.pot.sp.ISPObservation;
@@ -83,8 +76,8 @@ public class QueueProgramStatusExternalTable extends AbstractTable {
             final ISPProgram progShell = (ISPProgram) node;
             final SPProgramID id = progShell.getProgramID();
 
-            // Skip anything that's not a Queue program (i.e. Q, LP or FT)
-            if (!TypeCheck.isQueueType(id))
+            // Skip anything that should not be listed on external reports (i.e. other than Q, LP or FT)
+            if (!isExternalType(id))
                 return Collections.emptyList();
 
             // Get the semester
@@ -216,6 +209,18 @@ public class QueueProgramStatusExternalTable extends AbstractTable {
         }
         return builder.toString().toUpperCase();
     }
+
+    // a set of program types that are relevant for external reports
+    private static final Set<ProgramType> EXTERNAL_TYPES = new HashSet<>(
+            Arrays.asList(new ProgramType[] {
+                    ProgramType.LargeProgram$.MODULE$,
+                    ProgramType.FastTurnaround$.MODULE$,
+                    ProgramType.Queue$.MODULE$,
+            }));
+
+    private boolean isExternalType(final SPProgramID pid) { return TypeCheck.isAnyOf(pid, EXTERNAL_TYPES); }
+
+
 }
 
 
