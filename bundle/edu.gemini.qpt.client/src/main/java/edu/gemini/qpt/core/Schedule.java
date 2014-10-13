@@ -535,7 +535,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
 		return Collections.unmodifiableSortedSet(extraSemesters);
 	}
 
-	public void addExtraSemseter(String semester) {
+	public void addExtraSemester(String semester) {
 		if (!miniModel.getAllSemesters().contains(semester))
 			throw new NoSuchElementException(semester);
 		SortedSet<String> prev = new TreeSet<String>(extraSemesters);
