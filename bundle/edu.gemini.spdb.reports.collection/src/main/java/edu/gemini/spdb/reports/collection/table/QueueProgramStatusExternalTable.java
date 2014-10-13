@@ -1,22 +1,12 @@
 package edu.gemini.spdb.reports.collection.table;
 
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.logging.Logger;
-
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.ISPProgram;
+import edu.gemini.shared.util.TimeValue;
+import edu.gemini.skycalc.ObservingNight;
 import edu.gemini.spModel.core.ProgramType;
 import edu.gemini.spModel.core.SPProgramID;
-import edu.gemini.skycalc.ObservingNight;
-import edu.gemini.shared.util.TimeValue;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.obslog.ObsLog;
@@ -27,8 +17,11 @@ import edu.gemini.spdb.reports.IColumn;
 import edu.gemini.spdb.reports.collection.util.ReportUtils;
 import edu.gemini.spdb.reports.util.AbstractTable;
 
+import java.util.*;
+import java.util.logging.Logger;
+
 @SuppressWarnings("unchecked")
-public class QueueProgramStatusExternalTable extends AbstractTable {
+public final class QueueProgramStatusExternalTable extends AbstractTable {
 
     @SuppressWarnings("unused")
     private static final Logger LOGGER = Logger.getLogger(QueueProgramStatusExternalTable.class.getName());
@@ -64,7 +57,7 @@ public class QueueProgramStatusExternalTable extends AbstractTable {
             return caption;
         }
 
-        public String format(Object value) {
+        public String format(final Object value) {
             return String.format(Locale.getDefault(), format, value);
         }
 
@@ -83,8 +76,8 @@ public class QueueProgramStatusExternalTable extends AbstractTable {
             final ISPProgram progShell = (ISPProgram) node;
             final SPProgramID id = progShell.getProgramID();
 
-            // Skip anything that's not a Queue program (REL-1658: or large program)
-            if (!TypeCheck.is(id, ProgramType.Queue$.MODULE$) && !TypeCheck.is(id, ProgramType.LargeProgram$.MODULE$))
+            // Skip anything that should not be listed on external reports (i.e. other than Q, LP or FT)
+            if (!isExternalType(id))
                 return Collections.emptyList();
 
             // Get the semester
@@ -140,40 +133,31 @@ public class QueueProgramStatusExternalTable extends AbstractTable {
             return Collections.singletonList(row);
 	}
 
-	private static String getRollover(String semester, ISPProgram prog)  {
+	private static String getRollover(final String semester, final ISPProgram prog)  {
 		if (semester == null || !ReportUtils.isRollover(prog))
 			return null;
 		return getRollover(semester);
 	}
 
-//	private static boolean getRollover(P1Document doc) {
-//		try {
-//			return P1DocumentUtil.getGeminiPart(doc).getITacExtension().getRolloverFlag();
-//		} catch (NullPointerException npe) {
-//			// If the structure isn't there, rollover is false.  This is ok.
-//			return false;
-//		}
-//	}
-
     // 2004A => [r05A]
-    private static String getRollover(String semester) {
+    private static String getRollover(final String semester) {
         final int year = Integer.parseInt(semester.substring(0, 4));
         return "[r" + Integer.toString(year + 1).substring(2) + semester.charAt(4) + "]";
     }
 
-	private Object getDates(ISPProgram progShell)  {
-		SortedSet<String> set = new TreeSet<String>();
-		Site site = ReportUtils.getSiteDesc(progShell.getProgramID());
+	private Object getDates(final ISPProgram progShell)  {
+		final SortedSet<String> set = new TreeSet<String>();
+		final Site site = ReportUtils.getSiteDesc(progShell.getProgramID());
 		for (ISPObservation obs: progShell.getAllObservations()) {
             final ObsLog log = ObsLog.getIfExists(obs);
 			if (log != null) {
 				for (ObsVisit visit: log.getVisits()) {
-					String utc = new ObservingNight(site, visit.getStartTime()).getNightString();
+					final String utc = new ObservingNight(site, visit.getStartTime()).getNightString();
 					set.add(utc);
 				}
 			}
 		}
-		StringBuilder builder = new StringBuilder();
+		final StringBuilder builder = new StringBuilder();
 		for (String utc : set) {
 			if (builder.length() > 0)
 				builder.append(" / ");
@@ -182,30 +166,8 @@ public class QueueProgramStatusExternalTable extends AbstractTable {
 		return builder.toString();
 	}
 
-//    private String getPartners(P1Document p1doc) {
-//        if (p1doc == null)
-//            return "null p1 document";
-//        StringBuilder builder = new StringBuilder();
-//        for (PartnerCountry pc : PartnerCountry.TYPES) {
-//            TacExtension te = P1DocumentUtil.getTacExtension(p1doc, pc);
-//            if (te != null && te.getPartnerTime().convertTimeAmountTo(Units.HOURS) > 0.0) {
-//                String iso = te.getPartnerCountry().getIsoCode();
-//                if (builder.length() > 0)
-//                    builder.append("/");
-//                if (iso != null) {
-//                    builder.append(iso);
-//                } else if (te.getPartnerCountry().equals(PartnerCountry.GEMINISTAFF)) {
-//                    builder.append("GS");
-//                } else if (te.getPartnerCountry().equals(PartnerCountry.UH)) {
-//                    builder.append("UH");
-//                }
-//            }
-//        }
-//        return builder.toString().toUpperCase();
-//    }
-
-    private String getPartners(TimeAcctAllocation timeAcctAllocation) {
-        StringBuilder builder = new StringBuilder();
+    private String getPartners(final TimeAcctAllocation timeAcctAllocation) {
+        final StringBuilder builder = new StringBuilder();
         for (TimeAcctCategory cat : timeAcctAllocation.getCategories()) {
             if (timeAcctAllocation.getHours(cat) > 0.0) {
                 if (builder.length() > 0) {
@@ -216,6 +178,18 @@ public class QueueProgramStatusExternalTable extends AbstractTable {
         }
         return builder.toString().toUpperCase();
     }
+
+    // a set of program types that are relevant for external reports
+    private static final Set<ProgramType> EXTERNAL_TYPES = new HashSet<>(
+            Arrays.asList(new ProgramType[] {
+                    ProgramType.LargeProgram$.MODULE$,
+                    ProgramType.FastTurnaround$.MODULE$,
+                    ProgramType.Queue$.MODULE$,
+            }));
+
+    private boolean isExternalType(final SPProgramID pid) { return TypeCheck.isAnyOf(pid, EXTERNAL_TYPES); }
+
+
 }
 
 
