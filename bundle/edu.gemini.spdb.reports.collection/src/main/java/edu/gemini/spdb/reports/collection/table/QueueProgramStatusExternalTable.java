@@ -82,7 +82,7 @@ public final class QueueProgramStatusExternalTable extends AbstractTable {
 
 
             // Get the semester
-            String semester = ReportUtils.getSemester(id);
+            final String semester = ReportUtils.getSemester(id);
 
             // Fetch the program itself.
             final SPProgram prog = (SPProgram) progShell.getDataObject();
@@ -118,7 +118,7 @@ public final class QueueProgramStatusExternalTable extends AbstractTable {
             final String rollover = getRollover(semester, progShell);
 
             // Done. Build the row and return it.
-            final Map<IColumn, Object> row = new HashMap<IColumn, Object>();
+            final Map<IColumn, Object> row = new HashMap<>();
             row.put(Columns.SEMESTER, semester);
             row.put(Columns.BAND, band);
             row.put(Columns.PROGRAM_ID, id);
@@ -147,7 +147,7 @@ public final class QueueProgramStatusExternalTable extends AbstractTable {
     }
 
 	private Object getDates(final ISPProgram progShell)  {
-		final SortedSet<String> set = new TreeSet<String>();
+		final SortedSet<String> set = new TreeSet<>();
 		final Site site = ReportUtils.getSiteDesc(progShell.getProgramID());
 		for (ISPObservation obs: progShell.getAllObservations()) {
             final ObsLog log = ObsLog.getIfExists(obs);

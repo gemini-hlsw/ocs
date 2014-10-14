@@ -40,7 +40,7 @@ public abstract class AbstractQueueProgramStatusExternalReport extends BundleVel
             new SimpleSort(Columns.BAND),
     };
 
-    public void configureQuery(IQuery q) {
+    public void configureQuery(final IQuery q) {
         q.setGroups(GROUPS);
         q.setSorts(SORTS);
         q.setOutputColumns(COLUMNS);
@@ -52,73 +52,73 @@ public abstract class AbstractQueueProgramStatusExternalReport extends BundleVel
     // Subclasses override to return a custom filter
     protected abstract IFilter getFilter();
 
-    public AbstractQueueProgramStatusExternalReport(String templateName) {
+    public AbstractQueueProgramStatusExternalReport(final String templateName) {
         this.templateName = templateName;
     }
 
-    public List<File> execute(IQuery query, Map<IDBDatabaseService, List<IRow>> results, File parentDir) throws IOException {
+    public List<File> execute(final IQuery query, final Map<IDBDatabaseService, List<IRow>> results, final File parentDir) throws IOException {
 
         // Collect, for each semester, a list of SemesterInfos. There will normally just be
         // two SemesterInfos per semester, but during testing there may be fewer or more.
-        List<File> ret = new ArrayList<File>();
-        Map<String, List<SemesterInfo>> masterMap = new TreeMap<String, List<SemesterInfo>>();
-        {
-            for (Entry<IDBDatabaseService, List<IRow>> e : results.entrySet()) {
+        final List<File> ret = new ArrayList<>();
+        final Map<String, List<SemesterInfo>> masterMap = new TreeMap<>();
 
-                // Get the database's site abbreviation to create the internal map.
-                IDBDatabaseService db = e.getKey();
+        for (Entry<IDBDatabaseService, List<IRow>> e : results.entrySet()) {
 
-                // Now collect the semesters for this database.
-                Map<String, SemesterInfo> semInfo = new TreeMap<String, SemesterInfo>();
-                for (IRow row : e.getValue()) {
-                    String semester = (String) row.getGroupValues()[0];
-                    SemesterInfo info = semInfo.get(semester);
-                    if (info == null) {
-                        info = new SemesterInfo(semester, db);
-                        semInfo.put(semester, info);
-                    }
-                    info.add(row);
-                    info.addBand((Integer) row.getGroupValues()[1]);
+            // Get the database's site abbreviation to create the internal map.
+            final IDBDatabaseService db = e.getKey();
+
+            // Now collect the semesters for this database.
+            final Map<String, SemesterInfo> semInfo = new TreeMap<>();
+            for (IRow row : e.getValue()) {
+                final String semester = (String) row.getGroupValues()[0];
+                SemesterInfo info = semInfo.get(semester);
+                if (info == null) {
+                    info = new SemesterInfo(semester, db);
+                    semInfo.put(semester, info);
                 }
+                info.add(row);
+                info.addBand((Integer) row.getGroupValues()[1]);
+            }
 
-                // And append them to the master map.
-                for (Entry<String, SemesterInfo> entry : semInfo.entrySet()) {
-                    List<SemesterInfo> list = masterMap.get(entry.getKey());
-                    if (list == null) {
-                        list = new ArrayList<SemesterInfo>();
-                        masterMap.put(entry.getKey(), list);
-                    }
-                    list.add(entry.getValue());
+            // And append them to the master map.
+            for (Entry<String, SemesterInfo> entry : semInfo.entrySet()) {
+                List<SemesterInfo> list = masterMap.get(entry.getKey());
+                if (list == null) {
+                    list = new ArrayList<>();
+                    masterMap.put(entry.getKey(), list);
                 }
+                list.add(entry.getValue());
+            }
 
 
-                // And write one page per site/semester.
-                for (Entry<String, List<SemesterInfo>> e2 : masterMap.entrySet()) {
+            // And write one page per site/semester.
+            for (Entry<String, List<SemesterInfo>> e2 : masterMap.entrySet()) {
 
-                    List<SemesterInfo> infoList = e2.getValue();
-                    if (!infoList.isEmpty()) { // shouldn't happen, really
+                final List<SemesterInfo> infoList = e2.getValue();
+                if (!infoList.isEmpty()) { // shouldn't happen, really
 
-                        String site = infoList.get(0).getSiteAbbrev();
-                        String semester = e2.getKey();
-                        File file = new File(parentDir, getFileName(site, semester));
-                        ret.add(file);
+                    final String site = infoList.get(0).getSiteAbbrev();
+                    final String semester = e2.getKey();
+                    final File file = new File(parentDir, getFileName(site, semester));
+                    ret.add(file);
 
-                        Map<String, Object> vc = new TreeMap<String, Object>();
-                        vc.put("infoList", infoList);
-                        vc.put("sites", site);
-                        vc.put("query", query);
-                        vc.put("semester", semester);
-                        vc.put("escaper", new HtmlEscaper());
-                        vc.put("now", new Date());
+                    final Map<String, Object> vc = new TreeMap<>();
+                    vc.put("infoList", infoList);
+                    vc.put("sites", site);
+                    vc.put("query", query);
+                    vc.put("semester", semester);
+                    vc.put("escaper", new HtmlEscaper());
+                    vc.put("now", new Date());
 
-                        merge(file, getResourcePath(templateName), vc);
-
-                    }
+                    merge(file, getResourcePath(templateName), vc);
 
                 }
 
             }
+
         }
+
         // Done.
         return ret;
     }
@@ -127,7 +127,7 @@ public abstract class AbstractQueueProgramStatusExternalReport extends BundleVel
         return true;
     }
 
-    public class SemesterInfo extends ArrayList<IRow> {
+    public final class SemesterInfo extends ArrayList<IRow> {
 
         private static final long serialVersionUID = 1L;
 
@@ -178,7 +178,7 @@ public abstract class AbstractQueueProgramStatusExternalReport extends BundleVel
 
     abstract String getFileName(String site, String semester);
 
-    static class LaterThan2005AFilter implements IFilter {
+    static final class LaterThan2005AFilter implements IFilter {
         private static final long serialVersionUID = 1L;
 
         public boolean accept(Map<IColumn, ?> row) {
@@ -190,17 +190,17 @@ public abstract class AbstractQueueProgramStatusExternalReport extends BundleVel
         }
     }
 
-    static class BandFilter implements IFilter {
+    static final class BandFilter implements IFilter {
         private static final long serialVersionUID = 1L;
-        private int[] bands;
+        private final int[] bands;
 
-        public BandFilter(int... bands) {
+        public BandFilter(final int... bands) {
             this.bands = bands;
         }
 
-        public boolean accept(Map<IColumn, ?> row) {
+        public boolean accept(final Map<IColumn, ?> row) {
 
-            Integer band = (Integer) row.get(Columns.BAND);
+            final Integer band = (Integer) row.get(Columns.BAND);
             for (int b : bands)
                 if (b == band) return true;
             return false;
@@ -210,9 +210,9 @@ public abstract class AbstractQueueProgramStatusExternalReport extends BundleVel
     }
 
 
-    static class ProgramTypeFilter implements IFilter {
+    static final class ProgramTypeFilter implements IFilter {
         private static final long serialVersionUID = 1L;
-        private Set<ProgramType> types;
+        private final Set<ProgramType> types;
 
         public ProgramTypeFilter(final ProgramType type) {
             this.types = new HashSet<ProgramType>() {{ add(type); }};

@@ -19,7 +19,6 @@ public final class Activator implements BundleActivator {
 		addTable(context, new ExecHoursTable());
 		addTable(context, new QueueProgramStatusInternalTable());
 		addTable(context, new QueueProgramStatusExternalTable());
-//        addTable(context, new DDTable());
 
 		// And our report.
 		addReport(context, new TimeAccountingSummaryHtmlReport(), TimeAccountingSummaryTable.class);
