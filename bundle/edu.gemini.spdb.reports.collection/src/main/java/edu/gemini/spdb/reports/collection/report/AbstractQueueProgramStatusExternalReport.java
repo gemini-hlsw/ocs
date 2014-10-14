@@ -152,10 +152,6 @@ public abstract class AbstractQueueProgramStatusExternalReport extends BundleVel
             return semester;
         }
 
-        public String getHash() {
-            return "#"; // don't ask. velocity can go fuck itself
-        }
-
         public String getSemester(int i) {
             // Here we take advantage of integer division, which actually
             // does what want in this case. Works for all values of i.
@@ -173,6 +169,26 @@ public abstract class AbstractQueueProgramStatusExternalReport extends BundleVel
         void addBand(int band) {
             maxBand = Math.max(maxBand, band);
         }
+
+
+        // ==== THESE METHODS ARE NOT REFERENCED IN JAVA CODE BUT USED IN VELOCITY TEMPLATE
+
+        public String getHash() {
+            return "#"; // don't ask. velocity can go fuck itself
+        }
+
+        public String getFileName(final int i) {
+            return AbstractQueueProgramStatusExternalReport.this.getFileName(getSiteAbbrev(), getSemester(i));
+        }
+
+        public String getSemesterAbbrev(final int i) {
+            return getSemester(i);
+        }
+
+        public int getMaxBand() {
+            return maxBand;
+        }
+
 
     }
 
