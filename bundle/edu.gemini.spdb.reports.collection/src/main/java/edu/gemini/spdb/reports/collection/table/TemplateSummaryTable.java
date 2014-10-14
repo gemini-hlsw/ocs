@@ -21,6 +21,9 @@ public class TemplateSummaryTable extends AbstractTable {
 	@SuppressWarnings("unused")
 	private static final Logger LOGGER = Logger.getLogger(TemplateSummaryTable.class.getName());
 	private static final long serialVersionUID = 1L;
+	private static final float MS_PER_HOUR = 1000 * 60 * 60;
+	private static final String DESC = "Templates";
+	private static final String CAPTION = "Template Summary";
 
 	public static enum Columns implements IColumn {
         // REL-775: The information that must be extracted for each target is:
@@ -68,7 +71,7 @@ public class TemplateSummaryTable extends AbstractTable {
 	}
 
 	public TemplateSummaryTable() {
-		super(Domain.PROGRAM, Columns.values());
+		super(Domain.PROGRAM, Columns.values(), CAPTION, DESC);
 	}
 
 	public List<Map<IColumn, Object>> getRows(Object domainObject) {

@@ -25,6 +25,8 @@ public class ExecHoursTable extends AbstractTable {
 	private static final Logger LOGGER = Logger.getLogger(ExecHoursTable.class.getName());
 	private static final long serialVersionUID = 1L;
 	private static final float MS_PER_HOUR = 1000 * 60 * 60;
+	private static final String SHORT_DESCRIPTION = "Elapsed time per science program and charge class.";
+	private static final String DISPLAY_NAME = "Executed Program Hours";
 
 	public static enum Columns implements IColumn {
 
@@ -62,7 +64,7 @@ public class ExecHoursTable extends AbstractTable {
 	}
 
 	public ExecHoursTable() {
-		super(Domain.PROGRAM, Columns.values());
+		super(Domain.PROGRAM, Columns.values(), DISPLAY_NAME, SHORT_DESCRIPTION);
 	}
 
 	public List<Map<IColumn, Object>> getRows(Object node) {

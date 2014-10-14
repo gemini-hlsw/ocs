@@ -34,6 +34,8 @@ public class TimeAccountingSummaryTable extends AbstractTable {
 	private static final Logger LOGGER = Logger.getLogger(TimeAccountingSummaryTable.class.getName());
 	private static final long serialVersionUID = 1L;
 	private static final float MS_PER_HOUR = 1000 * 60 * 60;
+	private static final String DESC = "Nightly time charges by observation.";
+	private static final String CAPTION = "Time Account Summary";
 
 	public static enum Columns implements IColumn {
 
@@ -69,7 +71,7 @@ public class TimeAccountingSummaryTable extends AbstractTable {
 	}
 
 	public TimeAccountingSummaryTable() {
-		super(Domain.PROGRAM, Columns.values());
+		super(Domain.PROGRAM, Columns.values(), CAPTION, DESC);
 	}
 
 	public List<Map<IColumn, Object>> getRows(Object domainObject) {

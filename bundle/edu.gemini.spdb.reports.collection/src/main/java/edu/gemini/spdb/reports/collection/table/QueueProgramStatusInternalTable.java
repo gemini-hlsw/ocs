@@ -26,6 +26,8 @@ public class QueueProgramStatusInternalTable extends AbstractTable {
     private static final long serialVersionUID = 1L;
     private static final float MS_PER_HOUR = 1000 * 60 * 60;
     private static final Pattern PAT_DO_NOT_START = Pattern.compile("do not start", Pattern.CASE_INSENSITIVE);
+    private static final String DISPLAY_NAME = "Queue Program Status (Internal)";
+    private static final String SHORT_DESCRIPTION = "Program status from planning point of view; used for internal report.";
 
     public static enum Columns implements IColumn {
 
@@ -66,7 +68,7 @@ public class QueueProgramStatusInternalTable extends AbstractTable {
     }
 
     public QueueProgramStatusInternalTable() {
-        super(Domain.PROGRAM, Columns.values());
+        super(Domain.PROGRAM, Columns.values(), DISPLAY_NAME, SHORT_DESCRIPTION);
     }
 
 	public List<Map<IColumn, Object>> getRows(final Object node) {

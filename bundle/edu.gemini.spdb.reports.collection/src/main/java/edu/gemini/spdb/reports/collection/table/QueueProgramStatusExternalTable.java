@@ -27,6 +27,8 @@ public final class QueueProgramStatusExternalTable extends AbstractTable {
     private static final Logger LOGGER = Logger.getLogger(QueueProgramStatusExternalTable.class.getName());
     private static final long serialVersionUID = 1L;
     private static final float MS_PER_HOUR = 1000 * 60 * 60;
+    private static final String DISPLAY_NAME = "Queue Program Status (External)";
+    private static final String SHORT_DESCRIPTION = "Execution status by semester/band/program. Used in public report.";
 
     public static enum Columns implements IColumn {
 
@@ -66,7 +68,7 @@ public final class QueueProgramStatusExternalTable extends AbstractTable {
     }
 
     public QueueProgramStatusExternalTable() {
-        super(Domain.PROGRAM, Columns.values());
+        super(Domain.PROGRAM, Columns.values(), DISPLAY_NAME, SHORT_DESCRIPTION);
     }
 
 	public List<Map<IColumn, Object>> getRows(final Object node) {
