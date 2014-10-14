@@ -1,22 +1,20 @@
 package edu.gemini.spdb.reports.collection.report;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-import java.util.Map.Entry;
-
 import edu.gemini.pot.spdb.IDBDatabaseService;
-import edu.gemini.spdb.reports.CompoundFilter;
-import edu.gemini.spdb.reports.IColumn;
-import edu.gemini.spdb.reports.IFilter;
-import edu.gemini.spdb.reports.IQuery;
-import edu.gemini.spdb.reports.IRow;
-import edu.gemini.spdb.reports.ISort;
+import edu.gemini.spModel.core.ProgramType;
+import edu.gemini.spModel.core.SPProgramID;
+import edu.gemini.spdb.reports.*;
 import edu.gemini.spdb.reports.collection.table.QueueProgramStatusExternalTable.Columns;
+import edu.gemini.spdb.reports.collection.table.TypeCheck;
 import edu.gemini.spdb.reports.collection.util.BundleVelocityReport;
 import edu.gemini.spdb.reports.collection.util.DatabaseNameManager;
 import edu.gemini.spdb.reports.util.HtmlEscaper;
 import edu.gemini.spdb.reports.util.SimpleSort;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.Map.Entry;
 
 public abstract class AbstractQueueProgramStatusExternalReport extends BundleVelocityReport {
 
@@ -212,6 +210,24 @@ public abstract class AbstractQueueProgramStatusExternalReport extends BundleVel
     }
 
 
+    static class ProgramTypeFilter implements IFilter {
+        private static final long serialVersionUID = 1L;
+        private Set<ProgramType> types;
+
+        public ProgramTypeFilter(final ProgramType type) {
+            this.types = new HashSet<ProgramType>() {{ add(type); }};
+        }
+
+        public ProgramTypeFilter(final ProgramType... types) {
+            this.types = new HashSet<>(Arrays.asList(types));
+        }
+
+        public boolean accept(Map<IColumn, ?> row) {
+            final SPProgramID pid = (SPProgramID) row.get(Columns.PROGRAM_ID);
+            return TypeCheck.isAnyOf(pid, types);
+        }
+
+    }
 }
 
 

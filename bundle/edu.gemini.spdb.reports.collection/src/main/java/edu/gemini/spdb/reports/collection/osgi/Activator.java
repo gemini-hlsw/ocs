@@ -19,7 +19,7 @@ public final class Activator implements BundleActivator {
 		addTable(context, new ExecHoursTable());
 		addTable(context, new QueueProgramStatusInternalTable());
 		addTable(context, new QueueProgramStatusExternalTable());
-        addTable(context, new DDTable());
+//        addTable(context, new DDTable());
 
 		// And our report.
 		addReport(context, new TimeAccountingSummaryHtmlReport(), TimeAccountingSummaryTable.class);
@@ -30,7 +30,8 @@ public final class Activator implements BundleActivator {
 		addReport(context, new QueueProgramStatusExternalReport(), QueueProgramStatusExternalTable.class);
 		addReport(context, new BadWeatherQueueProgramStatusExternalReport(), QueueProgramStatusExternalTable.class);
         addReport(context, new LargeProgramStatusExternalReport(), QueueProgramStatusExternalTable.class);
-        addReport(context, new DDProgramStatusExternalReport(), DDTable.class);
+        addReport(context, new DDProgramStatusExternalReport(), QueueProgramStatusExternalTable.class);
+        addReport(context, new FTProgramStatusExternalReport(), QueueProgramStatusExternalTable.class);
 		addReport(context, new QueueProgramStatusInternalReport(), QueueProgramStatusInternalTable.class);
 
 	}
