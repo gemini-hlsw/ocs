@@ -92,7 +92,7 @@ public class NIFSSupport implements ITccInstrumentSupport {
         // Updated for SCI-0289-a.
         switch (_oe.getAoAspect()) {
             case ngs : return "ngs2nifs";
-            case lgs : return _oe.getAltairConfig().getMode().equals(AltairParams.Mode.LGS_P1) ? "lgs2nifs_p1" : "lgs2nifs";
+            case lgs : return _oe.adjustNameForLGS_P1("lgs2nifs");
             default  : return "nifs";
         }
     }

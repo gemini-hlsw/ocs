@@ -88,7 +88,7 @@ public class GNIRSSupport implements ITccInstrumentSupport {
         // Updates for SCI-0289-a
         switch (_oe.getAoAspect()) {
             case ngs : return "ngs2gnirs";
-            case lgs : return _oe.getAltairConfig().getMode().equals(AltairParams.Mode.LGS_P1) ? "lgs2gnirs_p1" : "lgs2gnirs";
+            case lgs : return _oe.adjustNameForLGS_P1("lgs2gnirs");
             default  : return "gnirs";
         }
     }
