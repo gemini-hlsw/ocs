@@ -263,9 +263,17 @@ public final class ObservationEnvironment {
         }
     }
 
-// private method to log and throw and exception
+    // private method to log and throw and exception
     private void _logAbort(String message, Exception ex) throws WdbaGlueException {
         LOG.severe(message);
         throw new WdbaGlueException(message, (ex != null) ? ex : null);
+    }
+
+    // REL-1596: Check if an instrument is using Altair, and if so and the mode is set to LGS_P1, adjust the origin name
+    // to reflect this by appending a "_p1".
+    public String adjustInstrumentOriginForLGS_P1(String basename) {
+        final InstAltair instAltair = getAltairConfig();
+        if (instAltair == null || !AltairParams.Mode.LGS_P1.equals(instAltair.getMode())) return basename + "_p1";
+        return basename;
     }
 }
