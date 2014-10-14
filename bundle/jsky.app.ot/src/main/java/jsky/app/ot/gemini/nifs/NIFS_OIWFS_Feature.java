@@ -119,24 +119,16 @@ public class NIFS_OIWFS_Feature extends OIWFS_FeatureBase {
      * @param yc the Y screen coordinate for the base position to use
      */
     protected void addOffsetConstrainedPatrolField(double xc, double yc) {
-        // get offsets
-
-        // ******************************
-        // TODO: What does _iw.getProgData().getOffsetPosLists() translate to?
-        // TODO: Presumably something like _iw.getContext().offsets().... ?
-        // FOR ORIGINAL CHANGE SEE: http://sbfsvn01.cl.gemini.edu:8060/changelog/Software?cs=48008
-        // ******************************
-
-        Option<OffsetPosList[]> myPosListA = None.instance(); // TODO :: _iw.getProgData().getOffsetPosLists();
-        Set<Offset> offsets = OffsetUtil.getSciencePositions(myPosListA);
 
         if (_iw.getMinimalObsContext().isEmpty()) return;
+
         PatrolField patrolField = NifsOiwfsGuideProbe.instance.getCorrectedPatrolField(_iw.getMinimalObsContext().getValue());
         // rotation, scaling and transformation to match screen coordinates
         Angle rotation = new Angle(-_posAngle, Angle.Unit.RADIANS);
         Point2D.Double translation = new Point2D.Double(xc, yc);
         setTransformationToScreen(rotation, _pixelsPerArcsec, translation);
 
+        Set<Offset> offsets = _iw.getContext().offsets().scienceOffsetsJava();
         addOffsetConstrainedPatrolField(patrolField, offsets);
     }
 
