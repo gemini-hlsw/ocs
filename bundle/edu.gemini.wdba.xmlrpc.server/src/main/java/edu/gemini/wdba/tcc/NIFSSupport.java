@@ -1,6 +1,5 @@
 package edu.gemini.wdba.tcc;
 
-import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.nifs.InstNIFS;
 import edu.gemini.spModel.gemini.nifs.NIFSParams;
 import edu.gemini.spModel.gemini.nifs.NifsOiwfsGuideProbe;
@@ -92,7 +91,7 @@ public class NIFSSupport implements ITccInstrumentSupport {
         // Updated for SCI-0289-a.
         switch (_oe.getAoAspect()) {
             case ngs : return "ngs2nifs";
-            case lgs : return _oe.adjustNameForLGS_P1("lgs2nifs");
+            case lgs : return _oe.adjustInstrumentOriginForLGS_P1("lgs2nifs");
             default  : return "nifs";
         }
     }

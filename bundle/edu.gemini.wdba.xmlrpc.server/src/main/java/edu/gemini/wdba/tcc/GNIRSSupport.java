@@ -1,13 +1,8 @@
 package edu.gemini.wdba.tcc;
 
-import edu.gemini.spModel.gemini.altair.AltairParams;
-import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
 import edu.gemini.spModel.gemini.gnirs.GnirsOiwfsGuideProbe;
 import edu.gemini.spModel.telescope.IssPort;
-
-import static edu.gemini.spModel.gemini.altair.AltairParams.GuideStarType;
-import static edu.gemini.spModel.gemini.altair.AltairParams.GuideStarType.*;
 
 /**
  *
@@ -88,7 +83,7 @@ public class GNIRSSupport implements ITccInstrumentSupport {
         // Updates for SCI-0289-a
         switch (_oe.getAoAspect()) {
             case ngs : return "ngs2gnirs";
-            case lgs : return _oe.adjustNameForLGS_P1("lgs2gnirs");
+            case lgs : return _oe.adjustInstrumentOriginForLGS_P1("lgs2gnirs");
             default  : return "gnirs";
         }
     }
