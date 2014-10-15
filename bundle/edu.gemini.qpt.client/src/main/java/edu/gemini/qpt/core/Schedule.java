@@ -1,60 +1,43 @@
 package edu.gemini.qpt.core;
 
-import static edu.gemini.qpt.shared.util.TimeUtils.MS_PER_DAY;
-
-import java.io.File;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import edu.gemini.qpt.core.listeners.Listeners;
+import edu.gemini.qpt.core.util.*;
+import edu.gemini.qpt.core.util.Variants.EditException;
+import edu.gemini.qpt.shared.sp.Conds;
+import edu.gemini.qpt.shared.sp.Inst;
+import edu.gemini.qpt.shared.sp.MiniModel;
+import edu.gemini.qpt.shared.util.PioSerializable;
+import edu.gemini.qpt.shared.util.TimeUtils;
+import edu.gemini.skycalc.TwilightBoundType;
+import edu.gemini.skycalc.TwilightBoundedNight;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.data.PreImagingType;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType;
+import edu.gemini.spModel.gemini.gmos.GmosNorthType.FilterNorth;
+import edu.gemini.spModel.gemini.gmos.GmosSouthType.FilterSouth;
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
 import edu.gemini.spModel.gemini.gpi.Gpi;
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
 import edu.gemini.spModel.gemini.nici.NICIParams;
 import edu.gemini.spModel.gemini.nifs.NIFSParams;
 import edu.gemini.spModel.gemini.niri.Niri;
 import edu.gemini.spModel.gemini.texes.TexesParams;
-import jsky.coords.WorldCoordinates;
-import jsky.util.DateUtil;
-import edu.gemini.qpt.core.listeners.Listeners;
-import edu.gemini.qpt.shared.sp.Conds;
-import edu.gemini.qpt.shared.sp.Inst;
-import edu.gemini.qpt.shared.sp.MiniModel;
-import edu.gemini.qpt.core.util.ApproximateAngle;
-import edu.gemini.qpt.core.util.BaseMutableBean;
-import edu.gemini.qpt.core.util.Commentable;
-import edu.gemini.qpt.core.util.Interval;
-import edu.gemini.qpt.core.util.MarkerManager;
-import edu.gemini.qpt.shared.util.PioSerializable;
-import edu.gemini.qpt.shared.util.TimeUtils;
-import edu.gemini.qpt.core.util.Union;
-import edu.gemini.qpt.core.util.Variants.EditException;
-import edu.gemini.skycalc.TwilightBoundType;
-import edu.gemini.skycalc.TwilightBoundedNight;
-import edu.gemini.spModel.gemini.gmos.GmosNorthType.FilterNorth;
-import edu.gemini.spModel.gemini.gmos.GmosSouthType.FilterSouth;
-import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
 import edu.gemini.spModel.gemini.trecs.TReCSParams;
 import edu.gemini.spModel.pio.Param;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
+import jsky.coords.WorldCoordinates;
+import jsky.util.DateUtil;
+
+import java.io.File;
+import java.io.Serializable;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static edu.gemini.qpt.shared.util.TimeUtils.MS_PER_DAY;
 
 /**
  * Top-level model object representing a queue plan.
@@ -510,7 +493,16 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
 		return blocks.getIntervals();
 	}
 
-	///
+    public SortedSet<Interval> getBlockIntervals() {
+        final SortedSet<Interval> ts = new TreeSet<>();
+        for (Block b : blocks) {
+            ts.add(new Interval(b.getStart(), b.getEnd()));
+        }
+        return ts;
+    }
+
+
+    ///
 	/// TRIVIAL GETTERS
 	///
 

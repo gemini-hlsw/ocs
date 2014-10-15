@@ -30,7 +30,7 @@ import edu.gemini.spModel.pio.PioFactory;
  * @see Variant#addAlloc(Obs, Long, Long)
  * @author rnorris
  */
-public final class Alloc extends Interval implements Commentable {
+public final class Alloc implements Comparable<Alloc>, Commentable, PioSerializable {
 
 	private static final Logger LOGGER = Logger.getLogger(Alloc.class.getName());
 
@@ -63,6 +63,7 @@ public final class Alloc extends Interval implements Commentable {
 	private static final long serialVersionUID = 1L;
 
 	// Members
+    private final Interval interval; // The interval
 	private final Obs obs;			// Associated Obs
 	private final Variant variant;	// Owning Variant
 	private final int firstStep;	// First step to execute
@@ -79,7 +80,7 @@ public final class Alloc extends Interval implements Commentable {
 	}
 
     Alloc(Variant variant, Obs obs, Long low, int firstStep, int lastStep, SetupType setup, String comment, long span) {
-        super(low, addLchOverlap(obs, low, low + span));
+        this.interval = new Interval(low, addLchOverlap(obs, low, low + span));
         this.shutterTime = getEnd() - (low + span);
         this.variant = variant;
         this.obs = obs;
@@ -90,7 +91,7 @@ public final class Alloc extends Interval implements Commentable {
     }
 
     Alloc(Variant variant, ParamSet params) {
-		super(params);
+		this.interval = new Interval(params);
         this.shutterTime = 0;
 		this.variant = variant;
 		this.obs = variant.getSchedule().getMiniModel().getObs(Pio.getValue(params, "obs"));
@@ -130,7 +131,7 @@ public final class Alloc extends Interval implements Commentable {
 
 	@Override
 	public ParamSet getParamSet(PioFactory factory, String name) {
-		ParamSet params = super.getParamSet(factory, name);
+		ParamSet params = interval.getParamSet(factory, name);
 		Pio.addIntParam(factory, params, "firstStep", firstStep);
 		Pio.addIntParam(factory, params, "lastStep", lastStep);
 		Pio.addParam(factory, params, "obs", getObs().getObsId());
@@ -138,6 +139,19 @@ public final class Alloc extends Interval implements Commentable {
 		Pio.addEnumParam(factory, params, "setupType", setupType);
 		return params;
 	}
+
+    ///
+    /// INTERVAL BEHAVIOR
+    ///
+
+    public Interval getInterval() { return interval; }
+    public long getStart() { return interval.getStart(); }
+    public long getEnd() { return interval.getEnd(); }
+    public long getLength() { return interval.getLength(); }
+    public boolean abuts(Alloc a) { return a != null && interval.abuts(a.interval); }
+    public boolean contains(long t) { return interval.contains(t); }
+    public boolean overlaps(Alloc a, Interval.Overlap o) { return interval.overlaps(a.interval, o); }
+    public boolean overlaps(Interval i, Interval.Overlap o) { return interval.overlaps(i, o); }
 
 	///
 	/// COMMENTS
@@ -161,7 +175,7 @@ public final class Alloc extends Interval implements Commentable {
 
 			// Calculate visit circumstances, which includes setup time.
 			WorldCoords coords = new WorldCoords(getObs().getRa(), getObs().getDec());
-			int size = Math.max(1, (int) (getLength() / QUANTUM));
+			int size = Math.max(1, (int) (interval.getLength() / QUANTUM));
 			circV = new TreeMap<Circumstance, Double[]>();
 			for (Circumstance c: Circumstance.values()) {
 				circV.put(c, new Double[size]);
@@ -169,7 +183,7 @@ public final class Alloc extends Interval implements Commentable {
 			TimingWindowSolver tws = new TimingWindowSolver(obs);
 			ImprovedSkyCalc calc = new ImprovedSkyCalc(variant.getSchedule().getSite());
 			for (int i = 0; i < size; i++) {
-				long t = getStart() + QUANTUM * i;
+				long t = interval.getStart() + QUANTUM * i;
 				calc.calculate(coords,new Date(t), true);
 				for (Circumstance c: Circumstance.values()) {
 					Double[] vals = circV.get(c);
@@ -344,21 +358,6 @@ public final class Alloc extends Interval implements Commentable {
         }
         return cor;
     }
-
-//	public Double get(Circumstance circ, long time) {
-//		if (!contains(time)) throw new IllegalArgumentException("Time out of range: " + new Date(time));
-//		long offset = time - getStart();
-//		return circumstances.get(circ)[(int) (offset / QUANTUM)];
-//	}
-
-	///
-	/// PROTECTED COPY CLONER
-	///
-
-	protected Alloc create(long newStart, long newEnd) {
-		throw new UnsupportedOperationException();
-//		return new Alloc(variant, obs, newStart, firstStep, lastStep);
-	}
 
 	///
 	/// MARKER MANAGER DELEGATE METHODS
@@ -575,18 +574,46 @@ public final class Alloc extends Interval implements Commentable {
 		return builder.toString();
 	}
 
+    @Override
+    public int hashCode() {
+        int hash = 17;
+        hash = hash * 37 + interval.hashCode();
+        hash = hash * 37 + obs.hashCode();
+        hash = hash * 37 + variant.hashCode();
+        hash = hash * 37 + firstStep;
+        hash = hash * 37 + lastStep;
+        hash = hash * 37 + setupType.hashCode();
+        hash = hash * 37 + (int) shutterTime;
+        return hash;
+    }
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof Alloc && super.equals(obj)) {
 			Alloc a = (Alloc) obj;
 			return
+                a.interval.equals(interval) &&
 				a.obs.equals(obs) &&
+                a.variant.equals(variant) &&
 				a.firstStep == firstStep &&
 				a.lastStep == lastStep &&
-				a.variant.equals(variant);
+				a.setupType.equals(setupType) &&
+                a.shutterTime == shutterTime;
 		}
 		return false;
 	}
+
+    @Override
+    public int compareTo(Alloc a) {
+        int diff = interval.compareTo(a.interval);
+        if (diff == 0) diff = obs.compareTo(a.obs);
+        if (diff == 0) diff = variant.getName().compareTo(a.variant.getName());
+        if (diff == 0) diff = firstStep - a.firstStep;
+        if (diff == 0) diff = lastStep - a.lastStep;
+        if (diff == 0) diff = setupType.compareTo(a.setupType);
+        if (diff == 0) diff = (int) (shutterTime - a.shutterTime);
+        return diff;
+    }
 
 	///
 	/// CTOR HELPER
