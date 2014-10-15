@@ -14,7 +14,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 
 /**
  * An {@link AuxFileSystem} implementation that may be used by a client
