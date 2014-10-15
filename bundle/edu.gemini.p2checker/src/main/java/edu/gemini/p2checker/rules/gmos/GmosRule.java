@@ -915,11 +915,7 @@ public final class GmosRule implements IRule {
                         _message = MESSAGE_NORTH;
                     }
 
-                    GmosCommonType.FPUnit fpUnit = getFPU(config, elems);
-                    boolean isCustomMask = !GmosNorthType.FPUNIT_BRIDGE.getCustomMask().equals(fpUnit) &&
-                                           !GmosSouthType.FPUNIT_BRIDGE.getCustomMask().equals(fpUnit);
-                    System.out.println("**** isNS=" + fpUnit.isNS() + ", isCustom=" + isCustomMask + ", isNSSlit=" + fpUnit.isNSslit());
-                    return !fpUnit.isNS() && !isCustomMask;
+                    return !getFPU(config, elems).isNS()
                 }
 
                 public String getMessage() {
