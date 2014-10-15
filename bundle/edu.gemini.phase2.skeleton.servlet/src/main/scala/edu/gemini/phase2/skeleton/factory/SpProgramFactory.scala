@@ -31,7 +31,6 @@ object SpProgramFactory {
     BR -> "Brazil",
     CA -> "Canada",
     CL -> "Chile",
-    GS -> "Gemini Staff",
     UH -> "University of Hawaii",
     US -> "United States"
   )
@@ -42,7 +41,6 @@ object SpProgramFactory {
     BR -> TimeAcctCategory.BR,
     CA -> TimeAcctCategory.CA,
     CL -> TimeAcctCategory.CL,
-    GS -> TimeAcctCategory.GS,
     UH -> TimeAcctCategory.UH,
     US -> TimeAcctCategory.US
   )
