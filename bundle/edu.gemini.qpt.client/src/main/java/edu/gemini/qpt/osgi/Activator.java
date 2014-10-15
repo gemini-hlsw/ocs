@@ -22,6 +22,9 @@ import org.osgi.framework.ServiceReference;
 import edu.gemini.qpt.ui.ShellAdvisor;
 import edu.gemini.qpt.ui.util.Platform;
 import edu.gemini.ui.workspace.IShellAdvisor;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
  * BundleActivator for the QPT application.
@@ -39,6 +42,7 @@ public final class Activator implements BundleActivator, AWTEventListener {
     private static final String PROP_INTERNAL_PASS = "edu.gemini.qpt.ui.action.destination.internal.pass";
     private static final String PROP_PACHON_USER   = "edu.gemini.qpt.ui.action.destination.pachon.user";
     private static final String PROP_PACHON_PASS   = "edu.gemini.qpt.ui.action.destination.pachon.pass";
+    private ServiceTracker<KeyChain, KeyChain> keyChainServiceTracker = null;
 
     @SuppressWarnings({ "deprecation", "unchecked" })
     public void start(final BundleContext context) throws Exception {
@@ -54,34 +58,50 @@ public final class Activator implements BundleActivator, AWTEventListener {
 
         this.context = context;
 
-        Dictionary<String, String> headers = context.getBundle().getHeaders();
-
         // TODO: this is set to the application install dir where we can find
         // the help files
         final String root = new File(System.getProperty("user.dir")).toURI().toString();
 
-        // Ok we're just going to grab this. It better be there.
-        final ServiceReference<KeyChain> acRef = context.getServiceReference(KeyChain.class);
-        final KeyChain ac = context.getService(acRef);
+        keyChainServiceTracker = new ServiceTracker<>(context, KeyChain.class, new ServiceTrackerCustomizer<KeyChain, KeyChain>() {
+            private final Dictionary<String, String> headers = context.getBundle().getHeaders();
+            private ServiceRegistration<?> shellRegistration;
 
-        final PublishAction.Destination internal, pachon;
+            @Override
+            public KeyChain addingService(ServiceReference<KeyChain> acRef) {
+                final KeyChain ac = context.getService(acRef);
 
-        internal = new PublishAction.Destination(
-            "gnconfig.gemini.edu",
-            getProp(PROP_INTERNAL_USER),
-            getProp(PROP_INTERNAL_PASS),
-            "/gemsoft/var/data/qpt",
-            "http://internal.gemini.edu/science/");
+                final PublishAction.Destination internal, pachon;
 
-        pachon = new PublishAction.Destination(
-            "gsconfig.gemini.edu",
-            getProp(PROP_PACHON_USER),
-            getProp(PROP_PACHON_PASS),
-            "/gemsoft/var/data/qpt",
-            null);
+                internal = new PublishAction.Destination(
+                    "gnconfig.gemini.edu",
+                    getProp(PROP_INTERNAL_USER),
+                    getProp(PROP_INTERNAL_PASS),
+                    "/gemsoft/var/data/qpt",
+                    "http://internal.gemini.edu/science/");
 
-        this.advisor = new ShellAdvisor(headers.get("Bundle-Name"), Version.current.toString(), root, ac, internal, pachon);
-        context.registerService(IShellAdvisor.class.getName(), advisor,  new Hashtable());
+                pachon = new PublishAction.Destination(
+                    "gsconfig.gemini.edu",
+                    getProp(PROP_PACHON_USER),
+                    getProp(PROP_PACHON_PASS),
+                    "/gemsoft/var/data/qpt",
+                    null);
+
+                Activator.this.advisor = new ShellAdvisor(headers.get("Bundle-Name"), Version.current.toString(), root, ac, internal, pachon);
+                shellRegistration = context.registerService(IShellAdvisor.class.getName(), advisor, new Hashtable());
+                return ac;
+            }
+
+            @Override
+            public void modifiedService(ServiceReference<KeyChain> serviceReference, KeyChain keyChain) {
+                // nop
+            }
+
+            @Override
+            public void removedService(ServiceReference<KeyChain> serviceReference, KeyChain keyChain) {
+                shellRegistration.unregister();
+            }
+        });
+        keyChainServiceTracker.open();
 
         if (Boolean.getBoolean("ctrl.key.hack")) {
             LOGGER.info("Enabling ctrl key hack.");
@@ -118,7 +138,6 @@ public final class Activator implements BundleActivator, AWTEventListener {
                 Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(ke2);
             }
         }
-
     }
 
 }
