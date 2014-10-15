@@ -914,8 +914,7 @@ public final class GmosRule implements IRule {
                     } else {
                         _message = MESSAGE_NORTH;
                     }
-
-                    return !getFPU(config, elems).isNS()
+                    return !getFPU(config, elems).isNS();
                 }
 
                 public String getMessage() {
