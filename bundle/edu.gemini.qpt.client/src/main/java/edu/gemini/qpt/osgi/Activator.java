@@ -30,7 +30,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * BundleActivator for the QPT application.
  * @author rnorris
  */
-public final class Activator implements BundleActivator, AWTEventListener {
+public final class Activator implements BundleActivator {
 
     @SuppressWarnings("unused")
     private static final Logger LOGGER = Logger.getLogger(Activator.class.getName());
@@ -43,6 +43,7 @@ public final class Activator implements BundleActivator, AWTEventListener {
     private static final String PROP_PACHON_USER   = "edu.gemini.qpt.ui.action.destination.pachon.user";
     private static final String PROP_PACHON_PASS   = "edu.gemini.qpt.ui.action.destination.pachon.pass";
     private ServiceTracker<KeyChain, KeyChain> keyChainServiceTracker = null;
+    private final CtrKeyListener ctrKeyListener = new CtrKeyListener();
 
     @SuppressWarnings({ "deprecation", "unchecked" })
     public void start(final BundleContext context) throws Exception {
@@ -105,7 +106,7 @@ public final class Activator implements BundleActivator, AWTEventListener {
 
         if (Boolean.getBoolean("ctrl.key.hack")) {
             LOGGER.info("Enabling ctrl key hack.");
-            Toolkit.getDefaultToolkit().addAWTEventListener(this, AWTEvent.KEY_EVENT_MASK);
+            Toolkit.getDefaultToolkit().addAWTEventListener(ctrKeyListener, AWTEvent.KEY_EVENT_MASK);
         }
 
     }
@@ -119,23 +120,26 @@ public final class Activator implements BundleActivator, AWTEventListener {
     }
 
     public void stop(BundleContext context) throws Exception {
-        Toolkit.getDefaultToolkit().removeAWTEventListener(this);
+        Toolkit.getDefaultToolkit().removeAWTEventListener(ctrKeyListener);
         this.keyChainServiceTracker.close();
         this.keyChainServiceTracker = null;
         this.advisor = null;
         this.context = null;
     }
 
-    public void eventDispatched(AWTEvent event) {
-        KeyEvent ke = (KeyEvent) event;
-        switch (ke.getKeyCode()) {
-        case KeyEvent.VK_RIGHT:
-        case KeyEvent.VK_LEFT:
-            if ((ke.getModifiers() & Platform.MENU_ACTION_MASK) == 0) {
-                ke.consume();
-                KeyEvent ke2 = new KeyEvent((Component) ke.getSource(), ke.getID(), ke.getWhen(),
-                        ke.getModifiers() | Platform.MENU_ACTION_MASK, ke.getKeyCode(), ke.getKeyChar());
-                Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(ke2);
+    private final class CtrKeyListener implements AWTEventListener {
+
+        public void eventDispatched(final AWTEvent event) {
+            final KeyEvent ke = (KeyEvent) event;
+            switch (ke.getKeyCode()) {
+                case KeyEvent.VK_RIGHT:
+                case KeyEvent.VK_LEFT:
+                    if ((ke.getModifiers() & Platform.MENU_ACTION_MASK) == 0) {
+                        ke.consume();
+                        final KeyEvent ke2 = new KeyEvent((Component) ke.getSource(), ke.getID(), ke.getWhen(),
+                                ke.getModifiers() | Platform.MENU_ACTION_MASK, ke.getKeyCode(), ke.getKeyChar());
+                        Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(ke2);
+                    }
             }
         }
     }
