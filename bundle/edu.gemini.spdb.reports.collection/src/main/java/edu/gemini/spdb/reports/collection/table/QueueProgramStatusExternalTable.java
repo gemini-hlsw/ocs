@@ -76,12 +76,15 @@ public final class QueueProgramStatusExternalTable extends AbstractTable {
             final ISPProgram progShell = (ISPProgram) node;
             final SPProgramID id = progShell.getProgramID();
 
-            // Skip anything that should not be listed on external reports (i.e. other than Q, LP or FT)
+            // Skip everything we don't want to see on external reports (i.e. anything other than Q, DD, FT, LP)
+            // NOTE: There is an additional per report filtering in the
+            // reports that use this table as their data source!
             if (!isExternalType(id))
                 return Collections.emptyList();
 
+
             // Get the semester
-            String semester = ReportUtils.getSemester(id);
+            final String semester = ReportUtils.getSemester(id);
 
             // Fetch the program itself.
             final SPProgram prog = (SPProgram) progShell.getDataObject();
@@ -117,7 +120,7 @@ public final class QueueProgramStatusExternalTable extends AbstractTable {
             final String rollover = getRollover(semester, progShell);
 
             // Done. Build the row and return it.
-            final Map<IColumn, Object> row = new HashMap<IColumn, Object>();
+            final Map<IColumn, Object> row = new HashMap<>();
             row.put(Columns.SEMESTER, semester);
             row.put(Columns.BAND, band);
             row.put(Columns.PROGRAM_ID, id);
@@ -146,7 +149,7 @@ public final class QueueProgramStatusExternalTable extends AbstractTable {
     }
 
 	private Object getDates(final ISPProgram progShell)  {
-		final SortedSet<String> set = new TreeSet<String>();
+		final SortedSet<String> set = new TreeSet<>();
 		final Site site = ReportUtils.getSiteDesc(progShell.getProgramID());
 		for (ISPObservation obs: progShell.getAllObservations()) {
             final ObsLog log = ObsLog.getIfExists(obs);
@@ -182,9 +185,10 @@ public final class QueueProgramStatusExternalTable extends AbstractTable {
     // a set of program types that are relevant for external reports
     private static final Set<ProgramType> EXTERNAL_TYPES = new HashSet<>(
             Arrays.asList(new ProgramType[] {
-                    ProgramType.LargeProgram$.MODULE$,
-                    ProgramType.FastTurnaround$.MODULE$,
                     ProgramType.Queue$.MODULE$,
+                    ProgramType.DirectorsTime$.MODULE$,
+                    ProgramType.FastTurnaround$.MODULE$,
+                    ProgramType.LargeProgram$.MODULE$,
             }));
 
     private boolean isExternalType(final SPProgramID pid) { return TypeCheck.isAnyOf(pid, EXTERNAL_TYPES); }

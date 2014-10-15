@@ -23,27 +23,19 @@
 
 
 </style>
-<title>$semester DD - Director's Discretionary Time</title>
+<title>$semester FT - Fast Turnaround Programs</title>
 </head>
 	<body link="#008080" vlink="#008080" text="#000000" bgcolor="#FFFFFF">
 
 	<table>
 		<tr>
 			<td><img SRC="http://www.gemini.edu/sciops/schedules/mayacal.gif" ALIGN="LEFT" width="243" height="84" alt="[Mayan calendar]"></td>
-		    <td width="100%" align="center"><h1><i>Director's Discretionary Time Summary : Semester $semester $sites</i></h1></td>
+		    <td width="100%" align="center"><h1><i>Fast Turnaround Summary : Semester $semester $sites</i></h1></td>
 		</tr>
 	</table>
 
 	<p>
-		The data shown in the tables below summarise the programs that constitute the "Director's Discretionary Time" (DDT) on $sites.
-        DDT proposals are typically for time-critical observations which cannot wait for the normal proposal cycle
-        (e.g. unexpected astronomical events) or for testing the feasibility of a technique or of a program.
-        See the <a href="http://www.gemini.edu/?q=node/10998">DDT web page</a> for more information.
-        DDT proposals may be submitted at any time by any astronomer world-wide.
-    </p>
-    <p>
-        In other respects - contact scientist support, Phase II definitions,
-        Gemini Science Archive data distribution - DDT programs are similar to other Gemini queue programs.
+		The data shown in the tables below summarise the programs that have been accpeted as "Fast Turnaround" (FT) proposals on $sites.
     </p>
     <p>
 		<font color="red"><b>
