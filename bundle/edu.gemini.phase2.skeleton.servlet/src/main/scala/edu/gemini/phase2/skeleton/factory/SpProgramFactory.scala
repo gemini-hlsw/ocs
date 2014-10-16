@@ -220,7 +220,13 @@ object SpProgramFactory {
         }
       case _: LargeProgramClass          => List((TimeAcctCategory.LP, 1.0))
       case e: ExchangeProposalClass      => ngoRatios(e.subs)
-      case l: FastTurnaroundProgramClass => Nil // This is incorrect, but timeaccounting for FT has not been defined
+        // TBD This part of the code won't be triggered because FT doesn't go through itac (See awardedHours function)
+        // But we'll leave it here for the future
+      case f: FastTurnaroundProgramClass =>
+        // In principle there are no proposals submitted without a PA but check just in case
+        require(f.partnerAffiliation.isDefined)
+        val s = NgoSubmission(f.sub.request, f.sub.response, f.partnerAffiliation.get, InvestigatorRef(proposal.investigators.pi))
+        ngoRatios(List(s))
       case s: SpecialProposalClass       => spcRatio(s.sub).toList
     }
 
