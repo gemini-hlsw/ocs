@@ -213,14 +213,15 @@ object SpProgramFactory {
 
   def timeAccountingRatios(proposal: Proposal): List[(TimeAcctCategory, Double)] =
     proposal.proposalClass match {
-      case n: GeminiNormalProposalClass =>
+      case n: GeminiNormalProposalClass  =>
         n.subs match {
           case Left(ngos) => ngoRatios(ngos)
           case Right(exc) => excRatio(exc).toList
         }
-      case _: LargeProgramClass         => List((TimeAcctCategory.LP, 1.0))
-      case e: ExchangeProposalClass     => ngoRatios(e.subs)
-      case s: SpecialProposalClass      => spcRatio(s.sub).toList
+      case _: LargeProgramClass          => List((TimeAcctCategory.LP, 1.0))
+      case e: ExchangeProposalClass      => ngoRatios(e.subs)
+      case l: FastTurnaroundProgramClass => Nil // This is incorrect, but timeaccounting for FT has not been defined
+      case s: SpecialProposalClass       => spcRatio(s.sub).toList
     }
 
   private def ngoRatios(subs: List[NgoSubmission]): List[(TimeAcctCategory, Double)] = {
