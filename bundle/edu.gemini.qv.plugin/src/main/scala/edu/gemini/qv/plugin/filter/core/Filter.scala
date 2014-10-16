@@ -210,7 +210,7 @@ object Filter {
     def lowest = RA.MinValue
     def highest = RA.MaxValue
     def getter = {o: Obs => if (o.getDec == 0 && o.getRa == 0) -0.001 else o.getRa/15 }
-    override def desc = "Filter for targets with min ≤ right ascension < max."
+    override def desc = "Filter for target right ascension, wraps around 24hrs if min > max (e.g. [18..5])."
   }
 
   object Dec {
