@@ -89,7 +89,7 @@ object FilterElement {
   class Options[A](data: ObservationProvider, init: EnumFilter[A], var showAvailableOnly: Boolean = true, val showCounts: Boolean = true) extends GridBagPanel with FilterUI {
     border = BorderFactory.createEmptyBorder(2, 2, 2, 2) // add some space at top and bottom
     var selection: Set[A] = init.selection.toSet
-    private val buttons = init.sortedValues.map(button(_))
+    private val buttons = init.sortedValues.map(button)
 
     peer.setComponentPopupMenu(createPopup.peer)
 
@@ -272,32 +272,37 @@ object FilterElement {
     border = BorderFactory.createEmptyBorder(0, 2, 2, 2) // add some space at top and bottom
     var filter: Filter = init
 
-    private object min extends TextField { text = init.min.toString }
-    private object max extends TextField { text = init.max.toString }
+    private object minField extends TextField { text = init.min.toString }
+    private object maxField extends TextField { text = init.max.toString }
 
     contents += new Label(init.label, null, Alignment.Left)
     contents += new Label("min:  ", null, Alignment.Right)
-    contents += min
+    contents += minField
     contents += new Label()
     contents += new Label("max:  ", null, Alignment.Right)
-    contents += max
+    contents += maxField
 
-    listenTo(min, max)
+    listenTo(minField, maxField)
 
     reactions += {
       case ValueChanged(_) => doUpdate()
     }
 
     def doUpdate() {
-      val (a, b) = {
-        val a = init.minFromString(min.text)
-        val b = init.maxFromString(max.text)
-        if (a < b) (a, b) else (a, init.highest)
-      }
+      val min = init.minFromString(minField.text)
+      val max = init.maxFromString(maxField.text)
+      // create new filter based on current min/max values
       filter = init match {
-        case f: RA => RA(a, b)
-        case f: Dec => Dec(a, b)
-        case f: SetTime => SetTime(f.ctx, a, b)
+
+        // NOTE: RA filter allows "wrap around" 24hrs for min value > max value, e.g. [18..5] translates
+        // to [0..5] or [18..24]; note that we want to exclude dummy values (RA < 0)in this case
+        case f: RA if min <= max  => RA(min, max)
+        case f: RA if min > max   => FilterOr(RA(0, max), RA(min, RA.MaxValue))
+
+        // all other filters just support plain vanilla [min..max] filtering
+        case f: Dec               => Dec(min, max)
+        case f: SetTime           => SetTime(f.ctx, min, max)
+
       }
       publish(ElementChanged)
     }
