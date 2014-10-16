@@ -98,7 +98,7 @@ object SpProgramFactory {
   def mode(proposal: Proposal): ProgramMode =
     proposal.proposalClass match {
       case c: ClassicalProposalClass => CLASSICAL
-      case _ => QUEUE
+      case _                         => QUEUE
     }
 
   def band(proposal: Proposal): Option[Int] =
@@ -112,14 +112,14 @@ object SpProgramFactory {
   def too(proposal: Proposal): TooType =
     proposal.proposalClass match {
       case q: QueueProposalClass => too(q.tooOption)
-      case _ => TooType.none
+      case _                     => TooType.none
     }
 
   private def too(tooType: TooOption): TooType =
     tooType match {
       case TooOption.STANDARD => TooType.standard
-      case TooOption.RAPID => TooType.rapid
-      case _ => TooType.none
+      case TooOption.RAPID    => TooType.rapid
+      case _                  => TooType.none
     }
 
   /**
@@ -140,10 +140,11 @@ object SpProgramFactory {
     } yield h
 
   private def hostSubmission(l: List[NgoSubmission]): Option[NgoSubmission] =
-    if (l.size == 0)
+    if (l.size == 0) {
       None
-    else
+    } else {
       Some(l.maxBy(s => timeAward(s).getOrElse(TimeAmount.empty).hours))
+    }
 
   private def acceptance(sub: Submission): Option[SubmissionAccept] =
     for {
@@ -158,7 +159,7 @@ object SpProgramFactory {
   def affiliate(proposal: Proposal): Option[Affiliate] =
     proposal.proposalClass match {
       case _: LargeProgramClass => Some(Affiliate.GEMINI_STAFF)
-      case _ => hostSubmission(proposal) flatMap { s => affiliate(s.partner) }
+      case _                    => hostSubmission(proposal) flatMap { s => affiliate(s.partner) }
     }
 
   def hostNgoEmail(p: Proposal): Option[String] =
@@ -226,10 +227,11 @@ object SpProgramFactory {
     val catHrs = categorizedHours(subs)
     val total  = catHrs.unzip._2.sum
 
-    if (total == 0.0)
-      catHrs map { case (cat, _)   => (cat, 1.0/catHrs.length)}
-    else
-      catHrs map { case (cat, hrs) => (cat, hrs/total) }
+    if (total == 0.0) {
+      catHrs map { case (cat, _) => (cat, 1.0 / catHrs.length)}
+    } else {
+      catHrs map { case (cat, hrs) => (cat, hrs / total)}
+    }
   }
 
   private def categorizedHours(subs: List[NgoSubmission]): List[(TimeAcctCategory, Double)] =
@@ -247,7 +249,7 @@ object SpProgramFactory {
 
   def gsaPhase1Data(proposal: Proposal): Gsa = {
     val abstrakt = new Gsa.Abstract(proposal.abstrakt)
-    val category = new Gsa.Category(~(proposal.tacCategory.map(_.value())))
+    val category = new Gsa.Category(~proposal.tacCategory.map(_.value()))
     val keywords = proposal.keywords.map(k => new Gsa.Keyword(k.value())).asJava
     val pi       = gsaPhase1DataInvestigator(proposal.investigators.pi)
     val cois     = proposal.investigators.cois.map(gsaPhase1DataInvestigator).asJava
