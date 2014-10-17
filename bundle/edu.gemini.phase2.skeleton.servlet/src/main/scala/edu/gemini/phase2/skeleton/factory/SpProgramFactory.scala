@@ -224,9 +224,10 @@ object SpProgramFactory {
         // But we'll leave it here for the future
       case f: FastTurnaroundProgramClass =>
         // In principle there are no proposals submitted without a PA but check just in case
-        require(f.partnerAffiliation.isDefined)
-        val s = NgoSubmission(f.sub.request, f.sub.response, f.partnerAffiliation.get, InvestigatorRef(proposal.investigators.pi))
-        ngoRatios(List(s))
+        ~f.partnerAffiliation.map { partnerAffiliation =>
+          val s = NgoSubmission(f.sub.request, f.sub.response, partnerAffiliation, InvestigatorRef(proposal.investigators.pi))
+          ngoRatios(List(s))
+        }
       case s: SpecialProposalClass       => spcRatio(s.sub).toList
     }
 
