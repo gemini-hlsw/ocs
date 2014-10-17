@@ -105,7 +105,7 @@ public final class CanopusFeature extends TpeImageFeature implements PropertyWat
      * Turn on/off the drawing of probe ranges.
      */
     public void setDrawProbeRanges(boolean draw) {
-        props.registerBooleanProperty(PROP_SHOW_RANGES, draw);
+        props.setBoolean(PROP_SHOW_RANGES, draw);
     }
 
     /**

@@ -175,6 +175,16 @@ public class BasicPropertyList {
     }
 
     /**
+     * Set an existing boolean property to the given value.
+     */
+    public synchronized void setBoolean(String name, boolean value) {
+        try {
+            BooleanProperty bp = (BooleanProperty) _lookupEntry(name);
+            bp.setValue(value);
+        } catch (Exception e) {}
+    }
+
+    /**
      * Register a ChoiceProperty with the given name, options, and default value.
      * If the property already has a recorded value, that value will be restored.
      */
@@ -185,8 +195,8 @@ public class BasicPropertyList {
     }
 
     /**
-     * Get the value of the "choice" property with the given name, defaulting
-     * to <code>def</def>.
+     * Get the value of the choice property with the given name, returning a default
+     * value if not able to do so.
      */
     public synchronized int getChoice(String name, int defaultValue) {
         try {
@@ -197,10 +207,8 @@ public class BasicPropertyList {
     }
 
     /**
-     * Set an existing "choice" property to the given value, the
+     * Set an existing choice property to the given value, the
      * index of the desired option.
-     *
-     * @see ChoiceProperty
      */
     public synchronized void setChoice(String name, int value) {
         try {
