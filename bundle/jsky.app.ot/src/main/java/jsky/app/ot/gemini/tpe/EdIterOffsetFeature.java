@@ -45,6 +45,9 @@ public class EdIterOffsetFeature extends TpeImageFeature
         TpeCreateableFeature, TpeSelectableFeature, TpeActionableFeature,
         PropertyWatcher, ChangeListener {
 
+    // Used to save settings between sessions
+    private static final String PREF_KEY = EdIterOffsetFeature.class.getName();
+
     /** Color used to draw offset features */
     public static final Color OFFSET_COLOR = Color.yellow;
     public static final Color INVALID_OFFSET_COLOR = Color.red;
@@ -77,14 +80,10 @@ public class EdIterOffsetFeature extends TpeImageFeature
     private SciAreaFeature _sciAreaFeature;
 
     // Offset display options
-    static BasicPropertyList _props;
+    private static final BasicPropertyList _props = new BasicPropertyList(EdIterOffsetFeature.class.getName());
     public static final String PROP_OFFSET_DISPLAY = "Display only offsets corresponding to selected offset node";
-
     static {
-        // Initialize the properties supported by this feature.
-        _props = new BasicPropertyList("EdIterOffsetFeatureProps");
-        _props.setBoolean(PROP_OFFSET_DISPLAY, false);
-        _props.restoreSettings();
+        _props.registerBooleanProperty(PROP_OFFSET_DISPLAY, false);
     }
 
 
@@ -437,6 +436,13 @@ public class EdIterOffsetFeature extends TpeImageFeature
 
     public TpeImageFeatureCategory getCategory() {
         return TpeImageFeatureCategory.target;
+    }
+
+    /**
+     * Restore the settings and register listeners to save the settings for the preferences.
+     */
+    private void restoreSettings() {
+
     }
 }
 
