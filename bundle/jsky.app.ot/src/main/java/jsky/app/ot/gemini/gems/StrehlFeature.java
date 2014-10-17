@@ -102,7 +102,7 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
      * Turn on/off the drawing of strehl map
      */
     public void setShowStrehlMap(boolean draw) {
-        props.registerBooleanProperty(PROP_SHOW_STREHL_MAP, draw);
+        props.setBoolean(PROP_SHOW_STREHL_MAP, draw);
     }
 
     /**

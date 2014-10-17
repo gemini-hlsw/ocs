@@ -137,7 +137,7 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
      * Turn on/off the filling of the obscured area.
      */
     public void setFillObscuredArea(boolean fill) {
-        getProps().registerBooleanProperty(PROP_FILL_OBSCURED, fill);
+        getProps().setBoolean(PROP_FILL_OBSCURED, fill);
     }
 
     /**

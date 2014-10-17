@@ -81,7 +81,7 @@ public class TpeTargetPosFeature extends TpePositionFeature
      * Turn on/off the drawing of position tags.
      */
     public void setDrawTags(boolean drawTags) {
-        _props.registerBooleanProperty(PROP_SHOW_TAGS, drawTags);
+        _props.setBoolean(PROP_SHOW_TAGS, drawTags);
     }
 
     /**

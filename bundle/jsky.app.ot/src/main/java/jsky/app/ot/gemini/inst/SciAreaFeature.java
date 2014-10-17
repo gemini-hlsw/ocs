@@ -144,7 +144,7 @@ public class SciAreaFeature extends TpeImageFeature
      * Turn the display of the chop beams on or off.
      */
     public static void setDisplayChopBeams(boolean show) {
-        _props.registerBooleanProperty(PROP_DISPLAY_CHOP_BEAMS, show);
+        _props.setBoolean(PROP_DISPLAY_CHOP_BEAMS, show);
     }
 
     /**
@@ -158,7 +158,7 @@ public class SciAreaFeature extends TpeImageFeature
      * Turn on/off the drawing of the offset index.
      */
     public static void setDrawIndex(boolean drawIndex) {
-        _props.registerBooleanProperty(PROP_SHOW_TAGS, drawIndex);
+        _props.setBoolean(PROP_SHOW_TAGS, drawIndex);
     }
 
     /**

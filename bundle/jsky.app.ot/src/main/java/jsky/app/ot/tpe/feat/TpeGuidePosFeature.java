@@ -97,7 +97,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
      * Turn on/off the drawing of position tags.
      */
     public void setDrawTags(boolean drawTags) {
-        _props.registerBooleanProperty(PROP_SHOW_TAGS, drawTags);
+        _props.setBoolean(PROP_SHOW_TAGS, drawTags);
     }
 
     /**
@@ -111,7 +111,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
      * Turn on/off the drawing of the primary guide star indicator.
      */
     public void setIdentifyPrimary(boolean identifyPrimary) {
-        _props.registerBooleanProperty(PROP_IDENTIFY_PRIMARY, identifyPrimary);
+        _props.setBoolean(PROP_IDENTIFY_PRIMARY, identifyPrimary);
     }
 
     /**

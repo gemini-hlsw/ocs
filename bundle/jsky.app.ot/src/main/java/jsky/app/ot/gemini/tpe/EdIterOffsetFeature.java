@@ -437,12 +437,5 @@ public class EdIterOffsetFeature extends TpeImageFeature
     public TpeImageFeatureCategory getCategory() {
         return TpeImageFeatureCategory.target;
     }
-
-    /**
-     * Restore the settings and register listeners to save the settings for the preferences.
-     */
-    private void restoreSettings() {
-
-    }
 }
 
