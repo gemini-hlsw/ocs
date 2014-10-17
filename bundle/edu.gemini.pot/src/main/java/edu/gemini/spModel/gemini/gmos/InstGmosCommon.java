@@ -1949,8 +1949,6 @@ public abstract class InstGmosCommon<
      * more than 2 arcsec from any other. If doing a square dither pattern, for example,
      * the diagonal of the square should be <=2 arcsec.
      * The default should be for no electronic offsets.
-     *
-     * @param inst the instrument corresponding to this list
      * @return a string explaining why electronic offsets are not allowed, or null if they are allowed
      */
     public static UseElectronicOffsettingRuling checkUseElectronicOffsetting(InstGmosCommon inst, OffsetPosList<OffsetPos> p) {
