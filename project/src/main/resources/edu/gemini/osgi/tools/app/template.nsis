@@ -49,6 +49,25 @@ Section Uninstall
 
 	DELETE "$SMPROGRAMS\Gemini\${NAME}\${NAME} ${VERSION}.lnk"
 
+	StrCpy $0 "$SMPROGRAMS\Gemini\${NAME}"
+	Call un.DeleteDirIfEmpty
+
 SectionEnd
 
-
+#
+# Delete directory only if it is empty
+#
+Function un.DeleteDirIfEmpty
+	FindFirst $R0 $R1 "$0\*.*"
+	strcmp $R1 "." 0 NoDelete
+	FindNext $R0 $R1
+		strcmp $R1 ".." 0 NoDelete
+		ClearErrors
+		FindNext $R0 $R1
+		IfErrors 0 NoDelete
+			FindClose $R0
+			Sleep 1000
+			RMDir "$0"
+		NoDelete:
+			FindClose $R0
+FunctionEnd
