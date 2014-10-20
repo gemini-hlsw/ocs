@@ -822,6 +822,23 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
 
 
     /**
+     * Check if the offsets are all "sufficiently small" to not require a target, i.e. sqrt(p^2+q^2) <= 1.
+     * See REL-1308 for more information.
+     */
+    private boolean _checkOffsetsSmall() {
+        boolean sufficientlySmall = true;
+        for (OffsetPos op : _opl.getAllPositions()) {
+            double p = op.getXaxis();
+            double q = op.getYaxis();
+            if (Math.sqrt(p*p + q*q) > 1) {
+                sufficientlySmall = false;
+                break;
+            }
+        }
+        return sufficientlySmall;
+    }
+
+    /**
      * Check the selected nod & shuffle settings and display a warning if needed.
      */
     private void _checkNSValues() {
@@ -830,13 +847,14 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
 
         String msg = null;
         if (_opl != null) {
+            boolean hasOiwfsGuideStar = primaryOiwfsStarExists();
+
             final InstGmosCommon.UseElectronicOffsettingRuling ruling;
-            if (!primaryOiwfsStarExists()) {
-                msg = "Electronic offsetting requires a GMOS OIWFS to be defined.";
-            } else {
+            if (hasOiwfsGuideStar) {
                 ruling = InstGmosCommon.checkUseElectronicOffsetting(getDataObject(), _opl);
                 if (!ruling.allow) msg = ruling.message;
-            }
+            } else if (!_checkOffsetsSmall())
+                msg = "Electronic offsetting requires a GMOS OIWFS to be defined unless the offsets are sufficiently small.";
         }
         if (getDataObject().isUseElectronicOffsetting()) {
             _w.electronicOffsetCheckBox.setSelected(true);
@@ -1075,6 +1093,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         } else if (w == _w.electronicOffsetCheckBox) {
             final boolean useEO = _w.electronicOffsetCheckBox.isSelected();
             getDataObject().setUseElectronicOffsetting(useEO);
+            _checkNSValues();
         } else if (w == _w.removeAllButton) {
             _opl.removeAllPositions();
         } else if (w == _w.removeButton) {
