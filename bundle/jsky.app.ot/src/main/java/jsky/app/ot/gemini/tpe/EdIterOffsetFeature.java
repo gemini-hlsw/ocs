@@ -45,9 +45,6 @@ public class EdIterOffsetFeature extends TpeImageFeature
         TpeCreateableFeature, TpeSelectableFeature, TpeActionableFeature,
         PropertyWatcher, ChangeListener {
 
-    // Used to save settings between sessions
-    private static final String PREF_KEY = EdIterOffsetFeature.class.getName();
-
     /** Color used to draw offset features */
     public static final Color OFFSET_COLOR = Color.yellow;
     public static final Color INVALID_OFFSET_COLOR = Color.red;

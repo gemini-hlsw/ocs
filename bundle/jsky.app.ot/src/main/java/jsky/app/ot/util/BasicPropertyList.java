@@ -9,6 +9,7 @@ package jsky.app.ot.util;
 import jsky.util.Preferences;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -138,10 +139,18 @@ public class BasicPropertyList {
     }
 
     /**
+     * Get a thread-safe list of the watchers for notification.
+     */
+    private synchronized List<PropertyWatcher> _getWatchers() {
+        return new ArrayList<>(_watchers);
+    }
+
+    /**
      * Notify watchers that a property has changed.
      */
     private void _notifyChange(String propertyName) {
-        for (PropertyWatcher pw : _watchers)
+        List<PropertyWatcher> cloned = _getWatchers();
+        for (PropertyWatcher pw : cloned)
             pw.propertyChange(propertyName);
     }
 
