@@ -32,21 +32,12 @@ import java.util.*;
 public class TpeGuidePosFeature extends TpePositionFeature
         implements TpeCreateableFeature, TpeActionableFeature, PropertyWatcher {
 
-    private static BasicPropertyList _props;
-
-    // Properties supported by this feature
+    private static final BasicPropertyList _props = new BasicPropertyList(TpeGuidePosFeature.class.getName());
     private static final String PROP_SHOW_TAGS = "Show Tags";
-
     private static final String PROP_IDENTIFY_PRIMARY = "Identify primary guide star";
-
     static {
-        // Initialize the properties supported by the TpeGuidePosFeature.
-
-        _props = new BasicPropertyList("TpeGuidePosFeatureProps");
-
-        _props.setBoolean(PROP_SHOW_TAGS, true);
-        _props.setBoolean(PROP_IDENTIFY_PRIMARY, true);
-        _props.restoreSettings();
+        _props.registerBooleanProperty(PROP_SHOW_TAGS, true);
+        _props.registerBooleanProperty(PROP_IDENTIFY_PRIMARY, true);
     }
 
 //    private static final Color PRIMARY_STAR_COLOR         = new Color(225, 182, 68);

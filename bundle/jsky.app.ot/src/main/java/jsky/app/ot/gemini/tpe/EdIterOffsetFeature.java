@@ -77,14 +77,10 @@ public class EdIterOffsetFeature extends TpeImageFeature
     private SciAreaFeature _sciAreaFeature;
 
     // Offset display options
-    static BasicPropertyList _props;
+    private static final BasicPropertyList _props = new BasicPropertyList(EdIterOffsetFeature.class.getName());
     public static final String PROP_OFFSET_DISPLAY = "Display only offsets corresponding to selected offset node";
-
     static {
-        // Initialize the properties supported by this feature.
-        _props = new BasicPropertyList("EdIterOffsetFeatureProps");
-        _props.setBoolean(PROP_OFFSET_DISPLAY, false);
-        _props.restoreSettings();
+        _props.registerBooleanProperty(PROP_OFFSET_DISPLAY, false);
     }
 
 

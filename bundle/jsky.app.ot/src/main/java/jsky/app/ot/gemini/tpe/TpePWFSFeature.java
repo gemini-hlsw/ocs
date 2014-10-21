@@ -112,21 +112,16 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
     public static final int NOD_A_CHOP_B = 1;
     public static final int NOD_B_CHOP_A = 2;
 
+    private static final BasicPropertyList _props = new BasicPropertyList(TpePWFSFeature.class.getName());
     public static final String PROP_DISPLAY_PWFS_AT = "Display at";
     public static final String PROP_FILL_OBSCURED = "Fill Obscured Area";
-
-    static BasicPropertyList _props;
-
     static {
-        // Initialize the properties supported by this feature.
-        _props = new BasicPropertyList("TpePWFSFeatureProps");
-        _props.setChoice(PROP_DISPLAY_PWFS_AT,
+        _props.registerChoiceProperty(PROP_DISPLAY_PWFS_AT,
                 new String[]{"Nod A Chop A, Nod B Chop B (default)",
                         "Nod A, Chop B",
                         "Nod B, Chop A"},
                 0);
-        _props.setBoolean(PROP_FILL_OBSCURED, true);
-        _props.restoreSettings();
+        _props.registerBooleanProperty(PROP_FILL_OBSCURED, true);
     }
 
 

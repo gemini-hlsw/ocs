@@ -245,7 +245,7 @@ public abstract class OIWFS_FeatureBase extends WFS_FeatureBase
      * Turn on/off the consideration of vignetting.
      */
     public void setWithVignetting(boolean withVignetting) {
-        OIWFS_Feature.getProps().setBoolean(OIWFS_Feature.PROP_WITH_VIG, withVignetting);
+        OIWFS_Feature.getProps().registerBooleanProperty(OIWFS_Feature.PROP_WITH_VIG, withVignetting);
     }
 
     /**
@@ -259,7 +259,7 @@ public abstract class OIWFS_FeatureBase extends WFS_FeatureBase
      * Turn on/off the filling of the obscured area.
      */
     public void setFillObscuredArea(boolean fill) {
-        OIWFS_Feature.getProps().setBoolean(OIWFS_Feature.PROP_FILL_OBSCURED, fill);
+        OIWFS_Feature.getProps().registerBooleanProperty(OIWFS_Feature.PROP_FILL_OBSCURED, fill);
     }
 
     /**

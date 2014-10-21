@@ -226,7 +226,6 @@ public class Preferences {
      * plus the name plus the suffix ".ser".
      */
     public void serialize(String name, Object object) throws IOException {
-
         String filename = _dir + _sep + name + ".ser";
         ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(filename));
         out.writeObject(object);
@@ -240,7 +239,6 @@ public class Preferences {
      * does not exist or is corrupt.
      */
     public Object deserialize(String name) throws ClassNotFoundException, IOException {
-
         String filename = _dir + _sep + name + ".ser";
         ObjectInputStream in = new ObjectInputStream(new FileInputStream(filename));
         Object object = in.readObject();

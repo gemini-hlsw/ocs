@@ -76,12 +76,10 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
     }
 
     // Property used to control drawing of the probe ranges.
-    private static final BasicPropertyList props = new BasicPropertyList("StrehlFeatureProps");
+    private static final BasicPropertyList props = new BasicPropertyList(StrehlFeature.class.getName());
     private static final String PROP_SHOW_STREHL_MAP = "Show Strehl Map";
-
     static {
-        props.setBoolean(PROP_SHOW_STREHL_MAP, true);
-        props.restoreSettings();
+        props.registerBooleanProperty(PROP_SHOW_STREHL_MAP, true);
     }
 
     /**

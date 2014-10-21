@@ -158,7 +158,7 @@ public abstract class TpeImageFeature implements TelescopePosWatcher {
      * to configure their display.  Unless overriden, this method simply
      * returns null, indicating that there are no configurable properties.
      *
-     * @see BasicPropertyList
+     * @see jsky.app.ot.util.BasicPropertyList
      */
     public BasicPropertyList getProperties() {
         return null;
