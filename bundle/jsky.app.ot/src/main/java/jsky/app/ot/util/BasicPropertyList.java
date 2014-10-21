@@ -9,7 +9,6 @@ package jsky.app.ot.util;
 import jsky.util.Preferences;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 
@@ -59,13 +58,16 @@ public class BasicPropertyList {
 
         public boolean getValue() { return value; }
 
-        public synchronized void setValue(boolean value) {
+        public void setValue(boolean value) {
+            if (_setValue(value))
+                _notifyChange(getName());
+        }
+        private synchronized boolean _setValue(boolean value) {
             Preferences.set(getID(), value);
 
             boolean oldValue = this.value;
             this.value = value;
-            if (oldValue != value)
-                _notifyChange(getName());
+            return oldValue != value;
         }
     }
 
@@ -87,7 +89,11 @@ public class BasicPropertyList {
 
         public int getSelection() { return selection; }
 
-        public synchronized void setSelection(int selection) {
+        public void setSelection(int selection) {
+            if (_setSelection(selection))
+                _notifyChange(getName());
+        }
+        public synchronized boolean _setSelection(int selection) {
             if (selection < 0 || selection >= choices.length)
                 selection = 0;
 
@@ -95,8 +101,7 @@ public class BasicPropertyList {
 
             int oldSelection = this.selection;
             this.selection = selection;
-            if (oldSelection != selection)
-                _notifyChange(getName());
+            return oldSelection != selection;
         }
 
         public String[] getChoices() { return choices; }
@@ -165,7 +170,7 @@ public class BasicPropertyList {
      * Register a boolean property with the given name and default value.
      * If the property already has a value, that value will be restored.
      */
-    public synchronized void registerBooleanProperty(String name, boolean defaultValue) {
+    public void registerBooleanProperty(String name, boolean defaultValue) {
         try {
             BooleanProperty bp = _getBooleanEntry(name, defaultValue);
         } catch (Exception e) {}
@@ -175,7 +180,7 @@ public class BasicPropertyList {
      * Get a boolean property by the given name, defaulting to <tt>def</tt>
      * if the property doesn't exist or isn't a boolean.
      */
-    public synchronized boolean getBoolean(String name, boolean defaultValue) {
+    public boolean getBoolean(String name, boolean defaultValue) {
         try {
             return ((BooleanProperty) _lookupEntry(name)).getValue();
         } catch (Exception e) {
@@ -186,7 +191,7 @@ public class BasicPropertyList {
     /**
      * Set an existing boolean property to the given value.
      */
-    public synchronized void setBoolean(String name, boolean value) {
+    public void setBoolean(String name, boolean value) {
         try {
             BooleanProperty bp = (BooleanProperty) _lookupEntry(name);
             bp.setValue(value);
@@ -197,7 +202,7 @@ public class BasicPropertyList {
      * Register a ChoiceProperty with the given name, options, and default value.
      * If the property already has a recorded value, that value will be restored.
      */
-    public synchronized void registerChoiceProperty(String name, String[] options, int value) {
+    public void registerChoiceProperty(String name, String[] options, int value) {
         try {
             ChoiceProperty cp = _getChoiceEntry(name, options, value);
         } catch (Exception e) {}
@@ -207,7 +212,7 @@ public class BasicPropertyList {
      * Get the value of the choice property with the given name, returning a default
      * value if not able to do so.
      */
-    public synchronized int getChoice(String name, int defaultValue) {
+    public int getChoice(String name, int defaultValue) {
         try {
             return ((ChoiceProperty) _lookupEntry(name)).getSelection();
         } catch (Exception e) {
@@ -219,7 +224,7 @@ public class BasicPropertyList {
      * Set an existing choice property to the given value, the
      * index of the desired option.
      */
-    public synchronized void setChoice(String name, int value) {
+    public void setChoice(String name, int value) {
         try {
             ChoiceProperty cp = (ChoiceProperty) _lookupEntry(name);
             cp.setSelection(value);
@@ -237,13 +242,13 @@ public class BasicPropertyList {
     }
 
     // Look up properties, creating and inserting new properties if not found.
-    private BooleanProperty _getBooleanEntry(String name, boolean defaultValue) {
+    private synchronized BooleanProperty _getBooleanEntry(String name, boolean defaultValue) {
         BooleanProperty bp = (BooleanProperty) _lookupEntry(name);
         if (bp == null)
             bp = new BooleanProperty(name, defaultValue);
         return bp;
     }
-    private ChoiceProperty _getChoiceEntry(String name, String[] choices, int selection) {
+    private synchronized ChoiceProperty _getChoiceEntry(String name, String[] choices, int selection) {
         ChoiceProperty cp = (ChoiceProperty) _lookupEntry(name);
         if (cp == null)
             cp = new ChoiceProperty(name, choices, selection);
