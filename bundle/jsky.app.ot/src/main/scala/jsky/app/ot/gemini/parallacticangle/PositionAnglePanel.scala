@@ -39,9 +39,6 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
 
   private object ui {
     val positionAngleConstraintComboBox = new EnableDisableComboBox[PosAngleConstraint](options)
-    // TODO: Remove this once the logic is fully implemented.
-    if (options.contains(PosAngleConstraint.UNBOUNDED))
-      positionAngleConstraintComboBox.disable(PosAngleConstraint.UNBOUNDED)
     layout(positionAngleConstraintComboBox) = new Constraints() {
       anchor = Anchor.NorthWest
       insets = new Insets(0, 0, 0, 15)
@@ -167,6 +164,11 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
 
     // Reset the combo box so that all of the options are enabled by default.
     ui.positionAngleConstraintComboBox.reset()
+
+    // TODO: Remove this once the logic is fully implemented.
+    if (options.contains(PosAngleConstraint.UNBOUNDED))
+      ui.positionAngleConstraintComboBox.disable(PosAngleConstraint.UNBOUNDED)
+
     ui.positionAngleConstraintComboBox.selection.item = instrument.getPosAngleConstraint
     ui.positionAngleTextField.text                    = numberFormatter.format(instrument.getPosAngle)
 
