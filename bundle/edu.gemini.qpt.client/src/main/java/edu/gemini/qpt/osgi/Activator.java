@@ -64,7 +64,6 @@ public final class Activator implements BundleActivator {
         final String root = new File(System.getProperty("user.dir")).toURI().toString();
 
         keyChainServiceTracker = new ServiceTracker<>(context, KeyChain.class, new ServiceTrackerCustomizer<KeyChain, KeyChain>() {
-            private final Dictionary<String, String> headers = context.getBundle().getHeaders();
             private ServiceRegistration<?> shellRegistration;
 
             @Override
@@ -87,7 +86,8 @@ public final class Activator implements BundleActivator {
                     "/gemsoft/var/data/qpt",
                     null);
 
-                Activator.this.advisor = new ShellAdvisor(headers.get("Bundle-Name"), Version.current.toString(), root, ac, internal, pachon);
+
+                Activator.this.advisor = new ShellAdvisor("Gemini QPT", Version.current.toString(), root, ac, internal, pachon);
                 shellRegistration = context.registerService(IShellAdvisor.class.getName(), advisor, new Hashtable());
                 return ac;
             }

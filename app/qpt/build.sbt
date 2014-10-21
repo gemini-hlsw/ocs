@@ -12,7 +12,7 @@ ocsAppManifest := {
   val v = ocsVersion.value.toBundleVersion
   Application(
     id = "qpt",
-    name = "Queue Planning Tool",
+    name = "QPT",
     version = ocsVersion.value.toString,
     configs = List(
       common(v),
@@ -83,6 +83,7 @@ def with_production_dbs(version: Version) = AppConfig(
 def mac_test(version: Version) = AppConfig(
   id = "mac-test",
   distribution = List(MacOS),
+  icon = Some(file("app/qpt/dist/MacOS/QPT.icns")),
   log = Some("%h/Library/Logs/edu.gemini.qpt/qpt.%u.%g.log")
 ) extending List(with_test_dbs(version))
 
@@ -90,6 +91,7 @@ def mac_test(version: Version) = AppConfig(
 def mac(version: Version) = AppConfig(
   id = "mac",
   distribution = List(MacOS),
+  icon = Some(file("app/qpt/dist/MacOS/QPT.icns")),
   log = Some("%h/Library/Logs/edu.gemini.qpt/qpt.%u.%g.log")
 ) extending List(with_production_dbs(version))
 
@@ -108,13 +110,15 @@ def linux64(version: Version) = AppConfig(
 // WINDOWS-TEST
 def windows_test(version: Version) = AppConfig(
   id = "windows-test",
-  distribution = List(Windows)
+  distribution = List(Windows),
+  icon = Some(file("app/qpt/dist/Windows/QPT.ico"))
 ) extending List(with_test_dbs(version))
 
 // WINDOWS
 def windows(version: Version) = AppConfig(
   id = "windows",
-  distribution = List(Windows)
+  distribution = List(Windows),
+  icon = Some(file("app/qpt/dist/Windows/QPT.ico"))
 ) extending List(with_production_dbs(version))
 
 // DEVELOPMENT

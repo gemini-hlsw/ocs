@@ -13,6 +13,7 @@ ocsAppManifest := {
     id = "pit",
     name = "PIT",
     version = pitVersion.value.toString,
+    useShortVersion = true,
     configs = List(
       common(pv),
         dev(pv),
