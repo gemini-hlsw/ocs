@@ -12,6 +12,7 @@ import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.system.ITarget;
 
 /**
  * Data object representing template parameters.
@@ -73,7 +74,15 @@ public final class TemplateParameters extends AbstractDataObject {
 
     public SPTarget getTarget() {
         checkRef(target);
-        return (SPTarget) target.clone();
+        final SPTarget newTarget = (SPTarget) target.clone();
+
+        // Ugh.  Otherwise the two targets share the same inner "itarget".
+        // I don't want to fix that directly in SPTarget.clone() because I don't
+        // know what behavior depends on it.  The new target model will fix all
+        // of this mess.
+        newTarget.setTarget((ITarget) newTarget.getTarget().clone());
+
+        return newTarget;
     }
 
     public TemplateParameters copy(SPTarget target) {

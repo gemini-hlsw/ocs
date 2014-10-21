@@ -5,7 +5,8 @@ import edu.gemini.shared.util.TimeValue
 import edu.gemini.spModel.`type`.ObsoletableSpType
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{PercentageContainer, ImageQuality, CloudCover, SkyBackground, WaterVapor}
-import edu.gemini.spModel.target.system.ConicTarget
+import edu.gemini.spModel.target.SPTarget
+import edu.gemini.spModel.target.system._
 import edu.gemini.spModel.template.TemplateParameters
 
 import javax.swing.BorderFactory
@@ -42,10 +43,11 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
   private def load: Iterable[TemplateParameters] =
     shells.asScala.map(_.getDataObject.asInstanceOf[TemplateParameters]).toIterable
 
+  // Applies the given function to a copy of the current template parameters
+  // data object and writes the update back to the shells.
   private def store(up: TemplateParameters => TemplateParameters): Unit =
     shells.asScala.foreach { shell =>
-      val obj = shell.getDataObject.asInstanceOf[TemplateParameters]
-      shell.setDataObject(up(obj))
+      shell.setDataObject(up(shell.getDataObject.asInstanceOf[TemplateParameters]))
     }
 
   trait InitWidget extends Component {
@@ -174,37 +176,70 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
 
     private val AllTargetTypes = List(Sidereal, NonSidereal)
 
+    def setTarget[A](up: (SPTarget, A) => Unit)(tp: TemplateParameters, a: A): TemplateParameters = {
+      val newTarget = tp.getTarget
+      up(newTarget, a)
+      tp.copy(newTarget)
+    }
+
     object CoordinatesPanel extends GridBagPanel with ColumnPanel {
       val nameField = new BoundTextField[String](10)(
         read = identity,
         show = identity,
         get  = _.getTarget.getName,
-        set  = (tp, name) => {
-          val newTarget = tp.getTarget
-          newTarget.setName(name)
-          tp.copy(newTarget)
-        }
+        set  = setTarget(_.setName(_))
       )
+
+      def targetType(t: SPTarget): TargetType =
+        if (t.getTarget.isInstanceOf[NonSiderealTarget]) NonSidereal else Sidereal
 
       val typeCombo = new BoundNullableCombo[TargetType](AllTargetTypes)(
         show = _.display,
-        get  = { tp =>
-          val target = tp.getTarget
-          if (target.getTarget.isInstanceOf[ConicTarget]) NonSidereal
-          else Sidereal
-        },
-        set  = { (tp, targetType) =>
-//          val target = tp.getTarget
-//          targetType match {
-//            case Sidereal =>
-//          }
-          tp
-        }
+        get  = { tp => targetType(tp.getTarget) },
+        set  = { setTarget((target, targetType) => {
+          val coords = targetType match {
+            case Sidereal    => new HmsDegTarget()
+            case NonSidereal => new ConicTarget()
+          }
+          coords.setC1(new HMS(target.getXaxis))
+          coords.setC2(new DMS(target.getYaxis))
+          coords.setName(target.getName)
+          target.setTarget(coords)
+        })}
       )
+
+      val hms = new HMSFormat()
+      val raField = new BoundTextField[HMS](10)(
+        read = s => new HMS(hms.parse(s)),
+        show = _.toString,
+        get  = _.getTarget.getTarget.getTargetAsJ2000.getC1.asInstanceOf[HMS],
+        set  = setTarget(_.getTarget.setC1(_))
+      )
+
+      val dms = new DMSFormat()
+      val decField = new BoundTextField[DMS](10)(
+        read = s => new DMS(dms.parse(s)),
+        show = _.toString,
+        get  = _.getTarget.getTarget.getTargetAsJ2000.getC2.asInstanceOf[DMS],
+        set  = setTarget(_.getTarget.setC2(_))
+      )
+
+//      val pmRaField = new BoundTextField[Double](10)(
+//        read = _.toDouble,
+//        show = _.toString,
+//        get  = _.getTarget.getPropMotionRA.toDouble,
+//        set  = (tp, pm) => {
+//          val newTarget = tp.getTarget
+//          newTarget.setPropMotionRA(pm.toString)
+//          tp.copy(newTarget)
+//        }
+//      )
 
       val rows = List(
         Row("Name", nameField),
-        Row("Type", typeCombo)
+        Row("Type", typeCombo),
+        Row("RA",   raField),
+        Row("Dec",  decField)
       )
 
       layoutRows()
@@ -220,7 +255,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
 
 
   object ConditionsPanel extends GridBagPanel with ColumnPanel {
-    border = BorderFactory.createEmptyBorder(0, 20, 0, 20)
+    border = BorderFactory.createEmptyBorder(0, 50, 0, 50)
 
     private def mkCombo[A >: Null <: PercentageContainer](opts: Seq[A])(get: SPSiteQuality => A, set: (SPSiteQuality, A) => Unit): BoundNullableCombo[A] = {
       // Filter out any obsolete values.
