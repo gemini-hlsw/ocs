@@ -103,29 +103,17 @@ public class PatrolField {
         return new PatrolField(this, transformation);
     }
 
-    /**
-     * Returns the BoundaryPosition of the candidateCoordinates.
-     *
-     * @param candidateCoordinates : The coordinates that are being checked against the GuideProbes patrol field
-     * @param baseCoordinates : The center of the viewport (probably the science target)
-     * @param positionAngle : The rotation of the viewport.
-     * @param sciencePositions : A set of offsets
-     * @return
-     */
-    public BoundaryPosition checkBoundaries(Coordinates candidateCoordinates, Coordinates baseCoordinates, Angle positionAngle, Set<Offset> sciencePositions) {
-        return checkBoundaries(candidateCoordinates, baseCoordinates, new Some<>(positionAngle), sciencePositions);
-    }
 
     /**
      * Returns the BoundaryPosition of the candidateCoordinates.
      *
-     * @param candidateCoordinates : The coordinates that are being checked against the GuideProbes patrol field
-     * @param baseCoordinates : The center of the viewport (probably the science target)
-     * @param positionAngle : The rotation of the viewport. If None, consider all viewport rotations.
-     * @param sciencePositions : A set of offsets
+     * @param candidateCoordinates : The coordinates that are being checked against the GuideProbes patrol field.
+     * @param baseCoordinates : The center of the viewport (probably the science target).
+     * @param positionAngle : The rotation of the viewport.
+     * @param sciencePositions : A set of offsets.
      * @return
      */
-    public BoundaryPosition checkBoundaries(Coordinates candidateCoordinates, Coordinates baseCoordinates, Option<Angle> positionAngle, Set<Offset> sciencePositions) {
+    public BoundaryPosition checkBoundaries(Coordinates candidateCoordinates, Coordinates baseCoordinates, Angle positionAngle, Set<Offset> sciencePositions) {
         // Calculate the difference between the coordinate and the observation's
         // base position.
         final CoordinateDiff diff = new CoordinateDiff(baseCoordinates, candidateCoordinates);
@@ -138,79 +126,27 @@ public class PatrolField {
 
         // Get a rotation to transform the shape to the position angle if one has been specified.
         final AffineTransform xform = new AffineTransform();
-        if (!positionAngle.isEmpty())
-            xform.rotate(-positionAngle.getValue().toRadians().getMagnitude());
+        xform.rotate(-positionAngle.toRadians().getMagnitude());
 
         Area a = new Area(calculateUnion(sciencePositions, getBlockedArea()));;
-        if (!positionAngle.isEmpty()) a.transform(xform);
-        else a = rotateAroundOrigin(a);
+        a.transform(xform);
         if (a.contains(p,q)) return BoundaryPosition.outside;
 
         a = new Area(calculateIntersection(sciencePositions, getSafe()));
-        if (!positionAngle.isEmpty()) a.transform(xform);
-        else a = rotateAroundOrigin(a);
+        a.transform(xform);
         if (a.contains(p, q)) return BoundaryPosition.inside;
 
         a = new Area(calculateIntersection(sciencePositions, getArea()));
-        if (!positionAngle.isEmpty()) a.transform(xform);
-        else a = rotateAroundOrigin(a);
+        a.transform(xform);
         if (a.contains(p, q)) return BoundaryPosition.innerBoundary;
 
         a = new Area(calculateIntersection(sciencePositions, getOuterLimit()));
-        if (!positionAngle.isEmpty()) a.transform(xform);
-        else a = rotateAroundOrigin(a);
+        a.transform(xform);
         if (a.contains(p, q)) return BoundaryPosition.outerBoundary;
 
         return BoundaryPosition.outside;
     }
 
-    /**
-     * Create a new shape by "rotating" a rectangle around the origin. This is a shortcut technique since using a
-     * rectangle makes this accomplishable using circle differences instead of actually having to rotate a volume.
-     */
-    private static Area rotateAroundOrigin(Rectangle2D rotRect) {
-        final double cx = rotRect.getMinX();
-        final double fx = rotRect.getMaxX();
-        final double cy = rotRect.getMinY();
-        final double fy = rotRect.getMaxY();
-
-        final double outerRadius = Math.sqrt(fx * fx + fy * fy);
-        final Ellipse2D.Double outer = new Ellipse2D.Double(-outerRadius, -outerRadius, 2*outerRadius, 2*outerRadius);
-
-        final double innerRadius = Math.sqrt(cx * cx + cy * cy);
-        final Ellipse2D.Double inner = new Ellipse2D.Double(-innerRadius, -innerRadius, 2*innerRadius, 2*innerRadius);
-
-        final Area a = new Area(outer);
-        a.subtract(new Area(inner));
-        return a;
-    }
-
-    /**
-     * Create a new shape by rotating an area around the origin.
-     * Note that if the area is a rectangle, the above rotateAroundOrigin method is used since it is far more efficient.
-     * Otherwise, we must use a sequence of AffineTransforms.
-     */
-    private static Area rotateAroundOrigin(Area a, double stepSizeInRads) {
-        if (a.isRectangular())
-            return rotateAroundOrigin(a.getBounds2D());
-
-        final Area annulus = new Area(a);
-        for (double rot=stepSizeInRads; rot < 2*Math.PI; rot += stepSizeInRads) {
-            final AffineTransform t = new AffineTransform();
-            t.rotate(rot);
-            final Area aRot = new Area(a);
-            aRot.transform(t);
-            annulus.add(aRot);
-        }
-        return annulus;
-    }
-
-    /**
-     * Convenience method to invoke rotateAroundOrigin with a default step size of 1 degree.
-     */
-    private static Area rotateAroundOrigin(Area a) {
-        return rotateAroundOrigin(a, Math.PI / 180.0);
-    }
 
     /**
      * Returns true if any guide stars are inside the inner boundary at any offset.

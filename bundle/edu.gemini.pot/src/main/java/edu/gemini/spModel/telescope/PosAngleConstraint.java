@@ -12,14 +12,6 @@ import java.util.List;
  * Constraint options on automatic position angle adjustments.
  */
 public enum PosAngleConstraint {
-    /** No constraint on adjusting pos angle. */
-    UNKNOWN() {
-        @Override
-        public String description() {
-            return "No constraint on adjusting position angle";
-        }
-    },
-
     /** The provided pos angle only. */
     FIXED() {
         @Override
@@ -56,7 +48,13 @@ public enum PosAngleConstraint {
         }
     },
 
+    /** Parallactic angle allows provided pos angle, or pos angle plus 180 deg. */
     PARALLACTIC_ANGLE() {
+        @Override
+        public ImList<Angle> steps(Angle start, Angle stepSize) {
+            return DefaultImList.create(start, start.add(Angle.ANGLE_PI));
+        }
+
         @Override
         public String description() { return "Use average parallactic angle"; }
     }

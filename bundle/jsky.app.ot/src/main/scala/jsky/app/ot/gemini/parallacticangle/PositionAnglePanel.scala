@@ -39,6 +39,9 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
 
   private object ui {
     val positionAngleConstraintComboBox = new EnableDisableComboBox[PosAngleConstraint](options)
+    // TODO: Remove this once the logic is fully implemented.
+    if (options.contains(PosAngleConstraint.UNBOUNDED))
+      positionAngleConstraintComboBox.disable(PosAngleConstraint.UNBOUNDED)
     layout(positionAngleConstraintComboBox) = new Constraints() {
       anchor = Anchor.NorthWest
       insets = new Insets(0, 0, 0, 15)
