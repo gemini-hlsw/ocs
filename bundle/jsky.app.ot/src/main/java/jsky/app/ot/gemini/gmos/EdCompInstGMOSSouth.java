@@ -196,8 +196,11 @@ public class EdCompInstGMOSSouth extends EdCompInstGMOS<InstGmosSouth> {
 
         // Add the property change listeners defined in InstGmosCommon.
         getDataObject().addPropertyChangeListener(InstGmosSouth.FPUNIT_PROP.getName(), updateParallacticAnglePCL);
-        getDataObject().addPropertyChangeListener(InstGmosSouth.FPUNIT_PROP.getName(), relativeTimeMenuPCL);
     }
 
+    @Override protected void cleanup() {
+        super.cleanup();
+        getDataObject().removePropertyChangeListener(InstGmosSouth.FPUNIT_PROP.getName(), updateParallacticAnglePCL);
+    }
 }
 

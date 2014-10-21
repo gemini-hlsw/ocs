@@ -7,11 +7,8 @@ package edu.gemini.spModel.gemini.gmos;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentBroadType;
 import edu.gemini.pot.sp.SPComponentType;
-import edu.gemini.shared.util.immutable.Function1;
+import edu.gemini.shared.util.immutable.*;
 import edu.gemini.skycalc.Angle;
-import edu.gemini.shared.util.immutable.None;
-import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.config.injector.ConfigInjector;
 import edu.gemini.spModel.config.injector.ConfigInjectorCalc3;
 import edu.gemini.spModel.config2.Config;
@@ -26,10 +23,7 @@ import edu.gemini.spModel.gemini.calunit.calibration.CalDictionary;
 import edu.gemini.spModel.gemini.parallacticangle.ParallacticAngleSupportInst;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
-import edu.gemini.spModel.inst.ParallacticAngleDuration;
-import edu.gemini.spModel.inst.ParallacticAngleSupport;
 import edu.gemini.spModel.inst.PositionAngleMode;
-import edu.gemini.spModel.obs.ObsTargetCalculatorService;
 import edu.gemini.spModel.obs.plannedtime.CommonStepCalculator;
 import edu.gemini.spModel.obs.plannedtime.ExposureCalculator;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTime;
@@ -50,7 +44,6 @@ import edu.gemini.spModel.telescope.IssPort;
 import edu.gemini.spModel.telescope.IssPortProvider;
 import edu.gemini.spModel.telescope.PosAngleConstraint;
 import edu.gemini.spModel.telescope.PosAngleConstraintAware;
-import edu.gemini.util.skycalc.calc.TargetCalculator;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
@@ -1039,29 +1032,6 @@ public abstract class InstGmosCommon<
         setIssPort(IssPort.getPort(name, oldValue));
     }
 
-    public PosAngleConstraint getPosAngleConstraint() {
-        return (_posAngleConstraint == null) ? PosAngleConstraint.FIXED : _posAngleConstraint;
-    }
-
-    public void setPosAngleConstraint(PosAngleConstraint newValue) {
-        PosAngleConstraint oldValue = getPosAngleConstraint();
-        if (oldValue != newValue) {
-            _posAngleConstraint = newValue;
-            firePropertyChange(POS_ANGLE_CONSTRAINT_PROP.getName(), oldValue, newValue);
-        }
-    }
-
-    private void _setPosAngleConstraint(String name) {
-        PosAngleConstraint oldValue = getPosAngleConstraint();
-        PosAngleConstraint newValue;
-        try {
-            newValue = PosAngleConstraint.valueOf(name);
-        } catch (Exception ex) {
-            newValue = oldValue;
-        }
-        setPosAngleConstraint(newValue);
-    }
-
     protected abstract GmosCommonType.StageModeBridge getStageModeBridge();
 
     /**
@@ -1983,7 +1953,7 @@ public abstract class InstGmosCommon<
     }
 
     // The reacquisition time, in seconds.
-    private final double REACQUISITION_TIME = 5.0 * 60;
+    private static final double REACQUISITION_TIME = 5.0 * 60;
 
     @Override
     public double getReacquisitionTime(ISPObservation obs) {
@@ -2004,16 +1974,41 @@ public abstract class InstGmosCommon<
         return !(_fpu.isImaging() || _fpuMode == GmosCommonType.FPUnitMode.CUSTOM_MASK);
     }
 
-    /**
-     * This needs to be overridden to support the PosAngleConstraint.
-     */
     @Override
     public void setPositionAngleMode(PositionAngleMode newValue) {
         PositionAngleMode oldValue = getPositionAngleMode();
         super.setPositionAngleMode(newValue);
+    }
 
-        if (!oldValue.equals(newValue) && newValue == PositionAngleMode.MEAN_PARALLACTIC_ANGLE)
-            setPosAngleConstraint(PosAngleConstraint.FIXED_180);
+    /**
+     * This needs to be overridden to support the PosAngleConstraint.
+     */
+    public PosAngleConstraint getPosAngleConstraint() {
+        return (_posAngleConstraint == null) ? PosAngleConstraint.FIXED : _posAngleConstraint;
+    }
+
+    public void setPosAngleConstraint(PosAngleConstraint newValue) {
+        PosAngleConstraint oldValue = getPosAngleConstraint();
+        if (!oldValue.equals(newValue)) {
+            _posAngleConstraint = newValue;
+            firePropertyChange(POS_ANGLE_CONSTRAINT_PROP.getName(), oldValue, newValue);
+        }
+    }
+
+    private void _setPosAngleConstraint(String name) {
+        PosAngleConstraint oldValue = getPosAngleConstraint();
+        PosAngleConstraint newValue;
+        try {
+            newValue = PosAngleConstraint.valueOf(name);
+        } catch (Exception ex) {
+            newValue = oldValue;
+        }
+        setPosAngleConstraint(newValue);
+    }
+
+    @Override
+    public String getPosAngleConstraintDescriptorKey() {
+        return POS_ANGLE_CONSTRAINT_PROP.getName();
     }
 
     // REL-814 Preserve the FPU Custom Mask Name

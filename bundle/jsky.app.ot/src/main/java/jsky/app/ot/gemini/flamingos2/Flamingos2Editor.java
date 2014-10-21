@@ -6,6 +6,7 @@ package jsky.app.ot.gemini.flamingos2;
 
 import com.jgoodies.forms.factories.DefaultComponentFactory;
 import edu.gemini.pot.sp.ISPObsComponent;
+import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.gui.ThinBorder;
 import edu.gemini.shared.gui.bean.*;
 import edu.gemini.shared.util.immutable.None;
@@ -14,12 +15,10 @@ import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.data.YesNoType;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.telescope.IssPort;
-import edu.gemini.spModel.telescope.PosAngleConstraint;
 import edu.gemini.spModel.type.SpTypeUtil;
 import jsky.app.ot.editor.eng.EngEditor;
 import jsky.app.ot.gemini.editor.ComponentEditor;
-import jsky.app.ot.gemini.parallacticangle.ParallacticAnglePanel;
-import jsky.app.ot.gemini.parallacticangle.ParallacticInstEditor;
+import jsky.app.ot.gemini.parallacticangle.PositionAnglePanel;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
@@ -36,7 +35,7 @@ import java.beans.PropertyDescriptor;
  *
  * (Work in progress: slated to replace EdCompInstFlamingos2, Flamingos2Form, and Flamingos2Form.jfd)
  */
-public class Flamingos2Editor extends ComponentEditor<ISPObsComponent, Flamingos2> implements EngEditor, ParallacticInstEditor {
+public class Flamingos2Editor extends ComponentEditor<ISPObsComponent, Flamingos2> implements EngEditor {
 
     private final class CustomMdfEnabler implements PropertyChangeListener {
         public void propertyChange(PropertyChangeEvent evt) {
@@ -134,27 +133,6 @@ public class Flamingos2Editor extends ComponentEditor<ISPObsComponent, Flamingos
 
             inst.removePropertyChangeListener(this);
             inst.setMosPreimaging(selected ? YesNoType.YES : YesNoType.NO);
-            inst.addPropertyChangeListener(this);
-        }
-    }
-
-    private class PosAngleConstraintChangeListener implements ItemListener, PropertyChangeListener {
-
-        public void propertyChange(PropertyChangeEvent evt) {
-            posAngleConstraint.removeItemListener(this);
-            posAngleConstraint.setSelected(getDataObject().getPosAngleConstraint() == PosAngleConstraint.FIXED_180);
-            posAngleConstraint.addItemListener(this);
-        }
-
-        public void itemStateChanged(ItemEvent e) {
-            JCheckBox cb = (JCheckBox) e.getSource();
-
-            Flamingos2 inst = getDataObject();
-
-            boolean selected = cb.isSelected();
-
-            inst.removePropertyChangeListener(this);
-            inst.setPosAngleConstraint(selected ? PosAngleConstraint.FIXED_180 : PosAngleConstraint.FIXED);
             inst.addPropertyChangeListener(this);
         }
     }
@@ -345,14 +323,11 @@ public class Flamingos2Editor extends ComponentEditor<ISPObsComponent, Flamingos
     private final ComboPropertyCtrl<Flamingos2, Flamingos2.Disperser> disperserCtrl;
     private final ComboPropertyCtrl<Flamingos2, Flamingos2.LyotWheel> lyotCtrl;
 
-    private final TextFieldPropertyCtrl<Flamingos2, Double> posAngleCtrl;
-    private final JCheckBox posAngleConstraint;
-    private final ParallacticAnglePanel parallacticAnglePanel;
+    private final PositionAnglePanel<Flamingos2, Flamingos2Editor> posAnglePanel;
 
     private final CustomMdfEnabler customMdfEnabler = new CustomMdfEnabler();
     private final ExposureTimeMessageUpdater exposureTimeMessageUpdater;
     private final PreImagingChangeListener preImagingListener;
-    private final PosAngleConstraintChangeListener posAngleConstraintListener;
 
     private final RadioPropertyCtrl<Flamingos2, Flamingos2.ReadMode> readModeCtrl;
     private final RadioPropertyCtrl<Flamingos2, IssPort> portCtrl;
@@ -372,18 +347,18 @@ public class Flamingos2Editor extends ComponentEditor<ISPObsComponent, Flamingos
     private static final int leftGapCol          = 3;
 
     private static final int centerWidgetCol     = 4;
-    private static final int centerUnitsCol      = 5;
-    private static final int centerGapCol        = 6;
+    private static final int centerGapCol        = 5;
 
-    private static final int rightLabelCol       = 7;
-    private static final int rightWidgetCol      = 8;
-    private static final int rightUnitsCol       = 9;
+    private static final int rightLabelCol       = 6;
+    private static final int rightWidgetCol      = 7;
+    private static final int rightUnitsCol       = 8;
 
     private static final int leftWidth           = 3;
-    private static final int centerWidth         = 2;
+    private static final int centerWidth         = 1;
     private static final int rightWidth          = 3;
     private static final int centerAndRightWidth = centerWidth + rightWidth + 1;
     private static final int colCount            = rightUnitsCol + 1;
+
 
     public Flamingos2Editor() {
         pan = new JPanel(new GridBagLayout());
@@ -446,18 +421,11 @@ public class Flamingos2Editor extends ComponentEditor<ISPObsComponent, Flamingos
         addCtrl(pan, leftLabelCol, row, filterCtrl);
 
         // Position Angle
-        pd = Flamingos2.POS_ANGLE_PROP;
-        posAngleCtrl = TextFieldPropertyCtrl.createDoubleInstance(pd, 1, 2);
-        posAngleCtrl.setColumns(6);
-        pan.add(posAngleCtrl.getComponent(), propWidgetGbc(centerWidgetCol, row));
-        pan.add(new JLabel("deg E of N"), propUnitsGbc(centerUnitsCol, row));
-
-        posAngleConstraint = new JCheckBox("Allow 180\u00ba change for guide star search");
-        posAngleConstraintListener = new PosAngleConstraintChangeListener();
-        posAngleConstraint.addItemListener(posAngleConstraintListener);
-        gbc = propWidgetGbc(rightLabelCol, row); gbc.gridwidth = rightWidth;
-        pan.add(posAngleConstraint, gbc);
-
+        posAnglePanel = PositionAnglePanel.apply(SPComponentType.INSTRUMENT_FLAMINGOS2);
+        gbc = propWidgetGbc(centerWidgetCol, row, centerAndRightWidth, 2);
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.insets = new Insets(0, 5, 0, 0);
+        pan.add(posAnglePanel.peer(), gbc);
         ++row;
 
         // REL-525: changed so that obsolete items are respected.
@@ -466,21 +434,15 @@ public class Flamingos2Editor extends ComponentEditor<ISPObsComponent, Flamingos
                 Flamingos2.LYOT_WHEEL_PROP,
                 SpTypeUtil.getSelectableItems((Class<Flamingos2.LyotWheel>) Flamingos2.LYOT_WHEEL_PROP.getPropertyType()).toArray());
         addCtrl(pan, leftLabelCol, row, lyotCtrl);
+        ++row;
 
         // Disperser falls into next row underneath.
         disperserCtrl = ComboPropertyCtrl.enumInstance(Flamingos2.DISPERSER_PROP);
-        gbc = propLabelGbc(leftLabelCol, row+1);
+        gbc = propLabelGbc(leftLabelCol, row);
         pan.add(new JLabel(Flamingos2.DISPERSER_PROP.getDisplayName()), gbc);
-        gbc = propWidgetGbc(leftWidgetCol, row+1);
+        gbc = propWidgetGbc(leftWidgetCol, row);
         pan.add(disperserCtrl.getComponent(), gbc);
-
-        // REL-1874: The panel for the parallactic angle feature.
-        // Must span two rows to accommodate the parallactic angle message.
-        parallacticAnglePanel = new ParallacticAnglePanel();
-        gbc = propWidgetGbc(centerWidgetCol, row, centerAndRightWidth, 2); gbc.anchor = GridBagConstraints.NORTHWEST; gbc.fill = GridBagConstraints.NONE;
-        pan.add(parallacticAnglePanel, gbc);
-
-        row += 2;
+        ++row;
 
         final JTabbedPane tabPane = new JTabbedPane();
 
@@ -552,6 +514,7 @@ public class Flamingos2Editor extends ComponentEditor<ISPObsComponent, Flamingos
         return pan;
     }
 
+
     @Override
     public void handlePreDataObjectUpdate(Flamingos2 inst) {
         if (inst == null) return;
@@ -559,8 +522,6 @@ public class Flamingos2Editor extends ComponentEditor<ISPObsComponent, Flamingos
         inst.removePropertyChangeListener(Flamingos2.READMODE_PROP.getName(), exposureTimeMessageUpdater);
         inst.removePropertyChangeListener(Flamingos2.FPU_PROP.getName(), customMdfEnabler);
         inst.removePropertyChangeListener(Flamingos2.MOS_PREIMAGING_PROP.getName(), preImagingListener);
-        inst.removePropertyChangeListener(Flamingos2.POS_ANGLE_CONSTRAINT_PROP.getName(), posAngleConstraintListener);
-//        eoff.handlePreDataObjectUpdate(inst, getProgData());
     }
 
     @Override
@@ -571,8 +532,6 @@ public class Flamingos2Editor extends ComponentEditor<ISPObsComponent, Flamingos
         filterCtrl.setBean(inst);
         disperserCtrl.setBean(inst);
         lyotCtrl.setBean(inst);
-        posAngleCtrl.setBean(inst);
-        posAngleConstraint.setSelected(inst.getPosAngleConstraint() == PosAngleConstraint.FIXED_180);
 
         expTimeCtrl.setBean(inst);
         readModeCtrl.setBean(inst);
@@ -590,61 +549,24 @@ public class Flamingos2Editor extends ComponentEditor<ISPObsComponent, Flamingos
         inst.addPropertyChangeListener(Flamingos2.FPU_PROP.getName(), customMdfEnabler);
         inst.addPropertyChangeListener(Flamingos2.READMODE_PROP.getName(), exposureTimeMessageUpdater);
         inst.addPropertyChangeListener(Flamingos2.MOS_PREIMAGING_PROP.getName(), preImagingListener);
-        inst.addPropertyChangeListener(Flamingos2.POS_ANGLE_CONSTRAINT_PROP.getName(), posAngleConstraintListener);
 
         preImaging.setSelected(inst.getMosPreimaging() == YesNoType.YES);
         customMdfEnabler.update(inst);
         exposureTimeMessageUpdater.update();
         messagePanel.update();
 
-
-        /**
-         * Parallactic angle setup.
-         */
-        parallacticAnglePanel.init(this, Site.GS);
+        posAnglePanel.init(this, Site.GS);
 
         // If the position angle mode or FPU mode properties change, force an update on the parallactic angle mode.
         final PropertyChangeListener updateParallacticAnglePCL = new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
-                parallacticAnglePanel.updateParallacticAngleMode();
+                posAnglePanel.updateParallacticControls();
             }
         };
         getDataObject().addPropertyChangeListener(Flamingos2.POS_ANGLE_PROP.getName(), updateParallacticAnglePCL);
         getDataObject().addPropertyChangeListener(Flamingos2.FPU_PROP.getName(),       updateParallacticAnglePCL);
-
-        // The setup and acquisition time is based on the disperser and FPU, so if these change, force a rebuild of
-        // the relative time menu.
-        final PropertyChangeListener relativeTimeMenuPCL = new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                parallacticAnglePanel.rebuildRelativeTimeMenu();
-            }
-        };
-        getDataObject().addPropertyChangeListener(Flamingos2.DISPERSER_PROP.getName(), relativeTimeMenuPCL);
-        getDataObject().addPropertyChangeListener(Flamingos2.FPU_PROP.getName(),       relativeTimeMenuPCL);
-
-        // TODO: Will this fix anything?
-        //getDataObject().addPropertyChangeListener(Flamingos2.POS_ANGLE_CONSTRAINT_PROP.getName(), new PropertyChangeListener() {
-        //    @Override public void propertyChange(PropertyChangeEvent evt) {
-        //        final PosAngleConstraint pac = (PosAngleConstraint) evt.getNewValue();
-        //        posAngleConstraint.setSelected(pac == PosAngleConstraint.FIXED_180);
-        //    }
-        //});
-    }
-
-    /**
-     * This is necessary for the parallactic angle panel.
-     */
-    @Override
-    public JTextField getPosAngleTextField() {
-        return posAngleCtrl.getTextField();
-    }
-
-    @Override
-    protected void updateEnabledState(boolean enabled) {
-        super.updateEnabledState(enabled);
-        parallacticAnglePanel.updateEnabledState(enabled);
+        getDataObject().addPropertyChangeListener(Flamingos2.DISPERSER_PROP.getName(), updateParallacticAnglePCL);
     }
 }
 

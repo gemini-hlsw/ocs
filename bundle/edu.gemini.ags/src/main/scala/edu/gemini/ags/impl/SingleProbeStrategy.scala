@@ -49,7 +49,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
 
   def estimate(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SkyObject]): AgsStrategy.Estimate = {
     val cv    = new CandidateValidator(params, mt, candidates)
-    val pac   = ctx.getPosAngleConstraint(UNKNOWN)
+    val pac   = ctx.getPosAngleConstraint(UNBOUNDED)
     val steps = pac.steps(ctx.getPositionAngle, params.stepSize).toList.asScala
 
     val anglesWithResults = steps.filter { angle => cv.exists(ctx.withPositionAngle(angle)) }
