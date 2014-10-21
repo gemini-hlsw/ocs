@@ -448,7 +448,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      * Initialize the calendar and the combo box for specifing a time
      */
     private void _initNonSiderealTimeWidgets() {
-        DefaultComboBoxModel model = new DefaultComboBoxModel(TimeConfig.values());
+        DefaultComboBoxModel model = new DefaultComboBoxModel<>(TimeConfig.values());
 
         //Add space for the editable field. We will use a String here
         //model.insertElementAt(timeFormatter.format(new Date()), 0);
@@ -545,7 +545,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         TargetEnvironment env = getDataObject().getTargetEnvironment();
                         GuideEnvironment ge = env.getGuideEnvironment();
                         ImList<GuideGroup> options = ge.getOptions();
-                        List<GuideGroup> list = new ArrayList<GuideGroup>(options.size());
+                        List<GuideGroup> list = new ArrayList<>(options.size());
                         for (GuideGroup g : options) {
                             list.add(g == _curGroup ? newGroup : g);
                         }
@@ -716,7 +716,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         // Get all the legally available guiders in the current context.
         Set<GuideProbe> avail = GuideProbeUtil.instance.getAvailableGuiders(getContextObservation());
-        Set<GuideProbe> guiders = new HashSet<GuideProbe>(avail);
+        Set<GuideProbe> guiders = new HashSet<>(avail);
         TargetEnvironment env = getDataObject().getTargetEnvironment();
 
         // Get the set of guiders that are referenced but not legal in this
@@ -739,7 +739,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
 
         // Sort the list of guiders.
-        List<GuideProbe> guidersList = new ArrayList<GuideProbe>(guiders);
+        List<GuideProbe> guidersList = new ArrayList<>(guiders);
         Collections.sort(guidersList, GuideProbe.KeyComparator.instance);
 
         // Make a list of PositionTypes that are legal in the current
@@ -777,7 +777,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     // When selected, update the currently selected name server
                     @Override
                     public void actionPerformed(ActionEvent actionEvent) {
-                        _selectedNameServer = new Some<Catalog>(ns);
+                        _selectedNameServer = new Some<>(ns);
                     }
                 });
             }};
@@ -787,7 +787,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         // Set the initial name server options
         if (nameServers.size() > 0) {
-            _selectedNameServer = new Some<Catalog>(nameServers.get(0));
+            _selectedNameServer = new Some<>(nameServers.get(0));
             grp.setSelected(((JMenuItem) _w.nameServer.getMenuComponent(0)).getModel(), true);
         }
     }
@@ -806,9 +806,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 if (group == null) {
                     return None.instance();
                 }
-                return new Some<TargetClipboard>(new TargetClipboard(group));
+                return new Some<>(new TargetClipboard(group));
             }
-            return new Some<TargetClipboard>(new TargetClipboard(target));
+            return new Some<>(new TargetClipboard(target));
         }
 
         TargetClipboard(SPTarget spTarget) {
@@ -842,7 +842,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         TargetEnvironment env = dataObject.getTargetEnvironment();
                         GuideEnvironment ge = dataObject.getTargetEnvironment().getGuideEnvironment();
                         ImList<GuideGroup> options = ge.getOptions();
-                        ArrayList<GuideGroup> list = new ArrayList<GuideGroup>(options.size());
+                        ArrayList<GuideGroup> list = new ArrayList<>(options.size());
                         for (GuideGroup gg : options) {
                             list.add(gg == group ? newGroup : gg);
                         }
@@ -882,7 +882,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         // GuideTargets list.
         boolean duplicated = false;
         env.getOrCreatePrimaryGuideGroup();
-        List<GuideGroup> groups = new ArrayList<GuideGroup>();
+        List<GuideGroup> groups = new ArrayList<>();
         for (GuideGroup group : env.getGroups()) {
             for (GuideProbeTargets gt : group) {
                 if (gt.getOptions().contains(target)) {
@@ -907,7 +907,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     // Duplicate the selected group
     private void _duplicateSelectedGroup(TargetObsComp dataObject, GuideGroup group) {
         TargetEnvironment env = dataObject.getTargetEnvironment();
-        List<GuideGroup> groups = new ArrayList<GuideGroup>();
+        List<GuideGroup> groups = new ArrayList<>();
         groups.addAll(env.getGroups().toList());
         groups.add(group.cloneTargets());
         env = env.setGuideEnvironment(env.getGuideEnvironment().setOptions(DefaultImList.create(groups)));
@@ -931,7 +931,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         clipboard.paste(obsComponent, dataObject);
     }
 
-    // Try to resolve the name in the name field to RA,Dec coorinates and insert the result in
+    // Try to resolve the name in the name field to RA,Dec coordinates and insert the result in
     // the RA,Dec text boxes.
     private void _resolveName(HorizonsAction.Type operationType, final ResolveNameListener listener) {
         String name = _w.targetName.getText().trim();
@@ -1457,8 +1457,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         TargetEnvironment env = obsComp.getTargetEnvironment();
 
         if (inst.hasGuideProbes()) {
-            List<GuideProbe> guiders;
-            guiders = new ArrayList<GuideProbe>(env.getGuideEnvironment().getActiveGuiders());
+            List<GuideProbe> guiders = new ArrayList<>(env.getGuideEnvironment().getActiveGuiders());
             Collections.sort(guiders, GuideProbe.KeyComparator.instance);
 
             for (final GuideProbe probe : guiders) {
@@ -1896,7 +1895,13 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             SPTarget base = env.getBase();
             base.setTargetWithJ2000(basePos.getRaDeg(), basePos.getDecDeg());
         } else if (w == _w.resolveButton) {
-            _resolveName(HorizonsAction.Type.GET_ORBITAL_ELEMENTS, null);
+            // REL-1063 Fix OT nonsidereal Solar System Object Horizons name resolution
+            if (_curPos.getTarget() instanceof NamedTarget) {
+                // For named objects like Moon, Saturn, etc don't get the orbital elements, just the position
+                _resolveName(HorizonsAction.Type.UPDATE_POSITION, null);
+            } else {
+                _resolveName(HorizonsAction.Type.GET_ORBITAL_ELEMENTS, null);
+            }
         } else if (w == _w.timeRangePlotButton) {
             _resolveName(HorizonsAction.Type.PLOT_EPHEMERIS, null);
         } else if (w == _w.updateRaDecButton) {
@@ -2048,7 +2053,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private class HorizonsActionContainer {
 
         public HashMap<HorizonsAction.Type, HorizonsAction> getActions() {
-            HashMap<HorizonsAction.Type, HorizonsAction> actions = new HashMap<HorizonsAction.Type, HorizonsAction>();
+            HashMap<HorizonsAction.Type, HorizonsAction> actions = new HashMap<>();
             actions.put(HorizonsAction.Type.GET_ORBITAL_ELEMENTS,
                     new UpdateOrbitalElements());
             actions.put(HorizonsAction.Type.UPDATE_POSITION,
