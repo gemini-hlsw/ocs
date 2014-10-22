@@ -54,33 +54,9 @@ package object common {
   implicit def pimpObjectInputStream(ois:ObjectInputStream) = new {
     def next[A]:A = {
       val obj = ois.readObject()
-//      println("*** GOT PAYLOAD " + obj)
       obj.asInstanceOf[A]
     }
   }
-
-//    def readBase64[A]:A = {
-//      val bis = new ByteArrayInputStream(new BASE64Decoder().decodeBuffer(is))
-//      val ois = new ObjectInputStream(bis) {
-//
-//        // Override to fall back on the current classloader, since ObjectInputStream pulls
-//        // one out of the ether and it's not really possible to know what to expect.
-//        override def resolveClass(desc:ObjectStreamClass):Class[_] =
-//          try {
-//            super.resolveClass(desc);
-//          } catch {
-//            case cnfe: ClassNotFoundException =>
-//              Class.forName(desc.getName, false, getClass.getClassLoader)
-//          }
-//        }
-//
-//      val obj = ois.readObject()
-//
-//      println("*** GOT PAYLOAD " + obj)
-//
-//      obj.asInstanceOf[A]
-//    }
-//  }
 
   def closing[A <: { def close():Unit }, B](a:A)(f: A => B):B = try {
     f(a)
