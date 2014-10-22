@@ -17,11 +17,11 @@ package object common {
     case e:Exception => e.left[A]
   }
 
-  implicit def pimpTry[A](ta:Try[A]) = new {
+  implicit class TryOps[A](ta:Try[A]) {
     def get:A = ta.fold(e => throw e, identity)
   }
 
-  implicit def pimpOutputStream(os:OutputStream) = new {
+  implicit class OutputStreamOps(os:OutputStream) {
     def writeBase64(as: Any*) {
       val bos = new ByteArrayOutputStream
       val oos = new ObjectOutputStream(bos)
@@ -32,7 +32,7 @@ package object common {
     }
   }
 
-  implicit def pimpInputStream(is:InputStream) = new {
+  implicit class InputStreamOps(is:InputStream) {
 
     def readBase64:ObjectInputStream = {
       new ObjectInputStream(new ByteArrayInputStream(new BASE64Decoder().decodeBuffer(is))) {
@@ -51,7 +51,7 @@ package object common {
 
   }
 
-  implicit def pimpObjectInputStream(ois:ObjectInputStream) = new {
+  implicit class ObjectInputStreamOps(ois:ObjectInputStream) {
     def next[A]:A = {
       val obj = ois.readObject()
       obj.asInstanceOf[A]
