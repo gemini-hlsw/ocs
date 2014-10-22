@@ -133,9 +133,9 @@ class TrpcClient private (host: String, port: Int, connectTimeout: Int, readTime
           if (Log.isLoggable(Level.FINE))
             Log.fine("Sending %d principals:".format(keys.size) + keys.map(p => "\n\t" + p))
 
-          closing(conn.getOutputStream)(_.writeBase64(Version.current, (args, keys))) // note that args may be null
+          closing(conn.getOutputStream)(_.writeRaw(Version.current, (args, keys))) // note that args may be null
           conn.getResponseCode match {
-            case HttpServletResponse.SC_OK => closing(conn.getInputStream)(_.readBase64.next[Try[AnyRef]]) match {
+            case HttpServletResponse.SC_OK => closing(conn.getInputStream)(_.readRaw.next[Try[AnyRef]]) match {
               case \/-(a) => a
               case -\/(e) =>
                 val localFrames = new Exception().getStackTrace.drop(2) // throw away the proxy frames (?)

@@ -7,6 +7,8 @@ import sun.misc.{BASE64Decoder, BASE64Encoder}
 
 package object common {
 
+  val BufSize = 1024 * 16 // ok?
+
   type Try[A] = Exception \/ A
 
   def lift[A](a: => A):Try[A] = catching(a.right[Exception])
@@ -22,20 +24,18 @@ package object common {
   }
 
   implicit class OutputStreamOps(os:OutputStream) {
-    def writeBase64(as: Any*) {
-      val bos = new ByteArrayOutputStream
-      val oos = new ObjectOutputStream(bos)
-      as.foreach(oos.writeObject)
-      oos.close
-      bos.close
-      new BASE64Encoder().encode(bos.toByteArray, os)
-    }
+    def writeRaw(as: Any*): Unit =
+      closing(new BufferedOutputStream(os, BufSize)) { os =>
+        closing(new ObjectOutputStream(os)) {
+          oos => as.foreach(oos.writeObject)
+        }
+      }
   }
 
   implicit class InputStreamOps(is:InputStream) {
 
-    def readBase64:ObjectInputStream = {
-      new ObjectInputStream(new ByteArrayInputStream(new BASE64Decoder().decodeBuffer(is))) {
+    def readRaw:ObjectInputStream = {
+      new ObjectInputStream(new BufferedInputStream(is, BufSize)) {
 
         // Override to fall back on the current classloader, since ObjectInputStream pulls
         // one out of the ether and it's not really possible to know what to expect.

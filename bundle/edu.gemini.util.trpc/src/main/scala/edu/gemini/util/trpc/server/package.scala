@@ -23,7 +23,7 @@ package object server {
       lift {
 
         // Get our object stream
-        val ios = req.getInputStream.readBase64
+        val ios = req.getInputStream.readRaw
 
         // Check serial compatibility
         try {
