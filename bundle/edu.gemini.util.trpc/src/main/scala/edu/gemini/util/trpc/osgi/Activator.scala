@@ -46,9 +46,17 @@ class Activator extends BundleActivator with ExternalStorage {
   def start(context: BundleContext) {
     this.context = context
 
-    val BUNDLE_PROP_DIR = "edu.gemini.spdb.dir" // Same location as the SPDB
-    val root:File = Option(context.getProperty(BUNDLE_PROP_DIR)).fold(getExternalDataFile(context, "spdb"))(new File(_))
-    val file:File = new File(OcsVersionUtil.getVersionDir(root, Version.current), "auth.ser")
+    // Keychain is in permanent storage, except for SPDB in which case it lives with the other
+    // data files. It's not entirely clear that this is what we want; special SPDB handling is
+    // problematic generally and should be revisited. Migration steps are not provided; this will
+    // be handled internally in KeyChain should the need arise.
+    val file: File = {
+      val spdbProp = "edu.gemini.spdb.dir" // Same as the SPDB
+      val fileName = "auth.ser"
+      Option(context.getProperty(spdbProp)).fold(
+        getPermanentDataFile(context, fileName, Nil))(root =>
+        new File(OcsVersionUtil.getVersionDir(new File(root), Version.current), fileName))
+    }
     file.getParentFile.mkdirs()
     Log.info(s"TRPC storage is at ${file.getAbsolutePath}")
 

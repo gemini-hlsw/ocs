@@ -41,19 +41,17 @@ trait ExternalStorage {
     bundleRootDir
   }
 
-  def getPermanentDataFile(context: BundleContext, name: String, migrationSteps: Option[Seq[MigrationStep]] = None): File = {
+  def getPermanentDataFile(context: BundleContext, name: String, migrationSteps: List[MigrationStep]): File = {
     val root = getPermanentDataRoot(context)
     val file = new File(root, name)
     if (file.exists()) file else migrate(root, name, migrationSteps)
   }
 
-  private def migrate(root: File, name: String, migrationSteps: Option[Seq[MigrationStep]]): File = {
-    migrationSteps.map {
-      _.foreach { step =>
-        val from = new File(root, step.fromName)
-        val to = new File(root, step.toName)
-        if (from.exists() && !to.exists()) step.migrate(from, to)
-      }
+  private def migrate(root: File, name: String, migrationSteps: List[MigrationStep]): File = {
+    migrationSteps foreach { step =>
+      val from = new File(root, step.fromName)
+      val to = new File(root, step.toName)
+      if (from.exists() && !to.exists()) step.migrate(from, to)
     }
     new File(root, name)
   }
