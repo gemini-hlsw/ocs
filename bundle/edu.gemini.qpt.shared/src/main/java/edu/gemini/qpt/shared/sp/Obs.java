@@ -153,33 +153,30 @@ public final class Obs implements Serializable, Comparable<Obs> {
 
         }
 
-        private static int classWeight(Enum c) {
-			Integer ret = ORDER.get(c.getClass());
-            if (ret == null) {
-                // if not found try an additional lookup with the declaring class (covers specialised enums that have their own implementation class
-                // e.g. Niri.Filter.NBF_H20.getClass() is Niri$Filter$1; getDeclaringClass() is Niri$Filter (as expected)
-                ret = ORDER.get(c.getDeclaringClass());
+        private static int classWeight(final Enum c) {
+			final Integer ret = ORDER.get(c.getClass());
+            if (ret != null) {
+                // ok, we have a specific order for this class
+                return ret;
+            } else {
+                // if not found, try an additional lookup with the declaring class (this covers specialised enums that
+                // have their own implementation class. E.g. Niri.Filter.NBF_H20.getClass() is Niri$Filter$1;
+                // getDeclaringClass() is Niri$Filter (as expected)
+                return ORDER.get(c.getDeclaringClass());
             }
-			if (ret == null) {
-                // order must be defined or values will be lost in the tree set; from the TreeSet doc:
-                // "two elements that are deemed equal by this method are, from the standpoint of the set, equal"
-                LOGGER.warning("No implicit ordering for class " + c.getClass().getName());
-                ret = c.hashCode(); // emergency fallback..
-			}
-			return ret;
 		}
 
 		private static final long serialVersionUID = 1L;
-		public int compare(Enum o1, Enum o2) {
-
-			Class<? extends Enum> c1 = o1.getClass();
-			Class<? extends Enum> c2 = o2.getClass();
-			if (c1 != c2) {
-				int w1 = classWeight(o1);
-				int w2 = classWeight(o2);
+		public int compare(final Enum o1, final Enum o2) {
+            final int w1 = classWeight(o1);
+            final int w2 = classWeight(o2);
+			if (w1 != w2) {
+                // for enums of different type use their class weight for sorting
 				return w1 - w2;
-			}
-			return o1.compareTo(o2);
+			} else {
+                // for enums of same type use their natural order
+                return o1.compareTo(o2);
+            }
 		}
 	}
 

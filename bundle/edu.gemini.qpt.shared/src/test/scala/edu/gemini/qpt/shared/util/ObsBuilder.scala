@@ -3,9 +3,8 @@ package edu.gemini.qpt.shared.util
 import edu.gemini.ags.api.AgsAnalysis
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.qpt.shared.sp.{Group, Obs, Prog}
-import edu.gemini.qpt.shared.util.ObsBuilder.E
 import edu.gemini.shared.util.immutable.DefaultImList
-import edu.gemini.spModel.core.SPProgramID
+import edu.gemini.spModel.core.{Coordinates, SPProgramID}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.obs.plannedtime.PlannedStepSummary
 import edu.gemini.spModel.obsclass.ObsClass
@@ -17,6 +16,7 @@ import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.too.TooType
 
 import scala.collection.JavaConverters._
+
 
 /**
  * A builder for mini model observations to simplify on-the-fly creations of observations, e.g. for testing.
@@ -46,7 +46,7 @@ case class ObsBuilder(
   ao: Boolean = false,
   meanParallacticAngle: Boolean = false,
   customMask: String = null,
-  options: Set[E] = Set[E](),
+  options: Set[Enum[_]] = Set(),
   instrument: Array[SPComponentType] = Array(),
   analysis: List[AgsAnalysis] = Nil
 )
@@ -55,7 +55,7 @@ case class ObsBuilder(
   def apply: Obs = {
     // create a unique number for this observation (used in equals on Obs object)
     // if none has been set by user
-    val nr = if (obsNumber == -1) ObsBuilder.curCounter else obsNumber
+    val nr = if (obsNumber == -1) ObsBuilder.curCounter() else obsNumber
     new Obs(
       prog,
       group,
@@ -68,7 +68,7 @@ case class ObsBuilder(
       obsClass,
       targetEnvironment,
       instrument,
-      options.asJava,
+      ObsBuilder.javaOptionsSet(options),
       customMask,
       centralWavelength,
       steps,
@@ -94,10 +94,11 @@ case class ObsBuilder(
   def setObsStatus(s: ObservationStatus) = copy(obsStatus = s)
   def setObsClass(c: ObsClass) = copy(obsClass = c)
   def setRa(ra: Double) = copy(targetEnvironment = TargetEnvironment.create(new SPTarget(ra*15, 0)))
+  def setCoordinates(coords: Coordinates) = copy(targetEnvironment = TargetEnvironment.create(new SPTarget(coords.ra.toAngle.toDegrees, coords.dec.toAngle.toDegrees)))
   def setTargetEnvironment(t: TargetEnvironment) = copy(targetEnvironment = t)
   def setInstrument(i: Array[SPComponentType]) = copy(instrument = i)
   def setInstrument(i: SPComponentType) = copy(instrument = Array(i))
-  def setOptions(o: Set[E]) = { copy(options = o.toSet); this}
+  def setOptions(o: Set[Enum[_]]) = copy(options = o)
   def setCustomMask(m: String) = copy(customMask = m)
   def setCentralWavelength(w: Double) = copy(centralWavelength = w)
   def setPlannedSteps(s: PlannedStepSummary)  = copy(steps = s)
@@ -108,6 +109,7 @@ case class ObsBuilder(
   def setAgsAnalysis(a : List[AgsAnalysis]) = copy(analysis = a)
 }
 
+
 /** Some static stuff. */
 object ObsBuilder {
   def curCounter(): Int = {
@@ -117,6 +119,11 @@ object ObsBuilder {
     }
   }
   private var obsCounter = 0
+
+  // existential type that represents java's Enum<?>
   private type E = Enum[T] forSome { type T <: Enum[T] }
+  def javaOptionsSet(o: Set[Enum[_]]) = new java.util.HashSet[E]() {{ o.foreach(x => add(x.asInstanceOf[E])) }}
+
 }
+
 
