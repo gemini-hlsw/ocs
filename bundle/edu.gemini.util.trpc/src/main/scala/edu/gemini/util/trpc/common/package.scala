@@ -3,7 +3,6 @@ package edu.gemini.util.trpc
 import scalaz._
 import Scalaz._
 import java.io._
-import sun.misc.{BASE64Decoder, BASE64Encoder}
 
 package object common {
 
