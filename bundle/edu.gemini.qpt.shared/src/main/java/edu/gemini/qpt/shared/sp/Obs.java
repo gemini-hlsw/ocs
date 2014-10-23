@@ -185,7 +185,7 @@ public final class Obs implements Serializable, Comparable<Obs> {
                 // for different enums with a defined weight use their class weight for sorting
                 return w1 - w2;
             } else {
-                // for enums of same type use their natural order
+                // same weight means same enum type: use their natural order
                 return o1.compareTo(o2);
             }
             // phew..
