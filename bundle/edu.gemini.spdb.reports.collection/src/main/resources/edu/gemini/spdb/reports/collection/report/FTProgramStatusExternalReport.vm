@@ -30,12 +30,12 @@
 	<table>
 		<tr>
 			<td><img SRC="http://www.gemini.edu/sciops/schedules/mayacal.gif" ALIGN="LEFT" width="243" height="84" alt="[Mayan calendar]"></td>
-		    <td width="100%" align="center"><h1><i>Fast Turnaround Summary : Semester $semester $sites</i></h1></td>
+		    <td width="100%" align="center"><h1><i>Fast Turnaround Queue Summary : Semester $semester $sites</i></h1></td>
 		</tr>
 	</table>
 
 	<p>
-		The data shown in the tables below summarise the programs that have been accpeted as "Fast Turnaround" (FT) proposals on $sites.
+		The tables below summarise the programs that constitute the Fast Turnaround program queue on $sites.
     </p>
     <p>
 		<font color="red"><b>
