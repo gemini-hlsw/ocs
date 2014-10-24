@@ -211,6 +211,14 @@ object Filter {
     def highest = RA.MaxValue
     def getter = {o: Obs => if (o.getDec == 0 && o.getRa == 0) -0.001 else o.getRa/15 }
     override def desc = "Filter for target right ascension, wraps around 24hrs if min > max (e.g. [18..5])."
+    override def predicate(o: Obs) = {
+      val ra = getter(o)
+      if (min <= max) {
+        min <= ra && ra < max
+      } else {
+        (0.0 <= ra && ra < max) || (min <= ra)
+      }
+    }
   }
 
   object Dec {
