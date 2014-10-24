@@ -165,9 +165,15 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
     })
 
     // Reset the combo box so that all of the options are enabled by default.
+    // TODO: When background AGS is implemented, we can remove the deafTo + listenTo lines, as well as the
+    // disabling of the positionAngleTextField.
+    deafTo(ui.positionAngleConstraintComboBox.selection)
     ui.positionAngleConstraintComboBox.reset()
     ui.positionAngleConstraintComboBox.selection.item = instrument.getPosAngleConstraint
     ui.positionAngleTextField.text                    = numberFormatter.format(instrument.getPosAngle)
+    if (instrument.getPosAngleConstraint == PosAngleConstraint.UNBOUNDED)
+      ui.positionAngleTextField.enabled = false
+    listenTo(ui.positionAngleConstraintComboBox.selection)
 
     // Turn on the parallactic angle changing event handling.
     ui.parallacticAngleControlsOpt.foreach(p => listenTo(p))

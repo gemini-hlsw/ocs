@@ -1061,8 +1061,10 @@ public final class SPTarget extends WatchablePos {
     public Angle calculatePositionAngle(Coordinates base) {
         double ra1  = base.getRa().toRadians().getMagnitude();
         double dec1 = base.getDec().toRadians().getMagnitude();
-        double ra2  = _target.getC1().getAs(Units.RADIANS);
-        double dec2 = _target.getC2().getAs(Units.RADIANS);
+        //double ra2  = _target.getC1().getAs(Units.RADIANS);
+        //double dec2 = _target.getC2().getAs(Units.RADIANS);
+        double ra2  = new Angle(_target.getC1().getAs(Units.DEGREES), Angle.Unit.DEGREES).toRadians().getMagnitude();
+        double dec2 = new Angle(_target.getC2().getAs(Units.DEGREES), Angle.Unit.DEGREES).toRadians().getMagnitude();
 
         double raDiff = ra2 - ra1;
         double angle = Math.atan2(Math.sin(raDiff), Math.cos(dec1) * Math.tan(dec2) - Math.sin(dec1) * Math.cos(raDiff));
