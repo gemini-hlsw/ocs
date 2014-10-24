@@ -205,4 +205,5 @@ class SingleProbeTest {
   @Test def testBaseRotated(): Unit                       = testAll(_.testBaseRotated())
   @Test def testBaseRotatedOneOffset(): Unit              = testAll(_.testBaseRotatedOneOffset())
   @Test def testBaseRotatedTwoIntersectingOffsets(): Unit = testAll(_.testBaseRotatedTwoIntersectingOffsets())
+  @Test def testBaseUnboundedPosAngleConstraint(): Unit = testAll(_.testBaseUnboundedPosAngleConstraint)
 }
