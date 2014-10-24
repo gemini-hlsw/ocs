@@ -460,7 +460,7 @@ final class EdTemplateParameters extends JPanel {
 
         paramEditor.removeAll();
         paramEditor.add(new TemplateParametersEditor(getSelectedParameters()).peer(), BorderLayout.CENTER);
-        paramEditor.validate();
+        paramEditor.revalidate();
         paramEditor.repaint();
     }
 
@@ -639,21 +639,6 @@ class GBC extends GridBagConstraints {
         insets = new Insets(0, 3, 1, 3);
         if (grab)
             this.weightx = 100;
-    }
-
-    public GBC(int gridx, int gridy, Insets insets) {
-        this(gridx, gridy, 1, 1, insets);
-    }
-
-    public GBC(int gridx, int gridy, Insets insets, boolean grab) {
-        this(gridx, gridy, 1, 1, insets);
-        if (grab)
-            this.weightx = 100;
-    }
-
-    public GBC(int gridx, int gridy, int anchor) {
-        this(gridx, gridy);
-        this.anchor = anchor;
     }
 
     public GBC(int gridx, int gridy, int xspan, int yspan, Insets insets) {
