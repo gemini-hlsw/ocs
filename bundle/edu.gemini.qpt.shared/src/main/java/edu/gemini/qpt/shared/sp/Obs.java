@@ -170,23 +170,20 @@ public final class Obs implements Serializable, Comparable<Obs> {
         public int compare(final Enum o1, final Enum o2) {
             final Integer w1 = classWeight(o1);
             final Integer w2 = classWeight(o2);
-            if (w1 == null && w2 == null) {
-                // no weight defined for both enums: order them by class and ordinal
+            if (w1 != null && w2 != null && !w1.equals(w2)) {
+                // for different enums with a defined weight use their class weight for sorting
+                return w1 - w2;
+            } else if (w1 == null && w2 != null) {
+                // put enums without weight last
+                return 1;
+            } else if (w1 != null && w2 == null) {
+                // put enums without weight last
+                return -1;
+            } else  {
+                // no weight defined for either enum or the weights are equal: order them by class and ordinal
                 final String s1 = o1.getClass().getName() + o1.ordinal();
                 final String s2 = o2.getClass().getName() + o2.ordinal();
                 return s1.compareTo(s2);
-            } else if (w1 == null) {
-                // put enums without weight last
-                return 1;
-            } else if (w2 == null) {
-                // put enums without weight last
-                return -1;
-            } else if (!w1.equals(w2)) {
-                // for different enums with a defined weight use their class weight for sorting
-                return w1 - w2;
-            } else {
-                // same weight means same enum type: use their natural order
-                return o1.compareTo(o2);
             }
             // phew..
         }
