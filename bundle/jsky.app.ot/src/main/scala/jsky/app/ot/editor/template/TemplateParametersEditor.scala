@@ -341,7 +341,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
   }
 
 
-  object ConditionsPanel extends ColumnPanel {
+  object ConditionsAndTimePanel extends ColumnPanel {
     border = BorderFactory.createEmptyBorder(0, 50, 0, 50)
 
     private def mkCombo[A >: Null <: PercentageContainer](opts: Seq[A])(get: SPSiteQuality => A, set: (SPSiteQuality, A) => Unit): BoundNullableCombo[A] = {
@@ -365,16 +365,6 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       )
     }
 
-    val rows = List(
-      Row("CC", mkCombo(CloudCover.values   )(_.getCloudCover,    _.setCloudCover(_)   )),
-      Row("IQ", mkCombo(ImageQuality.values )(_.getImageQuality,  _.setImageQuality(_) )),
-      Row("SB", mkCombo(SkyBackground.values)(_.getSkyBackground, _.setSkyBackground(_))),
-      Row("WV", mkCombo(WaterVapor.values   )(_.getWaterVapor,    _.setWaterVapor(_)   ))
-    )
-    layoutRows()
-  }
-
-  object TimePanel extends ColumnPanel {
     val timeField = new BoundTextField[Double](4)(
       read = _.toDouble,
       show = timeAmount => f"$timeAmount%.2f",
@@ -389,12 +379,19 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       set  = (tp, units) => tp.copy(new TimeValue(tp.getTime.getTimeAmount, units))
     )
 
-    val rows = List(Row("Time", timeField, unitsCombo))
+    val rows = List(
+      Row("Cloud Cover",    mkCombo(CloudCover.values   )(_.getCloudCover,    _.setCloudCover(_)   )),
+      Row("Image Quality",  mkCombo(ImageQuality.values )(_.getImageQuality,  _.setImageQuality(_) )),
+      Row("Sky Background", mkCombo(SkyBackground.values)(_.getSkyBackground, _.setSkyBackground(_))),
+      Row("Water Vapor",    mkCombo(WaterVapor.values   )(_.getWaterVapor,    _.setWaterVapor(_)   )),
+      Row(" "),
+      Row("Phase 1 Time",   timeField, unitsCombo)
+    )
     layoutRows()
   }
 
   val rows = List(
-    Row(TargetPanel, ConditionsPanel, TimePanel)
+    Row(TargetPanel, ConditionsAndTimePanel)
   )
 
   layoutRows()
