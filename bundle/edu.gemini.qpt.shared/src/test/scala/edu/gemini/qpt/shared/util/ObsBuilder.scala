@@ -95,7 +95,6 @@ case class ObsBuilder(
   def setObsClass(c: ObsClass) = copy(obsClass = c)
   def setRa(ra: Double) = copy(targetEnvironment = TargetEnvironment.create(new SPTarget(ra*15, 0)))
   def setCoordinates(coords: Coordinates) = copy(targetEnvironment = TargetEnvironment.create(new SPTarget(coords.ra.toAngle.toDegrees, coords.dec.toAngle.toDegrees)))
-  def setRa(ra: Double) = copy(targetEnvironment = TargetEnvironment.create(new SPTarget(ra*15, 1.0)))
   def setTargetEnvironment(t: TargetEnvironment) = copy(targetEnvironment = t)
   def setInstrument(i: Array[SPComponentType]) = copy(instrument = i)
   def setInstrument(i: SPComponentType) = copy(instrument = Array(i))

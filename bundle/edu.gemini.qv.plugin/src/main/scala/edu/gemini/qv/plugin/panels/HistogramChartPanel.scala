@@ -8,7 +8,7 @@ import edu.gemini.qv.plugin.chart.ui.{JFChartComponent, ChartCategoriesEditor}
 import edu.gemini.qv.plugin.charts.HistogramChart
 import edu.gemini.qv.plugin.data._
 import edu.gemini.qv.plugin.filter.core.Filter
-import edu.gemini.qv.plugin.filter.core.Filter.RA
+import edu.gemini.qv.plugin.filter.core.Filter.{HasDummyTarget, RA}
 import edu.gemini.qv.plugin.QvContext.HistogramChartType
 import edu.gemini.qv.plugin.{ReferenceDateChanged, QvContext}
 import edu.gemini.qv.plugin.selector.OptionsSelector._
@@ -81,16 +81,17 @@ class HistogramChartPanel(ctx: QvContext) extends GridBagPanel {
       val min = minRa
       val max = maxRa
       val limitedGroups = axis.groups.filter {
-        case RA(fmin, fmax) if min <= max => fmax > min && fmin < max
-        case RA(fmin, fmax)               => fmin >= 0
+        case HasDummyTarget(_)                => min == RA.MinValue && max == RA.MaxValue
+        case RA(fmin, fmax)     if min <= max => fmax > min && fmin < max
+        case RA(fmin, fmax)                   => fmin >= 0
       }
       new Axis(axis.label, limitedGroups)
     } else axis
   }
 
-  private def minRa = raOnly.map({case RA(fmin, _) => fmin}).reduceLeftOption(_ min _).getOrElse(-1.0)
+  private def minRa = raOnly.map({case RA(fmin, _) => fmin}).reduceLeftOption(_ min _).getOrElse(RA.MinValue)
 
-  private def maxRa = raOnly.map({case RA(_, fmax) => fmax}).reduceLeftOption(_ max _).getOrElse(24.0)
+  private def maxRa = raOnly.map({case RA(_, fmax) => fmax}).reduceLeftOption(_ max _).getOrElse(RA.MaxValue)
 
   private def raOnly: Set[Filter] = ctx.mainFilter.map(f => f.elements.filter({
     case RA(_, _) => true

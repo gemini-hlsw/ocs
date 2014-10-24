@@ -5,7 +5,7 @@ import edu.gemini.qv.plugin.chart._
 import edu.gemini.qv.plugin.charts.util.{QvChartFactory, ColorCoding}
 import edu.gemini.qv.plugin.data.{CategorizedXYValues, FilterProvider}
 import edu.gemini.qv.plugin.filter.core.Filter
-import edu.gemini.qv.plugin.filter.core.Filter.RA
+import edu.gemini.qv.plugin.filter.core.Filter.{HasDummyTarget, RA}
 import edu.gemini.qv.plugin.QvContext
 import edu.gemini.qv.plugin.selector.OptionsSelector
 import edu.gemini.qv.plugin.selector.OptionsSelector.{DarkHours, AvailableHours, RaAsLst, EmptyCategories}
@@ -112,10 +112,7 @@ class HistogramChart(ctx: QvContext, xAxis: Axis, yAxis: Axis, calculation: Calc
   private def xName(f: Filter) = f match {
     case f: RA if details.isSelected(RaAsLst) =>
       val optLst = SemesterData.lst(ctx.site, range, f)
-      if (optLst.isDefined) TimeUtils.print(optLst.get, ctx.site.timezone(), "MMM/dd")
-      else "Dummy"
-    case RA(min, max) if min < 0 =>
-      "Dummy"
+      optLst.map(TimeUtils.print(_, ctx.site.timezone(), "MMM/dd")).getOrElse(f.name)
     case _ =>
       f.name
   }
@@ -123,21 +120,19 @@ class HistogramChart(ctx: QvContext, xAxis: Axis, yAxis: Axis, calculation: Calc
   private def yName(f: Filter) = f.name
 
   private def dummyRaFilter(f: Filter) = f match {
-    case RA(min, max) if min < 0 => true
+    case HasDummyTarget(_) => true
     case _ => false
   }
 
   private def scienceTimeDataSet = {
     val d = new DefaultCategoryDataset
     categorizedData.xCategories.map(group => group match {
-      case ra: RA => {
-        if (ra.min < 0) d.addValue(null, "Available", ChartItem(xName(group), group))
-        else {
-          val seconds = SemesterData.scienceTime(ctx.site, range, ra) / 1000
-          d.addValue(seconds.toDouble/3600.0, "Available", ChartItem(xName(group), group))
-        }
-      }
-      case _ => d.addValue(0, "Available", ChartItem(xName(group), group))
+      case ra: RA =>
+        val seconds = SemesterData.scienceTime(ctx.site, range, ra) / 1000
+        d.addValue(seconds.toDouble/3600.0, "Available", ChartItem(xName(group), group))
+
+      case _ =>
+        d.addValue(null, "Available", ChartItem(xName(group), group))
     })
     d
   }
@@ -145,14 +140,12 @@ class HistogramChart(ctx: QvContext, xAxis: Axis, yAxis: Axis, calculation: Calc
   private def darkTimeDataSet = {
     val d = new DefaultCategoryDataset
     categorizedData.xCategories.map(group => group match {
-      case ra: RA => {
-        if (ra.min < 0) d.addValue(null, "Dark", ChartItem(xName(group), group))
-        else {
-          val seconds = SemesterData.darkTime(ctx.site, range, ra) / 1000
-          d.addValue(seconds.toDouble/3600.0, "Dark", ChartItem(xName(group), group))
-        }
-      }
-      case _ => d.addValue(0, "Dark", ChartItem(xName(group), group))
+      case ra: RA =>
+        val seconds = SemesterData.darkTime(ctx.site, range, ra) / 1000
+        d.addValue(seconds.toDouble/3600.0, "Dark", ChartItem(xName(group), group))
+
+      case _ =>
+        d.addValue(null, "Dark", ChartItem(xName(group), group))
     })
     d
   }

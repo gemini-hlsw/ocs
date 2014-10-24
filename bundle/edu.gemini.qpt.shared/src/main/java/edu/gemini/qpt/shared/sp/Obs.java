@@ -610,6 +610,13 @@ public final class Obs implements Serializable, Comparable<Obs> {
         return getAO() && !getLGS();                        // AO means it must either be NGS or LGS; therefore, if AO is true, NGS is true if LGS is not true
     }
 
+    /**
+     * For ToOs and occasionally for other (yet unknown) targets the coordinates are set to 0/0.
+     * Often we need to treat those values separately, e.g. when running statistics, we don't want those values
+     * to contribute to the counts in an RA [0..1) bin for example.
+     */
+    public boolean hasDummyTarget() { return getRa() == 0.0 && getDec() == 0.0; }
+
     public Boolean getAO() {
         return ao;
     }

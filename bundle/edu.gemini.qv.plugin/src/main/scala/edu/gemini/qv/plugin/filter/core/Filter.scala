@@ -202,18 +202,20 @@ object Filter {
   sealed trait SimpleRangeFilter extends RangeFilter
 
   object RA {
-    val MinValue = -1.0
+    val MinValue = 0.0
     val MaxValue = 24.0
   }
   case class RA(min: Double = RA.MinValue, max: Double = RA.MaxValue) extends SimpleRangeFilter {
     def label = "RA"
     def lowest = RA.MinValue
     def highest = RA.MaxValue
-    def getter = {o: Obs => if (o.getDec == 0 && o.getRa == 0) -0.001 else o.getRa/15 }
+    def getter = {o: Obs => o.getRa/15.0 }
     override def desc = "Filter for target right ascension, wraps around 24hrs if min > max (e.g. [18..5])."
     override def predicate(o: Obs) = {
       val ra = getter(o)
-      if (min <= max) {
+      if (o.hasDummyTarget) {
+        false
+      } else if (min <= max) {
         min <= ra && ra < max
       } else {
         (0.0 <= ra && ra < max) || (min <= ra)
@@ -335,6 +337,14 @@ object Filter {
   case class IsNonSidereal(value: Option[Boolean] = None) extends BooleanFilter {
     def label = "Non Sidereal"
     def getter = _.isNonSidereal
+  }
+
+  /** Checks if this observation has a dummy target, i.e. ra == 0 and dec == 0.
+      This filter is used in histograms with RA axes to collect all dummy targets. */
+  case class HasDummyTarget(value: Option[Boolean] = None) extends BooleanFilter {
+    val label = "Dummy"
+    override val name = "Dummy"
+    def getter = _.hasDummyTarget
   }
 
 
