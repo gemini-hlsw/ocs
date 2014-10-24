@@ -1,20 +1,56 @@
 package edu.gemini.util.trpc
 
-import common._
+import edu.gemini.util.trpc.common._
 import scalaz._
 import Scalaz._
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import java.{lang => jl}
 import java.lang.reflect.Method
+import java.io.{InvalidClassException, ByteArrayOutputStream, ByteArrayInputStream, ObjectInputStream}
+import edu.gemini.spModel.core.{VersionException, Version}
+import edu.gemini.util.security.auth.keychain._
 
 package object server {
 
-  implicit def pimpReq(req: HttpServletRequest) = new RichHttpServletRequest(req)
+  implicit class RichHttpServletRequest(req: HttpServletRequest) {
 
-  implicit class pimpClass[A](c: Class[A]) {
+    lazy val pathElems = req.getPathInfo.split("/").drop(1)
+
+    def param(s: String): Try[String] =
+      Option(req.getParameter(s)) \/> new IllegalArgumentException("Required request parameter %s was not found.".format(s))
+
+    def payload: Try[(Array[AnyRef], Set[Key])] =
+      lift {
+
+        // Get our object stream
+        val ios = req.getInputStream.readRaw
+
+        // Check serial compatibility
+        try {
+          val actualVersion = ios.next[Version]
+          if (!Version.current.isCompatible(actualVersion, Version.Compatibility.serial))
+            throw new VersionException(Version.current, actualVersion, Version.Compatibility.serial);
+        } catch {
+          case ice: InvalidClassException =>
+            // the version itself is incompatible!
+            throw new VersionException(Version.current, Version.Compatibility.serial);
+        }
+
+        // Next hunk is our payload
+        ios.next[(Array[AnyRef], Set[Key])]
+
+      }
+
+    def path(n: Int): Try[String] =
+      pathElems.lift(n) \/> new IllegalArgumentException("Path element %d was not found.".format(n))
+
+  }
+
+
+  implicit class ClassOps[A](c: Class[A]) {
 
     // Unboxed -> Boxed
-    private def boxed: Map[Class[_], Class[_]] = Map(
+    def boxed: Map[Class[_], Class[_]] = Map(
       jl.Boolean.TYPE   -> classOf[jl.Boolean],
       jl.Byte.TYPE      -> classOf[jl.Byte],
       jl.Character.TYPE -> classOf[jl.Character],
@@ -25,7 +61,7 @@ package object server {
       jl.Short.TYPE     -> classOf[jl.Short])
 
     // True if param (which may be primitive) is assignable from arg (which is not primitive but may be boxed)
-    private def isCompatible(param: Class[_], arg: Class[_]) =
+    def isCompatible(param: Class[_], arg: Class[_]) =
       arg == null || (param.isAssignableFrom(arg) || param.isPrimitive && boxed(param) == arg)
 
     /**
