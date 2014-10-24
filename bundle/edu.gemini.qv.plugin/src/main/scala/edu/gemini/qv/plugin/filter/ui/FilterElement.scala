@@ -289,11 +289,8 @@ object FilterElement {
     }
 
     def doUpdate() {
-      val (a, b) = {
-        val a = init.minFromString(min.text)
-        val b = init.maxFromString(max.text)
-        if (a < b) (a, b) else (a, init.highest)
-      }
+      val a = init.minFromString(min.text)
+      val b = init.maxFromString(max.text)
       filter = init match {
         case f: RA => RA(a, b)
         case f: Dec => Dec(a, b)

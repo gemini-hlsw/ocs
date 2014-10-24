@@ -81,8 +81,8 @@ class HistogramChartPanel(ctx: QvContext) extends GridBagPanel {
       val min = minRa
       val max = maxRa
       val limitedGroups = axis.groups.filter {
-        case RA(fmin, fmax) if fmin <= fmax => fmax > min && fmin < max
-        case RA(fmin, fmax)                 => fmin >= 0
+        case RA(fmin, fmax) if min <= max => fmax > min && fmin < max
+        case RA(fmin, fmax)               => fmin >= 0
       }
       new Axis(axis.label, limitedGroups)
     } else axis

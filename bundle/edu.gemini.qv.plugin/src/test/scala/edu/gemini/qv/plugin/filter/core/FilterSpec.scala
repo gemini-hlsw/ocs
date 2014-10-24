@@ -43,7 +43,7 @@ class FilterSpec extends Specification with ScalaCheck with Arbitraries {
       }
     }
 
-    "filter right ascension for minRa > maxRa (wrapped around 24hrs)" ! {
+    "filter right ascension for minRa > maxRa wrapped around 24hrs (REL-2015)" ! {
 
       forAll { (ra: RightAscension, minRa: RightAscension, maxRa: RightAscension) =>
         val minVal = minRa.toAngle.toDegrees / 15.0
