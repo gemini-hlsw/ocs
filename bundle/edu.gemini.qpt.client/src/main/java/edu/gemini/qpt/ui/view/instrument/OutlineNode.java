@@ -11,7 +11,6 @@ import edu.gemini.spModel.type.DisplayableSpType;
 @SuppressWarnings("serial")
 public class OutlineNode extends DefaultMutableTreeNode {
 
-	
 	public enum TriState {	SELECTED, UNSELECTED, INDEFINITE }
 
 	private TriState selected = TriState.UNSELECTED;

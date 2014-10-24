@@ -4,9 +4,12 @@ import edu.gemini.ags.api._
 import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.catalog.api.{QueryConstraint, CatalogServerInstances}
 import edu.gemini.shared.skyobject.SkyObject
+import edu.gemini.skycalc.Angle
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.spModel.target.SPTarget
+import edu.gemini.spModel.telescope.PosAngleConstraint
 import edu.gemini.spModel.telescope.PosAngleConstraint._
 
 import scala.collection.JavaConverters._
@@ -48,35 +51,53 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
     catalogResult(ctx, mt).map(estimate(ctx, mt, _))
 
   def estimate(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SkyObject]): AgsStrategy.Estimate = {
-    val cv    = new CandidateValidator(params, mt, candidates)
+    // If we are unbounded and there are any candidates, we are guaranteed success.
     val pac   = ctx.getPosAngleConstraint(UNBOUNDED)
-    val steps = pac.steps(ctx.getPositionAngle, params.stepSize).toList.asScala
+    if (pac == UNBOUNDED)
+      if (candidates.size > 0) AgsStrategy.Estimate.GuaranteedSuccess else AgsStrategy.Estimate.CompleteFailure
+    else {
+      val cv = new CandidateValidator(params, mt, candidates)
+      val steps = pac.steps(ctx.getPositionAngle, params.stepSize).toList.asScala
+      val anglesWithResults = steps.filter { angle => cv.exists(ctx.withPositionAngle(angle))}
 
-    val anglesWithResults = steps.filter { angle => cv.exists(ctx.withPositionAngle(angle)) }
-
-    // for FIXED_180 we return guaranteed success (1.0) if either position angle
-    // has candidates.
-    val successProbability = anglesWithResults.size.toDouble / steps.size.toDouble
-    if (pac != FIXED_180) AgsStrategy.Estimate.toEstimate(successProbability)
-    else if (successProbability > 0.0) AgsStrategy.Estimate.GuaranteedSuccess else AgsStrategy.Estimate.CompleteFailure
+      // For FIXED_180 and PARALLACTIC_ANGLE, we return guaranteed success (1.0) if either position angle
+      // has candidates.
+      val successProbability = anglesWithResults.size.toDouble / steps.size.toDouble
+      if (pac == FIXED) if (successProbability > 0.0) AgsStrategy.Estimate.GuaranteedSuccess else AgsStrategy.Estimate.CompleteFailure
+      else AgsStrategy.Estimate.toEstimate(successProbability)
+    }
   }
 
   def select(ctx: ObsContext, mt: MagnitudeTable): Future[Option[AgsStrategy.Selection]] =
     catalogResult(ctx, mt).map(select(ctx, mt, _))
 
-  def select(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SkyObject]): Option[AgsStrategy.Selection] =
-    if (candidates.size == 0) None
-    else {
+  def select(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SkyObject]): Option[AgsStrategy.Selection] = {
+    // List of candidates and their angles for the case where the pos angle constraint is not unbounded.
+    def selectBounded(alternatives: List[ObsContext]): List[(Angle, SkyObject)] = {
       val cv = new CandidateValidator(params, mt, candidates)
-      val alternatives = if (ctx.getPosAngleConstraint == FIXED_180) List(ctx, ctx180(ctx)) else List(ctx)
-      val results = alternatives.map(a => (a, cv.select(a))).collect {
+      alternatives.map(a => (a, cv.select(a))).collect {
         case (c, Some(so)) => (c.getPositionAngle, so)
       }
+    }
 
+    // List of candidates and their angles for the case where the pos angle constraint is bounded.
+    def selectUnbounded(): List[(Angle, SkyObject)] =
+      candidates.map(so => (new SPTarget(so).calculatePositionAngle(ctx.getBaseCoordinates), so)).filter {
+        case (angle, so) => new CandidateValidator(params, mt, List(so)).exists(ctx.withPositionAngle(angle))
+      }
+
+    if (candidates.size == 0) None
+    else {
+      val results = ctx.getPosAngleConstraint match {
+        case FIXED                         => selectBounded(List(ctx))
+        case FIXED_180 | PARALLACTIC_ANGLE => selectBounded(List(ctx, ctx180(ctx)))
+        case UNBOUNDED                     => selectUnbounded()
+      }
       brightest(results, params.band)(_._2).map {
         case (angle, skyObject) => AgsStrategy.Selection(angle, List(AgsStrategy.Assignment(params.guideProbe, skyObject)))
       }
     }
+  }
 
   override def queryConstraints(ctx: ObsContext, mt: MagnitudeTable): List[QueryConstraint] =
     params.queryConstraints(ctx, mt).toList

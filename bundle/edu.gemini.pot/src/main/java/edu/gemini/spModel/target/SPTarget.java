@@ -11,6 +11,7 @@ import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.Coordinates;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
@@ -1053,4 +1054,18 @@ public final class SPTarget extends WatchablePos {
         return ntarget;
     }
 
+
+    /**
+     * Calculate the position angle to this target from a specified base / target.
+     */
+    public Angle calculatePositionAngle(Coordinates base) {
+        double ra1  = base.getRa().toRadians().getMagnitude();
+        double dec1 = base.getDec().toRadians().getMagnitude();
+        double ra2  = _target.getC1().getAs(Units.RADIANS);
+        double dec2 = _target.getC2().getAs(Units.RADIANS);
+
+        double raDiff = ra2 - ra1;
+        double angle = Math.atan2(Math.sin(raDiff), Math.cos(dec1) * Math.tan(dec2) - Math.sin(dec1) * Math.cos(raDiff));
+        return new Angle(angle, Angle.Unit.RADIANS);
+    }
 }
