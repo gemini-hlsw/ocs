@@ -14,11 +14,12 @@ import edu.gemini.spModel.template.TemplateParameters
 import javax.swing.BorderFactory
 
 import scala.collection.JavaConverters._
+import scala.swing.ScrollPane.BarPolicy
 import scala.swing.event.{ButtonClicked, EditDone, SelectionChanged}
 import scala.swing._
 import scala.swing.ListView.Renderer
 import scala.swing.GridBagPanel.Anchor.{East, North}
-import scala.swing.GridBagPanel.Fill.Horizontal
+import scala.swing.GridBagPanel.Fill.{Horizontal, Vertical}
 
 import scalaz._
 
@@ -189,7 +190,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
   }
 
 
-  object TargetPanel extends ColumnPanel(10, North) {
+  object TargetPanel extends GridBagPanel with Initializable { // ColumnPanel(10, North) {
     trait TargetType { def display: String}
     case object Sidereal extends TargetType    { val display = "Sidereal"     }
     case object NonSidereal extends TargetType { val display = "Non-Sidereal" }
@@ -256,93 +257,114 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
           }
         )
 
-
-      val pmRaRow  = Row("Delta RA",  pmField(_.getPropMotionRA,  _.setPropMotionRA(_)))
-      val pmDecRow = Row("Delta Dec", pmField(_.getPropMotionDec, _.setPropMotionDec(_)))
+      val siderealRows = List(
+        Row("RA",        raField),
+        Row("Dec",       decField),
+        Row("Delta RA",  pmField(_.getPropMotionRA,  _.setPropMotionRA(_))),
+        Row("Delta Dec", pmField(_.getPropMotionDec, _.setPropMotionDec(_)))
+      )
 
       val rows = List(
         Row("Name",      nameField ),
-        Row("Type",      typeCombo ),
-        Row("RA",        raField   ),
-        Row("Dec",       decField  ),
-        pmRaRow,
-        pmDecRow
-      )
+        Row("Type",      typeCombo )
+      ) ++ siderealRows
 
-      override def init(ps: Iterable[TemplateParameters]): Unit = {
-        super.init(ps)
-        showTypeSpecificWidgets(ps)
-      }
-
-      def showTypeSpecificWidgets(): Unit = showTypeSpecificWidgets(load)
-
-      def showTypeSpecificWidgets(ps: Iterable[TemplateParameters]): Unit = {
-        val typeOpt = common(ps)(tp => targetType(tp.getTarget))
-        val isSid   = typeOpt.exists(_ == Sidereal)
-        pmRaRow.visible  = isSid
-        pmDecRow.visible = isSid
-
-        revalidate()
-        repaint()
-      }
+      def showSiderealRows(v: Boolean): Unit =
+        siderealRows.foreach(_.visible = v)
 
       layoutRows()
-
-      // When the target type changes, we have to update the display to match.
-      // Here we listen to the same event that actually stores the changes, so
-      // make sure the update happens after the changes are stored. This is
-      // pretty awful.  We could watch the shells for data object updates
-      // instead I suppose.
-      listenTo(typeCombo.selection)
-      reactions += { case SelectionChanged(_) => Swing.onEDT(showTypeSpecificWidgets()) }
     }
 
     object MagnitudesPanel extends ColumnPanel {
-      val band = Magnitude.Band.B
-      lazy val zero = new Magnitude(band, 0.0)
+      def magRow(band: Magnitude.Band): Row = {
+        lazy val zero = new Magnitude(band, 0.0)
 
-      val magCheck = new BoundCheckbox(
-        get = !_.getTarget.getMagnitude(band).isEmpty,
-        set = setTarget((target, inc) => {
-          if (inc) target.putMagnitude(zero)
-          else {
-            val mags = target.getMagnitudes.toList.asScala.filterNot(_.getBand == band)
-            target.setMagnitudes(DefaultImList.create(mags.asJava))
-          }}
+        val magCheck = new BoundCheckbox(
+          get = !_.getTarget.getMagnitude(band).isEmpty,
+          set = setTarget((target, inc) => {
+            if (inc) target.putMagnitude(zero)
+            else {
+              val mags = target.getMagnitudes.toList.asScala.filterNot(_.getBand == band)
+              target.setMagnitudes(DefaultImList.create(mags.asJava))
+            }}
+          )
         )
-      )
 
-      val magValue = new BoundTextField[Double](4)(
-        read = _.toDouble,
-        show = _.toString,
-        get  = _.getTarget.getMagnitude(band).getOrElse(zero).getBrightness,
-        set  = setTarget((t, b) => t.putMagnitude(new Magnitude(band, b)))
-      ) {
-        listenTo(magCheck)
-        reactions += {
-          case ButtonClicked(`magCheck`) => reinit()
+        val magValue = new BoundTextField[Double](4)(
+          read = _.toDouble,
+          show = _.toString,
+          get  = _.getTarget.getMagnitude(band).getOrElse(zero).getBrightness,
+          set  = setTarget((t, b) => t.putMagnitude(new Magnitude(band, b)))
+        ) {
+          listenTo(magCheck)
+          reactions += {
+            case ButtonClicked(`magCheck`) => reinit()
+          }
+
+          override def updateEnabledState(): Unit = {
+            enabled = shells.size() > 0 && magCheck.selected
+          }
         }
 
-        override def updateEnabledState(): Unit = {
-          enabled = shells.size() > 0 && magCheck.selected
-        }
+        Row(band.name, magCheck, magValue)
       }
 
-      val rows = List(
-        Row(magCheck, new Label("B"), magValue)
-      )
+      val rows = Magnitude.Band.values().toList.map(magRow)
       layoutRows()
     }
 
-    val rows = List(
-      Row(CoordinatesPanel, MagnitudesPanel)
-    )
-    layoutRows()
+    val magScroll = new ScrollPane(MagnitudesPanel) {
+      horizontalScrollBarPolicy = BarPolicy.Never
+      verticalScrollBarPolicy   = BarPolicy.AsNeeded
+      border = BorderFactory.createEmptyBorder(0,0,0,0)
+
+      val dim = new Dimension(160, 1)
+      maximumSize   = dim
+      preferredSize = dim
+      minimumSize   = dim
+    }
+
+    def init(ps: Iterable[TemplateParameters]): Unit = {
+      CoordinatesPanel.init(ps)
+      MagnitudesPanel.init(ps)
+      showTypeSpecificWidgets(ps)
+    }
+
+    layout(CoordinatesPanel) = new Constraints {
+      insets = new Insets(0, 0, VGap, 0)
+      fill   = Horizontal
+    }
+
+    layout(magScroll) = new Constraints {
+      gridx   = 1
+      insets  = new Insets(0, HGap, VGap, 0)
+      fill    = Vertical
+      weightx = 1.0
+    }
+
+    def showTypeSpecificWidgets(): Unit = showTypeSpecificWidgets(load)
+
+    def showTypeSpecificWidgets(ps: Iterable[TemplateParameters]): Unit = {
+      val isSid = common(ps)(tp => targetType(tp.getTarget)).exists(_ == Sidereal)
+      CoordinatesPanel.showSiderealRows(isSid)
+      magScroll.visible = isSid
+
+      revalidate()
+      repaint()
+    }
+
+    // When the target type changes, we have to update the display to match.
+    // Here we listen to the same event that actually stores the changes, so
+    // make sure the update happens after the changes are stored. This is
+    // pretty awful.  We could watch the shells for data object updates
+    // instead I suppose.
+    listenTo(CoordinatesPanel.typeCombo.selection)
+    reactions += { case SelectionChanged(_) => Swing.onEDT(showTypeSpecificWidgets()) }
   }
 
 
   object ConditionsAndTimePanel extends ColumnPanel {
-    border = BorderFactory.createEmptyBorder(0, 50, 0, 50)
+    border = BorderFactory.createEmptyBorder(0, 25, 0, 0)
 
     private def mkCombo[A >: Null <: PercentageContainer](opts: Seq[A])(get: SPSiteQuality => A, set: (SPSiteQuality, A) => Unit): BoundNullableCombo[A] = {
       // Filter out any obsolete values.
@@ -380,12 +402,12 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
     )
 
     val rows = List(
-      Row("Cloud Cover",    mkCombo(CloudCover.values   )(_.getCloudCover,    _.setCloudCover(_)   )),
-      Row("Image Quality",  mkCombo(ImageQuality.values )(_.getImageQuality,  _.setImageQuality(_) )),
-      Row("Sky Background", mkCombo(SkyBackground.values)(_.getSkyBackground, _.setSkyBackground(_))),
-      Row("Water Vapor",    mkCombo(WaterVapor.values   )(_.getWaterVapor,    _.setWaterVapor(_)   )),
+      Row("CC", mkCombo(CloudCover.values   )(_.getCloudCover,    _.setCloudCover(_)   )),
+      Row("IQ", mkCombo(ImageQuality.values )(_.getImageQuality,  _.setImageQuality(_) )),
+      Row("SB", mkCombo(SkyBackground.values)(_.getSkyBackground, _.setSkyBackground(_))),
+      Row("WV", mkCombo(WaterVapor.values   )(_.getWaterVapor,    _.setWaterVapor(_)   )),
       Row(" "),
-      Row("Phase 1 Time",   timeField, unitsCombo)
+      Row("Time", timeField, unitsCombo)
     )
     layoutRows()
   }
