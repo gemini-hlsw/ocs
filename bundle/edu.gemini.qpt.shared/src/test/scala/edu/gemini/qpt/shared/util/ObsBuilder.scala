@@ -4,7 +4,7 @@ import edu.gemini.ags.api.AgsAnalysis
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.qpt.shared.sp.{Group, Obs, Prog}
 import edu.gemini.shared.util.immutable.DefaultImList
-import edu.gemini.spModel.core.{Coordinates, SPProgramID}
+import edu.gemini.spModel.core.{Declination, RightAscension, Coordinates, SPProgramID}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.obs.plannedtime.PlannedStepSummary
 import edu.gemini.spModel.obsclass.ObsClass
@@ -93,7 +93,8 @@ case class ObsBuilder(
   def setTooType(t: TooType) = copy(tooPriority = t)
   def setObsStatus(s: ObservationStatus) = copy(obsStatus = s)
   def setObsClass(c: ObsClass) = copy(obsClass = c)
-  def setRa(ra: Double) = copy(targetEnvironment = TargetEnvironment.create(new SPTarget(ra*15, 0)))
+  def setRa(ra: RightAscension) = copy(targetEnvironment = TargetEnvironment.create(new SPTarget(ra.toAngle.toDegrees, 0)))
+  def setDec(dec: Declination) = copy(targetEnvironment = TargetEnvironment.create(new SPTarget(0, dec.toAngle.toDegrees)))
   def setCoordinates(coords: Coordinates) = copy(targetEnvironment = TargetEnvironment.create(new SPTarget(coords.ra.toAngle.toDegrees, coords.dec.toAngle.toDegrees)))
   def setTargetEnvironment(t: TargetEnvironment) = copy(targetEnvironment = t)
   def setInstrument(i: Array[SPComponentType]) = copy(instrument = i)

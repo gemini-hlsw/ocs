@@ -3,6 +3,7 @@ package edu.gemini.qv.plugin.chart
 import edu.gemini.qpt.shared.util.ObsBuilder
 import edu.gemini.qv.plugin.data.CategorizedXYValues
 import edu.gemini.qv.plugin.filter.core.Filter.{RA, Priorities}
+import edu.gemini.spModel.core.{Angle, RightAscension}
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.{InstGmosSouth, InstGmosNorth}
 import edu.gemini.spModel.gemini.nifs.InstNIFS
@@ -16,22 +17,21 @@ import org.junit.Test
  */
 class CategorizedDataTest {
 
+  val ra1hrs = Angle.fromHourAngle(1, 0, 0).map(RightAscension.fromAngle).get
+  val ra3hrs = Angle.fromHourAngle(3, 0, 0).map(RightAscension.fromAngle).get
+
   @Test def cat1() {
 
     val builder = new ObsBuilder
     val observations = Set(
-      builder.setRa(1).setPriority(LOW).apply,
-//      builder.setRa(1).setPriority(MEDIUM).apply,
-      builder.setRa(1).setPriority(LOW).apply,
-      builder.setRa(1).setPriority(LOW).apply,
-//      builder.setRa(1).setPriority(MEDIUM).apply,
-      builder.setRa(1).setPriority(HIGH).apply,
-      builder.setRa(3).setPriority(LOW).apply,
-//      builder.setRa(3).setPriority(MEDIUM).apply,
-      builder.setRa(3).setPriority(HIGH).apply,
-      builder.setRa(3).setPriority(LOW).apply,
-      builder.setRa(3).setPriority(MEDIUM).apply
-//      builder.setRa(3).setPriority(HIGH).apply
+      builder.setRa(ra1hrs).setPriority(LOW).apply,
+      builder.setRa(ra1hrs).setPriority(LOW).apply,
+      builder.setRa(ra1hrs).setPriority(LOW).apply,
+      builder.setRa(ra1hrs).setPriority(HIGH).apply,
+      builder.setRa(ra3hrs).setPriority(LOW).apply,
+      builder.setRa(ra3hrs).setPriority(HIGH).apply,
+      builder.setRa(ra3hrs).setPriority(LOW).apply,
+      builder.setRa(ra3hrs).setPriority(MEDIUM).apply
     )
 
     val catData = new CategorizedXYValues(Axis.RA1.groups, Axis.Priorities.groups, observations, Chart.ObservationCount.value)
@@ -45,18 +45,14 @@ class CategorizedDataTest {
 
     val builder = new ObsBuilder
     val observations = Set(
-      builder.setRa(1).setInstrument(InstGmosNorth.SP_TYPE).apply,
-      //      builder.setRa(1).setPriority(MEDIUM).apply,
-      builder.setRa(1).setInstrument(InstGmosSouth.SP_TYPE).apply,
-      builder.setRa(1).setInstrument(Flamingos2.SP_TYPE).apply,
-      //      builder.setRa(1).setPriority(MEDIUM).apply,
-      builder.setRa(1).setInstrument(InstGmosNorth.SP_TYPE).apply,
-      builder.setRa(3).setInstrument(InstGmosNorth.SP_TYPE).apply,
-      //      builder.setRa(3).setPriority(MEDIUM).apply,
-      builder.setRa(3).setInstrument(InstGmosNorth.SP_TYPE).apply,
-      builder.setRa(3).setInstrument(InstNIFS.SP_TYPE).apply,
-      builder.setRa(3).setInstrument(InstGmosNorth.SP_TYPE).apply
-      //      builder.setRa(3).setPriority(HIGH).apply
+      builder.setRa(ra1hrs).setInstrument(InstGmosNorth.SP_TYPE).apply,
+      builder.setRa(ra1hrs).setInstrument(InstGmosSouth.SP_TYPE).apply,
+      builder.setRa(ra1hrs).setInstrument(Flamingos2.SP_TYPE).apply,
+      builder.setRa(ra1hrs).setInstrument(InstGmosNorth.SP_TYPE).apply,
+      builder.setRa(ra3hrs).setInstrument(InstGmosNorth.SP_TYPE).apply,
+      builder.setRa(ra3hrs).setInstrument(InstGmosNorth.SP_TYPE).apply,
+      builder.setRa(ra3hrs).setInstrument(InstNIFS.SP_TYPE).apply,
+      builder.setRa(ra3hrs).setInstrument(InstGmosNorth.SP_TYPE).apply
     )
 
     val catData = new CategorizedXYValues(Axis.RA1.groups, Axis.Instruments.groups, observations, Chart.ObservationCount.value)

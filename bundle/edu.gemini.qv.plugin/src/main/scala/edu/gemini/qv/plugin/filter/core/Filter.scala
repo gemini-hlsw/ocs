@@ -204,6 +204,10 @@ object Filter {
   object RA {
     val MinValue = 0.0
     val MaxValue = 24.0
+
+    def apply(min: RightAscension, max: RightAscension) =
+      new RA(min.toAngle.toDegrees / 15.0, max.toAngle.toDegrees / 15.0)
+
   }
   case class RA(min: Double = RA.MinValue, max: Double = RA.MaxValue) extends SimpleRangeFilter {
     def label = "RA"

@@ -1,13 +1,15 @@
 package edu.gemini.qv.plugin.filter.core
 
 import edu.gemini.qpt.shared.util.ObsBuilder
-import edu.gemini.spModel.core.{RightAscension, Arbitraries}
+import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.DisperserNorth
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth
-import org.scalacheck.{Prop, Gen}
 import org.scalacheck.Prop._
+import org.scalacheck.{Gen, Prop}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
+
+import scalaz.Scalaz._
 
 /**
  * Tests for base filter functionality.
@@ -32,13 +34,10 @@ class FilterSpec extends Specification with ScalaCheck with Arbitraries {
     "filter right ascension for minRa <= maxRa" ! {
 
       forAll { (ra: RightAscension, minRa: RightAscension, maxRa: RightAscension) =>
-        val minVal = minRa.toAngle.toDegrees / 15.0
-        val maxVal = maxRa.toAngle.toDegrees / 15.0
-        (minVal <= maxVal) ==> Prop {
-          val raVal = ra.toAngle.toDegrees / 15.0
-          val o = ObsBuilder().setRa(raVal).apply
-          val f = Filter.RA(minVal, maxVal)
-          f.predicate(o) == (minVal <= raVal && raVal < maxVal)
+        (minRa <= maxRa) ==> Prop {
+          val o = ObsBuilder().setCoordinates(coordinatesFromRa(ra)).apply
+          val f = Filter.RA(minRa, maxRa)
+          f.predicate(o) == (minRa <= ra && ra < maxRa)
         }
       }
     }
@@ -46,18 +45,20 @@ class FilterSpec extends Specification with ScalaCheck with Arbitraries {
     "filter right ascension for minRa > maxRa wrapped around 24hrs (REL-2015)" ! {
 
       forAll { (ra: RightAscension, minRa: RightAscension, maxRa: RightAscension) =>
-        val minVal = minRa.toAngle.toDegrees / 15.0
-        val maxVal = maxRa.toAngle.toDegrees / 15.0
-        (minVal > maxVal) ==> Prop {
-          val raVal = ra.toAngle.toDegrees / 15.0
-          val o = ObsBuilder().setRa(raVal).apply
-          val f = Filter.RA(minVal, maxVal)
+        (minRa > maxRa) ==> Prop {
+          val o = ObsBuilder().setCoordinates(coordinatesFromRa(ra)).apply
+          val f = Filter.RA(minRa, maxRa)
           // e.g [18..5] turns into [0..5] || [18..]
-          f.predicate(o) == ((0 <= raVal && raVal < maxVal) || minVal <= raVal)
+          f.predicate(o) == ((RightAscension.zero <= ra && ra < maxRa) || minRa <= ra)
         }
       }
     }
   }
 
 
+  // NOTE: Targets with coordinates (ra=0,dec=0) are treated in special ways. For the tests above to
+  // work as expected we set dec to a value != 0 in order to be able to cover all possible RA values
+  // without running into the special case of 'dummy' targets.
+  def coordinatesFromRa(ra: RightAscension) =
+    Coordinates(ra, Declination.fromAngle(Angle.fromDegrees(1.0)).get)
 }
