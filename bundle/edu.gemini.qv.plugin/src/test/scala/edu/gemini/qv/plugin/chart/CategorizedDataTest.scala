@@ -17,8 +17,8 @@ import org.junit.Test
  */
 class CategorizedDataTest {
 
-  val ra1hrs = Angle.fromHourAngle(1, 0, 0).map(RightAscension.fromAngle).get
-  val ra3hrs = Angle.fromHourAngle(3, 0, 0).map(RightAscension.fromAngle).get
+  val ra1hrs = RightAscension.fromHours(1.0)
+  val ra3hrs = RightAscension.fromHours(3.0)
 
   @Test def cat1() {
 
