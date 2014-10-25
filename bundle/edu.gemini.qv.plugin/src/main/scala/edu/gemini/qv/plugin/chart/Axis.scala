@@ -109,10 +109,10 @@ object Axis {
   ))
 
   // ra default axes, note: ra values in obd are defined in degrees, not hours
-  val RA025 = Axis("RA 0.25", HasDummyTarget(Some(true)) +: ranges(0, 24, 0.25))
-  val RA05  = Axis("RA 0.5", HasDummyTarget(Some(true)) +: ranges(0, 24, 0.5))
-  val RA1   = Axis("RA", HasDummyTarget(Some(true)) +: ranges(0, 24, 1))
-  val RA2   = Axis("RA 2", HasDummyTarget(Some(true)) +: ranges(0, 24, 2))
+  val RA025 = Axis("RA 0.25", HasDummyTarget(Some(true)) +: raRanges(0.25))
+  val RA05  = Axis("RA 0.5", HasDummyTarget(Some(true)) +: raRanges(0.5))
+  val RA1   = Axis("RA", HasDummyTarget(Some(true)) +: raRanges(1))
+  val RA2   = Axis("RA 2", HasDummyTarget(Some(true)) +: raRanges(2))
 
   def forValues[A](label: String, v: Seq[A], f: Set[A] => Filter): Axis = {
     val s0 = v.map(Set(_))
@@ -120,9 +120,9 @@ object Axis {
     Axis(label, s1.toList)
   }
 
-  def ranges[A](start: Double, end: Double, step: Double): Seq[RA] =
+  def raRanges[A](step: Double): Seq[RA] =
     for {
-      a <- start until (end, step)
+      a <- RA.MinValue until (RA.MaxValue, step)
     } yield RA(a, a + step)
 
 }
