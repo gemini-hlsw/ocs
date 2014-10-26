@@ -96,7 +96,10 @@ import TemplateParametersEditor._
 
 
 /**
- * An editor for TemplateParameters.
+ * An editor for TemplateParameters.  The editor is recreated with the currently
+ * selected collection of template parameters.  It shows the common value across
+ * all selected parameters or a blank if the values differ.  Setting the value
+ * in a widget will update the value for all selected parameters.
  */
 class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) extends ColumnPanel(20, North) {
   border = BorderFactory.createEmptyBorder(10,10,10,10)
@@ -191,7 +194,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
   }
 
 
-  object TargetPanel extends GridBagPanel with Initializable { // ColumnPanel(10, North) {
+  object TargetPanel extends GridBagPanel with Initializable {
     trait TargetType { def display: String}
     case object Sidereal extends TargetType    { val display = "Sidereal"     }
     case object NonSidereal extends TargetType { val display = "Non-Sidereal" }
@@ -223,10 +226,9 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
             case Sidereal    => new HmsDegTarget()
             case NonSidereal => new ConicTarget()
           }
-          coords.setC1(new HMS(target.getXaxis))
-          coords.setC2(new DMS(target.getYaxis))
           coords.setName(target.getName)
           target.setTarget(coords)
+          target.setMagnitudes(DefaultImList.create[Magnitude]())
         })}
       )
 
@@ -259,15 +261,15 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
         )
 
       val siderealRows = List(
-        Row("RA",        raField),
-        Row("Dec",       decField),
-        Row("Delta RA",  pmField(_.getPropMotionRA,  _.setPropMotionRA(_))),
-        Row("Delta Dec", pmField(_.getPropMotionDec, _.setPropMotionDec(_)))
+        Row("RA",     raField),
+        Row("Dec",    decField),
+        Row("pm RA",  pmField(_.getPropMotionRA,  _.setPropMotionRA(_))),
+        Row("pm Dec", pmField(_.getPropMotionDec, _.setPropMotionDec(_)))
       )
 
       val rows = List(
-        Row("Name",      nameField ),
-        Row("Type",      typeCombo )
+        Row("Name",   nameField ),
+        Row("Type",   typeCombo )
       ) ++ siderealRows
 
       def showSiderealRows(v: Boolean): Unit =
@@ -362,8 +364,6 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       weightx = 1.0
     }
 
-    def showTypeSpecificWidgets(): Unit = showTypeSpecificWidgets(load)
-
     def showTypeSpecificWidgets(ps: Iterable[TemplateParameters]): Unit = {
       val isSid = common(ps)(tp => targetType(tp.getTarget)).exists(_ == Sidereal)
       CoordinatesPanel.showSiderealRows(isSid)
@@ -373,13 +373,20 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       repaint()
     }
 
+    def reinitTypeSpecificWidgets(): Unit = {
+      val ps = load
+      CoordinatesPanel.siderealRows.foreach(_.init(ps))
+      MagnitudesPanel.init(ps)
+      showTypeSpecificWidgets(ps)
+    }
+
     // When the target type changes, we have to update the display to match.
     // Here we listen to the same event that actually stores the changes, so
     // make sure the update happens after the changes are stored. This is
     // pretty awful.  We could watch the shells for data object updates
     // instead I suppose.
     listenTo(CoordinatesPanel.typeCombo.selection)
-    reactions += { case SelectionChanged(_) => Swing.onEDT(showTypeSpecificWidgets()) }
+    reactions += { case SelectionChanged(_) => Swing.onEDT(reinitTypeSpecificWidgets()) }
   }
 
 
