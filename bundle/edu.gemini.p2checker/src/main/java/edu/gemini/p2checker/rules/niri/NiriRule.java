@@ -1232,7 +1232,7 @@ public final class NiriRule implements IRule {
             boolean isF32 = camera == Niri.Camera.F32 || camera == Niri.Camera.F32_PV;
             Niri.Disperser disperser = (Niri.Disperser) SequenceRule.getInstrumentItem(config, InstNIRI.DISPERSER_PROP);
             Double expTime = SequenceRule.getExposureTime(config);
-            if (filter == Niri.Filter.BBF_LPRIME && isF32 && expTime >= 0.12) {
+            if (filter == Niri.Filter.BBF_LPRIME && isF32 && expTime != null && expTime >= 0.12) {
                 return new Problem(WARNING, PREFIX + "NIRI_L_PRIME", NIRI_L_PRIME, SequenceRule.getInstrumentOrSequenceNode(step,elems));
             } else if (filter == Niri.Filter.BBF_LPRIME && !isF32) {
                 return new Problem(WARNING, PREFIX + "NIRI_L_PRIME2", NIRI_L_PRIME2, SequenceRule.getInstrumentOrSequenceNode(step,elems));
