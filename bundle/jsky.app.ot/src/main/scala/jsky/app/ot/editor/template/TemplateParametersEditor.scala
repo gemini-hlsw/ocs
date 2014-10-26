@@ -7,6 +7,7 @@ import edu.gemini.shared.util.immutable.DefaultImList
 import edu.gemini.spModel.`type`.ObsoletableSpType
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{PercentageContainer, ImageQuality, CloudCover, SkyBackground, WaterVapor}
+import edu.gemini.spModel.rich.shared.immutable.asScalaOpt
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.system._
 import edu.gemini.spModel.template.TemplateParameters
@@ -245,14 +246,14 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
         set  = setTarget(_.getTarget.setC2(_))
       )
 
-      def pmField(get: SPTarget => String, set: (SPTarget, String) => Unit): BoundTextField[Double] =
+      def pmField(getPM: SPTarget => String, setPM: (SPTarget, String) => Unit): BoundTextField[Double] =
         new BoundTextField[Double](10)(
           read = _.toDouble,
           show = _.toString,
-          get  = tp => get(tp.getTarget).toDouble,
+          get  = tp => getPM(tp.getTarget).toDouble,
           set  = (tp, pm) => {
             val newTarget = tp.getTarget
-            set(newTarget, pm.toString)
+            setPM(newTarget, pm.toString)
             tp.copy(newTarget)
           }
         )
@@ -279,8 +280,17 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       def magRow(band: Magnitude.Band): Row = {
         lazy val zero = new Magnitude(band, 0.0)
 
+        def mag(tp: TemplateParameters): Option[Magnitude] =
+          tp.getTarget.getMagnitude(band).asScalaOpt
+
+        def magOrZero(tp: TemplateParameters): Magnitude =
+          mag(tp).getOrElse(zero)
+
+        def setMag[A](f: (Magnitude, A) => Magnitude): (TemplateParameters, A) => TemplateParameters =
+          setTarget[A]((t, a) => t.putMagnitude(f(t.getMagnitude(band).getOrElse(zero), a)))
+
         val magCheck = new BoundCheckbox(
-          get = !_.getTarget.getMagnitude(band).isEmpty,
+          get = mag(_).isDefined,
           set = setTarget((target, inc) => {
             if (inc) target.putMagnitude(zero)
             else {
@@ -290,23 +300,33 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
           )
         )
 
+        def includeBand: Boolean = shells.size > 0 && magCheck.selected
+
         val magValue = new BoundTextField[Double](4)(
           read = _.toDouble,
           show = _.toString,
-          get  = _.getTarget.getMagnitude(band).getOrElse(zero).getBrightness,
-          set  = setTarget((t, b) => t.putMagnitude(new Magnitude(band, b)))
+          get  = magOrZero(_).getBrightness,
+          set  = setMag((m, b) => new Magnitude(band, b, m.getSystem))
         ) {
-          listenTo(magCheck)
-          reactions += {
-            case ButtonClicked(`magCheck`) => reinit()
-          }
-
-          override def updateEnabledState(): Unit = {
-            enabled = shells.size() > 0 && magCheck.selected
-          }
+          override def updateEnabledState(): Unit = enabled = includeBand
         }
 
-        Row(band.name, magCheck, magValue)
+        val magSys = new BoundNullableCombo[Magnitude.System](Magnitude.System.values())(
+          show = _.name(),
+          get  = magOrZero(_).getSystem,
+          set  = setMag((m, s) => new Magnitude(band, m.getBrightness, s))
+        ) {
+          override def updateEnabledState(): Unit = enabled = includeBand
+        }
+
+        listenTo(magCheck)
+        reactions += {
+          case ButtonClicked(`magCheck`) =>
+            magValue.reinit()
+            magSys.reinit()
+        }
+
+        Row(band.name, magCheck, magValue, magSys)
       }
 
       val rows = Magnitude.Band.values().toList.map(magRow)
@@ -318,7 +338,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       verticalScrollBarPolicy   = BarPolicy.AsNeeded
       border = BorderFactory.createEmptyBorder(0,0,0,0)
 
-      val dim = new Dimension(160, 1)
+      val dim = new Dimension(180, 1)
       maximumSize   = dim
       preferredSize = dim
       minimumSize   = dim
