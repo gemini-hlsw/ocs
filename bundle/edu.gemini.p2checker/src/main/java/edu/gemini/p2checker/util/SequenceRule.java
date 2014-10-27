@@ -149,6 +149,24 @@ public class SequenceRule implements IRule {
         String strVal = (String)getItem(config, String.class, EXPOSURE_TIME_KEY);
         return _getDoubleValue(strVal);
     }
+
+    private static final ItemKey INSTRUMENT_EXPOSURE_TIME_KEY = new ItemKey(INSTRUMENT_PREFIX + "exposureTime");
+    
+    /**
+     * Return the exposure time for the instrument. Will try to
+     * get it both as a Double and String. The result is always a double
+     * and will return null in case nothing can be obtained from the config.
+     */
+    public static Double getInstrumentExposureTime(Config config) {
+        Double val = (Double)getItem(config, Double.class, INSTRUMENT_EXPOSURE_TIME_KEY);
+        if (val != null) {
+            return val;
+        }
+        //attempt to read it as string
+        String strVal = (String)getItem(config, String.class, INSTRUMENT_EXPOSURE_TIME_KEY);
+        return _getDoubleValue(strVal);
+    }
+
     private static final ItemKey COADDS_KEY = new ItemKey("observe:coadds");
 
     public static Integer getCoadds(Config config) {
