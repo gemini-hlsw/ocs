@@ -74,7 +74,7 @@ object ProgramId {
   case class Arbitrary(site: Option[Site], semester: Option[Semester], ptype: Option[ProgramType], idString: String) extends ProgramId {
     // Try to get the corresponding SPProgramID which might fail if the idString
     // has an unsupported character.
-    def spOption: Option[SPProgramID] = Try { SPProgramID.toProgramID(idString) }.toOption
+    val spOption: Option[SPProgramID] = Try { SPProgramID.toProgramID(idString) }.toOption
 
     override def toString: String = idString
   }
