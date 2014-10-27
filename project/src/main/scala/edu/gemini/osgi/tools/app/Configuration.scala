@@ -29,6 +29,7 @@ case class Configuration(
       case "org" :: "scala-lang" :: _                    => 10
       case "org" :: "scalaz"     :: _                    => 15
       case "edu" :: "gemini"     :: "model" :: "p1" :: _ => 30
+      case "edu" :: "gemini"     :: "dataman" :: _       => 100
       case "edu" :: "gemini"     :: _                    => 50
       case "org" :: "jsky"       :: _                    => 50
       case _                                             => 40
