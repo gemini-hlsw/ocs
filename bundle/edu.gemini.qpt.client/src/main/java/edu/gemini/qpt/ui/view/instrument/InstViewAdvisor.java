@@ -1,7 +1,6 @@
 package edu.gemini.qpt.ui.view.instrument;
 
-import java.awt.Cursor;
-import java.awt.Dimension;
+import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Enumeration;
@@ -15,6 +14,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 
 import edu.gemini.qpt.core.Schedule;
@@ -91,7 +91,7 @@ public class InstViewAdvisor implements IViewAdvisor, PropertyChangeListener {
 		for (final Inst i: Inst.values()) {
 			if (!i.existsAtSite(sched.getSite())) continue;
 
-			OutlineNode inode = new OutlineNode(i);
+			OutlineNode inode = new OutlineNode(i, i.getDependentOnChildren());
 			inode.setSelected(sched.hasFacility(i.getValue()));
 			root.add(inode);
 
