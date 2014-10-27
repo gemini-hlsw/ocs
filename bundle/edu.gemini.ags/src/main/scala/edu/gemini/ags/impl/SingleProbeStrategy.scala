@@ -53,8 +53,10 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   def estimate(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SkyObject]): AgsStrategy.Estimate = {
     // If we are unbounded and there are any candidates, we are guaranteed success.
     val pac   = ctx.getPosAngleConstraint(UNBOUNDED)
-    if (pac == UNBOUNDED)
-      if (candidates.size > 0) AgsStrategy.Estimate.GuaranteedSuccess else AgsStrategy.Estimate.CompleteFailure
+    if (pac == UNBOUNDED) {
+      if (candidates.size > 0) AgsStrategy.Estimate.GuaranteedSuccess
+      else AgsStrategy.Estimate.CompleteFailure
+    }
     else {
       val cv = new CandidateValidator(params, mt, candidates)
       val steps = pac.steps(ctx.getPositionAngle, params.stepSize).toList.asScala
@@ -63,7 +65,10 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
       // For FIXED_180 and PARALLACTIC_ANGLE, we return guaranteed success (1.0) if either position angle
       // has candidates.
       val successProbability = anglesWithResults.size.toDouble / steps.size.toDouble
-      if (pac == FIXED) if (successProbability > 0.0) AgsStrategy.Estimate.GuaranteedSuccess else AgsStrategy.Estimate.CompleteFailure
+      if (pac == FIXED) {
+        if (successProbability > 0.0) AgsStrategy.Estimate.GuaranteedSuccess
+        else AgsStrategy.Estimate.CompleteFailure
+      }
       else AgsStrategy.Estimate.toEstimate(successProbability)
     }
   }

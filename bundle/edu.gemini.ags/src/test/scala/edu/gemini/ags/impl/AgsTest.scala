@@ -277,19 +277,6 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(SkyObj
       new SkyObject.Builder(name("out", i), sc).magnitudes(mag).build()
     }
 
-//    println("*****USABLE SKY CANDIDATES*****")
-//    usableCandidates.foreach { case (c,_) =>
-//      println(s"${c.getName}, ${c.getCoordinates}, ${c.getMagnitudes}")
-//      //println(c.getName + " = " + c.getCoordinates + c.getMagnitudeBands)
-//    }
-//
-//    println("*****UNUSABLE SKY CANDIDATES*****")
-//    unusableCandidates.foreach { c =>
-//      println(s"${c.getName}, ${c.getCoordinates}, ${c.getMagnitudes}")
-//      //println(c.getName + " = " + c.getCoordinates)
-//    }
-//    Console.out.flush
-
     copy(usable = usableCandidates, unusable = unusableCandidates)
   }
 
@@ -453,12 +440,6 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(SkyObj
             asn match {
               case List(AgsStrategy.Assignment(actProbe, actStar)) =>
                 assertEquals(guideProbe, actProbe)
-
-                // Display the expected and selected star.
-                //println(s"expStar=$expStar")
-                //println(s"actStar=$actStar\n")
-                //Console.out.flush
-
                 assertEquals(expStar, actStar)
                 val actSpeed = AgsMagnitude.fastestGuideSpeed(mc, actStar.getMagnitude(band).getValue, ctx.getConditions)
                 assertTrue("Expected: " + expSpeed + ", actual: " + actSpeed, actSpeed.exists(_ == expSpeed))
@@ -471,12 +452,9 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(SkyObj
       best.fold(expectNothing()) { (expectSingleAssignment _).tupled }
 
       val remaining = best.map { case (so, gs) => winners.diff(List((so, gs)))}.toList.flatten
-      //println(s"Remaining=${remaining.mkString("\n\t", "\n\t", "")}")
-
       if (best.isDefined) go(remaining)
     }
 
-    //println(s"Candidates=${usable.mkString("\n\t", "\n\t", "")}")
     go(usable)
   }
 }
