@@ -22,7 +22,6 @@ import edu.gemini.spModel.obs.ObsClassService;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
-import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 
 import java.beans.PropertyDescriptor;
@@ -38,7 +37,7 @@ import java.util.Map;
  */
 public final class NiriRule implements IRule {
     private static final String PREFIX = "NiriRule_";
-    private static Collection<IConfigRule> NIRI_RULES = new ArrayList<IConfigRule>();
+    private static Collection<IConfigRule> NIRI_RULES = new ArrayList<>();
 
 
     /**
@@ -147,7 +146,7 @@ public final class NiriRule implements IRule {
             Niri.Disperser disperser = (Niri.Disperser) SequenceRule.getInstrumentItem(config, InstNIRI.DISPERSER_PROP);
 
             if (disperser != Niri.Disperser.NONE) {
-                return new Problem(WARNING, PREFIX+"ACQUISITION_WITH_DISPERSER_RULE", MESSAGE,
+                return new Problem(WARNING, PREFIX + "ACQUISITION_WITH_DISPERSER_RULE", MESSAGE,
                         SequenceRule.getInstrumentOrSequenceNode(step, elems));
             }
             return null;
@@ -165,7 +164,7 @@ public final class NiriRule implements IRule {
             if (mask == Niri.Mask.MASK_IMAGING) {
                 Niri.Disperser disperser = (Niri.Disperser) SequenceRule.getInstrumentItem(config, InstNIRI.DISPERSER_PROP);
                 if (disperser != Niri.Disperser.NONE) {
-                    return new Problem(WARNING, PREFIX+"IMAGING_AND_DISPERSER_RULE", MESSAGE,
+                    return new Problem(WARNING, PREFIX + "IMAGING_AND_DISPERSER_RULE", MESSAGE,
                             SequenceRule.getInstrumentOrSequenceNode(step, elems));
                 }
             }
@@ -183,7 +182,7 @@ public final class NiriRule implements IRule {
             if (disperser == Niri.Disperser.NONE) {
                 Niri.Mask mask = (Niri.Mask) SequenceRule.getInstrumentItem(config, InstNIRI.MASK_PROP);
                 if (mask != Niri.Mask.MASK_IMAGING) {
-                    return new Problem(WARNING, PREFIX+"SCIENCE_WITH_SLIT_NO_DISPERSER_RULE", MESSAGE,
+                    return new Problem(WARNING, PREFIX + "SCIENCE_WITH_SLIT_NO_DISPERSER_RULE", MESSAGE,
                             SequenceRule.getInstrumentOrSequenceNode(step, elems));
                 }
             }
@@ -213,7 +212,7 @@ public final class NiriRule implements IRule {
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
             Enum<?> device = (Enum<?>) SequenceRule.getInstrumentItem(config, _deviceProperty);
             if (device == _expectedValue) {
-                return new Problem(_problemType, PREFIX+"EngineeringRule", _message,
+                return new Problem(_problemType, PREFIX + "EngineeringRule", _message,
                         SequenceRule.getInstrumentOrSequenceNode(step, elems));
             }
             return null;
@@ -260,7 +259,7 @@ public final class NiriRule implements IRule {
                 }
             }
             if (polarimetryInUse) {
-                return new Problem(ERROR, PREFIX+"POLARIMETRY_RULE", MESSAGE,
+                return new Problem(ERROR, PREFIX + "POLARIMETRY_RULE", MESSAGE,
                         SequenceRule.getInstrumentOrSequenceNode(step, elems));
             }
             return null;
@@ -309,15 +308,15 @@ public final class NiriRule implements IRule {
 
             if (obsClass == ObsClass.ACQ || obsClass == ObsClass.ACQ_CAL) {
                 if (expTime * coadds > 60) {
-                    return new Problem(WARNING, PREFIX+"ACQUISITION_EXPOSURE_RULE_MESSAGE_ACQ", MESSAGE_ACQ, SequenceRule.getInstrumentOrSequenceNode(step, elems, config));
+                    return new Problem(WARNING, PREFIX + "ACQUISITION_EXPOSURE_RULE_MESSAGE_ACQ", MESSAGE_ACQ, SequenceRule.getInstrumentOrSequenceNode(step, elems, config));
                 }
             } else if (obsClass == ObsClass.SCIENCE) {
 
                 if (expTime * coadds > 300) {
-                    return new Problem(WARNING, PREFIX+"ACQUISITION_EXPOSURE_RULE_MESSAGE_SCIENCE_1", MESSAGE_SCIENCE_1,
+                    return new Problem(WARNING, PREFIX + "ACQUISITION_EXPOSURE_RULE_MESSAGE_SCIENCE_1", MESSAGE_SCIENCE_1,
                             SequenceRule.getInstrumentOrSequenceNode(step, elems, config));
                 } else if (expTime > 60 && coadds > 1) {
-                    return new Problem(WARNING, PREFIX+"ACQUISITION_EXPOSURE_RULE_MESSAGE_SCIENCE_2", MESSAGE_SCIENCE_2,
+                    return new Problem(WARNING, PREFIX + "ACQUISITION_EXPOSURE_RULE_MESSAGE_SCIENCE_2", MESSAGE_SCIENCE_2,
                             SequenceRule.getInstrumentOrSequenceNode(step, elems, config));
                 }
             }
@@ -373,7 +372,7 @@ public final class NiriRule implements IRule {
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
             Niri.Focus focus = (Niri.Focus) SequenceRule.getInstrumentItem(config, InstNIRI.FOCUS_PROP);
             if (!Niri.FocusSuggestion.BEST_FOCUS.displayValue().equals(focus.getStringValue())) {
-                return new Problem(ERROR, PREFIX+"FOCUS_RULE", MESSAGE, SequenceRule.getInstrumentOrSequenceNode(step, elems));
+                return new Problem(ERROR, PREFIX + "FOCUS_RULE", MESSAGE, SequenceRule.getInstrumentOrSequenceNode(step, elems));
             }
 
             return null;
@@ -406,10 +405,8 @@ public final class NiriRule implements IRule {
      */
 
     private static class BeamSplitterRule extends AbstractConfigRule {
-        private static final String MESSAGE = "All observations should have the beam splitter the same as the camera";
-
         private static final Map<Niri.Camera, Niri.BeamSplitter> configs =
-                new HashMap<Niri.Camera, Niri.BeamSplitter>();
+                new HashMap<>();
 
         static {
             configs.put(Niri.Camera.F6, Niri.BeamSplitter.f6);
@@ -440,7 +437,7 @@ public final class NiriRule implements IRule {
             //The NIRI beamsplitter is stuck at the f/6 position so the OT should only allow this configuration.
             if ((beamSplitter != Niri.BeamSplitter.f6) &&
                     (beamSplitter != Niri.BeamSplitter.same_as_camera || configBeamSplitter != Niri.BeamSplitter.f6)) {
-                return new Problem(ERROR, PREFIX+"BeamSplitterRule",
+                return new Problem(ERROR, PREFIX + "BeamSplitterRule",
                         "The NIRI beamsplitter must be in the f/6 position", SequenceRule.getInstrumentOrSequenceNode(step, elems));
             }
 
@@ -459,17 +456,6 @@ public final class NiriRule implements IRule {
         private static final String MESSAGE = "Altair can only be used with NIRI's f/32 or f/14 cameras.";
         private static final ALTAIR_CAMERA_RULE INSTANCE = new ALTAIR_CAMERA_RULE();
 
-        private boolean hasAO(TargetEnvironment env) {
-            return hasPrimary(env, AltairAowfsGuider.instance);
-        }
-
-        private boolean hasPrimary(TargetEnvironment env, GuideProbe guider) {
-            // TODO: GuideProbeTargets.isEnabled
-            if (!env.isActive(guider)) return false;
-            Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(guider);
-            return (!gtOpt.isEmpty()) && !gtOpt.getValue().getPrimary().isEmpty();
-        }
-
         @Override
         public Problem check(Config config, int step, ObservationElements elements, Object state) {
             boolean hasAOComp = elements.hasAltair();
@@ -477,7 +463,7 @@ public final class NiriRule implements IRule {
              Niri.Camera camera = (Niri.Camera) SequenceRule.getInstrumentItem(config, InstNIRI.CAMERA_PROP);
 
             if (hasAOComp && (camera == Niri.Camera.F6)) {
-                return new Problem(ERROR, PREFIX+"ALTAIR_CAMERA_RULE", MESSAGE,
+                return new Problem(ERROR, PREFIX + "ALTAIR_CAMERA_RULE", MESSAGE,
                         SequenceRule.getInstrumentOrSequenceNode(step, elements));
             }
             return null;
@@ -513,11 +499,8 @@ public final class NiriRule implements IRule {
                 TargetEnvironment env = obsComp.getTargetEnvironment();
 
                 P2Problems problems = new P2Problems();
-                boolean hasP2 = hasP2(env);
-
                 boolean hasAOTarget = hasAO(env);
                 boolean hasAOComp = elements.hasAltair();
-
 
                 if (hasAOTarget && !hasAOComp) {
                     problems.addError(PREFIX + "AO_NOALTAIR_MSG", AO_NOALTAIR_MSG, elements.getTargetObsComponentNode().getValue());
@@ -539,10 +522,6 @@ public final class NiriRule implements IRule {
                 return problems;
             }
             return null;
-        }
-
-        private boolean hasP2(TargetEnvironment env) {
-            return hasPrimary(env, PwfsGuideProbe.pwfs2);
         }
 
         private boolean hasOI(TargetEnvironment env) {
@@ -595,8 +574,7 @@ public final class NiriRule implements IRule {
 
         private static final String MESSAGE_TEMPLATE = "Exposure time is shorter than the minimum (%.3f sec)";
 
-        private static final Map<Niri.BuiltinROI, Double> LOW_BACKGROUND_LIMITS =
-                new HashMap<Niri.BuiltinROI, Double>();
+        private static final Map<Niri.BuiltinROI, Double> LOW_BACKGROUND_LIMITS = new HashMap<>();
 
         static {
             LOW_BACKGROUND_LIMITS.put(Niri.BuiltinROI.FULL_FRAME, 8.762);
@@ -605,8 +583,7 @@ public final class NiriRule implements IRule {
             LOW_BACKGROUND_LIMITS.put(Niri.BuiltinROI.CENTRAL_256, 0.654);
         }
 
-        private static final Map<Niri.BuiltinROI, Double> MEDIUM_BACKGROUND_LIMITS =
-                new HashMap<Niri.BuiltinROI, Double>();
+        private static final Map<Niri.BuiltinROI, Double> MEDIUM_BACKGROUND_LIMITS = new HashMap<>();
 
         static {
             MEDIUM_BACKGROUND_LIMITS.put(Niri.BuiltinROI.FULL_FRAME, 0.548);
@@ -615,8 +592,7 @@ public final class NiriRule implements IRule {
             MEDIUM_BACKGROUND_LIMITS.put(Niri.BuiltinROI.CENTRAL_256, 0.043);
         }
 
-        private static final Map<Niri.BuiltinROI, Double> HIGH_BACKGROUND_LIMITS =
-                new HashMap<Niri.BuiltinROI, Double>();
+        private static final Map<Niri.BuiltinROI, Double> HIGH_BACKGROUND_LIMITS = new HashMap<>();
 
         static {
             HIGH_BACKGROUND_LIMITS.put(Niri.BuiltinROI.FULL_FRAME, 0.179);
@@ -625,8 +601,7 @@ public final class NiriRule implements IRule {
             HIGH_BACKGROUND_LIMITS.put(Niri.BuiltinROI.CENTRAL_256, 0.020);
         }
 
-        private static final Map<Niri.ReadMode, Map<Niri.BuiltinROI, Double>> READ_MODE_TABLES =
-                new HashMap<Niri.ReadMode, Map<Niri.BuiltinROI, Double>>();
+        private static final Map<Niri.ReadMode, Map<Niri.BuiltinROI, Double>> READ_MODE_TABLES = new HashMap<>();
 
         static {
             READ_MODE_TABLES.put(Niri.ReadMode.IMAG_SPEC_NB, LOW_BACKGROUND_LIMITS);
@@ -697,7 +672,7 @@ public final class NiriRule implements IRule {
         /**
          * Maps a given Camera to the minimum offset that that camera supports
          */
-        private static Map<Niri.Camera, Integer> CAMERA_OFFSET_MAP = new HashMap<Niri.Camera, Integer>();
+        private static Map<Niri.Camera, Integer> CAMERA_OFFSET_MAP = new HashMap<>();
 
 
         static {
@@ -724,7 +699,7 @@ public final class NiriRule implements IRule {
                 Integer repeatCount = SequenceRule.getStepCount(config);
                 if (repeatCount == null) return null; //can't check
                 if (repeatCount <= 1) return null; // doesn't apply to single exposure
-                return new Problem(WARNING, PREFIX+"CameraOffsetRule", NO_OFFSET_MESSAGE, elems.getSeqComponentNode());
+                return new Problem(WARNING, PREFIX + "CameraOffsetRule", NO_OFFSET_MESSAGE, elems.getSeqComponentNode());
             } else {
                 Integer minOffset = CAMERA_OFFSET_MAP.get(camera);
                 if (minOffset == null) return null; // no entry in the map for this camera
@@ -816,7 +791,7 @@ public final class NiriRule implements IRule {
          * to issue if that happens.
          */
         private static Map<Niri.Disperser, FilterAndMessage> DISPERSER_FILTER_TABLE =
-                new HashMap<Niri.Disperser, FilterAndMessage>();
+                new HashMap<>();
 
         private static class FilterAndMessage {
             private Niri.Filter _filter;
@@ -909,7 +884,7 @@ public final class NiriRule implements IRule {
             if (expTime > 1) {
                 Niri.BuiltinROI array = (Niri.BuiltinROI) SequenceRule.getInstrumentItem(config, InstNIRI.BUILTIN_ROI_PROP);
                 if (array != Niri.BuiltinROI.FULL_FRAME) {
-                    return new Problem(WARNING, PREFIX+"EXPTIME_ARRAY_RULE",
+                    return new Problem(WARNING, PREFIX + "EXPTIME_ARRAY_RULE",
                             MESSAGE, SequenceRule.getInstrumentOrSequenceNode(step, elems, config));
                 }
             }
@@ -998,7 +973,7 @@ public final class NiriRule implements IRule {
         void appendProblem(IP2Problems problems, ObservationElements elems) {
             if (foundProblem()) {
                 for(ISPObsComponent sqn:elems.getSiteQualityNode()){
-                    problems.append(new Problem(WARNING, PREFIX+"WaterVaporRuleState", WV_MESSAGE, sqn));
+                    problems.append(new Problem(WARNING, PREFIX + "WaterVaporRuleState", WV_MESSAGE, sqn));
                 }
             }
         }
@@ -1060,7 +1035,7 @@ public final class NiriRule implements IRule {
 
         public void appendProblem(IP2Problems problems, ObservationElements elems) {
             if (problemState == State.PROBLEM) {
-                problems.append(new Problem(WARNING, PREFIX+"CameraOffsetState", String.format(MESSAGE, _minOffset), elems.getSeqComponentNode()));
+                problems.append(new Problem(WARNING, PREFIX + "CameraOffsetState", String.format(MESSAGE, _minOffset), elems.getSeqComponentNode()));
             }
         }
     }
@@ -1123,11 +1098,11 @@ public final class NiriRule implements IRule {
         public void appendProblem(IP2Problems problems, ObservationElements elems) {
 
             if (highBckgdReadModeState == State.PROBLEM) {
-                problems.addWarning(PREFIX+"HBCKG_MESSAGE", HBCKG_MESSAGE, SequenceRule.getInstrumentOrSequenceNode(stepHighBckgd, elems));
+                problems.addWarning(PREFIX + "HBCKG_MESSAGE", HBCKG_MESSAGE, SequenceRule.getInstrumentOrSequenceNode(stepHighBckgd, elems));
             }
 
             if (shallowWellModeState == State.PROBLEM) {
-                problems.addWarning(PREFIX+"SHALLOW_MESSAGE", SHALLOW_MESSAGE, SequenceRule.getInstrumentOrSequenceNode(stepShallowWeelMode, elems));
+                problems.addWarning(PREFIX + "SHALLOW_MESSAGE", SHALLOW_MESSAGE, SequenceRule.getInstrumentOrSequenceNode(stepShallowWeelMode, elems));
             }
 
 
@@ -1167,7 +1142,7 @@ public final class NiriRule implements IRule {
             //check for observe > 1
             Integer repeatCount = SequenceRule.getStepCount(config);
             if (repeatCount != null && repeatCount > 1) {
-                return new Problem(WARNING, PREFIX+"OFFSET_RULE", MESSAGE, elems.getSeqComponentNode());
+                return new Problem(WARNING, PREFIX + "OFFSET_RULE", MESSAGE, elems.getSeqComponentNode());
             }
             //check the offset. If they are the same as the previous known state,
             //issue a problem
@@ -1176,7 +1151,7 @@ public final class NiriRule implements IRule {
             final double p = pOpt.isDefined() ? pOpt.get() : 0.0;
             final double q = qOpt.isDefined() ? qOpt.get() : 0.0;
             if (niristate.offsetState.checkPQ(p, q)) {
-                return new Problem(WARNING, PREFIX+"OFFSET_RULE", MESSAGE, elems.getSeqComponentNode());
+                return new Problem(WARNING, PREFIX + "OFFSET_RULE", MESSAGE, elems.getSeqComponentNode());
             }
             return null;
         }
@@ -1221,7 +1196,7 @@ public final class NiriRule implements IRule {
 
                     if (!isValidTranslation(currentMask, newMask)) {
                         P2Problems probs = new P2Problems();
-                        probs.addError(PREFIX+"SLIT_CHANGES_RULE", MESSAGE, elements.getSeqComponentNode());
+                        probs.addError(PREFIX + "SLIT_CHANGES_RULE", MESSAGE, elements.getSeqComponentNode());
                         return probs;
                     }
                     currentMask = newMask;
@@ -1316,7 +1291,7 @@ public final class NiriRule implements IRule {
         //append the possible problems found regarding the Water Vapor
         state.waterVaporRuleState.appendProblem(seqProblems, elems);
 
-        //append the possible problems found regarding wavelenght
+        //append the possible problems found regarding wavelength
         state.wavelengthState.appendProblem(seqProblems, elems);
 
         //append the possible problems found on the offset iterator associated to the camera in use
@@ -1335,7 +1310,7 @@ public final class NiriRule implements IRule {
     private static double getWavelength(Config config) {
         Niri.Disperser disperser = (Niri.Disperser) SequenceRule.getInstrumentItem(config, InstNIRI.DISPERSER_PROP);
 
-        if (disperser == null) return -1; //can't get wvlength
+        if (disperser == null) return -1; //can't get wavelength
 
         double wavelength = -1.0;
         if (disperser == Niri.Disperser.NONE) {

@@ -15,7 +15,6 @@ import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.pot.sp.ISPProgramNode;
 import scala.Option;
 
-
 import java.util.*;
 import java.beans.PropertyDescriptor;
 
@@ -51,7 +50,7 @@ public class SequenceRule implements IRule {
     // types are primitives, "double.class", but the class of the object in the
     // sequence is the wrapper, "Double.class".  double.class.isInstance(obj)
     // returns false for objs of type Double.class.
-    private static final Map<Class, Class> PRIMITIVE_MAP = new HashMap<Class, Class>();
+    private static final Map<Class, Class> PRIMITIVE_MAP = new HashMap<>();
 
     // Matcher for science observations only.
     public static final IConfigMatcher SCIENCE_MATCHER = new IConfigMatcher() {
@@ -207,7 +206,7 @@ public class SequenceRule implements IRule {
     private Object _state;
 
     public SequenceRule(Collection<IConfigRule> instRules, Object state) {
-        _instRules = new HashSet<IConfigRule>(instRules);
+        _instRules = new HashSet<>(instRules);
         _state = state;
     }
 
@@ -221,7 +220,7 @@ public class SequenceRule implements IRule {
         for (Iterator it=seq.iterator(); it.hasNext(); ++step) {
             Config config = (Config) it.next();
 
-            Map<IConfigMatcher, Boolean> valMap = new HashMap<IConfigMatcher, Boolean>();
+            Map<IConfigMatcher, Boolean> valMap = new HashMap<>();
 
             Iterator<IConfigRule> ruleIt = _instRules.iterator();
             while (ruleIt.hasNext()) {
@@ -242,7 +241,7 @@ public class SequenceRule implements IRule {
                    valMap.put(matcher, res);
                 }
                 if (res) {
-                    // rules is appliable, do it
+                    // rules is applicable, do it
                     Problem prob = rule.check(config, step, elements, _state);
                     if (prob != null) {
                         probs.append(prob);
