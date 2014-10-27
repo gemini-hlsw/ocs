@@ -136,15 +136,13 @@ public class NIRISupport implements ITccInstrumentSupport {
     private static final class PointOrigKey {
         private final Camera camera;
         private final AoAspect ao;
-        private final AltairParams.Mode mode;
 
         /**
          * If mode is null, assume all modes should match. Otherwise, must match on a specific mode.
          */
-        PointOrigKey(Camera camera, AoAspect ao, AltairParams.Mode mode) {
+        PointOrigKey(Camera camera, AoAspect ao) {
             this.camera = camera;
             this.ao     = ao;
-            this.mode   = mode;
         }
 
         @Override
@@ -155,15 +153,12 @@ public class NIRISupport implements ITccInstrumentSupport {
             PointOrigKey that = (PointOrigKey) o;
             if (ao != that.ao) return false;
             if (camera != that.camera) return false;
-            if (mode != null && that.mode != null && mode != that.mode) return false;
 
             return true;
         }
 
         @Override
         public int hashCode() {
-            // Note that we don't use mode in calculating the hash code because we want a mode of null to match
-            // anything for a key.
             int result = camera != null ? camera.hashCode() : 0;
             result = 31 * result + (ao != null ? ao.hashCode() : 0);
             return result;
@@ -178,30 +173,22 @@ public class NIRISupport implements ITccInstrumentSupport {
         define(m, Camera.F6,  AoAspect.none, "nirif6p");
         define(m, Camera.F14, AoAspect.none, "nirif14p");
         define(m, Camera.F14, AoAspect.ngs,  "ngs2niri_f14");
+        define(m, Camera.F14, AoAspect.lgs,  "lgs2niri_f14");
         define(m, Camera.F32, AoAspect.none, "nirif32p");
         define(m, Camera.F32, AoAspect.ngs,  "ngs2niri_f32");
-
-        define(m, Camera.F14, AoAspect.lgs, AltairParams.Mode.LGS,    "lgs2niri_f14");
-        define(m, Camera.F14, AoAspect.lgs, AltairParams.Mode.LGS_OI, "lgs2niri_f14");
-        define(m, Camera.F14, AoAspect.lgs, AltairParams.Mode.LGS_P1, "lgs2niri_f14_p1");
-
-        define(m, Camera.F32, AoAspect.lgs, AltairParams.Mode.LGS,    "lgs2niri_f32");
-        define(m, Camera.F32, AoAspect.lgs, AltairParams.Mode.LGS_OI, "lgs2niri_f32");
-        define(m, Camera.F32, AoAspect.lgs, AltairParams.Mode.LGS_P1, "lgs2niri_f32_p1");
+        define(m, Camera.F32, AoAspect.lgs,  "lgs2niri_f32");
 
         POINT_ORIG_MAP = Collections.unmodifiableMap(m);
     }
 
-    private static void define(Map<PointOrigKey, String> m, Camera c, AoAspect ao, AltairParams.Mode mode, String val) {
-        m.put(new PointOrigKey(c, ao, mode), val);
-    }
-
     private static void define(Map<PointOrigKey, String> m, Camera c, AoAspect ao, String val) {
-        define(m, c, ao, null, val);
+        m.put(new PointOrigKey(c, ao), val);
     }
 
     private static String lookupPointOrig(Camera c, AoAspect ao, AltairParams.Mode mode) {
-        String val = POINT_ORIG_MAP.get(new PointOrigKey(c, ao, mode));
+        String val = POINT_ORIG_MAP.get(new PointOrigKey(c, ao));
+        if (val != null && AltairParams.Mode.LGS_P1.equals(mode))
+            val += "_p1";
         return val == null ? "unknown" : val;
     }
 
