@@ -125,7 +125,14 @@ object Angle {
   def fromRadians(r: Double): Angle =
     fromDegrees(r.toDegrees)
 
-  /** 
+  /**
+   * Construct an `Angle` from the given hours value, which will be normalized to [0, 24).
+   * @group Constructors
+   */
+  def fromHours(h: Double): Angle =
+    fromDegrees(h * 15.0)
+
+  /**
    * Construct an `Angle` from the given hour angle components if possible; `minutes` and `seconds` 
    * must be in [0, 60).
    * @group Constructors
