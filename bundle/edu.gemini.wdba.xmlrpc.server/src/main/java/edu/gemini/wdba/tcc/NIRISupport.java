@@ -153,7 +153,6 @@ public class NIRISupport implements ITccInstrumentSupport {
             if (o == null || getClass() != o.getClass()) return false;
 
             PointOrigKey that = (PointOrigKey) o;
-
             if (ao != that.ao) return false;
             if (camera != that.camera) return false;
             if (mode != null && that.mode != null && mode != that.mode) return false;
@@ -163,9 +162,10 @@ public class NIRISupport implements ITccInstrumentSupport {
 
         @Override
         public int hashCode() {
+            // Note that we don't use mode in calculating the hash code because we want a mode of null to match
+            // anything for a key.
             int result = camera != null ? camera.hashCode() : 0;
             result = 31 * result + (ao != null ? ao.hashCode() : 0);
-            result = 31 * result + (mode != null ? mode.hashCode() : 0);
             return result;
         }
     }
@@ -214,7 +214,7 @@ public class NIRISupport implements ITccInstrumentSupport {
         InstNIRI inst          = (InstNIRI) _oe.getInstrument();
         Camera   c             = inst.getCamera();
         AoAspect ao            = _oe.getAoAspect();
-        AltairParams.Mode mode = _oe.getAltairConfig().getMode();
+        AltairParams.Mode mode = _oe.getAltairConfig() == null ? null : _oe.getAltairConfig().getMode();
         return lookupPointOrig(c, ao, mode);
     }
 

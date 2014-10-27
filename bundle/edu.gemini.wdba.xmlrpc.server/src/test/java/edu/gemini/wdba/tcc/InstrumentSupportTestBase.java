@@ -63,12 +63,12 @@ public abstract class InstrumentSupportTestBase<T extends ISPDataObject> extends
     }
 
     protected ObsComponentPair<InstAltair> addAltair(AltairParams.GuideStarType type) throws Exception {
+        return addAltair(type == AltairParams.GuideStarType.NGS ? AltairParams.Mode.NGS : AltairParams.Mode.LGS);
+    }
+
+    protected ObsComponentPair<InstAltair> addAltair(AltairParams.Mode mode) throws Exception {
         ObsComponentPair<InstAltair> p = addAltair();
-        if (type == AltairParams.GuideStarType.NGS) {
-            p.dataObject.setMode(AltairParams.Mode.NGS);
-        } else {
-            p.dataObject.setMode(AltairParams.Mode.LGS);
-        }
+        p.dataObject.setMode(mode);
         p.store();
         return p;
     }

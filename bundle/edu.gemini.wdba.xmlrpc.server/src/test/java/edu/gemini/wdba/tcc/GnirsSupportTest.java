@@ -85,6 +85,11 @@ public final class GnirsSupportTest extends InstrumentSupportTestBase<InstGNIRS>
         addAltair(LGS); verifyPointOrig(getSouthResults(), "lgs2gnirs");
     }
 
+    public void testLgsP1PointOrig() throws Exception {
+        addAltair(AltairParams.Mode.LGS_P1);
+        verifyPointOrig(getSouthResults(), "lgs2gnirs_p1");
+    }
+
     public void testNgsPointOrig() throws Exception {
         addAltair(NGS); verifyPointOrig(getSouthResults(), "ngs2gnirs");
     }
