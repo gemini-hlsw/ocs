@@ -90,11 +90,11 @@ public final class Alloc implements Comparable<Alloc>, Commentable, PioSerializa
         setComment(comment);
     }
 
-    Alloc(Variant variant, ParamSet params) {
+    Alloc(Variant variant, Obs obs, ParamSet params) {
 		this.interval = new Interval(params);
         this.shutterTime = 0;
 		this.variant = variant;
-		this.obs = variant.getSchedule().getMiniModel().getObs(Pio.getValue(params, "obs"));
+		this.obs = obs;
 		this.firstStep = Pio.getIntValue(params, "firstStep", 0);
 		this.lastStep = Pio.getIntValue(params, "lastStep", 0);
         this.setupType = Pio.getEnumValue(params, "setupType", SetupType.FULL);

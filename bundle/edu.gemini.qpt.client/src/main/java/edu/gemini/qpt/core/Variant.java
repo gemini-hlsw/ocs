@@ -1027,14 +1027,25 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 @SuppressWarnings("serial")
 class AllocSet extends TreeSet<Alloc> implements PioSerializable {
 
-	public static final String PROP_MEMBER = "visit";
+    private static final Logger LOGGER = Logger.getLogger(AllocSet.class.getName());
+
+    public static final String PROP_MEMBER = "visit";
 
 	public AllocSet() {
 	}
 
 	public AllocSet(Variant variant, ParamSet paramSet) {
-		for (ParamSet allocParams: paramSet.getParamSets(PROP_MEMBER))
-			add(new Alloc(variant, allocParams));
+		for (ParamSet allocParams: paramSet.getParamSets(PROP_MEMBER)) {
+            final String obsId = Pio.getValue(allocParams, "obs");
+            final Obs obs = variant.getSchedule().getMiniModel().getObs(obsId);
+            if (obs != null) {
+                add(new Alloc(variant, obs, allocParams));
+            } else {
+                // Silently ignore observations that are not found in the mini model.
+                // This can for example happen when an observation is changed from Active to Inactive etc.
+                LOGGER.fine("No observation found in mini model with id " + obsId + "; ignoring this observation");
+            }
+        }
 	}
 
 	public ParamSet getParamSet(PioFactory factory, String name) {
