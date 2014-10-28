@@ -75,17 +75,13 @@ public interface SpidMatcher extends Serializable {
         private final IDBDatabaseService db;
 
         LocalMatcher(IDBDatabaseService db) { this.db = db; }
-        private SPProgramID toSpProgramId(scala.Option<ProgramId> pid) {
-            try {
-                return pid.isEmpty() ? null : SPProgramID.toProgramID(pid.get().toString());
-            } catch (Exception ex) {
-                return null;
-            }
-        }
-
         @Override public boolean matches(scala.Option<ProgramId> pid) {
-            final SPProgramID spid = toSpProgramId(pid);
-            return (spid == null) || (db.lookupProgramByID(spid) != null);
+            if (pid.isEmpty()) {
+                return true; // no program id, can't be remote
+            } else {
+                final scala.Option<SPProgramID> spid = pid.get().spOption();
+                return spid.isEmpty() || db.lookupProgramByID(spid.get()) != null;
+            }
         }
     }
 

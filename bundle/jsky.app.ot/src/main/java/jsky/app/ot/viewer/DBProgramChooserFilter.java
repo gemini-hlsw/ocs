@@ -179,17 +179,21 @@ public final class DBProgramChooserFilter implements IDBProgramChooserFilter {
 
 
     // Get the saved settings from the previous session, if any, and arrange to save the user's choices for later use.
-    private void restoreSettings() {
-        final List<JCheckBox> checks = Arrays.asList(remote, classical, lp, fastTurn, queue, cal, engineering, other, libs);
+    private static void restoreSettings(List<JCheckBox> checks, boolean def) {
         for (final JCheckBox c : checks) {
             final String pref = PREF_KEY + "." + c.getName();
-            c.setSelected(Boolean.valueOf(Preferences.get(pref, "true")));
+            c.setSelected(Preferences.get(pref, def));
             c.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     Preferences.set(pref, Boolean.toString(c.isSelected()));
                 }
             });
         }
+    }
+
+    private void restoreSettings() {
+        restoreSettings(Arrays.asList(remote, classical, lp, fastTurn, queue), true);
+        restoreSettings(Arrays.asList(cal, engineering, other, libs),         false);
     }
 
     // Filters the input list with some glorious UI updating side-effects.
