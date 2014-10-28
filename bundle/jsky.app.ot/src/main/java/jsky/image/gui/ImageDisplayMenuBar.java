@@ -34,7 +34,6 @@ import jsky.util.I18N;
 import jsky.util.Preferences;
 import jsky.util.gui.DialogUtil;
 import jsky.util.gui.GenericToolBar;
-import jsky.util.Resources;
 
 
 /**
@@ -788,15 +787,21 @@ public class ImageDisplayMenuBar extends JMenuBar {
      */
     protected JCheckBoxMenuItem createViewSmoothScrollingMenuItem() {
         JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(_I18N.getString("smoothScrolling"));
+
+        // Name used to store setting in user preferences.
+        final String prefName = getClass().getName() + ".SmoothScrolling";
+
         menuItem.addItemListener(new ItemListener() {
 
             public void itemStateChanged(ItemEvent e) {
                 JCheckBoxMenuItem rb = (JCheckBoxMenuItem) e.getSource();
                 _imageDisplay.setImmediateMode(rb.getState());
                 _imageDisplay.updateImage();
+                Preferences.set(prefName, rb.getState());
             }
         });
 
+        menuItem.setState(Preferences.get(prefName, true));
         return menuItem;
     }
 
