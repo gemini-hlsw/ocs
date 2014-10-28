@@ -88,7 +88,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
 
   // List of candidates and their angles for the case where the pos angle constraint is bounded.
   private def selectUnbounded(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SkyObject]): List[(Angle, SkyObject)] =
-    candidates.map(so => (calculatePositionAngle(ctx.getBaseCoordinates, so), so)).filter {
+    candidates.map(so => (SingleProbeStrategy.calculatePositionAngle(ctx.getBaseCoordinates, so), so)).filter {
       case (angle, so) => new CandidateValidator(params, mt, List(so)).exists(ctx.withPositionAngle(angle))
     }
 
