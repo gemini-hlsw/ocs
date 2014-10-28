@@ -4,11 +4,12 @@ import edu.gemini.ags.api._
 import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.catalog.api.{QueryConstraint, CatalogServerInstances}
 import edu.gemini.shared.skyobject.SkyObject
-import edu.gemini.skycalc.Angle
+import edu.gemini.skycalc.{Coordinates, Angle}
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
+import edu.gemini.spModel.target.system.CoordinateParam.Units
 import edu.gemini.spModel.telescope.PosAngleConstraint
 import edu.gemini.spModel.telescope.PosAngleConstraint._
 
@@ -87,7 +88,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
 
   // List of candidates and their angles for the case where the pos angle constraint is bounded.
   private def selectUnbounded(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SkyObject]): List[(Angle, SkyObject)] =
-    candidates.map(so => (new SPTarget(so).calculatePositionAngle(ctx.getBaseCoordinates), so)).filter {
+    candidates.map(so => (calculatePositionAngle(ctx.getBaseCoordinates, so), so)).filter {
       case (angle, so) => new CandidateValidator(params, mt, List(so)).exists(ctx.withPositionAngle(angle))
     }
 
@@ -96,4 +97,21 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
 
   override val guideProbes: List[GuideProbe] =
     List(params.guideProbe)
+}
+
+
+object SingleProbeStrategy {
+  /**
+   * Calculate the position angle to a target from a specified base position.
+   */
+  def calculatePositionAngle(base: Coordinates, so: SkyObject): Angle = {
+    val ra1    = base.getRa.toRadians.getMagnitude
+    val dec1   = base.getDec.toRadians.getMagnitude
+    val target = new SPTarget(so).getTarget
+    val ra2    = new Angle(target.getC1.getAs(Units.DEGREES), Angle.Unit.DEGREES).toRadians.getMagnitude
+    val dec2   = new Angle(target.getC2.getAs(Units.DEGREES), Angle.Unit.DEGREES).toRadians.getMagnitude
+    val raDiff = ra2 - ra1
+    val angle  = Math.atan2(Math.sin(raDiff), Math.cos(dec1) * Math.tan(dec2) - Math.sin(dec1) * Math.cos(raDiff))
+    new Angle(angle, Angle.Unit.RADIANS)
+  }
 }
