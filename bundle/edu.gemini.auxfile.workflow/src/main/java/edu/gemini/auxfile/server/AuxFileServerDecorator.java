@@ -52,7 +52,8 @@ public abstract class AuxFileServerDecorator implements AuxFileServer {
     }
 
     @Override
-    public void setChecked(SPProgramID progId, Collection<String> fileNames, boolean newChecked) throws AuxFileException {
-        delegate.setChecked(progId, fileNames, newChecked);
+    public void setChecked(SPProgramID progId, Collection<String> fileNames, boolean newChecked,
+                           boolean suppressNotification) throws AuxFileException {
+        delegate.setChecked(progId, fileNames, newChecked, suppressNotification);
     }
 }

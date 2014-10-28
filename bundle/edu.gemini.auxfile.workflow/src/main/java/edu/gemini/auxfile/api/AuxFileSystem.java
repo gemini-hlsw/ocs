@@ -135,10 +135,20 @@ public interface AuxFileSystem {
     void setDescription(SPProgramID programId, Collection<String> fileNames, String newDescription)
             throws AuxFileException;
 
-    void setChecked(SPProgramID programId, Collection<String> fileNames, boolean newChecked)
-    		throws AuxFileException;
-
-
+    /**
+     * Sets the NGO checked status of remote files. Allows suppression of
+     * e-mail / other notification, which is what we want when the aux file
+     * already exists and has been reuploaded, in which case, the NGO checked
+     * flag is unchecked.
+     *
+     * @param programId id of the program with which the file is associated
+     * @param fileNames names of the files on the remote machine whose checked status should be set
+     * @param newChecked new checked status that the file should have
+     * @param suppressNotification true if notification should be suppressed that the status has been changed
+     * @throws AuxFileException
+     */
+    void setChecked(SPProgramID programId, Collection<String> fileNames, boolean newChecked,
+                    boolean suppressNotification) throws AuxFileException;
 }
 
 

@@ -106,7 +106,6 @@ public final class BackendFileSystemImpl implements AuxFileServer {
     @Override
     public AuxFileChunk fetchChunk(SPProgramID progId, String fileName, int chunkNumber, int chunkSize, long timestamp)
             throws AuxFileException {
-
         // Compare timestamps, if necessary.
         File f = FileManager.instance().getProgramFile(progId, fileName);
         if (!f.exists()) return null;
@@ -160,7 +159,6 @@ public final class BackendFileSystemImpl implements AuxFileServer {
     @Override
     public String storeChunk(SPProgramID progId, String fileName, AuxFileChunk chunk, String token)
             throws AuxFileException {
-
         FileManager man = FileManager.instance();
 
         // Get the directory associated with the program, creating it if needed.
@@ -229,7 +227,6 @@ public final class BackendFileSystemImpl implements AuxFileServer {
     @Override
     public void setDescription(SPProgramID progId, Collection<String> fileNames, String newDescription)
             throws AuxFileException {
-
     	for (String fileName: fileNames) {
             try {
             	MetaData.forFile(progId, fileName).setDescription(newDescription);
@@ -244,10 +241,10 @@ public final class BackendFileSystemImpl implements AuxFileServer {
     }
 
     @Override
-    public void setChecked(SPProgramID progId, Collection<String> fileNames, boolean newChecked)
+    public void setChecked(SPProgramID progId, Collection<String> fileNames, boolean newChecked,
+                           boolean suppressNotification)
             throws AuxFileException {
-
-		for (String fileName : fileNames) {
+        for (String fileName : fileNames) {
 			try {
 				MetaData.forFile(progId, fileName).setChecked(newChecked);
 			} catch (IOException ex) {
