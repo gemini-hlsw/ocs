@@ -4,6 +4,7 @@
 
 package edu.gemini.wdba.tcc;
 
+import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
 import edu.gemini.spModel.telescope.IssPort;
@@ -35,6 +36,11 @@ public class GmosNorthSupportTest extends InstrumentSupportTestBase<InstGmosNort
 
     @Test public void testLgsPointOrig() throws Exception {
         addAltair(LGS); verifyPointOrig(getSouthResults(), "lgs2gmos");
+    }
+
+    @Test public void testLgsP1PointOrig() throws Exception {
+        addAltair(AltairParams.Mode.LGS_P1);
+        verifyPointOrig(getSouthResults(), "lgs2gmos_p1");
     }
 
     @Test public void testNgsPointOrig() throws Exception {

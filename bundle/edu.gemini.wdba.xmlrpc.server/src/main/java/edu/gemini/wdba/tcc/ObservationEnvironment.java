@@ -273,7 +273,7 @@ public final class ObservationEnvironment {
     // to reflect this by appending a "_p1".
     public String adjustInstrumentOriginForLGS_P1(String basename) {
         final InstAltair instAltair = getAltairConfig();
-        if (instAltair == null || !AltairParams.Mode.LGS_P1.equals(instAltair.getMode())) return basename + "_p1";
-        return basename;
+        if (instAltair == null || !AltairParams.Mode.LGS_P1.equals(instAltair.getMode())) return basename;
+        return basename + "_p1";
     }
 }
