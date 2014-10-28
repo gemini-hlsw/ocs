@@ -61,7 +61,9 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
         Try { text.toDouble }.toOption
 
       def validate(): Unit =
-        background = angle.fold(badBackground)(x => defaultBackground)
+        // TODO: Restore this line when background AGS is implemented.
+        //background = angle.fold(badBackground)(x => defaultBackground)
+        background = angle.fold(if (positionAngleConstraintComboBox.selection.item == PosAngleConstraint.UNBOUNDED) background else badBackground)(x => defaultBackground)
     }
 
     layout(positionAngleTextField) = new Constraints() {
@@ -163,14 +165,15 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
     })
 
     // Reset the combo box so that all of the options are enabled by default.
+    // TODO: When background AGS is implemented, we can remove the deafTo + listenTo lines, as well as the
+    // disabling of the positionAngleTextField.
+    deafTo(ui.positionAngleConstraintComboBox.selection)
     ui.positionAngleConstraintComboBox.reset()
-
-    // TODO: Remove this once the logic is fully implemented.
-    if (options.contains(PosAngleConstraint.UNBOUNDED))
-      ui.positionAngleConstraintComboBox.disable(PosAngleConstraint.UNBOUNDED)
-
     ui.positionAngleConstraintComboBox.selection.item = instrument.getPosAngleConstraint
     ui.positionAngleTextField.text                    = numberFormatter.format(instrument.getPosAngle)
+    if (instrument.getPosAngleConstraint == PosAngleConstraint.UNBOUNDED)
+      ui.positionAngleTextField.enabled = false
+    listenTo(ui.positionAngleConstraintComboBox.selection)
 
     // Turn on the parallactic angle changing event handling.
     ui.parallacticAngleControlsOpt.foreach(p => listenTo(p))
@@ -207,16 +210,21 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
       // Set the position angle constraint on the instrument.
       e.getDataObject.setPosAngleConstraint(posAngleConstraint)
 
+      // TODO: Remove this line when background AGS is implemented.
+      ui.positionAngleTextField.enabled = true
+
       // Set up the UI.
       ui.positionAngleConstraintComboBox.selection.item match {
         case PosAngleConstraint.PARALLACTIC_ANGLE =>
-          //ui.controlsPanel.layout.remove(ui.positionAngleFeedback)
-          //ui.controlsPanel.layout(p) = BorderPanel.Position.Center
           ui.controlsPanel.showParallacticAngleControls()
           p.resetComponents()
+        // TODO: Remove this case when background AGS is implemented.
+        case PosAngleConstraint.UNBOUNDED =>
+          ui.positionAngleTextField.enabled = false
+          ui.positionAngleTextField.text    = "0"
+          ui.controlsPanel.showPositionAngleFeedback()
+        // TODO: Stop removing here.
         case _ =>
-          //ui.controlsPanel.layout.remove(p)
-          //ui.controlsPanel.layout(ui.positionAngleFeedback) = BorderPanel.Position.Center
           ui.controlsPanel.showPositionAngleFeedback()
       }
     }

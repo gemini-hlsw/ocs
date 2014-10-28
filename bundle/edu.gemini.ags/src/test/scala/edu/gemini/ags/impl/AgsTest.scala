@@ -18,7 +18,7 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.TargetEnvironment
-import edu.gemini.spModel.telescope.IssPortProvider
+import edu.gemini.spModel.telescope.{PosAngleConstraintAware, PosAngleConstraint, IssPortProvider}
 import edu.gemini.spModel.telescope.IssPort._
 
 import org.junit.Assert._
@@ -277,19 +277,6 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(SkyObj
       new SkyObject.Builder(name("out", i), sc).magnitudes(mag).build()
     }
 
-//    println("*****USABLE SKY CANDIDATES*****")
-//    usableCandidates.foreach { case (c,_) =>
-//      println(s"${c.getName}, ${c.getCoordinates}, ${c.getMagnitudes}")
-//      //println(c.getName + " = " + c.getCoordinates + c.getMagnitudeBands)
-//    }
-//
-//    println("*****UNUSABLE SKY CANDIDATES*****")
-//    unusableCandidates.foreach { c =>
-//      println(s"${c.getName}, ${c.getCoordinates}, ${c.getMagnitudes}")
-//      //println(c.getName + " = " + c.getCoordinates)
-//    }
-//    Console.out.flush
-
     copy(usable = usableCandidates, unusable = unusableCandidates)
   }
 
@@ -394,6 +381,22 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(SkyObj
     }
   }
 
+  def testBaseUnboundedPosAngleConstraint(): Unit = {
+    if (ctx.getInstrument.isInstanceOf[PosAngleConstraintAware]) {
+      allConditions().map{ tc =>
+        tc.ctx.getInstrument.asInstanceOf[PosAngleConstraintAware].setPosAngleConstraint(PosAngleConstraint.UNBOUNDED)
+
+        // Now we want to create all the candidates for a position angle of 135 and test that these are accessible.
+        val tcp = tc.rotated(135)
+        val patrolField = tcp.calculateValidArea(ctx, guideProbe)
+        patrolField.transform(tcp.rotation)
+        val cands = tcp.genCandidates(calculateValidArea(ctx, guideProbe))
+
+        val newTest = tc.copy(usable = cands.usable, unusable = Nil)
+        newTest.test()
+      }
+    }
+  }
 
   // gets the selected single probe strategy, or blows up
   def strategy: SingleProbeStrategy =
@@ -437,12 +440,6 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(SkyObj
             asn match {
               case List(AgsStrategy.Assignment(actProbe, actStar)) =>
                 assertEquals(guideProbe, actProbe)
-
-                // Display the expected and selected star.
-                //println(s"expStar=$expStar\n")
-                //println(s"actStar=$actStar\n\n")
-                //Console.out.flush
-
                 assertEquals(expStar, actStar)
                 val actSpeed = AgsMagnitude.fastestGuideSpeed(mc, actStar.getMagnitude(band).getValue, ctx.getConditions)
                 assertTrue("Expected: " + expSpeed + ", actual: " + actSpeed, actSpeed.exists(_ == expSpeed))

@@ -91,7 +91,12 @@ public enum ToContext {
 
     public static final String POS_ANGLE_CONSTRAINT = "pac";
     private static final ParseOp<PosAngleConstraint> POS_ANGLE_CONSTRAINT_OP = new ParseOp<PosAngleConstraint>() {
-        public PosAngleConstraint apply(String s) { return PosAngleConstraint.valueOf(s); }
+        public PosAngleConstraint apply(String s) {
+            // We previously had value UNKNOWN, but eliminated it since it was superseded by UNBOUNDED.
+            if (s.equals("UNKNOWN"))
+                return PosAngleConstraint.UNBOUNDED;
+            return PosAngleConstraint.valueOf(s);
+        }
     };
 
     public static final String CC = "cc";

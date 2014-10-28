@@ -44,7 +44,8 @@ public enum PosAngleConstraint {
     UNBOUNDED() {
         @Override
         public String description() {
-            return "Find best position angle for guide star search";
+            //return "Find best position angle for guide star search";
+            return "Allow guide star search to set position angle";
         }
     },
 

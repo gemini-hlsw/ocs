@@ -1052,5 +1052,4 @@ public final class SPTarget extends WatchablePos {
         }
         return ntarget;
     }
-
 }
