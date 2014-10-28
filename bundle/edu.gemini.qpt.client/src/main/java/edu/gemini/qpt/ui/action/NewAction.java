@@ -242,7 +242,8 @@ class NewDialog extends JDialog {
 
         // It is possible (but should not happen) that the list of peers only has one entry in it and its site
         // is not the same as that returned by DefaultSite: in this case, simply pick the first peer from the list.
-        if (peer == null && peerSet.size() > 0) peer = peerSet.iterator().next();
+        if (peer == null && !peerSet.isEmpty())
+            peer = peerSet.iterator().next();
 
 		setBackground(Color.LIGHT_GRAY);
 		setLayout(new BorderLayout());
