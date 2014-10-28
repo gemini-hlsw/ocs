@@ -75,11 +75,11 @@ public final class Alloc implements Comparable<Alloc>, Commentable, PioSerializa
 	private Map<Circumstance, Double[]> circV, circS;
 
 	// Package-protected constructor called by Variant#addAlloc()
-	Alloc(Variant variant, Obs obs, Long low, int firstStep, int lastStep, SetupType setup, String comment) {
+	Alloc(final Variant variant, final Obs obs, final long low, final int firstStep, final int lastStep, final SetupType setup, final String comment) {
 		this(variant, obs, low, firstStep, lastStep, setup, comment, span(obs, firstStep, lastStep, setup));
 	}
 
-    Alloc(Variant variant, Obs obs, Long low, int firstStep, int lastStep, SetupType setup, String comment, long span) {
+    Alloc(final Variant variant, final Obs obs, final long low, final int firstStep, final int lastStep, final SetupType setup, final String comment, final long span) {
         this.interval = new Interval(low, addLchOverlap(obs, low, low + span));
         this.shutterTime = getEnd() - (low + span);
         this.variant = variant;
@@ -90,11 +90,11 @@ public final class Alloc implements Comparable<Alloc>, Commentable, PioSerializa
         setComment(comment);
     }
 
-    Alloc(Variant variant, ParamSet params) {
+    Alloc(final Variant variant, final Obs obs, final ParamSet params) {
 		this.interval = new Interval(params);
         this.shutterTime = 0;
 		this.variant = variant;
-		this.obs = variant.getSchedule().getMiniModel().getObs(Pio.getValue(params, "obs"));
+		this.obs = obs;
 		this.firstStep = Pio.getIntValue(params, "firstStep", 0);
 		this.lastStep = Pio.getIntValue(params, "lastStep", 0);
         this.setupType = Pio.getEnumValue(params, "setupType", SetupType.FULL);
@@ -393,9 +393,7 @@ public final class Alloc implements Comparable<Alloc>, Commentable, PioSerializa
 	/// TRIVIAL ACCESSORS
 	///
 
-	public Obs getObs() {
-		return obs;
-	}
+	public Obs getObs() { return obs; }
 
 	public int getLastStep() {
 		return lastStep;
@@ -470,25 +468,6 @@ public final class Alloc implements Comparable<Alloc>, Commentable, PioSerializa
 			return Grouping.NONE;
 		}
 
-//
-//		Group group = getObs().getGroup();
-//		if (group != null) {
-//			Alloc prev = getPrevious();
-//			Alloc next = getNext();
-//			boolean gup = prev != null && group == prev.getObs().getGroup();
-//			boolean gdn = next != null && group == next.getObs().getGroup();
-//			if (gup && gdn) {
-//				return Grouping.MIDDLE;
-//			} else if (gup) {
-//				return Grouping.LAST;
-//			} else if (gdn) {
-//				return Grouping.FIRST;
-//			} else {
-//				return Grouping.SOLO;
-//			}
-//		} else {
-//			return Grouping.NONE;
-//		}
 	}
 
 	public int getGroupIndex() {
