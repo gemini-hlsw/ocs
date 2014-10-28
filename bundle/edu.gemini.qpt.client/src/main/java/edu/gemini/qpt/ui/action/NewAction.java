@@ -7,6 +7,7 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -216,7 +217,6 @@ class NewDialog extends JDialog {
 	private File file;
 
 	private final CalendarPanel calendarPanel;
-	private final KeyChain authClient;
 
 	static final int OK_OPTION = JOptionPane.OK_OPTION;
 	static final int CANCEL_OPTION = JOptionPane.CANCEL_OPTION;
@@ -227,19 +227,23 @@ class NewDialog extends JDialog {
 
 	public NewDialog(Frame owner, final KeyChain authClient) {
 		super(owner, "New Plan", true);
-        this.authClient = authClient;
 
         // Peers
-        final Peer[] peers = authClient.asJava().peers().toArray(new Peer[0]);
+        final Set<Peer> peerSet = authClient.asJava().peers();
         peer = null;
 
         // Search the list of peers for the default site. DefaultSite.get() always returns a non-null value.
-        for (Peer p : peers) {
+        for (Peer p : peerSet) {
             if (p.site == DefaultSite.get()) {
                 peer = p;
                 break;
             }
         }
+
+        // It is possible (but should not happen) that the list of peers only has one entry in it and its site
+        // is not the same as that returned by DefaultSite: in this case, simply pick the first peer from the list.
+        if (peer == null && !peerSet.isEmpty())
+            peer = peerSet.iterator().next();
 
 		setBackground(Color.LIGHT_GRAY);
 		setLayout(new BorderLayout());
@@ -252,8 +256,9 @@ class NewDialog extends JDialog {
 
 			add(new JPanel(new BorderLayout(4, 4)) {{
 				add(new JLabel("Select a site:"), BorderLayout.WEST);
-				add(new JComboBox(peers) {{
-					setSelectedItem(peer);
+				add(new JComboBox<Peer>(peerSet.toArray(new Peer[peerSet.size()])) {{
+                    // If no peers are configured, peer will be null.
+					if (peer != null) setSelectedItem(peer);
 					addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
                             peer = (Peer) getSelectedItem();
