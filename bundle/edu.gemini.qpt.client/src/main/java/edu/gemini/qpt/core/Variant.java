@@ -650,7 +650,7 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 				}
 
 				// Insufficient facilities (option - grating, filter, etc)
-				for (Enum option: obs.getOptions()) {
+				for (Enum<?> option: obs.getOptions()) {
 					if (!owner.hasFacility(option)) {
 						facilitiesFlags.add(Flag.CONFIG_UNAVAILABLE);
 						break;
@@ -996,7 +996,7 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 	}
 
 	@SuppressWarnings("unchecked")
-	private boolean containsAny(Collection a, Collection b) {
+	private boolean containsAny(Collection<?> a, Collection<?> b) {
 		for (Object o: a)
 			if (b.contains(o))
 				return true;
@@ -1025,16 +1025,15 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 
 
 @SuppressWarnings("serial")
-class AllocSet extends TreeSet<Alloc> implements PioSerializable {
+final class AllocSet extends TreeSet<Alloc> implements PioSerializable {
 
     private static final Logger LOGGER = Logger.getLogger(AllocSet.class.getName());
 
     public static final String PROP_MEMBER = "visit";
 
-	public AllocSet() {
-	}
+    public AllocSet() {}
 
-	public AllocSet(Variant variant, ParamSet paramSet) {
+	public AllocSet(final Variant variant, final ParamSet paramSet) {
 		for (ParamSet allocParams: paramSet.getParamSets(PROP_MEMBER)) {
             final String obsId = Pio.getValue(allocParams, "obs");
             final Obs obs = variant.getSchedule().getMiniModel().getObs(obsId);
@@ -1048,8 +1047,8 @@ class AllocSet extends TreeSet<Alloc> implements PioSerializable {
         }
 	}
 
-	public ParamSet getParamSet(PioFactory factory, String name) {
-		ParamSet params = factory.createParamSet(name);
+	public ParamSet getParamSet(final PioFactory factory, final String name) {
+		final ParamSet params = factory.createParamSet(name);
 		for (Alloc a: this) {
 			params.addParamSet(a.getParamSet(factory, PROP_MEMBER));
 		}
