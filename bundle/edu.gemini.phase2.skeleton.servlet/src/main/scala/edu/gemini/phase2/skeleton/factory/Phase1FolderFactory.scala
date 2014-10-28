@@ -63,7 +63,7 @@ object Phase1FolderFactory {
     def toPhase1Folder: Phase1Folder = {
       val groups = oList.groupBy(_.bName).toList map {
         case (blueprintId, args) =>
-          val templateArgs = args map { arg => new TemplateParameters(arg.target, arg.siteQuality, arg.time)}
+          val templateArgs = args map { arg => TemplateParameters.newInstance(arg.target, arg.siteQuality, arg.time)}
           new Phase1Group(blueprintId, templateArgs.asJava)
       }
 

@@ -12,18 +12,32 @@ import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.system.ITarget;
 
 /**
  * Data object representing template parameters.
  *
  * Note that this class is effectively immutable. Either use the non-empty
  * constructor or call setParamSet() immediately on construction. setParamSet()
- * can be invoked only once.
+ * can be invoked only once.  Sorry this is so awkward.  Everything should be
+ * truly immutable.
  */
 public final class TemplateParameters extends AbstractDataObject {
     public static final SPComponentType SP_TYPE = SPComponentType.TEMPLATE_PARAMETERS;
     public static final String VERSION = "2015A-1";
     public static final String PARAM_TIME = "time";
+
+    public static TemplateParameters newEmpty() {
+        return new TemplateParameters(new SPTarget(), new SPSiteQuality(), TimeValue.ZERO_HOURS);
+    }
+
+    public static TemplateParameters newInstance(SPTarget target, SPSiteQuality conditions, TimeValue timeValue) {
+        return new TemplateParameters(
+                (SPTarget) target.clone(),
+                conditions.clone(),
+                timeValue
+        );
+    }
 
     private SPTarget target;
     private SPSiteQuality conditions;
@@ -40,10 +54,12 @@ public final class TemplateParameters extends AbstractDataObject {
         setParamSet(paramSet);
     }
 
-    public TemplateParameters(SPTarget target, SPSiteQuality conditions, TimeValue timeValue) {
+    // The private constructor is used to prevent making clones during calls
+    // to copy() when not necessary.
+    private TemplateParameters(SPTarget target, SPSiteQuality conditions, TimeValue timeValue) {
         this();
-        this.target     = (SPTarget) target.clone();
-        this.conditions = conditions.clone();
+        this.target     = target;
+        this.conditions = conditions;
         this.time       = timeValue;
     }
 
@@ -58,7 +74,19 @@ public final class TemplateParameters extends AbstractDataObject {
 
     public SPTarget getTarget() {
         checkRef(target);
-        return (SPTarget) target.clone();
+        final SPTarget newTarget = (SPTarget) target.clone();
+
+        // Ugh.  Otherwise the two targets share the same inner "itarget".
+        // I don't want to fix that directly in SPTarget.clone() because I don't
+        // know what behavior depends on it.  The new target model will fix all
+        // of this mess.
+        newTarget.setTarget((ITarget) newTarget.getTarget().clone());
+
+        return newTarget;
+    }
+
+    public TemplateParameters copy(SPTarget target) {
+        return new TemplateParameters((SPTarget) target.clone(), conditions, time);
     }
 
     public SPSiteQuality getSiteQuality() {
@@ -66,9 +94,17 @@ public final class TemplateParameters extends AbstractDataObject {
         return conditions.clone();
     }
 
+    public TemplateParameters copy(SPSiteQuality sq) {
+        return new TemplateParameters(target, sq.clone(), time);
+    }
+
     public TimeValue getTime() {
         checkRef(time);
         return time;  // actually immutable
+    }
+
+    public TemplateParameters copy(TimeValue time) {
+        return new TemplateParameters(target, conditions, time);
     }
 
     public ParamSet getParamSet(PioFactory factory) {
