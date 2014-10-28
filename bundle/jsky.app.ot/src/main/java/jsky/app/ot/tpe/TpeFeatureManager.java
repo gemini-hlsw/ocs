@@ -9,6 +9,7 @@ package jsky.app.ot.tpe;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
+import jsky.util.Preferences;
 
 import javax.swing.*;
 import java.awt.*;
@@ -69,21 +70,25 @@ final class TpeFeatureManager {
      * Add a feature.
      */
     public void addFeature(final TpeImageFeature tif) {
-        String name = tif.getName();
+        final String name = tif.getName();
+
+        // Name used to store setting in user preferences.
+        final String prefName = tif.getClass().getName() + ".selected";
 
         // See if this feature is already present.
         if (_featureMap.containsKey(name)) return;
 
-        JToggleButton btn = new JCheckBox(name);
+        final JToggleButton btn = new JCheckBox(name);
         btn.setToolTipText(tif.getDescription());
         btn.setVisible(false);
         btn.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
+                boolean selected = e.getStateChange() == ItemEvent.SELECTED;
+                if (selected)
                     _iw.addFeature(tif);
-                } else {
+                else
                     _iw.deleteFeature(tif);
-                }
+                Preferences.set(prefName, selected);
             }
         });
 
@@ -97,7 +102,8 @@ final class TpeFeatureManager {
         if (!keyPanel.isEmpty())
             _tpeToolBar.addViewItem(keyPanel.getValue(), tif.getCategory());
 
-        if (tif.isEnabledByDefault()) btn.setSelected(true);
+        // Load the desired value from the preferences or set to the default.
+        btn.setSelected(Preferences.get(prefName, tif.isEnabledByDefault()));
     }
 
     public void updateAvailableOptions(Collection<TpeImageFeature> feats, TpeContext ctx) {
