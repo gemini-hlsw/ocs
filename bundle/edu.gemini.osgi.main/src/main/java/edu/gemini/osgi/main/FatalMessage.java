@@ -49,14 +49,11 @@ final class FatalMessage {
     // An awful popup so that users who aren't launching the app from the
     // command line at least know what is going on and what to do.
     private static void showPopup(final String title, final String message, final Logger log) {
-        final JPanel pan = new JPanel(new BorderLayout(0, 5)) {{
-            setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        }};
-
+        final Color bg = UIManager.getDefaults().getColor("Panel.background");
         final Dimension size = new Dimension(500, 100);
         final String wrapper = "<html><style type=\"text/css\">body { font:12pt dialog,sans-serif; }</style><body>%s</body></html>";
         final JEditorPane ed = new JEditorPane("text/html", String.format(wrapper, message)) {{
-            setBackground(pan.getBackground());
+            setBackground(bg);
             setHighlighter(null);
             setEditable(false);
             addHyperlinkListener(new Link(log));
