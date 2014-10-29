@@ -441,7 +441,6 @@ trait OcsBundle {
 
   lazy val bundle_edu_gemini_util_osgi = 
     project.in(file("bundle/edu.gemini.util.osgi")).dependsOn(
-      bundle_edu_gemini_spModel_core
     )
 
   lazy val bundle_edu_gemini_util_security = 
