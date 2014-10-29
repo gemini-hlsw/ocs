@@ -43,7 +43,6 @@ import jsky.util.gui.GenericToolBar;
  * @author Allan Brighton
  */
 public class ImageDisplayMenuBar extends JMenuBar {
-
     // Used to access internationalized strings (see i18n/gui*.proprties)
     private static final I18N _I18N = I18N.getInstance(ImageDisplayMenuBar.class);
 
@@ -55,7 +54,6 @@ public class ImageDisplayMenuBar extends JMenuBar {
 
     // Used to format magnification settings < 1.
     private static NumberFormat _scaleFormat = NumberFormat.getInstance(Locale.US);
-
     static {
         _scaleFormat.setMaximumFractionDigits(1);
     }
@@ -73,9 +71,6 @@ public class ImageDisplayMenuBar extends JMenuBar {
     // Handle for the File menu
     private JMenu _fileMenu;
 
-    // Handle for the Edit menu
-    private JMenu _editMenu;
-
     // Handle for the View menu
     private JMenu _viewMenu;
 
@@ -86,10 +81,7 @@ public class ImageDisplayMenuBar extends JMenuBar {
     private JMenu _graphicsMenu;
 
     // The scale and zoom submenus
-    private JMenu _scaleMenu;
-    private JMenu _zoomInMenu;
-    private JMenu _zoomOutMenu;
-    private ButtonGroup _zoomInOutGroup = new ButtonGroup();
+    //private ScaleMenu _scaleMenu;
 
     // The "New Window" menu item
     private JMenuItem _newWindowMenuItem;
@@ -328,7 +320,7 @@ public class ImageDisplayMenuBar extends JMenuBar {
         menu.add(_imagePropertiesMenuItem = createViewImagePropertiesMenuItem());
         menu.addSeparator();
 
-        menu.add(createViewScaleMenu());
+        menu.add(new ImageScaleMenu(_imageDisplay));
         menu.add(createViewInterpolationMenu());
 
         // XXX doesn't currently work well with the non-square images pan window
@@ -525,105 +517,9 @@ public class ImageDisplayMenuBar extends JMenuBar {
         return Integer.toString(Math.round(f)) + "x";
     }
 
-    /**
-     * Create the View => "Scale"  menu item
-     */
-    protected JMenu createViewScaleMenu() {
-        _scaleMenu = new JMenu(_I18N.getString("scale"));
-        _scaleMenu.add(createViewScaleZoomOutMenu());
-        _scaleMenu.add(createViewScaleZoomInMenu());
-        _scaleMenu.add(createViewScaleFitToWindowMenuItem());
-
-        _imageDisplay.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent ce) {
-                ImageChangeEvent e = (ImageChangeEvent) ce;
-                if (e.isNewScale()) {
-                    float scale = _imageDisplay.getScale();
-                    String s = getScaleLabel(scale);
-                    JMenu menu;
-                    if (scale < 1)
-                        menu = _zoomOutMenu;
-                    else
-                        menu = _zoomInMenu;
-                    int n = menu.getItemCount();
-                    for (int i = 0; i < n; i++) {
-                        JRadioButtonMenuItem b = (JRadioButtonMenuItem) menu.getItem(i);
-                        if (b.getText().equals(s))
-                            b.setSelected(true);
-                    }
-                }
-            }
-        });
-        return _scaleMenu;
-    }
-
-    /**
-     * Create the View => "Scale" => "Zoom Out"  menu item
-     */
-    protected JMenu createViewScaleZoomOutMenu() {
-        _zoomOutMenu = new JMenu(_I18N.getString("zoomOut"));
-        for (int i = 1; i <= MAX_SCALE; i++) {
-            addScaleMenuItem(_zoomOutMenu, _zoomInOutGroup, "1/" + i + "x", 1.0F / (float) i);
-        }
-
-        return _zoomOutMenu;
-    }
-
-    /**
-     * Create the View => "Scale" => "Zoom In"  menu item
-     */
-    protected JMenu createViewScaleZoomInMenu() {
-        _zoomInMenu = new JMenu(_I18N.getString("zoomIn"));
-        for (int i = 1; i <= MAX_SCALE; i++) {
-            addScaleMenuItem(_zoomInMenu, _zoomInOutGroup, Integer.toString(i) + "x", (float) i);
-        }
-
-        return _zoomInMenu;
-    }
 
 
-    /**
-     * Create the View => "Scale" => "Fit Image in Window"  menu item
-     */
-    protected JMenuItem createViewScaleFitToWindowMenuItem() {
-        JMenuItem menuItem = new JMenuItem(_I18N.getString("fitImageInWindow"));
 
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                _imageDisplay.scaleToFit();
-                _imageDisplay.updateImage();
-            }
-        });
-        return menuItem;
-    }
-
-
-    /**
-     * Add a radio button menu item to the scale menu and given group
-     * with the given label and scale value.
-     */
-    protected void addScaleMenuItem(JMenu menu, ButtonGroup group, String label, float value) {
-        JRadioButtonMenuItem b = new JRadioButtonMenuItem(label);
-        b.setActionCommand(Float.toString(value));
-        b.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                setScale(Float.parseFloat(e.getActionCommand()));
-            }
-        });
-        group.add(b);
-        menu.add(b);
-    }
-
-
-    /**
-     * Set the scale for the image to the given value and update the menu
-     * label.
-     */
-    public void setScale(float value) {
-        _imageDisplay.setScale(value);
-        _imageDisplay.updateImage();
-    }
 
 
     /**
@@ -850,11 +746,6 @@ public class ImageDisplayMenuBar extends JMenuBar {
     /** Return the handle for the File menu */
     public JMenu getFileMenu() {
         return _fileMenu;
-    }
-
-    /** Return the handle for the Edit menu */
-    public JMenu getEditMenu() {
-        return _editMenu;
     }
 
     /** Return the handle for the View menu */
