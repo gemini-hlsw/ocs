@@ -31,7 +31,7 @@ trait ExternalStorage {
    * Gets the root directory for permanent user data for the given bundle. Data stored in this
    * directory will still be available after an upgrade of the related gemini bundle. Data is
    * segregated based on the `test` flag in order to facilitate testing without clobbering user
-   * data (computed via `Version.current.isTest`).
+   * data (typically computed via `Version.current.isTest`).
    * @param context the osgi bundle context
    * @param test `true` if this is a test version
    * @return
