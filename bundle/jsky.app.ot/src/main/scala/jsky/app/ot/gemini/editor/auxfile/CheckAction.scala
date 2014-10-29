@@ -23,7 +23,7 @@ class CheckAction(c: Component, model: AuxFileModel) extends AuxFileAction("Mark
 
   override def apply() {
     exec(model.currentSelection) { (client, pid, selection) =>
-      client.setChecked(pid, selection.map(_.getName).asJavaCollection, !allChecked(selection), false)
+      client.setChecked(pid, selection.map(_.getName).asJavaCollection, !allChecked(selection))
     }
   }
 }

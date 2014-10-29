@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Collection;
 import java.util.logging.Level;
@@ -190,9 +191,13 @@ public final class BackendFileSystemImpl implements AuxFileServer {
         }
 
         // If we're done transferring this file, rename it to the destination
-        // file name.
+        // file name. Mark file as unchecked to reset NGO checked flag in the
+        // case of a re-upload.
         boolean lastChunk = chunk.isLastChunk();
-        if (lastChunk) f.renameTo(man.getProgramFile(progId, fileName));
+        if (lastChunk) {
+            f.renameTo(man.getProgramFile(progId, fileName));
+            setChecked(progId, Collections.singleton(fileName), false);
+        }
 
         // Return the download token, so that the next chunk (if any) can be
         // associated with the correct file.
@@ -241,8 +246,7 @@ public final class BackendFileSystemImpl implements AuxFileServer {
     }
 
     @Override
-    public void setChecked(SPProgramID progId, Collection<String> fileNames, boolean newChecked,
-                           boolean suppressNotification)
+    public void setChecked(SPProgramID progId, Collection<String> fileNames, boolean newChecked)
             throws AuxFileException {
         for (String fileName : fileNames) {
 			try {

@@ -121,21 +121,17 @@ public final class NotifyingBackend extends AuxFileServerDecorator {
     }
 
     @Override
-    public void setChecked(SPProgramID progId, Collection<String> fileNames, boolean newChecked,
-                           boolean suppressNotification) throws AuxFileException {
-    	super.setChecked(progId, fileNames, newChecked, suppressNotification);
+    public void setChecked(SPProgramID progId, Collection<String> fileNames, boolean newChecked) throws AuxFileException {
+        super.setChecked(progId, fileNames, newChecked);
 
         Collection<File> files = new ArrayList<File>(fileNames.size());
         for (String fileName : fileNames) {
             files.add(FileManager.instance().getProgramFile(progId, fileName));
         }
 
-        if (!suppressNotification) {
-            List<AuxFileListener> listeners = _copyListeners();
-            for (AuxFileListener listener : listeners)
-                listener.checkedUpdated(progId, newChecked, files);
-        }
-
+        List<AuxFileListener> listeners = _copyListeners();
+        for (AuxFileListener listener : listeners)
+            listener.checkedUpdated(progId, newChecked, files);
     }
 
 }

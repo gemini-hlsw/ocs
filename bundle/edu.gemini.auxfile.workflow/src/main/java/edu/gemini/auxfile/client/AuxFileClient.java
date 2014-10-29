@@ -170,12 +170,6 @@ public final class AuxFileClient implements AuxFileSystem {
                 token = server.storeChunk(programId, remoteFileName, chunk, token);
                 if (!notifyListener(chunk, programId, remoteFileName, listener)) return;
             } while (!chunk.isLastChunk());
-
-            // REL-1394: Mark new files as unchecked so that re-uploaded files will have the NGO check flag removed.
-            Collection<String>  auxFileNames = Collections.singleton(localFile.getName());
-            Collection<AuxFile> auxFile      = server.list(programId, auxFileNames);
-            if (auxFile.size() > 0 && auxFile.iterator().next().isChecked())
-                setChecked(programId, Collections.singleton(localFile.getName()), false, true);
         } catch (IOException ex) {
             throw AuxFileException.create(ex);
         }
@@ -185,8 +179,7 @@ public final class AuxFileClient implements AuxFileSystem {
         server.setDescription(programId, fileNames, newDescription);
     }
 
-    @Override public void setChecked(SPProgramID programId, Collection<String> fileNames, boolean newChecked,
-                                     boolean suppressNotification) throws AuxFileException {
-        server.setChecked(programId, fileNames, newChecked, suppressNotification);
+    @Override public void setChecked(SPProgramID programId, Collection<String> fileNames, boolean newChecked) throws AuxFileException {
+        server.setChecked(programId, fileNames, newChecked);
     }
 }

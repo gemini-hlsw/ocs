@@ -29,6 +29,6 @@ public interface AuxFileServer {
     void setDescription(SPProgramID progId, Collection<String> fileNames, String newDescription)
             throws AuxFileException;
 
-    void setChecked(SPProgramID progId, Collection<String> fileNames, boolean newChecked, boolean suppressNotification)
+    void setChecked(SPProgramID progId, Collection<String> fileNames, boolean newChecked)
 			throws AuxFileException;
 }
