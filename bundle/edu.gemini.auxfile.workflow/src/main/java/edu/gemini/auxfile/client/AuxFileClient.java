@@ -170,9 +170,6 @@ public final class AuxFileClient implements AuxFileSystem {
                 token = server.storeChunk(programId, remoteFileName, chunk, token);
                 if (!notifyListener(chunk, programId, remoteFileName, listener)) return;
             } while (!chunk.isLastChunk());
-
-            // REL-1394: Mark new files as unchecked so that re-uploaded files will have the NGO check flag removed.
-            setChecked(programId, Collections.singleton(localFile.getName()), false);
         } catch (IOException ex) {
             throw AuxFileException.create(ex);
         }
