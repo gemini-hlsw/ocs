@@ -120,7 +120,7 @@ public class ImageDisplayMenuBar extends JMenuBar {
         imageDisplay.addChangeListener(new ChangeListener() {
 
             public void stateChanged(ChangeEvent ce) {
-                ImageChangeEvent e = (ImageChangeEvent) ce;
+                final ImageChangeEvent e = (ImageChangeEvent) ce;
                 if (e.isNewImage() && !e.isBefore()) {
                     _goMenu.removeAll();
                     createGoMenu(_goMenu);
@@ -163,7 +163,7 @@ public class ImageDisplayMenuBar extends JMenuBar {
      * Create the File menu.
      */
     protected JMenu createFileMenu() {
-        JMenu menu = new JMenu(_I18N.getString("file"));
+        final JMenu menu = new JMenu(_I18N.getString("file"));
         menu.add(_imageDisplay.getOpenAction());
         menu.add(createFileOpenURLMenuItem());
         menu.addSeparator();
@@ -179,7 +179,7 @@ public class ImageDisplayMenuBar extends JMenuBar {
         menu.add(createFileCloseMenuItem());
 
         // check if using internal frames before adding exit item
-        JDesktopPane desktop = _imageDisplay.getDesktop();
+        final JDesktopPane desktop = _imageDisplay.getDesktop();
         if (desktop == null && _imageDisplay.isMainWindow())
             menu.add(createFileExitMenuItem());
 
@@ -191,9 +191,8 @@ public class ImageDisplayMenuBar extends JMenuBar {
      * Create the File => "Open URL" menu item
      */
     protected JMenuItem createFileOpenURLMenuItem() {
-        JMenuItem menuItem = new JMenuItem(_I18N.getString("openURL"));
+        final JMenuItem menuItem = new JMenuItem(_I18N.getString("openURL"));
         menuItem.addActionListener(new ActionListener() {
-
             public void actionPerformed(ActionEvent ae) {
                 _imageDisplay.openURL();
             }
@@ -205,9 +204,8 @@ public class ImageDisplayMenuBar extends JMenuBar {
      * Create the File => Clear Image menu item
      */
     protected JMenuItem createFileClearImageMenuItem() {
-        JMenuItem menuItem = new JMenuItem(_I18N.getString("clearImage"));
+        final JMenuItem menuItem = new JMenuItem(_I18N.getString("clearImage"));
         menuItem.addActionListener(new ActionListener() {
-
             public void actionPerformed(ActionEvent ae) {
                 _imageDisplay.clear();
             }
@@ -220,7 +218,7 @@ public class ImageDisplayMenuBar extends JMenuBar {
      * Create the File => "New Window" menu item
      */
     protected JMenuItem createFileNewWindowMenuItem() {
-        JMenuItem menuItem = new JMenuItem(_I18N.getString("newWindow"));
+        final JMenuItem menuItem = new JMenuItem(_I18N.getString("newWindow"));
         menuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 _imageDisplay.newWindow();
@@ -234,9 +232,8 @@ public class ImageDisplayMenuBar extends JMenuBar {
      * Create the File => Exit menu item
      */
     protected JMenuItem createFileExitMenuItem() {
-        JMenuItem menuItem = new JMenuItem(_I18N.getString("exit"));
+        final JMenuItem menuItem = new JMenuItem(_I18N.getString("exit"));
         menuItem.addActionListener(new ActionListener() {
-
             public void actionPerformed(ActionEvent ae) {
                 _imageDisplay.exit();
             }
@@ -249,9 +246,8 @@ public class ImageDisplayMenuBar extends JMenuBar {
      * Create the File => Close menu item
      */
     protected JMenuItem createFileCloseMenuItem() {
-        JMenuItem menuItem = new JMenuItem(_I18N.getString("close"));
+        final JMenuItem menuItem = new JMenuItem(_I18N.getString("close"));
         menuItem.addActionListener(new ActionListener() {
-
             public void actionPerformed(ActionEvent ae) {
                 _imageDisplay.close();
             }
@@ -287,7 +283,7 @@ public class ImageDisplayMenuBar extends JMenuBar {
      * Create the View menu.
      */
     protected JMenu createViewMenu() {
-        JMenu menu = new JMenu(_I18N.getString("view"));
+        final JMenu menu = new JMenu(_I18N.getString("view"));
         menu.add(createViewToolBarMenuItem());
         menu.add(new ImageShowToolbarAsMenu(_toolBar));
         menu.addSeparator();
@@ -324,7 +320,7 @@ public class ImageDisplayMenuBar extends JMenuBar {
 
         menuItem.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent e) {
-                JCheckBoxMenuItem rb = (JCheckBoxMenuItem) e.getSource();
+                final JCheckBoxMenuItem rb = (JCheckBoxMenuItem) e.getSource();
                 _toolBar.setVisible(rb.getState());
                 Preferences.set(prefName, rb.getState());
             }
@@ -368,7 +364,7 @@ public class ImageDisplayMenuBar extends JMenuBar {
      * Create the View => "Pick Object" menu item
      */
     protected JMenuItem createViewPickObjectMenuItem() {
-        JMenuItem menuItem = new JMenuItem(_I18N.getString("pickObjects"));
+        final JMenuItem menuItem = new JMenuItem(_I18N.getString("pickObjects"));
         menuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 _imageDisplay.pickObject();
@@ -394,7 +390,7 @@ public class ImageDisplayMenuBar extends JMenuBar {
      * Create the View => "FITS Keywords"  menu item
      */
     protected JMenuItem createViewFitsKeywordsMenuItem() {
-        JMenuItem menuItem = new JMenuItem(_I18N.getString("fitsKeywords"));
+        final JMenuItem menuItem = new JMenuItem(_I18N.getString("fitsKeywords"));
         menuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 _imageDisplay.viewFitsKeywords();
@@ -407,7 +403,7 @@ public class ImageDisplayMenuBar extends JMenuBar {
      * Create the View => "Image Properties"  menu item
      */
     protected JMenuItem createViewImagePropertiesMenuItem() {
-        JMenuItem menuItem = new JMenuItem(_I18N.getString("imageProps"));
+        final JMenuItem menuItem = new JMenuItem(_I18N.getString("imageProps"));
         menuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 _imageDisplay.viewImageProperties();
@@ -515,12 +511,12 @@ public class ImageDisplayMenuBar extends JMenuBar {
      * Create the View => "Smooth Scrolling"  menu item
      */
     protected JCheckBoxMenuItem createViewSmoothScrollingMenuItem() {
-        JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(_I18N.getString("smoothScrolling"));
+        final JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(_I18N.getString("smoothScrolling"));
         final String prefName = getClass().getName() + ".SmoothScrolling";
 
         menuItem.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent e) {
-                JCheckBoxMenuItem rb = (JCheckBoxMenuItem) e.getSource();
+                final JCheckBoxMenuItem rb = (JCheckBoxMenuItem) e.getSource();
                 _imageDisplay.setImmediateMode(rb.getState());
                 _imageDisplay.updateImage();
                 Preferences.set(prefName, rb.getState());
@@ -535,17 +531,14 @@ public class ImageDisplayMenuBar extends JMenuBar {
     /**
      * Create or update the Go (history) menu.
      */
-    protected JMenu createGoMenu(JMenu menu) {
-        if (menu == null)
-            menu = new JMenu(_I18N.getString("go"));
-
+    protected JMenu createGoMenu(final JMenu oldMenu) {
+        final JMenu menu = oldMenu != null ? oldMenu : new JMenu(_I18N.getString("go"));
         menu.add(_imageDisplay.getBackAction());
         menu.add(_imageDisplay.getForwAction());
         menu.addSeparator();
         _imageDisplay.addHistoryMenuItems(menu);
         menu.addSeparator();
         menu.add(createGoClearHistoryMenuItem());
-
         return menu;
     }
 
@@ -554,7 +547,7 @@ public class ImageDisplayMenuBar extends JMenuBar {
      * Create the Go => "Clear History" menu item.
      */
     protected JMenuItem createGoClearHistoryMenuItem() {
-        JMenuItem menuItem = new JMenuItem(_I18N.getString("clearHistory"));
+        final JMenuItem menuItem = new JMenuItem(_I18N.getString("clearHistory"));
         menuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 _imageDisplay.clearHistory();
@@ -571,7 +564,7 @@ public class ImageDisplayMenuBar extends JMenuBar {
      */
     public static String getScaleLabel(float f) {
         if (f < 1.0) {
-            int i = Math.round(1.0F / f);
+            final int i = Math.round(1.0F / f);
             return "1/" + i + "x";
         }
         return Integer.toString(Math.round(f)) + "x";
