@@ -14,14 +14,13 @@ import java.util.HashMap;
 public final class ImageScaleMenu extends JMenu {
     private static final I18N _I18N = I18N.getInstance(ImageDisplayMenuBar.class);
 
-    // A lookup to be able to mark the appropriate radio button as selected when the image scale changes externally.
-    private final HashMap<Float, JRadioButtonMenuItem> scaleToButton;
-
     public ImageScaleMenu(final DivaMainImageDisplay imageDisplay) {
         super(_I18N.getString("scale"));
 
+        // A lookup to be able to mark the appropriate radio button as selected when the image scale changes externally.
+        final HashMap<Float, JRadioButtonMenuItem> scaleToButton = new HashMap<>();
+
         /** Create the zoom in and zoom out menu items **/
-        scaleToButton = new HashMap<>();
         final ButtonGroup group = new ButtonGroup();
         final ActionListener listener = new ActionListener() {
             @Override
@@ -33,7 +32,7 @@ public final class ImageScaleMenu extends JMenu {
         };
 
         for (ScaleMenuOptions o : ScaleMenuOptions.values()) {
-            final JMenu menu = new JMenu(o.getName());
+            final JMenu menu = new JMenu(o.i18name);
             for (int i=1; i <= ImageDisplayMenuBar.MAX_SCALE; ++i) {
                 final float scale = o.createScaleForIndex(i);
 
@@ -62,55 +61,48 @@ public final class ImageScaleMenu extends JMenu {
         imageDisplay.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent ce) {
                 ImageChangeEvent e = (ImageChangeEvent) ce;
-                if (e.isNewScale())
-                    selectButtonFromScale(imageDisplay.getScale());
+                if (e.isNewScale()) {
+                    final JRadioButtonMenuItem b = scaleToButton.get(imageDisplay.getScale());
+                    if (b != null)
+                        b.setSelected(true);
+                }
             }
         });
     }
 
-    private void selectButtonFromScale(float scale) {
-        final JRadioButtonMenuItem b = scaleToButton.get(scale);
-        if (b != null)
-            b.setSelected(true);
-    }
 
     private enum ScaleMenuOptions {
         ZoomOut("zoomOut") {
             @Override
-            protected String createLabelForIndex(int idx) {
+            String createLabelForIndex(int idx) {
                 return "1/" + idx + "x";
             }
 
             @Override
-            protected float createScaleForIndex(int idx) {
+            float createScaleForIndex(int idx) {
                 return 1.0f / idx;
             }
         },
         ZoomIn("zoomIn") {
             @Override
-            protected String createLabelForIndex(int idx) {
+            String createLabelForIndex(int idx) {
                 return idx + "x";
             }
 
             @Override
-            protected float createScaleForIndex(int idx) {
+            float createScaleForIndex(int idx) {
                 return (float) idx;
             }
         },;
 
         // Name of this item.
-        final private String name;
+        final String i18name;
 
-        private ScaleMenuOptions(final String name) {
-            this.name = _I18N.getString(name);
+        ScaleMenuOptions(final String name) {
+            i18name = _I18N.getString(name);
         }
 
-        private String getName() {
-            return name;
-        }
-
-        protected abstract String createLabelForIndex(int idx);
-
-        protected abstract float createScaleForIndex(int idx);
+        abstract String createLabelForIndex(int idx);
+        abstract float  createScaleForIndex(int idx);
     }
 }
