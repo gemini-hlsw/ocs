@@ -13,7 +13,6 @@ import java.text.NumberFormat;
 import java.util.Locale;
 
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JDesktopPane;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -104,7 +103,6 @@ public class ImageDisplayMenuBar extends JMenuBar {
         // Arrange to always set the current image display for use by the ImageHistoryItem class,
         // since the same items may be in the menus of multiple image displays
         _goMenu.addMenuListener(new MenuListener() {
-
             public void menuSelected(MenuEvent e) {
                 _currentImageDisplay = imageDisplay;
             }
@@ -118,7 +116,6 @@ public class ImageDisplayMenuBar extends JMenuBar {
 
         // keep the Go history menu up to date
         imageDisplay.addChangeListener(new ChangeListener() {
-
             public void stateChanged(ChangeEvent ce) {
                 final ImageChangeEvent e = (ImageChangeEvent) ce;
                 if (e.isNewImage() && !e.isBefore()) {
@@ -177,12 +174,6 @@ public class ImageDisplayMenuBar extends JMenuBar {
         menu.addSeparator();
         menu.add(_newWindowMenuItem);
         menu.add(createFileCloseMenuItem());
-
-        // check if using internal frames before adding exit item
-        final JDesktopPane desktop = _imageDisplay.getDesktop();
-        if (desktop == null && _imageDisplay.isMainWindow())
-            menu.add(createFileExitMenuItem());
-
         return menu;
     }
 
@@ -229,20 +220,6 @@ public class ImageDisplayMenuBar extends JMenuBar {
 
 
     /**
-     * Create the File => Exit menu item
-     */
-    protected JMenuItem createFileExitMenuItem() {
-        final JMenuItem menuItem = new JMenuItem(_I18N.getString("exit"));
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                _imageDisplay.exit();
-            }
-        });
-        return menuItem;
-    }
-
-
-    /**
      * Create the File => Close menu item
      */
     protected JMenuItem createFileCloseMenuItem() {
@@ -255,29 +232,6 @@ public class ImageDisplayMenuBar extends JMenuBar {
         return menuItem;
     }
 
-//    /**
-//     * Create the Edit menu.
-//     */
-//    protected JMenu createEditMenu() {
-//        JMenu menu = new JMenu(_I18N.getString("edit"));
-//        menu.add(createEditPreferencesMenuItem());
-//        return menu;
-//    }
-
-//    /**
-//     * Create the Edit => "Preferences" menu item
-//     */
-//    protected JMenuItem createEditPreferencesMenuItem() {
-//        JMenuItem menuItem = new JMenuItem(_I18N.getString("preferences"));
-//        menuItem.addActionListener(new ActionListener() {
-//
-//            public void actionPerformed(ActionEvent ae) {
-//                DialogUtil.error("Sorry, not implemented...");
-//                //_imageDisplay.editPreferences();
-//            }
-//        });
-//        return menuItem;
-//    }
 
     /**
      * Create the View menu.
@@ -287,26 +241,15 @@ public class ImageDisplayMenuBar extends JMenuBar {
         menu.add(createViewToolBarMenuItem());
         menu.add(new ImageShowToolbarAsMenu(_toolBar));
         menu.addSeparator();
-
         menu.add(_imageDisplay.getColorsAction());
         menu.add(_imageDisplay.getCutLevelsAction());
-
         menu.add(_pickObjectMenuItem);
         menu.add(_fitsExtensionsMenuItem);
         menu.add(_fitsKeywordsMenuItem);
         menu.add(_imagePropertiesMenuItem);
         menu.addSeparator();
-
         menu.add(new ImageScaleMenu(_imageDisplay));
         menu.add(new ImageScaleInterpolationMenu(_imageDisplay));
-
-        // XXX doesn't currently work well with the non-square images pan window
-        //menu.add(createViewRotateMenu());
-
-        // XXX Works okay for jskycat, but not supported by OT yet
-        //menu.add(createViewFlipXMenuItem());
-        //menu.add(createViewFlipYMenuItem());
-
         menu.add(createViewSmoothScrollingMenuItem());
         return menu;
     }
@@ -331,35 +274,6 @@ public class ImageDisplayMenuBar extends JMenuBar {
     }
 
 
-//    /**
-//     * Create the View => "Cut Levels" menu item
-//     */
-//    protected JMenuItem createViewCutLevelsMenuItem() {
-//        JMenuItem menuItem = new JMenuItem(_I18N.getString("cutLevels") + "...");
-//        menuItem.addActionListener(new ActionListener() {
-//
-//            public void actionPerformed(ActionEvent ae) {
-//                _imageDisplay.editCutLevels();
-//            }
-//        });
-//        return menuItem;
-//    }
-
-
-//    /**
-//     * Create the View => "Colors" menu item
-//     */
-//    protected JMenuItem createViewColorsMenuItem() {
-//        JMenuItem menuItem = new JMenuItem(_I18N.getString("colors") + "...");
-//        menuItem.addActionListener(new ActionListener() {
-//
-//            public void actionPerformed(ActionEvent ae) {
-//                _imageDisplay.editColors();
-//            }
-//        });
-//        return menuItem;
-//    }
-
     /**
      * Create the View => "Pick Object" menu item
      */
@@ -373,18 +287,6 @@ public class ImageDisplayMenuBar extends JMenuBar {
         return menuItem;
     }
 
-//    /**
-//     * Create the View => "FITS Extensions"  menu item
-//     */
-//    protected JMenuItem createViewFitsExtensionsMenuItem() {
-//        JMenuItem menuItem = new JMenuItem(_I18N.getString("fitsExt"));
-//        menuItem.addActionListener(new ActionListener() {
-//            public void actionPerformed(ActionEvent ae) {
-//                _imageDisplay.viewFitsExtensions();
-//            }
-//        });
-//        return menuItem;
-//    }
 
     /**
      * Create the View => "FITS Keywords"  menu item
@@ -399,6 +301,7 @@ public class ImageDisplayMenuBar extends JMenuBar {
         return menuItem;
     }
 
+
     /**
      * Create the View => "Image Properties"  menu item
      */
@@ -411,100 +314,6 @@ public class ImageDisplayMenuBar extends JMenuBar {
         });
         return menuItem;
     }
-
-
-//    /**
-//     * Create the View => "Rotate"  menu item
-//     */
-//    protected JMenu createViewRotateMenu() {
-//        JMenu menu = new JMenu("Rotate");
-//
-//        JRadioButtonMenuItem b1 = new JRadioButtonMenuItem("No Rotation");
-//        JRadioButtonMenuItem b2 = new JRadioButtonMenuItem("  90 deg");
-//        JRadioButtonMenuItem b3 = new JRadioButtonMenuItem(" 180 deg");
-//        JRadioButtonMenuItem b4 = new JRadioButtonMenuItem(" -90 deg");
-//        //JRadioButtonMenuItem b5 = new JRadioButtonMenuItem("  45 deg (XXX not impl)");
-//
-//        b1.setSelected(true);
-//        menu.add(b1);
-//        menu.add(b2);
-//        menu.add(b3);
-//        menu.add(b4);
-//        //menu.add(b5);
-//
-//        ButtonGroup group = new ButtonGroup();
-//        group.add(b1);
-//        group.add(b2);
-//        group.add(b3);
-//        group.add(b4);
-//        //group.add(b5);
-//
-//        ItemListener itemListener = new ItemListener() {
-//            public void itemStateChanged(ItemEvent e) {
-//                JRadioButtonMenuItem rb = (JRadioButtonMenuItem) e.getSource();
-//                double rad = Math.PI / 180.;
-//                ImageProcessor imageProcessor = _imageDisplay.getImageProcessor();
-//                if (rb.isSelected()) {
-//                    if (rb.getText().equals("No Rotation")) {
-//                        imageProcessor.setAngle(0.0);
-//                    } else if (rb.getText().equals("  90 deg")) {
-//                        imageProcessor.setAngle(90.0 * rad);
-//                    } else if (rb.getText().equals(" 180 deg")) {
-//                        imageProcessor.setAngle(180.0 * rad);
-//                    } else if (rb.getText().equals(" -90 deg")) {
-//                        imageProcessor.setAngle(-90.0 * rad);
-//                    }
-//                    //else if (rb.getText().equals("  45 deg (XXX not impl)")) {
-//                    //    imageProcessor.setAngle(45.0*rad);
-//                    //}
-//                    imageProcessor.update();
-//                }
-//            }
-//        };
-//
-//        b1.addItemListener(itemListener);
-//        b2.addItemListener(itemListener);
-//        b3.addItemListener(itemListener);
-//        b4.addItemListener(itemListener);
-//        //b5.addItemListener(itemListener);
-//
-//        return menu;
-//    }
-
-
-//    /**
-//     * Create the View => "Flip X"  menu item
-//     */
-//    protected JCheckBoxMenuItem createViewFlipXMenuItem() {
-//        JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem("Flip X");
-//        menuItem.addItemListener(new ItemListener() {
-//            public void itemStateChanged(ItemEvent e) {
-//                JCheckBoxMenuItem rb = (JCheckBoxMenuItem) e.getSource();
-//                ImageProcessor imageProcessor = _imageDisplay.getImageProcessor();
-//                imageProcessor.setFlipX(rb.getState());
-//                imageProcessor.update();
-//            }
-//        });
-//
-//        return menuItem;
-//    }
-
-//    /**
-//     * Create the View => "Flip Y"  menu item
-//     */
-//    protected JCheckBoxMenuItem createViewFlipYMenuItem() {
-//        JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem("Flip Y");
-//        menuItem.addItemListener(new ItemListener() {
-//            public void itemStateChanged(ItemEvent e) {
-//                JCheckBoxMenuItem rb = (JCheckBoxMenuItem) e.getSource();
-//                ImageProcessor imageProcessor = _imageDisplay.getImageProcessor();
-//                imageProcessor.setFlipY(rb.getState());
-//                imageProcessor.update();
-//            }
-//        });
-//
-//        return menuItem;
-//    }
 
 
     /**
