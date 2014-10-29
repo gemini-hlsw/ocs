@@ -1045,7 +1045,12 @@ public final class SPTarget extends WatchablePos {
     public Object clone() {
         final SPTarget ntarget;
         try {
-            ntarget = (SPTarget)super.clone();
+            ntarget = (SPTarget) super.clone();
+
+            // We also have to clone the inner target object because it is
+            // mutable. We don't need to clone the magnitudes list because it
+            // is an immutable list holding immutable objects.
+            ntarget._target = (ITarget) _target.clone();
         } catch (final CloneNotSupportedException ex) {
             // Should not happen
             throw new UnsupportedOperationException();
