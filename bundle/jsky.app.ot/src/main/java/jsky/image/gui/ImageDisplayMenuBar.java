@@ -27,7 +27,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
-import edu.gemini.shared.util.immutable.Pair;
 import jsky.image.ImageChangeEvent;
 import jsky.image.ImageProcessor;
 import jsky.image.graphics.gui.ImageGraphicsMenu;
