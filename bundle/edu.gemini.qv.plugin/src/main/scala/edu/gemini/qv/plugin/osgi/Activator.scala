@@ -4,6 +4,7 @@ import java.io.File
 
 import edu.gemini.qv.plugin.{QvTool, ShowQvToolAction}
 import edu.gemini.shared.util.FileUtil
+import edu.gemini.spModel.core.Version
 import edu.gemini.util.osgi.ExternalStorage
 import edu.gemini.util.osgi.ExternalStorage.MigrationStep
 import edu.gemini.util.osgi.Tracker._
@@ -19,7 +20,7 @@ class Activator extends BundleActivator {
 
   def start(ctx: BundleContext): Unit = {
 
-    QvTool.defaultsFile = ExternalStorage.getPermanentDataFile(ctx, "userFilters.v1.xml", migrationSteps)
+    QvTool.defaultsFile = ExternalStorage.getPermanentDataFile(ctx, Version.current.isTest, "userFilters.v1.xml", migrationSteps)
 
     reg = Option(ctx.registerService(classOf[OtActionPlugin], new ShowQvToolAction, new java.util.Hashtable[String, Object]()))
 

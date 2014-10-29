@@ -52,9 +52,9 @@ class Activator extends BundleActivator with ExternalStorage {
     // be handled internally in KeyChain should the need arise.
     val file: File = {
       val spdbProp = "edu.gemini.spdb.dir" // Same as the SPDB
-      val fileName = "auth.ser"
+      val fileName = "keychain.ser"
       Option(context.getProperty(spdbProp)).fold(
-        getPermanentDataFile(context, fileName, Nil))(root =>
+        getPermanentDataFile(context, Version.current.isTest, fileName, Nil))(root =>
         new File(OcsVersionUtil.getVersionDir(new File(root), Version.current), fileName))
     }
     file.getParentFile.mkdirs()

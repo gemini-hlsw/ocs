@@ -28,21 +28,25 @@ trait ExternalStorage {
     new File(getExternalDataRoot(context), name)
 
   /**
-   * Gets the root directory for permanent user data for the given bundle.
-   * Data stored in this directory will still be available after an upgrade of the related gemini bundle.
+   * Gets the root directory for permanent user data for the given bundle. Data stored in this
+   * directory will still be available after an upgrade of the related gemini bundle. Data is
+   * segregated based on the `test` flag in order to facilitate testing without clobbering user
+   * data (typically computed via `Version.current.isTest`).
    * @param context the osgi bundle context
+   * @param test `true` if this is a test version
    * @return
    */
-  def getPermanentDataRoot(context: BundleContext): File = {
+  def getPermanentDataRoot(context: BundleContext, test: Boolean): File = {
     val name = context.getBundle.getSymbolicName
     val version = context.getBundle.getVersion
-    val bundleRootDir = new File(permanentUserRoot, "bundle" + File.separator + name)
+    val bundleSegment = if (test) "bundle-test" else "bundle"
+    val bundleRootDir = new File(permanentUserRoot, bundleSegment + File.separator + name)
     bundleRootDir.mkdirs()
     bundleRootDir
   }
 
-  def getPermanentDataFile(context: BundleContext, name: String, migrationSteps: List[MigrationStep]): File = {
-    val root = getPermanentDataRoot(context)
+  def getPermanentDataFile(context: BundleContext, test: Boolean, name: String, migrationSteps: List[MigrationStep]): File = {
+    val root = getPermanentDataRoot(context, test)
     val file = new File(root, name)
     if (file.exists()) file else migrate(root, name, migrationSteps)
   }
