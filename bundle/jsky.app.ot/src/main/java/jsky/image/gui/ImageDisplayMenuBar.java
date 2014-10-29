@@ -27,6 +27,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
+import edu.gemini.shared.util.immutable.Pair;
 import jsky.image.ImageChangeEvent;
 import jsky.image.ImageProcessor;
 import jsky.image.graphics.gui.ImageGraphicsMenu;
@@ -346,7 +347,7 @@ public class ImageDisplayMenuBar extends JMenuBar {
      * Create the View => "Toolbar" menu item
      */
     protected JCheckBoxMenuItem createViewToolBarMenuItem() {
-        JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(_I18N.getString("toolbar"));
+        final JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(_I18N.getString("toolbar"));
 
         // name used to store setting in user preferences
         final String prefName = getClass().getName() + ".ShowToolBar";
@@ -356,20 +357,12 @@ public class ImageDisplayMenuBar extends JMenuBar {
             public void itemStateChanged(ItemEvent e) {
                 JCheckBoxMenuItem rb = (JCheckBoxMenuItem) e.getSource();
                 _toolBar.setVisible(rb.getState());
-                if (rb.getState())
-                    Preferences.set(prefName, "true");
-                else
-                    Preferences.set(prefName, "false");
+                Preferences.set(prefName, rb.getState());
             }
         });
 
         // check for a previous preference setting
-        String pref = Preferences.get(prefName);
-        if (pref != null)
-            menuItem.setState(pref.equals("true"));
-        else
-            menuItem.setState(true);
-
+        menuItem.setState(Preferences.get(prefName, true));
         return menuItem;
     }
 
@@ -377,60 +370,59 @@ public class ImageDisplayMenuBar extends JMenuBar {
      * Create the View => "Show Toolbar As" menu
      */
     protected JMenu createViewShowToolBarAsMenu() {
-        JMenu menu = new JMenu(_I18N.getString("showToolBarAs"));
-
-        JRadioButtonMenuItem b1 = new JRadioButtonMenuItem(_I18N.getString("picAndText"));
-        JRadioButtonMenuItem b2 = new JRadioButtonMenuItem(_I18N.getString("picOnly"));
-        JRadioButtonMenuItem b3 = new JRadioButtonMenuItem(_I18N.getString("textOnly"));
-
-        b1.setSelected(true);
-        _toolBar.setShowPictures(true);
-        _toolBar.setShowText(true);
-
-        menu.add(b1);
-        menu.add(b2);
-        menu.add(b3);
-
-        ButtonGroup group = new ButtonGroup();
-        group.add(b1);
-        group.add(b2);
-        group.add(b3);
-
-        // name used to store setting in user preferences
+        // Name used to store setting in user preferences.
         final String prefName = getClass().getName() + ".ShowToolBarAs";
 
-        ItemListener itemListener = new ItemListener() {
+        final JMenu menu = new JMenu(_I18N.getString("showToolBarAs"));
+        final ButtonGroup group = new ButtonGroup();
 
+        final JRadioButtonMenuItem[] buttons = new JRadioButtonMenuItem[] {
+                new JRadioButtonMenuItem(_I18N.getString("picAndText")),
+                new JRadioButtonMenuItem(_I18N.getString("picOnly")),
+                new JRadioButtonMenuItem(_I18N.getString("textOnly"))
+        };
+        final boolean[][] options = new boolean[][] {
+                new boolean[] {true, true},
+                new boolean[] {true, false},
+                new boolean[] {false, true}
+        };
+
+        final ItemListener itemListener = new ItemListener() {
             public void itemStateChanged(ItemEvent e) {
-                JRadioButtonMenuItem rb = (JRadioButtonMenuItem) e.getSource();
+                final JRadioButtonMenuItem rb = (JRadioButtonMenuItem) e.getSource();
                 if (rb.isSelected()) {
-                    if (rb.getText().equals(_I18N.getString("picAndText"))) {
-                        _toolBar.setShowPictures(true);
-                        _toolBar.setShowText(true);
-                        Preferences.set(prefName, "1");
-                    } else if (rb.getText().equals(_I18N.getString("picOnly"))) {
-                        _toolBar.setShowPictures(true);
-                        _toolBar.setShowText(false);
-                        Preferences.set(prefName, "2");
-                    } else if (rb.getText().equals(_I18N.getString("textOnly"))) {
-                        _toolBar.setShowPictures(false);
-                        _toolBar.setShowText(true);
-                        Preferences.set(prefName, "3");
+                    for (int i=0; i < buttons.length; ++i) {
+                        if (rb.equals(buttons[i])) {
+                            // Update the preferences: for backwards compatibility, must add 1 to i.
+                            Preferences.set(prefName, String.valueOf(i+1));
+
+                            // Update the toolbar.
+                            _toolBar.setShowPictures(options[i][0]);
+                            _toolBar.setShowText(options[i][1]);
+                            break;
+                        }
                     }
                 }
             }
         };
 
-        b1.addItemListener(itemListener);
-        b2.addItemListener(itemListener);
-        b3.addItemListener(itemListener);
+        final int defaultButton = 0;
+        buttons[defaultButton].setSelected(true);
+        _toolBar.setShowPictures(options[defaultButton][0]);
+        _toolBar.setShowText(options[defaultButton][1]);
 
-        // check for a previous preference setting
-        String pref = Preferences.get(prefName);
+        for (JRadioButtonMenuItem item : buttons) {
+            menu.add(item);
+            group.add(item);
+            item.addItemListener(itemListener);
+        }
+
+        // Check for a previous preference setting.
+        final String pref = Preferences.get(prefName);
         if (pref != null) {
-            JRadioButtonMenuItem[] ar = new JRadioButtonMenuItem[]{null, b1, b2, b3};
             try {
-                ar[Integer.parseInt(pref)].setSelected(true);
+                // Must subtract 1 from preference for backwards compatibility.
+                buttons[Integer.parseInt(pref)-1].setSelected(true);
             } catch (Exception e) {
             }
         }
@@ -639,48 +631,58 @@ public class ImageDisplayMenuBar extends JMenuBar {
      * Create the View => "Scale Interpolation"  menu item
      */
     protected JMenu createViewInterpolationMenu() {
-        JMenu menu = new JMenu(_I18N.getString("scaleInt"));
+        // Name used to store settings in user preferences.
+        final String prefName = getClass().getName() + ".ScaleInterpolation";
 
-        JRadioButtonMenuItem b1 = new JRadioButtonMenuItem("Nearest");
-        JRadioButtonMenuItem b2 = new JRadioButtonMenuItem("Bilinear");
-        JRadioButtonMenuItem b3 = new JRadioButtonMenuItem("Bicubic");
-        JRadioButtonMenuItem b4 = new JRadioButtonMenuItem("Bicubic2");
+        final JMenu menu = new JMenu(_I18N.getString("scaleInt"));
+        final ButtonGroup group = new ButtonGroup();
 
-        b1.setSelected(true);
-        menu.add(b1);
-        menu.add(b2);
-        menu.add(b3);
-        menu.add(b4);
+        final JRadioButtonMenuItem[] buttons = new JRadioButtonMenuItem[] {
+                new JRadioButtonMenuItem("Nearest"),
+                new JRadioButtonMenuItem("Bilinear"),
+                new JRadioButtonMenuItem("Bicubic"),
+                new JRadioButtonMenuItem("Bicubic2")
+        };
+        final int[] interpolations = new int[] {
+                Interpolation.INTERP_NEAREST,
+                Interpolation.INTERP_BILINEAR,
+                Interpolation.INTERP_BICUBIC,
+                Interpolation.INTERP_BICUBIC_2
+        };
 
-        ButtonGroup group = new ButtonGroup();
-        group.add(b1);
-        group.add(b2);
-        group.add(b3);
-        group.add(b4);
-
-        ItemListener itemListener = new ItemListener() {
-
+        final ItemListener itemListener = new ItemListener() {
             public void itemStateChanged(ItemEvent e) {
-                JRadioButtonMenuItem rb = (JRadioButtonMenuItem) e.getSource();
+                final JRadioButtonMenuItem rb = (JRadioButtonMenuItem) e.getSource();
                 if (rb.isSelected()) {
-                    if (rb.getText().equals("Nearest")) {
-                        _imageDisplay.setInterpolation(Interpolation.getInstance(Interpolation.INTERP_NEAREST));
-                    } else if (rb.getText().equals("Bilinear")) {
-                        _imageDisplay.setInterpolation(Interpolation.getInstance(Interpolation.INTERP_BILINEAR));
-                    } else if (rb.getText().equals("Bicubic")) {
-                        _imageDisplay.setInterpolation(Interpolation.getInstance(Interpolation.INTERP_BICUBIC));
-                    } else if (rb.getText().equals("Bicubic2")) {
-                        _imageDisplay.setInterpolation(Interpolation.getInstance(Interpolation.INTERP_BICUBIC_2));
+                    for (int i=0; i < buttons.length; ++i) {
+                        if (rb.equals(buttons[i])) {
+                            // Update the preferences.
+                            Preferences.set(prefName, String.valueOf(i));
+
+                            // Update the display.
+                            _imageDisplay.setInterpolation(Interpolation.getInstance(interpolations[i]));
+                            _imageDisplay.updateImage();
+                            break;
+                        }
                     }
-                    _imageDisplay.updateImage();
                 }
             }
         };
 
-        b1.addItemListener(itemListener);
-        b2.addItemListener(itemListener);
-        b3.addItemListener(itemListener);
-        b4.addItemListener(itemListener);
+        buttons[0].setSelected(true);
+        for (JRadioButtonMenuItem item : buttons) {
+            menu.add(item);
+            group.add(item);
+            item.addItemListener(itemListener);
+        }
+
+        // Check for a previous preference setting.
+        final String pref = Preferences.get(prefName);
+        if (pref != null) {
+            try {
+                buttons[Integer.parseInt(pref)].setSelected(true);
+            } catch (NumberFormatException e) {}
+        }
 
         return menu;
     }
