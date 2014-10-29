@@ -2,6 +2,7 @@ package edu.gemini.util.osgi
 
 import java.io.File
 
+import edu.gemini.spModel.core.Version
 import org.osgi.framework.BundleContext
 
 object ExternalStorage extends ExternalStorage
@@ -36,7 +37,8 @@ trait ExternalStorage {
   def getPermanentDataRoot(context: BundleContext): File = {
     val name = context.getBundle.getSymbolicName
     val version = context.getBundle.getVersion
-    val bundleRootDir = new File(permanentUserRoot, "bundle" + File.separator + name)
+    val bundleSegment = if (Version.current.isTest) "bundle-test" else "bundle"
+    val bundleRootDir = new File(permanentUserRoot, bundleSegment + File.separator + name)
     bundleRootDir.mkdirs()
     bundleRootDir
   }
