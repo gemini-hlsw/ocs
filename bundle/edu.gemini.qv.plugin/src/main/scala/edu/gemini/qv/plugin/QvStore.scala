@@ -238,6 +238,7 @@ class StoreImporter(parent: Component) extends FileChooser {
     QvStore.publish(QvStore.AxesChanged)
     QvStore.publish(QvStore.ChartsChanged)
     QvStore.publish(QvStore.TablesChanged)
+    QvStore.publish(DataChanged)
   }
 }
 
