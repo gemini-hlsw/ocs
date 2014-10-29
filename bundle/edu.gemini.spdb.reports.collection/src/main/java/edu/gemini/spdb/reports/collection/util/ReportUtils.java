@@ -357,10 +357,10 @@ public class ReportUtils {
         return String.format("%d-%d", hours[gapIndex], hours[gapIndex - 1]);
     }
 
-    private static Set<Integer> getRaHours(ISPProgram progShell)  {
-        Set<Integer> hourSet = new TreeSet<Integer>();
+    private static Set<Integer> getRaHours(final ISPProgram progShell)  {
+        final Set<Integer> hourSet = new TreeSet<>();
         for (ISPObservation obsShell : progShell.getAllObservations()) {
-            ObsClass obsClass = ObsClassService.lookupObsClass(obsShell);
+            final ObsClass obsClass = ObsClassService.lookupObsClass(obsShell);
             if (ObsClass.SCIENCE != obsClass) continue;
 
             // Need to look through all the components to find the target env.
@@ -374,25 +374,25 @@ public class ReportUtils {
             if (targetEnvComp == null) continue;
 
             // Figure out the RA of the base position
-            TargetObsComp targetEnv = (TargetObsComp) targetEnvComp.getDataObject();
-            SPTarget target = targetEnv.getBase();
-
-            try {
+            final TargetObsComp targetEnv = (TargetObsComp) targetEnvComp.getDataObject();
+            final SPTarget target = targetEnv.getBase();
+            if (hasRaHours(target)) {
                 hourSet.add(getRaHours(target));
-            } catch (Exception ex) {
             }
         }
         return hourSet;
 
     }
 
-    private static Set<Integer> getTemplateRaHours(ISPProgram progShell) {
-        final Set<Integer> hourSet = new TreeSet<Integer>();
+    private static Set<Integer> getTemplateRaHours(final ISPProgram progShell) {
+        final Set<Integer> hourSet = new TreeSet<>();
         final ISPTemplateFolder folder = progShell.getTemplateFolder();
         TemplateParameters.foreach(folder, new ApplyOp<TemplateParameters>() {
             @Override
             public void apply(TemplateParameters tp) {
-                hourSet.add(getRaHours(tp.getTarget()));
+                if (hasRaHours(tp.getTarget())) {
+                    hourSet.add(getRaHours(tp.getTarget()));
+                }
             }
         });
         return hourSet;
@@ -408,15 +408,24 @@ public class ReportUtils {
         return hourArray;
     }
 
-    private static Integer getRaHours(SPTarget target) {
-        if (target == null) throw new IllegalArgumentException();
-        if (!(target.getCoordSys() instanceof HmsDegTarget.SystemType)) throw new IllegalArgumentException();
-        HMS ra = (HMS) target.getC1();
-        DMS dec = (DMS) target.getC2();
-        double raDeg = ra.getValue();
-        double decDeg = dec.getValue();
-        if ((raDeg == 0.0) && (decDeg == 0)) throw new IllegalArgumentException();
+    /** Checks if the target is not null, is a RA/DEC coordinate and not a "dummy" target. */
+    private static boolean hasRaHours(final SPTarget target) {
+        return target != null
+                && target.getCoordSys() instanceof HmsDegTarget.SystemType
+                && !isDummyTarget(target);
+    }
 
+    /** Checks for dummy targets with RA=0 and Dec=0. Note: This works only with HMS/DMS targets. */
+    private static boolean isDummyTarget(final SPTarget target) {
+        final double r = ((HMS) target.getC1()).getValue();
+        final double d = ((DMS) target.getC2()).getValue();
+        return !(r == 0.0 && d == 0.0);
+    }
+
+    /** Gets the RA hours value. Note: This works only with HMS/DMS targets, use hasRaHours for validation first. */
+    private static Integer getRaHours(final SPTarget target) {
+        final HMS ra = (HMS) target.getC1();
+        final double raDeg = ra.getValue();
         return (((int) Math.round(raDeg / 15.0)) % 24);
     }
 
