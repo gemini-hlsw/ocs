@@ -64,7 +64,7 @@ public final class ImageScaleInterpolationMenu extends JMenu {
             try {
                 return ScaleInterpolation.valueOf(pref);
             } catch (Exception e) {
-                LOGGER.info("Illegal preference found for key " + PREF_KEY_INTERPOLATION + ": \"" + pref + "\"." +
+                LOGGER.info("Illegal preference found for key " + PREF_KEY_INTERPOLATION + ": \"" + pref + "\". " +
                             "Using Nearest instead.");
                 return Nearest;
             }
