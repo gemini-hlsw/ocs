@@ -7,10 +7,12 @@ import javax.media.jai.Interpolation;
 import javax.swing.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.logging.Logger;
 
 public final class ImageScaleInterpolationMenu extends JMenu {
+    private static final Logger LOGGER                 = Logger.getLogger(ImageScaleInterpolationMenu.class.getName());
     private static final String PREF_KEY_INTERPOLATION = ImageDisplayMenuBar.class.getName() + ".ScaleInterpolation";
-    private static final I18N _I18N                    = I18N.getInstance(ImageDisplayMenuBar.class);
+    private static final I18N   _I18N                  = I18N.getInstance(ImageDisplayMenuBar.class);
 
     public ImageScaleInterpolationMenu(final DivaMainImageDisplay imageDisplay) {
         super(_I18N.getString("scaleInt"));
@@ -35,7 +37,7 @@ public final class ImageScaleInterpolationMenu extends JMenu {
             group.add(menuItem);
             menuItem.addItemListener(itemListener);
         }
-        ScaleInterpolation.loadPreference();
+        ScaleInterpolation.loadPreference().menuItem.setSelected(true);
     }
 
     private enum ScaleInterpolation {
@@ -57,13 +59,14 @@ public final class ImageScaleInterpolationMenu extends JMenu {
             Preferences.set(PREF_KEY_INTERPOLATION, name());
         }
 
-        static void loadPreference() {
+        static ScaleInterpolation loadPreference() {
             final String pref = Preferences.get(PREF_KEY_INTERPOLATION, Nearest.name());
             try {
-                ScaleInterpolation.valueOf(pref).menuItem.setSelected(true);
+                return ScaleInterpolation.valueOf(pref);
             } catch (Exception e) {
-                e.printStackTrace();
-                Nearest.menuItem.setSelected(true);
+                LOGGER.info("Illegal preference found for key " + PREF_KEY_INTERPOLATION + ": \"" + pref + "\"." +
+                            "Using Nearest instead.");
+                return Nearest;
             }
         }
 
