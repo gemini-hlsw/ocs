@@ -106,23 +106,24 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
     val string = propClass match {
       case pc: SpecialProposalClass       => pc.sub.response.map(_.receipt.id).mkString(" ")
       case ft: FastTurnaroundProgramClass => ft.sub.response.map(_.receipt.id).mkString(" ")
-      case q:  QueueProposalClass         => ~q.subs.left.getOrElse(Nil).map(_.response.map(_.receipt.id).mkString(" ")).headOption
+      case q:  GeminiNormalProposalClass  => ~q.subs.left.getOrElse(Nil).map(_.response.map(_.receipt.id).mkString(" ")).headOption
       case _                              => ""
     }
     string.trim
   }
 
   private def getTypeString(propClass: ProposalClass): String = propClass match {
-      case pc: immutable.SpecialProposalClass       => pc.sub.specialType.value()
-      case ft: immutable.FastTurnaroundProgramClass => "Fast Turnaround"
-      case q: immutable.QueueProposalClass          => "Queue"
-      case _                                        => ""
+      case pc: SpecialProposalClass       => pc.sub.specialType.value()
+      case _:  FastTurnaroundProgramClass => "Fast Turnaround"
+      case _:  QueueProposalClass         => "Queue"
+      case _:  ClassicalProposalClass     => "Classical"
+      case _                              => ""
     }
 
   private def getTypeName(propClass: ProposalClass): String = propClass match {
-      case pc: immutable.SpecialProposalClass       => pc.sub.specialType
-      case ft: immutable.FastTurnaroundProgramClass => "FT"
-      case q:  immutable.QueueProposalClass         => ~q.subs.left.getOrElse(Nil).collect {
+      case pc: SpecialProposalClass       => pc.sub.specialType
+      case ft: FastTurnaroundProgramClass => "FT"
+      case q:  GeminiNormalProposalClass  => ~q.subs.left.getOrElse(Nil).collect {
           case s if cfg.map.keys.toList.contains(s.partner.value()) => s.partner.value().toUpperCase
         }.headOption
       case _                                        => ""
