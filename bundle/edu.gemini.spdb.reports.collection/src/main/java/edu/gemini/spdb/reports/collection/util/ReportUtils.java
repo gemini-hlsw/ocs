@@ -1,8 +1,6 @@
 package edu.gemini.spdb.reports.collection.util;
 
 import edu.gemini.pot.sp.*;
-import static edu.gemini.pot.sp.SPComponentBroadType.AO;
-import static edu.gemini.pot.sp.SPComponentBroadType.INSTRUMENT;
 import edu.gemini.shared.util.TimeValue;
 import edu.gemini.shared.util.immutable.ApplyOp;
 import edu.gemini.shared.util.immutable.Pair;
@@ -14,24 +12,28 @@ import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.gmos.*;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
-import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.obs.ObsClassService;
 import edu.gemini.spModel.obs.ObsTimesService;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.ProgramNote;
 import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.obsComp.TargetObsComp;
+import edu.gemini.spModel.target.system.DMS;
+import edu.gemini.spModel.target.system.HMS;
+import edu.gemini.spModel.target.system.HmsDegTarget;
 import edu.gemini.spModel.template.TemplateParameters;
 import edu.gemini.spModel.time.ChargeClass;
 import edu.gemini.spModel.too.Too;
 import edu.gemini.spModel.too.TooType;
-import edu.gemini.spModel.target.system.DMS;
-import edu.gemini.spModel.target.system.HMS;
-import edu.gemini.spModel.target.system.HmsDegTarget;
-
+import scala.Option;
+import scala.Some;
 
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static edu.gemini.pot.sp.SPComponentBroadType.AO;
+import static edu.gemini.pot.sp.SPComponentBroadType.INSTRUMENT;
 
 @SuppressWarnings("unchecked")
 public class ReportUtils {
@@ -376,8 +378,9 @@ public class ReportUtils {
             // Figure out the RA of the base position
             final TargetObsComp targetEnv = (TargetObsComp) targetEnvComp.getDataObject();
             final SPTarget target = targetEnv.getBase();
-            if (hasRaHours(target)) {
-                hourSet.add(getRaHours(target));
+            final Option<Integer> raHours = getRaHours(target);
+            if (raHours.isDefined()) {
+                hourSet.add(raHours.get());
             }
         }
         return hourSet;
@@ -389,9 +392,10 @@ public class ReportUtils {
         final ISPTemplateFolder folder = progShell.getTemplateFolder();
         TemplateParameters.foreach(folder, new ApplyOp<TemplateParameters>() {
             @Override
-            public void apply(TemplateParameters tp) {
-                if (hasRaHours(tp.getTarget())) {
-                    hourSet.add(getRaHours(tp.getTarget()));
+            public void apply(final TemplateParameters tp) {
+                final Option<Integer> raHours = getRaHours(tp.getTarget());
+                if (raHours.isDefined()) {
+                    hourSet.add(raHours.get());
                 }
             }
         });
@@ -408,25 +412,24 @@ public class ReportUtils {
         return hourArray;
     }
 
-    /** Checks if the target is not null, is a RA/DEC coordinate and not a "dummy" target. */
-    private static boolean hasRaHours(final SPTarget target) {
-        return target != null
-                && target.getCoordSys() instanceof HmsDegTarget.SystemType
-                && !isDummyTarget(target);
-    }
+    /** Gets the ra hours value - if the target is not null, has RA/DEC coordinates and is not a "dummy" target. */
+    private static Option<Integer> getRaHours(final SPTarget target) {
+        if (target == null) {
+            return Option.empty();
+        }
+        if (!(target.getCoordSys() instanceof HmsDegTarget.SystemType)) {
+            return Option.empty();
+        }
 
-    /** Checks for dummy targets with RA=0 and Dec=0. Note: This works only with HMS/DMS targets. */
-    private static boolean isDummyTarget(final SPTarget target) {
+        // we know it's a ra/dec target, so it's safe to cast here
         final double r = ((HMS) target.getC1()).getValue();
         final double d = ((DMS) target.getC2()).getValue();
-        return !(r == 0.0 && d == 0.0);
-    }
 
-    /** Gets the RA hours value. Note: This works only with HMS/DMS targets, use hasRaHours for validation first. */
-    private static Integer getRaHours(final SPTarget target) {
-        final HMS ra = (HMS) target.getC1();
-        final double raDeg = ra.getValue();
-        return (((int) Math.round(raDeg / 15.0)) % 24);
+        if (r == 0.0 && d == 0.0) {
+            return Option.empty();
+        } else {
+            return new Some<>(((int) Math.round(r / 15.0)) % 24);
+        }
     }
 
     public static Site getSiteDesc(SPProgramID id) {
