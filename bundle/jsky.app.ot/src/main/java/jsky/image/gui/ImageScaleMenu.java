@@ -1,6 +1,7 @@
 package jsky.image.gui;
 
 
+import edu.gemini.shared.util.immutable.Pair;
 import jsky.image.ImageChangeEvent;
 import jsky.util.I18N;
 
@@ -12,8 +13,10 @@ import java.awt.event.ActionListener;
 import java.util.HashMap;
 
 public final class ImageScaleMenu extends JMenu {
-    private static final I18N _I18N = I18N.getInstance(ImageDisplayMenuBar.class);
-    private final HashMap<Float, JRadioButtonMenuItem> scaleToButton;
+    private static final I18N _I18N     = I18N.getInstance(ImageDisplayMenuBar.class);
+    private static final int  MAX_SCALE = ImageDisplayMenuBar.MAX_SCALE;
+
+    private final HashMap<Pair<Integer, Integer>, JRadioButtonMenuItem> scaleToButton;
 
     public ImageScaleMenu(final DivaMainImageDisplay imageDisplay) {
         super(_I18N.getString("scale"));
@@ -33,16 +36,17 @@ public final class ImageScaleMenu extends JMenu {
         };
 
         for (ScaleMenuOptions o : ScaleMenuOptions.values()) {
-            final JMenu menu = new JMenu(o.i18name);
-            for (int i=1; i <= ImageDisplayMenuBar.MAX_SCALE; ++i) {
-                final float scale = o.createScaleForIndex(i);
+            final JMenu menu = new JMenu(o.i18nName);
+            for (int i=o.lowerBound; i <= o.upperBound; ++i) {
+                final float scale                     = o.createScaleForIndex(i);
+                final Pair<Integer, Integer> rational = o.createRationalScaleForIndex(i);
 
                 final JRadioButtonMenuItem b = new JRadioButtonMenuItem(o.createLabelForIndex(i));
                 b.setActionCommand(Float.toString(scale));
                 b.addActionListener(listener);
                 group.add(b);
                 menu.add(b);
-                scaleToButton.put(scale, b);
+                scaleToButton.put(rational, b);
             }
             add(menu);
         }
@@ -72,43 +76,65 @@ public final class ImageScaleMenu extends JMenu {
     }
 
     private void enableButtonForScale(float scale) {
-        final JRadioButtonMenuItem b = scaleToButton.get(scale);
+        final Pair<Integer, Integer> rational = convertScaleToRational(scale);
+        final JRadioButtonMenuItem b          = scaleToButton.get(rational);
         if (b != null)
             b.setSelected(true);
     }
 
+
+    private static Pair<Integer, Integer> convertScaleToRational(float scale) {
+        if (scale > 0 && scale < 1)
+            return new Pair<>(1, Math.round(1.0f/scale));
+        return new Pair<>(Math.round(scale),1);
+    }
+
     private enum ScaleMenuOptions {
-        ZoomOut("zoomOut") {
+        ZoomOut("zoomOut", 2, MAX_SCALE) {
             @Override
             String createLabelForIndex(int idx) {
                 return "1/" + idx + "x";
             }
 
             @Override
-            float createScaleForIndex(int idx) {
-                return 1.0f / idx;
+            Pair<Integer, Integer> createRationalScaleForIndex(int idx) {
+                return new Pair<>(1, idx);
             }
         },
-        ZoomIn("zoomIn") {
+        ZoomIn("zoomIn", 1, MAX_SCALE) {
             @Override
             String createLabelForIndex(int idx) {
                 return idx + "x";
             }
 
             @Override
-            float createScaleForIndex(int idx) {
-                return (float) idx;
+            Pair<Integer, Integer> createRationalScaleForIndex(int idx) {
+                return new Pair<>(idx, 1);
             }
         },;
 
         // Name of this item.
-        final String i18name;
+        final String i18nName;
+        final int    lowerBound;
+        final int    upperBound;
 
-        ScaleMenuOptions(final String name) {
-            i18name = _I18N.getString(name);
+        ScaleMenuOptions(final String name, final int lowerBound, final int upperBound) {
+            i18nName        = _I18N.getString(name);
+            this.lowerBound = lowerBound;
+            this.upperBound = upperBound;
         }
 
-        abstract String createLabelForIndex(int idx);
-        abstract float  createScaleForIndex(int idx);
+        abstract String                 createLabelForIndex(int idx);
+        abstract Pair<Integer, Integer> createRationalScaleForIndex(int idx);
+
+        float createScaleForIndex(int idx) {
+            final Pair<Integer, Integer> rational = createRationalScaleForIndex(idx);
+
+            // This should never happen.
+            if (rational._2() == 0)
+                return 0;
+
+            return ((float) rational._1()) / rational._2();
+        }
     }
 }

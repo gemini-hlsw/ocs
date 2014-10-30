@@ -37,7 +37,7 @@ public class ImageDisplayMenuBar extends JMenuBar {
     private static final I18N _I18N = I18N.getInstance(ImageDisplayMenuBar.class);
 
     /** Maximum scale (zoom) factor for menu. **/
-    public static final float MAX_SCALE = 20.0F;
+    public static final int   MAX_SCALE = 20;
 
     /** Minimum scale (zoom) factor for menu. **/
     public static final float MIN_SCALE = 1.0F / MAX_SCALE;
