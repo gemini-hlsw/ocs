@@ -173,7 +173,7 @@ object QvStore extends Publisher {
       savedFilters <- FilterXMLParser.parseFilters(xml \ "filters" \ "filter")
       filtersMap <- Try((DefaultFilters ++ savedFilters).map(a => (a.label, a)).toMap)
       savedAxes <- FilterXMLParser.parseAxes(xml \ "axes" \ "axis")
-      axesMap <- Try((DefaultAxes ++ savedAxes).map(a => (a.label, a)).toMap)
+      axesMap <- Try((DefaultAxes ++ savedAxes).map(a => (a.label, a)).toMap.withDefaultValue(Axis.RA1))
       savedCharts <- FilterXMLParser.parseHistograms(xml \ "histograms" \ "histogram", axesMap)
       savedTables <- FilterXMLParser.parseTables(xml \ "tables" \ "table", axesMap)
       savedVisCharts <- FilterXMLParser.parseVisCharts(xml \ "barcharts" \ "barchart", axesMap)
@@ -183,15 +183,14 @@ object QvStore extends Publisher {
     } yield (filtersMap, axesMap, chartsMap, tablesMap, visChartMap)
   }
 
-  def histogramFromXml(n: Node, axes: Map[String, Axis]): Histogram = {
+  def histogramFromXml(n: Node, axes: Map[String, Axis]): Histogram =
     new Histogram(n \ "label" text, axes(n \ "xAxis" text), axes(n \ "yAxis" text), QvStore.functionsMap(n \ "function" text))
-  }
-  def tableFromXml(n: Node, axes: Map[String, Axis]): Table = {
+
+  def tableFromXml(n: Node, axes: Map[String, Axis]): Table =
     new Table(n \ "label" text, axes(n \ "xAxis" text), axes(n \ "yAxis" text), QvStore.renderersMap(n \ "renderer" text))
-  }
-  def barChartFromXml(n: Node, axes: Map[String, Axis]): BarChart = {
+
+  def barChartFromXml(n: Node, axes: Map[String, Axis]): BarChart =
     new BarChart(n \ "label" text, axes(n \ "yAxis" text), axes(n \ "colorCoding" text))
-  }
 
   trait NamedElement {
     def label: String
