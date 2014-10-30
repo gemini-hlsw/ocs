@@ -13,12 +13,13 @@ import java.util.HashMap;
 
 public final class ImageScaleMenu extends JMenu {
     private static final I18N _I18N = I18N.getInstance(ImageDisplayMenuBar.class);
+    private final HashMap<Float, JRadioButtonMenuItem> scaleToButton;
 
     public ImageScaleMenu(final DivaMainImageDisplay imageDisplay) {
         super(_I18N.getString("scale"));
 
         // A lookup to be able to mark the appropriate radio button as selected when the image scale changes externally.
-        final HashMap<Float, JRadioButtonMenuItem> scaleToButton = new HashMap<>();
+        scaleToButton = new HashMap<>();
 
         /** Create the zoom in and zoom out menu items **/
         final ButtonGroup group = new ButtonGroup();
@@ -60,16 +61,21 @@ public final class ImageScaleMenu extends JMenu {
         /** Register a change listener to set the button if the scaling is changed externally. **/
         imageDisplay.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent ce) {
-                ImageChangeEvent e = (ImageChangeEvent) ce;
-                if (e.isNewScale()) {
-                    final JRadioButtonMenuItem b = scaleToButton.get(imageDisplay.getScale());
-                    if (b != null)
-                        b.setSelected(true);
-                }
+                final ImageChangeEvent e = (ImageChangeEvent) ce;
+                if (e.isNewScale())
+                    enableButtonForScale(imageDisplay.getScale());
             }
         });
+
+        // Set the default button to selected.
+        enableButtonForScale(imageDisplay.getScale());
     }
 
+    private void enableButtonForScale(float scale) {
+        final JRadioButtonMenuItem b = scaleToButton.get(scale);
+        if (b != null)
+            b.setSelected(true);
+    }
 
     private enum ScaleMenuOptions {
         ZoomOut("zoomOut") {
