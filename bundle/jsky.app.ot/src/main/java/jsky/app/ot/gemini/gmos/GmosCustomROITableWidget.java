@@ -5,13 +5,10 @@ import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import jsky.util.gui.DialogUtil;
 import jsky.util.gui.TableWidget;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 import java.util.Vector;
 
 /**
@@ -24,7 +21,6 @@ public class GmosCustomROITableWidget extends TableWidget {
     private GmosCommonType.CustomROIList rois;
     private GmosCommonType.Binning xBinning = GmosCommonType.Binning.DEFAULT;
     private GmosCommonType.Binning yBinning = GmosCommonType.Binning.DEFAULT;
-    private GmosCommonType.DetectorManufacturer det = null;
 
     public GmosCustomROITableWidget() {
         this.rois = GmosCommonType.CustomROIList.create();
@@ -39,17 +35,11 @@ public class GmosCustomROITableWidget extends TableWidget {
         }
     }
 
-    public void reinit(GmosCommonType.CustomROIList customROIs, GmosCommonType.Binning xBinning, GmosCommonType.Binning yBinning, GmosCommonType.DetectorManufacturer det) {
+    public void reinit(final GmosCommonType.CustomROIList customROIs, final GmosCommonType.Binning xBinning, final GmosCommonType.Binning yBinning) {
         rois = customROIs;
         this.xBinning = xBinning;
         this.yBinning = yBinning;
-        this.det = det;
         _updateTable();
-        for(GmosCommonType.ROIDescription roi:rois.get()){
-            if (det != null && !roi.validate(det.getXsize(), det.getYsize())) {
-                throw new IllegalArgumentException("ROI ["+roi+"] is not within valid ranges");
-            }
-        }
     }
 
     public void removeAllROIs() {
@@ -66,25 +56,17 @@ public class GmosCustomROITableWidget extends TableWidget {
         }
     }
 
-    public void updateSelectedROI(int xMin, int yMin, int xRange, int yRange) {
-        GmosCommonType.ROIDescription roi = new GmosCommonType.ROIDescription(xMin, yMin, xRange, yRange);
-        if (det != null && roi.validate(det.getXsize(), det.getYsize())) {
-            rois = rois.update(getSelectedRow(), roi);
-            _updateTable();
-        } else {
-            throw new IllegalArgumentException("ROI is not within valid ranges");
-        }
+    public void updateSelectedROI(final int xMin, final int yMin, final int xRange, final int yRange) {
+        final GmosCommonType.ROIDescription roi = new GmosCommonType.ROIDescription(xMin, yMin, xRange, yRange);
+        rois = rois.update(getSelectedRow(), roi);
+        _updateTable();
     }
 
-    public void addROI(int xMin, int yMin, int xRange, int yRange) {
-        GmosCommonType.ROIDescription roi = new GmosCommonType.ROIDescription(xMin, yMin, xRange, yRange);
-        if (det != null && roi.validate(det.getXsize(), det.getYsize())) {
-            rois = rois.add(roi);
-            _updateTable();
-            _selectLastRow();
-        } else {
-            throw new IllegalArgumentException("ROI is not within valid ranges");
-        }
+    public void addROI(final int xMin, final int yMin, final int xRange, final int yRange) {
+        final GmosCommonType.ROIDescription roi = new GmosCommonType.ROIDescription(xMin, yMin, xRange, yRange);
+        rois = rois.add(roi);
+        _updateTable();
+        _selectLastRow();
     }
 
     private void _updateTable() {
@@ -104,15 +86,6 @@ public class GmosCustomROITableWidget extends TableWidget {
             selectRowAt(getRowCount() - 1);
         }
     }
-
-//    private Vector<Integer> _createRow(int xMin, int yMin, int xRange, int yRange) {
-//        Vector<Integer> v = new Vector<Integer>(4);
-//        v.addElement(xMin);
-//        v.addElement(yMin);
-//        v.addElement(xRange);
-//        v.addElement(yRange);
-//        return v;
-//    }
 
     private Vector<Integer> _ROIToVector(GmosCommonType.ROIDescription roi) {
         Vector<Integer> v = new Vector<Integer>(4);

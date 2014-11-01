@@ -2,13 +2,11 @@
 // Observatory Control System, Gemini Telescopes Project.
 // See the file COPYRIGHT for complete details.
 //
-// $Id: EdCompInstGMOS.java 46768 2012-07-16 18:58:53Z rnorris $
-//
 package jsky.app.ot.gemini.gmos;
 
 import edu.gemini.mask.ObjectTable;
-import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.ISPNode;
+import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.ISPSeqComponent;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.data.YesNoType;
@@ -577,6 +575,10 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
             _w.ccd6AmpButton.setSelected(true);
         else if (c == GmosCommonType.AmpCount.TWELVE)
             _w.ccd12AmpButton.setSelected(true);
+
+        // changing the CCD can render ROIs invalid
+        validateROIs();
+
     }
 
     // Display the current translation stage details settings
@@ -609,19 +611,19 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         } else if (roi == BuiltinROI.CUSTOM) {
             _w.customButton.setSelected(true);
         }
-        try {
-            _customROITable.reinit(
-                    getDataObject().getCustomROIs(),
-                    getDataObject().getCcdXBinning(),
-                    getDataObject().getCcdYBinning(),
-                    getDataObject().getDetectorManufacturer());
-        } catch (IllegalArgumentException e) {
-            _setWarning(_w.warningCustomROI, e.getMessage());
-        }
+
+        _customROITable.reinit(
+                getDataObject().getCustomROIs(),
+                getDataObject().getCcdXBinning(),
+                getDataObject().getCcdYBinning());
+
         _w.xMin.setValue(1);
         _w.yMin.setValue(1);
         _w.xRange.setValue(1);
         _w.yRange.setValue(1);
+
+        // changing any of these settings might turn ROIs invalid
+        validateROIs();
     }
 
     // Display the current ISS port settings
@@ -889,7 +891,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
      *
      * @see TableWidgetWatcher
      */
-    public void tableRowSelected(TableWidget twe, int rowIndex) {
+    public void tableRowSelected(final TableWidget twe, final int rowIndex) {
         if (twe == _offsetTable) {
             if (_curPos != null)
                 _curPos.deleteWatcher(this);
@@ -898,16 +900,38 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
             showPos(_curPos);
         } else if (twe == _customROITable) {
             showROI(_customROITable.getSelectedROI());
-            _clearWarning(_w.warningCustomROI);
+            validateROIs();
         }
-
     }
 
-    protected void showROI(ROIDescription rDesc) {
+    private void showROI(final ROIDescription rDesc) {
         _w.xMin.setValue(rDesc.getXStart());
         _w.yMin.setValue(rDesc.getYStart());
         _w.xRange.setValue(rDesc.getXSize(getDataObject().getCcdXBinning()));
         _w.yRange.setValue(rDesc.getYSize(getDataObject().getCcdYBinning()));
+    }
+
+    /**
+     * Shows a warning for the first invalid ROI it finds, for too many ROIs or overlapping ROIs.
+     * Clears all warnings if there are none.
+     */
+    private void validateROIs() {
+        final DetectorManufacturer ccd = getDataObject().getDetectorManufacturer();
+        for (ROIDescription rDesc : _customROITable.getCustomROIs().get()) {
+            if (!rDesc.validate(ccd.getXsize(), ccd.getYsize())) {
+                _setWarning(_w.warningCustomROI, "ROI is not within valid ranges: " + rDesc);
+                return;
+            }
+        }
+        if (_customROITable.getCustomROIs().size() > ccd.getMaxROIs()) {
+            _setWarning(_w.warningCustomROI, "There must not be more than " + ccd.getMaxROIs() + " custom ROIs for this detector");
+        } else if (ccd == DetectorManufacturer.E2V && _customROITable.getCustomROIs().rowOverlap()) {
+            _setWarning(_w.warningCustomROI, "The custom ROIs must not overlap");
+        } else if (ccd == DetectorManufacturer.HAMAMATSU && _customROITable.getCustomROIs().pixelOverlap()) {
+            _setWarning(_w.warningCustomROI, "The custom ROIs must not overlap");
+        } else {
+            _clearWarning(_w.warningCustomROI);
+        }
     }
 
     /**
@@ -1061,34 +1085,32 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
             final boolean isPreimg = _w.preImgCheckButton.isSelected();
             getDataObject().setMosPreimaging(isPreimg ? YesNoType.YES : YesNoType.NO);
         } else if (w == _w.customROINewButton) {
-            if (_customROITable.getCustomROIs().size() >= 5 ||
-                    (!getDataObject().getDetectorManufacturer().equals(GmosCommonType.DetectorManufacturer.HAMAMATSU) &&
-                            _customROITable.getCustomROIs().size() >= 4)) {
+            if (_customROITable.getCustomROIs().size() >= getDataObject().getDetectorManufacturer().getMaxROIs()) {
                 //raise popup and do NOT add a new custom ROI
                 DialogUtil.error("You cannot declare more than 5 custom ROIs for HAMAMATSU CCDs or 4 for E2V CCDs");
             } else {
-                try {
-                    _customROITable.addROI(
-                            _w.xMin.getIntegerValue(1),
-                            _w.yMin.getIntegerValue(1),
-                            _w.xRange.getIntegerValue(1) * getDataObject().getCcdXBinning().getValue(),
-                            _w.yRange.getIntegerValue(1) * getDataObject().getCcdYBinning().getValue());
-                    getDataObject().setCustomROIs(_customROITable.getCustomROIs());
-                } catch (IllegalArgumentException e) {
-                    _setWarning(_w.warningCustomROI, e.getMessage());
-                }
+                _customROITable.addROI(
+                        _w.xMin.getIntegerValue(1),
+                        _w.yMin.getIntegerValue(1),
+                        _w.xRange.getIntegerValue(1) * getDataObject().getCcdXBinning().getValue(),
+                        _w.yRange.getIntegerValue(1) * getDataObject().getCcdYBinning().getValue());
+                getDataObject().setCustomROIs(_customROITable.getCustomROIs());
+                validateROIs();
             }
         } else if (w == _w.customROIPasteButton) {
-            int maxRows = getDataObject().getDetectorManufacturer().equals(GmosCommonType.DetectorManufacturer.HAMAMATSU) ? 5 : 4;
+            int maxRows = getDataObject().getDetectorManufacturer().getMaxROIs();
             if (_customROITable.paste(maxRows)) {
                 getDataObject().setCustomROIs(_customROITable.getCustomROIs());
             }
+            validateROIs();
         } else if (w == _w.customROIRemoveButton) {
             _customROITable.removeSelectedROI();
             getDataObject().setCustomROIs(_customROITable.getCustomROIs());
+            validateROIs();
         } else if (w == _w.customROIRemoveAllButton) {
             _customROITable.removeAllROIs();
             getDataObject().setCustomROIs(_customROITable.getCustomROIs());
+            validateROIs();
         }
     }
 
@@ -1099,7 +1121,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         AbstractAction action = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                int maxRows = getDataObject().getDetectorManufacturer().equals(GmosCommonType.DetectorManufacturer.HAMAMATSU) ? 5 : 4;
+                int maxRows = getDataObject().getDetectorManufacturer().getMaxROIs();
                 _customROITable.paste(maxRows);
             }
         };
@@ -1275,26 +1297,31 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
             final int sel = _customROITable.getSelectedRow();
             if (sel >= 0 && sel < _customROITable.getRowCount()) {
                 //only update if valid
-                _customROITable.deleteWatcher(this);
-                try {
-                    Integer.parseInt(_w.xMin.getValue());
-                    Integer.parseInt(_w.yMin.getValue());
-                    Integer.parseInt(_w.xRange.getValue());
-                    Integer.parseInt(_w.yRange.getValue());
+                if (validateROINumbers()) {
+                    _customROITable.deleteWatcher(this);
                     _customROITable.updateSelectedROI(_w.xMin.getIntegerValue(0),
                             _w.yMin.getIntegerValue(0),
                             _w.xRange.getIntegerValue(0) * getDataObject().getCcdXBinning().getValue(),
                             _w.yRange.getIntegerValue(0) * getDataObject().getCcdYBinning().getValue());
                     getDataObject().setCustomROIs(_customROITable.getCustomROIs());
-                    _clearWarning(_w.warningCustomROI);
-                } catch (NumberFormatException e) {
-                    _setWarning(_w.warningCustomROI, "Cannot parse number, " + e.getMessage());
-                } catch (IllegalArgumentException e) {
-                    _setWarning(_w.warningCustomROI, e.getMessage());
+                    _customROITable.selectRowAt(sel);
+                    _customROITable.addWatcher(this);
+                    validateROIs();
                 }
-                _customROITable.selectRowAt(sel);
-                _customROITable.addWatcher(this);
             }
+        }
+    }
+
+    private boolean validateROINumbers() {
+        try {
+            Integer.parseInt(_w.xMin.getValue());
+            Integer.parseInt(_w.yMin.getValue());
+            Integer.parseInt(_w.xRange.getValue());
+            Integer.parseInt(_w.yRange.getValue());
+            return true;
+        } catch (NumberFormatException e) {
+            _setWarning(_w.warningCustomROI, "Cannot parse number, " + e.getMessage());
+            return false;
         }
     }
 

@@ -1551,26 +1551,33 @@ public final class GmosRule implements IRule {
         private static final String errMsgE2V = "E2V CCDs support up to 4 custom ROIs";
         private static final String errMsgHamamatsu = "Hamamatsu CCDs support up to 5 custom ROIs";
 
-
         @Override
-        public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+        public Problem check(final Config config, final int step, final ObservationElements elems, final Object state) {
+            final InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
             GmosCommonType.DetectorManufacturer dm = getDetectorManufacturer(config);
-            if (dm == null)
+            if (dm == null) {
                 dm = inst.getDetectorManufacturer();
+            }
 
             GmosCommonType.CustomROIList customROIList = inst.getCustomROIs();
-            if (customROIList != null) {
-                if (dm.equals(GmosCommonType.DetectorManufacturer.HAMAMATSU) && customROIList.size() > 5) {
-                    return new Problem(ERROR, PREFIX + "HAMAMATSU_MAX_ROI_RULE", errMsgHamamatsu,
-                            SequenceRule.getInstrumentOrSequenceNode(step, elems));
-                } else if (dm.equals(GmosCommonType.DetectorManufacturer.E2V) &&
-                        customROIList.size() > 4) {
-                    return new Problem(ERROR, PREFIX + "E2V_MAX_ROI_RULE", errMsgE2V,
-                            SequenceRule.getInstrumentOrSequenceNode(step, elems));
+            if (customROIList != null && customROIList.size() > dm.getMaxROIs()) {
+                final String prefix, msg;
+                switch (dm) {
+                    case HAMAMATSU:
+                        prefix = PREFIX + "HAMAMATSU_MAX_ROI_RULE";
+                        msg = errMsgHamamatsu;
+                        break;
+                    case E2V:
+                        prefix = PREFIX + "E2V_MAX_ROI_RULE";
+                        msg = errMsgE2V;
+                        break;
+                    default:
+                        throw new IllegalArgumentException("unknown detector");
                 }
+                return new Problem(ERROR, prefix, msg, SequenceRule.getInstrumentOrSequenceNode(step, elems));
+            } else {
+                return null;
             }
-            return null;
         }
 
         @Override
@@ -1608,21 +1615,50 @@ public final class GmosRule implements IRule {
 
 
         @Override
+        public Problem check(final Config config, final int step, final ObservationElements elems, final Object state) {
+            final InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+            final GmosCommonType.DetectorManufacturer dm = inst.getDetectorManufacturer();
+            final boolean overlaps;
+            switch (dm) {
+                case E2V:
+                    overlaps = inst.getCustomROIs().rowOverlap();
+                    break;
+                case HAMAMATSU:
+                    overlaps = inst.getCustomROIs().pixelOverlap();
+                    break;
+                default:
+                    throw new IllegalArgumentException("unknown detector");
+            }
+            if (overlaps) {
+                return new Problem(ERROR, PREFIX + "ROI_OVERLAP_RULE", errMsg,
+                        SequenceRule.getInstrumentOrSequenceNode(step, elems));
+            } else {
+                return null;
+            }
+        }
+
+        @Override
+        public IConfigMatcher getMatcher() {
+            return IConfigMatcher.ALWAYS;
+        }
+    };
+
+    /**
+     * REL-2057: It is possible to invalidate custom ROIs by changing the detector. This rule detects ROIs that
+     * have been invalidated by doing so.
+     */
+    private static IConfigRule ROI_INVALID_RULE = new IConfigRule() {
+        private static final String errMsg = "One or several custom ROIs are invalid";
+
+        @Override
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
             InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
-            GmosCommonType.DetectorManufacturer dm = inst.getDetectorManufacturer();
-            if (dm.equals(GmosCommonType.DetectorManufacturer.E2V)) {
-                if (inst.getCustomROIs().rowOverlap()) {
-                    return new Problem(ERROR, PREFIX + "ROI_OVERLAP_RULE", errMsg,
-                            SequenceRule.getInstrumentOrSequenceNode(step, elems));
-                }
-            } else {//HAMAMATSU
-                if (inst.getCustomROIs().pixelOverlap()) {
-                    return new Problem(ERROR, PREFIX + "ROI_OVERLAP_RULE", errMsg,
-                            SequenceRule.getInstrumentOrSequenceNode(step, elems));
-                }
+            if (!inst.validateCustomROIs()) {
+                return new Problem(ERROR, PREFIX + "ROI_INVALID_RULE", errMsg,
+                        SequenceRule.getInstrumentOrSequenceNode(step, elems));
+            } else {
+                return null;
             }
-            return null;
         }
 
         @Override
@@ -1760,6 +1796,7 @@ public final class GmosRule implements IRule {
         GMOS_RULES.add(NON_ZERO_EXPOSURE_TIME_RULE);
         GMOS_RULES.add(MAX_ROI_RULE);
         GMOS_RULES.add(ROI_OVERLAP_RULE);
+        GMOS_RULES.add(ROI_INVALID_RULE);
         GMOS_RULES.add(CUSTOM_ROI_NOT_DECLARED_RULE);
         GMOS_RULES.add(IFU_NO_SPATIAL_BINNING_RULE);
         GMOS_RULES.add(NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE);
