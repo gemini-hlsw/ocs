@@ -2,7 +2,7 @@ package edu.gemini.qv.plugin
 
 import java.io.File
 import java.util.logging.Logger
-import javax.swing.BorderFactory
+import javax.swing.{JOptionPane, BorderFactory}
 
 import edu.gemini.qv.plugin.chart.Axis
 import edu.gemini.qv.plugin.chart.Chart.Calculation
@@ -137,7 +137,7 @@ object QvStore extends Publisher {
           tablesMap = tMap
           visChartMap = vcMap
         case Failure(t) =>
-          LOG.warning("Error while loading QV defaults: " + t.getMessage)
+          showError("Error while loading QV defaults: " + t.getMessage);
       }
     }
   }
@@ -150,12 +150,11 @@ object QvStore extends Publisher {
         histogramsMap ++= cMap
         tablesMap ++= tMap
         visChartMap ++= vcMap
+        // make new stuff locally persistent
+        saveDefaults()
       case Failure(t) =>
-        LOG.warning("Error while adding QV defaults: " + t.getMessage)
+        showError("Error while importing QV defaults: " + t.getMessage)
     }
-
-    // make new stuff locally persistent
-    saveDefaults()
   }
 
   def saveDefaults() {
@@ -163,35 +162,39 @@ object QvStore extends Publisher {
       XML.save(QvTool.defaultsFile.getAbsolutePath, FilterXMLFormatter.formatAll)
     } catch {
       case t: Throwable =>
-        LOG.warning("Error while storing QV defaults: " + t.getMessage)
+        showError("Error while storing QV defaults: " + t.getMessage)
     }
+  }
+
+  private def showError(msg: String) {
+    LOG.warning(msg)
+    JOptionPane.showMessageDialog(null, msg, "QV Defaults Error", JOptionPane.ERROR_MESSAGE)
   }
 
   def loadFromFile(file: File) = {
     for {
       xml <- Try(XML.load(file.getAbsolutePath))
       savedFilters <- FilterXMLParser.parseFilters(xml \ "filters" \ "filter")
-      filtersMap <- Try((DefaultFilters ++ savedFilters).map(a => (a.label, a)).toMap)
+      filtersMap = (DefaultFilters ++ savedFilters).map(a => a.label -> a).toMap
       savedAxes <- FilterXMLParser.parseAxes(xml \ "axes" \ "axis")
-      axesMap <- Try((DefaultAxes ++ savedAxes).map(a => (a.label, a)).toMap)
+      axesMap = (DefaultAxes ++ savedAxes).map(a => a.label -> a).toMap.withDefaultValue(Axis.RA1)
       savedCharts <- FilterXMLParser.parseHistograms(xml \ "histograms" \ "histogram", axesMap)
       savedTables <- FilterXMLParser.parseTables(xml \ "tables" \ "table", axesMap)
       savedVisCharts <- FilterXMLParser.parseVisCharts(xml \ "barcharts" \ "barchart", axesMap)
-      chartsMap <- Try((DefaultHistograms ++ savedCharts).map(c => (c.label, c)).toMap)
-      tablesMap <- Try((DefaultTables ++ savedTables).map(t => (t.label, t)).toMap)
-      visChartMap <- Try((DefaultBarCharts ++ savedVisCharts).map(c => (c.label, c)).toMap)
+      chartsMap = (DefaultHistograms ++ savedCharts).map(c => c.label -> c).toMap
+      tablesMap = (DefaultTables ++ savedTables).map(t => t.label -> t).toMap
+      visChartMap = (DefaultBarCharts ++ savedVisCharts).map(c => c.label -> c).toMap
     } yield (filtersMap, axesMap, chartsMap, tablesMap, visChartMap)
   }
 
-  def histogramFromXml(n: Node, axes: Map[String, Axis]): Histogram = {
+  def histogramFromXml(n: Node, axes: Map[String, Axis]): Histogram =
     new Histogram(n \ "label" text, axes(n \ "xAxis" text), axes(n \ "yAxis" text), QvStore.functionsMap(n \ "function" text))
-  }
-  def tableFromXml(n: Node, axes: Map[String, Axis]): Table = {
+
+  def tableFromXml(n: Node, axes: Map[String, Axis]): Table =
     new Table(n \ "label" text, axes(n \ "xAxis" text), axes(n \ "yAxis" text), QvStore.renderersMap(n \ "renderer" text))
-  }
-  def barChartFromXml(n: Node, axes: Map[String, Axis]): BarChart = {
+
+  def barChartFromXml(n: Node, axes: Map[String, Axis]): BarChart =
     new BarChart(n \ "label" text, axes(n \ "yAxis" text), axes(n \ "colorCoding" text))
-  }
 
   trait NamedElement {
     def label: String
@@ -238,6 +241,7 @@ class StoreImporter(parent: Component) extends FileChooser {
     QvStore.publish(QvStore.AxesChanged)
     QvStore.publish(QvStore.ChartsChanged)
     QvStore.publish(QvStore.TablesChanged)
+    QvStore.publish(DataChanged)
   }
 }
 
