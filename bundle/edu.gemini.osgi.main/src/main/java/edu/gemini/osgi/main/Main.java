@@ -37,9 +37,9 @@ public final class Main {
     private static final String NETWORKING_BUG_MESSAGE =
         "Your Mac's host name does not include domain information, which exposes a bug\n" +
         "in the version of Java being used by this application.  Adding <tt>.local</tt>\n" +
-        "to the host name will fix this issue.  See " +
-        "<a href=\"http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/observing-tool/known-bugs\">OT Known Bugs</a> "+
-        "for more information.";
+        "to the host name will fix this issue.  See our " +
+        "<a href=\"http://www.gemini.edu/node/12288\">note about Java 1.7</a> on the\n"+
+        "Gemini website for more information.";
 
     private static void checkLocalHostBug(Logger log) throws Exception {
         final String osname = System.getProperty("os.name");
