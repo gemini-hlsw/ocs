@@ -26,14 +26,6 @@ public final class ImageScaleMenu extends JMenu {
 
         /** Create the zoom in and zoom out menu items **/
         final ButtonGroup group = new ButtonGroup();
-        final ActionListener listener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                final float scale = Float.parseFloat(e.getActionCommand());
-                imageDisplay.setScale(scale);
-                imageDisplay.updateImage();
-            }
-        };
 
         for (ScaleMenuOptions o : ScaleMenuOptions.values()) {
             final JMenu menu = new JMenu(o.i18nName);
@@ -42,8 +34,13 @@ public final class ImageScaleMenu extends JMenu {
                 final Pair<Integer, Integer> rational = o.createRationalScaleForIndex(i);
 
                 final JRadioButtonMenuItem b = new JRadioButtonMenuItem(o.createLabelForIndex(i));
-                b.setActionCommand(Float.toString(scale));
-                b.addActionListener(listener);
+                b.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        imageDisplay.setScale(scale);
+                        imageDisplay.updateImage();
+                    }
+                });
                 group.add(b);
                 menu.add(b);
                 scaleToButton.put(rational, b);
