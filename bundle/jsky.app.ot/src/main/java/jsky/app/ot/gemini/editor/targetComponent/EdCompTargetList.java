@@ -1352,7 +1352,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         TargetSelection.deafTo(getContextTargetObsComp(), selectionListener);
         getDataObject().removePropertyChangeListener(TargetObsComp.TARGET_ENV_PROP, primaryButtonUpdater);
         getDataObject().removePropertyChangeListener(TargetObsComp.TARGET_ENV_PROP, guidingPanelUpdater);
-        //getDataObject().removePropertyChangeListener(TargetObsComp.TARGET_POS_PROP, guidingPanelUpdaterFromPos);
         super.cleanup();
     }
 
@@ -1371,12 +1370,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private final PropertyChangeListener guidingPanelUpdater = new PropertyChangeListener() {
         @Override public void propertyChange(PropertyChangeEvent evt) {
             updateGuiding((TargetEnvironment) evt.getNewValue());
-        }
-    };
-    private final PropertyChangeListener guidingPanelUpdaterFromPos = new PropertyChangeListener() {
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            updateGuiding();
         }
     };
 
@@ -1432,7 +1425,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         getDataObject().addPropertyChangeListener(TargetObsComp.TARGET_ENV_PROP, primaryButtonUpdater);
         getDataObject().addPropertyChangeListener(TargetObsComp.TARGET_ENV_PROP, guidingPanelUpdater);
-        //getDataObject().addPropertyChangeListener(TargetObsComp.TARGET_POS_PROP, guidingPanelUpdaterFromPos);
 
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
         _handleSelectionUpdate(TargetSelection.get(env, node));
