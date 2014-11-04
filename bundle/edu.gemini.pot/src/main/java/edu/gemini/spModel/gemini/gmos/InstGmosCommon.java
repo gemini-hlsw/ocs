@@ -7,7 +7,8 @@ package edu.gemini.spModel.gemini.gmos;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentBroadType;
 import edu.gemini.pot.sp.SPComponentType;
-import edu.gemini.shared.util.immutable.*;
+import edu.gemini.shared.util.immutable.Function1;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.config.injector.ConfigInjector;
 import edu.gemini.spModel.config.injector.ConfigInjectorCalc3;
@@ -1110,13 +1111,17 @@ public abstract class InstGmosCommon<
         return _customROIs;
     }
 
-    public void setCustomROIs(GmosCommonType.CustomROIList customROIs) {
-        for (GmosCommonType.ROIDescription roi : customROIs.get()) {
+    public boolean validateCustomROIs() {
+        for (GmosCommonType.ROIDescription roi : getCustomROIs().get()) {
             if (!roi.validate(getDetectorManufacturer().getXsize(), getDetectorManufacturer().getYsize())) {
-                throw new IllegalArgumentException("ROI is not within valid ranges: " + roi);
+                return false;
             }
         }
-        GmosCommonType.CustomROIList oldValue = _customROIs;
+        return true;
+    }
+
+    public void setCustomROIs(final GmosCommonType.CustomROIList customROIs) {
+        final GmosCommonType.CustomROIList oldValue = _customROIs;
         if (!customROIs.equals(oldValue)) {
             _customROIs = customROIs;
             firePropertyChange(CUSTOM_ROI_PROP.getName(), oldValue, _customROIs);

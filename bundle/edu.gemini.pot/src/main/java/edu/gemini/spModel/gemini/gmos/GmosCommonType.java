@@ -902,8 +902,8 @@ public class GmosCommonType {
     public static final int HAMAMATSU_SHUFFLE_OFFSET = 1392; // pixel
 
     public static enum DetectorManufacturer implements DisplayableSpType, ObsoletableSpType {
-        E2V("E2V", E2V_NORTH_PIXEL_SIZE, E2V_SOUTH_PIXEL_SIZE, E2V_SHUFFLE_OFFSET, 6144, 4608),
-        HAMAMATSU("HAMAMATSU", HAMAMATSU_PIXEL_SIZE, HAMAMATSU_PIXEL_SIZE, HAMAMATSU_SHUFFLE_OFFSET, 6144, 4224);
+        E2V("E2V", E2V_NORTH_PIXEL_SIZE, E2V_SOUTH_PIXEL_SIZE, E2V_SHUFFLE_OFFSET, 6144, 4608, 4),
+        HAMAMATSU("HAMAMATSU", HAMAMATSU_PIXEL_SIZE, HAMAMATSU_PIXEL_SIZE, HAMAMATSU_SHUFFLE_OFFSET, 6144, 4224, 5);
 
         public static final DetectorManufacturer DEFAULT = E2V;
         public static final ItemKey KEY = new ItemKey(INSTRUMENT_KEY, "detectorManufacturer");
@@ -914,15 +914,17 @@ public class GmosCommonType {
         private final int _defaultShuffleOffsetPixel;
         private final int xSize;
         private final int ySize;
+        private final int maxROIs;
 
-        private DetectorManufacturer(String displayValue, double pixelSizeNorth, double pixelSizeSouth,
-                                     int offset, int xSize, int ySize) {
+        private DetectorManufacturer(final String displayValue, final double pixelSizeNorth, final double pixelSizeSouth,
+                                     final int offset, final int xSize, final int ySize, final int maxROIs) {
             this._displayValue = displayValue;
             this._pixelSizeNorth = pixelSizeNorth;
             this._pixelSizeSouth = pixelSizeSouth;
             this._defaultShuffleOffsetPixel = offset;
             this.xSize = xSize;
             this.ySize = ySize;
+            this.maxROIs = maxROIs;
         }
 
         public String displayValue() {
@@ -956,6 +958,11 @@ public class GmosCommonType {
 
         public int getYsize() {
             return ySize;
+        }
+
+        /** Maximum number of "regions of interest". */
+        public int getMaxROIs() {
+            return maxROIs;
         }
 
         public boolean isObsolete() {
