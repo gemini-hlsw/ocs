@@ -40,6 +40,8 @@ import jsky.app.ot.tpe.TpeManager;
 import jsky.catalog.skycat.SkycatCatalog;
 import jsky.navigator.NavigatorManager;
 import jsky.util.gui.*;
+import scala.Option;
+import scala.Some;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -900,7 +902,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
             showPos(_curPos);
         } else if (twe == _customROITable) {
             showROI(_customROITable.getSelectedROI());
-            validateROIs();
         }
     }
 
@@ -1089,17 +1090,16 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
                 //raise popup and do NOT add a new custom ROI
                 DialogUtil.error("You cannot declare more than 5 custom ROIs for HAMAMATSU CCDs or 4 for E2V CCDs");
             } else {
-                _customROITable.addROI(
-                        _w.xMin.getIntegerValue(1),
-                        _w.yMin.getIntegerValue(1),
-                        _w.xRange.getIntegerValue(1) * getDataObject().getCcdXBinning().getValue(),
-                        _w.yRange.getIntegerValue(1) * getDataObject().getCcdYBinning().getValue());
-                getDataObject().setCustomROIs(_customROITable.getCustomROIs());
-                validateROIs();
+                final Option<ROIDescription> r = editedROI();
+                if (r.nonEmpty()) {
+                    _customROITable.addROI(r.get());
+                    getDataObject().setCustomROIs(_customROITable.getCustomROIs());
+                    validateROIs();
+                }
             }
         } else if (w == _w.customROIPasteButton) {
-            int maxRows = getDataObject().getDetectorManufacturer().getMaxROIs();
-            if (_customROITable.paste(maxRows)) {
+            final DetectorManufacturer ccd = getDataObject().getDetectorManufacturer();
+            if (_customROITable.paste(ccd)) {
                 getDataObject().setCustomROIs(_customROITable.getCustomROIs());
             }
             validateROIs();
@@ -1121,8 +1121,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         AbstractAction action = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                int maxRows = getDataObject().getDetectorManufacturer().getMaxROIs();
-                _customROITable.paste(maxRows);
+                _customROITable.paste(getDataObject().getDetectorManufacturer());
             }
         };
         _customROITable.registerKeyboardAction(action, "Paste", stroke, JComponent.WHEN_FOCUSED);
@@ -1296,13 +1295,10 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         } else if (tbwe == _w.xMin || tbwe == _w.yMin || tbwe == _w.xRange || tbwe == _w.yRange) {
             final int sel = _customROITable.getSelectedRow();
             if (sel >= 0 && sel < _customROITable.getRowCount()) {
-                //only update if valid
-                if (validateROINumbers()) {
+                final Option<ROIDescription> newROI = editedROI();
+                if (newROI.nonEmpty()) {
                     _customROITable.deleteWatcher(this);
-                    _customROITable.updateSelectedROI(_w.xMin.getIntegerValue(0),
-                            _w.yMin.getIntegerValue(0),
-                            _w.xRange.getIntegerValue(0) * getDataObject().getCcdXBinning().getValue(),
-                            _w.yRange.getIntegerValue(0) * getDataObject().getCcdYBinning().getValue());
+                    _customROITable.updateSelectedROI(newROI.get());
                     getDataObject().setCustomROIs(_customROITable.getCustomROIs());
                     _customROITable.selectRowAt(sel);
                     _customROITable.addWatcher(this);
@@ -1312,16 +1308,29 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         }
     }
 
-    private boolean validateROINumbers() {
+    /**
+     * Gets a new validated ROI based on the values in the text edit components if those values are valid numbers.
+     * @return a new ROI based on the parsed numbers if the ROI is valid for the current configuration, None otherwise
+     */
+    private Option<ROIDescription> editedROI() {
         try {
-            Integer.parseInt(_w.xMin.getValue());
-            Integer.parseInt(_w.yMin.getValue());
-            Integer.parseInt(_w.xRange.getValue());
-            Integer.parseInt(_w.yRange.getValue());
-            return true;
+            final int x = Integer.parseInt(_w.xMin.getValue());
+            final int y = Integer.parseInt(_w.yMin.getValue());
+            final int w = Integer.parseInt(_w.xRange.getValue()) * getDataObject().getCcdXBinning().getValue();
+            final int h = Integer.parseInt(_w.yRange.getValue()) * getDataObject().getCcdYBinning().getValue();
+
+            final ROIDescription newROI = new ROIDescription(x, y, w, h);
+            final DetectorManufacturer ccd = getDataObject().getDetectorManufacturer();
+            if (newROI.validate(ccd.getXsize(), ccd.getYsize())) {
+                return new Some<>(newROI);
+            } else {
+                _setWarning(_w.warningCustomROI, "ROI is not within valid ranges: " + newROI);
+                return Option.empty();
+            }
+
         } catch (NumberFormatException e) {
             _setWarning(_w.warningCustomROI, "Cannot parse number, " + e.getMessage());
-            return false;
+            return Option.empty();
         }
     }
 

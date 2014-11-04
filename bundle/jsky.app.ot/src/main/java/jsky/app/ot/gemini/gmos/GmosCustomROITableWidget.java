@@ -1,7 +1,6 @@
 package jsky.app.ot.gemini.gmos;
 
 import edu.gemini.spModel.core.Platform;
-import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import jsky.util.gui.DialogUtil;
 import jsky.util.gui.TableWidget;
 
@@ -9,24 +8,25 @@ import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Vector;
+
+import static edu.gemini.spModel.gemini.gmos.GmosCommonType.*;
 
 /**
  * Class GmosCustomROITableWidget
- *
- * @author Nicolas A. Barriga
- *         Date: 4/11/12
  */
 public class GmosCustomROITableWidget extends TableWidget {
-    private GmosCommonType.CustomROIList rois;
-    private GmosCommonType.Binning xBinning = GmosCommonType.Binning.DEFAULT;
-    private GmosCommonType.Binning yBinning = GmosCommonType.Binning.DEFAULT;
+    private CustomROIList rois;
+    private Binning xBinning = Binning.DEFAULT;
+    private Binning yBinning = Binning.DEFAULT;
 
     public GmosCustomROITableWidget() {
-        this.rois = GmosCommonType.CustomROIList.create();
+        this.rois = CustomROIList.create();
     }
 
-    public GmosCommonType.ROIDescription getSelectedROI() {
+    public ROIDescription getSelectedROI() {
         int i = getSelectedRow();
         if (i >= 0 && i < rois.size()) {
             return rois.get(i);
@@ -35,7 +35,7 @@ public class GmosCustomROITableWidget extends TableWidget {
         }
     }
 
-    public void reinit(final GmosCommonType.CustomROIList customROIs, final GmosCommonType.Binning xBinning, final GmosCommonType.Binning yBinning) {
+    public void reinit(final CustomROIList customROIs, final Binning xBinning, final Binning yBinning) {
         rois = customROIs;
         this.xBinning = xBinning;
         this.yBinning = yBinning;
@@ -43,7 +43,7 @@ public class GmosCustomROITableWidget extends TableWidget {
     }
 
     public void removeAllROIs() {
-        rois = GmosCommonType.CustomROIList.create();
+        rois = CustomROIList.create();
         _updateTable();
     }
 
@@ -56,14 +56,12 @@ public class GmosCustomROITableWidget extends TableWidget {
         }
     }
 
-    public void updateSelectedROI(final int xMin, final int yMin, final int xRange, final int yRange) {
-        final GmosCommonType.ROIDescription roi = new GmosCommonType.ROIDescription(xMin, yMin, xRange, yRange);
+    public void updateSelectedROI(final ROIDescription roi) {
         rois = rois.update(getSelectedRow(), roi);
         _updateTable();
     }
 
-    public void addROI(final int xMin, final int yMin, final int xRange, final int yRange) {
-        final GmosCommonType.ROIDescription roi = new GmosCommonType.ROIDescription(xMin, yMin, xRange, yRange);
+    public void addROI(final ROIDescription roi) {
         rois = rois.add(roi);
         _updateTable();
         _selectLastRow();
@@ -87,7 +85,7 @@ public class GmosCustomROITableWidget extends TableWidget {
         }
     }
 
-    private Vector<Integer> _ROIToVector(GmosCommonType.ROIDescription roi) {
+    private Vector<Integer> _ROIToVector(ROIDescription roi) {
         Vector<Integer> v = new Vector<Integer>(4);
         v.addElement(roi.getXStart());
         v.addElement(roi.getYStart());
@@ -96,7 +94,7 @@ public class GmosCustomROITableWidget extends TableWidget {
         return v;
     }
 
-    public GmosCommonType.CustomROIList getCustomROIs() {
+    public CustomROIList getCustomROIs() {
         return rois;
     }
 
@@ -110,28 +108,34 @@ public class GmosCustomROITableWidget extends TableWidget {
      *  2740 2604 250 250
      * </pre>
      *
-     * @param maxRows the max number of rows of data allowed
+     * @param ccd the detector of the current configuration
      * @return true if the table was modified
      */
-    public boolean paste(int maxRows) {
+    public boolean paste(final DetectorManufacturer ccd) {
+
+        // do we have something to paste?
         String s = getClipboardContents();
         if (s.length() == 0) {
-            DialogUtil.error(pasteError(s, maxRows));
+            DialogUtil.error(pasteError(s, ccd.getMaxROIs()));
             return false;
         }
+
+        // do we have less than the maximum number of ROIs to insert?
         String[] lines = s.trim().split("\n");
-        if (lines.length > maxRows) {
+        if (lines.length > ccd.getMaxROIs()) {
             DialogUtil.error("You cannot declare more than 5 custom ROIs for HAMAMATSU CCDs or 4 for E2V CCDs\n"
-                    + pasteError(s, maxRows));
+                    + pasteError(s, ccd.getMaxROIs()));
             return false;
         }
+
+        // can we parse the ROIs?
         int[][] ar = new int[lines.length][4];
         for (int i = 0; i < lines.length; i++) {
             String line = lines[i];
             String[] values = line.trim().split("\\s+");
             if (values.length != 4) {
                 DialogUtil.error("Invalid line: '" + line + "': Expected 4 integers separated by spaces\n"
-                        + pasteError(s, maxRows));
+                        + pasteError(s, ccd.getMaxROIs()));
                 return false;
             }
             for (int j = 0; j < values.length; j++) {
@@ -140,16 +144,50 @@ public class GmosCustomROITableWidget extends TableWidget {
                     ar[i][j] = (Integer.parseInt(value));
                 } catch (NumberFormatException ex) {
                     DialogUtil.error("Invalid value: '" + value + "': Expected an integer\n"
-                            + pasteError(s, maxRows));
+                            + pasteError(s, ccd.getMaxROIs()));
                     return false;
                 }
             }
         }
-        removeAllROIs();
-        for(int[] a : ar) {
-            addROI(a[0], a[1], a[2], a[3]);
+
+        // are the ROIs valid?
+        // if so, insert them otherwise reject them
+        final Collection<ROIDescription> rois = createROIs(ar);
+        final Collection<ROIDescription> invalidROIs = findInvalidROIs(rois, ccd);
+        if (invalidROIs.isEmpty()) {
+            removeAllROIs();
+            for (ROIDescription r : rois) {
+                addROI(r);
+            }
+            return true;
+        } else {
+            final StringBuffer error = new StringBuffer("The following ROIs are invalid for this configuration:\n");
+            for (ROIDescription r : invalidROIs) {
+                error.append("    ");
+                error.append(r.toString());
+                error.append("\n");
+            }
+            DialogUtil.error(error.toString() + pasteError(s, ccd.getMaxROIs()));
+            return false;
         }
-        return true;
+    }
+
+    private Collection<ROIDescription> createROIs(final int[][] ar) {
+        final ArrayList<ROIDescription> rois = new ArrayList<>();
+        for (int[] a : ar) {
+            rois.add(new ROIDescription(a[0], a[1], a[2], a[3]));
+        }
+        return rois;
+    }
+
+    private Collection<ROIDescription> findInvalidROIs(final Collection<ROIDescription> rois, final DetectorManufacturer ccd) {
+        final ArrayList<ROIDescription> invalidROIs = new ArrayList<>();
+        for (ROIDescription r : rois) {
+            if (!r.validate(ccd.getXsize(), ccd.getYsize())) {
+                invalidROIs.add(r);
+            }
+        }
+        return invalidROIs;
     }
 
     private String pasteError(String clipboard, int maxRows) {
