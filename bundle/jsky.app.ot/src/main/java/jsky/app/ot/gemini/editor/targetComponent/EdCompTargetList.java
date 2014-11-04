@@ -115,9 +115,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     // If true, ignore change events for the current position
     private boolean _ignorePosUpdate = false;
 
-    // Set to true if the base position has changed.
-    private boolean _basePosChanged = false;
-
     // Horizons Operations
     private final HashMap<HorizonsAction.Type, HorizonsAction> _horizonsOperations;
 
@@ -1331,13 +1328,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
     /**
-     * Apply any changes made in this editor.
-     */
-    public void afterApply() {
-        _basePosChanged = false;
-    }
-
-    /**
      * Initialize the editor with the given science program root
      * and node.
      */
@@ -1362,6 +1352,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         TargetSelection.deafTo(getContextTargetObsComp(), selectionListener);
         getDataObject().removePropertyChangeListener(TargetObsComp.TARGET_ENV_PROP, primaryButtonUpdater);
         getDataObject().removePropertyChangeListener(TargetObsComp.TARGET_ENV_PROP, guidingPanelUpdater);
+        //getDataObject().removePropertyChangeListener(TargetObsComp.TARGET_POS_PROP, guidingPanelUpdaterFromPos);
         super.cleanup();
     }
 
@@ -1380,6 +1371,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private final PropertyChangeListener guidingPanelUpdater = new PropertyChangeListener() {
         @Override public void propertyChange(PropertyChangeEvent evt) {
             updateGuiding((TargetEnvironment) evt.getNewValue());
+        }
+    };
+    private final PropertyChangeListener guidingPanelUpdaterFromPos = new PropertyChangeListener() {
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            updateGuiding();
         }
     };
 
@@ -1435,6 +1432,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         getDataObject().addPropertyChangeListener(TargetObsComp.TARGET_ENV_PROP, primaryButtonUpdater);
         getDataObject().addPropertyChangeListener(TargetObsComp.TARGET_ENV_PROP, guidingPanelUpdater);
+        //getDataObject().addPropertyChangeListener(TargetObsComp.TARGET_POS_PROP, guidingPanelUpdaterFromPos);
 
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
         _handleSelectionUpdate(TargetSelection.get(env, node));
@@ -1723,11 +1721,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             _ignorePosUpdate = true;
             try {
                 _curPos.setXYFromString(ra, dec);
-                _basePosChanged = (getDataObject().getBase() == _curPos);
             } finally {
                 _ignorePosUpdate = false;
             }
-
+            updateGuiding();
         }
     }
 
@@ -1739,11 +1736,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _ignorePosUpdate = true;
         try {
             _nonSiderealTargetSup.setConicPos(target, nbw);
-            _basePosChanged = getDataObject().getBase() == _curPos;
         } finally {
             _ignorePosUpdate = false;
         }
         _setCurPos(); // XXX not needed, except that this will cause an event to be fired
+        updateGuiding();
     }
 
 
@@ -2201,11 +2198,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         try {
                             _curPos.setXYFromString(coords.getRA().toString(),
                                     coords.getDec().toString());
-                            _basePosChanged = getDataObject().getBase() == _curPos;
                         } finally {
                             _ignorePosUpdate = false;
                         }
                         target.setDateForPosition(entry.getDate());
+                        updateGuiding();
                     }
 
                     // TPE REFACTOR -- what is this?
