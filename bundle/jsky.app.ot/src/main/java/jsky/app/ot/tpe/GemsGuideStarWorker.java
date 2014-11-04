@@ -178,7 +178,11 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
             for (GemsGuideStars gemsGuideStars : selectedAsterisms) {
                 if (i++ == 0) {
                     // Set position angle only for first (primary) group
-                    tpe.getInstObsComp().setPosAngleDegrees(gemsGuideStars.getPa().toDegrees().getMagnitude());
+                    final SPInstObsComp inst = ctx.instrument().orNull();
+                    if (inst != null) {
+                        inst.setPosAngle(gemsGuideStars.getPa().toDegrees().getMagnitude());
+                        ctx.instrument().commit();
+                    }
                 }
                 guideGroupList.add(gemsGuideStars.getGuideGroup());
             }
