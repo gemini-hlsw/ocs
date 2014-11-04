@@ -68,7 +68,9 @@ object SpProgramFactory {
     if (pmode == QUEUE) {
       // TODO: use TooTypeSetter
       prog.setTooType(too(proposal))
-      band(proposal) foreach { b => prog.setQueueBand(b.toString) }
+      // REL-2079 Set default to 1
+      val b = band(proposal).getOrElse(1)
+      prog.setQueueBand(b.toString)
     }
     prog.setRolloverStatus(isRollover(proposal))
     prog.setThesis(isThesis(proposal))
