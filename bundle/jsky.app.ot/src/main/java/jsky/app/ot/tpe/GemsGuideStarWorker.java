@@ -173,7 +173,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         TargetObsComp targetObsComp = ctx.targets().orNull();
         if (targetObsComp != null) {
             TargetEnvironment env = targetObsComp.getTargetEnvironment();
-            List<GuideGroup> guideGroupList = new ArrayList<GuideGroup>();
+            List<GuideGroup> guideGroupList = new ArrayList<>();
             int i = 0;
             for (GemsGuideStars gemsGuideStars : selectedAsterisms) {
                 if (i++ == 0) {
@@ -220,7 +220,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
      * @param obsContext used to getthe current pos angle
      */
     private Set<Angle> getPosAngles(ObsContext obsContext) {
-        Set<Angle> posAngles = new HashSet<Angle>();
+        Set<Angle> posAngles = new HashSet<>();
         posAngles.add(obsContext.getPositionAngle());
         posAngles.add(new Angle(0., Angle.Unit.DEGREES));
         posAngles.add(new Angle(90., Angle.Unit.DEGREES));
@@ -331,7 +331,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
             return gemsGuideStarsList;
         }
         Angle angle = gemsGuideStarsList.get(0).getPa();
-        List<GemsGuideStars> result = new ArrayList<GemsGuideStars>(gemsGuideStarsList.size());
+        List<GemsGuideStars> result = new ArrayList<>(gemsGuideStarsList.size());
         for (GemsGuideStars gemsGuideStars : gemsGuideStarsList) {
             if (angle.equals(gemsGuideStars.getPa())) {
                 result.add(gemsGuideStars);
@@ -343,7 +343,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
 
     // Checks that the results are valid: There must be at least 1 valid tiptilt and flexure star each
     private void checkResults(List<GemsCatalogSearchResults> results) {
-        Map<String, Boolean> keyMap = new HashMap<String, Boolean>();
+        Map<String, Boolean> keyMap = new HashMap<>();
         for (GemsCatalogSearchResults searchResults : results) {
             String key = searchResults.getCriterion().getKey().getGroup().getKey();
             if (searchResults.getResults().size() != 0) {
