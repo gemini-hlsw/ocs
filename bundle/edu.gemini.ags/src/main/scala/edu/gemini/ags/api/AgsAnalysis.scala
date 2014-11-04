@@ -62,7 +62,7 @@ object AgsAnalysis {
     override val message = s"No ${guideGroup.getKey} guide star selected."
   }
 
-  case class MagnitudeTooDim(guideProbe: GuideProbe, target: SPTarget) extends AgsAnalysisWithGuideProbe {
+  case class MagnitudeTooFaint(guideProbe: GuideProbe, target: SPTarget) extends AgsAnalysisWithGuideProbe {
     override val message = "Cannot guide with the star in these conditions, even using the slowest guide speed."
   }
 
@@ -131,12 +131,12 @@ object AgsAnalysis {
       val faintnessLimit  = magCalc(conds, SLOW).getFaintnessLimit.getBrightness
       val saturated       = saturationLimit.fold(false)(_.getBrightness > mag.getBrightness)
 
-      def almostTooDim: Boolean = !saturated && mag.getBrightness <= faintnessLimit + adj
-      def tooDim:       Boolean = mag.getBrightness > faintnessLimit + adj
+      def almostTooFaint: Boolean = !saturated && mag.getBrightness <= faintnessLimit + adj
+      def tooFaint:       Boolean = mag.getBrightness > faintnessLimit + adj
 
-      if (almostTooDim)         Usable(guideProbe, guideStar, SLOW, PossiblyUnusable)
-      else if (tooDim)          MagnitudeTooDim(guideProbe, guideStar)
-      else                      MagnitudeTooBright(guideProbe, guideStar)
+      if (almostTooFaint) Usable(guideProbe, guideStar, SLOW, PossiblyUnusable)
+      else if (tooFaint)  MagnitudeTooFaint(guideProbe, guideStar)
+      else                MagnitudeTooBright(guideProbe, guideStar)
     }
 
     // Called when we know that a valid guide speed can be chosen for the given guide star.
