@@ -129,7 +129,7 @@ object AgsAnalysis {
       val adj             = 0.5
       val saturationLimit = magCalc(conds, FAST).getSaturationLimit.asScalaOpt
       val faintnessLimit  = magCalc(conds, SLOW).getFaintnessLimit.getBrightness
-      val saturated       = saturationLimit.fold(false)(_.getBrightness > mag.getBrightness)
+      val saturated       = saturationLimit.exists(_.getBrightness > mag.getBrightness)
 
       def almostTooFaint: Boolean = !saturated && mag.getBrightness <= faintnessLimit + adj
       def tooFaint:       Boolean = mag.getBrightness > faintnessLimit + adj
