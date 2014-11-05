@@ -13,6 +13,8 @@ import edu.gemini.spModel.target.system._
 import edu.gemini.spModel.template.TemplateParameters
 
 import javax.swing.BorderFactory
+import javax.swing.event.{DocumentEvent, DocumentListener}
+import javax.swing.text.Document
 
 import scala.collection.JavaConverters._
 import scala.swing.ScrollPane.BarPolicy
@@ -127,7 +129,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
     // Write the currently displayed value back into TemplateParameters and then
     // update the shells with the new TemplateParameters.
     def writeThrough(): Unit =
-      displayedValue.fold(reinit()) { a =>
+      displayedValue.foreach { a =>
         if (common(load)(get).forall(_ != a)) store { set(_, a) }
       }
   }
@@ -138,17 +140,40 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       val get: TemplateParameters => A,
       val set: (TemplateParameters, A) => TemplateParameters) extends TextField(cols) with BoundWidget[A] {
 
-    def displayedValue: Option[A] = \/.fromTryCatch(read(text)).toOption
+    private def doc: Document   = peer.getDocument
+    private def readDoc: String = doc.getText(0, doc.getLength)
 
-    val reaction: Reactions.Reaction = { case EditDone(_) => writeThrough() }
+    private val docListener = new DocumentListener {
+      override def insertUpdate(e: DocumentEvent): Unit  = changedUpdate(e)
+      override def removeUpdate(e: DocumentEvent): Unit  = changedUpdate(e)
+      override def changedUpdate(e: DocumentEvent): Unit = writeThrough()
+    }
+
+    private def listenToDoc(): Unit = doc.addDocumentListener(docListener)
+    private def deafToDoc(): Unit   = doc.removeDocumentListener(docListener)
+
+    def displayedValue: Option[A] = \/.fromTryCatch(read(readDoc)).toOption
+
+    private def showCommonValue(ps: Iterable[TemplateParameters]): Unit = {
+      deafToDoc()
+      text = common(ps)(get).fold("") { show }
+      listenToDoc()
+      caret.position = 0
+    }
 
     def init(ps: Iterable[TemplateParameters]): Unit = {
-      reactions -= reaction
-      text = common(ps)(get).fold("") { show }
-      reactions += reaction
+      showCommonValue(ps)
       updateEnabledState()
     }
 
+    // Watch the underlying doc (as opposed to the EditDone event) to record
+    // updates as they happen as in the rest of the OT and to not try to record
+    // any updates _unless_ they happen.
+    listenToDoc()
+
+    // Watch for EditDone just to show the common value properly formatted when
+    // editing finishes.
+    reactions += { case EditDone(_) => showCommonValue(load) }
     listenTo(this)
   }
 
@@ -251,7 +276,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       def pmField(getPM: SPTarget => String, setPM: (SPTarget, String) => Unit): BoundTextField[Double] =
         new BoundTextField[Double](10)(
           read = _.toDouble,
-          show = _.toString,
+          show = d => f"$d%.3f",
           get  = tp => getPM(tp.getTarget).toDouble,
           set  = (tp, pm) => {
             val newTarget = tp.getTarget
@@ -304,9 +329,9 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
 
         def includeBand: Boolean = shells.size > 0 && magCheck.selected
 
-        val magValue = new BoundTextField[Double](4)(
+        val magValue = new BoundTextField[Double](5)(
           read = _.toDouble,
-          show = _.toString,
+          show = d => f"$d%.3f",
           get  = magOrZero(_).getBrightness,
           set  = setMag((m, b) => new Magnitude(band, b, m.getSystem))
         ) {
