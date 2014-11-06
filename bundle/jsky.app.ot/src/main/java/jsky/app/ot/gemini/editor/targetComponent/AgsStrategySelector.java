@@ -31,7 +31,7 @@ public final class AgsStrategySelector implements ActionListener {
     private final List<AgsSelectionUi> selectionViews;
 
     public AgsStrategySelector() {
-        selectionViews = new ArrayList<AgsSelectionUi>();
+        selectionViews = new ArrayList<>();
     }
 
     public void init(ISPObservation obs) {
@@ -110,15 +110,15 @@ public final class AgsStrategySelector implements ActionListener {
     }
 
     private static <T> Option<T> toJavaOption(scala.Option<T> optT) {
-        return optT.isDefined() ? new Some<T>(optT.get()) : None.<T>instance();
+        return optT.isDefined() ? new Some<>(optT.get()) : None.<T>instance();
     }
 
     public static Option<AgsStrategy> getSelectedOrDefault(ObsContext ctx) {
         final Option<AgsStrategyKey> sel = ctx.getSelectedAgsStrategy();
         if (sel.isEmpty()) {
-            return AgsStrategySelector.<AgsStrategy>toJavaOption(AgsRegistrar.defaultStrategy(ctx));
+            return AgsStrategySelector.toJavaOption(AgsRegistrar.defaultStrategy(ctx));
         } else {
-            return AgsStrategySelector.<AgsStrategy>toJavaOption(AgsRegistrar.lookup(sel.getValue()));
+            return AgsStrategySelector.toJavaOption(AgsRegistrar.lookup(sel.getValue()));
         }
     }
 
@@ -151,24 +151,8 @@ public final class AgsStrategySelector implements ActionListener {
      * @return
      */
     private static String createToolTipText(ObsContext ctx, AgsStrategy strategy) {
-        if (ctx == null) return "Cannot perform an AGS search for this observation";
-
-        // Get the query constraint from the Ags.Strategy. This returns a list of such constraints: we assume right
-        // now that there is exactly one, which contains the magnitude limits and the radius limits.
-        /*
-        final StringBuilder sb = new StringBuilder();
-        QueryConstraint queryConstraint = strategy.queryConstraints(ctx).get(0);
-        MagnitudeLimits magnitudeLimits = queryConstraint.magnitudeLimits;
-        RadiusLimits radiusLimits = queryConstraint.radiusLimits;
-
-        sb.append(magnitudeLimits.toString());
-        sb.append("; ");
-        sb.append(String.format("%.2f'", radiusLimits.getMinLimit().toArcmins().getMagnitude()));
-        sb.append(" - ");
-        sb.append(String.format("%.2f'", radiusLimits.getMaxLimit().toArcmins().getMagnitude()));
-        return sb.toString();
-        */
-        return "Perform AGS search for " + strategy.key().displayName();
+        return (ctx == null) ? "Cannot perform an AGS search for this observation"
+                             : "Perform AGS search for " + strategy.key().displayName();
     }
 
     private static final Comparator<AgsStrategy> DISPLAY_NAME_COMPARATOR = new Comparator<AgsStrategy>() {
@@ -202,7 +186,7 @@ public final class AgsStrategySelector implements ActionListener {
             setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
             this.label = new JLabel("Auto GS Options");
             this.buttonGroup = new ButtonGroup();
-            this.buttons = new ArrayList<Tuple2<JRadioButton, AgsStrategy>>();
+            this.buttons = new ArrayList<>();
             AgsStrategySelector.this.addView(this);
         }
 
@@ -230,7 +214,7 @@ public final class AgsStrategySelector implements ActionListener {
         public Option<AgsStrategy> getSelectedAgsStrategy() {
             for (Tuple2<JRadioButton, AgsStrategy> button : buttons) {
                 if (button._1().isSelected()) {
-                    return new Some<AgsStrategy>(button._2());
+                    return new Some<>(button._2());
                 }
             }
             return None.instance();
@@ -260,7 +244,7 @@ public final class AgsStrategySelector implements ActionListener {
                       !selectedStrategy.isEmpty() && selectedStrategy.getValue().equals(strategy)
                     );
 
-                    return new Pair<JRadioButton, AgsStrategy>(button,strategy);
+                    return new Pair<>(button,strategy);
                 }
             }).toList();
         }
@@ -272,7 +256,7 @@ public final class AgsStrategySelector implements ActionListener {
         }
     }
 
-    final class ComboBox extends JComboBox<String> implements AgsSelectionEditor, ActionListener {
+    final class ComboBox extends JComboBox<AgsStrategy> implements AgsSelectionEditor, ActionListener {
         public ComboBox() {
             AgsStrategySelector.this.addView(this);
 
@@ -299,7 +283,7 @@ public final class AgsStrategySelector implements ActionListener {
             setToolTipText("");
             removeAllItems();
 
-            final DefaultComboBoxModel cbm = new DefaultComboBoxModel(new Vector<AgsStrategy>(getSortedAgsStrategies(options).toList()));
+            final DefaultComboBoxModel<AgsStrategy> cbm = new DefaultComboBoxModel<>(new Vector<>(getSortedAgsStrategies(options).toList()));
             selectedStrategy.foreach(new ApplyOp<AgsStrategy>() {
                 @Override public void apply(AgsStrategy strategy) {
                     cbm.setSelectedItem(strategy);
