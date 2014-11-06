@@ -53,8 +53,8 @@ public enum GuideProbeUtil {
      *         this observation
      */
     public Set<GuideProbe> getAvailableGuiders(ISPObservation obs) {
-        List<ISPObsComponent> obsComponents = obs.getObsComponents();
-        List<AbstractDataObject> dataObjs = new ArrayList<AbstractDataObject>(obsComponents.size());
+        final List<ISPObsComponent> obsComponents = obs.getObsComponents();
+        final List<AbstractDataObject> dataObjs = new ArrayList<>(obsComponents.size());
         for (ISPObsComponent obsComp : obsComponents) {
             dataObjs.add((AbstractDataObject) obsComp.getDataObject());
         }
@@ -62,8 +62,8 @@ public enum GuideProbeUtil {
     }
 
     public Set<GuideProbe> getAvailableGuiders(Collection<? extends ISPDataObject> dataObjects) {
-        Set<GuideProbe> res = new HashSet<GuideProbe>();
-        Set<GuideProbe> anti = new HashSet<GuideProbe>();
+        final Set<GuideProbe> res = new HashSet<>();
+        final Set<GuideProbe> anti = new HashSet<>();
 
         for (ISPDataObject dataObj : dataObjects) {
             if (dataObj instanceof GuideProbeProvider) {
@@ -84,8 +84,8 @@ public enum GuideProbeUtil {
     }
 
     public boolean validate(SkyObject guideStar, PatrolField correctedPatrolField, ObsContext ctx) {
-        HmsDegCoordinates coords = guideStar.getCoordinates().toHmsDeg(0);
-        Coordinates c = new Coordinates(coords.getRa(), coords.getDec());
+        final HmsDegCoordinates coords = guideStar.getCoordinates().toHmsDeg(0);
+        final Coordinates c = new Coordinates(coords.getRa(), coords.getDec());
         return validate(c, correctedPatrolField, ctx);
     }
 
@@ -94,19 +94,19 @@ public enum GuideProbeUtil {
         final Set<Offset> sciencePositions = ctx.getSciencePositions();
         final Coordinates baseCoordinates = ctx.getBaseCoordinates();
 
-        BoundaryPosition bp = correctedPatrolField.checkBoundaries(coords, baseCoordinates, positionAngle, sciencePositions);
+        final BoundaryPosition bp = correctedPatrolField.checkBoundaries(coords, baseCoordinates, positionAngle, sciencePositions);
         return !(bp == BoundaryPosition.outside || bp == BoundaryPosition.outerBoundary);
     }
 
     public boolean inRange(GuideProbe guideProbe, ObsContext ctx, Offset offset) {
         // get primary guide star
-        Option<GuideProbeTargets> gptOpt = ctx.getTargets().getPrimaryGuideProbeTargets(guideProbe);
+        final Option<GuideProbeTargets> gptOpt = ctx.getTargets().getPrimaryGuideProbeTargets(guideProbe);
         if (gptOpt.isEmpty()) return false;
-        GuideProbeTargets gpt = gptOpt.getValue();
+        final GuideProbeTargets gpt = gptOpt.getValue();
 
-        Option<SPTarget> guideStarOpt = gpt.getPrimary();
+        final Option<SPTarget> guideStarOpt = gpt.getPrimary();
         if (guideStarOpt.isEmpty()) return false;
-        SPTarget guideStar = guideStarOpt.getValue();
+        final SPTarget guideStar = guideStarOpt.getValue();
 
         return inRange(guideStar, guideProbe.getCorrectedPatrolField(ctx), ctx, offset);
     }
