@@ -54,6 +54,12 @@ public interface Option<T> extends Iterable<T>, Serializable {
     boolean isEmpty();
 
     /**
+     * @return <code>true</code> if this is a {@link Some}, <code>false</code>
+     * otherwise
+     */
+    boolean isDefined();
+
+    /**
      * @return an {@link ImList} from the contained value (if there is one),
      * otherwise an empty list
      */
