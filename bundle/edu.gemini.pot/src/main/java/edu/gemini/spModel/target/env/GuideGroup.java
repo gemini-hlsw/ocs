@@ -335,6 +335,18 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
     }
 
     /**
+     * Gets the subset of referenced guiders that actually have an associated
+     * selected target.
+     */
+    public SortedSet<GuideProbe> getPrimaryReferencedGuiders() {
+        return toSet(guideTargets.filter(new PredicateOp<GuideProbeTargets>() {
+            @Override public Boolean apply(GuideProbeTargets gpt) {
+                return gpt.getPrimary().isDefined();
+            }
+        }).map(GuideProbeTargets.EXTRACT_PROBE));
+    }
+
+    /**
      * Gets all the {@link GuideProbe guiders} associated with the given type
      * that are used in this group (if any).
      *

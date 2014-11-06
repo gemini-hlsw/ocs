@@ -123,6 +123,18 @@ public final class GuideEnvironment implements Serializable, TargetContainer, Op
         return res;
     }
 
+    /**
+     * Gets the subset of referenced guiders that are actually selected, if any.
+     */
+    public SortedSet<GuideProbe> getPrimaryReferencedGuiders() {
+        return guideGroups.getPrimary().map(new MapOp<GuideGroup, SortedSet<GuideProbe>>() {
+            @Override
+            public SortedSet<GuideProbe> apply(GuideGroup group) {
+                return group.getPrimaryReferencedGuiders();
+            }
+        }).getOrElse(new TreeSet<GuideProbe>());
+    }
+
     @Override
     public ImList<SPTarget> getTargets() {
         return guideGroups.getOptions().flatMap(TargetContainer.EXTRACT_TARGET);
