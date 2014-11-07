@@ -49,25 +49,25 @@ public enum Inst {
 
     // Note: alphabetical order: REL-293
 
-    ACQUISITION_CAMERA(InstAcqCam.SP_TYPE, true, true, true, false),
+    ACQUISITION_CAMERA(InstAcqCam.SP_TYPE, true, true, true),
 
     // REL-293: Combine Altair component and AOWFS to one item with NGS and LGS children
     // (AOWFS child is needed as well, but is hidden)
     ALTAIR(InstAltair.SP_TYPE, true, false, true,
             AltairParams.GuideStarType.values(),
             arrayOf(AltairParams.GuideStarType.NGS),
-            arrayOf(AltairAowfsGuider.instance), true),
+            arrayOf(AltairAowfsGuider.instance)),
 
     // Not currently in use
-    BHROS(InstBHROS.SP_TYPE, false, false, false, false),
+    BHROS(InstBHROS.SP_TYPE, false, false, false),
 
     CANOPUS(SPComponentType.QPT_CANOPUS, // new SPInstComponentType(SPInstComponentType.INST_BROAD_TYPE, "Canopus", "Canopus"),
-            false, true, true, Canopus.Wfs.values(), Canopus.Wfs.values(), true),
+            false, true, true, Canopus.Wfs.values(), Canopus.Wfs.values()),
 
     FLAMINGOS2(Flamingos2.SP_TYPE, false, true, false,
             join(Flamingos2.FPUnit.values(), new Enum[]{Flamingos2OiwfsGuideProbe.instance}),
             join(arrayOf(Flamingos2.FPUnit.FPU_NONE, Flamingos2.FPUnit.CUSTOM_MASK), new Enum[]{Flamingos2OiwfsGuideProbe.instance}),
-            join(Flamingos2.Disperser.values(), Flamingos2.Filter.values(), PreImagingType.values()), false),
+            join(Flamingos2.Disperser.values(), Flamingos2.Filter.values(), PreImagingType.values())),
 
     GMOS_NORTH(InstGmosNorth.SP_TYPE, true, false, true,
             join(FPUnitNorth.values(),
@@ -79,8 +79,7 @@ public enum Inst {
                     FilterNorth.values(),
                     new Enum[]{GmosCommonType.DetectorManufacturer.E2V},
                     new Enum[]{GmosOiwfsGuideProbe.instance}),
-            join(GmosCommonType.UseNS.values(), PreImagingType.values()),
-            false),
+            join(GmosCommonType.UseNS.values(), PreImagingType.values())),
 
     GMOS_SOUTH(InstGmosSouth.SP_TYPE, false, true, true,
             join(FPUnitSouth.values(),
@@ -92,63 +91,55 @@ public enum Inst {
                     FilterSouth.values(),
                     new Enum[]{GmosCommonType.DetectorManufacturer.E2V},
                     new Enum[]{GmosOiwfsGuideProbe.instance}),
-            join(GmosCommonType.UseNS.values(), PreImagingType.values()),
-            false),
+             join(GmosCommonType.UseNS.values(), PreImagingType.values())),
 
 
     GNIRS(InstGNIRS.SP_TYPE, true, false, false,
             join(GNIRSParams.Disperser.values(), GNIRSParams.SlitWidth.values(), new Enum[]{GnirsOiwfsGuideProbe.instance}),
             join(GNIRSParams.Disperser.values(), GNIRSParams.SlitWidth.values(), new Enum[]{GnirsOiwfsGuideProbe.instance}),
-            join(GNIRSParams.CrossDispersed.values(), GNIRSParams.Filter.values(), GNIRSParams.Camera.values()),
-            false),
+            join(GNIRSParams.CrossDispersed.values(), GNIRSParams.Filter.values(), GNIRSParams.Camera.values())),
 
     GPI(Gpi.SP_TYPE, false, true, false,
             new Enum[0],
             new Enum[0],
-            join(Gpi.Disperser.values(), Gpi.Filter.values()),
-            false),
+            join(Gpi.Disperser.values(), Gpi.Filter.values())),
 
     GSAOI(Gsaoi.SP_TYPE, false, true, true,
-            GsaoiOdgw.values(), GsaoiOdgw.values(), Gsaoi.Filter.values(),
-            true),
+            GsaoiOdgw.values(), GsaoiOdgw.values(), Gsaoi.Filter.values()),
 
-    MICHELLE(InstMichelle.SP_TYPE, true, false, false, false),
+    MICHELLE(InstMichelle.SP_TYPE, true, false, false),
 
     NICI(InstNICI.SP_TYPE, false, true, false,
             new Enum[]{NiciOiwfsGuideProbe.instance},
             new Enum[]{NiciOiwfsGuideProbe.instance},
-            join(NICIParams.FocalPlaneMask.values(), NICIParams.DichroicWheel.values(), NICIParams.Channel1FW.values(), NICIParams.Channel2FW.values()),
-            false),
+            join(NICIParams.FocalPlaneMask.values(), NICIParams.DichroicWheel.values(), NICIParams.Channel1FW.values(), NICIParams.Channel2FW.values())),
 
     NIFS(InstNIFS.SP_TYPE, true, false, false,
             new Enum[]{NifsOiwfsGuideProbe.instance},
             new Enum[]{NifsOiwfsGuideProbe.instance},
-            join(NIFSParams.Disperser.values(), NIFSParams.Filter.values(), NIFSParams.Mask.values()),
-            false),
+            join(NIFSParams.Disperser.values(), NIFSParams.Filter.values(), NIFSParams.Mask.values())),
 
     NIRI(InstNIRI.SP_TYPE, true, false, false,
             join(new Enum[]{NiriOiwfsGuideProbe.instance}, Niri.Filter.values()),
             join(new Enum[]{NiriOiwfsGuideProbe.instance}),
-            join(Niri.Mask.values(), Niri.Disperser.values(), Niri.Camera.values()),
-            false),
+            join(Niri.Mask.values(), Niri.Disperser.values(), Niri.Camera.values())),
 
     // Not currently in use
-    PHOENIX(InstPhoenix.SP_TYPE, false, false, false, false),
+    PHOENIX(InstPhoenix.SP_TYPE, false, false, false),
 
     PWFS(SPComponentType.QPT_PWFS, // new SPInstComponentType(SPInstComponentType.INST_BROAD_TYPE, "PWFS", "PWFS"),
-            true, true, true, PwfsGuideProbe.values(), PwfsGuideProbe.values(), true),
+            true, true, true, PwfsGuideProbe.values(), PwfsGuideProbe.values()),
 
     // Not currently in use
     TEXES(InstTexes.SP_TYPE, false, false, false,
-            new Enum[0], new Enum[0], TexesParams.Disperser.values(), false),
+            new Enum[0], new Enum[0], TexesParams.Disperser.values()),
 
     TRECS(InstTReCS.SP_TYPE, false, true, false,
-            join(TReCSParams.Disperser.values(), TReCSParams.Mask.values()),
-            join(TReCSParams.Disperser.values(), TReCSParams.Mask.values()),
-            false),
+        join(TReCSParams.Disperser.values(), TReCSParams.Mask.values()),
+        join(TReCSParams.Disperser.values(), TReCSParams.Mask.values())),
 
 
-    VISITOR(SPComponentType.INSTRUMENT_VISITOR, true, true, false, false)
+    VISITOR(SPComponentType.INSTRUMENT_VISITOR, true, true, false)
     ;
 
     // Some instruments have different categories of options. This map allows
@@ -194,20 +185,17 @@ public enum Inst {
     private final Enum[] options, normallyAvailableOptions, hiddenOptions;
     private final GuideProbe guideProbe;
 
-    // Does this instrument exist independently of its options?
-    private final boolean isDependentOnChildren;
-
-    Inst(SPComponentType spType, boolean north, boolean south, boolean normallyAvailable, boolean isDependentOnChildren) {
-        this(spType, north, south, normallyAvailable, new Enum[0], new Enum[0], isDependentOnChildren);
+    Inst(SPComponentType spType, boolean north, boolean south, boolean normallyAvailable) {
+        this(spType, north, south, normallyAvailable, new Enum[0], new Enum[0]);
     }
 
     Inst(SPComponentType spType, boolean north, boolean south, boolean normallyAvailable,
-         Enum[] options, Enum[] normallyAvailableOptions, boolean isDependentOnChildren) {
-        this(spType, north, south, normallyAvailable, options, normallyAvailableOptions, new Enum[0], isDependentOnChildren);
-    }
+         Enum[] options, Enum[] normallyAvailableOptions) {
+        this(spType, north, south, normallyAvailable, options, normallyAvailableOptions, new Enum[0]);
+    };
 
     Inst(SPComponentType spType, boolean north, boolean south, boolean normallyAvailable,
-         Enum[] options, Enum[] normallyAvailableOptions, Enum[] hiddenOptions, boolean isDependentOnChildren) {
+         Enum[] options, Enum[] normallyAvailableOptions, Enum[] hiddenOptions) {
 
         assert spType != null;
 
@@ -219,7 +207,6 @@ public enum Inst {
         this.normallyAvailableOptions = normallyAvailableOptions;
         this.hiddenOptions = hiddenOptions;
         this.guideProbe = null;
-        this.isDependentOnChildren = isDependentOnChildren;
     }
 
     public boolean isNormallyAvailable() {
@@ -264,15 +251,6 @@ public enum Inst {
      */
     public Enum[] getHiddenOptions() {
         return hiddenOptions;
-    }
-
-    /**
-     * Does this instrument exist independently of its children? For example, PWFS is not actually an independent
-     * instrument, but GMOS exists independently of its filters.
-     * @return
-     */
-    public boolean getDependentOnChildren() {
-        return isDependentOnChildren;
     }
 
     public static String getCategory(Enum e) {
@@ -320,4 +298,5 @@ public enum Inst {
         }
         return super.toString(); // should not happen
     }
+
 }

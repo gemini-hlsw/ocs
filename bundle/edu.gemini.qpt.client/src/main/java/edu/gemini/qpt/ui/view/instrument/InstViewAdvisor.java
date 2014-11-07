@@ -91,7 +91,7 @@ public class InstViewAdvisor implements IViewAdvisor, PropertyChangeListener {
 		for (final Inst i: Inst.values()) {
 			if (!i.existsAtSite(sched.getSite())) continue;
 
-			OutlineNode inode = new OutlineNode(i, i.getDependentOnChildren());
+			OutlineNode inode = new OutlineNode(i);
 			inode.setSelected(sched.hasFacility(i.getValue()));
 			root.add(inode);
 
