@@ -13,18 +13,35 @@ import scala.util.Try
  * A ComboBox where items can be marked as enabled or disabled.
  * Disabled items appear grayed out and cannot be selected.
  */
-class EnableDisableComboBox[E <: Object : ClassTag](options: List[E]) extends ComboBox[E](Nil) {
-  private var enabledItems = scala.collection.mutable.Set[E](options: _*)
+class EnableDisableComboBox[E <: Object : ClassTag](initialItems: List[E]) extends ComboBox[E](Nil) {
+  private var items        = initialItems
+  private var enabledItems = scala.collection.mutable.Set[E](items: _*)
+  private var model        = new EnabledDisabledComboBoxModel(None)
 
-  def reset(): Unit =
-    options.foreach(enabledItems.add)
+  def setItemsAndResetSelectedItem(newItems: List[E]): Unit = {
+    items = newItems
+    model = new EnabledDisabledComboBoxModel(None)
+    peer.setModel(model)
+  }
+
+  def setItemsAndPreserveSelectedItem(newItems: List[E]): Unit = {
+    val oldItem = selection.item
+    items = newItems
+    model = new EnabledDisabledComboBoxModel(Some(oldItem))
+    peer.setModel(model)
+  }
+
+  def resetEnabledItems(): Unit =
+    items.foreach(enabledItems.add)
 
   /**
    * This custom model does not allow multiple selections and does not allow items marked as disabled to be
-   * selected.
+   * selected. An initial selection is permitted, but only if it is amongst the currently enabled items.
+   * If initialSelection is None or not amongst the enabled items, the first option that is an enabled item
+   * is selected.
    */
-  private object enabledDisabledComboBoxModel extends DefaultComboBoxModel[E](options.toArray) {
-    var selection: Option[E] = options.find(enabledItems.contains)
+  private class EnabledDisabledComboBoxModel(initialSelection: Option[E]) extends DefaultComboBoxModel[E](items.toArray) {
+    var selection = initialSelection.filter(enabledItems.contains).orElse(items.find(enabledItems.contains))
 
     override
     def getSelectedItem: Object = selection.orNull
@@ -37,8 +54,12 @@ class EnableDisableComboBox[E <: Object : ClassTag](options: List[E]) extends Co
           selection = Some(item)
       }
     }
+
+    def markItemDisabled(item: E): Unit = {
+      if (selection.forall(_.equals(item)))
+        selection = items.find(enabledItems.contains)
+    }
   }
-  peer.setModel(enabledDisabledComboBoxModel)
 
   /**
    * This renderer visually configures the combo box items so that the disabled items are evident.
@@ -97,8 +118,34 @@ class EnableDisableComboBox[E <: Object : ClassTag](options: List[E]) extends Co
   }
   peer.setRenderer(enabledDisabledComboBoxRenderer)
 
-  def disable(item: E): Unit =
+
+  /**
+   * Note that we allow items to be enabled / disabled that don't actually exist in items because they may become
+   * added at a later point through adding / setting items.
+   */
+  def disableItem(item: E): Unit = {
     enabledItems -= item
-  def enable(item: E): Unit =
+    model.markItemDisabled(item)
+  }
+
+  def enableItem(item: E): Unit =
     enabledItems += item
+
+  def removeItems(badItems: List[E]): Unit = {
+    val oldItem = selection.item
+    items = items.diff(badItems)
+    model = new EnabledDisabledComboBoxModel(Some(oldItem))
+    peer.setModel(model)
+  }
+  def removeItem(item: E): Unit =
+    removeItems(List(item))
+
+  def addItems(newItems: List[E]): Unit = {
+    val oldItem = selection.item
+    items = items ++ newItems
+    model = new EnabledDisabledComboBoxModel(Some(oldItem))
+    peer.setModel(model)
+  }
+  def addItem(item: E): Unit =
+    addItems(List(item))
 }

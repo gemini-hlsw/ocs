@@ -7,7 +7,9 @@ package edu.gemini.spModel.gemini.gmos;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentBroadType;
 import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.shared.util.immutable.DefaultImList;
 import edu.gemini.shared.util.immutable.Function1;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.config.injector.ConfigInjector;
@@ -856,7 +858,7 @@ public abstract class InstGmosCommon<
     }
 
     /**
-     * Set the FPUMask label.  Note that this is meaningful only
+     * Get the FPUMask label.  Note that this is meaningful only
      * if the user has placed the <@link FPUMode> to indicate the
      * <code><@link CUSTOM_MASK FPUnitMode.CUSTOM_MASK></code>
      * mode.
@@ -2014,6 +2016,23 @@ public abstract class InstGmosCommon<
     @Override
     public String getPosAngleConstraintDescriptorKey() {
         return POS_ANGLE_CONSTRAINT_PROP.getName();
+    }
+
+    @Override
+    public ImList<PosAngleConstraint> getSupportedPosAngleConstraints() {
+        return DefaultImList.create(PosAngleConstraint.FIXED,
+                                    PosAngleConstraint.FIXED_180,
+                                    PosAngleConstraint.UNBOUNDED,
+                                    PosAngleConstraint.PARALLACTIC_ANGLE);
+    }
+
+    @Override
+    public boolean allowUnboundedPositionAngle() {
+        // Note that we disable unbounded position angle as an option for MOS preimaging and FPU Custom Mask.
+        boolean isMos    = isMosPreimaging().equals(YesNoType.YES);
+        boolean isCustom = getFPUnitMode() == GmosCommonType.FPUnitMode.CUSTOM_MASK;
+        boolean isNone   = getFPUnit() == getFPUnitBridge().getNone();
+        return !isMos && !isCustom && !isNone;
     }
 
     // REL-814 Preserve the FPU Custom Mask Name

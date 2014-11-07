@@ -1400,15 +1400,28 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         return !(_fpu == FPUnit.FPU_NONE || _fpu == FPUnit.CUSTOM_MASK);
     }
 
-    /**
-     * This needs to be overridden to support the PosAngleConstraintAware.
-     */
     @Override
     public String getPosAngleConstraintDescriptorKey() {
         return POS_ANGLE_CONSTRAINT_PROP.getName();
     }
 
-        // REL-814 Preserve the FPU Custom Mask Name
+    @Override
+    public ImList<PosAngleConstraint> getSupportedPosAngleConstraints() {
+        return DefaultImList.create(PosAngleConstraint.FIXED,
+                                    PosAngleConstraint.FIXED_180,
+                                    PosAngleConstraint.UNBOUNDED,
+                                    PosAngleConstraint.PARALLACTIC_ANGLE);
+    }
+
+    @Override
+    public boolean allowUnboundedPositionAngle() {
+        // Note that we disable unbounded position angle as an option for MOS preimaging and FPU Custom Mask.
+        boolean isMos        = getMosPreimaging() == YesNoType.YES;
+        boolean isCustomMask = getFpu() == FPUnit.CUSTOM_MASK;
+        return !isMos && !isCustomMask;
+    }
+
+    // REL-814 Preserve the FPU Custom Mask Name
     @Override
     public void restoreScienceDetails(final SPInstObsComp oldData) {
         super.restoreScienceDetails(oldData);

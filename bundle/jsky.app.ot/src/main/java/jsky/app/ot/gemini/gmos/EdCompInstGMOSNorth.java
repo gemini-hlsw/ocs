@@ -18,11 +18,16 @@ public class EdCompInstGMOSNorth extends EdCompInstGMOS<InstGmosNorth> {
         super.init();
 
         // Add the property change listeners defined in InstGmosCommon.
-        getDataObject().addPropertyChangeListener(InstGmosNorth.FPUNIT_PROP.getName(), updateParallacticAnglePCL);
+        final InstGmosNorth inst = getDataObject();
+        inst.addPropertyChangeListener(InstGmosNorth.FPUNIT_PROP.getName(), updateParallacticAnglePCL);
+        inst.addPropertyChangeListener(InstGmosNorth.FPUNIT_PROP.getName(), updateUnboundedAnglePCL);
     }
 
     @Override protected void cleanup() {
         super.cleanup();
-        getDataObject().removePropertyChangeListener(InstGmosNorth.FPUNIT_PROP.getName(), updateParallacticAnglePCL);
+
+        final InstGmosNorth inst = getDataObject();
+        inst.removePropertyChangeListener(InstGmosNorth.FPUNIT_PROP.getName(), updateParallacticAnglePCL);
+        inst.removePropertyChangeListener(InstGmosNorth.FPUNIT_PROP.getName(), updateUnboundedAnglePCL);
     }
 }

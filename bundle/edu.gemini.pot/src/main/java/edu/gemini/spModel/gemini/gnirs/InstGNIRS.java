@@ -9,6 +9,8 @@ package edu.gemini.spModel.gemini.gnirs;
 
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.shared.util.immutable.DefaultImList;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.config.ConfigPostProcessor;
@@ -985,5 +987,17 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
     @Override
     public String getPosAngleConstraintDescriptorKey() {
         return POS_ANGLE_CONSTRAINT_PROP.getName();
+    }
+
+    @Override
+    public ImList<PosAngleConstraint> getSupportedPosAngleConstraints() {
+        return DefaultImList.create(PosAngleConstraint.FIXED,
+                                    PosAngleConstraint.PARALLACTIC_ANGLE);
+    }
+
+    @Override
+    public boolean allowUnboundedPositionAngle() {
+        // Unsupported for GNIRS.
+        return false;
     }
 }

@@ -36,6 +36,18 @@ import java.beans.PropertyDescriptor;
  * (Work in progress: slated to replace EdCompInstFlamingos2, Flamingos2Form, and Flamingos2Form.jfd)
  */
 public class Flamingos2Editor extends ComponentEditor<ISPObsComponent, Flamingos2> implements EngEditor {
+    private final PropertyChangeListener updateParallacticAnglePCL = new PropertyChangeListener() {
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            posAnglePanel.updateParallacticControls();
+        }
+    };
+    private final PropertyChangeListener updateUnboundedAnglePCL = new PropertyChangeListener() {
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            posAnglePanel.updateUnboundedControls();
+        }
+    };
 
     private final class CustomMdfEnabler implements PropertyChangeListener {
         public void propertyChange(PropertyChangeEvent evt) {
@@ -519,9 +531,16 @@ public class Flamingos2Editor extends ComponentEditor<ISPObsComponent, Flamingos
     public void handlePreDataObjectUpdate(Flamingos2 inst) {
         if (inst == null) return;
         inst.removePropertyChangeListener(messagePanel);
-        inst.removePropertyChangeListener(Flamingos2.READMODE_PROP.getName(), exposureTimeMessageUpdater);
-        inst.removePropertyChangeListener(Flamingos2.FPU_PROP.getName(), customMdfEnabler);
+        inst.removePropertyChangeListener(Flamingos2.READMODE_PROP.getName(),       exposureTimeMessageUpdater);
+        inst.removePropertyChangeListener(Flamingos2.FPU_PROP.getName(),            customMdfEnabler);
         inst.removePropertyChangeListener(Flamingos2.MOS_PREIMAGING_PROP.getName(), preImagingListener);
+
+        inst.removePropertyChangeListener(Flamingos2.POS_ANGLE_PROP.getName(),      updateParallacticAnglePCL);
+        inst.removePropertyChangeListener(Flamingos2.FPU_PROP.getName(),            updateParallacticAnglePCL);
+        inst.removePropertyChangeListener(Flamingos2.DISPERSER_PROP.getName(),      updateParallacticAnglePCL);
+        inst.removePropertyChangeListener(Flamingos2.MOS_PREIMAGING_PROP.getName(), updateUnboundedAnglePCL);
+        inst.removePropertyChangeListener(Flamingos2.FPU_PROP.getName(),            updateUnboundedAnglePCL);
+
     }
 
     @Override
@@ -558,15 +577,13 @@ public class Flamingos2Editor extends ComponentEditor<ISPObsComponent, Flamingos
         posAnglePanel.init(this, Site.GS);
 
         // If the position angle mode or FPU mode properties change, force an update on the parallactic angle mode.
-        final PropertyChangeListener updateParallacticAnglePCL = new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                posAnglePanel.updateParallacticControls();
-            }
-        };
-        getDataObject().addPropertyChangeListener(Flamingos2.POS_ANGLE_PROP.getName(), updateParallacticAnglePCL);
-        getDataObject().addPropertyChangeListener(Flamingos2.FPU_PROP.getName(),       updateParallacticAnglePCL);
-        getDataObject().addPropertyChangeListener(Flamingos2.DISPERSER_PROP.getName(), updateParallacticAnglePCL);
+        inst.addPropertyChangeListener(Flamingos2.POS_ANGLE_PROP.getName(), updateParallacticAnglePCL);
+        inst.addPropertyChangeListener(Flamingos2.FPU_PROP.getName(),       updateParallacticAnglePCL);
+        inst.addPropertyChangeListener(Flamingos2.DISPERSER_PROP.getName(), updateParallacticAnglePCL);
+
+        // If MOS preimaging or the FPU mode properties change, force an update on the unbounded angle mode.
+        inst.addPropertyChangeListener(Flamingos2.MOS_PREIMAGING_PROP.getName(), updateUnboundedAnglePCL);
+        inst.addPropertyChangeListener(Flamingos2.FPU_PROP.getName(),            updateUnboundedAnglePCL);
     }
 }
 
