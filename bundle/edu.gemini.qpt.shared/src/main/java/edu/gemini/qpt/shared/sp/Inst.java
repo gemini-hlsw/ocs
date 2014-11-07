@@ -298,5 +298,4 @@ public enum Inst {
         }
         return super.toString(); // should not happen
     }
-
 }

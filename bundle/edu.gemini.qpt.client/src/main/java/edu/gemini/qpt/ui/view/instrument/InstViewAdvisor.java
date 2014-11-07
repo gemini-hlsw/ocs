@@ -1,6 +1,7 @@
 package edu.gemini.qpt.ui.view.instrument;
 
-import java.awt.*;
+import java.awt.Cursor;
+import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Enumeration;
@@ -14,7 +15,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
-import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 
 import edu.gemini.qpt.core.Schedule;
