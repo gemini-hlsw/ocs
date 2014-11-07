@@ -216,13 +216,11 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
    * selection.
    */
   private def positionAngleConstraintSelected(): Unit = {
-    println("===== Here.")
     for {
       e <- editor
       p <- ui.parallacticAngleControlsOpt
     } yield {
       val posAngleConstraint = ui.positionAngleConstraintComboBox.selection.item
-      println(s"===== posAngleConstraint=${posAngleConstraint.name()}")
 
       // Set the position angle constraint on the instrument.
       e.getDataObject.setPosAngleConstraint(posAngleConstraint)
