@@ -122,9 +122,6 @@ final class TpeFeatureManager {
                 setVisible(feature, true);
             }
         }
-
-        // Update the guider selector at the bottom of the tool bar.
-        _tpeToolBar.getGuiderSelector().init(ctx.obsShellOrNull());
     }
 
     /**

@@ -3,6 +3,7 @@ package jsky.app.ot.gemini.editor.targetComponent;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
 import edu.gemini.shared.gui.calendar.JCalendarPopup;
+import jsky.app.ot.ags.AgsSelectorControl;
 import jsky.util.gui.DropDownListBoxWidget;
 import jsky.util.gui.NumberBoxWidget;
 import jsky.util.gui.TextBoxWidget;
@@ -859,5 +860,5 @@ public class TelescopeForm extends JPanel {
     // set to the peers in the guidingPanel.
     JButton autoGuideStarButton;
     JButton manualGuideStarButton;
-    JComboBox autoGuideStarGuiderSelector;
+    AgsSelectorControl autoGuideStarGuiderSelector;
 }

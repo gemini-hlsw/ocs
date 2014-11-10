@@ -167,7 +167,7 @@ public final class ObsContext {
         final Set<Offset> offsets = OffsetUtil.getSciencePositions(posListA);
 
         final SPObservation spObs = (SPObservation) obs.getDataObject();
-        return new Some<ObsContext>(ObsContext.create(spObs.getSelectedAgsStrategy(), env, inst, site, conds,
+        return new Some<ObsContext>(ObsContext.create(spObs.getAgsStrategyOverride(), env, inst, site, conds,
                 offsets, aoCompOpt.getOrNull()));
     }
 
@@ -210,7 +210,7 @@ public final class ObsContext {
         }
     }
 
-    private final Option<AgsStrategyKey> agsStrategy;
+    private final Option<AgsStrategyKey> agsOverride;
     private final TargetEnvironment targets;
     private final SPInstObsComp inst;
     private final Conditions conds;
@@ -220,7 +220,7 @@ public final class ObsContext {
 
     private ObsContext(Option<AgsStrategyKey> ags, TargetEnvironment targets, SPInstObsComp inst, Option<Site> site,
                        Conditions conds, Set<Offset> sciencePositions, Option<AbstractDataObject> aoCompOpt) {
-        this.agsStrategy      = ags;
+        this.agsOverride = ags;
         this.targets          = targets;
         this.inst             = (SPInstObsComp) inst.clone();
         this.site             = site;
@@ -244,12 +244,12 @@ public final class ObsContext {
         }
     }
 
-    public Option<AgsStrategyKey> getSelectedAgsStrategy() {
-        return agsStrategy;
+    public Option<AgsStrategyKey> getAgsStrategyOverride() {
+        return agsOverride;
     }
 
-    public ObsContext withSelectedAgsStrategy(Option<AgsStrategyKey> s) {
-        if (s.equals(agsStrategy)) return this;
+    public ObsContext withAgsStrategyOverride(Option<AgsStrategyKey> s) {
+        if (s.equals(agsOverride)) return this;
         return new ObsContext(s, targets, inst, site, conds, sciencePositions, aoCompOpt);
     }
 
@@ -259,7 +259,7 @@ public final class ObsContext {
 
     public ObsContext withTargets(TargetEnvironment targets) {
         if (targets.equals(this.targets)) return this;
-        return new ObsContext(agsStrategy, targets, inst, site, conds, sciencePositions, aoCompOpt);
+        return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt);
     }
 
     public Coordinates getBaseCoordinates() {
@@ -276,7 +276,7 @@ public final class ObsContext {
 
     public ObsContext withPositionAngle(Angle angle) {
         if (angle.equals(getPositionAngle())) return this;
-        return new ObsContext(agsStrategy, targets, inst, site, conds, sciencePositions, aoCompOpt, angle);
+        return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt, angle);
     }
 
     public PosAngleConstraint getPosAngleConstraint() {
@@ -306,7 +306,7 @@ public final class ObsContext {
 
     public ObsContext withIssPort(IssPort port) {
         if (getIssPort() == port) return this;
-        return new ObsContext(agsStrategy, targets, inst, site, conds, sciencePositions, aoCompOpt, port);
+        return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt, port);
     }
 
     public SPInstObsComp getInstrument(){
@@ -314,13 +314,13 @@ public final class ObsContext {
     }
 
     public ObsContext withInstrument(SPInstObsComp inst) {
-        return create(agsStrategy, targets, inst, site, conds, sciencePositions, aoCompOpt.getOrNull());
+        return create(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt.getOrNull());
     }
 
     public Option<Site> getSite() { return site; }
 
     public ObsContext withSite(final Option<Site> site) {
-        return new ObsContext(agsStrategy, targets, inst, site, conds, sciencePositions, aoCompOpt);
+        return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt);
     }
 
     public Conditions getConditions() {
@@ -329,7 +329,7 @@ public final class ObsContext {
 
     public ObsContext withConditions(Conditions conds) {
         if (getConditions().equals(conds)) return this;
-        return new ObsContext(agsStrategy, targets, inst, site, conds, sciencePositions, aoCompOpt);
+        return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt);
     }
 
     public Option<AbstractDataObject> getAOComponent(){
@@ -337,7 +337,7 @@ public final class ObsContext {
     }
 
     public ObsContext withAOComponent(AbstractDataObject aoCompOpt){
-        return new ObsContext(agsStrategy, targets,  inst, site, conds, sciencePositions, new Some<AbstractDataObject>(aoCompOpt));
+        return new ObsContext(agsOverride, targets,  inst, site, conds, sciencePositions, new Some<AbstractDataObject>(aoCompOpt));
     }
 
 
@@ -347,7 +347,7 @@ public final class ObsContext {
 
     public ObsContext withSciencePositions(Set<Offset> sciencePos) {
         if (sciencePos.equals(this.sciencePositions)) return this;
-        return create(agsStrategy, targets, inst, site, conds, sciencePos, aoCompOpt.getOrNull());
+        return create(agsOverride, targets, inst, site, conds, sciencePos, aoCompOpt.getOrNull());
     }
 
     public String toString() {

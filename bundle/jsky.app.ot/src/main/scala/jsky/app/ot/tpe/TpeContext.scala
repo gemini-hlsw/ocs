@@ -196,7 +196,7 @@ case class TpeContext(node: Option[ISPNode]) {
     i <- instrument.dataObject
     ao = (gems.dataObject orElse altair.dataObject).orNull
     obs = s.getDataObject.asInstanceOf[SPObservation]
-  } yield ObsContext.create(obs.getSelectedAgsStrategy, t, i, site, c, offsets.scienceOffsetsJava, ao)
+  } yield ObsContext.create(obs.getAgsStrategyOverride, t, i, site, c, offsets.scienceOffsetsJava, ao)
 
   def obsContextJavaWithConditions(c: Conditions): JOption[ObsContext] =
     toJOption(obsContextWithConditions(c))

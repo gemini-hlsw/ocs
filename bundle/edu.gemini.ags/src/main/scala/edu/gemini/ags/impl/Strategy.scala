@@ -115,7 +115,7 @@ object Strategy {
 
   // Get the site for a given strategy using the context.
   def site(ctx: ObsContext): Option[Site] =
-    ctx.getSite.asScalaOpt.orElse(AgsRegistrar.selectedStrategy(ctx).map {
+    ctx.getSite.asScalaOpt.orElse(AgsRegistrar.currentStrategy(ctx).map {
       case Pwfs1North | Pwfs2North => Option(Site.GN)
       case Pwfs1South | Pwfs2South => Option(Site.GS)
       case _ => None

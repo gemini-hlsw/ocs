@@ -7,7 +7,9 @@
 
 package jsky.app.ot.tpe;
 
+import edu.gemini.ags.api.AgsStrategy;
 import edu.gemini.pot.sp.*;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.gemini.nici.SeqRepeatNiciOffset;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
@@ -22,6 +24,7 @@ import edu.gemini.spModel.target.system.HmsDegTarget;
 import edu.gemini.spModel.target.system.ICoordinate;
 import jsky.app.jskycat.JSkyCat;
 import jsky.app.ot.OT;
+import jsky.app.ot.ags.*;
 import jsky.app.ot.util.BasicPropertyList;
 import jsky.catalog.BasicQueryArgs;
 import jsky.catalog.Catalog;
@@ -103,6 +106,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
      */
     private TpeImageDisplayMenuBar _tpeMenuBar;
 
+    private final AgsContextPublisher _agsPub = new AgsContextPublisher();
 
     /**
      * Create the application class and display the contents of the
@@ -124,6 +128,13 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         } else {
             throw new RuntimeException("internal error");
         }
+
+        _tpeToolBar.getGuiderSelector().addSelectionListener(new AgsSelectorControl.Listener() {
+            @Override public void agsStrategyUpdated(Option<AgsStrategy> strategy) {
+                AgsStrategyUtil.setSelection(_ctx.obsShellOrNull(), strategy);
+            }
+        });
+
 
         // Don't want the "New Window" menu item here
         _tpeMenuBar.getFileMenu().remove(_tpeMenuBar.getNewWindowMenuItem());
@@ -151,6 +162,12 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         OT.addEditableStateListener(new OT.EditableStateListener() {
             @Override public ISPNode getEditedNode() { return _ctx.nodeOrNull(); }
             @Override public void updateEditableState() { _editorTools.updateAvailableOptions(_allFeatures); }
+        });
+
+        _agsPub.subscribe(new AgsContextSubscriber() {
+            @Override public void notify(ISPObservation obs, AgsContext oldOptions, AgsContext newOptions) {
+                _tpeToolBar.getGuiderSelector().setAgsOptions(newOptions);
+            }
         });
     }
 
@@ -448,7 +465,8 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         _editorTools.updateEnabledStates();
 
         // update selected guiders in toolbar
-        _tpeToolBar.getGuiderSelector().init(_ctx.obsShellOrNull());
+        _agsPub.watch(_ctx.obsShellOrNull());
+        _tpeToolBar.getGuiderSelector().setAgsOptions(_agsPub.getAgsContext());
 
         if (_ctx.obsShell().isDefined()) {
             final ISPObservation obs = _ctx.obsShell().get();
