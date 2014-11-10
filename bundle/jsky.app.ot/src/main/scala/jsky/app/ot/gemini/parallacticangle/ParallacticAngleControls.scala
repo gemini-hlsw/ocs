@@ -110,7 +110,6 @@ class ParallacticAngleControls extends GridBagPanel with Publisher {
    * Initialize the UI and set the instrument editor to allow for the parallactic angle updates.
    */
   def init(e: ParallacticAngleControls.Editor, s: Site, f: Format): Unit = {
-    println("***** INIT!")
     editor    = Some(e)
     site      = Some(s)
     formatter = Some(f)
