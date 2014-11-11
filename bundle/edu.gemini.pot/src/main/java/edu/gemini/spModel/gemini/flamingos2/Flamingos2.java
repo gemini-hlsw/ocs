@@ -32,6 +32,7 @@ import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
 import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.inst.ElectronicOffsetProvider;
+import edu.gemini.spModel.inst.PositionAngleMode;
 import edu.gemini.spModel.obs.plannedtime.CommonStepCalculator;
 import edu.gemini.spModel.obs.plannedtime.ExposureCalculator;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;
@@ -1045,14 +1046,17 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     }
 
     private void _setPosAngleConstraint(String name) {
-        PosAngleConstraint oldValue = getPosAngleConstraint();
+        final PosAngleConstraint oldValue = getPosAngleConstraint();
         PosAngleConstraint newValue;
         try {
             newValue = PosAngleConstraint.valueOf(name);
         } catch (Exception ex) {
             newValue = oldValue;
         }
-        setPosAngleConstraint(newValue);
+
+        // If the pos angle mode is MEAN_PARALLACTIC_ANGLE, then the constraint should also be set to PARALLACTIC_ANGLE.
+        // This needs to be done because of a change from 2014B to 2015A data models.
+        _posAngleConstraint = getPositionAngleMode() == PositionAngleMode.MEAN_PARALLACTIC_ANGLE ? PosAngleConstraint.PARALLACTIC_ANGLE : newValue;
     }
 
     /**
