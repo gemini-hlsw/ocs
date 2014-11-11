@@ -48,6 +48,7 @@ import edu.gemini.spModel.core.ProgramType;
 import edu.gemini.spModel.seqcomp.SeqConfigComp;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
+import edu.gemini.spModel.telescope.PosAngleConstraint;
 import edu.gemini.spModel.time.ChargeClass;
 import edu.gemini.spModel.time.ObsTimeCharges;
 import edu.gemini.spModel.time.ObsTimes;
@@ -659,7 +660,18 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
         for (ISPObsComponent comp : obsShell.getObsComponents()) {
             if (SPComponentType.INSTRUMENT_GMOS.equals(comp.getType()) || SPComponentType.INSTRUMENT_GMOSSOUTH.equals(comp.getType())) {
                 InstGmosCommon gmos = (InstGmosCommon) comp.getDataObject();
-                if (gmos.getPositionAngleMode() == PositionAngleMode.MEAN_PARALLACTIC_ANGLE)
+                if (gmos.getPositionAngleMode() == PositionAngleMode.MEAN_PARALLACTIC_ANGLE
+                        || gmos.getPosAngleConstraint() == PosAngleConstraint.PARALLACTIC_ANGLE)
+                    return true;
+            } else if (SPComponentType.INSTRUMENT_FLAMINGOS2.equals(comp.getType())) {
+                Flamingos2 f2 = (Flamingos2) comp.getDataObject();
+                if (f2.getPositionAngleMode() == PositionAngleMode.MEAN_PARALLACTIC_ANGLE
+                        || f2.getPosAngleConstraint() == PosAngleConstraint.PARALLACTIC_ANGLE)
+                    return true;
+            } else if (SPComponentType.INSTRUMENT_GNIRS.equals(comp.getType())) {
+                InstGNIRS gnirs = (InstGNIRS) comp.getDataObject();
+                if (gnirs.getPositionAngleMode() == PositionAngleMode.MEAN_PARALLACTIC_ANGLE
+                        || gnirs.getPosAngleConstraint() == PosAngleConstraint.PARALLACTIC_ANGLE)
                     return true;
             }
         }
