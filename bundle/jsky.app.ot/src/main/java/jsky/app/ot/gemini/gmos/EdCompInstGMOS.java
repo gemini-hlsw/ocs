@@ -70,9 +70,10 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
     private static final String OIWFS = "OIWFS";
 
     /**
-     * Listeners for property changes that affect the parallactic angle components.
+     * Listeners for property changes that affect the parallactic and unbounded angle components.
      */
     final PropertyChangeListener updateParallacticAnglePCL;
+    final PropertyChangeListener updateUnboundedAnglePCL;
 
 //    /**
 //     * Value assigned to WFS tags to indicate that the WFS is parked (inactive).
@@ -370,6 +371,12 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
                 _w.posAnglePanel.updateParallacticControls();
             }
         };
+        updateUnboundedAnglePCL   = new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                _w.posAnglePanel.updateUnboundedControls();
+            }
+        };
     }
 
     private Site getSite() {
@@ -465,16 +472,23 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
 
 
         // If the position angle mode or FPU mode properties change, force an update on the parallactic angle mode.
-        getDataObject().addPropertyChangeListener(InstGmosCommon.POSITION_ANGLE_MODE_PROP.getName(), updateParallacticAnglePCL);
-        getDataObject().addPropertyChangeListener(InstGmosCommon.FPU_MODE_PROP.getName(), updateParallacticAnglePCL);
-        getDataObject().addPropertyChangeListener(InstGmosCommon.DISPERSER_PROP_NAME, updateParallacticAnglePCL);
+        final T inst = getDataObject();
+        inst.addPropertyChangeListener(InstGmosCommon.POSITION_ANGLE_MODE_PROP.getName(), updateParallacticAnglePCL);
+        inst.addPropertyChangeListener(InstGmosCommon.FPU_MODE_PROP.getName(), updateParallacticAnglePCL);
+        inst.addPropertyChangeListener(InstGmosCommon.DISPERSER_PROP_NAME, updateParallacticAnglePCL);
+
+        // If the MOS preimaging or FPU mode properties change, force an update on the unbounded angle mode.
+        inst.addPropertyChangeListener(InstGmosCommon.IS_MOS_PREIMAGING_PROP.getName(), updateUnboundedAnglePCL);
+        inst.addPropertyChangeListener(InstGmosCommon.FPU_MODE_PROP.getName(),          updateUnboundedAnglePCL);
     }
 
     @Override protected void cleanup() {
         super.cleanup();
-        getDataObject().removePropertyChangeListener(InstGmosCommon.POSITION_ANGLE_MODE_PROP.getName(), updateParallacticAnglePCL);
-        getDataObject().removePropertyChangeListener(InstGmosCommon.FPU_MODE_PROP.getName(), updateParallacticAnglePCL);
-        getDataObject().removePropertyChangeListener(InstGmosCommon.DISPERSER_PROP_NAME, updateParallacticAnglePCL);
+
+        final T inst = getDataObject();
+        inst.removePropertyChangeListener(InstGmosCommon.POSITION_ANGLE_MODE_PROP.getName(), updateParallacticAnglePCL);
+        inst.removePropertyChangeListener(InstGmosCommon.FPU_MODE_PROP.getName(), updateParallacticAnglePCL);
+        inst.removePropertyChangeListener(InstGmosCommon.DISPERSER_PROP_NAME, updateParallacticAnglePCL);
     }
 
     // Initialize controls based on gmos specific information.
