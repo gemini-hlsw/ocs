@@ -45,6 +45,7 @@ import jsky.science.Time;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
@@ -358,12 +359,13 @@ public class BlockTimeLineNode implements TimeLineNode {
                 graphics.setColor(Color.black);
                 float startX = fThumb.x - (float) (startBounds.getWidth() / 2.0);
                 float startY = fThumb.y + sThumbHeight + (float) (startBounds.getHeight() + TimeLineNode.DEFAULT_LABEL_SPACE);
+                AffineTransform oldTransform = graphics.getTransform();
                 if (startBounds.getWidth() > thumbWidth / 2f) {
-                    graphics.setFont(TimeLineNode.REVERSE_ROTATED_FONT);
-
+                    graphics.rotate(TimeLineNode.LABEL_REVERSE_ROTATION, startX, startY);
                 }
                 graphics.drawString(startStr, startX, startY);
                 graphics.setFont(origFont);
+                graphics.setTransform(oldTransform);
             }
 
             // draw end label
@@ -377,12 +379,13 @@ public class BlockTimeLineNode implements TimeLineNode {
                 graphics.setColor(Color.black);
                 float endX = fThumb.x + thumbWidth - (float) (endBounds.getWidth() / 2.0);
                 float endY = fThumb.y + sThumbHeight + (float) (endBounds.getHeight() + TimeLineNode.DEFAULT_LABEL_SPACE);
+                AffineTransform oldTransform = graphics.getTransform();
                 if (endBounds.getWidth() > thumbWidth / 2f) {
-                    graphics.setFont(TimeLineNode.REVERSE_ROTATED_FONT);
-
+                    graphics.rotate(TimeLineNode.LABEL_REVERSE_ROTATION, endX, endY);
                 }
                 graphics.drawString(endStr, endX, endY);
                 graphics.setFont(origFont);
+                graphics.setTransform(oldTransform);
 
             }
 
