@@ -63,8 +63,10 @@ public interface SpidMatcher extends Serializable {
         public boolean matches(scala.Option<ProgramId> pid) {
             // Sorry, this is awkward mixing Scala and Java Option and
             // worse still, using it from Java.
-            return semester.isEmpty() ||  // match anything
-                    (!pid.isEmpty() && !pid.get().semester().isEmpty() && pid.get().semester().get().equals(semester.getValue()));
+            return semester.isEmpty() ||
+                        pid.isEmpty() ||
+                        pid.get().semester().isEmpty() ||
+                        pid.get().semester().get().equals(semester.getValue());
         }
     }
 
