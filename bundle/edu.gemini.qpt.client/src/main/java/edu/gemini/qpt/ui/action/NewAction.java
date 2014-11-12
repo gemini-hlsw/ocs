@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 
 import javax.swing.*;
 
+import edu.gemini.ags.api.AgsMagnitude;
 import edu.gemini.qpt.core.Block;
 import edu.gemini.qpt.core.Schedule;
 import edu.gemini.qpt.core.ScheduleIO;
@@ -46,11 +47,13 @@ public class NewAction extends AbstractAsyncAction {
 
 	private final IShell shell;
     private final KeyChain authClient;
+    private final AgsMagnitude.MagnitudeTable magTable;
 
-	public NewAction(IShell shell, KeyChain authClient) {
+	public NewAction(IShell shell, KeyChain authClient, AgsMagnitude.MagnitudeTable magTable) {
 		super("New Plan...", authClient);
 		this.shell = shell;
         this.authClient = authClient;
+        this.magTable = magTable;
 		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, Platform.MENU_ACTION_MASK));
 	}
 
@@ -85,9 +88,9 @@ public class NewAction extends AbstractAsyncAction {
 						try {
                             if (templateFile != null) {
                                 pm.setMessage("Reading template...");
-                                template = ScheduleIO.read(templateFile, 1000, authClient);
+                                template = ScheduleIO.read(templateFile, 1000, authClient, magTable);
                             } else {
-                                miniModel = MiniModel.newInstance(authClient, nd.getAuthPeer(), tbn.getEndTime());
+                                miniModel = MiniModel.newInstance(authClient, nd.getAuthPeer(), tbn.getEndTime(), magTable);
                             }
                             if (pm.isCancelled()) return;
                             LttsServicesClient.newInstance(tbn.getStartTime(), nd.getAuthPeer());

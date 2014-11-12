@@ -1,5 +1,6 @@
 package edu.gemini.qpt.shared.sp;
 
+import edu.gemini.ags.api.AgsMagnitude;
 import edu.gemini.pot.sp.SPObservationID;
 import edu.gemini.pot.spdb.IDBQueryRunner;
 import edu.gemini.spModel.core.*;
@@ -106,9 +107,10 @@ public class MiniModel {
     public static MiniModel newInstance(
             KeyChain kc,
             Peer peer,
-            long date) throws IOException, TimeoutException {
+            long date,
+            AgsMagnitude.MagnitudeTable magTable) throws IOException, TimeoutException {
 
-        return newInstance(kc, peer, new Date(date), Collections.<Semester>emptySet(), ProgramType$.MODULE$.AllAsJava(), RELEVANT_OBS_CLASSES, RELEVANT_OBS_STATUSES);
+        return newInstance(kc, peer, new Date(date), Collections.<Semester>emptySet(), ProgramType$.MODULE$.AllAsJava(), RELEVANT_OBS_CLASSES, RELEVANT_OBS_STATUSES, magTable);
 
     }
 
@@ -126,7 +128,8 @@ public class MiniModel {
             KeyChain kc,
             Peer peer,
             long date,
-            Set<String> extraSemesters) throws IOException, TimeoutException {
+            Set<String> extraSemesters,
+            AgsMagnitude.MagnitudeTable magTable) throws IOException, TimeoutException {
 
         Set<Semester> semesters = new HashSet<Semester>();
         for (String s : extraSemesters) {
@@ -136,7 +139,7 @@ public class MiniModel {
                 throw new RuntimeException("can not parse semester: " + s);
             }
         }
-        return newInstance(kc, peer, new Date(date), semesters, ProgramType$.MODULE$.AllAsJava(), RELEVANT_OBS_CLASSES, RELEVANT_OBS_STATUSES);
+        return newInstance(kc, peer, new Date(date), semesters, ProgramType$.MODULE$.AllAsJava(), RELEVANT_OBS_CLASSES, RELEVANT_OBS_STATUSES, magTable);
     }
 
     /**
@@ -161,9 +164,10 @@ public class MiniModel {
             Set<Semester> extraSemesters,
             List<ProgramType> progTypes,
             Set<ObsClass> obsClasses,
-            Set<ObservationStatus> obsStatuses) throws IOException, TimeoutException {
+            Set<ObservationStatus> obsStatuses,
+            AgsMagnitude.MagnitudeTable magTable) throws IOException, TimeoutException {
 
-        ObsQueryFunctor func = new ObsQueryFunctor(peer.site, date, extraSemesters, progTypes, obsClasses, obsStatuses);
+        ObsQueryFunctor func = new ObsQueryFunctor(peer.site, date, extraSemesters, progTypes, obsClasses, obsStatuses, magTable);
         return newInstance(kc, peer, func);
 
     }

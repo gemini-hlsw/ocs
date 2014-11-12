@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
+import edu.gemini.ags.api.AgsMagnitude;
 import edu.gemini.qpt.core.Schedule;
 import edu.gemini.qpt.core.Variant;
 import edu.gemini.skycalc.TwilightBoundType;
@@ -32,8 +33,8 @@ public class MergeAction extends AbstractOpenAction implements PropertyChangeLis
 		"This command opens another plan and adds its variants to the current plan.\n" +
 		"Is this what you want to do?";
 
-	public MergeAction(IShell shell, KeyChain authClient) {
-		super("Merge...", shell, authClient);
+	public MergeAction(IShell shell, KeyChain authClient, AgsMagnitude.MagnitudeTable magTable) {
+		super("Merge...", shell, authClient, magTable);
 		setEnabled(false);
 		shell.addPropertyChangeListener(IShell.PROP_MODEL, this);
 	}
@@ -88,7 +89,7 @@ public class MergeAction extends AbstractOpenAction implements PropertyChangeLis
 					current.duplicateVariant(variant);
 
 				// The Obs in the new alloc point to the old minimodel, so we will refresh to fix it
-				new RefreshAction(shell, authClient).asyncActionPerformed(e);
+				new RefreshAction(shell, authClient, magTable).asyncActionPerformed(e);
 
 			}
 		} finally {

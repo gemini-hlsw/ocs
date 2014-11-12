@@ -1,5 +1,6 @@
 package edu.gemini.ags.api
 
+import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.pot.sp.ISPObservation
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
@@ -12,11 +13,11 @@ object AgsUtil {
       strategy <- AgsRegistrar.currentStrategy(ctx)
     } yield op(strategy, ctx)).getOrElse(Future.successful(default))
 
-  def lookupAndEstimate(obs: ISPObservation): Future[AgsStrategy.Estimate] =
-    lookupAndThen(obs, AgsStrategy.Estimate.CompleteFailure)((s,c) => s.estimate(c, DefaultMagnitudeTable))
+  def lookupAndEstimate(obs: ISPObservation, mt: MagnitudeTable): Future[AgsStrategy.Estimate] =
+    lookupAndThen(obs, AgsStrategy.Estimate.CompleteFailure)((s,c) => s.estimate(c, mt))
 
-  def lookupAndSelect(obs: ISPObservation): Future[Option[AgsStrategy.Selection]] =
-    lookupAndThen(obs, Option.empty[AgsStrategy.Selection])((s,c) => s.select(c, DefaultMagnitudeTable))
+  def lookupAndSelect(obs: ISPObservation, mt: MagnitudeTable): Future[Option[AgsStrategy.Selection]] =
+    lookupAndThen(obs, Option.empty[AgsStrategy.Selection])((s,c) => s.select(c, mt))
 
   def currentStrategy(obs: ISPObservation): Option[AgsStrategy] =
     ObsContext.create(obs).asScalaOpt.flatMap(AgsRegistrar.currentStrategy)

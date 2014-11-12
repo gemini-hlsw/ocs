@@ -6,6 +6,7 @@
 //
 package jsky.app.ot;
 
+import edu.gemini.ags.api.DefaultMagnitudeTable$;
 import edu.gemini.pot.sp.ISPProgramNode;
 import jsky.app.ot.plugin.OtActionPlugin;
 import jsky.app.ot.plugin.OtContext;
@@ -201,7 +202,7 @@ public final class SplashPanel extends JPanel implements PluginConsumer, ActionL
         public String toString() { return plugin.name(); }
         public void openPlugin() {
             Option<ISPProgramNode> none = Option.apply(null);
-            OtContext otContext = new OtContext(none, ObservingPeer.get(), OT.getKeyChain());
+            OtContext otContext = new OtContext(none, ObservingPeer.get(), OT.getKeyChain(), DefaultMagnitudeTable$.MODULE$);
             plugin.apply(otContext, SwingUtilities.getWindowAncestor(getParent()));
         }
     }

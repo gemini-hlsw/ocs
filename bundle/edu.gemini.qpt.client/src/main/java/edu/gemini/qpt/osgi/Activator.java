@@ -6,10 +6,10 @@ import java.awt.Toolkit;
 import java.awt.event.AWTEventListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.logging.Logger;
 
+import edu.gemini.ags.api.DefaultMagnitudeTable$;
 import edu.gemini.qpt.core.util.LttsServicesClient;
 
 import edu.gemini.qpt.ui.action.PublishAction;
@@ -87,7 +87,7 @@ public final class Activator implements BundleActivator {
                     null);
 
 
-                Activator.this.advisor = new ShellAdvisor("Gemini QPT", Version.current.toString(), root, ac, internal, pachon);
+                Activator.this.advisor = new ShellAdvisor("Gemini QPT", Version.current.toString(), root, ac, internal, pachon, DefaultMagnitudeTable$.MODULE$);
                 shellRegistration = context.registerService(IShellAdvisor.class.getName(), advisor, new Hashtable());
                 return ac;
             }

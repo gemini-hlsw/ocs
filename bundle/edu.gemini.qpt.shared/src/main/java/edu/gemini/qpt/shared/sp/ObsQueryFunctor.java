@@ -96,6 +96,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
     private final Boolean skipInactivePrograms;    // skips programs that are set to inactive
     private final Boolean skipInvalidObservations; // skips observations that have no conditions, instrument or target
     private final Boolean skipNoStepsObservations; // skips observations that have no remaining steps (QPT does not need those)
+    private final AgsMagnitude.MagnitudeTable magTable;
 
     /**
      * Constructs a functor that will retrieve candidate observations for the given input values.
@@ -107,7 +108,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
      * @param obsClasses
      * @param obsStatuses
      */
-    public ObsQueryFunctor(Site site, Set<Semester> semesters, List<ProgramType> progTypes, Set<ObsClass> obsClasses, Set<ObservationStatus> obsStatuses, boolean skipCompletedPrograms, boolean skipInactivePrograms) {
+    public ObsQueryFunctor(Site site, Set<Semester> semesters, List<ProgramType> progTypes, Set<ObsClass> obsClasses, Set<ObservationStatus> obsStatuses, boolean skipCompletedPrograms, boolean skipInactivePrograms, AgsMagnitude.MagnitudeTable magTable) {
 
         this.site = site;
         this.date = null;
@@ -123,6 +124,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
         // we don't need this and simply skip invalid/incomplete observations.
         this.skipInvalidObservations = true;
         this.skipNoStepsObservations = false; // QV wants those, while QPT is not interested in them
+        this.magTable = magTable;
 
     }
 
@@ -139,7 +141,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
      * @param obsClasses
      * @param obsStatuses
      */
-	public ObsQueryFunctor(Site site, Date date, final Set<Semester> extraSemesters, List<ProgramType> progTypes, Set<ObsClass> obsClasses, Set<ObservationStatus> obsStatuses) {
+	public ObsQueryFunctor(Site site, Date date, final Set<Semester> extraSemesters, List<ProgramType> progTypes, Set<ObsClass> obsClasses, Set<ObservationStatus> obsStatuses, AgsMagnitude.MagnitudeTable magTable) {
 
         this.site = site;
         this.date = Calendar.getInstance(site.timezone());
@@ -163,7 +165,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
         this.skipInvalidObservations = false;
         this.skipInactivePrograms = false;
         this.skipNoStepsObservations = true;
-
+        this.magTable = magTable;
     }
 
 	@SuppressWarnings("unchecked")
@@ -861,14 +863,11 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
             if (!ctxOpt.isEmpty()) {
                 ObsContext ctx = ctxOpt.getValue();
 
-                // TODO: This needs to be adjusted when we figure out how to change the magnitude table.
-                AgsMagnitude.MagnitudeTable mt = DefaultMagnitudeTable$.MODULE$;
-
                 // Perform the analysis.
                 scala.Option<AgsStrategy> strategyOption = AgsRegistrar.currentStrategy(ctx);
                 if (strategyOption.isDefined()) {
                     AgsStrategy strategy = strategyOption.get();
-                    analysis.addAll(JavaConversions.asJavaList(strategy.analyze(ctx, mt)));
+                    analysis.addAll(JavaConversions.asJavaList(strategy.analyze(ctx, magTable)));
                 }
             }
         }

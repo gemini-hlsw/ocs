@@ -7,6 +7,7 @@
 
 package jsky.app.ot.viewer;
 
+import edu.gemini.ags.api.DefaultMagnitudeTable$;
 import edu.gemini.pot.sp.ISPProgram;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.shared.util.immutable.DefaultImList;
@@ -505,7 +506,7 @@ final class SPViewerMenuBar extends JMenuBar {
         }
         menu.removeAll();
         for (OtActionPlugin plugin : plugins) {
-            menu.add(new PluginViewerAction(OT.getKeyChain(), _viewer, plugin));
+            menu.add(new PluginViewerAction(OT.getKeyChain(), _viewer, plugin, DefaultMagnitudeTable$.MODULE$));
             System.out.println("Adding menu item for: " + plugin.name());
         }
         menu.setVisible(plugins.size() > 0);
