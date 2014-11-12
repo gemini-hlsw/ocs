@@ -160,8 +160,7 @@ object AgsAnalysis {
     }
 
     val magAnalysis = for {
-      site      <- Strategy.site(ctx)
-      mc        <- mt(site, guideProbe)
+      mc <- mt(ctx, guideProbe)
       probeBand = band(mc)
     } yield {
       val magOpt      = guideStar.getMagnitude(probeBand).asScalaOpt

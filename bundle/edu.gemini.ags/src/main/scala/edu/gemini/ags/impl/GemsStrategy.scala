@@ -94,8 +94,8 @@ object GemsStrategy extends AgsStrategy {
   }
 
   override def magnitudes(ctx: ObsContext, mt: MagnitudeTable): List[(GuideProbe, MagnitudeCalc)] = {
-    val cans = Canopus.Wfs.values().map { cwfs => mt(Site.GS, cwfs).map(cwfs -> _) }.toList.flatten
-    val odgw = GsaoiOdgw.values().map { odgw => mt(Site.GS, odgw).map(odgw -> _) }.toList.flatten
+    val cans = Canopus.Wfs.values().map { cwfs => mt(ctx, cwfs).map(cwfs -> _) }.toList.flatten
+    val odgw = GsaoiOdgw.values().map { odgw => mt(ctx, odgw).map(odgw -> _) }.toList.flatten
     cans ++ odgw
   }
 

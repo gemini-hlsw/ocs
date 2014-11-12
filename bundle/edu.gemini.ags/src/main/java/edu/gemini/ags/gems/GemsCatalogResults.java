@@ -385,7 +385,7 @@ public class GemsCatalogResults {
         // Additional check for mag range (for cwfs1 and cwfs2, since different than cwfs3 and group range)
         if (valid && guideProbe instanceof Canopus.Wfs) {
             Canopus.Wfs wfs = (Canopus.Wfs) guideProbe;
-            DefaultMagnitudeTable.CanopusWfsCalculator canopusWfsCalculator = ((DefaultMagnitudeTable.CanopusWfsCalculator) new DefaultMagnitudeTable(ctx).CanopusWfsMagnitudeLimitsCalculator());
+            DefaultMagnitudeTable.CanopusWfsCalculator canopusWfsCalculator = ((DefaultMagnitudeTable.CanopusWfsCalculator) DefaultMagnitudeTable.CanopusWfsMagnitudeLimitsCalculator());
             valid = checkMagLimit(target, canopusWfsCalculator.getNominalMagnitudeLimits(wfs));
         }
         return valid;

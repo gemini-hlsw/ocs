@@ -34,7 +34,7 @@ sealed trait SingleProbeStrategyParams {
     RadiusLimitCalc.getAgsQueryRadiusLimits(guideProbe, ctx).asScalaOpt
 
   def magnitudeCalc(ctx: ObsContext, mt: MagnitudeTable): Option[MagnitudeCalc] =
-    mt(site, guideProbe)
+    mt(ctx, guideProbe)
 
   def validator(ctx: ObsContext): GuideStarValidator = guideProbe
 }

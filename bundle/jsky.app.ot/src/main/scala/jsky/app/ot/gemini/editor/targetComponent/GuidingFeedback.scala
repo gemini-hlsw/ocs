@@ -54,7 +54,7 @@ class GuidingFeedback extends GridBagPanel {
   def update(ctx: edu.gemini.shared.util.immutable.Option[ObsContext]): Unit =
     ctx.asScalaOpt.fold(reset())(update)
 
-  def update(ctx: ObsContext): Unit = update(ctx, DefaultMagnitudeTable(ctx))
+  def update(ctx: ObsContext): Unit = update(ctx, DefaultMagnitudeTable)
 
   def update(ctx: ObsContext, mt: MagnitudeTable): Unit = {
     val (calcTable, analysis) = AgsRegistrar.currentStrategy(ctx).fold((Map.empty[GuideProbe, MagnitudeCalc], List.empty[AgsAnalysis])) { strategy =>

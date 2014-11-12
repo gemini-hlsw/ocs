@@ -47,7 +47,7 @@ object AgsClient {
   def launch(tpeCtx: TpeContext, relativeTo: JComponent): Unit =
     tpeCtx.obsContext.foreach { obsCtx =>
       AgsRegistrar.currentStrategy(obsCtx).foreach { strategy =>
-        val fut    = strategy.select(obsCtx, DefaultMagnitudeTable(obsCtx))
+        val fut    = strategy.select(obsCtx, DefaultMagnitudeTable)
         val dialog = new AgsClient(tpeCtx)
 
         fut.onComplete {

@@ -30,7 +30,7 @@ import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
  * A magnitude table defined in the same way as we have done since before 2015A
  * (that is, with predefined magnitude limits).
  */
-case class DefaultMagnitudeTable(ctx: ObsContext) extends MagnitudeTable {
+object DefaultMagnitudeTable extends MagnitudeTable {
 
   private def faint(band: Magnitude.Band, fl: Double): MagnitudeLimits =
     new MagnitudeLimits(band, new FaintnessLimit(fl), Option.empty[MagnitudeLimits.SaturationLimit].asGeminiOpt)
@@ -38,7 +38,7 @@ case class DefaultMagnitudeTable(ctx: ObsContext) extends MagnitudeTable {
   private def magLimits(band: Magnitude.Band, fl: Double, sl: Double): MagnitudeLimits =
     new MagnitudeLimits(band, new FaintnessLimit(fl), new SaturationLimit(sl))
 
-  def apply(site: Site, probe: GuideProbe): Option[MagnitudeCalc] = {
+  def apply(ctx: ObsContext, probe: GuideProbe): Option[MagnitudeCalc] = {
     def mc(nominalLimits: MagnitudeLimits): MagnitudeCalc = new MagnitudeCalc() {
       def apply(conds: Conditions, speed: GuideSpeed): MagnitudeLimits =
         nominalLimits.mapMagnitudes(conds.magAdjustOp()).mapMagnitudes(speed.magAdjustOp())
@@ -50,46 +50,49 @@ case class DefaultMagnitudeTable(ctx: ObsContext) extends MagnitudeTable {
     def ml(band: Magnitude.Band, fl: Double, sl: Double): Option[MagnitudeLimits] =
       Some(magLimits(band, fl, sl))
 
-    ((site, probe) match {
-      case (Site.GN, AltairAowfsGuider.instance)           =>
-        ctx.getAOComponent.asScalaOpt.filter(_.isInstanceOf[InstAltair]).fold(Option(MagnitudeLimits.empty(R))) { ado =>
-          ado.asInstanceOf[InstAltair].getMode match {
-            case NGS | NGS_FL => ml(R, 15, -2)
-            case LGS          => ml(R, 18, -2)
-            case _            => None
+    def lookup(site: Site): Option[MagnitudeCalc] =
+      ((site, probe) match {
+        case (Site.GN, AltairAowfsGuider.instance)           =>
+          ctx.getAOComponent.asScalaOpt.filter(_.isInstanceOf[InstAltair]).fold(Option(MagnitudeLimits.empty(R))) { ado =>
+            ado.asInstanceOf[InstAltair].getMode match {
+              case NGS | NGS_FL => ml(R, 15, -2)
+              case LGS          => ml(R, 18, -2)
+              case _            => None
+            }
           }
-        }
 
-      case (Site.GS, Flamingos2OiwfsGuideProbe.instance)   => ml(R, 15.0,  9.5)
-      case (Site.GN, GmosOiwfsGuideProbe.instance)         => ml(R, 15.5,  9.5)
-      case (Site.GS, GmosOiwfsGuideProbe.instance)         => ml(R, 14.5,  8.5)
-      case (Site.GN, GnirsOiwfsGuideProbe.instance)        => ml(K, 14.0,  0.0)
-      case (Site.GS, NiciOiwfsGuideProbe.instance)         => ml(R, 15.5, -2.0)
-      case (Site.GN, NifsOiwfsGuideProbe.instance)         => ft(K, 14.5)
-      case (Site.GN, NiriOiwfsGuideProbe.instance)         => ft(K, 14.0)
+        case (Site.GS, Flamingos2OiwfsGuideProbe.instance)   => ml(R, 15.0,  9.5)
+        case (Site.GN, GmosOiwfsGuideProbe.instance)         => ml(R, 15.5,  9.5)
+        case (Site.GS, GmosOiwfsGuideProbe.instance)         => ml(R, 14.5,  8.5)
+        case (Site.GN, GnirsOiwfsGuideProbe.instance)        => ml(K, 14.0,  0.0)
+        case (Site.GS, NiciOiwfsGuideProbe.instance)         => ml(R, 15.5, -2.0)
+        case (Site.GN, NifsOiwfsGuideProbe.instance)         => ft(K, 14.5)
+        case (Site.GN, NiriOiwfsGuideProbe.instance)         => ft(K, 14.0)
 
-      case (s,       PwfsGuideProbe.pwfs1)                 =>
-        Some(ctx.getInstrument).filter(_.isChopping).fold { site match {
-          case Site.GN              => ml(R, 14.5, 9.0)
-          case Site.GS              => ml(R, 13.0, 8.0)
-        }} {_.getType match {
-          case InstMichelle.SP_TYPE => ml(R, 13.0, 7.5)
-          case InstTReCS.SP_TYPE    => ml(R, 12.0, 6.5)
-          case _                    => None
-        }}
+        case (s,       PwfsGuideProbe.pwfs1)                 =>
+          Some(ctx.getInstrument).filter(_.isChopping).fold { site match {
+            case Site.GN              => ml(R, 14.5, 9.0)
+            case Site.GS              => ml(R, 13.0, 8.0)
+          }} {_.getType match {
+            case InstMichelle.SP_TYPE => ml(R, 13.0, 7.5)
+            case InstTReCS.SP_TYPE    => ml(R, 12.0, 6.5)
+            case _                    => None
+          }}
 
-      case (_,       PwfsGuideProbe.pwfs2)                 =>
-        if (ctx.getInstrument.isChopping) ml(R, 13.0, 7.5)
-        else                              ml(R, 14.5, 9.0)
+        case (_,       PwfsGuideProbe.pwfs2)                 =>
+          if (ctx.getInstrument.isChopping) ml(R, 13.0, 7.5)
+          else                              ml(R, 14.5, 9.0)
 
-      case (Site.GS, odgw) if odgw.isInstanceOf[GsaoiOdgw] =>
-        Some(GsaoiOdgwMagnitudeLimitsCalculator.getGemsMagnitudeLimits(GemsGuideStarType.flexure, Some(H)))
+        case (Site.GS, odgw) if odgw.isInstanceOf[GsaoiOdgw] =>
+          Some(GsaoiOdgwMagnitudeLimitsCalculator.getGemsMagnitudeLimits(GemsGuideStarType.flexure, Some(H)))
 
-      case (Site.GS, can) if can.isInstanceOf[Canopus.Wfs] =>
-        Some(CanopusWfsMagnitudeLimitsCalculator.getGemsMagnitudeLimits(GemsGuideStarType.tiptilt, Some(R)))
+        case (Site.GS, can) if can.isInstanceOf[Canopus.Wfs] =>
+          Some(CanopusWfsMagnitudeLimitsCalculator.getGemsMagnitudeLimits(GemsGuideStarType.tiptilt, Some(R)))
 
-      case _                                               => None
-    }).map(mc)
+        case _                                               => None
+      }).map(mc)
+
+    ctx.getSite.asScalaOpt.flatMap(lookup)
   }
 
   /**

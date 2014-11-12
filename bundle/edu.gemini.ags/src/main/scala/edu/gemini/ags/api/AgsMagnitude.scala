@@ -2,11 +2,11 @@ package edu.gemini.ags.api
 
 import edu.gemini.catalog.api.MagnitudeLimits
 import edu.gemini.shared.skyobject.Magnitude
-import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions.{BEST, WORST}
 import edu.gemini.spModel.guide.{GuideSpeed, GuideProbe}
 import edu.gemini.spModel.guide.GuideSpeed.{FAST, SLOW}
+import edu.gemini.spModel.obs.context.ObsContext
 
 /**
  * Types and methods for calculating magnitude limits.
@@ -20,7 +20,7 @@ object AgsMagnitude {
   }
 
   trait MagnitudeTable {
-    def apply(s: Site, gp: GuideProbe): Option[MagnitudeCalc]
+    def apply(ctx: ObsContext, gp: GuideProbe): Option[MagnitudeCalc]
   }
 
 

@@ -6,9 +6,7 @@
 //
 package jsky.app.ot.gemini.editor.targetComponent;
 
-import edu.gemini.ags.api.AgsAnalysis$;
-import edu.gemini.ags.api.AgsGuideQuality;
-import edu.gemini.ags.api.DefaultMagnitudeTable;
+import edu.gemini.ags.api.*;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
@@ -237,9 +235,9 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             treeTable     = null;
         }
 
-        private static Option<AgsGuideQuality> guideQuality(Option<Tuple2<ObsContext, DefaultMagnitudeTable>> ags, final GuideProbe guideProbe, final SPTarget guideStar) {
-            return ags.flatMap(new MapOp<Tuple2<ObsContext, DefaultMagnitudeTable>, Option<AgsGuideQuality>>() {
-                @Override public Option<AgsGuideQuality> apply(Tuple2<ObsContext, DefaultMagnitudeTable> tup) {
+        private static Option<AgsGuideQuality> guideQuality(Option<Tuple2<ObsContext, AgsMagnitude.MagnitudeTable>> ags, final GuideProbe guideProbe, final SPTarget guideStar) {
+            return ags.flatMap(new MapOp<Tuple2<ObsContext, AgsMagnitude.MagnitudeTable>, Option<AgsGuideQuality>>() {
+                @Override public Option<AgsGuideQuality> apply(Tuple2<ObsContext, AgsMagnitude.MagnitudeTable> tup) {
                     if (guideProbe instanceof ValidatableGuideProbe) {
                         final ValidatableGuideProbe vgp = (ValidatableGuideProbe) guideProbe;
                         final scala.Option<AgsGuideQuality> gc = AgsAnalysis$.MODULE$.analysis(tup._1(), tup._2(), vgp, guideStar).qualityOption();
@@ -266,9 +264,9 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             tmp.add(new BaseTargetRow(base));
 
             // Add all the guide groups and targets.
-            final Option<Tuple2<ObsContext, DefaultMagnitudeTable>> ags = ctx.map(new MapOp<ObsContext, Tuple2<ObsContext, DefaultMagnitudeTable>>() {
-                @Override public Tuple2<ObsContext, DefaultMagnitudeTable> apply(ObsContext oc) {
-                    return new Pair<ObsContext, DefaultMagnitudeTable>(oc, new DefaultMagnitudeTable(oc));
+            final Option<Tuple2<ObsContext, AgsMagnitude.MagnitudeTable>> ags = ctx.map(new MapOp<ObsContext, Tuple2<ObsContext, AgsMagnitude.MagnitudeTable>>() {
+                @Override public Tuple2<ObsContext, AgsMagnitude.MagnitudeTable> apply(ObsContext oc) {
+                    return new Pair<ObsContext, AgsMagnitude.MagnitudeTable>(oc, DefaultMagnitudeTable$.MODULE$);
                 }
             });
 

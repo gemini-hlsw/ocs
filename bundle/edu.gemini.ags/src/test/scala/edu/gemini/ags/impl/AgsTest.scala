@@ -232,8 +232,8 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(SkyObj
     val out = ((if (!allUsable) outList else Nil) ++ (if (allUnusable)  inList else Nil)).toList
     val in  = ((if (allUsable)  outList else Nil) ++ (if (!allUnusable) inList else Nil)).toList
 
-    val mt = new DefaultMagnitudeTable(ctx)
-    val mc = mt.apply(ctx.getSite.getValue, guideProbe).get
+    val mt = DefaultMagnitudeTable
+    val mc = mt.apply(ctx, guideProbe).get
 
     def mags = {
       val m    = GuideSpeed.values.toList.map { gs => gs -> mc.apply(ctx.getConditions, gs) }.toMap
@@ -403,8 +403,8 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(SkyObj
     AgsRegistrar.currentStrategy(ctx).get.asInstanceOf[SingleProbeStrategy]
 
   def test(): Unit = {
-    val mt   = new DefaultMagnitudeTable(ctx)
-    val mc   = mt.apply(ctx.getSite.getValue, guideProbe).get
+    val mt   = DefaultMagnitudeTable
+    val mc   = mt.apply(ctx, guideProbe).get
     val band = mc.apply(ctx.getConditions, GuideSpeed.FAST).getBand
     val maxMag = new Magnitude(band, Double.MaxValue)
 
@@ -415,7 +415,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(SkyObj
       }
 
       val all = winners.map(_._1) ++ unusable
-      val res = strategy.select(ctx, new DefaultMagnitudeTable(ctx), all)
+      val res = strategy.select(ctx, DefaultMagnitudeTable, all)
 
       def equalPosAngles(e: Angle, a: Angle): Unit =
         assertEquals("Position angles do not match", e.toDegrees.getMagnitude, a.toDegrees.getMagnitude, 0.000001)

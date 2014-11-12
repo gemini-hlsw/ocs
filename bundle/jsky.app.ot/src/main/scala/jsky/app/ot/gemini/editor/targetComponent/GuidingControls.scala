@@ -52,7 +52,7 @@ class GuidingControls extends GridBagPanel {
     val analysis = (for {
       ctx <- ctxOpt.asScalaOpt
       str <- AgsRegistrar.currentStrategy(ctx)
-    } yield str.analyze(ctx, DefaultMagnitudeTable(ctx))).getOrElse(List.empty)
+    } yield str.analyze(ctx, DefaultMagnitudeTable)).getOrElse(List.empty)
     autoGuideStarButton.update(analysis)
     autoGuideStarGuiderSelector.setAgsOptions(AgsContext.create(ctxOpt))
   }

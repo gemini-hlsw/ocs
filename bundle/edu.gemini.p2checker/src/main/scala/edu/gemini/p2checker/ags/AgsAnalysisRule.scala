@@ -23,7 +23,7 @@ class AgsAnalysisRule extends IRule {
         elements.getTargetObsComponentNode.asScalaOpt.map(targetNode => {
           // Perform the analysis.
           // TODO: Need to change the magnitude table here.
-          val mt = DefaultMagnitudeTable(ctx)
+          val mt = DefaultMagnitudeTable
           val analysis = AgsRegistrar.currentStrategy(ctx).fold(List.empty[AgsAnalysis])(_.analyze(ctx, mt))
 
           // All analyses that are not DeliversRequestedIq in quality should lead to a warning or error.

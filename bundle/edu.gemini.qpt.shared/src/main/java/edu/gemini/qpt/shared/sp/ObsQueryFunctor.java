@@ -862,7 +862,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
                 ObsContext ctx = ctxOpt.getValue();
 
                 // TODO: This needs to be adjusted when we figure out how to change the magnitude table.
-                AgsMagnitude.MagnitudeTable mt = new DefaultMagnitudeTable(ctx);
+                AgsMagnitude.MagnitudeTable mt = DefaultMagnitudeTable$.MODULE$;
 
                 // Perform the analysis.
                 scala.Option<AgsStrategy> strategyOption = AgsRegistrar.currentStrategy(ctx);

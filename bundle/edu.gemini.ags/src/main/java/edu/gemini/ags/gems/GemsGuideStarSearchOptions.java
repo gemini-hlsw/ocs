@@ -269,12 +269,12 @@ public class GemsGuideStarSearchOptions {
     }
 
     public GemsCatalogSearchCriterion canopusCriterion(ObsContext obsContext, GemsGuideStarType ggst) {
-        DefaultMagnitudeTable.GemsMagnitudeLimitsCalculator calculator = new DefaultMagnitudeTable(obsContext).CanopusWfsMagnitudeLimitsCalculator();
+        DefaultMagnitudeTable.GemsMagnitudeLimitsCalculator calculator = DefaultMagnitudeTable.CanopusWfsMagnitudeLimitsCalculator();
         return searchCriterion(obsContext, Canopus.Wfs.Group.instance, calculator, ggst, None.<Magnitude.Band>instance());
     }
 
     public GemsCatalogSearchCriterion instrumentCriterion(ObsContext obsContext, GemsGuideStarType ggst, Option<Magnitude.Band> nirBand) {
-        DefaultMagnitudeTable.GemsMagnitudeLimitsCalculator calculator = new DefaultMagnitudeTable(obsContext).GemsInstrumentToMagnitudeLimitsCalculator().apply(instrument);
+        DefaultMagnitudeTable.GemsMagnitudeLimitsCalculator calculator = DefaultMagnitudeTable.GemsInstrumentToMagnitudeLimitsCalculator().apply(instrument);
         return searchCriterion(obsContext, instrument.getGuiders(), calculator, ggst, nirBand);
     }
 
