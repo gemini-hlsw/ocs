@@ -32,6 +32,7 @@ OsgiKeys.privatePackage := Seq(
   "jsky.app.jskycat.*",
   "jsky.app.ot.vcs.*",
   "jsky.app.ot",
+  "jsky.app.ot.ags",
   "jsky.app.ot.editor.*",
   "jsky.app.ot.osgi.*",
   "jsky.app.ot.gemini.*",

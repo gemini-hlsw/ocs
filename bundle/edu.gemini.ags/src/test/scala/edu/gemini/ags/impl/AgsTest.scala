@@ -400,7 +400,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(SkyObj
 
   // gets the selected single probe strategy, or blows up
   def strategy: SingleProbeStrategy =
-    AgsRegistrar.selectedStrategy(ctx).get.asInstanceOf[SingleProbeStrategy]
+    AgsRegistrar.currentStrategy(ctx).get.asInstanceOf[SingleProbeStrategy]
 
   def test(): Unit = {
     val mt   = new DefaultMagnitudeTable(ctx)

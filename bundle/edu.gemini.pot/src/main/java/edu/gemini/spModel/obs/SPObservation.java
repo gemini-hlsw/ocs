@@ -70,7 +70,7 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
 
     public static final String ORIGINATING_TEMPLATE_PROP = "originatingTemplate";
 
-    public static final String AGS_STRATEGY_PROP = "agsStrategy";
+    public static final String AGS_STRATEGY_PROP = "agsStrategyOverride";
 
     /**
      * Observation user priority.
@@ -144,7 +144,7 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
     // The next scheduling block for the observation. Begin with None.
     private Option<SchedulingBlock> _schedulingBlock = None.instance();
 
-    private Option<AgsStrategyKey> _selectedAgsStrategy = None.instance();
+    private Option<AgsStrategyKey> _agsStrategyOverride = None.instance();
 
     /**
      * Default constructor.
@@ -534,14 +534,14 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
         return _correctionLog.sumCorrections();
     }
 
-    public Option<AgsStrategyKey> getSelectedAgsStrategy() {
-        return _selectedAgsStrategy;
+    public Option<AgsStrategyKey> getAgsStrategyOverride() {
+        return _agsStrategyOverride;
     }
 
-    public void setSelectedAgsStrategy(Option<AgsStrategyKey> s) {
-        if (!s.equals(_selectedAgsStrategy)) {
-            final Option<AgsStrategyKey> old = _selectedAgsStrategy;
-            _selectedAgsStrategy = s;
+    public void setAgsStrategyOverride(Option<AgsStrategyKey> s) {
+        if (!s.equals(_agsStrategyOverride)) {
+            final Option<AgsStrategyKey> old = _agsStrategyOverride;
+            _agsStrategyOverride = s;
             firePropertyChange(AGS_STRATEGY_PROP, old, s);
         }
     }
@@ -579,8 +579,8 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
             paramSet.addParamSet(_correctionLog.toParamSet(factory));
         }
 
-        if (!_selectedAgsStrategy.isEmpty()) {
-            Pio.addParam(factory, paramSet, AGS_STRATEGY_PROP, _selectedAgsStrategy.getValue().id());
+        if (!_agsStrategyOverride.isEmpty()) {
+            Pio.addParam(factory, paramSet, AGS_STRATEGY_PROP, _agsStrategyOverride.getValue().id());
         }
 
         return paramSet;
@@ -665,9 +665,9 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
 
         v = Pio.getValue(paramSet, AGS_STRATEGY_PROP);
         if (v == null) {
-            _selectedAgsStrategy = None.instance();
+            _agsStrategyOverride = None.instance();
         } else {
-            _selectedAgsStrategy = ImOption.apply(AgsStrategyKey$.MODULE$.fromStringOrNull(v));
+            _agsStrategyOverride = ImOption.apply(AgsStrategyKey$.MODULE$.fromStringOrNull(v));
         }
     }
 }

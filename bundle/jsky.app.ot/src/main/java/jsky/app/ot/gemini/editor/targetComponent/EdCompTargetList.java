@@ -7,11 +7,13 @@
 package jsky.app.ot.gemini.editor.targetComponent;
 
 import com.jgoodies.forms.layout.CellConstraints;
+import edu.gemini.ags.api.AgsStrategy;
 import edu.gemini.horizons.api.EphemerisEntry;
 import edu.gemini.horizons.api.HorizonsQuery;
 import edu.gemini.horizons.api.HorizonsReply;
 import edu.gemini.horizons.api.OrbitalElements;
 import edu.gemini.pot.sp.ISPObsComponent;
+import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.shared.gui.ButtonFlattener;
 import edu.gemini.shared.gui.RotatedButtonUI;
@@ -34,6 +36,7 @@ import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
 import edu.gemini.spModel.target.system.*;
 import jsky.app.ot.OTOptions;
+import jsky.app.ot.ags.*;
 import jsky.app.ot.editor.OtItemEditor;
 import jsky.app.ot.gemini.editor.horizons.HorizonsPlotter;
 import jsky.app.ot.gemini.editor.horizons.HorizonsService;
@@ -122,6 +125,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     // which contains the time (HH:MM:SS) for when an Horizons query should be made
     private TimeDocument _timeDocument;
 
+    private AgsContextPublisher _agsPub = new AgsContextPublisher();
     /**
      * The constructor initializes the user interface.
      */
@@ -194,6 +198,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         //Horizons Operations
         _horizonsOperations = new HorizonsActionContainer().getActions();
+
+        _agsPub.subscribe(new AgsContextSubscriber() {
+            @Override public void notify(ISPObservation obs, AgsContext oldOptions, AgsContext newOptions) {
+                updateGuiding();
+            }
+        });
     }
 
     private static JPanel wrapNonsidereal(JPanel nonsiderealPanel, MagnitudeEditor med, OriginalMagnitudeEditor omed) {
@@ -382,6 +392,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
         });
 
+        _w.autoGuideStarGuiderSelector.addSelectionListener(new AgsSelectorControl.Listener() {
+            @Override public void agsStrategyUpdated(Option<AgsStrategy> strategy) {
+                AgsStrategyUtil.setSelection(getContextObservation(), strategy);
+            }
+        });
         _w.autoGuideStarButton.addActionListener(this);
         _w.manualGuideStarButton.addActionListener(this);
 
@@ -397,13 +412,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.updateRaDecButton.addActionListener(this);
 
         _initMenuButton(_w.nameServerBar, _w.nameServer, "eclipse/menu-trimmed.gif");
-
-        _w.autoGuideStarGuiderSelector.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateGuiding();
-            }
-        });
     }
 
     @Override
@@ -1336,19 +1344,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.manualGuideStarButton.setVisible(GuideStarSupport.supportsManualGuideStarSelection(getNode()));
         toggleAgsGuiElements(GuideStarSupport.supportsAutoGuideStarSelection(getNode())
                 && SPObservation.needsGuideStar(getContextObservation()));
-        _w.guidingControls.init(getContextObservation());
         updateGuiding();
-        //Make it a change listener, since an update can hide / un-hide AGS button
-        // TPE REFACTOR: WHAT SHOULD WE DO?
-//        _progData.addChangeListener(new ChangeListener() {
-//            @Override
-//            public void stateChanged(ChangeEvent changeEvent) {
-//                toggleAgsGuiElements(GuideStarSupport.supportsAutoGuideStarSelection(getNode()));
-//            }
-//        });
+        _agsPub.watch(getContextObservation());
     }
 
     protected void cleanup() {
+        _agsPub.watch(null);
         TargetSelection.deafTo(getContextTargetObsComp(), selectionListener);
         getDataObject().removePropertyChangeListener(TargetObsComp.TARGET_ENV_PROP, primaryButtonUpdater);
         getDataObject().removePropertyChangeListener(TargetObsComp.TARGET_ENV_PROP, guidingPanelUpdater);
@@ -1362,7 +1363,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      */
     private void toggleAgsGuiElements(boolean supportsAutoGuideStar) {
         // hide the ags related buttons
-        _w.guidingControls.toggleAgsGuiElements(supportsAutoGuideStar);
+        _w.guidingControls.visible_$eq(supportsAutoGuideStar);
         _w.guidingFeedback.visible_$eq(supportsAutoGuideStar);
     }
 
@@ -1383,7 +1384,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 return obsContext.withTargets(env);
             }
         });
-        _w.guidingControls.update();
+        _w.guidingControls.update(ctx);
         _w.guidingFeedback.update(ctx);
     }
 
@@ -1795,10 +1796,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
 
         _showPos();
-
-        // guider selector has to update for changes non-sidereal <-> sidereal;
-        // reset selected guiders to make sure proper default is used
-        _w.guidingControls.resetSelectedAgsStrategy();
         updateGuiding();
     }
 

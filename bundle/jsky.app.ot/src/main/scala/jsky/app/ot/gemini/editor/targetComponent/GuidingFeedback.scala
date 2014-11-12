@@ -57,7 +57,7 @@ class GuidingFeedback extends GridBagPanel {
   def update(ctx: ObsContext): Unit = update(ctx, DefaultMagnitudeTable(ctx))
 
   def update(ctx: ObsContext, mt: MagnitudeTable): Unit = {
-    val (calcTable, analysis) = AgsRegistrar.selectedStrategy(ctx).fold((Map.empty[GuideProbe, MagnitudeCalc], List.empty[AgsAnalysis])) { strategy =>
+    val (calcTable, analysis) = AgsRegistrar.currentStrategy(ctx).fold((Map.empty[GuideProbe, MagnitudeCalc], List.empty[AgsAnalysis])) { strategy =>
       (strategy.magnitudes(ctx, mt).toMap, strategy.analyze(ctx, mt))
     }
 

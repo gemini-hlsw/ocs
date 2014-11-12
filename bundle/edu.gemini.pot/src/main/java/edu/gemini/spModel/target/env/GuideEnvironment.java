@@ -61,7 +61,7 @@ public final class GuideEnvironment implements Serializable, TargetContainer, Op
     }
 
     private static Set<GuideProbe> cpGuideProbes(Collection<GuideProbe> elements) {
-        final Set<GuideProbe> s = new TreeSet<GuideProbe>(GuideProbe.KeyComparator.instance);
+        final Set<GuideProbe> s = new TreeSet<>(GuideProbe.KeyComparator.instance);
         s.addAll(elements);
         return Collections.unmodifiableSet(s);
     }
@@ -113,7 +113,7 @@ public final class GuideEnvironment implements Serializable, TargetContainer, Op
      * {@link edu.gemini.spModel.guide.GuideProbe.KeyComparator}.
      */
     public SortedSet<GuideProbe> getReferencedGuiders() {
-        final SortedSet<GuideProbe> res = new TreeSet<GuideProbe>(GuideProbe.KeyComparator.instance);
+        final SortedSet<GuideProbe> res = new TreeSet<>(GuideProbe.KeyComparator.instance);
         guideGroups.getOptions().foreach(new ApplyOp<GuideGroup>() {
             @Override
             public void apply(GuideGroup guideGroup) {
@@ -121,6 +121,18 @@ public final class GuideEnvironment implements Serializable, TargetContainer, Op
             }
         });
         return res;
+    }
+
+    /**
+     * Gets the subset of referenced guiders that are actually selected, if any.
+     */
+    public SortedSet<GuideProbe> getPrimaryReferencedGuiders() {
+        return guideGroups.getPrimary().map(new MapOp<GuideGroup, SortedSet<GuideProbe>>() {
+            @Override
+            public SortedSet<GuideProbe> apply(GuideGroup group) {
+                return group.getPrimaryReferencedGuiders();
+            }
+        }).getOrElse(new TreeSet<GuideProbe>());
     }
 
     @Override
@@ -267,7 +279,7 @@ public final class GuideEnvironment implements Serializable, TargetContainer, Op
 
     public static GuideEnvironment fromParamSet(ParamSet parent) {
         // Active guide probes.
-        Set<GuideProbe> active = new TreeSet<GuideProbe>(GuideProbe.KeyComparator.instance);
+        Set<GuideProbe> active = new TreeSet<>(GuideProbe.KeyComparator.instance);
         Param activeParam = parent.getParam("active");
         if (activeParam != null) {
             for (String guiderKey : activeParam.getValues()) {
@@ -278,9 +290,9 @@ public final class GuideEnvironment implements Serializable, TargetContainer, Op
 
         // Guide groups.
         int primary = Pio.getIntValue(parent, "primary", -1);
-        Option<Integer> primaryOpt = (primary < 0) ? None.INTEGER : new Some<Integer>(primary);
+        Option<Integer> primaryOpt = (primary < 0) ? None.INTEGER : new Some<>(primary);
 
-        List<GuideGroup> groups = new ArrayList<GuideGroup>();
+        List<GuideGroup> groups = new ArrayList<>();
         for (ParamSet gps : parent.getParamSets()) {
             groups.add(GuideGroup.fromParamSet(gps));
         }

@@ -3,16 +3,12 @@ package edu.gemini.p2checker.ags
 import edu.gemini.ags.api.AgsGuideQuality._
 import edu.gemini.ags.api.{AgsAnalysisWithGuideProbe, AgsAnalysis, AgsRegistrar, DefaultMagnitudeTable}
 import edu.gemini.p2checker.api.{P2Problems, IP2Problems, Problem, ObservationElements, IRule}
-import edu.gemini.p2checker.rules.general.GeneralRule
-import edu.gemini.spModel.obs.{SPObservation, ObsClassService}
-import edu.gemini.spModel.obsclass.ObsClass
+import edu.gemini.spModel.obs.SPObservation
 import edu.gemini.spModel.rich.shared.immutable._
-import edu.gemini.spModel.too.Too
 
 
 class AgsAnalysisRule extends IRule {
   override def check(elements: ObservationElements): IP2Problems = {
-    import AgsAnalysis._
     import AgsAnalysisRule._
 
     val problems = new P2Problems()
@@ -28,7 +24,7 @@ class AgsAnalysisRule extends IRule {
           // Perform the analysis.
           // TODO: Need to change the magnitude table here.
           val mt = DefaultMagnitudeTable(ctx)
-          val analysis = AgsRegistrar.selectedStrategy(ctx).fold(List.empty[AgsAnalysis])(_.analyze(ctx, mt))
+          val analysis = AgsRegistrar.currentStrategy(ctx).fold(List.empty[AgsAnalysis])(_.analyze(ctx, mt))
 
           // All analyses that are not DeliversRequestedIq in quality should lead to a warning or error.
           analysis.filterNot(_.qualityOption == Some(DeliversRequestedIq)).map { h =>

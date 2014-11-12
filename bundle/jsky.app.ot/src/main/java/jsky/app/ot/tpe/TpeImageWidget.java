@@ -18,7 +18,7 @@ import edu.gemini.spModel.target.system.HmsDegTarget;
 import edu.gemini.spModel.target.system.ICoordinate;
 import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.util.Angle;
-import jsky.app.ot.gemini.editor.targetComponent.AgsStrategySelector;
+import jsky.app.ot.ags.AgsStrategyUtil;
 import jsky.app.ot.tpe.gems.GemsGuideStarSearchDialog;
 import jsky.app.ot.util.OtColor;
 import jsky.app.ot.util.PolygonD;
@@ -1197,7 +1197,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
                 DialogUtil.error(String.format("%s component is missing. It is not possible to select a guide star.", missingComponent));
             } else {
                 if (GuideStarSupport.supportsAutoGuideStarSelection(_ctx)) {
-                    final Option<AgsStrategy> ass = AgsStrategySelector.getSelectedOrDefault(maybeObsContext);
+                    final Option<AgsStrategy> ass = AgsStrategyUtil.currentStrategy(maybeObsContext);
                     if (!ass.isEmpty()) {
                         if (ass.getValue().key() == AgsStrategyKey.GemsKey$.MODULE$ && GuideStarSupport.hasGemsComponent(_ctx)) {
                             gemsGuideStarSearch();

@@ -43,6 +43,11 @@ public final class Some<T> implements Option<T> {
     }
 
     @Override
+    public boolean isDefined() {
+        return true;
+    }
+
+    @Override
     public ImList<T> toImList() {
         return ImCollections.singletonList(val);
     }

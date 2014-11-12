@@ -1,10 +1,11 @@
 package jsky.app.ot.gemini.editor.targetComponent
 
 import edu.gemini.ags.api._
-import edu.gemini.pot.sp.ISPObservation
+import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 
-import java.awt.event.{ActionEvent, ActionListener, ItemEvent, ItemListener}
+import jsky.app.ot.ags.AgsContext
+
 import scala.swing._
 import edu.gemini.ags.api.DefaultMagnitudeTable
 
@@ -23,10 +24,9 @@ class GuidingControls extends GridBagPanel {
     insets = new Insets(0, 0, 0, 0)
   }
 
-  val autoGuiderSelector          = new AgsStrategySelector
-  val autoGuideStarGuiderSelector = new autoGuiderSelector.ComboBox
+  val autoGuideStarGuiderSelector = new AgsStrategyCombo
 
-  layout(Component.wrap(autoGuideStarGuiderSelector)) = new Constraints {
+  layout(Component.wrap(autoGuideStarGuiderSelector.getUi)) = new Constraints {
     gridx  = 1
     insets = new Insets(0, 5, 0, 10)
   }
@@ -42,7 +42,7 @@ class GuidingControls extends GridBagPanel {
         case _ => false
       }
 
-      enabled = !analysis.isEmpty // if empty, no strategy so no search
+      enabled = analysis.nonEmpty // if empty, no strategy so no search
       text    = if (analysis.exists(noGuideStar)) Search else Update
     }
   }
@@ -56,7 +56,7 @@ class GuidingControls extends GridBagPanel {
     text = "Plot..."
 
     def update(analysis: List[AgsAnalysis]): Unit = {
-      enabled = !analysis.isEmpty  // only empty if there is no strategy
+      enabled = analysis.nonEmpty  // only empty if there is no strategy
     }
   }
 
@@ -64,34 +64,15 @@ class GuidingControls extends GridBagPanel {
     gridx  = 3
   }
 
-  def init(obs: ISPObservation): Unit = {
-    autoGuiderSelector.init(obs)
-    update()
-  }
-
-  def resetSelectedAgsStrategy(): Unit =
-    autoGuiderSelector.updateSelectedAgsStrategy(Option.empty[AgsStrategy].asGeminiOpt)
-
-  def update(analysis: List[AgsAnalysis]): Unit = {
+  def update(ctxOpt: edu.gemini.shared.util.immutable.Option[ObsContext]): Unit = {
+    val analysis = (for {
+      ctx <- ctxOpt.asScalaOpt
+      str <- AgsRegistrar.currentStrategy(ctx)
+    } yield str.analyze(ctx, DefaultMagnitudeTable(ctx))).getOrElse(List.empty)
     autoGuideStarButton.update(analysis)
     manualGuideStarButton.update(analysis)
+    autoGuideStarGuiderSelector.setAgsOptions(AgsContext.create(ctxOpt))
   }
-
-  def update(): Unit = {
-    val analysis = (for {
-      ctx <- Option(autoGuiderSelector.getContext)
-      str <- AgsRegistrar.selectedStrategy(ctx)
-    } yield str.analyze(ctx, DefaultMagnitudeTable(ctx))).getOrElse(List.empty)
-    update(analysis)
-  }
-
-  def toggleAgsGuiElements(visible: Boolean): Unit =
-    this.visible = visible
-
-  autoGuideStarGuiderSelector.addActionListener(new ActionListener {
-    override def actionPerformed(e: ActionEvent): Unit =
-      update()
-  })
 }
 
 object GuidingControls {

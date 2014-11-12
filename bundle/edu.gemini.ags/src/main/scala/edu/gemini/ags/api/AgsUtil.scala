@@ -9,7 +9,7 @@ object AgsUtil {
   private def lookupAndThen[A](obs: ISPObservation, default: => A)(op: (AgsStrategy, ObsContext) => Future[A]): Future[A] =
     (for {
       ctx      <- ObsContext.create(obs).asScalaOpt
-      strategy <- AgsRegistrar.selectedStrategy(ctx)
+      strategy <- AgsRegistrar.currentStrategy(ctx)
     } yield op(strategy, ctx)).getOrElse(Future.successful(default))
 
   def lookupAndEstimate(obs: ISPObservation): Future[AgsStrategy.Estimate] =
@@ -18,6 +18,6 @@ object AgsUtil {
   def lookupAndSelect(obs: ISPObservation): Future[Option[AgsStrategy.Selection]] =
     lookupAndThen(obs, Option.empty[AgsStrategy.Selection])((s,c) => s.select(c, DefaultMagnitudeTable(c)))
 
-  def selectedStrategy(obs: ISPObservation): Option[AgsStrategy] =
-    ObsContext.create(obs).asScalaOpt.flatMap(AgsRegistrar.selectedStrategy)
+  def currentStrategy(obs: ISPObservation): Option[AgsStrategy] =
+    ObsContext.create(obs).asScalaOpt.flatMap(AgsRegistrar.currentStrategy)
 }
