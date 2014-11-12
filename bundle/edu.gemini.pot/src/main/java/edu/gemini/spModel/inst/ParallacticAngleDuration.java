@@ -97,8 +97,6 @@ public final class ParallacticAngleDuration implements Serializable {
             if (step.executed)
                 executedStepTime += step.totalTime();
         }
-        long calcDuration = totalStepTime - executedStepTime;
-
-        return calcDuration;
+        return totalStepTime - executedStepTime;
     }
 }

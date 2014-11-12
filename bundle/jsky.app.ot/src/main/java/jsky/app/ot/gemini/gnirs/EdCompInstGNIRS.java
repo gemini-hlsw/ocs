@@ -238,7 +238,10 @@ public class EdCompInstGNIRS extends EdCompInstBase<InstGNIRS> implements Action
 
     @Override
     protected void cleanup() {
-        getDataObject().removePropertyChangeListener(xdListener);
+        final InstGNIRS inst = getDataObject();
+        inst.removePropertyChangeListener(xdListener);
+        inst.removePropertyChangeListener(InstGNIRS.SLIT_WIDTH_PROP.getName(), updateParallacticAnglePCL);
+        inst.removePropertyChangeListener(InstGNIRS.DISPERSER_PROP.getName(),  updateParallacticAnglePCL);
     }
 
     /**
@@ -267,9 +270,9 @@ public class EdCompInstGNIRS extends EdCompInstBase<InstGNIRS> implements Action
         _w.posAnglePanel.init(this, Site.GN);
 
         // If the position angle mode or FPU mode properties change, force an update on the parallactic angle mode.
-        getDataObject().addPropertyChangeListener(InstGNIRS.POSITION_ANGLE_MODE_PROP.getName(), updateParallacticAnglePCL);
-        getDataObject().addPropertyChangeListener(InstGNIRS.SLIT_WIDTH_PROP.getName(),          updateParallacticAnglePCL);
-        getDataObject().addPropertyChangeListener(InstGNIRS.DISPERSER_PROP.getName(),           updateParallacticAnglePCL);
+        final InstGNIRS inst = getDataObject();
+        inst.addPropertyChangeListener(InstGNIRS.SLIT_WIDTH_PROP.getName(), updateParallacticAnglePCL);
+        inst.addPropertyChangeListener(InstGNIRS.DISPERSER_PROP.getName(),  updateParallacticAnglePCL);
     }
 
     // Return an array of default wavelength description strings (wavelength (order n))

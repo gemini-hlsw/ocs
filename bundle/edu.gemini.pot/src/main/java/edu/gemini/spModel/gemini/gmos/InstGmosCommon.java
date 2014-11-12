@@ -26,7 +26,6 @@ import edu.gemini.spModel.gemini.calunit.calibration.CalDictionary;
 import edu.gemini.spModel.gemini.parallacticangle.ParallacticAngleSupportInst;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
-import edu.gemini.spModel.inst.PositionAngleMode;
 import edu.gemini.spModel.obs.plannedtime.CommonStepCalculator;
 import edu.gemini.spModel.obs.plannedtime.ExposureCalculator;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTime;
@@ -790,10 +789,6 @@ public abstract class InstGmosCommon<
             setFPUnitMode(customMaskMode);
         } else if (_fpu != customMaskFPU && _fpuMode == customMaskMode) {
             setFPUnitMode(GmosCommonType.FPUnitMode.BUILTIN);
-        }
-
-        if (!isCompatibleWithMeanParallacticAngleMode()) {
-            setPositionAngleMode(PositionAngleMode.EXPLICITLY_SET);
         }
     }
 
@@ -1669,8 +1664,14 @@ public abstract class InstGmosCommon<
         }
         if (v != null) _setPort(v);
 
+        // REL-2090: Special workaround for elimination of former PositionAngleMode, since functionality has been
+        // merged with PosAngleConstraint but we still need legacy code.
         v = Pio.getValue(paramSet, POS_ANGLE_CONSTRAINT_PROP.getName());
-        if (v != null) _setPosAngleConstraint(v);
+        final String pam = Pio.getValue(paramSet, "positionAngleMode");
+        if (pam != null && pam.equals("MEAN_PARALLACTIC_ANGLE"))
+            _setPosAngleConstraint(PosAngleConstraint.PARALLACTIC_ANGLE);
+        else if (v != null)
+            _setPosAngleConstraint(v);
 
         v = Pio.getValue(paramSet, STAGE_MODE_PROP.getName());
         if (v != null) _setStageMode(v);
@@ -1811,7 +1812,6 @@ public abstract class InstGmosCommon<
         configInfo.add(new InstConfigInfo(DTAX_OFFSET_PROP));
         configInfo.add(new InstConfigInfo(FPU_MASK_PROP, false));
         configInfo.add(new InstConfigInfo(IS_MOS_PREIMAGING_PROP));
-        configInfo.add(new InstConfigInfo(POSITION_ANGLE_MODE_PROP));
 
         return configInfo;
     }
@@ -1977,14 +1977,7 @@ public abstract class InstGmosCommon<
 
     @Override
     public boolean isCompatibleWithMeanParallacticAngleMode() {
-        //
         return !(_fpu.isImaging() || _fpuMode == GmosCommonType.FPUnitMode.CUSTOM_MASK);
-    }
-
-    @Override
-    public void setPositionAngleMode(PositionAngleMode newValue) {
-        PositionAngleMode oldValue = getPositionAngleMode();
-        super.setPositionAngleMode(newValue);
     }
 
     /**
@@ -2002,18 +1995,21 @@ public abstract class InstGmosCommon<
         }
     }
 
-    private void _setPosAngleConstraint(String name) {
+    /**
+     * For backwards compatibility, we have a flag that indicates if the old method of representing the
+     * parallactic angle was detected, which overrides all other PosAngleConstraints.
+     */
+    private void _setPosAngleConstraint(final String name) {
         final PosAngleConstraint oldValue = getPosAngleConstraint();
-        PosAngleConstraint newValue;
         try {
-            newValue = PosAngleConstraint.valueOf(name);
+            _posAngleConstraint = PosAngleConstraint.valueOf(name);
         } catch (Exception ex) {
-            newValue = oldValue;
+            _posAngleConstraint = oldValue;
         }
+    }
 
-        // If the pos angle mode is MEAN_PARALLACTIC_ANGLE, then the constraint should also be set to PARALLACTIC_ANGLE.
-        // This needs to be done because of a change from 2014B to 2015A data models.
-        _posAngleConstraint = getPositionAngleMode() == PositionAngleMode.MEAN_PARALLACTIC_ANGLE ? PosAngleConstraint.PARALLACTIC_ANGLE : newValue;
+    private void _setPosAngleConstraint(final PosAngleConstraint pac) {
+        _posAngleConstraint = pac;
     }
 
     @Override

@@ -10,7 +10,7 @@ import edu.gemini.mask.Resources
 import edu.gemini.pot.sp.ISPObsComponent
 import edu.gemini.skycalc.Angle
 import edu.gemini.spModel.core.Site
-import edu.gemini.spModel.inst.{PositionAngleMode, ParallacticAngleDuration, ParallacticAngleDurationMode, ParallacticAngleSupport}
+import edu.gemini.spModel.inst.{ParallacticAngleDuration, ParallacticAngleDurationMode, ParallacticAngleSupport}
 import edu.gemini.spModel.obs.{ObsTargetCalculatorService, SPObservation, SchedulingBlock}
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.rich.shared.immutable._
@@ -186,7 +186,6 @@ class ParallacticAngleControls extends GridBagPanel with Publisher {
       val explicitlySet = !fmt.format(ParallacticAngleControls.angleToDegrees(angle)).equals(positionAngleText) &&
                           !fmt.format(ParallacticAngleControls.angleToDegrees(angle.add(Angle.ANGLE_PI))).equals(positionAngleText)
       ui.parallacticAngleFeedback.warningState(explicitlySet)
-      setPositionAngleMode(if (explicitlySet) PositionAngleMode.EXPLICITLY_SET else PositionAngleMode.MEAN_PARALLACTIC_ANGLE)
     }
   }
 
@@ -195,6 +194,7 @@ class ParallacticAngleControls extends GridBagPanel with Publisher {
    * This should be called whenever the parallactic angle components need to be reinitialized, and at initialization.
    */
   def resetComponents(): Unit = {
+    ui.parallacticAngleFeedback.text = ""
     for {
       e              <- editor
       ispObservation = e.getContextObservation
@@ -220,14 +220,6 @@ class ParallacticAngleControls extends GridBagPanel with Publisher {
 
       publish(ParallacticAngleControls.ParallacticAngleChangedEvent)
     }
-  }
-
-
-  /**
-   * Set the position angle mode on the observation.
-   */
-  def setPositionAngleMode(mode: PositionAngleMode): Unit = {
-    editor.map(_.getDataObject.setPositionAngleMode(mode))
   }
 
 
