@@ -1,14 +1,14 @@
 package edu.gemini.ags.servlet.osgi;
 
+import edu.gemini.ags.api.AgsMagnitude;
+import edu.gemini.ags.conf.ProbeLimitsTable;
 import edu.gemini.ags.servlet.AgsServlet;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
 
-import javax.servlet.ServletException;
 import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,15 +24,15 @@ public final class Activator implements BundleActivator {
         }
 
         @Override public HttpService addingService(ServiceReference<HttpService> ref) {
+
             LOG.info("Adding HttpService");
             final HttpService http = context.getService(ref);
 
             try {
-                http.registerServlet(APP_CONTEXT, new AgsServlet(), new Hashtable(), null);
-            } catch (ServletException ex) {
+                final AgsMagnitude.MagnitudeTable magTable = ProbeLimitsTable.loadOrThrow();
+                http.registerServlet(APP_CONTEXT, new AgsServlet(magTable), new Hashtable(), null);
+            } catch (Exception ex) {
                 LOG.log(Level.SEVERE, "Trouble setting up web application.", ex);
-            } catch (NamespaceException ex) {
-                LOG.log(Level.SEVERE, "Trouble setting up web applicaiton.", ex);
             }
             return http;
         }

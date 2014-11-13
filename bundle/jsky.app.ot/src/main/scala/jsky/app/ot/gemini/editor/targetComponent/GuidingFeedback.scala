@@ -7,6 +7,7 @@ import edu.gemini.catalog.api.MagnitudeLimits
 import edu.gemini.spModel.guide.{GuideSpeed, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
+import jsky.app.ot.OT
 import jsky.app.ot.util.OtColor
 
 import java.awt.Color
@@ -54,7 +55,7 @@ class GuidingFeedback extends GridBagPanel {
   def update(ctx: edu.gemini.shared.util.immutable.Option[ObsContext]): Unit =
     ctx.asScalaOpt.fold(reset())(update)
 
-  def update(ctx: ObsContext): Unit = update(ctx, DefaultMagnitudeTable)
+  def update(ctx: ObsContext): Unit = update(ctx, OT.getMagnitudeTable)
 
   def update(ctx: ObsContext, mt: MagnitudeTable): Unit = {
     val (calcTable, analysis) = AgsRegistrar.currentStrategy(ctx).fold((Map.empty[GuideProbe, MagnitudeCalc], List.empty[AgsAnalysis])) { strategy =>

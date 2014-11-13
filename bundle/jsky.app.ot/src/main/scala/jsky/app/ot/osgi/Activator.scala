@@ -1,5 +1,6 @@
 package jsky.app.ot.osgi
 
+import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.pot.client.SPDB
 import edu.gemini.sp.vcs.reg.{VcsRegistrationSubscriber, VcsRegistrar}
@@ -20,9 +21,8 @@ import org.osgi.util.tracker.ServiceTracker
 
 import jsky.app.ot.viewer.plugin.PluginRegistry
 
-import java.util.Hashtable
 import java.util.logging.Logger
-import javax.swing.SwingUtilities
+import javax.swing.{JOptionPane, SwingUtilities}
 
 import scala.swing.Swing
 
@@ -50,9 +50,12 @@ class Activator extends BundleActivator {
               System.exit(0)
           }
 
+          // Load the magnitude table.
+          val magTable = ProbeLimitsTable.load().fold(magTableError, identity)
+
           val start = System.currentTimeMillis
           LOG.info("Starting the OT as %s".format(auth.subject))
-          OT.open(auth, reg, storage)
+          OT.open(auth, magTable, reg, storage)
           LOG.info("Call to OT.open() took %d ms.".format(System.currentTimeMillis - start))
 
           CatalogQueryHistory.load(ExternalStorage.getExternalDataRoot(ctx))
@@ -60,7 +63,7 @@ class Activator extends BundleActivator {
       })
 
       ViewerService.instance = Some(new ViewerService(odb, reg))
-      ctx.registerService(classOf[OtViewerService], ViewerService.instance.get, new Hashtable[String, Any])
+      ctx.registerService(classOf[OtViewerService], ViewerService.instance.get, new java.util.Hashtable[String, Any])
 
     } { viewerReg =>
       viewerReg.unregister()
@@ -81,7 +84,13 @@ class Activator extends BundleActivator {
     } { _.unRegister() }
     pluginTracker.open()
 
-    vcsSubReg = ctx.registerService(classOf[VcsRegistrationSubscriber], VcsGui, new Hashtable[String, Any])
+    vcsSubReg = ctx.registerService(classOf[VcsRegistrationSubscriber], VcsGui, new java.util.Hashtable[String, Any])
+  }
+
+  private def magTableError(msg: String): Nothing = {
+    LOG.severe(msg)
+    JOptionPane.showMessageDialog(null, "Could not load magnitude table:\n" + msg, "Magnitude Table Load Failure", JOptionPane.ERROR_MESSAGE)
+    scala.sys.exit(0)
   }
 
   override def stop(ctx: BundleContext) {

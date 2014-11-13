@@ -28,6 +28,7 @@ import edu.gemini.spModel.target.offset.OffsetUtil;
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
 import edu.gemini.spModel.target.system.HmsDegTarget;
 import edu.gemini.spModel.target.system.ICoordinate;
+import jsky.app.ot.OT;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.util.Resources;
 import jsky.coords.WorldCoords;
@@ -266,7 +267,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             // Add all the guide groups and targets.
             final Option<Tuple2<ObsContext, AgsMagnitude.MagnitudeTable>> ags = ctx.map(new MapOp<ObsContext, Tuple2<ObsContext, AgsMagnitude.MagnitudeTable>>() {
                 @Override public Tuple2<ObsContext, AgsMagnitude.MagnitudeTable> apply(ObsContext oc) {
-                    return new Pair<ObsContext, AgsMagnitude.MagnitudeTable>(oc, DefaultMagnitudeTable$.MODULE$);
+                    return new Pair<ObsContext, AgsMagnitude.MagnitudeTable>(oc, OT.getMagnitudeTable());
                 }
             });
 
