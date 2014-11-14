@@ -16,7 +16,7 @@ import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Collection;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -54,7 +54,7 @@ final class TpeFeatureManager {
     /**
      * Maps image features to toggle button widgets
      */
-    private final Map<String, TpeFeatureData> _featureMap = new Hashtable<String, TpeFeatureData>();
+    private final Map<String, TpeFeatureData> _featureMap = new HashMap<>();
 
 
     /**
@@ -84,23 +84,24 @@ final class TpeFeatureManager {
         btn.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent e) {
                 boolean selected = e.getStateChange() == ItemEvent.SELECTED;
-                if (selected)
+                if (selected) {
                     _iw.addFeature(tif);
-                else
+                } else {
                     _iw.deleteFeature(tif);
+                }
                 Preferences.set(prefName, selected);
             }
         });
 
-        Option<Component> keyPanel = None.instance();
-        if (!tif.getKey().isEmpty()) {
-            keyPanel = new Some<Component>(TpeToolBar.createKeyPanel(tif.getKey().getValue()));
-        }
+        final Option<Component> keyPanel = tif.getKey().isEmpty() ? None.<Component>instance() :
+                                             new Some<>(TpeToolBar.createKeyPanel(tif.getKey().getValue()));
+
         _featureMap.put(name, new TpeFeatureData(tif, btn, keyPanel));
 
         _tpeToolBar.addViewItem(btn, tif.getCategory());
-        if (!keyPanel.isEmpty())
+        if (keyPanel.isDefined()) {
             _tpeToolBar.addViewItem(keyPanel.getValue(), tif.getCategory());
+        }
 
         // Load the desired value from the preferences or set to the default.
         btn.setSelected(Preferences.get(prefName, tif.isEnabledByDefault()));
@@ -122,15 +123,6 @@ final class TpeFeatureManager {
                 setVisible(feature, true);
             }
         }
-    }
-
-    /**
-     * Get the named feature.
-     */
-    public TpeImageFeature getFeature(String name) {
-        TpeFeatureData tfd = _featureMap.get(name);
-        if (tfd == null) return null;
-        return tfd.feature;
     }
 
     /**

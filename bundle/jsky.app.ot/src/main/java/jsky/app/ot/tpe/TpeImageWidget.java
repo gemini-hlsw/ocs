@@ -57,10 +57,10 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     private static final Logger LOG = Logger.getLogger(TpeImageWidget.class.getName());
 
     // List of mouse observers
-    private final Vector<TpeMouseObserver> _mouseObs = new Vector<TpeMouseObserver>();
+    private final Vector<TpeMouseObserver> _mouseObs = new Vector<>();
 
     // List of image view observers
-    private final Vector<TpeViewObserver> _viewObs = new Vector<TpeViewObserver>();
+    private final Vector<TpeViewObserver> _viewObs = new Vector<>();
 
     // Information about the image
     private TpeContext _ctx = TpeContext.empty();
@@ -71,10 +71,10 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     private boolean _imgInfoValid = false;
 
     // List of image info observers
-    private final Vector<TpeImageInfoObserver> _infoObs = new Vector<TpeImageInfoObserver>();
+    private final Vector<TpeImageInfoObserver> _infoObs = new Vector<>();
 
     // A list of position editor features that can be drawn on the image.
-    private final Vector<TpeImageFeature> _featureList = new Vector<TpeImageFeature>();
+    private final Vector<TpeImageFeature> _featureList = new Vector<>();
 
     // The current item being dragged
     private TpeDraggableFeature _dragFeature;
@@ -190,14 +190,14 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
             }
         }
 
-        java.util.List<TpeMessage> messages = new ArrayList<TpeMessage>();
+        final java.util.List<TpeMessage> messages = new ArrayList<>();
         for (int i = 0; i < _featureList.size(); ++i) {
-            TpeImageFeature tif = _featureList.elementAt(i);
+            final TpeImageFeature tif = _featureList.elementAt(i);
             tif.draw(g, _imgInfo);
 
             // Gather any warnings from this feature.
-            Option<Collection<TpeMessage>> opt = tif.getMessages();
-            if (!opt.isEmpty()) {
+            final Option<Collection<TpeMessage>> opt = tif.getMessages();
+            if (opt.isDefined()) {
                 messages.addAll(opt.getValue());
             }
         }
