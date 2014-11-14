@@ -763,8 +763,13 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
             setFilter(Filter.getFilter(v));
         }
 
-        v = Pio.getValue(paramSet, POS_ANGLE_CONSTRAINT_PROP);
-        if (v != null)
+        // REL-2090: Special workaround for elimination of former PositionAngleMode, since functionality has been
+        // merged with PosAngleConstraint but we still need legacy code.
+        v = Pio.getValue(paramSet, POS_ANGLE_CONSTRAINT_PROP.getName());
+        final String pam = Pio.getValue(paramSet, "positionAngleMode");
+        if ("MEAN_PARALLACTIC_ANGLE".equals(pam))
+            _setPosAngleConstraint(PosAngleConstraint.PARALLACTIC_ANGLE);
+        else if (v != null)
             _setPosAngleConstraint(v);
 
         v = Pio.getValue(paramSet, PORT_PROP);
@@ -973,15 +978,17 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         }
     }
 
-    private void _setPosAngleConstraint(String name) {
-        PosAngleConstraint oldValue = getPosAngleConstraint();
-        PosAngleConstraint newValue;
+    private void _setPosAngleConstraint(final String name) {
+        final PosAngleConstraint oldValue = getPosAngleConstraint();
         try {
-            newValue = PosAngleConstraint.valueOf(name);
+            _posAngleConstraint = PosAngleConstraint.valueOf(name);
         } catch (Exception ex) {
-            newValue = oldValue;
+            _posAngleConstraint = oldValue;
         }
-        setPosAngleConstraint(newValue);
+    }
+
+    private void _setPosAngleConstraint(final PosAngleConstraint pac) {
+        _posAngleConstraint = pac;
     }
 
     @Override

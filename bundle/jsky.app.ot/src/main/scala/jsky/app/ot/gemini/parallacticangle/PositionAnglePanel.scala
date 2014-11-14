@@ -8,7 +8,7 @@ import edu.gemini.pot.sp.{SPComponentType, ISPObsComponent}
 import edu.gemini.shared.gui.EnableDisableComboBox
 import edu.gemini.skycalc.Angle
 import edu.gemini.spModel.core.Site
-import edu.gemini.spModel.inst.{ParallacticAngleSupport, PositionAngleMode}
+import edu.gemini.spModel.inst.ParallacticAngleSupport
 import edu.gemini.spModel.obs.ObsClassService
 import edu.gemini.spModel.obsclass.ObsClass
 import edu.gemini.spModel.obscomp.SPInstObsComp
@@ -236,6 +236,7 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
         case PosAngleConstraint.UNBOUNDED =>
           ui.positionAngleTextField.text    = "0"
         // TODO: Stop removing here.
+        case _ =>
       }
     }
   }
@@ -253,7 +254,6 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
     } yield {
       val angleAsDouble = angle.toDegrees.toPositive.getMagnitude
       ui.positionAngleTextField.text = numberFormatter.format(angleAsDouble)
-      pa.setPositionAngleMode(PositionAngleMode.MEAN_PARALLACTIC_ANGLE)
       e.getDataObject.setPosAngle(angleAsDouble)
 
       // This requires an AGS lookup.

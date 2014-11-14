@@ -11,6 +11,7 @@ import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.core.Semester;
 import edu.gemini.spModel.core.Site;
+import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.data.config.DefaultParameter;
 import edu.gemini.spModel.data.config.IParameter;
 import edu.gemini.spModel.data.config.ISysConfig;
@@ -30,7 +31,6 @@ import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.gemini.texes.InstTexes;
 import edu.gemini.spModel.gemini.trecs.InstTReCS;
 import edu.gemini.spModel.guide.GuideProbe;
-import edu.gemini.spModel.inst.PositionAngleMode;
 import edu.gemini.spModel.obs.ObsClassService;
 import edu.gemini.spModel.obs.ObsTimesService;
 import edu.gemini.spModel.obs.ObservationStatus;
@@ -48,6 +48,8 @@ import edu.gemini.spModel.core.ProgramType;
 import edu.gemini.spModel.seqcomp.SeqConfigComp;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
+import edu.gemini.spModel.telescope.PosAngleConstraint;
+import edu.gemini.spModel.telescope.PosAngleConstraintAware;
 import edu.gemini.spModel.time.ChargeClass;
 import edu.gemini.spModel.time.ObsTimeCharges;
 import edu.gemini.spModel.time.ObsTimes;
@@ -657,11 +659,9 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
      */
     private boolean usesAverageParallacticAngle(ISPObservation obsShell) throws RemoteException {
         for (ISPObsComponent comp : obsShell.getObsComponents()) {
-            if (SPComponentType.INSTRUMENT_GMOS.equals(comp.getType()) || SPComponentType.INSTRUMENT_GMOSSOUTH.equals(comp.getType())) {
-                InstGmosCommon gmos = (InstGmosCommon) comp.getDataObject();
-                if (gmos.getPositionAngleMode() == PositionAngleMode.MEAN_PARALLACTIC_ANGLE)
-                    return true;
-            }
+            final ISPDataObject dObj = comp.getDataObject();
+            if (dObj instanceof PosAngleConstraintAware)
+                return ((PosAngleConstraintAware) dObj).getPosAngleConstraint() == PosAngleConstraint.PARALLACTIC_ANGLE;
         }
         return false;
     }

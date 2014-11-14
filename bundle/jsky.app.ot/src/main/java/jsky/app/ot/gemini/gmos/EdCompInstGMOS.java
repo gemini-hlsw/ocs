@@ -473,7 +473,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
 
         // If the position angle mode or FPU mode properties change, force an update on the parallactic angle mode.
         final T inst = getDataObject();
-        inst.addPropertyChangeListener(InstGmosCommon.POSITION_ANGLE_MODE_PROP.getName(), updateParallacticAnglePCL);
         inst.addPropertyChangeListener(InstGmosCommon.FPU_MODE_PROP.getName(), updateParallacticAnglePCL);
         inst.addPropertyChangeListener(InstGmosCommon.DISPERSER_PROP_NAME, updateParallacticAnglePCL);
 
@@ -486,7 +485,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         super.cleanup();
 
         final T inst = getDataObject();
-        inst.removePropertyChangeListener(InstGmosCommon.POSITION_ANGLE_MODE_PROP.getName(), updateParallacticAnglePCL);
         inst.removePropertyChangeListener(InstGmosCommon.FPU_MODE_PROP.getName(), updateParallacticAnglePCL);
         inst.removePropertyChangeListener(InstGmosCommon.DISPERSER_PROP_NAME, updateParallacticAnglePCL);
     }
