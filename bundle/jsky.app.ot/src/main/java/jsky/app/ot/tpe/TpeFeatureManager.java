@@ -15,9 +15,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This is a helper object used to manage the various TpeImageFeatures.
@@ -83,7 +81,7 @@ final class TpeFeatureManager {
         btn.setVisible(false);
         btn.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent e) {
-                boolean selected = e.getStateChange() == ItemEvent.SELECTED;
+                final boolean selected = e.getStateChange() == ItemEvent.SELECTED;
                 if (selected) {
                     _iw.addFeature(tif);
                 } else {
@@ -100,7 +98,9 @@ final class TpeFeatureManager {
 
         _tpeToolBar.addViewItem(btn, tif.getCategory());
         if (keyPanel.isDefined()) {
-            _tpeToolBar.addViewItem(keyPanel.getValue(), tif.getCategory());
+            final Component comp = keyPanel.getValue();
+            comp.setVisible(false);
+            _tpeToolBar.addViewItem(comp, tif.getCategory());
         }
 
         // Load the desired value from the preferences or set to the default.
@@ -109,18 +109,25 @@ final class TpeFeatureManager {
 
     public void updateAvailableOptions(Collection<TpeImageFeature> feats, TpeContext ctx) {
 
-        // Remove all the existing options.
-        for (TpeFeatureData data : _featureMap.values()) {
-            data.button.setVisible(false);
-            if (!data.key.isEmpty()) {
-                data.key.getValue().setVisible(false);
+        // TpeImageFeatures are clearly meant to each have a unique name as
+        // nothing in this class would work otherwise.  Here we remember those
+        // that are supposed to be available.
+        final Set<String> available = new HashSet<>();
+        for (final TpeImageFeature tif : feats) {
+            if (tif.isEnabled(ctx)) {
+                available.add(tif.getName());
             }
         }
 
-        // Add view options according to the enabled state of each item.
-        for (TpeImageFeature feature : feats) {
-            if (feature.isEnabled(ctx)) {
-                setVisible(feature, true);
+        // Walk through all the features and make them visible or not as
+        // appropriate.
+        for (TpeFeatureData data : _featureMap.values()) {
+            final boolean visible = available.contains(data.feature.getName());
+            setAvailable(data.feature, visible);
+            if (visible && isSelected(data.feature)) {
+                _iw.addFeature(data.feature);
+            } else {
+                _iw.deleteFeature(data.feature);
             }
         }
     }
@@ -133,6 +140,16 @@ final class TpeFeatureManager {
     }
 
     /**
+     * Determines whether the given feature has been selected for viewing in
+     * the TPE.
+     */
+    public boolean isSelected(TpeImageFeature tif) {
+        return _featureMap.get(tif.getName()).button.isSelected();
+    }
+
+    /**
+     * Sets the selected state of the feature, which determines whether it is
+     * shown in the TPE.
      */
     public void setSelected(TpeImageFeature tif, boolean selected) {
         TpeFeatureData tfd = _featureMap.get(tif.getName());
@@ -142,13 +159,15 @@ final class TpeFeatureManager {
     }
 
     /**
+     * Determines whether the checkbox to view the given feature is available
+     * or not.
      */
-    public void setVisible(TpeImageFeature tif, boolean visible) {
+    private void setAvailable(TpeImageFeature tif, boolean available) {
         TpeFeatureData tfd = _featureMap.get(tif.getName());
-        if (visible != tfd.button.isVisible()) {
-            tfd.button.setVisible(visible);
+        if (available != tfd.button.isVisible()) {
+            tfd.button.setVisible(available);
             if (!tfd.key.isEmpty()) {
-                tfd.key.getValue().setVisible(visible);
+                tfd.key.getValue().setVisible(available);
             }
         }
     }
