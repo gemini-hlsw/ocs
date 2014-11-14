@@ -1,6 +1,5 @@
 package edu.gemini.ags.gems;
 
-import edu.gemini.ags.api.DefaultMagnitudeTable;
 import edu.gemini.catalog.api.MagnitudeLimits;
 import edu.gemini.catalog.api.RadiusLimits;
 import edu.gemini.skycalc.Angle;
@@ -269,18 +268,18 @@ public class GemsGuideStarSearchOptions {
     }
 
     public GemsCatalogSearchCriterion canopusCriterion(ObsContext obsContext, GemsGuideStarType ggst) {
-        DefaultMagnitudeTable.GemsMagnitudeLimitsCalculator calculator = DefaultMagnitudeTable.CanopusWfsMagnitudeLimitsCalculator();
+        final GemsMagnitudeTable.LimitsCalculator calculator = GemsMagnitudeTable.CanopusWfsMagnitudeLimitsCalculator();
         return searchCriterion(obsContext, Canopus.Wfs.Group.instance, calculator, ggst, None.<Magnitude.Band>instance());
     }
 
     public GemsCatalogSearchCriterion instrumentCriterion(ObsContext obsContext, GemsGuideStarType ggst, Option<Magnitude.Band> nirBand) {
-        DefaultMagnitudeTable.GemsMagnitudeLimitsCalculator calculator = DefaultMagnitudeTable.GemsInstrumentToMagnitudeLimitsCalculator().apply(instrument);
+        final GemsMagnitudeTable.LimitsCalculator calculator = GemsMagnitudeTable.GemsInstrumentToMagnitudeLimitsCalculator().apply(instrument);
         return searchCriterion(obsContext, instrument.getGuiders(), calculator, ggst, nirBand);
     }
 
     public GemsCatalogSearchCriterion searchCriterion(ObsContext obsContext,
                                                       GemsGuideProbeGroup gGroup,
-                                                      DefaultMagnitudeTable.GemsMagnitudeLimitsCalculator calculator,
+                                                      GemsMagnitudeTable.LimitsCalculator calculator,
                                                       GemsGuideStarType gType,
                                                       Option<Magnitude.Band> nirBand) {
         String name = "%s %s".format(gGroup.getDisplayName(), gType.name());

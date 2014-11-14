@@ -1,14 +1,17 @@
 package edu.gemini.ags.conf
 
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
+import edu.gemini.ags.gems.GemsMagnitudeTable
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.core.Site.{GN, GS}
 
 import edu.gemini.spModel.gemini.altair.AltairParams.Mode._
 import edu.gemini.spModel.gemini.altair.{InstAltair, AltairAowfsGuider}
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2OiwfsGuideProbe
+import edu.gemini.spModel.gemini.gems.Canopus
 import edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe
 import edu.gemini.spModel.gemini.gnirs.GnirsOiwfsGuideProbe
+import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw
 import edu.gemini.spModel.gemini.nici.NiciOiwfsGuideProbe
 import edu.gemini.spModel.gemini.nifs.NifsOiwfsGuideProbe
 import edu.gemini.spModel.gemini.niri.NiriOiwfsGuideProbe
@@ -41,11 +44,18 @@ object ProbeLimitsTable {
 case class ProbeLimitsTable(tab: CalcMap) extends MagnitudeTable {
 
   def apply(ctx: ObsContext, probe: GuideProbe): Option[MagnitudeCalc] =
-    for {
-      s  <- ctx.getSite.asScalaOpt
-      id <- lookup(s, ctx, probe)
-      ct <- tab.get(id)
-    } yield ct
+    // Deferring GeMS to the old implementation until we understand
+    // what is supposed to happen.
+    probe match {
+      case _: GsaoiOdgw   => GemsMagnitudeTable(ctx, probe)
+      case _: Canopus.Wfs => GemsMagnitudeTable(ctx, probe)
+      case _              =>
+        for {
+          s <- ctx.getSite.asScalaOpt
+          id <- lookup(s, ctx, probe)
+          ct <- tab.get(id)
+        } yield ct
+    }
 
   private def lookup(site: Site, ctx: ObsContext, probe: GuideProbe): Option[MagLimitsId] = {
     (site, probe) match {
