@@ -1044,10 +1044,6 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         }
     }
 
-    /**
-     * For backwards compatibility, we have a flag that indicates if the old method of representing the
-     * parallactic angle was detected, which overrides all other PosAngleConstraints.
-     */
     private void _setPosAngleConstraint(final String name) {
         final PosAngleConstraint oldValue = getPosAngleConstraint();
         try {
@@ -1279,7 +1275,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         // merged with PosAngleConstraint but we still need legacy code.
         v = Pio.getValue(paramSet, POS_ANGLE_CONSTRAINT_PROP.getName());
         final String pam = Pio.getValue(paramSet, "positionAngleMode");
-        if (pam != null && pam.equals("MEAN_PARALLACTIC_ANGLE"))
+        if ("MEAN_PARALLACTIC_ANGLE".equals(pam))
             _setPosAngleConstraint(PosAngleConstraint.PARALLACTIC_ANGLE);
         else if (v != null)
             _setPosAngleConstraint(v);
