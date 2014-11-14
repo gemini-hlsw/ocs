@@ -160,7 +160,7 @@ public class GmosForm<T extends InstGmosCommon> extends JPanel {
                     new ColumnSpec[] {
                             new ColumnSpec(ColumnSpec.RIGHT, Sizes.DEFAULT, FormSpec.NO_GROW),
                             FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-                            ColumnSpec.decode("max(pref;200dlu)"),  // originally 84, then 150
+                            ColumnSpec.decode("max(pref;160dlu)"),  // originally 84, then 150, then 200
                             FormFactory.UNRELATED_GAP_COLSPEC,
                             ColumnSpec.decode("right:max(pref;70dlu)"), // originally 50
                             FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
