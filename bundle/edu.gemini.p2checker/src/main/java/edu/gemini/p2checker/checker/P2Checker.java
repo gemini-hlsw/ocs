@@ -185,9 +185,6 @@ public class P2Checker {
             for (ISPObservation o : tg.getAllObservations())
                 problems.append(check(o, mt));
             return problems;
-
-//        } else {
-            // node is null or irrelevant
         }
 
         return null;

@@ -3,7 +3,6 @@ package edu.gemini.ags.conf
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeCalc
 import edu.gemini.catalog.api.MagnitudeLimits
 import edu.gemini.catalog.api.MagnitudeLimits.{SaturationLimit, FaintnessLimit}
-import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.shared.skyobject.Magnitude.Band
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 import edu.gemini.spModel.guide.GuideSpeed
@@ -17,9 +16,7 @@ case class ProbeLimitsCalc(band: Band, saturationAdjustment: Double, faintnessTa
     val faint  = faintnessTable(FaintnessKey(c.iq, c.sb, gs))
     val bright = faint - saturationAdjustment
 
-    // TODO: cleanup to not have to go through a new Magnitude instance :-/
-    def ccAdj(v: Double): Double = c.cc.adjust(new Magnitude(band, v)).getBrightness
-
+    def ccAdj(v: Double): Double = v + c.cc.magAdjustment
     new MagnitudeLimits(band, new FaintnessLimit(ccAdj(faint)), new SaturationLimit(ccAdj(bright)))
   }
 }
