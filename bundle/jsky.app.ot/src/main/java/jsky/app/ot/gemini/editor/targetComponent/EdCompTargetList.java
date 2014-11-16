@@ -135,8 +135,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentShown(ComponentEvent componentEvent) {
-                toggleAgsGuiElements(GuideStarSupport.supportsAutoGuideStarSelection(getNode())
-                        && SPObservation.needsGuideStar(getContextObservation()));
+                toggleAgsGuiElements();
             }
         });
 
@@ -1342,8 +1341,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     public void init() {
         setTargetObsComp();
         _w.manualGuideStarButton.setVisible(GuideStarSupport.supportsManualGuideStarSelection(getNode()));
-        toggleAgsGuiElements(GuideStarSupport.supportsAutoGuideStarSelection(getNode())
-                && SPObservation.needsGuideStar(getContextObservation()));
         updateGuiding();
         _agsPub.watch(getContextObservation());
     }
@@ -1358,13 +1355,14 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     /**
      * Toggles the ags related gui elements depending on context.
-     *
-     * @param supportsAutoGuideStar
      */
-    private void toggleAgsGuiElements(boolean supportsAutoGuideStar) {
+    private void toggleAgsGuiElements() {
+        final boolean supports = GuideStarSupport.supportsAutoGuideStarSelection(getNode());
+        final boolean needs    = SPObservation.needsGuideStar(getContextObservation());
+
         // hide the ags related buttons
-        _w.guidingControls.visible_$eq(supportsAutoGuideStar);
-        _w.guidingFeedback.visible_$eq(supportsAutoGuideStar);
+        _w.guidingControls.supportsAgs_$eq(supports);
+        _w.guidingFeedback.visible_$eq(needs && supports);
     }
 
     // Guider panel property change listener to modify status and magnitude limits.
@@ -1379,6 +1377,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
     private void updateGuiding(final TargetEnvironment env) {
+        toggleAgsGuiElements();
         final Option<ObsContext> ctx = ObsContext.create(getContextObservation()).map(new Function1<ObsContext, ObsContext>() {
             @Override public ObsContext apply(ObsContext obsContext) {
                 return obsContext.withTargets(env);

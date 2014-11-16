@@ -31,19 +31,9 @@ class GuidingControls extends GridBagPanel {
     insets = new Insets(0, 5, 0, 10)
   }
 
-  val autoGuideStarButton = new Button {
-    import GuidingControls.{Search, Update}
-    text = Search
-
+  val autoGuideStarButton = new Button("Auto GS") {
     def update(analysis: List[AgsAnalysis]): Unit = {
-      def noGuideStar(a: AgsAnalysis): Boolean = a match {
-        case AgsAnalysis.NoGuideStarForGroup(_) => true
-        case AgsAnalysis.NoGuideStarForProbe(_) => true
-        case _ => false
-      }
-
       enabled = analysis.nonEmpty // if empty, no strategy so no search
-      text    = if (analysis.exists(noGuideStar)) Search else Update
     }
   }
 
@@ -52,13 +42,7 @@ class GuidingControls extends GridBagPanel {
     insets = new Insets(0, 0, 0, 5)
   }
 
-  val manualGuideStarButton = new Button {
-    text = "Plot..."
-
-    def update(analysis: List[AgsAnalysis]): Unit = {
-      enabled = analysis.nonEmpty  // only empty if there is no strategy
-    }
-  }
+  val manualGuideStarButton = new Button("Manual GS")
 
   layout(manualGuideStarButton) = new Constraints {
     gridx  = 3
@@ -70,14 +54,12 @@ class GuidingControls extends GridBagPanel {
       str <- AgsRegistrar.currentStrategy(ctx)
     } yield str.analyze(ctx, DefaultMagnitudeTable(ctx))).getOrElse(List.empty)
     autoGuideStarButton.update(analysis)
-    manualGuideStarButton.update(analysis)
     autoGuideStarGuiderSelector.setAgsOptions(AgsContext.create(ctxOpt))
   }
+
+  def supportsAgs_=(supports: Boolean): Unit = {
+    guiderLabel.visible = supports
+    autoGuideStarGuiderSelector.getUi.setVisible(supports)
+    autoGuideStarButton.visible = supports
+  }
 }
-
-object GuidingControls {
-  private val Search = "Search"
-  private val Update = "Update"
-}
-
-
