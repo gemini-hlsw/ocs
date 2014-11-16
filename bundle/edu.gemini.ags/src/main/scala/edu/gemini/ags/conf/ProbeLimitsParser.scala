@@ -34,8 +34,12 @@ object ProbeLimitsParser extends JavaTokenParsers {
   def band: Parser[Band]      = """[A-Z]+""".r ^? (bandMap, s => s"Unrecognized magnitude band '$s'.")
   def mag: Parser[Double]     = decimalNumber ^^ { _.toDouble }
 
+  // When exported by the Google spreadsheet, there are commas in the blank
+  // rows and columns.
+  def chaff: Parser[List[String]] = rep(",")
+
   def calcDef: Parser[(MagLimitsId, Band, Double)] =
-    (id<~",")~(band<~",")~mag ^^ {
+    (id<~",")~(band<~",")~(mag<~chaff) ^^ {
       case idVal~bandVal~magAdj => (idVal, bandVal, magAdj)
     }
 
@@ -62,7 +66,7 @@ object ProbeLimitsParser extends JavaTokenParsers {
     repN(16, limitsLine) ^? { case lst@(_ :: _) => lst.reduce(_ ++ _) }
 
   def calcEntry: Parser[(MagLimitsId, ProbeLimitsCalc)] =
-    calcDef~limitsMap ^^ { case (id, band, adj)~tab =>
+    chaff~>calcDef~limitsMap ^^ { case (id, band, adj)~tab =>
         id -> ProbeLimitsCalc(band, adj, tab)
     }
 
@@ -71,8 +75,8 @@ object ProbeLimitsParser extends JavaTokenParsers {
 
   private def read(src: Source): String \/ CalcMap =
     parseAll(calcMap, src.getLines().mkString("\n")) match {
-      case Success(m, _)        => \/-(m)
-      case NoSuccess(msg, next) => -\/(s"Problem parsing guide probe limits on line ${next.pos.line}: $msg")
+      case Success(m, _)        => m.right
+      case NoSuccess(msg, next) => s"Problem parsing guide probe limits on line ${next.pos.line}: $msg".left
     }
 
   def read(is: InputStream): String \/ CalcMap =
