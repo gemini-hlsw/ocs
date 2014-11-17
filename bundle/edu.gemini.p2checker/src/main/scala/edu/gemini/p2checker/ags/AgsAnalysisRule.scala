@@ -45,9 +45,11 @@ object AgsAnalysisRule {
    * Note that DeliversRequestedIq is already filtered out by this point, so we simply do not care
    * what Problem.Type is returned for it since this should never happen.
    */
-  def analysisProblemType(analysis: AgsAnalysis): Problem.Type = analysis.qualityOption match {
-      case Some(PossibleIqDegradation) | Some(IqDegradation) | Some(PossiblyUnusable) => Problem.Type.WARNING
-      case _ => Problem.Type.ERROR
+  def analysisProblemType(analysis: AgsAnalysis): Problem.Type =
+    analysis match {
+      case _: AgsAnalysis.Usable             => Problem.Type.WARNING
+      case _: AgsAnalysis.NoMagnitudeForBand => Problem.Type.WARNING
+      case _                                 => Problem.Type.ERROR
     }
 
   def analysisMessage(analysis: AgsAnalysis): String = (analysis match {

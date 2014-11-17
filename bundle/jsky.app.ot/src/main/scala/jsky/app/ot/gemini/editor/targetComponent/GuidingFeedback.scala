@@ -150,5 +150,5 @@ object GuidingFeedback {
         case a: AgsAnalysisWithGuideProbe => s"${a.guideProbe.getKey}  "
         case _ => ""
       }
-    else "") + analysis.message
+    else "") + analysis.feedbackMessage
 }
