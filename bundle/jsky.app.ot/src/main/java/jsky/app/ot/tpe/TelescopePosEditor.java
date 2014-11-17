@@ -290,7 +290,6 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         if (_featureMan.isFeaturePresent(tif)) return;// already being displayed
 
         _featureMan.addFeature(tif);
-        _featureMan.setVisible(tif, true);
         _editorTools.addFeature(tif);
 
         // If this feature has properties, show them in the "View" menu.

@@ -150,7 +150,9 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
     @Override
     public void unloaded() {
         props.deleteWatcher(this);
-        _iw.removeMouseListener(this);
+        if (_iw != null) {
+            _iw.removeMouseListener(this);
+        }
         super.unloaded();
     }
 

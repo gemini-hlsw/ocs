@@ -46,6 +46,7 @@ import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.*;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -57,10 +58,10 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     private static final Logger LOG = Logger.getLogger(TpeImageWidget.class.getName());
 
     // List of mouse observers
-    private final Vector<TpeMouseObserver> _mouseObs = new Vector<TpeMouseObserver>();
+    private final Vector<TpeMouseObserver> _mouseObs = new Vector<>();
 
     // List of image view observers
-    private final Vector<TpeViewObserver> _viewObs = new Vector<TpeViewObserver>();
+    private final Vector<TpeViewObserver> _viewObs = new Vector<>();
 
     // Information about the image
     private TpeContext _ctx = TpeContext.empty();
@@ -71,10 +72,10 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     private boolean _imgInfoValid = false;
 
     // List of image info observers
-    private final Vector<TpeImageInfoObserver> _infoObs = new Vector<TpeImageInfoObserver>();
+    private final Vector<TpeImageInfoObserver> _infoObs = new Vector<>();
 
     // A list of position editor features that can be drawn on the image.
-    private final Vector<TpeImageFeature> _featureList = new Vector<TpeImageFeature>();
+    private final Vector<TpeImageFeature> _featureList = new Vector<>();
 
     // The current item being dragged
     private TpeDraggableFeature _dragFeature;
@@ -190,14 +191,13 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
             }
         }
 
-        java.util.List<TpeMessage> messages = new ArrayList<TpeMessage>();
-        for (int i = 0; i < _featureList.size(); ++i) {
-            TpeImageFeature tif = _featureList.elementAt(i);
+        final java.util.List<TpeMessage> messages = new ArrayList<>();
+        for (final TpeImageFeature tif : _featureList) {
             tif.draw(g, _imgInfo);
 
             // Gather any warnings from this feature.
-            Option<Collection<TpeMessage>> opt = tif.getMessages();
-            if (!opt.isEmpty()) {
+            final Option<Collection<TpeMessage>> opt = tif.getMessages();
+            if (opt.isDefined()) {
                 messages.addAll(opt.getValue());
             }
         }
@@ -301,8 +301,8 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
             ex.printStackTrace();
             return;
         }
-        for (int i = 0; i < _mouseObs.size(); ++i) {
-            _mouseObs.elementAt(i).tpeMouseEvent(this, tme);
+        for (final TpeMouseObserver mo : _mouseObs) {
+            mo.tpeMouseEvent(this, tme);
         }
     }
 
@@ -310,8 +310,8 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
      * Tell all the view observers that the view has changed.
      */
     protected void _notifyViewObs() {
-        for (int i = 0; i < _viewObs.size(); ++i) {
-            _viewObs.elementAt(i).tpeViewChange(this);
+        for (final TpeViewObserver vo : _viewObs) {
+            vo.tpeViewChange(this);
         }
     }
 
@@ -380,13 +380,12 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     }
 
     private void _notifyInfoObs() {
-        Vector v;
+        final List<TpeImageInfoObserver> l;
         synchronized (_infoObs) {
-            v = (Vector) _infoObs.clone();
+            l = new ArrayList<>(_infoObs);
         }
 
-        for (int i = 0; i < v.size(); ++i) {
-            final TpeImageInfoObserver o = (TpeImageInfoObserver) v.elementAt(i);
+        for (final TpeImageInfoObserver o : l) {
             o.imageInfoUpdate(this, _imgInfo);
         }
     }
@@ -748,13 +747,12 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         if ((!_imgInfoValid)) return;
 
         Object dragObject = null;
-        for (int i = 0; i < _featureList.size(); ++i) {
-            TpeImageFeature tif = _featureList.elementAt(i);
+        for (final TpeImageFeature tif : _featureList) {
             if (tif instanceof TpeDraggableFeature) {
-                TpeDraggableFeature tdf = (TpeDraggableFeature) tif;
+                final TpeDraggableFeature tdf = (TpeDraggableFeature) tif;
 
-                Option<Object> dragOpt = tdf.dragStart(evt, _imgInfo);
-                if (!dragOpt.isEmpty()) {
+                final Option<Object> dragOpt = tdf.dragStart(evt, _imgInfo);
+                if (dragOpt.isDefined()) {
                     dragObject = dragOpt.getValue();
                     _dragFeature = tdf;
                     drag(evt);
@@ -766,10 +764,10 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         if (dragObject == null) return;
 
         // Let anybody who wants to know about this drag know
-        Option<ObsContext> ctxOpt = getObsContext();
-        if (!ctxOpt.isEmpty()) {
-            ObsContext ctx = ctxOpt.getValue();
-            for (TpeImageFeature tif : _featureList) {
+        final Option<ObsContext> ctxOpt = getObsContext();
+        if (ctxOpt.isDefined()) {
+            final ObsContext ctx = ctxOpt.getValue();
+            for (final TpeImageFeature tif : _featureList) {
                 if (tif instanceof TpeDragSensitive) {
                     ((TpeDragSensitive) tif).handleDragStarted(dragObject, ctx);
                 }
@@ -834,11 +832,9 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     public boolean erase(TpeMouseEvent tme) {
         if (!_imgInfoValid) return false;
 
-        int n = _featureList.size();
-        for (int i = 0; i < n; ++i) {
-            TpeImageFeature tif = _featureList.elementAt(i);
+        for (final TpeImageFeature tif : _featureList) {
             if (tif instanceof TpeEraseableFeature) {
-                TpeEraseableFeature tef = (TpeEraseableFeature) tif;
+                final TpeEraseableFeature tef = (TpeEraseableFeature) tif;
                 if (tef.erase(tme)) {
                     return true;
                 }
@@ -856,9 +852,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         }
 
         if (cursor != defaultCursor) {
-            int n = _featureList.size();
-            for (int i = 0; i < n; ++i) {
-                TpeImageFeature tif = _featureList.elementAt(i);
+            for (final TpeImageFeature tif : _featureList) {
                 if (tif.isMouseOver(tme)) {
                     if (getCursor() != cursor) {
                         setCursor(cursor);
@@ -959,13 +953,12 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     // Check if the instrument's position angle has changed and update the _imgInfo object
     private void _checkPosAngle() {
         if (_ctx.instrument().isDefined()) {
-            double d = _ctx.instrument().get().getPosAngleDegrees();
+            final double d = _ctx.instrument().get().getPosAngleDegrees();
             if (d != _imgInfo.getPosAngleDegrees()) {
                 _imgInfo.setPosAngleDegrees(d);
                 _notifyInfoObs();
 
-                for (int i = 0; i < _featureList.size(); ++i) {
-                    TpeImageFeature tif = _featureList.elementAt(i);
+                for (final TpeImageFeature tif : _featureList) {
                     tif.posAngleUpdate(_imgInfo);
                 }
             }
@@ -976,8 +969,8 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
      * Set the position angle in degrees.
      */
     public boolean setPosAngle(double posAngle) {
-        SPInstObsComp inst = _ctx.instrument().orNull();
-        Double d = _ctx.instrument().posAngleOrZero();
+        final SPInstObsComp inst = _ctx.instrument().orNull();
+        final Double d = _ctx.instrument().posAngleOrZero();
         if ((d != posAngle) && (inst != null)) {
             inst.setPosAngle(posAngle);
         }
@@ -989,8 +982,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         _imgInfo.setPosAngleDegrees(posAngle);
         _notifyInfoObs();
 
-        for (int i = 0; i < _featureList.size(); ++i) {
-            TpeImageFeature tif = _featureList.elementAt(i);
+        for (final TpeImageFeature tif : _featureList) {
             tif.posAngleUpdate(_imgInfo);
         }
         return true;
@@ -1088,8 +1080,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         _imgInfoValid = true;
         _notifyInfoObs();
 
-        for (int i = 0; i < _featureList.size(); ++i) {
-            TpeImageFeature tif = _featureList.elementAt(i);
+        for (final TpeImageFeature tif : _featureList) {
             tif.reinit(this, _imgInfo);
         }
 

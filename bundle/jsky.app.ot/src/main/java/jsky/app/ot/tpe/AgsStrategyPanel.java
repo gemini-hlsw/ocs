@@ -62,7 +62,7 @@ public final class AgsStrategyPanel extends AgsSelectorControl {
             }
         }
 
-        pan.invalidate();
+        pan.revalidate();
         pan.repaint();
     }
 
