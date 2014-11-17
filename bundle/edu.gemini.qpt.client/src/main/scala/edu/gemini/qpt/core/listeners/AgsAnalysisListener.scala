@@ -50,5 +50,5 @@ object AgsAnalysisListener {
   def analysisMessage(analysis: AgsAnalysis): String = (analysis match {
     case agp: AgsAnalysisWithGuideProbe => s"${agp.guideProbe.getKey}: "
     case _ => ""
-  }) + analysis.feedbackMessage
+  }) + analysis.message
 }
