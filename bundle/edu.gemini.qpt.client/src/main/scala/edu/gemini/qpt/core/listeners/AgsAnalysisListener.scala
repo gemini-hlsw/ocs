@@ -40,13 +40,15 @@ object AgsAnalysisListener {
    * Note that DeliversRequestedIq is already filtered out by this point, so we simply do not care
    * what Severity is returned for it since this should never happen.
    */
-  def analysisSeverity(analysis: AgsAnalysis): Severity = analysis.qualityOption match {
-    case Some(PossibleIqDegradation) | Some(IqDegradation) | Some(PossiblyUnusable) => Severity.Warning
-    case _ => Severity.Error
-  }
+  def analysisSeverity(analysis: AgsAnalysis): Severity =
+    analysis match {
+      case _: AgsAnalysis.Usable             => Severity.Warning
+      case _: AgsAnalysis.NoMagnitudeForBand => Severity.Warning
+      case _                                 => Severity.Error
+    }
 
   def analysisMessage(analysis: AgsAnalysis): String = (analysis match {
     case agp: AgsAnalysisWithGuideProbe => s"${agp.guideProbe.getKey}: "
     case _ => ""
-  }) + analysis.message
+  }) + analysis.feedbackMessage
 }
