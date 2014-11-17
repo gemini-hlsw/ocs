@@ -42,7 +42,12 @@ object AgsGuideQuality {
 
 sealed trait AgsAnalysis {
   def qualityOption: Option[AgsGuideQuality] = None
+
+  // Message used for P2 checks and QPT messages.
   def message: String
+
+  // Message used for guiding feedback.
+  def feedbackMessage: String = message
 }
 
 sealed trait AgsAnalysisWithGuideProbe extends AgsAnalysis {
@@ -71,7 +76,8 @@ object AgsAnalysis {
   }
 
   case class NoMagnitudeForBand(guideProbe: GuideProbe, target: SPTarget, band: Magnitude.Band) extends AgsAnalysisWithGuideProbe {
-    override val message = s"Guide star ${band.name}-band magnitude is missing."
+    override val message         = s"Guide star ${band.name}-band magnitude is missing. Cannot determine guiding performance."
+    override val feedbackMessage = s"Warning: guide star ${band.name}-band magnitude is missing. Cannot determine guiding performance."
   }
 
   case class NotReachable(guideProbe: GuideProbe, target: SPTarget) extends AgsAnalysisWithGuideProbe {

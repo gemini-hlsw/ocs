@@ -72,7 +72,7 @@ class GuidingFeedback extends GridBagPanel {
     reset()
 
     val messages = analysis.map(h => Message(GuidingIcon.apply(h.qualityOption, enabled = true), toColor(h), feedbackText(h, analysis.size > 1),
-                                                               magRangeText(h, limitsTable), fullMagRangeText(h, probeSpeedLimits)))
+      magRangeText(h, limitsTable), fullMagRangeText(h, probeSpeedLimits)))
     messages.zipWithIndex.foreach { case (msg, rowIndex) =>
       layout(new Feedback(msg)) = new Constraints {
         gridy = rowIndex
@@ -151,5 +151,5 @@ object GuidingFeedback {
         case a: AgsAnalysisWithGuideProbe => s"${a.guideProbe.getKey}  "
         case _ => ""
       }
-    else "") + analysis.message
+    else "") + analysis.feedbackMessage
 }
