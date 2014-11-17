@@ -16,6 +16,8 @@ import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.pio.PioParseException;
 import edu.gemini.spModel.seqcomp.IObserveSeqComponent;
+import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.time.ChargeClass;
 import edu.gemini.spModel.time.ObsTimeCharges;
 import edu.gemini.spModel.time.ObsTimeCorrection;
@@ -25,6 +27,7 @@ import edu.gemini.spModel.too.TooType;
 import edu.gemini.spModel.type.DisplayableSpType;
 import edu.gemini.spModel.type.SpTypeUtil;
 import edu.gemini.spModel.util.ObjectUtil;
+import edu.gemini.spModel.util.SPTreeUtil;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -421,9 +424,28 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
      * @return true if the observation is not a target of opportunity and not a day calibration
      */
     public static boolean needsGuideStar(ISPObservation obs) {
-        return !Too.isToo(obs)
+        return (!Too.isToo(obs) || hasDefinedTarget(obs))
                 && !ObsClassService.lookupObsClass(obs).equals(ObsClass.DAY_CAL)
                 && hasScienceObserve(obs.getSeqComponent());
+    }
+
+    // Determines if the observation has a base position with non zero (i.e.,
+    // default) coordinates.  An observation with a ToO target doesn't need a
+    // guide star obviously but once the ToO is instantiated into a real
+    // observation at a determined location then it does need a guide star.
+    // With today's target model there isn't a good way to do this so I want to
+    // leave this method private and only use it in conjunction with the
+    // needsGuideStar check.  With the good target model to come, we should just
+    // check whether it is a ToO target and get rid of this method altogether.
+    private static boolean hasDefinedTarget(ISPObservation obs) {
+        final ISPObsComponent targetComp = SPTreeUtil.findTargetEnvNode(obs);
+        if (targetComp == null) {
+            return false;
+        } else {
+            final TargetObsComp toc = (TargetObsComp) targetComp.getDataObject();
+            final SPTarget target = toc.getBase();
+            return (target.getXaxis() != 0.0) || (target.getYaxis() != 0.0);
+        }
     }
 
     /**
