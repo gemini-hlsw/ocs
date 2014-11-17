@@ -20,7 +20,8 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
 
-import scalaz.\/
+import scalaz._
+import Scalaz._
 
 object ProbeLimitsTable {
 
@@ -29,11 +30,14 @@ object ProbeLimitsTable {
   private val ConfFile  = "Guide Limits - OT Config.csv"
 
   def load(): String \/ MagnitudeTable = {
-    val is = this.getClass.getResourceAsStream(ConfFile)
+    val is = Option(this.getClass.getResourceAsStream(ConfFile))
     try {
-      ProbeLimitsParser.read(is).map(ProbeLimitsTable(_))
+      for {
+        s <- is.toRightDisjunction(s"Could not find $ConfFile")
+        t <- ProbeLimitsParser.read(s).map(ProbeLimitsTable(_))
+      } yield t
     } finally {
-      is.close()
+      is.foreach(_.close())
     }
   }
 

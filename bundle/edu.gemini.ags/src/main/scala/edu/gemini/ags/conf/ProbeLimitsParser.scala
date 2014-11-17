@@ -7,6 +7,8 @@ import edu.gemini.shared.skyobject.Magnitude.Band
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{SkyBackground, ImageQuality}
 import edu.gemini.spModel.guide.GuideSpeed
 
+import java.util.logging.{Level, Logger}
+
 import scala.io.Source
 import scala.util.parsing.combinator.JavaTokenParsers
 import scalaz._
@@ -25,6 +27,8 @@ import Scalaz._
  * ...
  */
 object ProbeLimitsParser extends JavaTokenParsers {
+  val Log     = Logger.getLogger(getClass.getName)
+
   val iqMap   = ImageQuality.values().map(iq => iq.getPercentage.toString -> iq).toMap +  ("ANY" -> ImageQuality.ANY)
   val sbMap   = SkyBackground.values().map(sb => sb.getPercentage.toString -> sb).toMap + ("ANY" -> SkyBackground.ANY)
   val bandMap = Band.values().map(b => b.name() -> b).toMap
@@ -79,9 +83,16 @@ object ProbeLimitsParser extends JavaTokenParsers {
       case NoSuccess(msg, next) => s"Problem parsing guide probe limits on line ${next.pos.line}: $msg".left
     }
 
+  private def message(t: Throwable): String = {
+    val msg = "Exception loading guide probe limits" + Option(t.getMessage).fold("")(m => s": $m")
+    // gross side-effect but we want to log what happened
+    Log.log(Level.SEVERE, msg, t)
+    msg
+  }
+
   def read(is: InputStream): String \/ CalcMap =
     for {
-      cm <- \/.fromTryCatch(read(Source.fromInputStream(is, "UTF8"))).fold(t => s"Exception loading guide probe limits: ${t.getMessage}".left, identity)
+      cm <- \/.fromTryCatch(read(Source.fromInputStream(is, "UTF8"))).fold(message(_).left, identity)
       _  <- validate(cm)
     } yield cm
 
