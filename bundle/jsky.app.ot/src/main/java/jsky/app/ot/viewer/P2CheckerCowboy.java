@@ -4,6 +4,7 @@
 
 package jsky.app.ot.viewer;
 
+import edu.gemini.ags.api.AgsMagnitude;
 import edu.gemini.p2checker.api.IP2Problems;
 import edu.gemini.p2checker.api.Problem;
 import edu.gemini.p2checker.api.ProblemRollup;
@@ -28,8 +29,8 @@ final class P2CheckerCowboy {
     }
 
 
-    void check(ISPNode node, SPTree tree)  {
-        IP2Problems probs = P2Checker.getInstance().check(node);
+    void check(ISPNode node, SPTree tree, AgsMagnitude.MagnitudeTable mt)  {
+        IP2Problems probs = P2Checker.getInstance().check(node, mt);
         if (probs == null) return;
 
         // if an observation or greater, clear everything below this node

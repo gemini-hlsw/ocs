@@ -7,6 +7,7 @@
 
 package jsky.app.ot.viewer;
 
+import edu.gemini.ags.api.AgsMagnitude;
 import edu.gemini.p2checker.api.IP2Problems;
 import edu.gemini.p2checker.api.Problem;
 import edu.gemini.pot.sp.*;
@@ -556,7 +557,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
                     if (OTOptions.isCheckingEngineEnabled() && (treeNode != null) && (node instanceof ISPProgramNode)) {
                         final NodeData viewable = (NodeData) treeNode.getUserObject();
                         if ((viewable != null) && !viewable.isCheckedForProblems()) {
-                            P2CheckerCowboy.INSTANCE.check(node, getTree());
+                            P2CheckerCowboy.INSTANCE.check(node, getTree(), OT.getMagnitudeTable());
                         }
                     }
 
@@ -644,7 +645,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
             if (dataObj instanceof ObsExecLog) return;
             if (dataObj instanceof SPNote) return;
 
-            P2CheckerCowboy.INSTANCE.check(nodeChanged, getTree()); // REL-337
+            P2CheckerCowboy.INSTANCE.check(nodeChanged, getTree(), OT.getMagnitudeTable()); // REL-337
 
             //update the problem viewer window
             _problemViewer.update();
@@ -724,7 +725,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
                 root.addPropertyChangeListener(ISPProgram.DATA_OBJECT_KEY, authListener);
 
                 if (getRoot() != null && OTOptions.isCheckingEngineEnabled()) {
-                    P2CheckerCowboy.INSTANCE.check(getRoot(), getTree());
+                    P2CheckerCowboy.INSTANCE.check(getRoot(), getTree(), OT.getMagnitudeTable());
                 }
             }
 
@@ -1032,7 +1033,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
     /** Checks the entire program looking for potential problems. */
     public void checkCurrentProgram() {
         if (getRoot() != null) {
-            P2CheckerCowboy.INSTANCE.check(getRoot(), getTree());
+            P2CheckerCowboy.INSTANCE.check(getRoot(), getTree(), OT.getMagnitudeTable());
             getTree().repaint();
             //set the problem viewer to watch the current selected node
             _problemViewer.setNodeData(getTree().getViewable());

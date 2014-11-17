@@ -1,6 +1,5 @@
 package edu.gemini.ags.gems;
 
-import edu.gemini.ags.api.DefaultMagnitudeTable;
 import edu.gemini.ags.gems.mascot.MascotConf;
 import edu.gemini.ags.gems.mascot.Star;
 import edu.gemini.ags.gems.mascot.Strehl;
@@ -384,8 +383,8 @@ public class GemsCatalogResults {
 
         // Additional check for mag range (for cwfs1 and cwfs2, since different than cwfs3 and group range)
         if (valid && guideProbe instanceof Canopus.Wfs) {
-            Canopus.Wfs wfs = (Canopus.Wfs) guideProbe;
-            DefaultMagnitudeTable.CanopusWfsCalculator canopusWfsCalculator = ((DefaultMagnitudeTable.CanopusWfsCalculator) new DefaultMagnitudeTable(ctx).CanopusWfsMagnitudeLimitsCalculator());
+            final Canopus.Wfs wfs = (Canopus.Wfs) guideProbe;
+            final GemsMagnitudeTable.CanopusWfsCalculator canopusWfsCalculator = GemsMagnitudeTable.CanopusWfsMagnitudeLimitsCalculator();
             valid = checkMagLimit(target, canopusWfsCalculator.getNominalMagnitudeLimits(wfs));
         }
         return valid;

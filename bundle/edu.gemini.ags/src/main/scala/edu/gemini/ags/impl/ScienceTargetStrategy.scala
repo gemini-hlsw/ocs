@@ -5,7 +5,6 @@ import edu.gemini.ags.api.{AgsMagnitude, AgsAnalysis, AgsStrategy}
 import edu.gemini.catalog.api.{RadiusLimits, QueryConstraint}
 import edu.gemini.shared.skyobject.SkyObject
 import edu.gemini.spModel.ags.AgsStrategyKey
-import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
@@ -13,7 +12,7 @@ import edu.gemini.spModel.rich.shared.immutable._
 import scala.concurrent.Future
 
 
-case class ScienceTargetStrategy(key: AgsStrategyKey, site: Site, guideProbe: ValidatableGuideProbe) extends AgsStrategy {
+case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGuideProbe) extends AgsStrategy {
 
   // Since the science target is the used as the guide star, success is always guaranteed.
   override def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[AgsStrategy.Estimate] =
@@ -37,7 +36,7 @@ case class ScienceTargetStrategy(key: AgsStrategyKey, site: Site, guideProbe: Va
   }
 
   override def magnitudes(ctx: ObsContext, mt: MagnitudeTable): List[(GuideProbe, MagnitudeCalc)] =
-    mt(site, guideProbe).toList.map((guideProbe, _))
+    mt(ctx, guideProbe).toList.map((guideProbe, _))
 
   override def queryConstraints(ctx: ObsContext, mt: MagnitudeTable): List[QueryConstraint] =
     (for {
@@ -49,7 +48,7 @@ case class ScienceTargetStrategy(key: AgsStrategyKey, site: Site, guideProbe: Va
     RadiusLimitCalc.getAgsQueryRadiusLimits(guideProbe, ctx).asScalaOpt
 
   private def magnitudeCalc(ctx: ObsContext, mt: MagnitudeTable): Option[MagnitudeCalc] =
-    mt(site, guideProbe)
+    mt(ctx, guideProbe)
 
   override val guideProbes: List[GuideProbe] = List(guideProbe)
 }

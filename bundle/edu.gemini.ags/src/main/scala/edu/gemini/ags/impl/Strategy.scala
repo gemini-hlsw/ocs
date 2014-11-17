@@ -29,7 +29,7 @@ object Strategy {
   val Pwfs2North      = SingleProbeStrategy(Pwfs2NorthKey,      PwfsParams(Site.GN, PwfsGuideProbe.pwfs2))
   val Pwfs1South      = SingleProbeStrategy(Pwfs1SouthKey,      PwfsParams(Site.GS, PwfsGuideProbe.pwfs1))
   val Pwfs2South      = SingleProbeStrategy(Pwfs2SouthKey,      PwfsParams(Site.GS, PwfsGuideProbe.pwfs2))
-  val NiciOiwfs       = ScienceTargetStrategy(NiciOiwfsKey,     Site.GS, NiciOiwfsGuideProbe.instance)
+  val NiciOiwfs       = ScienceTargetStrategy(NiciOiwfsKey,     NiciOiwfsGuideProbe.instance)
 
   val All = List(
     AltairAowfs,
@@ -97,7 +97,7 @@ object Strategy {
   private def guidersAvailable(ctx: ObsContext)(s: AgsStrategy): Boolean = {
     s match {
       case SingleProbeStrategy(_, params) => ctx.getTargets.isActive(params.guideProbe)
-      case ScienceTargetStrategy(_, _, gp) => ctx.getTargets.isActive(gp)
+      case ScienceTargetStrategy(_, gp)   => ctx.getTargets.isActive(gp)
       case GemsStrategy => ctx.getTargets.isActive(Canopus.Wfs.cwfs3) // any canopus would serve
       case _ => false
     }

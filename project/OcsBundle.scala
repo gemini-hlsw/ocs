@@ -558,6 +558,7 @@ trait OcsBundle {
 
   lazy val bundle_jsky_app_ot_plugin = 
     project.in(file("bundle/jsky.app.ot.plugin")).dependsOn(
+      bundle_edu_gemini_ags,
       bundle_edu_gemini_pot,
       bundle_edu_gemini_shared_util,
       bundle_edu_gemini_sp_vcs,

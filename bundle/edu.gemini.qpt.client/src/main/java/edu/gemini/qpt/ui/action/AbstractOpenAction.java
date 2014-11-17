@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
+import edu.gemini.ags.api.AgsMagnitude;
 import edu.gemini.qpt.core.Schedule;
 import edu.gemini.qpt.core.ScheduleIO;
 import edu.gemini.qpt.core.util.LttsServicesClient;
@@ -26,11 +27,13 @@ public abstract class AbstractOpenAction extends AbstractAsyncAction {
 
 	private final IShell shell;
     protected final KeyChain authClient;
+    protected final AgsMagnitude.MagnitudeTable magTable;
 
-	protected AbstractOpenAction(String title, IShell shell, KeyChain authClient) {
+	protected AbstractOpenAction(String title, IShell shell, KeyChain authClient, AgsMagnitude.MagnitudeTable magTable) {
 		super(title, authClient);
 		this.shell = shell;
         this.authClient = authClient;
+        this.magTable = magTable;
 	}
 
 	protected IShell getShell() {
@@ -72,7 +75,7 @@ public abstract class AbstractOpenAction extends AbstractAsyncAction {
 
                 for (int i = 0; sched == null ; i++) {
 					try {
-						sched = ScheduleIO.read(file, 1000, authClient);
+						sched = ScheduleIO.read(file, 1000, authClient, magTable);
 					} catch (TimeoutException te) {
 						pm.setMessage("Retrying (" + i + ") ...");
 						if (pm.isCancelled())

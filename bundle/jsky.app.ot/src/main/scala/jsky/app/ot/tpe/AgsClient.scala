@@ -1,8 +1,9 @@
 package jsky.app.ot.tpe
 
-import edu.gemini.ags.api.{DefaultMagnitudeTable, AgsRegistrar, AgsStrategy}
+import edu.gemini.ags.api.{AgsRegistrar, AgsStrategy}
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.spModel.guide.GuideProbe
+import jsky.app.ot.OT
 import jsky.app.ot.gemini.altair.Altair_WFS_Feature
 import jsky.app.ot.gemini.inst.OIWFS_Feature
 import jsky.app.ot.gemini.tpe.TpePWFSFeature
@@ -47,7 +48,7 @@ object AgsClient {
   def launch(tpeCtx: TpeContext, relativeTo: JComponent): Unit =
     tpeCtx.obsContext.foreach { obsCtx =>
       AgsRegistrar.currentStrategy(obsCtx).foreach { strategy =>
-        val fut    = strategy.select(obsCtx, DefaultMagnitudeTable(obsCtx))
+        val fut    = strategy.select(obsCtx, OT.getMagnitudeTable)
         val dialog = new AgsClient(tpeCtx)
 
         fut.onComplete {

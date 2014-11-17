@@ -2,6 +2,7 @@ package edu.gemini.qv.plugin.data
 
 import java.util.logging.Logger
 
+import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.pot.spdb.IDBQueryRunner
 import edu.gemini.qpt.shared.sp.{MiniModel, Obs, ObsQueryFunctor}
 import edu.gemini.qv.plugin.QvTool
@@ -24,7 +25,7 @@ object OdbDataSource {
 /**
  * Implementation of an observation data source that gets observations from the ODB.
  */
-class OdbDataSource(val peer: Peer) extends DataSource {
+class OdbDataSource(val peer: Peer, mt: MagnitudeTable) extends DataSource {
 
   def site = peer.site
 
@@ -49,7 +50,7 @@ class OdbDataSource(val peer: Peer) extends DataSource {
     val javaClasses  = new java.util.HashSet[ObsClass](); selectedClasses.foreach(javaClasses.add)
     val javaStatuses = new java.util.HashSet[ObservationStatus](); selectedStatuses.foreach(javaStatuses.add)
     val javaTypes = new java.util.ArrayList[ProgramType](); selectedTypes.foreach(javaTypes.add)
-    val functor = new ObsQueryFunctor(peer.site, javaSemesters, javaTypes, javaClasses, javaStatuses, !includeCompletedPrograms, !includeInactivePrograms)
+    val functor = new ObsQueryFunctor(peer.site, javaSemesters, javaTypes, javaClasses, javaStatuses, !includeCompletedPrograms, !includeInactivePrograms, mt)
 
     // create and initiate db read operation
     val c = {

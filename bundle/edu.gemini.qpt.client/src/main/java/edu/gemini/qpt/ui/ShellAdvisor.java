@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 
+import edu.gemini.ags.api.AgsMagnitude;
 import edu.gemini.qpt.core.Schedule;
 import edu.gemini.qpt.shared.util.StructuredProgramID;
 import edu.gemini.qpt.ui.action.*;
@@ -132,14 +133,16 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
 	}
 
     private final PublishAction.Destination internal, pachon;
+    private final AgsMagnitude.MagnitudeTable magTable;
 
-    public ShellAdvisor(String name, String version, String rootURL, KeyChain authClient, PublishAction.Destination internal, PublishAction.Destination pachon) {
+    public ShellAdvisor(String name, String version, String rootURL, KeyChain authClient, PublishAction.Destination internal, PublishAction.Destination pachon, AgsMagnitude.MagnitudeTable magTable) {
 		this.title = name + " " + version;
 		this.rootURL = rootURL;
 		this.version = version;
         this.authClient = authClient;
         this.internal = internal;
         this.pachon = pachon;
+        this.magTable = magTable;
 	}
 
 	@SuppressWarnings("serial")
@@ -165,9 +168,9 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
 
 			Menu.File,
 
-			new NewAction(shell, authClient),
-			new OpenAction(shell, authClient),
-			new OpenFromWebAction(shell, authClient),
+			new NewAction(shell, authClient, magTable),
+			new OpenAction(shell, authClient, magTable),
+			new OpenFromWebAction(shell, authClient, magTable),
 			null,
 			new CloseAction(shell, authClient),
 			new SaveAction(shell, authClient),
@@ -198,11 +201,11 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
 
 				Menu.Plan,
 
-				new AddSemesterAction(shell, authClient),
-				new RemoveSemesterAction(shell, authClient),
+				new AddSemesterAction(shell, authClient, magTable),
+				new RemoveSemesterAction(shell, authClient, magTable),
 				null,
-				new RefreshAction(shell, authClient),
-				new MergeAction(shell, authClient)
+				new RefreshAction(shell, authClient, magTable),
+				new MergeAction(shell, authClient, magTable)
 
 			);
 
