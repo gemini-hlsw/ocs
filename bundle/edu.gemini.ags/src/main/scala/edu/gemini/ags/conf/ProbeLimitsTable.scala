@@ -26,7 +26,7 @@ object ProbeLimitsTable {
 
   // Okay, for now load the configuration from the classpath.  At some point
   // this will become user-changeable and supplied as an argument..
-  private val ConfFile  = "ProbeLimits.txt"
+  private val ConfFile  = "Guide Limits - OT Config.csv"
 
   def load(): String \/ MagnitudeTable = {
     val is = this.getClass.getResourceAsStream(ConfFile)
