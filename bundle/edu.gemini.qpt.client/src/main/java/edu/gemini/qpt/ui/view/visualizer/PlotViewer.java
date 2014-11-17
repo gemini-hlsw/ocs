@@ -326,11 +326,11 @@ public class PlotViewer extends GViewer<Variant, Alloc> {
 		public void dragOver(final DropTargetDragEvent dtde) {
 			final Option<GSelection<Alloc>> obj = getDraggedObject(dtde.getTransferable());
 			if (obj.isDefined()) {
-                final boolean snap = BooleanToolPreference.TOOL_SNAP.get();
-                // Get the offset. This will be in ms between 0 and the obs/alloc length (or null).
-                getControl().setDrag(dtde.getLocation(), obj.get(), snap, (Long) obj.get().getProperty("offset"));
+				final boolean snap = BooleanToolPreference.TOOL_SNAP.get();
+				// Get the offset. This will be in ms between 0 and the obs/alloc length (or null).
+				getControl().setDrag(dtde.getLocation(), obj.get(), snap, (Long) obj.get().getProperty("offset"));
 			} else {
-                dtde.rejectDrag();
+				dtde.rejectDrag();
 			}
 		}
 
@@ -341,16 +341,16 @@ public class PlotViewer extends GViewer<Variant, Alloc> {
 			// from the model. We can just go ahead and remove anything from the model that's
 			// in the drag.
 			final Option<GSelection<Alloc>> obj = getDraggedObject(dtde.getTransferable());
-            if (obj.isDefined()) {
- 			    for (Alloc a: getModel().getAllocs()) {
-			    	if (obj.get().contains(a)) {
-                        a.forceRemove();
-                    }
-                }
-                dragOver(dtde);
-            } else {
-                dtde.rejectDrag();
-            }
+			if (obj.isDefined()) {
+				for (Alloc a: getModel().getAllocs()) {
+					if (obj.get().contains(a)) {
+						a.forceRemove();
+					}
+				}
+				dragOver(dtde);
+			} else {
+				dtde.rejectDrag();
+			}
 
 			getControl().setIgnoreRepaint(false); // [QPT-185]; see dragGestureRecognized() above
 		}
