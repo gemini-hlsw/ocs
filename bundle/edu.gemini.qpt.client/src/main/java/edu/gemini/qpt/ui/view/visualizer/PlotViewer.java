@@ -36,6 +36,8 @@ import edu.gemini.qpt.ui.util.TimePreference;
 import edu.gemini.ui.gface.GSelection;
 import edu.gemini.ui.gface.GViewer;
 import edu.gemini.ui.gface.GViewerPlugin;
+import scala.Option;
+import scala.Some;
 
 public class PlotViewer extends GViewer<Variant, Alloc> {
 
@@ -248,11 +250,12 @@ public class PlotViewer extends GViewer<Variant, Alloc> {
 	
 	DropTargetListener dropTargetListener = new DropTargetListener() {
 	
-		public void drop(DropTargetDropEvent dtde) {
-			GSelection<Alloc> obj = getDraggedObject(dtde.getTransferable());		
-			if (obj == null) return;				
-			doDrop(obj);		
-			dtde.dropComplete(true);
+		public void drop(final DropTargetDropEvent dtde) {
+			final Option<GSelection<Alloc>> obj = getDraggedObject(dtde.getTransferable());
+			if (obj.isDefined()) {
+				doDrop(obj.get());
+				dtde.dropComplete(true);
+			}
 		}
 	
 		@SuppressWarnings("unchecked")
@@ -320,50 +323,53 @@ public class PlotViewer extends GViewer<Variant, Alloc> {
 		public void dropActionChanged(DropTargetDragEvent dtde) {
 		}
 
-		public void dragOver(DropTargetDragEvent dtde) {
-			boolean snap = BooleanToolPreference.TOOL_SNAP.get(); 
-			GSelection<Alloc> obj = getDraggedObject(dtde.getTransferable());		
-			if (obj == null) {
-				dtde.rejectDrag();
-				return;
+		public void dragOver(final DropTargetDragEvent dtde) {
+			final Option<GSelection<Alloc>> obj = getDraggedObject(dtde.getTransferable());
+			if (obj.isDefined()) {
+                final boolean snap = BooleanToolPreference.TOOL_SNAP.get();
+                // Get the offset. This will be in ms between 0 and the obs/alloc length (or null).
+                getControl().setDrag(dtde.getLocation(), obj.get(), snap, (Long) obj.get().getProperty("offset"));
+			} else {
+                dtde.rejectDrag();
 			}
-
-			// Get the offset. This will be in ms between 0 and the obs/alloc length (or null).
-			getControl().setDrag(dtde.getLocation(), obj, snap, (Long) obj.getProperty("offset"));
 		}
 
-		public void dragEnter(DropTargetDragEvent dtde) {
+		public void dragEnter(final DropTargetDragEvent dtde) {
 			dtde.acceptDrag(DnDConstants.ACTION_MOVE);
-			
+
 			// If we're dragging a non-final slice back in, we have to force-remove it again
 			// from the model. We can just go ahead and remove anything from the model that's
 			// in the drag.
-			GSelection<Alloc> obj = getDraggedObject(dtde.getTransferable());		
-			for (Alloc a: getModel().getAllocs())
-				if (obj.contains(a)) a.forceRemove();
-			
-			
-			dragOver(dtde);
-			getControl().setIgnoreRepaint(false); // [QPT-185]; see dragGestureRecognized() above 
+			final Option<GSelection<Alloc>> obj = getDraggedObject(dtde.getTransferable());
+            if (obj.isDefined()) {
+ 			    for (Alloc a: getModel().getAllocs()) {
+			    	if (obj.get().contains(a)) {
+                        a.forceRemove();
+                    }
+                }
+                dragOver(dtde);
+            } else {
+                dtde.rejectDrag();
+            }
+
+			getControl().setIgnoreRepaint(false); // [QPT-185]; see dragGestureRecognized() above
 		}
 	
 	};
 	
 	
 	@SuppressWarnings("unchecked")
-	private static GSelection<Alloc> getDraggedObject(Transferable t) {
+	private static Option<GSelection<Alloc>> getDraggedObject(final Transferable t) {
 		try {
-
 			// We will accept an alloc or an obs
-			if (t.isDataFlavorSupported(GSELECTION_OF_ALLOCS))
-				return (GSelection<Alloc>) t.getTransferData(GSELECTION_OF_ALLOCS);
-			
-		} catch (UnsupportedFlavorException e) {
-			LOGGER.log(Level.WARNING, "Problem getting drag data. This should never happen.", e);
-		} catch (IOException e) {
+			if (t.isDataFlavorSupported(GSELECTION_OF_ALLOCS)) {
+				return new Some<>((GSelection<Alloc>) t.getTransferData(GSELECTION_OF_ALLOCS));
+			}
+		} catch (UnsupportedFlavorException | IOException e) {
 			LOGGER.log(Level.WARNING, "Problem getting drag data. This should never happen.", e);
 		}
-		return null;
+
+		return Option.empty();
 	}
 
 }
