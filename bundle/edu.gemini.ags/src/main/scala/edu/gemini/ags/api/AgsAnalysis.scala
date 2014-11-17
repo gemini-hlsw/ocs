@@ -16,7 +16,7 @@ import Scalaz._
 sealed trait AgsGuideQuality extends Ordered[AgsGuideQuality] {
   def ord: Int
   def compare(that: AgsGuideQuality): Int = ord.compareTo(that.ord)
-  def message:         String = ""
+  def message: String = ""
 }
 
 object AgsGuideQuality {
