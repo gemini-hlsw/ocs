@@ -162,7 +162,7 @@ public final class OT {
 //        }
 
 
-        Theme.installGreenTheme();
+        Theme.install();
 
         // [OT-642] Poke around with the keybindings for text fields on the Mac so
         // they respond to Cmd rather than Ctrl. Copied from QPT (Platform.java)
