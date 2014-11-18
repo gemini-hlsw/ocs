@@ -25,7 +25,7 @@ import scala.util.Try
 
 
 class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
-E <: OtItemEditor[ISPObsComponent, I]](instType: SPComponentType) extends GridBagPanel with Reactor {
+                         E <: OtItemEditor[ISPObsComponent, I]](instType: SPComponentType) extends GridBagPanel with Reactor {
   private var editor: Option[E] = None
 
   private val numberFormatter = NumberFormat.getInstance(Locale.US)
@@ -57,8 +57,8 @@ E <: OtItemEditor[ISPObsComponent, I]](instType: SPComponentType) extends GridBa
         Try { text.toDouble }.toOption
 
       def validate(): Unit =
-      // TODO: Restore this line when background AGS is implemented.
-      //background = angle.fold(badBackground)(x => defaultBackground)
+        // TODO: Restore this line when background AGS is implemented.
+        //background = angle.fold(badBackground)(x => defaultBackground)
         background = angle.fold(if (positionAngleConstraintComboBox.selection.item == PosAngleConstraint.UNBOUNDED) background else badBackground)(x => defaultBackground)
     }
 
@@ -96,9 +96,9 @@ E <: OtItemEditor[ISPObsComponent, I]](instType: SPComponentType) extends GridBa
     // supports parallactic angle by its type.
     val parallacticAngleControlsOpt = {
       val supportsParallacticAngle = Set(SPComponentType.INSTRUMENT_FLAMINGOS2,
-        SPComponentType.INSTRUMENT_GMOS,
-        SPComponentType.INSTRUMENT_GMOSSOUTH,
-        SPComponentType.INSTRUMENT_GNIRS).contains(instType)
+                                         SPComponentType.INSTRUMENT_GMOS,
+                                         SPComponentType.INSTRUMENT_GMOSSOUTH,
+                                         SPComponentType.INSTRUMENT_GNIRS).contains(instType)
 
       if (supportsParallacticAngle) {
         val parallacticAngleControls = new ParallacticAngleControls
@@ -280,9 +280,9 @@ E <: OtItemEditor[ISPObsComponent, I]](instType: SPComponentType) extends GridBa
 
       // Determine if the parallactic angle option can be selected.
       val isParInstAndOk = instrument.isInstanceOf[ParallacticAngleSupport] &&
-        instrument.asInstanceOf[ParallacticAngleSupport].isCompatibleWithMeanParallacticAngleMode
+                           instrument.asInstanceOf[ParallacticAngleSupport].isCompatibleWithMeanParallacticAngleMode
       val canUseAvgPar   = isParInstAndOk &&
-        !ObsClassService.lookupObsClass(e.getContextObservation).equals(ObsClass.DAY_CAL)
+                           !ObsClassService.lookupObsClass(e.getContextObservation).equals(ObsClass.DAY_CAL)
       setOptionEnabled(PosAngleConstraint.PARALLACTIC_ANGLE, canUseAvgPar)
 
       // Now the parallactic angle is in use if it can be used and is selected.
@@ -316,6 +316,6 @@ E <: OtItemEditor[ISPObsComponent, I]](instType: SPComponentType) extends GridBa
 
 object PositionAnglePanel {
   def apply[I <: SPInstObsComp with PosAngleConstraintAware with ParallacticAngleSupport,
-  E <: OtItemEditor[ISPObsComponent, I]](instType: SPComponentType): PositionAnglePanel[I,E] =
+            E <: OtItemEditor[ISPObsComponent, I]](instType: SPComponentType): PositionAnglePanel[I,E] =
     new PositionAnglePanel[I,E](instType)
 }
