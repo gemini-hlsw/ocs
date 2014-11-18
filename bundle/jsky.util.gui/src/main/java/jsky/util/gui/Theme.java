@@ -20,7 +20,15 @@ public final class Theme {
       * Install the green theme and JGoodies Plastic3DLookAndFeel.
       */
      public static void installGreenTheme() {
-         PlasticLookAndFeel.setPlasticTheme(new SkyBlue());
+         PlasticLookAndFeel.setPlasticTheme(new SkyBlue() {
+             private final ColorUIResource darkGray = new ColorUIResource(90, 90, 90);
+             @Override public ColorUIResource getPrimary1() {
+                 return getBlack();
+             }
+             @Override public ColorUIResource getMenuItemSelectedBackground() {
+                 return darkGray;
+             }
+         });
          try {
              UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
 
