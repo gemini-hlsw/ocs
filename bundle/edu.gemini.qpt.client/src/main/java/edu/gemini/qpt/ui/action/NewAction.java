@@ -49,12 +49,17 @@ public class NewAction extends AbstractAsyncAction {
     private final KeyChain authClient;
     private final AgsMagnitude.MagnitudeTable magTable;
 
-	public NewAction(IShell shell, KeyChain authClient, AgsMagnitude.MagnitudeTable magTable) {
+	public NewAction(IShell shell, final KeyChain authClient, AgsMagnitude.MagnitudeTable magTable) {
 		super("New Plan...", authClient);
 		this.shell = shell;
         this.authClient = authClient;
         this.magTable = magTable;
 		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, Platform.MENU_ACTION_MASK));
+        authClient.asJava().addListener(new Runnable() {
+            public void run() {
+                setEnabled(!authClient.asJava().isLocked());
+            }
+        });
 	}
 
 	public void asyncActionPerformed(ActionEvent e) {
