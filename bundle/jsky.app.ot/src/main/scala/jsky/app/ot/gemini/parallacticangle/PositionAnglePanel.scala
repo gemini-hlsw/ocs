@@ -181,7 +181,11 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
     // TODO: When background AGS is implemented, we can remove the deafTo + listenTo lines, as well as the
     // disabling of the positionAngleTextField.
     deafTo(ui.positionAngleConstraintComboBox.selection)
-    ui.positionAngleConstraintComboBox.setItemsAndResetSelectedItem(instrument.getSupportedPosAngleConstraints.asScalaList)
+
+    // TODO: Currently the UNBOUNDED PosAngleConstraint is disabled, so we remove it from any list of PACs.
+    val availablePACsNoUnbounded = instrument.getSupportedPosAngleConstraints.asScalaList.diff(List(PosAngleConstraint.UNBOUNDED))
+    ui.positionAngleConstraintComboBox.setItemsAndResetSelectedItem(availablePACsNoUnbounded)
+
     ui.positionAngleConstraintComboBox.resetEnabledItems()
     ui.positionAngleConstraintComboBox.selection.item = instrument.getPosAngleConstraint
     ui.positionAngleTextField.text                    = numberFormatter.format(instrument.getPosAngle)
