@@ -12,15 +12,23 @@ import javax.swing.*;
 import javax.swing.plaf.ColorUIResource;
 
 /**
- * Modifies the JGoodies SkyGreen theme to have greenish labels
+ * Provides a utility for installing the OT look and feel and color theme.
  */
 public final class Theme {
 
     /**
-      * Install the green theme and JGoodies Plastic3DLookAndFeel.
+      * Install the OT theme and look and feel.
       */
-     public static void installGreenTheme() {
-         PlasticLookAndFeel.setPlasticTheme(new SkyBlue());
+     public static void install() {
+         PlasticLookAndFeel.setPlasticTheme(new SkyBlue() {
+             private final ColorUIResource darkGray = new ColorUIResource(90, 90, 90);
+             @Override public ColorUIResource getPrimary1() {
+                 return getBlack();
+             }
+             @Override public ColorUIResource getMenuItemSelectedBackground() {
+                 return darkGray;
+             }
+         });
          try {
              UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
 

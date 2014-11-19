@@ -453,7 +453,7 @@ public class JSkyCat extends JFrame {
         // For testing
         // new tilecachetool.TCTool();
 
-        Theme.installGreenTheme();
+        Theme.install();
 
         new JSkyCat(imageFileOrUrl, internalFrames, showNavigator, portNum);
     }
