@@ -79,6 +79,13 @@ final class TpeFeatureManager {
         final JToggleButton btn = new JCheckBox(name);
         btn.setToolTipText(tif.getDescription());
         btn.setVisible(false);
+
+        // Load the desired value from the preferences or set to the default.
+        // Do this before adding the item listener so that the feature isn't
+        // added to the image widget as a side-effect.  Features are initialized
+        // in the image widget by updateAvailableOptions.
+        btn.setSelected(Preferences.get(prefName, tif.isEnabledByDefault()));
+
         btn.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent e) {
                 final boolean selected = e.getStateChange() == ItemEvent.SELECTED;
@@ -102,9 +109,6 @@ final class TpeFeatureManager {
             comp.setVisible(false);
             _tpeToolBar.addViewItem(comp, tif.getCategory());
         }
-
-        // Load the desired value from the preferences or set to the default.
-        btn.setSelected(Preferences.get(prefName, tif.isEnabledByDefault()));
     }
 
     public void updateAvailableOptions(Collection<TpeImageFeature> feats, TpeContext ctx) {
