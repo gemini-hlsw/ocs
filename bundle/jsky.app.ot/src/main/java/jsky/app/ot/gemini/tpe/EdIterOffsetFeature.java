@@ -150,7 +150,7 @@ public class EdIterOffsetFeature extends TpeImageFeature
         final List<SingleOffsetListContext> iterators = ctx.offsets().allJava();
 
         // iterators map { it => new OffsetPosMap(it) }
-        posMaps = new ArrayList<OffsetPosMap>(iterators.size());
+        posMaps = new ArrayList<>(iterators.size());
         for (SingleOffsetListContext iterator : iterators) {
             posMaps.add(new OffsetPosMap(iw, iterator));
         }
@@ -158,23 +158,17 @@ public class EdIterOffsetFeature extends TpeImageFeature
 
 
     /**
-     * Unloaded, so free the position map. Also select the base position, since the
-     * offset positions are no longer visible.
+     * Unloaded, so free the position map.
      */
     public void unloaded() {
-        _iw.setViewingOffsets(false);
+        if (_iw != null) {
+            _iw.setViewingOffsets(false);
+        }
 
         super.unloaded();
 
         for (OffsetPosMap opm : posMaps) opm.free();
         posMaps = Collections.emptyList();
-
-        // select the base pos
-        // TPE REFACTOR - selection handling
-//        if (getContext().targetEnv().isDefined()) {
-//            TargetEnvironment env = getContext().targetEnv().get();
-//            obsComp.setSelectedTarget(env.getBase());
-//        }
     }
 
     // Return the SciAreaFeature, or null if none is defined yet
