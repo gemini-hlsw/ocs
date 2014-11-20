@@ -1,7 +1,6 @@
 package edu.gemini.ags.api
 
 import edu.gemini.ags.api.AgsMagnitude._
-import edu.gemini.ags.impl.Strategy
 import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.ImageQuality
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbe, GuideProbeGroup, GuideSpeed}
@@ -40,46 +39,65 @@ object AgsGuideQuality {
     List(DeliversRequestedIq, PossibleIqDegradation, IqDegradation, PossiblyUnusable)
 }
 
+sealed trait AgsSeverity
+object AgsSeverity {
+  case object Warning extends AgsSeverity
+  case object Error   extends AgsSeverity
+}
+
 sealed trait AgsAnalysis {
   def qualityOption: Option[AgsGuideQuality] = None
-  def message: String
+  def severityLevel: Option[AgsSeverity]     = None
+  def message:       String
 }
 
 sealed trait AgsAnalysisWithGuideProbe extends AgsAnalysis {
   def guideProbe: GuideProbe
 }
 
+
 object AgsAnalysis {
   case object UnknownError extends AgsAnalysis {
-    override val message = "Unknown error."
+    override val message       = "Unknown error."
+    override val severityLevel = Some(AgsSeverity.Error)
   }
 
   case class NoGuideStarForProbe(guideProbe: GuideProbe) extends AgsAnalysisWithGuideProbe {
-    override val message = s"No ${guideProbe.getKey} guide star selected."
+    override val message       = s"No ${guideProbe.getKey} guide star selected."
+    override val severityLevel = Some(AgsSeverity.Error)
   }
 
   case class NoGuideStarForGroup(guideGroup: GuideProbeGroup) extends AgsAnalysis {
-    override val message = s"No ${guideGroup.getKey} guide star selected."
+    override val message       = s"No ${guideGroup.getKey} guide star selected."
+    override val severityLevel = Some(AgsSeverity.Error)
   }
 
   case class MagnitudeTooFaint(guideProbe: GuideProbe, target: SPTarget) extends AgsAnalysisWithGuideProbe {
-    override val message = "Cannot guide with the star in these conditions, even using the slowest guide speed."
+    override val message       = "Cannot guide with the star in these conditions, even using the slowest guide speed."
+    override val severityLevel = Some(AgsSeverity.Error)
   }
 
   case class MagnitudeTooBright(guideProbe: GuideProbe, target: SPTarget) extends AgsAnalysisWithGuideProbe {
-    override val message = "Guide star is too bright to guide."
+    override val message       = "Guide star is too bright to guide."
+    override val severityLevel = Some(AgsSeverity.Error)
   }
 
   case class NoMagnitudeForBand(guideProbe: GuideProbe, target: SPTarget, band: Magnitude.Band) extends AgsAnalysisWithGuideProbe {
-    override val message = s"Guide star ${band.name}-band magnitude is missing."
+    override val message       = s"Guide star ${band.name}-band magnitude is missing."
+    override val severityLevel = Some(AgsSeverity.Warning)
   }
 
   case class NotReachable(guideProbe: GuideProbe, target: SPTarget) extends AgsAnalysisWithGuideProbe {
-    override val message = "The star is not reachable at all positions."
+    override val message       = "The star is not reachable at all positions."
+    override val severityLevel = Some(AgsSeverity.Error)
   }
 
   case class Usable(guideProbe: GuideProbe, target: SPTarget, guideSpeed: GuideSpeed, quality: AgsGuideQuality) extends AgsAnalysisWithGuideProbe {
     override def qualityOption = Some(quality)
+    override def severityLevel = qualityOption match {
+      case Some(AgsGuideQuality.DeliversRequestedIq) => None
+      case _                                         => Some(AgsSeverity.Warning)
+    }
 
     override def message: String = quality.message + (quality match {
       case AgsGuideQuality.DeliversRequestedIq => ""
@@ -171,4 +189,13 @@ object AgsAnalysis {
     // This should theoretically never happen, but if it does, something has gone wrong with the site or magnitude table.
     magAnalysis.getOrElse(UnknownError)
   }
+
+  // Message format for guiding feedback, P2 rules, and QPT markers.
+  def analysisToMessage(analysis: AgsAnalysis, showGuideProbeName: Boolean): String =
+    (if (showGuideProbeName)
+      analysis match {
+        case a: AgsAnalysisWithGuideProbe => s"${a.guideProbe.getKey} "
+        case _ => ""
+      }
+    else "") + analysis.message
 }
