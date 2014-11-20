@@ -1,5 +1,6 @@
 package jsky.app.ot.gemini.editor.targetComponent
 
+import edu.gemini.ags.api.AgsAnalysis.Usable
 import edu.gemini.ags.api._
 import edu.gemini.ags.api.AgsGuideQuality.{IqDegradation, PossiblyUnusable, PossibleIqDegradation, DeliversRequestedIq}
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
@@ -68,12 +69,12 @@ class GuidingFeedback extends GridBagPanel {
 
     val limitsTable = calcTable.mapValues(mc => AgsMagnitude.autoSearchLimitsCalc(mc, ctx.getConditions))
 
-    // Clear out the old messages.
+    // Clear out the old messages, create new messages for each analysis, and add them to the feedback.
     reset()
-
-    val messages = analysis.map(h => Message(GuidingIcon.apply(h.qualityOption, enabled = true), toColor(h), feedbackText(h, analysis.size > 1),
-                                                               magRangeText(h, limitsTable), fullMagRangeText(h, probeSpeedLimits)))
-    messages.zipWithIndex.foreach { case (msg, rowIndex) =>
+    analysis.map { h => Message(GuidingIcon.apply(h.qualityOption, enabled = true), toColor(h),
+                                AgsAnalysis.analysisToMessage(h, showGuideProbeName = analysis.size > 1),
+                                magRangeText(h, limitsTable), fullMagRangeText(h, probeSpeedLimits))
+    }.zipWithIndex.foreach { case (msg, rowIndex) =>
       layout(new Feedback(msg)) = new Constraints {
         gridy = rowIndex
         weightx = 1.0
@@ -98,14 +99,20 @@ object GuidingFeedback {
 
   case class Message(icon: Icon, color: Color, text: String, magRangeText: Option[String], fullMagRangeText: Option[String])
 
-  def toColor(analysis: AgsAnalysis): Color = toColor(analysis.qualityOption)
-
-  def toColor(quality: Option[AgsGuideQuality]): Color =
-    quality.fold(LIGHT_SALMON) {
-      case DeliversRequestedIq   => HONEY_DEW
-      case PossibleIqDegradation => BANANA
-      case IqDegradation         => CANTALOUPE
-      case PossiblyUnusable      => TANGERINE
+  private val qualityToColor = Map[AgsGuideQuality, Color](
+    DeliversRequestedIq   -> HONEY_DEW,
+    PossibleIqDegradation -> BANANA,
+    IqDegradation         -> CANTALOUPE,
+    PossiblyUnusable      -> TANGERINE
+  )
+  private val severityToColor = Map[AgsSeverity, Color](
+    AgsSeverity.Warning   -> BANANA,
+    AgsSeverity.Error     -> LIGHT_SALMON
+  )
+  def toColor(analysis: AgsAnalysis): Color =
+    analysis match {
+      case Usable(_, _, _, quality) => qualityToColor(quality)
+      case other                    => other.severityLevel.map(severityToColor(_)).getOrElse(HONEY_DEW)
     }
 
   // Number formatter for formatting decimals.
@@ -114,6 +121,8 @@ object GuidingFeedback {
     setMaximumFractionDigits(2)
   }}
 
+  // Generate the full magnitude range text for the guide probe used by the analysis if there is one,
+  // e.g. 4 <= FAST <= 9 < MEDIUM <= 9.5 < SLOW <= 10.
   def fullMagRangeText(analysis: AgsAnalysis, probeSpeedLimits: ProbeSpeedLimits): Option[String] = {
     def toRangeText(guideProbe: GuideProbe, probeSpeedLimits: ProbeSpeedLimits): String = {
       def toText(guideSpeed: GuideSpeed, magLimits: MagnitudeLimits): String =
@@ -132,6 +141,8 @@ object GuidingFeedback {
     }
   }
 
+  // Get the reduced magnitude range text for the guide probe used by the analysis if there is one,
+  // e.g. 4 <= R <= 10.
   def magRangeText(analysis: AgsAnalysis, limitsTable: Map[GuideProbe, MagnitudeLimits]): Option[String] = {
     def toRangeText(guideProbe: GuideProbe, limitsTable: Map[GuideProbe, MagnitudeLimits]): String =
       limitsTable.get(guideProbe).fold("")(magLimits => {
@@ -144,12 +155,4 @@ object GuidingFeedback {
       case _ => None
     }
   }
-
-  def feedbackText(analysis: AgsAnalysis, showGuideProbeName: Boolean): String =
-    (if (showGuideProbeName)
-      analysis match {
-        case a: AgsAnalysisWithGuideProbe => s"${a.guideProbe.getKey}  "
-        case _ => ""
-      }
-    else "") + analysis.message
 }

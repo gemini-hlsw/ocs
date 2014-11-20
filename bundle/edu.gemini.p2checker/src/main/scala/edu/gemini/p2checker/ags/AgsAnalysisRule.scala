@@ -1,8 +1,7 @@
 package edu.gemini.p2checker.ags
 
-import edu.gemini.ags.api.AgsGuideQuality._
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
-import edu.gemini.ags.api.{AgsAnalysisWithGuideProbe, AgsAnalysis, AgsRegistrar}
+import edu.gemini.ags.api.{AgsSeverity, AgsAnalysis, AgsRegistrar}
 import edu.gemini.p2checker.api.{P2Problems, IP2Problems, Problem, ObservationElements, IRule}
 import edu.gemini.spModel.obs.SPObservation
 import edu.gemini.spModel.rich.shared.immutable._
@@ -26,9 +25,14 @@ class AgsAnalysisRule(mt: MagnitudeTable) extends IRule {
           val analysis = AgsRegistrar.currentStrategy(ctx).fold(List.empty[AgsAnalysis])(_.analyze(ctx, mt))
 
           // All analyses that are not DeliversRequestedIq in quality should lead to a warning or error.
-          analysis.filterNot(_.qualityOption == Some(DeliversRequestedIq)).map { h =>
-            new Problem(analysisProblemType(h), Prefix + "StrategyRule", analysisMessage(h), targetNode)
-          }.map(problems.append)
+          // This equates to all analyses with a severity level.
+          for {
+            h <- analysis
+            s <- h.severityLevel
+          } yield {
+            problems.append(new Problem(severityToProblemType(s), Prefix + "StrategyRule",
+                            AgsAnalysis.analysisToMessage(h, showGuideProbeName = true), targetNode))
+          }
         })
       })
     }
@@ -40,17 +44,8 @@ class AgsAnalysisRule(mt: MagnitudeTable) extends IRule {
 object AgsAnalysisRule {
   val Prefix = "AgsAnalysisRule_"
 
-  /**
-   * Note that DeliversRequestedIq is already filtered out by this point, so we simply do not care
-   * what Problem.Type is returned for it since this should never happen.
-   */
-  def analysisProblemType(analysis: AgsAnalysis): Problem.Type = analysis.qualityOption match {
-      case Some(PossibleIqDegradation) | Some(IqDegradation) | Some(PossiblyUnusable) => Problem.Type.WARNING
-      case _ => Problem.Type.ERROR
-    }
-
-  def analysisMessage(analysis: AgsAnalysis): String = (analysis match {
-    case agp: AgsAnalysisWithGuideProbe => s"${agp.guideProbe.getKey}: "
-    case _ => ""
-  }) + analysis.message
+  val severityToProblemType = Map[AgsSeverity,Problem.Type](
+    AgsSeverity.Warning -> Problem.Type.WARNING,
+    AgsSeverity.Error   -> Problem.Type.ERROR
+  )
 }
