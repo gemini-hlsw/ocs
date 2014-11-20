@@ -16,6 +16,11 @@ trait OcsBundle {
       bundle_edu_gemini_ags
     )
 
+  lazy val bundle_edu_gemini_itc_servlet =
+    project.in(file("bundle/edu.gemini.itc.servlet")).dependsOn(
+      bundle_edu_gemini_util_osgi
+    )  
+
   lazy val bundle_edu_gemini_auxfile_workflow = 
     project.in(file("bundle/edu.gemini.auxfile.workflow")).dependsOn(
       bundle_edu_gemini_util_osgi,
