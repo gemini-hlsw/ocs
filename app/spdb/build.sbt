@@ -20,6 +20,7 @@ ocsAppManifest := {
     name = "Science Program Database",
     version = ocsVersion.value.toString,
     configs = List(
+      itc(v),
       common(v), // note, each config extends xxx_credentials, defined in $TOP/project/OcsCredentials.scala
         with_gogo(v),
           rnorris(v),   
@@ -40,9 +41,9 @@ ocsAppManifest := {
   )
 }
 
-// COMMON
-def common(version: Version) = AppConfig(
-  id = "common",
+// MINIMAL
+def minimal(version: Version) = AppConfig(
+  id = "minimal",
   vmargs = List(
     "-Dcom.sun.management.jmxremote",
     "-Dcom.sun.management.jmxremote.authenticate=false",
@@ -51,6 +52,44 @@ def common(version: Version) = AppConfig(
     "-Djava.awt.headless=true",
     "-Dnetworkaddress.cache.ttl=60"
   ),
+  props = Map(
+    "org.osgi.framework.bootdelegation"          -> "*",
+    "org.osgi.framework.startlevel.beginning"    -> "99",
+    "org.osgi.framework.storage.clean"           -> "onFirstInit",
+    "org.osgi.service.http.port"                 -> "8442",
+    "org.osgi.service.http.port.secure"          -> "8443",
+    "org.osgi.service.http.secure.enabled"       -> "true"
+  ),
+  log = Some("log/spdb.%u.%g.log"),
+  bundles = List(
+    BundleSpec("edu.gemini.osgi.main",                   Version(4, 2, 1)),
+    BundleSpec("org.scala-lang.scala-reflect",           Version(2, 10, 1)),
+    BundleSpec("org.scalaz.core",                        Version(7, 0, 5)),
+    BundleSpec("org.scalaz.effect",                      Version(7, 0, 5)),
+    BundleSpec("org.scalaz.concurrent",                  Version(7, 0, 5)),
+    BundleSpec("slf4j.api",                              Version(1, 6, 4)),
+    BundleSpec("slf4j.jdk14",                            Version(1, 6, 4)),
+    BundleSpec("org.apache.commons.logging",             Version(1, 1, 0)),
+    BundleSpec("org.ops4j.pax.web.pax-web-extender-war", Version(1, 1, 13)),
+    BundleSpec("org.ops4j.pax.web.pax-web-jetty-bundle", Version(1, 1, 13)),
+    BundleSpec("org.ops4j.pax.web.pax-web-jsp",          Version(1, 1, 13)),
+    BundleSpec("org.ops4j.pax.web.pax-web-spi",          Version(1, 1, 13))
+  )
+) 
+
+// ITC - runs ITC web app in a minimal environment
+def itc(version: Version) = AppConfig(
+  id = "itc",
+  distribution = List(TestDistro),
+  bundles = List(
+    BundleSpec("edu.gemini.itc.servlet",                 version)
+  )
+) extending List(minimal(version), with_gogo(version))
+
+// COMMON - runs a full ODB with all services
+def common(version: Version) = AppConfig(
+  id = "common",
+  vmargs = Nil,
   props = Map(
     "edu.gemini.auxfile.chunkSize"               -> "32768",
     "edu.gemini.auxfile.fits.dest"               -> "/please/specify/in/host/specific/property/file",
@@ -79,15 +118,8 @@ def common(version: Version) = AppConfig(
     "edu.gemini.spdb.mode"                       -> "local",
     "edu.gemini.too.event.mode"                  -> "service",
     "edu.gemini.util.security.auth.startServer"  -> "true",
-    "org.ops4j.pax.web.ssl.keystore"             -> "conf/gemKeystore",
-    "org.osgi.framework.bootdelegation"          -> "*",
-    "org.osgi.framework.startlevel.beginning"    -> "99",
-    "org.osgi.framework.storage.clean"           -> "onFirstInit",
-    "org.osgi.service.http.port"                 -> "8442",
-    "org.osgi.service.http.port.secure"          -> "8443",
-    "org.osgi.service.http.secure.enabled"       -> "true"
+    "org.ops4j.pax.web.ssl.keystore"             -> "conf/gemKeystore"
   ),
-  log = Some("log/spdb.%u.%g.log"),
   bundles = List(
     BundleSpec("com.jgoodies.looks",                     Version(2, 4, 1)),
     BundleSpec("com.mchange.c3p0",                       Version(0, 9, 5)),
@@ -95,12 +127,12 @@ def common(version: Version) = AppConfig(
     BundleSpec("edu.gemini.ags.servlet",                 version),
     BundleSpec("edu.gemini.dataman.app",                 version),
     BundleSpec("edu.gemini.horizons.server",             version),
+    BundleSpec("edu.gemini.itc.servlet",                 version),
     BundleSpec("edu.gemini.lchquery.servlet",            version),
     BundleSpec("edu.gemini.obslog",                      version),
     BundleSpec("edu.gemini.oodb.auth.servlet",           version),
     BundleSpec("edu.gemini.oodb.too.url",                version),
     BundleSpec("edu.gemini.oodb.too.window",             version),
-    BundleSpec("edu.gemini.osgi.main",                   Version(4, 2, 1)),
     BundleSpec("edu.gemini.p2checker",                   version), // ?
     BundleSpec("edu.gemini.phase2.skeleton.servlet",     version),
     BundleSpec("edu.gemini.qpt.shared",                  version),
@@ -116,20 +148,11 @@ def common(version: Version) = AppConfig(
     BundleSpec("jsky.app.ot.shared",                     version),
     BundleSpec("org.apache.commons.io",                  Version(2, 0, 1)),
     BundleSpec("org.h2",                                 Version(1, 3, 170)),
-    BundleSpec("org.ops4j.pax.web.pax-web-extender-war", Version(1, 1, 13)),
-    BundleSpec("org.ops4j.pax.web.pax-web-jetty-bundle", Version(1, 1, 13)),
-    BundleSpec("org.ops4j.pax.web.pax-web-jsp",          Version(1, 1, 13)),
-    BundleSpec("org.ops4j.pax.web.pax-web-spi",          Version(1, 1, 13)),
-    BundleSpec("org.scala-lang.scala-reflect",           Version(2, 10, 1)),
-    BundleSpec("org.scalaz.concurrent",                  Version(7, 0, 5)),
-    BundleSpec("slf4j.api",                              Version(1, 6, 4)),
-    BundleSpec("slf4j.jdk14",                            Version(1, 6, 4)),
-    BundleSpec("org.apache.commons.logging",             Version(1, 1, 0)),
     BundleSpec("com.cosylab.epics.caj",                  Version(1, 0, 2)),
     BundleSpec("edu.gemini.shared.ca",                   version),
     BundleSpec("edu.gemini.spdb.reports.collection",     version)
   )
-) extending List(common_credentials(version))
+) extending List(minimal(version), common_credentials(version))
 
 // WITH-GOGO
 def with_gogo(version: Version) = AppConfig(
@@ -139,7 +162,7 @@ def with_gogo(version: Version) = AppConfig(
     BundleSpec(10, "org.apache.felix.gogo.runtime", Version(0, 10, 0)),
     BundleSpec(10, "org.apache.felix.gogo.shell",   Version(0, 10, 0))
   )
-) extending List(common(version), with_gogo_credentials(version))
+) extending List(with_gogo_credentials(version))
 
 // WITH-REMOTE-GOGO
 def with_remote_gogo(version: Version) = AppConfig(
@@ -190,7 +213,7 @@ def rnorris(version: Version) = AppConfig(
     "edu.gemini.spdb.dir"                        -> "/Users/rnorris/.spdb/",
     "edu.gemini.util.trpc.name"                  -> "Rob's ODB (Test)"
   )
-) extending List(with_gogo(version), rnorris_credentials(version))
+) extending List(common(version), with_gogo(version), rnorris_credentials(version))
 
 // SWALKER
 def swalker(version: Version) = AppConfig(
@@ -232,7 +255,7 @@ def swalker(version: Version) = AppConfig(
     "edu.gemini.spdb.dir"                        -> "/Users/swalker/.spdb/",
     "edu.gemini.util.trpc.name"                  -> "Shane's ODB (Test)"
   )
-) extending List(with_gogo(version), swalker_credentials(version))
+) extending List(common(version), with_gogo(version), swalker_credentials(version))
 
 // FNUSSBER
 def fnussber(version: Version) = AppConfig(
@@ -258,7 +281,7 @@ def fnussber(version: Version) = AppConfig(
     "edu.gemini.auxfile.other.dest" -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.fits.host"  -> "gsconfig.gemini.edu"
   )
-) extending List(with_gogo(version), fnussber_credentials(version))
+) extending List(common(version), with_gogo(version), fnussber_credentials(version))
 
 // SRAAPHORST
 def sraaphorst(version: Version) = AppConfig(
@@ -283,7 +306,7 @@ def sraaphorst(version: Version) = AppConfig(
     "edu.gemini.auxfile.fits.host"         -> "gsconfig.gemini.edu",
     "edu.gemini.dbTools.archive.directory" -> "/Users/sraaphor/tmp/archiver"
   )
-) extending List(with_gogo(version), sraaphorst_credentials(version))
+) extending List(common(version), with_gogo(version), sraaphorst_credentials(version))
 
 // CQUIROZ
 def cquiroz(version: Version) = AppConfig(
@@ -302,7 +325,7 @@ def cquiroz(version: Version) = AppConfig(
     "edu.gemini.auxfile.other.dest" -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.fits.host"  -> "gsconfig.gemini.edu"
   )
-) extending List(with_gogo(version), cquiroz_credentials(version))
+) extending List(common(version), with_gogo(version), cquiroz_credentials(version))
 
 // JLUHRS
 def jluhrs(version: Version) = AppConfig(
@@ -321,7 +344,7 @@ def jluhrs(version: Version) = AppConfig(
     "edu.gemini.auxfile.other.dest" -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.fits.host"  -> "gsconfig.gemini.edu"
   )
-) extending List(with_gogo(version), jluhrs_credentials(version))
+) extending List(common(version), with_gogo(version), jluhrs_credentials(version))
 
 // ABRIGHTON
 def abrighton(version: Version) = AppConfig(
@@ -363,7 +386,7 @@ def abrighton(version: Version) = AppConfig(
     "edu.gemini.spdb.dir"                        -> "/Users/abrighto/.spdb/",
     "edu.gemini.util.trpc.name"                  -> "Brightons's ODB (Test)"
   )
-) extending List(with_gogo(version), abrighton_credentials(version))
+) extending List(common(version), with_gogo(version), abrighton_credentials(version))
 
 // ODBTEST
 def odbtest(version: Version) = AppConfig(
@@ -388,7 +411,7 @@ def odbtest(version: Version) = AppConfig(
     "edu.gemini.util.trpc.name"            -> "Gemini ODB (Test)",
     "edu.gemini.dbTools.archive.directory" -> "/home/software/ugemini/spdb/spdb.archive"
   )
-) extending List(with_remote_gogo(version), odbtest_credentials(version))
+) extending List(common(version), with_remote_gogo(version), odbtest_credentials(version))
 
 // ODBPRODUCTION
 def odbproduction(version: Version) = AppConfig(
@@ -410,7 +433,7 @@ def odbproduction(version: Version) = AppConfig(
     "edu.gemini.smartgcal.host"       -> "gsodb",
     "edu.gemini.smartgcal.svnRootUrl" -> "http://source.gemini.edu/gcal/trunk/calibrations"
   )
-) extending List(with_remote_gogo(version), odbproduction_credentials(version))
+) extending List(common(version), with_remote_gogo(version), odbproduction_credentials(version))
 
 // GNODBTEST
 def gnodbtest(version: Version) = AppConfig(
