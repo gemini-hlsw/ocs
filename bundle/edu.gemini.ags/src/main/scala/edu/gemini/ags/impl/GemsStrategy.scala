@@ -54,21 +54,13 @@ object GemsStrategy extends AgsStrategy {
       OdgwFlexureId    -> GsaoiOdgw.Group.instance
     )
 
-    // Determine which catalog to use based on the instrument: GSAOI or F2.
-//    val server = {
-//      if (ctx.getInstrument.getType == SPComponentType.INSTRUMENT_GSAOI)
-//        CatalogServerInstances.UCAC3
-//      else
-//        CatalogServerInstances.STANDARD
-//    }
-    val server = CatalogServerInstances.STANDARD
-
     val adjustedConstraints = queryConstraints(ctx, mt).map { constraint =>
       // Adjust the magnitude limits for the conditions.
       val adjustedMagLimit = constraint.magnitudeLimits.mapMagnitudes(ctx.getConditions.magAdjustOp())
       constraint.copy(adjustedMagLimit)
     }
 
+    val server = CatalogServerInstances.STANDARD
     ParallelCatalogQuery.instance.query(server, adjustedConstraints.asImList).asScala.map { result =>
       val id = result.constraint.id
       CatalogResultWithKey(result, new GemsCatalogSearchKey(GuideStarTypeMap(id), GuideProbeGroupMap(id)))
