@@ -1,5 +1,6 @@
 package edu.gemini.ags.api
 
+import edu.gemini.ags.api.AgsGuideQuality.Unusable
 import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.ImageQuality
@@ -8,108 +9,105 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
 
-
-import scalaz._
-import Scalaz._
-
-sealed trait AgsGuideQuality extends Ordered[AgsGuideQuality] {
-  def ord: Int
-  def compare(that: AgsGuideQuality): Int = ord.compareTo(that.ord)
-  def message: String = ""
+sealed trait AgsGuideQuality {
+  def message: String
 }
 
 object AgsGuideQuality {
-  case object DeliversRequestedIq extends AgsGuideQuality   {
-    val ord = 0
+  case object DeliversRequestedIq extends AgsGuideQuality {
+    override val message = "Delivers requested IQ."
   }
   case object PossibleIqDegradation extends AgsGuideQuality {
-    val ord = 1
     override val message = "Slower guiding required; may not deliver requested IQ."
   }
-  case object IqDegradation extends AgsGuideQuality         {
-    val ord = 2
+  case object IqDegradation extends AgsGuideQuality {
     override val message = "Slower guiding required; will not deliver requested IQ."
   }
-  case object PossiblyUnusable extends AgsGuideQuality      {
-    val ord = 3
+  case object PossiblyUnusable extends AgsGuideQuality {
     override val message = "May not be able to guide."
+  }
+  case object Unusable extends AgsGuideQuality {
+    override val message = "Unable to guide."
   }
 
   val All: List[AgsGuideQuality] =
-    List(DeliversRequestedIq, PossibleIqDegradation, IqDegradation, PossiblyUnusable)
-}
-
-sealed trait AgsSeverity
-object AgsSeverity {
-  case object Warning extends AgsSeverity
-  case object Error   extends AgsSeverity
+    List(DeliversRequestedIq, PossibleIqDegradation, IqDegradation, PossiblyUnusable, Unusable)
 }
 
 sealed trait AgsAnalysis {
-  def qualityOption: Option[AgsGuideQuality] = None
-  def severityLevel: Option[AgsSeverity]     = None
-  def message:       String
+  def quality: AgsGuideQuality = Unusable
+  def message(withProbe: Boolean): String
 }
-
-sealed trait AgsAnalysisWithGuideProbe extends AgsAnalysis {
-  def guideProbe: GuideProbe
-}
-
 
 object AgsAnalysis {
   case object UnknownError extends AgsAnalysis {
-    override val message       = "Unknown error."
-    override val severityLevel = Some(AgsSeverity.Error)
+    override def message(withProbe: Boolean): String  = "Unknown error."
   }
 
-  case class NoGuideStarForProbe(guideProbe: GuideProbe) extends AgsAnalysisWithGuideProbe {
-    override val message       = s"No ${guideProbe.getKey} guide star selected."
-    override val severityLevel = Some(AgsSeverity.Error)
+  case class NoGuideStarForProbe(guideProbe: GuideProbe) extends AgsAnalysis {
+    override def message(withProbe: Boolean): String = {
+      val p = if (withProbe) s"${guideProbe.getKey} " else ""
+      s"No ${p}guide star selected."
+    }
   }
 
   case class NoGuideStarForGroup(guideGroup: GuideProbeGroup) extends AgsAnalysis {
-    override val message       = s"No ${guideGroup.getKey} guide star selected."
-    override val severityLevel = Some(AgsSeverity.Error)
+    override def message(withProbe: Boolean): String =
+      s"No ${guideGroup.getKey} guide star selected."
   }
 
-  case class MagnitudeTooFaint(guideProbe: GuideProbe, target: SPTarget) extends AgsAnalysisWithGuideProbe {
-    override val message       = "Cannot guide with the star in these conditions, even using the slowest guide speed."
-    override val severityLevel = Some(AgsSeverity.Error)
-  }
-
-  case class MagnitudeTooBright(guideProbe: GuideProbe, target: SPTarget) extends AgsAnalysisWithGuideProbe {
-    override val message       = "Guide star is too bright to guide."
-    override val severityLevel = Some(AgsSeverity.Error)
-  }
-
-  case class NoMagnitudeForBand(guideProbe: GuideProbe, target: SPTarget, band: Magnitude.Band) extends AgsAnalysisWithGuideProbe {
-    override val message       = s"Guide star ${band.name}-band magnitude is missing."
-    override val severityLevel = Some(AgsSeverity.Warning)
-  }
-
-  case class NotReachable(guideProbe: GuideProbe, target: SPTarget) extends AgsAnalysisWithGuideProbe {
-    override val message       = "The star is not reachable at all positions."
-    override val severityLevel = Some(AgsSeverity.Error)
-  }
-
-  case class Usable(guideProbe: GuideProbe, target: SPTarget, guideSpeed: GuideSpeed, quality: AgsGuideQuality) extends AgsAnalysisWithGuideProbe {
-    override def qualityOption = Some(quality)
-    override def severityLevel = qualityOption match {
-      case Some(AgsGuideQuality.DeliversRequestedIq) => None
-      case _                                         => Some(AgsSeverity.Warning)
+  case class MagnitudeTooFaint(guideProbe: GuideProbe, target: SPTarget) extends AgsAnalysis {
+    override def message(withProbe: Boolean): String = {
+      val p = if (withProbe) s"use ${guideProbe.getKey}" else "guide"
+      s"Cannot $p with the star in these conditions, even using the slowest guide speed."
     }
-
-    override def message: String = quality.message + (quality match {
-      case AgsGuideQuality.DeliversRequestedIq => ""
-      case _ => " "
-    }) + s"Guide Speed: ${guideSpeed.name}."
   }
 
-  def worstCaseGuideQuality(analysis: List[AgsAnalysis]): Option[AgsGuideQuality] =
-    analysis.map(_.qualityOption).sequence.flatMap {
-      case Nil => None
-      case lst => Some(lst.max)
+  case class MagnitudeTooBright(guideProbe: GuideProbe, target: SPTarget) extends AgsAnalysis {
+    override def message(withProbe: Boolean): String = {
+      val p = if (withProbe) s"${guideProbe.getKey} g" else "G"
+      s"${p}uide star is too bright to guide."
     }
+  }
+
+  case class NotReachable(guideProbe: GuideProbe, target: SPTarget) extends AgsAnalysis {
+    override def message(withProbe: Boolean): String = {
+      val p = if (withProbe) s"with ${guideProbe.getKey} " else ""
+      s"The star is not reachable ${p}at all positions."
+    }
+  }
+
+  case class NoMagnitudeForBand(guideProbe: GuideProbe, target: SPTarget, band: Magnitude.Band) extends AgsAnalysis {
+    override def message(withProbe: Boolean): String = {
+      val p = if (withProbe) s"${guideProbe.getKey} g" else "G"
+      s"${p}uide star ${band.name}-band magnitude is missing."
+    }
+    override val quality = AgsGuideQuality.PossiblyUnusable
+  }
+
+  case class Usable(guideProbe: GuideProbe, target: SPTarget, guideSpeed: GuideSpeed, override val quality: AgsGuideQuality) extends AgsAnalysis {
+    override def message(withProbe: Boolean): String = {
+      val qualityMessage = quality match {
+        case AgsGuideQuality.DeliversRequestedIq => ""
+        case _                                   => s"${quality.message} "
+      }
+      val p = if (withProbe) s"${guideProbe.getKey} " else ""
+
+      s"${qualityMessage}${p}Guide Speed: ${guideSpeed.name}."
+    }
+  }
+
+  def guideProbe(a: AgsAnalysis): Option[GuideProbe] = a match {
+    case UnknownError                => None
+    case NoGuideStarForProbe(p)      => Some(p)
+    case NoGuideStarForGroup(_)      => None
+    case MagnitudeTooFaint(p, _)     => Some(p)
+    case MagnitudeTooBright(p, _)    => Some(p)
+    case NotReachable(p, _)          => Some(p)
+    case NoMagnitudeForBand(p, _, _) => Some(p)
+    case Usable(p, _, _, _)          => Some(p)
+  }
+
 
   /**
    * Analysis of the selected guide star (if any) in the given context.
@@ -189,13 +187,4 @@ object AgsAnalysis {
     // This should theoretically never happen, but if it does, something has gone wrong with the site or magnitude table.
     magAnalysis.getOrElse(UnknownError)
   }
-
-  // Message format for guiding feedback, P2 rules, and QPT markers.
-  def analysisToMessage(analysis: AgsAnalysis, showGuideProbeName: Boolean): String =
-    (if (showGuideProbeName)
-      analysis match {
-        case a: AgsAnalysisWithGuideProbe => s"${a.guideProbe.getKey} "
-        case _ => ""
-      }
-    else "") + analysis.message
 }

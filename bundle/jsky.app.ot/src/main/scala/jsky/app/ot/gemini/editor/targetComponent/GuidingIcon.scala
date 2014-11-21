@@ -1,9 +1,10 @@
 package jsky.app.ot.gemini.editor.targetComponent
 
+import edu.gemini.ags.api.AgsGuideQuality._
+
 import java.awt.geom.{Rectangle2D, Arc2D}
 
 import edu.gemini.ags.api.AgsGuideQuality
-import edu.gemini.spModel.rich.shared.immutable.asScalaOpt
 import jsky.app.ot.util.Rendering
 
 import java.awt.{BasicStroke, Color}
@@ -15,25 +16,20 @@ import javax.swing.ImageIcon
  * enabled and disabled variations.
  */
 object GuidingIcon {
-  import AgsGuideQuality.All
 
   private val darkGreen = new Color(0, 153, 0)
 
   private val icons = (for {
-    x <- None :: All.map(q => Some(q))
-    y <- List(true, false)
-  } yield (x,y) -> makeIcon(x, y)).toMap
+    q <- AgsGuideQuality.All
+    e <- List(true, false)
+  } yield (q,e) -> makeIcon(q, e)).toMap
 
-  def apply(q: Option[AgsGuideQuality], enabled: Boolean): ImageIcon =
-    icons((q, enabled))
-
-  // For use from Java with the Gemini Java Option ...
-  def apply(q: edu.gemini.shared.util.immutable.Option[AgsGuideQuality], enabled: Boolean): ImageIcon =
-    apply(q.asScalaOpt, enabled)
+  def apply(quality: AgsGuideQuality, enabled: Boolean): ImageIcon =
+    icons((quality, enabled))
 
   // Create a Harvey Ball programmatically to represent the quality of the target.
   // See: http://en.wikipedia.org/wiki/Harvey_Balls
-  private def makeIcon(q: Option[AgsGuideQuality], enabled: Boolean): ImageIcon = {
+  private def makeIcon(q: AgsGuideQuality, enabled: Boolean): ImageIcon = {
     new ImageIcon({
       val img = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB)
       val g2  = img.createGraphics()
@@ -43,19 +39,27 @@ object GuidingIcon {
         val r2  = new Rectangle2D.Double(2, 2, img.getWidth-4, img.getHeight-4)
 
         // Paint the inner component indicating quality.
-        if (q.isDefined) {
+        val quarters = q match {
+          case DeliversRequestedIq   => 4
+          case PossibleIqDegradation => 3
+          case IqDegradation         => 2
+          case PossiblyUnusable      => 1
+          case Unusable              => 0
+        }
+        if (quarters > 0) {
           g2.setStroke(new BasicStroke(1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND))
           g2.setPaint(if (enabled) darkGreen else Color.gray)
-          g2.fill(new Arc2D.Double(r2, 90, -90 * (4 - q.get.ord), Arc2D.PIE))
+          g2.fill(new Arc2D.Double(r2, 90, -90 * quarters, Arc2D.PIE))
         }
 
         // Paint the outer border.
         g2.setStroke(new BasicStroke(1.2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND))
-        g2.setPaint((enabled, q.isEmpty) match {
-          case (true,  true)  => Color.red
-          case (true,  false) => Color.black
-          case (false, _)     => Color.gray
-        })
+
+        val color = if (enabled) {
+                      if (quarters == 0) Color.red else Color.black
+                    } else Color.gray
+
+        g2.setPaint(color)
         g2.draw(new Arc2D.Double(r2, 0, 360, Arc2D.OPEN))
       }
 
