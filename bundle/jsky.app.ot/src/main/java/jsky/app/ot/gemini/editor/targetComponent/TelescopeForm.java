@@ -212,8 +212,6 @@ public class TelescopeForm extends JPanel {
             }
 
             final JPanel feedbackAndButtonPanel = new JPanel(new BorderLayout());
-            guidingFeedback = new GuidingFeedback();
-            feedbackAndButtonPanel.add(guidingFeedback.peer(), BorderLayout.NORTH);
             feedbackAndButtonPanel.add(buttonPanel, BorderLayout.SOUTH);
 
             targetListPanel.add(feedbackAndButtonPanel, BorderLayout.SOUTH);
@@ -853,7 +851,6 @@ public class TelescopeForm extends JPanel {
     JRadioButton[] planetButtons;
 
     // Components for the Guider panel.
-    GuidingFeedback guidingFeedback;
     GuidingControls guidingControls;
 
     // These are just convenient placeholders to simplify the interactions with EdCompTargetList and are

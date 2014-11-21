@@ -4,6 +4,8 @@
 
 package jsky.app.ot.gemini.editor.targetComponent;
 
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 
 import java.awt.*;
@@ -21,5 +23,5 @@ interface TelescopePosEditor {
     /**
      * Informs the editor of which target position to edit.
      */
-    void edit(SPTarget target);
+    void edit(Option<ObsContext> ctx, SPTarget target);
 }
