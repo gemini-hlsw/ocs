@@ -1,67 +1,24 @@
 package jsky.app.ot.gemini.editor.targetComponent
 
+import edu.gemini.ags.api.AgsAnalysis.{NoGuideStarForProbe, NoGuideStarForGroup}
 import edu.gemini.ags.api._
 import edu.gemini.ags.api.AgsGuideQuality._
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.shared.skyobject.Magnitude
-import edu.gemini.spModel.guide.{GuideSpeed, GuideProbe}
+import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideSpeed, GuideProbe}
 import edu.gemini.spModel.guide.GuideSpeed._
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
-import jsky.app.ot.OT
+import edu.gemini.spModel.target.SPTarget
+import edu.gemini.spModel.target.env.TargetEnvironment
 import jsky.app.ot.util.OtColor
 
 import java.awt.Color.DARK_GRAY
 import javax.swing.BorderFactory
 
+import scala.collection.JavaConverters._
 import scala.swing._
 import scala.swing.GridBagPanel.Fill
-
-import GuidingFeedback._
-
-class GuidingFeedback extends GridBagPanel {
-  border = BorderFactory.createEmptyBorder(2, 2, 2, 2)
-
-  def update(ctx: edu.gemini.shared.util.immutable.Option[ObsContext]): Unit =
-    ctx.asScalaOpt.fold(reset())(update)
-
-  def update(ctx: ObsContext): Unit = update(ctx, OT.getMagnitudeTable)
-
-  def update(ctx: ObsContext, mt: MagnitudeTable): Unit = {
-    val (calcTable, analysis) = AgsRegistrar.currentStrategy(ctx).fold((Map.empty[GuideProbe, MagnitudeCalc], List.empty[AgsAnalysis])) { strategy =>
-      (strategy.magnitudes(ctx, mt).toMap, strategy.analyze(ctx, mt))
-    }
-
-    val probeLimitsMap = calcTable.mapValues(ProbeLimits(ctx, _))
-
-    // Clear out the old messages, create new messages for each analysis, and add them to the feedback.
-    reset()
-
-    analysis.map { a =>
-      val limits = for {
-        p  <- AgsAnalysis.guideProbe(a)
-        lo <- probeLimitsMap.get(p)
-        l  <- lo
-      } yield l
-
-      new Row(a, limits, includeProbeName = true)
-    }.zipWithIndex.foreach { case (row, rowIndex) =>
-      layout(row) = new Constraints {
-        gridy   = rowIndex
-        weightx = 1.0
-        fill    = Fill.Horizontal
-        insets  = new Insets(0, 0, 1, 0)
-      }
-    }
-
-    // Required when switching the primary guide star option.
-    revalidate()
-  }
-
-  def reset(): Unit = {
-    layout.clear()
-  }
-}
 
 object GuidingFeedback {
   import OtColor._
@@ -101,7 +58,10 @@ object GuidingFeedback {
       case Unusable              => LIGHT_SALMON
     }
 
+    val labelBorder = BorderFactory.createEmptyBorder(2, 2, 2, 2)
+
     object feedbackLabel extends Label {
+      border     = labelBorder
       icon       = GuidingIcon(analysis.quality, enabled = true)
       foreground = DARK_GRAY
       background = bg
@@ -111,6 +71,7 @@ object GuidingFeedback {
     }
 
     object rangeLabel extends Label {
+      border     = labelBorder
       foreground = DARK_GRAY
       background = bg
       text       = probeLimits.map(_.searchRange).getOrElse("")
@@ -121,17 +82,100 @@ object GuidingFeedback {
 
     override def opaque_=(o: Boolean): Unit =
       if (o != opaque) {
+        super.opaque = o
         feedbackLabel.opaque = o
         rangeLabel.opaque    = o
       }
 
+    override def enabled_=(e: Boolean): Unit =
+      if (e != enabled) {
+        super.enabled = enabled
+        feedbackLabel.icon = GuidingIcon(analysis.quality, enabled = false)
+      }
+
     layout(feedbackLabel) = new Constraints {
       weightx = 1.0
-      fill    = Fill.Horizontal
+      fill    = Fill.Both
     }
 
     layout(rangeLabel) = new Constraints {
       gridx = 1
+      fill  = Fill.Both
     }
+  }
+
+  class Table extends GridBagPanel {
+    def clear(): Unit = showRows(Nil)
+
+    def showRow(row: Row): Unit = showRows(List(row))
+
+    def showRows(rows: List[Row]): Unit = {
+      layout.clear()
+
+      rows.zipWithIndex.foreach { case (row, rowIndex) =>
+        layout(row) = new Constraints {
+          gridy   = rowIndex
+          weightx = 1.0
+          fill    = Fill.Horizontal
+          insets  = new Insets(0, 0, 1, 0)
+        }
+      }
+
+      revalidate()
+    }
+  }
+
+  // GuidingFeedback.Rows corresponding to the observation as a whole.
+  def obsAnalysis(ctx: ObsContext, mt: MagnitudeTable): List[Row] = {
+    val (calcTable, analysis) = AgsRegistrar.currentStrategy(ctx).fold((Map.empty[GuideProbe, MagnitudeCalc], List.empty[AgsAnalysis])) { strategy =>
+      (strategy.magnitudes(ctx, mt).toMap, strategy.analyze(ctx, mt))
+    }
+    val probeLimitsMap = calcTable.mapValues(ProbeLimits(ctx, _))
+
+    analysis.map { a =>
+      val plo = for {
+        gp <- AgsAnalysis.guideProbe(a)
+        pl <- probeLimitsMap.get(gp).flatten
+      } yield pl
+      new Row(a, plo, includeProbeName = true)
+    }
+  }
+
+  // Ugh, search through to figure out what the guide probe is, if any.
+  private def guideProbe(env: TargetEnvironment, target: SPTarget): Option[ValidatableGuideProbe] = {
+    val gpts = env.getGuideEnvironment.iterator().asScala.flatMap(_.iterator().asScala)
+    gpts.find(_.containsTarget(target)).map(_.getGuider).collect {
+      case v: ValidatableGuideProbe => v
+    }
+  }
+
+  // GuidingFeedback.Rows corresponding to the given target.  If the base
+  // position, show any global messages about missing guide stars. If a guide
+  // star, show information particular to the guide star itself.
+  def targetAnalysis(ctx: ObsContext, mt: MagnitudeTable, target: SPTarget): List[Row] = {
+    val env = ctx.getTargets
+    if (target == env.getBase) baseAnalysis(ctx, mt)
+    else guideProbe(env, target).fold(List.empty[Row]) { vgp =>
+      List(guideStarAnalysis(ctx, mt, vgp, target))
+    }
+  }
+
+  // GuidingFeedback.Rows corresponding to global errors like missing guide
+  // stars.
+  def baseAnalysis(ctx: ObsContext, mt: MagnitudeTable): List[Row] =
+    AgsRegistrar.currentStrategy(ctx).fold(List.empty[Row]) { s =>
+      s.analyze(ctx, mt).filter {
+        case AgsAnalysis.UnknownError => true
+        case NoGuideStarForGroup(_)   => true
+        case NoGuideStarForProbe(_)   => true
+        case _                        => false
+      }.map { a => new Row(a, None, includeProbeName = true) }
+    }
+
+  // GuidingFeedback.Row related to the given guide star itself.
+  def guideStarAnalysis(ctx: ObsContext, mt: MagnitudeTable, gp: ValidatableGuideProbe, target: SPTarget): Row = {
+    val analysis = AgsAnalysis.analysis(ctx, mt, gp, target)
+    val plo      = mt(ctx, gp).flatMap(ProbeLimits(ctx, _))
+    new Row(analysis, plo, includeProbeName = false)
   }
 }
