@@ -37,17 +37,17 @@ public abstract class ComponentEditor<N extends ISPNode, D extends ISPDataObject
     /**
      * Size of the row gap between a component and it's warning label.
      */
-    private static final int WARNING_ROW_GAP = 5;
+    public static final int WARNING_ROW_GAP = 5;
 
     /**
      * Size of the gap between columns of properties.
      */
-    private static final int PROPERTY_COLUMN_GAP = 10;
+    public static final int PROPERTY_COLUMN_GAP = 10;
 
     /**
      * Size of the gap between a label and the widget it names.
      */
-    private static final int LABEL_WIDGET_GAP = 5;
+    public static final int LABEL_WIDGET_GAP = 5;
 
     /**
      * Border to place around the panel.
