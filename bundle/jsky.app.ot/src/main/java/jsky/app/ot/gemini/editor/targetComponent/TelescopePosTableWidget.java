@@ -679,8 +679,16 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
     public void telescopePosGenericUpdate(WatchablePos tp) {
         int index = getSelectedRow();
         _resetTable(_env);
+
+        // Restore the selection without firing new selection events.
         if ((index >= 0) && (index < getRowCount())) {
-            _setSelectedRow(index);
+            final boolean ignore = _ignoreSelection;
+            try {
+                _ignoreSelection = true;
+                _setSelectedRow(index);
+            } finally {
+                _ignoreSelection = ignore;
+            }
         }
     }
 
@@ -772,7 +780,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
         @Override public void propertyChange(PropertyChangeEvent evt) {
             if (_tableData == null) return;
 
-            final SPTarget target = TargetSelection.get(_env, (Integer) evt.getNewValue());
+            final SPTarget target = TargetSelection.get(_env, _obsComp);
             if (target != null) {
                 int index = _tableData.indexOf(target);
                 _setSelectedRow(index);
@@ -1067,22 +1075,8 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
     private void _setSelectedRow(int index) {
         if ((index < 0) || (index >= getRowCount())) return;
-        getSelectionModel().addSelectionInterval(index, index);
-        focusAtRow(index);
-    }
-
-    /** Set the focus at the given row (actually just select the row and deselect all other rows). */
-    public void focusAtRow(int index) {
         getSelectionModel().setSelectionInterval(index, index);
     }
-
-//    public int getRowOf(SPTarget target) {
-//        if (_tableData == null) return -1;
-//        return _tableData.indexOf(target);
-//    }
-//    public SPTarget getTargetAt(int index) {
-//        return _tableData.targetAt(index);
-//    }
 
     public void selectRowAt(int index) {
         if (_tableData == null) return;
@@ -1090,12 +1084,10 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
         SPTarget target = _tableData.targetAt(index).getOrNull();
         if (target != null) {
             selectPos(target);
-            focusAtRow(index);
         } else {
             GuideGroup group = _tableData.groupAt(index).getOrNull();
             if (group != null) {
                 selectGroup(group);
-                focusAtRow(index);
             }
         }
     }
