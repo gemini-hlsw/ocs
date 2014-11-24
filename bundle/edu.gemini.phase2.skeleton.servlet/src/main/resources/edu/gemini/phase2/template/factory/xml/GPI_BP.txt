@@ -1,14 +1,14 @@
 Instrument: GPI
 Blueprint templates: GPI_BP.xml
 
-Last update: 2014 May 09, Fredrik Rantakyro
+Version 2014 May 09, Fredrik Rantakyro
+Version 2014 Nov 13, Andrew Stephens
+Version 2014 Nov 19, Bryan Miller
 
-Observations are now identified by library IDs, indicated with {}
+Observations are identified by library IDs, indicated with {}
 
 PI = Phase I
 {} = Library ID
-
-SET OBSERVING MODE FROM PI
 
 IF DISPERSER == PRISM:
   IF FILTER == {Y or J or H}:  # No sky required
@@ -22,5 +22,7 @@ ELSE IF DISPERSER == WOLLASTON:
     INCLUDE {5} {6}
   IF FILTER == {K1 or K2}:    # Sky required
     INCLUDE {5} {7}
+
+SET OBSERVING MODE FROM PI (all included observations)
 
 # Filter Change:  the goal is to leave the mode the same but change the filter from {K1 or K2} to {H}.  For example, if the mode is "Coronagraph K1" change it to "Coronagraph H".  If it is "K2 Direct" change it to "H Direct".  If it is "Non-Redundant K1" change it to "Non-Redundant H".
