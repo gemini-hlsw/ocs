@@ -4,6 +4,8 @@
 
 package jsky.app.ot.gemini.editor.targetComponent;
 
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
 import edu.gemini.spModel.target.WatchablePos;
@@ -37,7 +39,7 @@ abstract class AbstractTelescopePosEditor implements TelescopePosEditor {
      * @param target new target to edit
      */
     @Override
-    public void edit(SPTarget target) {
+    public void edit(final Option<ObsContext> ctx, final SPTarget target) {
         if (this.target == target) return;
         if (this.target != null) this.target.deleteWatcher(watcher);
         if (target != null) target.addWatcher(watcher);

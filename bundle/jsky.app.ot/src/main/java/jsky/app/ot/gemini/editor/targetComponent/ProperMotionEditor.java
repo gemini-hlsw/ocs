@@ -5,6 +5,7 @@
 package jsky.app.ot.gemini.editor.targetComponent;
 
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
 import edu.gemini.spModel.target.WatchablePos;
@@ -119,7 +120,7 @@ final class ProperMotionEditor implements TelescopePosEditor {
         }
     };
 
-    public void edit(final SPTarget target) {
+    public void edit(final Option<ObsContext> ctx, final SPTarget target) {
         if (this.target == target) return;
         if (this.target != null) this.target.deleteWatcher(watcher);
         if (target != null) target.addWatcher(watcher);

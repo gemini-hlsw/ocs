@@ -1,7 +1,8 @@
 package edu.gemini.p2checker.ags
 
+import edu.gemini.ags.api.AgsGuideQuality._
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
-import edu.gemini.ags.api.{AgsSeverity, AgsAnalysis, AgsRegistrar}
+import edu.gemini.ags.api.{AgsAnalysis, AgsRegistrar}
 import edu.gemini.p2checker.api.{P2Problems, IP2Problems, Problem, ObservationElements, IRule}
 import edu.gemini.spModel.obs.SPObservation
 import edu.gemini.spModel.rich.shared.immutable._
@@ -28,11 +29,8 @@ class AgsAnalysisRule(mt: MagnitudeTable) extends IRule {
           // This equates to all analyses with a severity level.
           for {
             h <- analysis
-            s <- h.severityLevel
-          } yield {
-            problems.append(new Problem(severityToProblemType(s), Prefix + "StrategyRule",
-                            AgsAnalysis.analysisToMessage(h, showGuideProbeName = true), targetNode))
-          }
+            s <- severity(h)
+          } yield problems.append(new Problem(s, Prefix + "StrategyRule", h.message(withProbe = true), targetNode))
         })
       })
     }
@@ -40,12 +38,16 @@ class AgsAnalysisRule(mt: MagnitudeTable) extends IRule {
   }
 }
 
-
 object AgsAnalysisRule {
   val Prefix = "AgsAnalysisRule_"
 
-  val severityToProblemType = Map[AgsSeverity,Problem.Type](
-    AgsSeverity.Warning -> Problem.Type.WARNING,
-    AgsSeverity.Error   -> Problem.Type.ERROR
-  )
+  def severity(a: AgsAnalysis): Option[Problem.Type] =
+    a.quality match {
+      case DeliversRequestedIq   => None
+      case PossibleIqDegradation => Some(Problem.Type.WARNING)
+      case IqDegradation         => Some(Problem.Type.WARNING)
+      case PossiblyUnusable      => Some(Problem.Type.WARNING)
+      case Unusable              => Some(Problem.Type.ERROR)
+    }
+
 }
