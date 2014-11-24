@@ -22,7 +22,7 @@ object LoadProbeLimits {
     }
 
   def main(args: Array[String]): Unit =
-    ProbeLimitsParser.read(this.getClass.getResourceAsStream("Guide Limits - OT Config.csv")) match {
+    new ProbeLimitsParser().read(this.getClass.getResourceAsStream("Guide Limits - OT Config.csv")) match {
       case \/-(m) => dump(m)
       case -\/(m) => println(m)
     }

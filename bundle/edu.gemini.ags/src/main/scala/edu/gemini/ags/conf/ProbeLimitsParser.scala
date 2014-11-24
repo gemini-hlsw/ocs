@@ -11,6 +11,7 @@ import java.util.logging.{Level, Logger}
 
 import scala.io.Source
 import scala.util.parsing.combinator.JavaTokenParsers
+
 import scalaz._
 import Scalaz._
 
@@ -26,7 +27,7 @@ import Scalaz._
  * 20, ANY, 15.50, 17.00, 18.00
  * ...
  */
-object ProbeLimitsParser extends JavaTokenParsers {
+object ProbeLimitsParser {
   val Log     = Logger.getLogger(getClass.getName)
 
   val iqMap   = ImageQuality.values().map(iq => iq.getPercentage.toString -> iq).toMap +  ("ANY" -> ImageQuality.ANY)
@@ -34,47 +35,76 @@ object ProbeLimitsParser extends JavaTokenParsers {
   val bandMap = Band.values().map(b => b.name() -> b).toMap
   val idMap   = AllLimitsIds.map(g => g.name -> g).toMap
 
-  def id: Parser[MagLimitsId] = """[^,]+""".r ^? (idMap, s => s"Unrecognized guide limit table id '$s'.")
-  def band: Parser[Band]      = """[A-Z]+""".r ^? (bandMap, s => s"Unrecognized magnitude band '$s'.")
-  def mag: Parser[Double]     = decimalNumber ^^ { _.toDouble }
+  // The parser validates most aspects of the CalcMap, but doesn't catch missing
+  // tables or duplicate faintness keys.
+  def validate(cm: CalcMap): String \/ Unit = {
+    def missingIds: ValidationNel[String, Unit] =
+      AllLimitsIds.filterNot(cm.contains).map(_.name) match {
+        case Nil => ().success
+        case ids => ids.mkString("Missing table for: ", ", ", "").failNel
+      }
+
+    def incompleteTables: ValidationNel[String, Unit] = {
+      val errors = cm.map { case (MagLimitsId(name), ProbeLimitsCalc(_, _, fm)) =>
+        name -> (AllFaintnessKeys &~ fm.keySet)
+      }.filterNot(_._2.isEmpty).map { case (name, keys) =>
+        s"$name is missing entries: ${keys.mkString(", ")}"
+      }
+
+      errors match {
+        case Nil    => ().success
+        case h :: t => NonEmptyList.nel(h, t.toList).fail
+      }
+    }
+
+    (missingIds |+| incompleteTables).disjunction.leftMap(_.toList.mkString("\n"))
+  }
+}
+
+import ProbeLimitsParser._
+
+final class ProbeLimitsParser extends JavaTokenParsers {
+  val id: Parser[MagLimitsId] = """[^,]+""".r ^? (idMap, s => s"Unrecognized guide limit table id '$s'.")
+  val band: Parser[Band]      = """[A-Z]+""".r ^? (bandMap, s => s"Unrecognized magnitude band '$s'.")
+  val mag: Parser[Double]     = decimalNumber ^^ { _.toDouble }
 
   // When exported by the Google spreadsheet, there are commas in the blank
   // rows and columns.
-  def chaff: Parser[List[String]] = rep(",")
+  val chaff: Parser[List[String]] = rep(",")
 
-  def calcDef: Parser[(MagLimitsId, Band, Double)] =
+  val calcDef: Parser[(MagLimitsId, Band, Double)] =
     (id<~",")~(band<~",")~(mag<~chaff) ^^ {
       case idVal~bandVal~magAdj => (idVal, bandVal, magAdj)
     }
 
-  def iq: Parser[ImageQuality] =
+  val iq: Parser[ImageQuality] =
     ("ANY" | wholeNumber) ^? (iqMap, s => s"Unable to parse '$s' as an image quality value.")
 
-  def sb: Parser[SkyBackground] =
+  val sb: Parser[SkyBackground] =
     ("ANY" | wholeNumber) ^? (sbMap, s => s"Unable to parse '$s' as a sky background value.")
 
 
-  def limits: Parser[List[(GuideSpeed, Double)]] =
+  val limits: Parser[List[(GuideSpeed, Double)]] =
     repsep(mag, ",") ^? {
       case l@List(f, m, s) => GuideSpeed.values().toList.zip(l)
     }
 
-  def limitsLine: Parser[FaintnessMap] =
+  val limitsLine: Parser[FaintnessMap] =
     (iq<~",")~(sb<~",")~limits ^^ {
       case iqVal~sbVal~gsList => gsList.map { case (guideSpeed, limit) =>
           FaintnessKey(iqVal, sbVal, guideSpeed) -> limit
       }.toMap
     }
 
-  def limitsMap: Parser[FaintnessMap] =
+  val limitsMap: Parser[FaintnessMap] =
     repN(16, limitsLine) ^? { case lst@(_ :: _) => lst.reduce(_ ++ _) }
 
-  def calcEntry: Parser[(MagLimitsId, ProbeLimitsCalc)] =
-    chaff~>calcDef~limitsMap ^^ { case (id, band, adj)~tab =>
-        id -> ProbeLimitsCalc(band, adj, tab)
+  val calcEntry: Parser[(MagLimitsId, ProbeLimitsCalc)] =
+    chaff~>calcDef~limitsMap ^^ { case (id0, band0, adj)~tab =>
+        id0 -> ProbeLimitsCalc(band0, adj, tab)
     }
 
-  def calcMap: Parser[CalcMap] =
+  val calcMap: Parser[CalcMap] =
     rep(calcEntry) ^^ { _.toMap }
 
   private def read(src: Source): String \/ CalcMap =
@@ -95,5 +125,4 @@ object ProbeLimitsParser extends JavaTokenParsers {
       cm <- \/.fromTryCatch(read(Source.fromInputStream(is, "UTF8"))).fold(message(_).left, identity)
       _  <- validate(cm)
     } yield cm
-
 }
