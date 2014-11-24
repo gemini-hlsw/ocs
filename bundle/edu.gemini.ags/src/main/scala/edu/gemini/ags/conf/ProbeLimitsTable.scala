@@ -34,7 +34,7 @@ object ProbeLimitsTable {
     try {
       for {
         s <- is.toRightDisjunction(s"Could not find $ConfFile")
-        t <- ProbeLimitsParser.read(s).map(ProbeLimitsTable(_))
+        t <- new ProbeLimitsParser().read(s).map(ProbeLimitsTable(_))
       } yield t
     } finally {
       is.foreach(_.close())
