@@ -171,7 +171,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
         static final class BaseTargetRow extends AbstractRow {
             BaseTargetRow(SPTarget target) {
-                super(true, TargetEnvironment.BASE_NAME, target.getName(), new Some<SPTarget>(target));
+                super(true, TargetEnvironment.BASE_NAME, target.getName(), new Some<>(target));
             }
         }
 
@@ -179,9 +179,9 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             final Option<Double> distance;
 
             NonBaseTargetRow(boolean enabled, String tag, SPTarget target, WorldCoords baseCoords) {
-                super(enabled, tag, target.getName(), new Some<SPTarget>(target));
+                super(enabled, tag, target.getName(), new Some<>(target));
                 final WorldCoords coords = getWorldCoords(target);
-                distance = new Some<Double>(Math.abs(baseCoords.dist(coords)));
+                distance = new Some<>(Math.abs(baseCoords.dist(coords)));
             }
 
             @Override public Option<Double> distance() { return distance; }
@@ -214,7 +214,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
             GroupRow(boolean enabled, int index, GuideGroup group, List<Row> children) {
                 super(enabled, group.getName().getOrElse("Guide Group " + index), "", None.<SPTarget>instance());
-                this.group    = new Some<GuideGroup>(group);
+                this.group    = new Some<>(group);
                 this.children = Collections.unmodifiableList(children);
             }
 
@@ -242,7 +242,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                     if (guideProbe instanceof ValidatableGuideProbe) {
                         final ValidatableGuideProbe vgp = (ValidatableGuideProbe) guideProbe;
                         final scala.Option<AgsGuideQuality> gc = AgsAnalysis$.MODULE$.analysis(tup._1(), tup._2(), vgp, guideStar).qualityOption();
-                        return gc.isEmpty() ? None.<AgsGuideQuality>instance() : new Some<AgsGuideQuality>(gc.get());
+                        return gc.isEmpty() ? None.<AgsGuideQuality>instance() : new Some<>(gc.get());
                     } else {
                         return None.instance();
                     }
@@ -267,7 +267,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             // Add all the guide groups and targets.
             final Option<Tuple2<ObsContext, AgsMagnitude.MagnitudeTable>> ags = ctx.map(new MapOp<ObsContext, Tuple2<ObsContext, AgsMagnitude.MagnitudeTable>>() {
                 @Override public Tuple2<ObsContext, AgsMagnitude.MagnitudeTable> apply(ObsContext oc) {
-                    return new Pair<ObsContext, AgsMagnitude.MagnitudeTable>(oc, OT.getMagnitudeTable());
+                    return new Pair<>(oc, OT.getMagnitudeTable());
                 }
             });
 
@@ -292,7 +292,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                 int groupIndex = 1;
                 for (GuideGroup group : groups) {
                     final boolean isPrimaryGroup = group == primaryGroup;
-                    final List<Row> rowList = new ArrayList<Row>();
+                    final List<Row> rowList = new ArrayList<>();
                     for (GuideProbeTargets gt : group.getAll()) {
                         final GuideProbe guideProbe = gt.getGuider();
                         final boolean isActive = env.isActive(guideProbe);
@@ -327,7 +327,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
         private ImList<Magnitude.Band> getSortedBands(TargetEnvironment env) {
             // Keep a sorted set of bands, sorted by the name.
             final Set<Magnitude.Band> bands;
-            bands = new TreeSet<Magnitude.Band>(Magnitude.Band.WAVELENGTH_COMPARATOR);
+            bands = new TreeSet<>(Magnitude.Band.WAVELENGTH_COMPARATOR);
 
             // An operation that adds a target's bands to the set.
             ApplyOp<SPTarget> op = new ApplyOp<SPTarget>() {
@@ -400,7 +400,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
         public Option<Row> rowAt(int index) {
             int i = 0;
             for (Row row : rows) {
-                if (i == index) return new Some<Row>(row);
+                if (i == index) return new Some<>(row);
 
                 final TreePath path = treeTable.getPathForRow(i);
                 ++i;
@@ -408,7 +408,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                     final List<Row> children = row.children();
                     final int cindex = index - i;
                     if (cindex < children.size()) {
-                        return new Some<Row>(children.get(cindex));
+                        return new Some<>(children.get(cindex));
                     } else {
                         i += children.size();
                     }
@@ -420,8 +420,8 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
         private static ImList<String> computeColumnHeaders(ImList<Magnitude.Band> bands) {
             // First add the fixed column headers
-            List<String> hdr = new ArrayList<String>();
-            for (Col c : Col.values()) hdr.add(c.displayName());
+            final List<String> hdr = new ArrayList<>();
+            for (final Col c : Col.values()) hdr.add(c.displayName());
 
             // Add each magnitude band name
             hdr.addAll(bands.map(new MapOp<Magnitude.Band, String>() {
@@ -679,8 +679,16 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
     public void telescopePosGenericUpdate(WatchablePos tp) {
         int index = getSelectedRow();
         _resetTable(_env);
+
+        // Restore the selection without firing new selection events.
         if ((index >= 0) && (index < getRowCount())) {
-            _setSelectedRow(index);
+            final boolean ignore = _ignoreSelection;
+            try {
+                _ignoreSelection = true;
+                _setSelectedRow(index);
+            } finally {
+                _ignoreSelection = ignore;
+            }
         }
     }
 
@@ -772,7 +780,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
         @Override public void propertyChange(PropertyChangeEvent evt) {
             if (_tableData == null) return;
 
-            final SPTarget target = TargetSelection.get(_env, (Integer) evt.getNewValue());
+            final SPTarget target = TargetSelection.get(_env, _obsComp);
             if (target != null) {
                 int index = _tableData.indexOf(target);
                 _setSelectedRow(index);
@@ -887,7 +895,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
     // Saves the expanded state of the tree table
     private void _saveTreeState() {
-        _expandedTags = new HashSet<String>();
+        _expandedTags = new HashSet<>();
         int numRows = getRowCount();
         for(int i = 0; i < numRows; i++) {
             TreePath path = getPathForRow(i);
@@ -901,9 +909,9 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
         }
     }
 
-    // Restores the expanded state of the treetable
+    // Restores the expanded state of the tree table
     private void _restoreTreeState() {
-        List<TreePath> expandList = new ArrayList<TreePath>();
+        List<TreePath> expandList = new ArrayList<>();
         int numRows = getRowCount();
         for (int i = 0; i < numRows; i++) {
             TreePath path = getPathForRow(i);
@@ -1002,12 +1010,12 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
      */
     public boolean isOkayToAdd(TableData.Row item, TableData.Row parent) {
         if (item == parent) return false;
-        GuideGroup group = parent.group().getOrNull();
-        SPTarget target = item.target().getOrNull();
+        final GuideGroup group = parent.group().getOrNull();
+        final SPTarget target = item.target().getOrNull();
         if (group == null || target == null || group.containsTarget(target)) {
             return false;
         }
-        return !item.tag().startsWith("Base") && !item.tag().startsWith("User") && (target instanceof SPTarget);
+        return !item.tag().startsWith("Base") && !item.tag().startsWith("User");
     }
 
     /**
@@ -1067,22 +1075,8 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
     private void _setSelectedRow(int index) {
         if ((index < 0) || (index >= getRowCount())) return;
-        getSelectionModel().addSelectionInterval(index, index);
-        focusAtRow(index);
-    }
-
-    /** Set the focus at the given row (actually just select the row and deselect all other rows). */
-    public void focusAtRow(int index) {
         getSelectionModel().setSelectionInterval(index, index);
     }
-
-//    public int getRowOf(SPTarget target) {
-//        if (_tableData == null) return -1;
-//        return _tableData.indexOf(target);
-//    }
-//    public SPTarget getTargetAt(int index) {
-//        return _tableData.targetAt(index);
-//    }
 
     public void selectRowAt(int index) {
         if (_tableData == null) return;
@@ -1090,12 +1084,10 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
         SPTarget target = _tableData.targetAt(index).getOrNull();
         if (target != null) {
             selectPos(target);
-            focusAtRow(index);
         } else {
             GuideGroup group = _tableData.groupAt(index).getOrNull();
             if (group != null) {
                 selectGroup(group);
-                focusAtRow(index);
             }
         }
     }
@@ -1178,15 +1170,15 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
     boolean confirmGroupChange(GuideGroup oldPrimary, GuideGroup newPrimary) {
         final List<OffsetPosList<OffsetPosBase>> posLists = OffsetUtil.allOffsetPosLists(owner.getNode());
         if (posLists.size() > 0) {
-            SortedSet<GuideProbe> oldGuideProbes = oldPrimary.getReferencedGuiders();
-            SortedSet<GuideProbe> newGuideProbes = newPrimary.getReferencedGuiders();
-            Set<String> warnSet = new TreeSet<String>();
-            for (OffsetPosList posList : posLists) {
-                for (Object o : posList.getAllPositions()) {
-                    OffsetPos offsetPos = (OffsetPos) o;
-                    for (GuideProbe guideProbe : oldGuideProbes) {
-                        GuideOption guideOption = offsetPos.getLink(guideProbe);
-                        GuideOptions options = guideProbe.getGuideOptions();
+            final SortedSet<GuideProbe> oldGuideProbes = oldPrimary.getReferencedGuiders();
+            final SortedSet<GuideProbe> newGuideProbes = newPrimary.getReferencedGuiders();
+            final Set<String> warnSet = new TreeSet<>();
+            for (final OffsetPosList posList : posLists) {
+                for (final Object o : posList.getAllPositions()) {
+                    final OffsetPos offsetPos = (OffsetPos) o;
+                    for (final GuideProbe guideProbe : oldGuideProbes) {
+                        final GuideOption guideOption = offsetPos.getLink(guideProbe);
+                        final GuideOptions options = guideProbe.getGuideOptions();
                         if (guideOption != null
                                 && guideOption != options.getDefaultActive()
                                 && !newGuideProbes.contains(guideProbe)) {
@@ -1204,7 +1196,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
     // OT-32: Displays a warning/confirmation dialog when the given guide probe configs are impacted
     private boolean confirmGroupChangeDialog(Set<String> warnSet) {
-        StringBuilder msg = new StringBuilder();
+        final StringBuilder msg = new StringBuilder();
         msg.append("<html>Changing the primary group will result in losing the existing "
                          + "offset iterator guiding configuration for:<ul>");
         for(String key : warnSet) {
