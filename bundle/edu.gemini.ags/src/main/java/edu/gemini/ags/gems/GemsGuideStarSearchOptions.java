@@ -36,8 +36,7 @@ public class GemsGuideStarSearchOptions {
         USER_CATALOG("user", "User Catalog"),
         ;
 
-//        public static CatalogChoice DEFAULT = NOMAD1_CADC;
-        public static CatalogChoice DEFAULT = UCAC3_CADC;
+        public static CatalogChoice DEFAULT = UCAC3_CDS;
 
         private String _displayValue;
         private String _catalogName;
