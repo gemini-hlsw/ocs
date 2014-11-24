@@ -178,6 +178,10 @@ public final class PioSpXmlParser {
         _factory = factory;
     }
 
+    public ISPRootNode parseDocument(File file) throws Exception {
+        return parseDocument(PioXmlUtil.read(file));
+    }
+
     public ISPRootNode parseDocument(Reader reader) throws Exception {
         return parseDocument(PioXmlUtil.read(reader));
     }
