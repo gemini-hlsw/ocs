@@ -39,7 +39,10 @@ object TrpcClient {
       withKeys(Set())
 
     def withKeyChain(kc: KeyChain): TrpcClient =
-      withKeys(kc.selection.unsafeRunAndThrow.map(_._2).toSet)
+      withKeys(kc.selection.run.unsafePerformIO.fold({
+        case KeyFailure.KeychainLocked => None
+        case f                         => throw f.toException
+      }, identity).map(_._2).toSet)
 
     def withOptionalKeyChain(okc: Option[KeyChain]): TrpcClient =
       okc.map(withKeyChain).getOrElse(withoutKeys)
