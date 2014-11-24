@@ -1,158 +1,181 @@
 package jsky.app.ot.gemini.editor.targetComponent
 
-import edu.gemini.ags.api.AgsAnalysis.Usable
+import edu.gemini.ags.api.AgsAnalysis.{NoGuideStarForProbe, NoGuideStarForGroup}
 import edu.gemini.ags.api._
-import edu.gemini.ags.api.AgsGuideQuality.{IqDegradation, PossiblyUnusable, PossibleIqDegradation, DeliversRequestedIq}
+import edu.gemini.ags.api.AgsGuideQuality._
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
-import edu.gemini.catalog.api.MagnitudeLimits
-import edu.gemini.spModel.guide.{GuideSpeed, GuideProbe}
+import edu.gemini.shared.skyobject.Magnitude
+import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideSpeed, GuideProbe}
+import edu.gemini.spModel.guide.GuideSpeed._
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
-import jsky.app.ot.OT
+import edu.gemini.spModel.target.SPTarget
+import edu.gemini.spModel.target.env.TargetEnvironment
 import jsky.app.ot.util.OtColor
 
-import java.awt.Color
-import java.text.DecimalFormat
-import javax.swing.{Icon, BorderFactory}
+import java.awt.Color.DARK_GRAY
+import javax.swing.BorderFactory
 
+import scala.collection.JavaConverters._
 import scala.swing._
+import scala.swing.GridBagPanel.Fill
 
-import GuidingFeedback._
+object GuidingFeedback {
+  import OtColor._
 
-class GuidingFeedback extends GridBagPanel {
-  border = BorderFactory.createEmptyBorder(2, 2, 2, 2)
+  object ProbeLimits {
+    def apply(ctx: ObsContext, mc: MagnitudeCalc): Option[ProbeLimits] = {
+      val cnds = ctx.getConditions
+      val fast = mc.apply(cnds, FAST)
 
-  class Feedback(message: Message) extends GridBagPanel {
+      def faint(gs: GuideSpeed) = mc.apply(cnds, gs).getFaintnessLimit.getBrightness
+
+      fast.getSaturationLimit.asScalaOpt.map { sat =>
+        ProbeLimits(fast.getBand, sat.getBrightness, faint(FAST), faint(MEDIUM), faint(SLOW))
+      }
+    }
+
+    val le = '\u2264'
+    def lim(d: Double): String = f"$d%.1f"
+  }
+
+  case class ProbeLimits(band: Magnitude.Band, sat: Double, fast: Double, medium: Double, slow: Double) {
+    import ProbeLimits.{le, lim}
+
+    def searchRange: String =
+      s"${lim(sat)} $le $band $le ${lim(slow)}"
+
+    def detailRange: String =
+      s"${lim(sat)} $le FAST $le ${lim(fast)} < MEDIUM $le ${lim(medium)} < SLOW $le ${lim(slow)}"
+  }
+
+  class Row(analysis: AgsAnalysis, probeLimits: Option[ProbeLimits], includeProbeName: Boolean) extends GridBagPanel {
+    val bg = analysis.quality match {
+      case DeliversRequestedIq   => HONEY_DEW
+      case PossibleIqDegradation => BANANA
+      case IqDegradation         => CANTALOUPE
+      case PossiblyUnusable      => TANGERINE
+      case Unusable              => LIGHT_SALMON
+    }
+
+    val labelBorder = BorderFactory.createEmptyBorder(2, 2, 2, 2)
+
     object feedbackLabel extends Label {
-      icon       = message.icon
-      foreground = Color.DARK_GRAY
-      background = message.color
-      text       = message.text
+      border     = labelBorder
+      icon       = GuidingIcon(analysis.quality, enabled = true)
+      foreground = DARK_GRAY
+      background = bg
+      text       = analysis.message(withProbe = includeProbeName)
       opaque     = true
       horizontalAlignment = Alignment.Left
     }
 
     object rangeLabel extends Label {
-      foreground = Color.DARK_GRAY
-      background = message.color
-      text       = message.magRangeText.getOrElse("")
+      border     = labelBorder
+      foreground = DARK_GRAY
+      background = bg
+      text       = probeLimits.map(_.searchRange).getOrElse("")
+      tooltip    = probeLimits.map(_.detailRange).orNull
       opaque     = true
       horizontalAlignment = Alignment.Right
-
-      if (message.fullMagRangeText.isDefined)
-        tooltip = message.fullMagRangeText.get
     }
+
+    override def opaque_=(o: Boolean): Unit =
+      if (o != opaque) {
+        super.opaque = o
+        feedbackLabel.opaque = o
+        rangeLabel.opaque    = o
+      }
+
+    override def enabled_=(e: Boolean): Unit =
+      if (e != enabled) {
+        super.enabled = enabled
+        feedbackLabel.icon = GuidingIcon(analysis.quality, enabled = false)
+      }
 
     layout(feedbackLabel) = new Constraints {
       weightx = 1.0
-      fill = GridBagPanel.Fill.Horizontal
+      fill    = Fill.Both
     }
+
     layout(rangeLabel) = new Constraints {
       gridx = 1
+      fill  = Fill.Both
     }
   }
 
+  class Table extends GridBagPanel {
+    def clear(): Unit = showRows(Nil)
 
-  def update(ctx: edu.gemini.shared.util.immutable.Option[ObsContext]): Unit =
-    ctx.asScalaOpt.fold(reset())(update)
+    def showRow(row: Row): Unit = showRows(List(row))
 
-  def update(ctx: ObsContext): Unit = update(ctx, OT.getMagnitudeTable)
+    def showRows(rows: List[Row]): Unit = {
+      layout.clear()
 
-  def update(ctx: ObsContext, mt: MagnitudeTable): Unit = {
+      rows.zipWithIndex.foreach { case (row, rowIndex) =>
+        layout(row) = new Constraints {
+          gridy   = rowIndex
+          weightx = 1.0
+          fill    = Fill.Horizontal
+          insets  = new Insets(0, 0, 1, 0)
+        }
+      }
+
+      revalidate()
+    }
+  }
+
+  // GuidingFeedback.Rows corresponding to the observation as a whole.
+  def obsAnalysis(ctx: ObsContext, mt: MagnitudeTable): List[Row] = {
     val (calcTable, analysis) = AgsRegistrar.currentStrategy(ctx).fold((Map.empty[GuideProbe, MagnitudeCalc], List.empty[AgsAnalysis])) { strategy =>
       (strategy.magnitudes(ctx, mt).toMap, strategy.analyze(ctx, mt))
     }
+    val probeLimitsMap = calcTable.mapValues(ProbeLimits(ctx, _))
 
-    // Map of Guider -> (Map of GuideSpeed -> MagLimits), used to calculate the full magnitude range string
-    // (e.g. 9.0 < FAST < 15.0 < MEDIUM < 15.8 < SLOW < 16.5)
-    val probeSpeedLimits = calcTable.keys.map(gp => (gp, GuideSpeed.values.toList.map(gs => (gs, calcTable(gp).apply(ctx.getConditions, gs))).toMap)).toMap
-
-    val limitsTable = calcTable.mapValues(mc => AgsMagnitude.autoSearchLimitsCalc(mc, ctx.getConditions))
-
-    // Clear out the old messages, create new messages for each analysis, and add them to the feedback.
-    reset()
-    analysis.map { h => Message(GuidingIcon.apply(h.qualityOption, enabled = true), toColor(h),
-                                AgsAnalysis.analysisToMessage(h, showGuideProbeName = analysis.size > 1),
-                                magRangeText(h, limitsTable), fullMagRangeText(h, probeSpeedLimits))
-    }.zipWithIndex.foreach { case (msg, rowIndex) =>
-      layout(new Feedback(msg)) = new Constraints {
-        gridy = rowIndex
-        weightx = 1.0
-        fill = GridBagPanel.Fill.Horizontal
-        insets = new Insets(0, 0, 1, 0)
-      }
-    }
-
-    // Required when switching the primary guide star option.
-    revalidate()
-  }
-
-  def reset(): Unit = {
-    layout.clear()
-  }
-}
-
-object GuidingFeedback {
-  import OtColor._
-
-  type ProbeSpeedLimits = Map[GuideProbe, Map[GuideSpeed, MagnitudeLimits]]
-
-  case class Message(icon: Icon, color: Color, text: String, magRangeText: Option[String], fullMagRangeText: Option[String])
-
-  private val qualityToColor = Map[AgsGuideQuality, Color](
-    DeliversRequestedIq   -> HONEY_DEW,
-    PossibleIqDegradation -> BANANA,
-    IqDegradation         -> CANTALOUPE,
-    PossiblyUnusable      -> TANGERINE
-  )
-  private val severityToColor = Map[AgsSeverity, Color](
-    AgsSeverity.Warning   -> BANANA,
-    AgsSeverity.Error     -> LIGHT_SALMON
-  )
-  def toColor(analysis: AgsAnalysis): Color =
-    analysis match {
-      case Usable(_, _, _, quality) => qualityToColor(quality)
-      case other                    => other.severityLevel.map(severityToColor(_)).getOrElse(HONEY_DEW)
-    }
-
-  // Number formatter for formatting decimals.
-  private val nf = new DecimalFormat("#.##") {{
-    setMinimumFractionDigits(0)
-    setMaximumFractionDigits(2)
-  }}
-
-  // Generate the full magnitude range text for the guide probe used by the analysis if there is one,
-  // e.g. 4 <= FAST <= 9 < MEDIUM <= 9.5 < SLOW <= 10.
-  def fullMagRangeText(analysis: AgsAnalysis, probeSpeedLimits: ProbeSpeedLimits): Option[String] = {
-    def toRangeText(guideProbe: GuideProbe, probeSpeedLimits: ProbeSpeedLimits): String = {
-      def toText(guideSpeed: GuideSpeed, magLimits: MagnitudeLimits): String =
-        s"${guideSpeed.name} \u2264 ${nf.format(magLimits.getFaintnessLimit.getBrightness)}"
-
-      probeSpeedLimits.get(guideProbe).fold("")(_.map {
-        case (GuideSpeed.FAST, fastLimits) =>
-          fastLimits.getSaturationLimit.asScalaOpt.fold("") { sl => s"${nf.format(sl.getBrightness)} \u2264 "} + toText(GuideSpeed.FAST, fastLimits)
-        case (guideSpeed, magLimits) => s"< ${toText(guideSpeed, magLimits)}"
-      }.mkString(" "))
-    }
-
-    analysis match {
-      case a: AgsAnalysisWithGuideProbe => Some(toRangeText(a.guideProbe, probeSpeedLimits))
-      case _ => None
+    analysis.map { a =>
+      val plo = for {
+        gp <- AgsAnalysis.guideProbe(a)
+        pl <- probeLimitsMap.get(gp).flatten
+      } yield pl
+      new Row(a, plo, includeProbeName = true)
     }
   }
 
-  // Get the reduced magnitude range text for the guide probe used by the analysis if there is one,
-  // e.g. 4 <= R <= 10.
-  def magRangeText(analysis: AgsAnalysis, limitsTable: Map[GuideProbe, MagnitudeLimits]): Option[String] = {
-    def toRangeText(guideProbe: GuideProbe, limitsTable: Map[GuideProbe, MagnitudeLimits]): String =
-      limitsTable.get(guideProbe).fold("")(magLimits => {
-        val sl = magLimits.getSaturationLimit.asScalaOpt.fold("") { sl => s"${nf.format(sl.getBrightness)} \u2264 "}
-        val fl = s" \u2264 ${nf.format(magLimits.getFaintnessLimit.getBrightness)}"
-        s"$sl${magLimits.getBand}$fl"
-      })
-    analysis match {
-      case a: AgsAnalysisWithGuideProbe => Some(toRangeText(a.guideProbe, limitsTable))
-      case _ => None
+  // Ugh, search through to figure out what the guide probe is, if any.
+  private def guideProbe(env: TargetEnvironment, target: SPTarget): Option[ValidatableGuideProbe] = {
+    val gpts = env.getGuideEnvironment.iterator().asScala.flatMap(_.iterator().asScala)
+    gpts.find(_.containsTarget(target)).map(_.getGuider).collect {
+      case v: ValidatableGuideProbe => v
     }
+  }
+
+  // GuidingFeedback.Rows corresponding to the given target.  If the base
+  // position, show any global messages about missing guide stars. If a guide
+  // star, show information particular to the guide star itself.
+  def targetAnalysis(ctx: ObsContext, mt: MagnitudeTable, target: SPTarget): List[Row] = {
+    val env = ctx.getTargets
+    if (target == env.getBase) baseAnalysis(ctx, mt)
+    else guideProbe(env, target).fold(List.empty[Row]) { vgp =>
+      List(guideStarAnalysis(ctx, mt, vgp, target))
+    }
+  }
+
+  // GuidingFeedback.Rows corresponding to global errors like missing guide
+  // stars.
+  def baseAnalysis(ctx: ObsContext, mt: MagnitudeTable): List[Row] =
+    AgsRegistrar.currentStrategy(ctx).fold(List.empty[Row]) { s =>
+      s.analyze(ctx, mt).filter {
+        case AgsAnalysis.UnknownError => true
+        case NoGuideStarForGroup(_)   => true
+        case NoGuideStarForProbe(_)   => true
+        case _                        => false
+      }.map { a => new Row(a, None, includeProbeName = true) }
+    }
+
+  // GuidingFeedback.Row related to the given guide star itself.
+  def guideStarAnalysis(ctx: ObsContext, mt: MagnitudeTable, gp: ValidatableGuideProbe, target: SPTarget): Row = {
+    val analysis = AgsAnalysis.analysis(ctx, mt, gp, target)
+    val plo      = mt(ctx, gp).flatMap(ProbeLimits(ctx, _))
+    new Row(analysis, plo, includeProbeName = false)
   }
 }

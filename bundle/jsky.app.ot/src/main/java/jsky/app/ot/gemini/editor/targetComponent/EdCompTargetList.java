@@ -23,7 +23,6 @@ import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeUtil;
-import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.pio.ParamSet;
@@ -1358,11 +1357,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      */
     private void toggleAgsGuiElements() {
         final boolean supports = GuideStarSupport.supportsAutoGuideStarSelection(getNode());
-        final boolean needs    = SPObservation.needsGuideStar(getContextObservation());
-
         // hide the ags related buttons
         _w.guidingControls.supportsAgs_$eq(supports);
-        _w.guidingFeedback.visible_$eq(needs && supports);
     }
 
     // Guider panel property change listener to modify status and magnitude limits.
@@ -1376,15 +1372,19 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         updateGuiding(getDataObject().getTargetEnvironment());
     }
 
-    private void updateGuiding(final TargetEnvironment env) {
-        toggleAgsGuiElements();
-        final Option<ObsContext> ctx = ObsContext.create(getContextObservation()).map(new Function1<ObsContext, ObsContext>() {
+    private Option<ObsContext> obsContext(final TargetEnvironment env) {
+        return ObsContext.create(getContextObservation()).map(new Function1<ObsContext, ObsContext>() {
             @Override public ObsContext apply(ObsContext obsContext) {
                 return obsContext.withTargets(env);
             }
         });
+    }
+
+    private void updateGuiding(final TargetEnvironment env) {
+        toggleAgsGuiElements();
+        final Option<ObsContext> ctx = obsContext(env);
         _w.guidingControls.update(ctx);
-        _w.guidingFeedback.update(ctx);
+        _siderealEditor.updateGuiding(ctx, _curPos);
     }
 
     private final PropertyChangeListener selectionListener = new PropertyChangeListener() {
@@ -1591,21 +1591,23 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     private void _handleSelectionUpdate(SPTarget selTarget) {
         if (getDataObject() == null) return;
-        TargetEnvironment env = getDataObject().getTargetEnvironment();
+        final TargetEnvironment env = getDataObject().getTargetEnvironment();
         if (!env.getTargets().contains(selTarget)) return;
+
+        final Option<ObsContext> ctx = obsContext(env);
 
         if (_curPos != null) _curPos.deleteWatcher(this);
 
         _curPos = selTarget;
 
         // Sidereal
-        _siderealEditor.edit(selTarget);
-        _trackingEditor.edit(selTarget);
+        _siderealEditor.edit(ctx, selTarget);
+        _trackingEditor.edit(ctx, selTarget);
 
         // Nonsidereal
         _nonSiderealTargetSup.updatePos(_curPos);
-        _nonsideMagEditor.edit(selTarget);
-        _nonsideOMagEditor.edit(selTarget);
+        _nonsideMagEditor.edit(ctx, selTarget);
+        _nonsideOMagEditor.edit(ctx, selTarget);
 
         if (_curPos != null) {
             _curPos.addWatcher(this);

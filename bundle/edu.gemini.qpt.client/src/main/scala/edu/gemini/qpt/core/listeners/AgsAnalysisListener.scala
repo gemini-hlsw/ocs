@@ -1,8 +1,10 @@
 package edu.gemini.qpt.core.listeners
 
+import edu.gemini.ags.api.AgsGuideQuality._
+
 import java.beans.PropertyChangeEvent
 
-import edu.gemini.ags.api.{AgsSeverity, AgsAnalysis}
+import edu.gemini.ags.api.AgsAnalysis
 import edu.gemini.qpt.core.Marker.Severity
 import edu.gemini.qpt.core.Variant
 import edu.gemini.qpt.core.util.MarkerManager
@@ -24,10 +26,9 @@ class AgsAnalysisListener extends MarkerModelListener[Variant] {
       // Only analyses with a severity level should generate a marker.
       for {
         a <- alloc.getObs.getAgsAnalysis.asScala
-        s <- a.severityLevel
+        s <- severity(a)
       } yield {
-        markerManager.addMarker(false, this, severityToQptSeverity(s),
-                                AgsAnalysis.analysisToMessage(a, showGuideProbeName = true), variant, alloc)
+        markerManager.addMarker(false, this, s, a.message(withProbe = true), variant, alloc)
       }
     }
   }
@@ -37,10 +38,13 @@ class AgsAnalysisListener extends MarkerModelListener[Variant] {
   }
 }
 
-
 object AgsAnalysisListener {
-  val severityToQptSeverity = Map[AgsSeverity,Severity](
-    AgsSeverity.Warning -> Severity.Warning,
-    AgsSeverity.Error   -> Severity.Error
-  )
+  def severity(a: AgsAnalysis): Option[Severity] =
+    a.quality match {
+      case DeliversRequestedIq   => None
+      case PossibleIqDegradation => Some(Severity.Warning)
+      case IqDegradation         => Some(Severity.Warning)
+      case PossiblyUnusable      => Some(Severity.Warning)
+      case Unusable              => Some(Severity.Error)
+    }
 }

@@ -48,7 +48,6 @@ import java.beans.PropertyChangeListener;
 import java.io.IOException;
 
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Set;
 import java.util.Vector;
 
@@ -67,12 +66,12 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
     /**
      * All feature class names
      */
-    private static final Vector<String> _featureClasses = new Vector<String>();
+    private static final Vector<String> _featureClasses = new Vector<>();
 
     /**
      * List of all features
      */
-    private Vector<TpeImageFeature> _allFeatures = new Vector<TpeImageFeature>();
+    private Vector<TpeImageFeature> _allFeatures = new Vector<>();
 
     private TpeContext _ctx = TpeContext.empty();
 
@@ -90,11 +89,6 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
      * Object managing the image features
      */
     private TpeFeatureManager _featureMan;
-
-    /**
-     * Table mapping feature class names to widget visible states
-     */
-    private final Hashtable<String, Boolean> _featureVisibleState = new Hashtable<String, Boolean>();
 
     /**
      * Toolbar (on the side with toggle buttons)
@@ -249,38 +243,20 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
     }
 
     public Set<TpeImageFeature> getFeatures() {
-        Set<TpeImageFeature> res = new HashSet<TpeImageFeature>();
-        res.addAll(_allFeatures);
-        return res;
+        return new HashSet<>(_allFeatures);
     }
 
     /**
      * Instantiate all the TpeImageFeatures indicated in the given Vector.
      */
     private static Vector<TpeImageFeature> _createFeatures() {
-        Vector<TpeImageFeature> v = new Vector<TpeImageFeature>();
+        final Vector<TpeImageFeature> v = new Vector<>();
         for (int i = 0; i < TelescopePosEditor._featureClasses.size(); ++i) {
-            String className = TelescopePosEditor._featureClasses.elementAt(i);
+            final String className = TelescopePosEditor._featureClasses.elementAt(i);
             v.addElement(TpeImageFeature.createFeature(className));
         }
         return v;
     }
-
-    /**
-     * Add a feature to the set of image features available for display.
-     * If the feature has never been added or was visible when last removed,
-     * it will be made visible again.
-     */
-//    public void addFeature(TpeImageFeature tif) {
-//        // See whether the feature was visible when last removed.
-//        Boolean b = _featureVisibleState.get(tif.getClass().getName());
-//        if (b == null) {
-//            b = Boolean.TRUE;
-//            _featureVisibleState.put(tif.getClass().getName(), b);
-//        }
-//
-//        _addFeature(tif);
-//    }
 
     /**
      * Do the work of adding a feature without worrying about whether
@@ -329,25 +305,6 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
 
         tp.setTargetWithJ2000(basePos.getRaDeg(), basePos.getDecDeg());
     }
-
-    /** Update the base position with a new value. */
-    // TPE REFACTOR - don't think we need to do this anymore
-//    public void setBasePosition(SPTarget pos) {
-//        if (_progData == null || _progData.getTargetEnvironment() == null) {
-//            DialogUtil.error("There is no target list!");
-//            return;
-//        }
-//
-//        SPTarget tp = _progData.getTargetEnvironment().getBase();
-//        if (tp == null) {
-//            DialogUtil.error("There is no base position!");
-//            return;
-//        }
-//
-//        tp.setTarget(pos.getTarget());
-//        loadImage();
-//    }
-
 
     /**
      * Load a cached image for the base position, or generate a blank image with
@@ -531,15 +488,9 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         if (_baseTarget == null) return;
 
         // XXX FIXME: We shouldn't have to use numeric indexes here
-        if (_baseTarget != null) {
-            queryArgs.setParamValue(2, _baseTarget.getC1().toString());
-            queryArgs.setParamValue(3, _baseTarget.getC2().toString());
-            queryArgs.setParamValue(4, _baseTarget.getCoordSysAsString());
-        } else { //use defaults, or warn the users?
-            queryArgs.setParamValue(2, "00:00:00");
-            queryArgs.setParamValue(3, "00:00:00");
-            queryArgs.setParamValue(4, "J2000");
-        }
+        queryArgs.setParamValue(2, _baseTarget.getC1().toString());
+        queryArgs.setParamValue(3, _baseTarget.getC2().toString());
+        queryArgs.setParamValue(4, _baseTarget.getCoordSysAsString());
         if (args.length > 2) {
             //first argument must be a Double, it represent the size on AstroCatalogs
             queryArgs.setParamValue(5, Double.valueOf(args[1]));
