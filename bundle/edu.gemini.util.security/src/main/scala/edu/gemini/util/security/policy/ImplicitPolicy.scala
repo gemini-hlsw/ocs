@@ -181,7 +181,10 @@ object ImplicitPolicyForJava {
 
   // N.B. this swallows KeyFailure. May or may not be a problem.
   def hasPermission(db: IDBDatabaseService, kc: KeyChain, p: Permission): Boolean =
-    ImplicitPolicy.hasPermission(db, kc, p).run.unsafePerformIO.fold(_ => false, identity)
+    ImplicitPolicy.hasPermission(db, kc, p).run.unsafePerformIO.fold({
+      case KeyFailure.KeychainLocked => false
+      case f                         => throw f.toException
+    }, identity)
 
   def checkPermission(db: IDBDatabaseService, ps: java.util.Collection[Principal], p: Permission): Unit =
     if (hasPermission(db, ps, p)) () else fail(p)
