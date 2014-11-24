@@ -15,6 +15,7 @@ import edu.gemini.qpt.core.util.LttsServicesClient;
 import edu.gemini.qpt.ui.action.PublishAction;
 import edu.gemini.spModel.core.Version;
 import edu.gemini.util.security.auth.keychain.KeyChain;
+import edu.gemini.util.security.auth.ui.PasswordDialog;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -25,6 +26,8 @@ import edu.gemini.ui.workspace.IShellAdvisor;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+
+import javax.swing.*;
 
 /**
  * BundleActivator for the QPT application.
@@ -86,6 +89,14 @@ public final class Activator implements BundleActivator {
                     "/gemsoft/var/data/qpt",
                     null);
 
+                // If the keychain is locked, give the user the chance to unlock it here. If they
+                // choose not to, they can do it via Edit > Manage Keys
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        if (ac.asJava().isLocked())
+                            PasswordDialog.unlock(ac, null);
+                    }
+                });
 
                 Activator.this.advisor = new ShellAdvisor("Gemini QPT", Version.current.toString(), root, ac, internal, pachon, ProbeLimitsTable.loadOrThrow());
                 shellRegistration = context.registerService(IShellAdvisor.class.getName(), advisor, new Hashtable());

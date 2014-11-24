@@ -252,6 +252,12 @@ abstract class KeyChain(kCell: KeyChain.KCell, pCell: KeyChain.PCell, lCell: Key
       o.map(_.rightMap(_.principal)).orNull
     }
 
+    def addListener(callback: Runnable): Int =
+      KeyChain.this.addListener(IO { callback.run(); true } ).unsafeRunAndThrow
+
+    def isLocked: Boolean =
+      KeyChain.this.isLocked.unsafeRunAndThrow
+
   }
 
 }

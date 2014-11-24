@@ -43,7 +43,12 @@ public class RefreshAction extends AbstractAsyncAction implements PropertyChange
         this.magTable = magTable;
 		setEnabled(false);
 		shell.addPropertyChangeListener(this);
-	}
+        authClient.asJava().addListener(new Runnable() {
+            public void run() {
+                updateEnabled();
+            }
+        });
+    }
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -144,9 +149,13 @@ public class RefreshAction extends AbstractAsyncAction implements PropertyChange
 	}
 
 	public void propertyChange(PropertyChangeEvent evt) {
-		if (IShell.PROP_MODEL.equals(evt.getPropertyName())) {
-			setEnabled(shell.getModel() != null);
-		}
+        if (IShell.PROP_MODEL.equals(evt.getPropertyName())) {
+            updateEnabled();
+        }
 	}
+
+    private void updateEnabled() {
+        setEnabled(shell.getModel() != null && !authClient.asJava().isLocked());
+    }
 
 }

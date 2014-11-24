@@ -34,7 +34,12 @@ public abstract class AbstractOpenAction extends AbstractAsyncAction {
 		this.shell = shell;
         this.authClient = authClient;
         this.magTable = magTable;
-	}
+        authClient.asJava().addListener(new Runnable() {
+            public void run() {
+                updateEnabled();
+            }
+        });
+    }
 
 	protected IShell getShell() {
 		return shell;
@@ -104,11 +109,11 @@ public abstract class AbstractOpenAction extends AbstractAsyncAction {
 
 				pd.setVisible(false);
 				JOptionPane.showMessageDialog(
-						shell.getPeer(),
-						"The database is not available right now, but I will continue searching for it.\n" +
-						"Try back in a few minutes.",
-						"Database Unavailable",
-						JOptionPane.ERROR_MESSAGE);
+                        shell.getPeer(),
+                        "The database is not available right now, but I will continue searching for it.\n" +
+                                "Try back in a few minutes.",
+                        "Database Unavailable",
+                        JOptionPane.ERROR_MESSAGE);
 
 			} catch (IOException ex) {
 
@@ -128,5 +133,9 @@ public abstract class AbstractOpenAction extends AbstractAsyncAction {
 		return null;
 
 	}
+
+    protected void updateEnabled() {
+        setEnabled(!authClient.asJava().isLocked());
+    }
 
 }
