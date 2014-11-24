@@ -62,12 +62,17 @@ public class OpenFromWebAction extends AbstractAsyncAction {
     private final KeyChain authClient;
     private final AgsMagnitude.MagnitudeTable magTable;
 
-	public OpenFromWebAction(IShell shell, KeyChain authClient, AgsMagnitude.MagnitudeTable magTable) {
+	public OpenFromWebAction(IShell shell, final KeyChain authClient, AgsMagnitude.MagnitudeTable magTable) {
 		super("Open from Web...", authClient);
 		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, Platform.MENU_ACTION_MASK | KeyEvent.SHIFT_DOWN_MASK));
 		this.shell = shell;
-        this.authClient = authClient;
-        this.magTable = magTable;
+    this.authClient = authClient;
+    this.magTable = magTable;
+    authClient.asJava().addListener(new Runnable() {
+    	public void run() {
+    		setEnabled(!authClient.asJava().isLocked());
+    	}
+    });
 	}
 
 	@Override

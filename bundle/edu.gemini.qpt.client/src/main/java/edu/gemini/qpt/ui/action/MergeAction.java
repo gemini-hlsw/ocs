@@ -98,7 +98,13 @@ public class MergeAction extends AbstractOpenAction implements PropertyChangeLis
 	}
 
 	public void propertyChange(PropertyChangeEvent evt) {
-		setEnabled(evt.getNewValue() != null);
+        updateEnabled();
 	}
 
+    @Override
+    protected void updateEnabled() {
+        super.updateEnabled();
+        if (isEnabled())
+            setEnabled(getShell().getModel() != null);
+    }
 }
