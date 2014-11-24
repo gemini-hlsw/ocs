@@ -21,7 +21,7 @@ public enum PosAngleConstraint {
 
         @Override
         public String description() {
-            return "Fixed position angle for guide star search";
+            return "Fixed";
         }
     },
 
@@ -34,7 +34,7 @@ public enum PosAngleConstraint {
 
         @Override
         public String description() {
-            return "Allow 180\u00ba change for guide star search";
+            return "Allow 180\u00ba flip";
         }
     },
 
@@ -44,8 +44,8 @@ public enum PosAngleConstraint {
     UNBOUNDED() {
         @Override
         public String description() {
-            //return "Find best position angle for guide star search";
-            return "Allow guide star search to set position angle";
+            //return "Allow guide star search to set position angle";
+            return "Find best";
         }
     },
 
@@ -57,7 +57,7 @@ public enum PosAngleConstraint {
         }
 
         @Override
-        public String description() { return "Use average parallactic angle"; }
+        public String description() { return "Average parallactic"; }
     }
     ;
 

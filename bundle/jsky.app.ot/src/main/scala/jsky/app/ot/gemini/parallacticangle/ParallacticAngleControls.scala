@@ -203,7 +203,8 @@ class ParallacticAngleControls extends GridBagPanel with Publisher {
       sb             <- spObservation.getSchedulingBlock.asScalaOpt
       fmt            <- formatter
     } yield {
-      object dateFormat extends SimpleDateFormat("MM/dd/yy 'at' HH:mm:ss z") {
+      //object dateFormat extends SimpleDateFormat("MM/dd/yy 'at' HH:mm:ss z") {
+      object dateFormat extends SimpleDateFormat("MM/dd/yy HH:mm:ss z") {
         setTimeZone(TimeZonePreference.get)
       }
       val dateTimeStr = dateFormat.format(new Date(sb.start))
@@ -211,9 +212,10 @@ class ParallacticAngleControls extends GridBagPanel with Publisher {
       // Include tenths of a minute if not even.
       val duration = sb.duration / 60000.0
       val durationFmt = if (Math.round(duration * 10) == (Math.floor(duration) * 10).toLong) "%.0f" else "%.1f"
-      val durationStr = durationFmt.format(duration)
-      val pluralOrNot = if ("1".equals(durationStr)) "" else "s"
-      val when = s"($dateTimeStr, for $durationStr min$pluralOrNot)"
+      //val durationStr = durationFmt.format(duration)
+      //val pluralOrNot = if ("1".equals(durationStr)) "" else "s"
+      //val when = s"($dateTimeStr, for $durationStr min$pluralOrNot)"
+      val when = s"($dateTimeStr, ${durationFmt.format(duration)}m)"
 
       ui.parallacticAngleFeedback.text = parallacticAngle.fold(s"Target not visible $when")(angle =>
         s"${fmt.format(ParallacticAngleControls.angleToDegrees(angle))}\u00b0 $when")
