@@ -39,7 +39,6 @@ import jsky.navigator.*;
 import jsky.util.Preferences;
 import jsky.util.gui.DialogUtil;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
@@ -50,7 +49,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
-
 
 /**
  * Implements a telescope position editor for the Gemini telescope
@@ -113,15 +111,8 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
 
         // get the TPE toolbar handle
         Component parent = _iw.getParentFrame();
-        if (parent instanceof TpeImageDisplayFrame) {
-            _tpeToolBar = ((TpeImageDisplayFrame) parent).getTpeToolBar();
-            _tpeMenuBar = (TpeImageDisplayMenuBar) ((TpeImageDisplayFrame) parent).getJMenuBar();
-        } else if (parent instanceof TpeImageDisplayInternalFrame) {
-            _tpeToolBar = ((TpeImageDisplayInternalFrame) parent).getTpeToolBar();
-            _tpeMenuBar = (TpeImageDisplayMenuBar) ((TpeImageDisplayInternalFrame) parent).getJMenuBar();
-        } else {
-            throw new RuntimeException("internal error");
-        }
+        _tpeToolBar = ((TpeImageDisplayFrame) parent).getTpeToolBar();
+        _tpeMenuBar = (TpeImageDisplayMenuBar) ((TpeImageDisplayFrame) parent).getJMenuBar();
 
         _tpeToolBar.getGuiderSelector().addSelectionListener(new AgsSelectorControl.Listener() {
             @Override public void agsStrategyUpdated(Option<AgsStrategy> strategy) {
@@ -188,18 +179,6 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
                     type.equals(SPSiteQuality.SP_TYPE));
         }
         return false;
-    }
-
-    /**
-     * Make and return an internal frame for displaying the given image (may be null).
-     *
-     * @param desktop        used to display the internal frame
-     * @param imageFileOrUrl specifies the image file or URL to display
-     */
-    protected NavigatorImageDisplayInternalFrame makeNavigatorImageDisplayInternalFrame(JDesktopPane desktop, String imageFileOrUrl) {
-        TpeImageDisplayInternalFrame frame = new TpeImageDisplayInternalFrame(desktop, imageFileOrUrl);
-        _iw = (TpeImageWidget) frame.getImageDisplayControl().getImageDisplay();
-        return frame;
     }
 
     /**
