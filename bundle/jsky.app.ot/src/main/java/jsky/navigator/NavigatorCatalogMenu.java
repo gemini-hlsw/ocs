@@ -43,9 +43,6 @@ public class NavigatorCatalogMenu extends JMenu implements TreeModelListener {
     /** Set to true if this menu is in the Catalog window menubar (doesn't have a Browse item) */
     private boolean _isInCatalogWindow = false;
 
-    /** Catalog submenu */
-    private JMenu _catalogMenu;
-
     /** Archive submenu */
     private JMenu _archiveMenu;
 
@@ -97,8 +94,6 @@ public class NavigatorCatalogMenu extends JMenu implements TreeModelListener {
         // update menu when the config file changes
         dir.removeTreeModelListener(this);
         dir.addTreeModelListener(this);
-
-        _catalogMenu = _createCatalogSubMenu(this, _catalogMenu, true, dir, Catalog.CATALOG, _I18N.getString("catalogs"));
 
         _archiveMenu = _createCatalogSubMenu(this, _archiveMenu, true, dir, Catalog.ARCHIVE, _I18N.getString("archives"));
 
