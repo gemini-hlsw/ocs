@@ -58,6 +58,12 @@ trait OcsBundle {
       bundle_jsky_coords
     )
 
+  lazy val bundle_edu_gemini_itc = 
+    project.in(file("bundle/edu.gemini.itc")).dependsOn(
+      bundle_edu_gemini_util_osgi,
+      bundle_edu_gemini_shared_util
+    )
+
   lazy val bundle_edu_gemini_lchquery_servlet = 
     project.in(file("bundle/edu.gemini.lchquery.servlet")).dependsOn(
       bundle_edu_gemini_shared_skyobject,
