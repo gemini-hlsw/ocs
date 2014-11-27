@@ -20,6 +20,7 @@ import java.util.List;
  * A {@link DefaultOutputAdapter} for use with the GSC2 @ STScI, which returns
  * its results in a different format than expected by the catalog output parser.
  */
+@Deprecated
 public final class Gsc2StsciOutputAdapter extends DefaultOutputAdapter {
     public static final String HEADER_LINE =
             "HSTGSID\tRa\tDec\tEpoch\tFpg\tJpg\tNpg\tUmag\tBmag\tVmag\tRmag\tImag\tc\tstatus\ta\tPA\te\tV\tM";

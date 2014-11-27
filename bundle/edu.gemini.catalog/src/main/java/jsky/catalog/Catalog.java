@@ -127,6 +127,7 @@ public abstract interface Catalog extends QueryResult, Cloneable {
      * @param queryArgs An object describing the query arguments.
      * @return An object describing the result of the query.
      */
+    @Deprecated
     public QueryResult query(QueryArgs queryArgs) throws CatalogException, IOException;
 }
 
