@@ -260,6 +260,7 @@ public class BasicTablePlotter
         // for each row in the catalog, evaluate the expressions and plot the symbols
         int nrows = table.getRowCount();
         RowCoordinates rowCoords = table.getRowCoordinates();
+
         //double tableEquinox = rowCoords.getEquinox();  // XXX might be specified in a column?
         Vector dataVec = table.getDataVector();
 
@@ -985,10 +986,11 @@ public class BasicTablePlotter
     }
 
     // Creates a CatalogHeader and CatalogRow from the corresponding Collections
+    @SuppressWarnings("varargs")
     private static Tuple2<CatalogHeader, CatalogRow> wrap(Collection<String> header, Collection<Object> row) {
-        ImList<Tuple2<String,Class>> colLst = DefaultImList.create();
+        ImList<Tuple2<String,Class<?>>> colLst = DefaultImList.create();
         for (String col : header) {
-            colLst = colLst.append(new Pair<String,Class>(col, String.class));
+            colLst = colLst.append(new Pair<String,Class<?>>(col, String.class));
         }
         return new Pair<CatalogHeader,  CatalogRow>(
                 new DefaultCatalogHeader(colLst),
