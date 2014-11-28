@@ -39,7 +39,6 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 /**
  * Implements basic plotting of catalog tables on in an image window.
  * For each row in a table query result, one or more symbols may be displayed
@@ -69,13 +68,13 @@ public class BasicTablePlotter
     private double _imageEquinox = 2000.;
 
     /** List of (table, symbolList) pairs, used to keep track of symbols for tables. */
-    private LinkedList _tableList = new LinkedList();
+    private LinkedList<TableListItem> _tableList = new LinkedList<>();
 
     /** Array of (symbol, figureList) pairs (for each table, which may have multiple plot symbols) */
     private SymbolListItem[] _symbolAr;
 
     /** List of (shape, rowNum) pairs (for each table/symbol entry). */
-    private LinkedList _figureList;
+    private LinkedList<FigureListItem> _figureList;
 
     /** If true, catalog symbols are visible, otherwise hidden */
     private boolean _visible = true;
@@ -87,7 +86,7 @@ public class BasicTablePlotter
     private EventListenerList _tableListenerList = new EventListenerList();
 
     /** Hash table for caching parsed plot symbol info. */
-    private Hashtable _plotSymbolMap = new Hashtable(32);
+    private final Map<Object, Object> _plotSymbolMap = new HashMap<>();
 
     /** Used to draw selected symbols */
     private Stroke _selectedStroke = new BasicStroke(3.0F);
@@ -144,10 +143,7 @@ public class BasicTablePlotter
             }
         }
 
-        if (!_coordinateConverter.isWCS()) {
-            return false;
-        }
-        return true;
+        return _coordinateConverter.isWCS();
     }
 
 
@@ -187,9 +183,9 @@ public class BasicTablePlotter
 
         // add this table to the list of plotted tables
         // (but remove any previous table from the same source)
-        ListIterator it = _tableList.listIterator(0);
+        final ListIterator<TableListItem> it = _tableList.listIterator(0);
         while (it.hasNext()) {
-            TableListItem item = (TableListItem) it.next();
+            final TableListItem item = it.next();
             if (item.table == table || item.table.getName().equals(table.getName())) {
                 if (item.table.getCatalog() == table.getCatalog()) {
                     it.remove();
@@ -258,15 +254,15 @@ public class BasicTablePlotter
      */
     protected void plotSymbols(TableQueryResult table, TablePlotSymbol[] symbols) {
         // for each row in the catalog, evaluate the expressions and plot the symbols
-        int nrows = table.getRowCount();
-        RowCoordinates rowCoords = table.getRowCoordinates();
+        final int nrows = table.getRowCount();
+        final RowCoordinates rowCoords = table.getRowCoordinates();
 
         //double tableEquinox = rowCoords.getEquinox();  // XXX might be specified in a column?
-        Vector dataVec = table.getDataVector();
+        final Vector<Vector<Object>> dataVec = table.getDataVector();
 
-        boolean isWCS = rowCoords.isWCS();
-        boolean isPix = rowCoords.isPix();
-        int cooSys;
+        final boolean isWCS = rowCoords.isWCS();
+        final boolean isPix = rowCoords.isPix();
+        final int cooSys;
         if (isPix) {
             cooSys = CoordinateConverter.IMAGE;
         } else if (isWCS) {
@@ -276,10 +272,10 @@ public class BasicTablePlotter
             throw new RuntimeException("no wcs or image coordinates to plot");
 
         for (int row = 0; row < nrows; row++) {
-            Vector rowVec = (Vector) dataVec.get(row);
-            Coordinates pos = rowCoords.getCoordinates(rowVec);
+            final Vector<Object> rowVec = dataVec.get(row);
+            final Coordinates pos = rowCoords.getCoordinates(rowVec);
             if (pos == null)
-                continue;	// coordinates might be missing - just ignore
+                continue;   // coordinates might be missing - just ignore
 
             double x, y;
             if (isPix) {
@@ -296,7 +292,7 @@ public class BasicTablePlotter
             for (int i = 0; i < symbols.length; i++) {
                 _figureList = _symbolAr[i].figureList;
                 try {
-                    plotRow(table, row, rowVec, x, y, cooSys, symbols[i]);
+                    plotRow(row, rowVec, x, y, cooSys, symbols[i]);
                 } catch (Exception e) {
                     // ignore: may be WCS out of range...
                 }
@@ -317,8 +313,8 @@ public class BasicTablePlotter
      * @param cooSys the coordinate system of X and Y (CoordinateConverter constant)
      * @param symbol an object describing the symbol
      */
-    protected void plotRow(TableQueryResult table, int row, Vector rowVec, double x, double y,
-                           int cooSys, TablePlotSymbol symbol) {
+    protected void plotRow(final int row, final Vector<Object> rowVec, final double x, final double y,
+                           final int cooSys, final TablePlotSymbol symbol) {
         // eval expr to get condition
         boolean cond = symbol.getCond(rowVec);
         if (!cond)
@@ -340,7 +336,7 @@ public class BasicTablePlotter
         // label may also contain col name vars, but might not be numeric
         String label = symbol.getLabel(rowVec);
 
-        plotSymbol(table, row, symbol, x, y, cooSys, radius, ratio, angle, label);
+        plotSymbol(row, symbol, x, y, cooSys, radius, ratio, angle, label);
     }
 
 
@@ -358,8 +354,8 @@ public class BasicTablePlotter
      * @param angle the rotation angle
      * @param label the label to display next to the symbol
      */
-    protected void plotSymbol(TableQueryResult table, int row, TablePlotSymbol symbol, double x, double y,
-                              int cooSys, double radius, double ratio, double angle, String label) {
+    protected void plotSymbol(final int row, final TablePlotSymbol symbol, final double x, final double y,
+                              final int cooSys, final double radius, final double ratio, final double angle, final String label) {
 
         // convert to screen coordinates
         Point2D.Double pos = new Point2D.Double(x, y);
@@ -400,7 +396,7 @@ public class BasicTablePlotter
             if (name.equals("user"))
                 return CoordinateConverter.USER;
         }
-        return _coordinateConverter.IMAGE;
+        return CoordinateConverter.IMAGE;
     }
 
 
@@ -563,9 +559,9 @@ public class BasicTablePlotter
 
     /** Erase the plot of the given table data */
     public void unplot(TableQueryResult table) {
-        ListIterator it = _tableList.listIterator(0);
+        ListIterator<TableListItem> it = _tableList.listIterator(0);
         while (it.hasNext()) {
-            TableListItem item = (TableListItem) it.next();
+            TableListItem item = it.next();
             if (item.table == table) {
                 it.remove();
                 _layer.repaint();
@@ -576,18 +572,19 @@ public class BasicTablePlotter
 
     /** Erase all plot symbols */
     public void unplotAll() {
-        _tableList = new LinkedList();
+        _tableList = new LinkedList<>();
         _layer.repaint();
     }
 
 
     /** Recalculate the coordinates and replot all symbols after a change in the coordinate system. */
+    @SuppressWarnings("unchecked")
     public void replotAll() {
-        LinkedList list = (LinkedList) _tableList.clone();
-        _tableList = new LinkedList();
-        ListIterator it = list.listIterator(0);
+        final LinkedList<TableListItem> list = (LinkedList<TableListItem>) _tableList.clone();
+        _tableList = new LinkedList<>();
+        final ListIterator<TableListItem> it = list.listIterator(0);
         while (it.hasNext()) {
-            TableListItem tli = (TableListItem) it.next();
+            final TableListItem tli = it.next();
             tli.inRange = tableInRange(tli.table);
             if (tli.inRange)
                 plot(tli.table);
@@ -602,10 +599,10 @@ public class BasicTablePlotter
         int n = _tableList.size();
         if (n == 0)
             return null;
-        ListIterator it = _tableList.listIterator(0);
-        Vector tableVec = new Vector(n);
+        final ListIterator<TableListItem> it = _tableList.listIterator(0);
+        final Vector<TableQueryResult> tableVec = new Vector<>(n);
         while (it.hasNext()) {
-            TableListItem item = (TableListItem) it.next();
+            final TableListItem item = it.next();
             if (item.inRange) {
                 tableVec.add(item.table);
             }
@@ -615,7 +612,7 @@ public class BasicTablePlotter
             return null;
         TableQueryResult[] tables = new TableQueryResult[n];
         for (int i = 0; i < n; i++)
-            tables[i] = (TableQueryResult) tableVec.get(i);
+            tables[i] = tableVec.get(i);
         return tables;
     }
 
@@ -627,15 +624,15 @@ public class BasicTablePlotter
     /** Set the selection state of the symbol corresponding to the given table row */
     public void selectSymbol(TableQueryResult table, int tableRow, boolean selected) {
         // Find the plot symbol for the given row in the given table
-        ListIterator tableIt = _tableList.listIterator(0);
+        final ListIterator<TableListItem> tableIt = _tableList.listIterator(0);
         while (tableIt.hasNext()) {
-            TableListItem tli = (TableListItem) tableIt.next();
+            final TableListItem tli = tableIt.next();
             if (tli.table == table) {
                 for (int i = 0; i < tli.symbolAr.length; i++) {
-                    SymbolListItem sli = tli.symbolAr[i];
-                    ListIterator figureListIt = sli.figureList.listIterator(0);
+                    final SymbolListItem sli = tli.symbolAr[i];
+                    final ListIterator<FigureListItem> figureListIt = sli.figureList.listIterator(0);
                     while (figureListIt.hasNext()) {
-                        FigureListItem fli = (FigureListItem) figureListIt.next();
+                        FigureListItem fli = figureListIt.next();
                         if (fli.row == tableRow) {
                             if (fli.selected != selected) {
                                 fli.selected = selected;
@@ -760,9 +757,9 @@ public class BasicTablePlotter
 
         // plot each table
         g2d.setPaintMode();
-        ListIterator tableIt = _tableList.listIterator(0);
+        final ListIterator<TableListItem> tableIt = _tableList.listIterator(0);
         while (tableIt.hasNext()) {
-            TableListItem tli = (TableListItem) tableIt.next();
+            final TableListItem tli = tableIt.next();
             if (!tli.inRange) // ignore tables not in image range
                 continue;
             // plot each symbol type in the table
@@ -770,9 +767,9 @@ public class BasicTablePlotter
                 SymbolListItem sli = tli.symbolAr[i];
                 g2d.setColor(sli.symbol.getFg());
                 // plot each figure
-                ListIterator figureListIt = sli.figureList.listIterator(0);
+                final ListIterator<FigureListItem> figureListIt = sli.figureList.listIterator(0);
                 while (figureListIt.hasNext()) {
-                    FigureListItem fli = (FigureListItem) figureListIt.next();
+                    final FigureListItem fli = figureListIt.next();
                     if (region == null || fli.shape.intersects(region)) {
                         if (fli.selected) {
                             // draw selected symbols with a thicker stroke
@@ -800,14 +797,14 @@ public class BasicTablePlotter
      * (called when the image is transformed, to keep the plot symbols up to date).
      */
     public void transformGraphics(AffineTransform trans) {
-        ListIterator tableIt = _tableList.listIterator(0);
+        final ListIterator<TableListItem> tableIt = _tableList.listIterator(0);
         while (tableIt.hasNext()) {
-            TableListItem tli = (TableListItem) tableIt.next();
+            final TableListItem tli = tableIt.next();
             for (int i = 0; i < tli.symbolAr.length; i++) {
                 SymbolListItem sli = tli.symbolAr[i];
-                ListIterator figureListIt = sli.figureList.listIterator(0);
+                final ListIterator<FigureListItem> figureListIt = sli.figureList.listIterator(0);
                 while (figureListIt.hasNext()) {
-                    FigureListItem fli = (FigureListItem) figureListIt.next();
+                    final FigureListItem fli = figureListIt.next();
                     fli.shape = ShapeUtilities.transformModify(fli.shape, trans);
                 }
             }
@@ -823,7 +820,7 @@ public class BasicTablePlotter
     protected boolean tableInRange(TableQueryResult table) {
         // get the coordinates of the region that the table covers from the query arguments, if known
         QueryArgs queryArgs = table.getQueryArgs();
-        CoordinateRadius region = null;
+        CoordinateRadius region;
         if (queryArgs == null) {
             // scan table here to get the range that it covers
             region = getTableRegion(table);
@@ -874,7 +871,7 @@ public class BasicTablePlotter
 
         RowCoordinates rowCoords = table.getRowCoordinates();
         double tableEquinox = rowCoords.getEquinox();
-        Vector dataVec = table.getDataVector();
+        final Vector<Vector<Object>> dataVec = table.getDataVector();
 
         if (rowCoords.isPix()) {
             // no WCS, just use image center and size
@@ -893,7 +890,7 @@ public class BasicTablePlotter
         double ra0 = 0., ra1 = 0., dec0 = 0., dec1 = 0.;
         boolean firstTime = true;
         for (int row = 1; row < nrows; row++) {
-            Vector rowVec = (Vector) dataVec.get(row);
+            Vector<Object> rowVec = dataVec.get(row);
             Coordinates pos = rowCoords.getCoordinates(rowVec);
             if (pos == null)
                 continue;
@@ -915,8 +912,7 @@ public class BasicTablePlotter
         // get the center point and radius
         WorldCoords centerPos = new WorldCoords((ra0 + ra1) / 2., (dec0 + dec1) / 2., tableEquinox);
         double d = WorldCoords.dist(ra0, dec0, ra1, dec1);
-        CoordinateRadius region = new CoordinateRadius(centerPos, d / 2.);
-        return region;
+        return new CoordinateRadius(centerPos, d / 2.);
     }
 
 
@@ -951,16 +947,16 @@ public class BasicTablePlotter
         boolean toggleSel = (e.isShiftDown() || e.isControlDown());
 
         // Find the plot symbol under the mouse pointer
-        ListIterator tableIt = _tableList.listIterator(0);
+        final ListIterator<TableListItem> tableIt = _tableList.listIterator(0);
         while (tableIt.hasNext()) {
-            TableListItem tli = (TableListItem) tableIt.next();
+            final TableListItem tli = tableIt.next();
             if (!tli.inRange)
                 continue;
             for (int i = 0; i < tli.symbolAr.length; i++) {
                 SymbolListItem sli = tli.symbolAr[i];
-                ListIterator figureListIt = sli.figureList.listIterator(0);
+                final ListIterator<FigureListItem> figureListIt = sli.figureList.listIterator(0);
                 while (figureListIt.hasNext()) {
-                    FigureListItem fli = (FigureListItem) figureListIt.next();
+                    final FigureListItem fli = figureListIt.next();
                     if (sli.symbol.getBoundingShape(fli.shape).contains(x, y)) {
                         if (toggleSel) {
                             fli.selected = !fli.selected;
@@ -1007,7 +1003,7 @@ public class BasicTablePlotter
         if (!fact.isEmpty()) {
             Tuple2<CatalogHeader, CatalogRow> cat = wrap(columnIdentifiers, row);
             try {
-                return new Some<SkyObject>(fact.getValue().create(cat._1(), cat._2()));
+                return new Some<>(fact.getValue().create(cat._1(), cat._2()));
             } catch (edu.gemini.catalog.skycat.CatalogException ex) {
                 LOG.log(Level.WARNING, ex.getMessage(), ex);
             }
@@ -1041,7 +1037,7 @@ public class BasicTablePlotter
             }
         }
         //noinspection unchecked
-        return "".equals(brightness) ? None.INSTANCE : new Some<String>(brightness);
+        return "".equals(brightness) ? None.INSTANCE : new Some<>(brightness);
     }
 
     /**
@@ -1051,24 +1047,24 @@ public class BasicTablePlotter
      */
     public NamedCoordinates getCatalogPosition(Point2D.Double p) {
         // Find the plot symbol under the mouse pointer
-        ListIterator tableIt = _tableList.listIterator(0);
+        final ListIterator<TableListItem> tableIt = _tableList.listIterator(0);
         while (tableIt.hasNext()) {
-            TableListItem tli = (TableListItem) tableIt.next();
+            final TableListItem tli = tableIt.next();
             if (!tli.inRange)
                 continue;
             for (int i = 0; i < tli.symbolAr.length; i++) {
-                SymbolListItem sli = tli.symbolAr[i];
-                ListIterator figureListIt = sli.figureList.listIterator(0);
+                final SymbolListItem sli = tli.symbolAr[i];
+                final ListIterator<FigureListItem> figureListIt = sli.figureList.listIterator(0);
                 while (figureListIt.hasNext()) {
-                    FigureListItem fli = (FigureListItem) figureListIt.next();
+                    final FigureListItem fli = figureListIt.next();
                     // assume symbol has already been selected
                     if (fli.selected && sli.symbol.getBoundingShape(fli.shape).contains(p)) {
                         RowCoordinates rowCoords = tli.table.getRowCoordinates();
                         if (!rowCoords.isWCS())
                             return null;
-                        Vector dataVec = tli.table.getDataVector();
+                        final Vector<Vector<Object>> dataVec = tli.table.getDataVector();
                         _imageEquinox = _coordinateConverter.getEquinox();
-                        Vector<Object> rowVec = (Vector<Object>) dataVec.get(fli.row);
+                        final Vector<Object> rowVec = dataVec.get(fli.row);
 
                         // get the world coordinates
                         Coordinates cpos = rowCoords.getCoordinates(rowVec);
@@ -1124,8 +1120,8 @@ public class BasicTablePlotter
      */
     protected class SymbolListItem {
 
-        public TablePlotSymbol symbol;                  // plot symbol description
-        public LinkedList figureList = new LinkedList();   // list of figures to draw using the above symbol
+        public final TablePlotSymbol symbol;                  // plot symbol description
+        public final LinkedList<FigureListItem> figureList = new LinkedList<>();   // list of figures to draw using the above symbol
 
         public SymbolListItem(TablePlotSymbol s) {
             symbol = s;
