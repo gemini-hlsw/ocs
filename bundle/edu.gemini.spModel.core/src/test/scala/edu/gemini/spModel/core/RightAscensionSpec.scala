@@ -10,7 +10,7 @@ import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 import AlmostEqual.AlmostEqualOps
 
-object RightAscensionSpec extends Specification with ScalaCheck with Arbitraries {
+object RightAscensionSpec extends Specification with ScalaCheck with Arbitraries with Helpers {
 
   "RightAscension Conversions" should {
    
@@ -40,6 +40,14 @@ object RightAscensionSpec extends Specification with ScalaCheck with Arbitraries
 
   }
 
+ "RightAscension Serialization" should {
+
+    "Support Java Binary" ! 
+      forAll { (ra: RightAscension) =>
+        canSerialize(ra)
+      }
+
+  }
 
 }
 

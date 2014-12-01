@@ -10,7 +10,7 @@ import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 import AlmostEqual.AlmostEqualOps
 
-object AngleSpec extends Specification with ScalaCheck with Arbitraries {
+object AngleSpec extends Specification with ScalaCheck with Arbitraries with Helpers {
 
   "Angle Conversions" should {
    
@@ -101,6 +101,42 @@ object AngleSpec extends Specification with ScalaCheck with Arbitraries {
 
   }
 
+  "Angle Formatting/Parsing Roundtrips" should {
+
+    "Support Degrees" !
+      forAll { (a: Angle) =>
+        val s = a.formatDegrees.init // drop the °
+        Angle.parseDegrees(s).fold(_ => false, _ ~= a)
+      }
+
+    "Support Radians" ! 
+      forAll { (a: Angle) =>
+        val s = a.toRadians.toString
+        Angle.parseRadians(s).fold(_ => false, _ ~= a)
+      }
+
+    "Support Sexigesimal" ! 
+      forAll { (a: Angle) =>
+        val s = a.formatSexigesimal
+        Angle.parseSexigesimal(s).fold(_ => false, _ ~= a)
+      }
+
+    "Support HourAngle" ! 
+      forAll { (a: Angle) =>
+        val s = a.formatHourAngle
+        Angle.parseHourAngle(s).fold(_ => false, _ ~= a)
+      }
+
+  }
+
+  "Angle Serialization" should {
+
+    "Support Java Binary" ! 
+      forAll { (a: Angle) =>
+        canSerialize(a)
+      }
+
+  }
 
 }
 

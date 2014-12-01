@@ -10,7 +10,7 @@ import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 import AlmostEqual.AlmostEqualOps
 
-object CoordinatesSpec extends Specification with ScalaCheck with Arbitraries {
+object CoordinatesSpec extends Specification with ScalaCheck with Arbitraries with Helpers {
 
   "Coordinates Offsetting" should {
 
@@ -46,6 +46,14 @@ object CoordinatesSpec extends Specification with ScalaCheck with Arbitraries {
 
   }
 
+  "Coordinates Serialization" should {
+
+    "Support Java Binary" ! 
+      forAll { (coords: Coordinates) =>
+        canSerialize(coords)
+      }
+
+  }
 }
 
 
