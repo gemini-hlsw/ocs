@@ -184,7 +184,6 @@ public enum ToContext {
                 NonSiderealTarget nst = new NonSiderealTarget(HmsDegTarget.SystemType.J2000) {
                     @Override public String getPosition() { return ""; }
                     @Override public String getShortSystemName() { return ""; }
-                    @Override public void dump() { }
                     @Override public TypeBase[] getSystemOptions() {
                         return new TypeBase[] { HmsDegTarget.SystemType.J2000 };
                     }
