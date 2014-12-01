@@ -524,14 +524,6 @@ public final class SPTarget extends WatchablePos {
     }
 
     /**
-     * Set the tracking system as a string.
-     */
-    public void setTrackingSystem(final String trackSys) {
-        setCoordSys(trackSys);
-        _notifyOfGenericUpdate();
-    }
-
-    /**
      * Get the tracking epoch.
      */
     public String getTrackingEpoch() {
