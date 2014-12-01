@@ -184,8 +184,6 @@ public final class SPTarget extends WatchablePos {
         // Based on instance create the right target
         if (type instanceof HmsDegTarget.SystemType) {
             target = new HmsDegTarget((HmsDegTarget.SystemType)type);
-        } else if (type instanceof DegDegTarget.SystemType) {
-            target = new DegDegTarget((DegDegTarget.SystemType)type);
         } else if (type instanceof ConicTarget.SystemType) {
             target = new ConicTarget((ConicTarget.SystemType)type);
         } else if (type instanceof NamedTarget.SystemType) {
@@ -211,15 +209,6 @@ public final class SPTarget extends WatchablePos {
             if (coordSys.equals("Hipparcos")) {
                 //LOGGER.info("Transforming Hipparcos to J2000");
                 return new HmsDegTarget(HmsDegTarget.SystemType.J2000);
-            }
-        }
-        // Then DegDeg
-        {
-            final DegDegTarget.SystemType[] types = DegDegTarget.SystemType.TYPES;
-            for (final DegDegTarget.SystemType type : types) {
-                if (coordSys.equals(type.getName())) {
-                    return new DegDegTarget(type);
-                }
             }
         }
         // Conic
@@ -452,10 +441,6 @@ public final class SPTarget extends WatchablePos {
         if (newCoordSys != null) {
             return new HmsDegTarget((HmsDegTarget.SystemType)newCoordSys);
         }
-        newCoordSys = _getCoordSys(DegDegTarget.SystemType.TYPES, coordSysString);
-        if (newCoordSys != null) {
-            return new DegDegTarget((DegDegTarget.SystemType)newCoordSys);
-        }
         newCoordSys = _getCoordSys(NamedTarget.SystemType.TYPES, coordSysString);
         if (newCoordSys != null) {
             return new NamedTarget((NamedTarget.SystemType)newCoordSys);
@@ -687,13 +672,6 @@ public final class SPTarget extends WatchablePos {
             paramSet.addParam(t.getParallax().getParam(factory, _PARALLAX));
             paramSet.addParam(t.getRV().getParam(factory, _RV));
             paramSet.addParam(t.getEffWavelength().getParam(factory, _WAVELENGTH));
-        } else if (target instanceof DegDegTarget) {
-            final DegDegTarget t = (DegDegTarget) target;
-            Pio.addParam(factory, paramSet, _SYSTEM, t.getSystemOption().getName());
-            paramSet.addParam(t.getEpoch().getParam(factory, _EPOCH));
-            Pio.addParam(factory, paramSet, _BRIGHTNESS, t.getBrightness());
-            Pio.addParam(factory, paramSet, _C1, t.c1ToString());
-            Pio.addParam(factory, paramSet, _C2, t.c2ToString());
         } else if (target instanceof NonSiderealTarget) {
             final NonSiderealTarget nst = (NonSiderealTarget) target;
             // OT-495: save and restore RA/Dec for conic targets
@@ -790,18 +768,6 @@ public final class SPTarget extends WatchablePos {
             final EffWavelength eff = new EffWavelength();
             eff.setParam(paramSet.getParam(_WAVELENGTH));
             t.setEffWavelength(eff);
-
-        } else if (itarget instanceof DegDegTarget) {
-            final DegDegTarget t = (DegDegTarget)itarget;
-
-            final String c1 = Pio.getValue(paramSet, _C1);
-            final String c2 = Pio.getValue(paramSet, _C2);
-            t.setC1C2(c1, c2);
-
-            final Epoch e = new Epoch();
-            e.setParam(paramSet.getParam(_EPOCH));
-            t.setEpoch(e);
-            t.setBrightness(brightness);
 
         } else if (itarget instanceof NonSiderealTarget) {
 
