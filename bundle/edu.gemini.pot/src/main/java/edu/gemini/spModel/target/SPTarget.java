@@ -277,7 +277,7 @@ public final class SPTarget extends WatchablePos {
      */
     private static ImList<Magnitude> filterDuplicates(final ImList<Magnitude> magList) {
         return magList.filter(new PredicateOp<Magnitude>() {
-            private final Set<Magnitude.Band> bands = new HashSet<Magnitude.Band>();
+            private final Set<Magnitude.Band> bands = new HashSet<>();
             @Override public Boolean apply(final Magnitude magnitude) {
                 final Magnitude.Band band = magnitude.getBand();
                 if (bands.contains(band)) return false;
@@ -329,7 +329,7 @@ public final class SPTarget extends WatchablePos {
                 return magnitude.getBand();
             }
         });
-        return new HashSet<Magnitude.Band>(bandList.toList());
+        return new HashSet<>(bandList.toList());
     }
 
     /**
