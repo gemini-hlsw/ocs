@@ -108,13 +108,6 @@ public interface ITarget extends Serializable {
     ICoordinate getC2();
 
     /**
-     * Set the first and second coordinates using appropriate
-     * {@link ICoordinate} objects.
-     */
-    void setC1C2(ICoordinate c1, ICoordinate c2)
-            throws IllegalArgumentException;
-
-    /**
      * Set the first Coordinate using a String.
      *
      * @throws IllegalArgumentException if the argument can not be parsed
@@ -198,8 +191,4 @@ public interface ITarget extends Serializable {
      */
     public boolean equals(Object obj);
 
-    /**
-     * Diagnostic to print contents of an ITarget.
-     */
-    public void dump();
 }

@@ -8,7 +8,7 @@ import java.util.Date;
  */
 public abstract class NonSiderealTarget extends CoordinateSystem implements INonSiderealTarget, IHorizonsTarget {
 
-    public static final String DEFAULT_NAME = "";
+    private static final String DEFAULT_NAME = "";
 
     // XXX temporary, until there is conversion code
     private HMS _ra = new HMS();
@@ -70,22 +70,14 @@ public abstract class NonSiderealTarget extends CoordinateSystem implements INon
     /**
      * Sets the first coordinate (right ascension) using a String.
      */
-    public void setRa(String newStringValue) {
+    void setRa(String newStringValue) {
         _ra.setValue(newStringValue);
-    }
-
-    /**
-     * Sets the right ascension and declination using String objects.
-     */
-    public void setRaDec(String newRa, String newDec) {
-        setRa(newRa);
-        setDec(newDec);
     }
 
     /**
      * Sets the second coordinate (declination) using a String.
      */
-    public void setDec(String newStringValue) {
+    void setDec(String newStringValue) {
         _dec.setValue(newStringValue);
     }
 
@@ -132,7 +124,7 @@ public abstract class NonSiderealTarget extends CoordinateSystem implements INon
     /**
      * Gets the first coordinate (right ascension) as a String.
      */
-    public String raToString() {
+    String raToString() {
         return _ra.toString();
     }
 
@@ -184,7 +176,7 @@ public abstract class NonSiderealTarget extends CoordinateSystem implements INon
     /**
      * Gets the second coordinate (declination) as a String.
      */
-    public String decToString() {
+    String decToString() {
         return _dec.toString();
     }
 

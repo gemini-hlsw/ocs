@@ -40,8 +40,8 @@ public final class NamedTarget extends NonSiderealTarget {
         NEPTUNE("Neptune", "899"),
         PLUTO("Pluto", "999");
 
-        private String _displayValue;
-        private String _horizonsId;
+        private final String _displayValue;
+        private final String _horizonsId;
 
         public static final NamedTarget.SolarObject DEFAULT_SOLAR_OBJECT = MOON;
 
@@ -67,25 +67,14 @@ public final class NamedTarget extends NonSiderealTarget {
     /**
      * Various default values.
      */
-    public static final SystemType DEFAULT_SYSTEM_TYPE = SystemType.SOLAR_OBJECT;
+    private static final SystemType DEFAULT_SYSTEM_TYPE = SystemType.SOLAR_OBJECT;
 
     /**
      * The base name of this coordinate system.
      */
-    public static final String SYSTEM_NAME = "Named Target";
-    public static final String SHORT_SYSTEM_NAME = "namedTarget";
-
-    public static final String DEFAULT_NAME = "";
+    private static final String SHORT_SYSTEM_NAME = "namedTarget";
 
     private NamedTarget.SolarObject _solarObject = NamedTarget.SolarObject.DEFAULT_SOLAR_OBJECT;
-
-    /**
-     * Provides clone support.
-     */
-    public Object clone() {
-        //planet is an enum, inmmutable
-        return super.clone();
-    }
 
     /**
      * Override equals to return true if both instances are the same.
@@ -160,14 +149,6 @@ public final class NamedTarget extends NonSiderealTarget {
      */
     public void setSolarObject(NamedTarget.SolarObject solarObject) {
         _solarObject = solarObject;
-    }
-
-
-    /**
-     * Diagnostic to dump the contents of the target to System.out.
-     */
-    public void dump() {
-        System.out.println(getPosition());
     }
 
     /**

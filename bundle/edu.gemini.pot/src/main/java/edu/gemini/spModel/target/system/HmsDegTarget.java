@@ -6,9 +6,6 @@
 //
 package edu.gemini.spModel.target.system;
 
-import edu.gemini.shared.util.immutable.None;
-import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
 import edu.gemini.spModel.target.system.CoordinateTypes.*;
 import jsky.coords.wcscon;
@@ -43,7 +40,6 @@ public final class HmsDegTarget extends CoordinateSystem
         public static final int _APPARENT = 2;
         public static final int _JNNNN = 3;
         public static final int _BNNNN = 4;
-     //   public static final int _HIPP = 5;
 
         public static final SystemType J2000 =
                 new SystemType(_J2000, "J2000");
@@ -60,10 +56,6 @@ public final class HmsDegTarget extends CoordinateSystem
         public static final SystemType BNNNN =
                 new SystemType(_BNNNN, "BNNNN");
 
-      //Hipparcos is obsolete: SCI-0381
-     //   public static final SystemType HIPP =
-     //           new SystemType(_HIPP, "Hipparcos");
-
         public static final SystemType[] TYPES = new SystemType[]{
             J2000,
             B1950,
@@ -77,30 +69,22 @@ public final class HmsDegTarget extends CoordinateSystem
             super(type, name);
         }
 
-        public static Option<SystemType> valueOf(String name) {
-            for (SystemType type : TYPES) {
-                if (type.getName().equals(name)) return new Some<SystemType>(type);
-            }
-            return None.instance();
-        }
     }
 
 
     // Various default values.
     // XXX Note: the types derived from CoordinateParam, such as Epoch, are NOT immutable!
-    public static final SystemType DEFAULT_SYSTEM_TYPE = SystemType.J2000;
-    public static final Epoch DEFAULT_EPOCH_1950 = new Epoch(1950, Units.YEARS);
-    public static final Epoch DEFAULT_EPOCH_2000 = new Epoch(2000, Units.YEARS);
-    public static final PM1 DEFAULT_PM1 = new PM1();
-    public static final PM2 DEFAULT_PM2 = new PM2();
-    public static final RV DEFAULT_RV = new RV();
-    public static final Parallax DEFAULT_PARALLAX = new Parallax();
-    public static final Date DEFAULT_TAIZ = null;
-    public static final double DEFAULT_RA_TRACKING_RATE = 0.0;
-    public static final double DEFAULT_DEC_TRACKING_RATE = 0.0;
-    public static final String DEFAULT_NAME = "";
+    private static final SystemType DEFAULT_SYSTEM_TYPE = SystemType.J2000;
+    private static final Epoch DEFAULT_EPOCH_1950 = new Epoch(1950, Units.YEARS);
+    private static final Epoch DEFAULT_EPOCH_2000 = new Epoch(2000, Units.YEARS);
+    private static final PM1 DEFAULT_PM1 = new PM1();
+    private static final PM2 DEFAULT_PM2 = new PM2();
+    private static final RV DEFAULT_RV = new RV();
+    private static final Parallax DEFAULT_PARALLAX = new Parallax();
+    private static final Date DEFAULT_TAIZ = null;
+    private static final String DEFAULT_NAME = "";
     public static final EffWavelength AUTO_EFF_WAVELENGTH = new EffWavelength(-1.0);
-    public static final EffWavelength DEFAULT_EFF_WAVELENGTH = AUTO_EFF_WAVELENGTH;
+    private static final EffWavelength DEFAULT_EFF_WAVELENGTH = AUTO_EFF_WAVELENGTH;
 
     private String _brightness = DEFAULT_NAME;
     private String _name = DEFAULT_NAME;
@@ -116,14 +100,11 @@ public final class HmsDegTarget extends CoordinateSystem
     private HMS _ra = new HMS();
     private DMS _dec = new DMS();
 
-    private double _raTrackingRate = DEFAULT_RA_TRACKING_RATE;
-    private double _decTrackingRate = DEFAULT_DEC_TRACKING_RATE;
-
     /**
      * The base name of this coordinate system.
      */
-    public static final String SYSTEM_NAME = "HMS Deg";
-    public static final String SHORT_SYSTEM_NAME = "hmsdegTarget";
+    private static final String SYSTEM_NAME = "HMS Deg";
+    private static final String SHORT_SYSTEM_NAME = "hmsdegTarget";
 
     /**
      * Provides clone support.
@@ -299,7 +280,7 @@ public final class HmsDegTarget extends CoordinateSystem
     /**
      * Sets the first coordinate (right ascension) using a String.
      */
-    public void setRa(String newStringValue) {
+    void setRa(String newStringValue) {
         _ra.setValue(newStringValue);
     }
 
@@ -313,7 +294,7 @@ public final class HmsDegTarget extends CoordinateSystem
     /**
      * Sets the second coordinate (declination) using a String.
      */
-    public void setDec(String newStringValue) {
+    void setDec(String newStringValue) {
         _dec.setValue(newStringValue);
     }
 
@@ -482,87 +463,6 @@ public final class HmsDegTarget extends CoordinateSystem
         _parallax = newValue;
     }
 
-
-    /**
-     * Gets the TAI at which the tracking rates result in no tracking errors.
-     *
-     * @return this date or null if not defined; the Date returned
-     * is a reference to the internal object.
-     */
-    public Date getTAIZ() {
-        if (_taiz == null) {
-            return null;
-        }
-        return new Date(_taiz.getTime());
-    }
-
-
-    /**
-     * Sets the TAI at which the tracking rates result in no tracking errors.
-     *
-     * @param newValue new value to use for the TAI; may be null to unset
-     */
-    public void setTAIZ(Date newValue) {
-        if (newValue == null) {
-            _taiz = null;
-
-        } else {
-            _taiz.setTime(newValue.getTime());
-        }
-    }
-
-
-    /**
-     * Gets the differential tracking rate in C1.
-     */
-    public double getRaTrackingRate() {
-        return _raTrackingRate;
-    }
-
-
-    /**
-     * Sets the differential tracking rate in RA.
-     */
-    public void setRaTrackingRate(double newValue) {
-        _raTrackingRate = newValue;
-    }
-
-    /**
-     * Sets the differential tracking rate in Ra using a String.
-     */
-    public void setRaTrackingRate(String newStringValue) {
-        if (newStringValue != null) {
-            double newValue = Double.parseDouble(newStringValue);
-            setRaTrackingRate(newValue);
-        }
-    }
-
-
-    /**
-     * Gets the differential tracking rate in Dec as a <code>double</code>.
-     */
-    public double getDecTrackingRate() {
-        return _decTrackingRate;
-    }
-
-
-    /**
-     * Sets the differential tracking rate in Dec.
-     */
-    public void setDecTrackingRate(double newValue) {
-        _decTrackingRate = newValue;
-    }
-
-    /**
-     * Sets the differential tracking rate in Dec as a String.
-     */
-    public void setDecTrackingRate(String newStringValue) {
-        if (newStringValue != null) {
-            double newValue = Double.parseDouble(newStringValue);
-            setDecTrackingRate(newValue);
-        }
-    }
-
     /**
      * Gets the effective wavelength of the target.
      * This method returns a reference to the internal object.
@@ -621,16 +521,6 @@ public final class HmsDegTarget extends CoordinateSystem
     }
 
     /**
-     * A diagnostic dump of the target.
-     */
-    public void dump() {
-        System.out.println(getPosition());
-        System.out.println("pm1=" + getPM1() + ",pm2=" + getPM2());
-        System.out.println("p=" + getParallax() + ",rv=" + getRV() +
-                           ",eW=" + getEffWavelength());
-    }
-
-    /**
      * Gets the system name.
      */
     public String getSystemName() {
@@ -663,9 +553,6 @@ public final class HmsDegTarget extends CoordinateSystem
      * Gets the available options for this coordinate system.
      */
     public TypeBase[] getSystemOptions() {
-//        SystemType[] stA = new SystemType[SystemType.TYPES.length];
-//        System.arraycopy(SystemType.TYPES, 0, stA, 0, SystemType.TYPES.length);
-//        return stA;
         return SystemType.TYPES;
     }
 
@@ -678,9 +565,6 @@ public final class HmsDegTarget extends CoordinateSystem
         // Make a copy for returning
         HmsDegTarget j2ksys = (HmsDegTarget) this.clone();
 
-        // First check to see if this coordinate is already J2000(FK5)
-        if (j2ksys.getSystemOption() == SystemType.J2000) {
-        }
         int etype = j2ksys.getSystemOption().getTypeCode();
         Epoch epoch = j2ksys.getEpoch();
 
@@ -800,7 +684,7 @@ public final class HmsDegTarget extends CoordinateSystem
     }
 
     // Helper method to do the conversion from J2000 to B1950
-    private HmsDegTarget _convertJ2000toB1950(HmsDegTarget in) {
+    private void _convertJ2000toB1950(HmsDegTarget in) {
         // Get the RA and Dec as degrees and create a new Point2D
         double ra = in.getC1().getAs(Units.DEGREES);
         double dec = in.getC2().getAs(Units.DEGREES);
@@ -813,7 +697,6 @@ public final class HmsDegTarget extends CoordinateSystem
         in.setSystemOption(SystemType.B1950);
         in.getC1().setAs(result.getX(), Units.DEGREES);
         in.getC2().setAs(result.getY(), Units.DEGREES);
-        return in;
     }
 
 }

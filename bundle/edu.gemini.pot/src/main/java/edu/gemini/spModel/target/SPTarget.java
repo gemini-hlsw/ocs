@@ -38,7 +38,6 @@ public final class SPTarget extends WatchablePos {
 
     private static final String COORDINATE_ZERO = "00:00:00.0";
     private static final Logger LOGGER = Logger.getLogger(SPTarget.class.getName());
-    private static final TypeBase DEFAULT_TARGET_TYPE = HmsDegTarget.SystemType.J2000;
 
     ///
     /// DATE HANDLING
@@ -127,11 +126,9 @@ public final class SPTarget extends WatchablePos {
     }
 
     public SPTarget(final double xaxis, final double yaxis) {
-        synchronized (this) {
-            _target = SPTarget.createTarget(DEFAULT_TARGET_TYPE);
-            _target.getC1().setAs(xaxis, Units.DEGREES);
-            _target.getC2().setAs(yaxis, Units.DEGREES);
-        }
+        this();
+        _target.getC1().setAs(xaxis, Units.DEGREES);
+        _target.getC2().setAs(yaxis, Units.DEGREES);
     }
 
     /** Constructs with a {@link SkyObject}, extracting its coordinate and magnitude information. */
@@ -171,25 +168,7 @@ public final class SPTarget extends WatchablePos {
 
     /** Create a default base position using the HmsDegTarget. */
     public static SPTarget createDefaultBasePosition() {
-        final ITarget target = createTarget(HmsDegTarget.DEFAULT_SYSTEM_TYPE);
-        if (target == null) return null;
-        return new SPTarget(target);
-    }
-
-    /**
-     * A public factory method to create target instances.
-     */
-    private static ITarget createTarget(final TypeBase type) {
-        ITarget target = null;
-        // Based on instance create the right target
-        if (type instanceof HmsDegTarget.SystemType) {
-            target = new HmsDegTarget((HmsDegTarget.SystemType)type);
-        } else if (type instanceof ConicTarget.SystemType) {
-            target = new ConicTarget((ConicTarget.SystemType)type);
-        } else if (type instanceof NamedTarget.SystemType) {
-            target = new NamedTarget((NamedTarget.SystemType)type);
-        }
-        return target;
+        return new SPTarget();
     }
 
     /**
@@ -277,7 +256,7 @@ public final class SPTarget extends WatchablePos {
      */
     private static ImList<Magnitude> filterDuplicates(final ImList<Magnitude> magList) {
         return magList.filter(new PredicateOp<Magnitude>() {
-            private final Set<Magnitude.Band> bands = new HashSet<Magnitude.Band>();
+            private final Set<Magnitude.Band> bands = new HashSet<>();
             @Override public Boolean apply(final Magnitude magnitude) {
                 final Magnitude.Band band = magnitude.getBand();
                 if (bands.contains(band)) return false;
@@ -329,7 +308,7 @@ public final class SPTarget extends WatchablePos {
                 return magnitude.getBand();
             }
         });
-        return new HashSet<Magnitude.Band>(bandList.toList());
+        return new HashSet<>(bandList.toList());
     }
 
     /**
@@ -521,14 +500,6 @@ public final class SPTarget extends WatchablePos {
      */
     public String getTrackingSystem() {
         return getCoordSysAsString();
-    }
-
-    /**
-     * Set the tracking system as a string.
-     */
-    public void setTrackingSystem(final String trackSys) {
-        setCoordSys(trackSys);
-        _notifyOfGenericUpdate();
     }
 
     /**
@@ -876,20 +847,10 @@ public final class SPTarget extends WatchablePos {
     }
 
     public static SPTarget fromParamSet(final ParamSet pset) {
-//        String name = Pio.getValue(pset, _NAME);
         final SPTarget res = new SPTarget();
         res.setParamSet(pset);
         return res;
     }
-
-// --Commented out by Inspection START (8/18/14 2:45 PM):
-//    /**
-//     * Standard debugging method.
-//     */
-//    public void dump() {
-//        _target.dump();
-//    }
-// --Commented out by Inspection STOP (8/18/14 2:45 PM)
 
     /**
      * Standard debugging method.
