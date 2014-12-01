@@ -565,9 +565,6 @@ public final class HmsDegTarget extends CoordinateSystem
         // Make a copy for returning
         HmsDegTarget j2ksys = (HmsDegTarget) this.clone();
 
-        // First check to see if this coordinate is already J2000(FK5)
-        if (j2ksys.getSystemOption() == SystemType.J2000) {
-        }
         int etype = j2ksys.getSystemOption().getTypeCode();
         Epoch epoch = j2ksys.getEpoch();
 
