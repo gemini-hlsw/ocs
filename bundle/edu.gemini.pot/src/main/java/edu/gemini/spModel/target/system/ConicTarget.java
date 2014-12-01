@@ -57,33 +57,14 @@ public final class ConicTarget extends NonSiderealTarget  {
     /**
      * The base name of this coordinate system.
      */
-    public static final String SYSTEM_NAME = "Conic";
-    public static final String SHORT_SYSTEM_NAME = "conicTarget";
+    private static final String SHORT_SYSTEM_NAME = "conicTarget";
 
     /**
      * Default system type.
      */
-    public static final SystemType DEFAULT_SYSTEM_TYPE = SystemType.ASA_COMET;
+    private static final SystemType DEFAULT_SYSTEM_TYPE = SystemType.ASA_COMET;
 
-    public static final String ANODE_PROP = "ANode";
-    public static final String AQ_PROP = "AQ";
-    public static final String E_PROP = "E";
-    public static final String EPOCH_PROP = "Epoch";
-    public static final String INCLINATION_PROP = "Inclination";
-    public static final String LM_PROP = "LM";
-    public static final String N_PROP = "N";
-    public static final String PERIHELION_PROP = "Perihelion";
-
-//    public static final ANode DEFAULT_ANODE = new ANode();
-//    public static final AQ DEFAULT_AQ = new AQ();
-    public static final double DEFAULT_E = 0.0;
-//    public static final Epoch DEFAULT_EPOCH = new Epoch("2000", Units.YEARS);
-//    public static final Epoch DEFAULT_EPOCH_OF_PERI = new Epoch("2000", Units.YEARS);
-//    public static final Inclination DEFAULT_INCLINATION = new Inclination();
-//    public static final LM DEFAULT_LM = new LM();
-//    public static final N DEFAULT_N = new N();
-//    public static final Perihelion DEFAULT_PERIHELION = new Perihelion();
-
+    private static final double DEFAULT_E = 0.0;
 
     private ANode _anode = new ANode();
     private AQ _aq = new AQ();
@@ -356,13 +337,6 @@ public final class ConicTarget extends NonSiderealTarget  {
     }
 
     /**
-     * Diagnostic to dump the contents of the target to System.out.
-     */
-    public void dump() {
-        System.out.println(getPosition());
-    }
-
-    /**
      * Gets a short description of the position.
      */
     public String getPosition() {
@@ -375,9 +349,6 @@ public final class ConicTarget extends NonSiderealTarget  {
      * Gets the available options for this coordinate system.
      */
     public TypeBase[] getSystemOptions() {
-//        SystemType[] stA = new SystemType[SystemType.TYPES.length];
-//        System.arraycopy(SystemType.TYPES, 0, stA, 0, SystemType.TYPES.length);
-//        return stA;
         return SystemType.TYPES;
     }
 
