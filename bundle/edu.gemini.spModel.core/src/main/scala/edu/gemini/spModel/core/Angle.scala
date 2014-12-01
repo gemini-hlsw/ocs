@@ -112,28 +112,28 @@ sealed trait Angle extends java.io.Serializable {
   def formatDegrees: String =
     Angle.formatDegrees(this)
 
- /**
+  /**
    * @see [[Angle.formatSexigesimal]]
    * @group Formatters 
    */
   def formatSexigesimal: String =
     Angle.formatSexigesimal(this)
 
- /**
+  /**
    * @see [[Angle.formatDMS]]
    * @group Formatters 
    */
   def formatDMS: String =
     Angle.formatDMS(this)
 
-/**
+ /**
    * @see [[Angle.formatHourAngle]]
    * @group Formatters 
    */
   def formatHourAngle: String =
     Angle.formatHourAngle(this)
 
- /**
+  /**
    * @see [[Angle.formatHMS]]
    * @group Formatters 
    */
@@ -150,7 +150,7 @@ object Angle {
    */
   def fromDegrees(d: Double): Angle =
     new Angle {
-      override val toDegrees = ((d % 360) + 360) % 360 // TODO: normalize to [0, 360)
+      override val toDegrees = ((d % 360) + 360) % 360
     }
 
   /** 

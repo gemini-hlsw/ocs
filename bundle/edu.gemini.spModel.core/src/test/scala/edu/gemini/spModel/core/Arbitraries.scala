@@ -49,14 +49,6 @@ trait Arbitraries {
   implicit val arbEquinox: Arbitrary[Equinox] =
     Arbitrary(oneOf(Equinox.J2000, Equinox.B1950))
 
-  implicit val arbTrackingWavelength: Arbitrary[ProperMotion.TrackingWavelength] =
-    Arbitrary {
-      for {
-        b <- arbitrary[Boolean]
-        w <- arbitrary[Double].map(ProperMotion.EffectiveWavelength)
-      } yield if (b) ProperMotion.Auto else w
-    }
-
   implicit val arbProperMotion: Arbitrary[ProperMotion] =
     Arbitrary {
       for {
@@ -65,8 +57,7 @@ trait Arbitraries {
         epoch    <- arbitrary[Epoch]
         parallax <- arbitrary[Double]
         rv       <- arbitrary[Double]
-        ew       <- arbitrary[ProperMotion.TrackingWavelength]
-      } yield ProperMotion(deltaRA, deltaDec, epoch, parallax, rv, ew)
+      } yield ProperMotion(deltaRA, deltaDec, epoch, parallax, rv)
     }
 
   implicit val arbMagnitude: Arbitrary[Magnitude] =

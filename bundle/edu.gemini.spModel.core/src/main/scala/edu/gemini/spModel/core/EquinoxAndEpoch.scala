@@ -6,13 +6,7 @@ import scalaz.Equal
 // Equinox (reference system) and Epoch (time of observation) are distinct but related.
 // See this article for more http://en.wikipedia.org/wiki/Epoch_(astronomy)
 
-sealed trait Equinox extends Product with Serializable {
-
-  /** Return a function to convert coordinates to the specified equinox. */
-  def toEquinox(target: Equinox): Coordinates => Coordinates =
-    ???
-
-}
+sealed trait Equinox extends Product with Serializable
 
 sealed abstract class EquinoxWithEpoch(val epoch: Epoch) extends Equinox
 
@@ -24,7 +18,6 @@ object Equinox {
 
 sealed abstract class Epoch {
   def value: Double
-  def toUnixTime: Long = ???
 }
 
 object Epoch {

@@ -11,35 +11,8 @@ sealed trait Target {
   /** Coordinates (if known) for this target at the specified UNIX time. */
   def coords(time: Long): Option[Coordinates]
 
-  /** Coordinates (if known) for this target at the specified epoch. */
-  def coordsAtEpoch(e: Epoch): Option[Coordinates] =
-    coords(e.toUnixTime)
-
-  /**
-   * Coordinates (if known) for this target at the natural epoch for the specified Equinox,
-   * precessed as required.
-   */
-  def coordsForEquinox(e: Equinox): Option[Coordinates] =
-    ???
-
-  /** Coordinates (if known) at equinox and epoch J2000. */
-  def coordsForJ2000: Option[Coordinates] =
-    coordsForEquinox(Equinox.J2000)
-
-  /** Coordinates at equinox and epoch J2000, or (0, 0). */
-  def coordsForJ2000orZero: Coordinates =
-    coordsForJ2000.getOrElse(Coordinates.zero)
-
   /** Horizons information for this target, if known. */
   def horizonsInfo: Option[Target.HorizonsInfo]
-
-  
-  def isNamedTarget: Boolean =
-    fold(too => false, sid => false, non => false, nam => true, con => false)
-
-  // TODO: this is somewhat misleading; perhaps name .hasFixedCoordinates ?
-  def isNonSiderealTarget: Boolean =
-    fold(too => false, sid => false, non => true, nam => true, con => true)
 
   /** Alternative to pattern-matching. */
   def fold[A](too: Target.TooTarget         => A,
@@ -185,10 +158,6 @@ object Target {
                 nam: Target.NamedTarget => A,
                 con: Target.ConicTarget => A): A = 
       non(this)
-
-    /** Treat this as a `SiderealTarget` by fixing the coordinates. */ // TODO: track down magnitude information
-    def fix(date: Long): Option[SiderealTarget] =
-      coords(date).map(SiderealTarget(name, _, equinox, None, Nil, horizonsInfo))
 
     def coords(date: Long): Option[Coordinates] = 
       for {
