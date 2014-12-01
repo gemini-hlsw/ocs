@@ -126,11 +126,9 @@ public final class SPTarget extends WatchablePos {
     }
 
     public SPTarget(final double xaxis, final double yaxis) {
-        synchronized (this) {
-            _target = new HmsDegTarget();
-            _target.getC1().setAs(xaxis, Units.DEGREES);
-            _target.getC2().setAs(yaxis, Units.DEGREES);
-        }
+        this();
+        _target.getC1().setAs(xaxis, Units.DEGREES);
+        _target.getC2().setAs(yaxis, Units.DEGREES);
     }
 
     /** Constructs with a {@link SkyObject}, extracting its coordinate and magnitude information. */
