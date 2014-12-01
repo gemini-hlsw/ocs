@@ -6,9 +6,6 @@
 //
 package edu.gemini.spModel.target.system;
 
-import edu.gemini.shared.util.immutable.None;
-import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
 import edu.gemini.spModel.target.system.CoordinateTypes.*;
 import jsky.coords.wcscon;
@@ -43,7 +40,6 @@ public final class HmsDegTarget extends CoordinateSystem
         public static final int _APPARENT = 2;
         public static final int _JNNNN = 3;
         public static final int _BNNNN = 4;
-     //   public static final int _HIPP = 5;
 
         public static final SystemType J2000 =
                 new SystemType(_J2000, "J2000");
@@ -60,10 +56,6 @@ public final class HmsDegTarget extends CoordinateSystem
         public static final SystemType BNNNN =
                 new SystemType(_BNNNN, "BNNNN");
 
-      //Hipparcos is obsolete: SCI-0381
-     //   public static final SystemType HIPP =
-     //           new SystemType(_HIPP, "Hipparcos");
-
         public static final SystemType[] TYPES = new SystemType[]{
             J2000,
             B1950,
@@ -77,12 +69,6 @@ public final class HmsDegTarget extends CoordinateSystem
             super(type, name);
         }
 
-        public static Option<SystemType> valueOf(String name) {
-            for (SystemType type : TYPES) {
-                if (type.getName().equals(name)) return new Some<SystemType>(type);
-            }
-            return None.instance();
-        }
     }
 
 
@@ -96,8 +82,6 @@ public final class HmsDegTarget extends CoordinateSystem
     public static final RV DEFAULT_RV = new RV();
     public static final Parallax DEFAULT_PARALLAX = new Parallax();
     public static final Date DEFAULT_TAIZ = null;
-    public static final double DEFAULT_RA_TRACKING_RATE = 0.0;
-    public static final double DEFAULT_DEC_TRACKING_RATE = 0.0;
     public static final String DEFAULT_NAME = "";
     public static final EffWavelength AUTO_EFF_WAVELENGTH = new EffWavelength(-1.0);
     public static final EffWavelength DEFAULT_EFF_WAVELENGTH = AUTO_EFF_WAVELENGTH;
@@ -115,9 +99,6 @@ public final class HmsDegTarget extends CoordinateSystem
     private Date _taiz = DEFAULT_TAIZ;
     private HMS _ra = new HMS();
     private DMS _dec = new DMS();
-
-    private double _raTrackingRate = DEFAULT_RA_TRACKING_RATE;
-    private double _decTrackingRate = DEFAULT_DEC_TRACKING_RATE;
 
     /**
      * The base name of this coordinate system.
@@ -482,87 +463,6 @@ public final class HmsDegTarget extends CoordinateSystem
         _parallax = newValue;
     }
 
-
-    /**
-     * Gets the TAI at which the tracking rates result in no tracking errors.
-     *
-     * @return this date or null if not defined; the Date returned
-     * is a reference to the internal object.
-     */
-    public Date getTAIZ() {
-        if (_taiz == null) {
-            return null;
-        }
-        return new Date(_taiz.getTime());
-    }
-
-
-    /**
-     * Sets the TAI at which the tracking rates result in no tracking errors.
-     *
-     * @param newValue new value to use for the TAI; may be null to unset
-     */
-    public void setTAIZ(Date newValue) {
-        if (newValue == null) {
-            _taiz = null;
-
-        } else {
-            _taiz.setTime(newValue.getTime());
-        }
-    }
-
-
-    /**
-     * Gets the differential tracking rate in C1.
-     */
-    public double getRaTrackingRate() {
-        return _raTrackingRate;
-    }
-
-
-    /**
-     * Sets the differential tracking rate in RA.
-     */
-    public void setRaTrackingRate(double newValue) {
-        _raTrackingRate = newValue;
-    }
-
-    /**
-     * Sets the differential tracking rate in Ra using a String.
-     */
-    public void setRaTrackingRate(String newStringValue) {
-        if (newStringValue != null) {
-            double newValue = Double.parseDouble(newStringValue);
-            setRaTrackingRate(newValue);
-        }
-    }
-
-
-    /**
-     * Gets the differential tracking rate in Dec as a <code>double</code>.
-     */
-    public double getDecTrackingRate() {
-        return _decTrackingRate;
-    }
-
-
-    /**
-     * Sets the differential tracking rate in Dec.
-     */
-    public void setDecTrackingRate(double newValue) {
-        _decTrackingRate = newValue;
-    }
-
-    /**
-     * Sets the differential tracking rate in Dec as a String.
-     */
-    public void setDecTrackingRate(String newStringValue) {
-        if (newStringValue != null) {
-            double newValue = Double.parseDouble(newStringValue);
-            setDecTrackingRate(newValue);
-        }
-    }
-
     /**
      * Gets the effective wavelength of the target.
      * This method returns a reference to the internal object.
@@ -621,16 +521,6 @@ public final class HmsDegTarget extends CoordinateSystem
     }
 
     /**
-     * A diagnostic dump of the target.
-     */
-    public void dump() {
-        System.out.println(getPosition());
-        System.out.println("pm1=" + getPM1() + ",pm2=" + getPM2());
-        System.out.println("p=" + getParallax() + ",rv=" + getRV() +
-                           ",eW=" + getEffWavelength());
-    }
-
-    /**
      * Gets the system name.
      */
     public String getSystemName() {
@@ -663,9 +553,6 @@ public final class HmsDegTarget extends CoordinateSystem
      * Gets the available options for this coordinate system.
      */
     public TypeBase[] getSystemOptions() {
-//        SystemType[] stA = new SystemType[SystemType.TYPES.length];
-//        System.arraycopy(SystemType.TYPES, 0, stA, 0, SystemType.TYPES.length);
-//        return stA;
         return SystemType.TYPES;
     }
 
