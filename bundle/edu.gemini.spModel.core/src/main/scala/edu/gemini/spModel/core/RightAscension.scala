@@ -46,6 +46,20 @@ object RightAscension {
       val toAngle = a
     }
 
+  /**
+   * Construct a `RightAscension` from the given value in degrees, which will be normalized to [0, 360).
+   * @group Constructors
+   */
+  def fromDegrees(d: Double): RightAscension =
+    fromAngle(Angle.fromDegrees(d))
+
+  /**
+   * Construct a `RightAscension` from the given value in hours, which will be normalized to [0, 24).
+   * @group Constructors
+   */
+  def fromHours(h: Double): RightAscension =
+    fromAngle(Angle.fromHours(h))
+
   /** 
    * The `RightAscension` at zero degrees.
    * @group Constructors
