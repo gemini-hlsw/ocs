@@ -10,7 +10,7 @@ import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 import AlmostEqual.AlmostEqualOps
 
-object DeclinationSpec extends Specification with ScalaCheck with Arbitraries {
+object DeclinationSpec extends Specification with ScalaCheck with Arbitraries with Helpers {
 
   "Declination Conversions" should {
    
@@ -35,6 +35,30 @@ object DeclinationSpec extends Specification with ScalaCheck with Arbitraries {
 
   }
 
+ "Declination Formatting/Parsing Roundtrips" should {
+
+    "Support Degrees" !
+      forAll { (dec: Declination) =>
+        val s = dec.formatDegrees.init // drop the °
+        Angle.parseDegrees(s).fold(_ => false, _ ~= dec.toAngle)
+      }
+
+    "Support Sexigesimal" ! 
+      forAll { (dec: Declination) =>
+        val s = dec.formatSexigesimal
+        Angle.parseSexigesimal(s).fold(_ => false, _ ~= dec.toAngle)
+      }
+
+  }
+
+  "Declination Serialization" should {
+
+    "Support Java Binary" ! 
+      forAll { (dec: Declination) =>
+        canSerialize(dec)
+      }
+
+  }
 
 }
 

@@ -27,7 +27,12 @@ final case class Coordinates(ra: RightAscension, dec: Declination) {
 
 }
 
-object Coordinates {
+object Coordinates extends ((RightAscension, Declination) => Coordinates) {
+
+  val ra:  Coordinates @> RightAscension = Lens(c => Store(r => c.copy(ra = r), c.ra))
+  val dec: Coordinates @> Declination    = Lens(c => Store(d => c.copy(dec = d), c.dec))
+
+  
 
   /** 
    * The origin, at RA = Dec = 0. 

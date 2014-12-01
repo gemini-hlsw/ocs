@@ -6,13 +6,22 @@ import scalaz._, Scalaz._
  * Newtype for an `Angle` in [270 - 360) + [0 - 90), tagged as a declination. By convention such
  * angles are logically in the range [-90 -90); the provided formatters respect this convention.
  */
-sealed trait Declination {
+sealed trait Declination extends java.io.Serializable {
   
   /** 
    * This `Declination` as an angle in [270 - 360) + [0 - 90). 
    * @group Conversions
    */
   def toAngle: Angle
+
+  /** 
+   * This `Declination` in degrees in (-90, 90]; for (0, 360] use `.toAngle.toDegrees`. 
+   * @group Conversions
+   */
+  def toDegrees: Double = {
+    val d = toAngle.toDegrees
+    if (d < 90) d else d - 360
+  }
 
   /**
    * Offset this `Declination` by the given angle, returning the result and a carry bit. A carry
@@ -46,6 +55,27 @@ sealed trait Declination {
   final override def hashCode =
     toAngle.hashCode
 
+  /**
+   * @see [[Declination.formatDegrees]]
+   * @group Formatters
+   */
+  def formatDegrees: String = 
+    Declination.formatDegrees(this)
+
+  /**
+   * @see [[Declination.formatSexigesimal]]
+   * @group Formatters
+   */
+  def formatSexigesimal: String =
+    Declination.formatSexigesimal(this)
+
+  /**
+   * @see [[Declination.formatDMS]]
+   * @group Formatters
+   */
+  def formatDMS: String =
+    Declination.formatDMS(this)
+
 }
 
 object Declination {
@@ -69,7 +99,39 @@ object Declination {
       def toAngle = Angle.zero
     }
 
-  // TODO: order/ordering based on -90 to 90
+  /** @group Typeclass Instances */
+  implicit val DeclinationOrder: Order[Declination] =
+    Order.orderBy(_.toDegrees)
+
+  /** @group Typeclass Instances */
+  implicit val DeclinationOrdering: scala.math.Ordering[Declination] =
+    scala.math.Ordering.by(_.toDegrees)
+
+  /**
+   * Format this `Declination` in decimal degrees in (-90, 90] with three decimal places,
+   * followed by the degree sign.
+   * @group Formatters
+   */
+  def formatDegrees(dec: Declination): String = 
+    f"${dec.toDegrees}%4.03f°"
+
+  /**
+   * Format the given `Declination` in sexigesimal `d:mm:ss` with degrees in (-90, 90], with three 
+   * fractional digits for seconds.
+   * @group Formatters
+   */
+  def formatSexigesimal(dec: Declination): String = {
+    val a = dec.toDegrees
+    if (a < 0) "-" + Angle.fromDegrees(a.abs).formatSexigesimal
+    else Angle.fromDegrees(a).formatSexigesimal
+  }
+
+  /**
+   * Alias for [[Declination.formatSexigesimal]]
+   * @group Formatters
+   */
+  def formatDMS(dec: Declination): String = 
+    formatSexigesimal(dec)
 
 }
 
