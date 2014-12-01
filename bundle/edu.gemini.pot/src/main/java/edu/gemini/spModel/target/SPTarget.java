@@ -212,28 +212,6 @@ public final class SPTarget extends WatchablePos {
         return null;
     }
 
-
-    /**
-     * Set the brightness.
-     * @deprecated
-     */
-    @Deprecated
-    public void setBrightness(final String brightness) {
-        synchronized (this) {
-            _target.setBrightness(brightness);
-        }
-        _notifyOfGenericUpdate();
-    }
-
-    /**
-     * Get the brightness.
-     * @deprecated
-     */
-    @Deprecated
-    public String getBrightness() {
-        return _target.getBrightness();
-    }
-
     /**
      * Gets all the {@link Magnitude} information associated with this target,
      * if any.
@@ -816,33 +794,10 @@ public final class SPTarget extends WatchablePos {
         if (magCollectionPset != null) {
             try {
                 magnitudes = MagnitudePio.instance.toList(magCollectionPset);
-                fixForRel549(magCollectionPset);
             } catch (final ParseException ex) {
                 LOGGER.log(Level.WARNING, "Could not parse target magnitudes", ex);
             }
 
-        }
-    }
-
-    // REL-549: "AB" and "Jy" were erroneously added to the list of Magnitude.Band options.
-    // Format any found as a String like "10.4 AB, 10.5 Jy" and append it to the brightness value.
-    // If the current brightness value is not empty, first append a semi-colon separator as in: "2.0 R; 10.4 AB".
-    private void fixForRel549(final ParamSet pset) {
-        final List<ParamSet> magPsetList = pset.getParamSets(MagnitudePio.MAG);
-        if (magPsetList != null) {
-            for (final ParamSet magPset : magPsetList) {
-                final String bandValue = Pio.getValue(magPset, MagnitudePio.MAG_VAL);
-                final String bandName = Pio.getValue(magPset, MagnitudePio.MAG_BAND);
-                if (bandValue != null && bandValue.length() != 0 && ("AB".equals(bandName) || "Jy".equals(bandName))) {
-                    String s = _target.getBrightness();
-                    if (s == null || s.length() == 0) {
-                        s = "";
-                    } else {
-                        s += "; ";
-                    }
-                    _target.setBrightness(s + bandValue + " " + bandName);
-                }
-            }
         }
     }
 

@@ -39,16 +39,6 @@ public interface ITarget extends Serializable {
     void setName(String name);
 
     /**
-     * Returns an optional brightness for the target.
-     */
-    String getBrightness();
-
-    /**
-     * Sets an optional brightness for the target.
-     */
-    void setBrightness(String brightness);
-
-    /**
      * Gets a short description of the position.  For instance, the
      * {@link HmsDegTarget} might return its RA and Dec in a
      * formated String such as "RA=12:34:56 Dec=00:11:22".  To actually

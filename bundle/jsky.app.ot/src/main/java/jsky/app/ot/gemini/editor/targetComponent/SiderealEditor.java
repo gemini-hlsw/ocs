@@ -26,15 +26,14 @@ final class SiderealEditor implements TelescopePosEditor {
 
     SiderealEditor() {
         final MagnitudeEditor          med = new MagnitudeEditor();
-        final OriginalMagnitudeEditor omed = new OriginalMagnitudeEditor();
         final ProperMotionEditor       ped = new ProperMotionEditor();
         this.guiding                       = new GuidingFeedbackEditor();
 
-        posEditors = DefaultImList.create(med, omed, ped, guiding);
-        pan        = createPermanentPanel(med, omed, ped, guiding);
+        posEditors = DefaultImList.create(med, ped, guiding);
+        pan        = createPermanentPanel(med, ped, guiding);
     }
 
-    private static JPanel createPermanentPanel(MagnitudeEditor med, OriginalMagnitudeEditor omed, ProperMotionEditor ped, GuidingFeedbackEditor gfr) {
+    private static JPanel createPermanentPanel(MagnitudeEditor med, ProperMotionEditor ped, GuidingFeedbackEditor gfr) {
         final JPanel pan = new JPanel(new GridBagLayout());
 
         // Place the editors in the panel.
@@ -70,12 +69,6 @@ final class SiderealEditor implements TelescopePosEditor {
         pan.add(gfr.getComponent(), new GridBagConstraints() {{
             gridx=0; gridy=2; gridwidth=4; fill=HORIZONTAL; weightx=1.0; insets=new Insets(10,0,0,0);
         }});
-
-        // Original magnitude editor along the bottom, when visible
-        pan.add(omed.getComponent(), new GridBagConstraints() {{
-            gridx=0; gridy=3; gridwidth=4; fill=HORIZONTAL; weightx=1.0;
-        }});
-
 
         return pan;
     }

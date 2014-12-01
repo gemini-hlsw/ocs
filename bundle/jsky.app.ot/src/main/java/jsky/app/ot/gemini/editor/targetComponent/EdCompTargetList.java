@@ -103,7 +103,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private final JToggleButton _trackingButton;
 
     private final MagnitudeEditor _nonsideMagEditor;
-    private final OriginalMagnitudeEditor _nonsideOMagEditor;
 
     // Current position being edited
     private SPTarget _curPos;
@@ -153,8 +152,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         // TODO: nonsidereal widgets from the TelescopeForm and make them
         // TODO: into a proper editor like the SiderealEditor.
         _nonsideMagEditor = new MagnitudeEditor();
-        _nonsideOMagEditor = new OriginalMagnitudeEditor();
-        JPanel nonsid = wrapNonsidereal(_w.nonsiderealPW, _nonsideMagEditor, _nonsideOMagEditor);
+        JPanel nonsid = wrapNonsidereal(_w.nonsiderealPW, _nonsideMagEditor);
         _w.extrasFolder.add(nonsid, "nonsidereal");
 
         //make the planet stuff non-visible
@@ -204,7 +202,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         });
     }
 
-    private static JPanel wrapNonsidereal(JPanel nonsiderealPanel, MagnitudeEditor med, OriginalMagnitudeEditor omed) {
+    private static JPanel wrapNonsidereal(JPanel nonsiderealPanel, MagnitudeEditor med) {
         JPanel pan = new JPanel(new GridBagLayout());
 
         pan.add(new JLabel("Brightness"), new GridBagConstraints() {{
@@ -229,16 +227,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             fill = BOTH;
             weightx = 1.0;
             weighty = 1.0;
-        }});
-
-        pan.add(omed.getComponent(), new GridBagConstraints() {{
-            gridx = 0;
-            gridy = 2;
-            gridwidth = 2;
-            fill = BOTH;
-            anchor = SOUTH;
-            weightx = 1.0;
-            insets = new Insets(5, 0, 0, 0);
         }});
 
         return pan;
@@ -1607,7 +1595,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         // Nonsidereal
         _nonSiderealTargetSup.updatePos(_curPos);
         _nonsideMagEditor.edit(ctx, selTarget);
-        _nonsideOMagEditor.edit(ctx, selTarget);
 
         if (_curPos != null) {
             _curPos.addWatcher(this);

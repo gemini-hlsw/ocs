@@ -60,7 +60,7 @@ public final class TargetConfig extends ParamSet {
         String systemName = spTarget.getTarget().getShortSystemName();
         addAttribute(TYPE, systemName);
 
-        putParameter(TccNames.BRIGHTNESS, spTarget.getBrightness());
+        putParameter(TccNames.BRIGHTNESS, ""); // TODO: can we elide this altogether?
         putParameter(TccNames.TAG, ""); // ugh
 
         ITarget target = spTarget.getTarget();

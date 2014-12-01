@@ -57,7 +57,6 @@ object SpTargetFactory {
 
       val spTarget = new SP.SPTarget(itarget)
       spTarget.setName(nsid.name)
-      nsid.magnitude(time) foreach { m => spTarget.setBrightness(m.toString) }
       spTarget
     }
 
