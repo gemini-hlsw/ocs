@@ -74,17 +74,17 @@ public final class HmsDegTarget extends CoordinateSystem
 
     // Various default values.
     // XXX Note: the types derived from CoordinateParam, such as Epoch, are NOT immutable!
-    public static final SystemType DEFAULT_SYSTEM_TYPE = SystemType.J2000;
-    public static final Epoch DEFAULT_EPOCH_1950 = new Epoch(1950, Units.YEARS);
-    public static final Epoch DEFAULT_EPOCH_2000 = new Epoch(2000, Units.YEARS);
-    public static final PM1 DEFAULT_PM1 = new PM1();
-    public static final PM2 DEFAULT_PM2 = new PM2();
-    public static final RV DEFAULT_RV = new RV();
-    public static final Parallax DEFAULT_PARALLAX = new Parallax();
-    public static final Date DEFAULT_TAIZ = null;
-    public static final String DEFAULT_NAME = "";
+    private static final SystemType DEFAULT_SYSTEM_TYPE = SystemType.J2000;
+    private static final Epoch DEFAULT_EPOCH_1950 = new Epoch(1950, Units.YEARS);
+    private static final Epoch DEFAULT_EPOCH_2000 = new Epoch(2000, Units.YEARS);
+    private static final PM1 DEFAULT_PM1 = new PM1();
+    private static final PM2 DEFAULT_PM2 = new PM2();
+    private static final RV DEFAULT_RV = new RV();
+    private static final Parallax DEFAULT_PARALLAX = new Parallax();
+    private static final Date DEFAULT_TAIZ = null;
+    private static final String DEFAULT_NAME = "";
     public static final EffWavelength AUTO_EFF_WAVELENGTH = new EffWavelength(-1.0);
-    public static final EffWavelength DEFAULT_EFF_WAVELENGTH = AUTO_EFF_WAVELENGTH;
+    private static final EffWavelength DEFAULT_EFF_WAVELENGTH = AUTO_EFF_WAVELENGTH;
 
     private String _brightness = DEFAULT_NAME;
     private String _name = DEFAULT_NAME;
@@ -103,8 +103,8 @@ public final class HmsDegTarget extends CoordinateSystem
     /**
      * The base name of this coordinate system.
      */
-    public static final String SYSTEM_NAME = "HMS Deg";
-    public static final String SHORT_SYSTEM_NAME = "hmsdegTarget";
+    private static final String SYSTEM_NAME = "HMS Deg";
+    private static final String SHORT_SYSTEM_NAME = "hmsdegTarget";
 
     /**
      * Provides clone support.
@@ -280,7 +280,7 @@ public final class HmsDegTarget extends CoordinateSystem
     /**
      * Sets the first coordinate (right ascension) using a String.
      */
-    public void setRa(String newStringValue) {
+    void setRa(String newStringValue) {
         _ra.setValue(newStringValue);
     }
 
@@ -294,7 +294,7 @@ public final class HmsDegTarget extends CoordinateSystem
     /**
      * Sets the second coordinate (declination) using a String.
      */
-    public void setDec(String newStringValue) {
+    void setDec(String newStringValue) {
         _dec.setValue(newStringValue);
     }
 
@@ -687,7 +687,7 @@ public final class HmsDegTarget extends CoordinateSystem
     }
 
     // Helper method to do the conversion from J2000 to B1950
-    private HmsDegTarget _convertJ2000toB1950(HmsDegTarget in) {
+    private void _convertJ2000toB1950(HmsDegTarget in) {
         // Get the RA and Dec as degrees and create a new Point2D
         double ra = in.getC1().getAs(Units.DEGREES);
         double dec = in.getC2().getAs(Units.DEGREES);
@@ -700,7 +700,6 @@ public final class HmsDegTarget extends CoordinateSystem
         in.setSystemOption(SystemType.B1950);
         in.getC1().setAs(result.getX(), Units.DEGREES);
         in.getC2().setAs(result.getY(), Units.DEGREES);
-        return in;
     }
 
 }
