@@ -38,7 +38,6 @@ public final class SPTarget extends WatchablePos {
 
     private static final String COORDINATE_ZERO = "00:00:00.0";
     private static final Logger LOGGER = Logger.getLogger(SPTarget.class.getName());
-    private static final TypeBase DEFAULT_TARGET_TYPE = HmsDegTarget.SystemType.J2000;
 
     ///
     /// DATE HANDLING
@@ -128,7 +127,7 @@ public final class SPTarget extends WatchablePos {
 
     public SPTarget(final double xaxis, final double yaxis) {
         synchronized (this) {
-            _target = SPTarget.createTarget(DEFAULT_TARGET_TYPE);
+            _target = new HmsDegTarget();
             _target.getC1().setAs(xaxis, Units.DEGREES);
             _target.getC2().setAs(yaxis, Units.DEGREES);
         }
@@ -171,25 +170,7 @@ public final class SPTarget extends WatchablePos {
 
     /** Create a default base position using the HmsDegTarget. */
     public static SPTarget createDefaultBasePosition() {
-        final ITarget target = createTarget(HmsDegTarget.DEFAULT_SYSTEM_TYPE);
-        if (target == null) return null;
-        return new SPTarget(target);
-    }
-
-    /**
-     * A public factory method to create target instances.
-     */
-    private static ITarget createTarget(final TypeBase type) {
-        ITarget target = null;
-        // Based on instance create the right target
-        if (type instanceof HmsDegTarget.SystemType) {
-            target = new HmsDegTarget((HmsDegTarget.SystemType)type);
-        } else if (type instanceof ConicTarget.SystemType) {
-            target = new ConicTarget((ConicTarget.SystemType)type);
-        } else if (type instanceof NamedTarget.SystemType) {
-            target = new NamedTarget((NamedTarget.SystemType)type);
-        }
-        return target;
+        return new SPTarget();
     }
 
     /**
