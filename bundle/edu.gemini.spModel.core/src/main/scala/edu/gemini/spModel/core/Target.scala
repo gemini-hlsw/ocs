@@ -228,7 +228,7 @@ object Target {
   ///
 
   /** Enumerated type of named targets recognized by the TCC. */
-  sealed abstract class NamedTarget(val name: String, val horizonsId: String) extends Target {
+  sealed abstract class NamedTarget(val name: String, val horizonsId: String) extends Target with Product with Serializable {
 
     def coords(time: Long) =
       None

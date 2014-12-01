@@ -112,11 +112,20 @@ trait Arbitraries {
       } yield Target.NonSiderealTarget(name, ephemeris, epoch, horizonsInfo)
     }
 
+  implicit val arbNamedTarget: Arbitrary[Target.NamedTarget] =
+    Arbitrary {
+      import Target.NamedTarget._
+      oneOf(Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto)
+    }
+
+  // TODO: conic targets
+
   implicit val arbTarget: Arbitrary[Target] =
     Arbitrary(oneOf(
       arbitrary[Target.TooTarget], 
       arbitrary[Target.SiderealTarget], 
-      arbitrary[Target.NonSiderealTarget]))
+      arbitrary[Target.NonSiderealTarget],
+      arbitrary[Target.NamedTarget]))
 
 }
 
