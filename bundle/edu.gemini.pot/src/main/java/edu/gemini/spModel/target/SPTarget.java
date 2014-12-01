@@ -847,20 +847,10 @@ public final class SPTarget extends WatchablePos {
     }
 
     public static SPTarget fromParamSet(final ParamSet pset) {
-//        String name = Pio.getValue(pset, _NAME);
         final SPTarget res = new SPTarget();
         res.setParamSet(pset);
         return res;
     }
-
-// --Commented out by Inspection START (8/18/14 2:45 PM):
-//    /**
-//     * Standard debugging method.
-//     */
-//    public void dump() {
-//        _target.dump();
-//    }
-// --Commented out by Inspection STOP (8/18/14 2:45 PM)
 
     /**
      * Standard debugging method.

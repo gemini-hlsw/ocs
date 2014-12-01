@@ -198,8 +198,4 @@ public interface ITarget extends Serializable {
      */
     public boolean equals(Object obj);
 
-    /**
-     * Diagnostic to print contents of an ITarget.
-     */
-    public void dump();
 }
