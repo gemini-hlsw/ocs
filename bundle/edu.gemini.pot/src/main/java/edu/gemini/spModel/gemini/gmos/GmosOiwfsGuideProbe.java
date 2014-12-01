@@ -10,7 +10,6 @@ import edu.gemini.skycalc.Offset;
 import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
@@ -118,18 +117,11 @@ public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
 
     public PatrolField getCorrectedPatrolField(ObsContext ctx, PatrolField patrolField) {
         final AffineTransform sideLooking = transformForPort(ctx.getIssPort());
-        final AffineTransform altairTransform = AffineTransform.getScaleInstance(1.0, -1.0);
 
         // calculate and apply GMOS specific IFU offsets and flip coordinates
         double ifuXOffset = ((GmosCommonType.FPUnit) ((InstGmosCommon) ctx.getInstrument()).getFPUnit()).getWFSOffset();
         AffineTransform offsetAndFlipTransform = AffineTransform.getTranslateInstance(ifuXOffset, 0.0);
         offsetAndFlipTransform.concatenate(sideLooking);
-
-        // REL-1914 flip the field if using Altair.
-        if(!ctx.getAOComponent().isEmpty()
-                && ctx.getAOComponent().getValue().getType().equals(InstAltair.SP_TYPE)) {
-            offsetAndFlipTransform.concatenate(altairTransform);
-        }
 
         // now get corrected patrol field
         return patrolField.getTransformed(offsetAndFlipTransform);

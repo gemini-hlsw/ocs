@@ -2,7 +2,6 @@ package edu.gemini.spModel.gemini.gmos;
 
 import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.Coordinates;
-import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.guide.BoundaryPosition;
 import edu.gemini.spModel.obs.context.ObsContext;
@@ -15,8 +14,6 @@ import org.junit.Test;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.spModel.core.Site;
 
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 
 import static edu.gemini.skycalc.Angle.Unit.ARCSECS;
@@ -219,26 +216,6 @@ public class GmosOiwfsGuideProbeTest extends TestCase {
                         GmosOiwfsGuideProbe.instance.checkBoundaries(guideTarget,baseContext));
             }
         }
-    }
-
-
-    /**
-     * Tests that the patrol field calculation considers the flip introduced by Altair
-     */
-    @Test
-    public void testAOFlip() {
-
-        final ObsContext ctx = baseContext.withAOComponent(new InstAltair());
-        final Area aoArea = GmosOiwfsGuideProbe.instance.getCorrectedPatrolField(ctx).getArea();
-
-        final AffineTransform altairTransform = AffineTransform.getScaleInstance(1.0, -1.0);
-        final Area expectedArea = GmosOiwfsGuideProbe.instance.getCorrectedPatrolField(baseContext)
-                .getTransformed(altairTransform).getArea();
-
-        // Had to use assertTrue() instead of assertEquals() because
-        // Area.equals() doesn't override Object.equals()
-        assertTrue("Patrol field not adjusted for AO.", aoArea.equals(expectedArea));
-
     }
 
     /**
