@@ -6,13 +6,13 @@ package edu.gemini.spModel.guide;
 
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.ISPObservation;
+import edu.gemini.shared.util.immutable.*;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.CoordinateDiff;
 import edu.gemini.skycalc.Coordinates;
 import edu.gemini.skycalc.Offset;
 import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
-import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.obs.context.ObsContext;
@@ -79,26 +79,30 @@ public enum GuideProbeUtil {
         return res;
     }
 
-    public boolean validate(SPTarget guideStar, PatrolField correctedPatrolField, ObsContext ctx) {
-        return validate(guideStar.getSkycalcCoordinates(), correctedPatrolField, ctx);
+    public boolean validate(final SPTarget guideStar, final GuideProbe guideProbe, final ObsContext ctx) {
+        return validate(guideStar.getSkycalcCoordinates(), guideProbe, ctx);
     }
 
-    public boolean validate(SkyObject guideStar, PatrolField correctedPatrolField, ObsContext ctx) {
+    public boolean validate(final SkyObject guideStar, final GuideProbe guideProbe, final ObsContext ctx) {
         final HmsDegCoordinates coords = guideStar.getCoordinates().toHmsDeg(0);
         final Coordinates c = new Coordinates(coords.getRa(), coords.getDec());
-        return validate(c, correctedPatrolField, ctx);
+        return validate(c, guideProbe, ctx);
     }
 
-    public boolean validate(Coordinates coords, PatrolField correctedPatrolField, ObsContext ctx) {
+    public boolean validate(final Coordinates coords, final GuideProbe guideProbe, final ObsContext ctx) {
         final Angle positionAngle = ctx.getPositionAngle();
         final Set<Offset> sciencePositions = ctx.getSciencePositions();
         final Coordinates baseCoordinates = ctx.getBaseCoordinates();
 
-        final BoundaryPosition bp = correctedPatrolField.checkBoundaries(coords, baseCoordinates, positionAngle, sciencePositions);
-        return !(bp == BoundaryPosition.outside || bp == BoundaryPosition.outerBoundary);
+        return guideProbe.getCorrectedPatrolField(ctx).exists(new PredicateOp<PatrolField>() {
+            @Override public Boolean apply(PatrolField patrolField) {
+                final BoundaryPosition bp = patrolField.checkBoundaries(coords, baseCoordinates, positionAngle, sciencePositions);
+                return !(bp == BoundaryPosition.outside || bp == BoundaryPosition.outerBoundary);
+            }
+        });
     }
 
-    public boolean inRange(GuideProbe guideProbe, ObsContext ctx, Offset offset) {
+    public boolean inRange(final GuideProbe guideProbe, final ObsContext ctx, final Offset offset) {
         // get primary guide star
         final Option<GuideProbeTargets> gptOpt = ctx.getTargets().getPrimaryGuideProbeTargets(guideProbe);
         if (gptOpt.isEmpty()) return false;
@@ -108,23 +112,27 @@ public enum GuideProbeUtil {
         if (guideStarOpt.isEmpty()) return false;
         final SPTarget guideStar = guideStarOpt.getValue();
 
-        return inRange(guideStar, guideProbe.getCorrectedPatrolField(ctx), ctx, offset);
+        return inRange(guideStar, guideProbe, ctx, offset);
     }
 
-    private boolean inRange(SPTarget guideStar, PatrolField correctedPatrolField, ObsContext ctx, Offset offset) {
-        // offset position -> we must move the corrected patrol field by this offset
-        final double xOffset = -offset.p().toArcsecs().getMagnitude();
-        final double yOffset = -offset.q().toArcsecs().getMagnitude();
-        final PatrolField offsetPatrolField = correctedPatrolField.getTransformed(AffineTransform.getTranslateInstance(xOffset, yOffset));
-        // and we must rotate the patrol field according to position angle
-        final PatrolField rotatedPatrolField = offsetPatrolField.getTransformed(AffineTransform.getRotateInstance(-ctx.getPositionAngle().toRadians().getMagnitude()));
-        // find distance of base position to the guide star
-        final Coordinates baseCoordinates = ctx.getBaseCoordinates();
-        final CoordinateDiff diff = new CoordinateDiff(baseCoordinates, guideStar.getSkycalcCoordinates());
-        final Offset dis = diff.getOffset();
-        final double p = -dis.p().toArcsecs().getMagnitude();
-        final double q = -dis.q().toArcsecs().getMagnitude();
-        // and now check if that guide star is inside the correctly transformed/rotated patrol field
-        return rotatedPatrolField.getArea().contains(p, q);
+    private boolean inRange(final SPTarget guideStar, final GuideProbe guideProbe, final ObsContext ctx, final Offset offset) {
+        return guideProbe.getCorrectedPatrolField(ctx).exists(new PredicateOp<PatrolField>() {
+            @Override public Boolean apply(PatrolField patrolField) {
+                // offset position -> we must move the corrected patrol field by this offset
+                final double xOffset = -offset.p().toArcsecs().getMagnitude();
+                final double yOffset = -offset.q().toArcsecs().getMagnitude();
+                final PatrolField offsetPatrolField = patrolField.getTransformed(AffineTransform.getTranslateInstance(xOffset, yOffset));
+                // and we must rotate the patrol field according to position angle
+                final PatrolField rotatedPatrolField = offsetPatrolField.getTransformed(AffineTransform.getRotateInstance(-ctx.getPositionAngle().toRadians().getMagnitude()));
+                // find distance of base position to the guide star
+                final Coordinates baseCoordinates = ctx.getBaseCoordinates();
+                final CoordinateDiff diff = new CoordinateDiff(baseCoordinates, guideStar.getSkycalcCoordinates());
+                final Offset dis = diff.getOffset();
+                final double p = -dis.p().toArcsecs().getMagnitude();
+                final double q = -dis.q().toArcsecs().getMagnitude();
+                // and now check if that guide star is inside the correctly transformed/rotated patrol field
+                return rotatedPatrolField.getArea().contains(p, q);
+            }
+        });
     }
 }

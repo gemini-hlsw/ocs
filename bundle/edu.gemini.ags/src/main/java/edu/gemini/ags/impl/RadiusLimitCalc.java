@@ -1,6 +1,7 @@
 package edu.gemini.ags.impl;
 
 import edu.gemini.catalog.api.RadiusLimits;
+import edu.gemini.shared.util.immutable.MapOp;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
@@ -24,7 +25,7 @@ public final class RadiusLimitCalc {
         return getAgsQueryRadiusLimits(guideProbe.getCorrectedPatrolField(ctx), ctx);
     }
 
-    public static Option<RadiusLimits> getAgsQueryRadiusLimits(PatrolField pf, ObsContext ctx) {
+    public static Option<RadiusLimits> getAgsQueryRadiusLimits(final Option<PatrolField> pf, final ObsContext ctx) {
         Angle min = Angle.ANGLE_0DEGREES;
 
         // This gets a rectangle expressed in arcsec but in screen coordinates
@@ -33,7 +34,11 @@ public final class RadiusLimitCalc {
         // So it would need to be flipped around to work with intuitively,
         // but we just need the distance from the base to the farthest corner
         // of the probe limits.
-        Rectangle2D r2d = pf.outerLimitOffsetIntersection(ctx.getSciencePositions()).getBounds2D();
+        final Rectangle2D r2d = pf.map(new MapOp<PatrolField, Rectangle2D>() {
+            @Override public Rectangle2D apply(PatrolField pf) {
+                return pf.outerLimitOffsetIntersection(ctx.getSciencePositions()).getBounds2D();
+            }
+        }).getOrElse(new Rectangle2D.Double(0,0,0,0));
 
         if ((r2d.getWidth() <= 0) || (r2d.getHeight() <= 0)) {
             // All the offset positions are far enough apart that the area of
@@ -47,15 +52,16 @@ public final class RadiusLimitCalc {
 
         // We need the fartherest corner, which will differ with port flips
         // so just get the biggest absolute x and y.
-        double maxx = Math.max(Math.abs(r2d.getMinX()), Math.abs(r2d.getMaxX()));
-        double maxy = Math.max(Math.abs(r2d.getMinY()), Math.abs(r2d.getMaxY()));
-        double maxr = Math.sqrt(maxx * maxx + maxy * maxy);
-        Angle max = new Angle(maxr, Angle.Unit.ARCSECS);
+        final double maxx = Math.max(Math.abs(r2d.getMinX()), Math.abs(r2d.getMaxX()));
+        final double maxy = Math.max(Math.abs(r2d.getMinY()), Math.abs(r2d.getMaxY()));
+        final double maxr = Math.sqrt(maxx * maxx + maxy * maxy);
+        final Angle max = new Angle(maxr, Angle.Unit.ARCSECS);
 
-        if (!r2d.contains(0, 0))
+        if (!r2d.contains(0, 0)) {
             min = new Angle(shortestDistance(r2d), Angle.Unit.ARCSECS);
+        }
 
-        return new Some<RadiusLimits>(new RadiusLimits(max, min));
+        return new Some<>(new RadiusLimits(max, min));
     }
 
     private static double shortestDistance(Rectangle2D r) {
