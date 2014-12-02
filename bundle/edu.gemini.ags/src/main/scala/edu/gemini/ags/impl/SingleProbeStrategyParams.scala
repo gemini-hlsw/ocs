@@ -93,7 +93,7 @@ case class PwfsParams(site: Site, guideProbe: PwfsGuideProbe) extends SingleProb
     }
 
     override def radiusLimits(ctx: ObsContext): Option[RadiusLimits] =
-      RadiusLimitCalc.getAgsQueryRadiusLimits(vignettingProofPatrolField(ctx), ctx).asScalaOpt
+      RadiusLimitCalc.getAgsQueryRadiusLimits(Some(vignettingProofPatrolField(ctx)).asGeminiOpt, ctx).asScalaOpt
 
     // We have a special validator for Pwfs.
     override def validator(ctx: ObsContext): GuideStarValidator =

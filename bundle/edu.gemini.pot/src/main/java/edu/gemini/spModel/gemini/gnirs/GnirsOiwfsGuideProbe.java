@@ -6,6 +6,7 @@ package edu.gemini.spModel.gemini.gnirs;
 
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
@@ -80,17 +81,21 @@ public enum GnirsOiwfsGuideProbe implements ValidatableGuideProbe {
         return patrolField;
     }
 
-    @Override public PatrolField getCorrectedPatrolField(ObsContext ctx) {
-        // flip X if altair is used (AO component installed) AND flip X again if side looking port; no flipRA
-        double flipX = 1.0;
-        flipX *= (ctx.getIssPort() == IssPort.SIDE_LOOKING) ? -1. : 1.;
-//        flipX *= (!ctx.getAOComponent().isEmpty()) ? -1. : 1.;
-        AffineTransform correction = AffineTransform.getScaleInstance(flipX, 1.0);
-        return patrolField.getTransformed(correction);
+    @Override public Option<PatrolField> getCorrectedPatrolField(ObsContext ctx) {
+        if (ctx.getInstrument() instanceof InstGNIRS) {
+            // flip X if altair is used (AO component installed) AND flip X again if side looking port; no flipRA
+            double flipX = 1.0;
+            flipX *= (ctx.getIssPort() == IssPort.SIDE_LOOKING) ? -1. : 1.;
+    //        flipX *= (!ctx.getAOComponent().isEmpty()) ? -1. : 1.;
+            final AffineTransform correction = AffineTransform.getScaleInstance(flipX, 1.0);
+            return new Some<>(patrolField.getTransformed(correction));
+        } else {
+            return None.instance();
+        }
     }
 
     @Override
     public boolean validate(SPTarget guideStar, ObsContext ctx) {
-        return GuideProbeUtil.instance.validate(guideStar.getSkycalcCoordinates(), getCorrectedPatrolField(ctx), ctx);
+        return GuideProbeUtil.instance.validate(guideStar.getSkycalcCoordinates(), this, ctx);
     }
 }

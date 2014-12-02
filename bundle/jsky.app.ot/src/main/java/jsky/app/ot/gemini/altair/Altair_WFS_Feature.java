@@ -142,7 +142,9 @@ public class Altair_WFS_Feature extends WFS_FeatureBase {
         // If there is a context (do we ever have no context?) we need to get the corrected patrol field.
         PatrolField patrolField = AltairAowfsGuider.instance.getPatrolField();
         for (ObsContext obsCtx : _iw.getMinimalObsContext()) {
-            patrolField = AltairAowfsGuider.instance.getCorrectedPatrolField(obsCtx);
+            for (PatrolField corrected : AltairAowfsGuider.instance.getCorrectedPatrolField(obsCtx)) {
+                patrolField = corrected;
+            }
         }
         edu.gemini.skycalc.Angle angle = new edu.gemini.skycalc.Angle(-_posAngle, edu.gemini.skycalc.Angle.Unit.RADIANS);
         setTransformationToScreen(angle, pixelsPerArcsec, offsetBaseScreenPos);
