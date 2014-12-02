@@ -30,7 +30,7 @@ object GemsMagnitudeTable extends MagnitudeTable {
   def apply(ctx: ObsContext, probe: GuideProbe): Option[MagnitudeCalc] = {
     def mc(nominalLimits: MagnitudeLimits): MagnitudeCalc = new MagnitudeCalc() {
       def apply(conds: Conditions, speed: GuideSpeed): MagnitudeLimits =
-        nominalLimits.mapMagnitudes(conds.magAdjustOp()).mapMagnitudes(speed.magAdjustOp())
+        nominalLimits.mapMagnitudes(conds.magAdjustOp())
     }
 
     def ft(band: Magnitude.Band, fl: Double): Option[MagnitudeLimits] =
