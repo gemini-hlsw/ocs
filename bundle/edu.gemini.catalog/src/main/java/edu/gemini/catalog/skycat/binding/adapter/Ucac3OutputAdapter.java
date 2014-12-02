@@ -14,6 +14,7 @@ import java.io.IOException;
  * A {@link edu.gemini.catalog.skycat.DefaultOutputAdapter} for use with the GSC2 @ STScI, which returns
  * its results in a different format than expected by the catalog output parser.
  */
+@Deprecated
 public final class Ucac3OutputAdapter extends DefaultOutputAdapter {
     public static final Factory FACTORY = new Factory() {
         public SkycatOutputAdapter create(BufferedReader rdr) {

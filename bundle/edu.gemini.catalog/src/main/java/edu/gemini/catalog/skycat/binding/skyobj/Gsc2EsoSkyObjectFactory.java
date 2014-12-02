@@ -26,6 +26,7 @@ import java.util.Set;
  * A {@link edu.gemini.catalog.skycat.table.SkyObjectFactory} used with the
  * GSC2@ESO catalog.
  */
+@Deprecated
 public enum Gsc2EsoSkyObjectFactory implements SkyObjectFactory {
     instance;
 

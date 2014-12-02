@@ -52,12 +52,11 @@ public class TableModelCatalogReader implements CatalogReader {
     public Option<CatalogHeader> getHeader() {
         if (table.getColumnCount() == 0) return None.instance();
 
-        List<Tuple2<String, Class>> lst;
-        lst = new ArrayList<Tuple2<String, Class>>(table.getColumnCount());
+        List<Tuple2<String, Class<?>>> lst = new ArrayList<>(table.getColumnCount());
         for (int col=0; col<table.getColumnCount(); ++col) {
             String name = table.getColumnName(col);
             Class  c    = table.getColumnClass(col);
-            lst.add(new Pair<String, Class>(name, c));
+            lst.add(new Pair<String, Class<?>>(name, c));
         }
 
         return new Some<CatalogHeader>(new DefaultCatalogHeader(DefaultImList.create(lst)));

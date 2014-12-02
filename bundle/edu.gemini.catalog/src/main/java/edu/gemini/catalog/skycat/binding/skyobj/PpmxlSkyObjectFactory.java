@@ -27,6 +27,7 @@ import java.util.Set;
 /**
  * A {@link SkyObjectFactory} used with the PPMXL catalog.
  */
+@Deprecated
 public enum PpmxlSkyObjectFactory implements SkyObjectFactory {
     instance;
 

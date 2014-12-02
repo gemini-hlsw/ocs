@@ -65,10 +65,10 @@ public final class SkycatCatalogServer implements CatalogServer {
 
     private static CatalogHeader getHeader(TableQueryResult table) {
         ImList<String> headerList = DefaultImList.create(table.getColumnIdentifiers());
-        ImList<Tuple2<String,Class>> headerPairList = headerList.map(new MapOp<String, Tuple2<String, Class>>() {
+        ImList<Tuple2<String,Class<?>>> headerPairList = headerList.map(new MapOp<String, Tuple2<String, Class<?>>>() {
             @Override
-            public Tuple2<String, Class> apply(String s) {
-                return new Pair<String, Class>(s, String.class);
+            public Tuple2<String, Class<?>> apply(String s) {
+                return new Pair<String, Class<?>>(s, String.class);
             }
         });
         return new DefaultCatalogHeader(headerPairList);

@@ -106,18 +106,17 @@ public final class CatalogValueExtractorTest {
 
     @Test
     public void testOptional() throws CatalogException {
-        Tuple2<String, Class> id, ra, dec, jmag;
-        id  = new Pair<String, Class>("col",   String.class);
-        ImList<Tuple2<String,Class>> headerLst = DefaultImList.create(id);
-        DefaultCatalogHeader header = new DefaultCatalogHeader(headerLst);
+        final Tuple2<String, Class<?>> id  = new Pair<String, Class<?>>("col",   String.class);
+        final ImList<Tuple2<String,Class<?>>> headerLst = DefaultImList.create(id);
+        final DefaultCatalogHeader header = new DefaultCatalogHeader(headerLst);
 
-        ImList<Object>         emptyLst = DefaultImList.create((Object)null);
-        DefaultCatalogRow      emptyRow = new DefaultCatalogRow(emptyLst);
-        CatalogValueExtractor emptyVext = new CatalogValueExtractor(header,  emptyRow);
+        final ImList<Object>         emptyLst = DefaultImList.create((Object)null);
+        final DefaultCatalogRow      emptyRow = new DefaultCatalogRow(emptyLst);
+        final CatalogValueExtractor emptyVext = new CatalogValueExtractor(header,  emptyRow);
 
-        ImList<Object>         presLst = DefaultImList.create((Object)"45");
-        DefaultCatalogRow      presRow = new DefaultCatalogRow(presLst);
-        CatalogValueExtractor presVext = new CatalogValueExtractor(header,  presRow);
+        final ImList<Object>         presLst = DefaultImList.create((Object)"45");
+        final DefaultCatalogRow      presRow = new DefaultCatalogRow(presLst);
+        final CatalogValueExtractor presVext = new CatalogValueExtractor(header,  presRow);
 
         // DEGREES -------------------------------------------
 
