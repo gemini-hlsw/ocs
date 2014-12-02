@@ -75,7 +75,7 @@ object GuidingFeedback {
       foreground = DARK_GRAY
       background = bg
       text       = probeLimits.map(_.searchRange).getOrElse("")
-      tooltip    = probeLimits.collect{case pl: ProbeLimits if pl.fast < pl.slow => pl.detailRange}.orNull
+      tooltip    = probeLimits.collect{case pl if pl.fast < pl.slow => pl.detailRange}.orNull
       opaque     = true
       horizontalAlignment = Alignment.Right
     }
