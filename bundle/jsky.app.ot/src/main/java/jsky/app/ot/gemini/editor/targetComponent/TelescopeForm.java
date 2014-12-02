@@ -193,7 +193,10 @@ public class TelescopeForm extends JPanel {
 
                 //---- primaryButton ----
                 primaryButton.setText("Primary");
-                primaryButton.setToolTipText("Select guide star option");
+                primaryButton.setToolTipText("Set as active guide star");
+                buttonPanel.add(primaryButton, new GridBagConstraints(5, 0, 1, 1, 0.0, 0.0,
+                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                        new Insets(0, 0, 0, 0), 0, 0));
 
                 //======== spacerPanel ========
                 {
