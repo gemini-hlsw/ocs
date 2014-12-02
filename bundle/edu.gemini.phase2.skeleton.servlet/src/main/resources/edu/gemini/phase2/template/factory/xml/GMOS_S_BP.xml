@@ -2,7 +2,7 @@
 <!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
 
 <document>
-  <container kind="program" type="Program" version="2014A-1" subtype="basic" key="d4ad9f8d-e5d1-4e36-a7c0-189f1d62531d" name="GMOS-S-BP">
+  <container kind="program" type="Program" version="2015A-1" subtype="basic" key="d4ad9f8d-e5d1-4e36-a7c0-189f1d62531d" name="GMOS-S-BP">
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="GMOS-S PHASE I/II MAPPING BPS"/>
       <param name="programMode" value="QUEUE"/>
@@ -50,6 +50,10 @@
             <param name="exposureTime" value="30.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -67,11 +71,6 @@
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -105,17 +104,17 @@
                     <param name="defaultGuideOption" value="on"/>
                   </paramset>
                   <paramset name="Offset0" sequence="1">
-                    <param name="p" value="-4.0"/>
+                    <param name="p" value="-6.0"/>
                     <param name="q" value="-6.0"/>
                     <param name="defaultGuideOption" value="on"/>
                   </paramset>
                   <paramset name="Offset3" sequence="2">
-                    <param name="p" value="4.0"/>
+                    <param name="p" value="6.0"/>
                     <param name="q" value="-6.0"/>
                     <param name="defaultGuideOption" value="on"/>
                   </paramset>
                   <paramset name="Offset2" sequence="3">
-                    <param name="p" value="8.0"/>
+                    <param name="p" value="12.0"/>
                     <param name="q" value="0.0"/>
                     <param name="defaultGuideOption" value="on"/>
                   </paramset>
@@ -180,6 +179,10 @@ the slit image (second step) should be left as defined at 20 seconds.
             <param name="exposureTime" value="10.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -197,11 +200,6 @@ the slit image (second step) should be left as defined at 20 seconds.
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="CCD2"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -399,6 +397,10 @@ Longslit: Twilight flat
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -413,16 +415,11 @@ Longslit: Twilight flat
             <param name="ccdXBinning" value="TWO"/>
             <param name="ccdYBinning" value="TWO"/>
             <param name="issPort" value="SIDE_LOOKING"/>
-            <param name="posAngleConstraint" value="FIXED"/>
+            <param name="posAngleConstraint" value="FIXED_180"/>
             <param name="stageMode" value="FOLLOW_XYZ"/>
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -478,7 +475,7 @@ Longslit: Twilight flat
           </container>
           <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="9a5fd14d-486e-4d9a-96a2-a48f238b71ad" name="GMOS-S Sequence">
             <paramset name="GMOS-S Sequence" kind="dataObj">
-              <param name="disperserLambda" value="525.0"/>
+              <param name="disperserLambda" value="530.0"/>
             </paramset>
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="db93ad6f-c5a1-4573-9f90-d7793ae2df55" name="Flat">
               <paramset name="Flat" kind="dataObj">
@@ -573,7 +570,6 @@ between the CCDs and get full wavelength coverage.
                   <value sequence="1">PWFS1</value>
                   <value sequence="2">PWFS2</value>
                 </param>
-                <param name="selected"/>
               </paramset>
             </paramset>
           </paramset>
@@ -583,6 +579,10 @@ between the CCDs and get full wavelength coverage.
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -602,11 +602,6 @@ between the CCDs and get full wavelength coverage.
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -642,7 +637,7 @@ between the CCDs and get full wavelength coverage.
             <paramset name="GMOS-S Sequence" kind="dataObj">
               <param name="disperserLambda">
                 <value sequence="0">520.0</value>
-                <value sequence="1">525.0</value>
+                <value sequence="1">530.0</value>
               </param>
             </paramset>
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="322f5cf4-4a8c-49da-a6cb-e20ce77f1fe1" name="Arc">
@@ -706,6 +701,10 @@ the slit image (second step) should be left as defined at 20 seconds.
             <param name="exposureTime" value="2.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -718,16 +717,11 @@ the slit image (second step) should be left as defined at 20 seconds.
             <param name="ccdXBinning" value="ONE"/>
             <param name="ccdYBinning" value="ONE"/>
             <param name="issPort" value="SIDE_LOOKING"/>
-            <param name="posAngleConstraint" value="FIXED"/>
+            <param name="posAngleConstraint" value="PARALLACTIC_ANGLE"/>
             <param name="stageMode" value="FOLLOW_XYZ"/>
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="CCD2"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -909,6 +903,10 @@ when conditions are convenient for observing baseline standards.
             <param name="exposureTime" value="60.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -923,16 +921,11 @@ when conditions are convenient for observing baseline standards.
             <param name="ccdXBinning" value="TWO"/>
             <param name="ccdYBinning" value="TWO"/>
             <param name="issPort" value="SIDE_LOOKING"/>
-            <param name="posAngleConstraint" value="FIXED"/>
+            <param name="posAngleConstraint" value="PARALLACTIC_ANGLE"/>
             <param name="stageMode" value="FOLLOW_XYZ"/>
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="CENTRAL_SPECTRUM"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -1035,7 +1028,6 @@ is taken.
                   <value sequence="1">PWFS1</value>
                   <value sequence="2">PWFS2</value>
                 </param>
-                <param name="selected"/>
               </paramset>
             </paramset>
           </paramset>
@@ -1045,6 +1037,10 @@ is taken.
             <param name="exposureTime" value="20.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -1064,11 +1060,6 @@ is taken.
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="CENTRAL_SPECTRUM"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -1142,7 +1133,6 @@ is taken.
                   <value sequence="1">PWFS1</value>
                   <value sequence="2">PWFS2</value>
                 </param>
-                <param name="selected"/>
               </paramset>
             </paramset>
           </paramset>
@@ -1179,6 +1169,10 @@ The exposure is taken on the sky so the Translation stage should be
             <param name="exposureTime" value="30.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -1198,11 +1192,6 @@ The exposure is taken on the sky so the Translation stage should be
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -1298,6 +1287,10 @@ the slit image (second step) should be left as defined at 20 seconds.
             <param name="exposureTime" value="30.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -1315,11 +1308,6 @@ the slit image (second step) should be left as defined at 20 seconds.
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="CCD2"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -1487,6 +1475,10 @@ Details:
             <param name="exposureTime" value="60.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -1506,11 +1498,6 @@ Details:
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="TRUE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="nsNumCycles" value="15"/>
             <param name="nsDetectorRows" value="1536"/>
             <param name="useElectronicOffsetting" value="false"/>
@@ -1654,7 +1641,7 @@ required.
           </container>
           <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="1ecff6b3-9141-4d10-9b06-b30866a9213a" name="GMOS-S Sequence">
             <paramset name="GMOS-S Sequence" kind="dataObj">
-              <param name="disperserLambda" value="790.0"/>
+              <param name="disperserLambda" value="795.0"/>
             </paramset>
             <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="7297027a-089b-46dd-aa33-d92f38f86972" name="GMOS-S Sequence">
               <paramset name="GMOS-S Sequence" kind="dataObj">
@@ -1713,7 +1700,7 @@ required.
           </container>
           <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="4e3ad2d3-33b9-46ec-9a6a-494902b9e2f1" name="GMOS-S Sequence">
             <paramset name="GMOS-S Sequence" kind="dataObj">
-              <param name="disperserLambda" value="770.0"/>
+              <param name="disperserLambda" value="765.0"/>
             </paramset>
             <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="14ae4961-0158-45d2-9b09-09cc6b913133" name="GMOS-S Sequence">
               <paramset name="GMOS-S Sequence" kind="dataObj">
@@ -1804,7 +1791,6 @@ required.
                   <value sequence="1">PWFS1</value>
                   <value sequence="2">PWFS2</value>
                 </param>
-                <param name="selected"/>
               </paramset>
             </paramset>
           </paramset>
@@ -1845,6 +1831,10 @@ wavelength coverage.
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -1864,11 +1854,6 @@ wavelength coverage.
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -1904,8 +1889,8 @@ wavelength coverage.
             <paramset name="GMOS-S Sequence" kind="dataObj">
               <param name="disperserLambda">
                 <value sequence="0">780.0</value>
-                <value sequence="1">790.0</value>
-                <value sequence="2">770.0</value>
+                <value sequence="1">795.0</value>
+                <value sequence="2">765.0</value>
               </param>
             </paramset>
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="1d857e2e-5df1-4b86-99e5-ad9105f84561" name="Arc">
@@ -1972,6 +1957,10 @@ closest to  the central wavelength used for the spectroscopy</value>
             <param name="exposureTime" value="2.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -1984,16 +1973,11 @@ closest to  the central wavelength used for the spectroscopy</value>
             <param name="ccdXBinning" value="TWO"/>
             <param name="ccdYBinning" value="TWO"/>
             <param name="issPort" value="SIDE_LOOKING"/>
-            <param name="posAngleConstraint" value="FIXED"/>
+            <param name="posAngleConstraint" value="PARALLACTIC_ANGLE"/>
             <param name="stageMode" value="FOLLOW_XYZ"/>
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="CCD2"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -2177,6 +2161,10 @@ when conditions are convenient for observing baseline standards.
             <param name="exposureTime" value="60.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -2191,16 +2179,11 @@ when conditions are convenient for observing baseline standards.
             <param name="ccdXBinning" value="TWO"/>
             <param name="ccdYBinning" value="ONE"/>
             <param name="issPort" value="SIDE_LOOKING"/>
-            <param name="posAngleConstraint" value="FIXED"/>
+            <param name="posAngleConstraint" value="PARALLACTIC_ANGLE"/>
             <param name="stageMode" value="FOLLOW_XYZ"/>
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="CENTRAL_SPECTRUM"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -2279,7 +2262,6 @@ when conditions are convenient for observing baseline standards.
                   <value sequence="1">PWFS1</value>
                   <value sequence="2">PWFS2</value>
                 </param>
-                <param name="selected"/>
               </paramset>
             </paramset>
           </paramset>
@@ -2320,6 +2302,10 @@ is taken.
             <param name="exposureTime" value="120.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -2339,11 +2325,6 @@ is taken.
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="CENTRAL_SPECTRUM"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -2417,7 +2398,6 @@ is taken.
                   <value sequence="1">PWFS1</value>
                   <value sequence="2">PWFS2</value>
                 </param>
-                <param name="selected"/>
               </paramset>
             </paramset>
           </paramset>
@@ -2458,6 +2438,10 @@ The exposure is taken on the sky so the Translation stage should be
             <param name="exposureTime" value="30.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -2477,11 +2461,6 @@ The exposure is taken on the sky so the Translation stage should be
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -2570,7 +2549,6 @@ The exposure is taken on the sky so the Translation stage should be
                   <value sequence="1">PWFS1</value>
                   <value sequence="2">PWFS2</value>
                 </param>
-                <param name="selected"/>
               </paramset>
             </paramset>
           </paramset>
@@ -2621,6 +2599,10 @@ Number of N&amp;S observations is 15</value>
             <param name="exposureTime" value="60.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -2638,11 +2620,6 @@ Number of N&amp;S observations is 15</value>
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="TRUE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="nsNumCycles" value="15"/>
             <param name="nsDetectorRows" value="1536"/>
             <param name="useElectronicOffsetting" value="false"/>
@@ -2733,6 +2710,10 @@ can be submitted.</value>
             <param name="exposureTime" value="30.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -2750,11 +2731,6 @@ can be submitted.</value>
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="YES"/>
           </paramset>
         </container>
@@ -2872,6 +2848,10 @@ masks for use, with a technical limit of 99 masks).</value>
             <param name="exposureTime" value="40.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -2889,13 +2869,8 @@ masks for use, with a technical limit of 99 masks).</value>
             <param name="posAngleConstraint" value="FIXED"/>
             <param name="stageMode" value="FOLLOW_XYZ"/>
             <param name="dtaXOffset" value="ZERO"/>
-            <param name="builtinROI" value="CUSTOM"/>
+            <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -3026,6 +3001,10 @@ gacq *filenumber*
             <param name="exposureTime" value="10.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -3045,11 +3024,6 @@ gacq *filenumber*
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="CUSTOM"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -3209,6 +3183,10 @@ masks for use, with a technical limit of 99 masks).
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -3230,11 +3208,6 @@ masks for use, with a technical limit of 99 masks).
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -3342,7 +3315,6 @@ masks for use, with a technical limit of 99 masks).
                   <value sequence="1">PWFS1</value>
                   <value sequence="2">PWFS2</value>
                 </param>
-                <param name="selected"/>
               </paramset>
             </paramset>
           </paramset>
@@ -3386,6 +3358,10 @@ wavelength coverage.
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -3407,11 +3383,6 @@ wavelength coverage.
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -3493,7 +3464,6 @@ wavelength coverage.
                   <value sequence="1">PWFS1</value>
                   <value sequence="2">PWFS2</value>
                 </param>
-                <param name="selected"/>
               </paramset>
             </paramset>
           </paramset>
@@ -3538,6 +3508,10 @@ Gemini Staff.</value>
             <param name="exposureTime" value="4.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -3557,11 +3531,6 @@ Gemini Staff.</value>
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -3595,10 +3564,7 @@ Gemini Staff.</value>
           <paramset name="Sequence" kind="dataObj"/>
           <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="c13b69b0-818b-483c-84b4-af6ced245867" name="GMOS-S Sequence">
             <paramset name="GMOS-S Sequence" kind="dataObj">
-              <param name="builtinROI">
-                <value sequence="0">FULL_FRAME</value>
-                <value sequence="1">CUSTOM</value>
-              </param>
+              <param name="builtinROI" value="FULL_FRAME"/>
             </paramset>
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="4ba143d0-982b-4c9f-8d00-d768a6303fbd" name="Flat">
               <paramset name="Flat" kind="dataObj">
@@ -3643,7 +3609,6 @@ Gemini Staff.</value>
                   <value sequence="1">PWFS1</value>
                   <value sequence="2">PWFS2</value>
                 </param>
-                <param name="selected"/>
               </paramset>
             </paramset>
           </paramset>
@@ -3683,6 +3648,10 @@ The exposure is taken on the sky so the Translation stage should be
             <param name="exposureTime" value="30.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -3704,11 +3673,6 @@ The exposure is taken on the sky so the Translation stage should be
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -3801,6 +3765,10 @@ the slit image (second step) should be left as defined at 10 seconds.</value>
             <param name="exposureTime" value="2.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -3813,16 +3781,11 @@ the slit image (second step) should be left as defined at 10 seconds.</value>
             <param name="ccdXBinning" value="ONE"/>
             <param name="ccdYBinning" value="ONE"/>
             <param name="issPort" value="SIDE_LOOKING"/>
-            <param name="posAngleConstraint" value="FIXED"/>
+            <param name="posAngleConstraint" value="PARALLACTIC_ANGLE"/>
             <param name="stageMode" value="FOLLOW_XYZ"/>
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="CENTRAL_STAMP"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -4019,6 +3982,10 @@ it possible to order the exposures as follows:
             <param name="exposureTime" value="90.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -4033,16 +4000,11 @@ it possible to order the exposures as follows:
             <param name="ccdXBinning" value="TWO"/>
             <param name="ccdYBinning" value="TWO"/>
             <param name="issPort" value="SIDE_LOOKING"/>
-            <param name="posAngleConstraint" value="FIXED"/>
+            <param name="posAngleConstraint" value="PARALLACTIC_ANGLE"/>
             <param name="stageMode" value="FOLLOW_XYZ"/>
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="CENTRAL_SPECTRUM"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -4162,7 +4124,6 @@ it possible to order the exposures as follows:
                   <value sequence="1">PWFS1</value>
                   <value sequence="2">PWFS2</value>
                 </param>
-                <param name="selected"/>
               </paramset>
             </paramset>
           </paramset>
@@ -4205,6 +4166,10 @@ is taken.
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -4224,11 +4189,6 @@ is taken.
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="CENTRAL_SPECTRUM"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -4301,6 +4261,10 @@ is taken.
             <param name="exposureTime" value="30.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -4318,13 +4282,8 @@ is taken.
             <param name="posAngleConstraint" value="FIXED"/>
             <param name="stageMode" value="FOLLOW_XYZ"/>
             <param name="dtaXOffset" value="ZERO"/>
-            <param name="builtinROI" value="CUSTOM"/>
+            <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -4427,6 +4386,10 @@ masks for use, with a technical limit of 99 masks).</value>
             <param name="exposureTime" value="10.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -4442,13 +4405,8 @@ masks for use, with a technical limit of 99 masks).</value>
             <param name="posAngleConstraint" value="FIXED"/>
             <param name="stageMode" value="FOLLOW_XYZ"/>
             <param name="dtaXOffset" value="ZERO"/>
-            <param name="builtinROI" value="CUSTOM"/>
+            <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -4716,6 +4674,10 @@ masks for use, with a technical limit of 99 masks).
             <param name="exposureTime" value="60.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -4737,11 +4699,6 @@ masks for use, with a technical limit of 99 masks).
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="TRUE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="nsNumCycles" value="15"/>
             <param name="nsDetectorRows" value="32"/>
             <param name="useElectronicOffsetting" value="true"/>
@@ -4840,7 +4797,7 @@ masks for use, with a technical limit of 99 masks).
           </container>
           <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="dffab4e6-9b01-4d59-af50-97368b3e1763" name="GMOS-S Sequence">
             <paramset name="GMOS-S Sequence" kind="dataObj">
-              <param name="disperserLambda" value="790.0"/>
+              <param name="disperserLambda" value="795.0"/>
             </paramset>
             <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="9ff82138-d4b6-4854-b564-1ba247e48487" name="GMOS-S Sequence">
               <paramset name="GMOS-S Sequence" kind="dataObj">
@@ -4899,7 +4856,7 @@ masks for use, with a technical limit of 99 masks).
           </container>
           <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="e201159f-195e-4b64-a437-f3034f4759a0" name="GMOS-S Sequence">
             <paramset name="GMOS-S Sequence" kind="dataObj">
-              <param name="disperserLambda" value="770.0"/>
+              <param name="disperserLambda" value="765.0"/>
             </paramset>
             <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="ef3d0114-935f-4a48-a9b3-7f7d7867fff6" name="GMOS-S Sequence">
               <paramset name="GMOS-S Sequence" kind="dataObj">
@@ -4990,7 +4947,6 @@ masks for use, with a technical limit of 99 masks).
                   <value sequence="1">PWFS1</value>
                   <value sequence="2">PWFS2</value>
                 </param>
-                <param name="selected"/>
               </paramset>
             </paramset>
           </paramset>
@@ -5042,6 +4998,10 @@ closed for bad weather.</value>
             <param name="exposureTime" value="60.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -5059,11 +5019,6 @@ closed for bad weather.</value>
             <param name="dtaXOffset" value="SIX"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="TRUE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="nsNumCycles" value="15"/>
             <param name="nsDetectorRows" value="32"/>
             <param name="useElectronicOffsetting" value="false"/>
@@ -5155,7 +5110,6 @@ closed for bad weather.</value>
                   <value sequence="1">PWFS1</value>
                   <value sequence="2">PWFS2</value>
                 </param>
-                <param name="selected"/>
               </paramset>
             </paramset>
           </paramset>
@@ -5200,6 +5154,10 @@ wavelength coverage.
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -5221,11 +5179,6 @@ wavelength coverage.
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -5261,8 +5214,8 @@ wavelength coverage.
             <paramset name="GMOS-S Sequence" kind="dataObj">
               <param name="disperserLambda">
                 <value sequence="0">780.0</value>
-                <value sequence="1">790.0</value>
-                <value sequence="2">770.0</value>
+                <value sequence="1">795.0</value>
+                <value sequence="2">765.0</value>
               </param>
             </paramset>
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="cbd45fee-1f08-45d2-904a-4ca58e546e47" name="Arc">
@@ -5307,7 +5260,6 @@ wavelength coverage.
                   <value sequence="1">PWFS1</value>
                   <value sequence="2">PWFS2</value>
                 </param>
-                <param name="selected"/>
               </paramset>
             </paramset>
           </paramset>
@@ -5347,6 +5299,10 @@ The exposure is taken on the sky so the Translation stage should be
             <param name="exposureTime" value="30.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -5368,11 +5324,6 @@ The exposure is taken on the sky so the Translation stage should be
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -5464,6 +5415,10 @@ the slit image (second step) should be left as defined at 10 seconds.</value>
             <param name="exposureTime" value="2.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -5476,16 +5431,11 @@ the slit image (second step) should be left as defined at 10 seconds.</value>
             <param name="ccdXBinning" value="ONE"/>
             <param name="ccdYBinning" value="ONE"/>
             <param name="issPort" value="SIDE_LOOKING"/>
-            <param name="posAngleConstraint" value="FIXED"/>
+            <param name="posAngleConstraint" value="PARALLACTIC_ANGLE"/>
             <param name="stageMode" value="FOLLOW_XYZ"/>
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="CENTRAL_STAMP"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -5680,6 +5630,10 @@ it possible to order the exposures as follows:
             <param name="exposureTime" value="90.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -5694,16 +5648,11 @@ it possible to order the exposures as follows:
             <param name="ccdXBinning" value="TWO"/>
             <param name="ccdYBinning" value="ONE"/>
             <param name="issPort" value="SIDE_LOOKING"/>
-            <param name="posAngleConstraint" value="FIXED"/>
+            <param name="posAngleConstraint" value="PARALLACTIC_ANGLE"/>
             <param name="stageMode" value="FOLLOW_XYZ"/>
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="CENTRAL_SPECTRUM"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -5823,7 +5772,6 @@ it possible to order the exposures as follows:
                   <value sequence="1">PWFS1</value>
                   <value sequence="2">PWFS2</value>
                 </param>
-                <param name="selected"/>
               </paramset>
             </paramset>
           </paramset>
@@ -5865,6 +5813,10 @@ is taken.
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -5884,11 +5836,6 @@ is taken.
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="CENTRAL_SPECTRUM"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -5984,6 +5931,10 @@ For help setting up the acquistion, see the Description note for the "Longslit A
             <param name="exposureTime" value="15.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -6001,11 +5952,6 @@ For help setting up the acquistion, see the Description note for the "Longslit A
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="CCD2"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -6109,6 +6055,10 @@ For help setting up the acquistion, see the Description note for the "Longslit A
             <param name="exposureTime" value="1200.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -6128,11 +6078,6 @@ For help setting up the acquistion, see the Description note for the "Longslit A
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -6198,7 +6143,7 @@ For help setting up the acquistion, see the Description note for the "Longslit A
             </container>
             <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="6ed91d12-d7c7-43d8-b9ae-d283f08fdde8" name="GMOS-S Sequence">
               <paramset name="GMOS-S Sequence" kind="dataObj">
-                <param name="disperserLambda" value="635.0"/>
+                <param name="disperserLambda" value="640.0"/>
               </paramset>
               <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="ad189a6e-7c8c-4917-8f58-3785d11076c8" name="Flat">
                 <paramset name="Flat" kind="dataObj">
@@ -6227,7 +6172,7 @@ For help setting up the acquistion, see the Description note for the "Longslit A
             </paramset>
             <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="7459b7ba-47b3-47f2-830f-30b182f10675" name="GMOS-S Sequence">
               <paramset name="GMOS-S Sequence" kind="dataObj">
-                <param name="disperserLambda" value="635.0"/>
+                <param name="disperserLambda" value="640.0"/>
               </paramset>
               <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="05d1c4a7-ab6a-420d-a1e1-6535d2078394" name="Observe">
                 <paramset name="Observe" kind="dataObj">
@@ -6296,7 +6241,6 @@ For help setting up the acquistion, see the Description note for the "Longslit A
                   <value sequence="1">PWFS1</value>
                   <value sequence="2">PWFS2</value>
                 </param>
-                <param name="selected"/>
               </paramset>
             </paramset>
           </paramset>
@@ -6329,6 +6273,10 @@ The readout is "fast" in order to save time.
             <param name="exposureTime" value="900.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -6348,11 +6296,6 @@ The readout is "fast" in order to save time.
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -6388,7 +6331,7 @@ The readout is "fast" in order to save time.
             <paramset name="GMOS-S Sequence" kind="dataObj">
               <param name="disperserLambda">
                 <value sequence="0">630.0</value>
-                <value sequence="1">635.0</value>
+                <value sequence="1">640.0</value>
               </param>
             </paramset>
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="976638f2-0b5e-4692-ae65-96d8badae5a4" name="Arc">
@@ -6434,7 +6377,6 @@ The readout is "fast" in order to save time.
                   <value sequence="1">PWFS1</value>
                   <value sequence="2">PWFS2</value>
                 </param>
-                <param name="selected"/>
               </paramset>
             </paramset>
           </paramset>
@@ -6469,6 +6411,10 @@ The exposure is taken on the sky so the Translation stage should be
             <param name="exposureTime" value="60.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -6488,11 +6434,6 @@ The exposure is taken on the sky so the Translation stage should be
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -6593,7 +6534,6 @@ on the side-looking ISS port.
                   <value sequence="1">PWFS1</value>
                   <value sequence="2">PWFS2</value>
                 </param>
-                <param name="selected"/>
               </paramset>
             </paramset>
           </paramset>
@@ -6603,6 +6543,10 @@ on the side-looking ISS port.
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -6622,11 +6566,6 @@ on the side-looking ISS port.
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -6712,6 +6651,10 @@ the slit image (second step) should be left as defined at 10 seconds.</value>
             <param name="exposureTime" value="2.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -6729,11 +6672,6 @@ the slit image (second step) should be left as defined at 10 seconds.</value>
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="CCD2"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -6875,6 +6813,10 @@ it possible to order the exposures as follows:
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -6894,11 +6836,6 @@ it possible to order the exposures as follows:
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -6996,6 +6933,10 @@ For help setting up the acquistion, see the Description note for the "Longslit A
             <param name="exposureTime" value="15.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -7013,11 +6954,6 @@ For help setting up the acquistion, see the Description note for the "Longslit A
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="CCD2"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -7147,6 +7083,10 @@ Assumed Conditions: IQ=70%, CC=50%, SB=50%, WV=Any (good IQ, photometric, dark)<
             <param name="exposureTime" value="60.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -7166,11 +7106,6 @@ Assumed Conditions: IQ=70%, CC=50%, SB=50%, WV=Any (good IQ, photometric, dark)<
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="TRUE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="nsNumCycles" value="15"/>
             <param name="nsDetectorRows" value="285"/>
             <param name="useElectronicOffsetting" value="false"/>
@@ -7228,7 +7163,7 @@ Assumed Conditions: IQ=70%, CC=50%, SB=50%, WV=Any (good IQ, photometric, dark)<
           </container>
           <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="a3581a66-c73d-4daf-9b06-149569d3a928" name="GMOS-S Sequence">
             <paramset name="GMOS-S Sequence" kind="dataObj">
-              <param name="disperserLambda" value="785.0"/>
+              <param name="disperserLambda" value="790.0"/>
             </paramset>
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="fabd96cf-3f05-4f51-9787-5d7d7abbc00e" name="Flat">
               <paramset name="Flat" kind="dataObj">
@@ -7278,7 +7213,6 @@ Assumed Conditions: IQ=70%, CC=50%, SB=50%, WV=Any (good IQ, photometric, dark)<
                   <value sequence="1">PWFS1</value>
                   <value sequence="2">PWFS2</value>
                 </param>
-                <param name="selected"/>
               </paramset>
             </paramset>
           </paramset>
@@ -7311,6 +7245,10 @@ The readout is "fast" in order to save time.
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -7330,11 +7268,6 @@ The readout is "fast" in order to save time.
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -7370,7 +7303,7 @@ The readout is "fast" in order to save time.
             <paramset name="GMOS-S Sequence" kind="dataObj">
               <param name="disperserLambda">
                 <value sequence="0">780.0</value>
-                <value sequence="1">785.0</value>
+                <value sequence="1">790.0</value>
               </param>
             </paramset>
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="c6de0ae0-d1e8-4629-b259-c736ac870daa" name="Arc">
@@ -7416,7 +7349,6 @@ The readout is "fast" in order to save time.
                   <value sequence="1">PWFS1</value>
                   <value sequence="2">PWFS2</value>
                 </param>
-                <param name="selected"/>
               </paramset>
             </paramset>
           </paramset>
@@ -7453,6 +7385,10 @@ Number of Nod &amp; Shuffle observations is set to 15.</value>
             <param name="exposureTime" value="60.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -7470,11 +7406,6 @@ Number of Nod &amp; Shuffle observations is set to 15.</value>
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="TRUE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="nsNumCycles" value="15"/>
             <param name="nsDetectorRows" value="285"/>
             <param name="useElectronicOffsetting" value="false"/>
@@ -7578,7 +7509,6 @@ Number of Nod &amp; Shuffle observations is set to 15.</value>
                   <value sequence="1">PWFS1</value>
                   <value sequence="2">PWFS2</value>
                 </param>
-                <param name="selected"/>
               </paramset>
             </paramset>
           </paramset>
@@ -7616,6 +7546,10 @@ The exposure is taken on the sky so the Translation stage should be
             <param name="exposureTime" value="60.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -7635,11 +7569,6 @@ The exposure is taken on the sky so the Translation stage should be
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -7716,7 +7645,6 @@ The exposure is taken on the sky so the Translation stage should be
                   <value sequence="1">PWFS1</value>
                   <value sequence="2">PWFS2</value>
                 </param>
-                <param name="selected"/>
               </paramset>
             </paramset>
           </paramset>
@@ -7751,6 +7679,10 @@ the CCDs and get full  wavelength coverage.
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -7770,11 +7702,6 @@ the CCDs and get full  wavelength coverage.
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -7860,6 +7787,10 @@ the slit image (second step) should be left as defined at 10 seconds.</value>
             <param name="exposureTime" value="2.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -7877,11 +7808,6 @@ the slit image (second step) should be left as defined at 10 seconds.</value>
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="CCD2"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -8024,6 +7950,10 @@ it possible to order the exposures as follows:
             <param name="exposureTime" value="120.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="adc" value="NONE"/>
             <param name="ampCount" value="TWELVE"/>
             <param name="gainChoice" value="LOW"/>
@@ -8043,11 +7973,6 @@ it possible to order the exposures as follows:
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="FALSE"/>
-            <param name="positionAngleMode" value="EXPLICITLY_SET"/>
-            <paramset name="parallacticAngleDuration">
-              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
-              <param name="explicitDuration" value="0"/>
-            </paramset>
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
@@ -8139,6 +8064,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="b626a8f5-366a-4e8b-ab83-cce006223175"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="f2e19bfc-0f4b-4332-b204-28e6d71fa73b"/>
@@ -8183,6 +8109,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="3fcf2c78-1731-435b-b103-51f0427f3b7e"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="c48ea927-a3b9-418c-a729-67a62a15b537"/>
@@ -8371,6 +8298,8 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="9b784315-e545-47a1-af26-a23e05fe44b4"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="1065f731-59d3-428d-8f33-6ead827bb45f" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="a716ed05-885d-4dd4-8280-2963eb8cea8b"/>
@@ -8451,6 +8380,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="70179eeb-cfd2-4512-8212-b85e92b6ed35"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="1065f731-59d3-428d-8f33-6ead827bb45f" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="ecb082b1-f97d-4f5d-9f00-89651acd67b3"/>
@@ -8547,6 +8477,8 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="7b80fd4d-56ed-49ff-a484-596a8d21c2bb"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="1065f731-59d3-428d-8f33-6ead827bb45f" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="7b538d6d-cd67-40d0-a6a0-2428b5061123"/>
@@ -8795,6 +8727,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="6ed91d12-d7c7-43d8-b9ae-d283f08fdde8"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="e8a43a41-1c55-4800-a004-332896a45f90"/>
@@ -8923,6 +8856,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="9bc91b65-d818-4cf1-9927-5c8e21658f92"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="ae864bd3-5c1e-4577-82ea-94b029235ad0"/>
@@ -8943,6 +8877,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="0f060ed0-fbb3-4099-b65d-b603342f43ae"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="7"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="b8cfc608-3c09-43ba-8683-24b6f0fd6575"/>
@@ -8999,6 +8934,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="a3581a66-c73d-4daf-9b06-149569d3a928"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="efad1417-e01d-4799-9199-eb851b6bb305"/>
@@ -9091,6 +9027,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="9a5fd14d-486e-4d9a-96a2-a48f238b71ad"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="5c0f712b-6d4b-49de-a058-df2258183fb0"/>
@@ -9175,6 +9112,8 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="0681effb-3a3d-4637-ac88-e7d532cc384b"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="1065f731-59d3-428d-8f33-6ead827bb45f" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="e5098a3b-04e9-4e36-adf9-cc5c030325f7"/>
@@ -9243,6 +9182,8 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="84d5bdbe-97b6-4922-baac-14d283ab4fc0"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="1065f731-59d3-428d-8f33-6ead827bb45f" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="f1d7a33e-eff6-4329-bfd0-da4a6d1b1b12"/>
@@ -9267,6 +9208,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="bb9e3c99-1761-4730-adcc-1c12853bc82c"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="db93ad6f-c5a1-4573-9f90-d7793ae2df55"/>
@@ -9311,6 +9253,8 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="5a4c808e-3134-40e2-b910-dfcbb4846035"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="1065f731-59d3-428d-8f33-6ead827bb45f" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="bf7e5f9a-d303-4c8e-b6fa-1c328c3097ec"/>
@@ -9375,6 +9319,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="7459b7ba-47b3-47f2-830f-30b182f10675"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="f8a30bd7-96eb-4a8c-834a-a98434763ce2"/>
@@ -9459,6 +9404,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="4e3ad2d3-33b9-46ec-9a6a-494902b9e2f1"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="73d3ccd2-71d5-4dba-86b0-5c1527c95aac"/>
@@ -9483,6 +9429,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="ce5361f0-6cd5-4eeb-8286-dfb7acdbe04c"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="1231b1f2-1369-4de2-83c9-c1948c1ef511"/>
@@ -9495,6 +9442,8 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="2ceea1f0-0c01-4695-8d31-473007a97933"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="1065f731-59d3-428d-8f33-6ead827bb45f" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="96319c42-3b3b-41cb-ba93-f9d82f39285e"/>
@@ -9571,6 +9520,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="c13b69b0-818b-483c-84b4-af6ced245867"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="957fe42d-0ad7-4dfa-bb59-aefbb80f4d2f"/>
@@ -9679,6 +9629,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="5996484f-ebca-42fc-9599-66e31bd8315c"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="055c0020-3781-4271-bfe7-b090b79b3a4e"/>
@@ -9767,10 +9718,12 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="3a381cfa-ea2a-45d5-9095-3c8906bfab0b"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="1065f731-59d3-428d-8f33-6ead827bb45f" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="dffab4e6-9b01-4d59-af50-97368b3e1763"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="e977d172-a97e-4847-a7ce-8016f80ed6b4"/>
@@ -10007,6 +9960,8 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="4958777c-c160-4a8b-b42c-12ce821496cd"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="1065f731-59d3-428d-8f33-6ead827bb45f" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="f18c0604-04c6-41a2-8c1c-e0a3c5bb6a8e"/>
@@ -10071,6 +10026,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="1ecff6b3-9141-4d10-9b06-b30866a9213a"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="19c7ebaf-8c89-4c72-887c-3b2d134c6d26"/>
@@ -10139,6 +10095,8 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="7fff9fb5-a397-4033-9a6f-1ca3cd0e4990"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="1065f731-59d3-428d-8f33-6ead827bb45f" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="327a6810-a1b9-4f60-bab9-83ee17e45f34"/>
@@ -10243,6 +10201,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="aa0125d8-f181-41cc-aa89-7d35d0bf45da"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="1065f731-59d3-428d-8f33-6ead827bb45f" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="738d3a5f-1820-4cfa-a125-17a8df892d88"/>
@@ -10339,6 +10298,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="95401d29-c1a5-4ede-912a-3f88c89d9d92"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="6"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="f2735f3a-aef1-402d-82f2-f4f6924f49fb"/>
@@ -10411,6 +10371,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="e201159f-195e-4b64-a437-f3034f4759a0"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="d6081ce2-23f3-4c32-906c-1ff83dde4d1c"/>
@@ -10547,6 +10508,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="4b3822ff-e57b-457d-a487-1353fddacfbb"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="f34fe888-9927-41b4-bc1e-dcbf66d31f7c"/>
@@ -10587,6 +10549,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="308c1b8b-ad6c-4ac0-982a-fd194408d0c6"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="6"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="aa369295-d91c-4273-bfae-8a21dcf3e769"/>
@@ -10675,6 +10638,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="1bdc7f08-e775-4443-bcae-92cfbf9735cb"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="1065f731-59d3-428d-8f33-6ead827bb45f" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="ebc131ef-37a1-4772-869d-cdc6cba35974"/>
