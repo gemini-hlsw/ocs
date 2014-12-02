@@ -9,6 +9,7 @@ import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.CoordinateDiff;
 import edu.gemini.skycalc.Coordinates;
 import edu.gemini.skycalc.Offset;
+import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.gems.GemsGuideProbeGroup;
 import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.context.ObsContext;
@@ -53,8 +54,8 @@ public enum Canopus {
             @Override public PatrolField getPatrolField() {
                 return new PatrolField(new Area());
             }
-            @Override public PatrolField getCorrectedPatrolField(ObsContext ctx) {
-                return getPatrolField();
+            @Override public Option<PatrolField> getCorrectedPatrolField(ObsContext ctx) {
+                return correctedPatrolField(ctx);
             }
         },
 
@@ -81,8 +82,8 @@ public enum Canopus {
             public PatrolField getPatrolField() {
                 return new PatrolField(new Area());
             }
-            @Override public PatrolField getCorrectedPatrolField(ObsContext ctx) {
-                return getPatrolField();
+            @Override public Option<PatrolField> getCorrectedPatrolField(ObsContext ctx) {
+                return correctedPatrolField(ctx);
             }
         },
 
@@ -110,10 +111,23 @@ public enum Canopus {
             public PatrolField getPatrolField() {
                 return new PatrolField(new Area());
             }
-            @Override public PatrolField getCorrectedPatrolField(ObsContext ctx) {
-                return getPatrolField();
+            @Override public Option<PatrolField> getCorrectedPatrolField(ObsContext ctx) {
+                return correctedPatrolField(ctx);
             }
         };
+
+        private static Option<PatrolField> correctedPatrolField(ObsContext ctx) {
+            return ctx.getAOComponent().filter(new PredicateOp<AbstractDataObject>() {
+                @Override public Boolean apply(AbstractDataObject ado) {
+                    return ado instanceof Gems;
+                }
+            }).map(new MapOp<AbstractDataObject, PatrolField>() {
+                @Override public PatrolField apply(AbstractDataObject abstractDataObject) {
+                    // not implemented yet, return an empty area
+                    return new PatrolField(new Area());
+                }
+            });
+        }
 
         /**
          * Probe arm starting angle. PI/2 means arm comes from the right.

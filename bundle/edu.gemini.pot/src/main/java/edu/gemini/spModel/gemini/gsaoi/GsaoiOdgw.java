@@ -345,7 +345,8 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
     @Override public PatrolField getPatrolField() {
         return patrolField;
     }
-    @Override public PatrolField getCorrectedPatrolField(ObsContext ctx) {
-        return patrolField;
+
+    @Override public Option<PatrolField> getCorrectedPatrolField(ObsContext ctx) {
+        return (ctx.getInstrument() instanceof Gsaoi) ? new Some<>(patrolField) : None.<PatrolField>instance();
     }
 }
