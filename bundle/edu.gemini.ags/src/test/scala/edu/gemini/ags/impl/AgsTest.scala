@@ -89,7 +89,7 @@ object AgsTest {
 
 case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(SkyObject, GuideSpeed)], unusable: List[SkyObject],
                    calculateValidArea: (ObsContext, GuideProbe) => Area
-                    = (ctx: ObsContext, probe: GuideProbe) => probe.getCorrectedPatrolField(ctx).getArea) {
+                    = (ctx: ObsContext, probe: GuideProbe) => probe.getCorrectedPatrolField(ctx).getValue.getArea) {
   import AgsTest.{nudge, minimumDistance, magTable}
   type Point = Point2D.Double
 

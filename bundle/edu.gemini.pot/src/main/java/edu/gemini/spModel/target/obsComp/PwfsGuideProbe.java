@@ -4,6 +4,8 @@
 
 package edu.gemini.spModel.target.obsComp;
 
+import edu.gemini.shared.util.immutable.MapOp;
+import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.Coordinates;
 import edu.gemini.skycalc.Offset;
@@ -23,7 +25,6 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.util.Set;
 
-import static edu.gemini.shared.skyobject.Magnitude.Band.R;
 
 /**
  * The Peripheral guide probes.
@@ -283,11 +284,11 @@ public enum PwfsGuideProbe implements ValidatableGuideProbe, OffsetValidatingGui
     }
 
     public boolean validate(SkyObject guideStar, ObsContext ctx) {
-        return GuideProbeUtil.instance.validate(guideStar, getCorrectedPatrolField(ctx), ctx);
+        return GuideProbeUtil.instance.validate(guideStar, this, ctx);
     }
 
     public boolean validate(Coordinates coords, ObsContext ctx) {
-        return GuideProbeUtil.instance.validate(coords, getCorrectedPatrolField(ctx), ctx);
+        return GuideProbeUtil.instance.validate(coords, this, ctx);
     }
 
     public BoundaryPosition checkBoundaries(SPTarget guideStar, ObsContext ctx){
@@ -296,34 +297,36 @@ public enum PwfsGuideProbe implements ValidatableGuideProbe, OffsetValidatingGui
 
     /**
      * Returns BoundaryPosition.outside, if the coordinates are outside the outer limit,
-     * inside, if inside the inner limit and innerBoundary if inbetween the inner and outer limits
+     * inside, if inside the inner limit and innerBoundary if between the inner and outer limits
      * (which is where the PWFS should normally be).
      *
      * @param coords the coordinates
      * @param ctx the context
      * @return
      */
-    public BoundaryPosition checkBoundaries(Coordinates coords, ObsContext ctx){
+    public BoundaryPosition checkBoundaries(final Coordinates coords, final ObsContext ctx) {
         final Coordinates baseCoordinates = ctx.getBaseCoordinates();
         final Angle positionAngle = ctx.getPositionAngle();
         final Set<Offset> sciencePositions = ctx.getSciencePositions();
 
         // check positions against corrected outer patrol field bounds
-        final PatrolField correctedPatrolField = getCorrectedPatrolField(ctx);
-        BoundaryPosition bp = correctedPatrolField.checkBoundaries(coords, baseCoordinates, positionAngle, sciencePositions);
-        if (bp != BoundaryPosition.inside) {
-            return BoundaryPosition.outside;
-        }
+        return getCorrectedPatrolField(ctx).map(new MapOp<PatrolField, BoundaryPosition>() {
+            @Override public BoundaryPosition apply(PatrolField patrolField) {
+                final BoundaryPosition bp = patrolField.checkBoundaries(coords, baseCoordinates, positionAngle, sciencePositions);
+                if (bp != BoundaryPosition.inside) {
+                    return BoundaryPosition.outside;
+                }
 
-        // Check if any of the guide stars are inside the inner bounds (opposite logic needed, union instead of intersection)
-        double minLimit = getVignettingClearance(ctx).toArcsecs().getMagnitude();
-        Ellipse2D e = new Ellipse2D.Double(-minLimit, -minLimit, minLimit * 2.0, minLimit * 2.0);
-        PatrolField p = getCorrectedPatrolField(new PatrolField(e, e, e), ctx);
-        if (p.anyInside(coords, baseCoordinates, positionAngle, sciencePositions)) {
-            return BoundaryPosition.inside;
-        }
-        return BoundaryPosition.innerBoundary;
-
+                // Check if any of the guide stars are inside the inner bounds (opposite logic needed, union instead of intersection)
+                final double minLimit = getVignettingClearance(ctx).toArcsecs().getMagnitude();
+                final Ellipse2D e = new Ellipse2D.Double(-minLimit, -minLimit, minLimit * 2.0, minLimit * 2.0);
+                final PatrolField p = getCorrectedPatrolField(new PatrolField(e, e, e), ctx);
+                if (p.anyInside(coords, baseCoordinates, positionAngle, sciencePositions)) {
+                    return BoundaryPosition.inside;
+                }
+                return BoundaryPosition.innerBoundary;
+            }
+        }).getOrElse(BoundaryPosition.outside);
     }
 
 
@@ -334,8 +337,8 @@ public enum PwfsGuideProbe implements ValidatableGuideProbe, OffsetValidatingGui
     }
 
     @Override
-    public PatrolField getCorrectedPatrolField(ObsContext ctx) {
-        return getCorrectedPatrolField(getPatrolField(), ctx);
+    public Option<PatrolField> getCorrectedPatrolField(ObsContext ctx) {
+        return ctx.getTargets().isActive(this) ? new Some<>(getCorrectedPatrolField(getPatrolField(), ctx)) : None.<PatrolField>instance();
     }
 
     public PatrolField getCorrectedPatrolField(PatrolField patrolField, ObsContext ctx) {

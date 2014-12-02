@@ -7,8 +7,6 @@
 package jsky.app.ot.gemini.nifs;
 
 import diva.util.java2d.Polygon2D;
-import edu.gemini.shared.util.immutable.None;
-import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.Offset;
 import edu.gemini.spModel.gemini.altair.AltairParams;
@@ -18,8 +16,6 @@ import edu.gemini.spModel.gemini.nifs.NifsOiwfsGuideProbe;
 import edu.gemini.spModel.guide.PatrolField;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
-import edu.gemini.spModel.target.offset.OffsetPosList;
-import edu.gemini.spModel.target.offset.OffsetUtil;
 import jsky.app.ot.gemini.inst.OIWFS_FeatureBase;
 import jsky.app.ot.tpe.TpeImageInfo;
 
@@ -96,18 +92,19 @@ public final class NIFS_OIWFS_Feature extends OIWFS_FeatureBase {
     protected void addPatrolField(final double xc, final double yc) {
         for (ObsContext ctx : _iw.getMinimalObsContext()) {
             // get scaled and offset f2 oiwfs patrol field
-            final PatrolField patrolField = NifsOiwfsGuideProbe.instance.getCorrectedPatrolField(ctx);
-            // rotation, scaling and transformation to match screen coordinates
-            final Angle rotation = new Angle(-_posAngle, Angle.Unit.RADIANS);
-            final Point2D.Double translation = new Point2D.Double(xc, yc);
-            setTransformationToScreen(rotation, _pixelsPerArcsec, translation);
+            for (PatrolField patrolField : NifsOiwfsGuideProbe.instance.getCorrectedPatrolField(ctx)) {
+                // rotation, scaling and transformation to match screen coordinates
+                final Angle rotation = new Angle(-_posAngle, Angle.Unit.RADIANS);
+                final Point2D.Double translation = new Point2D.Double(xc, yc);
+                setTransformationToScreen(rotation, _pixelsPerArcsec, translation);
 
-            // set patrol field for in Range check (this should probably be done using the inRange check provided by the guide probe)
-            final Area _patrolField = patrolField.getArea();
-            transformToScreen(_patrolField);
+                // set patrol field for in Range check (this should probably be done using the inRange check provided by the guide probe)
+                final Area _patrolField = patrolField.getArea();
+                transformToScreen(_patrolField);
 
-            // draw patrol field
-            addPatrolField(patrolField);
+                // draw patrol field
+                addPatrolField(patrolField);
+            }
         }
     }
 
@@ -119,17 +116,17 @@ public final class NIFS_OIWFS_Feature extends OIWFS_FeatureBase {
      * @param yc the Y screen coordinate for the base position to use
      */
     protected void addOffsetConstrainedPatrolField(final double xc, final double yc) {
+        for (ObsContext ctx : _iw.getMinimalObsContext()) {
+            for (PatrolField patrolField : NifsOiwfsGuideProbe.instance.getCorrectedPatrolField(ctx)) {
+                // rotation, scaling and transformation to match screen coordinates
+                final Angle rotation = new Angle(-_posAngle, Angle.Unit.RADIANS);
+                final Point2D.Double translation = new Point2D.Double(xc, yc);
+                setTransformationToScreen(rotation, _pixelsPerArcsec, translation);
 
-        if (_iw.getMinimalObsContext().isEmpty()) return;
-
-        final PatrolField patrolField = NifsOiwfsGuideProbe.instance.getCorrectedPatrolField(_iw.getMinimalObsContext().getValue());
-        // rotation, scaling and transformation to match screen coordinates
-        final Angle rotation = new Angle(-_posAngle, Angle.Unit.RADIANS);
-        final Point2D.Double translation = new Point2D.Double(xc, yc);
-        setTransformationToScreen(rotation, _pixelsPerArcsec, translation);
-
-        final Set<Offset> offsets = _iw.getContext().offsets().scienceOffsetsJava();
-        addOffsetConstrainedPatrolField(patrolField, offsets);
+                final Set<Offset> offsets = _iw.getContext().offsets().scienceOffsetsJava();
+                addOffsetConstrainedPatrolField(patrolField, offsets);
+            }
+        }
     }
 
     // draw the circles for the three guide fields at the given location
