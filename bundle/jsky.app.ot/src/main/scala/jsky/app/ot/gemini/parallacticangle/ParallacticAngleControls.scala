@@ -57,7 +57,7 @@ class ParallacticAngleControls extends GridBagPanel with Publisher {
 
           contents ++= List(
             RelativeTime(s"Now + Setup (${setupTimeInMinutes.toLong} min)", setupTimeInMinutes),
-            RelativeTime(s"Now + Reacq. (${reacquisitionTimeInMinutes.toLong}} min)", reacquisitionTimeInMinutes),
+            RelativeTime(s"Now + Reacq. (${reacquisitionTimeInMinutes.toLong} min)", reacquisitionTimeInMinutes),
             RelativeTime("Now", 0)
           ) ++ incrementsInMinutes.map(m => RelativeTime(s"Now + $m min", m))
         })
