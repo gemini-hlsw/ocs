@@ -34,8 +34,7 @@ class ParallacticAngleControls extends GridBagPanel with Publisher {
     object relativeTimeMenu extends Menu("Set To:") {
       private val incrementsInMinutes = List(10, 20, 30, 45, 60)
 
-      private case class RelativeTime(desc: String, timeInMinutes: Double) extends MenuItem(desc) {
-        private val timeInMs = (timeInMinutes * 60 * 1000).toLong
+      private case class RelativeTime(desc: String, timeInMs: Long) extends MenuItem(desc) {
         action = Action(desc) {
           updateSchedulingBlock(new Date().getTime + timeInMs)
         }
@@ -50,16 +49,20 @@ class ParallacticAngleControls extends GridBagPanel with Publisher {
       def rebuild(): Unit = {
         contents.clear()
         editor.foreach(e => {
-          val obs                        = e.getContextObservation
-          val inst                       = e.getContextInstrumentDataObject
-          val setupTimeInMinutes         = inst.getSetupTime(obs) / 60
-          val reacquisitionTimeInMinutes = inst.getReacquisitionTime(obs) / 60;
+          val obs         = e.getContextObservation
+          val inst        = e.getContextInstrumentDataObject
+          // For some ridiculous reason, setup and reacq time is provided as
+          // floating point seconds by the instrument implementations :/
+          val setupTimeMs = math.round(inst.getSetupTime(obs) * 1000)
+          val reacqTimeMs = math.round(inst.getReacquisitionTime(obs) * 1000)
+
+          def formatMin(ms: Long): String = s"(${math.round(ms/60000.0)} min)"
 
           contents ++= List(
-            RelativeTime(s"Now + Setup (${setupTimeInMinutes.toLong} min)", setupTimeInMinutes),
-            RelativeTime(s"Now + Reacq. (${reacquisitionTimeInMinutes.toLong}} min)", reacquisitionTimeInMinutes),
+            RelativeTime(s"Now + Setup ${formatMin(setupTimeMs)}", setupTimeMs),
+            RelativeTime(s"Now + Reacq. ${formatMin(reacqTimeMs)}", reacqTimeMs),
             RelativeTime("Now", 0)
-          ) ++ incrementsInMinutes.map(m => RelativeTime(s"Now + $m min", m))
+          ) ++ incrementsInMinutes.map(m => RelativeTime(s"Now + $m min", m * 60000))
         })
       }
     }
