@@ -264,14 +264,16 @@ def fnussber(version: Version) = AppConfig(
 def sraaphorst(version: Version) = AppConfig(
   id = "sraaphorst",
   distribution = List(TestDistro),
-  vmargs = List(
-    "-Xmx1024M",
-    "-XX:MaxPermSize=196M",
-    "-Dedu.gemini.site=north",
-    "-Dcron.*.edu.gemini.dbTools.html.ftpHost=localhost",
-    "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/Users/ftpuser/sftp",
-    "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=localhost",
-    "-Dcron.archive.edu.gemini.dbTools.html.ftpDestDir=/Users/sraaphor/cron"
+   vmargs = List(
+     "-Xmx1024M",
+     "-XX:MaxPermSize=196M",
+     "-Dedu.gemini.site=south",
+     "-Dcron.*.edu.gemini.dbTools.html.ftpHost=localhost",
+     "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/Users/sraaphor/.spdb/sftp",
+     "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=localhost",
+     "-Dcron.archive.edu.gemini.dbTools.html.ftpDestDir=/Users/sraaphor/cron",
+     "-Dcron.reports.edu.gemini.spdb.reports.public.host=localhost",
+     "-Dcron.reports.edu.gemini.spdb.reports.public.remotedir=/Users/sraaphor/cron"
   ),
   props = Map(
     "edu.gemini.smartgcal.host"            -> "localhost",
