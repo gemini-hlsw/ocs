@@ -380,7 +380,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
         });
 
-        _w.primaryButton.setIcon(Resources.getIcon("eclipse/primaryGuideStar.gif"));
+        _w.primaryButton.setIcon(Resources.getIcon("eclipse/radiobuttons.gif"));
         _w.primaryButton.setText("");
         ButtonFlattener.flatten(_w.primaryButton);
         _w.primaryButton.addActionListener(new ActionListener() {
