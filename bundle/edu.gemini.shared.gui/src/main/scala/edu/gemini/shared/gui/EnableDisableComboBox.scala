@@ -41,23 +41,32 @@ class EnableDisableComboBox[E <: Object : ClassTag](initialItems: List[E]) exten
    * is selected.
    */
   private class EnabledDisabledComboBoxModel(initialSelection: Option[E]) extends DefaultComboBoxModel[E](items.toArray) {
-    var selection = initialSelection.filter(enabledItems.contains).orElse(items.find(enabledItems.contains))
+    var selected = initialSelection.filter(enabledItems.contains).orElse(items.find(enabledItems.contains))
 
     override
-    def getSelectedItem: Object = selection.orNull
+    def getSelectedItem: Object = selected.orNull
 
     override
     def setSelectedItem(o: Object): Unit = {
       Try {
         val item = o.asInstanceOf[E]
         if (enabledItems.contains(item))
-          selection = Some(item)
+          selected = Some(item)
       }
     }
 
     def markItemDisabled(item: E): Unit = {
-      if (selection.forall(_.equals(item)))
-        selection = items.find(enabledItems.contains)
+      if (selected.forall(_.equals(item))) {
+        val idx = items.indexOf(item)
+        selected = items.find(enabledItems.contains)
+        fireContentsChanged(this, idx, idx)
+        EnabledDisabledComboBoxModel.this.setSelectedItem(selected.orNull)
+      }
+    }
+
+    def markItemEnabled(item: E): Unit = {
+      val idx = items.indexOf(item)
+      fireContentsChanged(this, idx, idx)
     }
   }
 
@@ -128,8 +137,10 @@ class EnableDisableComboBox[E <: Object : ClassTag](initialItems: List[E]) exten
     model.markItemDisabled(item)
   }
 
-  def enableItem(item: E): Unit =
+  def enableItem(item: E): Unit = {
     enabledItems += item
+    model.markItemEnabled(item)
+  }
 
   def removeItems(badItems: List[E]): Unit = {
     val oldItem = selection.item
