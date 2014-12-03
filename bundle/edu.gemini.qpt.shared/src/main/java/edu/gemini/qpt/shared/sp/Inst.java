@@ -89,7 +89,7 @@ public enum Inst {
                     new Enum[]{GmosOiwfsGuideProbe.instance}),
             join(new Enum[] { FPUnitSouth.FPU_NONE, FPUnitSouth.CUSTOM_MASK, DisperserSouth.MIRROR },
                     FilterSouth.values(),
-                    new Enum[]{GmosCommonType.DetectorManufacturer.E2V},
+                    new Enum[]{GmosCommonType.DetectorManufacturer.HAMAMATSU},
                     new Enum[]{GmosOiwfsGuideProbe.instance}),
              join(GmosCommonType.UseNS.values(), PreImagingType.values())),
 
