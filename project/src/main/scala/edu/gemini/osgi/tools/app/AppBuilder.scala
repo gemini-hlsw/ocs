@@ -13,7 +13,8 @@ object AppBuilder {
     Test    -> TestDistHandler,
     Windows -> WinDistHandler,
     Linux32 -> new GenericUnixDistHandler(true, Some("linux/JRE32_1.7")),
-    Linux64 -> new GenericUnixDistHandler(true, Some("linux/JRE64_1.7"))
+    Linux64 -> new GenericUnixDistHandler(true, Some("linux/JRE64_1.7")),
+    RPM64   -> new RPMDistHandler(Some("linux/JRE64_1.7"))
   )
 
   val LoggingPatternProp = "java.util.logging.FileHandler.pattern"
