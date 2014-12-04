@@ -1,77 +1,101 @@
 package edu.gemini.spModel.io.impl.migration.to2015B
 
-import java.io.File
+import java.util.UUID
 
 import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.shared.util.immutable.ScalaConverters._
+import edu.gemini.spModel.data.ISPDataObject
+import edu.gemini.spModel.io.impl.SpIOTags
+import edu.gemini.spModel.obscomp.SPNote
 
-import edu.gemini.spModel.pio.xml.PioXmlUtil
-import edu.gemini.spModel.pio._
+import edu.gemini.spModel.pio.xml.PioXmlFactory
+import edu.gemini.spModel.pio.{ Document, Container, ParamSet, Param }
+import edu.gemini.spModel.target.MagnitudePio
 
 /** Convert to new target model. */
 object To2015B {
   import PioSyntax._
   import BrightnessParser._
 
-  // These will be applied in the given order
-  val conversions: List[Document => Unit] = List(
-    brightnessToMagnitude,
-    brightnessToNote
-  )
-
   // Entry point here
   def updateProgram(d: Document): Unit =
     conversions.foreach(_.apply(d))
 
-  // Parse old `brightness` property into magnitudes when possible, then set to empty.
-  def brightnessToMagnitude(d: Document): Unit = {
+  private val MagnitudeNoteTitle = "2015B Magnitude Updates"
+  private val PioFactory = new PioXmlFactory()
+
+  // These will be applied in the given order
+  private val conversions: List[Document => Unit] = List(
+    brightnessToMagnitude
+  )
+
+  // Turn old `brightness` property into a magnitude table if possible.
+  private def brightnessToMagnitude(d: Document): Unit = {
     val names = Set("base", "spTarget")
     for {
       obs <- d.findContainers(SPComponentType.OBSERVATION_BASIC)
       env <- obs.findContainers(SPComponentType.TELESCOPE_TARGETENV)
       ps  <- env.allParamSets if names(ps.getName)
-      b   <- ps.value("brightness").toList if b.nonEmpty && ps.getParamSet("magnitudeList") == null
-      ms  <- parseBrightness(b).toList
-    } {
-//      println()
-//      println("update " + obs.getName + " - " + ps.value("name").getOrElse("(untitled)"))
-//      println("  from " + b)
-//      println("    to " + ms.list.mkString(", "))
-
-
-
-      ps.getParam("brightness").setValue("")
+      b   <- ps.value("brightness").filter(_.nonEmpty).toList
+    } (parseBrightness(b), Option(ps.getParamSet("magnitudeList"))) match {
+      case (None, _)           => appendNote(obs, ps, "failed: " + b)
+      case (Some(ms), Some(_)) => appendNote(obs, ps, "ignored: " + b)
+      case (Some(ms), None)    => appendNote(obs, ps, "parsed: " + b)
+        ps.addParamSet(MagnitudePio.instance.toParamSet(PioFactory, ms.list.asImList))
     }
   }
 
-
-  var seen: Set[String] = Set()
-
-  // Turn `brightness` value into a note, then set to empty.
-  def brightnessToNote(d: Document): Unit = {
-    val names = Set("base", "spTarget")
-    for {
-      obs <- d.findContainers(SPComponentType.OBSERVATION_BASIC)
-      env <- obs.findContainers(SPComponentType.TELESCOPE_TARGETENV)
-      ps  <- env.allParamSets if names(ps.getName)
-      b   <- ps.value("brightness").toList if b.nonEmpty && ps.getParamSet("magnitudeList") == null
-    } {
-      val b0 = b.replaceAll("""\d+(\.\d+)?""", "0").trim
-      if (!seen(b0)) {
-        seen = seen + b0
-        println(seen.size + "  failed: " + b)
-      }
-
-//      println()
-//      println("add note for " + obs.getName + " - " + ps.value("name").getOrElse("(untitled)"))
-//      println("  failed: " + b)
-    }
+  // Append a message to the shared magnitude note for the given obs, relating to the given target
+  private def appendNote(obs: Container, target: ParamSet, s: String): Unit = {
+    val p = noteText(obs)
+    p.setValue(p.getValue + target.value("name").getOrElse("(untitled)") + " " + s + "\n")
   }
 
-  /// TESTING
+  // Get or create the magnitude update note, returning the param containining its text
+  private def noteText(obs: Container): Param =
+    findNoteText(obs).getOrElse {
 
-  def main(args: Array[String]): Unit = {
-    val fs = new File("/Users/rnorris/Scala/ocs-arch/20140922-0730").listFiles.toStream.filter(_.getName.endsWith(".xml"))
-    fs.take(600).map(PioXmlUtil.read).map(_.asInstanceOf[Document]).foreach(updateProgram)
-  }
+      // Our note (easy way to get the ParamSet)
+      val note = new SPNote()
+      note.setTitle(MagnitudeNoteTitle)
+      note.setNote(
+        s"""|The unstructured 'brightness' property for targets was deprecated in 2010B and removed
+              |in 2015B. This note records the disposition of old brightness values associated with
+              |the targets in ${obs.getName}.
+              |
+              |A "parsed" message means that the brightness value was converted into one or more
+              |structured magnitude values with known pass bands. "failed" means that this process
+              |failed, so you may wish to update the magnitude table manually. "ignored" means that
+              |a structured magnitude table was already present and parsing was skipped.
+              |
+              |""".stripMargin)
+
+      // Container for ISPObsComponent
+      val container = PioFactory.createContainer(
+        SpIOTags.OBSCOMP,
+        SPComponentType.INFO_NOTE.broadType.value,
+        note.getVersion
+      )
+      container.setName(SPComponentType.INFO_NOTE.readableStr)
+      container.setSubtype(SPComponentType.INFO_NOTE.narrowType)
+      container.setKey(UUID.randomUUID.toString)
+
+      // Hook it all up
+      val ps = note.getParamSet(PioFactory)
+      container.addParamSet(ps)
+      obs.addContainer(container)
+      ps
+
+    } .getParam("NoteText")
+
+  // Find the [first] magnitude note and return its text param, if any
+  private def findNoteText(obs: Container): Option[ParamSet] =
+    (for {
+      note  <- obs.findContainers(SPComponentType.INFO_NOTE)
+      ps    <- note.paramSets if ps.getName == "Note"
+      name  <- ps.value(ISPDataObject.TITLE_PROP).toList if name == MagnitudeNoteTitle
+    } yield ps).headOption
 
 }
+
+

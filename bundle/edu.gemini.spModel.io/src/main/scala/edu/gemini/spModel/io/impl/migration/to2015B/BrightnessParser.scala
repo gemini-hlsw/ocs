@@ -36,10 +36,12 @@ object BrightnessParser {
       // K = 9.0
       // J ~ 16.5
       // R ~ 22 mag
-      pat("""^(U|B|V|UC|R|I|Y|J|H|K|L|M|N|Q) [=~] (-?\d+(\.\d+)?)( MAG)?$""".r, 2, 1),
+      // K  = 19.9
+      pat("""^(U|B|V|UC|R|I|Y|J|H|K|L|M|N|Q) +[=~] +(-?\d+(\.\d+)?)( MAG)?$""".r, 2, 1),
 
       // i mag = 18.1
-      pat("""^(U|B|V|UC|R|I|Y|J|H|K|L|M|N|Q) MAG = (-?\d+(\.\d+)?)$""".r, 2, 1),
+      // J mag ~ 18.8
+      pat("""^(U|B|V|UC|R|I|Y|J|H|K|L|M|N|Q) MAG [=~] (-?\d+(\.\d+)?)$""".r, 2, 1),
 
       // Hband 13.07
       pat("""^(U|B|V|UC|R|I|Y|J|H|K|L|M|N|Q)BAND (-?\d+(\.\d+)?)$""".r, 2, 1),
@@ -115,8 +117,8 @@ object BrightnessParser {
       // 17.9 (i mag)
       pat("""^(-?\d+(\.\d+)?) \((U|B|V|UC|R|I|Y|J|H|K|L|M|N|Q) MAG\)$""".r, 1, 3),
 
+      /// These last ones match multiple times so they's slightly less safe. Might want to re-examine
       ///
-      /// These last ones matches only parts of the string, so they need to come last.
       ///
 
       // 110 mJy @N, 2300 mJy @Q
@@ -139,7 +141,11 @@ object BrightnessParser {
 
       // Fmag=16.49, Jmag=17.38
       // Kmag 11.5
-      pat("""\b(U|B|V|UC|R|I|Y|J|H|K|L|M|N|Q)MAG[= ](-?\d+(\.\d+)?)\b""".r, 2, 1)
+      pat("""\b(U|B|V|UC|R|I|Y|J|H|K|L|M|N|Q)MAG[= ](-?\d+(\.\d+)?)\b""".r, 2, 1),
+
+      // U 15.45, J 13.053, K 12.542
+      pat("""\b(U|B|V|UC|R|I|Y|J|H|K|L|M|N|Q) (-?\d+(\.\d+)?)\b""".r, 2, 1)
+
 
     ).foldRight[Parser](_ => None)((a, b) => s => a(s) orElse b(s))
 
