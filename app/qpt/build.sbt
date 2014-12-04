@@ -112,7 +112,8 @@ def linux64(version: Version) = AppConfig(
 // RPM64
 def rpm64(version: Version) = AppConfig(
   id = "rpm64",
-  distribution = List(RPM64)
+  distribution = List(RPM64),
+  spec = Some(file("app/qpt/dist/RPM64/qpt.spec.template"))
 ) extending List(linux64(version))
 
 // WINDOWS-TEST
