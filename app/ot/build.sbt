@@ -26,6 +26,7 @@ ocsAppManifest := {
           linux(v),
             linux32(v),
             linux64(v),
+            rpm64(v),
       development(v),
         localhost_is_gn(v),
         localhost_is_gs(v)
@@ -62,7 +63,8 @@ def common(version: Version) = AppConfig(
     BundleSpec("jsky.app.ot",                  version),
     BundleSpec("jsky.app.ot.visitlog",         version),
     BundleSpec("org.apache.commons.logging",   Version(1, 1, 0))
-  )
+  ),
+  spec = Some(file("app/ot/dist/RPM64/ot.spec.template"))
 ) extending List()
 
 // WITH-TEST-DBS
@@ -138,6 +140,12 @@ def linux64(version: Version) = AppConfig(
   id = "linux64",
   distribution = List(Linux64)
 ) extending List(linux(version))
+
+// RPM64
+def rpm64(version: Version) = AppConfig(
+  id = "rpm64",
+  distribution = List(RPM64)
+) extending List(linux64(version))
 
 // WINDOWS-TEST
 def windows_test(version: Version) = AppConfig(

@@ -24,7 +24,8 @@ ocsAppManifest := {
         with_production_dbs(v),
           mac(v),
           linux64(v),
-          windows(v)
+          windows(v),
+          rpm64(v)
       )
     )
 }
@@ -58,7 +59,8 @@ def common(version: Version) = AppConfig(
     BundleSpec("slf4j.api",                    Version(1, 6, 4)),
     BundleSpec("slf4j.jdk14",                  Version(1, 6, 4)),
     BundleSpec("org.apache.commons.logging",   Version(1, 1, 0))
-  )
+  ),
+  spec = Some(file("app/qpt/dist/RPM64/qpt.spec.template"))
 ) extending List(common_credentials(version))
 
 // WITH-TEST-DBS
@@ -106,6 +108,13 @@ def linux64(version: Version) = AppConfig(
   id = "linux64",
   distribution = List(Linux64)
 ) extending List(with_production_dbs(version))
+
+// RPM64
+def rpm64(version: Version) = AppConfig(
+  id = "rpm64",
+  distribution = List(RPM64),
+  spec = Some(file("app/qpt/dist/RPM64/qpt.spec.template"))
+) extending List(linux64(version))
 
 // WINDOWS-TEST
 def windows_test(version: Version) = AppConfig(
