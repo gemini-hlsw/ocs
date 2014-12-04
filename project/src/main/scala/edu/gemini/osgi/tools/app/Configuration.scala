@@ -42,7 +42,7 @@ case class Configuration(
     bundles = c.bundles ++ bundles,
     props = c.props ++ props,
     log = log.orElse(c.log),
-    spec = c.spec,
+    spec = spec.orElse(c.spec),
     extending = extending :+ c
   )
 
