@@ -18,5 +18,4 @@ public interface TooGuideTarget extends TooTarget {
 
     GuideProbe getGuideProbe();
 
-    String getMagnitude();
 }
