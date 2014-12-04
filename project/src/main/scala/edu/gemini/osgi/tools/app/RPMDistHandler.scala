@@ -20,11 +20,9 @@ class RPMDistHandler(jre: Option[String]) extends DistHandler {
     val rpmbuild = wd // Hardcoded to avoid permission issues
     val rpmmacros = s"%_topdir $rpmbuild\n"
 
-    // Overwrite if not present
+    // Overwrite it, it changes per project
     val rpmmacrosFiles = new File(System.getProperty("user.home"), ".rpmmacros")
-    if (!rpmmacrosFiles.exists) {
-      Files.write(rpmmacrosFiles.toPath, rpmmacros.getBytes(StandardCharsets.UTF_8))
-    }
+    Files.write(rpmmacrosFiles.toPath, rpmmacros.getBytes(StandardCharsets.UTF_8))
 
     // Common part
     buildCommon(outDir, meta, version, config, d, solution, appProjectBaseDir)
@@ -90,16 +88,17 @@ class RPMDistHandler(jre: Option[String]) extends DistHandler {
     if (result != 0) {
       println("*** " + rpmArgs.mkString(" "))
       println("*** rpmbuild returned " + result)
+    }
 
-      // Move the rpm back to wd
-      val rpms = Files.newDirectoryStream(new File(rpmbuild, "RPMS").toPath, "*.rpm")
-      rpms.iterator.foreach { f =>
-         Files.move(f, wd.getParentFile.toPath.resolve(f.getFileName), StandardCopyOption.REPLACE_EXISTING)
-      }
+    // Move the rpm back to wd
+    val rpms = Files.newDirectoryStream(new File(rpmbuild, "RPMS").toPath, "*.rpm")
+    rpms.iterator.foreach { f =>
+       Files.move(f, wd.getParentFile.toPath.resolve(f.getFileName), StandardCopyOption.REPLACE_EXISTING)
     }
 
     // Remove our staging dir
     rm(wd)
+
   }
 
 }
