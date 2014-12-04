@@ -76,12 +76,12 @@ object GemsMagnitudeTable extends MagnitudeTable {
      * The map formerly in Gsaoi.Filter.
      */
     private val MagnitudeLimitsMap = Map[Pair[GemsGuideStarType, Magnitude.Band], MagnitudeLimits](
-      (GemsGuideStarType.flexure, J) -> magLimits(J, 21.2, 12.0),
-      (GemsGuideStarType.flexure, H) -> magLimits(H, 21.0, 12.0),
-      (GemsGuideStarType.flexure, K) -> magLimits(K, 20.2, 11.0),
-      (GemsGuideStarType.tiptilt, J) -> magLimits(J, 14.2,  7.1),
-      (GemsGuideStarType.tiptilt, H) -> magLimits(H, 14.5,  7.3),
-      (GemsGuideStarType.tiptilt, K) -> magLimits(K, 13.5,  6.5)
+      (GemsGuideStarType.flexure, J) -> magLimits(J, 17.2, 8.0),
+      (GemsGuideStarType.flexure, H) -> magLimits(H, 17.0, 8.0),
+      (GemsGuideStarType.flexure, K) -> magLimits(K, 18.2, 8.0),
+      (GemsGuideStarType.tiptilt, J) -> magLimits(J, 14.2, 7.1),
+      (GemsGuideStarType.tiptilt, H) -> magLimits(H, 14.5, 7.3),
+      (GemsGuideStarType.tiptilt, K) -> magLimits(K, 13.5, 6.5)
     )
 
     override def getGemsMagnitudeLimits(starType: GemsGuideStarType, nirBand: Option[Magnitude.Band]): MagnitudeLimits = {
@@ -99,19 +99,11 @@ object GemsMagnitudeTable extends MagnitudeTable {
   }
 
   lazy val CanopusWfsMagnitudeLimitsCalculator = new CanopusWfsCalculator {
-    /**
-     * The specific magnitude limits for the different Wfs probes.
-     */
-    private lazy val CwfsMagnitudeLimits = Map[Canopus.Wfs, MagnitudeLimits](
-      Canopus.Wfs.cwfs1 -> magLimits(R, 18.0, 8.0),
-      Canopus.Wfs.cwfs2 -> magLimits(R, 18.0, 8.5),
-      Canopus.Wfs.cwfs3 -> magLimits(R, 17.5, 8.5)
-    )
     override def getGemsMagnitudeLimits(starType: GemsGuideStarType, nirBand: Option[Magnitude.Band]) =
       magLimits(R, 18.0, 8.5)
 
     override def getNominalMagnitudeLimits(cwfs: Canopus.Wfs): MagnitudeLimits =
-      CwfsMagnitudeLimits(cwfs)
+      magLimits(R, 15.5, 8.0)
   }
 
   private lazy val Flamingos2OiwfsMagnitudeLimitsCalculator = new LimitsCalculator {
