@@ -80,7 +80,7 @@ object AgsAnalysis {
   case class NoMagnitudeForBand(guideProbe: GuideProbe, target: SPTarget, band: Magnitude.Band) extends AgsAnalysis {
     override def message(withProbe: Boolean): String = {
       val p = if (withProbe) s"${guideProbe.getKey} g" else "G"
-      s"${p}uide star ${band.name}-band magnitude is missing."
+      s"${p}uide star ${band.name}-band magnitude is missing, cannot determine guiding performance."
     }
     override val quality = AgsGuideQuality.PossiblyUnusable
   }
