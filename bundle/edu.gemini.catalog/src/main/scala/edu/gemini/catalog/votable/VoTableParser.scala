@@ -1,15 +1,14 @@
 package edu.gemini.catalog.votable
 
-import java.io.InputStream
+import java.io.{ByteArrayInputStream, InputStream}
 
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.Target.SiderealTarget
-import sun.tools.asm.TryData
 
 import scala.io.Source
 import scala.util.Try
 import scala.xml.{XML, Node}
-import scalaz.Node
+
 import scalaz._
 import Scalaz._
 
@@ -45,32 +44,22 @@ case class TargetsTable(rows: List[SiderealTarget])
 
 object TargetsTable {
   def apply(t: ParsedTable): TargetsTable = TargetsTable(t.rows.filter(_.isRight).map(_.toOption).flatten)
-
- // def extractProblems(t: ParsedTable) =
 }
 
 case class Resource(tables: List[TargetsTable])
 
 object Resource {
   def apply(r: ParsedResource):Resource = Resource(r.tables.map(TargetsTable.apply))
-
-  //def extractProblems(r: ParsedResource) = (r.tables.map(_.
 }
 
 /** Indicates an issue parsing the targets, e.g. missing values, bad format, etc. */
 sealed trait CatalogProblem
 
-case object ValidationError2 extends CatalogProblem
-case class ValidationError(url: List[FieldDescriptor]) extends CatalogProblem
+case class ValidationError(url: String) extends CatalogProblem
 case class MissingValues(fields: List[FieldDescriptor]) extends CatalogProblem
 case class FormattingProblem(field: FieldDescriptor, value: String) extends CatalogProblem
 
 object VoTableParser extends VoTableParser {
-  import scala.xml.Node
-  import javax.xml.transform.stream.StreamSource
-  import javax.xml.validation.Schema
-  import javax.xml.validation.SchemaFactory
-  import javax.xml.validation.{Validator => JValidator}
 
   val UCD_OBJID = Ucd("meta.id;meta.main")
   val UCD_RA = Ucd("pos.eq.ra;meta.main")
@@ -79,6 +68,8 @@ object VoTableParser extends VoTableParser {
   val OBJID = FieldDescriptor("objid", "objid", UCD_OBJID)
   val RA = FieldDescriptor("raj2000", "raj2000", UCD_RA)
   val DEC = FieldDescriptor("dej2000", "dej2000", UCD_DEC)
+
+  val xsd = "/votable-1.2.xsd"
 
   /**
    * Takes an XML Node and attempt to extract the resources and targets from a VOBTable
@@ -92,22 +83,26 @@ object VoTableParser extends VoTableParser {
     ParsedResource(tables.toList)
   }
 
-  private def validate(xmlFile: InputStream, xsdFile: String):Try[StreamSource] = {
-    Try {
-      val schemaLang = "http://www.w3.org/2001/XMLSchema"
-      val factory = SchemaFactory.newInstance(schemaLang)
-      val schema = factory.newSchema(new StreamSource(xsdFile))
-      val validator = schema.newValidator()
-      val xml = new StreamSource(xmlFile)
-      validator.validate(xml)
-      xml
-    }
+  private def validate(xmlFile: InputStream):Try[String] = Try {
+    import javax.xml.transform.stream.StreamSource
+    import javax.xml.validation.SchemaFactory
+
+    val schemaLang = "http://www.w3.org/2001/XMLSchema"
+    val factory = SchemaFactory.newInstance(schemaLang)
+    val schema = factory.newSchema(new StreamSource(getClass.getResourceAsStream(xsd)))
+    val validator = schema.newValidator()
+
+    // Load in memory (Could be a problem for large responses)
+    val xmlText = Source.fromInputStream(xmlFile, "UTF-8").getLines().mkString
+
+    validator.validate(new StreamSource(new ByteArrayInputStream(xmlText.getBytes(java.nio.charset.Charset.forName("UTF-8")))))
+    xmlText
   }
 
-  def parse(is: InputStream): List[CatalogProblem] \/ Resource = {
-    validate(is, "") match {
-      case scala.util.Success(s) => parse(XML.load(s.getInputStream)
-      case scala.util.Failure(_) => -\/(List(ValidationError2))
+  def parse(url: String, is: InputStream): CatalogProblem \/ ParsedResource = {
+    validate(is) match {
+      case scala.util.Success(s) => \/-(parse(XML.loadString(s)))
+      case scala.util.Failure(e) => -\/(ValidationError(url))
     }
   }
 }

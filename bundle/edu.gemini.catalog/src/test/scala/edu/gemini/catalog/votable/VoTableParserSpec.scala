@@ -209,5 +209,12 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       VoTableParser.parse(voTable).tables(0) should beEqualTo(result)
       VoTableParser.parse(voTable).tables(0).containsError should beFalse
     }
+    "be able to validate and parse an xml" in {
+      val badXml = "votable-non-validating.xml"
+      VoTableParser.parse(badXml, getClass.getResourceAsStream(s"/$badXml")) should beEqualTo(-\/(ValidationError(badXml)))
+
+      val goodXml = "votable.xml"
+      VoTableParser.parse(goodXml, getClass.getResourceAsStream(s"/$goodXml")).getOrElse(ParsedResource(Nil)).tables should be size 1
+    }
   }
 }
