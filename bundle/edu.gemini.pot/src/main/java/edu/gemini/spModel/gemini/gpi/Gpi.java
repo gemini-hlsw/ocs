@@ -1419,13 +1419,20 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         }
     }
 
+    private static double offsetVal(final Config c, final ItemKey key, double cur) {
+        // of course the p and q are stored as strings in the sequence ....
+        return c.containsItem(key) ? Double.parseDouble(c.getItemValue(key).toString()) : cur;
+    }
+
     public ConfigSequence postProcessSequence(ConfigSequence in) {
         final Config[] steps = in.getAllSteps();
         double p = 0;
         double q = 0;
-        ItemKey obsClassKey = new ItemKey(CalDictionary.OBS_KEY, InstConstants.OBS_CLASS_PROP);
-        ItemKey obsTypeKey = new ItemKey(CalDictionary.OBS_KEY, InstConstants.OBSERVE_TYPE_PROP);
+        final ItemKey obsClassKey = new ItemKey(CalDictionary.OBS_KEY, InstConstants.OBS_CLASS_PROP);
+        final ItemKey obsTypeKey  = new ItemKey(CalDictionary.OBS_KEY, InstConstants.OBSERVE_TYPE_PROP);
         for (Config c:steps) {
+            p = offsetVal(c, OffsetPosBase.TEL_P_KEY, p);
+            q = offsetVal(c, OffsetPosBase.TEL_Q_KEY, q);
             if (p == 0  && q == 0) {
                 c.putItem(new ItemKey(GUIDING_PATH), StandardGuideOptions.instance.getDefaultActive());
             } else {
@@ -1456,13 +1463,6 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
                     // REL-1743 Set guiding to off if it is a calibration sequence
                     c.putItem(new ItemKey(GUIDING_PATH), StandardGuideOptions.instance.getDefaultOff());
                 }
-            }
-
-            if (c.containsItem(OffsetPosBase.TEL_P_KEY)) {
-                p = Double.parseDouble(c.getItemValue(OffsetPosBase.TEL_P_KEY).toString());
-            }
-            if (c.containsItem(OffsetPosBase.TEL_Q_KEY)) {
-                q = Double.parseDouble(c.getItemValue(OffsetPosBase.TEL_Q_KEY).toString());
             }
         }
 
