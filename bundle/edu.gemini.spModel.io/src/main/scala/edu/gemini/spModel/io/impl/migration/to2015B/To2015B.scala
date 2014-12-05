@@ -12,7 +12,7 @@ import edu.gemini.spModel.pio.xml.PioXmlFactory
 import edu.gemini.spModel.pio.{ Document, Container, ParamSet, Param }
 import edu.gemini.spModel.target.MagnitudePio
 
-/** Convert to new target model. */
+/** Convert to new target model. This is side-effecty, sorry. */
 object To2015B {
   import PioSyntax._
   import BrightnessParser._
@@ -29,7 +29,8 @@ object To2015B {
     brightnessToMagnitude
   )
 
-  // Turn old `brightness` property into a magnitude table if possible.
+  // Turn old `brightness` property into a magnitude table if none exists, if possible, recording
+  // our work in a per-observation note.
   private def brightnessToMagnitude(d: Document): Unit = {
     val names = Set("base", "spTarget")
     for {
@@ -47,19 +48,33 @@ object To2015B {
 
   // Append a message to the shared magnitude note for the given obs, relating to the given target
   private def appendNote(obs: Container, target: ParamSet, s: String): Unit = {
-    val p = noteText(obs)
-    p.setValue(p.getValue + target.value("name").getOrElse("(untitled)") + " " + s + "\n")
+    val pset  = noteText(obs)
+    val param = pset.getParam("NoteText")
+    val text  = param.getValue
+    val tName = target.value("name").getOrElse("(untitled)")
+    param.setValue(s"$text  $tName $s\n")
   }
 
-  // Get or create the magnitude update note, returning the param containining its text
-  private def noteText(obs: Container): Param =
-    findNoteText(obs).getOrElse {
+  // Get or create the magnitude update note, returning its ParamSet
+  private def noteText(obs: Container): ParamSet =
+    findNoteText(obs).getOrElse(createNoteText(obs))
 
-      // Our note (easy way to get the ParamSet)
-      val note = new SPNote()
-      note.setTitle(MagnitudeNoteTitle)
-      note.setNote(
-        s"""|The unstructured 'brightness' property for targets was deprecated in 2010B and removed
+  // Find the [first] magnitude note and return its ParamSet, if any
+  private def findNoteText(obs: Container): Option[ParamSet] =
+    (for {
+      note  <- obs.findContainers(SPComponentType.INFO_NOTE)
+      ps    <- note.paramSets if ps.getName == "Note"
+      name  <- ps.value(ISPDataObject.TITLE_PROP).toList if name == MagnitudeNoteTitle
+    } yield ps).headOption
+
+  // Create the magnitude node and return its ParamSet
+  private def createNoteText(obs: Container): ParamSet = {
+
+    // Our note (easy way to get the ParamSet)
+    val note = new SPNote()
+    note.setTitle(MagnitudeNoteTitle)
+    note.setNote(
+      s"""|The unstructured 'brightness' property for targets was deprecated in 2010B and removed
               |in 2015B. This note records the disposition of old brightness values associated with
               |the targets in ${obs.getName}.
               |
@@ -70,32 +85,23 @@ object To2015B {
               |
               |""".stripMargin)
 
-      // Container for ISPObsComponent
-      val container = PioFactory.createContainer(
-        SpIOTags.OBSCOMP,
-        SPComponentType.INFO_NOTE.broadType.value,
-        note.getVersion
-      )
-      container.setName(SPComponentType.INFO_NOTE.readableStr)
-      container.setSubtype(SPComponentType.INFO_NOTE.narrowType)
-      container.setKey(UUID.randomUUID.toString)
+    // Container for ISPObsComponent
+    val container = PioFactory.createContainer(
+      SpIOTags.OBSCOMP,
+      SPComponentType.INFO_NOTE.broadType.value,
+      note.getVersion
+    )
+    container.setName(SPComponentType.INFO_NOTE.readableStr)
+    container.setSubtype(SPComponentType.INFO_NOTE.narrowType)
+    container.setKey(UUID.randomUUID.toString)
 
-      // Hook it all up
-      val ps = note.getParamSet(PioFactory)
-      container.addParamSet(ps)
-      obs.addContainer(container)
-      ps
+    // Hook it all up
+    val ps = note.getParamSet(PioFactory)
+    container.addParamSet(ps)
+    obs.addContainer(container)
+    ps
 
-    } .getParam("NoteText")
-
-  // Find the [first] magnitude note and return its text param, if any
-  private def findNoteText(obs: Container): Option[ParamSet] =
-    (for {
-      note  <- obs.findContainers(SPComponentType.INFO_NOTE)
-      ps    <- note.paramSets if ps.getName == "Note"
-      name  <- ps.value(ISPDataObject.TITLE_PROP).toList if name == MagnitudeNoteTitle
-    } yield ps).headOption
-
+  }
 }
 
 
