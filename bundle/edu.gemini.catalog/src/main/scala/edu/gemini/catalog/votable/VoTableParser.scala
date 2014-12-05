@@ -58,6 +58,7 @@ sealed trait CatalogProblem
 case class ValidationError(url: String) extends CatalogProblem
 case class MissingValues(fields: List[FieldDescriptor]) extends CatalogProblem
 case class FormattingProblem(field: FieldDescriptor, value: String) extends CatalogProblem
+case class UnmatchedField(field: FieldDescriptor) extends CatalogProblem
 
 object VoTableParser extends VoTableParser {
 
@@ -143,6 +144,27 @@ trait VoTableParser {
       table <-  xml   \\ "TABLEDATA"
       tr    <-  table \\ "TR"
     } yield parseTableRow(fields, tr)
+
+  protected def parseMagnitude(field: FieldDescriptor, value: String): CatalogProblem \/ Magnitude = {
+    def parseValue(f: FieldDescriptor, s: String): CatalogProblem \/ Double =
+      Try(s.toDouble) match {
+        case scala.util.Success(d) => \/-(d)
+        case scala.util.Failure(e) => -\/(FormattingProblem(f, s))
+      }
+
+    val magRegex = """em.opt.(\w)""".r
+
+    val band = for {
+      t <- field.ucd.tokens
+      m <- magRegex.findFirstMatchIn(t.token)
+      l  = m.group(1).toUpperCase
+    } yield MagnitudeBand.all.find(_.name == l)
+
+    for {
+      b <- band.headOption.flatten \/> UnmatchedField(field)
+      v <- parseValue(field, value)
+    } yield new Magnitude(v, b)
+  }
 
   /**
    * Convert a table row to a sidereal target or a CatalogpProblem

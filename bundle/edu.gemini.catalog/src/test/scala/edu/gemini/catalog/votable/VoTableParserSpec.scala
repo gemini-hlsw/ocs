@@ -200,6 +200,22 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
             )
       tableRow2Target(rowWithBadRa) should beEqualTo(-\/(FormattingProblem(VoTableParser.RA, "ABC")))
     }
+    "be able to parse magnitudes" in {
+      val iMagField = FieldDescriptor("imag", "imag", Ucd("phot.mag;em.opt.i"))
+      // Correct value
+      parseMagnitude(iMagField, "20.3051") should beEqualTo(\/-(new Magnitude(20.3051, MagnitudeBand.I)))
+
+      // No magnitude field
+      val badField = FieldDescriptor("id", "id", Ucd("meta.name"))
+      parseMagnitude(badField, "id") should beEqualTo(-\/(UnmatchedField(badField)))
+
+      // Bad value
+      parseMagnitude(iMagField, "stringValue") should beEqualTo(-\/(FormattingProblem(iMagField, "stringValue")))
+
+      // Unknows magnitude
+      val noBandField = FieldDescriptor("pmag", "pmag", Ucd("phot.mag;em.opt.p"))
+      parseMagnitude(noBandField, "stringValue") should beEqualTo(-\/(UnmatchedField(noBandField)))
+    }
     "be able to parse an xml into a list of SiderealTargets list of rows with a list of fields" in {
       val result = ParsedTable(List(
         \/-(SiderealTarget("-2140405448", Coordinates(RightAscension.fromDegrees(359.745951955), Declination.fromAngle(Angle.parseDegrees("0.209323681906").getOrElse(Angle.zero)).getOrElse(Declination.zero)), Equinox.J2000, None, Nil, None)),
