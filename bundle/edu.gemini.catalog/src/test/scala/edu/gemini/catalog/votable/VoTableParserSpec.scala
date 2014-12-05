@@ -218,14 +218,17 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       // Bad value
       parseMagnitude((iMagField, "stringValue")) should beEqualTo(-\/(FormattingProblem(iMagField, "stringValue")))
 
-      // Unknows magnitude
+      // Unknown magnitude
       val noBandField = FieldDescriptor("pmag", "pmag", Ucd("phot.mag;em.opt.p"))
       parseMagnitude((noBandField, "stringValue")) should beEqualTo(-\/(UnmatchedField(noBandField)))
     }
     "be able to parse an xml into a list of SiderealTargets list of rows with a list of fields" in {
+      val magsTarget1 = List(new Magnitude(22.082, MagnitudeBand.G), new Magnitude(20.3051, MagnitudeBand.I), new Magnitude(20.88, MagnitudeBand.R), new Magnitude(23.0888, MagnitudeBand.U), new Magnitude(19.8812, MagnitudeBand.Z))
+      val magsTarget2 = List(new Magnitude(23.0889, MagnitudeBand.G), new Magnitude(20.7891, MagnitudeBand.I), new Magnitude(21.7686, MagnitudeBand.R), new Magnitude(23.0853, MagnitudeBand.U), new Magnitude(20.0088, MagnitudeBand.Z))
+
       val result = ParsedTable(List(
-        \/-(SiderealTarget("-2140405448", Coordinates(RightAscension.fromDegrees(359.745951955), Declination.fromAngle(Angle.parseDegrees("0.209323681906").getOrElse(Angle.zero)).getOrElse(Declination.zero)), Equinox.J2000, None, Nil, None)),
-        \/-(SiderealTarget("-2140404569", Coordinates(RightAscension.fromDegrees(359.749274134), Declination.fromAngle(Angle.parseDegrees("0.210251239819").getOrElse(Angle.zero)).getOrElse(Declination.zero)), Equinox.J2000, None, Nil, None))
+        \/-(SiderealTarget("-2140405448", Coordinates(RightAscension.fromDegrees(359.745951955), Declination.fromAngle(Angle.parseDegrees("0.209323681906").getOrElse(Angle.zero)).getOrElse(Declination.zero)), Equinox.J2000, None, magsTarget1, None)),
+        \/-(SiderealTarget("-2140404569", Coordinates(RightAscension.fromDegrees(359.749274134), Declination.fromAngle(Angle.parseDegrees("0.210251239819").getOrElse(Angle.zero)).getOrElse(Declination.zero)), Equinox.J2000, None, magsTarget2, None))
       ))
       // There is only one table
       VoTableParser.parse(voTable).tables(0) should beEqualTo(result)

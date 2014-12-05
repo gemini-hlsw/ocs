@@ -72,6 +72,9 @@ object VoTableParser extends VoTableParser {
   val RA = FieldDescriptor("raj2000", "raj2000", UCD_RA)
   val DEC = FieldDescriptor("dej2000", "dej2000", UCD_DEC)
 
+  val UCD_MAG = UcdWord("phot.mag")
+  val STAT_ERR = UcdWord("stat.error")
+
   val xsd = "/votable-1.2.xsd"
 
   /**
@@ -171,23 +174,28 @@ trait VoTableParser {
   }
 
   /**
-   * Convert a table row to a sidereal target or a CatalogpProblem
+   * Convert a table row to a sidereal target or CatalogProblem
    */
   protected def tableRow2Target(row: TableRow): CatalogProblem \/ SiderealTarget = {
     val entries = row.itemsMap
 
     def missing = REQUIRED.filterNot(entries.contains)
 
+    def magnitudeField(v: (FieldDescriptor, String)) = v._1.ucd.includes(VoTableParser.UCD_MAG) && !v._1.ucd.includes(VoTableParser.STAT_ERR)
+
     val result = for {
       id  <- entries.get(VoTableParser.OBJID)
       ra  <- entries.get(VoTableParser.RA)
       dec <- entries.get(VoTableParser.DEC)
+      mag =  entries.filter(magnitudeField).map(parseMagnitude).toList.partition(p => p.isRight)
     } yield for {
         r           <- Angle.parseDegrees(ra).leftMap(_ => FormattingProblem(VoTableParser.RA, ra))
         d           <- Angle.parseDegrees(dec).leftMap(_ => FormattingProblem(VoTableParser.DEC, dec))
         declination <- Declination.fromAngle(d) \/> FormattingProblem(VoTableParser.DEC, dec)
         coordinates  = Coordinates(RightAscension.fromAngle(r), declination)
-      } yield SiderealTarget(id, coordinates, Equinox.J2000, None, Nil, None)
+        _           <- mag._2.headOption.getOrElse(\/-(true)) // Will stop the loop if an error is present
+        magnitudes   = mag._1.map(_.toOption).flatten
+      } yield SiderealTarget(id, coordinates, Equinox.J2000, None, magnitudes.sorted, None)
 
     result.getOrElse(-\/(MissingValues(missing)))
   }
