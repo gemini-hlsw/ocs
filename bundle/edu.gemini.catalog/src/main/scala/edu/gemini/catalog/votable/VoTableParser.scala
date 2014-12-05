@@ -145,7 +145,9 @@ trait VoTableParser {
       tr    <-  table \\ "TR"
     } yield parseTableRow(fields, tr)
 
-  protected def parseMagnitude(field: FieldDescriptor, value: String): CatalogProblem \/ Magnitude = {
+  protected def parseMagnitude(p: (FieldDescriptor, String)): CatalogProblem \/ Magnitude = {
+    val (field: FieldDescriptor, value: String) = p
+
     def parseValue(f: FieldDescriptor, s: String): CatalogProblem \/ Double =
       Try(s.toDouble) match {
         case scala.util.Success(d) => \/-(d)
