@@ -13,7 +13,9 @@ import scalaz._
 import Scalaz._
 
 case class UcdWord(token: String)
-case class Ucd(tokens: List[UcdWord])
+case class Ucd(tokens: List[UcdWord]) {
+  def includes(ucd: UcdWord): Boolean = tokens.find(_ == ucd).nonEmpty
+}
 
 object Ucd {
   def parseUcd(v: String): Ucd = Ucd(v.split(";").filter(_.nonEmpty).map(_.toLowerCase).map(UcdWord).toList)

@@ -9,6 +9,12 @@ import Scalaz._
 
 class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
 
+  "Ucd" should {
+    "detect if is a superset" in {
+      Ucd("stat.error;phot.mag;em.opt.i").includes(UcdWord("phot.mag")) should beTrue
+    }
+  }
+
   "The VoTable Parser" should {
     val fieldsNode =
       <TABLE>
