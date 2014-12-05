@@ -75,15 +75,15 @@ object To2015B {
     note.setTitle(MagnitudeNoteTitle)
     note.setNote(
       s"""|The unstructured 'brightness' property for targets was deprecated in 2010B and removed
-              |in 2015B. This note records the disposition of old brightness values associated with
-              |the targets in ${obs.getName}.
-              |
-              |A "parsed" message means that the brightness value was converted into one or more
-              |structured magnitude values with known pass bands. "failed" means that this process
-              |failed, so you may wish to update the magnitude table manually. "ignored" means that
-              |a structured magnitude table was already present and parsing was skipped.
-              |
-              |""".stripMargin)
+          |in 2015B. This note records the disposition of old brightness values associated with
+          |the targets in ${obs.getName}.
+          |
+          |A "parsed" message means that the brightness value was converted into one or more
+          |structured magnitude values with known pass bands. "failed" means that this process
+          |failed, so you may wish to update the magnitude table manually. "ignored" means that
+          |a structured magnitude table was already present and parsing was skipped.
+          |
+          |""".stripMargin)
 
     // Container for ISPObsComponent
     val container = PioFactory.createContainer(
