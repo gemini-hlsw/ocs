@@ -6,7 +6,6 @@ import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.Target.SiderealTarget
 
 import scala.io.Source
-import scala.util.Try
 import scala.xml.XML
 
 import scalaz._
@@ -27,7 +26,7 @@ object VoTableParser extends VoTableParser {
 
   val xsd = "/votable-1.2.xsd"
   
-  private def validate(xmlFile: InputStream):Try[String] = Try {
+  private def validate(xmlFile: InputStream): Throwable \/ String = \/.fromTryCatch {
     import javax.xml.transform.stream.StreamSource
     import javax.xml.validation.SchemaFactory
 
@@ -46,12 +45,8 @@ object VoTableParser extends VoTableParser {
   /**
    * parse takes an input stream and attempts to read the xml content and convert it to a VoTable resource
    */
-  def parse(url: String, is: InputStream): CatalogProblem \/ ParsedResource = {
-    validate(is) match {
-      case scala.util.Success(s) => \/-(parse(XML.loadString(s)))
-      case scala.util.Failure(_) => -\/(ValidationError(url))
-    }
-  }
+  def parse(url: String, is: InputStream): CatalogProblem \/ ParsedResource =
+    validate(is).fold(_ => \/.left(ValidationError(url)), r => \/.right(parse(XML.loadString(r))))
 }
 
 trait VoTableParser {
@@ -95,10 +90,7 @@ trait VoTableParser {
     val (field: FieldDescriptor, value: String) = p
 
     def parseValue(f: FieldDescriptor, s: String): CatalogProblem \/ Double =
-      Try(s.toDouble) match {
-        case scala.util.Success(d) => \/-(d)
-        case scala.util.Failure(e) => -\/(FieldValueProblem(f, s))
-      }
+      \/.fromTryCatch(s.toDouble).leftMap(_ => FieldValueProblem(f, s))
 
     val magRegex = """em.opt.(\w)""".r
 
@@ -136,20 +128,22 @@ trait VoTableParser {
 
     def magnitudeField(v: (FieldDescriptor, String)) = v._1.ucd.includes(VoTableParser.UCD_MAG) && !v._1.ucd.includes(VoTableParser.STAT_ERR)
 
-    val result = for {
-      id  <- entries.get(VoTableParser.OBJID)
-      ra  <- entries.get(VoTableParser.RA)
-      dec <- entries.get(VoTableParser.DEC)
-      mag =  entries.filter(magnitudeField).map(parseMagnitude).toList.partition(p => p.isRight)
-    } yield for {
+    def toSiderealTarget(id: String, ra: String, dec: String, mags: Map[FieldDescriptor, String]): \/[CatalogProblem, SiderealTarget] =
+      for {
         r           <- Angle.parseDegrees(ra).leftMap(_ => FieldValueProblem(VoTableParser.RA, ra))
         d           <- Angle.parseDegrees(dec).leftMap(_ => FieldValueProblem(VoTableParser.DEC, dec))
         declination <- Declination.fromAngle(d) \/> FieldValueProblem(VoTableParser.DEC, dec)
+        magnitudes  <- mags.map(parseMagnitude).toList.sequenceU
         coordinates  = Coordinates(RightAscension.fromAngle(r), declination)
-        _           <- mag._2.headOption.getOrElse(\/-(true)) // Will stop the loop if an error is present
-        magnitudes   = mag._1.map(_.toOption).flatten
       } yield SiderealTarget(id, coordinates, Equinox.J2000, None, magnitudes.sorted, None)
 
-    result.getOrElse(-\/(MissingValues(missing)))
+    val result = for {
+        id   <- entries.get(VoTableParser.OBJID)
+        ra   <- entries.get(VoTableParser.RA)
+        dec  <- entries.get(VoTableParser.DEC)
+        mags  = entries.filter(magnitudeField)
+      } yield toSiderealTarget(id, ra, dec, mags)
+
+    result.getOrElse(\/.left(MissingValues(missing)))
   }
 }

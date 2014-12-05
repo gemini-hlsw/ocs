@@ -2,11 +2,11 @@ package edu.gemini.catalog.votable
 
 import edu.gemini.spModel.core.Target.SiderealTarget
 
-import scalaz.\/
+import scalaz.{\/-, \/}
 
 case class UcdWord(token: String)
 case class Ucd(tokens: List[UcdWord]) {
-  def includes(ucd: UcdWord): Boolean = tokens.find(_ == ucd).nonEmpty
+  def includes(ucd: UcdWord): Boolean = tokens.contains(ucd)
 }
 
 object Ucd {
@@ -37,7 +37,7 @@ case class ParsedResource(tables: List[ParsedTable]) {
 case class TargetsTable(rows: List[SiderealTarget])
 
 object TargetsTable {
-  def apply(t: ParsedTable): TargetsTable = TargetsTable(t.rows.filter(_.isRight).map(_.toOption).flatten)
+  def apply(t: ParsedTable): TargetsTable = TargetsTable(t.rows.collect { case \/-(r) => r })
 }
 
 case class Resource(tables: List[TargetsTable])

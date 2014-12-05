@@ -14,12 +14,12 @@ object MagnitudeBand {
 
   case object U  extends MagnitudeBand("U", 365, "ultraviolet")
   case object B  extends MagnitudeBand("B", 445, "blue")
-  case object G  extends MagnitudeBand("G", 520) // TBD Wavelength to be confirmed
+  case object G  extends MagnitudeBand("G", 477)
   case object V  extends MagnitudeBand("V", 551, "visual")
   case object UC extends MagnitudeBand("UC",610, "UCAC") // unknown FWHM
   case object R  extends MagnitudeBand("R", 658, "red")
   case object I  extends MagnitudeBand("I", 806, "infrared")
-  case object Z  extends MagnitudeBand("Z", 910) // TBD Wavelength to be confirmed
+  case object Z  extends MagnitudeBand("Z", 913)
   case object Y  extends MagnitudeBand("Y", 1020)
   case object J  extends MagnitudeBand("J", 1220)
   case object H  extends MagnitudeBand("H", 1630)
