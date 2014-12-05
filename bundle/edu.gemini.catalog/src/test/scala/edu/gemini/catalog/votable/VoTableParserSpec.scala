@@ -204,7 +204,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
                 TableRowItem(FieldDescriptor("dej2000", "dej2000", Ucd("pos.eq.dec;meta.main")), "0.209323681906") ::
                 TableRowItem(FieldDescriptor("raj2000", "raj2000", Ucd("pos.eq.ra;meta.main")), "ABC") :: Nil
             )
-      tableRow2Target(rowWithBadRa) should beEqualTo(-\/(FormattingProblem(VoTableParser.RA, "ABC")))
+      tableRow2Target(rowWithBadRa) should beEqualTo(-\/(FieldValueProblem(VoTableParser.RA, "ABC")))
     }
     "be able to parse magnitudes" in {
       val iMagField = FieldDescriptor("imag", "imag", Ucd("phot.mag;em.opt.i"))
@@ -216,7 +216,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       parseMagnitude((badField, "id")) should beEqualTo(-\/(UnmatchedField(badField)))
 
       // Bad value
-      parseMagnitude((iMagField, "stringValue")) should beEqualTo(-\/(FormattingProblem(iMagField, "stringValue")))
+      parseMagnitude((iMagField, "stringValue")) should beEqualTo(-\/(FieldValueProblem(iMagField, "stringValue")))
 
       // Unknown magnitude
       val noBandField = FieldDescriptor("pmag", "pmag", Ucd("phot.mag;em.opt.p"))
@@ -231,8 +231,8 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
         \/-(SiderealTarget("-2140404569", Coordinates(RightAscension.fromDegrees(359.749274134), Declination.fromAngle(Angle.parseDegrees("0.210251239819").getOrElse(Angle.zero)).getOrElse(Declination.zero)), Equinox.J2000, None, magsTarget2, None))
       ))
       // There is only one table
-      VoTableParser.parse(voTable).tables(0) should beEqualTo(result)
-      VoTableParser.parse(voTable).tables(0).containsError should beFalse
+      parse(voTable).tables(0) should beEqualTo(result)
+      parse(voTable).tables(0).containsError should beFalse
     }
     "be able to validate and parse an xml" in {
       val badXml = "votable-non-validating.xml"

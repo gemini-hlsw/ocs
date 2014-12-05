@@ -59,7 +59,7 @@ sealed trait CatalogProblem
 
 case class ValidationError(url: String) extends CatalogProblem
 case class MissingValues(fields: List[FieldDescriptor]) extends CatalogProblem
-case class FormattingProblem(field: FieldDescriptor, value: String) extends CatalogProblem
+case class FieldValueProblem(field: FieldDescriptor, value: String) extends CatalogProblem
 case class UnmatchedField(field: FieldDescriptor) extends CatalogProblem
 
 object VoTableParser extends VoTableParser {
@@ -76,19 +76,7 @@ object VoTableParser extends VoTableParser {
   val STAT_ERR = UcdWord("stat.error")
 
   val xsd = "/votable-1.2.xsd"
-
-  /**
-   * Takes an XML Node and attempt to extract the resources and targets from a VOBTable
-   */
-  def parse(xml: Node): ParsedResource = {
-    val tables = for {
-      table <- xml \\ "TABLE"
-      fields = parseFields(table)
-      tr = parseTableRows(fields, table)
-    } yield ParsedTable(tr.map(tableRow2Target).toList)
-    ParsedResource(tables.toList)
-  }
-
+  
   private def validate(xmlFile: InputStream):Try[String] = Try {
     import javax.xml.transform.stream.StreamSource
     import javax.xml.validation.SchemaFactory
@@ -105,10 +93,13 @@ object VoTableParser extends VoTableParser {
     xmlText
   }
 
+  /**
+   * parse takes an input stream and attempts to read the xml content and convert it to a VoTable resource
+   */
   def parse(url: String, is: InputStream): CatalogProblem \/ ParsedResource = {
     validate(is) match {
       case scala.util.Success(s) => \/-(parse(XML.loadString(s)))
-      case scala.util.Failure(e) => -\/(ValidationError(url))
+      case scala.util.Failure(_) => -\/(ValidationError(url))
     }
   }
 }
@@ -156,7 +147,7 @@ trait VoTableParser {
     def parseValue(f: FieldDescriptor, s: String): CatalogProblem \/ Double =
       Try(s.toDouble) match {
         case scala.util.Success(d) => \/-(d)
-        case scala.util.Failure(e) => -\/(FormattingProblem(f, s))
+        case scala.util.Failure(e) => -\/(FieldValueProblem(f, s))
       }
 
     val magRegex = """em.opt.(\w)""".r
@@ -171,6 +162,18 @@ trait VoTableParser {
       b <- band.headOption.flatten \/> UnmatchedField(field)
       v <- parseValue(field, value)
     } yield new Magnitude(v, b)
+  }
+  
+  /**
+   * Takes an XML Node and attempts to extract the resources and targets from a VOBTable
+   */
+  protected def parse(xml: Node): ParsedResource = {
+    val tables = for {
+      table <- xml \\ "TABLE"
+      fields = parseFields(table)
+      tr = parseTableRows(fields, table)
+    } yield ParsedTable(tr.map(tableRow2Target).toList)
+    ParsedResource(tables.toList)
   }
 
   /**
@@ -189,9 +192,9 @@ trait VoTableParser {
       dec <- entries.get(VoTableParser.DEC)
       mag =  entries.filter(magnitudeField).map(parseMagnitude).toList.partition(p => p.isRight)
     } yield for {
-        r           <- Angle.parseDegrees(ra).leftMap(_ => FormattingProblem(VoTableParser.RA, ra))
-        d           <- Angle.parseDegrees(dec).leftMap(_ => FormattingProblem(VoTableParser.DEC, dec))
-        declination <- Declination.fromAngle(d) \/> FormattingProblem(VoTableParser.DEC, dec)
+        r           <- Angle.parseDegrees(ra).leftMap(_ => FieldValueProblem(VoTableParser.RA, ra))
+        d           <- Angle.parseDegrees(dec).leftMap(_ => FieldValueProblem(VoTableParser.DEC, dec))
+        declination <- Declination.fromAngle(d) \/> FieldValueProblem(VoTableParser.DEC, dec)
         coordinates  = Coordinates(RightAscension.fromAngle(r), declination)
         _           <- mag._2.headOption.getOrElse(\/-(true)) // Will stop the loop if an error is present
         magnitudes   = mag._1.map(_.toOption).flatten
