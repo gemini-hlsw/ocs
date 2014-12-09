@@ -36,6 +36,7 @@ public final class Magnitude implements Comparable, Serializable {
         M(4750),
         N(10000),
         Q(16000),
+        AP(None.INTEGER, new Some<>("apparent"))
         ;
 
         /**
