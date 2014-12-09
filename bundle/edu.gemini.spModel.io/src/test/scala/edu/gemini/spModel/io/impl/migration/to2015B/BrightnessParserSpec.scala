@@ -74,7 +74,7 @@ object BrightnessParserSpec extends Specification {
   "Brightness Parser" should {
       cases.foreach { case (s, ms) =>
         "parse " + s in {
-          BrightnessParser.parseBrightness(s) must_== Some(ms)
+          BrightnessParser.parseBrightness(s) must beSome(ms)
         }
       }
   }
