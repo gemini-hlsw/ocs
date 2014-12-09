@@ -23,6 +23,6 @@ OsgiKeys.dynamicImportPackage := Seq("")
 OsgiKeys.exportPackage := Seq(
   "edu.gemini.too.window",
   "edu.gemini.too.email")
-        
-OsgiKeys.privatePackage := Seq("edu.gemini.too.*")
+
+OsgiKeys.privatePackage := Seq("edu.gemini.too.email.*", "edu.gemini.too.window.*")
 
