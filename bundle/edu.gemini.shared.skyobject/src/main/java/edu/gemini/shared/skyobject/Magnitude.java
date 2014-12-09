@@ -39,19 +39,6 @@ public final class Magnitude implements Comparable, Serializable {
         ;
 
         /**
-         * A Comparator of magnitude bands based upon the name of the
-         * band.  The default ordering is in terms of increasing wavelength.
-         * This comparator can be used to sort passbands based upon an
-         * alphabetical sorting.
-         */
-        public static final Comparator<Band> NAME_COMPARATOR =
-            new Comparator<Band>() {
-                @Override public int compare(Band b1, Band b2) {
-                    return b1.name().compareTo(b2.name());
-                }
-            };
-
-        /**
          * A Comparator of magnitude bands based upon the associated
          * wavelength.
          */
@@ -80,10 +67,6 @@ public final class Magnitude implements Comparable, Serializable {
         Band(int mid, String desc) {
             this.wavelengthMidPoint = new Some<>(mid);
             this.description = (desc == null) ? None.STRING : new Some<>(desc);
-        }
-
-        public Option<Integer> getWavelengthMidPoint() {
-            return wavelengthMidPoint;
         }
 
         public Option<String> getDescription() {
