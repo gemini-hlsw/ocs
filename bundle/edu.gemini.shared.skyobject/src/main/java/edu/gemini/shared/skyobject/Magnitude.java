@@ -36,9 +36,6 @@ public final class Magnitude implements Comparable, Serializable {
         M(4750),
         N(10000),
         Q(16000),
-// REL-549: Remove "AB" and "Jy" Band enum values from the model since they are actually "system" options.
-//        AB(None.INTEGER, None.STRING),
-//        Jy(None.INTEGER, None.STRING),
         ;
 
         /**
@@ -81,8 +78,8 @@ public final class Magnitude implements Comparable, Serializable {
         }
 
         Band(int mid, String desc) {
-            this.wavelengthMidPoint = new Some<Integer>(mid);
-            this.description = (desc == null) ? None.STRING : new Some<String>(desc);
+            this.wavelengthMidPoint = new Some<>(mid);
+            this.description = (desc == null) ? None.STRING : new Some<>(desc);
         }
 
         public Option<Integer> getWavelengthMidPoint() {
