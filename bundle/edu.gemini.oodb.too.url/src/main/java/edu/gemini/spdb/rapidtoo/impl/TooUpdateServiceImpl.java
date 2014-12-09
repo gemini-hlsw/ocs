@@ -279,8 +279,6 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
                         target.setXY(gs.getRa(), gs.getDec());
                         String name = gs.getName();
                         if (name != null) target.setName(name);
-                        String mag = gs.getMagnitude();
-                        if (mag != null) target.setBrightness(mag);
 
                         if (targetOpt.isEmpty()) {
                             ImList<SPTarget> lst = gt.getOptions().cons(target);

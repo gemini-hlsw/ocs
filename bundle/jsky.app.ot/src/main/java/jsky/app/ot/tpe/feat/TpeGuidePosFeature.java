@@ -135,9 +135,6 @@ public class TpeGuidePosFeature extends TpePositionFeature
 
             pos = new SPTarget(ra, dec);
             if (tme.name != null) pos.setName(tme.name);
-
-            Option<String> bString = tme.getBrightness();
-            if (!bString.isEmpty()) pos.setBrightness(bString.getValue());
         }
 
         return pos;
