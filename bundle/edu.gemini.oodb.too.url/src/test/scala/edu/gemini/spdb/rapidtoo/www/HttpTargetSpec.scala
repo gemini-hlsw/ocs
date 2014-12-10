@@ -20,12 +20,12 @@ object HttpTargetSpec extends Specification with ScalaCheck with Arbitraries {
 
   // a valid request
   val req = MockRequest(
-    "target" -> "banana",
-    "ra"     -> "10",
-    "dec"    -> "20",
-    "gstarget" -> "banana",
-    "gsra"     -> "10",
-    "gsdec"    -> "20",
+    "target"   -> "banana",
+    "ra"       -> "10",
+    "dec"      -> "20",
+    "gstarget" -> "manzana",
+    "gsra"     -> "30",
+    "gsdec"    -> "40",
     "gsprobe"  -> "PWFS1"
   )
 
