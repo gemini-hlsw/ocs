@@ -7,8 +7,10 @@ import java.util.Locale
 import javax.servlet.{RequestDispatcher, ServletInputStream}
 import javax.servlet.http.{Cookie, HttpSession, HttpServletRequest}
 
+import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.spModel.core.{Angle, Declination, RightAscension}
 import edu.gemini.spdb.rapidtoo.TooGuideTarget.GuideProbe
+import edu.gemini.shared.util.immutable.ScalaConverters._
 
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
@@ -80,6 +82,14 @@ object HttpTargetSpec extends Specification with ScalaCheck with Arbitraries {
     "Dec: Fail on Missing" in {
       mustFail(req without "dec")
     }
+    "Mags: Parse Magnitudes" ! forAll { (ms: List[Magnitude]) =>
+      val s = ms.map(m => s"${m.getBrightness}/${m.getBand}/${m.getSystem}").mkString(",")
+      val t = new HttpTooTarget(req.modifiedWith("mags" -> s))
+      t.getMagnitudes must_== ms.asImList
+    }
+    "Mags: Fail on Malformed" in {
+      mustFail(req.modifiedWith("mags" -> "fluffy"))
+    }
 
   }
 
@@ -148,6 +158,14 @@ object HttpTargetSpec extends Specification with ScalaCheck with Arbitraries {
     }
     "Probe: Fail on Missing" in {
       mustFail(req without "gsprobe")
+    }
+    "Mags: Parse Magnitudes" ! forAll { (ms: List[Magnitude]) =>
+      val s = ms.map(m => s"${m.getBrightness}/${m.getBand}/${m.getSystem}").mkString(",")
+      val t = new HttpTooGuideTarget(req.modifiedWith("gsmags" -> s))
+      t.getMagnitudes must_== ms.asImList
+    }
+    "Mags: Fail on Malformed" in {
+      mustFail(req.modifiedWith("gsmags" -> "fluffy"))
     }
 
   }

@@ -4,6 +4,7 @@ import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.shared.skyobject.Magnitude.{ Band, System }
 import edu.gemini.spModel.core.{ Angle, RightAscension, Declination }
 import edu.gemini.spdb.rapidtoo.TooGuideTarget.GuideProbe
+
 import org.scalacheck._
 import org.scalacheck.Gen._
 import org.scalacheck.Arbitrary._
@@ -28,7 +29,7 @@ trait Arbitraries {
   implicit val arbMagnitude: Arbitrary[Magnitude] =
     Arbitrary {
       for {
-        value  <- arbitrary[Double]
+        value  <- arbitrary[Short].map(n => n / 10.0)
         band   <- arbitrary[Band]
         system <- arbitrary[System]
       } yield new Magnitude(band, value, system)

@@ -29,6 +29,7 @@ public abstract class HttpTarget implements TooTarget {
     public static final String TARGET_NAME_PARAM = "target";
     public static final String TARGET_RA_PARAM   = "ra";
     public static final String TARGET_DEC_PARAM  = "dec";
+    public static final String TARGET_MAGS_PARAM = "mags";
 
     private static Double parseRa(String val) throws BadRequestException {
         try {
@@ -61,6 +62,7 @@ public abstract class HttpTarget implements TooTarget {
     private final String _name;
     private final double _ra;
     private final double _dec;
+    private final ImList<Magnitude> _mags;
 
     protected String getParameter(HttpServletRequest req, String key, String defaultValue)
             throws BadRequestException {
@@ -85,6 +87,7 @@ public abstract class HttpTarget implements TooTarget {
         _name   = getParameter(req, TARGET_NAME_PARAM, defaultName);
         _ra     = parseRa(getParameter(req, TARGET_RA_PARAM, null));
         _dec    = parseDec(getParameter(req, TARGET_DEC_PARAM, null));
+        _mags   = new MagParser().unsafeParse(getParameter(req, TARGET_MAGS_PARAM, ""));
     }
 
     public String getName() {
@@ -100,7 +103,7 @@ public abstract class HttpTarget implements TooTarget {
     }
 
     public ImList<Magnitude> getMagnitudes() {
-        return DefaultImList.create();
+        return _mags;
     }
 
 
