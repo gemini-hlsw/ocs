@@ -23,95 +23,24 @@ import javax.servlet.http.HttpServletRequest;
  * <li>gsmag - magnitude of the guide star</li>
  * </ul>
  */
-public class HttpTooGuideTarget implements TooGuideTarget {
-    public static final String TARGET_NAME_PARAM = "gstarget";
-    public static final String TARGET_RA_PARAM   = "gsra";
-    public static final String TARGET_DEC_PARAM  = "gsdec";
+public class HttpTooGuideTarget extends HttpTarget implements TooGuideTarget {
 
-    public static final String TARGET_GUIDE_PROBE_PARAM = "gsprobe";
-    public static final String TARGET_MAGNITUDE_PARAM   = "gsmag";
+    public static final String TARGET_GUIDE_PROBE_PARAM = "probe";
 
-    /**
-     * Creates an HttpTooGuideTarget, if the appropriate parameters are in the
-     * supplied request.  Guide star specifications are required (including the
-     * probe, ra, and dec). If the name is missing, it will default to "GS".
-     * If the magnitude is missing, it will be ignored.
-     *
-     * @return the corresponding HttpTooGuideTarget
-     *
-     * @throws edu.gemini.spdb.rapidtoo.www.BadRequestException if the request
-     * parameters cannot be parsed into a valid
-     * {@link edu.gemini.spdb.rapidtoo.www.HttpTooGuideTarget}
-     */
-    public static HttpTooGuideTarget create(HttpServletRequest req)
-            throws BadRequestException {
-        Double ra  = HttpTooTarget.parseRa(req, TARGET_RA_PARAM);
-        if (ra == null) {
-            throw new BadRequestException("missing '" + TARGET_RA_PARAM + "'");
-        }
-        Double dec = HttpTooTarget.parseDec(req, TARGET_DEC_PARAM);
-        if (dec == null) {
-            throw new BadRequestException("missing '" + TARGET_DEC_PARAM + "'");
-        }
-
-        String probeStr = req.getParameter(TARGET_GUIDE_PROBE_PARAM);
-        if (probeStr == null) {
-            throw new BadRequestException("missing '" + TARGET_GUIDE_PROBE_PARAM + "'");
-        }
-        TooGuideTarget.GuideProbe probe;
-        try {
-            probe = TooGuideTarget.GuideProbe.valueOf(probeStr);
-        } catch (Exception ex) {
-            throw new BadRequestException("cannot parse the guide probe \"" +
-                                           probeStr + "\"");
-        }
-
-        String name = req.getParameter(TARGET_NAME_PARAM);
-        if (name == null) name = "GS";  // default to GS
-        name = name.trim();
-        if ("".equals(name)) name = "GS";
-
-        String mag  = req.getParameter(TARGET_MAGNITUDE_PARAM);
-
-        return new HttpTooGuideTarget(probe, name, ra, dec, mag);
-    }
-
-    private String _name;
-    private double _ra;
-    private double _dec;
-    private String _mag;
     private TooGuideTarget.GuideProbe _probe;
 
-    /**
-     * Constructs with the servlet request.
-     *
-     */
-    private HttpTooGuideTarget(TooGuideTarget.GuideProbe probe, String name,
-                               double ra, double dec, String mag) {
-        _probe = probe;
-        _name  = name;
-        _ra    = ra;
-        _dec   = dec;
-        _mag   = mag;
-    }
-
-    public String getName() {
-        return _name;
-    }
-
-    public double getRa() {
-        return _ra;
-    }
-
-    public double getDec() {
-        return _dec;
+    public HttpTooGuideTarget(HttpServletRequest req) throws BadRequestException {
+        super("gs", "GS", req);
+        String probeStr = getParameter(req, TARGET_GUIDE_PROBE_PARAM, null);
+        try {
+            _probe = TooGuideTarget.GuideProbe.valueOf(probeStr);
+        } catch (Exception ex) {
+            throw new BadRequestException("cannot parse the guide probe \"" + probeStr + "\"");
+        }
     }
 
     public TooGuideTarget.GuideProbe getGuideProbe() {
         return _probe;
     }
 
-    public String getMagnitude() {
-        return _mag;
-    }
 }
