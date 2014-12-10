@@ -12,7 +12,7 @@ import scalaz._
 import Scalaz._
 
 object VoTableParser extends VoTableParser {
-  type CatalogResult = CatalogProblem \/ ParsedResource
+  type CatalogResult = CatalogProblem \/ ParsedVoResource
 
   val UCD_OBJID = Ucd("meta.id;meta.main")
   val UCD_RA = Ucd("pos.eq.ra;meta.main")
@@ -110,13 +110,13 @@ trait VoTableParser {
   /**
    * Takes an XML Node and attempts to extract the resources and targets from a VOBTable
    */
-  protected def parse(xml: Node): ParsedResource = {
+  protected def parse(xml: Node): ParsedVoResource = {
     val tables = for {
       table <- xml \\ "TABLE"
       fields = parseFields(table)
       tr = parseTableRows(fields, table)
     } yield ParsedTable(tr.map(tableRow2Target).toList)
-    ParsedResource(tables.toList)
+    ParsedVoResource(tables.toList)
   }
 
   /**
