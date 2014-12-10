@@ -12,6 +12,7 @@ import scalaz._
 import Scalaz._
 
 object VoTableParser extends VoTableParser {
+  type CatalogResult = CatalogProblem \/ ParsedResource
 
   val UCD_OBJID = Ucd("meta.id;meta.main")
   val UCD_RA = Ucd("pos.eq.ra;meta.main")
@@ -45,8 +46,8 @@ object VoTableParser extends VoTableParser {
   /**
    * parse takes an input stream and attempts to read the xml content and convert it to a VoTable resource
    */
-  def parse(url: String, is: InputStream): CatalogProblem \/ ParsedResource =
-    validate(is).fold(_ => \/.left(ValidationError(url)), r => \/.right(parse(XML.loadString(r))))
+  def parse(url: String, is: InputStream): CatalogResult =
+    validate(is).fold(k => \/.left(ValidationError(url)), r => \/.right(parse(XML.loadString(r))))
 }
 
 trait VoTableParser {

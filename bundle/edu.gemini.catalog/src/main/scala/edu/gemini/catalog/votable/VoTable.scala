@@ -50,6 +50,7 @@ object Resource {
 sealed trait CatalogProblem
 
 case class ValidationError(url: String) extends CatalogProblem
+case class GenericError(msg: String) extends CatalogProblem
 case class MissingValues(fields: List[FieldDescriptor]) extends CatalogProblem
 case class FieldValueProblem(field: FieldDescriptor, value: String) extends CatalogProblem
 case class UnmatchedField(field: FieldDescriptor) extends CatalogProblem
