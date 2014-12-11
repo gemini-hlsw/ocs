@@ -31,7 +31,7 @@ object To2015B {
   )
 
   // Remove JNNNN and APPARENT coordinate systems and replace unceremoniously with J2000.
-  // These appear only in engineering and commissioning, each only once. So not a big deal.
+  // These appear only in engineering and commissioning, each only once. BNNNN is unused.
   private def uselessSystemsToJ2000(d: Document): Unit = {
     val systems = Set("JNNNN", "BNNNN", "Apparent")
     val names = Set("base", "spTarget")
