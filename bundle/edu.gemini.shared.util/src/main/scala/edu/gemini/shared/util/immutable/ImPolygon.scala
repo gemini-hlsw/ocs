@@ -11,18 +11,25 @@ import java.awt.geom._
  * @param points the points, in order, representing the vertices of the polygon, which is assumed to be closed
  *               and thus does not require the first point to also be the last.
  */
-class ImPolygon(points: List[(Double,Double)]) extends Shape with Cloneable with Serializable {
+case class ImPolygon(points: List[(Double,Double)] = Nil) extends Shape {
   // Calculate the path.
-  val path = new GeneralPath()
-  points.headOption.map { case (x, y) => path.moveTo(x, y)}
-  points.drop(1).map { case (x, y) => path.lineTo(x, y)}
+  private val closedPath = {
+    val pathOption = points.headOption.map {
+      case(x,y) =>
+        val path = new GeneralPath()
+        path.moveTo(x,y)
+        path
+    }
 
-  // Store the closed path, if there are points.
-  val closedPath = points.headOption.map(_ => path.clone.asInstanceOf[GeneralPath])
-  closedPath.foreach(_.closePath())
+    pathOption.foreach { path => {
+      points.drop(1).foreach { case (x,y) => path.lineTo(x,y) } }
+      path.closePath()
+    }
+    pathOption
+  }
 
   // Calculate the bounds.
-  val bounds = path.getBounds
+  private val bounds = closedPath.getOrElse(new GeneralPath()).getBounds
 
   override def getBounds: Rectangle =
     bounds
@@ -63,13 +70,6 @@ class ImPolygon(points: List[(Double,Double)]) extends Shape with Cloneable with
 }
 
 object ImPolygon {
-  def apply(): ImPolygon =
-    new ImPolygon(Nil)
-
-  def apply(points: List[(Double,Double)]): ImPolygon = {
-    new ImPolygon(points)
-  }
-
   def apply(rect: Rectangle2D): ImPolygon = {
     val points = for {
       x <- List(rect.getMinX, rect.getMaxX)
