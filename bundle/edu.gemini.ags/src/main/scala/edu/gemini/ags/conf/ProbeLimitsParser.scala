@@ -65,7 +65,7 @@ import ProbeLimitsParser._
 
 final class ProbeLimitsParser extends JavaTokenParsers {
   val id: Parser[MagLimitsId] = """[^,]+""".r ^? (idMap, s => s"Unrecognized guide limit table id '$s'.")
-  val band: Parser[Band]      = """[A-Z]+""".r ^? (bandMap, s => s"Unrecognized magnitude band '$s'.")
+  val band: Parser[Band]      = """[a-zA-Z]+""".r ^? (bandMap, s => s"Unrecognized magnitude band '$s'.")
   val mag: Parser[Double]     = decimalNumber ^^ { _.toDouble }
 
   // When exported by the Google spreadsheet, there are commas in the blank

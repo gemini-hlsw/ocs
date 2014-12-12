@@ -12,6 +12,13 @@ sealed abstract class MagnitudeBand private (val name: String, val wavelengthMid
 
 object MagnitudeBand {
 
+  // OCSADV-203
+  case object u extends MagnitudeBand("u", 350, "UV")
+  case object g extends MagnitudeBand("g", 475, "green")
+  case object r extends MagnitudeBand("r", 630, "red")
+  case object i extends MagnitudeBand("i", 780, "far red")
+  case object z extends MagnitudeBand("z", 925, "near-infrared")
+
   case object U  extends MagnitudeBand("U", 365, "ultraviolet")
   case object B  extends MagnitudeBand("B", 445, "blue")
   case object G  extends MagnitudeBand("G", 477)
