@@ -36,23 +36,8 @@ public final class Magnitude implements Comparable, Serializable {
         M(4750),
         N(10000),
         Q(16000),
-// REL-549: Remove "AB" and "Jy" Band enum values from the model since they are actually "system" options.
-//        AB(None.INTEGER, None.STRING),
-//        Jy(None.INTEGER, None.STRING),
+        AP(None.INTEGER, new Some<>("apparent"))
         ;
-
-        /**
-         * A Comparator of magnitude bands based upon the name of the
-         * band.  The default ordering is in terms of increasing wavelength.
-         * This comparator can be used to sort passbands based upon an
-         * alphabetical sorting.
-         */
-        public static final Comparator<Band> NAME_COMPARATOR =
-            new Comparator<Band>() {
-                @Override public int compare(Band b1, Band b2) {
-                    return b1.name().compareTo(b2.name());
-                }
-            };
 
         /**
          * A Comparator of magnitude bands based upon the associated
@@ -81,12 +66,8 @@ public final class Magnitude implements Comparable, Serializable {
         }
 
         Band(int mid, String desc) {
-            this.wavelengthMidPoint = new Some<Integer>(mid);
-            this.description = (desc == null) ? None.STRING : new Some<String>(desc);
-        }
-
-        public Option<Integer> getWavelengthMidPoint() {
-            return wavelengthMidPoint;
+            this.wavelengthMidPoint = new Some<>(mid);
+            this.description = (desc == null) ? None.STRING : new Some<>(desc);
         }
 
         public Option<String> getDescription() {

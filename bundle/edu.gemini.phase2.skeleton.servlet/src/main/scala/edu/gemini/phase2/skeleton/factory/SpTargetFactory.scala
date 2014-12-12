@@ -57,6 +57,12 @@ object SpTargetFactory {
 
       val spTarget = new SP.SPTarget(itarget)
       spTarget.setName(nsid.name)
+
+      // Add apparent magnitude, if any.
+      nsid.magnitude(time)
+        .map(new SO.Magnitude(SO.Magnitude.Band.AP, _))
+        .foreach(spTarget.putMagnitude)
+
       spTarget
     }
 

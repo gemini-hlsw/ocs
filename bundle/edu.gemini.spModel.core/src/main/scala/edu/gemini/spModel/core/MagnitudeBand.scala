@@ -1,12 +1,12 @@
 package edu.gemini.spModel.core
 
-sealed abstract class MagnitudeBand private (val name: String, val wavelengthMidPointNm: Int, val description: Option[String]) extends Product with Serializable {
+sealed abstract class MagnitudeBand private (val name: String, val wavelengthMidPointNm: Option[Int], val description: Option[String]) extends Product with Serializable {
 
   private def this(name: String, wavelengthMidPointNm: Int) =
-    this(name, wavelengthMidPointNm, None)
+    this(name, Some(wavelengthMidPointNm), None)
 
   private def this(name: String, wavelengthMidPointNm: Int, description: String) =
-    this(name, wavelengthMidPointNm, Some(description))
+    this(name, Some(wavelengthMidPointNm), Some(description))
 
 }
 
@@ -29,8 +29,10 @@ object MagnitudeBand {
   case object N  extends MagnitudeBand("N", 10000)
   case object Q  extends MagnitudeBand("Q", 16000)
 
+  case object AP extends MagnitudeBand("AP", None, Some("apparent"))
+
   val all: List[MagnitudeBand] =
-    List(U, B, G, V, UC, R, I, Z, Y, J, H, K, L, M, N, Q)
+    List(U, B, G, V, UC, R, I, Z, Y, J, H, K, L, M, N, Q, AP)
 
   implicit val MagnitudeBandOrder: scalaz.Order[MagnitudeBand] =
     scalaz.Order.orderBy(_.wavelengthMidPointNm)
