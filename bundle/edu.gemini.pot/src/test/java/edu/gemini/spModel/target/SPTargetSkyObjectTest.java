@@ -80,14 +80,8 @@ public final class SPTargetSkyObjectTest {
                 case HmsDegTarget.SystemType._B1950:
                     assertEquals(Epoch.B1950, e);
                     break;
-                case HmsDegTarget.SystemType._BNNNN:
-                    assertEquals(Epoch.Type.BESSELIAN, e.getType());
-                    break;
                 case HmsDegTarget.SystemType._J2000:
                     assertEquals(Epoch.J2000, e);
-                    break;
-                case HmsDegTarget.SystemType._JNNNN:
-                    assertEquals(Epoch.Type.JULIAN, e.getType());
                     break;
                 default:
                     fail();

@@ -57,20 +57,6 @@ public final class HmsDegTargetCase {
         assertEquals("Dec failed: ", decExpect, _t1.c2ToString());
     }
 
-
-    private void _doFk5PrecessTest(String raIn, String decIn, double epoch0,
-                                   String raExpect, String decExpect) {
-        _t1.setC1C2(raIn, decIn);
-        _t1.setSystemOption(HmsDegTarget.SystemType.JNNNN);
-        Epoch e = new Epoch(epoch0);
-        HmsDegTarget t1 = (HmsDegTarget) _t1;
-        t1.setEpoch(e);
-        HmsDegTarget nhms = _t1.getTargetAsJ2000();
-
-        assertEquals(" RA failed: ", raExpect, nhms.c1ToString());
-        assertEquals("Dec failed: ", decExpect, nhms.c2ToString());
-    }
-
     // Create targets of various types
     @Test
     public void testSimple() {
@@ -113,19 +99,6 @@ public final class HmsDegTargetCase {
         _doJ2000ConvertTest("10:0:0.0", "-60:0:0.0", "09:58:24.203", "-59:45:33.56");
         _doJ2000ConvertTest("16:0:0.0", "-80:0:0.0", "15:52:03.654", "-79:51:23.66");
         _doJ2000ConvertTest("22:0:0.0", "-40:0:0.0", "21:56:57.744", "-40:14:24.83");
-    }
-
-    @Test
-    public void testFKPrecessConversion() {
-        double epoch = 1972.0;
-        _doFk5PrecessTest("0:0:0.0", "0:0:0.0", epoch, "00:01:26.092", "00:09:21.24");
-        _doFk5PrecessTest("07:0:0.0", "20:0:0.0", epoch, "07:01:39.218", "19:57:32.79");
-        _doFk5PrecessTest("14:0:0.0", "40:0:0.0", epoch, "14:01:10.362", "39:51:54.67");
-        _doFk5PrecessTest("21:0:0.0", "80:0:0.0", epoch, "20:58:54.841", "80:06:35.92");
-        _doFk5PrecessTest("1:0:0.0", "-20:0:0.0", epoch, "01:01:22.542", "-19:50:58.32");
-        _doFk5PrecessTest("8:0:0.0", "-40:0:0.0", epoch, "08:00:58.898", "-40:04:41.66");
-        _doFk5PrecessTest("15:0:0.0", "-60:0:0.0", epoch, "15:02:12.238", "-60:06:34.94");
-        _doFk5PrecessTest("22:0:0.0", "-80:0:0.0", epoch, "22:03:10.196", "-79:51:52.02");
     }
 
     private void _doTestOne(String raIn, String decIn,
