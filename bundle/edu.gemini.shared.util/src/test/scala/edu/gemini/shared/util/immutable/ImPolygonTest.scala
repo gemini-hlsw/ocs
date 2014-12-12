@@ -12,7 +12,9 @@ class ImPolygonTest {
                                               AffineTransform.getRotateInstance(-math.Pi/2),
                                               AffineTransform.getRotateInstance(math.Pi)).map(scala.Option(_))
 
-  // The empty polygon is technically "situated" at the origin, but contains no points.
+  /**
+   * Test a no-point polygon (technically centered at the origin).
+   */
   @Test def testEmptyPolygon(): Unit = {
     val outerPoints       = List((0.0, 0.0))
     val outerAreas        = List((0.0, 0.0, 0.0, 0.0))
@@ -23,7 +25,9 @@ class ImPolygonTest {
                     nonintersectAreas = nonintersectAreas)
   }
 
-  // A single point polygon is still technically empty, as it equates to a translated polygon at (0,0).
+  /**
+   * Test a single point, which has area 0 and as such has no interior and is considered empty.
+   */
   @Test def testEmptyPolygonAddPoint(): Unit = {
     val init        = (50.0, 60.0)
     val points      = List(init)
@@ -32,7 +36,9 @@ class ImPolygonTest {
                     outerPoints = outerPoints)
   }
 
-  // A two point polygon is still technically empty, as it is just a line segment.
+  /**
+   * Test a 2-point polygon, i.e. a line segment, which has area 0 and as such has no interior and is considered empty.
+   */
   @Test def testEmptyPolygonAddTwoPoints(): Unit = {
     val init        = (10.0,  20.0)
     val last        = (110.0, 220.0)
@@ -42,13 +48,20 @@ class ImPolygonTest {
                     outerPoints = outerPoints)
   }
 
+  /**
+   * Run tests for regular n-gons for 3 <= n <= 8 (triangle through to octagon).
+   */
   @Test def testRegularNgons(): Unit = {
     Range(3,9).foreach { n =>
       runRegularNgonTest(n)
     }
   }
 
-  // Create a bizarre shape (a flat-bottomed V face) where the boundary has a lot of empty space in it.
+  /**
+   * Create a bizarre flat-bottomed V shaped polygon with lots of empty space in the boundary, and test
+   * "facial features" that overlap all categories of inner / outer / containment / noncontainment / intersection /
+   * empty intersection.
+   */
   @Test def testV(): Unit = {
     val points      = List((-4.0,  4.0),  (-2.0, 0.0),  (2.0, 0.0), (4.0, 4.0), (0.0, 2.0))
     val innerPoints = List((-3.75, 3.75), (3.75, 3.75), (0.0, 1.75))
@@ -73,10 +86,12 @@ class ImPolygonTest {
     runPolygonTests(points, innerPoints, outerPoints, innerAreas, outerAreas, intersectAreas, nonintersectAreas)
   }
 
-
-  private def runRegularNgonTest(n: Int,
-                         radius: Double = 1.0,
-                         at: scala.Option[AffineTransform] = scala.None): Unit = {
+  /**
+   * Create a regular n-gon of the specified radius, centered at the origin.
+   * @param n the number of vertices in the regular polygon
+   * @param radius the radius of the smallest circle in which the polygon can be inscribed
+   */
+  private def runRegularNgonTest(n: Int, radius: Double = 1.0): Unit = {
     assertTrue(n >= 3)
 
     // Create the points of the regular polygon.
@@ -110,7 +125,19 @@ class ImPolygonTest {
     runPolygonTests(points, innerPoints, outerPoints, innerAreas, outerAreas, intersectAreas, nonintersectAreas)
   }
 
-
+  /**
+   * Run test cases for the polygon described by points, both in terms of creating the ImPolygon with all points
+   * at once, and also in terms of creating the ImPolygon via addPoint, adding one point at a time.
+   * The tests are executed for every translation in the translations member.
+   * @note  Points are of the form (x,y) and areas are rectangular of the form (x,y,w,h).
+   * @param points             the points describing the polygon
+   * @param innerPoints        points to test as belonging to the interior of the polygon
+   * @param outerPoints        points to test as being exterior to the polygon
+   * @param innerAreas         areas to test as being contained within the polygon
+   * @param outerAreas         areas to test as not being contained within the polygon (may intersect)
+   * @param intersectAreas     areas to test as intersecting the polygon
+   * @param nonintersectAreas  areas to test as not intersecting the polygon
+   */
   private def runPolygonTests(points:            List[(Double, Double)],
                               innerPoints:       List[(Double, Double)] = Nil,
                               outerPoints:       List[(Double, Double)] = Nil,
@@ -131,16 +158,22 @@ class ImPolygonTest {
     }
   }
 
-
+  /**
+   * Run all tests for a given polygon and AffineTransform.
+   * Unspecified parameters are the same as in runPolygonTests.
+   * @see   runPolygonTests
+   * @param poly the polygon to test
+   * @param at   the affine transformation to execute, or None if no transformation is to be used
+   */
   private def runPolygonTest(poly: ImPolygon,
-                     points:            List[(Double, Double)],
-                     innerPoints:       List[(Double, Double)],
-                     outerPoints:       List[(Double, Double)],
-                     innerAreas:        List[(Double, Double, Double, Double)],
-                     outerAreas:        List[(Double, Double, Double, Double)],
-                     intersectAreas:    List[(Double, Double, Double, Double)],
-                     nonintersectAreas: List[(Double, Double, Double, Double)],
-                     at: scala.Option[AffineTransform]): Unit = {
+                             points:            List[(Double, Double)],
+                             innerPoints:       List[(Double, Double)],
+                             outerPoints:       List[(Double, Double)],
+                             innerAreas:        List[(Double, Double, Double, Double)],
+                             outerAreas:        List[(Double, Double, Double, Double)],
+                             intersectAreas:    List[(Double, Double, Double, Double)],
+                             nonintersectAreas: List[(Double, Double, Double, Double)],
+                             at: scala.Option[AffineTransform]): Unit = {
     // Confirm that the polygon was created as expected using a PathIterator with a possible transformation.
     def confirmVertices(): Unit = {
       // Transform a point using at.
