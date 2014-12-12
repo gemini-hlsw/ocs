@@ -165,7 +165,7 @@ class ImPolygonTest {
    * @param poly the polygon to test
    * @param at   the affine transformation to execute, or None if no transformation is to be used
    */
-  private def runPolygonTest(poly: ImPolygon,
+  private def runPolygonTest(poly:              ImPolygon,
                              points:            List[(Double, Double)],
                              innerPoints:       List[(Double, Double)],
                              outerPoints:       List[(Double, Double)],
@@ -173,7 +173,7 @@ class ImPolygonTest {
                              outerAreas:        List[(Double, Double, Double, Double)],
                              intersectAreas:    List[(Double, Double, Double, Double)],
                              nonintersectAreas: List[(Double, Double, Double, Double)],
-                             at: scala.Option[AffineTransform]): Unit = {
+                             at:                scala.Option[AffineTransform]): Unit = {
     // Confirm that the polygon was created as expected using a PathIterator with a possible transformation.
     def confirmVertices(): Unit = {
       // Transform a point using at.
@@ -249,7 +249,7 @@ class ImPolygonTest {
     assertFalse(outerAreas.exists(a => poly.contains(a._1, a._2, a._3, a._4)))
 
     // And the intersections.
-    assertTrue (intersectAreas.forall   {a => poly.intersects(a._1, a._2, a._3, a._4)})
+    assertTrue (intersectAreas.forall   (a => poly.intersects(a._1, a._2, a._3, a._4)))
     assertFalse(nonintersectAreas.exists(a => poly.intersects(a._1, a._2, a._3, a._4)))
   }
 }
