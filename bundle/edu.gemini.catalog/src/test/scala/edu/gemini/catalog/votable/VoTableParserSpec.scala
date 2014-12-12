@@ -48,6 +48,51 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
 
     val skyObjects =
       <TABLE>
+        <FIELD ID="flags1" datatype="int" name="flags1" ucd="meta.code"/>
+        <FIELD ID="umag" datatype="double" name="umag" ucd="phot.mag;em.opt.u"/>
+        <FIELD ID="flags2" datatype="int" name="flags2" ucd="meta.code"/>
+        <FIELD ID="imag" datatype="double" name="imag" ucd="phot.mag;em.opt.i"/>
+        <FIELD ID="dej2000" datatype="double" name="dej2000" ucd="pos.eq.dec;meta.main"/>
+        <FIELD ID="raj2000" datatype="double" name="raj2000" ucd="pos.eq.ra;meta.main"/>
+        <FIELD ID="rmag" datatype="double" name="rmag" ucd="phot.mag;em.opt.r"/>
+        <FIELD ID="objid" datatype="int" name="objid" ucd="meta.id;meta.main"/>
+        <FIELD ID="gmag" datatype="double" name="gmag" ucd="phot.mag;em.opt.g"/>
+        <FIELD ID="zmag" datatype="double" name="zmag" ucd="phot.mag;em.opt.z"/>
+        <FIELD ID="type" datatype="int" name="type" ucd="meta.code"/>
+        <DATA>
+          <TABLEDATA>
+            <TR>
+              <TD>268435728</TD>
+              <TD>23.0888</TD>
+              <TD>8208</TD>
+              <TD>20.3051</TD>
+              <TD>0.209323681906</TD>
+              <TD>359.745951955</TD>
+              <TD>20.88</TD>
+              <TD>-2140405448</TD>
+              <TD>22.082</TD>
+              <TD>19.8812</TD>
+              <TD>3</TD>
+            </TR>
+            <TR>
+              <TD>536871168</TD>
+              <TD>23.0853</TD>
+              <TD>65552</TD>
+              <TD>20.7891</TD>
+              <TD>0.210251239819</TD>
+              <TD>359.749274134</TD>
+              <TD>21.7686</TD>
+              <TD>-2140404569</TD>
+              <TD>23.0889</TD>
+              <TD>20.0088</TD>
+              <TD>3</TD>
+            </TR>
+          </TABLEDATA>
+      </DATA>
+    </TABLE>
+
+    val skyObjectsWithErrors =
+      <TABLE>
         <FIELD ID="gmag_err" datatype="double" name="gmag_err" ucd="stat.error;phot.mag;em.opt.g"/>
         <FIELD ID="rmag_err" datatype="double" name="rmag_err" ucd="stat.error;phot.mag;em.opt.r"/>
         <FIELD ID="flags1" datatype="int" name="flags1" ucd="meta.code"/>
@@ -110,6 +155,13 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       <VOTABLE>
         <RESOURCE type="results">
           {skyObjects}
+        </RESOURCE>
+      </VOTABLE>
+
+    val voTableWithErrors =
+      <VOTABLE>
+        <RESOURCE type="results">
+          {skyObjectsWithErrors}
         </RESOURCE>
       </VOTABLE>
 
@@ -206,21 +258,21 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
             )
       tableRow2Target(rowWithBadRa) should beEqualTo(-\/(FieldValueProblem(VoTableParser.RA, "ABC")))
     }
-    "be able to parse magnitudes" in {
+    "be able to parse magnitudes' band" in {
       val iMagField = FieldDescriptor("imag", "imag", Ucd("phot.mag;em.opt.i"))
       // Correct value
-      parseMagnitude((iMagField, "20.3051")) should beEqualTo(\/-(new Magnitude(20.3051, MagnitudeBand.I)))
+      parseBands((iMagField, "20.3051")) should beEqualTo(\/-((MagnitudeBand.I, 20.3051)))
 
       // No magnitude field
       val badField = FieldDescriptor("id", "id", Ucd("meta.name"))
-      parseMagnitude((badField, "id")) should beEqualTo(-\/(UnmatchedField(badField)))
+      parseBands((badField, "id")) should beEqualTo(-\/(UnmatchedField(badField)))
 
       // Bad value
-      parseMagnitude((iMagField, "stringValue")) should beEqualTo(-\/(FieldValueProblem(iMagField, "stringValue")))
+      parseBands((iMagField, "stringValue")) should beEqualTo(-\/(FieldValueProblem(iMagField, "stringValue")))
 
       // Unknown magnitude
       val noBandField = FieldDescriptor("pmag", "pmag", Ucd("phot.mag;em.opt.p"))
-      parseMagnitude((noBandField, "stringValue")) should beEqualTo(-\/(UnmatchedField(noBandField)))
+      parseBands((noBandField, "stringValue")) should beEqualTo(-\/(UnmatchedField(noBandField)))
     }
     "be able to parse an xml into a list of SiderealTargets list of rows with a list of fields" in {
       val magsTarget1 = List(new Magnitude(22.082, MagnitudeBand.G), new Magnitude(20.3051, MagnitudeBand.I), new Magnitude(20.88, MagnitudeBand.R), new Magnitude(23.0888, MagnitudeBand.U), new Magnitude(19.8812, MagnitudeBand.Z))
@@ -233,6 +285,16 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       // There is only one table
       parse(voTable).tables(0) should beEqualTo(result)
       parse(voTable).tables(0).containsError should beFalse
+    }
+    "be able to parse an xml into a list of SiderealTargets including magnitude errors" in {
+      val magsTarget1 = List(new Magnitude(22.082, MagnitudeBand.G, 0.0960165), new Magnitude(20.3051, MagnitudeBand.I, 0.0456069), new Magnitude(20.88, MagnitudeBand.R, 0.0503736), new Magnitude(23.0888, MagnitudeBand.U, 0.518214), new Magnitude(19.8812, MagnitudeBand.Z, 0.138202))
+      val magsTarget2 = List(new Magnitude(23.0889, MagnitudeBand.G, 0.51784), new Magnitude(20.7891, MagnitudeBand.I, 0.161275), new Magnitude(21.7686, MagnitudeBand.R, 0.252201), new Magnitude(23.0853, MagnitudeBand.U, 1.20311), new Magnitude(20.0088, MagnitudeBand.Z, 0.35873))
+
+      val result = ParsedTable(List(
+        \/-(SiderealTarget("-2140405448", Coordinates(RightAscension.fromDegrees(359.745951955), Declination.fromAngle(Angle.parseDegrees("0.209323681906").getOrElse(Angle.zero)).getOrElse(Declination.zero)), Equinox.J2000, None, magsTarget1, None)),
+        \/-(SiderealTarget("-2140404569", Coordinates(RightAscension.fromDegrees(359.749274134), Declination.fromAngle(Angle.parseDegrees("0.210251239819").getOrElse(Angle.zero)).getOrElse(Declination.zero)), Equinox.J2000, None, magsTarget2, None))
+      ))
+      parse(voTableWithErrors).tables(0) should beEqualTo(result)
     }
     "be able to validate and parse an xml" in {
       val badXml = "votable-non-validating.xml"
