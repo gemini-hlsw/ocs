@@ -30,7 +30,6 @@ import edu.gemini.spModel.telescope.PosAngleConstraint;
 import edu.gemini.spModel.telescope.PosAngleConstraintAware;
 import edu.gemini.spModel.util.SPTreeUtil;
 
-
 import java.util.*;
 
 /**
@@ -68,7 +67,7 @@ public final class ObsContext {
     public static Option<Site> getSiteFromInstrument(final SPInstObsComp instrument) {
         if (instrument == null) return None.instance();
         final Set<Site> siteSet = instrument.getSite();
-        return siteSet.size() == 1 ? new Some<Site>(siteSet.iterator().next()) : None.<Site>instance();
+        return siteSet.size() == 1 ? new Some<>(siteSet.iterator().next()) : None.<Site>instance();
     }
 
 
@@ -126,10 +125,10 @@ public final class ObsContext {
         if ((sciencePos != null) && (sciencePos.size() > 0) &&
                 (sciencePos != OffsetUtil.BASE_POS_OFFSET)) {
             // Get an unmodifiable copy of the list.
-            offsets = Collections.unmodifiableSet(new LinkedHashSet<Offset>(sciencePos));
+            offsets = Collections.unmodifiableSet(new LinkedHashSet<>(sciencePos));
         }
         if (aoComp != null) {
-            return new ObsContext(ags, targets, inst, site, conds, offsets, new Some<AbstractDataObject>(aoComp));
+            return new ObsContext(ags, targets, inst, site, conds, offsets, new Some<>(aoComp));
         } else {
             return new ObsContext(ags, targets, inst, site, conds, offsets, None.<AbstractDataObject>instance());
         }
@@ -147,6 +146,7 @@ public final class ObsContext {
      * @ if called from client code and there is a problem
      *                         communicating with the database
      */
+    @SuppressWarnings("rawtypes")
     public static Option<ObsContext> create(ISPObservation obs)  {
         Option<ObsData> opt = ObsData.extract(obs);
         if (opt.isEmpty()) return None.instance();
@@ -162,12 +162,12 @@ public final class ObsContext {
         final List<OffsetPosList<OffsetPosBase>> posLists;
         posLists = OffsetUtil.allOffsetPosLists(obs);
 
-        OffsetPosList[] posListA = new OffsetPosList[posLists.size()];
+        OffsetPosList<OffsetPosBase>[] posListA = (OffsetPosList<OffsetPosBase>[])new OffsetPosList[posLists.size()];
         posListA = posLists.toArray(posListA);
         final Set<Offset> offsets = OffsetUtil.getSciencePositions(posListA);
 
         final SPObservation spObs = (SPObservation) obs.getDataObject();
-        return new Some<ObsContext>(ObsContext.create(spObs.getAgsStrategyOverride(), env, inst, site, conds,
+        return new Some<>(ObsContext.create(spObs.getAgsStrategyOverride(), env, inst, site, conds,
                 offsets, aoCompOpt.getOrNull()));
     }
 
@@ -205,8 +205,8 @@ public final class ObsContext {
             }
 
             if ((target == null) || (inst == null) || (conds == null)) return None.instance();
-            Option<AbstractDataObject> aoOpt = (aoComp == null) ? None.<AbstractDataObject>instance() : new Some<AbstractDataObject>(aoComp);
-            return new Some<ObsData>(new ObsData(target, inst, conds, aoOpt));
+            Option<AbstractDataObject> aoOpt = (aoComp == null) ? None.<AbstractDataObject>instance() : new Some<>(aoComp);
+            return new Some<>(new ObsData(target, inst, conds, aoOpt));
         }
     }
 

@@ -29,7 +29,7 @@ case class TableRow(items: List[TableRowItem]) {
 case class ParsedTable(rows: List[CatalogProblem \/ SiderealTarget]) {
   def containsError: Boolean = rows.exists(_.isLeft)
 }
-case class ParsedResource(tables: List[ParsedTable]) {
+case class ParsedVoResource(tables: List[ParsedTable]) {
   def containsError: Boolean = tables.exists(_.containsError)
 }
 
@@ -40,16 +40,17 @@ object TargetsTable {
   def apply(t: ParsedTable): TargetsTable = TargetsTable(t.rows.collect { case \/-(r) => r })
 }
 
-case class Resource(tables: List[TargetsTable])
+case class VoResource(tables: List[TargetsTable])
 
-object Resource {
-  def apply(r: ParsedResource):Resource = Resource(r.tables.map(TargetsTable.apply))
+object VoResource {
+  def apply(r: ParsedVoResource):VoResource = VoResource(r.tables.map(TargetsTable.apply))
 }
 
 /** Indicates an issue parsing the targets, e.g. missing values, bad format, etc. */
 sealed trait CatalogProblem
 
 case class ValidationError(url: String) extends CatalogProblem
+case class GenericError(msg: String) extends CatalogProblem
 case class MissingValues(fields: List[FieldDescriptor]) extends CatalogProblem
 case class FieldValueProblem(field: FieldDescriptor, value: String) extends CatalogProblem
 case class UnmatchedField(field: FieldDescriptor) extends CatalogProblem
