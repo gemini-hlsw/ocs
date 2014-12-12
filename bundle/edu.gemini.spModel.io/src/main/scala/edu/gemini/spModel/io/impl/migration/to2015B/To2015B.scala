@@ -9,7 +9,7 @@ import edu.gemini.spModel.io.impl.SpIOTags
 import edu.gemini.spModel.obscomp.SPNote
 
 import edu.gemini.spModel.pio.xml.PioXmlFactory
-import edu.gemini.spModel.pio.{ Document, Container, ParamSet, Param }
+import edu.gemini.spModel.pio.{ Document, Container, ParamSet }
 import edu.gemini.spModel.target.MagnitudePio
 
 /** Convert to new target model. This is side-effecty, sorry. */
@@ -26,8 +26,22 @@ object To2015B {
 
   // These will be applied in the given order
   private val conversions: List[Document => Unit] = List(
-    brightnessToMagnitude
+    brightnessToMagnitude,
+    uselessSystemsToJ2000
   )
+
+  // Remove JNNNN and APPARENT coordinate systems and replace unceremoniously with J2000.
+  // These appear only in engineering and commissioning, each only once. BNNNN is unused.
+  private def uselessSystemsToJ2000(d: Document): Unit = {
+    val systems = Set("JNNNN", "BNNNN", "Apparent")
+    val names = Set("base", "spTarget")
+    for {
+      obs <- d.findContainers(SPComponentType.OBSERVATION_BASIC)
+      env <- obs.findContainers(SPComponentType.TELESCOPE_TARGETENV)
+      ps  <- env.allParamSets if names(ps.getName)
+      p   <- Option(ps.getParam("system")).toList if systems(p.getValue)
+    } p.setValue("J2000")
+  }
 
   // Turn old `brightness` property into a magnitude table if none exists, if possible, recording
   // our work in a per-observation note.

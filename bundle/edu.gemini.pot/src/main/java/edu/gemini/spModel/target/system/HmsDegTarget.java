@@ -37,9 +37,6 @@ public final class HmsDegTarget extends CoordinateSystem
     public static final class SystemType extends TypeBase {
         public static final int _J2000 = 0;
         public static final int _B1950 = 1;
-        public static final int _APPARENT = 2;
-        public static final int _JNNNN = 3;
-        public static final int _BNNNN = 4;
 
         public static final SystemType J2000 =
                 new SystemType(_J2000, "J2000");
@@ -47,22 +44,9 @@ public final class HmsDegTarget extends CoordinateSystem
         public static final SystemType B1950 =
                 new SystemType(_B1950, "B1950");
 
-        public static final SystemType APPARENT =
-                new SystemType(_APPARENT, "Apparent");
-
-        public static final SystemType JNNNN =
-                new SystemType(_JNNNN, "JNNNN");
-
-        public static final SystemType BNNNN =
-                new SystemType(_BNNNN, "BNNNN");
-
         public static final SystemType[] TYPES = new SystemType[]{
             J2000,
             B1950,
-            APPARENT,
-            JNNNN,
-            BNNNN,
-        //    HIPP,
         };
 
         private SystemType(int type, String name) {
@@ -70,7 +54,6 @@ public final class HmsDegTarget extends CoordinateSystem
         }
 
     }
-
 
     // Various default values.
     // XXX Note: the types derived from CoordinateParam, such as Epoch, are NOT immutable!
@@ -340,8 +323,7 @@ public final class HmsDegTarget extends CoordinateSystem
      */
     private Epoch _createDefaultEpoch() {
         Epoch ep;
-        if ((getSystemOption() == SystemType.B1950) ||
-                (getSystemOption() == SystemType.BNNNN)) {
+        if ((getSystemOption() == SystemType.B1950)) {
             ep = new Epoch(DEFAULT_EPOCH_1950.getValue(),
                            DEFAULT_EPOCH_1950.getUnits());
         } else {
@@ -366,11 +348,9 @@ public final class HmsDegTarget extends CoordinateSystem
     // Override setSystemOption
     protected void _setSystemOption(TypeBase systemOption) {
         super._setSystemOption(systemOption);
-        if ((systemOption == SystemType.B1950) ||
-                (systemOption == SystemType.BNNNN)) {
+        if ((systemOption == SystemType.B1950)) {
             _epoch = DEFAULT_EPOCH_1950;
-        } else if ((systemOption == SystemType.J2000) ||
-                (systemOption == SystemType.JNNNN)) {
+        } else if ((systemOption == SystemType.J2000)) {
             _epoch = DEFAULT_EPOCH_2000;
         }
     }
@@ -576,24 +556,6 @@ public final class HmsDegTarget extends CoordinateSystem
                 // Convert from B1950 to FK5(J2000)
                 j2ksys = _convertB1950toJ2000(j2ksys);
                 break;
-            case SystemType._JNNNN:
-                // JNNN must be precessed to J2000
-                if (epoch == DEFAULT_EPOCH_2000) {
-                    // They made a mistake, so just return it as J2000
-                    return j2ksys;
-                }
-                j2ksys = _convertFk5E0toE1(epoch.getValue(), 2000.0, j2ksys);
-                break;
-            case SystemType._BNNNN:
-                if (epoch != DEFAULT_EPOCH_1950) {
-                    // First precess BNNNN to B1950 before changing systems
-                    j2ksys = _convertFk4E0toE1(epoch.getValue(), 1950.0, j2ksys);
-                }
-                // Convert from B1950 to FK5(J2000)
-                j2ksys = _convertB1950toJ2000(j2ksys);
-                break;
-            case SystemType._APPARENT:
-                break;
         }
         // Copy the object name
         j2ksys.setName(getName());
@@ -612,34 +574,6 @@ public final class HmsDegTarget extends CoordinateSystem
 
         // Set the result
         in.setSystemOption(SystemType.J2000);
-        in.getC1().setAs(result.getX(), Units.DEGREES);
-        in.getC2().setAs(result.getY(), Units.DEGREES);
-        return in;
-    }
-
-    // Helper method to do the Fk5 precession of epoch0 to epoch1
-    private HmsDegTarget _convertFk5E0toE1(double epoch0, double epoch1,
-                                           HmsDegTarget in) {
-        double ra = in.getC1().getAs(Units.DEGREES);
-        double dec = in.getC2().getAs(Units.DEGREES);
-        Point2D.Double input = new Point2D.Double(ra, dec);
-
-        Point2D.Double result = wcscon.fk5prec(epoch0, epoch1, input);
-
-        in.getC1().setAs(result.getX(), Units.DEGREES);
-        in.getC2().setAs(result.getY(), Units.DEGREES);
-        return in;
-    }
-
-    // Helper method to do the Fk4 precession of epoch0 to epoch1
-    private HmsDegTarget _convertFk4E0toE1(double epoch0, double epoch1,
-                                           HmsDegTarget in) {
-        double ra = in.getC1().getAs(Units.DEGREES);
-        double dec = in.getC2().getAs(Units.DEGREES);
-        Point2D.Double input = new Point2D.Double(ra, dec);
-
-        Point2D.Double result = wcscon.fk4prec(epoch0, epoch1, input);
-
         in.getC1().setAs(result.getX(), Units.DEGREES);
         in.getC2().setAs(result.getY(), Units.DEGREES);
         return in;
@@ -665,18 +599,6 @@ public final class HmsDegTarget extends CoordinateSystem
             case SystemType._B1950:
                 // Convert from FK5(J2000) to B1950
                 _convertJ2000toB1950(this);
-                break;
-            case SystemType._JNNNN:
-                // Convert the J2000 to JNNNN based on internal epoch
-                _convertFk5E0toE1(2000.0, _epoch.getValue(), this);
-                break;
-            case SystemType._BNNNN:
-                // First convert from FK5(J2000) to B1950
-                _convertJ2000toB1950(this);
-                // It must be converted to BNNNN based on internal epoch
-                _convertFk4E0toE1(1950.0, _epoch.getValue(), this);
-                break;
-            case SystemType._APPARENT:
                 break;
         }
         // Copy the object name
