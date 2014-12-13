@@ -74,18 +74,6 @@ public final class SPTargetSkyObjectTest {
             CoordinateTypes.Epoch spEpoch = hmsDeg.getEpoch();
             assertEquals(e.getYear(), spEpoch.getValue(), 0.000001);
 
-
-            HmsDegTarget.SystemType st = (HmsDegTarget.SystemType) hmsDeg.getSystemOption();
-            switch (st.getTypeCode()) {
-                case HmsDegTarget.SystemType._B1950:
-                    assertEquals(Epoch.B1950, e);
-                    break;
-                case HmsDegTarget.SystemType._J2000:
-                    assertEquals(Epoch.J2000, e);
-                    break;
-                default:
-                    fail();
-            }
         }
     }
 
