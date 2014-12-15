@@ -13,48 +13,18 @@ class ImPolygonTest {
                                               AffineTransform.getRotateInstance(math.Pi)).map(scala.Option(_))
 
   /**
-   * Test a no-point polygon (technically centered at the origin).
+   * Test a set of 0 <= n <= 5 collinear points, i.e. a line segment, which has area 0 and, as such, no interior and is
+   * considered empty. This also tests the trivial "empty polygon" and the "point-based polygon" cases.
    */
-  @Test def testEmptyPolygon(): Unit = {
-    val outerPoints       = List((0.0, 0.0))
-    val outerAreas        = List((0.0, 0.0, 0.0, 0.0))
-    val nonintersectAreas = List((-10.0, -10.0, 20.0, 20.0))
-    runPolygonTests(Nil,
-                    outerPoints       = outerPoints,
-                    outerAreas        = outerAreas,
-                    nonintersectAreas = nonintersectAreas)
-  }
-
-  /**
-   * Test a single point, which has area 0 and as such has no interior and is considered empty.
-   */
-  @Test def testEmptyPolygonAddPoint(): Unit = {
-    val init        = (50.0, 60.0)
-    val points      = List(init)
-    val outerPoints = points
-    runPolygonTests(points,
-                    outerPoints = outerPoints)
-  }
-
-  /**
-   * Test a 2-point polygon, i.e. a line segment, which has area 0 and as such has no interior and is considered empty.
-   */
-  @Test def testEmptyPolygonAddTwoPoints(): Unit = {
-    val init        = (10.0,  20.0)
-    val last        = (110.0, 220.0)
-    val points      = List(init, last)
-    val outerPoints = (60.0, 120.0) :: points // Include the midpoint.
-    runPolygonTests(points,
-                    outerPoints = outerPoints)
+  @Test def testCollinearPoints(): Unit = {
+    Range(0,6).foreach(runCollinearTest(_))
   }
 
   /**
    * Run tests for regular n-gons for 3 <= n <= 8 (triangle through to octagon).
    */
   @Test def testRegularNgons(): Unit = {
-    Range(3,9).foreach { n =>
-      runRegularNgonTest(n)
-    }
+    Range(3,9).foreach(runRegularNgonTest(_))
   }
 
   /**
@@ -84,6 +54,20 @@ class ImPolygonTest {
     val intersectAreas    = List(leftEye, leftPupil, rightEye, rightPupil, mouth)
     val nonintersectAreas = List(halo)
     runPolygonTests(points, innerPoints, outerPoints, innerAreas, outerAreas, intersectAreas, nonintersectAreas)
+  }
+
+  /**
+   * Create a line segment represented by n collinear points starting at init and with the specified direction
+   * vector. Note that this should be empty since it has area 0.
+   * The resultant line segment has start point init and end point init + (n-1)vector.
+   * @param n      number of points specifically represented in the polygon definition on the line segment
+   * @param init   the start point of the line segment
+   * @param vector the direction vector of the line segment
+   */
+  def runCollinearTest(n: Int, init: (Double, Double) = (10.0, 15.0), vector: (Double, Double) = (1.0, 2.0)): Unit = {
+    val points            = Range(0,n).map{s => (init._1 + s * vector._1, init._2 + s * vector._2)}.toList
+    def outerAreas        = points.map(x => (x._1, x._2, 0.0, 0.0))
+    runPolygonTests(points, outerPoints = points, outerAreas = outerAreas)
   }
 
   /**
