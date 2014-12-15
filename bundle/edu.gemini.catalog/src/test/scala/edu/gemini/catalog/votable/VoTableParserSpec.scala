@@ -255,37 +255,37 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
                 TableRowItem(FieldDescriptor("dej2000", "dej2000", Ucd("pos.eq.dec;meta.main")), "0.209323681906") ::
                 TableRowItem(FieldDescriptor("raj2000", "raj2000", Ucd("pos.eq.ra;meta.main")), "359.745951955") :: Nil
               )
-      tableRow2Target(rowWithMissingId) should beEqualTo(-\/(MissingValues(List(VoTableParser.OBJID))))
+      tableRow2Target(rowWithMissingId) should beEqualTo(-\/(MissingValues(List(VoTableParser.UCD_OBJID))))
 
       val rowWithBadRa = TableRow(
                 TableRowItem(FieldDescriptor("objid", "objid", Ucd("meta.id;meta.main")), "123456") ::
                 TableRowItem(FieldDescriptor("dej2000", "dej2000", Ucd("pos.eq.dec;meta.main")), "0.209323681906") ::
                 TableRowItem(FieldDescriptor("raj2000", "raj2000", Ucd("pos.eq.ra;meta.main")), "ABC") :: Nil
             )
-      tableRow2Target(rowWithBadRa) should beEqualTo(-\/(FieldValueProblem(VoTableParser.RA, "ABC")))
+      tableRow2Target(rowWithBadRa) should beEqualTo(-\/(FieldValueProblem(VoTableParser.UCD_RA, "ABC")))
     }
     "be able to parse magnitudes' band" in {
-      val iMagField = FieldDescriptor("imag", "imag", Ucd("phot.mag;em.opt.i"))
+      val iMagField = Ucd("phot.mag;em.opt.i")
       // Optical band
       parseBands((iMagField, "20.3051")) should beEqualTo(\/-((MagnitudeBand.I, 20.3051)))
 
-      val jIRMagField = FieldDescriptor("jmag", "jmag", Ucd("phot.mag;em.IR.J"))
+      val jIRMagField = Ucd("phot.mag;em.IR.J")
       // IR band
       parseBands((jIRMagField, "13.2349")) should beEqualTo(\/-((MagnitudeBand.J, 13.2349)))
 
-      val jIRErrMagField = FieldDescriptor("err_jmag", "err_jmag", Ucd("stat.error;phot.mag;em.IR.J"))
+      val jIRErrMagField = Ucd("stat.error;phot.mag;em.IR.J")
       // IR Error
       parseBands((jIRErrMagField, "0.02")) should beEqualTo(\/-((MagnitudeBand.J, 0.02)))
 
       // No magnitude field
-      val badField = FieldDescriptor("id", "id", Ucd("meta.name"))
+      val badField = Ucd("meta.name")
       parseBands((badField, "id")) should beEqualTo(-\/(UnmatchedField(badField)))
 
       // Bad value
       parseBands((iMagField, "stringValue")) should beEqualTo(-\/(FieldValueProblem(iMagField, "stringValue")))
 
       // Unknown magnitude
-      val noBandField = FieldDescriptor("pmag", "pmag", Ucd("phot.mag;em.opt.p"))
+      val noBandField = Ucd("phot.mag;em.opt.p")
       parseBands((noBandField, "stringValue")) should beEqualTo(-\/(UnmatchedField(noBandField)))
     }
     "be able to parse an xml into a list of SiderealTargets list of rows with a list of fields" in {

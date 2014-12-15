@@ -20,9 +20,9 @@ case class FieldDescriptor(id: String, name: String, ucd: Ucd)
 
 case class TableRowItem(field: FieldDescriptor, data: String)
 case class TableRow(items: List[TableRowItem]) {
-  def itemsMap = (for {
+  def itemsMap:Map[Ucd, String] = (for {
     i <- items
-  } yield i.field -> i.data).toMap
+  } yield i.field.ucd -> i.data).toMap
 }
 
 /** ParsedTable and ParsedResources contains a list of problems */
@@ -51,6 +51,6 @@ sealed trait CatalogProblem
 
 case class ValidationError(url: String) extends CatalogProblem
 case class GenericError(msg: String) extends CatalogProblem
-case class MissingValues(fields: List[FieldDescriptor]) extends CatalogProblem
-case class FieldValueProblem(field: FieldDescriptor, value: String) extends CatalogProblem
-case class UnmatchedField(field: FieldDescriptor) extends CatalogProblem
+case class MissingValues(fields: List[Ucd]) extends CatalogProblem
+case class FieldValueProblem(ucd: Ucd, value: String) extends CatalogProblem
+case class UnmatchedField(ucd: Ucd) extends CatalogProblem
