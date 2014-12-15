@@ -93,12 +93,12 @@ trait VoTableParser {
   protected def parseBands(p: (FieldDescriptor, String)): CatalogProblem \/ (MagnitudeBand, Double) = {
     val (field: FieldDescriptor, value: String) = p
 
-    val magRegex = """em.opt.(\w)""".r
+    val magRegex = """(?i)em.(opt|IR).(\w)""".r
 
     val band = for {
       t <- field.ucd.tokens
       m <- magRegex.findFirstMatchIn(t.token)
-      l  = m.group(1).toUpperCase
+      l  = m.group(2).toUpperCase
     } yield MagnitudeBand.all.find(_.name == l)
 
     for {
