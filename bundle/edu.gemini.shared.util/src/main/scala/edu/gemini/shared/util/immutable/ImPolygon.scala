@@ -49,7 +49,8 @@ sealed class ImPolygon private (points: List[(Double,Double)] = Nil) extends Sha
     getPathIterator(at)
 
   override def contains(x: Double, y: Double): Boolean =
-    points.length > 2 && bounds.contains(x, y) && closedPath.contains(x, y)
+    //points.length > 2 && bounds.contains(x, y) && closedPath.contains(x, y)
+    points.nonEmpty && bounds.contains(x, y) && closedPath.contains(x, y)
 
   override def contains(p: Point2D): Boolean =
     contains(p.getX, p.getY)
