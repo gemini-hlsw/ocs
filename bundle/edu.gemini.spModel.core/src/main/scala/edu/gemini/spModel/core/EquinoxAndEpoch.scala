@@ -1,8 +1,5 @@
 package edu.gemini.spModel.core
 
-import scalaz.Equal
-
-
 // Equinox (reference system) and Epoch (time of observation) are distinct but related.
 // See this article for more http://en.wikipedia.org/wiki/Epoch_(astronomy)
 

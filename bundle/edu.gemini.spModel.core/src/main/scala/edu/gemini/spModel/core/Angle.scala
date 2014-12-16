@@ -374,10 +374,10 @@ object Angle {
 
   // Abstract over HMS/DMS
   private[core] def format3(a: Int, b: Int, c: Double): String = 
-    if (f"${c}%06.03f".startsWith("60")) // grr
+    if (f"$c%06.03f".startsWith("60")) // grr
       format3(a, b + 1, 0)
     else
-      f"${a}%d:${b}%02d:${c}%06.03f"
+      f"$a%d:$b%02d:$c%06.03f"
 
 }
 
