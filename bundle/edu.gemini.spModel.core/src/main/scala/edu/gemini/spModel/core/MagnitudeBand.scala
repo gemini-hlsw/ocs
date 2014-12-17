@@ -12,6 +12,15 @@ sealed abstract class MagnitudeBand private (val name: String, val wavelengthMid
 
 object MagnitudeBand {
 
+  // OCSADV-203
+  // Class files clobber one another on OS X so names can't differ only in case.
+  // We may need to revisit and come up with better names.
+  case object _u extends MagnitudeBand("u", 350, "UV")
+  case object _g extends MagnitudeBand("g", 475, "green")
+  case object _r extends MagnitudeBand("r", 630, "red")
+  case object _i extends MagnitudeBand("i", 780, "far red")
+  case object _z extends MagnitudeBand("z", 925, "near-infrared")
+
   case object U  extends MagnitudeBand("U", 365, "ultraviolet")
   case object B  extends MagnitudeBand("B", 445, "blue")
   case object G  extends MagnitudeBand("G", 477)
@@ -32,7 +41,7 @@ object MagnitudeBand {
   case object AP extends MagnitudeBand("AP", None, Some("apparent"))
 
   val all: List[MagnitudeBand] =
-    List(U, B, G, V, UC, R, I, Z, Y, J, H, K, L, M, N, Q, AP)
+    List(_u, _g, _r, _i, _z, U, B, G, V, UC, R, I, Z, Y, J, H, K, L, M, N, Q, AP)
 
   implicit val MagnitudeBandOrder: scalaz.Order[MagnitudeBand] =
     scalaz.Order.orderBy(_.wavelengthMidPointNm)

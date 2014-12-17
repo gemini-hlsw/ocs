@@ -22,6 +22,14 @@ public final class Magnitude implements Comparable, Serializable {
      * Common wavelength bands.
      */
     public enum Band {
+
+        // OCSADV-203
+        u(350, "UV"),
+        g(475, "green"),
+        r(630, "red"),
+        i(780, "far red"),
+        z(925, "near-infrared"),
+
         U( 365, "ultraviolet"),
         B( 445, "blue"),
         V( 551, "visual"),
@@ -73,6 +81,11 @@ public final class Magnitude implements Comparable, Serializable {
         public Option<String> getDescription() {
             return description;
         }
+
+        public Option<Integer> getWavelengthMidPoint() {
+            return wavelengthMidPoint;
+        }
+
     }
 
     /**
