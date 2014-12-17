@@ -157,6 +157,51 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       </DATA>
     </TABLE>
 
+    val skyObjectsWithProperMotion =
+      <TABLE>
+        <FIELD ID="pmde" datatype="double" name="pmde" ucd="pos.pm;pos.eq.dec"/>
+        <FIELD ID="pmra" datatype="double" name="pmra" ucd="pos.pm;pos.eq.ra"/>
+        <FIELD ID="dej2000" datatype="double" name="dej2000" ucd="pos.eq.dec;meta.main"/>
+        <FIELD ID="epde" datatype="double" name="epde" ucd="time.epoch"/>
+        <FIELD ID="raj2000" datatype="double" name="raj2000" ucd="pos.eq.ra;meta.main"/>
+        <FIELD ID="rmag" datatype="double" name="rmag" ucd="phot.mag;em.opt.R"/>
+        <FIELD ID="e_vmag" datatype="double" name="e_vmag" ucd="stat.error;phot.mag;em.opt.V"/>
+        <FIELD ID="e_pmra" datatype="double" name="e_pmra" ucd="stat.error;pos.pm;pos.eq.ra"/>
+        <FIELD ID="ucac4" arraysize="*" datatype="char" name="ucac4" ucd="meta.id;meta.main"/>
+        <FIELD ID="epra" datatype="double" name="epra" ucd="time.epoch"/>
+        <FIELD ID="e_pmde" datatype="double" name="e_pmde" ucd="stat.error;pos.pm;pos.eq.dec"/>
+        <DATA>
+         <TABLEDATA>
+          <TR>
+           <TD>-4.9000000000000004</TD>
+           <TD>-10.199999999999999</TD>
+           <TD>19.9887894444444</TD>
+           <TD>2000.3499999999999</TD>
+           <TD>9.8971419444444404</TD>
+           <TD>14.76</TD>
+           <TD>0.02</TD>
+           <TD>3.8999999999999999</TD>
+           <TD>550-001323</TD>
+           <TD>1999.9100000000001</TD>
+            <TD>2.4345</TD>
+          </TR>
+          <TR>
+           <TD>-13.9</TD>
+           <TD>-7</TD>
+           <TD>19.997709722222201</TD>
+           <TD>2000.0699999999999</TD>
+           <TD>9.9195805555555605</TD>
+           <TD>12.983000000000001</TD>
+           <TD>0.029999999999999999</TD>
+           <TD>1.8</TD>
+           <TD>550-001324</TD>
+           <TD>1999.4300000000001</TD>
+           <TD>2.3999999999999999</TD>
+          </TR>
+         </TABLEDATA>
+        </DATA>
+       </TABLE>
+
     val voTable =
       <VOTABLE>
         <RESOURCE type="results">
@@ -168,6 +213,13 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       <VOTABLE>
         <RESOURCE type="results">
           {skyObjectsWithErrors}
+        </RESOURCE>
+      </VOTABLE>
+
+    val voTableWithProperMotion =
+      <VOTABLE>
+        <RESOURCE type="results">
+          {skyObjectsWithProperMotion}
         </RESOURCE>
       </VOTABLE>
 
@@ -310,12 +362,30 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       ))
       parse(voTableWithErrors).tables(0) should beEqualTo(result)
     }
-    "be able to validate and parse an xml" in {
+    "be able to parse an xml into a list of SiderealTargets including proper motion" in {
+      val magsTarget1 = List(new Magnitude(14.76, MagnitudeBand.R))
+      val magsTarget2 = List(new Magnitude(12.983, MagnitudeBand.R))
+      val pm1 = ProperMotion(-10.199999999999999, -4.9000000000000004).some
+      val pm2 = ProperMotion(-7, -13.9).some
+
+      val result = ParsedTable(List(
+        \/-(SiderealTarget("550-001323", Coordinates(RightAscension.fromDegrees(9.897141944444456), Declination.fromAngle(Angle.parseDegrees("19.98878944444442").getOrElse(Angle.zero)).getOrElse(Declination.zero)), Equinox.J2000, pm1, magsTarget1, None)),
+        \/-(SiderealTarget("550-001324", Coordinates(RightAscension.fromDegrees(9.91958055555557), Declination.fromAngle(Angle.parseDegrees("19.997709722222226").getOrElse(Angle.zero)).getOrElse(Declination.zero)), Equinox.J2000, pm2, magsTarget2, None))
+      ))
+      parse(voTableWithProperMotion).tables(0) should beEqualTo(result)
+    }
+    "be able to validate and parse an xml from sds9" in {
       val badXml = "votable-non-validating.xml"
       VoTableParser.parse(badXml, getClass.getResourceAsStream(s"/$badXml")) should beEqualTo(-\/(ValidationError(badXml)))
 
       val goodXml = "votable.xml"
+      VoTableParser.parse(goodXml, getClass.getResourceAsStream(s"/$goodXml")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
       VoTableParser.parse(goodXml, getClass.getResourceAsStream(s"/$goodXml")).getOrElse(ParsedVoResource(Nil)).tables should be size 1
+    }
+    "be able to validate and parse an xml from ucac4" in {
+      val xmlFile = "votable-ucac4.xml"
+      VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
+      VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables should be size 1
     }
   }
 }

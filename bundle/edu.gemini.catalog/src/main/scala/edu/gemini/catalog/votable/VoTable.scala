@@ -20,9 +20,7 @@ case class FieldDescriptor(id: String, name: String, ucd: Ucd)
 
 case class TableRowItem(field: FieldDescriptor, data: String)
 case class TableRow(items: List[TableRowItem]) {
-  def itemsMap:Map[Ucd, String] = (for {
-    i <- items
-  } yield i.field.ucd -> i.data).toMap
+  def itemsMap:Map[Ucd, String] = items.map(i => i.field.ucd -> i.data)(collection.breakOut)
 }
 
 /** ParsedTable and ParsedResources contains a list of problems */
