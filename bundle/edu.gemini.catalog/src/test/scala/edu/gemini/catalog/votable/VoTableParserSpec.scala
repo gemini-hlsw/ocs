@@ -12,6 +12,8 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
   "Ucd" should {
     "detect if is a superset" in {
       Ucd("stat.error;phot.mag;em.opt.i").includes(UcdWord("phot.mag")) should beTrue
+      Ucd("stat.error;phot.mag;em.opt.i").matches("phot.mag".r) should beTrue
+      Ucd("stat.error;phot.mag;em.opt.i").matches("em.opt.(\\w)".r) should beTrue
     }
   }
 

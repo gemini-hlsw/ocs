@@ -2,11 +2,13 @@ package edu.gemini.catalog.votable
 
 import edu.gemini.spModel.core.Target.SiderealTarget
 
+import scala.util.matching.Regex
 import scalaz.{\/-, \/}
 
 case class UcdWord(token: String)
 case class Ucd(tokens: List[UcdWord]) {
   def includes(ucd: UcdWord): Boolean = tokens.contains(ucd)
+  def matches(r: Regex): Boolean = tokens.exists(t => r.findFirstIn(t.token).isDefined)
 }
 
 object Ucd {

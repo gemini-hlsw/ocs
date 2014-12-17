@@ -124,8 +124,9 @@ trait VoTableParser {
 
     def missing = REQUIRED.filterNot(entries.contains)
 
-    def magnitudeField(v: (Ucd, String)) = v._1.includes(VoTableParser.UCD_MAG) && !v._1.includes(VoTableParser.STAT_ERR)
-    def magnitudeErrorField(v: (Ucd, String)) = v._1.includes(VoTableParser.UCD_MAG) && v._1.includes(VoTableParser.STAT_ERR)
+    def containsMagnitude(v: (Ucd, String)) = v._1.includes(VoTableParser.UCD_MAG) && v._1.matches(magRegex)
+    def magnitudeField(v: (Ucd, String)) = containsMagnitude(v) && !v._1.includes(VoTableParser.STAT_ERR)
+    def magnitudeErrorField(v: (Ucd, String)) = containsMagnitude(v) && v._1.includes(VoTableParser.STAT_ERR)
 
     def parseProperMotion(pm: (Option[String], Option[String])): CatalogProblem \/ Option[ProperMotion] = {
       val k = for {
