@@ -4,13 +4,16 @@ import java.util.UUID
 
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.util.immutable.ScalaConverters._
+import edu.gemini.spModel.core.{Angle, RightAscension}
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.io.impl.SpIOTags
 import edu.gemini.spModel.obscomp.SPNote
 
 import edu.gemini.spModel.pio.xml.PioXmlFactory
-import edu.gemini.spModel.pio.{ Document, Container, ParamSet }
+import edu.gemini.spModel.pio.{ Document, Container, Param, ParamSet }
 import edu.gemini.spModel.target.MagnitudePio
+
+import scalaz._, Scalaz._
 
 /** Convert to new target model. This is side-effecty, sorry. */
 object To2015B {
@@ -27,8 +30,54 @@ object To2015B {
   // These will be applied in the given order
   private val conversions: List[Document => Unit] = List(
     brightnessToMagnitude,
-    uselessSystemsToJ2000
+    uselessSystemsToJ2000,
+    b1950ToJ2000
   )
+
+  // Convenience op for \/
+  implicit class MoreDisjunctionOps[A, B](ab: A \/ B) {
+    def unsafeExtract(implicit ev: A <:< Throwable): B =
+      ab.fold(throw _, identity)
+  }
+
+  // Convert B1950 coordinates to J2000
+  private def b1950ToJ2000(d: Document): Unit = {
+    val names = Set("base", "spTarget")
+    for {
+      obs   <- d.findContainers(SPComponentType.OBSERVATION_BASIC)
+      env   <- obs.findContainers(SPComponentType.TELESCOPE_TARGETENV)
+      ps    <- env.allParamSets if names(ps.getName)
+      pSys  <- Option(ps.getParam("system")).toList if pSys.getValue == "B1950"
+
+    } {
+
+      // Params
+      val pRa   = ps.getParam("c1")
+      val pDec  = ps.getParam("c2")
+      val pdRa  = ps.getParam("pm1")
+      val pdDec = ps.getParam("pm2")
+
+      // Get coords in degrees and PM in degrees/yr
+      val ra   = parseHmsOrDegrees(pRa.getValue).unsafeExtract
+      val dec  = parseDmsOrDegrees(pDec.getValue).unsafeExtract
+      val dRa  = degreesPerYear(pdRa)
+      val dDec = degreesPerYear(pdDec)
+
+      // Convert to J2000
+      val (ra0, dec0, dRa0, dDec0) = toJ2000(ra, dec, dRa, dDec)
+
+      // Set new values
+      pRa.setValue(ra0.toString)
+      pDec.setValue(dec0.toString)
+      pdRa.setValue((dRa0 * 60 * 60).toString)
+      pdRa.setUnits("seconds/year")
+      pdDec.setValue((dDec0 * 60 * 60).toString)
+      pdDec.setUnits("seconds/year")
+      pSys.setValue("J2000")
+
+    }
+
+  }
 
   // Remove JNNNN and APPARENT coordinate systems and replace unceremoniously with J2000.
   // These appear only in engineering and commissioning, each only once. BNNNN is unused.
@@ -116,6 +165,31 @@ object To2015B {
     ps
 
   }
+
+  // Proper Motion conversion to degrees/yr
+  def degreesPerYear(p: Param): Double = {
+    val n = p.getValue.toDouble
+    p.getUnits match {
+      case "seconds/year"       => n / (60 * 60)
+      case "arcsecs/year"       => n / (60 * 60 * 60)
+      case "milli-arcsecs/year" => n / (60 * 60 * 60 * 1000)
+    }
+  }
+
+  def parseHmsOrDegrees(s: String): NumberFormatException \/ Double =
+    Angle.parseHMS(s).map(_.toDegrees) orElse s.parseDouble.disjunction
+
+  def parseDmsOrDegrees(s: String): NumberFormatException \/ Double =
+    Angle.parseDMS(s).map(_.toDegrees) orElse s.parseDouble.disjunction
+
+  // Convert B1950 to J2000. RA and Dec in degrees, dRA, dDec in degrees/yr.
+  def toJ2000(ra: Double, dec: Double, dra: Double, ddec: Double): (Double, Double, Double, Double) = {
+    import java.awt.geom.Point2D.{ Double => P2D }
+    val (coords, pm) = (new P2D(ra, dec), new P2D(dra, ddec))
+    jsky.coords.wcscon.fk425m(coords, pm)
+    (coords.x, coords.y, pm.x, pm.y)
+  }
+
 }
 
 
