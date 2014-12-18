@@ -1,0 +1,154 @@
+<html>
+
+<head>
+<title>Integration Time Calculator Help </title>
+</head>
+
+<body link="#0000FF" vlink="#8B0000" text="#000000" bgcolor="#FFFFFF">
+
+<table>
+  <tr>
+    <td><img SRC="../ITClogo.gif" width="96" height="78" alt="ITC logo"> </td>
+    <td width="100%" align="center"><h1><i>Introduction to the Integration Time Calculator </i></h1>
+    </td>
+  </tr>
+</table>
+
+<p>Available integration time calculators:
+<div align="center"><center>
+<table border="0" width="90%" cellpadding="3" cellspacing="5">
+  <tr>
+    <td width="47%" height="50"><b>Gemini North</b></td>
+    <td width="6%" height="50"></td>
+    <td width="47%" height="50"><b>Gemini South</b></td>
+  </tr>
+  <tr>
+    <td width="47%" valign="top"><a href="../ITCniri.html"><b>NIRI</b></a>  (near-IR imager with grism
+    spectroscopy) - v4.0</td>
+    <td width="6%" valign="top"></td>
+    <td width="47%" valign="top"><a href="../ITCacqCam.html"><b>Acquisition Camera</b></a> (optical imaging)
+    - v4.0</td>
+  </tr>
+  <tr>
+    <td width="47%" valign="top"><a href="../ITCaltairNiri.html"><b>Altair + NIRI</b></a> (AO-corrected near-IR imaging) -
+      v4.0</td>
+    <td width="6%" valign="top"></td>
+    <td width="47%" valign="top"><a href="../ITCgmosSouth.html"><b>GMOS South</b></a> (optical imaging and long-slit
+    spectroscopy) - v4.0</td>
+  </tr>
+  <tr>
+    <td width="47%" valign="top"><a href="../ITCgmos.html"><b>GMOS North</b></a> (optical imaging and long-slit
+    spectroscopy) - v4.0</td>
+    <td width="6%" valign="top"></td>
+    <td width="47%" valign="top"><a href="../ITCtrecs.html"><b>T-ReCS</b></a>  (mid-IR imager and
+    spectrometer) - v4.0</td>
+  </tr>
+  <tr>
+    <td width="47%"><a href="../ITCmichelle.html"><b>Michelle</b></a>   (mid-IR imager and
+    spectrometer) - v4.1</td>
+    <td width="6%"></td>
+    <td width="47%"><a href="../ITCgnirs.html"><b>GNIRS</b></a> (near-IR
+      spectroscopy) - v4.0</td>
+  </tr>
+  <tr>
+    <td width="47%" valign="top"><a href="../ITCnifs.html"><b>NIFS</b></a> (near-IR integral field
+      spectrograph) - v4.0</td>
+    <td width="6%"></td>
+    <td width="47%"><b>bHROS</b> (high-res optical spectroscopy) - not yet
+      available</td>
+  </tr>
+  <tr>
+    <td width="47%" valign="top"></td>
+    <td width="6%"></td>
+    <td width="47%"><b>Phoenix</b>  (high-res near-IR spectroscopy) - <a href="http://www.noao.edu/gateway/spectime/gemphx.html" target="_top">time
+      calculator at NOAO</a></td>
+  </tr>
+  <tr>
+    <td width="100%" colspan="3"><hr></td>
+  </tr>
+  <tr>
+    <td width="47%" bgcolor="#FFFFCC" valign="top"><b>Recent updates:&nbsp;</b><br>
+      <b>15Sep2006</b> Added filter profiles for NIRI(v4.1). Removed sky background constraint for Michelle(v4.2).<br>
+      <b>24may2006</b> Fixed bug with minimum emission line width that affected all the instruments. 
+      Also added HK notch filter for NIRI. <br> 
+      <b>28feb2006</b> NIFS added to the list of available ITC's.  Added support for 
+      Michelle Polarimetry in the imaging mode.<br>
+      <b>23jun2005</b> New near-IR and mid-IR background files and updated throughputs
+      provide improved match to observed performance. Background and atmospheric
+      transmissions models are high resolution for Michelle echelle. Michelle
+      spectroscopy re-enabled.<br>
+      <b>23jun2005</b> All v4.0 ITC running on new server for improved calculation
+      speed.</td>
+    <td width="6%" valign="top"></td>
+    <td width="47%" bgcolor="#FFFFCC" valign="top"><b>Recent updates:&nbsp;</b><br>
+      <b>24may2006</b> Fixed bug with minimum emission line width that affected all the instruments.<br>
+      <b>28feb2006</b> New filters added for GMOS South.<br>
+      <b>23jun2005</b> New near-IR and mid-IR background files and updated throughputs
+      provide improved match to observed performance. Background and atmospheric
+      transmissions models are high resolution for GNIRS R=18000. T-ReCS
+      re-enabled.<br>
+      <b>23jun2005</b> All v4.0 ITC running on new server for improved calculation
+      speed.</td>
+  </tr>
+</table>
+</center>
+</div>
+
+<p>The Gemini Integration Time Calculator (ITC) consists of a web form in which the user
+defines the principal aspects of the observation and a Java servlet, resident on a Gemini
+Observatory computer, which performs the calculation and generates the results. </p>
+
+<p>The web form is divided into four sections: (1) the spatial profile, spectral shape and
+brightness of the astronomical source, (2) the instrument and telescope configuration, (3)
+the observing conditions and (4) methods of how the observation will be carried out and
+the results analysed. There are additional help pages in each section that provide further
+information (e.g. see the <em>more info</em> links within the form).</p>
+
+<p>Within the form, the desired characteristics are defined by selecting radio buttons
+(e.g. to choose between point or extended source), pull-down menus (e.g. to select the
+units for source brightness) and text boxes to enter numerical values (e.g. for source
+brightness). Clicking on the calculate button will post the user-defined values to the
+servlet and create an output web page containing the results. Unavailable features are
+indicated by red crosses.</p>
+
+<p>The ITC is built around re-usable modules (e.g. for definition of the astronomical
+source) and specific elements for individual instruments. There is a separate web form for
+each instrument. Only the facility instruments listed above are supported; sensitivity
+tables are available for visiting instruments on the relevant web pages. <a
+href="ITCmodsBugs.html">Changes, enhancements and bugs</a> within the ITC are listed
+chronologically. </p>
+
+<p><img src="../caution.gif" width="20" height="19" alt="caution"> <b>Caution:</b> the ITCs
+make some as yet unverified assumptions about telescope and instrument performance and
+approximations for computational simplicity. Estimated accuracies will be posted as they
+become available. The calculated integration times do not take overheads into account.</p>
+
+<p>ITC performance: imaging calculations typically take 4s, spectroscopic calculations
+take 10-20s, longer for large IFU calculations. (The calculation is the same in the
+spectroscopic case as for imaging but generating the graphics
+consumes 10-15s).</p>
+
+<p>Please report <strong>any problems</strong> with the ITCs via the Gemini <a
+href="http://www.gemini.edu/sciops/helpdesk/helpdeskIndex.html" target="_top">HelpDesk</a>.
+</p>
+
+<p>We are collecting a <a href="ITCwishlist.html">wishlist</a> of modifications and
+improvements for possible inclusion in future releases. Please e-mail Bryan Miller (<a
+href="mailto:bmiller@gemini.edu">bmiller@gemini.edu</a>) with suggestions (but use the
+HelpDesk for questions!).</p>
+
+<p><br>
+</p>
+
+<p align="center"><a href="/sciops/sciOpsContents.html" target="_top"><img
+alt="[Science Operations home]" src="../../../generic-images/sciopshomebtn.gif" border="2"
+hspace="5" width="120" height="28"></a> <a href="ITChelp.html"><img
+alt="[Int Time Calc home]" src="../itchomebtn.gif" border="2" hspace="5" width="77"
+height="28"></a> </p>
+
+<hr align="left" size="3">
+
+<p>
+<i>Last update 15 September, 2006; Brian Walls</i> </p>
+</body>
+</html>

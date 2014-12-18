@@ -6,6 +6,10 @@ trait OcsApp { this: OcsBundle =>
 
   lazy val app_bundle_server = project.in(file("app/bundle-server"))
 
+  lazy val app_itc = project.in(file("app/itc")).dependsOn(
+    bundle_edu_gemini_itc
+  )
+
   lazy val app_pit = project.in(file("app/pit")).dependsOn(
     bundle_edu_gemini_pit
   )

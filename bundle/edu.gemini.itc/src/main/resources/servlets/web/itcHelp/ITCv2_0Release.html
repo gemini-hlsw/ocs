@@ -1,0 +1,100 @@
+<html>
+
+<head>
+<title>Integration Time Calculator v2.0 Release Notes</title>
+</head>
+
+<body link="#0000FF" vlink="#8B0000" text="#000000" bgcolor="#FFFFFF">
+
+<table>
+  <tr>
+    <td><img SRC="../ITClogo.gif" width="96" height="78" alt="ITC logo"> </td>
+    <td width="100%" align="center"><h1><i>Integration Time Calculator v2.0 Release Notes</i></h1>
+    </td>
+  </tr>
+</table>
+
+<p>Changes included in the v2.0 releases (issued 8 March 2002) are listed below.</p>
+
+<p><b>Changes common to all ITCs:</b>
+<ul>
+  <li>User-defined source spectra can be used instead of the existing template
+    and model SEDs. Note the following restrictions on file format:</li>
+ <ul>
+  <li>Two space-separated columns: (1) wavelength in nm (2) flux density in
+    arbitrary units. Files can have any number of comment lines, each starting
+    with the # character, and any number of blank lines.</li>
+  <li>Wavelength interval need not be uniform.</li>
+  <li>Flux density must be in wavelength units (e.g. per nm or per um, but not
+    per Hz).&nbsp;</li>
+  <li>Wavelength range must extend to include the requested normalisation filter
+    (or wavelength). For example, a user-defined spectrum for T-ReCS must extend
+    to below 2000nm if the source brightness is defined in the K-band.</li>
+  <li>File size must be less than 1MB.</li>
+ </ul>
+  <li>80%-ile image quality degraded to provide better sampling of the range of
+    expected conditions. The corresponding image size is defined in the <a href="../../../ObsProcess/obsConstraints/obsConstraints.html">observing
+    condition constraints</a>.</li>
+  <li>Cloud cover constraints for 70%-ile, 90%-ile and &quot;any&quot; bins
+    changed to provide better sampling of the range of expected conditions. The
+    corresponding transmission is defined in the <a href="../../../ObsProcess/obsConstraints/obsConstraints.html">observing
+    condition constraints</a>.</li>
+  <li>Input parameters are now reported in full at the bottom of the results
+    page.</li>
+  <li>Performance improvements of 35-40% for imaging and spectroscopy
+    calculations were achieved.</li>
+</ul>
+
+<p>&nbsp;
+
+<p><b>NIRI changes:</b>
+<ul>
+  <li>Transmission curves updated for several narrow-band filters {specify}</li>
+  <li>Slid width and corresponding spectral resolution updated for 6-pixel
+    center slit to match new physical slit. User interface now defines slit
+    width in pixels (was in arcsec) to be consistent with PIT and OT and to
+    avoid future updates when small changes are made.</li>
+</ul>
+
+<p>&nbsp;
+
+<p><b>GMOS changes:</b>
+<ul>
+  <li>Size of IFU element corrected (hexagonal input aperture approximated by
+    0.19 arcsec square; was 0.21 arcsec).</li>
+  <li>Added radial range of IFU elements to extend previous single-element case.
+    IFU elements have offsets of 0.20 arcsec. As before, the S/N is calculated
+    for individual elements.</li>
+  <li>All gratings (including those not currently installed) made available for
+    ITC.</li>
+</ul>
+
+<p>&nbsp;
+
+<p><b>AcqCam changes:</b>
+<ul>
+  <li>None</li>
+</ul>
+
+<p>&nbsp;
+
+<p><b>T-ReCS changes:</b>
+<ul>
+  <li>Integration time now specified explicitly, replacing specification using
+    individual frame time and number of frames. As a placeholder, frame times of
+    20ms and 100ms are assumed for imaging and spectroscopy calculations.</li>
+  <li>Added non-stellar SEDs for planetary nebula, starburst galaxy, pre-main
+    sequence star and the Galactic center. SEDs derived from ISO spectra.</li>
+</ul>
+  
+<p>&nbsp;</p>
+
+<p align="center"><a href="/sciops/sciOpsContents.html" target="_top"><img
+alt="[Science Operations home]" src="../../../generic-images/sciopshomebtn.gif" border="2"
+hspace="5" width="120" height="28"></a> <a href="ITChelp.html"><img
+alt="[Int Time Calc home]" src="../itchomebtn.gif" border="2" hspace="5" width="77"
+height="28"></a> </p>
+
+<hr align="left" size="3">
+</body>
+</html>
