@@ -1,0 +1,15 @@
+# Average QE for the GSAOI HgCdTe HAWAII-2 detectors
+# Columns are (1) wavelength in nm, (2) QE
+# The average QE comes from NIFS detector. Values 
+# confirmed by the GSAOI team.
+# Author: Rodrigo Carrasco
+# Created: 01 August 2012
+# Note: Table cut-off to 3000 in lambad
+# lambda   QE
+    300   0.00
+    700   0.00
+   1100   0.60
+   1270   0.62
+   1640   0.80
+   2230   0.80
+   3000   0.80

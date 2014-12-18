@@ -1,0 +1,24 @@
+# trecs-wznse.dat
+# Transmission curve for T-ReCS ZnSe (Zinc Selenide) window. 
+# Columns are (1) wavelength in nm, (2) transmission.
+# Data from Janos web site plot for ZnSe with 8-12 micron AR coating.
+# The 13750 and 14500 nm points are extrapolations by TLH.  
+#
+# This filter is only used in the 7-14 micron wavelength range.
+#
+# Author: Tom Hayward
+# Created: 2001 July 24
+#
+# lambda  wznse
+
+ 7000   0.910
+ 7750   0.968
+ 8500   0.983
+ 9250   0.983
+10000   0.982
+10750   0.980
+11500   0.976
+12250   0.971
+13000   0.961
+13750   0.94
+14500   0.92

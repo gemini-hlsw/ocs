@@ -1,0 +1,45 @@
+# trecs_fNeII.dat
+# Transmission curve for T-ReCS NeII 12.8 um filter
+# Columns are (1) wavelength in nm, (2) transmission.
+#
+# No blocking element needed.
+# Measurement temperature = 10K
+#
+# Author: James De Buizer, digitized from info from U. Reading
+# Created: 2003 Apr 9
+#
+# Effective wavelength
+12810
+#
+# lambda  filtn
+
+12500    0.0
+12537    0.0000
+12581    0.0082
+12612    0.0268
+12634    0.0604
+12652    0.1165
+12672    0.2136
+12683    0.3014
+12695    0.3911
+12708    0.4677
+12723    0.5406
+12730    0.5649
+12741    0.5780
+12754    0.5761
+12772    0.5648
+12790    0.5424
+12819    0.5180
+12845    0.4937
+12858    0.4675
+12876    0.4282
+12890    0.3758
+12905    0.3066
+12925    0.2187
+12945    0.1458
+12962    0.0860
+12986    0.0429
+13009    0.0167
+13048    0.0054
+13090    0.0000
+13100    0.0

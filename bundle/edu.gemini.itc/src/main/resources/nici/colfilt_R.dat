@@ -1,0 +1,44 @@
+# transmission of acq cam R filter
+# columns are (1) wavelength in nm, (2) transmission.
+# data are sampled every 20nm from scanned transmission curve
+# 1050 and 1100nm data points added as 0.00 for extrapolation
+# author: Phil Puxley
+# created: 20 Jan 2001
+
+360	0.00
+380	0.00
+400	0.00
+420	0.00
+440	0.00
+460	0.00
+480	0.00
+500	0.00
+520	0.00
+540	0.00
+560	0.00
+580	0.00
+600	0.15
+620	0.74
+640	0.81
+660	0.76
+680	0.70
+700	0.62
+720	0.53
+740	0.45
+760	0.37
+780	0.29
+800	0.22
+820	0.17
+840	0.12
+860	0.09
+880	0.06
+900	0.04
+920	0.03
+940	0.02
+960	0.02
+980	0.01
+1000	0.01
+1050	0.00
+1100	0.00
+
+

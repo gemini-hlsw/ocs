@@ -1,0 +1,10 @@
+# Accounts for the reduction in flux due to NICI's spider mask, which
+# is slightly larger than the telescope central obstruction.
+#
+# The mask reduces the telescope pupil area by ~2.25 m^2 over the central
+# obstruction.  This coordesponds to about 4.58%.  This file will uniformly 
+# reduce an SED's flux by that amount.
+#
+
+900 0.9542
+5500 0.9542

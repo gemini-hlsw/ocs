@@ -1,0 +1,55 @@
+# trecs_fSi2.dat
+# Transmission curve for T-ReCS Si-2 8.9um filter
+# Columns are (1) wavelength in nm, (2) transmission.
+#
+# No blocking element needed.
+# Measurement temperature = Ambient
+#
+# Author: James De Buizer, digitized from info from OCLI
+# Created: 2003 Apr 8
+#
+# Effective wavelength
+8738
+#
+# lambda  filtn
+
+8060    0.0
+8068    0.0000
+8134    0.0111
+8189    0.0326
+8217    0.0705
+8246    0.1230
+8272    0.1900
+8294    0.2951
+8326    0.4255
+8349    0.5506
+8381    0.6720
+8407    0.7499
+8455    0.8167
+8490    0.8637
+8531    0.9088
+8570    0.9249
+8605    0.9265
+8653    0.9262
+8700    0.9222
+8742    0.9057
+8777    0.8982
+8821    0.8979
+8847    0.9086
+8875    0.9248
+8898    0.9355
+8945    0.9371
+8977    0.9187
+9003    0.8768
+9041    0.7840
+9066    0.6859
+9094    0.5532
+9122    0.4097
+9148    0.2916
+9176    0.1934
+9208    0.0934
+9242    0.0369
+9277    0.0149
+9316    0.0020
+9363    0.0000
+9400    0.0

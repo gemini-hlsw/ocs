@@ -1,0 +1,57 @@
+# GMOS-N transmission curve for g' filter
+# Columns are (1) wavelength in nm, (2) transmission.
+# These are the 'new' flatter filters from Barr.
+# Data are taken from faxes sent to Jeremy Allington-Smith, 
+# and read from plots by Isobel Hook 29 Jan 2001.
+# There are two of each color filter, the transmission curve here
+# is for set two - to be delivered with GMOS-N.
+# Start wavelength point is added as 0.00 for extrapolation.
+# Author: Inger Jorgensen
+# Created: 14 Feb 2001
+#
+# Effective wavelength for calculation of image quality, 
+# 75nm redwards of blue edge
+925.
+#
+# Table gmosz_n.tab  Wed 09:57:26 14-Feb-2001
+# lambda  filtz
+
+     810  0.000
+     815  0.000
+     820  0.005
+     825  0.010
+     830  0.015
+     835  0.035
+     840  0.215
+     845  0.410
+     850  0.760
+     855  0.950
+     860  0.980
+     865  0.965
+     870  0.955
+     875  0.960
+     880  0.965
+     885  0.970
+     890  0.970
+     895  0.970
+     900  0.970
+     910  0.970
+     920  0.970
+     930  0.975
+     940  0.975
+     950  0.975
+     960  0.970
+     970  0.965
+     980  0.960
+     990  0.965
+    1000  0.970
+    1010  0.975
+    1020  0.980
+    1030  0.980
+    1040  0.980
+    1050  0.975
+    1060  0.970
+    1070  0.960
+    1080  0.950
+    1090  0.940
+    1100  0.940

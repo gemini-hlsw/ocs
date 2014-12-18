@@ -1,0 +1,24 @@
+#parameters for NICI
+#Currently some are still acqcam, will need to be changed
+#10-Feb-2009 M. Dillman
+ 
+# Acq. Cam Parameters
+# 21-Feb-2001 Phil Puxley
+
+#name
+NICI
+#Starting wavelength (nm) (NICI)
+900
+#Ending wavelength (nm) (NICI)
+5900
+#Sampling (How is this set??)
+0.2
+#Background filename
+background.dat
+#Plate Scale (NICI)
+0.018
+#Read Noise
+6
+#Dark Current per pixel 
+#Webpage says 0.15 e-/s/pixel.  Tom says ~4.8 e-/s. Are these the same units?  
+4.8

@@ -1,0 +1,25 @@
+# Mapping wavelength to order for GNIRS
+# Columns are (1) order, (2) starting and (3) ending wavelengths in nm
+# Based on filter cutoffs (SDN0003-23) and (ideal?) grating response 
+#  (from Ming's Optical design document); there are large gaps between
+#  the filters-- I have either split the difference or assigned the
+#  wavespace to the order with better grating response in order to
+#  provide continuous wavelength coverage (although clearly the signal
+#  will be very low or non-existent in between filters 
+#
+#  NOTE: there are no order 7 & 8 filters, but wavelength coverage does extend
+#        below 800nm in the cross-dispersed mode
+#
+# Author: Bernadette Rodgers
+# Created: 30 July 2003
+# 29 Dec 03 PP & BR, added order 8
+#
+# order   lambda1[nm]   lambda2[nm]
+    1       4400          6000
+    2       2700          4399
+    3       1860          2699       
+    4       1430          1859
+    5       1170          1429
+    6       1030          1169
+    7        880          1029       
+    8        780           879       

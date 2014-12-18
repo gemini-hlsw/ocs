@@ -1,0 +1,25 @@
+# Author: Tom Hayward    
+# Created: 2003 Apr 09
+# Revised: 2003 Apr 11
+# Data taken from T-ReCS Acceptance Test Phase I report.
+#
+# Ref. WL = wavelength of laser used to measure spectroscopic 
+# resolution.  LoRes-20 grating was measured in 2nd order;   
+# results here have been scaled to 1st order.
+#
+# Blaze wavelengths are: LR-10: 10.9, LR-20: 21.9, HR-10: 10.4
+#    
+# d_lambda is the resolution in nm - constant with wavelength
+# d_lambda and R_at_ref are for 0.50 arcsec slitwidth
+# nm/pixel is dispersion for unbinned pixels
+#
+# Grating      Ref. WL   R_at_ref  d_lambda  nm/pixel
+#                [nm]               [nm]
+
+#LoRes-10  10600      68      155        24.3
+#LoRes-20  21200      50      421        71.4  
+#HiRes-10  10600     348       30.5       2.93  
+
+LoRes-10  10600      68      155        22.13
+LoRes-20  21200      50      421        33.0
+HiRes-10  10600     348       30.5       1.9

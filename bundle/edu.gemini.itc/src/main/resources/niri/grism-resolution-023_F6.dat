@@ -1,0 +1,12 @@
+# This file contains the resolving power for the various (JHKLM)
+# NIRI grisms when using a 0.23 arcsec slit with f/6 camera
+# assuming that the target fills the slit
+
+# Updated with measured resolving powers where available. Values
+# are the average of centre and blue slits; Phil Puxley 16-Feb-2001
+
+770
+1650
+1300
+1100
+1100

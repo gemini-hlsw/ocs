@@ -1,0 +1,30 @@
+# Average QE for the blue CCDs delivered with GMOS-S
+# Columns are (1) wavelength in nm, (2) QE
+# QEs are the mean values for the GMOS-S blue EEV CCDs as 
+# measured by NOAO.  Data from September 15, 2000
+#
+# Author: Bryan Miller
+# Created: 10 Oct 2002
+#
+# lambda blue_QE
+
+     300 0.375
+     320 0.410
+     334 0.452
+     365 0.539
+     380 0.661
+     405 0.768
+     450 0.831
+     500 0.879
+     550 0.869
+     600 0.854
+     650 0.815
+     700 0.757
+     750 0.666
+     800 0.546
+     850 0.431
+     900 0.296
+     950 0.156
+    1000 0.055
+    1050 0.00
+    1100 0.00

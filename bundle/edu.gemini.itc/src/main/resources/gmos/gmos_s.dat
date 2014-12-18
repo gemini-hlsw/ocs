@@ -1,0 +1,18 @@
+#parameters for GMOS-S (REL-477: Note that the value for Plate Scale is currently overridden in code)
+
+#name
+GMOS-S
+#Starting wavelength (nm)
+300
+#Ending wavelength (nm)
+1000
+#Sampling (nm)
+0.25
+#Background filename
+gmos_s_background.dat
+#Plate Scale
+0.072
+#Read Noise
+4.1
+#Dark Current per pixel per second
+0.00019

@@ -1,0 +1,24 @@
+# Average throughput for the GNIRS Broadband filter for cross-dispersion
+# Columns are (1) wavelength in nm, (2) throughput
+# Values are by-eye estimates from transmission
+# curve at 93K in GNIRS filter logbook
+#
+# Author: Bernadette Rodgers
+# Created: 30 July 2003
+# 29 Dec 03, BR: estimated from transmission curve
+#
+# lambda transmission
+    700   0.0
+    850   0.0
+    900   0.4
+   1000   0.6
+   1200   0.75
+   1400   0.85
+   1700   0.9
+   2000   0.9
+   2200   0.85
+   2500   0.8
+   2600   0.0
+   3710   0.0
+   5150   0.0
+   6000   0.0

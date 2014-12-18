@@ -1,0 +1,21 @@
+# Througput of Altair measured with NIRI (JHK) and 
+# GMOS-N (z) after introducing ALtair into the beam
+# Columns are (1) wavelength in nm, (2) throughput
+#
+# Author: Phil Puxley
+# Created: 26 August 2003
+# From data in e-mail by Francois rigaut 26aug03
+# Shortest and longest points added to ensure valid data
+# when extrapolating
+#
+# lambda transmission
+#
+# Modified 14 July 2009 to include fudged Altair long-wavelength transmission
+
+    810   0.83
+    925   0.83
+   1250   0.88
+   1650   0.89
+   2200   0.94   
+   2700   0.94
+   5600   0.94

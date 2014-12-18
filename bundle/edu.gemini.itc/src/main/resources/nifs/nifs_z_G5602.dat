@@ -1,0 +1,25 @@
+# Throughput for the NIFS Z grating  Best guess to get going.
+#
+# Columns are (1) wavelength in nm, (2) throughput
+#
+#
+# Author: Brian Walls
+# Created: 23 September 2005
+#
+
+330.0  0.0
+500.0  0.0
+600.0  0.2
+700.0  0.45
+800.0  0.69
+900.0  0.80
+1000.0 0.80
+1100.0 0.79
+1200.0 0.73
+1300.0 0.65
+1400.0 0.60
+1500.0 0.55
+1600.0 0.50
+1700.0 0.45
+2500.0 0.30
+6000.0 0.0

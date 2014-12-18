@@ -1,0 +1,30 @@
+# Transmission curve for waveplate/wire grid in Michelle used for polarimetry. 
+# Columns are (1) wavelength in nm, (2) transmission.
+#
+#
+# Author: Brian Walls
+# Created: 2006 Feb 23
+#
+# lambda  transmission
+
+ 1000    0.30
+ 2000    0.30
+ 3000    0.30
+ 4000    0.30
+ 5000    0.30
+ 6000    0.30
+ 7000    0.30
+ 8000    0.30
+ 9000    0.30
+10000    0.30
+12000    0.30
+14000    0.30
+16000    0.30
+17608    0.25
+17658    0.25
+19058    0.25
+19108    0.25
+20000    0.30
+24000    0.30
+28000    0.30
+30000    0.30

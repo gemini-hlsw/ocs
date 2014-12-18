@@ -1,0 +1,10 @@
+# transparency (cloud cover) model for ITC
+# 50%-ile conditions; these conditions are photometric
+# columns are (1) wavelength in nm, (2) transparency (0-1)
+# source: unity transmission by definition
+# author: Phil Puxley
+# created 27Aug1999
+
+     300   1.0
+    1000   1.0
+   30000   1.0

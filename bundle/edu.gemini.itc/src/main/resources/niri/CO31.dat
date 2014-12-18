@@ -1,0 +1,19 @@
+# transmission of niri Narrow-band CO 3-1 (bh) filter
+# columns are (1) Wavelength in nm, (2) transmission
+# these should be replaced later with scanned transmission curves
+# first and last values are 0 for extrapolation purposes
+# author: Brian Walls
+# created: 29 Aug 1999
+
+2268 0
+2278 0
+2301 0
+2306 0.5
+2307 0.7
+2323 0.7
+2339 0.7
+2340 0.5
+2345 0
+2368 0
+2378 0
+

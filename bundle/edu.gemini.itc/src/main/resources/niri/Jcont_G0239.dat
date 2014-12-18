@@ -1,0 +1,30 @@
+# transmission of niri Narrow-band J-continuum filter
+# columns are (1) Wavelength in nm, (2) transmission
+# first and last values are 0 for extrapolation purposes
+# author: Brian Walls
+# created: 29 Aug 1999
+#  replaced with scanned transmission curve: 25may2006
+# NIRI J-continuum 1.0715 um filter (G0239)
+# Chroma Technology Corp, lot 59673
+# 2005 Feb 9
+1060.000000   0.000000
+1061.000000   0.000000
+1062.000000   0.000000
+1063.000000   0.001000
+1064.000000   0.001000
+1065.000000   0.001000
+1066.000000   0.002000
+1067.000000   0.018000
+1068.000000   0.273000
+1069.000000   0.785000
+1070.000000   0.820000
+1071.000000   0.804000
+1072.000000   0.828000
+1073.000000   0.824000
+1074.000000   0.735000
+1075.000000   0.181000
+1076.000000   0.002000
+1077.000000   0.001000
+1078.000000   0.001000
+1079.000000   0.003000
+1080.000000   0.000000

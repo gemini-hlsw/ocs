@@ -1,0 +1,7 @@
+#Dichroic in H 50/50 beamsplitter position.  Each channel receives approximately
+#50% of the light, depending on the beamplitter's transmission function.
+#The function is unknown at this time, setting to 0.5
+#mdillman 20090305
+
+900 0.5
+6000 0.5
