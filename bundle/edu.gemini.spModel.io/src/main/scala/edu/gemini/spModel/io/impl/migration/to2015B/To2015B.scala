@@ -4,7 +4,7 @@ import java.util.UUID
 
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.core.{Angle, RightAscension}
+import edu.gemini.spModel.core.Angle
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.io.impl.SpIOTags
 import edu.gemini.spModel.obscomp.SPNote
@@ -24,6 +24,35 @@ object To2015B {
   def updateProgram(d: Document): Unit =
     conversions.foreach(_.apply(d))
 
+  // These constants are take from mainline code, where they are private to implementations and
+  // ultimately will go away (but we will need them here for a while longer).
+
+  val PARAM_SYSTEM     = "system"
+  val PARAM_RA         = "c1"
+  val PARAM_DEC        = "c2"
+  val PARAM_DELTA_RA   = "pm1"
+  val PARAM_DELTA_DEC  = "pm2"
+  val PARAM_NOTE_TEXT  = "NoteText"
+  val PARAM_NAME       = "name"
+  val PARAM_BRIGHTNESS = "brightness"
+
+  val PARAMSET_NOTE       = "Note"
+  val PARAMSET_BASE       = "base"
+  val PARAMSET_TARGET     = "spTarget"
+  val PARAMSET_MAGNITUDES = "magnitudeList"
+
+  val VALUE_NAME_UNTITLED = "(untitled)"
+
+  val VALUE_SYSTEM_B1950    = "B1950"
+  val VALUE_SYSTEM_J2000    = "J2000"
+  val VALUE_SYSTEM_JNNNN    = "JNNNN"
+  val VALUE_SYSTEM_BNNNN    = "BNNNN"
+  val VALUE_SYSTEM_APPARENT = "Apparent"
+
+  val UNITS_SECONDS_PER_YEAR          = "seconds/year"
+  val UNITS_ARCSECONDS_PER_YEAR       = "arcsecs/year"
+  val UNITS_MILLI_ARCSECONDS_PER_YEAR = "milli-arcsecs/year"
+
   private val MagnitudeNoteTitle = "2015B Magnitude Updates"
   private val PioFactory = new PioXmlFactory()
 
@@ -42,20 +71,20 @@ object To2015B {
 
   // Convert B1950 coordinates to J2000
   private def b1950ToJ2000(d: Document): Unit = {
-    val names = Set("base", "spTarget")
+    val names = Set(PARAMSET_BASE, PARAMSET_TARGET)
     for {
       obs   <- d.findContainers(SPComponentType.OBSERVATION_BASIC)
       env   <- obs.findContainers(SPComponentType.TELESCOPE_TARGETENV)
       ps    <- env.allParamSets if names(ps.getName)
-      pSys  <- Option(ps.getParam("system")).toList if pSys.getValue == "B1950"
+      pSys  <- Option(ps.getParam(PARAM_SYSTEM)).toList if pSys.getValue == VALUE_SYSTEM_B1950
 
     } {
 
       // Params
-      val pRa   = ps.getParam("c1")
-      val pDec  = ps.getParam("c2")
-      val pdRa  = ps.getParam("pm1")
-      val pdDec = ps.getParam("pm2")
+      val pRa   = ps.getParam(PARAM_RA)
+      val pDec  = ps.getParam(PARAM_DEC)
+      val pdRa  = ps.getParam(PARAM_DELTA_RA)
+      val pdDec = ps.getParam(PARAM_DELTA_DEC)
 
       // Get coords in degrees and PM in degrees/yr
       val ra   = parseHmsOrDegrees(pRa.getValue).unsafeExtract
@@ -70,10 +99,10 @@ object To2015B {
       pRa.setValue(ra0.toString)
       pDec.setValue(dec0.toString)
       pdRa.setValue((dRa0 * 60 * 60).toString)
-      pdRa.setUnits("seconds/year")
+      pdRa.setUnits(UNITS_SECONDS_PER_YEAR)
       pdDec.setValue((dDec0 * 60 * 60).toString)
-      pdDec.setUnits("seconds/year")
-      pSys.setValue("J2000")
+      pdDec.setUnits(UNITS_SECONDS_PER_YEAR)
+      pSys.setValue(VALUE_SYSTEM_J2000)
 
     }
 
@@ -82,26 +111,26 @@ object To2015B {
   // Remove JNNNN and APPARENT coordinate systems and replace unceremoniously with J2000.
   // These appear only in engineering and commissioning, each only once. BNNNN is unused.
   private def uselessSystemsToJ2000(d: Document): Unit = {
-    val systems = Set("JNNNN", "BNNNN", "Apparent")
-    val names = Set("base", "spTarget")
+    val systems = Set(VALUE_SYSTEM_JNNNN, VALUE_SYSTEM_BNNNN, VALUE_SYSTEM_APPARENT)
+    val names = Set(PARAMSET_BASE, PARAMSET_TARGET)
     for {
       obs <- d.findContainers(SPComponentType.OBSERVATION_BASIC)
       env <- obs.findContainers(SPComponentType.TELESCOPE_TARGETENV)
       ps  <- env.allParamSets if names(ps.getName)
-      p   <- Option(ps.getParam("system")).toList if systems(p.getValue)
-    } p.setValue("J2000")
+      p   <- Option(ps.getParam(PARAM_SYSTEM)).toList if systems(p.getValue)
+    } p.setValue(VALUE_SYSTEM_J2000)
   }
 
   // Turn old `brightness` property into a magnitude table if none exists, if possible, recording
   // our work in a per-observation note.
   private def brightnessToMagnitude(d: Document): Unit = {
-    val names = Set("base", "spTarget")
+    val names = Set(PARAMSET_BASE, PARAMSET_TARGET)
     for {
       obs <- d.findContainers(SPComponentType.OBSERVATION_BASIC)
       env <- obs.findContainers(SPComponentType.TELESCOPE_TARGETENV)
       ps  <- env.allParamSets if names(ps.getName)
-      b   <- ps.value("brightness").filter(_.nonEmpty).toList
-    } (parseBrightness(b), Option(ps.getParamSet("magnitudeList"))) match {
+      b   <- ps.value(PARAM_BRIGHTNESS).filter(_.nonEmpty).toList
+    } (parseBrightness(b), Option(ps.getParamSet(PARAMSET_MAGNITUDES))) match {
       case (None, _)           => appendNote(obs, ps, "failed: " + b)
       case (Some(ms), Some(_)) => appendNote(obs, ps, "ignored: " + b)
       case (Some(ms), None)    => appendNote(obs, ps, "parsed: " + b)
@@ -112,9 +141,9 @@ object To2015B {
   // Append a message to the shared magnitude note for the given obs, relating to the given target
   private def appendNote(obs: Container, target: ParamSet, s: String): Unit = {
     val pset  = noteText(obs)
-    val param = pset.getParam("NoteText")
+    val param = pset.getParam(PARAM_NOTE_TEXT)
     val text  = param.getValue
-    val tName = target.value("name").getOrElse("(untitled)")
+    val tName = target.value(PARAM_NAME).getOrElse(VALUE_NAME_UNTITLED)
     param.setValue(s"$text  $tName $s\n")
   }
 
@@ -126,7 +155,7 @@ object To2015B {
   private def findNoteText(obs: Container): Option[ParamSet] =
     (for {
       note  <- obs.findContainers(SPComponentType.INFO_NOTE)
-      ps    <- note.paramSets if ps.getName == "Note"
+      ps    <- note.paramSets if ps.getName == PARAMSET_NOTE
       name  <- ps.value(ISPDataObject.TITLE_PROP).toList if name == MagnitudeNoteTitle
     } yield ps).headOption
 
@@ -170,9 +199,9 @@ object To2015B {
   def degreesPerYear(p: Param): Double = {
     val n = p.getValue.toDouble
     p.getUnits match {
-      case "seconds/year"       => n / (60 * 60)
-      case "arcsecs/year"       => n / (60 * 60 * 60)
-      case "milli-arcsecs/year" => n / (60 * 60 * 60 * 1000)
+      case UNITS_SECONDS_PER_YEAR          => n / (60 * 60)
+      case UNITS_ARCSECONDS_PER_YEAR       => n / (60 * 60 * 60)
+      case UNITS_MILLI_ARCSECONDS_PER_YEAR => n / (60 * 60 * 60 * 1000)
     }
   }
 
