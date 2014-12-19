@@ -185,14 +185,14 @@ class ImPolygonTest {
         case Nil           => (0.0, 0.0)
         case (x0, y0) :: _ => (x0,  y0)
       }
-      assertEquals(point, (PathIterator.SEG_MOVETO, transform(initX, initY)))
+      assertEquals(point, (PathIterator.SEG_MOVETO, transform((initX, initY))))
       iter.next()
 
       // Each intermediate point.
       points.drop(1).foreach {
         case (x, y) =>
           assertFalse(iter.isDone)
-          assertEquals(point, (PathIterator.SEG_LINETO, transform(x, y)))
+          assertEquals(point, (PathIterator.SEG_LINETO, transform((x, y))))
           iter.next()
       }
 
