@@ -57,7 +57,7 @@ trait Arbitraries {
         epoch    <- arbitrary[Epoch]
         parallax <- arbitrary[Double]
         rv       <- arbitrary[Double]
-      } yield ProperMotion(deltaRA, deltaDec, epoch, parallax, rv)
+      } yield ProperMotion(deltaRA, deltaDec, epoch, Some(parallax), Some(rv))
     }
 
   implicit val arbMagnitude: Arbitrary[Magnitude] =

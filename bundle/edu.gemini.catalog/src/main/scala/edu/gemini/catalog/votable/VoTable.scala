@@ -2,11 +2,13 @@ package edu.gemini.catalog.votable
 
 import edu.gemini.spModel.core.Target.SiderealTarget
 
+import scala.util.matching.Regex
 import scalaz.{\/-, \/}
 
 case class UcdWord(token: String)
 case class Ucd(tokens: List[UcdWord]) {
   def includes(ucd: UcdWord): Boolean = tokens.contains(ucd)
+  def matches(r: Regex): Boolean = tokens.exists(t => r.findFirstIn(t.token).isDefined)
 }
 
 object Ucd {
@@ -20,9 +22,7 @@ case class FieldDescriptor(id: String, name: String, ucd: Ucd)
 
 case class TableRowItem(field: FieldDescriptor, data: String)
 case class TableRow(items: List[TableRowItem]) {
-  def itemsMap = (for {
-    i <- items
-  } yield i.field -> i.data).toMap
+  def itemsMap:Map[Ucd, String] = items.map(i => i.field.ucd -> i.data)(collection.breakOut)
 }
 
 /** ParsedTable and ParsedResources contains a list of problems */
@@ -51,6 +51,6 @@ sealed trait CatalogProblem
 
 case class ValidationError(url: String) extends CatalogProblem
 case class GenericError(msg: String) extends CatalogProblem
-case class MissingValues(fields: List[FieldDescriptor]) extends CatalogProblem
-case class FieldValueProblem(field: FieldDescriptor, value: String) extends CatalogProblem
-case class UnmatchedField(field: FieldDescriptor) extends CatalogProblem
+case class MissingValues(fields: List[Ucd]) extends CatalogProblem
+case class FieldValueProblem(ucd: Ucd, value: String) extends CatalogProblem
+case class UnmatchedField(ucd: Ucd) extends CatalogProblem
