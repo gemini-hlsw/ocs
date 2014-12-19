@@ -101,12 +101,11 @@
     </xsd:complexType>
 
     <!--
-      Epoch options are J2000 and B1950.
+      Epoch option is J2000 only.
     -->
     <xsd:simpleType name="CoordinatesEpoch">
         <xsd:restriction base="xsd:token">
             <xsd:enumeration value="J2000"/>
-            <xsd:enumeration value="B1950"/>
         </xsd:restriction>
     </xsd:simpleType>
 

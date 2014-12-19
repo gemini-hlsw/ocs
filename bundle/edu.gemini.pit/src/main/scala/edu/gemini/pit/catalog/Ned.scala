@@ -39,10 +39,8 @@ class Ned private (val host: String) extends VOTableCatalog {
     find = (s: String) => kvs.find(_._1.ucd == Some(s)).map(_._2)
 
     // Switch to Option here to pull out data
-    epoch <- vot.definitions.map(_.cooSys.id) map {
-      // TODO: this, better
+    epoch <- vot.definitions.map(_.cooSys.id) collect {
       case "J2000" => M.CoordinatesEpoch.J_2000
-      case "B1950" => M.CoordinatesEpoch.B_1950
     }
     name <- find("meta.id;meta.main")
     ra <- find("pos.eq.ra;meta.main").flatMap(_.toDoubleOption)

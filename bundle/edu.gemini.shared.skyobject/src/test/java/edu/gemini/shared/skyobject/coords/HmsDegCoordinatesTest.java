@@ -100,11 +100,11 @@ public class HmsDegCoordinatesTest {
         Angle pmDec = new Angle(2, Angle.Unit.MILLIARCSECS);
 
         HmsDegCoordinates.Builder b;
-        b = new HmsDegCoordinates.Builder(ra, dec).epoch(Epoch.B1950).pmRa(pmRa).pmDec(pmDec);
+        b = new HmsDegCoordinates.Builder(ra, dec).epoch(Epoch.J2000).pmRa(pmRa).pmDec(pmDec);
 
         HmsDegCoordinates c1 = b.build();
 
-        assertEquals(Epoch.B1950, c1.getEpoch());
+        assertEquals(Epoch.J2000, c1.getEpoch());
         assertEquals(ra.getMagnitude(), c1.getRa().getMagnitude(), 0.000001);
         assertEquals(dec.getMagnitude(), c1.getDec().getMagnitude(), 0.000001);
         assertEquals(pmRa.getMagnitude(), c1.getPmRa().getMagnitude(), 0.000001);
@@ -122,7 +122,7 @@ public class HmsDegCoordinatesTest {
     @Test
     public void testConvert() {
         HmsDegCoordinates.Builder b;
-        b = new HmsDegCoordinates.Builder(ra, dec).epoch(Epoch.B1950);
+        b = new HmsDegCoordinates.Builder(ra, dec).epoch(Epoch.J2000);
         HmsDegCoordinates c = b.build();
 
         // nothing should be created for the conversion to HmsDegCoordinates

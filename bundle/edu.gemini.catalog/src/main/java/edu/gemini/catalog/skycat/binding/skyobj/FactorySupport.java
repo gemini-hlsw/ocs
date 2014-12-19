@@ -158,7 +158,7 @@ public final class FactorySupport implements SkyObjectFactory {
 
                 HmsDegCoordinates.Epoch.Type type = HmsDegCoordinates.Epoch.Type.JULIAN;
                 if (d < 2000.0) {
-                    type = HmsDegCoordinates.Epoch.Type.BESSELIAN;
+                    throw new IllegalArgumentException("Unsupported epoch: " + epoch);
                 }
 
                 b = b.epoch(new HmsDegCoordinates.Epoch(type, d));

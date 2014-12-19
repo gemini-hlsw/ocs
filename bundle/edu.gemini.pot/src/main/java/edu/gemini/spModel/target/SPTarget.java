@@ -137,12 +137,7 @@ public final class SPTarget extends WatchablePos {
         final HmsDegCoordinates.Epoch e = coords.getEpoch();
 
         // Type
-        final HmsDegTarget.SystemType t;
-        if (HmsDegCoordinates.Epoch.Type.JULIAN.equals(e.getType())) {
-            t = HmsDegTarget.SystemType.J2000;
-        } else {
-            t = HmsDegTarget.SystemType.B1950;
-        }
+        final HmsDegTarget.SystemType t = HmsDegTarget.SystemType.J2000;
 
         // Epoch, RA, Dec
         final HmsDegTarget target = new HmsDegTarget(t);

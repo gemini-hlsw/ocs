@@ -18,13 +18,9 @@ public class EpochTest {
     @Test
     public void testConstruction() {
         Epoch j2010 = new Epoch(JULIAN, 2010.2);
-        Epoch b1960 = new Epoch(BESSELIAN, 1960.5);
 
         assertEquals(JULIAN, j2010.getType());
         assertEquals(2010.2, j2010.getYear(), 0.000001);
-
-        assertEquals(BESSELIAN, b1960.getType());
-        assertEquals(1960.5, b1960.getYear(), 0.000001);
 
         // can't construct with null type
         try {
@@ -39,13 +35,6 @@ public class EpochTest {
     public void testComparable() {
         Epoch j1999 = new Epoch(JULIAN, 1999.0);
         Epoch j2001 = new Epoch(JULIAN, 2001.0);
-
-        // B anything sorts before J anything
-        assertEquals(-1, Epoch.B1950.compareTo(Epoch.J2000));
-        assertEquals(-1, new Epoch(BESSELIAN, 2000).compareTo(new Epoch(JULIAN, 1950)));
-
-        // B and J are different, even if the year is the same.
-        assertEquals(-1, Epoch.B1950.compareTo(new Epoch(JULIAN, 1950)));
 
         // If the type is the same, the year matters.
         assertEquals( 1, Epoch.J2000.compareTo(j1999));
