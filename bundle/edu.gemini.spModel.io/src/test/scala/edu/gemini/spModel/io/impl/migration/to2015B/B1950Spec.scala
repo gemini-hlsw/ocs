@@ -1,50 +1,51 @@
 package edu.gemini.spModel.io.impl.migration.to2015B
 
+import org.specs2.mutable.Specification
+
 import edu.gemini.spModel.core.{Angle, Declination, RightAscension, Coordinates}
 
-object B1950Spec extends App {
+object B1950Spec extends Specification {
 
   def toJ2000(ra: Double, dec: Double): (Double, Double) = {
     val (ra0, dec0, _, _) = To2015B.toJ2000(ra, dec, 0, 0)
-    (ra0, dec0)
+    (Angle.fromDegrees(ra0).toDegrees, Angle.fromDegrees(dec0).toDegrees)
   }
 
-  sealed trait Catalog
-  case object NED extends Catalog
-  case object Simbad extends Catalog
+  def convert(ra0: String, dec0: String, ra1: String, dec1: String) =
+    f"Convert Coordinates $ra0%9s $dec0%9s -> $ra1%12s $dec1%12s" in {
 
-  case class Result(cat: Catalog, ra: Double, dec: Double)
+      val ra0d = Angle.parseHMS(ra0).toOption.get.toDegrees
+      val ra1d = Angle.parseHMS(ra1).toOption.get.toDegrees
 
-  // In B1950
-  val cases = Map(
-    "Vega"       -> Map((NED,    (278.812062, 38.738650,  279.232102, 38.782316)),
-                        (Simbad, (278.81111,  38.73605,   279.234735, 38.783689))),
-    "M51"        -> Map((NED,    (201.94300,  47.45294,   202.469575, 47.195258)),
-                        (Simbad, (201.9578,   47.4882,    202.4842,   47.2306))),
-    "Andromeda"  -> Map((NED,    (10.0004738, 40.9952444, 10.6847929, 41.2690650))),
-    "Rigel"      -> Map((Simbad, (078.03330,  -8.25795,   78.634467, -08.201638))),
-    "Betelgeuse" -> Map((Simbad, (088.11582,  07.39939,   88.792939,  07.407064)))
+      val dec0d = Angle.parseDMS(dec0).toOption.get.toDegrees
+      val dec1d = Angle.parseDMS(dec1).toOption.get.toDegrees
+
+      val (ra2d, dec2d) = toJ2000(ra0d, dec0d)
+
+      ra2d  must beCloseTo (ra1d,  0.00001)
+      dec2d must beCloseTo (dec1d, 0.00001)
+
+    }
+
+  // Testcases from old OCS
+  val cases = List(
+    ( "0:0:0.0",   "0:0:0.0", "00:02:33.774",  "00:16:42.06"),
+    ("02:0:0.0",  "40:0:0.0", "02:03:02.228",  "40:14:24.27"),
+    ("08:0:0.0",  "20:0:0.0", "08:02:54.645",  "19:51:33.54"),
+    ("10:0:0.0",  "60:0:0.0", "10:03:30.546",  "59:45:28.63"),
+    ("16:0:0.0",  "80:0:0.0", "15:57:09.269",  "79:51:33.79"),
+    ("22:0:0.0",  "40:0:0.0", "22:02:05.864",  "40:14:29.94"),
+    ( "2:0:0.0", "-20:0:0.0", "02:02:21.575", "-19:45:34.66"),
+    ( "8:0:0.0", "-40:0:0.0", "08:01:45.183", "-40:08:24.38"),
+    ("10:0:0.0", "-60:0:0.0", "10:01:35.954", "-60:14:29.75"),
+    ("16:0:0.0", "-80:0:0.0", "16:08:07.582", "-80:08:05.81"),
+    ("22:0:0.0", "-40:0:0.0", "22:03:01.376", "-39:45:28.73")
   )
 
-  def hms(d: Double) = Angle.fromDegrees(d).formatHMS
-  def dms(d: Double) = Angle.fromDegrees(d).formatDMS
-
-  def as(a: Double, b: Double) = (a - b).abs * 60 * 60 * 60
-
-  for {
-    (name, cs)                  <- cases
-    (cat, (ra, dec, ra0, dec0)) <- cs
-  } {
-    val (ra1, dec1) = toJ2000(ra, dec)
-    println(f"$name%-10s $cat%-6s RA  $ra%10.6f -> $ra0%10.6f ${dms(ra0)}%13s")
-    println(f"                                    $ra1%10.6f ${dms(ra1)}%13s ${as(ra1,ra0)}%7.3f as")
-    println(f"                  DEC $dec%10.6f -> $dec0%10.6f ${hms(dec0)}%13s")
-    println(f"                                    $dec1%10.6f ${hms(dec1)}%13s ${as(dec1, dec0)}%7.3f as")
-    println()
+  "B1950 Conversion" should {
+    cases foreach { case (a, b, c, d) => 
+      convert(a, b, c, d)
+    }
   }
-
-  println()
-  val (x, y) = toJ2000(0, 0)
-  println(s"Zero => ${dms(x)} ${dms(y)}")
 
 }
