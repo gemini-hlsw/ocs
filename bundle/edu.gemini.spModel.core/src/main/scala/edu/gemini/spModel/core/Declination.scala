@@ -3,13 +3,13 @@ package edu.gemini.spModel.core
 import scalaz._, Scalaz._
 
 /** 
- * Newtype for an `Angle` in [270 - 360) + [0 - 90), tagged as a declination. By convention such
- * angles are logically in the range [-90 -90); the provided formatters respect this convention.
+ * Newtype for an `Angle` in [270 - 360) + [0 - 90], tagged as a declination. By convention such
+ * angles are logically in the range [-90 -90]; the provided formatters respect this convention.
  */
 sealed trait Declination extends java.io.Serializable {
   
   /** 
-   * This `Declination` as an angle in [270 - 360) + [0 - 90). 
+   * This `Declination` as an angle in [270 - 360) + [0 - 90].
    * @group Conversions
    */
   def toAngle: Angle
@@ -20,7 +20,7 @@ sealed trait Declination extends java.io.Serializable {
    */
   def toDegrees: Double = {
     val d = toAngle.toDegrees
-    if (d < 90) d else d - 360
+    if (d <= 90) d else d - 360
   }
 
   /**
@@ -33,8 +33,7 @@ sealed trait Declination extends java.io.Serializable {
     val a0 = toAngle + a
     Declination.fromAngle(a0).strengthR(false).orElse {
       val a1 = a0.toDegrees
-      val a2 = if (a1 == 90) 270
-         else  if (a1 > 180) 540 - a1
+      val a2 = if (a1 > 180) 540 - a1
                else          180 - a1
       Declination.fromAngle(Angle.fromDegrees(a2)).strengthR(true)
     }.get // safe
@@ -81,11 +80,11 @@ sealed trait Declination extends java.io.Serializable {
 object Declination {
 
   /** 
-   * Construct a `Declination` from an `Angle` normalizable in [270 - 360) + [0 - 90), if possible. 
+   * Construct a `Declination` from an `Angle` normalizable in [270 - 360) + [0 - 90], if possible.
    * @group Constructors
    */
   def fromAngle(a: Angle): Option[Declination] =
-    (a.toDegrees >= 270 || a.toDegrees < 90) option 
+    (a.toDegrees >= 270 || a.toDegrees <= 90) option
       new Declination {
         def toAngle = a
       }
