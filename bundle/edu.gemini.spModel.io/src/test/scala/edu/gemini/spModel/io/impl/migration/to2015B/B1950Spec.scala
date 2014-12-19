@@ -2,7 +2,7 @@ package edu.gemini.spModel.io.impl.migration.to2015B
 
 import org.specs2.mutable.Specification
 
-import edu.gemini.spModel.core.{Angle, Declination, RightAscension, Coordinates}
+import edu.gemini.spModel.core.Angle
 
 object B1950Spec extends Specification {
 
