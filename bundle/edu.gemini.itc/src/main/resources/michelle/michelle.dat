@@ -1,0 +1,24 @@
+# Parameters for T-ReCS
+# by R. S. Fisher, 2002 August 20
+
+#name
+Michelle
+#Starting wavelength (nm)
+1000
+#Ending wavelength (nm)
+28000
+#Sampling (nm)
+.1
+#Background filename
+michelle_background.dat
+#Plate Scale
+0.10
+#Read Noise
+#This has yet to be measured with the real Michelle science-grade array.
+#This is the approximate value for the detector's deep-well mode.
+#The moderate-well mode read noise should be about 1/2 this value.
+4000
+#Dark Current per pixel per second
+#Don't know, wild guess.  Dark Current usually isn't a factor
+#with these devices.
+270000

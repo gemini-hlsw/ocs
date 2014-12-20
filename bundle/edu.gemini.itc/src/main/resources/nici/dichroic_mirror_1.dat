@@ -1,0 +1,4 @@
+#Dichroic mirror position.  0% to channel 1, mirror transmission function
+#to channel 2 (since an additional reflection has been introduced)
+900 0.0
+6000 0.0

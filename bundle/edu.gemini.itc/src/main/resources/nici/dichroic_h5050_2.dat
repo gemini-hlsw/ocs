@@ -1,0 +1,4 @@
+#Dichroic in H 50/50 Beamsplitter position.  Approximately 50% to each channel,
+#Depending on the beamsplitter's transmission function.
+900 0.5
+6000 0.5

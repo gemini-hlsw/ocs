@@ -1,0 +1,22 @@
+#parameters for NIFS
+# copied from GNIRS and modified for NIFS 
+# 
+# Author: Brian Walls
+# Created 23 September 2005
+
+#name
+NIFS
+#Starting wavelength (nm)
+750
+#Ending wavelength (nm)
+5500
+#Sampling (nm)
+0.02
+#Background filename
+background.dat
+#Plate Scale, arcsecs per pixel  Actually it is a square pixel 0.042x0.103.  This is just the size of a square pixel with the same effective area.
+0.0658
+#Read Noise, electrons
+5
+#Dark Current, electrons per pixel per second
+0.01

@@ -1,0 +1,19 @@
+# transmission of niri Narrow-band Hydrocarbon filter
+# columns are (1) Wavelength in nm, (2) transmission
+# these should be replaced later with scanned transmission curves
+# first and last values are 0 for extrapolation purposes
+# author: Brian Walls
+# created: 29 Aug 1999
+
+3225 0
+3235 0
+3230 0
+3235 0.5
+3236 0.7
+3295 0.7
+3382 0.7
+3283 0.5
+3288 0
+3354 0
+3364 0
+

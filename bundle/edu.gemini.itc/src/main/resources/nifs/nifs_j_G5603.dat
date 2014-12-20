@@ -1,0 +1,25 @@
+# Throughput for the NIFS J grating  Best guess to get going.
+#
+# Columns are (1) wavelength in nm, (2) throughput
+#
+#
+# Author: Brian Walls
+# Created: 23 September 2005
+#
+
+330.0  0.0
+800.0  0.2
+900.0  0.4
+1000.0 0.63
+1100.0 0.74
+1200.0 0.71
+1250.0 0.85
+1300.0 0.91
+1400.0 0.87
+1500.0 0.82
+1600.0 0.78
+1700.0 0.70
+1800.0 0.63
+1900.0 0.63
+2410.0 0.0
+6000.0 0.0

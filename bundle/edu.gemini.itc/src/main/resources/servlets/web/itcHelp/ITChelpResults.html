@@ -1,0 +1,116 @@
+<html>
+
+<head>
+<title>Integration Time Calculator Results </title>
+</head>
+
+<body link="#0000FF" vlink="#8B0000" text="#000000" bgcolor="#FFFFFF">
+
+<table>
+  <tr>
+    <td><img SRC="../ITClogo.gif" width="96" height="78" alt="ITC logo"> </td>
+    <td width="100%" align="center"><h1><i>Integration Time Calculator - Results </i></h1>
+    </td>
+  </tr>
+</table>
+
+<p>Each new calculation will post results into the same page. The results page can be printed and
+re-sized e.g. so that the ITC form and results are both visible on your screen.&nbsp; </p>
+
+
+<p>Additional information is available for: </p>
+
+
+<ul>
+  <li>image size and aperture</li>
+  <li>format of imaging and spectroscopic results; saving spectra as ASCII files</li>
+  <li>S/N calculations</li>
+  <li>error messages</li>
+</ul>
+
+<p>&nbsp; </p>
+
+
+<p><font size="+1">Image Size and Aperture </font></p>
+
+<p>The <b> derived image size</b> (FWHM of the assumed Gaussian PSF) includes
+contributions from seeing, telescope diffraction, the performance of the
+tip-tilt secondary and many other components. See the image quality predictions
+in the <a href="../../../ObsProcess/obsConstraints/obsConstraints.html">observing
+condition constraints</a> for more details of the wavelength dependence and
+frequency of occurrence.&nbsp;For the adaptive optics case both the FWHM of the
+AO-corrected core and the FWHM of the uncorrected halo are given, as is the
+Strehl ratio. </p>
+
+<p>The <b>&quot;optimum aperture&quot;</b> size is described on the <a href="ITChelpMethods.html#analysis">analysis
+methods page</a>. </p>
+
+<p>For&nbsp;most <b>uniform surface brightness</b> (USB) calculations, the
+(assumed circular) software aperture corresponds to an area of 1 arcsec^2 when
+the &quot;optimum aperture&quot; analysis option is selected. (A different value
+can be specified by the user and the point source size is also reported for
+reference). However in the case of the <b>GMOS IFU</b>, the &quot;optimum
+aperture&quot; option corresponds to a single IFU spatial element (not
+1 arcsec^2) and the spectra from that IFU fiber (nominally 5 detector rows) are summed.
+No optimal extraction or deconvolution is performed at this time. </p>
+
+
+<p>&nbsp; </p>
+
+<p><font size="+1">Format of imaging and spectroscopic results</font></p>
+
+<p>In imaging calculations, the results page displays relevant derived properties on the top half
+page and key user parameters at the bottom.&nbsp;For spectroscopic calculations the relevant signal, noise
+and S/N characteristics are shown graphically.&nbsp; </p>
+
+<p> If the final and single exposure S/N are
+the same then only the former is visible.&nbsp; </p>
+
+<p>In the cross-dispersed mode with GNIRS, the source signal and sqrt(background)
+are color-coded for each order with dark and light shades of the same color.
+Only the final S/N plot (i.e. not the single-exposure chart) is shown. </p>
+
+<p>To <b>view (or save) the spectra as ASCII files</b> with tab-separated
+columns, click (or shift+click) on the link(s) under each plot. The wavelength
+units are nm; the ordinate has the same units as the graphics plot.&nbsp; </p>
+
+
+<p>&nbsp; </p>
+
+<p><font size="+1">Signal to noise calculations</font></p>
+
+<p>See the <a href="ITChelpMethods.html">calculation and analysis methods</a> for more
+details on how the <strong>S/N for the whole observation</strong> is derived.</p>
+
+<p>&nbsp;</p>
+
+<p><font size="+1">Error messages</font> - most are self explanatory; others: </p>
+
+<ul>
+  <li><strong>Can't find sourceGeom</strong> - usually occurs when trying to use the ITC from
+Netscape 6.x which doesn't work with forms.
+  </li>
+  <li><b>Please use a model line width &gt; 1 nm to avoid undersampling of the 
+  line profile when convolved with the transmission response</b> - the ITC
+    currently samples the sky transmission spectrum, background and many other
+    optical elements at 0.25-0.5nm resolution. Hence any model emission line
+    that is narrower than 1nm may not be correctly propagated through the
+    calculator.&nbsp;<BR><br>
+  </li>
+</ul>
+
+<p><br>
+</p>
+
+<p align="center"><a href="/sciops/sciOpsContents.html" target="_top"><img
+alt="[Science Operations home]" src="../../../generic-images/sciopshomebtn.gif" border="2"
+hspace="5" width="120" height="28"></a> <a href="itcHelp.html"><img
+alt="[Int Time Calc home]" src="../itchomebtn.gif" border="2" hspace="5" width="77"
+height="28"></a> </p>
+
+<hr align="left" size="3">
+
+<p>
+<i>Last update January 30, 2004; Phil Puxley</i> </p>
+</body>
+</html>

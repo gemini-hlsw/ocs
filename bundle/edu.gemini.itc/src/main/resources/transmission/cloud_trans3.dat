@@ -1,0 +1,15 @@
+# transparency (cloud cover) model for ITC
+# 70%-ile conditions; these conditions are thin cloud
+# columns are (1) wavelength in nm, (2) transparency (0-1)
+# source: assume 0.5 mag (60% transmission) and grey
+# made up for now!!
+# author: Phil Puxley
+# created 27Aug1999
+#
+# Modified to 0.3 mag attenuation (76% transmission) - thought to be 
+# more in keeping with experience and kept grey 
+# Phil Puxley: 23Feb2002
+
+     300   0.76
+    1000   0.76
+   30000   0.76

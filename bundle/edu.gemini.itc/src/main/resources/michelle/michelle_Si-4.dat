@@ -1,0 +1,29 @@
+# trecs_fsi4.dat
+# Transmission curve for T-ReCS Si-4 (10.4 micron) filter
+# Columns are (1) wavelength in nm, (2) transmission.
+#
+# Transmission includes Trans = 0.92 BaF2 blocker.
+# Measurement temperature = 77K
+#
+# Author: Tom Hayward, based on data from C. Packham, UF
+# Created: 2001 Sep 4
+#
+# Effective wavelength
+10382
+#
+# lambda  f117
+
+    7000  0.000
+    8000  0.000
+    9000  0.000
+    9823  0.000
+    9873  0.423
+    9923  0.846
+   10840  0.846
+   10890  0.423
+   10940  0.000
+   11000  0.000
+   12000  0.000
+   13000  0.000
+   14000  0.000
+

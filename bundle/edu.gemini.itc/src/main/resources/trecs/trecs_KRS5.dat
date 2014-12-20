@@ -1,0 +1,32 @@
+# trecs-wkrs5.dat
+# Transmission curve for T-ReCS KRS-5 (Thallium Bromoiodide) window. 
+# Columns are (1) wavelength in nm, (2) transmission.
+# Data from Janos web site plot for KRS-5, no AR coating.
+#
+# This window transmits across the full 1-28 micron T-ReCS
+# wavelength range, but is only used below 7 and above 14
+# microns.  In the 7-14 micron band the ZnSe and KBr filters
+# provide better performance. 
+#
+# Author: Tom Hayward
+# Created: 2001 July 24
+#
+# lambda  wkrs5
+
+ 1000    0.72
+ 2000    0.71
+ 3000    0.71
+ 4000    0.71
+ 5000    0.71
+ 6000    0.71
+ 7000    0.72
+ 8000    0.72
+ 9000    0.72
+10000    0.72
+12000    0.73
+14000    0.73
+16000    0.72
+18000    0.72
+20000    0.72
+24000    0.72
+28000    0.72

@@ -1,0 +1,306 @@
+<html>
+
+<head>
+<title>Integration Time Calculator Astronomical Source Definition </title>
+</head>
+
+<body text="#000000" bgcolor="#FFFFFF" link="#0000FF" vlink="#8B0000">
+
+<table>
+  <tr>
+    <td><img SRC="../ITClogo.gif" ALT="ITC logo" height="78" width="96"></td>
+    <td ALIGN="CENTER" WIDTH="100%"><h1><i>Definition of an Astronomical Source in the ITC</i></h1>
+    </td>
+  </tr>
+</table>
+
+<p>Definition of an astronomical source involves specification of the
+<a href="#spatial">spatial profile</a>, the <a
+href="#brightness">brightness normalisation</a> and the <a
+href="#spectral">spectrum</a>. </p>
+
+<h3><a NAME="spatial"></a>Spatial profile</h3>
+
+<p>The astronomical target may be a <b>point</b> or an <b>extended</b>
+source.</p>
+
+<p>The <b>nominal point source</b> has a size defined by the image
+quality constraint and air mass (selected as part of the observing
+conditions), the wavelength (selected by the colour filter or
+dispersive element as part of the instrument properties) and the
+wavefront sensor (selected as part of the telescope properties). The
+adopted extent of the point source (in arcsec) is reported in the ITC
+results. </p>
+
+<p>Several different <b>extended sources</b> are (to be)
+available. Currently a 2-dimensional Gaussian profile with
+user-defined FWHM (in arcsec) and an extended source with uniform
+surface brightness may be selected. The user-defined FWHM is defined
+as the image size delivered in the telescope focal plane (i.e. it
+should include seeing). An arbitary spatial profile imported from an
+external file will be available at a later date.
+</p>
+
+<hr align="left" size="3">
+
+<h3><a NAME="brightness"></a>Source brightness and units</h3>
+
+<p>The source flux density or, for uniform extended sources, surface
+brightness are specified in familiar astronomical units available via
+the pull-down menus. The source brightness is converted into the ITC
+internal units of photons/s/nm/m^2 (optionally, per square arcsec)
+using the relationships described below. The source brightness can be
+specified at a wavelength that is not the observing wavelength
+provided that the chosen (redshifted) spectrum extends across the
+entire wavelength range of interest (e.g. that defined by the colour
+filter). </p>
+
+<h4>(a) mag</h4>
+
+<p>Zeropoints giving continuum photons/s/nm/m^2 for a zero magnitude source are assumed to
+be:</p>
+<div align="center"><center>
+
+<table BORDER="1">
+  <tr>
+    <td ALIGN="CENTER" WIDTH="100" BGCOLOR="#68B58A">Waveband</td>
+    <td ALIGN="CENTER" WIDTH="100" BGCOLOR="#68B58A">Wavelength (um)</td>
+    <td ALIGN="CENTER" WIDTH="140" BGCOLOR="#68B58A">Zeropoint <br>
+    (photons/s/nm/m^2)</td>
+  </tr>
+  <tr>
+    <td ALIGN="CENTER" WIDTH="100" BGCOLOR="#FFFFB7">U</td>
+    <td ALIGN="CENTER" WIDTH="100" BGCOLOR="#FFFFB7">0.36</td>
+    <td ALIGN="CENTER" WIDTH="140" BGCOLOR="#FFFFB7">7.59 * 10^7</td>
+  </tr>
+  <tr>
+    <td ALIGN="CENTER" WIDTH="100" BGCOLOR="#FFFFB7">B</td>
+    <td ALIGN="CENTER" WIDTH="100" BGCOLOR="#FFFFB7">0.44</td>
+    <td ALIGN="CENTER" WIDTH="140" BGCOLOR="#FFFFB7">1.46 * 10^8</td>
+  </tr>
+  <tr>
+    <td ALIGN="CENTER" WIDTH="100" BGCOLOR="#FFFFB7">V</td>
+    <td ALIGN="CENTER" WIDTH="100" BGCOLOR="#FFFFB7">0.55</td>
+    <td ALIGN="CENTER" WIDTH="140" BGCOLOR="#FFFFB7">9.71 * 10^7</td>
+  </tr>
+  <tr>
+    <td ALIGN="CENTER" WIDTH="100" BGCOLOR="#FFFFB7">R</td>
+    <td ALIGN="CENTER" WIDTH="100" BGCOLOR="#FFFFB7">0.67</td>
+    <td ALIGN="CENTER" WIDTH="140" BGCOLOR="#FFFFB7">6.46 * 10^7</td>
+  </tr>
+  <tr>
+    <td ALIGN="CENTER" WIDTH="100" BGCOLOR="#FFFFB7">I</td>
+    <td ALIGN="CENTER" WIDTH="100" BGCOLOR="#FFFFB7">0.87</td>
+    <td ALIGN="CENTER" WIDTH="140" BGCOLOR="#FFFFB7">3.90 * 10^7</td>
+  </tr>
+  <tr>
+    <td ALIGN="CENTER" BGCOLOR="#FFFFB7">J</td>
+    <td ALIGN="CENTER" WIDTH="100" BGCOLOR="#FFFFB7">1.25</td>
+    <td ALIGN="CENTER" WIDTH="140" BGCOLOR="#FFFFB7">1.97 * 10^7</td>
+  </tr>
+  <tr>
+    <td ALIGN="CENTER" WIDTH="100" BGCOLOR="#FFFFB7">H</td>
+    <td ALIGN="CENTER" WIDTH="100" BGCOLOR="#FFFFB7">1.65</td>
+    <td ALIGN="CENTER" WIDTH="140" BGCOLOR="#FFFFB7">9.6 * 10^6</td>
+  </tr>
+  <tr>
+    <td ALIGN="CENTER" WIDTH="100" BGCOLOR="#FFFFB7">K</td>
+    <td ALIGN="CENTER" WIDTH="100" BGCOLOR="#FFFFB7">2.20</td>
+    <td ALIGN="CENTER" WIDTH="140" BGCOLOR="#FFFFB7">4.5 * 10^6</td>
+  </tr>
+  <tr>
+    <td ALIGN="CENTER" WIDTH="100" BGCOLOR="#FFFFB7">L'</td>
+    <td ALIGN="CENTER" WIDTH="100" BGCOLOR="#FFFFB7">3.76</td>
+    <td ALIGN="CENTER" WIDTH="140" BGCOLOR="#FFFFB7">9.9 * 10^5</td>
+  </tr>
+  <tr>
+    <td ALIGN="CENTER" WIDTH="100" BGCOLOR="#FFFFB7">M'</td>
+    <td ALIGN="CENTER" WIDTH="100" BGCOLOR="#FFFFB7">4.77</td>
+    <td ALIGN="CENTER" WIDTH="140" BGCOLOR="#FFFFB7">5.1 * 10^5</td>
+  </tr>
+  <tr>
+    <td ALIGN="CENTER" WIDTH="100" BGCOLOR="#FFFFB7">N</td>
+    <td ALIGN="CENTER" WIDTH="100" BGCOLOR="#FFFFB7">10.5</td>
+    <td ALIGN="CENTER" WIDTH="140" BGCOLOR="#FFFFB7">5.1 * 10^4</td>
+  </tr>
+  <tr>
+    <td ALIGN="CENTER" WIDTH="100" BGCOLOR="#FFFFB7">Q</td>
+    <td ALIGN="CENTER" WIDTH="100" BGCOLOR="#FFFFB7">20.1</td>
+    <td ALIGN="CENTER" WIDTH="140" BGCOLOR="#FFFFB7">7.7 * 10^3</td>
+  </tr>
+</table>
+</center></div>
+
+<p>These values were derived from the CIT system used in the STScI
+units conversin tool (UBVRI) and Cohen et al. (1992. AJ, 104, 1650;
+JHKL'M' from Vega and Sirius for 10 and 20um).</p>
+
+<h4>(b) AB mag</h4>
+
+<p>The photon flux density (in photons/s/nm/m^2) as a function of the
+source brightness in AB magnitudes is given by: </p>
+
+<p align="center"><img SRC="eqnABmag.gif" ALT="AB mag eqn" height="72" width="450"> </p>
+
+<p>where lambda is the wavelength in nm. This is equivalent to the
+formal definition in Oke &amp; Gunn (1983. ApJ, 266, 713). </p>
+
+<h4>(c) Jy</h4>
+
+<p>The photon flux density (in photons/s/nm/m^2) as a function of the
+source brightness in Jy (i.e. 10^-26 W/m^2/Hz) is given by: </p>
+
+<p align="center"><img SRC="eqnJy.gif" ALT="Jy eqn" height="65" width="450"> </p>
+
+<p>where lambda is the wavelength in nm. </p>
+
+<h4>(d) W/m^2/um</h4>
+
+<p>The photon flux density (in photons/s/nm/m^2) as a function of the
+source brightness in W/m^2/um is given by: </p>
+
+<p align="center"><img SRC="eqnWmum.gif" ALT="Watt eqn" height="61" width="450"> </p>
+
+<p>where lambda is the wavelength in nm. </p>
+
+<h4>(e) ergs/s/cm^2/Angstrom</h4>
+
+<p>The photon flux density (in photons/s/nm/m^2) as a function of the
+source brightness in ergs/s/cm^2/Angstrom is given by: </p>
+
+<p align="center"><img SRC="eqnergAng.gif" ALT="ergs Ang eqn" height="69" width="450"> </p>
+
+<p>where lambda is the wavelength in nm. </p>
+
+<h4>(f) ergs/s/cm^2/Hz</h4>
+
+<p>The photon flux density (in photons/s/nm/m^2) as a function of the
+source brightness in ergs/s/cm^2/Hz is given by: </p>
+
+<p align="center"><img SRC="eqnergHz.gif" ALT="ergs Hz eqn" height="65" width="450"> </p>
+
+<p>where lambda is the wavelength in nm. </p>
+
+<hr align="left" size="3">
+
+<h3><a NAME="spectral"></a>Spectral distribution</h3>
+
+<p>The source spectrum is selected from the available libraries of
+stellar and non-stellar spectra, model emission line + continuum, and
+black body, power law and user-defined spectra. Different options are
+availale depending on the instrument in question. The spectrum may be
+redshifted by an arbitrary amount. If the selected (redshifted)
+spectrum does not completely cover the observing wavelength range, as
+defined by the colour filter or dispersive element, either an error is
+reported by the ITC or the spectrum is padded with leading or trailing
+zeros. </p>
+
+<p>For spectroscopic calculations, the source spectrum is smoothed to
+the resolution of the spectrograph as given by the dispersing element
+with an entrance aperture defined by the slit width, or source extent
+if narrower (some exceptions are noted for specific instruments). <b>
+Note that the stellar and non-stellar libraries may have an <u>
+intrinsic resolution less than that of the instrument</u> or a coarser
+sampling.</b> In all cases they are re-sampled to the appropriate
+dispersion within the ITC.</p>
+
+<p>The sky transmission and sky background spectra employed currently have a
+resolution of ~1nm and sampling of ~0.5nm. <b>Hence at higher instrument
+spectral resolutions, the sky lines will not be treated correctly.</b></p>
+
+<h4>(a) Stellar library</h4>
+
+<p>The Pickles (1998; PASP, 110, 863) stellar library covers optical
+and near-IR wavelengths out to 2.5um across a broad range of spectral
+types (O5 to M9) and luminosity classes (I, III and V). We have
+extended these spectra out to 6um, arbitrarily adopting the slope of
+the K0III star for all spectral types. More accurate spectrophotometry
+will be inserted in the ITC library as it becomes available. </p>
+
+<h4>(b) Non-stellar library</h4>
+
+<p>Rest-frame optical and near-IR spectra:
+
+<ul>
+  <li><b>Elliptical galaxy</b> - a template spectrum (class T=-5, -4) covering the wavelength
+    range 22 - 10000 nm and taken from the Pegase Atlas of Galaxies by Fioc &amp;
+    Rocca-Volmerange (1997). The spectrum has a sampling of 1nm at wavelengths shortwards of
+    878nm and 20nm longwards. (Look at a <a href="nonstellarLib/eGalaxy.gif">plot</a> or
+    download the <a href="nonstellarLib/eGalaxy.dat">data file</a>).</li>
+  <li><b>Spiral (Sc) galaxy</b> - a template spectrum (type Sc, class T=5) covering the
+    wavelength range 22 - 10000 nm and taken from the Pegase Atlas of Galaxies by Fioc &amp;
+    Rocca-Volmerange (1997). The spectrum has a sampling of 1nm at wavelengths shortwards of
+    878nm and 20nm longwards. (Look at a <a href="nonstellarLib/scGalaxy.gif">plot</a> or
+    download the <a href="nonstellarLib/scGalaxy.dat">data file</a>).</li>
+  <li><b>QSO</b> - covers the (rest) wavelength range 80 - 855 nm and is taken from
+    Vanden Berk et al. (2001, AJ, 122, 549). The spectrum has spectral
+    resolution ~1800 and a sampling of 0.1nm. (Look at a <a
+    href="nonstellarLib/qso.gif">plot</a> or download the <a href="nonstellarLib/qso.dat">data
+    file</a>).</li>
+  <li><b>HII region (Orion)</b> - covers the wavelength range 100 - 1100 nm and is taken from
+    the HST <a href="http://garnet.stsci.edu/STIS/stis_models.html" target="_top">STIS
+    exposure time calculator</a>. The spectrum has a sampling of 0.05nm. (Look at a <a
+    href="nonstellarLib/orion.gif">plot</a> or download the <a href="nonstellarLib/orion.dat">data
+    file</a>).</li>
+  <li><b>Planetary nebula (NGC7009)</b> - covers the wavelength range 100 - 1100 nm and is
+    taken from the HST <a href="http://garnet.stsci.edu/STIS/stis_models.html" target="_top">STIS
+    exposure time calculator</a>. The spectrum has a sampling of 0.05nm. (Look at a <a
+    href="nonstellarLib/pn.gif">plot</a> or download the <a href="nonstellarLib/pn.dat">data
+    file</a>).</li>
+</ul>
+
+<h4>(c) Mid-IR spectra</h4>
+
+A range of astronomical objects, including:
+
+<ul>
+  <li><b>Stellar spectra</b> - types F-M, Wolf Rayets, carbon stars</li>
+  <li><b>Other galactic objects</b> - Galactic Centre, planetary nebula, pre-main-sequence star, young stellar object, reflection nebula, dusty HII region...</li>
+  <li><b>Galaxy spectra</b> - starburst nucleus, Seyfert II nucleus</li>
+</ul>
+
+
+
+<h4>(d) Model emission line and continuum</h4>
+
+<p>This generates a Gaussian emission line on top of a flat (per
+wavelength interval) continuum. The specified line flux and continuum
+flux density override the brightness normalisation defined as part of
+the spatial profile. </p>
+
+<h4>(e) User-defined spectrum</h4>
+
+
+<p>User-defined source spectra can be used instead of the existing template
+    and model SEDs. Note the following restrictions on file format:
+<ul>
+  <li>Two space-separated columns: (1) wavelength in nm (2) flux density in
+    arbitrary units. Files can have any number of comment lines, each starting
+    with the # character, and any number of blank lines.</li>
+  <li>Wavelength interval need not be uniform.</li>
+  <li>Flux density must be in wavelength units (e.g. per nm or per um, but not
+    per Hz).&nbsp;</li>
+  <li>Wavelength range must extend to include the requested normalisation filter
+    (or wavelength). For example, a user-defined spectrum for T-ReCS must extend
+    to below 2000nm if the source brightness is defined in the K-band.</li>
+  <li>File size must be less than 1MB.</li>
+</ul>
+
+<br>
+
+<p align="center"><a href="/sciops/sciOpsContents.html" target="_top"><img
+alt="[Science Operations home]" src="../../../generic-images/sciopshomebtn.gif" border="2"
+hspace="5" width="120" height="28"></a> <a href="ITChelp.html"><img
+alt="[Int Time Calc home]" src="../itchomebtn.gif" border="2" hspace="5" width="77"
+height="28"></a> </p>
+
+
+
+<hr align="left" size="3">
+
+<p>
+<i>Last update August 17, 2006; Rachel Mason<br>
+Original version by Phil Puxley, Ted von Hippel and Marianne Takamiya. Mid-IR
+spectra from Kevin Volk and Tom Geballe.</i> </p>
+</body>
+</html>

@@ -1,0 +1,28 @@
+# Average throughput for the GNIRS Order 2 filter
+# Columns are (1) wavelength in nm, (2) throughput
+# No transmission curve available.
+# Values from J. Elias sensitivity table (July 2003)
+# Used Jay's value at the central wavelength and 50% filter edges
+# and assumed drop from peak to zero over ~200nm (similar
+# to order 1) 
+#
+# Author: Bernadette Rodgers
+# Created: 30 July 2003
+# 30 Sept 2003, BR: changed to tophat profile
+# 29 Dec 03, BR: updated using filter 1 profile
+#
+# lambda transmission
+    700   0.0
+   1100   0.0
+   1270   0.0
+   1640   0.0
+   2230   0.0
+   2800   0.0
+   2900   0.4
+   3000   0.83
+   3710   0.83
+   4100   0.83
+   4250   0.4
+   4400   0.0
+   5150   0.0
+   6000   0.0

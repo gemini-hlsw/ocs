@@ -1,0 +1,23 @@
+# Predicted HK Grism Throughput
+# Extracted from http://www.gemini.edu/sciops/instruments/flamingos2/PredThroughput_HKg_only_03Oct2008.png
+# The first and last data points are made up for the ITC.
+# Wavelength (nm) Transmission
+ 950.0   0.000
+1200.0   0.520
+1249.6   0.600
+1299.8   0.660
+1349.7   0.700
+1400.2   0.740
+1449.8   0.780
+1500.0   0.800
+1549.9   0.810
+1599.9   0.810
+1649.8   0.810
+1699.7   0.800
+1749.9   0.800
+1799.8   0.780
+1849.7   0.780
+1899.6   0.770
+1949.8   0.750
+1999.7   0.730
+2600.0   0.450
