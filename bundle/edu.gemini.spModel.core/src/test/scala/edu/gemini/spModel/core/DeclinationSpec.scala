@@ -19,6 +19,11 @@ object DeclinationSpec extends Specification with ScalaCheck with Arbitraries wi
         Declination.fromAngle(dec.toAngle).get == dec
       }
 
+    "declination of 90 is allowed" ! {
+      val deg90 = Angle.fromDegrees(90)
+      Declination.fromAngle(deg90).get.toAngle == deg90
+    }
+
   }
 
   "Declination Offsetting" should {

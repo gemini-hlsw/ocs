@@ -85,7 +85,7 @@ object Declination {
    * @group Constructors
    */
   def fromAngle(a: Angle): Option[Declination] =
-    (a.toDegrees >= 270 || a.toDegrees < 90) option 
+    (a.toDegrees >= 270 || a.toDegrees <= 90) option
       new Declination {
         def toAngle = a
       }
