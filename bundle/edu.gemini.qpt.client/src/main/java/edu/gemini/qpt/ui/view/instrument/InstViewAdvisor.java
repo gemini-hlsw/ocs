@@ -131,7 +131,7 @@ public class InstViewAdvisor implements IViewAdvisor, PropertyChangeListener {
                 // REL-1301: Only rebuild the entire tree when the model has just been instantiated.
                 // Note that if a new plan is created, this will happen as well automatically.
                 // This preserves the tree selections after refreshes.
-				if (model == null)
+                if (model == null)
 					((DefaultTreeModel) tree.getModel()).setRoot(getRoot(newModel));
                 model = newModel;
                 updateSchedule();
