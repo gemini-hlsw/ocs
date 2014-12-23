@@ -14,9 +14,9 @@ object ProgramDiff {
     * It is a "super-set" because ultimately not every returned `DiffNode` may
     * be necessary in merging program versions.
     */
-  def compare(local: ISPProgram, remoteVm: VersionMap): Vector[DiffNode] = {
+  def compare(local: ISPProgram, remoteVm: VersionMap): List[DiffNode] = {
     import scala.collection.breakOut
-    def toVector(keys: Set[SPNodeKey], f: SPNodeKey => DiffNode): Vector[DiffNode] =
+    def toList(keys: Set[SPNodeKey], f: SPNodeKey => DiffNode): List[DiffNode] =
       keys.map(f)(breakOut)
 
     val inUse          = inUseDiffs(local, remoteVm)
@@ -26,7 +26,7 @@ object ProgramDiff {
 
     // Any remote keys that we don't have locally are missing.
     val missingKeys    = remoteKeys &~ localKeys
-    val missing        = toVector(missingKeys, k => DiffNode(k, remoteVm(k), Diff.Missing))
+    val missing        = toList(missingKeys, k => DiffNode(k, remoteVm(k), Diff.Missing))
 
     // Take all the local keys, remove those that differ but are still active,
     // then remove all that don't differ.
@@ -34,9 +34,9 @@ object ProgramDiff {
     val removedKeys    = (localKeys &~ activeDiffKeys).filter { k =>
       remoteVm.get(k).forall(_ != localVm(k))
     }
-    val removed        = toVector(removedKeys, k => DiffNode(k, localVm(k), Diff.Removed))
+    val removed        = toList(removedKeys, k => DiffNode(k, localVm(k), Diff.Removed))
 
-    inUse ++ missing ++ removed
+    removed ++ missing ++ inUse
   }
 
   private def diffOne(n: ISPNode, remoteVm: VersionMap): Option[DiffNode] = {
@@ -48,7 +48,7 @@ object ProgramDiff {
 
   // Observations are atomic.  If anything differs at all in either version copy
   // the entire observation.
-  private def diffObs(o: ISPObservation, remoteVm: VersionMap): Vector[DiffNode] = {
+  private def diffObs(o: ISPObservation, remoteVm: VersionMap): List[DiffNode] = {
     def nodeDiffers(n: ISPNode): Boolean =
       n.getVersion != remoteVm.getOrElse(n.getNodeKey, EmptyNodeVersions)
 
@@ -62,21 +62,21 @@ object ProgramDiff {
       go(List(root))
     }
 
-    if (treeDiffers(o)) DiffNode.tree(o) else Vector.empty
+    if (treeDiffers(o)) DiffNode.tree(o) else List.empty
   }
 
   // Differences in in-use nodes rooted at n.
-  private def inUseDiffs(n: ISPNode, remoteVm: VersionMap): Vector[DiffNode] =
+  private def inUseDiffs(n: ISPNode, remoteVm: VersionMap): List[DiffNode] =
     n match {
       case o: ISPObservation => diffObs(o, remoteVm)
       case _                 =>
-        val childDiffs = (Vector.empty[DiffNode]/:n.children) { (ns, child) =>
-          ns ++ inUseDiffs(child, remoteVm)
+        val childDiffs = (List.empty[DiffNode]/:n.children) { (ns, child) =>
+          inUseDiffs(child, remoteVm) ++ ns
         }
 
         // If there is even one descendant that differs, include this node
         // in the results.  Otherwise, only include it if it differs.
-        if (childDiffs.isEmpty) diffOne(n, remoteVm).toVector
-        else DiffNode(n) +: childDiffs
+        if (childDiffs.isEmpty) diffOne(n, remoteVm).toList
+        else DiffNode(n) :: childDiffs
     }
 }

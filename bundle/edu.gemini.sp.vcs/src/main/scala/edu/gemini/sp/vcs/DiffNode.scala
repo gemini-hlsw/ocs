@@ -39,17 +39,15 @@ object DiffNode {
 
   /** Creates [[vcs.Diff.InUse]] `DiffNode`s for each
     * program node rooted at `root`.
-    *
-    * Nodes are returned in pre-order DFS.
     */
-  def tree(root: ISPNode): Vector[DiffNode] = {
-    @tailrec def go(nodes: List[ISPNode], results: Vector[DiffNode]): Vector[DiffNode] =
+  def tree(root: ISPNode): List[DiffNode] = {
+    @tailrec def go(nodes: List[ISPNode], results: List[DiffNode]): List[DiffNode] =
       nodes match {
         case Nil     => results
-        case n :: ns => go(n.children ++ ns, results :+ DiffNode(n))
+        case n :: ns => go(n.children ++ ns, DiffNode(n) :: results)
       }
 
-    go(List(root), Vector.empty)
+    go(List(root), List.empty)
   }
 }
 
