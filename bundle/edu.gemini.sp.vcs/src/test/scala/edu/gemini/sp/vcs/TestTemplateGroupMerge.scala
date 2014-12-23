@@ -60,30 +60,30 @@ class TestTemplateGroupMerge {
   }
 
   @Test def testConflictingTemplateGroups() {
-    withTestEnv { env =>
+    piSyncTest { env =>
       import env._
 
-      setupProg(remote)
+      setupProg(central)
       update(user)
 
       // split remote
-      val tgr = remote.sp.getTemplateFolder.getTemplateGroups.get(0)
+      val tgr = central.sp.getTemplateFolder.getTemplateGroups.get(0)
       val sfr = new SplitFunctor(tgr)
       sfr.add(tgr.getTemplateParameters.get(0))
       sfr.add(tgr.getTemplateParameters.get(1))
-      remote.odb.getQueryRunner(javaUser).execute(sfr, null)
+      central.odb.getQueryRunner(javaUser).execute(sfr, null)
 
       // split local
-      val tgl = local.sp.getTemplateFolder.getTemplateGroups.get(0)
+      val tgl = cloned.sp.getTemplateFolder.getTemplateGroups.get(0)
       val sfl = new SplitFunctor(tgl)
       sfl.add(tgl.getTemplateParameters.get(2))
       sfl.add(tgl.getTemplateParameters.get(3))
-      local.odb.getQueryRunner(javaUser).execute(sfl, null)
+      cloned.odb.getQueryRunner(javaUser).execute(sfl, null)
 
       update(user)
       commit()
 
-      val tgs = remote.sp.getTemplateFolder.getTemplateGroups.asScala.toList
+      val tgs = central.sp.getTemplateFolder.getTemplateGroups.asScala.toList
       assertEquals(3, tgs.size)
       assertEquals(List("1", "1.2", "1.1"), tgs.map(_.versionToken.toString))
 
