@@ -16,8 +16,8 @@ object ProgramDiff {
     */
   def compare(local: ISPProgram, remoteVm: VersionMap): Vector[DiffNode] = {
     import scala.collection.breakOut
-    def toVector[T <: DiffNode](keys: Set[SPNodeKey], f: SPNodeKey => T): Vector[T] =
-      keys.map(f)(breakOut): Vector[T]
+    def toVector(keys: Set[SPNodeKey], f: SPNodeKey => DiffNode): Vector[DiffNode] =
+      keys.map(f)(breakOut)
 
     val inUse          = inUseDiffs(local, remoteVm)
     val localVm        = local.getVersions
