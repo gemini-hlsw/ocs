@@ -2,7 +2,7 @@ package edu.gemini.catalog.api
 
 import edu.gemini.spModel.core.{Angle, Coordinates}
 
-case class CatalogQuery(base: Coordinates, coneRadius: Angle, catalog: CatalogName = sdss)
+case class CatalogQuery(base: Coordinates, coneRadius: Angle, catalog: CatalogName = ucac4)
 
 sealed abstract class CatalogName(val id: String)
 
