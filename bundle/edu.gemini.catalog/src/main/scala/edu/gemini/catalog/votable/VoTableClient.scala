@@ -3,7 +3,6 @@ package edu.gemini.catalog.votable
 import java.util.concurrent.atomic.AtomicInteger
 
 import edu.gemini.catalog.api.CatalogQuery
-import edu.gemini.catalog.votable.VoTableParser.CatalogResult
 import edu.gemini.spModel.core.Angle
 import org.apache.commons.httpclient.{NameValuePair, HttpClient}
 import org.apache.commons.httpclient.methods.GetMethod
@@ -11,7 +10,9 @@ import org.apache.commons.httpclient.methods.GetMethod
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Promise, Future, future}
 import scala.util.{Failure, Success}
-import scalaz.\/
+
+import scalaz._
+import Scalaz._
 
 trait VoTableClient {
   private def format(a: Angle)= f"${a.toDegrees}%4.03f"
@@ -35,7 +36,7 @@ trait VoTableClient {
     p.future
   }
 
-  protected def doQuery(query: CatalogQuery, url: String): Future[CatalogResult] = future {
+  protected def doQuery(query: CatalogQuery, url: String): Future[CatalogQueryResult] = future {
     val method = new GetMethod(s"$url/cgi-bin/conesearch.py")
     val qs = queryParams(query)
     method.setQueryString(qs)
@@ -44,7 +45,7 @@ trait VoTableClient {
 
     try {
       client.executeMethod(method)
-      VoTableParser.parse(url, method.getResponseBodyAsStream)
+      VoTableParser.parse(url, method.getResponseBodyAsStream).fold(p => CatalogQueryResult(TargetsTable.Zero, List(p)), y => CatalogQueryResult(y))
     }
     finally {
       method.releaseConnection()
@@ -53,15 +54,16 @@ trait VoTableClient {
 
 }
 
+
 object VoTableClient extends VoTableClient {
   val catalogUrls = List("http://cpocatalog2.cl.gemini.edu", "http://mkocatalog2.hi.gemini.edu")
 
-  def catalog(query: CatalogQuery): Future[CatalogResult] = {
+  def catalog(query: CatalogQuery): Future[CatalogQueryResult] = {
     val f = for {
       url <- catalogUrls
     } yield doQuery(query, url)
     selectOne(f).recover {
-       case t => \/.left(GenericError(t.getMessage))
+       case t => CatalogQueryResult(TargetsTable.Zero, List(GenericError(t.getMessage)))
     }
   }
 
