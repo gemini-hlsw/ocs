@@ -54,10 +54,12 @@ trait VoTableClient {
 
 }
 
-
 object VoTableClient extends VoTableClient {
   val catalogUrls = List("http://cpocatalog2.cl.gemini.edu", "http://mkocatalog2.hi.gemini.edu")
 
+  /**
+   * Do a query for targets, it returns a list of targets and possible problems found
+   */
   def catalog(query: CatalogQuery): Future[CatalogQueryResult] = {
     val f = for {
       url <- catalogUrls
@@ -65,6 +67,14 @@ object VoTableClient extends VoTableClient {
     selectOne(f).recover {
        case t => CatalogQueryResult(TargetsTable.Zero, List(GenericError(t.getMessage)))
     }
+  }
+
+  /**
+   * Do multiple parallel queries, it returns a consolidated list of targets and possible problems found
+   */
+  def catalog(queries: List[CatalogQuery]): Future[CatalogQueryResult] = {
+    val r = queries.map(catalog)
+    Future.sequence(r).map(_.suml)
   }
 
 }

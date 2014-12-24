@@ -57,6 +57,10 @@ case class CatalogQueryResult(targets:TargetsTable, problems: List[CatalogProble
 
 object CatalogQueryResult {
   def apply(r: ParsedVoResource):CatalogQueryResult = CatalogQueryResult(TargetsTable(r.tables.foldMap(identity)), r.tables.map(_.rows.collect {case -\/(p) => p}).flatten)
+
+  val Zero = CatalogQueryResult(TargetsTable.Zero, Nil)
+
+  implicit val monoid = Monoid.instance[CatalogQueryResult]((a, b) => CatalogQueryResult(a.targets |+| b.targets, a.problems |+| b.problems), Zero)
 }
 
 /** Indicates an issue parsing the targets, e.g. missing values, bad format, etc. */
