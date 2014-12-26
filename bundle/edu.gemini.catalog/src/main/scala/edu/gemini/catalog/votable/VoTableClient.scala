@@ -21,7 +21,7 @@ trait VoTableClient {
     new NameValuePair("CATALOG", qs.catalog.id),
     new NameValuePair("RA", format(qs.base.ra.toAngle)),
     new NameValuePair("DEC", format(qs.base.dec.toAngle)),
-    new NameValuePair("SR", format(qs.coneRadius)))
+    new NameValuePair("SR", format(qs.radiusRange.maxLimit)))
 
   // First success or last failure
   protected def selectOne[A](fs: List[Future[A]]): Future[A] = {
@@ -45,7 +45,7 @@ trait VoTableClient {
 
     try {
       client.executeMethod(method)
-      VoTableParser.parse(url, method.getResponseBodyAsStream).fold(p => CatalogQueryResult(TargetsTable.Zero, List(p)), y => CatalogQueryResult(y))
+      VoTableParser.parse(url, method.getResponseBodyAsStream).fold(p => CatalogQueryResult(TargetsTable.Zero, List(p)), y => CatalogQueryResult(y).filter(query))
     }
     finally {
       method.releaseConnection()

@@ -1,8 +1,8 @@
 package edu.gemini.catalog.api
 
-import edu.gemini.spModel.core.{Angle, Coordinates}
+import edu.gemini.spModel.core.Coordinates
 
-case class CatalogQuery(base: Coordinates, coneRadius: Angle, catalog: CatalogName = ucac4)
+case class CatalogQuery(base: Coordinates, radiusRange: RadiusRange, catalog: CatalogName = ucac4)
 
 sealed abstract class CatalogName(val id: String)
 

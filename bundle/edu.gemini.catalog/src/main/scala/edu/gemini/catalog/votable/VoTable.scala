@@ -1,5 +1,6 @@
 package edu.gemini.catalog.votable
 
+import edu.gemini.catalog.api.CatalogQuery
 import edu.gemini.spModel.core.Target.SiderealTarget
 
 import scala.util.matching.Regex
@@ -53,6 +54,8 @@ object TargetsTable {
 
 case class CatalogQueryResult(targets:TargetsTable, problems: List[CatalogProblem]) {
   def containsError: Boolean = problems.nonEmpty
+
+  def filter(query: CatalogQuery): CatalogQueryResult = copy(targets = TargetsTable(targets.rows.filter(query.radiusRange.targetsFilter(query.base))))
 }
 
 object CatalogQueryResult {

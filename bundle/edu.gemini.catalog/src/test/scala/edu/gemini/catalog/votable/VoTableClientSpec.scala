@@ -1,6 +1,6 @@
 package edu.gemini.catalog.votable
 
-import edu.gemini.catalog.api.CatalogQuery
+import edu.gemini.catalog.api.{RadiusRange, CatalogQuery}
 import edu.gemini.spModel.core.{Angle, Coordinates}
 import org.apache.commons.httpclient.NameValuePair
 import org.specs2.mutable.SpecificationWithJUnit
@@ -15,7 +15,7 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
 
   "The VoTable client" should {
 
-    val query = CatalogQuery(Coordinates.zero, Angle.fromDegrees(0.2))
+    val query = CatalogQuery(Coordinates.zero, RadiusRange.between(Angle.fromDegrees(0), Angle.fromDegrees(0.2)))
 
     "produce query params" in {
       queryParams(query) should beEqualTo(Array(new NameValuePair("CATALOG", "ucac4"), new NameValuePair("RA", "0.000"), new NameValuePair("DEC", "0.000"), new NameValuePair("SR", "0.200")))
