@@ -22,18 +22,12 @@ class GmosScienceArea[I  <: InstGmosCommon[D,F,P,SM],
       lazy val isSouth = inst.getSite.contains(Site.GS)
 
       gmos.getFPUnitMode match {
-        case GmosCommonType.FPUnitMode.BUILTIN =>
-          if (gmos.isImaging)
-            fov(GmosScienceArea.ImagingFOVSize, GmosScienceArea.ImagingFOVInnerSize)
-          else if (gmos.isSpectroscopic)
-            longSlitFOV(width)
-          else if (gmos.isIFU)
-            ifuFOV(gmos.getFPUnit, isSouth)
-          else if (gmos.isNS)
-            nsFOV(width)
-          else emptyArea
-        case GmosCommonType.FPUnitMode.CUSTOM_MASK =>
-          fov(GmosScienceArea.MOSFOVSize, GmosScienceArea.MOSFOVInnerSize)
+        case GmosCommonType.FPUnitMode.BUILTIN if gmos.isImaging       => fov(GmosScienceArea.ImagingFOVSize, GmosScienceArea.ImagingFOVInnerSize)
+        case GmosCommonType.FPUnitMode.BUILTIN if gmos.isSpectroscopic => longSlitFOV(width)
+        case GmosCommonType.FPUnitMode.BUILTIN if gmos.isIFU           => ifuFOV(gmos.getFPUnit, isSouth)
+        case GmosCommonType.FPUnitMode.BUILTIN if gmos.isNS            => nsFOV(width)
+        case GmosCommonType.FPUnitMode.CUSTOM_MASK                     => fov(GmosScienceArea.MOSFOVSize, GmosScienceArea.MOSFOVInnerSize)
+        case _                                                         => emptyArea
       }
     }.getOrElse(emptyArea)
   }
