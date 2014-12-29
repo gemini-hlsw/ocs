@@ -50,4 +50,13 @@ object ScalaConverters {
       (t, u) => f.apply(t, u)
   }
 
+  implicit class ScalaPairOps[A,B](val p: (A,B)) extends AnyVal {
+    def asGeminiPair: Pair[A,B] =
+      new Pair[A,B](p._1, p._2)
+  }
+
+  implicit class ImPairOps[A,B](val p: Pair[A,B]) extends AnyVal {
+    def asScalaPair: (A,B) =
+      (p._1(), p._2())
+  }
 }

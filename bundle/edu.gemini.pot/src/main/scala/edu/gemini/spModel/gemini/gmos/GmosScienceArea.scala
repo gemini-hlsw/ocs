@@ -72,10 +72,10 @@ class GmosScienceArea[I  <: InstGmosCommon[D,F,P,SM],
     val d = slitHeight + bridgeHeight
 
     val s = new Area
-    Range(-1,2).map { i =>
+    (-1 to 1).foreach { i =>
       val y = - (slitHeight / 2) + (i * d)
-      new Area(createSlit(x, y, slitWidth, slitHeight))
-    }.foreach(s.add)
+      s.add(new Area(createSlit(x, y, slitWidth, slitHeight)))
+    }
     s
   }
 
@@ -128,28 +128,25 @@ class GmosScienceArea[I  <: InstGmosCommon[D,F,P,SM],
 
     // Create and add the two slits.
     val area = new Area
-    (for {
+    for {
       fov <- GmosScienceArea.IFUFOVs
       if fov.use(widthAdjust)
-      rect = fov.rect
-    } yield {
-      val width  = (rect.getWidth + widthAdjust) * widthFactor
-      val height = rect.getHeight
 
-      val x = {
+      rect = fov.rect
+      width = (rect.getWidth + widthAdjust) * widthFactor
+      height = rect.getHeight
+      x = {
         val tx = rect.getX - width0 + xAdjust
 
         // OT-10: If we are in the case of the smaller rectangle for GMOS-S, we need to flip
         // along the X-axis about the base position.
         (isSouth, fov) match {
           case (true, GmosScienceArea.IFUFOVSmallerRectangle) => -tx - width
-          case _                                              =>  tx
+          case _ => tx
         }
       }
-      val y = rect.getY - height0
-
-      new Area(createSlit(x, y, width, height))
-    }).foreach(area.add)
+      y = rect.getY - height0
+    } area.add(new Area(createSlit(x, y, width, height)))
     area
   }
 
