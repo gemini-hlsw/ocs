@@ -3,6 +3,8 @@ package edu.gemini.shared.util.immutable
 import java.awt.{Rectangle, Polygon, Shape}
 import java.awt.geom._
 
+import edu.gemini.shared.util.immutable.ScalaConverters._
+
 import scala.collection.JavaConverters._
 
 /**
@@ -75,22 +77,18 @@ sealed class ImPolygon private (points: List[(Double,Double)] = Nil) extends Sha
     addPoint(p.getX, p.getY)
 }
 
+
 object ImPolygon {
+  type JavaPoint = edu.gemini.shared.util.immutable.Pair[java.lang.Double,java.lang.Double]
+
   def apply(): ImPolygon =
     new ImPolygon(Nil)
 
-  private type JavaPoint = edu.gemini.shared.util.immutable.Pair[java.lang.Double,java.lang.Double]
-  private def javaPointToScala(point: JavaPoint): (Double, Double) =
-    (point._1().doubleValue(), point._2().doubleValue())
+  def apply(points: java.util.Collection[JavaPoint]): ImPolygon =
+    apply(points.asScala.map(_.asScalaPair).map(x => (x._1.doubleValue, x._2.doubleValue)))
 
-  def apply(points: JavaPoint*): ImPolygon =
-    apply(points.map(javaPointToScala).toList)
-
-  def apply(points: java.util.List[edu.gemini.shared.util.immutable.Pair[java.lang.Double,java.lang.Double]]): ImPolygon =
-    apply(points.asScala.map(javaPointToScala).toList)
-
-  def apply(points: List[(Double,Double)]): ImPolygon =
-    new ImPolygon(points.reverse)
+  def apply(points: Iterable[(Double,Double)]): ImPolygon =
+    new ImPolygon(points.toList.reverse)
 
   def apply(rect: Rectangle2D): ImPolygon = {
     val (minx, maxx) = (rect.getMinX, rect.getMaxX)
