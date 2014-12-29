@@ -3,6 +3,8 @@ package edu.gemini.shared.util.immutable
 import java.awt.{Rectangle, Polygon, Shape}
 import java.awt.geom._
 
+import scala.collection.JavaConverters._
+
 /**
  * An immutable class representing a polygon as a collection of points.
  * @param points the points, in reverse order, representing the vertices of the polygon, which is assumed to be closed
@@ -74,10 +76,20 @@ sealed class ImPolygon private (points: List[(Double,Double)] = Nil) extends Sha
 }
 
 object ImPolygon {
-  def apply() =
+  def apply(): ImPolygon =
     new ImPolygon(Nil)
 
-  def apply(points: List[(Double,Double)]) =
+  private type JavaPoint = edu.gemini.shared.util.immutable.Pair[java.lang.Double,java.lang.Double]
+  private def javaPointToScala(point: JavaPoint): (Double, Double) =
+    (point._1().doubleValue(), point._2().doubleValue())
+
+  def apply(points: JavaPoint*): ImPolygon =
+    apply(points.map(javaPointToScala).toList)
+
+  def apply(points: java.util.List[edu.gemini.shared.util.immutable.Pair[java.lang.Double,java.lang.Double]]): ImPolygon =
+    apply(points.asScala.map(javaPointToScala).toList)
+
+  def apply(points: List[(Double,Double)]): ImPolygon =
     new ImPolygon(points.reverse)
 
   def apply(rect: Rectangle2D): ImPolygon = {
