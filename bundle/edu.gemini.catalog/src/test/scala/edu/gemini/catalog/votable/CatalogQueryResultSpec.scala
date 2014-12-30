@@ -1,6 +1,6 @@
 package edu.gemini.catalog.votable
 
-import edu.gemini.catalog.api.{RadiusRange, CatalogQuery}
+import edu.gemini.catalog.api.{RadiusConstraint, CatalogQuery}
 import edu.gemini.spModel.core._
 import org.specs2.mutable.SpecificationWithJUnit
 
@@ -15,16 +15,21 @@ class CatalogQueryResultSpec extends SpecificationWithJUnit {
   val targets = VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile"))
   val unfiltered = CatalogQueryResult(targets | ParsedVoResource(Nil))
 
-  unfiltered.targets.rows should be size 12
-
   "CatalogQueryResultSpec" should {
     "be able to filter targets inside the requested range limit" in {
-      val qc = CatalogQuery(c, RadiusRange.between(Angle.zero, coneSearch))
+      val qc = CatalogQuery(c, RadiusConstraint.between(Angle.zero, coneSearch))
       // Filtering on search radius should give all back
       unfiltered.filter(qc).targets.rows should be size 12
     }
     "be able to filter targets to a specific ring" in {
-      val qc = CatalogQuery(c, RadiusRange.between(Angle.fromDegrees(0.05), coneSearch))
+      val qc = CatalogQuery(c, RadiusConstraint.between(Angle.fromDegrees(0.05), coneSearch))
+      val filtered = unfiltered.filter(qc)
+
+      // Filtering on search radius filters out 4 targets
+      filtered.targets.rows should be size 8
+    }
+    "be able to filter by band" in {
+      val qc = CatalogQuery(c, RadiusConstraint.between(Angle.fromDegrees(0.05), coneSearch))
       val filtered = unfiltered.filter(qc)
 
       // Filtering on search radius filters out 4 targets

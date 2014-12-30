@@ -55,7 +55,13 @@ object TargetsTable {
 case class CatalogQueryResult(targets:TargetsTable, problems: List[CatalogProblem]) {
   def containsError: Boolean = problems.nonEmpty
 
-  def filter(query: CatalogQuery): CatalogQueryResult = copy(targets = TargetsTable(targets.rows.filter(query.radiusConstraint.targetsFilter(query.base))))
+  def filter(query: CatalogQuery): CatalogQueryResult = {
+    val t = for {
+      r <- targets.rows
+      if query.filter(r)
+    } yield r
+    copy(targets = TargetsTable(t))
+  }
 }
 
 object CatalogQueryResult {

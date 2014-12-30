@@ -1,8 +1,11 @@
 package edu.gemini.catalog.api
 
 import edu.gemini.spModel.core.Coordinates
+import edu.gemini.spModel.core.Target.SiderealTarget
 
-case class CatalogQuery(base: Coordinates, radiusConstraint: RadiusConstraint, catalog: CatalogName = ucac4)
+case class CatalogQuery(base: Coordinates, radiusConstraint: RadiusConstraint, catalog: CatalogName = ucac4) {
+  def filter: SiderealTarget => Boolean = (t) => radiusConstraint.targetsFilter(base)(t)
+}
 
 sealed abstract class CatalogName(val id: String)
 
