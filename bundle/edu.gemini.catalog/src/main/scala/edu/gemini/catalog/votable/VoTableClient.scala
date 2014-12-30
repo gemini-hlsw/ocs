@@ -21,7 +21,7 @@ trait VoTableClient {
     new NameValuePair("CATALOG", qs.catalog.id),
     new NameValuePair("RA", format(qs.base.ra.toAngle)),
     new NameValuePair("DEC", format(qs.base.dec.toAngle)),
-    new NameValuePair("SR", format(qs.radiusRange.maxLimit)))
+    new NameValuePair("SR", format(qs.radiusConstraint.maxLimit)))
 
   // First success or last failure
   protected def selectOne[A](fs: List[Future[A]]): Future[A] = {
