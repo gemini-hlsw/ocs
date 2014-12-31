@@ -11,9 +11,6 @@ import scalaz._
 import Scalaz._
 
 class OffsetSpec extends Specification with ScalaCheck with Arbitraries {
-  def beCloseTo(a: Angle, d: Double): Matcher[Angle] =
-     beCloseTo(a.toDegrees +/- d) ^^ ((a:Angle) => a.toDegrees)
-
   "Offset" should {
     "calculate distance from base" in {
       val p = ~Angle.fromDMS(0 ,0, 3) // 3 Arcsec
