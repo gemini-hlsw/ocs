@@ -200,8 +200,8 @@ object To2015B {
     val n = p.getValue.toDouble
     p.getUnits match {
       case UNITS_SECONDS_PER_YEAR          => n / (60 * 60)
-      case UNITS_ARCSECONDS_PER_YEAR       => n / (60 * 60 * 60)
-      case UNITS_MILLI_ARCSECONDS_PER_YEAR => n / (60 * 60 * 60 * 1000)
+      case UNITS_ARCSECONDS_PER_YEAR       => n / (60 * 60)
+      case UNITS_MILLI_ARCSECONDS_PER_YEAR => n / (60 * 60 * 1000)
     }
   }
 
