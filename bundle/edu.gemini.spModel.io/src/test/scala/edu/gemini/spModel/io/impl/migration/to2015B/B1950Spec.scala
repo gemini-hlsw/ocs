@@ -69,13 +69,7 @@ object B1950Spec extends Specification {
       val ddec0 = a.ddec / MasToDeg
 
       val (ra1, dec1_, dra1, ddec1) = To2015B.toJ2000(qra, qdec, qdra, qddec)
-
       val dec1 = Angle.fromDegrees(dec1_).toDegrees
-
-      val ra   = Angle.fromDegrees(ra1).formatHMS
-      val dec  = Declination.fromAngle(Angle.fromDegrees(dec1)).get.formatDMS
-      val dra  = dra1  * MasToDeg
-      val ddec = ddec1 * MasToDeg
 
       ra1   must beCloseTo(ra0,   degTolerance)
       dec1  must beCloseTo(dec0,  degTolerance)
