@@ -215,8 +215,13 @@ object To2015B {
   def toJ2000(ra: Double, dec: Double, dra: Double, ddec: Double): (Double, Double, Double, Double) = {
     import java.awt.geom.Point2D.{ Double => P2D }
     val (coords, pm) = (new P2D(ra, dec), new P2D(dra, ddec))
-    jsky.coords.wcscon.fk425m(coords, pm)
-    (coords.x, coords.y, pm.x, pm.y)
+    if (dra == 0 && ddec == 0) {
+      WSCon.fk425e(coords, 1950)
+      (coords.x, coords.y, 0, 0)
+    } else {
+      WSCon.fk425m(coords, pm)
+      (coords.x, coords.y, pm.x, pm.y)
+    }
   }
 
 }
