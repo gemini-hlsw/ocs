@@ -1,9 +1,12 @@
 package edu.gemini.catalog.votable
 
+import edu.gemini.catalog.api.CatalogQuery
 import edu.gemini.spModel.core.Target.SiderealTarget
 
 import scala.util.matching.Regex
-import scalaz.{\/-, \/}
+
+import scalaz._
+import Scalaz._
 
 case class UcdWord(token: String)
 case class Ucd(tokens: List[UcdWord]) {
@@ -29,6 +32,11 @@ case class TableRow(items: List[TableRowItem]) {
 case class ParsedTable(rows: List[CatalogProblem \/ SiderealTarget]) {
   def containsError: Boolean = rows.exists(_.isLeft)
 }
+
+object ParsedTable {
+  implicit val monoid = Monoid.instance[ParsedTable]((a, b) => ParsedTable(a.rows |+| b.rows), ParsedTable(Nil))
+}
+
 case class ParsedVoResource(tables: List[ParsedTable]) {
   def containsError: Boolean = tables.exists(_.containsError)
 }
@@ -38,12 +46,27 @@ case class TargetsTable(rows: List[SiderealTarget])
 
 object TargetsTable {
   def apply(t: ParsedTable): TargetsTable = TargetsTable(t.rows.collect { case \/-(r) => r })
+
+  val Zero = TargetsTable(Nil)
+
+  implicit val monoid = Monoid.instance[TargetsTable]((a, b) => TargetsTable(a.rows |+| b.rows), Zero)
 }
 
-case class VoResource(tables: List[TargetsTable])
+case class CatalogQueryResult(targets:TargetsTable, problems: List[CatalogProblem]) {
+  def containsError: Boolean = problems.nonEmpty
 
-object VoResource {
-  def apply(r: ParsedVoResource):VoResource = VoResource(r.tables.map(TargetsTable.apply))
+  def filter(query: CatalogQuery): CatalogQueryResult = {
+    val t = targets.rows.filter(query.filter)
+    copy(targets = TargetsTable(t))
+  }
+}
+
+object CatalogQueryResult {
+  def apply(r: ParsedVoResource):CatalogQueryResult = CatalogQueryResult(TargetsTable(r.tables.foldMap(identity)), r.tables.map(_.rows.collect {case -\/(p) => p}).flatten)
+
+  val Zero = CatalogQueryResult(TargetsTable.Zero, Nil)
+
+  implicit val monoid = Monoid.instance[CatalogQueryResult]((a, b) => CatalogQueryResult(a.targets |+| b.targets, a.problems |+| b.problems), Zero)
 }
 
 /** Indicates an issue parsing the targets, e.g. missing values, bad format, etc. */

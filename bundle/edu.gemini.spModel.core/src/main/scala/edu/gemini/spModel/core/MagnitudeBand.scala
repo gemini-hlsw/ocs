@@ -49,5 +49,8 @@ object MagnitudeBand {
   implicit val MagnitudeBandOrdering: scala.math.Ordering[MagnitudeBand] =
     MagnitudeBandOrder.toScalaOrdering
 
+  /** @group Typeclass Instances */
+  implicit val equals = scalaz.Equal.equalA[MagnitudeBand]
+
 }
 

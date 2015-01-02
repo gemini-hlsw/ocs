@@ -141,7 +141,7 @@ public final class Magnitude implements Comparable, Serializable {
      * @param error error in measurement
      */
     public Magnitude(Band band, double brightness, double error) {
-        this(band, brightness, new Some<Double>(error), System.DEFAULT);
+        this(band, brightness, new Some<>(error), System.DEFAULT);
     }
 
     /**
@@ -153,7 +153,7 @@ public final class Magnitude implements Comparable, Serializable {
      * @param system mag system
      */
     public Magnitude(Band band, double brightness, double error, System system) {
-        this(band, brightness, new Some<Double>(error), system);
+        this(band, brightness, new Some<>(error), system);
     }
 
     /**

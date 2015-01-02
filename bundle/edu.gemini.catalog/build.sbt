@@ -38,4 +38,4 @@ OsgiKeys.exportPackage := Seq(
   "jsky.catalog.util"
 )
 
-
+initialCommands := "import edu.gemini.spModel.core._,edu.gemini.catalog.api._,edu.gemini.catalog.votable._, scalaz._, Scalaz._"

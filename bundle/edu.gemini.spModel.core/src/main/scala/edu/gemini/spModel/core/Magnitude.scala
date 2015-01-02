@@ -29,4 +29,7 @@ object Magnitude {
   implicit val MagnitudeOrdering: scala.math.Ordering[Magnitude] =
     scala.math.Ordering.by(m => (m.system.name, m.band.name, m.value, m.error))
 
+  /** @group Typeclass Instances */
+  implicit val equals = scalaz.Equal.equalA[Magnitude]
+
 }
