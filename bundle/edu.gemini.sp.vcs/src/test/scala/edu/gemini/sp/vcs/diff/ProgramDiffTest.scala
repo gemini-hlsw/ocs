@@ -1,6 +1,7 @@
-package edu.gemini.sp.vcs
+package edu.gemini.sp.vcs.diff
 
 import edu.gemini.pot.sp.{DataObjectBlob, ISPNode}
+import edu.gemini.sp.vcs.TestingEnvironment
 import edu.gemini.sp.vcs.TestingEnvironment._
 import edu.gemini.spModel.obscomp.SPNote
 import edu.gemini.spModel.rich.pot.sp._
@@ -12,7 +13,7 @@ import scala.collection.JavaConverters._
 
 class ProgramDiffTest {
 
-  import edu.gemini.sp.vcs.Diff._
+  import edu.gemini.sp.vcs.diff.Diff._
 
   private def equalNodes(expected: DiffNode, actual: DiffNode): Boolean = {
     def equalDiff(expected: Diff, actual: Diff): Boolean =

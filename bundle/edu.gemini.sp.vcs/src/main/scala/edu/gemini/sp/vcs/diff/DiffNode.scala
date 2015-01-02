@@ -1,8 +1,8 @@
-package edu.gemini.sp.vcs
+package edu.gemini.sp.vcs.diff
 
 import edu.gemini.pot.sp._
 import edu.gemini.pot.sp.version.NodeVersions
-import edu.gemini.sp.vcs
+import edu.gemini.sp.vcs.diff
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.rich.pot.sp._
 
@@ -31,13 +31,13 @@ case class DiffNode(key: SPNodeKey, nv: NodeVersions, diff: Diff)
 
 object DiffNode {
 
-  /** Creates an [[vcs.Diff.InUse]] `DiffNode` from the
+  /** Creates an [[diff.Diff.InUse]] `DiffNode` from the
     * provided program node.
     */
   def apply(n: ISPNode): DiffNode =
     DiffNode(n.getNodeKey, n.getVersion, Diff(n))
 
-  /** Creates [[vcs.Diff.InUse]] `DiffNode`s for each
+  /** Creates [[diff.Diff.InUse]] `DiffNode`s for each
     * program node rooted at `root`.
     */
   def tree(root: ISPNode): List[DiffNode] = {

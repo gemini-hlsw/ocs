@@ -1,4 +1,4 @@
-package edu.gemini.sp.vcs
+package edu.gemini.sp.vcs.diff
 
 import edu.gemini.pot.sp.version._
 import edu.gemini.pot.sp.{ISPNode, ISPObservation, ISPProgram, SPNodeKey}

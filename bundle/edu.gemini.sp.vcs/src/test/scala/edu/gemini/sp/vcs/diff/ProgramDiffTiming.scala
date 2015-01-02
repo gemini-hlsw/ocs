@@ -1,8 +1,7 @@
-package edu.gemini.sp.vcs
+package edu.gemini.sp.vcs.diff
 
+import edu.gemini.sp.vcs.TestingEnvironment._
 import edu.gemini.spModel.rich.pot.sp._
-
-import TestingEnvironment._
 
 // Some more or less throw-away code to run a timing test on an impossibly large
 // program difference.
