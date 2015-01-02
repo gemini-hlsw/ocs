@@ -153,6 +153,18 @@ object Angle {
       override val toDegrees = ((d % 360) + 360) % 360
     }
 
+  /**
+   * Construct an `Angle` from the given value in arcseconds
+   * @group Constructors
+   */
+  def fromArcsecs(s: Double): Angle = fromDegrees(s / 3600)
+
+  /**
+   * Construct an `Angle` from the given value in arcminutes
+   * @group Constructors
+   */
+  def fromArcmin(m: Double): Angle = fromDegrees(m / 60)
+
   /** 
    * Construct an `Angle` from the given value in radians, which will be normalized to [0, 2π). 
    * @group Constructors

@@ -19,6 +19,16 @@ object AngleSpec extends Specification with ScalaCheck with Arbitraries with Hel
         Angle.fromDegrees(a.toDegrees) ~= a
       }
 
+    "support Arcsecs" !
+      forAll { (a: Angle) =>
+        Angle.fromArcsecs(a.toDegrees * 3600) ~= a
+      }
+
+    "support Arcmins" !
+      forAll { (a: Angle) =>
+        Angle.fromArcmin(a.toDegrees * 60) ~= a
+      }
+    
     "support Radians" !
       forAll { (a: Angle) =>  
         Angle.fromRadians(a.toRadians) ~= a
