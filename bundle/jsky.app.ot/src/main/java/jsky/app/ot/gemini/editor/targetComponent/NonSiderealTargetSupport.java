@@ -260,51 +260,12 @@ class NonSiderealTargetSupport {
      */
 
     public NonSiderealTargetSupport.NonSiderealSystem getNonSiderealSystem(TypeBase base) {
-       //for backward compatibility with previously supported formats
-        NonSiderealSystem ns = convertPreviousFormats(base);
-        if (ns != null) return ns;
-
         for (NonSiderealTargetSupport.NonSiderealSystem s : _nonSiderealSystems) {
             if (s.type == base) {
                 return s;
             }
         }
         return null;
-    }
-
-    /**
-     * Check if a system not currently supported in the UI is in use. If so, convert it
-     * to the formats supported.
-     *
-     * The conversion is:
-     *
-     * ASA_MAJOR_PLANET, JPL_MAJOR_PLANET ==> MAJOR_PLANET
-     * ASA_COMET, MPC_COMET ==> JPL_COMET
-     * ASA_MINOR_PLANET ==> JPL_MINOR_PLANET
-     *
-     */
-    private NonSiderealTargetSupport.NonSiderealSystem convertPreviousFormats(TypeBase base) {
-        if (ConicTarget.SystemType.ASA_MAJOR_PLANET.getName().equals(base.getName())) {
-            return _nonSiderealSystems[MAJOR_PLANET];
-        }
-
-        if (ConicTarget.SystemType.ASA_COMET.getName().equals(base.getName())) {
-            return _nonSiderealSystems[JPL_COMET];
-        }
-
-        if (ConicTarget.SystemType.ASA_MINOR_PLANET.getName().equals(base.getName())) {
-            return _nonSiderealSystems[JPL_MINOR_PLANET];
-        }
-
-        if (ConicTarget.SystemType.JPL_MAJOR_PLANET.getName().equals(base.getName())) {
-            return _nonSiderealSystems[MAJOR_PLANET];
-        }
-
-        if (ConicTarget.SystemType.MPC_COMET.getName().equals(base.getName())) {
-            return _nonSiderealSystems[JPL_COMET];
-        }
-        return null;
-
     }
 
     // initialize the array of parameter labels for each system
@@ -350,88 +311,6 @@ class NonSiderealTargetSupport {
         _paramLabels[JPL_MINOR_PLANET][DAILYMOT] = new String[]{null, null};
         _paramLabels[JPL_MINOR_PLANET][EPOCHOFPERI] = new String[]{null, null};
 
-    }
-
-
-    /**
-     * Returns the String value for the given JPL Horizons keyword.
-     * see <a href="http://ssd.jpl.nasa.gov/horizons_doc.html#searching">JPL Horizons</a>
-     *
-     * @param key the JPL Horizons keyword (type SB at the telnet promp for a list)
-     * @param target the ConicTarget holding the values
-     */
-    public String getJplParamValue(String key, ConicTarget target) {
-        // From the JPL Horizons doc:
-        //        ... acceptable label strings are defined as follows:
-        //               EPOCH ....  Julian ephemeris date (CT) of osculating elements
-        //               EC .......  Eccentricity
-        //               QR .......  Perihelion distance in (AU)
-        //               TP .......  Perihelion Julian date
-        //               OM .......  Longitude of ascending node (DEGREES) wrt ecliptic
-        //               W ........  Argument of perihelion (DEGREES) wrt ecliptic
-        //               IN .......  Inclination (DEGREES) wrt ecliptic
-        //
-        //        Instead of {TP, QR}, {MA, A} or {MA,N} may be specified (not both):
-        //               MA .......  Mean anomaly (DEGREES)
-        //               A ........  Semi-major axis (AU)
-        //               N ........  Mean motion (DEG/DAY)
-        //
-        //        Note that if you specify elements with MA, {TP, QR} will be computed from
-        //        them. The program always uses TP and QR.
-
-        TypeBase type = target.getSystemOption();
-        if (type == ConicTarget.SystemType.ASA_MAJOR_PLANET) {
-            if (key.equals("EPOCH")) { // EPOCH
-                return target.getEpoch().getStringValue();
-            } else if (key.equals("IN")) { // IN
-                return target.getInclination().getStringValue();
-            } else if (key.equals("OM")) { // OM
-                return target.getANode().getStringValue();
-            } else if (key.equals("W")) { // W
-                return target.getPerihelion().getStringValue();
-            } else if (key.equals("QR")) { // Q
-                return target.getAQ().getStringValue(); // XXX Can't use QR with MA
-            } else if (key.equals("EC")) { // EC
-                return String.valueOf(target.getE());
-            } else if (key.equals("MA")) { // MA
-                return target.getLM().getStringValue();
-            } else if (key.equals("N")) { // N
-                return target.getN().getStringValue();
-            }
-        } else if (type == ConicTarget.SystemType.JPL_MINOR_BODY) {
-            if (key.equals("EPOCH")) { // EPOCH
-                return target.getEpoch().getStringValue();
-            } else if (key.equals("IN")) { // IN
-                return target.getInclination().getStringValue();
-            } else if (key.equals("OM")) { // OM
-                return target.getANode().getStringValue();
-            } else if (key.equals("W")) { // W
-                return target.getPerihelion().getStringValue();
-            } else if (key.equals("QR")) { // Q
-                return target.getAQ().getStringValue();
-            } else if (key.equals("EC")) { // EC
-                return String.valueOf(target.getE());
-            } else if (key.equals("TP")) { // TP
-                return target.getEpochOfPeri().getStringValue();
-            }
-        } else if (type == ConicTarget.SystemType.MPC_MINOR_PLANET) {
-            if (key.equals("EPOCH")) { // Epoch
-                return target.getEpoch().getStringValue();
-            } else if (key.equals("IN")) { // Incl.
-                return target.getInclination().getStringValue();
-            } else if (key.equals("OM")) { // Node
-                return target.getANode().getStringValue();
-            } else if (key.equals("W")) { // Peri.
-                return target.getPerihelion().getStringValue();
-            } else if (key.equals("A")) { // a
-                return target.getAQ().getStringValue();
-            } else if (key.equals("EC")) { // e
-                return String.valueOf(target.getE());
-            } else if (key.equals("MA")) { // M
-                return target.getEpochOfPeri().getStringValue();
-            }
-        }
-        return null;
     }
 
     // initialize the array of widgets for each parameter

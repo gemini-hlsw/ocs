@@ -116,32 +116,6 @@ public final class TargetConfig extends ParamSet {
         // All have eccentricity
         putParameter(TccNames.ECCENTRICITY, String.valueOf(target.getE()));
 
-        if (option == ConicTarget.SystemType.ASA_MAJOR_PLANET) {
-            putParameter(TccNames.MEANDIST, target.getAQ().getStringValue());
-            putParameter(TccNames.MEANLONG, target.getLM().getStringValue());
-            putParameter(TccNames.LONGOFPERI, target.getPerihelion().getStringValue());
-            putParameter(TccNames.DAILYMOT, target.getN().getStringValue());
-        }
-
-        if (option == ConicTarget.SystemType.ASA_MINOR_PLANET) {
-            putParameter(TccNames.ARGOFPERI, target.getPerihelion().getStringValue());
-            putParameter(TccNames.MEANDIST, target.getAQ().getStringValue());
-            putParameter(TccNames.MEANANOM, target.getLM().getStringValue());
-        }
-
-        if (option == ConicTarget.SystemType.ASA_COMET) {
-            putParameter(TccNames.ARGOFPERI, target.getPerihelion().getStringValue());
-            putParameter(TccNames.PERIDIST, target.getAQ().getStringValue());
-            putParameter(TccNames.EPOCHOFPERI, target.getEpochOfPeri().getStringValue());
-        }
-
-        if (option == ConicTarget.SystemType.JPL_MAJOR_PLANET) {
-            putParameter(TccNames.ARGOFPERI, target.getPerihelion().getStringValue());
-            putParameter(TccNames.MEANDIST, target.getAQ().getStringValue());
-            putParameter(TccNames.MEANANOM, target.getLM().getStringValue());
-            putParameter(TccNames.DAILYMOT, target.getN().getStringValue());
-        }
-
         if (option == ConicTarget.SystemType.JPL_MINOR_BODY) {
             putParameter(TccNames.ARGOFPERI, target.getPerihelion().getStringValue());
             putParameter(TccNames.PERIDIST, target.getAQ().getStringValue());
@@ -152,12 +126,6 @@ public final class TargetConfig extends ParamSet {
             putParameter(TccNames.ARGOFPERI, target.getPerihelion().getStringValue());
             putParameter(TccNames.MEANDIST, target.getAQ().getStringValue());
             putParameter(TccNames.MEANANOM, target.getLM().getStringValue());
-        }
-
-        if (option == ConicTarget.SystemType.MPC_COMET) {
-            putParameter(TccNames.ARGOFPERI, target.getPerihelion().getStringValue());
-            putParameter(TccNames.PERIDIST, target.getAQ().getStringValue());
-            putParameter(TccNames.EPOCHOFPERI, target.getEpochOfPeri().getStringValue());
         }
 
     }
