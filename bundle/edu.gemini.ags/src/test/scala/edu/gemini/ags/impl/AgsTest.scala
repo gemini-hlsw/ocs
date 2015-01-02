@@ -1,6 +1,7 @@
 package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.{AgsMagnitude, AgsRegistrar, AgsStrategy}
+import edu.gemini.ags.impl._
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.skyobject.{Magnitude, SkyObject}
@@ -8,7 +9,9 @@ import edu.gemini.shared.skyobject.coords.{SkyCoordinates, HmsDegCoordinates}
 import edu.gemini.skycalc.{Offset, DDMMSS, HHMMSS, Angle}
 import edu.gemini.skycalc.Angle.ANGLE_0DEGREES
 import edu.gemini.skycalc.Angle.Unit._
-import edu.gemini.spModel.core.Site
+import edu.gemini.spModel.core
+import edu.gemini.spModel.core._
+import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.gemini.altair.{InstAltair, AltairParams}
 import edu.gemini.spModel.gemini.inst.InstRegistry
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
