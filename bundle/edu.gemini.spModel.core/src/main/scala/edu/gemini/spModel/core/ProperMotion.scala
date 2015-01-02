@@ -1,5 +1,14 @@
 package edu.gemini.spModel.core
 
+// TODO: review optional parameters; remove if unused
+
+/**
+ * Specification of proper motion.
+ * @param deltaRA velocity in right ascension, mas/yr
+ * @param deltaDec velocity in right ascension, mas/yr
+ * @param parallax parallax, if known, in arcseconds
+ * @param rv radial velocity, if known, in km/sec
+ */
 case class ProperMotion(
   deltaRA: Double,
   deltaDec: Double,
