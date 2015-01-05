@@ -9,38 +9,40 @@ import scalaz.Scalaz._
 
 object ProgramDiff {
 
+  import Diff.{missing, present}
+
   /** Returns a (super-set) of differences between two programs.
     *
-    * It is a "super-set" because ultimately not every returned `DiffNode` may
-    * be necessary in merging program versions.
+    * It is a "super-set" because ultimately not every returned `Diff` may be
+    * necessary in merging program versions.
     */
-  def compare(local: ISPProgram, remoteVm: VersionMap): List[DiffNode] = {
+  def compare(local: ISPProgram, remoteVm: VersionMap): List[Diff] = {
     import scala.collection.breakOut
-    def toList(keys: Set[SPNodeKey], f: SPNodeKey => DiffNode): List[DiffNode] =
+    def toList(keys: Set[SPNodeKey], f: SPNodeKey => Diff): List[Diff] =
       keys.map(f)(breakOut)
 
-    val inUse          = inUseDiffs(local, remoteVm)
-    val localVm        = local.getVersions
-    val localKeys      = localVm.keySet
-    val remoteKeys     = remoteVm.keySet
+    val presentDiffs    = findDiffs(local, remoteVm)
+    val localVm         = local.getVersions
+    val localKeys       = localVm.keySet
+    val remoteKeys      = remoteVm.keySet
 
     // Any remote keys that we don't have locally are missing.
-    val missingKeys    = remoteKeys &~ localKeys
-    val missing        = toList(missingKeys, k => DiffNode(k, remoteVm(k), Diff.Missing))
+    val missingKeys     = remoteKeys &~ localKeys
+    val missingDiffs    = toList(missingKeys, k => missing(k, remoteVm(k)))
 
     // Take all the local keys, remove those that differ but are still active,
     // then remove all that don't differ.
-    val activeDiffKeys = inUse.map(_.key)(breakOut): Set[SPNodeKey]
-    val removedKeys    = (localKeys &~ activeDiffKeys).filter { k =>
+    val presentDiffKeys = presentDiffs.map(_.key)(breakOut): Set[SPNodeKey]
+    val removedKeys     = (localKeys &~ presentDiffKeys).filter { k =>
       remoteVm.get(k).forall(_ != localVm(k))
     }
-    val removed        = toList(removedKeys, k => DiffNode(k, localVm(k), Diff.Removed))
+    val removedDiffs    = toList(removedKeys, k => missing(k, localVm(k)))
 
-    removed ++ missing ++ inUse
+    removedDiffs ++ missingDiffs ++ presentDiffs
   }
 
-  private def diffOne(n: ISPNode, remoteVm: VersionMap): Option[DiffNode] = {
-    lazy val someActive = some(DiffNode(n))
+  private def diffOne(n: ISPNode, remoteVm: VersionMap): Option[Diff] = {
+    lazy val someActive = some(present(n))
     remoteVm.get(n.getNodeKey).fold(someActive) { remoteNv =>
       if (n.getVersion == remoteNv) none else someActive
     }
@@ -48,7 +50,7 @@ object ProgramDiff {
 
   // Observations are atomic.  If anything differs at all in either version copy
   // the entire observation.
-  private def diffObs(o: ISPObservation, remoteVm: VersionMap): List[DiffNode] = {
+  private def diffObs(o: ISPObservation, remoteVm: VersionMap): List[Diff] = {
     def nodeDiffers(n: ISPNode): Boolean =
       n.getVersion != remoteVm.getOrElse(n.getNodeKey, EmptyNodeVersions)
 
@@ -62,21 +64,21 @@ object ProgramDiff {
       go(List(root))
     }
 
-    if (treeDiffers(o)) DiffNode.tree(o) else List.empty
+    if (treeDiffers(o)) Diff.tree(o) else List.empty
   }
 
   // Differences in in-use nodes rooted at n.
-  private def inUseDiffs(n: ISPNode, remoteVm: VersionMap): List[DiffNode] =
+  private def findDiffs(n: ISPNode, remoteVm: VersionMap): List[Diff] =
     n match {
       case o: ISPObservation => diffObs(o, remoteVm)
       case _                 =>
-        val childDiffs = (List.empty[DiffNode]/:n.children) { (ns, child) =>
-          inUseDiffs(child, remoteVm) ++ ns
+        val childDiffs = (List.empty[Diff]/:n.children) { (ns, child) =>
+          findDiffs(child, remoteVm) ++ ns
         }
 
         // If there is even one descendant that differs, include this node
         // in the results.  Otherwise, only include it if it differs.
         if (childDiffs.isEmpty) diffOne(n, remoteVm).toList
-        else DiffNode(n) :: childDiffs
+        else present(n) :: childDiffs
     }
 }

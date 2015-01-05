@@ -15,26 +15,22 @@ class ProgramDiffTest {
 
   import edu.gemini.sp.vcs.diff.Diff._
 
-  private def equalNodes(expected: DiffNode, actual: DiffNode): Boolean = {
-    def equalDiff(expected: Diff, actual: Diff): Boolean =
-      (expected, actual) match {
-        case (InUse(dob0, ch0, detail0), InUse(dob1, ch1, detail1)) =>
-          ch0 == ch1 && detail0 == detail1 && DataObjectBlob.same(dob0, dob1)
-        case (d0, d1) => d0 == d1
-      }
+  private def equalDiff(diffTuple: (Diff, Diff)): Boolean =
+    diffTuple match {
+      case (Present(eKey, eNv, eDob, eChild, eDet), Present(aKey, aNv, aDob, aChild, aDet)) =>
+        eKey   == aKey   &&
+        eNv    == aNv    &&
+        eChild == aChild &&
+        eDet   == aDet   &&
+        DataObjectBlob.same(eDob, aDob)
+      case (eDiff, aDiff) => eDiff == aDiff
+    }
 
-    (  expected.key == actual.key
-    && expected.nv == actual.nv
-    && equalDiff(expected.diff, actual.diff)
-    )
-  }
+  private def equalDiffs(e: Seq[Diff], a: Seq[Diff]): Boolean =
+    (e.size == a.size) && e.sortBy(_.key).zip(a.sortBy(_.key)).forall(equalDiff)
 
-  private def equalDiffs(expected: Seq[DiffNode], actual: Seq[DiffNode]): Boolean =
-    (  (expected.size == actual.size)
-    && expected.sortBy(_.key).zip(actual.sortBy(_.key)).forall(t => equalNodes(t._1, t._2))
-    )
 
-  private def assertEqualDiffs(env: TestingEnvironment, expected: DiffNode*): Unit = {
+  private def assertEqualDiffs(env: TestingEnvironment, expected: Diff*): Unit = {
     val actual = ProgramDiff.compare(env.central.sp, env.cloned.sp.getVersions)
     assertTrue(equalDiffs(expected, actual))
   }
@@ -46,24 +42,23 @@ class ProgramDiffTest {
       assertNoDiffs
     }
 
-  private def inUse(n: ISPNode, d: NodeDetail): DiffNode =
-    DiffNode(n.getNodeKey, n.getVersion, InUse(n.getDataObject, n.children.map(_.getNodeKey), d))
+  private def present(n: ISPNode, d: NodeDetail): Present =
+    Present(n.getNodeKey, n.getVersion, n.getDataObject, n.children.map(_.getNodeKey), d)
 
-  private def inUseEmpty(n: ISPNode): DiffNode =
-    inUse(n, NodeDetail.Empty)
+  private def presentEmpty(n: ISPNode): Present =
+    present(n, NodeDetail.Empty)
 
-  private def inUseObs(n: ISPNode, num: Int): DiffNode =
-    inUse(n, NodeDetail.Obs(num))
+  private def presentObs(n: ISPNode, num: Int): Present =
+    present(n, NodeDetail.Obs(num))
 
-  private def missing(n: ISPNode): DiffNode = DiffNode(n.getNodeKey, n.getVersion, Missing)
-  private def removed(n: ISPNode): DiffNode = DiffNode(n.getNodeKey, n.getVersion, Removed)
+  private def missing(n: ISPNode): Missing = Missing(n.getNodeKey, n.getVersion)
 
   @Test def localChangeProducesDiff(): Unit =
     withPiTestEnv { env =>
       import env._
 
       central.setTitle("My Program")
-      assertEqualDiffs(env, inUseEmpty(central.sp))
+      assertEqualDiffs(env, presentEmpty(central.sp))
     }
 
   @Test def remoteChangeProducesDiff(): Unit =
@@ -71,7 +66,7 @@ class ProgramDiffTest {
       import env._
 
       cloned.setTitle("My Program")
-      assertEqualDiffs(env, inUseEmpty(central.sp))
+      assertEqualDiffs(env, presentEmpty(central.sp))
     }
 
   @Test def updatedChildPullsInAncestors(): Unit =
@@ -88,16 +83,16 @@ class ProgramDiffTest {
       cloned.setNoteText("bar", note.getNodeKey)
 
       // all nodes present, diff contains "foo" version of note.
-      val noteDiff = inUseEmpty(note)
-      noteDiff.diff match {
-        case InUse(dob, Nil, NodeDetail.Empty) =>
+      val noteDiff = presentEmpty(note)
+      noteDiff match {
+        case Present(_, _, dob, Nil, NodeDetail.Empty) =>
           assertEquals("foo", dob.asInstanceOf[SPNote].getNote)
         case _ => fail()
       }
-      assertEqualDiffs(env, inUseEmpty(central.sp), inUseEmpty(group), noteDiff)
+      assertEqualDiffs(env, presentEmpty(central.sp), presentEmpty(group), noteDiff)
     }
 
-  @Test def updatedAncestorDoesntPullInDescendant(): Unit =
+  @Test def updatedAncestorDoesNotPullInDescendant(): Unit =
     withPiTestEnv { env =>
       import env._
 
@@ -111,13 +106,13 @@ class ProgramDiffTest {
       central.setTitle("foo", group.getNodeKey)
 
       // all nodes present, diff contains "foo" version of group title
-      val groupDiff = inUseEmpty(central.find(group.getNodeKey))
-      groupDiff.diff match {
-        case InUse(dob, children, NodeDetail.Empty) if children == List(note.getNodeKey) =>
+      val groupDiff = presentEmpty(central.find(group.getNodeKey))
+      groupDiff match {
+        case Present(_, _, dob, children, NodeDetail.Empty) if children == List(note.getNodeKey) =>
           assertEquals("foo", dob.getTitle)
         case _ => fail()
       }
-      assertEqualDiffs(env, inUseEmpty(central.sp), groupDiff)
+      assertEqualDiffs(env, presentEmpty(central.sp), groupDiff)
     }
 
   @Test def updatedObservationBringsEntireObservation(): Unit =
@@ -132,8 +127,8 @@ class ProgramDiffTest {
       val comps = obs.getChildren.asScala.toList
       central.setTitle("foo", comps.head.getNodeKey)
 
-      val diffs = inUseEmpty(central.sp) :: inUseObs(obs, 1) :: comps.map { c =>
-        inUseEmpty(central.find(c.getNodeKey))
+      val diffs = presentEmpty(central.sp) :: presentObs(obs, 1) :: comps.map { c =>
+        presentEmpty(central.find(c.getNodeKey))
       }
       assertEqualDiffs(env, diffs: _*)
     }
@@ -143,7 +138,7 @@ class ProgramDiffTest {
       import env._
 
       val note  = cloned.addNote("foo")
-      assertEqualDiffs(env, inUseEmpty(central.sp), missing(note))
+      assertEqualDiffs(env, presentEmpty(central.sp), missing(note))
     }
 
   @Test def removedNodeNeverPresentInOtherSideIsIncluded(): Unit =
@@ -156,7 +151,7 @@ class ProgramDiffTest {
       // Delete Note
       central.sp.children = Nil
 
-      assertEqualDiffs(env, inUseEmpty(central.sp), removed(note))
+      assertEqualDiffs(env, presentEmpty(central.sp), missing(note))
     }
 
   @Test def removedNodeKnownToBothSidesIsNotIncluded(): Unit =
@@ -173,7 +168,7 @@ class ProgramDiffTest {
 
       // Note version never updated so it is the same in both sides.  Only the
       // parent node (with its updated child list) need be sent.
-      assertEqualDiffs(env, inUseEmpty(central.sp))
+      assertEqualDiffs(env, presentEmpty(central.sp))
     }
 
   @Test def modifiedThenRemovedNodeKnownToBothSidesIsIncluded(): Unit =
@@ -189,7 +184,7 @@ class ProgramDiffTest {
       central.setNoteText("bar", note.getNodeKey)
       central.sp.children = Nil
 
-      assertEqualDiffs(env, inUseEmpty(central.sp), removed(note))
+      assertEqualDiffs(env, presentEmpty(central.sp), missing(note))
     }
 
 }
