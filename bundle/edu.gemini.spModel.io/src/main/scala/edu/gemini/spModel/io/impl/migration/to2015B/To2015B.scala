@@ -257,7 +257,7 @@ object To2015B {
       env <- obs.findContainers(SPComponentType.TELESCOPE_TARGETENV)
       ps  <- env.allParamSets if names(ps.getName)
       p   <- Option(ps.getParam(PARAM_SYSTEM)).toList if systems(p.getValue)
-    } p.setValue(to)
+    } { p.setValue(to); f(ps) }
   }
 
 }
