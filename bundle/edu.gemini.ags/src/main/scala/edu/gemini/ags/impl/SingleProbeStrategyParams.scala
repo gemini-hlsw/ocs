@@ -2,7 +2,7 @@ package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.AgsMagnitude
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
-import edu.gemini.catalog.api.{QueryConstraint, RadiusLimits}
+import edu.gemini.catalog.api.{RadiusConstraint, QueryConstraint, RadiusLimits}
 import edu.gemini.skycalc.Angle
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider
@@ -27,11 +27,12 @@ sealed trait SingleProbeStrategyParams {
   final def queryConstraints(ctx: ObsContext, mt: MagnitudeTable): Option[QueryConstraint] =
     for {
       mc <- magnitudeCalc(ctx, mt)
-      rl <- radiusLimits(ctx)
+      rc <- radiusLimits(ctx)
+      rl =  rc.toRadiusLimit
     } yield new QueryConstraint(ctx.getBaseCoordinates, rl, AgsMagnitude.manualSearchLimits(mc))
 
-  def radiusLimits(ctx: ObsContext): Option[RadiusLimits] =
-    RadiusLimitCalc.getAgsQueryRadiusLimits(guideProbe, ctx).asScalaOpt
+  def radiusLimits(ctx: ObsContext): Option[RadiusConstraint] =
+    RadiusLimitCalc.getAgsQueryRadiusLimits(guideProbe, ctx)
 
   def magnitudeCalc(ctx: ObsContext, mt: MagnitudeTable): Option[MagnitudeCalc] =
     mt(ctx, guideProbe)
@@ -92,8 +93,8 @@ case class PwfsParams(site: Site, guideProbe: PwfsGuideProbe) extends SingleProb
       guideProbe.getCorrectedPatrolField(PatrolField.fromRadiusLimits(min, PwfsGuideProbe.PWFS_RADIUS), ctx)
     }
 
-    override def radiusLimits(ctx: ObsContext): Option[RadiusLimits] =
-      RadiusLimitCalc.getAgsQueryRadiusLimits(Some(vignettingProofPatrolField(ctx)).asGeminiOpt, ctx).asScalaOpt
+    override def radiusLimits(ctx: ObsContext): Option[RadiusConstraint] =
+      RadiusLimitCalc.getAgsQueryRadiusLimits(Some(vignettingProofPatrolField(ctx)), ctx)
 
     // We have a special validator for Pwfs.
     override def validator(ctx: ObsContext): GuideStarValidator =
