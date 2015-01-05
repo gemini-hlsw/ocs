@@ -8,9 +8,7 @@ package edu.gemini.spModel.target.system;
 
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
 import edu.gemini.spModel.target.system.CoordinateTypes.*;
-import jsky.coords.wcscon;
 
-import java.awt.geom.Point2D;
 import java.util.Date;
 
 /**
@@ -36,17 +34,12 @@ public final class HmsDegTarget extends CoordinateSystem
      */
     public static final class SystemType extends TypeBase {
         public static final int _J2000 = 0;
-        public static final int _B1950 = 1;
 
         public static final SystemType J2000 =
                 new SystemType(_J2000, "J2000");
 
-        public static final SystemType B1950 =
-                new SystemType(_B1950, "B1950");
-
         public static final SystemType[] TYPES = new SystemType[]{
             J2000,
-            B1950,
         };
 
         private SystemType(int type, String name) {
@@ -322,15 +315,8 @@ public final class HmsDegTarget extends CoordinateSystem
      * set the epoch of the coordinate
      */
     private Epoch _createDefaultEpoch() {
-        Epoch ep;
-        if ((getSystemOption() == SystemType.B1950)) {
-            ep = new Epoch(DEFAULT_EPOCH_1950.getValue(),
-                           DEFAULT_EPOCH_1950.getUnits());
-        } else {
-            ep = new Epoch(DEFAULT_EPOCH_2000.getValue(),
-                           DEFAULT_EPOCH_2000.getUnits());
-        }
-        return ep;
+        return new Epoch(DEFAULT_EPOCH_2000.getValue(),
+                         DEFAULT_EPOCH_2000.getUnits());
     }
 
     /**
@@ -348,11 +334,7 @@ public final class HmsDegTarget extends CoordinateSystem
     // Override setSystemOption
     protected void _setSystemOption(TypeBase systemOption) {
         super._setSystemOption(systemOption);
-        if ((systemOption == SystemType.B1950)) {
-            _epoch = DEFAULT_EPOCH_1950;
-        } else if ((systemOption == SystemType.J2000)) {
-            _epoch = DEFAULT_EPOCH_2000;
-        }
+        _epoch = DEFAULT_EPOCH_2000;
     }
 
 
@@ -542,43 +524,8 @@ public final class HmsDegTarget extends CoordinateSystem
      * Part of Interface ICoordinate
      */
     public HmsDegTarget getTargetAsJ2000() {
-        // Make a copy for returning
-        HmsDegTarget j2ksys = (HmsDegTarget) this.clone();
-
-        int etype = j2ksys.getSystemOption().getTypeCode();
-        Epoch epoch = j2ksys.getEpoch();
-
-        switch (etype) {
-            case SystemType._J2000:
-                // Already in J2000(FK5)
-                break;
-            case SystemType._B1950:
-                // Convert from B1950 to FK5(J2000)
-                j2ksys = _convertB1950toJ2000(j2ksys);
-                break;
-        }
-        // Copy the object name
-        j2ksys.setName(getName());
-        return j2ksys;
+        return (HmsDegTarget) this.clone();
     }
-
-    // Helper method to do the conversion from B1950 to J2000
-    private HmsDegTarget _convertB1950toJ2000(HmsDegTarget in) {
-        // Get the input position in degrees
-        double ra = in.getC1().getAs(Units.DEGREES);
-        double dec = in.getC2().getAs(Units.DEGREES);
-        Point2D.Double input = new Point2D.Double(ra, dec);
-
-        // Convert the coordinate from FK4 to FK5
-        Point2D.Double result = wcscon.fk425(input);
-
-        // Set the result
-        in.setSystemOption(SystemType.J2000);
-        in.getC1().setAs(result.getX(), Units.DEGREES);
-        in.getC2().setAs(result.getY(), Units.DEGREES);
-        return in;
-    }
-
 
     /**
      * Set the position using a J2000 HmsDegTarget
@@ -592,33 +539,8 @@ public final class HmsDegTarget extends CoordinateSystem
         _ra = (HMS) in._ra.clone();
         _dec = (DMS) in._dec.clone();
 
-        switch (etype) {
-            case SystemType._J2000:
-                // Already in J2000(FK5) - may be new coordinates
-                break;
-            case SystemType._B1950:
-                // Convert from FK5(J2000) to B1950
-                _convertJ2000toB1950(this);
-                break;
-        }
         // Copy the object name
         setName(in.getName());
-    }
-
-    // Helper method to do the conversion from J2000 to B1950
-    private void _convertJ2000toB1950(HmsDegTarget in) {
-        // Get the RA and Dec as degrees and create a new Point2D
-        double ra = in.getC1().getAs(Units.DEGREES);
-        double dec = in.getC2().getAs(Units.DEGREES);
-        Point2D.Double input = new Point2D.Double(ra, dec);
-
-        // Convert from FK5 to FK4
-        Point2D.Double result = wcscon.fk524(input);
-
-        // Set the system with the results
-        in.setSystemOption(SystemType.B1950);
-        in.getC1().setAs(result.getX(), Units.DEGREES);
-        in.getC2().setAs(result.getY(), Units.DEGREES);
     }
 
 }

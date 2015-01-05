@@ -9,7 +9,6 @@ import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates.Epoch;
-import static edu.gemini.shared.skyobject.coords.HmsDegCoordinates.Epoch.Type.BESSELIAN;
 import static edu.gemini.shared.skyobject.coords.HmsDegCoordinates.Epoch.Type.JULIAN;
 import edu.gemini.shared.util.immutable.ApplyOp;
 import edu.gemini.shared.util.immutable.ImList;
@@ -28,9 +27,7 @@ import java.util.Set;
  */
 public final class SPTargetSkyObjectTest {
     private static final Epoch[] EPOCHS = {
-            Epoch.B1950,
             Epoch.J2000,
-            new Epoch(BESSELIAN, 1950.5),
             new Epoch(JULIAN, 2000.5),
     };
 

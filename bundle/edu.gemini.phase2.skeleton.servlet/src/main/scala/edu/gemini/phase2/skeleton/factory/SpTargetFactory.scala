@@ -97,7 +97,6 @@ object SpTargetFactory {
   private def siderealSystemType(sid: SiderealTarget): Either[String, SP.system.HmsDegTarget.SystemType] =
     sid.epoch match {
       case J_2000 => Right(SP.system.HmsDegTarget.SystemType.J2000)
-      case B_1950 => Right(SP.system.HmsDegTarget.SystemType.B1950)
       case _      => Left("Unexpected epoch %s".format(sid.epoch))
     }
 
