@@ -628,14 +628,14 @@ object YUtils {
    * Returns the matrix m with absolute values
    */
   def abs(m: DenseMatrix[Double]): DenseMatrix[Double] = {
-    m.mapValues(math.abs(_))
+    m.mapValues(math.abs)
   }
 
   /**
    * Returns the vector v with absolute values
    */
   def abs(v: DenseVector[Double]): DenseVector[Double] = {
-    v.mapValues(math.abs(_))
+    v.mapValues(math.abs)
   }
 
   /**
