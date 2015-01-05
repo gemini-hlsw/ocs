@@ -9,6 +9,10 @@ import Scalaz._
 
 class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
 
+  // TODO: remove this, use method on Angle companion
+  def fromMilliarcseconds(d: Double): Angle =
+    Angle.fromDegrees(d / (60 * 60 * 1000))
+
   "Ucd" should {
     "detect if is a superset" in {
       Ucd("stat.error;phot.mag;em.opt.i").includes(UcdWord("phot.mag")) should beTrue
@@ -367,8 +371,8 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
     "be able to parse an xml into a list of SiderealTargets including proper motion" in {
       val magsTarget1 = List(new Magnitude(14.76, MagnitudeBand.R))
       val magsTarget2 = List(new Magnitude(12.983, MagnitudeBand.R))
-      val pm1 = ProperMotion(-10.199999999999999, -4.9000000000000004).some
-      val pm2 = ProperMotion(-7, -13.9).some
+      val pm1 = ProperMotion(fromMilliarcseconds(-10.199999999999999), fromMilliarcseconds(-4.9000000000000004)).some
+      val pm2 = ProperMotion(fromMilliarcseconds(-7), fromMilliarcseconds(-13.9)).some
 
       val result = ParsedTable(List(
         \/-(SiderealTarget("550-001323", Coordinates(RightAscension.fromDegrees(9.897141944444456), Declination.fromAngle(Angle.parseDegrees("19.98878944444442").getOrElse(Angle.zero)).getOrElse(Declination.zero)), Equinox.J2000, pm1, magsTarget1, None)),

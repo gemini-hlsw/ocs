@@ -52,12 +52,12 @@ trait Arbitraries {
   implicit val arbProperMotion: Arbitrary[ProperMotion] =
     Arbitrary {
       for {
-        deltaRA  <- arbitrary[Double]
-        deltaDec <- arbitrary[Double]
+        deltaRA  <- arbitrary[Angle]
+        deltaDec <- arbitrary[Angle]
         epoch    <- arbitrary[Epoch]
-        parallax <- arbitrary[Double]
-        rv       <- arbitrary[Double]
-      } yield ProperMotion(deltaRA, deltaDec, epoch, Some(parallax), Some(rv))
+        parallax <- arbitrary[Option[Angle]]
+        rv       <- arbitrary[Option[Double]]
+      } yield ProperMotion(deltaRA, deltaDec, epoch, parallax, rv)
     }
 
   implicit val arbMagnitude: Arbitrary[Magnitude] =
