@@ -2,9 +2,8 @@ package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.AgsMagnitude
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
-import edu.gemini.catalog.api.{RadiusConstraint, QueryConstraint, RadiusLimits}
-import edu.gemini.skycalc.Angle
-import edu.gemini.spModel.core.Site
+import edu.gemini.catalog.api.{RadiusConstraint, QueryConstraint}
+import edu.gemini.spModel.core.{Angle, Site}
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2OiwfsGuideProbe
 import edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe
@@ -21,8 +20,8 @@ sealed trait SingleProbeStrategyParams {
   def site: Site
   def band: Magnitude.Band = Magnitude.Band.R
   def guideProbe: ValidatableGuideProbe
-  def stepSize: Angle            = new Angle(10, Angle.Unit.DEGREES)
-  def minDistance: Option[Angle] = Some(new Angle(20, Angle.Unit.ARCSECS))
+  def stepSize: Angle            = Angle.fromDegrees(10)
+  def minDistance: Option[Angle] = Some(Angle.fromArcsecs(20))
 
   final def queryConstraints(ctx: ObsContext, mt: MagnitudeTable): Option[QueryConstraint] =
     for {
@@ -44,14 +43,14 @@ object SingleProbeStrategyParams {
   case object AltairAowfsParams extends SingleProbeStrategyParams {
     val guideProbe           = AltairAowfsGuider.instance
     val site                 = Site.GN
-    override def stepSize    = new Angle(90, Angle.Unit.DEGREES)
-    override def minDistance = Some(new Angle(0.0, Angle.Unit.ARCSECS))
+    override def stepSize    = Angle.fromDegrees(90)
+    override def minDistance = Some(Angle.zero)
   }
 
   case object Flamingos2OiwfsParams extends SingleProbeStrategyParams {
     val guideProbe        = Flamingos2OiwfsGuideProbe.instance
     val site              = Site.GS
-    override def stepSize = new Angle(90, Angle.Unit.DEGREES)
+    override def stepSize = Angle.fromDegrees(90)
 
     // Note, for single probe strategy it is always OIWFS....
 //    override def radiusLimits(ctx: ObsContext): Option[RadiusLimits] = {
@@ -86,7 +85,7 @@ object SingleProbeStrategyParams {
   }
 
 case class PwfsParams(site: Site, guideProbe: PwfsGuideProbe) extends SingleProbeStrategyParams {
-    override def stepSize = new Angle(360, Angle.Unit.DEGREES)
+    override def stepSize = Angle.fromDegrees(360)
 
     private def vignettingProofPatrolField(ctx: ObsContext): PatrolField = {
       val min = guideProbe.getVignettingClearance(ctx)

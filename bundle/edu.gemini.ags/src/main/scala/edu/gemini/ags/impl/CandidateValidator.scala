@@ -1,8 +1,7 @@
 package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
-import edu.gemini.shared.skyobject.SkyObject
-import edu.gemini.skycalc.CoordinateDiff
+import edu.gemini.spModel.core.Coordinates
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
@@ -29,9 +28,9 @@ class CandidateValidator(params: SingleProbeStrategyParams, mt: MagnitudeTable, 
       // position (i.e. don't use science target as guide star)
       def farEnough =
         params.minDistance.forall { min =>
-          val soCoords = so.getHmsDegCoordinates.asSkycalc
-          val diff = new CoordinateDiff(ctx.getBaseCoordinates, soCoords)
-          diff.getDistance.compareToAngle(min) >= 0
+          val soCoords = so.coordinates
+          val diff = Coordinates.difference(ctx.getBaseCoordinates, soCoords)
+          diff.distance.compareToAngle(min) >= 0
         }
 
       // Only keep candidates that fall within the magnitude limits.

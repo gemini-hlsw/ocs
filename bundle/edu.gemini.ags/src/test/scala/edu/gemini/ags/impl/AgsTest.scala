@@ -30,6 +30,7 @@ import org.junit.Assert._
 import java.awt.geom.{Point2D, PathIterator, AffineTransform, Area}
 
 import scala.collection.JavaConverters._
+import AlmostEqual.AlmostEqualOps
 
 /**
  * Support for running single-probe tests.
@@ -72,7 +73,7 @@ object AgsTest {
       Nil)
   }
 
-  def skyObject(raDecStr: String, rMag: Double): SkyObject = {
+  def siderealTarget(raDecStr: String, rMag: Double): SiderealTarget = {
     val (raStr, decStr) = raDecStr.span(_ != ' ')
     val ra  = HHMMSS.parse(raStr)
     val dec = DDMMSS.parse(decStr.trim)
@@ -80,27 +81,27 @@ object AgsTest {
     new SkyObject.Builder(raDecStr, sc).magnitudes(new Magnitude(Magnitude.Band.R, rMag)).build()
   }
 
-  def skyObjects(so: (String, Double)*): List[SkyObject] = {
-    so.toList.map((skyObject _).tupled)
+  def siderealTargets(so: (String, Double)*): List[SiderealTarget] = {
+    so.toList.map((siderealTarget _).tupled)
   }
 
-  def usableSkyObjects(so: (String, Double, GuideSpeed)*): List[(SkyObject, GuideSpeed)] = {
-    val sos = skyObjects(so.map { case (c, d, _) => (c, d) }: _*)
+  def usableSiderealTarget(so: (String, Double, GuideSpeed)*): List[(SiderealTarget, GuideSpeed)] = {
+    val sos = siderealTargets(so.map { case (c, d, _) => (c, d) }: _*)
     sos.zip(so.map { case (_, _, gs) => gs })
   }
 }
 
-case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(SkyObject, GuideSpeed)], unusable: List[SkyObject],
+case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(SiderealTarget, GuideSpeed)], unusable: List[SiderealTarget],
                    calculateValidArea: (ObsContext, GuideProbe) => Area
                     = (ctx: ObsContext, probe: GuideProbe) => probe.getCorrectedPatrolField(ctx).getValue.getArea) {
   import AgsTest.{nudge, minimumDistance, magTable}
   type Point = Point2D.Double
 
   def unusable(so: (String, Double)*): AgsTest =
-    copy(unusable = AgsTest.skyObjects(so: _*))
+    copy(unusable = AgsTest.siderealTargets(so: _*))
 
   def usable(so: (String, Double, GuideSpeed)*): AgsTest =
-    copy(usable = AgsTest.usableSkyObjects(so: _*))
+    copy(usable = AgsTest.usableSiderealTarget(so: _*))
 
   def rotated(deg: Double): AgsTest =
     copy(ctx.withPositionAngle(new Angle(deg, DEGREES)))
@@ -274,12 +275,12 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(SkyObj
     def name(base: String, i: Int): String =
       s"$base${ctx.getInstrument.getType.narrowType}($i)"
 
-    val usableCandidates = candidates(in).zipWithIndex.collect { case ((sc, mag, Some(gs)), i) =>
-      (new SkyObject.Builder(name("in", i), sc).magnitudes(mag).build(), gs)
+    val usableCandidates:List[(SiderealTarget, GuideSpeed)] = candidates(in).zipWithIndex.collect { case ((sc, mag, Some(gs)), i) =>
+      (skyObject2SiderealTarget(new SkyObject.Builder(name("in", i), sc).magnitudes(mag).build()), gs)
     }
 
     val unusableCandidates = candidates(out).zipWithIndex.map { case ((sc, mag, _), i) =>
-      new SkyObject.Builder(name("out", i), sc).magnitudes(mag).build()
+      skyObject2SiderealTarget(new SkyObject.Builder(name("out", i), sc).magnitudes(mag).build())
     }
 
     copy(usable = usableCandidates, unusable = unusableCandidates)
@@ -407,12 +408,18 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(SkyObj
   def strategy: SingleProbeStrategy =
     AgsRegistrar.currentStrategy(ctx).get.asInstanceOf[SingleProbeStrategy]
 
+  def assertEqualTarget(t1: SiderealTarget, t2: SiderealTarget): Unit = {
+    assertEquals(t1.name, t2.name)
+    assertEquals(t1.magnitudes, t2.magnitudes)
+    assertTrue(t1.coordinates ~= t2.coordinates)
+  }
+
   def test(): Unit = {
     val mc   = magTable.apply(ctx, guideProbe).get
     val band = mc.apply(ctx.getConditions, GuideSpeed.FAST).getBand
     val maxMag = new Magnitude(band, Double.MaxValue)
 
-    def go(winners: List[(SkyObject, GuideSpeed)]): Unit = {
+    def go(winners: List[(SiderealTarget, GuideSpeed)]): Unit = {
       val best = winners match {
         case Nil => None
         case lst => Some(lst.minBy(_._1.getMagnitude(band).getOrElse(maxMag)))
@@ -435,7 +442,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(SkyObj
               }.mkString("[", ", ", "]"))
         }
 
-      def expectSingleAssignment(expStar: SkyObject, expSpeed: GuideSpeed): Unit = {
+      def expectSingleAssignment(expStar: SiderealTarget, expSpeed: GuideSpeed): Unit = {
         res match {
           case None      =>
             fail("Expected: (" + expStar + ", " + expSpeed + "), but nothing selected")
@@ -444,7 +451,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(SkyObj
             asn match {
               case List(AgsStrategy.Assignment(actProbe, actStar)) =>
                 assertEquals(guideProbe, actProbe)
-                assertEquals(expStar, actStar)
+                assertEqualTarget(expStar, skyObject2SiderealTarget(actStar))
                 val actSpeed = AgsMagnitude.fastestGuideSpeed(mc, actStar.getMagnitude(band).getValue, ctx.getConditions)
                 assertTrue("Expected: " + expSpeed + ", actual: " + actSpeed, actSpeed.exists(_ == expSpeed))
               case Nil => fail("Expected: (" + expStar + ", " + expSpeed + "), but nothing selected")
