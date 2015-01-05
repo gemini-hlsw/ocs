@@ -10,7 +10,7 @@ import edu.gemini.spModel.io.impl.SpIOTags
 import edu.gemini.spModel.obscomp.SPNote
 
 import edu.gemini.spModel.pio.xml.PioXmlFactory
-import edu.gemini.spModel.pio.{ Document, Container, Param, ParamSet }
+import edu.gemini.spModel.pio._
 import edu.gemini.spModel.target.MagnitudePio
 
 import scalaz._, Scalaz._
@@ -35,6 +35,7 @@ object To2015B {
   val PARAM_NOTE_TEXT  = "NoteText"
   val PARAM_NAME       = "name"
   val PARAM_BRIGHTNESS = "brightness"
+  val PARAM_OBJECT     = "object"
 
   val PARAMSET_NOTE       = "Note"
   val PARAMSET_BASE       = "base"
@@ -53,6 +54,16 @@ object To2015B {
   val UNITS_ARCSECONDS_PER_YEAR       = "arcsecs/year"
   val UNITS_MILLI_ARCSECONDS_PER_YEAR = "milli-arcsecs/year"
 
+  val SYS_ASA_MAJOR_PLANET = "AsA major planet"
+  val SYS_ASA_MINOR_PLANET = "AsA minor planet"
+  val SYS_ASA_COMET        = "AsA comet"
+  val SYS_JPL_MAJOR_PLANET = "JPL major planet"
+  val SYS_JPL_MINOR_BODY   = "JPL minor body"
+  val SYS_MPC_MINOR_PLANET = "MPC minor planet"
+  val SYS_MPC_COMET        = "MPC comet"
+
+  val SYS_SOLAR_OBJECT     = "Solar system object"
+
   private val MagnitudeNoteTitle = "2015B Magnitude Updates"
   private val PioFactory = new PioXmlFactory()
 
@@ -60,7 +71,10 @@ object To2015B {
   private val conversions: List[Document => Unit] = List(
     brightnessToMagnitude,
     uselessSystemsToJ2000,
-    b1950ToJ2000
+    b1950ToJ2000,
+    convertComet,
+    convertMinorPlanet,
+    convertSolar
   )
 
   // Convenience op for \/
@@ -222,6 +236,28 @@ object To2015B {
       WSCon.fk425m(coords, pm)
       (coords.x, coords.y, pm.x, pm.y)
     }
+  }
+
+  private lazy val convertComet       = convertSystem(SYS_JPL_MINOR_BODY)(SYS_ASA_COMET, SYS_MPC_COMET)()
+  private lazy val convertMinorPlanet = convertSystem(SYS_MPC_MINOR_PLANET)(SYS_ASA_MINOR_PLANET)()
+
+  private lazy val convertSolar =
+    convertSystem(SYS_SOLAR_OBJECT)(SYS_ASA_MAJOR_PLANET, SYS_JPL_MAJOR_PLANET) { ps =>
+      val n = ps.getParam("name")
+      Pio.addParam(PioFactory, ps, PARAM_OBJECT, n.getValue.toUpperCase)
+    }
+
+  // Construct a conversion that replaces the target system and optionally makes other changes to
+  // the target's paramset.
+  private def convertSystem(to: String)(from: String*)(f: ParamSet => Unit = _ => ()): Document => Unit = { d =>
+    val systems = Set(from: _*)
+    val names = Set(PARAMSET_BASE, PARAMSET_TARGET)
+    for {
+      obs <- d.findContainers(SPComponentType.OBSERVATION_BASIC)
+      env <- obs.findContainers(SPComponentType.TELESCOPE_TARGETENV)
+      ps  <- env.allParamSets if names(ps.getName)
+      p   <- Option(ps.getParam(PARAM_SYSTEM)).toList if systems(p.getValue)
+    } p.setValue(to)
   }
 
 }
