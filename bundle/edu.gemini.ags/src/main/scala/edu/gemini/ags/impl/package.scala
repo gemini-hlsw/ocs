@@ -122,10 +122,10 @@ package object impl {
   def brightness(so: skyobject.SkyObject, b: skyobject.Magnitude.Band): Option[Double] =
     so.getMagnitude(b).asScalaOpt.map(_.getBrightness)
 
-  def brightest[A](lst: List[A], band: skyobject.Magnitude.Band)(toSkyObject: A => skyobject.SkyObject): Option[A] = {
-    lazy val max = new skyobject.Magnitude(band, Double.MaxValue)
+  def brightest[A](lst: List[A], band: skyobject.Magnitude.Band)(toSiderealTarget: A => SiderealTarget): Option[A] = {
+    lazy val max = new Magnitude(Double.MaxValue, band)
     if (lst.isEmpty) None
-    else Some(lst.minBy(toSkyObject(_).getMagnitude(band).getOrElse(max)))
+    else Some(lst.minBy(toSiderealTarget(_).magnitudeOn(band).getOrElse(max)))
   }
 
   def skyObjectFromScienceTarget(target: SPTarget): skyobject.SkyObject = {

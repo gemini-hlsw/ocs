@@ -6,6 +6,7 @@ import edu.gemini.catalog.api.{QueryConstraint, CatalogServerInstances}
 import edu.gemini.shared.skyobject.SkyObject
 import edu.gemini.skycalc.{Coordinates, Angle}
 import edu.gemini.spModel.ags.AgsStrategyKey
+import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
@@ -25,13 +26,13 @@ import ExecutionContext.Implicits.global
  */
 case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyParams) extends AgsStrategy {
 
-  def magnitudes(ctx: ObsContext, mt: MagnitudeTable): List[(GuideProbe, AgsMagnitude.MagnitudeCalc)] =
+  override def magnitudes(ctx: ObsContext, mt: MagnitudeTable): List[(GuideProbe, AgsMagnitude.MagnitudeCalc)] =
     params.magnitudeCalc(ctx, mt).toList.map(params.guideProbe -> _)
 
-  def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] =
+  override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] =
     List(AgsAnalysis.analysis(ctx, mt, params.guideProbe))
 
-  def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SkyObject])]] = {
+  override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SkyObject])]] = {
     val empty = List((params.guideProbe: GuideProbe, List.empty[SkyObject]))
     queryConstraints(ctx, mt).foldLeft(Future.successful(empty)) { (_, qc) =>
       future {
@@ -40,18 +41,18 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
     }
   }
 
-  def catalogResult(ctx: ObsContext, mt: MagnitudeTable): Future[List[SkyObject]] =
+  private def catalogResult(ctx: ObsContext, mt: MagnitudeTable): Future[List[SiderealTarget]] =
     // call candidates and extract the one and only tuple for this strategy,
     // throw away the guide probe (which we know anyway), and obtain just the
     // list of guide stars
     candidates(ctx, mt).map { lst =>
-      lst.headOption.fold(List.empty[SkyObject]) { case (_, so) => so }
+      lst.headOption.fold(List.empty[SiderealTarget]) { case (_, so) => so.map(skyObject2SiderealTarget) }
     }
 
-  def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[AgsStrategy.Estimate] =
+  override def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[AgsStrategy.Estimate] =
     catalogResult(ctx, mt).map(estimate(ctx, mt, _))
 
-  def estimate(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SkyObject]): AgsStrategy.Estimate = {
+  def estimate(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SiderealTarget]): AgsStrategy.Estimate = {
     // If we are unbounded and there are any candidates, we are guaranteed success.
     val pac   = ctx.getPosAngleConstraint(UNBOUNDED)
     val cv    = new CandidateValidator(params, mt, candidates)
@@ -61,10 +62,10 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
     AgsStrategy.Estimate.toEstimate(successProbability)
   }
 
-  def select(ctx: ObsContext, mt: MagnitudeTable): Future[Option[AgsStrategy.Selection]] =
+  override def select(ctx: ObsContext, mt: MagnitudeTable): Future[Option[AgsStrategy.Selection]] =
     catalogResult(ctx, mt).map(select(ctx, mt, _))
 
-  def select(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SkyObject]): Option[AgsStrategy.Selection] = {
+  def select(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SiderealTarget]): Option[AgsStrategy.Selection] = {
     if (candidates.size == 0) None
     else {
       val results = ctx.getPosAngleConstraint match {
@@ -79,7 +80,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   }
 
   // List of candidates and their angles for the case where the pos angle constraint is not unbounded.
-  private def selectBounded(alternatives: List[ObsContext], mt: MagnitudeTable, candidates: List[SkyObject]): List[(Angle, SkyObject)] = {
+  private def selectBounded(alternatives: List[ObsContext], mt: MagnitudeTable, candidates: List[SiderealTarget]): List[(Angle, SiderealTarget)] = {
     val cv = new CandidateValidator(params, mt, candidates)
     alternatives.map(a => (a, cv.select(a))).collect {
       case (c, Some(so)) => (c.getPositionAngle, so)
@@ -87,7 +88,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   }
 
   // List of candidates and their angles for the case where the pos angle constraint is bounded.
-  private def selectUnbounded(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SkyObject]): List[(Angle, SkyObject)] =
+  private def selectUnbounded(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SiderealTarget]): List[(Angle, SiderealTarget)] =
     candidates.map(so => (SingleProbeStrategy.calculatePositionAngle(ctx.getBaseCoordinates, so), so)).filter {
       case (angle, so) => new CandidateValidator(params, mt, List(so)).exists(ctx.withPositionAngle(angle))
     }
