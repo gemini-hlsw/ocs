@@ -71,7 +71,7 @@ class ConversionsSpec extends Specification with ScalaCheck with Arbitraries {
           val t = so.toNewModel
           t.name shouldEqual "name"
           t.coordinates ~= c
-          t.magnitudeOn(mag.band) should beSome(mag.copy(error = None, system = MagnitudeSystem.VEGA))
+          t.magnitudeIn(mag.band) should beSome(mag.copy(error = None, system = MagnitudeSystem.VEGA))
         }
       }
     }

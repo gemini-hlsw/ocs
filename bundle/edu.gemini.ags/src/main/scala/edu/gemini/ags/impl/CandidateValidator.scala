@@ -35,7 +35,7 @@ class CandidateValidator(params: SingleProbeStrategyParams, mt: MagnitudeTable, 
         }
 
       // Only keep candidates that fall within the magnitude limits.
-      def brightnessOk = st.magnitudeOn(params.band).exists(m => magLimits.contains(m))
+      def brightnessOk = st.magnitudeIn(params.band).exists(magLimits.contains)
 
       // Only keep those that are in range of the guide probe.
       def inProbeRange = params.validator(ctx).validate(new SPTarget(st.toOldModel), ctx)

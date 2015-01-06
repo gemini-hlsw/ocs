@@ -76,7 +76,7 @@ object GemsStrategy extends AgsStrategy {
 
   // Convert from catalog results to GeMS-specific results.
   private def toGemsCatalogSearchResults(ctx: ObsContext, futureAgsCatalogResults: Future[List[CatalogResultWithKey]]): Future[List[GemsCatalogSearchResults]] = {
-    val anglesToTry = (0 until 360 by 45).map(x => Angle.fromDegrees(x))
+    val anglesToTry = (0 until 360 by 45).map(Angle.fromDegrees(_))
     val none: Option[Offset] = None
 
     futureAgsCatalogResults.map { agsCatalogResults =>
@@ -132,8 +132,7 @@ object GemsStrategy extends AgsStrategy {
 
     // why do we need multiple position angles?  catalog results are given in
     // a ring (limited by radius limits) around a base position ... confusion
-    val ctxAngle = Angle.fromDegrees(ctx.getPositionAngle.toDegrees.getMagnitude)
-    val posAngles   = (ctxAngle :: (0 until 360 by 90).map(a => Angle.fromDegrees(a)).toList).toSet
+    val posAngles   = (ctx.getPositionAngle.toNewModel :: (0 until 360 by 90).map(Angle.fromDegrees(_)).toList).toSet
     val emptyResult = List.empty[(GuideProbe, List[SkyObject])]
     future {
       search(GemsGuideStarSearchOptions.DEFAULT_CATALOG,
@@ -149,7 +148,7 @@ object GemsStrategy extends AgsStrategy {
     val results = toGemsCatalogSearchResults(ctx, catalogResult(ctx, mt))
 
     // Create a set of the angles to try.
-    val anglesToTry = (0 until 360 by 45).map(x => Angle.fromDegrees(x)).toSet
+    val anglesToTry = (0 until 360 by 45).map(Angle.fromDegrees(_)).toSet
 
 
     // A way to terminate the Mascot algorithm immediately in the following cases:
@@ -207,8 +206,7 @@ object GemsStrategy extends AgsStrategy {
   }
 
   override def select(ctx: ObsContext, mt: MagnitudeTable): Future[Option[Selection]] = future {
-    val ctxAngle = Angle.fromDegrees(ctx.getPositionAngle.toDegrees.getMagnitude)
-    val posAngles = (ctxAngle :: (0 until 360 by 90).map(a => Angle.fromDegrees(a)).toList).toSet
+    val posAngles = (ctx.getPositionAngle.toNewModel :: (0 until 360 by 90).map(Angle.fromDegrees(_)).toList).toSet
     val results = search(GemsGuideStarSearchOptions.DEFAULT_CATALOG,
       GemsGuideStarSearchOptions.DEFAULT_CATALOG,
       GemsTipTiltMode.canopus, ctx, posAngles, None)

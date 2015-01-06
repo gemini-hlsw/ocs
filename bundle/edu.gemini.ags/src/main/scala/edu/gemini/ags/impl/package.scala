@@ -135,12 +135,12 @@ package object impl {
     c.withPositionAngle(c.getPositionAngle.add(180.0, skycalc.Angle.Unit.DEGREES))
 
   def brightness(so: SiderealTarget, b: MagnitudeBand): Option[Double] =
-    so.magnitudeOn(b).map(_.value)
+    so.magnitudeIn(b).map(_.value)
 
   def brightest[A](lst: List[A], band: MagnitudeBand)(toSiderealTarget: A => SiderealTarget): Option[A] = {
     lazy val max = new Magnitude(Double.MaxValue, band)
     if (lst.isEmpty) None
-    else Some(lst.minBy(toSiderealTarget(_).magnitudeOn(band).getOrElse(max)))
+    else Some(lst.minBy(toSiderealTarget(_).magnitudeIn(band).getOrElse(max)))
   }
 
   def skyObjectFromScienceTarget(target: SPTarget): skyobject.SkyObject = {

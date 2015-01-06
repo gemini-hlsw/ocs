@@ -416,7 +416,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
     def go(winners: List[(SiderealTarget, GuideSpeed)]): Unit = {
       val best = winners match {
         case Nil => None
-        case lst => Some(lst.minBy(_._1.magnitudeOn(band).getOrElse(maxMag)))
+        case lst => Some(lst.minBy(_._1.magnitudeIn(band).getOrElse(maxMag)))
       }
 
       val all = winners.map(_._1) ++ unusable
