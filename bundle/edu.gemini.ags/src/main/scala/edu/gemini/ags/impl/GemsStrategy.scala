@@ -4,6 +4,7 @@ import edu.gemini.ags.api.{AgsAnalysis, AgsMagnitude, AgsStrategy}
 import edu.gemini.ags.api.AgsStrategy.{Assignment, Estimate, Selection}
 import edu.gemini.ags.gems._
 import edu.gemini.ags.gems.mascot.{Strehl, MascotProgress}
+import edu.gemini.catalog.api.MagnitudeLimits.{SaturationLimit, FaintnessLimit}
 import edu.gemini.catalog.api._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.skyobject.{SkyObject, Magnitude}
@@ -232,7 +233,10 @@ object GemsStrategy extends AgsStrategy {
     import AgsMagnitude._
     val cond = ctx.getConditions
     val mags = magnitudes(ctx, mt).toMap
-    def lim(gp: GuideProbe): MagnitudeLimits = autoSearchLimitsCalc(mags(gp), cond)
+    def lim(gp: GuideProbe): MagnitudeLimits = {
+      val ml = autoSearchLimitsCalc(mags(gp), cond)
+      new MagnitudeLimits(ml.band, new FaintnessLimit(ml.faintnessConstraint.brightness), ml.saturationConstraint.map(s => new SaturationLimit(s.brightness)).asGeminiOpt)
+    }
 
     val odgwMagLimits = (lim(GsaoiOdgw.odgw1)/:GsaoiOdgw.values().drop(1)) { (ml, odgw) =>
       ml.union(lim(odgw)).getValue

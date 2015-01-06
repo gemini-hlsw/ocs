@@ -2,7 +2,8 @@ package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.AgsMagnitude
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
-import edu.gemini.catalog.api.{RadiusConstraint, QueryConstraint}
+import edu.gemini.catalog.api.MagnitudeLimits.{SaturationLimit, FaintnessLimit}
+import edu.gemini.catalog.api.{MagnitudeLimits, RadiusConstraint, QueryConstraint}
 import edu.gemini.spModel.core.{Angle, Site}
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2OiwfsGuideProbe
@@ -28,7 +29,8 @@ sealed trait SingleProbeStrategyParams {
       mc <- magnitudeCalc(ctx, mt)
       rc <- radiusLimits(ctx)
       rl =  rc.toRadiusLimit
-    } yield new QueryConstraint(ctx.getBaseCoordinates, rl, AgsMagnitude.manualSearchLimits(mc))
+      ml =  AgsMagnitude.manualSearchLimits(mc)
+    } yield new QueryConstraint(ctx.getBaseCoordinates, rl, new MagnitudeLimits(ml.band, new FaintnessLimit(ml.faintnessConstraint.brightness), ml.saturationConstraint.map(s => new SaturationLimit(s.brightness)).asGeminiOpt))
 
   def radiusLimits(ctx: ObsContext): Option[RadiusConstraint] =
     RadiusLimitCalc.getAgsQueryRadiusLimits(guideProbe, ctx)

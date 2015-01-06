@@ -2,7 +2,8 @@ package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.ags.api.{AgsMagnitude, AgsAnalysis, AgsStrategy}
-import edu.gemini.catalog.api.{RadiusConstraint, RadiusLimits, QueryConstraint}
+import edu.gemini.catalog.api.MagnitudeLimits.{SaturationLimit, FaintnessLimit}
+import edu.gemini.catalog.api.{MagnitudeLimits, RadiusConstraint, QueryConstraint}
 import edu.gemini.shared.skyobject.SkyObject
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbe}
@@ -43,7 +44,8 @@ case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGui
       mc <- magnitudeCalc(ctx, mt)
       rc <- radiusLimits(ctx)
       rl =  rc.toRadiusLimit
-    } yield new QueryConstraint(ctx.getBaseCoordinates, rl, AgsMagnitude.manualSearchLimits(mc))).toList
+      ml = AgsMagnitude.manualSearchLimits(mc)
+    } yield new QueryConstraint(ctx.getBaseCoordinates, rl, new MagnitudeLimits(ml.band, new FaintnessLimit(ml.faintnessConstraint.brightness), ml.saturationConstraint.map(s => new SaturationLimit(s.brightness)).asGeminiOpt))).toList
 
   private def radiusLimits(ctx: ObsContext): Option[RadiusConstraint] =
     RadiusLimitCalc.getAgsQueryRadiusLimits(guideProbe, ctx)

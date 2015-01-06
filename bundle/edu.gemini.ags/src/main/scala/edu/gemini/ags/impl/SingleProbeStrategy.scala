@@ -11,7 +11,6 @@ import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.system.CoordinateParam.Units
-import edu.gemini.spModel.telescope.PosAngleConstraint
 import edu.gemini.spModel.telescope.PosAngleConstraint._
 
 import scala.collection.JavaConverters._

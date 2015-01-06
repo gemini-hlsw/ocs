@@ -1,12 +1,15 @@
 package edu.gemini.ags.api
 
-import edu.gemini.catalog.api.MagnitudeLimits
+import edu.gemini.catalog.api.{SaturationConstraint, FaintnessConstraint, MagnitudeConstraints, MagnitudeLimits}
 import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions.{BEST, WORST}
 import edu.gemini.spModel.guide.{GuideSpeed, GuideProbe}
 import edu.gemini.spModel.guide.GuideSpeed.{FAST, SLOW}
 import edu.gemini.spModel.obs.context.ObsContext
+
+import edu.gemini.ags.impl._
+import edu.gemini.shared.util.immutable.ScalaConverters._
 
 /**
  * Types and methods for calculating magnitude limits.
@@ -28,8 +31,10 @@ object AgsMagnitude {
    * Gets the widest possible range limits incorporating the given conditions
    * and speeds.
    */
-  def rangeLimits(mc: MagnitudeCalc, c1: (Conditions, GuideSpeed), c2: (Conditions, GuideSpeed)): MagnitudeLimits =
-    mc(c1._1, c1._2).union(mc(c2._1, c2._2)).getValue
+  def rangeLimits(mc: MagnitudeCalc, c1: (Conditions, GuideSpeed), c2: (Conditions, GuideSpeed)): MagnitudeConstraints = {
+    val ml = mc(c1._1, c1._2).union(mc(c2._1, c2._2)).getValue
+    MagnitudeConstraints(ml.getBand, FaintnessConstraint(ml.getFaintnessLimit.getBrightness), ml.getSaturationLimit.asScalaOpt.map(s => SaturationConstraint(s.getBrightness)))
+  }
 
   /**
    * Manual search limits provide the faintest possible limit for the best
@@ -38,7 +43,7 @@ object AgsMagnitude {
    * to a catalog server to find all possible candidates under any conditions
    * or guide speed.
    */
-  def manualSearchLimits(mc: MagnitudeCalc): MagnitudeLimits =
+  def manualSearchLimits(mc: MagnitudeCalc): MagnitudeConstraints =
     rangeLimits(mc, (BEST, SLOW), (WORST, FAST))
 
   /**
@@ -47,7 +52,7 @@ object AgsMagnitude {
    * stars which fall within these limits can be automatically assigned to
    * guiders by the AGS system.
    */
-  def autoSearchLimitsCalc(mc: MagnitudeCalc, c: Conditions): MagnitudeLimits =
+  def autoSearchLimitsCalc(mc: MagnitudeCalc, c: Conditions): MagnitudeConstraints =
     rangeLimits(mc, (c, SLOW), (c, FAST))
 
   /**
