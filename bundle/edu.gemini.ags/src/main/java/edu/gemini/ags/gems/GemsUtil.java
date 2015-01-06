@@ -66,7 +66,7 @@ public class GemsUtil {
                 map.put(name, skyObject);
             }
         }
-        return new ArrayList(map.values());
+        return new ArrayList<>(map.values());
     }
 
     /**
