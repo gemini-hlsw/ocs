@@ -1867,7 +1867,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
 
             SPTarget base = env.getBase();
-            base.setTargetWithJ2000(basePos.getRaDeg(), basePos.getDecDeg());
+            base.setXY(basePos.getRaDeg(), basePos.getDecDeg());
         } else if (w == _w.resolveButton) {
             // REL-1063 Fix OT nonsidereal Solar System Object Horizons name resolution
             if (_curPos.getTarget() instanceof NamedTarget) {

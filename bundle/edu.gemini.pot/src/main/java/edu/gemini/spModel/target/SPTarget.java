@@ -875,19 +875,6 @@ public final class SPTarget extends WatchablePos {
         _notifyOfLocationUpdate();
     }
 
-    /**
-     * Set the target from (ra, dec) in J2000, converting to
-     * the current target's coordinate system internally.
-     */
-    public void setTargetWithJ2000(final double ra, final double dec) {
-        final HmsDegTarget t = new HmsDegTarget(HmsDegTarget.SystemType.J2000);
-        t.getC1().setAs(ra, Units.DEGREES);
-        t.getC2().setAs(dec, Units.DEGREES);
-        t.setName(_target.getName());
-        _target.setTargetWithJ2000(t);
-        _notifyOfLocationUpdate();
-    }
-
     /** Set a new ITarget for this position and notify watchers */
     public void setTarget(final ITarget target) {
         synchronized (this) {

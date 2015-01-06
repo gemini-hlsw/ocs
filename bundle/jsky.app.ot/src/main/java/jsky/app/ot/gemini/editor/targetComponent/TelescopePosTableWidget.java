@@ -28,6 +28,7 @@ import edu.gemini.spModel.target.offset.OffsetUtil;
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
 import edu.gemini.spModel.target.system.HmsDegTarget;
 import edu.gemini.spModel.target.system.ICoordinate;
+import edu.gemini.spModel.target.system.ITarget;
 import jsky.app.ot.OT;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.util.Resources;
@@ -488,7 +489,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
     // Return the world coordinates for the given target
     private static WorldCoords getWorldCoords(SPTarget tp) {
-        HmsDegTarget target = tp.getTarget().getTargetAsJ2000();
+        ITarget target = tp.getTarget();
         ICoordinate c1 = target.getC1();
         ICoordinate c2 = target.getC2();
         double x = c1.getAs(Units.DEGREES);

@@ -48,24 +48,6 @@ public interface ITarget extends Serializable {
     String getPosition();
 
     /**
-     * Returns the position as {@link HmsDegTarget} for external use by
-     * client programs.
-     */
-    HmsDegTarget getTargetAsJ2000();
-
-    /**
-     * Set the system as {@link HmsDegTarget}.
-     * <p>
-     * Note that the <code>HmsDegTarget</code> used to set must have
-     * the J2000 system option.
-     *
-     * @throws IllegalArgumentException This can fail if the target system
-     *     does not allow conversion.
-     */
-    void setTargetWithJ2000(HmsDegTarget system)
-            throws IllegalArgumentException;
-
-    /**
      * Set the first Coordinate using an appropriate ICoordinate.
      *
      * @throws IllegalArgumentException if the <code>ICoordinate</code> is

@@ -506,7 +506,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
             _dragObject.screenPos.y = tme.yWidget;
 
             SPTarget tp = (SPTarget) _dragObject.taggedPos;
-            tp.setTargetWithJ2000(tme.pos.getRaDeg(), tme.pos.getDecDeg());
+            tp.setXY(tme.pos.getRaDeg(), tme.pos.getDecDeg());
         }
     }
 }

@@ -261,7 +261,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       val raField = new BoundTextField[HMS](10)(
         read = s => new HMS(hms.parse(s)),
         show = _.toString,
-        get  = _.getTarget.getTarget.getTargetAsJ2000.getC1.asInstanceOf[HMS],
+        get  = _.getTarget.getTarget.getC1.asInstanceOf[HMS],
         set  = setTarget(_.getTarget.setC1(_))
       )
 
@@ -269,7 +269,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       val decField = new BoundTextField[DMS](10)(
         read = s => new DMS(dms.parse(s)),
         show = _.toString,
-        get  = _.getTarget.getTarget.getTargetAsJ2000.getC2.asInstanceOf[DMS],
+        get  = _.getTarget.getTarget.getC2.asInstanceOf[DMS],
         set  = setTarget(_.getTarget.setC2(_))
       )
 

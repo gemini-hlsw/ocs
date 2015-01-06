@@ -18,6 +18,7 @@ import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
 import edu.gemini.spModel.target.system.HmsDegTarget;
 import edu.gemini.spModel.target.system.ICoordinate;
+import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.time.TimeAmountFormatter;
 import edu.gemini.spModel.util.SPTreeUtil;
 import jsky.coords.TargetDesc;
@@ -62,7 +63,7 @@ public class ObsTargetDesc extends TargetDesc {
         if (targetEnv == null) return null;
 
         SPTarget basePos = targetEnv.getBase();
-        HmsDegTarget target = basePos.getTarget().getTargetAsJ2000();
+        ITarget target = basePos.getTarget();
         ICoordinate c1 = target.getC1();
         ICoordinate c2 = target.getC2();
         double x = c1.getAs(Units.DEGREES);

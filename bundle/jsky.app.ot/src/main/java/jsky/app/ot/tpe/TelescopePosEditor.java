@@ -22,6 +22,7 @@ import edu.gemini.spModel.target.offset.OffsetPosSelection;
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
 import edu.gemini.spModel.target.system.HmsDegTarget;
 import edu.gemini.spModel.target.system.ICoordinate;
+import edu.gemini.spModel.target.system.ITarget;
 import jsky.app.jskycat.JSkyCat;
 import jsky.app.ot.OT;
 import jsky.app.ot.ags.*;
@@ -282,7 +283,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
             return;
         }
 
-        tp.setTargetWithJ2000(basePos.getRaDeg(), basePos.getDecDeg());
+        tp.setXY(basePos.getRaDeg(), basePos.getDecDeg());
     }
 
     /**
@@ -295,7 +296,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         SPTarget tp = _ctx.targets().baseOrNull();
         if (tp != null) {
             // Get the RA and Dec from the pos list.
-            HmsDegTarget target = tp.getTarget().getTargetAsJ2000();
+            ITarget target = tp.getTarget();
             ICoordinate c1 = target.getC1();
             ICoordinate c2 = target.getC2();
             ra = c1.getAs(Units.DEGREES);
@@ -324,8 +325,8 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         if (newBasePos == null) return oldBasePos != null;
         if (oldBasePos == null) return true;
 
-        HmsDegTarget oldBase = oldBasePos.getTarget().getTargetAsJ2000();
-        HmsDegTarget newBase = newBasePos.getTarget().getTargetAsJ2000();
+        ITarget oldBase = oldBasePos.getTarget();
+        ITarget newBase = newBasePos.getTarget();
 
         if (oldBase.getC1().getAs(Units.DEGREES) != newBase.getC1().getAs(Units.DEGREES))
             return true;

@@ -51,7 +51,7 @@ public final class HmsDegTarget extends CoordinateSystem
     // Various default values.
     // XXX Note: the types derived from CoordinateParam, such as Epoch, are NOT immutable!
     private static final SystemType DEFAULT_SYSTEM_TYPE = SystemType.J2000;
-    private static final Epoch DEFAULT_EPOCH_1950 = new Epoch(1950, Units.YEARS);
+//    private static final Epoch DEFAULT_EPOCH_1950 = new Epoch(1950, Units.YEARS);
     private static final Epoch DEFAULT_EPOCH_2000 = new Epoch(2000, Units.YEARS);
     private static final PM1 DEFAULT_PM1 = new PM1();
     private static final PM2 DEFAULT_PM2 = new PM2();
@@ -516,31 +516,6 @@ public final class HmsDegTarget extends CoordinateSystem
      */
     public TypeBase[] getSystemOptions() {
         return SystemType.TYPES;
-    }
-
-
-    /**
-     * Return a new coordinate system object as J2000.
-     * Part of Interface ICoordinate
-     */
-    public HmsDegTarget getTargetAsJ2000() {
-        return (HmsDegTarget) this.clone();
-    }
-
-    /**
-     * Set the position using a J2000 HmsDegTarget
-     */
-    public void setTargetWithJ2000(HmsDegTarget in)
-            throws IllegalArgumentException {
-        // First check to see what system "this" is using.
-        int etype = getSystemOption().getTypeCode();
-
-        // Copy the coordinates in this object
-        _ra = (HMS) in._ra.clone();
-        _dec = (DMS) in._dec.clone();
-
-        // Copy the object name
-        setName(in.getName());
     }
 
 }
