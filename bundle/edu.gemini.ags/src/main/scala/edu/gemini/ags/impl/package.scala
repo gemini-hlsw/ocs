@@ -108,10 +108,6 @@ package object impl {
 
   def isAo(ctx: ObsContext): Boolean = !ctx.getAOComponent.isEmpty
 
-  implicit def asSkycalcCoords(hmsDegCoords: skyobject.coords.HmsDegCoordinates) = new Object {
-    def asSkycalc: edu.gemini.skycalc.Coordinates = new skycalc.Coordinates(hmsDegCoords.getRa, hmsDegCoords.getDec)
-  }
-
   implicit object MagnitudeOrdering extends scala.Ordering[skyobject.Magnitude] {
     def compare(m1: skyobject.Magnitude, m2: skyobject.Magnitude): Int = m1.compareTo(m2)
   }
@@ -119,10 +115,10 @@ package object impl {
   def ctx180(c: ObsContext): ObsContext =
     c.withPositionAngle(c.getPositionAngle.add(180.0, skycalc.Angle.Unit.DEGREES))
 
-  def brightness(so: skyobject.SkyObject, b: skyobject.Magnitude.Band): Option[Double] =
-    so.getMagnitude(b).asScalaOpt.map(_.getBrightness)
+  def brightness(so: SiderealTarget, b: MagnitudeBand): Option[Double] =
+    so.magnitudeOn(b).map(_.value)
 
-  def brightest[A](lst: List[A], band: skyobject.Magnitude.Band)(toSiderealTarget: A => SiderealTarget): Option[A] = {
+  def brightest[A](lst: List[A], band: MagnitudeBand)(toSiderealTarget: A => SiderealTarget): Option[A] = {
     lazy val max = new Magnitude(Double.MaxValue, band)
     if (lst.isEmpty) None
     else Some(lst.minBy(toSiderealTarget(_).magnitudeOn(band).getOrElse(max)))
