@@ -4,11 +4,12 @@ import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.spModel.core.Coordinates
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.obs.context.ObsContext
-import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.ags.api.AgsMagnitude
 import edu.gemini.catalog.api.MagnitudeConstraints
 
+import scalaz._
+import Scalaz._
 
 /**
  * Math on a list of candidates with a given set of constraints.  The idea is
@@ -30,11 +31,11 @@ class CandidateValidator(params: SingleProbeStrategyParams, mt: MagnitudeTable, 
         params.minDistance.forall { min =>
           val soCoords = so.coordinates
           val diff = Coordinates.difference(ctx.getBaseCoordinates, soCoords)
-          diff.distance.compareToAngle(min) >= 0
+          diff.distance >= min
         }
 
       // Only keep candidates that fall within the magnitude limits.
-      def brightnessOk = so.getMagnitude(params.band).asScalaOpt.exists(m => magLimits.contains(m))
+      def brightnessOk = so.magnitudeOn(params.band).exists(m => magLimits.contains(m))
 
       // Only keep those that are in range of the guide probe.
       def inProbeRange = params.validator(ctx).validate(new SPTarget(so), ctx)
