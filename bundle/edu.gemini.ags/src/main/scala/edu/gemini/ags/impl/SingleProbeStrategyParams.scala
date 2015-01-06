@@ -4,7 +4,7 @@ import edu.gemini.ags.api.AgsMagnitude
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.catalog.api.MagnitudeLimits.{SaturationLimit, FaintnessLimit}
 import edu.gemini.catalog.api.{MagnitudeLimits, RadiusConstraint, QueryConstraint}
-import edu.gemini.spModel.core.{Angle, Site}
+import edu.gemini.spModel.core.{MagnitudeBand, Angle, Site}
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2OiwfsGuideProbe
 import edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe
@@ -15,11 +15,10 @@ import edu.gemini.spModel.guide.{GuideStarValidator, PatrolField, ValidatableGui
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
-import edu.gemini.shared.skyobject.Magnitude
 
 sealed trait SingleProbeStrategyParams {
   def site: Site
-  def band: Magnitude.Band = Magnitude.Band.R
+  def band: MagnitudeBand = MagnitudeBand.R
   def guideProbe: ValidatableGuideProbe
   def stepSize: Angle            = Angle.fromDegrees(10)
   def minDistance: Option[Angle] = Some(Angle.fromArcsecs(20))
@@ -70,20 +69,20 @@ object SingleProbeStrategyParams {
   case object GnirsOiwfsParams extends SingleProbeStrategyParams {
     val guideProbe    = GnirsOiwfsGuideProbe.instance
     val site          = Site.GN
-    override val band = Magnitude.Band.K
+    override val band = MagnitudeBand.K
   }
 
   case object NifsOiwfsParams extends SingleProbeStrategyParams {
     val guideProbe    = NifsOiwfsGuideProbe.instance
     val site          = Site.GN
-    override val band = Magnitude.Band.K
+    override val band = MagnitudeBand.K
 
   }
 
   case object NiriOiwfsParams extends SingleProbeStrategyParams {
     val guideProbe    = NiriOiwfsGuideProbe.instance
     val site          = Site.GN
-    override val band = Magnitude.Band.K
+    override val band = MagnitudeBand.K
   }
 
 case class PwfsParams(site: Site, guideProbe: PwfsGuideProbe) extends SingleProbeStrategyParams {
