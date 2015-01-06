@@ -28,6 +28,8 @@ import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.spModel.guide.{GuideProbeGroup, GuideProbe}
 import edu.gemini.spModel.core.{Angle, MagnitudeBand}
 
+import scalaz._
+import Scalaz._
 
 object GemsStrategy extends AgsStrategy {
   override def key = GemsKey
@@ -168,10 +170,7 @@ object GemsStrategy extends AgsStrategy {
 
     // Filter out the 1-star asterisms. If anything is left, we are good to go; otherwise, no.
     gemsCatalogResults.map { x =>
-      if (x.filter(_.getGuideGroup.getTargets.size() >= 3).isEmpty)
-        AgsStrategy.Estimate.CompleteFailure
-      else
-        AgsStrategy.Estimate.GuaranteedSuccess
+      x.filter(_.getGuideGroup.getTargets.size() >= 3).isEmpty? AgsStrategy.Estimate.CompleteFailure | AgsStrategy.Estimate.GuaranteedSuccess
     }
   }
 
@@ -179,10 +178,7 @@ object GemsStrategy extends AgsStrategy {
   private def search(opticalCatalog: String, nirCatalog: String, tipTiltMode: GemsTipTiltMode, ctx: ObsContext, posAngles: Set[Angle], nirBand: Option[MagnitudeBand]): Option[List[GemsCatalogSearchResults]] = {
     // Get the instrument: F2 or GSAOI?
     val gemsInstrument = {
-      if (ctx.getInstrument.getType == SPComponentType.INSTRUMENT_GSAOI)
-        GemsInstrument.gsaoi
-      else
-        GemsInstrument.flamingos2
+      (ctx.getInstrument.getType == SPComponentType.INSTRUMENT_GSAOI)? GemsInstrument.gsaoi | GemsInstrument.flamingos2
     }
     val gemsOptions = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog, gemsInstrument, tipTiltMode, posAngles.map(newAngle2Old).asJava)
 
@@ -201,10 +197,7 @@ object GemsStrategy extends AgsStrategy {
       else if (!resultMap.contains(key)) resultMap.updated(key, false)
       else                               resultMap
     })
-    if (checker.values.exists(!_))
-      None
-    else
-      Some(results)
+    checker.values.find(!_).map(_ => results)
   }
 
   private def findGuideStars(ctx: ObsContext, posAngles: Set[Angle], results: List[GemsCatalogSearchResults]): Option[GemsGuideStars] = {
