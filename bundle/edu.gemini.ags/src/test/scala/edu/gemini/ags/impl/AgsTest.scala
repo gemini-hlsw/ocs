@@ -99,7 +99,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
     copy(usable = AgsTest.usableSiderealTarget(so: _*))
 
   def rotated(deg: Double): AgsTest =
-    copy(ctx.withPositionAngle(Angle.fromDegrees(deg)))
+    copy(ctx.withPositionAngle(Angle.fromDegrees(deg).toOldModel))
 
   def withConditions(c: Conditions): AgsTest =
     copy(ctx.withConditions(c))
@@ -112,7 +112,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
 
   def withOffsets(offsets: (Double, Double)*) = {
     val o = offsets map {
-      case (p, q) => new Offset(Angle.fromArcsecs(p), Angle.fromArcsecs(q))
+      case (p, q) => new Offset(Angle.fromArcsecs(p).toOldModel, Angle.fromArcsecs(q).toOldModel)
     }
     copy(ctx.withSciencePositions(o.toSet.asJava))
   }
@@ -242,7 +242,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
       val band = fast.getBand
 
       def magList(base: Double)(adjs: (Double, Option[GuideSpeed])*): List[(Magnitude, Option[GuideSpeed])] =
-        adjs.toList.map { case (adj, gs) => (new Magnitude(base + adj, band), gs) }
+        adjs.toList.map { case (adj, gs) => (new Magnitude(base + adj, band.toNewModel), gs) }
 
       val bright = fast.getSaturationLimit.asScalaOpt.map(_.getBrightness).toList.flatMap { brightness =>
         magList(brightness)((-0.01, None), (0.0, Some(FAST)), (0.01, Some(FAST)))
@@ -256,7 +256,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
     }
 
     def toSkyCoordinates(lst: List[Point]): List[Coordinates] = {
-      lst.map { p => Coordinates(RightAscension.fromAngle(Angle.fromArcsecs(-p.getX).toPositive), Declination.fromAngle(Angle.fromArcsecs(-p.getY)).getOrElse(Declination.zero)) }.toSet.toList
+      lst.map { p => Coordinates(RightAscension.fromAngle(Angle.fromArcsecs(-p.getX)), Declination.fromAngle(Angle.fromArcsecs(-p.getY)).getOrElse(Declination.zero)) }.toSet.toList
     }
 
     def candidates(lst: List[Point]): List[(Coordinates, Magnitude, Option[GuideSpeed])] =
@@ -410,7 +410,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
 
   def test(): Unit = {
     val mc   = magTable.apply(ctx, guideProbe).get
-    val band:MagnitudeBand = mc.apply(ctx.getConditions, GuideSpeed.FAST).getBand
+    val band = mc.apply(ctx.getConditions, GuideSpeed.FAST).getBand.toNewModel
     val maxMag = new Magnitude(Double.MaxValue, band)
 
     def go(winners: List[(SiderealTarget, GuideSpeed)]): Unit = {
@@ -429,7 +429,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
         res match {
           case None                                       => // ok
           case Some(AgsStrategy.Selection(posAngle, Nil)) =>
-            equalPosAngles(ctx.getPositionAngle, posAngle)
+            equalPosAngles(ctx.getPositionAngle.toNewModel, posAngle.toNewModel)
           case Some(AgsStrategy.Selection(_,        asn)) =>
               fail("Expected nothing but got: " + asn.map { a =>
                 "(" + a.guideStar.toString + ", " + a.guideProbe + ")"
@@ -441,12 +441,12 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
           case None      =>
             fail("Expected: (" + expStar + ", " + expSpeed + "), but nothing selected")
           case Some(AgsStrategy.Selection(posAngle, asn)) =>
-            equalPosAngles(ctx.getPositionAngle, posAngle)
+            equalPosAngles(ctx.getPositionAngle.toNewModel, posAngle.toNewModel)
             asn match {
               case List(AgsStrategy.Assignment(actProbe, actStar)) =>
                 assertEquals(guideProbe, actProbe)
-                assertEqualTarget(expStar, skyObject2SiderealTarget(actStar))
-                val actSpeed = AgsMagnitude.fastestGuideSpeed(mc, actStar.getMagnitude(band).getValue, ctx.getConditions)
+                assertEqualTarget(expStar, actStar.toNewModel)
+                val actSpeed = AgsMagnitude.fastestGuideSpeed(mc, actStar.getMagnitude(band.toOldModel).getValue, ctx.getConditions)
                 assertTrue("Expected: " + expSpeed + ", actual: " + actSpeed, actSpeed.exists(_ == expSpeed))
               case Nil => fail("Expected: (" + expStar + ", " + expSpeed + "), but nothing selected")
               case _   => fail("Multiple guide probe assignments: " + asn)

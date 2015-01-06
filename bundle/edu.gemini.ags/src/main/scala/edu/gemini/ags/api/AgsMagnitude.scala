@@ -33,7 +33,7 @@ object AgsMagnitude {
    */
   def rangeLimits(mc: MagnitudeCalc, c1: (Conditions, GuideSpeed), c2: (Conditions, GuideSpeed)): MagnitudeConstraints = {
     val ml = mc(c1._1, c1._2).union(mc(c2._1, c2._2)).getValue
-    MagnitudeConstraints(ml.getBand, FaintnessConstraint(ml.getFaintnessLimit.getBrightness), ml.getSaturationLimit.asScalaOpt.map(s => SaturationConstraint(s.getBrightness)))
+    MagnitudeConstraints(ml.getBand.toNewModel, FaintnessConstraint(ml.getFaintnessLimit.getBrightness), ml.getSaturationLimit.asScalaOpt.map(s => SaturationConstraint(s.getBrightness)))
   }
 
   /**

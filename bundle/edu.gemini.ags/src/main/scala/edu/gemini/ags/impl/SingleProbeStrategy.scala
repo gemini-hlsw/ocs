@@ -4,7 +4,6 @@ import edu.gemini.ags.api._
 import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.catalog.api.{QueryConstraint, CatalogServerInstances}
 import edu.gemini.shared.skyobject.SkyObject
-import edu.gemini.skycalc
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.core.{Coordinates, Angle}
 import edu.gemini.spModel.core.Target.SiderealTarget
@@ -46,7 +45,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
     // throw away the guide probe (which we know anyway), and obtain just the
     // list of guide stars
     candidates(ctx, mt).map { lst =>
-      lst.headOption.fold(List.empty[SiderealTarget]) { case (_, so) => so.map(skyObject2SiderealTarget) }
+      lst.headOption.fold(List.empty[SiderealTarget]) { case (_, so) => so.map(_.toNewModel) }
     }
 
   override def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[AgsStrategy.Estimate] =
@@ -56,7 +55,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
     // If we are unbounded and there are any candidates, we are guaranteed success.
     val pac   = ctx.getPosAngleConstraint(UNBOUNDED)
     val cv    = new CandidateValidator(params, mt, candidates)
-    val steps = pac.steps(ctx.getPositionAngle, params.stepSize).toList.asScala
+    val steps = pac.steps(ctx.getPositionAngle, params.stepSize.toOldModel).toList.asScala
     val anglesWithResults  = steps.filter { angle => cv.exists(ctx.withPositionAngle(angle)) }
     val successProbability = anglesWithResults.size.toDouble / steps.size.toDouble
     AgsStrategy.Estimate.toEstimate(successProbability)
@@ -74,7 +73,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
         case UNBOUNDED                     => selectUnbounded(ctx, mt, candidates)
       }
       brightest(results, params.band)(_._2).map {
-        case (angle, skyObject) => AgsStrategy.Selection(angle, List(AgsStrategy.Assignment(params.guideProbe, skyObject)))
+        case (angle, st) => AgsStrategy.Selection(angle.toOldModel, List(AgsStrategy.Assignment(params.guideProbe, st.toOldModel)))
       }
     }
   }
@@ -83,14 +82,14 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   private def selectBounded(alternatives: List[ObsContext], mt: MagnitudeTable, candidates: List[SiderealTarget]): List[(Angle, SiderealTarget)] = {
     val cv = new CandidateValidator(params, mt, candidates)
     alternatives.map(a => (a, cv.select(a))).collect {
-      case (c, Some(so)) => (Angle.fromDegrees(c.getPositionAngle.toDegrees.getMagnitude), so)
+      case (c, Some(st)) => (Angle.fromDegrees(c.getPositionAngle.toDegrees.getMagnitude), st)
     }
   }
 
   // List of candidates and their angles for the case where the pos angle constraint is bounded.
   private def selectUnbounded(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SiderealTarget]): List[(Angle, SiderealTarget)] =
-    candidates.map(so => (SingleProbeStrategy.calculatePositionAngle(ctx.getBaseCoordinates, so), so)).filter {
-      case (angle, so) => new CandidateValidator(params, mt, List(so)).exists(ctx.withPositionAngle(angle))
+    candidates.map(so => (SingleProbeStrategy.calculatePositionAngle(ctx.getBaseCoordinates.toNewModel, so), so)).filter {
+      case (angle, st) => new CandidateValidator(params, mt, List(st)).exists(ctx.withPositionAngle(angle.toOldModel))
     }
 
   override def queryConstraints(ctx: ObsContext, mt: MagnitudeTable): List[QueryConstraint] =
@@ -106,10 +105,10 @@ object SingleProbeStrategy {
   /**
    * Calculate the position angle to a target from a specified base position.
    */
-  def calculatePositionAngle(base: Coordinates, so: SiderealTarget): Angle = {
-    val ra1    = so.coordinates.ra.toAngle.toRadians
-    val dec1   = so.coordinates.dec.toAngle.toRadians
-    val target = new SPTarget(so).getTarget
+  def calculatePositionAngle(base: Coordinates, st: SiderealTarget): Angle = {
+    val ra1    = st.coordinates.ra.toAngle.toRadians
+    val dec1   = st.coordinates.dec.toAngle.toRadians
+    val target = new SPTarget(st.toOldModel).getTarget
     val ra2    = Angle.fromDegrees(target.getC1.getAs(Units.DEGREES)).toRadians
     val dec2   = Angle.fromDegrees(target.getC2.getAs(Units.DEGREES)).toRadians
     val raDiff = ra2 - ra1

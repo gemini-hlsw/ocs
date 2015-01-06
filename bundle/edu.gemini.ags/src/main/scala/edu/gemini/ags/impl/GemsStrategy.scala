@@ -85,7 +85,7 @@ object GemsStrategy extends AgsStrategy {
         angle <- anglesToTry
       } yield {
         val constraint = result.catalogResult.constraint
-        val catalogSearchCriterion = new CatalogSearchCriterion("ags", constraint.magnitudeLimits, constraint.radiusLimits, none.asGeminiOpt, Some(angle).map(newAngle2Old).asGeminiOpt)
+        val catalogSearchCriterion = new CatalogSearchCriterion("ags", constraint.magnitudeLimits, constraint.radiusLimits, none.asGeminiOpt, Some(angle).map(_.toOldModel).asGeminiOpt)
         val gemsCatalogSearchCriterion = new GemsCatalogSearchCriterion(result.searchKey, catalogSearchCriterion)
         new GemsCatalogSearchResults(gemsCatalogSearchCriterion, result.catalogResult.candidates.toList)
       }
@@ -166,7 +166,7 @@ object GemsStrategy extends AgsStrategy {
     }
 
     // Iterate over 45 degree position angles if no asterism is found at PA = 0.
-    val gemsCatalogResults = results.map(result => new GemsCatalogResults().analyzeGoodEnough(ctx, anglesToTry.map(newAngle2Old).asJava, result.asJava, progressMeasurer).asScala)
+    val gemsCatalogResults = results.map(result => new GemsCatalogResults().analyzeGoodEnough(ctx, anglesToTry.map(_.toOldModel).asJava, result.asJava, progressMeasurer).asScala)
 
     // Filter out the 1-star asterisms. If anything is left, we are good to go; otherwise, no.
     gemsCatalogResults.map { x =>
@@ -180,14 +180,14 @@ object GemsStrategy extends AgsStrategy {
     val gemsInstrument = {
       (ctx.getInstrument.getType == SPComponentType.INSTRUMENT_GSAOI)? GemsInstrument.gsaoi | GemsInstrument.flamingos2
     }
-    val gemsOptions = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog, gemsInstrument, tipTiltMode, posAngles.map(newAngle2Old).asJava)
+    val gemsOptions = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog, gemsInstrument, tipTiltMode, posAngles.map(_.toOldModel).asJava)
 
     // Create the base position.
     val baseCoords = ctx.getBaseCoordinates
     val basePos = new HmsDegCoordinates.Builder(baseCoords.getRa, baseCoords.getDec).build
 
     // Perform the catalog search.
-    val searchBand = nirBand.map(newMagnitudeBand2Old)
+    val searchBand = nirBand.map(_.toOldModel)
     val results = new GemsCatalog().search(ctx, basePos, gemsOptions, searchBand.asGeminiOpt, null).asScala.toList
 
     // Now check that the results are valid: there must be a valid tip-tilt and flexure star each.
@@ -202,7 +202,7 @@ object GemsStrategy extends AgsStrategy {
 
   private def findGuideStars(ctx: ObsContext, posAngles: Set[Angle], results: List[GemsCatalogSearchResults]): Option[GemsGuideStars] = {
     // Passing in null to say we don't want a ProgressMeter.
-    val gemsResults = new GemsCatalogResults().analyze(ctx, posAngles.map(newAngle2Old).asJava, results.asJava, null).asScala
+    val gemsResults = new GemsCatalogResults().analyze(ctx, posAngles.map(_.toOldModel).asJava, results.asJava, null).asScala
     gemsResults.headOption
   }
 
@@ -231,7 +231,7 @@ object GemsStrategy extends AgsStrategy {
     val mags = magnitudes(ctx, mt).toMap
     def lim(gp: GuideProbe): MagnitudeLimits = {
       val ml = autoSearchLimitsCalc(mags(gp), cond)
-      new MagnitudeLimits(ml.band, new FaintnessLimit(ml.faintnessConstraint.brightness), ml.saturationConstraint.map(s => new SaturationLimit(s.brightness)).asGeminiOpt)
+      new MagnitudeLimits(ml.band.toOldModel, new FaintnessLimit(ml.faintnessConstraint.brightness), ml.saturationConstraint.map(s => new SaturationLimit(s.brightness)).asGeminiOpt)
     }
 
     val odgwMagLimits = (lim(GsaoiOdgw.odgw1)/:GsaoiOdgw.values().drop(1)) { (ml, odgw) =>
