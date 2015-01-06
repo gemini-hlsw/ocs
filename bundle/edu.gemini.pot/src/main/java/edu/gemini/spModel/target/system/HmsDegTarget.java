@@ -51,7 +51,6 @@ public final class HmsDegTarget extends CoordinateSystem
     // Various default values.
     // XXX Note: the types derived from CoordinateParam, such as Epoch, are NOT immutable!
     private static final SystemType DEFAULT_SYSTEM_TYPE = SystemType.J2000;
-//    private static final Epoch DEFAULT_EPOCH_1950 = new Epoch(1950, Units.YEARS);
     private static final Epoch DEFAULT_EPOCH_2000 = new Epoch(2000, Units.YEARS);
     private static final PM1 DEFAULT_PM1 = new PM1();
     private static final PM2 DEFAULT_PM2 = new PM2();
