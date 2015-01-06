@@ -108,10 +108,6 @@ package object impl {
 
   def isAo(ctx: ObsContext): Boolean = !ctx.getAOComponent.isEmpty
 
-  implicit object MagnitudeOrdering extends scala.Ordering[skyobject.Magnitude] {
-    def compare(m1: skyobject.Magnitude, m2: skyobject.Magnitude): Int = m1.compareTo(m2)
-  }
-
   def ctx180(c: ObsContext): ObsContext =
     c.withPositionAngle(c.getPositionAngle.add(180.0, skycalc.Angle.Unit.DEGREES))
 

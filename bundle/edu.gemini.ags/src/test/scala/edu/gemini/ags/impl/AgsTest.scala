@@ -1,15 +1,9 @@
 package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.{AgsMagnitude, AgsRegistrar, AgsStrategy}
-import edu.gemini.ags.impl._
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.pot.sp.SPComponentType
-import edu.gemini.shared.skyobject.{Magnitude, SkyObject}
-import edu.gemini.shared.skyobject.coords.{SkyCoordinates, HmsDegCoordinates}
-import edu.gemini.skycalc.{Offset, DDMMSS, HHMMSS, Angle}
-import edu.gemini.skycalc.Angle.ANGLE_0DEGREES
-import edu.gemini.skycalc.Angle.Unit._
-import edu.gemini.spModel.core
+import edu.gemini.skycalc.{Offset, DDMMSS, HHMMSS}
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.gemini.altair.{InstAltair, AltairParams}
@@ -37,6 +31,7 @@ import AlmostEqual.AlmostEqualOps
  */
 
 object AgsTest {
+
   private val magTable = ProbeLimitsTable.loadOrThrow()
 
   // Value to nudge things off of the border
@@ -75,10 +70,10 @@ object AgsTest {
 
   def siderealTarget(raDecStr: String, rMag: Double): SiderealTarget = {
     val (raStr, decStr) = raDecStr.span(_ != ' ')
-    val ra  = HHMMSS.parse(raStr)
-    val dec = DDMMSS.parse(decStr.trim)
-    val sc  = new HmsDegCoordinates.Builder(ra, dec).build()
-    new SkyObject.Builder(raDecStr, sc).magnitudes(new Magnitude(Magnitude.Band.R, rMag)).build()
+    val ra  = Angle.fromDegrees(HHMMSS.parse(raStr).toDegrees.getMagnitude)
+    val dec = Angle.fromDegrees(DDMMSS.parse(decStr.trim).toDegrees.getMagnitude)
+    val sc  = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
+    SiderealTarget(raDecStr, sc, Equinox.J2000, None, List(new Magnitude(rMag, MagnitudeBand.R)), None)
   }
 
   def siderealTargets(so: (String, Double)*): List[SiderealTarget] = {
@@ -104,7 +99,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
     copy(usable = AgsTest.usableSiderealTarget(so: _*))
 
   def rotated(deg: Double): AgsTest =
-    copy(ctx.withPositionAngle(new Angle(deg, DEGREES)))
+    copy(ctx.withPositionAngle(Angle.fromDegrees(deg)))
 
   def withConditions(c: Conditions): AgsTest =
     copy(ctx.withConditions(c))
@@ -117,7 +112,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
 
   def withOffsets(offsets: (Double, Double)*) = {
     val o = offsets map {
-      case (p, q) => new Offset(new Angle(p, ARCSECS), new Angle(q, ARCSECS))
+      case (p, q) => new Offset(Angle.fromArcsecs(p), Angle.fromArcsecs(q))
     }
     copy(ctx.withSciencePositions(o.toSet.asJava))
   }
@@ -247,7 +242,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
       val band = fast.getBand
 
       def magList(base: Double)(adjs: (Double, Option[GuideSpeed])*): List[(Magnitude, Option[GuideSpeed])] =
-        adjs.toList.map { case (adj, gs) => (new Magnitude(band, base + adj), gs) }
+        adjs.toList.map { case (adj, gs) => (new Magnitude(base + adj, band), gs) }
 
       val bright = fast.getSaturationLimit.asScalaOpt.map(_.getBrightness).toList.flatMap { brightness =>
         magList(brightness)((-0.01, None), (0.0, Some(FAST)), (0.01, Some(FAST)))
@@ -260,12 +255,11 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
       bright ++ faintFast ++ faintNorm ++ faintSlow
     }
 
-    def toSkyCoordinates(lst: List[Point]): List[SkyCoordinates] = {
-      val b = new HmsDegCoordinates.Builder(ANGLE_0DEGREES, ANGLE_0DEGREES)
-      lst.map { p => b.ra(Angle.arcsecs(-p.getX).toPositive).dec(Angle.arcsecs(-p.getY)).build() }.toSet.toList
+    def toSkyCoordinates(lst: List[Point]): List[Coordinates] = {
+      lst.map { p => Coordinates(RightAscension.fromAngle(Angle.fromArcsecs(-p.getX).toPositive), Declination.fromAngle(Angle.fromArcsecs(-p.getY)).getOrElse(Declination.zero)) }.toSet.toList
     }
 
-    def candidates(lst: List[Point]): List[(SkyCoordinates, Magnitude, Option[GuideSpeed])] =
+    def candidates(lst: List[Point]): List[(Coordinates, Magnitude, Option[GuideSpeed])] =
       for {
         sc <- toSkyCoordinates(lst)
         (mag, gs) <- mags
@@ -276,11 +270,11 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
       s"$base${ctx.getInstrument.getType.narrowType}($i)"
 
     val usableCandidates:List[(SiderealTarget, GuideSpeed)] = candidates(in).zipWithIndex.collect { case ((sc, mag, Some(gs)), i) =>
-      (skyObject2SiderealTarget(new SkyObject.Builder(name("in", i), sc).magnitudes(mag).build()), gs)
+      (SiderealTarget(name("in", i), sc, Equinox.J2000, None, List(mag), None), gs)
     }
 
     val unusableCandidates = candidates(out).zipWithIndex.map { case ((sc, mag, _), i) =>
-      skyObject2SiderealTarget(new SkyObject.Builder(name("out", i), sc).magnitudes(mag).build())
+      SiderealTarget(name("out", i), sc, Equinox.J2000, None, List(mag), None)
     }
 
     copy(usable = usableCandidates, unusable = unusableCandidates)
@@ -416,20 +410,20 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
 
   def test(): Unit = {
     val mc   = magTable.apply(ctx, guideProbe).get
-    val band = mc.apply(ctx.getConditions, GuideSpeed.FAST).getBand
-    val maxMag = new Magnitude(band, Double.MaxValue)
+    val band:MagnitudeBand = mc.apply(ctx.getConditions, GuideSpeed.FAST).getBand
+    val maxMag = new Magnitude(Double.MaxValue, band)
 
     def go(winners: List[(SiderealTarget, GuideSpeed)]): Unit = {
       val best = winners match {
         case Nil => None
-        case lst => Some(lst.minBy(_._1.getMagnitude(band).getOrElse(maxMag)))
+        case lst => Some(lst.minBy(_._1.magnitudeOn(band).getOrElse(maxMag)))
       }
 
       val all = winners.map(_._1) ++ unusable
       val res = strategy.select(ctx, magTable, all)
 
       def equalPosAngles(e: Angle, a: Angle): Unit =
-        assertEquals("Position angles do not match", e.toDegrees.getMagnitude, a.toDegrees.getMagnitude, 0.000001)
+        assertEquals("Position angles do not match", e.toDegrees, a.toDegrees, 0.000001)
 
       def expectNothing(): Unit =
         res match {
