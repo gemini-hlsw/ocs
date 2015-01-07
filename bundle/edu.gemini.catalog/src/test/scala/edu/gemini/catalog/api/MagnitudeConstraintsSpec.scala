@@ -1,7 +1,7 @@
 package edu.gemini.catalog.api
 
 import edu.gemini.spModel.core.Target.SiderealTarget
-import edu.gemini.spModel.core.{Equinox, Coordinates, Magnitude, MagnitudeBand}
+import edu.gemini.spModel.core.{ Coordinates, Magnitude, MagnitudeBand}
 import org.specs2.mutable.SpecificationWithJUnit
 
 class MagnitudeConstraintsSpec extends SpecificationWithJUnit {
@@ -28,34 +28,34 @@ class MagnitudeConstraintsSpec extends SpecificationWithJUnit {
     "filter targets on band and faintness" in {
       val ml = MagnitudeConstraints(MagnitudeBand.R, FaintnessConstraint(10.0), None)
 
-      ml.filter(SiderealTarget("name", Coordinates.zero, Equinox.J2000, None, Nil, None)) should beFalse
+      ml.filter(SiderealTarget("name", Coordinates.zero, None, Nil, None)) should beFalse
       val mag1 = new Magnitude(4.999, MagnitudeBand.R)
 
-      ml.filter(SiderealTarget("name", Coordinates.zero, Equinox.J2000, None, List(mag1), None)) should beTrue
+      ml.filter(SiderealTarget("name", Coordinates.zero, None, List(mag1), None)) should beTrue
 
       val mag2 = new Magnitude(10.001, MagnitudeBand.R)
-      ml.filter(SiderealTarget("name", Coordinates.zero, Equinox.J2000, None, List(mag2), None)) should beFalse
+      ml.filter(SiderealTarget("name", Coordinates.zero, None, List(mag2), None)) should beFalse
 
       val mag3 = new Magnitude(4.999, MagnitudeBand.K)
-      ml.filter(SiderealTarget("name", Coordinates.zero, Equinox.J2000, None, List(mag3), None)) should beFalse
+      ml.filter(SiderealTarget("name", Coordinates.zero, None, List(mag3), None)) should beFalse
 
       // Case where there are more than one magnitude band
-      ml.filter(SiderealTarget("name", Coordinates.zero, Equinox.J2000, None, List(mag2, mag3), None)) should beFalse
-      ml.filter(SiderealTarget("name", Coordinates.zero, Equinox.J2000, None, List(mag1, mag3), None)) should beTrue
+      ml.filter(SiderealTarget("name", Coordinates.zero, None, List(mag2, mag3), None)) should beFalse
+      ml.filter(SiderealTarget("name", Coordinates.zero, None, List(mag1, mag3), None)) should beTrue
     }
     "filter targets on band, faintness and saturation" in {
       val ml = MagnitudeConstraints(MagnitudeBand.R, FaintnessConstraint(10.0), Some(SaturationConstraint(5)))
 
-      ml.filter(SiderealTarget("name", Coordinates.zero, Equinox.J2000, None, Nil, None)) should beFalse
+      ml.filter(SiderealTarget("name", Coordinates.zero, None, Nil, None)) should beFalse
       val mag1 = new Magnitude(4.999, MagnitudeBand.R)
 
-      ml.filter(SiderealTarget("name", Coordinates.zero, Equinox.J2000, None, List(mag1), None)) should beFalse
+      ml.filter(SiderealTarget("name", Coordinates.zero, None, List(mag1), None)) should beFalse
 
       val mag2 = new Magnitude(5.001, MagnitudeBand.R)
-      ml.filter(SiderealTarget("name", Coordinates.zero, Equinox.J2000, None, List(mag2), None)) should beTrue
+      ml.filter(SiderealTarget("name", Coordinates.zero, None, List(mag2), None)) should beTrue
 
       val mag3 = new Magnitude(4.999, MagnitudeBand.K)
-      ml.filter(SiderealTarget("name", Coordinates.zero, Equinox.J2000, None, List(mag3), None)) should beFalse
+      ml.filter(SiderealTarget("name", Coordinates.zero, None, List(mag3), None)) should beFalse
     }
     "support the union operation" in {
       val m1 = MagnitudeConstraints(MagnitudeBand.R, FaintnessConstraint(10.0), None)
