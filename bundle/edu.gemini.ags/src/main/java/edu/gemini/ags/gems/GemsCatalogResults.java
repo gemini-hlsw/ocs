@@ -54,7 +54,7 @@ public class GemsCatalogResults {
                                         List<GemsCatalogSearchResults> results, MascotProgress progress) {
 
         Coordinates base = obsContext.getBaseCoordinates();
-        List<GemsGuideStars> result = new ArrayList<GemsGuideStars>();
+        List<GemsGuideStars> result = new ArrayList<>();
 
         for (TiptiltFlexurePair pair : TiptiltFlexurePair.pairs(results)) {
             GemsGuideProbeGroup tiptiltGroup = pair.getTiptiltResults().getCriterion().getKey().getGroup();
@@ -68,7 +68,7 @@ public class GemsCatalogResults {
                     progress.setProgressTitle("Finding asterisms for " + tiptiltGroup.getKey());
                 }
                 Magnitude.Band bandpass = getBandpass(tiptiltGroup, obsContext.getInstrument());
-                double factor = getStrehlFactor(new Some<ObsContext>(obsContext));
+                double factor = getStrehlFactor(new Some<>(obsContext));
                 MascotCat.StrehlResults strehlResults = MascotCat.javaFindBestAsterismInSkyObjectList(
                         tiptiltSkyObjectList, base.getRaDeg(), base.getDecDeg(), bandpass.name(), factor, progress);
                 for (Strehl strehl : strehlResults.strehlList()) {
@@ -98,7 +98,7 @@ public class GemsCatalogResults {
                                         List<GemsCatalogSearchResults> results, final MascotProgress progress) {
 
         Coordinates base = obsContext.getBaseCoordinates();
-        final List<GemsGuideStars> result = new ArrayList<GemsGuideStars>();
+        final List<GemsGuideStars> result = new ArrayList<>();
 
         for (TiptiltFlexurePair pair : TiptiltFlexurePair.pairs(results)) {
             final GemsGuideProbeGroup tiptiltGroup = pair.getTiptiltResults().getCriterion().getKey().getGroup();
@@ -128,7 +128,7 @@ public class GemsCatalogResults {
                     }
                 };
 
-                double factor = getStrehlFactor(new Some<ObsContext>(obsContext));
+                double factor = getStrehlFactor(new Some<>(obsContext));
                 try {
                     MascotCat.javaFindBestAsterismInSkyObjectList(
                             tiptiltSkyObjectList, base.getRaDeg(), base.getDecDeg(), bandpass.name(), factor, strehlHandler);
@@ -147,7 +147,7 @@ public class GemsCatalogResults {
                                                  List<SkyObject> flexureSkyObjectList,
                                                  GemsGuideProbeGroup flexureGroup,
                                                  GemsGuideProbeGroup tiptiltGroup) {
-        final List<GemsGuideStars> result = new ArrayList<GemsGuideStars>();
+        final List<GemsGuideStars> result = new ArrayList<>();
         for (Angle posAngle : posAngles) {
             List<SkyObject> flexureList = filter(obsContext, flexureSkyObjectList, flexureGroup, posAngle);
             SkyObject[] flexureStars = GemsUtil.brightestFirstSkyObject(flexureList);
@@ -171,7 +171,7 @@ public class GemsCatalogResults {
     private List<GemsGuideStars> analyzeStrehl(ObsContext obsContext, Strehl strehl, Angle posAngle,
                                                  GemsGuideProbeGroup tiptiltGroup, GemsGuideProbeGroup flexureGroup,
                                                  SkyObject[] flexureStars, boolean reverseOrder) {
-        List<GemsGuideStars> result = new ArrayList<GemsGuideStars>();
+        List<GemsGuideStars> result = new ArrayList<>();
         List<SPTarget> tiptiltTargetList = getTargetListFromStrehl(strehl);
 
         // XXX The TPE assumes canopus tiptilt if there are only 2 stars (one of each ODGW and CWFS),
@@ -204,13 +204,13 @@ public class GemsCatalogResults {
                                                               GemsGuideProbeGroup flexureGroup,
                                                               SkyObject[] flexureStars,
                                                               boolean reverseOrder) {
-        List<GuideProbeTargets> result = new ArrayList<GuideProbeTargets>(tiptiltTargetList.size() + 1);
+        List<GuideProbeTargets> result = new ArrayList<>(tiptiltTargetList.size() + 1);
 
         // assign guide probes for tiptilt asterism
         for(SPTarget target : tiptiltTargetList) {
             Option<GuideProbeTargets> guideProbeTargets = assignGuideProbeTarget(obsContext, posAngle, tiptiltGroup,
                     target, tiptiltGroup, result, tiptiltTargetList, reverseOrder);
-            if (guideProbeTargets.isEmpty()) return new ArrayList<GuideProbeTargets>();
+            if (guideProbeTargets.isEmpty()) return new ArrayList<>();
             result.add(guideProbeTargets.getValue());
             // Update the ObsContext, since validation of the following targets may depend on it
             obsContext = obsContext.withTargets(obsContext.getTargets().putPrimaryGuideProbeTargets(guideProbeTargets.getValue()));
@@ -230,7 +230,7 @@ public class GemsCatalogResults {
         if (result.size() == tiptiltTargetList.size() + 1) {
             return result;
         }
-        return new ArrayList<GuideProbeTargets>();
+        return new ArrayList<>();
     }
 
 
@@ -257,7 +257,7 @@ public class GemsCatalogResults {
         if (guideProbe.isEmpty()) {
             return None.instance();
         }
-        return new Some<GuideProbeTargets>(GuideProbeTargets.create(guideProbe.getValue(), target));
+        return new Some<>(GuideProbeTargets.create(guideProbe.getValue(), target));
     }
 
 
@@ -265,7 +265,7 @@ public class GemsCatalogResults {
     // given position angles.
     private List<SkyObject> filter(ObsContext obsContext, List<SkyObject> skyObjectList, GemsGuideProbeGroup group,
                                    Set<Angle> posAngles) {
-        List<SkyObject> result = new ArrayList<SkyObject>(skyObjectList.size());
+        List<SkyObject> result = new ArrayList<>(skyObjectList.size());
         for (Angle posAngle : posAngles) {
             result.addAll(filter(obsContext, skyObjectList, group, posAngle));
         }
@@ -276,7 +276,7 @@ public class GemsCatalogResults {
     // given position angle.
     private List<SkyObject> filter(ObsContext obsContext, List<SkyObject> skyObjectList,
                                    GemsGuideProbeGroup group, Angle posAngle) {
-        List<SkyObject> result = new ArrayList<SkyObject>(skyObjectList.size());
+        List<SkyObject> result = new ArrayList<>(skyObjectList.size());
         for (SkyObject skyObject : skyObjectList) {
             if (validate(obsContext, new SPTarget(skyObject), group, posAngle)) {
                 result.add(skyObject);
@@ -288,8 +288,8 @@ public class GemsCatalogResults {
     // Returns the input list sorted by ranking. See OT-27 and GemsGuideStars.compareTo
     private List<GemsGuideStars> sortResultsByRanking(List<GemsGuideStars> list) {
         // Sort by ranking and remove duplicates
-        Set<GemsGuideStars> set = new TreeSet<GemsGuideStars>(list);
-        List<GemsGuideStars> result = new ArrayList<GemsGuideStars>(set);
+        Set<GemsGuideStars> set = new TreeSet<>(list);
+        List<GemsGuideStars> result = new ArrayList<>(set);
         Collections.reverse(result); // put highest ranking first in list
         printResults(result);
         return result;
@@ -368,7 +368,7 @@ public class GemsCatalogResults {
                         }
                     }
                     if (valid) {
-                        return new Some<GuideProbe>(guideProbe);
+                        return new Some<>(guideProbe);
                     }
                 }
             }
@@ -440,7 +440,7 @@ public class GemsCatalogResults {
 
     // Returns the stars in the given asterism as a SPTarget list, sorted by R mag, brightest first.
     private List<SPTarget> getTargetListFromStrehl(Strehl strehl) {
-        List<SPTarget> targetList = new ArrayList<SPTarget>();
+        List<SPTarget> targetList = new ArrayList<>();
         for(Star star : strehl.getStars()) {
             targetList.add(starToSPTarget(star));
         }
@@ -456,7 +456,7 @@ public class GemsCatalogResults {
         HmsDegCoordinates.Builder b = new HmsDegCoordinates.Builder(ra, dec);
         HmsDegCoordinates coords = b.build();
 
-        List<Magnitude> magList = new ArrayList<Magnitude>(6);
+        List<Magnitude> magList = new ArrayList<>(6);
 
         double invalid = MascotConf.invalidMag();
         if (star.bmag() != invalid) magList.add(new Magnitude(Magnitude.Band.B, star.bmag()));

@@ -281,7 +281,7 @@ public class GemsGuideStarSearchOptions {
                                                       GemsMagnitudeTable.LimitsCalculator calculator,
                                                       GemsGuideStarType gType,
                                                       Option<Magnitude.Band> nirBand) {
-        String name = "%s %s".format(gGroup.getDisplayName(), gType.name());
+        String name = String.format("%s %s", gGroup.getDisplayName(), gType.name());
 
         // Adjust the mag limits for the worst conditions (as is done in the ags servlet)
         MagnitudeLimits magLimits = calculator.getGemsMagnitudeLimitsForJava(gType, nirBand).mapMagnitudes(obsContext.getConditions().magAdjustOp());
@@ -296,7 +296,7 @@ public class GemsGuideStarSearchOptions {
     }
 
     public Set<String> getCatalogs() {
-        Set<String> catalogs = new HashSet<String>(2);
+        Set<String> catalogs = new HashSet<>(2);
         catalogs.add(nirCatalog);
         catalogs.add(opticalCatalog);
         return catalogs;
