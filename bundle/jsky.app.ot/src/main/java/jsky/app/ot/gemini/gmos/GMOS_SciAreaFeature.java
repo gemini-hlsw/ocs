@@ -8,7 +8,7 @@ package jsky.app.ot.gemini.gmos;
 
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.gemini.gmos.*;
-import edu.gemini.spModel.inst.ScienceArea;
+import edu.gemini.spModel.inst.ScienceAreaGeometry;
 import jsky.app.ot.gemini.inst.SciAreaFeatureBase;
 import jsky.app.ot.tpe.TpeImageInfo;
 import jsky.app.ot.tpe.TpeImageWidget;
@@ -79,7 +79,7 @@ public class GMOS_SciAreaFeature extends SciAreaFeatureBase {
                 if (instGMOS.isIFU()) {
                     offset.y = _baseScreenPos.y - 30.0;
                 } else if (instGMOS.isNS()) {
-                    offset.y = _baseScreenPos.y - GmosScienceArea$.MODULE$.LongSlitFOVHeight() / 2.0 * _pixelsPerArcsec;
+                    offset.y = _baseScreenPos.y - GmosScienceAreaGeometry$.MODULE$.LongSlitFOVHeight() / 2.0 * _pixelsPerArcsec;
                 }
             }
         }
@@ -96,17 +96,17 @@ public class GMOS_SciAreaFeature extends SciAreaFeatureBase {
 
         InstGmosCommon instGMOS = getInst();
         if (instGMOS != null) {
-            final ScienceArea gmosScienceArea = new GmosScienceArea();
-            final Shape transformedArea = gmosScienceArea.transformedScienceArea(instGMOS, _baseScreenPos,
-                    _posAngle, _pixelsPerArcsec);
-            _figureList.add(transformedArea);
-
-            // Create any necessary modifications.
-            final GmosCommonType.FPUnitMode fpUnitMode = instGMOS.getFPUnitMode();
-            if (fpUnitMode == GmosCommonType.FPUnitMode.BUILTIN && instGMOS.isImaging())
-                _gaps = new ImagingGaps(GmosScienceArea$.MODULE$.ImagingFOVSize());
-            else if (fpUnitMode == GmosCommonType.FPUnitMode.CUSTOM_MASK)
-                _gaps = new ImagingGaps(GmosScienceArea$.MODULE$.MOSFOVSize());
+            final ScienceAreaGeometry gmosScienceArea = new GmosScienceAreaGeometry(instGMOS);
+            final Shape transformedArea = gmosScienceArea.scienceAreaAsJava(_baseScreenPos, _posAngle, _pixelsPerArcsec);
+            if (transformedArea != null) {
+                _figureList.add(transformedArea);
+                // Create any necessary modifications.
+                final GmosCommonType.FPUnitMode fpUnitMode = instGMOS.getFPUnitMode();
+                if (fpUnitMode == GmosCommonType.FPUnitMode.BUILTIN && instGMOS.isImaging())
+                    _gaps = new ImagingGaps(GmosScienceAreaGeometry$.MODULE$.ImagingFOVSize());
+                else if (fpUnitMode == GmosCommonType.FPUnitMode.CUSTOM_MASK)
+                    _gaps = new ImagingGaps(GmosScienceAreaGeometry$.MODULE$.MOSFOVSize());
+            }
         }
     }
 

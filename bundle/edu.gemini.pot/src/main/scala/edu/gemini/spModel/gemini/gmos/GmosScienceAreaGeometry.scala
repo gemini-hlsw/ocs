@@ -5,31 +5,31 @@ import java.awt.geom.{Area, Rectangle2D}
 
 import edu.gemini.shared.util.immutable.ImPolygon
 import edu.gemini.spModel.core.Site
-import edu.gemini.spModel.inst.ScienceArea
+import edu.gemini.spModel.inst.ScienceAreaGeometry
 
 
-class GmosScienceArea[I  <: InstGmosCommon[D,F,P,SM],
-                      D  <: Enum[D]  with GmosCommonType.Disperser,
-                      F  <: Enum[F]  with GmosCommonType.Filter,
-                      P  <: Enum[P]  with GmosCommonType.FPUnit,
-                      SM <: Enum[SM] with GmosCommonType.StageMode] extends ScienceArea[I] {
+class GmosScienceAreaGeometry[I  <: InstGmosCommon[D,F,P,SM],
+                              D  <: Enum[D]  with GmosCommonType.Disperser,
+                              F  <: Enum[F]  with GmosCommonType.Filter,
+                              P  <: Enum[P]  with GmosCommonType.FPUnit,
+                              SM <: Enum[SM] with GmosCommonType.StageMode](inst: I) extends ScienceAreaGeometry[I] {
 
-  override def scienceArea(inst: I): Shape = {
-    lazy val emptyArea = new Area()
+  import GmosScienceAreaGeometry._
 
-    Option(inst).map { gmos =>
-      lazy val width   = gmos.getScienceArea()(0)
+  override def basicScienceArea: Option[Shape] = {
+    if (inst == null) None
+    else Option({
+      lazy val width   = inst.getScienceArea()(0)
       lazy val isSouth = inst.getSite.contains(Site.GS)
-
-      gmos.getFPUnitMode match {
-        case GmosCommonType.FPUnitMode.BUILTIN if gmos.isImaging       => fov(GmosScienceArea.ImagingFOVSize, GmosScienceArea.ImagingFOVInnerSize)
-        case GmosCommonType.FPUnitMode.BUILTIN if gmos.isSpectroscopic => longSlitFOV(width)
-        case GmosCommonType.FPUnitMode.BUILTIN if gmos.isIFU           => ifuFOV(gmos.getFPUnit, isSouth)
-        case GmosCommonType.FPUnitMode.BUILTIN if gmos.isNS            => nsFOV(width)
-        case GmosCommonType.FPUnitMode.CUSTOM_MASK                     => fov(GmosScienceArea.MOSFOVSize, GmosScienceArea.MOSFOVInnerSize)
-        case _                                                         => emptyArea
+      inst.getFPUnitMode match {
+        case GmosCommonType.FPUnitMode.BUILTIN if inst.isImaging       => fov(ImagingFOVSize, ImagingFOVInnerSize)
+        case GmosCommonType.FPUnitMode.BUILTIN if inst.isSpectroscopic => longSlitFOV(width)
+        case GmosCommonType.FPUnitMode.BUILTIN if inst.isIFU           => ifuFOV(inst.getFPUnit, isSouth)
+        case GmosCommonType.FPUnitMode.BUILTIN if inst.isNS            => nsFOV(width)
+        case GmosCommonType.FPUnitMode.CUSTOM_MASK                     => fov(MOSFOVSize, MOSFOVInnerSize)
+        case _                                                         => null
       }
-    }.getOrElse(emptyArea)
+    })
   }
 
   /**
@@ -65,8 +65,8 @@ class GmosScienceArea[I  <: InstGmosCommon[D,F,P,SM],
    * @return                the shape matching the specifications
    */
   private def longSlitFOV(slitWidth: Double): Shape = {
-    val slitHeight   = GmosScienceArea.LongSlitFOVHeight
-    val bridgeHeight = GmosScienceArea.LongSlitFOVBridgeHeight
+    val slitHeight   = LongSlitFOVHeight
+    val bridgeHeight = LongSlitFOVBridgeHeight
 
     val x = -slitWidth / 2
     val d = slitHeight + bridgeHeight
@@ -85,7 +85,7 @@ class GmosScienceArea[I  <: InstGmosCommon[D,F,P,SM],
    * @return                the shape matching the specifications
    */
   private def nsFOV(slitWidth: Double): Shape = {
-    val slitHeight = GmosScienceArea.LongSlitFOVHeight
+    val slitHeight = LongSlitFOVHeight
 
     val x = -slitWidth  / 2
     val y = -slitHeight / 2
@@ -109,8 +109,8 @@ class GmosScienceArea[I  <: InstGmosCommon[D,F,P,SM],
     }
 
     // These are used to center the right rectangle on the base position.
-    val width0  = (GmosScienceArea.IFUFOVLargerRectangle.rect.getWidth + widthAdjust) / 2.0
-    val height0 =  GmosScienceArea.IFUFOVLargerRectangle.rect.getHeight / 2.0
+    val width0  = (IFUFOVLargerRectangle.rect.getWidth + widthAdjust) / 2.0
+    val height0 =  IFUFOVLargerRectangle.rect.getHeight / 2.0
 
     // For the following FPUnit types, we show the left or right half of both slits, with the larger
     // (north) or smaller (south) of the two centered about the base position.
@@ -129,7 +129,7 @@ class GmosScienceArea[I  <: InstGmosCommon[D,F,P,SM],
     // Create and add the two slits.
     val area = new Area
     for {
-      fov <- GmosScienceArea.IFUFOVs
+      fov <- IFUFOVs
       if fov.use(widthAdjust)
 
       rect = fov.rect
@@ -141,7 +141,7 @@ class GmosScienceArea[I  <: InstGmosCommon[D,F,P,SM],
         // OT-10: If we are in the case of the smaller rectangle for GMOS-S, we need to flip
         // along the X-axis about the base position.
         (isSouth, fov) match {
-          case (true, GmosScienceArea.IFUFOVSmallerRectangle) => -tx - width
+          case (true, IFUFOVSmallerRectangle) => -tx - width
           case _ => tx
         }
       }
@@ -165,11 +165,11 @@ class GmosScienceArea[I  <: InstGmosCommon[D,F,P,SM],
 }
 
 
-object GmosNorthScienceArea extends GmosScienceArea[InstGmosNorth, GmosNorthType.DisperserNorth, GmosNorthType.FilterNorth, GmosNorthType.FPUnitNorth, GmosNorthType.StageModeNorth]
-object GmosSouthScienceArea extends GmosScienceArea[InstGmosSouth, GmosSouthType.DisperserSouth, GmosSouthType.FilterSouth, GmosSouthType.FPUnitSouth, GmosSouthType.StageModeSouth]
+//object GmosNorthScienceArea extends GmosScienceArea[InstGmosNorth, GmosNorthType.DisperserNorth, GmosNorthType.FilterNorth, GmosNorthType.FPUnitNorth, GmosNorthType.StageModeNorth]
+//object GmosSouthScienceArea extends GmosScienceArea[InstGmosSouth, GmosSouthType.DisperserSouth, GmosSouthType.FilterSouth, GmosSouthType.FPUnitSouth, GmosSouthType.StageModeSouth]
 
 
-object GmosScienceArea {
+object GmosScienceAreaGeometry {
   // Various sizes used in the calculation of the science area in arcsec.
   val ImagingFOVSize          = 330.34
   val ImagingFOVInnerSize     = 131.33 * 2

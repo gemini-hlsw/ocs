@@ -14,6 +14,7 @@ import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe;
+import edu.gemini.spModel.gemini.gmos.GmosOiwfsProbeArm;
 import edu.gemini.spModel.gemini.gmos.InstGmosCommon;
 import edu.gemini.spModel.guide.PatrolField;
 import edu.gemini.spModel.obs.context.ObsContext;
@@ -31,6 +32,7 @@ import java.awt.geom.Point2D;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
+import java.util.List;
 
 
 /**
@@ -58,15 +60,6 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
 
     // The size of the OIWFS probe arm pickoff mirror in arcsec
     private static final double PICKOFF_MIRROR_SIZE = 20.;
-
-    // The length of the OIWFS probe arm, starting at the pickoff mirror, in arcsec
-    private static final double PROBE_ARM_LENGTH = MX - PICKOFF_MIRROR_SIZE / 2.;
-
-    // The width of the tapered end of the probe arm in arcsec
-    private static final double PROBE_ARM_TAPERED_WIDTH = 15.;
-
-    // The length of the tapered end of the probe arm in arcsec
-    private static final double PROBE_ARM_TAPERED_LENGTH = 180.;
 
     // Set to true if the offset constrained patrol field area is empty
     private boolean offsetConstrainedPatrolFieldIsEmpty = false;
@@ -112,73 +105,6 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
                 addOffsetConstrainedPatrolField(patrolField, offsets);
             }
         }
-    }
-
-
-    /**
-     * Add the OIWFS probe arm pickoff mirror to the display list.
-     *
-     * @param tp the location of the OIWFS guide star in screen coords
-     * @param trans the transformation to apply to the figure
-     */
-    private void _addPickoffMirror(Point2D.Double tp, AffineTransform trans) {
-        double width = PICKOFF_MIRROR_SIZE * _pixelsPerArcsec;
-        double d = width / 2.;
-        double x = tp.x - d;
-        double y = tp.y - d;
-        Polygon2D.Double pickoffMirror = new Polygon2D.Double(x, y);
-        pickoffMirror.lineTo(x + width, y);
-        pickoffMirror.lineTo(x + width, y + width);
-        pickoffMirror.lineTo(x, y + width);
-
-        // rotate by position angle
-        pickoffMirror.transform(trans);
-
-        _figureList.add(new Figure(pickoffMirror, PROBE_ARM_COLOR, BLOCKED, OIWFS_STROKE));
-    }
-
-
-    /**
-     * Add the OIWFS probe arm (without the pickoff mirror) to the display list.
-     *
-     * @param tp the location of the OIWFS guide star in screen coords
-     * @param trans the transformation to apply to the figure
-     */
-    private void _addProbeArm(Point2D.Double tp, AffineTransform trans) {
-        double mirror = PICKOFF_MIRROR_SIZE * _pixelsPerArcsec;
-//        double width = PROBE_ARM_WIDTH * _pixelsPerArcsec;
-        double length = PROBE_ARM_LENGTH * _pixelsPerArcsec;
-        double taperedWidth = PROBE_ARM_TAPERED_WIDTH * _pixelsPerArcsec;
-        double taperedLength = PROBE_ARM_TAPERED_LENGTH * _pixelsPerArcsec;
-        double hm = mirror / 2.;
-        double htw = taperedWidth / 2.;
-
-        double x0 = tp.x + hm * _flipRA;
-        double y0 = tp.y - htw;
-        Polygon2D.Double arm = new Polygon2D.Double(x0, y0);
-
-        double x1 = x0 + taperedLength * _flipRA;
-        double y1 = tp.y - hm;
-        arm.lineTo(x1, y1);
-
-        double x2 = x0 + length * _flipRA;
-        double y2 = y1;
-        arm.lineTo(x2, y2);
-
-        double x3 = x2;
-        double y3 = tp.y + hm;
-        arm.lineTo(x3, y3);
-
-        double x4 = x1;
-        double y4 = y3;
-        arm.lineTo(x4, y4);
-
-        double x5 = x0;
-        double y5 = tp.y + htw;
-        arm.lineTo(x5, y5);
-
-        arm.transform(trans);
-        _figureList.add(new Figure(arm, PROBE_ARM_COLOR, BLOCKED, OIWFS_STROKE));
     }
 
     // Get the offset that should be used as the "base" for drawing the probe
@@ -271,9 +197,13 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
         armTrans.translate(xt, yt);
         armTrans.rotate(angle, tp.x, tp.y);
 
-        // add the figures to the display list
-        _addPickoffMirror(tp, armTrans);
-        _addProbeArm(tp, armTrans);
+        // add the figures to the display list with required translation, reflection, and scaling
+        armTrans.concatenate(AffineTransform.getTranslateInstance(tp.getX(), tp.getY()));
+        armTrans.concatenate(AffineTransform.getScaleInstance(_flipRA, 1.0));
+        armTrans.concatenate(AffineTransform.getScaleInstance(_pixelsPerArcsec, _pixelsPerArcsec));
+        final List<Shape> shapes = GmosOiwfsProbeArm.transformedGeometryAsJava(armTrans);
+        for (final Shape s: shapes)
+            _figureList.add(new Figure(s, PROBE_ARM_COLOR, BLOCKED, OIWFS_STROKE));
     }
 
 
