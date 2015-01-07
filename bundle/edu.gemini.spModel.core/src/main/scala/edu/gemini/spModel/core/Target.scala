@@ -127,7 +127,7 @@ object Target {
                 con: Target.ConicTarget => A): A = 
       sid(this)
 
-    def magnitudeOn(band: MagnitudeBand): Option[Magnitude] = magnitudes.find(_.band === band)
+    def magnitudeIn(band: MagnitudeBand): Option[Magnitude] = magnitudes.find(_.band === band)
 
   }
 

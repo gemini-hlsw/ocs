@@ -9,8 +9,7 @@ import Strehl._
 /**
  * Tests methods in the Strehl class.
  */
-
-@Ignore class StrehlTest {
+class StrehlTest {
 
   //> create_distortion(1,2,3)
   //[1,0]

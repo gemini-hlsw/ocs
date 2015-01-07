@@ -64,7 +64,7 @@ case class MagnitudeConstraints(band: MagnitudeBand, faintnessConstraint: Faintn
     MagnitudeConstraints(mappedFaintness.band, fl, sl)
   }
 
-  def filter: SiderealTarget => Boolean = t => t.magnitudeOn(band).exists(contains)
+  def filter: SiderealTarget => Boolean = t => t.magnitudeIn(band).exists(contains)
 
   /**
    * Determines whether the magnitude limits include the given magnitude

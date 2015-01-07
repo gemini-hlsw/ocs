@@ -24,6 +24,10 @@ trait RadiusConstraint {
    * Returns a filter for coordinates with a distance inside the range
    */
   def targetsFilter(base: Coordinates): SiderealTarget => Boolean
+
+  // REMOVE When AGS is fully ported
+  @Deprecated
+  def toRadiusLimit = new RadiusLimits(edu.gemini.skycalc.Angle.degrees(maxLimit.toDegrees), edu.gemini.skycalc.Angle.degrees(minLimit.toDegrees))
 }
 
 /**

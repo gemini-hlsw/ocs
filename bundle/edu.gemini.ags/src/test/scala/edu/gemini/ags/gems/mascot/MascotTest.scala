@@ -7,7 +7,7 @@ import java.util.Date
 /**
  * Test cases for Scala port of the Yorick based Mascot sources.
  */
-@Ignore class MascotTest {
+class MascotTest {
   // nomad.dat for ngc1275
   //#...aclient 130.79.129.161 1660 nomad1  -c 03 19 48.2341 +41 30 42.078 -r 1.20 -E
   //#====== NOMAD1 server (2006-06, V1.31) ======  CDS, Strasbourg ======
@@ -70,7 +70,7 @@ import java.util.Date
   )
 
   @Test def testFindBestAsterism() {
-    val xxx = new Date().getTime()
+    val xxx = new Date().getTime
     val (starList, strehlList) = Mascot.findBestAsterism(allStarList)
     println("XXX findBestAsterism: " + ((new Date().getTime() - xxx) / 1000.0) + " sec")
 
@@ -85,7 +85,7 @@ import java.util.Date
 
     //    Asterism #1, [1.3,0.8], [-33.0,43.4], [42.4,15.9]
     //    Strehl over 80.0": avg=88.3  rms=0.4  min=86.7  max=88.8
-    var s = it.next
+    val s = it.next
     assertEquals(1.3, s.stars(0).x, err)
     assertEquals(0.8, s.stars(0).y, err)
     assertEquals(-33.0, s.stars(1).x, err)
