@@ -34,7 +34,7 @@ object ProgramDiff {
     // then remove all that don't differ.
     val presentDiffKeys = presentDiffs.map(_.key)(breakOut): Set[SPNodeKey]
     val removedKeys     = (localKeys &~ presentDiffKeys).filter { k =>
-      remoteVm.get(k).forall(_ != localVm(k))
+      remoteVm.get(k).forall(_ =/= localVm(k))
     }
     val removedDiffs    = toList(removedKeys, k => missing(k, localVm(k)))
 
@@ -44,7 +44,7 @@ object ProgramDiff {
   private def diffOne(n: ISPNode, remoteVm: VersionMap): Option[Diff] = {
     lazy val someActive = some(present(n))
     remoteVm.get(n.getNodeKey).fold(someActive) { remoteNv =>
-      if (n.getVersion == remoteNv) none else someActive
+      if (n.getVersion === remoteNv) none else someActive
     }
   }
 
@@ -52,7 +52,7 @@ object ProgramDiff {
   // the entire observation.
   private def diffObs(o: ISPObservation, remoteVm: VersionMap): List[Diff] = {
     def nodeDiffers(n: ISPNode): Boolean =
-      n.getVersion != remoteVm.getOrElse(n.getNodeKey, EmptyNodeVersions)
+      n.getVersion =/= remoteVm.getOrElse(n.getNodeKey, EmptyNodeVersions)
 
     def treeDiffers(root: ISPNode): Boolean = {
       @tailrec def go(nodes: List[ISPNode]): Boolean =
