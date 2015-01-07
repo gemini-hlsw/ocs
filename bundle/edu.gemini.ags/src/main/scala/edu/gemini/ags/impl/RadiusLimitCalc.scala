@@ -46,7 +46,7 @@ object RadiusLimitCalc {
       val maxr = sqrt(maxx * maxx + maxy * maxy)
 
       val maxAngle = Angle.fromArcsecs(maxr)
-      val minAngle = if (!r2d.contains(0, 0)) Angle.fromArcsecs(shortestDistance(r2d)) else Angle.zero
+      val minAngle = if (r2d.contains(0, 0)) Angle.zero else Angle.fromArcsecs(shortestDistance(r2d))
 
       RadiusConstraint.between(maxAngle, minAngle)
     }
@@ -61,24 +61,20 @@ object RadiusLimitCalc {
   }
 
   private def shortestDistanceToHorizontalLine(l: Line2D): Double = {
-    val p1 = l.getP1
-    val p2 = l.getP2
-    if ((p1.getX <= 0) && (0 <= p2.getX)) {
-      // If the center falls between the horizontal extremes of the
-      // segment, it's the veritical distance to the line.
-      abs(p1.getY)
-    } else {
-      min(Zero.distance(p1), Zero.distance(p2))
-    }
+    shortestDistance(l) {(a, b) => (a.getX <= 0) && (0 <= b.getX)} {_.getY}
   }
 
   private def shortestDistanceToVerticalLine(l: Line2D): Double = {
+    shortestDistance(l) {(a, b) => (a.getY <= 0) && (0 <= b.getY)} {_.getX}
+  }
+
+  private def shortestDistance(l: Line2D)(condition: (Point2D, Point2D) => Boolean)(result: Point2D => Double): Double = {
     val p1 = l.getP1
     val p2 = l.getP2
-    if ((p1.getY <= 0) && (0 <= p2.getY)) {
+    if (condition(p1, p2)) {
       // If the center falls between the vertical extremes of the
       // segment, it's the horizontal distance to the line.
-      abs(p1.getX)
+      abs(result(p1))
     } else {
       min(Zero.distance(p1), Zero.distance(p2))
     }
