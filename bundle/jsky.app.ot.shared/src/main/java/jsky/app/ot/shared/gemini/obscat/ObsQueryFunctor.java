@@ -36,6 +36,7 @@ import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
 import edu.gemini.spModel.target.system.HmsDegTarget;
 import edu.gemini.spModel.target.system.ICoordinate;
+import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.time.ChargeClass;
 import edu.gemini.spModel.time.ObsTimeCharges;
 import edu.gemini.spModel.time.ObsTimes;
@@ -561,7 +562,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
             return false;
         final TargetObsComp targetEnv = (TargetObsComp) targetObsComp.getDataObject();
         final SPTarget tp = targetEnv.getBase();
-        final HmsDegTarget target = tp.getTarget().getTargetAsJ2000();
+        final ITarget target = tp.getTarget();
         final ICoordinate c1 = target.getC1();
         final ICoordinate c2 = target.getC2();
         final double ra = c1.getAs(Units.DEGREES) / 15.;
@@ -661,7 +662,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
         if (targetObsComp != null) {
             final TargetObsComp targetEnv = (TargetObsComp) targetObsComp.getDataObject();
             final SPTarget tp = targetEnv.getBase();
-            final HmsDegTarget target = tp.getTarget().getTargetAsJ2000();
+            final ITarget target = tp.getTarget();
             final ICoordinate c1 = target.getC1();
             final ICoordinate c2 = target.getC2();
             ra = c1.getAs(Units.DEGREES);

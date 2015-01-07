@@ -117,8 +117,7 @@ public abstract class NonSiderealTarget extends CoordinateSystem implements INon
      * Get the first Coordinate as an ICoordinate.
      */
     public ICoordinate getC1() {
-        // convert to J2000 and return.
-        return getTargetAsJ2000().getC1();  // allan: changed from null
+        return _ra;
     }
 
     /**
@@ -169,8 +168,7 @@ public abstract class NonSiderealTarget extends CoordinateSystem implements INon
      * Get the second Coordinate as an ICoordinate.
      */
     public ICoordinate getC2() {
-        // convert to J2000 and return.
-        return getTargetAsJ2000().getC2();  // allan: changed from null
+        return _dec;
     }
 
     /**
@@ -228,36 +226,11 @@ public abstract class NonSiderealTarget extends CoordinateSystem implements INon
 
 
     /**
-     * Return a new coordinate system object as J2000.
-     * Part of Interface ICoordinate
-     */
-    public HmsDegTarget getTargetAsJ2000() {
-        HmsDegTarget target = new HmsDegTarget();
-        target.setC1C2(_ra, _dec);
-        return target;
-    }
-
-    /**
      * Gets the system's name including the selected (sub)option.
      */
     public String getSystemName() {
         return "(" + getSystemOption().getName() + ")";
     }
-
-    /**
-     * Set the position using a J2000 HmsDegTarget
-     */
-    public void setTargetWithJ2000(HmsDegTarget in)
-            throws IllegalArgumentException {
-
-        // Copy the coordinates in this object
-        _ra = (HMS) ((HMS) in.getC1()).clone();
-        _dec = (DMS) ((DMS) in.getC2()).clone();
-
-        // Copy the object name
-        setName(in.getName());
-    }
-
 
     public Date getDateForPosition() {
         return _date;

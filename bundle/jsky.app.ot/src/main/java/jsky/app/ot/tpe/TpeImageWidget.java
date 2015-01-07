@@ -507,7 +507,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
 
         // Get the equinox assumed by the coordinate conversion methods (depends on current image)
         //double equinox = getCoordinateConverter().getEquinox();
-        HmsDegTarget target = ((SPTarget) tp).getTarget().getTargetAsJ2000();
+        ITarget target = ((SPTarget) tp).getTarget();
         ICoordinate c1 = target.getC1();
         ICoordinate c2 = target.getC2();
         double x = c1.getAs(Units.DEGREES);
@@ -894,7 +894,6 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
      * The Base position has been updated.
      */
     public void basePosUpdate(ITarget target) {
-        target = target.getTargetAsJ2000();
         ICoordinate c1 = target.getC1();
         ICoordinate c2 = target.getC2();
         double x = c1.getAs(Units.DEGREES);

@@ -112,7 +112,6 @@ object Target {
   case class SiderealTarget (
     name: String,
     coordinates: Coordinates,
-    equinox: Equinox,
     properMotion: Option[ProperMotion],
     magnitudes: List[Magnitude],
     horizonsInfo: Option[Target.HorizonsInfo]) extends Target {
@@ -133,11 +132,10 @@ object Target {
 
   object SiderealTarget {
   
-    val empty = SiderealTarget("Untitled", Coordinates.zero, Equinox.J2000, None, Nil, None)
+    val empty = SiderealTarget("Untitled", Coordinates.zero, None, Nil, None)
   
     val name:        SiderealTarget @> String         = Lens(t => Store(s => t.copy(name = s), t.name))
     val coordinates: SiderealTarget @> Coordinates    = Lens(t => Store(c => t.copy(coordinates = c), t.coordinates))
-    val equinox:     SiderealTarget @> Equinox        = Lens(t => Store(e => t.copy(equinox = e), t.equinox))
     val ra:          SiderealTarget @> RightAscension = coordinates >=> Coordinates.ra
     val dec:         SiderealTarget @> Declination    = coordinates >=> Coordinates.dec
   
@@ -151,7 +149,6 @@ object Target {
   case class NonSiderealTarget(
     name: String,
     ephemeris: List[EphemerisElement],
-    equinox: Equinox,
     horizonsInfo: Option[Target.HorizonsInfo]) extends Target {
 
     def fold[A](too: Target.TooTarget => A,

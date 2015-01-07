@@ -42,12 +42,8 @@ trait Arbitraries {
     Arbitrary {
       for {
         d <- arbitrary[Short].map(_ / 100.0)
-        e <- oneOf(Epoch.JulianYears(d), Epoch.BesselianYears(d))
-      } yield e
+      } yield Epoch(d)
     }
-
-  implicit val arbEquinox: Arbitrary[Equinox] =
-    Arbitrary(oneOf(Equinox.J2000, Equinox.B1950))
 
   implicit val arbProperMotion: Arbitrary[ProperMotion] =
     Arbitrary {
@@ -86,11 +82,10 @@ trait Arbitraries {
       for {
           name         <- arbitrary[String]
           coordinates  <- arbitrary[Coordinates]
-          epoch        <- arbitrary[Equinox]
           properMotion <- arbitrary[Option[ProperMotion]]
           magnitudes   <- arbitrary[List[Magnitude]]
           horizonsInfo <- arbitrary[Option[Target.HorizonsInfo]]
-      } yield Target.SiderealTarget(name, coordinates, epoch, properMotion, magnitudes, horizonsInfo)
+      } yield Target.SiderealTarget(name, coordinates, properMotion, magnitudes, horizonsInfo)
     }
 
   implicit val arbNonSiderealTarget: Arbitrary[Target.NonSiderealTarget] =
@@ -98,9 +93,8 @@ trait Arbitraries {
       for {
          name         <- arbitrary[String]
          ephemeris    <- arbitrary[List[EphemerisElement]]
-         epoch        <- arbitrary[Equinox]
          horizonsInfo <- arbitrary[Option[Target.HorizonsInfo]]
-      } yield Target.NonSiderealTarget(name, ephemeris, epoch, horizonsInfo)
+      } yield Target.NonSiderealTarget(name, ephemeris, horizonsInfo)
     }
 
   implicit val arbNamedTarget: Arbitrary[Target.NamedTarget] =

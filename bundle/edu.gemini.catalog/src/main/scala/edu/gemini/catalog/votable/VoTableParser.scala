@@ -155,7 +155,7 @@ trait VoTableParser {
         magnitudes    <- mags.map(parseBands).toList.sequenceU
         properMotion  <- parseProperMotion(pm)
         coordinates    = Coordinates(RightAscension.fromAngle(r), declination)
-      } yield SiderealTarget(id, coordinates, Equinox.J2000, properMotion, combineWithErrors(magnitudes.map {case (b, v) => new Magnitude(v, b)}, magnitudeErrs.toMap).sorted, None)
+      } yield SiderealTarget(id, coordinates, properMotion, combineWithErrors(magnitudes.map {case (b, v) => new Magnitude(v, b)}, magnitudeErrs.toMap).sorted, None)
 
     val result = for {
         id            <- entries.get(VoTableParser.UCD_OBJID)
