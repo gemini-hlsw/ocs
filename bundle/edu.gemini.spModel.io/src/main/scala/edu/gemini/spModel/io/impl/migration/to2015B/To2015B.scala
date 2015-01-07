@@ -20,9 +20,16 @@ object To2015B {
   import PioSyntax._
   import BrightnessParser._
 
+  val Version_2015B = Version.`match`("2015B-1")
+
+  def isPre2015B(c: Container): Boolean =
+    c.getVersion.compareTo(Version_2015B) < 0
+
   // Entry point here
   def updateProgram(d: Document): Unit =
-    conversions.foreach(_.apply(d))
+    d.containers.find(_.getKind == SpIOTags.PROGRAM).filter(isPre2015B).foreach { _ =>
+      conversions.foreach(_.apply(d))
+    }
 
   // These constants are take from mainline code, where they are private to implementations and
   // ultimately will go away (but we will need them here for a while longer).
