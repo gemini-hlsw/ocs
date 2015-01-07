@@ -27,8 +27,7 @@ import java.util.Date;
  * @author      Shane Walker
  * @author      Kim Gillies (mangled for SP)
  */
-public final class HmsDegTarget extends CoordinateSystem
-        implements ITarget {
+public final class HmsDegTarget extends ITarget {
     /**
      * Options for the system type.
      */

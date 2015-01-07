@@ -6,37 +6,52 @@
 //
 package edu.gemini.spModel.target.system;
 
+import edu.gemini.shared.skyobject.Magnitude;
+import edu.gemini.shared.util.immutable.ImCollections;
+import edu.gemini.shared.util.immutable.ImList;
+import edu.gemini.shared.util.immutable.MapOp;
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.shared.util.immutable.PredicateOp;
 import edu.gemini.spModel.target.system.CoordinateTypes.Epoch;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * This interface describes methods that must be implemented by
+ * This class describes methods that must be implemented by
  * all coordinate systems.  A coordinate system consists of a
  * set of parameters that describe the position of a celestial object.
  *
  * @author      Kim Gillies
  */
-public interface ITarget extends Serializable {
+public abstract class ITarget extends CoordinateSystem implements Serializable {
+
     /**
-     * Gets the coordinate's system name as a String.
+     * Constructs with the system option.
+     *
+     * @param systemOption
+     * @throws IllegalArgumentException if the given <code>systemOption</code>
+     *                                            is not permitted
      */
-    String getSystemName();
+    protected ITarget(TypeBase systemOption) throws IllegalArgumentException {
+        super(systemOption);
+    }
 
     /**
      * Returns a short one word name for the coordinate system name.
      */
-    String getShortSystemName();
+    public abstract String getShortSystemName();
 
     /**
      * Returns an optional name for the target.
      */
-    String getName();
+    public abstract String getName();
 
     /**
      * Sets an optional name for the target.
      */
-    void setName(String name);
+    public abstract void setName(String name);
 
     /**
      * Gets a short description of the position.  For instance, the
@@ -45,7 +60,7 @@ public interface ITarget extends Serializable {
      * use a coordinate system's position, the client will have to use its
      * particular interface rather than this method.
      */
-    String getPosition();
+    public abstract String getPosition();
 
     /**
      * Set the first Coordinate using an appropriate ICoordinate.
@@ -53,7 +68,7 @@ public interface ITarget extends Serializable {
      * @throws IllegalArgumentException if the <code>ICoordinate</code> is
      * not an appropriate type.
      */
-    void setC1(ICoordinate c1)
+    public abstract void setC1(ICoordinate c1)
             throws IllegalArgumentException;
 
     /**
@@ -61,7 +76,7 @@ public interface ITarget extends Serializable {
      * This is generally, the internally used <code>ICoordinate</code> and
      * should be used with care.
      */
-    ICoordinate getC1();
+    public abstract ICoordinate getC1();
 
     /**
      * Set the second Coordinate using an appropriate {@link ICoordinate}.
@@ -69,7 +84,7 @@ public interface ITarget extends Serializable {
      * @throws IllegalArgumentException if the <code>ICoordinate</code> is
      * not an appropriate type.
      */
-    void setC2(ICoordinate c2)
+    public abstract void setC2(ICoordinate c2)
             throws IllegalArgumentException;
 
     /**
@@ -77,7 +92,7 @@ public interface ITarget extends Serializable {
      * This is generally, the internally used <code>ICoordinate</code>
      * and should be used with care.
      */
-    ICoordinate getC2();
+    public abstract ICoordinate getC2();
 
     /**
      * Set the first Coordinate using a String.
@@ -85,13 +100,13 @@ public interface ITarget extends Serializable {
      * @throws IllegalArgumentException if the argument can not be parsed
      * correctly.
      */
-    void setC1(String c1)
+    public abstract void setC1(String c1)
             throws IllegalArgumentException;
 
     /**
      * Gets the first coordinate as a String.
      */
-    String c1ToString();
+    public abstract String c1ToString();
 
     /**
      * Set the second Coordinate using a String.
@@ -99,13 +114,13 @@ public interface ITarget extends Serializable {
      * @throws IllegalArgumentException if the argument can not be parsed
      * correctly.
      */
-    void setC2(String c2)
+    public abstract void setC2(String c2)
             throws IllegalArgumentException;
 
     /**
      * Gets the second coordinate as a String.
      */
-    String c2ToString();
+    public abstract String c2ToString();
 
     /**
      * Set the first and second coordinates using appropriate String objects.
@@ -113,7 +128,7 @@ public interface ITarget extends Serializable {
      * @throws IllegalArgumentException if either of the arguments can not
      * be parsed correctly.
      */
-    void setC1C2(String c1, String c2)
+    public abstract void setC1C2(String c1, String c2)
             throws IllegalArgumentException;
 
     /**
@@ -121,7 +136,7 @@ public interface ITarget extends Serializable {
      * @throws IllegalArgumentException if the coordinate system does not
      * support the Epoch concept.
      */
-    Epoch getEpoch()
+    public abstract Epoch getEpoch()
             throws IllegalArgumentException;
 
     /**
@@ -129,38 +144,115 @@ public interface ITarget extends Serializable {
      * @throws IllegalArgumentException if the coordinate system does not
      * support the Epoch concept.
      */
-    public void setEpoch(Epoch e)
+    public abstract void setEpoch(Epoch e)
             throws IllegalArgumentException;
 
     /**
      * Gets the available types, or options within the system.  For instance,
      * the {@link HmsDegTarget} has options for J2000, B1950, apparent, etc.
      */
-    TypeBase[] getSystemOptions();
-
-    /**
-     * Gets the currently selected option (for instance "J2000").
-     */
-    TypeBase getSystemOption();
-
-    /**
-     * Sets the coordinate system (sub)option.
-     *
-     * @throws IllegalArgumentException if <code>type</code> is an unknown
-     * type; in other words, if it would not have been returned by the
-     * {@link #getSystemOptions} method.
-     */
-    void setSystemOption(TypeBase newValue)
-            throws IllegalArgumentException;
-
-    /**
-     * Provides clone support, but without Exception.
-     */
-    public Object clone();
+    public abstract TypeBase[] getSystemOptions();
 
     /**
      * Provides testing of equality of two targets.
      */
-    public boolean equals(Object obj);
+    public abstract boolean equals(Object obj);
+
+
+    // RCN: pushed across from SPTarget
+
+    private ImList<Magnitude> magnitudes = ImCollections.emptyList();
+
+    /**
+     * Gets all the {@link Magnitude} information associated with this target,
+     * if any.
+     *
+     * @return (possibly empty) immutable list of {@link Magnitude} values
+     * associated with this target
+     */
+    public ImList<Magnitude> getMagnitudes() {
+        return magnitudes;
+    }
+
+    /**
+     * Filters {@link Magnitude} values with the same passband.
+     *
+     * @param magList original magnitude list possibly containing values with
+     * duplicate passbands
+     *
+     * @return immutable list of {@link Magnitude} where each value in the
+     * list is guaranteed to have a distinct passband
+     */
+    private static ImList<Magnitude> filterDuplicates(final ImList<Magnitude> magList) {
+        return magList.filter(new PredicateOp<Magnitude>() {
+            private final Set<Magnitude.Band> bands = new HashSet<>();
+            @Override public Boolean apply(final Magnitude magnitude) {
+                final Magnitude.Band band = magnitude.getBand();
+                if (bands.contains(band)) return false;
+                bands.add(band);
+                return true;
+            }
+        });
+    }
+
+    /**
+     * Assigns the list of magnitudes to associate with this target.  If there
+     * are multiple magnitudes associated with the same bandpass, only one will
+     * be kept.
+     *
+     * @param magnitudes new collection of magnitude information to store with
+     * the target
+     */
+    public void setMagnitudes(final ImList<Magnitude> magnitudes) {
+        this.magnitudes = filterDuplicates(magnitudes);
+    }
+
+    /**
+     * Gets the {@link Magnitude} value associated with the given magnitude
+     * passband.
+     *
+     * @param band passband of the {@link Magnitude} value to retrieve
+     *
+     * @return {@link Magnitude} value associated with the given passband,
+     * wrapped in a {@link edu.gemini.shared.util.immutable.Some} object; {@link edu.gemini.shared.util.immutable.None} if none
+     */
+    public Option<Magnitude> getMagnitude(final Magnitude.Band band) {
+        return magnitudes.find(new PredicateOp<Magnitude>() {
+            @Override public Boolean apply(final Magnitude magnitude) {
+                return band.equals(magnitude.getBand());
+            }
+        });
+    }
+
+    /**
+     * Gets the set of magnitude bands that have been recorded in this target.
+     *
+     * @returns a Set of {@link Magnitude.Band magnitude bands} for which
+     * we have information in this target
+     */
+    public Set<Magnitude.Band> getMagnitudeBands() {
+        final ImList<Magnitude.Band> bandList = magnitudes.map(new MapOp<Magnitude, Magnitude.Band>() {
+            @Override public Magnitude.Band apply(final Magnitude magnitude) {
+                return magnitude.getBand();
+            }
+        });
+        return new HashSet<>(bandList.toList());
+    }
+
+    /**
+     * Adds the given magnitude to the collection of magnitudes associated with
+     * this target, replacing any other magnitude of the same band if any.
+     *
+     * @param mag magnitude information to add to the collection of magnitudes
+     */
+    public void putMagnitude(final Magnitude mag) {
+        magnitudes = magnitudes.filter(new PredicateOp<Magnitude>() {
+            @Override public Boolean apply(final Magnitude cur) {
+                return cur.getBand() != mag.getBand();
+            }
+        }).cons(mag);
+    }
+
+
 
 }

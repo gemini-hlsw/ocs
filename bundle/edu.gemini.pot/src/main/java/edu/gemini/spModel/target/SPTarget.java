@@ -22,8 +22,6 @@ import edu.gemini.spModel.target.system.CoordinateTypes.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.logging.Level;
@@ -108,7 +106,6 @@ public final class SPTarget extends WatchablePos {
     /// FIELDS
     ///
 
-    private ImList<Magnitude> magnitudes = ImCollections.emptyList();
     private ITarget _target;
 
     ///
@@ -154,7 +151,7 @@ public final class SPTarget extends WatchablePos {
 
         _target = target;
         setName(obj.getName());
-        magnitudes = filterDuplicates(obj.getMagnitudes());
+        setMagnitudes(obj.getMagnitudes());
     }
 
     /** Create a default base position using the HmsDegTarget. */
@@ -211,28 +208,7 @@ public final class SPTarget extends WatchablePos {
      * associated with this target
      */
     public ImList<Magnitude> getMagnitudes() {
-        return magnitudes;
-    }
-
-    /**
-     * Filters {@link Magnitude} values with the same passband.
-     *
-     * @param magList original magnitude list possibly containing values with
-     * duplicate passbands
-     *
-     * @return immutable list of {@link Magnitude} where each value in the
-     * list is guaranteed to have a distinct passband
-     */
-    private static ImList<Magnitude> filterDuplicates(final ImList<Magnitude> magList) {
-        return magList.filter(new PredicateOp<Magnitude>() {
-            private final Set<Magnitude.Band> bands = new HashSet<>();
-            @Override public Boolean apply(final Magnitude magnitude) {
-                final Magnitude.Band band = magnitude.getBand();
-                if (bands.contains(band)) return false;
-                bands.add(band);
-                return true;
-            }
-        });
+        return getTarget().getMagnitudes();
     }
 
     /**
@@ -244,7 +220,7 @@ public final class SPTarget extends WatchablePos {
      * the target
      */
     public void setMagnitudes(final ImList<Magnitude> magnitudes) {
-        this.magnitudes = filterDuplicates(magnitudes);
+        _target.setMagnitudes(magnitudes);
         notifyOfGenericUpdate();
     }
 
@@ -258,11 +234,7 @@ public final class SPTarget extends WatchablePos {
      * wrapped in a {@link Some} object; {@link None} if none
      */
     public Option<Magnitude> getMagnitude(final Magnitude.Band band) {
-        return magnitudes.find(new PredicateOp<Magnitude>() {
-            @Override public Boolean apply(final Magnitude magnitude) {
-                return band.equals(magnitude.getBand());
-            }
-        });
+        return _target.getMagnitude(band);
     }
 
     /**
@@ -272,12 +244,7 @@ public final class SPTarget extends WatchablePos {
      * we have information in this target
      */
     public Set<Magnitude.Band> getMagnitudeBands() {
-        final ImList<Magnitude.Band> bandList = magnitudes.map(new MapOp<Magnitude, Magnitude.Band>() {
-            @Override public Magnitude.Band apply(final Magnitude magnitude) {
-                return magnitude.getBand();
-            }
-        });
-        return new HashSet<>(bandList.toList());
+        return _target.getMagnitudeBands();
     }
 
     /**
@@ -287,11 +254,7 @@ public final class SPTarget extends WatchablePos {
      * @param mag magnitude information to add to the collection of magnitudes
      */
     public void putMagnitude(final Magnitude mag) {
-        magnitudes = magnitudes.filter(new PredicateOp<Magnitude>() {
-            @Override public Boolean apply(final Magnitude cur) {
-                return cur.getBand() != mag.getBand();
-            }
-        }).cons(mag);
+        _target.putMagnitude(mag);
         notifyOfGenericUpdate();
     }
 
@@ -644,6 +607,7 @@ public final class SPTarget extends WatchablePos {
         }
 
         // Add magnitude information to the paramset.
+        final ImList<Magnitude> magnitudes = target.getMagnitudes();
         if (magnitudes.size() > 0) {
             paramSet.addParamSet(MagnitudePio.instance.toParamSet(factory, magnitudes));
         }
@@ -780,15 +744,13 @@ public final class SPTarget extends WatchablePos {
 
 
         // Add magnitude information to the target.
-        magnitudes = ImCollections.emptyList();
         final ParamSet magCollectionPset = paramSet.getParamSet(MagnitudePio.MAG_LIST);
         if (magCollectionPset != null) {
             try {
-                magnitudes = MagnitudePio.instance.toList(magCollectionPset);
+                _target.setMagnitudes(MagnitudePio.instance.toList(magCollectionPset));
             } catch (final ParseException ex) {
                 LOGGER.log(Level.WARNING, "Could not parse target magnitudes", ex);
             }
-
         }
     }
 
