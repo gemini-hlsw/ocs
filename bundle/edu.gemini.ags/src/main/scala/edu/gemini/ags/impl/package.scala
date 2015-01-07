@@ -114,7 +114,7 @@ package object impl {
       val dec         = Angle.fromDegrees(so.getHmsDegCoordinates.getDec.toDegrees.getMagnitude)
       val coordinates = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
       val mags        = so.getMagnitudes.asScala.map(_.toNewModel)
-      SiderealTarget(so.getName, coordinates, Equinox.J2000, None, mags.toList, None)
+      SiderealTarget(so.getName, coordinates, None, mags.toList, None)
     }
   }
 
