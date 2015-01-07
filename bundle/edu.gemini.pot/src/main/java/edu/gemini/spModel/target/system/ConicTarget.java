@@ -24,29 +24,14 @@ public final class ConicTarget extends NonSiderealTarget  {
     public static final class SystemType extends TypeBase {
         public static int _count = 0;
 
-        public static final SystemType ASA_MAJOR_PLANET =
-                new SystemType("AsA major planet");
-        public static final SystemType ASA_MINOR_PLANET =
-                new SystemType("AsA minor planet");
-        public static final SystemType ASA_COMET =
-                new SystemType("AsA comet");
-        public static final SystemType JPL_MAJOR_PLANET =
-                new SystemType("JPL major planet");
         public static final SystemType JPL_MINOR_BODY =
                 new SystemType("JPL minor body");
         public static final SystemType MPC_MINOR_PLANET =
                 new SystemType("MPC minor planet");
-        public static final SystemType MPC_COMET =
-                new SystemType("MPC comet");
 
         public static final SystemType[] TYPES = new SystemType[]{
-            ASA_MAJOR_PLANET,
-            ASA_MINOR_PLANET,
-            ASA_COMET,
-            JPL_MAJOR_PLANET,
             JPL_MINOR_BODY,
             MPC_MINOR_PLANET,
-            MPC_COMET
         };
 
         private SystemType(String name) {
@@ -62,7 +47,7 @@ public final class ConicTarget extends NonSiderealTarget  {
     /**
      * Default system type.
      */
-    private static final SystemType DEFAULT_SYSTEM_TYPE = SystemType.ASA_COMET;
+    private static final SystemType DEFAULT_SYSTEM_TYPE = SystemType.JPL_MINOR_BODY;
 
     private static final double DEFAULT_E = 0.0;
 
