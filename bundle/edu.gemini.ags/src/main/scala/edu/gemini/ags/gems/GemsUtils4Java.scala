@@ -1,0 +1,18 @@
+package edu.gemini.ags.gems
+
+import edu.gemini.catalog.api.{MagnitudeLimits, MagnitudeConstraints}
+import edu.gemini.ags.impl._
+import edu.gemini.spModel.core.MagnitudeBand
+import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.target.SPTarget
+import edu.gemini.shared.util.immutable.ScalaConverters._
+
+/**
+ * Utility methods for Java classes to access scala classes/methods
+ */
+object GemsUtils4Java {
+  // Returns true if the target magnitude is within the given limits
+  def checkMagLimit(target: SPTarget, magLimits: MagnitudeConstraints): Boolean =
+    target.getMagnitude(magLimits.band.toOldModel).asScalaOpt.map(m => magLimits.contains(m.toNewModel)).getOrElse(true)
+
+}

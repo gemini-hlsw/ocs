@@ -1,7 +1,8 @@
 package edu.gemini.ags.gems
 
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
-import edu.gemini.catalog.api.MagnitudeLimits
+import edu.gemini.ags.impl._
+import edu.gemini.catalog.api.{MagnitudeConstraints, MagnitudeLimits}
 import edu.gemini.catalog.api.MagnitudeLimits.{FaintnessLimit, SaturationLimit}
 import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.shared.skyobject.Magnitude.Band.{R, J, H, K}
@@ -95,15 +96,15 @@ object GemsMagnitudeTable extends MagnitudeTable {
    * be used directly by Mascot, since it cannot be looked up through the GemsInstrumentToMagnitudeLimitsCalculator map.
    */
   trait CanopusWfsCalculator extends LimitsCalculator {
-    def getNominalMagnitudeLimits(cwfs: Canopus.Wfs): MagnitudeLimits
+    def getNominalMagnitudeConstraints(cwfs: Canopus.Wfs): MagnitudeConstraints
   }
 
   lazy val CanopusWfsMagnitudeLimitsCalculator = new CanopusWfsCalculator {
     override def getGemsMagnitudeLimits(starType: GemsGuideStarType, nirBand: Option[Magnitude.Band]) =
       magLimits(R, 15.5, 8.0)
 
-    override def getNominalMagnitudeLimits(cwfs: Canopus.Wfs): MagnitudeLimits =
-      magLimits(R, 15.5, 8.0)
+    override def getNominalMagnitudeConstraints(cwfs: Canopus.Wfs): MagnitudeConstraints =
+      magLimits(R, 15.5, 8.0).toMagnitudeConstraints
   }
 
   private lazy val Flamingos2OiwfsMagnitudeLimitsCalculator = new LimitsCalculator {

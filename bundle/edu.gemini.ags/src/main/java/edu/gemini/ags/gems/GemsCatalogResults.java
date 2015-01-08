@@ -5,7 +5,6 @@ import edu.gemini.ags.gems.mascot.Star;
 import edu.gemini.ags.gems.mascot.Strehl;
 import edu.gemini.ags.gems.mascot.MascotCat;
 import edu.gemini.ags.gems.mascot.MascotProgress;
-import edu.gemini.catalog.api.MagnitudeLimits;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.Coordinates;
 import edu.gemini.shared.skyobject.Magnitude;
@@ -385,18 +384,9 @@ public class GemsCatalogResults {
         if (valid && guideProbe instanceof Canopus.Wfs) {
             final Canopus.Wfs wfs = (Canopus.Wfs) guideProbe;
             final GemsMagnitudeTable.CanopusWfsCalculator canopusWfsCalculator = GemsMagnitudeTable.CanopusWfsMagnitudeLimitsCalculator();
-            valid = checkMagLimit(target, canopusWfsCalculator.getNominalMagnitudeLimits(wfs));
+            valid = GemsUtils4Java.checkMagLimit(target, canopusWfsCalculator.getNominalMagnitudeConstraints(wfs));
         }
         return valid;
-    }
-
-    // Returns true if the target magnitude is within the given limits
-    private boolean checkMagLimit(SPTarget target, final MagnitudeLimits magLimits) {
-        return target.getMagnitude(magLimits.getBand()).map(new MapOp<Magnitude, Boolean>() {
-            @Override public Boolean apply(Magnitude magnitude) {
-                return magLimits.contains(magnitude);
-            }
-        }).getOrElse(true);
     }
 
     // Returns true if none of the other targets are assigned the given guide probe.
