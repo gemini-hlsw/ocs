@@ -5,7 +5,18 @@ import java.util.Date;
 /**
  * Public interface for a NonSidereal Target
  */
-public interface INonSiderealTarget extends ITarget {
+public abstract class INonSiderealTarget extends ITarget {
+
+    /**
+     * Constructs with the system option.
+     *
+     * @param systemOption
+     * @throws IllegalArgumentException if the given <code>systemOption</code>
+     *                                            is not permitted
+     */
+    protected INonSiderealTarget(TypeBase systemOption) throws IllegalArgumentException {
+        super(systemOption);
+    }
 
     /**
      * A given position for a non sidereal object is valid only
@@ -15,6 +26,6 @@ public interface INonSiderealTarget extends ITarget {
      * @return Date when the stored position is valid, <code>null</code>
      * if the positions are not being set.
      */
-    public Date getDateForPosition();
+    public abstract Date getDateForPosition();
 
 }
