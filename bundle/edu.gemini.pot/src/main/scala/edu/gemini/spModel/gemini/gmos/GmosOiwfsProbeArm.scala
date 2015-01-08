@@ -46,7 +46,6 @@ class GmosOiwfsProbeArm[I  <: InstGmosCommon[D,F,P,SM],
                xFlipFactor: Double,
                raFactor:    Double): Double = {
     // TODO: Can we get rid of raFactor or xFlipFactor somehow?
-    // TODO: We can collapse TX and TZ into a single variable
     val posAngleRot = AffineTransform.getRotateInstance(posAngle)
 
     val offsetAdj = {
@@ -56,7 +55,7 @@ class GmosOiwfsProbeArm[I  <: InstGmosCommon[D,F,P,SM],
       transformPoint(offset, AffineTransform.getTranslateInstance(ifuOffset.getX, ifuOffset.getY))
     }
 
-    val t  = transformPoint(new Point2D.Double(TX, TZ), AffineTransform.getScaleInstance(raFactor, xFlipFactor))
+    val t  = transformPoint(T, AffineTransform.getScaleInstance(raFactor, xFlipFactor))
     val p  = transformPoint(guideStar, AffineTransform.getTranslateInstance(t.getX - offsetAdj.getX, t.getY - offsetAdj.getY))
     val r  = math.sqrt(p.getX * p.getX + p.getY * p.getY)
     val mx = MX * raFactor
@@ -82,6 +81,15 @@ class GmosOiwfsProbeArm[I  <: InstGmosCommon[D,F,P,SM],
                                  xFlipArm:        Boolean,
                                  raFactor:        Double): List[Shape] = {
     val xFlipFactor = if (xFlipArm) -1.0 else 1.0
+
+    for {
+      x <- List(-1.0, 1.0)
+      r <- List(-1.0, 1.0)
+    } {
+      val trans = AffineTransform.getScaleInstance(r, x)
+      println(s"ANGLE FOR x=$x r=$r -> ${armAngle(posAngle, transformPoint(guideStar, trans), transformPoint(offset, trans), x, r)}")
+    }
+    println("\n\n")
     val angle = armAngle(posAngle, guideStar, offset, xFlipFactor, raFactor)
 
     // Create the transformation for the geometry.
@@ -101,8 +109,7 @@ object GmosOiwfsProbeArm {
   private val ProbeArmTaperedLength = 180.0
 
   // Location of base stage in arcsec
-  private val TX = -427.52
-  private val TZ = -101.84
+  private val T = new Point2D.Double(-427.52, -101.84)
 
   // Length of stage arm in arcsec
   private val BX =  124.89
