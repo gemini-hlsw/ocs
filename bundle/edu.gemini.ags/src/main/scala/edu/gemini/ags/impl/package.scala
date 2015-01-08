@@ -7,10 +7,10 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.GuideProbeTargets
-import edu.gemini.spModel.target.system.INonSiderealTarget
 
 import edu.gemini.skycalc
 import edu.gemini.shared.skyobject
+import edu.gemini.spModel.target.system.NonSiderealTarget
 
 import scalaz._
 import Scalaz._
@@ -127,7 +127,7 @@ package object impl {
     }
 
   def isSidereal(ctx: ObsContext): Boolean =
-    !ctx.getTargets.getBase.getTarget.isInstanceOf[INonSiderealTarget]
+    !ctx.getTargets.getBase.getTarget.isInstanceOf[NonSiderealTarget]
 
   def isAo(ctx: ObsContext): Boolean = !ctx.getAOComponent.isEmpty
 

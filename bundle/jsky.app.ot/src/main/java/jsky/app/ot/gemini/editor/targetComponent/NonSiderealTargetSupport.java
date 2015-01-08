@@ -406,7 +406,7 @@ class NonSiderealTargetSupport {
      * Updates the Position at a given Time for a Non Sidereal Target in the UI
      * @param target The NonSideralTarget to show
      */
-    private void _updatePosition(INonSiderealTarget target, boolean updateDate) {
+    private void _updatePosition(NonSiderealTarget target, boolean updateDate) {
         //First the position
         _w.xaxis.setText(target.c1ToString());
         _w.yaxis.setText(target.c2ToString());

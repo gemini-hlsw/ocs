@@ -6,7 +6,7 @@ import java.util.Date;
  * An abstract base class for Non Sidereal Targets. Contains mechanisms to operate
  * with RA and Dec at a given time, plus the target name, Epoch and brightness.
  */
-public abstract class NonSiderealTarget extends INonSiderealTarget implements IHorizonsTarget {
+public abstract class NonSiderealTarget extends ITarget implements IHorizonsTarget {
 
     private static final String DEFAULT_NAME = "";
 
