@@ -1,7 +1,7 @@
 package edu.gemini.spModel.inst
 
 import java.awt.Shape
-import java.awt.geom.{Area, AffineTransform}
+import java.awt.geom.{Point2D, Area, AffineTransform}
 
 import scala.collection.JavaConverters._
 
@@ -56,5 +56,13 @@ trait FeatureGeometry {
     val area = new Area(fullGeometry)
     area.transform(transform)
     area
+  }
+}
+
+object FeatureGeometry {
+  def transformPoint(p: Point2D, trans: AffineTransform): Point2D = {
+    val pTrans = new Point2D.Double()
+    trans.transform(p, pTrans)
+    pTrans
   }
 }
