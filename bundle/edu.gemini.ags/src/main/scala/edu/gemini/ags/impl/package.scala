@@ -1,5 +1,6 @@
 package edu.gemini.ags
 
+import edu.gemini.catalog.api.{SaturationConstraint, FaintnessConstraint, MagnitudeConstraints, MagnitudeLimits}
 import edu.gemini.shared.util.immutable.PredicateOp
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.Target.SiderealTarget
@@ -115,6 +116,15 @@ package object impl {
       val coordinates = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
       val mags        = so.getMagnitudes.asScala.map(_.toNewModel)
       SiderealTarget(so.getName, coordinates, None, mags.toList, None)
+    }
+  }
+
+  // REMOVE When AGS is fully ported
+  @Deprecated
+  implicit class MagnitudeLimits2MagnitudeConstraints(val ml: MagnitudeLimits) extends AnyVal {
+
+    def toMagnitudeConstraints = {
+      MagnitudeConstraints(ml.getBand.toNewModel, FaintnessConstraint(ml.getFaintnessLimit.getBrightness), ml.getSaturationLimit.asScalaOpt.map(s => SaturationConstraint(s.getBrightness)))
     }
   }
 
