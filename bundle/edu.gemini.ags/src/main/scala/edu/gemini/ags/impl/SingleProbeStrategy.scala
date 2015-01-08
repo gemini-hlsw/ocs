@@ -17,7 +17,6 @@ import scala.collection.JavaConverters._
 import scala.concurrent._
 import ExecutionContext.Implicits.global
 
-
 /**
  * Implements the logic for estimation and selection for a single guide probe.
  * The same logic is applied to various single-star guiding scenarios (i.e.,

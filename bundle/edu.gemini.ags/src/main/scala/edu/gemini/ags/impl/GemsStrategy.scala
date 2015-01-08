@@ -227,10 +227,8 @@ object GemsStrategy extends AgsStrategy {
     import AgsMagnitude._
     val cond = ctx.getConditions
     val mags = magnitudes(ctx, mt).toMap
-    def lim(gp: GuideProbe): MagnitudeLimits = {
-      val ml = autoSearchLimitsCalc(mags(gp), cond)
-      new MagnitudeLimits(ml.band.toOldModel, new FaintnessLimit(ml.faintnessConstraint.brightness), ml.saturationConstraint.map(s => new SaturationLimit(s.brightness)).asGeminiOpt)
-    }
+    def lim(gp: GuideProbe): MagnitudeLimits =
+      autoSearchLimitsCalc(mags(gp), cond).toMagnitudeLimits
 
     val odgwMagLimits = (lim(GsaoiOdgw.odgw1)/:GsaoiOdgw.values().drop(1)) { (ml, odgw) =>
       ml.union(lim(odgw)).getValue
