@@ -1,6 +1,6 @@
 package edu.gemini.ags.api
 
-import edu.gemini.catalog.api.{SaturationConstraint, FaintnessConstraint, MagnitudeConstraints, MagnitudeLimits}
+import edu.gemini.catalog.api.MagnitudeConstraints
 import edu.gemini.spModel.core.{Magnitude, MagnitudeBand}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions.{BEST, WORST}
@@ -9,7 +9,6 @@ import edu.gemini.spModel.guide.GuideSpeed.{FAST, SLOW}
 import edu.gemini.spModel.obs.context.ObsContext
 
 import edu.gemini.ags.impl._
-import edu.gemini.shared.util.immutable.ScalaConverters._
 
 /**
  * Types and methods for calculating magnitude limits.
@@ -19,7 +18,7 @@ object AgsMagnitude {
 //  type MagnitudeCalc  = (Conditions, GuideSpeed) => MagnitudeLimits
 //  type MagnitudeTable = (Site, GuideProbe) => Option[MagnitudeCalc]
   trait MagnitudeCalc {
-    def apply(c: Conditions, gs: GuideSpeed): MagnitudeLimits
+    def apply(c: Conditions, gs: GuideSpeed): MagnitudeConstraints
   }
 
   trait MagnitudeTable {
@@ -31,10 +30,8 @@ object AgsMagnitude {
    * Gets the widest possible range limits incorporating the given conditions
    * and speeds.
    */
-  def rangeLimits(mc: MagnitudeCalc, c1: (Conditions, GuideSpeed), c2: (Conditions, GuideSpeed)): MagnitudeConstraints = {
-    val ml = mc(c1._1, c1._2).union(mc(c2._1, c2._2)).getValue
-    MagnitudeConstraints(ml.getBand.toNewModel, FaintnessConstraint(ml.getFaintnessLimit.getBrightness), ml.getSaturationLimit.asScalaOpt.map(s => SaturationConstraint(s.getBrightness)))
-  }
+  def rangeLimits(mc: MagnitudeCalc, c1: (Conditions, GuideSpeed), c2: (Conditions, GuideSpeed)): MagnitudeConstraints =
+    mc(c1._1, c1._2).union(mc(c2._1, c2._2)).getOrElse(???)
 
   /**
    * Manual search limits provide the faintest possible limit for the best
@@ -61,8 +58,8 @@ object AgsMagnitude {
    */
   def fastestGuideSpeed(mc: MagnitudeCalc, m: Magnitude, c: Conditions): Option[GuideSpeed] =
     GuideSpeed.values().find { gs => // assumes the values are sorted fast to slow
-      mc(c, gs).contains(m.toOldModel)
+      mc(c, gs).contains(m)
     }
 
-  def band(mc: MagnitudeCalc): MagnitudeBand = mc(BEST, FAST).getBand.toNewModel
+  def band(mc: MagnitudeCalc): MagnitudeBand = mc(BEST, FAST).band
 }

@@ -94,7 +94,7 @@ object AgsAnalysis {
       }
       val p = if (withProbe) s"${guideProbe.getKey} " else ""
 
-      s"${qualityMessage}${p}Guide Speed: ${guideSpeed.name}."
+      s"$qualityMessage${p}Guide Speed: ${guideSpeed.name}."
     }
   }
 
@@ -144,9 +144,9 @@ object AgsAnalysis {
     // otherwise returns the appropriate analysis indicating too dim or too bright.
     def outsideLimits(magCalc: MagnitudeCalc, mag: Magnitude): AgsAnalysis = {
       val adj             = 0.5
-      val saturationLimit = magCalc(conds, FAST).getSaturationLimit.asScalaOpt
-      val faintnessLimit  = magCalc(conds, SLOW).getFaintnessLimit.getBrightness
-      val saturated       = saturationLimit.exists(_.getBrightness > mag.getBrightness)
+      val saturationLimit = magCalc(conds, FAST).saturationConstraint
+      val faintnessLimit  = magCalc(conds, SLOW).faintnessConstraint.brightness
+      val saturated       = saturationLimit.exists(_.brightness > mag.getBrightness)
 
       def almostTooFaint: Boolean = !saturated && mag.getBrightness <= faintnessLimit + adj
       def tooFaint:       Boolean = mag.getBrightness > faintnessLimit + adj

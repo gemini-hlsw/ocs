@@ -2,7 +2,7 @@ package edu.gemini.ags.gems
 
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.ags.impl._
-import edu.gemini.catalog.api.{MagnitudeConstraints, MagnitudeLimits}
+import edu.gemini.catalog.api.{SaturationConstraint, FaintnessConstraint, MagnitudeConstraints, MagnitudeLimits}
 import edu.gemini.catalog.api.MagnitudeLimits.{FaintnessLimit, SaturationLimit}
 import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.shared.skyobject.Magnitude.Band.{R, J, H, K}
@@ -15,6 +15,8 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 
+import scalaz._
+import Scalaz._
 
 /**
  * A magnitude table defined in the same way as we have done since before 2015A
@@ -22,22 +24,22 @@ import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
  */
 object GemsMagnitudeTable extends MagnitudeTable {
 
-  private def faint(band: Magnitude.Band, fl: Double): MagnitudeLimits =
-    new MagnitudeLimits(band, new FaintnessLimit(fl), Option.empty[MagnitudeLimits.SaturationLimit].asGeminiOpt)
+  private def faint(band: Magnitude.Band, fl: Double): MagnitudeConstraints=
+    MagnitudeConstraints(band.toNewModel, FaintnessConstraint(fl), none)
 
-  private def magLimits(band: Magnitude.Band, fl: Double, sl: Double): MagnitudeLimits =
-    new MagnitudeLimits(band, new FaintnessLimit(fl), new SaturationLimit(sl))
+  private def magLimits(band: Magnitude.Band, fl: Double, sl: Double): MagnitudeConstraints =
+    MagnitudeConstraints(band.toNewModel, FaintnessConstraint(fl), SaturationConstraint(sl).some)
 
   def apply(ctx: ObsContext, probe: GuideProbe): Option[MagnitudeCalc] = {
-    def mc(nominalLimits: MagnitudeLimits): MagnitudeCalc = new MagnitudeCalc() {
-      def apply(conds: Conditions, speed: GuideSpeed): MagnitudeLimits =
-        nominalLimits.mapMagnitudes(conds.magAdjustOp())
+    def mc(nominalLimits: MagnitudeConstraints): MagnitudeCalc = new MagnitudeCalc() {
+      def apply(conds: Conditions, speed: GuideSpeed): MagnitudeConstraints =
+        nominalLimits.map(m => conds.magAdjustOp().apply(m.toOldModel).toNewModel)
     }
 
-    def ft(band: Magnitude.Band, fl: Double): Option[MagnitudeLimits] =
+    def ft(band: Magnitude.Band, fl: Double): Option[MagnitudeConstraints] =
       Some(faint(band, fl))
 
-    def ml(band: Magnitude.Band, fl: Double, sl: Double): Option[MagnitudeLimits] =
+    def ml(band: Magnitude.Band, fl: Double, sl: Double): Option[MagnitudeConstraints] =
       Some(magLimits(band, fl, sl))
 
     def lookup(site: Site): Option[MagnitudeCalc] =
@@ -49,7 +51,7 @@ object GemsMagnitudeTable extends MagnitudeTable {
           Some(CanopusWfsMagnitudeLimitsCalculator.getGemsMagnitudeLimits(GemsGuideStarType.tiptilt, Some(R)))
 
         case _                                               => None
-      }).map(mc)
+      }).map(ml => mc(ml.toMagnitudeConstraints))
 
     ctx.getSite.asScalaOpt.flatMap(lookup)
   }
@@ -76,7 +78,7 @@ object GemsMagnitudeTable extends MagnitudeTable {
     /**
      * The map formerly in Gsaoi.Filter.
      */
-    private val MagnitudeLimitsMap = Map[Pair[GemsGuideStarType, Magnitude.Band], MagnitudeLimits](
+    private val MagnitudeLimitsMap = Map[Pair[GemsGuideStarType, Magnitude.Band], MagnitudeConstraints](
       (GemsGuideStarType.flexure, J) -> magLimits(J, 17.2, 8.0),
       (GemsGuideStarType.flexure, H) -> magLimits(H, 17.0, 8.0),
       (GemsGuideStarType.flexure, K) -> magLimits(K, 18.2, 8.0),
@@ -87,7 +89,7 @@ object GemsMagnitudeTable extends MagnitudeTable {
 
     override def getGemsMagnitudeLimits(starType: GemsGuideStarType, nirBand: Option[Magnitude.Band]): MagnitudeLimits = {
       val filter = nirBand.fold(Gsaoi.Filter.H)(band => Gsaoi.Filter.getFilter(band, Gsaoi.Filter.H))
-      MagnitudeLimitsMap((starType, filter.getCatalogBand.getValue))
+      MagnitudeLimitsMap((starType, filter.getCatalogBand.getValue)).toMagnitudeLimits
     }
   }
 
@@ -101,14 +103,14 @@ object GemsMagnitudeTable extends MagnitudeTable {
 
   lazy val CanopusWfsMagnitudeLimitsCalculator = new CanopusWfsCalculator {
     override def getGemsMagnitudeLimits(starType: GemsGuideStarType, nirBand: Option[Magnitude.Band]) =
-      magLimits(R, 15.5, 8.0)
+      magLimits(R, 15.5, 8.0).toMagnitudeLimits
 
     override def getNominalMagnitudeConstraints(cwfs: Canopus.Wfs): MagnitudeConstraints =
-      magLimits(R, 15.5, 8.0).toMagnitudeConstraints
+      magLimits(R, 15.5, 8.0)
   }
 
   private lazy val Flamingos2OiwfsMagnitudeLimitsCalculator = new LimitsCalculator {
     override def getGemsMagnitudeLimits(starType: GemsGuideStarType, nirBand: Option[Magnitude.Band]) =
-      magLimits(R, 18.0, 9.5)
+      magLimits(R, 18.0, 9.5).toMagnitudeLimits
   }
 }

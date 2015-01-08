@@ -1,7 +1,9 @@
 package edu.gemini.ags
 
 import edu.gemini.catalog.api.{SaturationConstraint, FaintnessConstraint, MagnitudeConstraints, MagnitudeLimits}
+import edu.gemini.catalog.api.MagnitudeLimits.{FaintnessLimit, SaturationLimit}
 import edu.gemini.shared.util.immutable.PredicateOp
+import edu.gemini.shared.util.immutable.ScalaConverters.ScalaOptionOps
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.obs.context.ObsContext
@@ -120,6 +122,15 @@ package object impl {
   }
 
   // REMOVE When AGS is fully ported
+  @Deprecated
+  implicit class MagnitudeConstraints2MagnitudeLimits(val mc: MagnitudeConstraints) extends AnyVal {
+
+    def toMagnitudeLimits = {
+      val saturation: Option[SaturationLimit] = mc.saturationConstraint.map(s => new SaturationLimit(s.brightness))
+      new MagnitudeLimits(mc.band.toOldModel, new FaintnessLimit(mc.faintnessConstraint.brightness), new ScalaOptionOps(saturation).asGeminiOpt)
+    }
+  }
+
   @Deprecated
   implicit class MagnitudeLimits2MagnitudeConstraints(val ml: MagnitudeLimits) extends AnyVal {
 

@@ -5,6 +5,7 @@ import edu.gemini.ags.api._
 import edu.gemini.ags.api.AgsGuideQuality._
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.shared.skyobject.Magnitude
+import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideSpeed, GuideProbe}
 import edu.gemini.spModel.guide.GuideSpeed._
 import edu.gemini.spModel.obs.context.ObsContext
@@ -28,10 +29,10 @@ object GuidingFeedback {
       val cnds = ctx.getConditions
       val fast = mc.apply(cnds, FAST)
 
-      def faint(gs: GuideSpeed) = mc.apply(cnds, gs).getFaintnessLimit.getBrightness
+      def faint(gs: GuideSpeed) = mc.apply(cnds, gs).faintnessConstraint.brightness
 
-      fast.getSaturationLimit.asScalaOpt.map { sat =>
-        ProbeLimits(fast.getBand, sat.getBrightness, faint(FAST), faint(MEDIUM), faint(SLOW))
+      fast.saturationConstraint.map { sat =>
+        ProbeLimits(fast.band, sat.brightness, faint(FAST), faint(MEDIUM), faint(SLOW))
       }
     }
 
@@ -39,7 +40,7 @@ object GuidingFeedback {
     def lim(d: Double): String = f"$d%.1f"
   }
 
-  case class ProbeLimits(band: Magnitude.Band, sat: Double, fast: Double, medium: Double, slow: Double) {
+  case class ProbeLimits(band: MagnitudeBand, sat: Double, fast: Double, medium: Double, slow: Double) {
     import ProbeLimits.{le, lim}
 
     def searchRange: String =
