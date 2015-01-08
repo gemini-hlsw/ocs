@@ -3,7 +3,7 @@ package edu.gemini.ags.api
 import edu.gemini.ags.api.AgsGuideQuality.Unusable
 import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.ags.impl._
-import edu.gemini.shared.skyobject.Magnitude
+import edu.gemini.spModel.core.{Magnitude, MagnitudeBand}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.ImageQuality
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbe, GuideProbeGroup, GuideSpeed}
 import edu.gemini.spModel.obs.context.ObsContext
@@ -78,7 +78,7 @@ object AgsAnalysis {
     }
   }
 
-  case class NoMagnitudeForBand(guideProbe: GuideProbe, target: SPTarget, band: Magnitude.Band) extends AgsAnalysis {
+  case class NoMagnitudeForBand(guideProbe: GuideProbe, target: SPTarget, band: MagnitudeBand) extends AgsAnalysis {
     override def message(withProbe: Boolean): String = {
       val p = if (withProbe) s"${guideProbe.getKey} g" else "G"
       s"${p}uide star ${band.name}-band magnitude is missing. Cannot determine guiding performance."
@@ -146,10 +146,10 @@ object AgsAnalysis {
       val adj             = 0.5
       val saturationLimit = magCalc(conds, FAST).saturationConstraint
       val faintnessLimit  = magCalc(conds, SLOW).faintnessConstraint.brightness
-      val saturated       = saturationLimit.exists(_.brightness > mag.getBrightness)
+      val saturated       = saturationLimit.exists(_.brightness > mag.value)
 
-      def almostTooFaint: Boolean = !saturated && mag.getBrightness <= faintnessLimit + adj
-      def tooFaint:       Boolean = mag.getBrightness > faintnessLimit + adj
+      def almostTooFaint: Boolean = !saturated && mag.value <= faintnessLimit + adj
+      def tooFaint:       Boolean = mag.value > faintnessLimit + adj
 
       if (almostTooFaint) Usable(guideProbe, guideStar, SLOW, PossiblyUnusable)
       else if (tooFaint)  MagnitudeTooFaint(guideProbe, guideStar)
@@ -178,10 +178,10 @@ object AgsAnalysis {
 
     val magAnalysis = for {
       mc <- mt(ctx, guideProbe)
-      probeBand = band(mc).toOldModel
+      probeBand = band(mc)
     } yield {
-      val magOpt      = guideStar.getMagnitude(probeBand).asScalaOpt
-      val analysisOpt = magOpt.map(mag => fastestGuideSpeed(mc, mag.toNewModel, conds).fold(outsideLimits(mc, mag))(usable))
+      val magOpt      = guideStar.getMagnitude(probeBand.toOldModel).asScalaOpt
+      val analysisOpt = magOpt.map(mag => fastestGuideSpeed(mc, mag.toNewModel, conds).fold(outsideLimits(mc, mag.toNewModel))(usable))
       analysisOpt.getOrElse(NoMagnitudeForBand(guideProbe, guideStar, probeBand))
     }
 
