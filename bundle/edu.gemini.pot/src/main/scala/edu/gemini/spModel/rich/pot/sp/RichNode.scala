@@ -2,38 +2,37 @@ package edu.gemini.spModel.rich.pot.sp
 
 import edu.gemini.pot.sp.{ISPContainerNode, ISPNode}
 import edu.gemini.spModel.data.ISPDataObject
+
 import scala.collection.JavaConverters._
 
-class RichRemoteNode(node: ISPNode) {
-  def dataObject: Option[ISPDataObject] = Option(node.getDataObject.asInstanceOf[ISPDataObject])
+import scalaz._
+import Scalaz._
 
-  def dataObject_=(obj: ISPDataObject) {
+final class RichNode(val node: ISPNode) extends AnyVal {
+  def dataObject: Option[ISPDataObject] = Option(node.getDataObject)
+
+  def dataObject_=(obj: ISPDataObject): Unit =
     node.setDataObject(obj)
-  }
 
-  def dataObject_=(obj: Option[ISPDataObject]) {
+  def dataObject_=(obj: Option[ISPDataObject]): Unit =
     node.setDataObject(obj.orNull)
-  }
 
   def title: String =
-    (for {
-      d <- dataObject
-      t <- Option(d.getTitle)
-    } yield t).getOrElse("")
+    ~(for(d <- dataObject; t <- Option(d.getTitle)) yield t)
 
-  def title_=(t: String) {
-    dataObject foreach { obj =>
+  def title_=(t: String): Unit =
+    dataObject.foreach { obj =>
       obj.setTitle(t)
       node.setDataObject(obj)
     }
-  }
 
-  def children: List[ISPNode] = node match {
-    case c: ISPContainerNode => c.getChildren.asScala.toList
-    case _ => Nil
-  }
+  def children: List[ISPNode] =
+    node match {
+      case c: ISPContainerNode => c.getChildren.asScala.toList
+      case _                   => Nil
+    }
 
-  def children_=(lst: List[ISPNode]) {
+  def children_=(lst: List[ISPNode]): Unit =
     node match {
       case c: ISPContainerNode =>
         // For all new children in the list that are currently children of other
@@ -51,14 +50,15 @@ class RichRemoteNode(node: ISPNode) {
 
         c.setChildren(lst.asJava)
       case _ =>
-        if (!lst.isEmpty) sys.error("Adding children to a non-container node: " + node)
+        // TODO: this seems a bit poor
+        if (lst.nonEmpty) sys.error("Adding children to a non-container node: " + node)
     }
-  }
 
-  def toStream: Stream[ISPNode] = node match {
-    case c: ISPContainerNode => c #:: c.children.toStream.map(_.toStream).flatten
-    case n => Stream(n)
-  }
+  def toStream: Stream[ISPNode] =
+    node match {
+      case c: ISPContainerNode => c #:: c.children.toStream.map(_.toStream).flatten
+      case n                   => Stream(n)
+    }
 
   /**
    * Does a DFS search starting at the tree rooted by this node and stopping at
@@ -68,17 +68,8 @@ class RichRemoteNode(node: ISPNode) {
   def findDescendant(p: ISPNode => Boolean): Option[ISPNode] =
     toStream.find(p)
 
-  /*
-  {
-    def dfs0(c: List[ISPNode]): Option[ISPNode] = c match {
-      case h :: t => h.findDescendant(p) orElse dfs0(t)
-      case _      => None
-    }
-
-    if (p(node)) Some(node)
-    else dfs0(children)
-  }
-  */
+  def ancestors: Stream[ISPNode] =
+    Option(node.getParent).fold(Stream.empty[ISPNode]) { p => p #:: p.ancestors }
 
   /**
    * Searches the tree up from the current node all the way to the root of the
@@ -86,15 +77,5 @@ class RichRemoteNode(node: ISPNode) {
    * @param p predicate applied to each node
    */
   def findAncestor(p: ISPNode => Boolean): Option[ISPNode] =
-    if (p(node)) Some(node)
-    else Option(node.getParent).flatMap(_.findAncestor(p))
-
-  /*  Maybe just use toStream ...
-  def exists(p: ISPNode => Boolean): Boolean = p(node) || (node match {
-    case c: ISPContainerNode => c.children exists { _.exists(p) }
-    case _ => false
-  })
-
-  def forall(p: ISPNode => Boolean): Boolean = !node.exists(n => !p(n))
-  */
+    ancestors.find(p)
 }
