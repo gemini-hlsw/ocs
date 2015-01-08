@@ -6,7 +6,7 @@ import java.util.Date;
  * An abstract base class for Non Sidereal Targets. Contains mechanisms to operate
  * with RA and Dec at a given time, plus the target name, Epoch and brightness.
  */
-public abstract class NonSiderealTarget extends ITarget implements IHorizonsTarget {
+public abstract class NonSiderealTarget extends ITarget {
 
     private static final String DEFAULT_NAME = "";
 
@@ -18,6 +18,11 @@ public abstract class NonSiderealTarget extends ITarget implements IHorizonsTarg
     private String _name = DEFAULT_NAME;
     private Date _date = null; // The date for which the position is valid
 
+    /** PIO keys for the horizons object ID; used in XML serialization. */
+    public static final String PK_HORIZONS_OBJECT_ID = "horizons-object-id";
+
+    /** PIO keys for the horizons object type ordinal; used in XML serialization. */
+    public static final String PK_HORIZONS_OBJECT_TYPE_ORDINAL = "horizons-object-type";
 
     /**
      * Constructs with the system option.
