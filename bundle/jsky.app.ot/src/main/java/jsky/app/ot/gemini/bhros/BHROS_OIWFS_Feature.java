@@ -2,10 +2,17 @@ package jsky.app.ot.gemini.bhros;
 
 import edu.gemini.spModel.gemini.bhros.InstBHROS;
 import edu.gemini.spModel.gemini.bhros.BHROSParams.ISSPort;
+import edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe;
+import edu.gemini.spModel.gemini.gmos.GmosOiwfsProbeArm;
+import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 
 import jsky.app.ot.gemini.gmos.GMOS_OIWFS_Feature;
 import jsky.app.ot.tpe.TpeImageInfo;
+
+import java.awt.*;
+import java.awt.geom.Point2D;
+import java.util.*;
 
 /**
  * On-instrument wavefront sensor for bHROS. Because bHROS is really just a custom mask for GMOS,
