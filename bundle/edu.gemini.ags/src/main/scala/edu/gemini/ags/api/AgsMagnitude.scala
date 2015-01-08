@@ -1,7 +1,7 @@
 package edu.gemini.ags.api
 
 import edu.gemini.catalog.api.{SaturationConstraint, FaintnessConstraint, MagnitudeConstraints, MagnitudeLimits}
-import edu.gemini.shared.skyobject.Magnitude
+import edu.gemini.spModel.core.{Magnitude, MagnitudeBand}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions.{BEST, WORST}
 import edu.gemini.spModel.guide.{GuideSpeed, GuideProbe}
@@ -61,8 +61,8 @@ object AgsMagnitude {
    */
   def fastestGuideSpeed(mc: MagnitudeCalc, m: Magnitude, c: Conditions): Option[GuideSpeed] =
     GuideSpeed.values().find { gs => // assumes the values are sorted fast to slow
-      mc(c, gs).contains(m)
+      mc(c, gs).contains(m.toOldModel)
     }
 
-  def band(mc: MagnitudeCalc): Magnitude.Band = mc(BEST, FAST).getBand
+  def band(mc: MagnitudeCalc): MagnitudeBand = mc(BEST, FAST).getBand.toNewModel
 }

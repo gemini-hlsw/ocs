@@ -2,6 +2,7 @@ package edu.gemini.ags.api
 
 import edu.gemini.ags.api.AgsGuideQuality.Unusable
 import edu.gemini.ags.api.AgsMagnitude._
+import edu.gemini.ags.impl._
 import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.ImageQuality
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbe, GuideProbeGroup, GuideSpeed}
@@ -177,10 +178,10 @@ object AgsAnalysis {
 
     val magAnalysis = for {
       mc <- mt(ctx, guideProbe)
-      probeBand = band(mc)
+      probeBand = band(mc).toOldModel
     } yield {
       val magOpt      = guideStar.getMagnitude(probeBand).asScalaOpt
-      val analysisOpt = magOpt.map(mag => fastestGuideSpeed(mc, mag, conds).fold(outsideLimits(mc, mag))(usable))
+      val analysisOpt = magOpt.map(mag => fastestGuideSpeed(mc, mag.toNewModel, conds).fold(outsideLimits(mc, mag))(usable))
       analysisOpt.getOrElse(NoMagnitudeForBand(guideProbe, guideStar, probeBand))
     }
 

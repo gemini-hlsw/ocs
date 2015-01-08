@@ -446,7 +446,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
               case List(AgsStrategy.Assignment(actProbe, actStar)) =>
                 assertEquals(guideProbe, actProbe)
                 assertEqualTarget(expStar, actStar.toNewModel)
-                val actSpeed = AgsMagnitude.fastestGuideSpeed(mc, actStar.getMagnitude(band.toOldModel).getValue, ctx.getConditions)
+                val actSpeed = AgsMagnitude.fastestGuideSpeed(mc, actStar.getMagnitude(band.toOldModel).getValue.toNewModel, ctx.getConditions)
                 assertTrue("Expected: " + expSpeed + ", actual: " + actSpeed, actSpeed.exists(_ == expSpeed))
               case Nil => fail("Expected: (" + expStar + ", " + expSpeed + "), but nothing selected")
               case _   => fail("Multiple guide probe assignments: " + asn)
