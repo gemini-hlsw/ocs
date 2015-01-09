@@ -121,6 +121,18 @@ package object impl {
     }
   }
 
+  implicit class SPTarget2SiderealTarget(val sp:SPTarget) extends AnyVal {
+    def toNewModel:SiderealTarget = {
+      val name        = sp.getName
+      val coords      = sp.getSkycalcCoordinates
+      val mags        = sp.getMagnitudes.asScalaList.map(_.toNewModel)
+      val ra          = Angle.fromDegrees(coords.getRaDeg)
+      val dec         = Angle.fromDegrees(coords.getDecDeg)
+      val coordinates = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
+      SiderealTarget(name, coordinates, Equinox.J2000, None, mags, None)
+    }
+  }
+
   // REMOVE When AGS is fully ported
   @Deprecated
   implicit class MagnitudeConstraints2MagnitudeLimits(val mc: MagnitudeConstraints) extends AnyVal {
@@ -164,11 +176,4 @@ package object impl {
     else Some(lst.minBy(toSiderealTarget(_).magnitudeIn(band).getOrElse(max)))
   }
 
-  def skyObjectFromScienceTarget(target: SPTarget): skyobject.SkyObject = {
-    val name            = target.getName
-    val coords          = target.getSkycalcCoordinates
-    val skyObjectCoords = new skyobject.coords.HmsDegCoordinates.Builder(coords.getRa, coords.getDec).build
-    val magnitudes      = target.getMagnitudes
-    new skyobject.SkyObject.Builder(name, skyObjectCoords).build.withMagnitudes(magnitudes)
-  }
 }

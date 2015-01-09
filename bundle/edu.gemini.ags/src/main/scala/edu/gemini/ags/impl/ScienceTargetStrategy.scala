@@ -22,16 +22,16 @@ case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGui
     List(AgsAnalysis.analysis(ctx, mt, guideProbe))
 
   override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]] = {
-    val so = skyObjectFromScienceTarget(ctx.getTargets.getBase).toNewModel
+    val so = ctx.getTargets.getBase.toNewModel
     Future.successful(List((guideProbe, List(so))))
   }
 
   override def select(ctx: ObsContext, mt: MagnitudeTable): Future[Option[AgsStrategy.Selection]] = {
     // The science target is the guide star, but must be converted from SPTarget to SkyObject.
-    val skyObject = skyObjectFromScienceTarget(ctx.getTargets.getBase)
-    val posAngle  = ctx.getPositionAngle
-    val assignment = AgsStrategy.Assignment(guideProbe, skyObject)
-    val selection  = AgsStrategy.Selection(posAngle, List(assignment))
+    val siderealTarget = ctx.getTargets.getBase.toNewModel
+    val posAngle       = ctx.getPositionAngle
+    val assignment     = AgsStrategy.Assignment(guideProbe, siderealTarget)
+    val selection      = AgsStrategy.Selection(posAngle, List(assignment))
     Future.successful(Some(selection))
   }
 

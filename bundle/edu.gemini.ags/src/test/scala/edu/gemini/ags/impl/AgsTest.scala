@@ -445,11 +445,13 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
             asn match {
               case List(AgsStrategy.Assignment(actProbe, actStar)) =>
                 assertEquals(guideProbe, actProbe)
-                assertEqualTarget(expStar, actStar.toNewModel)
-                val actSpeed = AgsMagnitude.fastestGuideSpeed(mc, actStar.getMagnitude(band.toOldModel).getValue.toNewModel, ctx.getConditions)
-                assertTrue("Expected: " + expSpeed + ", actual: " + actSpeed, actSpeed.exists(_ == expSpeed))
-              case Nil => fail("Expected: (" + expStar + ", " + expSpeed + "), but nothing selected")
-              case _   => fail("Multiple guide probe assignments: " + asn)
+                assertEqualTarget(expStar, actStar)
+                actStar.magnitudeIn(band).foreach { mag =>
+                  val actSpeed = AgsMagnitude.fastestGuideSpeed(mc, mag, ctx.getConditions)
+                  assertTrue(s"Expected: $expSpeed , actual: $actSpeed", actSpeed.exists(_ == expSpeed))
+                }
+              case Nil => fail(s"Expected: ($expStar, $expSpeed), but nothing selected")
+              case _   => fail(s"Multiple guide probe assignments: $asn")
             }
         }
       }

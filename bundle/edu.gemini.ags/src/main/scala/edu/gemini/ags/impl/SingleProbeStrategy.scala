@@ -71,7 +71,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
         case UNBOUNDED                     => selectUnbounded(ctx, mt, candidates)
       }
       brightest(results, params.band)(_._2).map {
-        case (angle, st) => AgsStrategy.Selection(angle.toOldModel, List(AgsStrategy.Assignment(params.guideProbe, st.toOldModel)))
+        case (angle, st) => AgsStrategy.Selection(angle.toOldModel, List(AgsStrategy.Assignment(params.guideProbe, st)))
       }
     }
   }
