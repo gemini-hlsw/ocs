@@ -214,10 +214,10 @@ object GemsStrategy extends AgsStrategy {
 
     // Now we must convert from an Option[GemsGuideStars] to a Selection.
     gemsGuideStars.map { x =>
-      val posAngle = x.getPa.toDegrees
+      val posAngle = Angle.fromDegrees(x.getPa.toDegrees.getMagnitude)
       val assignments = x.getGuideGroup.getAll.asScalaList.map(targets => {
         val guider = targets.getGuider
-      targets.getTargets.asScalaList.map(target => Assignment(guider, target.toNewModel))
+        targets.getTargets.asScalaList.map(target => Assignment(guider, target.toNewModel))
       }).flatten
       Selection(posAngle, assignments)
     }

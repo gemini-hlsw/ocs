@@ -233,7 +233,7 @@ class AgsClient(ctx: TpeContext) extends Dialog {
 
       // Update the position angle, if necessary.
       ctx.instrument.dataObject.foreach { inst =>
-        val deg = sel.posAngle.toDegrees.getMagnitude
+        val deg = sel.posAngle.toDegrees
         val old = inst.getPosAngleDegrees
         if (deg != old) {
           inst.setPosAngleDegrees(deg)

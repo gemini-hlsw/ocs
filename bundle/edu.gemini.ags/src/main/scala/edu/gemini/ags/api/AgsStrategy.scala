@@ -3,8 +3,8 @@ package edu.gemini.ags.api
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.ags.impl._
 import edu.gemini.catalog.api.QueryConstraint
-import edu.gemini.skycalc.Angle
 import edu.gemini.spModel.ags.AgsStrategyKey
+import edu.gemini.spModel.core.Angle
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
