@@ -19,7 +19,7 @@ object ProgramDiffTiming {
       }
 
       val start = System.currentTimeMillis()
-      ProgramDiff.compare(central.sp, cloned.sp.getVersions)
+      ProgramDiff.compare(central.sp, cloned.sp.getVersions, removedKeys(cloned.sp))
       val end   = System.currentTimeMillis()
 
       println("Time: " + (end - start))

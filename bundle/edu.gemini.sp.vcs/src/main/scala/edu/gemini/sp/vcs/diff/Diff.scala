@@ -21,7 +21,7 @@ object Diff {
   /** Marks a node that either never existed in the program or else has been
     * removed and had different version information.
     */
-  case class Missing(key: SPNodeKey, nv: NodeVersions) extends Diff
+  final case class Missing(key: SPNodeKey, nv: NodeVersions) extends Diff
 
   /** Describes the content of a node that potentially differs and is still in
     * use in the local program.  Contains enough information to merge the node
@@ -30,11 +30,11 @@ object Diff {
     * program that would be followed when serializing.  In other words,
     * including any `ISPNode` would mean including the entire program.
     */
-  case class Present(key:      SPNodeKey,
-                     nv:       NodeVersions,
-                     dob:      ISPDataObject,
-                     children: List[SPNodeKey],
-                     detail:   NodeDetail      ) extends Diff
+  final case class Present(key:      SPNodeKey,
+                           nv:       NodeVersions,
+                           dob:      ISPDataObject,
+                           children: List[SPNodeKey],
+                           detail:   NodeDetail      ) extends Diff
 
   /** Creates an [[Missing]] `Diff` from the provided program node.
     *
@@ -49,7 +49,7 @@ object Diff {
       case o: ISPObservation => NodeDetail.Obs(o.getObservationNumber)
       case _                 => NodeDetail.Empty
     }
-    Present(n.getNodeKey, n.getVersion, n.getDataObject, n.children.map(_.getNodeKey), detail)
+    Present(n.key, n.getVersion, n.getDataObject, n.children.map(_.key), detail)
   }
 
   /** Creates [[Present]] `Diff`s for each program node rooted at `root`. */
@@ -71,5 +71,5 @@ sealed trait NodeDetail
 
 object NodeDetail {
   case object Empty extends NodeDetail
-  case class Obs(number: Int)  extends NodeDetail
+  final case class Obs(number: Int) extends NodeDetail
 }

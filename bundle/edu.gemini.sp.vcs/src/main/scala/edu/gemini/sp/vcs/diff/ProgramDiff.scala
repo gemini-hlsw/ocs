@@ -2,83 +2,114 @@ package edu.gemini.sp.vcs.diff
 
 import edu.gemini.pot.sp.version._
 import edu.gemini.pot.sp.{ISPNode, ISPObservation, ISPProgram, SPNodeKey}
+import edu.gemini.sp.vcs.diff.Diff.{missing, present}
 import edu.gemini.spModel.rich.pot.sp._
 
-import scala.annotation.tailrec
-import scalaz.Scalaz._
+import scalaz._
+import Scalaz._
 
 object ProgramDiff {
-
-  import Diff.{missing, present}
 
   /** Returns a (super-set) of differences between two programs.
     *
     * It is a "super-set" because ultimately not every returned `Diff` may be
-    * necessary in merging program versions.
+    * necessary for merging program versions.
+    *
+    * Each instance/copy of a program has its own unique id.  Each node in a
+    * program maintains a map from unique program id to a counter representing
+    * the number of edits made to the node in the associated program instance.
+    * This map is called `NodeVersions`, a type alias for a
+    * [[edu.gemini.shared.util.VersionVector]] keyed by unique program id with
+    * `java.lang.Integer` values.  A map of all the `NodeVersions` keyed by the
+    * node's `SPNodeKey` is a `VersionMap`. An edit to either the node's "data
+    * object" or child list increments the counter associated with the program's
+    * unique id.
+    *
+    * This method compares a local program with the `VersionMap` of a remote
+    * copy of the program. It generates `Diff` objects to describe the
+    * differences and allow the remote program to incorporate any changes that
+    * have been made locally.
+    *
+    * There are two types of `Diff` objects, `Present` and `Missing`.  A
+    * `Present` diff refers to a node that exists in the local program while
+    * `Missing` diffs are no longer reachable in the local program.
+    *
+    * The comparison must generate
+    *
+    * - `Missing` diffs for any node not in the local program that either (a)
+    * is still in the remote program or (b) has different version information
+    * than the remote program.
+    *
+    * - `Present` diffs for any node in the local program with different
+    * version information than its remote counterpart.
+    *
+    * - `Present` diffs for all nodes in an observation that have at least one
+    * contained node with a difference in version data.  In other words, any
+    * difference in an observation will bring `Present` diffs for the entire
+    * observation.
+    *
+    * - `Present` diffs for all ancestor nodes of a node with different version
+    * data.  For example, an edited note in a group will pull in the group and
+    * the program ancestors.
+    *
+    * Conversely, the comparison must not
+    *
+    * - include `Present` diffs for any node which has the same version
+    * information as the remote node and which has no descendants with different
+    * version data
+    *
+    * - include `Missing` diffs for nodes deleted both locally and remotely and
+    * that have the same version data
     */
-  def compare(local: ISPProgram, remoteVm: VersionMap): List[Diff] = {
-    import scala.collection.breakOut
-    def toList(keys: Set[SPNodeKey], f: SPNodeKey => Diff): List[Diff] =
-      keys.map(f)(breakOut)
+  def compare(local: ISPProgram, remoteVm: VersionMap, remoteRemoved: Set[SPNodeKey]): List[Diff] = {
+    def versionDiffers(k: SPNodeKey): Boolean =
+      remoteVm.get(k).forall(_ =/= local.getVersions(k))
 
-    val presentDiffs    = findDiffs(local, remoteVm)
-    val localVm         = local.getVersions
-    val localKeys       = localVm.keySet
+    // locally present node differs from the remote version
+    def presentDiffers(k: SPNodeKey): Boolean =
+      versionDiffers(k) || remoteRemoved.contains(k)
+
+    // locally missing node differs from the remote version
+    def missingDiffers(k: SPNodeKey): Boolean =
+      versionDiffers(k) || !remoteRemoved.contains(k)
+
+    def nodeDiffers(n: ISPNode): Boolean = presentDiffers(n.key)
+
+    def diffNode(n: ISPNode): Option[Diff] = nodeDiffers(n) option present(n)
+
+    // Present differences in in-use nodes rooted at r.
+    def presentDiffs(r: ISPNode): List[Diff] =
+      r match {
+        case o: ISPObservation =>
+          // Observations are atomic.  If anything differs at all in either
+          // version copy the entire observation.
+          if (o.exists(nodeDiffers)) Diff.tree(o) else List.empty
+
+        case _                 =>
+          val childDiffs = (List.empty[Diff]/:r.children) { (ns, child) =>
+            presentDiffs(child) ++ ns
+          }
+
+          // If there is even one descendant that differs, include this node
+          // in the results.  Otherwise, only include it if it differs.
+          if (childDiffs.isEmpty) diffNode(r).toList
+          else present(r) :: childDiffs
+      }
+
+    import scala.collection.breakOut
+    def missingDiffs(keys: Set[SPNodeKey]): List[Diff] =
+      keys.map(k => missing(k, local.getVersions(k)))(breakOut)
+
+    val localKeys       = local.getVersions.keySet
     val remoteKeys      = remoteVm.keySet
 
     // Any remote keys that we don't have locally are missing.
-    val missingKeys     = remoteKeys &~ localKeys
-    val missingDiffs    = toList(missingKeys, k => missing(k, remoteVm(k)))
+    val remoteOnlyKeys  = remoteKeys &~ localKeys
 
-    // Take all the local keys, remove those that differ but are still active,
-    // then remove all that don't differ.
-    val presentDiffKeys = presentDiffs.map(_.key)(breakOut): Set[SPNodeKey]
-    val removedKeys     = (localKeys &~ presentDiffKeys).filter { k =>
-      remoteVm.get(k).forall(_ =/= localVm(k))
-    }
-    val removedDiffs    = toList(removedKeys, k => missing(k, localVm(k)))
+    // Any removed keys that either differ from the remote version or are not
+    // deleted remotely.
+    val deletedKeys     = removedKeys(local).filter { missingDiffers }
 
-    removedDiffs ++ missingDiffs ++ presentDiffs
+    missingDiffs(remoteOnlyKeys ++ deletedKeys) ++ presentDiffs(local)
   }
-
-  private def diffOne(n: ISPNode, remoteVm: VersionMap): Option[Diff] = {
-    lazy val someActive = some(present(n))
-    remoteVm.get(n.getNodeKey).fold(someActive) { remoteNv =>
-      if (n.getVersion === remoteNv) none else someActive
-    }
-  }
-
-  // Observations are atomic.  If anything differs at all in either version copy
-  // the entire observation.
-  private def diffObs(o: ISPObservation, remoteVm: VersionMap): List[Diff] = {
-    def nodeDiffers(n: ISPNode): Boolean =
-      n.getVersion =/= remoteVm.getOrElse(n.getNodeKey, EmptyNodeVersions)
-
-    def treeDiffers(root: ISPNode): Boolean = {
-      @tailrec def go(nodes: List[ISPNode]): Boolean =
-        nodes match {
-          case Nil     => false
-          case n :: ns => nodeDiffers(n) || go(n.children ++ ns)
-        }
-
-      go(List(root))
-    }
-
-    if (treeDiffers(o)) Diff.tree(o) else List.empty
-  }
-
-  // Differences in in-use nodes rooted at n.
-  private def findDiffs(n: ISPNode, remoteVm: VersionMap): List[Diff] =
-    n match {
-      case o: ISPObservation => diffObs(o, remoteVm)
-      case _                 =>
-        val childDiffs = (List.empty[Diff]/:n.children) { (ns, child) =>
-          findDiffs(child, remoteVm) ++ ns
-        }
-
-        // If there is even one descendant that differs, include this node
-        // in the results.  Otherwise, only include it if it differs.
-        if (childDiffs.isEmpty) diffOne(n, remoteVm).toList
-        else present(n) :: childDiffs
-    }
 }

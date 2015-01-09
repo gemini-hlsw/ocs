@@ -5,6 +5,7 @@ import edu.gemini.pot.sp.version._
 import edu.gemini.pot.spdb.{DBLocalDatabase, IDBDatabaseService}
 import edu.gemini.sp.vcs.VcsFailure._
 import edu.gemini.spModel.data.ISPDataObject
+import edu.gemini.spModel.gemini.init.ObservationNI
 import edu.gemini.spModel.obs.{ObsPhase2Status, SPObservation}
 import edu.gemini.spModel.obscomp.{ProgramNote, SPNote}
 import edu.gemini.spModel.rich.pot.sp._
@@ -137,9 +138,37 @@ object TestingEnvironment {
       t.children = n :: t.children
     }
 
+    // Ugh.  Makes this program context's program a copy of the given one.
     def copyFrom(that: ProgContext): Unit = {
-      odb.remove(sp)
-      odb.put(odb.getFactory.copyWithSameKeys(that.sp))
+
+      def init(src: ISPNode, dest: ISPNode): Unit = {
+        dest.dataObject = src.dataObject
+        dest.children   = src.children.map(copy)
+      }
+
+      def copy(src: ISPNode): ISPNode = {
+        val fact    = odb.getFactory
+        val key     = src.key
+        val dob     = src.getDataObject
+        val cType   = dob.getType
+        val newNode = src match {
+          case _: ISPGroup              => fact.createGroup(sp, key)
+          case _: ISPObsComponent       => fact.createObsComponent(sp, cType, key)
+          case o: ISPObservation        => fact.createObservation(sp, o.getObservationNumber, ObservationNI.NO_CHILDREN_INSTANCE, key)
+          case _: ISPObsExecLog         => fact.createObsExecLog(sp, key)
+          case _: ISPObsQaLog           => fact.createObsQaLog(sp, key)
+          case _: ISPSeqComponent       => fact.createSeqComponent(sp, cType, key)
+          case _: ISPTemplateFolder     => fact.createTemplateFolder(sp, key)
+          case _: ISPTemplateGroup      => fact.createTemplateGroup(sp, key)
+          case _: ISPTemplateParameters => fact.createTemplateParameters(sp, key)
+        }
+
+        init(src, newNode)
+        newNode
+      }
+
+      init(that.sp, sp)
+      sp.setVersions(that.sp.getVersions)
     }
   }
 

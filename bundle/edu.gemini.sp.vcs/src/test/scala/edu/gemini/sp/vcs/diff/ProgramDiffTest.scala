@@ -1,6 +1,7 @@
 package edu.gemini.sp.vcs.diff
 
-import edu.gemini.pot.sp.{DataObjectBlob, ISPNode}
+import edu.gemini.pot.sp.{SPNodeKey, DataObjectBlob, ISPNode}
+import edu.gemini.pot.sp.version.EmptyNodeVersions
 import edu.gemini.sp.vcs.TestingEnvironment
 import edu.gemini.sp.vcs.TestingEnvironment._
 import edu.gemini.spModel.obscomp.SPNote
@@ -10,6 +11,8 @@ import org.junit.Test
 
 import scala.collection.JavaConverters._
 
+import scalaz._
+import Scalaz._
 
 class ProgramDiffTest {
 
@@ -31,11 +34,74 @@ class ProgramDiffTest {
 
 
   private def assertEqualDiffs(env: TestingEnvironment, expected: Diff*): Unit = {
-    val actual = ProgramDiff.compare(env.central.sp, env.cloned.sp.getVersions)
+    val actual = ProgramDiff.compare(env.central.sp, env.cloned.sp.getVersions, removedKeys(env.cloned.sp))
     assertTrue(equalDiffs(expected, actual))
   }
 
   private def assertNoDiffs(env: TestingEnvironment): Unit = assertEqualDiffs(env)
+
+  @Test def singleNodeMap(): Unit =
+    withPiTestEnv { env =>
+      val p        = env.central.sp
+      val actual   = p.nodeMap
+      val expected = Map(p.key -> p)
+      assertEquals(expected, actual)
+    }
+
+  @Test def simpleNodeMap(): Unit =
+    withPiTestEnv { env =>
+      val n0 = env.central.addNote("prog note")
+      val g  = env.central.addGroup()
+      val n1 = env.central.addNote("group note", g.key)
+
+      val p        = env.central.sp
+      val actual   = p.nodeMap
+      val expected = Map(
+        p.key  -> p,
+        n0.key -> n0,
+        g.key  -> g,
+        n1.key -> n1
+      )
+      assertEquals(expected, actual)
+    }
+
+  @Test def deletedDoesNotAppearInNodeMap(): Unit =
+    withPiTestEnv { env =>
+      val n0 = env.central.addNote("prog note")
+      val g  = env.central.addGroup()
+      val n1 = env.central.addNote("group note", g.key)
+
+      // Remove the group and its note
+      val p      = env.central.sp
+      p.children = List(n0)
+
+      val actual   = p.nodeMap
+      val expected = Map(
+        p.key  -> p,
+        n0.key -> n0
+      )
+      assertEquals(expected, actual)
+    }
+
+  @Test def noRemovedKeys(): Unit =
+    withPiTestEnv { env =>
+      assertTrue(removedKeys(env.cloned.sp).isEmpty)
+    }
+
+  @Test def testRemovedKeys(): Unit =
+    withPiTestEnv { env =>
+      val n0 = env.central.addNote("prog note")
+      val g  = env.central.addGroup()
+      val n1 = env.central.addNote("group note", g.key)
+
+      // Remove the group and its note
+      val p      = env.central.sp
+      p.children = List(n0)
+
+      val actual   = removedKeys(p)
+      val expected = Set(g.key, n1.key)
+      assertEquals(expected, actual)
+    }
 
   @Test def noChangeNoDiff(): Unit =
     withPiTestEnv {
@@ -43,15 +109,20 @@ class ProgramDiffTest {
     }
 
   private def present(n: ISPNode, d: NodeDetail): Present =
-    Present(n.getNodeKey, n.getVersion, n.getDataObject, n.children.map(_.getNodeKey), d)
+    Present(n.key, n.getVersion, n.getDataObject, n.children.map(_.key), d)
 
-  private def presentEmpty(n: ISPNode): Present =
+  private def presentEmpty(n: ISPNode): Diff =
     present(n, NodeDetail.Empty)
 
-  private def presentObs(n: ISPNode, num: Int): Present =
+  private def presentObs(n: ISPNode, num: Int): Diff =
     present(n, NodeDetail.Obs(num))
 
-  private def missing(n: ISPNode): Missing = Missing(n.getNodeKey, n.getVersion)
+  private def unknown(n: ISPNode): Diff = Missing(n.key, EmptyNodeVersions)
+  private def deleted(n: ISPNode): Diff = Missing(n.key, n.getVersion)
+
+  // In these tests we examine the diffs that would be returned from the local
+  // database ("central") when presented with the version information from a
+  // remote program ("cloned").
 
   @Test def localChangeProducesDiff(): Unit =
     withPiTestEnv { env =>
@@ -75,12 +146,12 @@ class ProgramDiffTest {
 
       // Prog -> Group -> Note (in both versions)
       val group = central.addGroup()
-      val note = central.addNote("foo", group.getNodeKey)
+      val note = central.addNote("foo", group.key)
       cloned.copyFrom(central)
       assertNoDiffs(env)
 
       // Edit Note.
-      cloned.setNoteText("bar", note.getNodeKey)
+      cloned.setNoteText("bar", note.key)
 
       // all nodes present, diff contains "foo" version of note.
       val noteDiff = presentEmpty(note)
@@ -98,17 +169,17 @@ class ProgramDiffTest {
 
       // Prog -> Group -> Note (in both versions)
       val group = central.addGroup()
-      val note = central.addNote("foo", group.getNodeKey)
+      val note = central.addNote("foo", group.key)
       cloned.copyFrom(central)
       assertNoDiffs(env)
 
       // Edit Group
-      central.setTitle("foo", group.getNodeKey)
+      central.setTitle("foo", group.key)
 
       // all nodes present, diff contains "foo" version of group title
-      val groupDiff = presentEmpty(central.find(group.getNodeKey))
+      val groupDiff = presentEmpty(central.find(group.key))
       groupDiff match {
-        case Present(_, _, dob, children, NodeDetail.Empty) if children == List(note.getNodeKey) =>
+        case Present(_, _, dob, children, NodeDetail.Empty) if children == List(note.key) =>
           assertEquals("foo", dob.getTitle)
         case _ => fail()
       }
@@ -125,23 +196,23 @@ class ProgramDiffTest {
       assertNoDiffs(env)
 
       val comps = obs.getChildren.asScala.toList
-      central.setTitle("foo", comps.head.getNodeKey)
+      central.setTitle("foo", comps.head.key)
 
       val diffs = presentEmpty(central.sp) :: presentObs(obs, 1) :: comps.map { c =>
-        presentEmpty(central.find(c.getNodeKey))
+        presentEmpty(central.find(c.key))
       }
       assertEqualDiffs(env, diffs: _*)
     }
 
-  @Test def unavailableNodeIsIncluded(): Unit =
+  @Test def unknownRemoteNodeIsMissing(): Unit =
     withPiTestEnv { env =>
       import env._
 
       val note  = cloned.addNote("foo")
-      assertEqualDiffs(env, presentEmpty(central.sp), missing(note))
+      assertEqualDiffs(env, presentEmpty(central.sp), unknown(note))
     }
 
-  @Test def removedNodeNeverPresentInOtherSideIsIncluded(): Unit =
+  @Test def locallyRemovedNodeNeverPresentRemotelyIsIncluded(): Unit =
     withPiTestEnv { env =>
       import env._
 
@@ -151,40 +222,71 @@ class ProgramDiffTest {
       // Delete Note
       central.sp.children = Nil
 
-      assertEqualDiffs(env, presentEmpty(central.sp), missing(note))
+      assertEqualDiffs(env, presentEmpty(central.sp), deleted(note))
     }
 
-  @Test def removedNodeKnownToBothSidesIsNotIncluded(): Unit =
-    withPiTestEnv { env =>
-      import env._
+  // Starting with a common program containing a single note, try all
+  // combinations of locally and remotely editing (or not) and/or removing (or
+  // not) the note.
+  @Test def removalTests(): Unit = {
+    case class RmTest(pc: TestingEnvironment => ProgContext, edited: Boolean, removed: Boolean) {
+      def setup(env: TestingEnvironment, key: SPNodeKey): Unit = {
+        val ctx  = pc(env)
+        val note = ctx.find(key)
+        if (edited) {
+          note.title = "edited title"
+        }
+        if (removed) {
+          ctx.sp.children = Nil
+        }
+      }
 
-      // Prog -> Note
-      val note = central.addNote("foo")
-      cloned.copyFrom(central)
-      assertNoDiffs(env)
+      def modifies: Boolean = edited || removed
 
-      // Delete Note
-      central.sp.children = Nil
-
-      // Note version never updated so it is the same in both sides.  Only the
-      // parent node (with its updated child list) need be sent.
-      assertEqualDiffs(env, presentEmpty(central.sp))
+      override def toString: String = s"edited=$edited, removed=$removed"
     }
 
-  @Test def modifiedThenRemovedNodeKnownToBothSidesIsIncluded(): Unit =
-    withPiTestEnv { env =>
-      import env._
+    def test(local: RmTest, remote: RmTest): Unit = {
+      val name = s"removalTests: local=($local), remote=($remote)"
 
-      // Prog -> Note
-      val note = central.addNote("foo")
-      cloned.copyFrom(central)
-      assertNoDiffs(env)
+      withPiTestEnv { env =>
+        import env._
 
-      // Update, then delete note
-      central.setNoteText("bar", note.getNodeKey)
-      central.sp.children = Nil
+        // Prog -> Note
+        val note = central.addNote("foo")
+        val key  = note.key
+        cloned.copyFrom(central)
+        assertNoDiffs(env)
 
-      assertEqualDiffs(env, presentEmpty(central.sp), missing(note))
+        // Make the appropriate modifications, if any.
+        local.setup(env,  key)
+        remote.setup(env, key)
+
+        val rootDiff = (local.modifies || remote.modifies) option presentEmpty(central.sp)
+
+        val noteDiff =
+          if (note.getVersion === env.cloned.sp.getVersions(key))
+            (local.removed, remote.removed) match {
+              case (false, true)  => some(presentEmpty(note))
+              case (true, false)  => some(deleted(note))
+              case _              => none
+            }
+          else
+            if (local.removed) some(deleted(note)) else some(presentEmpty(note))
+
+        val expected = rootDiff.toList ++ noteDiff.toList
+        val actual   = ProgramDiff.compare(env.central.sp, env.cloned.sp.getVersions, removedKeys(env.cloned.sp))
+        assertTrue(s"$name\nexptected=$expected\nactual=$actual", equalDiffs(expected, actual))
+      }
     }
 
+    val tf = List(true, false)
+    for {
+      led <- tf
+      lrm <- tf
+      red <- tf
+      rrm <- tf
+    } test(RmTest(_.central, edited = led, removed = lrm),
+           RmTest(_.cloned, edited = red, removed = rrm))
+  }
 }
