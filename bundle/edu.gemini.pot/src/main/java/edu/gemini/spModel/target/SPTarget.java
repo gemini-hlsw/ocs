@@ -553,16 +553,6 @@ public final class SPTarget extends WatchablePos {
         final ITarget target = getTarget();
         Pio.addParam(factory, paramSet, _NAME, getName());
 
-        // Ok, this is such bullshit. This stuff needs to be done polymorphically.
-        // Whoever wrote this class needs to be re-educated.
-        if (target instanceof IHorizonsTarget) {
-        	final IHorizonsTarget ht = (IHorizonsTarget) target;
-        	if (ht.isHorizonsDataPopulated()) {
-        		Pio.addLongParam(factory, paramSet, IHorizonsTarget.PK_HORIZONS_OBJECT_ID, ht.getHorizonsObjectId());
-        		Pio.addLongParam(factory, paramSet, IHorizonsTarget.PK_HORIZONS_OBJECT_TYPE_ORDINAL, ht.getHorizonsObjectTypeOrdinal());
-        	}
-        }
-
         if (target instanceof HmsDegTarget) {
             final HmsDegTarget t = (HmsDegTarget) target;
             Pio.addParam(factory, paramSet, _SYSTEM, t.getSystemOption().getName());
@@ -577,6 +567,13 @@ public final class SPTarget extends WatchablePos {
             paramSet.addParam(t.getEffWavelength().getParam(factory, _WAVELENGTH));
         } else if (target instanceof NonSiderealTarget) {
             final NonSiderealTarget nst = (NonSiderealTarget) target;
+
+            // Horizons data, if any
+            if (nst.isHorizonsDataPopulated()) {
+                Pio.addLongParam(factory, paramSet, NonSiderealTarget.PK_HORIZONS_OBJECT_ID, nst.getHorizonsObjectId());
+                Pio.addLongParam(factory, paramSet, NonSiderealTarget.PK_HORIZONS_OBJECT_TYPE_ORDINAL, nst.getHorizonsObjectTypeOrdinal());
+            }
+
             // OT-495: save and restore RA/Dec for conic targets
             // XXX FIXME: Temporary, until nonsidereal support is implemented
             Pio.addParam(factory, paramSet, _C1, nst.c1ToString());
@@ -632,14 +629,6 @@ public final class SPTarget extends WatchablePos {
 
         itarget.setName(name);
 
-        // Ok, this is such bullshit. This stuff needs to be done polymorphically.
-        // Whoever wrote this class needs to be re-educated.
-        if (itarget instanceof IHorizonsTarget) {
-        	final IHorizonsTarget ht = (IHorizonsTarget) itarget;
-        	ht.setHorizonsObjectId(Pio.getLongValue(paramSet, IHorizonsTarget.PK_HORIZONS_OBJECT_ID, null));
-        	ht.setHorizonsObjectTypeOrdinal(Pio.getIntValue(paramSet, IHorizonsTarget.PK_HORIZONS_OBJECT_TYPE_ORDINAL, -1));
-        }
-
         if (itarget instanceof HmsDegTarget) {
             final HmsDegTarget t = (HmsDegTarget)itarget;
 
@@ -676,6 +665,11 @@ public final class SPTarget extends WatchablePos {
         } else if (itarget instanceof NonSiderealTarget) {
 
             final NonSiderealTarget nst = (NonSiderealTarget)itarget;
+
+            // Horizons Info
+            nst.setHorizonsObjectId(Pio.getLongValue(paramSet, NonSiderealTarget.PK_HORIZONS_OBJECT_ID, null));
+            nst.setHorizonsObjectTypeOrdinal(Pio.getIntValue(paramSet, NonSiderealTarget.PK_HORIZONS_OBJECT_TYPE_ORDINAL, -1));
+
             // OT-495: save and restore RA/Dec for conic targets
             // XXX FIXME: Temporary, until nonsidereal support is implemented
             final String c1 = Pio.getValue(paramSet, _C1);

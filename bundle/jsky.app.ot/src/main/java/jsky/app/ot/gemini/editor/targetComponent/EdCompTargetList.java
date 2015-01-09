@@ -2048,8 +2048,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             public void execute(HorizonsReply reply) {
 
                 // If the target is capable of storing Horizons information, populate (or unpopulate) it.
-                if (_curPos.getTarget() instanceof IHorizonsTarget) {
-                    IHorizonsTarget ht = (IHorizonsTarget) _curPos.getTarget();
+                if (_curPos.getTarget() instanceof NonSiderealTarget) {
+                    NonSiderealTarget ht = (NonSiderealTarget) _curPos.getTarget();
                     if (reply.hasObjectIdAndType()) {
 
                         // Set the object id and type; both will be valid
