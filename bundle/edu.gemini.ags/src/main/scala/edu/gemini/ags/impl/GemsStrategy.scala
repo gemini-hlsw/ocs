@@ -6,6 +6,7 @@ import edu.gemini.ags.gems._
 import edu.gemini.ags.gems.mascot.{Strehl, MascotProgress}
 import edu.gemini.catalog.api._
 import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.spModel.core.Target.SiderealTarget
 
 // TODO port these dependencies
 import edu.gemini.shared.skyobject.SkyObject
@@ -116,23 +117,23 @@ object GemsStrategy extends AgsStrategy {
     mapGroup(Canopus.Wfs.Group.instance) ++ mapGroup(GsaoiOdgw.Group.instance)
   }
 
-  override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SkyObject])]] = {
+  override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]] = {
 
     // Extract something we can understand from the GemsCatalogSearchResults.
-    def simplifiedResult(results: List[GemsCatalogSearchResults]): List[(GuideProbe, List[SkyObject])] =
+    def simplifiedResult(results: List[GemsCatalogSearchResults]): List[(GuideProbe, List[SiderealTarget])] =
       results.flatMap { result =>
         val so = result.getResults.asScala.toList  // extract the sky objects from this thing
         // For each guide probe associated with these sky objects, add a tuple
         // (guide probe, sky object list) to the results
         result.getCriterion.getKey.getGroup.getMembers.asScala.toList.map { guideProbe =>
-          (guideProbe, so)
+          (guideProbe, so.map(_.toNewModel))
         }
       }
 
     // why do we need multiple position angles?  catalog results are given in
     // a ring (limited by radius limits) around a base position ... confusion
     val posAngles   = (ctx.getPositionAngle.toNewModel :: (0 until 360 by 90).map(Angle.fromDegrees(_)).toList).toSet
-    val emptyResult = List.empty[(GuideProbe, List[SkyObject])]
+    val emptyResult = List.empty[(GuideProbe, List[SiderealTarget])]
     future {
       search(GemsGuideStarSearchOptions.DEFAULT_CATALOG,
         GemsGuideStarSearchOptions.DEFAULT_CATALOG,

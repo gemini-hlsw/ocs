@@ -5,6 +5,7 @@ import edu.gemini.catalog.api.QueryConstraint
 import edu.gemini.shared.skyobject.SkyObject
 import edu.gemini.skycalc.Angle
 import edu.gemini.spModel.ags.AgsStrategyKey
+import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
@@ -21,7 +22,7 @@ trait AgsStrategy {
 
   def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis]
 
-  def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SkyObject])]]
+  def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]]
 
   def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[AgsStrategy.Estimate]
 

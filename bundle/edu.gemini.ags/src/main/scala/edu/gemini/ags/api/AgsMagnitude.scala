@@ -8,8 +8,6 @@ import edu.gemini.spModel.guide.{GuideSpeed, GuideProbe}
 import edu.gemini.spModel.guide.GuideSpeed.{FAST, SLOW}
 import edu.gemini.spModel.obs.context.ObsContext
 
-import edu.gemini.ags.impl._
-
 /**
  * Types and methods for calculating magnitude limits.
  */

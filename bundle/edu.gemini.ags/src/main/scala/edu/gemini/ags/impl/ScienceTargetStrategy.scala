@@ -6,6 +6,7 @@ import edu.gemini.ags.api.{AgsMagnitude, AgsAnalysis, AgsStrategy}
 import edu.gemini.catalog.api.{RadiusConstraint, QueryConstraint}
 import edu.gemini.shared.skyobject.SkyObject
 import edu.gemini.spModel.ags.AgsStrategyKey
+import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 
@@ -20,8 +21,8 @@ case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGui
   override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] =
     List(AgsAnalysis.analysis(ctx, mt, guideProbe))
 
-  override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SkyObject])]] = {
-    val so = skyObjectFromScienceTarget(ctx.getTargets.getBase)
+  override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]] = {
+    val so = skyObjectFromScienceTarget(ctx.getTargets.getBase).toNewModel
     Future.successful(List((guideProbe, List(so))))
   }
 

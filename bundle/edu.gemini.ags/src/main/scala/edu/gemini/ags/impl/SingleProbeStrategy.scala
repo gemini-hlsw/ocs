@@ -3,7 +3,6 @@ package edu.gemini.ags.impl
 import edu.gemini.ags.api._
 import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.catalog.api.{QueryConstraint, CatalogServerInstances}
-import edu.gemini.shared.skyobject.SkyObject
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.core.{Coordinates, Angle}
 import edu.gemini.spModel.core.Target.SiderealTarget
@@ -30,12 +29,12 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] =
     List(AgsAnalysis.analysis(ctx, mt, params.guideProbe))
 
-  override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SkyObject])]] = {
-    val empty = List((params.guideProbe: GuideProbe, List.empty[SkyObject]))
+  override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]] = {
+    val empty = List((params.guideProbe: GuideProbe, List.empty[SiderealTarget]))
     queryConstraints(ctx, mt).foldLeft(Future.successful(empty)) { (_, qc) =>
       future {
         CatalogServerInstances.STANDARD.query(qc).candidates.toList.asScala.toList
-      }.map { so => List((params.guideProbe, so)) }
+      }.map { so => List((params.guideProbe, so.map(_.toNewModel))) }
     }
   }
 
@@ -44,7 +43,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
     // throw away the guide probe (which we know anyway), and obtain just the
     // list of guide stars
     candidates(ctx, mt).map { lst =>
-      lst.headOption.fold(List.empty[SiderealTarget]) { case (_, so) => so.map(_.toNewModel) }
+      lst.headOption.fold(List.empty[SiderealTarget]) { case (_, so) => so }
     }
 
   override def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[AgsStrategy.Estimate] =
