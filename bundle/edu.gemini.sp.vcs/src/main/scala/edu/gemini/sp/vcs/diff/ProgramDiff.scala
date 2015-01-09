@@ -96,6 +96,8 @@ object ProgramDiff {
           if (o.exists(nodeDiffers)) Diff.tree(o) else List.empty
 
         case _                 =>
+          // If there is even one descendant that differs, include this node
+          // in the results.  Otherwise, only include it if it differs.
           r.children.flatMap(presentDiffs) match {
             case Nil => diffNode(r).toList
             case cds => present(r) :: cds
