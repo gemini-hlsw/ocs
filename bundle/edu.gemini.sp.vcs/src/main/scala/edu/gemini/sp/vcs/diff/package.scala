@@ -23,5 +23,5 @@ package object diff {
     * Note, requires a complete tree traversal so this is somewhat expensive.
     */
   def removedKeys(p: ISPProgram): Set[SPNodeKey] =
-    p.getVersions.keySet &~ p.keySet
+    p.fold(p.getVersions.keySet) { _ - _.key }
 }
