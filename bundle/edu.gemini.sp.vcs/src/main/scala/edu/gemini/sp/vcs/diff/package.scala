@@ -3,13 +3,7 @@ package edu.gemini.sp.vcs
 import edu.gemini.pot.sp.{ISPProgram, SPNodeKey, ISPNode}
 import edu.gemini.spModel.rich.pot.sp._
 
-import scalaz._
-
 package object diff {
-
-  // Java Integer seems to be missing from scalaz.Equal object but necessary
-  // for use with NodeVersions (a VersionVector[LifespanId, Integer]).
-  implicit def IntegerEqual: Equal[java.lang.Integer] = Equal.equalA
 
   implicit class IspNodeTreeOps(val node: ISPNode) extends AnyVal {
     /** A Map with entries for all nodes rooted at this node, keyed by

@@ -1,7 +1,7 @@
 package edu.gemini.sp.vcs.diff
 
 import edu.gemini.pot.sp.{SPNodeKey, DataObjectBlob, ISPNode}
-import edu.gemini.pot.sp.version.EmptyNodeVersions
+import edu.gemini.pot.sp.version._
 import edu.gemini.sp.vcs.TestingEnvironment
 import edu.gemini.sp.vcs.TestingEnvironment._
 import edu.gemini.spModel.obscomp.SPNote
