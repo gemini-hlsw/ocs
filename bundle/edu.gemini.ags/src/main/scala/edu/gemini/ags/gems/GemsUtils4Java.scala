@@ -13,6 +13,7 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
 object GemsUtils4Java {
   // Returns true if the target magnitude is within the given limits
   def checkMagLimit(target: SPTarget, magLimits: MagnitudeConstraints): Boolean =
+    // TODO This method has too many conversions, should be simplified
     target.getMagnitude(magLimits.band.toOldModel).asScalaOpt.map(m => magLimits.contains(m.toNewModel)).getOrElse(true)
 
 }

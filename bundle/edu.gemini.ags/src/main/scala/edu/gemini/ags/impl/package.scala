@@ -129,7 +129,7 @@ package object impl {
       val ra          = Angle.fromDegrees(coords.getRaDeg)
       val dec         = Angle.fromDegrees(coords.getDecDeg)
       val coordinates = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
-      SiderealTarget(name, coordinates, Equinox.J2000, None, mags, None)
+      SiderealTarget(name, coordinates, None, mags, None)
     }
   }
 
