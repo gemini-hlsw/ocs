@@ -1,14 +1,18 @@
 package edu.gemini.spModel.rich.pot.sp
 
-import edu.gemini.pot.sp.{ISPContainerNode, ISPNode}
+import edu.gemini.pot.sp.{SPNodeKey, ISPContainerNode, ISPNode}
 import edu.gemini.spModel.data.ISPDataObject
 
+import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 
 import scalaz._
 import Scalaz._
 
 final class RichNode(val node: ISPNode) extends AnyVal {
+  /** An alias for `getNodeKey`. */
+  def key: SPNodeKey = node.getNodeKey
+
   def dataObject: Option[ISPDataObject] = Option(node.getDataObject)
 
   def dataObject_=(obj: ISPDataObject): Unit =
@@ -39,13 +43,13 @@ final class RichNode(val node: ISPNode) extends AnyVal {
         // containers, first remove them from their container nodes.
 
         // Get lists of children that share some other parent
-        val parentMap = lst.filter(child => Option(child.getParent).exists(_ != c)).groupBy(_.getParent.getNodeKey)
+        val parentMap = lst.filter(child => Option(child.getParent).exists(_ != c)).groupBy(_.getParent.key)
         parentMap.values.foreach { childList =>
           val parent    = childList.head.getParent
-          val childKeys = childList.map(_.getNodeKey).toSet
+          val childKeys = childList.map(_.key).toSet
 
           // remove them from their current parent
-          parent.setChildren(parent.children.filter(c => !childKeys.contains(c.getNodeKey)).asJava)
+          parent.setChildren(parent.children.filter(c => !childKeys.contains(c.key)).asJava)
         }
 
         c.setChildren(lst.asJava)
@@ -78,4 +82,28 @@ final class RichNode(val node: ISPNode) extends AnyVal {
    */
   def findAncestor(p: ISPNode => Boolean): Option[ISPNode] =
     ancestors.find(p)
+
+  /** Performs a pre-order depth-first traversal over the program tree,
+    * combining nodes to produce the result according to `op`.
+    */
+  def fold[A](z: A)(op: (A, ISPNode) => A): A = {
+    @tailrec def go(rem: List[ISPNode], res: A): A =
+      rem match {
+        case Nil     => res
+        case n :: ns => go(n.children ++ ns, op(res, n))
+      }
+
+    go(List(node), z)
+  }
+
+  def exists(p: ISPNode => Boolean): Boolean = {
+    @tailrec def go(rem: List[ISPNode]): Boolean =
+      rem match {
+        case Nil     => false
+        case n :: ns => p(n) || go(n.children ++ ns)
+      }
+    go(List(node))
+  }
+
+  def forall(p: ISPNode => Boolean): Boolean = !exists(!p(_))
 }
