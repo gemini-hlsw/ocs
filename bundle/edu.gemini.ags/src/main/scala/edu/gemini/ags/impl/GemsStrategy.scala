@@ -4,7 +4,6 @@ import edu.gemini.ags.api.{AgsAnalysis, AgsMagnitude, AgsStrategy}
 import edu.gemini.ags.api.AgsStrategy.{Assignment, Estimate, Selection}
 import edu.gemini.ags.gems._
 import edu.gemini.ags.gems.mascot.{Strehl, MascotProgress}
-import edu.gemini.catalog.api.MagnitudeLimits.{SaturationLimit, FaintnessLimit}
 import edu.gemini.catalog.api._
 import edu.gemini.pot.sp.SPComponentType
 
@@ -227,19 +226,19 @@ object GemsStrategy extends AgsStrategy {
     import AgsMagnitude._
     val cond = ctx.getConditions
     val mags = magnitudes(ctx, mt).toMap
-    def lim(gp: GuideProbe): MagnitudeLimits =
-      autoSearchLimitsCalc(mags(gp), cond).toMagnitudeLimits
+    def lim(gp: GuideProbe): Option[MagnitudeConstraints] =
+      autoSearchLimitsCalc(mags(gp), cond)
 
-    val odgwMagLimits = (lim(GsaoiOdgw.odgw1)/:GsaoiOdgw.values().drop(1)) { (ml, odgw) =>
-      ml.union(lim(odgw)).getValue
+    val odgwMagLimits = (lim(GsaoiOdgw.odgw1) /: GsaoiOdgw.values().drop(1)) { (ml, odgw) =>
+      (ml |@| lim(odgw))(_ union _).flatten
     }
-    val canMagLimits = (lim(Canopus.Wfs.cwfs1)/:Canopus.Wfs.values().drop(1)) { (ml, can) =>
-      ml.union(lim(can)).getValue
+    val canMagLimits = (lim(Canopus.Wfs.cwfs1) /: Canopus.Wfs.values().drop(1)) { (ml, can) =>
+      (ml |@| lim(can))(_ union _).flatten
     }
 
-    val canopusConstraint = new QueryConstraint(CanopusTipTiltId, ctx.getBaseCoordinates, new RadiusLimits(Canopus.Wfs.Group.instance.getRadiusLimits), canMagLimits)
-    val odgwConstaint     = new QueryConstraint(OdgwFlexureId,    ctx.getBaseCoordinates, new RadiusLimits(GsaoiOdgw.Group.instance.getRadiusLimits),   odgwMagLimits)
-    List(canopusConstraint, odgwConstaint)
+    val canopusConstraint = canMagLimits.map(c => new QueryConstraint(CanopusTipTiltId, ctx.getBaseCoordinates, new RadiusLimits(Canopus.Wfs.Group.instance.getRadiusLimits), c.toMagnitudeLimits))
+    val odgwConstaint     = odgwMagLimits.map(c => new QueryConstraint(OdgwFlexureId,    ctx.getBaseCoordinates, new RadiusLimits(GsaoiOdgw.Group.instance.getRadiusLimits), c.toMagnitudeLimits))
+    List(canopusConstraint, odgwConstaint).flatten
   }
 
   override val guideProbes: List[GuideProbe] =

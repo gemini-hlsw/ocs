@@ -42,7 +42,7 @@ case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGui
       mc <- magnitudeCalc(ctx, mt)
       rc <- radiusLimits(ctx)
       rl =  rc.toRadiusLimit
-      ml = AgsMagnitude.manualSearchLimits(mc)
+      ml <- AgsMagnitude.manualSearchLimits(mc)
     } yield new QueryConstraint(ctx.getBaseCoordinates, rl, ml.toMagnitudeLimits)).toList
 
   private def radiusLimits(ctx: ObsContext): Option[RadiusConstraint] =

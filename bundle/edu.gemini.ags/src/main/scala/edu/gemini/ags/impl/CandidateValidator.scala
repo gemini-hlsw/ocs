@@ -22,7 +22,7 @@ class CandidateValidator(params: SingleProbeStrategyParams, mt: MagnitudeTable, 
    * established context.
    */
   private def isValid(ctx: ObsContext): (SiderealTarget) => Boolean = {
-    val magLimits = params.magnitudeCalc(ctx, mt).map(AgsMagnitude.autoSearchLimitsCalc(_, ctx.getConditions)).getOrElse(MagnitudeConstraints.empty(params.band))
+    val magLimits = params.magnitudeCalc(ctx, mt).map(AgsMagnitude.autoSearchLimitsCalc(_, ctx.getConditions)).getOrElse(MagnitudeConstraints.empty(params.band).some)
 
     (st: SiderealTarget) => {
       // Do not use any candidates that are too close to science target / base
@@ -35,7 +35,7 @@ class CandidateValidator(params: SingleProbeStrategyParams, mt: MagnitudeTable, 
         }
 
       // Only keep candidates that fall within the magnitude limits.
-      def brightnessOk = st.magnitudeIn(params.band).exists(magLimits.contains)
+      def brightnessOk = (magLimits |@| st.magnitudeIn(params.band))(_ contains _) | false
 
       // Only keep those that are in range of the guide probe.
       def inProbeRange = params.validator(ctx).validate(new SPTarget(st.toOldModel), ctx)
