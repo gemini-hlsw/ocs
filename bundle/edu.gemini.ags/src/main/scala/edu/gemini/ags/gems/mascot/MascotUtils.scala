@@ -451,14 +451,14 @@ object MascotUtils {
     //  return zero_point_fudge*res(2:);
 
 
-    val lambda = DenseVector(3.5, 4, 5, 6, 7, 8, 9, 10, 11) * 1e-7; // meters
-    val qe = DenseVector(0.0, 5, 30, 37, 37, 32, 23, 10, 0.0) * 0.01 * 1.6; // percent
+    val lambda = DenseVector(3.5, 4, 5, 6, 7, 8, 9, 10, 11) * 1e-7 // meters
+    val qe = DenseVector(0.0, 5, 30, 37, 37, 32, 23, 10, 0.0) * 0.01 * 1.6 // percent
     val h = 6.62e-34
     val c = 3e8
 
     // for band u,b,v,r,i
-    val cw = DenseVector(365.0, 440.0, 550.0, 700.0, 900.0) * 1e-9; // central wavelength
-    val dw = DenseVector(68.0, 98.0, 89.0, 22.0, 24.0) * 1e-3; // delta_lambda in microns
+    val cw = DenseVector(365.0, 440.0, 550.0, 700.0, 900.0) * 1e-9 // central wavelength
+    val dw = DenseVector(68.0, 98.0, 89.0, 22.0, 24.0) * 1e-3 // delta_lambda in microns
     val zp = DenseVector(-11.37, -11.18, -11.42, -11.76, -12.08)
 
     // photometric zeropoints in W/cm2/mic
@@ -476,8 +476,8 @@ object MascotUtils {
     val res = DenseVector.zeros[Double](4)
 
     for (i <- 0 until 4) {
-      val f1 = YUtils.pow(10.0, msky(i) * -0.4 + zp); // f en W/cm2/mic
-      val f2 = (f1 :/ divide(h * c, cw)) * math.Pi * (math.pow(400.0, 2) - math.pow(50.0, 2)); // f in N_photon/pup_gemini/s/mic
+      val f1 = YUtils.pow(10.0, msky(i) * -0.4 + zp) // f en W/cm2/mic
+      val f2 = (f1 :/ divide(h * c, cw)) * math.Pi * (math.pow(400.0, 2) - math.pow(50.0, 2)) // f in N_photon/pup_gemini/s/mic
       val f = f2 * 0.1; //f in N_photon/pup_gemini/s/100nm
       val tab1 = grow(f, f(f.size - 1))
       val tab2 = grow(cw, 1100e-9)
@@ -524,7 +524,7 @@ object MascotUtils {
     //  tab1   = f; grow,tab1,f(5);
     //  tab2   = cw; grow,tab2,1100e-9;
     //  sp     = tspline(10,tab1,tab2,lvec);
-    val f1 = YUtils.pow(10.0, msky * -0.4 + zp); // f en W/cm2/mic
+    val f1 = YUtils.pow(10.0, msky * -0.4 + zp) // f en W/cm2/mic
     val f2 = (f1 :/ divide(h * c, cw)) * math.Pi * (math.pow(400.0, 2) - math.pow(50.0, 2))
     val f = f2 * 0.1
     val tab1 = grow(f, f(f.size - 1))

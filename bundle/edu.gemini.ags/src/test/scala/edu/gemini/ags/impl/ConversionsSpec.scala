@@ -1,6 +1,5 @@
 package edu.gemini.ags.impl
 
-import edu.gemini.ags.impl
 import edu.gemini.shared.skyobject
 import edu.gemini.skycalc
 import edu.gemini.spModel.core.Target.SiderealTarget

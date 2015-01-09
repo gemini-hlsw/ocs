@@ -192,7 +192,7 @@ object YUtils {
    * Returns math.exp(v) for each value in v
    */
   def exp(v: DenseVector[Double]): DenseVector[Double] = {
-    v.mapValues(math.exp(_))
+    v.mapValues(math.exp)
   }
 
 //  /**
@@ -242,28 +242,28 @@ object YUtils {
    * Applies math.sinh to each element of the vector and returns the result
    */
   def sinh(v: DenseVector[Double]): DenseVector[Double] = {
-    v.mapValues(math.sinh(_))
+    v.mapValues(math.sinh)
   }
 
   /**
    * Applies math.cosh to each element of the vector and returns the result
    */
   def cosh(v: DenseVector[Double]): DenseVector[Double] = {
-    v.mapValues(math.cosh(_))
+    v.mapValues(math.cosh)
   }
 
   /**
    * Applies math.sqrt to each element of the vector and returns the result
    */
   def sqrt(v: DenseVector[Double]): DenseVector[Double] = {
-    v.mapValues(math.sqrt(_))
+    v.mapValues(math.sqrt)
   }
 
   /**
    * Applies math.sqrt to each element of the matrix and returns the result
    */
   def sqrt(m: DenseMatrix[Double]): DenseMatrix[Double] = {
-    m.mapValues(math.sqrt(_))
+    m.mapValues(math.sqrt)
   }
 
   /**
@@ -508,7 +508,7 @@ object YUtils {
    */
   def where(v: DenseVector[Double], f: Double => Boolean): Array[Int] = {
     v.toArray.zipWithIndex collect {
-      case (d, i) if (f(d)) => i
+      case (d, i) if f(d) => i
     }
   }
 
