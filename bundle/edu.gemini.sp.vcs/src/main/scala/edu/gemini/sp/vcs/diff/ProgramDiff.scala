@@ -60,6 +60,16 @@ object ProgramDiff {
     *
     * - include `Missing` diffs for nodes deleted both locally and remotely and
     * that have the same version data
+    *
+    * @param local local program from which differences are to be extracted
+    *
+    * @param remoteVm `VersionMap` of the remote instance of the program
+    *
+    * @param remoteRemoved `Set` of all node keys that are not present in the
+    *                     remote instance of the program
+    *
+    * @return super-set of `Diff`s between the local and remote program
+    *         instances
     */
   def compare(local: ISPProgram, remoteVm: VersionMap, remoteRemoved: Set[SPNodeKey]): List[Diff] = {
     def versionDiffers(k: SPNodeKey): Boolean =
