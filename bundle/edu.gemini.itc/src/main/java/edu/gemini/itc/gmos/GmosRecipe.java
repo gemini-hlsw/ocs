@@ -137,9 +137,11 @@ public final class GmosRecipe extends RecipeBase {
                       ObservationDetailsParameters obsDetailParameters,
                       ObservingConditionParameters obsConditionParameters,
                       GmosParameters gmosParameters, TeleParameters teleParameters,
-                      PlottingDetailsParameters plotParameters)
+                      PlottingDetailsParameters plotParameters,
+                      PrintWriter out)
 
     {
+        super(out);
         _sdParameters = sdParameters;
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;

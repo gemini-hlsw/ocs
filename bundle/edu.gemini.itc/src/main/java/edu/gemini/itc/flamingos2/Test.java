@@ -71,10 +71,10 @@ public class Test {
 			PlottingDetailsParameters pdp = new PlottingDetailsParameters(
 					PlottingDetailsParameters.AUTO_LIMITS, 3, 4);
 			
-			AltairParameters ap = new AltairParameters(5, 10, false);
+			AltairParameters ap = new AltairParameters(5, 10, "IN", "NGS", false);
 			
 			// Create AcqCamRecipe object with the fake parameters
-			Recipe recipe = new Flamingos2Recipe(sdp, odp, ocp, acp, tp, ap, pdp);
+			Recipe recipe = new Flamingos2Recipe(sdp, odp, ocp, acp, tp, ap, pdp, null);
 
 			// Perform Calculation
 			recipe.writeOutput();

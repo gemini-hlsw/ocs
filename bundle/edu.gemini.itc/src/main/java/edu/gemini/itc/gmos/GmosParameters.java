@@ -262,6 +262,7 @@ public final class GmosParameters extends ITCParameters {
                           String IFUOffset,
                           String IFUMinOffset,
                           String IFUMaxOffset,
+                          String ccdType,
                           String instrumentLocation) {
         _Filter = Filter;
         _grating = grating;
@@ -277,6 +278,7 @@ public final class GmosParameters extends ITCParameters {
         _IFUOffset = IFUOffset;
         _IFUMinOffset = IFUMinOffset;
         _IFUMaxOffset = IFUMaxOffset;
+        _CCDtype = ccdType;
         _instrumentLocation = instrumentLocation;
 
     }

@@ -98,7 +98,10 @@ public final class AcqCamRecipe extends RecipeBase {
             ObservationDetailsParameters obsDetailParameters,
             ObservingConditionParameters obsConditionParameters,
             AcquisitionCamParameters acqCamParameters,
-            TeleParameters teleParameters) {
+            TeleParameters teleParameters,
+            PrintWriter out) {
+        super(out);
+
         _sdParameters = sdParameters;
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;

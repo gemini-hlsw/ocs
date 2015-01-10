@@ -73,8 +73,12 @@ public class Test {
                     new ObservingConditionParameters(2, 2, 4, 3, 2.3);
             
             NiciParameters np =
-                    new NiciParameters("R",
-                    NiciParameters.NDA);
+                    new NiciParameters(
+                        "H",                    // channel1
+                        "ndfilt_clear",         // channel2
+                        "80",                   // pupil
+                        "",                     // instrument mode, unused?
+                        "h5050");               // dichroic position
             
             TeleParameters tp =
                     new TeleParameters(TeleParameters.ALUMINIUM,
@@ -84,7 +88,7 @@ public class Test {
             
             
             // Create AcqCamRecipe object with the fake parameters
-            Recipe recipe = new NiciRecipe(sdp, odp, ocp, np, tp);
+            Recipe recipe = new NiciRecipe(sdp, odp, ocp, np, tp, null);
             
             // Perform Calculation
             recipe.writeOutput();

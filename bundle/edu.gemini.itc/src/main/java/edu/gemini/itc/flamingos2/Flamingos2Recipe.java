@@ -132,7 +132,9 @@ public final class Flamingos2Recipe extends RecipeBase {
 			Flamingos2Parameters flamingos2Parameters,
 			TeleParameters teleParameters,
 			AltairParameters altairParameters, 
-			PlottingDetailsParameters plotParameters) {
+			PlottingDetailsParameters plotParameters,
+			PrintWriter out) {
+		super(out);
 		_sdParameters = sdParameters;
 		_obsDetailParameters = obsDetailParameters;
 		_obsConditionParameters = obsConditionParameters;
@@ -737,13 +739,12 @@ public final class Flamingos2Recipe extends RecipeBase {
 		_println(instrument.toString());
 
 		if (_altairParameters.altairIsUsed()) {
-			_teleParameters.setWFS("altair");
-		}
-		_println(_teleParameters.printParameterSummary());
-		if (_altairParameters.altairIsUsed()) {
+			_println(_teleParameters.printParameterSummary("altair"));
 			_println(_altairParameters.printParameterSummary());
+		} else {
+			_println(_teleParameters.printParameterSummary());
 		}
-		
+
 		_println(_obsConditionParameters.printParameterSummary());
 		_println(_obsDetailParameters.printParameterSummary());
 

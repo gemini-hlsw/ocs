@@ -101,7 +101,7 @@ public class Test {
 
             // Create GnirsRecipe object with the fake parameters
             // REL-472: Commenting out Altair option for now
-            Recipe recipe = new GnirsRecipe(sdp, odp, ocp, gp, tp, /* ap, */ pdp);
+            Recipe recipe = new GnirsRecipe(sdp, odp, ocp, gp, tp, /* ap, */ pdp, null);
 
             // Perform Calculation
             recipe.writeOutput();

@@ -84,7 +84,7 @@ public class Test {
             
             
             // Create AcqCamRecipe object with the fake parameters
-            Recipe recipe = new AcqCamRecipe(sdp, odp, ocp, acp, tp);
+            Recipe recipe = new AcqCamRecipe(sdp, odp, ocp, acp, tp, null);
             
             // Perform Calculation
             recipe.writeOutput();

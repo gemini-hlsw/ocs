@@ -122,9 +122,10 @@ public final class NifsRecipe extends RecipeBase {
      * Constructs a NifsRecipe given the parameters.
      * Useful for testing.
      */
-    public NifsRecipe(SourceDefinitionParameters sdParameters, ObservationDetailsParameters obsDetailParameters, ObservingConditionParameters obsConditionParameters, NifsParameters nifsParameters, TeleParameters teleParameters, AltairParameters altairParameters, PlottingDetailsParameters plotParameters)
+    public NifsRecipe(SourceDefinitionParameters sdParameters, ObservationDetailsParameters obsDetailParameters, ObservingConditionParameters obsConditionParameters, NifsParameters nifsParameters, TeleParameters teleParameters, AltairParameters altairParameters, PlottingDetailsParameters plotParameters, PrintWriter out)
 
     {
+        super(out);
         _sdParameters = sdParameters;
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;

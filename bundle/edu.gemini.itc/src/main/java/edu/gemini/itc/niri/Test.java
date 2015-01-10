@@ -98,12 +98,12 @@ public class Test
 							3,
 							4);
         
-        AltairParameters ap = new AltairParameters(5, 10, false);
+        AltairParameters ap = new AltairParameters(5, 10, "IN", "NGS", false);
 
 
 
 	 // Create NiriRecipe object with the fake parameters
-	 Recipe recipe = new NiriRecipe(sdp, odp, ocp, np,tp, ap, pdp);
+	 Recipe recipe = new NiriRecipe(sdp, odp, ocp, np,tp, ap, pdp, null);
 
 	 // Perform Calculation
          for(int i=0;i<50;i++)

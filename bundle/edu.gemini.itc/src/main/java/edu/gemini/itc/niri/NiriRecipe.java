@@ -151,9 +151,11 @@ public final class NiriRecipe extends RecipeBase {
                       ObservingConditionParameters obsConditionParameters,
                       NiriParameters niriParameters, TeleParameters teleParameters,
                       AltairParameters altairParameters,
-                      PlottingDetailsParameters plotParameters)
+                      PlottingDetailsParameters plotParameters,
+                      PrintWriter out)
 
     {
+        super(out);
         _sdParameters = sdParameters;
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;
@@ -1107,12 +1109,12 @@ public final class NiriRecipe extends RecipeBase {
         _println(_sdParameters.printParameterSummary());
         _println(instrument.toString());
         if (_altairParameters.altairIsUsed()) {
-            _teleParameters.setWFS("altair");
-        }
-        _println(_teleParameters.printParameterSummary());
-        if (_altairParameters.altairIsUsed()) {
+            _println(_teleParameters.printParameterSummary("altair"));
             _println(_altairParameters.printParameterSummary());
+        } else {
+            _println(_teleParameters.printParameterSummary());
         }
+
         _println(_obsConditionParameters.printParameterSummary());
         _println(_obsDetailParameters.printParameterSummary());
         if (_obsDetailParameters.getCalculationMode().equals(
