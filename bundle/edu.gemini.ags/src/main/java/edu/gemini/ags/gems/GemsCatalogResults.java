@@ -384,7 +384,7 @@ public class GemsCatalogResults {
         if (valid && guideProbe instanceof Canopus.Wfs) {
             final Canopus.Wfs wfs = (Canopus.Wfs) guideProbe;
             final GemsMagnitudeTable.CanopusWfsCalculator canopusWfsCalculator = GemsMagnitudeTable.CanopusWfsMagnitudeLimitsCalculator();
-            valid = GemsUtils4Java.checkMagLimit(target, canopusWfsCalculator.getNominalMagnitudeConstraints(wfs));
+            valid = GemsUtils4Java.containsMagnitudeInLimits(target, canopusWfsCalculator.getNominalMagnitudeConstraints(wfs));
         }
         return valid;
     }

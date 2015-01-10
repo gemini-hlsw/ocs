@@ -29,6 +29,8 @@ object AgsMagnitude {
    * and speeds.
    */
   def rangeLimits(mc: MagnitudeCalc, c1: (Conditions, GuideSpeed), c2: (Conditions, GuideSpeed)): Option[MagnitudeConstraints] =
+    // TODO In practice this shouldn't produce a None but there is no sensible default
+    // Review if the AGS model could be improved to support it
     mc(c1._1, c1._2).union(mc(c2._1, c2._2))
 
   /**

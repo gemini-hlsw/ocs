@@ -16,6 +16,9 @@ import scala.collection.JavaConverters._
 import scala.concurrent._
 import ExecutionContext.Implicits.global
 
+import scalaz._
+import Scalaz._
+
 /**
  * Implements the logic for estimation and selection for a single guide probe.
  * The same logic is applied to various single-star guiding scenarios (i.e.,
@@ -43,7 +46,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
     // throw away the guide probe (which we know anyway), and obtain just the
     // list of guide stars
     candidates(ctx, mt).map { lst =>
-      lst.headOption.fold(List.empty[SiderealTarget]) { case (_, so) => so }
+      lst.headOption.foldMap(_._2)
     }
 
   override def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[AgsStrategy.Estimate] =

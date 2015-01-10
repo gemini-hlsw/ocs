@@ -296,7 +296,7 @@ public class GemsGuideStarSearchOptions {
     }
 
     public Set<String> getCatalogs() {
-        Set<String> catalogs = new HashSet<>(2);
+        Set<String> catalogs = new HashSet<>(4);
         catalogs.add(nirCatalog);
         catalogs.add(opticalCatalog);
         return catalogs;

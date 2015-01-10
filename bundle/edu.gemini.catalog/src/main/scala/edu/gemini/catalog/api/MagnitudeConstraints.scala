@@ -82,7 +82,7 @@ case class MagnitudeConstraints(band: MagnitudeBand, faintnessConstraint: Faintn
     (band == that.band) option {
       val faintness = faintnessConstraint.max(that.faintnessConstraint)
 
-      // Calculate the max out of the saturation limit if both are defined
+      // Calculate the min saturation limit if both are defined
       val saturation = (saturationConstraint |@| that.saturationConstraint)(_ min _)
 
       MagnitudeConstraints(band, faintness, saturation)
