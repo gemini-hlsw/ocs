@@ -7,28 +7,32 @@ import scala.collection.JavaConverters._
 
 trait GuideProbeGeometry extends FeatureGeometry {
   /**
-   * Define the geometry of the probe arm for the guide probe.
-   * @return
+   * Define the geometry of the probe arm for the guide probe for a guide star at the origin.
+   * @return the geometry for the probe arm in arcsec
    */
-  def probeArm: Shape
+  protected def probeArm: Shape
 
   /**
-   * Define the geometry for the pickoff mirror for the guide probe.
-   * @return
+   * Define the geometry for the pickoff mirror for the guide probe for a guide star at the origin.
+   * @return the geometry for the pickoff mirror in arcsec
    */
-  def pickoffMirror: Shape
+  protected def pickoffMirror: Shape
 
   /**
-   * Calculate the geometry of the probe arm for the given parameters in arcsec.
-   * @param posAngle  the position angle
-   * @param guideStar the position of the selected guide star
-   * @param offset    the position of the offset in use
-   * @return          the geometry of the guidestar in arcsec
+   * Calculate the geometry of the probe arm for the given parameters.
+   * @param posAngle  the position angle in radians
+   * @param guideStar the position of the selected guide star in arcsec
+   * @param offset    the position of the offset in arcsec
+   * @return          the geometry of the probe in arcsec
    */
   def geometryForParams(posAngle:        Double  = 0.0,
                         guideStar:       Point2D = new Point2D.Double(0.0, 0.0),
                         offset:          Point2D = new Point2D.Double(0.0, 0.0)): List[Shape]
 
+  /**
+   * Caclulate the geometry of the probe arm for the given parameters and return the results as a Java list.
+   * @see geometryForParams
+   */
   def geometryForParamsAsJava(posAngle:        Double  = 0.0,
                               guideStar:       Point2D = new Point2D.Double(0.0, 0.0),
                               offset:          Point2D = new Point2D.Double(0.0, 0.0)): java.util.List[Shape] =
@@ -36,14 +40,14 @@ trait GuideProbeGeometry extends FeatureGeometry {
 
   /**
    * Calculate the geometry of the probe arm based on screen coordinates (for the TPE).
-   * @param posAngle        the position angle
+   * @param posAngle        the position angle in radians
    * @param guideStar       screen coordinates of the selected guide star
    * @param offset          screen coordinates of the offset in use
-   * @param translate       screen coordinates to use to translate the final result
+   * @param translate       any screen coordinates to use to translate the final result
    * @param xFlipArm        boolean as to whether the probe arm should be reflected in the x-axis
    * @param raFactor        RA scaling, representing a multiple to the x-coordinate (should be 1.0 or -1.0)
    * @param pixelsPerArcsec pixels per arcsec in the current screen representation
-   * @return                the shapes representing the probe arm
+   * @return                the geometry of the probe in screen coordinates
    */
   def geometryForScreen(posAngle:        Double  = 0.0,
                         guideStar:       Point2D = new Point2D.Double(0.0, 0.0),

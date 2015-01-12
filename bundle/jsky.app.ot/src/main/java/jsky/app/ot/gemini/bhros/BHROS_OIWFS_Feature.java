@@ -18,13 +18,10 @@ import java.util.*;
  * On-instrument wavefront sensor for bHROS. Because bHROS is really just a custom mask for GMOS,
  * it uses the same IOWFS. So we are subclassing here in a fairly poor manner, simply re-implementing
  * all of the methods in the superclass that downcast the instrument to GMOS.
- * <p>
  * TODO: refactor a common base class
  * @author rnorris
- *
  */
 public class BHROS_OIWFS_Feature extends GMOS_OIWFS_Feature {
-
 	private ISSPort _port;
     private Double _patrolFieldXOffset;
     private Double _patrolFieldYOffset;
@@ -51,14 +48,18 @@ public class BHROS_OIWFS_Feature extends GMOS_OIWFS_Feature {
      * @param oiwfsDefined set to true if an OIWFS position is defined (otherwise
      *                     the xg and yg parameters are ignored)
      */
-	protected void _updateFigureList(double guidePosX, double guidePosY, double offsetPosX, double offsetPosY, double translateX, double translateY, double basePosX, double basePosY, boolean oiwfsDefined) {
-		InstBHROS inst = _iw.getContext().instrument().orNull(InstBHROS.SP_TYPE);
+	protected void _updateFigureList(double guidePosX, double guidePosY,
+									 double offsetPosX, double offsetPosY,
+									 double translateX, double translateY,
+									 double basePosX, double basePosY,
+									 boolean oiwfsDefined) {
+		final InstBHROS inst = _iw.getContext().instrument().orNull(InstBHROS.SP_TYPE);
         if (inst != null) {
             _port = inst.getISSPort();
             _patrolFieldXOffset = _getPatrolFieldXOffset(inst);
             _patrolFieldYOffset = _getPatrolFieldYOffset(inst);
             _figureList.clear();
-            boolean flip = (_port == ISSPort.SIDE_LOOKING);
+            final boolean flip = (_port == ISSPort.SIDE_LOOKING);
             addOffsetConstrainedPatrolField(offsetPosX + translateX, offsetPosY + translateY);
             if (oiwfsDefined)
                 _addProbeArm(guidePosX, guidePosY, offsetPosX, offsetPosY, translateX, translateY, flip);
@@ -74,10 +75,9 @@ public class BHROS_OIWFS_Feature extends GMOS_OIWFS_Feature {
 			// in that case we can just keep going because we're replacing that code.
 			// What I really want to do is call super.super._needsUpdate()
 		}
-		InstBHROS instBHROS = (InstBHROS) inst;
-		double xOffset = _getPatrolFieldXOffset(instBHROS);
-		double yOffset = _getPatrolFieldYOffset(instBHROS);
+		final InstBHROS instBHROS = (InstBHROS) inst;
+		final double xOffset = _getPatrolFieldXOffset(instBHROS);
+		final double yOffset = _getPatrolFieldYOffset(instBHROS);
 		return (_patrolFieldXOffset != xOffset) || (_patrolFieldYOffset != yOffset) || (_port != instBHROS.getISSPort());
 	}
-
 }
