@@ -37,7 +37,7 @@ public class TiptiltFlexurePair {
         GemsCatalogSearchResults canopusFlexure = null;
 
         for (GemsCatalogSearchResults searchResults : results) {
-            GemsCatalogSearchCriterion criterion = searchResults.getCriterion();
+            GemsCatalogSearchCriterion criterion = searchResults.criterion();
             GemsCatalogSearchKey key = criterion.key();
             if (key.getType() == GemsGuideStarType.tiptilt) {
                 GemsGuideProbeGroup tiptiltGroup = key.getGroup();

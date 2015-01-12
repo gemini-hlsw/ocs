@@ -3,6 +3,8 @@ package edu.gemini.ags.gems
 import edu.gemini.catalog.api.{MagnitudeConstraints, RadiusConstraint}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core.{Magnitude, Coordinates, Offset, Angle}
+import edu.gemini.shared.skyobject
+import scala.collection.JavaConverters._
 
 import scalaz._
 import Scalaz._
@@ -95,3 +97,13 @@ case class CatalogSearchCriterion(name: String, magLimits: MagnitudeConstraints,
  * See OT-24
  */
 case class GemsCatalogSearchCriterion(key: GemsCatalogSearchKey, criterion: CatalogSearchCriterion)
+
+/**
+ * Results of a GeMS catalog search
+ * See OT-24
+ */
+case class GemsCatalogSearchResults(criterion: GemsCatalogSearchCriterion, results: List[skyobject.SkyObject]) {
+  def this(criterion: GemsCatalogSearchCriterion, results: java.util.List[skyobject.SkyObject]) = this(criterion, results.asScala.toList)
+
+  def resultsAsJava: java.util.List[skyobject.SkyObject] = results.asJava
+}

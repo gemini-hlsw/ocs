@@ -194,11 +194,11 @@ public class GemsCatalog {
     // Store the given results in the given map. This is used to later merge the results.
     private synchronized void mapResults(Map<GemsCatalogSearchCriterion, List<SkyObject>> map, List<GemsCatalogSearchResults> results) {
         for(GemsCatalogSearchResults result : results) {
-            GemsCatalogSearchCriterion criter = result.getCriterion();
+            GemsCatalogSearchCriterion criter = result.criterion();
             if (map.containsKey(criter)) {
-                map.get(criter).addAll(result.getResults());
+                map.get(criter).addAll(result.resultsAsJava());
             } else {
-                map.put(criter, result.getResults());
+                map.put(criter, result.resultsAsJava());
             }
         }
     }

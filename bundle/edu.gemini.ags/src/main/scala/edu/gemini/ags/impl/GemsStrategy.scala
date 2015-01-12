@@ -87,7 +87,7 @@ object GemsStrategy extends AgsStrategy {
         val radiusConstraint = RadiusConstraint.between(constraint.radiusLimits.getMinLimit.toNewModel, constraint.radiusLimits.getMaxLimit.toNewModel)
         val catalogSearchCriterion = CatalogSearchCriterion("ags", constraint.magnitudeLimits.toMagnitudeConstraints, radiusConstraint, None, angle.some)
         val gemsCatalogSearchCriterion = new GemsCatalogSearchCriterion(result.searchKey, catalogSearchCriterion)
-        new GemsCatalogSearchResults(gemsCatalogSearchCriterion, result.catalogResult.candidates.toList)
+        new GemsCatalogSearchResults(gemsCatalogSearchCriterion, result.catalogResult.candidates.asScalaList)
       }
     }
   }
@@ -122,10 +122,10 @@ object GemsStrategy extends AgsStrategy {
     // Extract something we can understand from the GemsCatalogSearchResults.
     def simplifiedResult(results: List[GemsCatalogSearchResults]): List[(GuideProbe, List[SiderealTarget])] =
       results.flatMap { result =>
-        val so = result.getResults.asScala.toList  // extract the sky objects from this thing
+        val so = result.results  // extract the sky objects from this thing
         // For each guide probe associated with these sky objects, add a tuple
         // (guide probe, sky object list) to the results
-        result.getCriterion.key.getGroup.getMembers.asScala.toList.map { guideProbe =>
+        result.criterion.key.getGroup.getMembers.asScala.toList.map { guideProbe =>
           (guideProbe, so.map(_.toNewModel))
         }
       }
@@ -190,8 +190,8 @@ object GemsStrategy extends AgsStrategy {
 
     // Now check that the results are valid: there must be a valid tip-tilt and flexure star each.
     val checker = results.foldRight(Map[String, Boolean]())((result, resultMap) => {
-      val key = result.getCriterion.key.getGroup.getKey
-      if (!result.getResults.isEmpty)    resultMap.updated(key, true)
+      val key = result.criterion.key.getGroup.getKey
+      if (!result.results.isEmpty)       resultMap.updated(key, true)
       else if (!resultMap.contains(key)) resultMap.updated(key, false)
       else                               resultMap
     })

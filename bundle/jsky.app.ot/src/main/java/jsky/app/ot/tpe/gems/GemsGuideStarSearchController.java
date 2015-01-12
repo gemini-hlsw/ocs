@@ -116,13 +116,13 @@ class GemsGuideStarSearchController {
     // in the candidates list.
     private List<GemsCatalogSearchResults> filter(List<SkyObject> excludeCandidates,
                                                   List<GemsCatalogSearchResults> gemsCatalogSearchResults) {
-        List<GemsCatalogSearchResults> results = new ArrayList<GemsCatalogSearchResults>();
+        List<GemsCatalogSearchResults> results = new ArrayList<>();
         for (GemsCatalogSearchResults in : gemsCatalogSearchResults) {
-            List<SkyObject> skyObjects = new ArrayList<SkyObject>(in.getResults().size());
-            skyObjects.addAll(in.getResults());
+            List<SkyObject> skyObjects = new ArrayList<>(in.results().size());
+            skyObjects.addAll(in.resultsAsJava());
             skyObjects = removeAll(skyObjects, excludeCandidates);
             if (!skyObjects.isEmpty()) {
-                GemsCatalogSearchResults out = new GemsCatalogSearchResults(in.getCriterion(), skyObjects);
+                GemsCatalogSearchResults out = new GemsCatalogSearchResults(in.criterion(), skyObjects);
                 results.add(out);
             }
         }
@@ -131,7 +131,7 @@ class GemsGuideStarSearchController {
 
     // Removes all the objects in the skyObjects list that are also in the excludeCandidates list by comparing names
     private List<SkyObject> removeAll(List<SkyObject> skyObjects, List<SkyObject> excludeCandidates) {
-        List<SkyObject> result = new ArrayList<SkyObject>();
+        List<SkyObject> result = new ArrayList<>();
         for(SkyObject skyObject : skyObjects) {
             if (!contains(excludeCandidates, skyObject)) {
                 result.add(skyObject);

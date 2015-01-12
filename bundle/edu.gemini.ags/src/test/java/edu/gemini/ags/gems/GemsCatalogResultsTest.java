@@ -202,8 +202,8 @@ public class GemsCatalogResultsTest  implements MascotProgress {
         for(GemsCatalogSearchResults result : results) {
             i++;
             System.out.println("Result #" + i);
-            System.out.println(" Criteria:" + result.getCriterion());
-            System.out.println(" Results size:" + result.getResults().size());
+            System.out.println(" Criteria:" + result.criterion());
+            System.out.println(" Results size:" + result.results().size());
         }
 
         List<GemsGuideStars> gemsResults = new GemsCatalogResults().analyze(obsContext, posAngles, results, null);

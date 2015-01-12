@@ -75,7 +75,7 @@ public class GemsUtil {
     public static List<SkyObject> getUniqueSkyObjects(List<GemsCatalogSearchResults> list) {
         List<SkyObject> result = new ArrayList<SkyObject>();
         for(GemsCatalogSearchResults searchResults : list) {
-            for(SkyObject skyObject : searchResults.getResults()) {
+            for(SkyObject skyObject : searchResults.resultsAsJava()) {
                 result.add(skyObject);
             }
         }
