@@ -42,60 +42,36 @@ class GmosOiwfsProbeArm[I  <: InstGmosCommon[D,F,P,SM],
 
   def armAngle(posAngle:    Double,
                guideStar:   Point2D,
-               offset:      Point2D,
-               xFlipFactor: Double,
-               raFactor:    Double): Double = {
-    // TODO: Can we get rid of raFactor or xFlipFactor somehow?
+               offset:      Point2D): Double = {
     val posAngleRot = AffineTransform.getRotateInstance(posAngle)
 
     val offsetAdj = {
-      val ifuTrans  = AffineTransform.getScaleInstance(raFactor, 1.0)
-      ifuTrans.concatenate(posAngleRot)
-      val ifuOffset = transformPoint(new Point2D.Double(inst.getFPUnit.getWFSOffset, 0.0), ifuTrans)
+      val ifuOffset = transformPoint(new Point2D.Double(inst.getFPUnit.getWFSOffset, 0.0), posAngleRot)
       transformPoint(offset, AffineTransform.getTranslateInstance(ifuOffset.getX, ifuOffset.getY))
     }
 
-    val t  = transformPoint(T, AffineTransform.getScaleInstance(raFactor, xFlipFactor))
-    val p  = transformPoint(guideStar, AffineTransform.getTranslateInstance(t.getX - offsetAdj.getX, t.getY - offsetAdj.getY))
+    val p  = transformPoint(guideStar, AffineTransform.getTranslateInstance(T.getX - offsetAdj.getX, T.getY - offsetAdj.getY))
     val r  = math.sqrt(p.getX * p.getX + p.getY * p.getY)
-    val mx = MX * raFactor
-    val bx = BX
-
 
     val alpha = math.atan2(p.getX, p.getY)
     val phi = {
-      val acosArg    = (r*r - (bx*bx + mx*mx)) / (2 * bx * mx)
+      val acosArg    = (r*r - (BX2 + MX2)) / (2 * BX * MX)
       val acosArgAdj = if (acosArg > 1.0) 1.0 else if (acosArg < -1.0) -1.0 else acosArg
-      xFlipFactor * math.acos(acosArgAdj)
+      math.acos(acosArgAdj)
     }
     val theta = {
-      val thetaP = math.asin((mx / r) * math.sin(phi))
-      if (mx * mx > (r*r + bx*bx)) math.Pi - thetaP else thetaP
+      val thetaP = math.asin((MX / r) * math.sin(phi))
+      if (MX2 > (r*r + BX2)) math.Pi - thetaP else thetaP
     }
     phi - theta - alpha - math.Pi / 2.0
   }
 
   override def geometryForParams(posAngle:        Double,
                                  guideStar:       Point2D,
-                                 offset:          Point2D,
-                                 xFlipArm:        Boolean,
-                                 raFactor:        Double): List[Shape] = {
-    val xFlipFactor = if (xFlipArm) -1.0 else 1.0
-
-    for {
-      x <- List(-1.0, 1.0)
-      r <- List(-1.0, 1.0)
-    } {
-      val trans = AffineTransform.getScaleInstance(r, x)
-      println(s"ANGLE FOR x=$x r=$r -> ${armAngle(posAngle, transformPoint(guideStar, trans), transformPoint(offset, trans), x, r)}")
-    }
-    println("\n\n")
-    val angle = armAngle(posAngle, guideStar, offset, xFlipFactor, raFactor)
-
-    // Create the transformation for the geometry.
+                                 offset:          Point2D): List[Shape] = {
+    val angle = armAngle(posAngle, guideStar, offset)
     val armTrans = AffineTransform.getRotateInstance(angle, guideStar.getX, guideStar.getY)
     armTrans.concatenate(AffineTransform.getTranslateInstance(guideStar.getX, guideStar.getY))
-    armTrans.concatenate(AffineTransform.getScaleInstance(raFactor, 1.0))
     transformedGeometry(armTrans)
   }
 }
@@ -112,8 +88,10 @@ object GmosOiwfsProbeArm {
   private val T = new Point2D.Double(-427.52, -101.84)
 
   // Length of stage arm in arcsec
-  private val BX =  124.89
+  private val BX  = 124.89
+  private val BX2 = BX * BX
 
   // Length of pick-off arm in arcsec
-  private val MX =  358.46
+  private val MX  = 358.46
+  private val MX2 = MX * MX
 }
