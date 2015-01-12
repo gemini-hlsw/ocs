@@ -1274,7 +1274,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                             _curPos.setPropMotionRA("0.0");
                         }
                         if (tqr.getCoordinates(0) instanceof WorldCoords) {
-                            _curPos.setCoordSys(HmsDegTarget.SystemType.J2000);
                             WorldCoords pos = (WorldCoords) tqr.getCoordinates(0);
                             _w.xaxis.setText(pos.getRA().toString());
                             _w.yaxis.setText(pos.getDec().toString());

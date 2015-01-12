@@ -302,16 +302,6 @@ public final class SPTarget extends WatchablePos {
     }
 
     /**
-     * Set the Coordinate System with an int (presumably from the coordinate
-     * system static constants).
-     */
-    public void setCoordSys(final TypeBase systemOption) throws IllegalArgumentException {
-        _target.setSystemOption(systemOption);
-
-        _notifyOfGenericUpdate();
-    }
-
-    /**
      * Set the Coordinate System with a string.
      */
     public void setCoordSys(final String coordSysString) throws IllegalArgumentException {
@@ -322,7 +312,7 @@ public final class SPTarget extends WatchablePos {
                 _target = newTarget;
             }
         } else {
-            setCoordSys(newCoordSys);
+            _target.setSystemOption(newCoordSys);
         }
 
         _notifyOfGenericUpdate();
