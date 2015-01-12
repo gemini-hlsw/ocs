@@ -281,22 +281,22 @@ public class GemsGuideStarSearchOptions {
                                                       GemsMagnitudeTable.LimitsCalculator calculator,
                                                       GemsGuideStarType gType,
                                                       Option<Magnitude.Band> nirBand) {
-        String name = "%s %s".format(gGroup.getDisplayName(), gType.name());
+        String name = String.format("%s %s", gGroup.getDisplayName(), gType.name());
 
         // Adjust the mag limits for the worst conditions (as is done in the ags servlet)
-        MagnitudeLimits magLimits = calculator.getGemsMagnitudeLimitsForJava(gType, nirBand).mapMagnitudes(obsContext.getConditions().magAdjustOp());
+        MagnitudeLimits magLimits = calculator.adjustGemsMagnitudeLimitsForJava(gType, nirBand, obsContext.getConditions());
 
         //MagnitudeLimits magLimits = gGroup.getMagLimits(gType, nirBand).mapMagnitudes(obsContext.getConditions().magAdjustOp());
         RadiusLimits radiusLimits = new RadiusLimits(gGroup.getRadiusLimits());
         Option<Offset> searchOffset = instrument.getOffset();
-        Option<Angle> searchPA = (posAngles.size() == 1) ? new Some<Angle>(posAngles.iterator().next()) : None.<Angle>instance();
+        Option<Angle> searchPA = (posAngles.size() == 1) ? new Some<>(posAngles.iterator().next()) : None.<Angle>instance();
         CatalogSearchCriterion criterion = new CatalogSearchCriterion(name, magLimits, radiusLimits, searchOffset, searchPA);
         GemsCatalogSearchKey key = new GemsCatalogSearchKey(gType, gGroup);
         return new GemsCatalogSearchCriterion(key, criterion);
     }
 
     public Set<String> getCatalogs() {
-        Set<String> catalogs = new HashSet<String>(2);
+        Set<String> catalogs = new HashSet<>(4);
         catalogs.add(nirCatalog);
         catalogs.add(opticalCatalog);
         return catalogs;

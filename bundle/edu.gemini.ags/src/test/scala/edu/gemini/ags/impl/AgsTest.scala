@@ -239,18 +239,18 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
     def mags = {
       val m    = GuideSpeed.values.toList.map { gs => gs -> mc.apply(ctx.getConditions, gs) }.toMap
       val fast = m(FAST)
-      val band = fast.getBand
+      val band = fast.band
 
       def magList(base: Double)(adjs: (Double, Option[GuideSpeed])*): List[(Magnitude, Option[GuideSpeed])] =
-        adjs.toList.map { case (adj, gs) => (new Magnitude(base + adj, band.toNewModel), gs) }
+        adjs.toList.map { case (adj, gs) => (new Magnitude(base + adj, band), gs) }
 
-      val bright = fast.getSaturationLimit.asScalaOpt.map(_.getBrightness).toList.flatMap { brightness =>
+      val bright = fast.saturationConstraint.map(_.brightness).toList.flatMap { brightness =>
         magList(brightness)((-0.01, None), (0.0, Some(FAST)), (0.01, Some(FAST)))
       }
 
-      val faintFast = magList(fast.getFaintnessLimit.getBrightness)((-0.01, Some(FAST)), (0.0, Some(FAST)), (0.01, Some(MEDIUM)))
-      val faintNorm = magList(m(MEDIUM).getFaintnessLimit.getBrightness)((-0.01, Some(MEDIUM)), (0.0, Some(MEDIUM)), (0.01, Some(SLOW)))
-      val faintSlow = magList(m(SLOW).getFaintnessLimit.getBrightness)((-0.01, Some(SLOW)), (0.0, Some(SLOW)), (0.01, None))
+      val faintFast = magList(fast.faintnessConstraint.brightness)((-0.01, Some(FAST)), (0.0, Some(FAST)), (0.01, Some(MEDIUM)))
+      val faintNorm = magList(m(MEDIUM).faintnessConstraint.brightness)((-0.01, Some(MEDIUM)), (0.0, Some(MEDIUM)), (0.01, Some(SLOW)))
+      val faintSlow = magList(m(SLOW).faintnessConstraint.brightness)((-0.01, Some(SLOW)), (0.0, Some(SLOW)), (0.01, None))
 
       bright ++ faintFast ++ faintNorm ++ faintSlow
     }
@@ -410,7 +410,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
 
   def test(): Unit = {
     val mc   = magTable.apply(ctx, guideProbe).get
-    val band = mc.apply(ctx.getConditions, GuideSpeed.FAST).getBand.toNewModel
+    val band = mc.apply(ctx.getConditions, GuideSpeed.FAST).band
     val maxMag = new Magnitude(Double.MaxValue, band)
 
     def go(winners: List[(SiderealTarget, GuideSpeed)]): Unit = {
@@ -429,7 +429,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
         res match {
           case None                                       => // ok
           case Some(AgsStrategy.Selection(posAngle, Nil)) =>
-            equalPosAngles(ctx.getPositionAngle.toNewModel, posAngle.toNewModel)
+            equalPosAngles(ctx.getPositionAngle.toNewModel, posAngle)
           case Some(AgsStrategy.Selection(_,        asn)) =>
               fail("Expected nothing but got: " + asn.map { a =>
                 "(" + a.guideStar.toString + ", " + a.guideProbe + ")"
@@ -441,15 +441,17 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
           case None      =>
             fail("Expected: (" + expStar + ", " + expSpeed + "), but nothing selected")
           case Some(AgsStrategy.Selection(posAngle, asn)) =>
-            equalPosAngles(ctx.getPositionAngle.toNewModel, posAngle.toNewModel)
+            equalPosAngles(ctx.getPositionAngle.toNewModel, posAngle)
             asn match {
               case List(AgsStrategy.Assignment(actProbe, actStar)) =>
                 assertEquals(guideProbe, actProbe)
-                assertEqualTarget(expStar, actStar.toNewModel)
-                val actSpeed = AgsMagnitude.fastestGuideSpeed(mc, actStar.getMagnitude(band.toOldModel).getValue, ctx.getConditions)
-                assertTrue("Expected: " + expSpeed + ", actual: " + actSpeed, actSpeed.exists(_ == expSpeed))
-              case Nil => fail("Expected: (" + expStar + ", " + expSpeed + "), but nothing selected")
-              case _   => fail("Multiple guide probe assignments: " + asn)
+                assertEqualTarget(expStar, actStar)
+                actStar.magnitudeIn(band).foreach { mag =>
+                  val actSpeed = AgsMagnitude.fastestGuideSpeed(mc, mag, ctx.getConditions)
+                  assertTrue(s"Expected: $expSpeed , actual: $actSpeed", actSpeed.exists(_ == expSpeed))
+                }
+              case Nil => fail(s"Expected: ($expStar, $expSpeed), but nothing selected")
+              case _   => fail(s"Multiple guide probe assignments: $asn")
             }
         }
       }

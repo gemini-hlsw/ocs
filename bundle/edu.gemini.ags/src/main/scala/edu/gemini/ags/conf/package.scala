@@ -5,8 +5,6 @@ import edu.gemini.spModel.guide.GuideSpeed
 
 package object conf {
 
-  sealed case class MagLimitsId(name: String)
-
   val AltairLgs  = MagLimitsId("Altair LGS")
   val AltairNgs  = MagLimitsId("Altair NGS")
   val F2Oiwfs    = MagLimitsId("F2 OIWFS")
@@ -36,10 +34,6 @@ package object conf {
     NifsOiwfs,
     NiriOiwfs
   )
-
-  case class FaintnessKey(iq: ImageQuality, sb: SkyBackground, gs: GuideSpeed) {
-    override def toString: String = s"($iq, $sb, $gs)"
-  }
 
   type FaintnessMap = Map[FaintnessKey, Double]
 

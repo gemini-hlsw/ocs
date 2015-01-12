@@ -4,9 +4,9 @@ import edu.gemini.ags.api.{AgsAnalysis, AgsMagnitude, AgsStrategy}
 import edu.gemini.ags.api.AgsStrategy.{Assignment, Estimate, Selection}
 import edu.gemini.ags.gems._
 import edu.gemini.ags.gems.mascot.{Strehl, MascotProgress}
-import edu.gemini.catalog.api.MagnitudeLimits.{SaturationLimit, FaintnessLimit}
 import edu.gemini.catalog.api._
 import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.spModel.core.Target.SiderealTarget
 
 // TODO port these dependencies
 import edu.gemini.shared.skyobject.SkyObject
@@ -117,23 +117,23 @@ object GemsStrategy extends AgsStrategy {
     mapGroup(Canopus.Wfs.Group.instance) ++ mapGroup(GsaoiOdgw.Group.instance)
   }
 
-  override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SkyObject])]] = {
+  override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]] = {
 
     // Extract something we can understand from the GemsCatalogSearchResults.
-    def simplifiedResult(results: List[GemsCatalogSearchResults]): List[(GuideProbe, List[SkyObject])] =
+    def simplifiedResult(results: List[GemsCatalogSearchResults]): List[(GuideProbe, List[SiderealTarget])] =
       results.flatMap { result =>
         val so = result.getResults.asScala.toList  // extract the sky objects from this thing
         // For each guide probe associated with these sky objects, add a tuple
         // (guide probe, sky object list) to the results
         result.getCriterion.getKey.getGroup.getMembers.asScala.toList.map { guideProbe =>
-          (guideProbe, so)
+          (guideProbe, so.map(_.toNewModel))
         }
       }
 
     // why do we need multiple position angles?  catalog results are given in
     // a ring (limited by radius limits) around a base position ... confusion
     val posAngles   = (ctx.getPositionAngle.toNewModel :: (0 until 360 by 90).map(Angle.fromDegrees(_)).toList).toSet
-    val emptyResult = List.empty[(GuideProbe, List[SkyObject])]
+    val emptyResult = List.empty[(GuideProbe, List[SiderealTarget])]
     future {
       search(GemsGuideStarSearchOptions.DEFAULT_CATALOG,
         GemsGuideStarSearchOptions.DEFAULT_CATALOG,
@@ -214,10 +214,10 @@ object GemsStrategy extends AgsStrategy {
 
     // Now we must convert from an Option[GemsGuideStars] to a Selection.
     gemsGuideStars.map { x =>
-      val posAngle = x.getPa.toDegrees
+      val posAngle = Angle.fromDegrees(x.getPa.toDegrees.getMagnitude)
       val assignments = x.getGuideGroup.getAll.asScalaList.map(targets => {
         val guider = targets.getGuider
-        targets.getTargets.asScalaList.map(target => Assignment(guider, skyObjectFromScienceTarget(target)))
+        targets.getTargets.asScalaList.map(target => Assignment(guider, target.toNewModel))
       }).flatten
       Selection(posAngle, assignments)
     }
@@ -227,21 +227,19 @@ object GemsStrategy extends AgsStrategy {
     import AgsMagnitude._
     val cond = ctx.getConditions
     val mags = magnitudes(ctx, mt).toMap
-    def lim(gp: GuideProbe): MagnitudeLimits = {
-      val ml = autoSearchLimitsCalc(mags(gp), cond)
-      new MagnitudeLimits(ml.band.toOldModel, new FaintnessLimit(ml.faintnessConstraint.brightness), ml.saturationConstraint.map(s => new SaturationLimit(s.brightness)).asGeminiOpt)
+    def lim(gp: GuideProbe): Option[MagnitudeConstraints] =
+      autoSearchLimitsCalc(mags(gp), cond)
+
+    val odgwMagLimits = (lim(GsaoiOdgw.odgw1) /: GsaoiOdgw.values().drop(1)) { (ml, odgw) =>
+      (ml |@| lim(odgw))(_ union _).flatten
+    }
+    val canMagLimits = (lim(Canopus.Wfs.cwfs1) /: Canopus.Wfs.values().drop(1)) { (ml, can) =>
+      (ml |@| lim(can))(_ union _).flatten
     }
 
-    val odgwMagLimits = (lim(GsaoiOdgw.odgw1)/:GsaoiOdgw.values().drop(1)) { (ml, odgw) =>
-      ml.union(lim(odgw)).getValue
-    }
-    val canMagLimits = (lim(Canopus.Wfs.cwfs1)/:Canopus.Wfs.values().drop(1)) { (ml, can) =>
-      ml.union(lim(can)).getValue
-    }
-
-    val canopusConstraint = new QueryConstraint(CanopusTipTiltId, ctx.getBaseCoordinates, new RadiusLimits(Canopus.Wfs.Group.instance.getRadiusLimits), canMagLimits)
-    val odgwConstaint     = new QueryConstraint(OdgwFlexureId,    ctx.getBaseCoordinates, new RadiusLimits(GsaoiOdgw.Group.instance.getRadiusLimits),   odgwMagLimits)
-    List(canopusConstraint, odgwConstaint)
+    val canopusConstraint = canMagLimits.map(c => new QueryConstraint(CanopusTipTiltId, ctx.getBaseCoordinates, new RadiusLimits(Canopus.Wfs.Group.instance.getRadiusLimits), c.toMagnitudeLimits))
+    val odgwConstaint     = odgwMagLimits.map(c => new QueryConstraint(OdgwFlexureId,    ctx.getBaseCoordinates, new RadiusLimits(GsaoiOdgw.Group.instance.getRadiusLimits), c.toMagnitudeLimits))
+    List(canopusConstraint, odgwConstaint).flatten
   }
 
   override val guideProbes: List[GuideProbe] =

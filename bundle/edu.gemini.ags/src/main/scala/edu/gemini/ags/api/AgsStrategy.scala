@@ -1,10 +1,11 @@
 package edu.gemini.ags.api
 
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
+import edu.gemini.ags.impl._
 import edu.gemini.catalog.api.QueryConstraint
-import edu.gemini.shared.skyobject.SkyObject
-import edu.gemini.skycalc.Angle
 import edu.gemini.spModel.ags.AgsStrategyKey
+import edu.gemini.spModel.core.Angle
+import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
@@ -21,7 +22,7 @@ trait AgsStrategy {
 
   def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis]
 
-  def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SkyObject])]]
+  def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]]
 
   def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[AgsStrategy.Estimate]
 
@@ -54,7 +55,7 @@ object AgsStrategy {
   /**
    * An assignment of a guide star to a particular guide probe.
    */
-  case class Assignment(guideProbe: GuideProbe, guideStar: SkyObject)
+  case class Assignment(guideProbe: GuideProbe, guideStar: SiderealTarget)
 
   /**
    * Results of running an AGS selection.  The position angle for which the
@@ -74,8 +75,8 @@ object AgsStrategy {
           }
         }
 
-      (env/:assignments) { (curEnv, ass) =>
-        val target = new SPTarget(ass.guideStar)
+      (env /: assignments) { (curEnv, ass) =>
+        val target = new SPTarget(ass.guideStar.toOldModel)
         val oldGpt = curEnv.getPrimaryGuideProbeTargets(ass.guideProbe).asScalaOpt
 
         val newGpt = oldGpt.fold(GuideProbeTargets.create(ass.guideProbe, target)) { gpt =>

@@ -1,9 +1,8 @@
 package edu.gemini.ags.conf
 
-
 import java.io.InputStream
 
-import edu.gemini.shared.skyobject.Magnitude.Band
+import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{SkyBackground, ImageQuality}
 import edu.gemini.spModel.guide.GuideSpeed
 
@@ -32,7 +31,7 @@ object ProbeLimitsParser {
 
   val iqMap   = ImageQuality.values().map(iq => iq.getPercentage.toString -> iq).toMap +  ("ANY" -> ImageQuality.ANY)
   val sbMap   = SkyBackground.values().map(sb => sb.getPercentage.toString -> sb).toMap + ("ANY" -> SkyBackground.ANY)
-  val bandMap = Band.values().map(b => b.name() -> b).toMap
+  val bandMap = MagnitudeBand.all.map(b => b.name -> b).toMap
   val idMap   = AllLimitsIds.map(g => g.name -> g).toMap
 
   // The parser validates most aspects of the CalcMap, but doesn't catch missing
@@ -64,15 +63,15 @@ object ProbeLimitsParser {
 import ProbeLimitsParser._
 
 final class ProbeLimitsParser extends JavaTokenParsers {
-  val id: Parser[MagLimitsId] = """[^,]+""".r ^? (idMap, s => s"Unrecognized guide limit table id '$s'.")
-  val band: Parser[Band]      = """[a-zA-Z]+""".r ^? (bandMap, s => s"Unrecognized magnitude band '$s'.")
-  val mag: Parser[Double]     = decimalNumber ^^ { _.toDouble }
+  val id: Parser[MagLimitsId]     = """[^,]+""".r ^? (idMap, s => s"Unrecognized guide limit table id '$s'.")
+  val band: Parser[MagnitudeBand] = """[a-zA-Z]+""".r ^? (bandMap, s => s"Unrecognized magnitude band '$s'.")
+  val mag: Parser[Double]         = decimalNumber ^^ { _.toDouble }
 
   // When exported by the Google spreadsheet, there are commas in the blank
   // rows and columns.
   val chaff: Parser[List[String]] = rep(",")
 
-  val calcDef: Parser[(MagLimitsId, Band, Double)] =
+  val calcDef: Parser[(MagLimitsId, MagnitudeBand, Double)] =
     (id<~",")~(band<~",")~(mag<~chaff) ^^ {
       case idVal~bandVal~magAdj => (idVal, bandVal, magAdj)
     }

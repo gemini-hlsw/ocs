@@ -117,7 +117,7 @@ object Star {
     var rmag2 = rmag
     if (rmag == invalidMag) {
       if (vmag != invalidMag && bmag != invalidMag) {
-        rmag2 = check_mag(bmag, vmag);
+        rmag2 = check_mag(bmag, vmag)
         m = if (rmag2 < 18.0) 1 else 0
       } else {
         //m = if (vmag != invalidMag && vmag < 17) 1 else 0
@@ -136,13 +136,13 @@ object Star {
   */
   private def check_mag(bMag: Double, vMag: Double): Double = {
     val a = Array(0.0530768, 0.794274, 0.212565, -0.867596, 0.77699, -0.161851)
-    val x = bMag - vMag;
+    val x = bMag - vMag
 
-    val funcMag = a(0) + a(1) * x + a(2) * math.pow(x, 2.0) + a(3) * math.pow(x, 3) + a(4) * math.pow(x, 4) + a(5) * math.pow(x, 5);
+    val funcMag = a(0) + a(1) * x + a(2) * math.pow(x, 2.0) + a(3) * math.pow(x, 3) + a(4) * math.pow(x, 4) + a(5) * math.pow(x, 5)
 
-    val rMag = vMag - funcMag;
+    val rMag = vMag - funcMag
 
-    rMag;
+    rMag
   }
 
 }

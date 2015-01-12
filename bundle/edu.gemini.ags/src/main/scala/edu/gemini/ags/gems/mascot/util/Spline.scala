@@ -118,7 +118,7 @@ object Spline {
 
     // XXX Since this function is a hotspot for performance, it was reimplemented in Java for better speed
 //    HotSpots.spline(y.toArray, x.toArray).asVector;
-    DenseVector(HotSpots.spline(y.toArray, x.toArray));
+    DenseVector(HotSpots.spline(y.toArray, x.toArray))
   }
 
   /**

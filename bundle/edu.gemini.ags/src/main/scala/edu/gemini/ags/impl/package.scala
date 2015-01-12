@@ -1,6 +1,9 @@
 package edu.gemini.ags
 
+import edu.gemini.catalog.api.{SaturationConstraint, FaintnessConstraint, MagnitudeConstraints, MagnitudeLimits}
+import edu.gemini.catalog.api.MagnitudeLimits.{FaintnessLimit, SaturationLimit}
 import edu.gemini.shared.util.immutable.PredicateOp
+import edu.gemini.shared.util.immutable.ScalaConverters.ScalaOptionOps
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.obs.context.ObsContext
@@ -118,6 +121,36 @@ package object impl {
     }
   }
 
+  implicit class SPTarget2SiderealTarget(val sp:SPTarget) extends AnyVal {
+    def toNewModel:SiderealTarget = {
+      val name        = sp.getName
+      val coords      = sp.getSkycalcCoordinates
+      val mags        = sp.getMagnitudes.asScalaList.map(_.toNewModel)
+      val ra          = Angle.fromDegrees(coords.getRaDeg)
+      val dec         = Angle.fromDegrees(coords.getDecDeg)
+      val coordinates = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
+      SiderealTarget(name, coordinates, None, mags, None)
+    }
+  }
+
+  // REMOVE When AGS is fully ported
+  @Deprecated
+  implicit class MagnitudeConstraints2MagnitudeLimits(val mc: MagnitudeConstraints) extends AnyVal {
+
+    def toMagnitudeLimits = {
+      val saturation: Option[SaturationLimit] = mc.saturationConstraint.map(s => new SaturationLimit(s.brightness))
+      new MagnitudeLimits(mc.band.toOldModel, new FaintnessLimit(mc.faintnessConstraint.brightness), new ScalaOptionOps(saturation).asGeminiOpt)
+    }
+  }
+
+  @Deprecated
+  implicit class MagnitudeLimits2MagnitudeConstraints(val ml: MagnitudeLimits) extends AnyVal {
+
+    def toMagnitudeConstraints = {
+      MagnitudeConstraints(ml.getBand.toNewModel, FaintnessConstraint(ml.getFaintnessLimit.getBrightness), ml.getSaturationLimit.asScalaOpt.map(s => SaturationConstraint(s.getBrightness)))
+    }
+  }
+
   def find(gpt: GuideProbeTargets, targetName: String): Option[SPTarget] =
     Option(targetName).map(_.trim).flatMap { tn =>
       gpt.getOptions.find(new PredicateOp[SPTarget] {
@@ -143,11 +176,4 @@ package object impl {
     else Some(lst.minBy(toSiderealTarget(_).magnitudeIn(band).getOrElse(max)))
   }
 
-  def skyObjectFromScienceTarget(target: SPTarget): skyobject.SkyObject = {
-    val name            = target.getName
-    val coords          = target.getSkycalcCoordinates
-    val skyObjectCoords = new skyobject.coords.HmsDegCoordinates.Builder(coords.getRa, coords.getDec).build
-    val magnitudes      = target.getMagnitudes
-    new skyobject.SkyObject.Builder(name, skyObjectCoords).build.withMagnitudes(magnitudes)
-  }
 }
