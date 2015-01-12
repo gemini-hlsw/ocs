@@ -9,6 +9,14 @@ trait Arbitraries {
   implicit val arbAngle: Arbitrary[Angle] =
     Arbitrary(arbitrary[Short].map(n => n / 10.0).map(Angle.fromDegrees))
 
+  implicit val arbOffset: Arbitrary[Offset] =
+    Arbitrary {
+      for {
+        p <- arbitrary[Angle]
+        q <- arbitrary[Angle]
+      } yield Offset(p, q)
+    }
+
   implicit val arbRA: Arbitrary[RightAscension] =
     Arbitrary(arbitrary[Angle].map(RightAscension.fromAngle))
 

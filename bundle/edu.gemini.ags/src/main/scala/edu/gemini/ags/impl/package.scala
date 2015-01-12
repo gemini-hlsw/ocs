@@ -28,6 +28,10 @@ package object impl {
     def toOldModel: skycalc.Angle = skycalc.Angle.degrees(angle.toDegrees)
   }
 
+  implicit class OldOffset2New(val offset: skycalc.Offset) extends AnyVal {
+    def toNewModel: Offset = Offset(offset.p().toNewModel, offset.q().toNewModel)
+  }
+
   implicit class OldCoordinates2New(val c: skycalc.Coordinates) extends AnyVal {
     def toNewModel: Coordinates = Coordinates(RightAscension.fromAngle(c.getRa.toNewModel), Declination.fromAngle(c.getDec.toNewModel).getOrElse(Declination.zero))
   }
