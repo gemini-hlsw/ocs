@@ -14,7 +14,7 @@ class GmosOiwfsProbeArm[I  <: InstGmosCommon[D,F,P,SM],
   import FeatureGeometry.transformPoint
   import GmosOiwfsProbeArm._
 
-  override protected def probeArm: Shape = {
+  override protected lazy val probeArm: Shape = {
     val hm  = PickoffMirrorSize / 2.0
     val htw = ProbeArmTaperedWidth / 2.0
 
@@ -29,7 +29,7 @@ class GmosOiwfsProbeArm[I  <: InstGmosCommon[D,F,P,SM],
     ImPolygon(points)
   }
 
-  override protected def pickoffMirror: Shape = {
+  override protected lazy val pickoffMirror: Shape = {
     val (x0, y0) = (-PickoffMirrorSize / 2.0, -PickoffMirrorSize / 2.0)
     val (x1, y1) = (x0 + PickoffMirrorSize,   y0)
     val (x2, y2) = (x1,                       y1 + PickoffMirrorSize)
