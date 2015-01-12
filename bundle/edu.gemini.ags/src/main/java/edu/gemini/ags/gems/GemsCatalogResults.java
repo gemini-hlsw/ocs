@@ -56,8 +56,8 @@ public class GemsCatalogResults {
         List<GemsGuideStars> result = new ArrayList<>();
 
         for (TiptiltFlexurePair pair : TiptiltFlexurePair.pairs(results)) {
-            GemsGuideProbeGroup tiptiltGroup = pair.getTiptiltResults().criterion().key().getGroup();
-            GemsGuideProbeGroup flexureGroup = pair.getFlexureResults().criterion().key().getGroup();
+            GemsGuideProbeGroup tiptiltGroup = pair.getTiptiltResults().criterion().key().group();
+            GemsGuideProbeGroup flexureGroup = pair.getFlexureResults().criterion().key().group();
             List<SkyObject> tiptiltSkyObjectList = filter(obsContext, pair.getTiptiltResults().resultsAsJava(),
                     tiptiltGroup, posAngles);
             List<SkyObject> flexureSkyObjectList = filter(obsContext, pair.getFlexureResults().resultsAsJava(),
@@ -100,8 +100,8 @@ public class GemsCatalogResults {
         final List<GemsGuideStars> result = new ArrayList<>();
 
         for (TiptiltFlexurePair pair : TiptiltFlexurePair.pairs(results)) {
-            final GemsGuideProbeGroup tiptiltGroup = pair.getTiptiltResults().criterion().key().getGroup();
-            final GemsGuideProbeGroup flexureGroup = pair.getFlexureResults().criterion().key().getGroup();
+            final GemsGuideProbeGroup tiptiltGroup = pair.getTiptiltResults().criterion().key().group();
+            final GemsGuideProbeGroup flexureGroup = pair.getFlexureResults().criterion().key().group();
             final List<SkyObject> tiptiltSkyObjectList = filter(obsContext, pair.getTiptiltResults().resultsAsJava(),
                     tiptiltGroup, posAngles);
             final List<SkyObject> flexureSkyObjectList = filter(obsContext, pair.getFlexureResults().resultsAsJava(),

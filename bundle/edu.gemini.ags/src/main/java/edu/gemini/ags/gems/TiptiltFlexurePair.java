@@ -39,8 +39,8 @@ public class TiptiltFlexurePair {
         for (GemsCatalogSearchResults searchResults : results) {
             GemsCatalogSearchCriterion criterion = searchResults.criterion();
             GemsCatalogSearchKey key = criterion.key();
-            if (key.getType() == GemsGuideStarType.tiptilt) {
-                GemsGuideProbeGroup tiptiltGroup = key.getGroup();
+            if (key.starType() == GemsGuideStarType.tiptilt) {
+                GemsGuideProbeGroup tiptiltGroup = key.group();
                 String groupKey = tiptiltGroup.getKey();
                 if ("CWFS".equals(groupKey)) {
                     canopusTiptilt = searchResults;
@@ -48,7 +48,7 @@ public class TiptiltFlexurePair {
                     gsaoiTiptilt = searchResults;
                 }
             } else {
-                GemsGuideProbeGroup flexureGroup = key.getGroup();
+                GemsGuideProbeGroup flexureGroup = key.group();
                 String groupKey = flexureGroup.getKey();
                 if ("ODGW".equals(groupKey) || "FII OIWFS".equals(groupKey)) {
                     gsaoiOrFlamingosFlexure = searchResults;

@@ -4,6 +4,7 @@ import edu.gemini.catalog.api.{MagnitudeConstraints, RadiusConstraint}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core.{Magnitude, Coordinates, Offset, Angle}
 import edu.gemini.shared.skyobject
+import edu.gemini.spModel.gems.{GemsGuideProbeGroup, GemsGuideStarType}
 import scala.collection.JavaConverters._
 
 import scalaz._
@@ -107,3 +108,9 @@ case class GemsCatalogSearchResults(criterion: GemsCatalogSearchCriterion, resul
 
   def resultsAsJava: java.util.List[skyobject.SkyObject] = results.asJava
 }
+
+/**
+ * Represents the GeMS catalog star options
+ * See OT-24
+ */
+case class GemsCatalogSearchKey(starType: GemsGuideStarType, group: GemsGuideProbeGroup)
