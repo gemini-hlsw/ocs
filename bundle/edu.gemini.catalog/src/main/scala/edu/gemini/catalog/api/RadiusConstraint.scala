@@ -44,7 +44,7 @@ object RadiusConstraint {
       val max = maxLimit + d
       val min = Angle.fromDegrees(scala.math.max(minLimit.toDegrees - d.toDegrees, 0.0))
 
-      RadiusConstraintImpl(max, min)
+      RadiusConstraint.between(max, min)
     }
 
     /**
