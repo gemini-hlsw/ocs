@@ -427,7 +427,7 @@ class NonSiderealTargetSupport {
 
 
     //refresh the Solar System Panel depending on the system type of the Non Sidereal Target
-    private void _refreshPlanetPanel(CoordinateSystem target) {
+    private void _refreshPlanetPanel(ITarget target) {
         boolean isSolarObject = target.getSystemOption() == NamedTarget.SystemType.SOLAR_OBJECT;
         _w.planetsPanel.setVisible(isSolarObject);
         if (isSolarObject) { //refresh the content of the panel

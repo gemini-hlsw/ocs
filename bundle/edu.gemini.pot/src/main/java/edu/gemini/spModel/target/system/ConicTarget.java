@@ -123,17 +123,14 @@ public final class ConicTarget extends NonSiderealTarget  {
      * Constructs a default ConicTarget instance with default properties.
      */
     public ConicTarget() {
-        // This can't really fail.
-        super(DEFAULT_SYSTEM_TYPE);
     }
 
     /**
      * Constructs with the specific conic system type and default
      * values.
      */
-    public ConicTarget(SystemType systemOption)
-            throws IllegalArgumentException {
-        super(systemOption);
+    public ConicTarget(SystemType systemOption) {
+        setSystemOption(systemOption);
     }
 
 
@@ -337,5 +334,19 @@ public final class ConicTarget extends NonSiderealTarget  {
         return SystemType.TYPES;
     }
 
+    private SystemType systemType = DEFAULT_SYSTEM_TYPE;
 
+    public TypeBase getSystemOption() {
+        return systemType;
+    }
+
+    public void setSystemOption(TypeBase newValue) {
+        for (SystemType t: SystemType.TYPES) {
+            if (newValue.equals(t)) {
+                systemType = t;
+                return;
+            }
+        }
+        throw new IllegalArgumentException("Nope. " + newValue);
+    }
 }

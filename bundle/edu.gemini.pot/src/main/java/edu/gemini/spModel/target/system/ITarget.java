@@ -25,18 +25,7 @@ import java.util.Set;
  *
  * @author      Kim Gillies
  */
-public abstract class ITarget extends CoordinateSystem implements Serializable {
-
-    /**
-     * Constructs with the system option.
-     *
-     * @param systemOption
-     * @throws IllegalArgumentException if the given <code>systemOption</code>
-     *                                            is not permitted
-     */
-    protected ITarget(TypeBase systemOption) throws IllegalArgumentException {
-        super(systemOption);
-    }
+public abstract class ITarget implements Cloneable, Serializable {
 
     /**
      * Returns a short one word name for the coordinate system name.
@@ -253,6 +242,22 @@ public abstract class ITarget extends CoordinateSystem implements Serializable {
         }).cons(mag);
     }
 
+
+    // pushed down from CoordinateSystem
+
+    public Object clone() {
+        try {
+            return super.clone();
+        } catch (CloneNotSupportedException cnse) {
+            throw new Error(cnse);
+        }
+    }
+
+    public abstract String getSystemName();
+
+    public abstract TypeBase getSystemOption();
+
+    public abstract void setSystemOption(TypeBase newValue);
 
 
 }

@@ -130,23 +130,6 @@ public final class HmsDegTarget extends ITarget {
         return true;
     }
 
-
-    /**
-     * Constructs with the default property values.
-     */
-    public HmsDegTarget() {
-        super(DEFAULT_SYSTEM_TYPE);
-    }
-
-    /**
-     * Constructs with the specific HmsDeg system type and default
-     * values.
-     */
-    public HmsDegTarget(SystemType systemOption)
-            throws IllegalArgumentException {
-        super(systemOption);
-    }
-
     /**
      * Gets the first coordinate (right ascension) as a String.
      */
@@ -329,13 +312,6 @@ public final class HmsDegTarget extends ITarget {
         _epoch = newValue;
     }
 
-    // Override setSystemOption
-    protected void _setSystemOption(TypeBase systemOption) {
-        super._setSystemOption(systemOption);
-        _epoch = DEFAULT_EPOCH_2000;
-    }
-
-
     /**
      * Gets the proper motion in the first coordinate.
      * This returns a reference to the internal PM1 object.
@@ -516,4 +492,12 @@ public final class HmsDegTarget extends ITarget {
         return SystemType.TYPES;
     }
 
+    public TypeBase getSystemOption() {
+        return SystemType.J2000;
+    }
+
+    public void setSystemOption(TypeBase newValue) {
+        if (!newValue.equals(SystemType.J2000))
+            throw new IllegalArgumentException("Nope. " + newValue);
+    }
 }

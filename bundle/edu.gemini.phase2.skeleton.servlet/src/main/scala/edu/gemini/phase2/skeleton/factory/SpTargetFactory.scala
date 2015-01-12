@@ -2,7 +2,6 @@ package edu.gemini.phase2.skeleton.factory
 
 
 import edu.gemini.model.p1.immutable._
-import edu.gemini.model.p1.mutable.CoordinatesEpoch._
 import edu.gemini.shared.{skyobject => SO}
 import edu.gemini.shared.util.immutable.DefaultImList
 import edu.gemini.spModel.{target => SP}
@@ -70,10 +69,9 @@ object SpTargetFactory {
   private def createSiderealTarget(sid: SiderealTarget, time: Long): Either[String, SP.SPTarget] =
     for {
       coords <- siderealCoordinates(sid, time).right
-      system <- siderealSystemType(sid).right
       mags   <- siderealMags(sid).right
     } yield {
-      val itarget  = new SP.system.HmsDegTarget(system)
+      val itarget  = new SP.system.HmsDegTarget()
       setRaDec(itarget, coords)
       sid.properMotion map { pm =>
         val ra  = pm.deltaRA
@@ -93,12 +91,6 @@ object SpTargetFactory {
     itarget.setC1(new SP.system.HMS(degDeg.ra.toDouble))
     itarget.setC2(new SP.system.DMS(degDeg.dec.toDouble))
   }
-
-  private def siderealSystemType(sid: SiderealTarget): Either[String, SP.system.HmsDegTarget.SystemType] =
-    sid.epoch match {
-      case J_2000 => Right(SP.system.HmsDegTarget.SystemType.J2000)
-      case _      => Left("Unexpected epoch %s".format(sid.epoch))
-    }
 
   private def siderealMags(sid: SiderealTarget): Either[String, List[SO.Magnitude]] = {
     val empty: Either[String, List[SO.Magnitude]] = Right(Nil)

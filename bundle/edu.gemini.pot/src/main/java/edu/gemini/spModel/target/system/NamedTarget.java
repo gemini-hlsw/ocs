@@ -105,24 +105,6 @@ public final class NamedTarget extends NonSiderealTarget {
     }
 
     /**
-     * Constructs a default ConicTarget instance with default properties.
-     */
-    public NamedTarget() {
-        // This can't really fail.
-        super(DEFAULT_SYSTEM_TYPE);
-    }
-
-    /**
-     * Constructs with the specific conic system type and default
-     * values.
-     */
-    public NamedTarget(NamedTarget.SystemType systemOption)
-            throws IllegalArgumentException {
-        super(systemOption);
-    }
-
-
-    /**
      * Gets the system's name including the selected (sub)option.
      */
     public String getSystemName() {
@@ -166,5 +148,14 @@ public final class NamedTarget extends NonSiderealTarget {
         return NamedTarget.SystemType.TYPES;
     }
 
+
+    public TypeBase getSystemOption() {
+        return SystemType.SOLAR_OBJECT;
+    }
+
+    public void setSystemOption(TypeBase newValue) {
+        if (!SystemType.SOLAR_OBJECT.equals(newValue))
+            throw new IllegalArgumentException("Nope. " + newValue);
+    }
 
 }

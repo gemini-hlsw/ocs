@@ -133,11 +133,8 @@ public final class SPTarget extends WatchablePos {
         final HmsDegCoordinates  coords = obj.getHmsDegCoordinates();
         final HmsDegCoordinates.Epoch e = coords.getEpoch();
 
-        // Type
-        final HmsDegTarget.SystemType t = HmsDegTarget.SystemType.J2000;
-
         // Epoch, RA, Dec
-        final HmsDegTarget target = new HmsDegTarget(t);
+        final HmsDegTarget target = new HmsDegTarget();
         target.setEpoch(new Epoch(e.getYear()));
         target.setC1(new HMS(coords.getRa().toDegrees().getMagnitude()));
         target.setC2(new DMS(coords.getDec().toDegrees().getMagnitude()));
@@ -170,12 +167,12 @@ public final class SPTarget extends WatchablePos {
             final HmsDegTarget.SystemType[] types = HmsDegTarget.SystemType.TYPES;
             for (final HmsDegTarget.SystemType type : types) {
                 if (coordSys.equals(type.getName())) {
-                    return new HmsDegTarget(type);
+                    return new HmsDegTarget();
                 }
             }
             if (coordSys.equals("Hipparcos")) {
                 //LOGGER.info("Transforming Hipparcos to J2000");
-                return new HmsDegTarget(HmsDegTarget.SystemType.J2000);
+                return new HmsDegTarget();
             }
         }
         // Conic
@@ -192,7 +189,7 @@ public final class SPTarget extends WatchablePos {
             final NamedTarget.SystemType[] types = NamedTarget.SystemType.TYPES;
             for (final NamedTarget.SystemType type: types) {
                 if (coordSys.equals(type.getName())) {
-                    return new NamedTarget(type);
+                    return new NamedTarget();
                 }
             }
         }
@@ -350,11 +347,11 @@ public final class SPTarget extends WatchablePos {
         }
         newCoordSys = _getCoordSys(HmsDegTarget.SystemType.TYPES, coordSysString);
         if (newCoordSys != null) {
-            return new HmsDegTarget((HmsDegTarget.SystemType)newCoordSys);
+            return new HmsDegTarget();
         }
         newCoordSys = _getCoordSys(NamedTarget.SystemType.TYPES, coordSysString);
         if (newCoordSys != null) {
-            return new NamedTarget((NamedTarget.SystemType)newCoordSys);
+            return new NamedTarget();
         }
         return null;
     }
