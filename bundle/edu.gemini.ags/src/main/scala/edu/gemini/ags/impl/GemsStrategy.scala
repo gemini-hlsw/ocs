@@ -125,7 +125,7 @@ object GemsStrategy extends AgsStrategy {
         val so = result.getResults.asScala.toList  // extract the sky objects from this thing
         // For each guide probe associated with these sky objects, add a tuple
         // (guide probe, sky object list) to the results
-        result.getCriterion.getKey.getGroup.getMembers.asScala.toList.map { guideProbe =>
+        result.getCriterion.key.getGroup.getMembers.asScala.toList.map { guideProbe =>
           (guideProbe, so.map(_.toNewModel))
         }
       }
@@ -190,7 +190,7 @@ object GemsStrategy extends AgsStrategy {
 
     // Now check that the results are valid: there must be a valid tip-tilt and flexure star each.
     val checker = results.foldRight(Map[String, Boolean]())((result, resultMap) => {
-      val key = result.getCriterion.getKey.getGroup.getKey
+      val key = result.getCriterion.key.getGroup.getKey
       if (!result.getResults.isEmpty)    resultMap.updated(key, true)
       else if (!resultMap.contains(key)) resultMap.updated(key, false)
       else                               resultMap

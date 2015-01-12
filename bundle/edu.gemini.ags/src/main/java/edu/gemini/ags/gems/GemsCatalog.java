@@ -130,7 +130,7 @@ public class GemsCatalog {
         if (!skyObjectFactoryList.isEmpty()) {
             for (GemsCatalogSearchCriterion criter : criterList) {
                 for (Tuple2<Catalog, SkyObjectFactory> t : skyObjectFactoryList) {
-                    final CatalogSearchCriterion c = criter.getCriterion();
+                    final CatalogSearchCriterion c = criter.criterion();
                     threadList.add(searchCatalog(t._1(), t._2(), basePosition, criterList, c.radiusLimits(),
                             c.magLimits(), searchResultsListener, statusLogger));
                 }
@@ -226,7 +226,7 @@ public class GemsCatalog {
         final Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
-                Coordinates coordinates = GemsUtils4Java.toCoordinates(basePosition);
+                final Coordinates coordinates = GemsUtils4Java.toCoordinates(basePosition);
                 try {
                     final QueryArgs queryArgs = getQueryArgs(catalog, factory, coordinates, radiusLimits, magLimits, statusLogger);
                     final QueryResult queryResult = catalog.query(queryArgs);
@@ -258,7 +258,7 @@ public class GemsCatalog {
                                   SkyObjectFactory factory, GemsCatalogSearchCriterion criter ) {
         final int numRows = table.getRowCount();
         final Vector<Vector<Object>> dataVector = table.getDataVector();
-        final CatalogSearchCriterion.Matcher matcher = criter.getCriterion().matcher(basePosition);
+        final CatalogSearchCriterion.Matcher matcher = criter.criterion().matcher(basePosition);
         final List<SkyObject> skyObjectList = new ArrayList<>();
         for (int i = 0; i < numRows; i++) {
             Option<SkyObject> skyObjectOpt = toSkyObject(table, factory, dataVector.get(i));
@@ -340,7 +340,7 @@ public class GemsCatalog {
         final List<RadiusConstraint> result = new ArrayList<>(criterList.size());
         if (inst == GemsInstrument.flamingos2) {
             for (GemsCatalogSearchCriterion criter : criterList) {
-                result.add(criter.getCriterion().adjustedLimits());
+                result.add(criter.criterion().adjustedLimits());
             }
         } else {
             result.add(GemsUtils4Java.optimizeRadiusConstraint(criterList));
@@ -353,7 +353,7 @@ public class GemsCatalog {
         final Map<MagnitudeBand, Double> faintMap = new HashMap<>();
         final Map<MagnitudeBand, Double> saturationMap = new HashMap<>();
         for (GemsCatalogSearchCriterion criter : criterList) {
-            final CatalogSearchCriterion c = criter.getCriterion();
+            final CatalogSearchCriterion c = criter.criterion();
             final MagnitudeConstraints magLimits = c.magLimits();
             final MagnitudeBand band = magLimits.band();
             final Double faintLimit = magLimits.faintnessConstraint().brightness();
@@ -426,7 +426,7 @@ public class GemsCatalog {
     // Makes sure the given set of bands contains all of the bands used in the given criteria
     private void assertHasRequiredBands(String name, List<GemsCatalogSearchCriterion> criterList, Set<MagnitudeBand> bands) {
         for (GemsCatalogSearchCriterion criter : criterList) {
-            final MagnitudeBand band = criter.getCriterion().magLimits().band();
+            final MagnitudeBand band = criter.criterion().magLimits().band();
             if (!bands.contains(band)) {
                 throw new RuntimeException("Catalog '"
                         + new File(name).getName()

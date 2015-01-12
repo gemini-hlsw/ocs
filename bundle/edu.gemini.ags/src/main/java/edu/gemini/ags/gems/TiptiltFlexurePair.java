@@ -38,7 +38,7 @@ public class TiptiltFlexurePair {
 
         for (GemsCatalogSearchResults searchResults : results) {
             GemsCatalogSearchCriterion criterion = searchResults.getCriterion();
-            GemsCatalogSearchKey key = criterion.getKey();
+            GemsCatalogSearchKey key = criterion.key();
             if (key.getType() == GemsGuideStarType.tiptilt) {
                 GemsGuideProbeGroup tiptiltGroup = key.getGroup();
                 String groupKey = tiptiltGroup.getKey();

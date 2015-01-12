@@ -56,8 +56,8 @@ public class GemsCatalogResults {
         List<GemsGuideStars> result = new ArrayList<>();
 
         for (TiptiltFlexurePair pair : TiptiltFlexurePair.pairs(results)) {
-            GemsGuideProbeGroup tiptiltGroup = pair.getTiptiltResults().getCriterion().getKey().getGroup();
-            GemsGuideProbeGroup flexureGroup = pair.getFlexureResults().getCriterion().getKey().getGroup();
+            GemsGuideProbeGroup tiptiltGroup = pair.getTiptiltResults().getCriterion().key().getGroup();
+            GemsGuideProbeGroup flexureGroup = pair.getFlexureResults().getCriterion().key().getGroup();
             List<SkyObject> tiptiltSkyObjectList = filter(obsContext, pair.getTiptiltResults().getResults(),
                     tiptiltGroup, posAngles);
             List<SkyObject> flexureSkyObjectList = filter(obsContext, pair.getFlexureResults().getResults(),
@@ -100,8 +100,8 @@ public class GemsCatalogResults {
         final List<GemsGuideStars> result = new ArrayList<>();
 
         for (TiptiltFlexurePair pair : TiptiltFlexurePair.pairs(results)) {
-            final GemsGuideProbeGroup tiptiltGroup = pair.getTiptiltResults().getCriterion().getKey().getGroup();
-            final GemsGuideProbeGroup flexureGroup = pair.getFlexureResults().getCriterion().getKey().getGroup();
+            final GemsGuideProbeGroup tiptiltGroup = pair.getTiptiltResults().getCriterion().key().getGroup();
+            final GemsGuideProbeGroup flexureGroup = pair.getFlexureResults().getCriterion().key().getGroup();
             final List<SkyObject> tiptiltSkyObjectList = filter(obsContext, pair.getTiptiltResults().getResults(),
                     tiptiltGroup, posAngles);
             final List<SkyObject> flexureSkyObjectList = filter(obsContext, pair.getFlexureResults().getResults(),
@@ -377,8 +377,7 @@ public class GemsCatalogResults {
 
     // Returns true if the given target is valid for the given guide probe
     private boolean validate(ObsContext ctx, SPTarget target, GuideProbe guideProbe) {
-        boolean valid = (guideProbe instanceof ValidatableGuideProbe) ?
-                ((ValidatableGuideProbe) guideProbe).validate(target, ctx) : true;
+        boolean valid = (guideProbe instanceof ValidatableGuideProbe) || ((ValidatableGuideProbe) guideProbe).validate(target, ctx);
 
         // Additional check for mag range (for cwfs1 and cwfs2, since different than cwfs3 and group range)
         if (valid && guideProbe instanceof Canopus.Wfs) {

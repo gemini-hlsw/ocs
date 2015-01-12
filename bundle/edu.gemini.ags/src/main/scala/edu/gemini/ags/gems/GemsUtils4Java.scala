@@ -29,7 +29,7 @@ object GemsUtils4Java {
   // Combines multiple radius limits into one
   def optimizeRadiusConstraint(criterList: java.util.List[GemsCatalogSearchCriterion]): RadiusConstraint = {
     val result = criterList.asScala.foldLeft((Double.MinValue, Double.MaxValue)) { (prev, current) =>
-      val c = current.getCriterion
+      val c = current.criterion
       val radiusConstraint = c.adjustedLimits
       val maxLimit = radiusConstraint.maxLimit
       val correctedMax = (c.offset |@| c.posAngle) { (o, _) =>

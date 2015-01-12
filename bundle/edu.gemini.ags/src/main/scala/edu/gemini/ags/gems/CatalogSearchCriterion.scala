@@ -90,3 +90,8 @@ case class CatalogSearchCriterion(name: String, magLimits: MagnitudeConstraints,
     Matcher(adjustedBase(base), adjustedLimits)
 
 }
+
+/**
+ * See OT-24
+ */
+case class GemsCatalogSearchCriterion(key: GemsCatalogSearchKey, criterion: CatalogSearchCriterion)
