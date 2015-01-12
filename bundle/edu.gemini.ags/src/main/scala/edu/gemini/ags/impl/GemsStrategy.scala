@@ -9,7 +9,6 @@ import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.core.Target.SiderealTarget
 
 // TODO port these dependencies
-import edu.gemini.shared.skyobject.SkyObject
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates
 import edu.gemini.skycalc.Offset
 
@@ -85,7 +84,8 @@ object GemsStrategy extends AgsStrategy {
         angle <- anglesToTry
       } yield {
         val constraint = result.catalogResult.constraint
-        val catalogSearchCriterion = new CatalogSearchCriterion("ags", constraint.magnitudeLimits, constraint.radiusLimits, none.asGeminiOpt, Some(angle).map(_.toOldModel).asGeminiOpt)
+        val radiusConstraint = RadiusConstraint.between(constraint.radiusLimits.getMinLimit.toNewModel, constraint.radiusLimits.getMaxLimit.toNewModel)
+        val catalogSearchCriterion = CatalogSearchCriterion("ags", constraint.magnitudeLimits.toMagnitudeConstraints, radiusConstraint, None, angle.some)
         val gemsCatalogSearchCriterion = new GemsCatalogSearchCriterion(result.searchKey, catalogSearchCriterion)
         new GemsCatalogSearchResults(gemsCatalogSearchCriterion, result.catalogResult.candidates.toList)
       }
@@ -186,8 +186,7 @@ object GemsStrategy extends AgsStrategy {
     val basePos = new HmsDegCoordinates.Builder(baseCoords.getRa, baseCoords.getDec).build
 
     // Perform the catalog search.
-    val searchBand = nirBand.map(_.toOldModel)
-    val results = new GemsCatalog().search(ctx, basePos, gemsOptions, searchBand.asGeminiOpt, null).asScala.toList
+    val results = new GemsCatalog().search(ctx, basePos, gemsOptions, nirBand.map(_.toOldModel).asGeminiOpt, null).asScala.toList
 
     // Now check that the results are valid: there must be a valid tip-tilt and flexure star each.
     val checker = results.foldRight(Map[String, Boolean]())((result, resultMap) => {

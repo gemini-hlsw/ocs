@@ -1,19 +1,15 @@
 package edu.gemini.ags.gems;
 
+import edu.gemini.catalog.api.*;
 import edu.gemini.catalog.skycat.table.CatalogHeader;
 import edu.gemini.catalog.skycat.table.CatalogRow;
 import edu.gemini.catalog.skycat.table.DefaultCatalogHeader;
 import edu.gemini.catalog.skycat.table.DefaultCatalogRow;
-import edu.gemini.catalog.api.MagnitudeLimits;
-import edu.gemini.catalog.api.RadiusLimits;
 import edu.gemini.catalog.skycat.table.SkyObjectFactory;
-import edu.gemini.skycalc.Angle;
-import edu.gemini.skycalc.Offset;
-import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.skyobject.SkyObject;
-import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.shared.skyobject.coords.SkyCoordinates;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.core.*;
 import edu.gemini.spModel.gemini.gems.GemsInstrument;
 import edu.gemini.spModel.obs.context.ObsContext;
 import jsky.catalog.BasicQueryArgs;
@@ -72,7 +68,7 @@ public class GemsCatalog {
      * @return list of search results
      */
     public List<GemsCatalogSearchResults> search(ObsContext obsContext, SkyCoordinates basePosition, GemsGuideStarSearchOptions options,
-                                                 Option<Magnitude.Band> nirBand, StatusLogger statusLogger)
+                                                 Option<edu.gemini.shared.skyobject.Magnitude.Band> nirBand, StatusLogger statusLogger)
             throws Exception {
         final Map<GemsCatalogSearchCriterion, List<SkyObject>> map = new HashMap<>();
         final List<Exception> exceptions = new ArrayList<>();
@@ -135,8 +131,8 @@ public class GemsCatalog {
             for (GemsCatalogSearchCriterion criter : criterList) {
                 for (Tuple2<Catalog, SkyObjectFactory> t : skyObjectFactoryList) {
                     final CatalogSearchCriterion c = criter.getCriterion();
-                    threadList.add(searchCatalog(t._1(), t._2(), basePosition, criterList, c.getRadiusLimits(),
-                            c.getMagLimits(), searchResultsListener, statusLogger));
+                    threadList.add(searchCatalog(t._1(), t._2(), basePosition, criterList, c.radiusLimits(),
+                            c.magLimits(), searchResultsListener, statusLogger));
                 }
             }
         }
@@ -164,8 +160,8 @@ public class GemsCatalog {
                                 Set<String> catalogs, GemsInstrument inst, SearchResultsListener searchResultsListener,
                                 StatusLogger statusLogger) {
 
-        final List<RadiusLimits> radiusLimitsList = getRadiusLimits(inst, criterList);
-        final List<MagnitudeLimits> magLimitsList = optimizeMagnitudeLimits(criterList);
+        final List<RadiusConstraint> radiusLimitsList = getRadiusLimits(inst, criterList);
+        final List<MagnitudeConstraints> magLimitsList = optimizeMagnitudeLimits(criterList);
         final List<Tuple2<Catalog, SkyObjectFactory>> skyObjectFactoryList = getSkyObjectFactoryList(catalogs, criterList);
         final List<Thread> threadList = new ArrayList<>();
         if (!skyObjectFactoryList.isEmpty()) {
@@ -181,8 +177,8 @@ public class GemsCatalog {
             // Note: We need to do a separate catalog search for each set of mag limits, since including them in one search
             // would be ANDing them together, which would normally result in an empty list. Use the map to merge
             // query results from multiple catalog queries based on the original criterion.
-            for (RadiusLimits radiusLimits : radiusLimitsList) {
-                for (MagnitudeLimits magLimits : magLimitsList) {
+            for (RadiusConstraint radiusLimits : radiusLimitsList) {
+                for (MagnitudeConstraints magLimits : magLimitsList) {
                     // Multiple queries: perform the lookup in parallel in background threads
                     for (Tuple2<Catalog, SkyObjectFactory> t : skyObjectFactoryList) {
                         threadList.add(searchCatalog(t._1(), t._2(), basePosition, criterList, radiusLimits, magLimits,
@@ -224,17 +220,18 @@ public class GemsCatalog {
     // Returns the thread object.
     private Thread searchCatalog(final Catalog catalog, final SkyObjectFactory factory, final SkyCoordinates basePosition,
                                                   final List<GemsCatalogSearchCriterion> criterList,
-                                                  final RadiusLimits radiusLimits, final MagnitudeLimits magLimits,
+                                                  final RadiusConstraint radiusLimits, final MagnitudeConstraints magLimits,
                                                   final SearchResultsListener searchResultsListener,
                                                   final StatusLogger statusLogger) {
         final Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
+                Coordinates coordinates = GemsUtils4Java.toCoordinates(basePosition);
                 try {
-                    final QueryArgs queryArgs = getQueryArgs(catalog, factory, basePosition, radiusLimits, magLimits, statusLogger);
+                    final QueryArgs queryArgs = getQueryArgs(catalog, factory, coordinates, radiusLimits, magLimits, statusLogger);
                     final QueryResult queryResult = catalog.query(queryArgs);
                     final TableQueryResult table = (TableQueryResult) queryResult;
-                    searchResultsListener.setResults(filter(basePosition, table, factory, criterList));
+                    searchResultsListener.setResults(filter(coordinates, table, factory, criterList));
                 } catch (Exception e) {
                     searchResultsListener.setException(e);
                 }
@@ -246,7 +243,7 @@ public class GemsCatalog {
 
 
     // Filters the table query results according to the given criteria and packs the results in the return list.
-    private List<GemsCatalogSearchResults> filter(SkyCoordinates basePosition, TableQueryResult table,
+    private List<GemsCatalogSearchResults> filter(Coordinates basePosition, TableQueryResult table,
                                                   SkyObjectFactory factory, List<GemsCatalogSearchCriterion> criterList) {
         final List<GemsCatalogSearchResults> searchResultsList = new ArrayList<>();
         for (GemsCatalogSearchCriterion criter : criterList) {
@@ -257,7 +254,7 @@ public class GemsCatalog {
 
 
     // Returns a list of matching sky objects based on the given criterion
-    private List<SkyObject> match(SkyCoordinates basePosition, TableQueryResult table,
+    private List<SkyObject> match(Coordinates basePosition, TableQueryResult table,
                                   SkyObjectFactory factory, GemsCatalogSearchCriterion criter ) {
         final int numRows = table.getRowCount();
         final Vector<Vector<Object>> dataVector = table.getDataVector();
@@ -267,7 +264,7 @@ public class GemsCatalog {
             Option<SkyObject> skyObjectOpt = toSkyObject(table, factory, dataVector.get(i));
             if (!skyObjectOpt.isEmpty()) {
                 SkyObject skyObject = skyObjectOpt.getValue();
-                if (matcher.matches(skyObject)) {
+                if (matcher.matches(GemsUtils4Java.toSiderealTarget(skyObject))) {
                     skyObjectList.add(skyObject);
                 }
             }
@@ -277,8 +274,8 @@ public class GemsCatalog {
 
     // Returns the query arguments to use to query the given catalog with the given base position,
     // radius and magnitude limits.
-    private QueryArgs getQueryArgs(Catalog catalog, SkyObjectFactory factory, SkyCoordinates basePosition,
-                                   RadiusLimits radiusLimits, MagnitudeLimits magLimits, StatusLogger statusLogger) {
+    private QueryArgs getQueryArgs(Catalog catalog, SkyObjectFactory factory, Coordinates basePosition,
+                                   RadiusConstraint radiusLimits, MagnitudeConstraints magLimits, StatusLogger statusLogger) {
         final BasicQueryArgs queryArgs = new BasicQueryArgs(catalog);
         queryArgs.setRegion(getRegion(basePosition, radiusLimits));
         setMagnitudeQueryArgs(queryArgs, catalog, factory, magLimits);
@@ -289,17 +286,17 @@ public class GemsCatalog {
 
     // Sets the min/max magnitude limits in the given query arguments
     private void setMagnitudeQueryArgs(BasicQueryArgs queryArgs, Catalog catalog, SkyObjectFactory factory,
-                                       MagnitudeLimits magLimits) {
+                                       MagnitudeConstraints magLimits) {
         final int numParams = catalog.getNumParams();
-        final String magColumn = factory.getMagColumn(magLimits.getBand());
+        final String magColumn = factory.getMagColumn(GemsUtils4Java.toOldBand(magLimits.band()));
         for (int i = 0; i < numParams; i++) {
             final FieldDesc fieldDesc = catalog.getParamDesc(i);
             if (magColumn.equals(fieldDesc.getId()) || magColumn.equals(fieldDesc.getName())) {
-                final Double maxMag = magLimits.getFaintnessLimit().getBrightness();
+                final Double maxMag = magLimits.faintnessConstraint().brightness();
                 Double minMag = null;
-                final Option<Double> limit = magLimits.getSaturationLimit().map(new MapOp<MagnitudeLimits.SaturationLimit, Double>() {
-                    public Double apply(MagnitudeLimits.SaturationLimit sl) {
-                        return sl.getBrightness();
+                final Option<Double> limit = GemsUtils4Java.mapMagintudes(magLimits.saturationConstraint(), new MapOp<SaturationConstraint, Double>() {
+                    public Double apply(SaturationConstraint sl) {
+                        return sl.brightness();
                     }
                 });
                 if (!limit.isEmpty()) {
@@ -325,42 +322,13 @@ public class GemsCatalog {
     }
 
     // Returns the query region to use based on the given base position and radius limits
-    private CoordinateRadius getRegion(SkyCoordinates basePosition, RadiusLimits radiusLimits) {
-        final HmsDegCoordinates coords = basePosition.toHmsDeg(0L);
+    private CoordinateRadius getRegion(Coordinates basePosition, RadiusConstraint radiusLimits) {
         final WorldCoords pos = new WorldCoords(
-                coords.getRa().toDegrees().getMagnitude(),
-                coords.getDec().toDegrees().getMagnitude(),
-                coords.getEpoch().getYear());
+                basePosition.ra().toAngle().toDegrees(),
+                basePosition.dec().toDegrees());
         return new CoordinateRadius(pos,
-                radiusLimits.getMaxLimit().toArcmins().getMagnitude(),
-                radiusLimits.getMinLimit().toArcmins().getMagnitude());
-    }
-
-    // Combines multiple radius limits into one
-    private RadiusLimits optimizeRadiusLimits(List<GemsCatalogSearchCriterion> criterList) {
-        Double maxLimit = null;
-        Double minLimit = null;
-        for (GemsCatalogSearchCriterion criter : criterList) {
-            final CatalogSearchCriterion c = criter.getCriterion();
-            final RadiusLimits radiusLimits = c.adjustedLimits();
-            double max = radiusLimits.getMaxLimit().toArcmins().getMagnitude();
-            double min = radiusLimits.getMinLimit().toArcmins().getMagnitude();
-            if (!c.getOffset().isEmpty() && !c.getPosAngle().isEmpty()) {
-                // XXX TODO: check if this is right
-                // If an offset and pos angle were defined, normally an adjusted base position
-                // would be used, however since we are merging queries here, use the original
-                // base position and adjust the radius limits
-                Offset offset = c.getOffset().getValue();
-                max += offset.distance().toArcmins().getMagnitude();
-            }
-            if (maxLimit == null || max > maxLimit) {
-                maxLimit = max;
-            }
-            if (minLimit == null || min < minLimit) {
-                minLimit = min;
-            }
-        }
-        return new RadiusLimits(new Angle(maxLimit, Angle.Unit.ARCMINS), new Angle(minLimit, Angle.Unit.ARCMINS));
+                radiusLimits.maxLimit().toArcmins(),
+                radiusLimits.minLimit().toArcmins());
     }
 
     // Returns a list of radius limits used in the criteria.
@@ -368,45 +336,45 @@ public class GemsCatalog {
     // areas is too large to get good results.
     // Otherwise, for GSAOI, merge the radius limits into one, since the Canopus and GSAOI radius are both about
     // 1 arcmin.
-    private List<RadiusLimits> getRadiusLimits(GemsInstrument inst, List<GemsCatalogSearchCriterion> criterList) {
-        final List<RadiusLimits> result = new ArrayList<RadiusLimits>(criterList.size());
+    private List<RadiusConstraint> getRadiusLimits(GemsInstrument inst, List<GemsCatalogSearchCriterion> criterList) {
+        final List<RadiusConstraint> result = new ArrayList<>(criterList.size());
         if (inst == GemsInstrument.flamingos2) {
             for (GemsCatalogSearchCriterion criter : criterList) {
                 result.add(criter.getCriterion().adjustedLimits());
             }
         } else {
-            result.add(optimizeRadiusLimits(criterList));
+            result.add(GemsUtils4Java.optimizeRadiusConstraint(criterList));
         }
         return result;
     }
 
     // Combines multiple magnitiude limits into one (using OR)
-    private List<MagnitudeLimits> optimizeMagnitudeLimits(List<GemsCatalogSearchCriterion> criterList) {
-        final Map<Magnitude.Band, Double> faintMap = new HashMap<>();
-        final Map<Magnitude.Band, Double> saturationMap = new HashMap<>();
+    private List<MagnitudeConstraints> optimizeMagnitudeLimits(List<GemsCatalogSearchCriterion> criterList) {
+        final Map<MagnitudeBand, Double> faintMap = new HashMap<>();
+        final Map<MagnitudeBand, Double> saturationMap = new HashMap<>();
         for (GemsCatalogSearchCriterion criter : criterList) {
             final CatalogSearchCriterion c = criter.getCriterion();
-            final MagnitudeLimits magLimits = c.getMagLimits();
-            final Magnitude.Band band = magLimits.getBand();
-            final Double faintLimit = magLimits.getFaintnessLimit().getBrightness();
+            final MagnitudeConstraints magLimits = c.magLimits();
+            final MagnitudeBand band = magLimits.band();
+            final Double faintLimit = magLimits.faintnessConstraint().brightness();
             if (!faintMap.containsKey(band) || faintLimit > faintMap.get(band)) {
                 faintMap.put(band, faintLimit);
             }
-            final Double saturationLimit = magLimits.getSaturationLimit().map(new MapOp<MagnitudeLimits.SaturationLimit, Double>() {
-                public Double apply(MagnitudeLimits.SaturationLimit sl) {
-                    return sl.getBrightness();
-                }
-            }).getOrElse(DEFAULT_SATURATION_MAGNITUDE);
+            final Double saturationLimit = GemsUtils4Java.mapMagintudes(magLimits.saturationConstraint(), new MapOp<SaturationConstraint, Double>() {
+                    public Double apply(SaturationConstraint sl) {
+                        return sl.brightness();
+                    }
+                }).getOrElse(DEFAULT_SATURATION_MAGNITUDE);
             if (!saturationMap.containsKey(band) || saturationLimit < saturationMap.get(band)) {
                 saturationMap.put(band, saturationLimit);
             }
         }
-        final List<MagnitudeLimits> result = new ArrayList<MagnitudeLimits>(faintMap.size());
-        for (Magnitude.Band band : faintMap.keySet()) {
+        final List<MagnitudeConstraints> result = new ArrayList<>(faintMap.size());
+        for (MagnitudeBand band : faintMap.keySet()) {
             if (saturationMap.containsKey(band)) {
-                result.add(new MagnitudeLimits(band, new MagnitudeLimits.FaintnessLimit(faintMap.get(band)), new MagnitudeLimits.SaturationLimit(saturationMap.get(band))));
+                result.add(new MagnitudeConstraints(band, new FaintnessConstraint(faintMap.get(band)), new scala.Some<>(new SaturationConstraint(saturationMap.get(band)))));
             } else {
-                result.add(new MagnitudeLimits(new Magnitude(band, faintMap.get(band))));
+                result.add(new MagnitudeConstraints(new Magnitude(faintMap.get(band), band)));
             }
         }
         return result;
@@ -447,7 +415,7 @@ public class GemsCatalog {
             }
             if (!factoryOpt.isEmpty()) {
                 final SkyObjectFactory fact = factoryOpt.getValue();
-                Set<Magnitude.Band> catalogBands = fact.bands();
+                Set<MagnitudeBand> catalogBands = GemsUtils4Java.translateBands(fact.bands());
                 assertHasRequiredBands(name, criterList, catalogBands);
                 skyObjectFactoryList.add(new Pair<>(catalog, fact));
             }
@@ -456,9 +424,9 @@ public class GemsCatalog {
     }
 
     // Makes sure the given set of bands contains all of the bands used in the given criteria
-    private void assertHasRequiredBands(String name, List<GemsCatalogSearchCriterion> criterList, Set<Magnitude.Band> bands) {
+    private void assertHasRequiredBands(String name, List<GemsCatalogSearchCriterion> criterList, Set<MagnitudeBand> bands) {
         for (GemsCatalogSearchCriterion criter : criterList) {
-            final Magnitude.Band band = criter.getCriterion().getMagLimits().getBand();
+            final MagnitudeBand band = criter.getCriterion().magLimits().band();
             if (!bands.contains(band)) {
                 throw new RuntimeException("Catalog '"
                         + new File(name).getName()

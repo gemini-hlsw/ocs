@@ -1,13 +1,10 @@
 package edu.gemini.ags.gems;
 
-import edu.gemini.catalog.api.MagnitudeLimits;
-import edu.gemini.catalog.api.RadiusLimits;
+import edu.gemini.catalog.api.MagnitudeConstraints;
 import edu.gemini.skycalc.Angle;
-import edu.gemini.skycalc.Offset;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.gemini.gems.Canopus;
 import edu.gemini.spModel.gemini.gems.GemsInstrument;
 import edu.gemini.spModel.gems.GemsGuideProbeGroup;
@@ -284,13 +281,9 @@ public class GemsGuideStarSearchOptions {
         String name = String.format("%s %s", gGroup.getDisplayName(), gType.name());
 
         // Adjust the mag limits for the worst conditions (as is done in the ags servlet)
-        MagnitudeLimits magLimits = calculator.adjustGemsMagnitudeLimitsForJava(gType, nirBand, obsContext.getConditions());
+        MagnitudeConstraints magConstraints = calculator.adjustGemsMagnitudeLimitsForJava(gType, nirBand, obsContext.getConditions());
 
-        //MagnitudeLimits magLimits = gGroup.getMagLimits(gType, nirBand).mapMagnitudes(obsContext.getConditions().magAdjustOp());
-        RadiusLimits radiusLimits = new RadiusLimits(gGroup.getRadiusLimits());
-        Option<Offset> searchOffset = instrument.getOffset();
-        Option<Angle> searchPA = (posAngles.size() == 1) ? new Some<>(posAngles.iterator().next()) : None.<Angle>instance();
-        CatalogSearchCriterion criterion = new CatalogSearchCriterion(name, magLimits, radiusLimits, searchOffset, searchPA);
+        CatalogSearchCriterion criterion = calculator.searchCriterionBuilder(name, gGroup.getRadiusLimits(), instrument, magConstraints, posAngles);
         GemsCatalogSearchKey key = new GemsCatalogSearchKey(gType, gGroup);
         return new GemsCatalogSearchCriterion(key, criterion);
     }
