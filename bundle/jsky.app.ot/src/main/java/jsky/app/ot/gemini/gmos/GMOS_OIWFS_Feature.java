@@ -6,13 +6,11 @@
 //
 package jsky.app.ot.gemini.gmos;
 
-import diva.util.java2d.Polygon2D;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.Offset;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
-import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe;
 import edu.gemini.spModel.gemini.gmos.GmosOiwfsProbeArm;
 import edu.gemini.spModel.gemini.gmos.InstGmosCommon;
@@ -27,7 +25,6 @@ import jsky.app.ot.tpe.TpeImageInfo;
 import jsky.app.ot.tpe.TpeMessage;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.util.Collection;
 import java.util.Collections;
@@ -45,20 +42,11 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
     // Composite used for drawing items that block the view
     private static final Composite BLOCKED = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5F);
 
-//    // The offsets (from the base pos) and dimensions of the OIWFS patrol field (in arcsec)
-//    private static final Shape PATROL_FIELD = GmosOiwfsGuideProbe.instance.getPatrolField().getArea();
-
-    // The following values (in arcsec) are used to calculate the position of the OIWFS arm
-    // and are described in the paper "Opto-Mechanical Design of the Gemini Multi-Object
-    // Spectrograph On-Instrument Wavefront Sensor".
-    private static final double TX = -427.52;  // Location of base stage in arcsec
-    private static final double TZ = -101.84;
-
-    private static final double BX = 124.89;   // Length of stage arm in arcsec
-    private static final double MX = 358.46;   // Length of pick-off arm in arcsec
-
     // Set to true if the offset constrained patrol field area is empty
     private boolean offsetConstrainedPatrolFieldIsEmpty = false;
+
+    // The TPE warning message to return in there is no valid region.
+    private static final TpeMessage WARNING = TpeMessage.warningMessage("No valid OIWFS region.  Check offset positions.");
 
     /**
      * Construct the feature with its name and description.
@@ -70,13 +58,12 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
 
     protected void addPatrolField(double xc, double yc) {
         // RCN: this won't work if there's no obs context
-        for (ObsContext ctx : _iw.getMinimalObsContext()) {
-            for (PatrolField patrolField : GmosOiwfsGuideProbe.instance.getCorrectedPatrolField(ctx)) {
+        for (final ObsContext ctx : _iw.getMinimalObsContext()) {
+            for (final PatrolField patrolField : GmosOiwfsGuideProbe.instance.getCorrectedPatrolField(ctx)) {
                 // rotation, scaling and transformation to match screen coordinates
-                Angle rotation = new Angle(-_posAngle, Angle.Unit.RADIANS);
-                Point2D.Double translation = new Point2D.Double(xc, yc);
+                final Angle rotation = new Angle(-_posAngle, Angle.Unit.RADIANS);
+                final Point2D.Double translation = new Point2D.Double(xc, yc);
                 setTransformationToScreen(rotation, _pixelsPerArcsec, translation);
-
                 addPatrolField(patrolField);
             }
         }
@@ -91,8 +78,8 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
     protected void addOffsetConstrainedPatrolField(final double xc, final double yc) {
         final Set<Offset> offsets = _iw.getContext().offsets().scienceOffsetsJava();
 
-        for (ObsContext ctx : _iw.getMinimalObsContext()) {
-            for (PatrolField patrolField : GmosOiwfsGuideProbe.instance.getCorrectedPatrolField(ctx)) {
+        for (final ObsContext ctx : _iw.getMinimalObsContext()) {
+            for (final PatrolField patrolField : GmosOiwfsGuideProbe.instance.getCorrectedPatrolField(ctx)) {
                 offsetConstrainedPatrolFieldIsEmpty = patrolField.outerLimitOffsetIntersection(offsets).isEmpty() ? true : false;
                 // rotation, scaling and transformation to match screen coordinates
                 final Angle rotation = new Angle(-_posAngle, Angle.Unit.RADIANS);
@@ -103,17 +90,15 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
         }
     }
 
-    // Get the offset that should be used as the "base" for drawing the probe
-    // arm.  This is either the selected offset position (if any), otherwise
-    // whatever offset position is considered the default one (the first), or
-    // failing all else a 0 offset (which corresponds to the base)..
+    /**
+     * Get the offset that should be used as the "base" for drawing the probe
+     * arm.  This is either the selected offset position (if any), otherwise
+     * whatever offset position is considered the default one (the first), or
+     * failing all else a 0 offset (which corresponds to the base).
+     */
     private Offset getProbeArmOffset() {
-        TpeContext ctx = _iw.getContext();
-        OffsetPosBase selOffset = ctx.offsets().selectedPosOrNull();
-
-        // TPE REFACTOR - default offset?
-//        if (selOffsetOpt.isEmpty()) selOffsetOpt = progData.getDefaultOffsetPos();
-
+        final TpeContext ctx = _iw.getContext();
+        final OffsetPosBase selOffset = ctx.offsets().selectedPosOrNull();
         return (selOffset == null) ? Offset.ZERO_OFFSET : selOffset.toSkycalcOffset();
     }
 
@@ -130,8 +115,8 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
      * @param flip if true, flip the probe arm about the base position X axis
      */
     protected void _addProbeArm(double xg, double yg, double xc, double yc, double xt, double yt, boolean flip) {
-        InstGmosCommon inst = (InstGmosCommon) _iw.getInstObsComp();
-        ObsContext ctx = _iw.getMinimalObsContext().getOrNull();
+        final InstGmosCommon inst = (InstGmosCommon) _iw.getInstObsComp();
+        final ObsContext ctx = _iw.getMinimalObsContext().getOrNull();
         if (ctx != null && GmosOiwfsGuideProbe.instance.inRange(ctx, getProbeArmOffset())) {
             final Point2D guideStar = new Point2D.Double(xg, yg);
             final Point2D offset = new Point2D.Double(xc, yc);
@@ -141,7 +126,6 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
                 _figureList.add(new Figure(s, PROBE_ARM_COLOR, BLOCKED, OIWFS_STROKE));
         }
     }
-
 
     /**
      * Update the list of figures to draw.
@@ -161,8 +145,8 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
                                      double translateX, double translateY, double basePosX, double basePosY, boolean oiwfsDefined) {
 
         // need to flip the drawing about the X axis if the instrument is side-mounted
-        InstGmosCommon inst = (InstGmosCommon) _iw.getInstObsComp();
-        boolean flip = (inst.getIssPort() == IssPort.SIDE_LOOKING);
+        final InstGmosCommon inst = (InstGmosCommon) _iw.getInstObsComp();
+        final boolean flip = (inst.getIssPort() == IssPort.SIDE_LOOKING);
 
         _figureList.clear();
         addOffsetConstrainedPatrolField(basePosX, basePosY);
@@ -172,16 +156,15 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
     }
 
 
-    /** Return true if the display needs to be updated because values changed. */
+    /**
+     * Return true if the display needs to be updated because values changed.
+     */
     protected boolean _needsUpdate(SPInstObsComp inst, TpeImageInfo tii) {
         // Needs to take into account offset position list updates to work
         // as intended.  Unclear whether it is worth the effort to maintain
         // the old offset lists when the calculation isn't that slow anyway.
         return true;
     }
-
-    private static final TpeMessage WARNING = TpeMessage.warningMessage(
-            "No valid OIWFS region.  Check offset positions.");
 
     @Override
     public Option<Collection<TpeMessage>> getMessages() {

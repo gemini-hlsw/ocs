@@ -5,7 +5,6 @@ import java.awt.geom.{Point2D, AffineTransform}
 
 import edu.gemini.shared.util.immutable.ImPolygon
 import edu.gemini.spModel.inst.{FeatureGeometry, GuideProbeGeometry}
-import edu.gemini.spModel.util.Angle
 
 class GmosOiwfsProbeArm[I  <: InstGmosCommon[D,F,P,SM],
                         D  <: Enum[D]  with GmosCommonType.Disperser,
@@ -15,7 +14,7 @@ class GmosOiwfsProbeArm[I  <: InstGmosCommon[D,F,P,SM],
   import FeatureGeometry.transformPoint
   import GmosOiwfsProbeArm._
 
-  override def probeArm: Shape = {
+  override protected def probeArm: Shape = {
     val hm  = PickoffMirrorSize / 2.0
     val htw = ProbeArmTaperedWidth / 2.0
 
@@ -30,7 +29,7 @@ class GmosOiwfsProbeArm[I  <: InstGmosCommon[D,F,P,SM],
     ImPolygon(points)
   }
 
-  override def pickoffMirror: Shape = {
+  override protected def pickoffMirror: Shape = {
     val (x0, y0) = (-PickoffMirrorSize / 2.0, -PickoffMirrorSize / 2.0)
     val (x1, y1) = (x0 + PickoffMirrorSize,   y0)
     val (x2, y2) = (x1,                       y1 + PickoffMirrorSize)
@@ -40,12 +39,19 @@ class GmosOiwfsProbeArm[I  <: InstGmosCommon[D,F,P,SM],
     ImPolygon(points)
   }
 
-  def armAngle(posAngle:    Double,
-               guideStar:   Point2D,
-               offset:      Point2D): Double = {
-    val posAngleRot = AffineTransform.getRotateInstance(posAngle)
-
+  /**
+   * Calculate the probe arm angle at the position angle (radians) for the given guide star location
+   * and offset, specified in arcsec.
+   * @param posAngle  the position angle in radians
+   * @param guideStar the guide star position in arcsec
+   * @param offset    the offset in arcsec
+   * @return          the angle of the probe arm in radians
+   */
+  private def armAngle(posAngle:    Double,
+                       guideStar:   Point2D,
+                       offset:      Point2D): Double = {
     val offsetAdj = {
+      val posAngleRot = AffineTransform.getRotateInstance(posAngle)
       val ifuOffset = transformPoint(new Point2D.Double(inst.getFPUnit.getWFSOffset, 0.0), posAngleRot)
       transformPoint(offset, AffineTransform.getTranslateInstance(ifuOffset.getX, ifuOffset.getY))
     }
@@ -84,6 +90,9 @@ object GmosOiwfsProbeArm {
   private val ProbeArmTaperedWidth  =  15.0
   private val ProbeArmTaperedLength = 180.0
 
+  // The following values (in arcsec) are used to calculate the position of the OIWFS arm
+  // and are described in the paper "Opto-Mechanical Design of the Gemini Multi-Object
+  // Spectrograph On-Instrument Wavefront Sensor".
   // Location of base stage in arcsec
   private val T = new Point2D.Double(-427.52, -101.84)
 
