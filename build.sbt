@@ -45,7 +45,8 @@ libraryDependencies in ThisBuild ++= Seq(
   "junit"           % "junit"           % "4.11"   % "test",
   "com.novocode"    % "junit-interface" % "0.9"    % "test",
   "org.scalacheck" %% "scalacheck"      % "1.10.1" % "test",
-  "org.specs2"     %% "specs2"          % "1.12.3" % "test"
+  "org.specs2"     %% "specs2"          % "1.12.3" % "test",
+  "org.scalatest"   % "scalatest_2.10"  % "2.0"    % "test"
 )
 
 // Don't build scaladoc (for now)
