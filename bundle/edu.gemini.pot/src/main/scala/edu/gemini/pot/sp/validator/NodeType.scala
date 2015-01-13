@@ -19,17 +19,17 @@ object NodeType {
     // This match expression peels off the proper manifest, so although it looks like
     // it doesn't do anything, it's important.
     n match {
-         case n: ISPGroup              => NodeType(n)
-         case n: ISPObsComponent       => NodeType(n)
-         case n: ISPObservation        => NodeType(n)
-         case n: ISPProgram            => NodeType(n)
-         case n: ISPSeqComponent       => NodeType(n)
-         case n: ISPTemplateFolder     => NodeType(n)
-         case n: ISPTemplateGroup      => NodeType(n)
-         case n: ISPTemplateParameters => NodeType(n)
-         case n: ISPConflictFolder     => NodeType(n)
-         case n: ISPObsQaLog           => NodeType(n)
-         case n: ISPObsExecLog         => NodeType(n)
-       }
+      case n: ISPGroup              => NodeType(n)
+      case n: ISPObsComponent       => NodeType(n)
+      case n: ISPObservation        => NodeType(n)
+      case n: ISPProgram            => NodeType(n)
+      case n: ISPSeqComponent       => NodeType(n)
+      case n: ISPTemplateFolder     => NodeType(n)
+      case n: ISPTemplateGroup      => NodeType(n)
+      case n: ISPTemplateParameters => NodeType(n)
+      case n: ISPConflictFolder     => NodeType(n)
+      case n: ISPObsQaLog           => NodeType(n)
+      case n: ISPObsExecLog         => NodeType(n)
+    }
 
 }
