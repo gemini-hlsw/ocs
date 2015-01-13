@@ -204,7 +204,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
         static final class UserTargetRow extends NonBaseTargetRow {
             UserTargetRow(int index, SPTarget target, WorldCoords baseCoords) {
-                super(true, String.format("%s (%d)", TargetEnvironment.USER_NAME, index), target, baseCoords);
+                super(true, String.format("%s (%d)", TargetEnvironment.USER_NAME, index+1), target, baseCoords);
             }
         }
 
