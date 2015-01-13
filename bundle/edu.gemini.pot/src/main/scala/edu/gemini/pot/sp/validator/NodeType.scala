@@ -1,6 +1,8 @@
 package edu.gemini.pot.sp.validator
 
 import edu.gemini.pot.sp._
+import scalaz._
+import Scalaz._
 
 /** A pair of shell type, component type. */
 case class NodeType[N <: ISPNode : Manifest](ct: SPComponentType) {
@@ -32,4 +34,41 @@ object NodeType {
       case n: ISPObsExecLog         => NodeType(n)
     }
 
+  def forComponentType(ct: SPComponentType): Option[NodeType[_ <: ISPNode]] = {
+    import edu.gemini.pot.sp.SPComponentType.{OBS_EXEC_LOG, OBS_QA_LOG, TEMPLATE_FOLDER, TEMPLATE_GROUP, TEMPLATE_PARAMETERS}
+    import edu.gemini.pot.sp.SPComponentBroadType._
+
+    def nt[A <: ISPNode : Manifest] = some(NodeType[A](ct))
+
+    ct.broadType match {
+      case AO          => nt[ISPObsComponent]
+      case CONFLICT    => nt[ISPConflictFolder]
+      case DATA        => none
+      case ENGINEERING => nt[ISPObsComponent]
+      case GROUP       => nt[ISPGroup]
+      case INFO        => nt[ISPObsComponent]
+      case INSTRUMENT  => nt[ISPObsComponent]
+      case ITERATOR    => nt[ISPSeqComponent]
+      case OBSERVATION => nt[ISPObservation]
+      case OBSERVER    => nt[ISPSeqComponent]
+      case OBSLOG      =>
+        ct match {
+          case OBS_EXEC_LOG        => nt[ISPObsExecLog]
+          case OBS_QA_LOG          => nt[ISPObsQaLog]
+          case _                   => none
+        }
+      case PLAN        => none
+      case PROGRAM     => nt[ISPProgram]
+      case SCHEDULING  => nt[ISPObsComponent]
+      case TELESCOPE   => nt[ISPObsComponent]
+      case TEMPLATE    =>
+        ct match {
+          case TEMPLATE_FOLDER     => nt[ISPTemplateFolder]
+          case TEMPLATE_GROUP      => nt[ISPTemplateGroup]
+          case TEMPLATE_PARAMETERS => nt[ISPTemplateParameters]
+          case _                   => none
+        }
+      case UNKNOWN     => none
+    }
+  }
 }
