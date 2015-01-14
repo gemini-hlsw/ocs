@@ -157,15 +157,6 @@ public final class SPTarget extends WatchablePos {
     }
 
     /**
-     * A public factory method to create a target instance based
-     * upon the String name of the coordinate system.
-     */
-    private static ITarget createTarget(final String coordSys) {
-        final ITarget.Tag tag = ITarget.Tag.valueOf(coordSys); // may throw, don't care
-        return ITarget.forTag(tag);
-    }
-
-    /**
      * Gets all the {@link Magnitude} information associated with this target,
      * if any.
      *
@@ -518,10 +509,16 @@ public final class SPTarget extends WatchablePos {
         final String system = Pio.getValue(paramSet, _SYSTEM);
         final String brightness = Pio.getValue(paramSet, _BRIGHTNESS);
 
-        final ITarget itarget = createTarget(system);
-        if (itarget == null) {
-            return;
+        // The system is the tccName, so we need to find it.
+        ITarget itarget = null;
+        for (ITarget.Tag t: ITarget.Tag.values()) {
+            if (t.tccName.equals(system)) {
+                itarget = ITarget.forTag(t);
+                break;
+            }
         }
+        if (itarget == null)
+            throw new IllegalArgumentException("No target tag with tccName " + system);
 
         itarget.setName(name);
 

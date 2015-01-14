@@ -29,7 +29,7 @@ public abstract class ITarget implements Cloneable, Serializable {
 
    public enum Tag {
 
-       // N.B. these strings are meaningful to the TCC
+       // N.B. these strings are meaningful to the TCC, catalog, and are used in PIO XML
        SIDEREAL("J2000"),
        NAMED("Solar system object"),
        JPL_MINOR_BODY("JPL minor body"),
