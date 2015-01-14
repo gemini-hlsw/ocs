@@ -3,6 +3,7 @@ package jsky.app.ot.tpe.gems;
 import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.ags.gems.GemsGuideStarSearchOptions.*;
 import edu.gemini.ags.gems.GemsGuideStars;
+import edu.gemini.spModel.core.Target;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import jsky.app.ot.tpe.GemsGuideStarWorker;
@@ -718,7 +719,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         _model.setAnalyseChoice((AnalyseChoice) _analyseComboBox.getSelectedItem());
         _model.setAllowPosAngleAdjustments(_allowPosAngleChangesCheckBox.isSelected());
 
-        final List<SkyObject> excludeCandidates = _candidateGuideStarsTable.getTableModel().getCandidates(false);
+        final List<Target.SiderealTarget> excludeCandidates = _candidateGuideStarsTable.getTableModel().getCandidates(false);
 
         new SwingWorker() {
 

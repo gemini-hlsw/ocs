@@ -1,6 +1,7 @@
 package edu.gemini.ags.gems
 
 import edu.gemini.catalog.api.{MagnitudeConstraints, RadiusConstraint}
+import edu.gemini.ags.impl._
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core.{Magnitude, Coordinates, Offset, Angle}
 import edu.gemini.shared.skyobject
@@ -103,10 +104,11 @@ case class GemsCatalogSearchCriterion(key: GemsCatalogSearchKey, criterion: Cata
  * Results of a GeMS catalog search
  * See OT-24
  */
-case class GemsCatalogSearchResults(criterion: GemsCatalogSearchCriterion, results: List[skyobject.SkyObject]) {
-  def this(criterion: GemsCatalogSearchCriterion, results: java.util.List[skyobject.SkyObject]) = this(criterion, results.asScala.toList)
+case class GemsCatalogSearchResults(criterion: GemsCatalogSearchCriterion, results: List[SiderealTarget]) {
+  def this(criterion: GemsCatalogSearchCriterion, results: java.util.List[skyobject.SkyObject]) = this(criterion, results.asScala.map(_.toNewModel).toList)
+  def this(results: java.util.List[SiderealTarget], criterion: GemsCatalogSearchCriterion) = this(criterion, results.asScala.toList)
 
-  def resultsAsJava: java.util.List[skyobject.SkyObject] = results.asJava
+  def resultsAsJava: java.util.List[SiderealTarget] = new java.util.ArrayList[SiderealTarget](results.asJava)
 }
 
 /**

@@ -68,7 +68,7 @@ object GemsStrategy extends AgsStrategy {
     val server = CatalogServerInstances.STANDARD
     ParallelCatalogQuery.instance.query(server, adjustedConstraints.asImList).asScala.map { result =>
       val id = result.constraint.id
-      CatalogResultWithKey(result, new GemsCatalogSearchKey(GuideStarTypeMap(id), GuideProbeGroupMap(id)))
+      CatalogResultWithKey(result, GemsCatalogSearchKey(GuideStarTypeMap(id), GuideProbeGroupMap(id)))
     }.toList
   }
 
@@ -87,7 +87,7 @@ object GemsStrategy extends AgsStrategy {
         val radiusConstraint = RadiusConstraint.between(constraint.radiusLimits.getMinLimit.toNewModel, constraint.radiusLimits.getMaxLimit.toNewModel)
         val catalogSearchCriterion = CatalogSearchCriterion("ags", constraint.magnitudeLimits.toMagnitudeConstraints, radiusConstraint, None, angle.some)
         val gemsCatalogSearchCriterion = new GemsCatalogSearchCriterion(result.searchKey, catalogSearchCriterion)
-        new GemsCatalogSearchResults(gemsCatalogSearchCriterion, result.catalogResult.candidates.asScalaList)
+        new GemsCatalogSearchResults(gemsCatalogSearchCriterion, result.catalogResult.candidates.toList)
       }
     }
   }
@@ -126,7 +126,7 @@ object GemsStrategy extends AgsStrategy {
         // For each guide probe associated with these sky objects, add a tuple
         // (guide probe, sky object list) to the results
         result.criterion.key.group.getMembers.asScala.toList.map { guideProbe =>
-          (guideProbe, so.map(_.toNewModel))
+          (guideProbe, so)
         }
       }
 
@@ -191,7 +191,7 @@ object GemsStrategy extends AgsStrategy {
     // Now check that the results are valid: there must be a valid tip-tilt and flexure star each.
     val checker = results.foldRight(Map[String, Boolean]())((result, resultMap) => {
       val key = result.criterion.key.group.getKey
-      if (!result.results.isEmpty)       resultMap.updated(key, true)
+      if (result.results.nonEmpty)       resultMap.updated(key, true)
       else if (!resultMap.contains(key)) resultMap.updated(key, false)
       else                               resultMap
     })

@@ -70,7 +70,7 @@ public class GemsCatalog {
     public List<GemsCatalogSearchResults> search(ObsContext obsContext, SkyCoordinates basePosition, GemsGuideStarSearchOptions options,
                                                  Option<edu.gemini.shared.skyobject.Magnitude.Band> nirBand, StatusLogger statusLogger)
             throws Exception {
-        final Map<GemsCatalogSearchCriterion, List<SkyObject>> map = new HashMap<>();
+        final Map<GemsCatalogSearchCriterion, List<Target.SiderealTarget>> map = new HashMap<>();
         final List<Exception> exceptions = new ArrayList<>();
 
         SearchResultsListener searchResultsListener = new SearchResultsListener() {
@@ -192,7 +192,7 @@ public class GemsCatalog {
 
 
     // Store the given results in the given map. This is used to later merge the results.
-    private synchronized void mapResults(Map<GemsCatalogSearchCriterion, List<SkyObject>> map, List<GemsCatalogSearchResults> results) {
+    private synchronized void mapResults(Map<GemsCatalogSearchCriterion, List<Target.SiderealTarget>> map, List<GemsCatalogSearchResults> results) {
         for(GemsCatalogSearchResults result : results) {
             GemsCatalogSearchCriterion criter = result.criterion();
             if (map.containsKey(criter)) {
@@ -204,12 +204,12 @@ public class GemsCatalog {
     }
 
     // Returns a list of results, merged based on the criterion, in the original order
-    private List<GemsCatalogSearchResults> mergeResults(Map<GemsCatalogSearchCriterion, List<SkyObject>> map,
+    private List<GemsCatalogSearchResults> mergeResults(Map<GemsCatalogSearchCriterion, List<Target.SiderealTarget>> map,
                                                         List<GemsCatalogSearchCriterion> criterList) {
         final List<GemsCatalogSearchResults> results = new ArrayList<>();
         for(GemsCatalogSearchCriterion criter : criterList) {
             if (map.containsKey(criter)) {
-                results.add(new GemsCatalogSearchResults(criter, map.get(criter)));
+                results.add(new GemsCatalogSearchResults(map.get(criter), criter));
             }
         }
         return results;

@@ -1,8 +1,10 @@
 package edu.gemini.ags.gems;
 
+import edu.gemini.model.p1.immutable.SiderealTarget;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.core.Target;
 import edu.gemini.spModel.target.SPTarget;
 
 import java.util.ArrayList;
@@ -39,7 +41,7 @@ public class GemsUtil {
     /**
      * Sorts the sky object list, putting the brightest stars first and returns the sorted array.
      */
-    public static SkyObject[] brightestFirstSkyObject(List<SkyObject> flexureList) {
+    public static SkyObject[] brightestFirstSkyObject(List<SiderealTarget> flexureList) {
         SkyObject[] ar = flexureList.toArray(new SkyObject[flexureList.size()]);
         Arrays.sort(ar, new Comparator<SkyObject>() {
             @Override
@@ -58,12 +60,12 @@ public class GemsUtil {
     /**
      * Removes any duplicates from the list
      */
-    public static List<SkyObject> removeDuplicates(List<SkyObject> list) {
-        Map<String, SkyObject> map = new HashMap<String,SkyObject>(list.size());
-        for(SkyObject skyObject : list) {
-            String name = skyObject.getName();
+    public static List<Target.SiderealTarget> removeDuplicates(List<Target.SiderealTarget> list) {
+        Map<String, Target.SiderealTarget> map = new HashMap<>(list.size());
+        for(Target.SiderealTarget siderealTarget : list) {
+            String name = siderealTarget.name();
             if (name != null) {
-                map.put(name, skyObject);
+                map.put(name, siderealTarget);
             }
         }
         return new ArrayList<>(map.values());
@@ -72,10 +74,10 @@ public class GemsUtil {
     /**
      * Returns a list of unique SkyObjects in the given search results.
      */
-    public static List<SkyObject> getUniqueSkyObjects(List<GemsCatalogSearchResults> list) {
-        List<SkyObject> result = new ArrayList<SkyObject>();
+    public static List<Target.SiderealTarget> getUniqueSkyObjects(List<GemsCatalogSearchResults> list) {
+        List<Target.SiderealTarget> result = new ArrayList<>();
         for(GemsCatalogSearchResults searchResults : list) {
-            for(SkyObject skyObject : searchResults.resultsAsJava()) {
+            for(Target.SiderealTarget skyObject : searchResults.resultsAsJava()) {
                 result.add(skyObject);
             }
         }

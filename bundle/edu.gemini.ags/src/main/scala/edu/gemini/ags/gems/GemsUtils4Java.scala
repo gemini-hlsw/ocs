@@ -1,5 +1,6 @@
 package edu.gemini.ags.gems
 
+import edu.gemini.ags.gems.mascot.{Star, MascotConf}
 import edu.gemini.catalog.api.{SaturationConstraint, RadiusConstraint, MagnitudeConstraints}
 import edu.gemini.ags.impl._
 import edu.gemini.shared.util.immutable
@@ -19,9 +20,8 @@ import Scalaz._
  */
 object GemsUtils4Java {
   // Returns true if the target magnitude is within the given limits
-  def containsMagnitudeInLimits(target: SPTarget, magLimits: MagnitudeConstraints): Boolean =
-    // TODO This method has too many conversions, should be simplified
-    target.getMagnitude(magLimits.band.toOldModel).asScalaOpt.map(m => magLimits.contains(m.toNewModel)).getOrElse(true)
+  def containsMagnitudeInLimits(target: SiderealTarget, magLimits: MagnitudeConstraints): Boolean =
+    target.magnitudeIn(magLimits.band).map(m => magLimits.contains(m)).getOrElse(true)
 
   def mapMagintudes(constraint: Option[SaturationConstraint], mapOp: immutable.MapOp[SaturationConstraint, java.lang.Double]): immutable.Option[java.lang.Double] =
     constraint.map(m => mapOp.apply(m)).asGeminiOpt
@@ -53,4 +53,25 @@ object GemsUtils4Java {
   def translateBands(bands: java.util.Set[skyobject.Magnitude.Band]): java.util.Set[MagnitudeBand] = bands.asScala.map(_.toNewModel).asJava
 
   def toOldBand(band: MagnitudeBand): skyobject.Magnitude.Band = band.toOldModel
+
+  /**
+   * Sorts the sky object list, putting the brightest stars first and returns the sorted array.
+   */
+  def brightestFirstSkyObject(flexureList: java.util.List[SiderealTarget]): java.util.List[SiderealTarget] =
+    flexureList.asScala.sortBy(_.magnitudeIn(MagnitudeBand.R)).asJava
+
+  def toSPTarget(siderealTarget: SiderealTarget):SPTarget = new SPTarget(siderealTarget.toOldModel)
+
+  // TODO Star should be replaced by SiderealTarget
+  def starToSiderealTarget(star: Star): SiderealTarget = {
+    val ra = RightAscension.fromAngle(Angle.fromDegrees(star.ra))
+    val dec = Declination.fromAngle(Angle.fromDegrees(star.dec)).getOrElse(Declination.zero)
+    val coords = Coordinates(ra, dec)
+
+    val magnitudes = List((star.bmag, MagnitudeBand.B), (star.vmag, MagnitudeBand.V), (star.rmag, MagnitudeBand.R), (star.jmag, MagnitudeBand.J), (star.hmag, MagnitudeBand.H), (star.kmag, MagnitudeBand.K))
+
+    val invalid = MascotConf.invalidMag
+    val mags = magnitudes.filter(_._1 != invalid).map(v => new Magnitude(v._1, v._2))
+    SiderealTarget(star.name, coords, None, mags, None)
+  }
 }

@@ -11,6 +11,7 @@ import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.core.Target;
 import edu.gemini.spModel.gemini.gems.Canopus;
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw;
@@ -58,9 +59,9 @@ public class GemsCatalogResults {
         for (TiptiltFlexurePair pair : TiptiltFlexurePair.pairs(results)) {
             GemsGuideProbeGroup tiptiltGroup = pair.getTiptiltResults().criterion().key().group();
             GemsGuideProbeGroup flexureGroup = pair.getFlexureResults().criterion().key().group();
-            List<SkyObject> tiptiltSkyObjectList = filter(obsContext, pair.getTiptiltResults().resultsAsJava(),
+            List<Target.SiderealTarget> tiptiltSkyObjectList = filter(obsContext, pair.getTiptiltResults().resultsAsJava(),
                     tiptiltGroup, posAngles);
-            List<SkyObject> flexureSkyObjectList = filter(obsContext, pair.getFlexureResults().resultsAsJava(),
+            List<Target.SiderealTarget> flexureSkyObjectList = filter(obsContext, pair.getFlexureResults().resultsAsJava(),
                     flexureGroup, posAngles);
             if (tiptiltSkyObjectList.size() != 0 && flexureSkyObjectList.size() != 0) {
                 if (progress != null) {
@@ -102,9 +103,9 @@ public class GemsCatalogResults {
         for (TiptiltFlexurePair pair : TiptiltFlexurePair.pairs(results)) {
             final GemsGuideProbeGroup tiptiltGroup = pair.getTiptiltResults().criterion().key().group();
             final GemsGuideProbeGroup flexureGroup = pair.getFlexureResults().criterion().key().group();
-            final List<SkyObject> tiptiltSkyObjectList = filter(obsContext, pair.getTiptiltResults().resultsAsJava(),
+            final List<Target.SiderealTarget> tiptiltSkyObjectList = filter(obsContext, pair.getTiptiltResults().resultsAsJava(),
                     tiptiltGroup, posAngles);
-            final List<SkyObject> flexureSkyObjectList = filter(obsContext, pair.getFlexureResults().resultsAsJava(),
+            final List<Target.SiderealTarget> flexureSkyObjectList = filter(obsContext, pair.getFlexureResults().resultsAsJava(),
                     flexureGroup, posAngles);
             if (tiptiltSkyObjectList.size() != 0 && flexureSkyObjectList.size() != 0) {
                 if (progress != null) {
@@ -143,13 +144,13 @@ public class GemsCatalogResults {
     // Tries the given asterism and flexure star at the given position angles and returns a list of
     // combinations that work.
     private List<GemsGuideStars> analyzeAtAngles(ObsContext obsContext, Set<Angle> posAngles, Strehl strehl,
-                                                 List<SkyObject> flexureSkyObjectList,
+                                                 List<Target.SiderealTarget> flexureSkyObjectList,
                                                  GemsGuideProbeGroup flexureGroup,
                                                  GemsGuideProbeGroup tiptiltGroup) {
         final List<GemsGuideStars> result = new ArrayList<>();
         for (Angle posAngle : posAngles) {
-            List<SkyObject> flexureList = filter(obsContext, flexureSkyObjectList, flexureGroup, posAngle);
-            SkyObject[] flexureStars = GemsUtil.brightestFirstSkyObject(flexureList);
+            List<Target.SiderealTarget> flexureList = filter(obsContext, flexureSkyObjectList, flexureGroup, posAngle);
+            List<Target.SiderealTarget> flexureStars = GemsUtils4Java.brightestFirstSkyObject(flexureList);
             result.addAll(analyzeStrehl(obsContext, strehl, posAngle, tiptiltGroup, flexureGroup, flexureStars, true));
             if ("CWFS".equals(tiptiltGroup.getKey())) {
                 // try different order of cwfs1 and cwfs2
@@ -169,9 +170,9 @@ public class GemsCatalogResults {
     // combinations of cwfs1 and cwfs2, since cwfs3 is otherwise fixed)
     private List<GemsGuideStars> analyzeStrehl(ObsContext obsContext, Strehl strehl, Angle posAngle,
                                                  GemsGuideProbeGroup tiptiltGroup, GemsGuideProbeGroup flexureGroup,
-                                                 SkyObject[] flexureStars, boolean reverseOrder) {
+                                                 List<Target.SiderealTarget> flexureStars, boolean reverseOrder) {
         List<GemsGuideStars> result = new ArrayList<>();
-        List<SPTarget> tiptiltTargetList = getTargetListFromStrehl(strehl);
+        List<Target.SiderealTarget> tiptiltTargetList = getTargetListFromStrehl(strehl);
 
         // XXX The TPE assumes canopus tiptilt if there are only 2 stars (one of each ODGW and CWFS),
         // So don't add any items to the list that have only 2 stars and GSAOI as tiptilt.
@@ -199,14 +200,14 @@ public class GemsCatalogResults {
     // combinations of cwfs1 and cwfs2, since cwfs3 is otherwise fixed)
     private List<GuideProbeTargets> assignGuideProbeTargets(ObsContext obsContext, Angle posAngle,
                                                               GemsGuideProbeGroup tiptiltGroup,
-                                                              List<SPTarget> tiptiltTargetList,
+                                                              List<Target.SiderealTarget> tiptiltTargetList,
                                                               GemsGuideProbeGroup flexureGroup,
-                                                              SkyObject[] flexureStars,
+                                                              List<Target.SiderealTarget> flexureStars,
                                                               boolean reverseOrder) {
         List<GuideProbeTargets> result = new ArrayList<>(tiptiltTargetList.size() + 1);
 
         // assign guide probes for tiptilt asterism
-        for(SPTarget target : tiptiltTargetList) {
+        for(Target.SiderealTarget target : tiptiltTargetList) {
             Option<GuideProbeTargets> guideProbeTargets = assignGuideProbeTarget(obsContext, posAngle, tiptiltGroup,
                     target, tiptiltGroup, result, tiptiltTargetList, reverseOrder);
             if (guideProbeTargets.isEmpty()) return new ArrayList<>();
@@ -216,10 +217,9 @@ public class GemsCatalogResults {
         }
 
         // assign guide probe for flexure star
-        for (SkyObject flexureStar : flexureStars) {
-            SPTarget target = new SPTarget(flexureStar);
+        for (Target.SiderealTarget flexureStar : flexureStars) {
             Option<GuideProbeTargets> guideProbeTargets = assignGuideProbeTarget(obsContext, posAngle, flexureGroup,
-                    target, tiptiltGroup, result, tiptiltTargetList, false);
+                    flexureStar, tiptiltGroup, result, tiptiltTargetList, false);
             if (!guideProbeTargets.isEmpty()) {
                 result.add(guideProbeTargets.getValue());
                 break;
@@ -238,10 +238,10 @@ public class GemsCatalogResults {
     // If reverseOrder is true, reverse the order in which guide probes are tried (to make sure to get all
     // combinations of cwfs1 and cwfs2, since cwfs3 is otherwise fixed)
     private Option<GuideProbeTargets> assignGuideProbeTarget(ObsContext obsContext, Angle posAngle,
-                                                             GemsGuideProbeGroup group, SPTarget target,
+                                                             GemsGuideProbeGroup group, Target.SiderealTarget target,
                                                              GemsGuideProbeGroup tiptiltGroup,
                                                              List<GuideProbeTargets> otherTargets,
-                                                             List<SPTarget> tiptiltTargetList,
+                                                             List<Target.SiderealTarget> tiptiltTargetList,
                                                              boolean reverseOrder) {
         // First try to assign cwfs3 to the brightest star, if applicable (assignCwfs3ToBrightest arg = true)
         Option<GuideProbe> guideProbe = getGuideProbe(obsContext, target, group, posAngle, tiptiltGroup,
@@ -256,15 +256,15 @@ public class GemsCatalogResults {
         if (guideProbe.isEmpty()) {
             return None.instance();
         }
-        return new Some<>(GuideProbeTargets.create(guideProbe.getValue(), target));
+        return new Some<>(GuideProbeTargets.create(guideProbe.getValue(), GemsUtils4Java.toSPTarget(target)));
     }
 
 
     // Returns the given skyObjectList with any objects removed that are not valid in at least one of the
     // given position angles.
-    private List<SkyObject> filter(ObsContext obsContext, List<SkyObject> skyObjectList, GemsGuideProbeGroup group,
+    private List<Target.SiderealTarget> filter(ObsContext obsContext, List<Target.SiderealTarget> skyObjectList, GemsGuideProbeGroup group,
                                    Set<Angle> posAngles) {
-        List<SkyObject> result = new ArrayList<>(skyObjectList.size());
+        List<Target.SiderealTarget> result = new ArrayList<>(skyObjectList.size());
         for (Angle posAngle : posAngles) {
             result.addAll(filter(obsContext, skyObjectList, group, posAngle));
         }
@@ -273,12 +273,12 @@ public class GemsCatalogResults {
 
     // Returns the given skyObjectList with any objects removed that are not valid in the
     // given position angle.
-    private List<SkyObject> filter(ObsContext obsContext, List<SkyObject> skyObjectList,
+    private List<Target.SiderealTarget> filter(ObsContext obsContext, List<Target.SiderealTarget> skyObjectList,
                                    GemsGuideProbeGroup group, Angle posAngle) {
-        List<SkyObject> result = new ArrayList<>(skyObjectList.size());
-        for (SkyObject skyObject : skyObjectList) {
-            if (validate(obsContext, new SPTarget(skyObject), group, posAngle)) {
-                result.add(skyObject);
+        List<Target.SiderealTarget> result = new ArrayList<>(skyObjectList.size());
+        for (Target.SiderealTarget siderealTarget : skyObjectList) {
+            if (validate(obsContext, siderealTarget, group, posAngle)) {
+                result.add(siderealTarget);
             }
         }
         return result;
@@ -304,8 +304,8 @@ public class GemsCatalogResults {
     }
 
     // Returns true if all the stars in the given target list are valid for the given group
-    private boolean validate(ObsContext obsContext, List<SPTarget> targetList, GemsGuideProbeGroup group, Angle posAngle) {
-        for(SPTarget target : targetList) {
+    private boolean validate(ObsContext obsContext, List<Target.SiderealTarget> targetList, GemsGuideProbeGroup group, Angle posAngle) {
+        for(Target.SiderealTarget target : targetList) {
             if (!validate(obsContext, target, group, posAngle)) {
                 System.out.println("Target " + target + " is not valid for " + group.getKey() + " at pos angle " + posAngle);
                 return false;
@@ -315,12 +315,12 @@ public class GemsCatalogResults {
     }
 
     // Returns true if the given target is valid for the given group
-    private boolean validate(ObsContext obsContext, SPTarget target, GemsGuideProbeGroup group, Angle posAngle) {
+    private boolean validate(ObsContext obsContext, Target.SiderealTarget target, GemsGuideProbeGroup group, Angle posAngle) {
         final ObsContext ctx = obsContext.withPositionAngle(posAngle);
         for (GuideProbe guideProbe : group.getMembers()) {
             if (guideProbe instanceof ValidatableGuideProbe) {
                 ValidatableGuideProbe v = (ValidatableGuideProbe) guideProbe;
-                if (v.validate(target, ctx)) {
+                if (v.validate(GemsUtils4Java.toSPTarget(target), ctx)) {
                     return true;
                 }
             } else {
@@ -337,9 +337,9 @@ public class GemsCatalogResults {
     // otherwise the second brightest (OT-27).
     // If reverseOrder is true, reverse the order in which guide probes are tried (to make sure to get all
     // combinations of cwfs1 and cwfs2, since cwfs3 is otherwise fixed)
-    private Option<GuideProbe> getGuideProbe(ObsContext obsContext, SPTarget target, GemsGuideProbeGroup group,
+    private Option<GuideProbe> getGuideProbe(ObsContext obsContext, Target.SiderealTarget target, GemsGuideProbeGroup group,
                                              Angle posAngle, GemsGuideProbeGroup tiptiltGroup,
-                                             List<GuideProbeTargets> otherTargets, List<SPTarget> tiptiltTargetList,
+                                             List<GuideProbeTargets> otherTargets, List<Target.SiderealTarget> tiptiltTargetList,
                                              boolean assignCwfs3ToBrightest, boolean reverseOrder) {
         final ObsContext ctx = obsContext.withPositionAngle(posAngle);
 
@@ -349,7 +349,7 @@ public class GemsCatalogResults {
         if (isFlexure && "ODGW".equals(tiptiltGroup.getKey())) {
             // Special case:
             // If the tip tilt asterism is assigned to the GSAOI ODGW group, then the flexure star must be assigned to CWFS3.
-            if (Canopus.Wfs.cwfs3.validate(target, ctx)) {
+            if (Canopus.Wfs.cwfs3.validate(GemsUtils4Java.toSPTarget(target), ctx)) {
                 return new Some<GuideProbe>(Canopus.Wfs.cwfs3);
             }
         } else {
@@ -376,8 +376,8 @@ public class GemsCatalogResults {
     }
 
     // Returns true if the given target is valid for the given guide probe
-    private boolean validate(ObsContext ctx, SPTarget target, GuideProbe guideProbe) {
-        boolean valid = (guideProbe instanceof ValidatableGuideProbe) || ((ValidatableGuideProbe) guideProbe).validate(target, ctx);
+    private boolean validate(ObsContext ctx, Target.SiderealTarget target, GuideProbe guideProbe) {
+        boolean valid = (guideProbe instanceof ValidatableGuideProbe) || ((ValidatableGuideProbe) guideProbe).validate(GemsUtils4Java.toSPTarget(target), ctx);
 
         // Additional check for mag range (for cwfs1 and cwfs2, since different than cwfs3 and group range)
         if (valid && guideProbe instanceof Canopus.Wfs) {
@@ -406,7 +406,7 @@ public class GemsCatalogResults {
     // Returns true if the given cwfs guide probe can be assigned to the given target according to the rules in OT-27.
     // If assignCwfs3ToBrightest is true, the brightest star in the asterism (in tiptiltTargetList) is assigned to cwfs3,
     // otherwise the second brightest (OT-27).
-    private boolean checkCwfs3Rule(GuideProbe guideProbe, SPTarget target, List<SPTarget> tiptiltTargetList,
+    private boolean checkCwfs3Rule(GuideProbe guideProbe, Target.SiderealTarget target, List<Target.SiderealTarget> tiptiltTargetList,
                                boolean assignCwfs3ToBrightest) {
         boolean isCwfs3 = guideProbe == Canopus.Wfs.cwfs3;
         if (tiptiltTargetList.size() <= 1) {
@@ -414,9 +414,9 @@ public class GemsCatalogResults {
         }
 
         // sort, put brightest stars first
-        SPTarget[] ar = GemsUtil.brightestFirstSPTarget(tiptiltTargetList);
-        boolean targetIsBrightest = ar[0] == target;
-        boolean targetIsSecondBrightest = ar[1] == target;
+        List<Target.SiderealTarget> ar = GemsUtils4Java.brightestFirstSkyObject(tiptiltTargetList);
+        boolean targetIsBrightest = target.equals(ar.get(0));
+        boolean targetIsSecondBrightest = target.equals(ar.get(1));
 
         if (isCwfs3) {
             if (assignCwfs3ToBrightest) return targetIsBrightest;
@@ -428,40 +428,12 @@ public class GemsCatalogResults {
     }
 
     // Returns the stars in the given asterism as a SPTarget list, sorted by R mag, brightest first.
-    private List<SPTarget> getTargetListFromStrehl(Strehl strehl) {
-        List<SPTarget> targetList = new ArrayList<>();
+    private List<Target.SiderealTarget> getTargetListFromStrehl(Strehl strehl) {
+        List<Target.SiderealTarget> targetList = new ArrayList<>();
         for(Star star : strehl.getStars()) {
-            targetList.add(starToSPTarget(star));
+            targetList.add(GemsUtils4Java.starToSiderealTarget(star));
         }
-        return Arrays.asList(GemsUtil.brightestFirstSPTarget(targetList));
-    }
-
-    // Returns a SkyObject for the given Star
-    private SkyObject starToSkyObject(Star star) {
-        String id = star.name();
-
-        Angle ra = new Angle(star.ra(), Angle.Unit.DEGREES);
-        Angle dec = new Angle(star.dec(), Angle.Unit.DEGREES);
-        HmsDegCoordinates.Builder b = new HmsDegCoordinates.Builder(ra, dec);
-        HmsDegCoordinates coords = b.build();
-
-        List<Magnitude> magList = new ArrayList<>(6);
-
-        double invalid = MascotConf.invalidMag();
-        if (star.bmag() != invalid) magList.add(new Magnitude(Magnitude.Band.B, star.bmag()));
-        if (star.vmag() != invalid) magList.add(new Magnitude(Magnitude.Band.V, star.vmag()));
-        if (star.rmag() != invalid) magList.add(new Magnitude(Magnitude.Band.R, star.rmag()));
-        if (star.jmag() != invalid) magList.add(new Magnitude(Magnitude.Band.J, star.jmag()));
-        if (star.hmag() != invalid) magList.add(new Magnitude(Magnitude.Band.H, star.hmag()));
-        if (star.kmag() != invalid) magList.add(new Magnitude(Magnitude.Band.K, star.kmag()));
-        ImList<Magnitude> mags = DefaultImList.create(magList);
-
-        return new SkyObject.Builder(id, coords).magnitudes(mags).build();
-    }
-
-    // Returns an SPTarget for the given Star
-    private SPTarget starToSPTarget(Star star) {
-        return new SPTarget(starToSkyObject(star));
+        return GemsUtils4Java.brightestFirstSkyObject(targetList);
     }
 
     // OT-33: If the asterism is a Canopus asterism, use R. If an ODGW asterism,
