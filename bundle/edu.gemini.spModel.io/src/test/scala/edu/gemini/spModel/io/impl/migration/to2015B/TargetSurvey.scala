@@ -36,7 +36,7 @@ object TargetSurvey extends SafeApp {
     t.getMagnitudes.asScalaList.map(_.getBand).strengthR(1).toMap
 
   def examineTarget(t: SPTarget): Stats =
-    Map((t.getTarget.getClass.getSimpleName, t.getCoordSysAsString) -> ((1, magnitudeMap(t))))
+    Map((t.getTarget.getClass.getSimpleName, t.getTarget.getTag.tccName) -> ((1, magnitudeMap(t))))
 
   def examineTargetEnv(e: TargetEnvironment): Stats =
     e.getTargets.asScala.toList.foldMap(examineTarget)

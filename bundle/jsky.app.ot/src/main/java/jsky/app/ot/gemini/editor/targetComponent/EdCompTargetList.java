@@ -1085,11 +1085,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 //  if (_nameIsId(name)) {
                 NonSiderealTargetSupport.NonSiderealSystem system =
                         (NonSiderealTargetSupport.NonSiderealSystem) _w.orbitalElementFormat.getSelectedItem();
-                if (system == _nonSiderealTargetSup.getNonSiderealSystem(ConicTarget.SystemType.JPL_MINOR_BODY)) {
+                if (system == _nonSiderealTargetSup.getNonSiderealSystem(ITarget.Tag.JPL_MINOR_BODY)) {
                     service.setObjectType(HorizonsQuery.ObjectType.COMET);
-                } else if (system == _nonSiderealTargetSup.getNonSiderealSystem(ConicTarget.SystemType.MPC_MINOR_PLANET)) {
+                } else if (system == _nonSiderealTargetSup.getNonSiderealSystem(ITarget.Tag.MPC_MINOR_PLANET)) {
                     service.setObjectType(HorizonsQuery.ObjectType.MINOR_BODY);
-                } else if (system == _nonSiderealTargetSup.getNonSiderealSystem(NamedTarget.SystemType.SOLAR_OBJECT)) {
+                } else if (system == _nonSiderealTargetSup.getNonSiderealSystem(ITarget.Tag.NAMED)) {
                     service.setObjectType(HorizonsQuery.ObjectType.MAJOR_BODY);
                 }
                 //}
@@ -1174,28 +1174,28 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     return;
                 }
                 if (_curPos.getTarget() instanceof NonSiderealTarget) {
-                    NonSiderealTarget target = (NonSiderealTarget) _curPos.getTarget();
+                    NonSiderealTarget oldTarget = (NonSiderealTarget) _curPos.getTarget();
                     switch (reply.getObjectType()) {
-                        case COMET:
-                            _nonSiderealTargetSup.showNonSiderealTarget(target,
-                                    _nonSiderealTargetSup.getNonSiderealSystem(ConicTarget.SystemType.JPL_MINOR_BODY).type.getName());
+                        case COMET: {
+                            final ConicTarget target = newOrExistingTarget(ITarget.Tag.JPL_MINOR_BODY);
+                            _nonSiderealTargetSup.showNonSiderealTarget(target, ITarget.Tag.JPL_MINOR_BODY);
                             _w.orbitalElementFormat.setValue(_nonSiderealTargetSup.getNonSiderealSystems()[NonSiderealTargetSupport.JPL_COMET]);
-                            target.setSystemOption(ConicTarget.SystemType.JPL_MINOR_BODY);
                             _curPos.setTarget(target);
+                            }
                             break;
-                        case MINOR_BODY:
-                            _nonSiderealTargetSup.showNonSiderealTarget(target,
-                                    _nonSiderealTargetSup.getNonSiderealSystem(ConicTarget.SystemType.MPC_MINOR_PLANET).type.getName());
+                        case MINOR_BODY: {
+                            final ConicTarget target = newOrExistingTarget(ITarget.Tag.MPC_MINOR_PLANET);
+                            _nonSiderealTargetSup.showNonSiderealTarget(target, ITarget.Tag.MPC_MINOR_PLANET);
                             _w.orbitalElementFormat.setValue(_nonSiderealTargetSup.getNonSiderealSystems()[NonSiderealTargetSupport.JPL_MINOR_PLANET]);
-                            target.setSystemOption(ConicTarget.SystemType.MPC_MINOR_PLANET);
                             _curPos.setTarget(target);
+                            }
                             break;
-                        case MAJOR_BODY:
-                            _nonSiderealTargetSup.showNonSiderealTarget(target,
-                                    _nonSiderealTargetSup.getNonSiderealSystem(NamedTarget.SystemType.SOLAR_OBJECT).type.getName());
+                        case MAJOR_BODY: {
+                            final NamedTarget target = (oldTarget instanceof NamedTarget) ? (NamedTarget) oldTarget : new NamedTarget();
+                            _nonSiderealTargetSup.showNonSiderealTarget(target,ITarget.Tag.NAMED);
                             _w.orbitalElementFormat.setValue(_nonSiderealTargetSup.getNonSiderealSystems()[NonSiderealTargetSupport.MAJOR_PLANET]);
-                            target.setSystemOption(NamedTarget.SystemType.SOLAR_OBJECT);
                             _curPos.setTarget(target);
+                            }
                             break;
                     }
                     //_nonSiderealTargetSup.showNonSiderealTarget(target, _curPos.getCoordSys().getName());
@@ -1209,6 +1209,17 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }.execute();
     }
 
+    /**
+     * Returns the current target if its system type matches the specified one, otherwise constructs
+     * and returns a new conic target of the specified type.
+     */
+    private ConicTarget newOrExistingTarget(ITarget.Tag tag) {
+        ITarget old = _curPos.getTarget();
+        if (old instanceof ConicTarget && old.getTag() == tag)
+            return (ConicTarget) old;
+        else
+            return (ConicTarget) ITarget.forTag(tag);
+    }
 
     // Query the given catalog using the given arguments and set the current target position
     // from the results. (XXX some of this should go in a helper class?)
@@ -1291,18 +1302,14 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     // Initialize the target System menu
     private void _initSystemChoices() {
         _w.system.clear();
-        for (HmsDegTarget.SystemType type : HmsDegTarget.SystemType.TYPES) {
-            _w.system.addChoice(type.getName());
-        }
+        _w.system.addChoice(HmsDegTarget.TAG.tccName);
+        _w.system.addChoice(NON_SIDEREAL_TARGET);
         _w.system.addWatcher(new DropDownListBoxWidgetWatcher() {
             public void dropDownListBoxAction(DropDownListBoxWidget dd, int i, String val) {
                 _updateCoordSystem();
             }
         });
-        //Initialize Non-Sidereal Targets.
-        //The System will be NON_SIDEREAL_TARGET, but the actual types
-        //will be stored in the orbital format combo box.
-        _nonSiderealTargetSup.initSystemChoices(NON_SIDEREAL_TARGET);
+        _nonSiderealTargetSup.initOrbitalElementFormatChoices();
     }
 
     //Initialize the listeners for the radio buttons.
@@ -1650,7 +1657,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         // update the display in the tabs
         if (_curPos.getTarget() instanceof NonSiderealTarget) {
-            String system = _curPos.getCoordSys().getName();
+            ITarget.Tag system = _curPos.getTarget().getTag();
             NonSiderealTarget nst = (NonSiderealTarget) _curPos.getTarget();
             _nonSiderealTargetSup.showNonSiderealTarget(nst, system);
         }
@@ -1730,7 +1737,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             _w.system.setValue(NON_SIDEREAL_TARGET);
             _nonSiderealTargetSup.showOrbitalElementFormat();
         } else {
-            _w.system.setValue(_curPos.getCoordSys().getName());
+            _w.system.setValue(_curPos.getTarget().getTag().tccName);
         }
     }
 
@@ -1771,13 +1778,15 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     // Update the current target to use the selected coordinate system
     private void _updateCoordSystem() {
-        String newSystem = _w.system.getStringValue();
-        if (newSystem.equals(NON_SIDEREAL_TARGET)) {
-            newSystem = ((NonSiderealTargetSupport.NonSiderealSystem) _w.orbitalElementFormat.getSelectedItem()).type.getName();
+        final ITarget.Tag tag;
+        if (_w.system.getStringValue().equals(NON_SIDEREAL_TARGET)) {
+            tag = ((ITarget.Tag) _w.orbitalElementFormat.getSelectedItem());
+        } else {
+            tag = ITarget.Tag.SIDEREAL;
         }
         _ignorePosUpdate = true;
         try {
-            _curPos.setCoordSys(newSystem);
+            _curPos.setCoordSys(tag);
         } finally {
             _ignorePosUpdate = false;
         }
@@ -2046,76 +2055,75 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
             public void execute(HorizonsReply reply) {
 
+                // Alright, we're going to replace the target if we get back a comet or minor
+                // object, otherwise we do nothing. That's the old behavior.
+                final ConicTarget target;
+                String name = _w.targetName.getText().trim();
+
+                // First construct the object and set the AQ
+                switch (reply.getReplyType()) {
+                    case COMET:
+                        target = new ConicTarget(ITarget.Tag.JPL_MINOR_BODY);
+                        if (reply.hasOrbitalElements()) {
+                            OrbitalElements elements = reply.getOrbitalElements();
+                            target.getAQ().setValue(elements.getValue(OrbitalElements.Name.QR));
+                        }
+                        _w.orbitalElementFormat.setSelectedItem(_nonSiderealTargetSup.getNonSiderealSystem(ITarget.Tag.JPL_MINOR_BODY));
+                        _w.targetName.setText(name); //name is cleared if we move the element format
+                        break;
+
+                    case MINOR_OBJECT:
+                        target = new ConicTarget(ITarget.Tag.MPC_MINOR_PLANET);
+                        if (reply.hasOrbitalElements()) {
+                            OrbitalElements elements = reply.getOrbitalElements();
+                            target.getAQ().setValue(elements.getValue(OrbitalElements.Name.A));
+                        }
+                        _w.orbitalElementFormat.setSelectedItem(_nonSiderealTargetSup.getNonSiderealSystem(ITarget.Tag.MPC_MINOR_PLANET));
+                        _w.targetName.setText(name); //name is cleared if we move the element format
+                        break;
+
+                    default:
+                        return; /// ***
+                }
+
                 // If the target is capable of storing Horizons information, populate (or unpopulate) it.
-                if (_curPos.getTarget() instanceof NonSiderealTarget) {
+                if (target instanceof NonSiderealTarget) {
                     NonSiderealTarget ht = (NonSiderealTarget) _curPos.getTarget();
                     if (reply.hasObjectIdAndType()) {
-
                         // Set the object id and type; both will be valid
                         ht.setHorizonsObjectId(reply.getObjectId());
                         ht.setHorizonsObjectTypeOrdinal(reply.getObjectType().ordinal());
-
                     } else {
-
                         // Clear the value out
                         ht.setHorizonsObjectId(null);
                         ht.setHorizonsObjectTypeOrdinal(-1);
-
                     }
-
-                    // force a change event. this is ridiculous.
-                    _curPos.notifyOfGenericUpdate();
                 }
 
+                // Set the orbital elements
                 if (reply.hasOrbitalElements()) {
                     OrbitalElements elements = reply.getOrbitalElements();
-
-                    if (_curPos.getTarget() instanceof ConicTarget) {
-                        String name = _w.targetName.getText().trim();
-                        ConicTarget target = (ConicTarget) _curPos.getTarget();
-                        target.getEpoch().setValue(elements.getValue(OrbitalElements.Name.EPOCH));
-                        target.getEpochOfPeri().setValue(elements.getValue(OrbitalElements.Name.TP));
-                        target.getANode().setValue(elements.getValue(OrbitalElements.Name.OM));
-                        target.getPerihelion().setValue(elements.getValue(OrbitalElements.Name.W));
-                        target.setE(elements.getValue(OrbitalElements.Name.EC));
-                        target.getInclination().setValue(elements.getValue(OrbitalElements.Name.IN));
-                        target.getLM().setValue(elements.getValue(OrbitalElements.Name.MA));
-                        final HorizonsService service = HorizonsService.getInstance();
-                        switch (reply.getReplyType()) {
-                            case COMET:
-                                //QR available for comets only
-                                target.getAQ().setValue(elements.getValue(OrbitalElements.Name.QR));
-                                if ((service != null) && (service.getObjectType() == null)) {
-                                    target.setSystemOption(ConicTarget.SystemType.JPL_MINOR_BODY);
-                                    _w.orbitalElementFormat.setSelectedItem(_nonSiderealTargetSup.getNonSiderealSystem(ConicTarget.SystemType.JPL_MINOR_BODY));
-                                    _w.targetName.setText(name); //name is cleared if we move the element format
-                                }
-                                break;
-                            case MINOR_OBJECT:
-                                //A is available for Minor objects only
-                                target.getAQ().setValue(elements.getValue(OrbitalElements.Name.A));
-                                if ((service != null) && (service.getObjectType() == null)) {
-                                    target.setSystemOption(ConicTarget.SystemType.MPC_MINOR_PLANET);
-                                    _w.orbitalElementFormat.setSelectedItem(_nonSiderealTargetSup.getNonSiderealSystem(ConicTarget.SystemType.MPC_MINOR_PLANET));
-                                    _w.targetName.setText(name); //name is cleared if we move the element format
-                                }
-                                break;
-                            case MUTLIPLE_ANSWER:
-                                break;
-                            case NO_RESULTS:
-                                break;
-                            case MAJOR_PLANET:
-                                break;
-                            case SPACECRAFT:
-                                break;
-                        }
-                        //now, update current RA, Dec
-                        if (reply.hasEphemeris()) {
-                            List<EphemerisEntry> ephemeris = reply.getEphemeris();
-                            _processEphemeris(ephemeris);
-                        }
-                    }
+                    target.getEpoch().setValue(elements.getValue(OrbitalElements.Name.EPOCH));
+                    target.getEpochOfPeri().setValue(elements.getValue(OrbitalElements.Name.TP));
+                    target.getANode().setValue(elements.getValue(OrbitalElements.Name.OM));
+                    target.getPerihelion().setValue(elements.getValue(OrbitalElements.Name.W));
+                    target.setE(elements.getValue(OrbitalElements.Name.EC));
+                    target.getInclination().setValue(elements.getValue(OrbitalElements.Name.IN));
+                    target.getLM().setValue(elements.getValue(OrbitalElements.Name.MA));
                 }
+
+                // Ok replace the target here since the ephemeris stuff updates the UI :-\
+                _curPos.setTarget(target);
+
+                //now, update current RA, Dec
+                if (reply.hasEphemeris()) {
+                    List<EphemerisEntry> ephemeris = reply.getEphemeris();
+                    _processEphemeris(ephemeris);
+                }
+
+                // And make sure there's an update to the UI. This is so terrible.
+                _curPos.notifyOfGenericUpdate();
+
             }
         }
 

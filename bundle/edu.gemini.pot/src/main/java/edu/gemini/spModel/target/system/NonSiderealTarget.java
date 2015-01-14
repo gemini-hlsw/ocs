@@ -218,14 +218,6 @@ public abstract class NonSiderealTarget extends ITarget {
         _epoch = newValue;
     }
 
-
-    /**
-     * Gets the system's name including the selected (sub)option.
-     */
-    public String getSystemName() {
-        return "(" + getSystemOption().getName() + ")";
-    }
-
     public Date getDateForPosition() {
         return _date;
     }

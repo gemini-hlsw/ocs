@@ -6,24 +6,11 @@ package edu.gemini.spModel.target.system;
  */
 public final class NamedTarget extends NonSiderealTarget {
 
-    /**
-     * Options for the system type.
-     */
-    public static final class SystemType extends TypeBase {
-        public static int _count = 0;
+    public static Tag TAG = Tag.NAMED;
 
-        public static final SystemType SOLAR_OBJECT =
-                new SystemType("Solar system object");
-
-        public static final SystemType[] TYPES = new SystemType[]{
-                SOLAR_OBJECT
-        };
-
-        private SystemType(String name) {
-            super(_count++, name);
-        }
+    public Tag getTag() {
+        return TAG;
     }
-
 
 
     /**
@@ -64,16 +51,6 @@ public final class NamedTarget extends NonSiderealTarget {
     }
 
 
-    /**
-     * Various default values.
-     */
-    private static final SystemType DEFAULT_SYSTEM_TYPE = SystemType.SOLAR_OBJECT;
-
-    /**
-     * The base name of this coordinate system.
-     */
-    private static final String SHORT_SYSTEM_NAME = "namedTarget";
-
     private NamedTarget.SolarObject _solarObject = NamedTarget.SolarObject.DEFAULT_SOLAR_OBJECT;
 
     /**
@@ -105,22 +82,7 @@ public final class NamedTarget extends NonSiderealTarget {
     }
 
     /**
-     * Gets the system's name including the selected (sub)option.
-     */
-    public String getSystemName() {
-        return "(" + getSystemOption().getName() + ")";
-    }
-
-    /**
-     * Return the short system name.
-     */
-    public String getShortSystemName() {
-        return SHORT_SYSTEM_NAME;
-    }
-
-
-    /**
-     * Get the objecct associated to this Named Target.
+     * Get the object associated to this Named Target.
      */
     public NamedTarget.SolarObject getSolarObject() {
         return _solarObject;
@@ -138,24 +100,6 @@ public final class NamedTarget extends NonSiderealTarget {
      */
     public String getPosition() {
         return (_solarObject != null) ?  _solarObject.getDisplayValue() : "Named Target";
-    }
-
-
-    /**
-     * Gets the available options for this coordinate system.
-     */
-    public TypeBase[] getSystemOptions() {
-        return NamedTarget.SystemType.TYPES;
-    }
-
-
-    public TypeBase getSystemOption() {
-        return SystemType.SOLAR_OBJECT;
-    }
-
-    public void setSystemOption(TypeBase newValue) {
-        if (!SystemType.SOLAR_OBJECT.equals(newValue))
-            throw new IllegalArgumentException("Nope. " + newValue);
     }
 
 }

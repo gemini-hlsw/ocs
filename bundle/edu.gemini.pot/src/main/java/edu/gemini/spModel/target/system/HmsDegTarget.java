@@ -28,28 +28,16 @@ import java.util.Date;
  * @author      Kim Gillies (mangled for SP)
  */
 public final class HmsDegTarget extends ITarget {
-    /**
-     * Options for the system type.
-     */
-    public static final class SystemType extends TypeBase {
-        public static final int _J2000 = 0;
 
-        public static final SystemType J2000 =
-                new SystemType(_J2000, "J2000");
+    public static final Tag TAG = Tag.SIDEREAL;
 
-        public static final SystemType[] TYPES = new SystemType[]{
-            J2000,
-        };
-
-        private SystemType(int type, String name) {
-            super(type, name);
-        }
-
+    public Tag getTag() {
+        return TAG;
     }
+
 
     // Various default values.
     // XXX Note: the types derived from CoordinateParam, such as Epoch, are NOT immutable!
-    private static final SystemType DEFAULT_SYSTEM_TYPE = SystemType.J2000;
     private static final Epoch DEFAULT_EPOCH_2000 = new Epoch(2000, Units.YEARS);
     private static final PM1 DEFAULT_PM1 = new PM1();
     private static final PM2 DEFAULT_PM2 = new PM2();
@@ -78,7 +66,6 @@ public final class HmsDegTarget extends ITarget {
      * The base name of this coordinate system.
      */
     private static final String SYSTEM_NAME = "HMS Deg";
-    private static final String SHORT_SYSTEM_NAME = "hmsdegTarget";
 
     /**
      * Provides clone support.
@@ -114,7 +101,6 @@ public final class HmsDegTarget extends ITarget {
         if (!(obj instanceof HmsDegTarget)) return false;
 
         HmsDegTarget sys = (HmsDegTarget) obj;
-        if (!(getSystemOption().equals(sys.getSystemOption()))) return false;
         if (!(_ra.equals(sys._ra)) || !(_dec.equals(sys._dec))) return false;
         if (!(_epoch.equals(sys._epoch))) return false;
 
@@ -457,24 +443,10 @@ public final class HmsDegTarget extends ITarget {
     }
 
     /**
-     * Gets the system name.
-     */
-    public String getSystemName() {
-        return SYSTEM_NAME + " (" + getSystemOption().getName() + ")";
-    }
-
-    /**
-     * Gets the short system name.
-     */
-    public String getShortSystemName() {
-        return SHORT_SYSTEM_NAME;
-    }
-
-    /**
      * Gets a short description of the position (its RA and Dec, epoch).
      */
     public String getPosition() {
-        return (getName().isEmpty() ? "" : getName() + " ") + "RA: " + getC1() + " Dec: " + getC2() + " " + getSystemName();
+        return (getName().isEmpty() ? "" : getName() + " ") + "RA: " + getC1() + " Dec: " + getC2() + " " + SYSTEM_NAME + " (" + TAG.tccName + ")";
     }
 
     /**
@@ -484,20 +456,4 @@ public final class HmsDegTarget extends ITarget {
         return getPosition();
     }
 
-
-    /**
-     * Gets the available options for this coordinate system.
-     */
-    public TypeBase[] getSystemOptions() {
-        return SystemType.TYPES;
-    }
-
-    public TypeBase getSystemOption() {
-        return SystemType.J2000;
-    }
-
-    public void setSystemOption(TypeBase newValue) {
-        if (!newValue.equals(SystemType.J2000))
-            throw new IllegalArgumentException("Nope. " + newValue);
-    }
 }

@@ -417,7 +417,7 @@ public class ReportUtils {
         if (target == null) {
             return Option.empty();
         }
-        if (!(target.getCoordSys() instanceof HmsDegTarget.SystemType)) {
+        if (!(target.getTarget() instanceof HmsDegTarget)) {
             return Option.empty();
         }
 

@@ -122,16 +122,12 @@ class NonSiderealTargetSupport {
     // Maps the display name to the system type and the GUI labels to use.
     // Null labels are not used or displayed.
     public static class NonSiderealSystem {
-        TypeBase type;
+        ITarget.Tag tag;
         String displayName;
         String[][] labels; // parameter labels/tooltips, indexed by param constants
 
-        public NonSiderealSystem(TypeBase type, String[][] labels) {
-            this(type, labels, type.getName());
-        }
-
-        public NonSiderealSystem(TypeBase type, String[][] labels, String displayValue) {
-            this.type = type;
+        public NonSiderealSystem(ITarget.Tag tag, String[][] labels, String displayValue) {
+            this.tag = tag;
             this.labels = labels;
             this.displayName = displayValue;
         }
@@ -259,9 +255,9 @@ class NonSiderealTargetSupport {
      * Return the ConicSystem associated to the given base
      */
 
-    public NonSiderealTargetSupport.NonSiderealSystem getNonSiderealSystem(TypeBase base) {
+    public NonSiderealTargetSupport.NonSiderealSystem getNonSiderealSystem(ITarget.Tag tag) {
         for (NonSiderealTargetSupport.NonSiderealSystem s : _nonSiderealSystems) {
-            if (s.type == base) {
+            if (s.tag == tag) {
                 return s;
             }
         }
@@ -335,13 +331,13 @@ class NonSiderealTargetSupport {
     private void _initNonSiderealSystems() {
         _nonSiderealSystems = new NonSiderealTargetSupport.NonSiderealSystem[_systemCount];
         _nonSiderealSystems[MAJOR_PLANET] = new NonSiderealTargetSupport.NonSiderealSystem(
-                NamedTarget.SystemType.SOLAR_OBJECT,
+                ITarget.Tag.NAMED,
                 _paramLabels[MAJOR_PLANET], "Solar System Object");
         _nonSiderealSystems[JPL_COMET] = new NonSiderealTargetSupport.NonSiderealSystem(
-                ConicTarget.SystemType.JPL_MINOR_BODY,
+                ITarget.Tag.JPL_MINOR_BODY,
                 _paramLabels[JPL_COMET], "JPL Comet");
         _nonSiderealSystems[JPL_MINOR_PLANET] = new NonSiderealTargetSupport.NonSiderealSystem(
-                ConicTarget.SystemType.MPC_MINOR_PLANET,
+                ITarget.Tag.MPC_MINOR_PLANET,
                 _paramLabels[JPL_MINOR_PLANET], "JPL Minor Planet");
     }
 
@@ -354,9 +350,9 @@ class NonSiderealTargetSupport {
      * @param system the target coordinate system {@link edu.gemini.spModel.target.system.ConicTarget.SystemType#TYPES}
      * @param updateDate if the date for the current position should be updated
      */
-    public void showNonSiderealTarget(NonSiderealTarget target, String system, boolean updateDate) {
+    public void showNonSiderealTarget(NonSiderealTarget target, ITarget.Tag tag, boolean updateDate) {
         for(int i = 0; i < _systemCount; i++) {
-            if (_nonSiderealSystems[i].type.getName().equals(system)) {
+            if (_nonSiderealSystems[i].tag == tag) {
                 showNonSiderealTarget(target, _nonSiderealSystems[i], updateDate);
             }
         }
@@ -367,8 +363,8 @@ class NonSiderealTargetSupport {
      * @param target the target position to display
      * @param system the target coordinate system {@link edu.gemini.spModel.target.system.ConicTarget.SystemType#TYPES}
      **/
-    public void showNonSiderealTarget(NonSiderealTarget target, String system) {
-        showNonSiderealTarget(target, system, true);
+    public void showNonSiderealTarget(NonSiderealTarget target, ITarget.Tag tag) {
+        showNonSiderealTarget(target, tag, true);
     }
 
     // Display the given target in the GUI
@@ -428,7 +424,7 @@ class NonSiderealTargetSupport {
 
     //refresh the Solar System Panel depending on the system type of the Non Sidereal Target
     private void _refreshPlanetPanel(ITarget target) {
-        boolean isSolarObject = target.getSystemOption() == NamedTarget.SystemType.SOLAR_OBJECT;
+        boolean isSolarObject = target instanceof NamedTarget;
         _w.planetsPanel.setVisible(isSolarObject);
         if (isSolarObject) { //refresh the content of the panel
             if (target instanceof NamedTarget) {
@@ -494,18 +490,7 @@ class NonSiderealTargetSupport {
 
     private DropDownListBoxWidgetWatcher orbitalElementFormatWatcher = new DropDownListBoxWidgetWatcher()  {
         public void dropDownListBoxAction(DropDownListBoxWidget dd, int i, String val) {
-            if (_curPos.getTarget() instanceof ConicTarget) {
-                if(((ConicTarget) _curPos.getTarget()).getSystemOption().getTypeCode() !=
-                        ((NonSiderealTargetSupport.NonSiderealSystem)_w.orbitalElementFormat.getSelectedItem()).type.getTypeCode()){
-                    //if we change the element type in the dropdown menu, we clean all the data, by creating a new ConicTarget
-                    //and copying the name and the selected type(if we don't copy the selected type, then we can't modify by hand the dropdown menu)
-                    int typecode = ((NonSiderealTargetSupport.NonSiderealSystem)_w.orbitalElementFormat.getSelectedItem()).type.getTypeCode();
-                    String name =  ((ConicTarget) _curPos.getTarget()).getName();
-                    _curPos.setTarget(new ConicTarget(ConicTarget.SystemType.TYPES[typecode]));
-                    ((ConicTarget) _curPos.getTarget()).setName(name);
-                }
-            }
-            _curPos.setCoordSys(((NonSiderealTargetSupport.NonSiderealSystem)_w.orbitalElementFormat.getSelectedItem()).type.getName());
+            _curPos.setCoordSys((ITarget.Tag) _w.orbitalElementFormat.getSelectedItem());
             if (!_ignoreResetCacheEvents) {
                 HorizonsService.resetCache();
             }
@@ -513,34 +498,24 @@ class NonSiderealTargetSupport {
     };
 
     // Initialize the Orbital Element Format menu
-    private void _initOrbitalElementFormatChoices() {
+    void initOrbitalElementFormatChoices() {
         _w.orbitalElementFormat.deleteWatcher(orbitalElementFormatWatcher);
         _w.orbitalElementFormat.clear();
-        NonSiderealTargetSupport.NonSiderealSystem[] systems = getNonSiderealSystems();
-
-        for (NonSiderealTargetSupport.NonSiderealSystem system : systems) {
-            _w.orbitalElementFormat.addChoice(system);
-        }
+        _w.orbitalElementFormat.addChoice(ITarget.Tag.JPL_MINOR_BODY);
+        _w.orbitalElementFormat.addChoice(ITarget.Tag.MPC_MINOR_PLANET);
+        _w.orbitalElementFormat.addChoice(ITarget.Tag.NAMED);
         _w.orbitalElementFormat.addWatcher(orbitalElementFormatWatcher);
     }
 
     void showOrbitalElementFormat() {
-        NonSiderealTargetSupport.NonSiderealSystem sytem = getNonSiderealSystem(_curPos.getCoordSys());
+        NonSiderealTargetSupport.NonSiderealSystem sytem = getNonSiderealSystem(_curPos.getTarget().getTag());
         if (sytem != null) {
             _w.orbitalElementFormat.deleteWatcher(orbitalElementFormatWatcher);
             _w.orbitalElementFormat.setSelectedItem(sytem);
             _w.orbitalElementFormat.addWatcher(orbitalElementFormatWatcher);
         } else {
-            DialogUtil.error("Target with obsolete or unknown orbital format: " + _curPos.getCoordSys().getName());
+            DialogUtil.error("Target with obsolete or unknown orbital format: " + _curPos.getTarget().getTag().tccName);
         }
-    }
-
-    /**
-     * Populates the system choices with the non sidereal stuff
-     */
-    public void initSystemChoices(String choice) {
-         _w.system.addChoice(choice); // special case for nonsidereal targets
-        _initOrbitalElementFormatChoices();
     }
 
     public void updatePos(SPTarget target) {

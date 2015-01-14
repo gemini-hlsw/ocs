@@ -27,10 +27,37 @@ import java.util.Set;
  */
 public abstract class ITarget implements Cloneable, Serializable {
 
-    /**
-     * Returns a short one word name for the coordinate system name.
-     */
-    public abstract String getShortSystemName();
+   public enum Tag {
+
+       // N.B. these strings are meaningful to the TCC
+       SIDEREAL("J2000"),
+       NAMED("Solar system object"),
+       JPL_MINOR_BODY("JPL minor body"),
+       MPC_MINOR_PLANET("MPC minor planet");
+
+       public final String tccName;
+
+       private Tag(String tccName) {
+           this.tccName = tccName;
+       }
+
+       @Override
+       public String toString() {
+           return tccName;
+       }
+
+    }
+
+    public static ITarget forTag(Tag tag) {
+        switch (tag) {
+            case JPL_MINOR_BODY:   return new ConicTarget(ITarget.Tag.JPL_MINOR_BODY);
+            case MPC_MINOR_PLANET: return new ConicTarget(ITarget.Tag.MPC_MINOR_PLANET);
+            case NAMED:            return new NamedTarget();
+            case SIDEREAL:         return new HmsDegTarget();
+        }
+        throw new Error("unpossible");
+    }
+
 
     /**
      * Returns an optional name for the target.
@@ -135,12 +162,6 @@ public abstract class ITarget implements Cloneable, Serializable {
      */
     public abstract void setEpoch(Epoch e)
             throws IllegalArgumentException;
-
-    /**
-     * Gets the available types, or options within the system.  For instance,
-     * the {@link HmsDegTarget} has options for J2000, B1950, apparent, etc.
-     */
-    public abstract TypeBase[] getSystemOptions();
 
     /**
      * Provides testing of equality of two targets.
@@ -253,11 +274,6 @@ public abstract class ITarget implements Cloneable, Serializable {
         }
     }
 
-    public abstract String getSystemName();
-
-    public abstract TypeBase getSystemOption();
-
-    public abstract void setSystemOption(TypeBase newValue);
-
+    public abstract Tag getTag();
 
 }

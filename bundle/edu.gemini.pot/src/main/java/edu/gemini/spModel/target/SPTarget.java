@@ -161,40 +161,8 @@ public final class SPTarget extends WatchablePos {
      * upon the String name of the coordinate system.
      */
     private static ITarget createTarget(final String coordSys) {
-        // Cycle through each known target type looking for matches
-        // First HmsDegTarget
-        {
-            final HmsDegTarget.SystemType[] types = HmsDegTarget.SystemType.TYPES;
-            for (final HmsDegTarget.SystemType type : types) {
-                if (coordSys.equals(type.getName())) {
-                    return new HmsDegTarget();
-                }
-            }
-            if (coordSys.equals("Hipparcos")) {
-                //LOGGER.info("Transforming Hipparcos to J2000");
-                return new HmsDegTarget();
-            }
-        }
-        // Conic
-        {
-            final ConicTarget.SystemType[] types = ConicTarget.SystemType.TYPES;
-            for (final ConicTarget.SystemType type : types) {
-                if (coordSys.equals(type.getName())) {
-                    return new ConicTarget(type);
-                }
-            }
-        }
-        // Named Target
-        {
-            final NamedTarget.SystemType[] types = NamedTarget.SystemType.TYPES;
-            for (final NamedTarget.SystemType type: types) {
-                if (coordSys.equals(type.getName())) {
-                    return new NamedTarget();
-                }
-            }
-        }
-
-        return null;
+        final ITarget.Tag tag = ITarget.Tag.valueOf(coordSys); // may throw, don't care
+        return ITarget.forTag(tag);
     }
 
     /**
@@ -304,62 +272,10 @@ public final class SPTarget extends WatchablePos {
     /**
      * Set the Coordinate System with a string.
      */
-    public void setCoordSys(final String coordSysString) throws IllegalArgumentException {
-        final TypeBase newCoordSys = _getCoordSys(_target.getSystemOptions(), coordSysString);
-        if (newCoordSys == null) {
-            final ITarget newTarget = _newTargetType(coordSysString);
-            if (newTarget != null) {
-                _target = newTarget;
-            }
-        } else {
-            _target.setSystemOption(newCoordSys);
-        }
-
-        _notifyOfGenericUpdate();
+    public void setCoordSys(final ITarget.Tag tag) {
+        if (tag != _target.getTag())
+            setTarget(ITarget.forTag(tag));
     }
-
-    // Return the TypeBase object from the array matching the given coordSysString
-    private TypeBase _getCoordSys(final TypeBase[] options, final String coordSysString) {
-        for (final TypeBase option : options) {
-            if (coordSysString.equals(option.getName())) {
-                return option;
-            }
-        }
-        return null;
-    }
-
-    // return a new target with the given coordSysString, searching in all of the
-    // known coordinate types for a matching value
-    private ITarget _newTargetType(final String coordSysString) {
-        TypeBase newCoordSys = _getCoordSys(ConicTarget.SystemType.TYPES, coordSysString);
-        if (newCoordSys != null) {
-            return new ConicTarget((ConicTarget.SystemType)newCoordSys);
-        }
-        newCoordSys = _getCoordSys(HmsDegTarget.SystemType.TYPES, coordSysString);
-        if (newCoordSys != null) {
-            return new HmsDegTarget();
-        }
-        newCoordSys = _getCoordSys(NamedTarget.SystemType.TYPES, coordSysString);
-        if (newCoordSys != null) {
-            return new NamedTarget();
-        }
-        return null;
-    }
-
-    /**
-     * Get coordinate system used by this position.
-     */
-    public TypeBase getCoordSys() {
-        return _target.getSystemOption();
-    }
-
-    /**
-     * Get coordinate system used by this position as a String.
-     */
-    public String getCoordSysAsString() {
-        return _target.getSystemOption().getName();
-    }
-
 
     // ----- Specialized methods for an HmsDegTarget ----------
     /**
@@ -412,13 +328,6 @@ public final class SPTarget extends WatchablePos {
         } else {
             throw new IllegalArgumentException();
         }
-    }
-
-    /**
-     * Get the tracking system.
-     */
-    public String getTrackingSystem() {
-        return getCoordSysAsString();
     }
 
     /**
@@ -542,7 +451,7 @@ public final class SPTarget extends WatchablePos {
 
         if (target instanceof HmsDegTarget) {
             final HmsDegTarget t = (HmsDegTarget) target;
-            Pio.addParam(factory, paramSet, _SYSTEM, t.getSystemOption().getName());
+            Pio.addParam(factory, paramSet, _SYSTEM, t.getTag().tccName);
             paramSet.addParam(t.getEpoch().getParam(factory, _EPOCH));
             Pio.addParam(factory, paramSet, _BRIGHTNESS, t.getBrightness());
             Pio.addParam(factory, paramSet, _C1, t.c1ToString());
@@ -571,7 +480,7 @@ public final class SPTarget extends WatchablePos {
 
             if (target instanceof ConicTarget) {
                 final ConicTarget t = (ConicTarget) target;
-                Pio.addParam(factory, paramSet, _SYSTEM, t.getSystemOption().getName());
+                Pio.addParam(factory, paramSet, _SYSTEM, t.getTag().tccName);
                 paramSet.addParam(t.getEpoch().getParam(factory, _EPOCH));
                 Pio.addParam(factory, paramSet, _BRIGHTNESS, t.getBrightness());
 
@@ -585,7 +494,7 @@ public final class SPTarget extends WatchablePos {
                 paramSet.addParam(t.getEpochOfPeri().getParam(factory, _EPOCH_OF_PERIHELION));
             } else if (target instanceof NamedTarget) {
                 final NamedTarget t = (NamedTarget) target;
-                Pio.addParam(factory, paramSet, _SYSTEM, t.getSystemOption().getName());
+                Pio.addParam(factory, paramSet, _SYSTEM, t.getTag().tccName);
                 Pio.addParam(factory, paramSet, _OBJECT, t.getSolarObject().name());
             }
         }

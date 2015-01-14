@@ -290,7 +290,7 @@ public class GeneralRule implements IRule {
 
         private boolean hasSameTrackingDetails(SPTarget base, SPTarget guide) {
 
-            if (!base.getTrackingSystem().equals(guide.getTrackingSystem())) return false;
+            if (base.getTarget().getTag() != guide.getTarget().getTag()) return false;
             if (!base.getTrackingEffectiveWavelength().equals(guide.getTrackingEffectiveWavelength())) return false;
             if (!base.getTrackingEpoch().equals(guide.getTrackingEpoch())) return false;
             if (!base.getTrackingParallax().equals(guide.getTrackingParallax())) return false;

@@ -18,6 +18,11 @@ import edu.gemini.spModel.target.system.CoordinateTypes.*;
  * @author      Kim Gillies (Modified for SP)
  */
 public final class ConicTarget extends NonSiderealTarget  {
+
+    public Tag getTag() {
+        return _tag;
+    }
+
     /**
      * Options for the system type.
      */
@@ -40,14 +45,9 @@ public final class ConicTarget extends NonSiderealTarget  {
     }
 
     /**
-     * The base name of this coordinate system.
-     */
-    private static final String SHORT_SYSTEM_NAME = "conicTarget";
-
-    /**
      * Default system type.
      */
-    private static final SystemType DEFAULT_SYSTEM_TYPE = SystemType.JPL_MINOR_BODY;
+    private static final Tag DEFAULT_TAG = Tag.JPL_MINOR_BODY;
 
     private static final double DEFAULT_E = 0.0;
 
@@ -59,6 +59,7 @@ public final class ConicTarget extends NonSiderealTarget  {
     private N _n = new N();
     private Perihelion _perihelion = new Perihelion();
     private Epoch _epochOfPeri = new Epoch("2000", Units.YEARS);
+    private final Tag _tag;
 
 
     /**
@@ -123,14 +124,15 @@ public final class ConicTarget extends NonSiderealTarget  {
      * Constructs a default ConicTarget instance with default properties.
      */
     public ConicTarget() {
+        this(DEFAULT_TAG);
     }
 
     /**
      * Constructs with the specific conic system type and default
      * values.
      */
-    public ConicTarget(SystemType systemOption) {
-        setSystemOption(systemOption);
+    public ConicTarget(Tag tag) {
+        _tag = tag;
     }
 
 
@@ -310,14 +312,6 @@ public final class ConicTarget extends NonSiderealTarget  {
         _perihelion = newValue;
     }
 
-
-    /**
-     * Return the short system name.
-     */
-    public String getShortSystemName() {
-        return SHORT_SYSTEM_NAME;
-    }
-
     /**
      * Gets a short description of the position.
      */
@@ -326,27 +320,4 @@ public final class ConicTarget extends NonSiderealTarget  {
         return "Orbital Elements";
     }
 
-
-    /**
-     * Gets the available options for this coordinate system.
-     */
-    public TypeBase[] getSystemOptions() {
-        return SystemType.TYPES;
-    }
-
-    private SystemType systemType = DEFAULT_SYSTEM_TYPE;
-
-    public TypeBase getSystemOption() {
-        return systemType;
-    }
-
-    public void setSystemOption(TypeBase newValue) {
-        for (SystemType t: SystemType.TYPES) {
-            if (newValue.equals(t)) {
-                systemType = t;
-                return;
-            }
-        }
-        throw new IllegalArgumentException("Nope. " + newValue);
-    }
 }

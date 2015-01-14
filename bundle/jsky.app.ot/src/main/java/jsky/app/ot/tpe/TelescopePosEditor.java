@@ -20,7 +20,6 @@ import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
 import edu.gemini.spModel.target.offset.OffsetPosSelection;
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
-import edu.gemini.spModel.target.system.HmsDegTarget;
 import edu.gemini.spModel.target.system.ICoordinate;
 import edu.gemini.spModel.target.system.ITarget;
 import jsky.app.jskycat.JSkyCat;
@@ -470,7 +469,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         // XXX FIXME: We shouldn't have to use numeric indexes here
         queryArgs.setParamValue(2, _baseTarget.getC1().toString());
         queryArgs.setParamValue(3, _baseTarget.getC2().toString());
-        queryArgs.setParamValue(4, _baseTarget.getCoordSysAsString());
+        queryArgs.setParamValue(4, _baseTarget.getTarget().getTag().tccName);
         if (args.length > 2) {
             //first argument must be a Double, it represent the size on AstroCatalogs
             queryArgs.setParamValue(5, Double.valueOf(args[1]));
