@@ -123,14 +123,14 @@ public class GemsGuideStarSearchOptions {
     private GemsInstrument instrument;
     private GemsTipTiltMode tipTiltMode;
     private Magnitude.Band nirBand = NirBandChoice.DEFAULT.getBand();
-    private Set<Angle> posAngles = new HashSet<Angle>();
+    private Set<Angle> posAngles = new HashSet<>();
 
 
     public GemsGuideStarSearchOptions() {
     }
 
-    public GemsGuideStarSearchOptions(String opticalCatalog, String nirCatalog, GemsInstrument instrument,
-                                      GemsTipTiltMode tipTiltMode, Set<Angle> posAngles) {
+    public GemsGuideStarSearchOptions(final String opticalCatalog, final String nirCatalog, final GemsInstrument instrument,
+                                      final GemsTipTiltMode tipTiltMode, final Set<Angle> posAngles) {
         this.opticalCatalog = opticalCatalog;
         this.nirCatalog = nirCatalog;
         this.instrument = instrument;
@@ -140,16 +140,7 @@ public class GemsGuideStarSearchOptions {
         } else {
             this.tipTiltMode = tipTiltMode;
         }
-//        this.nirMagLimits = nirMagLimits;
         this.posAngles = posAngles;
-    }
-
-    public String getOpticalCatalog() {
-        return opticalCatalog;
-    }
-
-    public String getNirCatalog() {
-        return nirCatalog;
     }
 
     public GemsInstrument getInstrument() {
@@ -164,10 +155,6 @@ public class GemsGuideStarSearchOptions {
         return posAngles;
     }
 
-    public Magnitude.Band getNirBand() {
-        return nirBand;
-    }
-
     /**
      * @return a copy of this instance
      */
@@ -177,45 +164,13 @@ public class GemsGuideStarSearchOptions {
     }
 
     /**
-     * @param opticalCatalog
-     * @return a copy of this instance with the given opticalCatalog
-     */
-    public GemsGuideStarSearchOptions setOpticalCatalog(String opticalCatalog) {
-        GemsGuideStarSearchOptions o = copy();
-        o.opticalCatalog = opticalCatalog;
-        return o;
-    }
-
-    /**
-     *
-     * @param nirCatalog
-     * @return a copy of this instance with the given nirCatalog
-     */
-    public GemsGuideStarSearchOptions setNirCatalog(String nirCatalog) {
-        GemsGuideStarSearchOptions o = copy();
-        o.nirCatalog = nirCatalog;
-        return o;
-    }
-
-    /**
      *
      * @param instrument
      * @return a copy of this instance with the given instrument
      */
-    public GemsGuideStarSearchOptions setInstrument(GemsInstrument instrument) {
+    public GemsGuideStarSearchOptions setInstrument(final GemsInstrument instrument) {
         GemsGuideStarSearchOptions o = copy();
         o.instrument = instrument;
-        return o;
-    }
-
-    /**
-     *
-     * @param tipTiltMode
-     * @return a copy of this instance with the given tipTiltMode
-     */
-    public GemsGuideStarSearchOptions setTipTiltMode(GemsTipTiltMode tipTiltMode) {
-        GemsGuideStarSearchOptions o = copy();
-        o.tipTiltMode = tipTiltMode;
         return o;
     }
 
@@ -224,20 +179,9 @@ public class GemsGuideStarSearchOptions {
      * @param posAngles
      * @return a copy of this instance with the given posAngles
      */
-    public GemsGuideStarSearchOptions setPosAngles(Set<Angle> posAngles) {
+    public GemsGuideStarSearchOptions setPosAngles(final Set<Angle> posAngles) {
         GemsGuideStarSearchOptions o = copy();
         o.posAngles = posAngles;
-        return o;
-    }
-
-    /**
-     *
-     * @param nirBand
-     * @return a copy of this instance with the given NIR band
-     */
-    public GemsGuideStarSearchOptions setNirBand(Magnitude.Band nirBand) {
-        GemsGuideStarSearchOptions o = copy();
-        this.nirBand = nirBand;
         return o;
     }
 
@@ -245,7 +189,7 @@ public class GemsGuideStarSearchOptions {
      * @param nirBand      optional NIR magnitude band (default is H)
      * @return all relevant CatalogSearchCriterion instances
      */
-    public List<GemsCatalogSearchCriterion> searchCriteria(ObsContext obsContext, Option<Magnitude.Band> nirBand) {
+    public List<GemsCatalogSearchCriterion> searchCriteria(final ObsContext obsContext, final Option<Magnitude.Band> nirBand) {
         switch(tipTiltMode) {
             case canopus: return Arrays.asList(
                     canopusCriterion(obsContext, GemsGuideStarType.tiptilt),
@@ -263,28 +207,28 @@ public class GemsGuideStarSearchOptions {
         }
     }
 
-    public GemsCatalogSearchCriterion canopusCriterion(ObsContext obsContext, GemsGuideStarType ggst) {
+    public GemsCatalogSearchCriterion canopusCriterion(final ObsContext obsContext, final GemsGuideStarType ggst) {
         final GemsMagnitudeTable.LimitsCalculator calculator = GemsMagnitudeTable.CanopusWfsMagnitudeLimitsCalculator();
         return searchCriterion(obsContext, Canopus.Wfs.Group.instance, calculator, ggst, None.<Magnitude.Band>instance());
     }
 
-    public GemsCatalogSearchCriterion instrumentCriterion(ObsContext obsContext, GemsGuideStarType ggst, Option<Magnitude.Band> nirBand) {
+    public GemsCatalogSearchCriterion instrumentCriterion(final ObsContext obsContext, final GemsGuideStarType ggst, final Option<Magnitude.Band> nirBand) {
         final GemsMagnitudeTable.LimitsCalculator calculator = GemsMagnitudeTable.GemsInstrumentToMagnitudeLimitsCalculator().apply(instrument);
         return searchCriterion(obsContext, instrument.getGuiders(), calculator, ggst, nirBand);
     }
 
-    public GemsCatalogSearchCriterion searchCriterion(ObsContext obsContext,
-                                                      GemsGuideProbeGroup gGroup,
-                                                      GemsMagnitudeTable.LimitsCalculator calculator,
-                                                      GemsGuideStarType gType,
-                                                      Option<Magnitude.Band> nirBand) {
-        String name = String.format("%s %s", gGroup.getDisplayName(), gType.name());
+    public GemsCatalogSearchCriterion searchCriterion(final ObsContext obsContext,
+                                                      final GemsGuideProbeGroup gGroup,
+                                                      final GemsMagnitudeTable.LimitsCalculator calculator,
+                                                      final GemsGuideStarType gType,
+                                                      final Option<Magnitude.Band> nirBand) {
+        final String name = String.format("%s %s", gGroup.getDisplayName(), gType.name());
 
         // Adjust the mag limits for the worst conditions (as is done in the ags servlet)
-        MagnitudeConstraints magConstraints = calculator.adjustGemsMagnitudeLimitsForJava(gType, nirBand, obsContext.getConditions());
+        final MagnitudeConstraints magConstraints = calculator.adjustGemsMagnitudeLimitsForJava(gType, nirBand, obsContext.getConditions());
 
-        CatalogSearchCriterion criterion = calculator.searchCriterionBuilder(name, gGroup.getRadiusLimits(), instrument, magConstraints, posAngles);
-        GemsCatalogSearchKey key = new GemsCatalogSearchKey(gType, gGroup);
+        final CatalogSearchCriterion criterion = calculator.searchCriterionBuilder(name, gGroup.getRadiusLimits(), instrument, magConstraints, posAngles);
+        final GemsCatalogSearchKey key = new GemsCatalogSearchKey(gType, gGroup);
         return new GemsCatalogSearchCriterion(key, criterion);
     }
 

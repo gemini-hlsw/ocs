@@ -23,7 +23,7 @@ object GemsUtils4Java {
   def containsMagnitudeInLimits(target: SiderealTarget, magLimits: MagnitudeConstraints): Boolean =
     target.magnitudeIn(magLimits.band).map(m => magLimits.contains(m)).getOrElse(true)
 
-  def mapMagintudes(constraint: Option[SaturationConstraint], mapOp: immutable.MapOp[SaturationConstraint, java.lang.Double]): immutable.Option[java.lang.Double] =
+  def mapMagnitudes(constraint: Option[SaturationConstraint], mapOp: immutable.MapOp[SaturationConstraint, java.lang.Double]): immutable.Option[java.lang.Double] =
     constraint.map(m => mapOp.apply(m)).asGeminiOpt
 
   // Combines multiple radius limits into one
@@ -55,10 +55,10 @@ object GemsUtils4Java {
   def toOldBand(band: MagnitudeBand): skyobject.Magnitude.Band = band.toOldModel
 
   /**
-   * Sorts the sky object list, putting the brightest stars first and returns the sorted array.
+   * Sorts the targets list, putting the brightest stars first and returns the sorted array.
    */
-  def brightestFirstSkyObject(flexureList: java.util.List[SiderealTarget]): java.util.List[SiderealTarget] =
-    flexureList.asScala.sortBy(_.magnitudeIn(MagnitudeBand.R)).asJava
+  def sortTargetsByBrightness(targetsList: java.util.List[SiderealTarget]): java.util.List[SiderealTarget] =
+    targetsList.asScala.sortBy(_.magnitudeIn(MagnitudeBand.R)).asJava
 
   def toSPTarget(siderealTarget: SiderealTarget):SPTarget = new SPTarget(siderealTarget.toOldModel)
 

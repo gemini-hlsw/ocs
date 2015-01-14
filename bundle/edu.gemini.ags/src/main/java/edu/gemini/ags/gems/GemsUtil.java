@@ -20,44 +20,6 @@ import java.util.Map;
 public class GemsUtil {
 
     /**
-     * Sorts the target list, putting the brightest stars first and returns the sorted array.
-     */
-    public static SPTarget[] brightestFirstSPTarget(List<SPTarget> targetList) {
-        SPTarget[] ar = targetList.toArray(new SPTarget[targetList.size()]);
-        Arrays.sort(ar, new Comparator<SPTarget>() {
-            @Override
-            public int compare(SPTarget t1, SPTarget t2) {
-                Option<Magnitude> m1 = t1.getMagnitude(Magnitude.Band.R);
-                Option<Magnitude> m2 = t2.getMagnitude(Magnitude.Band.R);
-                if (!m1.isEmpty() && !m2.isEmpty()) {
-                    return m1.getValue().compareTo(m2.getValue());
-                }
-                return 0;
-            }
-        });
-        return ar;
-    }
-
-    /**
-     * Sorts the sky object list, putting the brightest stars first and returns the sorted array.
-     */
-    public static SkyObject[] brightestFirstSkyObject(List<SiderealTarget> flexureList) {
-        SkyObject[] ar = flexureList.toArray(new SkyObject[flexureList.size()]);
-        Arrays.sort(ar, new Comparator<SkyObject>() {
-            @Override
-            public int compare(SkyObject o1, SkyObject o2) {
-                Option<Magnitude> m1 = o1.getMagnitude(Magnitude.Band.R);
-                Option<Magnitude> m2 = o2.getMagnitude(Magnitude.Band.R);
-                if (!m1.isEmpty() && !m2.isEmpty()) {
-                    return m1.getValue().compareTo(m2.getValue());
-                }
-                return 0;
-            }
-        });
-        return ar;
-    }
-
-    /**
      * Removes any duplicates from the list
      */
     public static List<Target.SiderealTarget> removeDuplicates(List<Target.SiderealTarget> list) {

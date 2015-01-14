@@ -4,7 +4,13 @@ import edu.gemini.spModel.core.{MagnitudeBand, Target}
 import jsky.coords.{DMS, HMS}
 import scala.collection.JavaConverters._
 
+/**
+ * Utility functions for tpe that reach into the scala world from Java
+ */
 object CatalogUtils4Java {
+  /**
+   * Build a row of data items from a Sidereal Target
+   */
   def makeRow(siderealTarget: Target.SiderealTarget, nirBand: String, unusedBands: Array[String]): java.util.Vector[AnyRef] = {
     new java.util.Vector[AnyRef](Vector[AnyRef](
       Boolean.box(true),

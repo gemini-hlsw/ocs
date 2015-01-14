@@ -64,7 +64,7 @@ case class CatalogSearchCriterion(name: String, magLimits: MagnitudeConstraints,
   case class Matcher(adjBase: Coordinates, adjLimits: RadiusConstraint) {
 
     /**
-     * @param obj the SkyObject to match
+     * @param obj the SiderealTarget to match
      * @return true if the object matches the magnitude and radius limits
      */
     def matches(obj: SiderealTarget): Boolean = {
@@ -85,7 +85,7 @@ case class CatalogSearchCriterion(name: String, magLimits: MagnitudeConstraints,
   }
 
   /**
-   * This can be used as a predicate to filter on a List[SkyObject].
+   * This can be used as a predicate to filter on a List[SiderealTarget].
    *
    * @param base the base position
    * @return a new Matcher for the given base position
@@ -105,6 +105,7 @@ case class GemsCatalogSearchCriterion(key: GemsCatalogSearchKey, criterion: Cata
  * See OT-24
  */
 case class GemsCatalogSearchResults(criterion: GemsCatalogSearchCriterion, results: List[SiderealTarget]) {
+  // Constructors for Java
   def this(criterion: GemsCatalogSearchCriterion, results: java.util.List[skyobject.SkyObject]) = this(criterion, results.asScala.map(_.toNewModel).toList)
   def this(results: java.util.List[SiderealTarget], criterion: GemsCatalogSearchCriterion) = this(criterion, results.asScala.toList)
 

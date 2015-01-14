@@ -124,8 +124,8 @@ object MascotCat {
   }
 
   /**
-   * Finds the best asterisms for the given list of SkyObjects.
-   * @param list the list of SkyObjects to use
+   * Finds the best asterisms for the given list of SiderealTargets.
+   * @param list the list of SiderealTargets to use
    * @param centerRA the base position RA coordinate
    * @param centerDec the base position Dec coordinate
    * @param bandpass determines which magnitudes are used in the calculations: (one of "B", "V", "R", "J", "H", "K")
@@ -160,9 +160,9 @@ object MascotCat {
   case class StrehlResults(starList: java.util.List[Star], strehlList: java.util.List[Strehl])
 
   /**
-   * Finds the best asterisms for the given list of SkyObjects
+   * Finds the best asterisms for the given list of SiderealTarget
    * (This version is easier to call from Java).
-   * @param javaList the list of SkyObjects to use
+   * @param javaList the list of SiderealTargets to use
    * @param centerRA the base position RA coordinate
    * @param centerDec the base position Dec coordinate
    * @param bandpass determines which magnitudes are used in the calculations: (one of "B", "V", "R", "J", "H", "K")
