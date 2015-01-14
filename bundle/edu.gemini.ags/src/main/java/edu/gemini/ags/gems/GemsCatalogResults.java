@@ -377,7 +377,7 @@ public class GemsCatalogResults {
 
     // Returns true if the given target is valid for the given guide probe
     private boolean validate(ObsContext ctx, Target.SiderealTarget target, GuideProbe guideProbe) {
-        boolean valid = (guideProbe instanceof ValidatableGuideProbe) || ((ValidatableGuideProbe) guideProbe).validate(GemsUtils4Java.toSPTarget(target), ctx);
+        boolean valid = !(guideProbe instanceof ValidatableGuideProbe) || ((ValidatableGuideProbe) guideProbe).validate(GemsUtils4Java.toSPTarget(target), ctx);
 
         // Additional check for mag range (for cwfs1 and cwfs2, since different than cwfs3 and group range)
         if (valid && guideProbe instanceof Canopus.Wfs) {
