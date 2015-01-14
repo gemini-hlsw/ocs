@@ -64,6 +64,11 @@ final class RichNode(val node: ISPNode) extends AnyVal {
       case n                   => Stream(n)
     }
 
+  def nel: NonEmptyList[ISPNode] = {
+    val s = toStream
+    NonEmptyList(s.head, s.tail: _*)  // always contains the current node ...
+  }
+
   /**
    * Does a DFS search starting at the tree rooted by this node and stopping at
    * the first descendant for which the predicate matches.
