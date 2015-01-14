@@ -522,7 +522,8 @@ public final class SourceDefinitionParameters extends ITCParameters {
                                       double eLineContinuumFlux,
                                       String eLineFluxUnits,
                                       String eLineContinuumFluxUnits,
-                                      double pLawIndex) {
+                                      double pLawIndex,
+                                      String sourceSpec) {
         _sourceGeom = sourceGeometry;
         _extSourceType = extSourceType;
         _sourceNorm = sourceNorm;
@@ -541,7 +542,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
         _eLineFluxUnits = eLineFluxUnits;
         _eLineContinuumFluxUnits = eLineContinuumFluxUnits;
         _pLawIndex = pLawIndex;
-        _sourceSpec = LIBRARY_STAR;
+        _sourceSpec = sourceSpec;
     }
 
     public String getSourceGeometry() {

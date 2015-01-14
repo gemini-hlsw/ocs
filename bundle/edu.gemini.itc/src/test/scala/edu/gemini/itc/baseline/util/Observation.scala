@@ -15,8 +15,11 @@ import edu.gemini.itc.parameters.ObservationDetailsParameters
 import edu.gemini.itc.shared.ITCParameters
 import edu.gemini.itc.trecs.TRecsParameters
 
-// Observation is combination of observation and instrument parameters.
-// Important because spectroscopy observations need instrument to be configured accordingly.
+/**
+ * Observations combine some observation details and instrument configurations.
+ * These two aspects have to be handled as one because certain observation types ask for specific instrument
+ * configurations and vice versa.
+ */
 sealed trait Observation {
   val odp: ObservationDetailsParameters
   val ins: ITCParameters
@@ -29,6 +32,9 @@ case class MichelleObservation(odp: ObservationDetailsParameters, ins: MichelleP
 case class NiciObservation(odp: ObservationDetailsParameters, ins: NiciParameters) extends Observation
 case class TRecsObservation(odp: ObservationDetailsParameters, ins: TRecsParameters) extends Observation
 
+/**
+ * Observations with Altair.
+ */
 sealed trait AltairObservation extends Observation {
   val alt: AltairParameters
   override val hash = (Hash.calc(odp)*37 + Hash.calc(ins))*37 + Hash.calc(alt)
@@ -37,7 +43,9 @@ case class F2Observation(odp: ObservationDetailsParameters, ins: Flamingos2Param
 case class NifsObservation(odp: ObservationDetailsParameters, ins: NifsParameters, alt: AltairParameters) extends AltairObservation
 case class NiriObservation(odp: ObservationDetailsParameters, ins: NiriParameters, alt: AltairParameters) extends AltairObservation
 
-
+/**
+ * Observations with Gems.
+ */
 sealed trait GemsObservation extends Observation {
   val gems: GemsParameters
   override val hash = (Hash.calc(odp)*37 + Hash.calc(ins))*37 + Hash.calc(gems)
@@ -45,35 +53,48 @@ sealed trait GemsObservation extends Observation {
 case class GsaoiObservation(odp: ObservationDetailsParameters, ins: GsaoiParameters, gems: GemsParameters) extends GemsObservation
 
 /**
- * Created by fnussber on 1/9/15.
+ * Definition of some default observations that can be used in test cases.
  */
 object Observation {
 
   // =============== OBSERVATIONS ====================
-  val SpectroscopyObservations = List(
+  lazy val SpectroscopyObservations = List(
     new ObservationDetailsParameters(
       ObservationDetailsParameters.SPECTROSCOPY,
-      ObservationDetailsParameters.INTTIME,
-      2,
-      1800.0,
+      ObservationDetailsParameters.S2N,
+      10,
+      600.0,
       1.0,
       10.0,
       ObservationDetailsParameters.IMAGING,
-      ObservationDetailsParameters.AUTO_APER,
+      ObservationDetailsParameters.USER_APER,
       0.7,
       3)
+
   )
 
-  val ImagingObservations = List(
+  lazy val ImagingObservations = List(
+    new ObservationDetailsParameters(
+      ObservationDetailsParameters.IMAGING,               // calc mode
+      ObservationDetailsParameters.INTTIME,               // calc method
+      2,                                                  // exposures
+      1800.0,                                             // exposure time
+      1.0,                                                // source fraction
+      10.0,                                               // SN ratio
+      ObservationDetailsParameters.IMAGING,               // analysis method
+      ObservationDetailsParameters.AUTO_APER,             // aperture type
+      0.7,                                                // aperture diameter
+      3),                                                 // sky aperture diameter
+
     new ObservationDetailsParameters(
       ObservationDetailsParameters.IMAGING,
-      ObservationDetailsParameters.INTTIME,
+      ObservationDetailsParameters.S2N,
       30,
       120.0,
       0.5,
       25.64,
       ObservationDetailsParameters.IMAGING,
-      ObservationDetailsParameters.AUTO_APER,
+      ObservationDetailsParameters.USER_APER,
       0.7,
       3)
   )

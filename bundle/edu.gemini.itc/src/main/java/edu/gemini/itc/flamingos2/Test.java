@@ -51,7 +51,8 @@ public class Test {
 					// "modelEmLine",
 					4805, 1.25, 150, 1e-18, 5e-16,
 					SourceDefinitionParameters.WATTS_FLUX,
-					SourceDefinitionParameters.WATTS, -1);
+					SourceDefinitionParameters.WATTS, -1,
+					SourceDefinitionParameters.LIBRARY_STAR);
 
 			ObservationDetailsParameters odp = new ObservationDetailsParameters(
 					ObservationDetailsParameters.SPECTROSCOPY,

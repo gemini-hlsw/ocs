@@ -3,30 +3,26 @@ package edu.gemini.itc.baseline
 import edu.gemini.itc.baseline.util.Baseline._
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.michelle.{MichelleParameters, MichelleRecipe}
-import org.scalacheck.{Arbitrary, Gen}
-import org.specs2.ScalaCheck
-import org.specs2.mutable.Specification
 
 /**
- * Michelle test cases.
+ * Michelle baseline test bits and pieces.
  * Michelle is not in use anymore but science wants to keep the ITC functionality alive as a reference.
  */
-object BaselineMichelleSpec extends Specification with ScalaCheck  {
+object BaselineMichelle {
 
-  val Observations =
+  lazy val Observations =
     for {
       odp <- Observation.SpectroscopyObservations
       ins <- config()
     } yield MichelleObservation(odp, ins)
 
-  implicit val arbObservation: Arbitrary[MichelleObservation] = Arbitrary { Gen.oneOf(Observations) }
-
-  "Michelle calculations" should {
-      "match latest baseline" !
-        prop { (e: Environment, o: MichelleObservation) =>
-          checkAgainstBaseline(Baseline.from(e, o, executeRecipe(e, o)))
-      }.set((minTestsOk, 10))
-  }
+  lazy val Environments =
+      for {
+        src <- Environment.MidIRSources
+        ocp <- Environment.ObservingConditions
+        tep <- Environment.TelescopeConfigurations
+        pdp <- Environment.PlottingParameters
+      } yield Environment(src, ocp, tep, pdp)
 
   def executeRecipe(e: Environment, o: MichelleObservation): Output =
     cookRecipe(w => new MichelleRecipe(e.src, o.odp, e.ocp, o.ins, e.tep, e.pdp, w))

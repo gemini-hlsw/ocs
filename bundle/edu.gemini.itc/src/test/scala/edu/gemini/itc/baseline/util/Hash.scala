@@ -15,9 +15,9 @@ import edu.gemini.itc.parameters.{ObservationDetailsParameters, ObservingConditi
 import edu.gemini.itc.shared.ITCParameters
 import edu.gemini.itc.trecs.TRecsParameters
 
-// Temporary helper
-// All input objects will become immutable data only objects (maybe even Scala case classes).
-// For now we need a workaround for missing hash functions.
+// TEMPORARY helper
+// All input objects will become immutable data only objects (probably Scala case classes).
+// For now we need a workaround for missing hash functions on the existing Java objects.
 object Hash {
 
   def calc(ip: ITCParameters): Int = ip match {
@@ -127,11 +127,11 @@ object Hash {
       p.getCamera,
       p.getFilter,
       p.getFocalPlaneMask,
-      p.getFPMask,
-      p.getFPMaskOffset,
+//      p.getFPMask,
+//      p.getFPMaskOffset,
       p.getGrism,
       p.getReadNoise,
-      p.getStringSlitWidth,
+//      p.getStringSlitWidth,
       p.getWellDepth
     )
 

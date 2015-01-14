@@ -5,8 +5,16 @@ import org.junit.{Ignore, Test}
 
 /**
  * Test cases that can be used to create a new baseline and to check exhaustively all provided configurations
- * against the current baseline. By default these tests are time consuming and we therefore only want to
- * execute them "on demand".
+ * against the current baseline.
+ *
+ * Execute {{{create()}}} in order to update the baseline. The file is written to the current output directory
+ * (e.g. ../ocs/app/itc/idea/out/test/edu.gemini.itc-2015001.6.1/baseline.txt when working with IntelliJ) and
+ * needs to be manually copied from there into the resources folder!
+ *
+ * Execute {{{checkAll()}}} in order to execute a test with all defined input values. This can be very time
+ * consuming (~hour(s)) but allows for exhaustive testing and test coverage analysis.
+ *
+ * Since these tests are either meant to be executed manually or are very time consuming they are marked as Ignore.
  */
 class BaselineTest {
 
@@ -17,11 +25,12 @@ class BaselineTest {
     val baseMap = baseSeq.map(b => b.in -> b.out).toMap
     // --
     // make sure we don't run into the unlikely case that two baselines end up having identical keys
+    // also checks if we have any problems with our makeshift hash values
     if (baseSeq.size != baseMap.size) throw new Exception("There are baselines with identical keys!")
     // --
     Baseline.write(baseSeq)
   }
-  
+
   @Ignore
   @Test
   def checkAll(): Unit = {
@@ -29,19 +38,17 @@ class BaselineTest {
   }
 
   private def baselines(): Seq[Baseline] = {
-    val envs = environments()
 
-    executeAll(envs, BaselineAcqCamSpec.Observations,   BaselineAcqCamSpec.executeRecipe) ++
-    executeAll(envs, BaselineF2Spec.Observations,       BaselineF2Spec.executeRecipe) ++
-    executeAll(envs, BaselineGmosSpec.Observations,     BaselineGmosSpec.executeRecipe) ++
-    executeAll(envs, BaselineGnirsSpec.Observations,    BaselineGnirsSpec.executeRecipe) ++
-    executeAll(envs, BaselineGsaoiSpec.Observations, BaselineGsaoiSpec.executeRecipe) ++
-    executeAll(envs, BaselineMichelleSpec.Observations, BaselineMichelleSpec.executeRecipe) ++
-    executeAll(envs, BaselineNiciSpec.Observations,     BaselineNiciSpec.executeRecipe) ++
-    executeAll(envs, BaselineNifsSpec.Observations,     BaselineNifsSpec.executeRecipe) ++
-    executeAll(envs, BaselineNiriSpec.Observations,     BaselineNiriSpec.executeRecipe) ++
-    // NOTE: TRecs needs special conditions!
-    executeAll(envs.filter(BaselineTRecsSpec.isValidForTRecs), BaselineTRecsSpec.Observations,    BaselineTRecsSpec.executeRecipe)
+    executeAll(BaselineAcqCam.Environments,    BaselineAcqCam.Observations,   BaselineAcqCam.executeRecipe)   ++
+    executeAll(BaselineF2.Environments,        BaselineF2.Observations,       BaselineF2.executeRecipe)       ++
+    executeAll(BaselineGmos.Environments,      BaselineGmos.Observations,     BaselineGmos.executeRecipe)     ++
+    executeAll(BaselineGnirs.Environments,     BaselineGnirs.Observations,    BaselineGnirs.executeRecipe)    ++
+    executeAll(BaselineGsaoi.Environments,     BaselineGsaoi.Observations,    BaselineGsaoi.executeRecipe)    ++
+    executeAll(BaselineMichelle.Environments,  BaselineMichelle.Observations, BaselineMichelle.executeRecipe) ++
+    executeAll(BaselineNici.Environments,      BaselineNici.Observations,     BaselineNici.executeRecipe)     ++
+    executeAll(BaselineNifs.Environments,      BaselineNifs.Observations,     BaselineNifs.executeRecipe)     ++
+    executeAll(BaselineNiri.Environments,      BaselineNiri.Observations,     BaselineNiri.executeRecipe)     ++
+    executeAll(BaselineTRecs.Environments,     BaselineTRecs.Observations,    BaselineTRecs.executeRecipe)
 
   }
 
@@ -50,13 +57,5 @@ class BaselineTest {
       e <- envs
       o <- obs
     } yield Baseline.from(e, o, f(e, o))
-
-  private def environments() =
-    for {
-      src <- Environment.Sources
-      ocp <- Environment.ObservingConditions
-      tp  <- Environment.TelescopeConfigurations
-      pdp <- Environment.PlottingParameters
-    } yield Environment(src, ocp, tp, pdp)
 
 }
