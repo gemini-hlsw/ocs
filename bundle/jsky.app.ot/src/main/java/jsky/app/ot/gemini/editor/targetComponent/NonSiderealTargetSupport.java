@@ -508,14 +508,9 @@ class NonSiderealTargetSupport {
     }
 
     void showOrbitalElementFormat() {
-        NonSiderealTargetSupport.NonSiderealSystem sytem = getNonSiderealSystem(_curPos.getTarget().getTag());
-        if (sytem != null) {
-            _w.orbitalElementFormat.deleteWatcher(orbitalElementFormatWatcher);
-            _w.orbitalElementFormat.setSelectedItem(sytem);
-            _w.orbitalElementFormat.addWatcher(orbitalElementFormatWatcher);
-        } else {
-            DialogUtil.error("Target with obsolete or unknown orbital format: " + _curPos.getTarget().getTag().tccName);
-        }
+        _w.orbitalElementFormat.deleteWatcher(orbitalElementFormatWatcher);
+        _w.orbitalElementFormat.setSelectedItem(_curPos.getTarget().getTag());
+        _w.orbitalElementFormat.addWatcher(orbitalElementFormatWatcher);
     }
 
     public void updatePos(SPTarget target) {
