@@ -32,12 +32,7 @@ import jsky.util.gui.StatusLogger;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CancellationException;
 
 /**
@@ -220,7 +215,12 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
      * @param obsContext used to getthe current pos angle
      */
     private Set<Angle> getPosAngles(ObsContext obsContext) {
-        Set<Angle> posAngles = new HashSet<>();
+        Set<Angle> posAngles = new TreeSet<>(new Comparator<Angle>() {
+            @Override
+            public int compare(Angle a1, Angle a2) {
+                return a1.compareToAngle(a2);
+            }
+        });
         posAngles.add(obsContext.getPositionAngle());
         posAngles.add(new Angle(0., Angle.Unit.DEGREES));
         posAngles.add(new Angle(90., Angle.Unit.DEGREES));
