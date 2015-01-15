@@ -14,9 +14,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TimeZone;
 
-//$Id: NonSiderealTargetSupport.java 7515 2006-12-28 18:04:41Z anunez $
 /**
  * Helper class for displaying and operating with non sidereal targets.
  * <p/>
@@ -26,13 +24,7 @@ import java.util.TimeZone;
  */
 class NonSiderealTargetSupport {
 
-    private static final DateFormat dateFormater = new SimpleDateFormat("dd/MMM/yyyy");
-    private static final DateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss z");
-    static {
-        TimeZone tz = TimeZone.getTimeZone("UTC");
-        timeFormatter.setTimeZone(tz);
-        dateFormater.setTimeZone(tz);
-    }
+    private static final DateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss");
 
     // Groups together the widgets for one parameter for conic targets
     private static class ConicTargetParamWidgets {
@@ -148,7 +140,7 @@ class NonSiderealTargetSupport {
 
     }
 
-    private static final Map<Param, ConicTargetParamWidgets> mkConicWidgets(TelescopeForm f) {
+    private static Map<Param, ConicTargetParamWidgets> mkConicWidgets(TelescopeForm f) {
         final Map<Param, ConicTargetParamWidgets> map = new HashMap<>();
         map.put(Param.EPOCHOFEL,    new ConicTargetParamWidgets(f.epochofelLabel,    f.epochofel,    f.epochofelUnits));
         map.put(Param.ORBINC,       new ConicTargetParamWidgets(f.orbincLabel,       f.orbinc,       f.orbincUnits));
@@ -261,7 +253,7 @@ class NonSiderealTargetSupport {
             date = new Date();
         }
         form.calendarDate.setDate(date);
-        td.setTime(EdCompTargetList.timeFormatter.format(date));
+        td.setTime(timeFormatter.format(date));
 
         // Update the solar system stuff
         if (target instanceof NamedTarget) {
