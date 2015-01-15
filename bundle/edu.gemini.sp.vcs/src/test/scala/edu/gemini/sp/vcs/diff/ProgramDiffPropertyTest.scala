@@ -16,7 +16,7 @@ import scala.collection.JavaConverters._
 import scalaz._
 import Scalaz._
 
-class ProgramTest extends JUnitSuite with Checkers {
+class ProgramDiffPropertyTest extends JUnitSuite with Checkers {
 
   type DiffProperty = (ISPProgram, ISPProgram, ISPProgram, List[Diff]) => Boolean
 
