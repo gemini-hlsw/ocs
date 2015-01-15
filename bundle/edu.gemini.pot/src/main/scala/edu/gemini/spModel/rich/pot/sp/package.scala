@@ -3,6 +3,9 @@ package edu.gemini.spModel.rich.pot
 import edu.gemini.pot.sp._
 import edu.gemini.spModel.core.{RichSpProgramId, SPProgramID}
 
+import scalaz._
+import Scalaz._
+
 package object sp {
   @inline implicit def progIdWrapper(id: SPProgramID): RichSpProgramId               = new RichSpProgramId(id)
   @inline implicit def remoteNodeWrapper(node: ISPNode): RichNode                    = new RichNode(node)
@@ -22,4 +25,18 @@ package object sp {
 
   def writeLocking[A <: ISPNode, B](a: A)(f: A => B): B =
     locking(a)(_.getProgramWriteLock(), _.returnProgramWriteLock(), f)
+
+  implicit val ShowNode =
+    Show.shows[ISPNode] {
+      case p: ISPProgram       => s"${p.key} Program ${~Option(p.getProgramID).map(_.toString)}"
+      case o: ISPObservation   => s"${o.key} Observation ${o.getObservationNumber}"
+      case oc: ISPObsComponent => s"${oc.key} ObsComp(${oc.getType})"
+      case sc: ISPSeqComponent => s"${sc.key} SeqComp(${sc.getType})"
+      case n                   => s"${n.key} ${n.getClass.getSimpleName}"
+    }
+
+  def drawNodeTree(n: ISPNode): String = {
+    val t = Tree.unfoldTree(n)(n0 => (n0, () => n0.children.toStream))
+    t.draw.zipWithIndex.collect { case (s, n0) if n0 % 2 == 0 => s}.mkString("\n")
+  }
 }
