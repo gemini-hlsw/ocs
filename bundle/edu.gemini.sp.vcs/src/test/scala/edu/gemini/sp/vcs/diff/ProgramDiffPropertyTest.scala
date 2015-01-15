@@ -16,6 +16,34 @@ import scala.collection.JavaConverters._
 import scalaz._
 import Scalaz._
 
+//
+// ProgramDiff property testing is a bit unorthodox in that there is one big
+// "property" that combines a bunch of smaller ones.  Program generation is
+// complicated by the fact that the ScienceProgram is mutable and must be
+// created and manipulated in the context of a database and factory.
+//
+// Only about 3% of the total time is taken verifying the properties plus
+// actually running the ProgramDiff for all the generated programs and edits.
+// In other words, about 97% of the time is the overhead of the program and edit
+// generation. If we separate the properties and generate programs and edits for
+// each, the time required to run the tests will be multiplied by the number of
+// properties (so instead of ~14 seconds it would take ~100 seconds).
+//
+// Because of the mutable science program, the generated programs and edits are
+// actually functions which make the normal property failure output less useful.
+// It will tell us that a property failed but the arguments it displays are
+// only functions, as in:
+//
+//  Falsified after 0 successful property evaluations.
+//  Location: (ProgramDiffPropertyTest.scala:154)
+//  Occurred when passed generated values (
+//    arg0 = <function1>
+//  )
+//
+// For that reason, we explicitly write out the generated programs that trigger
+// a failure.
+//
+
 class ProgramDiffPropertyTest extends JUnitSuite with Checkers {
 
   type DiffProperty = (ISPProgram, ISPProgram, ISPProgram, List[Diff]) => Boolean
