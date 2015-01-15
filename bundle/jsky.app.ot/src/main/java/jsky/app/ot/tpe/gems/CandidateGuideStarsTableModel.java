@@ -1,9 +1,6 @@
 package jsky.app.ot.tpe.gems;
 
-import edu.gemini.shared.skyobject.Magnitude;
-import edu.gemini.shared.skyobject.SkyObject;
-import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.ags.gems.GemsUtil;
+import edu.gemini.ags.gems.GemsUtils4Java;
 import edu.gemini.spModel.core.Target;
 import jsky.catalog.Catalog;
 import jsky.catalog.FieldDesc;
@@ -13,8 +10,6 @@ import jsky.catalog.skycat.SkycatCatalog;
 import jsky.catalog.skycat.SkycatConfigEntry;
 import jsky.catalog.skycat.SkycatConfigFile;
 import jsky.catalog.skycat.SkycatTable;
-import jsky.coords.DMS;
-import jsky.coords.HMS;
 
 import javax.swing.table.DefaultTableModel;
 import java.util.ArrayList;
@@ -85,7 +80,7 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
     }
 
     private Vector<Vector<Object>> makeDataVector() {
-        _siderealTargets = GemsUtil.getUniqueSkyObjects(_model.getGemsCatalogSearchResults());
+        _siderealTargets = GemsUtils4Java.uniqueTargets(_model.getGemsCatalogSearchResults());
         Vector<Vector<Object>> rows = new Vector<>();
         for (Target.SiderealTarget siderealTarget : _siderealTargets) {
             rows.add(CatalogUtils4Java.makeRow(siderealTarget, _nirBand, _unusedBands));

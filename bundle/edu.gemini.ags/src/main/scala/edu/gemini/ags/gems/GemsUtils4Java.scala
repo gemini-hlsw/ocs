@@ -74,4 +74,12 @@ object GemsUtils4Java {
     val mags = magnitudes.filter(_._1 != invalid).map(v => new Magnitude(v._1, v._2))
     SiderealTarget(star.name, coords, None, mags, None)
   }
+
+  /**
+   * Returns a list of unique targets in the given search results.
+   */
+  def uniqueTargets(list: java.util.List[GemsCatalogSearchResults]): java.util.List[Target.SiderealTarget] = {
+    import collection.breakOut
+    new java.util.ArrayList(list.asScala.map(_.results).flatten.groupBy(_.name).map(_._2.head)(breakOut).asJava)
+  }
 }
