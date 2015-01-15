@@ -135,6 +135,7 @@ class NonSiderealTargetSupport {
         public String toString() {
             return displayName;
         }
+
     }
 
     // number of different non sidereal systems
@@ -343,103 +344,78 @@ class NonSiderealTargetSupport {
 
 
     /**
-     * Display the given target in the GUI. Offers an option to not update the date where the coordinates
-     * are valid, useful when getting positions for new times
-     *
-     * @param target the target position to display
-     * @param system the target coordinate system {@link edu.gemini.spModel.target.system.ConicTarget.SystemType#TYPES}
-     * @param updateDate if the date for the current position should be updated
-     */
-    public void showNonSiderealTarget(NonSiderealTarget target, ITarget.Tag tag, boolean updateDate) {
-        for(int i = 0; i < _systemCount; i++) {
-            if (_nonSiderealSystems[i].tag == tag) {
-                showNonSiderealTarget(target, _nonSiderealSystems[i], updateDate);
-            }
-        }
-    }
-
-    /**
      * Display the given target in the GUI
      * @param target the target position to display
-     * @param system the target coordinate system {@link edu.gemini.spModel.target.system.ConicTarget.SystemType#TYPES}
      **/
-    public void showNonSiderealTarget(NonSiderealTarget target, ITarget.Tag tag) {
-        showNonSiderealTarget(target, tag, true);
-    }
+    public void showNonSiderealTarget(NonSiderealTarget target) {
+        for(int i = 0; i < _systemCount; i++) {
+            final NonSiderealSystem nss = _nonSiderealSystems[i];
+            if (nss.tag == target.getTag()) {
 
-    // Display the given target in the GUI
-    private void showNonSiderealTarget(NonSiderealTarget target, NonSiderealTargetSupport.NonSiderealSystem system, boolean updateDate) {
-        int row = 0;
-        int col = 0;
-        for (int i = 0; i < _paramCount; i++) {
-            String label = system.labels[i][0];
-            String toolTip = system.labels[i][1];
-            if (label != null) {
-                _conicWidgets[i].setVisible(true);
-                _conicWidgets[i].setText(label);
-                _conicWidgets[i].setToolTip(toolTip);
-                if (target instanceof ConicTarget) {
-                    String s = _getTargetParamValueAsString((ConicTarget) target, i);
-                    _conicWidgets[i].setValue(s);
-                }
-                _conicWidgets[i].setPos(row, col++);
-                if (col > 1) {
-                    row++;
-                    col = 0;
-                }
-            } else {
-                _conicWidgets[i].setVisible(false);
-            }
-        }
-        _updatePosition(target, updateDate);
-        _refreshPlanetPanel(target);
-        //Only show the Planet Panel when the System is Major Planet
-        _w.nonsiderealPW.revalidate();
-        _w.nonsiderealPW.repaint();
-    }
-
-    /**
-     * Updates the Position at a given Time for a Non Sidereal Target in the UI
-     * @param target The NonSideralTarget to show
-     */
-    private void _updatePosition(NonSiderealTarget target, boolean updateDate) {
-        //First the position
-        _w.xaxis.setText(target.c1ToString());
-        _w.yaxis.setText(target.c2ToString());
-        //if we need to update the date
-        if (updateDate) {
-            //now the time if available
-            Date date = target.getDateForPosition();
-            JTextField tf = (JTextField)_w.calendarTime.getEditor().getEditorComponent();
-            TimeDocument td = (TimeDocument)tf.getDocument();
-            //if the date is null  use the current time
-            if (date == null) {
-                date = new Date();
-            }
-            _w.calendarDate.setDate(date);
-            td.setTime(EdCompTargetList.timeFormatter.format(date));
-        }
-    }
-
-
-    //refresh the Solar System Panel depending on the system type of the Non Sidereal Target
-    private void _refreshPlanetPanel(ITarget target) {
-        boolean isSolarObject = target instanceof NamedTarget;
-        _w.planetsPanel.setVisible(isSolarObject);
-        if (isSolarObject) { //refresh the content of the panel
-            if (target instanceof NamedTarget) {
-                NamedTarget pt = (NamedTarget)target;
-                NamedTarget.SolarObject solarObject = pt.getSolarObject();
-                if (solarObject != null) {
-                    int pos = solarObject.ordinal();
-                    if (pos < _w.planetButtons.length) {
-                        _w.planetButtons[pos].setSelected(true);
+                // Update all the conic parameter widgets
+                int row = 0;
+                int col = 0;
+                for (int i1 = 0; i1 < _paramCount; i1++) {
+                    final ConicTargetParamWidgets cw = _conicWidgets[i1];
+                    final String label = nss.labels[i1][0];
+                    final String toolTip = nss.labels[i1][1];
+                    if (label != null) {
+                        cw.setVisible(true);
+                        cw.setText(label);
+                        cw.setToolTip(toolTip);
+                        if (target instanceof ConicTarget) {
+                            String s = _getTargetParamValueAsString((ConicTarget) target, i1);
+                            cw.setValue(s);
+                        }
+                        cw.setPos(row, col++);
+                        if (col > 1) {
+                            row++;
+                            col = 0;
+                        }
+                    } else {
+                        cw.setVisible(false);
                     }
                 }
+
+                // Update the RA and Dec
+                _w.xaxis.setText(target.c1ToString());
+                _w.yaxis.setText(target.c2ToString());
+
+                // Update the valid-at date
+                Date date = target.getDateForPosition();
+                JTextField tf = (JTextField)_w.calendarTime.getEditor().getEditorComponent();
+                TimeDocument td = (TimeDocument)tf.getDocument();
+                //if the date is null  use the current time
+                if (date == null) {
+                    date = new Date();
+                }
+                _w.calendarDate.setDate(date);
+                td.setTime(EdCompTargetList.timeFormatter.format(date));
+
+                // Update the solar system stuff
+                if (target instanceof NamedTarget) {
+                    _w.planetsPanel.setVisible(true);
+                    NamedTarget pt = (NamedTarget) target;
+                    NamedTarget.SolarObject solarObject = pt.getSolarObject();
+                    if (solarObject != null) {
+                        int pos = solarObject.ordinal();
+                        if (pos < _w.planetButtons.length) {
+                            _w.planetButtons[pos].setSelected(true);
+                        }
+                    }
+                } else {
+                    _w.planetsPanel.setVisible(false);
+                }
+
+                // And revalidate everything
+                _w.nonsiderealPW.revalidate();
+                _w.nonsiderealPW.repaint();
+                break;
+
             }
         }
-
     }
+
 
     // Return the current value of the given parameter as a string
     private String _getTargetParamValueAsString(ConicTarget target, int paramIndex) {

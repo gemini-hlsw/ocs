@@ -1178,21 +1178,21 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     switch (reply.getObjectType()) {
                         case COMET: {
                             final ConicTarget target = newOrExistingTarget(ITarget.Tag.JPL_MINOR_BODY);
-                            _nonSiderealTargetSup.showNonSiderealTarget(target, ITarget.Tag.JPL_MINOR_BODY);
+                            _nonSiderealTargetSup.showNonSiderealTarget(target);
                             _w.orbitalElementFormat.setValue(_nonSiderealTargetSup.getNonSiderealSystems()[NonSiderealTargetSupport.JPL_COMET]);
                             _curPos.setTarget(target);
                             }
                             break;
                         case MINOR_BODY: {
                             final ConicTarget target = newOrExistingTarget(ITarget.Tag.MPC_MINOR_PLANET);
-                            _nonSiderealTargetSup.showNonSiderealTarget(target, ITarget.Tag.MPC_MINOR_PLANET);
+                            _nonSiderealTargetSup.showNonSiderealTarget(target);
                             _w.orbitalElementFormat.setValue(_nonSiderealTargetSup.getNonSiderealSystems()[NonSiderealTargetSupport.JPL_MINOR_PLANET]);
                             _curPos.setTarget(target);
                             }
                             break;
                         case MAJOR_BODY: {
                             final NamedTarget target = (oldTarget instanceof NamedTarget) ? (NamedTarget) oldTarget : new NamedTarget();
-                            _nonSiderealTargetSup.showNonSiderealTarget(target,ITarget.Tag.NAMED);
+                            _nonSiderealTargetSup.showNonSiderealTarget(target);
                             _w.orbitalElementFormat.setValue(_nonSiderealTargetSup.getNonSiderealSystems()[NonSiderealTargetSupport.MAJOR_PLANET]);
                             _curPos.setTarget(target);
                             }
@@ -1657,9 +1657,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         // update the display in the tabs
         if (_curPos.getTarget() instanceof NonSiderealTarget) {
-            ITarget.Tag system = _curPos.getTarget().getTag();
             NonSiderealTarget nst = (NonSiderealTarget) _curPos.getTarget();
-            _nonSiderealTargetSup.showNonSiderealTarget(nst, system);
+            _nonSiderealTargetSup.showNonSiderealTarget(nst);
         }
     }
 
