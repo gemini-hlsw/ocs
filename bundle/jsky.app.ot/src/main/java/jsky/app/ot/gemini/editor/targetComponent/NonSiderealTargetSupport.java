@@ -116,9 +116,63 @@ class NonSiderealTargetSupport {
 
     private final Map<Param, ConicTargetParamWidgets> _conicWidgets;
 
-    // parameter labels and ToolTips for each system, indexed by [system][paramIndex][0] and
-    // [system][paramIndex][1]
-    private String[][][] _paramLabels;
+    private static final Map<ITarget.Tag, Map<Param, String[]>> _paramLabels;
+    static {
+        final HashMap<ITarget.Tag, Map<Param, String[]>> map = new HashMap<>();
+        _paramLabels = Collections.unmodifiableMap(map);
+        {
+            final Map<Param, String[]> inner = new HashMap();
+            map.put(ITarget.Tag.NAMED, Collections.unmodifiableMap(inner));
+
+            inner.put(Param.EPOCHOFEL,    new String[]{null, null});
+            inner.put(Param.ORBINC,       new String[]{null, null});
+            inner.put(Param.LONGASCNODE,  new String[]{null, null});
+            inner.put(Param.LONGOFPERI,   new String[]{null, null});
+            inner.put(Param.ARGOFPERI,    new String[]{null, null});
+            inner.put(Param.MEANDIST,     new String[]{null, null});
+            inner.put(Param.PERIDIST,     new String[]{null, null});
+            inner.put(Param.ECCENTRICITY, new String[]{null, null});
+            inner.put(Param.MEANLONG,     new String[]{null, null});
+            inner.put(Param.MEANANOM,     new String[]{null, null});
+            inner.put(Param.DAILYMOT,     new String[]{null, null});
+            inner.put(Param.EPOCHOFPERI,  new String[]{null, null});
+        }
+        {
+            final Map<Param, String[]> inner = new HashMap();
+            map.put(ITarget.Tag.JPL_MINOR_BODY, Collections.unmodifiableMap(inner));
+
+            inner.put(Param.EPOCHOFEL,    new String[]{"EPOCH", "Orbital Element Epoch"});
+            inner.put(Param.ORBINC,       new String[]{"IN", "Inclination"});
+            inner.put(Param.LONGASCNODE,  new String[]{"OM", "Longitude of Ascending Node"});
+            inner.put(Param.LONGOFPERI,   new String[]{null, null});
+            inner.put(Param.ARGOFPERI,    new String[]{"W", "Argument of Perihelion"});
+            inner.put(Param.MEANDIST,     new String[]{null, null});
+            inner.put(Param.PERIDIST,     new String[]{"QR", "Perihelion Distance"});
+            inner.put(Param.ECCENTRICITY, new String[]{"EC", "Eccentricity"});
+            inner.put(Param.MEANLONG,     new String[]{null, null});
+            inner.put(Param.MEANANOM,     new String[]{null, null});
+            inner.put(Param.DAILYMOT,     new String[]{null, null});
+            inner.put(Param.EPOCHOFPERI,  new String[]{"TP", "Time of Perihelion Passage"});
+        }
+        {
+            final Map<Param, String[]> inner = new HashMap();
+            map.put(ITarget.Tag.MPC_MINOR_PLANET, Collections.unmodifiableMap(inner));
+
+            inner.put(Param.EPOCHOFEL,    new String[]{"EPOCH", "Orbital Element Epoch"});
+            inner.put(Param.ORBINC,       new String[]{"IN", "Inclination"});
+            inner.put(Param.LONGASCNODE,  new String[]{"OM", "Longitude of Ascending Node"});
+            inner.put(Param.LONGOFPERI,   new String[]{null, null});
+            inner.put(Param.ARGOFPERI,    new String[]{"W", "Argument of Perihelion"});
+            inner.put(Param.MEANDIST,     new String[]{"A", "Semi-major Axis"});
+            inner.put(Param.PERIDIST,     new String[]{null, null});
+            inner.put(Param.ECCENTRICITY, new String[]{"EC", "Eccentricity"});
+            inner.put(Param.MEANLONG,     new String[]{null, null});
+            inner.put(Param.MEANANOM,     new String[]{"MA", "Mean Anomaly"});
+            inner.put(Param.DAILYMOT,     new String[]{null, null});
+            inner.put(Param.EPOCHOFPERI,  new String[]{null, null});
+
+        }
+    }
 
 
     // The GUI layout panel
@@ -136,7 +190,6 @@ class NonSiderealTargetSupport {
     NonSiderealTargetSupport(TelescopeForm w, SPTarget curPos) {
         _w = w;
         _curPos = curPos;
-        _initParamLabels();
         _conicWidgets = mkConicWidgets(w);
     }
 
@@ -185,53 +238,6 @@ class NonSiderealTargetSupport {
         }
     }
 
-
-    // initialize the array of parameter labels for each system
-    private void _initParamLabels() {
-        _paramLabels = new String[ITarget.Tag.values().length][Param.values().length][2];
-
-        _paramLabels[ITarget.Tag.NAMED.ordinal()][Param.EPOCHOFEL.ordinal()] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.NAMED.ordinal()][Param.ORBINC.ordinal()] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.NAMED.ordinal()][Param.LONGASCNODE.ordinal()] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.NAMED.ordinal()][Param.LONGOFPERI.ordinal()] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.NAMED.ordinal()][Param.ARGOFPERI.ordinal()] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.NAMED.ordinal()][Param.MEANDIST.ordinal()] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.NAMED.ordinal()][Param.PERIDIST.ordinal()] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.NAMED.ordinal()][Param.ECCENTRICITY.ordinal()] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.NAMED.ordinal()][Param.MEANLONG.ordinal()] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.NAMED.ordinal()][Param.MEANANOM.ordinal()] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.NAMED.ordinal()][Param.DAILYMOT.ordinal()] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.NAMED.ordinal()][Param.EPOCHOFPERI.ordinal()] = new String[]{null, null};
-
-        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][Param.EPOCHOFEL.ordinal()] = new String[]{"EPOCH", "Orbital Element Epoch"};
-        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][Param.ORBINC.ordinal()] = new String[]{"IN", "Inclination"};
-        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][Param.LONGASCNODE.ordinal()] = new String[]{"OM", "Longitude of Ascending Node"};
-        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][Param.LONGOFPERI.ordinal()] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][Param.ARGOFPERI.ordinal()] = new String[]{"W", "Argument of Perihelion"};
-        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][Param.MEANDIST.ordinal()] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][Param.PERIDIST.ordinal()] = new String[]{"QR", "Perihelion Distance"};
-        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][Param.ECCENTRICITY.ordinal()] = new String[]{"EC", "Eccentricity"};
-        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][Param.MEANLONG.ordinal()] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][Param.MEANANOM.ordinal()] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][Param.DAILYMOT.ordinal()] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][Param.EPOCHOFPERI.ordinal()] = new String[]{"TP", "Time of Perihelion Passage"};
-
-        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][Param.EPOCHOFEL.ordinal()] = new String[]{"EPOCH", "Orbital Element Epoch"};
-        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][Param.ORBINC.ordinal()] = new String[]{"IN", "Inclination"};
-        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][Param.LONGASCNODE.ordinal()] = new String[]{"OM", "Longitude of Ascending Node"};
-        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][Param.LONGOFPERI.ordinal()] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][Param.ARGOFPERI.ordinal()] = new String[]{"W", "Argument of Perihelion"};
-        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][Param.MEANDIST.ordinal()] = new String[]{"A", "Semi-major Axis"};
-        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][Param.PERIDIST.ordinal()] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][Param.ECCENTRICITY.ordinal()] = new String[]{"EC", "Eccentricity"};
-        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][Param.MEANLONG.ordinal()] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][Param.MEANANOM.ordinal()] = new String[]{"MA", "Mean Anomaly"};
-        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][Param.DAILYMOT.ordinal()] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][Param.EPOCHOFPERI.ordinal()] = new String[]{null, null};
-
-
-    }
-
     private static Map<Param, ConicTargetParamWidgets> mkConicWidgets(TelescopeForm f) {
         final Map<Param, ConicTargetParamWidgets> map = new HashMap<>();
         map.put(Param.EPOCHOFEL,    new ConicTargetParamWidgets(f.epochofelLabel,    f.epochofel,    f.epochofelUnits));
@@ -256,16 +262,15 @@ class NonSiderealTargetSupport {
     public void showNonSiderealTarget(NonSiderealTarget target) {
         for (ITarget.Tag tag: ITarget.Tag.values()) {
             if (tag == target.getTag()) {
+                final Map<Param, String[]> labels = _paramLabels.get(tag);
 
                 // Update all the conic parameter widgets
                 int row = 0;
                 int col = 0;
                 for (Param p: Param.values()) {
-                    final int i1 = p.ordinal();
                     final ConicTargetParamWidgets cw = _conicWidgets.get(p);
-                    final String[][] labels = _paramLabels[tag.ordinal()];
-                    final String label = labels[i1][0];
-                    final String toolTip = labels[i1][1];
+                    final String label = labels.get(p)[0];
+                    final String toolTip = labels.get(p)[1];
                     if (label != null) {
                         cw.setVisible(true);
                         cw.setText(label);
@@ -329,6 +334,7 @@ class NonSiderealTargetSupport {
         double d = _getTargetParamvalue(target, param);
         return String.valueOf(d);
     }
+
     // Return the current value of the given parameter
     private double _getTargetParamvalue(ConicTarget target, Param param) {
         switch (param) {
