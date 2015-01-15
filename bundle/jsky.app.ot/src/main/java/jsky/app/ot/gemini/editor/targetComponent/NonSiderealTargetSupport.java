@@ -96,22 +96,20 @@ class NonSiderealTargetSupport {
         }
     }
 
-    // number of possible parameters
-    private static int _paramCount = 0;
-
-    // Parameter constants: Indexes into _conicWidgets[] array.
-    private static final int EPOCHOFEL = _paramCount++;
-    private static final int ORBINC = _paramCount++;
-    private static final int LONGASCNODE = _paramCount++;
-    private static final int LONGOFPERI = _paramCount++;
-    private static final int ARGOFPERI = _paramCount++;
-    private static final int MEANDIST = _paramCount++;
-    private static final int PERIDIST = _paramCount++;
-    private static final int ECCENTRICITY = _paramCount++;
-    private static final int MEANLONG = _paramCount++;
-    private static final int MEANANOM = _paramCount++;
-    private static final int DAILYMOT = _paramCount++;
-    private static final int EPOCHOFPERI = _paramCount++;
+    enum Param {
+        EPOCHOFEL,
+        ORBINC,
+        LONGASCNODE,
+        LONGOFPERI,
+        ARGOFPERI,
+        MEANDIST,
+        PERIDIST,
+        ECCENTRICITY,
+        MEANLONG,
+        MEANANOM,
+        DAILYMOT,
+        EPOCHOFPERI
+    }
 
     // array indexed by the constants above
     private NonSiderealTargetSupport.ConicTargetParamWidgets[] _conicWidgets;
@@ -145,8 +143,8 @@ class NonSiderealTargetSupport {
 
     /** Add the given listener to all the entry widgets */
     public void initListeners(TextBoxWidgetWatcher watcher) {
-        for(int i = 0; i < _paramCount; i++) {
-            _conicWidgets[i].getEntry().addWatcher(watcher);
+        for (Param p: Param.values()) {
+            _conicWidgets[p.ordinal()].getEntry().addWatcher(watcher);
         }
     }
 
@@ -162,115 +160,94 @@ class NonSiderealTargetSupport {
         } catch (Exception ex) {
             return;
         }
-        for(int i = 0; i < _paramCount; i++) {
-            if (_conicWidgets[i].getEntry() == nbw) {
-                _setConicPos(target, i, value);
+        for (Param p: Param.values()) {
+            if (_conicWidgets[p.ordinal()].getEntry() == nbw) {
+                _setConicPos(target, p, value);
                 return;
             }
         }
     }
 
     // Set the value of the given param to the given value
-    private void _setConicPos(ConicTarget target, int paramIndex, double value) {
-        if (paramIndex == EPOCHOFEL) {
-            target.getEpoch().setValue(value);
-        }
-        if (paramIndex == ORBINC) {
-            target.getInclination().setValue(value);
-        }
-        if (paramIndex == LONGASCNODE) {
-            target.getANode().setValue(value);
-        }
-        if (paramIndex == LONGOFPERI) {
-            target.getPerihelion().setValue(value);
-        }
-        if (paramIndex == ARGOFPERI) {
-            target.getPerihelion().setValue(value);
-        }
-        if (paramIndex == MEANDIST) {
-            target.getAQ().setValue(value);
-        }
-        if (paramIndex == PERIDIST) {
-            target.getAQ().setValue(value);
-        }
-        if (paramIndex == ECCENTRICITY) {
-            target.setE(value);
-        }
-        if (paramIndex == MEANLONG) {
-            target.getLM().setValue(value);
-        }
-        if (paramIndex == MEANANOM) {
-            target.getLM().setValue(value);
-        }
-        if (paramIndex == DAILYMOT) {
-            target.getN().setValue(value);
-        }
-        if (paramIndex == EPOCHOFPERI) {
-            target.getEpochOfPeri().setValue(value);
+    private void _setConicPos(ConicTarget target, Param param, double value) {
+        switch (param) {
+            case EPOCHOFEL:    target.getEpoch().setValue(value); break;
+            case ORBINC:       target.getInclination().setValue(value); break;
+            case LONGASCNODE:  target.getANode().setValue(value); break;
+            case LONGOFPERI:   target.getPerihelion().setValue(value); break;
+            case ARGOFPERI:    target.getPerihelion().setValue(value); break;
+            case MEANDIST:     target.getAQ().setValue(value); break;
+            case PERIDIST:     target.getAQ().setValue(value); break;
+            case ECCENTRICITY: target.setE(value); break;
+            case MEANLONG:     target.getLM().setValue(value); break;
+            case MEANANOM:     target.getLM().setValue(value); break;
+            case DAILYMOT:     target.getN().setValue(value); break;
+            case EPOCHOFPERI:  target.getEpochOfPeri().setValue(value); break;
         }
     }
 
 
     // initialize the array of parameter labels for each system
     private void _initParamLabels() {
-        _paramLabels = new String[ITarget.Tag.values().length][_paramCount][2];
+        _paramLabels = new String[ITarget.Tag.values().length][Param.values().length][2];
 
-        _paramLabels[ITarget.Tag.NAMED.ordinal()][EPOCHOFEL] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.NAMED.ordinal()][ORBINC] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.NAMED.ordinal()][LONGASCNODE] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.NAMED.ordinal()][LONGOFPERI] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.NAMED.ordinal()][ARGOFPERI] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.NAMED.ordinal()][MEANDIST] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.NAMED.ordinal()][PERIDIST] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.NAMED.ordinal()][ECCENTRICITY] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.NAMED.ordinal()][MEANLONG] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.NAMED.ordinal()][MEANANOM] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.NAMED.ordinal()][DAILYMOT] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.NAMED.ordinal()][EPOCHOFPERI] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.NAMED.ordinal()][Param.EPOCHOFEL.ordinal()] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.NAMED.ordinal()][Param.ORBINC.ordinal()] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.NAMED.ordinal()][Param.LONGASCNODE.ordinal()] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.NAMED.ordinal()][Param.LONGOFPERI.ordinal()] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.NAMED.ordinal()][Param.ARGOFPERI.ordinal()] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.NAMED.ordinal()][Param.MEANDIST.ordinal()] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.NAMED.ordinal()][Param.PERIDIST.ordinal()] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.NAMED.ordinal()][Param.ECCENTRICITY.ordinal()] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.NAMED.ordinal()][Param.MEANLONG.ordinal()] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.NAMED.ordinal()][Param.MEANANOM.ordinal()] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.NAMED.ordinal()][Param.DAILYMOT.ordinal()] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.NAMED.ordinal()][Param.EPOCHOFPERI.ordinal()] = new String[]{null, null};
 
-        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][EPOCHOFEL] = new String[]{"EPOCH", "Orbital Element Epoch"};
-        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][ORBINC] = new String[]{"IN", "Inclination"};
-        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][LONGASCNODE] = new String[]{"OM", "Longitude of Ascending Node"};
-        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][LONGOFPERI] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][ARGOFPERI] = new String[]{"W", "Argument of Perihelion"};
-        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][MEANDIST] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][PERIDIST] = new String[]{"QR", "Perihelion Distance"};
-        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][ECCENTRICITY] = new String[]{"EC", "Eccentricity"};
-        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][MEANLONG] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][MEANANOM] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][DAILYMOT] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][EPOCHOFPERI] = new String[]{"TP", "Time of Perihelion Passage"};
+        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][Param.EPOCHOFEL.ordinal()] = new String[]{"EPOCH", "Orbital Element Epoch"};
+        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][Param.ORBINC.ordinal()] = new String[]{"IN", "Inclination"};
+        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][Param.LONGASCNODE.ordinal()] = new String[]{"OM", "Longitude of Ascending Node"};
+        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][Param.LONGOFPERI.ordinal()] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][Param.ARGOFPERI.ordinal()] = new String[]{"W", "Argument of Perihelion"};
+        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][Param.MEANDIST.ordinal()] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][Param.PERIDIST.ordinal()] = new String[]{"QR", "Perihelion Distance"};
+        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][Param.ECCENTRICITY.ordinal()] = new String[]{"EC", "Eccentricity"};
+        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][Param.MEANLONG.ordinal()] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][Param.MEANANOM.ordinal()] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][Param.DAILYMOT.ordinal()] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][Param.EPOCHOFPERI.ordinal()] = new String[]{"TP", "Time of Perihelion Passage"};
 
-        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][EPOCHOFEL] = new String[]{"EPOCH", "Orbital Element Epoch"};
-        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][ORBINC] = new String[]{"IN", "Inclination"};
-        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][LONGASCNODE] = new String[]{"OM", "Longitude of Ascending Node"};
-        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][LONGOFPERI] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][ARGOFPERI] = new String[]{"W", "Argument of Perihelion"};
-        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][MEANDIST] = new String[]{"A", "Semi-major Axis"};
-        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][PERIDIST] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][ECCENTRICITY] = new String[]{"EC", "Eccentricity"};
-        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][MEANLONG] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][MEANANOM] = new String[]{"MA", "Mean Anomaly"};
-        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][DAILYMOT] = new String[]{null, null};
-        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][EPOCHOFPERI] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][Param.EPOCHOFEL.ordinal()] = new String[]{"EPOCH", "Orbital Element Epoch"};
+        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][Param.ORBINC.ordinal()] = new String[]{"IN", "Inclination"};
+        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][Param.LONGASCNODE.ordinal()] = new String[]{"OM", "Longitude of Ascending Node"};
+        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][Param.LONGOFPERI.ordinal()] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][Param.ARGOFPERI.ordinal()] = new String[]{"W", "Argument of Perihelion"};
+        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][Param.MEANDIST.ordinal()] = new String[]{"A", "Semi-major Axis"};
+        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][Param.PERIDIST.ordinal()] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][Param.ECCENTRICITY.ordinal()] = new String[]{"EC", "Eccentricity"};
+        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][Param.MEANLONG.ordinal()] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][Param.MEANANOM.ordinal()] = new String[]{"MA", "Mean Anomaly"};
+        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][Param.DAILYMOT.ordinal()] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][Param.EPOCHOFPERI.ordinal()] = new String[]{null, null};
+
 
     }
 
     // initialize the array of widgets for each parameter
     private void _initConicWidgets() {
-        _conicWidgets = new NonSiderealTargetSupport.ConicTargetParamWidgets[_paramCount];
-        _conicWidgets[EPOCHOFEL] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.epochofelLabel, _w.epochofel, _w.epochofelUnits);
-        _conicWidgets[ORBINC] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.orbincLabel, _w.orbinc, _w.orbincUnits);
-        _conicWidgets[LONGASCNODE] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.longascnodeLabel, _w.longascnode, _w.longascnodeUnits);
-        _conicWidgets[LONGOFPERI] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.longofperiLabel, _w.longofperi, _w.longofperiUnits);
-        _conicWidgets[ARGOFPERI] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.argofperiLabel, _w.argofperi, _w.argofperiUnits);
-        _conicWidgets[MEANDIST] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.meandistLabel, _w.meandist, _w.meandistUnits);
-        _conicWidgets[PERIDIST] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.peridistLabel, _w.peridist, _w.peridistUnits);
-        _conicWidgets[ECCENTRICITY] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.eccentricityLabel, _w.eccentricity, _w.eccentricityUnits);
-        _conicWidgets[MEANLONG] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.meanlongLabel, _w.meanlong, _w.meanlongUnits);
-        _conicWidgets[MEANANOM] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.meananomLabel, _w.meananom, _w.meananomUnits);
-        _conicWidgets[DAILYMOT] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.dailymotLabel, _w.dailymot, _w.dailymotUnits);
-        _conicWidgets[EPOCHOFPERI] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.epochofperiLabel, _w.epochofperi, _w.epochofperiUnits);
+        _conicWidgets = new NonSiderealTargetSupport.ConicTargetParamWidgets[Param.values().length];
+        _conicWidgets[Param.EPOCHOFEL.ordinal()] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.epochofelLabel, _w.epochofel, _w.epochofelUnits);
+        _conicWidgets[Param.ORBINC.ordinal()] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.orbincLabel, _w.orbinc, _w.orbincUnits);
+        _conicWidgets[Param.LONGASCNODE.ordinal()] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.longascnodeLabel, _w.longascnode, _w.longascnodeUnits);
+        _conicWidgets[Param.LONGOFPERI.ordinal()] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.longofperiLabel, _w.longofperi, _w.longofperiUnits);
+        _conicWidgets[Param.ARGOFPERI.ordinal()] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.argofperiLabel, _w.argofperi, _w.argofperiUnits);
+        _conicWidgets[Param.MEANDIST.ordinal()] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.meandistLabel, _w.meandist, _w.meandistUnits);
+        _conicWidgets[Param.PERIDIST.ordinal()] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.peridistLabel, _w.peridist, _w.peridistUnits);
+        _conicWidgets[Param.ECCENTRICITY.ordinal()] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.eccentricityLabel, _w.eccentricity, _w.eccentricityUnits);
+        _conicWidgets[Param.MEANLONG.ordinal()] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.meanlongLabel, _w.meanlong, _w.meanlongUnits);
+        _conicWidgets[Param.MEANANOM.ordinal()] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.meananomLabel, _w.meananom, _w.meananomUnits);
+        _conicWidgets[Param.DAILYMOT.ordinal()] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.dailymotLabel, _w.dailymot, _w.dailymotUnits);
+        _conicWidgets[Param.EPOCHOFPERI.ordinal()] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.epochofperiLabel, _w.epochofperi, _w.epochofperiUnits);
     }
 
 
@@ -285,7 +262,8 @@ class NonSiderealTargetSupport {
                 // Update all the conic parameter widgets
                 int row = 0;
                 int col = 0;
-                for (int i1 = 0; i1 < _paramCount; i1++) {
+                for (Param p: Param.values()) {
+                    final int i1 = p.ordinal();
                     final ConicTargetParamWidgets cw = _conicWidgets[i1];
                     final String[][] labels = _paramLabels[tag.ordinal()];
                     final String label = labels[i1][0];
@@ -295,7 +273,7 @@ class NonSiderealTargetSupport {
                         cw.setText(label);
                         cw.setToolTip(toolTip);
                         if (target instanceof ConicTarget) {
-                            String s = _getTargetParamValueAsString((ConicTarget) target, i1);
+                            String s = _getTargetParamValueAsString((ConicTarget) target, p);
                             cw.setValue(s);
                         }
                         cw.setPos(row, col++);
@@ -349,50 +327,27 @@ class NonSiderealTargetSupport {
 
 
     // Return the current value of the given parameter as a string
-    private String _getTargetParamValueAsString(ConicTarget target, int paramIndex) {
-        double d = _getTargetParamvalue(target, paramIndex);
+    private String _getTargetParamValueAsString(ConicTarget target, Param param) {
+        double d = _getTargetParamvalue(target, param);
         return String.valueOf(d);
     }
     // Return the current value of the given parameter
-    private double _getTargetParamvalue(ConicTarget target, int paramIndex) {
-        if (paramIndex == EPOCHOFEL) {
-            return target.getEpoch().getValue();
+    private double _getTargetParamvalue(ConicTarget target, Param param) {
+        switch (param) {
+            case EPOCHOFEL:    return target.getEpoch().getValue();
+            case ORBINC:       return target.getInclination().getValue();
+            case LONGASCNODE:  return target.getANode().getValue();
+            case LONGOFPERI:   return target.getPerihelion().getValue();
+            case ARGOFPERI:    return target.getPerihelion().getValue();
+            case MEANDIST:     return target.getAQ().getValue();
+            case PERIDIST:     return target.getAQ().getValue();
+            case ECCENTRICITY: return target.getE();
+            case MEANLONG:     return target.getLM().getValue();
+            case MEANANOM:     return target.getLM().getValue();
+            case DAILYMOT:     return target.getN().getValue();
+            case EPOCHOFPERI:  return target.getEpochOfPeri().getValue();
+            default:           return 0;
         }
-        if (paramIndex == ORBINC) {
-            return target.getInclination().getValue();
-        }
-        if (paramIndex == LONGASCNODE) {
-            return target.getANode().getValue();
-        }
-        if (paramIndex == LONGOFPERI) {
-            return target.getPerihelion().getValue();
-        }
-        if (paramIndex == ARGOFPERI) {
-            return target.getPerihelion().getValue();
-        }
-        if (paramIndex == MEANDIST) {
-            return target.getAQ().getValue();
-        }
-        if (paramIndex == PERIDIST) {
-            return target.getAQ().getValue();
-        }
-        if (paramIndex == ECCENTRICITY) {
-            return target.getE();
-        }
-        if (paramIndex == MEANLONG) {
-            return target.getLM().getValue();
-        }
-        if (paramIndex == MEANANOM) {
-            return target.getLM().getValue();
-        }
-        if (paramIndex == DAILYMOT) {
-            return target.getN().getValue();
-        }
-        if (paramIndex == EPOCHOFPERI) {
-            return target.getEpochOfPeri().getValue();
-        }
-
-        return 0.;
     }
 
     private DropDownListBoxWidgetWatcher orbitalElementFormatWatcher = new DropDownListBoxWidgetWatcher()  {
