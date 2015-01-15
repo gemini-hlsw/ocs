@@ -25,17 +25,6 @@ public abstract class NonSiderealTarget extends ITarget {
     public static final String PK_HORIZONS_OBJECT_TYPE_ORDINAL = "horizons-object-type";
 
     /**
-     * Constructs with the system option.
-     *
-     * @throws IllegalArgumentException if the given <code>systemOption</code>
-     *                                  is not permitted
-     */
-    public NonSiderealTarget(TypeBase systemOption) throws IllegalArgumentException {
-        super(systemOption);
-    }
-
-
-    /**
      * Gets the optional name for a coordinate.
      * This returns the actual object reference, not a copy.
      */
@@ -227,14 +216,6 @@ public abstract class NonSiderealTarget extends ITarget {
      */
     public void setEpoch(CoordinateTypes.Epoch newValue) {
         _epoch = newValue;
-    }
-
-
-    /**
-     * Gets the system's name including the selected (sub)option.
-     */
-    public String getSystemName() {
-        return "(" + getSystemOption().getName() + ")";
     }
 
     public Date getDateForPosition() {

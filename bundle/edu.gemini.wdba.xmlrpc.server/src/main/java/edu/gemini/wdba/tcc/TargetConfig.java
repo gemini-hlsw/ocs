@@ -57,26 +57,25 @@ public final class TargetConfig extends ParamSet {
 
         putParameter(TccNames.OBJNAME, spTarget.getName());
 
-        String systemName = spTarget.getTarget().getShortSystemName();
-        addAttribute(TYPE, systemName);
-
         putParameter(TccNames.BRIGHTNESS, ""); // TODO: can we elide this altogether?
         putParameter(TccNames.TAG, ""); // ugh
 
         ITarget target = spTarget.getTarget();
         if (target instanceof HmsDegTarget) {
             // System only appears in HmsDegTarget
-            putParameter(TccNames.SYSTEM, spTarget.getCoordSysAsString());
+            addAttribute(TYPE, "hmsdegTarget");
+            putParameter(TccNames.SYSTEM, spTarget.getTarget().getTag().tccName);
             _buildHmsDegTarget(spTarget);
         } else if (target instanceof ConicTarget) {
+            addAttribute(TYPE, "conicTarget");
             _buildConicTarget(spTarget);
         } else if (target instanceof NamedTarget) {
-            // Temp fix until target code fixed
             addAttribute(TYPE, "namedTarget");
             _buildNamedTarget((NamedTarget) target);
         } else {
-            // In all other caes, report a problem and return
-            _logAbort("Unsupported coordinate system: " + target.getSystemName(), null);
+            // In all other cases, report a problem and return
+            _logAbort("Unsupported target type: " + target.getClass().getName(), null);
+
         }
 
         Option<Element> mags = _createMagnitudes(spTarget);
@@ -104,8 +103,8 @@ public final class TargetConfig extends ParamSet {
     private void _buildConicTarget(SPTarget spTarget) {
         ConicTarget target = (ConicTarget) spTarget.getTarget();
 
-        TypeBase option = target.getSystemOption();
-        putParameter(TccNames.FORMAT, target.getSystemOption().getName());
+        ITarget.Tag option = target.getTag();
+        putParameter(TccNames.FORMAT, option.tccName);
 
         // All have epoch
         putParameter(TccNames.EPOCHOFEL, target.getEpoch().getStringValue());
@@ -116,13 +115,13 @@ public final class TargetConfig extends ParamSet {
         // All have eccentricity
         putParameter(TccNames.ECCENTRICITY, String.valueOf(target.getE()));
 
-        if (option == ConicTarget.SystemType.JPL_MINOR_BODY) {
+        if (option == ITarget.Tag.JPL_MINOR_BODY) {
             putParameter(TccNames.ARGOFPERI, target.getPerihelion().getStringValue());
             putParameter(TccNames.PERIDIST, target.getAQ().getStringValue());
             putParameter(TccNames.EPOCHOFPERI, target.getEpochOfPeri().getStringValue());
         }
 
-        if (option == ConicTarget.SystemType.MPC_MINOR_PLANET) {
+        if (option == ITarget.Tag.MPC_MINOR_PLANET) {
             putParameter(TccNames.ARGOFPERI, target.getPerihelion().getStringValue());
             putParameter(TccNames.MEANDIST, target.getAQ().getStringValue());
             putParameter(TccNames.MEANANOM, target.getLM().getStringValue());
