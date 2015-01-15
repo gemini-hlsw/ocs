@@ -74,7 +74,7 @@ public class GemsCatalog {
      * @return list of search results
      */
     public List<GemsCatalogSearchResults> search(final ObsContext obsContext, final SkyCoordinates basePosition, final GemsGuideStarSearchOptions options,
-                                                 final Option<edu.gemini.shared.skyobject.Magnitude.Band> nirBand, final StatusLogger statusLogger)
+                                                 final Option<MagnitudeBand> nirBand, final StatusLogger statusLogger)
             throws Exception {
         final Map<GemsCatalogSearchCriterion, List<Target.SiderealTarget>> map = new HashMap<>();
         final List<Exception> exceptions = new ArrayList<>();

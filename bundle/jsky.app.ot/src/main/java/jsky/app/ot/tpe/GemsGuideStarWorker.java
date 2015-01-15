@@ -10,6 +10,7 @@ import edu.gemini.shared.skyobject.coords.SkyCoordinates;
 import edu.gemini.shared.util.immutable.DefaultImList;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.gemini.gems.GemsInstrument;
 import edu.gemini.spModel.gems.GemsTipTiltMode;
@@ -201,7 +202,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
 //        return search(GemsGuideStarSearchOptions.DEFAULT_CATALOG, GemsGuideStarSearchOptions.DEFAULT_CATALOG,
 //                GemsTipTiltMode.both, obsContext, posAngles, None.<Magnitude.Band>instance());
         return search(GemsGuideStarSearchOptions.DEFAULT_CATALOG, GemsGuideStarSearchOptions.DEFAULT_CATALOG,
-                GemsTipTiltMode.canopus, obsContext, posAngles, None.<Magnitude.Band>instance());
+                GemsTipTiltMode.canopus, obsContext, posAngles, None.<MagnitudeBand>instance());
     }
 
     /**
@@ -233,7 +234,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     public List<GemsCatalogSearchResults> search(String opticalCatalog, String nirCatalog,
                                                  GemsTipTiltMode tipTiltMode,
                                                  ObsContext obsContext, Set<Angle> posAngles,
-                                                 Option<Magnitude.Band> nirBand) throws Exception {
+                                                 Option<MagnitudeBand> nirBand) throws Exception {
         try {
             interrupted = false;
             startProgress();
@@ -280,7 +281,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
 //                None.<Magnitude.Band>instance());
         List<GemsCatalogSearchResults> results = search(GemsGuideStarSearchOptions.DEFAULT_CATALOG,
                 GemsGuideStarSearchOptions.DEFAULT_CATALOG, GemsTipTiltMode.canopus, obsContext, posAngles,
-                None.<Magnitude.Band>instance());
+                None.<MagnitudeBand>instance());
         return findGuideStars(obsContext, posAngles, results);
     }
 

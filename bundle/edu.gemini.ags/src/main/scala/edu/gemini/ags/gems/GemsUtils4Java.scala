@@ -44,26 +44,11 @@ object GemsUtils4Java {
     RadiusConstraint.between(Angle.fromDegrees(result._1), Angle.fromDegrees(result._2))
   }
 
-  def toCoordinates(coords: skyobject.coords.SkyCoordinates): Coordinates = {
-    val c = coords.toHmsDeg(0L)
-    Coordinates(RightAscension.fromAngle(c.getRa.toNewModel), Declination.fromAngle(c.getDec.toNewModel).getOrElse(Declination.zero))
-  }
-
-  def toSiderealTarget(skyObject: skyobject.SkyObject): SiderealTarget = skyObject.toNewModel
-
-  def translateBands(bands: java.util.Set[skyobject.Magnitude.Band]): java.util.Set[MagnitudeBand] = bands.asScala.map(_.toNewModel).asJava
-
-  def toOldBand(band: MagnitudeBand): skyobject.Magnitude.Band = band.toOldModel
-
-  def toNewAngle(angle: skycalc.Angle): Angle = angle.toNewModel
-
   /**
    * Sorts the targets list, putting the brightest stars first and returns the sorted array.
    */
   def sortTargetsByBrightness(targetsList: java.util.List[SiderealTarget]): java.util.List[SiderealTarget] =
     targetsList.asScala.sortBy(_.magnitudeIn(MagnitudeBand.R)).asJava
-
-  def toSPTarget(siderealTarget: SiderealTarget):SPTarget = new SPTarget(siderealTarget.toOldModel)
 
   // TODO Star should be replaced by SiderealTarget
   def starToSiderealTarget(star: Star): SiderealTarget = {
@@ -85,4 +70,22 @@ object GemsUtils4Java {
     import collection.breakOut
     new java.util.ArrayList(list.asScala.map(_.results).flatten.groupBy(_.name).map(_._2.head)(breakOut).asJava)
   }
+
+  // Set of conversors of new model to old model and vice versa for use in Java, they should disappear in time
+  def toCoordinates(coords: skyobject.coords.SkyCoordinates): Coordinates = {
+    val c = coords.toHmsDeg(0L)
+    Coordinates(RightAscension.fromAngle(c.getRa.toNewModel), Declination.fromAngle(c.getDec.toNewModel).getOrElse(Declination.zero))
+  }
+
+  def toSiderealTarget(skyObject: skyobject.SkyObject): SiderealTarget = skyObject.toNewModel
+
+  def translateBands(bands: java.util.Set[skyobject.Magnitude.Band]): java.util.Set[MagnitudeBand] = bands.asScala.map(_.toNewModel).asJava
+
+  def toOldBand(band: MagnitudeBand): skyobject.Magnitude.Band = band.toOldModel
+
+  def toNewBand(band: skyobject.Magnitude.Band): MagnitudeBand = band.toNewModel
+
+  def toNewAngle(angle: skycalc.Angle): Angle = angle.toNewModel
+
+  def toSPTarget(siderealTarget: SiderealTarget):SPTarget = new SPTarget(siderealTarget.toOldModel)
 }

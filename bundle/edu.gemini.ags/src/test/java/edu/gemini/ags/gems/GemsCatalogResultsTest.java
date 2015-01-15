@@ -31,7 +31,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import edu.gemini.shared.util.immutable.*;
 
 import java.net.URL;
 import java.util.HashSet;
@@ -171,7 +170,7 @@ public class GemsCatalogResultsTest  implements MascotProgress {
         WorldCoords coords = new WorldCoords(raStr, decStr);
         SPTarget baseTarget = new SPTarget(coords.getRaDeg(), coords.getDecDeg());
         TargetEnvironment env = TargetEnvironment.create(baseTarget);
-        Set<Offset> offsets = new HashSet<Offset>();
+        Set<Offset> offsets = new HashSet<>();
         ObsContext obsContext = ObsContext.create(env, inst, None.<Site>instance(), SPSiteQuality.Conditions.BEST, offsets, new Gems());
 
         Angle baseRA = new Angle(coords.getRaDeg(), Angle.Unit.DEGREES);
@@ -192,7 +191,7 @@ public class GemsCatalogResultsTest  implements MascotProgress {
         GemsGuideStarSearchOptions options = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog,
                 instrument, tipTiltMode, null);
 
-        List<GemsCatalogSearchResults> results = new GemsCatalog().search(obsContext, base, options, None.<Magnitude.Band>instance(), null);
+        List<GemsCatalogSearchResults> results = new GemsCatalog().search(obsContext, base, options, None.<MagnitudeBand>instance(), null);
         if (options.getTipTiltMode() == GemsTipTiltMode.both) {
             assertEquals(4, results.size());
         } else {

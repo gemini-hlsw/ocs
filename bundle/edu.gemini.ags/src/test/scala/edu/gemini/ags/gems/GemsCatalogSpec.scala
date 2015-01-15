@@ -1,9 +1,8 @@
 package edu.gemini.ags.gems
 
-import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates
 import edu.gemini.shared.util.immutable.None
-import edu.gemini.spModel.core.{Angle, Site}
+import edu.gemini.spModel.core.{MagnitudeBand, Angle, Site}
 import edu.gemini.spModel.gemini.gems.GemsInstrument
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
@@ -43,7 +42,7 @@ class GemsCatalogSpec extends Specification {
       val options = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog,
               instrument, tipTiltMode, posAngles)
 
-      val band = None.instance[Magnitude.Band]()
+      val band = None.instance[MagnitudeBand]()
       val results = new GemsCatalog().search(ctx, base, options, band, null)
       results should have size 2
     }

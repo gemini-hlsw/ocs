@@ -5,6 +5,7 @@ import edu.gemini.skycalc.Angle;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.core.Target;
 import edu.gemini.spModel.gems.GemsTipTiltMode;
 import edu.gemini.ags.gems.GemsCatalogSearchResults;
@@ -52,7 +53,7 @@ class GemsGuideStarSearchController {
         ObsContext obsContext = _worker.getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
         Set<Angle> posAngles = getPosAngles(obsContext);
 
-        Magnitude.Band band = _model.getBand().getBand();
+        MagnitudeBand band = _model.getBand().getBand();
         final String catName;
         if (_model.getCatalog() == GemsGuideStarSearchOptions.CatalogChoice.USER_CATALOG) {
             catName = _model.getUserCatalogFileName();
@@ -63,7 +64,7 @@ class GemsGuideStarSearchController {
         List<GemsCatalogSearchResults> results;
         try {
             results = _worker.search(catName, catName, tipTiltMode, obsContext, posAngles,
-                    new Some<Magnitude.Band>(band));
+                    new Some<MagnitudeBand>(band));
         } catch(Exception e) {
             DialogUtil.error(_dialog, e);
             results = new ArrayList<GemsCatalogSearchResults>();
