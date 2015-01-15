@@ -226,9 +226,7 @@ object ProgramGen {
       genEditDeleteChild,
       genEditMoveChild)
 
-  val genEdits: Gen[List[ProgEdit]] = sized { size =>
-    listOfN(size, genEdit)
-  }
+  val genEdits: Gen[List[ProgEdit]] = sized { size => listOfN(size, genEdit) }
 
   val genEditedProg: Gen[ProgFun[ISPProgram]] = {
     def copyFrom(fact: ISPFactory, that: ISPProgram): ISPProgram = {
