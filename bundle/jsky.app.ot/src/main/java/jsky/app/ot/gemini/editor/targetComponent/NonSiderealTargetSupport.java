@@ -99,7 +99,7 @@ class NonSiderealTargetSupport {
         }
     }
 
-    enum Param {
+    private enum Param {
         EPOCHOFEL,
         ORBINC,
         LONGASCNODE,
@@ -114,64 +114,50 @@ class NonSiderealTargetSupport {
         EPOCHOFPERI
     }
 
+    private static final class Labels {
+        public final String label;
+        public final String toolTip;
+        public Labels(String label, String toolTip) {
+            this.label = label;
+            this.toolTip = toolTip;
+        }
+    }
+
+
     private final Map<Param, ConicTargetParamWidgets> _conicWidgets;
 
-    private static final Map<ITarget.Tag, Map<Param, String[]>> _paramLabels;
+    private static final Map<ITarget.Tag, Map<Param, Labels>> _paramLabels;
     static {
-        final HashMap<ITarget.Tag, Map<Param, String[]>> map = new HashMap<>();
+
+        // Minor body param labels
+        final Map<Param, Labels> mbps = new HashMap<>();
+        mbps.put(Param.EPOCHOFEL,    new Labels("EPOCH", "Orbital Element Epoch"));
+        mbps.put(Param.ORBINC,       new Labels("IN", "Inclination"));
+        mbps.put(Param.LONGASCNODE,  new Labels("OM", "Longitude of Ascending Node"));
+        mbps.put(Param.ARGOFPERI,    new Labels("W", "Argument of Perihelion"));
+        mbps.put(Param.PERIDIST,     new Labels("QR", "Perihelion Distance"));
+        mbps.put(Param.ECCENTRICITY, new Labels("EC", "Eccentricity"));
+        mbps.put(Param.EPOCHOFPERI,  new Labels("TP", "Time of Perihelion Passage"));
+
+        // Minor planet param labels
+        final Map<Param, Labels> mpps = new HashMap<>();
+        mpps.put(Param.EPOCHOFEL,    new Labels("EPOCH", "Orbital Element Epoch"));
+        mpps.put(Param.ORBINC,       new Labels("IN", "Inclination"));
+        mpps.put(Param.LONGASCNODE,  new Labels("OM", "Longitude of Ascending Node"));
+        mpps.put(Param.ARGOFPERI,    new Labels("W", "Argument of Perihelion"));
+        mpps.put(Param.MEANDIST,     new Labels("A", "Semi-major Axis"));
+        mpps.put(Param.ECCENTRICITY, new Labels("EC", "Eccentricity"));
+        mpps.put(Param.MEANANOM,     new Labels("MA", "Mean Anomaly"));
+
+        // Label maps for each target type
+        final HashMap<ITarget.Tag, Map<Param, Labels>> map = new HashMap<>();
+        map.put(ITarget.Tag.NAMED,            Collections.<Param, Labels>emptyMap());
+        map.put(ITarget.Tag.MPC_MINOR_PLANET, Collections.unmodifiableMap(mpps));
+        map.put(ITarget.Tag.JPL_MINOR_BODY,   Collections.unmodifiableMap(mbps));
+
+        // Done
         _paramLabels = Collections.unmodifiableMap(map);
-        {
-            final Map<Param, String[]> inner = new HashMap();
-            map.put(ITarget.Tag.NAMED, Collections.unmodifiableMap(inner));
 
-            inner.put(Param.EPOCHOFEL,    new String[]{null, null});
-            inner.put(Param.ORBINC,       new String[]{null, null});
-            inner.put(Param.LONGASCNODE,  new String[]{null, null});
-            inner.put(Param.LONGOFPERI,   new String[]{null, null});
-            inner.put(Param.ARGOFPERI,    new String[]{null, null});
-            inner.put(Param.MEANDIST,     new String[]{null, null});
-            inner.put(Param.PERIDIST,     new String[]{null, null});
-            inner.put(Param.ECCENTRICITY, new String[]{null, null});
-            inner.put(Param.MEANLONG,     new String[]{null, null});
-            inner.put(Param.MEANANOM,     new String[]{null, null});
-            inner.put(Param.DAILYMOT,     new String[]{null, null});
-            inner.put(Param.EPOCHOFPERI,  new String[]{null, null});
-        }
-        {
-            final Map<Param, String[]> inner = new HashMap();
-            map.put(ITarget.Tag.JPL_MINOR_BODY, Collections.unmodifiableMap(inner));
-
-            inner.put(Param.EPOCHOFEL,    new String[]{"EPOCH", "Orbital Element Epoch"});
-            inner.put(Param.ORBINC,       new String[]{"IN", "Inclination"});
-            inner.put(Param.LONGASCNODE,  new String[]{"OM", "Longitude of Ascending Node"});
-            inner.put(Param.LONGOFPERI,   new String[]{null, null});
-            inner.put(Param.ARGOFPERI,    new String[]{"W", "Argument of Perihelion"});
-            inner.put(Param.MEANDIST,     new String[]{null, null});
-            inner.put(Param.PERIDIST,     new String[]{"QR", "Perihelion Distance"});
-            inner.put(Param.ECCENTRICITY, new String[]{"EC", "Eccentricity"});
-            inner.put(Param.MEANLONG,     new String[]{null, null});
-            inner.put(Param.MEANANOM,     new String[]{null, null});
-            inner.put(Param.DAILYMOT,     new String[]{null, null});
-            inner.put(Param.EPOCHOFPERI,  new String[]{"TP", "Time of Perihelion Passage"});
-        }
-        {
-            final Map<Param, String[]> inner = new HashMap();
-            map.put(ITarget.Tag.MPC_MINOR_PLANET, Collections.unmodifiableMap(inner));
-
-            inner.put(Param.EPOCHOFEL,    new String[]{"EPOCH", "Orbital Element Epoch"});
-            inner.put(Param.ORBINC,       new String[]{"IN", "Inclination"});
-            inner.put(Param.LONGASCNODE,  new String[]{"OM", "Longitude of Ascending Node"});
-            inner.put(Param.LONGOFPERI,   new String[]{null, null});
-            inner.put(Param.ARGOFPERI,    new String[]{"W", "Argument of Perihelion"});
-            inner.put(Param.MEANDIST,     new String[]{"A", "Semi-major Axis"});
-            inner.put(Param.PERIDIST,     new String[]{null, null});
-            inner.put(Param.ECCENTRICITY, new String[]{"EC", "Eccentricity"});
-            inner.put(Param.MEANLONG,     new String[]{null, null});
-            inner.put(Param.MEANANOM,     new String[]{"MA", "Mean Anomaly"});
-            inner.put(Param.DAILYMOT,     new String[]{null, null});
-            inner.put(Param.EPOCHOFPERI,  new String[]{null, null});
-
-        }
     }
 
 
@@ -262,19 +248,18 @@ class NonSiderealTargetSupport {
     public void showNonSiderealTarget(NonSiderealTarget target) {
         for (ITarget.Tag tag: ITarget.Tag.values()) {
             if (tag == target.getTag()) {
-                final Map<Param, String[]> labels = _paramLabels.get(tag);
+                final Map<Param, Labels> labels = _paramLabels.get(tag);
 
                 // Update all the conic parameter widgets
                 int row = 0;
                 int col = 0;
                 for (Param p: Param.values()) {
                     final ConicTargetParamWidgets cw = _conicWidgets.get(p);
-                    final String label = labels.get(p)[0];
-                    final String toolTip = labels.get(p)[1];
-                    if (label != null) {
+                    final Labels labs = labels.get(p);
+                    if (labs != null) {
                         cw.setVisible(true);
-                        cw.setText(label);
-                        cw.setToolTip(toolTip);
+                        cw.setText(labs.label);
+                        cw.setToolTip(labs.toolTip);
                         if (target instanceof ConicTarget) {
                             String s = _getTargetParamValueAsString((ConicTarget) target, p);
                             cw.setValue(s);
