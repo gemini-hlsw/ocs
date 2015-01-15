@@ -3,6 +3,7 @@ package edu.gemini.sp.vcs.diff
 import edu.gemini.pot.sp._
 import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.pot.sp.validator.{Validator, NodeCardinality, NodeType}
+import edu.gemini.spModel.core.ProgramIdGen
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.template.TemplateParameters
 

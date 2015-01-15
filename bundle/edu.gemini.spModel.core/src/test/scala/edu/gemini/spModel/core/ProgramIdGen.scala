@@ -1,4 +1,4 @@
-package edu.gemini.sp.vcs.diff
+package edu.gemini.spModel.core
 
 import edu.gemini.spModel.core.{Site, ProgramType, Semester, SPProgramID}
 import org.scalacheck.{Arbitrary, Gen}
