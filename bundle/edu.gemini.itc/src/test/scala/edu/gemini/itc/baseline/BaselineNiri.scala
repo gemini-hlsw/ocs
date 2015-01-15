@@ -10,15 +10,8 @@ import edu.gemini.itc.niri.{NiriParameters, NiriRecipe}
 object BaselineNiri {
 
   lazy val Observations =
-    (for {
-      odp  <- Observation.ImagingObservations
-      alt  <- Environment.AltairConfigurations
-      conf <- imagingConfigs()
-    } yield NiriObservation(odp, conf, alt)) ++
-    (for {
-      odp  <- Observation.SpectroscopyObservations
-      conf <- spectroscopyConfigs()
-    } yield NiriObservation(odp, conf, Environment.NoAltair))
+    specObs() ++
+    imgObs()
 
   lazy val Environments =
     for {
@@ -30,6 +23,13 @@ object BaselineNiri {
 
   def executeRecipe(e: Environment, o: NiriObservation): Output =
     cookRecipe(w => new NiriRecipe(e.src, o.odp, e.ocp, o.ins, e.tep, o.alt, e.pdp, w))
+
+  // imaging
+  private def imgObs() = for {
+    odp  <- Observation.ImagingObservations
+    alt  <- Environment.AltairConfigurations
+    conf <- imagingConfigs()
+  } yield NiriObservation(odp, conf, alt)
 
   private def imagingConfigs() = List(
     new NiriParameters(
@@ -48,6 +48,12 @@ object BaselineNiri {
       NiriParameters.HIGH_WELL_DEPTH,
       NiriParameters.NO_SLIT)
   )
+
+  // spectroscopy
+  private def specObs() = for {
+    odp  <- Observation.SpectroscopyObservations
+    conf <- spectroscopyConfigs()
+  } yield NiriObservation(odp, conf, Environment.NoAltair)
 
   private def spectroscopyConfigs() = List(
     new NiriParameters(

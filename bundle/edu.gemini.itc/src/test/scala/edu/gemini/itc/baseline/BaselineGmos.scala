@@ -11,16 +11,8 @@ object BaselineGmos {
 
   // Defines a set of valid observations for GMOS
   lazy val Observations =
-    // GMOS spectroscopy observations
-    (for {
-      odp <- Observation.SpectroscopyObservations
-      ins <- spectroscopyParams()
-    } yield GmosObservation(odp, ins)) ++
-    // GMOS imaging observations
-    (for {
-      odp <- Observation.ImagingObservations
-      ins <- imagingParams()
-    } yield GmosObservation(odp, ins))
+    specObs() ++
+    imgObs()
 
   lazy val Environments =
     for {
@@ -33,6 +25,11 @@ object BaselineGmos {
   def executeRecipe(e: Environment, o: GmosObservation): Output =
     cookRecipe(w => new GmosRecipe(e.src, o.odp, e.ocp, o.ins, e.tep, e.pdp, w))
 
+  // GMOS imaging observations
+  private def imgObs() = for {
+    odp <- Observation.ImagingObservations
+    ins <- imagingParams()
+  } yield GmosObservation(odp, ins)
 
   private def imagingParams() = List(
     new GmosParameters(
@@ -69,6 +66,12 @@ object BaselineGmos {
       "2",                        // HAMAMATSU CCD
       GmosParameters.GMOS_SOUTH)
   )
+
+  // GMOS spectroscopy observations
+  private def specObs() = for {
+    odp <- Observation.SpectroscopyObservations
+    ins <- spectroscopyParams()
+  } yield GmosObservation(odp, ins)
 
   private def spectroscopyParams() = List(
     new GmosParameters(
@@ -119,7 +122,6 @@ object BaselineGmos {
       "0.3",
       "2",                        // HAMAMATSU CCD
       GmosParameters.GMOS_NORTH)
-
   )
 
 }
