@@ -1079,20 +1079,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
                 service.setObjectType(null);
 
-                //if the object is an Id, set the appropriate type in
-                //the query, so we can attempt to narrow it.
-                //UPDATE: why set it only for IDs? Now we'll always set it.
-                //  if (_nameIsId(name)) {
-                NonSiderealTargetSupport.NonSiderealSystem system =
-                        (NonSiderealTargetSupport.NonSiderealSystem) _w.orbitalElementFormat.getSelectedItem();
-                if (system == _nonSiderealTargetSup.getNonSiderealSystem(ITarget.Tag.JPL_MINOR_BODY)) {
-                    service.setObjectType(HorizonsQuery.ObjectType.COMET);
-                } else if (system == _nonSiderealTargetSup.getNonSiderealSystem(ITarget.Tag.MPC_MINOR_PLANET)) {
-                    service.setObjectType(HorizonsQuery.ObjectType.MINOR_BODY);
-                } else if (system == _nonSiderealTargetSup.getNonSiderealSystem(ITarget.Tag.NAMED)) {
-                    service.setObjectType(HorizonsQuery.ObjectType.MAJOR_BODY);
+                ITarget.Tag tag = (ITarget.Tag) _w.orbitalElementFormat.getSelectedItem();
+                switch (tag) {
+                    case JPL_MINOR_BODY:   service.setObjectType(HorizonsQuery.ObjectType.COMET);
+                    case MPC_MINOR_PLANET: service.setObjectType(HorizonsQuery.ObjectType.MINOR_BODY);
+                    case NAMED:            service.setObjectType(HorizonsQuery.ObjectType.MAJOR_BODY);
                 }
-                //}
                 _nonSiderealTargetSup.ignoreResetCacheEvents(false);
 
                 HorizonsReply reply = service.execute();
@@ -1100,11 +1092,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 if (reply == null || reply.getReplyType() == HorizonsReply.ReplyType.MAJOR_PLANET) {
                     if (service.getObjectType() == HorizonsQuery.ObjectType.COMET) {
                         service.setObjectType(HorizonsQuery.ObjectType.MINOR_BODY);
-                        //DialogUtil.message("Couldn't find JPL Comet '" + name + "', will try querying for a JPL Minor Planet");
                         reply = service.execute();
                     } else if (service.getObjectType() == HorizonsQuery.ObjectType.MINOR_BODY) {
                         service.setObjectType(HorizonsQuery.ObjectType.COMET);
-                        // DialogUtil.message("Couldn't find JPL Minor Planet '" + name + "', will try querying for a JPL Comet");
                         reply = service.execute();
                     }
                 }
@@ -1179,21 +1169,21 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         case COMET: {
                             final ConicTarget target = newOrExistingTarget(ITarget.Tag.JPL_MINOR_BODY);
                             _nonSiderealTargetSup.showNonSiderealTarget(target);
-                            _w.orbitalElementFormat.setValue(_nonSiderealTargetSup.getNonSiderealSystems()[NonSiderealTargetSupport.JPL_COMET]);
+                            _w.orbitalElementFormat.setValue(ITarget.Tag.JPL_MINOR_BODY);
                             _curPos.setTarget(target);
                             }
                             break;
                         case MINOR_BODY: {
                             final ConicTarget target = newOrExistingTarget(ITarget.Tag.MPC_MINOR_PLANET);
                             _nonSiderealTargetSup.showNonSiderealTarget(target);
-                            _w.orbitalElementFormat.setValue(_nonSiderealTargetSup.getNonSiderealSystems()[NonSiderealTargetSupport.JPL_MINOR_PLANET]);
+                            _w.orbitalElementFormat.setValue(ITarget.Tag.MPC_MINOR_PLANET);
                             _curPos.setTarget(target);
                             }
                             break;
                         case MAJOR_BODY: {
                             final NamedTarget target = (oldTarget instanceof NamedTarget) ? (NamedTarget) oldTarget : new NamedTarget();
                             _nonSiderealTargetSup.showNonSiderealTarget(target);
-                            _w.orbitalElementFormat.setValue(_nonSiderealTargetSup.getNonSiderealSystems()[NonSiderealTargetSupport.MAJOR_PLANET]);
+                            _w.orbitalElementFormat.setValue(ITarget.Tag.NAMED);
                             _curPos.setTarget(target);
                             }
                             break;
@@ -2067,7 +2057,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                             OrbitalElements elements = reply.getOrbitalElements();
                             target.getAQ().setValue(elements.getValue(OrbitalElements.Name.QR));
                         }
-                        _w.orbitalElementFormat.setSelectedItem(_nonSiderealTargetSup.getNonSiderealSystem(ITarget.Tag.JPL_MINOR_BODY));
+                        _w.orbitalElementFormat.setSelectedItem(ITarget.Tag.JPL_MINOR_BODY);
                         _w.targetName.setText(name); //name is cleared if we move the element format
                         break;
 
@@ -2077,7 +2067,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                             OrbitalElements elements = reply.getOrbitalElements();
                             target.getAQ().setValue(elements.getValue(OrbitalElements.Name.A));
                         }
-                        _w.orbitalElementFormat.setSelectedItem(_nonSiderealTargetSup.getNonSiderealSystem(ITarget.Tag.MPC_MINOR_PLANET));
+                        _w.orbitalElementFormat.setSelectedItem(ITarget.Tag.JPL_MINOR_BODY.MPC_MINOR_PLANET);
                         _w.targetName.setText(name); //name is cleared if we move the element format
                         break;
 

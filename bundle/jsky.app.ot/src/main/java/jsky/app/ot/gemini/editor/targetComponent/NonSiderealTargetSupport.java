@@ -116,40 +116,6 @@ class NonSiderealTargetSupport {
     // array indexed by the constants above
     private NonSiderealTargetSupport.ConicTargetParamWidgets[] _conicWidgets;
 
-
-    // -- systems --
-
-    // Maps the display name to the system type and the GUI labels to use.
-    // Null labels are not used or displayed.
-    public static class NonSiderealSystem {
-        ITarget.Tag tag;
-        String displayName;
-        String[][] labels; // parameter labels/tooltips, indexed by param constants
-
-        public NonSiderealSystem(ITarget.Tag tag, String[][] labels, String displayValue) {
-            this.tag = tag;
-            this.labels = labels;
-            this.displayName = displayValue;
-        }
-
-        public String toString() {
-            return displayName;
-        }
-
-    }
-
-    // number of different non sidereal systems
-    private static int _systemCount = 0;
-
-    // System constants: Indexes into _nonSiderealSystems[] array.
-    public static final int JPL_COMET = _systemCount++;
-    public static final int JPL_MINOR_PLANET = _systemCount++;
-    public static final int MAJOR_PLANET = _systemCount++;
-
-
-    // array indexed by the constants above
-    private NonSiderealTargetSupport.NonSiderealSystem[] _nonSiderealSystems;
-
     // parameter labels and ToolTips for each system, indexed by [system][paramIndex][0] and
     // [system][paramIndex][1]
     private String[][][] _paramLabels;
@@ -175,7 +141,6 @@ class NonSiderealTargetSupport {
         _curPos = curPos;
         _initParamLabels();
         _initConicWidgets();
-        _initNonSiderealSystems();
     }
 
     /** Add the given listener to all the entry widgets */
@@ -245,68 +210,49 @@ class NonSiderealTargetSupport {
         }
     }
 
-    /**
-     * Get the available Non Sidereal Systems
-     */
-    public NonSiderealTargetSupport.NonSiderealSystem[] getNonSiderealSystems() {
-        return _nonSiderealSystems;
-    }
-
-    /**
-     * Return the ConicSystem associated to the given base
-     */
-
-    public NonSiderealTargetSupport.NonSiderealSystem getNonSiderealSystem(ITarget.Tag tag) {
-        for (NonSiderealTargetSupport.NonSiderealSystem s : _nonSiderealSystems) {
-            if (s.tag == tag) {
-                return s;
-            }
-        }
-        return null;
-    }
 
     // initialize the array of parameter labels for each system
     private void _initParamLabels() {
-        _paramLabels = new String[_systemCount][_paramCount][2];
+        _paramLabels = new String[ITarget.Tag.values().length][_paramCount][2];
 
-        _paramLabels[MAJOR_PLANET][EPOCHOFEL] = new String[]{null, null};
-        _paramLabels[MAJOR_PLANET][ORBINC] = new String[]{null, null};
-        _paramLabels[MAJOR_PLANET][LONGASCNODE] = new String[]{null, null};
-        _paramLabels[MAJOR_PLANET][LONGOFPERI] = new String[]{null, null};
-        _paramLabels[MAJOR_PLANET][ARGOFPERI] = new String[]{null, null};
-        _paramLabels[MAJOR_PLANET][MEANDIST] = new String[]{null, null};
-        _paramLabels[MAJOR_PLANET][PERIDIST] = new String[]{null, null};
-        _paramLabels[MAJOR_PLANET][ECCENTRICITY] = new String[]{null, null};
-        _paramLabels[MAJOR_PLANET][MEANLONG] = new String[]{null, null};
-        _paramLabels[MAJOR_PLANET][MEANANOM] = new String[]{null, null};
-        _paramLabels[MAJOR_PLANET][DAILYMOT] = new String[]{null, null};
-        _paramLabels[MAJOR_PLANET][EPOCHOFPERI] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.NAMED.ordinal()][EPOCHOFEL] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.NAMED.ordinal()][ORBINC] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.NAMED.ordinal()][LONGASCNODE] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.NAMED.ordinal()][LONGOFPERI] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.NAMED.ordinal()][ARGOFPERI] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.NAMED.ordinal()][MEANDIST] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.NAMED.ordinal()][PERIDIST] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.NAMED.ordinal()][ECCENTRICITY] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.NAMED.ordinal()][MEANLONG] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.NAMED.ordinal()][MEANANOM] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.NAMED.ordinal()][DAILYMOT] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.NAMED.ordinal()][EPOCHOFPERI] = new String[]{null, null};
 
-        _paramLabels[JPL_COMET][EPOCHOFEL] = new String[]{"EPOCH", "Orbital Element Epoch"};
-        _paramLabels[JPL_COMET][ORBINC] = new String[]{"IN", "Inclination"};
-        _paramLabels[JPL_COMET][LONGASCNODE] = new String[]{"OM", "Longitude of Ascending Node"};
-        _paramLabels[JPL_COMET][LONGOFPERI] = new String[]{null, null};
-        _paramLabels[JPL_COMET][ARGOFPERI] = new String[]{"W", "Argument of Perihelion"};
-        _paramLabels[JPL_COMET][MEANDIST] = new String[]{null, null};
-        _paramLabels[JPL_COMET][PERIDIST] = new String[]{"QR", "Perihelion Distance"};
-        _paramLabels[JPL_COMET][ECCENTRICITY] = new String[]{"EC", "Eccentricity"};
-        _paramLabels[JPL_COMET][MEANLONG] = new String[]{null, null};
-        _paramLabels[JPL_COMET][MEANANOM] = new String[]{null, null};
-        _paramLabels[JPL_COMET][DAILYMOT] = new String[]{null, null};
-        _paramLabels[JPL_COMET][EPOCHOFPERI] = new String[]{"TP", "Time of Perihelion Passage"};
+        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][EPOCHOFEL] = new String[]{"EPOCH", "Orbital Element Epoch"};
+        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][ORBINC] = new String[]{"IN", "Inclination"};
+        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][LONGASCNODE] = new String[]{"OM", "Longitude of Ascending Node"};
+        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][LONGOFPERI] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][ARGOFPERI] = new String[]{"W", "Argument of Perihelion"};
+        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][MEANDIST] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][PERIDIST] = new String[]{"QR", "Perihelion Distance"};
+        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][ECCENTRICITY] = new String[]{"EC", "Eccentricity"};
+        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][MEANLONG] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][MEANANOM] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][DAILYMOT] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.JPL_MINOR_BODY.ordinal()][EPOCHOFPERI] = new String[]{"TP", "Time of Perihelion Passage"};
 
-        _paramLabels[JPL_MINOR_PLANET][EPOCHOFEL] = new String[]{"EPOCH", "Orbital Element Epoch"};
-        _paramLabels[JPL_MINOR_PLANET][ORBINC] = new String[]{"IN", "Inclination"};
-        _paramLabels[JPL_MINOR_PLANET][LONGASCNODE] = new String[]{"OM", "Longitude of Ascending Node"};
-        _paramLabels[JPL_MINOR_PLANET][LONGOFPERI] = new String[]{null, null};
-        _paramLabels[JPL_MINOR_PLANET][ARGOFPERI] = new String[]{"W", "Argument of Perihelion"};
-        _paramLabels[JPL_MINOR_PLANET][MEANDIST] = new String[]{"A", "Semi-major Axis"};
-        _paramLabels[JPL_MINOR_PLANET][PERIDIST] = new String[]{null, null};
-        _paramLabels[JPL_MINOR_PLANET][ECCENTRICITY] = new String[]{"EC", "Eccentricity"};
-        _paramLabels[JPL_MINOR_PLANET][MEANLONG] = new String[]{null, null};
-        _paramLabels[JPL_MINOR_PLANET][MEANANOM] = new String[]{"MA", "Mean Anomaly"};
-        _paramLabels[JPL_MINOR_PLANET][DAILYMOT] = new String[]{null, null};
-        _paramLabels[JPL_MINOR_PLANET][EPOCHOFPERI] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][EPOCHOFEL] = new String[]{"EPOCH", "Orbital Element Epoch"};
+        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][ORBINC] = new String[]{"IN", "Inclination"};
+        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][LONGASCNODE] = new String[]{"OM", "Longitude of Ascending Node"};
+        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][LONGOFPERI] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][ARGOFPERI] = new String[]{"W", "Argument of Perihelion"};
+        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][MEANDIST] = new String[]{"A", "Semi-major Axis"};
+        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][PERIDIST] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][ECCENTRICITY] = new String[]{"EC", "Eccentricity"};
+        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][MEANLONG] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][MEANANOM] = new String[]{"MA", "Mean Anomaly"};
+        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][DAILYMOT] = new String[]{null, null};
+        _paramLabels[ITarget.Tag.MPC_MINOR_PLANET.ordinal()][EPOCHOFPERI] = new String[]{null, null};
 
     }
 
@@ -328,37 +274,22 @@ class NonSiderealTargetSupport {
     }
 
 
-    // initialize the array of Non Sidereal system information
-    private void _initNonSiderealSystems() {
-        _nonSiderealSystems = new NonSiderealTargetSupport.NonSiderealSystem[_systemCount];
-        _nonSiderealSystems[MAJOR_PLANET] = new NonSiderealTargetSupport.NonSiderealSystem(
-                ITarget.Tag.NAMED,
-                _paramLabels[MAJOR_PLANET], "Solar System Object");
-        _nonSiderealSystems[JPL_COMET] = new NonSiderealTargetSupport.NonSiderealSystem(
-                ITarget.Tag.JPL_MINOR_BODY,
-                _paramLabels[JPL_COMET], "JPL Comet");
-        _nonSiderealSystems[JPL_MINOR_PLANET] = new NonSiderealTargetSupport.NonSiderealSystem(
-                ITarget.Tag.MPC_MINOR_PLANET,
-                _paramLabels[JPL_MINOR_PLANET], "JPL Minor Planet");
-    }
-
-
     /**
      * Display the given target in the GUI
      * @param target the target position to display
      **/
     public void showNonSiderealTarget(NonSiderealTarget target) {
-        for(int i = 0; i < _systemCount; i++) {
-            final NonSiderealSystem nss = _nonSiderealSystems[i];
-            if (nss.tag == target.getTag()) {
+        for (ITarget.Tag tag: ITarget.Tag.values()) {
+            if (tag == target.getTag()) {
 
                 // Update all the conic parameter widgets
                 int row = 0;
                 int col = 0;
                 for (int i1 = 0; i1 < _paramCount; i1++) {
                     final ConicTargetParamWidgets cw = _conicWidgets[i1];
-                    final String label = nss.labels[i1][0];
-                    final String toolTip = nss.labels[i1][1];
+                    final String[][] labels = _paramLabels[tag.ordinal()];
+                    final String label = labels[i1][0];
+                    final String toolTip = labels[i1][1];
                     if (label != null) {
                         cw.setVisible(true);
                         cw.setText(label);
