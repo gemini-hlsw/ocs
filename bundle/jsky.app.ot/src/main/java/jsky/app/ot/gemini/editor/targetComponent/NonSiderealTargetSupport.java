@@ -10,7 +10,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
 
 //$Id: NonSiderealTargetSupport.java 7515 2006-12-28 18:04:41Z anunez $
@@ -33,7 +36,7 @@ class NonSiderealTargetSupport {
     // -- target parameters --
 
     // Groups together the widgets for one parameter for conic targets
-    private class ConicTargetParamWidgets {
+    private static class ConicTargetParamWidgets {
         private JLabel _label;
         private NumberBoxWidget _entry;
         private JLabel _units;
@@ -79,16 +82,16 @@ class NonSiderealTargetSupport {
         // 0 or 1 and is adjusted to make room for the _label, _entry, and units.
         // The row arg strarts at 0 and is adjusted according to the first row used
         // by the param widgets in the GUI (2).
-        public void setPos(int row, int col) {
+        public void setPos(TelescopeForm w, int row, int col) {
             col *= 3;
             row += 2;
-            _updateConstraints(_label, row, col++);
-            _updateConstraints(_entry, row, col++);
-            _updateConstraints(_units, row, col);
+            _updateConstraints(w, _label, row, col++);
+            _updateConstraints(w, _entry, row, col++);
+            _updateConstraints(w, _units, row, col);
         }
 
-        private void _updateConstraints(JComponent c, int row, int col) {
-            GridBagLayout layout = (GridBagLayout)_w.nonsiderealPW.getLayout();
+        private void _updateConstraints(TelescopeForm w, JComponent c, int row, int col) {
+            GridBagLayout layout = (GridBagLayout) w.nonsiderealPW.getLayout();
             GridBagConstraints contraints = layout.getConstraints(c);
             contraints.gridx = col;
             contraints.gridy = row;
@@ -111,8 +114,7 @@ class NonSiderealTargetSupport {
         EPOCHOFPERI
     }
 
-    // array indexed by the constants above
-    private NonSiderealTargetSupport.ConicTargetParamWidgets[] _conicWidgets;
+    private final Map<Param, ConicTargetParamWidgets> _conicWidgets;
 
     // parameter labels and ToolTips for each system, indexed by [system][paramIndex][0] and
     // [system][paramIndex][1]
@@ -130,21 +132,18 @@ class NonSiderealTargetSupport {
     // Current position being edited
     private SPTarget _curPos;
 
-
-    // ---
-
     // Initialize with the target list GUI class
     NonSiderealTargetSupport(TelescopeForm w, SPTarget curPos) {
         _w = w;
         _curPos = curPos;
         _initParamLabels();
-        _initConicWidgets();
+        _conicWidgets = mkConicWidgets(w);
     }
 
     /** Add the given listener to all the entry widgets */
     public void initListeners(TextBoxWidgetWatcher watcher) {
         for (Param p: Param.values()) {
-            _conicWidgets[p.ordinal()].getEntry().addWatcher(watcher);
+            _conicWidgets.get(p).getEntry().addWatcher(watcher);
         }
     }
 
@@ -161,7 +160,7 @@ class NonSiderealTargetSupport {
             return;
         }
         for (Param p: Param.values()) {
-            if (_conicWidgets[p.ordinal()].getEntry() == nbw) {
+            if (_conicWidgets.get(p).getEntry() == nbw) {
                 _setConicPos(target, p, value);
                 return;
             }
@@ -233,23 +232,22 @@ class NonSiderealTargetSupport {
 
     }
 
-    // initialize the array of widgets for each parameter
-    private void _initConicWidgets() {
-        _conicWidgets = new NonSiderealTargetSupport.ConicTargetParamWidgets[Param.values().length];
-        _conicWidgets[Param.EPOCHOFEL.ordinal()] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.epochofelLabel, _w.epochofel, _w.epochofelUnits);
-        _conicWidgets[Param.ORBINC.ordinal()] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.orbincLabel, _w.orbinc, _w.orbincUnits);
-        _conicWidgets[Param.LONGASCNODE.ordinal()] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.longascnodeLabel, _w.longascnode, _w.longascnodeUnits);
-        _conicWidgets[Param.LONGOFPERI.ordinal()] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.longofperiLabel, _w.longofperi, _w.longofperiUnits);
-        _conicWidgets[Param.ARGOFPERI.ordinal()] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.argofperiLabel, _w.argofperi, _w.argofperiUnits);
-        _conicWidgets[Param.MEANDIST.ordinal()] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.meandistLabel, _w.meandist, _w.meandistUnits);
-        _conicWidgets[Param.PERIDIST.ordinal()] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.peridistLabel, _w.peridist, _w.peridistUnits);
-        _conicWidgets[Param.ECCENTRICITY.ordinal()] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.eccentricityLabel, _w.eccentricity, _w.eccentricityUnits);
-        _conicWidgets[Param.MEANLONG.ordinal()] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.meanlongLabel, _w.meanlong, _w.meanlongUnits);
-        _conicWidgets[Param.MEANANOM.ordinal()] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.meananomLabel, _w.meananom, _w.meananomUnits);
-        _conicWidgets[Param.DAILYMOT.ordinal()] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.dailymotLabel, _w.dailymot, _w.dailymotUnits);
-        _conicWidgets[Param.EPOCHOFPERI.ordinal()] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.epochofperiLabel, _w.epochofperi, _w.epochofperiUnits);
+    private static Map<Param, ConicTargetParamWidgets> mkConicWidgets(TelescopeForm f) {
+        final Map<Param, ConicTargetParamWidgets> map = new HashMap<>();
+        map.put(Param.EPOCHOFEL,    new ConicTargetParamWidgets(f.epochofelLabel,    f.epochofel,    f.epochofelUnits));
+        map.put(Param.ORBINC,       new ConicTargetParamWidgets(f.orbincLabel,       f.orbinc,       f.orbincUnits));
+        map.put(Param.LONGASCNODE,  new ConicTargetParamWidgets(f.longascnodeLabel,  f.longascnode,  f.longascnodeUnits));
+        map.put(Param.LONGOFPERI,   new ConicTargetParamWidgets(f.longofperiLabel,   f.longofperi,   f.longofperiUnits));
+        map.put(Param.ARGOFPERI,    new ConicTargetParamWidgets(f.argofperiLabel,    f.argofperi,    f.argofperiUnits));
+        map.put(Param.MEANDIST,     new ConicTargetParamWidgets(f.meandistLabel,     f.meandist,     f.meandistUnits));
+        map.put(Param.PERIDIST,     new ConicTargetParamWidgets(f.peridistLabel,     f.peridist,     f.peridistUnits));
+        map.put(Param.ECCENTRICITY, new ConicTargetParamWidgets(f.eccentricityLabel, f.eccentricity, f.eccentricityUnits));
+        map.put(Param.MEANLONG,     new ConicTargetParamWidgets(f.meanlongLabel,     f.meanlong,     f.meanlongUnits));
+        map.put(Param.MEANANOM,     new ConicTargetParamWidgets(f.meananomLabel,     f.meananom,     f.meananomUnits));
+        map.put(Param.DAILYMOT,     new ConicTargetParamWidgets(f.dailymotLabel,     f.dailymot,     f.dailymotUnits));
+        map.put(Param.EPOCHOFPERI,  new ConicTargetParamWidgets(f.epochofperiLabel,  f.epochofperi,  f.epochofperiUnits));
+        return Collections.unmodifiableMap(map);
     }
-
 
     /**
      * Display the given target in the GUI
@@ -264,7 +262,7 @@ class NonSiderealTargetSupport {
                 int col = 0;
                 for (Param p: Param.values()) {
                     final int i1 = p.ordinal();
-                    final ConicTargetParamWidgets cw = _conicWidgets[i1];
+                    final ConicTargetParamWidgets cw = _conicWidgets.get(p);
                     final String[][] labels = _paramLabels[tag.ordinal()];
                     final String label = labels[i1][0];
                     final String toolTip = labels[i1][1];
@@ -276,7 +274,7 @@ class NonSiderealTargetSupport {
                             String s = _getTargetParamValueAsString((ConicTarget) target, p);
                             cw.setValue(s);
                         }
-                        cw.setPos(row, col++);
+                        cw.setPos(_w, row, col++);
                         if (col > 1) {
                             row++;
                             col = 0;
