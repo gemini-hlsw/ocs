@@ -1,6 +1,5 @@
 package edu.gemini.spModel.core
 
-import edu.gemini.spModel.core.{Site, ProgramType, Semester, SPProgramID}
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.Gen._
 

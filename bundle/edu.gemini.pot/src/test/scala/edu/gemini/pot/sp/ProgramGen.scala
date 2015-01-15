@@ -1,6 +1,5 @@
-package edu.gemini.sp.vcs.diff
+package edu.gemini.pot.sp
 
-import edu.gemini.pot.sp._
 import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.pot.sp.validator.{Validator, NodeCardinality, NodeType}
 import edu.gemini.spModel.core.ProgramIdGen
@@ -17,7 +16,7 @@ import scalaz._
 import Scalaz._
 
 /**
- *
+ * ScalaCheck generator for science programs.
  */
 object ProgramGen {
   type ProgFun[T] = (ISPFactory, ISPProgram) => T

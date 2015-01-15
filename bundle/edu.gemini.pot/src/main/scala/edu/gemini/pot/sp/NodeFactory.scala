@@ -1,6 +1,5 @@
-package edu.gemini.sp.vcs.diff
+package edu.gemini.pot.sp
 
-import edu.gemini.pot.sp._
 import edu.gemini.pot.sp.validator.NodeType
 import edu.gemini.spModel.gemini.init.ObservationNI
 

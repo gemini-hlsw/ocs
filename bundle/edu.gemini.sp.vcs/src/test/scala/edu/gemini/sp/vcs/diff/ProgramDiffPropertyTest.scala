@@ -1,6 +1,6 @@
 package edu.gemini.sp.vcs.diff
 
-import edu.gemini.pot.sp.{ISPNode, SPNodeKey, ISPFactory, ISPProgram}
+import edu.gemini.pot.sp.{SPNodeKey, ISPFactory, ISPProgram, ProgramGen}
 import edu.gemini.pot.sp.version._
 import edu.gemini.pot.spdb.DBLocalDatabase
 import edu.gemini.spModel.rich.pot.sp._
