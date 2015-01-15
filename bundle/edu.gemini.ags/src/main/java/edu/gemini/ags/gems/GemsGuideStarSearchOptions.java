@@ -1,10 +1,10 @@
 package edu.gemini.ags.gems;
 
 import edu.gemini.catalog.api.MagnitudeConstraints;
-import edu.gemini.skycalc.Angle;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.core.Angle;
 import edu.gemini.spModel.gemini.gems.Canopus;
 import edu.gemini.spModel.gemini.gems.GemsInstrument;
 import edu.gemini.spModel.gems.GemsGuideProbeGroup;
@@ -122,7 +122,6 @@ public class GemsGuideStarSearchOptions {
     private String nirCatalog = DEFAULT_CATALOG;
     private GemsInstrument instrument;
     private GemsTipTiltMode tipTiltMode;
-    private Magnitude.Band nirBand = NirBandChoice.DEFAULT.getBand();
     private Set<Angle> posAngles = new HashSet<>();
 
 
@@ -171,17 +170,6 @@ public class GemsGuideStarSearchOptions {
     public GemsGuideStarSearchOptions setInstrument(final GemsInstrument instrument) {
         GemsGuideStarSearchOptions o = copy();
         o.instrument = instrument;
-        return o;
-    }
-
-    /**
-     *
-     * @param posAngles
-     * @return a copy of this instance with the given posAngles
-     */
-    public GemsGuideStarSearchOptions setPosAngles(final Set<Angle> posAngles) {
-        GemsGuideStarSearchOptions o = copy();
-        o.posAngles = posAngles;
         return o;
     }
 

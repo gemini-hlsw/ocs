@@ -1,5 +1,6 @@
 package jsky.app.ot.tpe;
 
+import edu.gemini.ags.gems.*;
 import edu.gemini.ags.gems.mascot.Strehl;
 import edu.gemini.ags.gems.mascot.MascotProgress;
 import edu.gemini.skycalc.Angle;
@@ -12,11 +13,6 @@ import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.gemini.gems.GemsInstrument;
 import edu.gemini.spModel.gems.GemsTipTiltMode;
-import edu.gemini.ags.gems.GemsCatalog;
-import edu.gemini.ags.gems.GemsCatalogResults;
-import edu.gemini.ags.gems.GemsCatalogSearchResults;
-import edu.gemini.ags.gems.GemsGuideStarSearchOptions;
-import edu.gemini.ags.gems.GemsGuideStars;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
@@ -248,9 +244,14 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
 
             SPInstObsComp inst = obsContext.getInstrument();
 
+            Set<edu.gemini.spModel.core.Angle> angles = new HashSet<>();
+            for (Angle a: posAngles) {
+                angles.add(GemsUtils4Java.toNewAngle(a));
+            }
+
             GemsInstrument instrument = inst instanceof Flamingos2 ? GemsInstrument.flamingos2 : GemsInstrument.gsaoi;
             GemsGuideStarSearchOptions options = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog,
-                    instrument, tipTiltMode, posAngles);
+                    instrument, tipTiltMode, angles);
 
             List<GemsCatalogSearchResults> results = new GemsCatalog().search(obsContext, base, options, nirBand, statusLogger);
             if (interrupted) {

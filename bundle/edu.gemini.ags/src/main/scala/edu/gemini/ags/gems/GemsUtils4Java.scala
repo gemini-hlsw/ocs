@@ -9,6 +9,7 @@ import edu.gemini.spModel.core._
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.shared.skyobject
+import edu.gemini.skycalc
 import scala.math._
 import scala.collection.JavaConverters._
 
@@ -53,6 +54,8 @@ object GemsUtils4Java {
   def translateBands(bands: java.util.Set[skyobject.Magnitude.Band]): java.util.Set[MagnitudeBand] = bands.asScala.map(_.toNewModel).asJava
 
   def toOldBand(band: MagnitudeBand): skyobject.Magnitude.Band = band.toOldModel
+
+  def toNewAngle(angle: skycalc.Angle): Angle = angle.toNewModel
 
   /**
    * Sorts the targets list, putting the brightest stars first and returns the sorted array.

@@ -182,7 +182,7 @@ public class GemsCatalogResultsTest  implements MascotProgress {
         String nirCatalog = GemsGuideStarSearchOptions.DEFAULT_CATALOG;
         GemsInstrument instrument = inst instanceof Flamingos2 ? GemsInstrument.flamingos2 : GemsInstrument.gsaoi;
 
-        Set<Angle> posAngles = new HashSet<Angle>();
+        Set<Angle> posAngles = new HashSet<>();
         posAngles.add(obsContext.getPositionAngle());
         posAngles.add(new Angle(0., Angle.Unit.DEGREES));
 //        posAngles.add(new Angle(90., Angle.Unit.DEGREES));
@@ -190,7 +190,7 @@ public class GemsCatalogResultsTest  implements MascotProgress {
 //        posAngles.add(new Angle(270., Angle.Unit.DEGREES));
 
         GemsGuideStarSearchOptions options = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog,
-                instrument, tipTiltMode, posAngles);
+                instrument, tipTiltMode, null);
 
         List<GemsCatalogSearchResults> results = new GemsCatalog().search(obsContext, base, options, None.<Magnitude.Band>instance(), null);
         if (options.getTipTiltMode() == GemsTipTiltMode.both) {

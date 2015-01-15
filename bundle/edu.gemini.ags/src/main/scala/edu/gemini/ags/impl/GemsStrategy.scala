@@ -179,7 +179,7 @@ object GemsStrategy extends AgsStrategy {
     val gemsInstrument = {
       (ctx.getInstrument.getType == SPComponentType.INSTRUMENT_GSAOI)? GemsInstrument.gsaoi | GemsInstrument.flamingos2
     }
-    val gemsOptions = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog, gemsInstrument, tipTiltMode, posAngles.map(_.toOldModel).asJava)
+    val gemsOptions = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog, gemsInstrument, tipTiltMode, posAngles.asJava)
 
     // Create the base position.
     val baseCoords = ctx.getBaseCoordinates
