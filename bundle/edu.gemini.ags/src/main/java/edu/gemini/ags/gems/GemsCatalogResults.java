@@ -181,7 +181,7 @@ public class GemsCatalogResults {
             if (!guideProbeTargets.isEmpty()) {
                 final GuideGroup guideGroup = GuideGroup.create(None.<String>instance(), DefaultImList.create(guideProbeTargets));
                 final GemsStrehl gemsStrehl = new GemsStrehl(strehl.avgstrehl(), strehl.rmsstrehl(), strehl.minstrehl(), strehl.maxstrehl());
-                final GemsGuideStars gemsGuideStars = new GemsGuideStars(posAngle, tiptiltGroup, gemsStrehl, guideGroup);
+                final GemsGuideStars gemsGuideStars = new GemsGuideStars(GemsUtils4Java.toNewAngle(posAngle), tiptiltGroup, gemsStrehl, guideGroup);
                 result.add(gemsGuideStars);
             }
         }

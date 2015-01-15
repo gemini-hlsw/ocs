@@ -140,7 +140,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         TpeContext ctx = tpe.getContext();
         SPInstObsComp inst = ctx.instrument().orNull();
         if (inst != null) {
-            inst.setPosAngleDegrees(gemsGuideStars.getPa().toDegrees().getMagnitude());
+            inst.setPosAngleDegrees(gemsGuideStars.getPa().toDegrees());
             ctx.instrument().commit();
         }
 
@@ -171,7 +171,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
                     // Set position angle only for first (primary) group
                     final SPInstObsComp inst = ctx.instrument().orNull();
                     if (inst != null) {
-                        inst.setPosAngle(gemsGuideStars.getPa().toDegrees().getMagnitude());
+                        inst.setPosAngle(gemsGuideStars.getPa().toDegrees());
                         ctx.instrument().commit();
                     }
                 }
@@ -331,7 +331,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         if (gemsGuideStarsList.size() == 0) {
             return gemsGuideStarsList;
         }
-        Angle angle = gemsGuideStarsList.get(0).getPa();
+        Angle angle = Angle.degrees(gemsGuideStarsList.get(0).getPa().toDegrees());
         List<GemsGuideStars> result = new ArrayList<>(gemsGuideStarsList.size());
         for (GemsGuideStars gemsGuideStars : gemsGuideStarsList) {
             if (angle.equals(gemsGuideStars.getPa())) {

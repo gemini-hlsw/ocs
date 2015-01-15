@@ -771,7 +771,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         if (list.size() == 0) {
             return "";
         }
-        return "Pos Angle: " + NF.format(list.get(0).getPa().getMagnitude());
+        return "Pos Angle: " + NF.format(list.get(0).getPa().toDegrees());
     }
 
 

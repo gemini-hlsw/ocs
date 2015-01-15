@@ -65,11 +65,11 @@ public class GemsCatalogResultsTest  implements MascotProgress {
 
         assertTrue(!results.isEmpty());
         GemsGuideStars result = results.get(0);
-        assertEquals(0.0, result.getPa().toDegrees().getMagnitude(), 0.0001);
+        assertEquals(0.0, result.getPa().toDegrees(), 0.0001);
         assertEquals("CWFS", result.getTiptiltGroup().getKey());
 
         ObsContext obsContext = ObsContext.create(null, inst, None.<Site>instance(), null, null, null);
-        assertEquals(10.589586438901101* GemsCatalogResults.getStrehlFactor(new Some<ObsContext>(obsContext)),
+        assertEquals(10.589586438901101* GemsCatalogResults.getStrehlFactor(new Some<>(obsContext)),
                 result.getStrehl().getAvg(), 0.001);
 
         GuideGroup group = result.getGuideGroup();
