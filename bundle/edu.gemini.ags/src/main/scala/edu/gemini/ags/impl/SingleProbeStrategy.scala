@@ -29,7 +29,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
     params.magnitudeCalc(ctx, mt).toList.map(params.guideProbe -> _)
 
   def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] =
-    List(AgsAnalysis.analysis(ctx, mt, params.guideProbe))
+    AgsAnalysis.analysis(ctx, mt, params.guideProbe).toList
 
   def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SkyObject])]] = {
     val empty = List((params.guideProbe: GuideProbe, List.empty[SkyObject]))
