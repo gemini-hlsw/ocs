@@ -1,6 +1,6 @@
 package edu.gemini.sp.vcs.diff
 
-import edu.gemini.pot.sp.{SPNodeKey, ISPFactory, ISPProgram}
+import edu.gemini.pot.sp.{ISPNode, SPNodeKey, ISPFactory, ISPProgram}
 import edu.gemini.pot.sp.version._
 import edu.gemini.pot.spdb.DBLocalDatabase
 import edu.gemini.spModel.rich.pot.sp._
@@ -180,7 +180,7 @@ class ProgramDiffPropertyTest extends JUnitSuite with Checkers {
         val progs  = List(start,   local,   remote)
         titles.zip(progs).foreach { case (title, prog) =>
           println(s"\n$title")
-          println(prog)
+          println(drawNodeTree(prog))
         }
       }
 
