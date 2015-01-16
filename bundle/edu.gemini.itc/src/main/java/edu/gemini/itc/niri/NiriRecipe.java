@@ -6,75 +6,13 @@
 //
 package edu.gemini.itc.niri;
 
-import java.io.PrintWriter;
-
-import java.util.Enumeration;
-
-import java.awt.Image;
-import java.awt.image.BufferedImage;
+import edu.gemini.itc.altair.*;
+import edu.gemini.itc.operation.*;
+import edu.gemini.itc.parameters.*;
+import edu.gemini.itc.shared.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
-import edu.gemini.itc.shared.ArraySpectrum;
-import edu.gemini.itc.shared.BlackBodySpectrum;
-import edu.gemini.itc.shared.DefaultArraySpectrum;
-import edu.gemini.itc.shared.EmissionLineSpectrum;
-import edu.gemini.itc.shared.FormatStringWriter;
-import edu.gemini.itc.shared.Instrument;
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.Gaussian;
-import edu.gemini.itc.shared.Recipe;
-import edu.gemini.itc.shared.RecipeBase;
-import edu.gemini.itc.shared.SampledSpectrumVisitor;
-import edu.gemini.itc.shared.SEDFactory;
-import edu.gemini.itc.shared.VisitableSampledSpectrum;
-import edu.gemini.itc.shared.WavebandDefinition;
-import edu.gemini.itc.shared.ITCImageFileIO;
-import edu.gemini.itc.shared.ITCMultiPartParser;
-import edu.gemini.itc.shared.ServerInfo;
-import edu.gemini.itc.shared.ITCChart;
-import edu.gemini.itc.shared.SEDCombination;
-import edu.gemini.itc.shared.StopWatch;
-
-import edu.gemini.itc.altair.Altair;
-import edu.gemini.itc.altair.AltairBackgroundVisitor;
-import edu.gemini.itc.altair.AltairFluxAttenuationVisitor;
-import edu.gemini.itc.altair.AltairParameters;
-import edu.gemini.itc.altair.AltairTransmissionVisitor;
-
-//import edu.gemini.itc.operation.ChartDataSource;
-//import edu.gemini.itc.operation.ChartCreatePNG;
-//import edu.gemini.itc.operation.ChartCreate;
-
-import edu.gemini.itc.parameters.ObservingConditionParameters;
-import edu.gemini.itc.parameters.ObservationDetailsParameters;
-import edu.gemini.itc.parameters.SourceDefinitionParameters;
-import edu.gemini.itc.parameters.TeleParameters;
-import edu.gemini.itc.parameters.PlottingDetailsParameters;
-
-import edu.gemini.itc.operation.ResampleVisitor;
-import edu.gemini.itc.operation.RedshiftVisitor;
-import edu.gemini.itc.operation.AtmosphereVisitor;
-import edu.gemini.itc.operation.TelescopeApertureVisitor;
-import edu.gemini.itc.operation.TelescopeTransmissionVisitor;
-import edu.gemini.itc.operation.TelescopeBackgroundVisitor;
-import edu.gemini.itc.operation.NormalizeVisitor;
-import edu.gemini.itc.operation.CloudTransmissionVisitor;
-import edu.gemini.itc.operation.WaterTransmissionVisitor;
-//import edu.gemini.itc.operation.ChartVisitor;
-import edu.gemini.itc.operation.PeakPixelFluxCalc;
-import edu.gemini.itc.operation.SpecS2NVisitor;
-import edu.gemini.itc.operation.SlitThroughput;
-import edu.gemini.itc.operation.ImageQualityCalculatable;
-import edu.gemini.itc.operation.ImageQualityCalculation;
-import edu.gemini.itc.operation.ImageQualityCalculationFactory;
-import edu.gemini.itc.operation.SourceFractionCalculationFactory;
-import edu.gemini.itc.operation.SourceFractionCalculatable;
-import edu.gemini.itc.operation.ImagingS2NCalculationFactory;
-import edu.gemini.itc.operation.ImagingS2NCalculatable;
-import edu.gemini.itc.operation.Calculatable;
-
+import java.io.PrintWriter;
 import java.util.Calendar;
 
 /**
@@ -738,57 +676,57 @@ public final class NiriRecipe extends RecipeBase {
 			 * //NiriChart.setName("");
 			 * NiriChart.setYaxisTitle("e- per exposure per spectral pixel");
 			 * NiriChart.setSpectrum(specS2N.getSignalSpectrum());
-			 * 
+			 *
 			 * NiriChart.setSeriesName("SQRT(Background)  ");
 			 * NiriChart.addSpectrum(specS2N.getBackgroundSpectrum());
 			 * specS2N.getBackgroundSpectrum().accept(NiriChart);
 			 * //_println(NiriChart.getTag()); _println(NiriChart.getImage(),
 			 * "SigAndBack"); _println("");
-			 * 
+			 *
 			 * sigSpec = _printSpecTag("ASCII signal spectrum"); backSpec =
 			 * _printSpecTag("ASCII background spectrum");
-			 * 
-			 * 
-			 * 
+			 *
+			 *
+			 *
 			 * NiriChart.setSeriesName("Single Exp S/N  ");
 			 * NiriChart.setName("Intermediate Single Exp and Final S/N");
 			 * NiriChart.setYaxisTitle("Signal / Noise per spectral pixel");
-			 * 
+			 *
 			 * NiriChart.setSpectrum(specS2N.getExpS2NSpectrum());
-			 * 
+			 *
 			 * NiriChart.setSeriesName("Final S/N  ");
 			 * NiriChart.addSpectrum(specS2N.getFinalS2NSpectrum());
 			 * specS2N.getFinalS2NSpectrum().accept(NiriChart);
 			 * //_println(NiriChart.getTag()); _println(NiriChart.getImage(),
 			 * "SigAndBack"); _println("");
-			 * 
+			 *
 			 * singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
 			 * finalS2N = _printSpecTag("Final S/N ASCII data");
 			 */
 
 			/*
 			 * SATURATION LEVEL
-			 * 
+			 *
 			 * NiriChart.addArray(SEDCombination.combine(specS2N.getSignalSpectrum
 			 * (
 			 * ),specS2N.getBackgroundSpectrum_wo_sqrt(),SEDCombination.ADD).getData
 			 * (), "Signal + Background");
 			 * NiriChart.addTitle("Total Signal + background");
-			 * 
+			 *
 			 * NiriChart.addxAxisLabel("Wavelength (nm)");
 			 * NiriChart.addyAxisLabel("e- per exposure per spectral pixel");
-			 * 
+			 *
 			 * NiriChart.addHorizontalLine(instrument.getWellDepth()*.8,
 			 * java.awt.Color.BLACK, "80% full well");
 			 * NiriChart.addHorizontalLine(instrument.getWellDepth(),
 			 * java.awt.Color.BLACK, "Saturation Level");
-			 * 
+			 *
 			 * _println(NiriChart.getBufferedImage(), "SigPlusBack");
 			 * _println("");
-			 * 
+			 *
 			 * //sigSpec =
 			 * _printSpecTag("ASCII signal plus Background spectrum");
-			 * 
+			 *
 			 * NiriChart.flush();
 			 */
             NiriChart
