@@ -462,7 +462,7 @@ object MascotUtils {
     val zp = DenseVector(-11.37, -11.18, -11.42, -11.76, -12.08)
 
     // photometric zeropoints in W/cm2/mic
-    val zpv = 21.8; // mag V per square arcsec at darkest
+    val zpv = 21.8 // mag V per square arcsec at darkest
     val msky = Array(
       DenseVector(0.0, 0.8, 0.0, -0.9, -1.9) + zpv, // darkest
       DenseVector(-1.5, 0.2, 0.0, -0.8, -1.6) + (zpv - 0.6), // 50%
@@ -478,14 +478,14 @@ object MascotUtils {
     for (i <- 0 until 4) {
       val f1 = YUtils.pow(10.0, msky(i) * -0.4 + zp) // f en W/cm2/mic
       val f2 = (f1 :/ divide(h * c, cw)) * math.Pi * (math.pow(400.0, 2) - math.pow(50.0, 2)) // f in N_photon/pup_gemini/s/mic
-      val f = f2 * 0.1; //f in N_photon/pup_gemini/s/100nm
+      val f = f2 * 0.1 //f in N_photon/pup_gemini/s/100nm
       val tab1 = grow(f, f(f.size - 1))
       val tab2 = grow(cw, 1100e-9)
       val sp = tspline(8, tab1, tab2, lvec)
       res(i) = (sp :* qeapd).sum
     }
 
-    (res * (math.Pi * math.pow(ttwfs_aper_radius, 2.0))) * zero_point_fudge; // for the TT wfs field stop
+    (res * (math.Pi * math.pow(ttwfs_aper_radius, 2.0))) * zero_point_fudge // for the TT wfs field stop
   }
 
 

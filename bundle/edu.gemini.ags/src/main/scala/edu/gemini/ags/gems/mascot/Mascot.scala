@@ -25,14 +25,14 @@ object Mascot {
       print(", [%.1f,%.1f]" format (s.stars(i).x, s.stars(i).y))
     }
     println("\nStrehl over %.1f\": avg=%.1f  rms=%.1f  min=%.1f  max=%.1f\n" format (
-      s.halffield * 2, (s.avgstrehl * 100), (s.rmsstrehl * 100), (s.minstrehl * 100), (s.maxstrehl * 100)))
+      s.halffield * 2, s.avgstrehl * 100, s.rmsstrehl * 100, s.minstrehl * 100, s.maxstrehl * 100))
   }
 
   // The default mag bandpass
   val defaultBandpass:MagnitudeBand = MagnitudeBand.R
 
   // multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
-  val defaultFactor = 1.0;
+  val defaultFactor = 1.0
 
   /**
    * Performs the strehl algorithm on the given 1, 2 or 3 stars (2 and 3 are optional)
@@ -53,7 +53,10 @@ object Mascot {
       //          window,3;
       //          disp_strehl_map,sdata;
 
-      val starList = for (s <- List(n1, n2, n3); if (s != null)) yield s
+      val starList = for {
+          s <- List(n1, n2, n3)
+          if s != null
+        } yield s
       Strehl(starList, bandpass, factor)
     }
   }
@@ -199,18 +202,18 @@ object Mascot {
     do {
       for (i <- 0 until ns - 1) {
         // for each star, look at the distance to next (fainter) stars:
-        val dd = abs(starMat(0, ::).toDenseVector - starMat(0, i), starMat(1, ::).toDenseVector - starMat(1, i));
-        val ok = dd.mapValues(d => if (d >= crowd_rad) 1.0 else 0.0);
-        valid(i + 1 until valid.size) :*= ok(i + 1 until ok.size);
+        val dd = abs(starMat(0, ::).toDenseVector - starMat(0, i), starMat(1, ::).toDenseVector - starMat(1, i))
+        val ok = dd.mapValues(d => if (d >= crowd_rad) 1.0 else 0.0)
+        valid(i + 1 until valid.size) :*= ok(i + 1 until ok.size)
       }
-      crowd_rad += 2;
-    } while (valid.sum > nstar_limit);
-    crowd_rad -= 2;
+      crowd_rad += 2
+    } while (valid.sum > nstar_limit)
+    crowd_rad -= 2
 
     println("Select stars: found optimum crowding radius=%d\"\n" format crowd_rad)
 
     starList.zipWithIndex collect {
-      case (s, i) if (valid(i) != 0.0) => s
+      case (s, i) if valid(i) != 0.0 => s
     }
   }
 
@@ -224,6 +227,5 @@ object Mascot {
     else
       sall.sortWith((s1, s2) => s1.avgstrehl > s2.avgstrehl)
   }
-
 
 }

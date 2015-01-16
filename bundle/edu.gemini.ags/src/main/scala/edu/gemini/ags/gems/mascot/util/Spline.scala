@@ -408,12 +408,12 @@ object Spline {
     // Porting note: parameter names start with p here, since they are reassigned later.
     // Since some variables are also reassigned, sometimes with different data types, new 'vals'
     // were introduced instead. For example, val dx = ...;  val dx_2 = dx + ...
-    val l = digitize(xp, px).toSeq; // index of lower boundary of interval containing xp
+    val l = digitize(xp, px).toSeq // index of lower boundary of interval containing xp
     val u = add(l, 1)
 
     // extend x so that l and u can be used as index lists --
     // be careful not to make new intervals larger than necessary
-    val n = px.size - 1; // number of original intervals
+    val n = px.size - 1 // number of original intervals
     val dxavg = (px(px.size - 1) - px(0)) / n
     val dx0 = if (dxavg > 0.0) math.max(xp.max - px(px.size - 1), dxavg) else math.min(xp.min - px(px.size - 1), dxavg)
     val dx1 = if (dxavg > 0.0) math.max(px(0) - xp.min, dxavg) else math.min(px(0) - xp.max, dxavg)
@@ -448,7 +448,7 @@ object Spline {
     val yl = y(l).toDenseVector
     val dydx = (y(u).toDenseVector - yl) :/ dx_2
 
-    val km2 = divide(1.0, (k :* k))
+    val km2 = divide(1.0, k :* k)
     km2(0) = 0.0
     km2(km2.size - 1) = 0.0
     val km2_2 = km2(l).toDenseVector

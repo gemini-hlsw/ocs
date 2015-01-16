@@ -47,7 +47,7 @@ object StrehlContourPlotTest {
     setPreferredSize(new Dimension(plot.getWidth, plot.getHeight))
 
     override def paint(g: Graphics) {
-        val g2d = g.asInstanceOf[Graphics2D];
+        val g2d = g.asInstanceOf[Graphics2D]
         val trans = AffineTransform.getScaleInstance(1.0, -1.0)
         trans.translate(0.0, -plot.getHeight)
         g2d.drawRenderedImage(plot, trans)
@@ -57,8 +57,8 @@ object StrehlContourPlotTest {
   // Displays a message dialog containing a contour plot of the given Strehl object, for testing.
   def displayTest(s: Strehl) {
     val ret = StrehlContourPlot.create(s, 300)
-    val c = new FlipyComponent(ret);
-    JOptionPane.showMessageDialog(null, c);
+    val c = new FlipyComponent(ret)
+    JOptionPane.showMessageDialog(null, c)
   }
 
   def main(args: Array[String]) {

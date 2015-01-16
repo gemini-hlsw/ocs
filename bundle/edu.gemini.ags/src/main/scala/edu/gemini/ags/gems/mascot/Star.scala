@@ -46,15 +46,15 @@ object Star {
    * Returns the (x, y) offsets (in arcsec) from the center position for the given (ra, dec) (deg)
    */
   private def calculateXy(ra: Double, dec: Double, raCenter: Double, decCenter: Double): (Double, Double) = {
-    val distStarX = (raCenter - ra) * 3600.0;
-    val decRad = dec * math.Pi / 180.0;
-    val distStarY = (dec - decCenter) * 3600.0;
+    val distStarX = (raCenter - ra) * 3600.0
+    val decRad = dec * math.Pi / 180.0
+    val distStarY = (dec - decCenter) * 3600.0
     (distStarX * math.cos(decRad), distStarY)
   }
 
   // Calculates and returns (m, rmag) based on the given mag values
   private def calculateM(bmag: Double, vmag: Double, rmag: Double): (Double, Double) = {
-    var m = 0;
+    var m = 0
     var rmag2 = rmag
     if (rmag == invalidMag) {
       if (vmag != invalidMag && bmag != invalidMag) {

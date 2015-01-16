@@ -182,7 +182,7 @@ object YUtils {
     for (i <- 0 until a.size) {
       result(i) = Array.ofDim[DenseMatrix[Double]](a(i).size)
       for (j <- 0 until a(i).size) {
-        result(i)(j) = ((a(i)(j)) :^ d)
+        result(i)(j) = (a(i)(j) :^ d)
       }
     }
     result
@@ -508,7 +508,7 @@ object YUtils {
    */
   def where(v: DenseVector[Double], f: Double => Boolean): Array[Int] = {
     v.toArray.zipWithIndex collect {
-      case (d, i) if f(d) => i
+      case (d, j) if f(d) => j
     }
   }
 
