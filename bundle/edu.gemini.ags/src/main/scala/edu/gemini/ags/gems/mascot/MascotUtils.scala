@@ -47,16 +47,9 @@ object MascotUtils {
 
 
   // Returns true if the 3 (or at least 2) positions can be used
-  def doesItFit(n1: Star, n2: Star, n3: Star = null): Boolean = {
-    if (n3 == null) {
-      //      d = slist(1:2,1)-slist(1:2,2);
-      //      d = sqrt(sum(d^2.));
-      val d = math.sqrt((DenseVector(n1.y - n2.y, n1.x - n2.x) :^ 2.0).sum)
-      //      if (d<=(120-2*edge_margin)) return 1;
-      //      else return 0;
-      d <= (120 - 2 * edge_margin)
-    } else {
-      //  d = array(0.,[3,300,300,nstars]);
+  def doesItFit(n1: Star, n2: Star, n3: Option[Star] = None): Boolean = {
+    n3.map{ v3 =>
+            //  d = array(0.,[3,300,300,nstars]);
       //  for (ns=1;ns<=3;ns++) {
       //    d(,,ns) = dist(300,xc=150+slist(1,ns),yc=150+slist(2,ns));
       //  }
@@ -67,10 +60,17 @@ object MascotUtils {
       val r = size / 2
       val d1 = dist(size, r + n1.y, r + n1.x)
       val d2 = dist(size, r + n2.y, r + n2.x)
-      val d3 = dist(size, r + n3.y, r + n3.x)
+      val d3 = dist(size, r + v3.y, r + v3.x)
       val dmin = util.YUtils.max(util.YUtils.max(d1, d2), d3).min
 
       dmin < 60 - edge_margin
+    }.getOrElse {
+      //      d = slist(1:2,1)-slist(1:2,2);
+      //      d = sqrt(sum(d^2.));
+      val d = math.sqrt((DenseVector(n1.y - n2.y, n1.x - n2.x) :^ 2.0).sum)
+      //      if (d<=(120-2*edge_margin)) return 1;
+      //      else return 0;
+      d <= (120 - 2 * edge_margin)
     }
   }
 

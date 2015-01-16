@@ -8,7 +8,7 @@ import Amoeba._
 import edu.gemini.spModel.core.MagnitudeBand
 import util.Spline._
 import util.YUtils._
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 // mascot Strehl compute/optimize using distortion modes
 // instead of quadratic/tt phase (original method).
@@ -57,7 +57,7 @@ case class Strehl private (avgstrehl: Double,
              stars: List[Star]) {
 
   def getStars : java.util.List[Star] = {
-    stars.toList
+    stars.asJava
   }
 
   override def toString = "Strehl: avgstrehl=" + avgstrehl +
@@ -526,14 +526,12 @@ object Strehl {
       case 1 => Array(x * 0.0 + 1.0, x * 0.0)
       case 2 => Array(x * 0.0, x * 0.0 + 1.0)
       case 3 => Array(x / 100.0, y / 100.0)
-      case 4 => {
+      case 4 =>
         val tmp = (2.0 * math.sqrt(6.0) / 4.0 / math.sqrt(3.0)) / 100.0
         Array(y * tmp, x * tmp)
-      }
-      case 5 => {
+      case 5 =>
         val tmp = (2.0 * math.sqrt(6.0) / 4.0 / math.sqrt(3.0)) / 100.0
         Array(x * tmp, y * -tmp)
-      }
       case _ => throw new IllegalArgumentException("Expected 1 to 5")
     }
   }

@@ -232,8 +232,8 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
         new SwingWorker() {
             public Object construct() {
                 try {
-                    Strehl strehl = computeStrehlFromTargetList(targetList, guideProbeType);
-                    return new Trio<Strehl, TpeMessage, ContourPlot>(strehl, makeStrehlMessage(strehl), makeContourPlot(strehl));
+                    scala.Option<Strehl> strehl = computeStrehlFromTargetList(targetList, guideProbeType);
+                    return new Trio<>(strehl, makeStrehlMessage(strehl), makeContourPlot(strehl));
                 } catch (Exception e) {
                     e.printStackTrace();
                     return new Trio<Strehl, TpeMessage, ContourPlot>(null,
@@ -305,9 +305,12 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
 
 
     // Creates and returns a ContourPlot (BufferedImage subclass) containing the contour plot
-    private ContourPlot makeContourPlot(Strehl strehl) {
-        if (strehl == null || !getShowStrehlMap()) return null;
-        return StrehlContourPlot.create(strehl, getContourPlotSize());
+    private ContourPlot makeContourPlot(scala.Option<Strehl> strehl) {
+        if (strehl.isEmpty() || !getShowStrehlMap()) {
+            return null;
+        } else {
+            return StrehlContourPlot.create(strehl.get(), getContourPlotSize());
+        }
     }
 
     // Returns the size of the contour plot in pixels (plot will be size x size pixels)
@@ -374,12 +377,12 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
 
     // Returns a Strehl object calculated by the mascot algorithm based on the given
     // list of 1 to 3 stars (any fourth star is ignored).
-    private Strehl computeStrehlFromTargetList(List<SPTarget> targetList, GuideProbe.Type type) {
+    private scala.Option<Strehl> computeStrehlFromTargetList(List<SPTarget> targetList, GuideProbe.Type type) {
         if (targetList.size() == 0) return null;
         Star[] starList = targetListToStarList(targetList);
 
         double factor = GemsCatalogResults.getStrehlFactor(this.getContext().obsContextJava());
-        return Mascot.computeStrehl(getBandpass(type), factor, starList[0], starList[1], starList[2]);
+        return Mascot.computeStrehl(getBandpass(type), factor, starList[0], scala.Option.apply(starList[1]), scala.Option.apply(starList[2]));
     }
 
 
@@ -438,26 +441,28 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
     //
     // REL-1321: example: for K band IQ70:
     // Strehl: avg=16.2 ± 4.7, min=13.4, max=17.5; FWHM~0.09"
-    private TpeMessage makeStrehlMessage(Strehl strehl) {
-        if (strehl != null) {
+    private TpeMessage makeStrehlMessage(scala.Option<Strehl> strehl) {
+        if (strehl.isDefined()) {
+            Strehl s = strehl.get();
             Double fwhm = calculateFwhm();
 
             StringBuffer sb = new StringBuffer();
             sb.append("Strehl: avg=");
-            sb.append(nf.format(strehl.avgstrehl() * 100));
+            sb.append(nf.format(s.avgstrehl() * 100));
             sb.append(" \u00B1 ");
-            sb.append(nf.format(strehl.rmsstrehl() * 100));
+            sb.append(nf.format(s.rmsstrehl() * 100));
             sb.append(",  min=");
-            sb.append(nf.format(strehl.minstrehl() * 100));
+            sb.append(nf.format(s.minstrehl() * 100));
             sb.append(",  max=");
-            sb.append(nf.format(strehl.maxstrehl() * 100));
+            sb.append(nf.format(s.maxstrehl() * 100));
             if (fwhm != null)  {
                 sb.append(",  FWHM~");
                 sb.append(nf2.format(fwhm));
             }
             return TpeMessage.infoMessage(sb.toString());
+        } else {
+            return TpeMessage.warningMessage("Strehl: does not fit.");
         }
-        return TpeMessage.warningMessage("Strehl: does not fit.");
     }
 
     public void propertyChange(String propName) {

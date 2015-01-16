@@ -41,23 +41,19 @@ object Mascot {
    * @param n1 the first star to use
    * @param n2 the optional second star to use
    * @param n3 the optional third star to use
-   * @return a Strehl object containing the results of the computations, or null if the positions can't be used
+   * @return a Some(Strehl) object containing the results of the computations, or None if the positions can't be used
    */
-  def computeStrehl(bandpass: MagnitudeBand, factor: Double, n1: Star, n2: Star = null, n3: Star = null): Strehl = {
-    if (n2 != null && !doesItFit(n1, n2, n3)) {
-      println("Skipped. Does not fit.")
-      null
-    } else {
-      //          sdata = mascot_compute_strehl();
-      //          grow,sall,sdata;
-      //          window,3;
-      //          disp_strehl_map,sdata;
-
-      val starList = for {
-          s <- List(n1, n2, n3)
-          if s != null
-        } yield s
-      Strehl(starList, bandpass, factor)
+  def computeStrehl(bandpass: MagnitudeBand, factor: Double, n1: Star, n2: Option[Star] = None, n3: Option[Star] = None): Option[Strehl] = {
+    n2 match {
+      case Some(v2) if !doesItFit(n1, v2, n3) =>
+        println("Skipped. Does not fit.")
+        None
+      case _                                  =>
+        //          sdata = mascot_compute_strehl();
+        //          grow,sall,sdata;
+        //          window,3;
+        //          disp_strehl_map,sdata;
+        Strehl(List(n1.some, n2, n3).flatten, bandpass, factor).some
     }
   }
 
@@ -89,12 +85,10 @@ object Mascot {
 
     println("XXX Mascot.findBestAsterism: input stars: " + ns + ", total asterisms: " + total)
 
-
     if (ns >= 3) {
       for ((n1, n2, n3) <- trips) {
         count += 1
-        val s = computeStrehl(bandpass, factor, n1, n2, n3)
-        if (s != null) {
+        computeStrehl(bandpass, factor, n1, n2.some, n3.some).foreach { s =>
           progress(s, count, total)
           result = s :: result
         }
@@ -104,8 +98,7 @@ object Mascot {
     if (ns >= 2) {
       for ((n1, n2) <- pairs) {
         count += 1
-        val s = computeStrehl(bandpass, factor, n1, n2)
-        if (s != null) {
+        computeStrehl(bandpass, factor, n1, n2.some).foreach { s =>
           progress(s, count, total)
           result = s :: result
         }
@@ -115,8 +108,7 @@ object Mascot {
     if (ns >= 1) {
       for (n1 <- filteredStarList) {
         count += 1
-        val s = computeStrehl(bandpass, factor, n1)
-        if (s != null) {
+        computeStrehl(bandpass, factor, n1).foreach { s =>
           progress(s, count, total)
           result = s :: result
         }

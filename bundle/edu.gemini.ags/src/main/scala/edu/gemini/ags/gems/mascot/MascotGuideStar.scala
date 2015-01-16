@@ -140,7 +140,7 @@ object MascotGuideStar {
                                     basePosTolerance: Double = 0,
                                     bandpass: Option[MagnitudeBand] = Some(Mascot.defaultBandpass),
                                     factor: Double = Mascot.defaultFactor,
-                                    magLimits: MagLimits = Some(defaultMagLimits),
+                                    magLimits: MagLimits = defaultMagLimits,
                                     progress: (Strehl, Int, Int) => Unit = Mascot.defaultProgress)
   : List[(List[Strehl], Double, Double, Double)] = {
 
