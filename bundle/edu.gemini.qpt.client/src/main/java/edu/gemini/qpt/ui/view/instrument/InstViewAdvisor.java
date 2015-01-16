@@ -124,12 +124,12 @@ public class InstViewAdvisor implements IViewAdvisor, PropertyChangeListener {
     public void propertyChange(PropertyChangeEvent evt) {
         if (IShell.PROP_MODEL.equals(evt.getPropertyName())) {
             synchronized (this) {
-				// There is a hack in RefreshAction that calls shell.setModel(null) and then sets it back to the
-				// original model to force certain components to reupdate. We wish to ignore the null as this will
-				// otherwise trigger a call to setRoot(null), and then when the model is set back, a call to
-				// setRoot(old model), which causes tree node settings to be lost.
+                // There is a hack in RefreshAction that calls shell.setModel(null) and then sets it back to the
+                // original model to force certain components to reupdate. We wish to ignore the null as this will
+                // otherwise trigger a call to setRoot(null), and then when the model is set back, a call to
+                // setRoot(old model), which causes tree node settings to be lost.
                 final Schedule newModel = (Schedule) evt.getNewValue();
-				if (newModel == null) return;
+                if (newModel == null) return;
 
                 // REL-1301: Only rebuild the entire tree when the model has just been instantiated.
                 // Note that if a new plan is created, this will happen as well automatically.
