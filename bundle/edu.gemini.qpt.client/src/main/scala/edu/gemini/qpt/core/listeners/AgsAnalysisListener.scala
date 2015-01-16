@@ -34,9 +34,7 @@ class AgsAnalysisListener extends MarkerModelListener[Variant] {
           case _ => true
         })
         s <- severity(a)
-      } yield {
-        markerManager.addMarker(false, this, s, a.message(withProbe = true), variant, alloc)
-      }
+      } markerManager.addMarker(false, this, s, a.message(withProbe = true), variant, alloc)
     }
   }
 
