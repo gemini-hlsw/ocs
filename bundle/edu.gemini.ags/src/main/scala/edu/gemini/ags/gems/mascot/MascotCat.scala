@@ -1,10 +1,13 @@
 package edu.gemini.ags.gems.mascot
 
+import edu.gemini.spModel.core.MagnitudeBand
+import edu.gemini.spModel.core.Target.SiderealTarget
 import jsky.coords.{WorldCoords, CoordinateRadius}
 import jsky.catalog.{TableQueryResult, QueryArgs, BasicQueryArgs}
 import edu.gemini.catalog.skycat.table._
 import edu.gemini.ags.gems.mascot.MascotConf._
-import edu.gemini.shared.skyobject.{Magnitude, SkyObject}
+import edu.gemini.ags.impl._
+import edu.gemini.shared.skyobject.SkyObject
 import jsky.catalog.skycat.{SkyObjectFactoryRegistrar, SkycatConfigFile}
 import scala.collection.JavaConversions._
 import collection.JavaConversions
@@ -115,14 +118,14 @@ object MascotCat {
     val dataVector = queryResult.getDataVector
     val center = queryResult.getQueryArgs.getRegion.getCenterPosition
     val list = for (i <- 0 until rowCount) yield {
-      toSkyObject(queryResult, dataVector.get(i).asInstanceOf[java.util.Vector[Object]], skyObjectFactory)
+      toSkyObject(queryResult, dataVector.get(i), skyObjectFactory).toNewModel
     }
     findBestAsterismInSkyObjectList(list.toList, center.getX, center.getY, bandpass, factor, progress, filter)
   }
 
   /**
-   * Finds the best asterisms for the given list of SkyObjects.
-   * @param list the list of SkyObjects to use
+   * Finds the best asterisms for the given list of SiderealTargets.
+   * @param list the list of SiderealTargets to use
    * @param centerRA the base position RA coordinate
    * @param centerDec the base position Dec coordinate
    * @param bandpass determines which magnitudes are used in the calculations: (one of "B", "V", "R", "J", "H", "K")
@@ -131,7 +134,7 @@ object MascotCat {
    * @param filter a filter function that returns false if the Star should be excluded
    * @return a tuple: (list of stars actually used, list of asterisms found)
    */
-  def findBestAsterismInSkyObjectList(list: List[SkyObject],
+  def findBestAsterismInSkyObjectList(list: List[SiderealTarget],
                        centerRA: Double, centerDec: Double,
                        bandpass: String = Mascot.defaultBandpass,
                        factor: Double = Mascot.defaultFactor,
@@ -139,16 +142,16 @@ object MascotCat {
                        filter: Star => Boolean = Mascot.defaultFilter)
   : (List[Star], List[Strehl]) = {
     val starList = for (skyObject <- list) yield {
-      val name = skyObject.getName
-      val coords = skyObject.getCoordinates.toHmsDeg(0L)
-      val ra = coords.getRa.toDegrees.getMagnitude
-      val dec = coords.getDec.toDegrees.getMagnitude
-      val bmag = getMagnitudeValue(skyObject, Magnitude.Band.B)
-      val vmag = getMagnitudeValue(skyObject, Magnitude.Band.V)
-      val rmag = getMagnitudeValue(skyObject, Magnitude.Band.R)
-      val jmag = getMagnitudeValue(skyObject, Magnitude.Band.J)
-      val hmag = getMagnitudeValue(skyObject, Magnitude.Band.H)
-      val kmag = getMagnitudeValue(skyObject, Magnitude.Band.K)
+      val name = skyObject.name
+      val coords = skyObject.coordinates
+      val ra = coords.ra.toAngle.toDegrees
+      val dec = coords.dec.toDegrees
+      val bmag = getMagnitudeValue(skyObject, MagnitudeBand.B)
+      val vmag = getMagnitudeValue(skyObject, MagnitudeBand.V)
+      val rmag = getMagnitudeValue(skyObject, MagnitudeBand.R)
+      val jmag = getMagnitudeValue(skyObject, MagnitudeBand.J)
+      val hmag = getMagnitudeValue(skyObject, MagnitudeBand.H)
+      val kmag = getMagnitudeValue(skyObject, MagnitudeBand.K)
       Star.makeStar(name, centerRA, centerDec, bmag, vmag, rmag, jmag, hmag, kmag, ra, dec)
     }
     Mascot.findBestAsterism(starList.toList, bandpass, factor, progress, filter)
@@ -157,16 +160,16 @@ object MascotCat {
   case class StrehlResults(starList: java.util.List[Star], strehlList: java.util.List[Strehl])
 
   /**
-   * Finds the best asterisms for the given list of SkyObjects
+   * Finds the best asterisms for the given list of SiderealTarget
    * (This version is easier to call from Java).
-   * @param javaList the list of SkyObjects to use
+   * @param javaList the list of SiderealTargets to use
    * @param centerRA the base position RA coordinate
    * @param centerDec the base position Dec coordinate
    * @param bandpass determines which magnitudes are used in the calculations: (one of "B", "V", "R", "J", "H", "K")
    * @param mascotProgress optional, called for each asterism as it is calculated, can cancel the calculations by returning false
    * @return a tuple: (list of stars actually used, list of asterisms found)
    */
-  def javaFindBestAsterismInSkyObjectList(javaList: java.util.List[SkyObject],
+  def javaFindBestAsterismInSkyObjectList(javaList: java.util.List[SiderealTarget],
                        centerRA: Double, centerDec: Double,
                        bandpass: String, factor: Double,
                        mascotProgress: MascotProgress): StrehlResults = {
@@ -185,10 +188,8 @@ object MascotCat {
 
 
   // Returns the magnitude for the given band, if valid, otherwise invalidMag
-  private def getMagnitudeValue(skyObject: SkyObject, band: Magnitude.Band): Double = {
-    val mag = skyObject.getMagnitude(band)
-    if (mag.isEmpty) invalidMag else mag.getValue.getBrightness
-  }
+  private def getMagnitudeValue(skyObject: SiderealTarget, band: MagnitudeBand): Double =
+    skyObject.magnitudeIn(band).map(_.value).getOrElse(invalidMag)
 
   // Returns the SkyObject for the given catalog name
   private def getSkyObjectFactory(name: String): SkyObjectFactory = {

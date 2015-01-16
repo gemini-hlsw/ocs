@@ -2,9 +2,9 @@ package edu.gemini.ags.gems
 
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.ags.impl._
-import edu.gemini.catalog.api.{SaturationConstraint, FaintnessConstraint, MagnitudeConstraints, MagnitudeLimits}
+import edu.gemini.catalog.api._
 import edu.gemini.shared.skyobject.Magnitude.Band
-import edu.gemini.spModel.core.{MagnitudeBand, Site}
+import edu.gemini.spModel.core.{Angle, MagnitudeBand, Site}
 import edu.gemini.spModel.gemini.gems.{Canopus, GemsInstrument}
 import edu.gemini.spModel.gemini.gsaoi.{Gsaoi, GsaoiOdgw}
 import edu.gemini.spModel.gems.GemsGuideStarType
@@ -12,6 +12,9 @@ import edu.gemini.spModel.guide.{GuideSpeed, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
+
+import edu.gemini.skycalc
+import scala.collection.JavaConverters._
 
 import scalaz._
 import Scalaz._
@@ -59,8 +62,17 @@ object GemsMagnitudeTable extends MagnitudeTable {
    */
   trait LimitsCalculator {
     def getGemsMagnitudeConstraints(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand]): MagnitudeConstraints
-    def adjustGemsMagnitudeLimitsForJava(starType: GemsGuideStarType, nirBand: edu.gemini.shared.util.immutable.Option[Band], conditions: Conditions): MagnitudeLimits =
-      getGemsMagnitudeConstraints(starType, nirBand.asScalaOpt.map(_.toNewModel)).map(m => conditions.magAdjustOp.apply(m.toOldModel).toNewModel).toMagnitudeLimits
+
+    def adjustGemsMagnitudeLimitsForJava(starType: GemsGuideStarType, nirBand: edu.gemini.shared.util.immutable.Option[MagnitudeBand], conditions: Conditions): MagnitudeConstraints =
+      getGemsMagnitudeConstraints(starType, nirBand.asScalaOpt).map(m => conditions.magAdjustOp.apply(m.toOldModel).toNewModel)
+
+    def searchCriterionBuilder(name: String, radiusLimit: skycalc.Angle, instrument: GemsInstrument, magConstraint: MagnitudeConstraints, posAngles: java.util.Set[Angle]): CatalogSearchCriterion = {
+      val radiusConstraint = RadiusConstraint.between(Angle.zero, radiusLimit.toNewModel)
+      val searchOffset = instrument.getOffset
+      val searchPA = posAngles.asScala.headOption
+      CatalogSearchCriterion(name, magConstraint, radiusConstraint, searchOffset.asScalaOpt.map(_.toNewModel), searchPA)
+    }
+
   }
 
   /**

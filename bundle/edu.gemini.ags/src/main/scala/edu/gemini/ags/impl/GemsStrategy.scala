@@ -9,7 +9,6 @@ import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.core.Target.SiderealTarget
 
 // TODO port these dependencies
-import edu.gemini.shared.skyobject.SkyObject
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates
 import edu.gemini.skycalc.Offset
 
@@ -69,7 +68,7 @@ object GemsStrategy extends AgsStrategy {
     val server = CatalogServerInstances.STANDARD
     ParallelCatalogQuery.instance.query(server, adjustedConstraints.asImList).asScala.map { result =>
       val id = result.constraint.id
-      CatalogResultWithKey(result, new GemsCatalogSearchKey(GuideStarTypeMap(id), GuideProbeGroupMap(id)))
+      CatalogResultWithKey(result, GemsCatalogSearchKey(GuideStarTypeMap(id), GuideProbeGroupMap(id)))
     }.toList
   }
 
@@ -85,7 +84,8 @@ object GemsStrategy extends AgsStrategy {
         angle <- anglesToTry
       } yield {
         val constraint = result.catalogResult.constraint
-        val catalogSearchCriterion = new CatalogSearchCriterion("ags", constraint.magnitudeLimits, constraint.radiusLimits, none.asGeminiOpt, Some(angle).map(_.toOldModel).asGeminiOpt)
+        val radiusConstraint = RadiusConstraint.between(constraint.radiusLimits.getMinLimit.toNewModel, constraint.radiusLimits.getMaxLimit.toNewModel)
+        val catalogSearchCriterion = CatalogSearchCriterion("ags", constraint.magnitudeLimits.toMagnitudeConstraints, radiusConstraint, None, angle.some)
         val gemsCatalogSearchCriterion = new GemsCatalogSearchCriterion(result.searchKey, catalogSearchCriterion)
         new GemsCatalogSearchResults(gemsCatalogSearchCriterion, result.catalogResult.candidates.toList)
       }
@@ -122,11 +122,11 @@ object GemsStrategy extends AgsStrategy {
     // Extract something we can understand from the GemsCatalogSearchResults.
     def simplifiedResult(results: List[GemsCatalogSearchResults]): List[(GuideProbe, List[SiderealTarget])] =
       results.flatMap { result =>
-        val so = result.getResults.asScala.toList  // extract the sky objects from this thing
+        val so = result.results  // extract the sky objects from this thing
         // For each guide probe associated with these sky objects, add a tuple
         // (guide probe, sky object list) to the results
-        result.getCriterion.getKey.getGroup.getMembers.asScala.toList.map { guideProbe =>
-          (guideProbe, so.map(_.toNewModel))
+        result.criterion.key.group.getMembers.asScala.toList.map { guideProbe =>
+          (guideProbe, so)
         }
       }
 
@@ -179,20 +179,19 @@ object GemsStrategy extends AgsStrategy {
     val gemsInstrument = {
       (ctx.getInstrument.getType == SPComponentType.INSTRUMENT_GSAOI)? GemsInstrument.gsaoi | GemsInstrument.flamingos2
     }
-    val gemsOptions = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog, gemsInstrument, tipTiltMode, posAngles.map(_.toOldModel).asJava)
+    val gemsOptions = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog, gemsInstrument, tipTiltMode, posAngles.asJava)
 
     // Create the base position.
     val baseCoords = ctx.getBaseCoordinates
     val basePos = new HmsDegCoordinates.Builder(baseCoords.getRa, baseCoords.getDec).build
 
     // Perform the catalog search.
-    val searchBand = nirBand.map(_.toOldModel)
-    val results = new GemsCatalog().search(ctx, basePos, gemsOptions, searchBand.asGeminiOpt, null).asScala.toList
+    val results = new GemsCatalog().search(ctx, basePos, gemsOptions, nirBand.asGeminiOpt, null).asScala.toList
 
     // Now check that the results are valid: there must be a valid tip-tilt and flexure star each.
     val checker = results.foldRight(Map[String, Boolean]())((result, resultMap) => {
-      val key = result.getCriterion.getKey.getGroup.getKey
-      if (!result.getResults.isEmpty)    resultMap.updated(key, true)
+      val key = result.criterion.key.group.getKey
+      if (result.results.nonEmpty)       resultMap.updated(key, true)
       else if (!resultMap.contains(key)) resultMap.updated(key, false)
       else                               resultMap
     })
@@ -214,12 +213,11 @@ object GemsStrategy extends AgsStrategy {
 
     // Now we must convert from an Option[GemsGuideStars] to a Selection.
     gemsGuideStars.map { x =>
-      val posAngle = Angle.fromDegrees(x.getPa.toDegrees.getMagnitude)
       val assignments = x.getGuideGroup.getAll.asScalaList.map(targets => {
         val guider = targets.getGuider
         targets.getTargets.asScalaList.map(target => Assignment(guider, target.toNewModel))
       }).flatten
-      Selection(posAngle, assignments)
+      Selection(x.getPa, assignments)
     }
   }
 

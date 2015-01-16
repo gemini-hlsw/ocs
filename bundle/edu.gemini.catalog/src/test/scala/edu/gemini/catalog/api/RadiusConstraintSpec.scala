@@ -88,6 +88,18 @@ class RadiusConstraintSpec extends SpecificationWithJUnit with ScalaCheck with A
         f(buildTarget(a, b)) should beTrue
       }
     }
+    "for any pair of angles preserve order" in {
+      forAll { (a: Angle, b: Angle) =>
+        val rad = RadiusConstraint.between(a, b)
+        rad.maxLimit.toDegrees should beGreaterThanOrEqualTo(rad.minLimit.toDegrees)
+      }
+    }
+    "for any pair of angles an offset preserves order" in {
+      forAll { (o: Offset, a: Angle, b: Angle) =>
+        val rad = RadiusConstraint.between(a, b).adjust(o)
+        rad.maxLimit.toDegrees should beGreaterThanOrEqualTo(rad.minLimit.toDegrees)
+      }
+    }
   }
 
   private def ras(ras: List[Angle], dec: Angle): List[SiderealTarget] =

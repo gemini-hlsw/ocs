@@ -1,8 +1,8 @@
 package edu.gemini.ags.gems;
 
-import edu.gemini.skycalc.Angle;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.core.Angle;
 import edu.gemini.spModel.gemini.gems.Canopus;
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw;
 import edu.gemini.spModel.gems.GemsGuideProbeGroup;
@@ -103,8 +103,8 @@ public class GemsGuideStars implements Comparable<GemsGuideStars> {
             return Double.compare(thisStrel, thatStrehl);
         }
 
-        double thisPa = pa.toDegrees().getMagnitude();
-        double thatPa = that.pa.toDegrees().getMagnitude();
+        double thisPa = pa.toDegrees();
+        double thatPa = that.pa.toDegrees();
         double[] cardinalDirections = {0.,90.,180.,270.};
         if (thisPa != thatPa) {
             for (double d : cardinalDirections) {

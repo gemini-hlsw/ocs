@@ -10,7 +10,7 @@ import org.junit.{Ignore, Before, Test}
 @Ignore class MascotCatTest {
 
   @Before def initialize() {
-    val url = getClass.getResource("/resources/conf/test.skycat.cfg")
+    val url = getClass.getResource("/edu/gemini/spModel/gemsGuideStar/test.skycat.cfg")
     assert(url != null)
     SkycatConfigFile.setConfigFile(url)
   }

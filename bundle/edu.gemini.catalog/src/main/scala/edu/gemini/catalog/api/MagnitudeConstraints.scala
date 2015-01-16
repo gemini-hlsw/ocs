@@ -51,6 +51,8 @@ object SaturationConstraint {
  */
 case class MagnitudeConstraints(band: MagnitudeBand, faintnessConstraint: FaintnessConstraint, saturationConstraint: Option[SaturationConstraint]) {
 
+  def this(faint:Magnitude) = this(faint.band, FaintnessConstraint(faint.value), None)
+
   /**
    * Maps a transformation into a new MagnitudeConstraints
    */
@@ -92,4 +94,5 @@ case class MagnitudeConstraints(band: MagnitudeBand, faintnessConstraint: Faintn
 object MagnitudeConstraints {
   def empty(band: MagnitudeBand): MagnitudeConstraints =
     MagnitudeConstraints(band, FaintnessConstraint(0.0), SaturationConstraint(0.0).some)
+
 }

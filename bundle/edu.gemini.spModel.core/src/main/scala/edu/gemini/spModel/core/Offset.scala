@@ -35,4 +35,8 @@ case class Offset(p: Angle, q: Angle) {
 
 object Offset {
   val zero = Offset(Angle.zero, Angle.zero)
+
+  /** @group Typeclass Instances */
+  implicit val equals = scalaz.Equal.equalA[Offset]
+
 }
