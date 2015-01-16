@@ -65,7 +65,7 @@ public class GemsCatalogResults {
                 }
                 final MagnitudeBand bandpass = getBandpass(tiptiltGroup, obsContext.getInstrument());
                 final double factor = getStrehlFactor(new Some<>(obsContext));
-                final MascotCat.StrehlResults strehlResults = MascotCat.javaFindBestAsterismInSkyObjectList(
+                final MascotCat.StrehlResults strehlResults = MascotCat.javaFindBestAsterismInTargetsList(
                         tiptiltTargetsList, base.getRaDeg(), base.getDecDeg(), bandpass, factor, progress);
                 for (Strehl strehl : strehlResults.strehlList()) {
                     result.addAll(analyzeAtAngles(obsContext, posAngles, strehl, flexureTargetsList, flexureGroup,
@@ -126,7 +126,7 @@ public class GemsCatalogResults {
 
                 final double factor = getStrehlFactor(new Some<>(obsContext));
                 try {
-                    MascotCat.javaFindBestAsterismInSkyObjectList(
+                    MascotCat.javaFindBestAsterismInTargetsList(
                             tiptiltTargetsList, base.getRaDeg(), base.getDecDeg(), bandpass, factor, strehlHandler);
                 } catch (CancellationException e) {
                     // continue on with results so far?

@@ -119,7 +119,7 @@ object MascotCat {
     val list = for (i <- 0 until rowCount) yield {
       toSkyObject(queryResult, dataVector.get(i), skyObjectFactory).toNewModel
     }
-    findBestAsterismInSkyObjectList(list.toList, center.getX, center.getY, bandpass, factor, progress, filter)
+    findBestAsterismInTargetsList(list.toList, center.getX, center.getY, bandpass, factor, progress, filter)
   }
 
   /**
@@ -133,7 +133,7 @@ object MascotCat {
    * @param filter a filter function that returns false if the Star should be excluded
    * @return a tuple: (list of stars actually used, list of asterisms found)
    */
-  def findBestAsterismInSkyObjectList(list: List[SiderealTarget],
+  def findBestAsterismInTargetsList(list: List[SiderealTarget],
                        centerRA: Double, centerDec: Double,
                        bandpass: MagnitudeBand = Mascot.defaultBandpass,
                        factor: Double = Mascot.defaultFactor,
@@ -157,7 +157,7 @@ object MascotCat {
    * @param mascotProgress optional, called for each asterism as it is calculated, can cancel the calculations by returning false
    * @return a tuple: (list of stars actually used, list of asterisms found)
    */
-  def javaFindBestAsterismInSkyObjectList(javaList: java.util.List[SiderealTarget],
+  def javaFindBestAsterismInTargetsList(javaList: java.util.List[SiderealTarget],
                        centerRA: Double, centerDec: Double,
                        bandpass: MagnitudeBand, factor: Double,
                        mascotProgress: MascotProgress): StrehlResults = {
@@ -169,7 +169,7 @@ object MascotCat {
       }
     }
     val list = JavaConversions.asScalaBuffer(javaList).toList
-    val (starList, strehlList) = findBestAsterismInSkyObjectList(list, centerRA, centerDec, bandpass, factor, progress,
+    val (starList, strehlList) = findBestAsterismInTargetsList(list, centerRA, centerDec, bandpass, factor, progress,
       Mascot.defaultFilter)
     new StrehlResults(starList, strehlList)
   }
