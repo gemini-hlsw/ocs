@@ -20,6 +20,7 @@ import javax.swing.tree.DefaultTreeModel;
 import edu.gemini.qpt.core.Schedule;
 import edu.gemini.qpt.shared.sp.Inst;
 import edu.gemini.qpt.ui.view.instrument.OutlineNode.TriState;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.ui.workspace.IShell;
 import edu.gemini.ui.workspace.IViewAdvisor;
 import edu.gemini.ui.workspace.IViewContext;
@@ -27,100 +28,109 @@ import edu.gemini.ui.workspace.util.ElementFactory;
 
 public class InstViewAdvisor implements IViewAdvisor, PropertyChangeListener {
 
-	private final JTree tree = ElementFactory.createTree();
-	private Schedule model;
+    private final JTree tree = ElementFactory.createTree();
+    private Schedule model;
     private IViewContext context;
-	
-	public void open(final IViewContext context) {
+
+    public void open(final IViewContext context) {
         this.context = context;
 
-		// Set up the tree control.
-		tree.setModel(new DefaultTreeModel(getRoot(null)));
-		tree.setRootVisible(false);		
-		tree.setShowsRootHandles(true);
-		tree.setCellRenderer(new OutlineNodeRenderer());
-		tree.setSelectionModel(null);
-		tree.addMouseListener(new OutlineNodeMouseListener());
-		tree.setToggleClickCount(Integer.MAX_VALUE); // don't expand on multi-clicks
-		
-		tree.getModel().addTreeModelListener(new TreeModelListener() {
-			public void treeStructureChanged(TreeModelEvent e) {
-				updateSchedule();
-			}
-		
-			public void treeNodesRemoved(TreeModelEvent e) {
-				updateSchedule();
-			}
-		
-			public void treeNodesInserted(TreeModelEvent e) {
-				updateSchedule();
-			}
-		
-			public void treeNodesChanged(TreeModelEvent e) {
-				updateSchedule();
-			}
-		});
-		
-		// Scroll pane
-		JScrollPane scroll = new JScrollPane(tree);
-		scroll.getViewport().setPreferredSize(new Dimension(tree.getPreferredSize().width, tree.getRowHeight() * 8));	
-		scroll.getViewport().setMinimumSize(new Dimension(tree.getPreferredSize().width,  tree.getRowHeight() * 8));
-		scroll.setBorder(BorderFactory.createEmptyBorder());
-		
-		// And the context.
-		context.setTitle("Instruments");
-		context.setContent(scroll);		
-		
-		// Listen for model changes
-		context.getShell().addPropertyChangeListener(this);
-	}
+        // Set up the tree control.
+        tree.setModel(new DefaultTreeModel(getRoot(null)));
+        tree.setRootVisible(false);
+        tree.setShowsRootHandles(true);
+        tree.setCellRenderer(new OutlineNodeRenderer());
+        tree.setSelectionModel(null);
+        tree.addMouseListener(new OutlineNodeMouseListener());
+        tree.setToggleClickCount(Integer.MAX_VALUE); // don't expand on multi-clicks
 
-	public void close(IViewContext context) {
-		
-	}
+        tree.getModel().addTreeModelListener(new TreeModelListener() {
+            public void treeStructureChanged(TreeModelEvent e) {
+                updateSchedule();
+            }
 
-	public void setFocus() {
-		tree.requestFocus();
-	}
+            public void treeNodesRemoved(TreeModelEvent e) {
+                updateSchedule();
+            }
+
+            public void treeNodesInserted(TreeModelEvent e) {
+                updateSchedule();
+            }
+
+            public void treeNodesChanged(TreeModelEvent e) {
+                updateSchedule();
+            }
+        });
+
+        // Scroll pane
+        final JScrollPane scroll = new JScrollPane(tree);
+        scroll.getViewport().setPreferredSize(new Dimension(tree.getPreferredSize().width, tree.getRowHeight() * 8));
+        scroll.getViewport().setMinimumSize(new Dimension(tree.getPreferredSize().width,  tree.getRowHeight() * 8));
+        scroll.setBorder(BorderFactory.createEmptyBorder());
+
+        // And the context.
+        context.setTitle("Instruments");
+        context.setContent(scroll);
+
+        // Listen for model changes
+        context.getShell().addPropertyChangeListener(this);
+    }
+
+    public void close(final IViewContext context) {
+
+    }
+
+    public void setFocus() {
+        tree.requestFocus();
+    }
 
     // Rebuild the entire tree for the specified schedule.
-	@SuppressWarnings("unchecked")
-	private OutlineNode getRoot(Schedule sched) {
-		if (sched == null) return new OutlineNode();
-		OutlineNode root = new OutlineNode();
-		for (final Inst i: Inst.values()) {
-			if (!i.existsAtSite(sched.getSite())) continue;
+    @SuppressWarnings("unchecked")
+    private OutlineNode getRoot(final Schedule sched) {
+        if (sched == null) return new OutlineNode();
+        final OutlineNode root = new OutlineNode();
+        for (final Inst i: Inst.values()) {
+            if (!i.existsAtSite(sched.getSite())) continue;
 
-			OutlineNode inode = new OutlineNode(i);
-			inode.setSelected(sched.hasFacility(i.getValue()));
-			root.add(inode);
+            final OutlineNode inode = new OutlineNode(i);
+            inode.setSelected(sched.hasFacility(i.getValue()));
+            root.add(inode);
 
-			Map<String, OutlineNode> categoryNodes = new TreeMap<String, OutlineNode>();			
-			for (Enum option: i.getOptions()) {
-				OutlineNode optionNode = new OutlineNode(option);
+            final Map<String, OutlineNode> categoryNodes = new TreeMap<>();
+            for (final Enum option: i.getOptions()) {
+                final OutlineNode optionNode = new OutlineNode(option);
 
-				String category = Inst.getCategory(option);
-				if (category == null)
-					inode.add(optionNode);
-				else {
-					OutlineNode categoryNode = categoryNodes.get(category);
-					if (categoryNode == null) {
-						categoryNode = new OutlineNode(category);
-						categoryNodes.put(category, categoryNode);
-						inode.add(categoryNode);
+                final String category = Inst.getCategory(option);
+                if (category == null)
+                    inode.add(optionNode);
+                else {
+					final OutlineNode categoryNodeLookup = categoryNodes.get(category);
+                    final OutlineNode categoryNode;
+                    if (categoryNodeLookup == null) {
+                        categoryNode = new OutlineNode(category);
+                        categoryNodes.put(category, categoryNode);
+                        inode.add(categoryNode);
+                    }
+					else {
+						categoryNode = categoryNodeLookup;
 					}
-					categoryNode.add(optionNode);
-				}
-				optionNode.setSelected(sched.hasFacility(option));
-			}
-		}
-		return root;
-	}
+                    categoryNode.add(optionNode);
+                }
+                optionNode.setSelected(sched.hasFacility(option));
+            }
+        }
+        return root;
+    }
 
-	public void propertyChange(PropertyChangeEvent evt) {
-		if (IShell.PROP_MODEL.equals(evt.getPropertyName())) {
-			synchronized (this) {
-				Schedule newModel = (Schedule) evt.getNewValue();
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (IShell.PROP_MODEL.equals(evt.getPropertyName())) {
+            synchronized (this) {
+                // There is a hack in RefreshAction that calls shell.setModel(null) and then sets it back to the
+                // original model to force certain components to reupdate. We wish to ignore the null as this will
+                // otherwise trigger a call to setRoot(null), and then when the model is set back, a call to
+                // setRoot(old model), which causes tree node settings to be lost.
+                final Schedule newModel = (Schedule) evt.getNewValue();
+                if (newModel == null) return;
 
                 // REL-1301: Only rebuild the entire tree when the model has just been instantiated.
                 // Note that if a new plan is created, this will happen as well automatically.
@@ -129,21 +139,21 @@ public class InstViewAdvisor implements IViewAdvisor, PropertyChangeListener {
                     ((DefaultTreeModel) tree.getModel()).setRoot(getRoot(newModel));
                 model = newModel;
                 updateSchedule();
-			}
-		}
-	}
+            }
+        }
+    }
 
     private void updateSchedule() {
         if (model != null) {
             synchronized (this) {
                 // This is inefficient but it's cleaner than figuring out all the
                 // corner cases for various kinds of modifications.
-                Set<Enum> facilities = new HashSet<Enum>();
-                Enumeration e = ((OutlineNode) tree.getModel().getRoot()).breadthFirstEnumeration();
+                final Set<Enum> facilities = new HashSet<>();
+                final Enumeration e = ((OutlineNode) tree.getModel().getRoot()).breadthFirstEnumeration();
                 while (e.hasMoreElements()) {
-                    OutlineNode n = (OutlineNode) e.nextElement();
+                    final OutlineNode n = (OutlineNode) e.nextElement();
                     if (n.getSelected() != TriState.UNSELECTED) {
-                        Object o = n.getUserObject();
+                        final Object o = n.getUserObject();
                         if (o != null && o instanceof Enum) {
                             if (o instanceof Inst)
                                 facilities.add(((Inst)o).getValue());
