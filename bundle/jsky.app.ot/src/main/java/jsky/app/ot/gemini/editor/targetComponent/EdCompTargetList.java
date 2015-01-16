@@ -1031,9 +1031,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
                 ITarget.Tag tag = (ITarget.Tag) _w.orbitalElementFormat.getSelectedItem();
                 switch (tag) {
-                    case JPL_MINOR_BODY:   service.setObjectType(HorizonsQuery.ObjectType.COMET);
-                    case MPC_MINOR_PLANET: service.setObjectType(HorizonsQuery.ObjectType.MINOR_BODY);
-                    case NAMED:            service.setObjectType(HorizonsQuery.ObjectType.MAJOR_BODY);
+                    case JPL_MINOR_BODY:   service.setObjectType(HorizonsQuery.ObjectType.COMET);      break;
+                    case MPC_MINOR_PLANET: service.setObjectType(HorizonsQuery.ObjectType.MINOR_BODY); break;
+                    case NAMED:            service.setObjectType(HorizonsQuery.ObjectType.MAJOR_BODY); break;
                 }
                 _nonSiderealTargetSup.ignoreResetCacheEvents(false);
 
