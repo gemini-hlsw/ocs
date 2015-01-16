@@ -20,7 +20,7 @@ trait VoTableClient {
   protected def queryParams(qs: CatalogQuery): Array[NameValuePair] = Array(
     new NameValuePair("CATALOG", qs.catalog.id),
     new NameValuePair("RA", format(qs.base.ra.toAngle)),
-    new NameValuePair("DEC", format(qs.base.dec.toAngle)),
+    new NameValuePair("DEC", f"${qs.base.dec.toDegrees}%4.03f"),
     new NameValuePair("SR", format(qs.radiusConstraint.maxLimit)))
 
   // First success or last failure
