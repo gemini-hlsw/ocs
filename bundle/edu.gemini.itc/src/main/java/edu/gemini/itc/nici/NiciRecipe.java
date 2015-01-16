@@ -207,12 +207,6 @@ public final class NiciRecipe extends RecipeBase {
 		String band = _sdParameters.getNormBand();
 		double start = WavebandDefinition.getStart(band);
 		double end = WavebandDefinition.getEnd(band);
-		System.out.println("WStart:" + start + "SStart:" + sed.getStart());
-		System.out.println("WEnd:" + end + "SEnd:" + sed.getEnd());
-		System.out.println("OC1Start:" + instrumentChannel1.getObservingStart()
-				+ "OC1End:" + instrumentChannel1.getObservingEnd());
-		System.out.println("FRStart:" + fullRangeStart + " FREnd:"
-				+ fullRangeEnd);
 
 		// any sed except BBODY and ELINE have normailization regions
 		if (!(_sdParameters.getSpectrumResource().equals(_sdParameters.ELINE) || _sdParameters
@@ -372,9 +366,7 @@ public final class NiciRecipe extends RecipeBase {
 				.clone();
 		VisitableSampledSpectrum skyChannel2 = sky;
 
-		System.out.println("Convolving SED channel 1:");
 		instrumentChannel1.convolveComponents(sedChannel1);
-		System.out.println("Convolving SKY channel 1:");
 		instrumentChannel1.convolveComponents(skyChannel1);
 
 		instrumentChannel2.convolveComponents(sedChannel2);
@@ -457,8 +449,6 @@ public final class NiciRecipe extends RecipeBase {
 		// Create clone of input SED, which will become the residual halo of the
 		// AO system.
 		VisitableSampledSpectrum halo = (VisitableSampledSpectrum) sed.clone();
-		System.out.println("Halo (sed.clone) int. in CalcNiciChannel: "
-				+ halo.getIntegral());
 
 		// Calculate FWHM of the AO Corrected core
 		double im_qual = instrument.getAOCorrectedFWHM();

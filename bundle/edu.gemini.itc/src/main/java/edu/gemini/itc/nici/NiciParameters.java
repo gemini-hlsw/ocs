@@ -160,19 +160,6 @@ public final class NiciParameters extends ITCParameters {
 	return _dichroicPosition;
     }
 
-
-    public boolean isDualChannel() {
-        System.out.println("MODE: "+_instrumentMode);
-        if (_instrumentMode.equals("imaging2c")) {
-            System.out.println("TRUE");
-            return true;
-	}
-	else {
-            System.out.println("FALSE");
-            return false;
-	}
-    }
-    
     /** Return a human-readable string for debugging */
     public String toString() {
         StringBuffer sb = new StringBuffer();

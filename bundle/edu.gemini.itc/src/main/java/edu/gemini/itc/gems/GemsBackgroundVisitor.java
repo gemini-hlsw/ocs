@@ -22,8 +22,6 @@ import edu.gemini.itc.shared.ITCConstants;
  */
 public class GemsBackgroundVisitor implements SampledSpectrumVisitor {
 
-    private String _filename_base;
-
     private ArraySpectrum _gemsBack = null;
 
     /**
@@ -43,9 +41,6 @@ public class GemsBackgroundVisitor implements SampledSpectrumVisitor {
      * Implements the SampledSpectrumVisitor interface
      */
     public void visit(SampledSpectrum sed) throws Exception {
-
-        System.out.println("Applying Gems background file : " + Gems.GEMS_LIB + "/" + Gems.GEMS_PREFIX + Gems.GEMS_BACKGROUND_FILENAME + ITCConstants.DATA_SUFFIX);
-
         for (int i = 0; i < sed.getLength(); i++) {
             sed.setY(i, _gemsBack.getY(sed.getX(i)) + sed.getY(i));
         }

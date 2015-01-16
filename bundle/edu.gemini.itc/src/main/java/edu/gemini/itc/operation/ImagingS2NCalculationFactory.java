@@ -29,7 +29,6 @@ public class ImagingS2NCalculationFactory extends CalculationFactory {
 
         if (observationDetailsParameters.getCalculationMethod().
                 equals(ObservationDetailsParameters.S2N)) {
-	    System.out.println("ENTERING METHOD A S2N CALCULATION");
             return new ImagingS2NMethodACalculation(
                     observationDetailsParameters.getNumExposures(),
                     observationDetailsParameters.getSourceFraction(),
@@ -79,7 +78,6 @@ public class ImagingS2NCalculationFactory extends CalculationFactory {
                 }
             }
         }
-	System.out.println("ENTERING METHOD C CALCULATION");
         return new ImagingPointS2NMethodCCalculation(
                 observationDetailsParameters.getNumExposures(),
                 observationDetailsParameters.getSourceFraction(),

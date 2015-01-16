@@ -84,11 +84,6 @@ public class PeakPixelFluxCalc {
             source_fraction_in_peak = frac_in_peak;
         source_in_peak = summed_source * source_fraction_in_peak * exp_time;
         background_in_peak = summed_background * exp_time * pixel_size * pixel_size;
-        	System.out.println("Imqual: " + im_qual + "  Pixel Size:  " +
-        	   pixel_size +"  imqual in pix: " + im_qual_in_pix +
-        	   " frac in peak: " + frac_in_peak);
-		System.out.println("Summed source: " + summed_source + "Source in peak: " + source_in_peak +
-				   "Summed background: " + summed_background + "Background in peak: " + background_in_peak);
         return source_in_peak + background_in_peak + dark_current * exp_time;
 
     }

@@ -561,11 +561,4 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         return result.toString();
     }
 
-
-    public void print() {
-        System.out.println(this.toString());
-        for (int i = 0; i < getLength(); ++i) {
-            System.out.println("i: " + i + " x: " + getX(i) + " value: " + _y[i]);
-        }
-    }
 }

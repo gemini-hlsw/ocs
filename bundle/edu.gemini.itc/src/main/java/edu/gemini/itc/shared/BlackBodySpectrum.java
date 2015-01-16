@@ -435,8 +435,4 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
         return _spectrum.printSpecAsString(firstIndex, lastIndex);
     }
 
-    public void print() {
-        _spectrum.print();
-
-    }
 }

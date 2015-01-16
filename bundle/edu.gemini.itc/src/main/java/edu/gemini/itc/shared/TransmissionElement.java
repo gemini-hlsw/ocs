@@ -71,18 +71,11 @@ public class TransmissionElement implements SampledSpectrumVisitor {
      */
     public void visit(SampledSpectrum sed) {
         double multiplier = 0;
-	System.out.println("Applying transmission visitor: "+_resourceName);
         for (int i = 0; i < sed.getLength(); i++) {
             double startval = sed.getX(i);
             multiplier = _trans.getY(startval);
-	    //System.out.println(i + " % 100 = "+ (i%100));
-	    // if (_resourceName.equals("/niri/CH4ice2275_G0243.dat")) {
-	    //System.out.println(_resourceName +" SED x: "+ startval + " SED val: " + sed.getY(i) + " Trans mult: "+ multiplier + " Result: " + sed.getY(i)*multiplier);
-		//System.out.println(" Current SED integral: " + sed.getIntegral());
-	    //}
             sed.setY(i, sed.getY(i) * multiplier);
         }
-    //System.out.println("After transmission application: "+sed.getIntegral());
     }
 
     public String toString() {
