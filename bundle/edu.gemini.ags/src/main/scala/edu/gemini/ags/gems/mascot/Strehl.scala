@@ -1,18 +1,14 @@
 package edu.gemini.ags.gems.mascot
 
 import breeze.linalg._
-import breeze.util._
 
 import MascotUtils._
 import MascotConf._
 import Amoeba._
+import edu.gemini.spModel.core.MagnitudeBand
 import util.Spline._
-import util.MatrixUtil._
 import util.YUtils._
-import scala.math
-import java.util.Date
 import scala.collection.JavaConversions._
-import collection.JavaConversions
 
 // mascot Strehl compute/optimize using distortion modes
 // instead of quadratic/tt phase (original method).
@@ -49,22 +45,22 @@ import collection.JavaConversions
  * Holds the results of the computations done by the Strehl object below.
  * Usage: val s = Strehl(starList)
  */
-class Strehl(val avgstrehl: Double,
-             val rmsstrehl: Double,
-             val minstrehl: Double,
-             val maxstrehl: Double,
-             val halffield: Double,
-             val strehl_map: DenseMatrix[Double],
-             val strehl_map_halffield: DenseMatrix[Double],
-             val tiperr: DenseMatrix[Double],
-             val tilterr: DenseMatrix[Double],
-             val stars: List[Star]) {
+case class Strehl private (avgstrehl: Double,
+             rmsstrehl: Double,
+             minstrehl: Double,
+             maxstrehl: Double,
+             halffield: Double,
+             strehl_map: DenseMatrix[Double],
+             strehl_map_halffield: DenseMatrix[Double],
+             tiperr: DenseMatrix[Double],
+             tilterr: DenseMatrix[Double],
+             stars: List[Star]) {
 
   def getStars : java.util.List[Star] = {
     stars.toList
   }
 
-  override def toString() = "Strehl: avgstrehl=" + avgstrehl +
+  override def toString = "Strehl: avgstrehl=" + avgstrehl +
     "\nrmsstrehl = " + rmsstrehl +
     "\nminstrehl = " + minstrehl +
     "\nmaxstrehl = " + maxstrehl +
@@ -117,7 +113,7 @@ object Strehl {
    * @param bandpass determines which magnitudes are used in the calculations: (one of "B", "V", "R", "J", "H", "K")
    * @param factor multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
    */
-  def apply(starList: List[Star], bandpass: String, factor: Double = 1.0): Strehl = {
+  def apply(starList: List[Star], bandpass: MagnitudeBand, factor: Double = 1.0): Strehl = {
     optimize(starList, bandpass, factor)
   }
 
@@ -131,9 +127,9 @@ object Strehl {
    * @param bandpass determines which magnitudes are used in the calculations: (one of "B", "V", "R", "J", "H", "K")
    * @param factor multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
    */
-  def optimize(starList: List[Star], bandpass: String, factor: Double): Strehl = {
+  def optimize(starList: List[Star], bandpass: MagnitudeBand, factor: Double): Strehl = {
     val nstars = starList.size
-    val mag = (for (s <- starList) yield s.mag(bandpass)).toArray
+    val mag = (for (s <- starList) yield s.target.magnitudeIn(bandpass).map(_.value)).flatten.toArray
     val starx = (for (s <- starList) yield s.x).toArray
     val stary = (for (s <- starList) yield s.y).toArray
 
@@ -293,7 +289,7 @@ object Strehl {
     // get the strehl map:
     val (ret2, strehl_map, tiperr2, tilterr2) = getStrehlMap(mprop, dfields, nmodes_cont, bg)
 
-    new Strehl(avgstrehl, rmsstrehl, minstrehl, maxstrehl, halffield, strehl_map, strehl_map_halffield,
+    Strehl(avgstrehl, rmsstrehl, minstrehl, maxstrehl, halffield, strehl_map, strehl_map_halffield,
       tiperr2, tilterr2, starList)
   }
 
