@@ -141,9 +141,11 @@ public final class TRecsRecipe extends RecipeBase {
 			ObservationDetailsParameters obsDetailParameters,
 			ObservingConditionParameters obsConditionParameters,
 			TRecsParameters trecsParameters, TeleParameters teleParameters,
-			PlottingDetailsParameters plotParameters)
+			PlottingDetailsParameters plotParameters,
+			PrintWriter out)
 
 	{
+		super(out);
 		_sdParameters = sdParameters;
 		_obsDetailParameters = obsDetailParameters;
 		_obsConditionParameters = obsConditionParameters;

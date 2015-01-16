@@ -61,7 +61,8 @@ public class Test
 				     5e-16,
 				     SourceDefinitionParameters.WATTS_FLUX,
 				     SourceDefinitionParameters.WATTS,
-				     -1);
+				     -1,
+			  		 SourceDefinitionParameters.LIBRARY_STAR);
 
 	 ObservationDetailsParameters odp =
        new ObservationDetailsParameters(
@@ -98,12 +99,12 @@ public class Test
 							3,
 							4);
         
-        AltairParameters ap = new AltairParameters(5, 10, false);
+        AltairParameters ap = new AltairParameters(5, 10, "IN", "NGS", false);
 
 
 
 	 // Create NiriRecipe object with the fake parameters
-	 Recipe recipe = new NiriRecipe(sdp, odp, ocp, np,tp, ap, pdp);
+	 Recipe recipe = new NiriRecipe(sdp, odp, ocp, np,tp, ap, pdp, null);
 
 	 // Perform Calculation
          for(int i=0;i<50;i++)

@@ -138,9 +138,14 @@ public final class AltairParameters extends ITCParameters {
      */
     public AltairParameters(
             double guideStarSeperation,
-            double guideStarMagnitude, boolean altairUsed) {
+            double guideStarMagnitude,
+            String fieldLens,
+            String wfsMode,
+            boolean altairUsed) {
         _guideStarSeperation = guideStarSeperation;
         _guideStarMagnitude = guideStarMagnitude;
+        _fieldLens = fieldLens;
+        _wfsMode = wfsMode;
         _altairUsed=altairUsed;
         
     }

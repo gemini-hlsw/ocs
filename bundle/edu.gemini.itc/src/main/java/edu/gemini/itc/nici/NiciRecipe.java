@@ -107,7 +107,9 @@ public final class NiciRecipe extends RecipeBase {
 	public NiciRecipe(SourceDefinitionParameters sdParameters,
 			ObservationDetailsParameters obsDetailParameters,
 			ObservingConditionParameters obsConditionParameters,
-			NiciParameters niciParameters, TeleParameters teleParameters) {
+			NiciParameters niciParameters, TeleParameters teleParameters,
+			PrintWriter out) {
+		super(out);
 		_sdParameters = sdParameters;
 		_obsDetailParameters = obsDetailParameters;
 		_obsConditionParameters = obsConditionParameters;

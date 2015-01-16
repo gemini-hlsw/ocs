@@ -54,7 +54,8 @@ public class Test {
                     5e-16,
                     SourceDefinitionParameters.WATTS_FLUX,
                     SourceDefinitionParameters.WATTS,
-                    -1);
+                    -1,
+                    SourceDefinitionParameters.LIBRARY_STAR);
             
             ObservationDetailsParameters odp =
                     new ObservationDetailsParameters(
@@ -84,7 +85,7 @@ public class Test {
             
             
             // Create AcqCamRecipe object with the fake parameters
-            Recipe recipe = new AcqCamRecipe(sdp, odp, ocp, acp, tp);
+            Recipe recipe = new AcqCamRecipe(sdp, odp, ocp, acp, tp, null);
             
             // Perform Calculation
             recipe.writeOutput();

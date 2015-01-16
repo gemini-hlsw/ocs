@@ -128,9 +128,16 @@ public final class NiciParameters extends ITCParameters {
      * @throws Exception if input data is not parsable.
      */
     public NiciParameters(String channel1Filter,
-            String channel2Filter) {
+            String channel2Filter,
+            String pupilMask,
+            String instrumentMode,
+            String dichroicPosition
+            ) {
         _channel1Filter = channel1Filter;
         _channel2Filter = channel2Filter;
+        _pupilMask = pupilMask;
+        _instrumentMode = instrumentMode;
+        _dichroicPosition = dichroicPosition;
     }
     
     public String getChannel1Filter() {

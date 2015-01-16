@@ -55,7 +55,8 @@ public class Test {
             1e-18,
             5e-16,
             SourceDefinitionParameters.WATTS_FLUX,
-            SourceDefinitionParameters.WATTS, -1);
+            SourceDefinitionParameters.WATTS, -1,
+            SourceDefinitionParameters.LIBRARY_STAR);
             
             ObservationDetailsParameters odp =
             new ObservationDetailsParameters(
@@ -96,12 +97,12 @@ public class Test {
             new PlottingDetailsParameters(PlottingDetailsParameters.AUTO_LIMITS,
             .3,
             .6);
-            AltairParameters ap = new AltairParameters(5, 10, false);
+            AltairParameters ap = new AltairParameters(5, 10, "IN", "NGS", false);
             
             
             
             // Create NifsRecipe object with the fake parameters
-            Recipe recipe = new NifsRecipe(sdp, odp, ocp, gp, tp,ap,pdp);
+            Recipe recipe = new NifsRecipe(sdp, odp, ocp, gp, tp,ap,pdp, null);
             
             // Perform Calculation
             recipe.writeOutput();

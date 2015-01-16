@@ -155,7 +155,9 @@ public final class MichelleRecipe extends RecipeBase {
             ObservingConditionParameters obsConditionParameters,
             MichelleParameters michelleParameters,
             TeleParameters teleParameters,
-            PlottingDetailsParameters plotParameters) {
+            PlottingDetailsParameters plotParameters,
+            PrintWriter out) {
+        super(out);
         _sdParameters = sdParameters;
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;

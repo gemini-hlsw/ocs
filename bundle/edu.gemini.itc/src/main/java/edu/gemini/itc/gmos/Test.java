@@ -55,7 +55,8 @@ public class Test {
                                                    1e-18,
                                                    5e-16,
                                                    SourceDefinitionParameters.WATTS_FLUX,
-                                                   SourceDefinitionParameters.WATTS, -1);
+                                                   SourceDefinitionParameters.WATTS, -1,
+                                                   SourceDefinitionParameters.LIBRARY_STAR);
 
             ObservationDetailsParameters odp =
                     new ObservationDetailsParameters(
@@ -87,6 +88,7 @@ public class Test {
                                        "0",
                                        "0",
                                        "0.3",
+                                       "2",
                                        "gmosNorth");
 
             TeleParameters tp =
@@ -103,7 +105,7 @@ public class Test {
 
 
             // Create GmosRecipe object with the fake parameters
-            Recipe recipe = new GmosRecipe(sdp, odp, ocp, gp, tp, pdp);
+            Recipe recipe = new GmosRecipe(sdp, odp, ocp, gp, tp, pdp, null);
 
             // Perform Calculation
             recipe.writeOutput();

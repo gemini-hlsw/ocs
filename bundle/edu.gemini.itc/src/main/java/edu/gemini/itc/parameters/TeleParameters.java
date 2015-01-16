@@ -125,7 +125,6 @@ public final class TeleParameters extends ITCParameters {
 	}
 
     public double getTelescopeDiameter() { return _telescopeDiameter; }
-    public void setWFS(String wfs) { _wfs=wfs;}
 
     /** Return a human-readable string for debugging */
     public String toString() {
@@ -138,11 +137,15 @@ public final class TeleParameters extends ITCParameters {
     }
 
     public String printParameterSummary() {
+        return printParameterSummary(getWFS());
+    }
+
+    public String printParameterSummary(String wfs) {
 		StringBuffer sb = new StringBuffer();
 		sb.append("Telescope configuration: \n");
 		sb.append("<LI>" + getMirrorCoating() + " mirror coating.\n");
 		sb.append("<LI>" + getInstrumentPort() + " looking port.\n");
-		sb.append("<LI>wavefront sensor: " + getWFS()+ "\n");
+		sb.append("<LI>wavefront sensor: " + wfs + "\n");
 		return sb.toString();
 	}
 

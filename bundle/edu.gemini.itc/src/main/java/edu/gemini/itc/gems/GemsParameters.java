@@ -49,6 +49,11 @@ public final class GemsParameters extends ITCParameters {
         parseMultipartParameters(p);
     }
 
+    public GemsParameters(double avgStreh, String strehlBand) {
+        _avgStrehl = avgStreh;
+        _strehlBand = strehlBand;
+    }
+
     /**
      * Parse parameters from a servlet request.
      */

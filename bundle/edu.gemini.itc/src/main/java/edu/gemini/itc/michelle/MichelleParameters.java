@@ -198,7 +198,8 @@ public final class MichelleParameters extends ITCParameters {
             String instrumentCentralWavelength,
             String FP_Mask,
             String spatBinning,
-            String specBinning) {
+            String specBinning,
+            String polarimetry) {
         _Filter = Filter;
         //_InstrumentWindow = instrumentWindow;
         _grating = grating;
@@ -210,6 +211,7 @@ public final class MichelleParameters extends ITCParameters {
         _FP_Mask = FP_Mask;
         _spatBinning = spatBinning;
         _specBinning = specBinning;
+        _polarimetry = polarimetry;
         
     }
     

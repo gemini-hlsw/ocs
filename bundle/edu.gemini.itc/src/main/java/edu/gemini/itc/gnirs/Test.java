@@ -58,7 +58,8 @@ public class Test {
                             1e-18,
                             5e-16,
                             SourceDefinitionParameters.WATTS_FLUX,
-                            SourceDefinitionParameters.WATTS, -1);
+                            SourceDefinitionParameters.WATTS, -1,
+                            SourceDefinitionParameters.LIBRARY_STAR);
 
             ObservationDetailsParameters odp =
                     new ObservationDetailsParameters(
@@ -101,7 +102,7 @@ public class Test {
 
             // Create GnirsRecipe object with the fake parameters
             // REL-472: Commenting out Altair option for now
-            Recipe recipe = new GnirsRecipe(sdp, odp, ocp, gp, tp, /* ap, */ pdp);
+            Recipe recipe = new GnirsRecipe(sdp, odp, ocp, gp, tp, /* ap, */ pdp, null);
 
             // Perform Calculation
             recipe.writeOutput();

@@ -143,9 +143,11 @@ public final class GnirsRecipe extends RecipeBase {
                        ObservingConditionParameters obsConditionParameters,
                        GnirsParameters gnirsParameters, TeleParameters teleParameters,
 //                       AltairParameters altairParameters, // REL-472: Commenting out Altair option for now
-                       PlottingDetailsParameters plotParameters)
+                       PlottingDetailsParameters plotParameters,
+                       PrintWriter out)
 
     {
+        super(out);
         _sdParameters = sdParameters;
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;
