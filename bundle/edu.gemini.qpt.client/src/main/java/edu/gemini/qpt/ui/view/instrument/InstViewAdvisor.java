@@ -27,100 +27,100 @@ import edu.gemini.ui.workspace.util.ElementFactory;
 
 public class InstViewAdvisor implements IViewAdvisor, PropertyChangeListener {
 
-	private final JTree tree = ElementFactory.createTree();
-	private Schedule model;
+    private final JTree tree = ElementFactory.createTree();
+    private Schedule model;
     private IViewContext context;
-	
-	public void open(final IViewContext context) {
+
+    public void open(final IViewContext context) {
         this.context = context;
 
-		// Set up the tree control.
-		tree.setModel(new DefaultTreeModel(getRoot(null)));
-		tree.setRootVisible(false);		
-		tree.setShowsRootHandles(true);
-		tree.setCellRenderer(new OutlineNodeRenderer());
-		tree.setSelectionModel(null);
-		tree.addMouseListener(new OutlineNodeMouseListener());
-		tree.setToggleClickCount(Integer.MAX_VALUE); // don't expand on multi-clicks
-		
-		tree.getModel().addTreeModelListener(new TreeModelListener() {
-			public void treeStructureChanged(TreeModelEvent e) {
-				updateSchedule();
-			}
-		
-			public void treeNodesRemoved(TreeModelEvent e) {
-				updateSchedule();
-			}
-		
-			public void treeNodesInserted(TreeModelEvent e) {
-				updateSchedule();
-			}
-		
-			public void treeNodesChanged(TreeModelEvent e) {
-				updateSchedule();
-			}
-		});
-		
-		// Scroll pane
-		JScrollPane scroll = new JScrollPane(tree);
-		scroll.getViewport().setPreferredSize(new Dimension(tree.getPreferredSize().width, tree.getRowHeight() * 8));	
-		scroll.getViewport().setMinimumSize(new Dimension(tree.getPreferredSize().width,  tree.getRowHeight() * 8));
-		scroll.setBorder(BorderFactory.createEmptyBorder());
-		
-		// And the context.
-		context.setTitle("Instruments");
-		context.setContent(scroll);		
-		
-		// Listen for model changes
-		context.getShell().addPropertyChangeListener(this);
-	}
+        // Set up the tree control.
+        tree.setModel(new DefaultTreeModel(getRoot(null)));
+        tree.setRootVisible(false);
+        tree.setShowsRootHandles(true);
+        tree.setCellRenderer(new OutlineNodeRenderer());
+        tree.setSelectionModel(null);
+        tree.addMouseListener(new OutlineNodeMouseListener());
+        tree.setToggleClickCount(Integer.MAX_VALUE); // don't expand on multi-clicks
 
-	public void close(IViewContext context) {
-		
-	}
+        tree.getModel().addTreeModelListener(new TreeModelListener() {
+            public void treeStructureChanged(TreeModelEvent e) {
+                updateSchedule();
+            }
 
-	public void setFocus() {
-		tree.requestFocus();
-	}
+            public void treeNodesRemoved(TreeModelEvent e) {
+                updateSchedule();
+            }
+
+            public void treeNodesInserted(TreeModelEvent e) {
+                updateSchedule();
+            }
+
+            public void treeNodesChanged(TreeModelEvent e) {
+                updateSchedule();
+            }
+        });
+
+        // Scroll pane
+        JScrollPane scroll = new JScrollPane(tree);
+        scroll.getViewport().setPreferredSize(new Dimension(tree.getPreferredSize().width, tree.getRowHeight() * 8));
+        scroll.getViewport().setMinimumSize(new Dimension(tree.getPreferredSize().width,  tree.getRowHeight() * 8));
+        scroll.setBorder(BorderFactory.createEmptyBorder());
+
+        // And the context.
+        context.setTitle("Instruments");
+        context.setContent(scroll);
+
+        // Listen for model changes
+        context.getShell().addPropertyChangeListener(this);
+    }
+
+    public void close(IViewContext context) {
+
+    }
+
+    public void setFocus() {
+        tree.requestFocus();
+    }
 
     // Rebuild the entire tree for the specified schedule.
-	@SuppressWarnings("unchecked")
-	private OutlineNode getRoot(Schedule sched) {
-		if (sched == null) return new OutlineNode();
-		OutlineNode root = new OutlineNode();
-		for (final Inst i: Inst.values()) {
-			if (!i.existsAtSite(sched.getSite())) continue;
+    @SuppressWarnings("unchecked")
+    private OutlineNode getRoot(Schedule sched) {
+        if (sched == null) return new OutlineNode();
+        OutlineNode root = new OutlineNode();
+        for (final Inst i: Inst.values()) {
+            if (!i.existsAtSite(sched.getSite())) continue;
 
-			OutlineNode inode = new OutlineNode(i);
-			inode.setSelected(sched.hasFacility(i.getValue()));
-			root.add(inode);
+            OutlineNode inode = new OutlineNode(i);
+            inode.setSelected(sched.hasFacility(i.getValue()));
+            root.add(inode);
 
-			Map<String, OutlineNode> categoryNodes = new TreeMap<String, OutlineNode>();			
-			for (Enum option: i.getOptions()) {
-				OutlineNode optionNode = new OutlineNode(option);
+            Map<String, OutlineNode> categoryNodes = new TreeMap<String, OutlineNode>();
+            for (Enum option: i.getOptions()) {
+                OutlineNode optionNode = new OutlineNode(option);
 
-				String category = Inst.getCategory(option);
-				if (category == null)
-					inode.add(optionNode);
-				else {
-					OutlineNode categoryNode = categoryNodes.get(category);
-					if (categoryNode == null) {
-						categoryNode = new OutlineNode(category);
-						categoryNodes.put(category, categoryNode);
-						inode.add(categoryNode);
-					}
-					categoryNode.add(optionNode);
-				}
-				optionNode.setSelected(sched.hasFacility(option));
-			}
-		}
-		return root;
-	}
+                String category = Inst.getCategory(option);
+                if (category == null)
+                    inode.add(optionNode);
+                else {
+                    OutlineNode categoryNode = categoryNodes.get(category);
+                    if (categoryNode == null) {
+                        categoryNode = new OutlineNode(category);
+                        categoryNodes.put(category, categoryNode);
+                        inode.add(categoryNode);
+                    }
+                    categoryNode.add(optionNode);
+                }
+                optionNode.setSelected(sched.hasFacility(option));
+            }
+        }
+        return root;
+    }
 
-	public void propertyChange(PropertyChangeEvent evt) {
-		if (IShell.PROP_MODEL.equals(evt.getPropertyName())) {
-			synchronized (this) {
-				Schedule newModel = (Schedule) evt.getNewValue();
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (IShell.PROP_MODEL.equals(evt.getPropertyName())) {
+            synchronized (this) {
+                Schedule newModel = (Schedule) evt.getNewValue();
 
                 // REL-1301: Only rebuild the entire tree when the model has just been instantiated.
                 // Note that if a new plan is created, this will happen as well automatically.
@@ -129,9 +129,9 @@ public class InstViewAdvisor implements IViewAdvisor, PropertyChangeListener {
                     ((DefaultTreeModel) tree.getModel()).setRoot(getRoot(newModel));
                 model = newModel;
                 updateSchedule();
-			}
-		}
-	}
+            }
+        }
+    }
 
     private void updateSchedule() {
         if (model != null) {
