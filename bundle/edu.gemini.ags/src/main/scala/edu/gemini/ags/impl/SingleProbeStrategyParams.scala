@@ -2,7 +2,7 @@ package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.AgsMagnitude
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
-import edu.gemini.catalog.api.{RadiusConstraint, QueryConstraint}
+import edu.gemini.catalog.api.{CatalogQuery, RadiusConstraint}
 import edu.gemini.spModel.core.{MagnitudeBand, Angle, Site}
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2OiwfsGuideProbe
@@ -12,7 +12,6 @@ import edu.gemini.spModel.gemini.nifs.NifsOiwfsGuideProbe
 import edu.gemini.spModel.gemini.niri.NiriOiwfsGuideProbe
 import edu.gemini.spModel.guide.{GuideStarValidator, PatrolField, ValidatableGuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
-import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
 
 sealed trait SingleProbeStrategyParams {
@@ -22,15 +21,14 @@ sealed trait SingleProbeStrategyParams {
   def stepSize: Angle            = Angle.fromDegrees(10)
   def minDistance: Option[Angle] = Some(Angle.fromArcsecs(20))
 
-  final def queryConstraints(ctx: ObsContext, mt: MagnitudeTable): Option[QueryConstraint] =
+  final def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): Option[CatalogQuery] =
     for {
       mc <- magnitudeCalc(ctx, mt)
-      rc <- radiusLimits(ctx)
-      rl =  rc.toRadiusLimit
-      ml <-  AgsMagnitude.manualSearchLimits(mc)
-    } yield new QueryConstraint(ctx.getBaseCoordinates, rl, ml.toMagnitudeLimits)
+      rc <- radiusConstraint(ctx)
+      mc <- AgsMagnitude.manualSearchLimits(mc)
+    } yield CatalogQuery(ctx.getBaseCoordinates.toNewModel, rc, mc)
 
-  def radiusLimits(ctx: ObsContext): Option[RadiusConstraint] =
+  def radiusConstraint(ctx: ObsContext): Option[RadiusConstraint] =
     RadiusLimitCalc.getAgsQueryRadiusLimits(guideProbe, ctx)
 
   def magnitudeCalc(ctx: ObsContext, mt: MagnitudeTable): Option[MagnitudeCalc] =
@@ -92,7 +90,7 @@ case class PwfsParams(site: Site, guideProbe: PwfsGuideProbe) extends SingleProb
       guideProbe.getCorrectedPatrolField(PatrolField.fromRadiusLimits(min, PwfsGuideProbe.PWFS_RADIUS), ctx)
     }
 
-    override def radiusLimits(ctx: ObsContext): Option[RadiusConstraint] =
+    override def radiusConstraint(ctx: ObsContext): Option[RadiusConstraint] =
       RadiusLimitCalc.getAgsQueryRadiusLimits(Some(vignettingProofPatrolField(ctx)), ctx)
 
     // We have a special validator for Pwfs.

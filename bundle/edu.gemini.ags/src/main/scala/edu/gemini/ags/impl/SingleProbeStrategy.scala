@@ -2,7 +2,8 @@ package edu.gemini.ags.impl
 
 import edu.gemini.ags.api._
 import edu.gemini.ags.api.AgsMagnitude._
-import edu.gemini.catalog.api.{QueryConstraint, CatalogServerInstances}
+import edu.gemini.catalog.api.{CatalogQuery, QueryConstraint}
+import edu.gemini.catalog.votable.VoTableClient
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.core.{Coordinates, Angle}
 import edu.gemini.spModel.core.Target.SiderealTarget
@@ -35,10 +36,8 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
 
   override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]] = {
     val empty = List((params.guideProbe: GuideProbe, List.empty[SiderealTarget]))
-    queryConstraints(ctx, mt).foldLeft(Future.successful(empty)) { (_, qc) =>
-      future {
-        CatalogServerInstances.STANDARD.query(qc).candidates.toList.asScala.toList
-      }.map { so => List((params.guideProbe, so.map(_.toNewModel))) }
+    catalogQueries(ctx, mt).foldLeft(Future.successful(empty)) { (_, qc) =>
+      VoTableClient.catalog(qc).map { so => List((params.guideProbe, so.targets.rows)) }
     }
   }
 
@@ -94,8 +93,10 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
       case (angle, st) => new CandidateValidator(params, mt, List(st)).exists(ctx.withPositionAngle(angle.toOldModel))
     }
 
-  override def queryConstraints(ctx: ObsContext, mt: MagnitudeTable): List[QueryConstraint] =
-    params.queryConstraints(ctx, mt).toList
+  override def queryConstraints(ctx: ObsContext, mt: MagnitudeTable): List[QueryConstraint] = Nil
+
+  def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] =
+    params.catalogQueries(ctx, mt).toList
 
   override val guideProbes: List[GuideProbe] =
     List(params.guideProbe)
