@@ -5,7 +5,6 @@ import edu.gemini.spModel.core.Target.SiderealTarget
 import jsky.coords.{WorldCoords, CoordinateRadius}
 import jsky.catalog.{TableQueryResult, QueryArgs, BasicQueryArgs}
 import edu.gemini.catalog.skycat.table._
-import edu.gemini.ags.gems.mascot.MascotConf._
 import edu.gemini.ags.impl._
 import edu.gemini.shared.skyobject.SkyObject
 import jsky.catalog.skycat.{SkyObjectFactoryRegistrar, SkycatConfigFile}
@@ -34,7 +33,7 @@ object MascotCat {
   val defaultProgress = (s: Strehl, count: Int, total: Int) => {
     print("Asterism #" + count)
     for (i <- 0 until s.stars.size) {
-      print(", [%s]".format(new WorldCoords(s.stars(i).ra, s.stars(i).dec)))
+      print(", [%s]".format(new WorldCoords(s.stars(i).target.coordinates.ra.toAngle.toDegrees, s.stars(i).target.coordinates.dec.toAngle.toDegrees)))
     }
     println("\nStrehl over %.1f\": avg=%.1f  rms=%.1f  min=%.1f  max=%.1f\n" format (
       s.halffield * 2, s.avgstrehl * 100, s.rmsstrehl * 100, s.minstrehl * 100, s.maxstrehl * 100))
@@ -59,7 +58,7 @@ object MascotCat {
    */
   def findBestAsterism(coords: WorldCoords,
                        catName: String = defaultCatalogName,
-                       bandpass: String = Mascot.defaultBandpass,
+                       bandpass: MagnitudeBand = Mascot.defaultBandpass,
                        factor: Double = Mascot.defaultFactor,
                        progress: (Strehl, Int, Int) => Unit = defaultProgress,
                        filter: Star => Boolean = Mascot.defaultFilter,
@@ -88,7 +87,7 @@ object MascotCat {
    * @return a tuple: (list of stars actually used, list of asterisms found)
    */
   def findBestAsterismByQueryArgs(queryArgs: QueryArgs,
-                       bandpass: String = Mascot.defaultBandpass,
+                       bandpass: MagnitudeBand = Mascot.defaultBandpass,
                        factor: Double = Mascot.defaultFactor,
                        progress: (Strehl, Int, Int) => Unit = defaultProgress,
                        filter: Star => Boolean = Mascot.defaultFilter)
@@ -108,7 +107,7 @@ object MascotCat {
    * @return a tuple: (list of stars actually used, list of asterisms found)
    */
   def findBestAsterismInQueryResult(queryResult: TableQueryResult,
-                       bandpass: String = Mascot.defaultBandpass,
+                       bandpass: MagnitudeBand = Mascot.defaultBandpass,
                        factor: Double = Mascot.defaultFactor,
                        progress: (Strehl, Int, Int) => Unit = defaultProgress,
                        filter: Star => Boolean = Mascot.defaultFilter)
@@ -136,24 +135,13 @@ object MascotCat {
    */
   def findBestAsterismInSkyObjectList(list: List[SiderealTarget],
                        centerRA: Double, centerDec: Double,
-                       bandpass: String = Mascot.defaultBandpass,
+                       bandpass: MagnitudeBand = Mascot.defaultBandpass,
                        factor: Double = Mascot.defaultFactor,
                        progress: (Strehl, Int, Int) => Unit = defaultProgress,
                        filter: Star => Boolean = Mascot.defaultFilter)
   : (List[Star], List[Strehl]) = {
-    val starList = for (skyObject <- list) yield {
-      val name = skyObject.name
-      val coords = skyObject.coordinates
-      val ra = coords.ra.toAngle.toDegrees
-      val dec = coords.dec.toDegrees
-      val bmag = getMagnitudeValue(skyObject, MagnitudeBand.B)
-      val vmag = getMagnitudeValue(skyObject, MagnitudeBand.V)
-      val rmag = getMagnitudeValue(skyObject, MagnitudeBand.R)
-      val jmag = getMagnitudeValue(skyObject, MagnitudeBand.J)
-      val hmag = getMagnitudeValue(skyObject, MagnitudeBand.H)
-      val kmag = getMagnitudeValue(skyObject, MagnitudeBand.K)
-      Star.makeStar(name, centerRA, centerDec, bmag, vmag, rmag, jmag, hmag, kmag, ra, dec)
-    }
+    val starList = for (skyObject <- list)
+      yield Star.makeStar(skyObject, centerRA, centerDec)
     Mascot.findBestAsterism(starList.toList, bandpass, factor, progress, filter)
   }
 
@@ -171,7 +159,7 @@ object MascotCat {
    */
   def javaFindBestAsterismInSkyObjectList(javaList: java.util.List[SiderealTarget],
                        centerRA: Double, centerDec: Double,
-                       bandpass: String, factor: Double,
+                       bandpass: MagnitudeBand, factor: Double,
                        mascotProgress: MascotProgress): StrehlResults = {
 
     val progress = (s: Strehl, count: Int, total: Int) => {
@@ -185,11 +173,6 @@ object MascotCat {
       Mascot.defaultFilter)
     new StrehlResults(starList, strehlList)
   }
-
-
-  // Returns the magnitude for the given band, if valid, otherwise invalidMag
-  private def getMagnitudeValue(skyObject: SiderealTarget, band: MagnitudeBand): Double =
-    skyObject.magnitudeIn(band).map(_.value).getOrElse(invalidMag)
 
   // Returns the SkyObject for the given catalog name
   private def getSkyObjectFactory(name: String): SkyObjectFactory = {

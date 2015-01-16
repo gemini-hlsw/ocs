@@ -50,19 +50,6 @@ object GemsUtils4Java {
   def sortTargetsByBrightness(targetsList: java.util.List[SiderealTarget]): java.util.List[SiderealTarget] =
     targetsList.asScala.sortBy(_.magnitudeIn(MagnitudeBand.R)).asJava
 
-  // TODO Star should be replaced by SiderealTarget
-  def starToSiderealTarget(star: Star): SiderealTarget = {
-    val ra = RightAscension.fromAngle(Angle.fromDegrees(star.ra))
-    val dec = Declination.fromAngle(Angle.fromDegrees(star.dec)).getOrElse(Declination.zero)
-    val coords = Coordinates(ra, dec)
-
-    val magnitudes = List((star.bmag, MagnitudeBand.B), (star.vmag, MagnitudeBand.V), (star.rmag, MagnitudeBand.R), (star.jmag, MagnitudeBand.J), (star.hmag, MagnitudeBand.H), (star.kmag, MagnitudeBand.K))
-
-    val invalid = MascotConf.invalidMag
-    val mags = magnitudes.filter(_._1 != invalid).map(v => new Magnitude(v._1, v._2))
-    SiderealTarget(star.name, coords, None, mags, None)
-  }
-
   /**
    * Returns a list of unique targets in the given search results.
    */

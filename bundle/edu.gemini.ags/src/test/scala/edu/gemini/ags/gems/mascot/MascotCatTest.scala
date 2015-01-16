@@ -1,9 +1,13 @@
 package edu.gemini.ags.gems.mascot
 
+import edu.gemini.spModel.core.MagnitudeBand
 import jsky.catalog.skycat.SkycatConfigFile
 import org.junit.Assert._
 import jsky.coords.WorldCoords
 import org.junit.{Ignore, Before, Test}
+
+import scalaz._
+import Scalaz._
 
 /**
  */
@@ -26,8 +30,8 @@ import org.junit.{Ignore, Before, Test}
 //    queryArgs.setRegion(region)
 //    queryArgs.setMaxRows(19)
     val (starList, strehlList) = MascotCat.findBestAsterism(coords, "NOMAD1 catalog at CDS",
-                                      "R", Mascot.defaultFactor, Mascot.defaultProgress,
-                                      (star: Star) => star.rmag <= 17.5 && star.rmag >= 10.0
+                                      MagnitudeBand.R, Mascot.defaultFactor, Mascot.defaultProgress,
+                                      (star: Star) => star.target.magnitudeIn(MagnitudeBand.R).map(_.value) <= Some(17.5) && star.target.magnitudeIn(MagnitudeBand.R).map(_.value) >= Some(10.0)
                                   )
 
     // ... see MascotTest in mascot-core

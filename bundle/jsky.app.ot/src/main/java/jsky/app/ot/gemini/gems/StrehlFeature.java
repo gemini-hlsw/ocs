@@ -1,5 +1,6 @@
 package jsky.app.ot.gemini.gems;
 
+import edu.gemini.ags.gems.GemsUtils4Java;
 import edu.gemini.ags.gems.mascot.Mascot;
 import edu.gemini.ags.gems.mascot.MascotConf;
 import edu.gemini.ags.gems.mascot.Star;
@@ -8,6 +9,7 @@ import edu.gemini.mascot.gui.contour.ContourPlot;
 import edu.gemini.mascot.gui.contour.StrehlContourPlot;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.ags.gems.GemsCatalogResults;
@@ -376,10 +378,8 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
         if (targetList.size() == 0) return null;
         Star[] starList = targetListToStarList(targetList);
 
-
-        String bandpass = getBandpass(type);
         double factor = GemsCatalogResults.getStrehlFactor(this.getContext().obsContextJava());
-        return Mascot.computeStrehl(bandpass, factor, starList[0], starList[1], starList[2]);
+        return Mascot.computeStrehl(getBandpass(type), factor, starList[0], starList[1], starList[2]);
     }
 
 
@@ -387,18 +387,18 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
     // see OT-22 for a mapping of GSAOI filters to J, H, and K.
     // If iterating over filters, I think we can assume the filter in
     // the static component as a first pass at least.
-    private String getBandpass(GuideProbe.Type type) {
+    private MagnitudeBand getBandpass(GuideProbe.Type type) {
         if (type != null) {
             switch (type) {
                 case AOWFS:
-                    return Magnitude.Band.R.name();
+                    return Mascot.defaultBandpass();
                 case OIWFS:
                     SPInstObsComp inst = _iw.getInstObsComp();
                     if (inst instanceof Gsaoi) {
                         Gsaoi gsaoi = (Gsaoi) inst;
                         Option<Magnitude.Band> band = gsaoi.getFilter().getCatalogBand();
                         if (!band.isEmpty()) {
-                            return band.getValue().name();
+                            return GemsUtils4Java.toNewBand(band.getValue());
                         }
                     }
                 default:

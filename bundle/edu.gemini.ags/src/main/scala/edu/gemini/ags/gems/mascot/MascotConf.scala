@@ -11,8 +11,8 @@ import breeze.util._
 object MascotConf {
 
   // MASCOT PARAMETERS
-  val mag_min_threshold = 6.5   // XXX allan: changed from 10.
-  val mag_max_threshold = 21.2  // XXX allan: changed from 17.5
+  val mag_min_threshold = Some(6.5)   // XXX allan: changed from 10.
+  val mag_max_threshold = Some(21.2)  // XXX allan: changed from 17.5
   val nstar_limit = 7
   val get_2mass_image = true
 

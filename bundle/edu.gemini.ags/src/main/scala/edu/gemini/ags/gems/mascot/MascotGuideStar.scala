@@ -1,5 +1,6 @@
 package edu.gemini.ags.gems.mascot
 
+import edu.gemini.spModel.core.MagnitudeBand
 import jsky.coords.WorldCoords
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.system.CoordinateParam.Units
@@ -47,14 +48,14 @@ object MascotGuideStar {
                        guideStarType: GuideStarType,
                        posAngleTolerance: Double = 0,
                        basePosTolerance: Double = 0,
-                       bandpass: String = null,
+                       bandpass: Option[MagnitudeBand] = None,
                        factor: Double = 1.0,
                        magLimits: MagLimits = defaultMagLimits,
                        catName: String = MascotCat.defaultCatalogName,
                        progress: (Strehl, Int, Int) => Unit = Mascot.defaultProgress)
   : List[(List[Strehl], Double, Double, Double)] = {
 
-    val bp = if (bandpass != null) bandpass else guideStarType.defaultBandpass
+    val bp = bandpass.getOrElse(guideStarType.defaultBandpass)
     val basePos = ctx.getBaseCoordinates
     val coords = new WorldCoords(basePos.getRaDeg, basePos.getDecDeg)
     val maxRadius = MascotCat.defaultMaxRadius + basePosTolerance / 60.0
@@ -95,13 +96,13 @@ object MascotGuideStar {
                                   guideStarType: GuideStarType,
                                   posAngleTolerance: Double = 0,
                                   basePosTolerance: Double = 0,
-                                  bandpass: String = Mascot.defaultBandpass,
+                                  bandpass: Option[MagnitudeBand] = Some(Mascot.defaultBandpass),
                                   factor: Double = 1.0,
                                   magLimits: MagLimits = defaultMagLimits,
                                   progress: (Strehl, Int, Int) => Unit = Mascot.defaultProgress)
   : List[(List[Strehl], Double, Double, Double)] = {
 
-    val bp = if (bandpass != null) bandpass else guideStarType.defaultBandpass
+    val bp = bandpass.getOrElse(guideStarType.defaultBandpass)
     val simple = posAngleTolerance == 0.0 && basePosTolerance == 0.0
     val guideStarFilter = guideStarType.filter(ctx, magLimits, _: Star)
     // If no tolerances were given, wen can do more filtering up front
@@ -137,13 +138,13 @@ object MascotGuideStar {
                                     guideStarType: GuideStarType,
                                     posAngleTolerance: Double = 0,
                                     basePosTolerance: Double = 0,
-                                    bandpass: String = Mascot.defaultBandpass,
+                                    bandpass: Option[MagnitudeBand] = Some(Mascot.defaultBandpass),
                                     factor: Double = Mascot.defaultFactor,
                                     magLimits: MagLimits = defaultMagLimits,
                                     progress: (Strehl, Int, Int) => Unit = Mascot.defaultProgress)
   : List[(List[Strehl], Double, Double, Double)] = {
 
-    val bp = if (bandpass != null) bandpass else guideStarType.defaultBandpass
+    val bp = bandpass.getOrElse(guideStarType.defaultBandpass)
     val simple = posAngleTolerance == 0.0 && basePosTolerance == 0.0
     val guideStarFilter = guideStarType.filter(ctx, magLimits, _: Star)
     // If no tolerances were given, wen can do more filtering up front

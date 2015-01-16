@@ -1,11 +1,15 @@
 package edu.gemini.ags.gems.mascot
 
-import edu.gemini.ags.gems.mascot.util.AllPairsAndTriples._
+import edu.gemini.ags.gems.mascot.util.AllPairsAndTriples
 import edu.gemini.ags.gems.mascot.util.YUtils._
 
 import MascotUtils._
 import MascotConf._
 import breeze.linalg._
+import edu.gemini.spModel.core.MagnitudeBand
+
+import scalaz._
+import Scalaz._
 
 /**
  */
@@ -25,7 +29,7 @@ object Mascot {
   }
 
   // The default mag bandpass
-  val defaultBandpass = "R"
+  val defaultBandpass:MagnitudeBand = MagnitudeBand.R
 
   // multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
   val defaultFactor = 1.0;
@@ -39,7 +43,7 @@ object Mascot {
    * @param n3 the optional third star to use
    * @return a Strehl object containing the results of the computations, or null if the positions can't be used
    */
-  def computeStrehl(bandpass: String, factor: Double, n1: Star, n2: Star = null, n3: Star = null): Strehl = {
+  def computeStrehl(bandpass: MagnitudeBand, factor: Double, n1: Star, n2: Star = null, n3: Star = null): Strehl = {
     if (n2 != null && !doesItFit(n1, n2, n3)) {
       println("Skipped. Does not fit.")
       null
@@ -64,19 +68,19 @@ object Mascot {
    * @return a tuple: (list of stars actually used, list of asterisms found)
    */
   def findBestAsterism(starList: List[Star],
-                       bandpass: String = defaultBandpass,
+                       bandpass: MagnitudeBand = defaultBandpass,
                        factor: Double = defaultFactor,
                        progress: (Strehl, Int, Int) => Unit = defaultProgress,
                        filter: Star => Boolean = defaultFilter)
   : (List[Star], List[Strehl]) = {
     // sort by selected mag and select
-    val sortedStarList = starList.sortWith((s1,s2) => s1.mag(bandpass) < s2.mag(bandpass))
+    val sortedStarList = starList.sortWith((s1,s2) => s1.target.magnitudeIn(bandpass) < s2.target.magnitudeIn(bandpass))
     val filteredStarList = selectStarsOnMag(sortedStarList, bandpass).filter(filter)
 
     val ns = filteredStarList.length
     var count = 0
-    val trips = allTrips(filteredStarList)
-    val pairs = allPairs(filteredStarList)
+    val trips = AllPairsAndTriples.allTrips(filteredStarList)
+    val pairs = AllPairsAndTriples.allPairs(filteredStarList)
     val total = trips.length + pairs.length + ns
     var result = List[Strehl]()
 
@@ -133,9 +137,9 @@ object Mascot {
   //
   //  status = select_stars_not_too_close()
   //}
-  def selectStarsOnMag(starList: List[Star], bandpass: String = defaultBandpass): List[Star] = {
+  def selectStarsOnMag(starList: List[Star], bandpass: MagnitudeBand = defaultBandpass): List[Star] = {
     selectStarsNotTooClose(starList.filter(star => {
-      val mag = star.mag(bandpass)
+      val mag = star.target.magnitudeIn(bandpass).map(_.value)
       mag >= mag_min_threshold && mag <= mag_max_threshold
     }))
   }
