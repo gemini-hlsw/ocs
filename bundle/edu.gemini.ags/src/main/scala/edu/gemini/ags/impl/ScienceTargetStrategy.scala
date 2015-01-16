@@ -3,7 +3,7 @@ package edu.gemini.ags.impl
 import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.ags.impl._
 import edu.gemini.ags.api.{AgsMagnitude, AgsAnalysis, AgsStrategy}
-import edu.gemini.catalog.api.{RadiusConstraint, QueryConstraint}
+import edu.gemini.catalog.api.{CatalogQuery, RadiusConstraint, QueryConstraint}
 import edu.gemini.shared.skyobject.SkyObject
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.core.Target.SiderealTarget
@@ -38,15 +38,16 @@ case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGui
   override def magnitudes(ctx: ObsContext, mt: MagnitudeTable): List[(GuideProbe, MagnitudeCalc)] =
     mt(ctx, guideProbe).toList.map((guideProbe, _))
 
-  override def queryConstraints(ctx: ObsContext, mt: MagnitudeTable): List[QueryConstraint] =
+  def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] =
     (for {
       mc <- magnitudeCalc(ctx, mt)
-      rc <- radiusLimits(ctx)
-      rl =  rc.toRadiusLimit
+      rc <- radiusConstraints(ctx)
       ml <- AgsMagnitude.manualSearchLimits(mc)
-    } yield new QueryConstraint(ctx.getBaseCoordinates, rl, ml.toMagnitudeLimits)).toList
+    } yield CatalogQuery(ctx.getBaseCoordinates.toNewModel, rc, ml)).toList
 
-  private def radiusLimits(ctx: ObsContext): Option[RadiusConstraint] =
+  override def queryConstraints(ctx: ObsContext, mt: MagnitudeTable): List[QueryConstraint] = ???
+
+  private def radiusConstraints(ctx: ObsContext): Option[RadiusConstraint] =
     RadiusLimitCalc.getAgsQueryRadiusLimits(guideProbe, ctx)
 
   private def magnitudeCalc(ctx: ObsContext, mt: MagnitudeTable): Option[MagnitudeCalc] =
