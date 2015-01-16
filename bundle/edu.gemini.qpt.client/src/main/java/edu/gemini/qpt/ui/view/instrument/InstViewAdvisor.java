@@ -24,7 +24,6 @@ import edu.gemini.ui.workspace.IShell;
 import edu.gemini.ui.workspace.IViewAdvisor;
 import edu.gemini.ui.workspace.IViewContext;
 import edu.gemini.ui.workspace.util.ElementFactory;
-import scalaz.Alpha;
 
 public class InstViewAdvisor implements IViewAdvisor, PropertyChangeListener {
 
@@ -105,14 +104,14 @@ public class InstViewAdvisor implements IViewAdvisor, PropertyChangeListener {
                     inode.add(optionNode);
                 else {
                     final OutlineNode categoryNodeLookup = categoryNodes.get(category);
-					final OutlineNode categoryNode;
+                    final OutlineNode categoryNode;
                     if (categoryNodeLookup == null) {
                         categoryNode = new OutlineNode(category);
                         categoryNodes.put(category, categoryNode);
                         inode.add(categoryNode);
                     } else {
-						categoryNode = categoryNodeLookup;
-					}
+                        categoryNode = categoryNodeLookup;
+                    }
                     categoryNode.add(optionNode);
                 }
                 optionNode.setSelected(sched.hasFacility(option));
