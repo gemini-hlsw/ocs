@@ -6,7 +6,7 @@ import edu.gemini.ags.api.{AgsAnalysis, AgsRegistrar}
 import edu.gemini.p2checker.api.{P2Problems, IP2Problems, Problem, ObservationElements, IRule}
 import edu.gemini.spModel.gemini.gems.Canopus
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw
-import edu.gemini.spModel.guide.{GuideProbeGroup, GuideProbe}
+import edu.gemini.spModel.guide.GuideProbeGroup
 import edu.gemini.spModel.obs.SPObservation
 import edu.gemini.spModel.rich.shared.immutable._
 
