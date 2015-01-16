@@ -27,7 +27,7 @@ case class CatalogSearchCriterion(name: String, magLimits: MagnitudeConstraints,
   def adjustedBase(base: Coordinates): Coordinates = {
     (offset |@| posAngle) { (off, a) =>
       val pa = a.toRadians
-      if (pa != 0.0) {
+      (pa != 0.0) option {
         val p = off.p.toDegrees
         val q = off.q.toDegrees
         val cosa = Math.cos(pa)
@@ -36,9 +36,7 @@ case class CatalogSearchCriterion(name: String, magLimits: MagnitudeConstraints,
         val dec = -p * sina + q * cosa
         val raAngle = base.ra.offset(Angle.fromDegrees(ra))
         val decAngle = base.dec.offset(Angle.fromDegrees(dec))
-        Coordinates(raAngle, decAngle._1).some
-      } else {
-        none[Coordinates]
+        Coordinates(raAngle, decAngle._1)
       }
     }.flatten | base
   }
