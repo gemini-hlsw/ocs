@@ -325,11 +325,8 @@ public final class AcqCamRecipe extends RecipeBase {
         // Calculate image quality
         double im_qual = 0.;
         
-        ImageQualityCalculationFactory IQcalcFactory = new ImageQualityCalculationFactory();
         ImageQualityCalculatable IQcalc =
-                (ImageQualityCalculatable) IQcalcFactory.getCalculationInstance(
-                _sdParameters, _obsDetailParameters, _obsConditionParameters,
-                _teleParameters, instrument);
+                ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
         IQcalc.calculate();
         
         im_qual = IQcalc.getImageQuality();
@@ -337,11 +334,8 @@ public final class AcqCamRecipe extends RecipeBase {
         
         
 //Calculate Source fraction
-        SourceFractionCalculationFactory SFcalcFactory = new SourceFractionCalculationFactory();
         SourceFractionCalculatable SFcalc =
-                (SourceFractionCalculatable) SFcalcFactory.getCalculationInstance(
-                _sdParameters, _obsDetailParameters, _obsConditionParameters,
-                _teleParameters, instrument);
+                SourceFractionCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
         SFcalc.setImageQuality(im_qual);
         SFcalc.calculate();
         _print(SFcalc.getTextResult(device));
@@ -397,11 +391,8 @@ public final class AcqCamRecipe extends RecipeBase {
         
         //Calculate the Signal to Noise
         
-        ImagingS2NCalculationFactory IS2NcalcFactory = new ImagingS2NCalculationFactory();
         ImagingS2NCalculatable IS2Ncalc =
-                (ImagingS2NCalculatable) IS2NcalcFactory.getCalculationInstance(
-                _sdParameters, _obsDetailParameters, _obsConditionParameters,
-                _teleParameters, instrument);
+                ImagingS2NCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
         IS2Ncalc.setSedIntegral(sed_integral);
         IS2Ncalc.setSkyIntegral(sky_integral);
         IS2Ncalc.setSkyAperture(_obsDetailParameters.getSkyApertureDiameter());

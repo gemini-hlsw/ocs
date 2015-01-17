@@ -395,21 +395,16 @@ public final class GmosRecipe extends RecipeBase {
 
             // Calculate image quality
             double im_qual = 0.;
-            ImageQualityCalculationFactory IQcalcFactory = new ImageQualityCalculationFactory();
-            ImageQualityCalculatable IQcalc = (ImageQualityCalculatable) IQcalcFactory
-                    .getCalculationInstance(_sdParameters, _obsDetailParameters,
-                            _obsConditionParameters, _teleParameters, instrument);
+            ImageQualityCalculatable IQcalc =
+                    ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
             IQcalc.calculate();
 
             im_qual = IQcalc.getImageQuality();
 
             if (!instrument.IFU_IsUsed()) {
                 // Calculate the Fraction of source in the aperture
-                SourceFractionCalculationFactory SFcalcFactory = new SourceFractionCalculationFactory();
-                SourceFractionCalculatable SFcalc = (SourceFractionCalculatable) SFcalcFactory
-                        .getCalculationInstance(_sdParameters,
-                                _obsDetailParameters, _obsConditionParameters,
-                                _teleParameters, instrument);
+                SourceFractionCalculatable SFcalc =
+                        SourceFractionCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
                 SFcalc.setImageQuality(im_qual);
                 SFcalc.calculate();
                 source_fraction = SFcalc.getSourceFraction();
@@ -691,11 +686,8 @@ public final class GmosRecipe extends RecipeBase {
                     _println("");
                 }
             } else {
-                ImagingS2NCalculationFactory IS2NcalcFactory = new ImagingS2NCalculationFactory();
-                ImagingS2NCalculatable IS2Ncalc = (ImagingS2NCalculatable) IS2NcalcFactory
-                        .getCalculationInstance(_sdParameters,
-                                _obsDetailParameters, _obsConditionParameters,
-                                _teleParameters, instrument);
+                ImagingS2NCalculatable IS2Ncalc =
+                        ImagingS2NCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
                 IS2Ncalc.setSedIntegral(sed_integral);
                 IS2Ncalc.setSkyIntegral(sky_integral);
                 IS2Ncalc.setSkyAperture(_obsDetailParameters

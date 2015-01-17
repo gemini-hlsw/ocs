@@ -456,10 +456,8 @@ public final class NiciRecipe extends RecipeBase {
 		// Calculate image quality without AO correction
 		// double im_qual = 0.;
 
-		ImageQualityCalculationFactory IQcalcFactory = new ImageQualityCalculationFactory();
-		ImageQualityCalculatable IQcalc = (ImageQualityCalculatable) IQcalcFactory
-				.getCalculationInstance(_sdParameters, _obsDetailParameters,
-						_obsConditionParameters, _teleParameters, instrument);
+		ImageQualityCalculatable IQcalc =
+				ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
 		IQcalc.calculate();
 
 		double uncorrected_im_qual = IQcalc.getImageQuality();
@@ -478,10 +476,8 @@ public final class NiciRecipe extends RecipeBase {
 		double halo_integral = halo.getIntegral();
 
 		// Calculate Source fractions of halo and core
-		SourceFractionCalculationFactory SFcalcFactory = new SourceFractionCalculationFactory();
-		SourceFractionCalculatable SFcalc = (SourceFractionCalculatable) SFcalcFactory
-				.getCalculationInstance(_sdParameters, _obsDetailParameters,
-						_obsConditionParameters, _teleParameters, instrument);
+		SourceFractionCalculatable SFcalc =
+				SourceFractionCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
 
 		// SFcalc.setSFPrint();
 
@@ -587,10 +583,8 @@ public final class NiciRecipe extends RecipeBase {
 		// Includes halo SED via setting secondary integral value in
 		// ImagingS2NCalculatable object
 
-		ImagingS2NCalculationFactory IS2NcalcFactory = new ImagingS2NCalculationFactory();
-		ImagingS2NCalculatable IS2Ncalc = (ImagingS2NCalculatable) IS2NcalcFactory
-				.getCalculationInstance(_sdParameters, _obsDetailParameters,
-						_obsConditionParameters, _teleParameters, instrument);
+		ImagingS2NCalculatable IS2Ncalc =
+				ImagingS2NCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
 		IS2Ncalc.setSedIntegral(sed_integral);
 		IS2Ncalc.setSecondaryIntegral(halo_integral);
 		IS2Ncalc.setSecondarySourceFraction(halo_source_fraction);
