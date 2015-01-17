@@ -1,65 +1,17 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-//
 package edu.gemini.itc.flamingos2;
 
-import java.io.PrintWriter;
-import java.util.Calendar;
+import edu.gemini.itc.operation.*;
+import edu.gemini.itc.parameters.*;
+import edu.gemini.itc.shared.*;
 
 import javax.servlet.http.HttpServletRequest;
-import edu.gemini.itc.shared.FormatStringWriter;
-import edu.gemini.itc.shared.ITCChart;
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.RecipeBase;
-import edu.gemini.itc.shared.SampledSpectrumVisitor;
-import edu.gemini.itc.shared.SEDFactory;
-import edu.gemini.itc.shared.VisitableSampledSpectrum;
-import edu.gemini.itc.shared.WavebandDefinition;
-import edu.gemini.itc.shared.ITCMultiPartParser;
-
-import edu.gemini.itc.parameters.PlottingDetailsParameters;
-import edu.gemini.itc.parameters.SourceDefinitionParameters;
-import edu.gemini.itc.parameters.ObservationDetailsParameters;
-import edu.gemini.itc.parameters.ObservingConditionParameters;
-import edu.gemini.itc.parameters.TeleParameters;
-
-import edu.gemini.itc.altair.Altair;
-import edu.gemini.itc.altair.AltairBackgroundVisitor;
-import edu.gemini.itc.altair.AltairFluxAttenuationVisitor;
-import edu.gemini.itc.altair.AltairParameters;
-import edu.gemini.itc.altair.AltairTransmissionVisitor;
-import edu.gemini.itc.operation.ResampleVisitor;
-import edu.gemini.itc.operation.RedshiftVisitor;
-import edu.gemini.itc.operation.AtmosphereVisitor;
-import edu.gemini.itc.operation.SlitThroughput;
-//import edu.gemini.itc.operation.SpecS2NVisitor;
-import edu.gemini.itc.operation.SpecS2NLargeSlitVisitor;
-import edu.gemini.itc.operation.TelescopeApertureVisitor;
-import edu.gemini.itc.operation.TelescopeTransmissionVisitor;
-import edu.gemini.itc.operation.TelescopeBackgroundVisitor;
-import edu.gemini.itc.operation.NormalizeVisitor;
-import edu.gemini.itc.operation.CloudTransmissionVisitor;
-import edu.gemini.itc.operation.WaterTransmissionVisitor;
-import edu.gemini.itc.operation.PeakPixelFluxCalc;
-import edu.gemini.itc.operation.ImageQualityCalculatable;
-import edu.gemini.itc.operation.ImageQualityCalculationFactory;
-import edu.gemini.itc.operation.SourceFractionCalculationFactory;
-import edu.gemini.itc.operation.SourceFractionCalculatable;
-import edu.gemini.itc.operation.ImagingS2NCalculationFactory;
-import edu.gemini.itc.operation.ImagingS2NCalculatable;
+import java.io.PrintWriter;
+import java.util.Calendar;
 
 /**
  * This class performs the calculations for Flamingos 2 used for imaging.
  */
 public final class Flamingos2Recipe extends RecipeBase {
-
-	private AltairParameters _altairParameters;
 
 	private Flamingos2Parameters _flamingos2Parameters;
 	private String _header = new StringBuffer("# Flamingos-2 ITC: "
@@ -93,8 +45,6 @@ public final class Flamingos2Recipe extends RecipeBase {
 		_flamingos2Parameters = new Flamingos2Parameters(r);
 		_teleParameters = new TeleParameters(r);
 		_plotParameters = new PlottingDetailsParameters(r);
-
-		_altairParameters = new AltairParameters(r);
 	}
 
 	/**
@@ -118,8 +68,6 @@ public final class Flamingos2Recipe extends RecipeBase {
 		_flamingos2Parameters = new Flamingos2Parameters(r);
 		_teleParameters = new TeleParameters(r);
 		_plotParameters = new PlottingDetailsParameters(r);
-
-		_altairParameters = new AltairParameters(r);
 	}
 
 	/**
@@ -131,7 +79,6 @@ public final class Flamingos2Recipe extends RecipeBase {
 			ObservingConditionParameters obsConditionParameters,
 			Flamingos2Parameters flamingos2Parameters,
 			TeleParameters teleParameters,
-			AltairParameters altairParameters, 
 			PlottingDetailsParameters plotParameters,
 			PrintWriter out) {
 		super(out);
@@ -140,7 +87,6 @@ public final class Flamingos2Recipe extends RecipeBase {
 		_obsConditionParameters = obsConditionParameters;
 		_flamingos2Parameters = flamingos2Parameters;
 		_teleParameters = teleParameters;
-		_altairParameters = altairParameters;
 		_plotParameters = plotParameters;
 	}
 
@@ -372,93 +318,14 @@ public final class Flamingos2Recipe extends RecipeBase {
 
 		im_qual = IQcalc.getImageQuality();
 
-		if (_altairParameters.altairIsUsed()) {
-			if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.SPECTROSCOPY)) {
-				throw new Exception(
-						"Altair cannot currently be used with Spectroscopy mode in the ITC."
-								+ "Please deselect either altair or spectroscopy and resubmit the form.");
-			}
-			Altair altair = new Altair(instrument.getEffectiveWavelength(),
-					_teleParameters.getTelescopeDiameter(), im_qual,
-					_altairParameters.getGuideStarSeperation(),
-					_altairParameters.getGuideStarMagnitude(),
-					_altairParameters.getWFSMode(),
-					_altairParameters.fieldLensIsUsed(),
-                    0.0);
-			AltairBackgroundVisitor altairBackgroundVisitor = new AltairBackgroundVisitor();
-			AltairTransmissionVisitor altairTransmissionVisitor = new AltairTransmissionVisitor();
-			AltairFluxAttenuationVisitor altairFluxAttenuationVisitor = new AltairFluxAttenuationVisitor(
-					altair.getFluxAttenuation());
-			AltairFluxAttenuationVisitor altairFluxAttenuationVisitorHalo = new AltairFluxAttenuationVisitor(
-					(1 - altair.getStrehl()));
-			sky.accept(altairBackgroundVisitor);
-
-			sed.accept(altairTransmissionVisitor);
-			sky.accept(altairTransmissionVisitor);
-
-			// Moved Background visitor here so Altair background isn't affected
-			// by Altair's own transmission. Correct? - MD 20090723
-			// Moved back for now. The instrument background is done the other
-			// way (background is affected by instrument transmission)
-
-			// sky.accept(altairBackgroundVisitor);
-
-			halo = (VisitableSampledSpectrum) sed.clone();
-			halo.accept(altairFluxAttenuationVisitorHalo);
-			halo_integral = halo.getIntegral();
-
-			sed.accept(altairFluxAttenuationVisitor);
-
-			uncorrected_im_qual = im_qual; // Save uncorrected value for the
-											// image quality for later use
-
-			im_qual = altair.getAOCorrectedFWHMc();
-
-			int previousPrecision = device.getPrecision();
-			device.setPrecision(3); // Two decimal places
-			device.clear();
-			_println(altair.printSummary(device));
-			// _println(altair.toString());
-			device.setPrecision(previousPrecision); // Two decimal places
-			device.clear();
-		}
-
 		// Calculate Source fraction
 		SourceFractionCalculatable SFcalc =
 				SourceFractionCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
 
-		// if altair is used we need to calculate both a core and halo
-		// source_fraction
-		// halo first
-		if (_altairParameters.altairIsUsed()) {
-			// If altair is used turn off printing of SF calc
-			SFcalc.setSFPrint(false);
-			if (_obsDetailParameters.getApertureType().equals(
-					_obsDetailParameters.AUTO_APER)) {
-				SFcalc.setApType(_obsDetailParameters.USER_APER);
-				SFcalc.setApDiam(1.18 * im_qual);
-			}
-			SFcalc.setImageQuality(uncorrected_im_qual);
-			SFcalc.calculate();
-			halo_source_fraction = SFcalc.getSourceFraction();
-			if (_obsDetailParameters.getApertureType().equals(
-					_obsDetailParameters.AUTO_APER)) {
-				SFcalc.setApType(_obsDetailParameters.AUTO_APER);
-			}
-		}
-
 		SFcalc.setImageQuality(im_qual);
 		SFcalc.calculate();
 		_print(SFcalc.getTextResult(device));
-
-		if (_altairParameters.altairIsUsed()
-				&& _obsDetailParameters.getCalculationMode().equals(
-						ObservationDetailsParameters.IMAGING)) {
-			_println("Derived image halo size (FWHM) for a point source = "
-					+ device.toString(uncorrected_im_qual) + " arcsec.\n");
-		} else {
-			_println(IQcalc.getTextResult(device));
-		}
+		_println(IQcalc.getTextResult(device));
 
 		// Calculate the Peak Pixel Flux
 		PeakPixelFluxCalc ppfc;
@@ -473,15 +340,6 @@ public final class Flamingos2Recipe extends RecipeBase {
 					sky_integral, instrument.getDarkCurrent());
 
 			peak_pixel_count = ppfc.getFluxInPeakPixel();
-
-			if (_altairParameters.altairIsUsed()) {
-				PeakPixelFluxCalc ppfc_halo = new PeakPixelFluxCalc(
-						uncorrected_im_qual, pixel_size,
-						_obsDetailParameters.getExposureTime(), halo_integral,
-						sky_integral, instrument.getDarkCurrent());
-				peak_pixel_count = peak_pixel_count
-						+ ppfc_halo.getFluxInPeakPixel();
-			}
 
 		} else if (_sdParameters.getExtendedSourceType().equals(
 				SourceDefinitionParameters.UNIFORM)) {
@@ -603,35 +461,25 @@ public final class Flamingos2Recipe extends RecipeBase {
 					}
 				}
 			}
-            // OLD:
-            //specS2N = new SpecS2NVisitor(_flamingos2Parameters.getSlitSize()*pixel_size,
-            //        pixel_size, instrument.getSpectralPixelWidth(),
-            //        instrument.getObservingStart(),
-            //        instrument.getObservingEnd(),
-            //        instrument.getGrismResolution(), spec_source_frac, im_qual,
-            //        ap_diam, number_exposures, frac_with_source, exposure_time,
-            //        dark_current, read_noise);
-            // NEW:
+
+			final double gratDispersion_nmppix = instrument.getSpectralPixelWidth();
+			final double gratDispersion_nm = 0.5 / pixel_size * gratDispersion_nmppix;
+
             specS2N = new SpecS2NLargeSlitVisitor(_flamingos2Parameters.getSlitSize()*pixel_size,
 					pixel_size, instrument.getSpectralPixelWidth(),
 					instrument.getObservingStart(),
 					instrument.getObservingEnd(),
-					instrument.getSpectralPixelWidth() * ap_diam, instrument.getSpectralPixelWidth(),
+					gratDispersion_nm,
+					gratDispersion_nmppix,
                     instrument.getGrismResolution(), spec_source_frac, im_qual,
 					ap_diam, number_exposures, frac_with_source, exposure_time,
 					dark_current, read_noise,
                     _obsDetailParameters.getSkyApertureDiameter(), 1);
-			//specS2N.setCcdPixelRange(firstCcdIndex, lastCcdIndex);
+
             specS2N.setDetectorTransmission(instrument.getDetectorTransmision());
             specS2N.setSourceSpectrum(sed);
 			specS2N.setBackgroundSpectrum(sky);
-
-			if (_altairParameters.altairIsUsed()) {
-				double halo_spec_source_frac = st_halo.getSlitThroughput();
-				specS2N.setSpecHaloSourceFraction(halo_spec_source_frac);
-			}
-			else
-				specS2N.setSpecHaloSourceFraction(0.0);
+			specS2N.setSpecHaloSourceFraction(0.0);
 
 			sed.accept(specS2N);
 			_println("<p style=\"page-break-inside: never\">");
@@ -684,11 +532,6 @@ public final class Flamingos2Recipe extends RecipeBase {
 					ImagingS2NCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
 			IS2Ncalc.setSedIntegral(sed_integral);
 
-			if (_altairParameters.altairIsUsed()) {
-				IS2Ncalc.setSecondaryIntegral(halo_integral);
-				IS2Ncalc.setSecondarySourceFraction(halo_source_fraction);
-			}
-			
 			IS2Ncalc.setSkyIntegral(sky_integral);
 			IS2Ncalc.setSkyAperture(_obsDetailParameters
 					.getSkyApertureDiameter());
@@ -731,13 +574,7 @@ public final class Flamingos2Recipe extends RecipeBase {
 		_println(_sdParameters.printParameterSummary());
 		_println(instrument.toString());
 
-		if (_altairParameters.altairIsUsed()) {
-			_println(_teleParameters.printParameterSummary("altair"));
-			_println(_altairParameters.printParameterSummary());
-		} else {
-			_println(_teleParameters.printParameterSummary());
-		}
-
+		_println(_teleParameters.printParameterSummary());
 		_println(_obsConditionParameters.printParameterSummary());
 		_println(_obsDetailParameters.printParameterSummary());
 

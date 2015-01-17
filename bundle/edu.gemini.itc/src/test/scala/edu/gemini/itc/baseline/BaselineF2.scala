@@ -23,14 +23,13 @@ object BaselineF2 {
 
 
   def executeRecipe(e: Environment, o: F2Observation): Output =
-    cookRecipe(w => new Flamingos2Recipe(e.src, o.odp, e.ocp, o.ins, e.tep, o.alt, e.pdp, w))
+    cookRecipe(w => new Flamingos2Recipe(e.src, o.odp, e.ocp, o.ins, e.tep, e.pdp, w))
 
   // F2 imaging observations
   private def imgObs() = for {
     odp  <- Observation.ImagingObservations
-    alt  <- Environment.AltairConfigurations
     conf <- imagingConfigs()
-  } yield F2Observation(odp, conf, alt)
+  } yield F2Observation(odp, conf)
 
   private def imagingConfigs() = List(
     new Flamingos2Parameters(
@@ -40,11 +39,11 @@ object BaselineF2 {
       "lowNoise")                         // read noise
   )
 
-  // F2 spectroscopy observations, note: altair does not support spectroscopy
+  // F2 spectroscopy observations
   private def specObs() = for {
     odp  <- Observation.SpectroscopyObservations
     conf <- spectroscopyConfigs()
-  } yield F2Observation(odp, conf, Environment.NoAltair)
+  } yield F2Observation(odp, conf)
 
   private def spectroscopyConfigs() = List(
     new Flamingos2Parameters(

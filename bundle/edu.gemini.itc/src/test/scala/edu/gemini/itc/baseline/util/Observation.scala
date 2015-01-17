@@ -26,6 +26,7 @@ sealed trait Observation {
   val hash = Hash.calc(odp)*37 + Hash.calc(ins)
 }
 case class AcqCamObservation(odp: ObservationDetailsParameters, ins: AcquisitionCamParameters) extends Observation
+case class F2Observation(odp: ObservationDetailsParameters, ins: Flamingos2Parameters) extends Observation
 case class GmosObservation(odp: ObservationDetailsParameters, ins: GmosParameters) extends Observation
 case class GnirsObservation(odp: ObservationDetailsParameters, ins: GnirsParameters) extends Observation
 case class MichelleObservation(odp: ObservationDetailsParameters, ins: MichelleParameters) extends Observation
@@ -39,7 +40,6 @@ sealed trait AltairObservation extends Observation {
   val alt: AltairParameters
   override val hash = (Hash.calc(odp)*37 + Hash.calc(ins))*37 + Hash.calc(alt)
 }
-case class F2Observation(odp: ObservationDetailsParameters, ins: Flamingos2Parameters, alt: AltairParameters) extends AltairObservation
 case class NifsObservation(odp: ObservationDetailsParameters, ins: NifsParameters, alt: AltairParameters) extends AltairObservation
 case class NiriObservation(odp: ObservationDetailsParameters, ins: NiriParameters, alt: AltairParameters) extends AltairObservation
 
