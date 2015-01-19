@@ -1,5 +1,6 @@
 package edu.gemini.ags.gems.mascot
 
+import edu.gemini.spModel.core.MagnitudeBand
 import jsky.coords.WorldCoords
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.system.CoordinateParam.Units
@@ -43,18 +44,18 @@ object MascotGuideStar {
    * tuple contains only the asterisms that are valid for the guide star at that position angle
    * and ra,dec base position
    */
-  def findBestAsterism(ctx: ObsContext,
+  protected [mascot] def findBestAsterism(ctx: ObsContext,
                        guideStarType: GuideStarType,
                        posAngleTolerance: Double = 0,
                        basePosTolerance: Double = 0,
-                       bandpass: String = null,
+                       bandpass: Option[MagnitudeBand] = None,
                        factor: Double = 1.0,
                        magLimits: MagLimits = defaultMagLimits,
                        catName: String = MascotCat.defaultCatalogName,
                        progress: (Strehl, Int, Int) => Unit = Mascot.defaultProgress)
   : List[(List[Strehl], Double, Double, Double)] = {
 
-    val bp = if (bandpass != null) bandpass else guideStarType.defaultBandpass
+    val bp = bandpass.getOrElse(guideStarType.defaultBandpass)
     val basePos = ctx.getBaseCoordinates
     val coords = new WorldCoords(basePos.getRaDeg, basePos.getDecDeg)
     val maxRadius = MascotCat.defaultMaxRadius + basePosTolerance / 60.0
@@ -90,18 +91,18 @@ object MascotGuideStar {
    * tuple contains only the asterisms that are valid for the guide star at that position angle
    * and ra,dec base position
    */
-  def findBestAsterismByQueryArgs(queryArgs: QueryArgs,
+  private def findBestAsterismByQueryArgs(queryArgs: QueryArgs,
                                   ctx: ObsContext,
                                   guideStarType: GuideStarType,
                                   posAngleTolerance: Double = 0,
                                   basePosTolerance: Double = 0,
-                                  bandpass: String = Mascot.defaultBandpass,
+                                  bandpass: Option[MagnitudeBand] = Some(Mascot.defaultBandpass),
                                   factor: Double = 1.0,
                                   magLimits: MagLimits = defaultMagLimits,
                                   progress: (Strehl, Int, Int) => Unit = Mascot.defaultProgress)
   : List[(List[Strehl], Double, Double, Double)] = {
 
-    val bp = if (bandpass != null) bandpass else guideStarType.defaultBandpass
+    val bp = bandpass.getOrElse(guideStarType.defaultBandpass)
     val simple = posAngleTolerance == 0.0 && basePosTolerance == 0.0
     val guideStarFilter = guideStarType.filter(ctx, magLimits, _: Star)
     // If no tolerances were given, wen can do more filtering up front
@@ -132,18 +133,18 @@ object MascotGuideStar {
    * tuple contains only the asterisms that are valid for the guide star at that position angle
    * and ra,dec base position
    */
-  def findBestAsterismInQueryResult(queryResult: TableQueryResult,
+  protected [mascot] def findBestAsterismInQueryResult(queryResult: TableQueryResult,
                                     ctx: ObsContext,
                                     guideStarType: GuideStarType,
                                     posAngleTolerance: Double = 0,
                                     basePosTolerance: Double = 0,
-                                    bandpass: String = Mascot.defaultBandpass,
+                                    bandpass: Option[MagnitudeBand] = Some(Mascot.defaultBandpass),
                                     factor: Double = Mascot.defaultFactor,
                                     magLimits: MagLimits = defaultMagLimits,
                                     progress: (Strehl, Int, Int) => Unit = Mascot.defaultProgress)
   : List[(List[Strehl], Double, Double, Double)] = {
 
-    val bp = if (bandpass != null) bandpass else guideStarType.defaultBandpass
+    val bp = bandpass.getOrElse(guideStarType.defaultBandpass)
     val simple = posAngleTolerance == 0.0 && basePosTolerance == 0.0
     val guideStarFilter = guideStarType.filter(ctx, magLimits, _: Star)
     // If no tolerances were given, wen can do more filtering up front
@@ -171,7 +172,7 @@ object MascotGuideStar {
    * tuple contains only the asterisms that are valid for the guide star at that position angle
    * and ra,dec base position
    */
-  def asterismFilter(ctx: ObsContext,
+  private def asterismFilter(ctx: ObsContext,
                      guideStarFilter: Star => Boolean,
                      posAngleTolerance: Double = 0.0,
                      basePosTolerance: Double = 0.0,
@@ -206,7 +207,7 @@ object MascotGuideStar {
    * @param pa the position angle
    * @param posAngleTolerance position angle can be +- this amount in degrees
    */
-  def positionAnglesToTry(pa: Double, posAngleTolerance: Double): List[Double] = {
+  private def positionAnglesToTry(pa: Double, posAngleTolerance: Double): List[Double] = {
     if (posAngleTolerance == 0.0) {
       List(pa)
     } else {
@@ -226,7 +227,7 @@ object MascotGuideStar {
    * @param dec the dec coordinate
    * @param basePosTolerance base position can be +- this amount in arcsec
    */
-  def basePositionsToTry(ra: Double, dec: Double, basePosTolerance: Double): List[(Double, Double)] = {
+  private def basePositionsToTry(ra: Double, dec: Double, basePosTolerance: Double): List[(Double, Double)] = {
     if (basePosTolerance == 0.0) {
       List((ra, dec))
     } else {
@@ -262,7 +263,7 @@ object MascotGuideStar {
    * @param posAngleTolerance position angle can be +- this amount in degrees
    * @param basePosTolerance base position can be +- this amount in arcsec
    */
-  def settingsToTry(pa: Double,
+  private def settingsToTry(pa: Double,
                     ra: Double,
                     dec: Double,
                     posAngleTolerance: Double,

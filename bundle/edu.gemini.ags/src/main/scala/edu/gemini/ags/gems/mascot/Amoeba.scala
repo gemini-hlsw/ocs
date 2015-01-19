@@ -93,10 +93,10 @@ object Amoeba {
       //Each iteration
       // Porting note: yorick sort returns the indexes of the sorted items!
       val s = sort(y)
-      val ilo = s(0); //Lowest point
+      val ilo = s(0) //Lowest point
       val ihi = s(ndim); //Highest point
-      val inhi = s(ndim - 1); //Next highest point
-      val d = math.abs(y(ihi)) + math.abs(y(ilo)); //Denominator = interval
+      val inhi = s(ndim - 1) //Next highest point
+      val d = math.abs(y(ihi)) + math.abs(y(ilo)) //Denominator = interval
       //Terminate if interval is 0
       val rtol = if (d != 0.0) 2.0 * math.abs(y(ihi) - y(ilo)) / d else ftol / 2.0
 

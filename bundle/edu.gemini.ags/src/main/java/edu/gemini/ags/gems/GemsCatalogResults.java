@@ -8,6 +8,7 @@ import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.Coordinates;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.core.Target;
 import edu.gemini.spModel.gemini.gems.Canopus;
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
@@ -62,10 +63,10 @@ public class GemsCatalogResults {
                 if (progress != null) {
                     progress.setProgressTitle("Finding asterisms for " + tiptiltGroup.getKey());
                 }
-                final Magnitude.Band bandpass = getBandpass(tiptiltGroup, obsContext.getInstrument());
+                final MagnitudeBand bandpass = getBandpass(tiptiltGroup, obsContext.getInstrument());
                 final double factor = getStrehlFactor(new Some<>(obsContext));
-                final MascotCat.StrehlResults strehlResults = MascotCat.javaFindBestAsterismInSkyObjectList(
-                        tiptiltTargetsList, base.getRaDeg(), base.getDecDeg(), bandpass.name(), factor, progress);
+                final MascotCat.StrehlResults strehlResults = MascotCat.javaFindBestAsterismInTargetsList(
+                        tiptiltTargetsList, base.getRaDeg(), base.getDecDeg(), bandpass, factor, progress);
                 for (Strehl strehl : strehlResults.strehlList()) {
                     result.addAll(analyzeAtAngles(obsContext, posAngles, strehl, flexureTargetsList, flexureGroup,
                             tiptiltGroup));
@@ -106,7 +107,7 @@ public class GemsCatalogResults {
                 if (progress != null) {
                     progress.setProgressTitle("Finding asterisms for " + tiptiltGroup.getKey());
                 }
-                final Magnitude.Band bandpass = getBandpass(tiptiltGroup, obsContext.getInstrument());
+                final MagnitudeBand bandpass = getBandpass(tiptiltGroup, obsContext.getInstrument());
                 final MascotProgress strehlHandler = new MascotProgress() {
                     @Override
                     public boolean progress(Strehl strehl, int count, int total, boolean usable) {
@@ -125,8 +126,8 @@ public class GemsCatalogResults {
 
                 final double factor = getStrehlFactor(new Some<>(obsContext));
                 try {
-                    MascotCat.javaFindBestAsterismInSkyObjectList(
-                            tiptiltTargetsList, base.getRaDeg(), base.getDecDeg(), bandpass.name(), factor, strehlHandler);
+                    MascotCat.javaFindBestAsterismInTargetsList(
+                            tiptiltTargetsList, base.getRaDeg(), base.getDecDeg(), bandpass, factor, strehlHandler);
                 } catch (CancellationException e) {
                     // continue on with results so far?
                 }
@@ -429,7 +430,7 @@ public class GemsCatalogResults {
     private List<Target.SiderealTarget> getTargetListFromStrehl(final Strehl strehl) {
         final List<Target.SiderealTarget> targetList = new ArrayList<>();
         for(Star star : strehl.getStars()) {
-            targetList.add(GemsUtils4Java.starToSiderealTarget(star));
+            targetList.add(star.target());
         }
         return GemsUtils4Java.sortTargetsByBrightness(targetList);
     }
@@ -438,17 +439,17 @@ public class GemsCatalogResults {
     // see OT-22 for a mapping of GSAOI filters to J, H, and K.
     // If iterating over filters, I think we can assume the filter in
     // the static component as a first pass at least.
-    private Magnitude.Band getBandpass(final GemsGuideProbeGroup group, final SPInstObsComp inst) {
+    private MagnitudeBand getBandpass(final GemsGuideProbeGroup group, final SPInstObsComp inst) {
         if (group == GsaoiOdgw.Group.instance) {
             if (inst instanceof Gsaoi) {
                 final Gsaoi gsaoi = (Gsaoi) inst;
                 final Option<Magnitude.Band> band = gsaoi.getFilter().getCatalogBand();
                 if (!band.isEmpty()) {
-                    return band.getValue();
+                    return GemsUtils4Java.toNewBand(band.getValue());
                 }
             }
         }
-        return Magnitude.Band.R;
+        return GemsUtils4Java.toNewBand(Magnitude.Band.R);
     }
 
     // REL-426: Multiply the average, min, and max Strehl values reported by Mascot by the following scale

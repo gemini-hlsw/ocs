@@ -11,8 +11,8 @@ import breeze.util._
 object MascotConf {
 
   // MASCOT PARAMETERS
-  val mag_min_threshold = 6.5   // XXX allan: changed from 10.
-  val mag_max_threshold = 21.2  // XXX allan: changed from 17.5
+  val mag_min_threshold = Some(6.5)   // XXX allan: changed from 10.
+  val mag_max_threshold = Some(21.2)  // XXX allan: changed from 17.5
   val nstar_limit = 7
   val get_2mass_image = true
 
@@ -60,7 +60,7 @@ object MascotConf {
   val alt = DenseVector(0.0, 1800.0, 3300.0, 5800.0, 7400.0, 13100.0, 15800.0)
 
   // first coef in equation below is estimate with outer scale: in rd^2, from Noll w/ outer scale
-  val rmstt1 = 0.30 * (math.pow((7.9 / r0vis), 1.666))
+  val rmstt1 = 0.30 * math.pow(7.9 / r0vis, 1.666)
   // in rd rms, difference at edges.
   val rmstt2 = math.sqrt(rmstt1) * 4.0
   // in meters, difference at edges
