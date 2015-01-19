@@ -15,13 +15,13 @@ case class MagLimits private (bmag: Double,
                      kmag: Double) {
 
   // preallocate to use in filter
-  private lazy val filters = List(new Magnitude(bmag, MagnitudeBand.B).some, new Magnitude(vmag, MagnitudeBand.V).some, new Magnitude(rmag, MagnitudeBand.R).some, new Magnitude(jmag, MagnitudeBand.J).some, new Magnitude(hmag, MagnitudeBand.H).some, new Magnitude(kmag, MagnitudeBand.K).some)
+  private lazy val filters = List(new Magnitude(bmag, MagnitudeBand.B), new Magnitude(vmag, MagnitudeBand.V), new Magnitude(rmag, MagnitudeBand.R), new Magnitude(jmag, MagnitudeBand.J), new Magnitude(hmag, MagnitudeBand.H), new Magnitude(kmag, MagnitudeBand.K))
 
   /**
    * Returns true if the given star is within the mag limits
    */
   def filter(star: Star): Boolean =
-    filters.map(f => star.target.magnitudeIn(f.get.band) <= f).map(Tags.Conjunction).suml
+    filters.forall { m => star.target.magnitudeIn(m.band).exists(_.value <= m.value) }
 }
 
 
