@@ -147,7 +147,7 @@ object MascotGuideStar {
     val bp = bandpass.getOrElse(guideStarType.defaultBandpass)
     val simple = posAngleTolerance == 0.0 && basePosTolerance == 0.0
     val guideStarFilter = guideStarType.filter(ctx, magLimits, _: Star)
-    // If no tolerances were given, wen can do more filtering up front
+    // If no tolerances were given, we can do more filtering up front
     val filter = if (simple) guideStarFilter else magLimits.filter _
     val (_, strehlList) = MascotCat.findBestAsterismInQueryResult(queryResult, bp, factor, progress, filter)
     if (simple) {

@@ -196,6 +196,8 @@ object GemsStrategy extends AgsStrategy {
       else                               resultMap
     })
     checker.values.find(!_).map(_ => results)
+
+
   }
 
   private def findGuideStars(ctx: ObsContext, posAngles: Set[Angle], results: List[GemsCatalogSearchResults]): Option[GemsGuideStars] = {
