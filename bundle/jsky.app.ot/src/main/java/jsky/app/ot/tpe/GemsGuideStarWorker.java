@@ -190,22 +190,6 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     }
 
     /**
-     * Do the catalog part of the search using the default settings and return the results.
-     *
-     * @return catalog search results
-     */
-    public List<GemsCatalogSearchResults> search() throws Exception {
-        WorldCoords basePos = tpe.getBasePos();
-        ObsContext obsContext = getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
-        Set<Angle> posAngles = getPosAngles(obsContext);
-        // REL-1442: only allow CWFS asterisms for now
-//        return search(GemsGuideStarSearchOptions.DEFAULT_CATALOG, GemsGuideStarSearchOptions.DEFAULT_CATALOG,
-//                GemsTipTiltMode.both, obsContext, posAngles, None.<Magnitude.Band>instance());
-        return search(GemsGuideStarSearchOptions.DEFAULT_CATALOG, GemsGuideStarSearchOptions.DEFAULT_CATALOG,
-                GemsTipTiltMode.canopus, obsContext, posAngles, None.<MagnitudeBand>instance());
-    }
-
-    /**
      * Returns a set of position angles to use for the search, including the current one
      * used in the given obsContext.
      *
@@ -332,10 +316,10 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         if (gemsGuideStarsList.size() == 0) {
             return gemsGuideStarsList;
         }
-        Angle angle = Angle.degrees(gemsGuideStarsList.get(0).getPa().toDegrees());
+        edu.gemini.spModel.core.Angle positionAngle = gemsGuideStarsList.get(0).getPa();
         List<GemsGuideStars> result = new ArrayList<>(gemsGuideStarsList.size());
         for (GemsGuideStars gemsGuideStars : gemsGuideStarsList) {
-            if (angle.equals(gemsGuideStars.getPa())) {
+            if (positionAngle.equals(gemsGuideStars.getPa())) {
                 result.add(gemsGuideStars);
             }
         }
