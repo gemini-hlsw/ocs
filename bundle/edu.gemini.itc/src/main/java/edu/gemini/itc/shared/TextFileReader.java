@@ -238,24 +238,6 @@ public class TextFileReader {
         return d;
     }
 
-    /**
-     * Reads next token and tries to parse as a boolean.
-     * @return next data item in stream if it parses to boolean.
-     * @throws IOException if eof reached, ParseException
-     * if next item can't be parsed as an boolean.
-     */
-    public boolean readBoolean() throws ParseException, IOException {
-        if (!hasMoreData()) {
-            _throwEOF();
-        }
-        String s = _st.nextToken();
-        s = s.toUpperCase();
-        if (s.equals("T") || s.equals("TRUE")) return true;
-        if (s.equals("F") || s.equals("FALSE")) return false;
-        _throwParseException("boolean", s);
-        return false;
-    }
-
     // Throws a ParseException when token fails to parse.
     private void _throwParseException(String type, String token)
             throws ParseException {
@@ -292,51 +274,4 @@ public class TextFileReader {
         return true;
     }
 
-    /**
-     * Test driver.  Command line parameter is interpreted as name of
-     * data file to read.  For this test each non-comment line of the
-     * data file should contain an int followed by a float followed
-     * by string followed by boolean.
-     */
-    public static void main(String[] args) throws Exception {
-        if (args.length != 1) {
-            System.out.println("Usage: TextFileReader testFileName");
-            return;
-        }
-        String fileName = args[0];
-        System.out.println("Testing data file " + fileName);
-        TextFileReader reader;
-        reader = new TextFileReader(fileName);
-        try {
-            while (true) {
-                int i = reader.readInt();
-                System.out.println("line " + reader.getLineNumber()
-                                   + " int: " + i);
-                double d = reader.readDouble();
-                System.out.println("line " + reader.getLineNumber()
-                                   + " double: " + d);
-                String s = reader.readString();
-                System.out.println("line " + reader.getLineNumber()
-                                   + " String: " + s);
-                boolean b = reader.readBoolean();
-                System.out.println("line " + reader.getLineNumber()
-                                   + " boolean: " + b);
-            }
-        } catch (ParseException e) {
-            System.out.println(e.toString());
-        } catch (IOException e) {
-            System.out.println(e.toString());
-        }
-
-        reader = new TextFileReader(fileName);
-        try {
-            while (true) {
-                String line = reader.readLine();
-                System.out.println("line " + reader.getLineNumber()
-                                   + " line: " + line);
-            }
-        } catch (IOException e) {
-            System.out.println(e.toString());
-        }
-    }
 }

@@ -24,8 +24,6 @@ import java.io.IOException;
  */
 public class GratingOptics extends TransmissionElement {
     
-    
-    private List _x_values;
     private List _resolvingPowerArray;
     private List _dispersionArray;
     private List _blazeArray;
@@ -51,29 +49,7 @@ public class GratingOptics extends TransmissionElement {
         _detectorPixels = detectorPixels;
         _centralWavelength = centralWavelength;
         _gratingName = gratingName;
-        
-        //Read The transmission file for the start and stop wavelengths
-        TextFileReader dfr = new TextFileReader(directory +
-                prefix +
-                gratingName +
-                Instrument.getSuffix());
-        _x_values = new ArrayList();
-        
-        double x = 0;
-        double y = 0;
-        
-        try {
-            while (true) {
-                x = dfr.readDouble();
-                _x_values.add(new Double(x));
-                y = dfr.readDouble();
-            }
-        } catch (ParseException e) {
-            throw e;
-        } catch (IOException e) {
-            // normal eof
-        }
-        
+
         //New read of Grating Proporties
         TextFileReader grismProperties = new TextFileReader(directory +
                 prefix +
@@ -85,7 +61,7 @@ public class GratingOptics extends TransmissionElement {
         _resolutionArray = new ArrayList();
         _dispersionArray = new ArrayList();
         try {
-            while (true) {
+            while (grismProperties.hasMoreData()) {
                 _gratingNameArray.add(new String(grismProperties.readString()));
                 _blazeArray.add(new Integer(grismProperties.readInt()));
                 _resolvingPowerArray.add(new Integer(grismProperties.readInt()));
@@ -104,13 +80,13 @@ public class GratingOptics extends TransmissionElement {
     public double getStart() {
         return _centralWavelength - (
                 (((Double) _dispersionArray.get(getGratingNumber())).doubleValue())
-                * _detectorPixels / 2);//*_spectralBinning;
+                * _detectorPixels / 2);
     }
     
     public double getEnd() {
         return _centralWavelength + (
                 (((Double) _dispersionArray.get(getGratingNumber())).doubleValue())
-                * _detectorPixels / 2);//*_spectralBinning;
+                * _detectorPixels / 2);
     }
     
     public double getEffectiveWavelength() {
@@ -146,10 +122,6 @@ public class GratingOptics extends TransmissionElement {
         return ((Integer) _resolvingPowerArray.get(getGratingNumber())).intValue();
     }
     
-    public String getGratingName() {
-        return (String) _gratingNameArray.get(getGratingNumber());
-    }
-    
     public double getGratingBlaze() {
         return ((Integer) _blazeArray.get(getGratingNumber())).intValue();
     }
@@ -162,8 +134,6 @@ public class GratingOptics extends TransmissionElement {
         return ((Double) _dispersionArray.get(getGratingNumber())).doubleValue()
         * _spectralBinning;
     }
-    
-    
     
     public String toString() {
         return "Grating Optics: " + _gratingName;
