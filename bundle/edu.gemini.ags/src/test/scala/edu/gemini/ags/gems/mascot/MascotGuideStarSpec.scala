@@ -1,7 +1,5 @@
 package edu.gemini.ags.gems.mascot
 
-import org.junit.{Before, Test}
-import org.junit.Assert._
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
@@ -12,11 +10,12 @@ import jsky.coords.{CoordinateRadius, WorldCoords}
 import jsky.catalog.{TableQueryResult, BasicQueryArgs}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.shared.util.immutable.{None => JNone}
+import org.specs2.mutable.Specification
 
 /**
  * Tests the MascotGuideStar class
  */
-class MascotGuideStarTest {
+class MascotGuideStarSpec extends Specification {
   val asterism = List(
     List(0,49.950975416666665,41.51168833333333,0.0,0.0),
     List(0,49.950975416666665,41.510577222222224,0.0,3.9999999999878355),
@@ -184,55 +183,55 @@ class MascotGuideStarTest {
     List(0,49.94875319444444,41.510577222222224,180.0,8.944271909994837),
     List(0,49.95319763888889,41.51279944444444,180.0,8.944271909994837))
 
-  @Before def initialize() {
-    val url = getClass.getResource("/edu/gemini/spModel/gemsGuideStar/test.skycat.cfg")
-    assert(url != null)
-    SkycatConfigFile.setConfigFile(url)
-  }
+  val url = getClass.getResource("/edu/gemini/spModel/gemsGuideStar/test.skycat.cfg")
+  SkycatConfigFile.setConfigFile(url)
 
-  @Test def testFindBestAsterism() {
-    val coords = new WorldCoords("03:19:48.2341", "+41:30:42.078")
-    val base = new SPTarget(coords.getRaDeg, coords.getDecDeg)
-    val env = TargetEnvironment.create(base)
-    val inst = new Gsaoi()
-    inst.setPosAngle(0.0)
-    inst.setIssPort(IssPort.SIDE_LOOKING)
-    val ctx = ObsContext.create(env, inst, JNone.instance(), SPSiteQuality.Conditions.BEST, null, null)
-    val basePos = ctx.getBaseCoordinates
+  "Mascot" should {
+    "find best asterism" in {
+      val coords = new WorldCoords("03:19:48.2341", "+41:30:42.078")
+      val base = new SPTarget(coords.getRaDeg, coords.getDecDeg)
+      val env = TargetEnvironment.create(base)
+      val inst = new Gsaoi()
+      inst.setPosAngle(0.0)
+      inst.setIssPort(IssPort.SIDE_LOOKING)
+      val ctx = ObsContext.create(env, inst, JNone.instance(), SPSiteQuality.Conditions.BEST, null, null)
+      val basePos = ctx.getBaseCoordinates
 
-    val result = MascotGuideStar.findBestAsterism(ctx, MascotGuideStar.CWFS, 180.0, 10.0)
+      val result = MascotGuideStar.findBestAsterism(ctx, MascotGuideStar.CWFS, 180.0, 10.0)
 
-    for (((strehlList, pa, ra, dec), index) <- result.zipWithIndex) {
-      val d = MascotGuideStar.dist(ra, dec, basePos.getRaDeg, basePos.getDecDeg) * 3600.0
-      assertEquals(asterism(index), List(strehlList.size, ra, dec, pa, d))
+      val remoteAsterism = for {
+        (strehlList, pa, ra, dec) <- result
+        d = MascotGuideStar.dist(ra, dec, basePos.getRaDeg, basePos.getDecDeg) * 3600.0
+      } yield List(strehlList.size, ra, dec, pa, d)
+      asterism should beEqualTo(remoteAsterism)
+    }
+    "find best asterism by query result" in {
+      val configFile = SkycatConfigFile.getConfigFile
+      val cat = configFile.getCatalog(MascotCat.defaultCatalogName)
+      val queryArgs = new BasicQueryArgs(cat)
+      val coords = new WorldCoords("03:19:48.2341", "+41:30:42.078")
+      val region = new CoordinateRadius(coords, MascotCat.defaultMinRadius, MascotCat.defaultMaxRadius)
+      queryArgs.setRegion(region)
+      queryArgs.setMaxRows(MascotCat.defaultMaxRows)
+      val queryResult = cat.query(queryArgs)
+
+      val base = new SPTarget(coords.getRaDeg, coords.getDecDeg)
+      val env = TargetEnvironment.create(base)
+      val inst = new Gsaoi()
+      inst.setPosAngle(0.0)
+      inst.setIssPort(IssPort.SIDE_LOOKING)
+      val ctx = ObsContext.create(env, inst, JNone.instance(), SPSiteQuality.Conditions.BEST, null, null)
+
+      val result = MascotGuideStar.findBestAsterismInQueryResult(
+        queryResult.asInstanceOf[TableQueryResult], ctx, MascotGuideStar.CWFS, 180.0, 10.0)
+
+      val basePos = ctx.getBaseCoordinates
+      val remoteAsterism = for {
+        (strehlList, pa, ra, dec) <- result
+        d = MascotGuideStar.dist(ra, dec, basePos.getRaDeg, basePos.getDecDeg) * 3600.0
+      } yield List(strehlList.size, ra, dec, pa, d)
+      asterism should beEqualTo(remoteAsterism)
     }
   }
 
-  @Test def testFileBestAsterismByQueryResult() {
-    val configFile = SkycatConfigFile.getConfigFile
-    val cat = configFile.getCatalog(MascotCat.defaultCatalogName)
-    assert(cat != null)
-    val queryArgs = new BasicQueryArgs(cat)
-    val coords = new WorldCoords("03:19:48.2341", "+41:30:42.078")
-    val region = new CoordinateRadius(coords, MascotCat.defaultMinRadius, MascotCat.defaultMaxRadius)
-    queryArgs.setRegion(region)
-    queryArgs.setMaxRows(MascotCat.defaultMaxRows)
-    val queryResult = cat.query(queryArgs)
-
-    val base = new SPTarget(coords.getRaDeg, coords.getDecDeg)
-    val env = TargetEnvironment.create(base)
-    val inst = new Gsaoi()
-    inst.setPosAngle(0.0)
-    inst.setIssPort(IssPort.SIDE_LOOKING)
-    val ctx = ObsContext.create(env, inst, JNone.instance(), SPSiteQuality.Conditions.BEST, null, null)
-
-    val result = MascotGuideStar.findBestAsterismInQueryResult(
-      queryResult.asInstanceOf[TableQueryResult], ctx, MascotGuideStar.CWFS, 180.0, 10.0)
-
-    val basePos = ctx.getBaseCoordinates
-    for (((strehlList, pa, ra, dec), index) <- result.zipWithIndex) {
-      val d = MascotGuideStar.dist(ra, dec, basePos.getRaDeg, basePos.getDecDeg) * 3600.0
-      assertEquals(asterism(index), List(strehlList.size, ra, dec, pa, d))
-    }
-  }
 }
