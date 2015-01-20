@@ -115,65 +115,6 @@ final class TrackingEditor implements TelescopePosEditor {
         }
     }
 
-    private final class EffectiveWavelength extends AbstractRow {
-        private final JPanel pan;
-        private final JTextField tf;
-        private final JButton btn;
-
-        private final DocumentListener docListener = new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) { changedUpdate(e); }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) { changedUpdate(e); }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                target.deleteWatcher(watcher);
-                String val = tf.getText();
-                try {
-                    target.setTrackingEffectiveWavelength(val);
-                } catch (Exception ex) {
-                    target.setTrackingEffectiveWavelength("auto");
-                }
-                target.addWatcher(watcher);
-            }
-        };
-
-        EffectiveWavelength() {
-            super("Effective \u03BB", "\u00B5m");
-
-            pan = new JPanel(new GridBagLayout()) {{ setOpaque(false); }};
-
-            tf  = new JTextField(4);
-            tf.setMinimumSize(tf.getPreferredSize());
-            btn = new JButton("Auto") {{
-                addActionListener(new ActionListener() {
-                    @Override public void actionPerformed(ActionEvent e) {
-                        target.setTrackingEffectiveWavelength("auto");
-                    }
-                });
-                setToolTipText("Automatically set the effective wavelength");
-            }};
-
-            pan.add(tf, new GridBagConstraints() {{
-                gridx=0; gridy=0; fill=HORIZONTAL; weightx=1.0;
-            }});
-
-            pan.add(btn, new GridBagConstraints() {{
-                gridx=1; gridy=0; insets=new Insets(0, 5, 0, 0);
-            }});
-        }
-
-        public JComponent getComponent() { return pan; }
-
-        public void reinit() {
-            tf.getDocument().removeDocumentListener(docListener);
-            tf.setText(target.getTrackingEffectiveWavelength());
-            tf.getDocument().addDocumentListener(docListener);
-        }
-    }
-
     private SPTarget target;
 
     TrackingEditor() {
@@ -193,7 +134,6 @@ final class TrackingEditor implements TelescopePosEditor {
                             target.setTrackingEpoch(d==null ? "2000.0" : String.valueOf(d));
                         }
                     }),
-            new EffectiveWavelength(),
             new NumberRow("Parallax", "arcsec",
                     new InitFunction() {
                         @Override public void apply(SPTarget target, JFormattedTextField field) {

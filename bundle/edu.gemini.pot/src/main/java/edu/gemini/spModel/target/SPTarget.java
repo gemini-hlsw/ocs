@@ -396,41 +396,6 @@ public final class SPTarget extends WatchablePos {
     }
 
     /**
-     * Get the tracking effective wavelength.
-     */
-    public String getTrackingEffectiveWavelength() {
-        String res = "";
-        if (_target instanceof HmsDegTarget) {
-            final HmsDegTarget t = (HmsDegTarget)_target;
-            final EffWavelength ew = t.getEffWavelength();
-            if (ew.equals(HmsDegTarget.AUTO_EFF_WAVELENGTH)) {
-                res = "auto";
-            } else {
-                res = Double.toString(ew.getValue());
-            }
-        }
-        return res;
-    }
-
-    /**
-     * Set the tracking effective wavelength as a string.
-     */
-    public void setTrackingEffectiveWavelength(final String newValue) {
-        if (_target instanceof HmsDegTarget) {
-            final HmsDegTarget t = (HmsDegTarget)_target;
-            final EffWavelength ew;
-            if (newValue.equals("auto"))  // allan: added check
-                ew = HmsDegTarget.AUTO_EFF_WAVELENGTH;
-            else
-                ew = new EffWavelength(newValue);
-            t.setEffWavelength(ew);
-            _notifyOfGenericUpdate();
-        } else {
-            throw new IllegalArgumentException();
-        }
-    }
-
-    /**
      * Return a paramset describing this object
      */
     public ParamSet getParamSet(final PioFactory factory) {
@@ -451,7 +416,6 @@ public final class SPTarget extends WatchablePos {
             paramSet.addParam(t.getPM2().getParam(factory, _PM2));
             paramSet.addParam(t.getParallax().getParam(factory, _PARALLAX));
             paramSet.addParam(t.getRV().getParam(factory, _RV));
-            paramSet.addParam(t.getEffWavelength().getParam(factory, _WAVELENGTH));
         } else if (target instanceof NonSiderealTarget) {
             final NonSiderealTarget nst = (NonSiderealTarget) target;
 
@@ -550,10 +514,6 @@ public final class SPTarget extends WatchablePos {
             final RV rv = new RV();
             rv.setParam(paramSet.getParam(_RV));
             t.setRV(rv);
-
-            final EffWavelength eff = new EffWavelength();
-            eff.setParam(paramSet.getParam(_WAVELENGTH));
-            t.setEffWavelength(eff);
 
         } else if (itarget instanceof NonSiderealTarget) {
 

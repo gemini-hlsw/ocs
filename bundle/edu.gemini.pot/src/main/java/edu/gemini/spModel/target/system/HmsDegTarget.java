@@ -45,8 +45,6 @@ public final class HmsDegTarget extends ITarget {
     private static final Parallax DEFAULT_PARALLAX = new Parallax();
     private static final Date DEFAULT_TAIZ = null;
     private static final String DEFAULT_NAME = "";
-    public static final EffWavelength AUTO_EFF_WAVELENGTH = new EffWavelength(-1.0);
-    private static final EffWavelength DEFAULT_EFF_WAVELENGTH = AUTO_EFF_WAVELENGTH;
 
     private String _brightness = DEFAULT_NAME;
     private String _name = DEFAULT_NAME;
@@ -57,7 +55,6 @@ public final class HmsDegTarget extends ITarget {
     // and a software system may be able to use them.
     private RV _rv = DEFAULT_RV;
     private Parallax _parallax = DEFAULT_PARALLAX;
-    private EffWavelength _ew = DEFAULT_EFF_WAVELENGTH;
     private Date _taiz = DEFAULT_TAIZ;
     private HMS _ra = new HMS();
     private DMS _dec = new DMS();
@@ -82,7 +79,6 @@ public final class HmsDegTarget extends ITarget {
         if (_rv != null) result._rv = (RV) _rv.clone();
         if (_parallax != null) result._parallax = (Parallax) _parallax.clone();
         if (_taiz != null) result._taiz = (Date) _taiz.clone();
-        if (_ew != null) result._ew = (EffWavelength) _ew.clone();
 
         // _raTrackingRate is a double (immutable)
         // _decTrackingRate is a double (immutable)
@@ -111,7 +107,6 @@ public final class HmsDegTarget extends ITarget {
         if (!(_pm2.equals(sys._pm2))) return false;
         if (!(_rv.equals(sys._rv))) return false;
         if (!(_parallax.equals(sys._parallax))) return false;
-        if (!(_ew.equals(sys._ew))) return false;
 
         return true;
     }
@@ -383,26 +378,6 @@ public final class HmsDegTarget extends ITarget {
      */
     public void setParallax(Parallax newValue) {
         _parallax = newValue;
-    }
-
-    /**
-     * Gets the effective wavelength of the target.
-     * This method returns a reference to the internal object.
-     */
-    public EffWavelength getEffWavelength() {
-        if (_ew == null) {
-            _ew = DEFAULT_EFF_WAVELENGTH;
-        }
-        return _ew;
-    }
-
-    /**
-     * Sets the effective wavelength.  The value of the
-     * parameter is not copied so future modification will have an effect
-     * upon the value stored in this class.  The new value can be null.
-     */
-    public void setEffWavelength(EffWavelength newValue) {
-        _ew = newValue;
     }
 
     /**
