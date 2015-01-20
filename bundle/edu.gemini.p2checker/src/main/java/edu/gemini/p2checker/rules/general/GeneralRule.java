@@ -279,21 +279,21 @@ public class GeneralRule implements IRule {
 
         private boolean hasSameProperMotion(SPTarget base, SPTarget guide) {
 
-            String pmDecBase = base.getPropMotionDec();
-            String pmRaBase = base.getPropMotionRA();
+            double pmDecBase = base.getPropMotionDec();
+            double pmRaBase = base.getPropMotionRA();
 
-            String pmDecGuide = guide.getPropMotionDec();
-            String pmRaGuide = guide.getPropMotionRA();
+            double pmDecGuide = guide.getPropMotionDec();
+            double pmRaGuide = guide.getPropMotionRA();
 
-            return pmRaBase.equals(pmRaGuide) && pmDecBase.equals(pmDecGuide);
+            return pmRaBase == pmRaGuide && pmDecBase == pmDecGuide;
         }
 
         private boolean hasSameTrackingDetails(SPTarget base, SPTarget guide) {
 
             if (base.getTarget().getTag() != guide.getTarget().getTag()) return false;
-            if (!base.getTrackingEpoch().equals(guide.getTrackingEpoch())) return false;
-            if (!base.getTrackingParallax().equals(guide.getTrackingParallax())) return false;
-            if (!base.getTrackingRadialVelocity().equals(guide.getTrackingRadialVelocity())) return false;
+            if (base.getTrackingEpoch() != guide.getTrackingEpoch()) return false;
+            if (base.getTrackingParallax() !=  guide.getTrackingParallax()) return false;
+            if (base.getTrackingRadialVelocity() == guide.getTrackingRadialVelocity()) return false;
             //everything is the same
             return true;
         }
@@ -411,21 +411,16 @@ public class GeneralRule implements IRule {
 
             if (baseTarget == null) return null; //can't check;
 
-            //oh man, I hate these strings.
-            try {
-                Double pm_ra = Double.parseDouble(baseTarget.getPropMotionRA());
-                Double pm_dec = Double.parseDouble(baseTarget.getPropMotionDec());
-                Double total = pm_ra * pm_ra + pm_dec * pm_dec;
+            double pm_ra  = baseTarget.getPropMotionRA();
+            double pm_dec = baseTarget.getPropMotionDec();
+            double total = pm_ra * pm_ra + pm_dec * pm_dec;
 
-                if (total > MAX_PM * MAX_PM) { //to avoid sqrt call
-                    P2Problems problems = new P2Problems();
-                    problems.addWarning(PREFIX+"TARGET_PM_RULE", MESSAGE, elements.getTargetObsComponentNode().getValue());
-                    return problems;
-                }
-
-            }catch (NumberFormatException e) {
-               return null;
+            if (total > MAX_PM * MAX_PM) { //to avoid sqrt call
+                P2Problems problems = new P2Problems();
+                problems.addWarning(PREFIX+"TARGET_PM_RULE", MESSAGE, elements.getTargetObsComponentNode().getValue());
+                return problems;
             }
+
             return null;
         }
     };
