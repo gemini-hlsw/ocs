@@ -10,10 +10,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
-import java.util.TimeZone;
+import java.util.HashMap;
+import java.util.Map;
 
-//$Id: NonSiderealTargetSupport.java 7515 2006-12-28 18:04:41Z anunez $
 /**
  * Helper class for displaying and operating with non sidereal targets.
  * <p/>
@@ -22,21 +23,14 @@ import java.util.TimeZone;
  *
  */
 class NonSiderealTargetSupport {
-    private static final DateFormat dateFormater = new SimpleDateFormat("dd/MMM/yyyy");
-    private static final DateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss z");
-    static {
-        TimeZone tz = TimeZone.getTimeZone("UTC");
-        timeFormatter.setTimeZone(tz);
-        dateFormater.setTimeZone(tz);
-    }
 
-    // -- target parameters --
+    private static final DateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss");
 
     // Groups together the widgets for one parameter for conic targets
-    private class ConicTargetParamWidgets {
-        private JLabel _label;
-        private NumberBoxWidget _entry;
-        private JLabel _units;
+    private static class ConicTargetParamWidgets {
+        private final JLabel _label;
+        private final NumberBoxWidget _entry;
+        private final JLabel _units;
 
         public ConicTargetParamWidgets(JLabel label, NumberBoxWidget entry, JLabel units) {
             _label = label;
@@ -44,16 +38,8 @@ class NonSiderealTargetSupport {
             _units = units;
         }
 
-        public JLabel getLabel() {
-            return _label;
-        }
-
         public NumberBoxWidget getEntry() {
             return _entry;
-        }
-
-        public JLabel getUnits() {
-            return _units;
         }
 
         public void setVisible(boolean b) {
@@ -79,16 +65,16 @@ class NonSiderealTargetSupport {
         // 0 or 1 and is adjusted to make room for the _label, _entry, and units.
         // The row arg strarts at 0 and is adjusted according to the first row used
         // by the param widgets in the GUI (2).
-        public void setPos(int row, int col) {
+        public void setPos(TelescopeForm w, int row, int col) {
             col *= 3;
             row += 2;
-            _updateConstraints(_label, row, col++);
-            _updateConstraints(_entry, row, col++);
-            _updateConstraints(_units, row, col);
+            _updateConstraints(w, _label, row, col++);
+            _updateConstraints(w, _entry, row, col++);
+            _updateConstraints(w, _units, row, col);
         }
 
-        private void _updateConstraints(JComponent c, int row, int col) {
-            GridBagLayout layout = (GridBagLayout)_w.nonsiderealPW.getLayout();
+        private void _updateConstraints(TelescopeForm w, JComponent c, int row, int col) {
+            GridBagLayout layout = (GridBagLayout) w.nonsiderealPW.getLayout();
             GridBagConstraints contraints = layout.getConstraints(c);
             contraints.gridx = col;
             contraints.gridy = row;
@@ -96,91 +82,96 @@ class NonSiderealTargetSupport {
         }
     }
 
-    // number of possible parameters
-    private static int _paramCount = 0;
+    private enum Param {
+        EPOCHOFEL,
+        ORBINC,
+        LONGASCNODE,
+        LONGOFPERI,
+        ARGOFPERI,
+        MEANDIST,
+        PERIDIST,
+        ECCENTRICITY,
+        MEANLONG,
+        MEANANOM,
+        DAILYMOT,
+        EPOCHOFPERI
+    }
 
-    // Parameter constants: Indexes into _conicWidgets[] array.
-    private static final int EPOCHOFEL = _paramCount++;
-    private static final int ORBINC = _paramCount++;
-    private static final int LONGASCNODE = _paramCount++;
-    private static final int LONGOFPERI = _paramCount++;
-    private static final int ARGOFPERI = _paramCount++;
-    private static final int MEANDIST = _paramCount++;
-    private static final int PERIDIST = _paramCount++;
-    private static final int ECCENTRICITY = _paramCount++;
-    private static final int MEANLONG = _paramCount++;
-    private static final int MEANANOM = _paramCount++;
-    private static final int DAILYMOT = _paramCount++;
-    private static final int EPOCHOFPERI = _paramCount++;
-
-    // array indexed by the constants above
-    private NonSiderealTargetSupport.ConicTargetParamWidgets[] _conicWidgets;
-
-
-    // -- systems --
-
-    // Maps the display name to the system type and the GUI labels to use.
-    // Null labels are not used or displayed.
-    public static class NonSiderealSystem {
-        ITarget.Tag tag;
-        String displayName;
-        String[][] labels; // parameter labels/tooltips, indexed by param constants
-
-        public NonSiderealSystem(ITarget.Tag tag, String[][] labels, String displayValue) {
-            this.tag = tag;
-            this.labels = labels;
-            this.displayName = displayValue;
-        }
-
-        public String toString() {
-            return displayName;
+    private static final class Labels {
+        public final String label;
+        public final String toolTip;
+        public Labels(String label, String toolTip) {
+            this.label = label;
+            this.toolTip = toolTip;
         }
     }
 
-    // number of different non sidereal systems
-    private static int _systemCount = 0;
+    private static final Map<ITarget.Tag, Map<Param, Labels>> PARAM_LABELS;
+    static {
 
-    // System constants: Indexes into _nonSiderealSystems[] array.
-    public static final int JPL_COMET = _systemCount++;
-    public static final int JPL_MINOR_PLANET = _systemCount++;
-    public static final int MAJOR_PLANET = _systemCount++;
+        // Minor body param labels
+        final Map<Param, Labels> mbps = new HashMap<>();
+        mbps.put(Param.EPOCHOFEL,    new Labels("EPOCH", "Orbital Element Epoch"));
+        mbps.put(Param.ORBINC,       new Labels("IN",    "Inclination"));
+        mbps.put(Param.LONGASCNODE,  new Labels("OM",    "Longitude of Ascending Node"));
+        mbps.put(Param.ARGOFPERI,    new Labels("W",     "Argument of Perihelion"));
+        mbps.put(Param.PERIDIST,     new Labels("QR",    "Perihelion Distance"));
+        mbps.put(Param.ECCENTRICITY, new Labels("EC",    "Eccentricity"));
+        mbps.put(Param.EPOCHOFPERI,  new Labels("TP",    "Time of Perihelion Passage"));
 
+        // Minor planet param labels
+        final Map<Param, Labels> mpps = new HashMap<>();
+        mpps.put(Param.EPOCHOFEL,    new Labels("EPOCH", "Orbital Element Epoch"));
+        mpps.put(Param.ORBINC,       new Labels("IN",    "Inclination"));
+        mpps.put(Param.LONGASCNODE,  new Labels("OM",    "Longitude of Ascending Node"));
+        mpps.put(Param.ARGOFPERI,    new Labels("W",     "Argument of Perihelion"));
+        mpps.put(Param.MEANDIST,     new Labels("A",     "Semi-major Axis"));
+        mpps.put(Param.ECCENTRICITY, new Labels("EC",    "Eccentricity"));
+        mpps.put(Param.MEANANOM,     new Labels("MA",    "Mean Anomaly"));
 
-    // array indexed by the constants above
-    private NonSiderealTargetSupport.NonSiderealSystem[] _nonSiderealSystems;
+        // Label maps for each target type
+        final HashMap<ITarget.Tag, Map<Param, Labels>> map = new HashMap<>();
+        map.put(ITarget.Tag.NAMED,            Collections.<Param, Labels>emptyMap());
+        map.put(ITarget.Tag.MPC_MINOR_PLANET, Collections.unmodifiableMap(mpps));
+        map.put(ITarget.Tag.JPL_MINOR_BODY,   Collections.unmodifiableMap(mbps));
 
-    // parameter labels and ToolTips for each system, indexed by [system][paramIndex][0] and
-    // [system][paramIndex][1]
-    private String[][][] _paramLabels;
+        // Done
+        PARAM_LABELS = Collections.unmodifiableMap(map);
 
+    }
 
-    // The GUI layout panel
-    private TelescopeForm _w;
+    private static Map<Param, ConicTargetParamWidgets> mkConicWidgets(TelescopeForm f) {
+        final Map<Param, ConicTargetParamWidgets> map = new HashMap<>();
+        map.put(Param.EPOCHOFEL,    new ConicTargetParamWidgets(f.epochofelLabel,    f.epochofel,    f.epochofelUnits));
+        map.put(Param.ORBINC,       new ConicTargetParamWidgets(f.orbincLabel,       f.orbinc,       f.orbincUnits));
+        map.put(Param.LONGASCNODE,  new ConicTargetParamWidgets(f.longascnodeLabel,  f.longascnode,  f.longascnodeUnits));
+        map.put(Param.LONGOFPERI,   new ConicTargetParamWidgets(f.longofperiLabel,   f.longofperi,   f.longofperiUnits));
+        map.put(Param.ARGOFPERI,    new ConicTargetParamWidgets(f.argofperiLabel,    f.argofperi,    f.argofperiUnits));
+        map.put(Param.MEANDIST,     new ConicTargetParamWidgets(f.meandistLabel,     f.meandist,     f.meandistUnits));
+        map.put(Param.PERIDIST,     new ConicTargetParamWidgets(f.peridistLabel,     f.peridist,     f.peridistUnits));
+        map.put(Param.ECCENTRICITY, new ConicTargetParamWidgets(f.eccentricityLabel, f.eccentricity, f.eccentricityUnits));
+        map.put(Param.MEANLONG,     new ConicTargetParamWidgets(f.meanlongLabel,     f.meanlong,     f.meanlongUnits));
+        map.put(Param.MEANANOM,     new ConicTargetParamWidgets(f.meananomLabel,     f.meananom,     f.meananomUnits));
+        map.put(Param.DAILYMOT,     new ConicTargetParamWidgets(f.dailymotLabel,     f.dailymot,     f.dailymotUnits));
+        map.put(Param.EPOCHOFPERI,  new ConicTargetParamWidgets(f.epochofperiLabel,  f.epochofperi,  f.epochofperiUnits));
+        return Collections.unmodifiableMap(map);
+    }
 
+    private final TelescopeForm form;
+    private final Map<Param, ConicTargetParamWidgets> widgets;
+    private boolean ignoreResetCacheEvents = false;
+    private SPTarget spTarget;
 
-    // If true, ignore events that trigger a reset of the cache
-    private boolean _ignoreResetCacheEvents = false;
-
-
-    // Current position being edited
-    private SPTarget _curPos;
-
-
-    // ---
-
-    // Initialize with the target list GUI class
     NonSiderealTargetSupport(TelescopeForm w, SPTarget curPos) {
-        _w = w;
-        _curPos = curPos;
-        _initParamLabels();
-        _initConicWidgets();
-        _initNonSiderealSystems();
+        form = w;
+        spTarget = curPos;
+        widgets = mkConicWidgets(w);
     }
 
     /** Add the given listener to all the entry widgets */
     public void initListeners(TextBoxWidgetWatcher watcher) {
-        for(int i = 0; i < _paramCount; i++) {
-            _conicWidgets[i].getEntry().addWatcher(watcher);
+        for (Param p: Param.values()) {
+            widgets.get(p).getEntry().addWatcher(watcher);
         }
     }
 
@@ -189,336 +180,151 @@ class NonSiderealTargetSupport {
      * widget. The widget is used to determine which field to set. This method is called
      * whenever the user types a value into one of the conic target entry widgets.
      */
-    public void setConicPos(ConicTarget target, NumberBoxWidget nbw) {
-        double value;
+    void setConicPos(ConicTarget target, NumberBoxWidget nbw) {
         try {
-            value = Double.valueOf(nbw.getValue());
-        } catch (Exception ex) {
-            return;
-        }
-        for(int i = 0; i < _paramCount; i++) {
-            if (_conicWidgets[i].getEntry() == nbw) {
-                _setConicPos(target, i, value);
-                return;
+            double value = Double.valueOf(nbw.getValue());
+            for (Map.Entry<Param, ConicTargetParamWidgets> e: widgets.entrySet()) {
+                if (e.getValue().getEntry() == nbw) {
+                    switch (e.getKey()) {
+                        case EPOCHOFEL:    target.getEpoch().setValue(value);       break;
+                        case ORBINC:       target.getInclination().setValue(value); break;
+                        case LONGASCNODE:  target.getANode().setValue(value);       break;
+                        case LONGOFPERI:   target.getPerihelion().setValue(value);  break;
+                        case ARGOFPERI:    target.getPerihelion().setValue(value);  break;
+                        case MEANDIST:     target.getAQ().setValue(value);          break;
+                        case PERIDIST:     target.getAQ().setValue(value);          break;
+                        case ECCENTRICITY: target.setE(value);                      break;
+                        case MEANLONG:     target.getLM().setValue(value);          break;
+                        case MEANANOM:     target.getLM().setValue(value);          break;
+                        case DAILYMOT:     target.getN().setValue(value);           break;
+                        case EPOCHOFPERI:  target.getEpochOfPeri().setValue(value); break;
+                    }
+                    break;
+                }
             }
-        }
-    }
-
-    // Set the value of the given param to the given value
-    private void _setConicPos(ConicTarget target, int paramIndex, double value) {
-        if (paramIndex == EPOCHOFEL) {
-            target.getEpoch().setValue(value);
-        }
-        if (paramIndex == ORBINC) {
-            target.getInclination().setValue(value);
-        }
-        if (paramIndex == LONGASCNODE) {
-            target.getANode().setValue(value);
-        }
-        if (paramIndex == LONGOFPERI) {
-            target.getPerihelion().setValue(value);
-        }
-        if (paramIndex == ARGOFPERI) {
-            target.getPerihelion().setValue(value);
-        }
-        if (paramIndex == MEANDIST) {
-            target.getAQ().setValue(value);
-        }
-        if (paramIndex == PERIDIST) {
-            target.getAQ().setValue(value);
-        }
-        if (paramIndex == ECCENTRICITY) {
-            target.setE(value);
-        }
-        if (paramIndex == MEANLONG) {
-            target.getLM().setValue(value);
-        }
-        if (paramIndex == MEANANOM) {
-            target.getLM().setValue(value);
-        }
-        if (paramIndex == DAILYMOT) {
-            target.getN().setValue(value);
-        }
-        if (paramIndex == EPOCHOFPERI) {
-            target.getEpochOfPeri().setValue(value);
-        }
-    }
-
-    /**
-     * Get the available Non Sidereal Systems
-     */
-    public NonSiderealTargetSupport.NonSiderealSystem[] getNonSiderealSystems() {
-        return _nonSiderealSystems;
-    }
-
-    /**
-     * Return the ConicSystem associated to the given base
-     */
-
-    public NonSiderealTargetSupport.NonSiderealSystem getNonSiderealSystem(ITarget.Tag tag) {
-        for (NonSiderealTargetSupport.NonSiderealSystem s : _nonSiderealSystems) {
-            if (s.tag == tag) {
-                return s;
-            }
-        }
-        return null;
-    }
-
-    // initialize the array of parameter labels for each system
-    private void _initParamLabels() {
-        _paramLabels = new String[_systemCount][_paramCount][2];
-
-        _paramLabels[MAJOR_PLANET][EPOCHOFEL] = new String[]{null, null};
-        _paramLabels[MAJOR_PLANET][ORBINC] = new String[]{null, null};
-        _paramLabels[MAJOR_PLANET][LONGASCNODE] = new String[]{null, null};
-        _paramLabels[MAJOR_PLANET][LONGOFPERI] = new String[]{null, null};
-        _paramLabels[MAJOR_PLANET][ARGOFPERI] = new String[]{null, null};
-        _paramLabels[MAJOR_PLANET][MEANDIST] = new String[]{null, null};
-        _paramLabels[MAJOR_PLANET][PERIDIST] = new String[]{null, null};
-        _paramLabels[MAJOR_PLANET][ECCENTRICITY] = new String[]{null, null};
-        _paramLabels[MAJOR_PLANET][MEANLONG] = new String[]{null, null};
-        _paramLabels[MAJOR_PLANET][MEANANOM] = new String[]{null, null};
-        _paramLabels[MAJOR_PLANET][DAILYMOT] = new String[]{null, null};
-        _paramLabels[MAJOR_PLANET][EPOCHOFPERI] = new String[]{null, null};
-
-        _paramLabels[JPL_COMET][EPOCHOFEL] = new String[]{"EPOCH", "Orbital Element Epoch"};
-        _paramLabels[JPL_COMET][ORBINC] = new String[]{"IN", "Inclination"};
-        _paramLabels[JPL_COMET][LONGASCNODE] = new String[]{"OM", "Longitude of Ascending Node"};
-        _paramLabels[JPL_COMET][LONGOFPERI] = new String[]{null, null};
-        _paramLabels[JPL_COMET][ARGOFPERI] = new String[]{"W", "Argument of Perihelion"};
-        _paramLabels[JPL_COMET][MEANDIST] = new String[]{null, null};
-        _paramLabels[JPL_COMET][PERIDIST] = new String[]{"QR", "Perihelion Distance"};
-        _paramLabels[JPL_COMET][ECCENTRICITY] = new String[]{"EC", "Eccentricity"};
-        _paramLabels[JPL_COMET][MEANLONG] = new String[]{null, null};
-        _paramLabels[JPL_COMET][MEANANOM] = new String[]{null, null};
-        _paramLabels[JPL_COMET][DAILYMOT] = new String[]{null, null};
-        _paramLabels[JPL_COMET][EPOCHOFPERI] = new String[]{"TP", "Time of Perihelion Passage"};
-
-        _paramLabels[JPL_MINOR_PLANET][EPOCHOFEL] = new String[]{"EPOCH", "Orbital Element Epoch"};
-        _paramLabels[JPL_MINOR_PLANET][ORBINC] = new String[]{"IN", "Inclination"};
-        _paramLabels[JPL_MINOR_PLANET][LONGASCNODE] = new String[]{"OM", "Longitude of Ascending Node"};
-        _paramLabels[JPL_MINOR_PLANET][LONGOFPERI] = new String[]{null, null};
-        _paramLabels[JPL_MINOR_PLANET][ARGOFPERI] = new String[]{"W", "Argument of Perihelion"};
-        _paramLabels[JPL_MINOR_PLANET][MEANDIST] = new String[]{"A", "Semi-major Axis"};
-        _paramLabels[JPL_MINOR_PLANET][PERIDIST] = new String[]{null, null};
-        _paramLabels[JPL_MINOR_PLANET][ECCENTRICITY] = new String[]{"EC", "Eccentricity"};
-        _paramLabels[JPL_MINOR_PLANET][MEANLONG] = new String[]{null, null};
-        _paramLabels[JPL_MINOR_PLANET][MEANANOM] = new String[]{"MA", "Mean Anomaly"};
-        _paramLabels[JPL_MINOR_PLANET][DAILYMOT] = new String[]{null, null};
-        _paramLabels[JPL_MINOR_PLANET][EPOCHOFPERI] = new String[]{null, null};
-
-    }
-
-    // initialize the array of widgets for each parameter
-    private void _initConicWidgets() {
-        _conicWidgets = new NonSiderealTargetSupport.ConicTargetParamWidgets[_paramCount];
-        _conicWidgets[EPOCHOFEL] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.epochofelLabel, _w.epochofel, _w.epochofelUnits);
-        _conicWidgets[ORBINC] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.orbincLabel, _w.orbinc, _w.orbincUnits);
-        _conicWidgets[LONGASCNODE] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.longascnodeLabel, _w.longascnode, _w.longascnodeUnits);
-        _conicWidgets[LONGOFPERI] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.longofperiLabel, _w.longofperi, _w.longofperiUnits);
-        _conicWidgets[ARGOFPERI] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.argofperiLabel, _w.argofperi, _w.argofperiUnits);
-        _conicWidgets[MEANDIST] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.meandistLabel, _w.meandist, _w.meandistUnits);
-        _conicWidgets[PERIDIST] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.peridistLabel, _w.peridist, _w.peridistUnits);
-        _conicWidgets[ECCENTRICITY] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.eccentricityLabel, _w.eccentricity, _w.eccentricityUnits);
-        _conicWidgets[MEANLONG] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.meanlongLabel, _w.meanlong, _w.meanlongUnits);
-        _conicWidgets[MEANANOM] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.meananomLabel, _w.meananom, _w.meananomUnits);
-        _conicWidgets[DAILYMOT] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.dailymotLabel, _w.dailymot, _w.dailymotUnits);
-        _conicWidgets[EPOCHOFPERI] = new NonSiderealTargetSupport.ConicTargetParamWidgets(_w.epochofperiLabel, _w.epochofperi, _w.epochofperiUnits);
-    }
-
-
-    // initialize the array of Non Sidereal system information
-    private void _initNonSiderealSystems() {
-        _nonSiderealSystems = new NonSiderealTargetSupport.NonSiderealSystem[_systemCount];
-        _nonSiderealSystems[MAJOR_PLANET] = new NonSiderealTargetSupport.NonSiderealSystem(
-                ITarget.Tag.NAMED,
-                _paramLabels[MAJOR_PLANET], "Solar System Object");
-        _nonSiderealSystems[JPL_COMET] = new NonSiderealTargetSupport.NonSiderealSystem(
-                ITarget.Tag.JPL_MINOR_BODY,
-                _paramLabels[JPL_COMET], "JPL Comet");
-        _nonSiderealSystems[JPL_MINOR_PLANET] = new NonSiderealTargetSupport.NonSiderealSystem(
-                ITarget.Tag.MPC_MINOR_PLANET,
-                _paramLabels[JPL_MINOR_PLANET], "JPL Minor Planet");
-    }
-
-
-    /**
-     * Display the given target in the GUI. Offers an option to not update the date where the coordinates
-     * are valid, useful when getting positions for new times
-     *
-     * @param target the target position to display
-     * @param system the target coordinate system {@link edu.gemini.spModel.target.system.ConicTarget.SystemType#TYPES}
-     * @param updateDate if the date for the current position should be updated
-     */
-    public void showNonSiderealTarget(NonSiderealTarget target, ITarget.Tag tag, boolean updateDate) {
-        for(int i = 0; i < _systemCount; i++) {
-            if (_nonSiderealSystems[i].tag == tag) {
-                showNonSiderealTarget(target, _nonSiderealSystems[i], updateDate);
-            }
+        } catch (NumberFormatException ex) {
+            // do nothing (weak!)
         }
     }
 
     /**
      * Display the given target in the GUI
      * @param target the target position to display
-     * @param system the target coordinate system {@link edu.gemini.spModel.target.system.ConicTarget.SystemType#TYPES}
      **/
-    public void showNonSiderealTarget(NonSiderealTarget target, ITarget.Tag tag) {
-        showNonSiderealTarget(target, tag, true);
-    }
+    void showNonSiderealTarget(NonSiderealTarget target) {
 
-    // Display the given target in the GUI
-    private void showNonSiderealTarget(NonSiderealTarget target, NonSiderealTargetSupport.NonSiderealSystem system, boolean updateDate) {
+        final ITarget.Tag tag = target.getTag();
+        final Map<Param, Labels> labels = PARAM_LABELS.get(tag);
+
+        // Update all the conic parameter widgets
         int row = 0;
         int col = 0;
-        for (int i = 0; i < _paramCount; i++) {
-            String label = system.labels[i][0];
-            String toolTip = system.labels[i][1];
-            if (label != null) {
-                _conicWidgets[i].setVisible(true);
-                _conicWidgets[i].setText(label);
-                _conicWidgets[i].setToolTip(toolTip);
+        for (Param p: Param.values()) {
+            final ConicTargetParamWidgets cw = widgets.get(p);
+            final Labels labs = labels.get(p);
+            if (labs != null) {
+                cw.setVisible(true);
+                cw.setText(labs.label);
+                cw.setToolTip(labs.toolTip);
                 if (target instanceof ConicTarget) {
-                    String s = _getTargetParamValueAsString((ConicTarget) target, i);
-                    _conicWidgets[i].setValue(s);
+                    Double d = _getTargetParamvalue((ConicTarget) target, p);
+                    cw.setValue(String.valueOf(d));
                 }
-                _conicWidgets[i].setPos(row, col++);
+                cw.setPos(form, row, col++);
                 if (col > 1) {
                     row++;
                     col = 0;
                 }
             } else {
-                _conicWidgets[i].setVisible(false);
+                cw.setVisible(false);
             }
         }
-        _updatePosition(target, updateDate);
-        _refreshPlanetPanel(target);
-        //Only show the Planet Panel when the System is Major Planet
-        _w.nonsiderealPW.revalidate();
-        _w.nonsiderealPW.repaint();
-    }
 
-    /**
-     * Updates the Position at a given Time for a Non Sidereal Target in the UI
-     * @param target The NonSideralTarget to show
-     */
-    private void _updatePosition(NonSiderealTarget target, boolean updateDate) {
-        //First the position
-        _w.xaxis.setText(target.c1ToString());
-        _w.yaxis.setText(target.c2ToString());
-        //if we need to update the date
-        if (updateDate) {
-            //now the time if available
-            Date date = target.getDateForPosition();
-            JTextField tf = (JTextField)_w.calendarTime.getEditor().getEditorComponent();
-            TimeDocument td = (TimeDocument)tf.getDocument();
-            //if the date is null  use the current time
-            if (date == null) {
-                date = new Date();
-            }
-            _w.calendarDate.setDate(date);
-            td.setTime(EdCompTargetList.timeFormatter.format(date));
+        // Update the RA and Dec
+        form.xaxis.setText(target.c1ToString());
+        form.yaxis.setText(target.c2ToString());
+
+        // Update the valid-at date
+        Date date = target.getDateForPosition();
+        JTextField tf = (JTextField) form.calendarTime.getEditor().getEditorComponent();
+        TimeDocument td = (TimeDocument)tf.getDocument();
+        //if the date is null  use the current time
+        if (date == null) {
+            date = new Date();
         }
-    }
+        form.calendarDate.setDate(date);
+        td.setTime(timeFormatter.format(date));
 
-
-    //refresh the Solar System Panel depending on the system type of the Non Sidereal Target
-    private void _refreshPlanetPanel(ITarget target) {
-        boolean isSolarObject = target instanceof NamedTarget;
-        _w.planetsPanel.setVisible(isSolarObject);
-        if (isSolarObject) { //refresh the content of the panel
-            if (target instanceof NamedTarget) {
-                NamedTarget pt = (NamedTarget)target;
-                NamedTarget.SolarObject solarObject = pt.getSolarObject();
-                if (solarObject != null) {
-                    int pos = solarObject.ordinal();
-                    if (pos < _w.planetButtons.length) {
-                        _w.planetButtons[pos].setSelected(true);
-                    }
+        // Update the solar system stuff
+        if (target instanceof NamedTarget) {
+            form.planetsPanel.setVisible(true);
+            NamedTarget pt = (NamedTarget) target;
+            NamedTarget.SolarObject solarObject = pt.getSolarObject();
+            if (solarObject != null) {
+                int pos = solarObject.ordinal();
+                if (pos < form.planetButtons.length) {
+                    form.planetButtons[pos].setSelected(true);
                 }
             }
+        } else {
+            form.planetsPanel.setVisible(false);
         }
+
+        // And revalidate everything
+        form.nonsiderealPW.revalidate();
+        form.nonsiderealPW.repaint();
 
     }
 
-    // Return the current value of the given parameter as a string
-    private String _getTargetParamValueAsString(ConicTarget target, int paramIndex) {
-        double d = _getTargetParamvalue(target, paramIndex);
-        return String.valueOf(d);
-    }
-    // Return the current value of the given parameter
-    private double _getTargetParamvalue(ConicTarget target, int paramIndex) {
-        if (paramIndex == EPOCHOFEL) {
-            return target.getEpoch().getValue();
+    private double _getTargetParamvalue(ConicTarget target, Param param) {
+        switch (param) {
+            case EPOCHOFEL:    return target.getEpoch().getValue();
+            case ORBINC:       return target.getInclination().getValue();
+            case LONGASCNODE:  return target.getANode().getValue();
+            case LONGOFPERI:   return target.getPerihelion().getValue();
+            case ARGOFPERI:    return target.getPerihelion().getValue();
+            case MEANDIST:     return target.getAQ().getValue();
+            case PERIDIST:     return target.getAQ().getValue();
+            case ECCENTRICITY: return target.getE();
+            case MEANLONG:     return target.getLM().getValue();
+            case MEANANOM:     return target.getLM().getValue();
+            case DAILYMOT:     return target.getN().getValue();
+            case EPOCHOFPERI:  return target.getEpochOfPeri().getValue();
+            default:           return 0;
         }
-        if (paramIndex == ORBINC) {
-            return target.getInclination().getValue();
-        }
-        if (paramIndex == LONGASCNODE) {
-            return target.getANode().getValue();
-        }
-        if (paramIndex == LONGOFPERI) {
-            return target.getPerihelion().getValue();
-        }
-        if (paramIndex == ARGOFPERI) {
-            return target.getPerihelion().getValue();
-        }
-        if (paramIndex == MEANDIST) {
-            return target.getAQ().getValue();
-        }
-        if (paramIndex == PERIDIST) {
-            return target.getAQ().getValue();
-        }
-        if (paramIndex == ECCENTRICITY) {
-            return target.getE();
-        }
-        if (paramIndex == MEANLONG) {
-            return target.getLM().getValue();
-        }
-        if (paramIndex == MEANANOM) {
-            return target.getLM().getValue();
-        }
-        if (paramIndex == DAILYMOT) {
-            return target.getN().getValue();
-        }
-        if (paramIndex == EPOCHOFPERI) {
-            return target.getEpochOfPeri().getValue();
-        }
-
-        return 0.;
     }
 
-    private DropDownListBoxWidgetWatcher orbitalElementFormatWatcher = new DropDownListBoxWidgetWatcher()  {
-        public void dropDownListBoxAction(DropDownListBoxWidget dd, int i, String val) {
-            _curPos.setCoordSys((ITarget.Tag) _w.orbitalElementFormat.getSelectedItem());
-            if (!_ignoreResetCacheEvents) {
-                HorizonsService.resetCache();
+    private final DropDownListBoxWidgetWatcher orbitalElementFormatWatcher =
+        new DropDownListBoxWidgetWatcher()  {
+            public void dropDownListBoxAction(DropDownListBoxWidget dd, int i, String val) {
+                spTarget.setCoordSys((ITarget.Tag) form.orbitalElementFormat.getSelectedItem());
+                if (!ignoreResetCacheEvents) {
+                    HorizonsService.resetCache();
+                }
             }
-        }
-    };
+        };
 
-    // Initialize the Orbital Element Format menu
     void initOrbitalElementFormatChoices() {
-        _w.orbitalElementFormat.deleteWatcher(orbitalElementFormatWatcher);
-        _w.orbitalElementFormat.clear();
-        _w.orbitalElementFormat.addChoice(ITarget.Tag.JPL_MINOR_BODY);
-        _w.orbitalElementFormat.addChoice(ITarget.Tag.MPC_MINOR_PLANET);
-        _w.orbitalElementFormat.addChoice(ITarget.Tag.NAMED);
-        _w.orbitalElementFormat.addWatcher(orbitalElementFormatWatcher);
+        form.orbitalElementFormat.deleteWatcher(orbitalElementFormatWatcher);
+        form.orbitalElementFormat.clear();
+        form.orbitalElementFormat.addChoice(ITarget.Tag.JPL_MINOR_BODY);
+        form.orbitalElementFormat.addChoice(ITarget.Tag.MPC_MINOR_PLANET);
+        form.orbitalElementFormat.addChoice(ITarget.Tag.NAMED);
+        form.orbitalElementFormat.addWatcher(orbitalElementFormatWatcher);
     }
 
     void showOrbitalElementFormat() {
-        _w.orbitalElementFormat.deleteWatcher(orbitalElementFormatWatcher);
-        _w.orbitalElementFormat.setSelectedItem(_curPos.getTarget().getTag());
-        _w.orbitalElementFormat.addWatcher(orbitalElementFormatWatcher);
+        form.orbitalElementFormat.deleteWatcher(orbitalElementFormatWatcher);
+        form.orbitalElementFormat.setSelectedItem(spTarget.getTarget().getTag());
+        form.orbitalElementFormat.addWatcher(orbitalElementFormatWatcher);
     }
 
-    public void updatePos(SPTarget target) {
-        _curPos = target;
+    void updatePos(SPTarget target) {
+        spTarget = target;
     }
 
-    public void ignoreResetCacheEvents(boolean b) {
-        _ignoreResetCacheEvents = b;
+    void ignoreResetCacheEvents(boolean b) {
+        ignoreResetCacheEvents = b;
     }
 
 }

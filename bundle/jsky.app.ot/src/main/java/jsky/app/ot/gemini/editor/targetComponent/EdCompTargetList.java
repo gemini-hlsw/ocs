@@ -60,7 +60,6 @@ import javax.swing.event.MenuListener;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DateFormat;
@@ -81,14 +80,13 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         implements TelescopePosWatcher, ActionListener {
 
     private static final Logger LOG = Logger.getLogger(EdCompTargetList.class.getName());
-
     private static final String NON_SIDEREAL_TARGET = "Nonsidereal";
     private static final String EXTRA_URL_INFO = "/mimetype=full-rec";
     private static final String PROPER_MOTION_COL_ID = "pm1";
     private static final String SIMBAD_CATALOG_SHORTNAME = "simbad";
-    public static final DateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss");
     private static final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 
+    private static final DateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss");
     static {
         timeFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
@@ -111,7 +109,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private GuideGroup _curGroup;
 
     // Helper class for dealing with NonSidereal targets.
-    private NonSiderealTargetSupport _nonSiderealTargetSup;
+    private final NonSiderealTargetSupport _nonSiderealTargetSup;
 
     // If true, ignore change events for the current position
     private boolean _ignorePosUpdate = false;
@@ -123,12 +121,14 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     // which contains the time (HH:MM:SS) for when an Horizons query should be made
     private TimeDocument _timeDocument;
 
-    private AgsContextPublisher _agsPub = new AgsContextPublisher();
+    private final AgsContextPublisher _agsPub = new AgsContextPublisher();
     /**
      * The constructor initializes the user interface.
      */
     public EdCompTargetList() {
+
         _w = new TelescopeForm(this);
+
         //Callback for AGS visibiity
         _w.addComponentListener(new ComponentAdapter() {
             @Override
@@ -140,6 +140,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         _siderealEditor = new SiderealEditor();
         _trackingEditor = new TrackingEditor();
+
         // Tracking Editor use My Doggy style to match the p2 checker
         _trackingButton = new JToggleButton("Tracking Details") {{
             setUI(new RotatedButtonUI(RotatedButtonUI.Orientation.topToBottom));
@@ -554,21 +555,13 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
     private interface PositionType {
-        String getName();
-
         boolean isAvailable();
-
         void morphTarget(TargetObsComp obsComp, SPTarget target);
-
         boolean isMember(TargetEnvironment env, SPTarget target);
     }
 
     private enum BasePositionType implements PositionType {
         instance;
-
-        public String getName() {
-            return TargetEnvironment.BASE_NAME;
-        }
 
         public boolean isAvailable() {
             return true;
@@ -593,7 +586,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
 
         public String toString() {
-            return getName();
+            return TargetEnvironment.BASE_NAME;
         }
     }
 
@@ -604,10 +597,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         GuidePositionType(GuideProbe guider, boolean available) {
             this.guider = guider;
             this.available = available;
-        }
-
-        public String getName() {
-            return guider.getKey();
         }
 
         public boolean isAvailable() {
@@ -642,16 +631,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
 
         public String toString() {
-            return getName();
+            return guider.getKey();
         }
     }
 
     private enum UserPositionType implements PositionType {
         instance;
-
-        public String getName() {
-            return TargetEnvironment.USER_NAME;
-        }
 
         public boolean isAvailable() {
             return true;
@@ -671,7 +656,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
 
         public String toString() {
-            return getName();
+            return TargetEnvironment.USER_NAME;
         }
     }
 
@@ -910,14 +895,13 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     private static TargetClipboard clipboard;
 
-    static boolean copySelectedPosition(ISPObsComponent obsComponent, TargetObsComp dataObject) {
+    private static void copySelectedPosition(ISPObsComponent obsComponent, TargetObsComp dataObject) {
         Option<TargetClipboard> opt = TargetClipboard.copy(dataObject.getTargetEnvironment(), obsComponent);
-        if (opt.isEmpty()) return false;
+        if (opt.isEmpty()) return;
         clipboard = opt.getValue();
-        return true;
     }
 
-    static void pasteSelectedPosition(ISPObsComponent obsComponent, TargetObsComp dataObject) {
+    private static void pasteSelectedPosition(ISPObsComponent obsComponent, TargetObsComp dataObject) {
         if (clipboard == null) return;
         clipboard.paste(obsComponent, dataObject);
     }
@@ -936,8 +920,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             if (!name.isEmpty()) {
                 _resolveNonSidereal(name, operationType, listener);
             }
-        } else { //use standard catalogs.
-//            Catalog nameServer = (Catalog) _w.nameServer.getSelectedItem();
+        } else {
             if (!_selectedNameServer.isEmpty()) {
                 Catalog nameServer = _selectedNameServer.getValue();
                 if (name.length() != 0) {
@@ -948,39 +931,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
         }
     }
-
-
-    /**
-     * Will remove the Non Sidereal information from the current target
-     * Based on the <code>opType</code>, the data to be removed varies.
-     */
-    private void _clearNonSiderealInformation(HorizonsAction.Type opType) {
-
-        //TODO: maybe later. Currently we don't do this since it screws up
-        //TODO: the time picked up by the user.
-//        if (_curPos.getTarget() instanceof ConicTarget) {
-//            ConicTarget target = (ConicTarget)_curPos.getTarget();
-//            switch (opType) {
-//                case GET_ORBITAL_ELEMENTS:
-//                    target.getEpoch().setValue(2000.0);
-//                    target.getEpochOfPeri().setValue(2000.0);
-//                    target.getANode().setValue(0.0);
-//                    target.getPerihelion().setValue(0.0);
-//                    target.setE(0.0);
-//                    target.getInclination().setValue(0.0);
-//                    target.getLM().setValue(0.0);
-//                    target.getAQ().setValue(0.0);
-//                    //fall through
-//                case UPDATE_POSITION:
-//                    //target.setDateForPosition(null);
-//                    _curPos.setXY(0.0, 0.0);
-//                    break;
-//                case PLOT_EPHEMERIS:
-//                    break;
-//            }
-//        }
-    }
-
 
     /**
      * Retrieves a date, that's built based on the information from
@@ -1079,20 +1029,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
                 service.setObjectType(null);
 
-                //if the object is an Id, set the appropriate type in
-                //the query, so we can attempt to narrow it.
-                //UPDATE: why set it only for IDs? Now we'll always set it.
-                //  if (_nameIsId(name)) {
-                NonSiderealTargetSupport.NonSiderealSystem system =
-                        (NonSiderealTargetSupport.NonSiderealSystem) _w.orbitalElementFormat.getSelectedItem();
-                if (system == _nonSiderealTargetSup.getNonSiderealSystem(ITarget.Tag.JPL_MINOR_BODY)) {
-                    service.setObjectType(HorizonsQuery.ObjectType.COMET);
-                } else if (system == _nonSiderealTargetSup.getNonSiderealSystem(ITarget.Tag.MPC_MINOR_PLANET)) {
-                    service.setObjectType(HorizonsQuery.ObjectType.MINOR_BODY);
-                } else if (system == _nonSiderealTargetSup.getNonSiderealSystem(ITarget.Tag.NAMED)) {
-                    service.setObjectType(HorizonsQuery.ObjectType.MAJOR_BODY);
+                ITarget.Tag tag = (ITarget.Tag) _w.orbitalElementFormat.getSelectedItem();
+                switch (tag) {
+                    case JPL_MINOR_BODY:   service.setObjectType(HorizonsQuery.ObjectType.COMET);      break;
+                    case MPC_MINOR_PLANET: service.setObjectType(HorizonsQuery.ObjectType.MINOR_BODY); break;
+                    case NAMED:            service.setObjectType(HorizonsQuery.ObjectType.MAJOR_BODY); break;
                 }
-                //}
                 _nonSiderealTargetSup.ignoreResetCacheEvents(false);
 
                 HorizonsReply reply = service.execute();
@@ -1100,11 +1042,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 if (reply == null || reply.getReplyType() == HorizonsReply.ReplyType.MAJOR_PLANET) {
                     if (service.getObjectType() == HorizonsQuery.ObjectType.COMET) {
                         service.setObjectType(HorizonsQuery.ObjectType.MINOR_BODY);
-                        //DialogUtil.message("Couldn't find JPL Comet '" + name + "', will try querying for a JPL Minor Planet");
                         reply = service.execute();
                     } else if (service.getObjectType() == HorizonsQuery.ObjectType.MINOR_BODY) {
                         service.setObjectType(HorizonsQuery.ObjectType.COMET);
-                        // DialogUtil.message("Couldn't find JPL Minor Planet '" + name + "', will try querying for a JPL Comet");
                         reply = service.execute();
                     }
                 }
@@ -1122,26 +1062,22 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 } catch (ExecutionException ex) {
                     final String message = "An error occurred fetching results for: " + name.toUpperCase();
                     LOG.log(Level.WARNING, message, ex);
-                    _clearNonSiderealInformation(operationType);
                     DialogUtil.message(message);
                     return;
                 }
 
                 if ((reply == null) || (reply.getReplyType() == HorizonsReply.ReplyType.NO_RESULTS)) {
-                    _clearNonSiderealInformation(operationType);
                     DialogUtil.message("No results were found for: " + name.toUpperCase());
                     return;
                 }
 
                 if (reply.getReplyType() == HorizonsReply.ReplyType.MAJOR_PLANET
                         && !(_curPos.getTarget() instanceof NamedTarget)) {
-                    _clearNonSiderealInformation(operationType);
                     DialogUtil.message("Can't solve the given ID to any minor body");
                     return;
                 }
 
                 if (reply.getReplyType() == HorizonsReply.ReplyType.SPACECRAFT) {
-                    _clearNonSiderealInformation(operationType);
                     DialogUtil.message("Horizons suggests this is a spacecraft. Sorry, but OT can't use spacecrafts");
                     return;
                 }
@@ -1178,22 +1114,22 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     switch (reply.getObjectType()) {
                         case COMET: {
                             final ConicTarget target = newOrExistingTarget(ITarget.Tag.JPL_MINOR_BODY);
-                            _nonSiderealTargetSup.showNonSiderealTarget(target, ITarget.Tag.JPL_MINOR_BODY);
-                            _w.orbitalElementFormat.setValue(_nonSiderealTargetSup.getNonSiderealSystems()[NonSiderealTargetSupport.JPL_COMET]);
+                            _nonSiderealTargetSup.showNonSiderealTarget(target);
+                            _w.orbitalElementFormat.setValue(ITarget.Tag.JPL_MINOR_BODY);
                             _curPos.setTarget(target);
                             }
                             break;
                         case MINOR_BODY: {
                             final ConicTarget target = newOrExistingTarget(ITarget.Tag.MPC_MINOR_PLANET);
-                            _nonSiderealTargetSup.showNonSiderealTarget(target, ITarget.Tag.MPC_MINOR_PLANET);
-                            _w.orbitalElementFormat.setValue(_nonSiderealTargetSup.getNonSiderealSystems()[NonSiderealTargetSupport.JPL_MINOR_PLANET]);
+                            _nonSiderealTargetSup.showNonSiderealTarget(target);
+                            _w.orbitalElementFormat.setValue(ITarget.Tag.MPC_MINOR_PLANET);
                             _curPos.setTarget(target);
                             }
                             break;
                         case MAJOR_BODY: {
                             final NamedTarget target = (oldTarget instanceof NamedTarget) ? (NamedTarget) oldTarget : new NamedTarget();
-                            _nonSiderealTargetSup.showNonSiderealTarget(target,ITarget.Tag.NAMED);
-                            _w.orbitalElementFormat.setValue(_nonSiderealTargetSup.getNonSiderealSystems()[NonSiderealTargetSupport.MAJOR_PLANET]);
+                            _nonSiderealTargetSup.showNonSiderealTarget(target);
+                            _w.orbitalElementFormat.setValue(ITarget.Tag.NAMED);
                             _curPos.setTarget(target);
                             }
                             break;
@@ -1548,7 +1484,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     private static class AddGroupAction implements ActionListener {
         private final TargetObsComp obsComp;
-        private TelescopePosTableWidget positionTable;
+        private final TelescopePosTableWidget positionTable;
 
         AddGroupAction(TargetObsComp obsComp, TelescopePosTableWidget positionTable) {
             this.obsComp = obsComp;
@@ -1657,9 +1593,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         // update the display in the tabs
         if (_curPos.getTarget() instanceof NonSiderealTarget) {
-            ITarget.Tag system = _curPos.getTarget().getTag();
             NonSiderealTarget nst = (NonSiderealTarget) _curPos.getTarget();
-            _nonSiderealTargetSup.showNonSiderealTarget(nst, system);
+            _nonSiderealTargetSup.showNonSiderealTarget(nst);
         }
     }
 
@@ -1984,7 +1919,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         },;
 
         private static final int HOUR = 1000 * 60 * 60;
-        private String _displayValue;
+        private final String _displayValue;
 
         private TimeConfig(String displayValue) {
             _displayValue = displayValue;
@@ -2068,7 +2003,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                             OrbitalElements elements = reply.getOrbitalElements();
                             target.getAQ().setValue(elements.getValue(OrbitalElements.Name.QR));
                         }
-                        _w.orbitalElementFormat.setSelectedItem(_nonSiderealTargetSup.getNonSiderealSystem(ITarget.Tag.JPL_MINOR_BODY));
+                        _w.orbitalElementFormat.setSelectedItem(ITarget.Tag.JPL_MINOR_BODY);
                         _w.targetName.setText(name); //name is cleared if we move the element format
                         break;
 
@@ -2078,7 +2013,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                             OrbitalElements elements = reply.getOrbitalElements();
                             target.getAQ().setValue(elements.getValue(OrbitalElements.Name.A));
                         }
-                        _w.orbitalElementFormat.setSelectedItem(_nonSiderealTargetSup.getNonSiderealSystem(ITarget.Tag.MPC_MINOR_PLANET));
+                        _w.orbitalElementFormat.setSelectedItem(ITarget.Tag.MPC_MINOR_PLANET);
                         _w.targetName.setText(name); //name is cleared if we move the element format
                         break;
 
@@ -2086,18 +2021,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         return; /// ***
                 }
 
-                // If the target is capable of storing Horizons information, populate (or unpopulate) it.
-                if (target instanceof NonSiderealTarget) {
-                    NonSiderealTarget ht = (NonSiderealTarget) _curPos.getTarget();
-                    if (reply.hasObjectIdAndType()) {
-                        // Set the object id and type; both will be valid
-                        ht.setHorizonsObjectId(reply.getObjectId());
-                        ht.setHorizonsObjectTypeOrdinal(reply.getObjectType().ordinal());
-                    } else {
-                        // Clear the value out
-                        ht.setHorizonsObjectId(null);
-                        ht.setHorizonsObjectTypeOrdinal(-1);
-                    }
+                // Store horizons info, if available
+                if (reply.hasObjectIdAndType()) {
+                    target.setHorizonsObjectId(reply.getObjectId());
+                    target.setHorizonsObjectTypeOrdinal(reply.getObjectType().ordinal());
                 }
 
                 // Set the orbital elements
