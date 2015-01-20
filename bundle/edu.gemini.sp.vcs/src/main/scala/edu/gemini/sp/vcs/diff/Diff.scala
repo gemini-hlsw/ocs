@@ -36,15 +36,8 @@ object Diff {
                            children: List[SPNodeKey],
                            detail:   NodeDetail      ) extends Diff
 
-  /** Creates an [[Missing]] `Diff` from the provided program node.
-    *
-    * The only thing this offers over the Missing object's apply is that the
-    * resulting object has a more convenient type.
-    */
-  def missing(key: SPNodeKey, nv: NodeVersions): Diff = Missing(key, nv)
-
   /** Creates an [[Present]] `Diff` from the provided program node. */
-  def present(n: ISPNode): Diff = {
+  def present(n: ISPNode): Present = {
     val detail = n match {
       case o: ISPObservation => NodeDetail.Obs(o.getObservationNumber)
       case _                 => NodeDetail.Empty
