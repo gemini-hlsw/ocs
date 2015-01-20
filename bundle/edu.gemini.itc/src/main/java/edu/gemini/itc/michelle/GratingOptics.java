@@ -25,25 +25,17 @@ import java.io.IOException;
  */
 public class GratingOptics extends TransmissionElement {
 
-
-    private List _x_values;
-    //private List _F6_res_values;
-    //private List _F14_res_values;
-    //private List _spectralCoverageArray;
-    //private List _spectralPixelWidthArray;
     private List _resolvingPowerArray;
     private List _dispersionArray;
     private List _blazeArray;
     private List _resolutionArray;
     private List _gratingNameArray;
     private String _gratingName;
-    //private String _focalPlaneMaskOffset;
     private double _centralWavelength;
     private int _detectorPixels;
     private int _spectralBinning;
 
     public GratingOptics(String directory, String gratingName,
-                         //	      String focalPlaneMaskOffset,
                          String stringSlitWidth,
                          double centralWavelength,
                          int detectorPixels,
@@ -58,29 +50,6 @@ public class GratingOptics extends TransmissionElement {
         _detectorPixels = detectorPixels;
         _centralWavelength = centralWavelength;
         _gratingName = gratingName;
-        //    _focalPlaneMaskOffset = focalPlaneMaskOffset;
-
-        //Read The transmission file for the start and stop wavelengths
-        TextFileReader dfr = new TextFileReader(directory +
-                                                Michelle.getPrefix() +
-                                                gratingName +
-                                                Instrument.getSuffix());
-        _x_values = new ArrayList();
-
-        double x = 0;
-        double y = 0;
-
-        try {
-            while (true) {
-                x = dfr.readDouble();
-                _x_values.add(new Double(x));
-                y = dfr.readDouble();
-            }
-        } catch (ParseException e) {
-            throw e;
-        } catch (IOException e) {
-            // normal eof
-        }
 
         //New read of Grating Proporties
         TextFileReader grismProperties = new TextFileReader(directory +
@@ -92,9 +61,8 @@ public class GratingOptics extends TransmissionElement {
         _blazeArray = new ArrayList();
         _resolutionArray = new ArrayList();
         _dispersionArray = new ArrayList();
-        //int _resolvingPower = 0;
         try {
-            while (true) {
+            while (grismProperties.hasMoreData()) {
                 _gratingNameArray.add(new String(grismProperties.readString()));
                 _blazeArray.add(new Integer(grismProperties.readInt()));
                 _resolvingPowerArray.add(new Integer(grismProperties.readInt()));
@@ -107,63 +75,30 @@ public class GratingOptics extends TransmissionElement {
             // normal eof
         }
 
-        //TextFileReader grismCoverage = new TextFileReader(directory+
-        //					      Niri.getPrefix()+
-        //					      "grism-coverage-"+
-        //					      focalPlaneMaskOffset+
-        //					      Instrument.getSuffix());
-        //    _spectralCoverageArray = new ArrayList();
-        //_spectralPixelWidthArray = new ArrayList();
-
-
-        //int _resolvingPower = 0;
-        //try {
-        //while (true) {
-        //    _spectralCoverageArray.add(new Double(grismCoverage.readDouble()));
-        //    _spectralCoverageArray.add(new Double(grismCoverage.readDouble()));
-        //    _spectralPixelWidthArray.add(new Double(grismCoverage.readDouble()));
-        //}
-        //} catch (ParseException e) {
-        //throw e;
-        //} catch (IOException e) {
-        // normal eof
-        //}
-
-
     }
 
 
     public double getStart() {
-        //return ((Double)_spectralCoverageArray.get(getGrismNumber()*2)).doubleValue();
         return _centralWavelength - (
                 (((Double) _dispersionArray.get(getGratingNumber())).doubleValue())
                 * _detectorPixels / 2) * _spectralBinning;
     }
 
     public double getEnd() {
-        //return ((Double)_spectralCoverageArray.get(getGrismNumber()*2+1)).doubleValue();
         return _centralWavelength + (
                 (((Double) _dispersionArray.get(getGratingNumber())).doubleValue())
                 * _detectorPixels / 2) * _spectralBinning;
     }
 
     public double getEffectiveWavelength() {
-        //return (getStart()+getEnd())/2;
         return _centralWavelength;
     }
 
     public double getPixelWidth() {
-        //return ((Double)_spectralPixelWidthArray.get(getGrismNumber())).doubleValue();
         return ((Double) _dispersionArray.get(getGratingNumber())).doubleValue() * _spectralBinning;
 
     }
 
-    // for right now effective wavelen will just be the mid pt of the filter
-
-//    public double getEffectiveWavelength()
-//    {
-//       return ((Double)_x_values.get((int)_x_values.size()/2)).doubleValue();
-//    }
     public int getGratingNumber() {
         int grating_num = 0;
 
@@ -187,10 +122,6 @@ public class GratingOptics extends TransmissionElement {
         return ((Integer) _resolvingPowerArray.get(getGratingNumber())).intValue();
     }
 
-    public String getGratingName() {
-        return (String) _gratingNameArray.get(getGratingNumber());
-    }
-
     public double getGratingBlaze() {
         return ((Integer) _blazeArray.get(getGratingNumber())).intValue();
     }
@@ -200,66 +131,11 @@ public class GratingOptics extends TransmissionElement {
     }
 
     public double getGratingDispersion_nmppix() {
-        //System.out.println("Grating Num: "+ getGratingNumber() + "pixval" +
-        //		((Double)_dispersionArray.get(getGratingNumber())).doubleValue());
         return ((Double) _dispersionArray.get(getGratingNumber())).doubleValue()
                 * _spectralBinning;
     }
 
-    //    public double getGrismResolution()
-//     {
-// 	int grism_res=0;
-
-// 	if (_grismName.equals(NiriParameters.JGRISM)){
-// 	    if (_cameraName.equals(NiriParameters.F6)) {
-// 		grism_res=
-// 		    ((Integer)_F6_res_values.get(NiriParameters.J)).intValue();
-// 	    } else {
-// 		grism_res=
-// 		    ((Integer)_F14_res_values.get(NiriParameters.J)).intValue();
-// 	    }
-// 	} else if (_grismName.equals(NiriParameters.HGRISM)){
-// 	    if (_cameraName.equals(NiriParameters.F6)) {
-// 		grism_res=
-// 		    ((Integer)_F6_res_values.get(NiriParameters.H)).intValue();
-// 	    } else {
-// 		grism_res=
-// 		    ((Integer)_F14_res_values.get(NiriParameters.H)).intValue();
-// 	    }
-// 	} else if (_grismName.equals(NiriParameters.KGRISM)){
-// 	    if (_cameraName.equals(NiriParameters.F6)) {
-// 		grism_res=
-// 		    ((Integer)_F6_res_values.get(NiriParameters.K)).intValue();
-// 	    } else {
-// 		grism_res=
-// 		    ((Integer)_F14_res_values.get(NiriParameters.K)).intValue();
-// 	    }
-// 	} else if (_grismName.equals(NiriParameters.LGRISM)){
-// 	    if (_cameraName.equals(NiriParameters.F6)) {
-// 		grism_res=
-// 		    ((Integer)_F6_res_values.get(NiriParameters.L)).intValue();
-// 	    } else {
-// 		grism_res=
-// 		    ((Integer)_F14_res_values.get(NiriParameters.L)).intValue();
-// 	    }
-// 	} else if (_grismName.equals(NiriParameters.MGRISM)){
-// 	    if (_cameraName.equals(NiriParameters.F6)) {
-// 		grism_res=
-// 		    ((Integer)_F6_res_values.get(NiriParameters.M)).intValue();
-// 	    } else {
-// 		grism_res=
-// 		    ((Integer)_F14_res_values.get(NiriParameters.M)).intValue();
-// 	    }
-// 	}
-// 	return grism_res;
-//     }
-
-    public String toString() { // return "Grism Optics: " +
-// 				               Niri.getPrefix() +
-// 					       _grismName + "_" +
-// 					       _cameraName +
-// 					       Instrument.getSuffix();
-//    }
+    public String toString() {
         return "Grating Optics: " + _gratingName;
     }
 
