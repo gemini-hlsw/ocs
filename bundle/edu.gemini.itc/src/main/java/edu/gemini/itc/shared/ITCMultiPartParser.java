@@ -89,8 +89,7 @@ public class ITCMultiPartParser {
             fileTypes.put(file.getFieldName(), TEXT);
             
         } else {
-            System.out.println("wrong file type: " + file.getContentType());
-            
+
             throw new IncompatibleFileTypeException("Submitted file, " + file.getName()
             + ", is a " + file.getContentType() + " file which is not supported. ");
         }

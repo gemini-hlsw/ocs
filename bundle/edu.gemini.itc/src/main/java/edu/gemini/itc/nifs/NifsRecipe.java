@@ -338,11 +338,8 @@ public final class NifsRecipe extends RecipeBase {
         double im_qual = 0.;
         double uncorrected_im_qual = 0.;
 
-        ImageQualityCalculationFactory IQcalcFactory = new ImageQualityCalculationFactory();
         ImageQualityCalculatable IQcalc =
-                (ImageQualityCalculatable) IQcalcFactory.getCalculationInstance(
-                        _sdParameters, _obsDetailParameters, _obsConditionParameters,
-                        _teleParameters, instrument);
+                ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
         IQcalc.calculate();
 
         im_qual = IQcalc.getImageQuality();

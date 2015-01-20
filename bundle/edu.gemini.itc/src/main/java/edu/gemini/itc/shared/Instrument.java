@@ -126,24 +126,13 @@ public abstract class Instrument {
             throws Exception {
         for (Iterator itr = _components.iterator(); itr.hasNext();) {
             TransmissionElement te = (TransmissionElement) itr.next();
-            System.out.println("Trans EL: " +te.toString());
-            //System.out.println (new Double(sed.getIntegral(1205.0,1215.0)).toString()+":" +sed.getStart()+ ":" +sed.getEnd());
-            
-	    // MD 20100924
-	    // Had to comment out this line when it randomly started causing problems one day for no discernable reason.
-	    // convolveComponents() still seems to work OK
-	    //sed.accept((TransmissionElement)itr.next());
-            sed.accept((TransmissionElement) te);
-            System.out.println("After App: " +sed.getIntegral());
-	    System.out.println("After" +te.toString());
+            sed.accept(te);
         }
 
     }
 
     protected void addComponent(TransmissionElement c) {
         _components.add(c);
-        //System.out.println("added Component: " + c.toString());
-
     }
 
     // Accessor methods

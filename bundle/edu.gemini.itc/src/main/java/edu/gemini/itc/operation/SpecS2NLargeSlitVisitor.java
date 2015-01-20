@@ -161,7 +161,6 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor {
                 pix_width, 0);
 
 
-        System.out.println("Pixel width used in resampling: " + pix_width);
         source_flux.accept(source_resample);
         background_flux.accept(background_resample);
 

@@ -8,22 +8,16 @@
 
 package edu.gemini.itc.shared;
 
-import edu.gemini.itc.shared.TransmissionElement;
-import edu.gemini.itc.shared.Instrument;
-
 /**
  * This represents the transmission of the optics native to the camera.
  */
 public class Dichroic extends TransmissionElement {
-    //private static final String FILENAME =
-    //        "fixed_optics" + Instrument.getSuffix();
+
     private String _position;
 
     public Dichroic(String directory, String position, String channel) throws Exception {
         super(directory +"dichroic_" + position +"_"+ channel + Instrument.getSuffix());
-	_position = position;
-	System.out.println("Using dichroic: dichroic_"+position+"_"+channel+"_"+Instrument.getSuffix());
-
+    	_position = position;
     }
 
     public String toString() {

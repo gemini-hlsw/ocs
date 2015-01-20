@@ -150,8 +150,6 @@ public class ITCImageFileIO {
 
     public void saveCharttoDisk(Image tmpChart) throws IOException{//, EncoderException { //add for KLG
         try {
-            long startTime =System.currentTimeMillis();
-
             //PNGEncoder enc = new PNGEncoder();  // ADD for KLG
             File tmpOut = new File(getImagePath());
             File randomFileName = tmpOut.createTempFile("SessionID", ".png", tmpOut);
@@ -167,8 +165,6 @@ public class ITCImageFileIO {
             //enc.encode(tmpChart, out);  // ave 300 ms requires KLG :(
             out.flush();
             out.close();
-            long stopTime = System.currentTimeMillis();
-            System.out.println("Encode Elapsed Time: " + (stopTime - startTime));
 
             setFileName(randomFileName.getName());
 

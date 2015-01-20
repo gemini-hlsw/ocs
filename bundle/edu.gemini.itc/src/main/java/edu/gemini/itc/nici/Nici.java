@@ -162,7 +162,6 @@ public class Nici extends Instrument {
 
 	totalNoise = Math.sqrt(sigma_read_sqrd + sigma_dark_sqrd);
 
-	System.out.println("Read noise plus light leak noise: "+totalNoise);
 	return totalNoise;
 	
     }

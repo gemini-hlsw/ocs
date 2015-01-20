@@ -98,11 +98,6 @@ public class NormalizeVisitor implements SampledSpectrumVisitor {
         // Calculate multiplier.
         double multiplier = norm / average;
 
-	System.out.println("Waveband: " + _band);
-	System.out.println("Waveband Start/End: "+WavebandDefinition.getStart(_band)+ " " + WavebandDefinition.getEnd(_band));
-	System.out.println("Norm: "+norm);
-	System.out.println("multiplier: "+multiplier);
-
         // Apply normalization, multiply every value in the SED by
         // multiplier and then its average in specified band will be
         // the required amount.

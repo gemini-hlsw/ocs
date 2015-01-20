@@ -8,20 +8,13 @@
 
 package edu.gemini.itc.shared;
 
-import edu.gemini.itc.shared.TransmissionElement;
-import edu.gemini.itc.shared.Instrument;
-
 /**
  * This represents the transmission of the optics native to the camera.
  */
 public class PupilStopWheel extends TransmissionElement {
-    //private static final String FILENAME =
-    //        "fixed_optics" + Instrument.getSuffix();
 
     public PupilStopWheel(String directory, String pupilMask) throws Exception {
-        super(directory +"pupil_" + pupilMask + Instrument.getSuffix());
-	System.out.println("Pupil mask file: "+directory+"pupil_"+pupilMask +Instrument.getSuffix());
-
+        super(directory + "pupil_" + pupilMask + Instrument.getSuffix());
     }
 
     public String toString() {

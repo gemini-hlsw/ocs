@@ -14,7 +14,7 @@ package edu.gemini.itc.shared;
  * This class encapsulates the photon flux density (in photons/s/m^2/nm)
  * for a zero-magnitude star.
  */
-public final class ZeroMagnitudeStar extends AverageFlux {
+public final class ZeroMagnitudeStar {
     // flux densities for each waveband for zero-magnitude star (of some type)
     // units are photons/s/m^2/nm
     public static int[] FLUX_DENSITY = {

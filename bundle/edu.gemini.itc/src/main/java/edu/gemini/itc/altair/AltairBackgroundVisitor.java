@@ -22,8 +22,6 @@ import edu.gemini.itc.shared.ITCConstants;
  */
 public class AltairBackgroundVisitor implements SampledSpectrumVisitor {
     
-    private String _filename_base;
-    
     private ArraySpectrum _altairBack = null;
     
     /**
@@ -43,9 +41,6 @@ public class AltairBackgroundVisitor implements SampledSpectrumVisitor {
      * Implements the SampledSpectrumVisitor interface
      */
     public void visit(SampledSpectrum sed) throws Exception {
-
-	System.out.println("Applying Altair background file : "+Altair.ALTAIR_LIB + "/" + Altair.ALTAIR_PREFIX + Altair.ALTAIR_BACKGROUND_FILENAME + ITCConstants.DATA_SUFFIX);
-
         for (int i=0; i < sed.getLength(); i++) {
             sed.setY(i, _altairBack.getY(sed.getX(i))+sed.getY(i));
         }
