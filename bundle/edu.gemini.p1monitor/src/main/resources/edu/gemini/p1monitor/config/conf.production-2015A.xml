@@ -4,7 +4,7 @@
     <bcc>swalker@gemini.edu</bcc>
     <bcc>cquiroz@gemini.edu</bcc>
 
-    <!--type name="DirectorTime">
+    <type name="DirectorTime">
         <dir>/home/software/phase1/directorTime/proposals/2015A</dir>
         <to>pitdd@gemini.edu</to>
     </type>
@@ -12,7 +12,7 @@
     <type name="PoorWeather">
         <dir>/home/software/phase1/poorWeather/proposals/2015A</dir>
         <to>pitpw@gemini.edu</to>
-    </type-->
+    </type>
 
     <type name="DemoScience">
         <dir>/home/software/phase1/demoScience/proposals/2015A</dir>
