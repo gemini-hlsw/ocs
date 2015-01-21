@@ -281,7 +281,7 @@ public final class TRecsRecipe extends RecipeBase {
 		// inputs: SED, AIRMASS, sky emmision file, mirror configuration,
 		// output: SED and sky background as they arrive at instruments
 
-		SampledSpectrumVisitor clouds = new CloudTransmissionVisitor(
+		SampledSpectrumVisitor clouds = CloudTransmissionVisitor.create(
 				_obsConditionParameters.getSkyTransparencyCloud());
 		sed.accept(clouds);
 
@@ -297,7 +297,7 @@ public final class TRecsRecipe extends RecipeBase {
 			throw new Exception("");
 		}
 
-		SampledSpectrumVisitor water = new WaterTransmissionVisitor(
+		SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
 				_obsConditionParameters.getSkyTransparencyWater(),
 				_obsConditionParameters.getAirmass(), "midIR_trans_",
 				ITCConstants.CERRO_PACHON, ITCConstants.MID_IR);
@@ -322,7 +322,7 @@ public final class TRecsRecipe extends RecipeBase {
 		// sky.accept(resample);
 
 		// Apply telescope transmission to both sed and sky
-		SampledSpectrumVisitor t = new TelescopeTransmissionVisitor(
+		SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(
 				_teleParameters.getMirrorCoating(),
 				_teleParameters.getInstrumentPort());
 		sed.accept(t);
