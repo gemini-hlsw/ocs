@@ -6,9 +6,6 @@
 //
 package edu.gemini.itc.shared;
 
-import edu.gemini.itc.shared.TransmissionElement;
-import edu.gemini.itc.shared.Instrument;
-
 import java.awt.*;
 
 public class Detector extends TransmissionElement {

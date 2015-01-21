@@ -6,7 +6,8 @@ import edu.gemini.itc.shared.Instrument;
 
 public final class ImagingS2NCalculationFactory {
 
-    private ImagingS2NCalculationFactory() {}
+    private ImagingS2NCalculationFactory() {
+    }
 
     public static ImagingS2NCalculatable getCalculationInstance(
             final SourceDefinitionParameters sourceDefinitionParameters,
@@ -15,7 +16,7 @@ public final class ImagingS2NCalculationFactory {
 
 
         final String calcMethod = observationDetailsParameters.getCalculationMethod();
-        switch(calcMethod) {
+        switch (calcMethod) {
 
             // --- Signal to noise
             case ObservationDetailsParameters.S2N:

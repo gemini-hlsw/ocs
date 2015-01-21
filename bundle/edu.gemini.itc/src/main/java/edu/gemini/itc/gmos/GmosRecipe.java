@@ -9,58 +9,22 @@
 //
 package edu.gemini.itc.gmos;
 
-import java.awt.*;
-import java.io.PrintWriter;
+import edu.gemini.itc.operation.*;
+import edu.gemini.itc.parameters.*;
+import edu.gemini.itc.shared.*;
 
 import javax.servlet.http.HttpServletRequest;
-
-import edu.gemini.itc.shared.FormatStringWriter;
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.RecipeBase;
-import edu.gemini.itc.shared.SampledSpectrumVisitor;
-import edu.gemini.itc.shared.SEDFactory;
-import edu.gemini.itc.shared.VisitableSampledSpectrum;
-import edu.gemini.itc.shared.WavebandDefinition;
-import edu.gemini.itc.shared.GaussianMorphology;
-import edu.gemini.itc.shared.USBMorphology;
-import edu.gemini.itc.shared.VisitableMorphology;
-import edu.gemini.itc.shared.ITCMultiPartParser;
-import edu.gemini.itc.shared.ServerInfo;
-import edu.gemini.itc.shared.ITCChart;
+import java.awt.*;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
 
 //import edu.gemini.itc.operation.ChartDataSource;
 //import edu.gemini.itc.operation.ChartCreatePNG;
 //import edu.gemini.itc.operation.ChartCreate;
-
-import edu.gemini.itc.parameters.ObservingConditionParameters;
-import edu.gemini.itc.parameters.ObservationDetailsParameters;
-import edu.gemini.itc.parameters.SourceDefinitionParameters;
-import edu.gemini.itc.parameters.TeleParameters;
-import edu.gemini.itc.parameters.PlottingDetailsParameters;
-
-import edu.gemini.itc.operation.ResampleWithPaddingVisitor;
-import edu.gemini.itc.operation.RedshiftVisitor;
-import edu.gemini.itc.operation.TelescopeApertureVisitor;
-import edu.gemini.itc.operation.TelescopeTransmissionVisitor;
-import edu.gemini.itc.operation.TelescopeBackgroundVisitor;
-import edu.gemini.itc.operation.NormalizeVisitor;
-import edu.gemini.itc.operation.CloudTransmissionVisitor;
-import edu.gemini.itc.operation.WaterTransmissionVisitor;
 //import edu.gemini.itc.operation.ChartVisitor;
-import edu.gemini.itc.operation.PeakPixelFluxCalc;
-import edu.gemini.itc.operation.SpecS2NLargeSlitVisitor;
-import edu.gemini.itc.operation.SlitThroughput;
-import edu.gemini.itc.operation.ImageQualityCalculatable;
-import edu.gemini.itc.operation.ImageQualityCalculationFactory;
-import edu.gemini.itc.operation.SourceFractionCalculationFactory;
-import edu.gemini.itc.operation.SourceFractionCalculatable;
-import edu.gemini.itc.operation.ImagingS2NCalculationFactory;
-import edu.gemini.itc.operation.ImagingS2NCalculatable;
-
-import java.util.Calendar;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * This class performs the calculations for Gmos used for imaging.
@@ -226,7 +190,7 @@ public final class GmosRecipe extends RecipeBase {
             int lastCcdIndex = tv.getDetectorCcdEndIndex(ccdIndex, detectorCount);
             // REL-478: include the gaps in the text data output
             int lastCcdIndexWithGap = (ccdIndex < 2 && detectorCount > 1)
-                    ? tv.getDetectorCcdStartIndex(ccdIndex+1)
+                    ? tv.getDetectorCcdStartIndex(ccdIndex + 1)
                     : lastCcdIndex;
 
             SpecS2NLargeSlitVisitor specS2N = null;

@@ -10,15 +10,12 @@
 
 package edu.gemini.itc.gmos;
 
-import java.io.PrintWriter;
-
-import javax.servlet.http.HttpServletRequest;
-
-import java.util.Enumeration;
-
+import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCServlet;
 import edu.gemini.itc.shared.Recipe;
-import edu.gemini.itc.shared.ITCMultiPartParser;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.PrintWriter;
 
 /**
  * This servlet accepts form data from the ITC html document.
@@ -41,20 +38,26 @@ public final class ITCgmosServlet
     public static final String INSTRUMENT = "GMOS";
 
     public ITCgmosServlet() {
-		super ();
+        super();
     }
-    
-    /** Returns a title */
+
+    /**
+     * Returns a title
+     */
     public String getTitle() {
         return TITLE;
     }
 
-    /** Returns a version of this servlet */
+    /**
+     * Returns a version of this servlet
+     */
     public String getVersion() {
         return VERSION;
     }
 
-    /** Returns the Instrument name*/
+    /**
+     * Returns the Instrument name
+     */
     public String getInst() {
         return INSTRUMENT;
     }
@@ -67,7 +70,9 @@ public final class ITCgmosServlet
         return getTitle() + " " + getVersion() + " - ITCgmosServlet accepts form data and performs ITC calculation for Gmos.";
     }
 
-    /** Supply the body content for the html document. */
+    /**
+     * Supply the body content for the html document.
+     */
     public void writeOutput(HttpServletRequest r, PrintWriter out)
             throws Exception {
         // Construct recipe from the request.

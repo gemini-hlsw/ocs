@@ -10,9 +10,8 @@
 //
 package edu.gemini.itc.parameters;
 
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.ITCParameters;
 import edu.gemini.itc.shared.ITCMultiPartParser;
+import edu.gemini.itc.shared.ITCParameters;
 import edu.gemini.itc.shared.NoSuchParameterException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -39,8 +38,8 @@ public final class TeleParameters extends ITCParameters {
     public static final String OIWFS = "oiwfs";
     public static final String PWFS = "pwfs";
     public static final String AOWFS = "aowfs";
-    
-    private static final double _telescopeDiameter = 3.95+3.95;
+
+    private static final double _telescopeDiameter = 3.95 + 3.95;
 
     // Data members
     private String _mirrorCoating;  // aluminum or silver
@@ -49,6 +48,7 @@ public final class TeleParameters extends ITCParameters {
 
     /**
      * Constructs a TeleParameters from a servlet request
+     *
      * @param r Servlet request containing the form data.
      * @throws Exception if input data is not parsable.
      */
@@ -57,9 +57,10 @@ public final class TeleParameters extends ITCParameters {
     }
 
     /**
-     *Constructs a TeleParameters from a MultipartParser
+     * Constructs a TeleParameters from a MultipartParser
+     *
      * @param p MutipartParser that has all of the parameters and files Parsed
-     *@throws Exception of cannot parse any of the parameters.
+     * @throws Exception of cannot parse any of the parameters.
      */
 
     public TeleParameters(ITCMultiPartParser p) throws Exception {
@@ -67,7 +68,9 @@ public final class TeleParameters extends ITCParameters {
     }
 
 
-    /** Parse parameters from a servlet request. */
+    /**
+     * Parse parameters from a servlet request.
+     */
     public void parseServletRequest(HttpServletRequest r) throws Exception {
         // Parse the Telescope specific section of the form.
 
@@ -99,34 +102,43 @@ public final class TeleParameters extends ITCParameters {
             _instrumentPort = p.getParameter(ISS_PORT);
             _wfs = p.getParameter(WFSCOMB);
         } catch (NoSuchParameterException e) {
-            throw new Exception("The parameter "+ e.parameterName + " could not be found in the Telescope" +
-            " Parameters Section of the form.  Either add this value or Contact the Helpdesk.");
+            throw new Exception("The parameter " + e.parameterName + " could not be found in the Telescope" +
+                    " Parameters Section of the form.  Either add this value or Contact the Helpdesk.");
         }
     }
 
 
     public TeleParameters(String mirrorCoating,
-    String instrumentPort,
-    String wfs) {
+                          String instrumentPort,
+                          String wfs) {
         _mirrorCoating = mirrorCoating;
         _instrumentPort = instrumentPort;
         _wfs = wfs;
     }
 
-    public String getMirrorCoating() { return _mirrorCoating; }
-    public String getInstrumentPort() { return _instrumentPort; }
-    
+    public String getMirrorCoating() {
+        return _mirrorCoating;
+    }
+
+    public String getInstrumentPort() {
+        return _instrumentPort;
+    }
+
     public String getWFS() {
-	if (_wfs.equals(AOWFS))
-		return OIWFS;  //AO/tiptilt will be handled by Altair return something the rest of the 
-				// code can understand
-	else
-		return _wfs;
-	}
+        if (_wfs.equals(AOWFS))
+            return OIWFS;  //AO/tiptilt will be handled by Altair return something the rest of the
+            // code can understand
+        else
+            return _wfs;
+    }
 
-    public double getTelescopeDiameter() { return _telescopeDiameter; }
+    public double getTelescopeDiameter() {
+        return _telescopeDiameter;
+    }
 
-    /** Return a human-readable string for debugging */
+    /**
+     * Return a human-readable string for debugging
+     */
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("Mirror Coating:\t" + getMirrorCoating() + "\n");
@@ -141,12 +153,12 @@ public final class TeleParameters extends ITCParameters {
     }
 
     public String printParameterSummary(String wfs) {
-		StringBuffer sb = new StringBuffer();
-		sb.append("Telescope configuration: \n");
-		sb.append("<LI>" + getMirrorCoating() + " mirror coating.\n");
-		sb.append("<LI>" + getInstrumentPort() + " looking port.\n");
-		sb.append("<LI>wavefront sensor: " + wfs + "\n");
-		return sb.toString();
-	}
+        StringBuffer sb = new StringBuffer();
+        sb.append("Telescope configuration: \n");
+        sb.append("<LI>" + getMirrorCoating() + " mirror coating.\n");
+        sb.append("<LI>" + getInstrumentPort() + " looking port.\n");
+        sb.append("<LI>wavefront sensor: " + wfs + "\n");
+        return sb.toString();
+    }
 
 }

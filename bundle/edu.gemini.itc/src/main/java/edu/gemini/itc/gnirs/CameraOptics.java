@@ -8,14 +8,11 @@
 //
 package edu.gemini.itc.gnirs;
 
-import edu.gemini.itc.shared.TransmissionElement;
-import edu.gemini.itc.shared.Instrument;
-
 /**
  * This is the interface for the camera optics.
  */
-public interface CameraOptics  {
-    
+public interface CameraOptics {
+
     public double getPixelScale();
 }
 

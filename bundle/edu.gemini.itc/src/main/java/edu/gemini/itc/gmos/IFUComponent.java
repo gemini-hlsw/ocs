@@ -8,21 +8,15 @@
 //
 package edu.gemini.itc.gmos;
 
-import edu.gemini.itc.shared.ApertureComponent;
-import edu.gemini.itc.shared.ApertureComposite;
-import edu.gemini.itc.shared.HexagonalAperture;
-import edu.gemini.itc.shared.TransmissionElement;
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.Instrument;
+import edu.gemini.itc.shared.*;
 
-import java.util.List;
 import java.util.ArrayList;
-import java.util.ListIterator;
+import java.util.List;
 
 /**
- *  This is the specific setup for the IFU of GMOS.
- *  It uses Hexagonal Apertures that can be in a line radialy
- *  from an arbitrary point in a gaussian.
+ * This is the specific setup for the IFU of GMOS.
+ * It uses Hexagonal Apertures that can be in a line radialy
+ * from an arbitrary point in a gaussian.
  */
 
 public class IFUComponent extends TransmissionElement {
@@ -33,7 +27,7 @@ public class IFUComponent extends TransmissionElement {
 
 
     /**
-     *  Constructor for a user defined radial ifu set.
+     * Constructor for a user defined radial ifu set.
      */
 
     public IFUComponent(double IFURadialMin, double IFURadialMax) throws Exception {

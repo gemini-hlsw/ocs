@@ -10,15 +10,13 @@
 package edu.gemini.itc.shared;
 
 
-import edu.gemini.itc.shared.TransmissionElement;
-
 /**
- *  This is just a basic transmission element for polarimetry wire grid elements
- *  on instruments.
+ * This is just a basic transmission element for polarimetry wire grid elements
+ * on instruments.
  */
 
 public class WireGrid extends TransmissionElement {
-    
+
 
     public WireGrid(String resource) throws Exception {
         super(resource);

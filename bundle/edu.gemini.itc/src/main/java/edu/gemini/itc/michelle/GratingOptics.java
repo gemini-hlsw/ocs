@@ -8,17 +8,14 @@
 //
 package edu.gemini.itc.michelle;
 
-import edu.gemini.itc.shared.TransmissionElement;
 import edu.gemini.itc.shared.Instrument;
 import edu.gemini.itc.shared.TextFileReader;
-import edu.gemini.itc.shared.ITCConstants;
-
-import java.util.List;
-import java.util.ArrayList;
-
-import java.text.ParseException;
+import edu.gemini.itc.shared.TransmissionElement;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This represents the transmission and properties of the Grating optics.
@@ -43,7 +40,7 @@ public class GratingOptics extends TransmissionElement {
             throws Exception {
 
         super(directory + Michelle.getPrefix() +
-              gratingName + Instrument.getSuffix());
+                gratingName + Instrument.getSuffix());
 
         _spectralBinning = spectralBinning;
 
@@ -53,9 +50,9 @@ public class GratingOptics extends TransmissionElement {
 
         //New read of Grating Proporties
         TextFileReader grismProperties = new TextFileReader(directory +
-                                                            Michelle.getPrefix() +
-                                                            "gratings" +
-                                                            Instrument.getSuffix());
+                Michelle.getPrefix() +
+                "gratings" +
+                Instrument.getSuffix());
         _resolvingPowerArray = new ArrayList();
         _gratingNameArray = new ArrayList();
         _blazeArray = new ArrayList();
@@ -81,13 +78,13 @@ public class GratingOptics extends TransmissionElement {
     public double getStart() {
         return _centralWavelength - (
                 (((Double) _dispersionArray.get(getGratingNumber())).doubleValue())
-                * _detectorPixels / 2) * _spectralBinning;
+                        * _detectorPixels / 2) * _spectralBinning;
     }
 
     public double getEnd() {
         return _centralWavelength + (
                 (((Double) _dispersionArray.get(getGratingNumber())).doubleValue())
-                * _detectorPixels / 2) * _spectralBinning;
+                        * _detectorPixels / 2) * _spectralBinning;
     }
 
     public double getEffectiveWavelength() {

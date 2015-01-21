@@ -8,18 +8,11 @@
 
 package edu.gemini.itc.shared;
 
-import edu.gemini.itc.shared.TextFileReader;
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.DefaultArraySpectrum;
-
-
-import java.util.List;
-import java.util.Iterator;
-import java.util.ArrayList;
-
-import java.text.ParseException;
-
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * ErrorFunction

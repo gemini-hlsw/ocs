@@ -17,7 +17,9 @@ import javax.servlet.http.HttpServletRequest;
  */
 public abstract class ITCParameters {
 
-    /** Parse parameters from a servlet request. */
+    /**
+     * Parse parameters from a servlet request.
+     */
     public abstract void parseServletRequest(HttpServletRequest r)
             throws Exception;
 
@@ -43,12 +45,14 @@ public abstract class ITCParameters {
             i = parseInt(string);
         } catch (Exception e) {
             throw new Exception(description +
-                                " - can't parse into integer: " + string);
+                    " - can't parse into integer: " + string);
         }
         return i;
     }
 
-    /** Try to parse given string, throw informative exception on failure */
+    /**
+     * Try to parse given string, throw informative exception on failure
+     */
     public static int parseInt(String string) throws Exception {
         if (string == null) {
             throw new Exception("null input");
@@ -84,12 +88,14 @@ public abstract class ITCParameters {
             d = parseDouble(string);
         } catch (Exception e) {
             throw new Exception(description +
-                                " - can't parse into floating point number: " + string);
+                    " - can't parse into floating point number: " + string);
         }
         return d;
     }
 
-    /** Try to parse given string, throw informative exception on failure */
+    /**
+     * Try to parse given string, throw informative exception on failure
+     */
     public static double parseDouble(String string) throws Exception {
         if (string == null) {
             throw new Exception("null input");
@@ -103,7 +109,7 @@ public abstract class ITCParameters {
             d = Double.parseDouble(string);
         } catch (NumberFormatException e) {
             throw new Exception("Can't parse into floating point number: " +
-                                string);
+                    string);
         }
         return d;
     }

@@ -10,13 +10,6 @@ package edu.gemini.itc.shared;
 
 import edu.gemini.itc.parameters.SourceDefinitionParameters;
 
-import java.util.NoSuchElementException;
-import java.util.StringTokenizer;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.text.ParseException;
-
 /**
  * This class creates a EmissionLine spectrum over the interval defined by the
  * blocking filter.  The code comes from PPuxley's Mathcad Demo
@@ -124,8 +117,8 @@ public class EmissionLineSpectrum implements VisitableSampledSpectrum {
 
     /**
      * @return array of flux values.  For efficiency, it may return a
-     *         referenct to actual member data.  The client must not alter this
-     *         return value.
+     * referenct to actual member data.  The client must not alter this
+     * return value.
      */
     public double[] getValues() {
         return _spectrum.getValues();
@@ -169,7 +162,7 @@ public class EmissionLineSpectrum implements VisitableSampledSpectrum {
 
     /**
      * @return y value at specified x using linear interpolation.
-     *         Silently returns zero if x is out of spectrum range.
+     * Silently returns zero if x is out of spectrum range.
      */
     public double getY(double x) {
         return _spectrum.getY(x);

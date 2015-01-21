@@ -15,9 +15,7 @@
 package edu.gemini.itc.shared;
 
 /**
- *
- * @author  bwalls
- * @version
+ * @author bwalls
  */
 public class ParameterParseException extends java.lang.Exception {
 
@@ -32,6 +30,7 @@ public class ParameterParseException extends java.lang.Exception {
 
     /**
      * Constructs an <code>ParameterParseException</code> with the specified detail message.
+     *
      * @param msg the detail message.
      */
     public ParameterParseException(String msg, String parameterName) {

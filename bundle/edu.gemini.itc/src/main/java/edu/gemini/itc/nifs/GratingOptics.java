@@ -8,22 +8,20 @@
 //
 package edu.gemini.itc.nifs;
 
-import edu.gemini.itc.shared.TransmissionElement;
 import edu.gemini.itc.shared.Instrument;
 import edu.gemini.itc.shared.TextFileReader;
-
-import java.util.List;
-import java.util.ArrayList;
-
-import java.text.ParseException;
+import edu.gemini.itc.shared.TransmissionElement;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This represents the transmission and properties of the Grating optics.
  */
 public class GratingOptics extends TransmissionElement {
-    
+
     private List _resolvingPowerArray;
     private List _dispersionArray;
     private List _blazeArray;
@@ -33,19 +31,19 @@ public class GratingOptics extends TransmissionElement {
     private double _centralWavelength;
     private int _detectorPixels;
     private int _spectralBinning;
-    
+
     public GratingOptics(String directory, String prefix, String gratingName,
-            String stringSlitWidth,
-            double centralWavelength,
-            int detectorPixels,
-            int spectralBinning)
+                         String stringSlitWidth,
+                         double centralWavelength,
+                         int detectorPixels,
+                         int spectralBinning)
             throws Exception {
-        
+
         super(directory + prefix +
                 gratingName + Instrument.getSuffix());
-        
+
         _spectralBinning = spectralBinning;
-        
+
         _detectorPixels = detectorPixels;
         _centralWavelength = centralWavelength;
         _gratingName = gratingName;
@@ -73,35 +71,35 @@ public class GratingOptics extends TransmissionElement {
         } catch (IOException e) {
             // normal eof
         }
-        
+
     }
-    
-    
+
+
     public double getStart() {
         return _centralWavelength - (
                 (((Double) _dispersionArray.get(getGratingNumber())).doubleValue())
-                * _detectorPixels / 2);
+                        * _detectorPixels / 2);
     }
-    
+
     public double getEnd() {
         return _centralWavelength + (
                 (((Double) _dispersionArray.get(getGratingNumber())).doubleValue())
-                * _detectorPixels / 2);
+                        * _detectorPixels / 2);
     }
-    
+
     public double getEffectiveWavelength() {
         return _centralWavelength;
     }
-    
+
     public double getPixelWidth() {
         return ((Double) _dispersionArray.get(getGratingNumber())).doubleValue() * _spectralBinning;
-        
+
     }
-    
-    
+
+
     public int getGratingNumber() {
         int grating_num = 0;
-        
+
         if (_gratingName.equals(NifsParameters.Z_G5602)) {
             grating_num = NifsParameters.Z_G5602_N;
         } else if (_gratingName.equals(NifsParameters.J_G5603)) {
@@ -117,26 +115,26 @@ public class GratingOptics extends TransmissionElement {
         }
         return grating_num;
     }
-    
+
     public double getGratingResolution() {
         return ((Integer) _resolvingPowerArray.get(getGratingNumber())).intValue();
     }
-    
+
     public double getGratingBlaze() {
         return ((Integer) _blazeArray.get(getGratingNumber())).intValue();
     }
-    
+
     public double getGratingDispersion_nm() {
         return ((Double) _resolutionArray.get(getGratingNumber())).doubleValue();
     }
-    
+
     public double getGratingDispersion_nmppix() {
         return ((Double) _dispersionArray.get(getGratingNumber())).doubleValue()
-        * _spectralBinning;
+                * _spectralBinning;
     }
-    
+
     public String toString() {
         return "Grating Optics: " + _gratingName;
     }
-    
+
 }

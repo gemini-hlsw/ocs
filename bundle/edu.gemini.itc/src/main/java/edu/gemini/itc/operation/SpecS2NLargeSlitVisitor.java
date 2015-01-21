@@ -8,13 +8,11 @@
 
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.shared.SampledSpectrumVisitor;
-//import edu.gemini.itc.gmos.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.SampledSpectrum;
+import edu.gemini.itc.shared.SampledSpectrumVisitor;
 import edu.gemini.itc.shared.VisitableSampledSpectrum;
-import edu.gemini.itc.shared.ArraySpectrum;
-import edu.gemini.itc.shared.DefaultArraySpectrum;
-import edu.gemini.itc.shared.ITCConstants;
+
+//import edu.gemini.itc.gmos.DetectorsTransmissionVisitor;
 
 /**
  * The SpecS2NLargeSlitVisitor is used to calculate the s2n of an observation using

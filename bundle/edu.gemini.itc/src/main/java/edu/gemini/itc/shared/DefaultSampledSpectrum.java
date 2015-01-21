@@ -8,11 +8,8 @@
 
 package edu.gemini.itc.shared;
 
-import java.text.NumberFormat;
 import java.text.DecimalFormat;
-
-import java.util.List;
-import java.util.ArrayList;
+import java.text.NumberFormat;
 
 /**
  * Default implementation of SampledSpectrum interface.
@@ -53,7 +50,8 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     /**
      * Construct a DefaultSampledSpectrum by sampling the given
      * ArraySpectrum at specified interval.
-     * @param sp Spectrum to sample
+     *
+     * @param sp        Spectrum to sample
      * @param xInterval Sampling interval
      */
     public DefaultSampledSpectrum(ArraySpectrum sp, double xInterval) {
@@ -75,20 +73,26 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         System.arraycopy(getValues(), 0, data, 0, getLength());
         return new DefaultSampledSpectrum(data, getStart(), getSampling());
     }
-    
+
     public void trim(double newStart, double newEnd) {
-        if (newStart < getStart()) { newStart = getStart();} 
-        if (newEnd > getEnd()) { newEnd = getEnd();} 
-        if (newEnd < getStart() || newStart > getEnd()) { return; }
-        double[] data = new double[new Double((newEnd-newStart)/_xInterval).intValue()+4];
+        if (newStart < getStart()) {
+            newStart = getStart();
+        }
+        if (newEnd > getEnd()) {
+            newEnd = getEnd();
+        }
+        if (newEnd < getStart() || newStart > getEnd()) {
+            return;
+        }
+        double[] data = new double[new Double((newEnd - newStart) / _xInterval).intValue() + 4];
         //System.out.println("os: " + getStart() + "ns: " + newStart + " oe: " + getEnd() + " ne: " + newEnd);
         //System.out.println("startpos: " + new Double((newStart-getStart())/_xInterval).intValue() + "length: " + getLength() + " copylength: " + new Double((newEnd-newStart)/_xInterval).intValue());
-        
-        System.arraycopy(getValues(), new Double((newStart-getStart())/_xInterval).intValue(), data, 0, new Double((newEnd-newStart)/_xInterval).intValue());
-        reset(data , newStart, _xInterval);
+
+        System.arraycopy(getValues(), new Double((newStart - getStart()) / _xInterval).intValue(), data, 0, new Double((newEnd - newStart) / _xInterval).intValue());
+        reset(data, newStart, _xInterval);
     }
-        
-    
+
+
     /**
      * Sets all these SampledSpectrum parameters.
      * I don't like a method that sets everything at once, but I inherited
@@ -109,13 +113,12 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      * The accept(SampledSpectrumVisitor) method is used by Visitors to
      * visit the SampledSpectrum.
      * This is the way a SampledSpectrum is manipulated.
-     *
+     * <p/>
      * Example:
-     *
+     * <p/>
      * SampledSpectrum s = SampledSpectrumFactory.getSampledSpectrum("SampledSpectrumFILE");
      * SampledSpectrumVisitor r = new Resample();
      * s.Accept(r);
-     *
      */
     public void accept(SampledSpectrumVisitor v) throws Exception {
         v.visit(this);
@@ -134,27 +137,37 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         return _y;
     }
 
-    /** @return starting x */
+    /**
+     * @return starting x
+     */
     public double getStart() {
         return _xStart;
     }
 
-    /** @return ending x */
+    /**
+     * @return ending x
+     */
     public double getEnd() {
         return _xEnd;
     }
 
-    /** @return x sample size (bin size) */
+    /**
+     * @return x sample size (bin size)
+     */
     public double getSampling() {
         return _xInterval;
     }
 
-    /** @return flux value in specified bin */
+    /**
+     * @return flux value in specified bin
+     */
     public double getY(int index) {
         return _y[index];
     }
 
-    /** @return x of specified bin */
+    /**
+     * @return x of specified bin
+     */
     public double getX(int index) {
         return getStart() + index * getSampling();
     }
@@ -176,12 +189,16 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         return (slope * (x - x1) + y1);
     }
 
-    /** Returns the index of the data point with largest x value less than x */
+    /**
+     * Returns the index of the data point with largest x value less than x
+     */
     public int getLowerIndex(double x) {
         return (int) ((x - getStart()) / getSampling());
     }
 
-    /** @return number of bins in the histogram (number of data points) */
+    /**
+     * @return number of bins in the histogram (number of data points)
+     */
     public int getLength() {
         return _y.length;
     }
@@ -210,7 +227,9 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         _y[bin] = y;
     }
 
-    /** Rescales X axis by specified factor. Doesn't change sampling size. */
+    /**
+     * Rescales X axis by specified factor. Doesn't change sampling size.
+     */
     public void rescaleX(double factor) {
         if (factor == 1.0) return;
         double xStart = getStart() * factor;
@@ -225,7 +244,9 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         reset(data, xStart, getSampling());
     }
 
-    /** Rescales Y axis by specified factor. */
+    /**
+     * Rescales Y axis by specified factor.
+     */
     public void rescaleY(double factor) {
         if (factor == 1.0) return;
         for (int i = 0; i < getLength(); ++i) {
@@ -259,7 +280,9 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         _y = _y_temp;
     }
 
-    /** Returns the sum of all the y values in the SampledSpectrum */
+    /**
+     * Returns the sum of all the y values in the SampledSpectrum
+     */
     public double getSum() {
         double sum = 0;
         try {
@@ -270,7 +293,9 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         return sum;
     }
 
-    /** Returns the integral of all the y values in the SampledSpectrum */
+    /**
+     * Returns the integral of all the y values in the SampledSpectrum
+     */
     public double getIntegral() {
         double integral = 0;
         try {
@@ -280,7 +305,9 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         return integral;
     }
 
-    /** Returns the average of all the y values in the SampledSpectrum */
+    /**
+     * Returns the average of all the y values in the SampledSpectrum
+     */
     public double getAverage() {
         double average = 0;
         try {
@@ -293,15 +320,16 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     /**
      * Returns the sum of y values in the spectrum in
      * the specified index range.
+     *
      * @throws Exception If either limit is out of range.
      */
     public double getSum(int startIndex, int endIndex) throws Exception {
         if (startIndex < 0 || startIndex >= getLength() ||
                 endIndex < 0 || endIndex >= getLength()) {
             throw new Exception("Sum out of bounds: summing " +
-                                startIndex + " to " + endIndex +
-                                " for spectra from " +
-                                +getStart() + " to " + getEnd());
+                    startIndex + " to " + endIndex +
+                    " for spectra from " +
+                    +getStart() + " to " + getEnd());
         }
 
         if (startIndex > endIndex) {
@@ -321,14 +349,15 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     /**
      * Returns the sum of y values in the spectrum in
      * the specified range.
+     *
      * @throws Exception If either limit is out of range.
      */
     public double getSum(double x_start, double x_end) throws Exception {
         if (x_start < getStart() || x_start > getEnd() ||
                 x_end < getStart() || x_end > getEnd()) {
             throw new Exception("Sum out of bounds: summing " +
-                                x_start + " to " + x_end + " for spectra from " +
-                                +getStart() + " to " + getEnd());
+                    x_start + " to " + x_end + " for spectra from " +
+                    +getStart() + " to " + getEnd());
         }
 
         if (x_start > x_end) {
@@ -347,14 +376,15 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     /**
      * Returns the integral of y values in the spectrum in
      * the specified range.
+     *
      * @throws Exception If either limit is out of range.
      */
     public double getIntegral(double x_start, double x_end) throws Exception {
         if (x_start < getStart() || x_start > getEnd() ||
                 x_end < getStart() || x_end > getEnd()) {
             throw new Exception("Integral out of bounds: integrating " +
-                                x_start + " to " + x_end + " for spectra from " +
-                                +getStart() + " to " + getEnd());
+                    x_start + " to " + x_end + " for spectra from " +
+                    +getStart() + " to " + getEnd());
         }
 
         boolean negative = false;
@@ -402,8 +432,8 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         if (start_index < 0 || start_index >= getLength() ||
                 end_index < 0 || end_index >= getLength()) {
             throw new Exception("Integral out of bounds: integrating from index "
-                                + start_index + " to " + end_index
-                                + " for spectra of length " + getLength());
+                    + start_index + " to " + end_index
+                    + " for spectra of length " + getLength());
         }
 
         if (start_index == end_index) {
@@ -435,34 +465,36 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     /**
      * Returns the average of values in the SampledSpectrum in
      * the specified range.
+     *
      * @throws Exception If either limit is out of range.
      */
     public double getAverage(double x_start, double x_end) throws Exception {
-	//System.out.println("X start/end: "+x_start+" "+x_end);
-	//for (double i = x_start; i<x_end; i++)
-	//    System.out.println("(AVERAGE) X val: "+ i +" Y val: "+ getY(i));
+        //System.out.println("X start/end: "+x_start+" "+x_end);
+        //for (double i = x_start; i<x_end; i++)
+        //    System.out.println("(AVERAGE) X val: "+ i +" Y val: "+ getY(i));
         //System.out.println( "int" + getIntegral(x_start,x_end) + "points:"+ (x_end - x_start));
-	//double total=0;
-	//for (double i=x_start; i <=x_end; i++){
-	//    total = total+getY(i);
+        //double total=0;
+        //for (double i=x_start; i <=x_end; i++){
+        //    total = total+getY(i);
 
-	//    System.out.println("Averaging: X: "+i+" Y: "+getY(i));
-	//}
-	//System.out.println("Average: "+total);
-   
+        //    System.out.println("Averaging: X: "+i+" Y: "+getY(i));
+        //}
+        //System.out.println("Average: "+total);
+
         return getIntegral(x_start, x_end) / (x_end - x_start);
     }
 
     /**
      * Returns the average of values in the SampledSpectrum in
      * the specified range.
+     *
      * @throws Exception If either limit is out of range.
      */
     public double getAverage(int indexStart, int indexEnd) throws Exception {
         return getIntegral(indexStart, indexEnd) /
                 (getX(indexEnd) - getX(indexStart));
     }
-    
+
     private int getFirstNonZeroPosition() {
         for (int i = 0; i < getLength(); ++i) {
             if (_y[i] != 0)
@@ -470,9 +502,9 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         }
         return 0;
     }
-    
+
     private int getLastNonZeroPosition() {
-        for (int i = getLength()-1; i >= 0; --i) {
+        for (int i = getLength() - 1; i >= 0; --i) {
             if (_y[i] != 0)
                 return i;
         }
@@ -483,7 +515,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     /**
      * This returns a 2d array of the data used to chart the SampledSpectrum
      * using JClass Chart.  The array has the following dimensions
-     *    double data[][] = new double[2][getLength()];
+     * double data[][] = new double[2][getLength()];
      * data[0][i] = x values
      * data[1][i] = y values
      */
@@ -494,7 +526,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     /**
      * This returns a 2d array of the data used to chart the SampledSpectrum
      * using JClass Chart.  The array has the following dimensions
-     *    double data[][] = new double[2][getLength()];
+     * double data[][] = new double[2][getLength()];
      * data[0][i] = x values
      * data[1][i] = y values
      *
@@ -507,7 +539,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     /**
      * This returns a 2d array of the data used to chart the SampledSpectrum
      * using JClass Chart.  The array has the following dimensions
-     *    double data[][] = new double[2][getLength()];
+     * double data[][] = new double[2][getLength()];
      * data[0][i] = x values
      * data[1][i] = y values
      *
@@ -517,10 +549,10 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     public double[][] getData(int minXIndex, int maxXIndex) {
         if (maxXIndex >= _y.length) maxXIndex = _y.length - 1;
         if (minXIndex < 0) maxXIndex = 0;
-        double data[][] = new double[2][maxXIndex-minXIndex+1];
+        double data[][] = new double[2][maxXIndex - minXIndex + 1];
         for (int i = minXIndex; i <= maxXIndex; i++) {
-            data[0][i-minXIndex] = getStart() + i * getSampling();
-            data[1][i-minXIndex] = _y[i];
+            data[0][i - minXIndex] = getStart() + i * getSampling();
+            data[1][i - minXIndex] = _y[i];
         }
         return data;
     }
@@ -547,8 +579,8 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
 
     public String printSpecAsString(int firstIndex, int lastIndex) {
 
-        if (firstIndex >= _y.length) firstIndex = _y.length-1;
-        if (lastIndex >= _y.length) lastIndex = _y.length-1;
+        if (firstIndex >= _y.length) firstIndex = _y.length - 1;
+        if (lastIndex >= _y.length) lastIndex = _y.length - 1;
         StringBuffer result = new StringBuffer();
         NumberFormat nf = DecimalFormat.getInstance();
         nf.setGroupingUsed(false);

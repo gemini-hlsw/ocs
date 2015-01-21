@@ -10,17 +10,14 @@
 //
 package edu.gemini.itc.niri;
 
-import edu.gemini.itc.shared.TransmissionElement;
 import edu.gemini.itc.shared.Instrument;
 import edu.gemini.itc.shared.TextFileReader;
-import edu.gemini.itc.shared.ITCConstants;
-
-import java.util.List;
-import java.util.ArrayList;
-
-import java.text.ParseException;
+import edu.gemini.itc.shared.TransmissionElement;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This represents the transmission of the Grism optics.
@@ -44,7 +41,7 @@ public class GrismOptics extends TransmissionElement {
             throws Exception {
 
         super(directory + Niri.getPrefix() +
-              grismName + "_" + cameraName + Instrument.getSuffix());
+                grismName + "_" + cameraName + Instrument.getSuffix());
 
         _grismName = grismName;
         _cameraName = cameraName;
@@ -52,10 +49,10 @@ public class GrismOptics extends TransmissionElement {
 
         //Read The transmission file
         TextFileReader dfr = new TextFileReader(directory +
-                                                Niri.getPrefix() +
-                                                grismName + "_" +
-                                                cameraName +
-                                                Instrument.getSuffix());
+                Niri.getPrefix() +
+                grismName + "_" +
+                cameraName +
+                Instrument.getSuffix());
         _x_values = new ArrayList();
 
         double x = 0;
@@ -75,11 +72,11 @@ public class GrismOptics extends TransmissionElement {
 
         //New read of Grism Resolving Power
         TextFileReader grismResolve = new TextFileReader(directory +
-                                                         Niri.getPrefix() +
-                                                         "grism-resolution-" +
-                                                         stringSlitWidth +
-							 "_" + cameraName +
-                                                         Instrument.getSuffix());
+                Niri.getPrefix() +
+                "grism-resolution-" +
+                stringSlitWidth +
+                "_" + cameraName +
+                Instrument.getSuffix());
         _resolvingPowerArray = new ArrayList();
         //int _resolvingPower = 0;
         try {
@@ -93,10 +90,10 @@ public class GrismOptics extends TransmissionElement {
         }
 
         TextFileReader grismCoverage = new TextFileReader(directory +
-                                                          Niri.getPrefix() +
-                                                          "grism-coverage-" +
-                                                          focalPlaneMaskOffset +
-                                                          Instrument.getSuffix());
+                Niri.getPrefix() +
+                "grism-coverage-" +
+                focalPlaneMaskOffset +
+                Instrument.getSuffix());
         _spectralCoverageArray = new ArrayList();
         _spectralPixelWidthArray = new ArrayList();
 
@@ -171,7 +168,7 @@ public class GrismOptics extends TransmissionElement {
 
     // for right now effective wavelen will just be the mid pt of the filter
 
-//    public double getEffectiveWavelength()
+    //    public double getEffectiveWavelength()
 //    {
 //       return ((Double)_x_values.get((int)_x_values.size()/2)).doubleValue();
 //    }

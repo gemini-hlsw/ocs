@@ -8,10 +8,9 @@
 
 package edu.gemini.itc.nifs;
 
-import edu.gemini.itc.shared.ITCParameters;
 import edu.gemini.itc.shared.ITCMultiPartParser;
+import edu.gemini.itc.shared.ITCParameters;
 import edu.gemini.itc.shared.NoSuchParameterException;
-
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -36,12 +35,12 @@ public final class NifsParameters extends ITCParameters {
     public static final String RADIAL_IFU = "radialIFU";
     public static final String SUMMED_APERTURE_IFU = "summedApertureIFU";
     public static final String INSTRUMENT_LOCATION = "instrumentLocation";
-    
-    
+
+
     // ITC web form input values.
     // These constants must be kept in sync with the web page form.
     // They are used to parse form data.
-    
+
     public static final String NO_DISPERSER = "none";
     public static final String Z_G5602 = "z_G5602";
     public static final String J_G5603 = "j_G5603";
@@ -55,13 +54,13 @@ public final class NifsParameters extends ITCParameters {
     public static final int K_G5605_N = 3;
     public static final int KS_G5606_N = 4;
     public static final int KL_G5607_N = 5;
-    
-    
+
+
     //filters
     public static final String ZJ_G0601 = "ZJ_G0601";
     public static final String HJ_G0602 = "HJ_G0602";
     public static final String HK_G0603 = "HK_G0603";
-    
+
     public static final String LOW_READ_NOISE = "lowNoise";
     public static final String VERY_LOW_READ_NOISE = "verylowNoise";
     public static final String HIGH_READ_NOISE = "highNoise";
@@ -76,7 +75,7 @@ public final class NifsParameters extends ITCParameters {
     public static final String IFU_CENTER_Y = "ifuCenterY";
     public static final String NO_SLIT = "none";
     public static final String NIFS = "nifs";
-    
+
     // Data members
     private String _Filter;
     private String _grating; // Grating or null
@@ -92,29 +91,33 @@ public final class NifsParameters extends ITCParameters {
     private String _IFUnumY;
     private String _IFUcenterX;
     private String _IFUcenterY;
-    
+
     private String _instrumentLocation;
-    
+
     /**
      * Constructs a NifsParameters from a servlet request
+     *
      * @param r Servlet request containing the form data.
      * @throws Exception if input data is not parsable.
      */
     public NifsParameters(HttpServletRequest r) throws Exception {
         parseServletRequest(r);
     }
-    
+
     /**
      * Constructs a NifsParameters from a MultipartParser
+     *
      * @param p MutipartParser that has all of the parameters and files Parsed
      * @throws Exception of cannot parse any of the parameters.
      */
-    
+
     public NifsParameters(ITCMultiPartParser p) throws Exception {
         parseMultipartParameters(p);
     }
-    
-    /** Parse parameters from a servlet request. */
+
+    /**
+     * Parse parameters from a servlet request.
+     */
     public void parseServletRequest(HttpServletRequest r) throws Exception {
         // Parse the acquisition camera section of the form.
         // Get filter
@@ -127,13 +130,13 @@ public final class NifsParameters extends ITCParameters {
         if (_grating == null) {
             ITCParameters.notFoundException(INSTRUMENT_GRATING);
         }
-        
-        
+
+
         _readNoise = r.getParameter(READ_NOISE);
         if (_readNoise == null) {
             ITCParameters.notFoundException(READ_NOISE);
         }
-        
+
         // Get Instrument Central Wavelength
         _instrumentCentralWavelength =
                 r.getParameter(INSTRUMENT_CENTRAL_WAVELENGTH);
@@ -144,20 +147,20 @@ public final class NifsParameters extends ITCParameters {
         if (_instrumentCentralWavelength.equals(" ")) {
             _instrumentCentralWavelength = "0";
         }
-        
-        
+
+
         _FP_Mask = r.getParameter(FP_MASK);
         if (_FP_Mask == null) {
             ITCParameters.notFoundException(FP_MASK);
         }
-        
+
         _IFUMethod = r.getParameter(IFU_METHOD);
         if (_IFUMethod == null) {
             if (_FP_Mask.equals(IFU))
                 ITCParameters.notFoundException("a value for " + IFU_METHOD + ".  Please either deselect the\n" +
                         " IFU or select an IFU Method(Single or Radial). ");
         } else {
-            
+
             if (_IFUMethod.equals(SINGLE_IFU)) {
                 _IFUOffset = r.getParameter(IFU_OFFSET);
                 if (_IFUOffset == null) {
@@ -168,39 +171,39 @@ public final class NifsParameters extends ITCParameters {
                 if (_IFUMinOffset == null) {
                     ITCParameters.notFoundException(IFU_MIN_OFFSET);
                 }
-                
+
                 _IFUMaxOffset = r.getParameter(IFU_MAX_OFFSET);
                 if (_IFUMaxOffset == null) {
                     ITCParameters.notFoundException(IFU_MAX_OFFSET);
                 }
-                
+
             } else if (_IFUMethod.equals(SUMMED_APERTURE_IFU)) {
-                _IFUnumX =r.getParameter(IFU_NUM_X);
-                if ( _IFUnumX== null) {
+                _IFUnumX = r.getParameter(IFU_NUM_X);
+                if (_IFUnumX == null) {
                     ITCParameters.notFoundException(IFU_NUM_X);
                 }
-                
-                _IFUnumY =r.getParameter(IFU_NUM_Y);
-                if ( _IFUnumY== null) {
+
+                _IFUnumY = r.getParameter(IFU_NUM_Y);
+                if (_IFUnumY == null) {
                     ITCParameters.notFoundException(IFU_NUM_Y);
                 }
-                _IFUcenterX =r.getParameter(IFU_CENTER_X);
-                if ( _IFUcenterX== null) {
+                _IFUcenterX = r.getParameter(IFU_CENTER_X);
+                if (_IFUcenterX == null) {
                     ITCParameters.notFoundException(IFU_CENTER_X);
                 }
-                
-                _IFUcenterY =r.getParameter(IFU_CENTER_Y);
-                if ( _IFUcenterY== null) {
+
+                _IFUcenterY = r.getParameter(IFU_CENTER_Y);
+                if (_IFUcenterY == null) {
                     ITCParameters.notFoundException(IFU_CENTER_Y);
                 }
-                
+
             } else
                 ITCParameters.notFoundException(" a correct value for the IFU Parameters. ");
         }
-        
-        
+
+
     }
-    
+
     public void parseMultipartParameters(ITCMultiPartParser p) throws Exception {
         // Parse NIfs details section of the form.
         try {
@@ -219,7 +222,7 @@ public final class NifsParameters extends ITCParameters {
                 } else if (_IFUMethod.equals(RADIAL_IFU)) {
                     _IFUMinOffset = p.getParameter(IFU_MIN_OFFSET);
                     _IFUMaxOffset = p.getParameter(IFU_MAX_OFFSET);
-                }else if (_IFUMethod.equals(SUMMED_APERTURE_IFU)) {
+                } else if (_IFUMethod.equals(SUMMED_APERTURE_IFU)) {
                     _IFUnumX = p.getParameter(IFU_NUM_X);
                     _IFUnumY = p.getParameter(IFU_NUM_Y);
                     _IFUcenterX = p.getParameter(IFU_CENTER_X);
@@ -232,12 +235,12 @@ public final class NifsParameters extends ITCParameters {
                     " Paramters Section of the form.  Either add this value or Contact the Helpdesk.");
         }
     }
-    
+
     /**
      * Constructs a NifsParameters from a test file.
      */
     public NifsParameters(String Filter, String grating, String readNoise, String darkCurrent, String instrumentCentralWavelength, String FP_Mask, String IFUMethod, String IFUOffset, String IFUMinOffset, String IFUMaxOffset, String instrumentLocation) {
-        
+
         _Filter = Filter;
         _grating = grating;
         _darkCurrent = darkCurrent;
@@ -250,86 +253,88 @@ public final class NifsParameters extends ITCParameters {
         _IFUMinOffset = IFUMinOffset;
         _IFUMaxOffset = IFUMaxOffset;
     }
-    
+
     public String getFilter() {
         return _Filter;
     }
-    
+
     public String getGrating() {
         return _grating;
     }
-    
+
     public String getReadNoise() {
         return _readNoise;
     }
-    
+
     public String getDarkCurrent() {
         return _darkCurrent;
     }
-    
+
     public String getFocalPlaneMask() {
         return _FP_Mask;
     }
-    
+
     public double getInstrumentCentralWavelength() {
-        return new Double(_instrumentCentralWavelength).doubleValue()*1000;
+        return new Double(_instrumentCentralWavelength).doubleValue() * 1000;
     }
-    
+
     public double getUnXDispCentralWavelength() {
-        return new Double(_instrumentCentralWavelength).doubleValue()*1000;
+        return new Double(_instrumentCentralWavelength).doubleValue() * 1000;
     }
-    
-    
+
+
     public String getIFUMethod() {
         return _IFUMethod;
     }
-    
+
     public double getIFUOffset() {
         return new Double(_IFUOffset).doubleValue();
     }
-    
+
     public double getIFUMinOffset() {
         return new Double(_IFUMinOffset).doubleValue();
     }
-    
+
     public double getIFUMaxOffset() {
         return new Double(_IFUMaxOffset).doubleValue();
     }
-    
-    
+
+
     public int getIFUNumX() {
         return new Integer(_IFUnumX).intValue();
     }
-    
+
     public int getIFUNumY() {
         return new Integer(_IFUnumY).intValue();
     }
-    
+
     public double getIFUCenterX() {
         return new Double(_IFUcenterX).doubleValue();
     }
-    
+
     public double getIFUCenterY() {
         return new Double(_IFUcenterY).doubleValue();
     }
-    
+
     public double getFPMask() {
         if (_FP_Mask.equals(IFU))  //**** Might need to be changed.!!!!
             return 0.15;
         else
             return -1.0;
     }
-    
+
     public String getStringSlitWidth() {
         if (_FP_Mask.equals(IFU))
             return "IFU";
         else
             return "none";
-        
+
     }
-    
-    
-    /** Return a human-readable string for debugging */
+
+
+    /**
+     * Return a human-readable string for debugging
+     */
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("Grating:\t" + getGrating() + "\n");

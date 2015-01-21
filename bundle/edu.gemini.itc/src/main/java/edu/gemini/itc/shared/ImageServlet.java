@@ -13,14 +13,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import java.awt.Image;
-
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.FileInputStream;
-import java.io.BufferedInputStream;
 
 /**
  * Image servlet for ITC. The instrument Servlet adds a tag the points to .
@@ -44,7 +37,7 @@ public final class ImageServlet extends HttpServlet {
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         ITCImageFileIO ServFileIO = new ITCImageFileIO();
         _filename = request.getParameter("filename");
         _type = request.getParameter("type");
@@ -62,8 +55,6 @@ public final class ImageServlet extends HttpServlet {
             response.setContentType("text/plain");
             //System.out.println("other");
         }
-
-
 
 
         //create a Stream to pass the image through

@@ -14,11 +14,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Enumeration;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.Calendar;
 
 /**
@@ -31,20 +30,28 @@ public abstract class ITCServlet extends HttpServlet {
 
     public static int MAX_CONTENT_LENGTH = 1000000;  // Max file size 1MB
 
-    public ITCServlet () {
-    	super ();
+    public ITCServlet() {
+        super();
     }
-    
-    /** Returns a title */
+
+    /**
+     * Returns a title
+     */
     public abstract String getTitle();
 
-    /** Returns version of the servlet. */
+    /**
+     * Returns version of the servlet.
+     */
     public abstract String getVersion();
 
-    /** Returns the Instrument */
+    /**
+     * Returns the Instrument
+     */
     public abstract String getInst();
 
-    /** Subclasses supply the body content for the html document. */
+    /**
+     * Subclasses supply the body content for the html document.
+     */
     public abstract void writeOutput(HttpServletRequest req, PrintWriter out)
             throws Exception;
 
@@ -135,18 +142,22 @@ public abstract class ITCServlet extends HttpServlet {
 //}
     }
 
-    /** Write opening of html document */
+    /**
+     * Write opening of html document
+     */
     protected void openDocument(PrintWriter out) {
         out.println("<HTML><HEAD><TITLE>");
         out.println(getTitle() + " " + getVersion());
         out.println("</TITLE></HEAD>");
         out.println("<BODY text='#000000' bgcolor='#ffffff'>");
         out.println("<H2>" + getTitle() +
-                    //" (DEVELOPMENT SERVER)" +
-                    "<br>" + getInst() + " version " + getVersion() + "</H2>");
+                //" (DEVELOPMENT SERVER)" +
+                "<br>" + getInst() + " version " + getVersion() + "</H2>");
     }
 
-    /** Write closing of html document */
+    /**
+     * Write closing of html document
+     */
     protected void closeDocument(PrintWriter out) {
         out.println("</BODY></HTML>");
     }
@@ -162,7 +173,7 @@ public abstract class ITCServlet extends HttpServlet {
 
         // temporary for debugging
         //out.println("<p><hr>Debugging<br>");
-        log("Exception!!: "+ e.getMessage() + e.getCause() );
+        log("Exception!!: " + e.getMessage() + e.getCause());
         //e.printStackTrace(out);
 
         // close out html docuemnt

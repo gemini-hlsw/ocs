@@ -9,12 +9,12 @@
 //
 package edu.gemini.itc.gmos;
 
-import edu.gemini.itc.shared.Instrument;
-import edu.gemini.itc.shared.Filter;
-import edu.gemini.itc.shared.Detector;
-import edu.gemini.itc.shared.FixedOptics;
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.parameters.ObservationDetailsParameters;
+import edu.gemini.itc.shared.Detector;
+import edu.gemini.itc.shared.Filter;
+import edu.gemini.itc.shared.FixedOptics;
+import edu.gemini.itc.shared.Instrument;
 
 import java.awt.*;
 
@@ -25,7 +25,7 @@ public class GmosNorth extends Gmos {
 
     //Plate scales for original and Hamamatsu CCD's (temporary)
     public static final double ORIG_PLATE_SCALE = 0.0727;
-//    public static final double HAM_PLATE_SCALE = 0.0809;
+    //    public static final double HAM_PLATE_SCALE = 0.0809;
     public static final double HAM_PLATE_SCALE = 0.080778;
 
     protected String _CCDtype;
@@ -172,7 +172,8 @@ public class GmosNorth extends Gmos {
             Color color = DETECTOR_CCD_COLORS[detectorCcdIndex];
             _detector = new Detector(getDirectory() + "/", getPrefix(), fileName, "Hamamatsu array", name, color);
             _detector.setDetectorPixels(DETECTOR_PIXELS);
-            if (detectorCcdIndex == 0) _instruments = new Gmos[]{this, new GmosNorth(gp, odp, 1), new GmosNorth(gp, odp, 2)};
+            if (detectorCcdIndex == 0)
+                _instruments = new Gmos[]{this, new GmosNorth(gp, odp, 1), new GmosNorth(gp, odp, 2)};
         }
 
         if (detectorCcdIndex == 0) {

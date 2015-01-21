@@ -10,12 +10,12 @@
 //
 package edu.gemini.itc.parameters;
 
-import javax.servlet.http.HttpServletRequest;
-
-import edu.gemini.itc.shared.ITCParameters;
-import edu.gemini.itc.shared.ITCMultiPartParser;
-import edu.gemini.itc.shared.NoSuchParameterException;
 import edu.gemini.itc.shared.FormatStringWriter;
+import edu.gemini.itc.shared.ITCMultiPartParser;
+import edu.gemini.itc.shared.ITCParameters;
+import edu.gemini.itc.shared.NoSuchParameterException;
+
+import javax.servlet.http.HttpServletRequest;
 
 
 /**
@@ -44,6 +44,7 @@ public final class PlottingDetailsParameters extends ITCParameters {
 
     /**
      * Constructs a PlottingDetailsParameters from a servlet request
+     *
      * @param r Servlet request containing the form data.
      * @throws Exception if input data is not parsable.
      */
@@ -52,16 +53,19 @@ public final class PlottingDetailsParameters extends ITCParameters {
     }
 
     /**
-     *Constructs a PlottingDetailsParameters from a MultipartParser
+     * Constructs a PlottingDetailsParameters from a MultipartParser
+     *
      * @param p MutipartParser that has all of the parameters and files Parsed
-     *@throws Exception of cannot parse any of the parameters.
+     * @throws Exception of cannot parse any of the parameters.
      */
 
     public PlottingDetailsParameters(ITCMultiPartParser p) throws Exception {
         parseMultipartParameters(p);
     }
 
-    /** Parse parameters from a servlet request. */
+    /**
+     * Parse parameters from a servlet request.
+     */
     public void parseServletRequest(HttpServletRequest r) throws Exception {
         // Parse the Plotting details section of the form.
 
@@ -84,7 +88,8 @@ public final class PlottingDetailsParameters extends ITCParameters {
             }
             _plotWaveU = ITCParameters.parseDouble(plotWaveU, "Upper Bound of Plotting");
             if (_plotWaveU < 0) _plotWaveU *= -1;
-            if (_plotWaveU <= _plotWaveL) throw new Exception(" The Upper bound for the plotted spectra must be greater than the Lower bound. ");
+            if (_plotWaveU <= _plotWaveL)
+                throw new Exception(" The Upper bound for the plotted spectra must be greater than the Lower bound. ");
 
         }
     }
@@ -99,14 +104,16 @@ public final class PlottingDetailsParameters extends ITCParameters {
             if (_plotWaveU < 0) _plotWaveU *= -1;
         } catch (NoSuchParameterException e) {
             throw new Exception("The parameter " + e.parameterName + " could not be found in the Plotting" +
-                                " Parameters Section of the form.  Either add this value or Contact the Helpdesk.");
+                    " Parameters Section of the form.  Either add this value or Contact the Helpdesk.");
         }
 
-        if (_plotWaveU <= _plotWaveL) throw new Exception("The Upper bound for the plotted spectra must be greater than the Lower bound. ");
+        if (_plotWaveU <= _plotWaveL)
+            throw new Exception("The Upper bound for the plotted spectra must be greater than the Lower bound. ");
     }
 
     /**
      * Constructs a ObservationDetailsParameters from a servlet request
+     *
      * @param r Servlet request containing the form data.
      * @throws Exception if input data is not parsable.
      */
@@ -133,7 +140,9 @@ public final class PlottingDetailsParameters extends ITCParameters {
         return _plotWaveL * 1000;
     }   //convert microns to nm
 
-    /** Return a human-readable string for debugging */
+    /**
+     * Return a human-readable string for debugging
+     */
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("PlotMethod:\t" + getPlotLimits() + "\n");

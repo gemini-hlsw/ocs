@@ -10,13 +10,12 @@
 //
 package edu.gemini.itc.parameters;
 
-import javax.servlet.http.HttpServletRequest;
-
-
-import edu.gemini.itc.shared.ITCParameters;
-import edu.gemini.itc.shared.ITCMultiPartParser;
-import edu.gemini.itc.shared.NoSuchParameterException;
 import edu.gemini.itc.shared.FormatStringWriter;
+import edu.gemini.itc.shared.ITCMultiPartParser;
+import edu.gemini.itc.shared.ITCParameters;
+import edu.gemini.itc.shared.NoSuchParameterException;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * This class holds the information from the Observing Condition section
@@ -46,6 +45,7 @@ public final class ObservingConditionParameters extends ITCParameters {
 
     /**
      * Constructs a ObservingConditionParameters from a servlet request
+     *
      * @param r Servlet request containing the form data.
      * @throws Exception if input data is not parsable.
      */
@@ -54,16 +54,19 @@ public final class ObservingConditionParameters extends ITCParameters {
     }
 
     /**
-     *Constructs a ObservingConditionParameters from a MultipartParser
+     * Constructs a ObservingConditionParameters from a MultipartParser
+     *
      * @param p MutipartParser that has all of the parameters and files Parsed
-     *@throws Exception of cannot parse any of the parameters.
+     * @throws Exception of cannot parse any of the parameters.
      */
 
     public ObservingConditionParameters(ITCMultiPartParser p) throws Exception {
         parseMultipartParameters(p);
     }
 
-    /** Parse parameters from a servlet request. */
+    /**
+     * Parse parameters from a servlet request.
+     */
     public void parseServletRequest(HttpServletRequest r) throws Exception {
         // Parse the observing condition section of the form.
 
@@ -119,12 +122,13 @@ public final class ObservingConditionParameters extends ITCParameters {
 
         } catch (NoSuchParameterException e) {
             throw new Exception("The parameter " + e.parameterName + " could not be found in the Telescope" +
-                                " Parameters Section of the form.  Either add this value or Contact the Helpdesk.");
+                    " Parameters Section of the form.  Either add this value or Contact the Helpdesk.");
         }
     }
 
     /**
      * Constructs a ObservingConditionParameters from a servlet request
+     *
      * @param r Servlet request containing the form data.
      * @throws Exception if input data is not parsable.
      */
@@ -147,8 +151,8 @@ public final class ObservingConditionParameters extends ITCParameters {
     public double getImageQualityPercentile() {
         if (getImageQuality() == 1)
             return .2;
-        // else if (getImageQuality() == 2) return .5; //old bin changed to .7 BDW 9-4-02
-        // else if (getImageQuality() == 3) return .8; //old bin changed to .85 BDW 9-4-02
+            // else if (getImageQuality() == 2) return .5; //old bin changed to .7 BDW 9-4-02
+            // else if (getImageQuality() == 3) return .8; //old bin changed to .85 BDW 9-4-02
         else if (getImageQuality() == 2)
             return .7;
         else if (getImageQuality() == 3)
@@ -241,7 +245,9 @@ public final class ObservingConditionParameters extends ITCParameters {
     }
 
 
-    /** Return a human-readable string for debugging */
+    /**
+     * Return a human-readable string for debugging
+     */
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("Image Quality:\t" + getImageQuality() + "\n");
@@ -271,11 +277,11 @@ public final class ObservingConditionParameters extends ITCParameters {
         sb.append("<BR>");
 
         sb.append("Frequency of occurrence of these conditions: " +
-                  device.toString(getImageQualityPercentile() *
-                                  getSkyTransparencyCloudPercentile() *
-                                  getSkyTransparencyWaterPercentile() *
-                                  getSkyBackgroundPercentile() * 100)
-                  + "%<BR>"
+                        device.toString(getImageQualityPercentile() *
+                                getSkyTransparencyCloudPercentile() *
+                                getSkyTransparencyWaterPercentile() *
+                                getSkyBackgroundPercentile() * 100)
+                        + "%<BR>"
         );
 
         return sb.toString();

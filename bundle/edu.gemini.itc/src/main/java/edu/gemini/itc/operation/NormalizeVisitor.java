@@ -10,12 +10,11 @@
 //
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.shared.SampledSpectrumVisitor;
-import edu.gemini.itc.shared.SampledSpectrum;
-import edu.gemini.itc.shared.ZeroMagnitudeStar;
-import edu.gemini.itc.shared.WavebandDefinition;
-
 import edu.gemini.itc.parameters.SourceDefinitionParameters;
+import edu.gemini.itc.shared.SampledSpectrum;
+import edu.gemini.itc.shared.SampledSpectrumVisitor;
+import edu.gemini.itc.shared.WavebandDefinition;
+import edu.gemini.itc.shared.ZeroMagnitudeStar;
 
 // for units
 
@@ -32,9 +31,10 @@ public class NormalizeVisitor implements SampledSpectrumVisitor {
 
     /**
      * Constructs a Normalizer
-     * @param waveband The waveband to normalize over
+     *
+     * @param waveband  The waveband to normalize over
      * @param user_norm The average flux in the waveband
-     * @param units The code for the units chosen by user
+     * @param units     The code for the units chosen by user
      */
     public NormalizeVisitor(String waveband, double user_norm, String units) {
         _band = waveband;
@@ -86,9 +86,9 @@ public class NormalizeVisitor implements SampledSpectrumVisitor {
             throw new Exception("Unit code " + _units + " not supported.");
         }
 
-	//System.out.println("SED inside Normalize function:");
-	//for (int i = 1500; i<1800; i++)
-	//    System.out.println("X val: "+ i +" Y val: "+sed.getY(i));
+        //System.out.println("SED inside Normalize function:");
+        //for (int i = 1500; i<1800; i++)
+        //    System.out.println("X val: "+ i +" Y val: "+sed.getY(i));
 
         // Calculate avg flux density in chosen normalization band.
         double average = sed.getAverage(

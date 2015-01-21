@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * The Instrument class is the class that any instrument should extend.
  * It defines the common properties of any given Instrumnet.
- *
+ * <p/>
  * The important piece of data is the _list. This is a linked list
  * that contains all of the Components that make up the instrument.
  */
@@ -83,7 +83,8 @@ public abstract class Instrument {
      * All instruments have data files of the same format.
      * Note that one instrument accesses two files.
      * One gives instrument info, the other has transmission curve.
-     * @param subdir The subdirectory under lib where files are located
+     *
+     * @param subdir   The subdirectory under lib where files are located
      * @param filename The filename of the instrument data file
      */
     // Automatically loads the background data.
@@ -124,7 +125,7 @@ public abstract class Instrument {
      */
     public void convolveComponents(VisitableSampledSpectrum sed)
             throws Exception {
-        for (Iterator itr = _components.iterator(); itr.hasNext();) {
+        for (Iterator itr = _components.iterator(); itr.hasNext(); ) {
             TransmissionElement te = (TransmissionElement) itr.next();
             sed.accept(te);
         }
@@ -192,21 +193,26 @@ public abstract class Instrument {
      * Returns the effective observing wavelength.
      * This is properly calculated as a flux-weighted averate of
      * observed spectrum.  So this may be temporary.
+     *
      * @return Effective wavelength in nm
      */
     public abstract int getEffectiveWavelength();
 
-    /** Returns the subdirectory where this instrument's data files are. */
+    /**
+     * Returns the subdirectory where this instrument's data files are.
+     */
     public abstract String getDirectory();
 
-    /** The suffix on instrument data files. */
+    /**
+     * The suffix on instrument data files.
+     */
     public static String getSuffix() {
         return DATA_SUFFIX;
     }
 
     public String opticalComponentsToString() {
         String s = "Optical Components: <BR>";
-        for (Iterator itr = _components.iterator(); itr.hasNext();) {
+        for (Iterator itr = _components.iterator(); itr.hasNext(); ) {
             s += "<LI>" + itr.next().toString() + "<BR>";
         }
         return s;
@@ -215,7 +221,7 @@ public abstract class Instrument {
     public String toString() {
         String s = "Instrument configuration: \n";
         s += "Optical Components: <BR>";
-        for (Iterator itr = _components.iterator(); itr.hasNext();) {
+        for (Iterator itr = _components.iterator(); itr.hasNext(); ) {
             s += "<LI>" + itr.next().toString() + "<BR>";
         }
         s += "<BR>";
@@ -224,9 +230,9 @@ public abstract class Instrument {
         return s;
     }
 
-	public double get_plate_scale() {
-		return _plate_scale;
-	}
+    public double get_plate_scale() {
+        return _plate_scale;
+    }
 
     protected List getComponents() {
         return new ArrayList(_components);

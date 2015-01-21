@@ -10,15 +10,9 @@
 //
 package edu.gemini.itc.shared;
 
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.StringTokenizer;
-
+import java.io.*;
 import java.text.ParseException;
+import java.util.StringTokenizer;
 
 /**
  * This class offers convenience in reading data files.
@@ -62,6 +56,7 @@ public class TextFileReader {
 
     /**
      * Constructs TextFileReader on the named file.
+     *
      * @throws FileNotFoundException if fileName not found.
      */
     public TextFileReader(String fileName) throws Exception {
@@ -103,6 +98,7 @@ public class TextFileReader {
      * Note the reader may be in the middle of reading the line so it
      * is not necessarily the number of tokens left to read on the line.
      * When end of file is reached, returns 0.
+     *
      * @return number of tokens on current line
      */
     public int countTokens() {
@@ -117,6 +113,7 @@ public class TextFileReader {
      * return followed immediately by a linefeed.
      * This method is not meant to be used at the same time as the
      * readDataType() methods.
+     *
      * @return A String containing the contents of the line, not including
      * line-termination characters, or null if the end of the stream has been
      * reached.
@@ -136,6 +133,7 @@ public class TextFileReader {
      * return followed immediately by a linefeed.
      * This method is not meant to be used at the same time as the
      * readDataType() methods.
+     *
      * @return A String containing the contents of the line, not including
      * line-termination characters, or null if the end of the stream has been
      * reached.
@@ -174,6 +172,7 @@ public class TextFileReader {
 
     /**
      * Reads next token and returns it as a String.
+     *
      * @return next data item in stream
      */
     public String readString() throws IOException {
@@ -185,9 +184,10 @@ public class TextFileReader {
 
     /**
      * Reads next token and tries to parse as an integer.
+     *
      * @return next data item in stream if it parses to int.
      * @throws IOException if eof reached, ParseException
-     * if next item can't be parsed as an integer.
+     *                     if next item can't be parsed as an integer.
      */
     public int readInt() throws ParseException, IOException {
         if (!hasMoreData()) {
@@ -205,9 +205,10 @@ public class TextFileReader {
 
     /**
      * Reads next token and tries to parse as an double.
+     *
      * @return next data item in stream if it parses to double.
      * @throws IOException if eof reached, ParseException
-     * if next item can't be parsed as an double.
+     *                     if next item can't be parsed as an double.
      */
     public double readDouble() throws ParseException, IOException {
         if (!hasMoreData()) {
@@ -228,8 +229,8 @@ public class TextFileReader {
             throws ParseException {
         String file = (_fileName != null) ? (" of file " + _fileName) : "";
         throw new ParseException("Failed to parse "
-                                 + type + " on line "
-                                 + getLineNumber() + file + ".  Token: " + token, getLineNumber());
+                + type + " on line "
+                + getLineNumber() + file + ".  Token: " + token, getLineNumber());
     }
 
     // Throws a IOException when eof reached

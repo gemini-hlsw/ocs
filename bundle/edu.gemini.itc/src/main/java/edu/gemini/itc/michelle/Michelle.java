@@ -9,25 +9,21 @@
 //
 package edu.gemini.itc.michelle;
 
-import edu.gemini.itc.shared.Instrument;
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.WavebandDefinition;
-import edu.gemini.itc.shared.Filter;
-import edu.gemini.itc.shared.Detector;
-import edu.gemini.itc.shared.FixedOptics;
-import edu.gemini.itc.shared.InstrumentWindow;
-import edu.gemini.itc.shared.WireGrid;
 import edu.gemini.itc.parameters.ObservationDetailsParameters;
-import edu.gemini.itc.trecs.TRecsParameters;
+import edu.gemini.itc.shared.*;
 
 /**
  * Michelle specification class
  */
 public class Michelle extends Instrument {
-    /** Related files will be in this subdir of lib */
+    /**
+     * Related files will be in this subdir of lib
+     */
     public static final String INSTR_DIR = "michelle";
 
-    /** Related files will start with this prefix */
+    /**
+     * Related files will start with this prefix
+     */
     public static final String INSTR_PREFIX = "michelle_";
 
     // Instrument reads its configuration from here.
@@ -46,8 +42,8 @@ public class Michelle extends Instrument {
     private static final double SPECTROSCOPY_MED_N1_FRAME_TIME = 1.25; //Seconds
     private static final double SPECTROSCOPY_MED_N2_FRAME_TIME = 3.0; //Seconds
     private static final double SPECTROSCOPY_ECHELLE_FRAME_TIME = 30; //Seconds
-    
-    private static final double SPECTROSCOPY_PIXEL_SIZE=0.2;
+
+    private static final double SPECTROSCOPY_PIXEL_SIZE = 0.2;
 
     private static final int DETECTOR_PIXELS = 320;
 
@@ -103,13 +99,13 @@ public class Michelle extends Instrument {
 
         InstrumentWindow michelleInstrumentWindow =
                 new InstrumentWindow(getDirectory() + "/" + getPrefix() +
-                                     mp.KBR + Instrument.getSuffix(), mp.KBR);
+                        mp.KBR + Instrument.getSuffix(), mp.KBR);
         addComponent(michelleInstrumentWindow);
 
         if (mp.polarimetryIsUsed()) {
             WireGrid michelleWireGrid =
                     new WireGrid(getDirectory() + "/" + getPrefix() +
-                                    mp.WIRE_GRID + Instrument.getSuffix());
+                            mp.WIRE_GRID + Instrument.getSuffix());
             addComponent(michelleWireGrid);
         }
 
@@ -142,54 +138,54 @@ public class Michelle extends Instrument {
         if (_mode.equals(ObservationDetailsParameters.SPECTROSCOPY)) {
             if (_grating.equals("none"))
                 throw new Exception("Spectroscopy mode is selected but a grating" +
-                                    " is not.\nPlease select a grating and a " +
-                                    "focal plane mask in the Instrument " +
-                                    "configuration section.");
+                        " is not.\nPlease select a grating and a " +
+                        "focal plane mask in the Instrument " +
+                        "configuration section.");
             if (_focalPlaneMask.equals(MichelleParameters.NO_SLIT))
                 throw new Exception("Spectroscopy mode is selected but a focal" +
-                                    " plane mask is not.\nPlease select a " +
-                                    "grating and a " +
-                                    "focal plane mask in the Instrument " +
-                                    "configuration section.");
-           if (mp.polarimetryIsUsed()) {
+                        " plane mask is not.\nPlease select a " +
+                        "grating and a " +
+                        "focal plane mask in the Instrument " +
+                        "configuration section.");
+            if (mp.polarimetryIsUsed()) {
                 throw new Exception("Spectroscopy mode cannot be used with the " +
-                                    "Polarimeter in.\n Please either deselect the "+
-                                    "Polarimeter, or change the mode to Imaging.");
-           } 
+                        "Polarimeter in.\n Please either deselect the " +
+                        "Polarimeter, or change the mode to Imaging.");
+            }
         }
 
         if (_mode.equals(ObservationDetailsParameters.IMAGING)) {
             if (_filterUsed.equals("none"))
                 throw new Exception("Imaging mode is selected but a filter" +
-                                    " is not.\n  Please select a filter and resubmit the " +
-                                    "form to continue.");
+                        " is not.\n  Please select a filter and resubmit the " +
+                        "form to continue.");
             if (!_grating.equals("none"))
                 throw new Exception("Imaging mode is selected but a grating" +
-                                    " is also selected.\nPlease deselect the " +
-                                    "grating or change the mode to spectroscopy.");
+                        " is also selected.\nPlease deselect the " +
+                        "grating or change the mode to spectroscopy.");
             if (!_focalPlaneMask.equals("none"))
                 throw new Exception("Imaging mode is selected but a Focal" +
-                                    " Plane Mask is also selected.\nPlease " +
-                                    "deselect the Focal Plane Mask" +
-                                    " or change the mode to spectroscopy.");
+                        " Plane Mask is also selected.\nPlease " +
+                        "deselect the Focal Plane Mask" +
+                        " or change the mode to spectroscopy.");
         }
 
 
         _detector = new Detector(getDirectory() + "/", getPrefix(), "det",
-                                 "320x240 pixel Si:As IBC array");
+                "320x240 pixel Si:As IBC array");
         _detector.setDetectorPixels(DETECTOR_PIXELS);
- 
-	_dtv = new edu.gemini.itc.operation.DetectorsTransmissionVisitor(_spectralBinning,
-        getDirectory()+"/"+ getPrefix()+ "ccdpix"+Instrument.getSuffix());
+
+        _dtv = new edu.gemini.itc.operation.DetectorsTransmissionVisitor(_spectralBinning,
+                getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
 
         if (!(_grating.equals("none"))) {
 
             _gratingOptics = new GratingOptics(getDirectory() + "/", _grating,
-                                               // _focalPlaneMaskOffset,
-                                               _stringSlitWidth,
-                                               _centralWavelength,
-                                               _detector.getDetectorPixels(), //_spectralBinning,
-                                               _spectralBinning);
+                    // _focalPlaneMaskOffset,
+                    _stringSlitWidth,
+                    _centralWavelength,
+                    _detector.getDetectorPixels(), //_spectralBinning,
+                    _spectralBinning);
             //_sampling = _gratingOptics.getGratingDispersion_nmppix();
             //if (super.getStart()< _gratingOptics.getStart())
             _observingStart = _gratingOptics.getStart();
@@ -204,9 +200,9 @@ public class Michelle extends Instrument {
                 if ((_Filter.getStart() >= _gratingOptics.getEnd()) ||
                         (_Filter.getEnd() <= _gratingOptics.getStart())) {
                     throw new Exception("The " + _filterUsed + " filter" +
-                                        " and the " + _grating +
-                                        " do not overlap with the requested wavelength.\n" +
-                                        " Please select a different filter, grating or wavelength.");
+                            " and the " + _grating +
+                            " do not overlap with the requested wavelength.\n" +
+                            " Please select a different filter, grating or wavelength.");
                 }
             addComponent(_gratingOptics);
         }
@@ -221,6 +217,7 @@ public class Michelle extends Instrument {
      * Returns the effective observing wavelength.
      * This is properly calculated as a flux-weighted averate of
      * observed spectrum.  So this may be temporary.
+     *
      * @return Effective wavelength in nm
      */
     public int getEffectiveWavelength() {
@@ -257,7 +254,9 @@ public class Michelle extends Instrument {
     }
 
 
-    /** Returns the subdirectory where this instrument's data files are. */
+    /**
+     * Returns the subdirectory where this instrument's data files are.
+     */
     //Changed Oct 19.  If any problem reading in lib files change back...
     //public String getDirectory() { return ITCConstants.INST_LIB + "/" +
     //			      INSTR_DIR+"/lib"; }
@@ -295,18 +294,28 @@ public class Michelle extends Instrument {
 
     public double getFrameTime() {
         if (_mode.equals(ObservationDetailsParameters.SPECTROSCOPY)) {
-            String tempGrating=getGrating();
-            double frameTime=0.1;
-            
+            String tempGrating = getGrating();
+            double frameTime = 0.1;
+
             switch (_gratingOptics.getGratingNumber()) {
-                case MichelleParameters.LOWN: frameTime=SPECTROSCOPY_LOWRES_N_FRAME_TIME; break;
-                case MichelleParameters.MEDN1: frameTime=SPECTROSCOPY_MED_N1_FRAME_TIME; break;
-                case MichelleParameters.MEDN2: frameTime=SPECTROSCOPY_MED_N2_FRAME_TIME; break;
+                case MichelleParameters.LOWN:
+                    frameTime = SPECTROSCOPY_LOWRES_N_FRAME_TIME;
+                    break;
+                case MichelleParameters.MEDN1:
+                    frameTime = SPECTROSCOPY_MED_N1_FRAME_TIME;
+                    break;
+                case MichelleParameters.MEDN2:
+                    frameTime = SPECTROSCOPY_MED_N2_FRAME_TIME;
+                    break;
                 case MichelleParameters.ECHELLEN:
-                case MichelleParameters.ECHELLEQ: frameTime=SPECTROSCOPY_ECHELLE_FRAME_TIME; break;
-                default: frameTime=SPECTROSCOPY_FRAME_TIME; break;
+                case MichelleParameters.ECHELLEQ:
+                    frameTime = SPECTROSCOPY_ECHELLE_FRAME_TIME;
+                    break;
+                default:
+                    frameTime = SPECTROSCOPY_FRAME_TIME;
+                    break;
             }
-            
+
             return frameTime;
             /*
             if (tempGrating.equals(MichelleParameters.LOW_N))
@@ -346,7 +355,9 @@ public class Michelle extends Instrument {
         return LOW_GAIN;
     }
 
-    /** The prefix on data file names for this instrument. */
+    /**
+     * The prefix on data file names for this instrument.
+     */
     public static String getPrefix() {
         return INSTR_PREFIX;
     }
@@ -364,9 +375,9 @@ public class Michelle extends Instrument {
         if (!_focalPlaneMask.equals(MichelleParameters.NO_SLIT))
             s += "<LI> Focal Plane Mask: " + _focalPlaneMask;
         s += "\n";
-	s += "\n";
-	if (_mode.equals(ObservationDetailsParameters.SPECTROSCOPY))
-	    s += "<L1> Central Wavelength: " + _centralWavelength +" nm"+"\n";
+        s += "\n";
+        if (_mode.equals(ObservationDetailsParameters.SPECTROSCOPY))
+            s += "<L1> Central Wavelength: " + _centralWavelength + " nm" + "\n";
         //s += "Instrument: " +super.getName() + "\n";
         s += "Spatial Binning: " + getSpatialBinning() + "\n";
         if (_mode.equals(ObservationDetailsParameters.SPECTROSCOPY))

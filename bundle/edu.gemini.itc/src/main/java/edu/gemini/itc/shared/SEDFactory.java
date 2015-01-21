@@ -10,17 +10,13 @@
 //
 package edu.gemini.itc.shared;
 
-import java.io.IOException;
-import java.io.CharArrayReader;
-
-import java.util.NoSuchElementException;
-import java.util.StringTokenizer;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.text.ParseException;
-
 import edu.gemini.itc.parameters.SourceDefinitionParameters;
+
+import java.io.CharArrayReader;
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class encapsulates the process of creating a Spectral Energy
@@ -30,7 +26,7 @@ import edu.gemini.itc.parameters.SourceDefinitionParameters;
  * the first is a wavelength in nanometers, the second is the energy in
  * arbitrary units.  Since a SED will be normalized before it is used,
  * the scale is arbitrary.
- *
+ * <p/>
  * Programmer's note: There is no need for a factory.  A factory is for
  * creating something when the client does not know which concrete type
  * to create.  Since we don't have different types of SEDs at this point,
@@ -44,7 +40,7 @@ public class SEDFactory {
     public SampledSpectrum getSED(double[] flux, double wavelengthStart,
                                   double wavelengthInterval) {
         return new DefaultSampledSpectrum(flux, wavelengthStart,
-                                          wavelengthInterval);
+                wavelengthInterval);
     }
 
     /**
@@ -109,14 +105,14 @@ public class SEDFactory {
             try {
                 if (dfr.countTokens() != 1) {
                     throw new Exception("First line of spectral file " + fileName
-                                        + " must be sampling interval.");
+                            + " must be sampling interval.");
                 }
                 wavelengthInterval = dfr.readDouble();
             } catch (ParseException e) {
                 throw e;
             } catch (IOException e) {
                 throw new Exception("First line of spectral file " + fileName
-                                    + " must be sampling interval.");
+                        + " must be sampling interval.");
             }
         }
 
@@ -124,8 +120,8 @@ public class SEDFactory {
             while (true) {
                 if (dfr.countTokens() != 2) {
                     throw new Exception("Line " + dfr.getLineNumber()
-                                        + " of spectral file " + fileName
-                                        + " does not contain two values.");
+                            + " of spectral file " + fileName
+                            + " does not contain two values.");
                 }
                 wavelength = dfr.readDouble();
                 wavelengths.add(new Double(wavelength));
@@ -152,12 +148,12 @@ public class SEDFactory {
         }
 
         DefaultArraySpectrum as = new DefaultArraySpectrum(wavelengths,
-                                                           fluxDensities);
+                fluxDensities);
         wavelengths.clear();
-        wavelengths=null;
+        wavelengths = null;
         fluxDensities.clear();
-        fluxDensities=null;
-        
+        fluxDensities = null;
+
         return new DefaultSampledSpectrum(as, wavelengthInterval);
     }
 
@@ -202,14 +198,14 @@ public class SEDFactory {
             try {
                 if (dfr.countTokens() != 1) {
                     throw new Exception("First line of spectral file " + fileName
-                                        + " must be sampling interval.");
+                            + " must be sampling interval.");
                 }
                 wavelengthInterval = dfr.readDouble();
             } catch (ParseException e) {
                 throw e;
             } catch (IOException e) {
                 throw new Exception("First line of spectral file " + fileName
-                                    + " must be sampling interval.");
+                        + " must be sampling interval.");
             }
         }
 
@@ -217,8 +213,8 @@ public class SEDFactory {
             while (true) {
                 if (dfr.countTokens() != 2) {
                     throw new Exception("Line " + dfr.getLineNumber()
-                                        + " of spectral file " + fileName
-                                        + " does not contain two values.");
+                            + " of spectral file " + fileName
+                            + " does not contain two values.");
                 }
                 wavelength = dfr.readDouble();
                 wavelengths.add(new Double(wavelength));
@@ -245,12 +241,12 @@ public class SEDFactory {
         }
 
         DefaultArraySpectrum as = new DefaultArraySpectrum(wavelengths,
-                                                           fluxDensities);
+                fluxDensities);
         wavelengths.clear();
-        wavelengths=null;
+        wavelengths = null;
         fluxDensities.clear();
-        fluxDensities=null;
-        
+        fluxDensities = null;
+
         return new DefaultSampledSpectrum(as, wavelengthInterval);
     }
 
@@ -261,42 +257,42 @@ public class SEDFactory {
         if (sdp.getSpectrumResource().equals(sdp.BBODY)) {
             return new
                     BlackBodySpectrum(sdp.getBBTemp(),
-                                      instrument.getObservingStart(),
-                                      instrument.getObservingEnd(),
-                                      instrument.getSampling(),
-                                      sdp.getSourceNormalization(),
-                                      sdp.getUnits(),
-                                      sdp.getNormBand(),
-                                      sdp.getRedshift());
+                    instrument.getObservingStart(),
+                    instrument.getObservingEnd(),
+                    instrument.getSampling(),
+                    sdp.getSourceNormalization(),
+                    sdp.getUnits(),
+                    sdp.getNormBand(),
+                    sdp.getRedshift());
 
         } else if (sdp.getSpectrumResource().equals(sdp.ELINE)) {
             return new
                     EmissionLineSpectrum(sdp.getELineWavelength(),
-                                         sdp.getELineWidth(),
-                                         sdp.getELineFlux(),
-                                         sdp.getELineContinuumFlux(),
-                                         sdp.getELineFluxUnits(),
-                                         sdp.getELineContinuumFluxUnits(),
-                                         sdp.getRedshift(), 
-                                         instrument.getSampling());
+                    sdp.getELineWidth(),
+                    sdp.getELineFlux(),
+                    sdp.getELineContinuumFlux(),
+                    sdp.getELineFluxUnits(),
+                    sdp.getELineContinuumFluxUnits(),
+                    sdp.getRedshift(),
+                    instrument.getSampling());
 
 
         } else if (sdp.getSpectrumResource().equals(sdp.PLAW)) {
             return new
                     PowerLawSpectrum(sdp.getPowerLawIndex(),
-                                     instrument.getObservingStart(),
-                                     instrument.getObservingEnd(),
-                                     instrument.getSampling(),
-                                     sdp.getRedshift());
+                    instrument.getObservingStart(),
+                    instrument.getObservingEnd(),
+                    instrument.getSampling(),
+                    sdp.getRedshift());
         } else {
             VisitableSampledSpectrum temp;
             if (sdp.isSedUserDefined()) {
                 temp = getSED(sdp.getSpectrumResource(),
-                              sdp.getUserDefinedSpectrum(),
-                              instrument.getSampling());
+                        sdp.getUserDefinedSpectrum(),
+                        instrument.getSampling());
             } else {
                 temp = getSED(sdp.getSpectrumResource(),
-                              instrument.getSampling());
+                        instrument.getSampling());
             }
             temp.applyWavelengthCorrection();
 
@@ -314,42 +310,42 @@ public class SEDFactory {
         if (sdp.getSpectrumResource().equals(sdp.BBODY)) {
             return new
                     BlackBodySpectrum(sdp.getBBTemp(),
-                                      observingStart,
-                                      observingEnd,
-                                      sampling,
-                                      sdp.getSourceNormalization(),
-                                      sdp.getUnits(),
-                                      sdp.getNormBand(),
-                                      sdp.getRedshift());
+                    observingStart,
+                    observingEnd,
+                    sampling,
+                    sdp.getSourceNormalization(),
+                    sdp.getUnits(),
+                    sdp.getNormBand(),
+                    sdp.getRedshift());
 
         } else if (sdp.getSpectrumResource().equals(sdp.ELINE)) {
             return new
                     EmissionLineSpectrum(sdp.getELineWavelength(),
-                                         sdp.getELineWidth(),
-                                         sdp.getELineFlux(),
-                                         sdp.getELineContinuumFlux(),
-                                         sdp.getELineFluxUnits(),
-                                         sdp.getELineContinuumFluxUnits(),
-                                         sdp.getRedshift(), 
-                                         sampling);
+                    sdp.getELineWidth(),
+                    sdp.getELineFlux(),
+                    sdp.getELineContinuumFlux(),
+                    sdp.getELineFluxUnits(),
+                    sdp.getELineContinuumFluxUnits(),
+                    sdp.getRedshift(),
+                    sampling);
 
 
         } else if (sdp.getSpectrumResource().equals(sdp.PLAW)) {
             return new
                     PowerLawSpectrum(sdp.getPowerLawIndex(),
-                                     observingStart,
-                                     observingEnd,
-                                     sampling,
-                                     sdp.getRedshift());
+                    observingStart,
+                    observingEnd,
+                    sampling,
+                    sdp.getRedshift());
         } else {
             VisitableSampledSpectrum temp;
             if (sdp.isSedUserDefined()) {
                 temp = getSED(sdp.getSpectrumResource(),
-                              sdp.getUserDefinedSpectrum(),
-                              sampling);
+                        sdp.getUserDefinedSpectrum(),
+                        sampling);
             } else {
                 temp = getSED(sdp.getSpectrumResource(),
-                              sampling);
+                        sampling);
             }
             temp.applyWavelengthCorrection();
 
