@@ -1,13 +1,3 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-// $Id: Spectrum.java,v 1.2 2003/11/21 14:31:02 shane Exp $
-//
 package edu.gemini.itc.shared;
 
 /**
@@ -59,14 +49,6 @@ public interface Spectrum extends Cloneable {
      * @throws Exception If either limit is out of range.
      */
     double getSum(double x_start, double x_end) throws Exception;
-
-    /**
-     * Returns the integral of y values in the spectrum in
-     * the specified range.
-     *
-     * @throws Exception If either limit is out of range.
-     */
-    double getIntegral(double x_start, double x_end) throws Exception;
 
     /**
      * Returns the average of values in the Spectrum in

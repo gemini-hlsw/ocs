@@ -1,11 +1,3 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-
 package edu.gemini.itc.shared;
 
 /**
@@ -69,21 +61,6 @@ public interface ArraySpectrum extends Spectrum, Cloneable {
      * @throws Exception If either limit is out of range.
      */
     double getSum(int indexStart, int indexEnd) throws Exception;
-
-    /**
-     * Returns the integral of values in the ArraySpectrum in
-     * the specified range.
-     *
-     * @throws Exception If either limit is out of range.
-     */
-    double getIntegral(int indexStart, int indexEnd) throws Exception;
-
-    /**
-     * Returns the average of values in the SampledSpectrum in
-     * the specified range.
-     * If either limit is out of range, the average is not specified.
-     */
-    double getAverage(int indexStart, int indexEnd) throws Exception;
 
     /**
      * This returns a 2d array of the SED data used to chart the SED
