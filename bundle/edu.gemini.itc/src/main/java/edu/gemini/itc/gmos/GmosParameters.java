@@ -9,11 +9,9 @@
 //
 package edu.gemini.itc.gmos;
 
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.ITCParameters;
 import edu.gemini.itc.shared.ITCMultiPartParser;
+import edu.gemini.itc.shared.ITCParameters;
 import edu.gemini.itc.shared.NoSuchParameterException;
-
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -106,6 +104,7 @@ public final class GmosParameters extends ITCParameters {
 
     /**
      * Constructs a GmosParameters from a servlet request
+     *
      * @param r Servlet request containing the form data.
      * @throws Exception if input data is not parsable.
      */
@@ -114,16 +113,19 @@ public final class GmosParameters extends ITCParameters {
     }
 
     /**
-     *Constructs a GmosParameters from a MultipartParser
+     * Constructs a GmosParameters from a MultipartParser
+     *
      * @param p MutipartParser that has all of the parameters and files Parsed
-     *@throws Exception of cannot parse any of the parameters.
+     * @throws Exception of cannot parse any of the parameters.
      */
 
     public GmosParameters(ITCMultiPartParser p) throws Exception {
         parseMultipartParameters(p);
     }
 
-    /** Parse parameters from a servlet request. */
+    /**
+     * Parse parameters from a servlet request.
+     */
     public void parseServletRequest(HttpServletRequest r) throws Exception {
         // Parse the acquisition camera section of the form.
 
@@ -150,11 +152,11 @@ public final class GmosParameters extends ITCParameters {
             ITCParameters.notFoundException(SPEC_BINNING);
         }
 
-	//Get which type of CCD is being used, old or Hamamatsu
+        //Get which type of CCD is being used, old or Hamamatsu
         //System.out.println(_instrumentLocation);
-         _CCDtype = r.getParameter(CCD_TYPE);
+        _CCDtype = r.getParameter(CCD_TYPE);
         // }
-	//finally {
+        //finally {
 //	}
         if (_CCDtype == null) {
             ITCParameters.notFoundException(CCD_TYPE);
@@ -184,7 +186,7 @@ public final class GmosParameters extends ITCParameters {
         if (_IFUMethod == null) {
             if (_FP_Mask.equals(IFU))
                 ITCParameters.notFoundException("a value for " + IFU_METHOD + ".  Please either deselect the\n" +
-                                                " IFU or select an IFU Method(Single or Radial). ");
+                        " IFU or select an IFU Method(Single or Radial). ");
         } else {
 
             if (_IFUMethod.equals(SINGLE_IFU)) {
@@ -212,18 +214,18 @@ public final class GmosParameters extends ITCParameters {
 
     public void parseMultipartParameters(ITCMultiPartParser p) throws Exception {
         // Parse GMOS details section of the form.
- //       try {
+        //       try {
 //	_CCDtype = p.getParameter(CCD_TYPE);
-  //      }
+        //      }
 //	finally {
 //	}
 //System.out.println(_instrumentLocation);
-	try {
+        try {
             _Filter = p.getParameter(INSTRUMENT_FILTER);
             _grating = p.getParameter(INSTRUMENT_GRATING);
             _spatBinning = p.getParameter(SPAT_BINNING);
             _specBinning = p.getParameter(SPEC_BINNING);
-	    _CCDtype = p.getParameter(CCD_TYPE);
+            _CCDtype = p.getParameter(CCD_TYPE);
             _instrumentCentralWavelength = p.getParameter(INSTRUMENT_CENTRAL_WAVELENGTH);
             if (_instrumentCentralWavelength.equals(" ")) {
                 _instrumentCentralWavelength = "0";
@@ -242,7 +244,7 @@ public final class GmosParameters extends ITCParameters {
             _instrumentLocation = p.getParameter(INSTRUMENT_LOCATION);
         } catch (NoSuchParameterException e) {
             throw new Exception("The parameter " + e.parameterName + " could not be found in the Telescope" +
-                                " Paramters Section of the form.  Either add this value or Contact the Helpdesk.");
+                    " Paramters Section of the form.  Either add this value or Contact the Helpdesk.");
         }
     }
 
@@ -319,8 +321,8 @@ public final class GmosParameters extends ITCParameters {
         return new Integer(_spatBinning).intValue();
     }
 
-    public String getCCDtype () {
-	return _CCDtype;
+    public String getCCDtype() {
+        return _CCDtype;
     }
 
     public double getFPMask() {
@@ -389,13 +391,15 @@ public final class GmosParameters extends ITCParameters {
         return _instrumentLocation;
     }
 
-    /** Return a human-readable string for debugging */
+    /**
+     * Return a human-readable string for debugging
+     */
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("Filter:\t" + getFilter() + "\n");
         sb.append("Grating:\t" + getGrating() + "\n");
         sb.append("Instrument Central Wavelength:\t" +
-                  getInstrumentCentralWavelength() + "\n");
+                getInstrumentCentralWavelength() + "\n");
         sb.append("Focal Plane Mask: \t " + getFPMask() + " arcsec slit \n");
         sb.append("\n");
         return sb.toString();

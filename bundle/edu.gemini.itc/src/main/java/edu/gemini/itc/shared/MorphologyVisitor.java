@@ -27,7 +27,7 @@ package edu.gemini.itc.shared;
  */
 public interface MorphologyVisitor {
     void visitGaussian(Morphology3D morphology) throws Exception;
-    
+
     void visitAO(Morphology3D morphology) throws Exception;
 
     void visitUSB(Morphology3D morphology) throws Exception;

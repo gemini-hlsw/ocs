@@ -667,7 +667,7 @@ public final class NiriRecipe extends RecipeBase {
             sed.accept(specS2N);
             _println("<p style=\"page-break-inside: never\">");
             /*
-			 * NiriChart.setSeriesName("Signal  ");
+             * NiriChart.setSeriesName("Signal  ");
 			 * NiriChart.setName("Signal and Background ");
 			 * //NiriChart.setName("");
 			 * NiriChart.setYaxisTitle("e- per exposure per spectral pixel");

@@ -14,39 +14,40 @@
 package edu.gemini.itc.gnirs;
 
 import edu.gemini.itc.shared.TextFileReader;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.ArrayList;
-
-import java.text.ParseException;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
+
 /**
- *
- * @author  bwalls
+ * @author bwalls
  */
 public class GnirsOrderSelector {
-    
+
     private int _order = 0;
     private String orderFilename = "orders";
     private List _order_list;      //list of the order numbers
     private List _lambda1_list;    //start wavelenght for that order
     private List _lambda2_list;    //end wavelength fot that order
-    
-    /** Creates a new instance of GnirsOrderSelector */
+
+    /**
+     * Creates a new instance of GnirsOrderSelector
+     */
     public GnirsOrderSelector(String directory, String prefix, String suffix) throws Exception {
         TextFileReader dfr = new TextFileReader(directory + "/" +
-        prefix +
-        orderFilename +
-        suffix);
+                prefix +
+                orderFilename +
+                suffix);
         _order_list = new ArrayList();
         _lambda1_list = new ArrayList();
         _lambda2_list = new ArrayList();
-        
+
         int order = 0;
         int lambda1 = 0;
         int lambda2 = 0;
-        
+
         try {
             while (true) {
                 order = dfr.readInt();
@@ -62,35 +63,35 @@ public class GnirsOrderSelector {
             // normal eof
         }
     }
-    
-    private int findOrder(double centralWavelength) throws Exception{
-        
+
+    private int findOrder(double centralWavelength) throws Exception {
+
         int centralWavelengthInt = (new Double(centralWavelength)).intValue();
         ListIterator lambdaStart = _lambda1_list.listIterator();
         ListIterator lambdaEnd = _lambda2_list.listIterator();
         ListIterator order = _order_list.listIterator();
-        
+
         int selectedOrder = -1;
-        
-        while (lambdaStart.hasNext()&&lambdaEnd.hasNext()) {
-            int wavelenStart = ((Integer)lambdaStart.next()).intValue();
-            int wavelenEnd = ((Integer)lambdaEnd.next()).intValue();
-            if (centralWavelength>=wavelenStart && centralWavelength<=wavelenEnd) {
-                selectedOrder = ((Integer)order.next()).intValue();
+
+        while (lambdaStart.hasNext() && lambdaEnd.hasNext()) {
+            int wavelenStart = ((Integer) lambdaStart.next()).intValue();
+            int wavelenEnd = ((Integer) lambdaEnd.next()).intValue();
+            if (centralWavelength >= wavelenStart && centralWavelength <= wavelenEnd) {
+                selectedOrder = ((Integer) order.next()).intValue();
             } else {
                 order.next();
             }
         }
-        
-        if (selectedOrder == -1 ) {
+
+        if (selectedOrder == -1) {
             throw new Exception("Order could not be found for centralWavelength" + centralWavelength);
         }
-        
+
         return selectedOrder;
     }
-    
+
     int getOrder(double centralWavelength) throws Exception {
         return findOrder(centralWavelength);
     }
-    
+
 }

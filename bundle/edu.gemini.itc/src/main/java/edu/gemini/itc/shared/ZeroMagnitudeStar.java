@@ -18,23 +18,23 @@ public final class ZeroMagnitudeStar {
     // flux densities for each waveband for zero-magnitude star (of some type)
     // units are photons/s/m^2/nm
     public static int[] FLUX_DENSITY = {
-        75900000, // U
-        146100000, // B
-        97100000, // V
-        64600000, // R
-        39000000, // I
-        19700000, // J
-        9600000, // H
-        4500000, // K
-        990000, //L'
-        510000, //M'
-        51000, //N
-        7700, //Q
-        // Values for Sloan filters taken from Schneider, Gunn, & Hoessel (1983)
-        117000000, //g'
-        108000000, //r'
-        93600000, //i'
-        79800000 //z'
+            75900000, // U
+            146100000, // B
+            97100000, // V
+            64600000, // R
+            39000000, // I
+            19700000, // J
+            9600000, // H
+            4500000, // K
+            990000, //L'
+            510000, //M'
+            51000, //N
+            7700, //Q
+            // Values for Sloan filters taken from Schneider, Gunn, & Hoessel (1983)
+            117000000, //g'
+            108000000, //r'
+            93600000, //i'
+            79800000 //z'
     };
 
     // Keep anyone from instantiating this object.

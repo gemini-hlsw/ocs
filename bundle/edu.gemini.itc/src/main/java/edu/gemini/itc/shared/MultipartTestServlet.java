@@ -15,38 +15,49 @@
 
 package edu.gemini.itc.shared;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
-import java.io.*;
-import java.util.Iterator;
-import java.text.ParseException;
-
-import edu.gemini.itc.parameters.*;
 import edu.gemini.itc.acqcam.AcquisitionCamParameters;
+import edu.gemini.itc.parameters.ObservationDetailsParameters;
+import edu.gemini.itc.parameters.ObservingConditionParameters;
+import edu.gemini.itc.parameters.SourceDefinitionParameters;
+import edu.gemini.itc.parameters.TeleParameters;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
+import java.io.CharArrayReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.text.ParseException;
+import java.util.Iterator;
 
 
 /**
- *
- * @author  bwalls
- * @version
+ * @author bwalls
  */
 public class MultipartTestServlet extends HttpServlet {
 
-    /** Initializes the servlet.
+    /**
+     * Initializes the servlet.
      */
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
 
     }
 
-    /** Destroys the servlet.
+    /**
+     * Destroys the servlet.
      */
     public void destroy() {
 
     }
 
-    /** Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
-     * @param request servlet request
+    /**
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
+     *
+     * @param request  servlet request
      * @param response servlet response
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -115,7 +126,7 @@ public class MultipartTestServlet extends HttpServlet {
 
         } else {
             out.println("ERROR: File size (" + (new Integer(request.getContentLength())).doubleValue() / MAX_CONTENT_LENGTH +
-                        " MB)exceeds 1MB limit. Please resubmit with at smaller file.<br>");
+                    " MB)exceeds 1MB limit. Please resubmit with at smaller file.<br>");
             BufferedReader in = new BufferedReader(new InputStreamReader(request.getInputStream()));
             try {
                 while (true) {
@@ -134,8 +145,10 @@ public class MultipartTestServlet extends HttpServlet {
         out.close();
     }
 
-    /** Handles the HTTP <code>GET</code> method.
-     * @param request servlet request
+    /**
+     * Handles the HTTP <code>GET</code> method.
+     *
+     * @param request  servlet request
      * @param response servlet response
      */
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -143,8 +156,10 @@ public class MultipartTestServlet extends HttpServlet {
         processRequest(request, response);
     }
 
-    /** Handles the HTTP <code>POST</code> method.
-     * @param request servlet request
+    /**
+     * Handles the HTTP <code>POST</code> method.
+     *
+     * @param request  servlet request
      * @param response servlet response
      */
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -152,7 +167,8 @@ public class MultipartTestServlet extends HttpServlet {
         processRequest(request, response);
     }
 
-    /** Returns a short description of the servlet.
+    /**
+     * Returns a short description of the servlet.
      */
     public String getServletInfo() {
         return "MultiPartTestServlet";

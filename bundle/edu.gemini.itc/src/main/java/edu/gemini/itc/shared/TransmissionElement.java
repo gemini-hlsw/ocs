@@ -39,6 +39,6 @@ public class TransmissionElement implements SampledSpectrumVisitor {
     }
 
     public ArraySpectrum get_trans() {
-		return _trans;
-	}
+        return _trans;
+    }
 }

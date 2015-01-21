@@ -9,22 +9,20 @@
 
 package edu.gemini.itc.shared;
 
-import org.jfree.chart.*;
-import org.jfree.chart.plot.*;
-import org.jfree.chart.axis.NumberAxis;
-
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.util.List;
-import java.util.Iterator;
-
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
-import org.jfree.data.xy.XYDataset;
+import org.jfree.chart.plot.ValueMarker;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.RectangleEdge;
+
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.util.Iterator;
+import java.util.List;
 
 
 public class ITCChart {

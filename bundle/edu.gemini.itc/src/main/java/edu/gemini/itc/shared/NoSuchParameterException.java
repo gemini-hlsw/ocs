@@ -15,9 +15,7 @@
 package edu.gemini.itc.shared;
 
 /**
- *
- * @author  bwalls
- * @version
+ * @author bwalls
  */
 public class NoSuchParameterException extends java.lang.Exception {
 
@@ -32,6 +30,7 @@ public class NoSuchParameterException extends java.lang.Exception {
 
     /**
      * Constructs an <code>NoSuchParameterException</code> with the specified detail message.
+     *
      * @param msg the detail message.
      */
     public NoSuchParameterException(String msg, String parameterName) {

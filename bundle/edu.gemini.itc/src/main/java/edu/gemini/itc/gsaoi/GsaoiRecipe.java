@@ -6,49 +6,16 @@
 //
 package edu.gemini.itc.gsaoi;
 
-import java.io.PrintWriter;
-
-import javax.servlet.http.HttpServletRequest;
-
-import edu.gemini.itc.shared.FormatStringWriter;
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.RecipeBase;
-import edu.gemini.itc.shared.SampledSpectrumVisitor;
-import edu.gemini.itc.shared.SEDFactory;
-import edu.gemini.itc.shared.VisitableSampledSpectrum;
-import edu.gemini.itc.shared.WavebandDefinition;
-import edu.gemini.itc.shared.ITCMultiPartParser;
-
-import edu.gemini.itc.parameters.ObservingConditionParameters;
+import edu.gemini.itc.gems.*;
+import edu.gemini.itc.operation.*;
 import edu.gemini.itc.parameters.ObservationDetailsParameters;
+import edu.gemini.itc.parameters.ObservingConditionParameters;
 import edu.gemini.itc.parameters.SourceDefinitionParameters;
 import edu.gemini.itc.parameters.TeleParameters;
-import edu.gemini.itc.parameters.PlottingDetailsParameters;
+import edu.gemini.itc.shared.*;
 
-import edu.gemini.itc.gems.Gems;
-import edu.gemini.itc.gems.GemsBackgroundVisitor;
-import edu.gemini.itc.gems.GemsFluxAttenuationVisitor;
-import edu.gemini.itc.gems.GemsParameters;
-import edu.gemini.itc.gems.GemsTransmissionVisitor;
-
-import edu.gemini.itc.operation.ResampleVisitor;
-import edu.gemini.itc.operation.RedshiftVisitor;
-import edu.gemini.itc.operation.AtmosphereVisitor;
-import edu.gemini.itc.operation.TelescopeApertureVisitor;
-import edu.gemini.itc.operation.TelescopeTransmissionVisitor;
-import edu.gemini.itc.operation.TelescopeBackgroundVisitor;
-import edu.gemini.itc.operation.NormalizeVisitor;
-import edu.gemini.itc.operation.CloudTransmissionVisitor;
-import edu.gemini.itc.operation.WaterTransmissionVisitor;
-import edu.gemini.itc.operation.PeakPixelFluxCalc;
-import edu.gemini.itc.operation.SpecS2NVisitor;
-import edu.gemini.itc.operation.ImageQualityCalculatable;
-import edu.gemini.itc.operation.ImageQualityCalculationFactory;
-import edu.gemini.itc.operation.SourceFractionCalculationFactory;
-import edu.gemini.itc.operation.SourceFractionCalculatable;
-import edu.gemini.itc.operation.ImagingS2NCalculationFactory;
-import edu.gemini.itc.operation.ImagingS2NCalculatable;
-
+import javax.servlet.http.HttpServletRequest;
+import java.io.PrintWriter;
 import java.util.Calendar;
 
 /**

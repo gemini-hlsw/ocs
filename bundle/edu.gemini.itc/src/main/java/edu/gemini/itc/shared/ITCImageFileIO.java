@@ -11,32 +11,20 @@
 package edu.gemini.itc.shared;
 
 
+import org.jfree.chart.ChartUtilities;
+
+import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
 
 //import com.klg.jclass.util.swing.encode.PNGEncoder;
 //import com.klg.jclass.util.swing.encode.EncoderException;
 //import com.klg.jclass.chart.*;
-
-import java.io.FileInputStream;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.OutputStream;
-import java.io.DataOutputStream;
-import java.io.FileOutputStream;
-import java.io.File;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
-import javax.imageio.stream.FileImageOutputStream;
-
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-
-import org.jfree.chart.ChartUtilities;
-
 //import javax.media.jai.*;
 //import java.awt.image.renderable.ParameterBlock;
-import javax.servlet.ServletOutputStream;
 
 public class ITCImageFileIO {
 
@@ -44,7 +32,7 @@ public class ITCImageFileIO {
     private String _directory = "/tmp";
     private String _subDir = "/ITCTempImages";
     private File _tempDir = new File(File.separator + _directory +
-                                     File.separator + _subDir);
+            File.separator + _subDir);
 
     private String _imagePath;
     private String _fileName = "";
@@ -66,10 +54,10 @@ public class ITCImageFileIO {
             throws ServletException, IOException {
         try {
             File fileToDelete = new File(getImagePath() + File.separator +
-                                         filename);
+                    filename);
             BufferedInputStream bis = new BufferedInputStream(
                     new FileInputStream(getImagePath() + File.separator +
-                                        filename));
+                            filename));
             int data;
             while ((data = bis.read()) != -1) {
                 out.write(data);
@@ -148,20 +136,20 @@ public class ITCImageFileIO {
 
       } */
 
-    public void saveCharttoDisk(Image tmpChart) throws IOException{//, EncoderException { //add for KLG
+    public void saveCharttoDisk(Image tmpChart) throws IOException {//, EncoderException { //add for KLG
         try {
             //PNGEncoder enc = new PNGEncoder();  // ADD for KLG
             File tmpOut = new File(getImagePath());
             File randomFileName = tmpOut.createTempFile("SessionID", ".png", tmpOut);
-           
+
             FileOutputStream Outfile = new FileOutputStream(randomFileName);
             OutputStream out = new BufferedOutputStream(Outfile);
 
             //FileImageOutputStream fios = new FileImageOutputStream(randomFileName);
             //ImageIO.write((BufferedImage)tmpChart,"PNG",fios);  // 100 ms requires java 1.4  smaller file size
-                                                                 // could use the full imageIO capability to turn
-                                                                 // down compression for faster.
-            ChartUtilities.writeBufferedImageAsPNG(out,(BufferedImage)tmpChart);  //20 Seconds
+            // could use the full imageIO capability to turn
+            // down compression for faster.
+            ChartUtilities.writeBufferedImageAsPNG(out, (BufferedImage) tmpChart);  //20 Seconds
             //enc.encode(tmpChart, out);  // ave 300 ms requires KLG :(
             out.flush();
             out.close();
@@ -176,20 +164,19 @@ public class ITCImageFileIO {
     }
 
 
+    /*		public void saveCharttoDisk(BufferedImage tmpChart) throws IOException
+            {
+                try{
+                    File tmpOut = new File(getImagePath());
+                    File randomFileName = tmpOut.createTempFile("SessionID",".png", tmpOut);
 
-/*		public void saveCharttoDisk(BufferedImage tmpChart) throws IOException
-		{
-			try{
-				File tmpOut = new File(getImagePath());
-			    File randomFileName = tmpOut.createTempFile("SessionID",".png", tmpOut);
+                    ImageIO.write(tmpChart,"png",randomFileName);
+                    setFileName(randomFileName.getName());
 
-				ImageIO.write(tmpChart,"png",randomFileName);
-				setFileName(randomFileName.getName());
+                } catch (Exception ex) {ex.printStackTrace();}
 
-			} catch (Exception ex) {ex.printStackTrace();}
-
-		}
-*/
+            }
+    */
     public void saveSedtoDisk(String header, SampledSpectrum sed) throws IOException {
         try {
             File tmpOut = new File(getImagePath());
@@ -211,12 +198,12 @@ public class ITCImageFileIO {
         try {
             File tmpOut = new File(getImagePath() + "/" + randomFilename);
             //File randomFileName = tmpOut.createTempFile("SessionID",".dat", tmpOut);
-            FileOutputStream Outfile = new FileOutputStream(getImagePath() + "/" + randomFilename,true);  //append if exists
+            FileOutputStream Outfile = new FileOutputStream(getImagePath() + "/" + randomFilename, true);  //append if exists
             OutputStream out = new BufferedOutputStream(Outfile);
             DataOutputStream dout = new DataOutputStream(out);
             String specOutput = sed.printSpecAsString();
-            
-            if (tmpOut.length()>10) {
+
+            if (tmpOut.length() > 10) {
                 dout.writeBytes(specOutput);  //if the file already existed then just append spectrum to it.
             } else {
                 dout.writeBytes(header + " \n" + specOutput);
@@ -237,7 +224,7 @@ public class ITCImageFileIO {
             DataOutputStream dout = new DataOutputStream(out);
             String specOutput = sed.printSpecAsString(firstIndex, lastIndex);
 
-            if (tmpOut.length()>10) {
+            if (tmpOut.length() > 10) {
                 dout.writeBytes(specOutput);  //if the file already existed then just append spectrum to it.
             } else {
                 dout.writeBytes(header + " \n" + specOutput);

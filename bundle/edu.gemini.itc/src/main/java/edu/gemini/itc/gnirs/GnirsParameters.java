@@ -9,11 +9,9 @@
 //
 package edu.gemini.itc.gnirs;
 
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.ITCParameters;
 import edu.gemini.itc.shared.ITCMultiPartParser;
+import edu.gemini.itc.shared.ITCParameters;
 import edu.gemini.itc.shared.NoSuchParameterException;
-
 
 import javax.servlet.http.HttpServletRequest;
 

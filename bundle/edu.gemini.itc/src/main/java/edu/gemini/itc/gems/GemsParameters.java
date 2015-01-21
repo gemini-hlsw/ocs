@@ -10,12 +10,12 @@
 //
 package edu.gemini.itc.gems;
 
-import javax.servlet.http.HttpServletRequest;
-
-import edu.gemini.itc.shared.ITCParameters;
-import edu.gemini.itc.shared.ITCMultiPartParser;
-import edu.gemini.itc.shared.NoSuchParameterException;
 import edu.gemini.itc.shared.FormatStringWriter;
+import edu.gemini.itc.shared.ITCMultiPartParser;
+import edu.gemini.itc.shared.ITCParameters;
+import edu.gemini.itc.shared.NoSuchParameterException;
+
+import javax.servlet.http.HttpServletRequest;
 
 
 /**

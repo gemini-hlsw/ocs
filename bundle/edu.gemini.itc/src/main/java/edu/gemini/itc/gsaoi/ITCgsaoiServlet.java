@@ -11,13 +11,12 @@
 
 package edu.gemini.itc.gsaoi;
 
-import java.io.PrintWriter;
-
-import javax.servlet.http.HttpServletRequest;
-
+import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCServlet;
 import edu.gemini.itc.shared.Recipe;
-import edu.gemini.itc.shared.ITCMultiPartParser;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.PrintWriter;
 
 /**
  * This servlet accepts form data from the ITC html document.
@@ -35,21 +34,35 @@ import edu.gemini.itc.shared.ITCMultiPartParser;
  */
 public final class ITCgsaoiServlet
         extends ITCServlet {
-    public static final String VERSION="4.2";
-    public static final String TITLE="Gemini Integration Time Calculator";
+    public static final String VERSION = "4.2";
+    public static final String TITLE = "Gemini Integration Time Calculator";
     public static final String INSTRUMENT = "GSAOI";
-    
-    public ITCgsaoiServlet () {
-    	super ();
+
+    public ITCgsaoiServlet() {
+        super();
     }
-    
-    /** Returns a title */
-    public String getTitle() { return TITLE; }
-    /** Returns a version of this servlet */
-    public String getVersion() { return VERSION; }
-    /** Returns the Instrument name*/
-    public String getInst() {return INSTRUMENT; }
-    
+
+    /**
+     * Returns a title
+     */
+    public String getTitle() {
+        return TITLE;
+    }
+
+    /**
+     * Returns a version of this servlet
+     */
+    public String getVersion() {
+        return VERSION;
+    }
+
+    /**
+     * Returns the Instrument name
+     */
+    public String getInst() {
+        return INSTRUMENT;
+    }
+
     /**
      * Describes the purpose of the servlet.
      * Used by Java Web Server Administration Tool.
@@ -57,25 +70,27 @@ public final class ITCgsaoiServlet
     public String getServletInfo() {
         return getTitle() + " " + getVersion() + " - ITCGsaoiServlet accepts form data and performs ITC calculation for Gsaoi.";
     }
-    
-    /** Supply the body content for the html document. */
+
+    /**
+     * Supply the body content for the html document.
+     */
     public void writeOutput(HttpServletRequest r, PrintWriter out)
-    throws Exception {
+            throws Exception {
         // Construct recipe from the request.
         // Pass in same PrintWriter instead of getting another one from
         // the servlet request in case you get a different one each
         // time.  HTML document was already started with one PrintWriter.
         out.println("<a href = \"http://www.gemini.edu/sciops/instruments/integration-time-calculators/itc-help\"> Click here for help with the results page.</a>");
-        
+
 //      Recipe recipe = new GsaoiRecipe(r, out); // parses form data
-        
+
         Recipe recipe;
-        
+
         if (r.getContentType().startsWith("multipart/form-data")) {
-            recipe = new GsaoiRecipe(new ITCMultiPartParser(r, MAX_CONTENT_LENGTH),out);
+            recipe = new GsaoiRecipe(new ITCMultiPartParser(r, MAX_CONTENT_LENGTH), out);
         } else
             recipe = new GsaoiRecipe(r, out); // parses form data
-        
+
         // Perform calculation, write the output to the web page.
         recipe.writeOutput();
     }

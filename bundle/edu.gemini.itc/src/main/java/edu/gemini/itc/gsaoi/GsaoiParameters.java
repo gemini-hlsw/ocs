@@ -10,8 +10,8 @@
 //
 package edu.gemini.itc.gsaoi;
 
-import edu.gemini.itc.shared.ITCParameters;
 import edu.gemini.itc.shared.ITCMultiPartParser;
+import edu.gemini.itc.shared.ITCParameters;
 import edu.gemini.itc.shared.NoSuchParameterException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -48,6 +48,7 @@ public final class GsaoiParameters extends ITCParameters {
 
     /**
      * Constructs a GsaoiParameters from a servlet request
+     *
      * @param r Servlet request containing the form data.
      * @throws Exception if input data is not parsable.
      */
@@ -57,6 +58,7 @@ public final class GsaoiParameters extends ITCParameters {
 
     /**
      * Constructs a GsaoiParameters from a MultipartParser
+     *
      * @param p MutipartParser that has all of the parameters and files Parsed
      * @throws Exception of cannot parse any of the parameters.
      */
@@ -64,7 +66,9 @@ public final class GsaoiParameters extends ITCParameters {
         parseMultipartParameters(p);
     }
 
-    /** Parse parameters from a servlet request. */
+    /**
+     * Parse parameters from a servlet request.
+     */
     public void parseServletRequest(HttpServletRequest r) throws Exception {
 
         // Get Broad Band filter
@@ -101,13 +105,13 @@ public final class GsaoiParameters extends ITCParameters {
 
         } catch (NoSuchParameterException e) {
             throw new Exception("The parameter " + e.parameterName + " could not be found in the Telescope" +
-                                " Paramters Section of the form.  Either add this value or Contact the Helpdesk.");
+                    " Paramters Section of the form.  Either add this value or Contact the Helpdesk.");
         }
     }
 
     public GsaoiParameters(String filter,
-                          String camera,
-                          String readMode) {
+                           String camera,
+                           String readMode) {
         _filter = filter;
         _camera = camera;
         _readMode = readMode;
@@ -126,7 +130,9 @@ public final class GsaoiParameters extends ITCParameters {
     }
 
 
-    /** Return a human-readable string for debugging */
+    /**
+     * Return a human-readable string for debugging
+     */
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("Filter:\t" + getFilter() + "\n");

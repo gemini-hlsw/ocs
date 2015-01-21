@@ -8,8 +8,8 @@
 //
 package edu.gemini.itc.shared;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This is the concrete class is one type of aperture supported by the itc
@@ -19,7 +19,7 @@ import java.util.ArrayList;
  */
 public class RectangularAperture extends ApertureComponent {
     List sourceFraction = new ArrayList();
-    double IFUlenX,IFUlenY, IFUposX, IFUposY;
+    double IFUlenX, IFUlenY, IFUposX, IFUposY;
 
     public RectangularAperture(double IFUlenX, double IFUlenY, double IFUposX, double IFUposY) {
         this.IFUlenX = IFUlenX;
@@ -44,7 +44,7 @@ public class RectangularAperture extends ApertureComponent {
 
 
     }
-    
+
     public void visitAO(Morphology3D morphology) {
         double xLower = IFUposX - IFUlenX / 2;
         double xUpper = IFUposX + IFUlenX / 2;
@@ -76,7 +76,7 @@ public class RectangularAperture extends ApertureComponent {
     public List getFractionOfSourceInAperture() {
         return sourceFraction;
     }
-    
+
     public void clearFractionOfSourceInAperture() {
         sourceFraction.clear();
     }

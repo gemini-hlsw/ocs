@@ -10,15 +10,15 @@
 //
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.shared.SampledSpectrumVisitor;
 import edu.gemini.itc.shared.SampledSpectrum;
+import edu.gemini.itc.shared.SampledSpectrumVisitor;
 
 /**
  * A resampling operation can move the start or end of the spectrum
  * and change the sampling wavelength interval.
  * The start and end can not be moved beyond the original limits
  * because there would be no data.
- *
+ * <p/>
  * Motivation of this operation is to "save time and improve performance"
  * quoting from Phil's demo ITC document.
  */
@@ -33,17 +33,23 @@ public class ResampleVisitor implements SampledSpectrumVisitor {
         _sampling = sampling;
     }
 
-    /** @return sampling interval */
+    /**
+     * @return sampling interval
+     */
     public double getSampling() {
         return _sampling;
     }
 
-    /** @return wavelength start */
+    /**
+     * @return wavelength start
+     */
     public double getStart() {
         return _start;
     }
 
-    /** @return wavelength end */
+    /**
+     * @return wavelength end
+     */
     public double getEnd() {
         return _end;
     }
@@ -54,14 +60,14 @@ public class ResampleVisitor implements SampledSpectrumVisitor {
     public void visit(SampledSpectrum sed) throws Exception {
         if (getStart() < sed.getStart()) {
             throw new Exception("Resampling start " + getStart() + " is before "
-                                + " SED start " + sed.getStart());
+                    + " SED start " + sed.getStart());
         }
         if (getEnd() > sed.getEnd()) {
             throw new Exception("Resampling end " + getEnd() + " is after "
-                                + " SED end " + sed.getEnd());
+                    + " SED end " + sed.getEnd());
         }
         int num_elements = (int) ((getEnd() - getStart()) / getSampling());//+ 1;
-        
+
 
         // Sed is going to get a new array
         double[] data = new double[num_elements];
@@ -81,16 +87,18 @@ public class ResampleVisitor implements SampledSpectrumVisitor {
             //System.out.println("resampling requires interpolation" );
             for (int i = 1; i < num_elements; i++) {
                 // interpolate new values
-                data[i] = sed.getAverage(getStart() + i * getSampling()-getSampling()/2, getStart() + i * getSampling()+ getSampling()/2);///(getSampling()/sed.getSampling()+1);
+                data[i] = sed.getAverage(getStart() + i * getSampling() - getSampling() / 2, getStart() + i * getSampling() + getSampling() / 2);///(getSampling()/sed.getSampling()+1);
                 //System.out.println("point:" + sed.getY(getStart() + i * getSampling())+ "next: "+ sed.getY(getStart() + i * getSampling()+ getSampling()) + "INT: " + data[i]);
 
             }
         }
-        
+
         sed.reset(data, getStart(), getSampling());
     }
 
-    /** @return Human-readable representation of this class. */
+    /**
+     * @return Human-readable representation of this class.
+     */
     public String toString() {
         String s = "ResampleVisitor - starting wavelength: ";
         s += getStart() + " sampling interval: " + getSampling();

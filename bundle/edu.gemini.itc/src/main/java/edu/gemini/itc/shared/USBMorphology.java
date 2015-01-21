@@ -12,7 +12,6 @@ package edu.gemini.itc.shared;
 /**
  * The USBMorphology concreate class implements the operations that all
  * that are defined in it's abstract parent class Morphology2d.
- *
  */
 public class USBMorphology extends Morphology3D {
 
@@ -20,8 +19,9 @@ public class USBMorphology extends Morphology3D {
     /**
      * We should provide methods that allow the calculation of
      * integrals for square, circular.
-     * 
+     * <p/>
      * Method to get the 2D square integral on a USB source.  Easy! It is always 1
+     *
      * @param xMin -x side of the square region
      * @param xMax +x side of the square region
      * @param yMin -y side of the square region
@@ -37,6 +37,7 @@ public class USBMorphology extends Morphology3D {
 
     /**
      * The accept method for the Visitor pattern
+     *
      * @param v Visitor
      * @throws java.lang.Exception thown in something goes wrong
      */

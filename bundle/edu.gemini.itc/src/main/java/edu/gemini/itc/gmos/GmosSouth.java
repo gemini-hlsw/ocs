@@ -9,14 +9,12 @@
 //
 package edu.gemini.itc.gmos;
 
-import edu.gemini.itc.shared.Instrument;
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.WavebandDefinition;
-import edu.gemini.itc.shared.Filter;
-import edu.gemini.itc.shared.Detector;
-import edu.gemini.itc.shared.FixedOptics;
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.parameters.ObservationDetailsParameters;
+import edu.gemini.itc.shared.Detector;
+import edu.gemini.itc.shared.Filter;
+import edu.gemini.itc.shared.FixedOptics;
+import edu.gemini.itc.shared.Instrument;
 
 import java.awt.*;
 

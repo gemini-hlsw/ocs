@@ -10,13 +10,8 @@
 //
 package edu.gemini.itc.niri;
 
-import edu.gemini.itc.shared.Instrument;
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.WavebandDefinition;
-import edu.gemini.itc.shared.Filter;
-import edu.gemini.itc.shared.Detector;
-import edu.gemini.itc.shared.FixedOptics;
 import edu.gemini.itc.parameters.ObservationDetailsParameters;
+import edu.gemini.itc.shared.*;
 
 import java.util.Iterator;
 
@@ -304,7 +299,7 @@ public class Niri extends Instrument {
     public String toString() {
         String s = "Instrument configuration: \n";
         s += "Optical Components: <BR>";
-        for (Iterator itr = getComponents().iterator(); itr.hasNext();) {
+        for (Iterator itr = getComponents().iterator(); itr.hasNext(); ) {
             s += "<LI>" + itr.next().toString() + "<BR>";
         }
         if (!_focalPlaneMask.equals(NiriParameters.NO_SLIT))

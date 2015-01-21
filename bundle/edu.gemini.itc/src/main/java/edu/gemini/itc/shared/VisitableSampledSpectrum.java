@@ -24,14 +24,13 @@ public interface VisitableSampledSpectrum extends SampledSpectrum {
      * The accept(SampledSpectrumVisitor) method is used by Visitors to
      * visit the SampledSpectrum.
      * This is the way a SampledSpectrum is manipulated.
-     *
+     * <p/>
      * Example:
-     *
+     * <p/>
      * SampledSpectrum s = SampledSpectrumFactory.
-     *    getSampledSpectrum("SampledSpectrumFILE");
+     * getSampledSpectrum("SampledSpectrumFILE");
      * SampledSpectrumVisitor r = new ResampleVisitor();
      * s.Accept(r);
-     *
      */
     void accept(SampledSpectrumVisitor v) throws Exception;
 }

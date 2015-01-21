@@ -13,96 +13,135 @@ package edu.gemini.itc.shared;
 /**
  * This interface defines constants used across the ITC application.
  */
-public interface ITCConstants
-{
-   /** Speed of light in kilometers/second */
-   public static final double C = 299800.00;
+public interface ITCConstants {
+    /**
+     * Speed of light in kilometers/second
+     */
+    public static final double C = 299800.00;
 
-   /** Base location of data files relative to classpath */
+    /**
+     * Base location of data files relative to classpath
+     */
 //   public static final String LIB = "/edu/gemini/itc/lib";
-     public static final String LIB = "";
-   /** Directory for the instrument Libraries
-    */   
+    public static final String LIB = "";
+    /**
+     * Directory for the instrument Libraries
+     */
 //    public static final String INST_LIB = "/edu/gemini/itc";
     public static final String INST_LIB = "";
-   /** Base location of source spectra */
-   public static final String SED_LIB = LIB + "/sed";
+    /**
+     * Base location of source spectra
+     */
+    public static final String SED_LIB = LIB + "/sed";
 
-   /** Base location of various transmission files */
-   public static final String TRANSMISSION_LIB = LIB + "/transmission";
-   
-   /** Base name of telescope background files GS*/
-   public static final String GS_TELESCOPE_TRANSMISSION_FILENAME_BASE = "telTrans";
+    /**
+     * Base location of various transmission files
+     */
+    public static final String TRANSMISSION_LIB = LIB + "/transmission";
 
-    /** Base location of various calculation files */
-   public static final String CALC_LIB = LIB + "/calc";
+    /**
+     * Base name of telescope background files GS
+     */
+    public static final String GS_TELESCOPE_TRANSMISSION_FILENAME_BASE = "telTrans";
 
-   /** Location of sky background files */
-   public static final String SKY_BACKGROUND_LIB = LIB + "/sky_emiss";
+    /**
+     * Base location of various calculation files
+     */
+    public static final String CALC_LIB = LIB + "/calc";
 
-   /** Base name of sky background files (shoulden't be used any more)*/
-   public static final String SKY_BACKGROUND_FILENAME_BASE = "sky_emiss";
+    /**
+     * Location of sky background files
+     */
+    public static final String SKY_BACKGROUND_LIB = LIB + "/sky_emiss";
 
-   /** Base name for the optical sky background files */
-   public static final String OPTICAL_SKY_BACKGROUND_FILENAME_BASE = "skybg";
+    /**
+     * Base name of sky background files (shoulden't be used any more)
+     */
+    public static final String SKY_BACKGROUND_FILENAME_BASE = "sky_emiss";
 
-  /** Location of telescope background files */
-   public static final String TELESCOPE_BACKGROUND_LIB = LIB + "/tele_emiss";
+    /**
+     * Base name for the optical sky background files
+     */
+    public static final String OPTICAL_SKY_BACKGROUND_FILENAME_BASE = "skybg";
 
-   /** Base name of telescope background files */
-   public static final String TELESCOPE_BACKGROUND_FILENAME_BASE = "tel";
-   
-   /** Base name of telescope background files GS*/
-   public static final String GS_TELESCOPE_BACKGROUND_FILENAME_BASE = "telEmiss";
+    /**
+     * Location of telescope background files
+     */
+    public static final String TELESCOPE_BACKGROUND_LIB = LIB + "/tele_emiss";
 
-   /** File Name base for the Mid IR telescope files
-    */   
-   public static final String MID_IR_TELESCOPE_BACKGROUND_FILENAME_BASE = "midIR_tel";
+    /**
+     * Base name of telescope background files
+     */
+    public static final String TELESCOPE_BACKGROUND_FILENAME_BASE = "tel";
 
-    /** Base name for near ir sky background files */
-   public static final String NEAR_IR_SKY_BACKGROUND_FILENAME_BASE =
-       "nearIR_skybg";
+    /**
+     * Base name of telescope background files GS
+     */
+    public static final String GS_TELESCOPE_BACKGROUND_FILENAME_BASE = "telEmiss";
 
-    /** Base name for mid ir sky background files */
-   public static final String MID_IR_SKY_BACKGROUND_FILENAME_BASE =
-       "midIR_skybg";
+    /**
+     * File Name base for the Mid IR telescope files
+     */
+    public static final String MID_IR_TELESCOPE_BACKGROUND_FILENAME_BASE = "midIR_tel";
 
-   /** Location of image quality files */
-   public static final String IM_QUAL_LIB = LIB + "/imqual";
+    /**
+     * Base name for near ir sky background files
+     */
+    public static final String NEAR_IR_SKY_BACKGROUND_FILENAME_BASE =
+            "nearIR_skybg";
 
-   /** Base name image quality files */
-   public static final String IM_QUAL_BASE = "imqual_";
+    /**
+     * Base name for mid ir sky background files
+     */
+    public static final String MID_IR_SKY_BACKGROUND_FILENAME_BASE =
+            "midIR_skybg";
 
-   /** Pwfs name (for image qual) */
-   public static final String PWFS_FILE_NAME = "pwfs";
+    /**
+     * Location of image quality files
+     */
+    public static final String IM_QUAL_LIB = LIB + "/imqual";
 
-   /** Data file suffix */
-   public static final String DATA_SUFFIX = ".dat";
+    /**
+     * Base name image quality files
+     */
+    public static final String IM_QUAL_BASE = "imqual_";
 
-   /** Filename for the flux in peak pixel LUT
-    */   
-   public static final String FLUX_IN_PEAK_PIXEL_FILENAME =
-       "/flux_in_peak_pixel";
+    /**
+     * Pwfs name (for image qual)
+     */
+    public static final String PWFS_FILE_NAME = "pwfs";
 
-   /** Filename for the Slit throughput LUT
-    */   
-   public static final String SLIT_THROUGHPUT_FILENAME =
-       "/slit_throughput";
-   
-   public static final String CERRO_PACHON = "cp";
-   
-   public static final String MAUNA_KEA = "mk";
-   
-   public static final String VISIBLE="03-08";
-   
-   public static final String NEAR_IR="1-5";
-   
-   public static final String MID_IR="7-26";
-   
-   public static final String HI_RES="HI-Res";
-   
-   public static final String SERVER_TAG =
-                //"\"http://itc.gemini.edu:8080/itc/servlet/images?type=txt&filename="
-                "\"http://devitc.gemini.edu:8080/itc/servlet/images?type=txt&filename=";
+    /**
+     * Data file suffix
+     */
+    public static final String DATA_SUFFIX = ".dat";
+
+    /**
+     * Filename for the flux in peak pixel LUT
+     */
+    public static final String FLUX_IN_PEAK_PIXEL_FILENAME =
+            "/flux_in_peak_pixel";
+
+    /**
+     * Filename for the Slit throughput LUT
+     */
+    public static final String SLIT_THROUGHPUT_FILENAME =
+            "/slit_throughput";
+
+    public static final String CERRO_PACHON = "cp";
+
+    public static final String MAUNA_KEA = "mk";
+
+    public static final String VISIBLE = "03-08";
+
+    public static final String NEAR_IR = "1-5";
+
+    public static final String MID_IR = "7-26";
+
+    public static final String HI_RES = "HI-Res";
+
+    public static final String SERVER_TAG =
+            //"\"http://itc.gemini.edu:8080/itc/servlet/images?type=txt&filename="
+            "\"http://devitc.gemini.edu:8080/itc/servlet/images?type=txt&filename=";
 
 }

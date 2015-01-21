@@ -10,15 +10,9 @@
 //
 package edu.gemini.itc.parameters;
 
+import edu.gemini.itc.shared.*;
+
 import javax.servlet.http.HttpServletRequest;
-
-import java.util.Iterator;
-
-import edu.gemini.itc.shared.ITCParameters;
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.ITCMultiPartParser;
-import edu.gemini.itc.shared.NoSuchParameterException;
-import edu.gemini.itc.shared.FormatStringWriter;
 
 
 /**
@@ -709,7 +703,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
             sb.append(" a user defined spectrum with the name: " + getSpectrumResource());
         } else if (getSourceSpec().equals(PLAW)) {
             sb.append(" Power Law Spectrum, with an index of " + getPowerLawIndex()
-                      + " and " + getSourceNormalization() + " mag in the " + getNormBand() + " band.");
+                    + " and " + getSourceNormalization() + " mag in the " + getNormBand() + " band.");
         }
         sb.append("\n");
         return sb.toString();

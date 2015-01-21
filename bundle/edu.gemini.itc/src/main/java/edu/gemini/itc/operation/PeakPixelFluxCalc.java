@@ -12,12 +12,10 @@ package edu.gemini.itc.operation;
 import edu.gemini.itc.shared.ITCConstants;
 import edu.gemini.itc.shared.TextFileReader;
 
-import java.util.List;
-import java.util.ArrayList;
-
-import java.text.ParseException;
-
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PeakPixelFluxCalc {
 
@@ -89,9 +87,9 @@ public class PeakPixelFluxCalc {
     }
 
     public double getFluxInPeakPixelUSB(double source_fraction, double enclosedPixels) {
-        double background_in_peak,source_in_peak;
+        double background_in_peak, source_in_peak;
 
-        source_in_peak = summed_source * source_fraction * exp_time/enclosedPixels;
+        source_in_peak = summed_source * source_fraction * exp_time / enclosedPixels;
         background_in_peak = summed_background * exp_time * pixel_size * pixel_size;
         return source_in_peak + background_in_peak + dark_current * exp_time;
     }
@@ -100,8 +98,8 @@ public class PeakPixelFluxCalc {
     private void _initialize(List x_values, List y_values) throws Exception {
         if (x_values.size() != y_values.size()) {
             throw new Exception("Flux data invalid, " + x_values.size()
-                                + " x values " + y_values.size()
-                                + " y values");
+                    + " x values " + y_values.size()
+                    + " y values");
         }
         try {
             _data = new double[2][x_values.size()];
@@ -130,28 +128,38 @@ public class PeakPixelFluxCalc {
         return (slope * (x - x1) + y1);
     }
 
-    /** @return starting x value */
+    /**
+     * @return starting x value
+     */
     public double getStart() {
         return _data[0][0];
     }
 
-    /** @return ending x value */
+    /**
+     * @return ending x value
+     */
     public double getEnd() {
         return _data[0][_data[0].length - 1];
     }
 
-    /** Returns x value of specified data point. */
+    /**
+     * Returns x value of specified data point.
+     */
     public double getX(int index) {
         return _data[0][index];
     }
 
-    /** Returns y value of specified data point. */
+    /**
+     * Returns y value of specified data point.
+     */
     public double getY(int index) {
         return _data[1][index];
     }
 
 
-    /** Returns the index of the data point with largest x value less than x */
+    /**
+     * Returns the index of the data point with largest x value less than x
+     */
     public int getLowerIndex(double x) {
         // In a general spectrum we don't have an idea which bin a particular
         // x value is in.  The only solution is to search for it.

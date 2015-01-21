@@ -9,23 +9,20 @@
 //
 package edu.gemini.itc.trecs;
 
-import edu.gemini.itc.shared.TransmissionElement;
 import edu.gemini.itc.shared.Instrument;
 import edu.gemini.itc.shared.TextFileReader;
-import edu.gemini.itc.shared.ITCConstants;
-
-import java.util.List;
-import java.util.ArrayList;
-
-import java.text.ParseException;
+import edu.gemini.itc.shared.TransmissionElement;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This represents the transmission and properties of the Grating optics.
  */
 public class GratingOptics extends TransmissionElement {
-    
+
     private List _resolvingPowerArray;
     private List _dispersionArray;
     private List _blazeArray;
@@ -35,27 +32,27 @@ public class GratingOptics extends TransmissionElement {
     private double _centralWavelength;
     private int _detectorPixels;
     private int _spectralBinning;
-    
+
     public GratingOptics(String directory, String gratingName,
-    String stringSlitWidth,
-    double centralWavelength,
-    int detectorPixels,
-    int spectralBinning)
-    throws Exception {
-        
+                         String stringSlitWidth,
+                         double centralWavelength,
+                         int detectorPixels,
+                         int spectralBinning)
+            throws Exception {
+
         super(directory + TRecs.getPrefix() +
-        gratingName + Instrument.getSuffix());
-        
+                gratingName + Instrument.getSuffix());
+
         _spectralBinning = spectralBinning;
         _detectorPixels = detectorPixels;
         _centralWavelength = centralWavelength;
-        _gratingName=gratingName;
-        
+        _gratingName = gratingName;
+
         //New read of Grating Proporties
-        TextFileReader grismProperties = new TextFileReader(directory+
-        TRecs.getPrefix()+
-        "gratings"+
-        Instrument.getSuffix());
+        TextFileReader grismProperties = new TextFileReader(directory +
+                TRecs.getPrefix() +
+                "gratings" +
+                Instrument.getSuffix());
         _resolvingPowerArray = new ArrayList();
         _gratingNameArray = new ArrayList();
         _blazeArray = new ArrayList();
@@ -74,63 +71,64 @@ public class GratingOptics extends TransmissionElement {
         } catch (IOException e) {
             // normal eof
         }
-        
+
     }
-    
-    
+
+
     public double getStart() {
-        return _centralWavelength -(
-        (((Double)_dispersionArray.get(getGratingNumber())).doubleValue())
-        *_detectorPixels/2)*_spectralBinning;
+        return _centralWavelength - (
+                (((Double) _dispersionArray.get(getGratingNumber())).doubleValue())
+                        * _detectorPixels / 2) * _spectralBinning;
     }
-    
+
     public double getEnd() {
-        return _centralWavelength +(
-        (((Double)_dispersionArray.get(getGratingNumber())).doubleValue())
-        *_detectorPixels/2)*_spectralBinning;
+        return _centralWavelength + (
+                (((Double) _dispersionArray.get(getGratingNumber())).doubleValue())
+                        * _detectorPixels / 2) * _spectralBinning;
     }
-    
+
     public double getEffectiveWavelength() {
         return _centralWavelength;
     }
-    
+
     public double getPixelWidth() {
-        return ((Double)_dispersionArray.get(getGratingNumber())).doubleValue()*_spectralBinning;
-        
+        return ((Double) _dispersionArray.get(getGratingNumber())).doubleValue() * _spectralBinning;
+
     }
-    
+
     public int getGratingNumber() {
-        int grating_num=0;
-        
-        if (_gratingName.equals(TRecsParameters.LORES10_G5401)){
-            grating_num= TRecsParameters.LORES10;
-        } else if (_gratingName.equals(TRecsParameters.LORES20_G5402)){
-            grating_num= TRecsParameters.LORES20;
-        } else if (_gratingName.equals(TRecsParameters.HIRES10_G5403)){
-            grating_num= TRecsParameters.HIRES10;
+        int grating_num = 0;
+
+        if (_gratingName.equals(TRecsParameters.LORES10_G5401)) {
+            grating_num = TRecsParameters.LORES10;
+        } else if (_gratingName.equals(TRecsParameters.LORES20_G5402)) {
+            grating_num = TRecsParameters.LORES20;
+        } else if (_gratingName.equals(TRecsParameters.HIRES10_G5403)) {
+            grating_num = TRecsParameters.HIRES10;
         }
         return grating_num;
     }
-    
-    public double getGratingResolution(){
-        return ((Integer)_resolvingPowerArray.get(getGratingNumber())).intValue();
+
+    public double getGratingResolution() {
+        return ((Integer) _resolvingPowerArray.get(getGratingNumber())).intValue();
     }
-    
+
     public double getGratingBlaze() {
-        return ((Integer)_blazeArray.get(getGratingNumber())).intValue();
+        return ((Integer) _blazeArray.get(getGratingNumber())).intValue();
     }
-    
+
     public double getGratingDispersion_nm() {
-        return ((Double)_resolutionArray.get(getGratingNumber())).doubleValue();
+        return ((Double) _resolutionArray.get(getGratingNumber())).doubleValue();
     }
-    
+
     public double getGratingDispersion_nmppix() {
-        return ((Double)_dispersionArray.get(getGratingNumber())).doubleValue()
-        *_spectralBinning;
+        return ((Double) _dispersionArray.get(getGratingNumber())).doubleValue()
+                * _spectralBinning;
     }
-    
-    
+
+
     public String toString() {
-        return "Grating Optics: " + _gratingName;}
-    
+        return "Grating Optics: " + _gratingName;
+    }
+
 }

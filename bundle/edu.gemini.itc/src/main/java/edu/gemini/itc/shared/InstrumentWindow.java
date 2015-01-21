@@ -9,11 +9,9 @@
 package edu.gemini.itc.shared;
 
 
-import edu.gemini.itc.shared.TransmissionElement;
-
 /**
- *  This is just a basic transmission element for user selectable windows
- *  on instruments.
+ * This is just a basic transmission element for user selectable windows
+ * on instruments.
  */
 
 public class InstrumentWindow extends TransmissionElement {

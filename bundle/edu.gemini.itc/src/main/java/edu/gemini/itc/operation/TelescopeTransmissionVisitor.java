@@ -18,7 +18,8 @@ public final class TelescopeTransmissionVisitor {
 
     private static final String _COATING = "_coating_";
 
-    private TelescopeTransmissionVisitor() {}
+    private TelescopeTransmissionVisitor() {
+    }
 
     /**
      * The TelTrans constructor takes two arguments: one detailing what

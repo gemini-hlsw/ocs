@@ -10,14 +10,8 @@
 //
 package edu.gemini.itc.gsaoi;
 
-import edu.gemini.itc.shared.Instrument;
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.Filter;
-import edu.gemini.itc.shared.Detector;
-import edu.gemini.itc.shared.FixedOptics;
 import edu.gemini.itc.parameters.ObservationDetailsParameters;
-
-import java.util.Iterator;
+import edu.gemini.itc.shared.*;
 
 /**
  * Gsaoi specification class

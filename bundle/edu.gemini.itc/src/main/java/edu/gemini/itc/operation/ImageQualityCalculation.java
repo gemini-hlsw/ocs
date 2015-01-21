@@ -8,16 +8,15 @@
 
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.shared.FormatStringWriter;
-
 import edu.gemini.itc.shared.ArraySpectrum;
 import edu.gemini.itc.shared.DefaultArraySpectrum;
+import edu.gemini.itc.shared.FormatStringWriter;
 import edu.gemini.itc.shared.ITCConstants;
 
 public class ImageQualityCalculation implements ImageQualityCalculatable {
 
-    String wfs,imageQuality, im_qual_model_file;
-    double airmass,effectiveWavelength, im_qual;
+    String wfs, imageQuality, im_qual_model_file;
+    double airmass, effectiveWavelength, im_qual;
 
     public ImageQualityCalculation(String wfs,
                                    int imageQuality,

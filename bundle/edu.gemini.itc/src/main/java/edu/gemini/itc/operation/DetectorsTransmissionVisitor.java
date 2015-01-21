@@ -9,16 +9,11 @@
 //
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.shared.SampledSpectrumVisitor;
-import edu.gemini.itc.shared.SEDFactory;
-import edu.gemini.itc.shared.VisitableSampledSpectrum;
-import edu.gemini.itc.shared.SampledSpectrum;
-import edu.gemini.itc.shared.TextFileReader;
-
-import java.util.List;
-import java.util.ArrayList;
+import edu.gemini.itc.shared.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * For Gmos Spectroscopy the spectrum will be spread across 3 CCD's
@@ -107,7 +102,7 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
      * separated by gaps).
      */
     public int getDetectorCcdStartIndex(int detectorIndex) {
-        return detectorCcdIndexes.get(detectorIndex*2) / spectralBinning;
+        return detectorCcdIndexes.get(detectorIndex * 2) / spectralBinning;
     }
 
     /**
@@ -117,9 +112,9 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
     public int getDetectorCcdEndIndex(int detectorIndex, int detectorCount) {
         if (detectorCount == 1) {
             // REL-478: For EEV use only one with the whole range
-            return detectorCcdIndexes.get(detectorCcdIndexes.size()-1) / spectralBinning;
+            return detectorCcdIndexes.get(detectorCcdIndexes.size() - 1) / spectralBinning;
         }
-        return detectorCcdIndexes.get(detectorIndex*2+1) / spectralBinning;
+        return detectorCcdIndexes.get(detectorIndex * 2 + 1) / spectralBinning;
     }
 
     /**

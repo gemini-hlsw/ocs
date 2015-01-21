@@ -48,7 +48,7 @@ public class GrismOptics extends TransmissionElement {
     private final double _slitSize;
 
     public GrismOptics(String directory, String grismName, double slitSize, String filterBand) throws Exception {
-       super(directory + getGrismDataFileName(grismName, filterBand));
+        super(directory + getGrismDataFileName(grismName, filterBand));
 
         _grismName = grismName;
         _coverageDataName = buildCoverageDataName(grismName, filterBand);

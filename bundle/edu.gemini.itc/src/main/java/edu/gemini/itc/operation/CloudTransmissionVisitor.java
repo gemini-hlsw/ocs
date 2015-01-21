@@ -10,7 +10,8 @@ import edu.gemini.itc.shared.TransmissionElement;
 public final class CloudTransmissionVisitor {
     private static final String FILENAME = "cloud_trans";
 
-    private CloudTransmissionVisitor() {}
+    private CloudTransmissionVisitor() {
+    }
 
     /**
      * Constructs transmission visitor for clouds.

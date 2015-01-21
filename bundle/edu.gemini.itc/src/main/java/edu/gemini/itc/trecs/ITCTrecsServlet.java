@@ -10,15 +10,12 @@
 
 package edu.gemini.itc.trecs;
 
-import java.io.PrintWriter;
-
-import javax.servlet.http.HttpServletRequest;
-
-import java.util.Enumeration;
-
+import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCServlet;
 import edu.gemini.itc.shared.Recipe;
-import edu.gemini.itc.shared.ITCMultiPartParser;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.PrintWriter;
 
 /**
  * This servlet accepts form data from the ITC html document.
@@ -35,50 +32,63 @@ import edu.gemini.itc.shared.ITCMultiPartParser;
  * rather than calling the methods directly.
  */
 public final class ITCTrecsServlet
-   extends ITCServlet 
-{
-   public static final String VERSION="4.0";
-   public static final String TITLE="Gemini Integration Time Calculator";
-   public static final String INSTRUMENT = "T-ReCS";
+        extends ITCServlet {
+    public static final String VERSION = "4.0";
+    public static final String TITLE = "Gemini Integration Time Calculator";
+    public static final String INSTRUMENT = "T-ReCS";
 
-   public ITCTrecsServlet () {
-	   super ();
-   }
-   
-   /** Returns a title */
-   public String getTitle() { return TITLE; }
-   /** Returns a version of this servlet */
-   public String getVersion() { return VERSION; }
-   /** Returns the Instrument name*/
-   public String getInst() {return INSTRUMENT; }
+    public ITCTrecsServlet() {
+        super();
+    }
 
-   /**
-    * Describes the purpose of the servlet.
-    * Used by Java Web Server Administration Tool.
-    */
-   public String getServletInfo()
-   {
-      return getTitle() + " " + getVersion() + " - ITCTrecsServlet accepts form data and performs ITC calculation for T-Recs.";
-   }
+    /**
+     * Returns a title
+     */
+    public String getTitle() {
+        return TITLE;
+    }
 
-   /** Supply the body content for the html document. */
-   public void writeOutput(HttpServletRequest r, PrintWriter out)
-      throws Exception
-   {
-      // Construct recipe from the request.
-      // Pass in same PrintWriter instead of getting another one from
-      // the servlet request in case you get a different one each
-      // time.  HTML document was already started with one PrintWriter.
-	   out.println("<a href = \"http://www.gemini.edu/sciops/instruments/integration-time-calculators/itc-help\"> Click here for help with the results page.</a>");
+    /**
+     * Returns a version of this servlet
+     */
+    public String getVersion() {
+        return VERSION;
+    }
 
-	  Recipe recipe;
+    /**
+     * Returns the Instrument name
+     */
+    public String getInst() {
+        return INSTRUMENT;
+    }
 
-	  if (r.getContentType().startsWith("multipart/form-data")) {
-	  	recipe = new TRecsRecipe(new ITCMultiPartParser(r, MAX_CONTENT_LENGTH),out);
-  	  } else
-      	recipe = new TRecsRecipe(r, out); // parses form data
+    /**
+     * Describes the purpose of the servlet.
+     * Used by Java Web Server Administration Tool.
+     */
+    public String getServletInfo() {
+        return getTitle() + " " + getVersion() + " - ITCTrecsServlet accepts form data and performs ITC calculation for T-Recs.";
+    }
 
-      // Perform calculation, write the output to the web page.
-      recipe.writeOutput();
-   }
+    /**
+     * Supply the body content for the html document.
+     */
+    public void writeOutput(HttpServletRequest r, PrintWriter out)
+            throws Exception {
+        // Construct recipe from the request.
+        // Pass in same PrintWriter instead of getting another one from
+        // the servlet request in case you get a different one each
+        // time.  HTML document was already started with one PrintWriter.
+        out.println("<a href = \"http://www.gemini.edu/sciops/instruments/integration-time-calculators/itc-help\"> Click here for help with the results page.</a>");
+
+        Recipe recipe;
+
+        if (r.getContentType().startsWith("multipart/form-data")) {
+            recipe = new TRecsRecipe(new ITCMultiPartParser(r, MAX_CONTENT_LENGTH), out);
+        } else
+            recipe = new TRecsRecipe(r, out); // parses form data
+
+        // Perform calculation, write the output to the web page.
+        recipe.writeOutput();
+    }
 }
