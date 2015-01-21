@@ -1,6 +1,6 @@
 package edu.gemini.ags.gems.mascot
 
-import edu.gemini.catalog.api.{ppmxl, MagnitudeConstraints, RadiusConstraint, CatalogQuery}
+import edu.gemini.catalog.api.{ppmxl, RadiusConstraint, CatalogQuery}
 import edu.gemini.catalog.votable.VoTableClient
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
@@ -10,13 +10,9 @@ import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.telescope.IssPort
 import edu.gemini.spModel.obs.context.ObsContext
-import jsky.catalog.skycat.SkycatConfigFile
-import jsky.coords.{CoordinateRadius, WorldCoords}
-import jsky.catalog.{TableQueryResult, BasicQueryArgs}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.shared.util.immutable.{None => JNone}
 import org.specs2.mutable.Specification
-import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
@@ -210,9 +206,6 @@ class MascotGuideStarSpec extends Specification {
     SiderealTarget("142815509", Coordinates(RightAscension.fromAngle(Angle.fromDegrees(49.964692000000014)), Declination.fromAngle(Angle.fromDegrees(41.525802999999996)).getOrElse(Declination.zero)), Some(ProperMotion(Angle.fromDegrees(359.99999999999864), Angle.fromDegrees(359.99999999999835), Epoch(2000.0), None, None)), List(Magnitude(Double.NaN, MagnitudeBand.B, None, MagnitudeSystem.VEGA), Magnitude(14.713, MagnitudeBand.H, Some(0.08), MagnitudeSystem.VEGA), Magnitude(Double.NaN, MagnitudeBand.I, None, MagnitudeSystem.VEGA), Magnitude(15.287, MagnitudeBand.J, Some(0.067), MagnitudeSystem.VEGA), Magnitude(14.453, MagnitudeBand.K, Some(0.085), MagnitudeSystem.VEGA), Magnitude(18.01, MagnitudeBand.R, None, MagnitudeSystem.VEGA)), None),
     SiderealTarget("-854279698", Coordinates(RightAscension.fromAngle(Angle.fromDegrees(49.965525000000014)), Declination.fromAngle(Angle.fromDegrees(41.52722299999999)).getOrElse(Declination.zero)), Some(ProperMotion(Angle.fromDegrees(7.958078640513122E-13), Angle.fromDegrees(6.991740519879386E-12), Epoch(2000.0), None, None)), List(Magnitude(Double.NaN, MagnitudeBand.B, None, MagnitudeSystem.VEGA), Magnitude(Double.NaN, MagnitudeBand.H, Some(Double.NaN), MagnitudeSystem.VEGA), Magnitude(17.87, MagnitudeBand.I, None, MagnitudeSystem.VEGA), Magnitude(Double.NaN, MagnitudeBand.J, Some(Double.NaN), MagnitudeSystem.VEGA), Magnitude(Double.NaN, MagnitudeBand.K, Some(Double.NaN), MagnitudeSystem.VEGA), Magnitude(18.76, MagnitudeBand.R, None, MagnitudeSystem.VEGA)), None))
 
-  val url = getClass.getResource("/edu/gemini/spModel/gemsGuideStar/test.skycat.cfg")
-  SkycatConfigFile.setConfigFile(url)
-
   "Mascot" should {
     "find best asterism" in {
       val coordinates = Coordinates(RightAscension.fromAngle(Angle.fromHMS(3, 19, 48.2341).getOrElse(Angle.zero)), Declination.fromAngle(Angle.fromDMS(41, 30, 42.078).getOrElse(Angle.zero)).getOrElse(Declination.zero))
@@ -232,13 +225,6 @@ class MascotGuideStarSpec extends Specification {
       asterism should beEqualTo(remoteAsterism)
     }
     "find best asterism by query result" in {
-      val configFile = SkycatConfigFile.getConfigFile
-      val cat = configFile.getCatalog(MascotCat.defaultCatalogName)
-      val queryArgs = new BasicQueryArgs(cat)
-      val coords = new WorldCoords("03:19:48.2341", "+41:30:42.078")
-      val region = new CoordinateRadius(coords, MascotCat.defaultMinRadius, MascotCat.defaultMaxRadius)
-      queryArgs.setRegion(region)
-      queryArgs.setMaxRows(MascotCat.defaultMaxRows)
       val coordinates = Coordinates(RightAscension.fromAngle(Angle.fromHMS(3, 19, 48.2341).getOrElse(Angle.zero)), Declination.fromAngle(Angle.fromDMS(41, 30, 42.078).getOrElse(Angle.zero)).getOrElse(Declination.zero))
 
       val query = CatalogQuery(coordinates, RadiusConstraint.between(Angle.fromArcmin(MascotCat.defaultMinRadius), Angle.fromArcmin(MascotCat.defaultMaxRadius)), None, ppmxl)
