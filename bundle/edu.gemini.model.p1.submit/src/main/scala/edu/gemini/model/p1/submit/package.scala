@@ -22,9 +22,9 @@ package object submit {
     Exchange(KECK)               -> "http://phase1.gemini.edu/cgi-bin/gemini/keck/xmlbackend.cgi",
     Exchange(SUBARU)             -> "http://phase1.gemini.edu/cgi-bin/gemini/subaru/xmlbackend.cgi",
     Special(DEMO_SCIENCE)        -> "http://phase1.gemini.edu/cgi-bin/gemini/demo_science/xmlbackend.cgi",
-    Special(POOR_WEATHER)        -> "http://phase1.gemini.edu/cgi-bin/gemini/poor_weather_sv/xmlbackend.cgi",
+    Special(POOR_WEATHER)        -> "http://phase1.gemini.edu/cgi-bin/gemini/poor_weather/xmlbackend.cgi",
     Special(SYSTEM_VERIFICATION) -> "http://phase1.gemini.edu/cgi-bin/gemini/system_verification/xmlbackend.cgi",
-    Special(DIRECTORS_TIME)      -> "http://phase1.gemini.edu/cgi-bin/gemini/directors_time_sv/xmlbackend.cgi",
+    Special(DIRECTORS_TIME)      -> "http://phase1.gemini.edu/cgi-bin/gemini/directors_time/xmlbackend.cgi",
     LargeProgram                 -> "http://phase1.gemini.edu/cgi-bin/gemini/large_program/xmlbackend.cgi",
     FastTurnaroundProgram        -> "http://phase1.gemini.edu/cgi-bin/gemini/fast_turnaround/xmlbackend.cgi"
   )
