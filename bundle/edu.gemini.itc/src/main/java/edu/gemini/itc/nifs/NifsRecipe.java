@@ -235,12 +235,12 @@ public final class NifsRecipe extends RecipeBase {
         // inputs: SED, AIRMASS, sky emmision file, mirror configuration,
         // output: SED and sky background as they arrive at instruments
 
-        SampledSpectrumVisitor clouds = new CloudTransmissionVisitor(
+        SampledSpectrumVisitor clouds = CloudTransmissionVisitor.create(
                 _obsConditionParameters.getSkyTransparencyCloud());
         sed.accept(clouds);
 
 
-        SampledSpectrumVisitor water = new WaterTransmissionVisitor(
+        SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
                 _obsConditionParameters.getSkyTransparencyWater(),
                 _obsConditionParameters.getAirmass(),
                 "nearIR_trans_", ITCConstants.MAUNA_KEA, ITCConstants.NEAR_IR);
@@ -263,7 +263,7 @@ public final class NifsRecipe extends RecipeBase {
 
         // Apply telescope transmission to both sed and sky
         SampledSpectrumVisitor t =
-                new TelescopeTransmissionVisitor(_teleParameters.getMirrorCoating(),
+                TelescopeTransmissionVisitor.create(_teleParameters.getMirrorCoating(),
                         _teleParameters.getInstrumentPort());
         sed.accept(t);
         sky.accept(t);

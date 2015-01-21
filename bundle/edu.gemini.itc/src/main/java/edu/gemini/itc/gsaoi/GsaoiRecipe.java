@@ -274,11 +274,11 @@ public final class GsaoiRecipe extends RecipeBase {
                 _obsConditionParameters.getAirmass());
         // sed.accept(atmos);
 
-        SampledSpectrumVisitor clouds = new CloudTransmissionVisitor(
+        SampledSpectrumVisitor clouds = CloudTransmissionVisitor.create(
                 _obsConditionParameters.getSkyTransparencyCloud());
         sed.accept(clouds);
 
-        SampledSpectrumVisitor water = new WaterTransmissionVisitor(
+        SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
                 _obsConditionParameters.getSkyTransparencyWater(),
                 _obsConditionParameters.getAirmass(), "nearIR_trans_",
                 ITCConstants.CERRO_PACHON, ITCConstants.NEAR_IR);
@@ -294,9 +294,8 @@ public final class GsaoiRecipe extends RecipeBase {
                 + ITCConstants.DATA_SUFFIX, instrument.getSampling());
 
         // Apply telescope transmission
-        SampledSpectrumVisitor t = new TelescopeTransmissionVisitor(
+        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(
                 _teleParameters.getMirrorCoating(),
-//				_teleParameters.getInstrumentPort()
                 "side" // According to Rodrigo Carrasco, there is no difference, default to side-looking
         );
         sed.accept(t);

@@ -124,8 +124,13 @@ public class Flamingos2 extends Instrument {
 	private void addGrism(String filterBand) throws Exception {
 		if (_grism.equalsIgnoreCase(Flamingos2Parameters.NOGRISM))
 			return;
-		_grismOptics = new GrismOptics(getDirectory() + File.separator,
-				_grism, _slitSize * getPixelSize(), filterBand);
+
+		try {
+			_grismOptics = new GrismOptics(getDirectory() + File.separator, _grism, _slitSize * getPixelSize(), filterBand);
+		} catch (Exception e) {
+			throw new Exception("Grism/filter " + _grism + "+" + filterBand + " combination is not supported.");
+		}
+
 		addComponent(_grismOptics);
 	}
 

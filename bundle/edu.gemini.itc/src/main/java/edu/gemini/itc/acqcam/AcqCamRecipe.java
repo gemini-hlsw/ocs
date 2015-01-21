@@ -225,12 +225,12 @@ public final class AcqCamRecipe extends RecipeBase {
                 new AtmosphereVisitor(_obsConditionParameters.getAirmass());
         //sed.accept(atmos);
         
-        SampledSpectrumVisitor clouds = new CloudTransmissionVisitor(
+        SampledSpectrumVisitor clouds = CloudTransmissionVisitor.create(
                 _obsConditionParameters.getSkyTransparencyCloud());
         sed.accept(clouds);
         
         
-        SampledSpectrumVisitor water = new WaterTransmissionVisitor(
+        SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
                 _obsConditionParameters.getSkyTransparencyWater(),
                 _obsConditionParameters.getAirmass(),
                 "skytrans_", ITCConstants.MAUNA_KEA, ITCConstants.VISIBLE);
@@ -258,7 +258,7 @@ public final class AcqCamRecipe extends RecipeBase {
         
         // Apply telescope transmission
         SampledSpectrumVisitor t =
-                new TelescopeTransmissionVisitor(_teleParameters.getMirrorCoating(),
+                TelescopeTransmissionVisitor.create(_teleParameters.getMirrorCoating(),
                 _teleParameters.getInstrumentPort());
         
         sed.accept(t);

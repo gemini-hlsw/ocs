@@ -46,21 +46,6 @@ public class TextFileReader {
     private boolean _eof = false;
 
     /**
-     * Constructs TextFileReader on a stream.
-     */
-    public TextFileReader(InputStream input) {
-        _br = new BufferedReader(new InputStreamReader(input));
-        try {
-            _readLine();  // prime the pump
-        } catch (Exception e) {
-        }
-        try {
-            _readLine();  // prime the pump
-        } catch (Exception e) {
-        }
-    }
-
-    /**
      * Constructs TextFileReader on a reader.
      */
     public TextFileReader(Reader reader) {
