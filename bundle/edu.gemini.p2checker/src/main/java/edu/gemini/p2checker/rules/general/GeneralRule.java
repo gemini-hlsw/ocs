@@ -293,7 +293,7 @@ public class GeneralRule implements IRule {
             if (base.getTarget().getTag() != guide.getTarget().getTag()) return false;
             if (base.getTrackingEpoch() != guide.getTrackingEpoch()) return false;
             if (base.getTrackingParallax() !=  guide.getTrackingParallax()) return false;
-            if (base.getTrackingRadialVelocity() == guide.getTrackingRadialVelocity()) return false;
+            if (base.getTrackingRadialVelocity() != guide.getTrackingRadialVelocity()) return false;
             //everything is the same
             return true;
         }
