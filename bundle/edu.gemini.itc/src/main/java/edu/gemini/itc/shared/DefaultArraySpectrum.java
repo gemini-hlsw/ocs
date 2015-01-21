@@ -279,52 +279,30 @@ public class DefaultArraySpectrum implements ArraySpectrum {
      * Returns the sum of all the y values in the entire spectrum.
      */
     public double getSum() {
-        double sum = 0;
-        try {
-            sum = getSum(0, getLength() - 1);
-        } catch (Exception e) {
-        }
-        return sum;
+        return getSum(0, getLength() - 1);
     }
 
     /**
      * Returns the integral of entire spectrum.
      */
     public double getIntegral() {
-        double integral = 0;
-        try {
-            integral = getIntegral(getStart(), getEnd());
-        } catch (Exception e) {
-        }
-        return integral;
+        return getIntegral(getStart(), getEnd());
     }
 
     /**
      * Returns the average of all the y values in the entire spectrum
      */
     public double getAverage() {
-        double average = 0;
-        try {
-            average = getAverage(getStart(), getEnd());
-        } catch (Exception e) {
-        }
-        return average;
+        return getAverage(getStart(), getEnd());
     }
 
     /**
      * Returns the sum of y values in the spectrum in
      * the specified index range.
-     *
-     * @throws Exception If either limit is out of range.
      */
-    public double getSum(int startIndex, int endIndex) throws Exception {
-        if (startIndex < 0 || startIndex >= getLength() ||
-                endIndex < 0 || endIndex >= getLength()) {
-            throw new Exception("Sum out of bounds: summing " +
-                    startIndex + " to " + endIndex +
-                    " for spectra from " +
-                    +getStart() + " to " + getEnd());
-        }
+    public double getSum(int startIndex, int endIndex) {
+        assert startIndex >= 0 && startIndex < getLength();
+        assert endIndex   >= 0 && endIndex   < getLength();
 
         if (startIndex > endIndex) {
             int temp = startIndex;
@@ -342,16 +320,10 @@ public class DefaultArraySpectrum implements ArraySpectrum {
     /**
      * Returns the sum of y values in the spectrum in
      * the specified range.
-     *
-     * @throws Exception If either limit is out of range.
      */
-    public double getSum(double x_start, double x_end) throws Exception {
-        if (x_start < getStart() || x_start > getEnd() ||
-                x_end < getStart() || x_end > getEnd()) {
-            throw new Exception("Sum out of bounds: summing " +
-                    x_start + " to " + x_end + " for spectra from " +
-                    +getStart() + " to " + getEnd());
-        }
+    public double getSum(double x_start, double x_end) {
+        assert x_start >= getStart() && x_start <= getEnd();
+        assert x_end   >= getStart() && x_end   <= getEnd();
 
         if (x_start > x_end) {
             double temp = x_start;
@@ -369,16 +341,10 @@ public class DefaultArraySpectrum implements ArraySpectrum {
     /**
      * Returns the integral of y values in the spectrum in
      * the specified range.
-     *
-     * @throws Exception If either limit is out of range.
      */
-    public double getIntegral(double x_start, double x_end) throws Exception {
-        if (x_start < getStart() || x_start > getEnd() ||
-                x_end < getStart() || x_end > getEnd()) {
-            throw new Exception("Integral out of bounds: integrating " +
-                    x_start + " to " + x_end + " for spectra from " +
-                    +getStart() + " to " + getEnd());
-        }
+    public double getIntegral(double x_start, double x_end) {
+        assert x_start >= getStart() && x_start <= getEnd();
+        assert x_end   >= getStart() && x_end   <= getEnd();
 
         boolean negative = false;
         if (x_start > x_end) {
@@ -393,7 +359,7 @@ public class DefaultArraySpectrum implements ArraySpectrum {
         // first and last trapezoid separately.
         double area = 0.0;
         int start_index, end_index;
-        double delta_x, delta_y, y_min, y1, y2, x1, x2;
+        double delta_x, y1, y2, x1, x2;
 
         x1 = x_start;
         start_index = getLowerIndex(x1);
@@ -420,16 +386,10 @@ public class DefaultArraySpectrum implements ArraySpectrum {
     /**
      * Returns the integral of values in the ArraySpectrum in the
      * specified range between specified indices.
-     *
-     * @throws Exception If either limit is out of range.
      */
-    public double getIntegral(int start_index, int end_index) throws Exception {
-        if (start_index < 0 || start_index >= getLength() ||
-                end_index < 0 || end_index >= getLength()) {
-            throw new Exception("Integral out of bounds: integrating from index "
-                    + start_index + " to " + end_index
-                    + " for spectra of length " + getLength());
-        }
+    public double getIntegral(int start_index, int end_index) {
+        assert start_index >= 0 && start_index < getLength();
+        assert end_index   >= 0 && end_index   < getLength();
 
         boolean negative = false;
         if (start_index > end_index) {
@@ -458,20 +418,16 @@ public class DefaultArraySpectrum implements ArraySpectrum {
     /**
      * Returns the average of values in the SampledSpectrum in
      * the specified range.
-     *
-     * @throws Exception If either limit is out of range.
      */
-    public double getAverage(double x_start, double x_end) throws Exception {
+    public double getAverage(double x_start, double x_end) {
         return getIntegral(x_start, x_end) / (x_end - x_start);
     }
 
     /**
      * Returns the average of values in the SampledSpectrum in
      * the specified range.
-     *
-     * @throws Exception If either limit is out of range.
      */
-    public double getAverage(int indexStart, int indexEnd) throws Exception {
+    public double getAverage(int indexStart, int indexEnd) {
         return getIntegral(indexStart, indexEnd) /
                 (getX(indexEnd) - getX(indexStart));
     }

@@ -57,10 +57,8 @@ public interface ArraySpectrum extends Spectrum, Cloneable {
     /**
      * Returns the sum of values in the ArraySpectrum in
      * the specified range.
-     *
-     * @throws Exception If either limit is out of range.
      */
-    double getSum(int indexStart, int indexEnd) throws Exception;
+    double getSum(int indexStart, int indexEnd);
 
     /**
      * This returns a 2d array of the SED data used to chart the SED
