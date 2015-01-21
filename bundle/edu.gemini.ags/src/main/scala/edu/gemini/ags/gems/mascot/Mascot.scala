@@ -1,5 +1,7 @@
 package edu.gemini.ags.gems.mascot
 
+import java.util.logging.Logger
+
 import edu.gemini.ags.gems.mascot.util.AllPairsAndTriples
 import edu.gemini.ags.gems.mascot.util.YUtils._
 
@@ -14,18 +16,18 @@ import Scalaz._
 /**
  */
 object Mascot {
+  val Log = Logger.getLogger(Mascot.getClass.getSimpleName)
 
   // Default star filter
   val defaultFilter = (s: Star) => true
 
   // Default progress callback, called for each asterism as it is calculated
   val defaultProgress = (s: Strehl, count: Int, total: Int) => {
-    print("Asterism #" + count)
+    Log.info(s"Asterism #$count")
     for (i <- 0 until s.stars.size) {
-      print(", [%.1f,%.1f]" format (s.stars(i).x, s.stars(i).y))
+      Log.finer(s"[${s.stars(i).x}%.1f,${s.stars(i).y}%.1f]")
     }
-    println("\nStrehl over %.1f\": avg=%.1f  rms=%.1f  min=%.1f  max=%.1f\n" format (
-      s.halffield * 2, s.avgstrehl * 100, s.rmsstrehl * 100, s.minstrehl * 100, s.maxstrehl * 100))
+    Log.info(f"Strehl over ${s.halffield * 2}%.1f: avg=${s.avgstrehl * 100}%.1f  rms=${s.rmsstrehl * 100}%.1f  min=${s.minstrehl * 100}%.1f  max=${s.maxstrehl * 100}%.1f")
   }
 
   // The default mag bandpass
@@ -46,7 +48,7 @@ object Mascot {
   def computeStrehl(bandpass: MagnitudeBand, factor: Double, n1: Star, n2: Option[Star] = None, n3: Option[Star] = None): Option[Strehl] = {
     n2 match {
       case Some(v2) if !doesItFit(n1, v2, n3) =>
-        println("Skipped. Does not fit.")
+        Log.warning("Skipped. Does not fit.")
         None
       case _                                  =>
         //          sdata = mascot_compute_strehl();
@@ -83,7 +85,7 @@ object Mascot {
     val total = trips.length + pairs.length + ns
     var result = List[Strehl]()
 
-    println("XXX Mascot.findBestAsterism: input stars: " + ns + ", total asterisms: " + total)
+    Log.info(s"Mascot.findBestAsterism: input stars: $ns, total asterisms: $total")
 
     if (ns >= 3) {
       for ((n1, n2, n3) <- trips) {
@@ -202,7 +204,7 @@ object Mascot {
     } while (valid.sum > nstar_limit)
     crowd_rad -= 2
 
-    println("Select stars: found optimum crowding radius=%d\"\n" format crowd_rad)
+    Log.info(s"Select stars: found optimum crowding radius=$crowd_rad")
 
     starList.zipWithIndex collect {
       case (s, i) if valid(i) != 0.0 => s

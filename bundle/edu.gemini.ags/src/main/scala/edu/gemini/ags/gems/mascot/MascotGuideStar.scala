@@ -1,17 +1,17 @@
 package edu.gemini.ags.gems.mascot
 
+import java.util.logging.Logger
+
 import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.core.Target.SiderealTarget
-import jsky.coords.WorldCoords
 import edu.gemini.spModel.obs.context.ObsContext
-import edu.gemini.spModel.target.system.CoordinateParam.Units
-import jsky.catalog.QueryArgs
 import edu.gemini.ags.impl._
 
 /**
  * Provides methods to find the best ODGW or CWFS guide stars using the Mascot Strehl algorithm
  */
 object MascotGuideStar {
+  val Log = Logger.getLogger(MascotGuideStar.getClass.getSimpleName)
 
   /**Type for CWFS guide stars */
   val CWFS = new CwfsGuideStar
@@ -182,10 +182,6 @@ object MascotGuideStar {
   : List[(Double, Double, Double)] = {
     def posAngles = positionAnglesToTry(pa, posAngleTolerance)
     def posList = basePositionsToTry(ra, dec, basePosTolerance)
-
-    println("XXX posAngles = " + posAngles)
-    println("XXX basePos = " + ((ra, dec)))
-    println("XXX posList = " + posList)
 
     val l = for (pa <- posAngles; pos <- posList) yield (pa, pos._1, pos._2)
     l.toList

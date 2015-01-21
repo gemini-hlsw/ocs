@@ -1,17 +1,17 @@
 package edu.gemini.ags.gems.mascot
 
+import java.util.logging.Logger
+
 import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.core.Target.SiderealTarget
-import jsky.coords.WorldCoords
-import edu.gemini.ags.impl._
-import scala.collection.JavaConversions._
-import collection.JavaConversions
+import scala.collection.JavaConverters._
 import java.util.concurrent.CancellationException
 
 /**
  *
  */
 object MascotCat {
+  val Log = Logger.getLogger(MascotCat.getClass.getSimpleName)
 
   // default catalog
   val defaultCatalogName = "PPMXL Catalog at CDS"
@@ -27,12 +27,11 @@ object MascotCat {
 
   // Default progress callback, called for each asterism as it is calculated
   val defaultProgress = (s: Strehl, count: Int, total: Int) => {
-    print("Asterism #" + count)
+    Log.info(s"Asterism #$count")
     for (i <- 0 until s.stars.size) {
-      print(", [%s]".format(new WorldCoords(s.stars(i).target.coordinates.ra.toAngle.toDegrees, s.stars(i).target.coordinates.dec.toAngle.toDegrees)))
+      Log.finer(s.stars(i).target.coordinates.toString)
     }
-    println("\nStrehl over %.1f\": avg=%.1f  rms=%.1f  min=%.1f  max=%.1f\n" format (
-      s.halffield * 2, s.avgstrehl * 100, s.rmsstrehl * 100, s.minstrehl * 100, s.maxstrehl * 100))
+    Log.info(f"Strehl over ${s.halffield * 2}%.1f: avg=${s.avgstrehl * 100}%.1f rms=${s.rmsstrehl * 100}%.1f min=${s.minstrehl * 100}%.1f max=${s.maxstrehl * 100}%.1f")
   }
 
   /**
@@ -80,10 +79,8 @@ object MascotCat {
         throw new CancellationException("Canceled")
       }
     }
-    val list = JavaConversions.asScalaBuffer(javaList).toList
-    val (starList, strehlList) = findBestAsterismInTargetsList(list, centerRA, centerDec, bandpass, factor, progress,
-      Mascot.defaultFilter)
-    new StrehlResults(starList, strehlList)
+    val (starList, strehlList) = findBestAsterismInTargetsList(javaList.asScala.toList, centerRA, centerDec, bandpass, factor, progress, Mascot.defaultFilter)
+    StrehlResults(starList.asJava, strehlList.asJava)
   }
 
 }
