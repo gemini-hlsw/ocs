@@ -2,7 +2,7 @@ package edu.gemini.ags.gems.mascot
 
 import java.util.logging.Logger
 
-import edu.gemini.spModel.core.MagnitudeBand
+import edu.gemini.spModel.core.{Coordinates, MagnitudeBand}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.ags.impl._
@@ -66,7 +66,7 @@ object MascotGuideStar {
       val basePos = ctx.getBaseCoordinates
       List((strehlList, ctx.getInstrument.getPosAngleDegrees, basePos.getRaDeg, basePos.getDecDeg))
     } else {
-      asterismFilter(ctx, guideStarFilter, posAngleTolerance, basePosTolerance, strehlList)
+      asterismFilter(ctx.getInstrument.getPosAngleDegrees, center, guideStarFilter, posAngleTolerance, basePosTolerance, strehlList)
     }
   }
 
@@ -74,7 +74,8 @@ object MascotGuideStar {
   /**
    * Filters the given list of asterisms (Strehl objects) using the given settings.
    *
-   * @param ctx the observation context
+   * @param posAngle the position angle
+   * @param center base coordinates
    * @param guideStarFilter a filter that returns true if the given star is acceptable
    * @param posAngleTolerance position angle can be +- this amount in degrees
    * @param basePosTolerance base position can be +- this amount in arcsec
@@ -84,33 +85,21 @@ object MascotGuideStar {
    * tuple contains only the asterisms that are valid for the guide star at that position angle
    * and ra,dec base position
    */
-  private def asterismFilter(ctx: ObsContext,
-                     guideStarFilter: Star => Boolean,
-                     posAngleTolerance: Double = 0.0,
-                     basePosTolerance: Double = 0.0,
-                     strehlList: List[Strehl]): List[(List[Strehl], Double, Double, Double)] = {
+  private def asterismFilter(posAngle: Double,
+                             center: Coordinates,
+                             guideStarFilter: Star => Boolean,
+                             posAngleTolerance: Double = 0.0,
+                             basePosTolerance: Double = 0.0,
+                             strehlList: List[Strehl]): List[(List[Strehl], Double, Double, Double)] = {
 
-    val inst = ctx.getInstrument
-    val savedPa = inst.getPosAngleDegrees
-    val savedRa = ctx.getTargets.getBase.getTarget.getRa.getAs(Units.DEGREES)
-    val savedDec = ctx.getTargets.getBase.getTarget.getDec.getAs(Units.DEGREES)
-    val settingsList = settingsToTry(savedPa, savedRa, savedDec, posAngleTolerance, basePosTolerance)
-    try {
-      val result = for ((pa, ra, dec) <- settingsList) yield {
-        inst.setPosAngle(pa)
-        ctx.getTargets.getBase.getTarget.getRa.setAs(ra, Units.DEGREES)
-        ctx.getTargets.getBase.getTarget.getDec.setAs(dec, Units.DEGREES)
-        // XXX TODO use a cache map in the filter?
-        val l = strehlList.filter(_.stars.forall(guideStarFilter))
-        (l, pa, ra, dec)
-      }
-      result.toList
-    }
-    finally {
-      // restore settings
-      inst.setPosAngleDegrees(savedPa)
-      ctx.getTargets.getBase.getTarget.getRa.setAs(savedRa, Units.DEGREES)
-      ctx.getTargets.getBase.getTarget.getDec.setAs(savedDec, Units.DEGREES)
+    val savedRa = center.ra.toAngle.toDegrees
+    val savedDec = center.dec.toDegrees
+    val settingsList = settingsToTry(posAngle, savedRa, savedDec, posAngleTolerance, basePosTolerance)
+
+    for ((pa, ra, dec) <- settingsList) yield {
+      // XXX TODO use a cache map in the filter?
+      val l = strehlList.filter(_.stars.forall(guideStarFilter))
+      (l, pa, ra, dec)
     }
   }
 
