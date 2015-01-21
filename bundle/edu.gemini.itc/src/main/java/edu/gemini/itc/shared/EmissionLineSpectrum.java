@@ -239,10 +239,8 @@ public class EmissionLineSpectrum implements VisitableSampledSpectrum {
     /**
      * Returns the sum of y values in the spectrum in
      * the specified index range.
-     *
-     * @throws Exception If either limit is out of range.
      */
-    public double getSum(int startIndex, int endIndex) throws Exception {
+    public double getSum(int startIndex, int endIndex) {
         return _spectrum.getSum(startIndex, endIndex);
     }
 
@@ -250,20 +248,16 @@ public class EmissionLineSpectrum implements VisitableSampledSpectrum {
     /**
      * Returns the sum of y values in the spectrum in
      * the specified range.
-     *
-     * @throws Exception If either limit is out of range.
      */
-    public double getSum(double x_start, double x_end) throws Exception {
+    public double getSum(double x_start, double x_end) {
         return _spectrum.getSum(x_start, x_end);
     }
 
     /**
      * Returns the average of values in the SampledSpectrum in
      * the specified range.
-     *
-     * @throws Exception If either limit is out of range.
      */
-    public double getAverage(double x_start, double x_end) throws Exception {
+    public double getAverage(double x_start, double x_end) {
         return _spectrum.getAverage(x_start, x_end);
 
     }

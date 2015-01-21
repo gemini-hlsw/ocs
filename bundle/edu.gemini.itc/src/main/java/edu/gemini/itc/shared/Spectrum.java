@@ -45,16 +45,12 @@ public interface Spectrum extends Cloneable {
     /**
      * Returns the Sum of y values in the spectrum in
      * the specified range.
-     *
-     * @throws Exception If either limit is out of range.
      */
-    double getSum(double x_start, double x_end) throws Exception;
+    double getSum(double x_start, double x_end);
 
     /**
      * Returns the average of values in the Spectrum in
      * the specified range.
-     *
-     * @throws Exception If either limit is out of range.
      */
-    double getAverage(double x_start, double x_end) throws Exception;
+    double getAverage(double x_start, double x_end);
 }
