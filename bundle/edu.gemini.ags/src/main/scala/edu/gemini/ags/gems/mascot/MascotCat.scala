@@ -1,6 +1,6 @@
 package edu.gemini.ags.gems.mascot
 
-import edu.gemini.spModel.core.MagnitudeBand
+import edu.gemini.spModel.core.{Coordinates, MagnitudeBand}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import jsky.coords.{WorldCoords, CoordinateRadius}
 import jsky.catalog.{TableQueryResult, QueryArgs, BasicQueryArgs}
@@ -122,6 +122,7 @@ object MascotCat {
     findBestAsterismInTargetsList(list.toList, center.getX, center.getY, bandpass, factor, progress, filter)
   }
 
+
   /**
    * Finds the best asterisms for the given list of SiderealTargets.
    * @param list the list of SiderealTargets to use
@@ -140,8 +141,7 @@ object MascotCat {
                        progress: (Strehl, Int, Int) => Unit = defaultProgress,
                        filter: Star => Boolean = Mascot.defaultFilter)
   : (List[Star], List[Strehl]) = {
-    val starList = for (skyObject <- list)
-      yield Star.makeStar(skyObject, centerRA, centerDec)
+    val starList = list.map(Star.makeStar(_, centerRA, centerDec))
     Mascot.findBestAsterism(starList.toList, bandpass, factor, progress, filter)
   }
 

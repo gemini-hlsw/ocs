@@ -1,11 +1,12 @@
 package edu.gemini.ags.gems.mascot
 
 import edu.gemini.spModel.core.MagnitudeBand
+import edu.gemini.spModel.core.Target.SiderealTarget
 import jsky.coords.WorldCoords
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.system.CoordinateParam.Units
-import jsky.catalog.{TableQueryResult, QueryArgs}
-
+import jsky.catalog.QueryArgs
+import edu.gemini.ags.impl._
 
 /**
  * Provides methods to find the best ODGW or CWFS guide stars using the Mascot Strehl algorithm
@@ -28,95 +29,6 @@ object MascotGuideStar {
   val numBasePositions = 5 * 5
 
   /**
-   * Finds the best ODGW or CWFS asterisms by querying the default PPMXL catalog for the given coordinates and radius.
-   *
-   * @param ctx the observation context
-   * @param guideStarType CWFS or ODGW, defined in this class
-   * @param posAngleTolerance allow the pos angle to change +- this amount in degrees
-   * @param basePosTolerance allow the base position to change +- this amount in arcsec
-   * @param bandpass the magnitude bandpass to use for the calculations
-   *        (may be null, then uses default for guide star type)
-   * @param magLimits a set of optional magnitude limits used to filter the star list
-   * @param catName the long name of the catalog to use for the query
-   * @param progress a function(Strehl, count, total) called for each asterism as it is calculated
-   *
-   * @return a list of tuples (strehlList, posAngle, ra, dec), where the strehl list in each
-   * tuple contains only the asterisms that are valid for the guide star at that position angle
-   * and ra,dec base position
-   */
-  protected [mascot] def findBestAsterism(ctx: ObsContext,
-                       guideStarType: GuideStarType,
-                       posAngleTolerance: Double = 0,
-                       basePosTolerance: Double = 0,
-                       bandpass: Option[MagnitudeBand] = None,
-                       factor: Double = 1.0,
-                       magLimits: MagLimits = defaultMagLimits,
-                       catName: String = MascotCat.defaultCatalogName,
-                       progress: (Strehl, Int, Int) => Unit = Mascot.defaultProgress)
-  : List[(List[Strehl], Double, Double, Double)] = {
-
-    val bp = bandpass.getOrElse(guideStarType.defaultBandpass)
-    val basePos = ctx.getBaseCoordinates
-    val coords = new WorldCoords(basePos.getRaDeg, basePos.getDecDeg)
-    val maxRadius = MascotCat.defaultMaxRadius + basePosTolerance / 60.0
-    val simple = posAngleTolerance == 0.0 && basePosTolerance == 0.0
-    // XXX TODO add cache map arg to filter below to avoid multiple calculations for the same star?
-    val guideStarFilter = guideStarType.filter(ctx, magLimits, _: Star)
-    // If no tolerances were given, wen can do more filtering up front
-    val filter = if (simple) guideStarFilter else magLimits.filter _
-    val (_, strehlList) = MascotCat.findBestAsterism(coords, catName, bp, factor, progress, filter, maxRadius)
-    if (simple) {
-      List((strehlList, ctx.getInstrument.getPosAngleDegrees, basePos.getRaDeg, basePos.getDecDeg))
-    } else {
-      asterismFilter(ctx, guideStarFilter, posAngleTolerance, basePosTolerance, strehlList)
-    }
-  }
-
-
-  /**
-   * Finds the best ODGW or CWFS asterisms for the results of the given catalog query.
-   *
-   * @param queryArgs describes a catalog query
-   * @param ctx the observation context
-   * @param guideStarType CWFS or ODGW, defined in this class
-   * @param posAngleTolerance allow the pos angle to change +- this amount in degrees
-   * @param basePosTolerance allow the base position to change +- this amount in arcsec
-   * @param bandpass the magnitude bandpass to use for the calculations
-   *        (may be null, then uses default for guide star type)
-   * @param factor multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
-   * @param magLimits a set of optional magnitude limits used to filter the star list
-   * @param progress a function(strehl, count, total) called for each asterism as it is calculated
-   *
-   * @return a list of tuples (strehlList, posAngle, ra, dec), where the strehl list in each
-   * tuple contains only the asterisms that are valid for the guide star at that position angle
-   * and ra,dec base position
-   */
-  private def findBestAsterismByQueryArgs(queryArgs: QueryArgs,
-                                  ctx: ObsContext,
-                                  guideStarType: GuideStarType,
-                                  posAngleTolerance: Double = 0,
-                                  basePosTolerance: Double = 0,
-                                  bandpass: Option[MagnitudeBand] = Some(Mascot.defaultBandpass),
-                                  factor: Double = 1.0,
-                                  magLimits: MagLimits = defaultMagLimits,
-                                  progress: (Strehl, Int, Int) => Unit = Mascot.defaultProgress)
-  : List[(List[Strehl], Double, Double, Double)] = {
-
-    val bp = bandpass.getOrElse(guideStarType.defaultBandpass)
-    val simple = posAngleTolerance == 0.0 && basePosTolerance == 0.0
-    val guideStarFilter = guideStarType.filter(ctx, magLimits, _: Star)
-    // If no tolerances were given, wen can do more filtering up front
-    val filter = if (simple) guideStarFilter else magLimits.filter _
-    val (_, strehlList) = MascotCat.findBestAsterismByQueryArgs(queryArgs, bp, factor, progress, filter)
-    if (simple) {
-      val basePos = ctx.getBaseCoordinates
-      List((strehlList, ctx.getInstrument.getPosAngleDegrees, basePos.getRaDeg, basePos.getDecDeg))
-    } else {
-      asterismFilter(ctx, guideStarFilter, posAngleTolerance, basePosTolerance, strehlList)
-    }
-  }
-
-  /**
    * Finds the best ODGW or CWFS asterisms for the given table of stars.
    *
    * @param ctx the observation context
@@ -133,7 +45,7 @@ object MascotGuideStar {
    * tuple contains only the asterisms that are valid for the guide star at that position angle
    * and ra,dec base position
    */
-  protected [mascot] def findBestAsterismInQueryResult(queryResult: TableQueryResult,
+  protected [mascot] def findBestAsterismInQueryResult(queryResult: List[SiderealTarget],
                                     ctx: ObsContext,
                                     guideStarType: GuideStarType,
                                     posAngleTolerance: Double = 0,
@@ -143,13 +55,13 @@ object MascotGuideStar {
                                     magLimits: MagLimits = defaultMagLimits,
                                     progress: (Strehl, Int, Int) => Unit = Mascot.defaultProgress)
   : List[(List[Strehl], Double, Double, Double)] = {
-
+    val center = ctx.getBaseCoordinates.toNewModel
     val bp = bandpass.getOrElse(guideStarType.defaultBandpass)
     val simple = posAngleTolerance == 0.0 && basePosTolerance == 0.0
     val guideStarFilter = guideStarType.filter(ctx, magLimits, _: Star)
     // If no tolerances were given, we can do more filtering up front
     val filter = if (simple) guideStarFilter else magLimits.filter _
-    val (_, strehlList) = MascotCat.findBestAsterismInQueryResult(queryResult, bp, factor, progress, filter)
+    val (_, strehlList) = MascotCat.findBestAsterismInTargetsList(queryResult, center.ra.toAngle.toDegrees, center.dec.toAngle.toDegrees, bp, factor, progress, filter)
     if (simple) {
       val basePos = ctx.getBaseCoordinates
       List((strehlList, ctx.getInstrument.getPosAngleDegrees, basePos.getRaDeg, basePos.getDecDeg))
@@ -251,7 +163,6 @@ object MascotGuideStar {
     val dy = math.abs(y2 - y1)
     math.sqrt(dx * dx + dy * dy)
   }
-
 
   /**
    * Returns a list of tuples (pa, ra, dec) for the different position angles and
