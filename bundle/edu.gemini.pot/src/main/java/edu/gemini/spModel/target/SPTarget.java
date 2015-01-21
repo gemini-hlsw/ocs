@@ -270,21 +270,21 @@ public final class SPTarget extends WatchablePos {
 
     // ----- Specialized methods for an HmsDegTarget ----------
     /**
-     * Get the proper motion RA.
+     * Get the proper motion RA in mas/y
      */
-    public String getPropMotionRA() {
-        String res = "0";
+    public double getPropMotionRA() {
+        double res = 0.0;
         if (_target instanceof HmsDegTarget) {
             final HmsDegTarget t = (HmsDegTarget)_target;
-            res = t.getPM1().getStringValue();
+            res = t.getPM1().getValue();
         }
         return res;
     }
 
     /**
-     * Set the proper motion ra as a string.
+     * Set the proper motion ra in mas/y.
      */
-    public void setPropMotionRA(final String newValue) {
+    public void setPropMotionRA(final double newValue) {
         if (_target instanceof HmsDegTarget) {
             final HmsDegTarget t = (HmsDegTarget)_target;
             final PM1 pm1 = new PM1(newValue, Units.MILLI_ARCSECS_PER_YEAR);
@@ -296,21 +296,21 @@ public final class SPTarget extends WatchablePos {
     }
 
     /**
-     * Get the proper motion Dec.
+     * Get the proper motion Dec in mas/y
      */
-    public String getPropMotionDec() {
-        String res = "0";
+    public double getPropMotionDec() {
+        double res = 0.0;
         if (_target instanceof HmsDegTarget) {
             final HmsDegTarget t = (HmsDegTarget)_target;
-            res = t.getPM2().getStringValue();
+            res = t.getPM2().getValue();
         }
         return res;
     }
 
     /**
-     * Set the proper motion Dec as a string.
+     * Set the proper motion Dec in mas/y.
      */
-    public void setPropMotionDec(final String newValue) {
+    public void setPropMotionDec(final double newValue) {
         if (_target instanceof HmsDegTarget) {
             final HmsDegTarget t = (HmsDegTarget)_target;
             final PM2 pm2 = new PM2(newValue, Units.MILLI_ARCSECS_PER_YEAR);
@@ -322,35 +322,33 @@ public final class SPTarget extends WatchablePos {
     }
 
     /**
-     * Get the tracking epoch.
+     * Get the tracking epoch in julian years
      */
-    public String getTrackingEpoch() {
-        final String res = "2000";
+    public double getTrackingEpoch() {
+        final double res = 2000.0;
         final Epoch e = _target.getEpoch();
         if (e == null) return res;
 
-        return Double.toString(e.getValue());
+        return e.getValue();
     }
 
     /**
-     * Set the tracking epoch as a string.
+     * Set the tracking epoch as in julian years.
      */
-    public void setTrackingEpoch(final String trackEpoch) {
-        if (trackEpoch == null) return;
-
+    public void setTrackingEpoch(final double trackEpoch) {
         final Epoch e = new Epoch(trackEpoch);
         _target.setEpoch(e);
         _notifyOfGenericUpdate();
     }
 
     /**
-     * Get the tracking parallax.
+     * Get the tracking parallax in arcseconds
      */
-    public String getTrackingParallax() {
-        String res = "0";
+    public double getTrackingParallax() {
+        double res = 0.0;
         if (_target instanceof HmsDegTarget) {
             final HmsDegTarget t = (HmsDegTarget)_target;
-            res = t.getParallax().getStringValue();
+            res = t.getParallax().getValue();
         }
         return res;
     }
@@ -358,7 +356,7 @@ public final class SPTarget extends WatchablePos {
     /**
      * Set the tracking parallax as a string.
      */
-    public void setTrackingParallax(final String newValue) {
+    public void setTrackingParallax(final double newValue) {
         if (_target instanceof HmsDegTarget) {
             final HmsDegTarget t = (HmsDegTarget)_target;
             final Parallax p = new Parallax(newValue);
@@ -370,21 +368,21 @@ public final class SPTarget extends WatchablePos {
     }
 
     /**
-     * Get the tracking radial velocity.
+     * Get the tracking radial velocity in km/s
      */
-    public String getTrackingRadialVelocity() {
-        String res = "0";
+    public double getTrackingRadialVelocity() {
+        double res = 0.0;
         if (_target instanceof HmsDegTarget) {
             final HmsDegTarget t = (HmsDegTarget)_target;
-            res = t.getRV().getStringValue();
+            res = t.getRV().getValue();
         }
         return res;
     }
 
     /**
-     * Set the tracking radial velocity as a string.
+     * Set the tracking radial velocity in km/s.
      */
-    public void setTrackingRadialVelocity(final String newValue) {
+    public void setTrackingRadialVelocity(final double newValue) {
         if (_target instanceof HmsDegTarget) {
             final HmsDegTarget t = (HmsDegTarget)_target;
             final RV rv = new RV(newValue);

@@ -1212,13 +1212,13 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         if (pm >= 0) {
                             Double pm1 = (Double) tqr.getValueAt(0, pm);
                             Double pm2 = (Double) tqr.getValueAt(0, pm + 1);
-                            _curPos.setPropMotionRA(Double.toString(pm1));
-                            _curPos.setPropMotionDec(Double.toString(pm2));
+                            _curPos.setPropMotionRA(pm1);
+                            _curPos.setPropMotionDec(pm2);
                         } else {
                             //SCT-301: If not found, then we reset the value
                             //to zero. I hate these strings.
-                            _curPos.setPropMotionDec("0.0");
-                            _curPos.setPropMotionRA("0.0");
+                            _curPos.setPropMotionDec(0.0);
+                            _curPos.setPropMotionRA(0.0);
                         }
                         if (tqr.getCoordinates(0) instanceof WorldCoords) {
                             WorldCoords pos = (WorldCoords) tqr.getCoordinates(0);

@@ -126,34 +126,34 @@ final class TrackingEditor implements TelescopePosEditor {
             (Row) new NumberRow("Epoch", "years",
                     new InitFunction() {
                         @Override public void apply(SPTarget target, JFormattedTextField field) {
-                            field.setText(target.getTrackingEpoch());
+                            field.setText(Double.toString(target.getTrackingEpoch()));
                         }
                     },
                     new UpdateFunction() {
                         @Override public void apply(SPTarget target, Number d) {
-                            target.setTrackingEpoch(d==null ? "2000.0" : String.valueOf(d));
+                            target.setTrackingEpoch(d == null ? 2000.0 : d.doubleValue());
                         }
                     }),
             new NumberRow("Parallax", "arcsec",
                     new InitFunction() {
                         @Override public void apply(SPTarget target, JFormattedTextField field) {
-                            field.setText(target.getTrackingParallax());
+                            field.setText(Double.toString(target.getTrackingParallax()));
                         }
                     },
                     new UpdateFunction() {
                         @Override public void apply(SPTarget target, Number d) {
-                            target.setTrackingParallax(d==null ? "0.0" : String.valueOf(d));
+                            target.setTrackingParallax(d == null ? 0.0 : d.doubleValue());
                         }
                     }),
             new NumberRow("Radial Vel", "km/sec",
                     new InitFunction() {
                         @Override public void apply(SPTarget target, JFormattedTextField field) {
-                            field.setText(target.getTrackingRadialVelocity());
+                            field.setText(Double.toString(target.getTrackingRadialVelocity()));
                         }
                     },
                     new UpdateFunction() {
                         @Override public void apply(SPTarget target, Number d) {
-                            target.setTrackingRadialVelocity(d==null ? "0.0" : String.valueOf(d));
+                            target.setTrackingRadialVelocity(d == null ? 0.0 : d.doubleValue());
                         }
                     })
         );

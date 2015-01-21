@@ -273,14 +273,14 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
         set  = setTarget(_.getTarget.setC2(_))
       )
 
-      def pmField(getPM: SPTarget => String, setPM: (SPTarget, String) => Unit): BoundTextField[Double] =
+      def pmField(getPM: SPTarget => Double, setPM: (SPTarget, Double) => Unit): BoundTextField[Double] =
         new BoundTextField[Double](10)(
           read = _.toDouble,
           show = d => f"$d%.3f",
-          get  = tp => getPM(tp.getTarget).toDouble,
+          get  = tp => getPM(tp.getTarget),
           set  = (tp, pm) => {
             val newTarget = tp.getTarget
-            setPM(newTarget, pm.toString)
+            setPM(newTarget, pm)
             tp.copy(newTarget)
           }
         )

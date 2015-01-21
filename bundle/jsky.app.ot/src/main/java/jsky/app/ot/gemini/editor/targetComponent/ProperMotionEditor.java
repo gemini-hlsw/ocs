@@ -99,7 +99,7 @@ final class ProperMotionEditor implements TelescopePosEditor {
             try {
                 Number d = (Number) evt.getNewValue();
                 target.deleteWatcher(watcher);
-                target.setPropMotionRA(d == null ? "0.0" : String.valueOf(d));
+                target.setPropMotionRA(d == null ? 0.0 : d.doubleValue());
                 target.addWatcher(watcher);
             } catch (Exception ex) {
                 // do nothing
@@ -112,7 +112,7 @@ final class ProperMotionEditor implements TelescopePosEditor {
             try {
                 Number d = (Number) evt.getNewValue();
                 target.deleteWatcher(watcher);
-                target.setPropMotionDec(d == null ? "0.0" : String.valueOf(d));
+                target.setPropMotionDec(d == null ? 0 : d.doubleValue());
                 target.addWatcher(watcher);
             } catch (Exception ex) {
                 // do nothing
@@ -131,11 +131,11 @@ final class ProperMotionEditor implements TelescopePosEditor {
 
     private void reinit() {
         pmRa.removePropertyChangeListener("value", updatePmRaListener);
-        pmRa.setText(target == null ? "0.0" : target.getPropMotionRA());
+        pmRa.setText(target == null ? "0.0" : Double.toString(target.getPropMotionRA()));
         pmRa.addPropertyChangeListener("value", updatePmRaListener);
 
         pmDec.removePropertyChangeListener("value", updatePmDecListener);
-        pmDec.setText(target == null ? "0.0" : target.getPropMotionDec());
+        pmDec.setText(target == null ? "0.0" : Double.toString(target.getPropMotionDec()));
         pmDec.addPropertyChangeListener("value", updatePmDecListener);
     }
 }
