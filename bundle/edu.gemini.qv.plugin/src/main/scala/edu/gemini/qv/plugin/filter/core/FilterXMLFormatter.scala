@@ -119,6 +119,9 @@ object FilterXMLFormatter {
       case ConfigurationFilter(_, SPComponentType.INSTRUMENT_GNIRS, "Cameras", _, selection, _)          => <gnirscam>{makeEnumSetNode(selection)}</gnirscam>
       case ConfigurationFilter(_, SPComponentType.INSTRUMENT_GNIRS, "Focal Planes", _, selection, _)     => <gnirsfocplane>{makeEnumSetNode(selection)}</gnirsfocplane>
 
+      // GSAOI
+      case ConfigurationFilter(_, SPComponentType.INSTRUMENT_GSAOI, "Filters", _, selection, _)   => <gsaoifilt>{makeEnumSetNode(selection)}</gsaoifilt>
+
       // F2
       case ConfigurationFilter(_, SPComponentType.INSTRUMENT_FLAMINGOS2, "Dispersers", _, selection, _)   => <f2disp>{makeEnumSetNode(selection)}</f2disp>
       case ConfigurationFilter(_, SPComponentType.INSTRUMENT_FLAMINGOS2, "Filters", _, selection, _)   => <f2filt>{makeEnumSetNode(selection)}</f2filt>
