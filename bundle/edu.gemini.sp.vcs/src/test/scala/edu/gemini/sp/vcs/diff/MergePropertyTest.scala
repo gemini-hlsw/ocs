@@ -1,10 +1,13 @@
 package edu.gemini.sp.vcs.diff
 
-import edu.gemini.pot.sp.{ISPFactory, ISPProgram}
+import edu.gemini.pot.sp._
+import edu.gemini.pot.sp.version.{LifespanId, NodeVersions}
 import edu.gemini.pot.spdb.DBLocalDatabase
 import edu.gemini.spModel.rich.pot.sp._
 import org.scalacheck.Prop
 import org.scalatest.prop.Checkers
+
+import scalaz._
 
 //
 // Program property testing is a bit unorthodox in that there is one big
@@ -42,7 +45,20 @@ class MergePropertyTest[A](f: (ISPProgram, ISPProgram) => A) extends Checkers {
 
   import MergePropertyTest._
 
-  def checkOneProperty(p: MergeProperty[A]): Unit = {
+
+  def checkAllProperties(ps: List[NamedProperty[A]]): Unit =
+    exec { (start, local, remote, a) =>
+      val failure = ps.find { case (_, p) => !p(start, local, remote, a) }
+
+      failure.foreach { case (name, _) =>
+        Console.err.println("*** Program property failure: " + name)
+        showProgs(start, local, remote)
+      }
+
+      failure.isEmpty
+    }
+
+  private def exec(p: MergeProperty[A]): Unit = {
     val odb  = DBLocalDatabase.createTransient()
     val fact = odb.getFactory
 
@@ -54,38 +70,22 @@ class MergePropertyTest[A](f: (ISPProgram, ISPProgram) => A) extends Checkers {
       fEd0   <- genEditedProg
       fEd1   <- genEditedProg
     } yield {(f: ISPFactory) => {
-      val start = fStart(f)
-      val ed0   = fEd0(f, start)
-      val ed1   = fEd1(f, start)
-      (start, ed0, ed1)
+      val start  = fStart(f)
+      val local  = fEd0(f, start)
+      val remote = fEd1(f, start)
+      (start, local, remote)
     }}
 
     try {
       check(Prop.forAll(genProgs) { fun =>
-        val (start, ed0, ed1) = fun(fact)
-        p(start, ed0, ed1, f(ed0, ed1))
+        val (start, local, remote) = fun(fact)
+        p(start, local, remote, f(local, remote))
       })
     } finally {
       odb.getDBAdmin.shutdown()
     }
   }
 
-  def checkAllProperties(ps: List[NamedProperty[A]]): Unit =
-    checkOneProperty { (start, local, remote, a) =>
-      val failure = ps.find { case (_, p) => !p(start, local, remote, a) }
-
-      failure.foreach { case (name, _) =>
-        Console.err.println("*** Program property failure: " + name)
-        val titles = List("Start", "Local", "Remote")
-        val progs  = List(start,   local,   remote)
-        titles.zip(progs).foreach { case (title, prog) =>
-          Console.err.println(s"\n$title")
-          Console.err.println(drawNodeTree(prog))
-        }
-      }
-
-      failure.isEmpty
-    }
 }
 
 object MergePropertyTest {
@@ -97,4 +97,28 @@ object MergePropertyTest {
 
   /** A program property with a name / description. */
   type NamedProperty[A] = (String, MergeProperty[A])
+
+  def showProgs(start: ISPProgram, local: ISPProgram, remote: ISPProgram): Unit = {
+    val showNodeWithVersions = {
+      val lifespanMap = Map(
+        start.getLifespanId -> "start",
+        local.getLifespanId -> "local",
+        remote.getLifespanId -> "remote").withDefault(k => s"??? ($k)")
+
+      def showNodeVersionsEntry(kv: (LifespanId, Integer)): String =
+        s"${lifespanMap(kv._1)} -> ${kv._2}"
+
+      def showNodeVersions(nv: NodeVersions): String =
+        nv.clocks.map(showNodeVersionsEntry).toList.sorted.mkString("[", ", ", "]")
+
+      Show.shows[ISPNode] { n: ISPNode => s"${ShowNode.shows(n)} ${showNodeVersions(n.getVersion)}"}
+    }
+
+    val titles = List("Start", "Local", "Remote")
+    val progs  = List(start,   local,   remote)
+    titles.zip(progs).foreach { case (title, prog) =>
+      Console.err.println(s"\n$title")
+      Console.err.println(drawNodeTree(prog)(showNodeWithVersions))
+    }
+  }
 }
