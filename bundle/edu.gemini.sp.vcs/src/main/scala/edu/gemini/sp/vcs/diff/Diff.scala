@@ -14,6 +14,8 @@ import scala.annotation.tailrec
 sealed trait Diff {
   def key: SPNodeKey
   def nv: NodeVersions
+  def isMissing: Boolean
+  def isPresent: Boolean = !isMissing
 }
 
 object Diff {
@@ -21,7 +23,9 @@ object Diff {
   /** Marks a node that either never existed in the program or else has been
     * removed and had different version information.
     */
-  final case class Missing(key: SPNodeKey, nv: NodeVersions) extends Diff
+  final case class Missing(key: SPNodeKey, nv: NodeVersions) extends Diff {
+    def isMissing: Boolean = true
+  }
 
   /** Describes the content of a node that potentially differs and is still in
     * use in the local program.  Contains enough information to merge the node
@@ -34,7 +38,9 @@ object Diff {
                            nv:       NodeVersions,
                            dob:      ISPDataObject,
                            children: List[SPNodeKey],
-                           detail:   NodeDetail      ) extends Diff
+                           detail:   NodeDetail      ) extends Diff {
+    def isMissing: Boolean = false
+  }
 
   /** Creates an [[Present]] `Diff` from the provided program node. */
   def present(n: ISPNode): Present = {
