@@ -30,8 +30,7 @@ final class TrackingEditor implements TelescopePosEditor {
     private final ImList<Row> rows;
 
     private final TelescopePosWatcher watcher = new TelescopePosWatcher() {
-        @Override public void telescopePosLocationUpdate(WatchablePos tp) { }
-        @Override public void telescopePosGenericUpdate(WatchablePos tp) {
+        @Override public void telescopePosUpdate(WatchablePos tp) {
             reinit();
         }
     };

@@ -661,23 +661,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
     }
 
 
-    /**
-     * The current position location has changed.
-     *
-     * @see TelescopePosWatcher
-     * @param tp
-     */
-    public void telescopePosLocationUpdate(WatchablePos tp) {
-        telescopePosGenericUpdate(tp);
-    }
-
-    /**
-     * The current position has changed in some way.
-     *
-     * @see TelescopePosWatcher
-     * @param tp
-     */
-    public void telescopePosGenericUpdate(WatchablePos tp) {
+    public void telescopePosUpdate(WatchablePos tp) {
         int index = getSelectedRow();
         _resetTable(_env);
 

@@ -39,12 +39,8 @@ public final class OffsetPosCase {
         int locUpdateCount = 0;
         int genericUpdateCount = 0;
 
-        public void telescopePosLocationUpdate(WatchablePos tp) {
-            locUpdateCount++;
-        }
-
-        public void telescopePosGenericUpdate(WatchablePos tp) {
-            genericUpdateCount++;
+        public void telescopePosUpdate(WatchablePos tp) {
+            // TODO
         }
 
         public int getLocUpdateCount() {

@@ -324,8 +324,7 @@ final class MagnitudeEditor implements TelescopePosEditor {
     private final MagNewRow newRow;
 
     private final TelescopePosWatcher watcher = new TelescopePosWatcher() {
-        @Override public void telescopePosLocationUpdate(WatchablePos tp) { }
-        @Override public void telescopePosGenericUpdate(WatchablePos tp) {
+        @Override public void telescopePosUpdate(WatchablePos tp) {
             reinit((SPTarget)tp);
         }
     };

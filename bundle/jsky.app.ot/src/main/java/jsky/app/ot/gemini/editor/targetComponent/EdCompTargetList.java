@@ -1681,23 +1681,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         return (_curPos.getTarget() instanceof NonSiderealTarget);
     }
 
-    /**
-     * The current position location has changed.
-     *
-     * @see edu.gemini.spModel.target.TelescopePosWatcher
-     * @param tp
-     */
-    public void telescopePosLocationUpdate(WatchablePos tp) {
-        telescopePosGenericUpdate(tp);
-    }
-
-    /**
-     * The current position has changed in some way.
-     *
-     * @see edu.gemini.spModel.target.TelescopePosWatcher
-     * @param tp
-     */
-    public void telescopePosGenericUpdate(WatchablePos tp) {
+    public void telescopePosUpdate(WatchablePos tp) {
         if (_ignorePosUpdate)
             return;
 
@@ -1710,6 +1694,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _showPos();
         updateGuiding();
     }
+
 
     // Update the current target to use the selected coordinate system
     private void _updateCoordSystem() {
