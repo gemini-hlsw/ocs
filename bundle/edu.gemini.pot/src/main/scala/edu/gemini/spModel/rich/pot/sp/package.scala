@@ -39,4 +39,6 @@ package object sp {
     val t = Tree.unfoldTree(n)(n0 => (n0, () => n0.children.toStream))
     t.draw.zipWithIndex.collect { case (s, n0) if n0 % 2 == 0 => s}.mkString("\n")
   }
+
+  implicit def SpNodeKeyEqual: Equal[SPNodeKey] = Equal.equalA
 }
