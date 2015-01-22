@@ -2,28 +2,26 @@ package edu.gemini.qv.plugin.filter.core
 
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.qpt.shared.sp.Band
+import edu.gemini.qv.plugin.QvStore
+import edu.gemini.qv.plugin.QvStore.{BarChart, Histogram, Table}
 import edu.gemini.qv.plugin.chart.Axis
 import edu.gemini.qv.plugin.filter.core.Filter._
-import edu.gemini.qv.plugin.QvStore.BarChart
-import edu.gemini.qv.plugin.QvStore.Histogram
-import edu.gemini.qv.plugin.QvStore.Table
-import edu.gemini.qv.plugin.{QvContext, QvStore}
-import edu.gemini.spModel.core.{Affiliate, Semester, ProgramType}
+import edu.gemini.spModel.core.{Affiliate, ProgramType, Semester}
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer
-import edu.gemini.spModel.gemini.gmos.GmosNorthType.{FPUnitNorth, FilterNorth, DisperserNorth}
-import edu.gemini.spModel.gemini.gmos.GmosSouthType.{FPUnitSouth, FilterSouth, DisperserSouth}
+import edu.gemini.spModel.gemini.gmos.GmosNorthType.{DisperserNorth, FPUnitNorth, FilterNorth}
+import edu.gemini.spModel.gemini.gmos.GmosSouthType.{DisperserSouth, FPUnitSouth, FilterSouth}
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
+import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.nifs.NIFSParams
 import edu.gemini.spModel.gemini.niri.Niri
-import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{SkyBackground, CloudCover, ImageQuality, WaterVapor}
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{CloudCover, ImageQuality, SkyBackground, WaterVapor}
 import edu.gemini.spModel.obs.ObservationStatus
 import edu.gemini.spModel.obs.SPObservation.Priority
 import edu.gemini.spModel.obsclass.ObsClass
 import edu.gemini.spModel.too.TooType
-import scala.Some
-import scala.util.Failure
-import scala.util.Try
+
+import scala.util.{Failure, Try}
 import scala.xml.{Node, NodeSeq}
 
 object FilterXMLParser {
@@ -158,6 +156,9 @@ object FilterXMLParser {
       case <gnirscrossdisp>{setNode}</gnirscrossdisp> => parseEnumSetNode(classOf[GNIRSParams.CrossDispersed], setNode).map(Filter.GNIRS.CrossDispersers(_))
       case <gnirscam>{setNode}</gnirscam> => parseEnumSetNode(classOf[GNIRSParams.Camera], setNode).map(Filter.GNIRS.Cameras(_))
       case <gnirsfocplane>{setNode}</gnirsfocplane> => parseEnumSetNode(classOf[GNIRSParams.SlitWidth], setNode).map(Filter.GNIRS.FocalPlanes(_))
+
+      // GSAOI
+      case <gsaoifilt>{setNode}</gsaoifilt> => parseEnumSetNode(classOf[Gsaoi.Filter], setNode).map(Filter.GSAOI.Filters(_))
 
       // F2
       case <f2disp>{setNode}</f2disp> => parseEnumSetNode(classOf[Flamingos2.Disperser], setNode).map(Filter.F2.Dispersers(_))
