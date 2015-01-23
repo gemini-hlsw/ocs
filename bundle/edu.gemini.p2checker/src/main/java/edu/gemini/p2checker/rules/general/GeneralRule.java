@@ -427,11 +427,11 @@ public class GeneralRule implements IRule {
 
     private static boolean _areTargetsEquals(SPTarget p1Target, SPTarget target, ObservationElements elems) {
 
-        double spRA = target.getC1().getAs(CoordinateParam.Units.HMS);
-        double spDec = target.getC2().getAs(CoordinateParam.Units.DEGREES);
+        double spRA = target.getTarget().getC1().getAs(CoordinateParam.Units.HMS);
+        double spDec = target.getTarget().getC2().getAs(CoordinateParam.Units.DEGREES);
 
-        double p1RA = p1Target.getC1().getAs(CoordinateParam.Units.HMS);
-        double p1Dec = p1Target.getC2().getAs(CoordinateParam.Units.DEGREES);
+        double p1RA = p1Target.getTarget().getC1().getAs(CoordinateParam.Units.HMS);
+        double p1Dec = p1Target.getTarget().getC2().getAs(CoordinateParam.Units.DEGREES);
 
         return _closeEnough(elems, spRA, spDec, p1RA, p1Dec);
     }
@@ -444,8 +444,8 @@ public class GeneralRule implements IRule {
         final ISPObservation obs = elems.getObservationNode();
         if (obs == null || !Too.isToo(obs)) return false;
 
-        double p1RA = p1Target.getC1().getAs(CoordinateParam.Units.HMS);
-        double p1Dec = p1Target.getC2().getAs(CoordinateParam.Units.DEGREES);
+        double p1RA = p1Target.getTarget().getC1().getAs(CoordinateParam.Units.HMS);
+        double p1Dec = p1Target.getTarget().getC2().getAs(CoordinateParam.Units.DEGREES);
         return (p1RA == 0.0) && (p1Dec == 0.0);
     }
 

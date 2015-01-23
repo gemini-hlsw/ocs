@@ -567,25 +567,11 @@ public final class SPTarget extends WatchablePos {
     }
 
     /**
-     * Returns the ICoordinateValue for c1
-     */
-    public final ICoordinate getC1() {
-        return _target.getC1();
-    }
-
-    /**
      * Get the xaxis.
      */
     public final double getXaxis() {
         final ICoordinate c1 = _target.getC1();
         return c1.getAs(Units.DEGREES);
-    }
-
-    /**
-     * Returns the ICoordinate for c2
-     */
-    public final ICoordinate getC2() {
-        return _target.getC2();
     }
 
     /**

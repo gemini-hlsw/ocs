@@ -170,9 +170,9 @@ public class GemsGuideStars implements Comparable<GemsGuideStars> {
             SPTarget target = guideGroup.get(guideProbe).getValue().getPrimary().getValue();
             sb.append(guideProbe);
             sb.append("[");
-            sb.append(target.getC1());
+            sb.append(target.getTarget().getC1());
             sb.append(",");
-            sb.append(target.getC2());
+            sb.append(target.getTarget().getC2());
             sb.append("] ");
         }
         return "GemsGuideStars{" +

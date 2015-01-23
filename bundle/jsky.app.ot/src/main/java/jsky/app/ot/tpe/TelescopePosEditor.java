@@ -467,8 +467,8 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         if (_baseTarget == null) return;
 
         // XXX FIXME: We shouldn't have to use numeric indexes here
-        queryArgs.setParamValue(2, _baseTarget.getC1().toString());
-        queryArgs.setParamValue(3, _baseTarget.getC2().toString());
+        queryArgs.setParamValue(2, _baseTarget.getTarget().getC1().toString());
+        queryArgs.setParamValue(3, _baseTarget.getTarget().getC2().toString());
         queryArgs.setParamValue(4, _baseTarget.getTarget().getTag().tccName);
         if (args.length > 2) {
             //first argument must be a Double, it represent the size on AstroCatalogs
