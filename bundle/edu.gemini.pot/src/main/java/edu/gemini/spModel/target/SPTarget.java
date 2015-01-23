@@ -242,14 +242,7 @@ public final class SPTarget extends WatchablePos {
         return _target;
     }
 
-    /** A function wrapper for cloning SPTargets. */
-    public static Function1<SPTarget, SPTarget> CLONE_FUNCTION = new Function1<SPTarget, SPTarget>() {
-        @Override public SPTarget apply(final SPTarget target) {
-            return (SPTarget) target.clone();
-        }
-    };
-
-    public Object clone() {
+    public SPTarget clone() {
         final SPTarget ntarget;
         try {
             ntarget = (SPTarget) super.clone();

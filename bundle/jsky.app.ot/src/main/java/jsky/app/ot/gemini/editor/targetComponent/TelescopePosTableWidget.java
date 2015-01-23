@@ -1033,7 +1033,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
         boolean isPrimary = src.getPrimary().getOrElse(null) == target;
         GuideProbeTargets newSrc = src.removeTarget(target);
-        SPTarget newTarget = SPTarget.CLONE_FUNCTION.apply(target);
+        SPTarget newTarget = target.clone();
         GuideProbeTargets newSnk = snk.setOptions(snk.getOptions().append(newTarget));
         if (isPrimary) {
             newSnk = newSnk.selectPrimary(newTarget);
