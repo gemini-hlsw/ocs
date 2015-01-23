@@ -31,23 +31,13 @@ public class WatchablePos implements Cloneable, Serializable {
         return (Vector) _watchers.clone();
     }
 
-    protected final void _notifyOfLocationUpdate() {
+    protected final void _notifyOfUpdate() {
         final Vector v = _getWatchers();
         if (v == null) return;
         for (int i = 0; i < v.size(); ++i) {
             final TelescopePosWatcher tpw;
             tpw = (TelescopePosWatcher) v.elementAt(i);
-            tpw.telescopePosLocationUpdate(this);
-        }
-    }
-
-    protected final void _notifyOfGenericUpdate() {
-        final Vector v = _getWatchers();
-        if (v == null) return;
-        for (int i = 0; i < v.size(); ++i) {
-            final TelescopePosWatcher tpw;
-            tpw = (TelescopePosWatcher) v.elementAt(i);
-            tpw.telescopePosGenericUpdate(this);
+            tpw.telescopePosUpdate(this);
         }
     }
 

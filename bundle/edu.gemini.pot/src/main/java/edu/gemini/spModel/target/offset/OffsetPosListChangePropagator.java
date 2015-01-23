@@ -31,11 +31,7 @@ public final class OffsetPosListChangePropagator<P extends OffsetPosBase> implem
     }
 
     private final TelescopePosWatcher posWatcher = new TelescopePosWatcher() {
-        @Override public void telescopePosLocationUpdate(WatchablePos tp) {
-            propagate();
-        }
-
-        @Override public void telescopePosGenericUpdate(WatchablePos tp) {
+        @Override public void telescopePosUpdate(WatchablePos tp) {
             propagate();
         }
     };

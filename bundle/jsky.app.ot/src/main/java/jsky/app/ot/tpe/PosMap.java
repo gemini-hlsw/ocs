@@ -373,13 +373,7 @@ public abstract class PosMap <K, T extends WatchablePos>
     }
 
 
-    /**
-     * The location of a TaggedPos has changed.
-     *
-     * @see TelescopePosWatcher
-     * @param tp
-     */
-    public void telescopePosLocationUpdate(WatchablePos tp) {
+    public void telescopePosUpdate(WatchablePos tp) {
         Map<K, PosMapEntry<T>> posTable = getPosTable();
         if (posTable == null) return;
 
@@ -404,16 +398,6 @@ public abstract class PosMap <K, T extends WatchablePos>
             }
             _iw.repaint();
         }
-    }
-
-    /**
-     * Something other than the location of a TaggedPos has changed.
-     *
-     * @see TelescopePosWatcher
-     * @param tp
-     */
-    public void telescopePosGenericUpdate(WatchablePos tp) {
-        telescopePosLocationUpdate(tp);
     }
 
     /**

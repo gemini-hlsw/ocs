@@ -874,19 +874,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         repaint();
     }
 
-    /**
-     * Implements the TelescopePosWatcher interface
-     * @param tp
-     */
-    public void telescopePosLocationUpdate(WatchablePos tp) {
-        basePosUpdate(((SPTarget) tp).getTarget());
-    }
-
-    /**
-     * Implements the TelescopePosWatcher interface
-     * @param tp
-     */
-    public void telescopePosGenericUpdate(WatchablePos tp) {
+    public void telescopePosUpdate(WatchablePos tp) {
         basePosUpdate(((SPTarget) tp).getTarget());
     }
 

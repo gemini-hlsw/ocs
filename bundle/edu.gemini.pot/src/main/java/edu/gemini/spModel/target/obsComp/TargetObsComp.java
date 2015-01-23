@@ -48,17 +48,11 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
     }
 
     private final class PcePropagator implements TelescopePosWatcher {
-        @Override public void telescopePosLocationUpdate(WatchablePos tp) {
-            propagate(tp);
-        }
 
-        @Override public void telescopePosGenericUpdate(WatchablePos tp) {
-            propagate(tp);
-        }
-
-        private void propagate(WatchablePos tp) {
+        @Override public void telescopePosUpdate(WatchablePos tp) {
             firePropertyChange(TARGET_POS_PROP, null, tp);
         }
+
     }
 
     private TargetEnvironment targetEnv;

@@ -223,7 +223,7 @@ public final class SPTarget extends WatchablePos {
         synchronized (this) {
             _target.setName(name);
         }
-        _notifyOfGenericUpdate();
+        _notifyOfUpdate();
     }
 
     /**
@@ -257,7 +257,7 @@ public final class SPTarget extends WatchablePos {
                 }
             }
         }
-        _notifyOfLocationUpdate();
+        _notifyOfUpdate();
     }
 
     /**
@@ -289,7 +289,7 @@ public final class SPTarget extends WatchablePos {
             final HmsDegTarget t = (HmsDegTarget)_target;
             final PM1 pm1 = new PM1(newValue, Units.MILLI_ARCSECS_PER_YEAR);
             t.setPM1(pm1);
-            _notifyOfGenericUpdate();
+            _notifyOfUpdate();
         } else {
             throw new IllegalArgumentException();
         }
@@ -315,7 +315,7 @@ public final class SPTarget extends WatchablePos {
             final HmsDegTarget t = (HmsDegTarget)_target;
             final PM2 pm2 = new PM2(newValue, Units.MILLI_ARCSECS_PER_YEAR);
             t.setPM2(pm2);
-            _notifyOfGenericUpdate();
+            _notifyOfUpdate();
         } else {
             throw new IllegalArgumentException();
         }
@@ -338,7 +338,7 @@ public final class SPTarget extends WatchablePos {
     public void setTrackingEpoch(final double trackEpoch) {
         final Epoch e = new Epoch(trackEpoch);
         _target.setEpoch(e);
-        _notifyOfGenericUpdate();
+        _notifyOfUpdate();
     }
 
     /**
@@ -361,7 +361,7 @@ public final class SPTarget extends WatchablePos {
             final HmsDegTarget t = (HmsDegTarget)_target;
             final Parallax p = new Parallax(newValue);
             t.setParallax(p);
-            _notifyOfGenericUpdate();
+            _notifyOfUpdate();
         } else {
             throw new IllegalArgumentException();
         }
@@ -387,7 +387,7 @@ public final class SPTarget extends WatchablePos {
             final HmsDegTarget t = (HmsDegTarget)_target;
             final RV rv = new RV(newValue);
             t.setRV(rv);
-            _notifyOfGenericUpdate();
+            _notifyOfUpdate();
         } else {
             throw new IllegalArgumentException();
         }
@@ -617,7 +617,7 @@ public final class SPTarget extends WatchablePos {
     // target members through this idiotic class. All of this crap needs
     // to be rewritten.
     public void notifyOfGenericUpdate() {
-    	super._notifyOfGenericUpdate();
+    	super._notifyOfUpdate();
     }
 
     /**
@@ -679,7 +679,7 @@ public final class SPTarget extends WatchablePos {
             _target.getC1().setAs(x, Units.DEGREES);
             _target.getC2().setAs(y, Units.DEGREES);
         }
-        _notifyOfLocationUpdate();
+        _notifyOfUpdate();
     }
 
     /** Set a new ITarget for this position and notify watchers */
@@ -687,7 +687,7 @@ public final class SPTarget extends WatchablePos {
         synchronized (this) {
             _target = target;
         }
-        _notifyOfLocationUpdate();
+        _notifyOfUpdate();
     }
 
     /**

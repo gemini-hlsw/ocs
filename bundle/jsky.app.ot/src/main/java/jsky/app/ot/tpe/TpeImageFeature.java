@@ -217,19 +217,7 @@ public abstract class TpeImageFeature implements TelescopePosWatcher {
         }
     }
 
-
-    /**
-     * Implements the TelescopePosWatcher interface.
-     * @param tp
-     */
-    public void telescopePosLocationUpdate(WatchablePos tp) {
-    }
-
-    /**
-     * Implements the TelescopePosWatcher interface.
-     * @param tp
-     */
-    public void telescopePosGenericUpdate(WatchablePos tp) {
+    public void telescopePosUpdate(WatchablePos tp) {
     }
 
     protected void handleTargetEnvironmentUpdate(TargetEnvironmentDiff diff) {
