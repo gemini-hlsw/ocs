@@ -151,11 +151,6 @@ public final class SPTarget extends WatchablePos {
         setMagnitudes(obj.getMagnitudes());
     }
 
-    /** Create a default base position using the HmsDegTarget. */
-    public static SPTarget createDefaultBasePosition() {
-        return new SPTarget();
-    }
-
     /**
      * Gets all the {@link Magnitude} information associated with this target,
      * if any.

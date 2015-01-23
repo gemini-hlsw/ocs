@@ -35,7 +35,7 @@ enum SPTargetPosListParser {
         List<SPTarget> userTargets = new ArrayList<SPTarget>();
 
         TargetEnvironment toTargetEnv() {
-            if (base == null) base = SPTarget.createDefaultBasePosition();
+            if (base == null) base = new SPTarget();
             ImList<GuideProbeTargets> glst = DefaultImList.create(guideMap.values());
             ImList<SPTarget> ulst = DefaultImList.create(userTargets);
             return TargetEnvironment.create(base).setAllPrimaryGuideProbeTargets(glst).setUserTargets(ulst);
