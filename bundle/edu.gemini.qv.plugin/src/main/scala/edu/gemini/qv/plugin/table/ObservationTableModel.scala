@@ -10,6 +10,7 @@ import edu.gemini.skycalc.TimeUtils
 import edu.gemini.spModel.`type`.{DisplayableSpType, LoggableSpType}
 import edu.gemini.spModel.core.{Affiliate, Angle}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{ElevationConstraintType, TimingWindow}
+import jsky.coords.DMS
 
 import scala.collection.JavaConverters._
 
@@ -373,7 +374,7 @@ object ObservationTableModel {
       case d if d > 0   => 1
     }
     val prettyString: String = {
-      val hms = Angle.fromDegrees(ra).toHourAngle
+      val hms = Angle.fromDegrees(ra).toHMS
       f"${hms.hours}:${hms.minutes}%02d:${hms.seconds}%06.3f"
     }
   }
@@ -384,8 +385,9 @@ object ObservationTableModel {
       case d if d > 0   => 1
     }
     val prettyString: String = {
-      val dms = Angle.fromDegrees(dec).toSexigesimal
-      f"${dms.degrees}:${dms.minutes}%02d:${dms.seconds}%06.3f"
+      val dms = new DMS(dec)
+      val sig = if (dms.getSign < 0) "-" else ""
+      f"${sig}${dms.getDegrees}:${dms.getMin}%02d:${dms.getSec}%05.2f"
     }
   }
   case class TimeValue(t: Long) extends Comparable[TimeValue] {
