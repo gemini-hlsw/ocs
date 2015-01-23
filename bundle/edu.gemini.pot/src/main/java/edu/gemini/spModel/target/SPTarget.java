@@ -22,18 +22,7 @@ import edu.gemini.spModel.target.system.CoordinateTypes.*;
  */
 public final class SPTarget extends WatchablePos {
 
-
-    private static final String COORDINATE_ZERO = "00:00:00.0";
-
-    ///
-    /// FIELDS
-    ///
-
     private ITarget _target;
-
-    ///
-    /// CONSTRUCTORS
-    ///
 
     /** SPTarget with default empty target. */
     public SPTarget() {
@@ -51,74 +40,54 @@ public final class SPTarget extends WatchablePos {
         _target.getC2().setAs(yaxis, Units.DEGREES);
     }
 
-    /**
-     * Assigns the list of magnitudes to associate with this target.  If there
-     * are multiple magnitudes associated with the same bandpass, only one will
-     * be kept.
-     *
-     * @param magnitudes new collection of magnitude information to store with
-     * the target
-     */
+    /** Set contained target magnitudes and notify listeners. */
     public void setMagnitudes(final ImList<Magnitude> magnitudes) {
         _target.setMagnitudes(magnitudes);
-        notifyOfGenericUpdate();
+        _notifyOfUpdate();
     }
 
-    /**
-     * Adds the given magnitude to the collection of magnitudes associated with
-     * this target, replacing any other magnitude of the same band if any.
-     *
-     * @param mag magnitude information to add to the collection of magnitudes
-     */
+    /** Set a magnitude on the contained target and notify listeners. */
     public void putMagnitude(final Magnitude mag) {
         _target.putMagnitude(mag);
-        notifyOfGenericUpdate();
+        _notifyOfUpdate();
     }
 
-
-
-    /**
-     * Set the name.
-     */
+    /** Set the contained target's name and notify listeners. */
     public void setName(final String name) {
         _target.setName(name);
         _notifyOfUpdate();
     }
 
-
     /**
-     * Set the xaxis and the yaxis.
+     * Set the contained target's RA and Dec from Strings in HMS/DMS format and notify listeners.
+     * Invalid values are replaced with 00:00:00.
      */
     public void setXYFromString(final String xaxisStr, final String yaxisStr) {
         synchronized (this) {
             try {
                 _target.setC1(xaxisStr);
             } catch (final IllegalArgumentException ex) {
-                //a problem found, set it to 00:00:00
-                _target.setC1(COORDINATE_ZERO);
+                _target.setC1("00:00:00.0");
             }
             try {
                 _target.setC2(yaxisStr);
             } catch( final IllegalArgumentException ex) {
-                //a problem found, set it to 00:00:00
-                _target.setC2(COORDINATE_ZERO);
+                _target.setC2("00:00:00.0");
             }
         }
         _notifyOfUpdate();
     }
 
     /**
-     * Set the Coordinate System with a string.
+     * Replace the contained target with a new, empty target of the specified type, or do nothing
+     * if the contained target is of the specified type.
      */
     public void setCoordSys(final ITarget.Tag tag) {
         if (tag != _target.getTag())
             setTarget(ITarget.forTag(tag));
     }
 
-    // ----- Specialized methods for an HmsDegTarget ----------
-    /**
-     * Get the proper motion RA in mas/y
-     */
+    /** Get the PM RA in mas/y if the contained target is sidereal, otherwise zero. */
     public double getPropMotionRA() {
         double res = 0.0;
         if (_target instanceof HmsDegTarget) {
@@ -128,9 +97,7 @@ public final class SPTarget extends WatchablePos {
         return res;
     }
 
-    /**
-     * Set the proper motion ra in mas/y.
-     */
+    /** Set the PM RA in mas/y if the contained target is sidereal, otherwise throw. */
     public void setPropMotionRA(final double newValue) {
         if (_target instanceof HmsDegTarget) {
             final HmsDegTarget t = (HmsDegTarget)_target;
@@ -142,9 +109,7 @@ public final class SPTarget extends WatchablePos {
         }
     }
 
-    /**
-     * Get the proper motion Dec in mas/y
-     */
+    /** Get the PM Dec in mas/y if the contained target is sidereal, otherwise zero. */
     public double getPropMotionDec() {
         double res = 0.0;
         if (_target instanceof HmsDegTarget) {
@@ -154,9 +119,7 @@ public final class SPTarget extends WatchablePos {
         return res;
     }
 
-    /**
-     * Set the proper motion Dec in mas/y.
-     */
+    /** Set the PM Dec in mas/y if the contained target is sidereal, otherwise throw. */
     public void setPropMotionDec(final double newValue) {
         if (_target instanceof HmsDegTarget) {
             final HmsDegTarget t = (HmsDegTarget)_target;
@@ -168,29 +131,19 @@ public final class SPTarget extends WatchablePos {
         }
     }
 
-    /**
-     * Get the tracking epoch in julian years
-     */
+    /** Get the contained target epoch in Julian years. */
     public double getTrackingEpoch() {
-        final double res = 2000.0;
-        final Epoch e = _target.getEpoch();
-        if (e == null) return res;
-
-        return e.getValue();
+        return getTarget().getEpoch().getValue();
     }
 
-    /**
-     * Set the tracking epoch as in julian years.
-     */
+    /** Set the contained target epoch as in Julian years and notify listeners. */
     public void setTrackingEpoch(final double trackEpoch) {
         final Epoch e = new Epoch(trackEpoch);
         _target.setEpoch(e);
         _notifyOfUpdate();
     }
 
-    /**
-     * Get the tracking parallax in arcseconds
-     */
+    /** Get the PM parallax in arcsec if the contained target is sidereal, otherwise zero. */
     public double getTrackingParallax() {
         double res = 0.0;
         if (_target instanceof HmsDegTarget) {
@@ -200,9 +153,7 @@ public final class SPTarget extends WatchablePos {
         return res;
     }
 
-    /**
-     * Set the tracking parallax as a string.
-     */
+    /** Set the PM parallax in arcsec if the contained target is sidereal, otherwise throw. */
     public void setTrackingParallax(final double newValue) {
         if (_target instanceof HmsDegTarget) {
             final HmsDegTarget t = (HmsDegTarget)_target;
@@ -214,9 +165,7 @@ public final class SPTarget extends WatchablePos {
         }
     }
 
-    /**
-     * Get the tracking radial velocity in km/s
-     */
+    /** Get the PM radial velocity in km/s if the contained target is sidereal, otherwise zero. */
     public double getTrackingRadialVelocity() {
         double res = 0.0;
         if (_target instanceof HmsDegTarget) {
@@ -226,9 +175,7 @@ public final class SPTarget extends WatchablePos {
         return res;
     }
 
-    /**
-     * Set the tracking radial velocity in km/s.
-     */
+    /** Set the PM radial velocity in km/s if the contained target is sidereal, otherwise throw. */
     public void setTrackingRadialVelocity(final double newValue) {
         if (_target instanceof HmsDegTarget) {
             final HmsDegTarget t = (HmsDegTarget)_target;
@@ -240,27 +187,21 @@ public final class SPTarget extends WatchablePos {
         }
     }
 
-    /**
-     * Return a paramset describing this object
-     */
+    /** Return a paramset describing this SPTarget. */
     public ParamSet getParamSet(final PioFactory factory) {
         return SPTargetPio.getParamSet(this, factory);
     }
 
-    /**
-     * Initialize this object from the given paramset
-     */
+    /** Re-initialize this SPTarget from the given paramset */
     public void setParamSet(final ParamSet paramSet) {
         SPTargetPio.setParamSet(paramSet, this);
     }
 
+    /** Construct a new SPTarget from the given paramset */
     public static SPTarget fromParamSet(final ParamSet pset) {
         return SPTargetPio.fromParamSet(pset);
     }
 
-    /**
-     * Standard debugging method.
-     */
     public String toString() {
         return _target.toString();
     }
@@ -269,24 +210,21 @@ public final class SPTarget extends WatchablePos {
     // a change to the contained target, rather than publishing all the
     // target members through this idiotic class. All of this crap needs
     // to be rewritten.
+    /** @deprecated */
     public void notifyOfGenericUpdate() {
     	super._notifyOfUpdate();
     }
 
-    /**
-     * Gets a Skycalc {@link edu.gemini.skycalc.Coordinates} representation.
-     */
+    /** Gets a Skycalc {@link edu.gemini.skycalc.Coordinates} representation. */
     public synchronized Coordinates getSkycalcCoordinates() {
         return new Coordinates(getTarget().getC1().getAs(Units.DEGREES), getTarget().getC2().getAs(Units.DEGREES));
     }
 
-    /**
-     * Set the x/y position and notify observers
-     */
-    public void setXY(final double x, final double y) {
+    /** Set the contained target RA/Dec in degrees and notify observers. */
+    public void setXY(final double raDeg, final double decDeg) {
         synchronized (this) {
-            _target.getC1().setAs(x, Units.DEGREES);
-            _target.getC2().setAs(y, Units.DEGREES);
+            _target.getC1().setAs(raDeg, Units.DEGREES);
+            _target.getC2().setAs(decDeg, Units.DEGREES);
         }
         _notifyOfUpdate();
     }
@@ -303,11 +241,6 @@ public final class SPTarget extends WatchablePos {
     public ITarget getTarget() {
         return _target;
     }
-
-
-    ///
-    /// CLONING
-    ///
 
     /** A function wrapper for cloning SPTargets. */
     public static Function1<SPTarget, SPTarget> CLONE_FUNCTION = new Function1<SPTarget, SPTarget>() {
