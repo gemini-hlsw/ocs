@@ -234,11 +234,6 @@ public final class SPTarget extends WatchablePos {
     	super._notifyOfUpdate();
     }
 
-    /** Gets a Skycalc {@link edu.gemini.skycalc.Coordinates} representation. */
-    public synchronized Coordinates getSkycalcCoordinates() {
-        return new Coordinates(getTarget().getC1().getAs(Units.DEGREES), getTarget().getC2().getAs(Units.DEGREES));
-    }
-
     /** Set the contained target RA/Dec in degrees and notify observers. */
     public void setXY(final double raDeg, final double decDeg) {
         synchronized (this) {

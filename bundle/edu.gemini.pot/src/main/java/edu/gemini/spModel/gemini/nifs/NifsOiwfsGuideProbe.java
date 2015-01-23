@@ -6,6 +6,7 @@ package edu.gemini.spModel.gemini.nifs;
 
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.skycalc.Angle;
+import edu.gemini.skycalc.Coordinates;
 import edu.gemini.skycalc.Offset;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.gemini.altair.InstAltair;
@@ -81,6 +82,10 @@ public enum NifsOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
 
     @Override
     public boolean validate(SPTarget guideStar, ObsContext ctx) {
-        return GuideProbeUtil.instance.validate(guideStar.getSkycalcCoordinates(), this, ctx);
+        Coordinates result;
+        synchronized (guideStar) {
+            result = guideStar.getTarget().getSkycalcCoordinates();
+        }
+        return GuideProbeUtil.instance.validate(result, this, ctx);
     }
 }

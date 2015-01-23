@@ -80,7 +80,11 @@ public enum GuideProbeUtil {
     }
 
     public boolean validate(final SPTarget guideStar, final GuideProbe guideProbe, final ObsContext ctx) {
-        return validate(guideStar.getSkycalcCoordinates(), guideProbe, ctx);
+        Coordinates result;
+        synchronized (guideStar) {
+            result = guideStar.getTarget().getSkycalcCoordinates();
+        }
+        return validate(result, guideProbe, ctx);
     }
 
     public boolean validate(final SkyObject guideStar, final GuideProbe guideProbe, final ObsContext ctx) {
@@ -126,7 +130,11 @@ public enum GuideProbeUtil {
                 final PatrolField rotatedPatrolField = offsetPatrolField.getTransformed(AffineTransform.getRotateInstance(-ctx.getPositionAngle().toRadians().getMagnitude()));
                 // find distance of base position to the guide star
                 final Coordinates baseCoordinates = ctx.getBaseCoordinates();
-                final CoordinateDiff diff = new CoordinateDiff(baseCoordinates, guideStar.getSkycalcCoordinates());
+                Coordinates result;
+                synchronized (guideStar) {
+                    result = guideStar.getTarget().getSkycalcCoordinates();
+                }
+                final CoordinateDiff diff = new CoordinateDiff(baseCoordinates, result);
                 final Offset dis = diff.getOffset();
                 final double p = -dis.p().toArcsecs().getMagnitude();
                 final double q = -dis.q().toArcsecs().getMagnitude();

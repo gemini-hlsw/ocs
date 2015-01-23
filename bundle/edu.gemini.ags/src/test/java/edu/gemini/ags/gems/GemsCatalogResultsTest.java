@@ -83,10 +83,26 @@ public class GemsCatalogResultsTest  implements MascotProgress {
         assertFalse(set.contains(GsaoiOdgw.odgw3));
         assertFalse(set.contains(GsaoiOdgw.odgw4));
 
-        Coordinates cwfs1 = group.get(Canopus.Wfs.cwfs1).getValue().getPrimary().getValue().getSkycalcCoordinates();
-        Coordinates cwfs2 = group.get(Canopus.Wfs.cwfs2).getValue().getPrimary().getValue().getSkycalcCoordinates();
-        Coordinates cwfs3 = group.get(Canopus.Wfs.cwfs3).getValue().getPrimary().getValue().getSkycalcCoordinates();
-        Coordinates odgw1 = group.get(GsaoiOdgw.odgw1).getValue().getPrimary().getValue().getSkycalcCoordinates();
+        Coordinates result4;
+        synchronized (group.get(Canopus.Wfs.cwfs1).getValue().getPrimary().getValue()) {
+            result4 = group.get(Canopus.Wfs.cwfs1).getValue().getPrimary().getValue().getTarget().getSkycalcCoordinates();
+        }
+        Coordinates cwfs1 = result4;
+        Coordinates result3;
+        synchronized (group.get(Canopus.Wfs.cwfs2).getValue().getPrimary().getValue()) {
+            result3 = group.get(Canopus.Wfs.cwfs2).getValue().getPrimary().getValue().getTarget().getSkycalcCoordinates();
+        }
+        Coordinates cwfs2 = result3;
+        Coordinates result2;
+        synchronized (group.get(Canopus.Wfs.cwfs3).getValue().getPrimary().getValue()) {
+            result2 = group.get(Canopus.Wfs.cwfs3).getValue().getPrimary().getValue().getTarget().getSkycalcCoordinates();
+        }
+        Coordinates cwfs3 = result2;
+        Coordinates result1;
+        synchronized (group.get(GsaoiOdgw.odgw1).getValue().getPrimary().getValue()) {
+            result1 = group.get(GsaoiOdgw.odgw1).getValue().getPrimary().getValue().getTarget().getSkycalcCoordinates();
+        }
+        Coordinates odgw1 = result1;
 
         Coordinates cwfs1x = Coordinates.create("17:25:20.057", "-48:27:39.99");
         Coordinates cwfs2x = Coordinates.create("17:25:20.321", "-48:28:47.20");

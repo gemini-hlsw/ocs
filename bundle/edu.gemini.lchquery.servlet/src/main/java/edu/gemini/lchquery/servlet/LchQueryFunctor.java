@@ -370,7 +370,11 @@ public class LchQueryFunctor extends DBAbstractQueryFunctor implements IDBParall
             Sidereal sidereal = new Sidereal();
             sidereal.setName(target.getTarget().getName());
             sidereal.setType(_getTargetType(target, targetEnvironment));
-            Coordinates coords = target.getSkycalcCoordinates();
+            Coordinates result;
+            synchronized (target) {
+                result = target.getTarget().getSkycalcCoordinates();
+            }
+            Coordinates coords = result;
             HmsDms hmsDms = new HmsDms();
             hmsDms.setRa(HHMMSS.valStr(coords.getRa().getMagnitude()));
             hmsDms.setDec(DDMMSS.valStr(coords.getDec().getMagnitude()));

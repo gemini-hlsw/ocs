@@ -223,7 +223,11 @@ public enum Canopus {
         public abstract Area probeArm(ObsContext ctx, boolean validate);
 
         public boolean validate(SPTarget guideStar, ObsContext ctx) {
-            Coordinates coords = guideStar.getSkycalcCoordinates();
+            Coordinates result;
+            synchronized (guideStar) {
+                result = guideStar.getTarget().getSkycalcCoordinates();
+            }
+            Coordinates coords = result;
             return Canopus.instance.getProbesInRange(coords, ctx).contains(this);
         }
 
@@ -234,7 +238,11 @@ public enum Canopus {
             Area a = wfs.probeArm(ctx, false);
             if (a == null) return false;
 
-            CoordinateDiff diff = new CoordinateDiff(ctx.getBaseCoordinates(), guideStar.getSkycalcCoordinates());
+            Coordinates result;
+            synchronized (guideStar) {
+                result = guideStar.getTarget().getSkycalcCoordinates();
+            }
+            CoordinateDiff diff = new CoordinateDiff(ctx.getBaseCoordinates(), result);
             Offset dis = diff.getOffset();
             double p = -dis.p().toArcsecs().getMagnitude();
             double q = -dis.q().toArcsecs().getMagnitude();
@@ -258,7 +266,11 @@ public enum Canopus {
             SPTarget guideStar = guideStarOpt.getValue();
 
             // Calculate the difference between the coordinate and the observation's base position.
-            CoordinateDiff diff = new CoordinateDiff(ctx.getBaseCoordinates(), guideStar.getSkycalcCoordinates());
+            Coordinates result;
+            synchronized (guideStar) {
+                result = guideStar.getTarget().getSkycalcCoordinates();
+            }
+            CoordinateDiff diff = new CoordinateDiff(ctx.getBaseCoordinates(), result);
             // Get offset and switch it to be defined in the same coordinate
             // system as the shape.
             Offset dis = diff.getOffset();
@@ -340,7 +352,15 @@ public enum Canopus {
         SPTarget target = spTargetOpt.getValue();
 
         CoordinateDiff diff;
-        diff = new CoordinateDiff(base.getSkycalcCoordinates(), target.getSkycalcCoordinates());
+        Coordinates result;
+        synchronized (target) {
+            result = target.getTarget().getSkycalcCoordinates();
+        }
+        Coordinates result1;
+        synchronized (base) {
+            result1 = base.getTarget().getSkycalcCoordinates();
+        }
+        diff = new CoordinateDiff(result1, result);
         Offset o = diff.getOffset();
         double p = -o.p().toArcsecs().getMagnitude();
         double q = -o.q().toArcsecs().getMagnitude();
@@ -486,7 +506,11 @@ public enum Canopus {
             SPTarget target = targets.getPrimary().getOrElse(null);
             if (target != null && (!validate || cwfs.validate(target, ctx))) {
                 // Get offset from base position to cwfs in arcsecs
-                CoordinateDiff diff = new CoordinateDiff(ctx.getBaseCoordinates(), target.getSkycalcCoordinates());
+                Coordinates result;
+                synchronized (target) {
+                    result = target.getTarget().getSkycalcCoordinates();
+                }
+                CoordinateDiff diff = new CoordinateDiff(ctx.getBaseCoordinates(), result);
                 Offset dis = diff.getOffset();
                 double p = -dis.p().toArcsecs().getMagnitude();
                 double q = -dis.q().toArcsecs().getMagnitude();

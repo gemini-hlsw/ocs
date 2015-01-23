@@ -81,7 +81,11 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
         public TargetEnvironment add(SPTarget guideStar, ObsContext ctx) {
             // Select the appropriate guider, if any.
             TargetEnvironment env = ctx.getTargets();
-            Option<GuideProbe> probeOpt = select(guideStar.getSkycalcCoordinates(), ctx);
+            Coordinates result;
+            synchronized (guideStar) {
+                result = guideStar.getTarget().getSkycalcCoordinates();
+            }
+            Option<GuideProbe> probeOpt = select(result, ctx);
             GuideProbe probe;
             if (probeOpt.isEmpty()) {
                 // Just use ODGW1 since we're adding a target that is off the
@@ -133,7 +137,11 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
                 if (gtOpt.isEmpty()) continue;
 
                 for (SPTarget target : gtOpt.getValue().getOptions()) {
-                    Option<GuideProbe> opt = select(target.getSkycalcCoordinates(), ctx);
+                    Coordinates result;
+                    synchronized (target) {
+                        result = target.getTarget().getSkycalcCoordinates();
+                    }
+                    Option<GuideProbe> opt = select(result, ctx);
                     if (opt.isEmpty()) {
                         // Doesn't fall on the detector, so keep it with
                         // whichever ODGW it was associated with.
@@ -333,7 +341,11 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
     }
 
     public boolean validate(SPTarget guideStar, ObsContext ctx) {
-        Coordinates coords = guideStar.getSkycalcCoordinates();
+        Coordinates result;
+        synchronized (guideStar) {
+            result = guideStar.getTarget().getSkycalcCoordinates();
+        }
+        Coordinates coords = result;
         // Get the id of the detector in which the guide star lands, if any
         Option<GsaoiDetectorArray.Id> idOpt = GsaoiDetectorArray.instance.getId(coords, ctx);
         if (idOpt.isEmpty()) return false;

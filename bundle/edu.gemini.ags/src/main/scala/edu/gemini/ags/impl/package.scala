@@ -128,7 +128,7 @@ package object impl {
   implicit class SPTarget2SiderealTarget(val sp:SPTarget) extends AnyVal {
     def toNewModel:SiderealTarget = {
       val name        = sp.getTarget.getName
-      val coords      = sp.getSkycalcCoordinates
+      val coords      = sp.getTarget.getSkycalcCoordinates
       val mags        = sp.getTarget.getMagnitudes.asScalaList.map(_.toNewModel)
       val ra          = Angle.fromDegrees(coords.getRaDeg)
       val dec         = Angle.fromDegrees(coords.getDecDeg)

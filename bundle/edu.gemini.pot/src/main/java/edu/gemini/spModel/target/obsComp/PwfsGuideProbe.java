@@ -280,7 +280,11 @@ public enum PwfsGuideProbe implements ValidatableGuideProbe, OffsetValidatingGui
     /* ValidatableGuideProbe */
 
     public boolean validate(SPTarget guideStar, ObsContext ctx) {
-        return validate(guideStar.getSkycalcCoordinates(), ctx);
+        Coordinates result;
+        synchronized (guideStar) {
+            result = guideStar.getTarget().getSkycalcCoordinates();
+        }
+        return validate(result, ctx);
     }
 
     public boolean validate(SkyObject guideStar, ObsContext ctx) {
@@ -292,7 +296,11 @@ public enum PwfsGuideProbe implements ValidatableGuideProbe, OffsetValidatingGui
     }
 
     public BoundaryPosition checkBoundaries(SPTarget guideStar, ObsContext ctx){
-        return checkBoundaries(guideStar.getSkycalcCoordinates(), ctx);
+        Coordinates result;
+        synchronized (guideStar) {
+            result = guideStar.getTarget().getSkycalcCoordinates();
+        }
+        return checkBoundaries(result, ctx);
     }
 
     /**

@@ -12,6 +12,7 @@ import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.MapOp;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.PredicateOp;
+import edu.gemini.skycalc.Coordinates;
 import edu.gemini.spModel.target.system.CoordinateTypes.Epoch;
 
 import java.io.Serializable;
@@ -275,5 +276,10 @@ public abstract class ITarget implements Cloneable, Serializable {
     }
 
     public abstract Tag getTag();
+
+    /** Gets a Skycalc {@link edu.gemini.skycalc.Coordinates} representation. */
+    public Coordinates getSkycalcCoordinates() {
+        return new Coordinates(getC1().getAs(CoordinateParam.Units.DEGREES), getC2().getAs(CoordinateParam.Units.DEGREES));
+    }
 
 }

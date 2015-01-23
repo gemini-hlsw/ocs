@@ -7,6 +7,7 @@ package edu.gemini.spModel.gemini.niri;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.skycalc.Coordinates;
 import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
@@ -61,6 +62,10 @@ public enum NiriOiwfsGuideProbe implements ValidatableGuideProbe {
 
     @Override
     public boolean validate(SPTarget guideStar, ObsContext ctx) {
-        return GuideProbeUtil.instance.validate(guideStar.getSkycalcCoordinates(), this, ctx);
+        Coordinates result;
+        synchronized (guideStar) {
+            result = guideStar.getTarget().getSkycalcCoordinates();
+        }
+        return GuideProbeUtil.instance.validate(result, this, ctx);
     }
 }
