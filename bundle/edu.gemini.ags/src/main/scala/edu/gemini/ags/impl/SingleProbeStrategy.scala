@@ -10,6 +10,7 @@ import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.system.CoordinateParam.Units
+import edu.gemini.spModel.target.system.HmsDegTarget
 import edu.gemini.spModel.telescope.PosAngleConstraint._
 
 import scala.collection.JavaConverters._
@@ -109,7 +110,7 @@ object SingleProbeStrategy {
   def calculatePositionAngle(base: Coordinates, st: SiderealTarget): Angle = {
     val ra1    = st.coordinates.ra.toAngle.toRadians
     val dec1   = st.coordinates.dec.toAngle.toRadians
-    val target = new SPTarget(st.toOldModel).getTarget
+    val target = HmsDegTarget.fromSkyObject(st.toOldModel)
     val ra2    = Angle.fromDegrees(target.getC1.getAs(Units.DEGREES)).toRadians
     val dec2   = Angle.fromDegrees(target.getC2.getAs(Units.DEGREES)).toRadians
     val raDiff = ra2 - ra1

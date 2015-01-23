@@ -56,7 +56,7 @@ public final class SPTargetSkyObjectTest {
             coords = coords.builder().pmRa(pmRa).pmDec(pmDec).build();
 
             SkyObject   obj = new SkyObject.Builder("xyz", coords).build();
-            SPTarget target = new SPTarget(obj);
+            SPTarget target = new SPTarget(HmsDegTarget.fromSkyObject(obj));
 
             assertEquals(0, target.getTarget().getMagnitudes().size());
             assertEquals(0, target.getTarget().getMagnitudeBands().size());
@@ -82,7 +82,7 @@ public final class SPTargetSkyObjectTest {
 
     private void testSkyObjectConstructorMags(ImList<Magnitude> input, ImList<Magnitude> expected) throws Exception {
         SkyObject obj = createSkyObject(input);
-        final SPTarget target = new SPTarget(obj);
+        final SPTarget target = new SPTarget(HmsDegTarget.fromSkyObject(obj));
 
         final ImList<Magnitude> mags = target.getTarget().getMagnitudes();
         assertEquals(expected.size(), mags.size());
@@ -116,7 +116,7 @@ public final class SPTargetSkyObjectTest {
     @Test
     public void testPutMagnitude() throws Exception {
         SkyObject   obj = createSkyObject(DefaultImList.create(magJ1));
-        SPTarget target = new SPTarget(obj);
+        SPTarget target = new SPTarget(HmsDegTarget.fromSkyObject(obj));
 
         // Put a new magnitude for the K band.
         target.putMagnitude(magK2);
@@ -137,7 +137,7 @@ public final class SPTargetSkyObjectTest {
     @Test
     public void testSetMagnitudes() throws Exception {
         SkyObject   obj = createSkyObject(DefaultImList.create(magJ1));
-        SPTarget target = new SPTarget(obj);
+        SPTarget target = new SPTarget(HmsDegTarget.fromSkyObject(obj));
 
         // Put a new magnitude for the K band.
         target.setMagnitudes(DefaultImList.create(magJ3, magK2));

@@ -16,6 +16,7 @@ import edu.gemini.spModel.target.env.OptionsList.UpdateOps;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
+import edu.gemini.spModel.target.system.HmsDegTarget;
 import jsky.app.ot.gemini.editor.targetComponent.PrimaryTargetToggle;
 import jsky.app.ot.tpe.*;
 import jsky.app.ot.util.BasicPropertyList;
@@ -126,7 +127,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
 
         Option<SkyObject> skyObjectOpt = tme.getSkyObject();
         if (!skyObjectOpt.isEmpty()) {
-            pos = new SPTarget(skyObjectOpt.getValue());
+            pos = new SPTarget(HmsDegTarget.fromSkyObject(skyObjectOpt.getValue()));
         } else {
             // No SkyObject info is present so we use the old way of creating
             // a target from a mouse event.

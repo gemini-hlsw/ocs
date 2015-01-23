@@ -127,29 +127,6 @@ public final class SPTarget extends WatchablePos {
         _target.getC2().setAs(yaxis, Units.DEGREES);
     }
 
-    /** Constructs with a {@link SkyObject}, extracting its coordinate and magnitude information. */
-    public SPTarget(final SkyObject obj) {
-        final HmsDegCoordinates  coords = obj.getHmsDegCoordinates();
-        final HmsDegCoordinates.Epoch e = coords.getEpoch();
-
-        // Epoch, RA, Dec
-        final HmsDegTarget target = new HmsDegTarget();
-        target.setEpoch(new Epoch(e.getYear()));
-        target.setC1(new HMS(coords.getRa().toDegrees().getMagnitude()));
-        target.setC2(new DMS(coords.getDec().toDegrees().getMagnitude()));
-
-        // Proper Motion
-        final Units mas = Units.MILLI_ARCSECS_PER_YEAR;
-        final double pmRa  = coords.getPmRa().toMilliarcsecs().getMagnitude();
-        final double pmDec = coords.getPmDec().toMilliarcsecs().getMagnitude();
-        target.setPM1(new PM1(pmRa, mas));
-        target.setPM2(new PM2(pmDec, mas));
-
-        _target = target;
-        setName(obj.getName());
-        setMagnitudes(obj.getMagnitudes());
-    }
-
     /**
      * Assigns the list of magnitudes to associate with this target.  If there
      * are multiple magnitudes associated with the same bandpass, only one will

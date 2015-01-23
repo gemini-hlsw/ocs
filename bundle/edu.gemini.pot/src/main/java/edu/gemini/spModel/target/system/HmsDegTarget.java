@@ -6,6 +6,8 @@
 //
 package edu.gemini.spModel.target.system;
 
+import edu.gemini.shared.skyobject.SkyObject;
+import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
 import edu.gemini.spModel.target.system.CoordinateTypes.*;
 
@@ -63,6 +65,27 @@ public final class HmsDegTarget extends ITarget {
      * The base name of this coordinate system.
      */
     private static final String SYSTEM_NAME = "HMS Deg";
+
+    public static HmsDegTarget fromSkyObject(final SkyObject obj) {
+        final HmsDegCoordinates coords = obj.getHmsDegCoordinates();
+        final HmsDegCoordinates.Epoch e = coords.getEpoch();
+
+        final HmsDegTarget target = new HmsDegTarget();
+        target.setName(obj.getName());
+        target.setMagnitudes(obj.getMagnitudes());
+        target.setEpoch(new Epoch(e.getYear()));
+        target.setC1(new HMS(coords.getRa().toDegrees().getMagnitude()));
+        target.setC2(new DMS(coords.getDec().toDegrees().getMagnitude()));
+
+        // Proper Motion
+        final Units mas = Units.MILLI_ARCSECS_PER_YEAR;
+        final double pmRa  = coords.getPmRa().toMilliarcsecs().getMagnitude();
+        final double pmDec = coords.getPmDec().toMilliarcsecs().getMagnitude();
+        target.setPM1(new PM1(pmRa, mas));
+        target.setPM2(new PM2(pmDec, mas));
+
+        return target;
+    }
 
     /**
      * Provides clone support.
