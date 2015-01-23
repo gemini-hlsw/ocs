@@ -1706,7 +1706,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
         _ignorePosUpdate = true;
         try {
-            _curPos.setCoordSys(tag);
+            _curPos.setTargetType(tag);
         } finally {
             _ignorePosUpdate = false;
         }

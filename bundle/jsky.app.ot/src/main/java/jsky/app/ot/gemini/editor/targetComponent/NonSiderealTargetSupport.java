@@ -297,7 +297,7 @@ class NonSiderealTargetSupport {
     private final DropDownListBoxWidgetWatcher orbitalElementFormatWatcher =
         new DropDownListBoxWidgetWatcher()  {
             public void dropDownListBoxAction(DropDownListBoxWidget dd, int i, String val) {
-                spTarget.setCoordSys((ITarget.Tag) form.orbitalElementFormat.getSelectedItem());
+                spTarget.setTargetType((ITarget.Tag) form.orbitalElementFormat.getSelectedItem());
                 if (!ignoreResetCacheEvents) {
                     HorizonsService.resetCache();
                 }

@@ -9,7 +9,6 @@ package edu.gemini.spModel.target;
 
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
-import edu.gemini.skycalc.Coordinates;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.system.*;
@@ -50,6 +49,15 @@ public final class SPTarget extends WatchablePos {
     public void setTarget(final ITarget target) {
         _target = target;
         _notifyOfUpdate();
+    }
+
+    /**
+     * Replace the contained target with a new, empty target of the specified type, or do nothing
+     * if the contained target is of the specified type.
+     */
+    public void setTargetType(final ITarget.Tag tag) {
+        if (tag != _target.getTag())
+            setTarget(ITarget.forTag(tag));
     }
 
     /** Return a paramset describing this SPTarget. */
@@ -114,15 +122,6 @@ public final class SPTarget extends WatchablePos {
             }
         }
         _notifyOfUpdate();
-    }
-
-    /**
-     * Replace the contained target with a new, empty target of the specified type, or do nothing
-     * if the contained target is of the specified type.
-     */
-    public void setCoordSys(final ITarget.Tag tag) {
-        if (tag != _target.getTag())
-            setTarget(ITarget.forTag(tag));
     }
 
     /** Get the PM RA in mas/y if the contained target is sidereal, otherwise zero. */
