@@ -18,9 +18,9 @@ object FilterXMLFormatter {
     <qvTool>
       <filters>{QvStore.filters.filter(!QvStore.DefaultFilters.contains(_)).map(format)}</filters>
       <axes>{QvStore.axes.filter(!QvStore.DefaultAxes.contains(_)).map(format)}</axes>
-      <charts>{QvStore.histograms.filter(!QvStore.DefaultHistograms.contains(_)).map(_.toXml)}</charts>
+      <histograms>{QvStore.histograms.filter(!QvStore.DefaultHistograms.contains(_)).map(_.toXml)}</histograms>
       <tables>{QvStore.tables.filter(!QvStore.DefaultTables.contains(_)).map(_.toXml)}</tables>
-      <visCharts>{QvStore.visCharts.filter(!QvStore.DefaultBarCharts.contains(_)).map(_.toXml)}</visCharts>
+      <barcharts>{QvStore.visCharts.filter(!QvStore.DefaultBarCharts.contains(_)).map(_.toXml)}</barcharts>
     </qvTool>
 
 
@@ -28,9 +28,9 @@ object FilterXMLFormatter {
     <qvTool>
       <filters>{filters.map(format)}</filters>
       <axes>{axes.map(format)}</axes>
-      <charts>{histograms.map(_.toXml)}</charts>
+      <histograms>{histograms.map(_.toXml)}</histograms>
       <tables>{tables.map(_.toXml)}</tables>
-      <visCharts>{barCharts.map(_.toXml)}</visCharts>
+      <barcharts>{barCharts.map(_.toXml)}</barcharts>
     </qvTool>
 
   def format(filterSet: FilterSet): Node = {
@@ -70,6 +70,7 @@ object FilterXMLFormatter {
       case HasTimingConstraints(value) => <timingConstraints><boolvalue>{toBoolean(value)}</boolvalue></timingConstraints>
       case HasElevationConstraints(value) => <elevationConstraints><boolvalue>{toBoolean(value)}</boolvalue></elevationConstraints>
       case HasPreImaging(value) => <preImaging><boolvalue>{toBoolean(value)}</boolvalue></preImaging>
+      case HasDummyTarget(value) => <dummyTarget><boolvalue>{toBoolean(value)}</boolvalue></dummyTarget>
 
       case ProgId(value) => <progidfilter><id>{value}</id></progidfilter>
       case ProgPi(value) => <progpifilter><id>{value}</id></progpifilter>

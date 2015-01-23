@@ -106,6 +106,7 @@ object FilterXMLParser {
       case <timingConstraints><boolvalue>{value}</boolvalue></timingConstraints> => Try(Filter.HasTimingConstraints(fromBoolean(value.text)))
       case <elevationConstraints><boolvalue>{value}</boolvalue></elevationConstraints> => Try(Filter.HasElevationConstraints(fromBoolean(value.text)))
       case <preImaging><boolvalue>{value}</boolvalue></preImaging> => Try(Filter.HasPreImaging(fromBoolean(value.text)))
+      case <dummyTarget><boolvalue>{value}</boolvalue></dummyTarget> => Try(Filter.HasDummyTarget(fromBoolean(value.text)))
 
       case <progidfilter><id>{value}</id></progidfilter> => Try(Filter.ProgId(value.text))
       case <progpifilter><id>{value}</id></progpifilter> => Try(Filter.ProgPi(value.text))
