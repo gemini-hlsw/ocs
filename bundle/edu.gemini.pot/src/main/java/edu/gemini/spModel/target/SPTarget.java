@@ -220,9 +220,7 @@ public final class SPTarget extends WatchablePos {
      * Set the name.
      */
     public void setName(final String name) {
-        synchronized (this) {
-            _target.setName(name);
-        }
+        _target.setName(name);
         _notifyOfUpdate();
     }
 
@@ -239,22 +237,17 @@ public final class SPTarget extends WatchablePos {
      */
     public void setXYFromString(final String xaxisStr, final String yaxisStr) {
         synchronized (this) {
-            //set the first coordinate in the target.
-
-            //repeat operation for C2
-            synchronized (this) {
-                try {
-                    _target.setC1(xaxisStr);
-                } catch (final IllegalArgumentException ex) {
-                    //a problem found, set it to 00:00:00
-                    _target.setC1(COORDINATE_ZERO);
-                }
-                try {
-                    _target.setC2(yaxisStr);
-                } catch( final IllegalArgumentException ex) {
-                    //a problem found, set it to 00:00:00
-                    _target.setC2(COORDINATE_ZERO);
-                }
+            try {
+                _target.setC1(xaxisStr);
+            } catch (final IllegalArgumentException ex) {
+                //a problem found, set it to 00:00:00
+                _target.setC1(COORDINATE_ZERO);
+            }
+            try {
+                _target.setC2(yaxisStr);
+            } catch( final IllegalArgumentException ex) {
+                //a problem found, set it to 00:00:00
+                _target.setC2(COORDINATE_ZERO);
             }
         }
         _notifyOfUpdate();
@@ -608,7 +601,7 @@ public final class SPTarget extends WatchablePos {
     /**
      * Standard debugging method.
      */
-    public synchronized String toString() {
+    public String toString() {
         return _target.toString();
     }
 
@@ -623,14 +616,14 @@ public final class SPTarget extends WatchablePos {
     /**
      * Returns the ICoordinateValue for c1
      */
-    public final synchronized ICoordinate getC1() {
+    public final ICoordinate getC1() {
         return _target.getC1();
     }
 
     /**
      * Get the xaxis.
      */
-    public final synchronized double getXaxis() {
+    public final double getXaxis() {
         final ICoordinate c1 = _target.getC1();
         return c1.getAs(Units.DEGREES);
     }
@@ -638,14 +631,14 @@ public final class SPTarget extends WatchablePos {
     /**
      * Returns the ICoordinate for c2
      */
-    public final synchronized ICoordinate getC2() {
+    public final ICoordinate getC2() {
         return _target.getC2();
     }
 
     /**
      * Get the yaxis.
      */
-    public final synchronized double getYaxis() {
+    public final double getYaxis() {
         final ICoordinate c2 = _target.getC2();
         return c2.getAs(Units.DEGREES);
     }
@@ -653,14 +646,14 @@ public final class SPTarget extends WatchablePos {
     /**
      * Get the xaxis as a String.
      */
-    public synchronized String getXaxisAsString() {
+    public String getXaxisAsString() {
         return _target.c1ToString();
     }
 
     /**
      * Get the yaxis as a String.
      */
-    public synchronized String getYaxisAsString() {
+    public String getYaxisAsString() {
         return _target.c2ToString();
     }
 
@@ -684,9 +677,7 @@ public final class SPTarget extends WatchablePos {
 
     /** Set a new ITarget for this position and notify watchers */
     public void setTarget(final ITarget target) {
-        synchronized (this) {
-            _target = target;
-        }
+        _target = target;
         _notifyOfUpdate();
     }
 
