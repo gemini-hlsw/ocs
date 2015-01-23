@@ -57,7 +57,7 @@ public final class SPTargetSkyObjectTest {
             SkyObject   obj = new SkyObject.Builder("xyz", coords).build();
             SPTarget target = new SPTarget(obj);
 
-            assertEquals(0, target.getMagnitudes().size());
+            assertEquals(0, target.getTarget().getMagnitudes().size());
             assertEquals(0, target.getMagnitudeBands().size());
 
             HmsDegTarget hmsDeg = (HmsDegTarget) target.getTarget();
@@ -83,7 +83,7 @@ public final class SPTargetSkyObjectTest {
         SkyObject obj = createSkyObject(input);
         final SPTarget target = new SPTarget(obj);
 
-        final ImList<Magnitude> mags = target.getMagnitudes();
+        final ImList<Magnitude> mags = target.getTarget().getMagnitudes();
         assertEquals(expected.size(), mags.size());
 
         final Set<Magnitude.Band> bands = target.getMagnitudeBands();
@@ -119,7 +119,7 @@ public final class SPTargetSkyObjectTest {
 
         // Put a new magnitude for the K band.
         target.putMagnitude(magK2);
-        ImList<Magnitude> magList = target.getMagnitudes();
+        ImList<Magnitude> magList = target.getTarget().getMagnitudes();
 
         assertEquals(2, magList.size());
         assertEquals(magJ1, target.getMagnitude(Magnitude.Band.J).getValue());
@@ -127,7 +127,7 @@ public final class SPTargetSkyObjectTest {
 
         // Replace the existing J band mag with a new one.
         target.putMagnitude(magJ3);
-        magList = target.getMagnitudes();
+        magList = target.getTarget().getMagnitudes();
         assertEquals(2, magList.size());
         assertEquals(magJ3, target.getMagnitude(Magnitude.Band.J).getValue());
         assertEquals(magK2, target.getMagnitude(Magnitude.Band.K).getValue());
@@ -140,7 +140,7 @@ public final class SPTargetSkyObjectTest {
 
         // Put a new magnitude for the K band.
         target.setMagnitudes(DefaultImList.create(magJ3, magK2));
-        ImList<Magnitude> magList = target.getMagnitudes();
+        ImList<Magnitude> magList = target.getTarget().getMagnitudes();
 
         assertEquals(2, magList.size());
         assertEquals(magJ3, target.getMagnitude(Magnitude.Band.J).getValue());

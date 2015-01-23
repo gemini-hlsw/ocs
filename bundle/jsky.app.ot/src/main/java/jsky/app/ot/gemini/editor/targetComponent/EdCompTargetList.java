@@ -789,7 +789,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         TargetClipboard(SPTarget spTarget) {
             this.target = (ITarget) spTarget.getTarget().clone();
-            this.mag = spTarget.getMagnitudes();
+            this.mag = spTarget.getTarget().getMagnitudes();
         }
 
         TargetClipboard(GuideGroup group) {

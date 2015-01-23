@@ -129,7 +129,7 @@ package object impl {
     def toNewModel:SiderealTarget = {
       val name        = sp.getName
       val coords      = sp.getSkycalcCoordinates
-      val mags        = sp.getMagnitudes.asScalaList.map(_.toNewModel)
+      val mags        = sp.getTarget.getMagnitudes.asScalaList.map(_.toNewModel)
       val ra          = Angle.fromDegrees(coords.getRaDeg)
       val dec         = Angle.fromDegrees(coords.getDecDeg)
       val coordinates = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))

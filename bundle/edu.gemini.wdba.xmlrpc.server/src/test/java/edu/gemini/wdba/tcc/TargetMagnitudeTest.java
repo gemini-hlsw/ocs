@@ -104,7 +104,7 @@ public final class TargetMagnitudeTest extends TestBase {
 
     private void validateMagnitudes(Element element, SPTarget target) {
         final Element magGroupElement = (Element) element.selectSingleNode(MAG_PATH);
-        ImList<Magnitude> mags = target.getMagnitudes();
+        ImList<Magnitude> mags = target.getTarget().getMagnitudes();
         if (magGroupElement == null) {
             assertEquals(0, mags.size());
             return;

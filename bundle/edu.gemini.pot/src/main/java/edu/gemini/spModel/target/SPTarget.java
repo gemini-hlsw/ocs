@@ -152,17 +152,6 @@ public final class SPTarget extends WatchablePos {
     }
 
     /**
-     * Gets all the {@link Magnitude} information associated with this target,
-     * if any.
-     *
-     * @return (possibly empty) immutable list of {@link Magnitude} values
-     * associated with this target
-     */
-    public ImList<Magnitude> getMagnitudes() {
-        return getTarget().getMagnitudes();
-    }
-
-    /**
      * Assigns the list of magnitudes to associate with this target.  If there
      * are multiple magnitudes associated with the same bandpass, only one will
      * be kept.
