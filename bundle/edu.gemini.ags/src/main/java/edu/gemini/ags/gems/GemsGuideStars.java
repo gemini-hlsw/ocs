@@ -147,7 +147,7 @@ public class GemsGuideStars implements Comparable<GemsGuideStars> {
     // Returns the R magnitude, if known, otherwise 99.
     private double getRMag(Option<GuideProbeTargets> g) {
         if (!g.isEmpty() && !g.getValue().getPrimary().isEmpty()) {
-            Option<Magnitude> mag = g.getValue().getPrimary().getValue().getMagnitude(Magnitude.Band.R);
+            Option<Magnitude> mag = g.getValue().getPrimary().getValue().getTarget().getMagnitude(Magnitude.Band.R);
             if (!mag.isEmpty()) {
                 return mag.getValue().getBrightness();
             }

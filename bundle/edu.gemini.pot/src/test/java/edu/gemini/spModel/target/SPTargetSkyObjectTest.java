@@ -91,12 +91,12 @@ public final class SPTargetSkyObjectTest {
         expected.foreach(new ApplyOp<Magnitude>() {
             @Override public void apply(Magnitude magnitude) {
                 assertTrue(bands.contains(magnitude.getBand()));
-                assertEquals(magnitude, target.getMagnitude(magnitude.getBand()).getValue());
+                assertEquals(magnitude, target.getTarget().getMagnitude(magnitude.getBand()).getValue());
             }
         });
 
         // okay don't call this method with "M" in the list of expected or input
-        assertTrue(target.getMagnitude(Magnitude.Band.M).isEmpty());
+        assertTrue(target.getTarget().getMagnitude(Magnitude.Band.M).isEmpty());
     }
 
     @Test
@@ -122,15 +122,15 @@ public final class SPTargetSkyObjectTest {
         ImList<Magnitude> magList = target.getTarget().getMagnitudes();
 
         assertEquals(2, magList.size());
-        assertEquals(magJ1, target.getMagnitude(Magnitude.Band.J).getValue());
-        assertEquals(magK2, target.getMagnitude(Magnitude.Band.K).getValue());
+        assertEquals(magJ1, target.getTarget().getMagnitude(Magnitude.Band.J).getValue());
+        assertEquals(magK2, target.getTarget().getMagnitude(Magnitude.Band.K).getValue());
 
         // Replace the existing J band mag with a new one.
         target.putMagnitude(magJ3);
         magList = target.getTarget().getMagnitudes();
         assertEquals(2, magList.size());
-        assertEquals(magJ3, target.getMagnitude(Magnitude.Band.J).getValue());
-        assertEquals(magK2, target.getMagnitude(Magnitude.Band.K).getValue());
+        assertEquals(magJ3, target.getTarget().getMagnitude(Magnitude.Band.J).getValue());
+        assertEquals(magK2, target.getTarget().getMagnitude(Magnitude.Band.K).getValue());
     }
 
     @Test
@@ -143,7 +143,7 @@ public final class SPTargetSkyObjectTest {
         ImList<Magnitude> magList = target.getTarget().getMagnitudes();
 
         assertEquals(2, magList.size());
-        assertEquals(magJ3, target.getMagnitude(Magnitude.Band.J).getValue());
-        assertEquals(magK2, target.getMagnitude(Magnitude.Band.K).getValue());
+        assertEquals(magJ3, target.getTarget().getMagnitude(Magnitude.Band.J).getValue());
+        assertEquals(magK2, target.getTarget().getMagnitude(Magnitude.Band.K).getValue());
     }
 }

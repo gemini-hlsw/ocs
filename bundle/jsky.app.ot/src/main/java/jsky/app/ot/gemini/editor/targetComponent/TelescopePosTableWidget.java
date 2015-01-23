@@ -26,7 +26,6 @@ import edu.gemini.spModel.target.offset.OffsetPosBase;
 import edu.gemini.spModel.target.offset.OffsetPosList;
 import edu.gemini.spModel.target.offset.OffsetUtil;
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
-import edu.gemini.spModel.target.system.HmsDegTarget;
 import edu.gemini.spModel.target.system.ICoordinate;
 import edu.gemini.spModel.target.system.ITarget;
 import jsky.app.ot.OT;
@@ -154,7 +153,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             public Option<Magnitude> getMagnitude(final Magnitude.Band band) {
                 return target.flatMap(new MapOp<SPTarget, Option<Magnitude>>() {
                     @Override public Option<Magnitude> apply(SPTarget spTarget) {
-                        return spTarget.getMagnitude(band);
+                        return spTarget.getTarget().getMagnitude(band);
                     }
                 });
             }

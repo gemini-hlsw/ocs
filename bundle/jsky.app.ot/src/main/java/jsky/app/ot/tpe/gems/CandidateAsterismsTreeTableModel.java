@@ -184,7 +184,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
                     if (Canopus.Wfs.Group.instance.getMembers().contains(guideProbe)) {
                         band = Magnitude.Band.R;
                     }
-                    Option<Magnitude> magOpt = _guideProbeTargets.getPrimary().getValue().getMagnitude(band);
+                    Option<Magnitude> magOpt = _guideProbeTargets.getPrimary().getValue().getTarget().getMagnitude(band);
                     if (!magOpt.isEmpty()) {
                         return magOpt.getValue().getBrightness() + " (" + band.name() + ")";
                     }

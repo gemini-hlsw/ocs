@@ -105,9 +105,9 @@ public class GemsCatalogResultsTest  implements MascotProgress {
         assertEquals(odgw1x.getRaDeg(), odgw1.getRaDeg(), 0.001);
         assertEquals(odgw1x.getDecDeg(), odgw1.getDecDeg(), 0.001);
 
-        double cwfs1Mag = group.get(Canopus.Wfs.cwfs1).getValue().getPrimary().getValue().getMagnitude(Magnitude.Band.R).getValue().getBrightness();
-        double cwfs2Mag = group.get(Canopus.Wfs.cwfs2).getValue().getPrimary().getValue().getMagnitude(Magnitude.Band.R).getValue().getBrightness();
-        double cwfs3Mag = group.get(Canopus.Wfs.cwfs3).getValue().getPrimary().getValue().getMagnitude(Magnitude.Band.R).getValue().getBrightness();
+        double cwfs1Mag = group.get(Canopus.Wfs.cwfs1).getValue().getPrimary().getValue().getTarget().getMagnitude(Magnitude.Band.R).getValue().getBrightness();
+        double cwfs2Mag = group.get(Canopus.Wfs.cwfs2).getValue().getPrimary().getValue().getTarget().getMagnitude(Magnitude.Band.R).getValue().getBrightness();
+        double cwfs3Mag = group.get(Canopus.Wfs.cwfs3).getValue().getPrimary().getValue().getTarget().getMagnitude(Magnitude.Band.R).getValue().getBrightness();
         assertTrue(cwfs3Mag < cwfs1Mag && cwfs3Mag < cwfs2Mag); // cwfs3 is brightest
 
     }

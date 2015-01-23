@@ -165,19 +165,6 @@ public final class SPTarget extends WatchablePos {
     }
 
     /**
-     * Gets the {@link Magnitude} value associated with the given magnitude
-     * passband.
-     *
-     * @param band passband of the {@link Magnitude} value to retrieve
-     *
-     * @return {@link Magnitude} value associated with the given passband,
-     * wrapped in a {@link Some} object; {@link None} if none
-     */
-    public Option<Magnitude> getMagnitude(final Magnitude.Band band) {
-        return _target.getMagnitude(band);
-    }
-
-    /**
      * Gets the set of magnitude bands that have been recorded in this target.
      *
      * @returns a Set of {@link Magnitude.Band magnitude bands} for which
