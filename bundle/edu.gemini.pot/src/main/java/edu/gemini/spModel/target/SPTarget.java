@@ -100,15 +100,15 @@ public final class SPTarget extends WatchablePos {
      * Set the contained target's RA and Dec from Strings in HMS/DMS format and notify listeners.
      * Invalid values are replaced with 00:00:00.
      */
-    public void setXYFromString(final String xaxisStr, final String yaxisStr) {
+    public void setHmsDms(final String hms, final String dms) {
         synchronized (this) {
             try {
-                _target.setC1(xaxisStr);
+                _target.setC1(hms);
             } catch (final IllegalArgumentException ex) {
                 _target.setC1("00:00:00.0");
             }
             try {
-                _target.setC2(yaxisStr);
+                _target.setC2(dms);
             } catch( final IllegalArgumentException ex) {
                 _target.setC2("00:00:00.0");
             }
@@ -235,7 +235,7 @@ public final class SPTarget extends WatchablePos {
     }
 
     /** Set the contained target RA/Dec in degrees and notify observers. */
-    public void setXY(final double raDeg, final double decDeg) {
+    public void setRaDecDegrees(final double raDeg, final double decDeg) {
         synchronized (this) {
             _target.getC1().setAs(raDeg, Units.DEGREES);
             _target.getC2().setAs(decDeg, Units.DEGREES);

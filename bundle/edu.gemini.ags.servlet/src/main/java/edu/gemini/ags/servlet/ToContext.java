@@ -181,7 +181,7 @@ public enum ToContext {
             // pick the right guider.
             case nonsidereal:
                 t = new SPTarget(new ConicTarget());
-                t.setXY(raDeg, decDeg);
+                t.setRaDecDegrees(raDeg, decDeg);
                 break;
             default:
                 t = new SPTarget(raDeg, decDeg);

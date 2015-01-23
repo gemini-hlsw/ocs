@@ -182,7 +182,7 @@ case class PositionProvider(ctx: QvContext, base: ObservationProvider) extends O
       if (NonSiderealCache.isHorizonsTarget(o)) {
         val pos = NonSiderealCache.get(ctx.site, ctx.referenceDate, o)
         val newTarget = o.getTargetEnvironment.getBase.clone().asInstanceOf[SPTarget]
-        newTarget.setXY(pos.getRaDeg, pos.getDecDeg)
+        newTarget.setRaDecDegrees(pos.getRaDeg, pos.getDecDeg)
         new Obs(
           o.getProg,
           o.getGroup,
