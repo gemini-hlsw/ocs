@@ -165,16 +165,6 @@ public final class SPTarget extends WatchablePos {
     }
 
     /**
-     * Gets the set of magnitude bands that have been recorded in this target.
-     *
-     * @returns a Set of {@link Magnitude.Band magnitude bands} for which
-     * we have information in this target
-     */
-    public Set<Magnitude.Band> getMagnitudeBands() {
-        return _target.getMagnitudeBands();
-    }
-
-    /**
      * Adds the given magnitude to the collection of magnitudes associated with
      * this target, replacing any other magnitude of the same band if any.
      *

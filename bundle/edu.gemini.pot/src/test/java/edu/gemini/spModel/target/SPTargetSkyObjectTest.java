@@ -58,7 +58,7 @@ public final class SPTargetSkyObjectTest {
             SPTarget target = new SPTarget(obj);
 
             assertEquals(0, target.getTarget().getMagnitudes().size());
-            assertEquals(0, target.getMagnitudeBands().size());
+            assertEquals(0, target.getTarget().getMagnitudeBands().size());
 
             HmsDegTarget hmsDeg = (HmsDegTarget) target.getTarget();
 
@@ -86,7 +86,7 @@ public final class SPTargetSkyObjectTest {
         final ImList<Magnitude> mags = target.getTarget().getMagnitudes();
         assertEquals(expected.size(), mags.size());
 
-        final Set<Magnitude.Band> bands = target.getMagnitudeBands();
+        final Set<Magnitude.Band> bands = target.getTarget().getMagnitudeBands();
         assertEquals(expected.size(), bands.size());
         expected.foreach(new ApplyOp<Magnitude>() {
             @Override public void apply(Magnitude magnitude) {

@@ -332,12 +332,12 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             // An operation that adds a target's bands to the set.
             ApplyOp<SPTarget> op = new ApplyOp<SPTarget>() {
                 @Override public void apply(SPTarget spTarget) {
-                    bands.addAll(spTarget.getMagnitudeBands());
+                    bands.addAll(spTarget.getTarget().getMagnitudeBands());
                 }
             };
 
             // Extract all the magnitude bands from the environment.
-            bands.addAll(env.getBase().getMagnitudeBands());
+            bands.addAll(env.getBase().getTarget().getMagnitudeBands());
             for (GuideProbeTargets gt : env.getOrCreatePrimaryGuideGroup()) {
                 gt.getOptions().foreach(op);
             }
