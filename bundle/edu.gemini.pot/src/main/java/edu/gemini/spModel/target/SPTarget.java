@@ -22,7 +22,6 @@ import edu.gemini.spModel.target.system.CoordinateTypes.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.Set;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -183,13 +182,6 @@ public final class SPTarget extends WatchablePos {
     public void setName(final String name) {
         _target.setName(name);
         _notifyOfUpdate();
-    }
-
-    /**
-     * Get the name.
-     */
-    public String getName() {
-        return _target.getName();
     }
 
 
@@ -355,7 +347,7 @@ public final class SPTarget extends WatchablePos {
 
         // Based on instance create the right target
         final ITarget target = getTarget();
-        Pio.addParam(factory, paramSet, _NAME, getName());
+        Pio.addParam(factory, paramSet, _NAME, getTarget().getName());
 
         if (target instanceof HmsDegTarget) {
             final HmsDegTarget t = (HmsDegTarget) target;

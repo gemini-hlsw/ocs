@@ -34,7 +34,6 @@ import edu.gemini.spModel.pio.xml.PioXmlFactory;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
-import edu.gemini.spModel.target.system.HmsDegTarget;
 import edu.gemini.spModel.target.system.ICoordinate;
 import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.time.ChargeClass;
@@ -51,7 +50,6 @@ import jsky.catalog.SearchCondition;
 import jsky.coords.DMS;
 import jsky.coords.HMS;
 
-import javax.security.auth.Subject;
 import java.security.AccessControlException;
 import java.security.Principal;
 import java.util.*;
@@ -451,7 +449,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
             final SPTarget target = targetEnv.getBase();
             if (target == null)
                 return null;
-            return target.getName();
+            return target.getTarget().getName();
         } catch (Exception e) {
             e.printStackTrace();
             return null;

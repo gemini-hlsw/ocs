@@ -284,7 +284,7 @@ class ParamsListTableCellRenderer extends DefaultTableCellRenderer {
 
             // Cell for a target
             final SPTarget target = (SPTarget) value;
-            label.setText(target.getName());
+            label.setText(target.getTarget().getName());
 
             // Two possible icons
             if (target.getTarget() instanceof NonSiderealTarget) {

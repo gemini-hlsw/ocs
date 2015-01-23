@@ -91,7 +91,7 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
             TargetEnvironment env = getTargetEnvironment();
             SPTarget tp = env.getBase();
             if (tp != null) { // base pos should always be defined, so tp should never be null
-                String name = tp.getName();
+                String name = tp.getTarget().getName();
                 if (name == null || name.length() == 0) {
                     // Use the base position
                     return tp.getTarget().getPosition();

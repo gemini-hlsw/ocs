@@ -62,7 +62,7 @@ public final class SPTargetSkyObjectTest {
 
             HmsDegTarget hmsDeg = (HmsDegTarget) target.getTarget();
 
-            assertEquals("xyz", target.getName());
+            assertEquals("xyz", target.getTarget().getName());
             assertEquals(15.0, target.getXaxis(), 0.000001);
             assertEquals(20.0, target.getYaxis(), 0.000001);
             assertEquals(1.0, hmsDeg.getPM1().getValue(), 0.000001);

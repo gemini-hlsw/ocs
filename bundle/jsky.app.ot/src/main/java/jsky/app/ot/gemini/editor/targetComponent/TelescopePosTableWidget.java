@@ -171,7 +171,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
         static final class BaseTargetRow extends AbstractRow {
             BaseTargetRow(SPTarget target) {
-                super(true, TargetEnvironment.BASE_NAME, target.getName(), new Some<>(target));
+                super(true, TargetEnvironment.BASE_NAME, target.getTarget().getName(), new Some<>(target));
             }
         }
 
@@ -179,7 +179,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             final Option<Double> distance;
 
             NonBaseTargetRow(boolean enabled, String tag, SPTarget target, WorldCoords baseCoords) {
-                super(enabled, tag, target.getName(), new Some<>(target));
+                super(enabled, tag, target.getTarget().getName(), new Some<>(target));
                 final WorldCoords coords = getWorldCoords(target);
                 distance = new Some<>(Math.abs(baseCoords.dist(coords)));
             }

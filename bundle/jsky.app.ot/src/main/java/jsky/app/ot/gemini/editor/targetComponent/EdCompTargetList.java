@@ -1581,7 +1581,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _showTargetTag();
         _updateTargetInformationUI();
 
-        String name = _curPos.getName();
+        String name = _curPos.getTarget().getName();
         if (name != null) name = name.trim();
         _w.targetName.setValue(name);
         _w.resolveButton.setEnabled(editable && !"".equals(name));

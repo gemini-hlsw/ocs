@@ -359,7 +359,7 @@ public class LchQueryFunctor extends DBAbstractQueryFunctor implements IDBParall
     private Serializable _makeTargetNode(SPTarget target, TargetEnvironment targetEnvironment) {
         if (target.getTarget() instanceof NonSiderealTarget) {
             NonSidereal nonSidereal = new NonSidereal();
-            nonSidereal.setName(target.getName());
+            nonSidereal.setName(target.getTarget().getName());
             nonSidereal.setType(_getTargetType(target, targetEnvironment));
             Long id = ((NonSiderealTarget) target.getTarget()).getHorizonsObjectId();
             if (id != null) {
@@ -368,7 +368,7 @@ public class LchQueryFunctor extends DBAbstractQueryFunctor implements IDBParall
             return nonSidereal;
         } else {
             Sidereal sidereal = new Sidereal();
-            sidereal.setName(target.getName());
+            sidereal.setName(target.getTarget().getName());
             sidereal.setType(_getTargetType(target, targetEnvironment));
             Coordinates coords = target.getSkycalcCoordinates();
             HmsDms hmsDms = new HmsDms();

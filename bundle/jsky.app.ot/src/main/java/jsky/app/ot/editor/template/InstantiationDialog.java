@@ -101,7 +101,7 @@ class InstantiationDialogRenderer extends TemplateDialogRenderer {
 
             // Text
             final SPSiteQuality.Conditions conds = tps.getSiteQuality().conditions();
-            setText(spTarget.getName() + " - " + conds);
+            setText(spTarget.getTarget().getName() + " - " + conds);
         }
     }
 }

@@ -46,7 +46,7 @@ object RolloverObservation {
       dataObj    <- Option(targetComp.getDataObject.asInstanceOf[TargetObsComp])
       targetEnv  <- Option(dataObj.getTargetEnvironment)
       science    <- Option(targetEnv.getBase)
-      name       <- Option(science.getName)
+      name       <- Option(science.getTarget.getName)
       ra         <- Option(science.getXaxis)
       dec        <- Option(science.getYaxis)
     } yield RolloverTarget(name, new Angle(ra, Angle.Unit.DEGREES), new Angle(dec, Angle.Unit.DEGREES))

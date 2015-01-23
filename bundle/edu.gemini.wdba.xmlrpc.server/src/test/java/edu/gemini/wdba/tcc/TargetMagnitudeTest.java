@@ -89,7 +89,7 @@ public final class TargetMagnitudeTest extends TestBase {
 
             Option<SPTarget> target = env.getTargets().find(new PredicateOp<SPTarget>() {
                 public Boolean apply(SPTarget spTarget) {
-                    return name.equals(spTarget.getName());
+                    return name.equals(spTarget.getTarget().getName());
                 }
             });
 

@@ -422,7 +422,7 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
 
     // Returns a mascot Star object for the given target.
     private Star targetToStar(SPTarget target) {
-        String name = target.getName();
+        String name = target.getTarget().getName();
         double ra = target.getXaxis();
         double dec = target.getYaxis();
         double baseX = _tii.getBasePos().getRaDeg();
