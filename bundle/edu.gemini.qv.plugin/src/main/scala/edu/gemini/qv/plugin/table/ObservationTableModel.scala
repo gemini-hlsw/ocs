@@ -368,22 +368,14 @@ object ObservationTableModel {
 
   // ==== Wrapper case classes for some values which allow us to define custom renderers and sorting. ===
   case class RaValue(ra: Double) extends Comparable[RaValue] {
-    def compareTo(other: RaValue): Int = ra - other.ra match {
-      case d if d < 0   => -1
-      case d if d == 0  => 0
-      case d if d > 0   => 1
-    }
+    def compareTo(other: RaValue): Int = math.signum(ra - other.ra).toInt
     val prettyString: String = {
       val hms = Angle.fromDegrees(ra).toHMS
       f"${hms.hours}:${hms.minutes}%02d:${hms.seconds}%06.3f"
     }
   }
   case class DecValue(dec: Double) extends Comparable[DecValue] {
-    def compareTo(other: DecValue): Int = dec - other.dec match {
-      case d if d < 0   => -1
-      case d if d == 0  => 0
-      case d if d > 0   => 1
-    }
+    def compareTo(other: DecValue): Int = math.signum(dec - other.dec).toInt
     val prettyString: String = {
       val dms = new DMS(dec)
       val sig = if (dms.getSign < 0) "-" else ""
@@ -391,11 +383,7 @@ object ObservationTableModel {
     }
   }
   case class TimeValue(t: Long) extends Comparable[TimeValue] {
-    def compareTo(other: TimeValue): Int = t - other.t match {
-      case d if d < 0   => -1
-      case d if d == 0  => 0
-      case d if d > 0   => 1
-    }
+    def compareTo(other: TimeValue): Int = math.signum(t - other.t).toInt
     val prettyString: String = TimeUtils.msToHHMMSS(t)
   }
 
