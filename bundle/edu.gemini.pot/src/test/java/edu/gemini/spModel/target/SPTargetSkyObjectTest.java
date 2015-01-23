@@ -13,6 +13,7 @@ import static edu.gemini.shared.skyobject.coords.HmsDegCoordinates.Epoch.Type.JU
 import edu.gemini.shared.util.immutable.ApplyOp;
 import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.DefaultImList;
+import edu.gemini.spModel.target.system.CoordinateParam;
 import edu.gemini.spModel.target.system.CoordinateTypes;
 import edu.gemini.spModel.target.system.HmsDegTarget;
 import static org.junit.Assert.*;
@@ -63,8 +64,8 @@ public final class SPTargetSkyObjectTest {
             HmsDegTarget hmsDeg = (HmsDegTarget) target.getTarget();
 
             assertEquals("xyz", target.getTarget().getName());
-            assertEquals(15.0, target.getXaxis(), 0.000001);
-            assertEquals(20.0, target.getYaxis(), 0.000001);
+            assertEquals(15.0, target.getTarget().getC1().getAs(CoordinateParam.Units.DEGREES), 0.000001);
+            assertEquals(20.0, target.getTarget().getC2().getAs(CoordinateParam.Units.DEGREES), 0.000001);
             assertEquals(1.0, hmsDeg.getPM1().getValue(), 0.000001);
             assertEquals(2.0, hmsDeg.getPM2().getValue(), 0.000001);
 

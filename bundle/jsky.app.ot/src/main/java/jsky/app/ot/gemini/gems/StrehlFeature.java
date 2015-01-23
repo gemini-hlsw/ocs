@@ -21,6 +21,7 @@ import edu.gemini.spModel.target.WatchablePos;
 import edu.gemini.spModel.target.env.GuideGroup;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.env.TargetEnvironmentDiff;
+import edu.gemini.spModel.target.system.CoordinateParam;
 import jsky.app.ot.tpe.*;
 import jsky.app.ot.util.BasicPropertyList;
 import jsky.app.ot.util.PropertyWatcher;
@@ -423,8 +424,8 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
     // Returns a mascot Star object for the given target.
     private Star targetToStar(SPTarget target) {
         String name = target.getTarget().getName();
-        double ra = target.getXaxis();
-        double dec = target.getYaxis();
+        double ra = target.getTarget().getC1().getAs(CoordinateParam.Units.DEGREES);
+        double dec = target.getTarget().getC2().getAs(CoordinateParam.Units.DEGREES);
         double baseX = _tii.getBasePos().getRaDeg();
         double baseY = _tii.getBasePos().getDecDeg();
         Magnitude undef = new Magnitude(Magnitude.Band.J, MascotConf.invalidMag());

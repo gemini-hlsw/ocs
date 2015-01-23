@@ -567,40 +567,10 @@ public final class SPTarget extends WatchablePos {
     }
 
     /**
-     * Get the xaxis.
-     */
-    public final double getXaxis() {
-        final ICoordinate c1 = _target.getC1();
-        return c1.getAs(Units.DEGREES);
-    }
-
-    /**
-     * Get the yaxis.
-     */
-    public final double getYaxis() {
-        final ICoordinate c2 = _target.getC2();
-        return c2.getAs(Units.DEGREES);
-    }
-
-    /**
-     * Get the xaxis as a String.
-     */
-    public String getXaxisAsString() {
-        return _target.c1ToString();
-    }
-
-    /**
-     * Get the yaxis as a String.
-     */
-    public String getYaxisAsString() {
-        return _target.c2ToString();
-    }
-
-    /**
      * Gets a Skycalc {@link edu.gemini.skycalc.Coordinates} representation.
      */
     public synchronized Coordinates getSkycalcCoordinates() {
-        return new Coordinates(getXaxis(), getYaxis());
+        return new Coordinates(getTarget().getC1().getAs(Units.DEGREES), getTarget().getC2().getAs(Units.DEGREES));
     }
 
     /**

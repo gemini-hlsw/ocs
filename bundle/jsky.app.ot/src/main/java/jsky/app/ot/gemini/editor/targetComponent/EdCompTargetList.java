@@ -1586,8 +1586,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.targetName.setValue(name);
         _w.resolveButton.setEnabled(editable && !"".equals(name));
 
-        _w.xaxis.setValue(_curPos.getXaxisAsString());
-        _w.yaxis.setValue(_curPos.getYaxisAsString());
+        _w.xaxis.setValue(_curPos.getTarget().c1ToString());
+        _w.yaxis.setValue(_curPos.getTarget().c2ToString());
 
         _setCoordSys();
 
