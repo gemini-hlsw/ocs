@@ -34,11 +34,49 @@ public final class SPTarget extends WatchablePos {
         _target = target;
     }
 
-    public SPTarget(final double xaxis, final double yaxis) {
+    /** SPTarget with the given RA/Dec in degrees. */
+    public SPTarget(final double raDeg, final double degDec) {
         this();
-        _target.getC1().setAs(xaxis, Units.DEGREES);
-        _target.getC2().setAs(yaxis, Units.DEGREES);
+        _target.getC1().setAs(raDeg, Units.DEGREES);
+        _target.getC2().setAs(degDec, Units.DEGREES);
     }
+
+    /** Return the contained target. */
+    public ITarget getTarget() {
+        return _target;
+    }
+
+    /** Replace the contained target and notify listeners. */
+    public void setTarget(final ITarget target) {
+        _target = target;
+        _notifyOfUpdate();
+    }
+
+    /** Return a paramset describing this SPTarget. */
+    public ParamSet getParamSet(final PioFactory factory) {
+        return SPTargetPio.getParamSet(this, factory);
+    }
+
+    /** Re-initialize this SPTarget from the given paramset */
+    public void setParamSet(final ParamSet paramSet) {
+        SPTargetPio.setParamSet(paramSet, this);
+    }
+
+    /** Construct a new SPTarget from the given paramset */
+    public static SPTarget fromParamSet(final ParamSet pset) {
+        return SPTargetPio.fromParamSet(pset);
+    }
+
+    /** Clone this SPTarget. */
+    public SPTarget clone() {
+        return new SPTarget((ITarget) _target.clone());
+    }
+
+
+    ///
+    /// END OF PUBLIC API ... EVERYTHING FROM HERE DOWN GOES AWAY
+    ///
+
 
     /** Set contained target magnitudes and notify listeners. */
     public void setMagnitudes(final ImList<Magnitude> magnitudes) {
@@ -187,25 +225,6 @@ public final class SPTarget extends WatchablePos {
         }
     }
 
-    /** Return a paramset describing this SPTarget. */
-    public ParamSet getParamSet(final PioFactory factory) {
-        return SPTargetPio.getParamSet(this, factory);
-    }
-
-    /** Re-initialize this SPTarget from the given paramset */
-    public void setParamSet(final ParamSet paramSet) {
-        SPTargetPio.setParamSet(paramSet, this);
-    }
-
-    /** Construct a new SPTarget from the given paramset */
-    public static SPTarget fromParamSet(final ParamSet pset) {
-        return SPTargetPio.fromParamSet(pset);
-    }
-
-    public String toString() {
-        return _target.toString();
-    }
-
     // I'm making this public so I can call it from an editor when I make
     // a change to the contained target, rather than publishing all the
     // target members through this idiotic class. All of this crap needs
@@ -229,32 +248,4 @@ public final class SPTarget extends WatchablePos {
         _notifyOfUpdate();
     }
 
-    /** Set a new ITarget for this position and notify watchers */
-    public void setTarget(final ITarget target) {
-        _target = target;
-        _notifyOfUpdate();
-    }
-
-    /**
-     * Returns the position's current target.
-     */
-    public ITarget getTarget() {
-        return _target;
-    }
-
-    public SPTarget clone() {
-        final SPTarget ntarget;
-        try {
-            ntarget = (SPTarget) super.clone();
-
-            // We also have to clone the inner target object because it is
-            // mutable. We don't need to clone the magnitudes list because it
-            // is an immutable list holding immutable objects.
-            ntarget._target = (ITarget) _target.clone();
-        } catch (final CloneNotSupportedException ex) {
-            // Should not happen
-            throw new UnsupportedOperationException();
-        }
-        return ntarget;
-    }
 }
