@@ -121,36 +121,52 @@ object Exporter {
     val file = File.createTempFile("openAsFile", s".${format}")
     val out = new PrintWriter(file)
 
-//    out.append("<html>\n<head>\n<style type=\"text/css\">\n<!--\nbr {mso-data-placement:same-cell}\n//-->\n</style>\n</head>\n<body>")
-    out.append("<html>\n<body>\n")
+    out.append("""
+        |<html>
+        |  <head>
+        |    <style type="text/css">
+        |      .text{
+        |        mso-number-format:"\@";        <!-- Excel: keep excel from being "clever" and interpret values -->
+        |        mso-data-placement:same-cell;  <!-- Excel: keep values with line breaks in single cell -->
+        |      }
+        |    </style>
+        |  </head>
+        |  <body>
+        |    <table>
+        |      <thead>
+        |        <tr>
+      """.stripMargin)
 
-    out.append("<table>\n")
-    out.append("<thead>\n")
-    out.append("  <tr>\n")
     for (h <- 0 to header.size - 1) {
       out.append("    <td>")
       out.append(header(h))
       out.append("</td>")
     }
-    out.append("  </tr>")
-    out.append("</thead>\n")
+    out.append(
+      """
+        |        </tr>
+        |      </thead>
+        |      <tbody>
+      """.stripMargin)
 
-    out.append("<tbody>")
-    out.append("  <tr>\n")
     for (r <- 0 to data.size - 1) {
-      out.append("  <tr>\n")
+      out.append("        <tr>\n")
       for (c <- 0 to data(r).size - 1) {
-        out.append("    <td>")
         val string = toString(data(r)(c))
-        out.append(string.replaceAllLiterally("\n", "<br>")) //"<br style=\"mso-data-placement:same-cell;\">"))
-        out.append("</td>\n")
+        out.append("          <td class=\"text\">")
+        out.append(string.replaceAllLiterally("\n", "<br>"))
+        out.append("          </td>\n")
       }
-      out.append("  </tr>\n")
+      out.append("        </tr>\n")
     }
-    out.append("</tbody>")
-    out.append("</table>\n")
 
-    out.append("</body>\n</html>")
+    out.append(
+      """
+        |      </tbody>
+        |    </table>
+        |  </body>
+        |</html>
+      """.stripMargin)
 
     out.close
     file
