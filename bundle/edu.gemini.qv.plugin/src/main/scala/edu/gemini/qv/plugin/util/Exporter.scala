@@ -1,17 +1,20 @@
 package edu.gemini.qv.plugin.util
 
+import java.awt.Desktop
+import java.awt.print.{PageFormat, PrinterException, PrinterJob}
+import java.io.{File, PrintWriter}
+import javax.swing.JTable
+import javax.swing.JTable.PrintMode
+import javax.swing.table.TableColumn
+
+import edu.gemini.qv.plugin.table.ObservationTableModel.{DecValue, RaValue, TimeValue}
 import edu.gemini.qv.plugin.table.renderer.EncodedObservationsRenderer.TextPane
 import edu.gemini.qv.plugin.ui.QvGui
 import edu.gemini.qv.plugin.ui.QvGui.ActionButton
-import java.awt.Desktop
-import java.awt.print.{PageFormat, PrinterJob, PrinterException}
-import java.io.{PrintWriter, File}
-import javax.swing.JTable
-import javax.swing.JTable.PrintMode
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.swing.{Button, TextArea, Label}
-import javax.swing.table.TableColumn
+import scala.swing.{Button, Label, TextArea}
 
 /**
  */
@@ -160,15 +163,19 @@ object Exporter {
     (for (r <- 0 to table.getRowCount - 1) yield colValues(table, r)).toVector
 
   private def colValues(table: JTable, r: Int): Vector[AnyRef] =
-    (for (c <- 0 to table.getColumnCount - 1) yield table.getModel.getValueAt(table.convertRowIndexToModel(r), table.convertColumnIndexToModel(c))).toVector
+    (for (c <- 0 to table.getColumnCount - 1) yield table.getValueAt(r, c)).toVector
 
 
   private def toString(v: AnyRef): String = v match {
-    case s: String => s
-    case l: Label => l.text
-    case t: TextArea => t.text
-    case t: TextPane => t.styledDocument.getText(0, t.styledDocument.getLength)
-    case x => x.toString
+    case s: String            => s
+    case d: java.lang.Double  => f"$d%.2f"
+    case l: Label             => l.text
+    case t: TextArea          => t.text
+    case t: TextPane          => t.styledDocument.getText(0, t.styledDocument.getLength)
+    case r: RaValue           => r.prettyString
+    case d: DecValue          => d.prettyString
+    case t: TimeValue         => t.prettyString
+    case x                    => x.toString
   }
 
 
