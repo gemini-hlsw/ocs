@@ -104,11 +104,11 @@ public class GnirsNorth extends Gnirs {
         //Select filter depending on if Cross dispersion is used.
         if (_XDisp) {
             _filterUsed = "XD";
-            _Filter = new Filter(getPrefix(), _filterUsed, getDirectory() + "/", Filter.CALC_EFFECTIVE_WAVELEN);
+            _Filter = Filter.fromFile(getPrefix(), _filterUsed, getDirectory() + "/");
         } else {
             //Use GnirsOrderSelecter to decide which filter to put in
             _filterUsed = "order";
-            _Filter = new Filter(getPrefix(), _filterUsed + _os.getOrder(_centralWavelength), getDirectory() + "/", Filter.CALC_EFFECTIVE_WAVELEN);
+            _Filter = Filter.fromFile(getPrefix(), _filterUsed + _os.getOrder(_centralWavelength), getDirectory() + "/");
         }
         addComponent(_Filter);
 

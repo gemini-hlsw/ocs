@@ -98,7 +98,7 @@ public class Niri extends Instrument {
             //System.out.println("gris: " +grism);
             //if(!(_grism.equals("none"))){
             //	throw new Exception("Please select Grism Order Sorting from the filter list."); }
-            _Filter = new Filter(getPrefix(), _filterUsed, getDirectory() + "/", Filter.CALC_EFFECTIVE_WAVELEN);
+            _Filter = Filter.fromFile(getPrefix(), _filterUsed, getDirectory() + "/");
 
             _observingStart = _Filter.getStart();
             _observingEnd = _Filter.getEnd();
@@ -110,7 +110,7 @@ public class Niri extends Instrument {
             //To do this right we should have full transmission curves for all filters
             //that are used with the PK50 and include them all.
             if (_filterUsed.equals("Y-G0241")) {
-                _Filter2 = new Filter(getPrefix(), "PK50-fake", getDirectory() + "/", Filter.CALC_EFFECTIVE_WAVELEN);
+                _Filter2 = Filter.fromFile(getPrefix(), "PK50-fake", getDirectory() + "/");
 
                 addComponent(_Filter2);
             }

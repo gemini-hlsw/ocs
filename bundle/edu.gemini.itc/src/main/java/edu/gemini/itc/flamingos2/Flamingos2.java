@@ -116,8 +116,7 @@ public class Flamingos2 extends Instrument {
         if (_filterBand.equalsIgnoreCase(Flamingos2Parameters.CLEAR))
             return;
 
-        _colorFilter = new Filter(getPrefix(), _filterBand, getDirectory()
-                + "/", Filter.CALC_EFFECTIVE_WAVELEN);
+        _colorFilter = Filter.fromFile(getPrefix(), _filterBand, getDirectory() + "/");
         addComponent(_colorFilter);
 
     }

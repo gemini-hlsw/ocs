@@ -116,7 +116,7 @@ public class TRecs extends Instrument {
         if (!(_filterUsed.equals("none"))) {
 
 
-            _Filter = new Filter(getPrefix(), _filterUsed, getDirectory() + "/", Filter.GET_EFFECTIVE_WAVELEN_FROM_FILE);
+            _Filter = Filter.fromWLFile(getPrefix(), _filterUsed, getDirectory() + "/");
 
             if (_Filter.getStart() >= _observingStart)
                 _observingStart = _Filter.getStart();

@@ -3,27 +3,27 @@ package edu.gemini.itc.shared;
 /**
  * Filter
  */
-public class Filter extends TransmissionElement {
-    public static final int GET_EFFECTIVE_WAVELEN_FROM_FILE = 0;
-    public static final int CALC_EFFECTIVE_WAVELEN = 1;
-
-    private final String _File, _Filter;
+public final class Filter extends TransmissionElement {
+    private final String _filter;
     private final double _effectiveWavelength;
 
-    public Filter(String prefix, String Filter, String dir, int effectiveWavelengthMethod) throws Exception {
-        super(dir + prefix + Filter + Instrument.getSuffix());
-        _Filter = Filter;
-        _File = dir + prefix + Filter + Instrument.getSuffix();
+    public static Filter fromFile(final String prefix, final String filter, final String dir) {
+        final String file = dir + prefix + filter + Instrument.getSuffix();
+        final double[][] data  = SpectrumParser$.MODULE$.loadFromFile(file);
+        final double wl = data[0][data[0].length / 2];
+        return new Filter(filter, data, wl);
+    }
 
-        if (effectiveWavelengthMethod == GET_EFFECTIVE_WAVELEN_FROM_FILE) {
-            // TODO: the file is now read twice (one more time in the constructor of the base class)
-            // we read only the very first double here (which is the effective wavelength)
-            TextFileReader dfr = new TextFileReader(_File);
-            _effectiveWavelength = dfr.readDouble();
-        } else {
-            _effectiveWavelength = get_trans().getX(get_trans().getLength() / 2);
-        }
+    public static Filter fromWLFile(final String prefix, final String filter, final String dir) {
+        final String file = dir + prefix + filter + Instrument.getSuffix();
+        final scala.Tuple2<Double, double[][]>  data = SpectrumParser$.MODULE$.loadFromWLFile(file);
+        return new Filter(filter, data._2(), data._1());
+    }
 
+    private Filter(final String filter, final double[][] data, final double wl) {
+        super(new DefaultArraySpectrum(data));
+        _filter = filter;
+        _effectiveWavelength = wl;
     }
 
     public double getStart() {
@@ -42,7 +42,7 @@ public class Filter extends TransmissionElement {
     }
 
     public String toString() {
-        return "Filter: " + _Filter;
+        return "Filter: " + _filter;
     }
 
 }

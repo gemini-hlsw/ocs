@@ -29,32 +29,14 @@ import java.util.List;
  */
 public class GnirsGratingsTransmission {
 
-    private List _wavelength1_list;  //wavelength for order1
-    private List _wavelength2_list;  //wavelength for order2
-    private List _wavelength3_list;  //wavelength for order3
-    private List _wavelength4_list;  //wavelength for order4
-    private List _wavelength5_list;  //wavelength for order5
-    private List _wavelength6_list;  //wavelength for order6
-    private List _wavelength7_list;  //wavelength for order7
-    private List _wavelength8_list;  //wavelength for order8
-
-    private List _order1_list;    //Transmissionfor order1
-    private List _order2_list;    //Transmission for order2
-    private List _order3_list;    //Transmissionfor order3
-    private List _order4_list;    //Transmission for order4
-    private List _order5_list;    //Transmission for order5
-    private List _order6_list;    //Transmission for order6
-    private List _order7_list;    //Transmission for order7
-    private List _order8_list;    //Transmission for order8
-
-    private TransmissionElement _order1Transmission;
-    private TransmissionElement _order2Transmission;
-    private TransmissionElement _order3Transmission;
-    private TransmissionElement _order4Transmission;
-    private TransmissionElement _order5Transmission;
-    private TransmissionElement _order6Transmission;
-    private TransmissionElement _order7Transmission;
-    private TransmissionElement _order8Transmission;
+    private final TransmissionElement _order1Transmission;
+    private final TransmissionElement _order2Transmission;
+    private final TransmissionElement _order3Transmission;
+    private final TransmissionElement _order4Transmission;
+    private final TransmissionElement _order5Transmission;
+    private final TransmissionElement _order6Transmission;
+    private final TransmissionElement _order7Transmission;
+    private final TransmissionElement _order8Transmission;
 
     DefaultArraySpectrum test;
 
@@ -68,22 +50,22 @@ public class GnirsGratingsTransmission {
                 gratingOrdersTransmission +
                 suffix);
 
-        _wavelength1_list = new ArrayList();
-        _wavelength2_list = new ArrayList();
-        _wavelength3_list = new ArrayList();
-        _wavelength4_list = new ArrayList();
-        _wavelength5_list = new ArrayList();
-        _wavelength6_list = new ArrayList();
-        _wavelength7_list = new ArrayList();
-        _wavelength8_list = new ArrayList();
-        _order1_list = new ArrayList();
-        _order2_list = new ArrayList();
-        _order3_list = new ArrayList();
-        _order4_list = new ArrayList();
-        _order5_list = new ArrayList();
-        _order6_list = new ArrayList();
-        _order7_list = new ArrayList();
-        _order8_list = new ArrayList();
+        List<Double> _wavelength1_list = new ArrayList<>();
+        List<Double> _wavelength2_list = new ArrayList<>();
+        List<Double> _wavelength3_list = new ArrayList<>();
+        List<Double> _wavelength4_list = new ArrayList<>();
+        List<Double> _wavelength5_list = new ArrayList<>();
+        List<Double> _wavelength6_list = new ArrayList<>();
+        List<Double> _wavelength7_list = new ArrayList<>();
+        List<Double> _wavelength8_list = new ArrayList<>();
+        List<Double> _order1_list = new ArrayList<>();
+        List<Double> _order2_list = new ArrayList<>();
+        List<Double> _order3_list = new ArrayList<>();
+        List<Double> _order4_list = new ArrayList<>();
+        List<Double> _order5_list = new ArrayList<>();
+        List<Double> _order6_list = new ArrayList<>();
+        List<Double> _order7_list = new ArrayList<>();
+        List<Double> _order8_list = new ArrayList<>();
 
         int wavelength1 = 0;
         int wavelength2 = 0;
