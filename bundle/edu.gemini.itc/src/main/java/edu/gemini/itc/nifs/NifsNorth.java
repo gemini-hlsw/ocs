@@ -98,7 +98,7 @@ public class NifsNorth extends Nifs {
 
         if (!(_filterUsed.equals("none"))) {
 
-            _Filter = new Filter(getPrefix(), _filterUsed, getDirectory() + "/", Filter.CALC_EFFECTIVE_WAVELEN);
+            _Filter = Filter.fromFile(getPrefix(), _filterUsed, getDirectory() + "/");
 
             if (_Filter.getStart() >= _observingStart)
                 _observingStart = _Filter.getStart();

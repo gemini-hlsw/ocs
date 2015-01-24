@@ -80,8 +80,7 @@ public class Nici extends Instrument {
 
         addComponent(new Dichroic(getDirectory() + "/", dichroic, channel));
 
-        _filter = new Filter(getPrefix(), filter, getDirectory() + "/",
-                Filter.CALC_EFFECTIVE_WAVELEN);
+        _filter = Filter.fromFile(getPrefix(), filter, getDirectory() + "/");
 
         //_print("<pre>" _filterC1.toString() + "</pre>");
 

@@ -58,8 +58,7 @@ public class AcquisitionCamera extends Instrument {
         // Other instruments may not have filters and may just use
         // the range given in their instrument file.
         //_colorFilter = new ColorFilter(filterBand, getDirectory()+"/");
-        _colorFilter = new Filter(getPrefix(), "colfilt_" + filterBand, getDirectory() + "/",
-                Filter.CALC_EFFECTIVE_WAVELEN);
+        _colorFilter = Filter.fromFile(getPrefix(), "colfilt_" + filterBand, getDirectory() + "/");
 
         addComponent(_colorFilter);
         addComponent(new NDFilterWheel(ndFilter, getDirectory() + "/"));

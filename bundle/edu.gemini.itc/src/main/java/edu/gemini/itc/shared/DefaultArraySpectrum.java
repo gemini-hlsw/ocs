@@ -1,39 +1,31 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-
 package edu.gemini.itc.shared;
 
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Default implementation of Spectrum interface.
  * This interface represents a 2-D spectrum.  The x and y axes are the
  * real numbers (doubles).  Data points are not necessarily at regular
- * x intevals.
+ * x intervals.
  */
-public class DefaultArraySpectrum implements ArraySpectrum {
+public final class DefaultArraySpectrum implements ArraySpectrum {
     // The spectral data.  _data = new double[2][num_data_points]
     // data[0][i] = x values
     // data[1][i] = y values
-    private double[][] _data;
+    private final double[][] _data;
 
     /**
-     * Construce a DefaultSpectrum.  Lists represent data point pairs
+     * Construct a DefaultSpectrum.  Lists represent data point pairs
      * so they must have the same length.
-     *
-     * @throws Exception If lists do not have same length or if they contain
-     *                   anything other than Doubles
      */
-    public DefaultArraySpectrum(List x_values, List y_values) throws Exception {
-        _initialize(x_values, y_values);
+    public DefaultArraySpectrum(final List<Double> xs, final List<Double> ys) {
+        assert xs.size() == ys.size();
+
+        _data = new double[2][xs.size()];
+        for (int i = 0; i < xs.size(); ++i) {
+            _data[0][i] = xs.get(i);
+            _data[1][i] = ys.get(i);
+        }
     }
 
     /**
@@ -41,27 +33,14 @@ public class DefaultArraySpectrum implements ArraySpectrum {
      * double data[][] = new double[2][length];
      * data[0][i] = x values
      * data[1][i] = y values
-     *
-     * @throws Exception If array is not of proper form Exception is thrown
      */
-    public DefaultArraySpectrum(double[][] data) throws Exception {
-        // System.arraycopy() works only on 1-D arrays.
-        int length = data.length;
-        if (length != 2) {
-            throw new Exception("Spectrum array dimension must be 2, but it is "
-                    + length);
-        }
-        int x_len = data[0].length;
-        int y_len = data[1].length;
-        if (x_len != y_len) {
-            throw new Exception("Spectrum data invalid, " + x_len + " x values "
-                    + y_len + " y values");
-        }
-        _data = new double[2][x_len];
-        for (int i = 0; i < x_len; ++i) {
-            _data[0][i] = data[0][i];
-            _data[1][i] = data[1][i];
-        }
+    public DefaultArraySpectrum(final double[][] data) {
+        assert data.length == 2;
+        assert data[0].length == data[1].length;
+
+        _data = new double[2][];
+        _data[0] = data[0].clone();
+        _data[1] = data[1].clone();
     }
 
     /**
@@ -75,81 +54,19 @@ public class DefaultArraySpectrum implements ArraySpectrum {
      *                 separated by whitespace or comma.
      */
     public DefaultArraySpectrum(String fileName) throws Exception {
-        TextFileReader dfr = new TextFileReader(fileName);
-
-        // These lists hold doubles from the data file.
-        List<Double> x_values = new ArrayList<Double>();
-        List<Double> y_values = new ArrayList<Double>();
-
-        double x = 0;
-        double y = 0;
-        double dummy;
-        //Check to see if the first line has an effective wavelength. some will.
-        //If it does read in as a dummy value
-
-        try {
-            if (dfr.countTokens() == 1)
-                dummy = dfr.readDouble();
-
-            while (true) {
-                x = dfr.readDouble();
-                x_values.add(x);
-                y = dfr.readDouble();
-                y_values.add(y);
-            }
-        } catch (ParseException e) {
-            throw e;
-        } catch (IOException e) {
-            // This is normal and happens at the end of file
-        }
-
-        if (y_values.size() != x_values.size()) {
-            throw new Exception("Error in file " + fileName + ", not same number of x and y data points.");
-        }
-
-        if (y_values.size() < 1) {
-            throw new Exception("No values found in file " + fileName);
-        }
-
-        _initialize(x_values, y_values);  // throws Exception
-        x_values.clear();
-        x_values = null;
-        y_values.clear();
-        y_values = null;
-    }
-
-    private void _initialize(List x_values, List y_values) throws Exception {
-        if (x_values.size() != y_values.size()) {
-            throw new Exception("Spectrum data invalid, " + x_values.size()
-                    + " x values " + y_values.size() + " y values");
-        }
-        try {
-            _data = new double[2][x_values.size()];
-            for (int i = 0; i < x_values.size(); ++i) {
-                _data[0][i] = ((Double) x_values.get(i)).doubleValue();
-                _data[1][i] = ((Double) y_values.get(i)).doubleValue();
-            }
-        } catch (Exception e) {
-            throw new Exception("Spectrum data invalid");
-        }
+        final double[][] data  = SpectrumParser$.MODULE$.loadFromFile(fileName);
+        // for now make a copy of cached values, just to be on the safe side
+        _data = new double[2][];
+        _data[0] = data[0].clone();
+        _data[1] = data[1].clone();
     }
 
     /**
      * Implements Cloneable interface
      */
     public Object clone() {
-        int x_len = _data[0].length;
-        double[][] data = new double[2][x_len];
-        for (int i = 0; i < x_len; ++i) {
-            data[0][i] = _data[0][i];
-            data[1][i] = _data[1][i];
-        }
-        DefaultArraySpectrum sp = null;
-        try {
-            sp = new DefaultArraySpectrum(data);
-        } catch (Exception e) {/* shouldn't ever fail*/
-        }
-        return sp;
+        // constructor will clone the data array
+        return new DefaultArraySpectrum(_data);
     }
 
     /**

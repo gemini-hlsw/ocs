@@ -94,7 +94,7 @@ public class GmosSouth extends Gmos {
 
             //if(!(_grating.equals("none"))){
             //	throw new Exception("Please select Grism Order Sorting from the filter list."); }
-            _Filter = new Filter(getPrefix(), _filterUsed, getDirectory() + "/", Filter.GET_EFFECTIVE_WAVELEN_FROM_FILE);
+            _Filter = Filter.fromWLFile(getPrefix(), _filterUsed, getDirectory() + "/");
 
             if (_Filter.getStart() >= _observingStart)
                 _observingStart = _Filter.getStart();
