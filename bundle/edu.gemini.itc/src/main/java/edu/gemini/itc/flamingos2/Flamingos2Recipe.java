@@ -563,7 +563,8 @@ public final class Flamingos2Recipe extends RecipeBase {
 
         _print("<HR align=left SIZE=3>");
         _println("<b>Input Parameters:</b>");
-        _println("Instrument: " + instrument.getName() + "\n");
+//        _println("Instrument: " + instrument.getName() + "\n");
+        _println("Instrument: Flamingos 2\n"); // TODO: move names of instrument to instrument classes?
         _println(_sdParameters.printParameterSummary());
         _println(instrument.toString());
 

@@ -1,17 +1,9 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-//
-//
 package edu.gemini.itc.trecs;
 
 import edu.gemini.itc.parameters.ObservationDetailsParameters;
 import edu.gemini.itc.shared.*;
+
+import java.util.Scanner;
 
 /**
  * TRecs specification class
@@ -96,10 +88,10 @@ public class TRecs extends Instrument {
         _spatialBinning = tp.getSpatialBinning();
 
         //Read Extra-low freq data from file
-        String dir = ITCConstants.LIB + "/" + INSTR_DIR + "/";
-        TextFileReader in = new TextFileReader(dir + ELFN_FILENAME);
-
-        elfn_param = in.readInt();
+        final String dir = ITCConstants.LIB + "/" + INSTR_DIR + "/";
+        try (final Scanner in = DatFile.scan(dir + ELFN_FILENAME)) {
+            elfn_param = in.nextInt();
+        }
 
         //end of Extra-low freq data
 

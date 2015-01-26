@@ -1,37 +1,27 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-//
 package edu.gemini.itc.trecs;
 
 import edu.gemini.itc.shared.Instrument;
-import edu.gemini.itc.shared.TextFileReader;
+import edu.gemini.itc.shared.DatFile;
 import edu.gemini.itc.shared.TransmissionElement;
 
-import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 /**
  * This represents the transmission and properties of the Grating optics.
  */
 public class GratingOptics extends TransmissionElement {
 
-    private List _resolvingPowerArray;
-    private List _dispersionArray;
-    private List _blazeArray;
-    private List _resolutionArray;
-    private List _gratingNameArray;
-    private String _gratingName;
-    private double _centralWavelength;
-    private int _detectorPixels;
-    private int _spectralBinning;
+    private final List<Integer> _resolvingPowerArray;
+    private final List<Double> _dispersionArray;
+    private final List<Integer> _blazeArray;
+    private final List<Double> _resolutionArray;
+    private final List<String> _gratingNameArray;
+    private final String _gratingName;
+    private final double _centralWavelength;
+    private final int _detectorPixels;
+    private final int _spectralBinning;
 
     public GratingOptics(String directory, String gratingName,
                          String stringSlitWidth,
@@ -49,42 +39,32 @@ public class GratingOptics extends TransmissionElement {
         _gratingName = gratingName;
 
         //New read of Grating Proporties
-        TextFileReader grismProperties = new TextFileReader(directory +
-                TRecs.getPrefix() +
-                "gratings" +
-                Instrument.getSuffix());
-        _resolvingPowerArray = new ArrayList();
-        _gratingNameArray = new ArrayList();
-        _blazeArray = new ArrayList();
-        _resolutionArray = new ArrayList();
-        _dispersionArray = new ArrayList();
-        try {
-            while (grismProperties.hasMoreData()) {
-                _gratingNameArray.add(new String(grismProperties.readString()));
-                _blazeArray.add(new Integer(grismProperties.readInt()));
-                _resolvingPowerArray.add(new Integer(grismProperties.readInt()));
-                _resolutionArray.add(new Double(grismProperties.readDouble()));
-                _dispersionArray.add(new Double(grismProperties.readDouble()));
+        _resolvingPowerArray = new ArrayList<>();
+        _gratingNameArray = new ArrayList<>();
+        _blazeArray = new ArrayList<>();
+        _resolutionArray = new ArrayList<>();
+        _dispersionArray = new ArrayList<>();
+
+        final String file = directory + TRecs.getPrefix() + "gratings" + Instrument.getSuffix();
+        try (final Scanner grismProperties = DatFile.scan(file)) {
+            while (grismProperties.hasNext()) {
+                _gratingNameArray.add(grismProperties.next());
+                _blazeArray.add(grismProperties.nextInt());
+                _resolvingPowerArray.add(grismProperties.nextInt());
+                _resolutionArray.add(grismProperties.nextDouble());
+                _dispersionArray.add(grismProperties.nextDouble());
             }
-        } catch (ParseException e) {
-            throw e;
-        } catch (IOException e) {
-            // normal eof
         }
 
     }
 
 
     public double getStart() {
-        return _centralWavelength - (
-                (((Double) _dispersionArray.get(getGratingNumber())).doubleValue())
-                        * _detectorPixels / 2) * _spectralBinning;
+        return _centralWavelength - (_dispersionArray.get(getGratingNumber()) * _detectorPixels / 2) * _spectralBinning;
     }
 
     public double getEnd() {
-        return _centralWavelength + (
-                (((Double) _dispersionArray.get(getGratingNumber())).doubleValue())
-                        * _detectorPixels / 2) * _spectralBinning;
+        return _centralWavelength + (_dispersionArray.get(getGratingNumber()) * _detectorPixels / 2) * _spectralBinning;
     }
 
     public double getEffectiveWavelength() {
@@ -92,7 +72,7 @@ public class GratingOptics extends TransmissionElement {
     }
 
     public double getPixelWidth() {
-        return ((Double) _dispersionArray.get(getGratingNumber())).doubleValue() * _spectralBinning;
+        return _dispersionArray.get(getGratingNumber()) * _spectralBinning;
 
     }
 
@@ -110,20 +90,19 @@ public class GratingOptics extends TransmissionElement {
     }
 
     public double getGratingResolution() {
-        return ((Integer) _resolvingPowerArray.get(getGratingNumber())).intValue();
+        return _resolvingPowerArray.get(getGratingNumber());
     }
 
     public double getGratingBlaze() {
-        return ((Integer) _blazeArray.get(getGratingNumber())).intValue();
+        return _blazeArray.get(getGratingNumber());
     }
 
     public double getGratingDispersion_nm() {
-        return ((Double) _resolutionArray.get(getGratingNumber())).doubleValue();
+        return _resolutionArray.get(getGratingNumber());
     }
 
     public double getGratingDispersion_nmppix() {
-        return ((Double) _dispersionArray.get(getGratingNumber())).doubleValue()
-                * _spectralBinning;
+        return _dispersionArray.get(getGratingNumber()) * _spectralBinning;
     }
 
 

@@ -1,16 +1,33 @@
 package edu.gemini.itc.shared
 
 import java.io.InputStreamReader
+import java.util.Scanner
+import java.util.regex.Pattern
 
 import scala.collection.parallel.mutable
 import scala.util.parsing.combinator.JavaTokenParsers
 
 /**
- * Tools to parse array spectrums from files.
+ * Set of tools to ingest dat files stored as resource files.
+ * These files describe properties of transmission elements, filters, instruments etc.
  * TODO: This needs some additional TLC, in particular the caching.
  */
-object SpectrumParser {
+object DatFile {
 
+  // ===== Scan utils
+
+  // delimiters are whitespaces, commas and comments (from "#" up to next \n).
+  private val Delimiters = Pattern.compile("(\\s|,|(#[^\\n]*))+")
+
+  def scan(f: String): Scanner = {
+    Option(getClass.getResourceAsStream(f)).fold {
+      throw new IllegalArgumentException(s"Missing data file $f")
+    } {
+      new Scanner(_).useDelimiter(Delimiters)
+    }
+  }
+
+  // ===== Parse utils
   abstract class Parser extends JavaTokenParsers {
     override val whiteSpace                   = """[,\s]+""".r
     def comment    : Parser[Any]              = """#[^\n]*""".r
@@ -46,7 +63,8 @@ object SpectrumParser {
   }
 
   private val wlcache = mutable.ParHashMap[String, (java.lang.Double, Array[Array[Double]])]()
-  def loadFromWLFile(file: String): (java.lang.Double, Array[Array[Double]]) = {
+  def loadSpectrumWithWavelength(file: String): (java.lang.Double, Array[Array[Double]]) = {
+    // TODO: caching error handling
     if (wlcache.contains(file)) wlcache(file)
     else {
       System.out.println("Loading into cache: " + file)
@@ -62,7 +80,8 @@ object SpectrumParser {
   }
 
   private val cache = mutable.ParHashMap[String, Array[Array[Double]]]()
-  def loadFromFile(file: String): Array[Array[Double]] = {
+  def loadSpectrum(file: String): Array[Array[Double]] = {
+    // TODO: caching error handling
     if (cache.contains(file)) cache(file)
     else {
       System.out.println("Loading into cache: " + file)
