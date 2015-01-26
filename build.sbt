@@ -58,4 +58,10 @@ publishArtifact in (ThisBuild, packageSrc) := false
 // No poms
 publishMavenStyle in ThisBuild := false
 
-
+// Pull stuff up in Dash, if you have it: > dash List
+commands +=
+  Command.single("dash") { (state, topic) =>
+    import scala.sys.process._
+    s"/usr/bin/open dash://scala:$topic".!
+    state
+  }
