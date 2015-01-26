@@ -1,12 +1,14 @@
 package edu.gemini.itc.shared
 
-import edu.gemini.itc.shared.SpectrumParser.{WLSpectrumParser, PlainSpectrumParser}
+import java.util.Scanner
+
+import edu.gemini.itc.shared.DatFile.{WLSpectrumParser, PlainSpectrumParser}
 import org.junit.Test
 
 /**
  * Tests for the spectrum file parser.
  */
-class SpectrumParserTest {
+class DatFileTest {
 
   @Test
   def wlParseStringSimple(): Unit = {
@@ -202,4 +204,30 @@ class SpectrumParserTest {
     assert(r.successful)
     assert(r.get.size == 160)
   }
+
+  @Test
+  def readnoise(): Unit = {
+    try {
+      // TODO run this test from some string including corner cases like no ending \n etc
+      val scan: Scanner = DatFile.scan("/flamingos2/readnoise.dat")
+      try {
+        assert(scan.next() == "lowNoise")
+        assert(scan.next() == "5")
+        assert(scan.next() == "medNoise")
+        assert(scan.next() == "6")
+        assert(scan.next() == "highNoise")
+        assert(scan.next() == "12")
+      } finally {
+        if (scan != null) scan.close()
+      }
+    }
+  }
+
+  // TODO: make this work
+//  @Test
+//  def scanMissingFile(): Unit = {
+//    intercept[IllegalArgumentException] {
+//      SpectrumParser.scan("DOES NOT EXIST")
+//    }
+//  }
 }

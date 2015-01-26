@@ -1,21 +1,11 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-
-
 package edu.gemini.itc.operation;
 
 import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.TextFileReader;
+import edu.gemini.itc.shared.DatFile;
 
-import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class PeakPixelFluxCalc {
 
@@ -31,23 +21,13 @@ public class PeakPixelFluxCalc {
                              double summed_background, double dark_current)
             throws Exception {
         //set up the text file reader
-        TextFileReader dfr = new TextFileReader(fileName);
-        List x_values = new ArrayList();
-        List y_values = new ArrayList();
-
-        double x = 0;
-        double y = 0;
-        try {
-            while (true) {
-                x = dfr.readDouble();
-                x_values.add(new Double(x));
-                y = dfr.readDouble();
-                y_values.add(new Double(y));
+        final List<Double> x_values = new ArrayList<>();
+        final List<Double> y_values = new ArrayList<>();
+        try (final Scanner dfr = DatFile.scan(fileName)) {
+            while (dfr.hasNext()) {
+                x_values.add(dfr.nextDouble());
+                y_values.add(dfr.nextDouble());
             }
-        } catch (ParseException e) {
-            throw e;
-        } catch (IOException e) {
-// This is normal and happens at the end of file
         }
 
         if (y_values.size() != x_values.size()) {

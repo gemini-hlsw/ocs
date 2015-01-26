@@ -1,12 +1,11 @@
 package edu.gemini.itc.flamingos2;
 
 import edu.gemini.itc.shared.Instrument;
-import edu.gemini.itc.shared.TextFileReader;
+import edu.gemini.itc.shared.DatFile;
 import edu.gemini.itc.shared.TransmissionElement;
 
-import java.io.IOException;
-import java.text.ParseException;
 import java.util.Hashtable;
+import java.util.Scanner;
 
 /**
  * This represents the transmission of the Grism optics.
@@ -92,30 +91,21 @@ public class GrismOptics extends TransmissionElement {
     }
 
     // =====
-    private static void readCoverageData() throws Exception {
-        try {
-            TextFileReader tr = new TextFileReader("/" + Flamingos2.INSTR_DIR + "/grism-coverage"
-                    + Instrument.getSuffix());
-
-            while (tr.hasMoreData()) {
-                String grism = tr.readString();
-                String filter = tr.readString();
-                double start = tr.readDouble();
-                double end = tr.readDouble();
-                double width = tr.readDouble();
-                double res = tr.readDouble();
-                String grismDataFileName = tr.readString();
-
-                String name = buildCoverageDataName(grism, filter);
-                CoverageEntry ce = new CoverageEntry(name, start, end, width,
-                        res, grismDataFileName);
+    private static void readCoverageData() {
+        final String file = "/" + Flamingos2.INSTR_DIR + "/grism-coverage" + Instrument.getSuffix();
+        try (final Scanner tr = DatFile.scan(file)) {
+            while (tr.hasNext()) {
+                final String grism = tr.next();
+                final String filter = tr.next();
+                final double start = tr.nextDouble();
+                final double end = tr.nextDouble();
+                final double width = tr.nextDouble();
+                final double res = tr.nextDouble();
+                final String grismDataFileName = tr.next();
+                final String name = buildCoverageDataName(grism, filter);
+                final CoverageEntry ce = new CoverageEntry(name, start, end, width, res, grismDataFileName);
                 _coverage.put(name, ce);
             }
-        } catch (ParseException e) {
-            throw new Exception("Error while parsing grism_coverage file", e);
-        } catch (IOException e) {
-            throw new Exception(
-                    "Unexpected end of file in grism_coverage file", e);
         }
     }
 

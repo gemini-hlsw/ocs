@@ -9,14 +9,14 @@ public final class Filter extends TransmissionElement {
 
     public static Filter fromFile(final String prefix, final String filter, final String dir) {
         final String file = dir + prefix + filter + Instrument.getSuffix();
-        final double[][] data  = SpectrumParser$.MODULE$.loadFromFile(file);
+        final double[][] data = DatFile.loadSpectrum(file);
         final double wl = data[0][data[0].length / 2];
         return new Filter(filter, data, wl);
     }
 
     public static Filter fromWLFile(final String prefix, final String filter, final String dir) {
         final String file = dir + prefix + filter + Instrument.getSuffix();
-        final scala.Tuple2<Double, double[][]>  data = SpectrumParser$.MODULE$.loadFromWLFile(file);
+        final scala.Tuple2<Double, double[][]> data = DatFile.loadSpectrumWithWavelength(file);
         return new Filter(filter, data._2(), data._1());
     }
 

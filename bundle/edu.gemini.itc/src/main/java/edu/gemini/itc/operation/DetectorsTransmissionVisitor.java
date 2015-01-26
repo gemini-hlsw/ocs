@@ -1,19 +1,10 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-//
 package edu.gemini.itc.operation;
 
 import edu.gemini.itc.shared.*;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 /**
  * For Gmos Spectroscopy the spectrum will be spread across 3 CCD's
@@ -27,23 +18,17 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
 
     public DetectorsTransmissionVisitor(int spectralBinning, String filename) throws Exception {
 
-        TextFileReader dfr = new TextFileReader(filename);
         this.spectralBinning = spectralBinning;
+        final List<Double> x_values = new ArrayList<>();
+        final List<Double> y_values = new ArrayList<>();
 
-        List<Double> x_values = new ArrayList<Double>();
-        List<Double> y_values = new ArrayList<Double>();
-        double x;
-
-        try {
-            //noinspection InfiniteLoopStatement
-            while (true) {
-                x = dfr.readDouble();
-                x_values.add(x);
-                y_values.add(dfr.readDouble());
+        try (final Scanner scan = DatFile.scan(filename)) {
+            while (scan.hasNext()) {
+                x_values.add(scan.nextDouble());
+                y_values.add(scan.nextDouble());
             }
-        } catch (IOException e) {
-            // normal eof
         }
+
         initialize(x_values, y_values);
     }
 

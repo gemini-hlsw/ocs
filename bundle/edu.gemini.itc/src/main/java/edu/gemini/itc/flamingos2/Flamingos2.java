@@ -1,23 +1,12 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-// $Id: AcquisitionCamera.java,v 1.4 2003/11/21 14:31:02 shane Exp $
-//
 package edu.gemini.itc.flamingos2;
 
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.*;
 
 import java.io.File;
-import java.io.IOException;
-import java.text.ParseException;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Scanner;
 
 /**
  * Flamingos 2 specification class
@@ -192,22 +181,15 @@ public class Flamingos2 extends Instrument {
         return WELL_DEPTH;
     }
 
-    void readReadNoiseData() throws Exception {
-        try {
-            TextFileReader tr = new TextFileReader(getDirectory() + File.separator + Flamingos2.getPrefix()
-                    + "readnoise" + Instrument.getSuffix());
-
-            while (tr.hasMoreData()) {
-                String name = tr.readString();
-                double rn = tr.readDouble();
-
-                ReadNoiseEntry re = new ReadNoiseEntry(name, rn);
+    void readReadNoiseData() {
+        final String file = getDirectory() + File.separator + Flamingos2.getPrefix() + "readnoise" + Instrument.getSuffix();
+        try (final Scanner scan = DatFile.scan(file)) {
+            while (scan.hasNext()) {
+                final String name = scan.next();
+                final double rn = scan.nextDouble();
+                final ReadNoiseEntry re = new ReadNoiseEntry(name, rn);
                 _readNoiseLevels.put(name, re);
             }
-        } catch (ParseException e) {
-            throw new Exception("Error while parsing readnoise file", e);
-        } catch (IOException e) {
-            throw new Exception("Unexpected end of file in readnoise file", e);
         }
     }
 

@@ -1,13 +1,3 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-// $Id: SEDFactory.java,v 1.6 2003/11/21 14:31:02 shane Exp $
-//
 package edu.gemini.itc.shared;
 
 import edu.gemini.itc.parameters.SourceDefinitionParameters;
@@ -82,9 +72,7 @@ public class SEDFactory {
      *  ...
      * </pre>
      */
-    public static VisitableSampledSpectrum getSED(String fileName,
-                                                  double wavelengthInterval)
-            throws Exception {
+    public static VisitableSampledSpectrum getSED(String fileName, double wavelengthInterval) throws Exception {
         TextFileReader dfr = null;
         try {
             dfr = new TextFileReader(fileName);
@@ -147,8 +135,7 @@ public class SEDFactory {
             throw new Exception(s);
         }
 
-        DefaultArraySpectrum as = new DefaultArraySpectrum(wavelengths,
-                fluxDensities);
+        DefaultArraySpectrum as = new DefaultArraySpectrum(wavelengths, fluxDensities);
         wavelengths.clear();
         wavelengths = null;
         fluxDensities.clear();
