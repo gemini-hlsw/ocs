@@ -13,10 +13,10 @@ import org.osgi.framework.BundleContext
  */
 object CalendarService {
 
-  private val GoogleCalendarNorthProp    = "edu.gemini.services.telescope.schedule.calendar.id.north"
-  private val GoogleCalendarNorthUrlProp = "edu.gemini.services.telescope.schedule.calendar.url.north"
-  private val GoogleCalendarSouthProp    = "edu.gemini.services.telescope.schedule.calendar.id.south"
-  private val GoogleCalendarSouthUrlProp = "edu.gemini.services.telescope.schedule.calendar.url.south"
+  private val GoogleCalendarNorthProp    = "edu.gemini.services.telescope.schedule.id.north"
+  private val GoogleCalendarNorthUrlProp = "edu.gemini.services.telescope.schedule.url.north"
+  private val GoogleCalendarSouthProp    = "edu.gemini.services.telescope.schedule.id.south"
+  private val GoogleCalendarSouthUrlProp = "edu.gemini.services.telescope.schedule.url.south"
 
   def telescopeScheduleService(ctx: BundleContext, calendarService: CalendarService): TelescopeScheduleService = {
 
