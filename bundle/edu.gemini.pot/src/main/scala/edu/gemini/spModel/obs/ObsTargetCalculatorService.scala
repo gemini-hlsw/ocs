@@ -34,7 +34,7 @@ object ObsTargetCalculatorService {
     // Now, based on the SchedulingBlock determine if a TargetCalc should be created.
     // Get the TargetEnvironment if it exists, and from there, extract the RA and Dec.
     def coords = obs.findObsComponentByType(SPComponentType.TELESCOPE_TARGETENV).map {
-      _.getDataObject.asInstanceOf[TargetObsComp].getTargetEnvironment.getBase.getTarget.getSkycalcCoordinates
+      _.getDataObject.asInstanceOf[TargetObsComp].getTargetEnvironment.getBase.getSkycalcCoordinates
     }
 
     def calc(s: Site, b: SchedulingBlock, c: Coordinates): TargetCalculator = {

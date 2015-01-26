@@ -1,5 +1,7 @@
 package edu.gemini.spModel.guide;
 
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.CoordinateDiff;
 import edu.gemini.skycalc.Coordinates;
@@ -11,6 +13,7 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
 import java.util.Collection;
 import java.util.Set;
 
@@ -267,11 +270,7 @@ public class PatrolField {
 
         @Override public boolean validate(SPTarget guideStar, ObsContext ctx) {
             final Coordinates baseCoordinates  = ctx.getBaseCoordinates();
-            Coordinates result;
-            synchronized (guideStar) {
-                result = guideStar.getTarget().getSkycalcCoordinates();
-            }
-            final Coordinates guideCoordinates = result;
+            final Coordinates guideCoordinates = guideStar.getSkycalcCoordinates();
             // Calculate the difference between the coordinate and the observation's
             // base position.
             CoordinateDiff diff;

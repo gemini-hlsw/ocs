@@ -2,7 +2,6 @@ package edu.gemini.spModel.gemini.flamingos2;
 
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.skycalc.Angle;
-import edu.gemini.skycalc.Coordinates;
 import edu.gemini.skycalc.Offset;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
@@ -100,11 +99,7 @@ public enum Flamingos2OiwfsGuideProbe implements GuideProbe, ValidatableGuidePro
 
     @Override
     public boolean validate(SPTarget guideStar, ObsContext ctx) {
-        Coordinates result;
-        synchronized (guideStar) {
-            result = guideStar.getTarget().getSkycalcCoordinates();
-        }
-        return GuideProbeUtil.instance.validate(result, this, ctx);
+        return GuideProbeUtil.instance.validate(guideStar.getSkycalcCoordinates(), this, ctx);
     }
 
     @Override
