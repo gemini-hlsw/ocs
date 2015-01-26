@@ -9,6 +9,7 @@ package edu.gemini.spModel.target;
 
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.skycalc.Coordinates;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.system.*;
@@ -231,11 +232,6 @@ public final class SPTarget extends WatchablePos {
     /** @deprecated */
     public void notifyOfGenericUpdate() {
     	super._notifyOfUpdate();
-    }
-
-    /** Gets a Skycalc {@link edu.gemini.skycalc.Coordinates} representation. */
-    public synchronized Coordinates getSkycalcCoordinates() {
-        return new Coordinates(getTarget().getC1().getAs(Units.DEGREES), getTarget().getC2().getAs(Units.DEGREES));
     }
 
     /** Set the contained target RA/Dec in degrees and notify observers. */

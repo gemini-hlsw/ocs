@@ -70,7 +70,7 @@ public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
     }
 
     public BoundaryPosition checkBoundaries(SPTarget guideStar, ObsContext ctx) {
-        return checkBoundaries(guideStar.getSkycalcCoordinates(), ctx);
+        return checkBoundaries(guideStar.getTarget().getSkycalcCoordinates(), ctx);
     }
 
     public BoundaryPosition checkBoundaries(final Coordinates coords, final ObsContext ctx) {
@@ -99,7 +99,7 @@ public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
 
     @Override
     public boolean validate(SPTarget guideStar, ObsContext ctx) {
-        return GuideProbeUtil.instance.validate(guideStar.getSkycalcCoordinates(), this, ctx);
+        return GuideProbeUtil.instance.validate(guideStar.getTarget().getSkycalcCoordinates(), this, ctx);
     }
 
     public boolean validate(SkyObject guideStar, ObsContext ctx) {
