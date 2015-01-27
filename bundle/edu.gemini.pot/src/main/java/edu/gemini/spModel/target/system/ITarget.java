@@ -117,11 +117,6 @@ public abstract class ITarget implements Cloneable, Serializable {
      */
     public abstract void setEpoch(Epoch e);
 
-    /**
-     * Provides testing of equality of two targets.
-     */
-    public abstract boolean equals(Object obj);
-
 
     // RCN: pushed across from SPTarget
 
@@ -220,9 +215,9 @@ public abstract class ITarget implements Cloneable, Serializable {
 
     // pushed down from CoordinateSystem
 
-    public Object clone() {
+    public ITarget clone() {
         try {
-            return super.clone();
+            return (ITarget) super.clone();
         } catch (CloneNotSupportedException cnse) {
             throw new Error(cnse);
         }
