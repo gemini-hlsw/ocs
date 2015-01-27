@@ -85,8 +85,7 @@ public abstract class ITarget implements Cloneable, Serializable {
      * @throws IllegalArgumentException if the <code>ICoordinate</code> is
      * not an appropriate type.
      */
-    public abstract void setC1(ICoordinate c1)
-            throws IllegalArgumentException;
+    public abstract void setC1(ICoordinate c1);
 
     /**
      * Get the first Coordinate as an {@link ICoordinate}.
@@ -101,8 +100,7 @@ public abstract class ITarget implements Cloneable, Serializable {
      * @throws IllegalArgumentException if the <code>ICoordinate</code> is
      * not an appropriate type.
      */
-    public abstract void setC2(ICoordinate c2)
-            throws IllegalArgumentException;
+    public abstract void setC2(ICoordinate c2);
 
     /**
      * Get the second Coordinate as an {@link ICoordinate}.
@@ -117,8 +115,7 @@ public abstract class ITarget implements Cloneable, Serializable {
      * @throws IllegalArgumentException if the argument can not be parsed
      * correctly.
      */
-    public abstract void setC1(String c1)
-            throws IllegalArgumentException;
+    public abstract void setC1(String c1);
 
     /**
      * Gets the first coordinate as a String.
@@ -131,8 +128,7 @@ public abstract class ITarget implements Cloneable, Serializable {
      * @throws IllegalArgumentException if the argument can not be parsed
      * correctly.
      */
-    public abstract void setC2(String c2)
-            throws IllegalArgumentException;
+    public abstract void setC2(String c2);
 
     /**
      * Gets the second coordinate as a String.
@@ -140,29 +136,18 @@ public abstract class ITarget implements Cloneable, Serializable {
     public abstract String c2ToString();
 
     /**
-     * Set the first and second coordinates using appropriate String objects.
-     *
-     * @throws IllegalArgumentException if either of the arguments can not
-     * be parsed correctly.
-     */
-    public abstract void setC1C2(String c1, String c2)
-            throws IllegalArgumentException;
-
-    /**
      * Return the Epoch of this target position.
      * @throws IllegalArgumentException if the coordinate system does not
      * support the Epoch concept.
      */
-    public abstract Epoch getEpoch()
-            throws IllegalArgumentException;
+    public abstract Epoch getEpoch();
 
     /**
      * Set the Epoch of this target position.
      * @throws IllegalArgumentException if the coordinate system does not
      * support the Epoch concept.
      */
-    public abstract void setEpoch(Epoch e)
-            throws IllegalArgumentException;
+    public abstract void setEpoch(Epoch e);
 
     /**
      * Provides testing of equality of two targets.
