@@ -21,8 +21,6 @@ public final class GnirsNorth extends Gnirs {
     private final double _wellDepth;
     private final double _readNoiseValue;
 
-    private GnirsGratingsTransmission _gnirsGratingsTransmission;
-
     public GnirsNorth(GnirsParameters gp, ObservationDetailsParameters odp) throws Exception {
         super(FILENAME, INSTR_PREFIX);
         // The instrument data file gives a start/end wavelength for
@@ -144,8 +142,6 @@ public final class GnirsNorth extends Gnirs {
                     _detector.getDetectorPixels(),
                     1);
 
-            _gnirsGratingsTransmission = new GnirsGratingsTransmission(getDirectory(), getPrefix(), getSuffix(), _grating);
-
             _observingStart = _gratingOptics.getStart();
             _observingEnd = _gratingOptics.getEnd();
 
@@ -260,7 +256,7 @@ public final class GnirsNorth extends Gnirs {
     }
 
     public TransmissionElement getGratingOrderNTransmission(int order) throws Exception {
-        return _gnirsGratingsTransmission.getOrderNTransmission(order);
+        return GnirsGratingsTransmission.getOrderNTransmission(_grating, order);
     }
 
     public int getOrder() {
