@@ -144,7 +144,7 @@ public final class HmsDegTarget extends ITarget {
     /**
      * Gets the first coordinate (right ascension) as a String.
      */
-    public String getRaHMS() {
+    public String getRaHms() {
         return raToString();
     }
 
@@ -158,7 +158,7 @@ public final class HmsDegTarget extends ITarget {
     /**
      * Gets the second coordinate (right ascension) as a String.
      */
-    public String getDecDMS() {
+    public String getDecDms() {
         return decToString();
     }
 
@@ -248,7 +248,7 @@ public final class HmsDegTarget extends ITarget {
     /**
      * Sets the first coordinate (right ascension) using a String.
      */
-    public void setRaHMS(String hms) {
+    public void setRaHms(String hms) {
         setRa(hms);
     }
 
@@ -262,8 +262,8 @@ public final class HmsDegTarget extends ITarget {
     /**
      * Sets the second coordinate (declination) using a String.
      */
-    public void setDecDMS(String dec) {
-        setDec(dec);
+    public void setDecDms(String dms) {
+        setDec(dms);
     }
 
     /**
@@ -278,8 +278,8 @@ public final class HmsDegTarget extends ITarget {
      * Sets the first and second coordinates using String objects.
      */
     public void setC1C2(String c1, String c2) {
-        setRaHMS(c1);
-        setDecDMS(c2);
+        setRaHms(c1);
+        setDecDms(c2);
     }
 
     /**

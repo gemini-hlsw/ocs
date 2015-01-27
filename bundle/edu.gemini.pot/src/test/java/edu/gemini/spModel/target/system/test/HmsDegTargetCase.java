@@ -46,10 +46,10 @@ public final class HmsDegTargetCase {
 
     private void _doTestOne(String raIn, String decIn,
                             String raEx, String decEx) {
-        _t1.setRaHMS(raIn);
-        _t1.setDecDMS(decIn);
-        String raOut = _t1.getRaHMS();
-        String decOut = _t1.getDecDMS();
+        _t1.setRaHms(raIn);
+        _t1.setDecDms(decIn);
+        String raOut = _t1.getRaHms();
+        String decOut = _t1.getDecDms();
 
         assertEquals("Failed comparison,", raEx, raOut);
         assertEquals("Failed comparison,", decEx, decOut);

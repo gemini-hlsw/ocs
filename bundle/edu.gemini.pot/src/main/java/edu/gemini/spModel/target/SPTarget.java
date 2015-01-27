@@ -111,14 +111,14 @@ public final class SPTarget extends WatchablePos {
     public void setHmsDms(final String hms, final String dms) {
         synchronized (this) {
             try {
-                _target.setRaHMS(hms);
+                _target.setRaHms(hms);
             } catch (final IllegalArgumentException ex) {
-                _target.setRaHMS("00:00:00.0");
+                _target.setRaHms("00:00:00.0");
             }
             try {
-                _target.setDecDMS(dms);
+                _target.setDecDms(dms);
             } catch( final IllegalArgumentException ex) {
-                _target.setDecDMS("00:00:00.0");
+                _target.setDecDms("00:00:00.0");
             }
         }
         _notifyOfUpdate();
