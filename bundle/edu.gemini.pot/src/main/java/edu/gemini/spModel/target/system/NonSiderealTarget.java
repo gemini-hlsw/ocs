@@ -14,7 +14,6 @@ public abstract class NonSiderealTarget extends ITarget {
     private HMS _ra = new HMS();
     private DMS _dec = new DMS();
     private CoordinateTypes.Epoch _epoch = new CoordinateTypes.Epoch("2000", CoordinateParam.Units.YEARS);
-    private String _brightness = DEFAULT_NAME;
     private String _name = DEFAULT_NAME;
     private Date _date = null; // The date for which the position is valid
 
@@ -43,25 +42,7 @@ public abstract class NonSiderealTarget extends ITarget {
         }
     }
 
-    /**
-     * Gets the optional brightness for a coordinate.
-     * This returns a String description of the brightness.
-     */
-    public String getBrightness() {
-        return _brightness;
-    }
-
-    /**
-     * Sets the optional brightness for the position.
-     */
-    public void setBrightness(String brightness) {
-        // Make sure the name is never set to null
-        if (brightness != null) {
-            _brightness = brightness;
-        }
-    }
-
-    /**
+     /**
      * Sets the first coordinate (right ascension) using a String.
      */
     void setRa(String newStringValue) {
@@ -238,7 +219,7 @@ public abstract class NonSiderealTarget extends ITarget {
      * CoordinateParam}</code> implements hashCode.
      */
     public int hashCode() {
-        long hc = _name.hashCode() ^ _epoch.hashCode() ^ _brightness.hashCode();
+        long hc = _name.hashCode() ^ _epoch.hashCode();
         if (_date != null) hc = hc ^ _date.hashCode();
         return (int) hc ^ (int) (hc >> 32);
     }
