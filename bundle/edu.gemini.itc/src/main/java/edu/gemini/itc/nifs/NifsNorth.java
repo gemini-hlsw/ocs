@@ -167,9 +167,7 @@ public class NifsNorth extends Nifs {
 
         if (!(_grating.equals("none"))) {
 
-            _gratingOptics = new GratingOptics(getDirectory() + "/", getPrefix(), _grating,
-                    // _focalPlaneMaskOffset,
-                    _stringSlitWidth,
+            _gratingOptics = new NifsGratingOptics(getDirectory() + "/" + getPrefix(), _grating,
                     _centralWavelength,
                     _detector.getDetectorPixels(),//_spectralBinning,
                     1);

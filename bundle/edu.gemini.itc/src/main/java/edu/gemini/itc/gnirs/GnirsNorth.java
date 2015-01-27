@@ -156,8 +156,7 @@ public class GnirsNorth extends Gnirs {
 
         if (!(_grating.equals("none"))) {
 
-            _gratingOptics = new GratingOptics(getDirectory() + "/", getPrefix(), _grating,
-                    _stringSlitWidth,
+            _gratingOptics = new GnirsGratingOptics(getDirectory() + "/" + getPrefix(), _grating,
                     _centralWavelength,
                     _detector.getDetectorPixels(),
                     1);

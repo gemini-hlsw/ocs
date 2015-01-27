@@ -42,7 +42,7 @@ public class TRecs extends Instrument {
 
     // Keep a reference to the color filter to ask for effective wavelength
     private Filter _Filter;
-    private GratingOptics _gratingOptics;
+    private TrecsGratingOptics _gratingOptics;
     private Detector _detector;
     private double _sampling;
     private String _filterUsed;
@@ -164,8 +164,7 @@ public class TRecs extends Instrument {
 
         if (!(_grating.equals("none"))) {
 
-            _gratingOptics = new GratingOptics(getDirectory() + "/", _grating,
-                    _stringSlitWidth,
+            _gratingOptics = new TrecsGratingOptics(getDirectory() + "/" + TRecs.getPrefix(), _grating,
                     _centralWavelength,
                     _detector.getDetectorPixels(),//_spectralBinning,
                     _spectralBinning);
