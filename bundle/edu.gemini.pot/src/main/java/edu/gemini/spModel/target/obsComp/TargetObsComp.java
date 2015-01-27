@@ -19,6 +19,7 @@ import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
 import edu.gemini.spModel.target.WatchablePos;
 import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.system.ITarget;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -90,14 +91,18 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
             // assume user did not edit title manually
             TargetEnvironment env = getTargetEnvironment();
             SPTarget tp = env.getBase();
-            if (tp != null) { // base pos should always be defined, so tp should never be null
-                String name = tp.getTarget().getName();
-                if (name == null || name.length() == 0) {
-                    // Use the base position
-                    return tp.getTarget().getPosition();
+            if (tp != null) {
+                ITarget t = tp.getTarget();
+                String name = t.getName();
+                if (name == null || name.trim().length() == 0) {
+                    name = "<Untitled>";
                 }
-                // Else return the name of the base position
-                return "Targets" + " (" + name + ")";
+                switch (t.getTag()) {
+                    case JPL_MINOR_BODY:   return "Comet: " + name;
+                    case MPC_MINOR_PLANET: return "Minor Planet: " + name;
+                    case NAMED:            return "Solar System Object: " + name;
+                    case SIDEREAL:         return "Sidereal: " + name;
+                }
             }
         }
 

@@ -95,11 +95,4 @@ public final class NamedTarget extends NonSiderealTarget {
         _solarObject = solarObject;
     }
 
-    /**
-     * Gets a short description of the position.
-     */
-    public String getPosition() {
-        return (_solarObject != null) ?  _solarObject.getDisplayValue() : "Named Target";
-    }
-
 }

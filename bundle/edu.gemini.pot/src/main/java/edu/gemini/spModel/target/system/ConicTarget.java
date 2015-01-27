@@ -289,12 +289,4 @@ public final class ConicTarget extends NonSiderealTarget  {
         _perihelion = newValue;
     }
 
-    /**
-     * Gets a short description of the position.
-     */
-    public String getPosition() {
-        // what should be returned here
-        return "Orbital Elements";
-    }
-
 }

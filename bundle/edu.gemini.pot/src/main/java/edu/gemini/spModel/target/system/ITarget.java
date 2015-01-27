@@ -60,24 +60,11 @@ public abstract class ITarget implements Cloneable, Serializable {
     }
 
 
-    /**
-     * Returns an optional name for the target.
-     */
+    /** Get the name. */
     public abstract String getName();
 
-    /**
-     * Sets an optional name for the target.
-     */
+    /** Set the name. */
     public abstract void setName(String name);
-
-    /**
-     * Gets a short description of the position.  For instance, the
-     * {@link HmsDegTarget} might return its RA and Dec in a
-     * formated String such as "RA=12:34:56 Dec=00:11:22".  To actually
-     * use a coordinate system's position, the client will have to use its
-     * particular interface rather than this method.
-     */
-    public abstract String getPosition();
 
     /** Get the RA. */
     public abstract ICoordinate getRa();
@@ -85,18 +72,10 @@ public abstract class ITarget implements Cloneable, Serializable {
     /** Get the Dec. */
     public abstract ICoordinate getDec();
 
-    /**
-     * Return the Epoch of this target position.
-     * @throws IllegalArgumentException if the coordinate system does not
-     * support the Epoch concept.
-     */
+    /** Get the Epoch */
     public abstract Epoch getEpoch();
 
-    /**
-     * Set the Epoch of this target position.
-     * @throws IllegalArgumentException if the coordinate system does not
-     * support the Epoch concept.
-     */
+    /** Set the Epoch */
     public abstract void setEpoch(Epoch e);
 
 
@@ -210,6 +189,10 @@ public abstract class ITarget implements Cloneable, Serializable {
     /** Gets a Skycalc {@link edu.gemini.skycalc.Coordinates} representation. */
     public synchronized Coordinates getSkycalcCoordinates() {
         return new Coordinates(getRa().getAs(CoordinateParam.Units.DEGREES), getDec().getAs(CoordinateParam.Units.DEGREES));
+    }
+
+    public final String toString() {
+        return String.format("ITarget(%s, %s)", getTag(), getName());
     }
 
 }

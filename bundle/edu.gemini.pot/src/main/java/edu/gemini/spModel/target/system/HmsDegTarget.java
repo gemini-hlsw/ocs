@@ -293,18 +293,4 @@ public final class HmsDegTarget extends ITarget {
         }
     }
 
-    /**
-     * Gets a short description of the position (its RA and Dec, epoch).
-     */
-    public String getPosition() {
-        return (getName().isEmpty() ? "" : getName() + " ") + "RA: " + getRa() + " Dec: " + getDec() + " " + SYSTEM_NAME + " (" + TAG.tccName + ")";
-    }
-
-    /**
-     * Convenience method for printing out a position.
-     */
-    public String toString() {
-        return getPosition();
-    }
-
 }
