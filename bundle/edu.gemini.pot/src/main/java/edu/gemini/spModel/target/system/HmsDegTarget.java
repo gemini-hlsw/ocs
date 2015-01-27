@@ -57,8 +57,8 @@ public final class HmsDegTarget extends ITarget {
     private RV _rv = DEFAULT_RV;
     private Parallax _parallax = DEFAULT_PARALLAX;
     private Date _taiz = DEFAULT_TAIZ;
-    private HMS _ra = new HMS();
-    private DMS _dec = new DMS();
+    private final HMS _ra = new HMS();
+    private final DMS _dec = new DMS();
 
     /**
      * The base name of this coordinate system.
@@ -73,8 +73,8 @@ public final class HmsDegTarget extends ITarget {
         target.setName(obj.getName());
         target.setMagnitudes(obj.getMagnitudes());
         target.setEpoch(new Epoch(e.getYear()));
-        target.setRa(new HMS(coords.getRa().toDegrees().getMagnitude()));
-        target.setDec(new DMS(coords.getDec().toDegrees().getMagnitude()));
+        target.getRa().setAs(coords.getRa().toDegrees().getMagnitude(), Units.DEGREES);
+        target.getDec().setAs(coords.getDec().toDegrees().getMagnitude(), Units.DEGREES);
 
         // Proper Motion
         final Units mas = Units.MILLI_ARCSECS_PER_YEAR;
@@ -93,8 +93,8 @@ public final class HmsDegTarget extends ITarget {
      */
     public HmsDegTarget clone() {
         HmsDegTarget result = (HmsDegTarget) super.clone();
-        result._ra = (HMS) _ra.clone();
-        result._dec = (DMS) _dec.clone();
+        result._ra.setValue(_ra.getValue());
+        result._dec.setValue(_dec.getValue());
         if (_epoch != null) result._epoch = (Epoch) _epoch.clone();
         if (_pm1 != null) result._pm1 = (PM1) _pm1.clone();
         if (_pm2 != null) result._pm2 = (PM2) _pm2.clone();
@@ -151,53 +151,6 @@ public final class HmsDegTarget extends ITarget {
     public ICoordinate getDec() {
         // Dec exists at instance creation.
         return _dec;
-    }
-
-    /**
-     * Sets the right ascension coordinate using an object implementing
-     * the {@link ICoordinate ICoordinate} interface (an HMS object).
-     * The input object is not cloned.  Therefore, the caller can
-     * alter the contents if he is not careful.
-     * <p>
-     * If newValue is null, the method returns without changing the
-     * internal value.  This ensures that the object always has a
-     * valid <code>ICoordinate</code>(HMS) object.
-     * <p>
-     * This method throws IllegalArgumentException if the ICoordinate is
-     * not an instance of {@link HMS HMS}.
-     */
-    public void setRa(ICoordinate ra)
-            throws IllegalArgumentException {
-        if (ra == null) {
-            ra = new HMS();
-        }
-        if (!(ra instanceof HMS)) {
-            throw new IllegalArgumentException();
-        }
-        _ra = (HMS) ra;
-    }
-
-    /**
-     * Sets the right ascension coordinate using an object implementing
-     * the {@link ICoordinate ICoordinate} interface (an DMS object).
-     * The input object is not cloned.  Therefore, the caller can
-     * alter the contents if not careful.
-     * <p>
-     * If newValue is null, the method returns without changing the
-     * internal value.  This ensures the object always has a valid
-     * <code>ICoordinate</code>(DMS) object.
-     * <p>
-     * This method throws IllegalArgumentException if the ICoordinate is
-     * not an instance of {@link HMS HMS}.
-     */
-    public void setDec(ICoordinate dec) {
-        if (dec == null) {
-            dec = new DMS();
-        }
-        if (!(dec instanceof DMS)) {
-            throw new IllegalArgumentException();
-        }
-        _dec = (DMS) dec;
     }
 
     /**

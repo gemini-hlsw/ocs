@@ -79,14 +79,8 @@ public abstract class ITarget implements Cloneable, Serializable {
      */
     public abstract String getPosition();
 
-    /** Set the RA. */
-    public abstract void setRa(ICoordinate ra);
-
     /** Get the RA. */
     public abstract ICoordinate getRa();
-
-    /** Set the Dec. */
-    public abstract void setDec(ICoordinate dec);
 
     /** Get the Dec. */
     public abstract ICoordinate getDec();

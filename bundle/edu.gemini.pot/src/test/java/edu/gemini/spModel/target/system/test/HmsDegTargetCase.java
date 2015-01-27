@@ -36,10 +36,8 @@ public final class HmsDegTargetCase {
         HmsDegTarget t1 = new HmsDegTarget();
         assertNotNull(t1);
 
-        ICoordinate ra = new HMS("10:11:12.345");
-        ICoordinate dec = new DMS("-20:30:40.567");
-        t1.setRa(ra);
-        t1.setDec(dec);
+        t1.getRa().setValue("10:11:12.345");
+        t1.getDec().setValue("-20:30:40.567");
 
         assertEquals(t1.getRa().toString(), "10:11:12.345");
         assertEquals(t1.getDec().toString(), "-20:30:40.57");

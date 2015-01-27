@@ -26,10 +26,8 @@ public final class NamedTargetCase {
         assertNotNull(t1);
 
         // Alt/Az
-        HMS c1 = new HMS("16:11:12.345");
-        DMS c2 = new DMS("-20:30:40.567");
-        t1.setRa(c1);
-        t1.setDec(c2);
+        t1.getRa().setValue("16:11:12.345");
+        t1.getDec().setValue("-20:30:40.567");
 
         assertEquals("16:11:12.345", t1.getRa().toString());
         assertEquals("-20:30:40.57", t1.getDec().toString());

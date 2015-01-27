@@ -262,7 +262,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
         read = s => new HMS(hms.parse(s)),
         show = _.toString,
         get  = _.getTarget.getTarget.getRa.asInstanceOf[HMS],
-        set  = setTarget(_.getTarget.setRa(_))
+        set  = setTarget((a, b) => a.getTarget.getRa.setValue(b.toString))
       )
 
       val dms = new DMSFormat()
@@ -270,7 +270,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
         read = s => new DMS(dms.parse(s)),
         show = _.toString,
         get  = _.getTarget.getTarget.getDec.asInstanceOf[DMS],
-        set  = setTarget(_.getTarget.setDec(_))
+        set  = setTarget((a, b) => a.getTarget.getDec.setValue(b.toString))
       )
 
       def pmField(getPM: SPTarget => Double, setPM: (SPTarget, Double) => Unit): BoundTextField[Double] =
