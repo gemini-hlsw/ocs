@@ -53,9 +53,9 @@ public final class TargetConfig extends ParamSet {
      * Note that only the hmsDegTarget is supported at this time.
      */
     public TargetConfig(SPTarget spTarget) throws WdbaGlueException {
-        super(spTarget.getName());
+        super(spTarget.getTarget().getName());
 
-        putParameter(TccNames.OBJNAME, spTarget.getName());
+        putParameter(TccNames.OBJNAME, spTarget.getTarget().getName());
 
         putParameter(TccNames.BRIGHTNESS, ""); // TODO: can we elide this altogether?
         putParameter(TccNames.TAG, ""); // ugh
@@ -147,7 +147,7 @@ public final class TargetConfig extends ParamSet {
     }
 
     private Option<Element> _createMagnitudes(SPTarget target) {
-        ImList<Magnitude> magList = target.getMagnitudes();
+        ImList<Magnitude> magList = target.getTarget().getMagnitudes();
         if (magList.size() == 0) return None.instance();
 
         final ParamSet ps = new ParamSet(TccNames.MAGNITUDES);

@@ -4,7 +4,7 @@ import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.io.impl.SpIOTags
 import edu.gemini.spModel.pio.xml.PioXmlFactory
 import edu.gemini.spModel.pio._
-import edu.gemini.spModel.target.SPTarget
+import edu.gemini.spModel.target.{SPTargetPio, SPTarget}
 import edu.gemini.spModel.template.{TemplateParameters, TemplateGroup, TemplateFolder}
 
 import scala.collection.JavaConverters._
@@ -61,7 +61,7 @@ object To2015A {
         m + (key -> f(ps))
       }
 
-    val targetMap = mapParamSets(SPTarget.PARAM_SET_NAME) { ps =>
+    val targetMap = mapParamSets(SPTargetPio.PARAM_SET_NAME) { ps =>
       val t = new SPTarget()
       t.setParamSet(ps)
       t

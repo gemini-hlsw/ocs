@@ -210,14 +210,14 @@ public class GeneralRule implements IRule {
                 Set<String> errorSet = new TreeSet<String>();
                 for (SPTarget target : guideTargets) {
                     //Check for empty name
-                    if ("".equals(target.getName().trim())) {
+                    if ("".equals(target.getTarget().getName().trim())) {
                         errorSet.add(String.format(WFS_EMPTY_NAME_TEMPLATE, guider.getKey()));
                     }
 
                     // If a WFS has the same name as the base position, make sure
                     // that it has the same position.  If they have the same
                     // position, make sure they have the same name.
-                    boolean sameName = baseTarget.getName().equals(target.getName());
+                    boolean sameName = baseTarget.getTarget().getName().equals(target.getTarget().getName());
                     boolean samePos;
                     if (baseTarget.getTarget() instanceof NonSiderealTarget) {
                         samePos = sameNonSiderealPosition(baseTarget, target);
@@ -377,7 +377,7 @@ public class GeneralRule implements IRule {
             if (scienceTarget == null) { //really unlikely
                 problems.addError(PREFIX+"NO_SCIENCE_TARGET_MSG", NO_SCIENCE_TARGET_MSG, elements.getTargetObsComponentNode().getValue());
             } else {
-                if ("".equals(scienceTarget.getName().trim())) {
+                if ("".equals(scienceTarget.getTarget().getName().trim())) {
                     problems.addError(PREFIX+"EMPTY_TARGET_NAME_MSG", EMPTY_TARGET_NAME_MSG, elements.getTargetObsComponentNode().getValue());
                 }
             }
@@ -427,11 +427,11 @@ public class GeneralRule implements IRule {
 
     private static boolean _areTargetsEquals(SPTarget p1Target, SPTarget target, ObservationElements elems) {
 
-        double spRA = target.getC1().getAs(CoordinateParam.Units.HMS);
-        double spDec = target.getC2().getAs(CoordinateParam.Units.DEGREES);
+        double spRA = target.getTarget().getC1().getAs(CoordinateParam.Units.HMS);
+        double spDec = target.getTarget().getC2().getAs(CoordinateParam.Units.DEGREES);
 
-        double p1RA = p1Target.getC1().getAs(CoordinateParam.Units.HMS);
-        double p1Dec = p1Target.getC2().getAs(CoordinateParam.Units.DEGREES);
+        double p1RA = p1Target.getTarget().getC1().getAs(CoordinateParam.Units.HMS);
+        double p1Dec = p1Target.getTarget().getC2().getAs(CoordinateParam.Units.DEGREES);
 
         return _closeEnough(elems, spRA, spDec, p1RA, p1Dec);
     }
@@ -444,8 +444,8 @@ public class GeneralRule implements IRule {
         final ISPObservation obs = elems.getObservationNode();
         if (obs == null || !Too.isToo(obs)) return false;
 
-        double p1RA = p1Target.getC1().getAs(CoordinateParam.Units.HMS);
-        double p1Dec = p1Target.getC2().getAs(CoordinateParam.Units.DEGREES);
+        double p1RA = p1Target.getTarget().getC1().getAs(CoordinateParam.Units.HMS);
+        double p1Dec = p1Target.getTarget().getC2().getAs(CoordinateParam.Units.DEGREES);
         return (p1RA == 0.0) && (p1Dec == 0.0);
     }
 

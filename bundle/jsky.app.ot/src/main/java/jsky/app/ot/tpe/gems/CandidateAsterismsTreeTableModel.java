@@ -165,7 +165,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
         String getId() {
             if (_guideProbeTargets != null) {
                 if (!_guideProbeTargets.getPrimary().isEmpty()) {
-                    return _guideProbeTargets.getPrimary().getValue().getName();
+                    return _guideProbeTargets.getPrimary().getValue().getTarget().getName();
                 }
             } else if (_gemsGuideStars != null) { // top level displays Strehl values
                 GemsStrehl strehl = _gemsGuideStars.getStrehl();
@@ -184,7 +184,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
                     if (Canopus.Wfs.Group.instance.getMembers().contains(guideProbe)) {
                         band = Magnitude.Band.R;
                     }
-                    Option<Magnitude> magOpt = _guideProbeTargets.getPrimary().getValue().getMagnitude(band);
+                    Option<Magnitude> magOpt = _guideProbeTargets.getPrimary().getValue().getTarget().getMagnitude(band);
                     if (!magOpt.isEmpty()) {
                         return magOpt.getValue().getBrightness() + " (" + band.name() + ")";
                     }
@@ -207,7 +207,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
 
         String getRA() {
             if (_guideProbeTargets != null) {
-                return getTarget().getXaxisAsString();
+                return getTarget().getTarget().c1ToString();
             } else if (_gemsGuideStars != null) { // top level displays Strehl values
                 GemsStrehl strehl = _gemsGuideStars.getStrehl();
                 if (strehl != null) {
@@ -219,7 +219,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
 
         Object getDec() {
             if (_guideProbeTargets != null) {
-                return getTarget().getYaxisAsString();
+                return getTarget().getTarget().c2ToString();
             }
             return null;
         }

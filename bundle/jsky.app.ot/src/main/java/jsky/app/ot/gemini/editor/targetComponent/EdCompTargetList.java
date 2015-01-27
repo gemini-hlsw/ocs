@@ -789,7 +789,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         TargetClipboard(SPTarget spTarget) {
             this.target = (ITarget) spTarget.getTarget().clone();
-            this.mag = spTarget.getMagnitudes();
+            this.mag = spTarget.getTarget().getMagnitudes();
         }
 
         TargetClipboard(GuideGroup group) {
@@ -1581,13 +1581,13 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _showTargetTag();
         _updateTargetInformationUI();
 
-        String name = _curPos.getName();
+        String name = _curPos.getTarget().getName();
         if (name != null) name = name.trim();
         _w.targetName.setValue(name);
         _w.resolveButton.setEnabled(editable && !"".equals(name));
 
-        _w.xaxis.setValue(_curPos.getXaxisAsString());
-        _w.yaxis.setValue(_curPos.getYaxisAsString());
+        _w.xaxis.setValue(_curPos.getTarget().c1ToString());
+        _w.yaxis.setValue(_curPos.getTarget().c2ToString());
 
         _setCoordSys();
 
@@ -1642,7 +1642,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         if (!(dec.equals("-") || dec.equals("+"))) {
             _ignorePosUpdate = true;
             try {
-                _curPos.setXYFromString(ra, dec);
+                _curPos.setHmsDms(ra, dec);
             } finally {
                 _ignorePosUpdate = false;
             }
@@ -1706,7 +1706,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
         _ignorePosUpdate = true;
         try {
-            _curPos.setCoordSys(tag);
+            _curPos.setTargetType(tag);
         } finally {
             _ignorePosUpdate = false;
         }
@@ -1795,7 +1795,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
 
             SPTarget base = env.getBase();
-            base.setXY(basePos.getRaDeg(), basePos.getDecDeg());
+            base.setRaDecDegrees(basePos.getRaDeg(), basePos.getDecDeg());
         } else if (w == _w.resolveButton) {
             // REL-1063 Fix OT nonsidereal Solar System Object Horizons name resolution
             if (_curPos.getTarget() instanceof NamedTarget) {
@@ -2092,7 +2092,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         NonSiderealTarget target = (NonSiderealTarget) _curPos.getTarget();
                         _ignorePosUpdate = true;
                         try {
-                            _curPos.setXYFromString(coords.getRA().toString(),
+                            _curPos.setHmsDms(coords.getRA().toString(),
                                     coords.getDec().toString());
                         } finally {
                             _ignorePosUpdate = false;

@@ -56,7 +56,7 @@ class TestTemplateGroupMerge {
     def dataObject  = tp.getDataObject.asInstanceOf[TemplateParameters]
 
     def target: SPTarget = dataObject.getTarget
-    def targetName: String = target.getName
+    def targetName: String = target.getTarget.getName
   }
 
   @Test def testConflictingTemplateGroups() {

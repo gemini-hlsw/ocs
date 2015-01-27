@@ -10,6 +10,7 @@ import edu.gemini.spModel.target.SPTarget
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.shared.skyobject
 import edu.gemini.skycalc
+import edu.gemini.spModel.target.system.HmsDegTarget
 import scala.math._
 import scala.collection.JavaConverters._
 
@@ -74,5 +75,5 @@ object GemsUtils4Java {
 
   def toNewAngle(angle: skycalc.Angle): Angle = angle.toNewModel
 
-  def toSPTarget(siderealTarget: SiderealTarget):SPTarget = new SPTarget(siderealTarget.toOldModel)
+  def toSPTarget(siderealTarget: SiderealTarget):SPTarget = new SPTarget(HmsDegTarget.fromSkyObject(siderealTarget.toOldModel))
 }

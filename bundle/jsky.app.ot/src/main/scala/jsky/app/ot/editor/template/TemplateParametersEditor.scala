@@ -239,7 +239,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       val nameField = new BoundTextField[String](10)(
         read = identity,
         show = identity,
-        get  = _.getTarget.getName,
+        get  = _.getTarget.getTarget.getName,
         set  = setTarget(_.setName(_))
       )
 
@@ -251,7 +251,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
             case Sidereal    => new HmsDegTarget()
             case NonSidereal => new ConicTarget()
           }
-          coords.setName(target.getName)
+          coords.setName(target.getTarget.getName)
           target.setTarget(coords)
           target.setMagnitudes(DefaultImList.create[Magnitude]())
         })}
@@ -308,20 +308,20 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
         lazy val zero = new Magnitude(band, 0.0)
 
         def mag(tp: TemplateParameters): Option[Magnitude] =
-          tp.getTarget.getMagnitude(band).asScalaOpt
+          tp.getTarget.getTarget.getMagnitude(band).asScalaOpt
 
         def magOrZero(tp: TemplateParameters): Magnitude =
           mag(tp).getOrElse(zero)
 
         def setMag[A](f: (Magnitude, A) => Magnitude): (TemplateParameters, A) => TemplateParameters =
-          setTarget[A]((t, a) => t.putMagnitude(f(t.getMagnitude(band).getOrElse(zero), a)))
+          setTarget[A]((t, a) => t.putMagnitude(f(t.getTarget.getMagnitude(band).getOrElse(zero), a)))
 
         val magCheck = new BoundCheckbox(
           get = mag(_).isDefined,
           set = setTarget((target, inc) => {
             if (inc) target.putMagnitude(zero)
             else {
-              val mags = target.getMagnitudes.toList.asScala.filterNot(_.getBand == band)
+              val mags = target.getTarget.getMagnitudes.toList.asScala.filterNot(_.getBand == band)
               target.setMagnitudes(DefaultImList.create(mags.asJava))
             }}
           )

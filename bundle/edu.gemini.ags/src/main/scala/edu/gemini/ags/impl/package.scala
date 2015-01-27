@@ -127,9 +127,9 @@ package object impl {
 
   implicit class SPTarget2SiderealTarget(val sp:SPTarget) extends AnyVal {
     def toNewModel:SiderealTarget = {
-      val name        = sp.getName
-      val coords      = sp.getSkycalcCoordinates
-      val mags        = sp.getMagnitudes.asScalaList.map(_.toNewModel)
+      val name        = sp.getTarget.getName
+      val coords      = sp.getTarget.getSkycalcCoordinates
+      val mags        = sp.getTarget.getMagnitudes.asScalaList.map(_.toNewModel)
       val ra          = Angle.fromDegrees(coords.getRaDeg)
       val dec         = Angle.fromDegrees(coords.getDecDeg)
       val coordinates = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
@@ -159,7 +159,7 @@ package object impl {
     Option(targetName).map(_.trim).flatMap { tn =>
       gpt.getOptions.find(new PredicateOp[SPTarget] {
         def apply(spt: SPTarget): java.lang.Boolean =
-          Option(spt.getName).map(_.trim).exists(_ == tn)
+          Option(spt.getTarget.getName).map(_.trim).exists(_ == tn)
       }).asScalaOpt
     }
 

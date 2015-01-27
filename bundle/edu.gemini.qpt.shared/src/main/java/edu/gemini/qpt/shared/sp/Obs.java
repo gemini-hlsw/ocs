@@ -42,6 +42,7 @@ import edu.gemini.spModel.obs.plannedtime.PlannedStepSummary;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
+import edu.gemini.spModel.target.system.CoordinateParam;
 import edu.gemini.spModel.target.system.NonSiderealTarget;
 import edu.gemini.spModel.too.TooType;
 import edu.gemini.spModel.type.DisplayableSpType;
@@ -402,7 +403,7 @@ public final class Obs implements Serializable, Comparable<Obs> {
 	}
 
 	public String getTargetName() {
-		return (targetEnvironment != null ? targetEnvironment.getBase().getName() : "");
+        return (targetEnvironment != null ? targetEnvironment.getBase().getTarget().getName() : "");
 	}
 
 	public String getWavefrontSensors() {
@@ -571,11 +572,11 @@ public final class Obs implements Serializable, Comparable<Obs> {
 	}
 
 	public double getRa() {
-		return (targetEnvironment != null ? targetEnvironment.getBase().getXaxis() : 0.0);
+        return (targetEnvironment != null ? targetEnvironment.getBase().getTarget().getC1().getAs(CoordinateParam.Units.DEGREES) : 0.0);
 	}
 
 	public double getDec() {
-		return (targetEnvironment != null ? targetEnvironment.getBase().getYaxis() : 0.0);
+        return (targetEnvironment != null ? targetEnvironment.getBase().getTarget().getC2().getAs(CoordinateParam.Units.DEGREES) : 0.0);
 	}
 
 	public Conds getConditions() {

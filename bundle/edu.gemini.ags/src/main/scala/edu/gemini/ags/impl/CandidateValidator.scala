@@ -7,6 +7,7 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.ags.api.AgsMagnitude
 import edu.gemini.catalog.api.MagnitudeConstraints
+import edu.gemini.spModel.target.system.HmsDegTarget
 
 import scalaz._
 import Scalaz._
@@ -38,7 +39,7 @@ class CandidateValidator(params: SingleProbeStrategyParams, mt: MagnitudeTable, 
       def brightnessOk = (magLimits |@| st.magnitudeIn(params.band))(_ contains _) | false
 
       // Only keep those that are in range of the guide probe.
-      def inProbeRange = params.validator(ctx).validate(new SPTarget(st.toOldModel), ctx)
+      def inProbeRange = params.validator(ctx).validate(new SPTarget(HmsDegTarget.fromSkyObject(st.toOldModel)), ctx)
 
       farEnough && brightnessOk && inProbeRange
     }

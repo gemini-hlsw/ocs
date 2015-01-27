@@ -26,7 +26,6 @@ import edu.gemini.spModel.target.offset.OffsetPosBase;
 import edu.gemini.spModel.target.offset.OffsetPosList;
 import edu.gemini.spModel.target.offset.OffsetUtil;
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
-import edu.gemini.spModel.target.system.HmsDegTarget;
 import edu.gemini.spModel.target.system.ICoordinate;
 import edu.gemini.spModel.target.system.ITarget;
 import jsky.app.ot.OT;
@@ -83,7 +82,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                 public Object getValue(Row row) {
                     return row.target().map(new MapOp<SPTarget, String>() {
                         @Override public String apply(SPTarget t) {
-                            return t.getXaxisAsString();
+                            return t.getTarget().c1ToString();
                         }
                     }).getOrElse("");
                 }
@@ -93,7 +92,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                 public Object getValue(Row row) {
                     return row.target().map(new MapOp<SPTarget, String>() {
                         @Override public String apply(SPTarget t) {
-                            return t.getYaxisAsString();
+                            return t.getTarget().c2ToString();
                         }
                     }).getOrElse("");
                 }
@@ -154,7 +153,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             public Option<Magnitude> getMagnitude(final Magnitude.Band band) {
                 return target.flatMap(new MapOp<SPTarget, Option<Magnitude>>() {
                     @Override public Option<Magnitude> apply(SPTarget spTarget) {
-                        return spTarget.getMagnitude(band);
+                        return spTarget.getTarget().getMagnitude(band);
                     }
                 });
             }
@@ -172,7 +171,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
         static final class BaseTargetRow extends AbstractRow {
             BaseTargetRow(SPTarget target) {
-                super(true, TargetEnvironment.BASE_NAME, target.getName(), new Some<>(target));
+                super(true, TargetEnvironment.BASE_NAME, target.getTarget().getName(), new Some<>(target));
             }
         }
 
@@ -180,7 +179,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             final Option<Double> distance;
 
             NonBaseTargetRow(boolean enabled, String tag, SPTarget target, WorldCoords baseCoords) {
-                super(enabled, tag, target.getName(), new Some<>(target));
+                super(enabled, tag, target.getTarget().getName(), new Some<>(target));
                 final WorldCoords coords = getWorldCoords(target);
                 distance = new Some<>(Math.abs(baseCoords.dist(coords)));
             }
@@ -333,12 +332,12 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             // An operation that adds a target's bands to the set.
             ApplyOp<SPTarget> op = new ApplyOp<SPTarget>() {
                 @Override public void apply(SPTarget spTarget) {
-                    bands.addAll(spTarget.getMagnitudeBands());
+                    bands.addAll(spTarget.getTarget().getMagnitudeBands());
                 }
             };
 
             // Extract all the magnitude bands from the environment.
-            bands.addAll(env.getBase().getMagnitudeBands());
+            bands.addAll(env.getBase().getTarget().getMagnitudeBands());
             for (GuideProbeTargets gt : env.getOrCreatePrimaryGuideGroup()) {
                 gt.getOptions().foreach(op);
             }
@@ -1034,7 +1033,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
         boolean isPrimary = src.getPrimary().getOrElse(null) == target;
         GuideProbeTargets newSrc = src.removeTarget(target);
-        SPTarget newTarget = SPTarget.CLONE_FUNCTION.apply(target);
+        SPTarget newTarget = target.clone();
         GuideProbeTargets newSnk = snk.setOptions(snk.getOptions().append(newTarget));
         if (isPrimary) {
             newSnk = newSnk.selectPrimary(newTarget);

@@ -16,7 +16,7 @@ import edu.gemini.spModel.rich.pot.sp._
 case class NifsAo(blueprint: SpNifsBlueprintAo, exampleTarget: Option[SPTarget]) extends NifsBase[SpNifsBlueprintAo] {
   import blueprint._
 
-  val tb = exampleTarget.flatMap(t => Option(t.getMagnitude(Band.H).getOrNull)).map(_.getBrightness).map(TargetBrightness(_))
+  val tb = exampleTarget.flatMap(t => Option(t.getTarget.getMagnitude(Band.H).getOrNull)).map(_.getBrightness).map(TargetBrightness(_))
 
   // # Select acquisition and science observation
   // IF OCCULTING DISK == None

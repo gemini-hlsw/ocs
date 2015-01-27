@@ -72,7 +72,7 @@ final class TargetContext(obs: Option[ISPObservation]) extends TpeSubContext[ISP
 
   def baseOrNull: SPTarget = base.orNull
 
-  def baseOrDefault: SPTarget = base.getOrElse(SPTarget.createDefaultBasePosition())
+  def baseOrDefault: SPTarget = base.getOrElse(new SPTarget)
 
   def selected: Option[SPTarget] = for {
     s <- shell

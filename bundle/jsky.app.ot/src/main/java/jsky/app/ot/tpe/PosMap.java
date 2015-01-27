@@ -137,7 +137,7 @@ public abstract class PosMap <K, T extends WatchablePos>
                 // ignore
             }
         } else {
-            ((SPTarget) tp).setXY(tme.pos.getRaDeg(), tme.pos.getDecDeg());
+            ((SPTarget) tp).setRaDecDegrees(tme.pos.getRaDeg(), tme.pos.getDecDeg());
         }
 
         tp.addWatcher(this);

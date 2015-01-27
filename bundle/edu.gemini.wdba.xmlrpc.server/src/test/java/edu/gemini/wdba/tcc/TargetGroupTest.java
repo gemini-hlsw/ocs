@@ -344,7 +344,7 @@ public final class TargetGroupTest extends TestBase {
 
         public String getTargetName(SPTarget target) {
             String name = targetNameMap.get(target);
-            return (name == null) ? target.getName() : name;
+            return (name == null) ? target.getTarget().getName() : name;
         }
 
         public void putTargetName(SPTarget target, String name) {

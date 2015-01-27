@@ -33,7 +33,7 @@ object TargetSurvey extends SafeApp {
   type Stats = Map[(String, String), (Int, Map[Magnitude.Band, Int])]
 
   def magnitudeMap(t: SPTarget): Map[Magnitude.Band, Int] =
-    t.getMagnitudes.asScalaList.map(_.getBand).strengthR(1).toMap
+    t.getTarget.getMagnitudes.asScalaList.map(_.getBand).strengthR(1).toMap
 
   def examineTarget(t: SPTarget): Stats =
     Map((t.getTarget.getClass.getSimpleName, t.getTarget.getTag.tccName) -> ((1, magnitudeMap(t))))

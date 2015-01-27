@@ -119,7 +119,7 @@ trait Partitioner {
 
 object GnirsSpectroscopyPartitioner extends Partitioner {
   import edu.gemini.shared.skyobject.Magnitude.Band.H
-  def bucket(t:SPTarget):Int = Option(t.getMagnitude(H).getOrNull).map(_.getBrightness).map {H =>
+  def bucket(t:SPTarget):Int = Option(t.getTarget.getMagnitude(H).getOrNull).map(_.getBrightness).map {H =>
     if (H < 11.5) 1
     else if (H < 16) 2
     else if (H < 20) 3
@@ -136,7 +136,7 @@ object GnirsSpectroscopyPartitioner extends Partitioner {
 
 object NifsAoPartitioner extends Partitioner {
   import edu.gemini.shared.skyobject.Magnitude.Band.H
-  def bucket(t:SPTarget):Int = Option(t.getMagnitude(H).getOrNull).map(_.getBrightness).map {H =>
+  def bucket(t:SPTarget):Int = Option(t.getTarget.getMagnitude(H).getOrNull).map(_.getBrightness).map {H =>
     if (H <= 9) 1
     else if (H <= 12) 2
     else if (H <= 20) 3
@@ -150,7 +150,7 @@ object NifsAoPartitioner extends Partitioner {
 
 object F2LongslitPartitioner extends Partitioner {
   import edu.gemini.shared.skyobject.Magnitude.Band.H
-  def bucket(t: SPTarget): Int = (Option(t.getMagnitude(H).getOrNull).map(_.getBrightness) map { h =>
+  def bucket(t: SPTarget): Int = (Option(t.getTarget.getMagnitude(H).getOrNull).map(_.getBrightness) map { h =>
     if (h <= 12.0) 1 else 2
   }).getOrElse(3)
 }

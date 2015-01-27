@@ -163,7 +163,7 @@ final class MagnitudeEditor implements TelescopePosEditor {
 
         public void setTarget(SPTarget target, Mode mode) {
             Option<Magnitude> magOpt = None.instance();
-            if (target != null) magOpt = target.getMagnitude(band);
+            if (target != null) magOpt = target.getTarget().getMagnitude(band);
 
             // Update visibility based upon whether the target has a
             // corresponding magnitude value for this band.
@@ -179,7 +179,7 @@ final class MagnitudeEditor implements TelescopePosEditor {
             Set<Magnitude.Band> options = new TreeSet<Magnitude.Band>(Magnitude.Band.WAVELENGTH_COMPARATOR);
             options.addAll(Arrays.asList(Magnitude.Band.values()));
             //noinspection ConstantConditions
-            options.removeAll(target.getMagnitudeBands());
+            options.removeAll(target.getTarget().getMagnitudeBands());
             options.add(band);
             cb.removeActionListener(changeBandAction);
             cb.setModel(new DefaultComboBoxModel(options.toArray()));
@@ -262,13 +262,13 @@ final class MagnitudeEditor implements TelescopePosEditor {
 
             // Make the remove button active if there are existing magnitude
             // values.
-            rmButton.setEnabled(target.getMagnitudes().size()>0);
+            rmButton.setEnabled(target.getTarget().getMagnitudes().size()>0);
 
             // Update the combo-box options to contain the unused magnitude
             // bands and show that nothing is selected.
             Set<Magnitude.Band> options = new TreeSet<Magnitude.Band>(Magnitude.Band.WAVELENGTH_COMPARATOR);
             options.addAll(Arrays.asList(Magnitude.Band.values()));
-            options.removeAll(target.getMagnitudeBands());
+            options.removeAll(target.getTarget().getMagnitudeBands());
             cb.setMaximumRowCount(options.size());
             cb.removeActionListener(addAction);
             cb.setModel(new DefaultComboBoxModel(options.toArray()));
@@ -422,7 +422,7 @@ final class MagnitudeEditor implements TelescopePosEditor {
         // If there is no magnitude info though, switch to add mode so that
         // the user doesn't have to push the + button.
         Mode mode = Mode.edit;
-        if ((target != null) && (target.getMagnitudes().size() == 0)) {
+        if ((target != null) && (target.getTarget().getMagnitudes().size() == 0)) {
             mode = Mode.add;
         }
         reinit(target, mode);
@@ -455,7 +455,7 @@ final class MagnitudeEditor implements TelescopePosEditor {
                     JScrollBar sb = scroll.getVerticalScrollBar();
                     sb.setValue(sb.getMaximum());
 
-                    if (target.getMagnitudes().size() > 0) {
+                    if (target.getTarget().getMagnitudes().size() > 0) {
                         newRow.getBandCombo().getValue().requestFocusInWindow();
                     }
                 }
@@ -495,46 +495,46 @@ final class MagnitudeEditor implements TelescopePosEditor {
     }
 
     void addBand(Magnitude.Band b) {
-        Option<Magnitude> magOpt = target.getMagnitude(b);
+        Option<Magnitude> magOpt = target.getTarget().getMagnitude(b);
         if (!magOpt.isEmpty()) return; // shouldn't happen ...
 
         Magnitude newMag = new Magnitude(b, Magnitude.UNDEFINED_MAG, 0);
 
-        target.setMagnitudes(target.getMagnitudes().cons(newMag));
+        target.setMagnitudes(target.getTarget().getMagnitudes().cons(newMag));
         focusOn(b);
     }
 
     void removeBand(Magnitude.Band b) {
-        target.setMagnitudes(target.getMagnitudes().filter(new NotBand(b)));
+        target.setMagnitudes(target.getTarget().getMagnitudes().filter(new NotBand(b)));
     }
 
     void changeBand(Magnitude.Band from, Magnitude.Band to) {
-        Option<Magnitude> oldMagOpt = target.getMagnitude(from);
+        Option<Magnitude> oldMagOpt = target.getTarget().getMagnitude(from);
         if (oldMagOpt.isEmpty()) return; // shouldn't happen ...
         Magnitude oldMag = oldMagOpt.getValue();
         Magnitude newMag = new Magnitude(to, oldMag.getBrightness(), oldMag.getError(), oldMag.getSystem());
 
         target.setMagnitudes(
-               target.getMagnitudes().filter(new NotBand(from)).cons(newMag)
+               target.getTarget().getMagnitudes().filter(new NotBand(from)).cons(newMag)
         );
         focusOn(to);
     }
 
     void changeSystem(Magnitude.Band band, Magnitude.System system) {
-        Option<Magnitude> oldMagOpt = target.getMagnitude(band);
+        Option<Magnitude> oldMagOpt = target.getTarget().getMagnitude(band);
         if (oldMagOpt.isEmpty()) return; // shouldn't happen ...
         Magnitude oldMag = oldMagOpt.getValue();
         if (system == oldMag.getSystem()) return;
         Magnitude newMag = new Magnitude(band, oldMag.getBrightness(), oldMag.getError(), system);
 
         target.setMagnitudes(
-               target.getMagnitudes().filter(new NotBand(band)).cons(newMag)
+               target.getTarget().getMagnitudes().filter(new NotBand(band)).cons(newMag)
         );
         focusOn(band);
     }
 
     void updateMagnitudeValue(Magnitude.Band b, double d) {
-        Option<Magnitude> oldMagOpt = target.getMagnitude(b);
+        Option<Magnitude> oldMagOpt = target.getTarget().getMagnitude(b);
         if (oldMagOpt.isEmpty()) return;
         Magnitude oldMag = oldMagOpt.getValue();
 
@@ -542,7 +542,7 @@ final class MagnitudeEditor implements TelescopePosEditor {
             Magnitude newMag = new Magnitude(oldMag.getBand(), d, oldMag.getError(), oldMag.getSystem());
             target.deleteWatcher(watcher);
             target.setMagnitudes(
-                   target.getMagnitudes().filter(new NotBand(b)).cons(newMag)
+                   target.getTarget().getMagnitudes().filter(new NotBand(b)).cons(newMag)
             );
             target.addWatcher(watcher);
         } catch (Exception ex) {

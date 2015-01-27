@@ -237,7 +237,7 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
         SPTarget base = targetEnv.getBase();
 
         base.setName(tooTarget.getName());
-        base.setXY(tooTarget.getRa(), tooTarget.getDec());
+        base.setRaDecDegrees(tooTarget.getRa(), tooTarget.getDec());
         base.setMagnitudes(tooTarget.getMagnitudes());
 
         // Set the guide star, if present.
@@ -277,7 +277,7 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
                         Option<SPTarget> targetOpt = gt.getPrimary();
                         SPTarget target = targetOpt.isEmpty() ? new SPTarget() : targetOpt.getValue();
 
-                        target.setXY(gs.getRa(), gs.getDec());
+                        target.setRaDecDegrees(gs.getRa(), gs.getDec());
                         String name = gs.getName();
                         if (name != null) target.setName(name);
 

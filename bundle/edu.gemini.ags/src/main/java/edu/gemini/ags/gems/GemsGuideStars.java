@@ -147,7 +147,7 @@ public class GemsGuideStars implements Comparable<GemsGuideStars> {
     // Returns the R magnitude, if known, otherwise 99.
     private double getRMag(Option<GuideProbeTargets> g) {
         if (!g.isEmpty() && !g.getValue().getPrimary().isEmpty()) {
-            Option<Magnitude> mag = g.getValue().getPrimary().getValue().getMagnitude(Magnitude.Band.R);
+            Option<Magnitude> mag = g.getValue().getPrimary().getValue().getTarget().getMagnitude(Magnitude.Band.R);
             if (!mag.isEmpty()) {
                 return mag.getValue().getBrightness();
             }
@@ -170,9 +170,9 @@ public class GemsGuideStars implements Comparable<GemsGuideStars> {
             SPTarget target = guideGroup.get(guideProbe).getValue().getPrimary().getValue();
             sb.append(guideProbe);
             sb.append("[");
-            sb.append(target.getC1());
+            sb.append(target.getTarget().getC1());
             sb.append(",");
-            sb.append(target.getC2());
+            sb.append(target.getTarget().getC2());
             sb.append("] ");
         }
         return "GemsGuideStars{" +

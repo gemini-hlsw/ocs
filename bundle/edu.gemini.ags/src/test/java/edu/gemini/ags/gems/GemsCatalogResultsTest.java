@@ -83,10 +83,10 @@ public class GemsCatalogResultsTest  implements MascotProgress {
         assertFalse(set.contains(GsaoiOdgw.odgw3));
         assertFalse(set.contains(GsaoiOdgw.odgw4));
 
-        Coordinates cwfs1 = group.get(Canopus.Wfs.cwfs1).getValue().getPrimary().getValue().getSkycalcCoordinates();
-        Coordinates cwfs2 = group.get(Canopus.Wfs.cwfs2).getValue().getPrimary().getValue().getSkycalcCoordinates();
-        Coordinates cwfs3 = group.get(Canopus.Wfs.cwfs3).getValue().getPrimary().getValue().getSkycalcCoordinates();
-        Coordinates odgw1 = group.get(GsaoiOdgw.odgw1).getValue().getPrimary().getValue().getSkycalcCoordinates();
+        Coordinates cwfs1 = group.get(Canopus.Wfs.cwfs1).getValue().getPrimary().getValue().getTarget().getSkycalcCoordinates();
+        Coordinates cwfs2 = group.get(Canopus.Wfs.cwfs2).getValue().getPrimary().getValue().getTarget().getSkycalcCoordinates();
+        Coordinates cwfs3 = group.get(Canopus.Wfs.cwfs3).getValue().getPrimary().getValue().getTarget().getSkycalcCoordinates();
+        Coordinates odgw1 = group.get(GsaoiOdgw.odgw1).getValue().getPrimary().getValue().getTarget().getSkycalcCoordinates();
 
         Coordinates cwfs1x = Coordinates.create("17:25:20.057", "-48:27:39.99");
         Coordinates cwfs2x = Coordinates.create("17:25:20.321", "-48:28:47.20");
@@ -105,9 +105,9 @@ public class GemsCatalogResultsTest  implements MascotProgress {
         assertEquals(odgw1x.getRaDeg(), odgw1.getRaDeg(), 0.001);
         assertEquals(odgw1x.getDecDeg(), odgw1.getDecDeg(), 0.001);
 
-        double cwfs1Mag = group.get(Canopus.Wfs.cwfs1).getValue().getPrimary().getValue().getMagnitude(Magnitude.Band.R).getValue().getBrightness();
-        double cwfs2Mag = group.get(Canopus.Wfs.cwfs2).getValue().getPrimary().getValue().getMagnitude(Magnitude.Band.R).getValue().getBrightness();
-        double cwfs3Mag = group.get(Canopus.Wfs.cwfs3).getValue().getPrimary().getValue().getMagnitude(Magnitude.Band.R).getValue().getBrightness();
+        double cwfs1Mag = group.get(Canopus.Wfs.cwfs1).getValue().getPrimary().getValue().getTarget().getMagnitude(Magnitude.Band.R).getValue().getBrightness();
+        double cwfs2Mag = group.get(Canopus.Wfs.cwfs2).getValue().getPrimary().getValue().getTarget().getMagnitude(Magnitude.Band.R).getValue().getBrightness();
+        double cwfs3Mag = group.get(Canopus.Wfs.cwfs3).getValue().getPrimary().getValue().getTarget().getMagnitude(Magnitude.Band.R).getValue().getBrightness();
         assertTrue(cwfs3Mag < cwfs1Mag && cwfs3Mag < cwfs2Mag); // cwfs3 is brightest
 
     }

@@ -11,6 +11,7 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.{OptionsList, GuideProbeTargets, TargetEnvironment}
+import edu.gemini.spModel.target.system.HmsDegTarget
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
@@ -69,14 +70,14 @@ object AgsStrategy {
      */
     def applyTo(env: TargetEnvironment): TargetEnvironment = {
       def findMatching(gpt: GuideProbeTargets, target: SPTarget): Option[SPTarget] =
-        Option(target.getName).flatMap { n =>
+        Option(target.getTarget.getName).flatMap { n =>
           gpt.getOptions.toList.asScala.find { t =>
-            Option(t.getName).map(_.trim).exists(_ == n.trim)
+            Option(t.getTarget.getName).map(_.trim).exists(_ == n.trim)
           }
         }
 
       (env /: assignments) { (curEnv, ass) =>
-        val target = new SPTarget(ass.guideStar.toOldModel)
+        val target = new SPTarget(HmsDegTarget.fromSkyObject(ass.guideStar.toOldModel))
         val oldGpt = curEnv.getPrimaryGuideProbeTargets(ass.guideProbe).asScalaOpt
 
         val newGpt = oldGpt.fold(GuideProbeTargets.create(ass.guideProbe, target)) { gpt =>
