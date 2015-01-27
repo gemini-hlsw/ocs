@@ -92,7 +92,7 @@ public final class HmsDegTarget extends ITarget {
      * As expected, cloning an HmsDegTarget provides a copy of the
      * object with all new instances of the member objects.
      */
-    public Object clone() {
+    public HmsDegTarget clone() {
         HmsDegTarget result = (HmsDegTarget) super.clone();
         result._ra = (HMS) _ra.clone();
         result._dec = (DMS) _dec.clone();

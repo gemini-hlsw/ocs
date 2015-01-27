@@ -65,7 +65,7 @@ public final class ConicTarget extends NonSiderealTarget  {
     /**
      * Provides clone support.
      */
-    public Object clone() {
+    public ConicTarget clone() {
         ConicTarget result = (ConicTarget) super.clone();
 
         if (_anode != null) result._anode = (ANode) _anode.clone();

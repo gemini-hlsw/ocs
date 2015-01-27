@@ -248,7 +248,7 @@ public abstract class NonSiderealTarget extends ITarget {
     }
 
 
-    public Object clone() {
+    public NonSiderealTarget clone() {
         NonSiderealTarget result = (NonSiderealTarget) super.clone();
         if (_epoch != null) result._epoch = (CoordinateTypes.Epoch) _epoch.clone();
         if (_date != null) result._date = (Date) _date.clone();
