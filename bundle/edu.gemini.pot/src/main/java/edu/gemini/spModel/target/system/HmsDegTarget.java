@@ -48,7 +48,6 @@ public final class HmsDegTarget extends ITarget {
     private static final Date DEFAULT_TAIZ = null;
     private static final String DEFAULT_NAME = "";
 
-    private String _brightness = DEFAULT_NAME;
     private String _name = DEFAULT_NAME;
     private Epoch _epoch = _createDefaultEpoch();
     private PM1 _pm1 = DEFAULT_PM1;
@@ -320,24 +319,6 @@ public final class HmsDegTarget extends ITarget {
      */
     public void setParallax(Parallax newValue) {
         _parallax = newValue;
-    }
-
-    /**
-     * Gets the optional brightness for a coordinate.
-     * This returns a String description of the brightness.
-     */
-    public String getBrightness() {
-        return _brightness;
-    }
-
-    /**
-     * Sets the optional brightness for the position.
-     */
-    public void setBrightness(String brightness) {
-        // Make sure the name is never set to null
-        if (brightness != null) {
-            _brightness = brightness;
-        }
     }
 
     /**

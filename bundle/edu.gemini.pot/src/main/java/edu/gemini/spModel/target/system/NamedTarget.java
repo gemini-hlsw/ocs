@@ -6,7 +6,7 @@ package edu.gemini.spModel.target.system;
  */
 public final class NamedTarget extends NonSiderealTarget {
 
-    public static Tag TAG = Tag.NAMED;
+    public static final Tag TAG = Tag.NAMED;
 
     public Tag getTag() {
         return TAG;
