@@ -58,10 +58,19 @@ publishArtifact in (ThisBuild, packageSrc) := false
 // No poms
 publishMavenStyle in ThisBuild := false
 
-// Pull stuff up in Dash, if you have it: > dash List
-commands +=
-  Command.single("dash") { (state, topic) =>
-    import scala.sys.process._
-    s"/usr/bin/open dash://scala:$topic".!
+// > dash -s List
+commands += {
+  import scala.sys.process._
+  import complete.DefaultParsers._
+  val stuff = Seq(("-6", "java6",  "Java SE6"),
+                  ("-7", "java7",  "Java SE7"),
+                  ("-s", "scala",  "Scala"),
+                  ("-z", "scalaz", "scalaz"))
+  val option = stuff.map { case (o, d, _) => o ^^^ d } .reduceLeft(_ | _)
+  val parser = token(Space ~> option) ~ token(Space ~> StringBasic)
+  val help = Help.briefDetail(stuff.map { case (o, _, t) => (s"$o <word>", s"Search in $t") })
+  Command("dash", help)(_ => parser) { case (state, (set, topic)) =>
+    s"/usr/bin/open dash://$set:$topic".!
     state
   }
+}
