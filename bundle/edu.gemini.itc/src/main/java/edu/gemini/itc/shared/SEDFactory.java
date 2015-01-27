@@ -2,12 +2,6 @@ package edu.gemini.itc.shared;
 
 import edu.gemini.itc.parameters.SourceDefinitionParameters;
 
-import java.io.CharArrayReader;
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * This class encapsulates the process of creating a Spectral Energy
  * Distribution (SED).  (e.g. from a data file)
@@ -27,44 +21,16 @@ public class SEDFactory {
     /**
      * Returns a SED constructed with specified values.
      */
-    public SampledSpectrum getSED(double[] flux, double wavelengthStart,
-                                  double wavelengthInterval) {
-        return new DefaultSampledSpectrum(flux, wavelengthStart,
-                wavelengthInterval);
+    public static VisitableSampledSpectrum getSED(double[] flux, double wavelengthStart, double wavelengthInterval) {
+        return new DefaultSampledSpectrum(flux, wavelengthStart, wavelengthInterval);
     }
 
     /**
      * Returns a SED read from specified data file.
      * The format of the file is as follows:
-     * A line containing a double specifying the wavelength interval
-     * followed by lines containing two doubles
-     * separated by whitespace or commas.  The first is wavelength
-     * in nm.  The second is flux in arbitrary units.  e.g.
+     * Lines containing two doubles separated by whitespace or commas.
+     * The first is wavelength in nm.  The second is flux in arbitrary units.  e.g.
      * <pre>
-     * # Wavelength sampling size in nm
-     * 0.5
-     * # The data, wavelengths are in nm, flux units unknown
-     *  115.0  0.181751
-     *  115.5  0.203323
-     *  116.0  0.142062
-     *  ...
-     * </pre>
-     */
-    public static VisitableSampledSpectrum getSED(String fileName)
-            throws Exception {
-        return getSED(fileName, -1.0);  // Get sampling interval from file
-    }
-
-    /**
-     * Returns a SED read from specified data file.
-     * The format of the file is as follows:
-     * A line containing a double specifying the wavelength interval
-     * followed by lines containing two doubles
-     * separated by whitespace or commas.  The first is wavelength
-     * in nm.  The second is flux in arbitrary units.  e.g.
-     * <pre>
-     * # Wavelength sampling size in nm
-     * 0.5
      * # The data, wavelengths are in nm, flux units unknown
      *  115.0  0.181751
      *  115.5  0.203323
@@ -73,74 +39,9 @@ public class SEDFactory {
      * </pre>
      */
     public static VisitableSampledSpectrum getSED(String fileName, double wavelengthInterval) throws Exception {
-        TextFileReader dfr = null;
-        try {
-            dfr = new TextFileReader(fileName);
-        } catch (Exception e) {
-            System.out.println("SED file not found: " + fileName);
-            throw e;
-        }
-
-        // These lists hold doubles from the data file.
-        List wavelengths = new ArrayList();
-        List fluxDensities = new ArrayList();
-
-        double wavelength = 0;
-        double flux = 0;
-
-        // if interval is not specified, assume it is in the file
-        if (wavelengthInterval <= 0) {
-            try {
-                if (dfr.countTokens() != 1) {
-                    throw new Exception("First line of spectral file " + fileName
-                            + " must be sampling interval.");
-                }
-                wavelengthInterval = dfr.readDouble();
-            } catch (ParseException e) {
-                throw e;
-            } catch (IOException e) {
-                throw new Exception("First line of spectral file " + fileName
-                        + " must be sampling interval.");
-            }
-        }
-
-        try {
-            while (true) {
-                if (dfr.countTokens() != 2) {
-                    throw new Exception("Line " + dfr.getLineNumber()
-                            + " of spectral file " + fileName
-                            + " does not contain two values.");
-                }
-                wavelength = dfr.readDouble();
-                wavelengths.add(new Double(wavelength));
-                flux = dfr.readDouble();
-                fluxDensities.add(new Double(flux));
-            }
-        } catch (ParseException e) {
-            throw e;
-        } catch (IOException e) {
-            //System.out.println(e.toString());
-        }
-
-        if (fluxDensities.size() < 1) {
-            throw new Exception("SED data for " + fileName + " is empty.");
-        }
-
-        if (fluxDensities.size() != wavelengths.size()) {
-            String s = "SED data for " + fileName + " not consistent.  ";
-            s += fluxDensities.size() + " x values, " + wavelengths.size() +
-                    " y values.";
-            System.out.println("flux[0]: " + fluxDensities.get(0));
-            System.out.println("wave[0]: " + wavelengths.get(0));
-            throw new Exception(s);
-        }
-
-        DefaultArraySpectrum as = new DefaultArraySpectrum(wavelengths, fluxDensities);
-        wavelengths.clear();
-        wavelengths = null;
-        fluxDensities.clear();
-        fluxDensities = null;
-
+        // values <= 0 used to trigger different behavior in an older version but seems not be used anymore
+        assert wavelengthInterval > 0.0;
+        final DefaultArraySpectrum as = new DefaultArraySpectrum(fileName);
         return new DefaultSampledSpectrum(as, wavelengthInterval);
     }
 
@@ -162,84 +63,15 @@ public class SEDFactory {
      *  ...
      * </pre>
      */
-    public static VisitableSampledSpectrum getSED(String fileName, String userSED,
-                                                  double wavelengthInterval)
-            throws Exception {
-        TextFileReader dfr = null;
-        try {
-            dfr = new TextFileReader(new CharArrayReader(userSED.toCharArray()));
-        } catch (Exception e) {
-            System.out.println("SED file not found: " + fileName);
-            throw e;
-        }
-
-        // These lists hold doubles from the data file.
-        List wavelengths = new ArrayList();
-        List fluxDensities = new ArrayList();
-
-        double wavelength = 0;
-        double flux = 0;
-
-        // if interval is not specified, assume it is in the file
-        if (wavelengthInterval <= 0) {
-            try {
-                if (dfr.countTokens() != 1) {
-                    throw new Exception("First line of spectral file " + fileName
-                            + " must be sampling interval.");
-                }
-                wavelengthInterval = dfr.readDouble();
-            } catch (ParseException e) {
-                throw e;
-            } catch (IOException e) {
-                throw new Exception("First line of spectral file " + fileName
-                        + " must be sampling interval.");
-            }
-        }
-
-        try {
-            while (true) {
-                if (dfr.countTokens() != 2) {
-                    throw new Exception("Line " + dfr.getLineNumber()
-                            + " of spectral file " + fileName
-                            + " does not contain two values.");
-                }
-                wavelength = dfr.readDouble();
-                wavelengths.add(new Double(wavelength));
-                flux = dfr.readDouble();
-                fluxDensities.add(new Double(flux));
-            }
-        } catch (ParseException e) {
-            throw e;
-        } catch (IOException e) {
-            //System.out.println(e.toString());
-        }
-
-        if (fluxDensities.size() < 1) {
-            throw new Exception("SED data for " + fileName + " is empty.");
-        }
-
-        if (fluxDensities.size() != wavelengths.size()) {
-            String s = "SED data for " + fileName + " not consistent.  ";
-            s += fluxDensities.size() + " x values, " + wavelengths.size() +
-                    " y values.";
-            System.out.println("flux[0]: " + fluxDensities.get(0));
-            System.out.println("wave[0]: " + wavelengths.get(0));
-            throw new Exception(s);
-        }
-
-        DefaultArraySpectrum as = new DefaultArraySpectrum(wavelengths,
-                fluxDensities);
-        wavelengths.clear();
-        wavelengths = null;
-        fluxDensities.clear();
-        fluxDensities = null;
-
+    public static VisitableSampledSpectrum getSED(String fileName, String userSED, double wavelengthInterval) throws Exception {
+        // values <= 0 used to trigger different behavior in an older version but seems not be used anymore
+        assert wavelengthInterval > 0.0;
+        final DefaultArraySpectrum as = DefaultArraySpectrum.fromString(userSED);
         return new DefaultSampledSpectrum(as, wavelengthInterval);
     }
 
 
-    public static VisitableSampledSpectrum getSED(SourceDefinitionParameters sdp,
-                                                  Instrument instrument) throws Exception {
+    public static VisitableSampledSpectrum getSED(SourceDefinitionParameters sdp, Instrument instrument) throws Exception {
 
         if (sdp.getSpectrumResource().equals(sdp.BBODY)) {
             return new
@@ -291,8 +123,7 @@ public class SEDFactory {
 
 
     //Added to allow creation of an SED spanning more than one filter for NICI
-    public static VisitableSampledSpectrum getSED(SourceDefinitionParameters sdp,
-                                                  double sampling, double observingStart, double observingEnd) throws Exception {
+    public static VisitableSampledSpectrum getSED(SourceDefinitionParameters sdp, double sampling, double observingStart, double observingEnd) throws Exception {
 
         if (sdp.getSpectrumResource().equals(sdp.BBODY)) {
             return new

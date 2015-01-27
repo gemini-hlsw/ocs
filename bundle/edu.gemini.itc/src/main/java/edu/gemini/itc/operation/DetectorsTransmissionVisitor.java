@@ -71,8 +71,7 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
         }
         detectorCcdIndexes.add(finalPixelValue - 1);
 
-        SEDFactory sedfac = new SEDFactory();
-        detectorsTransmissionValues = (VisitableSampledSpectrum) sedfac.getSED(pixelData, 1, 1);
+        detectorsTransmissionValues = SEDFactory.getSED(pixelData, 1, 1);
 
         ResampleVisitor detectorResample = new ResampleVisitor(
                 detectorsTransmissionValues.getStart(),
