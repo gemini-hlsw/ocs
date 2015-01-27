@@ -88,8 +88,8 @@ public class SPTargetPio {
             final HmsDegTarget t = (HmsDegTarget) target;
             Pio.addParam(factory, paramSet, _SYSTEM, t.getTag().tccName);
             paramSet.addParam(t.getEpoch().getParam(factory, _EPOCH));
-            Pio.addParam(factory, paramSet, _C1, t.getRaHms());
-            Pio.addParam(factory, paramSet, _C2, t.getDecDms());
+            Pio.addParam(factory, paramSet, _C1, t.getRa().toString());
+            Pio.addParam(factory, paramSet, _C2, t.getDec().toString());
             paramSet.addParam(t.getPM1().getParam(factory, _PM1));
             paramSet.addParam(t.getPM2().getParam(factory, _PM2));
             paramSet.addParam(t.getParallax().getParam(factory, _PARALLAX));
@@ -105,8 +105,8 @@ public class SPTargetPio {
 
             // OT-495: save and restore RA/Dec for conic targets
             // XXX FIXME: Temporary, until nonsidereal support is implemented
-            Pio.addParam(factory, paramSet, _C1, nst.getRaHms());
-            Pio.addParam(factory, paramSet, _C2, nst.getDecDms());
+            Pio.addParam(factory, paramSet, _C1, nst.getRa().toString());
+            Pio.addParam(factory, paramSet, _C2, nst.getDec().toString());
             if (nst.getDateForPosition() != null) {
                 Pio.addParam(factory, paramSet, _VALID_DATE, formatDate(nst.getDateForPosition()));
             }
@@ -164,7 +164,8 @@ public class SPTargetPio {
 
             final String c1 = Pio.getValue(paramSet, _C1);
             final String c2 = Pio.getValue(paramSet, _C2);
-            t.setC1C2(c1, c2);
+            t.getRa().setValue(c1);
+            t.getDec().setValue(c2);
 
             final CoordinateTypes.Epoch e = new CoordinateTypes.Epoch();
             e.setParam(paramSet.getParam(_EPOCH));
@@ -199,7 +200,8 @@ public class SPTargetPio {
             final String c1 = Pio.getValue(paramSet, _C1);
             final String c2 = Pio.getValue(paramSet, _C2);
             if (c1 != null && c2 != null) {
-                nst.setC1C2(c1, c2);
+                nst.getRa().setValue(c1);
+                nst.getDec().setValue(c2);
             }
 
             final String dateStr = Pio.getValue(paramSet, _VALID_DATE);

@@ -38,18 +38,19 @@ public final class HmsDegTargetCase {
 
         ICoordinate ra = new HMS("10:11:12.345");
         ICoordinate dec = new DMS("-20:30:40.567");
-        t1.setC1C2(ra, dec);
+        t1.setRa(ra);
+        t1.setDec(dec);
 
-        assertEquals(t1.raToString(), "10:11:12.345");
-        assertEquals(t1.decToString(), "-20:30:40.57");
+        assertEquals(t1.getRa().toString(), "10:11:12.345");
+        assertEquals(t1.getDec().toString(), "-20:30:40.57");
     }
 
     private void _doTestOne(String raIn, String decIn,
                             String raEx, String decEx) {
-        _t1.setRaHms(raIn);
-        _t1.setDecDms(decIn);
-        String raOut = _t1.getRaHms();
-        String decOut = _t1.getDecDms();
+        _t1.getRa().setValue(raIn);
+        _t1.getDec().setValue(decIn);
+        String raOut = _t1.getRa().toString();
+        String decOut = _t1.getDec().toString();
 
         assertEquals("Failed comparison,", raEx, raOut);
         assertEquals("Failed comparison,", decEx, decOut);
@@ -65,7 +66,8 @@ public final class HmsDegTargetCase {
     @Test
     public void testSerialization() throws Exception {
         final HmsDegTarget outObject = new HmsDegTarget();
-        outObject.setRaDec("10:11:12.34", "-11:12:13.4");
+        outObject.getRa().setValue("10:11:12.34");
+        outObject.getDec().setValue("-11:12:13.4");
         final HmsDegTarget inObject = ser(outObject);
         assertTrue(outObject.equals(inObject));
     }

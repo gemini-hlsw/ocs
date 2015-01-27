@@ -42,20 +42,6 @@ public abstract class NonSiderealTarget extends ITarget {
         }
     }
 
-     /**
-     * Sets the first coordinate (right ascension) using a String.
-     */
-    void setRa(String newStringValue) {
-        _ra.setValue(newStringValue);
-    }
-
-    /**
-     * Sets the second coordinate (declination) using a String.
-     */
-    void setDec(String newStringValue) {
-        _dec.setValue(newStringValue);
-    }
-
 
     /**
      * Sets the right ascension coordinate using an object implementing
@@ -70,8 +56,7 @@ public abstract class NonSiderealTarget extends ITarget {
      * This method throws IllegalArgumentException if the ICoordinate is
      * not an instance of {@link HMS HMS}.
      */
-    public void setRa(ICoordinate ra)
-            throws IllegalArgumentException {
+    public void setRa(ICoordinate ra) {
         if (ra == null) {
             ra = new HMS();
         }
@@ -82,31 +67,10 @@ public abstract class NonSiderealTarget extends ITarget {
     }
 
     /**
-     * Sets the first coordinate (right ascension) using a String.
-     */
-    public void setRaHms(String hms) {
-        setRa(hms);
-    }
-
-    /**
      * Get the first Coordinate as an ICoordinate.
      */
     public ICoordinate getRa() {
         return _ra;
-    }
-
-    /**
-     * Gets the first coordinate (right ascension) as a String.
-     */
-    String raToString() {
-        return _ra.toString();
-    }
-
-    /**
-     * Gets the first coordinate (right ascension) as a String.
-     */
-    public String getRaHms() {
-        return raToString();
     }
 
     /**
@@ -133,51 +97,11 @@ public abstract class NonSiderealTarget extends ITarget {
     }
 
     /**
-     * Sets the second coordinate (declination) using a String.
-     */
-    public void setDecDms(String dms) {
-        setDec(dms);
-    }
-
-    /**
      * Get the second Coordinate as an ICoordinate.
      */
     public ICoordinate getDec() {
         return _dec;
     }
-
-    /**
-     * Gets the second coordinate (declination) as a String.
-     */
-    String decToString() {
-        return _dec.toString();
-    }
-
-    /**
-     * Gets the second coordinate (right ascension) as a String.
-     */
-    public String getDecDms() {
-        return decToString();
-    }
-
-    /**
-     * Set the first and second coordinates using appropriate
-     * <code>ICoordinate</code>.
-     */
-    public void setC1C2(ICoordinate c1, ICoordinate c2)
-            throws IllegalArgumentException {
-        setRa(c1);
-        setDec(c2);
-    }
-
-    /**
-     * Sets the first and second coordinates using String objects.
-     */
-    public void setC1C2(String c1, String c2) {
-        setRaHms(c1);
-        setDecDms(c2);
-    }
-
 
     /**
      * Gets the epoch of this object.

@@ -91,18 +91,6 @@ public abstract class ITarget implements Cloneable, Serializable {
     /** Get the Dec. */
     public abstract ICoordinate getDec();
 
-    /** Set the RA in HMS format. */
-    public abstract void setRaHms(String hms);
-
-    /** Get the RA in HMS format. */
-    public abstract String getRaHms();
-
-    /** Set the Dec in DMS format. */
-    public abstract void setDecDms(String dms);
-
-    /** Get the Dec in DMS format. */
-    public abstract String getDecDms();
-
     /**
      * Return the Epoch of this target position.
      * @throws IllegalArgumentException if the coordinate system does not

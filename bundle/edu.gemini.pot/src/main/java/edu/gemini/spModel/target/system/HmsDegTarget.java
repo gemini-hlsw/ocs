@@ -135,34 +135,6 @@ public final class HmsDegTarget extends ITarget {
     }
 
     /**
-     * Gets the first coordinate (right ascension) as a String.
-     */
-    public String raToString() {
-        return _ra.toString();
-    }
-
-    /**
-     * Gets the first coordinate (right ascension) as a String.
-     */
-    public String getRaHms() {
-        return raToString();
-    }
-
-    /**
-     * Gets the second coordinate (declination) as a String.
-     */
-    public String decToString() {
-        return _dec.toString();
-    }
-
-    /**
-     * Gets the second coordinate (right ascension) as a String.
-     */
-    public String getDecDms() {
-        return decToString();
-    }
-
-    /**
      * General method to return the first coordinate (right ascension).
      * This returns a reference to the actual object an {@link HMS HMS}
      * object so take care!
@@ -227,59 +199,6 @@ public final class HmsDegTarget extends ITarget {
             throw new IllegalArgumentException();
         }
         _dec = (DMS) dec;
-    }
-
-    /**
-     * General method to set the first and second coordinates together.
-     */
-    public void setC1C2(ICoordinate c1, ICoordinate c2)
-            throws IllegalArgumentException {
-        setRa(c1);
-        setDec(c2);
-    }
-
-    /**
-     * Sets the first coordinate (right ascension) using a String.
-     */
-    void setRa(String newStringValue) {
-        _ra.setValue(newStringValue);
-    }
-
-    /**
-     * Sets the first coordinate (right ascension) using a String.
-     */
-    public void setRaHms(String hms) {
-        setRa(hms);
-    }
-
-    /**
-     * Sets the second coordinate (declination) using a String.
-     */
-    void setDec(String newStringValue) {
-        _dec.setValue(newStringValue);
-    }
-
-    /**
-     * Sets the second coordinate (declination) using a String.
-     */
-    public void setDecDms(String dms) {
-        setDec(dms);
-    }
-
-    /**
-     * Sets the right ascension and declination using String objects.
-     */
-    public void setRaDec(String newRa, String newDec) {
-        setRa(newRa);
-        setDec(newDec);
-    }
-
-    /**
-     * Sets the first and second coordinates using String objects.
-     */
-    public void setC1C2(String c1, String c2) {
-        setRaHms(c1);
-        setDecDms(c2);
     }
 
     /**

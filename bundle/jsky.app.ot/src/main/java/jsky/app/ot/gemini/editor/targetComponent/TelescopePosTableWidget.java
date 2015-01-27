@@ -82,7 +82,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                 public Object getValue(Row row) {
                     return row.target().map(new MapOp<SPTarget, String>() {
                         @Override public String apply(SPTarget t) {
-                            return t.getTarget().getRaHms();
+                            return t.getTarget().getRa().toString();
                         }
                     }).getOrElse("");
                 }
@@ -92,7 +92,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                 public Object getValue(Row row) {
                     return row.target().map(new MapOp<SPTarget, String>() {
                         @Override public String apply(SPTarget t) {
-                            return t.getTarget().getDecDms();
+                            return t.getTarget().getDec().toString();
                         }
                     }).getOrElse("");
                 }

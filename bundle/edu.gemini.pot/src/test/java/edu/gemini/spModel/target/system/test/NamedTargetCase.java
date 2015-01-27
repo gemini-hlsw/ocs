@@ -28,10 +28,11 @@ public final class NamedTargetCase {
         // Alt/Az
         HMS c1 = new HMS("16:11:12.345");
         DMS c2 = new DMS("-20:30:40.567");
-        t1.setC1C2(c1, c2);
+        t1.setRa(c1);
+        t1.setDec(c2);
 
-        assertEquals("16:11:12.345", t1.getRaHms());
-        assertEquals("-20:30:40.57", t1.getDecDms());
+        assertEquals("16:11:12.345", t1.getRa().toString());
+        assertEquals("-20:30:40.57", t1.getDec().toString());
 
         //Planet
         t1.setSolarObject(NamedTarget.SolarObject.NEPTUNE);
@@ -40,10 +41,10 @@ public final class NamedTargetCase {
 
     private void _doTestOne(String lIn, String bIn,
                             String lEx, String bEx) {
-        _t1.setRaHms(lIn);
-        _t1.setDecDms(bIn);
-        String lOut = _t1.getRaHms();
-        String bOut = _t1.getDecDms();
+        _t1.getRa().setValue(lIn);
+        _t1.getDec().setValue(bIn);
+        String lOut = _t1.getRa().toString();
+        String bOut = _t1.getDec().toString();
 
         assertEquals("Failed comparison,", lEx, lOut);
         assertEquals("Failed comparison,", bEx, bOut);
@@ -59,7 +60,8 @@ public final class NamedTargetCase {
     @Test
     public void testSerialization() throws Exception {
         final NamedTarget outObject = new NamedTarget();
-        outObject.setC1C2("210:11:12.4", "-11:12:13.4");
+        outObject.getRa().setValue("210:11:12.4");
+        outObject.getDec().setValue("-11:12:13.4");
         outObject.setSolarObject(NamedTarget.SolarObject.URANUS);
         final NamedTarget inObject = ser(outObject);
         assertTrue(outObject.equals(inObject));
