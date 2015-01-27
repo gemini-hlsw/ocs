@@ -51,7 +51,7 @@ public class Michelle extends Instrument {
 
     // Keep a reference to the color filter to ask for effective wavelength
     private Filter _Filter;
-    private GratingOptics _gratingOptics;
+    private MichelleGratingOptics _gratingOptics;
     private Detector _detector;
     private double _sampling;
     private String _filterUsed;
@@ -180,9 +180,7 @@ public class Michelle extends Instrument {
 
         if (!(_grating.equals("none"))) {
 
-            _gratingOptics = new GratingOptics(getDirectory() + "/", _grating,
-                    // _focalPlaneMaskOffset,
-                    _stringSlitWidth,
+            _gratingOptics = new MichelleGratingOptics(getDirectory() + "/" + getPrefix(), _grating,
                     _centralWavelength,
                     _detector.getDetectorPixels(), //_spectralBinning,
                     _spectralBinning);

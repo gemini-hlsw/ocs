@@ -46,7 +46,7 @@ public abstract class Gnirs extends Instrument {
 
     // Keep a reference to the color filter to ask for effective wavelength
     protected Filter _Filter;
-    protected GratingOptics _gratingOptics;
+    protected GnirsGratingOptics _gratingOptics;
     protected Detector _detector;
     protected double _sampling;
     protected String _filterUsed;

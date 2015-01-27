@@ -191,9 +191,7 @@ public class GmosSouth extends Gmos {
 
         if (!(_grating.equals("none"))) {
 
-            _gratingOptics = new GratingOptics(getDirectory() + "/", getPrefix(), _grating, _detector,
-                    // _focalPlaneMaskOffset,
-                    _stringSlitWidth,
+            _gratingOptics = new GmosGratingOptics(getDirectory() + "/" + getPrefix(), _grating, _detector,
                     _centralWavelength,
                     _detector.getDetectorPixels(),//_spectralBinning,
                     _spectralBinning);
