@@ -16,8 +16,8 @@ object DatFile {
 
   // ===== Scan utils
 
-  // delimiters are whitespaces, commas and comments (from "#" up to next \n).
-  private val Delimiters = Pattern.compile("(\\s|,|(#[^\\n]*))+")
+  // delimiters are whitespaces, commas or semicolons and comments (everything from "#" up to next \n).
+  private val Delimiters = Pattern.compile("(\\s|,|;|(#[^\\n]*))+")
 
   def scan(f: String): Scanner = {
     Option(getClass.getResourceAsStream(f)).fold {
@@ -26,6 +26,8 @@ object DatFile {
       new Scanner(_).useDelimiter(Delimiters)
     }
   }
+
+  def scanString(s: String): Scanner = new Scanner(s).useDelimiter(Delimiters)
 
   // ===== Parse utils
   abstract class Parser extends JavaTokenParsers {
@@ -93,6 +95,16 @@ object DatFile {
       cache.put(file, data)
       data
     }
+  }
+
+  def parseSpectrum(spectrum: String): Array[Array[Double]] = {
+      System.out.println("Parsing user spectrum")
+      val r = new PlainSpectrumParser().parseString(spectrum)
+      if (!r.successful) System.out.println("*********ERROR FOR user spectrum")
+      val data = new Array[Array[Double]](2)
+      data(0) = r.get.map(_._1).toArray
+      data(1) = r.get.map(_._2).toArray
+      data
   }
 
 }

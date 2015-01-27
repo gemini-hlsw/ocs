@@ -1,18 +1,3 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-
-
-/*
- * MultipartTestServlet.java
- *
- * Created on November 29, 2001, 12:04 PM
- */
-
 package edu.gemini.itc.shared;
 
 import edu.gemini.itc.acqcam.AcquisitionCamParameters;
@@ -27,16 +12,15 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
-import java.io.CharArrayReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.text.ParseException;
 import java.util.Iterator;
+import java.util.Scanner;
 
 
-/**
- * @author bwalls
+/*
+ * MultipartTestServlet.java
  */
+
 public class MultipartTestServlet extends HttpServlet {
 
     /**
@@ -97,14 +81,10 @@ public class MultipartTestServlet extends HttpServlet {
                     System.out.println(parser.getTextFile(txtFileName) + "<br>");
                 }
                 //Use this Code in Sed Factory to create a Textfile Reader for the String.
-                TextFileReader t = new TextFileReader(new CharArrayReader(sdp.getUserDefinedSpectrum().toCharArray()));
-                try {
-                    while (true) {
-                        System.out.println("x: " + t.readDouble() + "\ny: " + t.readDouble());
+                try (final Scanner scan = DatFile.scanString(sdp.getUserDefinedSpectrum())) {
+                    while (scan.hasNext()) {
+                        System.out.println("x: " + scan.nextDouble() + "\ny: " + scan.nextDouble());
                     }
-                } catch (ParseException e) {
-                    throw e;
-                } catch (IOException e) {
                 }
 
                 /**
@@ -127,15 +107,9 @@ public class MultipartTestServlet extends HttpServlet {
         } else {
             out.println("ERROR: File size (" + (new Integer(request.getContentLength())).doubleValue() / MAX_CONTENT_LENGTH +
                     " MB)exceeds 1MB limit. Please resubmit with at smaller file.<br>");
-            BufferedReader in = new BufferedReader(new InputStreamReader(request.getInputStream()));
-            try {
-                while (true) {
-                    String line = in.readLine();
-                    if (line == null) throw new java.io.IOException();
-                }
-            } catch (java.io.IOException e) {
+            try (final BufferedReader in = new BufferedReader(new InputStreamReader(request.getInputStream()))) {
+                while (in.readLine() != null) { /* intentionally empty */}
             }
-
         }
 
 
