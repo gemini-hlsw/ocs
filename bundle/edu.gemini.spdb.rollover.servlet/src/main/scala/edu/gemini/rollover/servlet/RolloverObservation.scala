@@ -48,8 +48,8 @@ object RolloverObservation {
       targetEnv  <- Option(dataObj.getTargetEnvironment)
       science    <- Option(targetEnv.getBase)
       name       <- Option(science.getTarget.getName)
-      ra         <- Option(science.getTarget.getC1.getAs(Units.DEGREES))
-      dec        <- Option(science.getTarget.getC2.getAs(Units.DEGREES))
+      ra         <- Option(science.getTarget.getRa.getAs(Units.DEGREES))
+      dec        <- Option(science.getTarget.getDec.getAs(Units.DEGREES))
     } yield RolloverTarget(name, new Angle(ra, Angle.Unit.DEGREES), new Angle(dec, Angle.Unit.DEGREES))
 
   private def conditions(o: ISPObservation): Option[RolloverConditions] =

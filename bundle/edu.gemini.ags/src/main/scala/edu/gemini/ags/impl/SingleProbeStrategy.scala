@@ -111,8 +111,8 @@ object SingleProbeStrategy {
     val ra1    = st.coordinates.ra.toAngle.toRadians
     val dec1   = st.coordinates.dec.toAngle.toRadians
     val target = HmsDegTarget.fromSkyObject(st.toOldModel)
-    val ra2    = Angle.fromDegrees(target.getC1.getAs(Units.DEGREES)).toRadians
-    val dec2   = Angle.fromDegrees(target.getC2.getAs(Units.DEGREES)).toRadians
+    val ra2    = Angle.fromDegrees(target.getRa.getAs(Units.DEGREES)).toRadians
+    val dec2   = Angle.fromDegrees(target.getDec.getAs(Units.DEGREES)).toRadians
     val raDiff = ra2 - ra1
     val angle  = atan2(sin(raDiff), cos(dec1) * tan(dec2) - sin(dec1) * cos(raDiff))
     Angle.fromRadians(angle)

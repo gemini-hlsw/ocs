@@ -79,61 +79,29 @@ public abstract class ITarget implements Cloneable, Serializable {
      */
     public abstract String getPosition();
 
-    /**
-     * Set the first Coordinate using an appropriate ICoordinate.
-     *
-     * @throws IllegalArgumentException if the <code>ICoordinate</code> is
-     * not an appropriate type.
-     */
-    public abstract void setC1(ICoordinate c1);
+    /** Set the RA. */
+    public abstract void setRa(ICoordinate ra);
 
-    /**
-     * Get the first Coordinate as an {@link ICoordinate}.
-     * This is generally, the internally used <code>ICoordinate</code> and
-     * should be used with care.
-     */
-    public abstract ICoordinate getC1();
+    /** Get the RA. */
+    public abstract ICoordinate getRa();
 
-    /**
-     * Set the second Coordinate using an appropriate {@link ICoordinate}.
-     *
-     * @throws IllegalArgumentException if the <code>ICoordinate</code> is
-     * not an appropriate type.
-     */
-    public abstract void setC2(ICoordinate c2);
+    /** Set the Dec. */
+    public abstract void setDec(ICoordinate dec);
 
-    /**
-     * Get the second Coordinate as an {@link ICoordinate}.
-     * This is generally, the internally used <code>ICoordinate</code>
-     * and should be used with care.
-     */
-    public abstract ICoordinate getC2();
+    /** Get the Dec. */
+    public abstract ICoordinate getDec();
 
-    /**
-     * Set the first Coordinate using a String.
-     *
-     * @throws IllegalArgumentException if the argument can not be parsed
-     * correctly.
-     */
-    public abstract void setC1(String c1);
+    /** Set the RA in HMS format. */
+    public abstract void setRaHMS(String hms);
 
-    /**
-     * Gets the first coordinate as a String.
-     */
-    public abstract String c1ToString();
+    /** Get the RA in HMS format. */
+    public abstract String getRaHMS();
 
-    /**
-     * Set the second Coordinate using a String.
-     *
-     * @throws IllegalArgumentException if the argument can not be parsed
-     * correctly.
-     */
-    public abstract void setC2(String c2);
+    /** Set the Dec in DMS format. */
+    public abstract void setDecDMS(String dec);
 
-    /**
-     * Gets the second coordinate as a String.
-     */
-    public abstract String c2ToString();
+    /** Get the Dec in DMS format. */
+    public abstract String getDecDMS();
 
     /**
      * Return the Epoch of this target position.
@@ -264,7 +232,7 @@ public abstract class ITarget implements Cloneable, Serializable {
 
     /** Gets a Skycalc {@link edu.gemini.skycalc.Coordinates} representation. */
     public synchronized Coordinates getSkycalcCoordinates() {
-        return new Coordinates(getC1().getAs(CoordinateParam.Units.DEGREES), getC2().getAs(CoordinateParam.Units.DEGREES));
+        return new Coordinates(getRa().getAs(CoordinateParam.Units.DEGREES), getDec().getAs(CoordinateParam.Units.DEGREES));
     }
 
 }

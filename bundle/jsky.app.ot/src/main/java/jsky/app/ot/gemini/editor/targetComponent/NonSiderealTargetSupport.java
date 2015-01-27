@@ -241,8 +241,8 @@ class NonSiderealTargetSupport {
         }
 
         // Update the RA and Dec
-        form.xaxis.setText(target.c1ToString());
-        form.yaxis.setText(target.c2ToString());
+        form.xaxis.setText(target.getRaHMS());
+        form.yaxis.setText(target.getDecDMS());
 
         // Update the valid-at date
         Date date = target.getDateForPosition();

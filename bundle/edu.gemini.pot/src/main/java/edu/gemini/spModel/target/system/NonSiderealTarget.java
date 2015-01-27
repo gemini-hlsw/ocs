@@ -70,28 +70,28 @@ public abstract class NonSiderealTarget extends ITarget {
      * This method throws IllegalArgumentException if the ICoordinate is
      * not an instance of {@link HMS HMS}.
      */
-    public void setC1(ICoordinate newValue)
+    public void setRa(ICoordinate ra)
             throws IllegalArgumentException {
-        if (newValue == null) {
-            newValue = new HMS();
+        if (ra == null) {
+            ra = new HMS();
         }
-        if (!(newValue instanceof HMS)) {
+        if (!(ra instanceof HMS)) {
             throw new IllegalArgumentException();
         }
-        _ra = (HMS) newValue;
+        _ra = (HMS) ra;
     }
 
     /**
      * Sets the first coordinate (right ascension) using a String.
      */
-    public void setC1(String c1) {
-        setRa(c1);
+    public void setRaHMS(String hms) {
+        setRa(hms);
     }
 
     /**
      * Get the first Coordinate as an ICoordinate.
      */
-    public ICoordinate getC1() {
+    public ICoordinate getRa() {
         return _ra;
     }
 
@@ -105,7 +105,7 @@ public abstract class NonSiderealTarget extends ITarget {
     /**
      * Gets the first coordinate (right ascension) as a String.
      */
-    public String c1ToString() {
+    public String getRaHMS() {
         return raToString();
     }
 
@@ -122,27 +122,27 @@ public abstract class NonSiderealTarget extends ITarget {
      * This method throws IllegalArgumentException if the ICoordinate is
      * not an instance of {@link HMS HMS}.
      */
-    public void setC2(ICoordinate newValue) {
-        if (newValue == null) {
-            newValue = new DMS();
+    public void setDec(ICoordinate dec) {
+        if (dec == null) {
+            dec = new DMS();
         }
-        if (!(newValue instanceof DMS)) {
+        if (!(dec instanceof DMS)) {
             throw new IllegalArgumentException();
         }
-        _dec = (DMS) newValue;
+        _dec = (DMS) dec;
     }
 
     /**
      * Sets the second coordinate (declination) using a String.
      */
-    public void setC2(String c2) {
-        setDec(c2);
+    public void setDecDMS(String dec) {
+        setDec(dec);
     }
 
     /**
      * Get the second Coordinate as an ICoordinate.
      */
-    public ICoordinate getC2() {
+    public ICoordinate getDec() {
         return _dec;
     }
 
@@ -156,7 +156,7 @@ public abstract class NonSiderealTarget extends ITarget {
     /**
      * Gets the second coordinate (right ascension) as a String.
      */
-    public String c2ToString() {
+    public String getDecDMS() {
         return decToString();
     }
 
@@ -166,16 +166,16 @@ public abstract class NonSiderealTarget extends ITarget {
      */
     public void setC1C2(ICoordinate c1, ICoordinate c2)
             throws IllegalArgumentException {
-        setC1(c1);
-        setC2(c2);
+        setRa(c1);
+        setDec(c2);
     }
 
     /**
      * Sets the first and second coordinates using String objects.
      */
     public void setC1C2(String c1, String c2) {
-        setC1(c1);
-        setC2(c2);
+        setRaHMS(c1);
+        setDecDMS(c2);
     }
 
 

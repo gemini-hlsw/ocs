@@ -445,7 +445,7 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
         } else {
             final TargetObsComp toc = (TargetObsComp) targetComp.getDataObject();
             final SPTarget target = toc.getBase();
-            return (target.getTarget().getC1().getAs(CoordinateParam.Units.DEGREES) != 0.0) || (target.getTarget().getC2().getAs(CoordinateParam.Units.DEGREES) != 0.0);
+            return (target.getTarget().getRa().getAs(CoordinateParam.Units.DEGREES) != 0.0) || (target.getTarget().getDec().getAs(CoordinateParam.Units.DEGREES) != 0.0);
         }
     }
 

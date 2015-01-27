@@ -9,7 +9,6 @@ package edu.gemini.spModel.target;
 
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
-import edu.gemini.skycalc.Coordinates;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.system.*;
@@ -37,8 +36,8 @@ public final class SPTarget extends WatchablePos {
     /** SPTarget with the given RA/Dec in degrees. */
     public SPTarget(final double raDeg, final double degDec) {
         this();
-        _target.getC1().setAs(raDeg, Units.DEGREES);
-        _target.getC2().setAs(degDec, Units.DEGREES);
+        _target.getRa().setAs(raDeg, Units.DEGREES);
+        _target.getDec().setAs(degDec, Units.DEGREES);
     }
 
     /** Return the contained target. */
@@ -112,14 +111,14 @@ public final class SPTarget extends WatchablePos {
     public void setHmsDms(final String hms, final String dms) {
         synchronized (this) {
             try {
-                _target.setC1(hms);
+                _target.setRaHMS(hms);
             } catch (final IllegalArgumentException ex) {
-                _target.setC1("00:00:00.0");
+                _target.setRaHMS("00:00:00.0");
             }
             try {
-                _target.setC2(dms);
+                _target.setDecDMS(dms);
             } catch( final IllegalArgumentException ex) {
-                _target.setC2("00:00:00.0");
+                _target.setDecDMS("00:00:00.0");
             }
         }
         _notifyOfUpdate();
@@ -237,8 +236,8 @@ public final class SPTarget extends WatchablePos {
     /** Set the contained target RA/Dec in degrees and notify observers. */
     public void setRaDecDegrees(final double raDeg, final double decDeg) {
         synchronized (this) {
-            _target.getC1().setAs(raDeg, Units.DEGREES);
-            _target.getC2().setAs(decDeg, Units.DEGREES);
+            _target.getRa().setAs(raDeg, Units.DEGREES);
+            _target.getDec().setAs(decDeg, Units.DEGREES);
         }
         _notifyOfUpdate();
     }

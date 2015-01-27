@@ -74,8 +74,8 @@ public final class HmsDegTarget extends ITarget {
         target.setName(obj.getName());
         target.setMagnitudes(obj.getMagnitudes());
         target.setEpoch(new Epoch(e.getYear()));
-        target.setC1(new HMS(coords.getRa().toDegrees().getMagnitude()));
-        target.setC2(new DMS(coords.getDec().toDegrees().getMagnitude()));
+        target.setRa(new HMS(coords.getRa().toDegrees().getMagnitude()));
+        target.setDec(new DMS(coords.getDec().toDegrees().getMagnitude()));
 
         // Proper Motion
         final Units mas = Units.MILLI_ARCSECS_PER_YEAR;
@@ -144,7 +144,7 @@ public final class HmsDegTarget extends ITarget {
     /**
      * Gets the first coordinate (right ascension) as a String.
      */
-    public String c1ToString() {
+    public String getRaHMS() {
         return raToString();
     }
 
@@ -158,7 +158,7 @@ public final class HmsDegTarget extends ITarget {
     /**
      * Gets the second coordinate (right ascension) as a String.
      */
-    public String c2ToString() {
+    public String getDecDMS() {
         return decToString();
     }
 
@@ -167,7 +167,7 @@ public final class HmsDegTarget extends ITarget {
      * This returns a reference to the actual object an {@link HMS HMS}
      * object so take care!
      */
-    public ICoordinate getC1() {
+    public ICoordinate getRa() {
         // Ra exists at instance creation.
         return _ra;
     }
@@ -177,7 +177,7 @@ public final class HmsDegTarget extends ITarget {
      * This returns a reference to the actual object an {@link DMS DMS}
      * object so take care!
      */
-    public ICoordinate getC2() {
+    public ICoordinate getDec() {
         // Dec exists at instance creation.
         return _dec;
     }
@@ -195,15 +195,15 @@ public final class HmsDegTarget extends ITarget {
      * This method throws IllegalArgumentException if the ICoordinate is
      * not an instance of {@link HMS HMS}.
      */
-    public void setC1(ICoordinate newValue)
+    public void setRa(ICoordinate ra)
             throws IllegalArgumentException {
-        if (newValue == null) {
-            newValue = new HMS();
+        if (ra == null) {
+            ra = new HMS();
         }
-        if (!(newValue instanceof HMS)) {
+        if (!(ra instanceof HMS)) {
             throw new IllegalArgumentException();
         }
-        _ra = (HMS) newValue;
+        _ra = (HMS) ra;
     }
 
     /**
@@ -219,14 +219,14 @@ public final class HmsDegTarget extends ITarget {
      * This method throws IllegalArgumentException if the ICoordinate is
      * not an instance of {@link HMS HMS}.
      */
-    public void setC2(ICoordinate newValue) {
-        if (newValue == null) {
-            newValue = new DMS();
+    public void setDec(ICoordinate dec) {
+        if (dec == null) {
+            dec = new DMS();
         }
-        if (!(newValue instanceof DMS)) {
+        if (!(dec instanceof DMS)) {
             throw new IllegalArgumentException();
         }
-        _dec = (DMS) newValue;
+        _dec = (DMS) dec;
     }
 
     /**
@@ -234,8 +234,8 @@ public final class HmsDegTarget extends ITarget {
      */
     public void setC1C2(ICoordinate c1, ICoordinate c2)
             throws IllegalArgumentException {
-        setC1(c1);
-        setC2(c2);
+        setRa(c1);
+        setDec(c2);
     }
 
     /**
@@ -248,8 +248,8 @@ public final class HmsDegTarget extends ITarget {
     /**
      * Sets the first coordinate (right ascension) using a String.
      */
-    public void setC1(String c1) {
-        setRa(c1);
+    public void setRaHMS(String hms) {
+        setRa(hms);
     }
 
     /**
@@ -262,8 +262,8 @@ public final class HmsDegTarget extends ITarget {
     /**
      * Sets the second coordinate (declination) using a String.
      */
-    public void setC2(String c2) {
-        setDec(c2);
+    public void setDecDMS(String dec) {
+        setDec(dec);
     }
 
     /**
@@ -278,8 +278,8 @@ public final class HmsDegTarget extends ITarget {
      * Sets the first and second coordinates using String objects.
      */
     public void setC1C2(String c1, String c2) {
-        setC1(c1);
-        setC2(c2);
+        setRaHMS(c1);
+        setDecDMS(c2);
     }
 
     /**
@@ -444,7 +444,7 @@ public final class HmsDegTarget extends ITarget {
      * Gets a short description of the position (its RA and Dec, epoch).
      */
     public String getPosition() {
-        return (getName().isEmpty() ? "" : getName() + " ") + "RA: " + getC1() + " Dec: " + getC2() + " " + SYSTEM_NAME + " (" + TAG.tccName + ")";
+        return (getName().isEmpty() ? "" : getName() + " ") + "RA: " + getRa() + " Dec: " + getDec() + " " + SYSTEM_NAME + " (" + TAG.tccName + ")";
     }
 
     /**

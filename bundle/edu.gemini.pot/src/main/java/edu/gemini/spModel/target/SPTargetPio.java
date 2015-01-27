@@ -88,8 +88,8 @@ public class SPTargetPio {
             final HmsDegTarget t = (HmsDegTarget) target;
             Pio.addParam(factory, paramSet, _SYSTEM, t.getTag().tccName);
             paramSet.addParam(t.getEpoch().getParam(factory, _EPOCH));
-            Pio.addParam(factory, paramSet, _C1, t.c1ToString());
-            Pio.addParam(factory, paramSet, _C2, t.c2ToString());
+            Pio.addParam(factory, paramSet, _C1, t.getRaHMS());
+            Pio.addParam(factory, paramSet, _C2, t.getDecDMS());
             paramSet.addParam(t.getPM1().getParam(factory, _PM1));
             paramSet.addParam(t.getPM2().getParam(factory, _PM2));
             paramSet.addParam(t.getParallax().getParam(factory, _PARALLAX));
@@ -105,8 +105,8 @@ public class SPTargetPio {
 
             // OT-495: save and restore RA/Dec for conic targets
             // XXX FIXME: Temporary, until nonsidereal support is implemented
-            Pio.addParam(factory, paramSet, _C1, nst.c1ToString());
-            Pio.addParam(factory, paramSet, _C2, nst.c2ToString());
+            Pio.addParam(factory, paramSet, _C1, nst.getRaHMS());
+            Pio.addParam(factory, paramSet, _C2, nst.getDecDMS());
             if (nst.getDateForPosition() != null) {
                 Pio.addParam(factory, paramSet, _VALID_DATE, formatDate(nst.getDateForPosition()));
             }

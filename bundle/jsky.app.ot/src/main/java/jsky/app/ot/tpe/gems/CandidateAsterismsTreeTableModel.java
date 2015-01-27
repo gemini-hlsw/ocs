@@ -207,7 +207,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
 
         String getRA() {
             if (_guideProbeTargets != null) {
-                return getTarget().getTarget().c1ToString();
+                return getTarget().getTarget().getRaHMS();
             } else if (_gemsGuideStars != null) { // top level displays Strehl values
                 GemsStrehl strehl = _gemsGuideStars.getStrehl();
                 if (strehl != null) {
@@ -219,7 +219,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
 
         Object getDec() {
             if (_guideProbeTargets != null) {
-                return getTarget().getTarget().c2ToString();
+                return getTarget().getTarget().getDecDMS();
             }
             return null;
         }

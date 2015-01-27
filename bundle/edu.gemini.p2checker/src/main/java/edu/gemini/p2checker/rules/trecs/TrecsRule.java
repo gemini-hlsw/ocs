@@ -16,7 +16,6 @@ import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.system.CoordinateParam;
-import edu.gemini.spModel.target.system.HmsDegTarget;
 import edu.gemini.spModel.target.system.ICoordinate;
 import edu.gemini.spModel.target.system.ITarget;
 import jsky.coords.WorldCoords;
@@ -357,8 +356,8 @@ public class TrecsRule implements IRule {
         // Return the world coordinates for the give target
         private WorldCoords _getWorldCoords(SPTarget tp) {
             ITarget target = tp.getTarget();
-            ICoordinate c1 = target.getC1();
-            ICoordinate c2 = target.getC2();
+            ICoordinate c1 = target.getRa();
+            ICoordinate c2 = target.getDec();
             double x = c1.getAs(CoordinateParam.Units.DEGREES);
             double y = c2.getAs(CoordinateParam.Units.DEGREES);
             return new WorldCoords(x, y, 2000.);

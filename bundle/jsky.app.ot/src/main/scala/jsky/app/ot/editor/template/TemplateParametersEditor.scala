@@ -261,16 +261,16 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       val raField = new BoundTextField[HMS](10)(
         read = s => new HMS(hms.parse(s)),
         show = _.toString,
-        get  = _.getTarget.getTarget.getC1.asInstanceOf[HMS],
-        set  = setTarget(_.getTarget.setC1(_))
+        get  = _.getTarget.getTarget.getRa.asInstanceOf[HMS],
+        set  = setTarget(_.getTarget.setRa(_))
       )
 
       val dms = new DMSFormat()
       val decField = new BoundTextField[DMS](10)(
         read = s => new DMS(dms.parse(s)),
         show = _.toString,
-        get  = _.getTarget.getTarget.getC2.asInstanceOf[DMS],
-        set  = setTarget(_.getTarget.setC2(_))
+        get  = _.getTarget.getTarget.getDec.asInstanceOf[DMS],
+        set  = setTarget(_.getTarget.setDec(_))
       )
 
       def pmField(getPM: SPTarget => Double, setPM: (SPTarget, Double) => Unit): BoundTextField[Double] =

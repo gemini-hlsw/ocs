@@ -6,7 +6,6 @@
  */
 package edu.gemini.spModel.target.system.test;
 
-import edu.gemini.spModel.target.system.CoordinateTypes.Epoch;
 import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.target.system.HmsDegTarget;
 import edu.gemini.spModel.target.system.HMS;
@@ -47,10 +46,10 @@ public final class HmsDegTargetCase {
 
     private void _doTestOne(String raIn, String decIn,
                             String raEx, String decEx) {
-        _t1.setC1(raIn);
-        _t1.setC2(decIn);
-        String raOut = _t1.c1ToString();
-        String decOut = _t1.c2ToString();
+        _t1.setRaHMS(raIn);
+        _t1.setDecDMS(decIn);
+        String raOut = _t1.getRaHMS();
+        String decOut = _t1.getDecDMS();
 
         assertEquals("Failed comparison,", raEx, raOut);
         assertEquals("Failed comparison,", decEx, decOut);

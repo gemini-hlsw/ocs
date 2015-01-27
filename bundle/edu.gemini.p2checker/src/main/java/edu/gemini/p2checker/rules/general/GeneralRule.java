@@ -268,11 +268,11 @@ public class GeneralRule implements IRule {
             // Okay, this kind of sucks, but I want to compare the coordinates
             // in the same way they are externalized and displayed.  That is,
             // ignore any extra precision that we end up throwing away.
-            String baseC1 = base.getTarget().c1ToString();
-            String baseC2 = base.getTarget().c2ToString();
+            String baseC1 = base.getTarget().getRaHMS();
+            String baseC2 = base.getTarget().getDecDMS();
 
-            String guideC1 = guide.getTarget().c1ToString();
-            String guideC2 = guide.getTarget().c2ToString();
+            String guideC1 = guide.getTarget().getRaHMS();
+            String guideC2 = guide.getTarget().getDecDMS();
 
             return baseC1.equals(guideC1) && baseC2.equals(guideC2);
         }
@@ -427,11 +427,11 @@ public class GeneralRule implements IRule {
 
     private static boolean _areTargetsEquals(SPTarget p1Target, SPTarget target, ObservationElements elems) {
 
-        double spRA = target.getTarget().getC1().getAs(CoordinateParam.Units.HMS);
-        double spDec = target.getTarget().getC2().getAs(CoordinateParam.Units.DEGREES);
+        double spRA = target.getTarget().getRa().getAs(CoordinateParam.Units.HMS);
+        double spDec = target.getTarget().getDec().getAs(CoordinateParam.Units.DEGREES);
 
-        double p1RA = p1Target.getTarget().getC1().getAs(CoordinateParam.Units.HMS);
-        double p1Dec = p1Target.getTarget().getC2().getAs(CoordinateParam.Units.DEGREES);
+        double p1RA = p1Target.getTarget().getRa().getAs(CoordinateParam.Units.HMS);
+        double p1Dec = p1Target.getTarget().getDec().getAs(CoordinateParam.Units.DEGREES);
 
         return _closeEnough(elems, spRA, spDec, p1RA, p1Dec);
     }
@@ -444,8 +444,8 @@ public class GeneralRule implements IRule {
         final ISPObservation obs = elems.getObservationNode();
         if (obs == null || !Too.isToo(obs)) return false;
 
-        double p1RA = p1Target.getTarget().getC1().getAs(CoordinateParam.Units.HMS);
-        double p1Dec = p1Target.getTarget().getC2().getAs(CoordinateParam.Units.DEGREES);
+        double p1RA = p1Target.getTarget().getRa().getAs(CoordinateParam.Units.HMS);
+        double p1Dec = p1Target.getTarget().getDec().getAs(CoordinateParam.Units.DEGREES);
         return (p1RA == 0.0) && (p1Dec == 0.0);
     }
 

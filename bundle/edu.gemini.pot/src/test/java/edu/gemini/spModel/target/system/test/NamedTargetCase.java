@@ -30,8 +30,8 @@ public final class NamedTargetCase {
         DMS c2 = new DMS("-20:30:40.567");
         t1.setC1C2(c1, c2);
 
-        assertEquals("16:11:12.345", t1.c1ToString());
-        assertEquals("-20:30:40.57", t1.c2ToString());
+        assertEquals("16:11:12.345", t1.getRaHMS());
+        assertEquals("-20:30:40.57", t1.getDecDMS());
 
         //Planet
         t1.setSolarObject(NamedTarget.SolarObject.NEPTUNE);
@@ -40,10 +40,10 @@ public final class NamedTargetCase {
 
     private void _doTestOne(String lIn, String bIn,
                             String lEx, String bEx) {
-        _t1.setC1(lIn);
-        _t1.setC2(bIn);
-        String lOut = _t1.c1ToString();
-        String bOut = _t1.c2ToString();
+        _t1.setRaHMS(lIn);
+        _t1.setDecDMS(bIn);
+        String lOut = _t1.getRaHMS();
+        String bOut = _t1.getDecDMS();
 
         assertEquals("Failed comparison,", lEx, lOut);
         assertEquals("Failed comparison,", bEx, bOut);

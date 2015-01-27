@@ -88,8 +88,8 @@ object SpTargetFactory {
 
   private def setRaDec(itarget: SP.system.ITarget, c: Coordinates) {
     val degDeg   = c.toDegDeg
-    itarget.setC1(new SP.system.HMS(degDeg.ra.toDouble))
-    itarget.setC2(new SP.system.DMS(degDeg.dec.toDouble))
+    itarget.setRa(new SP.system.HMS(degDeg.ra.toDouble))
+    itarget.setDec(new SP.system.DMS(degDeg.dec.toDouble))
   }
 
   private def siderealMags(sid: SiderealTarget): Either[String, List[SO.Magnitude]] = {
