@@ -140,7 +140,7 @@ public final class SPTargetSkyObjectTest {
         SPTarget target = new SPTarget(HmsDegTarget.fromSkyObject(obj));
 
         // Put a new magnitude for the K band.
-        target.setMagnitudes(DefaultImList.create(magJ3, magK2));
+        target.getTarget().setMagnitudes(DefaultImList.create(magJ3, magK2));
         ImList<Magnitude> magList = target.getTarget().getMagnitudes();
 
         assertEquals(2, magList.size());

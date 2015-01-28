@@ -807,7 +807,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             if (spTarget != null) {
                 if (target != null) {
                     spTarget.setTarget((ITarget) target.clone());
-                    spTarget.setMagnitudes(mag);
+                    spTarget.getTarget().setMagnitudes(mag);
+                    spTarget.notifyOfGenericUpdate();
                 }
             } else {
                 final GuideGroup group = TargetSelection.getGuideGroup(dataObject.getTargetEnvironment(), obsComponent);

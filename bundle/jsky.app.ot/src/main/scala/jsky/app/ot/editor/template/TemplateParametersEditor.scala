@@ -253,7 +253,8 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
           }
           coords.setName(target.getTarget.getName)
           target.setTarget(coords)
-          target.setMagnitudes(DefaultImList.create[Magnitude]())
+          target.getTarget.setMagnitudes(DefaultImList.create[Magnitude]())
+          target.notifyOfGenericUpdate()
         })}
       )
 
@@ -322,7 +323,8 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
             if (inc) target.putMagnitude(zero)
             else {
               val mags = target.getTarget.getMagnitudes.toList.asScala.filterNot(_.getBand == band)
-              target.setMagnitudes(DefaultImList.create(mags.asJava))
+              target.getTarget.setMagnitudes(DefaultImList.create(mags.asJava))
+              target.notifyOfGenericUpdate()
             }}
           )
         )

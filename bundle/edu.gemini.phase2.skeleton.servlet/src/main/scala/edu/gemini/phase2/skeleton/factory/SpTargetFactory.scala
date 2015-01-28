@@ -83,7 +83,7 @@ object SpTargetFactory {
 
       val spTarget = new SP.SPTarget(itarget)
       spTarget.setName(sid.name)
-      spTarget.setMagnitudes(DefaultImList.create(mags.asJava))
+      spTarget.getTarget.setMagnitudes(DefaultImList.create(mags.asJava))
       spTarget
     }
 
