@@ -16,79 +16,78 @@ import Scalaz._
 class ProgramDiffPropertyTest extends JUnitSuite {
   import MergePropertyTest.NamedProperty
 
-  val props = List[NamedProperty[List[Diff]]] (
-    ("any node that differs must appear in diff list",
-      (start, local, remote, diffList) => {
-        val allKeys      = local.getVersions.keySet ++ remote.getVersions.keySet
-        val diffListKeys = diffList.map(_.key).toSet
-        val diffKeys     = allKeys.filter { key =>
+  val props = List[NamedProperty[MergePlan]] (
+    ("any node that differs must appear in diff",
+      (start, local, remote, mp) => {
+        val allKeys  = local.getVersions.keySet ++ remote.getVersions.keySet
+        val diffKeys = allKeys.filter { key =>
           local.getVersions(key) =/= remote.getVersions(key)
         }
 
-        (diffKeys &~ diffListKeys).isEmpty
+        (diffKeys &~ mpKeys(mp)).isEmpty
       }
     ),
 
     ("all ancestors of nodes in the diff list must also appear",
-      (start, local, remote, diffList) => {
-        val keys = presentKeys(diffList)
-        local.forall { n =>
+      (start, local, remote, mp) => {
+        val keys = presentKeys(mp)
+        remote.forall { n =>
           !keys.contains(n.key) || n.ancestors.forall(a => keys.contains(a.key))
         }
       }
     ),
 
     ("if a node in an observation appears in the diff list, the entire observation appears",
-      (start, local, remote, diffList) => {
-        val diffListKeys = presentKeys(diffList)
-        val allObsKeys   = local.getAllObservations.asScala.map(o => o.fold(Set.empty[SPNodeKey])(_ + _.key))
+      (start, local, remote, mp) => {
+        val modKeys    = modifiedKeys(mp)
+        val allObsKeys = remote.getAllObservations.asScala.map(o => o.fold(Set.empty[SPNodeKey])(_ + _.key))
 
         allObsKeys.forall { obsKeys =>
-          val sd = obsKeys &~ diffListKeys
+          val sd = obsKeys &~ modKeys
           sd.isEmpty || (sd == obsKeys) // all in or all out
         }
       }
     ),
 
-    ("any node that is new in the remote program must generate a Missing diff with empty NodeVersions",
-      (start, local, remote, diffList) => {
-        val newRemoteKeys    = remote.getVersions.keySet &~ start.getVersions.keySet
-        val emptyMissingKeys = diffList.collect {
-          case Diff.Missing(k, EmptyNodeVersions) => k
+    ("any node that is new in the local program must generate a Missing diff with empty NodeVersions",
+      (start, local, remote, mp) => {
+        val newLocalKeys     = local.getVersions.keySet &~ start.getVersions.keySet
+        val emptyMissingKeys = mp.delete.collect {
+          case Missing(k, EmptyNodeVersions) => k
         }.toSet
 
-        newRemoteKeys == emptyMissingKeys
+        newLocalKeys == emptyMissingKeys
       }
     ),
 
-    ("any node that is deleted in the local program but present in the remote program must generate a Missing diff with defined NodeVersions",
-      (start, local, remote, diffList) => {
-        val localDeleted     = removedKeys(local)
-        val remotePresent    = remote.keySet
-        val localDeletedOnly = localDeleted & remotePresent
-
-        val notEmptyMissingKeys = diffList.collect {
-          case Diff.Missing(k, nv) if nv =/= EmptyNodeVersions => k
-        }.toSet
-
-        (localDeletedOnly &~ notEmptyMissingKeys).isEmpty
-      }
-    ),
-
-    ("any node that is deleted in the remote program but present in the local program must generate a Present diff",
-      (start, local, remote, diffList) => {
+    ("any node that is deleted in the remote program but present in the local program must generate a Missing diff with defined NodeVersions",
+      (start, local, remote, mp) => {
         val remoteDeleted     = removedKeys(remote)
         val localPresent      = local.keySet
         val remoteDeletedOnly = remoteDeleted & localPresent
 
-        val localPresentDiffs = presentKeys(diffList)
+        val notEmptyMissingKeys = mp.delete.collect {
+          case Missing(k, nv) if nv =/= EmptyNodeVersions => k
+        }.toSet
 
-        (remoteDeletedOnly & localPresentDiffs) == remoteDeletedOnly
+        (remoteDeletedOnly &~ notEmptyMissingKeys).isEmpty
+      }
+    ),
+
+    ("any node that is deleted in the local program but present in the remote program must generate a Modified diff",
+      (start, local, remote, mp) => {
+        val localDeleted     = removedKeys(local)
+        val remotePresent    = remote.keySet
+        val localDeletedOnly = localDeleted & remotePresent
+
+        val remoteModifiedDiffs = modifiedKeys(mp)
+
+        (localDeletedOnly & remoteModifiedDiffs) == localDeletedOnly
       }
     ),
 
     ("any node that is deleted in both sides, should only generate a Missing diff if NodeVersions differ",
-      (start, local, remote, diffList) => {
+      (start, local, remote, mp) => {
         val localDeleted  = removedKeys(local)
         val remoteDeleted = removedKeys(remote)
         val bothDeleted   = localDeleted & remoteDeleted
@@ -97,21 +96,34 @@ class ProgramDiffPropertyTest extends JUnitSuite {
           local.getVersions(key) =/= remote.getVersions(key)
         }
 
-        val missingKeys = diffList.collect { case Diff.Missing(k, _) => k }.toSet
+        val missingKeys = mp.delete.map(_.key).toSet
 
         (differ &~ missingKeys).isEmpty && (same & missingKeys).isEmpty
       }
     )
   )
 
-  private def presentKeys(diffList: List[Diff]): Set[SPNodeKey] =
-    diffList.collect { case Diff.Present(k, _, _, _, _) =>  k }.toSet
+  private def presentKeys(mp: MergePlan): Set[SPNodeKey] =
+    mp.update.sFoldRight(Set.empty[SPNodeKey]) { (mn,s) => s + mn.key }
+
+  private def modifiedKeys(mp: MergePlan): Set[SPNodeKey] =
+    mp.update.sFoldRight(Set.empty[SPNodeKey]) { (mn,s) =>
+      mn match {
+        case _: Modified => s + mn.key
+        case _           => s
+      }
+    }
+
+  private def missingKeys(mp: MergePlan): Set[SPNodeKey] =
+    mp.delete.map(_.key)
+
+  private def mpKeys(mp: MergePlan): Set[SPNodeKey] = missingKeys(mp) ++ presentKeys(mp)
 
   @Test
   def testAllDiffProperties(): Unit = {
-    def mkDiffList(s: ISPProgram, ed0: ISPProgram, ed1: ISPProgram): List[Diff] =
-      ProgramDiff.compare(ed0, ed1.getVersions, removedKeys(ed1))
+    def mkDiffs(s: ISPProgram, l: ISPProgram, r: ISPProgram): MergePlan =
+      ProgramDiff.compare(r, l.getVersions, removedKeys(l))
 
-    new MergePropertyTest(mkDiffList).checkAllProperties(props)
+    new MergePropertyTest(mkDiffs).checkAllProperties(props)
   }
 }

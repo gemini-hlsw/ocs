@@ -16,6 +16,7 @@ import Scalaz._
 
 class ProgramDiffTest {
 
+  /*
   import edu.gemini.sp.vcs.diff.Diff._
 
   private def equalDiff(diffTuple: (Diff, Diff)): Boolean =
@@ -289,4 +290,6 @@ class ProgramDiffTest {
     } test(RmTest(_.central, edited = led, removed = lrm),
            RmTest(_.cloned, edited = red, removed = rrm))
   }
+
+  */
 }

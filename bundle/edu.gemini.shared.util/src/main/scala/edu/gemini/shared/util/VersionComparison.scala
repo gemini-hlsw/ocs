@@ -1,4 +1,7 @@
-package edu.gemini.pot.sp.version
+package edu.gemini.shared.util
+
+import scalaz.Scalaz._
+import scalaz._
 
 /** A comparison between two NodeVersions or VersionMaps.
   *
@@ -6,9 +9,6 @@ package edu.gemini.pot.sp.version
   * outcomes.
   */
 sealed trait VersionComparison
-
-import scalaz._
-import Scalaz._
 
 object VersionComparison {
   case object Same        extends VersionComparison
@@ -24,11 +24,8 @@ object VersionComparison {
       case None             => Conflicting
     }
 
-  def compare(nv0: NodeVersions, nv1: NodeVersions): VersionComparison =
-    VersionComparison(nv0.tryCompareTo(nv1))
-
-  def compare(vm0: VersionMap, vm1: VersionMap): VersionComparison =
-    VersionComparison(VersionMap.tryCompare(vm0, vm1))
+  def compare[K, V : Integral](vv0: VersionVector[K, V], vv1: VersionVector[K, V]): VersionComparison =
+    VersionComparison(vv0.tryCompareTo(vv1))
 
   implicit def VersionComparisonEqual: Equal[VersionComparison] = Equal.equalA
 
