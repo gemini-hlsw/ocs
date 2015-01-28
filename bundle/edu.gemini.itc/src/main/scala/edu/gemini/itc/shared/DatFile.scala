@@ -2,10 +2,12 @@ package edu.gemini.itc.shared
 
 import java.io.InputStreamReader
 import java.util.Scanner
+import java.util.logging.Logger
 import java.util.regex.Pattern
 
 import scala.collection.parallel.mutable
 import scala.util.parsing.combinator.JavaTokenParsers
+import scalaz._
 
 /**
  * Set of tools to ingest dat files stored as resource files.
@@ -13,6 +15,7 @@ import scala.util.parsing.combinator.JavaTokenParsers
  * TODO: This needs some additional TLC, in particular the caching.
  */
 object DatFile {
+  lazy val Log = Logger.getLogger(getClass.getName)
 
   // ===== Scan utils
 
@@ -21,7 +24,9 @@ object DatFile {
 
   def scan(f: String): Scanner = {
     Option(getClass.getResourceAsStream(f)).fold {
-      throw new IllegalArgumentException(s"Missing data file $f")
+      val msg = s"Missing data file: $f"
+      Log.severe(msg)
+      throw new IllegalArgumentException(msg)
     } {
       new Scanner(_).useDelimiter(Delimiters)
     }
@@ -69,7 +74,7 @@ object DatFile {
     // TODO: caching error handling
     if (wlcache.contains(file)) wlcache(file)
     else {
-      System.out.println("Loading into cache: " + file)
+      Log.info("Loading spectrum into cache: " + file)
       val r = new WLSpectrumParser().parseFile(file)
       if (!r.successful) System.out.println("*********ERROR FOR " + file)
       val data = new Array[Array[Double]](2)
@@ -82,11 +87,12 @@ object DatFile {
   }
 
   private val cache = mutable.ParHashMap[String, Array[Array[Double]]]()
-  def loadSpectrum(file: String): Array[Array[Double]] = {
+  /** Loads a series of (x,y) value pairs from the given data file. */
+  def loadArray(file: String): Array[Array[Double]] = {
     // TODO: caching error handling
     if (cache.contains(file)) cache(file)
     else {
-      System.out.println("Loading into cache: " + file)
+      Log.info("Loading data file into cache: " + file)
       val r = new PlainSpectrumParser().parseFile(file)
       if (!r.successful) System.out.println("*********ERROR FOR " + file)
       val data = new Array[Array[Double]](2)
@@ -105,6 +111,24 @@ object DatFile {
       data(0) = r.get.map(_._1).toArray
       data(1) = r.get.map(_._2).toArray
       data
+  }
+
+
+  // Instrument data files TODO: some values can potentially be replaced with values from spModel instrument objects
+  case class Instrument(name: String,
+                        start: Int,                  // The range and sampling allowed by this instrument.
+                        end: Int,
+                        sampling: Double,
+                        backgroundFile: String,
+                        plateScale: Double,
+                        readNoise: Double,          // electrons/pixel
+                        darkCurrent: Double         // electrons/s/pixel
+                         )
+  def parseInstrument(s: String) = memoParseInstrument(s)
+  private val memoParseInstrument: String => Instrument = Memo.mutableHashMapMemo[String, Instrument] { f: String =>
+    System.out.println(s"Loading instrument $f")
+    val s = scan(f)
+    Instrument(s.next, s.nextInt, s.nextInt, s.nextDouble, s.next, s.nextDouble, s.nextDouble, s.nextDouble)
   }
 
 }
