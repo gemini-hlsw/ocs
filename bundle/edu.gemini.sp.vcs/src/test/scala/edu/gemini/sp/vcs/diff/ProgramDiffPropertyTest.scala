@@ -109,7 +109,7 @@ class ProgramDiffPropertyTest extends JUnitSuite {
 
   @Test
   def testAllDiffProperties(): Unit = {
-    def mkDiffList(ed0: ISPProgram, ed1: ISPProgram): List[Diff] =
+    def mkDiffList(s: ISPProgram, ed0: ISPProgram, ed1: ISPProgram): List[Diff] =
       ProgramDiff.compare(ed0, ed1.getVersions, removedKeys(ed1))
 
     new MergePropertyTest(mkDiffList).checkAllProperties(props)
