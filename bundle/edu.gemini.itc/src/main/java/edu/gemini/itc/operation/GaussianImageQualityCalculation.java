@@ -12,7 +12,7 @@ import edu.gemini.itc.shared.FormatStringWriter;
 
 public class GaussianImageQualityCalculation implements ImageQualityCalculatable {
 
-    double im_qual,fwhm;
+    double im_qual, fwhm;
 
     public GaussianImageQualityCalculation(
             double fwhm) {

@@ -10,8 +10,8 @@
 //
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.shared.SampledSpectrumVisitor;
 import edu.gemini.itc.shared.SampledSpectrum;
+import edu.gemini.itc.shared.SampledSpectrumVisitor;
 
 /**
  * This class encapsulates information about the telescope aperture.
@@ -33,8 +33,8 @@ public final class TelescopeApertureVisitor implements SampledSpectrumVisitor {
      */
     public void visit(SampledSpectrum sed) {
         sed.rescaleY(TELESCOPE_APERTURE);
-	//Total fudge just to do one quick calculation.  CHANGE THIS BACK
-	//sed.rescaleY(40.66);
+        //Total fudge just to do one quick calculation.  CHANGE THIS BACK
+        //sed.rescaleY(40.66);
     }
 
     public String toString() {

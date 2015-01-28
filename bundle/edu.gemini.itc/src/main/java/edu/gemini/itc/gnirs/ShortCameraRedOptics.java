@@ -8,7 +8,6 @@
 //
 package edu.gemini.itc.gnirs;
 
-import edu.gemini.itc.shared.TransmissionElement;
 import edu.gemini.itc.shared.Instrument;
 
 /**
@@ -16,11 +15,13 @@ import edu.gemini.itc.shared.Instrument;
  */
 public class ShortCameraRedOptics extends ShortCameraOptics {
     private static final String CAMERA_FILENAME = FILENAME +
-    GnirsParameters.getRedCameraName() + Instrument.getSuffix();
-    
+            GnirsParameters.getRedCameraName() + Instrument.getSuffix();
+
     public ShortCameraRedOptics(String directory) throws Exception {
         super(directory + "/" + CAMERA_FILENAME);
     }
-    
-    public String toString() { return super.toString() + "Red)"; }
+
+    public String toString() {
+        return super.toString() + "Red)";
+    }
 }

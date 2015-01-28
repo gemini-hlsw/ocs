@@ -25,6 +25,7 @@ public class Gaussian {
     /**
      * This method returns the value of a 2-D circularly-symmetric gaussian
      * over a square region centered about the mean.
+     *
      * @param sigmaFraction The length of the square as a fraction of sigma.
      */
     public static double get2DIntegral(double sigmaFraction) {

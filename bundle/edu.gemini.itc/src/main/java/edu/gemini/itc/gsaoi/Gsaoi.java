@@ -10,14 +10,8 @@
 //
 package edu.gemini.itc.gsaoi;
 
-import edu.gemini.itc.shared.Instrument;
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.Filter;
-import edu.gemini.itc.shared.Detector;
-import edu.gemini.itc.shared.FixedOptics;
 import edu.gemini.itc.parameters.ObservationDetailsParameters;
-
-import java.util.Iterator;
+import edu.gemini.itc.shared.*;
 
 /**
  * Gsaoi specification class
@@ -77,7 +71,7 @@ public class Gsaoi extends Instrument {
         // Other instruments may not have filters and may just use
         // the range given in their instrument file.
         if (!(_filterUsed.equals("none"))) {
-            _filter = new Filter(getPrefix(), _filterUsed, getDirectory() + "/", Filter.CALC_EFFECTIVE_WAVELEN);
+            _filter = Filter.fromFile(getPrefix(), _filterUsed, getDirectory() + "/");
             _observingStart = _filter.getStart();
             _observingEnd = _filter.getEnd();
             addComponent(_filter);

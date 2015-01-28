@@ -8,20 +8,20 @@
 
 package edu.gemini.itc.shared;
 
-import java.io.StringWriter;
 import java.io.PrintStream;
+import java.io.StringWriter;
 
 /**
  * A formatting class to write pretty numbers and strings.
  * See the main test function for examples of use.
  * Note that the field width property is non-sticky.
  * Setting it affects only the next operation.
-
+ * <p/>
  * This class could not inherit from StringWriter because the
  * StringWriter.write() returns void and I wanted this class
  * to return an instance of itself for chaining.
  * So it contains a StringWriter instead.
-
+ * <p/>
  * This class is used to format printing to a PrintStream.
  */
 public class FormatStringWriter {

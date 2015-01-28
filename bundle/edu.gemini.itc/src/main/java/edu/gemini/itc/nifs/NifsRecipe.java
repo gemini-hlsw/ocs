@@ -8,52 +8,17 @@
 
 package edu.gemini.itc.nifs;
 
-import java.io.PrintWriter;
-
+import edu.gemini.itc.altair.*;
+import edu.gemini.itc.operation.*;
+import edu.gemini.itc.parameters.*;
+import edu.gemini.itc.shared.*;
 
 import javax.servlet.http.HttpServletRequest;
-
-import edu.gemini.itc.shared.FormatStringWriter;
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.RecipeBase;
-import edu.gemini.itc.shared.SampledSpectrumVisitor;
-import edu.gemini.itc.shared.SEDFactory;
-import edu.gemini.itc.shared.VisitableSampledSpectrum;
-import edu.gemini.itc.shared.WavebandDefinition;
-import edu.gemini.itc.shared.GaussianMorphology;
-import edu.gemini.itc.shared.USBMorphology;
-import edu.gemini.itc.shared.AOMorphology;
-import edu.gemini.itc.shared.VisitableMorphology;
-import edu.gemini.itc.shared.ITCMultiPartParser;
-import edu.gemini.itc.shared.ITCChart;
-
-import edu.gemini.itc.altair.Altair;
-import edu.gemini.itc.altair.AltairBackgroundVisitor;
-import edu.gemini.itc.altair.AltairFluxAttenuationVisitor;
-import edu.gemini.itc.altair.AltairParameters;
-import edu.gemini.itc.altair.AltairTransmissionVisitor;
-
-import edu.gemini.itc.parameters.ObservingConditionParameters;
-import edu.gemini.itc.parameters.ObservationDetailsParameters;
-import edu.gemini.itc.parameters.SourceDefinitionParameters;
-import edu.gemini.itc.parameters.TeleParameters;
-import edu.gemini.itc.parameters.PlottingDetailsParameters;
-import edu.gemini.itc.operation.RedshiftVisitor;
-import edu.gemini.itc.operation.TelescopeApertureVisitor;
-import edu.gemini.itc.operation.TelescopeTransmissionVisitor;
-import edu.gemini.itc.operation.TelescopeBackgroundVisitor;
-import edu.gemini.itc.operation.NormalizeVisitor;
-import edu.gemini.itc.operation.CloudTransmissionVisitor;
-import edu.gemini.itc.operation.WaterTransmissionVisitor;
-import edu.gemini.itc.operation.SpecS2NLargeSlitVisitor;
-import edu.gemini.itc.operation.SlitThroughput;
-import edu.gemini.itc.operation.ImageQualityCalculatable;
-import edu.gemini.itc.operation.ImageQualityCalculationFactory;
-
-import java.util.Calendar;
-import java.util.List;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * This class performs the calculations for Nifs
@@ -235,12 +200,12 @@ public final class NifsRecipe extends RecipeBase {
         // inputs: SED, AIRMASS, sky emmision file, mirror configuration,
         // output: SED and sky background as they arrive at instruments
 
-        SampledSpectrumVisitor clouds = new CloudTransmissionVisitor(
+        SampledSpectrumVisitor clouds = CloudTransmissionVisitor.create(
                 _obsConditionParameters.getSkyTransparencyCloud());
         sed.accept(clouds);
 
 
-        SampledSpectrumVisitor water = new WaterTransmissionVisitor(
+        SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
                 _obsConditionParameters.getSkyTransparencyWater(),
                 _obsConditionParameters.getAirmass(),
                 "nearIR_trans_", ITCConstants.MAUNA_KEA, ITCConstants.NEAR_IR);
@@ -249,11 +214,11 @@ public final class NifsRecipe extends RecipeBase {
         // Background spectrum is introduced here.
         VisitableSampledSpectrum sky =
                 SEDFactory.getSED("/" + ITCConstants.HI_RES + "/" + ITCConstants.MAUNA_KEA + ITCConstants.NEAR_IR +
-                        ITCConstants.SKY_BACKGROUND_LIB + "/" +
-                        ITCConstants.NEAR_IR_SKY_BACKGROUND_FILENAME_BASE + "_"
-                        + _obsConditionParameters.getSkyTransparencyWaterCategory() +
-                        "_" + _obsConditionParameters.getAirmassCategory() +
-                        ITCConstants.DATA_SUFFIX,
+                                ITCConstants.SKY_BACKGROUND_LIB + "/" +
+                                ITCConstants.NEAR_IR_SKY_BACKGROUND_FILENAME_BASE + "_"
+                                + _obsConditionParameters.getSkyTransparencyWaterCategory() +
+                                "_" + _obsConditionParameters.getAirmassCategory() +
+                                ITCConstants.DATA_SUFFIX,
                         instrument.getSampling());
 
         //_println("Total Photons..(After Sky)");
@@ -263,7 +228,7 @@ public final class NifsRecipe extends RecipeBase {
 
         // Apply telescope transmission to both sed and sky
         SampledSpectrumVisitor t =
-                new TelescopeTransmissionVisitor(_teleParameters.getMirrorCoating(),
+                TelescopeTransmissionVisitor.create(_teleParameters.getMirrorCoating(),
                         _teleParameters.getInstrumentPort());
         sed.accept(t);
         sky.accept(t);

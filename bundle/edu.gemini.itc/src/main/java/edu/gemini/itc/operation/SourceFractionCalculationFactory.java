@@ -6,7 +6,8 @@ import edu.gemini.itc.shared.Instrument;
 
 public final class SourceFractionCalculationFactory {
 
-    private SourceFractionCalculationFactory() {}
+    private SourceFractionCalculationFactory() {
+    }
 
     public static SourceFractionCalculatable getCalculationInstance(
             SourceDefinitionParameters sourceDefinitionParameters,
@@ -23,15 +24,15 @@ public final class SourceFractionCalculationFactory {
         if (sourceDefinitionParameters.getSourceGeometry().
                 equals(SourceDefinitionParameters.POINT_SOURCE) ||
                 sourceDefinitionParameters.getExtendedSourceType().
-                equals(SourceDefinitionParameters.GAUSSIAN))
+                        equals(SourceDefinitionParameters.GAUSSIAN))
 
             return new PointSourceFractionCalculation(
                     ap_type,
                     ap_diam,
                     instrument.getPixelSize());
 
-        // Case B if sdParams.getExtendedSourceType = UNIFORM
-        // This means the User has selected USB Calc
+            // Case B if sdParams.getExtendedSourceType = UNIFORM
+            // This means the User has selected USB Calc
         else
             return new USBSourceFractionCalculation(
                     ap_type,

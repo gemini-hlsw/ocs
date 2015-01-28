@@ -10,11 +10,7 @@
 //
 package edu.gemini.itc.gems;
 
-import edu.gemini.itc.shared.SampledSpectrumVisitor;
-import edu.gemini.itc.shared.SampledSpectrum;
-import edu.gemini.itc.shared.ArraySpectrum;
-import edu.gemini.itc.shared.DefaultArraySpectrum;
-import edu.gemini.itc.shared.ITCConstants;
+import edu.gemini.itc.shared.*;
 
 /**
  * The GemsBackgroundVisitor class is designed to adjust the SED for the

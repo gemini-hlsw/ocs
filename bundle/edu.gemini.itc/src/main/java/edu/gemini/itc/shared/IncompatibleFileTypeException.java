@@ -15,9 +15,7 @@
 package edu.gemini.itc.shared;
 
 /**
- *
- * @author  bwalls
- * @version
+ * @author bwalls
  */
 public class IncompatibleFileTypeException extends java.lang.Exception {
 
@@ -30,6 +28,7 @@ public class IncompatibleFileTypeException extends java.lang.Exception {
 
     /**
      * Constructs an <code>IncompatableFileTypeException</code> with the specified detail message.
+     *
      * @param msg the detail message.
      */
     public IncompatibleFileTypeException(String msg) {

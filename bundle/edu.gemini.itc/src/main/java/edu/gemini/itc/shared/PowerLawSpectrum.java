@@ -10,15 +10,6 @@
 //
 package edu.gemini.itc.shared;
 
-import edu.gemini.itc.parameters.SourceDefinitionParameters;
-
-import java.util.NoSuchElementException;
-import java.util.StringTokenizer;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.text.ParseException;
-
 /**
  * This class creates a PowerLaw spectrum over the interval defined by the
  * blocking filter.  The code comes from PPuxley's Mathcad Demo

@@ -7,7 +7,8 @@ import edu.gemini.itc.shared.Instrument;
 
 public final class ImageQualityCalculationFactory {
 
-    private ImageQualityCalculationFactory() {}
+    private ImageQualityCalculationFactory() {
+    }
 
     public static ImageQualityCalculatable getCalculationInstance(
             SourceDefinitionParameters sourceDefinitionParameters,
@@ -33,9 +34,9 @@ public final class ImageQualityCalculationFactory {
         // Probes in conjuction with the Atmosphric Seeing.
         // This case creates an ImageQuality Calculation
         return new ImageQualityCalculation(teleParameters.getWFS(),
-                                           observingConditionParameters.getImageQuality(),
-                                           observingConditionParameters.getAirmass(),
-                                           instrument.getEffectiveWavelength());
+                observingConditionParameters.getImageQuality(),
+                observingConditionParameters.getAirmass(),
+                instrument.getEffectiveWavelength());
 
     }
 }

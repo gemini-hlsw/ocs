@@ -9,13 +9,8 @@
 //
 package edu.gemini.itc.gnirs;
 
-import edu.gemini.itc.shared.FormatStringWriter;
-import edu.gemini.itc.shared.Instrument;
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.Filter;
-import edu.gemini.itc.shared.Detector;
 import edu.gemini.itc.parameters.ObservationDetailsParameters;
-import edu.gemini.itc.shared.TransmissionElement;
+import edu.gemini.itc.shared.*;
 
 
 /**
@@ -51,7 +46,7 @@ public abstract class Gnirs extends Instrument {
 
     // Keep a reference to the color filter to ask for effective wavelength
     protected Filter _Filter;
-    protected GratingOptics _gratingOptics;
+    protected GnirsGratingOptics _gratingOptics;
     protected Detector _detector;
     protected double _sampling;
     protected String _filterUsed;

@@ -10,13 +10,8 @@
 //
 package edu.gemini.itc.niri;
 
-import edu.gemini.itc.shared.Instrument;
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.WavebandDefinition;
-import edu.gemini.itc.shared.Filter;
-import edu.gemini.itc.shared.Detector;
-import edu.gemini.itc.shared.FixedOptics;
 import edu.gemini.itc.parameters.ObservationDetailsParameters;
+import edu.gemini.itc.shared.*;
 
 import java.util.Iterator;
 
@@ -103,7 +98,7 @@ public class Niri extends Instrument {
             //System.out.println("gris: " +grism);
             //if(!(_grism.equals("none"))){
             //	throw new Exception("Please select Grism Order Sorting from the filter list."); }
-            _Filter = new Filter(getPrefix(), _filterUsed, getDirectory() + "/", Filter.CALC_EFFECTIVE_WAVELEN);
+            _Filter = Filter.fromFile(getPrefix(), _filterUsed, getDirectory() + "/");
 
             _observingStart = _Filter.getStart();
             _observingEnd = _Filter.getEnd();
@@ -115,7 +110,7 @@ public class Niri extends Instrument {
             //To do this right we should have full transmission curves for all filters
             //that are used with the PK50 and include them all.
             if (_filterUsed.equals("Y-G0241")) {
-                _Filter2 = new Filter(getPrefix(), "PK50-fake", getDirectory() + "/", Filter.CALC_EFFECTIVE_WAVELEN);
+                _Filter2 = Filter.fromFile(getPrefix(), "PK50-fake", getDirectory() + "/");
 
                 addComponent(_Filter2);
             }
@@ -304,7 +299,7 @@ public class Niri extends Instrument {
     public String toString() {
         String s = "Instrument configuration: \n";
         s += "Optical Components: <BR>";
-        for (Iterator itr = getComponents().iterator(); itr.hasNext();) {
+        for (Iterator itr = getComponents().iterator(); itr.hasNext(); ) {
             s += "<LI>" + itr.next().toString() + "<BR>";
         }
         if (!_focalPlaneMask.equals(NiriParameters.NO_SLIT))

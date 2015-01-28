@@ -251,11 +251,11 @@ public final class NiriRecipe extends RecipeBase {
                 _obsConditionParameters.getAirmass());
         // sed.accept(atmos);
 
-        SampledSpectrumVisitor clouds = new CloudTransmissionVisitor(
+        SampledSpectrumVisitor clouds = CloudTransmissionVisitor.create(
                 _obsConditionParameters.getSkyTransparencyCloud());
         sed.accept(clouds);
 
-        SampledSpectrumVisitor water = new WaterTransmissionVisitor(
+        SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
                 _obsConditionParameters.getSkyTransparencyWater(),
                 _obsConditionParameters.getAirmass(), "nearIR_trans_",
                 ITCConstants.MAUNA_KEA, ITCConstants.NEAR_IR);
@@ -283,7 +283,7 @@ public final class NiriRecipe extends RecipeBase {
 
         // System.out.println("Average: " + sky.getAverage());
         // Apply telescope transmission
-        SampledSpectrumVisitor t = new TelescopeTransmissionVisitor(
+        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(
                 _teleParameters.getMirrorCoating(),
                 _teleParameters.getInstrumentPort());
         sed.accept(t);
@@ -667,7 +667,7 @@ public final class NiriRecipe extends RecipeBase {
             sed.accept(specS2N);
             _println("<p style=\"page-break-inside: never\">");
             /*
-			 * NiriChart.setSeriesName("Signal  ");
+             * NiriChart.setSeriesName("Signal  ");
 			 * NiriChart.setName("Signal and Background ");
 			 * //NiriChart.setName("");
 			 * NiriChart.setYaxisTitle("e- per exposure per spectral pixel");

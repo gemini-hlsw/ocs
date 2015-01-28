@@ -10,22 +10,21 @@
 //
 package edu.gemini.itc.niri;
 
-import edu.gemini.itc.shared.TransmissionElement;
 import edu.gemini.itc.shared.Instrument;
+import edu.gemini.itc.shared.TransmissionElement;
 
 /**
  * This represents the transmission of the optics native to the camera.
  */
-public class F6Optics extends TransmissionElement 
-{
-   private static final String FILENAME = Niri.getPrefix() +
-      "f6_optics" + Instrument.getSuffix();
+public class F6Optics extends TransmissionElement {
+    private static final String FILENAME = Niri.getPrefix() +
+            "f6_optics" + Instrument.getSuffix();
 
-   public F6Optics(String directory) throws Exception
-   {
-      super(directory + FILENAME);
-   }
+    public F6Optics(String directory) throws Exception {
+        super(directory + FILENAME);
+    }
 
     public String toString() {// return "F6Optics - " + FILENAME; }
-	return "Camera: f6"; }
+        return "Camera: f6";
+    }
 }

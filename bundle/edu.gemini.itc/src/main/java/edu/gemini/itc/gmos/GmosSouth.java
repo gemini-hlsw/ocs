@@ -9,14 +9,12 @@
 //
 package edu.gemini.itc.gmos;
 
-import edu.gemini.itc.shared.Instrument;
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.WavebandDefinition;
-import edu.gemini.itc.shared.Filter;
-import edu.gemini.itc.shared.Detector;
-import edu.gemini.itc.shared.FixedOptics;
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.parameters.ObservationDetailsParameters;
+import edu.gemini.itc.shared.Detector;
+import edu.gemini.itc.shared.Filter;
+import edu.gemini.itc.shared.FixedOptics;
+import edu.gemini.itc.shared.Instrument;
 
 import java.awt.*;
 
@@ -96,7 +94,7 @@ public class GmosSouth extends Gmos {
 
             //if(!(_grating.equals("none"))){
             //	throw new Exception("Please select Grism Order Sorting from the filter list."); }
-            _Filter = new Filter(getPrefix(), _filterUsed, getDirectory() + "/", Filter.GET_EFFECTIVE_WAVELEN_FROM_FILE);
+            _Filter = Filter.fromWLFile(getPrefix(), _filterUsed, getDirectory() + "/");
 
             if (_Filter.getStart() >= _observingStart)
                 _observingStart = _Filter.getStart();
@@ -193,9 +191,7 @@ public class GmosSouth extends Gmos {
 
         if (!(_grating.equals("none"))) {
 
-            _gratingOptics = new GratingOptics(getDirectory() + "/", getPrefix(), _grating, _detector,
-                    // _focalPlaneMaskOffset,
-                    _stringSlitWidth,
+            _gratingOptics = new GmosGratingOptics(getDirectory() + "/" + getPrefix(), _grating, _detector,
                     _centralWavelength,
                     _detector.getDetectorPixels(),//_spectralBinning,
                     _spectralBinning);
