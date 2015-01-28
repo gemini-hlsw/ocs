@@ -20,17 +20,17 @@ public final class NifsGratingOptics extends GratingOptics {
     @Override protected int getGratingNumber() {
         int grating_num = 0;
 
-        if (_gratingName.equals(NifsParameters.Z_G5602)) {
+        if (gratingName.equals(NifsParameters.Z_G5602)) {
             grating_num = NifsParameters.Z_G5602_N;
-        } else if (_gratingName.equals(NifsParameters.J_G5603)) {
+        } else if (gratingName.equals(NifsParameters.J_G5603)) {
             grating_num = NifsParameters.J_G5603_N;
-        } else if (_gratingName.equals(NifsParameters.H_G5604)) {
+        } else if (gratingName.equals(NifsParameters.H_G5604)) {
             grating_num = NifsParameters.H_G5604_N;
-        } else if (_gratingName.equals(NifsParameters.K_G5605)) {
+        } else if (gratingName.equals(NifsParameters.K_G5605)) {
             grating_num = NifsParameters.K_G5605_N;
-        } else if (_gratingName.equals(NifsParameters.KS_G5606)) {
+        } else if (gratingName.equals(NifsParameters.KS_G5606)) {
             grating_num = NifsParameters.KS_G5606_N;
-        } else if (_gratingName.equals(NifsParameters.KL_G5607)) {
+        } else if (gratingName.equals(NifsParameters.KL_G5607)) {
             grating_num = NifsParameters.KL_G5607_N;
         }
         return grating_num;
