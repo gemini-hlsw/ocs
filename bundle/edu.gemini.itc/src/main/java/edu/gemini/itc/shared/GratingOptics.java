@@ -1,6 +1,7 @@
 package edu.gemini.itc.shared;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
@@ -9,14 +10,49 @@ import java.util.Scanner;
  */
 public abstract class GratingOptics extends TransmissionElement {
 
-    protected final List<Integer> _resolvingPowerArray;
-    protected final List<Double> _dispersionArray;
-    protected final List<Integer> _blazeArray;
-    protected final List<Double> _resolutionArray;
-    protected final String _gratingName;
-    protected final double _centralWavelength;
-    protected final int _detectorPixels;
+    protected static final class GratingData {
+        final public String name;
+        final public int    resolvingPower;
+        final public int    blaze;
+        final public double dispersion;
+        final public double resolution;
+        GratingData(final String name, final int resolvingPower, final int blaze, final double dispersion, final double resolution) {
+            this.name           = name;
+            this.resolvingPower = resolvingPower;
+            this.blaze          = blaze;
+            this.dispersion     = dispersion;
+            this.resolution     = resolution;
+        }
+    }
+    // TODO: Instead of using fixed positions in this list provided by
+    // TODO: getGratingNumber() this should be changed to use a lookup by name.
+    private static final HashMap<String, List<GratingData>> gratings = new HashMap<>();
+    private static List<GratingData> loadData(final String file) {
+        final List<GratingData> data = new ArrayList<>();
+        try (final Scanner scan = DatFile.scan(file)) {
+            while (scan.hasNext()) {
+                final String name        = scan.next();
+                final int blaze          = scan.nextInt();
+                final int resolvingPower = scan.nextInt();
+                final double resolution  = scan.nextDouble();
+                final double dispersion  = scan.nextDouble();
+                data.add(new GratingData(name, resolvingPower, blaze, dispersion, resolution));
+            }
+        }
+        return data;
+    }
+    private synchronized static List<GratingData> getData(final String file) {
+        if (!gratings.containsKey(file)) {
+            gratings.put(file, loadData(file));
+        }
+        return gratings.get(file);
+    }
+
+    protected final String gratingName;
+    protected final double centralWavelength;
+    protected final int detectorPixels;
     protected final int _spectralBinning;
+    protected final List<GratingData> data;
 
     public GratingOptics(final String directory,
                          final String gratingName,
@@ -27,65 +63,51 @@ public abstract class GratingOptics extends TransmissionElement {
 
         super(directory + gratingName + Instrument.getSuffix());
 
-        _gratingName = gratingName;
-        _spectralBinning = spectralBinning;
-        _detectorPixels = detectorPixels;
-        _centralWavelength = centralWavelength;
-
         final String file = directory + gratingsName + Instrument.getSuffix();
-        try (final Scanner scan = DatFile.scan(file)) {
-            _resolvingPowerArray = new ArrayList<>();
-            _blazeArray = new ArrayList<>();
-            _resolutionArray = new ArrayList<>();
-            _dispersionArray = new ArrayList<>();
-
-            while (scan.hasNext()) {
-                String skipName = scan.next(); // skip grating name TODO: should we use this name for lookup in getGratingNum (instead of using the hardcoded numbers?)
-                _blazeArray.add(scan.nextInt());
-                _resolvingPowerArray.add(scan.nextInt());
-                _resolutionArray.add(scan.nextDouble());
-                _dispersionArray.add(scan.nextDouble());
-            }
-        }
+        this.data = getData(file);
+        this.gratingName = gratingName;
+        this._spectralBinning = spectralBinning;
+        this.detectorPixels = detectorPixels;
+        this.centralWavelength = centralWavelength;
     }
 
     protected abstract int getGratingNumber();
 
     public double getStart() {
-        return _centralWavelength - (_dispersionArray.get(getGratingNumber()) * _detectorPixels / 2);
+        return centralWavelength - (data.get(getGratingNumber()).dispersion * detectorPixels / 2);
     }
 
     public double getEnd() {
-        return _centralWavelength + (_dispersionArray.get(getGratingNumber()) * _detectorPixels / 2);
+        return centralWavelength + (data.get(getGratingNumber()).dispersion * detectorPixels / 2);
     }
 
     public double getEffectiveWavelength() {
-        return _centralWavelength;
+        return centralWavelength;
     }
 
     public double getPixelWidth() {
-        return _dispersionArray.get(getGratingNumber()) * _spectralBinning;
+        return data.get(getGratingNumber()).dispersion * _spectralBinning;
 
     }
 
     public double getGratingResolution() {
-        return _resolvingPowerArray.get(getGratingNumber());
+        return data.get(getGratingNumber()).resolution;
     }
 
     public double getGratingBlaze() {
-        return _blazeArray.get(getGratingNumber());
+        return data.get(getGratingNumber()).blaze;
     }
 
     public double getGratingDispersion_nm() {
-        return _resolutionArray.get(getGratingNumber());
+        return data.get(getGratingNumber()).dispersion;
     }
 
     public double getGratingDispersion_nmppix() {
-        return _dispersionArray.get(getGratingNumber()) * _spectralBinning;
+        return data.get(getGratingNumber()).dispersion * _spectralBinning;
     }
 
     public String toString() {
-        return "Grating Optics: " + _gratingName;
+        return "Grating Optics: " + gratingName;
     }
 
 }
