@@ -60,114 +60,23 @@ public abstract class ITarget implements Cloneable, Serializable {
     }
 
 
-    /**
-     * Returns an optional name for the target.
-     */
+    /** Get the name. */
     public abstract String getName();
 
-    /**
-     * Sets an optional name for the target.
-     */
+    /** Set the name. */
     public abstract void setName(String name);
 
-    /**
-     * Gets a short description of the position.  For instance, the
-     * {@link HmsDegTarget} might return its RA and Dec in a
-     * formated String such as "RA=12:34:56 Dec=00:11:22".  To actually
-     * use a coordinate system's position, the client will have to use its
-     * particular interface rather than this method.
-     */
-    public abstract String getPosition();
+    /** Get the RA. */
+    public abstract ICoordinate getRa();
 
-    /**
-     * Set the first Coordinate using an appropriate ICoordinate.
-     *
-     * @throws IllegalArgumentException if the <code>ICoordinate</code> is
-     * not an appropriate type.
-     */
-    public abstract void setC1(ICoordinate c1)
-            throws IllegalArgumentException;
+    /** Get the Dec. */
+    public abstract ICoordinate getDec();
 
-    /**
-     * Get the first Coordinate as an {@link ICoordinate}.
-     * This is generally, the internally used <code>ICoordinate</code> and
-     * should be used with care.
-     */
-    public abstract ICoordinate getC1();
+    /** Get the Epoch */
+    public abstract Epoch getEpoch();
 
-    /**
-     * Set the second Coordinate using an appropriate {@link ICoordinate}.
-     *
-     * @throws IllegalArgumentException if the <code>ICoordinate</code> is
-     * not an appropriate type.
-     */
-    public abstract void setC2(ICoordinate c2)
-            throws IllegalArgumentException;
-
-    /**
-     * Get the second Coordinate as an {@link ICoordinate}.
-     * This is generally, the internally used <code>ICoordinate</code>
-     * and should be used with care.
-     */
-    public abstract ICoordinate getC2();
-
-    /**
-     * Set the first Coordinate using a String.
-     *
-     * @throws IllegalArgumentException if the argument can not be parsed
-     * correctly.
-     */
-    public abstract void setC1(String c1)
-            throws IllegalArgumentException;
-
-    /**
-     * Gets the first coordinate as a String.
-     */
-    public abstract String c1ToString();
-
-    /**
-     * Set the second Coordinate using a String.
-     *
-     * @throws IllegalArgumentException if the argument can not be parsed
-     * correctly.
-     */
-    public abstract void setC2(String c2)
-            throws IllegalArgumentException;
-
-    /**
-     * Gets the second coordinate as a String.
-     */
-    public abstract String c2ToString();
-
-    /**
-     * Set the first and second coordinates using appropriate String objects.
-     *
-     * @throws IllegalArgumentException if either of the arguments can not
-     * be parsed correctly.
-     */
-    public abstract void setC1C2(String c1, String c2)
-            throws IllegalArgumentException;
-
-    /**
-     * Return the Epoch of this target position.
-     * @throws IllegalArgumentException if the coordinate system does not
-     * support the Epoch concept.
-     */
-    public abstract Epoch getEpoch()
-            throws IllegalArgumentException;
-
-    /**
-     * Set the Epoch of this target position.
-     * @throws IllegalArgumentException if the coordinate system does not
-     * support the Epoch concept.
-     */
-    public abstract void setEpoch(Epoch e)
-            throws IllegalArgumentException;
-
-    /**
-     * Provides testing of equality of two targets.
-     */
-    public abstract boolean equals(Object obj);
+    /** Set the Epoch */
+    public abstract void setEpoch(Epoch e);
 
 
     // RCN: pushed across from SPTarget
@@ -267,9 +176,9 @@ public abstract class ITarget implements Cloneable, Serializable {
 
     // pushed down from CoordinateSystem
 
-    public Object clone() {
+    public ITarget clone() {
         try {
-            return super.clone();
+            return (ITarget) super.clone();
         } catch (CloneNotSupportedException cnse) {
             throw new Error(cnse);
         }
@@ -279,7 +188,11 @@ public abstract class ITarget implements Cloneable, Serializable {
 
     /** Gets a Skycalc {@link edu.gemini.skycalc.Coordinates} representation. */
     public synchronized Coordinates getSkycalcCoordinates() {
-        return new Coordinates(getC1().getAs(CoordinateParam.Units.DEGREES), getC2().getAs(CoordinateParam.Units.DEGREES));
+        return new Coordinates(getRa().getAs(CoordinateParam.Units.DEGREES), getDec().getAs(CoordinateParam.Units.DEGREES));
+    }
+
+    public final String toString() {
+        return String.format("ITarget(%s, %s)", getTag(), getName());
     }
 
 }

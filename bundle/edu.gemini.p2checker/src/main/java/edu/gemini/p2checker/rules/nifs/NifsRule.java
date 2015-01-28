@@ -191,14 +191,14 @@ public final class NifsRule implements IRule {
                 if (baseTarget == null || oiTarget.isEmpty() || aoTarget.isEmpty()) return null;
                 //now, let's compare coordinates. If they are the same, raise an error
 
-                double baseC1 = baseTarget.getTarget().getC1().getAs(CoordinateParam.Units.HMS);
-                double baseC2 = baseTarget.getTarget().getC2().getAs(CoordinateParam.Units.DEGREES);
+                double baseC1 = baseTarget.getTarget().getRa().getAs(CoordinateParam.Units.HMS);
+                double baseC2 = baseTarget.getTarget().getDec().getAs(CoordinateParam.Units.DEGREES);
 
-                double oiC1 = oiTarget.getValue().getTarget().getC1().getAs(CoordinateParam.Units.HMS);
-                double oiC2 = oiTarget.getValue().getTarget().getC2().getAs(CoordinateParam.Units.DEGREES);
+                double oiC1 = oiTarget.getValue().getTarget().getRa().getAs(CoordinateParam.Units.HMS);
+                double oiC2 = oiTarget.getValue().getTarget().getDec().getAs(CoordinateParam.Units.DEGREES);
 
-                double aoC1 = aoTarget.getValue().getTarget().getC1().getAs(CoordinateParam.Units.HMS);
-                double aoC2 = aoTarget.getValue().getTarget().getC2().getAs(CoordinateParam.Units.DEGREES);
+                double aoC1 = aoTarget.getValue().getTarget().getRa().getAs(CoordinateParam.Units.HMS);
+                double aoC2 = aoTarget.getValue().getTarget().getDec().getAs(CoordinateParam.Units.DEGREES);
 
 
                 if (Double.compare(baseC1, oiC1) == 0

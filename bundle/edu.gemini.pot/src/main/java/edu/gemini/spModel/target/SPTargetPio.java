@@ -29,7 +29,6 @@ public class SPTargetPio {
     private static final String _OBJECT = "object";
     private static final String _SYSTEM = "system";
     private static final String _EPOCH = "epoch";
-    private static final String _BRIGHTNESS = "brightness";
     private static final String _C1 = "c1";
     private static final String _C2 = "c2";
     private static final String _VALID_DATE = "validAt";
@@ -89,9 +88,8 @@ public class SPTargetPio {
             final HmsDegTarget t = (HmsDegTarget) target;
             Pio.addParam(factory, paramSet, _SYSTEM, t.getTag().tccName);
             paramSet.addParam(t.getEpoch().getParam(factory, _EPOCH));
-            Pio.addParam(factory, paramSet, _BRIGHTNESS, t.getBrightness());
-            Pio.addParam(factory, paramSet, _C1, t.c1ToString());
-            Pio.addParam(factory, paramSet, _C2, t.c2ToString());
+            Pio.addParam(factory, paramSet, _C1, t.getRa().toString());
+            Pio.addParam(factory, paramSet, _C2, t.getDec().toString());
             paramSet.addParam(t.getPM1().getParam(factory, _PM1));
             paramSet.addParam(t.getPM2().getParam(factory, _PM2));
             paramSet.addParam(t.getParallax().getParam(factory, _PARALLAX));
@@ -107,8 +105,8 @@ public class SPTargetPio {
 
             // OT-495: save and restore RA/Dec for conic targets
             // XXX FIXME: Temporary, until nonsidereal support is implemented
-            Pio.addParam(factory, paramSet, _C1, nst.c1ToString());
-            Pio.addParam(factory, paramSet, _C2, nst.c2ToString());
+            Pio.addParam(factory, paramSet, _C1, nst.getRa().toString());
+            Pio.addParam(factory, paramSet, _C2, nst.getDec().toString());
             if (nst.getDateForPosition() != null) {
                 Pio.addParam(factory, paramSet, _VALID_DATE, formatDate(nst.getDateForPosition()));
             }
@@ -117,7 +115,6 @@ public class SPTargetPio {
                 final ConicTarget t = (ConicTarget) target;
                 Pio.addParam(factory, paramSet, _SYSTEM, t.getTag().tccName);
                 paramSet.addParam(t.getEpoch().getParam(factory, _EPOCH));
-                Pio.addParam(factory, paramSet, _BRIGHTNESS, t.getBrightness());
 
                 paramSet.addParam(t.getANode().getParam(factory, _ANODE));
                 paramSet.addParam(t.getAQ().getParam(factory, _AQ));
@@ -148,7 +145,6 @@ public class SPTargetPio {
 
         final String name = Pio.getValue(paramSet, _NAME);
         final String system = Pio.getValue(paramSet, _SYSTEM);
-        final String brightness = Pio.getValue(paramSet, _BRIGHTNESS);
 
         // The system is the tccName, so we need to find it.
         ITarget itarget = null;
@@ -168,13 +164,12 @@ public class SPTargetPio {
 
             final String c1 = Pio.getValue(paramSet, _C1);
             final String c2 = Pio.getValue(paramSet, _C2);
-            t.setC1C2(c1, c2);
+            t.getRa().setValue(c1);
+            t.getDec().setValue(c2);
 
             final CoordinateTypes.Epoch e = new CoordinateTypes.Epoch();
             e.setParam(paramSet.getParam(_EPOCH));
             t.setEpoch(e);
-
-            t.setBrightness(brightness);
 
             final CoordinateTypes.PM1 pm1 = new CoordinateTypes.PM1();
             pm1.setParam(paramSet.getParam(_PM1));
@@ -205,7 +200,8 @@ public class SPTargetPio {
             final String c1 = Pio.getValue(paramSet, _C1);
             final String c2 = Pio.getValue(paramSet, _C2);
             if (c1 != null && c2 != null) {
-                nst.setC1C2(c1, c2);
+                nst.getRa().setValue(c1);
+                nst.getDec().setValue(c2);
             }
 
             final String dateStr = Pio.getValue(paramSet, _VALID_DATE);
@@ -220,8 +216,6 @@ public class SPTargetPio {
                 final CoordinateTypes.Epoch e = new CoordinateTypes.Epoch();
                 e.setParam(paramSet.getParam(_EPOCH));
                 t.setEpoch(e);
-
-                t.setBrightness(brightness);
 
                 final CoordinateTypes.ANode anode = new CoordinateTypes.ANode();
                 anode.setParam(paramSet.getParam(_ANODE));

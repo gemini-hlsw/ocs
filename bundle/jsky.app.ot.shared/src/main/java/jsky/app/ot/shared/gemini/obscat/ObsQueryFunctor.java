@@ -561,8 +561,8 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
         final TargetObsComp targetEnv = (TargetObsComp) targetObsComp.getDataObject();
         final SPTarget tp = targetEnv.getBase();
         final ITarget target = tp.getTarget();
-        final ICoordinate c1 = target.getC1();
-        final ICoordinate c2 = target.getC2();
+        final ICoordinate c1 = target.getRa();
+        final ICoordinate c2 = target.getDec();
         final double ra = c1.getAs(Units.DEGREES) / 15.;
         final double dec = c2.getAs(Units.DEGREES);
 
@@ -661,8 +661,8 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
             final TargetObsComp targetEnv = (TargetObsComp) targetObsComp.getDataObject();
             final SPTarget tp = targetEnv.getBase();
             final ITarget target = tp.getTarget();
-            final ICoordinate c1 = target.getC1();
-            final ICoordinate c2 = target.getC2();
+            final ICoordinate c1 = target.getRa();
+            final ICoordinate c2 = target.getDec();
             ra = c1.getAs(Units.DEGREES);
             dec = c2.getAs(Units.DEGREES);
         }

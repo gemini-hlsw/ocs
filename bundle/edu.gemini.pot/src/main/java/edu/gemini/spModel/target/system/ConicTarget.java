@@ -23,30 +23,7 @@ public final class ConicTarget extends NonSiderealTarget  {
         return _tag;
     }
 
-    /**
-     * Options for the system type.
-     */
-    public static final class SystemType extends TypeBase {
-        public static int _count = 0;
 
-        public static final SystemType JPL_MINOR_BODY =
-                new SystemType("JPL minor body");
-        public static final SystemType MPC_MINOR_PLANET =
-                new SystemType("MPC minor planet");
-
-        public static final SystemType[] TYPES = new SystemType[]{
-            JPL_MINOR_BODY,
-            MPC_MINOR_PLANET,
-        };
-
-        private SystemType(String name) {
-            super(_count++, name);
-        }
-    }
-
-    /**
-     * Default system type.
-     */
     private static final Tag DEFAULT_TAG = Tag.JPL_MINOR_BODY;
 
     private static final double DEFAULT_E = 0.0;
@@ -65,7 +42,7 @@ public final class ConicTarget extends NonSiderealTarget  {
     /**
      * Provides clone support.
      */
-    public Object clone() {
+    public ConicTarget clone() {
         ConicTarget result = (ConicTarget) super.clone();
 
         if (_anode != null) result._anode = (ANode) _anode.clone();
@@ -310,14 +287,6 @@ public final class ConicTarget extends NonSiderealTarget  {
      */
     public void setPerihelion(Perihelion newValue) {
         _perihelion = newValue;
-    }
-
-    /**
-     * Gets a short description of the position.
-     */
-    public String getPosition() {
-        // what should be returned here
-        return "Orbital Elements";
     }
 
 }

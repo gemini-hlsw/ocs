@@ -48,7 +48,6 @@ public final class HmsDegTarget extends ITarget {
     private static final Date DEFAULT_TAIZ = null;
     private static final String DEFAULT_NAME = "";
 
-    private String _brightness = DEFAULT_NAME;
     private String _name = DEFAULT_NAME;
     private Epoch _epoch = _createDefaultEpoch();
     private PM1 _pm1 = DEFAULT_PM1;
@@ -58,8 +57,8 @@ public final class HmsDegTarget extends ITarget {
     private RV _rv = DEFAULT_RV;
     private Parallax _parallax = DEFAULT_PARALLAX;
     private Date _taiz = DEFAULT_TAIZ;
-    private HMS _ra = new HMS();
-    private DMS _dec = new DMS();
+    private final HMS _ra = new HMS();
+    private final DMS _dec = new DMS();
 
     /**
      * The base name of this coordinate system.
@@ -74,8 +73,8 @@ public final class HmsDegTarget extends ITarget {
         target.setName(obj.getName());
         target.setMagnitudes(obj.getMagnitudes());
         target.setEpoch(new Epoch(e.getYear()));
-        target.setC1(new HMS(coords.getRa().toDegrees().getMagnitude()));
-        target.setC2(new DMS(coords.getDec().toDegrees().getMagnitude()));
+        target.getRa().setAs(coords.getRa().toDegrees().getMagnitude(), Units.DEGREES);
+        target.getDec().setAs(coords.getDec().toDegrees().getMagnitude(), Units.DEGREES);
 
         // Proper Motion
         final Units mas = Units.MILLI_ARCSECS_PER_YEAR;
@@ -92,10 +91,10 @@ public final class HmsDegTarget extends ITarget {
      * As expected, cloning an HmsDegTarget provides a copy of the
      * object with all new instances of the member objects.
      */
-    public Object clone() {
+    public HmsDegTarget clone() {
         HmsDegTarget result = (HmsDegTarget) super.clone();
-        result._ra = (HMS) _ra.clone();
-        result._dec = (DMS) _dec.clone();
+        result._ra.setValue(_ra.getValue());
+        result._dec.setValue(_dec.getValue());
         if (_epoch != null) result._epoch = (Epoch) _epoch.clone();
         if (_pm1 != null) result._pm1 = (PM1) _pm1.clone();
         if (_pm2 != null) result._pm2 = (PM2) _pm2.clone();
@@ -135,39 +134,11 @@ public final class HmsDegTarget extends ITarget {
     }
 
     /**
-     * Gets the first coordinate (right ascension) as a String.
-     */
-    public String raToString() {
-        return _ra.toString();
-    }
-
-    /**
-     * Gets the first coordinate (right ascension) as a String.
-     */
-    public String c1ToString() {
-        return raToString();
-    }
-
-    /**
-     * Gets the second coordinate (declination) as a String.
-     */
-    public String decToString() {
-        return _dec.toString();
-    }
-
-    /**
-     * Gets the second coordinate (right ascension) as a String.
-     */
-    public String c2ToString() {
-        return decToString();
-    }
-
-    /**
      * General method to return the first coordinate (right ascension).
      * This returns a reference to the actual object an {@link HMS HMS}
      * object so take care!
      */
-    public ICoordinate getC1() {
+    public ICoordinate getRa() {
         // Ra exists at instance creation.
         return _ra;
     }
@@ -177,109 +148,9 @@ public final class HmsDegTarget extends ITarget {
      * This returns a reference to the actual object an {@link DMS DMS}
      * object so take care!
      */
-    public ICoordinate getC2() {
+    public ICoordinate getDec() {
         // Dec exists at instance creation.
         return _dec;
-    }
-
-    /**
-     * Sets the right ascension coordinate using an object implementing
-     * the {@link ICoordinate ICoordinate} interface (an HMS object).
-     * The input object is not cloned.  Therefore, the caller can
-     * alter the contents if he is not careful.
-     * <p>
-     * If newValue is null, the method returns without changing the
-     * internal value.  This ensures that the object always has a
-     * valid <code>ICoordinate</code>(HMS) object.
-     * <p>
-     * This method throws IllegalArgumentException if the ICoordinate is
-     * not an instance of {@link HMS HMS}.
-     */
-    public void setC1(ICoordinate newValue)
-            throws IllegalArgumentException {
-        if (newValue == null) {
-            newValue = new HMS();
-        }
-        if (!(newValue instanceof HMS)) {
-            throw new IllegalArgumentException();
-        }
-        _ra = (HMS) newValue;
-    }
-
-    /**
-     * Sets the right ascension coordinate using an object implementing
-     * the {@link ICoordinate ICoordinate} interface (an DMS object).
-     * The input object is not cloned.  Therefore, the caller can
-     * alter the contents if not careful.
-     * <p>
-     * If newValue is null, the method returns without changing the
-     * internal value.  This ensures the object always has a valid
-     * <code>ICoordinate</code>(DMS) object.
-     * <p>
-     * This method throws IllegalArgumentException if the ICoordinate is
-     * not an instance of {@link HMS HMS}.
-     */
-    public void setC2(ICoordinate newValue) {
-        if (newValue == null) {
-            newValue = new DMS();
-        }
-        if (!(newValue instanceof DMS)) {
-            throw new IllegalArgumentException();
-        }
-        _dec = (DMS) newValue;
-    }
-
-    /**
-     * General method to set the first and second coordinates together.
-     */
-    public void setC1C2(ICoordinate c1, ICoordinate c2)
-            throws IllegalArgumentException {
-        setC1(c1);
-        setC2(c2);
-    }
-
-    /**
-     * Sets the first coordinate (right ascension) using a String.
-     */
-    void setRa(String newStringValue) {
-        _ra.setValue(newStringValue);
-    }
-
-    /**
-     * Sets the first coordinate (right ascension) using a String.
-     */
-    public void setC1(String c1) {
-        setRa(c1);
-    }
-
-    /**
-     * Sets the second coordinate (declination) using a String.
-     */
-    void setDec(String newStringValue) {
-        _dec.setValue(newStringValue);
-    }
-
-    /**
-     * Sets the second coordinate (declination) using a String.
-     */
-    public void setC2(String c2) {
-        setDec(c2);
-    }
-
-    /**
-     * Sets the right ascension and declination using String objects.
-     */
-    public void setRaDec(String newRa, String newDec) {
-        setRa(newRa);
-        setDec(newDec);
-    }
-
-    /**
-     * Sets the first and second coordinates using String objects.
-     */
-    public void setC1C2(String c1, String c2) {
-        setC1(c1);
-        setC2(c2);
     }
 
     /**
@@ -404,24 +275,6 @@ public final class HmsDegTarget extends ITarget {
     }
 
     /**
-     * Gets the optional brightness for a coordinate.
-     * This returns a String description of the brightness.
-     */
-    public String getBrightness() {
-        return _brightness;
-    }
-
-    /**
-     * Sets the optional brightness for the position.
-     */
-    public void setBrightness(String brightness) {
-        // Make sure the name is never set to null
-        if (brightness != null) {
-            _brightness = brightness;
-        }
-    }
-
-    /**
      * Gets the optional name for a coordinate.
      * This returns the actual object reference, not a copy.
      */
@@ -438,20 +291,6 @@ public final class HmsDegTarget extends ITarget {
         if (name != null) {
             _name = name;
         }
-    }
-
-    /**
-     * Gets a short description of the position (its RA and Dec, epoch).
-     */
-    public String getPosition() {
-        return (getName().isEmpty() ? "" : getName() + " ") + "RA: " + getC1() + " Dec: " + getC2() + " " + SYSTEM_NAME + " (" + TAG.tccName + ")";
-    }
-
-    /**
-     * Convenience method for printing out a position.
-     */
-    public String toString() {
-        return getPosition();
     }
 
 }

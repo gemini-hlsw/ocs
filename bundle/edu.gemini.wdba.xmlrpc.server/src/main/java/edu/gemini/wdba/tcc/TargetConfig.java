@@ -95,8 +95,8 @@ public final class TargetConfig extends ParamSet {
     private void _buildHmsDegTarget(SPTarget target) {
 
         HmsDegTarget hmsDeg = (HmsDegTarget) target.getTarget();
-        putParameter(TccNames.C1, hmsDeg.c1ToString());
-        putParameter(TccNames.C2, hmsDeg.c2ToString());
+        putParameter(TccNames.C1, hmsDeg.getRa().toString());
+        putParameter(TccNames.C2, hmsDeg.getDec().toString());
         add(_addProperMotion(hmsDeg));
     }
 

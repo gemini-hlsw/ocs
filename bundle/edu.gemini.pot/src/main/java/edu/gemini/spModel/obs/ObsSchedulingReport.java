@@ -131,8 +131,8 @@ public final class ObsSchedulingReport implements Serializable {
         SPTarget target = env.getBase();
         if (target == null) return null;
 
-        double ra  = target.getTarget().getC1().getAs(CoordinateParam.Units.DEGREES);
-        double dec = target.getTarget().getC2().getAs(CoordinateParam.Units.DEGREES);
+        double ra  = target.getTarget().getRa().getAs(CoordinateParam.Units.DEGREES);
+        double dec = target.getTarget().getDec().getAs(CoordinateParam.Units.DEGREES);
         return new WorldCoords(ra, dec);
     }
 

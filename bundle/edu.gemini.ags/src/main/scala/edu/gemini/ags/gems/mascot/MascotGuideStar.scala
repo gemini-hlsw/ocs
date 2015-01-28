@@ -180,14 +180,14 @@ object MascotGuideStar {
 
     val inst = ctx.getInstrument
     val savedPa = inst.getPosAngleDegrees
-    val savedRa = ctx.getTargets.getBase.getTarget.getC1.getAs(Units.DEGREES)
-    val savedDec = ctx.getTargets.getBase.getTarget.getC2.getAs(Units.DEGREES)
+    val savedRa = ctx.getTargets.getBase.getTarget.getRa.getAs(Units.DEGREES)
+    val savedDec = ctx.getTargets.getBase.getTarget.getDec.getAs(Units.DEGREES)
     val settingsList = settingsToTry(savedPa, savedRa, savedDec, posAngleTolerance, basePosTolerance)
     try {
       val result = for ((pa, ra, dec) <- settingsList) yield {
         inst.setPosAngle(pa)
-        ctx.getTargets.getBase.getTarget.getC1.setAs(ra, Units.DEGREES)
-        ctx.getTargets.getBase.getTarget.getC2.setAs(dec, Units.DEGREES)
+        ctx.getTargets.getBase.getTarget.getRa.setAs(ra, Units.DEGREES)
+        ctx.getTargets.getBase.getTarget.getDec.setAs(dec, Units.DEGREES)
         // XXX TODO use a cache map in the filter?
         val l = strehlList.filter(_.stars.forall(guideStarFilter))
         (l, pa, ra, dec)
@@ -197,8 +197,8 @@ object MascotGuideStar {
     finally {
       // restore settings
       inst.setPosAngleDegrees(savedPa)
-      ctx.getTargets.getBase.getTarget.getC1.setAs(savedRa, Units.DEGREES)
-      ctx.getTargets.getBase.getTarget.getC2.setAs(savedDec, Units.DEGREES)
+      ctx.getTargets.getBase.getTarget.getRa.setAs(savedRa, Units.DEGREES)
+      ctx.getTargets.getBase.getTarget.getDec.setAs(savedDec, Units.DEGREES)
     }
   }
 

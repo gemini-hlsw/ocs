@@ -11,10 +11,9 @@ public abstract class NonSiderealTarget extends ITarget {
     private static final String DEFAULT_NAME = "";
 
     // XXX temporary, until there is conversion code
-    private HMS _ra = new HMS();
-    private DMS _dec = new DMS();
+    private final HMS _ra = new HMS();
+    private final DMS _dec = new DMS();
     private CoordinateTypes.Epoch _epoch = new CoordinateTypes.Epoch("2000", CoordinateParam.Units.YEARS);
-    private String _brightness = DEFAULT_NAME;
     private String _name = DEFAULT_NAME;
     private Date _date = null; // The date for which the position is valid
 
@@ -44,159 +43,18 @@ public abstract class NonSiderealTarget extends ITarget {
     }
 
     /**
-     * Gets the optional brightness for a coordinate.
-     * This returns a String description of the brightness.
-     */
-    public String getBrightness() {
-        return _brightness;
-    }
-
-    /**
-     * Sets the optional brightness for the position.
-     */
-    public void setBrightness(String brightness) {
-        // Make sure the name is never set to null
-        if (brightness != null) {
-            _brightness = brightness;
-        }
-    }
-
-    /**
-     * Sets the first coordinate (right ascension) using a String.
-     */
-    void setRa(String newStringValue) {
-        _ra.setValue(newStringValue);
-    }
-
-    /**
-     * Sets the second coordinate (declination) using a String.
-     */
-    void setDec(String newStringValue) {
-        _dec.setValue(newStringValue);
-    }
-
-
-    /**
-     * Sets the right ascension coordinate using an object implementing
-     * the {@link ICoordinate ICoordinate} interface (an HMS object).
-     * The input object is not cloned.  Therefore, the caller can
-     * alter the contents if he is not careful.
-     * <p/>
-     * If newValue is null, the method returns without changing the
-     * internal value.  This ensures that the object always has a
-     * valid <code>ICoordinate</code>(HMS) object.
-     * <p/>
-     * This method throws IllegalArgumentException if the ICoordinate is
-     * not an instance of {@link HMS HMS}.
-     */
-    public void setC1(ICoordinate newValue)
-            throws IllegalArgumentException {
-        if (newValue == null) {
-            newValue = new HMS();
-        }
-        if (!(newValue instanceof HMS)) {
-            throw new IllegalArgumentException();
-        }
-        _ra = (HMS) newValue;
-    }
-
-    /**
-     * Sets the first coordinate (right ascension) using a String.
-     */
-    public void setC1(String c1) {
-        setRa(c1);
-    }
-
-    /**
      * Get the first Coordinate as an ICoordinate.
      */
-    public ICoordinate getC1() {
+    public ICoordinate getRa() {
         return _ra;
-    }
-
-    /**
-     * Gets the first coordinate (right ascension) as a String.
-     */
-    String raToString() {
-        return _ra.toString();
-    }
-
-    /**
-     * Gets the first coordinate (right ascension) as a String.
-     */
-    public String c1ToString() {
-        return raToString();
-    }
-
-    /**
-     * Sets the right ascension coordinate using an object implementing
-     * the {@link ICoordinate ICoordinate} interface (an DMS object).
-     * The input object is not cloned.  Therefore, the caller can
-     * alter the contents if not careful.
-     * <p/>
-     * If newValue is null, the method returns without changing the
-     * internal value.  This ensures the object always has a valid
-     * <code>ICoordinate</code>(DMS) object.
-     * <p/>
-     * This method throws IllegalArgumentException if the ICoordinate is
-     * not an instance of {@link HMS HMS}.
-     */
-    public void setC2(ICoordinate newValue) {
-        if (newValue == null) {
-            newValue = new DMS();
-        }
-        if (!(newValue instanceof DMS)) {
-            throw new IllegalArgumentException();
-        }
-        _dec = (DMS) newValue;
-    }
-
-    /**
-     * Sets the second coordinate (declination) using a String.
-     */
-    public void setC2(String c2) {
-        setDec(c2);
     }
 
     /**
      * Get the second Coordinate as an ICoordinate.
      */
-    public ICoordinate getC2() {
+    public ICoordinate getDec() {
         return _dec;
     }
-
-    /**
-     * Gets the second coordinate (declination) as a String.
-     */
-    String decToString() {
-        return _dec.toString();
-    }
-
-    /**
-     * Gets the second coordinate (right ascension) as a String.
-     */
-    public String c2ToString() {
-        return decToString();
-    }
-
-    /**
-     * Set the first and second coordinates using appropriate
-     * <code>ICoordinate</code>.
-     */
-    public void setC1C2(ICoordinate c1, ICoordinate c2)
-            throws IllegalArgumentException {
-        setC1(c1);
-        setC2(c2);
-    }
-
-    /**
-     * Sets the first and second coordinates using String objects.
-     */
-    public void setC1C2(String c1, String c2) {
-        setC1(c1);
-        setC2(c2);
-    }
-
 
     /**
      * Gets the epoch of this object.
@@ -238,7 +96,7 @@ public abstract class NonSiderealTarget extends ITarget {
      * CoordinateParam}</code> implements hashCode.
      */
     public int hashCode() {
-        long hc = _name.hashCode() ^ _epoch.hashCode() ^ _brightness.hashCode();
+        long hc = _name.hashCode() ^ _epoch.hashCode();
         if (_date != null) hc = hc ^ _date.hashCode();
         return (int) hc ^ (int) (hc >> 32);
     }
@@ -267,16 +125,12 @@ public abstract class NonSiderealTarget extends ITarget {
     }
 
 
-    public Object clone() {
+    public NonSiderealTarget clone() {
         NonSiderealTarget result = (NonSiderealTarget) super.clone();
         if (_epoch != null) result._epoch = (CoordinateTypes.Epoch) _epoch.clone();
         if (_date != null) result._date = (Date) _date.clone();
-        if (_ra != null) {
-            result._ra = (HMS) _ra.clone();
-        }
-        if (_dec != null) {
-            result._dec = (DMS) _dec.clone();
-        }
+        result._ra.setValue(_ra.getValue());
+        result._dec.setValue(_dec.getValue());
         result._hObjId = _hObjId; // immutable, so don't need to clone
         result._hObjTypeOrd = _hObjTypeOrd;
         return result;

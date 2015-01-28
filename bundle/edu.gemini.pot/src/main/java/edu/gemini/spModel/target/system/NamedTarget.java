@@ -6,7 +6,7 @@ package edu.gemini.spModel.target.system;
  */
 public final class NamedTarget extends NonSiderealTarget {
 
-    public static Tag TAG = Tag.NAMED;
+    public static final Tag TAG = Tag.NAMED;
 
     public Tag getTag() {
         return TAG;
@@ -93,13 +93,6 @@ public final class NamedTarget extends NonSiderealTarget {
      */
     public void setSolarObject(NamedTarget.SolarObject solarObject) {
         _solarObject = solarObject;
-    }
-
-    /**
-     * Gets a short description of the position.
-     */
-    public String getPosition() {
-        return (_solarObject != null) ?  _solarObject.getDisplayValue() : "Named Target";
     }
 
 }
