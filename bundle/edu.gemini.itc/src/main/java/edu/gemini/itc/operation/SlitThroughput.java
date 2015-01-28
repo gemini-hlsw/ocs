@@ -5,28 +5,12 @@ import edu.gemini.itc.shared.ITCConstants;
 
 import java.util.Scanner;
 
-public class SlitThroughput {
+public final class SlitThroughput {
 
-    private final double im_qual;
-    private final double pixel_size;
-    private final double slit_width;
-    private final double slit_ap;
-    private final double[][] _data;
-    private final double[] x_axis;
-    private final double[] y_axis;
-
-    // constructor for the optimum aperture case
-    public SlitThroughput(double im_qual, double pixel_size, double slit_width) throws Exception {
-        this(im_qual, 1.4 * im_qual, pixel_size, slit_width);
-    }
-
-    //constructor for the user defined aperture case.
-    public SlitThroughput(double im_qual, double user_def_ap, double pixel_size, double slit_width) throws Exception {
-        this.im_qual = im_qual;
-        this.slit_ap = user_def_ap;
-        this.pixel_size = pixel_size;
-        this.slit_width = slit_width;
-
+    private static final double[] x_axis;
+    private static final double[] y_axis;
+    private static final double[][] _data;
+    static {
         final String file = ITCConstants.CALC_LIB + ITCConstants.SLIT_THROUGHPUT_FILENAME + ITCConstants.DATA_SUFFIX;
         try (final Scanner scan = DatFile.scan(file)) {
             // read x and y dimensions
@@ -51,6 +35,24 @@ public class SlitThroughput {
                 }
             }
         }
+    }
+
+    private final double im_qual;
+    private final double pixel_size;
+    private final double slit_width;
+    private final double slit_ap;
+
+    // constructor for the optimum aperture case
+    public SlitThroughput(final double im_qual, final double pixel_size, final double slit_width) throws Exception {
+        this(im_qual, 1.4 * im_qual, pixel_size, slit_width);
+    }
+
+    //constructor for the user defined aperture case.
+    public SlitThroughput(final double im_qual, final double user_def_ap, final double pixel_size, final double slit_width) throws Exception {
+        this.im_qual = im_qual;
+        this.slit_ap = user_def_ap;
+        this.pixel_size = pixel_size;
+        this.slit_width = slit_width;
     }
 
     public double getSlitThroughput() {
@@ -92,17 +94,17 @@ public class SlitThroughput {
      * @return y value at specified x using linear interpolation.
      * Silently returns zero if x is out of spectrum range.
      */
-    public double getSTvalue(double x, double y) {
+    public double getSTvalue(final double x, final double y) {
         if (x < getStartX() || y < getStartY()) {
             return 0;
         }
         if (y > getEndY()) return 1;
 
-        int low_index_x = getLowerXIndex(x);
-        int low_index_y = getLowerYIndex(y);
+        final int low_index_x = getLowerXIndex(x);
+        final int low_index_y = getLowerYIndex(y);
 
-        int high_index_x;
-        int high_index_y;
+        final int high_index_x;
+        final int high_index_y;
         if (low_index_y == getYAxisSize() - 1) {
             return 1.0;
         } else if (low_index_x == getXAxisSize() - 1) {
@@ -112,13 +114,13 @@ public class SlitThroughput {
             high_index_y = low_index_y + 1;
         }
 
-        double y1 = getValue(low_index_x, low_index_y);
-        double y2 = getValue(high_index_x, low_index_y);
-        double y3 = getValue(high_index_x, high_index_y);
-        double y4 = getValue(low_index_x, high_index_y);
+        final double y1 = getValue(low_index_x, low_index_y);
+        final double y2 = getValue(high_index_x, low_index_y);
+        final double y3 = getValue(high_index_x, high_index_y);
+        final double y4 = getValue(low_index_x, high_index_y);
 
-        double t = (x - getXAxisValue(low_index_x)) / (getXAxisValue(high_index_x) - getXAxisValue(low_index_x));
-        double u = (y - getYAxisValue(low_index_y)) / (getYAxisValue(high_index_y) - getYAxisValue(low_index_y));
+        final double t = (x - getXAxisValue(low_index_x)) / (getXAxisValue(high_index_x) - getXAxisValue(low_index_x));
+        final double u = (y - getYAxisValue(low_index_y)) / (getYAxisValue(high_index_y) - getYAxisValue(low_index_y));
 
         return ((1.0 - t) * (1.0 - u) * y1 + t * (1.0 - u) * y2 + t * u * y3 + (1.0 - t) * u * y4);
     }
@@ -130,11 +132,11 @@ public class SlitThroughput {
         return x_axis[0];
     }
 
-    public double getXAxisValue(int index) {
+    public double getXAxisValue(final int index) {
         return x_axis[index];
     }
 
-    public double getYAxisValue(int index) {
+    public double getYAxisValue(final int index) {
         return y_axis[index];
     }
 
@@ -163,14 +165,14 @@ public class SlitThroughput {
     /**
      * Returns x value of specified data point.
      */
-    public double getValue(int index_x, int index_y) {
+    public double getValue(final int index_x, final int index_y) {
         return _data[index_y][index_x];
     }
 
     /**
      * Returns the index of the data point with largest x value less than x
      */
-    public int getLowerXIndex(double x) {
+    public int getLowerXIndex(final double x) {
         // x value is in.  The only solution is to search for it.
         // Small amt of data so just walk through.
         int low_index = 0;
