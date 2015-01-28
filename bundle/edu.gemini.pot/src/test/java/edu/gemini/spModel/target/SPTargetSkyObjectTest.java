@@ -119,7 +119,7 @@ public final class SPTargetSkyObjectTest {
         SPTarget target = new SPTarget(HmsDegTarget.fromSkyObject(obj));
 
         // Put a new magnitude for the K band.
-        target.putMagnitude(magK2);
+        target.getTarget().putMagnitude(magK2);
         ImList<Magnitude> magList = target.getTarget().getMagnitudes();
 
         assertEquals(2, magList.size());
@@ -127,7 +127,7 @@ public final class SPTargetSkyObjectTest {
         assertEquals(magK2, target.getTarget().getMagnitude(Magnitude.Band.K).getValue());
 
         // Replace the existing J band mag with a new one.
-        target.putMagnitude(magJ3);
+        target.getTarget().putMagnitude(magJ3);
         magList = target.getTarget().getMagnitudes();
         assertEquals(2, magList.size());
         assertEquals(magJ3, target.getTarget().getMagnitude(Magnitude.Band.J).getValue());

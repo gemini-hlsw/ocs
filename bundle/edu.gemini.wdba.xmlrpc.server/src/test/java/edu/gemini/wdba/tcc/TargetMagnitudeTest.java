@@ -50,20 +50,20 @@ public final class TargetMagnitudeTest extends TestBase {
     }
 
     public void testOneMagnitude() throws Exception {
-        pwfs1_1.putMagnitude(new Magnitude(Magnitude.Band.J, 10));
+        pwfs1_1.getTarget().putMagnitude(new Magnitude(Magnitude.Band.J, 10));
         testTargetEnvironment(env);
     }
 
     public void testNonSiderealMagnitude() throws Exception {
-        pwfs1_1.putMagnitude(new Magnitude(Magnitude.Band.J, 10));
+        pwfs1_1.getTarget().putMagnitude(new Magnitude(Magnitude.Band.J, 10));
         pwfs1_1.setTarget(new ConicTarget());
         pwfs1_1.setName("PWFS1-1");
         testTargetEnvironment(env);
     }
 
     public void testTwoMagnitudes() throws Exception {
-        pwfs1_1.putMagnitude(new Magnitude(Magnitude.Band.J, 10));
-        pwfs1_1.putMagnitude(new Magnitude(Magnitude.Band.K, 20));
+        pwfs1_1.getTarget().putMagnitude(new Magnitude(Magnitude.Band.J, 10));
+        pwfs1_1.getTarget().putMagnitude(new Magnitude(Magnitude.Band.K, 20));
         testTargetEnvironment(env);
     }
 

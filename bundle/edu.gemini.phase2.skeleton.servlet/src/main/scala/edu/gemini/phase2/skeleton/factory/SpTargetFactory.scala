@@ -61,7 +61,7 @@ object SpTargetFactory {
       // Add apparent magnitude, if any.
       nsid.magnitude(time)
         .map(new SO.Magnitude(SO.Magnitude.Band.AP, _))
-        .foreach(spTarget.putMagnitude)
+        .foreach(spTarget.getTarget.putMagnitude)
 
       spTarget
     }

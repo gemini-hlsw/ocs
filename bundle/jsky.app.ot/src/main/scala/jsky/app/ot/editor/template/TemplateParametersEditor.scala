@@ -315,13 +315,18 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
           mag(tp).getOrElse(zero)
 
         def setMag[A](f: (Magnitude, A) => Magnitude): (TemplateParameters, A) => TemplateParameters =
-          setTarget[A]((t, a) => t.putMagnitude(f(t.getTarget.getMagnitude(band).getOrElse(zero), a)))
+          setTarget[A]{ (t, a) =>
+            t.getTarget.putMagnitude(f(t.getTarget.getMagnitude(band).getOrElse(zero), a))
+            t.notifyOfGenericUpdate()
+          }
 
         val magCheck = new BoundCheckbox(
           get = mag(_).isDefined,
           set = setTarget((target, inc) => {
-            if (inc) target.putMagnitude(zero)
-            else {
+            if (inc) {
+              target.getTarget.putMagnitude(zero)
+              target.notifyOfGenericUpdate()
+            } else {
               val mags = target.getTarget.getMagnitudes.toList.asScala.filterNot(_.getBand == band)
               target.getTarget.setMagnitudes(DefaultImList.create(mags.asJava))
               target.notifyOfGenericUpdate()

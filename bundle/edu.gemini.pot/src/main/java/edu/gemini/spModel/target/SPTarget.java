@@ -85,12 +85,6 @@ public final class SPTarget extends WatchablePos {
     /// END OF PUBLIC API ... EVERYTHING FROM HERE DOWN GOES AWAY
     ///
 
-    /** Set a magnitude on the contained target and notify listeners. */
-    public void putMagnitude(final Magnitude mag) {
-        _target.putMagnitude(mag);
-        _notifyOfUpdate();
-    }
-
     /** Set the contained target's name and notify listeners. */
     public void setName(final String name) {
         _target.setName(name);
