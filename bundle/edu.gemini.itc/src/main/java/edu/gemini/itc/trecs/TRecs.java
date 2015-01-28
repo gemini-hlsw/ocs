@@ -1,69 +1,52 @@
 package edu.gemini.itc.trecs;
 
+import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.parameters.ObservationDetailsParameters;
 import edu.gemini.itc.shared.*;
+import scala.Option;
 
 import java.util.Scanner;
 
 /**
  * TRecs specification class
  */
-public class TRecs extends Instrument {
-    /**
-     * Related files will be in this subdir of lib
-     */
-    public static final String INSTR_DIR = "trecs";
-
-    /**
-     * Related files will start with this prefix
-     */
-    public static final String INSTR_PREFIX = "trecs_";
-
-    // Instrument reads its configuration from here.
+public final class TRecs extends Instrument {
+    private static final String INSTR_DIR = "trecs";
+    private static final String INSTR_PREFIX = "trecs_";
     private static final String FILENAME = "trecs" + getSuffix();
-
     private static final String ELFN_FILENAME = INSTR_PREFIX + "elfn" + getSuffix();
-
     private static final double WELL_DEPTH = 30000000.0;
-
-    private static final double AD_SATURATION = 2500000;
-
-    private static final double HIGH_GAIN = 4.4;
-    private static final double LOW_GAIN = 2.18;
-
     private static final double IMAGING_FRAME_TIME = .020;  //Seconds
     private static final double SPECTROSCOPY_LOW_RES_FRAME_TIME = .1; //Seconds
     private static final double SPECTROSCOPY_HI_RES_FRAME_TIME = .5; //Seconds
-
     private static final int DETECTOR_PIXELS = 320;
 
-    private edu.gemini.itc.operation.DetectorsTransmissionVisitor _dtv;
-
+    //Read Extra-low freq data parameter from file
+    private static int elfn_param;  // extra low frequency noise
+    static {
+        final String dir = ITCConstants.LIB + "/" + INSTR_DIR + "/";
+        try (final Scanner in = DatFile.scan(dir + ELFN_FILENAME)) {
+            elfn_param = in.nextInt();
+        }
+    }
 
     // Keep a reference to the color filter to ask for effective wavelength
-    private Filter _Filter;
-    private TrecsGratingOptics _gratingOptics;
-    private Detector _detector;
-    private double _sampling;
-    private String _filterUsed;
-    private String _instrumentWindow;
-    private String _grating;
-    private String _readNoise;
-    private String _wellDepth;
-    private String _focalPlaneMask;
-    private String _stringSlitWidth;
-    private String _mode;
-    private double _centralWavelength;
-    private int _spectralBinning;
-    private int _spatialBinning;
-
-    private int elfn_param;  // extra low frequency noise
+    private final Option<Filter> _filter;
+    private final Option<TrecsGratingOptics> _gratingOptics;
+    private final double _sampling;
+    private final String _grating;
+    private final String _focalPlaneMask;
+    private final String _mode;
+    private final double _centralWavelength;
+    private final int _spectralBinning;
+    private final int _spatialBinning;
+    private final DetectorsTransmissionVisitor _dtv;
 
     // These are the limits of observable wavelength with this configuration.
     private double _observingStart;
     private double _observingEnd;
 
-    public TRecs(TRecsParameters tp, ObservationDetailsParameters odp) throws Exception {
+    public TRecs(final TRecsParameters tp, final ObservationDetailsParameters odp) throws Exception {
         super(INSTR_DIR, FILENAME);
         // The instrument data file gives a start/end wavelength for
         // the instrument.  But with a filter in place, the filter
@@ -71,33 +54,16 @@ public class TRecs extends Instrument {
 
         _observingStart = super.getStart();
         _observingEnd = super.getEnd();
-        _sampling = super.getSampling();
-
-        _readNoise = tp.getReadNoise();
-        _wellDepth = tp.getWellDepth();
         _focalPlaneMask = tp.getFocalPlaneMask();
-
-        _stringSlitWidth = tp.getStringSlitWidth();
         _grating = tp.getGrating();
-        _filterUsed = tp.getFilter();
-        _instrumentWindow = tp.getInstrumentWindow();
         _centralWavelength = tp.getInstrumentCentralWavelength();
-
         _mode = odp.getCalculationMode();
         _spectralBinning = tp.getSpectralBinning();
         _spatialBinning = tp.getSpatialBinning();
 
-        //Read Extra-low freq data from file
-        final String dir = ITCConstants.LIB + "/" + INSTR_DIR + "/";
-        try (final Scanner in = DatFile.scan(dir + ELFN_FILENAME)) {
-            elfn_param = in.nextInt();
-        }
-
-        //end of Extra-low freq data
-
-        InstrumentWindow trecsInstrumentWindow =
-                new InstrumentWindow(getDirectory() + "/" + getPrefix() +
-                        _instrumentWindow + Instrument.getSuffix(), _instrumentWindow);
+        final String instrumentWindow = tp.getInstrumentWindow();
+        final String file = getDirectory() + "/" + getPrefix() + instrumentWindow + Instrument.getSuffix();
+        final InstrumentWindow trecsInstrumentWindow = new InstrumentWindow(file, instrumentWindow);
         addComponent(trecsInstrumentWindow);
 
 
@@ -105,21 +71,22 @@ public class TRecs extends Instrument {
         // Note for designers of other instruments:
         // Other instruments may not have filters and may just use
         // the range given in their instrument file.
-        if (!(_filterUsed.equals("none"))) {
-
-
-            _Filter = Filter.fromWLFile(getPrefix(), _filterUsed, getDirectory() + "/");
-
-            if (_Filter.getStart() >= _observingStart)
-                _observingStart = _Filter.getStart();
-            if (_Filter.getEnd() <= _observingEnd)
-                _observingEnd = _Filter.getEnd();
-            addComponent(_Filter);
-
+        if (!(tp.getFilter().equals("none"))) {
+            final Filter filter = Filter.fromWLFile(getPrefix(), tp.getFilter(), getDirectory() + "/");
+            if (filter.getStart() >= _observingStart) {
+                _observingStart = filter.getStart();
+            }
+            if (filter.getEnd() <= _observingEnd) {
+                _observingEnd = filter.getEnd();
+            }
+            addComponent(filter);
+            _filter = Option.apply(filter);
+        } else {
+            _filter = Option.empty();
         }
 
 
-        FixedOptics _fixedOptics = new FixedOptics(getDirectory() + "/", getPrefix());
+        final FixedOptics _fixedOptics = new FixedOptics(getDirectory() + "/", getPrefix());
         addComponent(_fixedOptics);
 
 
@@ -139,7 +106,7 @@ public class TRecs extends Instrument {
         }
 
         if (_mode.equals(ObservationDetailsParameters.IMAGING)) {
-            if (_filterUsed.equals("none"))
+            if (tp.getFilter().equals("none"))
                 throw new Exception("Imaging calculation method is selected but a filter" +
                         " is not.\n  Please select a filter and resubmit the " +
                         "form to continue.");
@@ -155,44 +122,47 @@ public class TRecs extends Instrument {
         }
 
 
-        _detector = new Detector(getDirectory() + "/", getPrefix(), "det",
-                "320x240 pixel Si:As IBC array");
-        _detector.setDetectorPixels(DETECTOR_PIXELS);
+        final Detector detector = new Detector(getDirectory() + "/", getPrefix(), "det", "320x240 pixel Si:As IBC array");
+        detector.setDetectorPixels(DETECTOR_PIXELS);
 
         _dtv = new edu.gemini.itc.operation.DetectorsTransmissionVisitor(_spectralBinning,
                 getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
 
         if (!(_grating.equals("none"))) {
 
-            _gratingOptics = new TrecsGratingOptics(getDirectory() + "/" + TRecs.getPrefix(), _grating,
+            final TrecsGratingOptics gratingOptics = new TrecsGratingOptics(getDirectory() + "/" + TRecs.getPrefix(), _grating,
                     _centralWavelength,
-                    _detector.getDetectorPixels(),//_spectralBinning,
+                    detector.getDetectorPixels(),//_spectralBinning,
                     _spectralBinning);
-            _sampling = _gratingOptics.getGratingDispersion_nmppix();
-            _observingStart = _gratingOptics.getStart();
-            _observingEnd = _gratingOptics.getEnd();
+            _sampling = gratingOptics.getGratingDispersion_nmppix();
+            _observingStart = gratingOptics.getStart();
+            _observingEnd = gratingOptics.getEnd();
 
-            if (!(_grating.equals("none")) && !(_filterUsed.equals("none")))
-                if ((_Filter.getStart() >= _gratingOptics.getEnd()) ||
-                        (_Filter.getEnd() <= _gratingOptics.getStart()))
+            if (!(_grating.equals("none")) && _filter.isDefined())
+                if ((_filter.get().getStart() >= gratingOptics.getEnd()) ||
+                        (_filter.get().getEnd() <= gratingOptics.getStart()))
 
                 {
-                    throw new Exception("The " + _filterUsed + " filter" +
+                    throw new Exception("The " + tp.getFilter() + " filter" +
                             " and the " + _grating +
                             " do not overlap with the requested wavelength.\n" +
                             " Please select a different filter, grating or wavelength.");
                 }
 
-            if (getGrating().equals(TRecsParameters.LORES20_G5402) && !(_instrumentWindow.equals(TRecsParameters.KRS5))) {
+            if (getGrating().equals(TRecsParameters.LORES20_G5402) && !(instrumentWindow.equals(TRecsParameters.KRS5))) {
                 throw new Exception("The " + getGrating() + " grating must be " +
                         "used with the " + TRecsParameters.KRS5 + " window. \n" +
                         "Please change the grating or the window cover.");
             }
-            addComponent(_gratingOptics);
+            addComponent(gratingOptics);
+            _gratingOptics = Option.apply(gratingOptics);
+        } else {
+            _gratingOptics = Option.empty();
+            _sampling = super.getSampling();
         }
 
 
-        addComponent(_detector);
+        addComponent(detector);
 
 
     }
@@ -205,13 +175,13 @@ public class TRecs extends Instrument {
      * @return Effective wavelength in nm
      */
     public int getEffectiveWavelength() {
-        if (_grating.equals("none")) return (int) _Filter.getEffectiveWavelength();
-        else return (int) _gratingOptics.getEffectiveWavelength();
+        if (_grating.equals("none")) return (int) _filter.get().getEffectiveWavelength();
+        else return (int) _gratingOptics.get().getEffectiveWavelength();
 
     }
 
     public double getGratingResolution() {
-        return _gratingOptics.getGratingResolution();
+        return _gratingOptics.get().getGratingResolution();
     }
 
 
@@ -219,16 +189,12 @@ public class TRecs extends Instrument {
         return _grating;
     }
 
-    public double getGratingBlaze() {
-        return _gratingOptics.getGratingBlaze();
-    }
-
     public double getGratingDispersion_nm() {
-        return _gratingOptics.getGratingDispersion_nm();
+        return _gratingOptics.get().getGratingDispersion_nm();
     }
 
     public double getGratingDispersion_nmppix() {
-        return _gratingOptics.getGratingDispersion_nmppix();
+        return _gratingOptics.get().getGratingDispersion_nmppix();
     }
 
 
@@ -256,7 +222,7 @@ public class TRecs extends Instrument {
     }
 
     public double getSpectralPixelWidth() {
-        return _gratingOptics.getPixelWidth();
+        return _gratingOptics.get().getPixelWidth();
     }
 
     public double getWellDepth() {
@@ -287,24 +253,11 @@ public class TRecs extends Instrument {
         return _spatialBinning;
     }
 
-    public double getADSaturation() {
-        return AD_SATURATION;
-    }
-
-    public double getHighGain() {
-        return HIGH_GAIN;
-    }
-
-    public double getLowGain() {
-        return LOW_GAIN;
-    }
-
     public int getExtraLowFreqNoise() {
         if (_mode.equals(ObservationDetailsParameters.SPECTROSCOPY))
             return elfn_param * 3;
         else
             return elfn_param;
-
     }
 
     /**
