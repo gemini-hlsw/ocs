@@ -39,9 +39,10 @@ import scalaz._
 
 /** Support for testing program merge.
   *
-  * @param f combines two edited programs into a single result of type A
+  * @param f combines a starting program and two edited versions into a single
+  *          result of type A
   */
-class MergePropertyTest[A](f: (ISPProgram, ISPProgram) => A) extends Checkers {
+class MergePropertyTest[A](f: (ISPProgram, ISPProgram, ISPProgram) => A) extends Checkers {
 
   import MergePropertyTest._
 
@@ -79,7 +80,7 @@ class MergePropertyTest[A](f: (ISPProgram, ISPProgram) => A) extends Checkers {
     try {
       check(Prop.forAll(genProgs) { fun =>
         val (start, local, remote) = fun(fact)
-        p(start, local, remote, f(local, remote))
+        p(start, local, remote, f(start, local, remote))
       })
     } finally {
       odb.getDBAdmin.shutdown()
