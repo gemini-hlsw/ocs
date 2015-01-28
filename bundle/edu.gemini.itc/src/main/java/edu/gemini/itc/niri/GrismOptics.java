@@ -1,61 +1,93 @@
 package edu.gemini.itc.niri;
 
-import edu.gemini.itc.shared.Instrument;
 import edu.gemini.itc.shared.DatFile;
+import edu.gemini.itc.shared.Instrument;
 import edu.gemini.itc.shared.TransmissionElement;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * This represents the transmission of the Grism optics.
  */
-public class GrismOptics extends TransmissionElement {
+public final class GrismOptics extends TransmissionElement {
 
+    // === static code for caching of coverage and resolution data files
+    private static final class Coverage {
+        final double start;
+        final double end;
+        final double pixelWidth;
+        Coverage(final double start, final double end, final double pixelWidth) {
+            this.start = start;
+            this.end = end;
+            this.pixelWidth = pixelWidth;
+        }
+    }
+    private static final Map<String, List<Integer>> resolutions = new HashMap<>();
+    private static final Map<String, List<Coverage>> coverages = new HashMap<>();
 
-    private List<Double> _spectralCoverageArray;
-    private List<Double> _spectralPixelWidthArray;
-    private List<Integer> _resolvingPowerArray;
-    private String _grismName;
-
-    public GrismOptics(String directory, String grismName,
-                       String cameraName, String focalPlaneMaskOffset,
-                       String stringSlitWidth)
-            throws Exception {
-
-        super(directory + Niri.getPrefix() +
-                grismName + "_" + cameraName + Instrument.getSuffix());
-
-        _grismName = grismName;
-
-        //New read of Grism Resolving Power
-        _resolvingPowerArray = new ArrayList<>();
-        final String grismFile = directory + Niri.getPrefix() + "grism-resolution-" + stringSlitWidth + "_" + cameraName + Instrument.getSuffix();
-        try (final Scanner scan = DatFile.scan(grismFile)) {
+    private static List<Integer> loadResolutions(final String file) {
+        final List<Integer> resolvingPower = new ArrayList<>();
+        try (final Scanner scan = DatFile.scan(file)) {
             while (scan.hasNext()) {
-                _resolvingPowerArray.add(scan.nextInt());
+                resolvingPower.add(scan.nextInt());
             }
         }
+        return resolvingPower;
+    }
+    private static synchronized List<Integer> getResolution(final String file) {
+        if (!resolutions.containsKey(file)) {
+            resolutions.put(file, loadResolutions(file));
+        }
+        return resolutions.get(file);
+    }
 
-        final String coverageFile = directory + Niri.getPrefix() + "grism-coverage-" + focalPlaneMaskOffset + Instrument.getSuffix();
-        _spectralCoverageArray = new ArrayList<>();
-        _spectralPixelWidthArray = new ArrayList<>();
-        try (final Scanner grismCoverage =  DatFile.scan(coverageFile)) {
-            while (grismCoverage.hasNext()) {
-                _spectralCoverageArray.add(grismCoverage.nextDouble());
-                _spectralCoverageArray.add(grismCoverage.nextDouble());
-                _spectralPixelWidthArray.add(grismCoverage.nextDouble());
+    private static List<Coverage> loadCoverages(final String file) {
+        final List<Coverage> coverages = new ArrayList<>();
+        try (final Scanner scan = DatFile.scan(file)) {
+            while (scan.hasNext()) {
+                final double start = scan.nextDouble();
+                final double end   = scan.nextDouble();
+                final double pixW  = scan.nextDouble();
+                coverages.add(new Coverage(start, end, pixW));
             }
         }
+        return coverages;
+    }
+    private static synchronized List<Coverage> getCoverage(final String file) {
+        if (!coverages.containsKey(file)) {
+            coverages.put(file, loadCoverages(file));
+        }
+        return coverages.get(file);
+    }
+
+
+    // == non static stuff
+    private final List<Coverage> coverage;
+    private final List<Integer> resolution;
+    private final String grismName;
+
+    public GrismOptics(final String directory,
+                       final String grismName,
+                       final String cameraName,
+                       final String focalPlaneMaskOffset,
+                       final String stringSlitWidth) throws Exception {
+
+        super(directory + Niri.getPrefix() + grismName + "_" + cameraName + Instrument.getSuffix());
+
+        final String grismFile    = directory + Niri.getPrefix() + "grism-resolution-" + stringSlitWidth + "_" + cameraName + Instrument.getSuffix();
+        final String coverageFile = directory + Niri.getPrefix() + "grism-coverage-" + focalPlaneMaskOffset + Instrument.getSuffix();
+
+        this.grismName  = grismName;
+        this.resolution = getResolution(grismFile);
+        this.coverage   = getCoverage(coverageFile);
     }
 
     public double getStart() {
-        return _spectralCoverageArray.get(getGrismNumber() * 2);
+        return coverage.get(getGrismNumber()).start;
     }
 
     public double getEnd() {
-        return _spectralCoverageArray.get(getGrismNumber() * 2 + 1);
+        return coverage.get(getGrismNumber()).end;
     }
 
     public double getEffectiveWavelength() {
@@ -63,33 +95,33 @@ public class GrismOptics extends TransmissionElement {
     }
 
     public double getPixelWidth() {
-        return _spectralPixelWidthArray.get(getGrismNumber());
+        return coverage.get(getGrismNumber()).pixelWidth;
     }
 
     public int getGrismNumber() {
         int grism_num = 0;
 
-        if (_grismName.equals(NiriParameters.JGRISM)) {
+        if (grismName.equals(NiriParameters.JGRISM)) {
             grism_num = NiriParameters.J;
-        } else if (_grismName.equals(NiriParameters.HGRISM)) {
+        } else if (grismName.equals(NiriParameters.HGRISM)) {
             grism_num = NiriParameters.H;
-        } else if (_grismName.equals(NiriParameters.KGRISM)) {
+        } else if (grismName.equals(NiriParameters.KGRISM)) {
             grism_num = NiriParameters.K;
-        } else if (_grismName.equals(NiriParameters.LGRISM)) {
+        } else if (grismName.equals(NiriParameters.LGRISM)) {
             grism_num = NiriParameters.L;
-        } else if (_grismName.equals(NiriParameters.MGRISM)) {
+        } else if (grismName.equals(NiriParameters.MGRISM)) {
             grism_num = NiriParameters.M;
         }
         return grism_num;
     }
 
     public double getGrismResolution() {
-        return _resolvingPowerArray.get(getGrismNumber());
+        return resolution.get(getGrismNumber());
     }
 
 
     public String toString() {
-        return "Grism Optics: " + _grismName;
+        return "Grism Optics: " + grismName;
     }
 
 }
