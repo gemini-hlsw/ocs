@@ -9,7 +9,7 @@ public final class Filter extends TransmissionElement {
 
     public static Filter fromFile(final String prefix, final String filter, final String dir) {
         final String file = dir + prefix + filter + Instrument.getSuffix();
-        final double[][] data = DatFile.loadSpectrum(file);
+        final double[][] data = DatFile.loadArray(file);
         final double wl = data[0][data[0].length / 2];
         return new Filter(filter, data, wl);
     }

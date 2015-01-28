@@ -4,7 +4,6 @@ import edu.gemini.itc.shared.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 /**
  * For Gmos Spectroscopy the spectrum will be spread across 3 CCD's
@@ -12,24 +11,14 @@ import java.util.Scanner;
  * a file read in.
  */
 public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
-    private int spectralBinning;
+    private final int spectralBinning;
     private VisitableSampledSpectrum detectorsTransmissionValues;
-    List<Integer> detectorCcdIndexes;
+    private List<Integer> detectorCcdIndexes;
 
     public DetectorsTransmissionVisitor(int spectralBinning, String filename) throws Exception {
-
         this.spectralBinning = spectralBinning;
-        final List<Double> x_values = new ArrayList<>();
-        final List<Double> y_values = new ArrayList<>();
-
-        try (final Scanner scan = DatFile.scan(filename)) {
-            while (scan.hasNext()) {
-                x_values.add(scan.nextDouble());
-                y_values.add(scan.nextDouble());
-            }
-        }
-
-        initialize(x_values, y_values);
+        final double[][] data = DatFile.loadArray(filename); // TODO: strictly speaking this is NOT a spectrum but pixels -> wls maybe introduce other method loadDetectorTransmission?
+        initialize(data);
     }
 
     /**
@@ -45,18 +34,18 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
         }
     }
 
-    private void initialize(List<Double> x_values, List<Double> y_values) throws Exception {
+    private void initialize(final double[][] data) throws Exception {
         // need to sample the file at regular interval pixel values
-        int finalPixelValue = x_values.get(x_values.size() - 1).intValue();
+        int finalPixelValue = (int) data[0][data[0].length - 1];
         double[] pixelData = new double[finalPixelValue];
         pixelData[0] = 1.0; // XXX previously defaulted to 0
         int j = 0;
-        detectorCcdIndexes = new ArrayList<Integer>(6);
+        detectorCcdIndexes = new ArrayList<>(6);
         detectorCcdIndexes.add(0);
         int prevY = 1;
         for (int i = 1; i < finalPixelValue; i++) {
-            int x = x_values.get(j).intValue();
-            int y = y_values.get(j).intValue();
+            int x = (int) data[0][j];
+            int y = (int) data[1][j];
             if (prevY != y) {
                 detectorCcdIndexes.add(x - prevY - 1);
                 prevY = y;
@@ -66,7 +55,7 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
                 j++;
             } else {
                 // Apply the last transmission pixel value and go on without incrementing
-                pixelData[i] = y_values.get(j - 1);
+                pixelData[i] = data[1][j - 1];
             }
         }
         detectorCcdIndexes.add(finalPixelValue - 1);

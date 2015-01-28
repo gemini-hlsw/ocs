@@ -59,7 +59,7 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
      *                 separated by whitespace or comma.
      */
     public DefaultArraySpectrum(String fileName) throws Exception {
-        final double[][] data = DatFile.loadSpectrum(fileName);
+        final double[][] data = DatFile.loadArray(fileName);
         // for now make a copy of cached values, just to be on the safe side
         _data = new double[2][];
         _data[0] = data[0].clone();
