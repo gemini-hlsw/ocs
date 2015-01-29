@@ -7,8 +7,6 @@
 //
 package edu.gemini.spModel.target;
 
-import edu.gemini.shared.skyobject.Magnitude;
-import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.system.*;
@@ -88,26 +86,6 @@ public final class SPTarget extends WatchablePos {
     /** Set the contained target's name and notify listeners. */
     public void setName(final String name) {
         _target.setName(name);
-        _notifyOfUpdate();
-    }
-
-    /**
-     * Set the contained target's RA and Dec from Strings in HMS/DMS format and notify listeners.
-     * Invalid values are replaced with 00:00:00.
-     */
-    public void setHmsDms(final String hms, final String dms) {
-        synchronized (this) {
-            try {
-                _target.getRa().setValue(hms);
-            } catch (final IllegalArgumentException ex) {
-                _target.getRa().setValue("00:00:00.0");
-            }
-            try {
-                _target.getDec().setValue(dms);
-            } catch( final IllegalArgumentException ex) {
-                _target.getDec().setValue("00:00:00.0");
-            }
-        }
         _notifyOfUpdate();
     }
 

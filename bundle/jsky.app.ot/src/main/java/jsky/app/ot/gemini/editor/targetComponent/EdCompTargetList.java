@@ -233,6 +233,26 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         return pan;
     }
 
+    /**
+     * Set the contained target's RA and Dec from Strings in HMS/DMS format and notify listeners.
+     * Invalid values are replaced with 00:00:00.
+     */
+    private static void setHmsDms(SPTarget spTarget, final String hms, final String dms) {
+        synchronized (spTarget) {
+            try {
+                spTarget.getTarget().getRa().setValue(hms);
+            } catch (final IllegalArgumentException ex) {
+                spTarget.getTarget().getRa().setValue("00:00:00.0");
+            }
+            try {
+                spTarget.getTarget().getDec().setValue(dms);
+            } catch( final IllegalArgumentException ex) {
+                spTarget.getTarget().getDec().setValue("00:00:00.0");
+            }
+        }
+        spTarget.notifyOfGenericUpdate();
+    }
+
     // Initialize the widgets involved in editing positions. This includes the
     // RA/Dec + sidereal or nonsidereal information.  Takes the GUI built by
     // JFormDesigner in _w.coordinatesPanel and morphs it a bit.  This is all
@@ -1643,7 +1663,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         if (!(dec.equals("-") || dec.equals("+"))) {
             _ignorePosUpdate = true;
             try {
-                _curPos.setHmsDms(ra, dec);
+                setHmsDms(_curPos, ra, dec);
             } finally {
                 _ignorePosUpdate = false;
             }
@@ -2093,7 +2113,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         NonSiderealTarget target = (NonSiderealTarget) _curPos.getTarget();
                         _ignorePosUpdate = true;
                         try {
-                            _curPos.setHmsDms(coords.getRA().toString(),
+                            setHmsDms(_curPos, coords.getRA().toString(),
                                     coords.getDec().toString());
                         } finally {
                             _ignorePosUpdate = false;
