@@ -41,7 +41,7 @@ public final class GnirsGratingsTransmission {
         }
 
         final String file = "/" + Gnirs.INSTR_DIR + "/" + Gnirs.getPrefix() + grating + Gnirs.DATA_SUFFIX;
-        try (final Scanner scan = DatFile.scan(file)) {
+        try (final Scanner scan = DatFile.scanFile(file)) {
             while (scan.hasNext()) {
                 for (int i = 0; i < OrdersCnt; i++) {
                     wavel[i].add(scan.nextDouble());

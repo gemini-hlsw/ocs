@@ -27,7 +27,7 @@ public final class PeakPixelFluxCalc {
         this.summed_source = summed_source;
         this.summed_background = summed_background;
         this.dark_current = dark_current;
-        this.data = DatFile.loadArray(fileName);
+        this.data = DatFile.arrays().apply(fileName);
     }
 
     public double getFluxInPeakPixel() {

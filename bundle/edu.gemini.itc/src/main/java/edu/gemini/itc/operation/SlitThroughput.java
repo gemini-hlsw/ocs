@@ -12,7 +12,7 @@ public final class SlitThroughput {
     private static final double[][] _data;
     static {
         final String file = ITCConstants.CALC_LIB + ITCConstants.SLIT_THROUGHPUT_FILENAME + ITCConstants.DATA_SUFFIX;
-        try (final Scanner scan = DatFile.scan(file)) {
+        try (final Scanner scan = DatFile.scanFile(file)) {
             // read x and y dimensions
             final int xD = scan.nextInt();
             final int yD = scan.nextInt();

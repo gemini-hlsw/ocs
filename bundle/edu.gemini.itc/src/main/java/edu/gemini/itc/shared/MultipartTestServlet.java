@@ -81,7 +81,7 @@ public class MultipartTestServlet extends HttpServlet {
                     System.out.println(parser.getTextFile(txtFileName) + "<br>");
                 }
                 //Use this Code in Sed Factory to create a Textfile Reader for the String.
-                try (final Scanner scan = DatFile.scanString(sdp.getUserDefinedSpectrum())) {
+                try (final Scanner scan = DatFile.scan(sdp.getUserDefinedSpectrum())) {
                     while (scan.hasNext()) {
                         System.out.println("x: " + scan.nextDouble() + "\ny: " + scan.nextDouble());
                     }

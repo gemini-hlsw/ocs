@@ -1,28 +1,49 @@
 package edu.gemini.itc.shared
 
-import java.io.InputStreamReader
 import java.util.Scanner
 import java.util.logging.Logger
 import java.util.regex.Pattern
 
-import scala.collection.parallel.mutable
-import scala.util.parsing.combinator.JavaTokenParsers
+import scala.collection._
 import scalaz._
 
 /**
  * Set of tools to ingest dat files stored as resource files.
- * These files describe properties of transmission elements, filters, instruments etc.
- * TODO: This needs some additional TLC, in particular the caching.
+ * These files describe properties of transmission elements, filters, gratings, instruments etc.
+ * Parsing of file is implemented using a scanner. Using parser/combinators turned out to be very slow. Even
+ * using the pattern matching parsing in the scanner is extremely inefficient for huge dat files where we
+ * know all the numbers are doubles. Using scan.next().toDouble is much more efficient than scan.nextDouble().
+ * The contract regarding missing files and parsing errors is that this results in unchecked exceptions which
+ * bubble all the way up to the servlet. This isn't better or worse than what we had originally.
  */
 object DatFile {
   lazy val Log = Logger.getLogger(getClass.getName)
 
-  // ===== Scan utils
+  // ===== Data containers
+
+  type Data = Array[Array[Double]]
+
+  case class Filter(wavelength: Double, data: Data)
+
+  case class Instrument(name: String,
+                        start: Int,                  // The range and sampling allowed by this instrument.
+                        end: Int,
+                        sampling: Double,
+                        backgroundFile: String,
+                        plateScale: Double,
+                        readNoise: Double,          // electrons/pixel
+                        darkCurrent: Double)        // electrons/s/pixel
+
+  case class Grating(name: String, resolvingPower: Int, blaze: Int, dispersion: Double, resolution: Double)
+
+    // ===== Scan utils
 
   // delimiters are whitespaces, commas or semicolons and comments (everything from "#" up to next \n).
   private val Delimiters = Pattern.compile("(\\s|,|;|(#[^\\n]*))+")
 
-  def scan(f: String): Scanner = {
+  def scan(s: String): Scanner = new Scanner(s).useDelimiter(Delimiters)
+
+  def scanFile(f: String): Scanner = {
     Option(getClass.getResourceAsStream(f)).fold {
       val msg = s"Missing data file: $f"
       Log.severe(msg)
@@ -32,103 +53,50 @@ object DatFile {
     }
   }
 
-  def scanString(s: String): Scanner = new Scanner(s).useDelimiter(Delimiters)
+  // ===== Cached data file loaders
 
-  // ===== Parse utils
-  abstract class Parser extends JavaTokenParsers {
-    override val whiteSpace                   = """[,\s]+""".r
-    def comment    : Parser[Any]              = """#[^\n]*""".r
-    def double     : Parser[Double]           = floatingPointNumber ^^ (_.toDouble)
-    def pair       : Parser[(Double, Double)] = double ~! double ^^ { case ~(a,b) => (a,b) }
-    def twoDoubles : Parser[(Double, Double)] = rep(comment) ~> pair <~ rep(comment)
+  val arrays = cache { s =>
+    scanArray(s)
   }
 
-  class PlainSpectrumParser extends Parser {
-    private def spectrum   : Parser[List[(Double, Double)]] = rep(twoDoubles)
+  val filters = cache { s =>
+    Filter(s.nextDouble(), scanArray(s))
+  }
 
-    def parseString(s: String) = parseAll(spectrum, s)
-    def parseFile(f: String) = {
-      val s = new InputStreamReader(getClass.getResourceAsStream(f))
-      val r = parseAll(spectrum, s)
-      s.close()
-      r
+  val gratings = cache { s =>
+    val l = mutable.MutableList[Grating]()
+    while (s.hasNext) {
+      val name           = s.next()
+      val blaze          = s.nextInt()
+      val resolvingPower = s.nextInt()
+      val resolution     = s.nextDouble()
+      val dispersion     = s.nextDouble()
+      l.+=(Grating(name, resolvingPower, blaze, dispersion, resolution))
     }
-    def parseFile(r: InputStreamReader) = parseAll(spectrum, r)
+    l.toArray
   }
 
-  class WLSpectrumParser extends Parser {
-    private def spectrum   : Parser[(Double, List[(Double, Double)])] = rep(comment) ~> double ~! rep(twoDoubles) ^^ { case ~(a,b) => (a,b)}
-
-    def parseString(s: String) = parseAll(spectrum, s)
-    def parseFile(f: String) = {
-      val s = new InputStreamReader(getClass.getResourceAsStream(f))
-      val r = parseAll(spectrum, s)
-      s.close()
-      r
-    }
-    def parseFile(r: InputStreamReader) = parseAll(spectrum, r)
-  }
-
-  private val wlcache = mutable.ParHashMap[String, (java.lang.Double, Array[Array[Double]])]()
-  def loadSpectrumWithWavelength(file: String): (java.lang.Double, Array[Array[Double]]) = {
-    // TODO: caching error handling
-    if (wlcache.contains(file)) wlcache(file)
-    else {
-      Log.info("Loading spectrum into cache: " + file)
-      val r = new WLSpectrumParser().parseFile(file)
-      if (!r.successful) System.out.println("*********ERROR FOR " + file)
-      val data = new Array[Array[Double]](2)
-      data(0) = r.get._2.map(_._1).toArray
-      data(1) = r.get._2.map(_._2).toArray
-      val value = (new java.lang.Double(r.get._1), data)
-      wlcache.put(file, value)
-      value
-    }
-  }
-
-  private val cache = mutable.ParHashMap[String, Array[Array[Double]]]()
-  /** Loads a series of (x,y) value pairs from the given data file. */
-  def loadArray(file: String): Array[Array[Double]] = {
-    // TODO: caching error handling
-    if (cache.contains(file)) cache(file)
-    else {
-      Log.info("Loading data file into cache: " + file)
-      val r = new PlainSpectrumParser().parseFile(file)
-      if (!r.successful) System.out.println("*********ERROR FOR " + file)
-      val data = new Array[Array[Double]](2)
-      data(0) = r.get.map(_._1).toArray
-      data(1) = r.get.map(_._2).toArray
-      cache.put(file, data)
-      data
-    }
-  }
-
-  def parseSpectrum(spectrum: String): Array[Array[Double]] = {
-      System.out.println("Parsing user spectrum")
-      val r = new PlainSpectrumParser().parseString(spectrum)
-      if (!r.successful) System.out.println("*********ERROR FOR user spectrum")
-      val data = new Array[Array[Double]](2)
-      data(0) = r.get.map(_._1).toArray
-      data(1) = r.get.map(_._2).toArray
-      data
-  }
-
-
-  // Instrument data files TODO: some values can potentially be replaced with values from spModel instrument objects
-  case class Instrument(name: String,
-                        start: Int,                  // The range and sampling allowed by this instrument.
-                        end: Int,
-                        sampling: Double,
-                        backgroundFile: String,
-                        plateScale: Double,
-                        readNoise: Double,          // electrons/pixel
-                        darkCurrent: Double         // electrons/s/pixel
-                         )
-  def parseInstrument(s: String) = memoParseInstrument(s)
-  private val memoParseInstrument: String => Instrument = Memo.mutableHashMapMemo[String, Instrument] { f: String =>
-    System.out.println(s"Loading instrument $f")
-    val s = scan(f)
+  val instruments = cache { s =>
     Instrument(s.next, s.nextInt, s.nextInt, s.nextDouble, s.next, s.nextDouble, s.nextDouble, s.nextDouble)
+  }
+
+  private def scanArray(s: Scanner): Array[Array[Double]] = {
+    val l = mutable.MutableList[(Double, Double)]()
+    while (s.hasNext) {
+      val pair = (s.next().toDouble, s.next().toDouble)
+      l.+=(pair)
+    }
+    val data = new Array[Array[Double]](2)
+    data(0) = l.map(_._1).toArray
+    data(1) = l.map(_._2).toArray
+    data
+  }
+
+  /** Loads a file and parses it using the given scanner unless it is already available in the cache. */
+  // Note: this could be changed to use a weak hash map in case we run into memory issues
+  private def cache[T](load: Scanner => T): String => T = Memo.immutableHashMapMemo[String, T] { f =>
+    Log.info(s"Caching file $f")
+    load(scanFile(f))
   }
 
 }

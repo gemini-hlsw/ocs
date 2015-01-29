@@ -93,7 +93,7 @@ public class GrismOptics extends TransmissionElement {
     // =====
     private static void readCoverageData() {
         final String file = "/" + Flamingos2.INSTR_DIR + "/grism-coverage" + Instrument.getSuffix();
-        try (final Scanner tr = DatFile.scan(file)) {
+        try (final Scanner tr = DatFile.scanFile(file)) {
             while (tr.hasNext()) {
                 final String grism = tr.next();
                 final String filter = tr.next();

@@ -25,7 +25,7 @@ public final class Flamingos2 extends Instrument {
     private static Hashtable<String, ReadNoiseEntry> _readNoiseLevels = new Hashtable<>(3);
     static {
         final String file = File.separator + Flamingos2.INSTR_DIR + File.separator + Flamingos2.getPrefix() + "readnoise" + Instrument.getSuffix();
-        try (final Scanner scan = DatFile.scan(file)) {
+        try (final Scanner scan = DatFile.scanFile(file)) {
             while (scan.hasNext()) {
                 final String name = scan.next();
                 final double rn = scan.nextDouble();

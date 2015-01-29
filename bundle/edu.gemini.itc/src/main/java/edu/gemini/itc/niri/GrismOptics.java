@@ -27,7 +27,7 @@ public final class GrismOptics extends TransmissionElement {
 
     private static List<Integer> loadResolutions(final String file) {
         final List<Integer> resolvingPower = new ArrayList<>();
-        try (final Scanner scan = DatFile.scan(file)) {
+        try (final Scanner scan = DatFile.scanFile(file)) {
             while (scan.hasNext()) {
                 resolvingPower.add(scan.nextInt());
             }
@@ -43,7 +43,7 @@ public final class GrismOptics extends TransmissionElement {
 
     private static List<Coverage> loadCoverages(final String file) {
         final List<Coverage> coverages = new ArrayList<>();
-        try (final Scanner scan = DatFile.scan(file)) {
+        try (final Scanner scan = DatFile.scanFile(file)) {
             while (scan.hasNext()) {
                 final double start = scan.nextDouble();
                 final double end   = scan.nextDouble();

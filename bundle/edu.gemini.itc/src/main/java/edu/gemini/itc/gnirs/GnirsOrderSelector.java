@@ -19,7 +19,7 @@ public final class GnirsOrderSelector {
         _lambda1_list = new ArrayList<>();
         _lambda2_list = new ArrayList<>();
         final String file = "/" + Gnirs.INSTR_DIR + "/" + Gnirs.INSTR_PREFIX + orderFilename + Gnirs.DATA_SUFFIX;
-        try (final Scanner scan = DatFile.scan(file)) {
+        try (final Scanner scan = DatFile.scanFile(file)) {
             while (scan.hasNext()) {
                 _order_list.add(scan.nextInt());
                 _lambda1_list.add(scan.nextInt());

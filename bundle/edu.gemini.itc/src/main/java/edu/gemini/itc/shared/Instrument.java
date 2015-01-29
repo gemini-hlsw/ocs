@@ -33,7 +33,7 @@ public abstract class Instrument {
     // Automatically loads the background data.
     protected Instrument(String subdir, String filename) throws Exception {
         final String dir = ITCConstants.LIB + "/" + subdir + "/";
-        params = DatFile.parseInstrument(dir + filename);
+        params = DatFile.instruments().apply(dir + filename);
         components = new LinkedList<>();
         background = new DefaultArraySpectrum(dir + params.backgroundFile());
     }

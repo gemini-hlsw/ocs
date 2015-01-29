@@ -17,7 +17,7 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
 
     public DetectorsTransmissionVisitor(int spectralBinning, String filename) throws Exception {
         this.spectralBinning = spectralBinning;
-        final double[][] data = DatFile.loadArray(filename); // TODO: strictly speaking this is NOT a spectrum but pixels -> wls maybe introduce other method loadDetectorTransmission?
+        final double[][] data = DatFile.arrays().apply(filename);
         initialize(data);
     }
 

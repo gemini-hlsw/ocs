@@ -37,11 +37,11 @@ public final class MichelleGratingOptics extends GratingOptics {
 
 
     @Override public double getStart() {
-        return centralWavelength - (data.get(getGratingNumber()).dispersion * detectorPixels / 2) * _spectralBinning;
+        return centralWavelength - (data[getGratingNumber()].dispersion() * detectorPixels / 2) * _spectralBinning;
     }
 
     @Override public double getEnd() {
-        return centralWavelength + (data.get(getGratingNumber()).dispersion * detectorPixels / 2) * _spectralBinning;
+        return centralWavelength + (data[getGratingNumber()].dispersion() * detectorPixels / 2) * _spectralBinning;
     }
 
 }

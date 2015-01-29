@@ -25,7 +25,7 @@ public final class TRecs extends Instrument {
     private static int elfn_param;  // extra low frequency noise
     static {
         final String dir = ITCConstants.LIB + "/" + INSTR_DIR + "/";
-        try (final Scanner in = DatFile.scan(dir + ELFN_FILENAME)) {
+        try (final Scanner in = DatFile.scanFile(dir + ELFN_FILENAME)) {
             elfn_param = in.nextInt();
         }
     }
