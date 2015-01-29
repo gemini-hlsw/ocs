@@ -122,8 +122,45 @@ class PreliminaryMergePropertyTest extends JUnitSuite {
 
         (commonKeys &~ pc.deletedKeys).isEmpty
       }
-    )
+    ),
 
+    ("a node that is newer and still present in the local program must appear in merge tree",
+      (start, local, remote, pc) => (pc.local.editedKeys &~ pc.mergeMap.keySet).isEmpty
+    ),
+
+    ("a node that is older and still present in the remote program must appear in the merge tree",
+      (start, local, remote, pc) => (pc.remote.editedKeys &~ pc.mergeMap.keySet).isEmpty
+    ),
+
+    ("",
+      (start, local, remote, pc) => {
+        true
+      }
+    ),
+
+    ("",
+      (start, local, remote, pc) => {
+        true
+      }
+    ),
+
+    ("",
+      (start, local, remote, pc) => {
+        true
+      }
+    ),
+
+    ("",
+      (start, local, remote, pc) => {
+        true
+      }
+    ),
+
+    ("",
+      (start, local, remote, pc) => {
+        true
+      }
+    )
     // ....
 
   )

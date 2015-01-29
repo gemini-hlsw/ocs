@@ -29,6 +29,10 @@ sealed trait MergeNode {
 }
 
 
+/** Describes an [[Update]] to an existing node and the children it should have.
+  * The children are separated in order to facilitate the construction of a
+  * Zipper.
+  */
 final case class ModifiedNode(u: Update, children: List[MergeNode]) extends MergeNode {
   def key: SPNodeKey = u.key
 }
