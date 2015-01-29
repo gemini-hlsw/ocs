@@ -25,38 +25,44 @@ object MergeRecord {
   case class UpdateDataObject(key: SPNodeKey, was: ISPDataObject)  extends MergeRecord
 
 
-  /** Compares the given [[ModifiedNode]] to the corresponding local program node,
-    * if any, and returns the list of changes that were applied.
+  // TODO: currently this examines the root node only
+
+  /** Compares the given tree node to the corresponding local program
+    * node, if any, and returns the list of changes that were applied.
     *
     * @return changes to the given local node applied by the merge
     */
-  def changes(mc: MergeContext, mn: ModifiedNode): List[MergeRecord] = {
-    val k = mn.key
+  def changes(mc: MergeContext, t: Tree[MergeNode]): List[MergeRecord] = {
+    val k = t.rootLabel.key
+    val newChildren = t.subForest.map(_.rootLabel.key).toList
 
     def created: List[MergeRecord] = {
       val mr = if (mc.local.vm.contains(k)) Resurrect(k) else Create(k)
-      mr :: mn.children.map(c => AddChild(k, c.key))
+      mr :: newChildren.map(c => AddChild(k, c))
     }
 
-    def updated(n: ISPNode): List[MergeRecord] = {
-      val dob        = n.getDataObject
-      val updateDob  = !DataObjectBlob.same(mn.u.dob, dob) option UpdateDataObject(k, dob)
+    def updated(n: ISPNode, m: Modified): List[MergeRecord] = {
+      val curDob      = n.getDataObject
+      val newDob      = m.dob
+      val updateDob   = !DataObjectBlob.same(curDob, newDob) option UpdateDataObject(k, curDob)
 
-      val children   = n.children.map(_.key)
-      val mnChildren = mn.children.map(_.key)
-      val added      = mnChildren.diff(children)
-      val removed    = children.diff(mnChildren)
+      val curChildren = n.children.map(_.key)
+      val added       = newChildren.diff(curChildren)
+      val removed     = curChildren.diff(newChildren)
 
       // ignoring what has been added and removed, have we reordered?
-      val rKeys      = removed.toSet
-      val lst0       = children.filterNot(rKeys.contains)
-      val aKeys      = added.toSet
-      val lst1       = mnChildren.filterNot(aKeys.contains)
-      val reorder    = (lst0 =/= lst1) option ReorderChildren(k, children)
+      val rKeys       = removed.toSet
+      val lst0        = curChildren.filterNot(rKeys.contains)
+      val aKeys       = added.toSet
+      val lst1        = newChildren.filterNot(aKeys.contains)
+      val reorder     = (lst0 =/= lst1) option ReorderChildren(k, curChildren)
 
       updateDob.toList ++ reorder.toList ++ added.map(AddChild(k, _)) ++ removed.map(RemoveChild(k, _))
     }
 
-    mc.local.get(k).fold(created)(updated)
+    t.rootLabel match {
+      case m: Modified   => mc.local.get(k).fold(created)(n => updated(n, m))
+      case _: Unmodified => Nil
+    }
   }
 }

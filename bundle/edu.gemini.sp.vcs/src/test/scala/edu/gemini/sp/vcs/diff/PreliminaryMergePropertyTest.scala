@@ -15,16 +15,11 @@ import Scalaz._
 class PreliminaryMergePropertyTest extends JUnitSuite {
   import edu.gemini.sp.vcs.diff.MergePropertyTest.NamedProperty
 
-  private def drawMergeNode(mn: MergeNode): String = {
+  private def drawMergeNode(t: Tree[MergeNode]): String = {
     implicit val ShowNode = Show.shows[MergeNode] {
-      case ModifiedNode(u, c) => s"m ${u.key} (${u.dob.getType})"
-      case UnmodifiedNode(n)  => s"u ${n.key} (${n.getDataObject.getType})"
+      case Modified(k, _, dob, _) => s"m $k (${dob.getType})"
+      case Unmodified(n)          => s"u ${n.key} (${n.getDataObject.getType})"
     }
-
-    val t = Tree.unfoldTree(mn)(n => (n, () => n match {
-      case ModifiedNode(_, c) => c.toStream
-      case _                  => Stream.empty[MergeNode]
-    }))
     t.draw.zipWithIndex.collect { case (s0, n) if n % 2 == 0 => s0 }.mkString("\n")
   }
 
@@ -60,15 +55,15 @@ class PreliminaryMergePropertyTest extends JUnitSuite {
     val local  = new EditFacts(lp)
     val remote = new EditFacts(rp)
 
-    val mergeMap    = MergeNode.fold(Map.empty[SPNodeKey, MergeNode], mergePlan.update) { (m, mn) =>
+    val mergeMap    = mergePlan.update.sFoldRight(Map.empty[SPNodeKey, MergeNode]) { (mn, m) =>
       m + (mn.key -> mn)
     }
 
     val deletedKeys = mergePlan.delete.map(_.key).toSet
 
-    def modifiedNode(k: SPNodeKey): ModifiedNode =
+    def modifiedNode(k: SPNodeKey): Modified =
       mergeMap(k) match {
-        case m: ModifiedNode => m
+        case m: Modified => m
         case _ => error("expecting modified node but was unmodified: " + k)
       }
   }
@@ -76,29 +71,26 @@ class PreliminaryMergePropertyTest extends JUnitSuite {
   val props = List[NamedProperty[PropContext]] (
     ("all diffs are accounted for in the MergePlan",
       (start, local, remote, pc) => {
-        val modCount = MergeNode.fold(0, pc.mergePlan.update) { (count,mn) =>
-          mn match {
-            case _: ModifiedNode => count + 1
-            case _               => count
-          }
+        val modCount = pc.mergePlan.update.foldMap {
+          case _: Modified   => 1
+          case _: Unmodified => 0
         }
+
         val deleteCount = pc.mergePlan.delete.size
         pc.diffs.size == modCount + deleteCount
       }
     ),
 
-    ("the MergeNode graph is a tree, not a dag",
+    ("no nodes are duplicated in the update tree",
       (start, local, remote, pc) => {
         val emptyCounts = Map.empty[SPNodeKey, Int].withDefaultValue(0)
-        val parentCount = MergeNode.fold(emptyCounts, pc.mergePlan.update) { (m,mn) =>
-          mn match {
-            case ModifiedNode(_, children) =>
-              (m/:children) { (m2, c) => m2.updated(c.key, m2(c.key) + 1) }
-            case _                         =>
-              m
-          }
+
+        val keyCounts = pc.mergePlan.update.sFoldRight(emptyCounts) { (mn,m) =>
+          val count = m(mn.key) + 1
+          m.updated(mn.key, count)
         }
-        parentCount.values.forall(_ == 1)
+
+        keyCounts.values.forall(_ == 1)
       }
     ),
 
@@ -108,7 +100,7 @@ class PreliminaryMergePropertyTest extends JUnitSuite {
           case Present(k, _, _, _, _) => k
         }.toSet
 
-        val mergeKeys = pc.mergeMap.collect { case (k,ModifiedNode(_,_)) => k }.toSet
+        val mergeKeys = pc.mergePlan.update.flatten.collect { case Modified(k,_,_,_) => k }.toSet
         (commonKeys &~ mergeKeys).isEmpty
       }
     ),

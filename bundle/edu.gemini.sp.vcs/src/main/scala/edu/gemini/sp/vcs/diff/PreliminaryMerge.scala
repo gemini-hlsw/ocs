@@ -84,17 +84,17 @@ object PreliminaryMerge {
     val presentMap = presents.map(p => p.key -> p)(breakOut): Map[SPNodeKey, Present]
     val parentMap  = validParents(mc, presentMap)
 
-    val root: MergeNode = {
-      def go(root: SPNodeKey): MergeNode =
-        presentMap.get(root).fold(UnmodifiedNode(mc.local.nodeMap(root)): MergeNode) { p =>
-          val up = Update(p.key, p.nv, p.dob, p.detail)
-          val cs = p.children.filter(c => parentMap(c) === p.key)
-          ModifiedNode(up, cs.map(go))
+    val tree: Tree[MergeNode] = {
+      def go(root: SPNodeKey): Tree[MergeNode] =
+        presentMap.get(root).fold(MergeNode.unmodified(mc.local.nodeMap(root)).leaf) { p =>
+          val mod = MergeNode.modified(p.key, p.nv, p.dob, p.detail)
+          val cs  = p.children.filter(c => parentMap(c) === p.key)
+          mod.node(cs.map(go): _*)
         }
       go(mc.local.prog.key)
     }
 
-    val mergedKeys  = MergeNode.fold(Set.empty[SPNodeKey], root) { _ + _.key }
+    val mergedKeys  = tree.foldRight(Set.empty[SPNodeKey]) { (mn,s) => s + mn.key }
     val deletedKeys = presentMap.keySet &~ mergedKeys
 
     // This node has been deleted in the merged tree so turn it into a Missing
@@ -104,7 +104,7 @@ object PreliminaryMerge {
       Missing(p.key, p.nv)
     }
 
-    MergePlan(root, deleted ++ missing)
+    MergePlan(tree, deleted ++ missing)
   }
 
   //
