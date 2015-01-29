@@ -15,15 +15,12 @@ package edu.gemini.itc.shared;
  * Because of this separation, Concrete Elements must offer enough
  * accessors for the separate Concrete Visitor class to perform the
  * manipulation.
-
  */
 public interface VisitableMorphology {
     /**
      * The accept(MorphologyVisitor) method is used by Visitors to
      * visit the Morphology.
      * This is the way a Morphology is manipulated.
-     *
-     *
      */
     void accept(MorphologyVisitor v) throws Exception;
 }

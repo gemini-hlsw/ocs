@@ -18,7 +18,7 @@ import java.util.HashMap;
  * Standard units will be nm.
  * All classes should use this class for waveband information rather
  * than re-implementing the definitions and possibly causing an error.
- *
+ * <p/>
  * Values for Sloan filters (g', r', i', z') taken from Fukugita et al. (1996)
  */
 public final class WavebandDefinition {

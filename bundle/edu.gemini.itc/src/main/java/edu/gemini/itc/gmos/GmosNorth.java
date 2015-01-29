@@ -9,12 +9,12 @@
 //
 package edu.gemini.itc.gmos;
 
-import edu.gemini.itc.shared.Instrument;
-import edu.gemini.itc.shared.Filter;
-import edu.gemini.itc.shared.Detector;
-import edu.gemini.itc.shared.FixedOptics;
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.parameters.ObservationDetailsParameters;
+import edu.gemini.itc.shared.Detector;
+import edu.gemini.itc.shared.Filter;
+import edu.gemini.itc.shared.FixedOptics;
+import edu.gemini.itc.shared.Instrument;
 
 import java.awt.*;
 
@@ -25,7 +25,7 @@ public class GmosNorth extends Gmos {
 
     //Plate scales for original and Hamamatsu CCD's (temporary)
     public static final double ORIG_PLATE_SCALE = 0.0727;
-//    public static final double HAM_PLATE_SCALE = 0.0809;
+    //    public static final double HAM_PLATE_SCALE = 0.0809;
     public static final double HAM_PLATE_SCALE = 0.080778;
 
     protected String _CCDtype;
@@ -98,7 +98,7 @@ public class GmosNorth extends Gmos {
 
             //if(!(_grating.equals("none"))){
             //	throw new Exception("Please select Grism Order Sorting from the filter list."); }
-            _Filter = new Filter(getPrefix(), _filterUsed, getDirectory() + "/", Filter.GET_EFFECTIVE_WAVELEN_FROM_FILE);
+            _Filter = Filter.fromWLFile(getPrefix(), _filterUsed, getDirectory() + "/");
 
             if (_Filter.getStart() >= _observingStart)
                 _observingStart = _Filter.getStart();
@@ -172,7 +172,8 @@ public class GmosNorth extends Gmos {
             Color color = DETECTOR_CCD_COLORS[detectorCcdIndex];
             _detector = new Detector(getDirectory() + "/", getPrefix(), fileName, "Hamamatsu array", name, color);
             _detector.setDetectorPixels(DETECTOR_PIXELS);
-            if (detectorCcdIndex == 0) _instruments = new Gmos[]{this, new GmosNorth(gp, odp, 1), new GmosNorth(gp, odp, 2)};
+            if (detectorCcdIndex == 0)
+                _instruments = new Gmos[]{this, new GmosNorth(gp, odp, 1), new GmosNorth(gp, odp, 2)};
         }
 
         if (detectorCcdIndex == 0) {
@@ -200,9 +201,7 @@ public class GmosNorth extends Gmos {
 
         if (!(_grating.equals("none"))) {
 
-            _gratingOptics = new GratingOptics(getDirectory() + "/", getPrefix(), _grating, _detector,
-                    // _focalPlaneMaskOffset,
-                    _stringSlitWidth,
+            _gratingOptics = new GmosGratingOptics(getDirectory() + "/" + getPrefix(), _grating, _detector,
                     _centralWavelength,
                     _detector.getDetectorPixels(),//_spectralBinning,
                     _spectralBinning);

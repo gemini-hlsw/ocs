@@ -10,43 +10,39 @@
 //
 package edu.gemini.itc.altair;
 
-import edu.gemini.itc.shared.SampledSpectrumVisitor;
-import edu.gemini.itc.shared.SampledSpectrum;
-import edu.gemini.itc.shared.ArraySpectrum;
-import edu.gemini.itc.shared.DefaultArraySpectrum;
-import edu.gemini.itc.shared.ITCConstants;
+import edu.gemini.itc.shared.*;
 
 /**
  * The AltairBackgroundVisitor class is designed to adjust the SED for the
  * background given off by altair.
  */
 public class AltairBackgroundVisitor implements SampledSpectrumVisitor {
-    
+
     private ArraySpectrum _altairBack = null;
-    
+
     /**
      * Constructs AltairBackgroundVisitor.
      */
     public AltairBackgroundVisitor() throws Exception {
-        
+
         _altairBack = new DefaultArraySpectrum(
                 Altair.ALTAIR_LIB + "/" +
-                Altair.ALTAIR_PREFIX +
-                Altair.ALTAIR_BACKGROUND_FILENAME +
-                ITCConstants.DATA_SUFFIX);
+                        Altair.ALTAIR_PREFIX +
+                        Altair.ALTAIR_BACKGROUND_FILENAME +
+                        ITCConstants.DATA_SUFFIX);
     }
-    
-    
+
+
     /**
      * Implements the SampledSpectrumVisitor interface
      */
     public void visit(SampledSpectrum sed) throws Exception {
-        for (int i=0; i < sed.getLength(); i++) {
-            sed.setY(i, _altairBack.getY(sed.getX(i))+sed.getY(i));
+        for (int i = 0; i < sed.getLength(); i++) {
+            sed.setY(i, _altairBack.getY(sed.getX(i)) + sed.getY(i));
         }
     }
-    
-    
+
+
     public String toString() {
         return "AltairBackgroundVisitor ";
     }

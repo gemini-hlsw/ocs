@@ -1,24 +1,10 @@
-/**
- * Created with IntelliJ IDEA.
- * User: spakzad
- * Date: 2/27/14
- * Time: 12:04 PM
- * To change this template use File | Settings | File Templates.
- */
-
 package edu.gemini.itc.gnirs;
 
-import edu.gemini.itc.shared.Instrument;
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.WavebandDefinition;
-import edu.gemini.itc.shared.Filter;
-import edu.gemini.itc.shared.Detector;
-import edu.gemini.itc.shared.FixedOptics;
-import edu.gemini.itc.shared.TransmissionElement;
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.parameters.ObservationDetailsParameters;
+import edu.gemini.itc.shared.*;
 
-public class GnirsNorth extends Gnirs {
+public final class GnirsNorth extends Gnirs {
 
     /**
      * Related files will start with this prefix
@@ -28,26 +14,18 @@ public class GnirsNorth extends Gnirs {
     // Instrument reads its configuration from here.
     private static final String FILENAME = "gnirs" + getSuffix();
 
-    private edu.gemini.itc.operation.DetectorsTransmissionVisitor _dtv;
-
-    private CameraOptics _camera;
-    private TransmissionElement _selectableTrans;
-    private boolean _XDisp;
-    private GnirsParameters _gp;
-    private String _cameraLength;
-    private GnirsGratingsTransmission _gnirsGratingsTransmission;
-    private GnirsOrderSelector _os;
-    private double _wellDepth;
-    private double _readNoiseValue;
-
-    //private static double XDISP_CENTRAL_WAVELENGTH = 1750.0;
+    private final DetectorsTransmissionVisitor _dtv;
+    private final CameraOptics _camera;
+    private final boolean _XDisp;
+    private final String _cameraLength;
+    private final double _wellDepth;
+    private final double _readNoiseValue;
 
     public GnirsNorth(GnirsParameters gp, ObservationDetailsParameters odp) throws Exception {
         super(FILENAME, INSTR_PREFIX);
         // The instrument data file gives a start/end wavelength for
         // the instrument.  But with a filter in place, the filter
         // transmits wavelengths that are a subset of the original range.
-        _gp = gp;
 
         WELL_DEPTH = 90000.0;
 
@@ -81,8 +59,6 @@ public class GnirsNorth extends Gnirs {
         _mode = odp.getCalculationMode();
         _XDisp = gp.isXDispUsed();
 
-        _os = new GnirsOrderSelector(getDirectory(), getPrefix(), Instrument.getSuffix());
-
         if (_centralWavelength < 1030 || _centralWavelength > 6000) {
             throw new Exception("Central wavelength must be between 1.03um and 6.0um.");
         }
@@ -110,23 +86,22 @@ public class GnirsNorth extends Gnirs {
         //Select filter depending on if Cross dispersion is used.
         if (_XDisp) {
             _filterUsed = "XD";
-            _Filter = new Filter(getPrefix(), _filterUsed, getDirectory() + "/", Filter.CALC_EFFECTIVE_WAVELEN);
+            _Filter = Filter.fromFile(getPrefix(), _filterUsed, getDirectory() + "/");
         } else {
             //Use GnirsOrderSelecter to decide which filter to put in
             _filterUsed = "order";
-            _Filter = new Filter(getPrefix(), _filterUsed + _os.getOrder(_centralWavelength), getDirectory() + "/", Filter.CALC_EFFECTIVE_WAVELEN);
+            _Filter = Filter.fromFile(getPrefix(), _filterUsed + GnirsOrderSelector.getOrder(_centralWavelength), getDirectory() + "/");
         }
         addComponent(_Filter);
 
         //Select Transmission Element depending on if Cross dispersion is used.
+        final TransmissionElement selectableTrans;
         if (_XDisp) {
-            _selectableTrans = new XDispersingPrism(getDirectory(), gp.getCameraLength() + "XD");
-            //_selectableTrans = new TransmissionElement(getDirectory() + "/" + getPrefix() + gp.getCameraLength() + "XD" + getSuffix());
+            selectableTrans = new XDispersingPrism(getDirectory(), gp.getCameraLength() + "XD");
         } else {
-            _selectableTrans = new GnirsPickoffMirror(getDirectory(), "mirror");
-            //_selectableTrans = new TransmissionElement(getDirectory() + "/" + getPrefix() + "mirror" + getSuffix());
+            selectableTrans = new GnirsPickoffMirror(getDirectory(), "mirror");
         }
-        addComponent(_selectableTrans);
+        addComponent(selectableTrans);
 
         FixedOptics _fixedOptics = new FixedOptics(getDirectory() + "/", getPrefix());
         addComponent(_fixedOptics);
@@ -162,32 +137,18 @@ public class GnirsNorth extends Gnirs {
 
         if (!(_grating.equals("none"))) {
 
-            _gratingOptics = new GratingOptics(getDirectory() + "/", getPrefix(), _grating,
-                    _stringSlitWidth,
+            _gratingOptics = new GnirsGratingOptics(getDirectory() + "/" + getPrefix(), _grating,
                     _centralWavelength,
                     _detector.getDetectorPixels(),
                     1);
 
-            _gnirsGratingsTransmission = new GnirsGratingsTransmission(getDirectory(), getPrefix(), getSuffix(), _grating);
-
             _observingStart = _gratingOptics.getStart();
             _observingEnd = _gratingOptics.getEnd();
 
-            if (_grating.equals(gp.G10) && _cameraLength.equals(gp.SHORT))
+            if (_grating.equals(GnirsParameters.G10) && _cameraLength.equals(GnirsParameters.SHORT))
                 throw new Exception("The grating " + _grating + " cannot be used with the " +
-                        gp.SHORT_CAMERA + " arcsec/pix (Short) camera.\n" +
+                        GnirsParameters.SHORT_CAMERA + " arcsec/pix (Short) camera.\n" +
                         "  Please either change the camera or the grating.");
-
-            // REL-474: allow these settings
-//            if (_XDisp && _cameraLength.equals(gp.LONG))
-//                throw new Exception("Cross Dispersion can only be used with the " + gp.G32 +
-//                        "grating and the " + gp.SHORT_CAMERA + " arcsec/pix (Short) camera.\n" +
-//                        "If you would like to use Cross Dispersion change the grating and camera.");
-//
-//            if (_XDisp && !(_grating.equals(gp.G32) || _grating.equals(gp.G110)))
-//                throw new Exception("Cross Dispersion can only be used with the " + gp.G32 +
-//                        "grating and the " + gp.SHORT_CAMERA + " arcsec/pix (Short) camera.\n" +
-//                        "If you would like to use Cross Dispersion change the grating and camera.");
 
             if (!(_grating.equals("none")) && !(_filterUsed.equals("none")))
                 if ((_Filter.getStart() >= _gratingOptics.getEnd()) ||
@@ -214,13 +175,11 @@ public class GnirsNorth extends Gnirs {
     }
 
     public double getObservingStart() {
-        double start = _centralWavelength - (getGratingDispersion_nmppix() * _detector.getDetectorPixels() / 2);
-        return start;
+        return _centralWavelength - (getGratingDispersion_nmppix() * _detector.getDetectorPixels() / 2);
     }
 
     public double getObservingEnd() {
-        double end = _centralWavelength + (getGratingDispersion_nmppix() * _detector.getDetectorPixels() / 2);
-        return end;
+        return _centralWavelength + (getGratingDispersion_nmppix() * _detector.getDetectorPixels() / 2);
     }
 
     public double getPixelSize() {
@@ -228,8 +187,8 @@ public class GnirsNorth extends Gnirs {
     }
 
     public double getGratingResolution() {
-        if (_cameraLength.equals(_gp.LONG)) {
-            return _gratingOptics.getGratingResolution() * _gp.LONG_CAMERA_SCALE_FACTOR;
+        if (_cameraLength.equals(GnirsParameters.LONG)) {
+            return _gratingOptics.getGratingResolution() * GnirsParameters.LONG_CAMERA_SCALE_FACTOR;
         } else {
             return _gratingOptics.getGratingResolution();
         }
@@ -248,7 +207,7 @@ public class GnirsNorth extends Gnirs {
     }
 
     public double getSpectralPixelWidth() {
-        if (_cameraLength.equals(_gp.LONG)) {
+        if (_cameraLength.equals(GnirsParameters.LONG)) {
             return _gratingOptics.getPixelWidth() / 3.0;
         } else {
             return _gratingOptics.getPixelWidth();
@@ -258,14 +217,14 @@ public class GnirsNorth extends Gnirs {
     public double getGratingDispersion_nm() {
         try {
             if (!XDisp_IsUsed()) {
-                if (_cameraLength.equals(_gp.LONG)) {
-                    return _gratingOptics.getGratingDispersion_nm() / _gp.LONG_CAMERA_SCALE_FACTOR / _os.getOrder(_centralWavelength);
+                if (_cameraLength.equals(GnirsParameters.LONG)) {
+                    return _gratingOptics.getGratingDispersion_nm() / GnirsParameters.LONG_CAMERA_SCALE_FACTOR / GnirsOrderSelector.getOrder(_centralWavelength);
                 } else {
-                    return _gratingOptics.getGratingDispersion_nm() / _os.getOrder(_centralWavelength);
+                    return _gratingOptics.getGratingDispersion_nm() / GnirsOrderSelector.getOrder(_centralWavelength);
                 }
             } else {
-                if (_cameraLength.equals(_gp.LONG)) {
-                    return _gratingOptics.getGratingDispersion_nm() / _gp.LONG_CAMERA_SCALE_FACTOR;
+                if (_cameraLength.equals(GnirsParameters.LONG)) {
+                    return _gratingOptics.getGratingDispersion_nm() / GnirsParameters.LONG_CAMERA_SCALE_FACTOR;
                 } else {
                     return _gratingOptics.getGratingDispersion_nm();
                 }
@@ -278,14 +237,14 @@ public class GnirsNorth extends Gnirs {
     public double getGratingDispersion_nmppix() {
         try {
             if (!XDisp_IsUsed()) {
-                if (_cameraLength.equals(_gp.LONG)) {
-                    return _gratingOptics.getGratingDispersion_nmppix() / _gp.LONG_CAMERA_SCALE_FACTOR / _os.getOrder(_centralWavelength);
+                if (_cameraLength.equals(GnirsParameters.LONG)) {
+                    return _gratingOptics.getGratingDispersion_nmppix() / GnirsParameters.LONG_CAMERA_SCALE_FACTOR / GnirsOrderSelector.getOrder(_centralWavelength);
                 } else {
-                    return _gratingOptics.getGratingDispersion_nmppix() / _os.getOrder(_centralWavelength);
+                    return _gratingOptics.getGratingDispersion_nmppix() / GnirsOrderSelector.getOrder(_centralWavelength);
                 }
             } else {
-                if (_cameraLength.equals(_gp.LONG)) {
-                    return _gratingOptics.getGratingDispersion_nmppix() / _gp.LONG_CAMERA_SCALE_FACTOR;
+                if (_cameraLength.equals(GnirsParameters.LONG)) {
+                    return _gratingOptics.getGratingDispersion_nmppix() / GnirsParameters.LONG_CAMERA_SCALE_FACTOR;
                 } else {
                     return _gratingOptics.getGratingDispersion_nmppix();
                 }
@@ -297,12 +256,12 @@ public class GnirsNorth extends Gnirs {
     }
 
     public TransmissionElement getGratingOrderNTransmission(int order) throws Exception {
-        return _gnirsGratingsTransmission.getOrderNTransmission(order);
+        return GnirsGratingsTransmission.getOrderNTransmission(_grating, order);
     }
 
     public int getOrder() {
         try {
-            return _os.getOrder(_centralWavelength);
+            return GnirsOrderSelector.getOrder(_centralWavelength);
         } catch (Exception e) {
             System.out.println("Cannot find Order setting to 1.");
             return 1;

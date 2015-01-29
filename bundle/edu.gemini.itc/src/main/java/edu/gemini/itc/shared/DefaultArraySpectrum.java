@@ -1,168 +1,103 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-
 package edu.gemini.itc.shared;
 
 import java.util.List;
-import java.util.ArrayList;
-import java.text.ParseException;
-import java.io.IOException;
 
 /**
  * Default implementation of Spectrum interface.
  * This interface represents a 2-D spectrum.  The x and y axes are the
  * real numbers (doubles).  Data points are not necessarily at regular
- * x intevals.
+ * x intervals.
  */
-public class DefaultArraySpectrum implements ArraySpectrum {
+public final class DefaultArraySpectrum implements ArraySpectrum {
     // The spectral data.  _data = new double[2][num_data_points]
     // data[0][i] = x values
     // data[1][i] = y values
-    private double[][] _data;
+    private final double[][] _data;
+
+    public static DefaultArraySpectrum fromString(String spectrum) {
+        final double[][] data = DatFile.arrays().apply(spectrum);
+        return new DefaultArraySpectrum(data);
+    }
 
     /**
-     * Construce a DefaultSpectrum.  Lists represent data point pairs
+     * Construct a DefaultSpectrum.  Lists represent data point pairs
      * so they must have the same length.
-     * @throws Exception If lists do not have same length or if they contain
-     * anything other than Doubles
      */
-    public DefaultArraySpectrum(List x_values, List y_values) throws Exception {
-        _initialize(x_values, y_values);
+    public DefaultArraySpectrum(final List<Double> xs, final List<Double> ys) {
+        assert xs.size() == ys.size();
+
+        _data = new double[2][xs.size()];
+        for (int i = 0; i < xs.size(); ++i) {
+            _data[0][i] = xs.get(i);
+            _data[1][i] = ys.get(i);
+        }
     }
 
     /**
      * Construce a DefaultSpectrum.  Data array must be of this form:
-     *    double data[][] = new double[2][length];
+     * double data[][] = new double[2][length];
      * data[0][i] = x values
      * data[1][i] = y values
-     * @throws Exception If array is not of proper form Exception is thrown
      */
-    public DefaultArraySpectrum(double[][] data) throws Exception {
-        // System.arraycopy() works only on 1-D arrays.
-        int length = data.length;
-        if (length != 2) {
-            throw new Exception("Spectrum array dimension must be 2, but it is "
-                                + length);
-        }
-        int x_len = data[0].length;
-        int y_len = data[1].length;
-        if (x_len != y_len) {
-            throw new Exception("Spectrum data invalid, " + x_len + " x values "
-                                + y_len + " y values");
-        }
-        _data = new double[2][x_len];
-        for (int i = 0; i < x_len; ++i) {
-            _data[0][i] = data[0][i];
-            _data[1][i] = data[1][i];
-        }
+    public DefaultArraySpectrum(final double[][] data) {
+        assert data.length == 2;
+        assert data[0].length == data[1].length;
+
+        _data = new double[2][];
+        _data[0] = data[0].clone();
+        _data[1] = data[1].clone();
     }
 
     /**
      * Constructs a DefaultArraySpectrum from the specified file.
-     * @param fileName This method uses class.getResource() to search
-     * for this resource.  So fileName should be relative to some
-     * location on the classpath.
      *
-     * Each line of a ArraySpectrum data file consists of two doubles
-     * separated by whitespace or comma.
+     * @param fileName This method uses class.getResource() to search
+     *                 for this resource.  So fileName should be relative to some
+     *                 location on the classpath.
+     *                 <p/>
+     *                 Each line of a ArraySpectrum data file consists of two doubles
+     *                 separated by whitespace or comma.
      */
     public DefaultArraySpectrum(String fileName) throws Exception {
-        TextFileReader dfr = new TextFileReader(fileName);
-
-        // These lists hold doubles from the data file.
-        List<Double> x_values = new ArrayList<Double>();
-        List<Double> y_values = new ArrayList<Double>();
-
-        double x = 0;
-        double y = 0;
-        double dummy;
-        //Check to see if the first line has an effective wavelength. some will.
-        //If it does read in as a dummy value
-
-        try {
-            if (dfr.countTokens() == 1)
-                dummy = dfr.readDouble();
-
-            while (true) {
-                x = dfr.readDouble();
-                x_values.add(x);
-                y = dfr.readDouble();
-                y_values.add(y);
-            }
-        } catch (ParseException e) {
-            throw e;
-        } catch (IOException e) {
-            // This is normal and happens at the end of file
-        }
-
-        if (y_values.size() != x_values.size()) {
-            throw new Exception("Error in file " + fileName + ", not same number of x and y data points.");
-        }
-
-        if (y_values.size() < 1) {
-            throw new Exception("No values found in file " + fileName);
-        }
-
-        _initialize(x_values, y_values);  // throws Exception
-        x_values.clear();
-        x_values=null;
-        y_values.clear();
-        y_values=null;
+        final double[][] data = DatFile.arrays().apply(fileName);
+        // for now make a copy of cached values, just to be on the safe side
+        _data = new double[2][];
+        _data[0] = data[0].clone();
+        _data[1] = data[1].clone();
     }
 
-    private void _initialize(List x_values, List y_values) throws Exception {
-        if (x_values.size() != y_values.size()) {
-            throw new Exception("Spectrum data invalid, " + x_values.size()
-                                + " x values " + y_values.size() + " y values");
-        }
-        try {
-            _data = new double[2][x_values.size()];
-            for (int i = 0; i < x_values.size(); ++i) {
-                _data[0][i] = ((Double) x_values.get(i)).doubleValue();
-                _data[1][i] = ((Double) y_values.get(i)).doubleValue();
-            }
-        } catch (Exception e) {
-            throw new Exception("Spectrum data invalid");
-        }
-    }
-
-    /** Implements Cloneable interface */
+    /**
+     * Implements Cloneable interface
+     */
     public Object clone() {
-        int x_len = _data[0].length;
-        double[][] data = new double[2][x_len];
-        for (int i = 0; i < x_len; ++i) {
-            data[0][i] = _data[0][i];
-            data[1][i] = _data[1][i];
-        }
-        DefaultArraySpectrum sp = null;
-        try {
-            sp = new DefaultArraySpectrum(data);
-        } catch (Exception e) {/* shouldn't ever fail*/
-        }
-        return sp;
+        // constructor will clone the data array
+        return new DefaultArraySpectrum(_data);
     }
 
-    /** @return starting x value */
+    /**
+     * @return starting x value
+     */
     public double getStart() {
         return _data[0][0];
     }
 
-    /** @return ending x value */
+    /**
+     * @return ending x value
+     */
     public double getEnd() {
         return _data[0][_data[0].length - 1];
     }
 
-    /** Returns x value of specified data point. */
+    /**
+     * Returns x value of specified data point.
+     */
     public double getX(int index) {
         return _data[0][index];
     }
 
-    /** Returns y value of specified data point. */
+    /**
+     * Returns y value of specified data point.
+     */
     public double getY(int index) {
         return _data[1][index];
     }
@@ -183,12 +118,16 @@ public class DefaultArraySpectrum implements ArraySpectrum {
         return (slope * (x - x1) + y1);
     }
 
-    /** @return number of bins in the histogram (number of data points) */
+    /**
+     * @return number of bins in the histogram (number of data points)
+     */
     public int getLength() {
         return _data[0].length;
     }
 
-    /** Returns the index of the data point with largest x value less than x */
+    /**
+     * Returns the index of the data point with largest x value less than x
+     */
     public int getLowerIndex(double x) {
         // In a general spectrum we don't have an idea which bin a particular
         // x value is in.  The only solution is to search for it.
@@ -222,7 +161,9 @@ public class DefaultArraySpectrum implements ArraySpectrum {
         _data[1][index] = y;
     }
 
-    /** Rescales X axis by specified factor. */
+    /**
+     * Rescales X axis by specified factor.
+     */
     public void rescaleX(double factor) {
         if (factor == 1.0) return;
         for (int i = 0; i < getLength(); ++i) {
@@ -230,7 +171,9 @@ public class DefaultArraySpectrum implements ArraySpectrum {
         }
     }
 
-    /** Rescales Y axis by specified factor. */
+    /**
+     * Rescales Y axis by specified factor.
+     */
     public void rescaleY(double factor) {
         if (factor == 1.0) return;
         for (int i = 0; i < getLength(); ++i) {
@@ -254,49 +197,34 @@ public class DefaultArraySpectrum implements ArraySpectrum {
     }
 
 
-    /** Returns the sum of all the y values in the entire spectrum. */
+    /**
+     * Returns the sum of all the y values in the entire spectrum.
+     */
     public double getSum() {
-        double sum = 0;
-        try {
-            sum = getSum(0, getLength() - 1);
-        } catch (Exception e) {
-        }
-        return sum;
+        return getSum(0, getLength() - 1);
     }
 
-    /** Returns the integral of entire spectrum. */
+    /**
+     * Returns the integral of entire spectrum.
+     */
     public double getIntegral() {
-        double integral = 0;
-        try {
-            integral = getIntegral(getStart(), getEnd());
-        } catch (Exception e) {
-        }
-        return integral;
+        return getIntegral(getStart(), getEnd());
     }
 
-    /** Returns the average of all the y values in the entire spectrum */
+    /**
+     * Returns the average of all the y values in the entire spectrum
+     */
     public double getAverage() {
-        double average = 0;
-        try {
-            average = getAverage(getStart(), getEnd());
-        } catch (Exception e) {
-        }
-        return average;
+        return getAverage(getStart(), getEnd());
     }
 
     /**
      * Returns the sum of y values in the spectrum in
      * the specified index range.
-     * @throws Exception If either limit is out of range.
      */
-    public double getSum(int startIndex, int endIndex) throws Exception {
-        if (startIndex < 0 || startIndex >= getLength() ||
-                endIndex < 0 || endIndex >= getLength()) {
-            throw new Exception("Sum out of bounds: summing " +
-                                startIndex + " to " + endIndex +
-                                " for spectra from " +
-                                +getStart() + " to " + getEnd());
-        }
+    public double getSum(int startIndex, int endIndex) {
+        assert startIndex >= 0 && startIndex < getLength();
+        assert endIndex   >= 0 && endIndex   < getLength();
 
         if (startIndex > endIndex) {
             int temp = startIndex;
@@ -314,15 +242,10 @@ public class DefaultArraySpectrum implements ArraySpectrum {
     /**
      * Returns the sum of y values in the spectrum in
      * the specified range.
-     * @throws Exception If either limit is out of range.
      */
-    public double getSum(double x_start, double x_end) throws Exception {
-        if (x_start < getStart() || x_start > getEnd() ||
-                x_end < getStart() || x_end > getEnd()) {
-            throw new Exception("Sum out of bounds: summing " +
-                                x_start + " to " + x_end + " for spectra from " +
-                                +getStart() + " to " + getEnd());
-        }
+    public double getSum(double x_start, double x_end) {
+        assert x_start >= getStart() && x_start <= getEnd();
+        assert x_end   >= getStart() && x_end   <= getEnd();
 
         if (x_start > x_end) {
             double temp = x_start;
@@ -340,15 +263,10 @@ public class DefaultArraySpectrum implements ArraySpectrum {
     /**
      * Returns the integral of y values in the spectrum in
      * the specified range.
-     * @throws Exception If either limit is out of range.
      */
-    public double getIntegral(double x_start, double x_end) throws Exception {
-        if (x_start < getStart() || x_start > getEnd() ||
-                x_end < getStart() || x_end > getEnd()) {
-            throw new Exception("Integral out of bounds: integrating " +
-                                x_start + " to " + x_end + " for spectra from " +
-                                +getStart() + " to " + getEnd());
-        }
+    public double getIntegral(double x_start, double x_end) {
+        assert x_start >= getStart() && x_start <= getEnd();
+        assert x_end   >= getStart() && x_end   <= getEnd();
 
         boolean negative = false;
         if (x_start > x_end) {
@@ -363,7 +281,7 @@ public class DefaultArraySpectrum implements ArraySpectrum {
         // first and last trapezoid separately.
         double area = 0.0;
         int start_index, end_index;
-        double delta_x, delta_y, y_min, y1, y2, x1, x2;
+        double delta_x, y1, y2, x1, x2;
 
         x1 = x_start;
         start_index = getLowerIndex(x1);
@@ -390,15 +308,10 @@ public class DefaultArraySpectrum implements ArraySpectrum {
     /**
      * Returns the integral of values in the ArraySpectrum in the
      * specified range between specified indices.
-     * @throws Exception If either limit is out of range.
      */
-    public double getIntegral(int start_index, int end_index) throws Exception {
-        if (start_index < 0 || start_index >= getLength() ||
-                end_index < 0 || end_index >= getLength()) {
-            throw new Exception("Integral out of bounds: integrating from index "
-                                + start_index + " to " + end_index
-                                + " for spectra of length " + getLength());
-        }
+    public double getIntegral(int start_index, int end_index) {
+        assert start_index >= 0 && start_index < getLength();
+        assert end_index   >= 0 && end_index   < getLength();
 
         boolean negative = false;
         if (start_index > end_index) {
@@ -427,18 +340,16 @@ public class DefaultArraySpectrum implements ArraySpectrum {
     /**
      * Returns the average of values in the SampledSpectrum in
      * the specified range.
-     * @throws Exception If either limit is out of range.
      */
-    public double getAverage(double x_start, double x_end) throws Exception {
+    public double getAverage(double x_start, double x_end) {
         return getIntegral(x_start, x_end) / (x_end - x_start);
     }
 
     /**
      * Returns the average of values in the SampledSpectrum in
      * the specified range.
-     * @throws Exception If either limit is out of range.
      */
-    public double getAverage(int indexStart, int indexEnd) throws Exception {
+    public double getAverage(int indexStart, int indexEnd) {
         return getIntegral(indexStart, indexEnd) /
                 (getX(indexEnd) - getX(indexStart));
     }
@@ -446,7 +357,7 @@ public class DefaultArraySpectrum implements ArraySpectrum {
     /**
      * This returns a 2d array of the SED data used to chart the SED
      * using JClass Chart.  The array has the following dimensions
-     *    double data[][] = new double[2][getLength()];
+     * double data[][] = new double[2][getLength()];
      * data[0][i] = x values
      * data[1][i] = y values
      * May return reference to member data, so client should not
@@ -459,13 +370,13 @@ public class DefaultArraySpectrum implements ArraySpectrum {
     /**
      * This returns a 2d array of the SED data used to chart the SED
      * using JClass Chart.  The array has the following dimensions
-     *    double data[][] = new double[2][getLength()];
+     * double data[][] = new double[2][getLength()];
      * data[0][i] = x values
      * data[1][i] = y values
      *
      * @param maxIndex data returned up to maximum specified
-     * x bin.  If maxIndex >= number of data points, maxIndex
-     * will be truncated.
+     *                 x bin.  If maxIndex >= number of data points, maxIndex
+     *                 will be truncated.
      */
     public double[][] getData(int maxIndex) {
         return getData(0, maxIndex);
@@ -474,22 +385,22 @@ public class DefaultArraySpectrum implements ArraySpectrum {
     /**
      * This returns a 2d array of the SED data used to chart the SED
      * using JClass Chart.  The array has the following dimensions
-     *    double data[][] = new double[2][getLength()];
+     * double data[][] = new double[2][getLength()];
      * data[0][i] = x values
      * data[1][i] = y values
      *
      * @param minIndex data returned from minimum specified
      * @param maxIndex data returned up to maximum specified
-     * x bin.  If maxIndex >= number of data points, maxIndex
-     * will be truncated.
+     *                 x bin.  If maxIndex >= number of data points, maxIndex
+     *                 will be truncated.
      */
     public double[][] getData(int minIndex, int maxIndex) {
         if (minIndex < 0) minIndex = 0;
-        if (maxIndex >= _data[0].length) maxIndex = _data[0].length-1;
+        if (maxIndex >= _data[0].length) maxIndex = _data[0].length - 1;
         double[][] data = new double[2][maxIndex - minIndex + 1];
         for (int i = minIndex; i <= maxIndex; i++) {
-            data[0][i-minIndex] = _data[0][i];
-            data[1][i-minIndex] = _data[1][i];
+            data[0][i - minIndex] = _data[0][i];
+            data[1][i - minIndex] = _data[1][i];
         }
         return data;
     }

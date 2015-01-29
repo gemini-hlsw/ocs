@@ -10,9 +10,8 @@
 //
 package edu.gemini.itc.niri;
 
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.ITCParameters;
 import edu.gemini.itc.shared.ITCMultiPartParser;
+import edu.gemini.itc.shared.ITCParameters;
 import edu.gemini.itc.shared.NoSuchParameterException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -89,6 +88,7 @@ public final class NiriParameters extends ITCParameters {
 
     /**
      * Constructs a AcquisitionCamParameters from a servlet request
+     *
      * @param r Servlet request containing the form data.
      * @throws Exception if input data is not parsable.
      */
@@ -97,16 +97,19 @@ public final class NiriParameters extends ITCParameters {
     }
 
     /**
-     *Constructs a NiriParameters from a MultipartParser
+     * Constructs a NiriParameters from a MultipartParser
+     *
      * @param p MutipartParser that has all of the parameters and files Parsed
-     *@throws Exception of cannot parse any of the parameters.
+     * @throws Exception of cannot parse any of the parameters.
      */
 
     public NiriParameters(ITCMultiPartParser p) throws Exception {
         parseMultipartParameters(p);
     }
 
-    /** Parse parameters from a servlet request. */
+    /**
+     * Parse parameters from a servlet request.
+     */
     public void parseServletRequest(HttpServletRequest r) throws Exception {
         // Parse the acquisition camera section of the form.
 
@@ -167,12 +170,13 @@ public final class NiriParameters extends ITCParameters {
 
         } catch (NoSuchParameterException e) {
             throw new Exception("The parameter " + e.parameterName + " could not be found in the Telescope" +
-                                " Paramters Section of the form.  Either add this value or Contact the Helpdesk.");
+                    " Paramters Section of the form.  Either add this value or Contact the Helpdesk.");
         }
     }
 
     /**
      * Constructs a AcquisitionCamParameters from a servlet request
+     *
      * @param r Servlet request containing the form data.
      * @throws Exception if input data is not parsable.
      */
@@ -219,7 +223,7 @@ public final class NiriParameters extends ITCParameters {
         //if (_FP_Mask.equals(NOSLIT)) return null;
         if (_FP_Mask.equals(SLIT0_70_CENTER) ||
                 _FP_Mask.equals(SLIT_6_PIX_CENTER))
-            	return 0.75; //old value 0.68;
+            return 0.75; //old value 0.68;
         else if (_FP_Mask.equals(SLIT0_70_BLUE) ||
                 _FP_Mask.equals(SLIT_6_PIX_BLUE))
             return 0.7;
@@ -227,19 +231,19 @@ public final class NiriParameters extends ITCParameters {
                 _FP_Mask.equals(SLIT0_23_BLUE) ||
                 _FP_Mask.equals(SLIT_2_PIX_CENTER) ||
                 _FP_Mask.equals(SLIT_2_PIX_BLUE))
-            	return 0.23;
+            return 0.23;
         else if (_FP_Mask.equals(SLIT0_46_CENTER) ||
                 _FP_Mask.equals(SLIT_4_PIX_CENTER))
-            	return 0.47;
+            return 0.47;
         else if (_FP_Mask.equals(SLIT0_46_BLUE) ||
                 _FP_Mask.equals(SLIT_4_PIX_BLUE))
             return 0.46;
-	else if (_FP_Mask.equals(F32_SLIT_10_PIX_CENTER))
-	    return 0.22;
-	else if (_FP_Mask.equals(F32_SLIT_7_PIX_CENTER))
-	    return 0.144;
-	else if (_FP_Mask.equals(F32_SLIT_4_PIX_CENTER))
-	    return 0.09;
+        else if (_FP_Mask.equals(F32_SLIT_10_PIX_CENTER))
+            return 0.22;
+        else if (_FP_Mask.equals(F32_SLIT_7_PIX_CENTER))
+            return 0.144;
+        else if (_FP_Mask.equals(F32_SLIT_4_PIX_CENTER))
+            return 0.09;
         else
             return -1.0;
     }
@@ -254,7 +258,7 @@ public final class NiriParameters extends ITCParameters {
                 _FP_Mask.equals(F32_SLIT_10_PIX_CENTER) ||
                 _FP_Mask.equals(F32_SLIT_7_PIX_CENTER) ||
                 _FP_Mask.equals(F32_SLIT_4_PIX_CENTER))
-		 return "center";
+            return "center";
         else if (_FP_Mask.equals(SLIT0_70_BLUE) ||
                 _FP_Mask.equals(SLIT0_23_BLUE) ||
                 _FP_Mask.equals(SLIT0_46_BLUE) ||
@@ -271,29 +275,31 @@ public final class NiriParameters extends ITCParameters {
                 _FP_Mask.equals(SLIT0_70_BLUE) ||
                 _FP_Mask.equals(SLIT_6_PIX_CENTER) ||
                 _FP_Mask.equals(SLIT_6_PIX_BLUE))
-            	return "070";
+            return "070";
         else if (_FP_Mask.equals(SLIT0_23_CENTER) ||
                 _FP_Mask.equals(SLIT0_23_BLUE) ||
                 _FP_Mask.equals(SLIT_2_PIX_BLUE) ||
                 _FP_Mask.equals(SLIT_2_PIX_CENTER))
-            	return "023";
+            return "023";
         else if (_FP_Mask.equals(SLIT0_46_CENTER) ||
                 _FP_Mask.equals(SLIT0_46_BLUE) ||
                 _FP_Mask.equals(SLIT_4_PIX_BLUE) ||
                 _FP_Mask.equals(SLIT_4_PIX_CENTER))
-            	return "046";
-	else if (_FP_Mask.equals(F32_SLIT_4_PIX_CENTER))
-		return "009";
-	else if (_FP_Mask.equals(F32_SLIT_7_PIX_CENTER))
-                return "014";
-	else if (_FP_Mask.equals(F32_SLIT_10_PIX_CENTER))
-                return "023";
+            return "046";
+        else if (_FP_Mask.equals(F32_SLIT_4_PIX_CENTER))
+            return "009";
+        else if (_FP_Mask.equals(F32_SLIT_7_PIX_CENTER))
+            return "014";
+        else if (_FP_Mask.equals(F32_SLIT_10_PIX_CENTER))
+            return "023";
         else
             return "none";
     }
 
 
-    /** Return a human-readable string for debugging */
+    /**
+     * Return a human-readable string for debugging
+     */
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("Filter:\t" + getFilter() + "\n");

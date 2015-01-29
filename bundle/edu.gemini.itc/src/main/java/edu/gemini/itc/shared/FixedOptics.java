@@ -8,9 +8,6 @@
 
 package edu.gemini.itc.shared;
 
-import edu.gemini.itc.shared.TransmissionElement;
-import edu.gemini.itc.shared.Instrument;
-
 /**
  * This represents the transmission of the optics native to the camera.
  */

@@ -16,8 +16,8 @@ public class Dichroic extends TransmissionElement {
     private String _position;
 
     public Dichroic(String directory, String position, String channel) throws Exception {
-        super(directory +"dichroic_" + position +"_"+ channel + Instrument.getSuffix());
-    	_position = position;
+        super(directory + "dichroic_" + position + "_" + channel + Instrument.getSuffix());
+        _position = position;
     }
 
     public String toString() {

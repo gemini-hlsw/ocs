@@ -11,7 +11,6 @@ package edu.gemini.itc.shared;
 /**
  * The GaussianMorphology concreate class implements the operations that all
  * that are defined in it's abstract parent class Morphology2d.
- *
  */
 public class GaussianMorphology extends Morphology3D {
 
@@ -19,6 +18,7 @@ public class GaussianMorphology extends Morphology3D {
 
     /**
      * Constructor for the Gaussian Morphology
+     *
      * @param sourceSize Allows the source size in arcsec to be set at constuction
      */
 
@@ -46,6 +46,7 @@ public class GaussianMorphology extends Morphology3D {
     /**
      * This method returns the value of a 2-D circularly-symmetric gaussian
      * over a square region centered about the mean.
+     *
      * @param sigmaFraction The length of the square as a fraction of sigma.
      */
     public double get2DSquareIntegral(double sigmaFraction) {
@@ -56,6 +57,7 @@ public class GaussianMorphology extends Morphology3D {
     /**
      * This Method returns the value of a 2-D circularly-symmetric gaussian
      * over a square region that is arbitrarily placed on the gaussian.
+     *
      * @param xMin The coordinate of the minimum X position.
      * @param xMax The coordinate of the maximum X position.
      * @param yMin The coordinate of the minimum Y position.
@@ -83,18 +85,18 @@ public class GaussianMorphology extends Morphology3D {
 
     //////////BEGIN CIRCULAR/////////////
 
-   /**
-    * Use ErrorFunction to calculate the value of a 2-D circularly-symmetric gaussian
-    * over a circular region that is centered on the mean of the gaussian.
-    * @param radius The radius of the aperture in arcsec.
-    *
-    * Use the following equations.
-    * use aperture to find sigmaFraction
-    * then use following cumulitive distribution function  def f(x,u,sigma): return .5*(1+pygsl.sf.erf((x-u)/(sigma*math.sqrt(2)))[0]) 
-    * in the form f(sigmaFraction,0,1) - f(-sigmaFraction,0,1)
-    * to calculate the fraction of light in the aperture.
-    *
-    */
+    /**
+     * Use ErrorFunction to calculate the value of a 2-D circularly-symmetric gaussian
+     * over a circular region that is centered on the mean of the gaussian.
+     *
+     * @param radius The radius of the aperture in arcsec.
+     *               <p/>
+     *               Use the following equations.
+     *               use aperture to find sigmaFraction
+     *               then use following cumulitive distribution function  def f(x,u,sigma): return .5*(1+pygsl.sf.erf((x-u)/(sigma*math.sqrt(2)))[0])
+     *               in the form f(sigmaFraction,0,1) - f(-sigmaFraction,0,1)
+     *               to calculate the fraction of light in the aperture.
+     */
 
 
     /////////END CIRCULAR///////////////

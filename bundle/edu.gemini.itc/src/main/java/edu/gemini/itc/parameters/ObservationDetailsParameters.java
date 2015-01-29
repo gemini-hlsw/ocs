@@ -10,12 +10,12 @@
 //
 package edu.gemini.itc.parameters;
 
-import javax.servlet.http.HttpServletRequest;
-
-import edu.gemini.itc.shared.ITCParameters;
-import edu.gemini.itc.shared.ITCMultiPartParser;
-import edu.gemini.itc.shared.NoSuchParameterException;
 import edu.gemini.itc.shared.FormatStringWriter;
+import edu.gemini.itc.shared.ITCMultiPartParser;
+import edu.gemini.itc.shared.ITCParameters;
+import edu.gemini.itc.shared.NoSuchParameterException;
+
+import javax.servlet.http.HttpServletRequest;
 
 
 /**
@@ -77,6 +77,7 @@ public final class ObservationDetailsParameters extends ITCParameters {
 
     /**
      * Constructs a ObservationDetailsParameters from a servlet request
+     *
      * @param r Servlet request containing the form data.
      * @throws Exception if input data is not parsable.
      */
@@ -85,16 +86,19 @@ public final class ObservationDetailsParameters extends ITCParameters {
     }
 
     /**
-     *Constructs a ObservationDetailsParameters from a MultipartParser
+     * Constructs a ObservationDetailsParameters from a MultipartParser
+     *
      * @param p MutipartParser that has all of the parameters and files Parsed
-     *@throws Exception of cannot parse any of the parameters.
+     * @throws Exception of cannot parse any of the parameters.
      */
 
     public ObservationDetailsParameters(ITCMultiPartParser p) throws Exception {
         parseMultipartParameters(p);
     }
 
-    /** Parse parameters from a servlet request. */
+    /**
+     * Parse parameters from a servlet request.
+     */
     public void parseServletRequest(HttpServletRequest r) throws Exception {
         // Parse the observation details section of the form.
         _calcMode = r.getParameter(CALC_MODE);
@@ -152,7 +156,7 @@ public final class ObservationDetailsParameters extends ITCParameters {
                 if (_sourceFraction < 0) _sourceFraction *= -1;
             } else {
                 throw new Exception("Unrecognized calculation method: " +
-                                    getCalculationMethod());
+                        getCalculationMethod());
             }
         } else if (_calcMode.equals(SPECTROSCOPY)) {
             _calcMethod = r.getParameter(CALC_METHOD);
@@ -183,12 +187,12 @@ public final class ObservationDetailsParameters extends ITCParameters {
 
             } else {
                 throw new Exception("Total integration time to achieve a specific \n" +
-                                    "S/N ratio is not supported in spectroscopy mode.  \nPlease select the Total S/N method. ");
+                        "S/N ratio is not supported in spectroscopy mode.  \nPlease select the Total S/N method. ");
 
             }
         } else {
             throw new Exception("Unrecognized calculation mode: " +
-                                getCalculationMode());
+                    getCalculationMode());
         }
 
         String skyAper;
@@ -210,12 +214,12 @@ public final class ObservationDetailsParameters extends ITCParameters {
             if (_apertureDiameter < 0) _apertureDiameter *= -1;
         } else {
             throw new Exception("Unrecognized aperture type: " +
-                                _apertureType);
+                    _apertureType);
         }
         _skyApertureDiameter = ITCParameters.parseDouble(skyAper, "Sky Aperture Diameter");
         if (_skyApertureDiameter < 1)
             throw new Exception("The Sky aperture: " + _skyApertureDiameter +
-                                " must be 1 or greater.  Please retype the value and resubmit.");
+                    " must be 1 or greater.  Please retype the value and resubmit.");
 
     }
 
@@ -278,7 +282,7 @@ public final class ObservationDetailsParameters extends ITCParameters {
 
         } catch (NoSuchParameterException e) {
             throw new Exception("The parameter " + e.parameterName + " could not be found in the Observation" +
-                                " Details Section of the form. \nEither add this value or Contact the Helpdesk.");
+                    " Details Section of the form. \nEither add this value or Contact the Helpdesk.");
         }
     }
 
@@ -333,7 +337,7 @@ public final class ObservationDetailsParameters extends ITCParameters {
     public double getTotalObservationTime() {
         return _totalObservationTime;
     }
-    
+
     public void setTotalObservationTime(double totalObservationTime) {
         _totalObservationTime = totalObservationTime;
     }
@@ -362,7 +366,9 @@ public final class ObservationDetailsParameters extends ITCParameters {
         return _skyApertureDiameter;
     }
 
-    /** Return a human-readable string for debugging */
+    /**
+     * Return a human-readable string for debugging
+     */
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("Calculation Method:\t" + getCalculationMethod() + "\n");

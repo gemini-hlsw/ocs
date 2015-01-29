@@ -22,5 +22,6 @@ import java.util.List;
  */
 public abstract class ApertureComponent implements MorphologyVisitor {
     public abstract List getFractionOfSourceInAperture();
+
     public abstract void clearFractionOfSourceInAperture();
 }

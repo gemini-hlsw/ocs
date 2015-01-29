@@ -10,15 +10,12 @@
 
 package edu.gemini.itc.gnirs;
 
-import java.io.PrintWriter;
-
-import javax.servlet.http.HttpServletRequest;
-
-import java.util.Enumeration;
-
+import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCServlet;
 import edu.gemini.itc.shared.Recipe;
-import edu.gemini.itc.shared.ITCMultiPartParser;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.PrintWriter;
 
 /**
  * This servlet accepts form data from the ITC html document.
@@ -38,25 +35,32 @@ public final class ITCgnirsServlet extends ITCServlet {
     public static final String VERSION = "4.0";
     public static final String TITLE = "Gemini Integration Time Calculator";
     public static final String INSTRUMENT = "GNIRS";
-    
+
     public ITCgnirsServlet() {
-    	super ();
+        super();
     }
-    /** Returns a title */
+
+    /**
+     * Returns a title
+     */
     public String getTitle() {
         return TITLE;
     }
-    
-    /** Returns a version of this servlet */
+
+    /**
+     * Returns a version of this servlet
+     */
     public String getVersion() {
         return VERSION;
     }
-    
-    /** Returns the Instrument name*/
+
+    /**
+     * Returns the Instrument name
+     */
     public String getInst() {
         return INSTRUMENT;
     }
-    
+
     /**
      * Describes the purpose of the servlet.
      * Used by Java Web Server Administration Tool.
@@ -64,27 +68,29 @@ public final class ITCgnirsServlet extends ITCServlet {
     public String getServletInfo() {
         return getTitle() + " " + getVersion() + " - ITCgnirsServlet accepts form data and performs ITC calculation for GNIRS.";
     }
-    
-    /** Supply the body content for the html document. */
+
+    /**
+     * Supply the body content for the html document.
+     */
     public void writeOutput(HttpServletRequest r, PrintWriter out)
-    throws Exception {
+            throws Exception {
         // Construct recipe from the request.
         // Pass in same PrintWriter instead of getting another one from
         // the servlet request in case you get a different one each
         // time.  HTML document was already started with one PrintWriter.
         out.println("<a href = \"http://www.gemini.edu/sciops/instruments/integration-time-calculators/itc-help\"> Click here for help with the results page.</a>");
-        
+
         //      Recipe recipe = new GnirsRecipe(r, out); // parses form data
-        
+
         Recipe recipe;
-        
+
         if (r.getContentType().startsWith("multipart/form-data")) {
             //System.out.println("Max: " + MAX_CONTENT_LENGTH);
             recipe = new GnirsRecipe(new ITCMultiPartParser(r, MAX_CONTENT_LENGTH), out);
         } else
             recipe = new GnirsRecipe(r, out); // parses form data
-        
-        
+
+
         // Perform calculation, write the output to the web page.
         recipe.writeOutput();
     }

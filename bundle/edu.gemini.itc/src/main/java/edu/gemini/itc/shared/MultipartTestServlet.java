@@ -1,52 +1,47 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
+package edu.gemini.itc.shared;
+
+import edu.gemini.itc.acqcam.AcquisitionCamParameters;
+import edu.gemini.itc.parameters.ObservationDetailsParameters;
+import edu.gemini.itc.parameters.ObservingConditionParameters;
+import edu.gemini.itc.parameters.SourceDefinitionParameters;
+import edu.gemini.itc.parameters.TeleParameters;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.Iterator;
+import java.util.Scanner;
 
 
 /*
  * MultipartTestServlet.java
- *
- * Created on November 29, 2001, 12:04 PM
  */
 
-package edu.gemini.itc.shared;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
-import java.io.*;
-import java.util.Iterator;
-import java.text.ParseException;
-
-import edu.gemini.itc.parameters.*;
-import edu.gemini.itc.acqcam.AcquisitionCamParameters;
-
-
-/**
- *
- * @author  bwalls
- * @version
- */
 public class MultipartTestServlet extends HttpServlet {
 
-    /** Initializes the servlet.
+    /**
+     * Initializes the servlet.
      */
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
 
     }
 
-    /** Destroys the servlet.
+    /**
+     * Destroys the servlet.
      */
     public void destroy() {
 
     }
 
-    /** Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
-     * @param request servlet request
+    /**
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
+     *
+     * @param request  servlet request
      * @param response servlet response
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -86,14 +81,10 @@ public class MultipartTestServlet extends HttpServlet {
                     System.out.println(parser.getTextFile(txtFileName) + "<br>");
                 }
                 //Use this Code in Sed Factory to create a Textfile Reader for the String.
-                TextFileReader t = new TextFileReader(new CharArrayReader(sdp.getUserDefinedSpectrum().toCharArray()));
-                try {
-                    while (true) {
-                        System.out.println("x: " + t.readDouble() + "\ny: " + t.readDouble());
+                try (final Scanner scan = DatFile.scan(sdp.getUserDefinedSpectrum())) {
+                    while (scan.hasNext()) {
+                        System.out.println("x: " + scan.nextDouble() + "\ny: " + scan.nextDouble());
                     }
-                } catch (ParseException e) {
-                    throw e;
-                } catch (IOException e) {
                 }
 
                 /**
@@ -115,16 +106,10 @@ public class MultipartTestServlet extends HttpServlet {
 
         } else {
             out.println("ERROR: File size (" + (new Integer(request.getContentLength())).doubleValue() / MAX_CONTENT_LENGTH +
-                        " MB)exceeds 1MB limit. Please resubmit with at smaller file.<br>");
-            BufferedReader in = new BufferedReader(new InputStreamReader(request.getInputStream()));
-            try {
-                while (true) {
-                    String line = in.readLine();
-                    if (line == null) throw new java.io.IOException();
-                }
-            } catch (java.io.IOException e) {
+                    " MB)exceeds 1MB limit. Please resubmit with at smaller file.<br>");
+            try (final BufferedReader in = new BufferedReader(new InputStreamReader(request.getInputStream()))) {
+                while (in.readLine() != null) { /* intentionally empty */}
             }
-
         }
 
 
@@ -134,8 +119,10 @@ public class MultipartTestServlet extends HttpServlet {
         out.close();
     }
 
-    /** Handles the HTTP <code>GET</code> method.
-     * @param request servlet request
+    /**
+     * Handles the HTTP <code>GET</code> method.
+     *
+     * @param request  servlet request
      * @param response servlet response
      */
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -143,8 +130,10 @@ public class MultipartTestServlet extends HttpServlet {
         processRequest(request, response);
     }
 
-    /** Handles the HTTP <code>POST</code> method.
-     * @param request servlet request
+    /**
+     * Handles the HTTP <code>POST</code> method.
+     *
+     * @param request  servlet request
      * @param response servlet response
      */
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -152,7 +141,8 @@ public class MultipartTestServlet extends HttpServlet {
         processRequest(request, response);
     }
 
-    /** Returns a short description of the servlet.
+    /**
+     * Returns a short description of the servlet.
      */
     public String getServletInfo() {
         return "MultiPartTestServlet";

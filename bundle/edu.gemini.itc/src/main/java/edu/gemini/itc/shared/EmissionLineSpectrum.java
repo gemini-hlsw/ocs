@@ -1,21 +1,6 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-
 package edu.gemini.itc.shared;
 
 import edu.gemini.itc.parameters.SourceDefinitionParameters;
-
-import java.util.NoSuchElementException;
-import java.util.StringTokenizer;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.text.ParseException;
 
 /**
  * This class creates a EmissionLine spectrum over the interval defined by the
@@ -124,8 +109,8 @@ public class EmissionLineSpectrum implements VisitableSampledSpectrum {
 
     /**
      * @return array of flux values.  For efficiency, it may return a
-     *         referenct to actual member data.  The client must not alter this
-     *         return value.
+     * referenct to actual member data.  The client must not alter this
+     * return value.
      */
     public double[] getValues() {
         return _spectrum.getValues();
@@ -169,7 +154,7 @@ public class EmissionLineSpectrum implements VisitableSampledSpectrum {
 
     /**
      * @return y value at specified x using linear interpolation.
-     *         Silently returns zero if x is out of spectrum range.
+     * Silently returns zero if x is out of spectrum range.
      */
     public double getY(double x) {
         return _spectrum.getY(x);
@@ -254,10 +239,8 @@ public class EmissionLineSpectrum implements VisitableSampledSpectrum {
     /**
      * Returns the sum of y values in the spectrum in
      * the specified index range.
-     *
-     * @throws Exception If either limit is out of range.
      */
-    public double getSum(int startIndex, int endIndex) throws Exception {
+    public double getSum(int startIndex, int endIndex) {
         return _spectrum.getSum(startIndex, endIndex);
     }
 
@@ -265,53 +248,17 @@ public class EmissionLineSpectrum implements VisitableSampledSpectrum {
     /**
      * Returns the sum of y values in the spectrum in
      * the specified range.
-     *
-     * @throws Exception If either limit is out of range.
      */
-    public double getSum(double x_start, double x_end) throws Exception {
+    public double getSum(double x_start, double x_end) {
         return _spectrum.getSum(x_start, x_end);
     }
 
-
-    /**
-     * Returns the integral of y values in the spectrum in
-     * the specified range.
-     *
-     * @throws Exception If either limit is out of range.
-     */
-    public double getIntegral(double x_start, double x_end) throws Exception {
-        return _spectrum.getIntegral(x_start, x_end);
-    }
-
-
-    /**
-     * Returns the integral of values in the SampledSpectrum in the
-     * specified range between specified indices.
-     */
-    public double getIntegral(int start_index, int end_index) throws Exception {
-        return _spectrum.getIntegral(start_index, end_index);
-    }
-
-
     /**
      * Returns the average of values in the SampledSpectrum in
      * the specified range.
-     *
-     * @throws Exception If either limit is out of range.
      */
-    public double getAverage(double x_start, double x_end) throws Exception {
+    public double getAverage(double x_start, double x_end) {
         return _spectrum.getAverage(x_start, x_end);
-
-    }
-
-    /**
-     * Returns the average of values in the SampledSpectrum in
-     * the specified range.
-     *
-     * @throws Exception If either limit is out of range.
-     */
-    public double getAverage(int indexStart, int indexEnd) throws Exception {
-        return _spectrum.getAverage(indexStart, indexEnd);
 
     }
 

@@ -8,8 +8,8 @@
 
 package edu.gemini.itc.shared;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.ListIterator;
 
 /**
@@ -68,7 +68,7 @@ public class ApertureComposite extends ApertureComponent {
 
         }
     }
-    
+
     public void visitAO(Morphology3D morphology) {
         ListIterator apIter = apertureList.listIterator();
         while (apIter.hasNext()) {
@@ -128,7 +128,7 @@ public class ApertureComposite extends ApertureComponent {
             try {
                 sourceFractionsList.add(
                         (((ApertureComponent) apIter.next())
-                         .getFractionOfSourceInAperture()).get(0));
+                                .getFractionOfSourceInAperture()).get(0));
             } catch (Exception e) {
                 System.out.println(" Could Not get Source Fraction.");
             }
@@ -136,10 +136,10 @@ public class ApertureComposite extends ApertureComponent {
 
         return sourceFractionsList;
     }
-    
+
     public void clearFractionOfSourceInAperture() {
         ListIterator apIter = apertureList.listIterator();
-        
+
         while (apIter.hasNext()) {
             // there should only one source fraction per aperture.  Code might need to be
             // changed if we implement different clusters other than in a line.

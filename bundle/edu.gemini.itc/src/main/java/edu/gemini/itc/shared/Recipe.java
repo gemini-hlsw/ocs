@@ -10,8 +10,6 @@
 //
 package edu.gemini.itc.shared;
 
-import java.io.PrintWriter;
-
 /**
  * Interface for ITC recipes.
  * By convention a recipe constructor should take as arguments a

@@ -11,7 +11,6 @@ package edu.gemini.itc.shared;
 /**
  * The GaussianMorphology concreate class implements the operations that all
  * that are defined in it's abstract parent class Morphology2d.
- *
  */
 public class AOMorphology extends Morphology3D {
 
@@ -19,6 +18,7 @@ public class AOMorphology extends Morphology3D {
 
     /**
      * Constructor for the Gaussian Morphology
+     *
      * @param sourceSize Allows the source size in arcsec to be set at constuction
      */
 
@@ -46,6 +46,7 @@ public class AOMorphology extends Morphology3D {
     /**
      * This method returns the value of a 2-D circularly-symmetric gaussian
      * over a square region centered about the mean.
+     *
      * @param sigmaFraction The length of the square as a fraction of sigma.
      */
     public double get2DSquareIntegral(double sigmaFraction) {
@@ -56,6 +57,7 @@ public class AOMorphology extends Morphology3D {
     /**
      * This Method returns the value of a 2-D circularly-symmetric gaussian
      * over a square region that is arbitrarily placed on the gaussian.
+     *
      * @param xMin The coordinate of the minimum X position.
      * @param xMax The coordinate of the maximum X position.
      * @param yMin The coordinate of the minimum Y position.

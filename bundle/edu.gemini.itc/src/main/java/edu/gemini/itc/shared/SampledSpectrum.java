@@ -23,10 +23,14 @@ package edu.gemini.itc.shared;
  * elements.
  */
 public interface SampledSpectrum extends ArraySpectrum {
-    /** @return array of spectrum y values */
+    /**
+     * @return array of spectrum y values
+     */
     public double[] getValues();
 
-    /** @return x sample size (bin size) */
+    /**
+     * @return x sample size (bin size)
+     */
     public double getSampling();
 
     /**
@@ -36,13 +40,17 @@ public interface SampledSpectrum extends ArraySpectrum {
      */
     public abstract void reset(double[] flux, double wavelengthStart,
                                double wavelengthInterval);
-    
+
     public abstract void trim(double wavelengthStart, double wavelengthEnd);
 
 
-    /** @return String of all the Values */
+    /**
+     * @return String of all the Values
+     */
     public String printSpecAsString();
 
-    /** @return String of all the Values between the given indexes */
+    /**
+     * @return String of all the Values between the given indexes
+     */
     public String printSpecAsString(int firstIndex, int lastIndex);
 }

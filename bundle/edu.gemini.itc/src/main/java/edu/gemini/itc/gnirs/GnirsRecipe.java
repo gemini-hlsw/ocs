@@ -9,62 +9,21 @@
 //
 package edu.gemini.itc.gnirs;
 
-import java.io.PrintWriter;
-
-import java.util.Enumeration;
-
-import java.awt.Image;
-import java.awt.image.BufferedImage;
+import edu.gemini.itc.operation.*;
+import edu.gemini.itc.parameters.*;
+import edu.gemini.itc.shared.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
 //import edu.gemini.itc.altair.Altair;
 //import edu.gemini.itc.altair.AltairBackgroundVisitor;
 //import edu.gemini.itc.altair.AltairFluxAttenuationVisitor;
 //import edu.gemini.itc.altair.AltairParameters;
 //import edu.gemini.itc.altair.AltairTransmissionVisitor;
-import edu.gemini.itc.shared.FormatStringWriter;
-import edu.gemini.itc.shared.GaussianMorphology;
-import edu.gemini.itc.shared.HexagonalAperture;
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.RecipeBase;
-import edu.gemini.itc.shared.SampledSpectrumVisitor;
-import edu.gemini.itc.shared.SEDFactory;
-import edu.gemini.itc.shared.USBMorphology;
-import edu.gemini.itc.shared.VisitableMorphology;
-import edu.gemini.itc.shared.VisitableSampledSpectrum;
-import edu.gemini.itc.shared.WavebandDefinition;
-import edu.gemini.itc.shared.ITCMultiPartParser;
-import edu.gemini.itc.shared.ITCChart;
-
-import edu.gemini.itc.parameters.ObservingConditionParameters;
-import edu.gemini.itc.parameters.ObservationDetailsParameters;
-import edu.gemini.itc.parameters.SourceDefinitionParameters;
-import edu.gemini.itc.parameters.TeleParameters;
-import edu.gemini.itc.parameters.PlottingDetailsParameters;
-
-import edu.gemini.itc.operation.ResampleWithPaddingVisitor;
-import edu.gemini.itc.operation.RedshiftVisitor;
-import edu.gemini.itc.operation.TelescopeApertureVisitor;
-import edu.gemini.itc.operation.TelescopeTransmissionVisitor;
-import edu.gemini.itc.operation.TelescopeBackgroundVisitor;
-import edu.gemini.itc.operation.NormalizeVisitor;
-import edu.gemini.itc.operation.CloudTransmissionVisitor;
-import edu.gemini.itc.operation.WaterTransmissionVisitor;
-import edu.gemini.itc.operation.PeakPixelFluxCalc;
-import edu.gemini.itc.operation.SpecS2NLargeSlitVisitor;
-import edu.gemini.itc.operation.SlitThroughput;
-import edu.gemini.itc.operation.ImageQualityCalculatable;
-import edu.gemini.itc.operation.ImageQualityCalculationFactory;
-import edu.gemini.itc.operation.SourceFractionCalculationFactory;
-import edu.gemini.itc.operation.SourceFractionCalculatable;
-import edu.gemini.itc.operation.ImagingS2NCalculationFactory;
-import edu.gemini.itc.operation.ImagingS2NCalculatable;
-
-import java.util.Calendar;
-import java.util.List;
-import java.util.ArrayList;
 
 /**
  * This class performs the calculations for Gnirs used for imaging.
@@ -264,11 +223,11 @@ public final class GnirsRecipe extends RecipeBase {
         // inputs: SED, AIRMASS, sky emmision file, mirror configuration,
         // output: SED and sky background as they arrive at instruments
 
-        SampledSpectrumVisitor clouds = new CloudTransmissionVisitor(
+        SampledSpectrumVisitor clouds = CloudTransmissionVisitor.create(
                 _obsConditionParameters.getSkyTransparencyCloud());
         sed.accept(clouds);
 
-        SampledSpectrumVisitor water = new WaterTransmissionVisitor(
+        SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
                 _obsConditionParameters.getSkyTransparencyWater(),
                 _obsConditionParameters.getAirmass(), "nearIR_trans_",
                 ITCConstants.MAUNA_KEA, ITCConstants.NEAR_IR);
@@ -287,7 +246,7 @@ public final class GnirsRecipe extends RecipeBase {
         // sky.accept(resample);
 
         // Apply telescope transmission to both sed and sky
-        SampledSpectrumVisitor t = new TelescopeTransmissionVisitor(
+        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(
                 _teleParameters.getMirrorCoating(),
                 _teleParameters.getInstrumentPort());
         sed.accept(t);
@@ -738,10 +697,10 @@ public final class GnirsRecipe extends RecipeBase {
                         .accept(instrument.getGratingOrderNTransmission(3));
                 skyOrder3
                         .trim(trimCenter
-                                * 3
-                                / 3
-                                - (instrument.getGratingDispersion_nmppix()
-                                / 3 * instrument.DETECTOR_PIXELS / 2),
+                                        * 3
+                                        / 3
+                                        - (instrument.getGratingDispersion_nmppix()
+                                        / 3 * instrument.DETECTOR_PIXELS / 2),
                                 trimCenter
                                         * 3
                                         / 3
@@ -753,10 +712,10 @@ public final class GnirsRecipe extends RecipeBase {
                         .accept(instrument.getGratingOrderNTransmission(4));
                 sedOrder4
                         .trim(trimCenter
-                                * 3
-                                / 4
-                                - (instrument.getGratingDispersion_nmppix()
-                                / 4 * instrument.DETECTOR_PIXELS / 2),
+                                        * 3
+                                        / 4
+                                        - (instrument.getGratingDispersion_nmppix()
+                                        / 4 * instrument.DETECTOR_PIXELS / 2),
                                 trimCenter
                                         * 3
                                         / 4
@@ -768,10 +727,10 @@ public final class GnirsRecipe extends RecipeBase {
                         .accept(instrument.getGratingOrderNTransmission(4));
                 skyOrder4
                         .trim(trimCenter
-                                * 3
-                                / 4
-                                - (instrument.getGratingDispersion_nmppix()
-                                / 4 * instrument.DETECTOR_PIXELS / 2),
+                                        * 3
+                                        / 4
+                                        - (instrument.getGratingDispersion_nmppix()
+                                        / 4 * instrument.DETECTOR_PIXELS / 2),
                                 trimCenter
                                         * 3
                                         / 4
@@ -783,10 +742,10 @@ public final class GnirsRecipe extends RecipeBase {
                         .accept(instrument.getGratingOrderNTransmission(5));
                 sedOrder5
                         .trim(trimCenter
-                                * 3
-                                / 5
-                                - (instrument.getGratingDispersion_nmppix()
-                                / 5 * instrument.DETECTOR_PIXELS / 2),
+                                        * 3
+                                        / 5
+                                        - (instrument.getGratingDispersion_nmppix()
+                                        / 5 * instrument.DETECTOR_PIXELS / 2),
                                 trimCenter
                                         * 3
                                         / 5
@@ -798,10 +757,10 @@ public final class GnirsRecipe extends RecipeBase {
                         .accept(instrument.getGratingOrderNTransmission(5));
                 skyOrder5
                         .trim(trimCenter
-                                * 3
-                                / 5
-                                - (instrument.getGratingDispersion_nmppix()
-                                / 5 * instrument.DETECTOR_PIXELS / 2),
+                                        * 3
+                                        / 5
+                                        - (instrument.getGratingDispersion_nmppix()
+                                        / 5 * instrument.DETECTOR_PIXELS / 2),
                                 trimCenter
                                         * 3
                                         / 5
@@ -813,10 +772,10 @@ public final class GnirsRecipe extends RecipeBase {
                         .accept(instrument.getGratingOrderNTransmission(6));
                 sedOrder6
                         .trim(trimCenter
-                                * 3
-                                / 6
-                                - (instrument.getGratingDispersion_nmppix()
-                                / 6 * instrument.DETECTOR_PIXELS / 2),
+                                        * 3
+                                        / 6
+                                        - (instrument.getGratingDispersion_nmppix()
+                                        / 6 * instrument.DETECTOR_PIXELS / 2),
                                 trimCenter
                                         * 3
                                         / 6
@@ -828,10 +787,10 @@ public final class GnirsRecipe extends RecipeBase {
                         .accept(instrument.getGratingOrderNTransmission(6));
                 skyOrder6
                         .trim(trimCenter
-                                * 3
-                                / 6
-                                - (instrument.getGratingDispersion_nmppix()
-                                / 6 * instrument.DETECTOR_PIXELS / 2),
+                                        * 3
+                                        / 6
+                                        - (instrument.getGratingDispersion_nmppix()
+                                        / 6 * instrument.DETECTOR_PIXELS / 2),
                                 trimCenter
                                         * 3
                                         / 6
@@ -843,10 +802,10 @@ public final class GnirsRecipe extends RecipeBase {
                         .accept(instrument.getGratingOrderNTransmission(7));
                 sedOrder7
                         .trim(trimCenter
-                                * 3
-                                / 7
-                                - (instrument.getGratingDispersion_nmppix()
-                                / 7 * instrument.DETECTOR_PIXELS / 2),
+                                        * 3
+                                        / 7
+                                        - (instrument.getGratingDispersion_nmppix()
+                                        / 7 * instrument.DETECTOR_PIXELS / 2),
                                 trimCenter
                                         * 3
                                         / 7
@@ -858,10 +817,10 @@ public final class GnirsRecipe extends RecipeBase {
                         .accept(instrument.getGratingOrderNTransmission(7));
                 skyOrder7
                         .trim(trimCenter
-                                * 3
-                                / 7
-                                - (instrument.getGratingDispersion_nmppix()
-                                / 7 * instrument.DETECTOR_PIXELS / 2),
+                                        * 3
+                                        / 7
+                                        - (instrument.getGratingDispersion_nmppix()
+                                        / 7 * instrument.DETECTOR_PIXELS / 2),
                                 trimCenter
                                         * 3
                                         / 7
@@ -873,10 +832,10 @@ public final class GnirsRecipe extends RecipeBase {
                         .accept(instrument.getGratingOrderNTransmission(8));
                 sedOrder8
                         .trim(trimCenter
-                                * 3
-                                / 8
-                                - (instrument.getGratingDispersion_nmppix()
-                                / 8 * instrument.DETECTOR_PIXELS / 2),
+                                        * 3
+                                        / 8
+                                        - (instrument.getGratingDispersion_nmppix()
+                                        / 8 * instrument.DETECTOR_PIXELS / 2),
                                 trimCenter
                                         * 3
                                         / 8
@@ -888,10 +847,10 @@ public final class GnirsRecipe extends RecipeBase {
                         .accept(instrument.getGratingOrderNTransmission(8));
                 skyOrder8
                         .trim(trimCenter
-                                * 3
-                                / 8
-                                - (instrument.getGratingDispersion_nmppix()
-                                / 8 * instrument.DETECTOR_PIXELS / 2),
+                                        * 3
+                                        / 8
+                                        - (instrument.getGratingDispersion_nmppix()
+                                        / 8 * instrument.DETECTOR_PIXELS / 2),
                                 trimCenter
                                         * 3
                                         / 8
@@ -925,7 +884,7 @@ public final class GnirsRecipe extends RecipeBase {
                         "Signal Order 3",
                         org.jfree.chart.ChartColor.DARK_RED);
                 GnirsChart.addArray(specS2N.getBackgroundSpectrum()
-                        .getData(), "SQRT(Background) Order 3 ",
+                                .getData(), "SQRT(Background) Order 3 ",
                         org.jfree.chart.ChartColor.VERY_LIGHT_RED);
 
                 signalOrder3 = (VisitableSampledSpectrum) specS2N
@@ -952,7 +911,7 @@ public final class GnirsRecipe extends RecipeBase {
                         "Signal Order 4",
                         org.jfree.chart.ChartColor.DARK_BLUE);
                 GnirsChart.addArray(specS2N.getBackgroundSpectrum()
-                        .getData(), "SQRT(Background)  Order 4",
+                                .getData(), "SQRT(Background)  Order 4",
                         org.jfree.chart.ChartColor.VERY_LIGHT_BLUE);
 
                 signalOrder4 = (VisitableSampledSpectrum) specS2N
@@ -979,7 +938,7 @@ public final class GnirsRecipe extends RecipeBase {
                         "Signal Order 5",
                         org.jfree.chart.ChartColor.DARK_GREEN);
                 GnirsChart.addArray(specS2N.getBackgroundSpectrum()
-                        .getData(), "SQRT(Background)  Order 5",
+                                .getData(), "SQRT(Background)  Order 5",
                         org.jfree.chart.ChartColor.VERY_LIGHT_GREEN);
 
                 signalOrder5 = (VisitableSampledSpectrum) specS2N
@@ -1006,7 +965,7 @@ public final class GnirsRecipe extends RecipeBase {
                         "Signal Order 6",
                         org.jfree.chart.ChartColor.DARK_MAGENTA);
                 GnirsChart.addArray(specS2N.getBackgroundSpectrum()
-                        .getData(), "SQRT(Background) Order 6",
+                                .getData(), "SQRT(Background) Order 6",
                         org.jfree.chart.ChartColor.VERY_LIGHT_MAGENTA);
 
                 signalOrder6 = (VisitableSampledSpectrum) specS2N
@@ -1032,7 +991,7 @@ public final class GnirsRecipe extends RecipeBase {
                 GnirsChart.addArray(specS2N.getSignalSpectrum().getData(),
                         "Signal Order 7", org.jfree.chart.ChartColor.black);
                 GnirsChart.addArray(specS2N.getBackgroundSpectrum()
-                        .getData(), "SQRT(Background) Order 7",
+                                .getData(), "SQRT(Background) Order 7",
                         org.jfree.chart.ChartColor.lightGray);
 
                 signalOrder7 = (VisitableSampledSpectrum) specS2N
@@ -1059,7 +1018,7 @@ public final class GnirsRecipe extends RecipeBase {
                         "Signal Order 8",
                         org.jfree.chart.ChartColor.DARK_CYAN);
                 GnirsChart.addArray(specS2N.getBackgroundSpectrum()
-                        .getData(), "SQRT(Background) Order 8",
+                                .getData(), "SQRT(Background) Order 8",
                         org.jfree.chart.ChartColor.VERY_LIGHT_CYAN);
 
                 signalOrder8 = (VisitableSampledSpectrum) specS2N

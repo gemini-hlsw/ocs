@@ -1,21 +1,6 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-
 package edu.gemini.itc.shared;
 
 import edu.gemini.itc.parameters.SourceDefinitionParameters;
-
-import java.util.NoSuchElementException;
-import java.util.StringTokenizer;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.text.ParseException;
 
 /**
  * This class creates a black body spectrum over the interval defined by the
@@ -129,7 +114,7 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
         returnFlux = //scaleFactor* java.lang.Math.pow(10.0,-8)*
                 //java.lang.Math.pow(10.0,-0.4*flux)*
                 (1 / java.lang.Math.pow(lambda / 1000, 4)) *
-                (1 / (java.lang.Math.exp(14387 / (lambda / 1000 * temp)) - 1));//
+                        (1 / (java.lang.Math.exp(14387 / (lambda / 1000 * temp)) - 1));//
         //(2.99792458e8/(lambda/1e6)*6.62618e-34);
 
         return returnFlux;
@@ -203,10 +188,10 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
         return new BlackBodySpectrum(spectrum);
     }
 
-    public void trim (double startWavelength, double endWavelength) {
+    public void trim(double startWavelength, double endWavelength) {
         _spectrum.trim(startWavelength, endWavelength);
     }
-    
+
     public void reset(double[] s, double v, double r) {
         _spectrum.reset(s, v, r);
     }
@@ -232,27 +217,37 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
         return _spectrum.getValues();
     }
 
-    /** @return starting x */
+    /**
+     * @return starting x
+     */
     public double getStart() {
         return _spectrum.getStart();
     }
 
-    /** @return ending x */
+    /**
+     * @return ending x
+     */
     public double getEnd() {
         return _spectrum.getEnd();
     }
 
-    /** @return x sample size (bin size) */
+    /**
+     * @return x sample size (bin size)
+     */
     public double getSampling() {
         return _spectrum.getSampling();
     }
 
-    /** @return flux value in specified bin */
+    /**
+     * @return flux value in specified bin
+     */
     public double getY(int index) {
         return _spectrum.getY(index);
     }
 
-    /** @return x of specified bin */
+    /**
+     * @return x of specified bin
+     */
     public double getX(int index) {
         return _spectrum.getX(index);
     }
@@ -267,13 +262,17 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
     }
 
 
-    /** Returns the index of the data point with largest x value less than x */
+    /**
+     * Returns the index of the data point with largest x value less than x
+     */
     public int getLowerIndex(double x) {
         return _spectrum.getLowerIndex(x);
     }
 
 
-    /** @return number of bins in the histogram (number of data points) */
+    /**
+     * @return number of bins in the histogram (number of data points)
+     */
     public int getLength() {
         return _spectrum.getLength();
     }
@@ -291,13 +290,17 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
         _spectrum.setY(bin, y);
     }
 
-    /** Rescales X axis by specified factor. Doesn't change sampling size. */
+    /**
+     * Rescales X axis by specified factor. Doesn't change sampling size.
+     */
     public void rescaleX(double factor) {
         _spectrum.rescaleX(factor);
     }
 
 
-    /** Rescales Y axis by specified factor. */
+    /**
+     * Rescales Y axis by specified factor.
+     */
     public void rescaleY(double factor) {
         _spectrum.rescaleY(factor);
     }
@@ -306,18 +309,24 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
         _spectrum.smoothY(factor);
     }
 
-    /** Returns the sum of all the y values in the SampledSpectrum */
+    /**
+     * Returns the sum of all the y values in the SampledSpectrum
+     */
     public double getSum() {
         return _spectrum.getSum();
     }
 
-    /** Returns the integral of all the y values in the SampledSpectrum */
+    /**
+     * Returns the integral of all the y values in the SampledSpectrum
+     */
     public double getIntegral() {
         return _spectrum.getIntegral();
     }
 
 
-    /** Returns the average of all the y values in the SampledSpectrum */
+    /**
+     * Returns the average of all the y values in the SampledSpectrum
+     */
     public double getAverage() {
         return _spectrum.getAverage();
     }
@@ -326,9 +335,8 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
     /**
      * Returns the sum of y values in the spectrum in
      * the specified index range.
-     * @throws Exception If either limit is out of range.
      */
-    public double getSum(int startIndex, int endIndex) throws Exception {
+    public double getSum(int startIndex, int endIndex) {
         return _spectrum.getSum(startIndex, endIndex);
     }
 
@@ -336,56 +344,24 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
     /**
      * Returns the sum of y values in the spectrum in
      * the specified range.
-     * @throws Exception If either limit is out of range.
      */
-    public double getSum(double x_start, double x_end) throws Exception {
+    public double getSum(double x_start, double x_end) {
         return _spectrum.getSum(x_start, x_end);
     }
 
-
-    /**
-     * Returns the integral of y values in the spectrum in
-     * the specified range.
-     * @throws Exception If either limit is out of range.
-     */
-    public double getIntegral(double x_start, double x_end) throws Exception {
-        return _spectrum.getIntegral(x_start, x_end);
-    }
-
-
-    /**
-     * Returns the integral of values in the SampledSpectrum in the
-     * specified range between specified indices.
-     */
-    public double getIntegral(int start_index, int end_index) throws Exception {
-        return _spectrum.getIntegral(start_index, end_index);
-    }
-
-
     /**
      * Returns the average of values in the SampledSpectrum in
      * the specified range.
-     * @throws Exception If either limit is out of range.
      */
-    public double getAverage(double x_start, double x_end) throws Exception {
+    public double getAverage(double x_start, double x_end) {
         return _spectrum.getAverage(x_start, x_end);
-
-    }
-
-    /**
-     * Returns the average of values in the SampledSpectrum in
-     * the specified range.
-     * @throws Exception If either limit is out of range.
-     */
-    public double getAverage(int indexStart, int indexEnd) throws Exception {
-        return _spectrum.getAverage(indexStart, indexEnd);
 
     }
 
     /**
      * This returns a 2d array of the data used to chart the SampledSpectrum
      * using JClass Chart.  The array has the following dimensions
-     *    double data[][] = new double[2][getLength()];
+     * double data[][] = new double[2][getLength()];
      * data[0][i] = x values
      * data[1][i] = y values
      */
@@ -397,7 +373,7 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
     /**
      * This returns a 2d array of the data used to chart the SampledSpectrum
      * using JClass Chart.  The array has the following dimensions
-     *    double data[][] = new double[2][getLength()];
+     * double data[][] = new double[2][getLength()];
      * data[0][i] = x values
      * data[1][i] = y values
      *
@@ -411,7 +387,7 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
     /**
      * This returns a 2d array of the data used to chart the SampledSpectrum
      * using JClass Chart.  The array has the following dimensions
-     *    double data[][] = new double[2][getLength()];
+     * double data[][] = new double[2][getLength()];
      * data[0][i] = x values
      * data[1][i] = y values
      *

@@ -10,11 +10,7 @@
 //
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.shared.SampledSpectrumVisitor;
-import edu.gemini.itc.shared.SampledSpectrum;
-import edu.gemini.itc.shared.ArraySpectrum;
-import edu.gemini.itc.shared.DefaultArraySpectrum;
-import edu.gemini.itc.shared.ITCConstants;
+import edu.gemini.itc.shared.*;
 
 /**
  * The AtmosphereVisitor class is designed to adjust the SED for the
@@ -46,10 +42,12 @@ public class AtmosphereVisitor implements SampledSpectrumVisitor {
 
         _transmission = new
                 DefaultArraySpectrum(ITCConstants.TRANSMISSION_LIB + "/" +
-                                     FILENAME + ITCConstants.DATA_SUFFIX);
+                FILENAME + ITCConstants.DATA_SUFFIX);
     }
 
-    /** @return the airmass used by this calculation */
+    /**
+     * @return the airmass used by this calculation
+     */
     public double getAirMass() {
         return _airmass;
     }
@@ -66,13 +64,13 @@ public class AtmosphereVisitor implements SampledSpectrumVisitor {
     /**
      * This is the old implimentation of the SampledSpectrumVisitor interface
      * it was commented out Oct 4 1999 by Brian Walls
-     *public void visit(SampledSpectrum sed) throws Exception
-     *{
-     *   for (int i=0; i < sed.getLength(); i++) {
-     *  	  double power = -0.4*_transmission.getY(sed.getX(i))*getAirMass();
-     *	  sed.setY(i, Math.pow(10, power)*sed.getY(i));
-     *   }
-     *}
+     * public void visit(SampledSpectrum sed) throws Exception
+     * {
+     * for (int i=0; i < sed.getLength(); i++) {
+     * double power = -0.4*_transmission.getY(sed.getX(i))*getAirMass();
+     * sed.setY(i, Math.pow(10, power)*sed.getY(i));
+     * }
+     * }
      */
 
     public String toString() {

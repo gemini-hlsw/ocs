@@ -8,8 +8,8 @@
 
 package edu.gemini.itc.shared;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This is the concrete class is one type of aperture supported by the itc
@@ -44,7 +44,7 @@ public class HexagonalAperture extends ApertureComponent {
 
 
     }
-    
+
     public void visitAO(Morphology3D morphology) {
         double xLower = IFUposX - IFUdiam / 2;
         double xUpper = IFUposX + IFUdiam / 2;

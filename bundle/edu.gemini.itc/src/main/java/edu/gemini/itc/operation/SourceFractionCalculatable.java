@@ -8,18 +8,23 @@
 
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.shared.FormatStringWriter;
+public interface SourceFractionCalculatable extends Calculatable {
+    public void setImageQuality(double im_qual);
 
-public interface SourceFractionCalculatable extends Calculatable{
-	public void setImageQuality( double im_qual);
-        public void setApType(String ap_type);
-        public void setApDiam(double ap_diam);
-        public void setSFPrint(boolean SFprint);
+    public void setApType(String ap_type);
 
-	public double getSourceFraction();
-	public double getNPix();
-	public double getApDiam();
-	public double getApPix();
-	public double getSwAp();
+    public void setApDiam(double ap_diam);
+
+    public void setSFPrint(boolean SFprint);
+
+    public double getSourceFraction();
+
+    public double getNPix();
+
+    public double getApDiam();
+
+    public double getApPix();
+
+    public double getSwAp();
 
 }
