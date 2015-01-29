@@ -48,21 +48,16 @@ public final class TargetGroupTest extends TestBase {
 
         base = new SPTarget();
         base.getTarget().setName("Base Pos");
-        base.notifyOfGenericUpdate();
 
         pwfs1_1 = new SPTarget();
         pwfs1_1.getTarget().setName("PWFS1-1");
-        pwfs1_1.notifyOfGenericUpdate();
         pwfs1_2 = new SPTarget();
         pwfs1_2.getTarget().setName("PWFS1-2");
-        pwfs1_2.notifyOfGenericUpdate();
 
         pwfs2_1 = new SPTarget();
         pwfs2_1.getTarget().setName("PWFS2-1");
-        pwfs2_1.notifyOfGenericUpdate();
         pwfs2_2 = new SPTarget();
         pwfs2_2.getTarget().setName("PWFS2-2");
-        pwfs2_2.notifyOfGenericUpdate();
     }
 
     /**
@@ -147,10 +142,8 @@ public final class TargetGroupTest extends TestBase {
     public void testDisabledGuideTargets() throws Exception {
         SPTarget guide1 = new SPTarget();
         guide1.getTarget().setName("OIWFS-1");
-        guide1.notifyOfGenericUpdate();
         SPTarget guide2 = new SPTarget();
         guide2.getTarget().setName("OIWFS-2");
-        guide2.notifyOfGenericUpdate();
 
         ImList<SPTarget> targetList;
         targetList = ImCollections.singletonList(guide2).cons(guide1);

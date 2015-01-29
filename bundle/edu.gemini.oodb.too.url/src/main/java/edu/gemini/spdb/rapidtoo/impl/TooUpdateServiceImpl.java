@@ -238,11 +238,10 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
         SPTarget base = targetEnv.getBase();
 
         base.getTarget().setName(tooTarget.getName());
-        base.notifyOfGenericUpdate();
         base.getTarget().getRa().setAs(tooTarget.getRa(), CoordinateParam.Units.DEGREES);
         base.getTarget().getDec().setAs(tooTarget.getDec(), CoordinateParam.Units.DEGREES);
-        base.notifyOfGenericUpdate();
         base.getTarget().setMagnitudes(tooTarget.getMagnitudes());
+        base.notifyOfGenericUpdate();
 
         // Set the guide star, if present.
         TooGuideTarget gs = update.getGuideStar();
@@ -283,12 +282,11 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
 
                         target.getTarget().getRa().setAs(gs.getRa(), CoordinateParam.Units.DEGREES);
                         target.getTarget().getDec().setAs(gs.getDec(), CoordinateParam.Units.DEGREES);
-                        target.notifyOfGenericUpdate();
                         String name = gs.getName();
                         if (name != null) {
                             target.getTarget().setName(name);
-                            target.notifyOfGenericUpdate();
                         }
+                        target.notifyOfGenericUpdate();
 
                         target.getTarget().setMagnitudes(gs.getMagnitudes());
 
