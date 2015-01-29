@@ -532,7 +532,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 String name = tbwe.getText();
                 if (name != null) name = name.trim();
                 _curPos.deleteWatcher(EdCompTargetList.this);
-                _curPos.setName(name);
+                _curPos.getTarget().setName(name);
+                _curPos.notifyOfGenericUpdate();
                 _curPos.addWatcher(EdCompTargetList.this);
                 _w.resolveButton.setEnabled(!"".equals(name));
             }
@@ -1118,7 +1119,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 final HorizonsService service = HorizonsService.getInstance();
                 if (service != null) {
                     final String objectId = service.getObjectId();
-                    _curPos.setName(objectId);
+                    _curPos.getTarget().setName(objectId);
+                    _curPos.notifyOfGenericUpdate();
                 }
 
 
@@ -1816,7 +1818,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
 
             SPTarget base = env.getBase();
-            base.setRaDecDegrees(basePos.getRaDeg(), basePos.getDecDeg());
+            base.getTarget().getRa().setAs(basePos.getRaDeg(), CoordinateParam.Units.DEGREES);
+            base.getTarget().getDec().setAs(basePos.getDecDeg(), CoordinateParam.Units.DEGREES);
+            base.notifyOfGenericUpdate();
         } else if (w == _w.resolveButton) {
             // REL-1063 Fix OT nonsidereal Solar System Object Horizons name resolution
             if (_curPos.getTarget() instanceof NamedTarget) {

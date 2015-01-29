@@ -240,7 +240,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
         read = identity,
         show = identity,
         get  = _.getTarget.getTarget.getName,
-        set  = setTarget(_.setName(_))
+        set  = setTarget(_.getTarget.setName(_))
       )
 
       val typeCombo = new BoundNullableCombo[TargetType](AllTargetTypes)(

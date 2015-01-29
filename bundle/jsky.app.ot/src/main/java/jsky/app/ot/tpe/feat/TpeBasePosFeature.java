@@ -13,6 +13,7 @@ import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
+import edu.gemini.spModel.target.system.CoordinateParam;
 import jsky.app.ot.tpe.*;
 
 import java.awt.*;
@@ -144,7 +145,9 @@ public class TpeBasePosFeature extends TpePositionFeature {
             }
 
             SPTarget tp = (SPTarget) _dragObject.taggedPos;
-            tp.setRaDecDegrees(tme.pos.getRaDeg(), tme.pos.getDecDeg());
+            tp.getTarget().getRa().setAs(tme.pos.getRaDeg(), CoordinateParam.Units.DEGREES);
+            tp.getTarget().getDec().setAs(tme.pos.getDecDeg(), CoordinateParam.Units.DEGREES);
+            tp.notifyOfGenericUpdate();
         }
     }
 

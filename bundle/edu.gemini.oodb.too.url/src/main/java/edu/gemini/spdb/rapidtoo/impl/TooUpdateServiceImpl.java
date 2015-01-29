@@ -22,6 +22,7 @@ import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
+import edu.gemini.spModel.target.system.CoordinateParam;
 import edu.gemini.spModel.too.TooConstraintService;
 import edu.gemini.spdb.rapidtoo.*;
 import edu.gemini.util.security.auth.keychain.KeyService;
@@ -236,8 +237,11 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
         TargetEnvironment targetEnv = targetObsComp.getTargetEnvironment();
         SPTarget base = targetEnv.getBase();
 
-        base.setName(tooTarget.getName());
-        base.setRaDecDegrees(tooTarget.getRa(), tooTarget.getDec());
+        base.getTarget().setName(tooTarget.getName());
+        base.notifyOfGenericUpdate();
+        base.getTarget().getRa().setAs(tooTarget.getRa(), CoordinateParam.Units.DEGREES);
+        base.getTarget().getDec().setAs(tooTarget.getDec(), CoordinateParam.Units.DEGREES);
+        base.notifyOfGenericUpdate();
         base.getTarget().setMagnitudes(tooTarget.getMagnitudes());
 
         // Set the guide star, if present.
@@ -277,9 +281,14 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
                         Option<SPTarget> targetOpt = gt.getPrimary();
                         SPTarget target = targetOpt.isEmpty() ? new SPTarget() : targetOpt.getValue();
 
-                        target.setRaDecDegrees(gs.getRa(), gs.getDec());
+                        target.getTarget().getRa().setAs(gs.getRa(), CoordinateParam.Units.DEGREES);
+                        target.getTarget().getDec().setAs(gs.getDec(), CoordinateParam.Units.DEGREES);
+                        target.notifyOfGenericUpdate();
                         String name = gs.getName();
-                        if (name != null) target.setName(name);
+                        if (name != null) {
+                            target.getTarget().setName(name);
+                            target.notifyOfGenericUpdate();
+                        }
 
                         target.getTarget().setMagnitudes(gs.getMagnitudes());
 

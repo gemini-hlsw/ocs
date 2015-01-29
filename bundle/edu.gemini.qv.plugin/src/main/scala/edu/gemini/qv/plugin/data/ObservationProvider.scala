@@ -6,6 +6,7 @@ import edu.gemini.qv.plugin.{ReferenceDateChanged, QvContext}
 import edu.gemini.qv.plugin.util.ConstraintsCache.ConstraintCalculationEnd
 import edu.gemini.qv.plugin.util.{SolutionProvider, NonSiderealCache}
 import edu.gemini.spModel.target.SPTarget
+import edu.gemini.spModel.target.system.CoordinateParam.Units
 import scala.collection.JavaConversions._
 import scala.swing.event.Event
 import scala.swing.{Swing, Publisher}
@@ -181,8 +182,9 @@ case class PositionProvider(ctx: QvContext, base: ObservationProvider) extends O
     _observations = base.observations.map(o => {
       if (NonSiderealCache.isHorizonsTarget(o)) {
         val pos = NonSiderealCache.get(ctx.site, ctx.referenceDate, o)
-        val newTarget = o.getTargetEnvironment.getBase.clone().asInstanceOf[SPTarget]
-        newTarget.setRaDecDegrees(pos.getRaDeg, pos.getDecDeg)
+        val newTarget = o.getTargetEnvironment.getBase.clone()
+        newTarget.getTarget.getRa.setAs(pos.getRaDeg, Units.DEGREES)
+        newTarget.getTarget.getDec.setAs(pos.getDecDeg, Units.DEGREES)
         new Obs(
           o.getProg,
           o.getGroup,

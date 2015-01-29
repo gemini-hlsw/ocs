@@ -157,7 +157,8 @@ public class LchQueryFunctorTest {
     protected void addTargetObsCompAOP1(ISPProgram prog) throws SPUnknownIDException, RemoteException, SPTreeStateException, SPNodeNotLocalException {
         TargetObsComp target = new TargetObsComp();
         SPTarget sptarget = new SPTarget();
-        sptarget.setName("name");
+        sptarget.getTarget().setName("name");
+        sptarget.notifyOfGenericUpdate();
         Set<GuideProbe> guideProbes = new HashSet<GuideProbe>();
         guideProbes.add(AltairAowfsGuider.instance);
         guideProbes.add(PwfsGuideProbe.pwfs1);
@@ -193,7 +194,8 @@ public class LchQueryFunctorTest {
     protected void addTargetObsCompAO(ISPProgram prog) throws SPUnknownIDException, RemoteException, SPTreeStateException, SPNodeNotLocalException {
         TargetObsComp target = new TargetObsComp();
         SPTarget sptarget = new SPTarget();
-        sptarget.setName("name");
+        sptarget.getTarget().setName("name");
+        sptarget.notifyOfGenericUpdate();
         Set<GuideProbe> guideProbes = new HashSet<GuideProbe>();
         guideProbes.add(AltairAowfsGuider.instance);
 

@@ -75,19 +75,13 @@ public final class SPTarget extends WatchablePos {
 
     /** Clone this SPTarget. */
     public SPTarget clone() {
-        return new SPTarget((ITarget) _target.clone());
+        return new SPTarget(_target.clone());
     }
 
 
     ///
     /// END OF PUBLIC API ... EVERYTHING FROM HERE DOWN GOES AWAY
     ///
-
-    /** Set the contained target's name and notify listeners. */
-    public void setName(final String name) {
-        _target.setName(name);
-        _notifyOfUpdate();
-    }
 
     /** Get the PM RA in mas/y if the contained target is sidereal, otherwise zero. */
     public double getPropMotionRA() {
@@ -196,15 +190,6 @@ public final class SPTarget extends WatchablePos {
     /** @deprecated */
     public void notifyOfGenericUpdate() {
     	super._notifyOfUpdate();
-    }
-
-    /** Set the contained target RA/Dec in degrees and notify observers. */
-    public void setRaDecDegrees(final double raDeg, final double decDeg) {
-        synchronized (this) {
-            _target.getRa().setAs(raDeg, Units.DEGREES);
-            _target.getDec().setAs(decDeg, Units.DEGREES);
-        }
-        _notifyOfUpdate();
     }
 
 }

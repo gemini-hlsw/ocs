@@ -34,10 +34,12 @@ public final class TargetMagnitudeTest extends TestBase {
         super.setUp();
 
         SPTarget base = new SPTarget();
-        base.setName("Base Pos");
+        base.getTarget().setName("Base Pos");
+        base.notifyOfGenericUpdate();
 
         pwfs1_1 = new SPTarget();
-        pwfs1_1.setName("PWFS1-1");
+        pwfs1_1.getTarget().setName("PWFS1-1");
+        pwfs1_1.notifyOfGenericUpdate();
 
         env = TargetEnvironment.create(base);
         GuideProbeTargets gpt = GuideProbeTargets.create(PwfsGuideProbe.pwfs1, pwfs1_1);
@@ -57,7 +59,8 @@ public final class TargetMagnitudeTest extends TestBase {
     public void testNonSiderealMagnitude() throws Exception {
         pwfs1_1.getTarget().putMagnitude(new Magnitude(Magnitude.Band.J, 10));
         pwfs1_1.setTarget(new ConicTarget());
-        pwfs1_1.setName("PWFS1-1");
+        pwfs1_1.getTarget().setName("PWFS1-1");
+        pwfs1_1.notifyOfGenericUpdate();
         testTargetEnvironment(env);
     }
 
