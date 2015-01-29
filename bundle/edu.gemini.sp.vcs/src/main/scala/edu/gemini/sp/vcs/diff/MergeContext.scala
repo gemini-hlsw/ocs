@@ -51,10 +51,8 @@ object ProgContext {
     def isTreeModified(k: SPNodeKey): Boolean =
       nodeMap.get(k).exists { n =>
         VersionComparison.compare(version(k), remoteVm.get(k) | EmptyNodeVersions) match {
-          case Same        => n.children.map(_.key).exists(isTreeModified)
-          case Newer       => true
-          case Older       => n.children.map(_.key).exists(isTreeModified)
-          case Conflicting => true
+          case Same  | Older       => n.children.map(_.key).exists(isTreeModified)
+          case Newer | Conflicting => true
         }
       }
   }
@@ -75,9 +73,7 @@ object ProgContext {
           case Nil       => parents
           case (k :: ks) =>
             diffMap.get(k) match {
-              case None                          =>
-                go(ks, parents)
-              case Some(Missing(_, _))           =>
+              case None | Some(Missing(_,_))     =>
                 go(ks, parents)
               case Some(Present(_, _, _, cs, _)) =>
                 go(cs ++ ks, (parents/:cs) { (pm, c) => pm + (c -> k) })
@@ -96,10 +92,8 @@ object ProgContext {
         case Missing(_, _)                  => false
         case Present(_, nv, _, children, _) =>
           VersionComparison.compare(localVm.get(k) | EmptyNodeVersions, nv) match {
-            case Same        => children.exists(isTreeModified)
-            case Newer       => children.exists(isTreeModified)
-            case Older       => true
-            case Conflicting => true
+            case Same  | Newer       => children.exists(isTreeModified)
+            case Older | Conflicting => true
           }
       }
   }
