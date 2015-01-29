@@ -13,10 +13,7 @@ import edu.gemini.spModel.target.system.*;
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
 import edu.gemini.spModel.target.system.CoordinateTypes.*;
 
-/**
- * A data object that describes a telescope position and includes methods
- * for extracting positions.
- */
+/** A mutable cell containing an ITarget. */
 public final class SPTarget extends WatchablePos {
 
     private ITarget _target;
