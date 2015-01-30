@@ -270,9 +270,7 @@ public final class MichelleRecipe extends RecipeBase {
 
 
         // Apply telescope transmission to both sed and sky
-        SampledSpectrumVisitor t =
-                TelescopeTransmissionVisitor.create(_teleParameters.getMirrorCoating(),
-                        _teleParameters.getInstrumentPort());
+        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(_teleParameters);
         sed.accept(t);
         sky.accept(t);
 
@@ -280,9 +278,7 @@ public final class MichelleRecipe extends RecipeBase {
         //_println("Telescope Back ave: " + sky.getAverage());
         //Create and Add background for the telescope.
         SampledSpectrumVisitor tb =
-                new TelescopeBackgroundVisitor(_teleParameters.getMirrorCoating(),
-                        _teleParameters.getInstrumentPort(),
-                        ITCConstants.MAUNA_KEA, ITCConstants.MID_IR);
+                new TelescopeBackgroundVisitor(_teleParameters, ITCConstants.MAUNA_KEA, ITCConstants.MID_IR);
         sky.accept(tb);
         //_println("Telescope Back ave: " + sky.getAverage());
 

@@ -276,16 +276,11 @@ public final class NiciRecipe extends RecipeBase {
 
         // Create and Add Background for the tele
 
-        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(
-                _teleParameters.getMirrorCoating(),
-                _teleParameters.getInstrumentPort(), ITCConstants.CERRO_PACHON,
-                ITCConstants.VISIBLE);
+        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, ITCConstants.CERRO_PACHON, ITCConstants.VISIBLE);
         sky.accept(tb);
 
         // Apply telescope transmission
-        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(
-                _teleParameters.getMirrorCoating(),
-                _teleParameters.getInstrumentPort());
+        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(_teleParameters);
 
         sed.accept(t);
         sky.accept(t);

@@ -295,17 +295,12 @@ public final class GmosRecipe extends RecipeBase {
             // sky.accept(resample);
 
             // Apply telescope transmission to both sed and sky
-            SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(
-                    _teleParameters.getMirrorCoating(),
-                    _teleParameters.getInstrumentPort());
+            SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(_teleParameters);
             sed.accept(t);
             sky.accept(t);
 
             // Create and Add background for the telescope.
-            SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(
-                    _teleParameters.getMirrorCoating(),
-                    _teleParameters.getInstrumentPort(), site,
-                    ITCConstants.VISIBLE);
+            SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, site, ITCConstants.VISIBLE);
             sky.accept(tb);
 
             sky.accept(tel);

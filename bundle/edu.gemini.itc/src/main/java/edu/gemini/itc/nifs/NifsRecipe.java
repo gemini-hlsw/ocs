@@ -227,9 +227,7 @@ public final class NifsRecipe extends RecipeBase {
         //_println("Total photons/s between 2199 - 2201: "+ sed.getIntegral(2199.0,2201.0));
 
         // Apply telescope transmission to both sed and sky
-        SampledSpectrumVisitor t =
-                TelescopeTransmissionVisitor.create(_teleParameters.getMirrorCoating(),
-                        _teleParameters.getInstrumentPort());
+        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(_teleParameters);
         sed.accept(t);
         sky.accept(t);
 
@@ -240,9 +238,7 @@ public final class NifsRecipe extends RecipeBase {
 
         //Create and Add background for the telescope.
         SampledSpectrumVisitor tb =
-                new TelescopeBackgroundVisitor(_teleParameters.getMirrorCoating(),
-                        _teleParameters.getInstrumentPort(),
-                        ITCConstants.MAUNA_KEA, ITCConstants.NEAR_IR);
+                new TelescopeBackgroundVisitor(_teleParameters,ITCConstants.MAUNA_KEA, ITCConstants.NEAR_IR);
         sky.accept(tb);
         sky.accept(tel);
 

@@ -261,20 +261,12 @@ public final class GsaoiRecipe extends RecipeBase {
                 + ITCConstants.DATA_SUFFIX, instrument.getSampling());
 
         // Apply telescope transmission
-        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(
-                _teleParameters.getMirrorCoating(),
-                "side" // According to Rodrigo Carrasco, there is no difference, default to side-looking
-        );
+        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(_teleParameters);
         sed.accept(t);
         sky.accept(t);
 
         // Create and Add background for the telescope.
-        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(
-                _teleParameters.getMirrorCoating(),
-//				_teleParameters.getInstrumentPort()
-                "side", // According to Rodrigo Carrasco, there is no difference, default to side-looking
-                ITCConstants.CERRO_PACHON,
-                ITCConstants.NEAR_IR);
+        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, ITCConstants.CERRO_PACHON, ITCConstants.NEAR_IR);
         sky.accept(tb);
 
 

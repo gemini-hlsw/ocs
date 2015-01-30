@@ -1,5 +1,6 @@
 package edu.gemini.itc.operation;
 
+import edu.gemini.itc.parameters.TeleParameters;
 import edu.gemini.itc.shared.ITCConstants;
 import edu.gemini.itc.shared.TransmissionElement;
 
@@ -8,11 +9,6 @@ import edu.gemini.itc.shared.TransmissionElement;
  * Telesope Tranmsission.
  */
 public final class TelescopeTransmissionVisitor {
-    // These constants define the different mirror surfaces used
-    public static final String ALUMINUM = "aluminium";
-    public static final String SILVER = "silver";
-    public static final String UP = "up";
-    public static final String SIDE = "side";
 
     private static final String _COATING = "_coating_";
 
@@ -24,23 +20,29 @@ public final class TelescopeTransmissionVisitor {
      * type of coating is used, and the other detailing how many mirrors
      * should be used.
      */
-    public static TransmissionElement create(String coating, String issPort) throws Exception {
+    public static TransmissionElement create(final TeleParameters tp) throws Exception {
         String fileName;
 
-        if (coating.equals(ALUMINUM)) {
-            fileName = "al" + _COATING;
-        } else if (coating.equals(SILVER)) {
-            fileName = "ag" + _COATING;
-        } else {
-            throw new Exception("Unknown mirror material: " + coating);
+        switch (tp.getMirrorCoating()) {
+            case TeleParameters.ALUMINIUM:
+                fileName = "al" + _COATING;
+                break;
+            case TeleParameters.SILVER:
+                fileName = "ag" + _COATING;
+                break;
+            default:
+                throw new Exception("Unknown mirror material: " + tp.getMirrorCoating());
         }
 
-        if (issPort.equals(UP)) {
-            fileName += UP;
-        } else if (issPort.equals(SIDE)) {
-            fileName += SIDE;
-        } else {
-            throw new Exception("Unknown iss port: " + issPort);
+        switch (tp.getInstrumentPort()) {
+            case TeleParameters.UP:
+                fileName += TeleParameters.UP;
+                break;
+            case TeleParameters.SIDE:
+                fileName += TeleParameters.SIDE;
+                break;
+            default:
+                throw new Exception("Unknown iss port: " + tp.getInstrumentPort());
         }
 
         return new TransmissionElement(ITCConstants.TRANSMISSION_LIB + "/" + fileName + ITCConstants.DATA_SUFFIX);

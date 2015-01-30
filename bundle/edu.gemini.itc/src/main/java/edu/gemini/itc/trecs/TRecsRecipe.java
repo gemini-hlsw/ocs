@@ -261,18 +261,13 @@ public final class TRecsRecipe extends RecipeBase {
         // sky.accept(resample);
 
         // Apply telescope transmission to both sed and sky
-        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(
-                _teleParameters.getMirrorCoating(),
-                _teleParameters.getInstrumentPort());
+        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(_teleParameters);
         sed.accept(t);
         sky.accept(t);
 
         // _println("Telescope Back ave: " + sky.getAverage());
         // Create and Add background for the telescope.
-        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(
-                _teleParameters.getMirrorCoating(),
-                _teleParameters.getInstrumentPort(),
-                ITCConstants.CERRO_PACHON, ITCConstants.MID_IR);
+        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, ITCConstants.CERRO_PACHON, ITCConstants.MID_IR);
         sky.accept(tb);
         // _println("Telescope Back ave: " + sky.getAverage());
 

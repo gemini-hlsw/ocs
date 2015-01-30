@@ -246,17 +246,12 @@ public final class GnirsRecipe extends RecipeBase {
         // sky.accept(resample);
 
         // Apply telescope transmission to both sed and sky
-        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(
-                _teleParameters.getMirrorCoating(),
-                _teleParameters.getInstrumentPort());
+        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(_teleParameters);
         sed.accept(t);
         sky.accept(t);
 
         // Create and Add background for the telescope.
-        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(
-                _teleParameters.getMirrorCoating(),
-                _teleParameters.getInstrumentPort(), ITCConstants.MAUNA_KEA,
-                ITCConstants.NEAR_IR);
+        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, ITCConstants.MAUNA_KEA, ITCConstants.NEAR_IR);
         sky.accept(tb);
 
         // DEBUGGING GRAPHS

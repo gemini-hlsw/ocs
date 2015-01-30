@@ -236,16 +236,11 @@ public final class Flamingos2Recipe extends RecipeBase {
 
         // Create and Add Background for the tele
 
-        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(
-                _teleParameters.getMirrorCoating(),
-                _teleParameters.getInstrumentPort(), ITCConstants.CERRO_PACHON,
-                ITCConstants.NEAR_IR);
+        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, ITCConstants.CERRO_PACHON, ITCConstants.NEAR_IR);
         sky.accept(tb);
 
         // Apply telescope transmission
-        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(
-                _teleParameters.getMirrorCoating(),
-                _teleParameters.getInstrumentPort());
+        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(_teleParameters);
 
         sed.accept(t);
         sky.accept(t);
