@@ -2,7 +2,7 @@ package edu.gemini.sp.vcs.diff
 
 import edu.gemini.pot.sp.version._
 import edu.gemini.pot.sp.{ISPNode, ISPObservation, ISPProgram, SPNodeKey}
-import edu.gemini.sp.vcs.diff.Diff.{missing, present}
+import edu.gemini.sp.vcs.diff.Diff.{present, Missing}
 import edu.gemini.spModel.rich.pot.sp._
 
 import scalaz._
@@ -106,7 +106,7 @@ object ProgramDiff {
 
     import scala.collection.breakOut
     def missingDiffs(keys: Set[SPNodeKey]): List[Diff] =
-      keys.map(k => missing(k, local.getVersions(k)))(breakOut)
+      keys.map(k => Missing(k, local.getVersions(k)))(breakOut)
 
     val localKeys       = local.getVersions.keySet
     val remoteKeys      = remoteVm.keySet

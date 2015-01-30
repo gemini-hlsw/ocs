@@ -229,7 +229,7 @@ class ProgramDiffTest {
   // combinations of locally and remotely editing (or not) and/or removing (or
   // not) the note.
   @Test def removalTests(): Unit = {
-    case class RmTest(pc: TestingEnvironment => ProgContext, edited: Boolean, removed: Boolean) {
+    case class RmTest(pc: TestingEnvironment => TestingEnvironment.ProgContext, edited: Boolean, removed: Boolean) {
       def setup(env: TestingEnvironment, key: SPNodeKey): Unit = {
         val ctx  = pc(env)
         val note = ctx.find(key)
