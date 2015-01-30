@@ -2,6 +2,7 @@ package edu.gemini.itc.baseline.util
 
 import edu.gemini.itc.baseline._
 import org.junit.{Ignore, Test}
+import org.junit.Assert._
 
 /**
  * Test cases that can be used to create a new baseline and to check exhaustively all provided configurations
@@ -33,9 +34,8 @@ class BaselineTest {
 
   @Ignore
   @Test
-  def checkAll(): Unit = {
-    baselines().foreach(Baseline.checkAgainstBaseline)
-  }
+  def checkAll(): Unit =
+    baselines().foreach { b => assertTrue(Baseline.checkAgainstBaseline(b)) }
 
   private def baselines(): Seq[Baseline] = {
 
