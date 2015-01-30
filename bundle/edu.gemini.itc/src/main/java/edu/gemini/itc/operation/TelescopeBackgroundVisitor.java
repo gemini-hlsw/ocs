@@ -50,18 +50,6 @@ public class TelescopeBackgroundVisitor implements SampledSpectrumVisitor {
                 _setup = "_3ag_ph";
             } else if (port.equals("side") && coating.equals("aluminium")) {
                 _setup = "_2al+1ag_ph";
-            } else if (port.equals("upGS") && coating.equals("silver")) {
-                filenameBase = ITCConstants.GS_TELESCOPE_BACKGROUND_FILENAME_BASE;
-                _setup = "_ag1_al1";
-            } else if (port.equals("upGS") && coating.equals("aluminium")) {
-                filenameBase = ITCConstants.GS_TELESCOPE_BACKGROUND_FILENAME_BASE;
-                _setup = "_al2";
-            } else if (port.equals("sideGS") && coating.equals("silver")) {
-                filenameBase = ITCConstants.GS_TELESCOPE_BACKGROUND_FILENAME_BASE;
-                _setup = "_ag1_al2";
-            } else if (port.equals("sideGS") && coating.equals("aluminium")) {
-                filenameBase = ITCConstants.GS_TELESCOPE_BACKGROUND_FILENAME_BASE;
-                _setup = "_al3";
             }
 
             _fullBackgroundResource = ITCConstants.TELESCOPE_BACKGROUND_LIB + "/" +

@@ -12,9 +12,7 @@ public final class TelescopeTransmissionVisitor {
     public static final String ALUMINUM = "aluminium";
     public static final String SILVER = "silver";
     public static final String UP = "up";
-    public static final String UP_GS = "upGS";
     public static final String SIDE = "side";
-    public static final String SIDE_GS = "sideGS";
 
     private static final String _COATING = "_coating_";
 
@@ -41,30 +39,11 @@ public final class TelescopeTransmissionVisitor {
             fileName += UP;
         } else if (issPort.equals(SIDE)) {
             fileName += SIDE;
-        } else if (issPort.equals(UP_GS) || issPort.equals(SIDE_GS)) {
-            fileName = "";
         } else {
             throw new Exception("Unknown iss port: " + issPort);
         }
 
-        //if GS use new mirror transmision files
-
-        if (issPort.equals(UP_GS) && coating.equals("silver")) {
-            fileName = ITCConstants.GS_TELESCOPE_TRANSMISSION_FILENAME_BASE;
-            fileName += "_ag1_al1";
-        } else if (issPort.equals(UP_GS) && coating.equals("aluminium")) {
-            fileName = ITCConstants.GS_TELESCOPE_TRANSMISSION_FILENAME_BASE;
-            fileName += "_al2";
-        } else if (issPort.equals(SIDE_GS) && coating.equals("silver")) {
-            fileName = ITCConstants.GS_TELESCOPE_TRANSMISSION_FILENAME_BASE;
-            fileName += "_ag1_al2";
-        } else if (issPort.equals(SIDE_GS) && coating.equals("aluminium")) {
-            fileName = ITCConstants.GS_TELESCOPE_TRANSMISSION_FILENAME_BASE;
-            fileName += "_al3";
-        }
-
-        return new TransmissionElement(ITCConstants.TRANSMISSION_LIB + "/" + fileName +
-                ITCConstants.DATA_SUFFIX);
+        return new TransmissionElement(ITCConstants.TRANSMISSION_LIB + "/" + fileName + ITCConstants.DATA_SUFFIX);
     }
 
 }
