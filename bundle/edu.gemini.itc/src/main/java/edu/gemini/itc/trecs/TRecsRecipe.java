@@ -272,7 +272,6 @@ public final class TRecsRecipe extends RecipeBase {
         SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(
                 _teleParameters.getMirrorCoating(),
                 _teleParameters.getInstrumentPort(),
-                ITCConstants.MID_IR_TELESCOPE_BACKGROUND_FILENAME_BASE,
                 ITCConstants.CERRO_PACHON, ITCConstants.MID_IR);
         sky.accept(tb);
         // _println("Telescope Back ave: " + sky.getAverage());
