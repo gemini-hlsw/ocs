@@ -1,8 +1,9 @@
 package edu.gemini.itc.baseline.util
 
 import edu.gemini.itc.altair.AltairParameters
+import edu.gemini.itc.parameters.TeleParameters.{Coating, Wfs}
 import edu.gemini.itc.parameters._
-import org.scalacheck.{Arbitrary, Gen}
+import edu.gemini.spModel.telescope.IssPort
 
 /**
  * Representation of an environment to be used in ITC recipe execution.
@@ -245,9 +246,9 @@ object Environment {
   // NOTE: looking at TeleParameters.getWFS() it seems that AOWFS is always replaced with OIWFS
   lazy val TelescopeConfigurations =
     for {
-      coating       <- List(TeleParameters.SILVER) // don't test aluminium coating
-      port          <- List(TeleParameters.SIDE, TeleParameters.UP)
-      wfs           <- List(TeleParameters.OIWFS, TeleParameters.PWFS) // don't use AOWFS (?)
+      coating       <- List(Coating.SILVER)       // don't test aluminium coating
+      port          <- IssPort.values()
+      wfs           <- List(Wfs.OIWFS, Wfs.PWFS)  // don't use AOWFS (?)
     } yield new TeleParameters(coating, port, wfs)
 
   lazy val PlottingParameters = List(

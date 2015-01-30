@@ -10,6 +10,8 @@
 //
 package edu.gemini.itc.shared;
 
+import edu.gemini.spModel.type.SpTypeUtil;
+
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -17,14 +19,37 @@ import javax.servlet.http.HttpServletRequest;
  */
 public abstract class ITCParameters {
 
-    /**
-     * Parse parameters from a servlet request.
-     */
-    public abstract void parseServletRequest(HttpServletRequest r)
-            throws Exception;
-
     public static void notFoundException(String s) throws Exception {
         throw new Exception("Can't find " + s);
+    }
+
+    /** Tries to get the given parameter form an http request. */
+    public static String getParameter(final HttpServletRequest r, final String parameter) {
+        final String value = r.getParameter(parameter);
+        if (value == null) {
+            throw new NoSuchParameterException(parameter);
+        }
+        return value;
+    }
+
+    /** Tries to get the given parameter form an http request and translates it into an enum. */
+    public static <T extends Enum<T>> T getParameter(final Class<T> c, final HttpServletRequest r) {
+        final String value = r.getParameter(c.getSimpleName());
+        return getParameter(c, value);
+    }
+
+    /** Tries to get the given parameter form an http request and translates it into an enum. */
+    public static <T extends Enum<T>> T getParameter(final Class<T> c, final ITCMultiPartParser r) {
+        final String value = r.getParameter(c.getSimpleName());
+        return getParameter(c, value);
+    }
+
+    private static <T extends Enum<T>> T getParameter(final Class<T> c, final String value) {
+        final T e = SpTypeUtil.oldValueOf(c, value, null);
+        if (e == null) {
+            throw new IllegalArgumentException("option " + value + " is invalid for " + c.getSimpleName());
+        }
+        return e;
     }
 
     /**

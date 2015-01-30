@@ -12,8 +12,7 @@ public final class TelescopeTransmissionVisitor {
 
     private static final String _COATING = "_coating_";
 
-    private TelescopeTransmissionVisitor() {
-    }
+    private TelescopeTransmissionVisitor() {}
 
     /**
      * The TelTrans constructor takes two arguments: one detailing what
@@ -21,31 +20,22 @@ public final class TelescopeTransmissionVisitor {
      * should be used.
      */
     public static TransmissionElement create(final TeleParameters tp) throws Exception {
-        String fileName;
 
+        final String coating;
         switch (tp.getMirrorCoating()) {
-            case TeleParameters.ALUMINIUM:
-                fileName = "al" + _COATING;
-                break;
-            case TeleParameters.SILVER:
-                fileName = "ag" + _COATING;
-                break;
-            default:
-                throw new Exception("Unknown mirror material: " + tp.getMirrorCoating());
+            case ALUMINIUM:     coating = "al" + _COATING; break;
+            case SILVER:        coating = "ag" + _COATING; break;
+            default:            throw new IllegalArgumentException("Unknown mirror material: " + tp.getMirrorCoating());
         }
 
+        final String port;
         switch (tp.getInstrumentPort()) {
-            case TeleParameters.UP:
-                fileName += TeleParameters.UP;
-                break;
-            case TeleParameters.SIDE:
-                fileName += TeleParameters.SIDE;
-                break;
-            default:
-                throw new Exception("Unknown iss port: " + tp.getInstrumentPort());
+            case UP_LOOKING:    port = "up";   break;
+            case SIDE_LOOKING:  port = "side"; break;
+            default:            throw new IllegalArgumentException("Unknown iss port: " + tp.getInstrumentPort());
         }
 
-        return new TransmissionElement(ITCConstants.TRANSMISSION_LIB + "/" + fileName + ITCConstants.DATA_SUFFIX);
+        return new TransmissionElement(ITCConstants.TRANSMISSION_LIB + "/" + coating + port + ITCConstants.DATA_SUFFIX);
     }
 
 }

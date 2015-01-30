@@ -102,13 +102,12 @@ public class ITCMultiPartParser {
      * @return java.lang.String of the value from the requested Parameter.
      * @throws NoSuchParameterException Thrown if the parameter was not parsed from the HTTP request
      */
-    public String getParameter(java.lang.String name) throws NoSuchParameterException {
+    public String getParameter(java.lang.String name) {
         String parameter = (String) parameters.get(name);
         if (parameter != null)
             return parameter;
         else
-            throw new NoSuchParameterException("Parameter, " + name + " was not found. "
-                    + "Contact Helpdesk. ", name);
+            throw new NoSuchParameterException(name);
     }
 
     /**

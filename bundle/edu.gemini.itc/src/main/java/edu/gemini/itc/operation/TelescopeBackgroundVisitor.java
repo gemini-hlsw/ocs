@@ -42,21 +42,21 @@ public class TelescopeBackgroundVisitor implements SampledSpectrumVisitor {
     private String getFileName(final TeleParameters tp) {
         switch (tp.getInstrumentPort()) {
 
-            case TeleParameters.UP:
+            case UP_LOOKING:
                 switch (tp.getMirrorCoating()) {
-                    case TeleParameters.ALUMINIUM:
+                    case ALUMINIUM:
                         return "_2al";
-                    case TeleParameters.SILVER:
+                    case SILVER:
                         return "_2ag";
                     default:
                         throw new IllegalArgumentException("unknown coating");
                 }
 
-            case TeleParameters.SIDE:
+            case SIDE_LOOKING:
                 switch (tp.getMirrorCoating()) {
-                    case TeleParameters.ALUMINIUM:
+                    case ALUMINIUM:
                         return "_2al+1ag";
-                    case TeleParameters.SILVER:
+                    case SILVER:
                         return "_3ag";
                     default:
                         throw new IllegalArgumentException("unknown coating");

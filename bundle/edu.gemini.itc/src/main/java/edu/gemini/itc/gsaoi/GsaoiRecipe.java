@@ -548,14 +548,13 @@ public final class GsaoiRecipe extends RecipeBase {
     }
 
     public String printTeleParametersSummary() {
-        return printTeleParametersSummary(_teleParameters.getWFS());
+        return printTeleParametersSummary(_teleParameters.getWFS().displayValue());
     }
 
     public String printTeleParametersSummary(String wfs) {
         StringBuffer sb = new StringBuffer();
         sb.append("Telescope configuration: \n");
-        sb.append("<LI>" + _teleParameters.getMirrorCoating() + " mirror coating.\n");
-//		sb.append("<LI>" + _teleParameters.getInstrumentPort() + " looking port.\n");
+        sb.append("<LI>" + _teleParameters.getMirrorCoating().displayValue() + " mirror coating.\n");
         sb.append("<LI>wavefront sensor: " + wfs + "\n");
         return sb.toString();
     }
