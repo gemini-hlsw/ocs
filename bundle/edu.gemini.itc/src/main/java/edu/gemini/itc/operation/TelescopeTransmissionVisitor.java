@@ -19,7 +19,7 @@ public final class TelescopeTransmissionVisitor {
      * type of coating is used, and the other detailing how many mirrors
      * should be used.
      */
-    public static TransmissionElement create(final TeleParameters tp) throws Exception {
+    public static TransmissionElement create(final TeleParameters tp) {
 
         final String coating;
         switch (tp.getMirrorCoating()) {

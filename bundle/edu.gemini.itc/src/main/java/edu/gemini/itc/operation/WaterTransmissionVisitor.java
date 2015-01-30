@@ -17,11 +17,11 @@ public final class WaterTransmissionVisitor {
     /**
      * Constructs transmission visitor for water vapor.
      */
-    public static SampledSpectrumVisitor create(int skyTransparencyWater) throws Exception {
+    public static SampledSpectrumVisitor create(int skyTransparencyWater) {
         return new TransmissionElement(ITCConstants.TRANSMISSION_LIB + "/" + FILENAME + skyTransparencyWater + ITCConstants.DATA_SUFFIX);
     }
 
-    public static SampledSpectrumVisitor create(int skyTransparencyWater, double airMass, String file_name, String site, String wavelenRange) throws Exception {
+    public static SampledSpectrumVisitor create(int skyTransparencyWater, double airMass, String file_name, String site, String wavelenRange) {
 
         final String name;
 

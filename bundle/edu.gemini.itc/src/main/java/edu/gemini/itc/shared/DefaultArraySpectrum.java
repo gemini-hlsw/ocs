@@ -58,7 +58,7 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
      *                 Each line of a ArraySpectrum data file consists of two doubles
      *                 separated by whitespace or comma.
      */
-    public DefaultArraySpectrum(String fileName) throws Exception {
+    public DefaultArraySpectrum(String fileName) {
         final double[][] data = DatFile.arrays().apply(fileName);
         // for now make a copy of cached values, just to be on the safe side
         _data = new double[2][];

@@ -22,7 +22,7 @@ public class ImageQualityCalculation implements ImageQualityCalculatable {
         this.effectiveWavelength = effectiveWavelength;
     }
 
-    public void calculate() throws Exception {
+    public void calculate() {
         ArraySpectrum im_qual_model = new DefaultArraySpectrum(im_qual_model_file);
         im_qual = im_qual_model.getY(effectiveWavelength) * (Math.pow(airmass, 0.6));
     }

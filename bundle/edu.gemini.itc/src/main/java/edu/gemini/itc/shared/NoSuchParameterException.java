@@ -1,6 +1,6 @@
 package edu.gemini.itc.shared;
 
-public class NoSuchParameterException extends Error {
+public class NoSuchParameterException extends RuntimeException {
 
     public java.lang.String parameterName;
 

@@ -81,7 +81,7 @@ public final class ObservationDetailsParameters extends ITCParameters {
      * @param r Servlet request containing the form data.
      * @throws Exception if input data is not parsable.
      */
-    public ObservationDetailsParameters(HttpServletRequest r) throws Exception {
+    public ObservationDetailsParameters(HttpServletRequest r) {
         parseServletRequest(r);
     }
 
@@ -92,14 +92,14 @@ public final class ObservationDetailsParameters extends ITCParameters {
      * @throws Exception of cannot parse any of the parameters.
      */
 
-    public ObservationDetailsParameters(ITCMultiPartParser p) throws Exception {
+    public ObservationDetailsParameters(ITCMultiPartParser p) {
         parseMultipartParameters(p);
     }
 
     /**
      * Parse parameters from a servlet request.
      */
-    public void parseServletRequest(HttpServletRequest r) throws Exception {
+    public void parseServletRequest(HttpServletRequest r) {
         // Parse the observation details section of the form.
         _calcMode = r.getParameter(CALC_MODE);
         if (_calcMode == null) {
@@ -155,7 +155,7 @@ public final class ObservationDetailsParameters extends ITCParameters {
                         ITCParameters.parseDouble(s, "Exposures containing source");
                 if (_sourceFraction < 0) _sourceFraction *= -1;
             } else {
-                throw new Exception("Unrecognized calculation method: " +
+                throw new IllegalArgumentException("Unrecognized calculation method: " +
                         getCalculationMethod());
             }
         } else if (_calcMode.equals(SPECTROSCOPY)) {
@@ -186,12 +186,12 @@ public final class ObservationDetailsParameters extends ITCParameters {
                 if (_sourceFraction < 0) _sourceFraction *= -1;
 
             } else {
-                throw new Exception("Total integration time to achieve a specific \n" +
+                throw new IllegalArgumentException("Total integration time to achieve a specific \n" +
                         "S/N ratio is not supported in spectroscopy mode.  \nPlease select the Total S/N method. ");
 
             }
         } else {
-            throw new Exception("Unrecognized calculation mode: " +
+            throw new IllegalArgumentException("Unrecognized calculation mode: " +
                     getCalculationMode());
         }
 
@@ -213,18 +213,18 @@ public final class ObservationDetailsParameters extends ITCParameters {
                     ITCParameters.parseDouble(aperDiam, "Aperture diameter");
             if (_apertureDiameter < 0) _apertureDiameter *= -1;
         } else {
-            throw new Exception("Unrecognized aperture type: " +
+            throw new IllegalArgumentException("Unrecognized aperture type: " +
                     _apertureType);
         }
         _skyApertureDiameter = ITCParameters.parseDouble(skyAper, "Sky Aperture Diameter");
         if (_skyApertureDiameter < 1)
-            throw new Exception("The Sky aperture: " + _skyApertureDiameter +
+            throw new IllegalArgumentException("The Sky aperture: " + _skyApertureDiameter +
                     " must be 1 or greater.  Please retype the value and resubmit.");
 
     }
 
 
-    public void parseMultipartParameters(ITCMultiPartParser p) throws Exception {
+    public void parseMultipartParameters(ITCMultiPartParser p) {
         // Parse Telescope details section of the form.
         try {
             _calcMode = p.getParameter(CALC_MODE);
@@ -247,7 +247,7 @@ public final class ObservationDetailsParameters extends ITCParameters {
                 if (_sourceFraction < 0) _sourceFraction *= -1;
             } else if (_calcMethod.equals(INTTIME)) {
                 if (_calcMode.equals(SPECTROSCOPY)) {
-                    throw new Exception("Total integration time to achieve a specific \nS/N ratio is not supported in spectroscopy mode.  \nPlease select the Total S/N method. ");
+                    throw new IllegalArgumentException("Total integration time to achieve a specific \nS/N ratio is not supported in spectroscopy mode.  \nPlease select the Total S/N method. ");
                 }
                 if (p.parameterExists(EXP_TIME_2)) {
                     _exposureTime = ITCParameters.parseDouble(p.getParameter(EXP_TIME_2), "Exposure Time");
@@ -260,7 +260,7 @@ public final class ObservationDetailsParameters extends ITCParameters {
                 if (_sourceFraction < 0) _sourceFraction *= -1;
 
             } else {
-                throw new Exception("Unrecognized calculation mode: " + getCalculationMode());
+                throw new IllegalArgumentException("Unrecognized calculation mode: " + getCalculationMode());
             }
 
             // Aperture Section
@@ -273,15 +273,15 @@ public final class ObservationDetailsParameters extends ITCParameters {
                 _apertureDiameter = ITCParameters.parseDouble(p.getParameter(APER_DIAM), "Aperture Diameter");
                 if (_apertureDiameter < 0) _apertureDiameter *= -1;
             } else {
-                throw new Exception("Unrecognized Aperture type: " + _apertureType + ". Contact Helpdesk.");
+                throw new IllegalArgumentException("Unrecognized Aperture type: " + _apertureType + ". Contact Helpdesk.");
             }
             _skyApertureDiameter = ITCParameters.parseDouble(skyAper, "Sky Aperture Diameter");
             if (_skyApertureDiameter < 0) _skyApertureDiameter *= -1;
             if (_skyApertureDiameter < 1)
-                throw new Exception("The Sky aperture: " + _skyApertureDiameter + " must be 1 or greater.  Please retype the value and resubmit.");
+                throw new IllegalArgumentException("The Sky aperture: " + _skyApertureDiameter + " must be 1 or greater.  Please retype the value and resubmit.");
 
         } catch (NoSuchParameterException e) {
-            throw new Exception("The parameter " + e.parameterName + " could not be found in the Observation" +
+            throw new IllegalArgumentException("The parameter " + e.parameterName + " could not be found in the Observation" +
                     " Details Section of the form. \nEither add this value or Contact the Helpdesk.");
         }
     }

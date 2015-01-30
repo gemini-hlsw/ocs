@@ -1,13 +1,3 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-// $Id: VisitableSampledSpectrum.java,v 1.2 2003/11/21 14:31:02 shane Exp $
-//
 package edu.gemini.itc.shared;
 
 /**
@@ -32,5 +22,5 @@ public interface VisitableSampledSpectrum extends SampledSpectrum {
      * SampledSpectrumVisitor r = new ResampleVisitor();
      * s.Accept(r);
      */
-    void accept(SampledSpectrumVisitor v) throws Exception;
+    void accept(SampledSpectrumVisitor v);
 }

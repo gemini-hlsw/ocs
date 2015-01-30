@@ -1,13 +1,3 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-// $Id: AcquisitionCamera.java,v 1.4 2003/11/21 14:31:02 shane Exp $
-//
 package edu.gemini.itc.acqcam;
 
 import edu.gemini.itc.shared.*;
@@ -43,8 +33,7 @@ public class AcquisitionCamera extends Instrument {
     /**
      * construct an AcquisitionCamera with specified color filter and ND filter.
      */
-    public AcquisitionCamera(String filterBand, String ndFilter)
-            throws Exception {
+    public AcquisitionCamera(String filterBand, String ndFilter) {
         super(INSTR_DIR, FILENAME);
         // The instrument data file gives a start/end wavelength for
         // the instrument.  But with a filter in place, the filter

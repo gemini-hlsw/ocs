@@ -24,7 +24,7 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
     /**
      * This method performs the Detectors transmision manipulation on the SED.
      */
-    public void visit(SampledSpectrum sed) throws Exception {
+    public void visit(SampledSpectrum sed) {
         for (int i = 0; i < sed.getLength(); i++) {
             sed.setY(i,
                     sed.getY(i * sed.getSampling() + sed.getStart()) *
@@ -34,7 +34,7 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
         }
     }
 
-    private void initialize(final double[][] data) throws Exception {
+    private void initialize(final double[][] data) {
         // need to sample the file at regular interval pixel values
         int finalPixelValue = (int) data[0][data[0].length - 1];
         double[] pixelData = new double[finalPixelValue];

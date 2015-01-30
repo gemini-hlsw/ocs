@@ -17,7 +17,7 @@ public class TelescopeBackgroundVisitor implements SampledSpectrumVisitor {
      * We will use a different background file for different
      * ports and coatings.
      */
-    public TelescopeBackgroundVisitor(final TeleParameters tp, final String site, final String wavelenRange) throws Exception {
+    public TelescopeBackgroundVisitor(final TeleParameters tp, final String site, final String wavelenRange) {
 
         final String _fullBackgroundResource;
         if (!wavelenRange.equals(ITCConstants.VISIBLE)) {
@@ -70,7 +70,7 @@ public class TelescopeBackgroundVisitor implements SampledSpectrumVisitor {
     /**
      * Implements the SampledSpectrumVisitor interface
      */
-    public void visit(SampledSpectrum sed) throws Exception {
+    public void visit(SampledSpectrum sed) {
         for (int i = 0; i < sed.getLength(); i++) {
             sed.setY(i, telescopeBack.getY(sed.getX(i)) + sed.getY(i));
         }

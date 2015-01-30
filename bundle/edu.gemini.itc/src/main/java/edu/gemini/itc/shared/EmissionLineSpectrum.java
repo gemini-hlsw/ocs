@@ -99,7 +99,7 @@ public class EmissionLineSpectrum implements VisitableSampledSpectrum {
         _spectrum.reset(s, v, r);
     }
 
-    public void accept(SampledSpectrumVisitor v) throws Exception {
+    public void accept(SampledSpectrumVisitor v) {
         _spectrum.accept(v);
     }
 

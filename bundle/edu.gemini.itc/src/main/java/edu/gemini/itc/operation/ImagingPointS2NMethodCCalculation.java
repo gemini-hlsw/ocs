@@ -1,12 +1,5 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-
-/// THis is not really Method C it is just a copy of B I need to change this later
+// TODO: FN: is this really still just a copy, if so, get rid of it!
+// Ancient comment: THis is not really Method C it is just a copy of B I need to change this later
 
 package edu.gemini.itc.operation;
 
@@ -15,8 +8,7 @@ import edu.gemini.itc.shared.FormatStringWriter;
 public class ImagingPointS2NMethodCCalculation extends ImagingS2NCalculation {
 
     int number_exposures, int_req_source_exposures;
-    double frac_with_source, exp_s2n, final_s2n, number_source_exposures,
-            req_s2n, req_source_exposures, req_number_exposures,
+    double frac_with_source, req_s2n, req_source_exposures, req_number_exposures,
             effective_s2n;
 
     public ImagingPointS2NMethodCCalculation(int number_exposures,
@@ -34,7 +26,7 @@ public class ImagingPointS2NMethodCCalculation extends ImagingS2NCalculation {
 
     }
 
-    public void calculate() throws Exception {
+    public void calculate() {
         super.calculate();
         req_source_exposures = (req_s2n / signal) * (req_s2n / signal) *
                 (signal + noiseFactor * sourceless_noise * sourceless_noise);

@@ -19,7 +19,7 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
 
     public BlackBodySpectrum(double temp, double start, double end,
                              double interval, double flux, String units,
-                             String band, double z) throws Exception {
+                             String band, double z) {
         double _flux;
         double _S;
         // This is to buffer the sed for normailisation.
@@ -200,7 +200,7 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
         _spectrum.applyWavelengthCorrection();
     }
 
-    public void accept(SampledSpectrumVisitor v) throws Exception {
+    public void accept(SampledSpectrumVisitor v) {
         _spectrum.accept(v);
     }
 

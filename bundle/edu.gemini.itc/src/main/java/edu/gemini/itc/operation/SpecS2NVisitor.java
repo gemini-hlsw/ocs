@@ -1,18 +1,8 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may
-// only be used or copied as described in the license set out in the
-// file LICENSE.TXT included with the distribution package.
-
 package edu.gemini.itc.operation;
 
 import edu.gemini.itc.shared.SampledSpectrum;
 import edu.gemini.itc.shared.SampledSpectrumVisitor;
 import edu.gemini.itc.shared.VisitableSampledSpectrum;
-
-//import edu.gemini.itc.gmos.DetectorsTransmissionVisitor;
 
 /**
  * The SpecS2NVisitor is used to calculate the s2n of an observation using
@@ -63,7 +53,7 @@ public class SpecS2NVisitor implements SampledSpectrumVisitor {
     /**
      * Implements the SampledSpectrumVisitor interface
      */
-    public void visit(SampledSpectrum sed) throws Exception {
+    public void visit(SampledSpectrum sed) {
         this.obs_wave = (obs_wave_low + obs_wave_high) / 2;
 
 

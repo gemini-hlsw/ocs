@@ -16,7 +16,7 @@ public final class CloudTransmissionVisitor {
     /**
      * Constructs transmission visitor for clouds.
      */
-    public static TransmissionElement create(int skyTransparencyCloud) throws Exception {
+    public static TransmissionElement create(int skyTransparencyCloud) {
         return new TransmissionElement(ITCConstants.TRANSMISSION_LIB + "/" + FILENAME +
                 skyTransparencyCloud + ITCConstants.DATA_SUFFIX);
     }

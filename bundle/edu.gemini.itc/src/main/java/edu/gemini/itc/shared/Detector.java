@@ -1,9 +1,3 @@
-// Copyright 1999 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
-//
-//
-//
 package edu.gemini.itc.shared;
 
 import java.awt.*;
@@ -15,14 +9,14 @@ public class Detector extends TransmissionElement {
     private String _name;
     private Color _color; // Optional color for plot
 
-    public Detector(String directory, String prefix, String filename, String detectorType) throws Exception {
+    public Detector(String directory, String prefix, String filename, String detectorType) {
         super(directory + prefix + filename + Instrument.getSuffix());
         _detectorType = detectorType;
         _name = "";
         _color = null;
     }
 
-    public Detector(String directory, String prefix, String filename, String detectorType, String name, Color color) throws Exception {
+    public Detector(String directory, String prefix, String filename, String detectorType, String name, Color color) {
         super(directory + prefix + filename + Instrument.getSuffix());
         _detectorType = detectorType;
         _name = name;

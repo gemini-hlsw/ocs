@@ -1,13 +1,3 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-// $Id: AtmosphereVisitor.java,v 1.2 2003/11/21 14:31:02 shane Exp $
-//
 package edu.gemini.itc.operation;
 
 import edu.gemini.itc.shared.*;
@@ -30,7 +20,7 @@ public class AtmosphereVisitor implements SampledSpectrumVisitor {
      * We will use a different convolution file for different
      * airmass ranges.
      */
-    public AtmosphereVisitor(double airmass) throws Exception {
+    public AtmosphereVisitor(double airmass) {
         _airmass = airmass;
         if (_airmass < 1.26) {
             FILENAME = "atmosphere_extinction_airmass10";
@@ -55,23 +45,11 @@ public class AtmosphereVisitor implements SampledSpectrumVisitor {
     /**
      * Implements the SampledSpectrumVisitor interface
      */
-    public void visit(SampledSpectrum sed) throws Exception {
+    public void visit(SampledSpectrum sed) {
         for (int i = 0; i < sed.getLength(); i++) {
             sed.setY(i, _transmission.getY(sed.getX(i)) * sed.getY(i));
         }
     }
-
-    /**
-     * This is the old implimentation of the SampledSpectrumVisitor interface
-     * it was commented out Oct 4 1999 by Brian Walls
-     * public void visit(SampledSpectrum sed) throws Exception
-     * {
-     * for (int i=0; i < sed.getLength(); i++) {
-     * double power = -0.4*_transmission.getY(sed.getX(i))*getAirMass();
-     * sed.setY(i, Math.pow(10, power)*sed.getY(i));
-     * }
-     * }
-     */
 
     public String toString() {
         return "AtmosphereVisitor using airmass " + _airmass;

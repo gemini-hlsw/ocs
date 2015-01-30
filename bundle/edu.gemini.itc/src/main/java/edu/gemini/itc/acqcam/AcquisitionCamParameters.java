@@ -47,7 +47,7 @@ public final class AcquisitionCamParameters extends ITCParameters {
      * @param r Servlet request containing the form data.
      * @throws Exception if input data is not parsable.
      */
-    public AcquisitionCamParameters(HttpServletRequest r) throws Exception {
+    public AcquisitionCamParameters(HttpServletRequest r) {
         parseServletRequest(r);
     }
 
@@ -58,14 +58,14 @@ public final class AcquisitionCamParameters extends ITCParameters {
      * @throws Exception of cannot parse any of the parameters.
      */
 
-    public AcquisitionCamParameters(ITCMultiPartParser p) throws Exception {
+    public AcquisitionCamParameters(ITCMultiPartParser p) {
         parseMultipartParameters(p);
     }
 
     /**
      * Parse parameters from a servlet request.
      */
-    public void parseServletRequest(HttpServletRequest r) throws Exception {
+    public void parseServletRequest(HttpServletRequest r) {
         // Parse the acquisition camera section of the form.
 
         // Get color filter
@@ -84,13 +84,13 @@ public final class AcquisitionCamParameters extends ITCParameters {
     /**
      * Parse Parameters from a multipart servlet request
      */
-    public void parseMultipartParameters(ITCMultiPartParser p) throws Exception {
+    public void parseMultipartParameters(ITCMultiPartParser p) {
         // Parse Acquisition Cam details section of the form.
         try {
             _colorFilter = p.getParameter(INSTRUMENT_FILTER);
             _ndFilter = p.getParameter(INSTRUMENT_ND_FILTER);
         } catch (NoSuchParameterException e) {
-            throw new Exception("The parameter " + e.parameterName + " could not be found in the Telescope" +
+            throw new IllegalArgumentException("The parameter " + e.parameterName + " could not be found in the Telescope" +
                     " Paramters Section of the form.  Either add this value or Contact the Helpdesk.");
         }
     }
