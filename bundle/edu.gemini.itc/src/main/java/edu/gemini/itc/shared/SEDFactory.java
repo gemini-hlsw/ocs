@@ -66,7 +66,7 @@ public class SEDFactory {
     public static VisitableSampledSpectrum getSED(String fileName, String userSED, double wavelengthInterval) {
         // values <= 0 used to trigger different behavior in an older version but seems not be used anymore
         assert wavelengthInterval > 0.0;
-        final DefaultArraySpectrum as = DefaultArraySpectrum.fromString(userSED);
+        final DefaultArraySpectrum as = DefaultArraySpectrum.fromUserSpectrum(userSED);
         return new DefaultSampledSpectrum(as, wavelengthInterval);
     }
 

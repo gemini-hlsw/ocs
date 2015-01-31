@@ -79,6 +79,11 @@ object DatFile {
     }
   }
 
+  def fromUserSpectrum(s: String) = {
+    val scan = new Scanner(s).useDelimiter(Delimiters)
+    scanArray(scan)
+  }
+
   // ===== Cached data file loaders
 
   val arrays = cache { s =>

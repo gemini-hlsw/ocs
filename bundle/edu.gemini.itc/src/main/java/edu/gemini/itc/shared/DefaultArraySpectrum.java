@@ -14,8 +14,8 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
     // data[1][i] = y values
     private final double[][] _data;
 
-    public static DefaultArraySpectrum fromString(String spectrum) {
-        final double[][] data = DatFile.arrays().apply(spectrum);
+    public static DefaultArraySpectrum fromUserSpectrum(String spectrum) {
+        final double[][] data = DatFile.fromUserSpectrum(spectrum);
         return new DefaultArraySpectrum(data);
     }
 
