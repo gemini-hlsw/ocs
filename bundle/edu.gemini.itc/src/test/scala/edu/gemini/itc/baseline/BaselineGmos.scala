@@ -77,7 +77,7 @@ object BaselineGmos {
     new GmosParameters(
       GmosParameters.G_G0301,
       GmosParameters.R150_G5306,
-      GmosParameters.LOW_READ_NOISE,
+      GmosParameters.HIGH_READ_NOISE,
       GmosParameters.HIGH_WELL_DEPTH,
       "4.7",
       "500",
@@ -92,7 +92,7 @@ object BaselineGmos {
       GmosParameters.GMOS_NORTH),
     new GmosParameters(
       GmosParameters.G_G0301,
-      GmosParameters.R150_G5306,
+      GmosParameters.R400_G5305,
       GmosParameters.LOW_READ_NOISE,
       GmosParameters.HIGH_WELL_DEPTH,
       "4.7",

@@ -210,10 +210,9 @@ object Hash {
 
   def calc(tp: TeleParameters): Int =
     hash(
-      tp.getInstrumentPort,
-      tp.getMirrorCoating,
-      tp.getTelescopeDiameter,
-      tp.getWFS
+      tp.getInstrumentPort.displayValue,
+      tp.getMirrorCoating.displayValue,
+      tp.getWFS.displayValue
     )
 
   def calc(ocp: ObservingConditionParameters): Int =

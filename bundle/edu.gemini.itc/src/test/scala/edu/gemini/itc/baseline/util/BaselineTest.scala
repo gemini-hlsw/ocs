@@ -29,6 +29,7 @@ class BaselineTest {
     // also checks if we have any problems with our makeshift hash values
     if (baseSeq.size != baseMap.size) throw new Exception("There are baselines with identical keys!")
     // --
+    System.out.println(s"Writing new baseline with ${baseSeq.size} entries")
     Baseline.write(baseSeq)
   }
 
