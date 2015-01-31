@@ -1,17 +1,7 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-//
 package edu.gemini.itc.gnirs;
 
 import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCParameters;
-import edu.gemini.itc.shared.NoSuchParameterException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -93,7 +83,7 @@ public final class GnirsParameters extends ITCParameters {
      * @param r Servlet request containing the form data.
      * @throws Exception if input data is not parsable.
      */
-    public GnirsParameters(HttpServletRequest r) throws Exception {
+    public GnirsParameters(HttpServletRequest r) {
         parseServletRequest(r);
     }
 
@@ -104,14 +94,14 @@ public final class GnirsParameters extends ITCParameters {
      * @throws Exception of cannot parse any of the parameters.
      */
 
-    public GnirsParameters(ITCMultiPartParser p) throws Exception {
+    public GnirsParameters(ITCMultiPartParser p) {
         parseMultipartParameters(p);
     }
 
     /**
      * Parse parameters from a servlet request.
      */
-    public void parseServletRequest(HttpServletRequest r) throws Exception {
+    public void parseServletRequest(HttpServletRequest r) {
         // Parse the acquisition camera section of the form.
 
         // Get Grating
@@ -154,22 +144,16 @@ public final class GnirsParameters extends ITCParameters {
         }
     }
 
-    public void parseMultipartParameters(ITCMultiPartParser p) throws Exception {
-        // Parse Gnirs details section of the form.
-        try {
-            _grating = p.getParameter(INSTRUMENT_GRATING);
-            _camera = p.getParameter(INSTRUMENT_CAMERA);
-            _xDisp = p.getParameter(X_DISP);
-            _readNoise = p.getParameter(READ_NOISE);
-            _instrumentCentralWavelength = p.getParameter(INSTRUMENT_CENTRAL_WAVELENGTH);
-            if (_instrumentCentralWavelength.equals(" ")) {
-                _instrumentCentralWavelength = "0";
-            }
-            _FP_Mask = p.getParameter(FP_MASK);
-        } catch (NoSuchParameterException e) {
-            throw new Exception("The parameter " + e.parameterName + " could not be found in the Telescope" +
-                    " Parameters Section of the form.  Either add this value or Contact the Helpdesk.");
+    public void parseMultipartParameters(ITCMultiPartParser p) {
+        _grating = p.getParameter(INSTRUMENT_GRATING);
+        _camera = p.getParameter(INSTRUMENT_CAMERA);
+        _xDisp = p.getParameter(X_DISP);
+        _readNoise = p.getParameter(READ_NOISE);
+        _instrumentCentralWavelength = p.getParameter(INSTRUMENT_CENTRAL_WAVELENGTH);
+        if (_instrumentCentralWavelength.equals(" ")) {
+            _instrumentCentralWavelength = "0";
         }
+        _FP_Mask = p.getParameter(FP_MASK);
     }
 
     /**

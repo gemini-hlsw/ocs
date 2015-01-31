@@ -17,7 +17,7 @@ public abstract class ITCParameters {
     public static String getParameter(final HttpServletRequest r, final String parameter) {
         final String value = r.getParameter(parameter);
         if (value == null) {
-            throw new NoSuchParameterException(parameter);
+            throw new IllegalArgumentException("Parameter " + parameter + "not found in request.");
         }
         return value;
     }

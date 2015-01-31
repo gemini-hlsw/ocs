@@ -3,7 +3,6 @@ package edu.gemini.itc.parameters;
 import edu.gemini.itc.shared.FormatStringWriter;
 import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCParameters;
-import edu.gemini.itc.shared.NoSuchParameterException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -101,19 +100,11 @@ public final class ObservingConditionParameters extends ITCParameters {
     }
 
     public void parseMultipartParameters(ITCMultiPartParser p) {
-        // Parse Observing Condition details section of the form.
-        try {
-            _imageQuality = ITCParameters.parseInt(p.getParameter(IMAGE_QUALITY), "Image Quality");
-            _skyTransCloud = ITCParameters.parseInt(p.getParameter(SKY_TRANS_CLOUD), "Sky transparency (cloud cover)");
-            _skyTransWater = ITCParameters.parseInt(p.getParameter(SKY_TRANS_WATER), "Sky transparency (water vapour)");
-            _skyBackground = ITCParameters.parseInt(p.getParameter(SKY_BACKGROUND), "Sky background");
-            _airmass = ITCParameters.parseDouble(p.getParameter(AIRMASS), "Airmass");
-
-
-        } catch (NoSuchParameterException e) {
-            throw new IllegalArgumentException("The parameter " + e.parameterName + " could not be found in the Telescope" +
-                    " Parameters Section of the form.  Either add this value or Contact the Helpdesk.");
-        }
+        _imageQuality = ITCParameters.parseInt(p.getParameter(IMAGE_QUALITY), "Image Quality");
+        _skyTransCloud = ITCParameters.parseInt(p.getParameter(SKY_TRANS_CLOUD), "Sky transparency (cloud cover)");
+        _skyTransWater = ITCParameters.parseInt(p.getParameter(SKY_TRANS_WATER), "Sky transparency (water vapour)");
+        _skyBackground = ITCParameters.parseInt(p.getParameter(SKY_BACKGROUND), "Sky background");
+        _airmass = ITCParameters.parseDouble(p.getParameter(AIRMASS), "Airmass");
     }
 
     /**

@@ -1,18 +1,7 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-// $Id: AcquisitionCamParameters.java,v 1.4 2003/11/21 14:31:02 shane Exp $
-//
 package edu.gemini.itc.acqcam;
 
 import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCParameters;
-import edu.gemini.itc.shared.NoSuchParameterException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -85,14 +74,8 @@ public final class AcquisitionCamParameters extends ITCParameters {
      * Parse Parameters from a multipart servlet request
      */
     public void parseMultipartParameters(ITCMultiPartParser p) {
-        // Parse Acquisition Cam details section of the form.
-        try {
-            _colorFilter = p.getParameter(INSTRUMENT_FILTER);
-            _ndFilter = p.getParameter(INSTRUMENT_ND_FILTER);
-        } catch (NoSuchParameterException e) {
-            throw new IllegalArgumentException("The parameter " + e.parameterName + " could not be found in the Telescope" +
-                    " Paramters Section of the form.  Either add this value or Contact the Helpdesk.");
-        }
+        _colorFilter = p.getParameter(INSTRUMENT_FILTER);
+        _ndFilter = p.getParameter(INSTRUMENT_ND_FILTER);
     }
 
     /**

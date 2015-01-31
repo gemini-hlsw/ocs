@@ -1,17 +1,7 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-//
 package edu.gemini.itc.gmos;
 
 import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCParameters;
-import edu.gemini.itc.shared.NoSuchParameterException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -108,7 +98,7 @@ public final class GmosParameters extends ITCParameters {
      * @param r Servlet request containing the form data.
      * @throws Exception if input data is not parsable.
      */
-    public GmosParameters(HttpServletRequest r) throws Exception {
+    public GmosParameters(HttpServletRequest r)  {
         parseServletRequest(r);
     }
 
@@ -119,14 +109,14 @@ public final class GmosParameters extends ITCParameters {
      * @throws Exception of cannot parse any of the parameters.
      */
 
-    public GmosParameters(ITCMultiPartParser p) throws Exception {
+    public GmosParameters(ITCMultiPartParser p) {
         parseMultipartParameters(p);
     }
 
     /**
      * Parse parameters from a servlet request.
      */
-    public void parseServletRequest(HttpServletRequest r) throws Exception {
+    public void parseServletRequest(HttpServletRequest r) {
         // Parse the acquisition camera section of the form.
 
         // Get filter
@@ -212,40 +202,28 @@ public final class GmosParameters extends ITCParameters {
 
     }
 
-    public void parseMultipartParameters(ITCMultiPartParser p) throws Exception {
-        // Parse GMOS details section of the form.
-        //       try {
-//	_CCDtype = p.getParameter(CCD_TYPE);
-        //      }
-//	finally {
-//	}
-//System.out.println(_instrumentLocation);
-        try {
-            _Filter = p.getParameter(INSTRUMENT_FILTER);
-            _grating = p.getParameter(INSTRUMENT_GRATING);
-            _spatBinning = p.getParameter(SPAT_BINNING);
-            _specBinning = p.getParameter(SPEC_BINNING);
-            _CCDtype = p.getParameter(CCD_TYPE);
-            _instrumentCentralWavelength = p.getParameter(INSTRUMENT_CENTRAL_WAVELENGTH);
-            if (_instrumentCentralWavelength.equals(" ")) {
-                _instrumentCentralWavelength = "0";
-            }
-            _FP_Mask = p.getParameter(FP_MASK);
-            if (_FP_Mask.equals(IFU)) {
-                _IFUMethod = p.getParameter(IFU_METHOD);
-                if (_IFUMethod.equals(SINGLE_IFU)) {
-                    _IFUOffset = p.getParameter(IFU_OFFSET);
-                } else if (_IFUMethod.equals(RADIAL_IFU)) {
-                    _IFUMinOffset = p.getParameter(IFU_MIN_OFFSET);
-                    _IFUMaxOffset = p.getParameter(IFU_MAX_OFFSET);
-                } else
-                    ITCParameters.notFoundException(" a correct value for the IFU Parameters. ");
-            }
-            _instrumentLocation = p.getParameter(INSTRUMENT_LOCATION);
-        } catch (NoSuchParameterException e) {
-            throw new Exception("The parameter " + e.parameterName + " could not be found in the Telescope" +
-                    " Paramters Section of the form.  Either add this value or Contact the Helpdesk.");
+    public void parseMultipartParameters(ITCMultiPartParser p) {
+        _Filter = p.getParameter(INSTRUMENT_FILTER);
+        _grating = p.getParameter(INSTRUMENT_GRATING);
+        _spatBinning = p.getParameter(SPAT_BINNING);
+        _specBinning = p.getParameter(SPEC_BINNING);
+        _CCDtype = p.getParameter(CCD_TYPE);
+        _instrumentCentralWavelength = p.getParameter(INSTRUMENT_CENTRAL_WAVELENGTH);
+        if (_instrumentCentralWavelength.equals(" ")) {
+            _instrumentCentralWavelength = "0";
         }
+        _FP_Mask = p.getParameter(FP_MASK);
+        if (_FP_Mask.equals(IFU)) {
+            _IFUMethod = p.getParameter(IFU_METHOD);
+            if (_IFUMethod.equals(SINGLE_IFU)) {
+                _IFUOffset = p.getParameter(IFU_OFFSET);
+            } else if (_IFUMethod.equals(RADIAL_IFU)) {
+                _IFUMinOffset = p.getParameter(IFU_MIN_OFFSET);
+                _IFUMaxOffset = p.getParameter(IFU_MAX_OFFSET);
+            } else
+                ITCParameters.notFoundException(" a correct value for the IFU Parameters. ");
+        }
+        _instrumentLocation = p.getParameter(INSTRUMENT_LOCATION);
     }
 
     /**
