@@ -6,55 +6,45 @@ import edu.gemini.itc.shared.Instrument;
 
 public final class ImagingS2NCalculationFactory {
 
-    private ImagingS2NCalculationFactory() {
-    }
+    private ImagingS2NCalculationFactory() {}
 
     public static ImagingS2NCalculatable getCalculationInstance(
-            final SourceDefinitionParameters sourceDefinitionParameters,
-            final ObservationDetailsParameters observationDetailsParameters,
+            final SourceDefinitionParameters sdp,
+            final ObservationDetailsParameters odp,
             final Instrument instrument) {
 
 
-        final String calcMethod = observationDetailsParameters.getCalculationMethod();
+        final String calcMethod = odp.getCalculationMethod();
         switch (calcMethod) {
 
             // --- Signal to noise
             case ObservationDetailsParameters.S2N:
                 return new ImagingS2NMethodACalculation(
-                        observationDetailsParameters.getNumExposures(),
-                        observationDetailsParameters.getSourceFraction(),
-                        observationDetailsParameters.getExposureTime(),
+                        odp.getNumExposures(),
+                        odp.getSourceFraction(),
+                        odp.getExposureTime(),
                         instrument.getReadNoise(),
                         instrument.getPixelSize());
 
             // --- Integration time
             case ObservationDetailsParameters.INTTIME:
-                if (sourceDefinitionParameters.getSourceGeometry().equals(SourceDefinitionParameters.EXTENDED_SOURCE)) {
-                    if (sourceDefinitionParameters.getExtendedSourceType().equals(SourceDefinitionParameters.UNIFORM)) {
-                        return new ImagingUSBS2NMethodBCalculation(
-                                observationDetailsParameters.getNumExposures(),
-                                observationDetailsParameters.getSourceFraction(),
-                                observationDetailsParameters.getExposureTime(),
-                                instrument.getReadNoise(),
-                                observationDetailsParameters.getSNRatio(),
-                                instrument.getPixelSize());
-                    } else {
-                        return new ImagingPointS2NMethodCCalculation(
-                                observationDetailsParameters.getNumExposures(),
-                                observationDetailsParameters.getSourceFraction(),
-                                observationDetailsParameters.getExposureTime(),
-                                instrument.getReadNoise(),
-                                observationDetailsParameters.getSNRatio(),
-                                instrument.getPixelSize());
-
-                    }
+                final boolean extendedSource = sdp.getSourceGeometry().equals(SourceDefinitionParameters.EXTENDED_SOURCE);
+                final boolean uniformSource  = sdp.getExtendedSourceType().equals(SourceDefinitionParameters.UNIFORM);
+                if (extendedSource && uniformSource) {
+                    return new ImagingUSBS2NMethodBCalculation(
+                            odp.getNumExposures(),
+                            odp.getSourceFraction(),
+                            odp.getExposureTime(),
+                            instrument.getReadNoise(),
+                            odp.getSNRatio(),
+                            instrument.getPixelSize());
                 } else {
                     return new ImagingPointS2NMethodBCalculation(
-                            observationDetailsParameters.getNumExposures(),
-                            observationDetailsParameters.getSourceFraction(),
-                            observationDetailsParameters.getExposureTime(),
+                            odp.getNumExposures(),
+                            odp.getSourceFraction(),
+                            odp.getExposureTime(),
                             instrument.getReadNoise(),
-                            observationDetailsParameters.getSNRatio(),
+                            odp.getSNRatio(),
                             instrument.getPixelSize());
                 }
 
