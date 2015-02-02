@@ -633,14 +633,14 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
           result must \\("queue", "key" -> "604c87d8-9bf8-96a8-0642-f70604c87d89", "tooOption" -> "None")
       }
     }
-    "proposal with Graces blueprints must be removed, REL-1350" in {
+    "proposal with Graces blueprints must be preserved, REL-2200" in {
       val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_graces.xml")))
 
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 4
-          changes must contain("The original proposal contained Graces observations. The instrument is not available and those resources have been removed.")
+          changes must have length 3
+          result \\ "graces" must \\("fiberMode") \> "2 fibers (target + sky, R~37k)"
       }
     }
   }

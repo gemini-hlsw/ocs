@@ -136,9 +136,8 @@ case object SemesterConverter2014BTo2015A extends SemesterConverter {
   val gsSubmission:TransformFunction = {
     case <ngo>{ns @ _*}</ngo> if (ns \\ "partner").text == "gs" => StepResult("Gemini Staff is no longer a valid partner and this time request has been removed", Nil).successNel
   }
-  val gracesRemoved = removeBlueprint("graces", "Graces")
   val texesRemoved = removeBlueprint("texes", "Texes")
-  override val transformers = List(gsSubmission, gracesRemoved, texesRemoved)
+  override val transformers = List(gsSubmission, texesRemoved)
 }
 /**
  * This converter is to current, as a minimum you need to convert a proposal to be the current version and semester
