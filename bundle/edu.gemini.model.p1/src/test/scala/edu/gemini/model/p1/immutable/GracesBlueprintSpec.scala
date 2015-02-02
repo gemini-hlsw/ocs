@@ -19,7 +19,7 @@ class GracesBlueprintSpec extends SpecificationWithJUnit with SemesterProperties
     }
     "have an appropriate public name" in {
       val blueprint = GracesBlueprint(M.GracesFiberMode.ONE_FIBER)
-      blueprint.name must beEqualTo("Graces 1 fiber (target, R~50000)")
+      blueprint.name must beEqualTo("Graces 1 fiber (target, R~48k)")
     }
     "is a visitor" in {
       val blueprint = GracesBlueprint(M.GracesFiberMode.ONE_FIBER)
@@ -30,7 +30,7 @@ class GracesBlueprintSpec extends SpecificationWithJUnit with SemesterProperties
       val xml = XML.loadString(ProposalIo.writeToString(proposal))
 
       // verify the blueprint has a false attribute
-      xml must \\("Graces") \("visitor") \> "true"
+      xml must \\("Graces") \"visitor" \> "true"
     }
     "export fiber mode to XML" in {
       val blueprint = GracesBlueprint(M.GracesFiberMode.ONE_FIBER)
@@ -40,7 +40,7 @@ class GracesBlueprintSpec extends SpecificationWithJUnit with SemesterProperties
       val xml = XML.loadString(ProposalIo.writeToString(proposal))
 
       // verify the exported value
-      xml must \\("fiberMode") \> ("1 fiber (target, R~50000)")
+      xml must \\("fiberMode") \> "1 fiber (target, R~48k)"
     }
     "be possible to deserialize" in {
       val proposal = ProposalIo.read(new InputStreamReader(getClass.getResourceAsStream("proposal_with_graces.xml")))

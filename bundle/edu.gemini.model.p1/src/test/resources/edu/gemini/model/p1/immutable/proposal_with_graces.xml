@@ -23,9 +23,9 @@
     <blueprints>
         <graces>
             <Graces id="blueprint-0">
-                <name>Graces 1 fiber (target, R~50000)</name>
+                <name>Graces 1 fiber (target, R~48k)</name>
                 <visitor>false</visitor>
-                <fiberMode>1 fiber (target, R~50000)</fiberMode>
+                <fiberMode>1 fiber (target, R~48k)</fiberMode>
             </Graces>
         </graces>
     </blueprints>
