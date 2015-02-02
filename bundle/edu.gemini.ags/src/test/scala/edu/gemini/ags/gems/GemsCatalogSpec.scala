@@ -20,8 +20,6 @@ import org.specs2.mutable.Specification
 class GemsCatalogSpec extends Specification {
   "GemsCatalog" should {
     "support executing queries" in {
-      skipped("Skipped as it requires GUI interaction")
-
       val url = getClass.getResource("/edu/gemini/spModel/gemsGuideStar/test.skycat.cfg")
       SkycatConfigFile.setConfigFile(url)
 

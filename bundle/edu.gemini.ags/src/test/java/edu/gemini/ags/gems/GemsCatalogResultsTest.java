@@ -41,11 +41,10 @@ import java.util.SortedSet;
 /**
  * See OT-27
  */
-@Ignore
 public class GemsCatalogResultsTest  implements MascotProgress {
     @Before
     public void init() {
-        URL url = getClass().getResource("test.skycat.cfg");
+        URL url = getClass().getResource("/edu/gemini/spModel/gemsGuideStar/test.skycat.cfg");
         assert(url != null);
         SkycatConfigFile.setConfigFile(url);
     }
@@ -78,15 +77,14 @@ public class GemsCatalogResultsTest  implements MascotProgress {
         assertTrue(set.contains(Canopus.Wfs.cwfs2));
         assertTrue(set.contains(Canopus.Wfs.cwfs3));
 
-        assertTrue(set.contains(GsaoiOdgw.odgw1));
+        assertFalse(set.contains(GsaoiOdgw.odgw1));
         assertFalse(set.contains(GsaoiOdgw.odgw2));
-        assertFalse(set.contains(GsaoiOdgw.odgw3));
+        assertTrue(set.contains(GsaoiOdgw.odgw3));
         assertFalse(set.contains(GsaoiOdgw.odgw4));
 
         Coordinates cwfs1 = group.get(Canopus.Wfs.cwfs1).getValue().getPrimary().getValue().getTarget().getSkycalcCoordinates();
         Coordinates cwfs2 = group.get(Canopus.Wfs.cwfs2).getValue().getPrimary().getValue().getTarget().getSkycalcCoordinates();
         Coordinates cwfs3 = group.get(Canopus.Wfs.cwfs3).getValue().getPrimary().getValue().getTarget().getSkycalcCoordinates();
-        Coordinates odgw1 = group.get(GsaoiOdgw.odgw1).getValue().getPrimary().getValue().getTarget().getSkycalcCoordinates();
 
         Coordinates cwfs1x = Coordinates.create("17:25:20.057", "-48:27:39.99");
         Coordinates cwfs2x = Coordinates.create("17:25:20.321", "-48:28:47.20");
@@ -101,9 +99,6 @@ public class GemsCatalogResultsTest  implements MascotProgress {
 
         assertEquals(cwfs3x.getRaDeg(), cwfs3.getRaDeg(), 0.001);
         assertEquals(cwfs3x.getDecDeg(), cwfs3.getDecDeg(), 0.001);
-
-        assertEquals(odgw1x.getRaDeg(), odgw1.getRaDeg(), 0.001);
-        assertEquals(odgw1x.getDecDeg(), odgw1.getDecDeg(), 0.001);
 
         double cwfs1Mag = group.get(Canopus.Wfs.cwfs1).getValue().getPrimary().getValue().getTarget().getMagnitude(Magnitude.Band.R).getValue().getBrightness();
         double cwfs2Mag = group.get(Canopus.Wfs.cwfs2).getValue().getPrimary().getValue().getTarget().getMagnitude(Magnitude.Band.R).getValue().getBrightness();
@@ -181,15 +176,15 @@ public class GemsCatalogResultsTest  implements MascotProgress {
         String nirCatalog = GemsGuideStarSearchOptions.DEFAULT_CATALOG;
         GemsInstrument instrument = inst instanceof Flamingos2 ? GemsInstrument.flamingos2 : GemsInstrument.gsaoi;
 
-        Set<Angle> posAngles = new HashSet<>();
-        posAngles.add(obsContext.getPositionAngle());
-        posAngles.add(new Angle(0., Angle.Unit.DEGREES));
+        Set<edu.gemini.spModel.core.Angle> posAngles = new HashSet<>();
+        posAngles.add(GemsUtils4Java.toNewAngle(obsContext.getPositionAngle()));
+        posAngles.add(GemsUtils4Java.toNewAngle(new Angle(0., Angle.Unit.DEGREES)));
 //        posAngles.add(new Angle(90., Angle.Unit.DEGREES));
 //        posAngles.add(new Angle(180., Angle.Unit.DEGREES));
 //        posAngles.add(new Angle(270., Angle.Unit.DEGREES));
 
         GemsGuideStarSearchOptions options = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog,
-                instrument, tipTiltMode, null);
+                instrument, tipTiltMode, posAngles);
 
         List<GemsCatalogSearchResults> results = new GemsCatalog().search(obsContext, base, options, None.<MagnitudeBand>instance(), null);
         if (options.getTipTiltMode() == GemsTipTiltMode.both) {
@@ -204,8 +199,12 @@ public class GemsCatalogResultsTest  implements MascotProgress {
             System.out.println(" Criteria:" + result.criterion());
             System.out.println(" Results size:" + result.results().size());
         }
+        Set<Angle> posAngles2 = new HashSet<>();
+        posAngles2.add(obsContext.getPositionAngle());
+        posAngles2.add(new Angle(0., Angle.Unit.DEGREES));
 
-        List<GemsGuideStars> gemsResults = new GemsCatalogResults().analyze(obsContext, posAngles, results, null);
+
+        List<GemsGuideStars> gemsResults = new GemsCatalogResults().analyze(obsContext, posAngles2, results, null);
         System.out.println("gems results: size = " + gemsResults.size());
 
         return gemsResults;
