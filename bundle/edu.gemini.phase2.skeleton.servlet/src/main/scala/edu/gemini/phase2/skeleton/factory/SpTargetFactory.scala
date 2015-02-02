@@ -23,7 +23,7 @@ object SpTargetFactory {
 
   private def createTooTarget(too: TooTarget): SP.SPTarget = {
     val sp   = new SP.SPTarget(0.0, 0.0)
-    sp.setName(too.name)
+    sp.getTarget.setName(too.name)
     sp
   }
 
@@ -56,12 +56,12 @@ object SpTargetFactory {
       itarget.setDateForPosition(new java.util.Date(when))
 
       val spTarget = new SP.SPTarget(itarget)
-      spTarget.setName(nsid.name)
+      spTarget.getTarget.setName(nsid.name)
 
       // Add apparent magnitude, if any.
       nsid.magnitude(time)
         .map(new SO.Magnitude(SO.Magnitude.Band.AP, _))
-        .foreach(spTarget.putMagnitude)
+        .foreach(spTarget.getTarget.putMagnitude)
 
       spTarget
     }
@@ -82,8 +82,8 @@ object SpTargetFactory {
       }
 
       val spTarget = new SP.SPTarget(itarget)
-      spTarget.setName(sid.name)
-      spTarget.setMagnitudes(DefaultImList.create(mags.asJava))
+      spTarget.getTarget.setName(sid.name)
+      spTarget.getTarget.setMagnitudes(DefaultImList.create(mags.asJava))
       spTarget
     }
 

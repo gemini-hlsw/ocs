@@ -10,6 +10,7 @@ import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
 import edu.gemini.spModel.target.WatchablePos;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
+import edu.gemini.spModel.target.system.CoordinateParam;
 import edu.gemini.spModel.telescope.IssPort;
 
 import java.awt.geom.Point2D;
@@ -137,7 +138,9 @@ public abstract class PosMap <K, T extends WatchablePos>
                 // ignore
             }
         } else {
-            ((SPTarget) tp).setRaDecDegrees(tme.pos.getRaDeg(), tme.pos.getDecDeg());
+            ((SPTarget) tp).getTarget().getRa().setAs(tme.pos.getRaDeg(), CoordinateParam.Units.DEGREES);
+            ((SPTarget) tp).getTarget().getDec().setAs(tme.pos.getDecDeg(), CoordinateParam.Units.DEGREES);
+            ((SPTarget) tp).notifyOfGenericUpdate();
         }
 
         tp.addWatcher(this);

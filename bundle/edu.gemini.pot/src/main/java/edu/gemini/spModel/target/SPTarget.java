@@ -7,18 +7,13 @@
 //
 package edu.gemini.spModel.target;
 
-import edu.gemini.shared.skyobject.Magnitude;
-import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.system.*;
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
 import edu.gemini.spModel.target.system.CoordinateTypes.*;
 
-/**
- * A data object that describes a telescope position and includes methods
- * for extracting positions.
- */
+/** A mutable cell containing an ITarget. */
 public final class SPTarget extends WatchablePos {
 
     private ITarget _target;
@@ -77,52 +72,13 @@ public final class SPTarget extends WatchablePos {
 
     /** Clone this SPTarget. */
     public SPTarget clone() {
-        return new SPTarget((ITarget) _target.clone());
+        return new SPTarget(_target.clone());
     }
 
 
     ///
     /// END OF PUBLIC API ... EVERYTHING FROM HERE DOWN GOES AWAY
     ///
-
-
-    /** Set contained target magnitudes and notify listeners. */
-    public void setMagnitudes(final ImList<Magnitude> magnitudes) {
-        _target.setMagnitudes(magnitudes);
-        _notifyOfUpdate();
-    }
-
-    /** Set a magnitude on the contained target and notify listeners. */
-    public void putMagnitude(final Magnitude mag) {
-        _target.putMagnitude(mag);
-        _notifyOfUpdate();
-    }
-
-    /** Set the contained target's name and notify listeners. */
-    public void setName(final String name) {
-        _target.setName(name);
-        _notifyOfUpdate();
-    }
-
-    /**
-     * Set the contained target's RA and Dec from Strings in HMS/DMS format and notify listeners.
-     * Invalid values are replaced with 00:00:00.
-     */
-    public void setHmsDms(final String hms, final String dms) {
-        synchronized (this) {
-            try {
-                _target.getRa().setValue(hms);
-            } catch (final IllegalArgumentException ex) {
-                _target.getRa().setValue("00:00:00.0");
-            }
-            try {
-                _target.getDec().setValue(dms);
-            } catch( final IllegalArgumentException ex) {
-                _target.getDec().setValue("00:00:00.0");
-            }
-        }
-        _notifyOfUpdate();
-    }
 
     /** Get the PM RA in mas/y if the contained target is sidereal, otherwise zero. */
     public double getPropMotionRA() {
@@ -231,15 +187,6 @@ public final class SPTarget extends WatchablePos {
     /** @deprecated */
     public void notifyOfGenericUpdate() {
     	super._notifyOfUpdate();
-    }
-
-    /** Set the contained target RA/Dec in degrees and notify observers. */
-    public void setRaDecDegrees(final double raDeg, final double decDeg) {
-        synchronized (this) {
-            _target.getRa().setAs(raDeg, Units.DEGREES);
-            _target.getDec().setAs(decDeg, Units.DEGREES);
-        }
-        _notifyOfUpdate();
     }
 
 }

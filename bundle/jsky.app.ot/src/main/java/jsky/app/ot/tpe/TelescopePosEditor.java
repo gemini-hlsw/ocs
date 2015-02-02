@@ -282,7 +282,9 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
             return;
         }
 
-        tp.setRaDecDegrees(basePos.getRaDeg(), basePos.getDecDeg());
+        tp.getTarget().getRa().setAs(basePos.getRaDeg(), Units.DEGREES);
+        tp.getTarget().getDec().setAs(basePos.getDecDeg(), Units.DEGREES);
+        tp.notifyOfGenericUpdate();
     }
 
     /**

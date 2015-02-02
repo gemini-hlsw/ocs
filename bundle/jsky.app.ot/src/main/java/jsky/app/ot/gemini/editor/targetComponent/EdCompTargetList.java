@@ -233,6 +233,26 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         return pan;
     }
 
+    /**
+     * Set the contained target's RA and Dec from Strings in HMS/DMS format and notify listeners.
+     * Invalid values are replaced with 00:00:00.
+     */
+    private static void setHmsDms(SPTarget spTarget, final String hms, final String dms) {
+        synchronized (spTarget) {
+            try {
+                spTarget.getTarget().getRa().setValue(hms);
+            } catch (final IllegalArgumentException ex) {
+                spTarget.getTarget().getRa().setValue("00:00:00.0");
+            }
+            try {
+                spTarget.getTarget().getDec().setValue(dms);
+            } catch( final IllegalArgumentException ex) {
+                spTarget.getTarget().getDec().setValue("00:00:00.0");
+            }
+        }
+        spTarget.notifyOfGenericUpdate();
+    }
+
     // Initialize the widgets involved in editing positions. This includes the
     // RA/Dec + sidereal or nonsidereal information.  Takes the GUI built by
     // JFormDesigner in _w.coordinatesPanel and morphs it a bit.  This is all
@@ -512,7 +532,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 String name = tbwe.getText();
                 if (name != null) name = name.trim();
                 _curPos.deleteWatcher(EdCompTargetList.this);
-                _curPos.setName(name);
+                _curPos.getTarget().setName(name);
+                _curPos.notifyOfGenericUpdate();
                 _curPos.addWatcher(EdCompTargetList.this);
                 _w.resolveButton.setEnabled(!"".equals(name));
             }
@@ -807,7 +828,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             if (spTarget != null) {
                 if (target != null) {
                     spTarget.setTarget((ITarget) target.clone());
-                    spTarget.setMagnitudes(mag);
+                    spTarget.getTarget().setMagnitudes(mag);
+                    spTarget.notifyOfGenericUpdate();
                 }
             } else {
                 final GuideGroup group = TargetSelection.getGuideGroup(dataObject.getTargetEnvironment(), obsComponent);
@@ -1097,7 +1119,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 final HorizonsService service = HorizonsService.getInstance();
                 if (service != null) {
                     final String objectId = service.getObjectId();
-                    _curPos.setName(objectId);
+                    _curPos.getTarget().setName(objectId);
+                    _curPos.notifyOfGenericUpdate();
                 }
 
 
@@ -1642,7 +1665,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         if (!(dec.equals("-") || dec.equals("+"))) {
             _ignorePosUpdate = true;
             try {
-                _curPos.setHmsDms(ra, dec);
+                setHmsDms(_curPos, ra, dec);
             } finally {
                 _ignorePosUpdate = false;
             }
@@ -1795,7 +1818,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
 
             SPTarget base = env.getBase();
-            base.setRaDecDegrees(basePos.getRaDeg(), basePos.getDecDeg());
+            base.getTarget().getRa().setAs(basePos.getRaDeg(), CoordinateParam.Units.DEGREES);
+            base.getTarget().getDec().setAs(basePos.getDecDeg(), CoordinateParam.Units.DEGREES);
+            base.notifyOfGenericUpdate();
         } else if (w == _w.resolveButton) {
             // REL-1063 Fix OT nonsidereal Solar System Object Horizons name resolution
             if (_curPos.getTarget() instanceof NamedTarget) {
@@ -2092,7 +2117,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         NonSiderealTarget target = (NonSiderealTarget) _curPos.getTarget();
                         _ignorePosUpdate = true;
                         try {
-                            _curPos.setHmsDms(coords.getRA().toString(),
+                            setHmsDms(_curPos, coords.getRA().toString(),
                                     coords.getDec().toString());
                         } finally {
                             _ignorePosUpdate = false;
