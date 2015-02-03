@@ -99,18 +99,13 @@ class GmosOiwfsProbeArm[I  <: InstGmosCommon[D,F,P,SM],
   private def armAngle(posAngle:    Double,
                        guideStar:   Point2D,
                        offset:      Point2D): Double = {
-    println("\n*** armAngle")
-    println(s"posAngle=$posAngle\nguidestar=(${guideStar.getX},${guideStar.getY})\noffset=(${offset.getX},${offset.getY})")
     val offsetAdj = {
       val posAngleRot = AffineTransform.getRotateInstance(posAngle)
       val ifuOffset = transformPoint(new Point2D.Double(inst.getFPUnit.getWFSOffset, 0.0), posAngleRot)
-      println(s"ifuOffset=(${ifuOffset.getX},${ifuOffset.getY})")
       transformPoint(offset, AffineTransform.getTranslateInstance(ifuOffset.getX, ifuOffset.getY))
     }
 
     val p  = transformPoint(guideStar, AffineTransform.getTranslateInstance(T.getX - offsetAdj.getX, T.getY - offsetAdj.getY))
-    println(s"offsetAdj=(${offsetAdj.getX},${offsetAdj.getY})\np=(${p.getX},${p.getY})")
-    println(s"\tp.y = ${p.getY} = ${guideStar.getY} + ${T.getY} - ${offsetAdj.getY}")
     val r  = math.sqrt(p.getX * p.getX + p.getY * p.getY)
 
     val alpha = math.atan2(p.getX, p.getY)
@@ -123,7 +118,6 @@ class GmosOiwfsProbeArm[I  <: InstGmosCommon[D,F,P,SM],
       val thetaP = math.asin((MX / r) * math.sin(phi))
       if (MX2 > (r*r + BX2)) math.Pi - thetaP else thetaP
     }
-    println(s"\tAngle=${phi-theta-alpha-math.Pi/2.0}")
     phi - theta - alpha - math.Pi / 2.0
   }
 }

@@ -129,7 +129,6 @@ public abstract class OIWFS_FeatureBase extends WFS_FeatureBase
     }
 
     private void _addOIWFSFigures() {
-        System.out.println("---_addOIWFSFigures");
         // Calculate the field position for OIWFS
         // These are changed when an offset position is selected
         double basePosX = _baseScreenPos.x, basePosY = _baseScreenPos.y;
@@ -173,7 +172,6 @@ public abstract class OIWFS_FeatureBase extends WFS_FeatureBase
 
 
         if (pme == null) {
-            System.out.println("---pme == null");
             // no OIWFS defined yet, but we can still draw the patrol area
             _updateFigureList(0., 0., basePosX, basePosY, 0., 0., _baseScreenPos.x, _baseScreenPos.y, false);
         } else {
@@ -182,7 +180,6 @@ public abstract class OIWFS_FeatureBase extends WFS_FeatureBase
             if (p != null) {
                 OffsetPosBase offsetPos = pmoe.getOffsetPos();
                 if (isFrozen && offsetPos != null) {
-                    System.out.println("---frozen");
                     // guide set to frozen: Use pos and angle of previous offset, but translate to selected offset pos
                     Point2D.Double pp = new Point2D.Double(offsetPos.getXaxis() * _pixelsPerArcsec * _flipRA,
                                                            offsetPos.getYaxis() * _pixelsPerArcsec);
@@ -192,7 +189,6 @@ public abstract class OIWFS_FeatureBase extends WFS_FeatureBase
                     _updateFigureList(p.x, p.y, bx, by, pp.x - offsetX, pp.y - offsetY, _baseScreenPos.x, _baseScreenPos.y, true);
                 } else {
                     // Normal case
-                    System.out.println("---normal");
                     _updateFigureList(p.x, p.y, basePosX, basePosY, 0., 0., _baseScreenPos.x, _baseScreenPos.y, true);
                 }
             }

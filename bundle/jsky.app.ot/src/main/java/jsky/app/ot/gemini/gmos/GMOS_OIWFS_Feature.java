@@ -117,13 +117,6 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
         final InstGmosCommon inst = (InstGmosCommon) _iw.getInstObsComp();
         final ObsContext ctx = _iw.getMinimalObsContext().getOrNull();
         if (ctx != null && GmosOiwfsGuideProbe.instance.inRange(ctx, getProbeArmOffset())) {
-//            final Point2D guideStar = new Point2D.Double(xg, yg);
-//            final Point2D offset = new Point2D.Double(xc, yc);
-//            final Point2D translate = new Point2D.Double(xt, yt);
-//            final List<Shape> shapes2 = new GmosOiwfsProbeArm(inst).geometryForScreenAsJava(_posAngle, guideStar, offset, translate, flip, _flipRA, _pixelsPerArcsec);
-//            for (final Shape s : shapes2)
-//                _figureList.add(new Figure(s, Color.BLUE, BLOCKED, OIWFS_STROKE));
-
             final GmosOiwfsProbeArm probeArm = new GmosOiwfsProbeArm(inst);
             final ImList<Shape> shapes   = probeArm.geometryAsJava();
 
@@ -134,7 +127,6 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
             // Translation to move the probe arm to the required position on the screen.
             final AffineTransform trans = AffineTransform.getTranslateInstance(xt+xb, yt+yb);
 
-            //final AffineTransform trans = AffineTransform.getTranslateInstance(xt, yt);
             adj.foreach(new ApplyOp<Pair<Double, Point2D>>() {
                 @Override
                 public void apply(final Pair<Double, Point2D> armAdj) {
@@ -206,10 +198,6 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
      */
     protected void _updateFigureList(double guidePosX, double guidePosY, double offsetPosX, double offsetPosY,
                                      double translateX, double translateY, double basePosX, double basePosY, boolean oiwfsDefined) {
-        System.out.println("\n-----_updateFigureList-----");
-        System.out.println("TPE    base=(" + basePosX + "," + basePosY + ") -> (" + basePosX/_pixelsPerArcsec + "," + basePosY/_pixelsPerArcsec + ")");
-        System.out.println("Screen base=(" + _baseScreenPos.getX() + "," + _baseScreenPos.getY() + ") -> (" + _baseScreenPos.getX()/_pixelsPerArcsec + "," + _baseScreenPos.getY()/_pixelsPerArcsec + ")");
-
         // need to flip the drawing about the X axis if the instrument is side-mounted
         final InstGmosCommon inst = (InstGmosCommon) _iw.getInstObsComp();
         final boolean flip = (inst.getIssPort() == IssPort.SIDE_LOOKING);
