@@ -126,7 +126,29 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter will upgrade to 2015B
  */
 case object SemesterConverter2015ATo2015B extends SemesterConverter {
-  val transformers = Nil
+  val gracesFiberTransformer: TransformFunction = {
+    case p @ <graces>{ns @ _*}</graces> if (p \\ "fiberMode").nonEmpty =>
+      val fiberMode = (p \\ "fiberMode").text
+      val gracesRegex = "(Graces )?(.*)".r
+      def transformFiberMode(name: String) = name match {
+        case gracesRegex(_, "2 fibers (target + sky, R~30000)") => "2 fibers (target + sky, R~37k)"
+        case gracesRegex(_, "1 fiber (target, R~50000)")        => "1 fiber (target, R~48k)"
+        case _                                                  => name
+      }
+
+      object GracesFiberMode extends BasicTransformer {
+        override def transform(n: xml.Node): xml.NodeSeq = n match {
+          case <fiberMode>{name}</fiberMode> => <fiberMode>{transformFiberMode(name.text)}</fiberMode>
+          case <name>{name}</name>           => <name>Graces {transformFiberMode(name.text)}</name>
+          case elem: xml.Elem                => elem.copy(child = elem.child.flatMap(transform _))
+          case _                             => n
+        }
+      }
+
+      StepResult(s"Graces Fiber mode $fiberMode updated to ${transformFiberMode(fiberMode)}.", <graces>{GracesFiberMode.transform(ns)}</graces>).successNel
+  }
+
+  val transformers = List(gracesFiberTransformer)
 }
 
 /**
