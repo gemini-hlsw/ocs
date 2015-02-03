@@ -1,0 +1,50 @@
+import OcsKeys._
+
+name := "edu.gemini.epics.epics-acm"
+
+version := "0.0.1-SNAPSHOT"
+
+sourceGenerators in Compile += Def.task {
+  import scala.sys.process._
+  val pkg = "edu.gemini.epics.acm.generated"
+  val log = state.value.log
+  val gen = (sourceManaged in Compile).value
+  val out = (gen /: pkg.split("\\."))(_ / _)
+  val xsd = sourceDirectory.value / "main" / "resources" / "CaSchema.xsd"
+  val cmd = List("xjc",
+    "-d", gen.getAbsolutePath,
+    "-p", pkg,
+    xsd.getAbsolutePath)
+  val mod = (xsd.getParentFile.listFiles).map(_.lastModified).max
+  val cur = if (out.exists && out.listFiles.nonEmpty) out.listFiles.map(_.lastModified).min else Int.MaxValue
+  if (mod > cur) {
+    out.mkdirs
+    val err = cmd.run(ProcessLogger(log.info(_), log.error(_))).exitValue
+    if (err != 0) sys.error("xjc failed")
+  }
+  out.listFiles.toSeq
+}.taskValue
+
+resolvers += "Gemini SWG Repository" at "http://build.cl.gemini.edu:8081/artifactory/libs-releases"
+
+libraryDependencies ++= Seq(
+  "edu.gemini.epics" % "epics-service" % "0.12-SNAPSHOT",
+  "edu.gemini.gmp" % "gmp-commands-records" % "0.6.0-SNAPSHOT",
+  "xmlunit" % "xmlunit" % "1.5"
+)
+
+parallelExecution in Test := false
+
+osgiSettings
+
+ocsBundleSettings
+
+OsgiKeys.bundleActivator := Some("edu.gemini.pot.spdb.osgi.Activator")
+
+OsgiKeys.bundleSymbolicName := name.value
+
+OsgiKeys.dynamicImportPackage := Seq("")
+
+OsgiKeys.exportPackage := Seq(
+  "edu.geminu.epics.acm"
+)
