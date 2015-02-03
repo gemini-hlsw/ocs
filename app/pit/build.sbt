@@ -37,7 +37,8 @@ def common(pv: Version) = AppConfig(
     "org.osgi.framework.startlevel.beginning" -> "100",
     "org.osgi.framework.bootdelegation"       -> "*",
     "edu.gemini.ags.host"                     -> "gnodb.gemini.edu",
-    "edu.gemini.ags.port"                     -> "8443"
+    "edu.gemini.ags.port"                     -> "8443",
+    "edu.gemini.pit.test"                     -> "true"
   ),
   // log = Some("%a/log/qpt.%u.%g.log"),
   bundles = List(

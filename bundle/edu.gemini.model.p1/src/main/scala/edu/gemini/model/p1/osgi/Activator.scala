@@ -8,7 +8,7 @@ import java.util.Enumeration
 
 class Activator extends BundleActivator {
   def start(context: BundleContext) {
-    val bundleRegex = """(\d\d\d\d)00(\d)\.(\d)\.\d""".r
+    val bundleRegex = """(\d\d\d\d)\d\d(\d)\.(\d)\.\d""".r
     if (context.getProperty("edu.gemini.model.p1.year") != null) {
       System.setProperty("edu.gemini.model.p1.year", context.getProperty("edu.gemini.model.p1.year"))
     }
