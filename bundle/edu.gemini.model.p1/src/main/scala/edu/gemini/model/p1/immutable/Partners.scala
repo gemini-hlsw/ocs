@@ -13,6 +13,7 @@ object Partners {
     NgoPartner.KR -> "Korea",
     NgoPartner.US -> "United States",
     NgoPartner.UH -> "University of Hawaii",
+    ExchangePartner.CFHT -> Site.CFHT.name,
     ExchangePartner.KECK -> Site.Keck.name,
     ExchangePartner.SUBARU -> Site.Subaru.name,
     LargeProgramPartner -> "Large Program"
