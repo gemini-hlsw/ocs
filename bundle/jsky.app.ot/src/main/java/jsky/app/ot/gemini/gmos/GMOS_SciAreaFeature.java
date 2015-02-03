@@ -8,7 +8,8 @@ package jsky.app.ot.gemini.gmos;
 
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.gemini.gmos.*;
-import edu.gemini.spModel.inst.ScienceAreaGeometry;
+import edu.gemini.spModel.inst.FeatureGeometry$;
+import edu.gemini.spModel.obs.context.ObsContext;
 import jsky.app.ot.gemini.inst.SciAreaFeatureBase;
 import jsky.app.ot.tpe.TpeImageInfo;
 import jsky.app.ot.tpe.TpeImageWidget;
@@ -96,10 +97,22 @@ public class GMOS_SciAreaFeature extends SciAreaFeatureBase {
 
         InstGmosCommon instGMOS = getInst();
         if (instGMOS != null) {
-            final ScienceAreaGeometry gmosScienceArea = new GmosScienceAreaGeometry(instGMOS);
-            final Shape transformedArea = gmosScienceArea.scienceAreaAsJava(_baseScreenPos, _posAngle, _pixelsPerArcsec);
-            if (transformedArea != null) {
-                _figureList.add(transformedArea);
+            final ObsContext ctx = _iw.getMinimalObsContext().getOrNull();
+            if (ctx != null) {
+                final GmosScienceAreaGeometry gmosScienceArea = new GmosScienceAreaGeometry(instGMOS);
+                final ImList<Shape> shapes = gmosScienceArea.geometryAsJava();
+                final AffineTransform trans = AffineTransform.getTranslateInstance(_baseScreenPos.getX(), _baseScreenPos.getY());
+
+                shapes.foreach(new ApplyOp<Shape>() {
+                    @Override
+                    public void apply(final Shape s) {
+                        final Shape s2 = FeatureGeometry$.MODULE$.transformScienceAreaForContext(s, ctx);
+                        final Shape s3 = FeatureGeometry$.MODULE$.transformScienceAreaForScreen(s2, _pixelsPerArcsec);
+                        final Shape s4 = trans.createTransformedShape(s3);
+                        _figureList.add(s4);
+                    }
+                });
+
                 // Create any necessary modifications.
                 final GmosCommonType.FPUnitMode fpUnitMode = instGMOS.getFPUnitMode();
                 if (fpUnitMode == GmosCommonType.FPUnitMode.BUILTIN && instGMOS.isImaging())

@@ -3,18 +3,31 @@ package edu.gemini.spModel.gemini.gmos
 import java.awt.Shape
 import java.awt.geom.{Point2D, AffineTransform}
 
-import edu.gemini.shared.util.immutable.ImPolygon
-import edu.gemini.spModel.inst.{FeatureGeometry, GuideProbeGeometry}
+import edu.gemini.shared.util.immutable.{DefaultImList, ImList, ImPolygon}
+import edu.gemini.skycalc.{Angle, CoordinateDiff, Offset}
+import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.spModel.rich.shared.immutable._
+import edu.gemini.spModel.target.system.CoordinateParam
+import edu.gemini.spModel.telescope.IssPort
+
+
+import scala.collection.JavaConverters._
 
 class GmosOiwfsProbeArm[I  <: InstGmosCommon[D,F,P,SM],
                         D  <: Enum[D]  with GmosCommonType.Disperser,
                         F  <: Enum[F]  with GmosCommonType.Filter,
                         P  <: Enum[P]  with GmosCommonType.FPUnit,
-                        SM <: Enum[SM] with GmosCommonType.StageMode](inst: I) extends GuideProbeGeometry {
-  import FeatureGeometry.transformPoint
+                        SM <: Enum[SM] with GmosCommonType.StageMode](inst: I) {
+  import edu.gemini.spModel.inst.FeatureGeometry.transformPoint
   import GmosOiwfsProbeArm._
 
-  override protected lazy val probeArm: Shape = {
+  def geometry: List[Shape] =
+    List(probeArm, pickoffMirror)
+
+  def geometryAsJava: ImList[Shape] =
+    DefaultImList.create(geometry.asJava)
+
+  private lazy val probeArm: Shape = {
     val hm  = PickoffMirrorSize / 2.0
     val htw = ProbeArmTaperedWidth / 2.0
 
@@ -29,7 +42,7 @@ class GmosOiwfsProbeArm[I  <: InstGmosCommon[D,F,P,SM],
     ImPolygon(points)
   }
 
-  override protected lazy val pickoffMirror: Shape = {
+  private lazy val pickoffMirror: Shape = {
     val (x0, y0) = (-PickoffMirrorSize / 2.0, -PickoffMirrorSize / 2.0)
     val (x1, y1) = (x0 + PickoffMirrorSize,   y0)
     val (x2, y2) = (x1,                       y1 + PickoffMirrorSize)
@@ -38,6 +51,42 @@ class GmosOiwfsProbeArm[I  <: InstGmosCommon[D,F,P,SM],
     val points = List((x0,y0), (x1,y1), (x2,y2), (x3,y3))
     ImPolygon(points)
   }
+
+  /**
+   * For a given observation context and a specific offset, calculate the adjustment required for the probe arm.
+   * This consists of a pair representing the angle of the arm in radians and the guide star as a point.
+   * @param ctx    the observation context
+   * @param offset the offset to use
+   * @return       a pair comprising the angle in radians of the probe arm and the position of the guide star in arcsec
+   */
+  def armAdjustment(ctx: ObsContext, offset: Offset): Option[(Double, Point2D)] = {
+    if (ctx == null || offset == null) None
+    else {
+      for {
+        gts <- ctx.getTargets.getPrimaryGuideProbeTargets(GmosOiwfsGuideProbe.instance).asScalaOpt
+        gt  <- gts.getPrimary.asScalaOpt
+      } yield {
+        val flip = if (ctx.getIssPort == IssPort.SIDE_LOOKING) -1.0 else 1.0
+        val diff = new CoordinateDiff(ctx.getBaseCoordinates, gt.getTarget.getSkycalcCoordinates)
+        val x = diff.getOffset.p.toArcsecs.getMagnitude
+        val y = diff.getOffset.q.toArcsecs.getMagnitude
+        val guideStar = new Point2D.Double(-x, -y * flip)
+        val offsetPt = new Point2D.Double(-offset.p.convertTo(Angle.Unit.ARCSECS).getMagnitude, -offset.q.convertTo(Angle.Unit.ARCSECS).getMagnitude * flip)
+
+        (armAngle(ctx.getPositionAngle.convertTo(Angle.Unit.RADIANS).getMagnitude, guideStar, offsetPt), guideStar)
+      }
+    }
+  }
+
+  /**
+   * Return the arm adjustment parameters in a format easily usable by Java.
+   * @see          armAdjustment
+   * @param ctx    the observation context
+   * @param offset the offset to use
+   * @return       a pair comprising the angle in radians of the probe arm and the position of the guide star in arcsec
+   */
+  def  armAdjustmentForJava(ctx: ObsContext, offset: Offset): edu.gemini.shared.util.immutable.Option[edu.gemini.shared.util.immutable.Pair[java.lang.Double, Point2D]] =
+    armAdjustment(ctx, offset: Offset).map{ case (angle, guideStar) => new edu.gemini.shared.util.immutable.Pair(new java.lang.Double(angle.toDouble), guideStar) }.asGeminiOpt
 
   /**
    * Calculate the probe arm angle at the position angle (radians) for the given guide star location
@@ -50,13 +99,18 @@ class GmosOiwfsProbeArm[I  <: InstGmosCommon[D,F,P,SM],
   private def armAngle(posAngle:    Double,
                        guideStar:   Point2D,
                        offset:      Point2D): Double = {
+    println("\n*** armAngle")
+    println(s"posAngle=$posAngle\nguidestar=(${guideStar.getX},${guideStar.getY})\noffset=(${offset.getX},${offset.getY})")
     val offsetAdj = {
       val posAngleRot = AffineTransform.getRotateInstance(posAngle)
       val ifuOffset = transformPoint(new Point2D.Double(inst.getFPUnit.getWFSOffset, 0.0), posAngleRot)
+      println(s"ifuOffset=(${ifuOffset.getX},${ifuOffset.getY})")
       transformPoint(offset, AffineTransform.getTranslateInstance(ifuOffset.getX, ifuOffset.getY))
     }
 
     val p  = transformPoint(guideStar, AffineTransform.getTranslateInstance(T.getX - offsetAdj.getX, T.getY - offsetAdj.getY))
+    println(s"offsetAdj=(${offsetAdj.getX},${offsetAdj.getY})\np=(${p.getX},${p.getY})")
+    println(s"\tp.y = ${p.getY} = ${guideStar.getY} + ${T.getY} - ${offsetAdj.getY}")
     val r  = math.sqrt(p.getX * p.getX + p.getY * p.getY)
 
     val alpha = math.atan2(p.getX, p.getY)
@@ -69,16 +123,8 @@ class GmosOiwfsProbeArm[I  <: InstGmosCommon[D,F,P,SM],
       val thetaP = math.asin((MX / r) * math.sin(phi))
       if (MX2 > (r*r + BX2)) math.Pi - thetaP else thetaP
     }
+    println(s"\tAngle=${phi-theta-alpha-math.Pi/2.0}")
     phi - theta - alpha - math.Pi / 2.0
-  }
-
-  override def geometryForParams(posAngle:        Double,
-                                 guideStar:       Point2D,
-                                 offset:          Point2D): List[Shape] = {
-    val angle = armAngle(posAngle, guideStar, offset)
-    val armTrans = AffineTransform.getRotateInstance(angle, guideStar.getX, guideStar.getY)
-    armTrans.concatenate(AffineTransform.getTranslateInstance(guideStar.getX, guideStar.getY))
-    transformedGeometry(armTrans)
   }
 }
 

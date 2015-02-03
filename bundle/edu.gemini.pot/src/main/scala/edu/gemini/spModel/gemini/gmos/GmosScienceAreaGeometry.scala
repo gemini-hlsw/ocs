@@ -3,20 +3,38 @@ package edu.gemini.spModel.gemini.gmos
 import java.awt.Shape
 import java.awt.geom.{Area, Rectangle2D}
 
-import edu.gemini.shared.util.immutable.ImPolygon
+import edu.gemini.shared.util.immutable.{DefaultImList, ImList, ImPolygon}
 import edu.gemini.spModel.core.Site
-import edu.gemini.spModel.inst.ScienceAreaGeometry
 
+import scala.collection.JavaConverters._
 
 class GmosScienceAreaGeometry[I  <: InstGmosCommon[D,F,P,SM],
                               D  <: Enum[D]  with GmosCommonType.Disperser,
                               F  <: Enum[F]  with GmosCommonType.Filter,
                               P  <: Enum[P]  with GmosCommonType.FPUnit,
-                              SM <: Enum[SM] with GmosCommonType.StageMode](inst: I) extends ScienceAreaGeometry[I] {
-
+                              SM <: Enum[SM] with GmosCommonType.StageMode](inst: I) {
   import GmosScienceAreaGeometry._
 
-  override def basicScienceArea: Option[Shape] = {
+
+  /**
+   * Return a list of the shapes comprising the geometry of the science area.
+   * @return the list of the shapes
+   */
+  def geometry: List[Shape] =
+    basicScienceArea.toList
+
+  /**
+   * Return a list of the shapes comprising the geometry of the science area for Java.
+   * @return an immutable list of the shapes
+   */
+  def geometryAsJava: ImList[Shape] =
+    DefaultImList.create(geometry.asJava)
+
+  /**
+   * Create the shape for the science area based on the instrument configuration.
+   * @return Some(shape) if a shape exists for the configuration, and None otherwise
+   */
+  private def basicScienceArea: Option[Shape] = {
     if (inst == null) None
     else Option({
       lazy val width   = inst.getScienceArea()(0)
