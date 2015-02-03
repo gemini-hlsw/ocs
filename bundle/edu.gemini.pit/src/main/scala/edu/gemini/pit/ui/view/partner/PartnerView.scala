@@ -168,7 +168,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
     }
 
     // Site combo
-    object siteCombo extends ComboBox(ExchangePartner.values) with Bound[Proposal, ProposalClass] with TextRenderer[ExchangePartner] {
+    object siteCombo extends ComboBox(ExchangePartner.values.filterNot(_ == ExchangePartner.CFHT)) with Bound[Proposal, ProposalClass] with TextRenderer[ExchangePartner] {
 
       val lens = Proposal.proposalClass
 
