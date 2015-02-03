@@ -62,7 +62,7 @@ public class BHROS_OIWFS_Feature extends GMOS_OIWFS_Feature {
             final boolean flip = (_port == ISSPort.SIDE_LOOKING);
             addOffsetConstrainedPatrolField(offsetPosX + translateX, offsetPosY + translateY);
             if (oiwfsDefined)
-                _addProbeArm(guidePosX, guidePosY, offsetPosX, offsetPosY, translateX, translateY, flip);
+                _addProbeArm(guidePosX, guidePosY, offsetPosX, offsetPosY, translateX, translateY, basePosX, basePosY, flip);
         }
 	}
 

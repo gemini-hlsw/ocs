@@ -3,69 +3,17 @@ package edu.gemini.spModel.inst
 import java.awt.Shape
 import java.awt.geom.{Point2D, Area, AffineTransform}
 
+import edu.gemini.skycalc.Angle
+import edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe
+import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.spModel.target.system.CoordinateParam
+
 import scala.collection.JavaConverters._
 
 /**
- * The geometry for a telescope feature, such as a science area or
- * a guide probe.
+ * Functions to manipulate the geometry for a telescope feature, e.g. a science area or a
+ * guide probe arm.
  */
-trait FeatureGeometry {
-  /**
-   * Create Shapes representing the geometry features for the given instrument configuration.
-   * @return the geometry features in arcsec
-   */
-  def geometry: List[Shape]
-
-  /**
-   * A convenience method to calculate the geometry and then apply a transformation to it.
-   * @see geometry
-   * @param transform the transformation to apply
-   * @return          the geometry for the features under the transformation in arcsec
-   */
-  def transformedGeometry(transform: AffineTransform): List[Shape] = {
-    geometry.map{ g =>
-      val area = new Area(g)
-      area.transform(transform)
-      area
-    }
-  }
-
-  /**
-   * A convenience method to calculate the geometry and then apply a transformation to it and return
-   * the results as a Java list.
-   * @see transformedGeometry
-   * @see geometry
-   */
-  def transformedGeometryAsJava(transform: AffineTransform): java.util.List[Shape] =
-    transformedGeometry(transform).asJava
-
-  /**
-   * Combine the shapes representing the geometry features for the given instrument configuration.
-   * @return a shape representing the union of the geometry features in arcsec
-   */
-  def fullGeometry: Shape = {
-    val allShapes = geometry
-    if (allShapes.length <= 1)
-      allShapes.headOption.getOrElse(new Area())
-    else {
-      val fullArea = new Area()
-      geometry.foreach(g => fullArea.add(new Area(g)))
-      fullArea
-    }
-  }
-
-  /**
-   * A convenience method to calculate the full geometry and then apply a transformation to it.
-   * @param transform the transformation to apply
-   * @return          the geometry for the features under the transformation in arcsec
-   */
-  def transformedFullGeometry(transform: AffineTransform): Shape = {
-    val area = new Area(fullGeometry)
-    area.transform(transform)
-    area
-  }
-}
-
 object FeatureGeometry {
   /**
    * Convenience method to execute a transformation on a point and return the result.
@@ -78,4 +26,99 @@ object FeatureGeometry {
     trans.transform(p, pTrans)
     pTrans
   }
+
+  /**
+   * Given a list of shapes representing a science area, transform them as needed for the specified context.
+   * @param shapes the list of shapes to transform
+   * @param ctx    the context under which to transform them
+   * @return       the transformed shapes
+   */
+  def transformScienceAreaForContext(shapes: List[Shape], ctx: ObsContext): List[Shape] = {
+    val posAngle = ctx.getPositionAngle.toRadians.getMagnitude
+    val basePoint = {
+      val coords = ctx.getBaseCoordinates
+      new Point2D.Double(coords.getDec.getMagnitude, coords.getRa.getMagnitude)
+    }
+    val trans = AffineTransform.getRotateInstance(-posAngle, basePoint.getX, basePoint.getY)
+    trans.translate(basePoint.getX, basePoint.getY)
+    shapes.map{ trans.createTransformedShape }
+  }
+
+  /**
+   * Given a single shape representing part or all of a science area, transform it as needed for the context.
+   * @param shape the shape to transform
+   * @param ctx   the context under which to transform it
+   * @return      the transformed shape
+   */
+  def transformScienceAreaForContext(shape: Shape, ctx: ObsContext): Shape =
+    transformScienceAreaForContext(List(shape), ctx).head
+
+  /**
+   * Given a list of shapes representing a science area, transform it to screen coordinates.
+   * @param shapes          the list of shapes to transform
+   * @param pixelsPerArcsec the pixel density
+   * @return                the shapes scaled for the display
+   */
+  def transformScienceAreaForScreen(shapes: List[Shape], pixelsPerArcsec: Double): List[Shape] = {
+    val scaleTrans = AffineTransform.getScaleInstance(pixelsPerArcsec, pixelsPerArcsec)
+    shapes.map {scaleTrans.createTransformedShape }
+  }
+
+  /**
+   * Given a shape representing part or all of a science area, transform it to screen coordinates.
+   * @param shape          the shape to transform
+   * @param pixelsPerArcsec the pixel density
+   * @return                the shape scaled for the display
+   */
+  def transformScienceAreaForScreen(shape: Shape, pixelsPerArcsec: Double): Shape =
+    transformScienceAreaForScreen(List(shape), pixelsPerArcsec).head
+
+
+  /**
+   * Given a list of shapes representing a guide probe arm, an angle for the probe arm, and the position of the guide
+   * star, execute transformations on the shapes to get the adjusted probe arm.
+   * @param shapes    the list of shapes to transform
+   * @param armAngle  the angle at which the probe arm will be situated
+   * @param guideStar the position of the guide star in arcseconds
+   * @return          the transformed shapes
+   */
+  def transformProbeArmForContext(shapes: List[Shape], armAngle: Double, guideStar: Point2D): List[Shape] = {
+    val armTrans = AffineTransform.getRotateInstance(armAngle, guideStar.getX, guideStar.getY)
+    armTrans.concatenate(AffineTransform.getTranslateInstance(guideStar.getX, guideStar.getY))
+    shapes.map { armTrans.createTransformedShape }
+  }
+
+  /**
+   * Given a shape representing a guide probe arm or segment, an angle for the probe arm, and the position of the guide
+   * star, execute transformations on the shape to get the adjusted probe arm.
+   * @param shape     the shape to transform
+   * @param armAngle  the angle at which the probe arm will be situated
+   * @param guideStar the position of the guide star in arcsec
+   * @return          the transformed shapes
+   */
+  def transformProbeArmForContext(shape: Shape, armAngle: Double, guideStar: Point2D): Shape =
+    transformProbeArmForContext(List(shape), armAngle, guideStar).head
+
+  /**
+   * Given a list of geometry shapes, transform them as needed for display on the screen.
+   * @param shapes          the list of shapes to transform
+   * @param pixelsPerArcsec the pixel density per arcsec on the current display
+   * @return                the transformed shape
+   */
+  def transformProbeArmForScreen(shapes: List[Shape], pixelsPerArcsec: Double, xFlipArm: Boolean, flipRA: Double): List[Shape] = {
+    val xFlipFactor = if (xFlipArm) -1.0 else 1.0
+    val scaleTrans = AffineTransform.getScaleInstance(pixelsPerArcsec, pixelsPerArcsec)
+    scaleTrans.scale(flipRA, xFlipFactor)
+    shapes.map { scaleTrans.createTransformedShape }
+  }
+
+  /**
+   * Given a shape, transform it as needed for display on the screen.
+   * @param shape           the shape to transform
+   * @param pixelsPerArcsec the pixel density per arcsec on the current display
+   * @return                the transformed shape
+   */
+  def transformProbeArmForScreen(shape: Shape, pixelsPerArcsec: Double, xFlipArm: Boolean, flipRA: Double): Shape =
+    transformProbeArmForScreen(List(shape), pixelsPerArcsec, xFlipArm, flipRA).head
+
 }
