@@ -13,6 +13,18 @@
                 <jxb:typesafeEnumMember name="TWO_FIBER"/>
             </jxb:bindings>
         </jxb:bindings>
+        <!-- GracesReadMode => Graces.GracesReadMode -->
+        <jxb:bindings node="./xsd:simpleType[@name='GracesReadMode']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='Fast (Gain=1.6e/ADU, Read noise=4.7e)']">
+                <jxb:typesafeEnumMember name="FAST"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Normal (Gain=1.3e/ADU, Read noise=4.3e)']">
+                <jxb:typesafeEnumMember name="NORMAL"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Slow (Gain=1.2e/ADU, Read noise=2.9e)']">
+                <jxb:typesafeEnumMember name="SLOW"/>
+            </jxb:bindings>
+        </jxb:bindings>
     </jxb:bindings>
 
 </jxb:bindings>
