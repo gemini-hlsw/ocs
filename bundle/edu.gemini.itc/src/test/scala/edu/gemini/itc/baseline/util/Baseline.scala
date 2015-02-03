@@ -1,8 +1,8 @@
 package edu.gemini.itc.baseline.util
 
-import java.io.{ByteArrayOutputStream, PrintWriter}
+import java.io.{File, ByteArrayOutputStream, PrintWriter}
 
-import edu.gemini.itc.shared.Recipe
+import edu.gemini.itc.shared.{ITCImageFileIO, Recipe}
 
 import scala.io.Source
 
@@ -20,8 +20,23 @@ case class Input(obs: Observation, env: Environment) {
  * @param string
  */
 case class Output(string: String) {
-  val hash: Int = fixString(string).hashCode()
+  private val DatFiles = """SessionID\d*\.dat""".r
+  val hash: Long = 37L*fixString(string).hashCode() + hashAllFiles(string)
   private def fixString(s: String) = s.replaceAll("SessionID\\d*", "SessionIDXXX")
+
+  def hashAllFiles(s: String): Long =
+    DatFiles.
+      findAllIn(s).
+      map(hashDatFile).
+      foldLeft(17L)((acc, s) => 37L*acc + s.hashCode.toLong)
+
+  def hashDatFile(f: String): Int = {
+    val path = new ITCImageFileIO().getImagePath
+    val file = io.Source.fromFile(path + File.separator + f)
+    // first line is a comment with timestamp, don't take into account for hash!
+    // for testing it is safe to assume there is at least one line (header)
+    file.getLines().drop(1).foldLeft(17)((acc, s) => 37*acc + s.hashCode)
+  }
 }
 
 /**
@@ -29,7 +44,7 @@ case class Output(string: String) {
  * @param in  hash value of input
  * @param out hash value of expected output
  */
-case class Baseline(in: Long, out: Int)
+case class Baseline(in: Long, out: Long)
 
 /**
  * Helper methods to load existing baselines from resources and create and store updated baselines.
@@ -40,7 +55,7 @@ object Baseline {
   private lazy val entry = """(-?\d*),(-?\d*)""".r
   private lazy val File = getClass.getResource("/baseline.txt").getFile
 
-  private lazy val baseline: Map[Long, Int] = {
+  private lazy val baseline: Map[Long, Long] = {
     val lines = Source.fromFile(File).getLines()
     val map = lines.map(parse).map(b => b.in -> b.out).toMap
     map
@@ -71,7 +86,7 @@ object Baseline {
     }
 
   private def parse(s: String): Baseline = s match {
-    case entry(in, out) => Baseline(in.toLong, out.toInt)
+    case entry(in, out) => Baseline(in.toLong, out.toLong)
     case _              => throw new Exception(s"Could not parse baseline: $s")
   }
 

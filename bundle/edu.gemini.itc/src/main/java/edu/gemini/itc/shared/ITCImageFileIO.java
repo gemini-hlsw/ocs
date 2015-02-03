@@ -250,7 +250,7 @@ public class ITCImageFileIO {
     }
 
 
-    private String getImagePath() {
+    public String getImagePath() {
         return _imagePath;
     }
 

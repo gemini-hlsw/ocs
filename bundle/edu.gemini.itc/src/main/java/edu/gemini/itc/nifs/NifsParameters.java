@@ -224,7 +224,7 @@ public final class NifsParameters extends ITCParameters {
     /**
      * Constructs a NifsParameters from a test file.
      */
-    public NifsParameters(String Filter, String grating, String readNoise, String darkCurrent, String instrumentCentralWavelength, String FP_Mask, String IFUMethod, String IFUOffset, String IFUMinOffset, String IFUMaxOffset, String instrumentLocation) {
+    public NifsParameters(String Filter, String grating, String readNoise, String darkCurrent, String instrumentCentralWavelength, String FP_Mask, String IFUMethod, String IFUOffset, String IFUMinOffset, String IFUMaxOffset, String IFUNumX, String IFUNumY, String IFUCenterX, String IFUCenterY) {
 
         _Filter = Filter;
         _grating = grating;
@@ -237,6 +237,10 @@ public final class NifsParameters extends ITCParameters {
         _IFUOffset = IFUOffset;
         _IFUMinOffset = IFUMinOffset;
         _IFUMaxOffset = IFUMaxOffset;
+        _IFUnumX = IFUNumX;
+        _IFUnumY = IFUNumY;
+        _IFUcenterX = IFUCenterX;
+        _IFUcenterY = IFUCenterY;
     }
 
     public String getFilter() {

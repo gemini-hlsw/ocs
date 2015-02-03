@@ -514,7 +514,19 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         nf.setMinimumFractionDigits(3);
         int n = getLastNonZeroPosition();
         for (int i = getFirstNonZeroPosition(); i < n; ++i) {
-            result.append(nf.format(getX(i)) + "\t" + nf.format(_y[i]) + "\n");
+            double x = getX(i);
+            double y = _y[i];
+            // By default DecimalFormat returns unicode characters for NaN and Infinity. This
+            // causes encoding problems when reading the text file back. For now,
+            // just replace NaNs with a string.
+            // TODO: This is a workaround, writing spectra files needs an overhaul.
+            // TODO: Also: Change GNIRS test data in a way that no NaN values are created(?).
+            String xStr = Double.isNaN(x) ? "NaN" : nf.format(x);
+            String yStr = Double.isNaN(y) ? "NaN" : nf.format(y);
+            result.append(xStr);
+            result.append("\t");
+            result.append(yStr);
+            result.append("\n");
         }
         return result.toString();
     }
