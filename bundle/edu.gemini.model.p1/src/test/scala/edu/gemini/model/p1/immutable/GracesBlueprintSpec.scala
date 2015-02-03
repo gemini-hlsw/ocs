@@ -8,21 +8,22 @@ import java.io.InputStreamReader
 class GracesBlueprintSpec extends SpecificationWithJUnit with SemesterProperties {
 
   "The Graces Blueprint" should {
-    "has an observing mode and a disperser" in {
+    "has a fiber mode and a read mode" in {
       // trivial sanity tests
-      val blueprint = GracesBlueprint(M.GracesFiberMode.ONE_FIBER)
+      val blueprint = GracesBlueprint(M.GracesFiberMode.ONE_FIBER, M.GracesReadMode.NORMAL)
       blueprint.fiberMode must beEqualTo(M.GracesFiberMode.ONE_FIBER)
+      blueprint.readMode must beEqualTo(M.GracesReadMode.NORMAL)
     }
     "never uses Lgs" in {
-      val blueprint = GracesBlueprint(M.GracesFiberMode.ONE_FIBER)
+      val blueprint = GracesBlueprint(M.GracesFiberMode.ONE_FIBER, M.GracesReadMode.NORMAL)
       blueprint.ao must beEqualTo(AoNone)
     }
-    "have an appropriate public name" in {
-      val blueprint = GracesBlueprint(M.GracesFiberMode.ONE_FIBER)
-      blueprint.name must beEqualTo("Graces 1 fiber (target, R~48k)")
+    "has an appropriate public name" in {
+      val blueprint = GracesBlueprint(M.GracesFiberMode.ONE_FIBER, M.GracesReadMode.NORMAL)
+      blueprint.name must beEqualTo("Graces 1 fiber (target, R~48k) Normal (Gain=1.3e/ADU, Read noise=4.3e)")
     }
     "is a visitor" in {
-      val blueprint = GracesBlueprint(M.GracesFiberMode.ONE_FIBER)
+      val blueprint = GracesBlueprint(M.GracesFiberMode.ONE_FIBER, M.GracesReadMode.NORMAL)
       blueprint.visitor must beTrue
       val observation = Observation(Some(blueprint), None, None, Band.BAND_1_2, None)
 
@@ -32,8 +33,8 @@ class GracesBlueprintSpec extends SpecificationWithJUnit with SemesterProperties
       // verify the blueprint has a false attribute
       xml must \\("Graces") \"visitor" \> "true"
     }
-    "export fiber mode to XML" in {
-      val blueprint = GracesBlueprint(M.GracesFiberMode.ONE_FIBER)
+    "export fiber mode and read mode to XML" in {
+      val blueprint = GracesBlueprint(M.GracesFiberMode.ONE_FIBER, M.GracesReadMode.NORMAL)
       val observation = Observation(Some(blueprint), None, None, Band.BAND_1_2, None)
 
       val proposal = Proposal.empty.copy(observations = observation :: Nil)
@@ -41,12 +42,13 @@ class GracesBlueprintSpec extends SpecificationWithJUnit with SemesterProperties
 
       // verify the exported value
       xml must \\("fiberMode") \> "1 fiber (target, R~48k)"
+      xml must \\("readMode") \> "Normal (Gain=1.3e/ADU, Read noise=4.3e)"
     }
     "be possible to deserialize" in {
       val proposal = ProposalIo.read(new InputStreamReader(getClass.getResourceAsStream("proposal_with_graces.xml")))
 
       proposal.blueprints(0).visitor must beTrue
-      proposal.blueprints must beEqualTo(GracesBlueprint(M.GracesFiberMode.ONE_FIBER) :: Nil)
+      proposal.blueprints must beEqualTo(GracesBlueprint(M.GracesFiberMode.ONE_FIBER, M.GracesReadMode.NORMAL) :: Nil)
     }
   }
 

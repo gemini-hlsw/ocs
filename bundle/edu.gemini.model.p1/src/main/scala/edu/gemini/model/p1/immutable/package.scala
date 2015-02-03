@@ -227,6 +227,9 @@ package object immutable {
   type GracesFiberMode = mutable.GracesFiberMode
   object GracesFiberMode extends EnumObject[mutable.GracesFiberMode]
 
+  type GracesReadMode = mutable.GracesReadMode
+  object GracesReadMode extends EnumObject[mutable.GracesReadMode]
+
   type GpiObservingMode = mutable.GpiObservingMode
   object GpiObservingMode extends EnumObject[mutable.GpiObservingMode] {
     def isCoronographMode(mode: GpiObservingMode):Boolean = mode.value.startsWith("Coronograph")
