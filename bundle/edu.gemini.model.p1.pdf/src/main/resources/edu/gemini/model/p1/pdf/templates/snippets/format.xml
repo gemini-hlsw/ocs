@@ -173,6 +173,45 @@
         <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 10), '0.0')"/>
     </xsl:template>
 
+    <!-- Calculates observation per site-->
+    <xsl:template name="get-total-observation-time-per-site">
+        <xsl:param name="site"/>
+        <xsl:param name="band"/>
+
+        <!-- observation has no reference to the instrument/time, needs te reach down to the blueprints -->
+        <xsl:variable name="obs">
+            <xsl:for-each select="/proposal/observations/observation[@band = $band]">
+                <xsl:variable name="bp" select="@blueprint"/>
+                <xsl:variable name="inst" select="name(/proposal/blueprints/*/*[@id=$bp]/..)"/>
+                <!-- Get the instrument site, special handling is required for visitors -->
+                <xsl:variable name="instSite">
+                    <xsl:choose>
+                        <!-- There could be visitors to GN or GS -->
+                        <xsl:when test="$inst = 'visitor'">
+                            <xsl:value-of select="/proposal/blueprints/*/*[@id=$bp]/../*/site"/>
+                        </xsl:when>
+                        
+                        <xsl:otherwise>
+                            <xsl:call-template name="get-inst-telescope-name">
+                                <xsl:with-param name="inst" select="$inst"/>
+                            </xsl:call-template>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:variable>
+
+                <xsl:if test="contains($instSite, $site)">
+                    <xsl:copy-of select="time"/>
+                </xsl:if>
+            </xsl:for-each>
+        </xsl:variable>
+
+        <xsl:variable name="observations" select="nodeset($obs)"/>
+        <xsl:variable name="minutes" select="sum($observations/time[@units='min'])"/>
+        <xsl:variable name="hours"   select="sum($observations/time[@units='hr'])"/>
+        <xsl:variable name="nights"  select="sum($observations/time[@units='night'])"/>
+        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 8), '0.0')"/>
+    </xsl:template>
+
     <!-- Creates a nice name for the instrument names used in the xml blueprints -->
     <xsl:template name="get-inst-name">
         <xsl:param name="inst"/>

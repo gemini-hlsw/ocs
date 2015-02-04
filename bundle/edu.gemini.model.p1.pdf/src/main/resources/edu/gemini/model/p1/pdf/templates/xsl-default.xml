@@ -679,6 +679,105 @@
                     </fo:table>
                     <!--  END Partner Submission Details -->
 
+                    <!--  BEGIN Observation Time Summary-->
+                    <fo:block space-before="8pt">
+                        <fo:inline font-weight="bold">
+                            Total Time of Observations
+                        </fo:inline>
+                    </fo:block>
+
+                    <fo:table table-layout="fixed" space-before="6pt" space-after="12pt" font-size="10pt">
+                        <fo:table-column column-width="5%"/>
+                        <fo:table-column column-width="45%"/>
+                        <fo:table-column column-width="25%"/>
+                        <fo:table-column column-width="25%"/>
+                        <fo:table-body>
+                            <fo:table-row>
+                                <fo:table-cell background-color="{$hdrColor}">
+                                    <fo:block>&#160;</fo:block>
+                                </fo:table-cell>
+                                <fo:table-cell background-color="{$hdrColor}">
+                                    <fo:block text-align="center" font-weight="bold">Band</fo:block>
+                                </fo:table-cell>
+                                <fo:table-cell background-color="{$hdrColor}"
+                                               border-left-style="solid" border-color="black" border-width="0.5pt">
+                                    <fo:block text-align="center" font-weight="bold">GN</fo:block>
+                                </fo:table-cell>
+                                <fo:table-cell background-color="{$hdrColor}"
+                                               border-left-style="solid" border-color="black" border-width="0.5pt">
+                                    <fo:block text-align="center" font-weight="bold">GS</fo:block>
+                                </fo:table-cell>
+                            </fo:table-row>
+
+                            <fo:table-row>
+                                <fo:table-cell number-columns-spanned="4" border-bottom-style="solid"
+                                               border-color="black" border-width="0.25pt">
+                                    <fo:block/>
+                                </fo:table-cell>
+                            </fo:table-row>
+
+                            <fo:table-row>
+                                <fo:table-cell border-bottom-style="solid"
+                                               border-color="black" border-width="0.25pt">
+                                    <fo:block>&#160;</fo:block>
+                                </fo:table-cell>
+                                <fo:table-cell border-bottom-style="solid"
+                                               border-color="black" border-width="0.25pt">
+                                    <fo:block>Band 1/2</fo:block>
+                                </fo:table-cell>
+                                <fo:table-cell border-bottom-style="solid"
+                                               border-color="black" border-width="0.25pt">
+                                    <fo:block>
+                                        <xsl:call-template name="get-total-observation-time-per-site">
+                                            <xsl:with-param name="site" select="'North'"/>
+                                            <xsl:with-param name="band" select="'Band 1/2'"/>
+                                        </xsl:call-template> hr
+                                    </fo:block>
+                                </fo:table-cell>
+                                <fo:table-cell border-bottom-style="solid"
+                                               border-color="black" border-width="0.25pt">
+                                    <fo:block>
+                                        <xsl:call-template name="get-total-observation-time-per-site">
+                                            <xsl:with-param name="site" select="'South'"/>
+                                            <xsl:with-param name="band" select="'Band 1/2'"/>
+                                        </xsl:call-template> hr
+                                    </fo:block>
+                                </fo:table-cell>
+                            </fo:table-row>
+
+                            <fo:table-row>
+                                <fo:table-cell border-bottom-style="solid"
+                                               border-color="black" border-width="0.25pt">
+                                    <fo:block>&#160;</fo:block>
+                                </fo:table-cell>
+                                <fo:table-cell border-bottom-style="solid"
+                                               border-color="black" border-width="0.25pt">
+                                    <fo:block>Band 3</fo:block>
+                                </fo:table-cell>
+                                <fo:table-cell border-bottom-style="solid"
+                                               border-color="black" border-width="0.25pt">
+                                    <fo:block>
+                                        <xsl:call-template name="get-total-observation-time-per-site">
+                                            <xsl:with-param name="site" select="'North'"/>
+                                            <xsl:with-param name="band" select="'Band 3'"/>
+                                        </xsl:call-template> hr
+                                    </fo:block>
+                                </fo:table-cell>
+                                <fo:table-cell border-bottom-style="solid"
+                                               border-color="black" border-width="0.25pt">
+                                    <fo:block>
+                                        <xsl:call-template name="get-total-observation-time-per-site">
+                                            <xsl:with-param name="site" select="'South'"/>
+                                            <xsl:with-param name="band" select="'Band 3'"/>
+                                        </xsl:call-template> hr
+                                    </fo:block>
+                                </fo:table-cell>
+
+                            </fo:table-row>
+                        </fo:table-body>
+                    </fo:table>
+                    <!--  END Partner Submission Details -->
+
                     <!-- BEGIN abstract -->
                     <fo:block space-after="6pt">
                         <fo:inline font-weight="bold">
