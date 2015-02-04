@@ -20,8 +20,7 @@ import edu.gemini.pit.catalog.Error
 
 object ProblemRobot {
 
-  class Problem(val targetx: Any,
-                val severity: Severity,
+  class Problem(val severity: Severity,
                 val description: String,
                 val section: String,
                 fix: => Unit) extends Ordered[Problem] {
@@ -88,23 +87,23 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     private def when[A](b: Boolean)(a: => A) = if (b) Some(a) else None
 
     private lazy val titleCheck = when(p.title.isEmpty) {
-      new Problem(p, Severity.Todo, "Please provide a title.", "Overview", s.inOverview(_.title.requestFocus()))
+      new Problem(Severity.Todo, "Please provide a title.", "Overview", s.inOverview(_.title.requestFocus()))
     }
 
     private lazy val abstractCheck = when(p.abstrakt.isEmpty) {
-      new Problem(p, Severity.Todo, "Please provide an abstract.", "Overview", s.inOverview(_.abstrakt.requestFocus()))
+      new Problem(Severity.Todo, "Please provide an abstract.", "Overview", s.inOverview(_.abstrakt.requestFocus()))
     }
 
     private lazy val tacCategoryCheck = when(p.tacCategory.isEmpty) {
-      new Problem(p, Severity.Todo, "Please select a TAC category.", "Overview", s.inOverview(_.tacCategory.peer.setPopupVisible(true)))
+      new Problem(Severity.Todo, "Please select a TAC category.", "Overview", s.inOverview(_.tacCategory.peer.setPopupVisible(true)))
     }
 
     private lazy val keywordCheck = when(p.keywords.isEmpty) {
-      new Problem(p, Severity.Todo, "Please provide keywords.", "Overview", s.inOverview(_.keywords.select.doClick()))
+      new Problem(Severity.Todo, "Please provide keywords.", "Overview", s.inOverview(_.keywords.select.doClick()))
     }
 
     private lazy val attachmentCheck = when(p.meta.attachment.isEmpty) {
-      new Problem(p, Severity.Todo, "Please provide a PDF attachment.", "Overview", s.inOverview(_.attachment.select.doClick()))
+      new Problem(Severity.Todo, "Please provide a PDF attachment.", "Overview", s.inOverview(_.attachment.select.doClick()))
     }
 
     def extractInvestigator(i:PrincipalInvestigator) = (i.firstName, i.lastName, i.email, i.phone, i.status, i.address.institution)
@@ -126,9 +125,9 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     }
 
     private val duplicateInvestigatorCheck = if (duplicateInvestigators(p.investigators.all)) {
-      Some(new Problem(p, Severity.Error, "Please remove duplicates from the investigator list.", "Overview", s.inOverview(_.investigators.editPi())))
+      Some(new Problem(Severity.Error, "Please remove duplicates from the investigator list.", "Overview", s.inOverview(_.investigators.editPi())))
     } else if (similarInvestigators(p.investigators.all)) {
-      Some(new Problem(p, Severity.Warning, "Please check for duplications in the investigator list.", "Overview", s.inOverview(_.investigators.editPi())))
+      Some(new Problem(Severity.Warning, "Please check for duplications in the investigator list.", "Overview", s.inOverview(_.investigators.editPi())))
     } else {
       None
     }
@@ -136,7 +135,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     private lazy val attachmentValidityCheck = for {
       a <- p.meta.attachment
       if !PDF.isPDF(xml, a)
-    } yield new Problem(a, Severity.Error, "File %s does not exist or is not a PDF file.".format(a.getName), "Overview", s.inOverview(_.attachment.select.doClick()))
+    } yield new Problem(Severity.Error, "File %s does not exist or is not a PDF file.".format(a.getName), "Overview", s.inOverview(_.attachment.select.doClick()))
 
     private lazy val cfCheck = for {
       (t, Some(f)) <- s.catalogHandler.state
@@ -145,14 +144,14 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         case NotFound(id) => (Severity.Error, s"""Catalog lookup returned no results for target "$id" """)
         case Error(e) => (Severity.Error, s"Catalog lookup failed for ${t.name} due to an unexpected error: ")
       }
-    } yield new Problem(t, sev, msg, "Targets", s.inTargetsView(_.edit(t)))
+    } yield new Problem(sev, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     private lazy val emptyTargetCheck = for {
       t <- p.targets
       if t.isEmpty
       if !s.catalogHandler.state.contains(t)
       msg = "Target \"%s\" appears to be empty.".format(t.name)
-    } yield new Problem(t, Severity.Error, msg, "Targets", s.inTargetsView(_.edit(t)))
+    } yield new Problem(Severity.Error, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     lazy val utc = new SimpleDateFormat("dd-MMM-yyyy")
 
@@ -168,7 +167,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         "Ephemeris for target \"%s\" is undefined between %s and %s UTC.".format(t.name, utc.format(p.semester.firstDay), utc.format(p.semester.lastDay))
       else
         "Ephemeris for target \"%s\" is undefined before %s and %s UTC.".format(t.name, utc.format(p.semester.firstDay), utc.format(date))
-    } yield new Problem(t, Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
+    } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     private lazy val finalEphemerisCheck = for {
       t @ NonSiderealTarget(_, n, e, _) <- p.targets
@@ -182,7 +181,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         "Ephemeris for target \"%s\" is undefined between %s and %s UTC.".format(t.name, utc.format(p.semester.firstDay), utc.format(p.semester.lastDay))
       else
         "Ephemeris for target \"%s\" is undefined between %s and %s UTC.".format(t.name, utc.format(date), utc.format(p.semester.lastDay))
-    } yield new Problem(t, Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
+    } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     private lazy val emptyEphemerisCheck = for {
       t@NonSiderealTarget(_, n, e, _) <- p.targets
@@ -190,7 +189,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       if !s.catalogHandler.state.contains(t)
       if e.isEmpty
       msg = "Ephemeris for target \"%s\" is undefined.".format(t.name)
-    } yield new Problem(t, Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
+    } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     private val gpiCheck = {
       def gpiMagnitudesPresent(target: SiderealTarget):List[(Severity, String)] = {
@@ -253,7 +252,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         problem     <- gpiProblems._2
         severity    =  problem._1
         message     =  problem._2
-      } yield new Problem(target, severity, message, "Targets", s.inTargetsView(_.edit(target)))
+      } yield new Problem(severity, message, "Targets", s.inTargetsView(_.edit(target)))
     }
 
     private lazy val singlePointEphemerisCheck = for {
@@ -262,7 +261,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       if !s.catalogHandler.state.contains(t)
       if e.size == 1
       msg = "Ephemeris for target \"%s\" contains only one point; please specify at least two.".format(t.name)
-    } yield new Problem(t, Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
+    } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     private lazy val missingObsElementCheck = {
       def fix[A](b: Band, g: ObsListGrouping[A]) {
@@ -272,8 +271,8 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       def check[A](s: String, g: ObsListGrouping[A]) =
         p.observations.filter(g.lens.get(_).isEmpty) match {
           case Nil => None
-          case h :: Nil => Some(new Problem(null, Severity.Error, "One observation has no %s.".format(s), "Observations", fix(h.band, g)))
-          case h :: tail => Some(new Problem(null, Severity.Error, "%d observations have no %s.".format(1 + tail.length, s), "Observations", fix(h.band, g)))
+          case h :: Nil => Some(new Problem(Severity.Error, "One observation has no %s.".format(s), "Observations", fix(h.band, g)))
+          case h :: tail => Some(new Problem(Severity.Error, "%d observations have no %s.".format(1 + tail.length, s), "Observations", fix(h.band, g)))
         }
 
       List(
@@ -289,8 +288,8 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     private lazy val missingObsDetailsCheck =
       p.observations.filter(_.time.isEmpty) match {
         case Nil => None
-        case h :: Nil => Some(new Problem(null, Severity.Error, "One observation has no observation time.", "Observations", indicateObservation(h)))
-        case h :: tail => Some(new Problem(null, Severity.Error, "%d observations have no observation times.".format(1 + tail.length), "Observations", indicateObservation(h)))
+        case h :: Nil => Some(new Problem(Severity.Error, "One observation has no observation time.", "Observations", indicateObservation(h)))
+        case h :: tail => Some(new Problem(Severity.Error, "%d observations have no observation times.".format(1 + tail.length), "Observations", indicateObservation(h)))
       }
 
     private def hasBestGuidingConditions(o: Observation): Boolean =
@@ -308,7 +307,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       o <- p.observations
       m <- o.meta
       g <- m.guiding if g.evaluation == GuidingEvaluation.FAILURE
-    } yield new Problem(null, Severity.Warning, guidingMessage(o), "Observations", indicateObservation(o))
+    } yield new Problem(Severity.Warning, guidingMessage(o), "Observations", indicateObservation(o))
 
     private def visibilityMessage(tmpl: String, sem: Semester, o: Observation): String =
       tmpl.format(
@@ -320,7 +319,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       o @ Observation(Some(_), Some(_), Some(_), Some(_), _) <- p.observations
       v <- if (p.proposalClass.isSpecial) TargetVisibilityCalc.getOnDec(p.semester, o) else TargetVisibilityCalc.get(p.semester, o)
       if v == TargetVisibility.Bad
-    } yield new Problem(null, Severity.Error,
+    } yield new Problem(Severity.Error,
         visibilityMessage("Target is inaccessible at %s during %s.  Consider an alternative.", p.semester, o),
         "Observations",
         indicateObservation(o))
@@ -330,7 +329,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       o @ Observation(Some(_), Some(_), Some(_), Some(_), _) <- p.observations
       v <- if (p.proposalClass.isSpecial) TargetVisibilityCalc.getOnDec(p.semester, o) else TargetVisibilityCalc.get(p.semester, o)
       if v == TargetVisibility.Limited
-    } yield new Problem(null, Severity.Warning,
+    } yield new Problem(Severity.Warning,
         visibilityMessage("Target has limited visibility at %s during %s.", p.semester, o),
         "Observations",
         indicateObservation(o))
@@ -357,16 +356,14 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
             case l: LargeProgramSubmission   => "large program"
             case f: FastTurnaroundSubmission => "fast-turnaround"
           }
-          new Problem(null, Severity.Error, s"Requested time for $kind is less than minimum requested time.", TimeProblems.SCHEDULING_SECTION,
+          new Problem(Severity.Error, s"Requested time for $kind is less than minimum requested time.", TimeProblems.SCHEDULING_SECTION,
             s.inPartnersView(_.editSubmissionTime(sub)))
       }
 
     }
 
     private lazy val band3option = (p.meta.band3OptionChosen, p.proposalClass) match {
-      case (false, q: QueueProposalClass)         => Some(new Problem(null, Severity.Todo, "Please select a Band 3 option.", TimeProblems.SCHEDULING_SECTION, s.showPartnersView))
-      // TODO Remove if FT does not allow band3
-      //case (false, f: FastTurnaroundProgramClass) => Some(new Problem(null, Severity.Todo, "Please select a Band 3 option.", TimeProblems.SCHEDULING_SECTION, s.showPartnersView))
+      case (false, q: QueueProposalClass)         => Some(new Problem(Severity.Todo, "Please select a Band 3 option.", TimeProblems.SCHEDULING_SECTION, s.showPartnersView))
       case _                                      => None
     }
 
@@ -378,7 +375,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         case _ => true
       })
     } yield {
-      new Problem(null, Severity.Error,
+      new Problem(Severity.Error,
       "Allow consideration for Band 3 or delete the Band 3 observation.", "Observations", {
         s.showPartnersView()
         s.inObsListView(o.band, v => v.Fixes.indicateObservation(o))
@@ -388,7 +385,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     private lazy val ftReviewerOrMentor = for {
         f @ FastTurnaroundProgramClass(_, _, _, _, _, _, r, m, _, _) <- Some(p.proposalClass)
         if r.isEmpty || (~r.map(_.status != InvestigatorStatus.PH_D) && m.isEmpty)
-      } yield new Problem(null, Severity.Error,
+      } yield new Problem(Severity.Error,
             "A Fast Turnaround program must select a reviewer or a mentor with PhD degree", TimeProblems.SCHEDULING_SECTION, {
               s.showPartnersView()
             })
@@ -399,7 +396,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         f @ FastTurnaroundProgramClass(_, _, _, _, _, _, _, _, affiliateNgo, _) <- Option(p.proposalClass)
         same <- (affiliateNgo |@| piNgo){_ == _}
         if ~(affiliateNgo |@| piNgo){_ != _}
-      } yield new Problem(null, Severity.Info,
+      } yield new Problem(Severity.Info,
             s"The Fast Turnaround affiliation country: '${~Partners.name.get(affiliateNgo.get)}' is different from the PI's country: '${~Partners.name.get(piNgo.get)}'.", TimeProblems.SCHEDULING_SECTION, {
               s.showPartnersView()
             })
@@ -417,19 +414,19 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         case e: ExchangeProposalClass if e.partner == ExchangePartner.SUBARU => Site.Subaru.name
         case _ => "Gemini"
       }
-      new Problem(null, Severity.Error, "Scheduling request is for %s but resource resides at %s".format(host, b.site.name), "Observations", {
+      new Problem(Severity.Error, "Scheduling request is for %s but resource resides at %s".format(host, b.site.name), "Observations", {
         s.showPartnersView()
         s.inObsListView(o.band, v => v.Fixes.indicateObservation(o))
       })
     }
 
     private lazy val noObs = if (p.observations.isEmpty) {
-      Some(new Problem(null, Severity.Todo, "Please create observations with conditions, targets, and resources.", "Observations", ()))
+      Some(new Problem(Severity.Todo, "Please create observations with conditions, targets, and resources.", "Observations", ()))
     } else None
 
     private lazy val incompleteInvestigator = for {
       i <- p.investigators.all if !i.isComplete
-    } yield new Problem(null, Severity.Todo, "Please provide full contact information for %s.".format(i.fullName), "Overview", s.inOverview {
+    } yield new Problem(Severity.Todo, "Please provide full contact information for %s.".format(i.fullName), "Overview", s.inOverview {
         v =>
           v.edit(i)
       })
@@ -471,7 +468,7 @@ object TimeProblems {
         } yield for {
             ps <- sub
             if ps.request.time.value <= 0.0
-          } yield new Problem(null, Severity.Error, s"Please specify a time request for partner ${Partners.name.getOrElse(ps.partner, "")}", SCHEDULING_SECTION, s.showPartnersView())
+          } yield new Problem(Severity.Error, s"Please specify a time request for partner ${Partners.name.getOrElse(ps.partner, "")}", SCHEDULING_SECTION, s.showPartnersView())
       probs.right.getOrElse(Nil)
     case _                            => Nil
   }
@@ -500,7 +497,7 @@ case class TimeProblems(p: Proposal, s: ShellAdvisor) {
       val msg = (formatDifferingTimes(r, o, 2) map {
         case (s1, s2) => "Requested %stime, %s, differs from the sum of times for all %sobservations, %s.".format(b3, s1, b3, s2)
       }).getOrElse("Requested %stime differs from the sum of times for all %sobservations.".format(b3, b3))
-      new Problem(null, Severity.Warning, msg, SCHEDULING_SECTION, {
+      new Problem(Severity.Warning, msg, SCHEDULING_SECTION, {
         s.showPartnersView()
         s.showObsListView(b)
       })
@@ -510,11 +507,11 @@ case class TimeProblems(p: Proposal, s: ShellAdvisor) {
   def requestedB3TimeDiffers = requestedTimeCheck(b3ReqOrZero, obsB3, Band.BAND_3)
 
   def noTimeRequest = when(requested.hours <= 0.0) {
-    new Problem(null, Severity.Todo, "Please specify a time request.", SCHEDULING_SECTION, s.showPartnersView())
+    new Problem(Severity.Todo, "Please specify a time request.", SCHEDULING_SECTION, s.showPartnersView())
   }
 
   private def b3Problem(f: SubmissionRequest => Boolean, sev: Severity, msg: String) = when(b3Req.exists(r => f(r))) {
-    new Problem(null, sev, msg, SCHEDULING_SECTION, s.inPartnersView(_.editBand3Time()))
+    new Problem(sev, msg, SCHEDULING_SECTION, s.inPartnersView(_.editBand3Time()))
   }
 
   def noBand3Time = b3Problem(_.time.hours <= 0.0, Severity.Todo, "Please enter the total requested time for a Band 3 allocation.")
@@ -549,10 +546,9 @@ case class TacProblems(p: Proposal, s: ShellAdvisor) {
   }.flatten.toMap
 
   def tacProblem(f: => Boolean, sev: Severity, msg: String, partner: Partner): Option[Problem] =
-    Option(f).filter(_ == true).map(_ => new Problem(null, sev, msg, TAC_SECTION, s.showTacView(partner)))
+    Option(f).filter(_ == true).map(_ => new Problem(sev, msg, TAC_SECTION, s.showTacView(partner)))
 
   def noResponses = Option(responses).filter(_.isEmpty).map(_ => new Problem(
-    null,
     Severity.Error,
     "This proposal has no responses; TAC mode is not applicable.",
     TAC_SECTION,
