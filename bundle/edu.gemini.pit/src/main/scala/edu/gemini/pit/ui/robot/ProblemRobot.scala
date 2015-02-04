@@ -78,6 +78,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       val ps =
         List(noObs, titleCheck, band3option, abstractCheck, tacCategoryCheck, keywordCheck, attachmentCheck, attachmentValidityCheck, missingObsDetailsCheck, duplicateInvestigatorCheck, ftReviewerOrMentor, ftAffiliationMissmatch).flatten ++
           TimeProblems(p, s).all ++
+          TimeProblems.partnerZeroTimeRequest(p, s) ++
           TacProblems(p, s).all ++
           List(incompleteInvestigator, missingObsElementCheck, cfCheck, emptyTargetCheck, emptyEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
             badGuiding, badVisibility, iffyVisibility, singlePointEphemerisCheck, minTimeCheck, wrongSite, band3Orphan2, gpiCheck).flatten
@@ -437,6 +438,8 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
 }
 
+import ProblemRobot._
+import TimeProblems._
 
 object TimeProblems {
   // Are two time amounts close enough to be considered the same?
@@ -459,10 +462,20 @@ object TimeProblems {
       }
 
   val SCHEDULING_SECTION = "Time Requests"
-}
 
-import ProblemRobot._
-import TimeProblems._
+  // REL-2032 Check that none of the requested times per partner are zero
+  def partnerZeroTimeRequest(p: Proposal, s:ShellAdvisor): List[ProblemRobot.Problem] = p.proposalClass match {
+    case g:GeminiNormalProposalClass =>
+      val probs = for {
+          sub <- g.subs.swap.right
+        } yield for {
+            ps <- sub
+            if ps.request.time.value <= 0.0
+          } yield new Problem(null, Severity.Error, s"Please specify a time request for partner ${Partners.name.getOrElse(ps.partner, "")}", SCHEDULING_SECTION, s.showPartnersView())
+      probs.right.getOrElse(Nil)
+    case _                            => Nil
+  }
+}
 
 case class TimeProblems(p: Proposal, s: ShellAdvisor) {
   lazy val requested = p.proposalClass.requestedTime
@@ -478,7 +491,6 @@ case class TimeProblems(p: Proposal, s: ShellAdvisor) {
     case _ => None
   }
   lazy val b3ReqOrZero = b3Req.map(_.time).getOrElse(TimeAmount.empty)
-
 
   private def when[A](b: Boolean)(a: => A) = if (b) Some(a) else None
 
