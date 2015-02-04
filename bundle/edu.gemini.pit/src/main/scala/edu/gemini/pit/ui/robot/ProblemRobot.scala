@@ -135,14 +135,14 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     private lazy val attachmentValidityCheck = for {
       a <- p.meta.attachment
       if !PDF.isPDF(xml, a)
-    } yield new Problem(Severity.Error, "File %s does not exist or is not a PDF file.".format(a.getName), "Overview", s.inOverview(_.attachment.select.doClick()))
+    } yield new Problem(Severity.Error, s"File ${a.getName} does not exist or is not a PDF file.", "Overview", s.inOverview(_.attachment.select.doClick()))
 
     private lazy val cfCheck = for {
       (t, Some(f)) <- s.catalogHandler.state
       (sev, msg) = f match {
-        case Offline => (Severity.Error, s"Catalog lookup failed for ${t.name} due to network connectivity problems.")
-        case NotFound(id) => (Severity.Error, s"""Catalog lookup returned no results for target "$id" """)
-        case Error(e) => (Severity.Error, s"Catalog lookup failed for ${t.name} due to an unexpected error: ")
+        case Offline      => (Severity.Error, s"Catalog lookup failed for ${t.name} due to network connectivity problems.")
+        case NotFound(t)  => (Severity.Error, s"""Catalog lookup returned no results for target "$t" """)
+        case Error(e)     => (Severity.Error, s"Catalog lookup failed for ${t.name} due to an unexpected error: ")
       }
     } yield new Problem(sev, msg, "Targets", s.inTargetsView(_.edit(t)))
 
@@ -150,7 +150,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       t <- p.targets
       if t.isEmpty
       if !s.catalogHandler.state.contains(t)
-      msg = "Target \"%s\" appears to be empty.".format(t.name)
+      msg = s"""Target "${t.name}" appears to be empty."""
     } yield new Problem(Severity.Error, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     lazy val utc = new SimpleDateFormat("dd-MMM-yyyy")
@@ -164,9 +164,9 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       if diff > 1.days
       date = new Date(ds.min)
       msg = if (ds.min >= p.semester.lastDay)
-        "Ephemeris for target \"%s\" is undefined between %s and %s UTC.".format(t.name, utc.format(p.semester.firstDay), utc.format(p.semester.lastDay))
+        s"""Ephemeris for target "${t.name}" is undefined between ${utc.format(p.semester.firstDay)} and ${utc.format(p.semester.lastDay)} UTC."""
       else
-        "Ephemeris for target \"%s\" is undefined before %s and %s UTC.".format(t.name, utc.format(p.semester.firstDay), utc.format(date))
+        s"""Ephemeris for target "${t.name}" is undefined before ${utc.format(p.semester.firstDay)} and ${utc.format(date)} UTC."""
     } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     private lazy val finalEphemerisCheck = for {
@@ -178,9 +178,9 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       if diff > 1.days
       date = new Date(ds.max)
       msg = if (ds.max <= p.semester.firstDay)
-        "Ephemeris for target \"%s\" is undefined between %s and %s UTC.".format(t.name, utc.format(p.semester.firstDay), utc.format(p.semester.lastDay))
+        s"""Ephemeris for target "${t.name}" is undefined between ${utc.format(p.semester.firstDay)}} and ${utc.format(p.semester.lastDay)} UTC."""
       else
-        "Ephemeris for target \"%s\" is undefined between %s and %s UTC.".format(t.name, utc.format(date), utc.format(p.semester.lastDay))
+        s"""Ephemeris for target "${t.name}" is undefined between ${utc.format(date)} and ${utc.format(p.semester.lastDay)} UTC."""
     } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     private lazy val emptyEphemerisCheck = for {
@@ -260,7 +260,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       if !t.isEmpty
       if !s.catalogHandler.state.contains(t)
       if e.size == 1
-      msg = "Ephemeris for target \"%s\" contains only one point; please specify at least two.".format(t.name)
+      msg = s"""Ephemeris for target "${t.name}" contains only one point; please specify at least two."""
     } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     private lazy val missingObsElementCheck = {
@@ -271,7 +271,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       def check[A](s: String, g: ObsListGrouping[A]) =
         p.observations.filter(g.lens.get(_).isEmpty) match {
           case Nil => None
-          case h :: Nil => Some(new Problem(Severity.Error, "One observation has no %s.".format(s), "Observations", fix(h.band, g)))
+          case h :: Nil => Some(new Problem(Severity.Error, s"One observation has no $s.", "Observations", fix(h.band, g)))
           case h :: tail => Some(new Problem(Severity.Error, "%d observations have no %s.".format(1 + tail.length, s), "Observations", fix(h.band, g)))
         }
 
@@ -300,7 +300,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
     private def guidingMessage(o: Observation): String = {
       val base = "Observation unlikely to have usable guide stars."
-      if (hasBestGuidingConditions(o)) base else "%s Try better conditions?".format(base)
+      if (hasBestGuidingConditions(o)) base else s"$base Try better conditions?"
     }
 
     private lazy val badGuiding = for {
@@ -338,8 +338,8 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
       val subs:List[Submission] = p.proposalClass match {
         case n: GeminiNormalProposalClass => n.subs match {
-          case Left(ss) => ss
-          case Right(s) => List(s)
+          case Left(ss)  => ss
+          case Right(ss) => List(ss)
         }
         case e: ExchangeProposalClass      => e.subs
         case s: SpecialProposalClass       => List(s.sub)
@@ -363,8 +363,8 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     }
 
     private lazy val band3option = (p.meta.band3OptionChosen, p.proposalClass) match {
-      case (false, q: QueueProposalClass)         => Some(new Problem(Severity.Todo, "Please select a Band 3 option.", TimeProblems.SCHEDULING_SECTION, s.showPartnersView))
-      case _                                      => None
+      case (false, q: QueueProposalClass) => Some(new Problem(Severity.Todo, "Please select a Band 3 option.", TimeProblems.SCHEDULING_SECTION, s.showPartnersView))
+      case _                              => None
     }
 
     private lazy val band3Orphan2 = for {
@@ -414,7 +414,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         case e: ExchangeProposalClass if e.partner == ExchangePartner.SUBARU => Site.Subaru.name
         case _ => "Gemini"
       }
-      new Problem(Severity.Error, "Scheduling request is for %s but resource resides at %s".format(host, b.site.name), "Observations", {
+      new Problem(Severity.Error, s"Scheduling request is for $host but resource resides at ${b.site.name}", "Observations", {
         s.showPartnersView()
         s.inObsListView(o.band, v => v.Fixes.indicateObservation(o))
       })
@@ -426,7 +426,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
     private lazy val incompleteInvestigator = for {
       i <- p.investigators.all if !i.isComplete
-    } yield new Problem(Severity.Todo, "Please provide full contact information for %s.".format(i.fullName), "Overview", s.inOverview {
+    } yield new Problem(Severity.Todo, s"Please provide full contact information for ${i.fullName}.", "Overview", s.inOverview {
         v =>
           v.edit(i)
       })
@@ -495,8 +495,8 @@ case class TimeProblems(p: Proposal, s: ShellAdvisor) {
     when(r.hours > 0 && !sameTime(r, o)) {
       val b3 = if (b == Band.BAND_3) "Band 3 " else ""
       val msg = (formatDifferingTimes(r, o, 2) map {
-        case (s1, s2) => "Requested %stime, %s, differs from the sum of times for all %sobservations, %s.".format(b3, s1, b3, s2)
-      }).getOrElse("Requested %stime differs from the sum of times for all %sobservations.".format(b3, b3))
+        case (s1, s2) => s"Requested ${b3}time, $s1, differs from the sum of times for all ${b3}observations, $s2."
+      }).getOrElse(s"Requested ${b3}time differs from the sum of times for all ${b3}observations.")
       new Problem(Severity.Warning, msg, SCHEDULING_SECTION, {
         s.showPartnersView()
         s.showObsListView(b)
@@ -528,7 +528,7 @@ object TacProblems {
   type Partner = Any
   // ugh
   def tac = AppPreferences.current.mode == AppPreferences.PITMode.TAC
-  def name(p: Partner) = Partners.name.get(p).getOrElse("<unknown>")
+  def name(p: Partner) = Partners.name.getOrElse(p, "<unknown>")
 
 }
 
@@ -559,28 +559,28 @@ case class TacProblems(p: Proposal, s: ShellAdvisor) {
       tacProblem(
         r.decision.isEmpty,
         Severity.Todo,
-        "Please provide a TAC decision for %s.".format(name(p)),
+        s"Please provide a TAC decision for ${name(p)}.",
         p)
   }
 
   def noEmail = accepts.map {
     case (p, a) =>
-      tacProblem(a.email.trim.isEmpty, Severity.Todo, "Please provide a contact email address for %s.".format(name(p)), p)
+      tacProblem(a.email.trim.isEmpty, Severity.Todo, s"Please provide a contact email address for ${name(p)}.", p)
   }
 
   def noRanking = accepts.map {
     case (p, a) =>
-      tacProblem(a.ranking == 0, Severity.Todo, "Please provide a non-zero ranking for %s.".format(name(p)), p)
+      tacProblem(a.ranking == 0, Severity.Todo, s"Please provide a non-zero ranking for ${name(p)}.", p)
   }
 
   def noTimes = accepts.map {
     case (p, a) =>
-      tacProblem(a.recommended.isEmpty, Severity.Todo, "Please provide a recommended time for %s.".format(name(p)), p)
+      tacProblem(a.recommended.isEmpty, Severity.Todo, s"Please provide a recommended time for ${name(p)}.", p)
   }
 
   def badTimes = accepts.map {
     case (p, a) =>
-      tacProblem(a.recommended.hours < a.minRecommended.hours, Severity.Error, "Minimum time is greater than recommended time for %s.".format(name(p)), p)
+      tacProblem(a.recommended.hours < a.minRecommended.hours, Severity.Error, s"Minimum time is greater than recommended time for ${name(p)}.", p)
   }
 
   def all: List[Problem] = if (tac) (
