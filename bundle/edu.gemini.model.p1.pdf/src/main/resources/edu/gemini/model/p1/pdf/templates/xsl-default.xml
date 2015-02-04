@@ -131,8 +131,8 @@
                         font-family="Times">
 
                    <fo:table table-layout="fixed">
-                       <fo:table-column column-width="20%"/>
-                       <fo:table-column column-width="60%"/>
+                        <fo:table-column column-width="20%"/>
+                        <fo:table-column column-width="60%"/>
                         <fo:table-column column-width="20%"/>
                         <fo:table-body>
                             <fo:table-row>
@@ -186,10 +186,10 @@
                          font-family="Times"
                          font-size="11pt">
 
-                    <fo:block space-after="24pt"/>
+                    <fo:block space-after="8pt"/>
 
                     <!-- BEGIN data block -->
-                    <fo:table table-layout="fixed" space-before="24pt"
+                    <fo:table table-layout="fixed" space-before="8pt"
                               space-after="8pt">
                         <fo:table-column column-width="30%"/>
                         <fo:table-column column-width="36%"/>
