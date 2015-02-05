@@ -219,6 +219,19 @@ class P1TemplatesSpec extends SpecificationWithJUnit {
       proposalXml must (\\("inline") \>~ """\s*Mentor:\s*""")
       proposalXml must (\\("block") \>~ """.*John.Doe\s*""")
     }
+    "calculate the total time for all observations for GN and GS, REL-1298" in {
+      val result = transformProposal("proposal_with_gn_and_gs.xml")
+      val proposalXml = XML.loadString(result)
+      // Check values manually calculated
+      // Band 1/2 GN
+      proposalXml must (\\("block") \>~ """11.1 hr\s*""")
+      // Band 1/2 GS
+      proposalXml must (\\("block") \>~ """8.4 hr\s*""")
+      // Band 3 GN
+      proposalXml must (\\("block") \>~ """3.0 hr\s*""")
+      // Band 3 GS
+      proposalXml must (\\("block") \>~ """1.0 hr\s*""")
+    }
 
   }
 
