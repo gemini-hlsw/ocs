@@ -56,6 +56,9 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
   import ProblemRobot._
 
+  val MaxAttachmentSize = 30 // in megabytes
+  val MaxAttachmentSizeBytes = MaxAttachmentSize*1000*1000 // kbytes as used on the phase1 backends
+
   // Our state
   type State = List[Problem]
   protected[this] val initialState = Nil
@@ -75,7 +78,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
     lazy val all = {
       val ps =
-        List(noObs, titleCheck, band3option, abstractCheck, tacCategoryCheck, keywordCheck, attachmentCheck, attachmentValidityCheck, missingObsDetailsCheck, duplicateInvestigatorCheck, ftReviewerOrMentor, ftAffiliationMissmatch).flatten ++
+        List(noObs, titleCheck, band3option, abstractCheck, tacCategoryCheck, keywordCheck, attachmentCheck, attachmentValidityCheck, attachmentSizeCheck, missingObsDetailsCheck, duplicateInvestigatorCheck, ftReviewerOrMentor, ftAffiliationMissmatch).flatten ++
           TimeProblems(p, s).all ++
           TimeProblems.partnerZeroTimeRequest(p, s) ++
           TacProblems(p, s).all ++
@@ -136,6 +139,11 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       a <- p.meta.attachment
       if !PDF.isPDF(xml, a)
     } yield new Problem(Severity.Error, s"File ${a.getName} does not exist or is not a PDF file.", "Overview", s.inOverview(_.attachment.select.doClick()))
+
+    private lazy val attachmentSizeCheck = for {
+      a <- p.meta.attachment
+      if a.length() > MaxAttachmentSizeBytes
+    } yield new Problem(Severity.Error, s"Attachment '${a.getName}' is larger than ${MaxAttachmentSize}MB.", "Overview", s.inOverview(_.attachment.select.doClick()))
 
     private lazy val cfCheck = for {
       (t, Some(f)) <- s.catalogHandler.state
