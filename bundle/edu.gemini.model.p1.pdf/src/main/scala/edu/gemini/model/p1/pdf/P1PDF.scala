@@ -129,5 +129,6 @@ object P1PDF {
 
     val ok = Runtime.getRuntime.exec(Array("open", out.getAbsolutePath)).waitFor
     println("Exec returned " + ok)
+    System.exit(0)
   }
 }
