@@ -97,7 +97,7 @@ class TableCategoriesEditor(ctx: QvContext) extends CategoriesEditor {
 
 /** Editor for chart categories. Charts only support calculations that result in a double value. */
 class BarChartCategoriesEditor(ctx: QvContext) extends CategoriesEditor {
-  val y = AxisSelector(ctx, "y-Axis", () => QvStore.axes ++ Seq(Axis("Observations", Seq()), Axis("Programs", Seq())))
+  val y = AxisSelector(ctx, "y-Axis", () => QvStore.axes ++ Axis.Dynamics)
   val cc = AxisSelector(ctx, "Color Coding")
   val c = new BarChartSelector("Visibility", y, cc)
   val selectors = Seq(c, y, cc)
@@ -121,7 +121,7 @@ class BarChartCategoriesEditor(ctx: QvContext) extends CategoriesEditor {
 
 /** Editor for elevation and hours visibility plots. */
 class VisChartEditor(ctx: QvContext) extends CategoriesEditor {
-  val cc = AxisSelector(ctx, "Color Coding", () => QvStore.axes ++ Seq(Axis("Observations", Seq()), Axis("Programs", Seq())))
+  val cc = AxisSelector(ctx, "Color Coding", () => QvStore.axes ++ Axis.Dynamics)
   val selectors = Seq(cc)
 
   def colorCoding = cc.axis

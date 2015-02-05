@@ -108,6 +108,14 @@ object Axis {
     FilterAnd(Filter.IQs(ImageQuality.PERCENT_85), Filter.CCs(CloudCover.PERCENT_70))
   ))
 
+  // These axes depend on the actual observations and programs that are available in the data we're looking at.
+  // They are created "on-the-fly" whenever one of these stubs is selected using Program.forPrograms() and
+  // Observation.forObservations() respectively. Note that the axes stubs also need to be used for looking up
+  // axes when loading configurations from disk.
+  val Observations = Axis("Observations",  Seq())
+  val Programs     = Axis("Programs",      Seq())
+  val Dynamics     = Seq(Observations, Programs)
+
   // ra default axes, note: ra values in obd are defined in degrees, not hours
   val RA025 = Axis("RA 0.25", HasDummyTarget(Some(true)) +: raRanges(0.25))
   val RA05  = Axis("RA 0.5", HasDummyTarget(Some(true)) +: raRanges(0.5))
