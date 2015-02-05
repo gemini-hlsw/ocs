@@ -31,6 +31,7 @@ object BlueprintEditor {
       case e:ExchangeProposalClass => e.partner match {
         case ExchangePartner.KECK   => Site.Keck
         case ExchangePartner.SUBARU => Site.Subaru
+        case ExchangePartner.KECK   => Site.CFHT // Shouldn't happen
       }
       case _ => Site.GN // or GS; same thing
     }, p.semester))
