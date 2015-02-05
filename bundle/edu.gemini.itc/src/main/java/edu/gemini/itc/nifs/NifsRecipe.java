@@ -395,8 +395,6 @@ public final class NifsRecipe extends RecipeBase {
 
         if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.SPECTROSCOPY)) {
 
-            ITCChart NifsChart = new ITCChart();
-
             _println("derived image halo size (FWHM) for a point source = " + device.toString(uncorrected_im_qual) + "arcsec\n");
 
             //_println("Sky subtraction aperture = " +
@@ -412,13 +410,6 @@ public final class NifsRecipe extends RecipeBase {
                     " secs is on source.");
 
             _print("<HR align=left SIZE=3>");
-
-            if (_plotParameters.getPlotLimits().equals(_plotParameters.USER_LIMITS)) {
-                NifsChart.setDomainMinMax(_plotParameters.getPlotWaveL(), _plotParameters.getPlotWaveU());
-            } else {
-                NifsChart.autoscale();
-            }
-
 
             if (instrument.IFU_IsUsed()) {//&&
                 //!(_sdParameters.getSourceGeometry().equals(SourceDefinitionParameters.EXTENDED_SOURCE)
@@ -478,49 +469,40 @@ public final class NifsRecipe extends RecipeBase {
                     device.setPrecision(3);  // NO decimal places
                     device.clear();
 
-                    NifsChart.addArray(specS2N.getSignalSpectrum().getData(), "Signal ");
-                    NifsChart.addArray(specS2N.getBackgroundSpectrum().getData(), "SQRT(Background)  ");
+                    final String chart1Title =
+                            _nifsParameters.getIFUMethod().equals(_nifsParameters.SUMMED_APERTURE_IFU) ?
+                                    "Signal and Background (IFU summed apertures: " +
+                                            device.toString(_nifsParameters.getIFUNumX()) + "x" + device.toString(_nifsParameters.getIFUNumY()) +
+                                            ", " + device.toString(_nifsParameters.getIFUNumX() * instrument.getIFU().IFU_LEN_X) + "\"x" +
+                                            device.toString(_nifsParameters.getIFUNumY() * instrument.getIFU().IFU_LEN_Y) + "\")" :
+                                    "Signal and Background (IFU element offset: " + device.toString(ifu_offset) + " arcsec)";
 
-                    if (_nifsParameters.getIFUMethod().equals(_nifsParameters.SUMMED_APERTURE_IFU))
-                        NifsChart.addTitle("Signal and Background (IFU summed apertures: " +
-                                device.toString(_nifsParameters.getIFUNumX()) + "x" + device.toString(_nifsParameters.getIFUNumY()) +
-                                ", " + device.toString(_nifsParameters.getIFUNumX() * instrument.getIFU().IFU_LEN_X) + "\"x" +
-                                device.toString(_nifsParameters.getIFUNumY() * instrument.getIFU().IFU_LEN_Y) + "\")");
-                    else
-                        NifsChart.addTitle("Signal and Background (IFU element offset: " + device.toString(ifu_offset) + " arcsec)");
-
-                    NifsChart.addxAxisLabel("Wavelength (nm)");
-                    NifsChart.addyAxisLabel("e- per exposure per spectral pixel");
-
-                    _println(NifsChart.getBufferedImage(), "SigAndBack");
+                    final ITCChart chart1 = new ITCChart(chart1Title, "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
+                    chart1.addArray(specS2N.getSignalSpectrum().getData(), "Signal ");
+                    chart1.addArray(specS2N.getBackgroundSpectrum().getData(), "SQRT(Background)  ");
+                    _println(chart1.getBufferedImage(), "SigAndBack");
                     _println("");
 
 
                     sigSpec = _printSpecTag("ASCII signal spectrum");
                     backSpec = _printSpecTag("ASCII background spectrum");
 
-                    NifsChart.flush();
+                    final String chart2Title =
+                            _nifsParameters.getIFUMethod().equals(_nifsParameters.SUMMED_APERTURE_IFU) ?
+                                    "Intermediate Single Exp and Final S/N \n(IFU apertures:" +
+                                            device.toString(_nifsParameters.getIFUNumX()) + "x" + device.toString(_nifsParameters.getIFUNumY()) +
+                                            ", " + device.toString(_nifsParameters.getIFUNumX() * instrument.getIFU().IFU_LEN_X) + "\"x" +
+                                            device.toString(_nifsParameters.getIFUNumY() * instrument.getIFU().IFU_LEN_Y) + "\")" :
+                                    "Intermediate Single Exp and Final S/N (IFU element offset: " + device.toString(ifu_offset) + " arcsec)";
 
-                    NifsChart.addArray(specS2N.getExpS2NSpectrum().getData(), "Single Exp S/N");
-                    NifsChart.addArray(specS2N.getFinalS2NSpectrum().getData(), "Final S/N  ");
-
-                    if (_nifsParameters.getIFUMethod().equals(_nifsParameters.SUMMED_APERTURE_IFU))
-                        NifsChart.addTitle("Intermediate Single Exp and Final S/N \n(IFU apertures:" +
-                                device.toString(_nifsParameters.getIFUNumX()) + "x" + device.toString(_nifsParameters.getIFUNumY()) +
-                                ", " + device.toString(_nifsParameters.getIFUNumX() * instrument.getIFU().IFU_LEN_X) + "\"x" +
-                                device.toString(_nifsParameters.getIFUNumY() * instrument.getIFU().IFU_LEN_Y) + "\")");
-                    else
-                        NifsChart.addTitle("Intermediate Single Exp and Final S/N (IFU element offset: " + device.toString(ifu_offset) + " arcsec)");
-
-                    NifsChart.addxAxisLabel("Wavelength (nm)");
-                    NifsChart.addyAxisLabel("Signal / Noise per spectral pixel");
-
-                    _println(NifsChart.getBufferedImage(), "Sig2N");
+                    final ITCChart chart2 = new ITCChart(chart2Title, "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
+                    chart2.addArray(specS2N.getExpS2NSpectrum().getData(), "Single Exp S/N");
+                    chart2.addArray(specS2N.getFinalS2NSpectrum().getData(), "Final S/N  ");
+                    _println(chart2.getBufferedImage(), "Sig2N");
                     _println("");
 
                     singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
                     finalS2N = _printSpecTag("Final S/N ASCII data");
-                    NifsChart.flush();
                 }
             }
 

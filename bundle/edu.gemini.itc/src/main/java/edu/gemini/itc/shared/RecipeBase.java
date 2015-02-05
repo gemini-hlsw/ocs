@@ -32,13 +32,12 @@ public abstract class RecipeBase implements Recipe {
     }
 
     protected void _println(BufferedImage image, String imageName) {
-        ITCImageFileIO FileIO = new ITCImageFileIO();
         try {
-            FileIO.saveCharttoDisk(image);
-            _print("<IMG alt=\"" + FileIO.getFileName()
+            final String fileName = ITCImageFileIO.saveCharttoDisk(image);
+            _print("<IMG alt=\"" + fileName
                     + "\" height=500 src=\"" + ServerInfo.getServerURL()
                     + "itc/servlet/images?type=img&filename="
-                    + FileIO.getFileName() + "\" width=675 border=0>");
+                    + fileName + "\" width=675 border=0>");
         } catch (Exception ex) {
             System.out.println("Unable to save file");
             _print("<br>Failed to save image " + imageName + "<br>");
@@ -61,10 +60,9 @@ public abstract class RecipeBase implements Recipe {
 
     protected String _printSpecTag(String spectrumName) {
         String Filename = "";
-        ITCImageFileIO FileIO = new ITCImageFileIO();
 
         try {
-            Filename = FileIO.getRandomFileName(".dat");
+            Filename = ITCImageFileIO.getRandomFileName(".dat");
 
             _println("<a href ="
                     +
@@ -81,10 +79,9 @@ public abstract class RecipeBase implements Recipe {
     protected void _println(VisitableSampledSpectrum sed, String header, String spectrumName) {
         // this will print out the VisitableSampled Spectrum as a text file to
         // be taken by the user
-        ITCImageFileIO FileIO = new ITCImageFileIO();
 
         try {
-            FileIO.saveSedtoDisk(header, sed, spectrumName);
+            ITCImageFileIO.saveSedtoDisk(header, sed, spectrumName);
         } catch (Exception ex) {
             System.out.println("Unable to save file");
             ex.printStackTrace();
@@ -94,10 +91,9 @@ public abstract class RecipeBase implements Recipe {
     protected void _println(VisitableSampledSpectrum sed, String header, String spectrumName, int firstIndex, int lastIndex) {
         // this will print out the VisitableSampled Spectrum as a text file to
         // be taken by the user
-        ITCImageFileIO FileIO = new ITCImageFileIO();
 
         try {
-            FileIO.saveSedtoDisk(header, sed, spectrumName, firstIndex, lastIndex);
+            ITCImageFileIO.saveSedtoDisk(header, sed, spectrumName, firstIndex, lastIndex);
         } catch (Exception ex) {
             System.out.println("Unable to save file");
             ex.printStackTrace();

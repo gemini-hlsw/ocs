@@ -146,34 +146,22 @@ public final class GmosRecipe extends RecipeBase {
         }
 
         // Create one chart to use for all 3 CCDS (one for Signal and Background and one for Intermediate Single Exp and Final S/N)
-        ITCChart gmosChart1 = null;
-        ITCChart gmosChart2 = null;
+        final ITCChart gmosChart1;
+        final ITCChart gmosChart2;
         if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.SPECTROSCOPY)) {
-            // ChartVisitor GmosChart = new ChartVisitor();
-            gmosChart1 = new ITCChart();
-            gmosChart2 = new ITCChart();
-            if (_plotParameters.getPlotLimits().equals(_plotParameters.USER_LIMITS)) {
-                gmosChart1.setDomainMinMax(_plotParameters.getPlotWaveL(), _plotParameters.getPlotWaveU());
-                gmosChart2.setDomainMinMax(_plotParameters.getPlotWaveL(), _plotParameters.getPlotWaveU());
-            } else {
-                gmosChart1.autoscale();
-                gmosChart2.autoscale();
-            }
-            gmosChart1.addxAxisLabel("Wavelength (nm)");
-            gmosChart1.addyAxisLabel("e- per exposure per spectral pixel");
-            gmosChart2.addxAxisLabel("Wavelength (nm)");
-            gmosChart2.addyAxisLabel("Signal / Noise per spectral pixel");
-            if (mainInstrument.IFU_IsUsed() && !(_sdParameters.getSourceGeometry().equals(
-                    SourceDefinitionParameters.EXTENDED_SOURCE) && _sdParameters
-                    .getExtendedSourceType().equals(
-                            SourceDefinitionParameters.UNIFORM))) {
-                double ifu_offset = (Double) mainInstrument.getIFU().getApertureOffsetList().iterator().next();
-                gmosChart1.addTitle("Signal and Background (IFU element offset: " + device.toString(ifu_offset) + " arcsec)");
-                gmosChart2.addTitle("Intermediate Single Exp and Final S/N (IFU element offset: " + device.toString(ifu_offset) + " arcsec)");
-            } else {
-                gmosChart1.addTitle("Signal and Background ");
-                gmosChart2.addTitle("Intermediate Single Exp and Final S/N");
-            }
+            final boolean ifuAndUniform =
+                    mainInstrument.IFU_IsUsed() &&
+                            !(_sdParameters.getSourceGeometry().equals(SourceDefinitionParameters.EXTENDED_SOURCE) &&
+                            _sdParameters.getExtendedSourceType().equals(SourceDefinitionParameters.UNIFORM));
+            final double ifu_offset = ifuAndUniform ? (Double) mainInstrument.getIFU().getApertureOffsetList().iterator().next() : 0.0;
+            final String chart1Title = ifuAndUniform ? "Signal and Background (IFU element offset: " + device.toString(ifu_offset) + " arcsec)" : "Signal and Background ";
+            final String chart2Title = ifuAndUniform ? "Intermediate Single Exp and Final S/N (IFU element offset: " + device.toString(ifu_offset) + " arcsec)" : "Intermediate Single Exp and Final S/N";
+            gmosChart1 = new ITCChart(chart1Title, "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
+            gmosChart2 = new ITCChart(chart2Title, "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
+
+        } else {
+            gmosChart1 = null;
+            gmosChart2 = null;
         }
 
         String sigSpec = null, backSpec = null, singleS2N = null, finalS2N = null;
@@ -705,10 +693,8 @@ public final class GmosRecipe extends RecipeBase {
         if (gmosChart1 != null && gmosChart2 != null) {
             _println(gmosChart1.getBufferedImage(), "SigAndBack");
             _println("");
-            gmosChart1.flush();
             _println(gmosChart2.getBufferedImage(), "Sig2N");
             _println("");
-            gmosChart2.flush();
         }
 
         _println("");

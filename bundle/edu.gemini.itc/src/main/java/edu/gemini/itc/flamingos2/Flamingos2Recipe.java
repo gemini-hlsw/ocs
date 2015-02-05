@@ -365,7 +365,6 @@ public final class Flamingos2Recipe extends RecipeBase {
             SpecS2NLargeSlitVisitor specS2N;
             SlitThroughput st;
             SlitThroughput st_halo;
-            ITCChart chart = new ITCChart();
 
             if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
                 st = new SlitThroughput(im_qual,
@@ -423,14 +422,6 @@ public final class Flamingos2Recipe extends RecipeBase {
             ap_diam = st.getSpatialPix();
             double spec_source_frac = st.getSlitThroughput();
 
-            if (_plotParameters.getPlotLimits().equals(
-                    PlottingDetailsParameters.USER_LIMITS)) {
-                chart.setDomainMinMax(_plotParameters.getPlotWaveL(),
-                        _plotParameters.getPlotWaveU());
-            } else {
-                chart.autoscale();
-            }
-
             if (_sdParameters.getSourceGeometry().equals(
                     SourceDefinitionParameters.EXTENDED_SOURCE)) {
                 if (_sdParameters.getExtendedSourceType().equals(
@@ -469,47 +460,37 @@ public final class Flamingos2Recipe extends RecipeBase {
             specS2N.setBackgroundSpectrum(sky);
             specS2N.setSpecHaloSourceFraction(0.0);
 
+            final ITCChart chart1 = new ITCChart(
+                    "Signal and SQRT(Background) in software aperture of " + ap_diam + " pixels",
+                    "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
+            final ITCChart chart2 = new ITCChart(
+                    "Intermediate Single Exp and Final S/N",
+                    "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
+
             sed.accept(specS2N);
             _println("<p style=\"page-break-inside: never\">");
-            chart.addArray(specS2N.getSignalSpectrum().getData(), "Signal ");
-            chart.addArray(specS2N.getBackgroundSpectrum().getData(),
-                    "SQRT(Background)  ");
+            chart1.addArray(specS2N.getSignalSpectrum().getData(), "Signal ");
+            chart1.addArray(specS2N.getBackgroundSpectrum().getData(), "SQRT(Background)  ");
 
-            chart.addTitle("Signal and SQRT(Background) in software aperture of "
-                    + ap_diam + " pixels");
-            chart.addxAxisLabel("Wavelength (nm)");
-            chart.addyAxisLabel("e- per exposure per spectral pixel");
-
-            _println(chart.getBufferedImage(), "SigAndBack");
+            _println(chart1.getBufferedImage(), "SigAndBack");
             _println("");
 
             sigSpec = _printSpecTag("ASCII signal spectrum");
             backSpec = _printSpecTag("ASCII background spectrum");
 
-            chart.flush();
+            chart2.addArray(specS2N.getExpS2NSpectrum().getData(), "Single Exp S/N");
+            chart2.addArray(specS2N.getFinalS2NSpectrum().getData(), "Final S/N  ");
 
-            chart.addArray(specS2N.getExpS2NSpectrum().getData(),
-                    "Single Exp S/N");
-            chart.addArray(specS2N.getFinalS2NSpectrum().getData(),
-                    "Final S/N  ");
-
-            chart.addTitle("Intermediate Single Exp and Final S/N");
-            chart.addxAxisLabel("Wavelength (nm)");
-            chart.addyAxisLabel("Signal / Noise per spectral pixel");
-
-            _println(chart.getBufferedImage(), "Sig2N");
+            _println(chart2.getBufferedImage(), "Sig2N");
             _println("");
 
             singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
             finalS2N = _printSpecTag("Final S/N ASCII data");
-            chart.flush();
 
             _println(specS2N.getSignalSpectrum(), _header.toString(), sigSpec);
-            _println(specS2N.getBackgroundSpectrum(), _header.toString(),
-                    backSpec);
+            _println(specS2N.getBackgroundSpectrum(), _header.toString(), backSpec);
             _println(specS2N.getExpS2NSpectrum(), _header.toString(), singleS2N);
-            _println(specS2N.getFinalS2NSpectrum(), _header.toString(),
-                    finalS2N);
+            _println(specS2N.getFinalS2NSpectrum(), _header.toString(), finalS2N);
 
         } else {
             // Observing mode: Imaging

@@ -1,19 +1,12 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-
 package edu.gemini.itc.shared;
 
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Image servlet for ITC. The instrument Servlet adds a tag the points to .
@@ -22,49 +15,39 @@ import java.io.IOException;
  * stream.
  */
 public final class ImageServlet extends HttpServlet {
-    private final String IMG = "img";
-    private final String TXT = "txt";
 
-    private String _filename;
-    private String _type;
-    //private HttpSession _sessionObject = null;
+    private static final Logger Log = Logger.getLogger(ImageServlet.class.getName());
 
-    //public ITCImageFileIO ServFileIO = new ITCImageFileIO();
+    private static final String IMG = "img";
+    private static final String TXT = "txt";
 
     /**
-     * Called by server when an image is requested.
+     * Called by server when an image or a result data file is requested.
      */
-    public void doGet(HttpServletRequest request,
-                      HttpServletResponse response)
-            throws ServletException, IOException {
+    public void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
 
-        ITCImageFileIO ServFileIO = new ITCImageFileIO();
-        _filename = request.getParameter("filename");
-        _type = request.getParameter("type");
-        //_sessionObject = request.getSession(true);
-        //System.out.println(" Session is over after" +_sessionObject.getMaxInactiveInterval());
-        if (_type.equals(IMG)) {
-            // set the content type to image png
-            response.setContentType("image/png");
-            //response.setHeader("Cache-Control", "no-cache");
-            //System.out.println("Image");
-        } else if (_type.equals(TXT)) {
-            response.setContentType("text/plain");
-            //System.out.println("txt");
-        } else {
-            response.setContentType("text/plain");
-            //System.out.println("other");
+        final String filename = request.getParameter("filename");
+        final String type = request.getParameter("type");
+
+        // set the content type of reply
+        switch (type) {
+            case IMG: response.setContentType("image/png");  break;
+            case TXT: response.setContentType("text/plain"); break;
+            default:  response.setContentType("text/plain");
         }
 
+        try {
+            // copy file to output stream
+            ITCImageFileIO.sendFiletoServOut(filename, response.getOutputStream());
 
-        //create a Stream to pass the image through
-        ServletOutputStream out = response.getOutputStream();
+        } catch (FileNotFoundException e) {
+            Log.log(Level.WARNING, "Unknown file requested: " + filename, e);
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
 
-        ServFileIO.sendFiletoServOut(_filename, out);
-        //ServFileIO.sendFiletoServOut((Image)_sessionObject.getAttribute(_filename),out);
-
-        out.flush();
-        out.close();
+        } catch (Exception e) {
+            Log.log(Level.WARNING, "Problem with file: " + filename, e);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
     }
 
 }

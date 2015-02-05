@@ -31,7 +31,7 @@ case class Output(string: String) {
       foldLeft(17L)((acc, s) => 37L*acc + s.hashCode.toLong)
 
   def hashDatFile(f: String): Int = {
-    val path = new ITCImageFileIO().getImagePath
+    val path = ITCImageFileIO.getImagePath
     val file = io.Source.fromFile(path + File.separator + f)
     // first line is a comment with timestamp, don't take into account for hash!
     // for testing it is safe to assume there is at least one line (header)

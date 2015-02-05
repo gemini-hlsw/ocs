@@ -443,7 +443,6 @@ public final class TRecsRecipe extends RecipeBase {
             // sky.accept(dtv);
 
             // ChartVisitor TRecsChart = new ChartVisitor();
-            ITCChart TRecsChart = new ITCChart();
             if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
                 st = new SlitThroughput(im_qual,
                         _obsDetailParameters.getApertureDiameter(), pixel_size,
@@ -499,14 +498,6 @@ public final class TRecsRecipe extends RecipeBase {
             // _println("Spec_source_frac: " + st.getSlitThroughput()+
             // "  Spec_npix: "+ ap_diam);
 
-            if (_plotParameters.getPlotLimits().equals(
-                    _plotParameters.USER_LIMITS)) {
-                TRecsChart.setDomainMinMax(_plotParameters.getPlotWaveL(),
-                        _plotParameters.getPlotWaveU());
-            } else {
-                TRecsChart.autoscale();
-            }
-
             // For the usb case we want the resolution to be determined by the
             // slit width and not the image quality for a point source.
             if (_sdParameters.getSourceGeometry().equals(
@@ -550,38 +541,25 @@ public final class TRecsRecipe extends RecipeBase {
             sed.accept(specS2N);
             _println("<p style=\"page-break-inside: never\">");
 
-            TRecsChart.addArray(specS2N.getSignalSpectrum().getData(),
-                    "Signal ");
-            TRecsChart.addArray(specS2N.getBackgroundSpectrum().getData(),
-                    "SQRT(Background)  ");
 
-            TRecsChart.addTitle("Signal and Background ");
-            TRecsChart.addxAxisLabel("Wavelength (nm)");
-            TRecsChart.addyAxisLabel("e- per exposure per spectral pixel");
+            final ITCChart chart1 = new ITCChart("Signal and Background", "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
+            final ITCChart chart2 = new ITCChart("Intermediate Single Exp and Final S/N", "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
 
-            _println(TRecsChart.getBufferedImage(), "SigAndBack");
+            chart1.addArray(specS2N.getSignalSpectrum().getData(), "Signal ");
+            chart1.addArray(specS2N.getBackgroundSpectrum().getData(), "SQRT(Background)  ");
+            _println(chart1.getBufferedImage(), "SigAndBack");
             _println("");
 
             sigSpec = _printSpecTag("ASCII signal spectrum");
             backSpec = _printSpecTag("ASCII background spectrum");
 
-            TRecsChart.flush();
-
-            TRecsChart.addArray(specS2N.getExpS2NSpectrum().getData(),
-                    "Single Exp S/N");
-            TRecsChart.addArray(specS2N.getFinalS2NSpectrum().getData(),
-                    "Final S/N  ");
-
-            TRecsChart.addTitle("Intermediate Single Exp and Final S/N");
-            TRecsChart.addxAxisLabel("Wavelength (nm)");
-            TRecsChart.addyAxisLabel("Signal / Noise per spectral pixel");
-
-            _println(TRecsChart.getBufferedImage(), "Sig2N");
+            chart2.addArray(specS2N.getExpS2NSpectrum().getData(), "Single Exp S/N");
+            chart2.addArray(specS2N.getFinalS2NSpectrum().getData(), "Final S/N  ");
+            _println(chart2.getBufferedImage(), "Sig2N");
             _println("");
 
             singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
             finalS2N = _printSpecTag("Final S/N ASCII data");
-            TRecsChart.flush();
 
             binFactor = instrument.getSpatialBinning()
                     * instrument.getSpectralBinning();
