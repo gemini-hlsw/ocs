@@ -180,7 +180,8 @@ object QvStore extends Publisher {
       axesMap = (DefaultAxes ++ savedAxes).map(a => a.label -> a).toMap.withDefaultValue(Axis.RA1)
       savedCharts <- FilterXMLParser.parseHistograms(xml \ "histograms" \ "histogram", axesMap)
       savedTables <- FilterXMLParser.parseTables(xml \ "tables" \ "table", axesMap)
-      savedVisCharts <- FilterXMLParser.parseVisCharts(xml \ "barcharts" \ "barchart", axesMap)
+      barchartAxesMap = axesMap ++ Axis.Dynamics.map(a=>a.label -> a).toMap // include dynamic axes for lookup when loading stored bar charts
+      savedVisCharts <- FilterXMLParser.parseVisCharts(xml \ "barcharts" \ "barchart", barchartAxesMap)
       chartsMap = (DefaultHistograms ++ savedCharts).map(c => c.label -> c).toMap
       tablesMap = (DefaultTables ++ savedTables).map(t => t.label -> t).toMap
       visChartMap = (DefaultBarCharts ++ savedVisCharts).map(c => c.label -> c).toMap
