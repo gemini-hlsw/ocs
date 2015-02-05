@@ -33,13 +33,15 @@ libraryDependencies ++= Seq(
   "xmlunit" % "xmlunit" % "1.5"
 )
 
-parallelExecution in Test := false
+fork in test := true
+
+parallelExecution in test := false
 
 osgiSettings
 
 ocsBundleSettings
 
-OsgiKeys.bundleActivator := Some("edu.gemini.pot.spdb.osgi.Activator")
+OsgiKeys.bundleActivator := None
 
 OsgiKeys.bundleSymbolicName := name.value
 

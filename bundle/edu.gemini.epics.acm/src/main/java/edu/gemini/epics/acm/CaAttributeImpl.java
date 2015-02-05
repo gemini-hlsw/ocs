@@ -47,7 +47,7 @@ class CaAttributeImpl<T> implements CaAttribute<T> {
                         if (CaAttributeImpl.this.type.isInstance(arg1.get(0))) {
                             List<T> vals = new ArrayList<T>();
                             for (T v : arg1) {
-                                vals.add((T) v);
+                                vals.add(v);
                             }
 
                             setValues(vals);

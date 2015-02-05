@@ -232,6 +232,11 @@ class CaStatusAcceptorImpl implements CaStatusAcceptor {
                 e.printStackTrace();
             }
         }
+        
+        stringAttributes.clear();
+        doubleAttributes.clear();
+        floatAttributes.clear();
+        integerAttributes.clear();
 
         epicsReader = null;
     }

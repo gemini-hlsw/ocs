@@ -41,6 +41,9 @@ class CaApplySenderImpl implements CaApplySender {
     private TimeUnit timeoutUnit;
     private ScheduledExecutorService executor;
     private ScheduledFuture<?> timeoutFuture;
+    private ChannelListener<Integer> valListener;
+    private ChannelListener<Integer> carClidListener;
+    private ChannelListener<CarState> carValListener;
 
     public CaApplySenderImpl(String name, String applyRecord, String carRecord, String description,
             EpicsService epicsService) throws CAException {
@@ -61,7 +64,7 @@ class CaApplySenderImpl implements CaApplySender {
         carOMSS = epicsReader.getStringChannel(carRecord + CAR_OMSS_SUFFIX);
         mess = epicsReader.getStringChannel(applyRecord + MSG_SUFFIX);
 
-        val.registerListener(new ChannelListener<Integer>() {
+        val.registerListener(valListener = new ChannelListener<Integer>() {
             @Override
             public void valueChanged(String arg0, List<Integer> newVals) {
                 if (newVals != null && !newVals.isEmpty()) {
@@ -69,7 +72,7 @@ class CaApplySenderImpl implements CaApplySender {
                 }
             }
         });
-        carCLID.registerListener(new ChannelListener<Integer>() {
+        carCLID.registerListener(carClidListener = new ChannelListener<Integer>() {
             @Override
             public void valueChanged(String arg0, List<Integer> newVals) {
                 if (newVals != null && !newVals.isEmpty()) {
@@ -77,7 +80,7 @@ class CaApplySenderImpl implements CaApplySender {
                 }
             }
         });
-        carVAL.registerListener(new ChannelListener<CarState>() {
+        carVAL.registerListener(carValListener = new ChannelListener<CarState>() {
             @Override
             public void valueChanged(String arg0, List<CarState> newVals) {
                 if (newVals != null && !newVals.isEmpty()) {
@@ -104,28 +107,63 @@ class CaApplySenderImpl implements CaApplySender {
         return carRecord;
     }
 
-    void unbind() throws CAException {
+    void unbind() {
+        
+        try {
+            val.unRegisterListener(valListener);
+            carCLID.unRegisterListener(carClidListener);
+            carVAL.unRegisterListener(carValListener);
+        } catch (CAException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
 
         try {
             epicsWriter.destroyChannel(dirChannel);
         } catch (CAException e) {
+            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         dirChannel = null;
 
-        epicsReader.destroyChannel(val);
+        try {
+            epicsReader.destroyChannel(val);
+        } catch (CAException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         val = null;
 
-        epicsReader.destroyChannel(carCLID);
+        try {
+            epicsReader.destroyChannel(carCLID);
+        } catch (CAException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         carCLID = null;
 
-        epicsReader.destroyChannel(carVAL);
+        try {
+            epicsReader.destroyChannel(carVAL);
+        } catch (CAException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         carVAL = null;
 
-        epicsReader.destroyChannel(carOMSS);
+        try {
+            epicsReader.destroyChannel(carOMSS);
+        } catch (CAException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         carOMSS = null;
 
-        epicsReader.destroyChannel(mess);
+        try {
+            epicsReader.destroyChannel(mess);
+        } catch (CAException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         mess = null;
 
         epicsWriter = null;
@@ -421,6 +459,17 @@ class CaApplySenderImpl implements CaApplySender {
     @Override
     public String getDescription() {
         return description;
+    }
+
+    @Override
+    public void clear() throws TimeoutException {
+        if (dirChannel != null) {
+            try {
+                dirChannel.setValue(CadDirective.CLEAR);
+            } catch (CAException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }

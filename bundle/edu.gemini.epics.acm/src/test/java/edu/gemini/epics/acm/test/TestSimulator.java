@@ -142,6 +142,19 @@ public class TestSimulator {
         sys.stop();
 
         ticker.cancel(false);
+        try {
+            executor.awaitTermination(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        executor.shutdown();
+        executor = null;
+        
+        server.destroyChannel(intChannel);
+        server.destroyChannel(strChannel);
+        server.destroyChannel(dblChannel);
+        server.destroyChannel(fltChannel);
 
         try {
             server.stop();
@@ -149,6 +162,7 @@ public class TestSimulator {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        server = null;
     }
 
     public static void main(String[] args) {

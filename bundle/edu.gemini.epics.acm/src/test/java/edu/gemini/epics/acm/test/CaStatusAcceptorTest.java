@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.gemini.epics.acm.CaAttribute;
@@ -31,20 +33,20 @@ public class CaStatusAcceptorTest {
 	private static final String ATTR2_CHANNEL = TOP + ":" + TestSimulator.STRING_STATUS;
 	private static final long SLEEP_TIME = 2000;
 
-	private TestSimulator simulator;
-	private CaService caService;
+	private static TestSimulator simulator;
+	private static CaService caService;
 	private boolean updated;
 
-	@Before
-	public void setUp() throws Exception {
+	@BeforeClass
+	public static void setUp() throws Exception {
 	    simulator = new TestSimulator(TOP);
 	    simulator.start();
 		CaService.setAddressList(CA_ADDR_LIST);
 		caService = CaService.getInstance();
 	}
 
-	@After
-	public void tearDown() throws Exception {
+	@AfterClass
+	public static void tearDown() throws Exception {
 		if (caService != null) {
 			caService.unbind();
 			caService = null;
@@ -62,6 +64,8 @@ public class CaStatusAcceptorTest {
 		CaStatusAcceptor sa = caService.createStatusAcceptor(SA_NAME);
 
 		assertNotNull("Unable to create CaStatusAcceptor.", sa);
+		
+		caService.destroyStatusAcceptor(SA_NAME);
 	}
 
 	@Test
@@ -70,6 +74,8 @@ public class CaStatusAcceptorTest {
 		CaStatusAcceptor sa2 = caService.getStatusAcceptor(SA_NAME);
 
 		assertEquals("Retrieved the wrong CaStatusAcceptor.", sa1, sa2);
+        
+        caService.destroyStatusAcceptor(SA_NAME);
 	}
 
 	@Test
@@ -78,15 +84,22 @@ public class CaStatusAcceptorTest {
 		CaAttribute<Integer> attr = sa.addInteger(ATTR1_NAME, ATTR1_CHANNEL);
 
 		assertNotNull("Unable to create status acceptor attribute.", attr);
-
+        
+        caService.destroyStatusAcceptor(SA_NAME);
 	}
 
 	@Test(expected = CaException.class)
 	public void testRejectAttributeCreationWithDifferentType()
 			throws CaException, CAException {
 		CaStatusAcceptor sa = caService.createStatusAcceptor(SA_NAME);
+
 		sa.addInteger(ATTR1_NAME, ATTR1_CHANNEL);
-        sa.addString(ATTR1_NAME, ATTR1_CHANNEL);
+		try {
+		    sa.addString(ATTR1_NAME, ATTR1_CHANNEL);
+		}
+		finally {
+		    caService.destroyStatusAcceptor(SA_NAME);
+		}
 	}
 
 	@Test(expected = CaException.class)
@@ -94,7 +107,12 @@ public class CaStatusAcceptorTest {
 			throws CaException, CAException {
 		CaStatusAcceptor sa = caService.createStatusAcceptor(SA_NAME);
 		sa.addInteger(ATTR1_NAME, ATTR1_CHANNEL);
-		sa.addInteger(ATTR1_NAME, ATTR2_CHANNEL);
+		try {
+		    sa.addInteger(ATTR1_NAME, ATTR2_CHANNEL);
+		}
+        finally {
+            caService.destroyStatusAcceptor(SA_NAME);
+        }
 	}
 
 	@Test
@@ -107,6 +125,8 @@ public class CaStatusAcceptorTest {
 
 		assertEquals("Retrieved the wrong status acceptor attribute.", attr1,
 				attr2);
+        
+        caService.destroyStatusAcceptor(SA_NAME);
 	}
 
 	@Test
@@ -124,6 +144,8 @@ public class CaStatusAcceptorTest {
 		testSet.add(ATTR2_NAME);
 
 		assertEquals("Retrieved bad attribute list.", attrSet, testSet);
+        
+        caService.destroyStatusAcceptor(SA_NAME);
 	}
 
 	@Test
@@ -149,6 +171,8 @@ public class CaStatusAcceptorTest {
 		}
 
 		assertTrue("Attribute monitor did not receive updates.", updated);
+        
+        caService.destroyStatusAcceptor(SA_NAME);
 	}
 
 }

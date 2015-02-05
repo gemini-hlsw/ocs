@@ -77,6 +77,11 @@ class CaCommandSenderImpl implements CaCommandSender {
         for (CaParameterImpl<?> param : integerParameters.values()) {
             param.unbind();
         }
+        
+        stringParameters.clear();
+        doubleParameters.clear();
+        floatParameters.clear();
+        integerParameters.clear();
 
         try {
             if (dirChannel != null) {
@@ -268,8 +273,20 @@ class CaCommandSenderImpl implements CaCommandSender {
     }
 
     @Override
+    public void clear() throws TimeoutException {
+        if (dirChannel != null) {
+            try {
+                dirChannel.setValue(CadDirective.CLEAR);
+            } catch (CAException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
     public String getDescription() {
         return description;
     }
+
 
 }

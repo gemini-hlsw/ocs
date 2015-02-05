@@ -1,5 +1,7 @@
 package edu.gemini.epics.acm;
 
+import gov.aps.jca.TimeoutException;
+
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -88,5 +90,10 @@ public interface CaApplySender {
      * @return true if a command is being executed, false otherwise.
      */
     public boolean isActive();
+    
+    /**
+     * Clears the MARK flag on all the CADs.
+     */
+    public void clear() throws TimeoutException;
 
 }

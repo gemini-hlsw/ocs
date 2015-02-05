@@ -236,4 +236,43 @@ public class CaService {
         return statusAcceptors.keySet();
     }
 
+    /**
+     * Destroys a command sender with a given name. If the command sender does
+     * not exists, it does nothing.
+     * 
+     * @param name the name of the command sender to destroy.
+     */
+    public void destroyCommandSender(String name) {
+        CaCommandSenderImpl cs = commandSenders.remove(name);
+        if (cs != null) {
+            cs.unbind();
+        }
+    }
+
+    /**
+     * Destroys a apply sender with a given name. If the apply sender does
+     * not exists, it does nothing.
+     * 
+     * @param name the name of the apply sender to destroy.
+     */
+    public void destroyApplySender(String name) {
+        CaApplySenderImpl apply = applySenders.remove(name);
+        if (apply != null) {
+            apply.unbind();
+        }
+    }
+
+    /**
+     * Destroys a status acceptor with a given name. If the status acceptor does
+     * not exists, it does nothing.
+     * 
+     * @param name the name of the status acceptor to destroy.
+     */
+    public void destroyStatusAcceptor(String name) {
+        CaStatusAcceptorImpl sa = statusAcceptors.remove(name);
+        if (sa != null) {
+            sa.unbind();
+        }
+    }
+
 }

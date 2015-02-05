@@ -24,16 +24,21 @@ public interface CaCommandSender {
     public String getDescription();
 
     /**
-     * Retrieve the names of the parameters of this command sender.
+     * Retrieves the names of the parameters of this command sender.
      * 
      * @return set of parameter names.
      */
     public Set<String> getInfo();
 
     /**
-     * Mark this command for execution. Useful for commands without parameters.
+     * Marks this command for execution. Useful for commands without parameters.
      */
     public void mark() throws TimeoutException;
+
+    /**
+     * Clears the MARK flag for this command for execution.
+     */
+    public void clear() throws TimeoutException;
 
     /**
      * Trigger the EPICS apply record. The command return immediately.

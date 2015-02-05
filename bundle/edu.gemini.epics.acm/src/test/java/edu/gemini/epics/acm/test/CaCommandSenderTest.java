@@ -7,7 +7,9 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.gemini.epics.acm.CaApplySender;
@@ -20,9 +22,6 @@ import edu.gemini.epics.acm.CaService;
 import edu.gemini.epics.acm.CaStatusAcceptor;
 import gov.aps.jca.CAException;
 import gov.aps.jca.TimeoutException;
-
-//TODO: Create a test IOC to run these tests against it.
-//For now, just use the TCS simulator.
 
 public class CaCommandSenderTest {
 
@@ -44,25 +43,39 @@ public class CaCommandSenderTest {
     private static final String VALUE = "MagicWord";
     private static final long SLEEP_TIME = 5000;
 
-    private CaService caService;
-    private TestSimulator simulator;
+    private static CaService caService;
+    private static TestSimulator simulator;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeClass
+    public static void setUpClass() throws Exception {
         simulator = new TestSimulator(TOP);
         simulator.start();
         CaService.setAddressList(CA_ADDR_LIST);
         caService = CaService.getInstance();
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterClass
+    public static void tearDownClass() throws Exception {
         if (caService != null) {
             caService.unbind();
             caService = null;
         }
 
-        simulator.stop();
+        if (simulator != null) {
+            simulator.stop();
+            simulator = null;
+        }
+    }
+    
+    @Before
+    public void setUp() throws CAException, TimeoutException {
+        //Make sure commands are clear
+        CaApplySender apply = caService.createApplySender(APPLY_NAME, APPLY,
+                CAR);
+
+        apply.clear();
+
+        caService.destroyApplySender(APPLY_NAME);
     }
 
     @Test
@@ -70,6 +83,8 @@ public class CaCommandSenderTest {
         CaApplySender apply = caService.createApplySender(APPLY_NAME, APPLY,
                 CAR);
         assertNotNull("Unable to create CaApplySender", apply);
+
+        caService.destroyApplySender(APPLY_NAME);
     }
 
     @Test
@@ -79,6 +94,8 @@ public class CaCommandSenderTest {
         CaApplySender apply2 = caService.getApplySender(APPLY_NAME);
 
         assertEquals("Retrieved the wrong CaStatusAcceptor.", apply1, apply2);
+
+        caService.destroyApplySender(APPLY_NAME);
     }
 
     @Test
@@ -86,7 +103,11 @@ public class CaCommandSenderTest {
         CaApplySender apply = caService.createApplySender(APPLY_NAME, APPLY,
                 CAR);
         CaCommandSender cs = caService.createCommandSender(CS_NAME, apply, null);
+        
         assertNotNull("Unable to create CaCommandSender", cs);
+
+        caService.destroyApplySender(APPLY_NAME);
+        caService.destroyCommandSender(CS_NAME);
     }
 
     @Test
@@ -97,6 +118,9 @@ public class CaCommandSenderTest {
         CaCommandSender cs2 = caService.getCommandSender(CS_NAME);
 
         assertEquals("Retrieved the wrong CaStatusAcceptor.", cs1, cs2);
+
+        caService.destroyApplySender(APPLY_NAME);
+        caService.destroyCommandSender(CS_NAME);
     }
 
     @Test
@@ -107,6 +131,9 @@ public class CaCommandSenderTest {
         CaParameter<String> param = cs.addString(PARAM1_NAME, PARAM1_CHANNEL);
 
         assertNotNull("Unable to create CaParameter.", param);
+
+        caService.destroyApplySender(APPLY_NAME);
+        caService.destroyCommandSender(CS_NAME);
     }
 
     @Test(expected = CaException.class)
@@ -118,6 +145,9 @@ public class CaCommandSenderTest {
 
         cs.addString(PARAM1_NAME, PARAM1_CHANNEL);
         cs.addInteger(PARAM1_NAME, PARAM1_CHANNEL);
+
+        caService.destroyApplySender(APPLY_NAME);
+        caService.destroyCommandSender(CS_NAME);
     }
 
     @Test(expected = CaException.class)
@@ -129,6 +159,9 @@ public class CaCommandSenderTest {
 
         cs.addString(PARAM1_NAME, PARAM1_CHANNEL);
         cs.addInteger(PARAM1_NAME, PARAM2_CHANNEL);
+
+        caService.destroyApplySender(APPLY_NAME);
+        caService.destroyCommandSender(CS_NAME);
     }
 
     @Test
@@ -141,6 +174,9 @@ public class CaCommandSenderTest {
 
         assertEquals("Retrieved wrong command sender parameter.", param1,
                 param2);
+
+        caService.destroyApplySender(APPLY_NAME);
+        caService.destroyCommandSender(CS_NAME);
     }
 
     @Test
@@ -160,6 +196,9 @@ public class CaCommandSenderTest {
         testSet.add(PARAM2_NAME);
 
         assertEquals("Retrieved bad attribute list.", paramSet, testSet);
+
+        caService.destroyApplySender(APPLY_NAME);
+        caService.destroyCommandSender(CS_NAME);
     }
 
     @Test
@@ -182,6 +221,9 @@ public class CaCommandSenderTest {
         String val = attr.value();
 
         assertEquals("Unable to write parameter value.", VALUE, val);
+        
+        caService.destroyApplySender(APPLY_NAME);
+        caService.destroyCommandSender(CS_NAME);
     }
 
     @Test
@@ -199,6 +241,9 @@ public class CaCommandSenderTest {
             e.printStackTrace();
         }
         assertTrue("Unmarked command did not completed.", cm.isDone());
+
+        caService.destroyApplySender(APPLY_NAME);
+        caService.destroyCommandSender(CS_NAME);
     }
 
     @Test
@@ -218,6 +263,9 @@ public class CaCommandSenderTest {
             e.printStackTrace();
         }
         assertTrue("Unable to trigger command execution.", cm.isDone());
+
+        caService.destroyApplySender(APPLY_NAME);
+        caService.destroyCommandSender(CS_NAME);
     }
 
     @Test
@@ -237,6 +285,9 @@ public class CaCommandSenderTest {
             e.printStackTrace();
         }
         assertTrue("Unable to trigger command execution.", cm.isDone());
+
+        caService.destroyApplySender(APPLY_NAME);
+        caService.destroyCommandSender(CS_NAME);
     }
 
     @Test
@@ -257,6 +308,9 @@ public class CaCommandSenderTest {
         }
         assertTrue("Command did not report execution error.", cm.isDone()
                 && cm.state().equals(CaCommandMonitor.State.ERROR));
+
+        caService.destroyApplySender(APPLY_NAME);
+        caService.destroyCommandSender(CS_NAME);
     }
 
     @Test
@@ -278,6 +332,9 @@ public class CaCommandSenderTest {
         assertTrue("Command did not report execution error.", cm.isDone()
                 && cm.state().equals(CaCommandMonitor.State.ERROR)
                 && cm.error().getMessage().equals(TestSimulator.ERROR_MSG));
+
+        caService.destroyApplySender(APPLY_NAME);
+        caService.destroyCommandSender(CS_NAME);
     }
 
     @Test
@@ -298,9 +355,12 @@ public class CaCommandSenderTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        assertTrue("Command did not report execution timeout.",
+        assertTrue("Command did not report execution timeout (" + cm.isDone() + ", " + cm.state() + ", " + cm.error() + ")",
                 cm.isDone() && cm.state().equals(CaCommandMonitor.State.ERROR)
                         && cm.error() instanceof TimeoutException);
+
+        caService.destroyApplySender(APPLY_NAME);
+        caService.destroyCommandSender(CS_NAME);
     }
 
 }

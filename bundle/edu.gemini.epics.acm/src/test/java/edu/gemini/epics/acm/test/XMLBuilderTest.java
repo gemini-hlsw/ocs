@@ -6,7 +6,9 @@ import java.io.FileNotFoundException;
 import java.util.Set;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.gemini.epics.acm.CaCommandSender;
@@ -25,17 +27,19 @@ public class XMLBuilderTest {
     private static final String COMMAND1 = "test";
     private static final String PARAM[] = { "param1", "param2" };
 
-    private TestSimulator simulator;
-    private CaService caService;
+    private static TestSimulator simulator;
+    private static CaService caService;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeClass
+    public static void setUp() throws Exception {
+        simulator = new TestSimulator(TOP1);
+        simulator.start();
         CaService.setAddressList(CA_ADDR_LIST);
         caService = CaService.getInstance();
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterClass
+    public static void tearDown() throws Exception {
         if (simulator != null) {
             simulator.stop();
             simulator = null;
@@ -48,9 +52,6 @@ public class XMLBuilderTest {
 
     @Test
     public void testCreateStatus() throws FileNotFoundException {
-        simulator = new TestSimulator(TOP1);
-        simulator.start();
-
         XMLBuilder builder = new XMLBuilder();
 
         CaStatusAcceptor sa = builder
@@ -68,13 +69,12 @@ public class XMLBuilderTest {
             assertTrue("Status acceptor created with wrong attributes.",
                     saAttribs.contains(attrName));
         }
+
+        caService.destroyStatusAcceptor(sa.getName());
     }
     
     @Test
     public void testCreateCommand() throws FileNotFoundException {
-        simulator = new TestSimulator(TOP1);
-        simulator.start();
-
         XMLBuilder builder = new XMLBuilder();
 
         CaCommandSender cs = builder
@@ -92,6 +92,8 @@ public class XMLBuilderTest {
             assertTrue("Status acceptor created with wrong attributes.",
                     csParams.contains(paramName));
         }
+
+        caService.destroyCommandSender(cs.getName());
     }
 
 }
