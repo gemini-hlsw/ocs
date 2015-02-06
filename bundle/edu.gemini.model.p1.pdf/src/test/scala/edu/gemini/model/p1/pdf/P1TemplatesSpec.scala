@@ -327,7 +327,7 @@ class P1TemplatesSpec extends SpecificationWithJUnit {
       ftMode must be size 1
     }
     "calculate the total time for all observations for GN and GS, REL-1298" in {
-      val result = transformProposal("proposal_with_gn_and_gs.xml")
+      val result = transformProposal("proposal_with_gn_and_gs.xml", P1PDF.NOAO)
       val proposalXml = XML.loadString(result)
       // Check values manually calculated
       // Band 1/2 GN
@@ -341,6 +341,17 @@ class P1TemplatesSpec extends SpecificationWithJUnit {
     }
   }
 
+  "The P1 AU Template" should {
+    "includes the program id with a sensible default, REL-813" in {
+      val result = transformProposal("proposal_au_no_submission.xml", P1PDF.AU)
+      val proposalXml = XML.loadString(result)
+
+      // Show the semester
+      proposalXml must (\\("block") \>~ "AU-2013B-.*")
+
+    }
+  }
+
   def transformProposal(proposal: String, template: Template = P1PDF.DEFAULT) = {
     val xslStream = getClass.getResourceAsStream(template.location)
 
@@ -351,11 +362,11 @@ class P1TemplatesSpec extends SpecificationWithJUnit {
 
     // Setup XSLT
     val factory = TransformerFactory.newInstance()
-    factory setURIResolver uriResolver
+    factory.setURIResolver(uriResolver)
 
     val transformer = factory.newTransformer(xslSource)
-    transformer setURIResolver uriResolver
-    P1PDF.DEFAULT.parameters foreach (p => transformer setParameter(p._1, p._2))
+    transformer.setURIResolver(uriResolver)
+    template.parameters.foreach(p => transformer.setParameter(p._1, p._2))
 
     val writer = new StringWriter()
 
