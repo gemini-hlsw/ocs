@@ -191,7 +191,7 @@ class SubmitView(ph: ProblemRobot, newShellHandler: (Model,Option[File]) => Unit
   object viewer extends SimpleListViewer[Model, List[Submission], Submission] {
 
     override val lens = Model.proposal andThen Proposal.proposalClass andThen subsLens
-    val yearLens = Model.fromSemester
+    val versionLens = Model.schemaVersion
 
     object columns extends Enumeration {
       val Partner, Status, Reference, Contact = Value
@@ -227,7 +227,7 @@ class SubmitView(ph: ProblemRobot, newShellHandler: (Model,Option[File]) => Unit
       case Status => sr(s) match {
         case Some(SubmitResult.Offline(d))              =>  SubmitStatus.offlineBackend(d)
         case Some(SubmitResult.ClientError(m, _))       => s"Client error: $m"
-        case Some(SubmitResult.ServiceError(d, 405, m)) => s"Service error (405) ${SubmitStatus.nonCompliantBackend(d, SubmitView.this.model.map(yearLens.get))}"
+        case Some(SubmitResult.ServiceError(d, 405, m)) => s"Service error (405) ${SubmitStatus.nonCompliantBackend(d, ~SubmitView.this.model.map(versionLens.get))}"
         case Some(SubmitResult.ServiceError(d, i, m))   => s"Service error ($i) ${SubmitStatus.genericError(d)}"
         case Some(SubmitResult.SubmitException(d, _))   => s"Internal error: ${SubmitStatus.genericError(d)}"
         case Some(SubmitResult.Success(_, _, _, _))     =>  "Proposal was submitted successfully."
