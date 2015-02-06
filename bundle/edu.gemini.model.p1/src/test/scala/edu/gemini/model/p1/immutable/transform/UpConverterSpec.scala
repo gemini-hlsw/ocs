@@ -639,8 +639,11 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 3
+          changes must have length 5
           result \\ "graces" must \\("fiberMode") \> "2 fibers (target + sky, R~37k)"
+          result \\ "graces" must \\("name") \> "Graces 2 fibers (target + sky, R~37k)"
+          result \\ "graces" must \\("fiberMode") \> "1 fiber (target, R~48k)"
+          result \\ "graces" must \\("name") \> "Graces 1 fiber (target, R~48k)"
       }
     }
   }

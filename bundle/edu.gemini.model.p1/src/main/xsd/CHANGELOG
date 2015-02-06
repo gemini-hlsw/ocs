@@ -4,6 +4,8 @@ Gemini Phase I Schema Changes
 ##########################
 
 * Offer GRACES as a blueprint option
+* Rename Graces' fiber modes to 1 fiber (target, R~48k) and 2 fibers (target + sky, R~37k)
+* Added Read modes to Graces' blueprints
 
 # Version 2015.1.2 - 2015A
 ##########################
