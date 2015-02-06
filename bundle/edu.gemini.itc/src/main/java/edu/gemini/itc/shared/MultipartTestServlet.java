@@ -61,7 +61,7 @@ public class MultipartTestServlet extends HttpServlet {
                 ITCMultiPartParser parser = new ITCMultiPartParser(request, MAX_CONTENT_LENGTH);
 
                 ObservationDetailsParameters odp = new ObservationDetailsParameters(parser);
-                ObservingConditionParameters ocp = new ObservingConditionParameters(parser);
+                ObservingConditionParameters ocp = ITCRequest.obsConditionParameters(parser);
                 SourceDefinitionParameters sdp = new SourceDefinitionParameters(parser);
                 TeleParameters tp = ITCRequest.teleParameters(parser);
                 AcquisitionCamParameters acp = new AcquisitionCamParameters(parser);

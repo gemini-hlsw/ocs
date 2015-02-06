@@ -39,7 +39,7 @@ public final class TRecsRecipe extends RecipeBase {
         // Read parameters from the four main sections of the web page.
         _sdParameters = new SourceDefinitionParameters(r);
         _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
+        _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _trecsParameters = new TRecsParameters(r);
         _teleParameters = ITCRequest.teleParameters(r);
         _plotParameters = new PlottingDetailsParameters(r);
@@ -197,8 +197,7 @@ public final class TRecsRecipe extends RecipeBase {
 
         // For mid-IR observation the watervapor percentile and sky background
         // percentile must be the same
-        if (_obsConditionParameters.getSkyTransparencyWaterCategory() != _obsConditionParameters
-                .getSkyBackgroundCategory()) {
+        if (!_obsConditionParameters.getSkyTransparencyWaterCategory().equals(_obsConditionParameters.getSkyBackgroundCategory())) {
             _println("");
             _println("Sky background percentile must be equal to sky transparency(water vapor): \n "
                     + "    Please modify the Observing condition constraints section of the HTML form \n"

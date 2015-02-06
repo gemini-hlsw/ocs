@@ -42,7 +42,7 @@ public final class NiriRecipe extends RecipeBase {
         // Read parameters from the four main sections of the web page.
         _sdParameters = new SourceDefinitionParameters(r);
         _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
+        _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _niriParameters = new NiriParameters(r);
         _teleParameters = ITCRequest.teleParameters(r);
         _altairParameters = new AltairParameters(r);

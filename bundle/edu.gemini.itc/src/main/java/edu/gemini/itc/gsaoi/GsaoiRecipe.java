@@ -35,7 +35,7 @@ public final class GsaoiRecipe extends RecipeBase {
 
         _sdParameters = new SourceDefinitionParameters(r);
         _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
+        _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _gsaoiParameters = new GsaoiParameters(r);
         _teleParameters = ITCRequest.teleParameters(r);
         _gemsParameters = new GemsParameters(r);

@@ -3,6 +3,7 @@ package edu.gemini.itc.baseline.util
 import edu.gemini.itc.altair.AltairParameters
 import edu.gemini.itc.parameters.TeleParameters.{Coating, Wfs}
 import edu.gemini.itc.parameters._
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.telescope.IssPort
 
 /**
@@ -27,20 +28,11 @@ object Environment {
 
   // ================
   // Defines a set of relevant weather conditions (not all combinations make sense)
-  // NOTE:
-  //    IQ(1,2,3,4)  =IQ(20%,70%,85%,Any)
-  //    CC(1,2,3,4,5)=CC(20%,50%,70%,80%,Any)
-  //    WV(1,2,3,4)  =WV(20%,50%,80%,Any)
-  private val weatherConditions = List[Tuple3[Int,Int,Int]](
-    (1,2,2), // IQ20,CC50,WV50
-//    (1,2,4), // IQ20,CC50,Any
-//    (1,3,4), // IQ20,CC70,-
-//    (2,2,2), // IQ70,CC50,WV50
-    (2,2,4), // IQ70,CC50,Any
-//    (2,3,4), // IQ70,CC70,-
-//    (3,2,2), // IQ85,CC50,WV50
-//    (3,3,4), // IQ85,CC70,-
-    (4,5,4)  // Any ,-   ,-
+  import SPSiteQuality._
+  private val weatherConditions = List[Tuple3[ImageQuality,CloudCover,WaterVapor]](
+    (ImageQuality.PERCENT_20, CloudCover.PERCENT_50, WaterVapor.PERCENT_50),  // IQ20,CC50,WV50
+    (ImageQuality.PERCENT_70, CloudCover.PERCENT_50, WaterVapor.ANY),         // IQ70,CC50,Any
+    (ImageQuality.ANY,        CloudCover.ANY,        WaterVapor.ANY)          // Any ,-   ,-
   )
   // ================
 
@@ -235,11 +227,12 @@ object Environment {
   )
 
   // Defines a set of relevant observing conditions; total 9*4*3=108 conditions
+  import SPSiteQuality.SkyBackground._
   lazy val ObservingConditions =
     for {
       (iq, cc, wv)  <- weatherConditions
-      sb            <- List(2,3)              // SB20=1, SB50=2, SB80=3, ANY=4
-      am            <- List(1.5)              // airmass 1.0, 1.5, 2.0 (relevant levels: < 1.26; 1.26..1.75, > 1.75)
+      sb            <- List(PERCENT_50, PERCENT_80) // SB20=1, SB50=2, SB80=3, ANY=4
+      am            <- List(1.5)                    // airmass 1.0, 1.5, 2.0 (relevant levels: < 1.26; 1.26..1.75, > 1.75)
     } yield new ObservingConditionParameters(iq, cc, wv, sb, am)
 
   // Defines a set of relevant telescope configurations; total 1*2*2=4 configurations
