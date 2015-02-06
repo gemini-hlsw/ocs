@@ -4,7 +4,6 @@ import edu.gemini.itc.operation.*;
 import edu.gemini.itc.parameters.*;
 import edu.gemini.itc.shared.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.PrintWriter;
 import java.util.Calendar;
 
@@ -13,36 +12,13 @@ import java.util.Calendar;
  */
 public final class Flamingos2Recipe extends RecipeBase {
 
-    private Flamingos2Parameters _flamingos2Parameters;
-    private String _header = new StringBuffer("# Flamingos-2 ITC: "
-            + Calendar.getInstance().getTime() + "\n").toString();
-    private ObservingConditionParameters _obsConditionParameters;
-    private ObservationDetailsParameters _obsDetailParameters;
-    private PlottingDetailsParameters _plotParameters;
-    // Parameters from the web page.
-    private SourceDefinitionParameters _sdParameters;
-
-    private TeleParameters _teleParameters;
-
-    /**
-     * Constructs an Flamingos2 object by parsing servlet request.
-     *
-     * @param r   Servlet request containing form data from ITC web page.
-     * @param out Results will be written to this PrintWriter.
-     * @throws Exception on failure to parse parameters.
-     */
-    public Flamingos2Recipe(HttpServletRequest r, PrintWriter out)
-            throws Exception {
-        super(out);
-
-        // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
-        _flamingos2Parameters = new Flamingos2Parameters(r);
-        _teleParameters = new TeleParameters(r);
-        _plotParameters = new PlottingDetailsParameters(r);
-    }
+    private final Flamingos2Parameters _flamingos2Parameters;
+    private final String _header = new StringBuffer("# Flamingos-2 ITC: " + Calendar.getInstance().getTime() + "\n").toString();
+    private final ObservingConditionParameters _obsConditionParameters;
+    private final ObservationDetailsParameters _obsDetailParameters;
+    private final PlottingDetailsParameters _plotParameters;
+    private final SourceDefinitionParameters _sdParameters;
+    private final TeleParameters _teleParameters;
 
     /**
      * Constructs an Flamingos 2 object by parsing a Multi part servlet request.
@@ -51,8 +27,7 @@ public final class Flamingos2Recipe extends RecipeBase {
      * @param out Results will be written to this PrintWriter.
      * @throws Exception on failure to parse parameters.
      */
-    public Flamingos2Recipe(ITCMultiPartParser r, PrintWriter out)
-            throws Exception {
+    public Flamingos2Recipe(ITCMultiPartParser r, PrintWriter out) throws Exception {
         super(out);
 
         // Read parameters from the four main sections of the web page.

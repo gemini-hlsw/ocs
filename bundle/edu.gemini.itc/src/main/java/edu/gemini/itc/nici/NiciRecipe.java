@@ -1,13 +1,3 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-// $Id: NiciRecipe.java,v 1.0 2009/01/30 09:00:00 mdillman Exp $
-//
 package edu.gemini.itc.nici;
 
 import edu.gemini.itc.operation.*;
@@ -17,7 +7,6 @@ import edu.gemini.itc.parameters.SourceDefinitionParameters;
 import edu.gemini.itc.parameters.TeleParameters;
 import edu.gemini.itc.shared.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.PrintWriter;
 
 /**
@@ -25,30 +14,13 @@ import java.io.PrintWriter;
  * imaging.
  */
 public final class NiciRecipe extends RecipeBase {
+
     // Parameters from the web page.
-    private SourceDefinitionParameters _sdParameters;
-    private ObservationDetailsParameters _obsDetailParameters;
-    private ObservingConditionParameters _obsConditionParameters;
-    private NiciParameters _niciParameters;
-    private TeleParameters _teleParameters;
-
-    /**
-     * Constructs an NiciRecipe by parsing servlet request.
-     *
-     * @param r   Servlet request containing form data from ITC web page.
-     * @param out Results will be written to this PrintWriter.
-     * @throws Exception on failure to parse parameters.
-     */
-    public NiciRecipe(HttpServletRequest r, PrintWriter out) throws Exception {
-        super(out);
-
-        // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
-        _niciParameters = new NiciParameters(r);
-        _teleParameters = new TeleParameters(r);
-    }
+    private final SourceDefinitionParameters _sdParameters;
+    private final ObservationDetailsParameters _obsDetailParameters;
+    private final ObservingConditionParameters _obsConditionParameters;
+    private final NiciParameters _niciParameters;
+    private final TeleParameters _teleParameters;
 
     /**
      * Constructs an NiciRecipe by parsing a Multi part servlet request.

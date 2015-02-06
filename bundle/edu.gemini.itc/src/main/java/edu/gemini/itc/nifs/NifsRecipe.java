@@ -1,11 +1,3 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-
 package edu.gemini.itc.nifs;
 
 import edu.gemini.itc.altair.*;
@@ -13,7 +5,6 @@ import edu.gemini.itc.operation.*;
 import edu.gemini.itc.parameters.*;
 import edu.gemini.itc.shared.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -30,38 +21,15 @@ public final class NifsRecipe extends RecipeBase {
 
     private String sigSpec, backSpec, singleS2N, finalS2N;
     private SpecS2NLargeSlitVisitor specS2N;
-    private SlitThroughput st;
-
 
     // Parameters from the web page.
-    private SourceDefinitionParameters _sdParameters;
-    private ObservationDetailsParameters _obsDetailParameters;
-    private ObservingConditionParameters _obsConditionParameters;
-    private NifsParameters _nifsParameters;
-    private TeleParameters _teleParameters;
-    private AltairParameters _altairParameters;
-    private PlottingDetailsParameters _plotParameters;
-
-
-    /**
-     * Constructs a NifsRecipe by parsing servlet request.
-     *
-     * @param r   Servlet request containing form data from ITC web page.
-     * @param out Results will be written to this PrintWriter.
-     * @throws Exception on failure to parse parameters.
-     */
-    public NifsRecipe(HttpServletRequest r, PrintWriter out) throws Exception {
-        super(out);
-
-        // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
-        _nifsParameters = new NifsParameters(r);
-        _teleParameters = new TeleParameters(r);
-        _altairParameters = new AltairParameters(r);
-        _plotParameters = new PlottingDetailsParameters(r);
-    }
+    private final SourceDefinitionParameters _sdParameters;
+    private final ObservationDetailsParameters _obsDetailParameters;
+    private final ObservingConditionParameters _obsConditionParameters;
+    private final NifsParameters _nifsParameters;
+    private final TeleParameters _teleParameters;
+    private final AltairParameters _altairParameters;
+    private final PlottingDetailsParameters _plotParameters;
 
     /**
      * Constructs a NifsRecipe by parsing a Multipart servlet request.

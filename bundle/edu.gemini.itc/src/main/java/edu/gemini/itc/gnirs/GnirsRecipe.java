@@ -1,12 +1,3 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-//
 package edu.gemini.itc.gnirs;
 
 import edu.gemini.itc.operation.*;
@@ -14,40 +5,29 @@ import edu.gemini.itc.parameters.*;
 import edu.gemini.itc.shared.*;
 import org.jfree.chart.ChartColor;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-//import edu.gemini.itc.altair.Altair;
-//import edu.gemini.itc.altair.AltairBackgroundVisitor;
-//import edu.gemini.itc.altair.AltairFluxAttenuationVisitor;
-//import edu.gemini.itc.altair.AltairParameters;
-//import edu.gemini.itc.altair.AltairTransmissionVisitor;
-
 /**
  * This class performs the calculations for Gnirs used for imaging.
  */
 public final class GnirsRecipe extends RecipeBase {
-    // Images will be saved to this session object
-    // private HttpSession _sessionObject = null; // set from servlet request
 
-    //    private AltairParameters _altairParameters; // REL-472: Commenting out Altair option for now
     private Calendar now = Calendar.getInstance();
-    private String _header = new StringBuffer("# GNIRS ITC: "
-            + now.getTime() + "\n").toString();
+    private String _header = new StringBuffer("# GNIRS ITC: " + now.getTime() + "\n").toString();
 
     private String sigSpec, backSpec, singleS2N, finalS2N;
     private SpecS2NLargeSlitVisitor specS2N;
 
     // Parameters from the web page.
-    private SourceDefinitionParameters _sdParameters;
-    private ObservationDetailsParameters _obsDetailParameters;
-    private ObservingConditionParameters _obsConditionParameters;
-    private GnirsParameters _gnirsParameters;
-    private TeleParameters _teleParameters;
-    private PlottingDetailsParameters _plotParameters;
+    private final SourceDefinitionParameters _sdParameters;
+    private final ObservationDetailsParameters _obsDetailParameters;
+    private final ObservingConditionParameters _obsConditionParameters;
+    private final GnirsParameters _gnirsParameters;
+    private final TeleParameters _teleParameters;
+    private final PlottingDetailsParameters _plotParameters;
 
     private VisitableSampledSpectrum signalOrder3, signalOrder4, signalOrder5,
             signalOrder6, signalOrder7, signalOrder8;
@@ -56,25 +36,6 @@ public final class GnirsRecipe extends RecipeBase {
             backGroundOrder8;
     private VisitableSampledSpectrum finalS2NOrder3, finalS2NOrder4,
             finalS2NOrder5, finalS2NOrder6, finalS2NOrder7, finalS2NOrder8;
-
-    /**
-     * Constructs a GnirsRecipe by parsing servlet request.
-     *
-     * @param r   Servlet request containing form data from ITC web page.
-     * @param out Results will be written to this PrintWriter.
-     * @throws Exception on failure to parse parameters.
-     */
-    public GnirsRecipe(HttpServletRequest r, PrintWriter out) throws Exception {
-        super(out);
-        // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
-        _gnirsParameters = new GnirsParameters(r);
-        _teleParameters = new TeleParameters(r);
-//        _altairParameters = new AltairParameters(r); // REL-472: Commenting out Altair option for now
-        _plotParameters = new PlottingDetailsParameters(r);
-    }
 
     /**
      * Constructs a GnirsRecipe by parsing a Multipart servlet request.
@@ -91,7 +52,6 @@ public final class GnirsRecipe extends RecipeBase {
         _obsConditionParameters = new ObservingConditionParameters(r);
         _gnirsParameters = new GnirsParameters(r);
         _teleParameters = new TeleParameters(r);
-//        _altairParameters = new AltairParameters(r); // REL-472: Commenting out Altair option for now
         _plotParameters = new PlottingDetailsParameters(r);
     }
 
@@ -102,7 +62,6 @@ public final class GnirsRecipe extends RecipeBase {
                        ObservationDetailsParameters obsDetailParameters,
                        ObservingConditionParameters obsConditionParameters,
                        GnirsParameters gnirsParameters, TeleParameters teleParameters,
-//                       AltairParameters altairParameters, // REL-472: Commenting out Altair option for now
                        PlottingDetailsParameters plotParameters,
                        PrintWriter out)
 

@@ -5,8 +5,6 @@ import edu.gemini.itc.shared.ITCParameters;
 import edu.gemini.spModel.telescope.IssPort;
 import edu.gemini.spModel.type.DisplayableSpType;
 
-import javax.servlet.http.HttpServletRequest;
-
 /**
  * This class holds the information from the Telescope section
  * of an ITC web page.  This object is constructed from a servlet request.
@@ -46,18 +44,6 @@ public final class TeleParameters extends ITCParameters {
     private final Coating _mirrorCoating;  // aluminum or silver
     private final IssPort _instrumentPort; // up or side
     private final Wfs     _wfs;
-
-    /**
-     * Constructs a TeleParameters from a servlet request
-     *
-     * @param r Servlet request containing the form data.
-     * @throws Exception if input data is not parsable.
-     */
-    public TeleParameters(final HttpServletRequest r) {
-        _mirrorCoating  = getParameter(Coating.class, r);
-        _instrumentPort = getParameter(IssPort.class, r);
-        _wfs            = getParameter(Wfs.class,     r);
-    }
 
     /**
      * Constructs a TeleParameters from a MultipartParser

@@ -7,7 +7,6 @@ import edu.gemini.itc.parameters.SourceDefinitionParameters;
 import edu.gemini.itc.parameters.TeleParameters;
 import edu.gemini.itc.shared.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.PrintWriter;
 
 /**
@@ -16,29 +15,11 @@ import java.io.PrintWriter;
  */
 public final class AcqCamRecipe extends RecipeBase {
     // Parameters from the web page.
-    private SourceDefinitionParameters _sdParameters;
-    private ObservationDetailsParameters _obsDetailParameters;
-    private ObservingConditionParameters _obsConditionParameters;
-    private AcquisitionCamParameters _acqCamParameters;
-    private TeleParameters _teleParameters;
-
-    /**
-     * Constructs an AcqCamRecipe by parsing servlet request.
-     *
-     * @param r   Servlet request containing form data from ITC web page.
-     * @param out Results will be written to this PrintWriter.
-     * @throws Exception on failure to parse parameters.
-     */
-    public AcqCamRecipe(HttpServletRequest r, PrintWriter out) {
-        super(out);
-
-        // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
-        _acqCamParameters = new AcquisitionCamParameters(r);
-        _teleParameters = new TeleParameters(r);
-    }
+    private final SourceDefinitionParameters _sdParameters;
+    private final ObservationDetailsParameters _obsDetailParameters;
+    private final ObservingConditionParameters _obsConditionParameters;
+    private final AcquisitionCamParameters _acqCamParameters;
+    private final TeleParameters _teleParameters;
 
     /**
      * Constructs an AcqCamRecipe by parsing a Multi part servlet request.

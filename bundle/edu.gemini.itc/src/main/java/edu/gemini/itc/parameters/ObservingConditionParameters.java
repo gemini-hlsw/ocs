@@ -4,8 +4,6 @@ import edu.gemini.itc.shared.FormatStringWriter;
 import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCParameters;
 
-import javax.servlet.http.HttpServletRequest;
-
 /**
  * This class holds the information from the Observing Condition section
  * of an ITC web page.  This object is constructed from a servlet request.
@@ -26,21 +24,11 @@ public final class ObservingConditionParameters extends ITCParameters {
     // They are used to parse form data.
 
     // Data members
-    private int _imageQuality;
-    private int _skyTransCloud;
-    private int _skyTransWater;
-    private int _skyBackground;
-    private double _airmass;
-
-    /**
-     * Constructs a ObservingConditionParameters from a servlet request
-     *
-     * @param r Servlet request containing the form data.
-     * @throws Exception if input data is not parsable.
-     */
-    public ObservingConditionParameters(HttpServletRequest r) {
-        parseServletRequest(r);
-    }
+    private final int _imageQuality;
+    private final int _skyTransCloud;
+    private final int _skyTransWater;
+    private final int _skyBackground;
+    private final double _airmass;
 
     /**
      * Constructs a ObservingConditionParameters from a MultipartParser
@@ -50,56 +38,6 @@ public final class ObservingConditionParameters extends ITCParameters {
      */
 
     public ObservingConditionParameters(ITCMultiPartParser p) {
-        parseMultipartParameters(p);
-    }
-
-    /**
-     * Parse parameters from a servlet request.
-     */
-    public void parseServletRequest(HttpServletRequest r) {
-        // Parse the observing condition section of the form.
-
-        String s;
-
-        // Get image quality
-        s = r.getParameter(IMAGE_QUALITY);
-        if (s == null) {
-            ITCParameters.notFoundException(IMAGE_QUALITY);
-        }
-        _imageQuality = ITCParameters.parseInt(s, "Image quality");
-
-        // Get sky transparency (cloud)
-        s = r.getParameter(SKY_TRANS_CLOUD);
-        if (s == null) {
-            ITCParameters.notFoundException(SKY_TRANS_CLOUD);
-        }
-        _skyTransCloud =
-                ITCParameters.parseInt(s, "Sky transparency (cloud cover)");
-
-        // Get sky transparency (water)
-        s = r.getParameter(SKY_TRANS_WATER);
-        if (s == null) {
-            ITCParameters.notFoundException(SKY_TRANS_WATER);
-        }
-        _skyTransWater =
-                ITCParameters.parseInt(s, "Sky transparency (water vapour)");
-
-        // Get sky background
-        s = r.getParameter(SKY_BACKGROUND);
-        if (s == null) {
-            ITCParameters.notFoundException(SKY_BACKGROUND);
-        }
-        _skyBackground = ITCParameters.parseInt(s, "Sky background");
-
-        // Get airmass
-        s = r.getParameter(AIRMASS);
-        if (s == null) {
-            ITCParameters.notFoundException(AIRMASS);
-        }
-        _airmass = ITCParameters.parseDouble(s, "Airmass");
-    }
-
-    public void parseMultipartParameters(ITCMultiPartParser p) {
         _imageQuality = ITCParameters.parseInt(p.getParameter(IMAGE_QUALITY), "Image Quality");
         _skyTransCloud = ITCParameters.parseInt(p.getParameter(SKY_TRANS_CLOUD), "Sky transparency (cloud cover)");
         _skyTransWater = ITCParameters.parseInt(p.getParameter(SKY_TRANS_WATER), "Sky transparency (water vapour)");

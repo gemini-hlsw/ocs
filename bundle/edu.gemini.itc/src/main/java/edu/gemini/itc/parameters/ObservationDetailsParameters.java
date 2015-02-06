@@ -4,8 +4,6 @@ import edu.gemini.itc.shared.FormatStringWriter;
 import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCParameters;
 
-import javax.servlet.http.HttpServletRequest;
-
 
 /**
  * This class holds the information from the Observation Details section
@@ -51,8 +49,8 @@ public final class ObservationDetailsParameters extends ITCParameters {
     public static final String USER_APER = "userAper";
 
     // Data members
-    private String _calcMode; //imgaging or spectroscopy
-    private String _calcMethod;  // S/N given time or time given S/N
+    private final String _calcMode; //imgaging or spectroscopy
+    private final String _calcMethod;  // S/N given time or time given S/N
     private int _numExposures;
     private double _exposureTime;   // in seconds
     private double _totalObservationTime;  // Total observation Time, some instruments use this.
@@ -60,19 +58,9 @@ public final class ObservationDetailsParameters extends ITCParameters {
     private double _snRatio;  // ratio desired
 
     private String _analysisMethod; // imaging or spectroscopy
-    private String _apertureType; // auto or user
+    private final String _apertureType; // auto or user
     private double _apertureDiameter; // in arcsec
     private double _skyApertureDiameter;
-
-    /**
-     * Constructs a ObservationDetailsParameters from a servlet request
-     *
-     * @param r Servlet request containing the form data.
-     * @throws Exception if input data is not parsable.
-     */
-    public ObservationDetailsParameters(HttpServletRequest r) {
-        parseServletRequest(r);
-    }
 
     /**
      * Constructs a ObservationDetailsParameters from a MultipartParser
@@ -82,138 +70,6 @@ public final class ObservationDetailsParameters extends ITCParameters {
      */
 
     public ObservationDetailsParameters(ITCMultiPartParser p) {
-        parseMultipartParameters(p);
-    }
-
-    /**
-     * Parse parameters from a servlet request.
-     */
-    public void parseServletRequest(HttpServletRequest r) {
-        // Parse the observation details section of the form.
-        _calcMode = r.getParameter(CALC_MODE);
-        if (_calcMode == null) {
-            ITCParameters.notFoundException(CALC_MODE);
-        }
-
-        if (_calcMode.equals(IMAGING)) {
-            // Get Calculation method - S/N given time  or  time given S/N
-            _calcMethod = r.getParameter(CALC_METHOD);
-
-            if (_calcMethod == null) {
-                ITCParameters.notFoundException(CALC_METHOD);
-            }
-            if (_calcMethod.equals(S2N)) {
-                String s = r.getParameter(NUM_EXPOSURES);
-                if (s == null) {
-                    ITCParameters.notFoundException(NUM_EXPOSURES);
-                }
-                _numExposures = ITCParameters.parseInt(s, "Number of exposures");
-                if (_numExposures < 0) _numExposures *= -1;
-                s = r.getParameter(EXP_TIME);
-                if (s == null) {
-                    ITCParameters.notFoundException(EXP_TIME);
-                }
-                _exposureTime = ITCParameters.parseDouble(s, "Exposure time");
-                if (_exposureTime < 0) _exposureTime *= -1;
-                s = r.getParameter(SRC_FRACTION);
-                if (s == null) {
-                    ITCParameters.notFoundException(SRC_FRACTION);
-                }
-                _sourceFraction =
-                        ITCParameters.parseDouble(s, "Exposures containing source");
-                if (_sourceFraction < 0) _sourceFraction *= -1;
-            } else if (_calcMethod.equals(INTTIME)) {
-
-                String s = r.getParameter(EXP_TIME_2);
-                if (s == null) {
-                    ITCParameters.notFoundException(EXP_TIME_2);
-                }
-                _exposureTime = ITCParameters.parseDouble(s, "Exposure time");
-                if (_exposureTime < 0) _exposureTime *= -1;
-                s = r.getParameter(SIGMA);
-                if (s == null) {
-                    ITCParameters.notFoundException(SIGMA);
-                }
-                _snRatio = ITCParameters.parseDouble(s, "Sigma");
-                if (_snRatio < 0) _snRatio *= -1;
-                s = r.getParameter(SRC_FRACTION_2);
-                if (s == null) {
-                    ITCParameters.notFoundException(SRC_FRACTION_2);
-                }
-                _sourceFraction =
-                        ITCParameters.parseDouble(s, "Exposures containing source");
-                if (_sourceFraction < 0) _sourceFraction *= -1;
-            } else {
-                throw new IllegalArgumentException("Unrecognized calculation method: " +
-                        getCalculationMethod());
-            }
-        } else if (_calcMode.equals(SPECTROSCOPY)) {
-            _calcMethod = r.getParameter(CALC_METHOD);
-
-            if (_calcMethod == null) {
-                ITCParameters.notFoundException(CALC_METHOD);
-            }
-            if (_calcMethod.equals(S2N)) {
-                String s = r.getParameter(NUM_EXPOSURES);
-                if (s == null) {
-                    ITCParameters.notFoundException(NUM_EXPOSURES);
-                }
-                _numExposures = ITCParameters.parseInt(s, "Number of exposures");
-                if (_numExposures < 0) _numExposures *= -1;
-                s = r.getParameter(EXP_TIME);
-                if (s == null) {
-                    ITCParameters.notFoundException(EXP_TIME);
-                }
-                _exposureTime = ITCParameters.parseDouble(s, "Exposure time");
-                if (_exposureTime < 0) _exposureTime *= -1;
-                s = r.getParameter(SRC_FRACTION);
-                if (s == null) {
-                    ITCParameters.notFoundException(SRC_FRACTION);
-                }
-                _sourceFraction =
-                        ITCParameters.parseDouble(s, "Exposures containing source");
-                if (_sourceFraction < 0) _sourceFraction *= -1;
-
-            } else {
-                throw new IllegalArgumentException("Total integration time to achieve a specific \n" +
-                        "S/N ratio is not supported in spectroscopy mode.  \nPlease select the Total S/N method. ");
-
-            }
-        } else {
-            throw new IllegalArgumentException("Unrecognized calculation mode: " +
-                    getCalculationMode());
-        }
-
-        String skyAper;
-        _apertureType = r.getParameter(APER_TYPE);
-        if (_apertureType == null) {
-            ITCParameters.notFoundException(APER_TYPE);
-        }
-        if (_apertureType.equals(AUTO_APER)) {
-            // nothing to do here
-            skyAper = r.getParameter(AUTO_SKY_APER);
-        } else if (_apertureType.equals(USER_APER)) {
-            skyAper = r.getParameter(USER_SKY_APER);
-            String aperDiam = r.getParameter(APER_DIAM);
-            if (aperDiam == null) {
-                ITCParameters.notFoundException(APER_DIAM);
-            }
-            _apertureDiameter =
-                    ITCParameters.parseDouble(aperDiam, "Aperture diameter");
-            if (_apertureDiameter < 0) _apertureDiameter *= -1;
-        } else {
-            throw new IllegalArgumentException("Unrecognized aperture type: " +
-                    _apertureType);
-        }
-        _skyApertureDiameter = ITCParameters.parseDouble(skyAper, "Sky Aperture Diameter");
-        if (_skyApertureDiameter < 1)
-            throw new IllegalArgumentException("The Sky aperture: " + _skyApertureDiameter +
-                    " must be 1 or greater.  Please retype the value and resubmit.");
-
-    }
-
-
-    public void parseMultipartParameters(ITCMultiPartParser p) {
         _calcMode = p.getParameter(CALC_MODE);
         _calcMethod = p.getParameter(CALC_METHOD);
 

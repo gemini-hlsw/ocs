@@ -1,9 +1,3 @@
-// Copyright 1999 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
-//
-// $Id: GsaoiRecipe.java,v 1.17 2004/02/16 18:49:01 bwalls Exp $
-//
 package edu.gemini.itc.gsaoi;
 
 import edu.gemini.itc.gems.*;
@@ -14,51 +8,19 @@ import edu.gemini.itc.parameters.SourceDefinitionParameters;
 import edu.gemini.itc.parameters.TeleParameters;
 import edu.gemini.itc.shared.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.PrintWriter;
-import java.util.Calendar;
 
 /**
  * This class performs the calculations for Gsaoi used for imaging.
  */
 public final class GsaoiRecipe extends RecipeBase {
 
-    private GemsParameters _gemsParameters;
-    private StringBuffer _header = new StringBuffer("# GSAOI ITC: "
-            + Calendar.getInstance().getTime() + "\n");
-
-    private GsaoiParameters _gsaoiParameters;
-    private ObservingConditionParameters _obsConditionParameters;
-    private ObservationDetailsParameters _obsDetailParameters;
-    //	private PlottingDetailsParameters _plotParameters;
-    // Parameters from the web page.
-    private SourceDefinitionParameters _sdParameters;
-    private TeleParameters _teleParameters;
-
-    private String sigSpec, backSpec, singleS2N, finalS2N;
-    private SpecS2NVisitor specS2N;
-
-    /**
-     * Constructs a GsaoiRecipe by parsing servlet request.
-     *
-     * @param r   Servlet request containing form data from ITC web page.
-     * @param out Results will be written to this PrintWriter.
-     * @throws Exception on failure to parse parameters.
-     */
-    public GsaoiRecipe(HttpServletRequest r, PrintWriter out) throws Exception {
-        super(out);
-        // Set the Http Session object
-        // _sessionObject = r.getSession(true);
-
-        // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
-        _gsaoiParameters = new GsaoiParameters(r);
-        _teleParameters = new TeleParameters(r);
-        _gemsParameters = new GemsParameters(r);
-//		_plotParameters = new PlottingDetailsParameters(r);
-    }
+    private final GemsParameters _gemsParameters;
+    private final GsaoiParameters _gsaoiParameters;
+    private final ObservingConditionParameters _obsConditionParameters;
+    private final ObservationDetailsParameters _obsDetailParameters;
+    private final SourceDefinitionParameters _sdParameters;
+    private final TeleParameters _teleParameters;
 
     /**
      * Constructs a GsaoiRecipe by parsing a Multipart servlet request.
@@ -69,17 +31,13 @@ public final class GsaoiRecipe extends RecipeBase {
      */
     public GsaoiRecipe(ITCMultiPartParser r, PrintWriter out) throws Exception {
         super(out);
-        // Set the Http Session object
-        // _sessionObject = r.getSession(true);
 
-        // Read parameters from the four main sections of the web page.
         _sdParameters = new SourceDefinitionParameters(r);
         _obsDetailParameters = new ObservationDetailsParameters(r);
         _obsConditionParameters = new ObservingConditionParameters(r);
         _gsaoiParameters = new GsaoiParameters(r);
         _teleParameters = new TeleParameters(r);
         _gemsParameters = new GemsParameters(r);
-//		_plotParameters = new PlottingDetailsParameters(r);
     }
 
     /**
@@ -100,7 +58,6 @@ public final class GsaoiRecipe extends RecipeBase {
         _gsaoiParameters = gsaoiParameters;
         _teleParameters = teleParameters;
         _gemsParameters = gemsParameters;
-//		_plotParameters = plotParameters;
     }
 
     /**

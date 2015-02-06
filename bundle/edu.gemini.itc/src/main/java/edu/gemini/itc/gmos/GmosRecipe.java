@@ -1,30 +1,15 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-//
 package edu.gemini.itc.gmos;
 
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.parameters.*;
 import edu.gemini.itc.shared.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.awt.*;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
-
-//import edu.gemini.itc.operation.ChartDataSource;
-//import edu.gemini.itc.operation.ChartCreatePNG;
-//import edu.gemini.itc.operation.ChartCreate;
-//import edu.gemini.itc.operation.ChartVisitor;
 
 /**
  * This class performs the calculations for Gmos used for imaging.
@@ -37,36 +22,12 @@ public final class GmosRecipe extends RecipeBase {
     private final String _header = new StringBuffer("# GMOS ITC: " + now.getTime() + "\n").toString();
 
     // Parameters from the web page.
-    private SourceDefinitionParameters _sdParameters;
-    private ObservationDetailsParameters _obsDetailParameters;
-    private ObservingConditionParameters _obsConditionParameters;
-    private GmosParameters _gmosParameters;
-    private TeleParameters _teleParameters;
-    private PlottingDetailsParameters _plotParameters;
-
-    /**
-     * Constructs a GmosRecipe by parsing servlet request.
-     *
-     * @param r   Servlet request containing form data from ITC web page.
-     * @param out Results will be written to this PrintWriter.
-     * @throws Exception on failure to parse parameters.
-     */
-    public GmosRecipe(HttpServletRequest r, PrintWriter out) throws Exception {
-        super(out);
-        // Set the Http Session object
-        // _sessionObject = r.getSession(true);
-
-        // System.out.println(" Session is over after"
-        // +_sessionObject.getCreationTime());
-
-        // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
-        _gmosParameters = new GmosParameters(r);
-        _teleParameters = new TeleParameters(r);
-        _plotParameters = new PlottingDetailsParameters(r);
-    }
+    private final SourceDefinitionParameters _sdParameters;
+    private final ObservationDetailsParameters _obsDetailParameters;
+    private final ObservingConditionParameters _obsConditionParameters;
+    private final GmosParameters _gmosParameters;
+    private final TeleParameters _teleParameters;
+    private final PlottingDetailsParameters _plotParameters;
 
     /**
      * Constructs a GmosRecipe by parsing a Multipart servlet request.

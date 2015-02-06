@@ -1,73 +1,31 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-//
 package edu.gemini.itc.michelle;
 
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.parameters.*;
 import edu.gemini.itc.shared.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.PrintWriter;
 import java.util.Calendar;
-
-//import edu.gemini.itc.operation.ChartDataSource;
-//import edu.gemini.itc.operation.ChartCreatePNG;
-//import edu.gemini.itc.operation.ChartCreate;
-//import edu.gemini.itc.operation.ChartVisitor;
 
 /**
  * This class performs the calculations for Michelle
  * used for imaging.
  */
 public final class MichelleRecipe extends RecipeBase {
-    // Images will be saved to this session object
-    //private HttpSession _sessionObject = null;	// set from servlet request
 
     // Parameters from the web page.
-    private SourceDefinitionParameters _sdParameters;
-    private ObservationDetailsParameters _obsDetailParameters;
-    private ObservingConditionParameters _obsConditionParameters;
-    private MichelleParameters _michelleParameters;
-    private TeleParameters _teleParameters;
-    private PlottingDetailsParameters _plotParameters;
-    private SpecS2NLargeSlitVisitor specS2N;
+    private final SourceDefinitionParameters _sdParameters;
+    private final ObservationDetailsParameters _obsDetailParameters;
+    private final ObservingConditionParameters _obsConditionParameters;
+    private final MichelleParameters _michelleParameters;
+    private final TeleParameters _teleParameters;
+    private final PlottingDetailsParameters _plotParameters;
 
+    private SpecS2NLargeSlitVisitor specS2N;
     private String sigSpec, backSpec, singleS2N, finalS2N;
 
     private Calendar now = Calendar.getInstance();
     private String _header = new StringBuffer("# Michelle ITC: " + now.getTime() + "\n").toString();
-
-
-    /**
-     * Constructs a MichelleRecipe by parsing servlet request.
-     *
-     * @param r   Servlet request containing form data from ITC web page.
-     * @param out Results will be written to this PrintWriter.
-     * @throws Exception on failure to parse parameters.
-     */
-    public MichelleRecipe(HttpServletRequest r, PrintWriter out) throws Exception {
-        super(out);
-        // Set the Http Session object
-        //_sessionObject = r.getSession(true);
-
-        //System.out.println(" Session is over after" +_sessionObject.getCreationTime());
-
-
-        // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
-        _michelleParameters = new MichelleParameters(r);
-        _teleParameters = new TeleParameters(r);
-        _plotParameters = new PlottingDetailsParameters(r);
-    }
 
     /**
      * Constructs a MichelleRecipe by parsing  a Multipart servlet request.

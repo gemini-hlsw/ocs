@@ -4,8 +4,6 @@ import edu.gemini.itc.shared.FormatStringWriter;
 import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCParameters;
 
-import javax.servlet.http.HttpServletRequest;
-
 
 /**
  * This class holds the information from the Plotting Details section
@@ -27,21 +25,11 @@ public final class PlottingDetailsParameters extends ITCParameters {
     public static final String USER_LIMITS = "userLimits";
 
     // Data members
-    private String _plotLimits; // auto or user
+    private final String _plotLimits; // auto or user
     private double _plotWaveL;
     private double _plotWaveU;
 
-    /**
-     * Constructs a PlottingDetailsParameters from a servlet request
-     *
-     * @param r Servlet request containing the form data.
-     * @throws Exception if input data is not parsable.
-     */
-    public PlottingDetailsParameters(HttpServletRequest r) throws Exception {
-        parseServletRequest(r);
-    }
-
-    /**
+   /**
      * Constructs a PlottingDetailsParameters from a MultipartParser
      *
      * @param p MutipartParser that has all of the parameters and files Parsed
@@ -49,38 +37,6 @@ public final class PlottingDetailsParameters extends ITCParameters {
      */
 
     public PlottingDetailsParameters(ITCMultiPartParser p) {
-        parseMultipartParameters(p);
-    }
-
-    /**
-     * Parse parameters from a servlet request.
-     */
-    public void parseServletRequest(HttpServletRequest r) {
-        _plotLimits = r.getParameter(PLOT_LIMITS);
-        if (_plotLimits == null) {
-            ITCParameters.notFoundException(PLOT_LIMITS);
-        }
-        if (_plotLimits.equals(USER_LIMITS)) {
-            String plotWaveL = r.getParameter(PLOT_WAVE_L);
-            if (plotWaveL == null) {
-                ITCParameters.notFoundException(PLOT_WAVE_L);
-            }
-            _plotWaveL = ITCParameters.parseDouble(plotWaveL, "Lower Bound of Plotting");
-            if (_plotWaveL < 0) _plotWaveL *= -1;
-
-            String plotWaveU = r.getParameter(PLOT_WAVE_U);
-            if (plotWaveU == null) {
-                ITCParameters.notFoundException(PLOT_WAVE_U);
-            }
-            _plotWaveU = ITCParameters.parseDouble(plotWaveU, "Upper Bound of Plotting");
-            if (_plotWaveU < 0) _plotWaveU *= -1;
-            if (_plotWaveU <= _plotWaveL)
-                throw new IllegalArgumentException("The Upper bound for the plotted spectra must be greater than the Lower bound. ");
-
-        }
-    }
-
-    public void parseMultipartParameters(ITCMultiPartParser p) {
         _plotLimits = p.getParameter(PLOT_LIMITS);
         _plotWaveL = ITCParameters.parseDouble(p.getParameter(PLOT_WAVE_L), "Lower Bound of Plotting");
         if (_plotWaveL < 0) _plotWaveL *= -1;
