@@ -3,6 +3,7 @@ package edu.gemini.itc.michelle;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.parameters.*;
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.web.ITCRequest;
 
 import java.io.PrintWriter;
 import java.util.Calendar;
@@ -47,7 +48,7 @@ public final class MichelleRecipe extends RecipeBase {
         _obsDetailParameters = new ObservationDetailsParameters(r);
         _obsConditionParameters = new ObservingConditionParameters(r);
         _michelleParameters = new MichelleParameters(r);
-        _teleParameters = new TeleParameters(r);
+        _teleParameters = ITCRequest.teleParameters(r);
         _plotParameters = new PlottingDetailsParameters(r);
     }
 

@@ -3,6 +3,7 @@ package edu.gemini.itc.gmos;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.parameters.*;
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.web.ITCRequest;
 
 import java.awt.*;
 import java.io.PrintWriter;
@@ -51,7 +52,7 @@ public final class GmosRecipe extends RecipeBase {
         _obsDetailParameters = new ObservationDetailsParameters(r);
         _obsConditionParameters = new ObservingConditionParameters(r);
         _gmosParameters = new GmosParameters(r);
-        _teleParameters = new TeleParameters(r);
+        _teleParameters = ITCRequest.teleParameters(r);
         _plotParameters = new PlottingDetailsParameters(r);
     }
 

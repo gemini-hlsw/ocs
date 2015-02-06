@@ -1,6 +1,5 @@
 package edu.gemini.itc.parameters;
 
-import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCParameters;
 import edu.gemini.spModel.telescope.IssPort;
 import edu.gemini.spModel.type.DisplayableSpType;
@@ -44,19 +43,6 @@ public final class TeleParameters extends ITCParameters {
     private final Coating _mirrorCoating;  // aluminum or silver
     private final IssPort _instrumentPort; // up or side
     private final Wfs     _wfs;
-
-    /**
-     * Constructs a TeleParameters from a MultipartParser
-     *
-     * @param p MutipartParser that has all of the parameters and files Parsed
-     * @throws Exception of cannot parse any of the parameters.
-     */
-
-    public TeleParameters(final ITCMultiPartParser p) {
-        _mirrorCoating  = getParameter(Coating.class, p);
-        _instrumentPort = getParameter(IssPort.class, p);
-        _wfs            = getParameter(Wfs.class, p);
-    }
 
     public TeleParameters(final Coating mirrorCoating, final IssPort instrumentPort, final Wfs wfs) {
         _mirrorCoating  = mirrorCoating;

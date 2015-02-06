@@ -6,6 +6,7 @@ import edu.gemini.itc.parameters.ObservingConditionParameters;
 import edu.gemini.itc.parameters.SourceDefinitionParameters;
 import edu.gemini.itc.parameters.TeleParameters;
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.web.ITCRequest;
 
 import java.io.PrintWriter;
 
@@ -36,7 +37,7 @@ public final class AcqCamRecipe extends RecipeBase {
         _obsDetailParameters = new ObservationDetailsParameters(r);
         _obsConditionParameters = new ObservingConditionParameters(r);
         _acqCamParameters = new AcquisitionCamParameters(r);
-        _teleParameters = new TeleParameters(r);
+        _teleParameters = ITCRequest.teleParameters(r);
     }
 
     /**
