@@ -449,48 +449,43 @@
             <tr>
                 <td colspan="6"><font color="red">Be sure to update the Average Strehl Ratio when changing the IQ.</font> </td>
             </tr>
-			<tr>
-				<td><b>Image quality:</b></td>
-				<td><input name="imageQuality" value="1" type="radio" /> best 20%-ile</td>
-				<td><input name="imageQuality" value="2" checked="checked" type="radio" /> 70%-ile</td>
-				<td><input name="imageQuality" value="3" type="radio" /> 85%-ile</td>
 
-				<td colspan="2"><input name="imageQuality" value="4" type="radio" /> any</td>
-			</tr>
-			<tr>
-				<td><b>Sky transparency (cloud cover):</b></td>
-				<!-- 
-				<td><input name="skyTransCloud" value="1" type="radio"></input> best 20%-ile</td> -->
-				<td><input name="skyTransCloud" value="2" checked="checked" type="radio" /> 50%-ile</td>
+            <tr>
+                <td><b>Image quality:</b></td>
+                <td><input name="ImageQuality" value="PERCENT_20" type="radio" /> best 20%-ile</td>
+                <td><input name="ImageQuality" value="PERCENT_70" type="radio"checked  />  70%-ile</td>
+                <td><input name="ImageQuality" value="PERCENT_85" type="radio" />  85%-ile</td>
+                <td><input name="ImageQuality" value="ANY" type="radio" /> any</td>
+            </tr>
+            <tr>
+                <td><b>Sky transparency (cloud cover):</b></td>
+                <td><input name="CloudCover" value="PERCENT_50" type="radio" checked /> 50%-ile</td>
+                <td><input name="CloudCover" value="PERCENT_70" type="radio" /> 70%-ile</td>
+                <td><input name="CloudCover" value="PERCENT_80" type="radio" /> 80%-ile</td>
+                <td><input name="CloudCover" value="ANY" type="radio" /> any</td>
+            </tr>
+            <tr>
+                <td><b>Sky transparency (water vapour):</b></td>
+                <td><input name="WaterVapor" value="PERCENT_20" type="radio" /> best 20%-ile</td>
+                <td><input name="WaterVapor" value="PERCENT_50" type="radio" /> 50%-ile</td>
+                <td><input name="WaterVapor" value="PERCENT_80" type="radio" /> 80%-ile</td>
+                <td><input name="WaterVapor" value="ANY" type="radio" checked /> any</td>
+            </tr>
 
-				<td><input name="skyTransCloud" value="3" type="radio" /> 70%-ile</td>
-				<td><input name="skyTransCloud" value="4" type="radio" /> 80%-ile</td>
-				<td><input name="skyTransCloud" value="5" type="radio" /> any</td>
-			</tr>
-			<tr>
-				<td><b>Sky transparency (water vapour):</b></td>
+            <tr>
+                <td><b>Sky background:</b></td>
+                <td><input name="SkyBackground" value="PERCENT_20" type="radio" /> best 20%-ile</td>
+                <td><input name="SkyBackground" value="PERCENT_50" type="radio" /> 50%-ile</td>
+                <td><input name="SkyBackground" value="PERCENT_80" type="radio" /> 80%-ile</td>
+                <td><input name="SkyBackground" value="ANY" type="radio" checked /> any</td>
+            </tr>
+            <tr>
+                <td><b>Typical air mass during observation:</b></td>
+                <td><input name="Airmass" value="1.2" type="radio" /> &lt;1.2</td>
+                <td><input name="Airmass" value="1.5" type="radio" checked="checked" /> 1.5</td>
+                <td><input name="Airmass" value="2.0" type="radio" /> 2.0</td>
+            </tr>
 
-				<td><input name="skyTransWater" value="1" type="radio" /> best 20%-ile</td>
-				<td><input name="skyTransWater" value="2" type="radio" /> 50%-ile</td>
-				<td><input name="skyTransWater" value="3" type="radio" /> 80%-ile</td>
-				<td colspan="2"><input name="skyTransWater" value="4" checked="checked" type="radio" /> any</td>
-			</tr>
-
-			<tr>
-				<td><b>Sky background:</b></td>
-				<td><input name="skyBackground" value="1" type="radio" /> best 20%-ile</td>
-				<td><input name="skyBackground" value="2" type="radio" /> 50%-ile</td>
-				<td><input name="skyBackground" value="3" type="radio" /> 80%-ile</td>
-
-				<td colspan="2"><input name="skyBackground" value="4" checked="checked" type="radio" /> any</td>
-			</tr>
-			<tr>
-				<td><b>Typical air mass during observation:</b></td>
-				<td><input name="airMass" value="1.2" type="radio" /> &lt;1.2</td>
-				<td><input name="airMass" value="1.5" checked="checked" type="radio" /> 1.5</td>
-
-				<td colspan="3"><input name="airMass" value="2.0" type="radio" /> 2.0</td>
-			</tr>
 			<tr>
 				<td colspan="6"><input src="http://www.gemini.edu/sciops/instruments/itc/calcButton.gif" align="right" border="0" height="24" type="image" width="78" /></td>
 			</tr>

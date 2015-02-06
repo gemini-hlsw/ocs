@@ -52,7 +52,7 @@ object ITCRequest {
     val cc      = pc.enumParameter(classOf[SPSiteQuality.CloudCover])
     val wv      = pc.enumParameter(classOf[SPSiteQuality.WaterVapor])
     val sb      = pc.enumParameter(classOf[SPSiteQuality.SkyBackground])
-    val airmass = pc.doubleParameter("airMass")
+    val airmass = pc.doubleParameter("Airmass")
     new ObservingConditionParameters(iq, cc, wv, sb, airmass)
   }
 

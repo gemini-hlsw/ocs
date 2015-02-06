@@ -327,41 +327,43 @@ target="resultsWindow">
         available on the <a href="../../ObsProcess/obsConstraints/obsConstraints.html">observing
         condition constraints</a> pages. </td>
     </tr>
-    <tr>
-      <td><b>Image quality:</b></td>
-      <td><input type="radio" name="imageQuality" value="1"> best 20%-ile</td>
-      <td><input type="radio" name="imageQuality" value="2" checked>  70%-ile</td>
-      <td><input type="radio" name="imageQuality" value="3">  85%-ile</td>
-      <td colspan="2"><input type="radio" name="imageQuality" value="4"> any</td>
-    </tr>
-    <tr>
-      <td><b>Sky transparency (cloud cover):</b></td>
-      <td><input type="radio" name="skyTransCloud" value="1"> best 20%-ile</td>
-      <td><input type="radio" name="skyTransCloud" value="2" checked> 50%-ile</td>
-      <td><input type="radio" name="skyTransCloud" value="3"> 70%-ile</td>
-      <td><input type="radio" name="skyTransCloud" value="4"> 90%-ile</td>
-      <td><input type="radio" name="skyTransCloud" value="5"> any</td>
-    </tr>
-    <tr>
-      <td><b>Sky transparency (water vapour):</b></td>
-      <td><input type="radio" name="skyTransWater" value="1"> best 20%-ile</td>
-      <td><input type="radio" name="skyTransWater" value="2"> 50%-ile</td>
-      <td><input type="radio" name="skyTransWater" value="3" checked> 80%-ile</td>
-      <td colspan="2"><input type="radio" name="skyTransWater" value="4"> any</td>
-    </tr>
-    <tr>
-      <td><b>Sky background:</b></td>
-      <td><input type="radio" name="skyBackground" value="1"> best 20%-ile</td>
-      <td><input type="radio" name="skyBackground" value="2"> 50%-ile</td>
-      <td><input type="radio" name="skyBackground" value="3" checked> 80%-ile</td>
-      <td colspan="2"><input type="radio" name="skyBackground" value="4"> any</td>
-    </tr>
-    <tr>
-      <td><b>Typical air mass during observation:</b></td>
-      <td><input type="radio" name="airMass" value="1.2" checked> &lt;1.2</td>
-      <td><input type="radio" name="airMass" value="1.5"> 1.5</td>
-      <td colspan="3"><input type="radio" name="airMass" value="2.0"> 2.0</td>
-    </tr>
+
+      <tr>
+          <td><b>Image quality:</b></td>
+          <td><input name="ImageQuality" value="PERCENT_20" type="radio" /> best 20%-ile</td>
+          <td><input name="ImageQuality" value="PERCENT_70" type="radio"checked />  70%-ile</td>
+          <td><input name="ImageQuality" value="PERCENT_85" type="radio" />  85%-ile</td>
+          <td><input name="ImageQuality" value="ANY" type="radio" /> any</td>
+      </tr>
+      <tr>
+          <td><b>Sky transparency (cloud cover):</b></td>
+          <td><input name="CloudCover" value="PERCENT_50" type="radio" checked /> 50%-ile</td>
+          <td><input name="CloudCover" value="PERCENT_70" type="radio" /> 70%-ile</td>
+          <td><input name="CloudCover" value="PERCENT_80" type="radio" /> 80%-ile</td>
+          <td><input name="CloudCover" value="ANY" type="radio" /> any</td>
+      </tr>
+      <tr>
+          <td><b>Sky transparency (water vapour):</b></td>
+          <td><input name="WaterVapor" value="PERCENT_20" type="radio" /> best 20%-ile</td>
+          <td><input name="WaterVapor" value="PERCENT_50" type="radio" /> 50%-ile</td>
+          <td><input name="WaterVapor" value="PERCENT_80" type="radio" checked /> 80%-ile</td>
+          <td><input name="WaterVapor" value="ANY" type="radio" /> any</td>
+      </tr>
+
+      <tr>
+          <td><b>Sky background:</b></td>
+          <td><input name="SkyBackground" value="PERCENT_20" type="radio" /> best 20%-ile</td>
+          <td><input name="SkyBackground" value="PERCENT_50" type="radio" /> 50%-ile</td>
+          <td><input name="SkyBackground" value="PERCENT_80" type="radio" checked /> 80%-ile</td>
+          <td><input name="SkyBackground" value="ANY" type="radio" /> any</td>
+      </tr>
+      <tr>
+          <td><b>Typical air mass during observation:</b></td>
+          <td><input name="Airmass" value="1.2" type="radio" checked /> &lt;1.2</td>
+          <td><input name="Airmass" value="1.5" type="radio" /> 1.5</td>
+          <td><input name="Airmass" value="2.0" type="radio" /> 2.0</td>
+      </tr>
+
     <tr>
       <td colspan="6">
         <p align="right"><input type="reset" value="reset">&nbsp; <input type="image" border="0" src="calcButton.gif"
