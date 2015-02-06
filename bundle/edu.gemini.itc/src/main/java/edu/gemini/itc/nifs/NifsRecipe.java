@@ -49,7 +49,7 @@ public final class NifsRecipe extends RecipeBase {
         _nifsParameters = new NifsParameters(r);
         _teleParameters = ITCRequest.teleParameters(r);
         _altairParameters = new AltairParameters(r);
-        _plotParameters = new PlottingDetailsParameters(r);
+        _plotParameters = ITCRequest.plotParamters(r);
     }
 
     /**
@@ -129,7 +129,7 @@ public final class NifsRecipe extends RecipeBase {
 
         // Check to see if user has defined plot limits; if so check to make sure they are not outside of the
         // actual data
-        if (_plotParameters.getPlotLimits().equals(_plotParameters.USER_LIMITS)) {
+        if (_plotParameters.getPlotLimits().equals(PlottingDetailsParameters.PlotLimits.USER)) {
             if (_plotParameters.getPlotWaveL() > instrument.getObservingEnd() ||
                     _plotParameters.getPlotWaveU() < instrument.getObservingStart()) {
                 _println(" The user limits defined for plotting do not overlap with the Spectrum.");

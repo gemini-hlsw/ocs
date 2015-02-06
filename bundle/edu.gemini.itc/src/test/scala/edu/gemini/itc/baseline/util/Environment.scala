@@ -18,6 +18,7 @@ case class Environment(
                         ocp: ObservingConditionParameters,
                         tep: TeleParameters,
                         pdp: PlottingDetailsParameters) {
+  // plotting details only impact gifs which are not part of the hashed result, intentionally ignored
   val hash = Hash.calc(src) + Hash.calc(ocp) + Hash.calc(tep)
 }
 
@@ -245,7 +246,7 @@ object Environment {
     } yield new TeleParameters(coating, port, wfs)
 
   lazy val PlottingParameters = List(
-    new PlottingDetailsParameters(PlottingDetailsParameters.AUTO_LIMITS, .3, .6)
+    new PlottingDetailsParameters(PlottingDetailsParameters.PlotLimits.AUTO, .3, .6)
   )
 
   lazy val AltairConfigurations = List(

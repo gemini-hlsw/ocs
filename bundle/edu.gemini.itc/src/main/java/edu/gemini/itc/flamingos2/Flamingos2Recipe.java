@@ -38,7 +38,7 @@ public final class Flamingos2Recipe extends RecipeBase {
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _flamingos2Parameters = new Flamingos2Parameters(r);
         _teleParameters = ITCRequest.teleParameters(r);
-        _plotParameters = new PlottingDetailsParameters(r);
+        _plotParameters = ITCRequest.plotParamters(r);
     }
 
     /**

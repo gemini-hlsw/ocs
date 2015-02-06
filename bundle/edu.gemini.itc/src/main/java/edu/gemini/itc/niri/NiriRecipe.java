@@ -36,17 +36,13 @@ public final class NiriRecipe extends RecipeBase {
      */
     public NiriRecipe(ITCMultiPartParser r, PrintWriter out) throws Exception {
         super(out);
-        // Set the Http Session object
-        // _sessionObject = r.getSession(true);
-
-        // Read parameters from the four main sections of the web page.
         _sdParameters = new SourceDefinitionParameters(r);
         _obsDetailParameters = new ObservationDetailsParameters(r);
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _niriParameters = new NiriParameters(r);
         _teleParameters = ITCRequest.teleParameters(r);
         _altairParameters = new AltairParameters(r);
-        _plotParameters = new PlottingDetailsParameters(r);
+        _plotParameters = ITCRequest.plotParamters(r);
     }
 
     /**
@@ -163,7 +159,7 @@ public final class NiriRecipe extends RecipeBase {
                     "Shifted spectrum lies outside of observed wavelengths");
         }
 
-        if (_plotParameters.getPlotLimits().equals(_plotParameters.USER_LIMITS)) {
+        if (_plotParameters.getPlotLimits().equals(PlottingDetailsParameters.PlotLimits.USER)) {
             if (_plotParameters.getPlotWaveL() > instrument.getObservingEnd()
                     || _plotParameters.getPlotWaveU() < instrument
                     .getObservingStart()) {

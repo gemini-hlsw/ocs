@@ -2,7 +2,7 @@ package edu.gemini.itc.web
 
 import javax.servlet.http.HttpServletRequest
 
-import edu.gemini.itc.parameters.{ObservingConditionParameters, TeleParameters}
+import edu.gemini.itc.parameters.{PlottingDetailsParameters, ObservingConditionParameters, TeleParameters}
 import edu.gemini.itc.shared.ITCMultiPartParser
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.telescope.IssPort
@@ -54,6 +54,14 @@ object ITCRequest {
     val sb      = pc.enumParameter(classOf[SPSiteQuality.SkyBackground])
     val airmass = pc.doubleParameter("Airmass")
     new ObservingConditionParameters(iq, cc, wv, sb, airmass)
+  }
+
+  def plotParamters(r: ITCMultiPartParser): PlottingDetailsParameters = {
+    val pc      = ITCRequest.from(r)
+    val limits  = pc.enumParameter(classOf[PlottingDetailsParameters.PlotLimits])
+    val lower   = pc.doubleParameter("plotWavelengthL")
+    val upper   = pc.doubleParameter("plotWavelengthU")
+    new PlottingDetailsParameters(limits, lower, upper)
   }
 
 }

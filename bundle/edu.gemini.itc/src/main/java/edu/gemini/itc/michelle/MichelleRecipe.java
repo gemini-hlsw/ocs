@@ -49,7 +49,7 @@ public final class MichelleRecipe extends RecipeBase {
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _michelleParameters = new MichelleParameters(r);
         _teleParameters = ITCRequest.teleParameters(r);
-        _plotParameters = new PlottingDetailsParameters(r);
+        _plotParameters = ITCRequest.plotParamters(r);
     }
 
     /**
@@ -141,7 +141,7 @@ public final class MichelleRecipe extends RecipeBase {
         //}
 
 
-        if (_plotParameters.getPlotLimits().equals(_plotParameters.USER_LIMITS)) {
+        if (_plotParameters.getPlotLimits().equals(PlottingDetailsParameters.PlotLimits.USER)) {
             if (_plotParameters.getPlotWaveL() > instrument.getObservingEnd() ||
                     _plotParameters.getPlotWaveU() < instrument.getObservingStart()) {
                 _println(" The user limits defined for plotting do not overlap with the Spectrum.");

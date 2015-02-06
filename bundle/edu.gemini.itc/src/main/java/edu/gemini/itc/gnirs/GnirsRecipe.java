@@ -53,7 +53,7 @@ public final class GnirsRecipe extends RecipeBase {
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _gnirsParameters = new GnirsParameters(r);
         _teleParameters = ITCRequest.teleParameters(r);
-        _plotParameters = new PlottingDetailsParameters(r);
+        _plotParameters = ITCRequest.plotParamters(r);
     }
 
     /**
@@ -140,7 +140,7 @@ public final class GnirsRecipe extends RecipeBase {
             }
         }
 
-        if (_plotParameters.getPlotLimits().equals(_plotParameters.USER_LIMITS)) {
+        if (_plotParameters.getPlotLimits().equals(PlottingDetailsParameters.PlotLimits.USER)) {
             if (_plotParameters.getPlotWaveL() > instrument.getObservingEnd()
                     || _plotParameters.getPlotWaveU() < instrument
                     .getObservingStart()) {

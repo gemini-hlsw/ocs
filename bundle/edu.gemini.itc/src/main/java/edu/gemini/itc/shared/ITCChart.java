@@ -21,7 +21,7 @@ public final class ITCChart {
         chart = ChartFactory.createXYLineChart(chartTitle, xAxisLabel, yAxisLabel, this.seriesData, PlotOrientation.VERTICAL, true, false, false);
         chart.getLegend().setPosition(RectangleEdge.TOP);
         chart.setBackgroundPaint(java.awt.Color.white);
-        if (plotParams.getPlotLimits().equals(PlottingDetailsParameters.USER_LIMITS)) {
+        if (plotParams.getPlotLimits().equals(PlottingDetailsParameters.PlotLimits.USER)) {
             setDomainMinMax(plotParams.getPlotWaveL(), plotParams.getPlotWaveU());
         } else {
             autoscale();
