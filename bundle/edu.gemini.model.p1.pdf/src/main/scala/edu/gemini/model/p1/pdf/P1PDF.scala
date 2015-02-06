@@ -10,7 +10,6 @@ import io.Source
 /**
  * Creator object for pdf creation for Phase1 documents.
  */
-
 object P1PDF {
 
   object DEFAULT extends Template(

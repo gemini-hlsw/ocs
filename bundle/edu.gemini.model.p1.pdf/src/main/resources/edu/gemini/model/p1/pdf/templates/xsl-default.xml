@@ -151,7 +151,7 @@
                                                 <xsl:when test="proposalClass//ngo/partner[text()=$partner]/../response/receipt/id">
                                                     <xsl:value-of select="proposalClass//ngo/partner[text()=$partner]/../response/receipt/id"/>
                                                 </xsl:when>
-                                                <xsl:otherwise>AU-2012B-???</xsl:otherwise>
+                                                <xsl:otherwise><xsl:value-of select="concat('AU-', $semesterYear, $semesterHalf, '-???')"/></xsl:otherwise>
                                             </xsl:choose>
                                         </xsl:variable>
                                         <fo:table-cell border="0.5pt solid black" text-align="center">
