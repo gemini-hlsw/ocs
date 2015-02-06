@@ -87,19 +87,6 @@ public class MultipartTestServlet extends HttpServlet {
                     }
                 }
 
-                /**
-                 Iterator it = parser.getParameterNames();
-                 while (it.hasNext()) {
-                 String param = (String)it.next();
-                 out.println("P: " + param + "="+ parser.getParameter(param)+ "<br>");
-                 }
-                 **/
-            } catch (NoSuchParameterException e) {
-                out.println("ERROR: " + e.getMessage());
-            } catch (IncompatibleFileTypeException e) {
-                out.println("ERROR: " + e.getMessage());
-            } catch (ParameterParseException e) {
-                out.println("ERROR: " + e.getMessage());
             } catch (Exception e) {
                 out.println("ERROR: " + e.getMessage());
             }

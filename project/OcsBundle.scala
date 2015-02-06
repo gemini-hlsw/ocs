@@ -60,7 +60,8 @@ trait OcsBundle {
   lazy val bundle_edu_gemini_itc = 
     project.in(file("bundle/edu.gemini.itc")).dependsOn(
       bundle_edu_gemini_util_osgi,
-      bundle_edu_gemini_shared_util
+      bundle_edu_gemini_shared_util,
+      bundle_edu_gemini_pot
     )
 
   lazy val bundle_edu_gemini_lchquery_servlet = 

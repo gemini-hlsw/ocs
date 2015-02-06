@@ -1,17 +1,7 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-//
 package edu.gemini.itc.michelle;
 
 import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCParameters;
-import edu.gemini.itc.shared.NoSuchParameterException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -78,7 +68,6 @@ public final class MichelleParameters extends ITCParameters {
 
     // Data members
     private String _Filter;  // filters
-    private String _InstrumentWindow;
     private String _grating; // Grating or null
     private String _readNoise;
     private String _darkCurrent;
@@ -95,7 +84,7 @@ public final class MichelleParameters extends ITCParameters {
      * @param r Servlet request containing the form data.
      * @throws Exception if input data is not parsable.
      */
-    public MichelleParameters(HttpServletRequest r) throws Exception {
+    public MichelleParameters(HttpServletRequest r) {
         parseServletRequest(r);
     }
 
@@ -106,14 +95,14 @@ public final class MichelleParameters extends ITCParameters {
      * @throws Exception of cannot parse any of the parameters.
      */
 
-    public MichelleParameters(ITCMultiPartParser p) throws Exception {
+    public MichelleParameters(ITCMultiPartParser p) {
         parseMultipartParameters(p);
     }
 
     /**
      * Parse parameters from a servlet request.
      */
-    public void parseServletRequest(HttpServletRequest r) throws Exception {
+    public void parseServletRequest(HttpServletRequest r) {
         // Parse the acquisition camera section of the form.
 
         // Get filter
@@ -121,12 +110,6 @@ public final class MichelleParameters extends ITCParameters {
         if (_Filter == null) {
             ITCParameters.notFoundException(INSTRUMENT_FILTER);
         }
-
-        // Get instrument Window(No changeable window for Michelle)
-        //_InstrumentWindow = r.getParameter(INSTRUMENT_WINDOW);
-        //if (_InstrumentWindow == null) {
-        //    ITCParameters.notFoundException(INSTRUMENT_WINDOW);
-        //}
 
         // Get Grating
         _grating = r.getParameter(INSTRUMENT_GRATING);
@@ -165,25 +148,17 @@ public final class MichelleParameters extends ITCParameters {
 
     }
 
-    public void parseMultipartParameters(ITCMultiPartParser p) throws Exception {
-        // Parse Michelle details section of the form.
-        try {
-            _Filter = p.getParameter(INSTRUMENT_FILTER);
-            //_InstrumentWindow = p.getParameter(INSTRUMENT_WINDOW);
-            _grating = p.getParameter(INSTRUMENT_GRATING);
-            _spatBinning = p.getParameter(SPAT_BINNING);
-            _specBinning = p.getParameter(SPEC_BINNING);
-            _instrumentCentralWavelength = p.getParameter(INSTRUMENT_CENTRAL_WAVELENGTH);
-            if (_instrumentCentralWavelength.equals(" ")) {
-                _instrumentCentralWavelength = "0";
-            }
-            _FP_Mask = p.getParameter(FP_MASK);
-            _polarimetry = p.getParameter(POLARIMETRY);
-
-        } catch (NoSuchParameterException e) {
-            throw new Exception("The parameter " + e.parameterName + " could not be found in the Michelle Specific" +
-                    " Paramters Section of the form.  Either add this value or Contact the Helpdesk.");
+    public void parseMultipartParameters(ITCMultiPartParser p) {
+        _Filter = p.getParameter(INSTRUMENT_FILTER);
+        _grating = p.getParameter(INSTRUMENT_GRATING);
+        _spatBinning = p.getParameter(SPAT_BINNING);
+        _specBinning = p.getParameter(SPEC_BINNING);
+        _instrumentCentralWavelength = p.getParameter(INSTRUMENT_CENTRAL_WAVELENGTH);
+        if (_instrumentCentralWavelength.equals(" ")) {
+            _instrumentCentralWavelength = "0";
         }
+        _FP_Mask = p.getParameter(FP_MASK);
+        _polarimetry = p.getParameter(POLARIMETRY);
     }
 
     /**
@@ -193,7 +168,6 @@ public final class MichelleParameters extends ITCParameters {
      * @throws Exception if input data is not parsable.
      */
     public MichelleParameters(String Filter,
-                              //String instrumentWindow,
                               String grating,
                               String readNoise,
                               String wellDepth,
@@ -204,7 +178,6 @@ public final class MichelleParameters extends ITCParameters {
                               String specBinning,
                               String polarimetry) {
         _Filter = Filter;
-        //_InstrumentWindow = instrumentWindow;
         _grating = grating;
         _darkCurrent = darkCurrent;
         _readNoise = readNoise;
@@ -222,7 +195,6 @@ public final class MichelleParameters extends ITCParameters {
         return _Filter;
     }
 
-    //public String getInstrumentWindow() {return _InstrumentWindow;}
     public String getGrating() {
         return _grating;
     }

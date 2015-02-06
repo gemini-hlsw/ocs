@@ -270,9 +270,7 @@ public final class MichelleRecipe extends RecipeBase {
 
 
         // Apply telescope transmission to both sed and sky
-        SampledSpectrumVisitor t =
-                TelescopeTransmissionVisitor.create(_teleParameters.getMirrorCoating(),
-                        _teleParameters.getInstrumentPort());
+        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(_teleParameters);
         sed.accept(t);
         sky.accept(t);
 
@@ -280,10 +278,7 @@ public final class MichelleRecipe extends RecipeBase {
         //_println("Telescope Back ave: " + sky.getAverage());
         //Create and Add background for the telescope.
         SampledSpectrumVisitor tb =
-                new TelescopeBackgroundVisitor(_teleParameters.getMirrorCoating(),
-                        _teleParameters.getInstrumentPort(),
-                        ITCConstants.MID_IR_TELESCOPE_BACKGROUND_FILENAME_BASE,
-                        ITCConstants.MAUNA_KEA, ITCConstants.MID_IR);
+                new TelescopeBackgroundVisitor(_teleParameters, ITCConstants.MAUNA_KEA, ITCConstants.MID_IR);
         sky.accept(tb);
         //_println("Telescope Back ave: " + sky.getAverage());
 
@@ -444,8 +439,6 @@ public final class MichelleRecipe extends RecipeBase {
 //	 sed.accept(dtv);
 //	 sky.accept(dtv);
 
-            ITCChart MichelleChart = new ITCChart();
-
             if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
                 st = new SlitThroughput(im_qual,
                         _obsDetailParameters.getApertureDiameter(),
@@ -510,12 +503,6 @@ public final class MichelleRecipe extends RecipeBase {
             //_println("Spec_source_frac: " + st.getSlitThroughput()+ "  Spec_npix: "+ ap_diam);
 
 
-            if (_plotParameters.getPlotLimits().equals(_plotParameters.USER_LIMITS)) {
-                MichelleChart.setDomainMinMax(_plotParameters.getPlotWaveL(), _plotParameters.getPlotWaveU());
-            } else {
-                MichelleChart.autoscale();
-            }
-
             //For the usb case we want the resolution to be determined by the
             //slit width and not the image quality for a point source.
             if (_sdParameters.getSourceGeometry().
@@ -578,34 +565,23 @@ public final class MichelleRecipe extends RecipeBase {
             specS2N.getFinalS2NSpectrum().accept(MichelleChart);
             _println(MichelleChart.getImage(), "Sig2N");
              */
-            MichelleChart.addArray(specS2N.getSignalSpectrum().getData(), "Signal ");
-            MichelleChart.addArray(specS2N.getBackgroundSpectrum().getData(), "SQRT(Background)  ");
-
-            MichelleChart.addTitle("Signal and Background ");
-            MichelleChart.addxAxisLabel("Wavelength (nm)");
-            MichelleChart.addyAxisLabel("e- per exposure per spectral pixel");
-
-            _println(MichelleChart.getBufferedImage(), "SigAndBack");
+            final ITCChart chart1 = new ITCChart("Signal and Background ", "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
+            chart1.addArray(specS2N.getSignalSpectrum().getData(), "Signal ");
+            chart1.addArray(specS2N.getBackgroundSpectrum().getData(), "SQRT(Background)  ");
+            _println(chart1.getBufferedImage(), "SigAndBack");
             _println("");
 
             sigSpec = _printSpecTag("ASCII signal spectrum");
             backSpec = _printSpecTag("ASCII background spectrum");
 
-            MichelleChart.flush();
-
-            MichelleChart.addArray(specS2N.getExpS2NSpectrum().getData(), "Single Exp S/N");
-            MichelleChart.addArray(specS2N.getFinalS2NSpectrum().getData(), "Final S/N  ");
-
-            MichelleChart.addTitle("Intermediate Single Exp and Final S/N");
-            MichelleChart.addxAxisLabel("Wavelength (nm)");
-            MichelleChart.addyAxisLabel("Signal / Noise per spectral pixel");
-
-            _println(MichelleChart.getBufferedImage(), "Sig2N");
+            final ITCChart chart2 = new ITCChart("Intermediate Single Exp and Final S/N", "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
+            chart2.addArray(specS2N.getExpS2NSpectrum().getData(), "Single Exp S/N");
+            chart2.addArray(specS2N.getFinalS2NSpectrum().getData(), "Final S/N  ");
+            _println(chart2.getBufferedImage(), "Sig2N");
             _println("");
 
             singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
             finalS2N = _printSpecTag("Final S/N ASCII data");
-            MichelleChart.flush();
 
             binFactor = instrument.getSpatialBinning() *
                     instrument.getSpectralBinning();

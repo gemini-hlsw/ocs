@@ -1,13 +1,3 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-// $Id: NormalizeVisitor.java,v 1.5 2003/11/21 14:31:02 shane Exp $
-//
 package edu.gemini.itc.operation;
 
 import edu.gemini.itc.parameters.SourceDefinitionParameters;
@@ -46,13 +36,13 @@ public class NormalizeVisitor implements SampledSpectrumVisitor {
      * Implements the visitor interface.
      * Performs the normalization.
      */
-    public void visit(SampledSpectrum sed) throws Exception {
+    public void visit(SampledSpectrum sed) {
         // obtain normalization value
         double norm = -1;
 
         // This is hard-wired to use the flux of a zero-magnitude star.
         // Flux is in magnitudes
-        if (_units == null) throw new Exception("null units");
+        if (_units == null) throw new IllegalStateException("null units");
         // Here is where you do unit conversions.
         if (_units.equals(SourceDefinitionParameters.MAG)) {
             double zeropoint = ZeroMagnitudeStar.getAverageFlux(_band);
@@ -83,7 +73,7 @@ public class NormalizeVisitor implements SampledSpectrumVisitor {
             norm = 5.632e10 * java.lang.Math.pow(10, -0.4 * _user_norm) /
                     WavebandDefinition.getCenter(_band);
         } else {
-            throw new Exception("Unit code " + _units + " not supported.");
+            throw new IllegalArgumentException("Unit code " + _units + " not supported.");
         }
 
         //System.out.println("SED inside Normalize function:");

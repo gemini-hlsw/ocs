@@ -1,19 +1,8 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-// $Id: PlottingDetailsParameters.java,v 1.3 2003/11/21 14:31:02 shane Exp $
-//
 package edu.gemini.itc.parameters;
 
 import edu.gemini.itc.shared.FormatStringWriter;
 import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCParameters;
-import edu.gemini.itc.shared.NoSuchParameterException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -59,17 +48,14 @@ public final class PlottingDetailsParameters extends ITCParameters {
      * @throws Exception of cannot parse any of the parameters.
      */
 
-    public PlottingDetailsParameters(ITCMultiPartParser p) throws Exception {
+    public PlottingDetailsParameters(ITCMultiPartParser p) {
         parseMultipartParameters(p);
     }
 
     /**
      * Parse parameters from a servlet request.
      */
-    public void parseServletRequest(HttpServletRequest r) throws Exception {
-        // Parse the Plotting details section of the form.
-
-        // new plot code
+    public void parseServletRequest(HttpServletRequest r) {
         _plotLimits = r.getParameter(PLOT_LIMITS);
         if (_plotLimits == null) {
             ITCParameters.notFoundException(PLOT_LIMITS);
@@ -89,26 +75,20 @@ public final class PlottingDetailsParameters extends ITCParameters {
             _plotWaveU = ITCParameters.parseDouble(plotWaveU, "Upper Bound of Plotting");
             if (_plotWaveU < 0) _plotWaveU *= -1;
             if (_plotWaveU <= _plotWaveL)
-                throw new Exception(" The Upper bound for the plotted spectra must be greater than the Lower bound. ");
+                throw new IllegalArgumentException("The Upper bound for the plotted spectra must be greater than the Lower bound. ");
 
         }
     }
 
-    public void parseMultipartParameters(ITCMultiPartParser p) throws Exception {
-        // Parse Plotting details section of the form.
-        try {
-            _plotLimits = p.getParameter(PLOT_LIMITS);
-            _plotWaveL = ITCParameters.parseDouble(p.getParameter(PLOT_WAVE_L), "Lower Bound of Plotting");
-            if (_plotWaveL < 0) _plotWaveL *= -1;
-            _plotWaveU = ITCParameters.parseDouble(p.getParameter(PLOT_WAVE_U), "Upper Bound of Plotting");
-            if (_plotWaveU < 0) _plotWaveU *= -1;
-        } catch (NoSuchParameterException e) {
-            throw new Exception("The parameter " + e.parameterName + " could not be found in the Plotting" +
-                    " Parameters Section of the form.  Either add this value or Contact the Helpdesk.");
-        }
+    public void parseMultipartParameters(ITCMultiPartParser p) {
+        _plotLimits = p.getParameter(PLOT_LIMITS);
+        _plotWaveL = ITCParameters.parseDouble(p.getParameter(PLOT_WAVE_L), "Lower Bound of Plotting");
+        if (_plotWaveL < 0) _plotWaveL *= -1;
+        _plotWaveU = ITCParameters.parseDouble(p.getParameter(PLOT_WAVE_U), "Upper Bound of Plotting");
+        if (_plotWaveU < 0) _plotWaveU *= -1;
 
         if (_plotWaveU <= _plotWaveL)
-            throw new Exception("The Upper bound for the plotted spectra must be greater than the Lower bound. ");
+            throw new IllegalArgumentException("The Upper bound for the plotted spectra must be greater than the Lower bound. ");
     }
 
     /**

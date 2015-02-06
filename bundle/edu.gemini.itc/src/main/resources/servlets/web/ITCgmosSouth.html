@@ -514,30 +514,15 @@
 				<td colspan="4" height="50" valign="bottom"><b>Telescope configuration:</b><i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10271','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i></td>
 
 			</tr>
-			<!-- silver disabled when not available
 			<tr>
-				<td colspan="4">Mirror coating: <input type="radio" value="aluminium" name="mirrorCoating"
-				checked> aluminium&nbsp; <img src="http://www.gemini.edu/sciops/instruments/itc/dis.gif" width="15" height="15" alt="option disabled"> silver </td>
+				<td colspan="4">Mirror coating: <input value="ALUMINIUM" name="Coating" type="radio" /> aluminium  <input value="SILVER" name="Coating" checked="checked" type="radio" /> silver </td>
 			</tr>
-			-->
 			<tr>
-				<td colspan="4">Mirror coating: <input value="aluminium" name="mirrorCoating" type="radio" /> aluminium  <input value="silver" name="mirrorCoating" checked="checked" type="radio" /> silver </td>
-			</tr>
-			<!-- up-looking disabled when not available 
-			<tr>
-				<td colspan="4">Instrument port: <input type="radio" value="upGS" name="issPort"> up-looking
-				(2 reflections)&nbsp; <input type="radio" value="sideGS" name="issPort" checked>
-				side-looking (3 reflections) </td>
-			</tr>
-			-->
-
-			<tr>
-				<td colspan="4">Instrument port: <!-- <img src="http://www.gemini.edu/sciops/instruments/itc/dis.gif" alt="option disabled" height="15" width="15" /> up-looking
-				(2 reflections) --> <input value="side" name="issPort" checked="checked" type="radio" />
+				<td colspan="4">Instrument port: <input value="SIDE_LOOKING" name="IssPort" checked="checked" type="radio" />
 				side-looking (3 reflections) </td>
 			</tr>
 			<tr>
-				<td colspan="4">Wavefront sensor for tip-tilt compensation: <input value="pwfs" name="wfscomb" type="radio" /> PWFS  <input value="oiwfs" name="wfscomb" checked="checked" type="radio" /> OIWFS </td>
+				<td colspan="4">Wavefront sensor for tip-tilt compensation: <input value="PWFS" name="Wfs" type="radio" /> PWFS  <input value="OIWFS" name="Wfs" checked="checked" type="radio" /> OIWFS </td>
 
 			</tr>
 			<tr>

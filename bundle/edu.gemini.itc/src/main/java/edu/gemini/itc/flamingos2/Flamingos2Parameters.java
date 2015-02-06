@@ -1,18 +1,7 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-// $Id: AcquisitionCamParameters.java,v 1.4 2003/11/21 14:31:02 shane Exp $
-//
 package edu.gemini.itc.flamingos2;
 
 import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCParameters;
-import edu.gemini.itc.shared.NoSuchParameterException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -54,7 +43,7 @@ public final class Flamingos2Parameters extends ITCParameters {
      * @param r Servlet request containing the form data.
      * @throws Exception if input data is not parsable.
      */
-    public Flamingos2Parameters(HttpServletRequest r) throws Exception {
+    public Flamingos2Parameters(HttpServletRequest r) {
         parseServletRequest(r);
     }
 
@@ -65,14 +54,14 @@ public final class Flamingos2Parameters extends ITCParameters {
      * @throws Exception of cannot parse any of the parameters.
      */
 
-    public Flamingos2Parameters(ITCMultiPartParser p) throws Exception {
+    public Flamingos2Parameters(ITCMultiPartParser p) {
         parseMultipartParameters(p);
     }
 
     /**
      * Parse parameters from a servlet request.
      */
-    public void parseServletRequest(HttpServletRequest r) throws Exception {
+    public void parseServletRequest(HttpServletRequest r) {
         // Parse the acquisition camera section of the form.
 
         // Get color filter
@@ -88,7 +77,7 @@ public final class Flamingos2Parameters extends ITCParameters {
         }
 
         if (_colorFilter.equalsIgnoreCase("none") && _grism.equalsIgnoreCase("none")) {
-            throw new Exception("Must specify a filter or a grism");
+            throw new IllegalArgumentException("Must specify a filter or a grism");
         }
 
         //Get High or low read noise
@@ -114,20 +103,14 @@ public final class Flamingos2Parameters extends ITCParameters {
     /**
      * Parse Parameters from a multipart servlet request
      */
-    public void parseMultipartParameters(ITCMultiPartParser p) throws Exception {
-        // Parse Acquisition Cam details section of the form.
-        try {
-            _colorFilter = p.getParameter(INSTRUMENT_FILTER);
-            //_ndFilter = p.getParameter(INSTRUMENT_ND_FILTER);
+    public void parseMultipartParameters(ITCMultiPartParser p) {
+        _colorFilter = p.getParameter(INSTRUMENT_FILTER);
+        //_ndFilter = p.getParameter(INSTRUMENT_ND_FILTER);
 
-            _grism = p.getParameter(INSTRUMENT_GRISM);
-            //Get High or low read noise
-            _readNoise = p.getParameter(READ_NOISE);
-            _fpMask = p.getParameter(FP_MASK);
-        } catch (NoSuchParameterException e) {
-            throw new Exception("The parameter " + e.parameterName + " could not be found in the Telescope" +
-                    " Paramters Section of the form.  Either add this value or Contact the Helpdesk.");
-        }
+        _grism = p.getParameter(INSTRUMENT_GRISM);
+        //Get High or low read noise
+        _readNoise = p.getParameter(READ_NOISE);
+        _fpMask = p.getParameter(FP_MASK);
     }
 
     /**

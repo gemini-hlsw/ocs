@@ -1,11 +1,3 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-
 package edu.gemini.itc.shared;
 
 import java.text.DecimalFormat;
@@ -120,7 +112,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      * SampledSpectrumVisitor r = new Resample();
      * s.Accept(r);
      */
-    public void accept(SampledSpectrumVisitor v) throws Exception {
+    public void accept(SampledSpectrumVisitor v) {
         v.visit(this);
     }
 
@@ -522,7 +514,19 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         nf.setMinimumFractionDigits(3);
         int n = getLastNonZeroPosition();
         for (int i = getFirstNonZeroPosition(); i < n; ++i) {
-            result.append(nf.format(getX(i)) + "\t" + nf.format(_y[i]) + "\n");
+            double x = getX(i);
+            double y = _y[i];
+            // By default DecimalFormat returns unicode characters for NaN and Infinity. This
+            // causes encoding problems when reading the text file back. For now,
+            // just replace NaNs with a string.
+            // TODO: This is a workaround, writing spectra files needs an overhaul.
+            // TODO: Also: Change GNIRS test data in a way that no NaN values are created(?).
+            String xStr = Double.isNaN(x) ? "NaN" : nf.format(x);
+            String yStr = Double.isNaN(y) ? "NaN" : nf.format(y);
+            result.append(xStr);
+            result.append("\t");
+            result.append(yStr);
+            result.append("\n");
         }
         return result.toString();
     }

@@ -1,13 +1,3 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-// $Id: AltairBackgroundVisitor.java,v 1.1 2004/01/12 16:22:25 bwalls Exp $
-//
 package edu.gemini.itc.altair;
 
 import edu.gemini.itc.shared.*;
@@ -23,7 +13,7 @@ public class AltairBackgroundVisitor implements SampledSpectrumVisitor {
     /**
      * Constructs AltairBackgroundVisitor.
      */
-    public AltairBackgroundVisitor() throws Exception {
+    public AltairBackgroundVisitor() {
 
         _altairBack = new DefaultArraySpectrum(
                 Altair.ALTAIR_LIB + "/" +
@@ -36,7 +26,7 @@ public class AltairBackgroundVisitor implements SampledSpectrumVisitor {
     /**
      * Implements the SampledSpectrumVisitor interface
      */
-    public void visit(SampledSpectrum sed) throws Exception {
+    public void visit(SampledSpectrum sed) {
         for (int i = 0; i < sed.getLength(); i++) {
             sed.setY(i, _altairBack.getY(sed.getX(i)) + sed.getY(i));
         }

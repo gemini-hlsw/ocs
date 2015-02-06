@@ -403,13 +403,14 @@
 			</tr>
 			<tr>
 				<td colspan="4" height="21">Mirror coating:
-                    <input value="aluminium" name="mirrorCoating" type="radio" /> aluminium
-                    <input value="silver" name="mirrorCoating" checked="checked" type="radio" /> silver </td>
+                    <input value="ALUMINIUM" name="Coating" type="radio" /> aluminium
+                    <input value="SILVER" name="Coating" checked="checked" type="radio" /> silver </td>
 			</tr>
-			<input type="hidden" value="side" name="issPort">
+            <!-- According to Rodrigo Carrasco, there is no difference, default is always side-looking! -->
+			<input type="hidden" value="SIDE_LOOKING" name="IssPort">
 			<tr>
 				<td colspan="4">Wavefront sensor:
-                    <input value="oiwfs" name="wfscomb" checked="checked" type="radio" />Canopus WFS + GSAOI ODGW</td>
+                    <input value="OIWFS" name="Wfs" checked="checked" type="radio" />Canopus WFS + GSAOI ODGW</td>
 			</tr>
             <tr>
                 <td colspan="4">Average Strehl Ratio from OT/Mascot

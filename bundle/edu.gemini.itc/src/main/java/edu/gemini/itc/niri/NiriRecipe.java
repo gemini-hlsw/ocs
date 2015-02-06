@@ -283,17 +283,12 @@ public final class NiriRecipe extends RecipeBase {
 
         // System.out.println("Average: " + sky.getAverage());
         // Apply telescope transmission
-        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(
-                _teleParameters.getMirrorCoating(),
-                _teleParameters.getInstrumentPort());
+        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(_teleParameters);
         sed.accept(t);
         sky.accept(t);
 
         // Create and Add background for the telescope.
-        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(
-                _teleParameters.getMirrorCoating(),
-                _teleParameters.getInstrumentPort(), ITCConstants.MAUNA_KEA,
-                ITCConstants.NEAR_IR);
+        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, ITCConstants.MAUNA_KEA, ITCConstants.NEAR_IR);
         sky.accept(tb);
 
         // DEBUGGING GRAPHS
@@ -563,9 +558,6 @@ public final class NiriRecipe extends RecipeBase {
             // _niriParameters.getFPMask());
             SlitThroughput st_halo;
 
-            // ChartVisitor NiriChart = new ChartVisitor();
-            ITCChart NiriChart = new ITCChart();
-
             if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
                 st = new SlitThroughput(im_qual,
                         _obsDetailParameters.getApertureDiameter(), pixel_size,
@@ -621,14 +613,6 @@ public final class NiriRecipe extends RecipeBase {
             ap_diam = st.getSpatialPix();
             double spec_source_frac = st.getSlitThroughput();
             double halo_spec_source_frac = st_halo.getSlitThroughput();
-
-            if (_plotParameters.getPlotLimits().equals(
-                    _plotParameters.USER_LIMITS)) {
-                NiriChart.setDomainMinMax(_plotParameters.getPlotWaveL(),
-                        _plotParameters.getPlotWaveU());
-            } else {
-                NiriChart.autoscale();
-            }
 
             if (_sdParameters.getSourceGeometry().equals(
                     SourceDefinitionParameters.EXTENDED_SOURCE)) {
@@ -725,40 +709,24 @@ public final class NiriRecipe extends RecipeBase {
 			 *
 			 * NiriChart.flush();
 			 */
-            NiriChart
-                    .addArray(specS2N.getSignalSpectrum().getData(), "Signal ");
-            NiriChart.addArray(specS2N.getBackgroundSpectrum().getData(),
-                    "SQRT(Background)  ");
+            final ITCChart chart1 = new ITCChart("Signal and SQRT(Background) in software aperture of " + ap_diam + " pixels", "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
+            final ITCChart chart2 = new ITCChart("Intermediate Single Exp and Final S/N", "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
 
-            NiriChart
-                    .addTitle("Signal and SQRT(Background) in software aperture of "
-                            + ap_diam + " pixels");
-            NiriChart.addxAxisLabel("Wavelength (nm)");
-            NiriChart.addyAxisLabel("e- per exposure per spectral pixel");
-
-            _println(NiriChart.getBufferedImage(), "SigAndBack");
+            chart1.addArray(specS2N.getSignalSpectrum().getData(), "Signal ");
+            chart1.addArray(specS2N.getBackgroundSpectrum().getData(), "SQRT(Background)  ");
+            _println(chart1.getBufferedImage(), "SigAndBack");
             _println("");
 
             sigSpec = _printSpecTag("ASCII signal spectrum");
             backSpec = _printSpecTag("ASCII background spectrum");
 
-            NiriChart.flush();
-
-            NiriChart.addArray(specS2N.getExpS2NSpectrum().getData(),
-                    "Single Exp S/N");
-            NiriChart.addArray(specS2N.getFinalS2NSpectrum().getData(),
-                    "Final S/N  ");
-
-            NiriChart.addTitle("Intermediate Single Exp and Final S/N");
-            NiriChart.addxAxisLabel("Wavelength (nm)");
-            NiriChart.addyAxisLabel("Signal / Noise per spectral pixel");
-
-            _println(NiriChart.getBufferedImage(), "Sig2N");
+            chart2.addArray(specS2N.getExpS2NSpectrum().getData(), "Single Exp S/N");
+            chart2.addArray(specS2N.getFinalS2NSpectrum().getData(), "Final S/N  ");
+            _println(chart2.getBufferedImage(), "Sig2N");
             _println("");
 
             singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
             finalS2N = _printSpecTag("Final S/N ASCII data");
-            NiriChart.flush();
 
         } else {
 

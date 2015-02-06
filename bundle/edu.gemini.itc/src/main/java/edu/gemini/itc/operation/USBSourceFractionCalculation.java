@@ -1,11 +1,3 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-
 package edu.gemini.itc.operation;
 
 import edu.gemini.itc.parameters.ObservationDetailsParameters;
@@ -25,9 +17,9 @@ public class USBSourceFractionCalculation implements SourceFractionCalculatable 
         this.pixel_size = pixel_size;
     }
 
-    public void calculate() throws Exception {
+    public void calculate() {
         if (im_qual < 0)
-            throw new Exception("Programming Error, Must set image quality before calling Calculate");
+            throw new IllegalStateException("Programming Error, Must set image quality before calling Calculate");
 
         pix_per_sq_arcsec = 1 / (pixel_size * pixel_size);
         if (ap_type.equals(ObservationDetailsParameters.AUTO_APER)) {
@@ -38,7 +30,7 @@ public class USBSourceFractionCalculation implements SourceFractionCalculatable 
             // Do nothing to ap_diam. It is correct
             usbApArea = ap_diam * ap_diam * Math.PI / 4;
         } else {
-            throw new Exception(
+            throw new IllegalArgumentException(
                     "Unknown aperture type: " + ap_type);
         }
 

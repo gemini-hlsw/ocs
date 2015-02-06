@@ -1,19 +1,8 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-// $Id: ObservationDetailsParameters.java,v 1.8 2003/11/21 14:31:02 shane Exp $
-//
 package edu.gemini.itc.parameters;
 
 import edu.gemini.itc.shared.FormatStringWriter;
 import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCParameters;
-import edu.gemini.itc.shared.NoSuchParameterException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -81,7 +70,7 @@ public final class ObservationDetailsParameters extends ITCParameters {
      * @param r Servlet request containing the form data.
      * @throws Exception if input data is not parsable.
      */
-    public ObservationDetailsParameters(HttpServletRequest r) throws Exception {
+    public ObservationDetailsParameters(HttpServletRequest r) {
         parseServletRequest(r);
     }
 
@@ -92,14 +81,14 @@ public final class ObservationDetailsParameters extends ITCParameters {
      * @throws Exception of cannot parse any of the parameters.
      */
 
-    public ObservationDetailsParameters(ITCMultiPartParser p) throws Exception {
+    public ObservationDetailsParameters(ITCMultiPartParser p) {
         parseMultipartParameters(p);
     }
 
     /**
      * Parse parameters from a servlet request.
      */
-    public void parseServletRequest(HttpServletRequest r) throws Exception {
+    public void parseServletRequest(HttpServletRequest r) {
         // Parse the observation details section of the form.
         _calcMode = r.getParameter(CALC_MODE);
         if (_calcMode == null) {
@@ -155,7 +144,7 @@ public final class ObservationDetailsParameters extends ITCParameters {
                         ITCParameters.parseDouble(s, "Exposures containing source");
                 if (_sourceFraction < 0) _sourceFraction *= -1;
             } else {
-                throw new Exception("Unrecognized calculation method: " +
+                throw new IllegalArgumentException("Unrecognized calculation method: " +
                         getCalculationMethod());
             }
         } else if (_calcMode.equals(SPECTROSCOPY)) {
@@ -186,12 +175,12 @@ public final class ObservationDetailsParameters extends ITCParameters {
                 if (_sourceFraction < 0) _sourceFraction *= -1;
 
             } else {
-                throw new Exception("Total integration time to achieve a specific \n" +
+                throw new IllegalArgumentException("Total integration time to achieve a specific \n" +
                         "S/N ratio is not supported in spectroscopy mode.  \nPlease select the Total S/N method. ");
 
             }
         } else {
-            throw new Exception("Unrecognized calculation mode: " +
+            throw new IllegalArgumentException("Unrecognized calculation mode: " +
                     getCalculationMode());
         }
 
@@ -213,77 +202,71 @@ public final class ObservationDetailsParameters extends ITCParameters {
                     ITCParameters.parseDouble(aperDiam, "Aperture diameter");
             if (_apertureDiameter < 0) _apertureDiameter *= -1;
         } else {
-            throw new Exception("Unrecognized aperture type: " +
+            throw new IllegalArgumentException("Unrecognized aperture type: " +
                     _apertureType);
         }
         _skyApertureDiameter = ITCParameters.parseDouble(skyAper, "Sky Aperture Diameter");
         if (_skyApertureDiameter < 1)
-            throw new Exception("The Sky aperture: " + _skyApertureDiameter +
+            throw new IllegalArgumentException("The Sky aperture: " + _skyApertureDiameter +
                     " must be 1 or greater.  Please retype the value and resubmit.");
 
     }
 
 
-    public void parseMultipartParameters(ITCMultiPartParser p) throws Exception {
-        // Parse Telescope details section of the form.
-        try {
-            _calcMode = p.getParameter(CALC_MODE);
-            _calcMethod = p.getParameter(CALC_METHOD);
+    public void parseMultipartParameters(ITCMultiPartParser p) {
+        _calcMode = p.getParameter(CALC_MODE);
+        _calcMethod = p.getParameter(CALC_METHOD);
 
-            if (_calcMethod.equals(S2N)) {
-                if (p.parameterExists(NUM_EXPOSURES) && p.parameterExists(EXP_TIME)) {
-                    _numExposures = ITCParameters.parseInt(p.getParameter(NUM_EXPOSURES), "Number of Exposures");
-                    if (_numExposures < 0) _numExposures *= -1;
-                    _exposureTime = ITCParameters.parseDouble(p.getParameter(EXP_TIME), "Exposure Time");
-                    if (_exposureTime < 0) _exposureTime *= -1;
+        if (_calcMethod.equals(S2N)) {
+            if (p.parameterExists(NUM_EXPOSURES) && p.parameterExists(EXP_TIME)) {
+                _numExposures = ITCParameters.parseInt(p.getParameter(NUM_EXPOSURES), "Number of Exposures");
+                if (_numExposures < 0) _numExposures *= -1;
+                _exposureTime = ITCParameters.parseDouble(p.getParameter(EXP_TIME), "Exposure Time");
+                if (_exposureTime < 0) _exposureTime *= -1;
+            } else {
+                if (p.parameterExists(TOTAL_OBSERVATION_TIME)) {
+                    _totalObservationTime = ITCParameters.parseInt(p.getParameter(TOTAL_OBSERVATION_TIME), "Total Observation Time");
                 } else {
-                    if (p.parameterExists(TOTAL_OBSERVATION_TIME)) {
-                        _totalObservationTime = ITCParameters.parseInt(p.getParameter(TOTAL_OBSERVATION_TIME), "Total Observation Time");
-                    } else {
-                        p.getParameter(TOTAL_OBSERVATION_TIME);  // DUMMY Parameter to throw an exception.
-                    }
+                    p.getParameter(TOTAL_OBSERVATION_TIME);  // DUMMY Parameter to throw an exception.
                 }
-                _sourceFraction = ITCParameters.parseDouble(p.getParameter(SRC_FRACTION), "Exposures Containing Source");
-                if (_sourceFraction < 0) _sourceFraction *= -1;
-            } else if (_calcMethod.equals(INTTIME)) {
-                if (_calcMode.equals(SPECTROSCOPY)) {
-                    throw new Exception("Total integration time to achieve a specific \nS/N ratio is not supported in spectroscopy mode.  \nPlease select the Total S/N method. ");
-                }
-                if (p.parameterExists(EXP_TIME_2)) {
-                    _exposureTime = ITCParameters.parseDouble(p.getParameter(EXP_TIME_2), "Exposure Time");
-                    if (_exposureTime < 0) _exposureTime *= -1;
-                } else
-                    _totalObservationTime = 1;  //_totalObservationTime not used for int time just set it to 1.
-                _snRatio = ITCParameters.parseDouble(p.getParameter(SIGMA), "Sigma");
-                if (_snRatio < 0) _snRatio *= -1;
-                _sourceFraction = ITCParameters.parseDouble(p.getParameter(SRC_FRACTION_2), "Exposures Containing Source");
-                if (_sourceFraction < 0) _sourceFraction *= -1;
-
-            } else {
-                throw new Exception("Unrecognized calculation mode: " + getCalculationMode());
             }
-
-            // Aperture Section
-            String skyAper;
-            _apertureType = p.getParameter(APER_TYPE);
-            if (_apertureType.equals(AUTO_APER)) {
-                skyAper = p.getParameter(AUTO_SKY_APER);
-            } else if (_apertureType.equals(USER_APER)) {
-                skyAper = p.getParameter(USER_SKY_APER);
-                _apertureDiameter = ITCParameters.parseDouble(p.getParameter(APER_DIAM), "Aperture Diameter");
-                if (_apertureDiameter < 0) _apertureDiameter *= -1;
-            } else {
-                throw new Exception("Unrecognized Aperture type: " + _apertureType + ". Contact Helpdesk.");
+            _sourceFraction = ITCParameters.parseDouble(p.getParameter(SRC_FRACTION), "Exposures Containing Source");
+            if (_sourceFraction < 0) _sourceFraction *= -1;
+        } else if (_calcMethod.equals(INTTIME)) {
+            if (_calcMode.equals(SPECTROSCOPY)) {
+                throw new IllegalArgumentException("Total integration time to achieve a specific \nS/N ratio is not supported in spectroscopy mode.  \nPlease select the Total S/N method. ");
             }
-            _skyApertureDiameter = ITCParameters.parseDouble(skyAper, "Sky Aperture Diameter");
-            if (_skyApertureDiameter < 0) _skyApertureDiameter *= -1;
-            if (_skyApertureDiameter < 1)
-                throw new Exception("The Sky aperture: " + _skyApertureDiameter + " must be 1 or greater.  Please retype the value and resubmit.");
+            if (p.parameterExists(EXP_TIME_2)) {
+                _exposureTime = ITCParameters.parseDouble(p.getParameter(EXP_TIME_2), "Exposure Time");
+                if (_exposureTime < 0) _exposureTime *= -1;
+            } else
+                _totalObservationTime = 1;  //_totalObservationTime not used for int time just set it to 1.
+            _snRatio = ITCParameters.parseDouble(p.getParameter(SIGMA), "Sigma");
+            if (_snRatio < 0) _snRatio *= -1;
+            _sourceFraction = ITCParameters.parseDouble(p.getParameter(SRC_FRACTION_2), "Exposures Containing Source");
+            if (_sourceFraction < 0) _sourceFraction *= -1;
 
-        } catch (NoSuchParameterException e) {
-            throw new Exception("The parameter " + e.parameterName + " could not be found in the Observation" +
-                    " Details Section of the form. \nEither add this value or Contact the Helpdesk.");
+        } else {
+            throw new IllegalArgumentException("Unrecognized calculation mode: " + getCalculationMode());
         }
+
+        // Aperture Section
+        String skyAper;
+        _apertureType = p.getParameter(APER_TYPE);
+        if (_apertureType.equals(AUTO_APER)) {
+            skyAper = p.getParameter(AUTO_SKY_APER);
+        } else if (_apertureType.equals(USER_APER)) {
+            skyAper = p.getParameter(USER_SKY_APER);
+            _apertureDiameter = ITCParameters.parseDouble(p.getParameter(APER_DIAM), "Aperture Diameter");
+            if (_apertureDiameter < 0) _apertureDiameter *= -1;
+        } else {
+            throw new IllegalArgumentException("Unrecognized Aperture type: " + _apertureType + ". Contact Helpdesk.");
+        }
+        _skyApertureDiameter = ITCParameters.parseDouble(skyAper, "Sky Aperture Diameter");
+        if (_skyApertureDiameter < 0) _skyApertureDiameter *= -1;
+        if (_skyApertureDiameter < 1)
+            throw new IllegalArgumentException("The Sky aperture: " + _skyApertureDiameter + " must be 1 or greater.  Please retype the value and resubmit.");
+
     }
 
 

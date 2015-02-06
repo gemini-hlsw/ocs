@@ -31,7 +31,7 @@ public abstract class Instrument {
      * @param filename The filename of the instrument data file
      */
     // Automatically loads the background data.
-    protected Instrument(String subdir, String filename) throws Exception {
+    protected Instrument(String subdir, String filename) {
         final String dir = ITCConstants.LIB + "/" + subdir + "/";
         params = DatFile.instruments().apply(dir + filename);
         components = new LinkedList<>();
@@ -51,7 +51,7 @@ public abstract class Instrument {
      * Method to iterate through the Components list and apply the
      * accept method of each component to a sed.
      */
-    public void convolveComponents(VisitableSampledSpectrum sed) throws Exception {
+    public void convolveComponents(VisitableSampledSpectrum sed) {
         for (final TransmissionElement te : components) {
             sed.accept(te);
         }
@@ -94,7 +94,7 @@ public abstract class Instrument {
         return params.darkCurrent();
     }
 
-    protected void resetBackGround(String subdir, String filename_prefix) throws Exception {
+    protected void resetBackGround(String subdir, String filename_prefix) {
         final String dir = ITCConstants.LIB + "/" + subdir + "/";
         background = new DefaultArraySpectrum(dir + filename_prefix + params.backgroundFile());
     }

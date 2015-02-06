@@ -2,6 +2,7 @@ package edu.gemini.itc.baseline.util
 
 import edu.gemini.itc.baseline._
 import org.junit.{Ignore, Test}
+import org.junit.Assert._
 
 /**
  * Test cases that can be used to create a new baseline and to check exhaustively all provided configurations
@@ -28,14 +29,14 @@ class BaselineTest {
     // also checks if we have any problems with our makeshift hash values
     if (baseSeq.size != baseMap.size) throw new Exception("There are baselines with identical keys!")
     // --
+    System.out.println(s"Writing new baseline with ${baseSeq.size} entries")
     Baseline.write(baseSeq)
   }
 
   @Ignore
   @Test
-  def checkAll(): Unit = {
-    baselines().foreach(Baseline.checkAgainstBaseline)
-  }
+  def checkAll(): Unit =
+    baselines().foreach { b => assertTrue(Baseline.checkAgainstBaseline(b)) }
 
   private def baselines(): Seq[Baseline] = {
 

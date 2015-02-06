@@ -23,7 +23,7 @@ public class TransmissionElement implements SampledSpectrumVisitor {
     /**
      * Constructs a TransmissionElement using specified transmission data file
      */
-    public TransmissionElement(final String resourceName) throws Exception {
+    public TransmissionElement(final String resourceName) {
         _trans = new DefaultArraySpectrum(resourceName);
     }
 

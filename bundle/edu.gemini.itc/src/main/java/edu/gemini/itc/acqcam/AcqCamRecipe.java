@@ -1,13 +1,3 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-// $Id: AcqCamRecipe.java,v 1.6 2004/02/16 18:49:01 bwalls Exp $
-//
 package edu.gemini.itc.acqcam;
 
 import edu.gemini.itc.operation.*;
@@ -39,7 +29,7 @@ public final class AcqCamRecipe extends RecipeBase {
      * @param out Results will be written to this PrintWriter.
      * @throws Exception on failure to parse parameters.
      */
-    public AcqCamRecipe(HttpServletRequest r, PrintWriter out) throws Exception {
+    public AcqCamRecipe(HttpServletRequest r, PrintWriter out) {
         super(out);
 
         // Read parameters from the four main sections of the web page.
@@ -57,7 +47,7 @@ public final class AcqCamRecipe extends RecipeBase {
      * @param out Results will be written to this PrintWriter.
      * @throws Exception on failure to parse parameters.
      */
-    public AcqCamRecipe(ITCMultiPartParser r, PrintWriter out) throws Exception {
+    public AcqCamRecipe(ITCMultiPartParser r, PrintWriter out) {
         super(out);
 
         // Read parameters from the four main sections of the web page.
@@ -94,7 +84,7 @@ public final class AcqCamRecipe extends RecipeBase {
      * @throws Exception A recipe calculation can fail in many ways,
      *                   missing data files, incorrectly-formatted data files, ...
      */
-    public void writeOutput() throws Exception {
+    public void writeOutput() {
         // This object is used to format numerical strings.
         FormatStringWriter device = new FormatStringWriter();
         device.setPrecision(2);  // Two decimal places
@@ -119,7 +109,7 @@ public final class AcqCamRecipe extends RecipeBase {
 
         if (_sdParameters.getSourceSpec().equals(_sdParameters.ELINE))
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000))) {
-                throw new Exception("Please use a model line width > 1 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
+                throw new IllegalArgumentException("Please use a model line width > 1 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
 
         //Get Source spectrum from factory
@@ -149,7 +139,7 @@ public final class AcqCamRecipe extends RecipeBase {
         if (!(_sdParameters.getSpectrumResource().equals(_sdParameters.ELINE) ||
                 _sdParameters.getSpectrumResource().equals(_sdParameters.BBODY))) {
             if (sed.getStart() > start || sed.getEnd() < end) {
-                throw new Exception("Shifted spectrum lies outside of specified normalisation waveband.");
+                throw new IllegalArgumentException("Shifted spectrum lies outside of specified normalisation waveband.");
             }
         }
 
@@ -158,7 +148,7 @@ public final class AcqCamRecipe extends RecipeBase {
             _println(" Sed start" + sed.getStart() + "> than instrument start" + instrument.getObservingStart());
             _println(" Sed END" + sed.getEnd() + "< than instrument end" + instrument.getObservingEnd());
 
-            throw new Exception("Shifted spectrum lies outside of observed wavelengths");
+            throw new IllegalArgumentException("Shifted spectrum lies outside of observed wavelengths");
         }
 
 
@@ -225,17 +215,12 @@ public final class AcqCamRecipe extends RecipeBase {
 
         //Create and Add Background for the tele
 
-        SampledSpectrumVisitor tb =
-                new TelescopeBackgroundVisitor(_teleParameters.getMirrorCoating(),
-                        _teleParameters.getInstrumentPort(),
-                        ITCConstants.MAUNA_KEA, ITCConstants.VISIBLE);
+        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, ITCConstants.MAUNA_KEA, ITCConstants.VISIBLE);
         sky.accept(tb);
 
 
         // Apply telescope transmission
-        SampledSpectrumVisitor t =
-                TelescopeTransmissionVisitor.create(_teleParameters.getMirrorCoating(),
-                        _teleParameters.getInstrumentPort());
+        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(_teleParameters);
 
         sed.accept(t);
         sky.accept(t);
@@ -340,7 +325,7 @@ public final class AcqCamRecipe extends RecipeBase {
                     instrument.getDarkCurrent());
             peak_pixel_count = ppfc.getFluxInPeakPixelUSB(SFcalc.getSourceFraction(), SFcalc.getNPix());
         } else {
-            throw new Exception(
+            throw new IllegalArgumentException(
                     "Peak Pixel Flux could not be calculated for type" +
                             _sdParameters.getSourceGeometry());
         }

@@ -1,13 +1,3 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-// $Id: SourceDefinitionParameters.java,v 1.7 2004/01/12 16:31:43 bwalls Exp $
-//
 package edu.gemini.itc.parameters;
 
 import edu.gemini.itc.shared.*;
@@ -155,7 +145,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
      * @param r Servlet request containing the form data.
      * @throws Exception if input data is not parsable.
      */
-    public SourceDefinitionParameters(HttpServletRequest r) throws Exception {
+    public SourceDefinitionParameters(HttpServletRequest r) {
         parseServletRequest(r);
     }
 
@@ -166,14 +156,14 @@ public final class SourceDefinitionParameters extends ITCParameters {
      * @throws Exception of cannot parse any of the parameters.
      */
 
-    public SourceDefinitionParameters(ITCMultiPartParser p) throws Exception {
+    public SourceDefinitionParameters(ITCMultiPartParser p) {
         parseMultipartParameters(p);
     }
 
     /**
      * Parse parameters from a servlet request.
      */
-    public void parseServletRequest(HttpServletRequest r) throws Exception {
+    public void parseServletRequest(HttpServletRequest r) {
         // Parse the source definition section of the form.
 
         // Get source geometry type
@@ -196,7 +186,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
                 ITCParameters.notFoundException(SOURCE_UNITS_PT_SOURCE);
             }
             if (getUnitCode(_units) < 0) {
-                throw new Exception("Unrecognized units: " + _units);
+                throw new IllegalArgumentException("Unrecognized units: " + _units);
             }
         } else if (_sourceGeom.equals(EXTENDED_SOURCE)) {
             _extSourceType = r.getParameter(EXTENDED_SOURCE_TYPE);
@@ -210,7 +200,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
                 }
                 _fwhm = ITCParameters.parseDouble(fwhm, "Full Width Half Max");
                 if (_fwhm < .1)
-                    throw new Exception("Please use a Gaussian FWHM greater than 0.1");
+                    throw new IllegalArgumentException("Please use a Gaussian FWHM greater than 0.1");
                 sourceNorm = r.getParameter(SOURCE_NORM_GAUSSIAN);
                 _sourceNorm = ITCParameters.parseDouble(sourceNorm,
                         "Integrated brightness");
@@ -219,7 +209,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
                     ITCParameters.notFoundException(SOURCE_UNITS_GAUSSIAN);
                 }
                 if (getUnitCode(_units) < 0) {
-                    throw new Exception("Unrecognized units: " + _units);
+                    throw new IllegalArgumentException("Unrecognized units: " + _units);
                 }
             } else if (_extSourceType.equals(UNIFORM)) {
                 sourceNorm = r.getParameter(SOURCE_NORM_USB);
@@ -230,34 +220,16 @@ public final class SourceDefinitionParameters extends ITCParameters {
                     ITCParameters.notFoundException(SOURCE_UNITS_USB);
                 }
                 if (getUnitCode(_units) < 0) {
-                    throw new Exception("Unrecognized units: " + _units);
+                    throw new IllegalArgumentException("Unrecognized units: " + _units);
                 }
             } else {
-                throw new Exception("Unrecognized extended source geometry: " +
+                throw new IllegalArgumentException("Unrecognized extended source geometry: " +
                         _extSourceType);
             }
         } else {
-            throw new Exception("Unrecognized source geometry: " +
+            throw new IllegalArgumentException("Unrecognized source geometry: " +
                     getSourceGeometry());
         }
-
-        // the following code was copied into both the point source and
-        // the uniform surface brightness. if they don't work uncomment
-
-        // String norm = r.getParameter(sourceNorm);
-        //if (norm == null) {
-        //	 ITCParameters.notFoundException(sourceNorm);
-        //}
-        //_sourceNorm = ITCParameters.parseDouble(norm, "Integrated brightness");
-
-        // Get units
-        //_units = r.getParameter(sourceUnits);
-        //if (_units == null) {
-        //	 ITCParameters.notFoundException(sourceUnits);
-        //}
-        //if (getUnitCode(_units) < 0) {
-        //	 throw new Exception("Unrecognized units: " + _units);
-        //}
 
         // Get normalization info
         _normType = r.getParameter(NORM_TYPE);
@@ -277,7 +249,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
             _normWavelength =
                     ITCParameters.parseDouble(wavelen, "Normalization wavelength");
         } else {
-            throw new Exception("Unrecognized normalization type: " +
+            throw new IllegalArgumentException("Unrecognized normalization type: " +
                     getNormType());
         }
 
@@ -288,7 +260,6 @@ public final class SourceDefinitionParameters extends ITCParameters {
         }
         _sourceSpec = sourceSpec;
         String specType;
-        String spectrum;
         if (sourceSpec.equals(LIBRARY_STAR)) {
             specType = r.getParameter(ST_SPEC_TYPE);
             if (specType == null) {
@@ -368,7 +339,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
             _sourceSpec = BBODY;
             _sedSpectrum = BBODY;
         } else {
-            throw new Exception("Unrecognized spectrum type: " +
+            throw new IllegalArgumentException("Unrecognized spectrum type: " +
                     sourceSpec);
         }
 
@@ -392,105 +363,98 @@ public final class SourceDefinitionParameters extends ITCParameters {
             _redshift = ITCParameters.parseDouble(shift, "Redshift velocity")
                     / ITCConstants.C;
         } else {
-            throw new Exception("Unrecognized redshift method: " +
+            throw new IllegalArgumentException("Unrecognized redshift method: " +
                     recession);
         }
     }
 
-    public void parseMultipartParameters(ITCMultiPartParser p) throws Exception {
-        // Parse source definition section of the form.
-        try {
-            _sourceGeom = p.getParameter(SOURCE_GEOM);
-            if (_sourceGeom.equals(POINT_SOURCE)) {
-                _sourceNorm = ITCParameters.parseDouble(p.getParameter(SOURCE_NORM_PT_SOURCE), "Integrated Brightness");
-                _units = p.getParameter(SOURCE_UNITS_PT_SOURCE);
+    public void parseMultipartParameters(ITCMultiPartParser p) {
+        _sourceGeom = p.getParameter(SOURCE_GEOM);
+        if (_sourceGeom.equals(POINT_SOURCE)) {
+            _sourceNorm = ITCParameters.parseDouble(p.getParameter(SOURCE_NORM_PT_SOURCE), "Integrated Brightness");
+            _units = p.getParameter(SOURCE_UNITS_PT_SOURCE);
+            if (getUnitCode(_units) < 0) {
+                throw new IllegalArgumentException("Unrecognized units: " + _units);
+            }
+        } else if (_sourceGeom.equals(EXTENDED_SOURCE)) {
+            _extSourceType = p.getParameter(EXTENDED_SOURCE_TYPE);
+            if (_extSourceType.equals(GAUSSIAN)) {
+                _fwhm = ITCParameters.parseDouble(p.getParameter(SOURCE_FWHM_GAUSSIAN), "Full Width Half Max");
+                if (_fwhm < 0.1) throw new IllegalArgumentException("Please use a Gaussian FWHM greater than 0.1");
+                _sourceNorm = ITCParameters.parseDouble(p.getParameter(SOURCE_NORM_GAUSSIAN), "Integrated Brightness");
+                _units = p.getParameter(SOURCE_UNITS_GAUSSIAN);
                 if (getUnitCode(_units) < 0) {
-                    throw new Exception("Unrecognized units: " + _units);
+                    throw new IllegalArgumentException("Unrecognized units: " + _units);
                 }
-            } else if (_sourceGeom.equals(EXTENDED_SOURCE)) {
-                _extSourceType = p.getParameter(EXTENDED_SOURCE_TYPE);
-                if (_extSourceType.equals(GAUSSIAN)) {
-                    _fwhm = ITCParameters.parseDouble(p.getParameter(SOURCE_FWHM_GAUSSIAN), "Full Width Half Max");
-                    if (_fwhm < 0.1) throw new Exception("Please use a Gaussian FWHM greater than 0.1");
-                    _sourceNorm = ITCParameters.parseDouble(p.getParameter(SOURCE_NORM_GAUSSIAN), "Integrated Brightness");
-                    _units = p.getParameter(SOURCE_UNITS_GAUSSIAN);
-                    if (getUnitCode(_units) < 0) {
-                        throw new Exception("Unrecognized units: " + _units);
-                    }
-                } else if (_extSourceType.equals(UNIFORM)) {
-                    _sourceNorm = ITCParameters.parseDouble(p.getParameter(SOURCE_NORM_USB), "Integrated Brightness");
-                    _units = p.getParameter(SOURCE_UNITS_USB);
-                    if (getUnitCode(_units) < 0) {
-                        throw new Exception("Unrecognized units: " + _units);
-                    }
-                } else {
-                    throw new Exception("Unrecognized extended source geometry: " + _extSourceType);
+            } else if (_extSourceType.equals(UNIFORM)) {
+                _sourceNorm = ITCParameters.parseDouble(p.getParameter(SOURCE_NORM_USB), "Integrated Brightness");
+                _units = p.getParameter(SOURCE_UNITS_USB);
+                if (getUnitCode(_units) < 0) {
+                    throw new IllegalArgumentException("Unrecognized units: " + _units);
                 }
             } else {
-                throw new Exception("Unrecognized source geometry: " + getSourceGeometry());
+                throw new IllegalArgumentException("Unrecognized extended source geometry: " + _extSourceType);
             }
+        } else {
+            throw new IllegalArgumentException("Unrecognized source geometry: " + getSourceGeometry());
+        }
 
-            // Get Normalization info
-            _normType = p.getParameter(NORM_TYPE);
-            if (_normType.equals(FILTER)) {
-                _normBand = p.getParameter(NORM_BAND);
-            } else if (_normType.equals(WAVELENGTH)) {
-                _normWavelength = ITCParameters.parseDouble(p.getParameter(NORM_WAVELENGTH), "Normalization Wavelength");
-            } else {
-                throw new Exception("Unrecognized normalization type: " + getNormType());
-            }
+        // Get Normalization info
+        _normType = p.getParameter(NORM_TYPE);
+        if (_normType.equals(FILTER)) {
+            _normBand = p.getParameter(NORM_BAND);
+        } else if (_normType.equals(WAVELENGTH)) {
+            _normWavelength = ITCParameters.parseDouble(p.getParameter(NORM_WAVELENGTH), "Normalization Wavelength");
+        } else {
+            throw new IllegalArgumentException("Unrecognized normalization type: " + getNormType());
+        }
 
-            // Get Spectrum Resource
-            _sourceSpec = p.getParameter(SOURCE_SPEC);
-            if (_sourceSpec.equals(LIBRARY_STAR)) {
-                _specType = p.getParameter(ST_SPEC_TYPE);
-                _sedSpectrum = STELLAR_LIB + "/" + _specType.toLowerCase() + SED_FILE_EXTENSION;
-            } else if (_sourceSpec.equals(LIBRARY_NON_STAR)) {
-                _specType = p.getParameter(NS_SPEC_TYPE);
-                _sedSpectrum = NON_STELLAR_LIB + "/" + _specType + SED_FILE_EXTENSION;
-            } else if (_sourceSpec.equals(ELINE)) {
-                _eLineWavelength = ITCParameters.parseDouble(p.getParameter(LINE_WAVELENGTH), "Line Wavelength");
-                _eLineWidth = ITCParameters.parseDouble(p.getParameter(LINE_WIDTH), "Line Width");
-                _eLineFlux = ITCParameters.parseDouble(p.getParameter(LINE_FLUX), "Line Flux");
-                _eLineContinuumFlux = ITCParameters.parseDouble(p.getParameter(LINE_CONTINUUM), "Line Continuum");
-                _eLineFluxUnits = p.getParameter(LINE_FLUX_UNITS);
-                _eLineContinuumFluxUnits = p.getParameter(LINE_CONTINUUM_UNITS);
-                _sourceSpec = ELINE;
-                _sedSpectrum = ELINE;
-                //if the desired linewidth is too small throw an exception
-                //if (_eLineWidth < (3E5 / (_eLineWavelength*1000))) {
-                //    throw new Exception("Please use a model line width > 1 nm to avoid undersampling of the line profile when convolved with the transmission response");
-                //}
-            } else if (_sourceSpec.equals(BBODY)) {
-                _bBTemp = ITCParameters.parseDouble(p.getParameter(BBTEMP), "Black Body Temp");
-                _sourceSpec = BBODY;
-                _sedSpectrum = BBODY;
-            } else if (_sourceSpec.equals(PLAW)) {
-                _pLawIndex = ITCParameters.parseDouble(p.getParameter(PLAW_INDEX), "Power Law Index");
-                _sourceSpec = PLAW;
-                _sedSpectrum = PLAW;
-            } else if (_sourceSpec.equals(USER_DEFINED_SPECTRUM)) {
-                _sourceSpec = USER_DEFINED_SPECTRUM;
-                _sedSpectrum = p.getRemoteFileName(USER_DEFINED_SPECTRUM_NAME);
-                _userDefinedSedString = p.getTextFile(USER_DEFINED_SPECTRUM_NAME);
-                _isSEDUserDefined = true;
-            } else {
-                throw new Exception("Unrecognized spectrum type: " + _sourceSpec);
-            }
+        // Get Spectrum Resource
+        _sourceSpec = p.getParameter(SOURCE_SPEC);
+        if (_sourceSpec.equals(LIBRARY_STAR)) {
+            _specType = p.getParameter(ST_SPEC_TYPE);
+            _sedSpectrum = STELLAR_LIB + "/" + _specType.toLowerCase() + SED_FILE_EXTENSION;
+        } else if (_sourceSpec.equals(LIBRARY_NON_STAR)) {
+            _specType = p.getParameter(NS_SPEC_TYPE);
+            _sedSpectrum = NON_STELLAR_LIB + "/" + _specType + SED_FILE_EXTENSION;
+        } else if (_sourceSpec.equals(ELINE)) {
+            _eLineWavelength = ITCParameters.parseDouble(p.getParameter(LINE_WAVELENGTH), "Line Wavelength");
+            _eLineWidth = ITCParameters.parseDouble(p.getParameter(LINE_WIDTH), "Line Width");
+            _eLineFlux = ITCParameters.parseDouble(p.getParameter(LINE_FLUX), "Line Flux");
+            _eLineContinuumFlux = ITCParameters.parseDouble(p.getParameter(LINE_CONTINUUM), "Line Continuum");
+            _eLineFluxUnits = p.getParameter(LINE_FLUX_UNITS);
+            _eLineContinuumFluxUnits = p.getParameter(LINE_CONTINUUM_UNITS);
+            _sourceSpec = ELINE;
+            _sedSpectrum = ELINE;
+            //if the desired linewidth is too small throw an exception
+            //if (_eLineWidth < (3E5 / (_eLineWavelength*1000))) {
+            //    throw new Exception("Please use a model line width > 1 nm to avoid undersampling of the line profile when convolved with the transmission response");
+            //}
+        } else if (_sourceSpec.equals(BBODY)) {
+            _bBTemp = ITCParameters.parseDouble(p.getParameter(BBTEMP), "Black Body Temp");
+            _sourceSpec = BBODY;
+            _sedSpectrum = BBODY;
+        } else if (_sourceSpec.equals(PLAW)) {
+            _pLawIndex = ITCParameters.parseDouble(p.getParameter(PLAW_INDEX), "Power Law Index");
+            _sourceSpec = PLAW;
+            _sedSpectrum = PLAW;
+        } else if (_sourceSpec.equals(USER_DEFINED_SPECTRUM)) {
+            _sourceSpec = USER_DEFINED_SPECTRUM;
+            _sedSpectrum = p.getRemoteFileName(USER_DEFINED_SPECTRUM_NAME);
+            _userDefinedSedString = p.getTextFile(USER_DEFINED_SPECTRUM_NAME);
+            _isSEDUserDefined = true;
+        } else {
+            throw new IllegalArgumentException("Unrecognized spectrum type: " + _sourceSpec);
+        }
 
-            //Get Redshift
-            String recession = p.getParameter(RECESSION);
-            if (recession.equals(REDSHIFT)) {
-                _redshift = ITCParameters.parseDouble(p.getParameter(Z), "Redshift");
-            } else if (recession.equals(VELOCITY)) {
-                _redshift = ITCParameters.parseDouble(p.getParameter(V), "Redshift Velocity") / ITCConstants.C;
-            } else {
-                throw new Exception("Unrecognized redshift method: " + recession);
-            }
-
-        } catch (NoSuchParameterException e) {
-            throw new Exception("The parameter " + e.parameterName + " could not be found in the Telescope" +
-                    " Parameters Section of the form.  Either add this value or Contact the Helpdesk.");
+        //Get Redshift
+        String recession = p.getParameter(RECESSION);
+        if (recession.equals(REDSHIFT)) {
+            _redshift = ITCParameters.parseDouble(p.getParameter(Z), "Redshift");
+        } else if (recession.equals(VELOCITY)) {
+            _redshift = ITCParameters.parseDouble(p.getParameter(V), "Redshift Velocity") / ITCConstants.C;
+        } else {
+            throw new IllegalArgumentException("Unrecognized redshift method: " + recession);
         }
     }
 

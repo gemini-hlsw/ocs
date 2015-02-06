@@ -1,19 +1,8 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-// $Id: ObservingConditionParameters.java,v 1.6 2003/11/21 14:31:02 shane Exp $
-//
 package edu.gemini.itc.parameters;
 
 import edu.gemini.itc.shared.FormatStringWriter;
 import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCParameters;
-import edu.gemini.itc.shared.NoSuchParameterException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -49,7 +38,7 @@ public final class ObservingConditionParameters extends ITCParameters {
      * @param r Servlet request containing the form data.
      * @throws Exception if input data is not parsable.
      */
-    public ObservingConditionParameters(HttpServletRequest r) throws Exception {
+    public ObservingConditionParameters(HttpServletRequest r) {
         parseServletRequest(r);
     }
 
@@ -60,14 +49,14 @@ public final class ObservingConditionParameters extends ITCParameters {
      * @throws Exception of cannot parse any of the parameters.
      */
 
-    public ObservingConditionParameters(ITCMultiPartParser p) throws Exception {
+    public ObservingConditionParameters(ITCMultiPartParser p) {
         parseMultipartParameters(p);
     }
 
     /**
      * Parse parameters from a servlet request.
      */
-    public void parseServletRequest(HttpServletRequest r) throws Exception {
+    public void parseServletRequest(HttpServletRequest r) {
         // Parse the observing condition section of the form.
 
         String s;
@@ -110,20 +99,12 @@ public final class ObservingConditionParameters extends ITCParameters {
         _airmass = ITCParameters.parseDouble(s, "Airmass");
     }
 
-    public void parseMultipartParameters(ITCMultiPartParser p) throws Exception {
-        // Parse Observing Condition details section of the form.
-        try {
-            _imageQuality = ITCParameters.parseInt(p.getParameter(IMAGE_QUALITY), "Image Quality");
-            _skyTransCloud = ITCParameters.parseInt(p.getParameter(SKY_TRANS_CLOUD), "Sky transparency (cloud cover)");
-            _skyTransWater = ITCParameters.parseInt(p.getParameter(SKY_TRANS_WATER), "Sky transparency (water vapour)");
-            _skyBackground = ITCParameters.parseInt(p.getParameter(SKY_BACKGROUND), "Sky background");
-            _airmass = ITCParameters.parseDouble(p.getParameter(AIRMASS), "Airmass");
-
-
-        } catch (NoSuchParameterException e) {
-            throw new Exception("The parameter " + e.parameterName + " could not be found in the Telescope" +
-                    " Parameters Section of the form.  Either add this value or Contact the Helpdesk.");
-        }
+    public void parseMultipartParameters(ITCMultiPartParser p) {
+        _imageQuality = ITCParameters.parseInt(p.getParameter(IMAGE_QUALITY), "Image Quality");
+        _skyTransCloud = ITCParameters.parseInt(p.getParameter(SKY_TRANS_CLOUD), "Sky transparency (cloud cover)");
+        _skyTransWater = ITCParameters.parseInt(p.getParameter(SKY_TRANS_WATER), "Sky transparency (water vapour)");
+        _skyBackground = ITCParameters.parseInt(p.getParameter(SKY_BACKGROUND), "Sky background");
+        _airmass = ITCParameters.parseDouble(p.getParameter(AIRMASS), "Airmass");
     }
 
     /**

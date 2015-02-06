@@ -77,7 +77,7 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor {
     /**
      * Implements the SampledSpectrumVisitor interface
      */
-    public void visit(SampledSpectrum sed) throws Exception {
+    public void visit(SampledSpectrum sed) {
         //this.obs_wave = (obs_wave_low+obs_wave_high)/2;
 
 

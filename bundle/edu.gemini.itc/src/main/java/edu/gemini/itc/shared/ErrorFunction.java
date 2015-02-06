@@ -14,11 +14,11 @@ public class ErrorFunction {
 
     private final DefaultArraySpectrum errorFunction;
 
-    public ErrorFunction() throws Exception {
+    public ErrorFunction() {
         this(ErrorFunction.DEFAULT_ERROR_FILENAME);
     }
 
-    public ErrorFunction(String file) throws Exception {
+    public ErrorFunction(String file) {
         errorFunction = new DefaultArraySpectrum(file);
     }
 

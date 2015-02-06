@@ -52,6 +52,7 @@ OsgiKeys.importPackage := Seq(
   "!org.testng.*",
   "!uk.ltd.getahead.*",
   "!org.w3c.dom.traversal",
+  "!sun.reflect.generics.reflectiveObjects.*",
   "*")
 
 OsgiKeys.additionalHeaders +=

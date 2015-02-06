@@ -36,7 +36,33 @@ object DatFile {
 
   case class Grating(name: String, resolvingPower: Int, blaze: Int, dispersion: Double, resolution: Double)
 
-    // ===== Scan utils
+  // ===== Parse utils
+// EXPERIMENTAL; May or may not be used in a later stage.
+//  abstract class Parser extends JavaTokenParsers {
+//    override val whiteSpace                   = """(\s|,|;|(#[^\n]*))+""".r
+//    def double     : Parser[Double]           = floatingPointNumber ^^ (_.toDouble)
+//    def pair       : Parser[(Double, Double)] = double ~ double ^^ { case ~(a,b) => (a,b) }
+//  }
+//
+//  class PlainSpectrumParser extends Parser {
+//    private def spectrum   : Parser[List[(Double, Double)]] = rep(pair)
+//
+//    def parseString(s: String) = parseAll(spectrum, s)
+//    def parseFile(f: String): Array[Array[Double]] = {
+//      val s = new InputStreamReader(getClass.getResourceAsStream(f))
+//      val r = parseAll(spectrum, s)
+//      s.close()
+//      val data = new Array[Array[Double]](2)
+//      data(0) = r.get.map(_._1).toArray
+//      data(1) = r.get.map(_._2).toArray
+//      data
+//    }
+//    def parseFile(r: InputStreamReader) = parseAll(spectrum, r)
+//  }
+
+
+
+  // ===== Scan utils
 
   // delimiters are whitespaces, commas or semicolons and comments (everything from "#" up to next \n).
   private val Delimiters = Pattern.compile("(\\s|,|;|(#[^\\n]*))+")
@@ -51,6 +77,11 @@ object DatFile {
     } {
       new Scanner(_).useDelimiter(Delimiters)
     }
+  }
+
+  def fromUserSpectrum(s: String) = {
+    val scan = new Scanner(s).useDelimiter(Delimiters)
+    scanArray(scan)
   }
 
   // ===== Cached data file loaders

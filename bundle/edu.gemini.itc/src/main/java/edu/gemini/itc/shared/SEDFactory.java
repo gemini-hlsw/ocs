@@ -38,7 +38,7 @@ public class SEDFactory {
      *  ...
      * </pre>
      */
-    public static VisitableSampledSpectrum getSED(String fileName, double wavelengthInterval) throws Exception {
+    public static VisitableSampledSpectrum getSED(String fileName, double wavelengthInterval) {
         // values <= 0 used to trigger different behavior in an older version but seems not be used anymore
         assert wavelengthInterval > 0.0;
         final DefaultArraySpectrum as = new DefaultArraySpectrum(fileName);
@@ -63,15 +63,15 @@ public class SEDFactory {
      *  ...
      * </pre>
      */
-    public static VisitableSampledSpectrum getSED(String fileName, String userSED, double wavelengthInterval) throws Exception {
+    public static VisitableSampledSpectrum getSED(String fileName, String userSED, double wavelengthInterval) {
         // values <= 0 used to trigger different behavior in an older version but seems not be used anymore
         assert wavelengthInterval > 0.0;
-        final DefaultArraySpectrum as = DefaultArraySpectrum.fromString(userSED);
+        final DefaultArraySpectrum as = DefaultArraySpectrum.fromUserSpectrum(userSED);
         return new DefaultSampledSpectrum(as, wavelengthInterval);
     }
 
 
-    public static VisitableSampledSpectrum getSED(SourceDefinitionParameters sdp, Instrument instrument) throws Exception {
+    public static VisitableSampledSpectrum getSED(SourceDefinitionParameters sdp, Instrument instrument) {
 
         if (sdp.getSpectrumResource().equals(sdp.BBODY)) {
             return new
@@ -123,7 +123,7 @@ public class SEDFactory {
 
 
     //Added to allow creation of an SED spanning more than one filter for NICI
-    public static VisitableSampledSpectrum getSED(SourceDefinitionParameters sdp, double sampling, double observingStart, double observingEnd) throws Exception {
+    public static VisitableSampledSpectrum getSED(SourceDefinitionParameters sdp, double sampling, double observingStart, double observingEnd) {
 
         if (sdp.getSpectrumResource().equals(sdp.BBODY)) {
             return new

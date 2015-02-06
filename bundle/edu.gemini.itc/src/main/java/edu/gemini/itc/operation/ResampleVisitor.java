@@ -1,13 +1,3 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-// $Id: ResampleVisitor.java,v 1.3 2003/11/21 14:31:02 shane Exp $
-//
 package edu.gemini.itc.operation;
 
 import edu.gemini.itc.shared.SampledSpectrum;
@@ -57,13 +47,13 @@ public class ResampleVisitor implements SampledSpectrumVisitor {
     /**
      * This method performs the resampling manipulation on the SED.
      */
-    public void visit(SampledSpectrum sed) throws Exception {
+    public void visit(SampledSpectrum sed) {
         if (getStart() < sed.getStart()) {
-            throw new Exception("Resampling start " + getStart() + " is before "
+            throw new IllegalArgumentException("Resampling start " + getStart() + " is before "
                     + " SED start " + sed.getStart());
         }
         if (getEnd() > sed.getEnd()) {
-            throw new Exception("Resampling end " + getEnd() + " is after "
+            throw new IllegalArgumentException("Resampling end " + getEnd() + " is after "
                     + " SED end " + sed.getEnd());
         }
         int num_elements = (int) ((getEnd() - getStart()) / getSampling());//+ 1;

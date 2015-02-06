@@ -12,6 +12,7 @@ package edu.gemini.itc.gnirs;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.parameters.*;
 import edu.gemini.itc.shared.*;
+import org.jfree.chart.ChartColor;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.PrintWriter;
@@ -138,8 +139,6 @@ public final class GnirsRecipe extends RecipeBase {
         // calculates: redshifted SED
         // output: redshifteed SED
         Gnirs instrument;
-        ITCChart GnirsChart2 = new ITCChart();
-        GnirsChart2.setDomainMinMax(1150, 1270);
 
         //instrument = new GnirsSouth(_gnirsParameters, _obsDetailParameters);
         instrument = new GnirsNorth(_gnirsParameters, _obsDetailParameters);   // Added on 2/27/2014 (see REL-480)
@@ -246,17 +245,12 @@ public final class GnirsRecipe extends RecipeBase {
         // sky.accept(resample);
 
         // Apply telescope transmission to both sed and sky
-        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(
-                _teleParameters.getMirrorCoating(),
-                _teleParameters.getInstrumentPort());
+        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(_teleParameters);
         sed.accept(t);
         sky.accept(t);
 
         // Create and Add background for the telescope.
-        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(
-                _teleParameters.getMirrorCoating(),
-                _teleParameters.getInstrumentPort(), ITCConstants.MAUNA_KEA,
-                ITCConstants.NEAR_IR);
+        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, ITCConstants.MAUNA_KEA, ITCConstants.NEAR_IR);
         sky.accept(tb);
 
         // DEBUGGING GRAPHS
@@ -530,9 +524,6 @@ public final class GnirsRecipe extends RecipeBase {
             SlitThroughput st;
             SlitThroughput st_halo = null;
 
-            // ChartVisitor GnirsChart = new ChartVisitor();
-            ITCChart GnirsChart = new ITCChart();
-
             if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
                 st = new SlitThroughput(im_qual,
                         _obsDetailParameters.getApertureDiameter(),
@@ -596,14 +587,6 @@ public final class GnirsRecipe extends RecipeBase {
             double spec_source_frac = st.getSlitThroughput();
             double halo_spec_source_frac = 0;
             if (st_halo != null) halo_spec_source_frac = st_halo.getSlitThroughput();
-
-            if (_plotParameters.getPlotLimits().equals(
-                    _plotParameters.USER_LIMITS)) {
-                GnirsChart.setDomainMinMax(_plotParameters.getPlotWaveL(),
-                        _plotParameters.getPlotWaveU());
-            } else {
-                GnirsChart.autoscale();
-            }
 
             // For the usb case we want the resolution to be determined by the
             // slit width and not the image quality for a point source.
@@ -859,13 +842,6 @@ public final class GnirsRecipe extends RecipeBase {
                                         / 8
                                         * instrument.DETECTOR_PIXELS / 2));
 
-                GnirsChart
-                        .addTitle("Signal and Background in software aperture of "
-                                + ap_diam + " pixels");
-                GnirsChart.addxAxisLabel("Wavelength (nm)");
-                GnirsChart
-                        .addyAxisLabel("e- per exposure per spectral pixel");
-
                 specS2N.setSourceSpectrum(sedOrder3);
                 specS2N.setBackgroundSpectrum(skyOrder3);
 
@@ -880,12 +856,6 @@ public final class GnirsRecipe extends RecipeBase {
                 specS2N.setEndWavelength(sedOrder3.getEnd());
 
                 sed.accept(specS2N);
-                GnirsChart.addArray(specS2N.getSignalSpectrum().getData(),
-                        "Signal Order 3",
-                        org.jfree.chart.ChartColor.DARK_RED);
-                GnirsChart.addArray(specS2N.getBackgroundSpectrum()
-                                .getData(), "SQRT(Background) Order 3 ",
-                        org.jfree.chart.ChartColor.VERY_LIGHT_RED);
 
                 signalOrder3 = (VisitableSampledSpectrum) specS2N
                         .getSignalSpectrum().clone();
@@ -907,13 +877,6 @@ public final class GnirsRecipe extends RecipeBase {
 
                 sed.accept(specS2N);
 
-                GnirsChart.addArray(specS2N.getSignalSpectrum().getData(),
-                        "Signal Order 4",
-                        org.jfree.chart.ChartColor.DARK_BLUE);
-                GnirsChart.addArray(specS2N.getBackgroundSpectrum()
-                                .getData(), "SQRT(Background)  Order 4",
-                        org.jfree.chart.ChartColor.VERY_LIGHT_BLUE);
-
                 signalOrder4 = (VisitableSampledSpectrum) specS2N
                         .getSignalSpectrum().clone();
                 backGroundOrder4 = (VisitableSampledSpectrum) specS2N
@@ -933,13 +896,6 @@ public final class GnirsRecipe extends RecipeBase {
                 specS2N.setEndWavelength(sedOrder5.getEnd());
 
                 sed.accept(specS2N);
-
-                GnirsChart.addArray(specS2N.getSignalSpectrum().getData(),
-                        "Signal Order 5",
-                        org.jfree.chart.ChartColor.DARK_GREEN);
-                GnirsChart.addArray(specS2N.getBackgroundSpectrum()
-                                .getData(), "SQRT(Background)  Order 5",
-                        org.jfree.chart.ChartColor.VERY_LIGHT_GREEN);
 
                 signalOrder5 = (VisitableSampledSpectrum) specS2N
                         .getSignalSpectrum().clone();
@@ -961,13 +917,6 @@ public final class GnirsRecipe extends RecipeBase {
 
                 sed.accept(specS2N);
 
-                GnirsChart.addArray(specS2N.getSignalSpectrum().getData(),
-                        "Signal Order 6",
-                        org.jfree.chart.ChartColor.DARK_MAGENTA);
-                GnirsChart.addArray(specS2N.getBackgroundSpectrum()
-                                .getData(), "SQRT(Background) Order 6",
-                        org.jfree.chart.ChartColor.VERY_LIGHT_MAGENTA);
-
                 signalOrder6 = (VisitableSampledSpectrum) specS2N
                         .getSignalSpectrum().clone();
                 backGroundOrder6 = (VisitableSampledSpectrum) specS2N
@@ -987,12 +936,6 @@ public final class GnirsRecipe extends RecipeBase {
                 specS2N.setEndWavelength(sedOrder7.getEnd());
 
                 sed.accept(specS2N);
-
-                GnirsChart.addArray(specS2N.getSignalSpectrum().getData(),
-                        "Signal Order 7", org.jfree.chart.ChartColor.black);
-                GnirsChart.addArray(specS2N.getBackgroundSpectrum()
-                                .getData(), "SQRT(Background) Order 7",
-                        org.jfree.chart.ChartColor.lightGray);
 
                 signalOrder7 = (VisitableSampledSpectrum) specS2N
                         .getSignalSpectrum().clone();
@@ -1014,31 +957,29 @@ public final class GnirsRecipe extends RecipeBase {
 
                 sed.accept(specS2N);
 
-                GnirsChart.addArray(specS2N.getSignalSpectrum().getData(),
-                        "Signal Order 8",
-                        org.jfree.chart.ChartColor.DARK_CYAN);
-                GnirsChart.addArray(specS2N.getBackgroundSpectrum()
-                                .getData(), "SQRT(Background) Order 8",
-                        org.jfree.chart.ChartColor.VERY_LIGHT_CYAN);
-
                 signalOrder8 = (VisitableSampledSpectrum) specS2N
                         .getSignalSpectrum().clone();
                 backGroundOrder8 = (VisitableSampledSpectrum) specS2N
                         .getBackgroundSpectrum().clone();
 
-                _println(GnirsChart.getBufferedImage(), "SigAndBack");
+                final ITCChart chart1 = new ITCChart("Signal and Background in software aperture of " + ap_diam + " pixels", "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
+                chart1.addArray(signalOrder3.getData(), "Signal Order 3", ChartColor.DARK_RED);
+                chart1.addArray(backGroundOrder3.getData(), "SQRT(Background) Order 3 ", ChartColor.VERY_LIGHT_RED);
+                chart1.addArray(signalOrder4.getData(), "Signal Order 4", ChartColor.DARK_BLUE);
+                chart1.addArray(backGroundOrder4.getData(), "SQRT(Background)  Order 4", ChartColor.VERY_LIGHT_BLUE);
+                chart1.addArray(signalOrder5.getData(), "Signal Order 5", ChartColor.DARK_GREEN);
+                chart1.addArray(backGroundOrder5.getData(), "SQRT(Background)  Order 5", org.jfree.chart.ChartColor.VERY_LIGHT_GREEN);
+                chart1.addArray(signalOrder6.getData(), "Signal Order 6", ChartColor.DARK_MAGENTA);
+                chart1.addArray(backGroundOrder6.getData(), "SQRT(Background) Order 6", ChartColor.VERY_LIGHT_MAGENTA);
+                chart1.addArray(signalOrder7.getData(), "Signal Order 7", ChartColor.black);
+                chart1.addArray(backGroundOrder7.getData(), "SQRT(Background) Order 7", ChartColor.lightGray);
+                chart1.addArray(signalOrder8.getData(), "Signal Order 8", ChartColor.DARK_CYAN);
+                chart1.addArray(backGroundOrder8.getData(), "SQRT(Background) Order 8", ChartColor.VERY_LIGHT_CYAN);
+                _println(chart1.getBufferedImage(), "SigAndBack");
                 _println("");
 
                 sigSpec = _printSpecTag("ASCII signal spectrum");
                 backSpec = _printSpecTag("ASCII background spectrum");
-
-                GnirsChart.flush();
-
-                // GnirsChart.addTitle("Intermediate Single Exp and Final S/N");
-                GnirsChart.addTitle("Final S/N");
-                GnirsChart.addxAxisLabel("Wavelength (nm)");
-                GnirsChart
-                        .addyAxisLabel("Signal / Noise per spectral pixel");
 
                 specS2N.setSourceSpectrum(sedOrder3);
                 specS2N.setBackgroundSpectrum(skyOrder3);
@@ -1054,13 +995,6 @@ public final class GnirsRecipe extends RecipeBase {
                 specS2N.setEndWavelength(sedOrder3.getEnd());
 
                 sed.accept(specS2N);
-
-                // GnirsChart.addArray(specS2N.getExpS2NSpectrum().getData(),
-                // "Single Exp S/N Order 3");
-                GnirsChart.addArray(
-                        specS2N.getFinalS2NSpectrum().getData(),
-                        "Final S/N Order 3",
-                        org.jfree.chart.ChartColor.DARK_RED);
 
                 finalS2NOrder3 = (VisitableSampledSpectrum) specS2N
                         .getFinalS2NSpectrum().clone();
@@ -1080,13 +1014,6 @@ public final class GnirsRecipe extends RecipeBase {
 
                 sed.accept(specS2N);
 
-                // GnirsChart.addArray(specS2N.getExpS2NSpectrum().getData(),
-                // "Single Exp S/N Order 4");
-                GnirsChart.addArray(
-                        specS2N.getFinalS2NSpectrum().getData(),
-                        "Final S/N Order 4",
-                        org.jfree.chart.ChartColor.DARK_BLUE);
-
                 finalS2NOrder4 = (VisitableSampledSpectrum) specS2N
                         .getFinalS2NSpectrum().clone();
 
@@ -1104,13 +1031,6 @@ public final class GnirsRecipe extends RecipeBase {
                 specS2N.setEndWavelength(sedOrder5.getEnd());
 
                 sed.accept(specS2N);
-
-                // GnirsChart.addArray(specS2N.getExpS2NSpectrum().getData(),
-                // "Single Exp S/N Order 5");
-                GnirsChart.addArray(
-                        specS2N.getFinalS2NSpectrum().getData(),
-                        "Final S/N Order 5",
-                        org.jfree.chart.ChartColor.DARK_GREEN);
 
                 finalS2NOrder5 = (VisitableSampledSpectrum) specS2N
                         .getFinalS2NSpectrum().clone();
@@ -1130,13 +1050,6 @@ public final class GnirsRecipe extends RecipeBase {
 
                 sed.accept(specS2N);
 
-                // GnirsChart.addArray(specS2N.getExpS2NSpectrum().getData(),
-                // "Single Exp S/N Order 6");
-                GnirsChart.addArray(
-                        specS2N.getFinalS2NSpectrum().getData(),
-                        "Final S/N Order 6",
-                        org.jfree.chart.ChartColor.DARK_MAGENTA);
-
                 finalS2NOrder6 = (VisitableSampledSpectrum) specS2N
                         .getFinalS2NSpectrum().clone();
 
@@ -1154,13 +1067,6 @@ public final class GnirsRecipe extends RecipeBase {
                 specS2N.setEndWavelength(sedOrder7.getEnd());
 
                 sed.accept(specS2N);
-
-                // GnirsChart.addArray(specS2N.getExpS2NSpectrum().getData(),
-                // "Single Exp S/N Order 7");
-                GnirsChart.addArray(
-                        specS2N.getFinalS2NSpectrum().getData(),
-                        "Final S/N Order 7",
-                        org.jfree.chart.ChartColor.black);
 
                 finalS2NOrder7 = (VisitableSampledSpectrum) specS2N
                         .getFinalS2NSpectrum().clone();
@@ -1180,24 +1086,21 @@ public final class GnirsRecipe extends RecipeBase {
 
                 sed.accept(specS2N);
 
-                // GnirsChart.addArray(specS2N.getExpS2NSpectrum().getData(),
-                // "Single Exp S/N Order 8");
-                GnirsChart.addArray(
-                        specS2N.getFinalS2NSpectrum().getData(),
-                        "Final S/N Order 8",
-                        org.jfree.chart.ChartColor.DARK_CYAN);
-
                 finalS2NOrder8 = (VisitableSampledSpectrum) specS2N
                         .getFinalS2NSpectrum().clone();
 
-                _println(GnirsChart.getBufferedImage(), "Sig2N");
+                final ITCChart chart2 = new ITCChart("Final S/N", "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
+                chart2.addArray(finalS2NOrder3.getData(), "Final S/N Order 3", ChartColor.DARK_RED);
+                chart2.addArray(finalS2NOrder4.getData(), "Final S/N Order 4", ChartColor.DARK_BLUE);
+                chart2.addArray(finalS2NOrder5.getData(), "Final S/N Order 5", ChartColor.DARK_GREEN);
+                chart2.addArray(finalS2NOrder6.getData(), "Final S/N Order 6", ChartColor.DARK_MAGENTA);
+                chart2.addArray(finalS2NOrder7.getData(), "Final S/N Order 7", ChartColor.black);
+                chart2.addArray(finalS2NOrder8.getData(), "Final S/N Order 8", ChartColor.DARK_CYAN);
+                _println(chart2.getBufferedImage(), "Sig2N");
                 _println("");
 
-                // singleS2N =
-                // _printSpecTag("Single Exposure S/N ASCII data");
                 finalS2N = _printSpecTag("Final S/N ASCII data");
 
-                GnirsChart.flush();
 
             } else {
 
@@ -1222,44 +1125,23 @@ public final class GnirsRecipe extends RecipeBase {
 
                 sed.accept(specS2N);
 
-                GnirsChart.addArray(specS2N.getSignalSpectrum().getData(),
-                        "Signal ");
-                GnirsChart.addArray(specS2N.getBackgroundSpectrum()
-                        .getData(), "SQRT(Background)  ");
-
-                GnirsChart.addTitle("Signal and Background in software aperture of "
-                        + ap_diam + " pixels");
-
-                GnirsChart.addxAxisLabel("Wavelength (nm)");
-                GnirsChart
-                        .addyAxisLabel("e- per exposure per spectral pixel");
-
-                _println(GnirsChart.getBufferedImage(), "SigAndBack");
+                final ITCChart chart1 = new ITCChart("Signal and Background in software aperture of " + ap_diam + " pixels", "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
+                chart1.addArray(specS2N.getSignalSpectrum().getData(), "Signal ");
+                chart1.addArray(specS2N.getBackgroundSpectrum().getData(), "SQRT(Background)  ");
+                _println(chart1.getBufferedImage(), "SigAndBack");
                 _println("");
 
                 sigSpec = _printSpecTag("ASCII signal spectrum");
                 backSpec = _printSpecTag("ASCII background spectrum");
 
-                GnirsChart.flush();
-
-                GnirsChart.addArray(specS2N.getExpS2NSpectrum().getData(),
-                        "Single Exp S/N");
-                GnirsChart.addArray(
-                        specS2N.getFinalS2NSpectrum().getData(),
-                        "Final S/N  ");
-
-                GnirsChart
-                        .addTitle("Intermediate Single Exp and Final S/N");
-                GnirsChart.addxAxisLabel("Wavelength (nm)");
-                GnirsChart
-                        .addyAxisLabel("Signal / Noise per spectral pixel");
-
-                _println(GnirsChart.getBufferedImage(), "Sig2N");
+                final ITCChart chart2 = new ITCChart("Intermediate Single Exp and Final S/N", "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
+                chart2.addArray(specS2N.getExpS2NSpectrum().getData(), "Single Exp S/N");
+                chart2.addArray(specS2N.getFinalS2NSpectrum().getData(), "Final S/N  ");
+                _println(chart2.getBufferedImage(), "Sig2N");
                 _println("");
 
                 singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
                 finalS2N = _printSpecTag("Final S/N ASCII data");
-                GnirsChart.flush();
             }
 
             // THis was used for TED to output the data might be useful later.

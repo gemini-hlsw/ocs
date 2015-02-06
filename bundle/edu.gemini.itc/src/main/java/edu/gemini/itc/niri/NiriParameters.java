@@ -1,18 +1,7 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-// $Id: NiriParameters.java,v 1.7 2003/11/21 14:31:02 shane Exp $
-//
 package edu.gemini.itc.niri;
 
 import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCParameters;
-import edu.gemini.itc.shared.NoSuchParameterException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -92,7 +81,7 @@ public final class NiriParameters extends ITCParameters {
      * @param r Servlet request containing the form data.
      * @throws Exception if input data is not parsable.
      */
-    public NiriParameters(HttpServletRequest r) throws Exception {
+    public NiriParameters(HttpServletRequest r) {
         parseServletRequest(r);
     }
 
@@ -103,14 +92,14 @@ public final class NiriParameters extends ITCParameters {
      * @throws Exception of cannot parse any of the parameters.
      */
 
-    public NiriParameters(ITCMultiPartParser p) throws Exception {
+    public NiriParameters(ITCMultiPartParser p) {
         parseMultipartParameters(p);
     }
 
     /**
      * Parse parameters from a servlet request.
      */
-    public void parseServletRequest(HttpServletRequest r) throws Exception {
+    public void parseServletRequest(HttpServletRequest r) {
         // Parse the acquisition camera section of the form.
 
         // Get Broad Band filter
@@ -127,7 +116,7 @@ public final class NiriParameters extends ITCParameters {
         }
 
         if (_Filter.equals("none") && _grism.equals("none")) {
-            throw new Exception("Must specify a filter or a grism");
+            throw new IllegalArgumentException("Must specify a filter or a grism");
         }
 
         // Get Camera Used
@@ -155,23 +144,16 @@ public final class NiriParameters extends ITCParameters {
 
     }
 
-    public void parseMultipartParameters(ITCMultiPartParser p) throws Exception {
-        // Parse Niri details section of the form.
-        try {
-            _Filter = p.getParameter(INSTRUMENT_FILTER);
-            _grism = p.getParameter(INSTRUMENT_GRISM);
-            if (_Filter.equals("none") && _grism.equals("none")) {
-                throw new Exception("Must specify a filter or a grism");
-            }
-            _camera = p.getParameter(INSTRUMENT_CAMERA);
-            _readNoise = p.getParameter(READ_NOISE);
-            _wellDepth = p.getParameter(WELL_DEPTH);
-            _FP_Mask = p.getParameter(FP_MASK);
-
-        } catch (NoSuchParameterException e) {
-            throw new Exception("The parameter " + e.parameterName + " could not be found in the Telescope" +
-                    " Paramters Section of the form.  Either add this value or Contact the Helpdesk.");
+    public void parseMultipartParameters(ITCMultiPartParser p) {
+        _Filter = p.getParameter(INSTRUMENT_FILTER);
+        _grism = p.getParameter(INSTRUMENT_GRISM);
+        if (_Filter.equals("none") && _grism.equals("none")) {
+            throw new IllegalArgumentException("Must specify a filter or a grism");
         }
+        _camera = p.getParameter(INSTRUMENT_CAMERA);
+        _readNoise = p.getParameter(READ_NOISE);
+        _wellDepth = p.getParameter(WELL_DEPTH);
+        _FP_Mask = p.getParameter(FP_MASK);
     }
 
     /**

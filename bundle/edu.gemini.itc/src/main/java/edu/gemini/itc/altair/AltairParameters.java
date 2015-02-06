@@ -1,19 +1,9 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-// $Id: AltairParameters.java,v 1.1 2004/01/12 16:22:25 bwalls Exp $
-//
 package edu.gemini.itc.altair;
 
+import edu.gemini.itc.parameters.TeleParameters;
 import edu.gemini.itc.shared.FormatStringWriter;
 import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCParameters;
-import edu.gemini.itc.shared.NoSuchParameterException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -33,11 +23,9 @@ public final class AltairParameters extends ITCParameters {
     public static final String WFS_MODE = "wfsMode";
     public static final String LGS = "laserGuideStar";
     public static final String NGS = "naturalGuideStar";
-    public static final String WFSCOMB = "wfscomb";
 
     private static final String FIELD_LENS_IN = "IN";
     private static final String FIELD_LENS_OUT = "OUT";
-    public static final String AOWFS = "aowfs";
 
 
     // Data members
@@ -46,7 +34,7 @@ public final class AltairParameters extends ITCParameters {
     private double _guideStarSeperation;
     private double _guideStarMagnitude;
     private String _fieldLens;
-    private String _wfs;
+    private TeleParameters.Wfs _wfs;
 
     /**
      * Constructs a PlottingDetailsParameters from a servlet request
@@ -54,7 +42,7 @@ public final class AltairParameters extends ITCParameters {
      * @param r Servlet request containing the form data.
      * @throws Exception if input data is not parsable.
      */
-    public AltairParameters(HttpServletRequest r) throws Exception {
+    public AltairParameters(HttpServletRequest r) {
         parseServletRequest(r);
     }
 
@@ -65,14 +53,14 @@ public final class AltairParameters extends ITCParameters {
      * @throws Exception of cannot parse any of the parameters.
      */
 
-    public AltairParameters(ITCMultiPartParser p) throws Exception {
+    public AltairParameters(ITCMultiPartParser p) {
         parseMultipartParameters(p);
     }
 
     /**
      * Parse parameters from a servlet request.
      */
-    public void parseServletRequest(HttpServletRequest r) throws Exception {
+    public void parseServletRequest(HttpServletRequest r) {
         // Parse the Plotting details section of the form.
 
 
@@ -82,7 +70,7 @@ public final class AltairParameters extends ITCParameters {
         }
         _guideStarSeperation = ITCParameters.parseDouble(guideStarSeperation, "Seperation of Guide Star");
         if (_guideStarSeperation < 0 || _guideStarSeperation > 22)
-            throw new Exception(" Altair Guide star distance must be between 0 and 22");
+            throw new IllegalArgumentException(" Altair Guide star distance must be between 0 and 22");
 
         String guideStarMagnitude = r.getParameter(GUIDE_MAG);
         if (guideStarMagnitude == null) {
@@ -90,55 +78,35 @@ public final class AltairParameters extends ITCParameters {
         }
         _guideStarMagnitude = ITCParameters.parseDouble(guideStarMagnitude, "Guide Star Magnitude");
         if (_guideStarMagnitude > 17 || _guideStarMagnitude < 7)
-            throw new Exception(" Altair Guide star Magnitude must be between 7 and 17 ");
+            throw new IllegalArgumentException(" Altair Guide star Magnitude must be between 7 and 17 ");
 
     }
 
-    public void parseMultipartParameters(ITCMultiPartParser p) throws Exception {
-        // Parse Altair specific section of the form.
+    public void parseMultipartParameters(ITCMultiPartParser p) {
+        _guideStarSeperation = ITCParameters.parseDouble(p.getParameter(GUIDE_SEPERATION), "Seperation fo Guide Star");
+        _guideStarMagnitude = ITCParameters.parseDouble(p.getParameter(GUIDE_MAG), "Guide Star Magnitude");
+        _fieldLens = p.getParameter(FIELD_LENS);
+        _wfs = getParameter(TeleParameters.Wfs.class, p);
+        _wfsMode = p.getParameter(WFS_MODE);
 
-        try {
-            _guideStarSeperation = ITCParameters.parseDouble(p.getParameter(GUIDE_SEPERATION), "Seperation fo Guide Star");
-            _guideStarMagnitude = ITCParameters.parseDouble(p.getParameter(GUIDE_MAG), "Guide Star Magnitude");
-            _fieldLens = p.getParameter(FIELD_LENS);
-            _wfs = p.getParameter(WFSCOMB);
-            _wfsMode = p.getParameter(WFS_MODE);
-        } catch (NoSuchParameterException e) {
-            _altairUsed = false;
-            _guideStarSeperation = 1;
-            _guideStarMagnitude = 8;
-        }
-//        try {
-//            _wfsMode = p.getParameter(WFS_MODE);
-//            if (_wfsMode.equals(LGS)){
-//                _altairUsed=true;
-//                //_guideStarSeperation=0;  //old hardcoding of LGS info
-//                //_guideStarMagnitude=11;
-//            }
-//       } catch (NoSuchParameterException e) {
-//            //assume NGS mode
-//            System.out.println("No such param");
-//            _wfsMode=NGS;
-//       }
-
-        if (_wfs.equals(AOWFS))
+        if (_wfs == TeleParameters.Wfs.AOWFS)
             _altairUsed = true;
         else
             _altairUsed = false;
 
 
         if (_guideStarSeperation < 0 || _guideStarSeperation > 25)
-            throw new Exception(" Altair Guide star distance must be between 0 and 25 arcsecs.");
+            throw new IllegalArgumentException(" Altair Guide star distance must be between 0 and 25 arcsecs.");
 
         if (_wfsMode.equals(LGS) && _guideStarMagnitude > 19.5)
-            throw new Exception(" Altair Guide star Magnitude must be <= 19.5 in R for LGS mode. ");
+            throw new IllegalArgumentException(" Altair Guide star Magnitude must be <= 19.5 in R for LGS mode. ");
 
         if (_wfsMode.equals(NGS) && _guideStarMagnitude > 15.5)
-            throw new Exception(" Altair Guide star Magnitude must be <= 15.5 in R for NGS mode. ");
+            throw new IllegalArgumentException(" Altair Guide star Magnitude must be <= 15.5 in R for NGS mode. ");
 
 
         if (_wfsMode.equals(LGS) && _fieldLens.equals(FIELD_LENS_OUT))
-            throw new Exception("The field Lens must be IN when Altair is in LGS mode.");
+            throw new IllegalArgumentException("The field Lens must be IN when Altair is in LGS mode.");
     }
 
 

@@ -1,19 +1,9 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-// $Id: GemsParameters.java,v 1.1 2004/01/12 16:22:25 bwalls Exp $
-//
 package edu.gemini.itc.gems;
 
 import edu.gemini.itc.shared.FormatStringWriter;
 import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCParameters;
-import edu.gemini.itc.shared.NoSuchParameterException;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -57,20 +47,14 @@ public final class GemsParameters extends ITCParameters {
     /**
      * Parse parameters from a servlet request.
      */
-    public void parseServletRequest(HttpServletRequest r) throws Exception {
+    public void parseServletRequest(HttpServletRequest r) {
+        throw new NotImplementedException();
     }
 
-    public void parseMultipartParameters(ITCMultiPartParser p) throws Exception {
-        // Parse Gems specific section of the form.
-
-        try {
-            _avgStrehl = ITCParameters.parseDouble(p.getParameter(AVG_STREHL), "Average Strehl");
-            _avgStrehl = _avgStrehl / 100.; // Value is percent
-
-            _strehlBand = p.getParameter(STREHL_BAND);
-        } catch (NoSuchParameterException e) {
-            e.printStackTrace();
-        }
+    public void parseMultipartParameters(ITCMultiPartParser p) {
+        _avgStrehl = ITCParameters.parseDouble(p.getParameter(AVG_STREHL), "Average Strehl");
+        _avgStrehl = _avgStrehl / 100.; // Value is percent
+        _strehlBand = p.getParameter(STREHL_BAND);
     }
 
     public boolean gemsIsUsed() {

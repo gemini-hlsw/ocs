@@ -1,22 +1,7 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-// $Id: AcquisitionCamParameters.java,v 1.4 2003/11/21 14:31:02 shane Exp $
-//
-// Most of this class will need to be modified to accept NICI filters/parameters.
-// Any selectable NICI option from the webform will need to be here (read noise,
-// filters, etc)
-//
 package edu.gemini.itc.nici;
 
 import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCParameters;
-import edu.gemini.itc.shared.NoSuchParameterException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -61,7 +46,7 @@ public final class NiciParameters extends ITCParameters {
      * @param r Servlet request containing the form data.
      * @throws Exception if input data is not parsable.
      */
-    public NiciParameters(HttpServletRequest r) throws Exception {
+    public NiciParameters(HttpServletRequest r) {
         parseServletRequest(r);
     }
 
@@ -72,14 +57,14 @@ public final class NiciParameters extends ITCParameters {
      * @throws Exception of cannot parse any of the parameters.
      */
 
-    public NiciParameters(ITCMultiPartParser p) throws Exception {
+    public NiciParameters(ITCMultiPartParser p) {
         parseMultipartParameters(p);
     }
 
     /**
      * Parse parameters from a servlet request.
      */
-    public void parseServletRequest(HttpServletRequest r) throws Exception {
+    public void parseServletRequest(HttpServletRequest r) {
         // Parse the acquisition camera section of the form.
 
         // Get channel 1 filter
@@ -116,18 +101,12 @@ public final class NiciParameters extends ITCParameters {
     /**
      * Parse Parameters from a multipart servlet request
      */
-    public void parseMultipartParameters(ITCMultiPartParser p) throws Exception {
-        // Parse NICI details section of the form.
-        try {
-            _channel1Filter = p.getParameter(CHANNEL1_FILTER);
-            _channel2Filter = p.getParameter(CHANNEL2_FILTER);
-            _instrumentMode = p.getParameter(INSTRUMENT_MODE);
-            _pupilMask = p.getParameter(PUPIL_MASK);
-            _dichroicPosition = p.getParameter(DICHROIC_POSITION);
-        } catch (NoSuchParameterException e) {
-            throw new Exception("The parameter " + e.parameterName + " could not be found in the Telescope" +
-                    " Paramters Section of the form.  Either add this value or Contact the Helpdesk.");
-        }
+    public void parseMultipartParameters(ITCMultiPartParser p) {
+        _channel1Filter = p.getParameter(CHANNEL1_FILTER);
+        _channel2Filter = p.getParameter(CHANNEL2_FILTER);
+        _instrumentMode = p.getParameter(INSTRUMENT_MODE);
+        _pupilMask = p.getParameter(PUPIL_MASK);
+        _dichroicPosition = p.getParameter(DICHROIC_POSITION);
     }
 
     /**
