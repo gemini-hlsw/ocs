@@ -2,20 +2,20 @@ package edu.gemini.qv.plugin.chart
 
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.qpt.shared.sp.Band
-import edu.gemini.qv.plugin.filter.core.Filter.{HasDummyTarget, RA, Partner}
-import edu.gemini.qv.plugin.filter.core._
 import edu.gemini.qv.plugin.QvStore.NamedElement
+import edu.gemini.qv.plugin.filter.core.Filter.{HasDummyTarget, Partner, RA}
+import edu.gemini.qv.plugin.filter.core._
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.DisperserNorth
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.DisperserSouth
-import edu.gemini.spModel.gemini.gmos.{GmosSouthType, GmosNorthType}
-import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{SkyBackground, WaterVapor, CloudCover, ImageQuality}
+import edu.gemini.spModel.gemini.gmos.{GmosNorthType, GmosSouthType}
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{CloudCover, ImageQuality, SkyBackground, WaterVapor}
 import edu.gemini.spModel.obs.SPObservation.Priority
 
-case class Axis(label: String, groups: Seq[Filter]) extends NamedElement {
+trait Axis extends NamedElement {
+  val groups: Seq[Filter]
 
-  /**
-   * True if all categories on this axis represent RA bins.
-   * This must includes dummy target bins for targets with RA=0 and Dec=0.
+  /** True if all categories on this axis represent RA bins.
+   *  This must includes dummy target bins for targets with RA=0 and Dec=0.
    */
   def isTime: Boolean = {
     !groups.exists({
@@ -28,6 +28,28 @@ case class Axis(label: String, groups: Seq[Filter]) extends NamedElement {
 }
 
 object Axis {
+
+  /** Creates an axis for a given set of filters, if there are no filters the axis is a stub and non editable. */
+  // TODO: Here we should "require(g.nonEmpty)" but older versions exported the Observations and Programs filter
+  // TODO: stubs to file. On cleaning this up I have to make sure this case is handled properly.
+  def apply(l: String, g: Seq[Filter]) = {
+    new Axis {
+      override val isEditable = g.nonEmpty
+      val label = l
+      val groups = g
+    }
+  }
+
+  /** Creates a non editable axis stub without filters that serves as a placeholder for dynamic
+    * filters which are calculated on-the-fly based on the data that is present.
+    */
+  def apply(l: String) = {
+    new Axis {
+      override val isEditable = false
+      val label = l
+      val groups = Seq()
+    }
+  }
 
   // create a set of default axes
   val Instruments     = forValues[SPComponentType]("Instruments", Filter.Instruments().sortedValues, Filter.Instruments.apply)
@@ -112,8 +134,9 @@ object Axis {
   // They are created "on-the-fly" whenever one of these stubs is selected using Program.forPrograms() and
   // Observation.forObservations() respectively. Note that the axes stubs also need to be used for looking up
   // axes when loading configurations from disk.
-  val Observations = Axis("Observations",  Seq())
-  val Programs     = Axis("Programs",      Seq())
+  // TODO: Make calculated axes part of default axes.
+  val Observations = Axis("Observations")
+  val Programs     = Axis("Programs")
   val Dynamics     = Seq(Observations, Programs)
 
   // ra default axes, note: ra values in obd are defined in degrees, not hours

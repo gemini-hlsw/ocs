@@ -10,27 +10,22 @@ import scala.xml.Node
 
 object FilterXMLFormatter {
 
-  /** Only store customer made elements, don't store pre defined ones.
+  /** Store everything. */
+  def formatAll: Node = formatSome(QvStore.filters, QvStore.axes, QvStore.histograms, QvStore.tables, QvStore.visCharts)
+
+  /** Store some data.
+    * Only store customer made elements, don't store pre-defined/default ones.
     * This makes sure a fail proof minimal set of axes, charts and tables is always available.
     * @return
     */
-  def formatAll: Node =
+  // TODO: The dynamic on-the-fly axes should become part of the default axes, so we don't need to treat them separately.
+  def formatSome(filters: Seq[FilterSet] = Seq(), axes: Seq[Axis] = Seq(), histograms: Seq[Histogram] = Seq(), tables: Seq[Table] = Seq(), barCharts: Seq[BarChart] = Seq()): Node =
     <qvTool>
-      <filters>{QvStore.filters.filter(!QvStore.DefaultFilters.contains(_)).map(format)}</filters>
-      <axes>{QvStore.axes.filter(!QvStore.DefaultAxes.contains(_)).map(format)}</axes>
-      <histograms>{QvStore.histograms.filter(!QvStore.DefaultHistograms.contains(_)).map(_.toXml)}</histograms>
-      <tables>{QvStore.tables.filter(!QvStore.DefaultTables.contains(_)).map(_.toXml)}</tables>
-      <barcharts>{QvStore.visCharts.filter(!QvStore.DefaultBarCharts.contains(_)).map(_.toXml)}</barcharts>
-    </qvTool>
-
-
-  def formatSome(filters: Set[FilterSet] = Set(), axes: Set[Axis] = Set(), histograms: Set[Histogram] = Set(), tables: Set[Table] = Set(), barCharts: Set[BarChart] = Set()): Node =
-    <qvTool>
-      <filters>{filters.map(format)}</filters>
-      <axes>{axes.map(format)}</axes>
-      <histograms>{histograms.map(_.toXml)}</histograms>
-      <tables>{tables.map(_.toXml)}</tables>
-      <barcharts>{barCharts.map(_.toXml)}</barcharts>
+      <filters>{filters.filter(!QvStore.DefaultFilters.contains(_)).map(format)}</filters>
+      <axes>{axes.filter(!(QvStore.DefaultAxes ++ Axis.Dynamics).contains(_)).map(format)}</axes>
+      <histograms>{histograms.filter(!QvStore.DefaultHistograms.contains(_)).map(_.toXml)}</histograms>
+      <tables>{tables.filter(!QvStore.DefaultTables.contains(_)).map(_.toXml)}</tables>
+      <barcharts>{barCharts.filter(!QvStore.DefaultBarCharts.contains(_)).map(_.toXml)}</barcharts>
     </qvTool>
 
   def format(filterSet: FilterSet): Node = {
@@ -41,7 +36,6 @@ object FilterXMLFormatter {
       </filterset>
     </filter>
   }
-
 
   def format(axis: Axis): Node = {
     <axis>

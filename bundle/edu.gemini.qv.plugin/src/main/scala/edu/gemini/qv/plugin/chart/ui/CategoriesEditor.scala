@@ -1,19 +1,14 @@
 package edu.gemini.qv.plugin.chart.ui
 
-import scala.swing._
-import scala.swing.event._
-import edu.gemini.qv.plugin.chart.Chart._
-import edu.gemini.qv.plugin.chart.ui.CategoriesEditor._
-import edu.gemini.qv.plugin.table.renderer.{CalculationRenderer, CellRenderer}
-import edu.gemini.qv.plugin.data.ObservationProvider
-import scala.swing.Swing.EmptyBorder
-import edu.gemini.qv.plugin.chart.editor._
-import edu.gemini.qv.plugin.chart.editor.AxisSelector
-import scala.swing.event.SelectionChanged
-import edu.gemini.qv.plugin.chart.Chart.Calculation
-import edu.gemini.qv.plugin.{QvContext, QvStore}
 import edu.gemini.qv.plugin.chart.Axis
+import edu.gemini.qv.plugin.chart.editor.{AxisSelector, _}
+import edu.gemini.qv.plugin.chart.ui.CategoriesEditor._
 import edu.gemini.qv.plugin.filter.ui.MainFilter
+import edu.gemini.qv.plugin.{QvContext, QvStore}
+
+import scala.swing.Swing.EmptyBorder
+import scala.swing._
+import scala.swing.event.{SelectionChanged, _}
 
 object CategoriesEditor {
 
@@ -148,21 +143,16 @@ trait CategoriesEditor extends GridBagPanel with Publisher {
   border = EmptyBorder(10,10,10,10)
 
   def layoutSelectors() {
-    selectors.zipWithIndex.foreach({case (s, posY) => {
-      // create label
-      val label = new Label(s.label){horizontalAlignment = Alignment.Right}
-
-      // layout all three elements, editor part is optional
-      layout(label)           = new Constraints { gridx=0; gridy=posY; weightx=0.05 }
-      layout(s.selector)      = new Constraints { gridx=1; gridy=posY; weightx=0.90; fill = GridBagPanel.Fill.Horizontal}
-      if (s.editor != null)
-        layout(s.editButton)  = new Constraints { gridx=2; gridy=posY; weightx=0.05 }
-    }})
+    selectors.zipWithIndex.foreach { case (s, posY) =>
+      // create label and layout elements
+      val label             = new Label(s.label) { horizontalAlignment=Alignment.Right }
+      layout(label)         = new Constraints { gridx=0; gridy=posY; weightx=0.05 }
+      layout(s.selector)    = new Constraints { gridx=1; gridy=posY; weightx=0.90; fill=GridBagPanel.Fill.Horizontal }
+      layout(s.editButton)  = new Constraints { gridx=2; gridy=posY; weightx=0.05 }
+    }
     listenTo(selectors:_*)
     reactions += {
-      case SelectionChanged(source) => source match {
-        case s => doUpdate(source)
-      }
+      case SelectionChanged(source) => doUpdate(source)
     }
   }
 
