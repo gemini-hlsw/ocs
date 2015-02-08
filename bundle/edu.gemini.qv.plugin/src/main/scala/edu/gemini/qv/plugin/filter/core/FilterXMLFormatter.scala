@@ -21,11 +21,11 @@ object FilterXMLFormatter {
   // TODO: The dynamic on-the-fly axes should become part of the default axes, so we don't need to treat them separately.
   def formatSome(filters: Seq[FilterSet] = Seq(), axes: Seq[Axis] = Seq(), histograms: Seq[Histogram] = Seq(), tables: Seq[Table] = Seq(), barCharts: Seq[BarChart] = Seq()): Node =
     <qvTool>
-      <filters>{filters.filter(!QvStore.DefaultFilters.contains(_)).map(format)}</filters>
-      <axes>{axes.filter(!(QvStore.DefaultAxes ++ Axis.Dynamics).contains(_)).map(format)}</axes>
-      <histograms>{histograms.filter(!QvStore.DefaultHistograms.contains(_)).map(_.toXml)}</histograms>
-      <tables>{tables.filter(!QvStore.DefaultTables.contains(_)).map(_.toXml)}</tables>
-      <barcharts>{barCharts.filter(!QvStore.DefaultBarCharts.contains(_)).map(_.toXml)}</barcharts>
+      <filters>{filters.filterNot(QvStore.DefaultFilters.contains(_)).map(format)}</filters>
+      <axes>{axes.filterNot((QvStore.DefaultAxes ++ Axis.Dynamics).contains(_)).map(format)}</axes>
+      <histograms>{histograms.filterNot(QvStore.DefaultHistograms.contains(_)).map(_.toXml)}</histograms>
+      <tables>{tables.filterNot(QvStore.DefaultTables.contains(_)).map(_.toXml)}</tables>
+      <barcharts>{barCharts.filterNot(QvStore.DefaultBarCharts.contains(_)).map(_.toXml)}</barcharts>
     </qvTool>
 
   def format(filterSet: FilterSet): Node = {
