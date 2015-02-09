@@ -21,6 +21,7 @@ package object submit {
     Ngo(UH)                      -> "http://www.ifa.hawaii.edu/cgi-bin/gemini/xmlbackend.cgi",
     Exchange(KECK)               -> "http://phase1.gemini.edu/cgi-bin/gemini/keck/xmlbackend.cgi",
     Exchange(SUBARU)             -> "http://phase1.gemini.edu/cgi-bin/gemini/subaru/xmlbackend.cgi",
+    Exchange(CFHT)               -> "http://phase1.gemini.edu/cgi-bin/gemini/cfht/xmlbackend.cgi",
     Special(DEMO_SCIENCE)        -> "http://phase1.gemini.edu/cgi-bin/gemini/demo_science/xmlbackend.cgi",
     Special(POOR_WEATHER)        -> "http://phase1.gemini.edu/cgi-bin/gemini/poor_weather/xmlbackend.cgi",
     Special(SYSTEM_VERIFICATION) -> "http://phase1.gemini.edu/cgi-bin/gemini/system_verification/xmlbackend.cgi",

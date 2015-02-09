@@ -200,6 +200,7 @@
         <xsd:restriction base="xsd:token">
             <xsd:enumeration value="keck"/>
             <xsd:enumeration value="subaru"/>
+            <xsd:enumeration value="cfht"/>
         </xsd:restriction>
     </xsd:simpleType>
 

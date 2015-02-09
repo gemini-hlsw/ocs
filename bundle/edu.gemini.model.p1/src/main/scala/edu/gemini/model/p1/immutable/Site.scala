@@ -41,4 +41,10 @@ object Site {
     def abbreviation = "Subaru"
     override def isExchange = true
   }
+
+  case object CFHT extends Site {
+    def name = "CFHT Telescope"
+    def abbreviation = "CFHT"
+    override def isExchange = true
+  }
 }
