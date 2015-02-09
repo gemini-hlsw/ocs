@@ -31,7 +31,7 @@ object SubmitStatus {
 
   def semesterName(semester: Option[Semester]) = semester.map(s => s.display).getOrElse("Unknown")
 
-  def nonCompliantBackend(destination: Option[SubmitDestination], semester: Option[Semester]) = s"The ${destinationName(destination)} backend server is configured to accept proposals from the ${semesterName(semester)} PIT"
+  def nonCompliantBackend(destination: Option[SubmitDestination], version: String) = s"The ${destinationName(destination)} backend server is configured to accept proposals from the ${version} PIT"
 
   def offlineBackend(destination: Option[SubmitDestination]) = s"There is a connection problem with the ${destinationName(destination)} backend server. Please check your network connection and/or try again later."
 
@@ -41,12 +41,12 @@ object SubmitStatus {
 
   def submissionClosed(destination: Option[SubmitDestination]) = s"The ${destinationName(destination)} proposal server is currently closed. Please see the Gemini web pages for proposal submission dates"
 
-  private val ErrorRegex = """.* (\d\d\d\d.) .*""".r // Extract semester from the backend error message
+  private val ErrorRegex = """.* (\d\d\d\d.) ([\d\.]*).*""".r // Extract semester and version from the backend error message
 
   def msg(results: Seq[SubmitResult]):Seq[String] = results.collect {
     case ServiceError(destination, code, message) if code == 405 =>
-      val ErrorRegex(semester) = message
-      nonCompliantBackend(destination, Semester.parse(semester))
+      val ErrorRegex(_, version) = message
+      nonCompliantBackend(destination, version)
     case ServiceError(d @ Some(SubmitDestination.LargeProgram), code, message) if code == 401 =>
       lpSubmissionClosed(d)
     case ServiceError(destination, code, message) if code == 401 =>
