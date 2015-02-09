@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import edu.gemini.epics.EpicsService;
 import edu.gemini.epics.EpicsReader;
@@ -11,6 +12,8 @@ import edu.gemini.epics.impl.EpicsReaderImpl;
 import gov.aps.jca.CAException;
 
 class CaStatusAcceptorImpl implements CaStatusAcceptor {
+
+    private static final Logger LOG = Logger.getLogger(CaStatusAcceptorImpl.class.getName()); 
 
     private final String name;
     private final String description;
@@ -204,32 +207,28 @@ class CaStatusAcceptorImpl implements CaStatusAcceptor {
             try {
                 attr.unbind();
             } catch (CAException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOG.warning(e.getMessage());
             }
         }
         for (CaAttributeImpl<?> attr : doubleAttributes.values()) {
             try {
                 attr.unbind();
             } catch (CAException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOG.warning(e.getMessage());
             }
         }
         for (CaAttributeImpl<?> attr : floatAttributes.values()) {
             try {
                 attr.unbind();
             } catch (CAException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOG.warning(e.getMessage());
             }
         }
         for (CaAttributeImpl<?> attr : integerAttributes.values()) {
             try {
                 attr.unbind();
             } catch (CAException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOG.warning(e.getMessage());
             }
         }
         

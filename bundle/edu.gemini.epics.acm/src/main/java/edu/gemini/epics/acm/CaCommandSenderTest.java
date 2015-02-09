@@ -1,9 +1,14 @@
 package edu.gemini.epics.acm;
 
+import java.util.logging.Logger;
+
 import gov.aps.jca.CAException;
 import gov.aps.jca.TimeoutException;
 
 public class CaCommandSenderTest {
+    private static final Logger LOG = Logger.getLogger(CaCommandSenderTest.class.getName()); 
+
+    
     public static void main(String[] args) throws CAException {
         CaService.setAddressList("172.16.2.20");
         CaService service = CaService.getInstance();
@@ -36,23 +41,23 @@ public class CaCommandSenderTest {
             cm.waitDone();
         } catch (CaException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.warning(e.getMessage());
         } catch (CAException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.warning(e.getMessage());
         } catch (TimeoutException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.warning(e.getMessage());
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.warning(e.getMessage());
         }
 
         try {
             service.unbind();
         } catch (CAException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.warning(e.getMessage());
         }
     }
 

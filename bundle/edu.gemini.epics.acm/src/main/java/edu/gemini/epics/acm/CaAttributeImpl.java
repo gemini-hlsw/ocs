@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
+
 import edu.gemini.epics.EpicsReader;
 import edu.gemini.epics.ReadOnlyClientEpicsChannel;
 import edu.gemini.epics.api.ChannelListener;
@@ -97,7 +99,7 @@ class CaAttributeImpl<T> implements CaAttribute<T> {
     @Override
     synchronized public List<T> values() {
         if (isValid) {
-            return values;
+            return ImmutableList.copyOf(values);
         } else {
             return null;
         }

@@ -1,11 +1,15 @@
 package edu.gemini.epics.acm;
 
+import java.util.logging.Logger;
+
 import edu.gemini.epics.EpicsWriter;
 import edu.gemini.epics.ReadWriteClientEpicsChannel;
 import gov.aps.jca.CAException;
 import gov.aps.jca.TimeoutException;
 
 class CaParameterImpl<T> implements CaParameter<T> {
+    
+    private static final Logger LOG = Logger.getLogger(CaParameterImpl.class.getName()); 
 
     private final String name;
     private final String channel;
@@ -49,7 +53,7 @@ class CaParameterImpl<T> implements CaParameter<T> {
         try {
             epicsWriter.destroyChannel(rwChannel);
         } catch (CAException e) {
-            e.printStackTrace();
+            LOG.warning(e.getMessage());
         }
         rwChannel = null;
         epicsWriter = null;

@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
@@ -33,6 +34,8 @@ import gov.aps.jca.CAException;
  *
  */
 public class XMLBuilder {
+    
+    private static final Logger LOG = Logger.getLogger(XMLBuilder.class.getName()); 
 
     private static final String CONFIG_SCHEMA_FILE = "/CaSchema.xsd";
     private static final String XMLSCHEMA_URL = "http://www.w3.org/2001/XMLSchema";
@@ -232,7 +235,7 @@ public class XMLBuilder {
 
                     }
                 } catch (CaException e) {
-                    e.printStackTrace();
+                    LOG.warning(e.getMessage());
                 }
             }
             return cs;
@@ -273,7 +276,7 @@ public class XMLBuilder {
 
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                LOG.warning(e.getMessage());
             }
         }
         return sa;

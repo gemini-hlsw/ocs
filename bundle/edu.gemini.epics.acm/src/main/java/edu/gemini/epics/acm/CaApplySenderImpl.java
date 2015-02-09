@@ -5,6 +5,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import edu.gemini.epics.EpicsReader;
 import edu.gemini.epics.EpicsService;
@@ -18,6 +19,8 @@ import gov.aps.jca.CAException;
 import gov.aps.jca.TimeoutException;
 
 class CaApplySenderImpl implements CaApplySender {
+    
+    private static final Logger LOG = Logger.getLogger(CaApplySenderImpl.class.getName()); 
 
     private final String name;
     private final String carRecord;
@@ -44,6 +47,7 @@ class CaApplySenderImpl implements CaApplySender {
     private ChannelListener<Integer> valListener;
     private ChannelListener<Integer> carClidListener;
     private ChannelListener<CarState> carValListener;
+    private State currentState;
 
     public CaApplySenderImpl(String name, String applyRecord, String carRecord, String description,
             EpicsService epicsService) throws CAException {
@@ -113,56 +117,49 @@ class CaApplySenderImpl implements CaApplySender {
             val.unRegisterListener(valListener);
             carCLID.unRegisterListener(carClidListener);
             carVAL.unRegisterListener(carValListener);
-        } catch (CAException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+        } catch (CAException e) {
+            LOG.warning(e.getMessage());
         }
 
         try {
             epicsWriter.destroyChannel(dirChannel);
         } catch (CAException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.warning(e.getMessage());
         }
         dirChannel = null;
 
         try {
             epicsReader.destroyChannel(val);
         } catch (CAException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.warning(e.getMessage());
         }
         val = null;
 
         try {
             epicsReader.destroyChannel(carCLID);
         } catch (CAException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.warning(e.getMessage());
         }
         carCLID = null;
 
         try {
             epicsReader.destroyChannel(carVAL);
         } catch (CAException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.warning(e.getMessage());
         }
         carVAL = null;
 
         try {
             epicsReader.destroyChannel(carOMSS);
         } catch (CAException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.warning(e.getMessage());
         }
         carOMSS = null;
 
         try {
             epicsReader.destroyChannel(mess);
         } catch (CAException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.warning(e.getMessage());
         }
         mess = null;
 
@@ -382,8 +379,6 @@ class CaApplySenderImpl implements CaApplySender {
 
     }
 
-    private State currentState;
-
     private synchronized void onApplyValChange(Integer val) {
         if (currentState != null) {
             currentState = currentState.onApplyValChange(val);
@@ -447,9 +442,9 @@ class CaApplySenderImpl implements CaApplySender {
                 try {
                     msg = msgSrc.getFirst();
                 } catch (CAException e) {
-                    e.printStackTrace();
+                    LOG.warning(e.getMessage());
                 } catch (TimeoutException e) {
-                    e.printStackTrace();
+                    LOG.warning(e.getMessage());
                 }
                 cm.completeFailure(new CaCommandError(msg));
             }
@@ -467,7 +462,7 @@ class CaApplySenderImpl implements CaApplySender {
             try {
                 dirChannel.setValue(CadDirective.CLEAR);
             } catch (CAException e) {
-                e.printStackTrace();
+                LOG.warning(e.getMessage());
             }
         }
     }

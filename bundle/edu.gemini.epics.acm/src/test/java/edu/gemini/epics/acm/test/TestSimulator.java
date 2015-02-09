@@ -3,6 +3,7 @@ package edu.gemini.epics.acm.test;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import edu.gemini.aspen.giapi.commands.Command;
 import edu.gemini.aspen.giapi.commands.CommandSender;
@@ -16,6 +17,8 @@ import gov.aps.jca.CAException;
 import gov.aps.jca.TimeoutException;
 
 public class TestSimulator {
+
+    private static final Logger LOG = Logger.getLogger(TestSimulator.class.getName()); 
 
     public static final String INTEGER_STATUS = "intVal";
     public static final String STRING_STATUS = "strVal";
@@ -85,7 +88,7 @@ public class TestSimulator {
             @Override
             public HandlerResponse sendCommand(Command command,
                     CompletionListener listener, long timeout) {
-                // TODO Auto-generated method stub
+
                 return sendCommand(command, listener);
             }
 
@@ -97,8 +100,7 @@ public class TestSimulator {
         try {
             server.start();
         } catch (CAException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.warning(e.getMessage());
         }
         try {
             intChannel = server.createChannel(epicsTop + ":" + INTEGER_STATUS,
@@ -110,8 +112,7 @@ public class TestSimulator {
             fltChannel = server.createChannel(epicsTop + ":" + FLOAT_STATUS,
                     0.0f);
         } catch (CAException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.warning(e.getMessage());
         }
 
         ticker = executor.scheduleAtFixedRate(new Runnable() {
@@ -126,11 +127,9 @@ public class TestSimulator {
                     dblChannel.setValue((double) count);
                     fltChannel.setValue((float) count);
                 } catch (CAException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOG.warning(e.getMessage());
                 } catch (TimeoutException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOG.warning(e.getMessage());
                 }
             }
         }, 1, 1, TimeUnit.SECONDS);
@@ -144,9 +143,8 @@ public class TestSimulator {
         ticker.cancel(false);
         try {
             executor.awaitTermination(10, TimeUnit.SECONDS);
-        } catch (InterruptedException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+        } catch (InterruptedException e) {
+            LOG.warning(e.getMessage());
         }
         executor.shutdown();
         executor = null;
@@ -159,8 +157,7 @@ public class TestSimulator {
         try {
             server.stop();
         } catch (CAException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.warning(e.getMessage());
         }
         server = null;
     }

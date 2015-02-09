@@ -3,8 +3,11 @@ package edu.gemini.epics.acm;
 import gov.aps.jca.CAException;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 class CaStatusAcceptorTest {
+    
+    private static final Logger LOG = Logger.getLogger(CaStatusAcceptorTest.class.getName()); 
 
     public static void main(String[] args) {
         CaService service = CaService.getInstance();
@@ -12,11 +15,10 @@ class CaStatusAcceptorTest {
         CaStatusAcceptor sa = service.createStatusAcceptor("tcs::sad");
         try {
             sa.addString("LST", "tcs:LST.VAL");
-        } catch (CaException e1) {
-            e1.printStackTrace();
+        } catch (CaException e) {
+            LOG.warning(e.getMessage());
         } catch (CAException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.warning(e.getMessage());
         }
         CaAttribute<String> lst = sa.getStringAttribute("LST");
 
@@ -24,7 +26,7 @@ class CaStatusAcceptorTest {
             try {
                 Thread.sleep(750);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                LOG.warning(e.getMessage());
             }
             System.out.println(i + ": " + lst.value());
         }
@@ -49,14 +51,13 @@ class CaStatusAcceptorTest {
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOG.warning(e.getMessage());
         }
 
         try {
             service.unbind();
         } catch (CAException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.warning(e.getMessage());
         }
         service = null;
 

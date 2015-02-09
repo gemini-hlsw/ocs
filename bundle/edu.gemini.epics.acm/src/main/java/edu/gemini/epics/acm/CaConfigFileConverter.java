@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import javax.xml.bind.JAXBContext;
@@ -50,6 +51,8 @@ import edu.gemini.epics.acm.generated.TopType;
  *
  */
 public class CaConfigFileConverter {
+    
+    private static final Logger LOG = Logger.getLogger(CaConfigFileConverter.class.getName()); 
 
     private static final String USAGE = "Usage: java edu.gemini.epics.acm.CaConfigFileConverter [-f outFile] [inFiles]";
 
@@ -344,7 +347,7 @@ public class CaConfigFileConverter {
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             marshaller.marshal(records, out);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.warning(e.getMessage());
         }
 
     }
@@ -479,14 +482,14 @@ public class CaConfigFileConverter {
                 try {
                     output = new BufferedWriter(new FileWriter(args[i]));
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    LOG.warning(e.getMessage());
                     System.exit(-1);
                 }
             } else {
                 try {
                     input.add(new BufferedReader(new FileReader(args[i])));
                 } catch (FileNotFoundException e) {
-                    e.printStackTrace();
+                    LOG.warning(e.getMessage());
                     System.exit(-1);
                 }
             }
@@ -502,7 +505,7 @@ public class CaConfigFileConverter {
         try {
             convert(input, output);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.warning(e.getMessage());
             System.exit(-1);
         }
 

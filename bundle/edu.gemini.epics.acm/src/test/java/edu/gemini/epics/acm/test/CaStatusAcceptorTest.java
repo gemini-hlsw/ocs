@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -24,7 +25,9 @@ import gov.aps.jca.CAException;
 
 public class CaStatusAcceptorTest {
 
-	private static final String CA_ADDR_LIST = "127.0.0.1";
+    private static final Logger LOG = Logger.getLogger(CaStatusAcceptorTest.class.getName()); 
+
+    private static final String CA_ADDR_LIST = "127.0.0.1";
 	private static final String TOP = "test";
 	private static final String SA_NAME = "sad";
 	private static final String ATTR1_NAME = "status1";
@@ -167,7 +170,7 @@ public class CaStatusAcceptorTest {
 		try {
 			Thread.sleep(SLEEP_TIME);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			LOG.warning(e.getMessage());
 		}
 
 		assertTrue("Attribute monitor did not receive updates.", updated);

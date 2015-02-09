@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import edu.gemini.epics.EpicsService;
 import edu.gemini.epics.EpicsWriter;
@@ -13,6 +14,8 @@ import gov.aps.jca.CAException;
 import gov.aps.jca.TimeoutException;
 
 class CaCommandSenderImpl implements CaCommandSender {
+    
+    private static final Logger LOG = Logger.getLogger(CaCommandSenderImpl.class.getName()); 
 
     private static final String DIR_SUFFIX = ".DIR";
     private final String name;
@@ -89,7 +92,7 @@ class CaCommandSenderImpl implements CaCommandSender {
                 dirChannel = null;
             }
         } catch (CAException e) {
-            e.printStackTrace();
+            LOG.warning(e.getMessage());
         }
 
         epicsWriter = null;
@@ -267,7 +270,7 @@ class CaCommandSenderImpl implements CaCommandSender {
             try {
                 dirChannel.setValue(CadDirective.MARK);
             } catch (CAException e) {
-                e.printStackTrace();
+                LOG.warning(e.getMessage());
             }
         }
     }
@@ -278,7 +281,7 @@ class CaCommandSenderImpl implements CaCommandSender {
             try {
                 dirChannel.setValue(CadDirective.CLEAR);
             } catch (CAException e) {
-                e.printStackTrace();
+                LOG.warning(e.getMessage());
             }
         }
     }
