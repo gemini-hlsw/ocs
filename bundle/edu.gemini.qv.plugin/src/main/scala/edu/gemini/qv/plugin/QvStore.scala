@@ -171,13 +171,17 @@ object QvStore extends Publisher {
     JOptionPane.showMessageDialog(null, msg, "QV Defaults Error", JOptionPane.ERROR_MESSAGE)
   }
 
+  // TODO: On import we should make sure that default elements are not overridden.
   def loadFromFile(file: File) = {
     for {
       xml <- Try(XML.load(file.getAbsolutePath))
       savedFilters <- FilterXMLParser.parseFilters(xml \ "filters" \ "filter")
       filtersMap = (DefaultFilters ++ savedFilters).map(a => a.label -> a).toMap
       savedAxes <- FilterXMLParser.parseAxes(xml \ "axes" \ "axis")
-      axesMap = (DefaultAxes ++ savedAxes).map(a => a.label -> a).toMap.withDefaultValue(Axis.RA1)
+      // TODO: remove this; a permanent proper solution is to make sure that no default/dynamic axes are imported
+      // TODO: unfortunately this is needed right now because there are xml files in the wild with "Observations" axes
+      fixedAxes = savedAxes.filter(_.label != "Observations").filter(_.label != "Programs")
+      axesMap = (DefaultAxes ++ fixedAxes).map(a => a.label -> a).toMap.withDefaultValue(Axis.RA1)
       savedCharts <- FilterXMLParser.parseHistograms(xml \ "histograms" \ "histogram", axesMap)
       savedTables <- FilterXMLParser.parseTables(xml \ "tables" \ "table", axesMap)
       barchartAxesMap = axesMap ++ Axis.Dynamics.map(a=>a.label -> a).toMap // include dynamic axes for lookup when loading stored bar charts
@@ -198,6 +202,7 @@ object QvStore extends Publisher {
     new BarChart(n \ "label" text, axes(n \ "yAxis" text), axes(n \ "colorCoding" text))
 
   trait NamedElement {
+    def isEditable: Boolean = true
     def label: String
   }
 
@@ -297,19 +302,19 @@ class StoreExporter(parent: Component, elements: Seq[QvStore.NamedElement]) exte
     if (fileChooser.showSaveDialog(parent) == FileChooser.Result.Approve) {
       val path = fileChooser.selectedFile.getAbsolutePath
       choices.selection.item match {
-        case fs: FilterSet => XML.save(path, FilterXMLFormatter.formatSome(filters = Set(fs)))
-        case a: Axis => XML.save(path, FilterXMLFormatter.formatSome(axes = Set(a)))
+        case fs: FilterSet => XML.save(path, FilterXMLFormatter.formatSome(filters = Seq(fs)))
+        case a: Axis => XML.save(path, FilterXMLFormatter.formatSome(axes = Seq(a)))
         case c: QvStore.Histogram => XML.save(path, FilterXMLFormatter.formatSome(
-          axes = Set(c.xAxis, c.yAxis),
-          histograms = Set(c)
+          axes = Seq(c.xAxis, c.yAxis),
+          histograms = Seq(c)
         ))
         case t: QvStore.Table => XML.save(path, FilterXMLFormatter.formatSome(
-          axes = Set(t.xAxis, t.yAxis),
-          tables = Set(t)
+          axes = Seq(t.xAxis, t.yAxis),
+          tables = Seq(t)
         ))
         case b: QvStore.BarChart => XML.save(path, FilterXMLFormatter.formatSome(
-          axes = Set(b.colorCoding, b.yAxis),
-          barCharts = Set(b)
+          axes = Seq(b.colorCoding, b.yAxis),
+          barCharts = Seq(b)
         ))
       }
     }

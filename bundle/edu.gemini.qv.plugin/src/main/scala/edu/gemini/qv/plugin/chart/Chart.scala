@@ -7,6 +7,7 @@ import edu.gemini.qv.plugin.QvStore.NamedElement
 object Chart {
 
   trait ChartFunction extends NamedElement {
+    override val isEditable = false
     def label: String
   }
 
