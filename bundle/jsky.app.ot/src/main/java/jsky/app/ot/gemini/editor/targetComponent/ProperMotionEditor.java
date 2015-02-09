@@ -9,6 +9,8 @@ import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
 import edu.gemini.spModel.target.WatchablePos;
+import edu.gemini.spModel.target.system.HmsDegTarget;
+import edu.gemini.spModel.target.system.ITarget;
 
 import javax.swing.*;
 import javax.swing.text.DefaultFormatter;
@@ -98,7 +100,11 @@ final class ProperMotionEditor implements TelescopePosEditor {
             try {
                 Number d = (Number) evt.getNewValue();
                 target.deleteWatcher(watcher);
-                target.setPropMotionRA(d == null ? 0.0 : d.doubleValue());
+                final ITarget it = target.getTarget();
+                if (it instanceof HmsDegTarget) {
+                    ((HmsDegTarget) it).setPropMotionRA(d == null ? 0.0 : d.doubleValue());
+                }
+                target.notifyOfGenericUpdate(); // someone else may be watching
                 target.addWatcher(watcher);
             } catch (Exception ex) {
                 // do nothing
@@ -111,7 +117,11 @@ final class ProperMotionEditor implements TelescopePosEditor {
             try {
                 Number d = (Number) evt.getNewValue();
                 target.deleteWatcher(watcher);
-                target.setPropMotionDec(d == null ? 0 : d.doubleValue());
+                final ITarget it = target.getTarget();
+                if (it instanceof HmsDegTarget) {
+                    ((HmsDegTarget) it).setPropMotionDec(d == null ? 0 : d.doubleValue());
+                }
+                target.notifyOfGenericUpdate(); // someone else may be watching
                 target.addWatcher(watcher);
             } catch (Exception ex) {
                 // do nothing
@@ -130,11 +140,17 @@ final class ProperMotionEditor implements TelescopePosEditor {
 
     private void reinit() {
         pmRa.removePropertyChangeListener("value", updatePmRaListener);
-        pmRa.setText(target == null ? "0.0" : Double.toString(target.getPropMotionRA()));
-        pmRa.addPropertyChangeListener("value", updatePmRaListener);
-
         pmDec.removePropertyChangeListener("value", updatePmDecListener);
-        pmDec.setText(target == null ? "0.0" : Double.toString(target.getPropMotionDec()));
+        final ITarget it = target == null ? null : target.getTarget();
+        if (it instanceof HmsDegTarget) {
+            final HmsDegTarget t = (HmsDegTarget) target.getTarget();
+            pmRa.setText(Double.toString(t.getPropMotionRA()));
+            pmDec.setText(Double.toString(t.getPropMotionDec()));
+        } else {
+            pmRa.setText("0.0");
+            pmDec.setText("0.0");
+        }
+        pmRa.addPropertyChangeListener("value", updatePmRaListener);
         pmDec.addPropertyChangeListener("value", updatePmDecListener);
     }
 }

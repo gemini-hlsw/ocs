@@ -293,4 +293,56 @@ public final class HmsDegTarget extends ITarget {
         }
     }
 
+
+
+    /** Get the PM RA in mas/y. */
+    public double getPropMotionRA() {
+        return getPM1().getValue();
+    }
+
+    /** Set the PM RA in mas/y. */
+    public void setPropMotionRA(final double newValue) {
+        setPM1(new PM1(newValue, Units.MILLI_ARCSECS_PER_YEAR));
+    }
+
+    /** Get the PM Dec in mas/y. */
+    public double getPropMotionDec() {
+        return getPM2().getValue();
+    }
+
+    /** Set the PM Dec in mas/y. */
+    public void setPropMotionDec(final double newValue) {
+        setPM2(new PM2(newValue, Units.MILLI_ARCSECS_PER_YEAR));
+    }
+
+    /** Get the PM parallax in arcsec. */
+    public double getTrackingParallax() {
+        return getParallax().getValue();
+    }
+
+    /** Set the PM parallax in arcsec. */
+    public void setTrackingParallax(final double newValue) {
+        setParallax(new Parallax(newValue));
+    }
+
+    /** Get the PM radial velocity in km/s. */
+    public double getTrackingRadialVelocity() {
+        return getRV().getValue();
+    }
+
+    /** Set the PM radial velocity in km/s. */
+    public void setTrackingRadialVelocity(final double newValue) {
+        setRV(new RV(newValue));
+    }
+
+    /** Get the contained target epoch in Julian years. */
+    public double getTrackingEpoch() {
+        return getEpoch().getValue();
+    }
+
+    /** Set the contained target epoch as in Julian years. */
+    public void setTrackingEpoch(final double trackEpoch) {
+        setEpoch(new Epoch(trackEpoch));
+    }
+
 }

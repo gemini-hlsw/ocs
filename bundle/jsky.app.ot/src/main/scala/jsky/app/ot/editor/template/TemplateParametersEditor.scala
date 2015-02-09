@@ -274,14 +274,17 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
         set  = setTarget((a, b) => a.getTarget.getDec.setValue(b.toString))
       )
 
-      def pmField(getPM: SPTarget => Double, setPM: (SPTarget, Double) => Unit): BoundTextField[Double] =
+      def pmField(getPM: HmsDegTarget => Double, setPM: (HmsDegTarget, Double) => Unit): BoundTextField[Double] =
         new BoundTextField[Double](10)(
           read = _.toDouble,
           show = d => f"$d%.3f",
-          get  = tp => getPM(tp.getTarget),
+          get  = tp => Option(tp.getTarget.getTarget).collect { case t: HmsDegTarget => getPM(t) } .getOrElse(0.0),
           set  = (tp, pm) => {
             val newTarget = tp.getTarget
-            setPM(newTarget, pm)
+            newTarget.getTarget match {
+              case t: HmsDegTarget => setPM(t, pm); newTarget.notifyOfGenericUpdate()
+              case _               => () // do nothing
+            }
             tp.copy(newTarget)
           }
         )

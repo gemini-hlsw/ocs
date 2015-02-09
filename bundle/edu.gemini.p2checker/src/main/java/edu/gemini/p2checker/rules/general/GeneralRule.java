@@ -39,6 +39,7 @@ import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.offset.OffsetPosList;
 import edu.gemini.spModel.target.system.CoordinateParam;
+import edu.gemini.spModel.target.system.HmsDegTarget;
 import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.target.system.NonSiderealTarget;
 import edu.gemini.spModel.template.TemplateParameters;
@@ -118,7 +119,9 @@ public class GeneralRule implements IRule {
         private static final String NAME_CLASH_MESSAGE =
             "Objects with the same name must have the same coordinates.";
         private static final String COORD_CLASH_MESSAGE =
-            "Objects with the same coordinates must have the same name.";
+                "Objects with the same coordinates must have the same name.";
+        private static final String TAG_CLASH_MESSAGE =
+                "Objects with the same name must have the same type and coordinates.";
 
         private static final String WFS_DEFINED_MESSAGE = "WFS should be defined";
         //TODO: Rule to check if the WFS is in the patrol field, whatever that means
@@ -214,22 +217,30 @@ public class GeneralRule implements IRule {
                         errorSet.add(String.format(WFS_EMPTY_NAME_TEMPLATE, guider.getKey()));
                     }
 
-                    // If a WFS has the same name as the base position, make sure
-                    // that it has the same position.  If they have the same
-                    // position, make sure they have the same name.
-                    boolean sameName = baseTarget.getTarget().getName().equals(target.getTarget().getName());
-                    boolean samePos;
-                    if (baseTarget.getTarget() instanceof NonSiderealTarget) {
-                        samePos = sameNonSiderealPosition(baseTarget, target);
-                    } else {
-                        samePos = samePosition(baseTarget, target);
-                    }
-                    if (sameName && !samePos) {
+                    // If a WFS has the same name as the base position, make sure the have the same
+                    // type (i.e., tag) and position; or, if they have the same tag and position,
+                    // make sure they have the same name.
+                    final ITarget t1 = baseTarget.getTarget();
+                    final ITarget t2 = target.getTarget();
+
+                    final boolean sameName = t1.getName().equals(t2.getName());
+                    final boolean sameTag  = t1.getTag() == t2.getTag();
+
+                    if (sameName) {
+                        if (sameTag) {
+                            if (!samePosition(t1, t2)) {
+                                // same name and tag, but positions don't match
+                                errorSet.add(COORD_CLASH_MESSAGE);
+                            }
+                        } else {
+                            // same name but different tags
+                            errorSet.add(TAG_CLASH_MESSAGE);
+                        }
+                    } else if (sameTag && samePosition(t1, t2)) {
+                        // same tag and position, but different name
                         errorSet.add(NAME_CLASH_MESSAGE);
                     }
-                    if (samePos && !sameName) {
-                        errorSet.add(COORD_CLASH_MESSAGE);
-                    }
+
                 }
                 for (String error : errorSet) {
                     String id = error.equals(WFS_EMPTY_NAME_TEMPLATE) ? "WFS_EMPTY_NAME_TEMPLATE" :
@@ -241,8 +252,30 @@ public class GeneralRule implements IRule {
             return problems;
         }
 
-        private boolean hasAltair(TargetEnvironment env) {
-            return hasPrimary(env, AltairAowfsGuider.instance);
+        // determines whether positions are the same, assuming identical tags
+        private boolean samePosition(ITarget t1, ITarget t2) {
+            assert t1.getTag() == t2.getTag() : "Programmer error; tags must match.";
+            switch (t1.getTag()) {
+                case JPL_MINOR_BODY:
+                case MPC_MINOR_PLANET:
+                case NAMED:
+
+                    // SUPER SUPER SKETCHY
+                    // The .equals logic in NonSiderealTarget actually does what we want here, at
+                    // least according to the old implementation here. So we'll leave it for now.
+                    // This will be easier with the new model.
+                    return t1.equals(t2);
+
+                case SIDEREAL:
+                    final HmsDegTarget hms1 = (HmsDegTarget) t1;
+                    final HmsDegTarget hms2 = (HmsDegTarget) t2;
+                    return hasSameCoordinates(hms1, hms2) &&
+                           hasSameProperMotion(hms1, hms2) &&
+                           hasSameTrackingDetails(hms1, hms2);
+
+                default:
+                    throw new Error("Unpossible target tag: " + t1.getTag());
+            }
         }
 
         private boolean hasPrimary(TargetEnvironment env, GuideProbe guider) {
@@ -251,33 +284,22 @@ public class GeneralRule implements IRule {
             Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(guider);
             return (!gtOpt.isEmpty()) && !gtOpt.getValue().getPrimary().isEmpty();
         }
-        private boolean sameNonSiderealPosition(SPTarget base, SPTarget guide) {
-            ITarget baseTarget = base.getTarget();
-            ITarget guideTarget = guide.getTarget();
-            return baseTarget.equals(guideTarget);
-        }
 
-        private boolean samePosition(SPTarget base, SPTarget guide) {
-            return hasSameCoordinates(base, guide) &&
-                   hasSameProperMotion(base, guide) &&
-                   hasSameTrackingDetails(base, guide);
-        }
-
-        private boolean hasSameCoordinates(SPTarget base, SPTarget guide) {
+        private boolean hasSameCoordinates(HmsDegTarget base, HmsDegTarget guide) {
 
             // Okay, this kind of sucks, but I want to compare the coordinates
             // in the same way they are externalized and displayed.  That is,
             // ignore any extra precision that we end up throwing away.
-            String baseC1 = base.getTarget().getRa().toString();
-            String baseC2 = base.getTarget().getDec().toString();
+            String baseC1 = base.getRa().toString();
+            String baseC2 = base.getDec().toString();
 
-            String guideC1 = guide.getTarget().getRa().toString();
-            String guideC2 = guide.getTarget().getDec().toString();
+            String guideC1 = guide.getRa().toString();
+            String guideC2 = guide.getDec().toString();
 
             return baseC1.equals(guideC1) && baseC2.equals(guideC2);
         }
 
-        private boolean hasSameProperMotion(SPTarget base, SPTarget guide) {
+        private boolean hasSameProperMotion(HmsDegTarget base, HmsDegTarget guide) {
 
             double pmDecBase = base.getPropMotionDec();
             double pmRaBase = base.getPropMotionRA();
@@ -288,9 +310,7 @@ public class GeneralRule implements IRule {
             return pmRaBase == pmRaGuide && pmDecBase == pmDecGuide;
         }
 
-        private boolean hasSameTrackingDetails(SPTarget base, SPTarget guide) {
-
-            if (base.getTarget().getTag() != guide.getTarget().getTag()) return false;
+        private boolean hasSameTrackingDetails(HmsDegTarget base, HmsDegTarget guide) {
             if (base.getTrackingEpoch() != guide.getTrackingEpoch()) return false;
             if (base.getTrackingParallax() !=  guide.getTrackingParallax()) return false;
             if (base.getTrackingRadialVelocity() != guide.getTrackingRadialVelocity()) return false;
@@ -409,18 +429,22 @@ public class GeneralRule implements IRule {
 
             SPTarget baseTarget = elements.getTargetObsComp().getValue().getBase();
 
-            if (baseTarget == null) return null; //can't check;
+            if (baseTarget != null) {
+                final ITarget t = baseTarget.getTarget();
+                if (t instanceof HmsDegTarget) {
+                    final HmsDegTarget hms = (HmsDegTarget) t;
 
-            double pm_ra  = baseTarget.getPropMotionRA();
-            double pm_dec = baseTarget.getPropMotionDec();
-            double total = pm_ra * pm_ra + pm_dec * pm_dec;
+                    double pm_ra = hms.getPropMotionRA();
+                    double pm_dec = hms.getPropMotionDec();
+                    double total = pm_ra * pm_ra + pm_dec * pm_dec;
 
-            if (total > MAX_PM * MAX_PM) { //to avoid sqrt call
-                P2Problems problems = new P2Problems();
-                problems.addWarning(PREFIX+"TARGET_PM_RULE", MESSAGE, elements.getTargetObsComponentNode().getValue());
-                return problems;
+                    if (total > MAX_PM * MAX_PM) { //to avoid sqrt call
+                        P2Problems problems = new P2Problems();
+                        problems.addWarning(PREFIX + "TARGET_PM_RULE", MESSAGE, elements.getTargetObsComponentNode().getValue());
+                        return problems;
+                    }
+                }
             }
-
             return null;
         }
     };
