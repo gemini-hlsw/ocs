@@ -41,7 +41,7 @@ public final class NiriRecipe extends RecipeBase {
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _niriParameters = new NiriParameters(r);
         _teleParameters = ITCRequest.teleParameters(r);
-        _altairParameters = new AltairParameters(r);
+        _altairParameters = ITCRequest.altairParameters(r);
         _plotParameters = ITCRequest.plotParamters(r);
     }
 
@@ -331,13 +331,7 @@ public final class NiriRecipe extends RecipeBase {
                 throw new Exception(
                         "Altair cannot currently be used with Spectroscopy mode in the ITC.  Please deselect either altair or spectroscopy and resubmit the form.");
             }
-            Altair altair = new Altair(instrument.getEffectiveWavelength(),
-                    _teleParameters.getTelescopeDiameter(), im_qual,
-                    _altairParameters.getGuideStarSeperation(),
-                    _altairParameters.getGuideStarMagnitude(),
-                    _altairParameters.getWFSMode(),
-                    _altairParameters.fieldLensIsUsed(),
-                    0.0);
+            Altair altair = new Altair(instrument.getEffectiveWavelength(), _teleParameters.getTelescopeDiameter(), im_qual, _altairParameters, 0.0);
             AltairBackgroundVisitor altairBackgroundVisitor = new AltairBackgroundVisitor();
             AltairTransmissionVisitor altairTransmissionVisitor = new AltairTransmissionVisitor();
             AltairFluxAttenuationVisitor altairFluxAttenuationVisitor = new AltairFluxAttenuationVisitor(

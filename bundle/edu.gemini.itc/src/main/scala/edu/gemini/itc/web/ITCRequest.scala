@@ -2,8 +2,10 @@ package edu.gemini.itc.web
 
 import javax.servlet.http.HttpServletRequest
 
-import edu.gemini.itc.parameters.{PlottingDetailsParameters, ObservingConditionParameters, TeleParameters}
+import edu.gemini.itc.altair.AltairParameters
+import edu.gemini.itc.parameters.{ObservingConditionParameters, PlottingDetailsParameters, TeleParameters}
 import edu.gemini.itc.shared.ITCMultiPartParser
+import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.telescope.IssPort
 
@@ -62,6 +64,17 @@ object ITCRequest {
     val lower   = pc.doubleParameter("plotWavelengthL")
     val upper   = pc.doubleParameter("plotWavelengthU")
     new PlottingDetailsParameters(limits, lower, upper)
+  }
+
+  def altairParameters(r: ITCMultiPartParser): AltairParameters = {
+    val pc      = ITCRequest.from(r)
+    val guideStarSeperation  = pc.doubleParameter("guideSep")
+    val guideStarMagnitude   = pc.doubleParameter("guideMag")
+    val fieldLens            = pc.enumParameter(classOf[AltairParams.FieldLens])
+    val wfsMode              = pc.enumParameter(classOf[AltairParams.GuideStarType])
+    val wfs                  = pc.enumParameter(classOf[TeleParameters.Wfs])
+    val altairUsed           = wfs eq TeleParameters.Wfs.AOWFS
+    new AltairParameters(guideStarSeperation, guideStarMagnitude, fieldLens, wfsMode, altairUsed)
   }
 
 }

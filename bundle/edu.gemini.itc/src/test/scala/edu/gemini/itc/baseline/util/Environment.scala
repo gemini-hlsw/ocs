@@ -3,6 +3,7 @@ package edu.gemini.itc.baseline.util
 import edu.gemini.itc.altair.AltairParameters
 import edu.gemini.itc.parameters.TeleParameters.{Coating, Wfs}
 import edu.gemini.itc.parameters._
+import edu.gemini.spModel.gemini.altair.AltairParams.{GuideStarType, FieldLens}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.telescope.IssPort
 
@@ -130,7 +131,7 @@ object Environment {
       0,                                      // plaw index           (N/A)
       SourceDefinitionParameters.ELINE),      // source spec
 
-    // TODO get power line to work with other instruments(?)
+    // TODO get power law to work with other instruments(?)
     //power law spectral distribution
     new SourceDefinitionParameters(
       SourceDefinitionParameters.EXTENDED_SOURCE,
@@ -250,13 +251,13 @@ object Environment {
   )
 
   lazy val AltairConfigurations = List(
-    new AltairParameters(0.0,  0.0,  "",   "",                   false),  // no altair
-    new AltairParameters(4.0,  9.0, "IN",  AltairParameters.NGS, true),   // altair with NGS and field lens
-    new AltairParameters(5.0, 10.0, "OUT", AltairParameters.NGS, true),   // altair with NGS w/o field lens
-    new AltairParameters(6.0, 10.0, "IN",  AltairParameters.LGS, true)    // altair with LGS
+    new AltairParameters(0.0,  0.0, FieldLens.OUT,  GuideStarType.NGS, false),  // no altair
+    new AltairParameters(4.0,  9.0, FieldLens.IN,   GuideStarType.NGS, true),   // altair with NGS and field lens
+    new AltairParameters(5.0, 10.0, FieldLens.OUT,  GuideStarType.NGS, true),   // altair with NGS w/o field lens
+    new AltairParameters(6.0, 10.0, FieldLens.IN,   GuideStarType.LGS, true)    // altair with LGS (must have field lens in)
   )
 
   lazy val NoAltair =
-    new AltairParameters(0.0,  0.0,  "",   "",                   false)   // use this for spectroscopy
+    new AltairParameters(0.0,  0.0,  FieldLens.OUT,  GuideStarType.NGS, false)   // use this for spectroscopy
 
 }

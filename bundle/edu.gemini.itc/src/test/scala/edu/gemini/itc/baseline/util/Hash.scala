@@ -228,9 +228,8 @@ object Hash {
     hash(
       alt.getGuideStarMagnitude,
       alt.getGuideStarSeperation,
-      alt.altairIsUsed,
-      alt.fieldLensIsUsed,
-      alt.getWFSMode
+      alt.getFieldLens.displayValue,
+      alt.getWFSMode.displayValue
     )
 
   def calc(alt: GemsParameters): Int =

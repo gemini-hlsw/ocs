@@ -1,16 +1,7 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-//
-//
 package edu.gemini.itc.altair;
 
 import edu.gemini.itc.shared.FormatStringWriter;
+import edu.gemini.spModel.gemini.altair.AltairParams;
 
 /**
  * Altair AO class
@@ -36,33 +27,25 @@ public class Altair {
      */
     public static final String ALTAIR_TRANSMISSION_FILENAME = "transmission";
 
-    public static final String NGS = "naturalGuideStar";
-    public static final String LGS = "laserGuideStar";
-
-    private double wavelength, wavelengthMeters, telescopeDiameter, uncorrectedSeeing, guideStarDistance, guideStarMag, fwhmInst;
     private static final double geometricFactor = 1.0;
 
-    private AltairBackgroundVisitor altairBackground;
-    private AltairTransmissionVisitor altairTransmission;
-    private String observingMode;  // LGS or NGS
-    private boolean fieldLens; // Is field lens in use
+    private final AltairParameters altair;
+    private final double wavelength;
+    private final double telescopeDiameter;
+    private final double uncorrectedSeeing;
+    private final double fwhmInst;
 
+    private final AltairBackgroundVisitor altairBackground;
+    private final AltairTransmissionVisitor altairTransmission;
 
-    // Constructor
-    // See REL-472
-    public Altair(double wavelength, double telescopeDiameter, double uncorrectedSeeing, double guideStarDistance,
-                  double guideStarMag, String observingMode, boolean fieldLens, double fwhmInst) throws Exception {
-        altairBackground = new AltairBackgroundVisitor();
-        altairTransmission = new AltairTransmissionVisitor();
+    public Altair(double wavelength, double telescopeDiameter, double uncorrectedSeeing, AltairParameters altair, double fwhmInst) throws Exception {
+        this.altair = altair;
         this.wavelength = wavelength;
-        this.wavelengthMeters = wavelength * 10E9;
         this.telescopeDiameter = telescopeDiameter;
         this.uncorrectedSeeing = uncorrectedSeeing;
-        this.guideStarDistance = guideStarDistance;
-        this.guideStarMag = guideStarMag;
-        this.observingMode = observingMode;
-        this.fieldLens = fieldLens;
         this.fwhmInst = fwhmInst;
+        this.altairBackground = new AltairBackgroundVisitor();
+        this.altairTransmission = new AltairTransmissionVisitor();
     }
 
     //Methods
@@ -87,7 +70,7 @@ public class Altair {
         double r0power, corr;
         double r0 = getr0();
 
-        if (getObservingMode().equals(NGS)) {
+        if (altair.getWFSMode().equals(AltairParams.GuideStarType.NGS)) {
             r0power = 0.96; //if NGS
             corr = 0.20; //if NGS
         } else {
@@ -108,14 +91,13 @@ public class Altair {
     public double getStrehlNoiseMag() {
         double rgs0;
 
-        if (getObservingMode().equals(NGS)) {
+        if (altair.getWFSMode().equals(AltairParams.GuideStarType.NGS)) {
             rgs0 = 14.0; //if NGS
         } else {
             rgs0 = 17.0; //if LGS
         }
 
-        // double strehlNoiseMag = Math.exp(-1*Math.pow(guideStarMag/14.5,16)*Math.pow(1650/wavelength,2));  //Old equation
-        return Math.exp(-1 * Math.pow(guideStarMag / rgs0, 16) * Math.pow(1650 / wavelength, 2));
+        return Math.exp(-1 * Math.pow(altair.getGuideStarMagnitude() / rgs0, 16) * Math.pow(1650 / wavelength, 2));
     }
 
     // Calculates the strehl noise from the guide star distance
@@ -133,7 +115,7 @@ public class Altair {
         }
         //double strehlNoiseDistance = Math.exp(-1*Math.pow(guideStarDistance/12.5,2)*Math.pow(1650/wavelength,2));  //Old caclulation
 
-        return Math.exp(-1 * Math.pow(guideStarDistance / dgs0, dgspow) * Math.pow(1650 / wavelength, 2));
+        return Math.exp(-1 * Math.pow(altair.getGuideStarSeperation() / dgs0, dgspow) * Math.pow(1650 / wavelength, 2));
     }
 
     // Function that calculates the strehl from the fit, distance and magnitude
@@ -158,12 +140,8 @@ public class Altair {
         return Math.sqrt(fwhmAO * fwhmAO + fwhmInst * fwhmInst); // REL-472
     }
 
-    public String getObservingMode() {
-        return observingMode;
-    }
-
-    public boolean fieldLensIsIn() {
-        return fieldLens;
+    private boolean fieldLensIsIn() {
+        return altair.getFieldLens().equals(AltairParams.FieldLens.IN);
     }
 
 
@@ -171,34 +149,7 @@ public class Altair {
         String s = "r0(" + wavelength + "nm) = " + device.toString(getr0()) + " m\n";
         s += "Strehl = " + device.toString(getStrehl()) + "\n";
         s += "FWHM of an AO-corrected core = " + device.toString(getAOCorrectedFWHMc()) + " arcsec\n";
-
-//        // XXX Temp DEBUG (REL-472)
-//        s += toString();
-
         return s;
     }
-
-//    //Used for debugging
-//    public String toString(){
-//        String s = "\nAltair Debug Information:\n";
-//
-//        s +="r0: " + getr0() + "\n";
-//        s +="Total Strehl (S): " + (getStrehlFit()*getStrehlNoiseDist()*getStrehlNoiseMag()) + "\n";
-//        s +="Total Strehl (Sc): " + getStrehl()+ "\n";
-//        s +="Base Strehl (Sfit): " + getStrehlFit() + "\n";
-//        s +="Strehl GSdist Component (Saniso): " + getStrehlNoiseDist() + "\n";
-//        s +="Strehl GSmag Component (Snoise): " + getStrehlNoiseMag() + "\n";
-//        s +="FluxAttenuation: " + getFluxAttenuation() + "\n";
-//        s +="AO Corrected FWHM (fwhmAOc): " + getAOCorrectedFWHMc() + " (fwhmAO=" + getAOCorrectedFWHM() + ")\n";
-//        s +="Wavelength: " + wavelength + "\n";
-//        s +="Uncorrected Seeing " + uncorrectedSeeing + "\n";
-//        s +="Telescope Diameter " + telescopeDiameter + "\n";
-//        s +="GS seperation " + guideStarDistance + "\n";
-//        s +="GS Mag " + guideStarMag + "\n";
-//	    s +="Observing Mode " + getObservingMode() + "\n";
-//	    s +="Field Lens " + fieldLens + "\n";
-//
-//        return s;
-//    }
 
 }

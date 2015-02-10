@@ -48,7 +48,7 @@ public final class NifsRecipe extends RecipeBase {
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _nifsParameters = new NifsParameters(r);
         _teleParameters = ITCRequest.teleParameters(r);
-        _altairParameters = new AltairParameters(r);
+        _altairParameters = ITCRequest.altairParameters(r);
         _plotParameters = ITCRequest.plotParamters(r);
     }
 
@@ -275,9 +275,7 @@ public final class NifsRecipe extends RecipeBase {
         im_qual = IQcalc.getImageQuality();
 
         //Altair Section
-        Altair altair = new Altair(instrument.getEffectiveWavelength(), _teleParameters.getTelescopeDiameter(),
-                im_qual, _altairParameters.getGuideStarSeperation(), _altairParameters.getGuideStarMagnitude(),
-                _altairParameters.getWFSMode(), _altairParameters.fieldLensIsUsed(), 0);
+        Altair altair = new Altair(instrument.getEffectiveWavelength(), _teleParameters.getTelescopeDiameter(), im_qual, _altairParameters, 0);
         AltairBackgroundVisitor altairBackgroundVisitor = new AltairBackgroundVisitor();
         AltairTransmissionVisitor altairTransmissionVisitor = new AltairTransmissionVisitor();
         AltairFluxAttenuationVisitor altairFluxAttenuationVisitor = new AltairFluxAttenuationVisitor(altair.getFluxAttenuation());

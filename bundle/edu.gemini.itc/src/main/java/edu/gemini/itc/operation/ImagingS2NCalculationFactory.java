@@ -29,8 +29,7 @@ public final class ImagingS2NCalculationFactory {
             // --- Integration time
             case ObservationDetailsParameters.INTTIME:
                 final boolean extendedSource = sdp.getSourceGeometry().equals(SourceDefinitionParameters.EXTENDED_SOURCE);
-                final boolean uniformSource  = sdp.getExtendedSourceType().equals(SourceDefinitionParameters.UNIFORM);
-                if (extendedSource && uniformSource) {
+                if (extendedSource) {
                     return new ImagingUSBS2NMethodBCalculation(
                             odp.getNumExposures(),
                             odp.getSourceFraction(),
