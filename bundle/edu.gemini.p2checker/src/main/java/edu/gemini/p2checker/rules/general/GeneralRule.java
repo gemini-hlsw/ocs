@@ -116,9 +116,9 @@ public class GeneralRule implements IRule {
         // Now applies to any WFS
 //        private static final String AOWFS_MESSAGE = "Please make sure that the AOWFS coordinates, proper motions, and " +
 //                "tracking details are exactly the same as those of the target";
-        private static final String NAME_CLASH_MESSAGE =
-            "Objects with the same name must have the same coordinates.";
         private static final String COORD_CLASH_MESSAGE =
+            "Objects with the same name must have the same coordinates.";
+        private static final String NAME_CLASH_MESSAGE =
                 "Objects with the same coordinates must have the same name.";
         private static final String TAG_CLASH_MESSAGE =
                 "Objects with the same name must have the same type and coordinates.";
@@ -194,7 +194,7 @@ public class GeneralRule implements IRule {
             for (GuideProbeTargets guideTargets : env.getOrCreatePrimaryGuideGroup()) {
                 GuideProbe guider = guideTargets.getGuider();
                 // TODO: GuideProbeTargets.isEnabled
-                if (!env.isActive(guider) && (guideTargets.getOptions().size() > 0)) {
+                if ((!env.isActive(guider)) && (guideTargets.getOptions().size() > 0)) {
                     problems.addError(PREFIX+"DISABLED_GUIDER", String.format(DISABLED_GUIDER, guider.getKey()),
                             elements.getTargetObsComponentNode().getValue());
                     continue;
