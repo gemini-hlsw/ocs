@@ -11,8 +11,8 @@ public abstract class NonSiderealTarget extends ITarget {
     private static final String DEFAULT_NAME = "";
 
     // XXX temporary, until there is conversion code
-    private final HMS _ra = new HMS();
-    private final DMS _dec = new DMS();
+    private HMS _ra = new HMS();
+    private DMS _dec = new DMS();
     private CoordinateTypes.Epoch _epoch = new CoordinateTypes.Epoch("2000", CoordinateParam.Units.YEARS);
     private String _name = DEFAULT_NAME;
     private Date _date = null; // The date for which the position is valid
@@ -129,8 +129,8 @@ public abstract class NonSiderealTarget extends ITarget {
         NonSiderealTarget result = (NonSiderealTarget) super.clone();
         if (_epoch != null) result._epoch = (CoordinateTypes.Epoch) _epoch.clone();
         if (_date != null) result._date = (Date) _date.clone();
-        result._ra.setValue(_ra.getValue());
-        result._dec.setValue(_dec.getValue());
+        if (_ra != null) result._ra = (HMS) _ra.clone();
+        if (_dec != null) result._dec = (DMS) _dec.clone();
         result._hObjId = _hObjId; // immutable, so don't need to clone
         result._hObjTypeOrd = _hObjTypeOrd;
         return result;

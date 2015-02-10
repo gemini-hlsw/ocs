@@ -57,8 +57,8 @@ public final class HmsDegTarget extends ITarget {
     private RV _rv = DEFAULT_RV;
     private Parallax _parallax = DEFAULT_PARALLAX;
     private Date _taiz = DEFAULT_TAIZ;
-    private final HMS _ra = new HMS();
-    private final DMS _dec = new DMS();
+    private HMS _ra = new HMS();
+    private DMS _dec = new DMS();
 
     /**
      * The base name of this coordinate system.
@@ -93,8 +93,10 @@ public final class HmsDegTarget extends ITarget {
      */
     public HmsDegTarget clone() {
         HmsDegTarget result = (HmsDegTarget) super.clone();
-        result._ra.setValue(_ra.getValue());
-        result._dec.setValue(_dec.getValue());
+
+        if (_ra != null) result._ra = (HMS) _ra.clone();
+        if (_dec != null) result._dec = (DMS) _dec.clone();
+
         if (_epoch != null) result._epoch = (Epoch) _epoch.clone();
         if (_pm1 != null) result._pm1 = (PM1) _pm1.clone();
         if (_pm2 != null) result._pm2 = (PM2) _pm2.clone();
