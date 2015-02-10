@@ -5,6 +5,7 @@ import java.awt.geom.{Point2D, AffineTransform}
 
 import edu.gemini.shared.util.immutable.{DefaultImList, ImList, ImPolygon}
 import edu.gemini.skycalc.{Angle, CoordinateDiff, Offset}
+import edu.gemini.spModel.inst.ProbeArmGeometry
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.system.CoordinateParam
@@ -13,19 +14,14 @@ import edu.gemini.spModel.telescope.IssPort
 
 import scala.collection.JavaConverters._
 
-class GmosOiwfsProbeArm[I  <: InstGmosCommon[D,F,P,SM],
-                        D  <: Enum[D]  with GmosCommonType.Disperser,
-                        F  <: Enum[F]  with GmosCommonType.Filter,
-                        P  <: Enum[P]  with GmosCommonType.FPUnit,
-                        SM <: Enum[SM] with GmosCommonType.StageMode](inst: I) {
+object GmosOiwfsProbeArm extends ProbeArmGeometry {
   import edu.gemini.spModel.inst.FeatureGeometry.transformPoint
   import GmosOiwfsProbeArm._
 
+  val instance = this
+
   def geometry: List[Shape] =
     List(probeArm, pickoffMirror)
-
-  def geometryAsJava: ImList[Shape] =
-    DefaultImList.create(geometry.asJava)
 
   private lazy val probeArm: Shape = {
     val hm  = PickoffMirrorSize / 2.0
@@ -52,14 +48,7 @@ class GmosOiwfsProbeArm[I  <: InstGmosCommon[D,F,P,SM],
     ImPolygon(points)
   }
 
-  /**
-   * For a given observation context and a specific offset, calculate the adjustment required for the probe arm.
-   * This consists of a pair representing the angle of the arm in radians and the guide star as a point.
-   * @param ctx    the observation context
-   * @param offset the offset to use
-   * @return       a pair comprising the angle in radians of the probe arm and the position of the guide star in arcsec
-   */
-  def armAdjustment(ctx: ObsContext, offset: Offset): Option[(Double, Point2D)] = {
+  override def armAdjustment(ctx: ObsContext, offset: Offset): Option[(Double, Point2D)] = {
     if (ctx == null || offset == null) None
     else {
       for {
@@ -67,13 +56,20 @@ class GmosOiwfsProbeArm[I  <: InstGmosCommon[D,F,P,SM],
         gt  <- gts.getPrimary.asScalaOpt
       } yield {
         val flip = if (ctx.getIssPort == IssPort.SIDE_LOOKING) -1.0 else 1.0
-        val diff = new CoordinateDiff(ctx.getBaseCoordinates, gt.getTarget.getSkycalcCoordinates)
-        val x = diff.getOffset.p.toArcsecs.getMagnitude
-        val y = diff.getOffset.q.toArcsecs.getMagnitude
-        val guideStar = new Point2D.Double(-x, -y * flip)
-        val offsetPt = new Point2D.Double(-offset.p.convertTo(Angle.Unit.ARCSECS).getMagnitude, -offset.q.convertTo(Angle.Unit.ARCSECS).getMagnitude * flip)
 
-        (armAngle(ctx.getPositionAngle.convertTo(Angle.Unit.RADIANS).getMagnitude, guideStar, offsetPt), guideStar)
+        val pa        = ctx.getPositionAngle.toRadians.getMagnitude
+        val offsetPt  = new Point2D.Double(-offset.p.toArcsecs.getMagnitude, -offset.q.toArcsecs.getMagnitude * flip)
+        val guideStar = {
+          val o     = new CoordinateDiff(ctx.getBaseCoordinates, gt.getTarget.getSkycalcCoordinates).getOffset
+          val (x,y) = (o.p.toArcsecs.getMagnitude, o.q.toArcsecs.getMagnitude)
+          new Point2D.Double(-x, -y * flip)
+        }
+
+        ctx.getInstrument match {
+          case gmosn: InstGmosNorth => (armAngle(gmosn.getFPUnit.getWFSOffset, pa, guideStar, offsetPt), guideStar)
+          case gmoss: InstGmosSouth => (armAngle(gmoss.getFPUnit.getWFSOffset, pa, guideStar, offsetPt), guideStar)
+          case _                    => null
+        }
       }
     }
   }
@@ -85,7 +81,7 @@ class GmosOiwfsProbeArm[I  <: InstGmosCommon[D,F,P,SM],
    * @param offset the offset to use
    * @return       a pair comprising the angle in radians of the probe arm and the position of the guide star in arcsec
    */
-  def  armAdjustmentForJava(ctx: ObsContext, offset: Offset): edu.gemini.shared.util.immutable.Option[edu.gemini.shared.util.immutable.Pair[java.lang.Double, Point2D]] =
+  def armAdjustmentForJava(ctx: ObsContext, offset: Offset): edu.gemini.shared.util.immutable.Option[edu.gemini.shared.util.immutable.Pair[java.lang.Double, Point2D]] =
     armAdjustment(ctx, offset: Offset).map{ case (angle, guideStar) => new edu.gemini.shared.util.immutable.Pair(new java.lang.Double(angle.toDouble), guideStar) }.asGeminiOpt
 
   /**
@@ -96,12 +92,13 @@ class GmosOiwfsProbeArm[I  <: InstGmosCommon[D,F,P,SM],
    * @param offset    the offset in arcsec
    * @return          the angle of the probe arm in radians
    */
-  private def armAngle(posAngle:    Double,
+  private def armAngle(wfsOffset: Double,
+                       posAngle:    Double,
                        guideStar:   Point2D,
                        offset:      Point2D): Double = {
     val offsetAdj = {
       val posAngleRot = AffineTransform.getRotateInstance(posAngle)
-      val ifuOffset = transformPoint(new Point2D.Double(inst.getFPUnit.getWFSOffset, 0.0), posAngleRot)
+      val ifuOffset = transformPoint(new Point2D.Double(wfsOffset, 0.0), posAngleRot)
       transformPoint(offset, AffineTransform.getTranslateInstance(ifuOffset.getX, ifuOffset.getY))
     }
 
@@ -120,9 +117,7 @@ class GmosOiwfsProbeArm[I  <: InstGmosCommon[D,F,P,SM],
     }
     phi - theta - alpha - math.Pi / 2.0
   }
-}
 
-object GmosOiwfsProbeArm {
   // Various measurements in arcsec.
   private val PickoffArmLength      = 358.46
   private val PickoffMirrorSize     =  20.0

@@ -3,7 +3,8 @@ package edu.gemini.spModel.gemini.gmos
 import java.awt.Shape
 import java.awt.geom.{Area, Rectangle2D}
 
-import edu.gemini.shared.util.immutable.{DefaultImList, ImList, ImPolygon}
+import edu.gemini.shared.util.immutable.{DefaultImList, ImPolygon}
+import edu.gemini.spModel.inst.ScienceAreaGeometry
 import edu.gemini.spModel.core.Site
 
 import scala.collection.JavaConverters._
@@ -12,43 +13,29 @@ class GmosScienceAreaGeometry[I  <: InstGmosCommon[D,F,P,SM],
                               D  <: Enum[D]  with GmosCommonType.Disperser,
                               F  <: Enum[F]  with GmosCommonType.Filter,
                               P  <: Enum[P]  with GmosCommonType.FPUnit,
-                              SM <: Enum[SM] with GmosCommonType.StageMode](inst: I) {
+                              SM <: Enum[SM] with GmosCommonType.StageMode] extends ScienceAreaGeometry[I] {
   import GmosScienceAreaGeometry._
 
-
-  /**
-   * Return a list of the shapes comprising the geometry of the science area.
-   * @return the list of the shapes
-   */
-  def geometry: List[Shape] =
-    basicScienceArea.toList
-
-  /**
-   * Return a list of the shapes comprising the geometry of the science area for Java.
-   * @return an immutable list of the shapes
-   */
-  def geometryAsJava: ImList[Shape] =
-    DefaultImList.create(geometry.asJava)
-
-  /**
-   * Create the shape for the science area based on the instrument configuration.
-   * @return Some(shape) if a shape exists for the configuration, and None otherwise
-   */
-  private def basicScienceArea: Option[Shape] = {
-    if (inst == null) None
-    else Option({
+  override def geometry(inst: I): List[Shape] = {
+    if (inst == null) Nil
+    else {
       lazy val width   = inst.getScienceArea()(0)
       lazy val isSouth = inst.getSite.contains(Site.GS)
       inst.getFPUnitMode match {
-        case GmosCommonType.FPUnitMode.BUILTIN if inst.isImaging       => fov(ImagingFOVSize, ImagingFOVInnerSize)
-        case GmosCommonType.FPUnitMode.BUILTIN if inst.isSpectroscopic => longSlitFOV(width)
-        case GmosCommonType.FPUnitMode.BUILTIN if inst.isIFU           => ifuFOV(inst.getFPUnit, isSouth)
-        case GmosCommonType.FPUnitMode.BUILTIN if inst.isNS            => nsFOV(width)
-        case GmosCommonType.FPUnitMode.CUSTOM_MASK                     => fov(MOSFOVSize, MOSFOVInnerSize)
-        case _                                                         => null
+        case GmosCommonType.FPUnitMode.BUILTIN if inst.isImaging       => List(fov(ImagingFOVSize, ImagingFOVInnerSize))
+        case GmosCommonType.FPUnitMode.BUILTIN if inst.isSpectroscopic => List(longSlitFOV(width))
+        case GmosCommonType.FPUnitMode.BUILTIN if inst.isIFU           => List(ifuFOV(inst.getFPUnit, isSouth))
+        case GmosCommonType.FPUnitMode.BUILTIN if inst.isNS            => List(nsFOV(width))
+        case GmosCommonType.FPUnitMode.CUSTOM_MASK                     => List(fov(MOSFOVSize, MOSFOVInnerSize))
+        case _                                                         => Nil
       }
-    })
+    }
   }
+
+  // We need to override this due to the subtypes of InstGmosCommon. Otherwise, the supermethod fails to properly
+  // be called and an exception is thrown.
+  override def geometryAsJava(inst: I): edu.gemini.shared.util.immutable.ImList[Shape] =
+    DefaultImList.create(geometry(inst).asJava)
 
   /**
    * Return a field of view for the specified size and the pixel density.
@@ -181,10 +168,6 @@ class GmosScienceAreaGeometry[I  <: InstGmosCommon[D,F,P,SM],
     ImPolygon(points)
   }
 }
-
-
-//object GmosNorthScienceArea extends GmosScienceArea[InstGmosNorth, GmosNorthType.DisperserNorth, GmosNorthType.FilterNorth, GmosNorthType.FPUnitNorth, GmosNorthType.StageModeNorth]
-//object GmosSouthScienceArea extends GmosScienceArea[InstGmosSouth, GmosSouthType.DisperserSouth, GmosSouthType.FilterSouth, GmosSouthType.FPUnitSouth, GmosSouthType.StageModeSouth]
 
 
 object GmosScienceAreaGeometry {
