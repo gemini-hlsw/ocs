@@ -70,22 +70,6 @@
         <url-pattern>/servlet/gsaoi</url-pattern>
     </servlet-mapping>
 
-    <!-- This maps /servlet/nirialtair to the altair + niri servlet class (* NOT USED? *) -->
-    <servlet>
-        <servlet-name>
-            nirialtair
-        </servlet-name>
-        <servlet-class>
-            edu.gemini.itc.altair.ITCaltairNiriServlet
-        </servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>nirialtair</servlet-name>
-        <url-pattern>/servlet/nirialtair</url-pattern>
-    </servlet-mapping>
-
-
     <!-- This maps /servlet/gmos to the gmos servlet class -->
     <servlet>
         <servlet-name>
