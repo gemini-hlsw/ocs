@@ -22,9 +22,6 @@ public final class SourceDefinitionParameters extends ITCParameters {
     public static final String SOURCE_UNITS_GAUSSIAN = "gaussSourceUnits";
     public static final String SOURCE_FWHM_GAUSSIAN = "gaussFwhm";
     public static final String EXTENDED_SOURCE_TYPE = "extSourceType";
-    public static final String NORM_TYPE = "normType";
-    public static final String NORM_BAND = "normBand";
-    public static final String NORM_WAVELENGTH = "normWavelength";
     public static final String SOURCE_SPEC = "sourceSpec";
     public static final String ST_SPEC_TYPE = "stSpectrumType";
     public static final String NS_SPEC_TYPE = "nsSpectrumType";
@@ -79,9 +76,6 @@ public final class SourceDefinitionParameters extends ITCParameters {
     private static final int ITC_UNITS_WATTS_FLUX = 12;
     private static final int ITC_UNITS_ERGS_FLUX = 13;
 
-    public static final String FILTER = "filter";
-    public static final String WAVELENGTH = "wavelength";
-
     public static final String LIBRARY_STAR = "libraryStar";
     public static final String LIBRARY_NON_STAR = "libraryNonStar";
     public static final String BLACK_BODY = "blackBody";
@@ -118,9 +112,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
     private double _sourceNorm;  // 19.3 or 2e-17
     private String _units; // unit code
     private double _fwhm;
-    private String _normType; // filter or wavelength
     private String _normBand; // U, V, B, ...
-    private double _normWavelength; // e.g. 670nm
     private double _bBTemp;
     private double _eLineWavelength;
     private double _eLineWidth;
@@ -178,14 +170,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
         }
 
         // Get Normalization info
-        _normType = p.getParameter(NORM_TYPE);
-        if (_normType.equals(FILTER)) {
-            _normBand = p.getParameter(NORM_BAND);
-        } else if (_normType.equals(WAVELENGTH)) {
-            _normWavelength = ITCParameters.parseDouble(p.getParameter(NORM_WAVELENGTH), "Normalization Wavelength");
-        } else {
-            throw new IllegalArgumentException("Unrecognized normalization type: " + getNormType());
-        }
+        _normBand = p.getParameter("normBand");
 
         // Get Spectrum Resource
         _sourceSpec = p.getParameter(SOURCE_SPEC);
@@ -246,9 +231,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
                                       double sourceNorm,
                                       String units,
                                       double fwhm,
-                                      String normType,
                                       String normBand,
-                                      double normWavelength,
                                       double redshift,
                                       String spectrumResource,
                                       double bBTemp,
@@ -265,9 +248,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
         _sourceNorm = sourceNorm;
         _units = units;
         _fwhm = fwhm;
-        _normType = normType;
         _normBand = normBand;
-        _normWavelength = normWavelength;
         _redshift = redshift;
         _sedSpectrum = spectrumResource;
         _bBTemp = bBTemp;
@@ -305,16 +286,8 @@ public final class SourceDefinitionParameters extends ITCParameters {
         return _fwhm;
     }
 
-    public String getNormType() {
-        return _normType;
-    }
-
     public String getNormBand() {
         return _normBand;
-    }
-
-    public double getNormWavelength() {
-        return _normWavelength;
     }
 
     public double getRedshift() {
@@ -391,21 +364,18 @@ public final class SourceDefinitionParameters extends ITCParameters {
         sb.append("Source Normalization:\t" + getSourceNormalization() + "\n");
         sb.append("Units:\t\t\t" + getUnits() + "\n");
         sb.append("Gaussian FWHM:\t" + getFWHM() + "\n");
-        sb.append("Normalization Type:\t" + getNormType() + "\n");
+        sb.append("Normalization Type:\tfilter\n");
         sb.append("Normalization WaveBand:\t" + getNormBand() + "\n");
-        sb.append("Normalization Wavelen:\t" + getNormWavelength() + "\n");
+        sb.append("Normalization Wavelen:\t0.0\n");
         sb.append("Redshift:\t\t" + getRedshift() + "\n");
         sb.append("Spectrum Resource:\t" + getSpectrumResource() + "\n");
         sb.append("Black Body Temp:\t" + getBBTemp() + "\n");
-        sb.append("Emission Line Central Wavelen:\t" + getELineWavelength() +
-                "\n");
+        sb.append("Emission Line Central Wavelen:\t" + getELineWavelength() + "\n");
         sb.append("Emission Line Width:\t" + getELineWidth() + "\n");
         sb.append("Emission Line Flux:\t" + getELineFlux() + "\n");
-        sb.append("Emission Line Continuum Flux:\t" + getELineContinuumFlux() +
-                "\n");
+        sb.append("Emission Line Continuum Flux:\t" + getELineContinuumFlux() + "\n");
         sb.append("Emission Line Units:" + getELineFluxUnits() + "\n");
-        sb.append("Emission Line Cont Units:" + getELineContinuumFluxUnits() +
-                "\n");
+        sb.append("Emission Line Cont Units:" + getELineContinuumFluxUnits() + "\n");
         sb.append("Power Law Index:" + getPowerLawIndex() + "\n");
         sb.append("\n");
         return sb.toString();

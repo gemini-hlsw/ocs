@@ -47,9 +47,7 @@ object Environment {
       15.0,
       SourceDefinitionParameters.MAG,
       .35,
-      SourceDefinitionParameters.FILTER,
       "H",
-      0.0,
       0.3,
       SourceDefinitionParameters.STELLAR_LIB + "/k0iii.nm",
       0.0,                                // black body temp        (N/A)
@@ -69,9 +67,7 @@ object Environment {
       2E-17,
       SourceDefinitionParameters.WATTS,
       .35,
-      SourceDefinitionParameters.FILTER,
       "K",
-      0.0,
       1.0,                                // redshift
       SourceDefinitionParameters.NON_STELLAR_LIB + "/elliptical-galaxy.nm",
       0.0,                                // black body temp        (N/A)
@@ -91,9 +87,7 @@ object Environment {
       19.0,
       SourceDefinitionParameters.WATTS,
       .35,
-      SourceDefinitionParameters.FILTER,
       "L",                                // band
-      0.0,                                // norm wavelength
       0.5,                                // redshift
       SourceDefinitionParameters.BBODY,   // spectrum resource
       8000.0,                             // black body temp
@@ -116,9 +110,7 @@ object Environment {
       20.0,
       SourceDefinitionParameters.WATTS,
       .35,
-      SourceDefinitionParameters.FILTER,
       "R",                                    // band
-      0.0,                                    // norm wavelength
       1.0,                                    // redshift
       SourceDefinitionParameters.ELINE,       // spectrum resource
       0.0,                                    // black body temp [K]  (N/A)
@@ -139,9 +131,7 @@ object Environment {
       20.0,
       SourceDefinitionParameters.MAG,
       .35,
-      SourceDefinitionParameters.FILTER,
       "R",
-      0.0,
       1.5,
       SourceDefinitionParameters.PLAW,
       0.0,                                // black body temp        (N/A)
@@ -164,9 +154,7 @@ object Environment {
       20.0,
       SourceDefinitionParameters.WATTS,
       .35,
-      SourceDefinitionParameters.FILTER,
       "R",                                    // band
-      0.0,                                    // norm wavelength
       1.0,                                    // redshift
       SourceDefinitionParameters.ELINE,       // spectrum resource
       0.0,                                    // black body temp [K]  (N/A)
@@ -188,9 +176,7 @@ object Environment {
       20.0,
       SourceDefinitionParameters.WATTS,
       .35,
-      SourceDefinitionParameters.FILTER,
       "J",                                    // band
-      0.0,                                    // norm wavelength
       0.7,                                    // redshift
       SourceDefinitionParameters.ELINE,       // spectrum resource
       0.0,                                    // black body temp [K]  (N/A)
@@ -212,9 +198,7 @@ object Environment {
       20.0,
       SourceDefinitionParameters.WATTS,
       .35,
-      SourceDefinitionParameters.FILTER,
       "J",                                    // band
-      0.0,                                    // norm wavelength
       1.0,                                    // redshift
       SourceDefinitionParameters.ELINE,       // spectrum resource
       0.0,                                    // black body temp [K]  (N/A)
