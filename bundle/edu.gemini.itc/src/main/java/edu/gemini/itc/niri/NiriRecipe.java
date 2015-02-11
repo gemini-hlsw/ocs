@@ -135,9 +135,9 @@ public final class NiriRecipe extends RecipeBase {
         // both the normalization waveband and the observation waveband
         // (filter region).
 
-        String band = _sdParameters.getNormBand();
-        double start = WavebandDefinition.getStart(band);
-        double end = WavebandDefinition.getEnd(band);
+        final WavebandDefinition band = _sdParameters.getNormBand();
+        final double start = band.getStart();
+        final double end = band.getEnd();
 
         // any sed except BBODY and ELINE have normailization regions
         if (!(_sdParameters.getSpectrumResource().equals(_sdParameters.ELINE) || _sdParameters

@@ -76,8 +76,6 @@ public class SEDFactory {
         if (sdp.getSpectrumResource().equals(sdp.BBODY)) {
             return new
                     BlackBodySpectrum(sdp.getBBTemp(),
-                    instrument.getObservingStart(),
-                    instrument.getObservingEnd(),
                     instrument.getSampling(),
                     sdp.getSourceNormalization(),
                     sdp.getUnits(),
@@ -128,8 +126,6 @@ public class SEDFactory {
         if (sdp.getSpectrumResource().equals(sdp.BBODY)) {
             return new
                     BlackBodySpectrum(sdp.getBBTemp(),
-                    observingStart,
-                    observingEnd,
                     sampling,
                     sdp.getSourceNormalization(),
                     sdp.getUnits(),

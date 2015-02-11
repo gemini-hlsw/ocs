@@ -123,9 +123,9 @@ public final class Flamingos2Recipe extends RecipeBase {
         // both the normalization waveband and the observation waveband
         // (filter region).
 
-        String band = _sdParameters.getNormBand();
-        double start = WavebandDefinition.getStart(band);
-        double end = WavebandDefinition.getEnd(band);
+        final WavebandDefinition band = _sdParameters.getNormBand();
+        final double start = band.getStart();
+        final double end = band.getEnd();
         // System.out.println("WStart:" + start + "SStart:" +sed.getStart());
         // System.out.println("WEnd:" + end + "SEnd:" +sed.getEnd());
         // System.out.println("OStart:" + instrument.getObservingStart() +

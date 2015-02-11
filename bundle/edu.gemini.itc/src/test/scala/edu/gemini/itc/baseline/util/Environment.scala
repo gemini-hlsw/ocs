@@ -3,6 +3,7 @@ package edu.gemini.itc.baseline.util
 import edu.gemini.itc.altair.AltairParameters
 import edu.gemini.itc.parameters.TeleParameters.{Coating, Wfs}
 import edu.gemini.itc.parameters._
+import edu.gemini.itc.shared.WavebandDefinition
 import edu.gemini.spModel.gemini.altair.AltairParams.{GuideStarType, FieldLens}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.telescope.IssPort
@@ -47,7 +48,7 @@ object Environment {
       15.0,
       SourceDefinitionParameters.MAG,
       .35,
-      "H",
+      WavebandDefinition.H,
       0.3,
       SourceDefinitionParameters.STELLAR_LIB + "/k0iii.nm",
       0.0,                                // black body temp        (N/A)
@@ -67,7 +68,7 @@ object Environment {
       2E-17,
       SourceDefinitionParameters.WATTS,
       .35,
-      "K",
+      WavebandDefinition.K,               // normalisation band
       1.0,                                // redshift
       SourceDefinitionParameters.NON_STELLAR_LIB + "/elliptical-galaxy.nm",
       0.0,                                // black body temp        (N/A)
@@ -87,10 +88,10 @@ object Environment {
       19.0,
       SourceDefinitionParameters.WATTS,
       .35,
-      "L",                                // band
+      WavebandDefinition.L,               // normalisation band
       0.5,                                // redshift
       SourceDefinitionParameters.BBODY,   // spectrum resource
-      8000.0,                             // black body temp
+      10000.0,                            // black body temp
       0.0,                                // eline wavelength       (N/A)
       0.0,                                // eline width            (N/A)
       0.0,                                // eline flux             (N/A)
@@ -110,7 +111,7 @@ object Environment {
       20.0,
       SourceDefinitionParameters.WATTS,
       .35,
-      "R",                                    // band
+      WavebandDefinition.R,                   // normalisation band
       1.0,                                    // redshift
       SourceDefinitionParameters.ELINE,       // spectrum resource
       0.0,                                    // black body temp [K]  (N/A)
@@ -131,7 +132,7 @@ object Environment {
       20.0,
       SourceDefinitionParameters.MAG,
       .35,
-      "R",
+      WavebandDefinition.R,               // normalisation band
       1.5,
       SourceDefinitionParameters.PLAW,
       0.0,                                // black body temp        (N/A)
@@ -154,7 +155,7 @@ object Environment {
       20.0,
       SourceDefinitionParameters.WATTS,
       .35,
-      "R",                                    // band
+      WavebandDefinition.R,                   // normalisation band
       1.0,                                    // redshift
       SourceDefinitionParameters.ELINE,       // spectrum resource
       0.0,                                    // black body temp [K]  (N/A)
@@ -176,7 +177,7 @@ object Environment {
       20.0,
       SourceDefinitionParameters.WATTS,
       .35,
-      "J",                                    // band
+      WavebandDefinition.J,                   // normalisation band
       0.7,                                    // redshift
       SourceDefinitionParameters.ELINE,       // spectrum resource
       0.0,                                    // black body temp [K]  (N/A)
@@ -198,7 +199,7 @@ object Environment {
       20.0,
       SourceDefinitionParameters.WATTS,
       .35,
-      "J",                                    // band
+      WavebandDefinition.J,                   // normalisation band
       1.0,                                    // redshift
       SourceDefinitionParameters.ELINE,       // spectrum resource
       0.0,                                    // black body temp [K]  (N/A)

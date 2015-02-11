@@ -15,9 +15,9 @@ import edu.gemini.itc.shared.ZeroMagnitudeStar;
  * This is where unit conversion happens.
  */
 public class NormalizeVisitor implements SampledSpectrumVisitor {
-    private String _band; // String description of waveband (A, B, R, etc.)
-    private double _user_norm; // Brightness of the object (flux) as an average
-    private String _units;  // mag, abmag, ...
+    private final WavebandDefinition _band; // String description of waveband (A, B, R, etc.)
+    private final double _user_norm; // Brightness of the object (flux) as an average
+    private final String _units;  // mag, abmag, ...
 
     /**
      * Constructs a Normalizer
@@ -26,7 +26,7 @@ public class NormalizeVisitor implements SampledSpectrumVisitor {
      * @param user_norm The average flux in the waveband
      * @param units     The code for the units chosen by user
      */
-    public NormalizeVisitor(String waveband, double user_norm, String units) {
+    public NormalizeVisitor(final WavebandDefinition waveband, final double user_norm, final String units) {
         _band = waveband;
         _user_norm = user_norm;
         _units = units;
@@ -48,43 +48,37 @@ public class NormalizeVisitor implements SampledSpectrumVisitor {
             double zeropoint = ZeroMagnitudeStar.getAverageFlux(_band);
             norm = zeropoint * (java.lang.Math.pow(10.0, -0.4 * _user_norm));
         } else if (_units.equals(SourceDefinitionParameters.JY)) {
-            norm = _user_norm * 1.509e7 / WavebandDefinition.getCenter(_band);
+            norm = _user_norm * 1.509e7 / _band.getCenter();
         } else if (_units.equals(SourceDefinitionParameters.WATTS)) {
-            norm = _user_norm * WavebandDefinition.getCenter(_band) / 1.988e-13;
+            norm = _user_norm * _band.getCenter() / 1.988e-13;
         } else if (_units.equals(SourceDefinitionParameters.ERGS_WAVELENGTH)) {
-            norm = _user_norm * WavebandDefinition.getCenter(_band) / 1.988e-14;
+            norm = _user_norm * _band.getCenter() / 1.988e-14;
         } else if (_units.equals(SourceDefinitionParameters.ERGS_FREQUENCY)) {
-            norm = _user_norm * 1.509e30 / WavebandDefinition.getCenter(_band);
+            norm = _user_norm * 1.509e30 / _band.getCenter();
         } else if (_units.equals(SourceDefinitionParameters.ABMAG)) {
-            norm = 5.632e10 * java.lang.Math.pow(10, -0.4 * _user_norm) /
-                    WavebandDefinition.getCenter(_band);
+            norm = 5.632e10 * java.lang.Math.pow(10, -0.4 * _user_norm) / _band.getCenter();
         } else if (_units.equals(SourceDefinitionParameters.MAG_PSA)) {
             double zeropoint = ZeroMagnitudeStar.getAverageFlux(_band);
             norm = zeropoint * (java.lang.Math.pow(10.0, -0.4 * _user_norm));
         } else if (_units.equals(SourceDefinitionParameters.JY_PSA)) {
-            norm = _user_norm * 1.509e7 / WavebandDefinition.getCenter(_band);
+            norm = _user_norm * 1.509e7 / _band.getCenter();
         } else if (_units.equals(SourceDefinitionParameters.WATTS_PSA)) {
-            norm = _user_norm * WavebandDefinition.getCenter(_band) / 1.988e-13;
+            norm = _user_norm * _band.getCenter() / 1.988e-13;
         } else if (_units.equals(SourceDefinitionParameters.ERGS_WAVELENGTH_PSA)) {
-            norm = _user_norm * WavebandDefinition.getCenter(_band) / 1.988e-14;
+            norm = _user_norm * _band.getCenter() / 1.988e-14;
         } else if (_units.equals(SourceDefinitionParameters.ERGS_FREQUENCY_PSA)) {
-            norm = _user_norm * 1.509e30 / WavebandDefinition.getCenter(_band);
+            norm = _user_norm * 1.509e30 / _band.getCenter();
         } else if (_units.equals(SourceDefinitionParameters.ABMAG_PSA)) {
-            norm = 5.632e10 * java.lang.Math.pow(10, -0.4 * _user_norm) /
-                    WavebandDefinition.getCenter(_band);
+            norm = 5.632e10 * java.lang.Math.pow(10, -0.4 * _user_norm) / _band.getCenter();
         } else {
             throw new IllegalArgumentException("Unit code " + _units + " not supported.");
         }
 
-        //System.out.println("SED inside Normalize function:");
-        //for (int i = 1500; i<1800; i++)
-        //    System.out.println("X val: "+ i +" Y val: "+sed.getY(i));
-
         // Calculate avg flux density in chosen normalization band.
         double average = sed.getAverage(
-                (double) WavebandDefinition.getStart(_band),
-                (double) WavebandDefinition.getEnd(_band));
-        //System.out.println("Average flux over Normail:" +average+ " Norm: "+ norm);
+                (double) _band.getStart(),
+                (double) _band.getEnd());
+
         // Calculate multiplier.
         double multiplier = norm / average;
 

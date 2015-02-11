@@ -1,8 +1,7 @@
 package edu.gemini.itc.parameters;
 
 import edu.gemini.itc.shared.*;
-
-import javax.servlet.http.HttpServletRequest;
+import edu.gemini.itc.web.ITCRequest;
 
 
 /**
@@ -48,37 +47,17 @@ public final class SourceDefinitionParameters extends ITCParameters {
     public static final String ABMAG_PSA = "ABmag_per_sq_arcsec";
     public static final String JY_PSA = "jy_per_sq_arcsec";
     public static final String WATTS_PSA = "watts_fd_wavelength_per_sq_arcsec";
-    public static final String ERGS_WAVELENGTH_PSA =
-            "ergs_fd_wavelength_per_sq_arcsec";
-    public static final String ERGS_FREQUENCY_PSA =
-            "ergs_fd_frequency_per_sq_arcsec";
+    public static final String ERGS_WAVELENGTH_PSA = "ergs_fd_wavelength_per_sq_arcsec";
+    public static final String ERGS_FREQUENCY_PSA = "ergs_fd_frequency_per_sq_arcsec";
     public static final String WATTS_FLUX = "watts_flux";
     public static final String ERGS_FLUX = "ergs_flux";
     public static final String[] UNITS =
             {MAG, ABMAG, JY, WATTS, ERGS_WAVELENGTH, ERGS_FREQUENCY, MAG_PSA,
                     ABMAG_PSA, JY_PSA, WATTS_PSA, ERGS_WAVELENGTH_PSA, ERGS_FREQUENCY_PSA,
                     WATTS_FLUX, ERGS_FLUX};
-    /**
-     * Constant defining units
-     */
-    private static final int ITC_UNITS_MAG = 0;
-    private static final int ITC_UNITS_ABMAG = 1;
-    private static final int ITC_UNITS_JY = 2;
-    private static final int ITC_UNITS_WATTS = 3;
-    private static final int ITC_UNITS_ERGS_WAVELENGTH = 4;
-    private static final int ITC_UNITS_ERGS_FREQUENCY = 5;
-    private static final int ITC_UNITS_MAG_PSA = 6;
-    private static final int ITC_UNITS_ABMAG_PSA = 7;
-    private static final int ITC_UNITS_JY_PSA = 8;
-    private static final int ITC_UNITS_WATTS_PSA = 9;
-    private static final int ITC_UNITS_ERGS_WAVELENGTH_PSA = 10;
-    private static final int ITC_UNITS_ERGS_FREQUENCY_PSA = 11;
-    private static final int ITC_UNITS_WATTS_FLUX = 12;
-    private static final int ITC_UNITS_ERGS_FLUX = 13;
 
     public static final String LIBRARY_STAR = "libraryStar";
     public static final String LIBRARY_NON_STAR = "libraryNonStar";
-    public static final String BLACK_BODY = "blackBody";
     public static final String BBTEMP = "BBTemp";
     public static final String BBODY = "modelBlackBody";
     public static final String ELINE = "modelEmLine";
@@ -92,7 +71,6 @@ public final class SourceDefinitionParameters extends ITCParameters {
     public static final String PLAW_INDEX = "powerIndex";
     public static final String USER_DEFINED_SPECTRUM = "userDefinedSpectrum";
     public static final String USER_DEFINED_SPECTRUM_NAME = "specUserDef";
-    public static final int USER_DEFINED_SPECTRUM_INDEX = 0;
 
     public static final String REDSHIFT = "redshift";
     public static final String VELOCITY = "velocity";
@@ -103,16 +81,15 @@ public final class SourceDefinitionParameters extends ITCParameters {
      * Location of SED data files
      */
     public static final String STELLAR_LIB = ITCConstants.SED_LIB + "/stellar";
-    public static final String NON_STELLAR_LIB =
-            ITCConstants.SED_LIB + "/non_stellar";
+    public static final String NON_STELLAR_LIB = ITCConstants.SED_LIB + "/non_stellar";
 
     // Data members
-    private String _sourceGeom;  // point or extended
+    private final String _sourceGeom;  // point or extended
     private String _extSourceType; // uniform, gaussian, ...
-    private double _sourceNorm;  // 19.3 or 2e-17
-    private String _units; // unit code
+    private final double _sourceNorm;  // 19.3 or 2e-17
+    private final String _units; // unit code
     private double _fwhm;
-    private String _normBand; // U, V, B, ...
+    private final WavebandDefinition _normBand; // U, V, B, ...
     private double _bBTemp;
     private double _eLineWavelength;
     private double _eLineWidth;
@@ -139,6 +116,8 @@ public final class SourceDefinitionParameters extends ITCParameters {
      */
 
     public SourceDefinitionParameters(ITCMultiPartParser p) {
+        ITCRequest itcR = ITCRequest.from(p); // temporary
+
         _sourceGeom = p.getParameter(SOURCE_GEOM);
         if (_sourceGeom.equals(POINT_SOURCE)) {
             _sourceNorm = ITCParameters.parseDouble(p.getParameter(SOURCE_NORM_PT_SOURCE), "Integrated Brightness");
@@ -170,7 +149,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
         }
 
         // Get Normalization info
-        _normBand = p.getParameter("normBand");
+        _normBand = itcR.enumParameter(WavebandDefinition.class);
 
         // Get Spectrum Resource
         _sourceSpec = p.getParameter(SOURCE_SPEC);
@@ -231,7 +210,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
                                       double sourceNorm,
                                       String units,
                                       double fwhm,
-                                      String normBand,
+                                      WavebandDefinition normBand,
                                       double redshift,
                                       String spectrumResource,
                                       double bBTemp,
@@ -286,7 +265,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
         return _fwhm;
     }
 
-    public String getNormBand() {
+    public WavebandDefinition getNormBand() {
         return _normBand;
     }
 
@@ -365,7 +344,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
         sb.append("Units:\t\t\t" + getUnits() + "\n");
         sb.append("Gaussian FWHM:\t" + getFWHM() + "\n");
         sb.append("Normalization Type:\tfilter\n");
-        sb.append("Normalization WaveBand:\t" + getNormBand() + "\n");
+        sb.append("Normalization WaveBand:\t" + getNormBand().name + "\n");
         sb.append("Normalization Wavelen:\t0.0\n");
         sb.append("Redshift:\t\t" + getRedshift() + "\n");
         sb.append("Spectrum Resource:\t" + getSpectrumResource() + "\n");
@@ -404,18 +383,18 @@ public final class SourceDefinitionParameters extends ITCParameters {
                     device.toString(getELineContinuumFlux()) + " " + getELineContinuumFluxUnits() + ".");
         } else if (getSourceSpec().equals(BBODY)) {
             sb.append(" " + getBBTemp() + "K Blackbody, at " + getSourceNormalization() +
-                    " " + getPrettyUnits() + " in the " + getNormBand() + " band.");
+                    " " + getPrettyUnits() + " in the " + getNormBand().name + " band.");
         } else if (getSourceSpec().equals(LIBRARY_STAR)) {
             sb.append(" " + getSourceNormalization() + " " + getPrettyUnits() + " " + getSpecType() +
-                    " star in the " + getNormBand() + " band.");
+                    " star in the " + getNormBand().name + " band.");
         } else if (getSourceSpec().equals(LIBRARY_NON_STAR)) {
             sb.append(" " + getSourceNormalization() + " " + getPrettyUnits() + " " + getSpecType() +
-                    " in the " + getNormBand() + " band.");
+                    " in the " + getNormBand().name + " band.");
         } else if (isSedUserDefined()) {
             sb.append(" a user defined spectrum with the name: " + getSpectrumResource());
         } else if (getSourceSpec().equals(PLAW)) {
             sb.append(" Power Law Spectrum, with an index of " + getPowerLawIndex()
-                    + " and " + getSourceNormalization() + " mag in the " + getNormBand() + " band.");
+                    + " and " + getSourceNormalization() + " mag in the " + getNormBand().name + " band.");
         }
         sb.append("\n");
         return sb.toString();

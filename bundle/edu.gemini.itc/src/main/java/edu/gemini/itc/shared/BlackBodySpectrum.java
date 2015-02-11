@@ -17,16 +17,12 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
         _spectrum = spectrum;
     }
 
-    public BlackBodySpectrum(double temp, double start, double end,
-                             double interval, double flux, String units,
-                             String band, double z) {
+    public BlackBodySpectrum(double temp, double interval, double flux, String units,
+                             WavebandDefinition band, double z) {
         double _flux;
         double _S;
-        // This is to buffer the sed for normailisation.
-        //start-=20;
-        //end+=20;
-        start = 300;
-        end = 30000;
+        double start = 300;
+        double end = 30000;
 
         //rescale the start and end depending on the redshift
 
@@ -46,14 +42,12 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
         //System.out.println("flux:"+flux+"   _flux:"+ _flux + " unit " + units + " band " + band);
         // get the scaling factor S
 
-        double band_start = WavebandDefinition.getStart(band) / (1 + z);
-        double band_end = WavebandDefinition.getEnd(band) / (1 + z);
+        double band_start = band.getStart() / (1 + z);
+        double band_end = band.getEnd() / (1 + z);
         double band_sum = 0;
         int sum_counter = 0;
 
         _S = _getScalingFactor(band_start, band_end);
-        //System.out.println("Scale:"+_S);
-        //for (double wavelength=start; wavelength <= end+20; wavelength+=interval)
 
         for (double wavelength = start; wavelength <= end; wavelength += interval) {
             fluxArray[i] = _blackbodyFlux(wavelength, temp, _flux, _S);//*wavelength;//1.988e-13;
@@ -63,8 +57,6 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
 
             }
             i = i + 1;
-            //System.out.print("i:"+i);
-
         }
 
         //for ( i = 1130-300 ; i< 1130-200 ; i++)
@@ -77,7 +69,7 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
         double phot_norm = zeropoint * (java.lang.Math.pow(10.0, -0.4 * _flux));
         //double watt_norm= phot_norm/WavebandDefinition.getCenter(band)*1.988e-13;
         double norm = phot_norm;//watt_norm * WavebandDefinition.getCenter(band) / 1.988e-13;
-        double average = _spectrum.getAverage((double) WavebandDefinition.getStart(band) / (1 + z), (double) WavebandDefinition.getEnd(band) / (1 + z));
+        double average = _spectrum.getAverage((double) band.getStart() / (1 + z), (double) band.getEnd() / (1 + z));
         //double average =  band_sum/(sum_counter*2);
 
         //System.out.println("zero: " +zeropoint+ " photn: "+ phot_norm + " z: " + z+ " average: " + average+ " start: " +WavebandDefinition.getStart(band)+" end: "+WavebandDefinition.getEnd(band)+" " +sum_counter);
@@ -121,37 +113,35 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
     }
 
 
-    private double _convertToMag(double flux, String units, String band) {
+    private double _convertToMag(double flux, String units, WavebandDefinition band) {
         //THis method should convert the flux into units of magnitude.
         //same code as in NormalizeVisitor.java.  Eventually should come out
         // into a genral purpose conversion class if needs to be used again.
         double norm = -1;
         //The firstpart converts the units to our internal units.
         if (units.equals(SourceDefinitionParameters.JY)) {
-            norm = flux * 1.509e7 / WavebandDefinition.getCenter(band);
+            norm = flux * 1.509e7 / band.getCenter();
         } else if (units.equals(SourceDefinitionParameters.WATTS)) {
-            norm = flux * WavebandDefinition.getCenter(band) / 1.988e-13;
+            norm = flux * band.getCenter() / 1.988e-13;
         } else if (units.equals(SourceDefinitionParameters.ERGS_WAVELENGTH)) {
-            norm = flux * WavebandDefinition.getCenter(band) / 1.988e-14;
+            norm = flux * band.getCenter() / 1.988e-14;
         } else if (units.equals(SourceDefinitionParameters.ERGS_FREQUENCY)) {
-            norm = flux * 1.509e30 / WavebandDefinition.getCenter(band);
+            norm = flux * 1.509e30 / band.getCenter();
         } else if (units.equals(SourceDefinitionParameters.ABMAG)) {
-            norm = 5.632e10 * java.lang.Math.pow(10, -0.4 * flux) /
-                    WavebandDefinition.getCenter(band);
+            norm = 5.632e10 * java.lang.Math.pow(10, -0.4 * flux) / band.getCenter();
         } else if (units.equals(SourceDefinitionParameters.MAG_PSA)) {
             double zeropoint = ZeroMagnitudeStar.getAverageFlux(band);
             norm = zeropoint * (java.lang.Math.pow(10.0, -0.4 * flux));
         } else if (units.equals(SourceDefinitionParameters.JY_PSA)) {
-            norm = flux * 1.509e7 / WavebandDefinition.getCenter(band);
+            norm = flux * 1.509e7 / band.getCenter();
         } else if (units.equals(SourceDefinitionParameters.WATTS_PSA)) {
-            norm = flux * WavebandDefinition.getCenter(band) / 1.988e-13;
+            norm = flux * band.getCenter() / 1.988e-13;
         } else if (units.equals(SourceDefinitionParameters.ERGS_WAVELENGTH_PSA)) {
-            norm = flux * WavebandDefinition.getCenter(band) / 1.988e-14;
+            norm = flux * band.getCenter() / 1.988e-14;
         } else if (units.equals(SourceDefinitionParameters.ERGS_FREQUENCY_PSA)) {
-            norm = flux * 1.509e30 / WavebandDefinition.getCenter(band);
+            norm = flux * 1.509e30 / band.getCenter();
         } else if (units.equals(SourceDefinitionParameters.ABMAG_PSA)) {
-            norm = 5.632e10 * java.lang.Math.pow(10, -0.4 * flux) /
-                    WavebandDefinition.getCenter(band);
+            norm = 5.632e10 * java.lang.Math.pow(10, -0.4 * flux) / band.getCenter();
         }
 
 
