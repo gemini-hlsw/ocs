@@ -18,7 +18,8 @@ class RPMDistHandler(jre: Option[String]) extends DistHandler {
 
     // Due to permission issues and limitations on rpmbuild we need to override .rpmmacros
     val rpmbuild = wd // Hardcoded to avoid permission issues
-    val rpmmacros = s"%_topdir $rpmbuild\n"
+    // Set topdir and prevent the binary stripping step on RPM creation
+    val rpmmacros = s"%_topdir $rpmbuild\n%__os_install_post %{nil}\n"
 
     // Overwrite it, it changes per project
     val rpmmacrosFiles = new File(System.getProperty("user.home"), ".rpmmacros")
