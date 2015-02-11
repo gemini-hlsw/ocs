@@ -75,9 +75,7 @@ public class NormalizeVisitor implements SampledSpectrumVisitor {
         }
 
         // Calculate avg flux density in chosen normalization band.
-        double average = sed.getAverage(
-                (double) _band.getStart(),
-                (double) _band.getEnd());
+        double average = sed.getAverage(_band.getStart(), _band.getEnd());
 
         // Calculate multiplier.
         double multiplier = norm / average;

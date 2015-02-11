@@ -69,7 +69,7 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
         double phot_norm = zeropoint * (java.lang.Math.pow(10.0, -0.4 * _flux));
         //double watt_norm= phot_norm/WavebandDefinition.getCenter(band)*1.988e-13;
         double norm = phot_norm;//watt_norm * WavebandDefinition.getCenter(band) / 1.988e-13;
-        double average = _spectrum.getAverage((double) band.getStart() / (1 + z), (double) band.getEnd() / (1 + z));
+        double average = _spectrum.getAverage(band.getStart() / (1 + z), band.getEnd() / (1 + z));
         //double average =  band_sum/(sum_counter*2);
 
         //System.out.println("zero: " +zeropoint+ " photn: "+ phot_norm + " z: " + z+ " average: " + average+ " start: " +WavebandDefinition.getStart(band)+" end: "+WavebandDefinition.getEnd(band)+" " +sum_counter);

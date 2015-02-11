@@ -39,23 +39,23 @@ public enum WavebandDefinition {
     }
 
     /** Returns the center of this waveband in nm. */
-    public int getCenter() {
+    public double getCenter() {
         return center;
     }
 
     /** Returns the width of this waveband in nm. */
-    public int getWidth() {
+    public double getWidth() {
         return width;
     }
 
     /** Returns the lower limit of this waveband in nm. */
-    public int getStart() {
-        return getCenter() - (getWidth() / 2);
+    public double getStart() {
+        return center - (width / 2);
     }
 
     /** Returns the upper limit of this waveband in nm. */
-    public int getEnd() {
-        return getCenter() + (getWidth() / 2);
+    public double getEnd() {
+        return center + (width / 2);
     }
 }
 
