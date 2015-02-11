@@ -1235,13 +1235,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         if (pm >= 0) {
                             Double pm1 = (Double) tqr.getValueAt(0, pm);
                             Double pm2 = (Double) tqr.getValueAt(0, pm + 1);
-                            _curPos.setPropMotionRA(pm1);
-                            _curPos.setPropMotionDec(pm2);
+                            setPM(_curPos, pm1, pm2);
                         } else {
-                            //SCT-301: If not found, then we reset the value
-                            //to zero. I hate these strings.
-                            _curPos.setPropMotionDec(0.0);
-                            _curPos.setPropMotionRA(0.0);
+                            //SCT-301: If not found, then we reset the value to zero
+                            setPM(_curPos, 0.0, 0.0);
                         }
                         if (tqr.getCoordinates(0) instanceof WorldCoords) {
                             WorldCoords pos = (WorldCoords) tqr.getCoordinates(0);
@@ -1253,6 +1250,17 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         DialogUtil.error(((Exception) o).getMessage());
                     }
                 }
+
+                private void setPM(SPTarget spt, double ra, double dec) {
+                    final ITarget it = spt.getTarget();
+                    if (it instanceof HmsDegTarget) {
+                        final HmsDegTarget t = (HmsDegTarget) it;
+                        t.setPropMotionRA(ra);
+                        t.setPropMotionDec(dec);
+                    }
+                    spt.notifyOfGenericUpdate();
+                }
+
             }.start();
         }
     }

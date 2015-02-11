@@ -9,6 +9,7 @@ import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
 import edu.gemini.spModel.target.WatchablePos;
+import edu.gemini.spModel.target.system.HmsDegTarget;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -62,11 +63,11 @@ final class TrackingEditor implements TelescopePosEditor {
     }
 
     private static interface UpdateFunction {
-        void apply(SPTarget target, Number d);
+        void apply(HmsDegTarget target, Number d);
     }
 
     private static interface InitFunction {
-        void apply(SPTarget target, JFormattedTextField field);
+        void apply(HmsDegTarget target, JFormattedTextField field);
     }
 
     private final class NumberFieldListener implements PropertyChangeListener {
@@ -79,7 +80,10 @@ final class TrackingEditor implements TelescopePosEditor {
         @Override public void propertyChange(PropertyChangeEvent evt) {
             target.deleteWatcher(watcher);
             Number d = (Number) evt.getNewValue();
-            function.apply(target, d);
+            if (target.getTarget() instanceof HmsDegTarget) {
+                function.apply((HmsDegTarget) target.getTarget(), d);
+            }
+            target.notifyOfGenericUpdate(); // someone else may be watching
             target.addWatcher(watcher);
         }
     }
@@ -109,7 +113,9 @@ final class TrackingEditor implements TelescopePosEditor {
 
         public void reinit() {
             field.removePropertyChangeListener("value", listener);
-            init.apply(target, field);
+            if (target.getTarget() instanceof HmsDegTarget) {
+                init.apply((HmsDegTarget) target.getTarget(), field);
+            }
             field.addPropertyChangeListener("value", listener);
         }
     }
@@ -124,34 +130,34 @@ final class TrackingEditor implements TelescopePosEditor {
         rows = DefaultImList.create(
             (Row) new NumberRow("Epoch", "years",
                     new InitFunction() {
-                        @Override public void apply(SPTarget target, JFormattedTextField field) {
+                        @Override public void apply(HmsDegTarget target, JFormattedTextField field) {
                             field.setText(Double.toString(target.getTrackingEpoch()));
                         }
                     },
                     new UpdateFunction() {
-                        @Override public void apply(SPTarget target, Number d) {
+                        @Override public void apply(HmsDegTarget target, Number d) {
                             target.setTrackingEpoch(d == null ? 2000.0 : d.doubleValue());
                         }
                     }),
             new NumberRow("Parallax", "arcsec",
                     new InitFunction() {
-                        @Override public void apply(SPTarget target, JFormattedTextField field) {
+                        @Override public void apply(HmsDegTarget target, JFormattedTextField field) {
                             field.setText(Double.toString(target.getTrackingParallax()));
                         }
                     },
                     new UpdateFunction() {
-                        @Override public void apply(SPTarget target, Number d) {
+                        @Override public void apply(HmsDegTarget target, Number d) {
                             target.setTrackingParallax(d == null ? 0.0 : d.doubleValue());
                         }
                     }),
             new NumberRow("Radial Vel", "km/sec",
                     new InitFunction() {
-                        @Override public void apply(SPTarget target, JFormattedTextField field) {
+                        @Override public void apply(HmsDegTarget target, JFormattedTextField field) {
                             field.setText(Double.toString(target.getTrackingRadialVelocity()));
                         }
                     },
                     new UpdateFunction() {
-                        @Override public void apply(SPTarget target, Number d) {
+                        @Override public void apply(HmsDegTarget target, Number d) {
                             target.setTrackingRadialVelocity(d == null ? 0.0 : d.doubleValue());
                         }
                     })
