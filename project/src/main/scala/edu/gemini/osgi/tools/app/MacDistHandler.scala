@@ -19,6 +19,7 @@ case class MacDistHandler(jre: Option[String], jreName: String) extends DistHand
     // Output dirs
     val name = meta.osxVisibleName(version)
     val appDir = mkdir(outDir,  s"$name.app")
+    val trashDir = mkdir(appDir, ".Trash")  // http://stackoverflow.com/questions/18621467/error-creating-disk-image-using-hdutil
     val contentsDir = mkdir(appDir, "Contents")
     val macosDir = mkdir(contentsDir, "MacOS")
     val resourcesDir = mkdir(contentsDir, "Resources")
