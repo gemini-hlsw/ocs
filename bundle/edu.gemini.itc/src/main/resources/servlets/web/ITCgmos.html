@@ -28,18 +28,18 @@
 				<td colspan="2"><b>Point source</b> (<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10257#spatial','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false">nominal
 				PSF</a>) with spatially integrated brightness <input name="psSourceNorm" size="8" value="20.0" type="text" /> <select name="psSourceUnits" size="1">
 
-				<option selected="selected" value="mag">
+				<option selected="selected" value="MAG">
 				mag</option>
-				<option value="ABmag">
+				<option value="ABMAG">
 				AB mag</option>
-				<option value="jy">
+				<option value="JY">
 				Jy</option>
-				<option value="watts_fd_wavelength">
+				<option value="WATTS">
 
 				W/m^2/um</option>
-				<option value="ergs_fd_wavelength">
+				<option value="ERGS_WAVELENGTH">
 				ergs/s/cm^2/A</option>
-				<option value="ergs_fd_frequency">
+				<option value="ERGS_FREQUENCY">
 				ergs/s/cm^2/Hz</option>
 				</select> (e.g. 19.3 mag or 2e-17 W/m^2/um) </td>
 
@@ -54,18 +54,18 @@
 
 				<td><img src="/spacer.gif" height="1" width="40" /><input name="extSourceType" value="gaussian" type="radio" /></td>
 				<td>Gaussian profile with full width half maximum (including seeing) of <input name="gaussFwhm" size="5" value="1.0" type="text" /> arcsec and spatially integrated brightness of <input name="gaussSourceNorm" size="8" value="20" type="text" /> <select name="gaussSourceUnits" size="1">
-				<option value="mag" selected="selected">
+				<option value="MAG" selected="selected">
 				mag</option>
-				<option value="ABmag">
+				<option value="ABMAG">
 				AB mag</option>
 
-				<option value="jy">
+				<option value="JY">
 				Jy</option>
-				<option value="watts_fd_wavelength">
+				<option value="WATTS">
 				W/m^2/um</option>
-				<option value="ergs_fd_wavelength">
+				<option value="ERGS_WAVELENGTH">
 				ergs/s/cm^2/A</option>
-				<option value="ergs_fd_frequency">
+				<option value="ERGS_FREQUENCY">
 
 				ergs/s/cm^2/Hz</option>
 				</select> (e.g. 19.3 mag or 2e-17 W/m^2/um) </td>
@@ -75,18 +75,18 @@
 				<td><img src="/spacer.gif" height="1" width="40" /><input name="extSourceType" value="uniform" checked="checked" type="radio" /></td>
 				<td>Uniform surface brightness <input name="usbSourceNorm" size="8" value="22.0" type="text" /> <select name="usbSourceUnits" size="1">
 
-				<option selected="selected" value="mag_per_sq_arcsec">
+				<option selected="selected" value="MAG_PSA">
 				mag / sq arcsec</option>
-				<option value="ABmag_per_sq_arcsec">
+				<option value="ABMAG_PSA">
 				AB mag / sq arcsec</option>
-				<option value="jy_per_sq_arcsec">
+				<option value="JY_PSA">
 				Jy / sq arcsec</option>
-				<option value="watts_fd_wavelength_per_sq_arcsec">
+				<option value="WATTS_PSA">
 
 				W/m^2/um / sq arcsec</option>
-				<option value="ergs_fd_wavelength_per_sq_arcsec">
+				<option value="ERGS_WAVELENGTH_PSA">
 				ergs/s/cm^2/A / sq arcsec</option>
-				<option value="ergs_fd_frequency_per_sq_arcsec">
+				<option value="ERGS_FREQUENCY_PSA">
 				ergs/s/cm^2/Hz / sq arcsec</option>
 				</select> (e.g. 21.6 mag / sq arcsec) </td>
 
