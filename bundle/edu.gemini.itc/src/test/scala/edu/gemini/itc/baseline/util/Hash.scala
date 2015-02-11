@@ -194,7 +194,7 @@ object Hash {
       src.getFWHM,
       src.getNormBand.name,
       src.getPowerLawIndex,
-      src.getPrettyUnits,
+      src.getUnits.displayValue, // TODO: remove
       src.getRedshift,
       src.getSourceGeometry,
       src.getSourceGeometryStr,
@@ -202,7 +202,7 @@ object Hash {
       src.getSourceSpec,
       src.getSpectrumResource,
       src.getSpecType,
-      src.getUnits,
+      src.getUnits.displayValue,
       src.getUserDefinedSpectrum
     )
 

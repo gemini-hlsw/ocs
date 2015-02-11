@@ -46,7 +46,7 @@ object Environment {
       SourceDefinitionParameters.POINT_SOURCE,
       SourceDefinitionParameters.UNIFORM,
       15.0,
-      SourceDefinitionParameters.MAG,
+      SourceDefinitionParameters.BrightnessUnit.MAG,
       .35,
       WavebandDefinition.H,
       0.3,
@@ -66,7 +66,7 @@ object Environment {
       SourceDefinitionParameters.POINT_SOURCE,
       SourceDefinitionParameters.UNIFORM,
       2E-17,
-      SourceDefinitionParameters.WATTS,
+      SourceDefinitionParameters.BrightnessUnit.WATTS,
       .35,
       WavebandDefinition.K,               // normalisation band
       1.0,                                // redshift
@@ -86,7 +86,7 @@ object Environment {
       SourceDefinitionParameters.EXTENDED_SOURCE,
       SourceDefinitionParameters.UNIFORM,
       19.0,
-      SourceDefinitionParameters.WATTS,
+      SourceDefinitionParameters.BrightnessUnit.WATTS,
       .35,
       WavebandDefinition.L,               // normalisation band
       0.5,                                // redshift
@@ -109,7 +109,7 @@ object Environment {
       SourceDefinitionParameters.EXTENDED_SOURCE,
       SourceDefinitionParameters.GAUSSIAN,
       20.0,
-      SourceDefinitionParameters.WATTS,
+      SourceDefinitionParameters.BrightnessUnit.WATTS,
       .35,
       WavebandDefinition.R,                   // normalisation band
       1.0,                                    // redshift
@@ -130,7 +130,7 @@ object Environment {
       SourceDefinitionParameters.EXTENDED_SOURCE,
       SourceDefinitionParameters.GAUSSIAN,
       20.0,
-      SourceDefinitionParameters.MAG,
+      SourceDefinitionParameters.BrightnessUnit.MAG,
       .35,
       WavebandDefinition.R,               // normalisation band
       1.5,
@@ -153,7 +153,7 @@ object Environment {
       SourceDefinitionParameters.EXTENDED_SOURCE,
       SourceDefinitionParameters.GAUSSIAN,
       20.0,
-      SourceDefinitionParameters.WATTS,
+      SourceDefinitionParameters.BrightnessUnit.WATTS,
       .35,
       WavebandDefinition.R,                   // normalisation band
       1.0,                                    // redshift
@@ -175,7 +175,7 @@ object Environment {
       SourceDefinitionParameters.EXTENDED_SOURCE,
       SourceDefinitionParameters.GAUSSIAN,
       20.0,
-      SourceDefinitionParameters.WATTS,
+      SourceDefinitionParameters.BrightnessUnit.WATTS,
       .35,
       WavebandDefinition.J,                   // normalisation band
       0.7,                                    // redshift
@@ -197,7 +197,7 @@ object Environment {
       SourceDefinitionParameters.EXTENDED_SOURCE,
       SourceDefinitionParameters.GAUSSIAN,
       20.0,
-      SourceDefinitionParameters.WATTS,
+      SourceDefinitionParameters.BrightnessUnit.WATTS,
       .35,
       WavebandDefinition.J,                   // normalisation band
       1.0,                                    // redshift

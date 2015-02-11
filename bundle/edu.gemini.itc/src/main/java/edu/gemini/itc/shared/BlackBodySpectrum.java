@@ -8,7 +8,6 @@ import edu.gemini.itc.parameters.SourceDefinitionParameters;
  * paper on IR spectrophotometric calibrations.  This Class implements
  * Visitable sampled specturm to create the sed.
  */
-
 public class BlackBodySpectrum implements VisitableSampledSpectrum {
     private DefaultSampledSpectrum _spectrum;
 
@@ -17,164 +16,91 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
         _spectrum = spectrum;
     }
 
-    public BlackBodySpectrum(double temp, double interval, double flux, String units,
-                             WavebandDefinition band, double z) {
-        double _flux;
-        double _S;
-        double start = 300;
-        double end = 30000;
+    public BlackBodySpectrum(double temp, double interval, double flux, SourceDefinitionParameters.BrightnessUnit units, WavebandDefinition band, double z) {
 
         //rescale the start and end depending on the redshift
+        final double start = 300 / (1 + z);
+        final double end   = 30000 / (1 + z);
 
-        start /= ((1 + z));
-        end /= ((1 + z));
+        final int n = (int) ((end - start) / interval + 1);
+        final double[] fluxArray = new double[n + 40];
 
-        int n = (int) ((end - start) / interval + 1);
-        double[] fluxArray = new double[n + 40];
-        // System.out.println("array:" +(n+40)+ "int"+interval);
-        int i = 0;
         //if units need to be converted do it.
-        if (units.equals(SourceDefinitionParameters.MAG) || units.equals(
-                SourceDefinitionParameters.MAG_PSA))
-            _flux = flux;
-        else
-            _flux = _convertToMag(flux, units, band);
-        //System.out.println("flux:"+flux+"   _flux:"+ _flux + " unit " + units + " band " + band);
-        // get the scaling factor S
+        final double _flux;
+        switch (units) {
+            case MAG:
+            case MAG_PSA:
+                _flux = flux;
+                break;
+            default:
+                _flux = _convertToMag(flux, units, band);
+        }
 
-        double band_start = band.getStart() / (1 + z);
-        double band_end = band.getEnd() / (1 + z);
-        double band_sum = 0;
-        int sum_counter = 0;
-
-        _S = _getScalingFactor(band_start, band_end);
-
+        int i = 0;
         for (double wavelength = start; wavelength <= end; wavelength += interval) {
-            fluxArray[i] = _blackbodyFlux(wavelength, temp, _flux, _S);//*wavelength;//1.988e-13;
-            if (wavelength >= band_start / (1 + z) && wavelength <= band_end / (1 + z)) {
-                band_sum = fluxArray[i];
-                sum_counter++;
-
-            }
+            fluxArray[i] = _blackbodyFlux(wavelength, temp);
             i = i + 1;
         }
 
-        //for ( i = 1130-300 ; i< 1130-200 ; i++)
-        //		System.out.println("flux:"+fluxArray[i]);
         _spectrum = new DefaultSampledSpectrum(fluxArray, start, interval);
-        //System.out.println("inte: " + _spectrum.getIntegral()+ "added up:" + t+ " " +t/n);
+
         //with blackbody convert W m^2 um^-1 to phot....
+        final double zeropoint = ZeroMagnitudeStar.getAverageFlux(band);
+        final double phot_norm = zeropoint * (java.lang.Math.pow(10.0, -0.4 * _flux));
+        final double average   = _spectrum.getAverage(band.getStart() / (1 + z), band.getEnd() / (1 + z));
 
-        double zeropoint = ZeroMagnitudeStar.getAverageFlux(band);
-        double phot_norm = zeropoint * (java.lang.Math.pow(10.0, -0.4 * _flux));
-        //double watt_norm= phot_norm/WavebandDefinition.getCenter(band)*1.988e-13;
-        double norm = phot_norm;//watt_norm * WavebandDefinition.getCenter(band) / 1.988e-13;
-        double average = _spectrum.getAverage(band.getStart() / (1 + z), band.getEnd() / (1 + z));
-        //double average =  band_sum/(sum_counter*2);
-
-        //System.out.println("zero: " +zeropoint+ " photn: "+ phot_norm + " z: " + z+ " average: " + average+ " start: " +WavebandDefinition.getStart(band)+" end: "+WavebandDefinition.getEnd(band)+" " +sum_counter);
-
-        //     for (double wavelength=start; wavelength <= end+20; wavelength+=interval)
-        //       {
-        //		System.out.println("Value: " + getY(wavelength));
-        //}
         // Calculate multiplier.
-        double multiplier = norm / average;
-        //System.out.println(":"+multiplier);
-        // Apply normalization, multiply every value in the SED by
-        // multiplier and then its average in specified band will be
-        // the required amount.
-        //print();
-        //System.out.println("Mult: " + multiplier);
+        final double multiplier = phot_norm / average;
         _spectrum.rescaleY(multiplier);
-        //print();
-        //return _spectrum;
 
     }
 
 
-    private double _blackbodyFlux(double lambda, double temp, double flux,
-                                  double scaleFactor) {
-        //this funtion will calculate the blacbody spectum for a given wavelen
+    private double _blackbodyFlux(final double lambda, final double temp) {
+        //this funtion will calculate the blackbody spectum for a given wavelen
         // and effective temp (specified by the user. The flux is just the mag
         // of the object in question.  The units are returned as W m^-2 um^-1.
         // That is good so we dont have to do any thing to the result.  It will
         // be changed in normalize visitor.
 
-        double returnFlux;
+        return (1 / java.lang.Math.pow(lambda / 1000, 4)) * (1 / (java.lang.Math.exp(14387 / (lambda / 1000 * temp)) - 1));
 
-        returnFlux = //scaleFactor* java.lang.Math.pow(10.0,-8)*
-                //java.lang.Math.pow(10.0,-0.4*flux)*
-                (1 / java.lang.Math.pow(lambda / 1000, 4)) *
-                        (1 / (java.lang.Math.exp(14387 / (lambda / 1000 * temp)) - 1));//
-        //(2.99792458e8/(lambda/1e6)*6.62618e-34);
-
-        return returnFlux;
     }
 
 
-    private double _convertToMag(double flux, String units, WavebandDefinition band) {
+    private double _convertToMag(final double flux, final SourceDefinitionParameters.BrightnessUnit units, final WavebandDefinition band) {
         //THis method should convert the flux into units of magnitude.
         //same code as in NormalizeVisitor.java.  Eventually should come out
         // into a genral purpose conversion class if needs to be used again.
-        double norm = -1;
+        final double norm;
         //The firstpart converts the units to our internal units.
-        if (units.equals(SourceDefinitionParameters.JY)) {
-            norm = flux * 1.509e7 / band.getCenter();
-        } else if (units.equals(SourceDefinitionParameters.WATTS)) {
-            norm = flux * band.getCenter() / 1.988e-13;
-        } else if (units.equals(SourceDefinitionParameters.ERGS_WAVELENGTH)) {
-            norm = flux * band.getCenter() / 1.988e-14;
-        } else if (units.equals(SourceDefinitionParameters.ERGS_FREQUENCY)) {
-            norm = flux * 1.509e30 / band.getCenter();
-        } else if (units.equals(SourceDefinitionParameters.ABMAG)) {
-            norm = 5.632e10 * java.lang.Math.pow(10, -0.4 * flux) / band.getCenter();
-        } else if (units.equals(SourceDefinitionParameters.MAG_PSA)) {
-            double zeropoint = ZeroMagnitudeStar.getAverageFlux(band);
-            norm = zeropoint * (java.lang.Math.pow(10.0, -0.4 * flux));
-        } else if (units.equals(SourceDefinitionParameters.JY_PSA)) {
-            norm = flux * 1.509e7 / band.getCenter();
-        } else if (units.equals(SourceDefinitionParameters.WATTS_PSA)) {
-            norm = flux * band.getCenter() / 1.988e-13;
-        } else if (units.equals(SourceDefinitionParameters.ERGS_WAVELENGTH_PSA)) {
-            norm = flux * band.getCenter() / 1.988e-14;
-        } else if (units.equals(SourceDefinitionParameters.ERGS_FREQUENCY_PSA)) {
-            norm = flux * 1.509e30 / band.getCenter();
-        } else if (units.equals(SourceDefinitionParameters.ABMAG_PSA)) {
-            norm = 5.632e10 * java.lang.Math.pow(10, -0.4 * flux) / band.getCenter();
+        switch (units) {
+            case JY:                norm = flux * 1.509e7 / band.getCenter();       break;
+            case WATTS:             norm = flux * band.getCenter() / 1.988e-13;     break;
+            case ERGS_WAVELENGTH:   norm = flux * band.getCenter() / 1.988e-14;     break;
+            case ERGS_FREQUENCY:    norm = flux * 1.509e30 / band.getCenter();      break;
+            case ABMAG:             norm = 5.632e10 * Math.pow(10, -0.4 * flux) / band.getCenter(); break;
+            case MAG_PSA:
+                double zeropoint = ZeroMagnitudeStar.getAverageFlux(band);
+                norm = zeropoint * (Math.pow(10.0, -0.4 * flux));
+                break;
+            case JY_PSA:            norm = flux * 1.509e7 / band.getCenter();       break;
+            case WATTS_PSA:         norm = flux * band.getCenter() / 1.988e-13;     break;
+            case ERGS_WAVELENGTH_PSA: norm = flux * band.getCenter() / 1.988e-14;   break;
+            case ERGS_FREQUENCY_PSA:norm = flux * 1.509e30 / band.getCenter();      break;
+            case ABMAG_PSA:         norm = 5.632e10 * Math.pow(10, -0.4 * flux) / band.getCenter(); break;
+            default:
+                throw new IllegalArgumentException("invalid units " + units);
         }
 
 
-        double zeropoint = ZeroMagnitudeStar.getAverageFlux(band);
-        return -(java.lang.Math.log(norm / zeropoint) / java.lang.Math.log(10)) / .4;
+        final double zeropoint = ZeroMagnitudeStar.getAverageFlux(band);
+        return -(Math.log(norm / zeropoint) / Math.log(10)) / .4;
     }
-
-    private double _getScalingFactor(double start, double end) {
-        // this method will return the Scaling factor dermined by the mid pt
-        // of the filter. The mid pt should eventually be replaced by the
-        // true central wavelen of the filter.
-
-        double midpt = (start / 1000 + end / 1000) / 2;
-
-        if (midpt <= 1.434)
-            return 2.1797;
-        else if (midpt <= 1.917)
-            return 2.1398;
-        else if (midpt <= 2.863)
-            return 2.0473;
-        else if (midpt <= 3.654)
-            return 1.9756;
-        else if (midpt <= 4.265)
-            return 1.9675;
-        else
-            return 1.9502;
-    }
-
 
     //Implements the clonable interface
     public Object clone() {
-        DefaultSampledSpectrum spectrum =
-                (DefaultSampledSpectrum) _spectrum.clone();
+        DefaultSampledSpectrum spectrum = (DefaultSampledSpectrum) _spectrum.clone();
         return new BlackBodySpectrum(spectrum);
     }
 

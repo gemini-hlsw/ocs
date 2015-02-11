@@ -2,6 +2,7 @@ package edu.gemini.itc.parameters;
 
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.ITCRequest;
+import edu.gemini.spModel.type.DisplayableSpType;
 
 
 /**
@@ -37,24 +38,31 @@ public final class SourceDefinitionParameters extends ITCParameters {
     public static final String UNIFORM = "uniform";
     public static final String GAUSSIAN = "gaussian";
 
-    public static final String MAG = "mag";
-    public static final String ABMAG = "ABmag";
-    public static final String JY = "jy";
+    public static enum BrightnessUnit implements DisplayableSpType {
+        // TODO: The "displayable" units are pretty ugly, but I have to keep them for
+        // TODO: now in order to be backwards compatible for regression testing.
+        MAG                 ("mag"),
+        ABMAG               ("ABmag"),
+        JY                  ("Jy"),
+        WATTS               ("watts_fd_wavelength"),
+        ERGS_WAVELENGTH     ("ergs_fd_wavelength"),
+        ERGS_FREQUENCY      ("ergs_fd_frequency"),
+        // -- TODO: same in blue but per area, can we unify those two sets of values?
+        MAG_PSA             ("mag_per_sq_arcsec"),
+        ABMAG_PSA           ("ABmag_per_sq_arcsec"),
+        JY_PSA              ("jy_per_sq_arcsec"),
+        WATTS_PSA           ("watts_fd_wavelength_per_sq_arcsec"),
+        ERGS_WAVELENGTH_PSA ("ergs_fd_wavelength_per_sq_arcsec"),
+        ERGS_FREQUENCY_PSA  ("ergs_fd_frequency_per_sq_arcsec")
+        ;
+        private final String displayValue;
+        private BrightnessUnit(final String displayName) { this.displayValue = displayName; }
+        public String displayValue() {return displayValue;}
+    }
+
     public static final String WATTS = "watts_fd_wavelength";
-    public static final String ERGS_WAVELENGTH = "ergs_fd_wavelength";
-    public static final String ERGS_FREQUENCY = "ergs_fd_frequency";
-    public static final String MAG_PSA = "mag_per_sq_arcsec";
-    public static final String ABMAG_PSA = "ABmag_per_sq_arcsec";
-    public static final String JY_PSA = "jy_per_sq_arcsec";
-    public static final String WATTS_PSA = "watts_fd_wavelength_per_sq_arcsec";
-    public static final String ERGS_WAVELENGTH_PSA = "ergs_fd_wavelength_per_sq_arcsec";
-    public static final String ERGS_FREQUENCY_PSA = "ergs_fd_frequency_per_sq_arcsec";
     public static final String WATTS_FLUX = "watts_flux";
     public static final String ERGS_FLUX = "ergs_flux";
-    public static final String[] UNITS =
-            {MAG, ABMAG, JY, WATTS, ERGS_WAVELENGTH, ERGS_FREQUENCY, MAG_PSA,
-                    ABMAG_PSA, JY_PSA, WATTS_PSA, ERGS_WAVELENGTH_PSA, ERGS_FREQUENCY_PSA,
-                    WATTS_FLUX, ERGS_FLUX};
 
     public static final String LIBRARY_STAR = "libraryStar";
     public static final String LIBRARY_NON_STAR = "libraryNonStar";
@@ -62,12 +70,6 @@ public final class SourceDefinitionParameters extends ITCParameters {
     public static final String BBODY = "modelBlackBody";
     public static final String ELINE = "modelEmLine";
     public static final String PLAW = "modelPowerLaw";
-    public static final String LINE_WAVELENGTH = "lineWavelength";
-    public static final String LINE_FLUX = "lineFlux";
-    public static final String LINE_WIDTH = "lineWidth";
-    public static final String LINE_FLUX_UNITS = "lineFluxUnits";
-    public static final String LINE_CONTINUUM = "lineContinuum";
-    public static final String LINE_CONTINUUM_UNITS = "lineContinuumUnits";
     public static final String PLAW_INDEX = "powerIndex";
     public static final String USER_DEFINED_SPECTRUM = "userDefinedSpectrum";
     public static final String USER_DEFINED_SPECTRUM_NAME = "specUserDef";
@@ -87,7 +89,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
     private final String _sourceGeom;  // point or extended
     private String _extSourceType; // uniform, gaussian, ...
     private final double _sourceNorm;  // 19.3 or 2e-17
-    private final String _units; // unit code
+    private final BrightnessUnit _units; // unit code
     private double _fwhm;
     private final WavebandDefinition _normBand; // U, V, B, ...
     private double _bBTemp;
@@ -120,27 +122,18 @@ public final class SourceDefinitionParameters extends ITCParameters {
 
         _sourceGeom = p.getParameter(SOURCE_GEOM);
         if (_sourceGeom.equals(POINT_SOURCE)) {
-            _sourceNorm = ITCParameters.parseDouble(p.getParameter(SOURCE_NORM_PT_SOURCE), "Integrated Brightness");
-            _units = p.getParameter(SOURCE_UNITS_PT_SOURCE);
-            if (getUnitCode(_units) < 0) {
-                throw new IllegalArgumentException("Unrecognized units: " + _units);
-            }
+            _sourceNorm = itcR.doubleParameter(SOURCE_NORM_PT_SOURCE);
+            _units      = itcR.enumParameter(BrightnessUnit.class, SOURCE_UNITS_PT_SOURCE);
         } else if (_sourceGeom.equals(EXTENDED_SOURCE)) {
             _extSourceType = p.getParameter(EXTENDED_SOURCE_TYPE);
             if (_extSourceType.equals(GAUSSIAN)) {
                 _fwhm = ITCParameters.parseDouble(p.getParameter(SOURCE_FWHM_GAUSSIAN), "Full Width Half Max");
                 if (_fwhm < 0.1) throw new IllegalArgumentException("Please use a Gaussian FWHM greater than 0.1");
-                _sourceNorm = ITCParameters.parseDouble(p.getParameter(SOURCE_NORM_GAUSSIAN), "Integrated Brightness");
-                _units = p.getParameter(SOURCE_UNITS_GAUSSIAN);
-                if (getUnitCode(_units) < 0) {
-                    throw new IllegalArgumentException("Unrecognized units: " + _units);
-                }
+                _sourceNorm = itcR.doubleParameter(SOURCE_NORM_GAUSSIAN);
+                _units      = itcR.enumParameter(BrightnessUnit.class, SOURCE_UNITS_GAUSSIAN);
             } else if (_extSourceType.equals(UNIFORM)) {
-                _sourceNorm = ITCParameters.parseDouble(p.getParameter(SOURCE_NORM_USB), "Integrated Brightness");
-                _units = p.getParameter(SOURCE_UNITS_USB);
-                if (getUnitCode(_units) < 0) {
-                    throw new IllegalArgumentException("Unrecognized units: " + _units);
-                }
+                _sourceNorm = itcR.doubleParameter(SOURCE_NORM_USB);
+                _units      = itcR.enumParameter(BrightnessUnit.class, SOURCE_UNITS_USB);
             } else {
                 throw new IllegalArgumentException("Unrecognized extended source geometry: " + _extSourceType);
             }
@@ -154,37 +147,39 @@ public final class SourceDefinitionParameters extends ITCParameters {
         // Get Spectrum Resource
         _sourceSpec = p.getParameter(SOURCE_SPEC);
         if (_sourceSpec.equals(LIBRARY_STAR)) {
-            _specType = p.getParameter(ST_SPEC_TYPE);
-            _sedSpectrum = STELLAR_LIB + "/" + _specType.toLowerCase() + SED_FILE_EXTENSION;
+            _specType                 = p.getParameter(ST_SPEC_TYPE);
+            _sedSpectrum              = STELLAR_LIB + "/" + _specType.toLowerCase() + SED_FILE_EXTENSION;
+
         } else if (_sourceSpec.equals(LIBRARY_NON_STAR)) {
-            _specType = p.getParameter(NS_SPEC_TYPE);
-            _sedSpectrum = NON_STELLAR_LIB + "/" + _specType + SED_FILE_EXTENSION;
+            _specType                 = p.getParameter(NS_SPEC_TYPE);
+            _sedSpectrum              = NON_STELLAR_LIB + "/" + _specType + SED_FILE_EXTENSION;
+
         } else if (_sourceSpec.equals(ELINE)) {
-            _eLineWavelength = ITCParameters.parseDouble(p.getParameter(LINE_WAVELENGTH), "Line Wavelength");
-            _eLineWidth = ITCParameters.parseDouble(p.getParameter(LINE_WIDTH), "Line Width");
-            _eLineFlux = ITCParameters.parseDouble(p.getParameter(LINE_FLUX), "Line Flux");
-            _eLineContinuumFlux = ITCParameters.parseDouble(p.getParameter(LINE_CONTINUUM), "Line Continuum");
-            _eLineFluxUnits = p.getParameter(LINE_FLUX_UNITS);
-            _eLineContinuumFluxUnits = p.getParameter(LINE_CONTINUUM_UNITS);
-            _sourceSpec = ELINE;
-            _sedSpectrum = ELINE;
-            //if the desired linewidth is too small throw an exception
-            //if (_eLineWidth < (3E5 / (_eLineWavelength*1000))) {
-            //    throw new Exception("Please use a model line width > 1 nm to avoid undersampling of the line profile when convolved with the transmission response");
-            //}
+            _eLineWavelength          = itcR.doubleParameter("lineWavelength");
+            _eLineWidth               = itcR.doubleParameter("lineWidth");
+            _eLineFlux                = itcR.doubleParameter("lineFlux");
+            _eLineContinuumFlux       = itcR.doubleParameter("lineContinuum");
+            _eLineFluxUnits           = p.getParameter("lineFluxUnits");
+            _eLineContinuumFluxUnits  = p.getParameter("lineContinuumUnits");
+            _sourceSpec               = ELINE;
+            _sedSpectrum              = ELINE;
+
         } else if (_sourceSpec.equals(BBODY)) {
-            _bBTemp = ITCParameters.parseDouble(p.getParameter(BBTEMP), "Black Body Temp");
-            _sourceSpec = BBODY;
-            _sedSpectrum = BBODY;
+            _bBTemp                   = itcR.doubleParameter(BBTEMP);
+            _sourceSpec               = BBODY;
+            _sedSpectrum              = BBODY;
+
         } else if (_sourceSpec.equals(PLAW)) {
-            _pLawIndex = ITCParameters.parseDouble(p.getParameter(PLAW_INDEX), "Power Law Index");
-            _sourceSpec = PLAW;
-            _sedSpectrum = PLAW;
+            _pLawIndex                = itcR.doubleParameter(PLAW_INDEX);
+            _sourceSpec               = PLAW;
+            _sedSpectrum              = PLAW;
+
         } else if (_sourceSpec.equals(USER_DEFINED_SPECTRUM)) {
-            _sourceSpec = USER_DEFINED_SPECTRUM;
-            _sedSpectrum = p.getRemoteFileName(USER_DEFINED_SPECTRUM_NAME);
-            _userDefinedSedString = p.getTextFile(USER_DEFINED_SPECTRUM_NAME);
-            _isSEDUserDefined = true;
+            _sourceSpec               = USER_DEFINED_SPECTRUM;
+            _sedSpectrum              = p.getRemoteFileName(USER_DEFINED_SPECTRUM_NAME);
+            _userDefinedSedString     = p.getTextFile(USER_DEFINED_SPECTRUM_NAME);
+            _isSEDUserDefined         = true;
+
         } else {
             throw new IllegalArgumentException("Unrecognized spectrum type: " + _sourceSpec);
         }
@@ -208,7 +203,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
     public SourceDefinitionParameters(String sourceGeometry,
                                       String extSourceType,
                                       double sourceNorm,
-                                      String units,
+                                      BrightnessUnit units,
                                       double fwhm,
                                       WavebandDefinition normBand,
                                       double redshift,
@@ -257,7 +252,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
         return _sourceNorm;
     }
 
-    public String getUnits() {
+    public BrightnessUnit getUnits() {
         return _units;
     }
 
@@ -325,23 +320,16 @@ public final class SourceDefinitionParameters extends ITCParameters {
         return _userDefinedSedString;
     }
 
-    // function to be used to Supply human readable units.  Will be printed out in results
-    public String getPrettyUnits() {
-        if (getUnits().equals(SourceDefinitionParameters.JY))
-            return "Jy";
-        else
-            return getUnits();
-    }
-
     /**
      * Return a human-readable string for debugging
+     * NOTE: toString() is also used by NiciRecipe to create final html output.
      */
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("Source Geometry:\t" + getSourceGeometry() + "\n");
         sb.append("Extended source type:\t" + getExtendedSourceType() + "\n");
         sb.append("Source Normalization:\t" + getSourceNormalization() + "\n");
-        sb.append("Units:\t\t\t" + getUnits() + "\n");
+        sb.append("Units:\t\t\t" + getUnits().displayValue() + "\n");
         sb.append("Gaussian FWHM:\t" + getFWHM() + "\n");
         sb.append("Normalization Type:\tfilter\n");
         sb.append("Normalization WaveBand:\t" + getNormBand().name + "\n");
@@ -383,12 +371,12 @@ public final class SourceDefinitionParameters extends ITCParameters {
                     device.toString(getELineContinuumFlux()) + " " + getELineContinuumFluxUnits() + ".");
         } else if (getSourceSpec().equals(BBODY)) {
             sb.append(" " + getBBTemp() + "K Blackbody, at " + getSourceNormalization() +
-                    " " + getPrettyUnits() + " in the " + getNormBand().name + " band.");
+                    " " + _units.displayValue() + " in the " + getNormBand().name + " band.");
         } else if (getSourceSpec().equals(LIBRARY_STAR)) {
-            sb.append(" " + getSourceNormalization() + " " + getPrettyUnits() + " " + getSpecType() +
+            sb.append(" " + getSourceNormalization() + " " + _units.displayValue() + " " + getSpecType() +
                     " star in the " + getNormBand().name + " band.");
         } else if (getSourceSpec().equals(LIBRARY_NON_STAR)) {
-            sb.append(" " + getSourceNormalization() + " " + getPrettyUnits() + " " + getSpecType() +
+            sb.append(" " + getSourceNormalization() + " " + _units.displayValue() + " " + getSpecType() +
                     " in the " + getNormBand().name + " band.");
         } else if (isSedUserDefined()) {
             sb.append(" a user defined spectrum with the name: " + getSpectrumResource());
@@ -401,15 +389,4 @@ public final class SourceDefinitionParameters extends ITCParameters {
 
     }
 
-    /**
-     * Returns the unit code corresponding to the specified units string.
-     * If the string is not recognized, -1 is returned with no exception.
-     */
-    public int getUnitCode(String units) {
-        if (units == null) return -1;
-        for (int i = 0; i < UNITS.length; ++i) {
-            if (units.equals(UNITS[i])) return i;
-        }
-        return -1;
-    }
 }

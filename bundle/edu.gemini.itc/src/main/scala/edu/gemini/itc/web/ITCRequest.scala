@@ -18,8 +18,11 @@ import edu.gemini.spModel.telescope.IssPort
 sealed abstract class ITCRequest {
   def parameter(name: String): String
 
-  /** Gets the named value as an enum of type {{{Class[T]}}}. */
-  def enumParameter[T <: Enum[T]](c: Class[T]): T = Enum.valueOf(c, parameter(c.getSimpleName))
+  /** Gets the named value as an enum of type {{{Class[T]}}} using the simple name of the class as the parameter name. */
+  def enumParameter[T <: Enum[T]](c: Class[T]): T = enumParameter(c, c.getSimpleName)
+
+  /** Gets the named value as an enum of type {{{Class[T]}}} using the given name as the parameter name. */
+  def enumParameter[T <: Enum[T]](c: Class[T], n: String): T = Enum.valueOf(c, parameter(n))
 
   /** Gets the named value as an integer. */
   def intParameter(name: String): Int = parameter(name).toInt
