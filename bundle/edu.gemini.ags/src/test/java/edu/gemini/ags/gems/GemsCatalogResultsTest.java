@@ -186,7 +186,7 @@ public class GemsCatalogResultsTest  implements MascotProgress {
         GemsGuideStarSearchOptions options = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog,
                 instrument, tipTiltMode, posAngles);
 
-        List<GemsCatalogSearchResults> results = new GemsCatalog().search(obsContext, base, options, None.<MagnitudeBand>instance(), null);
+        List<GemsCatalogSearchResults> results = new GemsCatalog().search(obsContext, GemsUtils4Java.toCoordinates(base), options, None.<MagnitudeBand>instance(), null);
         if (options.getTipTiltMode() == GemsTipTiltMode.both) {
             assertEquals(4, results.size());
         } else {

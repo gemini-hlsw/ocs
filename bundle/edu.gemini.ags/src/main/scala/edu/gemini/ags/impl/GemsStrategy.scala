@@ -181,12 +181,8 @@ object GemsStrategy extends AgsStrategy {
     }
     val gemsOptions = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog, gemsInstrument, tipTiltMode, posAngles.asJava)
 
-    // Create the base position.
-    val baseCoords = ctx.getBaseCoordinates
-    val basePos = new HmsDegCoordinates.Builder(baseCoords.getRa, baseCoords.getDec).build
-
     // Perform the catalog search.
-    val results = new GemsCatalog().search(ctx, basePos, gemsOptions, nirBand.asGeminiOpt, null).asScala.toList
+    val results = new GemsCatalog().search(ctx, ctx.getBaseCoordinates.toNewModel, gemsOptions, nirBand.asGeminiOpt, null).asScala.toList
 
     // Now check that the results are valid: there must be a valid tip-tilt and flexure star each.
     val checker = results.foldRight(Map[String, Boolean]())((result, resultMap) => {

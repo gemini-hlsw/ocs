@@ -238,7 +238,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
             GemsGuideStarSearchOptions options = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog,
                     instrument, tipTiltMode, angles);
 
-            List<GemsCatalogSearchResults> results = new GemsCatalog().search(obsContext, base, options, nirBand, statusLogger);
+            List<GemsCatalogSearchResults> results = new GemsCatalog().search(obsContext, GemsUtils4Java.toCoordinates(base), options, nirBand, statusLogger);
             if (interrupted) {
                 throw new CancellationException("Canceled");
             }
