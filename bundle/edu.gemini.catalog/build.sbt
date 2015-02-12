@@ -28,6 +28,7 @@ OsgiKeys.privatePackage := Seq(
 OsgiKeys.exportPackage := Seq(
   "edu.gemini.catalog.api",
   "edu.gemini.catalog.impl",
+  "edu.gemini.catalog.votable",
   "edu.gemini.catalog.skycat",
   "edu.gemini.catalog.skycat.binding.adapter",
   "edu.gemini.catalog.skycat.binding.skyobj",
