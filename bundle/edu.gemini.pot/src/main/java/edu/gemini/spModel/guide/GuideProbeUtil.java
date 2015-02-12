@@ -146,9 +146,9 @@ public enum GuideProbeUtil {
         });
     }
 
-    public static double calculateVignetting(final ObsContext ctx,
-                                             final ScienceAreaGeometry scienceAreaGeometry,
-                                             final ProbeArmGeometry probeArmGeometry) {
+    public double calculateVignetting(final ObsContext ctx,
+                                      final ScienceAreaGeometry scienceAreaGeometry,
+                                      final ProbeArmGeometry probeArmGeometry) {
         if (ctx == null || scienceAreaGeometry == null || probeArmGeometry == null)
             return 0.0;
 

@@ -144,6 +144,12 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
                     });
                 }
             });
+
+            // TODO: Remove this. Print the vignetting for testing.
+            final ScienceAreaGeometry scienceAreaGeometry = new GmosScienceAreaGeometry();
+            final ProbeArmGeometry probeArmGeometry       = GmosOiwfsProbeArm.instance();
+            double vignetting = GuideProbeUtil.instance.calculateVignetting(ctx, scienceAreaGeometry, probeArmGeometry);
+            System.out.println("***** VIGNETTING: " + vignetting);
         }
     }
 
