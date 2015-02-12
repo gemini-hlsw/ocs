@@ -104,7 +104,7 @@ public final class NiriRecipe extends RecipeBase {
         // output: redshifteed SED
         Niri instrument = new Niri(_niriParameters, _obsDetailParameters);
 
-        if (_sdParameters.getSourceSpec().equals(_sdParameters.ELINE))
+        if (_sdParameters.getSourceSpec().equals(SourceDefinitionParameters.SpectralDistribution.ELINE))
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters
                     .getELineWavelength() * 1000 * 25))) { // *25 b/c of
                 // increased
@@ -140,12 +140,15 @@ public final class NiriRecipe extends RecipeBase {
         final double end = band.getEnd();
 
         // any sed except BBODY and ELINE have normailization regions
-        if (!(_sdParameters.getSpectrumResource().equals(_sdParameters.ELINE) || _sdParameters
-                .getSpectrumResource().equals(_sdParameters.BBODY))) {
-            if (sed.getStart() > start || sed.getEnd() < end) {
-                throw new Exception(
-                        "Shifted spectrum lies outside of specified normalisation waveband.");
-            }
+        switch (_sdParameters.getSourceSpec()) {
+            case ELINE:
+            case BBODY:
+                break;
+            default:
+                if (sed.getStart() > start || sed.getEnd() < end) {
+                    throw new Exception(
+                            "Shifted spectrum lies outside of specified normalisation waveband.");
+                }
         }
 
         if (sed.getStart() > instrument.getObservingStart()
@@ -183,12 +186,11 @@ public final class NiriRecipe extends RecipeBase {
         // units
         // calculates: normalized SED, resampled SED, SED adjusted for aperture
         // output: SED in common internal units
-        SampledSpectrumVisitor norm = new NormalizeVisitor(
-                _sdParameters.getNormBand(),
-                _sdParameters.getSourceNormalization(),
-                _sdParameters.getUnits());
-        if (!_sdParameters.getSpectrumResource().equals(_sdParameters.ELINE)) {// ||
-            // !_sdParameters.getSpectrumResource().equals(_sdParameters.BBODY)){
+        if (!_sdParameters.getSourceSpec().equals(SourceDefinitionParameters.SpectralDistribution.ELINE)) {
+            final SampledSpectrumVisitor norm = new NormalizeVisitor(
+                    _sdParameters.getNormBand(),
+                    _sdParameters.getSourceNormalization(),
+                    _sdParameters.getUnits());
             sed.accept(norm);
         }
 

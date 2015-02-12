@@ -11,10 +11,6 @@ import edu.gemini.spModel.type.DisplayableSpType;
  */
 public final class SourceDefinitionParameters extends ITCParameters {
 
-    public static final String SOURCE_SPEC = "sourceSpec";
-    public static final String ST_SPEC_TYPE = "stSpectrumType";
-    public static final String NS_SPEC_TYPE = "nsSpectrumType";
-
     public static enum BrightnessUnit implements DisplayableSpType {
         // TODO: The "displayable" units are pretty ugly, but we have to keep them for
         // TODO: now in order to be backwards compatible for regression testing.
@@ -58,17 +54,18 @@ public final class SourceDefinitionParameters extends ITCParameters {
         EXTENDED_GAUSSIAN
     }
 
+    public static enum SpectralDistribution {
+        LIBRARY_STAR,
+        LIBRARY_NON_STAR,
+        BBODY,
+        ELINE,
+        PLAW,
+        USER_DEFINED
+    }
+
     public static final String WATTS = "watts_fd_wavelength";
     public static final String WATTS_FLUX = "watts_flux";
     public static final String ERGS_FLUX = "ergs_flux";
-
-    public static final String LIBRARY_STAR = "libraryStar";
-    public static final String LIBRARY_NON_STAR = "libraryNonStar";
-    public static final String BBODY = "modelBlackBody";
-    public static final String ELINE = "modelEmLine";
-    public static final String PLAW = "modelPowerLaw";
-    public static final String USER_DEFINED_SPECTRUM = "userDefinedSpectrum";
-    public static final String USER_DEFINED_SPECTRUM_NAME = "specUserDef";
 
     public static final String SED_FILE_EXTENSION = ".nm";
 
@@ -79,10 +76,10 @@ public final class SourceDefinitionParameters extends ITCParameters {
     public static final String NON_STELLAR_LIB = ITCConstants.SED_LIB + "/non_stellar";
 
     // Data members
-    private SourceType _sourceType;  // point or extended
-    private double _sourceNorm;  // 19.3 or 2e-17
+    private final SourceType _sourceType;  // point or extended
+    private final double _sourceNorm;  // 19.3 or 2e-17
     private final BrightnessUnit _units; // unit code
-    private double _fwhm;
+    private final double _fwhm;
     private final WavebandDefinition _normBand; // U, V, B, ...
     private double _bBTemp;
     private double _eLineWavelength;
@@ -92,10 +89,9 @@ public final class SourceDefinitionParameters extends ITCParameters {
     private String _eLineFluxUnits; // units for eline flux
     private String _eLineContinuumFluxUnits;
     private double _pLawIndex;
-    private String _sourceSpec;
+    private final SpectralDistribution _sourceSpec;
     private String _specType;
     private String _userDefinedSedString;
-    private boolean _isSEDUserDefined = false;
 
     // resource name of library spectrum
     private String _sedSpectrum;  // /lib/stellar/KOIII.nm
@@ -117,6 +113,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
         switch (sourceGeom) {
             case POINT:
                 _sourceType         = SourceType.POINT;
+                _fwhm               = 0.0; // N/A; only for extended gaussian
                 _sourceNorm         = itcR.doubleParameter("psSourceNorm");
                 _units              = itcR.enumParameter(BrightnessUnit.class, "psSourceUnits");
                 break;
@@ -125,65 +122,60 @@ public final class SourceDefinitionParameters extends ITCParameters {
                     case GAUSSIAN:
                         _sourceType = SourceType.EXTENDED_GAUSSIAN;
                         _fwhm       = itcR.doubleParameter("gaussFwhm");
-                        if (_fwhm < 0.1)
-                            throw new IllegalArgumentException("Please use a Gaussian FWHM greater than 0.1");
                         _sourceNorm = itcR.doubleParameter("gaussSourceNorm");
                         _units      = itcR.enumParameter(BrightnessUnit.class, "gaussSourceUnits");
                         break;
                     case UNIFORM:
                         _sourceType = SourceType.EXTENDED_UNIFORM;
+                        _fwhm       = 0.0; // N/A; only for extended gaussian
                         _sourceNorm = itcR.doubleParameter("usbSourceNorm");
                         _units      = itcR.enumParameter(BrightnessUnit.class, "usbSourceUnits");
                         break;
                     default:
-                        throw new IllegalArgumentException("Unrecognized extended source geometry: " + extSourceType);
+                        throw new IllegalArgumentException();
                 }
                 break;
             default:
-                throw new IllegalArgumentException("Unrecognized source geometry: " + sourceGeom);
+                throw new IllegalArgumentException();
         }
 
         // Get Normalization info
         _normBand = itcR.enumParameter(WavebandDefinition.class);
 
         // Get Spectrum Resource
-        _sourceSpec = p.getParameter(SOURCE_SPEC);
-        if (_sourceSpec.equals(LIBRARY_STAR)) {
-            _specType                 = p.getParameter(ST_SPEC_TYPE);
-            _sedSpectrum              = STELLAR_LIB + "/" + _specType.toLowerCase() + SED_FILE_EXTENSION;
-
-        } else if (_sourceSpec.equals(LIBRARY_NON_STAR)) {
-            _specType                 = p.getParameter(NS_SPEC_TYPE);
-            _sedSpectrum              = NON_STELLAR_LIB + "/" + _specType + SED_FILE_EXTENSION;
-
-        } else if (_sourceSpec.equals(ELINE)) {
-            _eLineWavelength          = itcR.doubleParameter("lineWavelength");
-            _eLineWidth               = itcR.doubleParameter("lineWidth");
-            _eLineFlux                = itcR.doubleParameter("lineFlux");
-            _eLineContinuumFlux       = itcR.doubleParameter("lineContinuum");
-            _eLineFluxUnits           = p.getParameter("lineFluxUnits");
-            _eLineContinuumFluxUnits  = p.getParameter("lineContinuumUnits");
-            _sourceSpec               = ELINE;
-            _sedSpectrum              = ELINE;
-
-        } else if (_sourceSpec.equals(BBODY)) {
-            _bBTemp                   = itcR.doubleParameter("BBTemp");
-            _sourceSpec               = BBODY;
-            _sedSpectrum              = BBODY;
-
-        } else if (_sourceSpec.equals(PLAW)) {
-            _pLawIndex                = itcR.doubleParameter("powerIndex");
-            _sourceSpec               = PLAW;
-            _sedSpectrum              = PLAW;
-
-        } else if (_sourceSpec.equals(USER_DEFINED_SPECTRUM)) {
-            _sourceSpec               = USER_DEFINED_SPECTRUM;
-            _sedSpectrum              = p.getRemoteFileName(USER_DEFINED_SPECTRUM_NAME);
-            _userDefinedSedString     = p.getTextFile(USER_DEFINED_SPECTRUM_NAME);
-            _isSEDUserDefined         = true;
-
-        } else {
-            throw new IllegalArgumentException("Unrecognized spectrum type: " + _sourceSpec);
+        _sourceSpec = itcR.enumParameter(SpectralDistribution.class);
+        switch (_sourceSpec) {
+            case LIBRARY_STAR:
+                _specType                 = itcR.parameter("stSpectrumType");
+                _sedSpectrum              = STELLAR_LIB + "/" + _specType.toLowerCase() + SED_FILE_EXTENSION;
+                break;
+            case LIBRARY_NON_STAR:
+                _specType                 = itcR.parameter("nsSpectrumType");
+                _sedSpectrum              = NON_STELLAR_LIB + "/" + _specType + SED_FILE_EXTENSION;
+                break;
+            case ELINE:
+                _eLineWavelength          = itcR.doubleParameter("lineWavelength");
+                _eLineWidth               = itcR.doubleParameter("lineWidth");
+                _eLineFlux                = itcR.doubleParameter("lineFlux");
+                _eLineContinuumFlux       = itcR.doubleParameter("lineContinuum");
+                _eLineFluxUnits           = itcR.parameter("lineFluxUnits");
+                _eLineContinuumFluxUnits  = itcR.parameter("lineContinuumUnits");
+                _sedSpectrum              = ""; // N/A
+                break;
+            case BBODY:
+                _bBTemp                   = itcR.doubleParameter("BBTemp");
+                _sedSpectrum              = ""; // N/A
+                break;
+            case PLAW:
+                _pLawIndex                = itcR.doubleParameter("powerIndex");
+                _sedSpectrum              = ""; // N/A
+                break;
+            case USER_DEFINED:
+                _userDefinedSedString     = p.getTextFile("specUserDef");
+                _sedSpectrum              = p.getRemoteFileName("specUserDef"); // N/A ??
+                break;
+            default:
+                throw new IllegalArgumentException();
         }
 
         //Get Redshift
@@ -215,7 +207,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
                                       String eLineFluxUnits,
                                       String eLineContinuumFluxUnits,
                                       double pLawIndex,
-                                      String sourceSpec) {
+                                      SpectralDistribution sourceSpec) {
         _sourceType = sourceType;
         _sourceNorm = sourceNorm;
         _units = units;
@@ -232,6 +224,11 @@ public final class SourceDefinitionParameters extends ITCParameters {
         _eLineContinuumFluxUnits = eLineContinuumFluxUnits;
         _pLawIndex = pLawIndex;
         _sourceSpec = sourceSpec;
+
+        if ((sourceType == SourceType.EXTENDED_GAUSSIAN) && (_fwhm < 0.1)) {
+            throw new IllegalArgumentException("Please use a Gaussian FWHM greater than 0.1");
+        }
+
     }
 
     public SourceType getSourceType() {
@@ -269,7 +266,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
         return _redshift;
     }
 
-    public String getSourceSpec() {
+    public SpectralDistribution getSourceSpec() {
         return _sourceSpec;
     }
 
@@ -314,7 +311,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
     }
 
     public boolean isSedUserDefined() {
-        return _isSEDUserDefined;
+        return _sourceSpec.equals(SpectralDistribution.USER_DEFINED);
     }
 
     public String getUserDefinedSpectrum() {
@@ -383,27 +380,34 @@ public final class SourceDefinitionParameters extends ITCParameters {
         sb.append(" ");
         sb.append(getSourceGeometryStr());
         sb.append(" is a");
-        if (getSourceSpec().equals(ELINE)) {
-            sb.append("n emission line, at a wavelength of " + device.toString(getELineWavelength()));
-            device.setPrecision(2);
-            device.clear();
-            sb.append(" microns, and with a width of " + device.toString(getELineWidth()) + " km/s.\n  It's total flux is " +
-                    device.toString(getELineFlux()) + " " + getELineFluxUnits() + " on a flat continuum of flux density " +
-                    device.toString(getELineContinuumFlux()) + " " + getELineContinuumFluxUnits() + ".");
-        } else if (getSourceSpec().equals(BBODY)) {
-            sb.append(" " + getBBTemp() + "K Blackbody, at " + getSourceNormalization() +
-                    " " + _units.displayValue() + " in the " + getNormBand().name + " band.");
-        } else if (getSourceSpec().equals(LIBRARY_STAR)) {
-            sb.append(" " + getSourceNormalization() + " " + _units.displayValue() + " " + getSpecType() +
-                    " star in the " + getNormBand().name + " band.");
-        } else if (getSourceSpec().equals(LIBRARY_NON_STAR)) {
-            sb.append(" " + getSourceNormalization() + " " + _units.displayValue() + " " + getSpecType() +
-                    " in the " + getNormBand().name + " band.");
-        } else if (isSedUserDefined()) {
-            sb.append(" a user defined spectrum with the name: " + getSpectrumResource());
-        } else if (getSourceSpec().equals(PLAW)) {
-            sb.append(" Power Law Spectrum, with an index of " + getPowerLawIndex()
-                    + " and " + getSourceNormalization() + " mag in the " + getNormBand().name + " band.");
+        switch (getSourceSpec()) {
+            case ELINE:
+                sb.append("n emission line, at a wavelength of " + device.toString(getELineWavelength()));
+                device.setPrecision(2);
+                device.clear();
+                sb.append(" microns, and with a width of " + device.toString(getELineWidth()) + " km/s.\n  It's total flux is " +
+                        device.toString(getELineFlux()) + " " + getELineFluxUnits() + " on a flat continuum of flux density " +
+                        device.toString(getELineContinuumFlux()) + " " + getELineContinuumFluxUnits() + ".");
+                break;
+            case BBODY:
+                sb.append(" " + getBBTemp() + "K Blackbody, at " + getSourceNormalization() +
+                        " " + _units.displayValue() + " in the " + getNormBand().name + " band.");
+                break;
+            case LIBRARY_STAR:
+                sb.append(" " + getSourceNormalization() + " " + _units.displayValue() + " " + getSpecType() +
+                        " star in the " + getNormBand().name + " band.");
+                break;
+            case LIBRARY_NON_STAR:
+                sb.append(" " + getSourceNormalization() + " " + _units.displayValue() + " " + getSpecType() +
+                        " in the " + getNormBand().name + " band.");
+                break;
+            case USER_DEFINED:
+                sb.append(" a user defined spectrum with the name: " + getSpectrumResource());
+                break;
+            case PLAW:
+                sb.append(" Power Law Spectrum, with an index of " + getPowerLawIndex()
+                        + " and " + getSourceNormalization() + " mag in the " + getNormBand().name + " band.");
+                break;
         }
         sb.append("\n");
         return sb.toString();

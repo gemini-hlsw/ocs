@@ -59,7 +59,7 @@ object Environment {
       "",                                 // eline flux units       (N/A)
       "",                                 // eline cont flux units  (N/A)
       0,                                  // plaw index             (N/A)
-      SourceDefinitionParameters.LIBRARY_STAR),
+      SourceDefinitionParameters.SpectralDistribution.LIBRARY_STAR),
 
     // point source defined by W/m2/um
     new SourceDefinitionParameters(
@@ -78,7 +78,7 @@ object Environment {
       "",                                 // eline flux units       (N/A)
       "",                                 // eline cont flux units  (N/A)
       0,                                  // plaw index             (N/A)
-      SourceDefinitionParameters.LIBRARY_NON_STAR),
+      SourceDefinitionParameters.SpectralDistribution.LIBRARY_NON_STAR),
 
     // black body spectral distribution
     new SourceDefinitionParameters(
@@ -88,7 +88,7 @@ object Environment {
       .35,
       WavebandDefinition.L,               // normalisation band
       0.5,                                // redshift
-      SourceDefinitionParameters.BBODY,   // spectrum resource
+      "modelBlackBody",                   // spectrum resource     (N/A)
       10000.0,                            // black body temp
       0.0,                                // eline wavelength       (N/A)
       0.0,                                // eline width            (N/A)
@@ -97,7 +97,7 @@ object Environment {
       "",                                 // eline flux units       (N/A)
       "",                                 // eline cont flux units  (N/A)
       0,                                  // plaw index             (N/A)
-      SourceDefinitionParameters.BBODY)
+      SourceDefinitionParameters.SpectralDistribution.BBODY)
 
   )
 
@@ -110,7 +110,7 @@ object Environment {
       .35,
       WavebandDefinition.R,                   // normalisation band
       1.0,                                    // redshift
-      SourceDefinitionParameters.ELINE,       // spectrum resource
+      "modelEmLine",                          // spectrum source      (N/A)
       0.0,                                    // black body temp [K]  (N/A)
       0.656,                                  // eline wavelength
       500.0,                                  // eline width
@@ -119,7 +119,7 @@ object Environment {
       SourceDefinitionParameters.ERGS_FLUX,   // eline flux units
       SourceDefinitionParameters.ERGS_FLUX,   // eline continuum flux units
       0,                                      // plaw index           (N/A)
-      SourceDefinitionParameters.ELINE),      // source spec
+      SourceDefinitionParameters.SpectralDistribution.ELINE),      // source spec
 
     // TODO get power law to work with other instruments(?)
     //power law spectral distribution
@@ -130,7 +130,7 @@ object Environment {
       .35,
       WavebandDefinition.R,               // normalisation band
       1.5,
-      SourceDefinitionParameters.PLAW,
+      "modelPowerLaw",                    // spectrum source        (N/A)
       0.0,                                // black body temp        (N/A)
       0.0,                                // eline wavelength       (N/A)
       0.0,                                // eline width            (N/A)
@@ -139,7 +139,7 @@ object Environment {
       "",                                 // eline flux units       (N/A)
       "",                                 // eline cont flux units  (N/A)
       -1,                                 // plaw index
-      SourceDefinitionParameters.PLAW)
+      SourceDefinitionParameters.SpectralDistribution.PLAW)
 
   )
 
@@ -152,7 +152,7 @@ object Environment {
       .35,
       WavebandDefinition.R,                   // normalisation band
       1.0,                                    // redshift
-      SourceDefinitionParameters.ELINE,       // spectrum resource
+      "modelEmLine",                          // spectrum resource    (N/A)
       0.0,                                    // black body temp [K]  (N/A)
       0.656,                                  // eline wavelength
       500.0,                                  // eline width
@@ -161,7 +161,7 @@ object Environment {
       SourceDefinitionParameters.WATTS_FLUX,  // eline flux units
       SourceDefinitionParameters.WATTS_FLUX,  // eline continuum flux units
       0,                                      // plaw index           (N/A)
-      SourceDefinitionParameters.ELINE)       // source spec
+      SourceDefinitionParameters.SpectralDistribution.ELINE)       // source spec
   )
 
   lazy val NearIRSources = PointSources ++ List(
@@ -173,7 +173,7 @@ object Environment {
       .35,
       WavebandDefinition.J,                   // normalisation band
       0.7,                                    // redshift
-      SourceDefinitionParameters.ELINE,       // spectrum resource
+      "modelEmLine",                          // spectrum resource    (N/A)
       0.0,                                    // black body temp [K]  (N/A)
       2.2,                                    // eline wavelength
       100.0,                                  // eline width
@@ -182,7 +182,7 @@ object Environment {
       SourceDefinitionParameters.WATTS_FLUX,  // eline flux units
       SourceDefinitionParameters.WATTS_FLUX,  // eline continuum flux units
       0,                                      // plaw index           (N/A)
-      SourceDefinitionParameters.ELINE)       // source spec
+      SourceDefinitionParameters.SpectralDistribution.ELINE)       // source spec
   )
 
   lazy val MidIRSources = PointSources ++ List(
@@ -194,7 +194,7 @@ object Environment {
       .35,
       WavebandDefinition.J,                   // normalisation band
       1.0,                                    // redshift
-      SourceDefinitionParameters.ELINE,       // spectrum resource
+      "modelEmLine",                          // spectrum resource    (N/A)
       0.0,                                    // black body temp [K]  (N/A)
       12.8,                                   // eline wavelength
       500.0,                                  // eline width
@@ -203,7 +203,7 @@ object Environment {
       SourceDefinitionParameters.WATTS_FLUX,  // eline flux units
       SourceDefinitionParameters.WATTS_FLUX,  // eline continuum flux units
       0,                                      // plaw index           (N/A)
-      SourceDefinitionParameters.ELINE)       // source spec
+      SourceDefinitionParameters.SpectralDistribution.ELINE)       // source spec
   )
 
   // Defines a set of relevant observing conditions; total 9*4*3=108 conditions

@@ -132,13 +132,15 @@ public final class Flamingos2Recipe extends RecipeBase {
         // "OEnd:" +instrument.getObservingEnd());
 
         // any sed except BBODY and ELINE have normailization regions
-        if (!(_sdParameters.getSpectrumResource().equals(
-                SourceDefinitionParameters.ELINE) || _sdParameters
-                .getSpectrumResource().equals(SourceDefinitionParameters.BBODY))) {
-            if (sed.getStart() > start || sed.getEnd() < end) {
-                throw new Exception(
-                        "Shifted spectrum lies outside of specified normalisation waveband.");
-            }
+        switch (_sdParameters.getSourceSpec()) {
+            case ELINE:
+            case BBODY:
+                break;
+            default:
+                if (sed.getStart() > start || sed.getEnd() < end) {
+                    throw new Exception(
+                            "Shifted spectrum lies outside of specified normalisation waveband.");
+                }
         }
 
         if (sed.getStart() > instrument.getObservingStart()
@@ -160,12 +162,11 @@ public final class Flamingos2Recipe extends RecipeBase {
         // units
         // calculates: normalized SED, resampled SED, SED adjusted for aperture
         // output: SED in common internal units
-        SampledSpectrumVisitor norm = new NormalizeVisitor(
-                _sdParameters.getNormBand(),
-                _sdParameters.getSourceNormalization(),
-                _sdParameters.getUnits());
-        if (!_sdParameters.getSpectrumResource().equals(
-                SourceDefinitionParameters.ELINE)) {
+        if (!_sdParameters.getSourceSpec().equals(SourceDefinitionParameters.SpectralDistribution.ELINE)) {
+            final SampledSpectrumVisitor norm = new NormalizeVisitor(
+                    _sdParameters.getNormBand(),
+                    _sdParameters.getSourceNormalization(),
+                    _sdParameters.getUnits());
             sed.accept(norm);
         }
 
