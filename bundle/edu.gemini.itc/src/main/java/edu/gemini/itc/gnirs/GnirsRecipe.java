@@ -48,7 +48,7 @@ public final class GnirsRecipe extends RecipeBase {
     public GnirsRecipe(ITCMultiPartParser r, PrintWriter out) throws Exception {
         super(out);
         // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
+        _sdParameters = ITCRequest.sourceDefinitionParameters(r);
         _obsDetailParameters = new ObservationDetailsParameters(r);
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _gnirsParameters = new GnirsParameters(r);

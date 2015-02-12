@@ -36,7 +36,7 @@ public final class NiriRecipe extends RecipeBase {
      */
     public NiriRecipe(ITCMultiPartParser r, PrintWriter out) throws Exception {
         super(out);
-        _sdParameters = new SourceDefinitionParameters(r);
+        _sdParameters = ITCRequest.sourceDefinitionParameters(r);
         _obsDetailParameters = new ObservationDetailsParameters(r);
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _niriParameters = new NiriParameters(r);

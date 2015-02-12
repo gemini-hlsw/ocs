@@ -59,7 +59,8 @@ object Environment {
       "",                                 // eline flux units       (N/A)
       "",                                 // eline cont flux units  (N/A)
       0,                                  // plaw index             (N/A)
-      SourceDefinitionParameters.SpectralDistribution.LIBRARY_STAR),
+      SourceDefinitionParameters.SpectralDistribution.LIBRARY_STAR,
+      null, null),                                // user defined spectrum  (N/A)
 
     // point source defined by W/m2/um
     new SourceDefinitionParameters(
@@ -78,7 +79,8 @@ object Environment {
       "",                                 // eline flux units       (N/A)
       "",                                 // eline cont flux units  (N/A)
       0,                                  // plaw index             (N/A)
-      SourceDefinitionParameters.SpectralDistribution.LIBRARY_NON_STAR),
+      SourceDefinitionParameters.SpectralDistribution.LIBRARY_NON_STAR,
+      null, null),                                // user defined spectrum  (N/A)
 
     // black body spectral distribution
     new SourceDefinitionParameters(
@@ -97,7 +99,8 @@ object Environment {
       "",                                 // eline flux units       (N/A)
       "",                                 // eline cont flux units  (N/A)
       0,                                  // plaw index             (N/A)
-      SourceDefinitionParameters.SpectralDistribution.BBODY)
+      SourceDefinitionParameters.SpectralDistribution.BBODY,
+      null, null)                                 // user defined spectrum  (N/A)
 
   )
 
@@ -119,7 +122,8 @@ object Environment {
       SourceDefinitionParameters.ERGS_FLUX,   // eline flux units
       SourceDefinitionParameters.ERGS_FLUX,   // eline continuum flux units
       0,                                      // plaw index           (N/A)
-      SourceDefinitionParameters.SpectralDistribution.ELINE),      // source spec
+      SourceDefinitionParameters.SpectralDistribution.ELINE,
+      null, null),                                    // user defined spectrum  (N/A)
 
     // TODO get power law to work with other instruments(?)
     //power law spectral distribution
@@ -139,7 +143,8 @@ object Environment {
       "",                                 // eline flux units       (N/A)
       "",                                 // eline cont flux units  (N/A)
       -1,                                 // plaw index
-      SourceDefinitionParameters.SpectralDistribution.PLAW)
+      SourceDefinitionParameters.SpectralDistribution.PLAW,
+      null, null)                                 // user defined spectrum  (N/A)
 
   )
 
@@ -161,7 +166,8 @@ object Environment {
       SourceDefinitionParameters.WATTS_FLUX,  // eline flux units
       SourceDefinitionParameters.WATTS_FLUX,  // eline continuum flux units
       0,                                      // plaw index           (N/A)
-      SourceDefinitionParameters.SpectralDistribution.ELINE)       // source spec
+      SourceDefinitionParameters.SpectralDistribution.ELINE,
+      null, null)                                     // user defined spectrum  (N/A)
   )
 
   lazy val NearIRSources = PointSources ++ List(
@@ -182,7 +188,8 @@ object Environment {
       SourceDefinitionParameters.WATTS_FLUX,  // eline flux units
       SourceDefinitionParameters.WATTS_FLUX,  // eline continuum flux units
       0,                                      // plaw index           (N/A)
-      SourceDefinitionParameters.SpectralDistribution.ELINE)       // source spec
+      SourceDefinitionParameters.SpectralDistribution.ELINE,
+      null, null)                                    // user defined spectrum  (N/A)
   )
 
   lazy val MidIRSources = PointSources ++ List(
@@ -203,7 +210,8 @@ object Environment {
       SourceDefinitionParameters.WATTS_FLUX,  // eline flux units
       SourceDefinitionParameters.WATTS_FLUX,  // eline continuum flux units
       0,                                      // plaw index           (N/A)
-      SourceDefinitionParameters.SpectralDistribution.ELINE)       // source spec
+      SourceDefinitionParameters.SpectralDistribution.ELINE,
+      null, null)                                     // user defined spectrum  (N/A)
   )
 
   // Defines a set of relevant observing conditions; total 9*4*3=108 conditions

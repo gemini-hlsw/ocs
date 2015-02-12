@@ -33,7 +33,7 @@ public final class GsaoiRecipe extends RecipeBase {
     public GsaoiRecipe(ITCMultiPartParser r, PrintWriter out) throws Exception {
         super(out);
 
-        _sdParameters = new SourceDefinitionParameters(r);
+        _sdParameters = ITCRequest.sourceDefinitionParameters(r);
         _obsDetailParameters = new ObservationDetailsParameters(r);
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _gsaoiParameters = new GsaoiParameters(r);

@@ -37,7 +37,7 @@ public final class TRecsRecipe extends RecipeBase {
         _out = out;
 
         // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
+        _sdParameters = ITCRequest.sourceDefinitionParameters(r);
         _obsDetailParameters = new ObservationDetailsParameters(r);
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _trecsParameters = new TRecsParameters(r);

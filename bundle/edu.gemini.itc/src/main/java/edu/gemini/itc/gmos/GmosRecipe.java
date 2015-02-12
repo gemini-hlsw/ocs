@@ -48,7 +48,7 @@ public final class GmosRecipe extends RecipeBase {
         System.out.println("ServerName: " + ServerInfo.getServerURL());
 
         // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
+        _sdParameters = ITCRequest.sourceDefinitionParameters(r);
         _obsDetailParameters = new ObservationDetailsParameters(r);
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _gmosParameters = new GmosParameters(r);

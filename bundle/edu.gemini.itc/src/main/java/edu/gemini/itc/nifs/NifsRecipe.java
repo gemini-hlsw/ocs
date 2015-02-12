@@ -43,7 +43,7 @@ public final class NifsRecipe extends RecipeBase {
         super(out);
 
         // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
+        _sdParameters = ITCRequest.sourceDefinitionParameters(r);
         _obsDetailParameters = new ObservationDetailsParameters(r);
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _nifsParameters = new NifsParameters(r);

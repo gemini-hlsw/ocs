@@ -38,12 +38,12 @@ public final class SourceDefinitionParameters extends ITCParameters {
         VELOCITY
     }
 
-    private static enum SourceGeometry {
+    public static enum SourceGeometry {
         POINT,
         EXTENDED
     }
 
-    private static enum ExtSourceType {
+    public static enum ExtSourceType {
         UNIFORM,
         GAUSSIAN
     }
@@ -81,111 +81,22 @@ public final class SourceDefinitionParameters extends ITCParameters {
     private final BrightnessUnit _units; // unit code
     private final double _fwhm;
     private final WavebandDefinition _normBand; // U, V, B, ...
-    private double _bBTemp;
-    private double _eLineWavelength;
-    private double _eLineWidth;
-    private double _eLineFlux;
-    private double _eLineContinuumFlux;
-    private String _eLineFluxUnits; // units for eline flux
-    private String _eLineContinuumFluxUnits;
-    private double _pLawIndex;
+    private final double _bBTemp;
+    private final double _eLineWavelength;
+    private final double _eLineWidth;
+    private final double _eLineFlux;
+    private final double _eLineContinuumFlux;
+    private final String _eLineFluxUnits; // units for eline flux
+    private final String _eLineContinuumFluxUnits;
+    private final double _pLawIndex;
     private final SpectralDistribution _sourceSpec;
-    private String _specType;
-    private String _userDefinedSedString;
+    private final String _specType;
+    private final String _userDefinedSedString;
 
     // resource name of library spectrum
     private String _sedSpectrum;  // /lib/stellar/KOIII.nm
 
     private final double _redshift;  // z
-
-    /**
-     * Constructs a SourceDefinitionParameters from a MultipartParser
-     *
-     * @param p MutipartParser that has all of the parameters and files Parsed
-     * @throws Exception of cannot parse any of the parameters.
-     */
-
-    public SourceDefinitionParameters(ITCMultiPartParser p) {
-        final ITCRequest itcR = ITCRequest.from(p); // temporary
-
-        final SourceGeometry sourceGeom    = itcR.enumParameter(SourceGeometry.class);
-        final ExtSourceType  extSourceType = itcR.enumParameter(ExtSourceType.class);
-        switch (sourceGeom) {
-            case POINT:
-                _sourceType         = SourceType.POINT;
-                _fwhm               = 0.0; // N/A; only for extended gaussian
-                _sourceNorm         = itcR.doubleParameter("psSourceNorm");
-                _units              = itcR.enumParameter(BrightnessUnit.class, "psSourceUnits");
-                break;
-            case EXTENDED:
-                switch (extSourceType) {
-                    case GAUSSIAN:
-                        _sourceType = SourceType.EXTENDED_GAUSSIAN;
-                        _fwhm       = itcR.doubleParameter("gaussFwhm");
-                        _sourceNorm = itcR.doubleParameter("gaussSourceNorm");
-                        _units      = itcR.enumParameter(BrightnessUnit.class, "gaussSourceUnits");
-                        break;
-                    case UNIFORM:
-                        _sourceType = SourceType.EXTENDED_UNIFORM;
-                        _fwhm       = 0.0; // N/A; only for extended gaussian
-                        _sourceNorm = itcR.doubleParameter("usbSourceNorm");
-                        _units      = itcR.enumParameter(BrightnessUnit.class, "usbSourceUnits");
-                        break;
-                    default:
-                        throw new IllegalArgumentException();
-                }
-                break;
-            default:
-                throw new IllegalArgumentException();
-        }
-
-        // Get Normalization info
-        _normBand = itcR.enumParameter(WavebandDefinition.class);
-
-        // Get Spectrum Resource
-        _sourceSpec = itcR.enumParameter(SpectralDistribution.class);
-        switch (_sourceSpec) {
-            case LIBRARY_STAR:
-                _specType                 = itcR.parameter("stSpectrumType");
-                _sedSpectrum              = STELLAR_LIB + "/" + _specType.toLowerCase() + SED_FILE_EXTENSION;
-                break;
-            case LIBRARY_NON_STAR:
-                _specType                 = itcR.parameter("nsSpectrumType");
-                _sedSpectrum              = NON_STELLAR_LIB + "/" + _specType + SED_FILE_EXTENSION;
-                break;
-            case ELINE:
-                _eLineWavelength          = itcR.doubleParameter("lineWavelength");
-                _eLineWidth               = itcR.doubleParameter("lineWidth");
-                _eLineFlux                = itcR.doubleParameter("lineFlux");
-                _eLineContinuumFlux       = itcR.doubleParameter("lineContinuum");
-                _eLineFluxUnits           = itcR.parameter("lineFluxUnits");
-                _eLineContinuumFluxUnits  = itcR.parameter("lineContinuumUnits");
-                _sedSpectrum              = ""; // N/A
-                break;
-            case BBODY:
-                _bBTemp                   = itcR.doubleParameter("BBTemp");
-                _sedSpectrum              = ""; // N/A
-                break;
-            case PLAW:
-                _pLawIndex                = itcR.doubleParameter("powerIndex");
-                _sedSpectrum              = ""; // N/A
-                break;
-            case USER_DEFINED:
-                _userDefinedSedString     = p.getTextFile("specUserDef");
-                _sedSpectrum              = p.getRemoteFileName("specUserDef"); // N/A ??
-                break;
-            default:
-                throw new IllegalArgumentException();
-        }
-
-        //Get Redshift
-        final Recession recession = itcR.enumParameter(Recession.class);
-        switch (recession) {
-            case REDSHIFT:  _redshift = itcR.doubleParameter("z");                  break;
-            case VELOCITY:  _redshift = itcR.doubleParameter("v") / ITCConstants.C; break;
-            default:         throw new IllegalArgumentException("invalid recession " + recession);
-        }
-    }
 
     /**
      * Constructs a SourceDefinitionParameters from a servlet request
@@ -207,7 +118,9 @@ public final class SourceDefinitionParameters extends ITCParameters {
                                       String eLineFluxUnits,
                                       String eLineContinuumFluxUnits,
                                       double pLawIndex,
-                                      SpectralDistribution sourceSpec) {
+                                      SpectralDistribution sourceSpec,
+                                      String userDefinedString,
+                                      String specType) {
         _sourceType = sourceType;
         _sourceNorm = sourceNorm;
         _units = units;
@@ -224,6 +137,8 @@ public final class SourceDefinitionParameters extends ITCParameters {
         _eLineContinuumFluxUnits = eLineContinuumFluxUnits;
         _pLawIndex = pLawIndex;
         _sourceSpec = sourceSpec;
+        _userDefinedSedString = userDefinedString;
+        _specType = specType; // TODO: used??
 
         if ((sourceType == SourceType.EXTENDED_GAUSSIAN) && (_fwhm < 0.1)) {
             throw new IllegalArgumentException("Please use a Gaussian FWHM greater than 0.1");

@@ -3,8 +3,9 @@ package edu.gemini.itc.web
 import javax.servlet.http.HttpServletRequest
 
 import edu.gemini.itc.altair.AltairParameters
-import edu.gemini.itc.parameters.{ObservingConditionParameters, PlottingDetailsParameters, TeleParameters}
-import edu.gemini.itc.shared.ITCMultiPartParser
+import edu.gemini.itc.parameters.SourceDefinitionParameters._
+import edu.gemini.itc.parameters.{SourceDefinitionParameters, ObservingConditionParameters, PlottingDetailsParameters, TeleParameters}
+import edu.gemini.itc.shared.{ITCConstants, WavebandDefinition, ITCMultiPartParser}
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.telescope.IssPort
@@ -29,6 +30,15 @@ sealed abstract class ITCRequest {
 
   /** Gets the named value as a double. */
   def doubleParameter(name: String): Double = parameter(name).toDouble
+
+  /** Gets the user SED text file from the request.
+    * Only multipart HTTP requests will support this. */
+  def userSpectrum(): Option[String]
+
+  /** Gets the user SED text file name from the request.
+    * Only multipart HTTP requests will support this. */
+  // TODO: Can we get rid of this method?
+   def userSpectrumName(): Option[String]
 }
 
 /**
@@ -38,9 +48,13 @@ object ITCRequest {
 
   def from(request: HttpServletRequest): ITCRequest = new ITCRequest {
     override def parameter(name: String): String = request.getParameter(name)
+    override def userSpectrum(): Option[String] = None
+    override def userSpectrumName(): Option[String] = None
   }
   def from(request: ITCMultiPartParser): ITCRequest = new ITCRequest {
     override def parameter(name: String): String = request.getParameter(name)
+    override def userSpectrum(): Option[String] = Some(request.getTextFile("specUserDef"))
+    override def userSpectrumName(): Option[String] = Some(request.getRemoteFileName("specUserDef"))
   }
 
   def teleParameters(r: ITCMultiPartParser): TeleParameters = {
@@ -79,5 +93,131 @@ object ITCRequest {
     val altairUsed           = wfs eq TeleParameters.Wfs.AOWFS
     new AltairParameters(guideStarSeperation, guideStarMagnitude, fieldLens, wfsMode, altairUsed)
   }
+
+  def sourceDefinitionParameters(r: ITCMultiPartParser): SourceDefinitionParameters = {
+    val itcR = ITCRequest.from(r)
+
+    // Get the source geometry and type
+    val sourceGeom: SourceDefinitionParameters.SourceGeometry = itcR.enumParameter(classOf[SourceDefinitionParameters.SourceGeometry])
+    val extSourceType: SourceDefinitionParameters.ExtSourceType = itcR.enumParameter(classOf[SourceDefinitionParameters.ExtSourceType])
+    // TODO: introduce specific types for different source geometries
+    val (sourceType, fwhm, sourceNorm, units) = sourceGeom match {
+      case SourceGeometry.POINT =>
+        (SourceType.POINT, 0.0, itcR.doubleParameter("psSourceNorm"), itcR.enumParameter(classOf[SourceDefinitionParameters.BrightnessUnit], "psSourceUnits"))
+      case SourceGeometry.EXTENDED =>
+        extSourceType match {
+          case ExtSourceType.GAUSSIAN => (SourceType.EXTENDED_GAUSSIAN, itcR.doubleParameter("gaussFwhm"), itcR.doubleParameter("gaussSourceNorm"), itcR.enumParameter(classOf[SourceDefinitionParameters.BrightnessUnit], "gaussSourceUnits"))
+          case ExtSourceType.UNIFORM =>  (SourceType.EXTENDED_UNIFORM, 0.0, itcR.doubleParameter("usbSourceNorm"), itcR.enumParameter(classOf[SourceDefinitionParameters.BrightnessUnit], "usbSourceUnits"))
+        }
+    }
+
+    // Get Normalization info
+    val normBand = itcR.enumParameter(classOf[WavebandDefinition])
+
+    // Get Spectrum Resource
+    val sourceSpec = itcR.enumParameter(classOf[SourceDefinitionParameters.SpectralDistribution])
+    // TODO: introduce specific types for different spectra resources
+    val (specType, sedSpectrum, eLineWavelength, eLineWidth, eLineFlux, eLineContinuumFlux, eLineFluxUnits, eLineContinuumFluxUnits, bbTemp, plawIndex, userDefined) = sourceSpec match {
+      case SpectralDistribution.LIBRARY_STAR =>
+        val st = itcR.parameter("stSpectrumType")
+        (st,
+         STELLAR_LIB + "/" + st.toLowerCase + SED_FILE_EXTENSION,
+         0.0, // N/A
+         0.0, // N/A
+         0.0, // N/A
+         0.0, // N/A
+         "",  // N/A
+         "",  // N/A
+         0.0, // N/A
+         0.0, // N/A
+         "")  // N/A
+
+      case SpectralDistribution.LIBRARY_NON_STAR =>
+        val st = itcR.parameter("nsSpectrumType")
+        (st,
+        NON_STELLAR_LIB + "/" + st + SED_FILE_EXTENSION,
+          0.0, // N/A
+          0.0, // N/A
+          0.0, // N/A
+          0.0, // N/A
+          "",  // N/A
+          "",  // N/A
+          0.0, // N/A
+          0.0, // N/A
+          "")  // N/A
+      case SpectralDistribution.ELINE =>
+        (
+          "",  // N/A
+          "",  // N/A
+          itcR.doubleParameter("lineWavelength"),
+          itcR.doubleParameter("lineWidth"),
+          itcR.doubleParameter("lineFlux"),
+          itcR.doubleParameter("lineContinuum"),
+          itcR.parameter("lineFluxUnits"),
+          itcR.parameter("lineContinuumUnits"),
+          0.0, // N/A
+          0.0, // N/A
+          "")  // N/A
+      case SpectralDistribution.BBODY =>
+        (
+          "",  // N/A
+          "",  // N/A
+          0.0, // N/A
+          0.0, // N/A
+          0.0, // N/A
+          0.0, // N/A
+          "",  // N/A
+          "",  // N/A
+          itcR.doubleParameter("BBTemp"), // BBTEMP
+          0.0, // N/A
+          "")  // N/A
+      case SpectralDistribution.PLAW =>
+        (
+          "",  // N/A
+          "",  // N/A
+          0.0, // N/A
+          0.0, // N/A
+          0.0, // N/A
+          0.0, // N/A
+          "",  // N/A
+          "",  // N/A
+          0.0, // N/A
+          itcR.doubleParameter("powerIndex"),
+          "")  // N/A
+      case SpectralDistribution.USER_DEFINED =>
+        (
+          "",  // N/A
+          itcR.userSpectrumName().get, // TODO: needed??
+          0.0, // N/A
+          0.0, // N/A
+          0.0, // N/A
+          0.0, // N/A
+          "",  // N/A
+          "",  // N/A
+          0.0, // N/A
+          0.0, // N/A
+          itcR.userSpectrum().get)  // N/A
+    }
+
+    //Get Redshift
+    val recession: SourceDefinitionParameters.Recession = itcR.enumParameter(classOf[SourceDefinitionParameters.Recession])
+    val redshift = recession match {
+      case Recession.REDSHIFT => itcR.doubleParameter("z")
+      case Recession.VELOCITY => itcR.doubleParameter("v") / ITCConstants.C
+    }
+
+    // WOW, finally we've got everything in place..
+    new SourceDefinitionParameters(
+      sourceType, sourceNorm, units, fwhm, normBand, redshift,
+      sedSpectrum,
+      bbTemp,
+      eLineWavelength, eLineWidth, eLineFlux, eLineContinuumFlux, eLineFluxUnits, eLineContinuumFluxUnits,
+      plawIndex,
+      sourceSpec,
+      userDefined, specType)
+  }
+
+
+
 
 }
