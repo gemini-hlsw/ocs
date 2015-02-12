@@ -449,10 +449,7 @@ public final class NiriRecipe extends RecipeBase {
         // }
         PeakPixelFluxCalc ppfc;
 
-        if (_sdParameters.getSourceGeometry().equals(
-                SourceDefinitionParameters.POINT_SOURCE)
-                || _sdParameters.getExtendedSourceType().equals(
-                SourceDefinitionParameters.GAUSSIAN)) {
+        if (!_sdParameters.sourceIsUniform()) {
 
             // calculation of image quaility was in here if the current setup
             // does not work copy it back in here from above, and uncomment
@@ -480,9 +477,7 @@ public final class NiriRecipe extends RecipeBase {
 
             }
 
-        } else if (_sdParameters.getExtendedSourceType().equals(
-                SourceDefinitionParameters.UNIFORM)) {
-            double usbApArea = 0;
+        } else {
 
             ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
                     _obsDetailParameters.getExposureTime(), sed_integral,
@@ -490,10 +485,6 @@ public final class NiriRecipe extends RecipeBase {
 
             peak_pixel_count = ppfc
                     .getFluxInPeakPixelUSB(source_fraction, Npix);
-        } else {
-            throw new Exception(
-                    "Source geometry not supported for image quality calculation: "
-                            + _sdParameters.getSourceGeometry());
         }
 
         // In this version we are bypassing morphology modules 3a-5a.
@@ -534,24 +525,19 @@ public final class NiriRecipe extends RecipeBase {
                 st_halo = new SlitThroughput(uncorrected_im_qual, pixel_size,
                         _niriParameters.getFPMask());
 
-                if (_sdParameters.getSourceGeometry().equals(
-                        SourceDefinitionParameters.EXTENDED_SOURCE)) {
-                    if (_sdParameters.getExtendedSourceType().equals(
-                            SourceDefinitionParameters.UNIFORM)) {
-                        _println("software aperture extent along slit = "
-                                + device.toString(1 / _niriParameters
-                                .getFPMask()) + " arcsec");
-                    }
-                } else {
-                    _println("software aperture extent along slit = "
-                            + device.toString(1.4 * im_qual) + " arcsec");
+                switch (_sdParameters.getSourceType()) {
+                    case EXTENDED_UNIFORM:
+                        _println("software aperture extent along slit = " + device.toString(1 / _niriParameters.getFPMask()) + " arcsec");
+                        break;
+                    case POINT:
+                        _println("software aperture extent along slit = " + device.toString(1.4 * im_qual) + " arcsec");
+                        break;
                 }
+
+
             }
 
-            if (_sdParameters.getSourceGeometry().equals(
-                    SourceDefinitionParameters.POINT_SOURCE)
-                    || _sdParameters.getExtendedSourceType().equals(
-                    SourceDefinitionParameters.GAUSSIAN)) {
+            if (!_sdParameters.sourceIsUniform()) {
                 _println("fraction of source flux in aperture = "
                         + device.toString(st.getSlitThroughput()));
             }
@@ -572,22 +558,17 @@ public final class NiriRecipe extends RecipeBase {
             double spec_source_frac = st.getSlitThroughput();
             double halo_spec_source_frac = st_halo.getSlitThroughput();
 
-            if (_sdParameters.getSourceGeometry().equals(
-                    SourceDefinitionParameters.EXTENDED_SOURCE)) {
-                if (_sdParameters.getExtendedSourceType().equals(
-                        SourceDefinitionParameters.UNIFORM)) {
-                    // im_qual=10000;
+            if (_sdParameters.sourceIsUniform()) {
 
-                    if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
-                        spec_source_frac = _niriParameters.getFPMask()
-                                * ap_diam * pixel_size; // ap_diam = Spec_NPix
-                    } else if (ap_type
-                            .equals(ObservationDetailsParameters.AUTO_APER)) {
-                        ap_diam = new Double(
-                                1 / (_niriParameters.getFPMask() * pixel_size) + 0.5)
-                                .intValue();
-                        spec_source_frac = 1;
-                    }
+                if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
+                    spec_source_frac = _niriParameters.getFPMask()
+                            * ap_diam * pixel_size; // ap_diam = Spec_NPix
+                } else if (ap_type
+                        .equals(ObservationDetailsParameters.AUTO_APER)) {
+                    ap_diam = new Double(
+                            1 / (_niriParameters.getFPMask() * pixel_size) + 0.5)
+                            .intValue();
+                    spec_source_frac = 1;
                 }
             }
 

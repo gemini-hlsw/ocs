@@ -285,7 +285,7 @@ public final class GsaoiRecipe extends RecipeBase {
                     _teleParameters.getTelescopeDiameter(), im_qual,
                     _gemsParameters.getAvgStrehl(), _gemsParameters.getStrehlBand(),
                     _obsConditionParameters.getImageQualityPercentile(),
-                    _sdParameters.getSourceGeometry(), _sdParameters.getFWHM());
+                    _sdParameters);
             GemsBackgroundVisitor gemsBackgroundVisitor = new GemsBackgroundVisitor();
             GemsTransmissionVisitor gemsTransmissionVisitor = new GemsTransmissionVisitor();
             GemsFluxAttenuationVisitor gemsFluxAttenuationVisitor = new GemsFluxAttenuationVisitor(
@@ -390,10 +390,7 @@ public final class GsaoiRecipe extends RecipeBase {
 
         PeakPixelFluxCalc ppfc;
 
-        if (_sdParameters.getSourceGeometry().equals(
-                SourceDefinitionParameters.POINT_SOURCE)
-                || _sdParameters.getExtendedSourceType().equals(
-                SourceDefinitionParameters.GAUSSIAN)) {
+        if (!_sdParameters.sourceIsUniform()) {
 
             // calculation of image quaility was in here if the current setup
             // does not work copy it back in here from above, and uncomment
@@ -411,19 +408,11 @@ public final class GsaoiRecipe extends RecipeBase {
                         uncorrected_im_qual, pixel_size,
                         _obsDetailParameters.getExposureTime(), halo_integral,
                         sky_integral, instrument.getDarkCurrent());
-                // _println("Peak pixel in halo: " +
-                // ppfc_halo.getFluxInPeakPixel());
-                // _println("Peak pixel in core: " + peak_pixel_count + "\n");
-                peak_pixel_count = peak_pixel_count
-                        + ppfc_halo.getFluxInPeakPixel();
-                // _println("Total peak pixel count: " + peak_pixel_count +
-                // " \n");
+                peak_pixel_count = peak_pixel_count + ppfc_halo.getFluxInPeakPixel();
 
             }
 
-        } else if (_sdParameters.getExtendedSourceType().equals(
-                SourceDefinitionParameters.UNIFORM)) {
-            double usbApArea = 0;
+        } else  {
 
             ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
                     _obsDetailParameters.getExposureTime(), sed_integral,
@@ -431,10 +420,6 @@ public final class GsaoiRecipe extends RecipeBase {
 
             peak_pixel_count = ppfc
                     .getFluxInPeakPixelUSB(source_fraction, Npix);
-        } else {
-            throw new Exception(
-                    "Source geometry not supported for image quality calculation: "
-                            + _sdParameters.getSourceGeometry());
         }
 
         // In this version we are bypassing morphology modules 3a-5a.

@@ -285,10 +285,7 @@ public final class AcqCamRecipe extends RecipeBase {
 // Calculate the Peak Pixel Flux
         PeakPixelFluxCalc ppfc;
 
-        if (_sdParameters.getSourceGeometry().
-                equals(SourceDefinitionParameters.POINT_SOURCE) ||
-                _sdParameters.getExtendedSourceType().
-                        equals(SourceDefinitionParameters.GAUSSIAN)) {
+        if (!_sdParameters.sourceIsUniform()) {
 
             ppfc = new
                     PeakPixelFluxCalc(im_qual, pixel_size,
@@ -297,19 +294,16 @@ public final class AcqCamRecipe extends RecipeBase {
                     instrument.getDarkCurrent());
 
             peak_pixel_count = ppfc.getFluxInPeakPixel();
-        } else if (_sdParameters.getExtendedSourceType().
-                equals(SourceDefinitionParameters.UNIFORM)) {
-            double usbApArea = 0;
+
+        } else {
+
             ppfc = new
                     PeakPixelFluxCalc(im_qual, pixel_size,
                     _obsDetailParameters.getExposureTime(),
                     sed_integral, sky_integral,
                     instrument.getDarkCurrent());
             peak_pixel_count = ppfc.getFluxInPeakPixelUSB(SFcalc.getSourceFraction(), SFcalc.getNPix());
-        } else {
-            throw new IllegalArgumentException(
-                    "Peak Pixel Flux could not be calculated for type" +
-                            _sdParameters.getSourceGeometry());
+
         }
 
         // In this version we are bypassing morphology modules 3a-5a.

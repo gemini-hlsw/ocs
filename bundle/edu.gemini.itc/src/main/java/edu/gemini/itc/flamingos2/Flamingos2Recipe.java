@@ -295,10 +295,7 @@ public final class Flamingos2Recipe extends RecipeBase {
         // Calculate the Peak Pixel Flux
         PeakPixelFluxCalc ppfc;
 
-        if (_sdParameters.getSourceGeometry().equals(
-                SourceDefinitionParameters.POINT_SOURCE)
-                || _sdParameters.getExtendedSourceType().equals(
-                SourceDefinitionParameters.GAUSSIAN)) {
+        if (!_sdParameters.sourceIsUniform()) {
 
             ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
                     _obsDetailParameters.getExposureTime(), sed_integral,
@@ -306,18 +303,14 @@ public final class Flamingos2Recipe extends RecipeBase {
 
             peak_pixel_count = ppfc.getFluxInPeakPixel();
 
-        } else if (_sdParameters.getExtendedSourceType().equals(
-                SourceDefinitionParameters.UNIFORM)) {
-            double usbApArea = 0;
+        } else {
+
+
             ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
                     _obsDetailParameters.getExposureTime(), sed_integral,
                     sky_integral, instrument.getDarkCurrent());
             peak_pixel_count = ppfc.getFluxInPeakPixelUSB(
                     SFcalc.getSourceFraction(), SFcalc.getNPix());
-        } else {
-            throw new Exception(
-                    "Peak Pixel Flux could not be calculated for type"
-                            + _sdParameters.getSourceGeometry());
         }
 
         // In this version we are bypassing morphology modules 3a-5a.
@@ -362,24 +355,20 @@ public final class Flamingos2Recipe extends RecipeBase {
                 st_halo = new SlitThroughput(uncorrected_im_qual, pixel_size,
                         _flamingos2Parameters.getSlitSize() * pixel_size);
 
-                if (_sdParameters.getSourceGeometry().equals(
-                        SourceDefinitionParameters.EXTENDED_SOURCE)) {
-                    if (_sdParameters.getExtendedSourceType().equals(
-                            SourceDefinitionParameters.UNIFORM)) {
+                switch (_sdParameters.getSourceType()) {
+                    case EXTENDED_UNIFORM:
                         _println("software aperture extent along slit = "
                                 + device.toString(1 / _flamingos2Parameters
                                 .getSlitSize() * pixel_size) + " arcsec");
-                    }
-                } else {
+                        break;
+                    case POINT:
                     _println("software aperture extent along slit = "
                             + device.toString(1.4 * im_qual) + " arcsec");
+                        break;
                 }
             }
 
-            if (_sdParameters.getSourceGeometry().equals(
-                    SourceDefinitionParameters.POINT_SOURCE)
-                    || _sdParameters.getExtendedSourceType().equals(
-                    SourceDefinitionParameters.GAUSSIAN)) {
+            if (!_sdParameters.sourceIsUniform()) {
                 _println("fraction of source flux in aperture = "
                         + device.toString(st.getSlitThroughput()));
             }
@@ -399,22 +388,17 @@ public final class Flamingos2Recipe extends RecipeBase {
             ap_diam = st.getSpatialPix();
             double spec_source_frac = st.getSlitThroughput();
 
-            if (_sdParameters.getSourceGeometry().equals(
-                    SourceDefinitionParameters.EXTENDED_SOURCE)) {
-                if (_sdParameters.getExtendedSourceType().equals(
-                        SourceDefinitionParameters.UNIFORM)) {
-                    // im_qual=10000;
+            if (_sdParameters.sourceIsUniform()) {
 
-                    if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
-                        spec_source_frac = _flamingos2Parameters.getSlitSize() * pixel_size
-                                * ap_diam * pixel_size; // ap_diam = Spec_NPix
-                    } else if (ap_type
-                            .equals(ObservationDetailsParameters.AUTO_APER)) {
-                        ap_diam = new Double(
-                                1 / (_flamingos2Parameters.getSlitSize() * pixel_size) + 0.5)
-                                .intValue();
-                        spec_source_frac = 1;
-                    }
+                if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
+                    spec_source_frac = _flamingos2Parameters.getSlitSize() * pixel_size
+                            * ap_diam * pixel_size; // ap_diam = Spec_NPix
+                } else if (ap_type
+                        .equals(ObservationDetailsParameters.AUTO_APER)) {
+                    ap_diam = new Double(
+                            1 / (_flamingos2Parameters.getSlitSize() * pixel_size) + 0.5)
+                            .intValue();
+                    spec_source_frac = 1;
                 }
             }
 

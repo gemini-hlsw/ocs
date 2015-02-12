@@ -28,23 +28,23 @@ public final class ImagingS2NCalculationFactory {
 
             // --- Integration time
             case ObservationDetailsParameters.INTTIME:
-                final boolean extendedSource = sdp.getSourceGeometry().equals(SourceDefinitionParameters.EXTENDED_SOURCE);
-                if (extendedSource) {
-                    return new ImagingUSBS2NMethodBCalculation(
-                            odp.getNumExposures(),
-                            odp.getSourceFraction(),
-                            odp.getExposureTime(),
-                            instrument.getReadNoise(),
-                            odp.getSNRatio(),
-                            instrument.getPixelSize());
-                } else {
-                    return new ImagingPointS2NMethodBCalculation(
-                            odp.getNumExposures(),
-                            odp.getSourceFraction(),
-                            odp.getExposureTime(),
-                            instrument.getReadNoise(),
-                            odp.getSNRatio(),
-                            instrument.getPixelSize());
+                switch (sdp.getSourceType()) {
+                    case POINT:
+                        return new ImagingPointS2NMethodBCalculation(
+                                odp.getNumExposures(),
+                                odp.getSourceFraction(),
+                                odp.getExposureTime(),
+                                instrument.getReadNoise(),
+                                odp.getSNRatio(),
+                                instrument.getPixelSize());
+                    default:
+                        return new ImagingUSBS2NMethodBCalculation(
+                                odp.getNumExposures(),
+                                odp.getSourceFraction(),
+                                odp.getExposureTime(),
+                                instrument.getReadNoise(),
+                                odp.getSNRatio(),
+                                instrument.getPixelSize());
                 }
 
             default:

@@ -464,10 +464,7 @@ public final class NiciRecipe extends RecipeBase {
         PeakPixelFluxCalc ppfc, ppfc_halo;
         double exp_time;
 
-        if (_sdParameters.getSourceGeometry().equals(
-                SourceDefinitionParameters.POINT_SOURCE)
-                || _sdParameters.getExtendedSourceType().equals(
-                SourceDefinitionParameters.GAUSSIAN)) {
+        if (!_sdParameters.sourceIsUniform()) {
 
             ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
                     _obsDetailParameters.getExposureTime(), sed_integral,
@@ -479,19 +476,16 @@ public final class NiciRecipe extends RecipeBase {
 
             peak_pixel_count = ppfc.getFluxInPeakPixel()
                     + ppfc_halo.getFluxInPeakPixel();
-        } else if (_sdParameters.getExtendedSourceType().equals(
-                SourceDefinitionParameters.UNIFORM)) {
-            double usbApArea = 0;
+
+        } else {
+
             ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
                     _obsDetailParameters.getExposureTime(), sed_integral,
                     sky_integral, instrument.getDarkCurrent());
             peak_pixel_count = ppfc.getFluxInPeakPixelUSB(
                     SFcalc.getSourceFraction(), SFcalc.getNPix());
-        } else {
-            throw new Exception(
-                    "Peak Pixel Flux could not be calculated for type"
-                            + _sdParameters.getSourceGeometry());
         }
+
         // _print("Peak Pixel Flux calculated");
 
         // In this version we are bypassing morphology modules 3a-5a.

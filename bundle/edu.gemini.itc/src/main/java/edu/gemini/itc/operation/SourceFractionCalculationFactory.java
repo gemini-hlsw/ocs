@@ -18,26 +18,23 @@ public final class SourceFractionCalculationFactory {
         double ap_diam =
                 observationDetailsParameters.getApertureDiameter();
 
-        //Case A if a point Source or a Gaussian use the same code
-        // Creates a PointSourceFractionCalculation object
 
-        if (sourceDefinitionParameters.getSourceGeometry().
-                equals(SourceDefinitionParameters.POINT_SOURCE) ||
-                sourceDefinitionParameters.getExtendedSourceType().
-                        equals(SourceDefinitionParameters.GAUSSIAN))
-
-            return new PointSourceFractionCalculation(
-                    ap_type,
-                    ap_diam,
-                    instrument.getPixelSize());
-
+        if (sourceDefinitionParameters.sourceIsUniform()) {
             // Case B if sdParams.getExtendedSourceType = UNIFORM
             // This means the User has selected USB Calc
-        else
             return new USBSourceFractionCalculation(
                     ap_type,
                     ap_diam,
                     instrument.getPixelSize());
+        } else {
+            //Case A if a point Source or a Gaussian use the same code
+            // Creates a PointSourceFractionCalculation object
+            return new PointSourceFractionCalculation(
+                    ap_type,
+                    ap_diam,
+                    instrument.getPixelSize());
+        }
+
     }
 }
 

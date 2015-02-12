@@ -53,14 +53,11 @@ public class Gems {
     private double imageQualityPercentile;
 
     // Point source or extended source
-    private String sourceGeometry;
-
-    // User entered fwhm for extended source
-    private double fwhm;
+    private final SourceDefinitionParameters source;
 
     //Constructor
     public Gems(double wavelength, double telescopeDiameter, double uncorrectedSeeing, double avgStrehl,
-                String strehlBand, double imageQualityPercentile, String sourceGeometry, double fwhm) throws Exception {
+                String strehlBand, double imageQualityPercentile, SourceDefinitionParameters source) throws Exception {
         gemsBackground = new GemsBackgroundVisitor();
         gemsTransmission = new GemsTransmissionVisitor();
         this.wavelength = wavelength;
@@ -70,8 +67,7 @@ public class Gems {
         this.avgStrehl = avgStrehl;
         this.strehlBand = strehlBand;
         this.imageQualityPercentile = imageQualityPercentile;
-        this.sourceGeometry = sourceGeometry;
-        this.fwhm = fwhm;
+        this.source = source;
     }
 
     //Methods
@@ -124,46 +120,49 @@ public class Gems {
     //
     // Note: The IQ table should only be applied to the Point Source mode,
     public double getAOCorrectedFWHM() {
-        if (SourceDefinitionParameters.POINT_SOURCE.equals(sourceGeometry)) {
-            // point source
-            final int IQ20 = 20, IQ70 = 70, IQ85 = 85;
-            final int iq = (int) (imageQualityPercentile * 100);
-            switch (strehlBand.charAt(0)) {
-                case 'J':
-                    switch (iq) {
-                        case IQ20:
-                            return 0.08;
-                        case IQ70:
-                            return 0.13;
-                        case IQ85:
-                            return 0.15;
-                    }
-                    break;
-                case 'H':
-                    switch (iq) {
-                        case IQ20:
-                            return 0.07;
-                        case IQ70:
-                            return 0.10;
-                        case IQ85:
-                            return 0.13;
-                    }
-                    break;
-                case 'K':
-                    switch (iq) {
+        switch (source.getSourceType()) {
+            case POINT:
+                // point source
+                final int IQ20 = 20, IQ70 = 70, IQ85 = 85;
+                final int iq = (int) (imageQualityPercentile * 100);
+                switch (strehlBand.charAt(0)) {
+                    case 'J':
+                        switch (iq) {
+                            case IQ20:
+                                return 0.08;
+                            case IQ70:
+                                return 0.13;
+                            case IQ85:
+                                return 0.15;
+                        }
+                        break;
+                    case 'H':
+                        switch (iq) {
+                            case IQ20:
+                                return 0.07;
+                            case IQ70:
+                                return 0.10;
+                            case IQ85:
+                                return 0.13;
+                        }
+                        break;
+                    case 'K':
+                        switch (iq) {
 
-                        case IQ20:
-                            return 0.06;
-                        case IQ70:
-                            return 0.09;
-                        case IQ85:
-                            return 0.12;
-                    }
-                    break;
-            }
-        } else {
-            // extended source
-            return fwhm;
+                            case IQ20:
+                                return 0.06;
+                            case IQ70:
+                                return 0.09;
+                            case IQ85:
+                                return 0.12;
+                        }
+                        break;
+                }
+                break;
+
+            default:
+                // extended source
+                return source.getFWHM();
         }
 
         // The web page always selects one of J, H or K, so if we get here, the IQ must be wrong

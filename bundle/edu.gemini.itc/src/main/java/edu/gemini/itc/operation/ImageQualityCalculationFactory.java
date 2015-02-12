@@ -16,27 +16,22 @@ public final class ImageQualityCalculationFactory {
             TeleParameters teleParameters,
             Instrument instrument) {
 
-        // Case A The Image quality is defined by the user
-        // who has selected a Gaussian Extended source
-        // Creates a GaussianImageQualityCalculation
+        switch (sourceDefinitionParameters.getSourceType()) {
+            case EXTENDED_GAUSSIAN:
+                // Case A The Image quality is defined by the user
+                // who has selected a Gaussian Extended source
+                // Creates a GaussianImageQualityCalculation
+                return new GaussianImageQualityCalculation(sourceDefinitionParameters.getFWHM());
 
-        if (sourceDefinitionParameters.getSourceGeometry().equals(
-                SourceDefinitionParameters.EXTENDED_SOURCE)) {
-
-            if (sourceDefinitionParameters.getExtendedSourceType().equals(
-                    SourceDefinitionParameters.GAUSSIAN)) {
-                return new GaussianImageQualityCalculation(
-                        sourceDefinitionParameters.getFWHM());
-            }
+            default:
+                // Case B The Image Quality is defined by either of the
+                // Probes in conjuction with the Atmosphric Seeing.
+                // This case creates an ImageQuality Calculation
+                return new ImageQualityCalculation(teleParameters.getWFS(),
+                        observingConditionParameters.getImageQuality(),
+                        observingConditionParameters.getAirmass(),
+                        instrument.getEffectiveWavelength());
         }
-
-        // Case B The Image Quality is defined by either of the
-        // Probes in conjuction with the Atmosphric Seeing.
-        // This case creates an ImageQuality Calculation
-        return new ImageQualityCalculation(teleParameters.getWFS(),
-                observingConditionParameters.getImageQuality(),
-                observingConditionParameters.getAirmass(),
-                instrument.getEffectiveWavelength());
 
     }
 }

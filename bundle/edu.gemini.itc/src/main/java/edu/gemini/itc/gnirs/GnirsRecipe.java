@@ -423,10 +423,7 @@ public final class GnirsRecipe extends RecipeBase {
         // Calculate the Peak Pixel Flux
         PeakPixelFluxCalc ppfc;
 
-        if (_sdParameters.getSourceGeometry().equals(
-                SourceDefinitionParameters.POINT_SOURCE)
-                || _sdParameters.getExtendedSourceType().equals(
-                SourceDefinitionParameters.GAUSSIAN)) {
+        if (!_sdParameters.sourceIsUniform()) {
 
             ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
                     _obsDetailParameters.getExposureTime(), sed_integral,
@@ -434,24 +431,7 @@ public final class GnirsRecipe extends RecipeBase {
 
             peak_pixel_count = ppfc.getFluxInPeakPixel();
 
-//            // REL-472: Commenting out Altair option for now
-//            if (_altairParameters.altairIsUsed()) {
-//                PeakPixelFluxCalc ppfc_halo = new PeakPixelFluxCalc(
-//                        uncorrected_im_qual, pixel_size,
-//                        _obsDetailParameters.getExposureTime(), halo_integral,
-//                        sky_integral, instrument.getDarkCurrent());
-//                // _println("Peak pixel in halo: " +
-//                // ppfc_halo.getFluxInPeakPixel());
-//                // _println("Peak pixel in core: " + peak_pixel_count + "\n");
-//                peak_pixel_count = peak_pixel_count
-//                        + ppfc_halo.getFluxInPeakPixel();
-//                // _println("Total peak pixel count: " + peak_pixel_count +
-//                // " \n");
-//
-//            }
-        } else if (_sdParameters.getExtendedSourceType().equals(
-                SourceDefinitionParameters.UNIFORM)) {
-            double usbApArea = 0;
+        } else {
 
             ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
                     _obsDetailParameters.getExposureTime(), sed_integral,
@@ -459,8 +439,6 @@ public final class GnirsRecipe extends RecipeBase {
 
             peak_pixel_count = ppfc
                     .getFluxInPeakPixelUSB(source_fraction, Npix);
-        } else {
-            throw new Exception("Peak Pixel could not be calculated ");
         }
 
         // In this version we are bypassing morphology modules 3a-5a.
@@ -498,24 +476,21 @@ public final class GnirsRecipe extends RecipeBase {
                 st = new SlitThroughput(im_qual, pixel_size, _gnirsParameters.getFPMask());
                 st_halo = new SlitThroughput(uncorrected_im_qual, pixel_size, _gnirsParameters.getFPMask());
 
-                if (_sdParameters.getSourceGeometry().equals(
-                        SourceDefinitionParameters.EXTENDED_SOURCE)) {
-                    if (_sdParameters.getExtendedSourceType().equals(
-                            SourceDefinitionParameters.UNIFORM)) {
+                switch (_sdParameters.getSourceType()) {
+                    case EXTENDED_UNIFORM:
                         _println("software aperture extent along slit = "
                                 + device.toString(1 / _gnirsParameters
                                 .getFPMask()) + " arcsec");
-                    }
-                } else {
-                    _println("software aperture extent along slit = "
-                            + device.toString(1.4 * im_qual) + " arcsec");
+                        break;
+                    case POINT:
+                        _println("software aperture extent along slit = "
+                                + device.toString(1.4 * im_qual) + " arcsec");
+                        break;
                 }
+
             }
 
-            if (_sdParameters.getSourceGeometry().equals(
-                    SourceDefinitionParameters.POINT_SOURCE)
-                    || _sdParameters.getExtendedSourceType().equals(
-                    SourceDefinitionParameters.GAUSSIAN)) {
+            if (!_sdParameters.sourceIsUniform()) {
                 _println("fraction of source flux in aperture = "
                         + device.toString(st.getSlitThroughput()));
             }
@@ -550,23 +525,18 @@ public final class GnirsRecipe extends RecipeBase {
 
             // For the usb case we want the resolution to be determined by the
             // slit width and not the image quality for a point source.
-            if (_sdParameters.getSourceGeometry().equals(
-                    SourceDefinitionParameters.EXTENDED_SOURCE)) {
-                if (_sdParameters.getExtendedSourceType().equals(
-                        SourceDefinitionParameters.UNIFORM)) {
-                    im_qual = 10000;
-
-                    if (ap_type
-                            .equals(ObservationDetailsParameters.USER_APER)) {
-                        spec_source_frac = _gnirsParameters.getFPMask()
-                                * ap_diam * pixel_size; // Spec_NPix
-                    } else if (ap_type
-                            .equals(ObservationDetailsParameters.AUTO_APER)) {
-                        ap_diam = new Double(
-                                1 / (_gnirsParameters.getFPMask() * pixel_size) + 0.5)
-                                .intValue();
-                        spec_source_frac = 1;
-                    }
+            if (_sdParameters.sourceIsUniform()) {
+                im_qual = 10000;
+                if (ap_type
+                        .equals(ObservationDetailsParameters.USER_APER)) {
+                    spec_source_frac = _gnirsParameters.getFPMask()
+                            * ap_diam * pixel_size; // Spec_NPix
+                } else if (ap_type
+                        .equals(ObservationDetailsParameters.AUTO_APER)) {
+                    ap_diam = new Double(
+                            1 / (_gnirsParameters.getFPMask() * pixel_size) + 0.5)
+                            .intValue();
+                    spec_source_frac = 1;
                 }
             }
 

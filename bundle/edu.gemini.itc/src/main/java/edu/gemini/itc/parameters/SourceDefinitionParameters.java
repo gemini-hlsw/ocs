@@ -10,36 +10,13 @@ import edu.gemini.spModel.type.DisplayableSpType;
  * of an ITC web page.  This object is constructed from a servlet request.
  */
 public final class SourceDefinitionParameters extends ITCParameters {
-    // ITC web form parameter names.
-    // These constants must be kept in sync with the web page form.
-    // They are used to parse form data.
-    public static final String SOURCE_GEOM = "sourceGeom";
-    public static final String SOURCE_NORM_PT_SOURCE = "psSourceNorm";
-    public static final String SOURCE_NORM_USB = "usbSourceNorm";
-    public static final String SOURCE_NORM_GAUSSIAN = "gaussSourceNorm";
-    public static final String SOURCE_UNITS_PT_SOURCE = "psSourceUnits";
-    public static final String SOURCE_UNITS_USB = "usbSourceUnits";
-    public static final String SOURCE_UNITS_GAUSSIAN = "gaussSourceUnits";
-    public static final String SOURCE_FWHM_GAUSSIAN = "gaussFwhm";
-    public static final String EXTENDED_SOURCE_TYPE = "extSourceType";
+
     public static final String SOURCE_SPEC = "sourceSpec";
     public static final String ST_SPEC_TYPE = "stSpectrumType";
     public static final String NS_SPEC_TYPE = "nsSpectrumType";
-    public static final String RECESSION = "recession";
-
-    public static final String Z = "z";
-    public static final String V = "v";
-
-    // ITC web form input values.
-    // These constants must be kept in sync with the web page form.
-    // They are used to parse form data.
-    public static final String POINT_SOURCE = "pointSource";
-    public static final String EXTENDED_SOURCE = "extendedSource";
-    public static final String UNIFORM = "uniform";
-    public static final String GAUSSIAN = "gaussian";
 
     public static enum BrightnessUnit implements DisplayableSpType {
-        // TODO: The "displayable" units are pretty ugly, but I have to keep them for
+        // TODO: The "displayable" units are pretty ugly, but we have to keep them for
         // TODO: now in order to be backwards compatible for regression testing.
         MAG                 ("mag"),
         ABMAG               ("ABmag"),
@@ -60,22 +37,38 @@ public final class SourceDefinitionParameters extends ITCParameters {
         public String displayValue() {return displayValue;}
     }
 
+    public static enum Recession {
+        REDSHIFT,
+        VELOCITY
+    }
+
+    private static enum SourceGeometry {
+        POINT,
+        EXTENDED
+    }
+
+    private static enum ExtSourceType {
+        UNIFORM,
+        GAUSSIAN
+    }
+
+    public static enum SourceType {
+        POINT,
+        EXTENDED_UNIFORM,
+        EXTENDED_GAUSSIAN
+    }
+
     public static final String WATTS = "watts_fd_wavelength";
     public static final String WATTS_FLUX = "watts_flux";
     public static final String ERGS_FLUX = "ergs_flux";
 
     public static final String LIBRARY_STAR = "libraryStar";
     public static final String LIBRARY_NON_STAR = "libraryNonStar";
-    public static final String BBTEMP = "BBTemp";
     public static final String BBODY = "modelBlackBody";
     public static final String ELINE = "modelEmLine";
     public static final String PLAW = "modelPowerLaw";
-    public static final String PLAW_INDEX = "powerIndex";
     public static final String USER_DEFINED_SPECTRUM = "userDefinedSpectrum";
     public static final String USER_DEFINED_SPECTRUM_NAME = "specUserDef";
-
-    public static final String REDSHIFT = "redshift";
-    public static final String VELOCITY = "velocity";
 
     public static final String SED_FILE_EXTENSION = ".nm";
 
@@ -86,9 +79,8 @@ public final class SourceDefinitionParameters extends ITCParameters {
     public static final String NON_STELLAR_LIB = ITCConstants.SED_LIB + "/non_stellar";
 
     // Data members
-    private final String _sourceGeom;  // point or extended
-    private String _extSourceType; // uniform, gaussian, ...
-    private final double _sourceNorm;  // 19.3 or 2e-17
+    private SourceType _sourceType;  // point or extended
+    private double _sourceNorm;  // 19.3 or 2e-17
     private final BrightnessUnit _units; // unit code
     private double _fwhm;
     private final WavebandDefinition _normBand; // U, V, B, ...
@@ -108,7 +100,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
     // resource name of library spectrum
     private String _sedSpectrum;  // /lib/stellar/KOIII.nm
 
-    private double _redshift;  // z
+    private final double _redshift;  // z
 
     /**
      * Constructs a SourceDefinitionParameters from a MultipartParser
@@ -118,27 +110,37 @@ public final class SourceDefinitionParameters extends ITCParameters {
      */
 
     public SourceDefinitionParameters(ITCMultiPartParser p) {
-        ITCRequest itcR = ITCRequest.from(p); // temporary
+        final ITCRequest itcR = ITCRequest.from(p); // temporary
 
-        _sourceGeom = p.getParameter(SOURCE_GEOM);
-        if (_sourceGeom.equals(POINT_SOURCE)) {
-            _sourceNorm = itcR.doubleParameter(SOURCE_NORM_PT_SOURCE);
-            _units      = itcR.enumParameter(BrightnessUnit.class, SOURCE_UNITS_PT_SOURCE);
-        } else if (_sourceGeom.equals(EXTENDED_SOURCE)) {
-            _extSourceType = p.getParameter(EXTENDED_SOURCE_TYPE);
-            if (_extSourceType.equals(GAUSSIAN)) {
-                _fwhm = ITCParameters.parseDouble(p.getParameter(SOURCE_FWHM_GAUSSIAN), "Full Width Half Max");
-                if (_fwhm < 0.1) throw new IllegalArgumentException("Please use a Gaussian FWHM greater than 0.1");
-                _sourceNorm = itcR.doubleParameter(SOURCE_NORM_GAUSSIAN);
-                _units      = itcR.enumParameter(BrightnessUnit.class, SOURCE_UNITS_GAUSSIAN);
-            } else if (_extSourceType.equals(UNIFORM)) {
-                _sourceNorm = itcR.doubleParameter(SOURCE_NORM_USB);
-                _units      = itcR.enumParameter(BrightnessUnit.class, SOURCE_UNITS_USB);
-            } else {
-                throw new IllegalArgumentException("Unrecognized extended source geometry: " + _extSourceType);
-            }
-        } else {
-            throw new IllegalArgumentException("Unrecognized source geometry: " + getSourceGeometry());
+        final SourceGeometry sourceGeom    = itcR.enumParameter(SourceGeometry.class);
+        final ExtSourceType  extSourceType = itcR.enumParameter(ExtSourceType.class);
+        switch (sourceGeom) {
+            case POINT:
+                _sourceType         = SourceType.POINT;
+                _sourceNorm         = itcR.doubleParameter("psSourceNorm");
+                _units              = itcR.enumParameter(BrightnessUnit.class, "psSourceUnits");
+                break;
+            case EXTENDED:
+                switch (extSourceType) {
+                    case GAUSSIAN:
+                        _sourceType = SourceType.EXTENDED_GAUSSIAN;
+                        _fwhm       = itcR.doubleParameter("gaussFwhm");
+                        if (_fwhm < 0.1)
+                            throw new IllegalArgumentException("Please use a Gaussian FWHM greater than 0.1");
+                        _sourceNorm = itcR.doubleParameter("gaussSourceNorm");
+                        _units      = itcR.enumParameter(BrightnessUnit.class, "gaussSourceUnits");
+                        break;
+                    case UNIFORM:
+                        _sourceType = SourceType.EXTENDED_UNIFORM;
+                        _sourceNorm = itcR.doubleParameter("usbSourceNorm");
+                        _units      = itcR.enumParameter(BrightnessUnit.class, "usbSourceUnits");
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unrecognized extended source geometry: " + extSourceType);
+                }
+                break;
+            default:
+                throw new IllegalArgumentException("Unrecognized source geometry: " + sourceGeom);
         }
 
         // Get Normalization info
@@ -165,12 +167,12 @@ public final class SourceDefinitionParameters extends ITCParameters {
             _sedSpectrum              = ELINE;
 
         } else if (_sourceSpec.equals(BBODY)) {
-            _bBTemp                   = itcR.doubleParameter(BBTEMP);
+            _bBTemp                   = itcR.doubleParameter("BBTemp");
             _sourceSpec               = BBODY;
             _sedSpectrum              = BBODY;
 
         } else if (_sourceSpec.equals(PLAW)) {
-            _pLawIndex                = itcR.doubleParameter(PLAW_INDEX);
+            _pLawIndex                = itcR.doubleParameter("powerIndex");
             _sourceSpec               = PLAW;
             _sedSpectrum              = PLAW;
 
@@ -185,13 +187,11 @@ public final class SourceDefinitionParameters extends ITCParameters {
         }
 
         //Get Redshift
-        String recession = p.getParameter(RECESSION);
-        if (recession.equals(REDSHIFT)) {
-            _redshift = ITCParameters.parseDouble(p.getParameter(Z), "Redshift");
-        } else if (recession.equals(VELOCITY)) {
-            _redshift = ITCParameters.parseDouble(p.getParameter(V), "Redshift Velocity") / ITCConstants.C;
-        } else {
-            throw new IllegalArgumentException("Unrecognized redshift method: " + recession);
+        final Recession recession = itcR.enumParameter(Recession.class);
+        switch (recession) {
+            case REDSHIFT:  _redshift = itcR.doubleParameter("z");                  break;
+            case VELOCITY:  _redshift = itcR.doubleParameter("v") / ITCConstants.C; break;
+            default:         throw new IllegalArgumentException("invalid recession " + recession);
         }
     }
 
@@ -200,8 +200,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
      *
      * @throws Exception if input data is not parsable.
      */
-    public SourceDefinitionParameters(String sourceGeometry,
-                                      String extSourceType,
+    public SourceDefinitionParameters(SourceType sourceType,
                                       double sourceNorm,
                                       BrightnessUnit units,
                                       double fwhm,
@@ -217,8 +216,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
                                       String eLineContinuumFluxUnits,
                                       double pLawIndex,
                                       String sourceSpec) {
-        _sourceGeom = sourceGeometry;
-        _extSourceType = extSourceType;
+        _sourceType = sourceType;
         _sourceNorm = sourceNorm;
         _units = units;
         _fwhm = fwhm;
@@ -236,16 +234,19 @@ public final class SourceDefinitionParameters extends ITCParameters {
         _sourceSpec = sourceSpec;
     }
 
-    public String getSourceGeometry() {
-        return _sourceGeom;
+    public SourceType getSourceType() {
+        return _sourceType;
+    }
+
+    public boolean sourceIsUniform() {
+        return _sourceType == SourceType.EXTENDED_UNIFORM;
     }
 
     public String getSourceGeometryStr() {
-        return "pointSource".equals(_sourceGeom) ? "point source" : "extended source";
-    }
-
-    public String getExtendedSourceType() {
-        return _extSourceType;
+        switch (_sourceType) {
+            case POINT: return "point source";
+            default:    return "extended source";
+        }
     }
 
     public double getSourceNormalization() {
@@ -326,8 +327,8 @@ public final class SourceDefinitionParameters extends ITCParameters {
      */
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append("Source Geometry:\t" + getSourceGeometry() + "\n");
-        sb.append("Extended source type:\t" + getExtendedSourceType() + "\n");
+        sb.append("Source Geometry:\t" + sourceGeometry() + "\n");
+        sb.append("Extended source type:\t" + extendedSourceType() + "\n");
         sb.append("Source Normalization:\t" + getSourceNormalization() + "\n");
         sb.append("Units:\t\t\t" + getUnits().displayValue() + "\n");
         sb.append("Gaussian FWHM:\t" + getFWHM() + "\n");
@@ -346,6 +347,26 @@ public final class SourceDefinitionParameters extends ITCParameters {
         sb.append("Power Law Index:" + getPowerLawIndex() + "\n");
         sb.append("\n");
         return sb.toString();
+    }
+
+    // only needed for regression testing June release 2015, remove asap
+    private String sourceGeometry() {
+        switch (_sourceType) {
+            case POINT:                 return "pointSource";
+            case EXTENDED_GAUSSIAN:     return "extendedSource";
+            case EXTENDED_UNIFORM:      return "extendedSource";
+            default: throw new IllegalArgumentException();
+        }
+    }
+
+    // only needed for regression testing June release 2015, remove asap
+    private String extendedSourceType() {
+        switch (_sourceType) {
+            case POINT:                 return "uniform"; // TODO: set to "null"
+            case EXTENDED_GAUSSIAN:     return "gaussian";
+            case EXTENDED_UNIFORM:      return "uniform";
+            default: throw new IllegalArgumentException();
+        }
     }
 
     public String printParameterSummary() {

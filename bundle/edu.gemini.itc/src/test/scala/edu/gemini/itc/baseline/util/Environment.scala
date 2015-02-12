@@ -1,6 +1,7 @@
 package edu.gemini.itc.baseline.util
 
 import edu.gemini.itc.altair.AltairParameters
+import edu.gemini.itc.parameters.SourceDefinitionParameters.SourceType
 import edu.gemini.itc.parameters.TeleParameters.{Coating, Wfs}
 import edu.gemini.itc.parameters._
 import edu.gemini.itc.shared.WavebandDefinition
@@ -43,8 +44,7 @@ object Environment {
   lazy val PointSources = List(
     // point source defined by magnitude
     new SourceDefinitionParameters(
-      SourceDefinitionParameters.POINT_SOURCE,
-      SourceDefinitionParameters.UNIFORM,
+      SourceType.POINT,
       15.0,
       SourceDefinitionParameters.BrightnessUnit.MAG,
       .35,
@@ -63,8 +63,7 @@ object Environment {
 
     // point source defined by W/m2/um
     new SourceDefinitionParameters(
-      SourceDefinitionParameters.POINT_SOURCE,
-      SourceDefinitionParameters.UNIFORM,
+      SourceType.POINT,
       2E-17,
       SourceDefinitionParameters.BrightnessUnit.WATTS,
       .35,
@@ -83,8 +82,7 @@ object Environment {
 
     // black body spectral distribution
     new SourceDefinitionParameters(
-      SourceDefinitionParameters.EXTENDED_SOURCE,
-      SourceDefinitionParameters.UNIFORM,
+      SourceType.EXTENDED_UNIFORM,
       19.0,
       SourceDefinitionParameters.BrightnessUnit.WATTS,
       .35,
@@ -106,8 +104,7 @@ object Environment {
   lazy val GmosSources = PointSources ++ List(
     // emission line spectral distribution
     new SourceDefinitionParameters(
-      SourceDefinitionParameters.EXTENDED_SOURCE,
-      SourceDefinitionParameters.GAUSSIAN,
+      SourceType.EXTENDED_GAUSSIAN,
       20.0,
       SourceDefinitionParameters.BrightnessUnit.WATTS,
       .35,
@@ -127,8 +124,7 @@ object Environment {
     // TODO get power law to work with other instruments(?)
     //power law spectral distribution
     new SourceDefinitionParameters(
-      SourceDefinitionParameters.EXTENDED_SOURCE,
-      SourceDefinitionParameters.GAUSSIAN,
+      SourceType.EXTENDED_GAUSSIAN,
       20.0,
       SourceDefinitionParameters.BrightnessUnit.MAG,
       .35,
@@ -150,8 +146,7 @@ object Environment {
   lazy val NiciSources = PointSources ++ List(
     // emission line spectral distribution
     new SourceDefinitionParameters(
-      SourceDefinitionParameters.EXTENDED_SOURCE,
-      SourceDefinitionParameters.GAUSSIAN,
+      SourceType.EXTENDED_GAUSSIAN,
       20.0,
       SourceDefinitionParameters.BrightnessUnit.WATTS,
       .35,
@@ -172,8 +167,7 @@ object Environment {
   lazy val NearIRSources = PointSources ++ List(
     // emission line spectral distribution
     new SourceDefinitionParameters(
-      SourceDefinitionParameters.EXTENDED_SOURCE,
-      SourceDefinitionParameters.GAUSSIAN,
+      SourceType.EXTENDED_GAUSSIAN,
       20.0,
       SourceDefinitionParameters.BrightnessUnit.WATTS,
       .35,
@@ -194,8 +188,7 @@ object Environment {
   lazy val MidIRSources = PointSources ++ List(
     // emission line spectral distribution
     new SourceDefinitionParameters(
-      SourceDefinitionParameters.EXTENDED_SOURCE,
-      SourceDefinitionParameters.GAUSSIAN,
+      SourceType.EXTENDED_GAUSSIAN,
       20.0,
       SourceDefinitionParameters.BrightnessUnit.WATTS,
       .35,

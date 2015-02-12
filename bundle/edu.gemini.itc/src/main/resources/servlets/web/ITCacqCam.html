@@ -22,7 +22,7 @@
     </tr>
     <tr>
 
-      <td><input type="radio" name="sourceGeom" value="pointSource" checked></td>
+      <td><input type="radio" name="SourceGeometry" value="POINT" checked></td>
       <td colspan="2"><b>Point source</b> (<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10257#spatial','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">nominal PSF</a>) with spatially integrated brightness <input type="text" name="psSourceNorm" size="8" value="20.0"> <select name="psSourceUnits" size="1">
         <option selected value="MAG">mag</option>
         <option value="ABMAG">AB mag</option>
@@ -37,13 +37,13 @@
     </tr>
     <tr>
 
-      <td valign="top"><input type="radio" name="sourceGeom" value="extendedSource"></td>
+      <td valign="top"><input type="radio" name="SourceGeometry" value="EXTENDED"></td>
       <td colspan="2"><b>Extended source</b> having ...(When this option is selected the image quality selection in section 3 of the ITC is disabled.) </td>
     </tr>
     <tr>
       <td>&nbsp;</td>
 
-      <td><img src="spacer.gif" width="40" height="1"><input type="radio" name="extSourceType" value="gaussian"></td>
+      <td><img src="spacer.gif" width="40" height="1"><input type="radio" name="ExtSourceType" value="GAUSSIAN"></td>
       <td>Gaussian profile with full width half maximum of <input type="text" name="gaussFwhm" size="5" value="1.0"> arcsec and spatially integrated brightness of <input type="text" name="gaussSourceNorm" size="8" value="1.0e-3"> <select name="gaussSourceUnits" size="1">
 
         <option value="MAG">mag</option>
@@ -59,7 +59,7 @@
     <tr>
 
       <td>&nbsp;</td>
-      <td><img src="spacer.gif" width="40" height="1"><input type="radio" name="extSourceType" value="uniform" checked></td>
+      <td><img src="spacer.gif" width="40" height="1"><input type="radio" name="ExtSourceType" value="UNIFORM" checked></td>
       <td>Uniform surface brightness <input type="text" name="usbSourceNorm" size="8" value="22.0"> <select name="usbSourceUnits" size="1">
         <option selected value="MAG_PSA">mag / sq arcsec</option>
 
@@ -232,7 +232,7 @@
       <td colspan="2">User-defined spectrum read from file (size &lt; 1MB) <input type=FILE name = "specUserDef"></td>
     </tr>
     <tr>
-      <td colspan="3">with the <b>spectrum mapped</b> to a redshift <input type="radio" name="recession" value="redshift" checked> z = <input type="text" name="z" size="5" value="0.0"> or a radial velocity <input type="radio" name="recession" value="velocity"> v
+      <td colspan="3">with the <b>spectrum mapped</b> to a redshift <input type="radio" name="Recession" value="REDSHIFT" checked> z = <input type="text" name="z" size="5" value="0.0"> or a radial velocity <input type="radio" name="Recession" value="VELOCITY"> v
       = <input type="text" name="v" size="5" value="0.0"> km/s</td>
 
     </tr>

@@ -326,33 +326,21 @@ public final class TRecsRecipe extends RecipeBase {
         // Calculate the Peak Pixel Flux
         PeakPixelFluxCalc ppfc;
 
-        if (_sdParameters.getSourceGeometry().equals(
-                SourceDefinitionParameters.POINT_SOURCE)
-                || _sdParameters.getExtendedSourceType().equals(
-                SourceDefinitionParameters.GAUSSIAN)) {
+        if (!_sdParameters.sourceIsUniform()) {
 
             ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
-                    // _obsDetailParameters.getExposureTime(), // OLD TRECS EXPOSURE
-                    // TIME;
-                    // instrument.getFrameTime(),
                     exp_time, sed_integral, sky_integral,
                     instrument.getDarkCurrent());
 
             peak_pixel_count = ppfc.getFluxInPeakPixel();
-        } else if (_sdParameters.getExtendedSourceType().equals(
-                SourceDefinitionParameters.UNIFORM)) {
-            double usbApArea = 0;
+
+        } else {
+
             ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
-                    // _obsDetailParameters.getExposureTime(), // OLD TRECS EXPOSURE
-                    // TIME;
-                    // instrument.getFrameTime(),
                     exp_time, sed_integral, sky_integral,
                     instrument.getDarkCurrent());
 
-            peak_pixel_count = ppfc.getFluxInPeakPixelUSB(
-                    SFcalc.getSourceFraction(), SFcalc.getNPix());
-        } else {
-            throw new Exception("Peak Pixel could not be calculated ");
+            peak_pixel_count = ppfc.getFluxInPeakPixelUSB(SFcalc.getSourceFraction(), SFcalc.getNPix());
         }
 
         // In this version we are bypassing morphology modules 3a-5a.
@@ -421,26 +409,18 @@ public final class TRecsRecipe extends RecipeBase {
                         + device.toString(_obsDetailParameters
                         .getApertureDiameter()) + " arcsec");
             } else {
-                st = new SlitThroughput(im_qual, pixel_size,
-                        _trecsParameters.getFPMask());
-                if (_sdParameters.getSourceGeometry().equals(
-                        SourceDefinitionParameters.EXTENDED_SOURCE)) {
-                    if (_sdParameters.getExtendedSourceType().equals(
-                            SourceDefinitionParameters.UNIFORM)) {
-                        _println("software aperture extent along slit = "
-                                + device.toString(1 / _trecsParameters
-                                .getFPMask()) + " arcsec");
-                    }
-                } else {
-                    _println("software aperture extent along slit = "
-                            + device.toString(1.4 * im_qual) + " arcsec");
+                st = new SlitThroughput(im_qual, pixel_size, _trecsParameters.getFPMask());
+                switch (_sdParameters.getSourceType()) {
+                    case EXTENDED_UNIFORM:
+                        _println("software aperture extent along slit = " + device.toString(1 / _trecsParameters.getFPMask()) + " arcsec");
+                        break;
+                    case POINT:
+                        _println("software aperture extent along slit = " + device.toString(1.4 * im_qual) + " arcsec");
+                        break;
                 }
             }
 
-            if (_sdParameters.getSourceGeometry().equals(
-                    SourceDefinitionParameters.POINT_SOURCE)
-                    || _sdParameters.getExtendedSourceType().equals(
-                    SourceDefinitionParameters.GAUSSIAN)) {
+            if (!_sdParameters.sourceIsUniform()) {
                 _println("fraction of source flux in aperture = "
                         + device.toString(st.getSlitThroughput()));
             }
@@ -470,22 +450,18 @@ public final class TRecsRecipe extends RecipeBase {
 
             // For the usb case we want the resolution to be determined by the
             // slit width and not the image quality for a point source.
-            if (_sdParameters.getSourceGeometry().equals(
-                    SourceDefinitionParameters.EXTENDED_SOURCE)) {
-                if (_sdParameters.getExtendedSourceType().equals(
-                        SourceDefinitionParameters.UNIFORM)) {
-                    im_qual = 10000;
+            if (_sdParameters.sourceIsUniform()) {
+                im_qual = 10000;
 
-                    if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
-                        spec_source_frac = _trecsParameters.getFPMask()
-                                * ap_diam * pixel_size; // ap_diam = Spec_NPix
-                    } else if (ap_type
-                            .equals(ObservationDetailsParameters.AUTO_APER)) {
-                        ap_diam = new Double(
-                                1 / (_trecsParameters.getFPMask() * pixel_size) + 0.5)
-                                .intValue();
-                        spec_source_frac = 1;
-                    }
+                if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
+                    spec_source_frac = _trecsParameters.getFPMask()
+                            * ap_diam * pixel_size; // ap_diam = Spec_NPix
+                } else if (ap_type
+                        .equals(ObservationDetailsParameters.AUTO_APER)) {
+                    ap_diam = new Double(
+                            1 / (_trecsParameters.getFPMask() * pixel_size) + 0.5)
+                            .intValue();
+                    spec_source_frac = 1;
                 }
             }
             // _println("Spec_source_frac: " + spec_source_frac+

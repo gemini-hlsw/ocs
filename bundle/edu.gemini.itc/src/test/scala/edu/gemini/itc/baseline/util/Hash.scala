@@ -11,6 +11,7 @@ import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nici.NiciParameters
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.niri.NiriParameters
+import edu.gemini.itc.parameters.SourceDefinitionParameters.SourceType
 import edu.gemini.itc.parameters.{ObservationDetailsParameters, ObservingConditionParameters, SourceDefinitionParameters, TeleParameters}
 import edu.gemini.itc.shared.ITCParameters
 import edu.gemini.itc.trecs.TRecsParameters
@@ -190,13 +191,13 @@ object Hash {
       src.getELineFluxUnits,
       src.getELineWavelength,
       src.getELineWidth,
-      src.getExtendedSourceType,
+      if (src.getSourceType == SourceType.EXTENDED_GAUSSIAN) "gaussian" else "uniform", //src.getExtendedSourceType,
       src.getFWHM,
       src.getNormBand.name,
       src.getPowerLawIndex,
       src.getUnits.displayValue, // TODO: remove
       src.getRedshift,
-      src.getSourceGeometry,
+      if (src.getSourceType == SourceType.POINT) "pointSource" else "extendedSource", //src.getSourceGeometry,
       src.getSourceGeometryStr,
       src.getSourceNormalization,
       src.getSourceSpec,

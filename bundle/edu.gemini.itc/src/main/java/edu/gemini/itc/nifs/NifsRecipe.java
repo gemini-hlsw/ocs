@@ -313,15 +313,21 @@ public final class NifsRecipe extends RecipeBase {
 
         //IFU morphology section
         VisitableMorphology morph, haloMorphology;
-        if (_sdParameters.getSourceGeometry().equals(SourceDefinitionParameters.POINT_SOURCE)) {
-            morph = new AOMorphology(im_qual);
-            haloMorphology = new AOMorphology(uncorrected_im_qual);
-        } else if (_sdParameters.getExtendedSourceType().equals(SourceDefinitionParameters.GAUSSIAN)) {
-            morph = new GaussianMorphology(im_qual);
-            haloMorphology = new GaussianMorphology(uncorrected_im_qual);
-        } else {
-            morph = new USBMorphology();
-            haloMorphology = new USBMorphology();
+        switch (_sdParameters.getSourceType()) {
+            case POINT:
+                morph = new AOMorphology(im_qual);
+                haloMorphology = new AOMorphology(uncorrected_im_qual);
+                break;
+            case EXTENDED_GAUSSIAN:
+                morph = new GaussianMorphology(im_qual);
+                haloMorphology = new GaussianMorphology(uncorrected_im_qual);
+                break;
+            case EXTENDED_UNIFORM:
+                morph = new USBMorphology();
+                haloMorphology = new USBMorphology();
+                break;
+            default:
+                throw new IllegalArgumentException();
         }
         morph.accept(instrument.getIFU().getAperture());
 
