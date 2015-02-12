@@ -2,8 +2,6 @@ package jsky.app.ot.tpe.gems;
 
 import edu.gemini.ags.gems.GemsUtils4Java;
 import edu.gemini.skycalc.Angle;
-import edu.gemini.shared.skyobject.Magnitude;
-import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.core.Target;
@@ -51,7 +49,7 @@ class GemsGuideStarSearchController {
         TpeImageWidget tpe = TpeManager.create().getImageWidget();
         WorldCoords basePos = tpe.getBasePos();
         ObsContext obsContext = _worker.getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
-        Set<Angle> posAngles = getPosAngles(obsContext);
+        Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);
 
         MagnitudeBand band = _model.getBand().getBand();
         final String catName;
@@ -64,40 +62,29 @@ class GemsGuideStarSearchController {
         List<GemsCatalogSearchResults> results;
         try {
             results = _worker.search(catName, catName, tipTiltMode, obsContext, posAngles,
-                    new Some<MagnitudeBand>(band));
+                    new Some<>(band));
         } catch(Exception e) {
             DialogUtil.error(_dialog, e);
-            results = new ArrayList<GemsCatalogSearchResults>();
+            results = new ArrayList<>();
             _dialog.setState(GemsGuideStarSearchDialog.State.PRE_QUERY);
         }
 
         if (_model.isReviewCanditatesBeforeSearch()) {
-            _model.setGemsCatalogSearchResults(filterQueryResults(obsContext, posAngles, results));
+            _model.setGemsCatalogSearchResults(results);
         } else {
             _model.setGemsCatalogSearchResults(results);
             _model.setGemsGuideStars(_worker.findAllGuideStars(obsContext, posAngles, results));
         }
     }
 
-    // Returns a copy of results with any query results removed that can not actually be used in the
-    // given context, with the given position angles and modes.
-    // (This is done again later in the call to analyze() , but can be called here to filter the list
-    // of candidate stars that the user sees, if that option is on.)
-    private List<GemsCatalogSearchResults> filterQueryResults(final ObsContext obsContext, final Set<Angle> posAngles,
-                                                  List<GemsCatalogSearchResults> results) {
-
-        // XXX TODO
-        return results;
-    }
-
-    private Set<Angle> getPosAngles(ObsContext obsContext) {
-        Set<Angle> posAngles = new HashSet<Angle>();
-        posAngles.add(obsContext.getPositionAngle());
+    private Set<edu.gemini.spModel.core.Angle> getPosAngles(ObsContext obsContext) {
+        Set<edu.gemini.spModel.core.Angle> posAngles = new HashSet<>();
+        posAngles.add(GemsUtils4Java.toNewAngle(obsContext.getPositionAngle()));
         if (_model.isAllowPosAngleAdjustments()) {
-            posAngles.add(new Angle(0., Angle.Unit.DEGREES));
-            posAngles.add(new Angle(90., Angle.Unit.DEGREES));
-            posAngles.add(new Angle(180., Angle.Unit.DEGREES));
-            posAngles.add(new Angle(270., Angle.Unit.DEGREES));
+            posAngles.add(GemsUtils4Java.toNewAngle(new Angle(0., Angle.Unit.DEGREES)));
+            posAngles.add(GemsUtils4Java.toNewAngle(new Angle(90., Angle.Unit.DEGREES)));
+            posAngles.add(GemsUtils4Java.toNewAngle(new Angle(180., Angle.Unit.DEGREES)));
+            posAngles.add(GemsUtils4Java.toNewAngle(new Angle(270., Angle.Unit.DEGREES)));
         }
         return posAngles;
     }
@@ -111,7 +98,7 @@ class GemsGuideStarSearchController {
         TpeImageWidget tpe = TpeManager.create().getImageWidget();
         WorldCoords basePos = tpe.getBasePos();
         ObsContext obsContext = _worker.getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
-        Set<Angle> posAngles = getPosAngles(obsContext);
+        Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);
         _model.setGemsGuideStars(_worker.findAllGuideStars(obsContext, posAngles,
                 filter(excludeCandidates, _model.getGemsCatalogSearchResults())));
     }

@@ -65,6 +65,9 @@ object GemsUtils4Java {
     Coordinates(RightAscension.fromAngle(c.getRa.toNewModel), Declination.fromAngle(c.getDec.toNewModel).getOrElse(Declination.zero))
   }
 
+  def toCoordinates(coords: skycalc.Coordinates): Coordinates =
+    Coordinates(RightAscension.fromAngle(Angle.fromDegrees(coords.getRaDeg)), Declination.fromAngle(Angle.fromDegrees(coords.getDecDeg)).getOrElse(Declination.zero))
+
   def toSiderealTarget(skyObject: skyobject.SkyObject): SiderealTarget = skyObject.toNewModel
 
   def translateBands(bands: java.util.Set[skyobject.Magnitude.Band]): java.util.Set[MagnitudeBand] = bands.asScala.map(_.toNewModel).asJava
@@ -74,6 +77,8 @@ object GemsUtils4Java {
   def toNewBand(band: skyobject.Magnitude.Band): MagnitudeBand = band.toNewModel
 
   def toNewAngle(angle: skycalc.Angle): Angle = angle.toNewModel
+
+  def toOldAngle(angle: Angle): skycalc.Angle = angle.toOldModel
 
   def toSPTarget(siderealTarget: SiderealTarget):SPTarget = new SPTarget(HmsDegTarget.fromSkyObject(siderealTarget.toOldModel))
 }

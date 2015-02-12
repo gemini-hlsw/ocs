@@ -4,7 +4,6 @@ import edu.gemini.ags.gems.*;
 import edu.gemini.ags.gems.mascot.Strehl;
 import edu.gemini.ags.gems.mascot.MascotProgress;
 import edu.gemini.skycalc.Angle;
-import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.shared.skyobject.coords.SkyCoordinates;
 import edu.gemini.shared.util.immutable.DefaultImList;
@@ -195,18 +194,19 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
      *
      * @param obsContext used to getthe current pos angle
      */
-    private Set<Angle> getPosAngles(ObsContext obsContext) {
-        Set<Angle> posAngles = new TreeSet<>(new Comparator<Angle>() {
+    private Set<edu.gemini.spModel.core.Angle> getPosAngles(ObsContext obsContext) {
+        Set<edu.gemini.spModel.core.Angle> posAngles = new TreeSet<>(new Comparator<edu.gemini.spModel.core.Angle>() {
             @Override
-            public int compare(Angle a1, Angle a2) {
-                return a1.compareToAngle(a2);
+            public int compare(edu.gemini.spModel.core.Angle a1, edu.gemini.spModel.core.Angle a2) {
+                return Double.compare(a1.toDegrees(), a2.toDegrees());
             }
         });
-        posAngles.add(obsContext.getPositionAngle());
-        posAngles.add(new Angle(0., Angle.Unit.DEGREES));
-        posAngles.add(new Angle(90., Angle.Unit.DEGREES));
-        posAngles.add(new Angle(180., Angle.Unit.DEGREES));
-        posAngles.add(new Angle(270., Angle.Unit.DEGREES));
+
+        posAngles.add(GemsUtils4Java.toNewAngle(obsContext.getPositionAngle()));
+        posAngles.add(GemsUtils4Java.toNewAngle(new Angle(0., Angle.Unit.DEGREES)));
+        posAngles.add(GemsUtils4Java.toNewAngle(new Angle(90., Angle.Unit.DEGREES)));
+        posAngles.add(GemsUtils4Java.toNewAngle(new Angle(180., Angle.Unit.DEGREES)));
+        posAngles.add(GemsUtils4Java.toNewAngle(new Angle(270., Angle.Unit.DEGREES)));
         return posAngles;
     }
 
@@ -217,7 +217,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
      */
     public List<GemsCatalogSearchResults> search(String opticalCatalog, String nirCatalog,
                                                  GemsTipTiltMode tipTiltMode,
-                                                 ObsContext obsContext, Set<Angle> posAngles,
+                                                 ObsContext obsContext, Set<edu.gemini.spModel.core.Angle> posAngles,
                                                  Option<MagnitudeBand> nirBand) throws Exception {
         try {
             interrupted = false;
@@ -229,14 +229,9 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
 
             SPInstObsComp inst = obsContext.getInstrument();
 
-            Set<edu.gemini.spModel.core.Angle> angles = new HashSet<>();
-            for (Angle a: posAngles) {
-                angles.add(GemsUtils4Java.toNewAngle(a));
-            }
-
             GemsInstrument instrument = inst instanceof Flamingos2 ? GemsInstrument.flamingos2 : GemsInstrument.gsaoi;
             GemsGuideStarSearchOptions options = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog,
-                    instrument, tipTiltMode, angles);
+                    instrument, tipTiltMode, posAngles);
 
             List<GemsCatalogSearchResults> results = new GemsCatalog().search(obsContext, GemsUtils4Java.toCoordinates(base), options, nirBand, statusLogger);
             if (interrupted) {
@@ -258,7 +253,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     public GemsGuideStars findGuideStars() throws Exception {
         WorldCoords basePos = tpe.getBasePos();
         ObsContext obsContext = getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
-        Set<Angle> posAngles = getPosAngles(obsContext);
+        Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);
         // REL-1442: only allow CWFS asterisms for now
 //        List<GemsCatalogSearchResults> results = search(GemsGuideStarSearchOptions.DEFAULT_CATALOG,
 //                GemsGuideStarSearchOptions.DEFAULT_CATALOG, GemsTipTiltMode.both, obsContext, posAngles,
@@ -272,7 +267,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     /**
      * Returns the set of Gems guide stars with the highest ranking using the given settings
      */
-    public GemsGuideStars findGuideStars(ObsContext obsContext, Set<Angle> posAngles,
+    private GemsGuideStars findGuideStars(ObsContext obsContext, Set<edu.gemini.spModel.core.Angle> posAngles,
                                          List<GemsCatalogSearchResults> results) throws Exception {
 
         interrupted = false;
@@ -294,7 +289,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     /**
      * Returns a list of all possible Gems guide star sets.
      */
-    public List<GemsGuideStars> findAllGuideStars(ObsContext obsContext, Set<Angle> posAngles,
+    public List<GemsGuideStars> findAllGuideStars(ObsContext obsContext, Set<edu.gemini.spModel.core.Angle> posAngles,
                                                   List<GemsCatalogSearchResults> results) throws Exception {
         interrupted = false;
         try {

@@ -4,12 +4,12 @@ import edu.gemini.ags.gems.mascot.Star;
 import edu.gemini.ags.gems.mascot.Strehl;
 import edu.gemini.ags.gems.mascot.MascotCat;
 import edu.gemini.ags.gems.mascot.MascotProgress;
-import edu.gemini.skycalc.Angle;
-import edu.gemini.skycalc.Coordinates;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.core.Angle;
 import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.core.Target;
+import edu.gemini.spModel.core.Coordinates;
 import edu.gemini.spModel.gemini.gems.Canopus;
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw;
@@ -46,10 +46,10 @@ public class GemsCatalogResults {
      * @param progress used to report progress of Mascot Strehl calculations and interrupt if requested
      * @return a sorted List of GemsGuideStars
      */
-    public List<GemsGuideStars> analyze(final ObsContext obsContext, final Set<Angle> posAngles,
+    public List<GemsGuideStars> analyze(final ObsContext obsContext, final Set<edu.gemini.spModel.core.Angle> posAngles,
                                         final List<GemsCatalogSearchResults> results, final MascotProgress progress) {
 
-        final Coordinates base = obsContext.getBaseCoordinates();
+        final Coordinates base = GemsUtils4Java.toCoordinates(obsContext.getBaseCoordinates());
         final List<GemsGuideStars> result = new ArrayList<>();
 
         for (TiptiltFlexurePair pair : TiptiltFlexurePair.pairs(results)) {
@@ -66,7 +66,7 @@ public class GemsCatalogResults {
                 final MagnitudeBand bandpass = getBandpass(tiptiltGroup, obsContext.getInstrument());
                 final double factor = getStrehlFactor(new Some<>(obsContext));
                 final MascotCat.StrehlResults strehlResults = MascotCat.javaFindBestAsterismInTargetsList(
-                        tiptiltTargetsList, base.getRaDeg(), base.getDecDeg(), bandpass, factor, progress);
+                        tiptiltTargetsList, base.ra().toAngle().toDegrees(), base.dec().toDegrees(), bandpass, factor, progress);
                 for (Strehl strehl : strehlResults.strehlList()) {
                     result.addAll(analyzeAtAngles(obsContext, posAngles, strehl, flexureTargetsList, flexureGroup,
                             tiptiltGroup));
@@ -93,7 +93,7 @@ public class GemsCatalogResults {
     public List<GemsGuideStars> analyzeGoodEnough(final ObsContext obsContext, final Set<Angle> posAngles,
                                         final List<GemsCatalogSearchResults> results, final MascotProgress progress) {
 
-        final Coordinates base = obsContext.getBaseCoordinates();
+        final Coordinates base = GemsUtils4Java.toCoordinates(obsContext.getBaseCoordinates());
         final List<GemsGuideStars> result = new ArrayList<>();
 
         for (TiptiltFlexurePair pair : TiptiltFlexurePair.pairs(results)) {
@@ -127,7 +127,7 @@ public class GemsCatalogResults {
                 final double factor = getStrehlFactor(new Some<>(obsContext));
                 try {
                     MascotCat.javaFindBestAsterismInTargetsList(
-                            tiptiltTargetsList, base.getRaDeg(), base.getDecDeg(), bandpass, factor, strehlHandler);
+                            tiptiltTargetsList, base.ra().toAngle().toDegrees(), base.dec().toDegrees(), bandpass, factor, strehlHandler);
                 } catch (CancellationException e) {
                     // continue on with results so far?
                 }
@@ -182,7 +182,7 @@ public class GemsCatalogResults {
             if (!guideProbeTargets.isEmpty()) {
                 final GuideGroup guideGroup = GuideGroup.create(None.<String>instance(), DefaultImList.create(guideProbeTargets));
                 final GemsStrehl gemsStrehl = new GemsStrehl(strehl.avgstrehl(), strehl.rmsstrehl(), strehl.minstrehl(), strehl.maxstrehl());
-                final GemsGuideStars gemsGuideStars = new GemsGuideStars(GemsUtils4Java.toNewAngle(posAngle), tiptiltGroup, gemsStrehl, guideGroup);
+                final GemsGuideStars gemsGuideStars = new GemsGuideStars(posAngle, tiptiltGroup, gemsStrehl, guideGroup);
                 result.add(gemsGuideStars);
             }
         }
@@ -314,7 +314,7 @@ public class GemsCatalogResults {
 
     // Returns true if the given target is valid for the given group
     private boolean validate(final ObsContext obsContext, final Target.SiderealTarget target, final GemsGuideProbeGroup group, final Angle posAngle) {
-        final ObsContext ctx = obsContext.withPositionAngle(posAngle);
+        final ObsContext ctx = obsContext.withPositionAngle(GemsUtils4Java.toOldAngle(posAngle));
         for (GuideProbe guideProbe : group.getMembers()) {
             if (guideProbe instanceof ValidatableGuideProbe) {
                 final ValidatableGuideProbe v = (ValidatableGuideProbe) guideProbe;
@@ -339,7 +339,7 @@ public class GemsCatalogResults {
                                              final Angle posAngle, final GemsGuideProbeGroup tiptiltGroup,
                                              final List<GuideProbeTargets> otherTargets, final List<Target.SiderealTarget> tiptiltTargetList,
                                              final boolean assignCwfs3ToBrightest, final boolean reverseOrder) {
-        final ObsContext ctx = obsContext.withPositionAngle(posAngle);
+        final ObsContext ctx = obsContext.withPositionAngle(GemsUtils4Java.toOldAngle(posAngle));
 
         final boolean isFlexure = (tiptiltGroup != group);
         final boolean isTiptilt = !isFlexure;
