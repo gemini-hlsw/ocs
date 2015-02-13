@@ -160,11 +160,11 @@ public class Gems {
                 }
                 break;
 
-            case EXTENDED_GAUSSIAN:
+            case GAUSSIAN:
                 return source.getFWHM();
 
             default:
-                return 1.0;
+                return 0.0;
         }
 
         // The web page always selects one of J, H or K, so if we get here, the IQ must be wrong
