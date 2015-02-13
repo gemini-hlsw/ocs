@@ -11,9 +11,10 @@ import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nici.NiciParameters
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.niri.NiriParameters
-import edu.gemini.itc.parameters.SourceDefinitionParameters.{SpectralDistribution, SourceType}
+import edu.gemini.itc.parameters.SourceDefinitionParameters.Distribution
+import edu.gemini.itc.parameters.SourceDefinitionParameters.Distribution._
 import edu.gemini.itc.parameters.{ObservationDetailsParameters, ObservingConditionParameters, SourceDefinitionParameters, TeleParameters}
-import edu.gemini.itc.shared.ITCParameters
+import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
 
 // TEMPORARY helper
@@ -184,27 +185,12 @@ object Hash {
 
   def calc(src: SourceDefinitionParameters): Int =
     hash(
-      src.getBBTemp,
-      src.getELineContinuumFlux,
-      src.getELineContinuumFluxUnits,
-      src.getELineFlux,
-      src.getELineFluxUnits,
-      src.getELineWavelength,
-      src.getELineWidth,
-      if (src.getSourceType == SourceType.EXTENDED_GAUSSIAN) "gaussian" else "uniform", //src.getExtendedSourceType,
-      src.getFWHM,
-      src.getNormBand.name,
-      src.getPowerLawIndex,
-      src.getUnits.displayValue,  // TODO: remove
-      src.getRedshift,
-      if (src.getSourceType == SourceType.POINT) "pointSource" else "extendedSource", //src.getSourceGeometry,
-      src.getSourceGeometryStr,
-      src.getSourceNormalization,
-      toString(src.getSourceSpec), // TODO: remove toString for this value
-      src.getSpectrumResource,
-      src.getSpecType,
-      src.getUnits.displayValue,
-      src.getUserDefinedSpectrum  // TODO: remove
+      src.getProfileType.name,
+      src.profile.norm,
+      src.profile.units.name,
+      src.distribution,
+      src.normBand.name,
+      src.redshift
     )
 
   def calc(tp: TeleParameters): Int =
@@ -245,13 +231,13 @@ object Hash {
       foldLeft(17)((acc, h) => 37*acc + h)
 
   // temporary: TODO: remove with next update of baseline.txt
-  private def toString(sd: SpectralDistribution) = sd match {
-    case  SpectralDistribution.LIBRARY_STAR => "libraryStar"
-    case  SpectralDistribution.LIBRARY_NON_STAR => "libraryNonStar"
-    case  SpectralDistribution.BBODY => "modelBlackBody"
-    case  SpectralDistribution.ELINE => "modelEmLine"
-    case  SpectralDistribution.PLAW => "modelPowerLaw"
-    case  SpectralDistribution.USER_DEFINED => "userDefinedSpectrum"
+  private def toString(sd: Distribution) = sd match {
+    case  LIBRARY_STAR => "libraryStar"
+    case  LIBRARY_NON_STAR => "libraryNonStar"
+    case  BBODY => "modelBlackBody"
+    case  ELINE => "modelEmLine"
+    case  PLAW => "modelPowerLaw"
+    case  USER_DEFINED => "userDefinedSpectrum"
   }
 
 }

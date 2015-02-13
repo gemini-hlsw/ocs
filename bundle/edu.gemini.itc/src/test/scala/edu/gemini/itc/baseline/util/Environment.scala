@@ -1,12 +1,10 @@
 package edu.gemini.itc.baseline.util
 
 import edu.gemini.itc.altair.AltairParameters
-import edu.gemini.itc.parameters.SourceDefinitionParameters.SourceType
 import edu.gemini.itc.parameters.TeleParameters.{Coating, Wfs}
 import edu.gemini.itc.parameters._
-import edu.gemini.itc.shared.WavebandDefinition
-import edu.gemini.spModel.gemini.altair.AltairParams.{GuideStarType, FieldLens}
-import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
+import edu.gemini.itc.shared._
+import edu.gemini.spModel.gemini.altair.AltairParams.{FieldLens, GuideStarType}
 import edu.gemini.spModel.telescope.IssPort
 
 /**
@@ -32,7 +30,7 @@ object Environment {
 
   // ================
   // Defines a set of relevant weather conditions (not all combinations make sense)
-  import SPSiteQuality._
+  import edu.gemini.spModel.gemini.obscomp.SPSiteQuality._
   private val weatherConditions = List[Tuple3[ImageQuality,CloudCover,WaterVapor]](
     (ImageQuality.PERCENT_20, CloudCover.PERCENT_50, WaterVapor.PERCENT_50),  // IQ20,CC50,WV50
     (ImageQuality.PERCENT_70, CloudCover.PERCENT_50, WaterVapor.ANY),         // IQ70,CC50,Any
@@ -44,178 +42,64 @@ object Environment {
   lazy val PointSources = List(
     // point source defined by magnitude
     new SourceDefinitionParameters(
-      SourceType.POINT,
-      15.0,
-      SourceDefinitionParameters.BrightnessUnit.MAG,
-      .35,
+      PointSource(15.0, SourceDefinitionParameters.BrightnessUnit.MAG),
+      LibraryStar(null, SourceDefinitionParameters.STELLAR_LIB + "/k0iii.nm"),
       WavebandDefinition.H,
-      0.3,
-      SourceDefinitionParameters.STELLAR_LIB + "/k0iii.nm",
-      0.0,                                // black body temp        (N/A)
-      0.0,                                // eline wavelength       (N/A)
-      0.0,                                // eline width            (N/A)
-      0.0,                                // eline flux             (N/A)
-      0.0,                                // eline cont flux        (N/A)
-      "",                                 // eline flux units       (N/A)
-      "",                                 // eline cont flux units  (N/A)
-      0,                                  // plaw index             (N/A)
-      SourceDefinitionParameters.SpectralDistribution.LIBRARY_STAR,
-      null, null),                                // user defined spectrum  (N/A)
+      0.3),
 
     // point source defined by W/m2/um
     new SourceDefinitionParameters(
-      SourceType.POINT,
-      2E-17,
-      SourceDefinitionParameters.BrightnessUnit.WATTS,
-      .35,
+      PointSource(2E-17, SourceDefinitionParameters.BrightnessUnit.WATTS),
+      LibraryNonStar(null, SourceDefinitionParameters.NON_STELLAR_LIB + "/elliptical-galaxy.nm"),
       WavebandDefinition.K,               // normalisation band
-      1.0,                                // redshift
-      SourceDefinitionParameters.NON_STELLAR_LIB + "/elliptical-galaxy.nm",
-      0.0,                                // black body temp        (N/A)
-      0.0,                                // eline wavelength       (N/A)
-      0.0,                                // eline width            (N/A)
-      0.0,                                // eline flux             (N/A)
-      0.0,                                // eline cont flux        (N/A)
-      "",                                 // eline flux units       (N/A)
-      "",                                 // eline cont flux units  (N/A)
-      0,                                  // plaw index             (N/A)
-      SourceDefinitionParameters.SpectralDistribution.LIBRARY_NON_STAR,
-      null, null),                                // user defined spectrum  (N/A)
+      1.0),                               // redshift
 
     // black body spectral distribution
     new SourceDefinitionParameters(
-      SourceType.EXTENDED_UNIFORM,
-      19.0,
-      SourceDefinitionParameters.BrightnessUnit.WATTS,
-      .35,
+      UniformSource(19.0, SourceDefinitionParameters.BrightnessUnit.WATTS),
+      BlackBody(10000.0),
       WavebandDefinition.L,               // normalisation band
-      0.5,                                // redshift
-      "modelBlackBody",                   // spectrum resource     (N/A)
-      10000.0,                            // black body temp
-      0.0,                                // eline wavelength       (N/A)
-      0.0,                                // eline width            (N/A)
-      0.0,                                // eline flux             (N/A)
-      0.0,                                // eline cont flux        (N/A)
-      "",                                 // eline flux units       (N/A)
-      "",                                 // eline cont flux units  (N/A)
-      0,                                  // plaw index             (N/A)
-      SourceDefinitionParameters.SpectralDistribution.BBODY,
-      null, null)                                 // user defined spectrum  (N/A)
+      0.5)                                // redshift
 
   )
 
   lazy val GmosSources = PointSources ++ List(
     // emission line spectral distribution
     new SourceDefinitionParameters(
-      SourceType.EXTENDED_GAUSSIAN,
-      20.0,
-      SourceDefinitionParameters.BrightnessUnit.WATTS,
-      .35,
+      GaussianSource(20.0, SourceDefinitionParameters.BrightnessUnit.WATTS, .35),
+      EmissionLine(0.656, 500.0, 5e-17, SourceDefinitionParameters.ERGS_FLUX, 1e-17, SourceDefinitionParameters.ERGS_FLUX),
       WavebandDefinition.R,                   // normalisation band
-      1.0,                                    // redshift
-      "modelEmLine",                          // spectrum source      (N/A)
-      0.0,                                    // black body temp [K]  (N/A)
-      0.656,                                  // eline wavelength
-      500.0,                                  // eline width
-      5e-17,                                  // eline flux
-      1e-17,                                  // eline continuum flux
-      SourceDefinitionParameters.ERGS_FLUX,   // eline flux units
-      SourceDefinitionParameters.ERGS_FLUX,   // eline continuum flux units
-      0,                                      // plaw index           (N/A)
-      SourceDefinitionParameters.SpectralDistribution.ELINE,
-      null, null),                                    // user defined spectrum  (N/A)
+      1.0),                                   // redshift
 
     // TODO get power law to work with other instruments(?)
     //power law spectral distribution
     new SourceDefinitionParameters(
-      SourceType.EXTENDED_GAUSSIAN,
-      20.0,
-      SourceDefinitionParameters.BrightnessUnit.MAG,
-      .35,
+      GaussianSource(20.0, SourceDefinitionParameters.BrightnessUnit.MAG, .35),
+      PowerLaw(-1),
       WavebandDefinition.R,               // normalisation band
-      1.5,
-      "modelPowerLaw",                    // spectrum source        (N/A)
-      0.0,                                // black body temp        (N/A)
-      0.0,                                // eline wavelength       (N/A)
-      0.0,                                // eline width            (N/A)
-      0.0,                                // eline flux             (N/A)
-      0.0,                                // eline cont flux        (N/A)
-      "",                                 // eline flux units       (N/A)
-      "",                                 // eline cont flux units  (N/A)
-      -1,                                 // plaw index
-      SourceDefinitionParameters.SpectralDistribution.PLAW,
-      null, null)                                 // user defined spectrum  (N/A)
-
-  )
-
-  lazy val NiciSources = PointSources ++ List(
-    // emission line spectral distribution
-    new SourceDefinitionParameters(
-      SourceType.EXTENDED_GAUSSIAN,
-      20.0,
-      SourceDefinitionParameters.BrightnessUnit.WATTS,
-      .35,
-      WavebandDefinition.R,                   // normalisation band
-      1.0,                                    // redshift
-      "modelEmLine",                          // spectrum resource    (N/A)
-      0.0,                                    // black body temp [K]  (N/A)
-      0.656,                                  // eline wavelength
-      500.0,                                  // eline width
-      5e-19,                                  // eline flux
-      1e-16,                                  // eline continuum flux
-      SourceDefinitionParameters.WATTS_FLUX,  // eline flux units
-      SourceDefinitionParameters.WATTS_FLUX,  // eline continuum flux units
-      0,                                      // plaw index           (N/A)
-      SourceDefinitionParameters.SpectralDistribution.ELINE,
-      null, null)                                     // user defined spectrum  (N/A)
+      1.5)
   )
 
   lazy val NearIRSources = PointSources ++ List(
     // emission line spectral distribution
     new SourceDefinitionParameters(
-      SourceType.EXTENDED_GAUSSIAN,
-      20.0,
-      SourceDefinitionParameters.BrightnessUnit.WATTS,
-      .35,
+      GaussianSource(20.0, SourceDefinitionParameters.BrightnessUnit.WATTS, .35),
+      EmissionLine(2.2, 100.0, 5e-19, SourceDefinitionParameters.WATTS_FLUX, 1e-16, SourceDefinitionParameters.WATTS_FLUX),
       WavebandDefinition.J,                   // normalisation band
-      0.7,                                    // redshift
-      "modelEmLine",                          // spectrum resource    (N/A)
-      0.0,                                    // black body temp [K]  (N/A)
-      2.2,                                    // eline wavelength
-      100.0,                                  // eline width
-      5e-19,                                  // eline flux
-      1e-16,                                  // eline continuum flux
-      SourceDefinitionParameters.WATTS_FLUX,  // eline flux units
-      SourceDefinitionParameters.WATTS_FLUX,  // eline continuum flux units
-      0,                                      // plaw index           (N/A)
-      SourceDefinitionParameters.SpectralDistribution.ELINE,
-      null, null)                                    // user defined spectrum  (N/A)
+      0.7)                                    // redshift
   )
 
   lazy val MidIRSources = PointSources ++ List(
     // emission line spectral distribution
     new SourceDefinitionParameters(
-      SourceType.EXTENDED_GAUSSIAN,
-      20.0,
-      SourceDefinitionParameters.BrightnessUnit.WATTS,
-      .35,
+      GaussianSource(20.0, SourceDefinitionParameters.BrightnessUnit.WATTS, .35),
+      EmissionLine(12.8, 500.0, 5e-19, SourceDefinitionParameters.WATTS_FLUX, 1e-16, SourceDefinitionParameters.WATTS_FLUX),
       WavebandDefinition.J,                   // normalisation band
-      1.0,                                    // redshift
-      "modelEmLine",                          // spectrum resource    (N/A)
-      0.0,                                    // black body temp [K]  (N/A)
-      12.8,                                   // eline wavelength
-      500.0,                                  // eline width
-      5e-19,                                  // eline flux
-      1e-16,                                  // eline continuum flux
-      SourceDefinitionParameters.WATTS_FLUX,  // eline flux units
-      SourceDefinitionParameters.WATTS_FLUX,  // eline continuum flux units
-      0,                                      // plaw index           (N/A)
-      SourceDefinitionParameters.SpectralDistribution.ELINE,
-      null, null)                                     // user defined spectrum  (N/A)
+      1.0)                                    // redshift
   )
 
   // Defines a set of relevant observing conditions; total 9*4*3=108 conditions
-  import SPSiteQuality.SkyBackground._
+  import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.SkyBackground._
   lazy val ObservingConditions =
     for {
       (iq, cc, wv)  <- weatherConditions
