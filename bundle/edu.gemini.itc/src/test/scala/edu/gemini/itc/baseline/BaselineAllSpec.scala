@@ -96,19 +96,6 @@ object BaselineAllSpec extends Specification with ScalaCheck {
     }
   }
 
-  // === NICI
-  {
-    implicit val arbO: Arbitrary[NiciObservation] = Arbitrary { Gen.oneOf(BaselineNici.Observations) }
-    implicit val arbE: Arbitrary[Environment]     = Arbitrary { Gen.oneOf(BaselineNici.Environments) }
-
-    "NICI calculations" should {
-      "match latest baseline" !
-        prop { (e: Environment, o: NiciObservation) =>
-          checkAgainstBaseline(Baseline.from(e, o, BaselineNici.executeRecipe(e, o)))
-        }.set((minTestsOk, minTestsCnt))
-    }
-  }
-
   // === NIFS
   {
     implicit val arbO: Arbitrary[NifsObservation] = Arbitrary { Gen.oneOf(BaselineNifs.Observations) }

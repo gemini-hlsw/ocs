@@ -46,7 +46,6 @@ class BaselineTest {
     executeAll(BaselineGnirs.Environments,     BaselineGnirs.Observations,    BaselineGnirs.executeRecipe)    ++
     executeAll(BaselineGsaoi.Environments,     BaselineGsaoi.Observations,    BaselineGsaoi.executeRecipe)    ++
     executeAll(BaselineMichelle.Environments,  BaselineMichelle.Observations, BaselineMichelle.executeRecipe) ++
-    executeAll(BaselineNici.Environments,      BaselineNici.Observations,     BaselineNici.executeRecipe)     ++
     executeAll(BaselineNifs.Environments,      BaselineNifs.Observations,     BaselineNifs.executeRecipe)     ++
     executeAll(BaselineNiri.Environments,      BaselineNiri.Observations,     BaselineNiri.executeRecipe)     ++
     executeAll(BaselineTRecs.Environments,     BaselineTRecs.Observations,    BaselineTRecs.executeRecipe)
