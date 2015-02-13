@@ -1,6 +1,0 @@
-#Dichroic mirror position.  0% to channel 1, mirror transmission function to 
-#channel 2.  Mirror transmission is unknown at this time, setting to 1.0 
-#mdillman 20090305
-
-900 1.0
-6000 1.0

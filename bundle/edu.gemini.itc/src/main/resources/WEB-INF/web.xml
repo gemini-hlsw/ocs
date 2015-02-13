@@ -24,22 +24,6 @@
     </servlet-mapping>
 
 
-    <!-- This maps /servlet/nici to the nici servlet class -->
-    <servlet>
-        <servlet-name>
-            nici
-        </servlet-name>
-        <servlet-class>
-            edu.gemini.itc.nici.ITCniciServlet
-        </servlet-class>
-
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>nici</servlet-name>
-        <url-pattern>/servlet/nici</url-pattern>
-    </servlet-mapping>
-
     <!-- This maps /servlet/niri to the niri servlet class -->
     <servlet>
         <servlet-name>

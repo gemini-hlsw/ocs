@@ -1,5 +1,0 @@
-#Mask stops down telescope pupil diameter to 95% of original size
-#Reduction in area 0.95^2 = 0.9025
-
-900 0.9025
-5500 0.9025
