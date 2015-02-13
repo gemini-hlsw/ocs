@@ -4,7 +4,7 @@ import javax.servlet.http.HttpServletRequest
 
 import edu.gemini.itc.altair.AltairParameters
 import edu.gemini.itc.parameters.SourceDefinitionParameters._
-import edu.gemini.itc.parameters.{SourceDefinitionParameters, ObservingConditionParameters, PlottingDetailsParameters, TeleParameters}
+import edu.gemini.itc.parameters.{ObservingConditionParameters, PlottingDetailsParameters, SourceDefinitionParameters, TeleParameters}
 import edu.gemini.itc.shared._
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
@@ -98,15 +98,21 @@ object ITCRequest {
     val itcR = ITCRequest.from(r)
 
     // Get the source geometry and type
-    val sourceGeom: SourceDefinitionParameters.SourceGeometry = itcR.enumParameter(classOf[SourceDefinitionParameters.SourceGeometry])
-    val extSourceType: SourceDefinitionParameters.ExtSourceType = itcR.enumParameter(classOf[SourceDefinitionParameters.ExtSourceType])
-    val spatialProfile = sourceGeom match {
-      case SourceGeometry.POINT     => PointSource(itcR.doubleParameter("psSourceNorm"), itcR.enumParameter(classOf[SourceDefinitionParameters.BrightnessUnit], "psSourceUnits"))
-      case SourceGeometry.EXTENDED  =>
-        extSourceType match {
-          case ExtSourceType.GAUSSIAN => GaussianSource(itcR.doubleParameter("gaussSourceNorm"), itcR.enumParameter(classOf[SourceDefinitionParameters.BrightnessUnit], "gaussSourceUnits"), itcR.doubleParameter("gaussFwhm"))
-          case ExtSourceType.UNIFORM  => UniformSource(itcR.doubleParameter("usbSourceNorm"), itcR.enumParameter(classOf[SourceDefinitionParameters.BrightnessUnit], "usbSourceUnits"))
-        }
+    import Profile._
+    val spatialProfile = itcR.enumParameter(classOf[Profile]) match {
+      case POINT    =>
+        val norm  = itcR.doubleParameter("psSourceNorm")
+        val units = itcR.enumParameter(classOf[BrightnessUnit], "psSourceUnits")
+        PointSource(norm, units)
+      case GAUSSIAN =>
+        val norm  = itcR.doubleParameter("gaussSourceNorm")
+        val units = itcR.enumParameter(classOf[BrightnessUnit], "gaussSourceUnits")
+        val fwhm  = itcR.doubleParameter("gaussFwhm")
+        GaussianSource(norm, units, fwhm)
+      case UNIFORM  =>
+        val norm  = itcR.doubleParameter("usbSourceNorm")
+        val units = itcR.enumParameter(classOf[BrightnessUnit], "usbSourceUnits")
+        UniformSource(norm, units)
     }
 
     // Get Normalization info
@@ -114,7 +120,7 @@ object ITCRequest {
 
     // Get Spectrum Resource
     import Distribution._
-    val sourceSpec = itcR.enumParameter(classOf[SourceDefinitionParameters.Distribution])
+    val sourceSpec = itcR.enumParameter(classOf[Distribution])
     val sourceDefinition = sourceSpec match {
       case LIBRARY_STAR =>
         val st = itcR.parameter("stSpectrumType")
@@ -139,10 +145,11 @@ object ITCRequest {
     }
 
     //Get Redshift
-    val recession: SourceDefinitionParameters.Recession = itcR.enumParameter(classOf[SourceDefinitionParameters.Recession])
+    import Recession._
+    val recession = itcR.enumParameter(classOf[Recession])
     val redshift = recession match {
-      case Recession.REDSHIFT => itcR.doubleParameter("z")
-      case Recession.VELOCITY => itcR.doubleParameter("v") / ITCConstants.C
+      case REDSHIFT => itcR.doubleParameter("z")
+      case VELOCITY => itcR.doubleParameter("v") / ITCConstants.C
     }
 
     // WOW, finally we've got everything in place..

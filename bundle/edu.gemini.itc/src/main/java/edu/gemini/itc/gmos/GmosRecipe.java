@@ -401,7 +401,7 @@ public final class GmosRecipe extends RecipeBase {
                         st = new SlitThroughput(im_qual, pixel_size, _gmosParameters.getFPMask());
 
                         switch (_sdParameters.getProfileType()) {
-                            case EXTENDED_UNIFORM:
+                            case UNIFORM:
                                 if (ccdIndex == 0) {
                                     _println("software aperture extent along slit = "
                                             + device.toString(1 / _gmosParameters

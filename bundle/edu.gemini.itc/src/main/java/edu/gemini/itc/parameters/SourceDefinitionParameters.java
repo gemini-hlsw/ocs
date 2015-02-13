@@ -36,20 +36,10 @@ public final class SourceDefinitionParameters extends ITCParameters {
         VELOCITY
     }
 
-    public static enum SourceGeometry {
-        POINT,
-        EXTENDED
-    }
-
-    public static enum ExtSourceType {
-        UNIFORM,
-        GAUSSIAN
-    }
-
     public static enum Profile {
         POINT,
-        EXTENDED_UNIFORM,
-        EXTENDED_GAUSSIAN
+        UNIFORM,
+        GAUSSIAN
     }
 
     public static enum Distribution {
@@ -95,8 +85,8 @@ public final class SourceDefinitionParameters extends ITCParameters {
 
         // provide an enum for the spatial profile types (helps with the Java implementation -> switch)
         if      (profile instanceof PointSource)          profileType = Profile.POINT;
-        else if (profile instanceof GaussianSource)       profileType = Profile.EXTENDED_GAUSSIAN;
-        else if (profile instanceof UniformSource)        profileType = Profile.EXTENDED_UNIFORM;
+        else if (profile instanceof GaussianSource)       profileType = Profile.GAUSSIAN;
+        else if (profile instanceof UniformSource)        profileType = Profile.UNIFORM;
         else    throw new IllegalArgumentException();
 
         // provide an enum for the spectral distribution types (helps with the Java implementation -> switch)
@@ -115,7 +105,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
     }
 
     public boolean isUniform() {
-        return profileType == Profile.EXTENDED_UNIFORM;
+        return profileType == Profile.UNIFORM;
     }
 
     public String getSourceGeometryStr() {

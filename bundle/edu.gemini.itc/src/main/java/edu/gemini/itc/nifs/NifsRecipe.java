@@ -321,11 +321,11 @@ public final class NifsRecipe extends RecipeBase {
                 morph = new AOMorphology(im_qual);
                 haloMorphology = new AOMorphology(uncorrected_im_qual);
                 break;
-            case EXTENDED_GAUSSIAN:
+            case GAUSSIAN:
                 morph = new GaussianMorphology(im_qual);
                 haloMorphology = new GaussianMorphology(uncorrected_im_qual);
                 break;
-            case EXTENDED_UNIFORM:
+            case UNIFORM:
                 morph = new USBMorphology();
                 haloMorphology = new USBMorphology();
                 break;

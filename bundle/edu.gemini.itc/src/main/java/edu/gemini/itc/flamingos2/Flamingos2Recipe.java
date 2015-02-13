@@ -356,7 +356,7 @@ public final class Flamingos2Recipe extends RecipeBase {
                         _flamingos2Parameters.getSlitSize() * pixel_size);
 
                 switch (_sdParameters.getProfileType()) {
-                    case EXTENDED_UNIFORM:
+                    case UNIFORM:
                         _println("software aperture extent along slit = "
                                 + device.toString(1 / _flamingos2Parameters
                                 .getSlitSize() * pixel_size) + " arcsec");

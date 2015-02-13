@@ -414,7 +414,7 @@ public final class TRecsRecipe extends RecipeBase {
             } else {
                 st = new SlitThroughput(im_qual, pixel_size, _trecsParameters.getFPMask());
                 switch (_sdParameters.getProfileType()) {
-                    case EXTENDED_UNIFORM:
+                    case UNIFORM:
                         _println("software aperture extent along slit = " + device.toString(1 / _trecsParameters.getFPMask()) + " arcsec");
                         break;
                     case POINT:

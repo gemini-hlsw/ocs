@@ -480,7 +480,7 @@ public final class GnirsRecipe extends RecipeBase {
                 st_halo = new SlitThroughput(uncorrected_im_qual, pixel_size, _gnirsParameters.getFPMask());
 
                 switch (_sdParameters.getProfileType()) {
-                    case EXTENDED_UNIFORM:
+                    case UNIFORM:
                         _println("software aperture extent along slit = "
                                 + device.toString(1 / _gnirsParameters
                                 .getFPMask()) + " arcsec");

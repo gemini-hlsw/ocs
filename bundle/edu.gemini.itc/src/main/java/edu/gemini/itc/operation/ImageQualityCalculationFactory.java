@@ -17,7 +17,7 @@ public final class ImageQualityCalculationFactory {
             Instrument instrument) {
 
         switch (sourceDefinitionParameters.getProfileType()) {
-            case EXTENDED_GAUSSIAN:
+            case GAUSSIAN:
                 // Case A The Image quality is defined by the user
                 // who has selected a Gaussian Extended source
                 // Creates a GaussianImageQualityCalculation

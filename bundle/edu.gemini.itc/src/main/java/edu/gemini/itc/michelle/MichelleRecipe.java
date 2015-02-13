@@ -402,7 +402,7 @@ public final class MichelleRecipe extends RecipeBase {
                 st = new SlitThroughput(im_qual, pixel_size, _michelleParameters.getFPMask());
 
                 switch (_sdParameters.getProfileType()) {
-                    case EXTENDED_UNIFORM:
+                    case UNIFORM:
                         _println("software aperture extent along slit = " + device.toString(1 / _michelleParameters.getFPMask()) + " arcsec");
                         break;
                     case POINT:

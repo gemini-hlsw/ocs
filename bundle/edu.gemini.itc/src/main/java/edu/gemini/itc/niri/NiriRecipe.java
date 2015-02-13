@@ -528,7 +528,7 @@ public final class NiriRecipe extends RecipeBase {
                         _niriParameters.getFPMask());
 
                 switch (_sdParameters.getProfileType()) {
-                    case EXTENDED_UNIFORM:
+                    case UNIFORM:
                         _println("software aperture extent along slit = " + device.toString(1 / _niriParameters.getFPMask()) + " arcsec");
                         break;
                     case POINT:
