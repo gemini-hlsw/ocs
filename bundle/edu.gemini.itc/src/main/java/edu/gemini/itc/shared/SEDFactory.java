@@ -147,7 +147,7 @@ public class SEDFactory {
 
             default:
                 final VisitableSampledSpectrum temp;
-                if (sdp.getSourceSpec() == SourceDefinitionParameters.SpectralDistribution.USER_DEFINED) {
+                if (sdp.getSourceSpec() == SourceDefinitionParameters.Distribution.USER_DEFINED) {
                     temp = getSED(sdp.getSpectrumResource(),
                             sdp.getUserDefinedSpectrum(),
                             sampling);

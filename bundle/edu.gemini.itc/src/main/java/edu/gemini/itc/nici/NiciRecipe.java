@@ -101,7 +101,7 @@ public final class NiciRecipe extends RecipeBase {
                 _niciParameters.getDichroicPosition());
 
         _print("<pre> Nici channels created </pre>");
-        if (_sdParameters.getSourceSpec().equals(SourceDefinitionParameters.SpectralDistribution.ELINE))
+        if (_sdParameters.getSourceSpec().equals(SourceDefinitionParameters.Distribution.ELINE))
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters
                     .getELineWavelength() * 1000))) {
                 throw new Exception(
@@ -181,7 +181,7 @@ public final class NiciRecipe extends RecipeBase {
         // calculates: normalized SED, resampled SED, SED adjusted for aperture
         // output: SED in common internal units
         _print("Module 2");
-        if (!_sdParameters.getSourceSpec().equals(SourceDefinitionParameters.SpectralDistribution.ELINE)) {
+        if (!_sdParameters.getSourceSpec().equals(SourceDefinitionParameters.Distribution.ELINE)) {
             final SampledSpectrumVisitor norm = new NormalizeVisitor(
                     _sdParameters.getNormBand(),
                     _sdParameters.getSourceNormalization(),

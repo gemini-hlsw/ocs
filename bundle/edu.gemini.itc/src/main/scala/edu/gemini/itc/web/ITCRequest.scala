@@ -5,7 +5,7 @@ import javax.servlet.http.HttpServletRequest
 import edu.gemini.itc.altair.AltairParameters
 import edu.gemini.itc.parameters.SourceDefinitionParameters._
 import edu.gemini.itc.parameters.{SourceDefinitionParameters, ObservingConditionParameters, PlottingDetailsParameters, TeleParameters}
-import edu.gemini.itc.shared.{ITCConstants, WavebandDefinition, ITCMultiPartParser}
+import edu.gemini.itc.shared._
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.telescope.IssPort
@@ -100,14 +100,12 @@ object ITCRequest {
     // Get the source geometry and type
     val sourceGeom: SourceDefinitionParameters.SourceGeometry = itcR.enumParameter(classOf[SourceDefinitionParameters.SourceGeometry])
     val extSourceType: SourceDefinitionParameters.ExtSourceType = itcR.enumParameter(classOf[SourceDefinitionParameters.ExtSourceType])
-    // TODO: introduce specific types for different source geometries
-    val (sourceType, fwhm, sourceNorm, units) = sourceGeom match {
-      case SourceGeometry.POINT =>
-        (SourceType.POINT, 0.0, itcR.doubleParameter("psSourceNorm"), itcR.enumParameter(classOf[SourceDefinitionParameters.BrightnessUnit], "psSourceUnits"))
-      case SourceGeometry.EXTENDED =>
+    val spatialProfile = sourceGeom match {
+      case SourceGeometry.POINT     => PointSource(itcR.doubleParameter("psSourceNorm"), itcR.enumParameter(classOf[SourceDefinitionParameters.BrightnessUnit], "psSourceUnits"))
+      case SourceGeometry.EXTENDED  =>
         extSourceType match {
-          case ExtSourceType.GAUSSIAN => (SourceType.EXTENDED_GAUSSIAN, itcR.doubleParameter("gaussFwhm"), itcR.doubleParameter("gaussSourceNorm"), itcR.enumParameter(classOf[SourceDefinitionParameters.BrightnessUnit], "gaussSourceUnits"))
-          case ExtSourceType.UNIFORM =>  (SourceType.EXTENDED_UNIFORM, 0.0, itcR.doubleParameter("usbSourceNorm"), itcR.enumParameter(classOf[SourceDefinitionParameters.BrightnessUnit], "usbSourceUnits"))
+          case ExtSourceType.GAUSSIAN => GaussianSource(itcR.doubleParameter("gaussSourceNorm"), itcR.enumParameter(classOf[SourceDefinitionParameters.BrightnessUnit], "gaussSourceUnits"), itcR.doubleParameter("gaussFwhm"))
+          case ExtSourceType.UNIFORM  => UniformSource(itcR.doubleParameter("usbSourceNorm"), itcR.enumParameter(classOf[SourceDefinitionParameters.BrightnessUnit], "usbSourceUnits"))
         }
     }
 
@@ -115,88 +113,29 @@ object ITCRequest {
     val normBand = itcR.enumParameter(classOf[WavebandDefinition])
 
     // Get Spectrum Resource
-    val sourceSpec = itcR.enumParameter(classOf[SourceDefinitionParameters.SpectralDistribution])
-    // TODO: introduce specific types for different spectra resources
-    val (specType, sedSpectrum, eLineWavelength, eLineWidth, eLineFlux, eLineContinuumFlux, eLineFluxUnits, eLineContinuumFluxUnits, bbTemp, plawIndex, userDefined) = sourceSpec match {
-      case SpectralDistribution.LIBRARY_STAR =>
+    import Distribution._
+    val sourceSpec = itcR.enumParameter(classOf[SourceDefinitionParameters.Distribution])
+    val sourceDefinition = sourceSpec match {
+      case LIBRARY_STAR =>
         val st = itcR.parameter("stSpectrumType")
-        (st,
-         STELLAR_LIB + "/" + st.toLowerCase + SED_FILE_EXTENSION,
-         0.0, // N/A
-         0.0, // N/A
-         0.0, // N/A
-         0.0, // N/A
-         "",  // N/A
-         "",  // N/A
-         0.0, // N/A
-         0.0, // N/A
-         "")  // N/A
-
-      case SpectralDistribution.LIBRARY_NON_STAR =>
+        LibraryStar(st, STELLAR_LIB + "/" + st.toLowerCase + SED_FILE_EXTENSION)
+      case LIBRARY_NON_STAR =>
         val st = itcR.parameter("nsSpectrumType")
-        (st,
-        NON_STELLAR_LIB + "/" + st + SED_FILE_EXTENSION,
-          0.0, // N/A
-          0.0, // N/A
-          0.0, // N/A
-          0.0, // N/A
-          "",  // N/A
-          "",  // N/A
-          0.0, // N/A
-          0.0, // N/A
-          "")  // N/A
-      case SpectralDistribution.ELINE =>
-        (
-          "",  // N/A
-          "",  // N/A
+        LibraryNonStar(st, NON_STELLAR_LIB + "/" + st + SED_FILE_EXTENSION)
+      case ELINE =>
+        EmissionLine(
           itcR.doubleParameter("lineWavelength"),
           itcR.doubleParameter("lineWidth"),
           itcR.doubleParameter("lineFlux"),
-          itcR.doubleParameter("lineContinuum"),
           itcR.parameter("lineFluxUnits"),
-          itcR.parameter("lineContinuumUnits"),
-          0.0, // N/A
-          0.0, // N/A
-          "")  // N/A
-      case SpectralDistribution.BBODY =>
-        (
-          "",  // N/A
-          "",  // N/A
-          0.0, // N/A
-          0.0, // N/A
-          0.0, // N/A
-          0.0, // N/A
-          "",  // N/A
-          "",  // N/A
-          itcR.doubleParameter("BBTemp"), // BBTEMP
-          0.0, // N/A
-          "")  // N/A
-      case SpectralDistribution.PLAW =>
-        (
-          "",  // N/A
-          "",  // N/A
-          0.0, // N/A
-          0.0, // N/A
-          0.0, // N/A
-          0.0, // N/A
-          "",  // N/A
-          "",  // N/A
-          0.0, // N/A
-          itcR.doubleParameter("powerIndex"),
-          "")  // N/A
-      case SpectralDistribution.USER_DEFINED =>
-        (
-          "",  // N/A
-          itcR.userSpectrumName().get, // TODO: needed??
-          0.0, // N/A
-          0.0, // N/A
-          0.0, // N/A
-          0.0, // N/A
-          "",  // N/A
-          "",  // N/A
-          0.0, // N/A
-          0.0, // N/A
-          itcR.userSpectrum().get)  // N/A
+          itcR.doubleParameter("lineContinuum"),
+          itcR.parameter("lineContinuumUnits"))
+      case BBODY =>
+        BlackBody(itcR.doubleParameter("BBTemp"))
+      case PLAW =>
+        PowerLaw(itcR.doubleParameter("powerIndex"))
+      case USER_DEFINED =>
+        UserDefined(itcR.userSpectrumName().get, itcR.userSpectrum().get)
     }
 
     //Get Redshift
@@ -207,14 +146,7 @@ object ITCRequest {
     }
 
     // WOW, finally we've got everything in place..
-    new SourceDefinitionParameters(
-      sourceType, sourceNorm, units, fwhm, normBand, redshift,
-      sedSpectrum,
-      bbTemp,
-      eLineWavelength, eLineWidth, eLineFlux, eLineContinuumFlux, eLineFluxUnits, eLineContinuumFluxUnits,
-      plawIndex,
-      sourceSpec,
-      userDefined, specType)
+    new SourceDefinitionParameters(spatialProfile, sourceDefinition, normBand, redshift)
   }
 
 
