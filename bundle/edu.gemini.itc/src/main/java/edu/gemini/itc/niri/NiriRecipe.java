@@ -104,7 +104,7 @@ public final class NiriRecipe extends RecipeBase {
         // output: redshifteed SED
         Niri instrument = new Niri(_niriParameters, _obsDetailParameters);
 
-        if (_sdParameters.getSourceSpec().equals(SourceDefinitionParameters.Distribution.ELINE))
+        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters
                     .getELineWavelength() * 1000 * 25))) { // *25 b/c of
                 // increased
@@ -140,7 +140,7 @@ public final class NiriRecipe extends RecipeBase {
         final double end = band.getEnd();
 
         // any sed except BBODY and ELINE have normailization regions
-        switch (_sdParameters.getSourceSpec()) {
+        switch (_sdParameters.getDistributionType()) {
             case ELINE:
             case BBODY:
                 break;
@@ -186,7 +186,7 @@ public final class NiriRecipe extends RecipeBase {
         // units
         // calculates: normalized SED, resampled SED, SED adjusted for aperture
         // output: SED in common internal units
-        if (!_sdParameters.getSourceSpec().equals(SourceDefinitionParameters.Distribution.ELINE)) {
+        if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
             final SampledSpectrumVisitor norm = new NormalizeVisitor(
                     _sdParameters.getNormBand(),
                     _sdParameters.getSourceNormalization(),
@@ -451,7 +451,7 @@ public final class NiriRecipe extends RecipeBase {
         // }
         PeakPixelFluxCalc ppfc;
 
-        if (!_sdParameters.sourceIsUniform()) {
+        if (!_sdParameters.isUniform()) {
 
             // calculation of image quaility was in here if the current setup
             // does not work copy it back in here from above, and uncomment
@@ -527,7 +527,7 @@ public final class NiriRecipe extends RecipeBase {
                 st_halo = new SlitThroughput(uncorrected_im_qual, pixel_size,
                         _niriParameters.getFPMask());
 
-                switch (_sdParameters.getSourceType()) {
+                switch (_sdParameters.getProfileType()) {
                     case EXTENDED_UNIFORM:
                         _println("software aperture extent along slit = " + device.toString(1 / _niriParameters.getFPMask()) + " arcsec");
                         break;
@@ -539,7 +539,7 @@ public final class NiriRecipe extends RecipeBase {
 
             }
 
-            if (!_sdParameters.sourceIsUniform()) {
+            if (!_sdParameters.isUniform()) {
                 _println("fraction of source flux in aperture = "
                         + device.toString(st.getSlitThroughput()));
             }
@@ -560,7 +560,7 @@ public final class NiriRecipe extends RecipeBase {
             double spec_source_frac = st.getSlitThroughput();
             double halo_spec_source_frac = st_halo.getSlitThroughput();
 
-            if (_sdParameters.sourceIsUniform()) {
+            if (_sdParameters.isUniform()) {
 
                 if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
                     spec_source_frac = _niriParameters.getFPMask()

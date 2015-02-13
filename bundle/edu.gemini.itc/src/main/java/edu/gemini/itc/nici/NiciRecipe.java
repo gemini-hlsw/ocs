@@ -101,7 +101,7 @@ public final class NiciRecipe extends RecipeBase {
                 _niciParameters.getDichroicPosition());
 
         _print("<pre> Nici channels created </pre>");
-        if (_sdParameters.getSourceSpec().equals(SourceDefinitionParameters.Distribution.ELINE))
+        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters
                     .getELineWavelength() * 1000))) {
                 throw new Exception(
@@ -148,7 +148,7 @@ public final class NiciRecipe extends RecipeBase {
         final double end = band.getEnd();
 
         // any sed except BBODY and ELINE have normailization regions
-        switch (_sdParameters.getSourceSpec()) {
+        switch (_sdParameters.getDistributionType()) {
             case BBODY:
             case ELINE:
                 break;
@@ -181,7 +181,7 @@ public final class NiciRecipe extends RecipeBase {
         // calculates: normalized SED, resampled SED, SED adjusted for aperture
         // output: SED in common internal units
         _print("Module 2");
-        if (!_sdParameters.getSourceSpec().equals(SourceDefinitionParameters.Distribution.ELINE)) {
+        if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
             final SampledSpectrumVisitor norm = new NormalizeVisitor(
                     _sdParameters.getNormBand(),
                     _sdParameters.getSourceNormalization(),
@@ -467,7 +467,7 @@ public final class NiciRecipe extends RecipeBase {
         PeakPixelFluxCalc ppfc, ppfc_halo;
         double exp_time;
 
-        if (!_sdParameters.sourceIsUniform()) {
+        if (!_sdParameters.isUniform()) {
 
             ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
                     _obsDetailParameters.getExposureTime(), sed_integral,

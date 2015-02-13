@@ -100,7 +100,7 @@ public final class MichelleRecipe extends RecipeBase {
         Michelle instrument = new Michelle(_michelleParameters, _obsDetailParameters);
 
 
-        if (_sdParameters.getSourceSpec().equals(SourceDefinitionParameters.Distribution.ELINE))
+        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000 * 5))) {  //*5 b/c of increased resolution of transmission files
                 throw new Exception("Please use a model line width > 0.2 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 5)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
@@ -125,7 +125,7 @@ public final class MichelleRecipe extends RecipeBase {
         final double end = band.getEnd();
 
         //any sed except BBODY and ELINE have normailization regions
-        switch (_sdParameters.getSourceSpec()) {
+        switch (_sdParameters.getDistributionType()) {
             case ELINE:
             case BBODY:
                 break;
@@ -159,7 +159,7 @@ public final class MichelleRecipe extends RecipeBase {
         // inputs: instrument,redshifted SED, waveband, normalization flux, units
         // calculates: normalized SED, resampled SED, SED adjusted for aperture
         // output: SED in common internal units
-        if (!_sdParameters.getSourceSpec().equals(SourceDefinitionParameters.Distribution.ELINE)) {
+        if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
             final SampledSpectrumVisitor norm =
                     new NormalizeVisitor(_sdParameters.getNormBand(),
                             _sdParameters.getSourceNormalization(),
@@ -332,7 +332,7 @@ public final class MichelleRecipe extends RecipeBase {
         // Calculate the Peak Pixel Flux
         PeakPixelFluxCalc ppfc;
 
-        if (!_sdParameters.sourceIsUniform()) {
+        if (!_sdParameters.isUniform()) {
 
             ppfc = new
                     PeakPixelFluxCalc(im_qual, pixel_size,
@@ -401,7 +401,7 @@ public final class MichelleRecipe extends RecipeBase {
 
                 st = new SlitThroughput(im_qual, pixel_size, _michelleParameters.getFPMask());
 
-                switch (_sdParameters.getSourceType()) {
+                switch (_sdParameters.getProfileType()) {
                     case EXTENDED_UNIFORM:
                         _println("software aperture extent along slit = " + device.toString(1 / _michelleParameters.getFPMask()) + " arcsec");
                         break;
@@ -413,7 +413,7 @@ public final class MichelleRecipe extends RecipeBase {
 
             }
 
-            if (!_sdParameters.sourceIsUniform()) {
+            if (!_sdParameters.isUniform()) {
                 _println("fraction of source flux in aperture = " +
                         device.toString(st.getSlitThroughput()));
             }
@@ -454,7 +454,7 @@ public final class MichelleRecipe extends RecipeBase {
 
             //For the usb case we want the resolution to be determined by the
             //slit width and not the image quality for a point source.
-            if (_sdParameters.sourceIsUniform()) {
+            if (_sdParameters.isUniform()) {
                 im_qual = 10000;
                 if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
                     spec_source_frac = _michelleParameters.getFPMask() * ap_diam * pixel_size;  //ap_diam = Spec_NPix
@@ -722,7 +722,7 @@ public final class MichelleRecipe extends RecipeBase {
          
         _println("");
                                                   //getSpectrumResource
-            if (_sdParameters.getSourceSpec().equals(_sdParameters.ELINE)){
+            if (_sdParameters.getDistributionType().equals(_sdParameters.ELINE)){
                           device.setPrecision(4);
                           device.clear();
                    _print("The Source is an emission line, at a wavelength of "
@@ -738,17 +738,17 @@ public final class MichelleRecipe extends RecipeBase {
                                           device.toString(_sdParameters.getELineContinuumFlux())+
                                         " " + _sdParameters.getELineContinuumFluxUnits()+
                                         ".");
-            }else if (_sdParameters.getSourceSpec().equals(_sdParameters.BBODY)){
+            }else if (_sdParameters.getDistributionType().equals(_sdParameters.BBODY)){
                             _print("The Source is a "
                                             + _sdParameters.getBBTemp() + "K Blackbody, at "
                                             + _sdParameters.getSourceNormalization() +
                                             " " + _sdParameters.getUnits() +" in the "+
                                             _sdParameters.getNormBand()+ " band.");
-            }else if (_sdParameters.getSourceSpec().equals(_sdParameters.LIBRARY_STAR)){
+            }else if (_sdParameters.getDistributionType().equals(_sdParameters.LIBRARY_STAR)){
                             _print("The Source is a "+_sdParameters.getSourceNormalization() +
                                             " " + _sdParameters.getUnits() + " " + _sdParameters.getSpecType() +
                                             " star at " + _sdParameters.getNormBand()+ ".");
-            }else if (_sdParameters.getSourceSpec().equals(_sdParameters.LIBRARY_NON_STAR)){
+            }else if (_sdParameters.getDistributionType().equals(_sdParameters.LIBRARY_NON_STAR)){
                             _print("The Source is a "+_sdParameters.getSourceNormalization() +
                                             " " + _sdParameters.getUnits() + " " + _sdParameters.getSpecType() +
                                             " at " + _sdParameters.getNormBand()+ ".");

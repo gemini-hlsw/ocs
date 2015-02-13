@@ -111,7 +111,7 @@ public final class GmosRecipe extends RecipeBase {
         final ITCChart gmosChart1;
         final ITCChart gmosChart2;
         if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.SPECTROSCOPY)) {
-            final boolean ifuAndNotUniform = mainInstrument.IFU_IsUsed() && !(_sdParameters.sourceIsUniform());
+            final boolean ifuAndNotUniform = mainInstrument.IFU_IsUsed() && !(_sdParameters.isUniform());
             final double ifu_offset = ifuAndNotUniform ? (Double) mainInstrument.getIFU().getApertureOffsetList().iterator().next() : 0.0;
             final String chart1Title = ifuAndNotUniform ? "Signal and Background (IFU element offset: " + device.toString(ifu_offset) + " arcsec)" : "Signal and Background ";
             final String chart2Title = ifuAndNotUniform ? "Intermediate Single Exp and Final S/N (IFU element offset: " + device.toString(ifu_offset) + " arcsec)" : "Intermediate Single Exp and Final S/N";
@@ -143,7 +143,7 @@ public final class GmosRecipe extends RecipeBase {
             SpecS2NLargeSlitVisitor specS2N = null;
             SlitThroughput st = null;
 
-            if (_sdParameters.getSourceSpec().equals(SourceDefinitionParameters.Distribution.ELINE))
+            if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
                 if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters
                         .getELineWavelength() * 1000))) {
                     throw new Exception(
@@ -169,7 +169,7 @@ public final class GmosRecipe extends RecipeBase {
             final double end = band.getEnd();
 
             // any sed except BBODY and ELINE have normailization regions
-            switch (_sdParameters.getSourceSpec()) {
+            switch (_sdParameters.getDistributionType()) {
                 case ELINE:
                 case BBODY:
                     break;
@@ -197,7 +197,7 @@ public final class GmosRecipe extends RecipeBase {
             // units
             // calculates: normalized SED, resampled SED, SED adjusted for aperture
             // output: SED in common internal units
-            if (!_sdParameters.getSourceSpec().equals(SourceDefinitionParameters.Distribution.ELINE)) {
+            if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
                 final SampledSpectrumVisitor norm = new NormalizeVisitor(
                         _sdParameters.getNormBand(),
                         _sdParameters.getSourceNormalization(),
@@ -329,7 +329,7 @@ public final class GmosRecipe extends RecipeBase {
                 }
             } else {
                 VisitableMorphology morph;
-                if (!_sdParameters.sourceIsUniform()) {
+                if (!_sdParameters.isUniform()) {
                     morph = new GaussianMorphology(im_qual);
                 } else {
                     morph = new USBMorphology();
@@ -351,7 +351,7 @@ public final class GmosRecipe extends RecipeBase {
             // Calculate the Peak Pixel Flux
             PeakPixelFluxCalc ppfc;
 
-            if (!_sdParameters.sourceIsUniform()) {
+            if (!_sdParameters.isUniform()) {
 
                 ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
                         _obsDetailParameters.getExposureTime(), sed_integral,
@@ -400,7 +400,7 @@ public final class GmosRecipe extends RecipeBase {
                     } else {
                         st = new SlitThroughput(im_qual, pixel_size, _gmosParameters.getFPMask());
 
-                        switch (_sdParameters.getSourceType()) {
+                        switch (_sdParameters.getProfileType()) {
                             case EXTENDED_UNIFORM:
                                 if (ccdIndex == 0) {
                                     _println("software aperture extent along slit = "
@@ -417,7 +417,7 @@ public final class GmosRecipe extends RecipeBase {
                         }
                     }
 
-                    if (!_sdParameters.sourceIsUniform()) {
+                    if (!_sdParameters.isUniform()) {
                         if (ccdIndex == 0) {
                             _println("fraction of source flux in aperture = "
                                     + device.toString(st.getSlitThroughput()));
@@ -455,7 +455,7 @@ public final class GmosRecipe extends RecipeBase {
 
                 // For the usb case we want the resolution to be determined by the
                 // slit width and not the image quality for a point source.
-                if (_sdParameters.sourceIsUniform()) {
+                if (_sdParameters.isUniform()) {
                     im_qual = 10000;
 
                     if (!instrument.IFU_IsUsed()) {
@@ -475,7 +475,7 @@ public final class GmosRecipe extends RecipeBase {
                     }
                 }
 
-                if (instrument.IFU_IsUsed() && !_sdParameters.sourceIsUniform()) {
+                if (instrument.IFU_IsUsed() && !_sdParameters.isUniform()) {
                     Iterator src_frac_it = sf_list.iterator();
                     Iterator ifu_offset_it = ap_offset_list.iterator();
 

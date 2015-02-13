@@ -131,7 +131,7 @@ public final class Flamingos2Recipe extends RecipeBase {
         // "OEnd:" +instrument.getObservingEnd());
 
         // any sed except BBODY and ELINE have normailization regions
-        switch (_sdParameters.getSourceSpec()) {
+        switch (_sdParameters.getDistributionType()) {
             case ELINE:
             case BBODY:
                 break;
@@ -161,7 +161,7 @@ public final class Flamingos2Recipe extends RecipeBase {
         // units
         // calculates: normalized SED, resampled SED, SED adjusted for aperture
         // output: SED in common internal units
-        if (!_sdParameters.getSourceSpec().equals(SourceDefinitionParameters.Distribution.ELINE)) {
+        if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
             final SampledSpectrumVisitor norm = new NormalizeVisitor(
                     _sdParameters.getNormBand(),
                     _sdParameters.getSourceNormalization(),
@@ -295,7 +295,7 @@ public final class Flamingos2Recipe extends RecipeBase {
         // Calculate the Peak Pixel Flux
         PeakPixelFluxCalc ppfc;
 
-        if (!_sdParameters.sourceIsUniform()) {
+        if (!_sdParameters.isUniform()) {
 
             ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
                     _obsDetailParameters.getExposureTime(), sed_integral,
@@ -355,7 +355,7 @@ public final class Flamingos2Recipe extends RecipeBase {
                 st_halo = new SlitThroughput(uncorrected_im_qual, pixel_size,
                         _flamingos2Parameters.getSlitSize() * pixel_size);
 
-                switch (_sdParameters.getSourceType()) {
+                switch (_sdParameters.getProfileType()) {
                     case EXTENDED_UNIFORM:
                         _println("software aperture extent along slit = "
                                 + device.toString(1 / _flamingos2Parameters
@@ -368,7 +368,7 @@ public final class Flamingos2Recipe extends RecipeBase {
                 }
             }
 
-            if (!_sdParameters.sourceIsUniform()) {
+            if (!_sdParameters.isUniform()) {
                 _println("fraction of source flux in aperture = "
                         + device.toString(st.getSlitThroughput()));
             }
@@ -388,7 +388,7 @@ public final class Flamingos2Recipe extends RecipeBase {
             ap_diam = st.getSpatialPix();
             double spec_source_frac = st.getSlitThroughput();
 
-            if (_sdParameters.sourceIsUniform()) {
+            if (_sdParameters.isUniform()) {
 
                 if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
                     spec_source_frac = _flamingos2Parameters.getSlitSize() * pixel_size

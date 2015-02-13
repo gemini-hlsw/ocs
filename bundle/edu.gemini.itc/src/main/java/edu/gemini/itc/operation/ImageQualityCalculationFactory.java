@@ -16,7 +16,7 @@ public final class ImageQualityCalculationFactory {
             TeleParameters teleParameters,
             Instrument instrument) {
 
-        switch (sourceDefinitionParameters.getSourceType()) {
+        switch (sourceDefinitionParameters.getProfileType()) {
             case EXTENDED_GAUSSIAN:
                 // Case A The Image quality is defined by the user
                 // who has selected a Gaussian Extended source

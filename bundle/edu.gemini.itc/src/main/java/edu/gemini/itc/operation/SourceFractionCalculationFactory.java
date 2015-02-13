@@ -19,7 +19,7 @@ public final class SourceFractionCalculationFactory {
                 observationDetailsParameters.getApertureDiameter();
 
 
-        if (sourceDefinitionParameters.sourceIsUniform()) {
+        if (sourceDefinitionParameters.isUniform()) {
             // Case B if sdParams.getExtendedSourceType = UNIFORM
             // This means the User has selected USB Calc
             return new USBSourceFractionCalculation(

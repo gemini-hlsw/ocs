@@ -88,7 +88,7 @@ public final class GsaoiRecipe extends RecipeBase {
         // output: redshifteed SED
         Gsaoi instrument = new Gsaoi(_gsaoiParameters, _obsDetailParameters);
 
-        if (_sdParameters.getSourceSpec().equals(SourceDefinitionParameters.Distribution.ELINE))
+        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters
                     .getELineWavelength() * 1000 * 25))) { // *25 b/c of
                 // increased
@@ -124,7 +124,7 @@ public final class GsaoiRecipe extends RecipeBase {
         final double end = band.getEnd();
 
         // any sed except BBODY and ELINE have normailization regions
-        switch (_sdParameters.getSourceSpec()) {
+        switch (_sdParameters.getDistributionType()) {
             case ELINE:
             case BBODY:
                 break;
@@ -170,7 +170,7 @@ public final class GsaoiRecipe extends RecipeBase {
         // units
         // calculates: normalized SED, resampled SED, SED adjusted for aperture
         // output: SED in common internal units
-        if (!_sdParameters.getSourceSpec().equals(SourceDefinitionParameters.Distribution.ELINE)) {
+        if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
             final SampledSpectrumVisitor norm = new NormalizeVisitor(
                     _sdParameters.getNormBand(),
                     _sdParameters.getSourceNormalization(),
@@ -392,7 +392,7 @@ public final class GsaoiRecipe extends RecipeBase {
 
         PeakPixelFluxCalc ppfc;
 
-        if (!_sdParameters.sourceIsUniform()) {
+        if (!_sdParameters.isUniform()) {
 
             // calculation of image quaility was in here if the current setup
             // does not work copy it back in here from above, and uncomment

@@ -73,7 +73,7 @@ public class SEDFactory {
 
     public static VisitableSampledSpectrum getSED(SourceDefinitionParameters sdp, Instrument instrument) {
 
-        switch (sdp.getSourceSpec()) {
+        switch (sdp.getDistributionType()) {
             case BBODY:
                 return new BlackBodySpectrum(sdp.getBBTemp(),
                         instrument.getSampling(),
@@ -119,7 +119,7 @@ public class SEDFactory {
     //Added to allow creation of an SED spanning more than one filter for NICI
     public static VisitableSampledSpectrum getSED(SourceDefinitionParameters sdp, double sampling, double observingStart, double observingEnd) {
 
-        switch (sdp.getSourceSpec()) {
+        switch (sdp.getDistributionType()) {
             case BBODY:
                 return new BlackBodySpectrum(sdp.getBBTemp(),
                         sampling,
@@ -147,7 +147,7 @@ public class SEDFactory {
 
             default:
                 final VisitableSampledSpectrum temp;
-                if (sdp.getSourceSpec() == SourceDefinitionParameters.Distribution.USER_DEFINED) {
+                if (sdp.getDistributionType() == SourceDefinitionParameters.Distribution.USER_DEFINED) {
                     temp = getSED(sdp.getSpectrumResource(),
                             sdp.getUserDefinedSpectrum(),
                             sampling);

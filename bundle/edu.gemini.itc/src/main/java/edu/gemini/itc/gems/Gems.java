@@ -120,7 +120,7 @@ public class Gems {
     //
     // Note: The IQ table should only be applied to the Point Source mode,
     public double getAOCorrectedFWHM() {
-        switch (source.getSourceType()) {
+        switch (source.getProfileType()) {
             case POINT:
                 // point source
                 final int IQ20 = 20, IQ70 = 70, IQ85 = 85;
@@ -160,9 +160,11 @@ public class Gems {
                 }
                 break;
 
-            default:
-                // extended source
+            case EXTENDED_GAUSSIAN:
                 return source.getFWHM();
+
+            default:
+                return 1.0;
         }
 
         // The web page always selects one of J, H or K, so if we get here, the IQ must be wrong

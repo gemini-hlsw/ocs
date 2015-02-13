@@ -92,7 +92,7 @@ public final class NifsRecipe extends RecipeBase {
         Nifs instrument;
         instrument = new NifsNorth(_nifsParameters, _obsDetailParameters);
 
-        if (_sdParameters.getSourceSpec().equals(SourceDefinitionParameters.Distribution.ELINE))
+        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25))) {  // *25 b/c of increased resolutuion of transmission files
                 throw new Exception("Please use a model line width > 0.04 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
@@ -120,7 +120,7 @@ public final class NifsRecipe extends RecipeBase {
         final double end = band.getEnd();
 
         //any sed except BBODY and ELINE have normailization regions
-        switch (_sdParameters.getSourceSpec()) {
+        switch (_sdParameters.getDistributionType()) {
             case ELINE:
             case BBODY:
                 break;
@@ -146,7 +146,7 @@ public final class NifsRecipe extends RecipeBase {
         // inputs: instrument,redshifted SED, waveband, normalization flux, units
         // calculates: normalized SED, resampled SED, SED adjusted for aperture
         // output: SED in common internal units
-        if (!_sdParameters.getSourceSpec().equals(SourceDefinitionParameters.Distribution.ELINE)) {
+        if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
             final SampledSpectrumVisitor norm =
                     new NormalizeVisitor(_sdParameters.getNormBand(),
                             _sdParameters.getSourceNormalization(),
@@ -316,7 +316,7 @@ public final class NifsRecipe extends RecipeBase {
 
         //IFU morphology section
         VisitableMorphology morph, haloMorphology;
-        switch (_sdParameters.getSourceType()) {
+        switch (_sdParameters.getProfileType()) {
             case POINT:
                 morph = new AOMorphology(im_qual);
                 haloMorphology = new AOMorphology(uncorrected_im_qual);

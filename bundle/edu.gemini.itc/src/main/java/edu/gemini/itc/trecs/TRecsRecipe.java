@@ -89,7 +89,7 @@ public final class TRecsRecipe extends RecipeBase {
 
         TRecs instrument = new TRecs(_trecsParameters, _obsDetailParameters);
 
-        if (_sdParameters.getSourceSpec().equals(SourceDefinitionParameters.Distribution.ELINE))
+        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters
                     .getELineWavelength() * 1000 / 4))) { // /4 b/c of increased
                 // resolution of
@@ -122,7 +122,7 @@ public final class TRecsRecipe extends RecipeBase {
         final double end = band.getEnd();
 
         // any sed except BBODY and ELINE have normailization regions
-        switch (_sdParameters.getSourceSpec()) {
+        switch (_sdParameters.getDistributionType()) {
             case ELINE:
             case BBODY:
                 break;
@@ -162,7 +162,7 @@ public final class TRecsRecipe extends RecipeBase {
         // units
         // calculates: normalized SED, resampled SED, SED adjusted for aperture
         // output: SED in common internal units
-        if (!_sdParameters.getSourceSpec().equals(SourceDefinitionParameters.Distribution.ELINE)) {
+        if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
             final SampledSpectrumVisitor norm = new NormalizeVisitor(
                     _sdParameters.getNormBand(),
                     _sdParameters.getSourceNormalization(),
@@ -329,7 +329,7 @@ public final class TRecsRecipe extends RecipeBase {
         // Calculate the Peak Pixel Flux
         PeakPixelFluxCalc ppfc;
 
-        if (!_sdParameters.sourceIsUniform()) {
+        if (!_sdParameters.isUniform()) {
 
             ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
                     exp_time, sed_integral, sky_integral,
@@ -413,7 +413,7 @@ public final class TRecsRecipe extends RecipeBase {
                         .getApertureDiameter()) + " arcsec");
             } else {
                 st = new SlitThroughput(im_qual, pixel_size, _trecsParameters.getFPMask());
-                switch (_sdParameters.getSourceType()) {
+                switch (_sdParameters.getProfileType()) {
                     case EXTENDED_UNIFORM:
                         _println("software aperture extent along slit = " + device.toString(1 / _trecsParameters.getFPMask()) + " arcsec");
                         break;
@@ -423,7 +423,7 @@ public final class TRecsRecipe extends RecipeBase {
                 }
             }
 
-            if (!_sdParameters.sourceIsUniform()) {
+            if (!_sdParameters.isUniform()) {
                 _println("fraction of source flux in aperture = "
                         + device.toString(st.getSlitThroughput()));
             }
@@ -453,7 +453,7 @@ public final class TRecsRecipe extends RecipeBase {
 
             // For the usb case we want the resolution to be determined by the
             // slit width and not the image quality for a point source.
-            if (_sdParameters.sourceIsUniform()) {
+            if (_sdParameters.isUniform()) {
                 im_qual = 10000;
 
                 if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {

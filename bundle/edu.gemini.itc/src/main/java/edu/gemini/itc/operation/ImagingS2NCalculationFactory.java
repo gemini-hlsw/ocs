@@ -28,7 +28,7 @@ public final class ImagingS2NCalculationFactory {
 
             // --- Integration time
             case ObservationDetailsParameters.INTTIME:
-                switch (sdp.getSourceType()) {
+                switch (sdp.getProfileType()) {
                     case POINT:
                         return new ImagingPointS2NMethodBCalculation(
                                 odp.getNumExposures(),

@@ -73,68 +73,68 @@ public final class SourceDefinitionParameters extends ITCParameters {
     public static final String STELLAR_LIB = ITCConstants.SED_LIB + "/stellar";
     public static final String NON_STELLAR_LIB = ITCConstants.SED_LIB + "/non_stellar";
 
-    private final SpatialProfile spatialProfile;
-    private final SpectralDistribution spectralDistribution;
-    private final WavebandDefinition normBand;
-    private final double redshift;
+    public final SpatialProfile profile;
+    public final SpectralDistribution distribution;
+    public final WavebandDefinition normBand;
+    public final double redshift;
     // additional java enums in order to be able to use switch statements for Scala case classes
-    private final Profile profile;
-    private final Distribution distribution;
+    public final Profile profileType;
+    public final Distribution distributionType;
 
     /**
      * Constructs a SourceDefinitionParameters
      */
-    public SourceDefinitionParameters(final SpatialProfile spatialProfile,
-                                      final SpectralDistribution spectralDistribution,
+    public SourceDefinitionParameters(final SpatialProfile profile,
+                                      final SpectralDistribution distribution,
                                       final WavebandDefinition normBand,
                                       final double redshift) {
-        this.spatialProfile = spatialProfile;
-        this.spectralDistribution = spectralDistribution;
-        this.normBand = normBand;
-        this.redshift = redshift;
+        this.profile        = profile;
+        this.distribution   = distribution;
+        this.normBand       = normBand;
+        this.redshift       = redshift;
 
         // provide an enum for the spatial profile types (helps with the Java implementation -> switch)
-        if      (spatialProfile instanceof PointSource)          profile = Profile.POINT;
-        else if (spatialProfile instanceof GaussianSource)       profile = Profile.EXTENDED_GAUSSIAN;
-        else if (spatialProfile instanceof UniformSource)        profile = Profile.EXTENDED_UNIFORM;
+        if      (profile instanceof PointSource)          profileType = Profile.POINT;
+        else if (profile instanceof GaussianSource)       profileType = Profile.EXTENDED_GAUSSIAN;
+        else if (profile instanceof UniformSource)        profileType = Profile.EXTENDED_UNIFORM;
         else    throw new IllegalArgumentException();
 
         // provide an enum for the spectral distribution types (helps with the Java implementation -> switch)
-        if      (spectralDistribution instanceof BlackBody)      distribution = Distribution.BBODY;
-        else if (spectralDistribution instanceof EmissionLine)   distribution = Distribution.ELINE;
-        else if (spectralDistribution instanceof LibraryNonStar) distribution = Distribution.LIBRARY_NON_STAR;
-        else if (spectralDistribution instanceof LibraryStar)    distribution = Distribution.LIBRARY_STAR;
-        else if (spectralDistribution instanceof PowerLaw)       distribution = Distribution.PLAW;
-        else if (spectralDistribution instanceof UserDefined)    distribution = Distribution.USER_DEFINED;
+        if      (distribution instanceof BlackBody)      distributionType = Distribution.BBODY;
+        else if (distribution instanceof EmissionLine)   distributionType = Distribution.ELINE;
+        else if (distribution instanceof LibraryNonStar) distributionType = Distribution.LIBRARY_NON_STAR;
+        else if (distribution instanceof LibraryStar)    distributionType = Distribution.LIBRARY_STAR;
+        else if (distribution instanceof PowerLaw)       distributionType = Distribution.PLAW;
+        else if (distribution instanceof UserDefined)    distributionType = Distribution.USER_DEFINED;
         else    throw new IllegalArgumentException();
 
     }
 
-    public Profile getSourceType() {
-        return profile;
+    public Profile getProfileType() {
+        return profileType;
     }
 
-    public boolean sourceIsUniform() {
-        return profile == Profile.EXTENDED_UNIFORM;
+    public boolean isUniform() {
+        return profileType == Profile.EXTENDED_UNIFORM;
     }
 
     public String getSourceGeometryStr() {
-        switch (profile) {
+        switch (profileType) {
             case POINT: return "point source";
             default:    return "extended source";
         }
     }
 
     public double getSourceNormalization() {
-        return spatialProfile.norm();
+        return profile.norm();
     }
 
     public BrightnessUnit getUnits() {
-        return spatialProfile.units();
+        return profile.units();
     }
 
     public double getFWHM() {
-        return ((GaussianSource) spatialProfile).fwhm();
+        return ((GaussianSource) profile).fwhm();
     }
 
     public WavebandDefinition getNormBand() {
@@ -145,56 +145,56 @@ public final class SourceDefinitionParameters extends ITCParameters {
         return redshift;
     }
 
-    public Distribution getSourceSpec() {
-        return distribution;
+    public Distribution getDistributionType() {
+        return distributionType;
     }
 
     public String getSpecType() {
-        return ((Library) spectralDistribution).specType();
+        return ((Library) distribution).specType();
     }
 
     public String getSpectrumResource() {
-        return ((Library) spectralDistribution).sedSpectrum();
+        return ((Library) distribution).sedSpectrum();
     }
 
     public double getBBTemp() {
-        return ((BlackBody) spectralDistribution).temperature();
+        return ((BlackBody) distribution).temperature();
     }
 
     public double getELineWavelength() {
-        return ((EmissionLine) spectralDistribution).wavelength();
+        return ((EmissionLine) distribution).wavelength();
     }
 
     public double getELineWidth() {
-        return ((EmissionLine) spectralDistribution).width();
+        return ((EmissionLine) distribution).width();
     }
 
     public double getELineFlux() {
-        return ((EmissionLine) spectralDistribution).flux();
+        return ((EmissionLine) distribution).flux();
     }
 
     public double getELineContinuumFlux() {
-        return ((EmissionLine) spectralDistribution).continuum();
+        return ((EmissionLine) distribution).continuum();
     }
 
     public String getELineFluxUnits() {
-        return ((EmissionLine) spectralDistribution).fluxUnits();
+        return ((EmissionLine) distribution).fluxUnits();
     }
 
     public String getELineContinuumFluxUnits() {
-        return ((EmissionLine) spectralDistribution).continuumUnits();
+        return ((EmissionLine) distribution).continuumUnits();
     }
 
     public double getPowerLawIndex() {
-        return ((PowerLaw) spectralDistribution).index();
+        return ((PowerLaw) distribution).index();
     }
 
     public boolean isSedUserDefined() {
-        return distribution.equals(Distribution.USER_DEFINED);
+        return distributionType.equals(Distribution.USER_DEFINED);
     }
 
     public String getUserDefinedSpectrum() {
-        return ((UserDefined) spectralDistribution).spectrum();
+        return ((UserDefined) distribution).spectrum();
     }
 
     public String printParameterSummary() {
@@ -211,7 +211,7 @@ public final class SourceDefinitionParameters extends ITCParameters {
         sb.append(" ");
         sb.append(getSourceGeometryStr());
         sb.append(" is a");
-        switch (getSourceSpec()) {
+        switch (getDistributionType()) {
             case ELINE:
                 sb.append("n emission line, at a wavelength of " + device.toString(getELineWavelength()));
                 device.setPrecision(2);
@@ -222,14 +222,14 @@ public final class SourceDefinitionParameters extends ITCParameters {
                 break;
             case BBODY:
                 sb.append(" " + getBBTemp() + "K Blackbody, at " + getSourceNormalization() +
-                        " " + spatialProfile.units().displayValue() + " in the " + getNormBand().name + " band.");
+                        " " + profile.units().displayValue() + " in the " + getNormBand().name + " band.");
                 break;
             case LIBRARY_STAR:
-                sb.append(" " + getSourceNormalization() + " " + spatialProfile.units().displayValue() + " " + getSpecType() +
+                sb.append(" " + getSourceNormalization() + " " + profile.units().displayValue() + " " + getSpecType() +
                         " star in the " + getNormBand().name + " band.");
                 break;
             case LIBRARY_NON_STAR:
-                sb.append(" " + getSourceNormalization() + " " + spatialProfile.units().displayValue() + " " + getSpecType() +
+                sb.append(" " + getSourceNormalization() + " " + profile.units().displayValue() + " " + getSpecType() +
                         " in the " + getNormBand().name + " band.");
                 break;
             case USER_DEFINED:

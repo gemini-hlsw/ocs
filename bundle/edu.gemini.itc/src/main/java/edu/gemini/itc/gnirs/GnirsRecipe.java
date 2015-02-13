@@ -103,7 +103,7 @@ public final class GnirsRecipe extends RecipeBase {
         //instrument = new GnirsSouth(_gnirsParameters, _obsDetailParameters);
         instrument = new GnirsNorth(_gnirsParameters, _obsDetailParameters);   // Added on 2/27/2014 (see REL-480)
 
-        if (_sdParameters.getSourceSpec().equals(SourceDefinitionParameters.Distribution.ELINE))
+        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
             // *25 b/c of increased resolutuion of transmission files
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25))) {
                 throw new Exception(
@@ -132,7 +132,7 @@ public final class GnirsRecipe extends RecipeBase {
         final double end = band.getEnd();
 
         // any sed except BBODY and ELINE have normailization regions
-        switch (_sdParameters.getSourceSpec()) {
+        switch (_sdParameters.getDistributionType()) {
             case ELINE:
             case BBODY:
                 break;
@@ -160,7 +160,7 @@ public final class GnirsRecipe extends RecipeBase {
         // units
         // calculates: normalized SED, resampled SED, SED adjusted for aperture
         // output: SED in common internal units
-        if (!_sdParameters.getSourceSpec().equals(SourceDefinitionParameters.Distribution.ELINE)) {
+        if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
             final SampledSpectrumVisitor norm = new NormalizeVisitor(
                     _sdParameters.getNormBand(),
                     _sdParameters.getSourceNormalization(),
@@ -426,7 +426,7 @@ public final class GnirsRecipe extends RecipeBase {
         // Calculate the Peak Pixel Flux
         PeakPixelFluxCalc ppfc;
 
-        if (!_sdParameters.sourceIsUniform()) {
+        if (!_sdParameters.isUniform()) {
 
             ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
                     _obsDetailParameters.getExposureTime(), sed_integral,
@@ -479,7 +479,7 @@ public final class GnirsRecipe extends RecipeBase {
                 st = new SlitThroughput(im_qual, pixel_size, _gnirsParameters.getFPMask());
                 st_halo = new SlitThroughput(uncorrected_im_qual, pixel_size, _gnirsParameters.getFPMask());
 
-                switch (_sdParameters.getSourceType()) {
+                switch (_sdParameters.getProfileType()) {
                     case EXTENDED_UNIFORM:
                         _println("software aperture extent along slit = "
                                 + device.toString(1 / _gnirsParameters
@@ -493,7 +493,7 @@ public final class GnirsRecipe extends RecipeBase {
 
             }
 
-            if (!_sdParameters.sourceIsUniform()) {
+            if (!_sdParameters.isUniform()) {
                 _println("fraction of source flux in aperture = "
                         + device.toString(st.getSlitThroughput()));
             }
@@ -528,7 +528,7 @@ public final class GnirsRecipe extends RecipeBase {
 
             // For the usb case we want the resolution to be determined by the
             // slit width and not the image quality for a point source.
-            if (_sdParameters.sourceIsUniform()) {
+            if (_sdParameters.isUniform()) {
                 im_qual = 10000;
                 if (ap_type
                         .equals(ObservationDetailsParameters.USER_APER)) {

@@ -89,7 +89,7 @@ public final class AcqCamRecipe extends RecipeBase {
                         _acqCamParameters.getNDFilter());
 
 
-        if (_sdParameters.getSourceSpec().equals(SourceDefinitionParameters.Distribution.ELINE))
+        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000))) {
                 throw new IllegalArgumentException("Please use a model line width > 1 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
@@ -118,7 +118,7 @@ public final class AcqCamRecipe extends RecipeBase {
 
 
         //any sed except BBODY and ELINE have normailization regions
-        switch (_sdParameters.getSourceSpec()) {
+        switch (_sdParameters.getDistributionType()) {
             case ELINE:
             case BBODY:
                     break;
@@ -143,7 +143,7 @@ public final class AcqCamRecipe extends RecipeBase {
         // inputs: instrument,redshifted SED, waveband, normalization flux, units
         // calculates: normalized SED, resampled SED, SED adjusted for aperture
         // output: SED in common internal units
-        if (!_sdParameters.getSourceSpec().equals(SourceDefinitionParameters.Distribution.ELINE)) {
+        if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
             final SampledSpectrumVisitor norm =
                     new NormalizeVisitor(_sdParameters.getNormBand(),
                             _sdParameters.getSourceNormalization(),
@@ -288,7 +288,7 @@ public final class AcqCamRecipe extends RecipeBase {
 // Calculate the Peak Pixel Flux
         PeakPixelFluxCalc ppfc;
 
-        if (!_sdParameters.sourceIsUniform()) {
+        if (!_sdParameters.isUniform()) {
 
             ppfc = new
                     PeakPixelFluxCalc(im_qual, pixel_size,
