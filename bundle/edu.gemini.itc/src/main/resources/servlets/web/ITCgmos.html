@@ -24,7 +24,7 @@
 				filter/wavelength </i></td>
 			</tr>
 			<tr>
-				<td><input name="SourceGeometry" value="POINT" checked="checked" type="radio" /></td>
+				<td><input name="Profile" value="POINT" checked="checked" type="radio" /></td>
 				<td colspan="2"><b>Point source</b> (<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10257#spatial','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false">nominal
 				PSF</a>) with spatially integrated brightness <input name="psSourceNorm" size="8" value="20.0" type="text" /> <select name="psSourceUnits" size="1">
 
@@ -45,14 +45,14 @@
 
 			</tr>
 			<tr>
-				<td valign="top"><input name="SourceGeometry" value="EXTENDED" type="radio" /></td>
+				<td valign="top"></td>
 				<td colspan="2"><b>Extended source</b> having ...(When this option is selected the image
 				quality selection in section 3 of the ITC is disabled.) </td>
 			</tr>
 			<tr>
 				<td> </td>
 
-				<td><img src="/spacer.gif" height="1" width="40" /><input name="ExtSourceType" value="GAUSSIAN" type="radio" /></td>
+				<td><img src="/spacer.gif" height="1" width="40" /><input name="Profile" value="GAUSSIAN" type="radio" /></td>
 				<td>Gaussian profile with full width half maximum (including seeing) of <input name="gaussFwhm" size="5" value="1.0" type="text" /> arcsec and spatially integrated brightness of <input name="gaussSourceNorm" size="8" value="20" type="text" /> <select name="gaussSourceUnits" size="1">
 				<option value="MAG" selected="selected">
 				mag</option>
@@ -72,7 +72,7 @@
 			</tr>
 			<tr>
 				<td> </td>
-				<td><img src="/spacer.gif" height="1" width="40" /><input name="ExtSourceType" value="UNIFORM" checked="checked" type="radio" /></td>
+				<td><img src="/spacer.gif" height="1" width="40" /><input name="Profile" value="UNIFORM" type="radio" /></td>
 				<td>Uniform surface brightness <input name="usbSourceNorm" size="8" value="22.0" type="text" /> <select name="usbSourceUnits" size="1">
 
 				<option selected="selected" value="MAG_PSA">
@@ -134,7 +134,7 @@
 				<i>Choose one SED, the redshift and extinction</i></td>
 			</tr>
 			<tr>
-				<td><input value="LIBRARY_NON_STAR" name="SpectralDistribution" type="radio" /></td>
+				<td><input value="LIBRARY_NON_STAR" name="Distribution" type="radio" /></td>
 				<td colspan="2">Library spectrum of a non-stellar object <select name="nsSpectrumType" size="1">
 				<option value="elliptical-galaxy">
 				elliptical galaxy</option>
@@ -153,7 +153,7 @@
                 </select></td>
 			</tr>
 			<tr>
-				<td><input value="LIBRARY_STAR" name="SpectralDistribution" checked="checked" type="radio" /></td>
+				<td><input value="LIBRARY_STAR" name="Distribution" checked="checked" type="radio" /></td>
 				<td colspan="2">Library spectrum of a star with spectral type <select name="stSpectrumType" size="1">
 				<option value="O5V">
 				O5V</option>
@@ -273,7 +273,7 @@
 				</select></td>
 			</tr>
 			<tr>
-				<td><input value="ELINE" name="SpectralDistribution" type="radio" /></td>
+				<td><input value="ELINE" name="Distribution" type="radio" /></td>
 				<td colspan="2">Single emission line at wavelength <input name="lineWavelength" size="5" value="0.656" type="text" /> um with line flux <input name="lineFlux" size="8" value="5.0e-17" type="text" /> <select name="lineFluxUnits" size="1">
 				<option value="watts_flux">
 				W/m^2</option>
@@ -290,16 +290,16 @@
 				</select></td>
 			</tr>
 			<tr>
-				<td><input value="BBODY" name="SpectralDistribution" type="radio" /></td>
+				<td><input value="BBODY" name="Distribution" type="radio" /></td>
 				<td colspan="2">Model black body spectrum with temperature <input name="BBTemp" size="6" value="10000" type="text" /> K </td>
 
 			</tr>
 			<tr>
-				<td><input value="PLAW" name="SpectralDistribution" type="radio" /></td>
+				<td><input value="PLAW" name="Distribution" type="radio" /></td>
 				<td colspan="2">Model power-law spectrum (S_lambda = lambda ^ <input name="powerIndex" size="5" value="-1.0" type="text" /> ) </td>
 			</tr>
 			<tr>
-				<td><input value="USER_DEFINED" name="SpectralDistribution" type="radio" /></td>
+				<td><input value="USER_DEFINED" name="Distribution" type="radio" /></td>
 
 				<td colspan="2">User-defined spectrum read from file (size &lt; 1MB) <input name="specUserDef" type="file" /></td>
 			</tr>
