@@ -8,7 +8,6 @@ import edu.gemini.itc.gmos.GmosParameters
 import edu.gemini.itc.gnirs.GnirsParameters
 import edu.gemini.itc.gsaoi.GsaoiParameters
 import edu.gemini.itc.michelle.MichelleParameters
-import edu.gemini.itc.nici.NiciParameters
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.niri.NiriParameters
 import edu.gemini.itc.parameters.SourceDefinitionParameters.Distribution
@@ -29,7 +28,6 @@ object Hash {
     case p: GnirsParameters           => calc(p)
     case p: GsaoiParameters           => calc(p)
     case p: MichelleParameters        => calc(p)
-    case p: NiciParameters            => calc(p)
     case p: NifsParameters            => calc(p)
     case p: NiriParameters            => calc(p)
     case p: TRecsParameters           => calc(p)
@@ -92,15 +90,6 @@ object Hash {
       p.getStringSlitWidth,
       p.getWellDepth,
       p.polarimetryIsUsed()
-    )
-
-  def calc(p: NiciParameters): Int =
-    hash(
-      p.getChannel1Filter,
-      p.getChannel2Filter,
-      p.getDichroicPosition,
-      p.getInstrumentMode,
-      p.getPupilMask
     )
 
   def calc(p: NifsParameters): Int =
@@ -170,7 +159,7 @@ object Hash {
 
   def calc(odp: ObservationDetailsParameters): Int =
     hash(
-      odp.getAnalysisMethod,
+      ObservationDetailsParameters.IMAGING,           // TODO: remove with next new baseline
       odp.getApertureDiameter,
       odp.getApertureType,
       odp.getCalculationMethod,

@@ -3,12 +3,14 @@ package edu.gemini.itc.web
 import javax.servlet.http.HttpServletRequest
 
 import edu.gemini.itc.altair.AltairParameters
+import edu.gemini.itc.parameters.ObservationDetailsParameters.CalcMethod
 import edu.gemini.itc.parameters.SourceDefinitionParameters._
-import edu.gemini.itc.parameters.{ObservingConditionParameters, PlottingDetailsParameters, SourceDefinitionParameters, TeleParameters}
+import edu.gemini.itc.parameters._
 import edu.gemini.itc.shared._
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.telescope.IssPort
+import sun.reflect.generics.reflectiveObjects.NotImplementedException
 
 /**
  * ITC requests define a generic mechanism to look up values by their parameter names.
@@ -94,62 +96,97 @@ object ITCRequest {
     new AltairParameters(guideStarSeperation, guideStarMagnitude, fieldLens, wfsMode, altairUsed)
   }
 
+  def observationParameters(r: ITCMultiPartParser): ObservationDetailsParameters = {
+    val pc = ITCRequest.from(r)
+
+    import CalcMethod._
+    val calculationMethod = pc.enumParameter(classOf[CalcMethod]) match {
+      case IMAGING_INT  =>
+        ImagingInt(
+          pc.doubleParameter("sigmaC"),
+          pc.doubleParameter("expTimeC"),
+          pc.doubleParameter("fracOnSourceC")
+        )
+      case IMAGING_SN   =>
+        ImagingSN(
+          pc.doubleParameter("sigmaC"),
+          pc.doubleParameter("expTimeA"),
+          pc.doubleParameter("fracOnSourceA")
+        )
+      case IMAGING_SN_TOTAL   =>
+        ImagingSNTotal(
+          pc.doubleParameter("totTimeA"),
+          pc.doubleParameter("fracOnSourceA")
+        )
+      case SPECTROSCOPY =>
+        SpectroscopySN(
+          pc.doubleParameter("sigmaC"),
+          pc.doubleParameter("expTimeC"),
+          pc.doubleParameter("fracOnSourceC")
+        )
+    }
+
+    // TODO!
+    throw new NotImplementedException()
+
+  }
+
   def sourceDefinitionParameters(r: ITCMultiPartParser): SourceDefinitionParameters = {
-    val itcR = ITCRequest.from(r)
+    val pc = ITCRequest.from(r)
 
     // Get the source geometry and type
     import Profile._
-    val spatialProfile = itcR.enumParameter(classOf[Profile]) match {
+    val spatialProfile = pc.enumParameter(classOf[Profile]) match {
       case POINT    =>
-        val norm  = itcR.doubleParameter("psSourceNorm")
-        val units = itcR.enumParameter(classOf[BrightnessUnit], "psSourceUnits")
+        val norm  = pc.doubleParameter("psSourceNorm")
+        val units = pc.enumParameter(classOf[BrightnessUnit], "psSourceUnits")
         PointSource(norm, units)
       case GAUSSIAN =>
-        val norm  = itcR.doubleParameter("gaussSourceNorm")
-        val units = itcR.enumParameter(classOf[BrightnessUnit], "gaussSourceUnits")
-        val fwhm  = itcR.doubleParameter("gaussFwhm")
+        val norm  = pc.doubleParameter("gaussSourceNorm")
+        val units = pc.enumParameter(classOf[BrightnessUnit], "gaussSourceUnits")
+        val fwhm  = pc.doubleParameter("gaussFwhm")
         GaussianSource(norm, units, fwhm)
       case UNIFORM  =>
-        val norm  = itcR.doubleParameter("usbSourceNorm")
-        val units = itcR.enumParameter(classOf[BrightnessUnit], "usbSourceUnits")
+        val norm  = pc.doubleParameter("usbSourceNorm")
+        val units = pc.enumParameter(classOf[BrightnessUnit], "usbSourceUnits")
         UniformSource(norm, units)
     }
 
     // Get Normalization info
-    val normBand = itcR.enumParameter(classOf[WavebandDefinition])
+    val normBand = pc.enumParameter(classOf[WavebandDefinition])
 
     // Get Spectrum Resource
     import Distribution._
-    val sourceSpec = itcR.enumParameter(classOf[Distribution])
+    val sourceSpec = pc.enumParameter(classOf[Distribution])
     val sourceDefinition = sourceSpec match {
       case LIBRARY_STAR =>
-        val st = itcR.parameter("stSpectrumType")
+        val st = pc.parameter("stSpectrumType")
         LibraryStar(st, STELLAR_LIB + "/" + st.toLowerCase + SED_FILE_EXTENSION)
       case LIBRARY_NON_STAR =>
-        val st = itcR.parameter("nsSpectrumType")
+        val st = pc.parameter("nsSpectrumType")
         LibraryNonStar(st, NON_STELLAR_LIB + "/" + st + SED_FILE_EXTENSION)
       case ELINE =>
         EmissionLine(
-          itcR.doubleParameter("lineWavelength"),
-          itcR.doubleParameter("lineWidth"),
-          itcR.doubleParameter("lineFlux"),
-          itcR.parameter("lineFluxUnits"),
-          itcR.doubleParameter("lineContinuum"),
-          itcR.parameter("lineContinuumUnits"))
+          pc.doubleParameter("lineWavelength"),
+          pc.doubleParameter("lineWidth"),
+          pc.doubleParameter("lineFlux"),
+          pc.parameter("lineFluxUnits"),
+          pc.doubleParameter("lineContinuum"),
+          pc.parameter("lineContinuumUnits"))
       case BBODY =>
-        BlackBody(itcR.doubleParameter("BBTemp"))
+        BlackBody(pc.doubleParameter("BBTemp"))
       case PLAW =>
-        PowerLaw(itcR.doubleParameter("powerIndex"))
+        PowerLaw(pc.doubleParameter("powerIndex"))
       case USER_DEFINED =>
-        UserDefined(itcR.userSpectrumName().get, itcR.userSpectrum().get)
+        UserDefined(pc.userSpectrumName().get, pc.userSpectrum().get)
     }
 
     //Get Redshift
     import Recession._
-    val recession = itcR.enumParameter(classOf[Recession])
+    val recession = pc.enumParameter(classOf[Recession])
     val redshift = recession match {
-      case REDSHIFT => itcR.doubleParameter("z")
-      case VELOCITY => itcR.doubleParameter("v") / ITCConstants.C
+      case REDSHIFT => pc.doubleParameter("z")
+      case VELOCITY => pc.doubleParameter("v") / ITCConstants.C
     }
 
     // WOW, finally we've got everything in place..

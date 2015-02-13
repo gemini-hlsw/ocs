@@ -24,6 +24,41 @@ sealed trait Library extends SpectralDistribution {
 final case class LibraryStar(specType: String, sedSpectrum: String) extends Library
 final case class LibraryNonStar(specType: String, sedSpectrum: String) extends Library
 
+// ==== CALCULATION METHOD
+
+sealed trait CalcType
+case object Signal2Noise extends CalcType
+case object IntegrationTime extends CalcType
+
+sealed trait CalculationMethod {
+  val calcType: CalcType
+  val isImaging: Boolean
+  val isSpectroscopy: Boolean = !isImaging
+}
+sealed trait Imaging extends CalculationMethod {
+  val calcType = Signal2Noise
+  val isImaging = true
+}
+sealed trait Spectroscopy extends CalculationMethod {
+  val calcType = Signal2Noise
+  val isImaging = false
+}
+case class ImagingSN(exposures: Double, time: Double, fraction: Double) extends Imaging
+case class ImagingSNTotal(totalTime: Double, fraction: Double) extends Imaging
+case class ImagingInt(sigma: Double, expTime: Double, fraction: Double) extends Imaging {
+  override val calcType = IntegrationTime
+}
+case class SpectroscopySN(exposures: Double, time: Double, fraction: Double) extends Spectroscopy
+
+// ==== ANALYSIS METHOD
+
+sealed trait AnalysisMethod
+case class AutoAperture(skyAperture: Double) extends AnalysisMethod
+case class UserAperture(diameter: Double, skyAperture: Double) extends AnalysisMethod
+
+
+
+
 object SpectralDistribution {
 
 }

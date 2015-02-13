@@ -1,8 +1,6 @@
 package edu.gemini.itc.parameters;
 
-import edu.gemini.itc.shared.FormatStringWriter;
-import edu.gemini.itc.shared.ITCMultiPartParser;
-import edu.gemini.itc.shared.ITCParameters;
+import edu.gemini.itc.shared.*;
 
 
 /**
@@ -10,6 +8,18 @@ import edu.gemini.itc.shared.ITCParameters;
  * of an ITC web page.  This object is constructed from a servlet request.
  */
 public final class ObservationDetailsParameters extends ITCParameters {
+
+    public static enum CalcMethod {
+        IMAGING_SN,
+        IMAGING_SN_TOTAL,
+        IMAGING_INT,
+        SPECTROSCOPY
+    }
+    public static enum AnMethod {
+        AUTO_APERTURE,
+        USER_APERTURE
+    }
+
     // ITC web form parameter names.
     // These constants must be kept in sync with the web page form.
     // They are used to parse form data.
@@ -17,7 +27,6 @@ public final class ObservationDetailsParameters extends ITCParameters {
     public static final String CALC_MODE = "calcMode";
     //define the parameters for imaging method A and C.
     public static final String NUM_EXPOSURES = "numExpA";
-    public static final String NUM_EXPOSURES_2 = "numExpC";
     public static final String EXP_TIME = "expTimeA";
     public static final String EXP_TIME_2 = "expTimeC";
     public static final String TOTAL_OBSERVATION_TIME = "totTimeA";
@@ -25,16 +34,10 @@ public final class ObservationDetailsParameters extends ITCParameters {
     public static final String SRC_FRACTION_2 = "fracOnSourceC";
     public static final String SIGMA = "sigmaC";
     //define the parameters for spectroscopy method A
-    public static final String NUM_EXPOSURES_SP = "numExpSpA";
-    public static final String EXP_TIME_SP = "expTimeSpA";
-    public static final String SRC_FRACTION_SP = "fracOnSourceSpA";
 
 
-    public static final String ANAL_METHOD = "analMethod";
     public static final String APER_TYPE = "aperType";
-    public static final String APER_TYPE_SP = "aperTypeSp";
     public static final String APER_DIAM = "userAperDiam";
-    public static final String APER_DIAM_SP = "userAperDiamSp";
     public static final String AUTO_SKY_APER = "autoSkyAper";
     public static final String USER_SKY_APER = "userSkyAper";
 
@@ -57,7 +60,6 @@ public final class ObservationDetailsParameters extends ITCParameters {
     private double _sourceFraction;  // fraction of exposures containing source
     private double _snRatio;  // ratio desired
 
-    private String _analysisMethod; // imaging or spectroscopy
     private final String _apertureType; // auto or user
     private double _apertureDiameter; // in arcsec
     private double _skyApertureDiameter;
@@ -132,7 +134,6 @@ public final class ObservationDetailsParameters extends ITCParameters {
                                         double exposureTime,
                                         double sourceFraction,
                                         double snRatio,
-                                        String analysisMethod,
                                         String apertureType,
                                         double apertureDiameter,
                                         double skyApertureDiameter) {
@@ -142,7 +143,6 @@ public final class ObservationDetailsParameters extends ITCParameters {
         _exposureTime = exposureTime;
         _sourceFraction = sourceFraction;
         _snRatio = snRatio;
-        _analysisMethod = analysisMethod;
         _apertureType = apertureType;
         _apertureDiameter = apertureDiameter;
         _skyApertureDiameter = skyApertureDiameter;
@@ -189,10 +189,6 @@ public final class ObservationDetailsParameters extends ITCParameters {
         return _snRatio;
     }
 
-    public String getAnalysisMethod() {
-        return _analysisMethod;
-    }
-
     public String getApertureType() {
         return _apertureType;
     }
@@ -215,7 +211,6 @@ public final class ObservationDetailsParameters extends ITCParameters {
         sb.append("Exposure Time:\t\t" + getExposureTime() + "\n");
         sb.append("Fraction on Source:\t" + getSourceFraction() + "\n");
         sb.append("SN Ratio:\t\t" + getSNRatio() + "\n");
-        sb.append("Analysis Method:\t" + getAnalysisMethod() + "\n");
         sb.append("Aperture Type:\t\t" + getApertureType() + "\n");
         sb.append("Aperture Diameter:\t" + getApertureDiameter() + "\n");
         sb.append("\n");
