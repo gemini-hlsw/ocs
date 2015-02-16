@@ -23,7 +23,6 @@ import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.TargetEnvironment
 import jsky.catalog.skycat.SkycatConfigFile
 import jsky.coords.WorldCoords
-import java.net.URL
 import org.specs2.time.NoTimeConversions
 
 import scala.concurrent.duration._
@@ -37,11 +36,11 @@ import scala.concurrent.Await
  * See OT-27
  */
 class GemsCatalogResultsSpec extends MascotProgress with Specification with NoTimeConversions {
-  val url = getClass.getResource("/edu/gemini/spModel/gemsGuideStar/test.skycat.cfg")
-  SkycatConfigFile.setConfigFile(url)
-
   "GemsCatalogResultsSpec" should {
     "support legacy Gsaoi Search" in {
+      val url = getClass.getResource("/edu/gemini/spModel/gemsGuideStar/test.skycat.cfg")
+      SkycatConfigFile.setConfigFile(url)
+
       val base = new WorldCoords("17:25:17.633", "-48:28:01.47")
       val inst = new Gsaoi
       val results = legacySearch(inst, base.getRA.toString, base.getDec.toString, GemsTipTiltMode.canopus)
