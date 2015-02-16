@@ -218,7 +218,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     public List<GemsCatalogSearchResults> search(String opticalCatalog, String nirCatalog,
                                                  GemsTipTiltMode tipTiltMode,
                                                  ObsContext obsContext, Set<edu.gemini.spModel.core.Angle> posAngles,
-                                                 Option<MagnitudeBand> nirBand) throws Exception {
+                                                 scala.Option<MagnitudeBand> nirBand) throws Exception {
         try {
             interrupted = false;
             startProgress();
@@ -233,7 +233,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
             GemsGuideStarSearchOptions options = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog,
                     instrument, tipTiltMode, posAngles);
 
-            List<GemsCatalogSearchResults> results = new GemsCatalog().search(obsContext, GemsUtils4Java.toCoordinates(base), options, nirBand, statusLogger);
+            List<GemsCatalogSearchResults> results = GemsVoTableCatalog.search4Java(obsContext, GemsUtils4Java.toCoordinates(base), options, nirBand, statusLogger, 10);
             if (interrupted) {
                 throw new CancellationException("Canceled");
             }
@@ -260,7 +260,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
 //                None.<Magnitude.Band>instance());
         List<GemsCatalogSearchResults> results = search(GemsGuideStarSearchOptions.DEFAULT_CATALOG,
                 GemsGuideStarSearchOptions.DEFAULT_CATALOG, GemsTipTiltMode.canopus, obsContext, posAngles,
-                None.<MagnitudeBand>instance());
+                scala.Option.<MagnitudeBand>empty());
         return findGuideStars(obsContext, posAngles, results);
     }
 

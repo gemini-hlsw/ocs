@@ -236,7 +236,7 @@ class MascotGuideStarSpec extends Specification {
         inst.setIssPort(IssPort.SIDE_LOOKING)
         val ctx = ObsContext.create(env, inst, JNone.instance(), SPSiteQuality.Conditions.BEST, null, null)
 
-        val targets = t.targets.rows
+        val targets = t.result.targets.rows
         val result = MascotGuideStar.findBestAsterismInQueryResult(targets, ctx, MascotGuideStar.CWFS, 180.0, 10.0)
 
         for {

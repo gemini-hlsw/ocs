@@ -37,7 +37,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]] = {
     val empty = List((params.guideProbe: GuideProbe, List.empty[SiderealTarget]))
     catalogQueries(ctx, mt).foldLeft(Future.successful(empty)) { (_, qc) =>
-      VoTableClient.catalog(qc).map { so => List((params.guideProbe, so.targets.rows)) }
+      VoTableClient.catalog(qc).map { so => List((params.guideProbe, so.result.targets.rows)) }
     }
   }
 

@@ -69,6 +69,8 @@ object CatalogQueryResult {
   implicit val monoid = Monoid.instance[CatalogQueryResult]((a, b) => CatalogQueryResult(a.targets |+| b.targets, a.problems |+| b.problems), Zero)
 }
 
+case class QueryResult(query: CatalogQuery, result: CatalogQueryResult)
+
 /** Indicates an issue parsing the targets, e.g. missing values, bad format, etc. */
 sealed trait CatalogProblem
 

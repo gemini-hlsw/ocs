@@ -49,6 +49,7 @@ import java.util.logging.Logger;
  * The catalog search will provide the inputs to the analysis phase, which actually assigns guide stars to guiders.
  * See OT-26
  */
+@Deprecated
 public class GemsCatalog {
 
     private static final Logger LOG = Logger.getLogger(GemsCatalog.class.getName());
@@ -72,8 +73,9 @@ public class GemsCatalog {
      * @param nirBand      optional NIR magnitude band (default is H)
      * @return list of search results
      */
+    @Deprecated
     public List<GemsCatalogSearchResults> search(final ObsContext obsContext, final Coordinates basePosition, final GemsGuideStarSearchOptions options,
-                                                 final Option<MagnitudeBand> nirBand, final StatusLogger statusLogger)
+                                                 final scala.Option<MagnitudeBand> nirBand, final StatusLogger statusLogger)
             throws Exception {
         final Map<GemsCatalogSearchCriterion, List<Target.SiderealTarget>> map = new HashMap<>();
         final List<Exception> exceptions = new ArrayList<>();

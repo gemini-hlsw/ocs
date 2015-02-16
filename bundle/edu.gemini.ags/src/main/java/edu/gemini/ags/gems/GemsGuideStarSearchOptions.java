@@ -1,11 +1,8 @@
 package edu.gemini.ags.gems;
 
 import edu.gemini.catalog.api.MagnitudeConstraints;
-import edu.gemini.shared.util.immutable.None;
-import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.Angle;
 import edu.gemini.spModel.core.MagnitudeBand;
-import edu.gemini.spModel.core.MagnitudeBand$;
 import edu.gemini.spModel.gemini.gems.Canopus;
 import edu.gemini.spModel.gemini.gems.GemsInstrument;
 import edu.gemini.spModel.gems.GemsGuideProbeGroup;
@@ -92,7 +89,6 @@ public class GemsGuideStarSearchOptions {
         GSAOI("GSAOI", GemsTipTiltMode.instrument),
         ;
 
-//        public static AnalyseChoice DEFAULT = BOTH;
         public static AnalyseChoice DEFAULT = CANOPUS; // REL-604
 
         private String _displayValue;
@@ -125,10 +121,6 @@ public class GemsGuideStarSearchOptions {
     private GemsTipTiltMode tipTiltMode;
     private Set<Angle> posAngles = new HashSet<>();
 
-
-    public GemsGuideStarSearchOptions() {
-    }
-
     public GemsGuideStarSearchOptions(final String opticalCatalog, final String nirCatalog, final GemsInstrument instrument,
                                       final GemsTipTiltMode tipTiltMode, final Set<Angle> posAngles) {
         this.opticalCatalog = opticalCatalog;
@@ -149,10 +141,6 @@ public class GemsGuideStarSearchOptions {
 
     public GemsTipTiltMode getTipTiltMode() {
         return tipTiltMode;
-    }
-
-    public Set<Angle> getPosAngles() {
-        return posAngles;
     }
 
     /**
@@ -178,7 +166,7 @@ public class GemsGuideStarSearchOptions {
      * @param nirBand      optional NIR magnitude band (default is H)
      * @return all relevant CatalogSearchCriterion instances
      */
-    public List<GemsCatalogSearchCriterion> searchCriteria(final ObsContext obsContext, final Option<MagnitudeBand> nirBand) {
+    public List<GemsCatalogSearchCriterion> searchCriteria(final ObsContext obsContext, final scala.Option<MagnitudeBand> nirBand) {
         switch(tipTiltMode) {
             case canopus: return Arrays.asList(
                     canopusCriterion(obsContext, GemsGuideStarType.tiptilt),
@@ -196,21 +184,22 @@ public class GemsGuideStarSearchOptions {
         }
     }
 
-    public GemsCatalogSearchCriterion canopusCriterion(final ObsContext obsContext, final GemsGuideStarType ggst) {
+    private GemsCatalogSearchCriterion canopusCriterion(final ObsContext obsContext, final GemsGuideStarType ggst) {
         final GemsMagnitudeTable.LimitsCalculator calculator = GemsMagnitudeTable.CanopusWfsMagnitudeLimitsCalculator();
-        return searchCriterion(obsContext, Canopus.Wfs.Group.instance, calculator, ggst, None.<MagnitudeBand>instance());
+        // Ugly hack for
+        return searchCriterion(obsContext, Canopus.Wfs.Group.instance, calculator, ggst, scala.Option.<MagnitudeBand>empty());
     }
 
-    public GemsCatalogSearchCriterion instrumentCriterion(final ObsContext obsContext, final GemsGuideStarType ggst, final Option<MagnitudeBand> nirBand) {
+    private GemsCatalogSearchCriterion instrumentCriterion(final ObsContext obsContext, final GemsGuideStarType ggst, final scala.Option<MagnitudeBand> nirBand) {
         final GemsMagnitudeTable.LimitsCalculator calculator = GemsMagnitudeTable.GemsInstrumentToMagnitudeLimitsCalculator().apply(instrument);
         return searchCriterion(obsContext, instrument.getGuiders(), calculator, ggst, nirBand);
     }
 
-    public GemsCatalogSearchCriterion searchCriterion(final ObsContext obsContext,
+    private GemsCatalogSearchCriterion searchCriterion(final ObsContext obsContext,
                                                       final GemsGuideProbeGroup gGroup,
                                                       final GemsMagnitudeTable.LimitsCalculator calculator,
                                                       final GemsGuideStarType gType,
-                                                      final Option<MagnitudeBand> nirBand) {
+                                                      final scala.Option<MagnitudeBand> nirBand) {
         final String name = String.format("%s %s", gGroup.getDisplayName(), gType.name());
 
         // Adjust the mag limits for the worst conditions (as is done in the ags servlet)

@@ -63,8 +63,8 @@ object GemsMagnitudeTable extends MagnitudeTable {
   trait LimitsCalculator {
     def getGemsMagnitudeConstraints(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand]): MagnitudeConstraints
 
-    def adjustGemsMagnitudeLimitsForJava(starType: GemsGuideStarType, nirBand: edu.gemini.shared.util.immutable.Option[MagnitudeBand], conditions: Conditions): MagnitudeConstraints =
-      getGemsMagnitudeConstraints(starType, nirBand.asScalaOpt).map(m => conditions.magAdjustOp.apply(m.toOldModel).toNewModel)
+    def adjustGemsMagnitudeLimitsForJava(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand], conditions: Conditions): MagnitudeConstraints =
+      getGemsMagnitudeConstraints(starType, nirBand).map(m => conditions.magAdjustOp.apply(m.toOldModel).toNewModel)
 
     def searchCriterionBuilder(name: String, radiusLimit: skycalc.Angle, instrument: GemsInstrument, magConstraint: MagnitudeConstraints, posAngles: java.util.Set[Angle]): CatalogSearchCriterion = {
       val radiusConstraint = RadiusConstraint.between(Angle.zero, radiusLimit.toNewModel)

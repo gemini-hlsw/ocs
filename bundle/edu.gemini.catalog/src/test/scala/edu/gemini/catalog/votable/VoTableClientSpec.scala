@@ -32,7 +32,7 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
     }
     "make a query (skipped if it fails)" in {
       // We'll skip this one if it fails as it depends on the remote server and the content may change
-      Await.result(VoTableClient.catalog(query), 5.seconds).containsError should beFalse.orSkip("Catalog maybe down")
+      Await.result(VoTableClient.catalog(query), 5.seconds).result.containsError should beFalse.orSkip("Catalog maybe down")
     }
 
   }

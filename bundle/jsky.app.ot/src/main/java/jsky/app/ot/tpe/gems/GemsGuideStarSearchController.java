@@ -62,7 +62,7 @@ class GemsGuideStarSearchController {
         List<GemsCatalogSearchResults> results;
         try {
             results = _worker.search(catName, catName, tipTiltMode, obsContext, posAngles,
-                    new Some<>(band));
+                    new scala.Some<>(band));
         } catch(Exception e) {
             DialogUtil.error(_dialog, e);
             results = new ArrayList<>();
