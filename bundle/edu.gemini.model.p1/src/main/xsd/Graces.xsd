@@ -36,8 +36,8 @@
     -->
     <xsd:simpleType name="GracesFiberMode">
         <xsd:restriction base="xsd:token">
-            <xsd:enumeration value="1 fiber (target, R~48k)"/>
-            <xsd:enumeration value="2 fibers (target + sky, R~37k)"/>
+            <xsd:enumeration value="1 fiber (target only, R~67.5k)"/>
+            <xsd:enumeration value="2 fibers (target+sky, R~40k)"/>
         </xsd:restriction>
     </xsd:simpleType>
 

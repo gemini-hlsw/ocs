@@ -6,10 +6,10 @@
     <jxb:bindings schemaLocation="../xsd/Graces.xsd" node="/xsd:schema">
         <!-- GracesFiberMode => Graces.GracesFiberMode -->
         <jxb:bindings node="./xsd:simpleType[@name='GracesFiberMode']/xsd:restriction">
-            <jxb:bindings node="./xsd:enumeration[@value='1 fiber (target, R~48k)']">
+            <jxb:bindings node="./xsd:enumeration[@value='1 fiber (target only, R~67.5k)']">
                 <jxb:typesafeEnumMember name="ONE_FIBER"/>
             </jxb:bindings>
-            <jxb:bindings node="./xsd:enumeration[@value='2 fibers (target + sky, R~37k)']">
+            <jxb:bindings node="./xsd:enumeration[@value='2 fibers (target+sky, R~40k)']">
                 <jxb:typesafeEnumMember name="TWO_FIBER"/>
             </jxb:bindings>
         </jxb:bindings>

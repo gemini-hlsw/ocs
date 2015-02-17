@@ -20,7 +20,7 @@ class GracesBlueprintSpec extends SpecificationWithJUnit with SemesterProperties
     }
     "has an appropriate public name" in {
       val blueprint = GracesBlueprint(M.GracesFiberMode.ONE_FIBER, M.GracesReadMode.NORMAL)
-      blueprint.name must beEqualTo("Graces 1 fiber (target, R~48k) Normal (Gain=1.3e/ADU, Read noise=4.3e)")
+      blueprint.name must beEqualTo("Graces 1 fiber (target only, R~67.5k) Normal (Gain=1.3e/ADU, Read noise=4.3e)")
     }
     "is a visitor" in {
       val blueprint = GracesBlueprint(M.GracesFiberMode.ONE_FIBER, M.GracesReadMode.NORMAL)
@@ -41,7 +41,7 @@ class GracesBlueprintSpec extends SpecificationWithJUnit with SemesterProperties
       val xml = XML.loadString(ProposalIo.writeToString(proposal))
 
       // verify the exported value
-      xml must \\("fiberMode") \> "1 fiber (target, R~48k)"
+      xml must \\("fiberMode") \> "1 fiber (target only, R~67.5k)"
       xml must \\("readMode") \> "Normal (Gain=1.3e/ADU, Read noise=4.3e)"
     }
     "be possible to deserialize" in {
