@@ -476,7 +476,7 @@ object TimeProblems {
         } yield for {
             ps <- sub
             if ps.request.time.value <= 0.0
-          } yield new Problem(Severity.Error, s"Please specify a time request for ${Partners.name.getOrElse(ps.partner, "")} or remove partner", SCHEDULING_SECTION, s.showPartnersView())
+          } yield new Problem(Severity.Error, s"Please specify a time request for ${Partners.name.getOrElse(ps.partner, "")} or remove partner", SCHEDULING_SECTION, s.inPartnersView(_.editSubmissionTime(ps)))
       probs.right.getOrElse(Nil)
     case _                            => Nil
   }
