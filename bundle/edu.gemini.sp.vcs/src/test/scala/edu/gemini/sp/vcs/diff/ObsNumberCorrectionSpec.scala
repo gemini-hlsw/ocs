@@ -1,11 +1,13 @@
 package edu.gemini.sp.vcs.diff
 
-import edu.gemini.pot.sp.SPNodeKey
+import edu.gemini.pot.sp.{SPObservationID, SPNodeKey}
 import edu.gemini.pot.sp.version.EmptyNodeVersions
 import edu.gemini.sp.vcs.diff.ProgramLocation.{Remote, Local}
 import edu.gemini.spModel.data.ISPDataObject
+import edu.gemini.spModel.event.SlewEvent
 import edu.gemini.spModel.gemini.obscomp.SPProgram
 import edu.gemini.spModel.obs.SPObservation
+import edu.gemini.spModel.obslog.ObsExecLog
 import org.specs2.mutable._
 
 import scalaz._
@@ -16,20 +18,21 @@ class ObsNumberCorrectionSpec extends Specification {
   val RemoteOnly: Set[ProgramLocation] = Set(Remote)
   val Both: Set[ProgramLocation]       = Set(Local, Remote)
 
+
+  import NodeDetail._
+
+  def mergeNode(dob: ISPDataObject, obsNum: Option[Int]): MergeNode = Modified(
+    new SPNodeKey(),
+    EmptyNodeVersions,
+    dob,
+    obsNum.fold(Empty: NodeDetail) { Obs.apply }
+  )
+
+  def nonObs(dob: ISPDataObject): MergeNode = mergeNode(dob, None)
+
+  def obs(num: Int): MergeNode = mergeNode(new SPObservation, Some(num))
+
   def doTest(expected: List[Int], merged: (Int, Set[ProgramLocation])*): Boolean = {
-    import NodeDetail._
-
-    def mergeNode(dob: ISPDataObject, obsNum: Option[Int]): MergeNode = Modified(
-      new SPNodeKey(),
-      EmptyNodeVersions,
-      dob,
-      obsNum.fold(Empty: NodeDetail) { Obs.apply }
-    )
-
-    def nonObs(dob: ISPDataObject): MergeNode = mergeNode(dob, None)
-
-    def obs(num: Int): MergeNode = mergeNode(new SPObservation, Some(num))
-
     val obsList = merged.map { case (i,_) => obs(i).leaf }
 
     val mergeTree =
@@ -48,7 +51,7 @@ class ObsNumberCorrectionSpec extends Specification {
     val plan = MergePlan(mergeTree, Set.empty)
     val onc  = new ObsNumberCorrection(Function.untupled(known.contains))
 
-    obsNumbers(onc(plan).update) shouldEqual expected
+    onc(plan).map(mp => obsNumbers(mp.update)) shouldEqual \/-(expected)
   }
 
   "ObsRenumber" should {
@@ -128,5 +131,24 @@ class ObsNumberCorrectionSpec extends Specification {
         (6, LocalOnly)
       )
     }
+
+    "reject a renumbering if the observation is executed" in {
+      val log = new ObsExecLog() <| (_.getRecord.addEvent(new SlewEvent(1, new SPObservationID("GS-2015A-Q-1-1")), null))
+
+      val localObs  = obs(1).node(nonObs(log).leaf)
+      val remoteObs = obs(1).leaf
+
+      val mergeTree = nonObs(new SPProgram).node(localObs, remoteObs)
+      val plan      = MergePlan(mergeTree, Set.empty)
+
+      val known = Set[(ProgramLocation, SPNodeKey)](
+        (Local,  localObs.key),
+        (Remote, remoteObs.key)
+      )
+      val onc  = new ObsNumberCorrection(Function.untupled(known.contains))
+
+      onc(plan) shouldEqual ObsNumberCorrection.unmergeable(List(1)).left[MergePlan]
+    }
+
   }
 }

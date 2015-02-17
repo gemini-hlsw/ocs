@@ -86,12 +86,12 @@ object MergeNode {
     /** A fold over observations contained in this tree node (if any).
       * Doesn't descend into the observation itself.
       */
-    def foldObservations[B](z: B)(f: (Modified, Int, B) => B): B = {
+    def foldObservations[B](z: B)(f: (Modified, Int, Stream[Tree[MergeNode]], B) => B): B = {
       def go(rem: List[Tree[MergeNode]], res: B): B =
         rem match {
           case Nil        => res
           case (t2 :: ts) => t2.rootLabel match {
-            case m@Modified(_, _, _, Obs(n)) => go(ts, f(m, n, res))
+            case m@Modified(_, _, _, Obs(n)) => go(ts, f(m, n, t2.subForest, res))
             case _                           => go(t2.subForest.toList ++ ts, res)
           }
         }
