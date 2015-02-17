@@ -1,5 +1,6 @@
 package edu.gemini.catalog.votable
 
+import java.net.UnknownHostException
 import java.util.concurrent.atomic.AtomicInteger
 
 import edu.gemini.catalog.api.CatalogQuery
@@ -68,7 +69,8 @@ object VoTableClient extends VoTableClient {
       url <- catalogUrls
     } yield doQuery(query, url)
     selectOne(f).recover {
-       case t => QueryResult(query, CatalogQueryResult(TargetsTable.Zero, List(GenericError(t.getMessage))))
+       case t:UnknownHostException => QueryResult(query, CatalogQueryResult(TargetsTable.Zero, List(GenericError(s"Unreachable host ${t.getMessage}"))))
+       case t                      => QueryResult(query, CatalogQueryResult(TargetsTable.Zero, List(GenericError(t.getMessage))))
     }
   }
 

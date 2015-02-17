@@ -3,6 +3,7 @@ package jsky.app.ot.tpe;
 import edu.gemini.ags.gems.*;
 import edu.gemini.ags.gems.mascot.Strehl;
 import edu.gemini.ags.gems.mascot.MascotProgress;
+import edu.gemini.catalog.votable.CatalogException;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.shared.skyobject.coords.SkyCoordinates;
@@ -102,6 +103,8 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
             DialogUtil.message("The guide star search was canceled.");
         } else if (o instanceof NoStarsException) {
             DialogUtil.error(((NoStarsException) o).getMessage());
+        } else if (o instanceof CatalogException) {
+            DialogUtil.error(((CatalogException) o).firstMessage());
         } else if (o instanceof Exception) {
             DialogUtil.error((Exception) o);
         } else {

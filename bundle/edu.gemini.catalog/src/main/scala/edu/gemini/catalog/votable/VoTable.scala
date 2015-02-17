@@ -80,4 +80,9 @@ case class MissingValues(fields: List[Ucd]) extends CatalogProblem
 case class FieldValueProblem(ucd: Ucd, value: String) extends CatalogProblem
 case class UnmatchedField(ucd: Ucd) extends CatalogProblem
 
-case class CatalogException(problems: List[CatalogProblem]) extends RuntimeException
+case class CatalogException(problems: List[CatalogProblem]) extends RuntimeException(problems.mkString(", ")) {
+  def firstMessage:String = ~problems.headOption.map {
+    case e: GenericError => e.msg
+    case e               => e.toString
+  }
+}
