@@ -79,3 +79,5 @@ case class GenericError(msg: String) extends CatalogProblem
 case class MissingValues(fields: List[Ucd]) extends CatalogProblem
 case class FieldValueProblem(ucd: Ucd, value: String) extends CatalogProblem
 case class UnmatchedField(ucd: Ucd) extends CatalogProblem
+
+case class CatalogException(problems: List[CatalogProblem]) extends RuntimeException

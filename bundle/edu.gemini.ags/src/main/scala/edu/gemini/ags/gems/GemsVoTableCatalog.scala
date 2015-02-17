@@ -1,7 +1,7 @@
 package edu.gemini.ags.gems
 
 import edu.gemini.catalog.api._
-import edu.gemini.catalog.votable.VoTableClient
+import edu.gemini.catalog.votable.{CatalogException, VoTableClient}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core.{Magnitude, MagnitudeBand, Coordinates}
 import edu.gemini.spModel.gemini.gems.GemsInstrument
@@ -97,10 +97,15 @@ object GemsVoTableCatalog {
       queryArgs = CatalogQuery(basePosition, radiusLimits, magLimits.some)
     } yield queryArgs
 
-    VoTableClient.catalog(queries).map(l => {
-      val targets = l.map(k => k.result.targets).suml
-      assignToCriterion(basePosition, criterions, targets.rows)
-    })
+    VoTableClient.catalog(queries).flatMap {
+      case l if l.filter(_.result.containsError).nonEmpty =>
+        Future.failed(CatalogException(l.map(_.result.problems).suml))
+      case l =>
+        Future.successful {
+          val targets = l.map(k => k.result.targets).suml
+          assignToCriterion(basePosition, criterions, targets.rows)
+        }
+    }
   }
 
   /**
