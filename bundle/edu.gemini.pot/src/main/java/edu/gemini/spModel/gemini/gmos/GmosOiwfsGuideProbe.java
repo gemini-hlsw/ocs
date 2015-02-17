@@ -12,6 +12,7 @@ import edu.gemini.skycalc.Offset;
 import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.core.Target;
 import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.inst.ProbeArmGeometry;
 import edu.gemini.spModel.inst.ScienceAreaGeometry;
@@ -26,7 +27,7 @@ import java.util.Set;
 /**
  * GMOS on-instrument guide probe.
  */
-public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidatingGuideProbe, VignettingGuideProbe<InstGmosCommon> {
+public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidatingGuideProbe, VignettingGuideProbe {
     instance;
 
     private static final PatrolField patrolField;
@@ -127,10 +128,11 @@ public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
     }
 
     @Override
-    public double calculateVignetting(final InstGmosCommon inst, final ObsContext ctx) {
+    public double calculateVignetting(final ObsContext ctx,
+                                      final edu.gemini.spModel.core.Coordinates guideStarCoordinates) {
         final ProbeArmGeometry probeArmGeometry       = GmosOiwfsProbeArm.instance();
         final ScienceAreaGeometry scienceAreaGeometry = new GmosScienceAreaGeometry();
-        return GuideProbeUtil.instance.calculateVignetting(ctx, scienceAreaGeometry, probeArmGeometry);
+        return GuideProbeUtil.instance.calculateVignetting(ctx, guideStarCoordinates, scienceAreaGeometry, probeArmGeometry);
     }
 
     private PatrolField getCorrectedPatrolField(final ObsContext ctx, final PatrolField patrolField) {
