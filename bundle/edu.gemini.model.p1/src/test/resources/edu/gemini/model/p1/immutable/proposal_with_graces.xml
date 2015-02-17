@@ -23,9 +23,9 @@
     <blueprints>
         <graces>
             <Graces id="blueprint-0">
-                <name>Graces 1 fiber (target, R~48k) Normal (Gain=1.3e/ADU, Read noise=4.3e)</name>
+                <name>Graces 1 fiber (target only, R~67.5k) Normal (Gain=1.3e/ADU, Read noise=4.3e)</name>
                 <visitor>false</visitor>
-                <fiberMode>1 fiber (target, R~48k)</fiberMode>
+                <fiberMode>1 fiber (target only, R~67.5k)</fiberMode>
                 <readMode>Normal (Gain=1.3e/ADU, Read noise=4.3e)</readMode>
             </Graces>
         </graces>
