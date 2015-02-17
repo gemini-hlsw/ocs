@@ -35,8 +35,10 @@ package object sp {
       case n                   => s"${n.key} ${n.getClass.getSimpleName}"
     }
 
-  def drawNodeTree(n: ISPNode): String = {
+  def drawNodeTree(n: ISPNode)(implicit ev: Show[ISPNode]): String = {
     val t = Tree.unfoldTree(n)(n0 => (n0, () => n0.children.toStream))
-    t.draw.zipWithIndex.collect { case (s, n0) if n0 % 2 == 0 => s}.mkString("\n")
+    t.draw(ev).zipWithIndex.collect { case (s, n0) if n0 % 2 == 0 => s}.mkString("\n")
   }
+
+  implicit def SpNodeKeyEqual: Equal[SPNodeKey] = Equal.equalA
 }

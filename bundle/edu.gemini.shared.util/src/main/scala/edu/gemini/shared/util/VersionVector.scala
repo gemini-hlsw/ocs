@@ -86,4 +86,7 @@ case class VersionVector[K, V : Integral](clocks: Map[K, V]) extends PartiallyOr
       }
     }
   }
+
+  def compare(that: VersionVector[K, V]): VersionComparison =
+    VersionComparison.compare(this, that)
 }
