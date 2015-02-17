@@ -136,7 +136,8 @@ public final class ObservationDetailsParameters extends ITCParameters {
                                         double snRatio,
                                         String apertureType,
                                         double apertureDiameter,
-                                        double skyApertureDiameter) {
+                                        double skyApertureDiameter,
+                                        double totalObservationTime) {
         _calcMode = calcMode;
         _calcMethod = calcMethod;
         _numExposures = numExposures;
@@ -146,6 +147,7 @@ public final class ObservationDetailsParameters extends ITCParameters {
         _apertureType = apertureType;
         _apertureDiameter = apertureDiameter;
         _skyApertureDiameter = skyApertureDiameter;
+        _totalObservationTime = totalObservationTime;
 
     }
 
@@ -161,24 +163,12 @@ public final class ObservationDetailsParameters extends ITCParameters {
         return _numExposures;
     }
 
-    public void setNumExposures(int numExposures) {
-        _numExposures = numExposures;
-    }
-
     public double getExposureTime() {
         return _exposureTime;
     }
 
-    public void setExposureTime(double exposureTime) {
-        _exposureTime = exposureTime;
-    }
-
     public double getTotalObservationTime() {
         return _totalObservationTime;
-    }
-
-    public void setTotalObservationTime(double totalObservationTime) {
-        _totalObservationTime = totalObservationTime;
     }
 
     public double getSourceFraction() {

@@ -37,10 +37,10 @@ public final class TRecsRecipe extends RecipeBase {
         _out = out;
 
         // Read parameters from the four main sections of the web page.
-        _sdParameters = ITCRequest.sourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _trecsParameters = new TRecsParameters(r);
+        _sdParameters = ITCRequest.sourceDefinitionParameters(r);
+        _obsDetailParameters = correctedObsDetails(_trecsParameters, new ObservationDetailsParameters(r));
+        _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _teleParameters = ITCRequest.teleParameters(r);
         _plotParameters = ITCRequest.plotParamters(r);
     }
@@ -53,16 +53,46 @@ public final class TRecsRecipe extends RecipeBase {
                        ObservingConditionParameters obsConditionParameters,
                        TRecsParameters trecsParameters, TeleParameters teleParameters,
                        PlottingDetailsParameters plotParameters,
-                       PrintWriter out)
+                       PrintWriter out) throws Exception
 
     {
         super(out);
         _sdParameters = sdParameters;
-        _obsDetailParameters = obsDetailParameters;
+        _obsDetailParameters = correctedObsDetails(trecsParameters, obsDetailParameters);
         _obsConditionParameters = obsConditionParameters;
         _trecsParameters = trecsParameters;
         _teleParameters = teleParameters;
         _plotParameters = plotParameters;
+    }
+
+    private ObservationDetailsParameters correctedObsDetails(TRecsParameters tp, ObservationDetailsParameters odp) throws Exception {
+        // TODO : These corrections were previously done in random places throughout the recipe. I moved them here
+        // TODO : so the ObservationDetailsParameters object can become immutable. This is probably not the
+        // TODO : best place to deal with this. This needs to be analysed and cleaned up.
+        final TRecs instrument = new TRecs(tp, odp); // TODO: Avoid creating an instrument instance twice.
+        final double correctedExposureTime;
+        final int correctedNumExposures;
+        if (odp.getTotalObservationTime() == 0) {
+            // NOTE: In theory this should never be executed, default is 1800 seconds
+            // NOTE: Can we throw an exception if totalObsTime <= 0?
+            correctedNumExposures = odp.getNumExposures(); // OLD, this value doesn't exist on trecs html page
+            correctedExposureTime = odp.getExposureTime(); // OLD, this value doesn't exist on trecs html page
+        } else {
+            correctedNumExposures = new Double(odp.getTotalObservationTime() / instrument.getFrameTime() + 0.5).intValue();
+            correctedExposureTime = instrument.getFrameTime();
+        }
+
+        return new ObservationDetailsParameters(
+                odp.getCalculationMode(),
+                odp.getCalculationMethod(),
+                correctedNumExposures,
+                correctedExposureTime,
+                odp.getSourceFraction(),
+                odp.getSNRatio(),
+                odp.getApertureType(),
+                odp.getApertureDiameter(),
+                odp.getSkyApertureDiameter(),
+                odp.getTotalObservationTime());
     }
 
     /**
@@ -304,13 +334,7 @@ public final class TRecsRecipe extends RecipeBase {
         IQcalc.calculate();
 
         im_qual = IQcalc.getImageQuality();
-        double exp_time;
-        if (_obsDetailParameters.getTotalObservationTime() == 0)
-            exp_time = _obsDetailParameters.getExposureTime();
-        else {
-            exp_time = instrument.getFrameTime();
-            _obsDetailParameters.setExposureTime(exp_time);
-        }
+        final double exp_time = _obsDetailParameters.getExposureTime();
 
         // Calculate the Fraction of source in the aperture
         SourceFractionCalculatable SFcalc =
@@ -350,41 +374,10 @@ public final class TRecsRecipe extends RecipeBase {
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
         int binFactor;
-        int number_exposures;
+        final int number_exposures = _obsDetailParameters.getNumExposures();
         double spec_source_frac = 0;
-        if (_obsDetailParameters.getTotalObservationTime() == 0) {
-            number_exposures = _obsDetailParameters.getNumExposures(); // OLD
-            // TRECS
-            // NUM
-            // EXPOSURE
-        } else {
-            number_exposures = new Double(
-                    _obsDetailParameters.getTotalObservationTime()
-                            / instrument.getFrameTime() + 0.5).intValue();
-            _obsDetailParameters.setNumExposures(number_exposures); // sets
-            // number
-            // exposures
-            // for
-            // classes
-            // that need
-            // it.
-        }
         double frac_with_source = _obsDetailParameters.getSourceFraction();
         double dark_current = instrument.getDarkCurrent();
-        double exposure_time;
-        if (_obsDetailParameters.getTotalObservationTime() == 0) {
-            exposure_time = _obsDetailParameters.getExposureTime(); // OLD TRECS
-            // EXPOSURE
-            // TIME
-        } else {
-            exposure_time = instrument.getFrameTime();
-            _obsDetailParameters.setExposureTime(exposure_time); // sets
-            // exposure
-            // time for
-            // classes
-            // that need
-            // it.
-        }
         double read_noise = instrument.getReadNoise();
         // report error if this does not come out to be an integer
         checkSourceFraction(number_exposures, frac_with_source);
@@ -437,9 +430,9 @@ public final class TRecsRecipe extends RecipeBase {
 
             _println("");
             _println("Requested total integration time = "
-                    + device.toString(exposure_time * number_exposures)
+                    + device.toString(exp_time * number_exposures)
                     + " secs, of which "
-                    + device.toString(exposure_time * number_exposures
+                    + device.toString(exp_time * number_exposures
                     * frac_with_source) + " secs is on source.");
 
             _print("<HR align=left SIZE=3>");
@@ -479,7 +472,7 @@ public final class TRecsRecipe extends RecipeBase {
                     instrument.getGratingDispersion_nmppix(),
                     instrument.getGratingResolution(), spec_source_frac,
                     im_qual, ap_diam, number_exposures, frac_with_source,
-                    exposure_time, dark_current
+                    exp_time, dark_current
                     * instrument.getSpatialBinning()
                     * instrument.getSpectralBinning(), read_noise,
                     _obsDetailParameters.getSkyApertureDiameter(),

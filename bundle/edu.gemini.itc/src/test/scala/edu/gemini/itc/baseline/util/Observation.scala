@@ -66,7 +66,8 @@ object Observation {
       10.0,
       ObservationDetailsParameters.USER_APER,
       0.7,
-      3)
+      3,
+      0)
 
   )
 
@@ -80,7 +81,8 @@ object Observation {
       10.0,                                               // SN ratio
       ObservationDetailsParameters.AUTO_APER,             // aperture type
       0.7,                                                // aperture diameter
-      3),                                                 // sky aperture diameter
+      3,                                                  // sky aperture diameter
+      0),                                                 // total observation time
 
     new ObservationDetailsParameters(
       ObservationDetailsParameters.IMAGING,
@@ -91,7 +93,8 @@ object Observation {
       25.64,
       ObservationDetailsParameters.USER_APER,
       0.7,
-      3)
+      3,
+      0)
   )
 
 }
