@@ -2,6 +2,7 @@ package edu.gemini.sp.vcs.diff
 
 import edu.gemini.pot.sp.{ISPObservation, ISPNode, SPNodeKey}
 import edu.gemini.pot.sp.version.NodeVersions
+import edu.gemini.sp.vcs.diff.NodeDetail.Obs
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.rich.pot.sp._
 
@@ -81,6 +82,22 @@ object MergeNode {
 
   implicit class MergeTreeOps(t: Tree[MergeNode]) {
     def key: SPNodeKey = t.rootLabel.key
+
+    /** A fold over observations contained in this tree node (if any).
+      * Doesn't descend into the observation itself.
+      */
+    def foldObservations[B](z: B)(f: (Modified, Int, B) => B): B = {
+      def go(rem: List[Tree[MergeNode]], res: B): B =
+        rem match {
+          case Nil        => res
+          case (t2 :: ts) => t2.rootLabel match {
+            case m@Modified(_, _, _, Obs(n)) => go(ts, f(m, n, res))
+            case _                           => go(t2.subForest.toList ++ ts, res)
+          }
+        }
+
+      go(List(t), z)
+    }
   }
 
   implicit val ShowNode = Show.shows[MergeNode] {

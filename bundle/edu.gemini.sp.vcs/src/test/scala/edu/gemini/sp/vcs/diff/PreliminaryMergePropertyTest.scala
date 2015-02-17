@@ -3,6 +3,7 @@ package edu.gemini.sp.vcs.diff
 import edu.gemini.pot.sp.{DataObjectBlob => DOB, ISPNode, ISPProgram, SPNodeKey}
 import edu.gemini.shared.util.VersionComparison
 import VersionComparison.Newer
+import edu.gemini.sp.vcs.diff.NodeDetail.Obs
 import edu.gemini.spModel.rich.pot.sp._
 
 import org.junit.Test
@@ -267,6 +268,39 @@ class PreliminaryMergePropertyTest extends JUnitSuite {
         val allUnmodified   = (Set.empty[SPNodeKey]/:unmodifiedNodes) { _ ++ _.keySet }
 
         emptySet(pc, allUnmodified & pc.modifiedKeys)
+      }
+    ),
+
+    ("no duplicates after renumbering observations",
+      (start, local, remote, pc) => {
+        val empty = Map.empty[Int, SPNodeKey]
+        val (localOnly, remoteOnly) = pc.mergePlan.update.foldObservations((empty, empty)) { case (m, i, (lo, ro)) =>
+          val key = m.key
+          (pc.local.p.getVersions.contains(key), pc.remote.p.getVersions.contains(key)) match {
+            case (true, false) => (lo + (i -> key), ro)
+            case (false, true) => (lo, ro + (i -> key))
+            case _             => (lo, ro)
+          }
+        }
+
+        localOnly.isEmpty || remoteOnly.isEmpty || {
+          val localKeys = localOnly.values.toSet
+          val remoteMax = remoteOnly.keySet.max
+
+          val t = ObsNumberCorrection(pc.mergeContext).apply(pc.mergePlan).update
+
+          val emptyMap = Map.empty[Int, Set[SPNodeKey]].withDefaultValue(Set.empty[SPNodeKey])
+          val obsMap = t.foldRight(emptyMap) {
+            case (Modified(k, _, _, Obs(n)), m) => m.updated(n, m(n) + k)
+            case (_, m)                         => m
+          }
+
+          val renumberedKeys = (Set.empty[SPNodeKey]/:((remoteMax + 1) to remoteMax + localKeys.size)) { (s, i) =>
+            s ++ obsMap(i)
+          }
+
+          obsMap.values.forall(_.size == 1) && (localKeys == renumberedKeys)
+        }
       }
     )
   )
