@@ -3,7 +3,7 @@ package edu.gemini.ags.impl
 import edu.gemini.ags.api._
 import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.catalog.api.{CatalogQuery, QueryConstraint}
-import edu.gemini.catalog.votable.VoTableClient
+import edu.gemini.catalog.votable.{CatalogException, VoTableClient}
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.core.{Coordinates, Angle}
 import edu.gemini.spModel.core.Target.SiderealTarget
@@ -37,7 +37,9 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]] = {
     val empty = List((params.guideProbe: GuideProbe, List.empty[SiderealTarget]))
     catalogQueries(ctx, mt).foldLeft(Future.successful(empty)) { (_, qc) =>
-      VoTableClient.catalog(qc).map { so => List((params.guideProbe, so.result.targets.rows)) }
+      VoTableClient.catalog(qc).flatMap {
+        case r if r.result.containsError => Future.failed(CatalogException(r.result.problems))
+        case r                           => Future.successful(List((params.guideProbe, r.result.targets.rows))) }
     }
   }
 
