@@ -1,7 +1,6 @@
 package edu.gemini.sp.vcs.diff
 
 import edu.gemini.pot.sp.{DataObjectBlob => DOB, ISPNode, ISPProgram, SPNodeKey}
-import edu.gemini.pot.sp.version._
 import edu.gemini.shared.util.VersionComparison
 import VersionComparison.Newer
 import edu.gemini.spModel.rich.pot.sp._
@@ -193,7 +192,6 @@ class PreliminaryMergePropertyTest extends JUnitSuite {
           pc.remote.isParentEdited(pc.remote.nodeMap(k))
         }
 
-        val notResurrected = inEditedRemoteParent &~ pc.mergeMap.keySet
         emptySet(pc, inEditedRemoteParent &~ pc.mergeMap.keySet)
       }
     ),

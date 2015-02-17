@@ -6,7 +6,6 @@ import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.rich.pot.sp._
 
 import scalaz._
-import Scalaz._
 
 
 /** MergeNodes form a tree with potential links into an existing science
