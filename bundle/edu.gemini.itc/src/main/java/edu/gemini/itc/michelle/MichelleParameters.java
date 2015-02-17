@@ -14,12 +14,8 @@ public final class MichelleParameters extends ITCParameters {
     // These constants must be kept in sync with the web page form.
     // They are used to parse form data.
     public static final String INSTRUMENT_FILTER = "instrumentFilter";
-    public static final String INSTRUMENT_WINDOW = "instrumentWindow";
     public static final String INSTRUMENT_GRATING = "instrumentDisperser";
-    public static final String INSTRUMENT_CENTRAL_WAVELENGTH =
-            "instrumentCentralWavelength";
-    public static final String READ_NOISE = "readNoise";
-    public static final String DARK_CURRENT = "darkCurrent";
+    public static final String INSTRUMENT_CENTRAL_WAVELENGTH = "instrumentCentralWavelength";
     public static final String WELL_DEPTH = "wellDepth";
     public static final String FP_MASK = "instrumentFPMask";
     public static final String SPAT_BINNING = "spatBinning";
@@ -31,7 +27,6 @@ public final class MichelleParameters extends ITCParameters {
 
     public static final String KBR = "KBr";
     public static final String KRS5 = "KRS5";
-    public static final String ZNSE = "ZnSe";
 
     public static final String LOW_N = "lowN";
     public static final String LOW_Q = "lowQ";
@@ -47,11 +42,9 @@ public final class MichelleParameters extends ITCParameters {
     public static final int ECHELLEN = 4;
     public static final int ECHELLEQ = 5;
 
-    public static final String NO_DISPERSER = "none";
     public static final String LOW_READ_NOISE = "lowNoise";
     public static final String HIGH_READ_NOISE = "highNoise";
     public static final String HIGH_WELL_DEPTH = "highWell";
-    public static final String LOW_WELL_DEPTH = "lowWell";
     public static final String SLIT0_19 = "slit0.19";
     public static final String SLIT0_38 = "slit0.38";
     public static final String SLIT0_57 = "slit0.57";
@@ -69,9 +62,6 @@ public final class MichelleParameters extends ITCParameters {
     // Data members
     private String _Filter;  // filters
     private String _grating; // Grating or null
-    private String _readNoise;
-    private String _darkCurrent;
-    private String _wellDepth;
     private String _instrumentCentralWavelength;
     private String _FP_Mask;
     private String _spatBinning;
@@ -169,9 +159,6 @@ public final class MichelleParameters extends ITCParameters {
      */
     public MichelleParameters(String Filter,
                               String grating,
-                              String readNoise,
-                              String wellDepth,
-                              String darkCurrent,
                               String instrumentCentralWavelength,
                               String FP_Mask,
                               String spatBinning,
@@ -179,11 +166,7 @@ public final class MichelleParameters extends ITCParameters {
                               String polarimetry) {
         _Filter = Filter;
         _grating = grating;
-        _darkCurrent = darkCurrent;
-        _readNoise = readNoise;
-        _wellDepth = wellDepth;
-        _instrumentCentralWavelength =
-                instrumentCentralWavelength;
+        _instrumentCentralWavelength = instrumentCentralWavelength;
         _FP_Mask = FP_Mask;
         _spatBinning = spatBinning;
         _specBinning = specBinning;
@@ -199,32 +182,20 @@ public final class MichelleParameters extends ITCParameters {
         return _grating;
     }
 
-    public String getReadNoise() {
-        return _readNoise;
-    }
-
-    public String getWellDepth() {
-        return _wellDepth;
-    }
-
-    public String getDarkCurrent() {
-        return _darkCurrent;
-    }
-
     public String getFocalPlaneMask() {
         return _FP_Mask;
     }
 
     public double getInstrumentCentralWavelength() {
-        return (new Double(_instrumentCentralWavelength).doubleValue()) * 1000;
+        return (new Double(_instrumentCentralWavelength)) * 1000;
     }
 
     public int getSpectralBinning() {//System.out.println(new Integer(_specBinning).intValue());
-        return new Integer(_specBinning).intValue();
+        return new Integer(_specBinning);
     }
 
     public int getSpatialBinning() {//System.out.println(new Integer(_spatBinning).intValue());
-        return new Integer(_spatBinning).intValue();
+        return new Integer(_spatBinning);
     }
 
     public double getFPMask() {
@@ -260,9 +231,7 @@ public final class MichelleParameters extends ITCParameters {
     }
 
     public boolean polarimetryIsUsed() {
-        if (_polarimetry.equals(ENABLED))
-            return true;
-        else return false;
+        return _polarimetry.equals(ENABLED);
     }
 
 

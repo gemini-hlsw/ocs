@@ -33,9 +33,6 @@ object BaselineMichelle {
     new MichelleParameters(
       "none",                             //String Filter,
       MichelleParameters.LOW_N,           //String grating,
-      MichelleParameters.HIGH_READ_NOISE, //String readNoise,
-      MichelleParameters.HIGH_WELL_DEPTH, //String wellDepth,
-      "NOT_USED?",                        //String darkCurrent, TODO UNUSED?
       "777",                              //String instrumentCentralWavelength,
       MichelleParameters.SLIT0_19,        //String FP_Mask,
       "1",                                //String spatBinning,

@@ -33,9 +33,6 @@ object BaselineTRecs {
       "none",                             //String Filter,
       "KBr",                              //String Instrumentwindow
       "HiRes-10",                         //String grating, ("none") for imaging
-      TRecsParameters.HIGH_READ_NOISE,    //String readNoise,
-      TRecsParameters.HIGH_WELL_DEPTH,    //String wellDepth,
-      "NOT_USED?",                        //String darkCurrent, TODO UNUSED?
       "777",                              //String instrumentCentralWavelength,
       TRecsParameters.SLIT0_21,           //String FP_Mask,
       "1",                                //String spatBinning,

@@ -78,17 +78,17 @@ object Hash {
 
   def calc(p: MichelleParameters): Int =
     hash(
-      p.getDarkCurrent,
+      "NOT_USED?",                        // TODO: Remove with next baseline update
       p.getFilter,
       p.getFocalPlaneMask,
       p.getFPMask,
       p.getGrating,
       p.getInstrumentCentralWavelength,
-      p.getReadNoise,
+      MichelleParameters.HIGH_READ_NOISE,// TODO: Remove with next baseline update
       p.getSpatialBinning,
       p.getSpectralBinning,
       p.getStringSlitWidth,
-      p.getWellDepth,
+      MichelleParameters.HIGH_WELL_DEPTH,// TODO: Remove with next baseline update
       p.polarimetryIsUsed()
     )
 
@@ -128,18 +128,18 @@ object Hash {
 
   def calc(p: TRecsParameters): Int =
     hash(
-      p.getDarkCurrent,
+      "NOT_USED?",                      // TODO: Remove with next baseline update
       p.getFilter,
       p.getFocalPlaneMask,
       p.getFPMask,
       p.getGrating,
       p.getInstrumentCentralWavelength,
       p.getInstrumentWindow,
-      p.getReadNoise,
+      TRecsParameters.HIGH_READ_NOISE,  // TODO: Remove with next baseline update
       p.getSpatialBinning,
       p.getSpectralBinning,
       p.getStringSlitWidth,
-      p.getWellDepth
+      TRecsParameters.HIGH_WELL_DEPTH   // TODO: Remove with next baseline update
     )
 
   def calc(p: AcquisitionCamParameters): Int =

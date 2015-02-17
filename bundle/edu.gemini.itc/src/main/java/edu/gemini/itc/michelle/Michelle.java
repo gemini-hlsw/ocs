@@ -55,14 +55,8 @@ public class Michelle extends Instrument {
     private Detector _detector;
     private double _sampling;
     private String _filterUsed;
-    //private String _instrumentWindow;
     private String _grating;
-    //private String _camera;
-    private String _readNoise;
-    private String _wellDepth;
     private String _focalPlaneMask;
-    //private String _focalPlaneMaskOffset;
-    private String _stringSlitWidth;
     private String _mode;
     private double _centralWavelength;
     private int _spectralBinning;
@@ -81,15 +75,9 @@ public class Michelle extends Instrument {
         _observingStart = super.getStart();
         _observingEnd = super.getEnd();
         _sampling = super.getSampling();
-
-        _readNoise = mp.getReadNoise();
-        _wellDepth = mp.getWellDepth();
         _focalPlaneMask = mp.getFocalPlaneMask();
-
-        _stringSlitWidth = mp.getStringSlitWidth();
         _grating = mp.getGrating();
         _filterUsed = mp.getFilter();
-        //_instrumentWindow = mp.getInstrumentWindow();
         _centralWavelength = mp.getInstrumentCentralWavelength();
 
         _mode = odp.getCalculationMode();
@@ -230,11 +218,6 @@ public class Michelle extends Instrument {
         return _gratingOptics.getGratingResolution();
     }
 
-    //public double getReadNoise() {
-    //if (_readNoise.equals(GmosParameters.LOW_READ_NOISE))
-    //    return LOW_BACK_READ_NOISE;
-    //else return HIGH_BACK_READ_NOISE;
-    //}
     public String getGrating() {
         return _grating;
     }
