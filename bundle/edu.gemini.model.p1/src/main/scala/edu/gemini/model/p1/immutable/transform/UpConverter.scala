@@ -131,8 +131,8 @@ case object SemesterConverter2015ATo2015B extends SemesterConverter {
       val fiberMode = (p \\ "fiberMode").text
       val gracesRegex = "(Graces )?(.*)".r
       def transformFiberMode(name: String) = name match {
-        case gracesRegex(_, "2 fibers (target + sky, R~30000)") => "2 fibers (target + sky, R~37k)"
-        case gracesRegex(_, "1 fiber (target, R~50000)")        => "1 fiber (target, R~48k)"
+        case gracesRegex(_, "2 fibers (target + sky, R~30000)") => "2 fibers (target+sky, R~40k)"
+        case gracesRegex(_, "1 fiber (target, R~50000)")        => "1 fiber (target only, R~67.5k)"
         case _                                                  => name
       }
 
