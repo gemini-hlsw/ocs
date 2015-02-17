@@ -15,6 +15,8 @@ import scalaz._
 import Scalaz._
 
 trait VoTableClient {
+  private val timeout = 30 * 1000 // Max time to wait
+
   private def format(a: Angle)= f"${a.toDegrees}%4.03f"
 
   protected def queryParams(qs: CatalogQuery): Array[NameValuePair] = Array(
@@ -42,6 +44,7 @@ trait VoTableClient {
     method.setQueryString(qs)
 
     val client = new HttpClient
+    client.setConnectionTimeout(timeout)
 
     try {
       client.executeMethod(method)
