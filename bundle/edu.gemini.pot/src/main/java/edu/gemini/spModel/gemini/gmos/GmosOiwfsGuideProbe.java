@@ -12,7 +12,10 @@ import edu.gemini.skycalc.Offset;
 import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.core.Target;
 import edu.gemini.spModel.guide.*;
+import edu.gemini.spModel.inst.ProbeArmGeometry;
+import edu.gemini.spModel.inst.ScienceAreaGeometry;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.telescope.IssPort;
@@ -24,17 +27,17 @@ import java.util.Set;
 /**
  * GMOS on-instrument guide probe.
  */
-public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidatingGuideProbe {
+public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidatingGuideProbe, VignettingGuideProbe {
     instance;
 
     private static final PatrolField patrolField;
     static {
-        Rectangle2D.Double fov = new Rectangle2D.Double(-11.4, -34.92, 212.7, 249.6);
-        Rectangle2D.Double fovIn = new Rectangle2D.Double(fov.x + 2.0,
+        final Rectangle2D.Double fov = new Rectangle2D.Double(-11.4, -34.92, 212.7, 249.6);
+        final Rectangle2D.Double fovIn = new Rectangle2D.Double(fov.x + 2.0,
                 fov.y + 2.0,
                 fov.width - 4.0,
                 fov.height - 4.0);
-        Rectangle2D.Double fovOut = new Rectangle2D.Double(fov.x - 2.0,
+        final Rectangle2D.Double fovOut = new Rectangle2D.Double(fov.x - 2.0,
                 fov.y - 2.0,
                 fov.width + 4.0,
                 fov.height + 4.0);
@@ -69,7 +72,7 @@ public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
         return None.instance();
     }
 
-    public BoundaryPosition checkBoundaries(SPTarget guideStar, ObsContext ctx) {
+    public BoundaryPosition checkBoundaries(final SPTarget guideStar, final ObsContext ctx) {
         return checkBoundaries(guideStar.getTarget().getSkycalcCoordinates(), ctx);
     }
 
@@ -93,20 +96,20 @@ public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
      * @param offset to check if the guide star is in range
      * @return true if guide star is in range from the given offset, false otherwise
      */
-    public boolean inRange(ObsContext ctx, Offset offset) {
+    public boolean inRange(final ObsContext ctx, final Offset offset) {
         return GuideProbeUtil.instance.inRange(this, ctx, offset);
     }
 
     @Override
-    public boolean validate(SPTarget guideStar, ObsContext ctx) {
+    public boolean validate(final SPTarget guideStar, final ObsContext ctx) {
         return GuideProbeUtil.instance.validate(guideStar.getTarget().getSkycalcCoordinates(), this, ctx);
     }
 
-    public boolean validate(SkyObject guideStar, ObsContext ctx) {
+    public boolean validate(final SkyObject guideStar, final ObsContext ctx) {
         return GuideProbeUtil.instance.validate(guideStar, this, ctx);
     }
 
-    public boolean validate(Coordinates guideStar, ObsContext ctx) {
+    public boolean validate(final Coordinates guideStar, final ObsContext ctx) {
         return GuideProbeUtil.instance.validate(guideStar, this, ctx);
     }
 
@@ -116,7 +119,7 @@ public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
     }
 
     @Override
-    public Option<PatrolField> getCorrectedPatrolField(ObsContext ctx) {
+    public Option<PatrolField> getCorrectedPatrolField(final ObsContext ctx) {
         if (ctx.getInstrument() instanceof InstGmosCommon) {
             return new Some<>(getCorrectedPatrolField(ctx, getPatrolField()));
         } else {
@@ -124,12 +127,20 @@ public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
         }
     }
 
-    private PatrolField getCorrectedPatrolField(ObsContext ctx, PatrolField patrolField) {
+    @Override
+    public double calculateVignetting(final ObsContext ctx,
+                                      final edu.gemini.spModel.core.Coordinates guideStarCoordinates) {
+        final ProbeArmGeometry probeArmGeometry       = GmosOiwfsProbeArm.instance();
+        final ScienceAreaGeometry scienceAreaGeometry = new GmosScienceAreaGeometry();
+        return GuideProbeUtil.instance.calculateVignetting(ctx, guideStarCoordinates, scienceAreaGeometry, probeArmGeometry);
+    }
+
+    private PatrolField getCorrectedPatrolField(final ObsContext ctx, final PatrolField patrolField) {
         final AffineTransform sideLooking = transformForPort(ctx.getIssPort());
 
         // calculate and apply GMOS specific IFU offsets and flip coordinates
-        double ifuXOffset = ((GmosCommonType.FPUnit) ((InstGmosCommon) ctx.getInstrument()).getFPUnit()).getWFSOffset();
-        AffineTransform offsetAndFlipTransform = AffineTransform.getTranslateInstance(ifuXOffset, 0.0);
+        final double ifuXOffset = ((GmosCommonType.FPUnit) ((InstGmosCommon) ctx.getInstrument()).getFPUnit()).getWFSOffset();
+        final AffineTransform offsetAndFlipTransform = AffineTransform.getTranslateInstance(ifuXOffset, 0.0);
         offsetAndFlipTransform.concatenate(sideLooking);
 
         // now get corrected patrol field
@@ -137,7 +148,7 @@ public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
     }
 
     // take care of transformations needed for different ports
-    private AffineTransform transformForPort(IssPort port) {
+    private AffineTransform transformForPort(final IssPort port) {
         if (port == IssPort.SIDE_LOOKING) {
             // if on side looking port flip y coordinates
             return AffineTransform.getScaleInstance(1.0, -1.0);
@@ -146,5 +157,4 @@ public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
             return new AffineTransform();
         }
     }
-
 }

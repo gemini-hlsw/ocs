@@ -1,6 +1,5 @@
 package edu.gemini.ags.gems
 
-import edu.gemini.ags.gems.mascot.{Star, MascotConf}
 import edu.gemini.catalog.api.{SaturationConstraint, RadiusConstraint, MagnitudeConstraints}
 import edu.gemini.ags.impl._
 import edu.gemini.shared.util.immutable

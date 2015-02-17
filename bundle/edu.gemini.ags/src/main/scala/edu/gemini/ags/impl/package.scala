@@ -6,7 +6,9 @@ import edu.gemini.shared.util.immutable.PredicateOp
 import edu.gemini.shared.util.immutable.ScalaConverters.ScalaOptionOps
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.guide.VignettingGuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.GuideProbeTargets
@@ -173,6 +175,9 @@ package object impl {
 
   def brightness(so: SiderealTarget, b: MagnitudeBand): Option[Double] =
     so.magnitudeIn(b).map(_.value)
+
+  def vignetting(ctx: ObsContext, probe: VignettingGuideProbe, so: SiderealTarget): Double =
+    probe.calculateVignetting(ctx, so.coordinates)
 
   def brightest[A](lst: List[A], band: MagnitudeBand)(toSiderealTarget: A => SiderealTarget): Option[A] = {
     lazy val max = new Magnitude(Double.MaxValue, band)

@@ -15,13 +15,24 @@ import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.data.ISPDataObject;
+import edu.gemini.spModel.inst.ArmAdjustment;
+import edu.gemini.spModel.inst.FeatureGeometry$;
+import edu.gemini.spModel.inst.ProbeArmGeometry;
+import edu.gemini.spModel.inst.ScienceAreaGeometry;
 import edu.gemini.spModel.obs.context.ObsContext;
+import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
+import edu.gemini.spModel.telescope.IssPort;
 
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 
+import java.awt.geom.Area;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.*;
+import java.util.List;
 
 /**
  * Utility methods for working with guide probes.
@@ -134,5 +145,88 @@ public enum GuideProbeUtil {
                 return rotatedPatrolField.getArea().contains(p, q);
             }
         });
+    }
+
+
+    public double calculateVignetting(final ObsContext ctx,
+                                      final edu.gemini.spModel.core.Coordinates guideStarCoordinates,
+                                      final ScienceAreaGeometry scienceAreaGeometry,
+                                      final ProbeArmGeometry probeArmGeometry) {
+        if (ctx == null || scienceAreaGeometry == null || probeArmGeometry == null)
+            return 0.0;
+
+        final double        flip = ctx.getIssPort() == IssPort.SIDE_LOOKING ? -1.0 : 1.0;
+        final SPInstObsComp inst = ctx.getInstrument();
+        final ImList<Shape> paShapes = probeArmGeometry.geometryAsJava();
+
+        // Configure the science area components for the context and combine into a single area.
+        final ImList<Shape> saShapes = FeatureGeometry$.MODULE$.transformScienceAreaForContextAsJava(scienceAreaGeometry.geometry(inst), ctx);
+        final Area scienceArea       = new Area();
+        saShapes.foreach(new ApplyOp<Shape>() {
+            @Override
+            public void apply(final Shape shape) {
+                scienceArea.add(new Area(shape));
+            }
+        });
+
+        final ImList<Offset> sciencePositions = DefaultImList.create(ctx.getSciencePositions());
+        final double sum = sciencePositions.foldLeft(0.0, new Function2<Double, Offset, Double>() {
+            @Override
+            public Double apply(final Double currentSum, final Offset offset) {
+                // Find the probe arm adjustment: we need the probe arm angle and the location of the guide star
+                // in arcseconds.
+                final Option<ArmAdjustment> adjOpt = probeArmGeometry.armAdjustmentAsJava(ctx, guideStarCoordinates, offset);
+
+                // If an adjustment exists, calculate the vignetting for this adjustment.
+                final double vignetting = adjOpt.map(new MapOp<ArmAdjustment, Double>() {
+                    @Override
+                    public Double apply(final ArmAdjustment adj) {
+                        final double angle      = adj.angle();
+                        final Point2D guideStar = adj.guideStarCoords();
+
+                        // Adjust the science area for the offset.
+                        final double x = -offset.p().toArcsecs().getMagnitude();
+                        final double y = -offset.q().toArcsecs().getMagnitude() * flip;
+                        final AffineTransform trans = AffineTransform.getTranslateInstance(x, y);
+                        final Area adjScienceArea = scienceArea.createTransformedArea(trans);
+
+                        final Area probeArmArea = new Area();
+                        paShapes.foreach(new ApplyOp<Shape>() {
+                            @Override
+                            public void apply(final Shape s) {
+                                final Shape st = FeatureGeometry$.MODULE$.transformProbeArmForContext(s, angle, guideStar);
+                                probeArmArea.add(new Area(st));
+                            }
+                        });
+
+                        // Take the intersection of the probe arm with the science area and calculate the approximate
+                        // ratio of the length of the probe arm falling inside the science area to the total length
+                        // of the probe arm.
+                        final Area vignettingArea = new Area(adjScienceArea);
+                        vignettingArea.intersect(probeArmArea);
+
+                        // We take, as our approximation, the ratio of the length of the diagonal of the bounding
+                        // box of the vignetting area to the length of the diagonal of the bounding box of the entire
+                        // probe arm.
+                        final Rectangle2D vignetteBounds = vignettingArea.getBounds2D();
+                        final double vWidth              = vignetteBounds.getWidth();
+                        final double vHeight             = vignetteBounds.getHeight();
+                        final double vLengthSquared      = vWidth * vWidth + vHeight * vHeight;
+
+                        final Rectangle2D probeArmBounds = probeArmArea.getBounds2D();
+                        final double pWidth              = probeArmBounds.getWidth();
+                        final double pHeight             = probeArmBounds.getHeight();
+                        final double pLengthSquared      = pWidth * pWidth + pHeight * pHeight;
+
+                        return (pLengthSquared > 0 ? Math.sqrt(vLengthSquared / pLengthSquared) : 0.0);
+                    }
+                }).getOrElse(0.0);
+
+                return currentSum + vignetting;
+            }
+        });
+
+        // Now average out the vignetting across the science positions.
+        return sciencePositions.isEmpty() ? 0.0 : sum / sciencePositions.size();
     }
 }

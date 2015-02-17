@@ -2,7 +2,7 @@ package edu.gemini.spModel.rich.shared
 
 import edu.gemini.shared.util.immutable.{ Option, ImList, Function1, Function2, ScalaConverters}
 
-// N.B. this is left behind for compatability; use edu.gemini.shared.util.immutable.ScalaConverters
+// N.B. this is left behind for compatibility; use edu.gemini.shared.util.immutable.ScalaConverters
 package object immutable {
   import ScalaConverters._
 
