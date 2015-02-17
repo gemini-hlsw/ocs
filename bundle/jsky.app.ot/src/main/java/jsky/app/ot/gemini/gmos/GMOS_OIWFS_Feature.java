@@ -8,15 +8,16 @@ package jsky.app.ot.gemini.gmos;
 
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.skycalc.Angle;
+import edu.gemini.skycalc.Coordinates;
 import edu.gemini.skycalc.Offset;
 import edu.gemini.spModel.gemini.gmos.*;
 import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.guide.PatrolField;
-import edu.gemini.spModel.inst.FeatureGeometry$;
-import edu.gemini.spModel.inst.ProbeArmGeometry;
-import edu.gemini.spModel.inst.ScienceAreaGeometry;
+import edu.gemini.spModel.inst.*;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
+import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
 import edu.gemini.spModel.telescope.IssPort;
 import jsky.app.ot.gemini.inst.OIWFS_FeatureBase;
@@ -119,17 +120,16 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
             final Option<Offset> offsetOpt = FeatureGeometry$.MODULE$.findObsContextOffsetAsJava(ctx, xc, yc, xb, yb, _pixelsPerArcsec);
             offsetOpt.foreach(new ApplyOp<Offset>() {
                 @Override
-                public void apply(Offset offset) {
-                    final Option<Pair<Double, Point2D>> adj = GmosOiwfsProbeArm.armAdjustmentForJava(ctx, offset);
-
+                public void apply(final Offset offset) {
                     // Translation to move the probe arm to the required position on the screen.
                     final AffineTransform trans = AffineTransform.getTranslateInstance(xt+xb, yt+yb);
 
-                    adj.foreach(new ApplyOp<Pair<Double, Point2D>>() {
+                    final Option<ArmAdjustment> adj = GmosOiwfsProbeArm.armAdjustmentAsJava(ctx, offset);
+                    adj.foreach(new ApplyOp<ArmAdjustment>() {
                         @Override
-                        public void apply(final Pair<Double, Point2D> armAdj) {
-                            final double armAngle      = armAdj._1();
-                            final Point2D guideStar    = armAdj._2();
+                        public void apply(final ArmAdjustment armAdj) {
+                            final double armAngle      = armAdj.angle();
+                            final Point2D guideStar    = armAdj.guideStarCoords();
                             final ImList<Shape> shapes = GmosOiwfsProbeArm.geometryAsJava();
                             shapes.foreach(new ApplyOp<Shape>() {
                                 @Override
@@ -146,10 +146,23 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
             });
 
             // TODO: Remove this. Print the vignetting for testing.
-            final ScienceAreaGeometry scienceAreaGeometry = new GmosScienceAreaGeometry();
-            final ProbeArmGeometry probeArmGeometry       = GmosOiwfsProbeArm.instance();
-            double vignetting = GuideProbeUtil.instance.calculateVignetting(ctx, scienceAreaGeometry, probeArmGeometry);
-            System.out.println("***** VIGNETTING: " + vignetting);
+            // Get the primary guide star for the guider, if it exists.
+            final Option<GuideProbeTargets> gpt = ctx.getTargets().getPrimaryGuideProbeTargets(GmosOiwfsGuideProbe.instance);
+            final Option<SPTarget> guideStar = gpt.flatMap(new Function1<GuideProbeTargets, Option<SPTarget>>() {
+                @Override
+                public Option<SPTarget> apply(GuideProbeTargets spTargets) {
+                    return spTargets.getPrimary();
+                }
+            });
+            guideStar.foreach(new ApplyOp<SPTarget>() {
+                @Override
+                public void apply(SPTarget spTarget) {
+                    final Coordinates skycalcCoordinates = spTarget.getTarget().getSkycalcCoordinates();
+                    final edu.gemini.spModel.core.Coordinates coordinates = new ProbeArmGeometry.SkycalcCoordinates2New(skycalcCoordinates).toNewModel();
+                    double vignetting = GmosOiwfsGuideProbe.instance.calculateVignetting(ctx, coordinates);
+                    System.out.println("***** VIGNETTING: " + vignetting);
+                }
+            });
         }
     }
 

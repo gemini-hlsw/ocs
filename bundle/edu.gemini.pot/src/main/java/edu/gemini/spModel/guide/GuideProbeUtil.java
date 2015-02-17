@@ -15,6 +15,7 @@ import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.data.ISPDataObject;
+import edu.gemini.spModel.inst.ArmAdjustment;
 import edu.gemini.spModel.inst.FeatureGeometry$;
 import edu.gemini.spModel.inst.ProbeArmGeometry;
 import edu.gemini.spModel.inst.ScienceAreaGeometry;
@@ -146,7 +147,9 @@ public enum GuideProbeUtil {
         });
     }
 
+
     public double calculateVignetting(final ObsContext ctx,
+                                      final edu.gemini.spModel.core.Coordinates guideStarCoordinates,
                                       final ScienceAreaGeometry scienceAreaGeometry,
                                       final ProbeArmGeometry probeArmGeometry) {
         if (ctx == null || scienceAreaGeometry == null || probeArmGeometry == null)
@@ -172,14 +175,14 @@ public enum GuideProbeUtil {
             public Double apply(final Double currentSum, final Offset offset) {
                 // Find the probe arm adjustment: we need the probe arm angle and the location of the guide star
                 // in arcseconds.
-                final Option<Pair<Double, Point2D>> adjOpt = probeArmGeometry.armAdjustmentAsJava(ctx, offset);
+                final Option<ArmAdjustment> adjOpt = probeArmGeometry.armAdjustmentAsJava(ctx, guideStarCoordinates, offset);
 
                 // If an adjustment exists, calculate the vignetting for this adjustment.
-                final double vignetting = adjOpt.map(new MapOp<Pair<Double, Point2D>, Double>() {
+                final double vignetting = adjOpt.map(new MapOp<ArmAdjustment, Double>() {
                     @Override
-                    public Double apply(final Pair<Double, Point2D> adj) {
-                        final double angle = adj._1();
-                        final Point2D guideStar = adj._2();
+                    public Double apply(final ArmAdjustment adj) {
+                        final double angle      = adj.angle();
+                        final Point2D guideStar = adj.guideStarCoords();
 
                         // Adjust the science area for the offset.
                         final double x = -offset.p().toArcsecs().getMagnitude();

@@ -3,24 +3,23 @@ package edu.gemini.spModel.gemini.gmos
 import java.awt.Shape
 import java.awt.geom.{Point2D, AffineTransform}
 
-import edu.gemini.shared.util.immutable.{DefaultImList, ImList, ImPolygon}
-import edu.gemini.skycalc.{Angle, CoordinateDiff, Offset}
-import edu.gemini.spModel.inst.ProbeArmGeometry
+import edu.gemini.shared.util.immutable.ImPolygon
+import edu.gemini.skycalc.{CoordinateDiff, Offset}
+import edu.gemini.spModel.core.Coordinates
+import edu.gemini.spModel.inst.{ArmAdjustment, ProbeArmGeometry}
 import edu.gemini.spModel.obs.context.ObsContext
-import edu.gemini.spModel.rich.shared.immutable._
-import edu.gemini.spModel.target.system.CoordinateParam
+import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.telescope.IssPort
 
-
-import scala.collection.JavaConverters._
+import edu.gemini.spModel.rich.shared.immutable._
 
 object GmosOiwfsProbeArm extends ProbeArmGeometry {
   import edu.gemini.spModel.inst.FeatureGeometry.transformPoint
-  import GmosOiwfsProbeArm._
 
   val instance = this
+  override protected val guideProbeInstance = GmosOiwfsGuideProbe.instance
 
-  def geometry: List[Shape] =
+  override def geometry: List[Shape] =
     List(probeArm, pickoffMirror)
 
   private lazy val probeArm: Shape = {
@@ -48,41 +47,32 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
     ImPolygon(points)
   }
 
-  override def armAdjustment(ctx: ObsContext, offset: Offset): Option[(Double, Point2D)] = {
+  override def armAdjustment(ctx: ObsContext, guideStarCoords: Coordinates, offset: Offset): Option[ArmAdjustment] = {
     if (ctx == null || offset == null) None
     else {
-      for {
-        gts <- ctx.getTargets.getPrimaryGuideProbeTargets(GmosOiwfsGuideProbe.instance).asScalaOpt
-        gt  <- gts.getPrimary.asScalaOpt
-      } yield {
-        val flip = if (ctx.getIssPort == IssPort.SIDE_LOOKING) -1.0 else 1.0
-
-        val pa        = ctx.getPositionAngle.toRadians.getMagnitude
-        val offsetPt  = new Point2D.Double(-offset.p.toArcsecs.getMagnitude, -offset.q.toArcsecs.getMagnitude * flip)
-        val guideStar = {
-          val o     = new CoordinateDiff(ctx.getBaseCoordinates, gt.getTarget.getSkycalcCoordinates).getOffset
-          val (x,y) = (o.p.toArcsecs.getMagnitude, o.q.toArcsecs.getMagnitude)
-          new Point2D.Double(-x, -y * flip)
-        }
-
+      import ProbeArmGeometry._
+      val flip        = if (ctx.getIssPort == IssPort.SIDE_LOOKING) -1.0 else 1.0
+      val posAngle    = ctx.getPositionAngle.toRadians.getMagnitude
+      val offsetPt    = new Point2D.Double(-offset.p.toArcsecs.getMagnitude, -offset.q.toArcsecs.getMagnitude * flip)
+      val guideStarPt = {
+        val baseCoords = ctx.getBaseCoordinates.toNewModel
+        val o = Coordinates.difference(baseCoords, guideStarCoords).offset
+        val (x,y) = (o.p.toArcsecs, o.q.toArcsecs)
+        new Point2D.Double(-x, -y * flip).toCanonicalForm
+      }
+      val wfsOffset   = {
         ctx.getInstrument match {
-          case gmosn: InstGmosNorth => (armAngle(gmosn.getFPUnit.getWFSOffset, pa, guideStar, offsetPt), guideStar)
-          case gmoss: InstGmosSouth => (armAngle(gmoss.getFPUnit.getWFSOffset, pa, guideStar, offsetPt), guideStar)
-          case _                    => null
+          case gmosn: InstGmosNorth => Some(gmosn.getFPUnit.getWFSOffset)
+          case gmoss: InstGmosSouth => Some(gmoss.getFPUnit.getWFSOffset)
+          case _                    => None
         }
+      }
+      wfsOffset.map { w =>
+        val angle = armAngle(w, posAngle, guideStarPt, offsetPt)
+        ArmAdjustment(angle, guideStarPt)
       }
     }
   }
-
-  /**
-   * Return the arm adjustment parameters in a format easily usable by Java.
-   * @see          armAdjustment
-   * @param ctx    the observation context
-   * @param offset the offset to use
-   * @return       a pair comprising the angle in radians of the probe arm and the position of the guide star in arcsec
-   */
-  def armAdjustmentForJava(ctx: ObsContext, offset: Offset): edu.gemini.shared.util.immutable.Option[edu.gemini.shared.util.immutable.Pair[java.lang.Double, Point2D]] =
-    armAdjustment(ctx, offset: Offset).map{ case (angle, guideStar) => new edu.gemini.shared.util.immutable.Pair(new java.lang.Double(angle.toDouble), guideStar) }.asGeminiOpt
 
   /**
    * Calculate the probe arm angle at the position angle (radians) for the given guide star location
@@ -93,28 +83,41 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
    * @return          the angle of the probe arm in radians
    */
   private def armAngle(wfsOffset: Double,
-                       posAngle:    Double,
-                       guideStar:   Point2D,
-                       offset:      Point2D): Double = {
+                       posAngle:  Double,
+                       guideStar: Point2D,
+                       offset:    Point2D): Double = {
+    import ProbeArmGeometry._
+
     val offsetAdj = {
       val posAngleRot = AffineTransform.getRotateInstance(posAngle)
       val ifuOffset = transformPoint(new Point2D.Double(wfsOffset, 0.0), posAngleRot)
       transformPoint(offset, AffineTransform.getTranslateInstance(ifuOffset.getX, ifuOffset.getY))
     }
 
-    val p  = transformPoint(guideStar, AffineTransform.getTranslateInstance(T.getX - offsetAdj.getX, T.getY - offsetAdj.getY))
+    val p  = transformPoint(guideStar, AffineTransform.getTranslateInstance(T.getX - offsetAdj.getX, T.getY - offsetAdj.getY)).toCanonicalForm
+//    {
+//      val tp = transformPoint(guideStar, AffineTransform.getTranslateInstance(T.getX - offsetAdj.getX, T.getY - offsetAdj.getY))
+//
+//      // Normalize the point if necessary, as arcsecs should range between 0 and 1296000 = 360 * 60 * 60.
+//      val maxArcsec = 360 * 60 * 60
+//      val nx = tp.getX % maxArcsec
+//      val ny = tp.getY % maxArcsec
+//      new Point2D.Double(nx, ny)
+//    }
     val r  = math.sqrt(p.getX * p.getX + p.getY * p.getY)
+    val r2 = r*r
 
     val alpha = math.atan2(p.getX, p.getY)
     val phi = {
-      val acosArg    = (r*r - (BX2 + MX2)) / (2 * BX * MX)
+      val acosArg    = (r2 - (BX2 + MX2)) / (2 * BX * MX)
       val acosArgAdj = if (acosArg > 1.0) 1.0 else if (acosArg < -1.0) -1.0 else acosArg
       math.acos(acosArgAdj)
     }
     val theta = {
       val thetaP = math.asin((MX / r) * math.sin(phi))
-      if (MX2 > (r*r + BX2)) math.Pi - thetaP else thetaP
+      if (MX2 > (r2 + BX2)) math.Pi - thetaP else thetaP
     }
+
     phi - theta - alpha - math.Pi / 2.0
   }
 
