@@ -59,7 +59,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
   // An enum for submission type, so we can filter the partner/exchange list
   object PartnerType extends Enumeration {
     val GeminiPartner  = Value("Gemini Partner Request")
-    val ExchangeCFHT   = Value("Exchange Request (CFHT PIs)")
+    val ExchangeCFHT   = Value("Exchange Request (CFH PIs)")
     val ExchangeKeck   = Value("Exchange Request (Keck PIs)")
     val ExchangeSubaru = Value("Exchange Request (Japanese PIs)")
   }
