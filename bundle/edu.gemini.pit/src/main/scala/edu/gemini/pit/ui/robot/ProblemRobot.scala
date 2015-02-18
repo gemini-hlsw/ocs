@@ -497,7 +497,7 @@ case class TimeProblems(p: Proposal, s: ShellAdvisor) {
   }
   lazy val b3ReqOrZero = b3Req.map(_.time).getOrElse(TimeAmount.empty)
   lazy val jointNotAllowed = {
-    def checkForNotAllowedJointProposals(subs: Option[List[NgoSubmission]]):List[Option[Problem]] = {
+    def checkForNotAllowedJointProposals(subs: Option[List[NgoSubmission]]):List[Problem] = {
       val r = for {
           subs <- subs
           if subs.size > 1
@@ -505,13 +505,13 @@ case class TimeProblems(p: Proposal, s: ShellAdvisor) {
             p <- subs.filter(s => Partners.jointProposalNotAllowed.contains(s.partner))
           } yield new Problem(Severity.Error, s"${~Partners.name.get(p.partner)} cannot be part of a joint proposal, please update the time request.", SCHEDULING_SECTION,
               s.inPartnersView(_.editSubmissionTime(p)))
-      r.sequence
+      r.sequence.flatten
     }
 
     p.proposalClass match {
       case p: GeminiNormalProposalClass => checkForNotAllowedJointProposals(p.subs.left.toOption)
       case e: ExchangeProposalClass     => checkForNotAllowedJointProposals(e.subs.some)
-      case x                            => println("abc " + x);Nil
+      case x                            => Nil
     }
   }
 
@@ -544,7 +544,7 @@ case class TimeProblems(p: Proposal, s: ShellAdvisor) {
   def noMinBand3Time = b3Problem(r => r.time.hours > 0.0 && r.minTime.hours <= 0.0, Severity.Todo, "Please enter the minimum required time for a usable Band 3 allocation.")
   def band3MinTime = b3Problem(r => r.time.hours < r.minTime.hours, Severity.Error, "The minimum Band 3 required time must not be longer than the total Band 3 requested time.")
 
-  def all = (List(requestedTimeDiffers, requestedB3TimeDiffers, noTimeRequest, noBand3Time, noMinBand3Time, band3MinTime) ++ jointNotAllowed).flatten
+  def all = List(requestedTimeDiffers, requestedB3TimeDiffers, noTimeRequest, noBand3Time, noMinBand3Time, band3MinTime).flatten ++ jointNotAllowed
 }
 
 
