@@ -49,7 +49,7 @@ public final class GnirsRecipe extends RecipeBase {
         super(out);
         // Read parameters from the four main sections of the web page.
         _sdParameters = ITCRequest.sourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
+        _obsDetailParameters = ITCRequest.observationParameters(r);
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _gnirsParameters = new GnirsParameters(r);
         _teleParameters = ITCRequest.teleParameters(r);
@@ -260,7 +260,6 @@ public final class GnirsRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        String ap_type = _obsDetailParameters.getApertureType();
         double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
         double ap_pix = 0;
@@ -406,8 +405,7 @@ public final class GnirsRecipe extends RecipeBase {
         SFcalc.calculate();
         source_fraction = SFcalc.getSourceFraction();
         Npix = SFcalc.getNPix();
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.IMAGING)) {
+        if (_obsDetailParameters.getMethod().isImaging()) {
             _print(SFcalc.getTextResult(device));
             _println(IQcalc.getTextResult(device));
             _println("Sky subtraction aperture = "
@@ -459,13 +457,12 @@ public final class GnirsRecipe extends RecipeBase {
 
         // ObservationMode Imaging or spectroscopy
 
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
 
             SlitThroughput st;
             SlitThroughput st_halo = null;
 
-            if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
+            if (!_obsDetailParameters.isAutoAperture()) {
                 st = new SlitThroughput(im_qual,
                         _obsDetailParameters.getApertureDiameter(),
                         pixel_size, _gnirsParameters.getFPMask());
@@ -530,16 +527,11 @@ public final class GnirsRecipe extends RecipeBase {
             // slit width and not the image quality for a point source.
             if (_sdParameters.isUniform()) {
                 im_qual = 10000;
-                if (ap_type
-                        .equals(ObservationDetailsParameters.USER_APER)) {
-                    spec_source_frac = _gnirsParameters.getFPMask()
-                            * ap_diam * pixel_size; // Spec_NPix
-                } else if (ap_type
-                        .equals(ObservationDetailsParameters.AUTO_APER)) {
-                    ap_diam = new Double(
-                            1 / (_gnirsParameters.getFPMask() * pixel_size) + 0.5)
-                            .intValue();
+                if (_obsDetailParameters.isAutoAperture()) {
+                    ap_diam = new Double(1 / (_gnirsParameters.getFPMask() * pixel_size) + 0.5).intValue();
                     spec_source_frac = 1;
+                } else {
+                    spec_source_frac = _gnirsParameters.getFPMask() * ap_diam * pixel_size;
                 }
             }
 
@@ -1168,13 +1160,11 @@ public final class GnirsRecipe extends RecipeBase {
 
         _println(_obsConditionParameters.printParameterSummary());
         _println(_obsDetailParameters.printParameterSummary());
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
             _println(_plotParameters.printParameterSummary());
         }
 
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.SPECTROSCOPY)) { // 49 ms
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) { // 49 ms
             if (instrument.XDisp_IsUsed()) {
                 _println(signalOrder3, _header, sigSpec);
                 _println(signalOrder4, _header, sigSpec);

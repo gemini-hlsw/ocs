@@ -1,18 +1,15 @@
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.parameters.ObservationDetailsParameters;
 import edu.gemini.itc.shared.FormatStringWriter;
 
 public class USBSourceFractionCalculation implements SourceFractionCalculatable {
 
     double im_qual = -1;
-    double ap_diam, pixel_size, ap_pix, sw_ap, Npix, source_fraction,
-            usbApArea, pix_per_sq_arcsec;
-    String ap_type;
+    double ap_diam, pixel_size, ap_pix, sw_ap, Npix, source_fraction, usbApArea, pix_per_sq_arcsec;
+    boolean isAutoAperture;
 
-    public USBSourceFractionCalculation(String ap_type,
-                                        double ap_diam, double pixel_size) {
-        this.ap_type = ap_type;
+    public USBSourceFractionCalculation(boolean isAutoAperture, double ap_diam, double pixel_size) {
+        this.isAutoAperture = isAutoAperture;
         this.ap_diam = ap_diam;
         this.pixel_size = pixel_size;
     }
@@ -22,16 +19,12 @@ public class USBSourceFractionCalculation implements SourceFractionCalculatable 
             throw new IllegalStateException("Programming Error, Must set image quality before calling Calculate");
 
         pix_per_sq_arcsec = 1 / (pixel_size * pixel_size);
-        if (ap_type.equals(ObservationDetailsParameters.AUTO_APER)) {
+        if (isAutoAperture) {
             usbApArea = 1;
             ap_diam = Math.sqrt(usbApArea * 4 / Math.PI);
-        } else if (ap_type.equals(
-                ObservationDetailsParameters.USER_APER)) {
+        } else {
             // Do nothing to ap_diam. It is correct
             usbApArea = ap_diam * ap_diam * Math.PI / 4;
-        } else {
-            throw new IllegalArgumentException(
-                    "Unknown aperture type: " + ap_type);
         }
 
         ap_pix = usbApArea * pix_per_sq_arcsec;
@@ -57,8 +50,8 @@ public class USBSourceFractionCalculation implements SourceFractionCalculatable 
         this.im_qual = im_qual;
     }
 
-    public void setApType(String ap_type) {
-        this.ap_type = ap_type;
+    public void setApType(boolean isAuto) {
+        this.isAutoAperture = isAuto;
     }
 
     public void setApDiam(double ap_diam) {

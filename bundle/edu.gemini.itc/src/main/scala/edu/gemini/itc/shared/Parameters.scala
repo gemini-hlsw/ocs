@@ -1,6 +1,9 @@
 package edu.gemini.itc.shared
 
-import edu.gemini.itc.parameters.SourceDefinitionParameters.{BrightnessUnit, Profile}
+import edu.gemini.itc.parameters.SourceDefinitionParameters.BrightnessUnit
+
+
+// ==== Source spatial profile
 
 sealed trait SpatialProfile {
   val norm: Double
@@ -11,6 +14,9 @@ final case class GaussianSource(norm: Double, units: BrightnessUnit, fwhm: Doubl
   require (fwhm >= 0.1, "Please use a Gaussian FWHM greater than 0.1")
 }
 final case class UniformSource(norm: Double, units: BrightnessUnit) extends SpatialProfile
+
+
+// ==== Source spectral distribution
 
 sealed trait SpectralDistribution
 final case class BlackBody(temperature: Double) extends SpectralDistribution
@@ -24,41 +30,40 @@ sealed trait Library extends SpectralDistribution {
 final case class LibraryStar(specType: String, sedSpectrum: String) extends Library
 final case class LibraryNonStar(specType: String, sedSpectrum: String) extends Library
 
-// ==== CALCULATION METHOD
 
-sealed trait CalcType
-case object Signal2Noise extends CalcType
-case object IntegrationTime extends CalcType
+// ==== Calculation method
+
 
 sealed trait CalculationMethod {
-  val calcType: CalcType
+  val fraction: Double
+  val isIntTime: Boolean
+  def isS2N: Boolean = !isIntTime
   val isImaging: Boolean
-  val isSpectroscopy: Boolean = !isImaging
+  def isSpectroscopy: Boolean = !isImaging
 }
 sealed trait Imaging extends CalculationMethod {
-  val calcType = Signal2Noise
   val isImaging = true
 }
 sealed trait Spectroscopy extends CalculationMethod {
-  val calcType = Signal2Noise
   val isImaging = false
 }
-case class ImagingSN(exposures: Double, time: Double, fraction: Double) extends Imaging
-case class ImagingSNTotal(totalTime: Double, fraction: Double) extends Imaging
-case class ImagingInt(sigma: Double, expTime: Double, fraction: Double) extends Imaging {
-  override val calcType = IntegrationTime
+case class ImagingSN(exposures: Int, time: Double, fraction: Double) extends Imaging {
+  val isIntTime = false
 }
-case class SpectroscopySN(exposures: Double, time: Double, fraction: Double) extends Spectroscopy
+case class ImagingInt(sigma: Double, expTime: Double, fraction: Double) extends Imaging {
+  val isIntTime = true
+}
+case class SpectroscopySN(exposures: Int, time: Double, fraction: Double) extends Spectroscopy {
+  val isIntTime = false
+}
 
-// ==== ANALYSIS METHOD
 
-sealed trait AnalysisMethod
+// ==== Analysis method
+
+sealed trait AnalysisMethod {
+  val skyAperture: Double
+}
 case class AutoAperture(skyAperture: Double) extends AnalysisMethod
 case class UserAperture(diameter: Double, skyAperture: Double) extends AnalysisMethod
 
 
-
-
-object SpectralDistribution {
-
-}

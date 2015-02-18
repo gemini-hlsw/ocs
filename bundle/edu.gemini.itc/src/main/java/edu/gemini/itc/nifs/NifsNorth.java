@@ -71,7 +71,7 @@ public class NifsNorth extends Nifs {
         _grating = gp.getGrating();
         _centralWavelength = gp.getInstrumentCentralWavelength();
         _filterUsed = gp.getFilter();
-        _mode = odp.getCalculationMode();
+        _mode = odp.getMethod();
 
         if (_centralWavelength < 1000 || _centralWavelength > 6000) {
             throw new Exception("Central wavelength must be between 1.00um and 6.0um.");
@@ -115,7 +115,7 @@ public class NifsNorth extends Nifs {
         addComponent(_fixedOptics);
 
         //Test to see that all conditions for Spectroscopy are met
-        if (_mode.equals(ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_mode.isSpectroscopy()) {
             if (_grating.equals("none"))
                 throw new Exception("Spectroscopy calculation method is selected but a grating" +
                         " is not.\nPlease select a grating and a " +

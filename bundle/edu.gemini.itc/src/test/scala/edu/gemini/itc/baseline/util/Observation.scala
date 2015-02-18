@@ -11,7 +11,7 @@ import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.niri.NiriParameters
 import edu.gemini.itc.parameters.ObservationDetailsParameters
-import edu.gemini.itc.shared.ITCParameters
+import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
 
 /**
@@ -58,43 +58,18 @@ object Observation {
   // =============== OBSERVATIONS ====================
   lazy val SpectroscopyObservations = List(
     new ObservationDetailsParameters(
-      ObservationDetailsParameters.SPECTROSCOPY,
-      ObservationDetailsParameters.S2N,
-      10,
-      600.0,
-      1.0,
-      10.0,
-      ObservationDetailsParameters.USER_APER,
-      0.7,
-      3,
-      0)
-
+      new SpectroscopySN(10, 600.0, 1.0),
+      new UserAperture(0.7, 3))
   )
 
   lazy val ImagingObservations = List(
     new ObservationDetailsParameters(
-      ObservationDetailsParameters.IMAGING,               // calc mode
-      ObservationDetailsParameters.INTTIME,               // calc method
-      2,                                                  // exposures
-      1800.0,                                             // exposure time
-      1.0,                                                // source fraction
-      10.0,                                               // SN ratio
-      ObservationDetailsParameters.AUTO_APER,             // aperture type
-      0.7,                                                // aperture diameter
-      3,                                                  // sky aperture diameter
-      0),                                                 // total observation time
+      new ImagingInt(10.0, 1800.0, 1.0),
+      new AutoAperture(3)),
 
     new ObservationDetailsParameters(
-      ObservationDetailsParameters.IMAGING,
-      ObservationDetailsParameters.S2N,
-      30,
-      120.0,
-      0.5,
-      25.64,
-      ObservationDetailsParameters.USER_APER,
-      0.7,
-      3,
-      0)
+      new ImagingSN(30, 120.0, 0.5),
+      new UserAperture(0.7, 3.0))
   )
 
 }

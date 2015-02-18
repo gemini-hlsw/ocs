@@ -43,7 +43,6 @@ public class Gsaoi extends Instrument {
     private String _filterUsed;
     private String _camera;
     private String _readMode;
-    private String _mode;
 
     // These are the limits of observable wavelength with this configuration.
     private double _observingStart;
@@ -65,7 +64,6 @@ public class Gsaoi extends Instrument {
         _readMode = np.getReadMode();
         _filterUsed = np.getFilter();
         _camera = np.getCamera();
-        _mode = odp.getCalculationMode();
 
         // Note for designers of other instruments:
         // Other instruments may not have filters and may just use

@@ -33,7 +33,7 @@ public final class Flamingos2Recipe extends RecipeBase {
 
         // Read parameters from the four main sections of the web page.
         _sdParameters = ITCRequest.sourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
+        _obsDetailParameters = ITCRequest.observationParameters(r);
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _flamingos2Parameters = new Flamingos2Parameters(r);
         _teleParameters = ITCRequest.teleParameters(r);
@@ -66,8 +66,7 @@ public final class Flamingos2Recipe extends RecipeBase {
      * @throws Exception
      */
     public void checkInputParameters() throws Exception {
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
             if (_flamingos2Parameters.getGrism().equalsIgnoreCase("none")) {
                 throw new Exception(
                         "In spectroscopy mode, a grism must be selected");
@@ -265,7 +264,6 @@ public final class Flamingos2Recipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        String ap_type = _obsDetailParameters.getApertureType();
         double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
         double source_fraction = 0;
@@ -327,8 +325,7 @@ public final class Flamingos2Recipe extends RecipeBase {
         double dark_current = instrument.getDarkCurrent();
         double read_noise = instrument.getReadNoise();
 
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
 
             String sigSpec, backSpec, singleS2N, finalS2N;
             //SpecS2NVisitor specS2N;
@@ -336,7 +333,7 @@ public final class Flamingos2Recipe extends RecipeBase {
             SlitThroughput st;
             SlitThroughput st_halo;
 
-            if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
+            if (!_obsDetailParameters.isAutoAperture()) {
                 st = new SlitThroughput(im_qual,
                         _obsDetailParameters.getApertureDiameter(), pixel_size,
                         _flamingos2Parameters.getSlitSize() * pixel_size);
@@ -389,16 +386,11 @@ public final class Flamingos2Recipe extends RecipeBase {
             double spec_source_frac = st.getSlitThroughput();
 
             if (_sdParameters.isUniform()) {
-
-                if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
-                    spec_source_frac = _flamingos2Parameters.getSlitSize() * pixel_size
-                            * ap_diam * pixel_size; // ap_diam = Spec_NPix
-                } else if (ap_type
-                        .equals(ObservationDetailsParameters.AUTO_APER)) {
-                    ap_diam = new Double(
-                            1 / (_flamingos2Parameters.getSlitSize() * pixel_size) + 0.5)
-                            .intValue();
+               if (_obsDetailParameters.isAutoAperture()) {
+                    ap_diam = new Double(1 / (_flamingos2Parameters.getSlitSize() * pixel_size) + 0.5).intValue();
                     spec_source_frac = 1;
+                } else {
+                    spec_source_frac = _flamingos2Parameters.getSlitSize() * pixel_size * ap_diam * pixel_size; // ap_diam = Spec_NPix
                 }
             }
 
@@ -509,8 +501,7 @@ public final class Flamingos2Recipe extends RecipeBase {
         _println(_obsConditionParameters.printParameterSummary());
         _println(_obsDetailParameters.printParameterSummary());
 
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
             _println(_plotParameters.printParameterSummary());
         }
     }

@@ -42,5 +42,28 @@ object BaselineMichelle {
 
   )
 
+//  lazy val Fixtures = List(
+//    (new SourceDefinitionParameters(
+//      GaussianSource(1.0e-3, BrightnessUnit.MAG, 1.0),
+//      BlackBody(10000.0),
+//      WavebandDefinition.U,
+//      0.0
+//    ),
+//      new ObservationDetailsParameters(
+//        ImagingSN(0, 1800.0, 0.5),
+//        AutoAperture(5.0)
+//      ),
+//      new MichelleParameters(
+//        "Nprime",                           //String Filter,
+//        "none",                             //String grating,
+//        "12",                               //String instrumentCentralWavelength,
+//        "none",                             //String FP_Mask,
+//        "1",                                //String spatBinning, // TODO: always 1 can we remove this?
+//        "1",                                //String specBinning  // TODO: always 1 can we remove this?
+//        MichelleParameters.DISABLED         //String polarimetry (enabled only allowed if imaging)
+//      )
+//      )
+//  )
+
 
 }

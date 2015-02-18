@@ -55,7 +55,7 @@ public abstract class Gnirs extends Instrument {
     protected String _wellDepth;
     protected String _focalPlaneMask;
     protected String _stringSlitWidth;
-    protected String _mode;
+    protected CalculationMethod _mode;
     protected double _centralWavelength;
     protected int _spectralBinning = 1;
     protected int _spatialBinning = 1;
@@ -217,7 +217,7 @@ public abstract class Gnirs extends Instrument {
 
         s += "<L1> Central Wavelength: " + _centralWavelength + " nm" + " \n";
         s += "Pixel Size in Spatial Direction: " + getPixelSize() + "arcsec\n";
-        if (_mode.equals(ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_mode.isSpectroscopy()) {
             if (XDisp_IsUsed()) {
                 s += "Pixel Size in Spectral Direction(Order 3): " + device.toString(getGratingDispersion_nmppix() / 3) + "nm\n";
                 s += "Pixel Size in Spectral Direction(Order 4): " + device.toString(getGratingDispersion_nmppix() / 4) + "nm\n";

@@ -44,7 +44,7 @@ public final class NifsRecipe extends RecipeBase {
 
         // Read parameters from the four main sections of the web page.
         _sdParameters = ITCRequest.sourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
+        _obsDetailParameters = ITCRequest.observationParameters(r);
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _nifsParameters = new NifsParameters(r);
         _teleParameters = ITCRequest.teleParameters(r);
@@ -254,7 +254,6 @@ public final class NifsRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        String ap_type = _obsDetailParameters.getApertureType();
         double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
         double ap_pix = 0;
@@ -369,7 +368,7 @@ public final class NifsRecipe extends RecipeBase {
         //ObservationMode Imaging or spectroscopy
 
 
-        if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
 
             _println("derived image halo size (FWHM) for a point source = " + device.toString(uncorrected_im_qual) + "arcsec\n");
 
@@ -502,12 +501,8 @@ public final class NifsRecipe extends RecipeBase {
         _println(_teleParameters.printParameterSummary());
         _println(_obsConditionParameters.printParameterSummary());
         _println(_obsDetailParameters.printParameterSummary());
-        if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
             _println(_plotParameters.printParameterSummary());
-        }
-
-
-        if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.SPECTROSCOPY)) {  //49 ms
             _println(specS2N.getSignalSpectrum(), _header, sigSpec);
             _println(specS2N.getBackgroundSpectrum(), _header, backSpec);
             _println(specS2N.getExpS2NSpectrum(), _header, singleS2N);

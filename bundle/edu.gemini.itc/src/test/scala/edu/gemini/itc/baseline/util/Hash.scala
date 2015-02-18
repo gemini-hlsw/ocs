@@ -78,17 +78,14 @@ object Hash {
 
   def calc(p: MichelleParameters): Int =
     hash(
-      "NOT_USED?",                        // TODO: Remove with next baseline update
       p.getFilter,
       p.getFocalPlaneMask,
       p.getFPMask,
       p.getGrating,
       p.getInstrumentCentralWavelength,
-      MichelleParameters.HIGH_READ_NOISE,// TODO: Remove with next baseline update
       p.getSpatialBinning,
       p.getSpectralBinning,
       p.getStringSlitWidth,
-      MichelleParameters.HIGH_WELL_DEPTH,// TODO: Remove with next baseline update
       p.polarimetryIsUsed()
     )
 
@@ -128,18 +125,15 @@ object Hash {
 
   def calc(p: TRecsParameters): Int =
     hash(
-      "NOT_USED?",                      // TODO: Remove with next baseline update
       p.getFilter,
       p.getFocalPlaneMask,
       p.getFPMask,
       p.getGrating,
       p.getInstrumentCentralWavelength,
       p.getInstrumentWindow,
-      TRecsParameters.HIGH_READ_NOISE,  // TODO: Remove with next baseline update
       p.getSpatialBinning,
       p.getSpectralBinning,
-      p.getStringSlitWidth,
-      TRecsParameters.HIGH_WELL_DEPTH   // TODO: Remove with next baseline update
+      p.getStringSlitWidth
     )
 
   def calc(p: AcquisitionCamParameters): Int =
@@ -159,17 +153,15 @@ object Hash {
 
   def calc(odp: ObservationDetailsParameters): Int =
     hash(
-      ObservationDetailsParameters.IMAGING,           // TODO: remove with next new baseline
-      odp.getApertureDiameter,
-      odp.getApertureType,
-      odp.getCalculationMethod,
-      odp.getCalculationMode,
+      odp.isAutoAperture,
+      odp.getMethod.isS2N,
+      odp.getMethod.isImaging,
       odp.getExposureTime,
       odp.getNumExposures,
+      odp.getApertureDiameter,
       odp.getSkyApertureDiameter,
       odp.getSNRatio,
-      odp.getSourceFraction,
-      odp.getTotalObservationTime
+      odp.getSourceFraction
     )
 
   def calc(src: SourceDefinitionParameters): Int =
@@ -218,16 +210,6 @@ object Hash {
       filter(_ != null).
       map(_.hashCode).
       foldLeft(17)((acc, h) => 37*acc + h)
-
-  // temporary: TODO: remove with next update of baseline.txt
-  private def toString(sd: Distribution) = sd match {
-    case  LIBRARY_STAR => "libraryStar"
-    case  LIBRARY_NON_STAR => "libraryNonStar"
-    case  BBODY => "modelBlackBody"
-    case  ELINE => "modelEmLine"
-    case  PLAW => "modelPowerLaw"
-    case  USER_DEFINED => "userDefinedSpectrum"
-  }
 
 }
 

@@ -37,7 +37,7 @@ public final class NiriRecipe extends RecipeBase {
     public NiriRecipe(ITCMultiPartParser r, PrintWriter out) throws Exception {
         super(out);
         _sdParameters = ITCRequest.sourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
+        _obsDetailParameters = ITCRequest.observationParameters(r);
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _niriParameters = new NiriParameters(r);
         _teleParameters = ITCRequest.teleParameters(r);
@@ -301,7 +301,6 @@ public final class NiriRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        String ap_type = _obsDetailParameters.getApertureType();
         double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
         double ap_pix = 0;
@@ -329,7 +328,7 @@ public final class NiriRecipe extends RecipeBase {
 
         if (_altairParameters.altairIsUsed()) {
 
-            if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.SPECTROSCOPY)) {
+            if (_obsDetailParameters.getMethod().isSpectroscopy()) {
                 throw new Exception(
                         "Altair cannot currently be used with Spectroscopy mode in the ITC.  Please deselect either altair or spectroscopy and resubmit the form.");
             }
@@ -409,17 +408,15 @@ public final class NiriRecipe extends RecipeBase {
         if (_altairParameters.altairIsUsed()) {
             // If altair is used turn off printing of SF calc
             SFcalc.setSFPrint(false);
-            if (_obsDetailParameters.getApertureType().equals(
-                    _obsDetailParameters.AUTO_APER)) {
-                SFcalc.setApType(_obsDetailParameters.USER_APER);
+            if (_obsDetailParameters.isAutoAperture()) {
+                SFcalc.setApType(false);
                 SFcalc.setApDiam(1.18 * im_qual);
             }
             SFcalc.setImageQuality(uncorrected_im_qual);
             SFcalc.calculate();
             halo_source_fraction = SFcalc.getSourceFraction();
-            if (_obsDetailParameters.getApertureType().equals(
-                    _obsDetailParameters.AUTO_APER)) {
-                SFcalc.setApType(_obsDetailParameters.AUTO_APER);
+            if (_obsDetailParameters.isAutoAperture()) {
+                SFcalc.setApType(true);
             }
         }
         // this will be the core for an altair source; unchanged for non altair.
@@ -427,8 +424,7 @@ public final class NiriRecipe extends RecipeBase {
         SFcalc.calculate();
         source_fraction = SFcalc.getSourceFraction();
         Npix = SFcalc.getNPix();
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.IMAGING)) {
+        if (_obsDetailParameters.getMethod().isImaging()) {
             _print(SFcalc.getTextResult(device));
             if (_altairParameters.altairIsUsed()) {
                 _println("derived image halo size (FWHM) for a point source = "
@@ -502,14 +498,13 @@ public final class NiriRecipe extends RecipeBase {
 
         // ObservationMode Imaging or spectroscopy
 
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
 
             SlitThroughput st;// = new SlitThroughput(im_qual,pixel_size,
             // _niriParameters.getFPMask());
             SlitThroughput st_halo;
 
-            if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
+            if (!_obsDetailParameters.isAutoAperture()) {
                 st = new SlitThroughput(im_qual,
                         _obsDetailParameters.getApertureDiameter(), pixel_size,
                         _niriParameters.getFPMask());
@@ -562,15 +557,11 @@ public final class NiriRecipe extends RecipeBase {
 
             if (_sdParameters.isUniform()) {
 
-                if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
-                    spec_source_frac = _niriParameters.getFPMask()
-                            * ap_diam * pixel_size; // ap_diam = Spec_NPix
-                } else if (ap_type
-                        .equals(ObservationDetailsParameters.AUTO_APER)) {
-                    ap_diam = new Double(
-                            1 / (_niriParameters.getFPMask() * pixel_size) + 0.5)
-                            .intValue();
+                if (_obsDetailParameters.isAutoAperture()) {
+                    ap_diam = new Double(1 / (_niriParameters.getFPMask() * pixel_size) + 0.5).intValue();
                     spec_source_frac = 1;
+                } else {
+                    spec_source_frac = _niriParameters.getFPMask() * ap_diam * pixel_size; // ap_diam = Spec_NPix
                 }
             }
 
@@ -957,19 +948,12 @@ public final class NiriRecipe extends RecipeBase {
 
         _println(_obsConditionParameters.printParameterSummary());
         _println(_obsDetailParameters.printParameterSummary());
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
             _println(_plotParameters.printParameterSummary());
-        }
-
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.SPECTROSCOPY)) {
             _println(specS2N.getSignalSpectrum(), _header.toString(), sigSpec);
-            _println(specS2N.getBackgroundSpectrum(), _header.toString(),
-                    backSpec);
+            _println(specS2N.getBackgroundSpectrum(), _header.toString(), backSpec);
             _println(specS2N.getExpS2NSpectrum(), _header.toString(), singleS2N);
-            _println(specS2N.getFinalS2NSpectrum(), _header.toString(),
-                    finalS2N);
+            _println(specS2N.getFinalS2NSpectrum(), _header.toString(), finalS2N);
         }
 
         sed = null;

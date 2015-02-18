@@ -57,7 +57,7 @@ public class Michelle extends Instrument {
     private String _filterUsed;
     private String _grating;
     private String _focalPlaneMask;
-    private String _mode;
+    private CalculationMethod _mode;
     private double _centralWavelength;
     private int _spectralBinning;
     private int _spatialBinning;
@@ -80,7 +80,7 @@ public class Michelle extends Instrument {
         _filterUsed = mp.getFilter();
         _centralWavelength = mp.getInstrumentCentralWavelength();
 
-        _mode = odp.getCalculationMode();
+        _mode = odp.getMethod();
         _spectralBinning = mp.getSpectralBinning();
         _spatialBinning = mp.getSpatialBinning();
 
@@ -123,7 +123,7 @@ public class Michelle extends Instrument {
 
 
         //Test to see that all conditions for Spectroscopy are met
-        if (_mode.equals(ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_mode.isSpectroscopy()) {
             if (_grating.equals("none"))
                 throw new Exception("Spectroscopy mode is selected but a grating" +
                         " is not.\nPlease select a grating and a " +
@@ -142,7 +142,7 @@ public class Michelle extends Instrument {
             }
         }
 
-        if (_mode.equals(ObservationDetailsParameters.IMAGING)) {
+        if (_mode.isImaging()) {
             if (_filterUsed.equals("none"))
                 throw new Exception("Imaging mode is selected but a filter" +
                         " is not.\n  Please select a filter and resubmit the " +
@@ -255,7 +255,7 @@ public class Michelle extends Instrument {
     }
 
     public double getPixelSize() {
-        if (_mode.equals(ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_mode.isSpectroscopy()) {
             return SPECTROSCOPY_PIXEL_SIZE * _spatialBinning;
         } else
             return super.getPixelSize() * _spatialBinning;
@@ -274,7 +274,7 @@ public class Michelle extends Instrument {
     }
 
     public double getFrameTime() {
-        if (_mode.equals(ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_mode.isSpectroscopy()) {
             String tempGrating = getGrating();
             double frameTime = 0.1;
 
@@ -357,14 +357,14 @@ public class Michelle extends Instrument {
             s += "<LI> Focal Plane Mask: " + _focalPlaneMask;
         s += "\n";
         s += "\n";
-        if (_mode.equals(ObservationDetailsParameters.SPECTROSCOPY))
+        if (_mode.isSpectroscopy())
             s += "<L1> Central Wavelength: " + _centralWavelength + " nm" + "\n";
         //s += "Instrument: " +super.getName() + "\n";
         s += "Spatial Binning: " + getSpatialBinning() + "\n";
-        if (_mode.equals(ObservationDetailsParameters.SPECTROSCOPY))
+        if (_mode.isSpectroscopy())
             s += "Spectral Binning: " + getSpectralBinning() + "\n";
         s += "Pixel Size in Spatial Direction: " + getPixelSize() + "arcsec\n";
-        if (_mode.equals(ObservationDetailsParameters.SPECTROSCOPY))
+        if (_mode.isSpectroscopy())
             s += "Pixel Size in Spectral Direction: " + getGratingDispersion_nmppix() + "nm\n";
         return s;
     }

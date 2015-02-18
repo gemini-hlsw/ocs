@@ -49,7 +49,7 @@ public final class GmosRecipe extends RecipeBase {
 
         // Read parameters from the four main sections of the web page.
         _sdParameters = ITCRequest.sourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
+        _obsDetailParameters = ITCRequest.observationParameters(r);
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _gmosParameters = new GmosParameters(r);
         _teleParameters = ITCRequest.teleParameters(r);
@@ -110,7 +110,7 @@ public final class GmosRecipe extends RecipeBase {
         // Create one chart to use for all 3 CCDS (one for Signal and Background and one for Intermediate Single Exp and Final S/N)
         final ITCChart gmosChart1;
         final ITCChart gmosChart2;
-        if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
             final boolean ifuAndNotUniform = mainInstrument.IFU_IsUsed() && !(_sdParameters.isUniform());
             final double ifu_offset = ifuAndNotUniform ? (Double) mainInstrument.getIFU().getApertureOffsetList().iterator().next() : 0.0;
             final String chart1Title = ifuAndNotUniform ? "Signal and Background (IFU element offset: " + device.toString(ifu_offset) + " arcsec)" : "Signal and Background ";
@@ -290,7 +290,6 @@ public final class GmosRecipe extends RecipeBase {
             //
             // inputs: source morphology specification
 
-            String ap_type = _obsDetailParameters.getApertureType();
             double pixel_size = instrument.getPixelSize();
             double ap_diam = 0;
             double ap_pix = 0;
@@ -319,8 +318,7 @@ public final class GmosRecipe extends RecipeBase {
                 source_fraction = SFcalc.getSourceFraction();
                 Npix = SFcalc.getNPix();
 
-                if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.IMAGING)
-                        && ccdIndex == 0) {
+                if (_obsDetailParameters.getMethod().isImaging() && ccdIndex == 0) {
                     _print(SFcalc.getTextResult(device));
                     _println(IQcalc.getTextResult(device));
                     _println("Sky subtraction aperture = "
@@ -386,9 +384,9 @@ public final class GmosRecipe extends RecipeBase {
             checkSourceFraction(number_exposures, frac_with_source);
 
             // ObservationMode Imaging or spectroscopy
-            if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.SPECTROSCOPY)) {
+            if (_obsDetailParameters.getMethod().isSpectroscopy()) {
                 if (!instrument.IFU_IsUsed()) {
-                    if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
+                    if (!_obsDetailParameters.isAutoAperture()) {
                         st = new SlitThroughput(im_qual,
                                 _obsDetailParameters.getApertureDiameter(),
                                 pixel_size, _gmosParameters.getFPMask());
@@ -460,16 +458,10 @@ public final class GmosRecipe extends RecipeBase {
 
                     if (!instrument.IFU_IsUsed()) {
 
-                        if (ap_type
-                                .equals(ObservationDetailsParameters.USER_APER)) {
-                            spec_source_frac = _gmosParameters.getFPMask()
-                                    * ap_diam * pixel_size; // ap_diam =
-                            // Spec_NPix
-                        } else if (ap_type
-                                .equals(ObservationDetailsParameters.AUTO_APER)) {
-                            ap_diam = new Double(
-                                    1 / (_gmosParameters.getFPMask() * pixel_size) + 0.5)
-                                    .intValue();
+                        if (!_obsDetailParameters.isAutoAperture()) {
+                            spec_source_frac = _gmosParameters.getFPMask() * ap_diam * pixel_size;
+                        } else {
+                            ap_diam = new Double(1 / (_gmosParameters.getFPMask() * pixel_size) + 0.5).intValue();
                             spec_source_frac = 1;
                         }
                     }
@@ -624,7 +616,7 @@ public final class GmosRecipe extends RecipeBase {
 
             }
 
-            if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.SPECTROSCOPY)) {
+            if (_obsDetailParameters.getMethod().isSpectroscopy()) {
                 _println(specS2N.getSignalSpectrum(), _header, sigSpec, firstCcdIndex, lastCcdIndexWithGap);
                 _println(specS2N.getBackgroundSpectrum(), _header, backSpec, firstCcdIndex, lastCcdIndexWithGap);
                 _println(specS2N.getExpS2NSpectrum(), _header, singleS2N, firstCcdIndex, lastCcdIndexWithGap);

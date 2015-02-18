@@ -14,41 +14,37 @@ public final class ImagingS2NCalculationFactory {
             final Instrument instrument) {
 
 
-        final String calcMethod = odp.getCalculationMethod();
-        switch (calcMethod) {
+        if (odp.getMethod().isS2N()) {
 
             // --- Signal to noise
-            case ObservationDetailsParameters.S2N:
-                return new ImagingS2NMethodACalculation(
-                        odp.getNumExposures(),
-                        odp.getSourceFraction(),
-                        odp.getExposureTime(),
-                        instrument.getReadNoise(),
-                        instrument.getPixelSize());
+            return new ImagingS2NMethodACalculation(
+                    odp.getNumExposures(),
+                    odp.getSourceFraction(),
+                    odp.getExposureTime(),
+                    instrument.getReadNoise(),
+                    instrument.getPixelSize());
+
+        } else {
 
             // --- Integration time
-            case ObservationDetailsParameters.INTTIME:
-                switch (sdp.getProfileType()) {
-                    case POINT:
-                        return new ImagingPointS2NMethodBCalculation(
-                                odp.getNumExposures(),
-                                odp.getSourceFraction(),
-                                odp.getExposureTime(),
-                                instrument.getReadNoise(),
-                                odp.getSNRatio(),
-                                instrument.getPixelSize());
-                    default:
-                        return new ImagingUSBS2NMethodBCalculation(
-                                odp.getNumExposures(),
-                                odp.getSourceFraction(),
-                                odp.getExposureTime(),
-                                instrument.getReadNoise(),
-                                odp.getSNRatio(),
-                                instrument.getPixelSize());
-                }
-
-            default:
-                throw new IllegalArgumentException("unknown calculation method " + calcMethod);
+            switch (sdp.getProfileType()) {
+                case POINT:
+                    return new ImagingPointS2NMethodBCalculation(
+                            odp.getNumExposures(),
+                            odp.getSourceFraction(),
+                            odp.getExposureTime(),
+                            instrument.getReadNoise(),
+                            odp.getSNRatio(),
+                            instrument.getPixelSize());
+                default:
+                    return new ImagingUSBS2NMethodBCalculation(
+                            odp.getNumExposures(),
+                            odp.getSourceFraction(),
+                            odp.getExposureTime(),
+                            instrument.getReadNoise(),
+                            odp.getSNRatio(),
+                            instrument.getPixelSize());
+            }
         }
 
     }

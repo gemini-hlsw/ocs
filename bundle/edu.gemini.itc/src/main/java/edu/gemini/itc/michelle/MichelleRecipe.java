@@ -46,7 +46,7 @@ public final class MichelleRecipe extends RecipeBase {
         // Read parameters from the four main sections of the web page.
         _sdParameters = ITCRequest.sourceDefinitionParameters(r);
         _michelleParameters = new MichelleParameters(r);
-        _obsDetailParameters = correctedObsDetails(_michelleParameters, new ObservationDetailsParameters(r));
+        _obsDetailParameters = correctedObsDetails(_michelleParameters, ITCRequest.observationParameters(r));
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _teleParameters = ITCRequest.teleParameters(r);
         _plotParameters = ITCRequest.plotParamters(r);
@@ -74,39 +74,38 @@ public final class MichelleRecipe extends RecipeBase {
 
     private ObservationDetailsParameters correctedObsDetails(MichelleParameters mp, ObservationDetailsParameters odp) throws Exception {
         // TODO : These corrections were previously done in random places throughout the recipe. I moved them here
-        // TODO : so the ObservationDetailsParameters object can become immutable. This is probably not the
-        // TODO : best place to deal with this. This needs to be analysed and cleaned up.
+        // TODO : so the ObservationDetailsParameters object can become immutable. Basically this calculates
+        // TODO : some missing parameters and/or turns the total exposure time into a single exposure time.
+        // TODO : This is a temporary hack. There needs to be a better solution for this.
+        // NOTE : odp.getExposureTime() carries the TOTAL exposure time (as opposed to exp time for a single frame)
         final Michelle instrument = new Michelle(mp, odp); // TODO: Avoid creating an instrument instance twice.
         final double correctedTotalObservationTime;
         if (mp.polarimetryIsUsed()) {
             //If polarimetry is used divide exposure time by 4 because of the 4 waveplate positions
-            correctedTotalObservationTime = odp.getTotalObservationTime() / 4;
+            correctedTotalObservationTime = odp.getExposureTime() / 4;
         } else {
-            correctedTotalObservationTime = odp.getTotalObservationTime();
+            correctedTotalObservationTime = odp.getExposureTime();
         }
-        final double correctedExposureTime;
-        final int correctedNumExposures;
-        if (odp.getTotalObservationTime() == 0) {
-            // NOTE: In theory this should never be executed, default is 1800 seconds
-            // NOTE: Can we throw an exception if totalObsTime <= 0?
-            correctedExposureTime = odp.getExposureTime();  //OLD this value doesn't exist on Michelle html page
-            correctedNumExposures = odp.getNumExposures();  //OLD this value doesn't exist on Michelle html page
+        final double correctedExposureTime = instrument.getFrameTime();
+        final int correctedNumExposures = new Double(correctedTotalObservationTime / instrument.getFrameTime() + 0.5).intValue();
+        if (odp.getMethod() instanceof ImagingInt) {
+            return new ObservationDetailsParameters(
+                    new ImagingInt(odp.getSNRatio(), correctedExposureTime, odp.getSourceFraction()),
+                    odp.getAnalysis()
+            );
+        } else if (odp.getMethod() instanceof ImagingSN) {
+            return new ObservationDetailsParameters(
+                    new ImagingSN(correctedNumExposures, correctedExposureTime, odp.getSourceFraction()),
+                    odp.getAnalysis()
+            );
+        } else if (odp.getMethod() instanceof SpectroscopySN) {
+            return new ObservationDetailsParameters(
+                    new SpectroscopySN(correctedNumExposures, correctedExposureTime, odp.getSourceFraction()),
+                    odp.getAnalysis()
+            );
         } else {
-            correctedExposureTime = instrument.getFrameTime();
-            correctedNumExposures = new Double(correctedTotalObservationTime / instrument.getFrameTime() + 0.5).intValue();
+            throw new IllegalArgumentException();
         }
-
-        return new ObservationDetailsParameters(
-                odp.getCalculationMode(),
-                odp.getCalculationMethod(),
-                correctedNumExposures,
-                correctedExposureTime,
-                odp.getSourceFraction(),
-                odp.getSNRatio(),
-                odp.getApertureType(),
-                odp.getApertureDiameter(),
-                odp.getSkyApertureDiameter(),
-                correctedTotalObservationTime);
 
     }
 
@@ -320,7 +319,6 @@ public final class MichelleRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        String ap_type = _obsDetailParameters.getApertureType();
         double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
         double ap_pix = 0;
@@ -345,7 +343,7 @@ public final class MichelleRecipe extends RecipeBase {
                 SourceFractionCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
         SFcalc.setImageQuality(im_qual);
         SFcalc.calculate();
-        if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.IMAGING)) {
+        if (_obsDetailParameters.getMethod().isImaging()) {
             _print(SFcalc.getTextResult(device));
             _println(IQcalc.getTextResult(device));
             _println("Sky subtraction aperture = " +
@@ -397,7 +395,7 @@ public final class MichelleRecipe extends RecipeBase {
         //ObservationMode Imaging or spectroscopy
 
 
-        if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
 
             SlitThroughput st;
 
@@ -407,7 +405,7 @@ public final class MichelleRecipe extends RecipeBase {
 //	 sed.accept(dtv);
 //	 sky.accept(dtv);
 
-            if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
+            if (!_obsDetailParameters.isAutoAperture()) {
                 st = new SlitThroughput(im_qual,
                         _obsDetailParameters.getApertureDiameter(),
                         pixel_size, _michelleParameters.getFPMask());
@@ -472,11 +470,11 @@ public final class MichelleRecipe extends RecipeBase {
             //slit width and not the image quality for a point source.
             if (_sdParameters.isUniform()) {
                 im_qual = 10000;
-                if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
-                    spec_source_frac = _michelleParameters.getFPMask() * ap_diam * pixel_size;  //ap_diam = Spec_NPix
-                } else if (ap_type.equals(ObservationDetailsParameters.AUTO_APER)) {
+                if (_obsDetailParameters.isAutoAperture()) {
                     ap_diam = new Double(1 / (_michelleParameters.getFPMask() * pixel_size) + 0.5).intValue();
                     spec_source_frac = 1;
+                } else {
+                    spec_source_frac = _michelleParameters.getFPMask() * ap_diam * pixel_size;  //ap_diam = Spec_NPix
                 }
             }
             //_println("Spec_source_frac: " + spec_source_frac+ "  Spec_npix: "+ ap_diam);
@@ -795,10 +793,8 @@ public final class MichelleRecipe extends RecipeBase {
             }
         }
 
-        if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
             _println(_plotParameters.printParameterSummary());
-        }
-        if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.SPECTROSCOPY)) {
             _println(specS2N.getSignalSpectrum(), _header, sigSpec);
             _println(specS2N.getBackgroundSpectrum(), _header, backSpec);
             _println(specS2N.getExpS2NSpectrum(), _header, singleS2N);

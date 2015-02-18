@@ -36,7 +36,7 @@ public final class TRecs extends Instrument {
     private final double _sampling;
     private final String _grating;
     private final String _focalPlaneMask;
-    private final String _mode;
+    private final CalculationMethod _mode;
     private final double _centralWavelength;
     private final int _spectralBinning;
     private final int _spatialBinning;
@@ -57,7 +57,7 @@ public final class TRecs extends Instrument {
         _focalPlaneMask = tp.getFocalPlaneMask();
         _grating = tp.getGrating();
         _centralWavelength = tp.getInstrumentCentralWavelength();
-        _mode = odp.getCalculationMode();
+        _mode = odp.getMethod();
         _spectralBinning = tp.getSpectralBinning();
         _spatialBinning = tp.getSpatialBinning();
 
@@ -91,7 +91,7 @@ public final class TRecs extends Instrument {
 
 
         //Test to see that all conditions for Spectroscopy are met
-        if (_mode.equals(ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_mode.isSpectroscopy()) {
             if (_grating.equals("none"))
                 throw new Exception("Spectroscopy calculation method is selected but a grating" +
                         " is not.\nPlease select a grating and a " +
@@ -105,7 +105,7 @@ public final class TRecs extends Instrument {
                         "configuration section.");
         }
 
-        if (_mode.equals(ObservationDetailsParameters.IMAGING)) {
+        if (_mode.isImaging()) {
             if (tp.getFilter().equals("none"))
                 throw new Exception("Imaging calculation method is selected but a filter" +
                         " is not.\n  Please select a filter and resubmit the " +
@@ -234,7 +234,7 @@ public final class TRecs extends Instrument {
     }
 
     public double getFrameTime() {
-        if (_mode.equals(ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_mode.isSpectroscopy()) {
             if (getGrating().equals(TRecsParameters.HIRES10_G5403)) {
                 return SPECTROSCOPY_HI_RES_FRAME_TIME;
             } else {
@@ -254,7 +254,7 @@ public final class TRecs extends Instrument {
     }
 
     public int getExtraLowFreqNoise() {
-        if (_mode.equals(ObservationDetailsParameters.SPECTROSCOPY))
+        if (_mode.isSpectroscopy())
             return elfn_param * 3;
         else
             return elfn_param;
@@ -279,13 +279,13 @@ public final class TRecs extends Instrument {
         if (!_focalPlaneMask.equals(TRecsParameters.NO_SLIT))
             s += "<LI> Focal Plane Mask: " + _focalPlaneMask + "\n";
         s += "\n";
-        if (_mode.equals(ObservationDetailsParameters.SPECTROSCOPY))
+        if (_mode.isSpectroscopy())
             s += "<L1> Central Wavelength: " + _centralWavelength + " nm" + "\n";
         s += "Spatial Binning: " + getSpatialBinning() + "\n";
-        if (_mode.equals(ObservationDetailsParameters.SPECTROSCOPY))
+        if (_mode.isSpectroscopy())
             s += "Spectral Binning: " + getSpectralBinning() + "\n";
         s += "Pixel Size in Spatial Direction: " + getPixelSize() + "arcsec\n";
-        if (_mode.equals(ObservationDetailsParameters.SPECTROSCOPY))
+        if (_mode.isSpectroscopy())
             s += "Pixel Size in Spectral Direction: " + getGratingDispersion_nmppix() + "nm\n";
         return s;
     }

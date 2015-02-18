@@ -34,7 +34,7 @@ public final class AcqCamRecipe extends RecipeBase {
 
         // Read parameters from the four main sections of the web page.
         _sdParameters = ITCRequest.sourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
+        _obsDetailParameters = ITCRequest.observationParameters(r);
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _acqCamParameters = new AcquisitionCamParameters(r);
         _teleParameters = ITCRequest.teleParameters(r);
@@ -256,7 +256,6 @@ public final class AcqCamRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        String ap_type = _obsDetailParameters.getApertureType();
         double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
         double ap_pix = 0;

@@ -34,7 +34,7 @@ public final class GsaoiRecipe extends RecipeBase {
         super(out);
 
         _sdParameters = ITCRequest.sourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
+        _obsDetailParameters = ITCRequest.observationParameters(r);
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _gsaoiParameters = new GsaoiParameters(r);
         _teleParameters = ITCRequest.teleParameters(r);
@@ -255,7 +255,6 @@ public final class GsaoiRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        String ap_type = _obsDetailParameters.getApertureType();
         double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
         double ap_pix = 0;
@@ -360,17 +359,15 @@ public final class GsaoiRecipe extends RecipeBase {
         if (_gemsParameters.gemsIsUsed()) {
             // If gems is used turn off printing of SF calc
             SFcalc.setSFPrint(false);
-            if (_obsDetailParameters.getApertureType().equals(
-                    _obsDetailParameters.AUTO_APER)) {
-                SFcalc.setApType(_obsDetailParameters.USER_APER);
+            if (_obsDetailParameters.isAutoAperture()) {
+                SFcalc.setApType(false);
                 SFcalc.setApDiam(1.18 * im_qual);
             }
             SFcalc.setImageQuality(uncorrected_im_qual);
             SFcalc.calculate();
             halo_source_fraction = SFcalc.getSourceFraction();
-            if (_obsDetailParameters.getApertureType().equals(
-                    _obsDetailParameters.AUTO_APER)) {
-                SFcalc.setApType(_obsDetailParameters.AUTO_APER);
+            if (_obsDetailParameters.isAutoAperture()) {
+                SFcalc.setApType(true);
             }
         }
 
@@ -379,8 +376,7 @@ public final class GsaoiRecipe extends RecipeBase {
         SFcalc.calculate();
         source_fraction = SFcalc.getSourceFraction();
         Npix = SFcalc.getNPix();
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.IMAGING)) {
+        if (_obsDetailParameters.getMethod().isImaging()) {
             _print(SFcalc.getTextResult(device));
             if (_gemsParameters.gemsIsUsed()) {
                 _println("derived image halo size (FWHM) for a point source = "

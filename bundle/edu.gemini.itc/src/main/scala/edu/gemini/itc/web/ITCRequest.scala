@@ -3,7 +3,7 @@ package edu.gemini.itc.web
 import javax.servlet.http.HttpServletRequest
 
 import edu.gemini.itc.altair.AltairParameters
-import edu.gemini.itc.parameters.ObservationDetailsParameters.CalcMethod
+import edu.gemini.itc.parameters.ObservationDetailsParameters.{AnMethod, CalcMethod}
 import edu.gemini.itc.parameters.SourceDefinitionParameters._
 import edu.gemini.itc.parameters._
 import edu.gemini.itc.shared._
@@ -99,35 +99,36 @@ object ITCRequest {
   def observationParameters(r: ITCMultiPartParser): ObservationDetailsParameters = {
     val pc = ITCRequest.from(r)
 
-    import CalcMethod._
-    val calculationMethod = pc.enumParameter(classOf[CalcMethod]) match {
-      case IMAGING_INT  =>
+    val calcMode   = pc.parameter("calcMode")
+    val calcMethod = pc.parameter("calcMethod")
+    val calculationMethod = (calcMode, calcMethod) match {
+      case ("imaging", "intTime")     =>
         ImagingInt(
           pc.doubleParameter("sigmaC"),
           pc.doubleParameter("expTimeC"),
           pc.doubleParameter("fracOnSourceC")
         )
-      case IMAGING_SN   =>
+      case ("imaging", "s2n")         =>
         ImagingSN(
-          pc.doubleParameter("sigmaC"),
+          pc.intParameter("numExpA"),
           pc.doubleParameter("expTimeA"),
           pc.doubleParameter("fracOnSourceA")
         )
-      case IMAGING_SN_TOTAL   =>
-        ImagingSNTotal(
-          pc.doubleParameter("totTimeA"),
+      case ("spectroscopy", "s2n")    =>
+        SpectroscopySN(
+          pc.intParameter("numExpA"),
+          pc.doubleParameter("expTimeA"),
           pc.doubleParameter("fracOnSourceA")
         )
-      case SPECTROSCOPY =>
-        SpectroscopySN(
-          pc.doubleParameter("sigmaC"),
-          pc.doubleParameter("expTimeC"),
-          pc.doubleParameter("fracOnSourceC")
-        )
+      case _ => throw new IllegalArgumentException("Total integration time to achieve a specific \nS/N ratio is not supported in spectroscopy mode.  \nPlease select the Total S/N method.")
     }
 
-    // TODO!
-    throw new NotImplementedException()
+    val analysisMethod = pc.parameter("aperType") match {
+      case "autoAper" => AutoAperture(pc.doubleParameter("autoSkyAper"))
+      case "userAper" => UserAperture(pc.doubleParameter("userAperDiam"), pc.doubleParameter("userSkyAper"))
+    }
+
+    new ObservationDetailsParameters(calculationMethod, analysisMethod)
 
   }
 

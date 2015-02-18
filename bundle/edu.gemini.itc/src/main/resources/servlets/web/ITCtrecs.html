@@ -484,8 +484,8 @@
 			<tr>
 				<td> </td>
 				<!-- calc method A-->
-				<td><input value="s2n" name="calcMethod" checked="checked" type="radio" /></td>
-				<td>Total S/N ratio resulting from a total time of <input name="totTimeA" size="5" value="1800" type="text" /> secs and with a fraction <input name="fracOnSourceA" size="4" value="0.5" type="text" /> of exposures that observe the source (number of individual
+				<td><input value="s2n" name="calcMethod" checked="checked" type="radio" /><input name="numExpA" value="0" type="hidden" /></td>
+				<td>Total S/N ratio resulting from a total time of <input name="expTimeA" size="5" value="1800" type="text" /> secs and with a fraction <input name="fracOnSourceA" size="4" value="0.5" type="text" /> of exposures that observe the source (number of individual
 				exposures will be calculated from assumed frame time) </td>
 
 			</tr>
@@ -493,7 +493,7 @@
 			<!-- calc method C-->
 			<tr>
 				<td> </td>
-				<td><input value="intTime" name="calcMethod" type="radio" /></td>
+				<td><input value="intTime" name="calcMethod" type="radio" /><input name="expTimeC" value="0" type="hidden" /></td>
 				<td>Total integration time to achieve a S/N ratio of <input name="sigmaC" size="3" value="5" type="text" />  and with a fraction <input name="fracOnSourceC" size="4" value="0.5" type="text" /> of exposures that observe the source </td>
 
 			</tr>

@@ -60,7 +60,7 @@ public class MultipartTestServlet extends HttpServlet {
             try {
                 ITCMultiPartParser parser = new ITCMultiPartParser(request, MAX_CONTENT_LENGTH);
 
-                ObservationDetailsParameters odp = new ObservationDetailsParameters(parser);
+                ObservationDetailsParameters odp = ITCRequest.observationParameters(parser);
                 ObservingConditionParameters ocp = ITCRequest.obsConditionParameters(parser);
                 SourceDefinitionParameters sdp = ITCRequest.sourceDefinitionParameters(parser);
                 TeleParameters tp = ITCRequest.teleParameters(parser);

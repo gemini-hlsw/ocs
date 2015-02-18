@@ -44,7 +44,7 @@ public abstract class Nifs extends Instrument {
     protected String _wellDepth;
     protected String _focalPlaneMask;
     protected String _stringSlitWidth;
-    protected String _mode;
+    protected CalculationMethod _mode;
     protected double _centralWavelength;
     protected int _spectralBinning = 1;
     protected int _spatialBinning = 1;
