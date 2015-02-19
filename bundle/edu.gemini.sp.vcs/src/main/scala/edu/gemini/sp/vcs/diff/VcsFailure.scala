@@ -14,4 +14,7 @@ object VcsFailure {
 
   /** Indicates an unexpected problem while performing a vcs operation. */
   case class Unexpected(msg: String) extends VcsFailure
+
+  /** Exception thrown while performing a vcs operation. */
+  case class VcsException(ex: Throwable) extends VcsFailure
 }

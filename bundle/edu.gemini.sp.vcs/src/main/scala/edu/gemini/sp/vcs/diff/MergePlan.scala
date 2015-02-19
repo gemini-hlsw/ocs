@@ -1,6 +1,7 @@
 package edu.gemini.sp.vcs.diff
 
 import edu.gemini.pot.sp._
+import edu.gemini.sp.vcs.diff.NodeDetail.Obs
 import edu.gemini.sp.vcs.diff.VcsFailure._
 import edu.gemini.spModel.rich.pot.sp._
 
@@ -25,14 +26,19 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
       }
 
     // Edit the ISPNode, applying the changes in the MergeNode if any.
-    def edit(t: Tree[(MergeNode, ISPNode)]): ISPNode =
+    def edit(t: Tree[(MergeNode, ISPNode)]): ISPNode = {
       t.rootLabel match {
         case (Modified(_, nv, dob, det), n) =>
+          val n2 = (det, n) match {
+            case (Obs(num), o: ISPObservation) => o <| (_.setObservationNumber(num))
+            case _                             => n
+          }
           val children = t.subForest.toList.map(edit)
-          n <| (_.children = children) <| (_.setDataObjectAndVersion(dob, nv))
+          n2 <| (_.children = children) <| (_.setDataObjectAndVersion(dob, nv))
         case (Unmodified(_), n) =>
           n
       }
+    }
 
     val nodeMap = p.nodeMap
 
@@ -42,13 +48,17 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
       nodeMap.get(mn.key).fold(create(mn)) { _.right }.map {n => (mn, n) }
     }.sequenceU
 
-    // apply the changes
-    mergeTree.map { mt =>
-      val prog = edit(mt).getProgram
-      val vm   = (prog.getVersions/:delete) { (vm, missing) =>
-        vm.updated(missing.key, missing.nv)
+    // Apply the changes which mutates the program p.  This is a bit awkward
+    // but avoids mutating in map.
+    \/.fromTryCatch {
+      mergeTree.foreach { mt =>
+        edit(mt)
+        val vm = (p.getVersions/:delete) { (vm, missing) =>
+          vm.updated(missing.key, missing.nv)
+        }
+        p.setVersions(vm)
       }
-      prog.setVersions(vm)
-    }
+      mergeTree.map(_ => ())
+    }.valueOr(ex => VcsException(ex).left)
   }
 }

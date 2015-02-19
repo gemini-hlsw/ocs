@@ -4,6 +4,7 @@ import edu.gemini.pot.sp.{DataObjectBlob => DOB, _}
 import edu.gemini.shared.util.VersionComparison
 import VersionComparison.Newer
 import edu.gemini.sp.vcs.diff.NodeDetail.Obs
+import edu.gemini.sp.vcs.diff.VcsFailure.VcsException
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.rich.pot.sp._
@@ -78,6 +79,16 @@ class MergeTest extends JUnitSuite {
     }.toSet
 
     val deletedKeys = mergePlan.delete.map(_.key).toSet
+
+    val correctedMergePlan = ObsNumberCorrection(mergeContext).apply(mergePlan)
+
+    val updatedLocalProgram = {
+      val localCopy = lp.copy(fact)
+      for {
+        mp <- correctedMergePlan
+        _  <- mp.merge(fact, localCopy)
+      } yield localCopy
+    }
   }
 
   def mpKeys(mp: MergePlan): Set[SPNodeKey] = {
@@ -319,11 +330,8 @@ class MergeTest extends JUnitSuite {
       }
     ),
 
-    ("updated program matches merge plan",
+    ("merged program matches merge plan",
       (start, local, remote, pc) => {
-        // copy the local program
-        val localCopy = pc.lp.copy(pc.fact)
-
         def dataObjectMatches(nDob: ISPDataObject, tDob: ISPDataObject): Boolean = {
           // Ugh.  There is a ridiculous "active guider" concept in the target
           // environment which is updated behind the scenes as changes are made
@@ -363,27 +371,47 @@ class MergeTest extends JUnitSuite {
           sameKeys && nMap.values.forall { nc => matchesMergePlan(nc, tMap(nc.key)) }
         }
 
+        def obsNumSame(n: ISPNode, det: NodeDetail): Boolean =
+          (n, det) match {
+            case (o: ISPObservation, Obs(num)) => o.getObservationNumber == num
+            case (o: ISPObservation, _       ) => false
+            case (_,                 Obs(num)) => false
+            case _                             => true
+          }
 
         def matchesMergePlan(n: ISPNode, t: Tree[MergeNode]): Boolean =
           t.rootLabel match {
-            case Modified(k, _, dob, _) =>
+            case Modified(k, _, dob, det) =>
               lazy val dobSame      = dataObjectMatches(n.getDataObject, dob)
               lazy val childrenSame = childrenMatch(n.children, t.subForest)
-              k == n.key && dobSame && childrenSame
+              k == n.key && dobSame && childrenSame && obsNumSame(n, det)
             case Unmodified(k)          =>
               k == n.key
           }
 
-        \/.fromTryCatch { pc.mergePlan.merge(pc.fact, localCopy) } match {
-          case -\/(ex) => true // TODO: ignore for now, missing correction ...
-          case \/-(_)  =>
-            val matches = matchesMergePlan(localCopy, pc.mergePlan.update)
-            if (!matches) {
-              Console.err.println("Merge Plan")
-              Console.err.println(MergeNode.draw(pc.mergePlan.update))
-              Console.err.println("Merged Program")
-              Console.err.println(drawNodeTree(localCopy))
-            }
+        val result = for {
+          cmp <- pc.correctedMergePlan
+          ulp <- pc.updatedLocalProgram
+        } yield {
+          val matches = matchesMergePlan(ulp, cmp.update)
+          if (!matches) {
+            Console.err.println("Merge Plan")
+            Console.err.println(MergeNode.draw(cmp.update))
+            Console.err.println("Merged Program")
+            Console.err.println(drawNodeTree(ulp))
+          }
+          matches
+        }
+
+        result match {
+          case -\/(VcsException(ex)) =>
+            true // TODO: ignore for now, missing correction ...
+
+          case -\/(failure)          =>
+            Console.err.println(failure)
+            false
+
+          case \/-(matches)          =>
             matches
         }
       }
