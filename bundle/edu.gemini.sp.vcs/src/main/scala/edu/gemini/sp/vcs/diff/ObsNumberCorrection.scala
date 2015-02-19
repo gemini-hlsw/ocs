@@ -3,6 +3,7 @@ package edu.gemini.sp.vcs.diff
 import edu.gemini.pot.sp.SPNodeKey
 import edu.gemini.sp.vcs.diff.NodeDetail.Obs
 import edu.gemini.sp.vcs.diff.ProgramLocation.{Remote, Local}
+import edu.gemini.sp.vcs.diff.VcsFailure.Unmergeable
 import edu.gemini.spModel.obslog.ObsExecLog
 import edu.gemini.spModel.rich.pot.sp._
 

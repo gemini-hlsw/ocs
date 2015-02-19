@@ -11,7 +11,7 @@ package object diff {
    * A `MergeCorrection` is just a function that modifies an `MergePlan` to
    * correct some aspect of the merge.
    */
-  type MergeCorrection = MergePlan => Unmergeable \/ MergePlan
+  type MergeCorrection = MergePlan => VcsFailure.Unmergeable \/ MergePlan
 
   implicit class IspNodeTreeOps(val node: ISPNode) extends AnyVal {
     /** A Map with entries for all nodes rooted at this node, keyed by
