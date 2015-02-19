@@ -1,13 +1,18 @@
 package edu.gemini.sp.vcs.diff
 
-import edu.gemini.pot.sp.{DataObjectBlob => DOB, ISPFactory, ISPNode, ISPProgram, SPNodeKey}
+import edu.gemini.pot.sp.{DataObjectBlob => DOB, _}
 import edu.gemini.shared.util.VersionComparison
 import VersionComparison.Newer
 import edu.gemini.sp.vcs.diff.NodeDetail.Obs
+import edu.gemini.spModel.data.ISPDataObject
+import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.rich.pot.sp._
+import edu.gemini.spModel.target.obsComp.TargetObsComp
 
 import org.junit.Test
 import org.scalatest.junit.JUnitSuite
+
+import scala.collection.JavaConverters._
 
 import scalaz._
 
@@ -310,6 +315,76 @@ class PreliminaryMergePropertyTest extends JUnitSuite {
 
               obsMap.values.forall(_.size == 1) && (localKeys == renumberedKeys)
           }
+        }
+      }
+    ),
+
+    ("updated program matches merge plan",
+      (start, local, remote, pc) => {
+        // copy the local program
+        val localCopy = pc.lp.copy(pc.fact)
+
+        def dataObjectMatches(nDob: ISPDataObject, tDob: ISPDataObject): Boolean = {
+          // Ugh.  There is a ridiculous "active guider" concept in the target
+          // environment which is updated behind the scenes as changes are made
+          // to the observation.  Ignore it.
+          def wipeOutActiveGuiders(toc: TargetObsComp): Unit =
+            toc.setTargetEnvironment(toc.getTargetEnvironment.setActiveGuiders(Set.empty[GuideProbe].asJava))
+
+          val same = DOB.same(nDob, tDob) || ((nDob, tDob) match {
+            case (nTarget: TargetObsComp, tTarget: TargetObsComp) =>
+              wipeOutActiveGuiders(nTarget)
+              wipeOutActiveGuiders(tTarget)
+              DOB.same(nTarget, tTarget)
+            case _ => false
+          })
+
+          if (!same) {
+            Console.err.println("Data objects don't match: " + nDob.getType + ", " + tDob.getType)
+          }
+
+          same
+        }
+
+        def childrenMatch(n: List[ISPNode], t: Stream[Tree[MergeNode]]): Boolean = {
+          // The order won't be the same because the Tree[MergeNode] doesn't
+          // worry about ordering amongst different types of objects (e.g.,
+          // obs components before the obs log before the sequence node).
+          val nMap = n.map(c => c.key -> c).toMap
+          val tMap = t.map(c => c.key -> c).toMap
+
+          val sameKeys = nMap.keySet == tMap.keySet
+          if (!sameKeys) {
+            Console.err.println("Children don't match: ")
+            Console.err.println("\tn.children = " + n.map(_.key))
+            Console.err.println("\tt.children = " + t.map(_.key))
+          }
+
+          sameKeys && nMap.values.forall { nc => matchesMergePlan(nc, tMap(nc.key)) }
+        }
+
+
+        def matchesMergePlan(n: ISPNode, t: Tree[MergeNode]): Boolean =
+          t.rootLabel match {
+            case Modified(k, _, dob, _) =>
+              lazy val dobSame      = dataObjectMatches(n.getDataObject, dob)
+              lazy val childrenSame = childrenMatch(n.children, t.subForest)
+              k == n.key && dobSame && childrenSame
+            case Unmodified(k)          =>
+              k == n.key
+          }
+
+        \/.fromTryCatch { pc.mergePlan.merge(pc.fact, localCopy) } match {
+          case -\/(ex) => true // TODO: ignore for now, missing correction ...
+          case \/-(_)  =>
+            val matches = matchesMergePlan(localCopy, pc.mergePlan.update)
+            if (!matches) {
+              Console.err.println("Merge Plan")
+              Console.err.println(MergeNode.draw(pc.mergePlan.update))
+              Console.err.println("Merged Program")
+              Console.err.println(drawNodeTree(localCopy))
+            }
+            matches
         }
       }
     )
