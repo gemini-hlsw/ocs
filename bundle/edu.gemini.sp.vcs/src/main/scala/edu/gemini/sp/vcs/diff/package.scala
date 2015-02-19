@@ -3,7 +3,15 @@ package edu.gemini.sp.vcs
 import edu.gemini.pot.sp.{ISPProgram, SPNodeKey, ISPNode}
 import edu.gemini.spModel.rich.pot.sp._
 
+import scalaz.\/
+
 package object diff {
+
+  /**
+   * A `MergeCorrection` is just a function that modifies an `MergePlan` to
+   * correct some aspect of the merge.
+   */
+  type MergeCorrection = MergePlan => Unmergeable \/ MergePlan
 
   implicit class IspNodeTreeOps(val node: ISPNode) extends AnyVal {
     /** A Map with entries for all nodes rooted at this node, keyed by
