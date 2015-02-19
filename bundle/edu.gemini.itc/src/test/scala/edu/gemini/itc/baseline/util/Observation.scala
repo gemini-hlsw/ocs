@@ -8,11 +8,10 @@ import edu.gemini.itc.gmos.GmosParameters
 import edu.gemini.itc.gnirs.GnirsParameters
 import edu.gemini.itc.gsaoi.GsaoiParameters
 import edu.gemini.itc.michelle.MichelleParameters
-import edu.gemini.itc.nici.NiciParameters
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.niri.NiriParameters
 import edu.gemini.itc.parameters.ObservationDetailsParameters
-import edu.gemini.itc.shared.ITCParameters
+import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
 
 /**
@@ -30,7 +29,6 @@ case class F2Observation(odp: ObservationDetailsParameters, ins: Flamingos2Param
 case class GmosObservation(odp: ObservationDetailsParameters, ins: GmosParameters) extends Observation
 case class GnirsObservation(odp: ObservationDetailsParameters, ins: GnirsParameters) extends Observation
 case class MichelleObservation(odp: ObservationDetailsParameters, ins: MichelleParameters) extends Observation
-case class NiciObservation(odp: ObservationDetailsParameters, ins: NiciParameters) extends Observation
 case class TRecsObservation(odp: ObservationDetailsParameters, ins: TRecsParameters) extends Observation
 
 /**
@@ -60,43 +58,18 @@ object Observation {
   // =============== OBSERVATIONS ====================
   lazy val SpectroscopyObservations = List(
     new ObservationDetailsParameters(
-      ObservationDetailsParameters.SPECTROSCOPY,
-      ObservationDetailsParameters.S2N,
-      10,
-      600.0,
-      1.0,
-      10.0,
-      ObservationDetailsParameters.IMAGING,
-      ObservationDetailsParameters.USER_APER,
-      0.7,
-      3)
-
+      new SpectroscopySN(10, 600.0, 1.0),
+      new UserAperture(0.7, 3))
   )
 
   lazy val ImagingObservations = List(
     new ObservationDetailsParameters(
-      ObservationDetailsParameters.IMAGING,               // calc mode
-      ObservationDetailsParameters.INTTIME,               // calc method
-      2,                                                  // exposures
-      1800.0,                                             // exposure time
-      1.0,                                                // source fraction
-      10.0,                                               // SN ratio
-      ObservationDetailsParameters.IMAGING,               // analysis method
-      ObservationDetailsParameters.AUTO_APER,             // aperture type
-      0.7,                                                // aperture diameter
-      3),                                                 // sky aperture diameter
+      new ImagingInt(10.0, 1800.0, 1.0),
+      new AutoAperture(3)),
 
     new ObservationDetailsParameters(
-      ObservationDetailsParameters.IMAGING,
-      ObservationDetailsParameters.S2N,
-      30,
-      120.0,
-      0.5,
-      25.64,
-      ObservationDetailsParameters.IMAGING,
-      ObservationDetailsParameters.USER_APER,
-      0.7,
-      3)
+      new ImagingSN(30, 120.0, 0.5),
+      new UserAperture(0.7, 3.0))
   )
 
 }

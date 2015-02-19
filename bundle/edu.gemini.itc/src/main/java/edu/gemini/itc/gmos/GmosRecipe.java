@@ -1,30 +1,16 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-//
 package edu.gemini.itc.gmos;
 
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.parameters.*;
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.web.ITCRequest;
 
-import javax.servlet.http.HttpServletRequest;
 import java.awt.*;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
-
-//import edu.gemini.itc.operation.ChartDataSource;
-//import edu.gemini.itc.operation.ChartCreatePNG;
-//import edu.gemini.itc.operation.ChartCreate;
-//import edu.gemini.itc.operation.ChartVisitor;
 
 /**
  * This class performs the calculations for Gmos used for imaging.
@@ -37,36 +23,12 @@ public final class GmosRecipe extends RecipeBase {
     private final String _header = new StringBuffer("# GMOS ITC: " + now.getTime() + "\n").toString();
 
     // Parameters from the web page.
-    private SourceDefinitionParameters _sdParameters;
-    private ObservationDetailsParameters _obsDetailParameters;
-    private ObservingConditionParameters _obsConditionParameters;
-    private GmosParameters _gmosParameters;
-    private TeleParameters _teleParameters;
-    private PlottingDetailsParameters _plotParameters;
-
-    /**
-     * Constructs a GmosRecipe by parsing servlet request.
-     *
-     * @param r   Servlet request containing form data from ITC web page.
-     * @param out Results will be written to this PrintWriter.
-     * @throws Exception on failure to parse parameters.
-     */
-    public GmosRecipe(HttpServletRequest r, PrintWriter out) throws Exception {
-        super(out);
-        // Set the Http Session object
-        // _sessionObject = r.getSession(true);
-
-        // System.out.println(" Session is over after"
-        // +_sessionObject.getCreationTime());
-
-        // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
-        _gmosParameters = new GmosParameters(r);
-        _teleParameters = new TeleParameters(r);
-        _plotParameters = new PlottingDetailsParameters(r);
-    }
+    private final SourceDefinitionParameters _sdParameters;
+    private final ObservationDetailsParameters _obsDetailParameters;
+    private final ObservingConditionParameters _obsConditionParameters;
+    private final GmosParameters _gmosParameters;
+    private final TeleParameters _teleParameters;
+    private final PlottingDetailsParameters _plotParameters;
 
     /**
      * Constructs a GmosRecipe by parsing a Multipart servlet request.
@@ -86,12 +48,12 @@ public final class GmosRecipe extends RecipeBase {
         System.out.println("ServerName: " + ServerInfo.getServerURL());
 
         // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
+        _sdParameters = ITCRequest.sourceDefinitionParameters(r);
+        _obsDetailParameters = ITCRequest.observationParameters(r);
+        _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _gmosParameters = new GmosParameters(r);
-        _teleParameters = new TeleParameters(r);
-        _plotParameters = new PlottingDetailsParameters(r);
+        _teleParameters = ITCRequest.teleParameters(r);
+        _plotParameters = ITCRequest.plotParamters(r);
     }
 
     /**
@@ -148,14 +110,11 @@ public final class GmosRecipe extends RecipeBase {
         // Create one chart to use for all 3 CCDS (one for Signal and Background and one for Intermediate Single Exp and Final S/N)
         final ITCChart gmosChart1;
         final ITCChart gmosChart2;
-        if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.SPECTROSCOPY)) {
-            final boolean ifuAndUniform =
-                    mainInstrument.IFU_IsUsed() &&
-                            !(_sdParameters.getSourceGeometry().equals(SourceDefinitionParameters.EXTENDED_SOURCE) &&
-                            _sdParameters.getExtendedSourceType().equals(SourceDefinitionParameters.UNIFORM));
-            final double ifu_offset = ifuAndUniform ? (Double) mainInstrument.getIFU().getApertureOffsetList().iterator().next() : 0.0;
-            final String chart1Title = ifuAndUniform ? "Signal and Background (IFU element offset: " + device.toString(ifu_offset) + " arcsec)" : "Signal and Background ";
-            final String chart2Title = ifuAndUniform ? "Intermediate Single Exp and Final S/N (IFU element offset: " + device.toString(ifu_offset) + " arcsec)" : "Intermediate Single Exp and Final S/N";
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
+            final boolean ifuAndNotUniform = mainInstrument.IFU_IsUsed() && !(_sdParameters.isUniform());
+            final double ifu_offset = ifuAndNotUniform ? (Double) mainInstrument.getIFU().getApertureOffsetList().iterator().next() : 0.0;
+            final String chart1Title = ifuAndNotUniform ? "Signal and Background (IFU element offset: " + device.toString(ifu_offset) + " arcsec)" : "Signal and Background ";
+            final String chart2Title = ifuAndNotUniform ? "Intermediate Single Exp and Final S/N (IFU element offset: " + device.toString(ifu_offset) + " arcsec)" : "Intermediate Single Exp and Final S/N";
             gmosChart1 = new ITCChart(chart1Title, "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
             gmosChart2 = new ITCChart(chart2Title, "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
 
@@ -184,7 +143,7 @@ public final class GmosRecipe extends RecipeBase {
             SpecS2NLargeSlitVisitor specS2N = null;
             SlitThroughput st = null;
 
-            if (_sdParameters.getSourceSpec().equals(_sdParameters.ELINE))
+            if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
                 if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters
                         .getELineWavelength() * 1000))) {
                     throw new Exception(
@@ -205,20 +164,23 @@ public final class GmosRecipe extends RecipeBase {
             // both the normalization waveband and the observation waveband
             // (filter region).
 
-            String band = _sdParameters.getNormBand();
-            double start = WavebandDefinition.getStart(band);
-            double end = WavebandDefinition.getEnd(band);
+            final WavebandDefinition band = _sdParameters.getNormBand();
+            final double start = band.getStart();
+            final double end = band.getEnd();
 
             // any sed except BBODY and ELINE have normailization regions
-            if (!(_sdParameters.getSpectrumResource().equals(_sdParameters.ELINE) || _sdParameters
-                    .getSpectrumResource().equals(_sdParameters.BBODY))) {
-                if (sed.getStart() > start || sed.getEnd() < end) {
-                    throw new Exception(
-                            "Shifted spectrum lies outside of specified normalisation waveband.");
-                }
+            switch (_sdParameters.getDistributionType()) {
+                case ELINE:
+                case BBODY:
+                    break;
+                default:
+                    if (sed.getStart() > start || sed.getEnd() < end) {
+                        throw new Exception(
+                                "Shifted spectrum lies outside of specified normalisation waveband.");
+                    }
             }
 
-            if (_plotParameters.getPlotLimits().equals(_plotParameters.USER_LIMITS)) {
+            if (_plotParameters.getPlotLimits().equals(PlottingDetailsParameters.PlotLimits.USER)) {
                 if (_plotParameters.getPlotWaveL() > instrument.getObservingEnd()
                         || _plotParameters.getPlotWaveU() < instrument
                         .getObservingStart()) {
@@ -235,11 +197,11 @@ public final class GmosRecipe extends RecipeBase {
             // units
             // calculates: normalized SED, resampled SED, SED adjusted for aperture
             // output: SED in common internal units
-            SampledSpectrumVisitor norm = new NormalizeVisitor(
-                    _sdParameters.getNormBand(),
-                    _sdParameters.getSourceNormalization(),
-                    _sdParameters.getUnits());
-            if (!_sdParameters.getSpectrumResource().equals(_sdParameters.ELINE)) {
+            if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
+                final SampledSpectrumVisitor norm = new NormalizeVisitor(
+                        _sdParameters.getNormBand(),
+                        _sdParameters.getSourceNormalization(),
+                        _sdParameters.getUnits());
                 sed.accept(norm);
             }
 
@@ -328,7 +290,6 @@ public final class GmosRecipe extends RecipeBase {
             //
             // inputs: source morphology specification
 
-            String ap_type = _obsDetailParameters.getApertureType();
             double pixel_size = instrument.getPixelSize();
             double ap_diam = 0;
             double ap_pix = 0;
@@ -357,8 +318,7 @@ public final class GmosRecipe extends RecipeBase {
                 source_fraction = SFcalc.getSourceFraction();
                 Npix = SFcalc.getNPix();
 
-                if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.IMAGING)
-                        && ccdIndex == 0) {
+                if (_obsDetailParameters.getMethod().isImaging() && ccdIndex == 0) {
                     _print(SFcalc.getTextResult(device));
                     _println(IQcalc.getTextResult(device));
                     _println("Sky subtraction aperture = "
@@ -367,10 +327,7 @@ public final class GmosRecipe extends RecipeBase {
                 }
             } else {
                 VisitableMorphology morph;
-                if (_sdParameters.getSourceGeometry().equals(
-                        SourceDefinitionParameters.POINT_SOURCE)
-                        || _sdParameters.getExtendedSourceType().equals(
-                        SourceDefinitionParameters.GAUSSIAN)) {
+                if (!_sdParameters.isUniform()) {
                     morph = new GaussianMorphology(im_qual);
                 } else {
                     morph = new USBMorphology();
@@ -392,28 +349,22 @@ public final class GmosRecipe extends RecipeBase {
             // Calculate the Peak Pixel Flux
             PeakPixelFluxCalc ppfc;
 
-            if (_sdParameters.getSourceGeometry().equals(
-                    SourceDefinitionParameters.POINT_SOURCE)
-                    || _sdParameters.getExtendedSourceType().equals(
-                    SourceDefinitionParameters.GAUSSIAN)) {
+            if (!_sdParameters.isUniform()) {
 
                 ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
                         _obsDetailParameters.getExposureTime(), sed_integral,
                         sky_integral, instrument.getDarkCurrent());
 
                 peak_pixel_count = ppfc.getFluxInPeakPixel();
-            } else if (_sdParameters.getExtendedSourceType().equals(
-                    SourceDefinitionParameters.UNIFORM)) {
-                double usbApArea = 0;
+
+            } else {
 
                 ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
                         _obsDetailParameters.getExposureTime(), sed_integral,
                         sky_integral, instrument.getDarkCurrent());
 
-                peak_pixel_count = ppfc
-                        .getFluxInPeakPixelUSB(source_fraction, Npix);
-            } else {
-                throw new Exception("Peak Pixel could not be calculated ");
+                peak_pixel_count = ppfc.getFluxInPeakPixelUSB(source_fraction, Npix);
+
             }
 
             // In this version we are bypassing morphology modules 3a-5a.
@@ -433,9 +384,9 @@ public final class GmosRecipe extends RecipeBase {
             checkSourceFraction(number_exposures, frac_with_source);
 
             // ObservationMode Imaging or spectroscopy
-            if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.SPECTROSCOPY)) {
+            if (_obsDetailParameters.getMethod().isSpectroscopy()) {
                 if (!instrument.IFU_IsUsed()) {
-                    if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
+                    if (!_obsDetailParameters.isAutoAperture()) {
                         st = new SlitThroughput(im_qual,
                                 _obsDetailParameters.getApertureDiameter(),
                                 pixel_size, _gmosParameters.getFPMask());
@@ -445,30 +396,26 @@ public final class GmosRecipe extends RecipeBase {
                                     .getApertureDiameter()) + " arcsec");
                         }
                     } else {
-                        st = new SlitThroughput(im_qual, pixel_size,
-                                _gmosParameters.getFPMask());
-                        if (_sdParameters.getSourceGeometry().equals(
-                                SourceDefinitionParameters.EXTENDED_SOURCE)) {
-                            if (_sdParameters.getExtendedSourceType().equals(
-                                    SourceDefinitionParameters.UNIFORM)) {
+                        st = new SlitThroughput(im_qual, pixel_size, _gmosParameters.getFPMask());
+
+                        switch (_sdParameters.getProfileType()) {
+                            case UNIFORM:
                                 if (ccdIndex == 0) {
                                     _println("software aperture extent along slit = "
                                             + device.toString(1 / _gmosParameters
                                             .getFPMask()) + " arcsec");
                                 }
-                            }
-                        } else {
-                            if (ccdIndex == 0) {
-                                _println("software aperture extent along slit = "
-                                        + device.toString(1.4 * im_qual) + " arcsec");
-                            }
+                                break;
+                            case POINT:
+                                if (ccdIndex == 0) {
+                                    _println("software aperture extent along slit = "
+                                            + device.toString(1.4 * im_qual) + " arcsec");
+                                }
+                                break;
                         }
                     }
 
-                    if (_sdParameters.getSourceGeometry().equals(
-                            SourceDefinitionParameters.POINT_SOURCE)
-                            || _sdParameters.getExtendedSourceType().equals(
-                            SourceDefinitionParameters.GAUSSIAN)) {
+                    if (!_sdParameters.isUniform()) {
                         if (ccdIndex == 0) {
                             _println("fraction of source flux in aperture = "
                                     + device.toString(st.getSlitThroughput()));
@@ -506,34 +453,21 @@ public final class GmosRecipe extends RecipeBase {
 
                 // For the usb case we want the resolution to be determined by the
                 // slit width and not the image quality for a point source.
-                if (_sdParameters.getSourceGeometry().equals(
-                        SourceDefinitionParameters.EXTENDED_SOURCE)) {
-                    if (_sdParameters.getExtendedSourceType().equals(
-                            SourceDefinitionParameters.UNIFORM)) {
-                        im_qual = 10000;
+                if (_sdParameters.isUniform()) {
+                    im_qual = 10000;
 
-                        if (!instrument.IFU_IsUsed()) {
+                    if (!instrument.IFU_IsUsed()) {
 
-                            if (ap_type
-                                    .equals(ObservationDetailsParameters.USER_APER)) {
-                                spec_source_frac = _gmosParameters.getFPMask()
-                                        * ap_diam * pixel_size; // ap_diam =
-                                // Spec_NPix
-                            } else if (ap_type
-                                    .equals(ObservationDetailsParameters.AUTO_APER)) {
-                                ap_diam = new Double(
-                                        1 / (_gmosParameters.getFPMask() * pixel_size) + 0.5)
-                                        .intValue();
-                                spec_source_frac = 1;
-                            }
+                        if (!_obsDetailParameters.isAutoAperture()) {
+                            spec_source_frac = _gmosParameters.getFPMask() * ap_diam * pixel_size;
+                        } else {
+                            ap_diam = new Double(1 / (_gmosParameters.getFPMask() * pixel_size) + 0.5).intValue();
+                            spec_source_frac = 1;
                         }
                     }
                 }
 
-                if (instrument.IFU_IsUsed() && !(_sdParameters.getSourceGeometry().equals(
-                        SourceDefinitionParameters.EXTENDED_SOURCE) && _sdParameters
-                        .getExtendedSourceType().equals(
-                                SourceDefinitionParameters.UNIFORM))) {
+                if (instrument.IFU_IsUsed() && !_sdParameters.isUniform()) {
                     Iterator src_frac_it = sf_list.iterator();
                     Iterator ifu_offset_it = ap_offset_list.iterator();
 
@@ -682,7 +616,7 @@ public final class GmosRecipe extends RecipeBase {
 
             }
 
-            if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.SPECTROSCOPY)) {
+            if (_obsDetailParameters.getMethod().isSpectroscopy()) {
                 _println(specS2N.getSignalSpectrum(), _header, sigSpec, firstCcdIndex, lastCcdIndexWithGap);
                 _println(specS2N.getBackgroundSpectrum(), _header, backSpec, firstCcdIndex, lastCcdIndexWithGap);
                 _println(specS2N.getExpS2NSpectrum(), _header, singleS2N, firstCcdIndex, lastCcdIndexWithGap);

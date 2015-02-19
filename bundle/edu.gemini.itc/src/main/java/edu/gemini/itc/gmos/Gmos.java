@@ -9,11 +9,7 @@
 //
 package edu.gemini.itc.gmos;
 
-import edu.gemini.itc.parameters.ObservationDetailsParameters;
-import edu.gemini.itc.shared.Detector;
-import edu.gemini.itc.shared.Filter;
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.Instrument;
+import edu.gemini.itc.shared.*;
 
 import java.awt.*;
 
@@ -63,7 +59,7 @@ public abstract class Gmos extends Instrument {
     protected String _focalPlaneMask;
     //private String _focalPlaneMaskOffset;
     protected String _stringSlitWidth;
-    protected String _mode;
+    protected CalculationMethod _mode;
     protected double _centralWavelength;
     protected int _spectralBinning;
     protected int _spatialBinning;
@@ -253,13 +249,13 @@ public abstract class Gmos extends Instrument {
             s += "<LI> Focal Plane Mask: " + _focalPlaneMask + "\n";
         //s += "Instrument: " +super.getName() + "\n";
         s += "\n";
-        if (_mode.equals(ObservationDetailsParameters.SPECTROSCOPY))
+        if (_mode.isSpectroscopy())
             s += "<L1> Central Wavelength: " + _centralWavelength + " nm" + "\n";
         s += "Spatial Binning: " + getSpatialBinning() + "\n";
-        if (_mode.equals(ObservationDetailsParameters.SPECTROSCOPY))
+        if (_mode.isSpectroscopy())
             s += "Spectral Binning: " + getSpectralBinning() + "\n";
         s += "Pixel Size in Spatial Direction: " + getPixelSize() + "arcsec\n";
-        if (_mode.equals(ObservationDetailsParameters.SPECTROSCOPY))
+        if (_mode.isSpectroscopy())
             s += "Pixel Size in Spectral Direction: " + getGratingDispersion_nmppix() + "nm\n";
         if (IFU_IsUsed()) {
             s += "IFU is selected,";

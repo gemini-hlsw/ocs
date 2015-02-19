@@ -1,16 +1,4 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-// $Id: WavebandDefinition.java,v 1.4 2003/11/21 14:31:02 shane Exp $
-//
 package edu.gemini.itc.shared;
-
-import java.util.HashMap;
 
 /**
  * This class represents the definition of standard "wavebands",
@@ -21,71 +9,53 @@ import java.util.HashMap;
  * <p/>
  * Values for Sloan filters (g', r', i', z') taken from Fukugita et al. (1996)
  */
-public final class WavebandDefinition {
-    // The names of the standard wavebands in order of wavelength.
-    public static final String[]
-            //WAVEBAND_NAMES = {"U", "B", "V", "R", "I", "J", "H", "K", "L'", "M'", "N", "Q", "g'", "r'", "i'", "z'"};
-            WAVEBAND_NAMES = {"U", "B", "V", "R", "I", "J", "H", "K", "L'", "M'", "N", "Q", "G'", "R'", "I'", "Z'"};
+public enum WavebandDefinition {
+    U("U",      360,    75),
+    B("B",      440,    90),
+    V("V",      550,    85),
+    R("R",      670,   100),
+    I("I",      870,   100),
+    J("J",     1250,   240),
+    H("H",     1650,   300),
+    K("K",     2200,   410),
+    L("L'",    3760,   700),
+    M("M'",    4770,   240),
+    N("N",    10470,  5230),
+    Q("Q",    20130,  1650),
+    g("g'",     483,    99),
+    r("r'",     626,    96),
+    i("i'",     767,   106),
+    z("z'",     910,   125)
+    ;
 
-    private static HashMap _bandNameToIndex;
+    public final String name;
+    public final int center;
+    public final int width;
 
-    // static initializer
-    static {
-        // Fill table of indices into arrays
-        _bandNameToIndex = new HashMap();
-        for (int i = 0; i < WAVEBAND_NAMES.length; ++i) {
-            _bandNameToIndex.put(WAVEBAND_NAMES[i], new Integer(i));
-        }
+    private WavebandDefinition(final String name, final int center, final int width) {
+        this.name   = name;
+        this.center = center;
+        this.width  = width;
     }
 
-    // Waveband center in nm for     U,   B,   V,    R,    I,    J,    H,    K
-    private static int[] _center = {360, 440, 550, 670, 870, 1250, 1650, 2200
-            , 3760, 4770, 10470, 20130, 483, 626, 767, 910};  //L' M' N Q g' r' i' z'
-
-    // Waveband width in nm
-    private static int[] _width = {75, 90, 85, 100, 100, 240, 300, 410,
-            700, 240, 5230, 1650, 99, 96, 106, 125};
-
-    /**
-     *
-     */
-    public static int getWavebandIndex(String wavebandName) {
-        wavebandName = wavebandName.toUpperCase();
-        Integer index = (Integer) (_bandNameToIndex.get(wavebandName));
-        if (index == null) return 0;
-        return index.intValue();
+    /** Returns the center of this waveband in nm. */
+    public double getCenter() {
+        return center;
     }
 
-    /**
-     * Returns the center of specified waveband in nm.
-     * If waveband does not exist, returns 0.
-     */
-    public static int getCenter(String waveband) {
-        return _center[getWavebandIndex(waveband)];
+    /** Returns the width of this waveband in nm. */
+    public double getWidth() {
+        return width;
     }
 
-    /**
-     * Returns the width of specified waveband in nm.
-     * If waveband does not exist, returns 0.
-     */
-    public static int getWidth(String waveband) {
-        return _width[getWavebandIndex(waveband)];
+    /** Returns the lower limit of this waveband in nm. */
+    public double getStart() {
+        return center - (width / 2);
     }
 
-    /**
-     * Returns the lower limit of specified waveband in nm.
-     * If waveband does not exist, returns 0.
-     */
-    public static int getStart(String waveband) {
-        return getCenter(waveband) - (getWidth(waveband) / 2);
-    }
-
-    /**
-     * Returns the upper limit of specified waveband in nm.
-     * If waveband does not exist, returns 0.
-     */
-    public static int getEnd(String waveband) {
-        return getCenter(waveband) + (getWidth(waveband) / 2);
+    /** Returns the upper limit of this waveband in nm. */
+    public double getEnd() {
+        return center + (width / 2);
     }
 }
 

@@ -13,21 +13,6 @@ public abstract class ITCParameters {
         throw new IllegalArgumentException("Can't find " + s);
     }
 
-    /** Tries to get the given parameter form an http request. */
-    public static String getParameter(final HttpServletRequest r, final String parameter) {
-        final String value = r.getParameter(parameter);
-        if (value == null) {
-            throw new IllegalArgumentException("Parameter " + parameter + "not found in request.");
-        }
-        return value;
-    }
-
-    /** Tries to get the given parameter form an http request and translates it into an enum. */
-    public static <T extends Enum<T>> T getParameter(final Class<T> c, final HttpServletRequest r) {
-        final String value = r.getParameter(c.getSimpleName());
-        return getParameter(c, value);
-    }
-
     /** Tries to get the given parameter form an http request and translates it into an enum. */
     public static <T extends Enum<T>> T getParameter(final Class<T> c, final ITCMultiPartParser r) {
         final String value = r.getParameter(c.getSimpleName());

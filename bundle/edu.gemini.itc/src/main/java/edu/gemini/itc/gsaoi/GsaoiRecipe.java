@@ -1,9 +1,3 @@
-// Copyright 1999 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
-//
-// $Id: GsaoiRecipe.java,v 1.17 2004/02/16 18:49:01 bwalls Exp $
-//
 package edu.gemini.itc.gsaoi;
 
 import edu.gemini.itc.gems.*;
@@ -13,52 +7,21 @@ import edu.gemini.itc.parameters.ObservingConditionParameters;
 import edu.gemini.itc.parameters.SourceDefinitionParameters;
 import edu.gemini.itc.parameters.TeleParameters;
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.web.ITCRequest;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.PrintWriter;
-import java.util.Calendar;
 
 /**
  * This class performs the calculations for Gsaoi used for imaging.
  */
 public final class GsaoiRecipe extends RecipeBase {
 
-    private GemsParameters _gemsParameters;
-    private StringBuffer _header = new StringBuffer("# GSAOI ITC: "
-            + Calendar.getInstance().getTime() + "\n");
-
-    private GsaoiParameters _gsaoiParameters;
-    private ObservingConditionParameters _obsConditionParameters;
-    private ObservationDetailsParameters _obsDetailParameters;
-    //	private PlottingDetailsParameters _plotParameters;
-    // Parameters from the web page.
-    private SourceDefinitionParameters _sdParameters;
-    private TeleParameters _teleParameters;
-
-    private String sigSpec, backSpec, singleS2N, finalS2N;
-    private SpecS2NVisitor specS2N;
-
-    /**
-     * Constructs a GsaoiRecipe by parsing servlet request.
-     *
-     * @param r   Servlet request containing form data from ITC web page.
-     * @param out Results will be written to this PrintWriter.
-     * @throws Exception on failure to parse parameters.
-     */
-    public GsaoiRecipe(HttpServletRequest r, PrintWriter out) throws Exception {
-        super(out);
-        // Set the Http Session object
-        // _sessionObject = r.getSession(true);
-
-        // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
-        _gsaoiParameters = new GsaoiParameters(r);
-        _teleParameters = new TeleParameters(r);
-        _gemsParameters = new GemsParameters(r);
-//		_plotParameters = new PlottingDetailsParameters(r);
-    }
+    private final GemsParameters _gemsParameters;
+    private final GsaoiParameters _gsaoiParameters;
+    private final ObservingConditionParameters _obsConditionParameters;
+    private final ObservationDetailsParameters _obsDetailParameters;
+    private final SourceDefinitionParameters _sdParameters;
+    private final TeleParameters _teleParameters;
 
     /**
      * Constructs a GsaoiRecipe by parsing a Multipart servlet request.
@@ -69,17 +32,13 @@ public final class GsaoiRecipe extends RecipeBase {
      */
     public GsaoiRecipe(ITCMultiPartParser r, PrintWriter out) throws Exception {
         super(out);
-        // Set the Http Session object
-        // _sessionObject = r.getSession(true);
 
-        // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
+        _sdParameters = ITCRequest.sourceDefinitionParameters(r);
+        _obsDetailParameters = ITCRequest.observationParameters(r);
+        _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _gsaoiParameters = new GsaoiParameters(r);
-        _teleParameters = new TeleParameters(r);
+        _teleParameters = ITCRequest.teleParameters(r);
         _gemsParameters = new GemsParameters(r);
-//		_plotParameters = new PlottingDetailsParameters(r);
     }
 
     /**
@@ -100,7 +59,6 @@ public final class GsaoiRecipe extends RecipeBase {
         _gsaoiParameters = gsaoiParameters;
         _teleParameters = teleParameters;
         _gemsParameters = gemsParameters;
-//		_plotParameters = plotParameters;
     }
 
     /**
@@ -130,7 +88,7 @@ public final class GsaoiRecipe extends RecipeBase {
         // output: redshifteed SED
         Gsaoi instrument = new Gsaoi(_gsaoiParameters, _obsDetailParameters);
 
-        if (_sdParameters.getSourceSpec().equals(_sdParameters.ELINE))
+        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters
                     .getELineWavelength() * 1000 * 25))) { // *25 b/c of
                 // increased
@@ -161,17 +119,20 @@ public final class GsaoiRecipe extends RecipeBase {
         // both the normalization waveband and the observation waveband
         // (filter region).
 
-        String band = _sdParameters.getNormBand();
-        double start = WavebandDefinition.getStart(band);
-        double end = WavebandDefinition.getEnd(band);
+        final WavebandDefinition band = _sdParameters.getNormBand();
+        final double start = band.getStart();
+        final double end = band.getEnd();
 
         // any sed except BBODY and ELINE have normailization regions
-        if (!(_sdParameters.getSpectrumResource().equals(_sdParameters.ELINE) || _sdParameters
-                .getSpectrumResource().equals(_sdParameters.BBODY))) {
-            if (sed.getStart() > start || sed.getEnd() < end) {
-                throw new Exception(
-                        "Shifted spectrum lies outside of specified normalisation waveband.");
-            }
+        switch (_sdParameters.getDistributionType()) {
+            case ELINE:
+            case BBODY:
+                break;
+            default:
+                if (sed.getStart() > start || sed.getEnd() < end) {
+                    throw new Exception(
+                            "Shifted spectrum lies outside of specified normalisation waveband.");
+                }
         }
 
         if (sed.getStart() > instrument.getObservingStart()
@@ -209,12 +170,11 @@ public final class GsaoiRecipe extends RecipeBase {
         // units
         // calculates: normalized SED, resampled SED, SED adjusted for aperture
         // output: SED in common internal units
-        SampledSpectrumVisitor norm = new NormalizeVisitor(
-                _sdParameters.getNormBand(),
-                _sdParameters.getSourceNormalization(),
-                _sdParameters.getUnits());
-        if (!_sdParameters.getSpectrumResource().equals(_sdParameters.ELINE)) {// ||
-            // !_sdParameters.getSpectrumResource().equals(_sdParameters.BBODY)){
+        if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
+            final SampledSpectrumVisitor norm = new NormalizeVisitor(
+                    _sdParameters.getNormBand(),
+                    _sdParameters.getSourceNormalization(),
+                    _sdParameters.getUnits());
             sed.accept(norm);
         }
 
@@ -295,7 +255,6 @@ public final class GsaoiRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        String ap_type = _obsDetailParameters.getApertureType();
         double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
         double ap_pix = 0;
@@ -327,7 +286,7 @@ public final class GsaoiRecipe extends RecipeBase {
                     _teleParameters.getTelescopeDiameter(), im_qual,
                     _gemsParameters.getAvgStrehl(), _gemsParameters.getStrehlBand(),
                     _obsConditionParameters.getImageQualityPercentile(),
-                    _sdParameters.getSourceGeometry(), _sdParameters.getFWHM());
+                    _sdParameters);
             GemsBackgroundVisitor gemsBackgroundVisitor = new GemsBackgroundVisitor();
             GemsTransmissionVisitor gemsTransmissionVisitor = new GemsTransmissionVisitor();
             GemsFluxAttenuationVisitor gemsFluxAttenuationVisitor = new GemsFluxAttenuationVisitor(
@@ -400,17 +359,15 @@ public final class GsaoiRecipe extends RecipeBase {
         if (_gemsParameters.gemsIsUsed()) {
             // If gems is used turn off printing of SF calc
             SFcalc.setSFPrint(false);
-            if (_obsDetailParameters.getApertureType().equals(
-                    _obsDetailParameters.AUTO_APER)) {
-                SFcalc.setApType(_obsDetailParameters.USER_APER);
+            if (_obsDetailParameters.isAutoAperture()) {
+                SFcalc.setApType(false);
                 SFcalc.setApDiam(1.18 * im_qual);
             }
             SFcalc.setImageQuality(uncorrected_im_qual);
             SFcalc.calculate();
             halo_source_fraction = SFcalc.getSourceFraction();
-            if (_obsDetailParameters.getApertureType().equals(
-                    _obsDetailParameters.AUTO_APER)) {
-                SFcalc.setApType(_obsDetailParameters.AUTO_APER);
+            if (_obsDetailParameters.isAutoAperture()) {
+                SFcalc.setApType(true);
             }
         }
 
@@ -419,8 +376,7 @@ public final class GsaoiRecipe extends RecipeBase {
         SFcalc.calculate();
         source_fraction = SFcalc.getSourceFraction();
         Npix = SFcalc.getNPix();
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.IMAGING)) {
+        if (_obsDetailParameters.getMethod().isImaging()) {
             _print(SFcalc.getTextResult(device));
             if (_gemsParameters.gemsIsUsed()) {
                 _println("derived image halo size (FWHM) for a point source = "
@@ -432,10 +388,7 @@ public final class GsaoiRecipe extends RecipeBase {
 
         PeakPixelFluxCalc ppfc;
 
-        if (_sdParameters.getSourceGeometry().equals(
-                SourceDefinitionParameters.POINT_SOURCE)
-                || _sdParameters.getExtendedSourceType().equals(
-                SourceDefinitionParameters.GAUSSIAN)) {
+        if (!_sdParameters.isUniform()) {
 
             // calculation of image quaility was in here if the current setup
             // does not work copy it back in here from above, and uncomment
@@ -453,19 +406,11 @@ public final class GsaoiRecipe extends RecipeBase {
                         uncorrected_im_qual, pixel_size,
                         _obsDetailParameters.getExposureTime(), halo_integral,
                         sky_integral, instrument.getDarkCurrent());
-                // _println("Peak pixel in halo: " +
-                // ppfc_halo.getFluxInPeakPixel());
-                // _println("Peak pixel in core: " + peak_pixel_count + "\n");
-                peak_pixel_count = peak_pixel_count
-                        + ppfc_halo.getFluxInPeakPixel();
-                // _println("Total peak pixel count: " + peak_pixel_count +
-                // " \n");
+                peak_pixel_count = peak_pixel_count + ppfc_halo.getFluxInPeakPixel();
 
             }
 
-        } else if (_sdParameters.getExtendedSourceType().equals(
-                SourceDefinitionParameters.UNIFORM)) {
-            double usbApArea = 0;
+        } else  {
 
             ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
                     _obsDetailParameters.getExposureTime(), sed_integral,
@@ -473,10 +418,6 @@ public final class GsaoiRecipe extends RecipeBase {
 
             peak_pixel_count = ppfc
                     .getFluxInPeakPixelUSB(source_fraction, Npix);
-        } else {
-            throw new Exception(
-                    "Source geometry not supported for image quality calculation: "
-                            + _sdParameters.getSourceGeometry());
         }
 
         // In this version we are bypassing morphology modules 3a-5a.

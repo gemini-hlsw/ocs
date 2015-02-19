@@ -3,8 +3,8 @@ package edu.gemini.itc.flamingos2;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.parameters.*;
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.web.ITCRequest;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.PrintWriter;
 import java.util.Calendar;
 
@@ -13,36 +13,13 @@ import java.util.Calendar;
  */
 public final class Flamingos2Recipe extends RecipeBase {
 
-    private Flamingos2Parameters _flamingos2Parameters;
-    private String _header = new StringBuffer("# Flamingos-2 ITC: "
-            + Calendar.getInstance().getTime() + "\n").toString();
-    private ObservingConditionParameters _obsConditionParameters;
-    private ObservationDetailsParameters _obsDetailParameters;
-    private PlottingDetailsParameters _plotParameters;
-    // Parameters from the web page.
-    private SourceDefinitionParameters _sdParameters;
-
-    private TeleParameters _teleParameters;
-
-    /**
-     * Constructs an Flamingos2 object by parsing servlet request.
-     *
-     * @param r   Servlet request containing form data from ITC web page.
-     * @param out Results will be written to this PrintWriter.
-     * @throws Exception on failure to parse parameters.
-     */
-    public Flamingos2Recipe(HttpServletRequest r, PrintWriter out)
-            throws Exception {
-        super(out);
-
-        // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
-        _flamingos2Parameters = new Flamingos2Parameters(r);
-        _teleParameters = new TeleParameters(r);
-        _plotParameters = new PlottingDetailsParameters(r);
-    }
+    private final Flamingos2Parameters _flamingos2Parameters;
+    private final String _header = new StringBuffer("# Flamingos-2 ITC: " + Calendar.getInstance().getTime() + "\n").toString();
+    private final ObservingConditionParameters _obsConditionParameters;
+    private final ObservationDetailsParameters _obsDetailParameters;
+    private final PlottingDetailsParameters _plotParameters;
+    private final SourceDefinitionParameters _sdParameters;
+    private final TeleParameters _teleParameters;
 
     /**
      * Constructs an Flamingos 2 object by parsing a Multi part servlet request.
@@ -51,17 +28,16 @@ public final class Flamingos2Recipe extends RecipeBase {
      * @param out Results will be written to this PrintWriter.
      * @throws Exception on failure to parse parameters.
      */
-    public Flamingos2Recipe(ITCMultiPartParser r, PrintWriter out)
-            throws Exception {
+    public Flamingos2Recipe(ITCMultiPartParser r, PrintWriter out) throws Exception {
         super(out);
 
         // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
+        _sdParameters = ITCRequest.sourceDefinitionParameters(r);
+        _obsDetailParameters = ITCRequest.observationParameters(r);
+        _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _flamingos2Parameters = new Flamingos2Parameters(r);
-        _teleParameters = new TeleParameters(r);
-        _plotParameters = new PlottingDetailsParameters(r);
+        _teleParameters = ITCRequest.teleParameters(r);
+        _plotParameters = ITCRequest.plotParamters(r);
     }
 
     /**
@@ -90,8 +66,7 @@ public final class Flamingos2Recipe extends RecipeBase {
      * @throws Exception
      */
     public void checkInputParameters() throws Exception {
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
             if (_flamingos2Parameters.getGrism().equalsIgnoreCase("none")) {
                 throw new Exception(
                         "In spectroscopy mode, a grism must be selected");
@@ -146,22 +121,24 @@ public final class Flamingos2Recipe extends RecipeBase {
         // both the normalization waveband and the observation waveband
         // (filter region).
 
-        String band = _sdParameters.getNormBand();
-        double start = WavebandDefinition.getStart(band);
-        double end = WavebandDefinition.getEnd(band);
+        final WavebandDefinition band = _sdParameters.getNormBand();
+        final double start = band.getStart();
+        final double end = band.getEnd();
         // System.out.println("WStart:" + start + "SStart:" +sed.getStart());
         // System.out.println("WEnd:" + end + "SEnd:" +sed.getEnd());
         // System.out.println("OStart:" + instrument.getObservingStart() +
         // "OEnd:" +instrument.getObservingEnd());
 
         // any sed except BBODY and ELINE have normailization regions
-        if (!(_sdParameters.getSpectrumResource().equals(
-                SourceDefinitionParameters.ELINE) || _sdParameters
-                .getSpectrumResource().equals(SourceDefinitionParameters.BBODY))) {
-            if (sed.getStart() > start || sed.getEnd() < end) {
-                throw new Exception(
-                        "Shifted spectrum lies outside of specified normalisation waveband.");
-            }
+        switch (_sdParameters.getDistributionType()) {
+            case ELINE:
+            case BBODY:
+                break;
+            default:
+                if (sed.getStart() > start || sed.getEnd() < end) {
+                    throw new Exception(
+                            "Shifted spectrum lies outside of specified normalisation waveband.");
+                }
         }
 
         if (sed.getStart() > instrument.getObservingStart()
@@ -183,12 +160,11 @@ public final class Flamingos2Recipe extends RecipeBase {
         // units
         // calculates: normalized SED, resampled SED, SED adjusted for aperture
         // output: SED in common internal units
-        SampledSpectrumVisitor norm = new NormalizeVisitor(
-                _sdParameters.getNormBand(),
-                _sdParameters.getSourceNormalization(),
-                _sdParameters.getUnits());
-        if (!_sdParameters.getSpectrumResource().equals(
-                SourceDefinitionParameters.ELINE)) {
+        if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
+            final SampledSpectrumVisitor norm = new NormalizeVisitor(
+                    _sdParameters.getNormBand(),
+                    _sdParameters.getSourceNormalization(),
+                    _sdParameters.getUnits());
             sed.accept(norm);
         }
 
@@ -288,7 +264,6 @@ public final class Flamingos2Recipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        String ap_type = _obsDetailParameters.getApertureType();
         double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
         double source_fraction = 0;
@@ -318,10 +293,7 @@ public final class Flamingos2Recipe extends RecipeBase {
         // Calculate the Peak Pixel Flux
         PeakPixelFluxCalc ppfc;
 
-        if (_sdParameters.getSourceGeometry().equals(
-                SourceDefinitionParameters.POINT_SOURCE)
-                || _sdParameters.getExtendedSourceType().equals(
-                SourceDefinitionParameters.GAUSSIAN)) {
+        if (!_sdParameters.isUniform()) {
 
             ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
                     _obsDetailParameters.getExposureTime(), sed_integral,
@@ -329,18 +301,14 @@ public final class Flamingos2Recipe extends RecipeBase {
 
             peak_pixel_count = ppfc.getFluxInPeakPixel();
 
-        } else if (_sdParameters.getExtendedSourceType().equals(
-                SourceDefinitionParameters.UNIFORM)) {
-            double usbApArea = 0;
+        } else {
+
+
             ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
                     _obsDetailParameters.getExposureTime(), sed_integral,
                     sky_integral, instrument.getDarkCurrent());
             peak_pixel_count = ppfc.getFluxInPeakPixelUSB(
                     SFcalc.getSourceFraction(), SFcalc.getNPix());
-        } else {
-            throw new Exception(
-                    "Peak Pixel Flux could not be calculated for type"
-                            + _sdParameters.getSourceGeometry());
         }
 
         // In this version we are bypassing morphology modules 3a-5a.
@@ -357,8 +325,7 @@ public final class Flamingos2Recipe extends RecipeBase {
         double dark_current = instrument.getDarkCurrent();
         double read_noise = instrument.getReadNoise();
 
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
 
             String sigSpec, backSpec, singleS2N, finalS2N;
             //SpecS2NVisitor specS2N;
@@ -366,7 +333,7 @@ public final class Flamingos2Recipe extends RecipeBase {
             SlitThroughput st;
             SlitThroughput st_halo;
 
-            if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
+            if (!_obsDetailParameters.isAutoAperture()) {
                 st = new SlitThroughput(im_qual,
                         _obsDetailParameters.getApertureDiameter(), pixel_size,
                         _flamingos2Parameters.getSlitSize() * pixel_size);
@@ -385,24 +352,20 @@ public final class Flamingos2Recipe extends RecipeBase {
                 st_halo = new SlitThroughput(uncorrected_im_qual, pixel_size,
                         _flamingos2Parameters.getSlitSize() * pixel_size);
 
-                if (_sdParameters.getSourceGeometry().equals(
-                        SourceDefinitionParameters.EXTENDED_SOURCE)) {
-                    if (_sdParameters.getExtendedSourceType().equals(
-                            SourceDefinitionParameters.UNIFORM)) {
+                switch (_sdParameters.getProfileType()) {
+                    case UNIFORM:
                         _println("software aperture extent along slit = "
                                 + device.toString(1 / _flamingos2Parameters
                                 .getSlitSize() * pixel_size) + " arcsec");
-                    }
-                } else {
+                        break;
+                    case POINT:
                     _println("software aperture extent along slit = "
                             + device.toString(1.4 * im_qual) + " arcsec");
+                        break;
                 }
             }
 
-            if (_sdParameters.getSourceGeometry().equals(
-                    SourceDefinitionParameters.POINT_SOURCE)
-                    || _sdParameters.getExtendedSourceType().equals(
-                    SourceDefinitionParameters.GAUSSIAN)) {
+            if (!_sdParameters.isUniform()) {
                 _println("fraction of source flux in aperture = "
                         + device.toString(st.getSlitThroughput()));
             }
@@ -422,22 +385,12 @@ public final class Flamingos2Recipe extends RecipeBase {
             ap_diam = st.getSpatialPix();
             double spec_source_frac = st.getSlitThroughput();
 
-            if (_sdParameters.getSourceGeometry().equals(
-                    SourceDefinitionParameters.EXTENDED_SOURCE)) {
-                if (_sdParameters.getExtendedSourceType().equals(
-                        SourceDefinitionParameters.UNIFORM)) {
-                    // im_qual=10000;
-
-                    if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
-                        spec_source_frac = _flamingos2Parameters.getSlitSize() * pixel_size
-                                * ap_diam * pixel_size; // ap_diam = Spec_NPix
-                    } else if (ap_type
-                            .equals(ObservationDetailsParameters.AUTO_APER)) {
-                        ap_diam = new Double(
-                                1 / (_flamingos2Parameters.getSlitSize() * pixel_size) + 0.5)
-                                .intValue();
-                        spec_source_frac = 1;
-                    }
+            if (_sdParameters.isUniform()) {
+               if (_obsDetailParameters.isAutoAperture()) {
+                    ap_diam = new Double(1 / (_flamingos2Parameters.getSlitSize() * pixel_size) + 0.5).intValue();
+                    spec_source_frac = 1;
+                } else {
+                    spec_source_frac = _flamingos2Parameters.getSlitSize() * pixel_size * ap_diam * pixel_size; // ap_diam = Spec_NPix
                 }
             }
 
@@ -548,8 +501,7 @@ public final class Flamingos2Recipe extends RecipeBase {
         _println(_obsConditionParameters.printParameterSummary());
         _println(_obsDetailParameters.printParameterSummary());
 
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
             _println(_plotParameters.printParameterSummary());
         }
     }

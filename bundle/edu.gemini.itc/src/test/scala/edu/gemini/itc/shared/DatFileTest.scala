@@ -195,6 +195,13 @@ class DatFileTest {
   }
 
   @Test
+  def parseFile5(): Unit = {
+    val data = DatFile.arrays("/trecs/trecs_LoRes-20.dat")
+    assert(data(1).size == 25)
+  }
+
+
+  @Test
   def readnoise(): Unit = {
     try {
       // TODO run this test from some string including corner cases like no ending \n etc

@@ -73,51 +73,45 @@ public class SEDFactory {
 
     public static VisitableSampledSpectrum getSED(SourceDefinitionParameters sdp, Instrument instrument) {
 
-        if (sdp.getSpectrumResource().equals(sdp.BBODY)) {
-            return new
-                    BlackBodySpectrum(sdp.getBBTemp(),
-                    instrument.getObservingStart(),
-                    instrument.getObservingEnd(),
-                    instrument.getSampling(),
-                    sdp.getSourceNormalization(),
-                    sdp.getUnits(),
-                    sdp.getNormBand(),
-                    sdp.getRedshift());
+        switch (sdp.getDistributionType()) {
+            case BBODY:
+                return new BlackBodySpectrum(sdp.getBBTemp(),
+                        instrument.getSampling(),
+                        sdp.getSourceNormalization(),
+                        sdp.getUnits(),
+                        sdp.getNormBand(),
+                        sdp.getRedshift());
 
-        } else if (sdp.getSpectrumResource().equals(sdp.ELINE)) {
-            return new
-                    EmissionLineSpectrum(sdp.getELineWavelength(),
-                    sdp.getELineWidth(),
-                    sdp.getELineFlux(),
-                    sdp.getELineContinuumFlux(),
-                    sdp.getELineFluxUnits(),
-                    sdp.getELineContinuumFluxUnits(),
-                    sdp.getRedshift(),
-                    instrument.getSampling());
-
-
-        } else if (sdp.getSpectrumResource().equals(sdp.PLAW)) {
-            return new
-                    PowerLawSpectrum(sdp.getPowerLawIndex(),
-                    instrument.getObservingStart(),
-                    instrument.getObservingEnd(),
-                    instrument.getSampling(),
-                    sdp.getRedshift());
-        } else {
-            VisitableSampledSpectrum temp;
-            if (sdp.isSedUserDefined()) {
-                temp = getSED(sdp.getSpectrumResource(),
-                        sdp.getUserDefinedSpectrum(),
+            case ELINE:
+                return new EmissionLineSpectrum(sdp.getELineWavelength(),
+                        sdp.getELineWidth(),
+                        sdp.getELineFlux(),
+                        sdp.getELineContinuumFlux(),
+                        sdp.getELineFluxUnits(),
+                        sdp.getELineContinuumFluxUnits(),
+                        sdp.getRedshift(),
                         instrument.getSampling());
-            } else {
-                temp = getSED(sdp.getSpectrumResource(),
-                        instrument.getSampling());
-            }
-            temp.applyWavelengthCorrection();
 
-            return temp;
-            // return getSED(sdp.getSpectrumResource(),
-            //	instrument.getSampling());
+            case PLAW:
+                return new PowerLawSpectrum(sdp.getPowerLawIndex(),
+                        instrument.getObservingStart(),
+                        instrument.getObservingEnd(),
+                        instrument.getSampling(),
+                        sdp.getRedshift());
+
+            default:
+                final VisitableSampledSpectrum temp;
+                if (sdp.isSedUserDefined()) {
+                    temp = getSED(sdp.getSpectrumResource(),
+                            sdp.getUserDefinedSpectrum(),
+                            instrument.getSampling());
+                } else {
+                    temp = getSED(sdp.getSpectrumResource(),
+                            instrument.getSampling());
+                }
+                temp.applyWavelengthCorrection();
+
+                return temp;
         }
     }
 
@@ -125,51 +119,44 @@ public class SEDFactory {
     //Added to allow creation of an SED spanning more than one filter for NICI
     public static VisitableSampledSpectrum getSED(SourceDefinitionParameters sdp, double sampling, double observingStart, double observingEnd) {
 
-        if (sdp.getSpectrumResource().equals(sdp.BBODY)) {
-            return new
-                    BlackBodySpectrum(sdp.getBBTemp(),
-                    observingStart,
-                    observingEnd,
-                    sampling,
-                    sdp.getSourceNormalization(),
-                    sdp.getUnits(),
-                    sdp.getNormBand(),
-                    sdp.getRedshift());
+        switch (sdp.getDistributionType()) {
+            case BBODY:
+                return new BlackBodySpectrum(sdp.getBBTemp(),
+                        sampling,
+                        sdp.getSourceNormalization(),
+                        sdp.getUnits(),
+                        sdp.getNormBand(),
+                        sdp.getRedshift());
 
-        } else if (sdp.getSpectrumResource().equals(sdp.ELINE)) {
-            return new
-                    EmissionLineSpectrum(sdp.getELineWavelength(),
-                    sdp.getELineWidth(),
-                    sdp.getELineFlux(),
-                    sdp.getELineContinuumFlux(),
-                    sdp.getELineFluxUnits(),
-                    sdp.getELineContinuumFluxUnits(),
-                    sdp.getRedshift(),
-                    sampling);
-
-
-        } else if (sdp.getSpectrumResource().equals(sdp.PLAW)) {
-            return new
-                    PowerLawSpectrum(sdp.getPowerLawIndex(),
-                    observingStart,
-                    observingEnd,
-                    sampling,
-                    sdp.getRedshift());
-        } else {
-            VisitableSampledSpectrum temp;
-            if (sdp.isSedUserDefined()) {
-                temp = getSED(sdp.getSpectrumResource(),
-                        sdp.getUserDefinedSpectrum(),
+            case ELINE:
+                return new EmissionLineSpectrum(sdp.getELineWavelength(),
+                        sdp.getELineWidth(),
+                        sdp.getELineFlux(),
+                        sdp.getELineContinuumFlux(),
+                        sdp.getELineFluxUnits(),
+                        sdp.getELineContinuumFluxUnits(),
+                        sdp.getRedshift(),
                         sampling);
-            } else {
-                temp = getSED(sdp.getSpectrumResource(),
-                        sampling);
-            }
-            temp.applyWavelengthCorrection();
 
-            return temp;
-            // return getSED(sdp.getSpectrumResource(),
-            //	instrument.getSampling());
+            case PLAW:
+                return new PowerLawSpectrum(sdp.getPowerLawIndex(),
+                        observingStart,
+                        observingEnd,
+                        sampling,
+                        sdp.getRedshift());
+
+            default:
+                final VisitableSampledSpectrum temp;
+                if (sdp.getDistributionType() == SourceDefinitionParameters.Distribution.USER_DEFINED) {
+                    temp = getSED(sdp.getSpectrumResource(),
+                            sdp.getUserDefinedSpectrum(),
+                            sampling);
+                } else {
+                    temp = getSED(sdp.getSpectrumResource(),
+                            sampling);
+                }
+                temp.applyWavelengthCorrection();
+                return temp;
         }
     }
 

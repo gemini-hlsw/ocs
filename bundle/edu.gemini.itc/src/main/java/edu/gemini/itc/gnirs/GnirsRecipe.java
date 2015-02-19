@@ -1,53 +1,34 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-//
 package edu.gemini.itc.gnirs;
 
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.parameters.*;
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.web.ITCRequest;
 import org.jfree.chart.ChartColor;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-//import edu.gemini.itc.altair.Altair;
-//import edu.gemini.itc.altair.AltairBackgroundVisitor;
-//import edu.gemini.itc.altair.AltairFluxAttenuationVisitor;
-//import edu.gemini.itc.altair.AltairParameters;
-//import edu.gemini.itc.altair.AltairTransmissionVisitor;
-
 /**
  * This class performs the calculations for Gnirs used for imaging.
  */
 public final class GnirsRecipe extends RecipeBase {
-    // Images will be saved to this session object
-    // private HttpSession _sessionObject = null; // set from servlet request
 
-    //    private AltairParameters _altairParameters; // REL-472: Commenting out Altair option for now
     private Calendar now = Calendar.getInstance();
-    private String _header = new StringBuffer("# GNIRS ITC: "
-            + now.getTime() + "\n").toString();
+    private String _header = new StringBuffer("# GNIRS ITC: " + now.getTime() + "\n").toString();
 
     private String sigSpec, backSpec, singleS2N, finalS2N;
     private SpecS2NLargeSlitVisitor specS2N;
 
     // Parameters from the web page.
-    private SourceDefinitionParameters _sdParameters;
-    private ObservationDetailsParameters _obsDetailParameters;
-    private ObservingConditionParameters _obsConditionParameters;
-    private GnirsParameters _gnirsParameters;
-    private TeleParameters _teleParameters;
-    private PlottingDetailsParameters _plotParameters;
+    private final SourceDefinitionParameters _sdParameters;
+    private final ObservationDetailsParameters _obsDetailParameters;
+    private final ObservingConditionParameters _obsConditionParameters;
+    private final GnirsParameters _gnirsParameters;
+    private final TeleParameters _teleParameters;
+    private final PlottingDetailsParameters _plotParameters;
 
     private VisitableSampledSpectrum signalOrder3, signalOrder4, signalOrder5,
             signalOrder6, signalOrder7, signalOrder8;
@@ -56,25 +37,6 @@ public final class GnirsRecipe extends RecipeBase {
             backGroundOrder8;
     private VisitableSampledSpectrum finalS2NOrder3, finalS2NOrder4,
             finalS2NOrder5, finalS2NOrder6, finalS2NOrder7, finalS2NOrder8;
-
-    /**
-     * Constructs a GnirsRecipe by parsing servlet request.
-     *
-     * @param r   Servlet request containing form data from ITC web page.
-     * @param out Results will be written to this PrintWriter.
-     * @throws Exception on failure to parse parameters.
-     */
-    public GnirsRecipe(HttpServletRequest r, PrintWriter out) throws Exception {
-        super(out);
-        // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
-        _gnirsParameters = new GnirsParameters(r);
-        _teleParameters = new TeleParameters(r);
-//        _altairParameters = new AltairParameters(r); // REL-472: Commenting out Altair option for now
-        _plotParameters = new PlottingDetailsParameters(r);
-    }
 
     /**
      * Constructs a GnirsRecipe by parsing a Multipart servlet request.
@@ -86,13 +48,12 @@ public final class GnirsRecipe extends RecipeBase {
     public GnirsRecipe(ITCMultiPartParser r, PrintWriter out) throws Exception {
         super(out);
         // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
+        _sdParameters = ITCRequest.sourceDefinitionParameters(r);
+        _obsDetailParameters = ITCRequest.observationParameters(r);
+        _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _gnirsParameters = new GnirsParameters(r);
-        _teleParameters = new TeleParameters(r);
-//        _altairParameters = new AltairParameters(r); // REL-472: Commenting out Altair option for now
-        _plotParameters = new PlottingDetailsParameters(r);
+        _teleParameters = ITCRequest.teleParameters(r);
+        _plotParameters = ITCRequest.plotParamters(r);
     }
 
     /**
@@ -102,7 +63,6 @@ public final class GnirsRecipe extends RecipeBase {
                        ObservationDetailsParameters obsDetailParameters,
                        ObservingConditionParameters obsConditionParameters,
                        GnirsParameters gnirsParameters, TeleParameters teleParameters,
-//                       AltairParameters altairParameters, // REL-472: Commenting out Altair option for now
                        PlottingDetailsParameters plotParameters,
                        PrintWriter out)
 
@@ -143,7 +103,7 @@ public final class GnirsRecipe extends RecipeBase {
         //instrument = new GnirsSouth(_gnirsParameters, _obsDetailParameters);
         instrument = new GnirsNorth(_gnirsParameters, _obsDetailParameters);   // Added on 2/27/2014 (see REL-480)
 
-        if (_sdParameters.getSourceSpec().equals(_sdParameters.ELINE))
+        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
             // *25 b/c of increased resolutuion of transmission files
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25))) {
                 throw new Exception(
@@ -167,20 +127,23 @@ public final class GnirsRecipe extends RecipeBase {
         // both the normalization waveband and the observation waveband
         // (filter region).
 
-        String band = _sdParameters.getNormBand();
-        double start = WavebandDefinition.getStart(band);
-        double end = WavebandDefinition.getEnd(band);
+        final WavebandDefinition band = _sdParameters.getNormBand();
+        final double start = band.getStart();
+        final double end = band.getEnd();
 
         // any sed except BBODY and ELINE have normailization regions
-        if (!(_sdParameters.getSpectrumResource().equals(_sdParameters.ELINE) || _sdParameters
-                .getSpectrumResource().equals(_sdParameters.BBODY))) {
-            if (sed.getStart() > start || sed.getEnd() < end) {
-                throw new Exception(
-                        "Shifted spectrum lies outside of specified normalisation waveband.");
-            }
+        switch (_sdParameters.getDistributionType()) {
+            case ELINE:
+            case BBODY:
+                break;
+            default:
+                if (sed.getStart() > start || sed.getEnd() < end) {
+                    throw new Exception(
+                            "Shifted spectrum lies outside of specified normalisation waveband.");
+                }
         }
 
-        if (_plotParameters.getPlotLimits().equals(_plotParameters.USER_LIMITS)) {
+        if (_plotParameters.getPlotLimits().equals(PlottingDetailsParameters.PlotLimits.USER)) {
             if (_plotParameters.getPlotWaveL() > instrument.getObservingEnd()
                     || _plotParameters.getPlotWaveU() < instrument
                     .getObservingStart()) {
@@ -197,11 +160,11 @@ public final class GnirsRecipe extends RecipeBase {
         // units
         // calculates: normalized SED, resampled SED, SED adjusted for aperture
         // output: SED in common internal units
-        SampledSpectrumVisitor norm = new NormalizeVisitor(
-                _sdParameters.getNormBand(),
-                _sdParameters.getSourceNormalization(),
-                _sdParameters.getUnits());
-        if (!_sdParameters.getSpectrumResource().equals(_sdParameters.ELINE)) {
+        if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
+            final SampledSpectrumVisitor norm = new NormalizeVisitor(
+                    _sdParameters.getNormBand(),
+                    _sdParameters.getSourceNormalization(),
+                    _sdParameters.getUnits());
             sed.accept(norm);
         }
 
@@ -297,7 +260,6 @@ public final class GnirsRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        String ap_type = _obsDetailParameters.getApertureType();
         double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
         double ap_pix = 0;
@@ -443,8 +405,7 @@ public final class GnirsRecipe extends RecipeBase {
         SFcalc.calculate();
         source_fraction = SFcalc.getSourceFraction();
         Npix = SFcalc.getNPix();
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.IMAGING)) {
+        if (_obsDetailParameters.getMethod().isImaging()) {
             _print(SFcalc.getTextResult(device));
             _println(IQcalc.getTextResult(device));
             _println("Sky subtraction aperture = "
@@ -463,10 +424,7 @@ public final class GnirsRecipe extends RecipeBase {
         // Calculate the Peak Pixel Flux
         PeakPixelFluxCalc ppfc;
 
-        if (_sdParameters.getSourceGeometry().equals(
-                SourceDefinitionParameters.POINT_SOURCE)
-                || _sdParameters.getExtendedSourceType().equals(
-                SourceDefinitionParameters.GAUSSIAN)) {
+        if (!_sdParameters.isUniform()) {
 
             ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
                     _obsDetailParameters.getExposureTime(), sed_integral,
@@ -474,24 +432,7 @@ public final class GnirsRecipe extends RecipeBase {
 
             peak_pixel_count = ppfc.getFluxInPeakPixel();
 
-//            // REL-472: Commenting out Altair option for now
-//            if (_altairParameters.altairIsUsed()) {
-//                PeakPixelFluxCalc ppfc_halo = new PeakPixelFluxCalc(
-//                        uncorrected_im_qual, pixel_size,
-//                        _obsDetailParameters.getExposureTime(), halo_integral,
-//                        sky_integral, instrument.getDarkCurrent());
-//                // _println("Peak pixel in halo: " +
-//                // ppfc_halo.getFluxInPeakPixel());
-//                // _println("Peak pixel in core: " + peak_pixel_count + "\n");
-//                peak_pixel_count = peak_pixel_count
-//                        + ppfc_halo.getFluxInPeakPixel();
-//                // _println("Total peak pixel count: " + peak_pixel_count +
-//                // " \n");
-//
-//            }
-        } else if (_sdParameters.getExtendedSourceType().equals(
-                SourceDefinitionParameters.UNIFORM)) {
-            double usbApArea = 0;
+        } else {
 
             ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
                     _obsDetailParameters.getExposureTime(), sed_integral,
@@ -499,8 +440,6 @@ public final class GnirsRecipe extends RecipeBase {
 
             peak_pixel_count = ppfc
                     .getFluxInPeakPixelUSB(source_fraction, Npix);
-        } else {
-            throw new Exception("Peak Pixel could not be calculated ");
         }
 
         // In this version we are bypassing morphology modules 3a-5a.
@@ -518,13 +457,12 @@ public final class GnirsRecipe extends RecipeBase {
 
         // ObservationMode Imaging or spectroscopy
 
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
 
             SlitThroughput st;
             SlitThroughput st_halo = null;
 
-            if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
+            if (!_obsDetailParameters.isAutoAperture()) {
                 st = new SlitThroughput(im_qual,
                         _obsDetailParameters.getApertureDiameter(),
                         pixel_size, _gnirsParameters.getFPMask());
@@ -538,24 +476,21 @@ public final class GnirsRecipe extends RecipeBase {
                 st = new SlitThroughput(im_qual, pixel_size, _gnirsParameters.getFPMask());
                 st_halo = new SlitThroughput(uncorrected_im_qual, pixel_size, _gnirsParameters.getFPMask());
 
-                if (_sdParameters.getSourceGeometry().equals(
-                        SourceDefinitionParameters.EXTENDED_SOURCE)) {
-                    if (_sdParameters.getExtendedSourceType().equals(
-                            SourceDefinitionParameters.UNIFORM)) {
+                switch (_sdParameters.getProfileType()) {
+                    case UNIFORM:
                         _println("software aperture extent along slit = "
                                 + device.toString(1 / _gnirsParameters
                                 .getFPMask()) + " arcsec");
-                    }
-                } else {
-                    _println("software aperture extent along slit = "
-                            + device.toString(1.4 * im_qual) + " arcsec");
+                        break;
+                    case POINT:
+                        _println("software aperture extent along slit = "
+                                + device.toString(1.4 * im_qual) + " arcsec");
+                        break;
                 }
+
             }
 
-            if (_sdParameters.getSourceGeometry().equals(
-                    SourceDefinitionParameters.POINT_SOURCE)
-                    || _sdParameters.getExtendedSourceType().equals(
-                    SourceDefinitionParameters.GAUSSIAN)) {
+            if (!_sdParameters.isUniform()) {
                 _println("fraction of source flux in aperture = "
                         + device.toString(st.getSlitThroughput()));
             }
@@ -590,23 +525,13 @@ public final class GnirsRecipe extends RecipeBase {
 
             // For the usb case we want the resolution to be determined by the
             // slit width and not the image quality for a point source.
-            if (_sdParameters.getSourceGeometry().equals(
-                    SourceDefinitionParameters.EXTENDED_SOURCE)) {
-                if (_sdParameters.getExtendedSourceType().equals(
-                        SourceDefinitionParameters.UNIFORM)) {
-                    im_qual = 10000;
-
-                    if (ap_type
-                            .equals(ObservationDetailsParameters.USER_APER)) {
-                        spec_source_frac = _gnirsParameters.getFPMask()
-                                * ap_diam * pixel_size; // Spec_NPix
-                    } else if (ap_type
-                            .equals(ObservationDetailsParameters.AUTO_APER)) {
-                        ap_diam = new Double(
-                                1 / (_gnirsParameters.getFPMask() * pixel_size) + 0.5)
-                                .intValue();
-                        spec_source_frac = 1;
-                    }
+            if (_sdParameters.isUniform()) {
+                im_qual = 10000;
+                if (_obsDetailParameters.isAutoAperture()) {
+                    ap_diam = new Double(1 / (_gnirsParameters.getFPMask() * pixel_size) + 0.5).intValue();
+                    spec_source_frac = 1;
+                } else {
+                    spec_source_frac = _gnirsParameters.getFPMask() * ap_diam * pixel_size;
                 }
             }
 
@@ -1235,13 +1160,11 @@ public final class GnirsRecipe extends RecipeBase {
 
         _println(_obsConditionParameters.printParameterSummary());
         _println(_obsDetailParameters.printParameterSummary());
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
             _println(_plotParameters.printParameterSummary());
         }
 
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.SPECTROSCOPY)) { // 49 ms
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) { // 49 ms
             if (instrument.XDisp_IsUsed()) {
                 _println(signalOrder3, _header, sigSpec);
                 _println(signalOrder4, _header, sigSpec);

@@ -1,19 +1,10 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-//
 package edu.gemini.itc.trecs;
 
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.parameters.*;
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.web.ITCRequest;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.PrintWriter;
 import java.util.Calendar;
 
@@ -33,27 +24,7 @@ public final class TRecsRecipe extends RecipeBase {
     private SpecS2NLargeSlitVisitor specS2N;
 
     private Calendar now = Calendar.getInstance();
-    private String _header = new StringBuffer("# T-ReCS ITC: " + now.getTime()
-            + "\n").toString();
-
-    /**
-     * Constructs a TRecsRecipe by parsing servlet request.
-     *
-     * @param r   Servlet request containing form data from ITC web page.
-     * @param out Results will be written to this PrintWriter.
-     * @throws Exception on failure to parse parameters.
-     */
-    public TRecsRecipe(HttpServletRequest r, PrintWriter out) throws Exception {
-        _out = out;
-
-        // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
-        _trecsParameters = new TRecsParameters(r);
-        _teleParameters = new TeleParameters(r);
-        _plotParameters = new PlottingDetailsParameters(r);
-    }
+    private String _header = new StringBuffer("# T-ReCS ITC: " + now.getTime() + "\n").toString();
 
     /**
      * Constructs a TRecsRecipe by parsing a Multipart servlet request.
@@ -66,12 +37,12 @@ public final class TRecsRecipe extends RecipeBase {
         _out = out;
 
         // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
         _trecsParameters = new TRecsParameters(r);
-        _teleParameters = new TeleParameters(r);
-        _plotParameters = new PlottingDetailsParameters(r);
+        _sdParameters = ITCRequest.sourceDefinitionParameters(r);
+        _obsDetailParameters = correctedObsDetails(_trecsParameters, ITCRequest.observationParameters(r));
+        _obsConditionParameters = ITCRequest.obsConditionParameters(r);
+        _teleParameters = ITCRequest.teleParameters(r);
+        _plotParameters = ITCRequest.plotParamters(r);
     }
 
     /**
@@ -82,16 +53,45 @@ public final class TRecsRecipe extends RecipeBase {
                        ObservingConditionParameters obsConditionParameters,
                        TRecsParameters trecsParameters, TeleParameters teleParameters,
                        PlottingDetailsParameters plotParameters,
-                       PrintWriter out)
+                       PrintWriter out) throws Exception
 
     {
         super(out);
         _sdParameters = sdParameters;
-        _obsDetailParameters = obsDetailParameters;
+        _obsDetailParameters = correctedObsDetails(trecsParameters, obsDetailParameters);
         _obsConditionParameters = obsConditionParameters;
         _trecsParameters = trecsParameters;
         _teleParameters = teleParameters;
         _plotParameters = plotParameters;
+    }
+
+    private ObservationDetailsParameters correctedObsDetails(TRecsParameters tp, ObservationDetailsParameters odp) throws Exception {
+        // TODO : These corrections were previously done in random places throughout the recipe. I moved them here
+        // TODO : so the ObservationDetailsParameters object can become immutable. Basically this calculates
+        // TODO : some missing parameters and/or turns the total exposure time into a single exposure time.
+        // TODO : This is a temporary hack. There needs to be a better solution for this.
+        // NOTE : odp.getExposureTime() carries the TOTAL exposure time (as opposed to exp time for a single frame)
+        final TRecs instrument = new TRecs(tp, odp); // TODO: Avoid creating an instrument instance twice.
+        final double correctedExposureTime = instrument.getFrameTime();
+        final int correctedNumExposures = new Double(odp.getExposureTime() / instrument.getFrameTime() + 0.5).intValue();
+        if (odp.getMethod() instanceof ImagingInt) {
+            return new ObservationDetailsParameters(
+                    new ImagingInt(odp.getSNRatio(), correctedExposureTime, odp.getSourceFraction()),
+                    odp.getAnalysis()
+            );
+        } else if (odp.getMethod() instanceof ImagingSN) {
+            return new ObservationDetailsParameters(
+                    new ImagingSN(correctedNumExposures, correctedExposureTime, odp.getSourceFraction()),
+                    odp.getAnalysis()
+            );
+        } else if (odp.getMethod() instanceof SpectroscopySN) {
+            return new ObservationDetailsParameters(
+                    new SpectroscopySN(correctedNumExposures, correctedExposureTime, odp.getSourceFraction()),
+                    odp.getAnalysis()
+            );
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
 
     /**
@@ -118,7 +118,7 @@ public final class TRecsRecipe extends RecipeBase {
 
         TRecs instrument = new TRecs(_trecsParameters, _obsDetailParameters);
 
-        if (_sdParameters.getSourceSpec().equals(_sdParameters.ELINE))
+        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters
                     .getELineWavelength() * 1000 / 4))) { // /4 b/c of increased
                 // resolution of
@@ -146,17 +146,20 @@ public final class TRecsRecipe extends RecipeBase {
         // both the normalization waveband and the observation waveband
         // (filter region).
 
-        String band = _sdParameters.getNormBand();
-        double start = WavebandDefinition.getStart(band);
-        double end = WavebandDefinition.getEnd(band);
+        final WavebandDefinition band = _sdParameters.getNormBand();
+        final double start = band.getStart();
+        final double end = band.getEnd();
 
         // any sed except BBODY and ELINE have normailization regions
-        if (!(_sdParameters.getSpectrumResource().equals(_sdParameters.ELINE) || _sdParameters
-                .getSpectrumResource().equals(_sdParameters.BBODY))) {
-            if (sed.getStart() > start || sed.getEnd() < end) {
-                throw new Exception(
-                        "Shifted spectrum lies outside of specified normalisation waveband.");
-            }
+        switch (_sdParameters.getDistributionType()) {
+            case ELINE:
+            case BBODY:
+                break;
+            default:
+                if (sed.getStart() > start || sed.getEnd() < end) {
+                    throw new Exception(
+                            "Shifted spectrum lies outside of specified normalisation waveband.");
+                }
         }
 
         // if (sed.getStart() > instrument.getObservingStart() ||
@@ -170,7 +173,7 @@ public final class TRecsRecipe extends RecipeBase {
         // Exception("Shifted spectrum lies outside of observed wavelengths");
         // }
 
-        if (_plotParameters.getPlotLimits().equals(_plotParameters.USER_LIMITS)) {
+        if (_plotParameters.getPlotLimits().equals(PlottingDetailsParameters.PlotLimits.USER)) {
             if (_plotParameters.getPlotWaveL() > instrument.getObservingEnd()
                     || _plotParameters.getPlotWaveU() < instrument
                     .getObservingStart()) {
@@ -188,11 +191,11 @@ public final class TRecsRecipe extends RecipeBase {
         // units
         // calculates: normalized SED, resampled SED, SED adjusted for aperture
         // output: SED in common internal units
-        SampledSpectrumVisitor norm = new NormalizeVisitor(
-                _sdParameters.getNormBand(),
-                _sdParameters.getSourceNormalization(),
-                _sdParameters.getUnits());
-        if (!_sdParameters.getSpectrumResource().equals(_sdParameters.ELINE)) {
+        if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
+            final SampledSpectrumVisitor norm = new NormalizeVisitor(
+                    _sdParameters.getNormBand(),
+                    _sdParameters.getSourceNormalization(),
+                    _sdParameters.getUnits());
             sed.accept(norm);
         }
 
@@ -226,8 +229,7 @@ public final class TRecsRecipe extends RecipeBase {
 
         // For mid-IR observation the watervapor percentile and sky background
         // percentile must be the same
-        if (_obsConditionParameters.getSkyTransparencyWaterCategory() != _obsConditionParameters
-                .getSkyBackgroundCategory()) {
+        if (!_obsConditionParameters.getSkyTransparencyWaterCategory().equals(_obsConditionParameters.getSkyBackgroundCategory())) {
             _println("");
             _println("Sky background percentile must be equal to sky transparency(water vapor): \n "
                     + "    Please modify the Observing condition constraints section of the HTML form \n"
@@ -314,7 +316,6 @@ public final class TRecsRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        String ap_type = _obsDetailParameters.getApertureType();
         double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
         double ap_pix = 0;
@@ -331,21 +332,14 @@ public final class TRecsRecipe extends RecipeBase {
         IQcalc.calculate();
 
         im_qual = IQcalc.getImageQuality();
-        double exp_time;
-        if (_obsDetailParameters.getTotalObservationTime() == 0)
-            exp_time = _obsDetailParameters.getExposureTime();
-        else {
-            exp_time = instrument.getFrameTime();
-            _obsDetailParameters.setExposureTime(exp_time);
-        }
+        final double exp_time = _obsDetailParameters.getExposureTime();
 
         // Calculate the Fraction of source in the aperture
         SourceFractionCalculatable SFcalc =
                 SourceFractionCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
         SFcalc.setImageQuality(im_qual);
         SFcalc.calculate();
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.IMAGING)) {
+        if (_obsDetailParameters.getMethod().isImaging()) {
             _print(SFcalc.getTextResult(device));
             _println(IQcalc.getTextResult(device));
             _println("Sky subtraction aperture = "
@@ -356,82 +350,38 @@ public final class TRecsRecipe extends RecipeBase {
         // Calculate the Peak Pixel Flux
         PeakPixelFluxCalc ppfc;
 
-        if (_sdParameters.getSourceGeometry().equals(
-                SourceDefinitionParameters.POINT_SOURCE)
-                || _sdParameters.getExtendedSourceType().equals(
-                SourceDefinitionParameters.GAUSSIAN)) {
+        if (!_sdParameters.isUniform()) {
 
             ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
-                    // _obsDetailParameters.getExposureTime(), // OLD TRECS EXPOSURE
-                    // TIME;
-                    // instrument.getFrameTime(),
                     exp_time, sed_integral, sky_integral,
                     instrument.getDarkCurrent());
 
             peak_pixel_count = ppfc.getFluxInPeakPixel();
-        } else if (_sdParameters.getExtendedSourceType().equals(
-                SourceDefinitionParameters.UNIFORM)) {
-            double usbApArea = 0;
+
+        } else {
+
             ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
-                    // _obsDetailParameters.getExposureTime(), // OLD TRECS EXPOSURE
-                    // TIME;
-                    // instrument.getFrameTime(),
                     exp_time, sed_integral, sky_integral,
                     instrument.getDarkCurrent());
 
-            peak_pixel_count = ppfc.getFluxInPeakPixelUSB(
-                    SFcalc.getSourceFraction(), SFcalc.getNPix());
-        } else {
-            throw new Exception("Peak Pixel could not be calculated ");
+            peak_pixel_count = ppfc.getFluxInPeakPixelUSB(SFcalc.getSourceFraction(), SFcalc.getNPix());
         }
 
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
         int binFactor;
-        int number_exposures;
+        final int number_exposures = _obsDetailParameters.getNumExposures();
         double spec_source_frac = 0;
-        if (_obsDetailParameters.getTotalObservationTime() == 0) {
-            number_exposures = _obsDetailParameters.getNumExposures(); // OLD
-            // TRECS
-            // NUM
-            // EXPOSURE
-        } else {
-            number_exposures = new Double(
-                    _obsDetailParameters.getTotalObservationTime()
-                            / instrument.getFrameTime() + 0.5).intValue();
-            _obsDetailParameters.setNumExposures(number_exposures); // sets
-            // number
-            // exposures
-            // for
-            // classes
-            // that need
-            // it.
-        }
         double frac_with_source = _obsDetailParameters.getSourceFraction();
         double dark_current = instrument.getDarkCurrent();
-        double exposure_time;
-        if (_obsDetailParameters.getTotalObservationTime() == 0) {
-            exposure_time = _obsDetailParameters.getExposureTime(); // OLD TRECS
-            // EXPOSURE
-            // TIME
-        } else {
-            exposure_time = instrument.getFrameTime();
-            _obsDetailParameters.setExposureTime(exposure_time); // sets
-            // exposure
-            // time for
-            // classes
-            // that need
-            // it.
-        }
         double read_noise = instrument.getReadNoise();
         // report error if this does not come out to be an integer
         checkSourceFraction(number_exposures, frac_with_source);
 
         // ObservationMode Imaging or spectroscopy
 
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
 
             SlitThroughput st;
 
@@ -443,7 +393,7 @@ public final class TRecsRecipe extends RecipeBase {
             // sky.accept(dtv);
 
             // ChartVisitor TRecsChart = new ChartVisitor();
-            if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
+            if (!_obsDetailParameters.isAutoAperture()) {
                 st = new SlitThroughput(im_qual,
                         _obsDetailParameters.getApertureDiameter(), pixel_size,
                         _trecsParameters.getFPMask());
@@ -451,26 +401,18 @@ public final class TRecsRecipe extends RecipeBase {
                         + device.toString(_obsDetailParameters
                         .getApertureDiameter()) + " arcsec");
             } else {
-                st = new SlitThroughput(im_qual, pixel_size,
-                        _trecsParameters.getFPMask());
-                if (_sdParameters.getSourceGeometry().equals(
-                        SourceDefinitionParameters.EXTENDED_SOURCE)) {
-                    if (_sdParameters.getExtendedSourceType().equals(
-                            SourceDefinitionParameters.UNIFORM)) {
-                        _println("software aperture extent along slit = "
-                                + device.toString(1 / _trecsParameters
-                                .getFPMask()) + " arcsec");
-                    }
-                } else {
-                    _println("software aperture extent along slit = "
-                            + device.toString(1.4 * im_qual) + " arcsec");
+                st = new SlitThroughput(im_qual, pixel_size, _trecsParameters.getFPMask());
+                switch (_sdParameters.getProfileType()) {
+                    case UNIFORM:
+                        _println("software aperture extent along slit = " + device.toString(1 / _trecsParameters.getFPMask()) + " arcsec");
+                        break;
+                    case POINT:
+                        _println("software aperture extent along slit = " + device.toString(1.4 * im_qual) + " arcsec");
+                        break;
                 }
             }
 
-            if (_sdParameters.getSourceGeometry().equals(
-                    SourceDefinitionParameters.POINT_SOURCE)
-                    || _sdParameters.getExtendedSourceType().equals(
-                    SourceDefinitionParameters.GAUSSIAN)) {
+            if (!_sdParameters.isUniform()) {
                 _println("fraction of source flux in aperture = "
                         + device.toString(st.getSlitThroughput()));
             }
@@ -484,9 +426,9 @@ public final class TRecsRecipe extends RecipeBase {
 
             _println("");
             _println("Requested total integration time = "
-                    + device.toString(exposure_time * number_exposures)
+                    + device.toString(exp_time * number_exposures)
                     + " secs, of which "
-                    + device.toString(exposure_time * number_exposures
+                    + device.toString(exp_time * number_exposures
                     * frac_with_source) + " secs is on source.");
 
             _print("<HR align=left SIZE=3>");
@@ -500,22 +442,13 @@ public final class TRecsRecipe extends RecipeBase {
 
             // For the usb case we want the resolution to be determined by the
             // slit width and not the image quality for a point source.
-            if (_sdParameters.getSourceGeometry().equals(
-                    SourceDefinitionParameters.EXTENDED_SOURCE)) {
-                if (_sdParameters.getExtendedSourceType().equals(
-                        SourceDefinitionParameters.UNIFORM)) {
-                    im_qual = 10000;
-
-                    if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
-                        spec_source_frac = _trecsParameters.getFPMask()
-                                * ap_diam * pixel_size; // ap_diam = Spec_NPix
-                    } else if (ap_type
-                            .equals(ObservationDetailsParameters.AUTO_APER)) {
-                        ap_diam = new Double(
-                                1 / (_trecsParameters.getFPMask() * pixel_size) + 0.5)
-                                .intValue();
-                        spec_source_frac = 1;
-                    }
+            if (_sdParameters.isUniform()) {
+                im_qual = 10000;
+                if (_obsDetailParameters.isAutoAperture()) {
+                    ap_diam = new Double(1 / (_trecsParameters.getFPMask() * pixel_size) + 0.5).intValue();
+                    spec_source_frac = 1;
+                } else {
+                    spec_source_frac = _trecsParameters.getFPMask() * ap_diam * pixel_size; // ap_diam = Spec_NPix
                 }
             }
             // _println("Spec_source_frac: " + spec_source_frac+
@@ -530,7 +463,7 @@ public final class TRecsRecipe extends RecipeBase {
                     instrument.getGratingDispersion_nmppix(),
                     instrument.getGratingResolution(), spec_source_frac,
                     im_qual, ap_diam, number_exposures, frac_with_source,
-                    exposure_time, dark_current
+                    exp_time, dark_current
                     * instrument.getSpatialBinning()
                     * instrument.getSpectralBinning(), read_noise,
                     _obsDetailParameters.getSkyApertureDiameter(),
@@ -631,13 +564,8 @@ public final class TRecsRecipe extends RecipeBase {
         _println(_teleParameters.printParameterSummary());
         _println(_obsConditionParameters.printParameterSummary());
         _println(_obsDetailParameters.printParameterSummary());
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
             _println(_plotParameters.printParameterSummary());
-        }
-
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.SPECTROSCOPY)) {
             _println(specS2N.getSignalSpectrum(), _header, sigSpec);
             _println(specS2N.getBackgroundSpectrum(), _header, backSpec);
             _println(specS2N.getExpS2NSpectrum(), _header, singleS2N);

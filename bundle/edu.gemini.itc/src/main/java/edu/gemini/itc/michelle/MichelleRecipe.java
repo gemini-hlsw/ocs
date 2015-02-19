@@ -1,73 +1,32 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-//
 package edu.gemini.itc.michelle;
 
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.parameters.*;
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.web.ITCRequest;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.PrintWriter;
 import java.util.Calendar;
-
-//import edu.gemini.itc.operation.ChartDataSource;
-//import edu.gemini.itc.operation.ChartCreatePNG;
-//import edu.gemini.itc.operation.ChartCreate;
-//import edu.gemini.itc.operation.ChartVisitor;
 
 /**
  * This class performs the calculations for Michelle
  * used for imaging.
  */
 public final class MichelleRecipe extends RecipeBase {
-    // Images will be saved to this session object
-    //private HttpSession _sessionObject = null;	// set from servlet request
 
     // Parameters from the web page.
-    private SourceDefinitionParameters _sdParameters;
-    private ObservationDetailsParameters _obsDetailParameters;
-    private ObservingConditionParameters _obsConditionParameters;
-    private MichelleParameters _michelleParameters;
-    private TeleParameters _teleParameters;
-    private PlottingDetailsParameters _plotParameters;
-    private SpecS2NLargeSlitVisitor specS2N;
+    private final SourceDefinitionParameters _sdParameters;
+    private final ObservationDetailsParameters _obsDetailParameters;
+    private final ObservingConditionParameters _obsConditionParameters;
+    private final MichelleParameters _michelleParameters;
+    private final TeleParameters _teleParameters;
+    private final PlottingDetailsParameters _plotParameters;
 
+    private SpecS2NLargeSlitVisitor specS2N;
     private String sigSpec, backSpec, singleS2N, finalS2N;
 
     private Calendar now = Calendar.getInstance();
     private String _header = new StringBuffer("# Michelle ITC: " + now.getTime() + "\n").toString();
-
-
-    /**
-     * Constructs a MichelleRecipe by parsing servlet request.
-     *
-     * @param r   Servlet request containing form data from ITC web page.
-     * @param out Results will be written to this PrintWriter.
-     * @throws Exception on failure to parse parameters.
-     */
-    public MichelleRecipe(HttpServletRequest r, PrintWriter out) throws Exception {
-        super(out);
-        // Set the Http Session object
-        //_sessionObject = r.getSession(true);
-
-        //System.out.println(" Session is over after" +_sessionObject.getCreationTime());
-
-
-        // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
-        _michelleParameters = new MichelleParameters(r);
-        _teleParameters = new TeleParameters(r);
-        _plotParameters = new PlottingDetailsParameters(r);
-    }
 
     /**
      * Constructs a MichelleRecipe by parsing  a Multipart servlet request.
@@ -85,12 +44,12 @@ public final class MichelleRecipe extends RecipeBase {
 
 
         // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
+        _sdParameters = ITCRequest.sourceDefinitionParameters(r);
         _michelleParameters = new MichelleParameters(r);
-        _teleParameters = new TeleParameters(r);
-        _plotParameters = new PlottingDetailsParameters(r);
+        _obsDetailParameters = correctedObsDetails(_michelleParameters, ITCRequest.observationParameters(r));
+        _obsConditionParameters = ITCRequest.obsConditionParameters(r);
+        _teleParameters = ITCRequest.teleParameters(r);
+        _plotParameters = ITCRequest.plotParamters(r);
     }
 
     /**
@@ -103,14 +62,51 @@ public final class MichelleRecipe extends RecipeBase {
                           MichelleParameters michelleParameters,
                           TeleParameters teleParameters,
                           PlottingDetailsParameters plotParameters,
-                          PrintWriter out) {
+                          PrintWriter out) throws Exception {
         super(out);
         _sdParameters = sdParameters;
-        _obsDetailParameters = obsDetailParameters;
+        _obsDetailParameters = correctedObsDetails(michelleParameters, obsDetailParameters);
         _obsConditionParameters = obsConditionParameters;
         _michelleParameters = michelleParameters;
         _teleParameters = teleParameters;
         _plotParameters = plotParameters;
+    }
+
+    private ObservationDetailsParameters correctedObsDetails(MichelleParameters mp, ObservationDetailsParameters odp) throws Exception {
+        // TODO : These corrections were previously done in random places throughout the recipe. I moved them here
+        // TODO : so the ObservationDetailsParameters object can become immutable. Basically this calculates
+        // TODO : some missing parameters and/or turns the total exposure time into a single exposure time.
+        // TODO : This is a temporary hack. There needs to be a better solution for this.
+        // NOTE : odp.getExposureTime() carries the TOTAL exposure time (as opposed to exp time for a single frame)
+        final Michelle instrument = new Michelle(mp, odp); // TODO: Avoid creating an instrument instance twice.
+        final double correctedTotalObservationTime;
+        if (mp.polarimetryIsUsed()) {
+            //If polarimetry is used divide exposure time by 4 because of the 4 waveplate positions
+            correctedTotalObservationTime = odp.getExposureTime() / 4;
+        } else {
+            correctedTotalObservationTime = odp.getExposureTime();
+        }
+        final double correctedExposureTime = instrument.getFrameTime();
+        final int correctedNumExposures = new Double(correctedTotalObservationTime / instrument.getFrameTime() + 0.5).intValue();
+        if (odp.getMethod() instanceof ImagingInt) {
+            return new ObservationDetailsParameters(
+                    new ImagingInt(odp.getSNRatio(), correctedExposureTime, odp.getSourceFraction()),
+                    odp.getAnalysis()
+            );
+        } else if (odp.getMethod() instanceof ImagingSN) {
+            return new ObservationDetailsParameters(
+                    new ImagingSN(correctedNumExposures, correctedExposureTime, odp.getSourceFraction()),
+                    odp.getAnalysis()
+            );
+        } else if (odp.getMethod() instanceof SpectroscopySN) {
+            return new ObservationDetailsParameters(
+                    new SpectroscopySN(correctedNumExposures, correctedExposureTime, odp.getSourceFraction()),
+                    odp.getAnalysis()
+            );
+        } else {
+            throw new IllegalArgumentException();
+        }
+
     }
 
     /**
@@ -128,10 +124,6 @@ public final class MichelleRecipe extends RecipeBase {
         device.setPrecision(2);  // Two decimal places
         device.clear();
 
-        //If polarimetry is used divide exposure time by 4 because of the 4 waveplate positions
-        if (_michelleParameters.polarimetryIsUsed())
-            _obsDetailParameters.setTotalObservationTime(_obsDetailParameters.getTotalObservationTime() / 4);
-
         // Module 1b
         // Define the source energy (as function of wavelength).
         //
@@ -141,7 +133,7 @@ public final class MichelleRecipe extends RecipeBase {
         Michelle instrument = new Michelle(_michelleParameters, _obsDetailParameters);
 
 
-        if (_sdParameters.getSourceSpec().equals(_sdParameters.ELINE))
+        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000 * 5))) {  //*5 b/c of increased resolution of transmission files
                 throw new Exception("Please use a model line width > 0.2 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 5)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
@@ -161,16 +153,19 @@ public final class MichelleRecipe extends RecipeBase {
         // both the normalization waveband and the observation waveband
         // (filter region).
 
-        String band = _sdParameters.getNormBand();
-        double start = WavebandDefinition.getStart(band);
-        double end = WavebandDefinition.getEnd(band);
+        final WavebandDefinition band = _sdParameters.getNormBand();
+        final double start = band.getStart();
+        final double end = band.getEnd();
 
         //any sed except BBODY and ELINE have normailization regions
-        if (!(_sdParameters.getSpectrumResource().equals(_sdParameters.ELINE) ||
-                _sdParameters.getSpectrumResource().equals(_sdParameters.BBODY))) {
-            if (sed.getStart() > start || sed.getEnd() < end) {
-                throw new Exception("Shifted spectrum lies outside of specified normalisation waveband.");
-            }
+        switch (_sdParameters.getDistributionType()) {
+            case ELINE:
+            case BBODY:
+                break;
+            default:
+                if (sed.getStart() > start || sed.getEnd() < end) {
+                    throw new Exception("Shifted spectrum lies outside of specified normalisation waveband.");
+                }
         }
 
         //if (sed.getStart() > instrument.getObservingStart() ||
@@ -182,7 +177,7 @@ public final class MichelleRecipe extends RecipeBase {
         //}
 
 
-        if (_plotParameters.getPlotLimits().equals(_plotParameters.USER_LIMITS)) {
+        if (_plotParameters.getPlotLimits().equals(PlottingDetailsParameters.PlotLimits.USER)) {
             if (_plotParameters.getPlotWaveL() > instrument.getObservingEnd() ||
                     _plotParameters.getPlotWaveU() < instrument.getObservingStart()) {
                 _println(" The user limits defined for plotting do not overlap with the Spectrum.");
@@ -197,11 +192,11 @@ public final class MichelleRecipe extends RecipeBase {
         // inputs: instrument,redshifted SED, waveband, normalization flux, units
         // calculates: normalized SED, resampled SED, SED adjusted for aperture
         // output: SED in common internal units
-        SampledSpectrumVisitor norm =
-                new NormalizeVisitor(_sdParameters.getNormBand(),
-                        _sdParameters.getSourceNormalization(),
-                        _sdParameters.getUnits());
-        if (!_sdParameters.getSpectrumResource().equals(_sdParameters.ELINE)) {
+        if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
+            final SampledSpectrumVisitor norm =
+                    new NormalizeVisitor(_sdParameters.getNormBand(),
+                            _sdParameters.getSourceNormalization(),
+                            _sdParameters.getUnits());
             sed.accept(norm);
         }
 
@@ -324,7 +319,6 @@ public final class MichelleRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        String ap_type = _obsDetailParameters.getApertureType();
         double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
         double ap_pix = 0;
@@ -341,13 +335,7 @@ public final class MichelleRecipe extends RecipeBase {
         IQcalc.calculate();
 
         im_qual = IQcalc.getImageQuality();
-        double exp_time;
-        if (_obsDetailParameters.getTotalObservationTime() == 0)
-            exp_time = _obsDetailParameters.getExposureTime();
-        else {
-            exp_time = instrument.getFrameTime();
-            _obsDetailParameters.setExposureTime(exp_time);
-        }
+        double exp_time = _obsDetailParameters.getExposureTime();
 
 
         // Calculate the Fraction of source in the aperture
@@ -355,7 +343,7 @@ public final class MichelleRecipe extends RecipeBase {
                 SourceFractionCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
         SFcalc.setImageQuality(im_qual);
         SFcalc.calculate();
-        if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.IMAGING)) {
+        if (_obsDetailParameters.getMethod().isImaging()) {
             _print(SFcalc.getTextResult(device));
             _println(IQcalc.getTextResult(device));
             _println("Sky subtraction aperture = " +
@@ -370,58 +358,36 @@ public final class MichelleRecipe extends RecipeBase {
         // Calculate the Peak Pixel Flux
         PeakPixelFluxCalc ppfc;
 
-        if (_sdParameters.getSourceGeometry().
-                equals(SourceDefinitionParameters.POINT_SOURCE) ||
-                _sdParameters.getExtendedSourceType().
-                        equals(SourceDefinitionParameters.GAUSSIAN)) {
+        if (!_sdParameters.isUniform()) {
 
             ppfc = new
                     PeakPixelFluxCalc(im_qual, pixel_size,
-                    //_obsDetailParameters.getExposureTime(),  // OLD Michelle EXPOSURE TIME;
-                    //instrument.getFrameTime(),
                     exp_time,
                     sed_integral, sky_integral,
                     instrument.getDarkCurrent());
 
             peak_pixel_count = ppfc.getFluxInPeakPixel();
-        } else if (_sdParameters.getExtendedSourceType().
-                equals(SourceDefinitionParameters.UNIFORM)) {
-            double usbApArea = 0;
+
+        } else {
+
             ppfc = new
                     PeakPixelFluxCalc(im_qual, pixel_size,
-                    //_obsDetailParameters.getExposureTime(),  // OLD Michelle EXPOSURE TIME;
-                    //instrument.getFrameTime(),
                     exp_time,
                     sed_integral, sky_integral,
                     instrument.getDarkCurrent());
 
             peak_pixel_count = ppfc.getFluxInPeakPixelUSB(SFcalc.getSourceFraction(), SFcalc.getNPix());
-        } else {
-            throw new Exception(
-                    "Peak Pixel could not be calculated ");
         }
 
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
         int binFactor;
-        int number_exposures;
+        int number_exposures = _obsDetailParameters.getNumExposures();
         double spec_source_frac = 0;
-        if (_obsDetailParameters.getTotalObservationTime() == 0) {
-            number_exposures = _obsDetailParameters.getNumExposures();  //OLD Michelle NUM EXPOSURE
-        } else {
-            number_exposures = new Double(_obsDetailParameters.getTotalObservationTime() / instrument.getFrameTime() + 0.5).intValue();
-            _obsDetailParameters.setNumExposures(number_exposures);  //sets number exposures for classes that need it.
-        }
         double frac_with_source = _obsDetailParameters.getSourceFraction();
         double dark_current = instrument.getDarkCurrent();
-        double exposure_time;
-        if (_obsDetailParameters.getTotalObservationTime() == 0) {
-            exposure_time = _obsDetailParameters.getExposureTime();    //OLD Michelle EXPOSURE TIME
-        } else {
-            exposure_time = instrument.getFrameTime();
-            _obsDetailParameters.setExposureTime(exposure_time);  // sets exposure time for classes that need it.
-        }
+        double exposure_time = _obsDetailParameters.getExposureTime();
         double read_noise = instrument.getReadNoise();
         // report error if this does not come out to be an integer
         checkSourceFraction(number_exposures, frac_with_source);
@@ -429,7 +395,7 @@ public final class MichelleRecipe extends RecipeBase {
         //ObservationMode Imaging or spectroscopy
 
 
-        if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
 
             SlitThroughput st;
 
@@ -439,32 +405,29 @@ public final class MichelleRecipe extends RecipeBase {
 //	 sed.accept(dtv);
 //	 sky.accept(dtv);
 
-            if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
+            if (!_obsDetailParameters.isAutoAperture()) {
                 st = new SlitThroughput(im_qual,
                         _obsDetailParameters.getApertureDiameter(),
                         pixel_size, _michelleParameters.getFPMask());
                 _println("software aperture extent along slit = " + device.toString(_obsDetailParameters.getApertureDiameter()) +
                         " arcsec");
             } else {
-                st = new SlitThroughput(im_qual, pixel_size,
-                        _michelleParameters.getFPMask());
-                if (_sdParameters.getSourceGeometry().
-                        equals(SourceDefinitionParameters.EXTENDED_SOURCE)) {
-                    if (_sdParameters.getExtendedSourceType().
-                            equals(SourceDefinitionParameters.UNIFORM)) {
-                        _println("software aperture extent along slit = " + device.toString(1 / _michelleParameters.getFPMask()) +
-                                " arcsec");
-                    }
-                } else {
-                    _println("software aperture extent along slit = " + device.toString(1.4 * im_qual) +
-                            " arcsec");
+
+                st = new SlitThroughput(im_qual, pixel_size, _michelleParameters.getFPMask());
+
+                switch (_sdParameters.getProfileType()) {
+                    case UNIFORM:
+                        _println("software aperture extent along slit = " + device.toString(1 / _michelleParameters.getFPMask()) + " arcsec");
+                        break;
+                    case POINT:
+                        _println("software aperture extent along slit = " + device.toString(1.4 * im_qual) + " arcsec");
+                        break;
                 }
+
+
             }
 
-            if (_sdParameters.getSourceGeometry().
-                    equals(SourceDefinitionParameters.POINT_SOURCE) ||
-                    _sdParameters.getExtendedSourceType().
-                            equals(SourceDefinitionParameters.GAUSSIAN)) {
+            if (!_sdParameters.isUniform()) {
                 _println("fraction of source flux in aperture = " +
                         device.toString(st.getSlitThroughput()));
             }
@@ -505,18 +468,13 @@ public final class MichelleRecipe extends RecipeBase {
 
             //For the usb case we want the resolution to be determined by the
             //slit width and not the image quality for a point source.
-            if (_sdParameters.getSourceGeometry().
-                    equals(SourceDefinitionParameters.EXTENDED_SOURCE)) {
-                if (_sdParameters.getExtendedSourceType().
-                        equals(SourceDefinitionParameters.UNIFORM)) {
-                    im_qual = 10000;
-
-                    if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
-                        spec_source_frac = _michelleParameters.getFPMask() * ap_diam * pixel_size;  //ap_diam = Spec_NPix
-                    } else if (ap_type.equals(ObservationDetailsParameters.AUTO_APER)) {
-                        ap_diam = new Double(1 / (_michelleParameters.getFPMask() * pixel_size) + 0.5).intValue();
-                        spec_source_frac = 1;
-                    }
+            if (_sdParameters.isUniform()) {
+                im_qual = 10000;
+                if (_obsDetailParameters.isAutoAperture()) {
+                    ap_diam = new Double(1 / (_michelleParameters.getFPMask() * pixel_size) + 0.5).intValue();
+                    spec_source_frac = 1;
+                } else {
+                    spec_source_frac = _michelleParameters.getFPMask() * ap_diam * pixel_size;  //ap_diam = Spec_NPix
                 }
             }
             //_println("Spec_source_frac: " + spec_source_frac+ "  Spec_npix: "+ ap_diam);
@@ -778,7 +736,7 @@ public final class MichelleRecipe extends RecipeBase {
          
         _println("");
                                                   //getSpectrumResource
-            if (_sdParameters.getSourceSpec().equals(_sdParameters.ELINE)){
+            if (_sdParameters.getDistributionType().equals(_sdParameters.ELINE)){
                           device.setPrecision(4);
                           device.clear();
                    _print("The Source is an emission line, at a wavelength of "
@@ -794,17 +752,17 @@ public final class MichelleRecipe extends RecipeBase {
                                           device.toString(_sdParameters.getELineContinuumFlux())+
                                         " " + _sdParameters.getELineContinuumFluxUnits()+
                                         ".");
-            }else if (_sdParameters.getSourceSpec().equals(_sdParameters.BBODY)){
+            }else if (_sdParameters.getDistributionType().equals(_sdParameters.BBODY)){
                             _print("The Source is a "
                                             + _sdParameters.getBBTemp() + "K Blackbody, at "
                                             + _sdParameters.getSourceNormalization() +
                                             " " + _sdParameters.getUnits() +" in the "+
                                             _sdParameters.getNormBand()+ " band.");
-            }else if (_sdParameters.getSourceSpec().equals(_sdParameters.LIBRARY_STAR)){
+            }else if (_sdParameters.getDistributionType().equals(_sdParameters.LIBRARY_STAR)){
                             _print("The Source is a "+_sdParameters.getSourceNormalization() +
                                             " " + _sdParameters.getUnits() + " " + _sdParameters.getSpecType() +
                                             " star at " + _sdParameters.getNormBand()+ ".");
-            }else if (_sdParameters.getSourceSpec().equals(_sdParameters.LIBRARY_NON_STAR)){
+            }else if (_sdParameters.getDistributionType().equals(_sdParameters.LIBRARY_NON_STAR)){
                             _print("The Source is a "+_sdParameters.getSourceNormalization() +
                                             " " + _sdParameters.getUnits() + " " + _sdParameters.getSpecType() +
                                             " at " + _sdParameters.getNormBand()+ ".");
@@ -835,10 +793,8 @@ public final class MichelleRecipe extends RecipeBase {
             }
         }
 
-        if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
             _println(_plotParameters.printParameterSummary());
-        }
-        if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.SPECTROSCOPY)) {
             _println(specS2N.getSignalSpectrum(), _header, sigSpec);
             _println(specS2N.getBackgroundSpectrum(), _header, backSpec);
             _println(specS2N.getExpS2NSpectrum(), _header, singleS2N);

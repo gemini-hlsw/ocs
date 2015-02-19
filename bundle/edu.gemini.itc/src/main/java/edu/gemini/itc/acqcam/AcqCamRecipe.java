@@ -6,8 +6,8 @@ import edu.gemini.itc.parameters.ObservingConditionParameters;
 import edu.gemini.itc.parameters.SourceDefinitionParameters;
 import edu.gemini.itc.parameters.TeleParameters;
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.web.ITCRequest;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.PrintWriter;
 
 /**
@@ -16,29 +16,11 @@ import java.io.PrintWriter;
  */
 public final class AcqCamRecipe extends RecipeBase {
     // Parameters from the web page.
-    private SourceDefinitionParameters _sdParameters;
-    private ObservationDetailsParameters _obsDetailParameters;
-    private ObservingConditionParameters _obsConditionParameters;
-    private AcquisitionCamParameters _acqCamParameters;
-    private TeleParameters _teleParameters;
-
-    /**
-     * Constructs an AcqCamRecipe by parsing servlet request.
-     *
-     * @param r   Servlet request containing form data from ITC web page.
-     * @param out Results will be written to this PrintWriter.
-     * @throws Exception on failure to parse parameters.
-     */
-    public AcqCamRecipe(HttpServletRequest r, PrintWriter out) {
-        super(out);
-
-        // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
-        _acqCamParameters = new AcquisitionCamParameters(r);
-        _teleParameters = new TeleParameters(r);
-    }
+    private final SourceDefinitionParameters _sdParameters;
+    private final ObservationDetailsParameters _obsDetailParameters;
+    private final ObservingConditionParameters _obsConditionParameters;
+    private final AcquisitionCamParameters _acqCamParameters;
+    private final TeleParameters _teleParameters;
 
     /**
      * Constructs an AcqCamRecipe by parsing a Multi part servlet request.
@@ -51,11 +33,11 @@ public final class AcqCamRecipe extends RecipeBase {
         super(out);
 
         // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
+        _sdParameters = ITCRequest.sourceDefinitionParameters(r);
+        _obsDetailParameters = ITCRequest.observationParameters(r);
+        _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _acqCamParameters = new AcquisitionCamParameters(r);
-        _teleParameters = new TeleParameters(r);
+        _teleParameters = ITCRequest.teleParameters(r);
     }
 
     /**
@@ -107,7 +89,7 @@ public final class AcqCamRecipe extends RecipeBase {
                         _acqCamParameters.getNDFilter());
 
 
-        if (_sdParameters.getSourceSpec().equals(_sdParameters.ELINE))
+        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000))) {
                 throw new IllegalArgumentException("Please use a model line width > 1 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
@@ -127,20 +109,23 @@ public final class AcqCamRecipe extends RecipeBase {
         // both the normalization waveband and the observation waveband
         // (filter region).
 
-        String band = _sdParameters.getNormBand();
-        double start = WavebandDefinition.getStart(band);
-        double end = WavebandDefinition.getEnd(band);
+        final WavebandDefinition band = _sdParameters.getNormBand();
+        final double start = band.getStart();
+        final double end = band.getEnd();
         //System.out.println("WStart:" + start + "SStart:" +sed.getStart());
         //System.out.println("WEnd:" + end + "SEnd:" +sed.getEnd());
         //System.out.println("OStart:" + instrument.getObservingStart() + "OEnd:" +instrument.getObservingEnd());
 
 
         //any sed except BBODY and ELINE have normailization regions
-        if (!(_sdParameters.getSpectrumResource().equals(_sdParameters.ELINE) ||
-                _sdParameters.getSpectrumResource().equals(_sdParameters.BBODY))) {
-            if (sed.getStart() > start || sed.getEnd() < end) {
-                throw new IllegalArgumentException("Shifted spectrum lies outside of specified normalisation waveband.");
-            }
+        switch (_sdParameters.getDistributionType()) {
+            case ELINE:
+            case BBODY:
+                    break;
+            default:
+                if (sed.getStart() > start || sed.getEnd() < end) {
+                    throw new IllegalArgumentException("Shifted spectrum lies outside of specified normalisation waveband.");
+                }
         }
 
         if (sed.getStart() > instrument.getObservingStart() ||
@@ -158,11 +143,11 @@ public final class AcqCamRecipe extends RecipeBase {
         // inputs: instrument,redshifted SED, waveband, normalization flux, units
         // calculates: normalized SED, resampled SED, SED adjusted for aperture
         // output: SED in common internal units
-        SampledSpectrumVisitor norm =
-                new NormalizeVisitor(_sdParameters.getNormBand(),
-                        _sdParameters.getSourceNormalization(),
-                        _sdParameters.getUnits());
-        if (!_sdParameters.getSpectrumResource().equals(_sdParameters.ELINE)) {
+        if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
+            final SampledSpectrumVisitor norm =
+                    new NormalizeVisitor(_sdParameters.getNormBand(),
+                            _sdParameters.getSourceNormalization(),
+                            _sdParameters.getUnits());
             sed.accept(norm);
         }
 
@@ -271,7 +256,6 @@ public final class AcqCamRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        String ap_type = _obsDetailParameters.getApertureType();
         double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
         double ap_pix = 0;
@@ -303,10 +287,7 @@ public final class AcqCamRecipe extends RecipeBase {
 // Calculate the Peak Pixel Flux
         PeakPixelFluxCalc ppfc;
 
-        if (_sdParameters.getSourceGeometry().
-                equals(SourceDefinitionParameters.POINT_SOURCE) ||
-                _sdParameters.getExtendedSourceType().
-                        equals(SourceDefinitionParameters.GAUSSIAN)) {
+        if (!_sdParameters.isUniform()) {
 
             ppfc = new
                     PeakPixelFluxCalc(im_qual, pixel_size,
@@ -315,19 +296,16 @@ public final class AcqCamRecipe extends RecipeBase {
                     instrument.getDarkCurrent());
 
             peak_pixel_count = ppfc.getFluxInPeakPixel();
-        } else if (_sdParameters.getExtendedSourceType().
-                equals(SourceDefinitionParameters.UNIFORM)) {
-            double usbApArea = 0;
+
+        } else {
+
             ppfc = new
                     PeakPixelFluxCalc(im_qual, pixel_size,
                     _obsDetailParameters.getExposureTime(),
                     sed_integral, sky_integral,
                     instrument.getDarkCurrent());
             peak_pixel_count = ppfc.getFluxInPeakPixelUSB(SFcalc.getSourceFraction(), SFcalc.getNPix());
-        } else {
-            throw new IllegalArgumentException(
-                    "Peak Pixel Flux could not be calculated for type" +
-                            _sdParameters.getSourceGeometry());
+
         }
 
         // In this version we are bypassing morphology modules 3a-5a.

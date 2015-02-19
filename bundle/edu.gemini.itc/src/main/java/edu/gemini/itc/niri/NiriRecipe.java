@@ -1,17 +1,11 @@
-// Copyright 1999 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
-//
-// $Id: NiriRecipe.java,v 1.17 2004/02/16 18:49:01 bwalls Exp $
-//
 package edu.gemini.itc.niri;
 
 import edu.gemini.itc.altair.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.parameters.*;
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.web.ITCRequest;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.PrintWriter;
 import java.util.Calendar;
 
@@ -19,45 +13,19 @@ import java.util.Calendar;
  * This class performs the calculations for Niri used for imaging.
  */
 public final class NiriRecipe extends RecipeBase {
-    // Images will be saved to this session object
-    // private HttpSession _sessionObject = null; // set from servlet request
 
-    private AltairParameters _altairParameters;
-    private StringBuffer _header = new StringBuffer("# NIRI ITC: "
-            + Calendar.getInstance().getTime() + "\n");
+    private final AltairParameters _altairParameters;
+    private final StringBuffer _header = new StringBuffer("# NIRI ITC: " + Calendar.getInstance().getTime() + "\n");
 
-    private NiriParameters _niriParameters;
-    private ObservingConditionParameters _obsConditionParameters;
-    private ObservationDetailsParameters _obsDetailParameters;
-    private PlottingDetailsParameters _plotParameters;
-    // Parameters from the web page.
-    private SourceDefinitionParameters _sdParameters;
-    private TeleParameters _teleParameters;
+    private final NiriParameters _niriParameters;
+    private final ObservingConditionParameters _obsConditionParameters;
+    private final ObservationDetailsParameters _obsDetailParameters;
+    private final PlottingDetailsParameters _plotParameters;
+    private final SourceDefinitionParameters _sdParameters;
+    private final TeleParameters _teleParameters;
 
     private String sigSpec, backSpec, singleS2N, finalS2N;
     private SpecS2NVisitor specS2N;
-
-    /**
-     * Constructs a NiriRecipe by parsing servlet request.
-     *
-     * @param r   Servlet request containing form data from ITC web page.
-     * @param out Results will be written to this PrintWriter.
-     * @throws Exception on failure to parse parameters.
-     */
-    public NiriRecipe(HttpServletRequest r, PrintWriter out) throws Exception {
-        super(out);
-        // Set the Http Session object
-        // _sessionObject = r.getSession(true);
-
-        // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
-        _niriParameters = new NiriParameters(r);
-        _teleParameters = new TeleParameters(r);
-        _altairParameters = new AltairParameters(r);
-        _plotParameters = new PlottingDetailsParameters(r);
-    }
 
     /**
      * Constructs a NiriRecipe by parsing a Multipart servlet request.
@@ -68,17 +36,13 @@ public final class NiriRecipe extends RecipeBase {
      */
     public NiriRecipe(ITCMultiPartParser r, PrintWriter out) throws Exception {
         super(out);
-        // Set the Http Session object
-        // _sessionObject = r.getSession(true);
-
-        // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
+        _sdParameters = ITCRequest.sourceDefinitionParameters(r);
+        _obsDetailParameters = ITCRequest.observationParameters(r);
+        _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _niriParameters = new NiriParameters(r);
-        _teleParameters = new TeleParameters(r);
-        _altairParameters = new AltairParameters(r);
-        _plotParameters = new PlottingDetailsParameters(r);
+        _teleParameters = ITCRequest.teleParameters(r);
+        _altairParameters = ITCRequest.altairParameters(r);
+        _plotParameters = ITCRequest.plotParamters(r);
     }
 
     /**
@@ -140,7 +104,7 @@ public final class NiriRecipe extends RecipeBase {
         // output: redshifteed SED
         Niri instrument = new Niri(_niriParameters, _obsDetailParameters);
 
-        if (_sdParameters.getSourceSpec().equals(_sdParameters.ELINE))
+        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters
                     .getELineWavelength() * 1000 * 25))) { // *25 b/c of
                 // increased
@@ -171,17 +135,20 @@ public final class NiriRecipe extends RecipeBase {
         // both the normalization waveband and the observation waveband
         // (filter region).
 
-        String band = _sdParameters.getNormBand();
-        double start = WavebandDefinition.getStart(band);
-        double end = WavebandDefinition.getEnd(band);
+        final WavebandDefinition band = _sdParameters.getNormBand();
+        final double start = band.getStart();
+        final double end = band.getEnd();
 
         // any sed except BBODY and ELINE have normailization regions
-        if (!(_sdParameters.getSpectrumResource().equals(_sdParameters.ELINE) || _sdParameters
-                .getSpectrumResource().equals(_sdParameters.BBODY))) {
-            if (sed.getStart() > start || sed.getEnd() < end) {
-                throw new Exception(
-                        "Shifted spectrum lies outside of specified normalisation waveband.");
-            }
+        switch (_sdParameters.getDistributionType()) {
+            case ELINE:
+            case BBODY:
+                break;
+            default:
+                if (sed.getStart() > start || sed.getEnd() < end) {
+                    throw new Exception(
+                            "Shifted spectrum lies outside of specified normalisation waveband.");
+                }
         }
 
         if (sed.getStart() > instrument.getObservingStart()
@@ -195,7 +162,7 @@ public final class NiriRecipe extends RecipeBase {
                     "Shifted spectrum lies outside of observed wavelengths");
         }
 
-        if (_plotParameters.getPlotLimits().equals(_plotParameters.USER_LIMITS)) {
+        if (_plotParameters.getPlotLimits().equals(PlottingDetailsParameters.PlotLimits.USER)) {
             if (_plotParameters.getPlotWaveL() > instrument.getObservingEnd()
                     || _plotParameters.getPlotWaveU() < instrument
                     .getObservingStart()) {
@@ -219,12 +186,11 @@ public final class NiriRecipe extends RecipeBase {
         // units
         // calculates: normalized SED, resampled SED, SED adjusted for aperture
         // output: SED in common internal units
-        SampledSpectrumVisitor norm = new NormalizeVisitor(
-                _sdParameters.getNormBand(),
-                _sdParameters.getSourceNormalization(),
-                _sdParameters.getUnits());
-        if (!_sdParameters.getSpectrumResource().equals(_sdParameters.ELINE)) {// ||
-            // !_sdParameters.getSpectrumResource().equals(_sdParameters.BBODY)){
+        if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
+            final SampledSpectrumVisitor norm = new NormalizeVisitor(
+                    _sdParameters.getNormBand(),
+                    _sdParameters.getSourceNormalization(),
+                    _sdParameters.getUnits());
             sed.accept(norm);
         }
 
@@ -335,7 +301,6 @@ public final class NiriRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        String ap_type = _obsDetailParameters.getApertureType();
         double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
         double ap_pix = 0;
@@ -363,17 +328,11 @@ public final class NiriRecipe extends RecipeBase {
 
         if (_altairParameters.altairIsUsed()) {
 
-            if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.SPECTROSCOPY)) {
+            if (_obsDetailParameters.getMethod().isSpectroscopy()) {
                 throw new Exception(
                         "Altair cannot currently be used with Spectroscopy mode in the ITC.  Please deselect either altair or spectroscopy and resubmit the form.");
             }
-            Altair altair = new Altair(instrument.getEffectiveWavelength(),
-                    _teleParameters.getTelescopeDiameter(), im_qual,
-                    _altairParameters.getGuideStarSeperation(),
-                    _altairParameters.getGuideStarMagnitude(),
-                    _altairParameters.getWFSMode(),
-                    _altairParameters.fieldLensIsUsed(),
-                    0.0);
+            Altair altair = new Altair(instrument.getEffectiveWavelength(), _teleParameters.getTelescopeDiameter(), im_qual, _altairParameters, 0.0);
             AltairBackgroundVisitor altairBackgroundVisitor = new AltairBackgroundVisitor();
             AltairTransmissionVisitor altairTransmissionVisitor = new AltairTransmissionVisitor();
             AltairFluxAttenuationVisitor altairFluxAttenuationVisitor = new AltairFluxAttenuationVisitor(
@@ -449,17 +408,15 @@ public final class NiriRecipe extends RecipeBase {
         if (_altairParameters.altairIsUsed()) {
             // If altair is used turn off printing of SF calc
             SFcalc.setSFPrint(false);
-            if (_obsDetailParameters.getApertureType().equals(
-                    _obsDetailParameters.AUTO_APER)) {
-                SFcalc.setApType(_obsDetailParameters.USER_APER);
+            if (_obsDetailParameters.isAutoAperture()) {
+                SFcalc.setApType(false);
                 SFcalc.setApDiam(1.18 * im_qual);
             }
             SFcalc.setImageQuality(uncorrected_im_qual);
             SFcalc.calculate();
             halo_source_fraction = SFcalc.getSourceFraction();
-            if (_obsDetailParameters.getApertureType().equals(
-                    _obsDetailParameters.AUTO_APER)) {
-                SFcalc.setApType(_obsDetailParameters.AUTO_APER);
+            if (_obsDetailParameters.isAutoAperture()) {
+                SFcalc.setApType(true);
             }
         }
         // this will be the core for an altair source; unchanged for non altair.
@@ -467,8 +424,7 @@ public final class NiriRecipe extends RecipeBase {
         SFcalc.calculate();
         source_fraction = SFcalc.getSourceFraction();
         Npix = SFcalc.getNPix();
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.IMAGING)) {
+        if (_obsDetailParameters.getMethod().isImaging()) {
             _print(SFcalc.getTextResult(device));
             if (_altairParameters.altairIsUsed()) {
                 _println("derived image halo size (FWHM) for a point source = "
@@ -491,10 +447,7 @@ public final class NiriRecipe extends RecipeBase {
         // }
         PeakPixelFluxCalc ppfc;
 
-        if (_sdParameters.getSourceGeometry().equals(
-                SourceDefinitionParameters.POINT_SOURCE)
-                || _sdParameters.getExtendedSourceType().equals(
-                SourceDefinitionParameters.GAUSSIAN)) {
+        if (!_sdParameters.isUniform()) {
 
             // calculation of image quaility was in here if the current setup
             // does not work copy it back in here from above, and uncomment
@@ -522,9 +475,7 @@ public final class NiriRecipe extends RecipeBase {
 
             }
 
-        } else if (_sdParameters.getExtendedSourceType().equals(
-                SourceDefinitionParameters.UNIFORM)) {
-            double usbApArea = 0;
+        } else {
 
             ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
                     _obsDetailParameters.getExposureTime(), sed_integral,
@@ -532,10 +483,6 @@ public final class NiriRecipe extends RecipeBase {
 
             peak_pixel_count = ppfc
                     .getFluxInPeakPixelUSB(source_fraction, Npix);
-        } else {
-            throw new Exception(
-                    "Source geometry not supported for image quality calculation: "
-                            + _sdParameters.getSourceGeometry());
         }
 
         // In this version we are bypassing morphology modules 3a-5a.
@@ -551,14 +498,13 @@ public final class NiriRecipe extends RecipeBase {
 
         // ObservationMode Imaging or spectroscopy
 
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
 
             SlitThroughput st;// = new SlitThroughput(im_qual,pixel_size,
             // _niriParameters.getFPMask());
             SlitThroughput st_halo;
 
-            if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
+            if (!_obsDetailParameters.isAutoAperture()) {
                 st = new SlitThroughput(im_qual,
                         _obsDetailParameters.getApertureDiameter(), pixel_size,
                         _niriParameters.getFPMask());
@@ -576,24 +522,19 @@ public final class NiriRecipe extends RecipeBase {
                 st_halo = new SlitThroughput(uncorrected_im_qual, pixel_size,
                         _niriParameters.getFPMask());
 
-                if (_sdParameters.getSourceGeometry().equals(
-                        SourceDefinitionParameters.EXTENDED_SOURCE)) {
-                    if (_sdParameters.getExtendedSourceType().equals(
-                            SourceDefinitionParameters.UNIFORM)) {
-                        _println("software aperture extent along slit = "
-                                + device.toString(1 / _niriParameters
-                                .getFPMask()) + " arcsec");
-                    }
-                } else {
-                    _println("software aperture extent along slit = "
-                            + device.toString(1.4 * im_qual) + " arcsec");
+                switch (_sdParameters.getProfileType()) {
+                    case UNIFORM:
+                        _println("software aperture extent along slit = " + device.toString(1 / _niriParameters.getFPMask()) + " arcsec");
+                        break;
+                    case POINT:
+                        _println("software aperture extent along slit = " + device.toString(1.4 * im_qual) + " arcsec");
+                        break;
                 }
+
+
             }
 
-            if (_sdParameters.getSourceGeometry().equals(
-                    SourceDefinitionParameters.POINT_SOURCE)
-                    || _sdParameters.getExtendedSourceType().equals(
-                    SourceDefinitionParameters.GAUSSIAN)) {
+            if (!_sdParameters.isUniform()) {
                 _println("fraction of source flux in aperture = "
                         + device.toString(st.getSlitThroughput()));
             }
@@ -614,22 +555,13 @@ public final class NiriRecipe extends RecipeBase {
             double spec_source_frac = st.getSlitThroughput();
             double halo_spec_source_frac = st_halo.getSlitThroughput();
 
-            if (_sdParameters.getSourceGeometry().equals(
-                    SourceDefinitionParameters.EXTENDED_SOURCE)) {
-                if (_sdParameters.getExtendedSourceType().equals(
-                        SourceDefinitionParameters.UNIFORM)) {
-                    // im_qual=10000;
+            if (_sdParameters.isUniform()) {
 
-                    if (ap_type.equals(ObservationDetailsParameters.USER_APER)) {
-                        spec_source_frac = _niriParameters.getFPMask()
-                                * ap_diam * pixel_size; // ap_diam = Spec_NPix
-                    } else if (ap_type
-                            .equals(ObservationDetailsParameters.AUTO_APER)) {
-                        ap_diam = new Double(
-                                1 / (_niriParameters.getFPMask() * pixel_size) + 0.5)
-                                .intValue();
-                        spec_source_frac = 1;
-                    }
+                if (_obsDetailParameters.isAutoAperture()) {
+                    ap_diam = new Double(1 / (_niriParameters.getFPMask() * pixel_size) + 0.5).intValue();
+                    spec_source_frac = 1;
+                } else {
+                    spec_source_frac = _niriParameters.getFPMask() * ap_diam * pixel_size; // ap_diam = Spec_NPix
                 }
             }
 
@@ -1016,19 +948,12 @@ public final class NiriRecipe extends RecipeBase {
 
         _println(_obsConditionParameters.printParameterSummary());
         _println(_obsDetailParameters.printParameterSummary());
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
             _println(_plotParameters.printParameterSummary());
-        }
-
-        if (_obsDetailParameters.getCalculationMode().equals(
-                ObservationDetailsParameters.SPECTROSCOPY)) {
             _println(specS2N.getSignalSpectrum(), _header.toString(), sigSpec);
-            _println(specS2N.getBackgroundSpectrum(), _header.toString(),
-                    backSpec);
+            _println(specS2N.getBackgroundSpectrum(), _header.toString(), backSpec);
             _println(specS2N.getExpS2NSpectrum(), _header.toString(), singleS2N);
-            _println(specS2N.getFinalS2NSpectrum(), _header.toString(),
-                    finalS2N);
+            _println(specS2N.getFinalS2NSpectrum(), _header.toString(), finalS2N);
         }
 
         sed = null;

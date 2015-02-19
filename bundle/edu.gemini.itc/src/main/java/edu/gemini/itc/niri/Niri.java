@@ -50,7 +50,7 @@ public class Niri extends Instrument {
     private String _focalPlaneMask;
     private String _focalPlaneMaskOffset;
     private String _stringSlitWidth;
-    private String _mode;
+    private CalculationMethod _mode;
 
     // These are the limits of observable wavelength with this configuration.
     private double _observingStart;
@@ -82,7 +82,7 @@ public class Niri extends Instrument {
         _filterUsed = np.getFilter();
         _grism = np.getGrism();
         _camera = np.getCamera();
-        _mode = odp.getCalculationMode();
+        _mode = odp.getMethod();
         ////_readNoise = readNoise;
         ////_wellDepth = wellDepth;
         ////_focalPlaneMask = focalPlaneMask;
@@ -125,7 +125,7 @@ public class Niri extends Instrument {
         ////_camera=camera;
 
         //Test to see that all conditions for Spectroscopy are met
-        if (_mode.equals(ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_mode.isSpectroscopy()) {
             if (_grism.equals("none"))
                 throw new Exception("Spectroscopy calculation method is selected but a grism" +
                         " is not.\nPlease select a grism and a " +
@@ -143,7 +143,7 @@ public class Niri extends Instrument {
             //			 "and resubmit the form. ");
         }
 
-        if (_mode.equals(ObservationDetailsParameters.IMAGING)) {
+        if (_mode.isImaging()) {
             if (!_grism.equals("none"))
                 throw new Exception("Imaging calculation method is selected but a grism" +
                         " is also selected.\nPlease deselect the " +

@@ -1,19 +1,11 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-
 package edu.gemini.itc.nifs;
 
 import edu.gemini.itc.altair.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.parameters.*;
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.web.ITCRequest;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -30,38 +22,15 @@ public final class NifsRecipe extends RecipeBase {
 
     private String sigSpec, backSpec, singleS2N, finalS2N;
     private SpecS2NLargeSlitVisitor specS2N;
-    private SlitThroughput st;
-
 
     // Parameters from the web page.
-    private SourceDefinitionParameters _sdParameters;
-    private ObservationDetailsParameters _obsDetailParameters;
-    private ObservingConditionParameters _obsConditionParameters;
-    private NifsParameters _nifsParameters;
-    private TeleParameters _teleParameters;
-    private AltairParameters _altairParameters;
-    private PlottingDetailsParameters _plotParameters;
-
-
-    /**
-     * Constructs a NifsRecipe by parsing servlet request.
-     *
-     * @param r   Servlet request containing form data from ITC web page.
-     * @param out Results will be written to this PrintWriter.
-     * @throws Exception on failure to parse parameters.
-     */
-    public NifsRecipe(HttpServletRequest r, PrintWriter out) throws Exception {
-        super(out);
-
-        // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
-        _nifsParameters = new NifsParameters(r);
-        _teleParameters = new TeleParameters(r);
-        _altairParameters = new AltairParameters(r);
-        _plotParameters = new PlottingDetailsParameters(r);
-    }
+    private final SourceDefinitionParameters _sdParameters;
+    private final ObservationDetailsParameters _obsDetailParameters;
+    private final ObservingConditionParameters _obsConditionParameters;
+    private final NifsParameters _nifsParameters;
+    private final TeleParameters _teleParameters;
+    private final AltairParameters _altairParameters;
+    private final PlottingDetailsParameters _plotParameters;
 
     /**
      * Constructs a NifsRecipe by parsing a Multipart servlet request.
@@ -74,13 +43,13 @@ public final class NifsRecipe extends RecipeBase {
         super(out);
 
         // Read parameters from the four main sections of the web page.
-        _sdParameters = new SourceDefinitionParameters(r);
-        _obsDetailParameters = new ObservationDetailsParameters(r);
-        _obsConditionParameters = new ObservingConditionParameters(r);
+        _sdParameters = ITCRequest.sourceDefinitionParameters(r);
+        _obsDetailParameters = ITCRequest.observationParameters(r);
+        _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _nifsParameters = new NifsParameters(r);
-        _teleParameters = new TeleParameters(r);
-        _altairParameters = new AltairParameters(r);
-        _plotParameters = new PlottingDetailsParameters(r);
+        _teleParameters = ITCRequest.teleParameters(r);
+        _altairParameters = ITCRequest.altairParameters(r);
+        _plotParameters = ITCRequest.plotParamters(r);
     }
 
     /**
@@ -123,7 +92,7 @@ public final class NifsRecipe extends RecipeBase {
         Nifs instrument;
         instrument = new NifsNorth(_nifsParameters, _obsDetailParameters);
 
-        if (_sdParameters.getSourceSpec().equals(_sdParameters.ELINE))
+        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25))) {  // *25 b/c of increased resolutuion of transmission files
                 throw new Exception("Please use a model line width > 0.04 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
@@ -146,21 +115,24 @@ public final class NifsRecipe extends RecipeBase {
         // both the normalization waveband and the observation waveband
         // (filter region).
 
-        String band = _sdParameters.getNormBand();
-        double start = WavebandDefinition.getStart(band);
-        double end = WavebandDefinition.getEnd(band);
+        final WavebandDefinition band = _sdParameters.getNormBand();
+        final double start = band.getStart();
+        final double end = band.getEnd();
 
         //any sed except BBODY and ELINE have normailization regions
-        if (!(_sdParameters.getSpectrumResource().equals(_sdParameters.ELINE) ||
-                _sdParameters.getSpectrumResource().equals(_sdParameters.BBODY))) {
-            if (sed.getStart() > start || sed.getEnd() < end) {
-                throw new Exception("Shifted spectrum lies outside of specified normalisation waveband.");
-            }
+        switch (_sdParameters.getDistributionType()) {
+            case ELINE:
+            case BBODY:
+                break;
+            default:
+                if (sed.getStart() > start || sed.getEnd() < end) {
+                    throw new Exception("Shifted spectrum lies outside of specified normalisation waveband.");
+                }
         }
 
         // Check to see if user has defined plot limits; if so check to make sure they are not outside of the
         // actual data
-        if (_plotParameters.getPlotLimits().equals(_plotParameters.USER_LIMITS)) {
+        if (_plotParameters.getPlotLimits().equals(PlottingDetailsParameters.PlotLimits.USER)) {
             if (_plotParameters.getPlotWaveL() > instrument.getObservingEnd() ||
                     _plotParameters.getPlotWaveU() < instrument.getObservingStart()) {
                 _println(" The user limits defined for plotting do not overlap with the Spectrum.");
@@ -174,11 +146,11 @@ public final class NifsRecipe extends RecipeBase {
         // inputs: instrument,redshifted SED, waveband, normalization flux, units
         // calculates: normalized SED, resampled SED, SED adjusted for aperture
         // output: SED in common internal units
-        SampledSpectrumVisitor norm =
-                new NormalizeVisitor(_sdParameters.getNormBand(),
-                        _sdParameters.getSourceNormalization(),
-                        _sdParameters.getUnits());
-        if (!_sdParameters.getSpectrumResource().equals(_sdParameters.ELINE)) {
+        if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
+            final SampledSpectrumVisitor norm =
+                    new NormalizeVisitor(_sdParameters.getNormBand(),
+                            _sdParameters.getSourceNormalization(),
+                            _sdParameters.getUnits());
             sed.accept(norm);
         }
 
@@ -282,7 +254,6 @@ public final class NifsRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        String ap_type = _obsDetailParameters.getApertureType();
         double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
         double ap_pix = 0;
@@ -306,9 +277,7 @@ public final class NifsRecipe extends RecipeBase {
         im_qual = IQcalc.getImageQuality();
 
         //Altair Section
-        Altair altair = new Altair(instrument.getEffectiveWavelength(), _teleParameters.getTelescopeDiameter(),
-                im_qual, _altairParameters.getGuideStarSeperation(), _altairParameters.getGuideStarMagnitude(),
-                _altairParameters.getWFSMode(), _altairParameters.fieldLensIsUsed(), 0);
+        Altair altair = new Altair(instrument.getEffectiveWavelength(), _teleParameters.getTelescopeDiameter(), im_qual, _altairParameters, 0);
         AltairBackgroundVisitor altairBackgroundVisitor = new AltairBackgroundVisitor();
         AltairTransmissionVisitor altairTransmissionVisitor = new AltairTransmissionVisitor();
         AltairFluxAttenuationVisitor altairFluxAttenuationVisitor = new AltairFluxAttenuationVisitor(altair.getFluxAttenuation());
@@ -346,15 +315,21 @@ public final class NifsRecipe extends RecipeBase {
 
         //IFU morphology section
         VisitableMorphology morph, haloMorphology;
-        if (_sdParameters.getSourceGeometry().equals(SourceDefinitionParameters.POINT_SOURCE)) {
-            morph = new AOMorphology(im_qual);
-            haloMorphology = new AOMorphology(uncorrected_im_qual);
-        } else if (_sdParameters.getExtendedSourceType().equals(SourceDefinitionParameters.GAUSSIAN)) {
-            morph = new GaussianMorphology(im_qual);
-            haloMorphology = new GaussianMorphology(uncorrected_im_qual);
-        } else {
-            morph = new USBMorphology();
-            haloMorphology = new USBMorphology();
+        switch (_sdParameters.getProfileType()) {
+            case POINT:
+                morph = new AOMorphology(im_qual);
+                haloMorphology = new AOMorphology(uncorrected_im_qual);
+                break;
+            case GAUSSIAN:
+                morph = new GaussianMorphology(im_qual);
+                haloMorphology = new GaussianMorphology(uncorrected_im_qual);
+                break;
+            case UNIFORM:
+                morph = new USBMorphology();
+                haloMorphology = new USBMorphology();
+                break;
+            default:
+                throw new IllegalArgumentException();
         }
         morph.accept(instrument.getIFU().getAperture());
 
@@ -393,7 +368,7 @@ public final class NifsRecipe extends RecipeBase {
         //ObservationMode Imaging or spectroscopy
 
 
-        if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
 
             _println("derived image halo size (FWHM) for a point source = " + device.toString(uncorrected_im_qual) + "arcsec\n");
 
@@ -526,12 +501,8 @@ public final class NifsRecipe extends RecipeBase {
         _println(_teleParameters.printParameterSummary());
         _println(_obsConditionParameters.printParameterSummary());
         _println(_obsDetailParameters.printParameterSummary());
-        if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
             _println(_plotParameters.printParameterSummary());
-        }
-
-
-        if (_obsDetailParameters.getCalculationMode().equals(ObservationDetailsParameters.SPECTROSCOPY)) {  //49 ms
             _println(specS2N.getSignalSpectrum(), _header, sigSpec);
             _println(specS2N.getBackgroundSpectrum(), _header, backSpec);
             _println(specS2N.getExpS2NSpectrum(), _header, singleS2N);

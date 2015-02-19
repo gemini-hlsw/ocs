@@ -8,11 +8,12 @@ import edu.gemini.itc.gmos.GmosParameters
 import edu.gemini.itc.gnirs.GnirsParameters
 import edu.gemini.itc.gsaoi.GsaoiParameters
 import edu.gemini.itc.michelle.MichelleParameters
-import edu.gemini.itc.nici.NiciParameters
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.niri.NiriParameters
+import edu.gemini.itc.parameters.SourceDefinitionParameters.Distribution
+import edu.gemini.itc.parameters.SourceDefinitionParameters.Distribution._
 import edu.gemini.itc.parameters.{ObservationDetailsParameters, ObservingConditionParameters, SourceDefinitionParameters, TeleParameters}
-import edu.gemini.itc.shared.ITCParameters
+import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
 
 // TEMPORARY helper
@@ -27,7 +28,6 @@ object Hash {
     case p: GnirsParameters           => calc(p)
     case p: GsaoiParameters           => calc(p)
     case p: MichelleParameters        => calc(p)
-    case p: NiciParameters            => calc(p)
     case p: NifsParameters            => calc(p)
     case p: NiriParameters            => calc(p)
     case p: TRecsParameters           => calc(p)
@@ -78,27 +78,15 @@ object Hash {
 
   def calc(p: MichelleParameters): Int =
     hash(
-      p.getDarkCurrent,
       p.getFilter,
       p.getFocalPlaneMask,
       p.getFPMask,
       p.getGrating,
       p.getInstrumentCentralWavelength,
-      p.getReadNoise,
       p.getSpatialBinning,
       p.getSpectralBinning,
       p.getStringSlitWidth,
-      p.getWellDepth,
       p.polarimetryIsUsed()
-    )
-
-  def calc(p: NiciParameters): Int =
-    hash(
-      p.getChannel1Filter,
-      p.getChannel2Filter,
-      p.getDichroicPosition,
-      p.getInstrumentMode,
-      p.getPupilMask
     )
 
   def calc(p: NifsParameters): Int =
@@ -137,18 +125,15 @@ object Hash {
 
   def calc(p: TRecsParameters): Int =
     hash(
-      p.getDarkCurrent,
       p.getFilter,
       p.getFocalPlaneMask,
       p.getFPMask,
       p.getGrating,
       p.getInstrumentCentralWavelength,
       p.getInstrumentWindow,
-      p.getReadNoise,
       p.getSpatialBinning,
       p.getSpectralBinning,
-      p.getStringSlitWidth,
-      p.getWellDepth
+      p.getStringSlitWidth
     )
 
   def calc(p: AcquisitionCamParameters): Int =
@@ -168,44 +153,25 @@ object Hash {
 
   def calc(odp: ObservationDetailsParameters): Int =
     hash(
-      odp.getAnalysisMethod,
-      odp.getApertureDiameter,
-      odp.getApertureType,
-      odp.getCalculationMethod,
-      odp.getCalculationMode,
+      odp.isAutoAperture,
+      odp.getMethod.isS2N,
+      odp.getMethod.isImaging,
       odp.getExposureTime,
       odp.getNumExposures,
+      odp.getApertureDiameter,
       odp.getSkyApertureDiameter,
       odp.getSNRatio,
-      odp.getSourceFraction,
-      odp.getTotalObservationTime
+      odp.getSourceFraction
     )
 
   def calc(src: SourceDefinitionParameters): Int =
     hash(
-      src.getBBTemp,
-      src.getELineContinuumFlux,
-      src.getELineContinuumFluxUnits,
-      src.getELineFlux,
-      src.getELineFluxUnits,
-      src.getELineWavelength,
-      src.getELineWidth,
-      src.getExtendedSourceType,
-      src.getFWHM,
-      src.getNormBand,
-      src.getNormType,
-      src.getNormWavelength,
-      src.getPowerLawIndex,
-      src.getPrettyUnits,
-      src.getRedshift,
-      src.getSourceGeometry,
-      src.getSourceGeometryStr,
-      src.getSourceNormalization,
-      src.getSourceSpec,
-      src.getSpectrumResource,
-      src.getSpecType,
-      src.getUnits,
-      src.getUserDefinedSpectrum
+      src.getProfileType.name,
+      src.profile.norm,
+      src.profile.units.name,
+      src.distribution,
+      src.normBand.name,
+      src.redshift
     )
 
   def calc(tp: TeleParameters): Int =
@@ -228,9 +194,8 @@ object Hash {
     hash(
       alt.getGuideStarMagnitude,
       alt.getGuideStarSeperation,
-      alt.altairIsUsed,
-      alt.fieldLensIsUsed,
-      alt.getWFSMode
+      alt.getFieldLens.displayValue,
+      alt.getWFSMode.displayValue
     )
 
   def calc(alt: GemsParameters): Int =

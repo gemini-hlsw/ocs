@@ -23,140 +23,93 @@
 				<i>Choose one of point, extended or user-defined source profile and the brightness in any filter/wavelength </i></td>
 			</tr>
 			<tr>
-				<td><input name="sourceGeom" value="pointSource" checked="checked" type="radio" /></td>
+				<td><input name="Profile" value="POINT" checked="checked" type="radio" /></td>
 				<td colspan="2"><b>Point source</b> (<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10257#spatial','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">nominal
 				PSF</a>) with spatially integrated brightness <input name="psSourceNorm" size="8" value="0.001" type="text" /> <select name="psSourceUnits" size="1">
 
-				<option value="mag">
+				<option value="MAG">
 				mag</option>
-				<option value="ABmag">
+				<option value="ABMAG">
 				AB mag</option>
-				<option value="jy">
+				<option value="JY">
 				Jy</option>
-				<option value="watts_fd_wavelength">
+				<option value="WATTS">
 
 				W/m^2/um</option>
-				<option value="ergs_fd_wavelength">
+				<option value="ERGS_WAVELENGTH">
 				ergs/s/cm^2/A</option>
-				<option value="ergs_fd_frequency">
+				<option value="ERGS_FREQUENCY">
 				ergs/s/cm^2/Hz</option>
 				</select> (e.g. 19.3 mag or 2e-17 W/m^2/um) </td>
 
 			</tr>
 			<tr>
-				<td valign="top"><input name="sourceGeom" value="extendedSource" type="radio" /></td>
+				<td valign="top"></td>
 				<td colspan="2"><b>Extended source</b> having ...(When this option is selected the image quality selection in section 3 of the ITC is disabled.) </td>
 			</tr>
 			<tr>
 				<td> </td>
 
-				<td><img src="/spacer.gif" height="1" width="40" /><input name="extSourceType" value="gaussian" type="radio" /></td>
+				<td><img src="/spacer.gif" height="1" width="40" /><input name="Profile" value="GAUSSIAN" type="radio" /></td>
 				<td>Gaussian profile with full width half maximum (including seeing) of <input name="gaussFwhm" size="5" value="1.0" type="text" /> arcsec and spatially integrated brightness of <input name="gaussSourceNorm" size="8" value="0.005" type="text" /> <select name="gaussSourceUnits" size="1">
-				<option value="mag">
+				<option value="MAG">
 				mag</option>
-				<option value="ABmag">
+				<option value="ABMAG">
 				AB mag</option>
 
-				<option value="jy">
+				<option value="JY">
 				Jy</option>
-				<option value="watts_fd_wavelength">
+				<option value="WATTS">
 				W/m^2/um</option>
-				<option value="ergs_fd_wavelength">
+				<option value="ERGS_WAVELENGTH">
 				ergs/s/cm^2/A</option>
-				<option value="ergs_fd_frequency">
+				<option value="ERGS_FREQUENCY">
 
 				ergs/s/cm^2/Hz</option>
 				</select> (e.g. 19.3 mag or 2e-17 W/m^2/um) </td>
 			</tr>
 			<tr>
 				<td> </td>
-				<td><img src="/spacer.gif" height="1" width="40" /><input name="extSourceType" value="uniform" checked="checked" type="radio" /></td>
+				<td><img src="/spacer.gif" height="1" width="40" /><input name="Profile" value="UNIFORM" type="radio" /></td>
 				<td>Uniform surface brightness <input name="usbSourceNorm" size="8" value="12.0" type="text" /> <select name="usbSourceUnits" size="1">
 
-				<option value="mag_per_sq_arcsec">
+				<option value="MAG_PSA">
 				mag / sq arcsec</option>
-				<option value="ABmag_per_sq_arcsec">
+				<option value="ABMAG_PSA">
 				AB mag / sq arcsec</option>
-				<option value="jy_per_sq_arcsec">
+				<option value="JY_PSA">
 				Jy / sq arcsec</option>
-				<option value="watts_fd_wavelength_per_sq_arcsec">
+				<option value="WATTS_PSA">
 
 				W/m^2/um / sq arcsec</option>
-				<option value="ergs_fd_wavelength_per_sq_arcsec">
+				<option value="ERGS_WAVELENGTH_PSA">
 				ergs/s/cm^2/A / sq arcsec</option>
-				<option value="ergs_fd_frequency_per_sq_arcsec">
+				<option value="ERGS_FREQUENCY_PSA">
 				ergs/s/cm^2/Hz / sq arcsec</option>
 				</select> (e.g. 21.6 mag / sq arcsec) </td>
 
 			</tr>
-		<!--	<tr>
-				<td> </td>
-				<td><img src="/spacer.gif" height="1" width="40" /><img src="http://www.gemini.edu/sciops/instruments/itc/dis.gif" alt="disabled" height="15" width="15" /></td>
-				<td>Exponential profile with spatially integrated brightness <input name="expSourceNorm" size="8" value="20.0" type="text" /> <select name="expSourceUnits" size="1">
-				<option value="mag">
-				mag</option>
-
-				<option value="ABmag">
-				AB mag</option>
-				<option value="jy">
-				Jy</option>
-				<option value="watts_fd_wavelength">
-				W/m^2/um</option>
-				<option value="ergs_fd_wavelength">
-
-				ergs/s/cm^2/A</option>
-				<option value="ergs_fd_frequency">
-				ergs/s/cm^2/Hz</option>
-				</select> (e.g. 19.3 mag or 2e-17 W/m^2/um) and half-light radius of <input name="expHalfLightRadius" size="5" value="3.0" type="text" /> arcsec <i>(disabled)</i></td>
-			</tr>
-
 			<tr>
-				<td> </td>
-				<td><img src="/spacer.gif" height="1" width="40" /><img src="http://www.gemini.edu/sciops/instruments/itc/dis.gif" alt="disabled" height="15" width="15" /></td>
-				<td>Elliptical r^(1/4) profile with spatially integrated brightness <input name="ellSourceNorm" size="8" value="20.0" type="text" /> <select name="ellSourceUnits" size="1">
-				<option value="mag">
-				mag</option>
-				<option value="ABmag">
-
-				AB mag</option>
-				<option value="jy">
-				Jy</option>
-				<option value="watts_fd_wavelength">
-				</option>
-				<option value="ergs_fd_wavelength">
-				ergs/s/cm^2/A</option>
-
-				<option value="ergs_fd_frequency">
-				ergs/s/cm^2/Hz</option>
-				</select> (e.g. 19.3 mag or 2e-17 W/m^2/um) and half-light radius of <input name="ellHalfLightRadius" size="5" value="3.0" type="text" /> arcsec <i>(disabled)</i></td>
-			</tr>
-			<tr>
-				<td valign="top"><img src="http://www.gemini.edu/sciops/instruments/itc/dis.gif" alt="disabled" height="15" width="15" /></td>
-
-				<td colspan="2"><b>User-defined 2D image</b> read from file <i;(disabled)></i;(disabled)></td>
-			</tr> -->
-			<tr>
-				<td colspan="3"><img src="/spacer.gif" height="40" width="1" />with the above <b>brightness normalisation</b> applied <input name="normType" value="filter" checked="checked" type="radio" /> in filter <select name="normBand" size="1">
+				<td colspan="3"><img src="/spacer.gif" height="40" width="1" />with the above <b>brightness normalisation</b> applied in filter <select name="WavebandDefinition" size="1">
 
                     <option value="U">U (0.36um)</option>
                     <option value="B">B (0.44um)</option>
-                    <option value="g'">g' (0.48um) </option>
+                    <option value="g">g' (0.48um) </option>
                     <option value="V">V (0.55um)</option>
-                    <option value="r'">r' (0.62um) </option>
+                    <option value="r">r' (0.62um) </option>
                     <option value="R">R (0.67um)</option>
-                    <option value="i'">i' (0.77um) </option>
+                    <option value="i">i' (0.77um) </option>
                     <option value="I">I (0.87um)</option>
-                    <option value="z'">z' (0.92um) </option>
+                    <option value="z">z' (0.92um) </option>
                     <option value="J">J (1.25um)</option>
                     <option value="H">H (1.65um)</option>
                     <option value="K">K (2.2um)</option>
-                    <option value="L'">L' (3.76um)</option>
-                    <option value="M'">M' (4.77um)</option>
+                    <option value="L">L' (3.76um)</option>
+                    <option value="M">M' (4.77um)</option>
                     <option value="N">N (10.5um)</option>
                     <option value="Q">Q (20.1um)</option>
 
-				</select> band <!-- or <img src="http://www.gemini.edu/sciops/instruments/itc/dis.gif" alt="disabled" height="15" width="15" /> --> <!-- not yet enabled<input type="radio" name="normType" value="wavelength">--> at a
-				wavelength <input name="normWavelength" size="5" value="0.55" type="text" /> micron <!-- <i>(latter option disabled)</i> --> </td>
+				</select> band</td>
 
 			</tr>
 			<tr>
@@ -179,7 +132,7 @@
 				<i>Choose one SED, the redshift and extinction</i></td>
 			</tr>
 			<tr>
-				<td><input value="libraryNonStar" name="sourceSpec" type="radio" /></td>
+				<td><input value="LIBRARY_NON_STAR" name="Distribution" type="radio" /></td>
 				<td colspan="2">Library spectrum of a non-stellar object <select name="nsSpectrumType" size="1">
 				<option value="Planetary-nebula-NGC7027">
 				Planetary nebula (NGC7027)</option>
@@ -234,128 +187,8 @@
 
 				</select></td>
 			</tr>
-			<!-- <tr>
-				<td><img src="http://www.gemini.edu/sciops/instruments/itc/dis.gif" alt="option disabled" height="15" width="15" /></td>
-				<td colspan="2">Library spectrum of a star with spectral type <select name="stSpectrumType" size="1">
-				<option value="O5V">
-				O5V</option>
-				<option value="O8III">
-
-				O8III</option>
-				<option value="B0V">
-				B0V</option>
-				<option value="B5-7V">
-				B5-7V</option>
-				<option value="B5III">
-				B5III</option>
-
-				<option value="B5I">
-				B5I</option>
-				<option value="A0V">
-				A0V</option>
-				<option value="A0III">
-				A0III</option>
-				<option value="A0I">
-
-				A0I</option>
-				<option value="A5V">
-				A5V</option>
-				<option value="A5III">
-				A5III</option>
-				<option value="F0V">
-				F0V</option>
-
-				<option value="F0III">
-				F0III</option>
-				<option value="F0I">
-				F0I</option>
-				<option value="F5V">
-				F5V</option>
-				<option value="F5V-w">
-
-				F5V-w</option>
-				<option value="F6V-r">
-				F6V-r</option>
-				<option value="F5III">
-				F5III</option>
-				<option value="F5I">
-				F5I</option>
-
-				<option value="G0V">
-				G0V</option>
-				<option value="G0V-w">
-				G0V-w</option>
-				<option value="G0V-r">
-				G0V-r</option>
-				<option value="G0III">
-
-				G0III</option>
-				<option value="G0I">
-				G0I</option>
-				<option value="G2V">
-				G2V</option>
-				<option value="G5V">
-				G5V</option>
-
-				<option value="G5V-w">
-				G5V-w</option>
-				<option value="G5V-r">
-				G5V-r</option>
-				<option value="G5III">
-				G5III</option>
-				<option value="G5III-w">
-
-				G5III-w</option>
-				<option value="G5III-r">
-				G5III-r</option>
-				<option value="G5I">
-				G5I</option>
-				<option value="K0V">
-				K0V</option>
-
-				<option value="K0V-r">
-				K0V-r</option>
-				<option value="K0III">
-				K0III</option>
-				<option value="K0III-w">
-				K0III-w</option>
-				<option value="K0III-r">
-
-				K0III-r</option>
-				<option value="K0-1II">
-				K0-1II</option>
-				<option value="K4V">
-				K4V</option>
-				<option value="K4III">
-				K4III</option>
-
-				<option value="K4III-w">
-				K4III-w</option>
-				<option value="K4III-r">
-				K4III-r</option>
-				<option value="K4I">
-				K4I</option>
-				<option value="M0V">
-
-				M0V</option>
-				<option value="M0III">
-				M0III</option>
-				<option value="M3V">
-				M3V</option>
-				<option value="M3III">
-				M3III</option>
-
-				<option value="M6V">
-				M6V</option>
-				<option value="M6III">
-				M6III</option>
-				<option value="M9III">
-				M9III</option>
-				</select></td>
-
-			</tr> --> 
 			<tr>
-				<td><input value="modelEmLine" name="sourceSpec" type="radio" /></td>
+				<td><input value="ELINE" name="Distribution" type="radio" /></td>
 				<td colspan="2">Single emission line at wavelength <input name="lineWavelength" size="5" value="12.8" type="text" /> micron with line flux <input name="lineFlux" size="8" value="5.0e-19" type="text" /> <select name="lineFluxUnits" size="1">
 				<option value="watts_flux">
 				W/m^2</option>
@@ -371,26 +204,23 @@
 				</select></td>
 			</tr>
 			<tr>
-				<td><input value="modelBlackBody" name="sourceSpec" checked="checked" type="radio" /></td>
+				<td><input value="BBODY" name="Distribution" checked="checked" type="radio" /></td>
 				<td colspan="2">Model black body spectrum with temperature <input name="BBTemp" size="6" value="10000" type="text" /> K </td>
 
 			</tr>
 			<tr>
-				<td><input value="modelPowerLaw" name="sourceSpec" type="radio" /></td>
+				<td><input value="PLAW" name="Distribution" type="radio" /></td>
 				<td colspan="2">Model power-law spectrum (S_lambda = lambda ^ <input name="powerIndex" size="5" value="-1.0" type="text" /> ) </td>
 			</tr>
 			<tr>
-				<td><input value="userDefinedSpectrum" name="sourceSpec" type="radio" /></td>
+				<td><input value="USER_DEFINED" name="Distribution" type="radio" /></td>
 
 				<td colspan="2">User-defined spectrum read from file (size &lt; 1MB) <input name="specUserDef" type="file" /></td>
 			</tr>
 			<tr>
-				<td colspan="3">with the <b>spectrum mapped</b> to a redshift <input name="recession" value="redshift" checked="checked" type="radio" /> z = <input name="z" size="5" value="0.0" type="text" /> or a radial velocity <input name="recession" value="velocity" type="radio" /> v
+				<td colspan="3">with the <b>spectrum mapped</b> to a redshift <input name="Recession" value="REDSHIFT" checked="checked" type="radio" /> z = <input name="z" size="5" value="0.0" type="text" /> or a radial velocity <input name="Recession" value="VELOCITY" type="radio" /> v
 				= <input name="v" size="5" value="0.0" type="text" /> km/s</td>
 
-			</tr>
-			<tr>
-				<td colspan="3">...and subject to <b>dust reddening</b> by a foreground screen (see more info on the extinction law) having a visual extinction of Av = <input name="Av" size="4" value="0" type="text" /> <!-- mag <i>(disabled)</i> <img src="http://www.gemini.edu/sciops/instruments/itc/dis.gif" alt="disabled" height="15" width="15" /> --> </td>
 			</tr>
 
 			<tr>
@@ -551,50 +381,44 @@
 				condition constraints</a> pages. </td>
 
 			</tr>
-			<tr>
-				<td><b>Image quality:</b></td>
-				<td><input name="imageQuality" value="1" type="radio" /> best 20%-ile</td>
-				<td><input name="imageQuality" value="2" checked="checked" type="radio" />  70%-ile</td>
-				<td><input name="imageQuality" value="3" type="radio" />  85%-ile</td>
 
-				<td colspan="2"><input name="imageQuality" value="4" type="radio" /> any</td>
-			</tr>
-			<tr>
-				<td><b>Sky transparency (cloud cover):</b></td>
-				<!-- 
-				<td><input name="skyTransCloud" value="1" type="radio"></input> best 20%-ile</td> No longer offered -->
-				<td><input name="skyTransCloud" value="2" checked="checked" type="radio" /> 50%-ile</td>
+            <tr>
+                <td><b>Image quality:</b></td>
+                <td><input name="ImageQuality" value="PERCENT_20" type="radio" /> best 20%-ile</td>
+                <td><input name="ImageQuality" value="PERCENT_70" type="radio"checked  />  70%-ile</td>
+                <td><input name="ImageQuality" value="PERCENT_85" type="radio" />  85%-ile</td>
+                <td><input name="ImageQuality" value="ANY" type="radio" /> any</td>
+            </tr>
+            <tr>
+                <td><b>Sky transparency (cloud cover):</b></td>
+                <td><input name="CloudCover" value="PERCENT_50" type="radio" checked="checked" /> 50%-ile</td>
+                <td><input name="CloudCover" value="PERCENT_70" type="radio" /> 70%-ile</td>
+                <!--td><input name="CloudCover" value="PERCENT_80" type="radio" /> 80%-ile</td-->
+                <!--td><input name="CloudCover" value="ANY" type="radio" /> any</td-->
+            </tr>
+            <tr>
+                <td><b>Sky transparency (water vapour):</b></td>
+                <td><input name="WaterVapor" value="PERCENT_20" type="radio" /> best 20%-ile</td>
+                <td><input name="WaterVapor" value="PERCENT_50" type="radio" checked /> 50%-ile</td>
+                <td><input name="WaterVapor" value="PERCENT_80" type="radio" /> 80%-ile</td>
+                <td><input name="WaterVapor" value="ANY" type="radio" /> any</td>
+            </tr>
 
-				<td><input name="skyTransCloud" value="3" type="radio" /> 70%-ile</td>
-				<!-- <td><img src="http://www.gemini.edu/sciops/instruments/itc/dis.gif" alt="disabled" height="15" width="15" /> 80%-ile</td>
-				<td><img src="http://www.gemini.edu/sciops/instruments/itc/dis.gif" alt="disabled" height="15" width="15" /> any</td> -->
-			</tr>
-			<tr>
-				<td><b>Sky transparency (water vapour):</b></td>
+            <tr>
+                <td><b>Sky background: Any (see <a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10272','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>explanatory notes</span></a>)</b></td>
+                <!--td><input name="SkyBackground" value="PERCENT_20" type="radio" /> best 20%-ile</td-->
+                <!--td><input name="SkyBackground" value="PERCENT_50" type="radio" /> 50%-ile</td-->
+                <!--td><input name="SkyBackground" value="PERCENT_80" type="radio" checked="checked" /> 80%-ile</td-->
+                <!--td><input name="SkyBackground" value="ANY" type="radio" /> any</td-->
+                <input name="SkyBackground" value="ANY" type="hidden" />
+            </tr>
+            <tr>
+                <td><b>Typical air mass during observation:</b></td>
+                <td><input name="Airmass" value="1.2" type="radio" checked /> &lt;1.2</td>
+                <td><input name="Airmass" value="1.5" type="radio" /> 1.5</td>
+                <td><input name="Airmass" value="2.0" type="radio" /> 2.0</td>
+            </tr>
 
-				<td><input name="skyTransWater" value="1" type="radio" /> best 20%-ile</td>
-				<td><input name="skyTransWater" value="2" checked="checked" type="radio" /> 50%-ile</td>
-				<td><input name="skyTransWater" value="3" type="radio" /> 80%-ile</td>
-				<td colspan="2"><input name="skyTransWater" value="4" type="radio" /> any</td>
-			</tr>
-
-			<tr>
-				<td><b>Sky background: Any (see <a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10272','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>explanatory notes</span></a>)</b></td>
-				<!--
-				<td><input type="radio" name="skyBackground" value="1"> best 20%-ile</td>
-				<td><input type="radio" name="skyBackground" value="2" checked> 50%-ile</td>
-				<td><input type="radio" name="skyBackground" value="3"> 80%-ile</td>
-				<td colspan="2"><input type="radio" name="skyBackground" value="4"> any</td>
-				-->
-				<input value="4" name="skyBackground" type="hidden" /> 
-			</tr>
-			<tr>
-				<td><b>Typical air mass during observation:</b></td>
-
-				<td><input name="airMass" value="1.2" checked="checked" type="radio" /> &lt;1.2</td>
-				<td><input name="airMass" value="1.5" type="radio" /> 1.5</td>
-				<td colspan="3"><input name="airMass" value="2.0" type="radio" /> 2.0</td>
-			</tr>
 			<tr>
 				<td colspan="6">
 
@@ -627,8 +451,8 @@
 			<tr>
 				<td> </td>
 				<!-- calc method A-->
-				<td><input value="s2n" name="calcMethod" checked="checked" type="radio" /></td>
-				<td>Total S/N ratio resulting from a total time of <input name="totTimeA" size="5" value="1800" type="text" /> secs and with a fraction <input name="fracOnSourceA" size="4" value="0.5" type="text" /> of exposures that observe the source (number of individual
+				<td><input value="s2n" name="calcMethod" checked="checked" type="radio" /><input name="numExpA" value="0" type="hidden" /></td>
+				<td>Total S/N ratio resulting from a total time of <input name="expTimeA" size="5" value="1800" type="text" /> secs and with a fraction <input name="fracOnSourceA" size="4" value="0.5" type="text" /> of exposures that observe the source (number of individual
 				exposures will be calculated from assumed frame time) </td>
 
 			</tr>
@@ -636,7 +460,7 @@
 			<!-- calc method C-->
 			<tr>
 				<td> </td>
-				<td><input value="intTime" name="calcMethod" type="radio" /></td>
+				<td><input value="intTime" name="calcMethod" type="radio" /><input name="expTimeC" value="0" type="hidden" /></td>
 				<td>Total integration time to achieve a S/N ratio of <input name="sigmaC" size="3" value="5" type="text" />  and with a fraction <input name="fracOnSourceC" size="4" value="0.5" type="text" /> of exposures that observe the source </td>
 
 			</tr>
@@ -656,7 +480,7 @@
 				<td colspan="3" height="50" valign="bottom"><b>Output:</b> </td>
 			</tr>
 			<tr>
-				<td colspan="3">For spectroscopy, <input value="autoLimits" name="plotLimits" checked="checked" type="radio" /> autoscale or <input value="userLimits" name="plotLimits" type="radio" /> specify limits for plotted spectra (lower wavelength <input name="plotWavelengthL" size="6" value="0.500" type="text" /> um and upper wavelength <input name="plotWavelengthU" size="6" value="0.900" type="text" /> um) </td>
+				<td colspan="3">For spectroscopy, <input value="AUTO" name="PlotLimits" checked="checked" type="radio" /> autoscale or <input value="USER" name="PlotLimits" type="radio" /> specify limits for plotted spectra (lower wavelength <input name="plotWavelengthL" size="6" value="0.500" type="text" /> um and upper wavelength <input name="plotWavelengthU" size="6" value="0.900" type="text" /> um) </td>
 
 			</tr>
 			<tr>

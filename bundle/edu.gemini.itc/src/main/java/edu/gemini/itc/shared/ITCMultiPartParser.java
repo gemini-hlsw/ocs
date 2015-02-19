@@ -92,7 +92,7 @@ public class ITCMultiPartParser {
     public String getParameter(final String name) {
         final String parameter = parameters.get(name);
         if (parameter == null) {
-            throw new IllegalArgumentException("Parameter " + name + "not found in request.");
+            throw new IllegalArgumentException("Parameter " + name + " not found in request.");
         }
         return parameter;
     }

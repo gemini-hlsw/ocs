@@ -56,7 +56,7 @@ public final class GnirsNorth extends Gnirs {
         _stringSlitWidth = gp.getStringSlitWidth();
         _grating = gp.getGrating();
         _centralWavelength = gp.getInstrumentCentralWavelength();
-        _mode = odp.getCalculationMode();
+        _mode = odp.getMethod();
         _XDisp = gp.isXDispUsed();
 
         if (_centralWavelength < 1030 || _centralWavelength > 6000) {
@@ -113,7 +113,7 @@ public final class GnirsNorth extends Gnirs {
         _cameraLength = gp.getCameraLength();
 
         //Test to see that all conditions for Spectroscopy are met
-        if (_mode.equals(ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_mode.isSpectroscopy()) {
             if (_grating.equals("none"))
                 throw new Exception("Spectroscopy calculation method is selected but a grating" +
                         " is not.\nPlease select a grating and a " +

@@ -77,7 +77,7 @@ public class GmosSouth extends Gmos {
         _filterUsed = gp.getFilter();
         _centralWavelength = gp.getInstrumentCentralWavelength();
         //_camera = gp.getCamera();
-        _mode = odp.getCalculationMode();
+        _mode = odp.getMethod();
         _spectralBinning = gp.getSpectralBinning();
         _spatialBinning = gp.getSpatialBinning();
 
@@ -111,7 +111,7 @@ public class GmosSouth extends Gmos {
 
 
         //Test to see that all conditions for Spectroscopy are met
-        if (_mode.equals(ObservationDetailsParameters.SPECTROSCOPY)) {
+        if (_mode.isSpectroscopy()) {
             if (_grating.equals("none"))
                 throw new Exception("Spectroscopy calculation method is selected but a grating" +
                         " is not.\nPlease select a grating and a " +
@@ -125,7 +125,7 @@ public class GmosSouth extends Gmos {
                         "configuration section.");
         }
 
-        if (_mode.equals(ObservationDetailsParameters.IMAGING)) {
+        if (_mode.isImaging()) {
             if (_filterUsed.equals("none"))
                 throw new Exception("Imaging calculation method is selected but a filter" +
                         " is not.\n  Please select a filter and resubmit the " +
