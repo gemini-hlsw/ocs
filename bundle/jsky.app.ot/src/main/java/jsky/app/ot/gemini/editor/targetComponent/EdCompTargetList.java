@@ -1710,19 +1710,19 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
     private final TelescopePosWatcher posWatcher = new TelescopePosWatcher() {
-    public void telescopePosUpdate(WatchablePos tp) {
-        if (_ignorePosUpdate)
-            return;
+        public void telescopePosUpdate(WatchablePos tp) {
+            if (_ignorePosUpdate)
+                return;
 
-        if (tp != _curPos) {
-            // This shouldn't happen ...
-            System.out.println(getClass().getName() + ": received a position " +
-                    " update for a position other than the current one: " + tp);
-            return;
+            if (tp != _curPos) {
+                // This shouldn't happen ...
+                System.out.println(getClass().getName() + ": received a position " +
+                        " update for a position other than the current one: " + tp);
+                return;
+            }
+            _showPos();
+            updateGuiding();
         }
-        _showPos();
-        updateGuiding();
-    }
     };
 
     // Update the current target to use the selected coordinate system
@@ -1770,124 +1770,124 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
     private ActionListener bigListener = new ActionListener() {
-    public void actionPerformed(ActionEvent evt) {
-        final Object w = evt.getSource();
-        TargetEnvironment env = getDataObject().getTargetEnvironment();
+        public void actionPerformed(ActionEvent evt) {
+            final Object w = evt.getSource();
+            TargetEnvironment env = getDataObject().getTargetEnvironment();
 
-        if (w == _w.removeButton) {
-            if (env.isBasePosition(_curPos)) {
-                DialogUtil.error("You can't remove the Base Position.");
-                return;
-            }
-            if (_curPos != null) {
-                env = env.removeTarget(_curPos);
-            } else if (_curGroup != null) {
-                final GuideGroup primary = env.getOrCreatePrimaryGuideGroup();
-                if (_curGroup == primary) {
-                    DialogUtil.error("You can't remove the primary guide group.");
+            if (w == _w.removeButton) {
+                if (env.isBasePosition(_curPos)) {
+                    DialogUtil.error("You can't remove the Base Position.");
                     return;
                 }
-                env = env.removeGroup(_curGroup);
-                _curGroup = primary;
-            }
-            getDataObject().setTargetEnvironment(env);
-            _handleSelectionUpdate(TargetSelection.get(env, getNode()));
-
-        } else if (w == _w.manualGuideStarButton || w == _w.autoGuideStarButton) {
-            try {
-                final boolean manual = w == _w.manualGuideStarButton;
-                if (manual || GuideStarSupport.hasGemsComponent(getNode())) {
-                    final TelescopePosEditor tpe = TpeManager.open();
-                    tpe.reset(getNode());
-                    tpe.getImageWidget().guideStarSearch(manual);
-                } else {
-                    // In general, we don't want to pop open the TPE just to
-                    // pick a guide star.
-                    AgsClient.launch(getNode(), _w);
-                }
-            } catch (Exception e) {
-                DialogUtil.error(e);
-            }
-        } else if (w == _w.setBaseButton) {
-            final TelescopePosEditor tpe = TpeManager.get();
-            if (tpe == null) {
-                DialogUtil.message("The Position Editor must be opened for this feature to work.");
-                return;
-            }
-            tpe.reset(getNode());
-            final WorldCoords basePos = tpe.getImageCenterLocation();
-            if (basePos == null) {
-                DialogUtil.message("Couldn't determine the image center.");
-                return;
-            }
-
-            final SPTarget base = env.getBase();
-            base.getTarget().getRa().setAs(basePos.getRaDeg(), CoordinateParam.Units.DEGREES);
-            base.getTarget().getDec().setAs(basePos.getDecDeg(), CoordinateParam.Units.DEGREES);
-            base.notifyOfGenericUpdate();
-        } else if (w == _w.resolveButton) {
-            // REL-1063 Fix OT nonsidereal Solar System Object Horizons name resolution
-            if (_curPos.getTarget() instanceof NamedTarget) {
-                // For named objects like Moon, Saturn, etc don't get the orbital elements, just the position
-                _resolveName(HorizonsAction.Type.UPDATE_POSITION, null);
-            } else {
-                _resolveName(HorizonsAction.Type.GET_ORBITAL_ELEMENTS, null);
-            }
-        } else if (w == _w.timeRangePlotButton) {
-            _resolveName(HorizonsAction.Type.PLOT_EPHEMERIS, null);
-        } else if (w == _w.updateRaDecButton) {
-            // REL-1063 Fix OT nonsidereal Solar System Object Horizons name resolution
-            if (_curPos.getTarget() instanceof NamedTarget) {
-                // For named objects like Moon, Saturn, etc don't get the orbital elements, just the position
-                _resolveName(HorizonsAction.Type.UPDATE_POSITION, null);
-            } else {
-                // REL-343: Force nonsidereal target name resolution on coordinate updates
-                _resolveName(HorizonsAction.Type.GET_ORBITAL_ELEMENTS, new ResolveNameListener() {
-                    @Override
-                    public void nameResolved() {
-                        _resolveName(HorizonsAction.Type.UPDATE_POSITION, null);
+                if (_curPos != null) {
+                    env = env.removeTarget(_curPos);
+                } else if (_curGroup != null) {
+                    final GuideGroup primary = env.getOrCreatePrimaryGuideGroup();
+                    if (_curGroup == primary) {
+                        DialogUtil.error("You can't remove the primary guide group.");
+                        return;
                     }
-                });
-            }
-        } else if (w == _w.calendarTime) {
-            final Object o = _w.calendarTime.getSelectedItem();
-            if (o instanceof TimeConfig) {
-                final TimeConfig tr = (TimeConfig) o;
-                final Date d = tr.getDate();
-                final String time = timeFormatter.format(d);
-                _timeDocument.setTime(time);
-                //we have to set the correct day in the calendar when
-                // shortcuts are used.
-                //because _w.calendarDate.setDate(d) doesn't work,
-                // and Shane agreed :) we destroy the calendar a create a  new one with the correct date
-                // (Shane's words => def uglyWorkaroundAcceptable(appName: String) = appName == "OT")
-                //todo: figure out why  _w.calendarDate.setDate(d) doesn't work
+                    env = env.removeGroup(_curGroup);
+                    _curGroup = primary;
+                }
+                getDataObject().setTargetEnvironment(env);
+                _handleSelectionUpdate(TargetSelection.get(env, getNode()));
 
-                _w.panel1.remove(_w.calendarDate);
-                _w.calendarDate = new JCalendarPopup(d, TimeZone.getTimeZone("UTC"));
-                _w.panel1.add(_w.calendarDate, new CellConstraints().xy(5, 1));
-                _w.calendarDate.revalidate();
-                _w.calendarDate.repaint();
-
-                //_w.calendarDate.set
-            } else if (o instanceof String) {
-                //just update the time document
-                _timeDocument.setTime((String) o);
-            }
-
-        } else if (w instanceof JRadioButton) {
-            final String cmd = evt.getActionCommand().toUpperCase();
-            if (_curPos.getTarget() instanceof NamedTarget) {
-                final NamedTarget target = (NamedTarget) _curPos.getTarget();
+            } else if (w == _w.manualGuideStarButton || w == _w.autoGuideStarButton) {
                 try {
-                    target.setSolarObject(NamedTarget.SolarObject.valueOf(cmd));
-                    _setCurPos(); //not needed, but used to fire an event
-                } catch (IllegalArgumentException ex) {
-                    DialogUtil.error("Couldn't find a Planet called " + cmd);
+                    final boolean manual = w == _w.manualGuideStarButton;
+                    if (manual || GuideStarSupport.hasGemsComponent(getNode())) {
+                        final TelescopePosEditor tpe = TpeManager.open();
+                        tpe.reset(getNode());
+                        tpe.getImageWidget().guideStarSearch(manual);
+                    } else {
+                        // In general, we don't want to pop open the TPE just to
+                        // pick a guide star.
+                        AgsClient.launch(getNode(), _w);
+                    }
+                } catch (Exception e) {
+                    DialogUtil.error(e);
+                }
+            } else if (w == _w.setBaseButton) {
+                final TelescopePosEditor tpe = TpeManager.get();
+                if (tpe == null) {
+                    DialogUtil.message("The Position Editor must be opened for this feature to work.");
+                    return;
+                }
+                tpe.reset(getNode());
+                final WorldCoords basePos = tpe.getImageCenterLocation();
+                if (basePos == null) {
+                    DialogUtil.message("Couldn't determine the image center.");
+                    return;
+                }
+
+                final SPTarget base = env.getBase();
+                base.getTarget().getRa().setAs(basePos.getRaDeg(), CoordinateParam.Units.DEGREES);
+                base.getTarget().getDec().setAs(basePos.getDecDeg(), CoordinateParam.Units.DEGREES);
+                base.notifyOfGenericUpdate();
+            } else if (w == _w.resolveButton) {
+                // REL-1063 Fix OT nonsidereal Solar System Object Horizons name resolution
+                if (_curPos.getTarget() instanceof NamedTarget) {
+                    // For named objects like Moon, Saturn, etc don't get the orbital elements, just the position
+                    _resolveName(HorizonsAction.Type.UPDATE_POSITION, null);
+                } else {
+                    _resolveName(HorizonsAction.Type.GET_ORBITAL_ELEMENTS, null);
+                }
+            } else if (w == _w.timeRangePlotButton) {
+                _resolveName(HorizonsAction.Type.PLOT_EPHEMERIS, null);
+            } else if (w == _w.updateRaDecButton) {
+                // REL-1063 Fix OT nonsidereal Solar System Object Horizons name resolution
+                if (_curPos.getTarget() instanceof NamedTarget) {
+                    // For named objects like Moon, Saturn, etc don't get the orbital elements, just the position
+                    _resolveName(HorizonsAction.Type.UPDATE_POSITION, null);
+                } else {
+                    // REL-343: Force nonsidereal target name resolution on coordinate updates
+                    _resolveName(HorizonsAction.Type.GET_ORBITAL_ELEMENTS, new ResolveNameListener() {
+                        @Override
+                        public void nameResolved() {
+                            _resolveName(HorizonsAction.Type.UPDATE_POSITION, null);
+                        }
+                    });
+                }
+            } else if (w == _w.calendarTime) {
+                final Object o = _w.calendarTime.getSelectedItem();
+                if (o instanceof TimeConfig) {
+                    final TimeConfig tr = (TimeConfig) o;
+                    final Date d = tr.getDate();
+                    final String time = timeFormatter.format(d);
+                    _timeDocument.setTime(time);
+                    //we have to set the correct day in the calendar when
+                    // shortcuts are used.
+                    //because _w.calendarDate.setDate(d) doesn't work,
+                    // and Shane agreed :) we destroy the calendar a create a  new one with the correct date
+                    // (Shane's words => def uglyWorkaroundAcceptable(appName: String) = appName == "OT")
+                    //todo: figure out why  _w.calendarDate.setDate(d) doesn't work
+
+                    _w.panel1.remove(_w.calendarDate);
+                    _w.calendarDate = new JCalendarPopup(d, TimeZone.getTimeZone("UTC"));
+                    _w.panel1.add(_w.calendarDate, new CellConstraints().xy(5, 1));
+                    _w.calendarDate.revalidate();
+                    _w.calendarDate.repaint();
+
+                    //_w.calendarDate.set
+                } else if (o instanceof String) {
+                    //just update the time document
+                    _timeDocument.setTime((String) o);
+                }
+
+            } else if (w instanceof JRadioButton) {
+                final String cmd = evt.getActionCommand().toUpperCase();
+                if (_curPos.getTarget() instanceof NamedTarget) {
+                    final NamedTarget target = (NamedTarget) _curPos.getTarget();
+                    try {
+                        target.setSolarObject(NamedTarget.SolarObject.valueOf(cmd));
+                        _setCurPos(); //not needed, but used to fire an event
+                    } catch (IllegalArgumentException ex) {
+                        DialogUtil.error("Couldn't find a Planet called " + cmd);
+                    }
                 }
             }
         }
-    }
     };
 
     ////////////////////////////////////////////////////////////////////////
