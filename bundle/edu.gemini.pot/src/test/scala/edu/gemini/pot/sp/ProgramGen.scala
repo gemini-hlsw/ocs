@@ -228,30 +228,10 @@ object ProgramGen {
 
   val genEdits: Gen[List[ProgEdit]] = sized { size => listOfN(size, genEdit) }
 
-  val genEditedProg: Gen[ProgFun[ISPProgram]] = {
-    def copyFrom(fact: ISPFactory, that: ISPProgram): ISPProgram = {
-      val sp = fact.createProgram(that.getNodeKey, that.getProgramID)
-
-      def init(src: ISPNode, dest: ISPNode): Unit = {
-        dest.dataObject = src.dataObject
-        dest.children   = src.children.map(copy)
-      }
-
-      def copy(src: ISPNode): ISPNode = {
-        val newNode = NodeFactory.mkNode(fact, sp, src)
-        init(src, newNode)
-        newNode
-      }
-
-      init(that, sp)
-      sp.setVersions(that.getVersions)
-      sp
-    }
-
+  val genEditedProg: Gen[ProgFun[ISPProgram]] =
     genEdits.map { edits => (f: ISPFactory, p: ISPProgram) => {
-      val p2 = copyFrom(f, p)
+      val p2 = p.copy(f)
       edits.sequenceU.apply(f, p2)
       p2
     }}
-  }
 }
