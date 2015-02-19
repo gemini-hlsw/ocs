@@ -1,6 +1,6 @@
 package edu.gemini.sp.vcs.diff
 
-import edu.gemini.pot.sp.{DataObjectBlob => DOB, ISPNode, ISPProgram, SPNodeKey}
+import edu.gemini.pot.sp.{DataObjectBlob => DOB, ISPFactory, ISPNode, ISPProgram, SPNodeKey}
 import edu.gemini.shared.util.VersionComparison
 import VersionComparison.Newer
 import edu.gemini.sp.vcs.diff.NodeDetail.Obs
@@ -48,7 +48,7 @@ class PreliminaryMergePropertyTest extends JUnitSuite {
     val deletedKeys = p.getVersions.keySet &~ nodeMap.keySet
   }
 
-  case class PropContext(sp: ISPProgram, lp: ISPProgram, rp: ISPProgram, diffs: MergePlan, mergePlan: MergePlan) {
+  case class PropContext(fact: ISPFactory, sp: ISPProgram, lp: ISPProgram, rp: ISPProgram, diffs: MergePlan, mergePlan: MergePlan) {
     val startMap = sp.nodeMap
     val startId  = sp.getLifespanId
 
@@ -317,10 +317,10 @@ class PreliminaryMergePropertyTest extends JUnitSuite {
 
   @Test
   def testAllPreliminaryMergeProperties(): Unit = {
-    def mkPropContext(start: ISPProgram, local: ISPProgram, remote: ISPProgram): PropContext = {
+    def mkPropContext(fact: ISPFactory, start: ISPProgram, local: ISPProgram, remote: ISPProgram): PropContext = {
       val diffs = ProgramDiff.compare(remote, local.getVersions, removedKeys(local))
       val mc    = MergeContext(local, diffs)
-      PropContext(start, local, remote, diffs, PreliminaryMerge.merge(mc))
+      PropContext(fact, start, local, remote, diffs, PreliminaryMerge.merge(mc))
     }
 
     new MergePropertyTest(mkPropContext).checkAllProperties(props)
