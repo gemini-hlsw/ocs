@@ -887,16 +887,6 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         // Enabled?
         enabled = canEdit
 
-        // Hide CFHT for queue proposals
-        m.map {
-          case _:QueueProposalClass     =>
-            new DefaultComboBoxModel(PartnerType.values.filterNot(_ == ExchangeCFHT).toArray)
-          case _:ClassicalProposalClass =>
-            new DefaultComboBoxModel(PartnerType.values.toArray)
-          case _                        =>
-            this.peer.getModel
-        }.map(this.peer.setModel)
-
         // Update visibility
         visible = ~m.map {
           case _:QueueProposalClass     => true
@@ -923,7 +913,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           case QueueProposalClass(_, _, _, Left(_), _, _)                                          => GeminiPartner
           case QueueProposalClass(_, _, _, Right(e), _, _) if e.partner == ExchangePartner.KECK    => ExchangeKeck
           case QueueProposalClass(_, _, _, Right(e), _, _) if e.partner == ExchangePartner.SUBARU  => ExchangeSubaru
-          case QueueProposalClass(_, _, _, Right(e), _, _) if e.partner == ExchangePartner.CFHT    => GeminiPartner
+          case QueueProposalClass(_, _, _, Right(e), _, _) if e.partner == ExchangePartner.CFHT    => ExchangeCFHT
           case ClassicalProposalClass(_, _, _, Left(_), _)                                         => GeminiPartner
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.KECK   => ExchangeKeck
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.SUBARU => ExchangeSubaru
