@@ -76,8 +76,7 @@ import static jsky.app.ot.util.OtColor.*;
 /**
  * This is the editor for the target list component.
  */
-public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, TargetObsComp>
-        implements TelescopePosWatcher, ActionListener {
+public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, TargetObsComp> {
 
     private static final Logger LOG = Logger.getLogger(EdCompTargetList.class.getName());
     private static final String NON_SIDEREAL_TARGET = "Nonsidereal";
@@ -351,7 +350,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         _initMenuButton(_w.newMenuBar, _w.newMenu, "eclipse/add_menu.gif");
 
-        _w.removeButton.addActionListener(this);
+        _w.removeButton.addActionListener(bigListener);
         _w.removeButton.setText("");
         _w.removeButton.setIcon(Resources.getIcon("eclipse/remove.gif"));
         ButtonFlattener.flatten(_w.removeButton);
@@ -403,19 +402,19 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 AgsStrategyUtil.setSelection(getContextObservation(), strategy);
             }
         });
-        _w.autoGuideStarButton.addActionListener(this);
-        _w.manualGuideStarButton.addActionListener(this);
+        _w.autoGuideStarButton.addActionListener(bigListener);
+        _w.manualGuideStarButton.addActionListener(bigListener);
 
-        _w.resolveButton.addActionListener(this);
+        _w.resolveButton.addActionListener(bigListener);
         _w.resolveButton.setText("");
         _w.resolveButton.setIcon(Resources.getIcon("eclipse/search.gif"));
         ButtonFlattener.flatten(_w.resolveButton);
-        _w.setBaseButton.addActionListener(this);
+        _w.setBaseButton.addActionListener(bigListener);
 
-        _w.calendarTime.addActionListener(this);
+        _w.calendarTime.addActionListener(bigListener);
 
-        _w.timeRangePlotButton.addActionListener(this);
-        _w.updateRaDecButton.addActionListener(this);
+        _w.timeRangePlotButton.addActionListener(bigListener);
+        _w.updateRaDecButton.addActionListener(bigListener);
 
         _initMenuButton(_w.nameServerBar, _w.nameServer, "eclipse/menu-trimmed.gif");
     }
@@ -530,10 +529,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             public void textBoxKeyPress(TextBoxWidget tbwe) {
                 String name = tbwe.getText();
                 if (name != null) name = name.trim();
-                _curPos.deleteWatcher(EdCompTargetList.this);
+                _curPos.deleteWatcher(posWatcher);
                 _curPos.getTarget().setName(name);
                 _curPos.notifyOfGenericUpdate();
-                _curPos.addWatcher(EdCompTargetList.this);
+                _curPos.addWatcher(posWatcher);
                 _w.resolveButton.setEnabled(!"".equals(name));
             }
 
@@ -1281,7 +1280,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private void _initPlanetsRadioButtons() {
         final JRadioButton[] buttons = _w.planetButtons;
         for (JRadioButton button : buttons) {
-            button.addActionListener(this);
+            button.addActionListener(bigListener);
         }
     }
 
@@ -1555,7 +1554,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         final Option<ObsContext> ctx = obsContext(env);
 
-        if (_curPos != null) _curPos.deleteWatcher(this);
+        if (_curPos != null) _curPos.deleteWatcher(posWatcher);
 
         _curPos = selTarget;
 
@@ -1568,7 +1567,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _nonsideMagEditor.edit(ctx, selTarget);
 
         if (_curPos != null) {
-            _curPos.addWatcher(this);
+            _curPos.addWatcher(posWatcher);
             _showPos();
 
             // can't remove base position, so disable button
@@ -1583,7 +1582,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
         if (!env.getGroups().contains(selGroup)) return;
 
-        if (_curPos != null) _curPos.deleteWatcher(this);
+        if (_curPos != null) _curPos.deleteWatcher(posWatcher);
 
         _curPos = null;
         _curGroup = selGroup;
@@ -1710,6 +1709,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         return (_curPos.getTarget() instanceof NonSiderealTarget);
     }
 
+    private final TelescopePosWatcher posWatcher = new TelescopePosWatcher() {
     public void telescopePosUpdate(WatchablePos tp) {
         if (_ignorePosUpdate)
             return;
@@ -1723,7 +1723,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _showPos();
         updateGuiding();
     }
-
+    };
 
     // Update the current target to use the selected coordinate system
     private void _updateCoordSystem() {
@@ -1769,9 +1769,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         void nameResolved();
     }
 
-    /**
-     * Method to handle button actions.
-     */
+    private ActionListener bigListener = new ActionListener() {
     public void actionPerformed(ActionEvent evt) {
         final Object w = evt.getSource();
         TargetEnvironment env = getDataObject().getTargetEnvironment();
@@ -1890,6 +1888,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
         }
     }
+    };
 
     ////////////////////////////////////////////////////////////////////////
     //////////////////////////// Utility Classes  //////////////////////////
