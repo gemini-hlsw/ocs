@@ -17,7 +17,7 @@ import scala.collection.JavaConverters._
 import scalaz._
 
 
-class PreliminaryMergePropertyTest extends JUnitSuite {
+class MergeTest extends JUnitSuite {
   import edu.gemini.sp.vcs.diff.MergePropertyTest.NamedProperty
 
   private def keys(l: List[ISPNode]): Set[SPNodeKey] = l.map(_.key).toSet
@@ -391,7 +391,7 @@ class PreliminaryMergePropertyTest extends JUnitSuite {
   )
 
   @Test
-  def testAllPreliminaryMergeProperties(): Unit = {
+  def testAllMergeProperties(): Unit = {
     def mkPropContext(fact: ISPFactory, start: ISPProgram, local: ISPProgram, remote: ISPProgram): PropContext = {
       val diffs = ProgramDiff.compare(remote, local.getVersions, removedKeys(local))
       val mc    = MergeContext(local, diffs)

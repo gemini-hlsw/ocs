@@ -13,7 +13,7 @@ import scalaz._
 import Scalaz._
 
 
-class ProgramDiffPropertyTest extends JUnitSuite {
+class ProgramDiffTest extends JUnitSuite {
   import MergePropertyTest.NamedProperty
 
   val props = List[NamedProperty[MergePlan]] (
