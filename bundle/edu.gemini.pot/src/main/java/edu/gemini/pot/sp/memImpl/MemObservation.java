@@ -112,7 +112,7 @@ public final class MemObservation extends MemAbstractContainer implements ISPObs
         return _obsNumber;
     }
 
-    void setObservationNumber(int number) {
+    public void setObservationNumber(int number) {
         _obsNumber = number;
     }
 
