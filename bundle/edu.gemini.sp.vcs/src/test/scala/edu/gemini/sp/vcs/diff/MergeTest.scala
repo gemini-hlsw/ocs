@@ -356,8 +356,8 @@ class MergeTest extends JUnitSuite {
           val sameKeys = nMap.keySet == tMap.keySet
           if (!sameKeys) {
             Console.err.println("Children don't match: ")
-            Console.err.println("\tn.children = " + n.map(_.key))
-            Console.err.println("\tt.children = " + t.map(_.key))
+            Console.err.println("\tn.children = " + n.map(_.key).mkString(", "))
+            Console.err.println("\tt.children = " + t.map(_.key).mkString(", "))
           }
 
           sameKeys && nMap.values.forall { nc => matchesMergePlan(nc, tMap(nc.key)) }
