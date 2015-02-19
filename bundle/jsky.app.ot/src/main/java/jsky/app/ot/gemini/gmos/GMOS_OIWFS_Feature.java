@@ -8,16 +8,12 @@ package jsky.app.ot.gemini.gmos;
 
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.skycalc.Angle;
-import edu.gemini.skycalc.Coordinates;
 import edu.gemini.skycalc.Offset;
 import edu.gemini.spModel.gemini.gmos.*;
-import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.guide.PatrolField;
 import edu.gemini.spModel.inst.*;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
-import edu.gemini.spModel.target.SPTarget;
-import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
 import edu.gemini.spModel.telescope.IssPort;
 import jsky.app.ot.gemini.inst.OIWFS_FeatureBase;
@@ -142,25 +138,6 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
                             });
                         }
                     });
-                }
-            });
-
-            // TODO: Remove this. Print the vignetting for testing.
-            // Get the primary guide star for the guider, if it exists.
-            final Option<GuideProbeTargets> gpt = ctx.getTargets().getPrimaryGuideProbeTargets(GmosOiwfsGuideProbe.instance);
-            final Option<SPTarget> guideStar = gpt.flatMap(new Function1<GuideProbeTargets, Option<SPTarget>>() {
-                @Override
-                public Option<SPTarget> apply(GuideProbeTargets spTargets) {
-                    return spTargets.getPrimary();
-                }
-            });
-            guideStar.foreach(new ApplyOp<SPTarget>() {
-                @Override
-                public void apply(SPTarget spTarget) {
-                    final Coordinates skycalcCoordinates = spTarget.getTarget().getSkycalcCoordinates();
-                    final edu.gemini.spModel.core.Coordinates coordinates = new ProbeArmGeometry.SkycalcCoordinates2New(skycalcCoordinates).toNewModel();
-                    double vignetting = GmosOiwfsGuideProbe.instance.calculateVignetting(ctx, coordinates);
-                    System.out.println("***** VIGNETTING: " + vignetting);
                 }
             });
         }

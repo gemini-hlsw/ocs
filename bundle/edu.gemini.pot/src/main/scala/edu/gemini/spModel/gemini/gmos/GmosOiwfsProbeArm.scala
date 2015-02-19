@@ -3,15 +3,13 @@ package edu.gemini.spModel.gemini.gmos
 import java.awt.Shape
 import java.awt.geom.{Point2D, AffineTransform}
 
+import edu.gemini.pot.ModelConverters._
 import edu.gemini.shared.util.immutable.ImPolygon
-import edu.gemini.skycalc.{CoordinateDiff, Offset}
+import edu.gemini.skycalc.Offset
 import edu.gemini.spModel.core.Coordinates
 import edu.gemini.spModel.inst.{ArmAdjustment, ProbeArmGeometry}
 import edu.gemini.spModel.obs.context.ObsContext
-import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.telescope.IssPort
-
-import edu.gemini.spModel.rich.shared.immutable._
 
 object GmosOiwfsProbeArm extends ProbeArmGeometry {
   import edu.gemini.spModel.inst.FeatureGeometry.transformPoint
@@ -50,7 +48,7 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
   override def armAdjustment(ctx: ObsContext, guideStarCoords: Coordinates, offset: Offset): Option[ArmAdjustment] = {
     if (ctx == null || offset == null) None
     else {
-      import ProbeArmGeometry._
+      import ProbeArmGeometry.CanonicalPoint
       val flip        = if (ctx.getIssPort == IssPort.SIDE_LOOKING) -1.0 else 1.0
       val posAngle    = ctx.getPositionAngle.toRadians.getMagnitude
       val offsetPt    = new Point2D.Double(-offset.p.toArcsecs.getMagnitude, -offset.q.toArcsecs.getMagnitude * flip)

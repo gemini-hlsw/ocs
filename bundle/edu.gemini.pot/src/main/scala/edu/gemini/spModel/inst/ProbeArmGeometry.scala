@@ -3,8 +3,8 @@ package edu.gemini.spModel.inst
 import java.awt.Shape
 import java.awt.geom.Point2D
 
+import edu.gemini.pot.ModelConverters._
 import edu.gemini.shared.util.immutable.{DefaultImList, ImList, Option => GOption}
-import edu.gemini.skycalc
 import edu.gemini.skycalc.Offset
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
@@ -80,26 +80,12 @@ trait ProbeArmGeometry {
 }
 
 object ProbeArmGeometry {
-  // This is a hideous hack of code to convert between coordinate systems, using code from the edu.gemini.ags package
-  // object, since this package is not available here and would currently introduce a circular dependency.
-
-  import edu.gemini.skycalc.{Coordinates => SkycalcCoordinates}
-
-  // This code is largely copy-pasted from edu.gemini.ags impl/package.scala.
-  implicit class SkycalcCoordinates2New(val coordinates: SkycalcCoordinates) extends AnyVal {
-    def toNewModel: Coordinates = {
-      val ra = RightAscension.fromAngle(coordinates.getRa.toNewModel)
-      val dec = Declination.fromAngle(coordinates.getDec.toNewModel).getOrElse(Declination.zero)
-      Coordinates(ra, dec)
-    }
-  }
-
-  private implicit class OldAngle2New(val angle: skycalc.Angle) extends AnyVal {
-    def toNewModel: Angle = Angle.fromDegrees(angle.toDegrees.getMagnitude)
-  }
-
-
   private lazy val maxArcsecs = 360 * 60 * 60d
+
+  /**
+   * Convert a value in arcseconds (i.e. in the range [0,maxArcsecs) to its canonical value, i.e.
+   * the equivalent value in the range [-maxArcsecs/2,maxArcsecs/2).
+   */
   private implicit class CanonicalValue(val v: Double) extends AnyVal {
     def toCanonicalValue: Double = {
       val v1 = math.IEEEremainder(v, maxArcsecs)
@@ -108,6 +94,9 @@ object ProbeArmGeometry {
     }
   }
 
+  /**
+   * Convert a point representing coordinates in arcsec to canonical value in both coordinates.
+   */
   implicit class CanonicalPoint(val p: Point2D) extends AnyVal {
     def toCanonicalForm: Point2D =
       new Point2D.Double(p.getX.toCanonicalValue, p.getY.toCanonicalValue)
@@ -119,6 +108,4 @@ object ProbeArmGeometry {
  * @param angle           the angle which will be used by the probe arm
  * @param guideStarCoords the coordinates (in arcsec) where the probe arm will be placed
  */
-// TODO: Should we add the guide star itself here and then just calculate the coordinates? We already calculate
-// TODO: the coordinates for GMOS, but this seems like it could certainly be probe independent.
 case class ArmAdjustment(angle: Double, guideStarCoords: Point2D)
