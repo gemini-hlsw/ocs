@@ -294,7 +294,7 @@ public final class MemGroup extends MemAbstractContainer implements ISPGroup {
     protected void setTypedChildren(MemAbstractContainer.TypedChildren tc)
             throws SPNodeNotLocalException, SPTreeStateException {
         tc.verify(VALID_CHILD_TYPES);
-        setConflictFolder(tc.getChild(MemConflictFolder.class));
+        setConflictFolder(tc.getOnlyChild(MemConflictFolder.class));
         setObsComponents(tc.getChildren(MemObsComponent.class));
         setObservations(tc.getChildren(MemObservation.class));
     }

@@ -189,7 +189,7 @@ public final class MemSeqComponent extends MemAbstractContainer implements ISPSe
     protected void setTypedChildren(MemAbstractContainer.TypedChildren tc)
             throws SPNodeNotLocalException, SPTreeStateException {
         tc.verify(VALID_CHILD_TYPES);
-        setConflictFolder(tc.getChild(MemConflictFolder.class));
+        setConflictFolder(tc.getOnlyChild(MemConflictFolder.class));
         setSeqComponents(tc.getChildren(MemSeqComponent.class));
     }
 

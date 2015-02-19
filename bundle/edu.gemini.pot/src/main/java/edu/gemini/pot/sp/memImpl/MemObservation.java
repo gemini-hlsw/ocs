@@ -353,20 +353,11 @@ public final class MemObservation extends MemAbstractContainer implements ISPObs
         final Object obj = getClientData(InstrumentSequenceSync.USER_OBJ_KEY);
         removeClientData(InstrumentSequenceSync.USER_OBJ_KEY);
 
-        setConflictFolder(tc.getChild(MemConflictFolder.class));
+        setConflictFolder(tc.getOnlyChild(MemConflictFolder.class));
         setObsComponents(tc.getChildren(MemObsComponent.class));
-        setObsQaLog(tc.getChild(MemObsQaLog.class));
-        setObsExecLog(tc.getChild(MemObsExecLog.class));
-
-        List<MemSeqComponent> children = tc.getChildren(MemSeqComponent.class);
-        if (children.size() == 0) {
-            removeSeqComponent();
-        } else {
-            if (children.size() > 1) {
-                throw new SPTreeStateException("Cannot support more than one sequence component");
-            }
-            setSeqComponent(children.get(0));
-        }
+        setObsQaLog(tc.getOnlyChild(MemObsQaLog.class));
+        setObsExecLog(tc.getOnlyChild(MemObsExecLog.class));
+        setSeqComponent(tc.getOnlyChild(MemSeqComponent.class));
 
         // Restore the instrument/sequence sync event monitor and guarantee
         // that the components being added are in sync. :-/
