@@ -40,10 +40,10 @@ final class ProperMotionEditor implements TelescopePosEditor {
         pmDec = createTextField("Proper motion in declination");
 
         // A list of tuples of label and widget
-        ImList<Pair<String,JFormattedTextField>> items =
+        final ImList<Pair<String,JFormattedTextField>> items =
                 DefaultImList.create(
-                        new Pair<String,JFormattedTextField>("RA", pmRa),
-                        new Pair<String,JFormattedTextField>("Dec", pmDec)
+                        new Pair<>("RA", pmRa),
+                        new Pair<>("Dec", pmDec)
                 );
 
         // Place the items in the panel
@@ -72,7 +72,7 @@ final class ProperMotionEditor implements TelescopePosEditor {
     }
 
     private static JFormattedTextField createTextField(final String tip) {
-        NumberFormat nf = NumberFormat.getNumberInstance();
+        final NumberFormat nf = NumberFormat.getNumberInstance();
         nf.setMinimumFractionDigits(1);
         nf.setMinimumIntegerDigits(1);
         nf.setGroupingUsed(false);
@@ -98,7 +98,7 @@ final class ProperMotionEditor implements TelescopePosEditor {
     private final PropertyChangeListener updatePmRaListener = new PropertyChangeListener() {
         @Override public void propertyChange(PropertyChangeEvent evt) {
             try {
-                Number d = (Number) evt.getNewValue();
+                final Number d = (Number) evt.getNewValue();
                 target.deleteWatcher(watcher);
                 final ITarget it = target.getTarget();
                 if (it instanceof HmsDegTarget) {
@@ -115,7 +115,7 @@ final class ProperMotionEditor implements TelescopePosEditor {
     private final PropertyChangeListener updatePmDecListener = new PropertyChangeListener() {
         @Override public void propertyChange(PropertyChangeEvent evt) {
             try {
-                Number d = (Number) evt.getNewValue();
+                final Number d = (Number) evt.getNewValue();
                 target.deleteWatcher(watcher);
                 final ITarget it = target.getTarget();
                 if (it instanceof HmsDegTarget) {

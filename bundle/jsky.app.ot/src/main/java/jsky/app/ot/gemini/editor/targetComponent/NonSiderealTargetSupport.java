@@ -74,8 +74,8 @@ class NonSiderealTargetSupport {
         }
 
         private void _updateConstraints(TelescopeForm w, JComponent c, int row, int col) {
-            GridBagLayout layout = (GridBagLayout) w.nonsiderealPW.getLayout();
-            GridBagConstraints contraints = layout.getConstraints(c);
+            final GridBagLayout layout = (GridBagLayout) w.nonsiderealPW.getLayout();
+            final GridBagConstraints contraints = layout.getConstraints(c);
             contraints.gridx = col;
             contraints.gridy = row;
             layout.setConstraints(c, contraints);
@@ -182,7 +182,7 @@ class NonSiderealTargetSupport {
      */
     void setConicPos(ConicTarget target, NumberBoxWidget nbw) {
         try {
-            double value = Double.valueOf(nbw.getValue());
+            final double value = Double.valueOf(nbw.getValue());
             for (Map.Entry<Param, ConicTargetParamWidgets> e: widgets.entrySet()) {
                 if (e.getValue().getEntry() == nbw) {
                     switch (e.getKey()) {
@@ -227,7 +227,7 @@ class NonSiderealTargetSupport {
                 cw.setText(labs.label);
                 cw.setToolTip(labs.toolTip);
                 if (target instanceof ConicTarget) {
-                    Double d = _getTargetParamvalue((ConicTarget) target, p);
+                    final Double d = _getTargetParamvalue((ConicTarget) target, p);
                     cw.setValue(String.valueOf(d));
                 }
                 cw.setPos(form, row, col++);
@@ -246,8 +246,8 @@ class NonSiderealTargetSupport {
 
         // Update the valid-at date
         Date date = target.getDateForPosition();
-        JTextField tf = (JTextField) form.calendarTime.getEditor().getEditorComponent();
-        TimeDocument td = (TimeDocument)tf.getDocument();
+        final JTextField tf = (JTextField) form.calendarTime.getEditor().getEditorComponent();
+        final TimeDocument td = (TimeDocument)tf.getDocument();
         //if the date is null  use the current time
         if (date == null) {
             date = new Date();
@@ -258,10 +258,10 @@ class NonSiderealTargetSupport {
         // Update the solar system stuff
         if (target instanceof NamedTarget) {
             form.planetsPanel.setVisible(true);
-            NamedTarget pt = (NamedTarget) target;
-            NamedTarget.SolarObject solarObject = pt.getSolarObject();
+            final NamedTarget pt = (NamedTarget) target;
+            final NamedTarget.SolarObject solarObject = pt.getSolarObject();
             if (solarObject != null) {
-                int pos = solarObject.ordinal();
+                final int pos = solarObject.ordinal();
                 if (pos < form.planetButtons.length) {
                     form.planetButtons[pos].setSelected(true);
                 }

@@ -24,7 +24,7 @@ import java.util.TimeZone;
  * @author User #1
  */
 
-public class TelescopeForm extends JPanel {
+class TelescopeForm extends JPanel {
 
     private final EdCompTargetList owner;
 
@@ -36,8 +36,8 @@ public class TelescopeForm extends JPanel {
     JPanel panel1;
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        JPanel targetListPanel = new JPanel();
-        buttonPanel = new JPanel();
+        final JPanel targetListPanel = new JPanel();
+        final JPanel buttonPanel = new JPanel();
         newMenuBar = new JMenuBar();
         newMenu = new JMenu();
         removeButton = new JButton();
@@ -45,26 +45,26 @@ public class TelescopeForm extends JPanel {
         pasteButton = new JButton();
         duplicateButton = new JButton();
         primaryButton = new JButton();
-        JPanel spacerPanel = new JPanel();
-        posTableScrollPane = new JScrollPane();
+        final JPanel spacerPanel = new JPanel();
+        final JScrollPane posTableScrollPane = new JScrollPane();
         positionTable = new TelescopePosTableWidget(owner);
         coordinatesPanel = new JPanel();
         objectGBW = new JPanel();
         guideGroupPanel = new JPanel();
         tag = new JComboBox();
-        nameLabel = new JLabel();
-        guideGroupNameLabel = new JLabel();
+        final JLabel nameLabel = new JLabel();
+        final JLabel guideGroupNameLabel = new JLabel();
         targetName = new TextBoxWidget();
         guideGroupName = new TextBoxWidget();
         resolveButton = new JButton();
         nameServerBar = new JMenuBar();
         nameServer = new JMenu();
-        JPanel stretchPanel = new JPanel();
+        final JPanel stretchPanel = new JPanel();
         system = new DropDownListBoxWidget();
-        RA_Az_STW = new JLabel();
-        JPanel alignmentPanel = new JPanel();
+        final JLabel RA_Az_STW = new JLabel();
+        final JPanel alignmentPanel = new JPanel();
         xaxis = new TextBoxWidget();
-        Dec_El_STW = new JLabel();
+        final JLabel dec_El_STW = new JLabel();
         yaxis = new TextBoxWidget();
         extrasFolder = new JPanel();
         nonsiderealPW = new JPanel();
@@ -104,30 +104,30 @@ public class TelescopeForm extends JPanel {
         meandist = new NumberBoxWidget();
         epochofperiLabel = new JLabel();
         epochofperi = new NumberBoxWidget();
-        orbitalElementFormatPanel = new JPanel();
-        orbitalElementFormatLabel = new JLabel();
+        final JPanel orbitalElementFormatPanel = new JPanel();
+        final JLabel orbitalElementFormatLabel = new JLabel();
         orbitalElementFormat = new DropDownListBoxWidget();
         planetsPanel = new JPanel();
-        JLabel label1 = new JLabel();
-        JRadioButton radioButton1 = new JRadioButton();
-        JRadioButton radioButton2 = new JRadioButton();
-        JRadioButton radioButton3 = new JRadioButton();
-        JRadioButton radioButton4 = new JRadioButton();
-        JRadioButton radioButton5 = new JRadioButton();
-        JRadioButton radioButton6 = new JRadioButton();
-        JRadioButton radioButton7 = new JRadioButton();
-        JRadioButton radioButton8 = new JRadioButton();
-        JRadioButton radioButton9 = new JRadioButton();
+        final JLabel label1 = new JLabel();
+        final JRadioButton radioButton1 = new JRadioButton();
+        final JRadioButton radioButton2 = new JRadioButton();
+        final JRadioButton radioButton3 = new JRadioButton();
+        final JRadioButton radioButton4 = new JRadioButton();
+        final JRadioButton radioButton5 = new JRadioButton();
+        final JRadioButton radioButton6 = new JRadioButton();
+        final JRadioButton radioButton7 = new JRadioButton();
+        final JRadioButton radioButton8 = new JRadioButton();
+        final JRadioButton radioButton9 = new JRadioButton();
         panel1 = new JPanel();
-        JLabel label2 = new JLabel();
+        final JLabel label2 = new JLabel();
         calendarDate = new JCalendarPopup(new Date(), TimeZone.getTimeZone("UTC"));
-        JLabel label4 = new JLabel();
+        final JLabel label4 = new JLabel();
         calendarTime = new JComboBox();
-        JLabel label3 = new JLabel();
+        final JLabel label3 = new JLabel();
         updateRaDecButton = new JButton();
         timeRangePlotButton = new JButton();
         setBaseButton = new JButton();
-        CellConstraints cc = new CellConstraints();
+        final CellConstraints cc = new CellConstraints();
 
         //======== this ========
         setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -143,10 +143,10 @@ public class TelescopeForm extends JPanel {
                 buttonPanel.setBackground(new Color(238, 238, 238));
                 buttonPanel.setBorder(new EmptyBorder(2, 2, 2, 2));
                 buttonPanel.setLayout(new GridBagLayout());
-                ((GridBagLayout)buttonPanel.getLayout()).columnWidths = new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0};
-                ((GridBagLayout)buttonPanel.getLayout()).rowHeights = new int[] {0, 0};
-                ((GridBagLayout)buttonPanel.getLayout()).columnWeights = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0E-4};
-                ((GridBagLayout)buttonPanel.getLayout()).rowWeights = new double[] {0.0, 1.0E-4};
+                ((GridBagLayout) buttonPanel.getLayout()).columnWidths = new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0};
+                ((GridBagLayout) buttonPanel.getLayout()).rowHeights = new int[] {0, 0};
+                ((GridBagLayout) buttonPanel.getLayout()).columnWeights = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0E-4};
+                ((GridBagLayout) buttonPanel.getLayout()).rowWeights = new double[] {0.0, 1.0E-4};
 
                 //---- newButton ----
                 newMenu.setToolTipText("Create a new target or guide group");
@@ -155,8 +155,8 @@ public class TelescopeForm extends JPanel {
                 newMenu.setFocusable(false);
                 newMenuBar.add(newMenu);
                 buttonPanel.add(newMenuBar, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                    new Insets(0, 0, 0, 0), 0, 0));
+                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                        new Insets(0, 0, 0, 0), 0, 0));
 
                 //---- removeButton ----
                 removeButton.setToolTipText("Remove the selected target");
@@ -164,32 +164,32 @@ public class TelescopeForm extends JPanel {
                 removeButton.setText("Remove");
                 removeButton.setFocusable(false);
                 buttonPanel.add(removeButton, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                    new Insets(0, 0, 0, 0), 0, 0));
+                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                        new Insets(0, 0, 0, 0), 0, 0));
 
                 //---- copyButton ----
                 copyButton.setText("Copy");
                 copyButton.setFocusable(false);
                 copyButton.setToolTipText("Copy selected target coordinates");
                 buttonPanel.add(copyButton, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                    new Insets(0, 10, 0, 0), 0, 0));
+                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                        new Insets(0, 10, 0, 0), 0, 0));
 
                 //---- pasteButton ----
                 pasteButton.setText("Paste");
                 pasteButton.setFocusable(false);
                 pasteButton.setToolTipText("Paste coordinates on selected target");
                 buttonPanel.add(pasteButton, new GridBagConstraints(3, 0, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                    new Insets(0, 0, 0, 0), 0, 0));
+                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                        new Insets(0, 0, 0, 0), 0, 0));
 
                 //---- duplicateButton ----
                 duplicateButton.setText("Duplicate");
                 duplicateButton.setFocusable(false);
                 duplicateButton.setToolTipText("Duplicate selected target");
                 buttonPanel.add(duplicateButton, new GridBagConstraints(4, 0, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                    new Insets(0, 0, 0, 0), 0, 0));
+                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                        new Insets(0, 0, 0, 0), 0, 0));
 
                 //---- primaryButton ----
                 primaryButton.setText("Primary");
@@ -205,13 +205,13 @@ public class TelescopeForm extends JPanel {
                     spacerPanel.setLayout(new BorderLayout());
                 }
                 buttonPanel.add(spacerPanel, new GridBagConstraints(6, 0, 1, 1, 1.0, 0.0,
-                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                    new Insets(0, 0, 0, 0), 0, 0));
+                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                        new Insets(0, 0, 0, 0), 0, 0));
 
                 guidingControls = new GuidingControls();
                 buttonPanel.add(guidingControls.peer(), new GridBagConstraints(7, 0, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                    new Insets(0, 0, 0, 0), 0, 0));
+                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                        new Insets(0, 0, 0, 0), 0, 0));
             }
 
             final JPanel feedbackAndButtonPanel = new JPanel(new BorderLayout());
@@ -313,9 +313,9 @@ public class TelescopeForm extends JPanel {
                         new Insets(0, 0, 0, 5), 0, 0));
 
                     //---- Dec_El_STW ----
-                    Dec_El_STW.setLabelFor(null);
-                    Dec_El_STW.setText("Dec");
-                    alignmentPanel.add(Dec_El_STW, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
+                    dec_El_STW.setLabelFor(null);
+                    dec_El_STW.setText("Dec");
+                    alignmentPanel.add(dec_El_STW, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
                         GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                         new Insets(0, 0, 0, 5), 0, 0));
 
@@ -751,7 +751,7 @@ public class TelescopeForm extends JPanel {
         autoGuideStarGuiderSelector = guidingControls.autoGuideStarGuiderSelector();
 
         //---- planetButtonGroup ----
-        ButtonGroup planetButtonGroup = new ButtonGroup();
+        final ButtonGroup planetButtonGroup = new ButtonGroup();
         planetButtonGroup.add(radioButton1);
         planetButtonGroup.add(radioButton2);
         planetButtonGroup.add(radioButton3);
@@ -775,8 +775,6 @@ public class TelescopeForm extends JPanel {
         planetButtons[8] = radioButton9;
     }
 
-    // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    JPanel buttonPanel;
     JMenuBar newMenuBar;
     JMenu newMenu;
     JButton removeButton;
@@ -784,23 +782,18 @@ public class TelescopeForm extends JPanel {
     JButton pasteButton;
     JButton duplicateButton;
     JButton primaryButton;
-    JScrollPane posTableScrollPane;
     TelescopePosTableWidget positionTable;
     JPanel coordinatesPanel;
     JPanel objectGBW;
     JPanel guideGroupPanel;
-    JLabel guideGroupNameLabel;
     JComboBox tag;
-    JLabel nameLabel;
     TextBoxWidget targetName;
     TextBoxWidget guideGroupName;
     JButton resolveButton;
     JMenuBar nameServerBar;
     JMenu nameServer;
     DropDownListBoxWidget system;
-    JLabel RA_Az_STW;
     TextBoxWidget xaxis;
-    JLabel Dec_El_STW;
     TextBoxWidget yaxis;
     JPanel extrasFolder;
     JPanel nonsiderealPW;
@@ -840,8 +833,6 @@ public class TelescopeForm extends JPanel {
     NumberBoxWidget meandist;
     JLabel epochofperiLabel;
     NumberBoxWidget epochofperi;
-    JPanel orbitalElementFormatPanel;
-    JLabel orbitalElementFormatLabel;
     DropDownListBoxWidget orbitalElementFormat;
     JPanel planetsPanel;
     JCalendarPopup calendarDate;

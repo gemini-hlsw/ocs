@@ -1,6 +1,5 @@
 package jsky.app.ot.gemini.editor.targetComponent;
 
-import jsky.app.ot.OTOptions;
 import jsky.app.ot.util.DnDUtils;
 
 import javax.swing.tree.TreePath;
@@ -14,13 +13,10 @@ import java.awt.event.MouseEvent;
  *
  * @author Allan Brighton
  */
-public class TelescopePosTableDragSource implements DragGestureListener, DragSourceListener {
-
-    // Use the default DragSource
-    protected DragSource _dragSource = DragSource.getDefaultDragSource();
+class TelescopePosTableDragSource implements DragGestureListener, DragSourceListener {
 
     /** The pos table widget */
-    protected TelescopePosTableWidget _tree;
+    private final TelescopePosTableWidget _tree;
 
     private boolean editable = false;
 
@@ -34,6 +30,7 @@ public class TelescopePosTableDragSource implements DragGestureListener, DragSou
         _tree = tree;
 
         // Create a DragGestureRecognizer and register as the listener
+        final DragSource _dragSource = DragSource.getDefaultDragSource();
         _dragSource.createDefaultDragGestureRecognizer(_tree, DnDConstants.ACTION_COPY_OR_MOVE, this);
     }
 
@@ -44,18 +41,18 @@ public class TelescopePosTableDragSource implements DragGestureListener, DragSou
         if (!editable) return;
 
         // don't conflict with popup menus
-        InputEvent e = dge.getTriggerEvent();
+        final InputEvent e = dge.getTriggerEvent();
         if (e instanceof MouseEvent && ((MouseEvent) e).isPopupTrigger())
             return;
 
 
         // Get the mouse location and convert it to
         // a location within the tree.
-        Point location = dge.getDragOrigin();
-        TreePath dragPath = _tree.getPathForLocation(location.x, location.y);
+        final Point location = dge.getDragOrigin();
+        final TreePath dragPath = _tree.getPathForLocation(location.x, location.y);
         if (dragPath != null && _tree.isPathSelected(dragPath)) {
             // Get the list of selected nodes and create a Transferable
-            TelescopePosTableWidget.TableData.Row[] nodes = _tree.getSelectedNodes();
+            final TelescopePosTableWidget.TableData.Row[] nodes = _tree.getSelectedNodes();
             if (nodes != null && nodes.length > 0) {
                 _dragObject = new TelescopePosTableDragDropObject(nodes, _tree);
                 try {

@@ -73,7 +73,7 @@ final class SiderealEditor implements TelescopePosEditor {
         return pan;
     }
 
-    @Override public Component getComponent() { return pan; }
+    public Component getComponent() { return pan; }
 
     @Override
     public void edit(final Option<ObsContext> ctx, final SPTarget target) {

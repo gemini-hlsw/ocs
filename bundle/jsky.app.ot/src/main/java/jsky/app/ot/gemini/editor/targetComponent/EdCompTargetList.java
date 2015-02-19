@@ -152,7 +152,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         // TODO: nonsidereal widgets from the TelescopeForm and make them
         // TODO: into a proper editor like the SiderealEditor.
         _nonsideMagEditor = new MagnitudeEditor();
-        JPanel nonsid = wrapNonsidereal(_w.nonsiderealPW, _nonsideMagEditor);
+        final JPanel nonsid = wrapNonsidereal(_w.nonsiderealPW, _nonsideMagEditor);
         _w.extrasFolder.add(nonsid, "nonsidereal");
 
         //make the planet stuff non-visible
@@ -203,7 +203,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
     private static JPanel wrapNonsidereal(JPanel nonsiderealPanel, MagnitudeEditor med) {
-        JPanel pan = new JPanel(new GridBagLayout());
+        final JPanel pan = new JPanel(new GridBagLayout());
 
         pan.add(new JLabel("Brightness"), new GridBagConstraints() {{
             gridx = 0;
@@ -264,7 +264,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         // Pan will contain and take the place of _w.coordinatesPanel.  It
         // contains a "content" panel and the "Tracking Details" sideways
         // button.
-        JPanel contentPanel = new JPanel(new GridBagLayout());
+        final JPanel contentPanel = new JPanel(new GridBagLayout());
 
         // Content will contain the JFormDesigner panel and, when present, the
         // contents of the Tracking Details widgets.
@@ -289,7 +289,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final JPanel editor = wrapTrackingEditor(_trackingEditor.getComponent());
         addActivateEditorAction(content, _trackingButton, editor);
 
-        JPanel buttonsPanel = new JPanel();
+        final JPanel buttonsPanel = new JPanel();
         buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.PAGE_AXIS));
         buttonsPanel.add(_trackingButton);
 
@@ -314,7 +314,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     // Wraps the tracking details editor with a border and a lighter background
     // so that it shows.
     private static JPanel wrapTrackingEditor(Component component) {
-        JPanel wrapper = new JPanel(new BorderLayout()) {{
+        final JPanel wrapper = new JPanel(new BorderLayout()) {{
             setBackground(LIGHT_GREY);
             setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(DARKER_BG_GREY),
@@ -331,7 +331,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JToggleButton tb = (JToggleButton) e.getSource();
+                final JToggleButton tb = (JToggleButton) e.getSource();
                 if (tb.isSelected()) {
                     tb.setBackground(LIGHT_ORANGE);
                     content.add(panel, BorderLayout.EAST);
@@ -459,7 +459,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      * Initialize the calendar and the combo box for specifing a time
      */
     private void _initNonSiderealTimeWidgets() {
-        DefaultComboBoxModel model = new DefaultComboBoxModel<>(TimeConfig.values());
+        final DefaultComboBoxModel model = new DefaultComboBoxModel<>(TimeConfig.values());
 
         //Add space for the editable field. We will use a String here
         //model.insertElementAt(timeFormatter.format(new Date()), 0);
@@ -479,9 +479,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
         });
 
-        ComboBoxEditor editor = _w.calendarTime.getEditor();
+        final ComboBoxEditor editor = _w.calendarTime.getEditor();
 
-        JTextField tf = (JTextField) editor.getEditorComponent();
+        final JTextField tf = (JTextField) editor.getEditorComponent();
         _timeDocument = new TimeDocument(tf);
 
         _timeDocument.setTime(timeFormatter.format(new Date()));
@@ -550,14 +550,14 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        String name = _w.guideGroupName.getText();
+                        final String name = _w.guideGroupName.getText();
                         // don't trim, otherwise user can't include space in group name
 //                        if (name != null) name = name.trim();
-                        GuideGroup newGroup = _curGroup.setName(name);
-                        TargetEnvironment env = getDataObject().getTargetEnvironment();
-                        GuideEnvironment ge = env.getGuideEnvironment();
-                        ImList<GuideGroup> options = ge.getOptions();
-                        List<GuideGroup> list = new ArrayList<>(options.size());
+                        final GuideGroup newGroup = _curGroup.setName(name);
+                        final TargetEnvironment env = getDataObject().getTargetEnvironment();
+                        final GuideEnvironment ge = env.getGuideEnvironment();
+                        final ImList<GuideGroup> options = ge.getOptions();
+                        final List<GuideGroup> list = new ArrayList<>(options.size());
                         for (GuideGroup g : options) {
                             list.add(g == _curGroup ? newGroup : g);
                         }
@@ -592,10 +592,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             if (isMember(env, target)) return;
             env = env.removeTarget(target);
 
-            SPTarget base = env.getBase();
+            final SPTarget base = env.getBase();
 
-            GuideEnvironment genv = env.getGuideEnvironment();
-            ImList<SPTarget> user = env.getUserTargets().append(base);
+            final GuideEnvironment genv = env.getGuideEnvironment();
+            final ImList<SPTarget> user = env.getUserTargets().append(base);
 
             env = TargetEnvironment.create(target, genv, user);
             obsComp.setTargetEnvironment(env);
@@ -629,7 +629,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             env = env.removeTarget(target);
 
             GuideProbeTargets gt;
-            Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(guider);
+            final Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(guider);
             if (gtOpt.isEmpty()) {
                 gt = GuideProbeTargets.create(guider, ImCollections.singletonList(target));
             } else {
@@ -642,7 +642,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         public boolean isMember(TargetEnvironment env, SPTarget target) {
             for (GuideGroup group : env.getGroups()) {
-                Option<GuideProbeTargets> gtOpt = group.get(guider);
+                final Option<GuideProbeTargets> gtOpt = group.get(guider);
                 if (!gtOpt.isEmpty() && gtOpt.getValue().getOptions().contains(target)) {
                     return true;
                 }
@@ -682,7 +682,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     private final ActionListener _tagListener = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-            PositionType pt = (PositionType) _w.tag.getSelectedItem();
+            final PositionType pt = (PositionType) _w.tag.getSelectedItem();
             pt.morphTarget(getDataObject(), _curPos);
             _handleSelectionUpdate(_curPos);
         }
@@ -697,8 +697,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         @Override
         public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-            JLabel lab = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            PositionType pt = (PositionType) value;
+            final JLabel lab = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            final PositionType pt = (PositionType) value;
             if (!pt.isAvailable()) {
                 lab.setFont(lab.getFont().deriveFont(Font.ITALIC));
                 lab.setIcon(errorIcon);
@@ -711,14 +711,14 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private void _initTagChoices() {
 
         // Get all the legally available guiders in the current context.
-        Set<GuideProbe> avail = GuideProbeUtil.instance.getAvailableGuiders(getContextObservation());
-        Set<GuideProbe> guiders = new HashSet<>(avail);
-        TargetEnvironment env = getDataObject().getTargetEnvironment();
+        final Set<GuideProbe> avail = GuideProbeUtil.instance.getAvailableGuiders(getContextObservation());
+        final Set<GuideProbe> guiders = new HashSet<>(avail);
+        final TargetEnvironment env = getDataObject().getTargetEnvironment();
 
         // Get the set of guiders that are referenced but not legal in this
         // context, if any.  Any "available" guider is legal, anything left
         // over is referenced but not really available.
-        Set<GuideProbe> illegalSet = env.getOrCreatePrimaryGuideGroup().getReferencedGuiders();
+        final Set<GuideProbe> illegalSet = env.getOrCreatePrimaryGuideGroup().getReferencedGuiders();
         illegalSet.removeAll(avail);
 
         // Determine whether the current position is one of these illegal
@@ -727,7 +727,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         // delete it.
         GuideProbe illegal = null;
         for (GuideProbe guider : illegalSet) {
-            Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(guider);
+            final Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(guider);
             if (gtOpt.getValue().getOptions().contains(_curPos)) {
                 illegal = guider;
                 guiders.add(guider);
@@ -735,12 +735,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
 
         // Sort the list of guiders.
-        List<GuideProbe> guidersList = new ArrayList<>(guiders);
+        final List<GuideProbe> guidersList = new ArrayList<>(guiders);
         Collections.sort(guidersList, GuideProbe.KeyComparator.instance);
 
         // Make a list of PositionTypes that are legal in the current
         // observation context.
-        PositionType[] ptA;
+        final PositionType[] ptA;
         ptA = new PositionType[2 + guiders.size()];
 
         int index = 0;
@@ -762,13 +762,13 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     // Initialize the choices for name servers for resolving the Name field to RA,Dec
     private void _initNameServerChoices() {
-        SkycatConfigFile cf = SkycatConfigFile.getConfigFile();
+        final SkycatConfigFile cf = SkycatConfigFile.getConfigFile();
 
         // Create radio button options for each of the name servers.
         final ButtonGroup grp = new ButtonGroup();
-        List<Catalog> nameServers = cf.getNameServers();
+        final List<Catalog> nameServers = cf.getNameServers();
         for (final Catalog ns : nameServers) {
-            JRadioButtonMenuItem mi = new JRadioButtonMenuItem(ns.getName()) {{
+            final JRadioButtonMenuItem mi = new JRadioButtonMenuItem(ns.getName()) {{
                 addActionListener(new ActionListener() {
                     // When selected, update the currently selected name server
                     @Override
@@ -798,7 +798,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
             final SPTarget target = TargetSelection.get(env, obsComponent);
             if (target == null) {
-                GuideGroup group = TargetSelection.getGuideGroup(env, obsComponent);
+                final GuideGroup group = TargetSelection.getGuideGroup(env, obsComponent);
                 if (group == null) {
                     return None.instance();
                 }
@@ -808,7 +808,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
 
         TargetClipboard(SPTarget spTarget) {
-            this.target = (ITarget) spTarget.getTarget().clone();
+            this.target = spTarget.getTarget().clone();
             this.mag = spTarget.getTarget().getMagnitudes();
         }
 
@@ -826,7 +826,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             final SPTarget spTarget = TargetSelection.get(dataObject.getTargetEnvironment(), obsComponent);
             if (spTarget != null) {
                 if (target != null) {
-                    spTarget.setTarget((ITarget) target.clone());
+                    spTarget.setTarget(target.clone());
                     spTarget.getTarget().setMagnitudes(mag);
                     spTarget.notifyOfGenericUpdate();
                 }
@@ -834,12 +834,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 final GuideGroup group = TargetSelection.getGuideGroup(dataObject.getTargetEnvironment(), obsComponent);
                 if (group != null) {
                     if (this.group != null) {
-                        GuideGroup newGroup = group.setAll(this.group.cloneTargets().getAll());
+                        final GuideGroup newGroup = group.setAll(this.group.cloneTargets().getAll());
                         // XXX TODO: add a helper method in the model to replace a guide group
-                        TargetEnvironment env = dataObject.getTargetEnvironment();
-                        GuideEnvironment ge = dataObject.getTargetEnvironment().getGuideEnvironment();
-                        ImList<GuideGroup> options = ge.getOptions();
-                        ArrayList<GuideGroup> list = new ArrayList<>(options.size());
+                        final TargetEnvironment env = dataObject.getTargetEnvironment();
+                        final GuideEnvironment ge = dataObject.getTargetEnvironment().getGuideEnvironment();
+                        final ImList<GuideGroup> options = ge.getOptions();
+                        final ArrayList<GuideGroup> list = new ArrayList<>(options.size());
                         for (GuideGroup gg : options) {
                             list.add(gg == group ? newGroup : gg);
                         }
@@ -867,8 +867,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     // Duplicate the selected position
     private void _duplicateSelectedPosition(TargetObsComp dataObject, SPTarget target) {
         // Clone the target.
-        ParamSet ps = target.getParamSet(new PioXmlFactory());
-        SPTarget newTarget = new SPTarget();
+        final ParamSet ps = target.getParamSet(new PioXmlFactory());
+        final SPTarget newTarget = new SPTarget();
         newTarget.setParamSet(ps);
 
         // Add it to the environment.  First we have to figure out
@@ -879,7 +879,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         // GuideTargets list.
         boolean duplicated = false;
         env.getOrCreatePrimaryGuideGroup();
-        List<GuideGroup> groups = new ArrayList<>();
+        final List<GuideGroup> groups = new ArrayList<>();
         for (GuideGroup group : env.getGroups()) {
             for (GuideProbeTargets gt : group) {
                 if (gt.getOptions().contains(target)) {
@@ -904,7 +904,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     // Duplicate the selected group
     private void _duplicateSelectedGroup(TargetObsComp dataObject, GuideGroup group) {
         TargetEnvironment env = dataObject.getTargetEnvironment();
-        List<GuideGroup> groups = new ArrayList<>();
+        final List<GuideGroup> groups = new ArrayList<>();
         groups.addAll(env.getGroups().toList());
         groups.add(group.cloneTargets());
         env = env.setGuideEnvironment(env.getGuideEnvironment().setOptions(DefaultImList.create(groups)));
@@ -917,7 +917,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private static TargetClipboard clipboard;
 
     private static void copySelectedPosition(ISPObsComponent obsComponent, TargetObsComp dataObject) {
-        Option<TargetClipboard> opt = TargetClipboard.copy(dataObject.getTargetEnvironment(), obsComponent);
+        final Option<TargetClipboard> opt = TargetClipboard.copy(dataObject.getTargetEnvironment(), obsComponent);
         if (opt.isEmpty()) return;
         clipboard = opt.getValue();
     }
@@ -934,7 +934,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         //if non-sidereal, then do horizons query...
         if (_w.system.getSelectedItem() == NON_SIDEREAL_TARGET) {
             if (_curPos.getTarget() instanceof NamedTarget) {
-                NamedTarget target = (NamedTarget) _curPos.getTarget();
+                final NamedTarget target = (NamedTarget) _curPos.getTarget();
                 name = target.getSolarObject().getHorizonsId();
             }
 
@@ -943,9 +943,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
         } else {
             if (!_selectedNameServer.isEmpty()) {
-                Catalog nameServer = _selectedNameServer.getValue();
+                final Catalog nameServer = _selectedNameServer.getValue();
                 if (name.length() != 0) {
-                    QueryArgs queryArgs = new BasicQueryArgs(nameServer);
+                    final QueryArgs queryArgs = new BasicQueryArgs(nameServer);
                     queryArgs.setId(name);
                     _setRaDecFromCatalog(nameServer, queryArgs);
                 }
@@ -960,7 +960,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private Date _getDate() {
         //get the appropriate date to perform the query based on the calendar widget and
         //the time widget
-        Date date = _w.calendarDate.getDate();
+        final Date date = _w.calendarDate.getDate();
         //this date is at 00:00:00. Let's add the hours, minutes and sec from the time document
 
         calendar.setTimeZone(_w.calendarDate.getTimeZone());
@@ -1016,10 +1016,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
 
                 //Get the Date to start the query
-                Date date = _getDate();
+                final Date date = _getDate();
 
                 //lets see if we can use the existing ephemeris
-                HorizonsReply lastReply = service.getLastResult();
+                final HorizonsReply lastReply = service.getLastResult();
                 if (lastReply != null && name.equals(service.getObjectId())) {
                     //so, apparently nothing has changed
                     boolean workable = true;
@@ -1034,7 +1034,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     //okay (the ephemeris is usable for operations that doesn't
                     //involve updating orbital elements.
                     if (lastReply.hasEphemeris() && workable) {
-                        EphemerisEntry firstEntry = lastReply.getEphemeris().get(0);
+                        final EphemerisEntry firstEntry = lastReply.getEphemeris().get(0);
                         if (date.equals(firstEntry.getDate())) {
                             //Same results
                             return lastReply;
@@ -1050,7 +1050,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
                 service.setObjectType(null);
 
-                ITarget.Tag tag = (ITarget.Tag) _w.orbitalElementFormat.getSelectedItem();
+                final ITarget.Tag tag = (ITarget.Tag) _w.orbitalElementFormat.getSelectedItem();
                 switch (tag) {
                     case JPL_MINOR_BODY:   service.setObjectType(HorizonsQuery.ObjectType.COMET);      break;
                     case MPC_MINOR_PLANET: service.setObjectType(HorizonsQuery.ObjectType.MINOR_BODY); break;
@@ -1123,16 +1123,16 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 }
 
 
-                HorizonsAction action = _horizonsOperations.get(operationType);
+                final HorizonsAction action = _horizonsOperations.get(operationType);
                 try {
                     action.execute(reply);
                 } catch (NullPointerException ex) {
-                    Logger LOG = Logger.getLogger(EdCompTargetList.class.getName());
+                    final Logger LOG = Logger.getLogger(EdCompTargetList.class.getName());
                     LOG.log(Level.INFO, "Probable problem parsing the reply from JPL", ex);
                     return;
                 }
                 if (_curPos.getTarget() instanceof NonSiderealTarget) {
-                    NonSiderealTarget oldTarget = (NonSiderealTarget) _curPos.getTarget();
+                    final NonSiderealTarget oldTarget = (NonSiderealTarget) _curPos.getTarget();
                     switch (reply.getObjectType()) {
                         case COMET: {
                             final ConicTarget target = newOrExistingTarget(ITarget.Tag.JPL_MINOR_BODY);
@@ -1172,7 +1172,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      * and returns a new conic target of the specified type.
      */
     private ConicTarget newOrExistingTarget(ITarget.Tag tag) {
-        ITarget old = _curPos.getTarget();
+        final ITarget old = _curPos.getTarget();
         if (old instanceof ConicTarget && old.getTag() == tag)
             return (ConicTarget) old;
         else
@@ -1188,11 +1188,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     try {
                         String originalUrls[] = null;
                         if (cat instanceof SkycatCatalog) {
-                            SkycatCatalog skycat = (SkycatCatalog) cat;
+                            final SkycatCatalog skycat = (SkycatCatalog) cat;
                             if (skycat.getShortName().contains(SIMBAD_CATALOG_SHORTNAME)) {
                                 skycat.addCatalogFilter(FullMimeSimbadCatalogFilter.getFilter());
-                                int n = skycat.getConfigEntry().getNumURLs();
-                                String[] urls = new String[n];
+                                final int n = skycat.getConfigEntry().getNumURLs();
+                                final String[] urls = new String[n];
                                 originalUrls = new String[n];
                                 for (int i = 0; i < n; i++) {
                                     String urlStr = skycat.getConfigEntry().getURL(i);
@@ -1203,17 +1203,17 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                             }
                         }
                         queryArgs.setMaxRows(1);
-                        QueryResult r = cat.query(queryArgs);
+                        final QueryResult r = cat.query(queryArgs);
                         //Return the URLs to the previous state
                         if (cat instanceof SkycatCatalog) {
-                            SkycatCatalog skycat = (SkycatCatalog) cat;
+                            final SkycatCatalog skycat = (SkycatCatalog) cat;
                             if (skycat.getShortName().contains(SIMBAD_CATALOG_SHORTNAME)) {
                                 skycat.getConfigEntry().setURLs(originalUrls);
                             }
                         }
 
                         if (r instanceof TableQueryResult) {
-                            TableQueryResult tqr = (TableQueryResult) r;
+                            final TableQueryResult tqr = (TableQueryResult) r;
                             if (tqr.getRowCount() > 0) {
                                 return tqr;
                             }
@@ -1226,20 +1226,20 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 }
 
                 public void finished() {
-                    Object o = getValue();
+                    final Object o = getValue();
                     if (o instanceof TableQueryResult) {
-                        TableQueryResult tqr = (TableQueryResult) o;
-                        int pm = tqr.getColumnIndex(PROPER_MOTION_COL_ID);
+                        final TableQueryResult tqr = (TableQueryResult) o;
+                        final int pm = tqr.getColumnIndex(PROPER_MOTION_COL_ID);
                         if (pm >= 0) {
-                            Double pm1 = (Double) tqr.getValueAt(0, pm);
-                            Double pm2 = (Double) tqr.getValueAt(0, pm + 1);
+                            final Double pm1 = (Double) tqr.getValueAt(0, pm);
+                            final Double pm2 = (Double) tqr.getValueAt(0, pm + 1);
                             setPM(_curPos, pm1, pm2);
                         } else {
                             //SCT-301: If not found, then we reset the value to zero
                             setPM(_curPos, 0.0, 0.0);
                         }
                         if (tqr.getCoordinates(0) instanceof WorldCoords) {
-                            WorldCoords pos = (WorldCoords) tqr.getCoordinates(0);
+                            final WorldCoords pos = (WorldCoords) tqr.getCoordinates(0);
                             _w.xaxis.setText(pos.getRA().toString());
                             _w.yaxis.setText(pos.getDec().toString());
                             _setCurPos();
@@ -1279,7 +1279,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     //Initialize the listeners for the radio buttons.
     private void _initPlanetsRadioButtons() {
-        JRadioButton[] buttons = _w.planetButtons;
+        final JRadioButton[] buttons = _w.planetButtons;
         for (JRadioButton button : buttons) {
             button.addActionListener(this);
         }
@@ -1367,8 +1367,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         public void propertyChange(PropertyChangeEvent evt) {
             boolean enabled = false;
             if (_curPos != null) {
-                TargetEnvironment env = getDataObject().getTargetEnvironment();
-                ImList<GuideProbeTargets> gtList = env.getOrCreatePrimaryGuideGroup().getAllContaining(_curPos);
+                final TargetEnvironment env = getDataObject().getTargetEnvironment();
+                final ImList<GuideProbeTargets> gtList = env.getOrCreatePrimaryGuideGroup().getAllContaining(_curPos);
                 enabled = gtList.size() > 0;
             } else if (_curGroup != null) {
                 enabled = true;
@@ -1395,7 +1395,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     // Initializes the menu of items that can be added to the target
     // environment.
     private void _initAddMenu(final TargetObsComp obsComp) {
-        SPInstObsComp inst = getContextInstrumentDataObject();
+        final SPInstObsComp inst = getContextInstrumentDataObject();
         _w.newMenu.removeAll();
         if (obsComp == null || inst == null) {
             _w.newMenu.setEnabled(false);
@@ -1403,10 +1403,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
         _w.newMenu.setEnabled(true);
 
-        TargetEnvironment env = obsComp.getTargetEnvironment();
+        final TargetEnvironment env = obsComp.getTargetEnvironment();
 
         if (inst.hasGuideProbes()) {
-            List<GuideProbe> guiders = new ArrayList<>(env.getGuideEnvironment().getActiveGuiders());
+            final List<GuideProbe> guiders = new ArrayList<>(env.getGuideEnvironment().getActiveGuiders());
             Collections.sort(guiders, GuideProbe.KeyComparator.instance);
 
             for (final GuideProbe probe : guiders) {
@@ -1468,15 +1468,15 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
             // OT-16: add new guide star to selected group, if any, otherwise the primary group
             GuideGroup guideGroup = positionTable.getSelectedGroupOrParentGroup(env);
-            Option<GuideProbeTargets> opt = guideGroup == null ?
+            final Option<GuideProbeTargets> opt = guideGroup == null ?
                     env.getPrimaryGuideProbeTargets(probe) :
                     guideGroup.get(probe);
             if (guideGroup == null) {
                 guideGroup = ge.getPrimary().getValue();
             }
 
-            GuideProbeTargets targets;
-            SPTarget target = new SPTarget();
+            final GuideProbeTargets targets;
+            final SPTarget target = new SPTarget();
             if (opt.isEmpty()) {
                 targets = GuideProbeTargets.create(probe, target);
             } else {
@@ -1522,15 +1522,15 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-            TargetEnvironment env = obsComp.getTargetEnvironment();
+            final TargetEnvironment env = obsComp.getTargetEnvironment();
             GuideEnvironment ge = env.getGuideEnvironment();
             if (ge.getPrimary().isEmpty()) {
                 ge = ge.setPrimary(env.getOrCreatePrimaryGuideGroup());
             }
-            GuideGroup primaryGroup = ge.getPrimary().getValue();
-            ImList<GuideGroup> options = ge.getOptions();
-            GuideGroup group = GuideGroup.create(null);
-            ImList<GuideGroup> groups = options.append(group);
+            final GuideGroup primaryGroup = ge.getPrimary().getValue();
+            final ImList<GuideGroup> options = ge.getOptions();
+            final GuideGroup group = GuideGroup.create(null);
+            final ImList<GuideGroup> groups = options.append(group);
             // OT-34: make new group primary and select it
             if (!positionTable.confirmGroupChange(primaryGroup, group)) return;
             obsComp.setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(groups).selectPrimary(group)));
@@ -1572,7 +1572,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             _showPos();
 
             // can't remove base position, so disable button
-            boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
+            final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
             _w.removeButton.setEnabled(_curPos != env.getBase() && editable);
             _w.primaryButton.setEnabled(enablePrimary(selTarget, env) && editable);
         }
@@ -1580,7 +1580,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     private void _handleSelectionUpdate(GuideGroup selGroup) {
         if (getDataObject() == null) return;
-        TargetEnvironment env = getDataObject().getTargetEnvironment();
+        final TargetEnvironment env = getDataObject().getTargetEnvironment();
         if (!env.getGroups().contains(selGroup)) return;
 
         if (_curPos != null) _curPos.deleteWatcher(this);
@@ -1590,7 +1590,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         _showGroup();
 
-        boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
+        final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
         _w.removeButton.setEnabled(editable);
         _w.primaryButton.setEnabled(editable);
     }
@@ -1601,7 +1601,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private void _showPos() {
         _w.extrasFolder.setVisible(true);
         _w.objectGBW.setVisible(true);
-        boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
+        final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
         _w.objectGBW.setEnabled(editable);
         _w.guideGroupPanel.setVisible(false);
         _trackingButton.setVisible(!_isNonSidereal());
@@ -1622,7 +1622,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         // update the display in the tabs
         if (_curPos.getTarget() instanceof NonSiderealTarget) {
-            NonSiderealTarget nst = (NonSiderealTarget) _curPos.getTarget();
+            final NonSiderealTarget nst = (NonSiderealTarget) _curPos.getTarget();
             _nonSiderealTargetSup.showNonSiderealTarget(nst);
         }
     }
@@ -1638,7 +1638,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             _trackingButton.doClick();
         _trackingButton.setVisible(false);
 
-        String name = _curGroup.getName().getOrElse("");
+        final String name = _curGroup.getName().getOrElse("");
         // don't trim, otherwise user can't include space in group name
 //        if (name != null) name = name.trim();
         _w.guideGroupName.setValue(name);
@@ -1646,9 +1646,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
 
     private void _showTargetTag() {
-        TargetEnvironment env = getDataObject().getTargetEnvironment();
+        final TargetEnvironment env = getDataObject().getTargetEnvironment();
         for (int i = 0; i < _w.tag.getItemCount(); ++i) {
-            PositionType pt = (PositionType) _w.tag.getItemAt(i);
+            final PositionType pt = (PositionType) _w.tag.getItemAt(i);
             if (pt.isMember(env, _curPos)) {
                 _w.tag.removeActionListener(_tagListener);
                 _w.tag.setSelectedIndex(i);
@@ -1683,7 +1683,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     // Called when the user types a value in one of the entries in the conic
     // target tab
     private void _setConicPos(NumberBoxWidget nbw) {
-        ConicTarget target = (ConicTarget) _curPos.getTarget();
+        final ConicTarget target = (ConicTarget) _curPos.getTarget();
         _ignorePosUpdate = true;
         try {
             _nonSiderealTargetSup.setConicPos(target, nbw);
@@ -1746,9 +1746,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     // Update the enabled states of the target tabs based on the selected coordinate system
     private void _updateTargetInformationUI() {
-        boolean isNonSidereal = _isNonSidereal();
-        CardLayout cl = (CardLayout) _w.extrasFolder.getLayout();
-        String tag = isNonSidereal ? "nonsidereal" : "sidereal";
+        final boolean isNonSidereal = _isNonSidereal();
+        final CardLayout cl = (CardLayout) _w.extrasFolder.getLayout();
+        final String tag = isNonSidereal ? "nonsidereal" : "sidereal";
         cl.show(_w.extrasFolder, tag);
 
         if (isNonSidereal) {
@@ -1773,7 +1773,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      * Method to handle button actions.
      */
     public void actionPerformed(ActionEvent evt) {
-        Object w = evt.getSource();
+        final Object w = evt.getSource();
         TargetEnvironment env = getDataObject().getTargetEnvironment();
 
         if (w == _w.removeButton) {
@@ -1784,7 +1784,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             if (_curPos != null) {
                 env = env.removeTarget(_curPos);
             } else if (_curGroup != null) {
-                GuideGroup primary = env.getOrCreatePrimaryGuideGroup();
+                final GuideGroup primary = env.getOrCreatePrimaryGuideGroup();
                 if (_curGroup == primary) {
                     DialogUtil.error("You can't remove the primary guide group.");
                     return;
@@ -1797,9 +1797,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         } else if (w == _w.manualGuideStarButton || w == _w.autoGuideStarButton) {
             try {
-                boolean manual = w == _w.manualGuideStarButton;
+                final boolean manual = w == _w.manualGuideStarButton;
                 if (manual || GuideStarSupport.hasGemsComponent(getNode())) {
-                    TelescopePosEditor tpe = TpeManager.open();
+                    final TelescopePosEditor tpe = TpeManager.open();
                     tpe.reset(getNode());
                     tpe.getImageWidget().guideStarSearch(manual);
                 } else {
@@ -1811,19 +1811,19 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 DialogUtil.error(e);
             }
         } else if (w == _w.setBaseButton) {
-            TelescopePosEditor tpe = TpeManager.get();
+            final TelescopePosEditor tpe = TpeManager.get();
             if (tpe == null) {
                 DialogUtil.message("The Position Editor must be opened for this feature to work.");
                 return;
             }
             tpe.reset(getNode());
-            WorldCoords basePos = tpe.getImageCenterLocation();
+            final WorldCoords basePos = tpe.getImageCenterLocation();
             if (basePos == null) {
                 DialogUtil.message("Couldn't determine the image center.");
                 return;
             }
 
-            SPTarget base = env.getBase();
+            final SPTarget base = env.getBase();
             base.getTarget().getRa().setAs(basePos.getRaDeg(), CoordinateParam.Units.DEGREES);
             base.getTarget().getDec().setAs(basePos.getDecDeg(), CoordinateParam.Units.DEGREES);
             base.notifyOfGenericUpdate();
@@ -1852,11 +1852,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 });
             }
         } else if (w == _w.calendarTime) {
-            Object o = _w.calendarTime.getSelectedItem();
+            final Object o = _w.calendarTime.getSelectedItem();
             if (o instanceof TimeConfig) {
-                TimeConfig tr = (TimeConfig) o;
-                Date d = tr.getDate();
-                String time = timeFormatter.format(d);
+                final TimeConfig tr = (TimeConfig) o;
+                final Date d = tr.getDate();
+                final String time = timeFormatter.format(d);
                 _timeDocument.setTime(time);
                 //we have to set the correct day in the calendar when
                 // shortcuts are used.
@@ -1878,9 +1878,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
 
         } else if (w instanceof JRadioButton) {
-            String cmd = evt.getActionCommand().toUpperCase();
+            final String cmd = evt.getActionCommand().toUpperCase();
             if (_curPos.getTarget() instanceof NamedTarget) {
-                NamedTarget target = (NamedTarget) _curPos.getTarget();
+                final NamedTarget target = (NamedTarget) _curPos.getTarget();
                 try {
                     target.setSolarObject(NamedTarget.SolarObject.valueOf(cmd));
                     _setCurPos(); //not needed, but used to fire an event
@@ -1909,27 +1909,27 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         },
         ONE_HOUR("1 Hour") {
             public Date getDate() {
-                Date d = new Date();
+                final Date d = new Date();
                 return new Date(d.getTime() + HOUR);
             }
         },
         TWO_HOUR("2 Hours") {
             public Date getDate() {
-                Date d = new Date();
+                final Date d = new Date();
                 return new Date(d.getTime() + HOUR * 2);
             }
         },
 
         THREE_HOUR("3 Hours") {
             public Date getDate() {
-                Date d = new Date();
+                final Date d = new Date();
                 return new Date(d.getTime() + HOUR * 3);
             }
         },
 
         FIVE_HOUR("5 Hours") {
             public Date getDate() {
-                Date d = new Date();
+                final Date d = new Date();
                 return new Date(d.getTime() + HOUR * 5);
             }
         },;
@@ -1986,7 +1986,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private class HorizonsActionContainer {
 
         public HashMap<HorizonsAction.Type, HorizonsAction> getActions() {
-            HashMap<HorizonsAction.Type, HorizonsAction> actions = new HashMap<>();
+            final HashMap<HorizonsAction.Type, HorizonsAction> actions = new HashMap<>();
             actions.put(HorizonsAction.Type.GET_ORBITAL_ELEMENTS,
                     new UpdateOrbitalElements());
             actions.put(HorizonsAction.Type.UPDATE_POSITION,
@@ -2009,14 +2009,14 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 // Alright, we're going to replace the target if we get back a comet or minor
                 // object, otherwise we do nothing. That's the old behavior.
                 final ConicTarget target;
-                String name = _w.targetName.getText().trim();
+                final String name = _w.targetName.getText().trim();
 
                 // First construct the object and set the AQ
                 switch (reply.getReplyType()) {
                     case COMET:
                         target = new ConicTarget(ITarget.Tag.JPL_MINOR_BODY);
                         if (reply.hasOrbitalElements()) {
-                            OrbitalElements elements = reply.getOrbitalElements();
+                            final OrbitalElements elements = reply.getOrbitalElements();
                             target.getAQ().setValue(elements.getValue(OrbitalElements.Name.QR));
                         }
                         _w.orbitalElementFormat.setSelectedItem(ITarget.Tag.JPL_MINOR_BODY);
@@ -2026,7 +2026,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     case MINOR_OBJECT:
                         target = new ConicTarget(ITarget.Tag.MPC_MINOR_PLANET);
                         if (reply.hasOrbitalElements()) {
-                            OrbitalElements elements = reply.getOrbitalElements();
+                            final OrbitalElements elements = reply.getOrbitalElements();
                             target.getAQ().setValue(elements.getValue(OrbitalElements.Name.A));
                         }
                         _w.orbitalElementFormat.setSelectedItem(ITarget.Tag.MPC_MINOR_PLANET);
@@ -2045,7 +2045,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
                 // Set the orbital elements
                 if (reply.hasOrbitalElements()) {
-                    OrbitalElements elements = reply.getOrbitalElements();
+                    final OrbitalElements elements = reply.getOrbitalElements();
                     target.getEpoch().setValue(elements.getValue(OrbitalElements.Name.EPOCH));
                     target.getEpochOfPeri().setValue(elements.getValue(OrbitalElements.Name.TP));
                     target.getANode().setValue(elements.getValue(OrbitalElements.Name.OM));
@@ -2060,7 +2060,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
                 //now, update current RA, Dec
                 if (reply.hasEphemeris()) {
-                    List<EphemerisEntry> ephemeris = reply.getEphemeris();
+                    final List<EphemerisEntry> ephemeris = reply.getEphemeris();
                     _processEphemeris(ephemeris);
                 }
 
@@ -2117,10 +2117,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         private void _processEphemeris(List<EphemerisEntry> ephemeris) {
             if (ephemeris != null) {
                 if (ephemeris.size() > 0) {
-                    EphemerisEntry entry = ephemeris.get(0);
-                    WorldCoords coords = entry.getCoordinates();
+                    final EphemerisEntry entry = ephemeris.get(0);
+                    final WorldCoords coords = entry.getCoordinates();
                     if (_curPos.getTarget() instanceof NonSiderealTarget) {
-                        NonSiderealTarget target = (NonSiderealTarget) _curPos.getTarget();
+                        final NonSiderealTarget target = (NonSiderealTarget) _curPos.getTarget();
                         _ignorePosUpdate = true;
                         try {
                             setHmsDms(_curPos, coords.getRA().toString(),

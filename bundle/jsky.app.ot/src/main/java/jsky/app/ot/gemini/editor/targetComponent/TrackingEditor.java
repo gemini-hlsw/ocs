@@ -12,12 +12,8 @@ import edu.gemini.spModel.target.WatchablePos;
 import edu.gemini.spModel.target.system.HmsDegTarget;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.text.DefaultFormatter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.NumberFormat;
@@ -48,14 +44,9 @@ final class TrackingEditor implements TelescopePosEditor {
         private final String label;
         private final Option<String> units;
 
-        AbstractRow(String label) {
-            this.label = label;
-            this.units = None.instance();
-        }
-
         AbstractRow(String label, String units) {
             this.label = label;
-            this.units = new Some<String>(units);
+            this.units = new Some<>(units);
         }
 
         public String getLabel() { return label; }
@@ -79,7 +70,7 @@ final class TrackingEditor implements TelescopePosEditor {
 
         @Override public void propertyChange(PropertyChangeEvent evt) {
             target.deleteWatcher(watcher);
-            Number d = (Number) evt.getNewValue();
+            final Number d = (Number) evt.getNewValue();
             if (target.getTarget() instanceof HmsDegTarget) {
                 function.apply((HmsDegTarget) target.getTarget(), d);
             }
@@ -98,7 +89,7 @@ final class TrackingEditor implements TelescopePosEditor {
             this.init = init;
             listener = new NumberFieldListener(update);
 
-            NumberFormat nf = NumberFormat.getNumberInstance();
+            final NumberFormat nf = NumberFormat.getNumberInstance();
             nf.setMinimumFractionDigits(1);
             nf.setMinimumIntegerDigits(1);
             nf.setGroupingUsed(false);
@@ -179,7 +170,7 @@ final class TrackingEditor implements TelescopePosEditor {
                 }});
 
                 if (!row.getUnits().isEmpty()) {
-                    String units = row.getUnits().getValue();
+                    final String units = row.getUnits().getValue();
                     pan.add(new JLabel(units), new GridBagConstraints() {{
                         gridx=2; gridy=y; anchor=WEST; insets=new Insets(0, 5, vgap, 0);
                     }});
@@ -193,7 +184,6 @@ final class TrackingEditor implements TelescopePosEditor {
         }});
     }
 
-    @Override
     public Component getComponent() {
         return pan;
     }
