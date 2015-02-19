@@ -26,7 +26,7 @@ object ResponseParser {
     } catch {
       case ex: Exception =>
         LOG.log(Level.INFO, "Couldn't parse submission response: %s".format(s), ex)
-        Left(ServiceError(None, 500, UNEXPECTED_MSG))
+        Left(ServiceError(None, None, 500, UNEXPECTED_MSG))
     }
 
   private def read(n: NodeSeq): SubmitResult =
@@ -46,20 +46,20 @@ object ResponseParser {
 
   private def readPartnerRef(n: NodeSeq): Either[Failure, String] =
     (n \ "partnerReferenceKey").text match {
-      case ""  => Left(ServiceError(None, 500, NO_PARTNER_REF_MSG))
+      case ""  => Left(ServiceError(None, None, 500, NO_PARTNER_REF_MSG))
       case ref => Right(ref)
     }
 
   private def readTimestamp(n: NodeSeq): Either[Failure, Long] =
     (n \ "timestamp").text match {
-      case "" => Left(ServiceError(None, 500, NO_TIMESTAMP_MSG))
+      case "" => Left(ServiceError(None, None, 500, NO_TIMESTAMP_MSG))
       case s  =>
         try {
           val FMT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
           FMT.setTimeZone(TimeZone.getTimeZone("UTC"))
           Right(FMT.parse(s).getTime)
         } catch {
-          case ex: ParseException => Left(ServiceError(None, 500, BAD_TIMESTAMP_MSG(s)))
+          case ex: ParseException => Left(ServiceError(None, None, 500, BAD_TIMESTAMP_MSG(s)))
         }
     }
 
@@ -71,12 +71,12 @@ object ResponseParser {
     LOG.info("Received submission error response: code=%s, msg=%s, url=%s:\n%s".format(code, msg, url, n.toString()))
 
     if (code.isEmpty)
-      ServiceError(None, 500, UNEXPECTED_MSG)
+      ServiceError(None, None, 500, UNEXPECTED_MSG)
     else
       try {
-        ServiceError(None, code.toInt, msg)
+        ServiceError(None, None, code.toInt, msg)
       } catch {
-        case _: Exception => ServiceError(None, 500, UNEXPECTED_MSG)
+        case _: Exception => ServiceError(None, None, 500, UNEXPECTED_MSG)
       }
   }
 }
