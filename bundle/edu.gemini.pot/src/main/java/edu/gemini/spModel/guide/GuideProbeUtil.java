@@ -21,7 +21,6 @@ import edu.gemini.spModel.target.env.GuideProbeTargets;
 
 import java.awt.geom.AffineTransform;
 import java.util.*;
-import java.util.List;
 
 /**
  * Utility methods for working with guide probes.
