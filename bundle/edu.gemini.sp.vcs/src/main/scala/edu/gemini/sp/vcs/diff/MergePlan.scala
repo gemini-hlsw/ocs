@@ -44,8 +44,7 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
           t.subForest.foreach(edit)
           n.children = t.subForest.toList.map(_.rootLabel._2)
 
-        case (Unmodified(_), n) =>
-          n
+        case (Unmodified(_), _) => // do nothing
       }
     }
 
