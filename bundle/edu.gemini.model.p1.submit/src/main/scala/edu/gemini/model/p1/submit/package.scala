@@ -33,14 +33,9 @@ package object submit {
   val testSubmissionUrls: Map[SubmitDestination, String] = {
     def url(s:String) = s"http://phase1.cl.gemini.edu/cgi-bin/gemini/test/${s.toLowerCase}/xmlbackend.cgi"
 
-    // REL-1257 It was requested to support simultaneous SV and non SV backends
     val specialProposalsTestUrls = for {
       st      <- SpecialProposalType.values.toSeq
-    } yield if (st == SpecialProposalType.DIRECTORS_TIME || st == SpecialProposalType.POOR_WEATHER) {
-        Special(st) -> url(s"${st.name}_sv")
-      }  else {
-        Special(st) -> url(st.name)
-      }
+    } yield Special(st) -> url(st.name)
 
     NgoPartner.values.map(p => Ngo(p) -> url(p.name)).toMap ++
     ExchangePartner.values.map(p => Exchange(p) -> url(p.name)).toMap ++
