@@ -18,9 +18,8 @@ object NumberField {
 }
 
 class NumberField(d: Option[Double]) extends FormattedTextField(NumberField.df) with SelectOnFocus {
-  d.orElse(Some(0))foreach { d =>
-    import NumberField.df
-    text = df.format(d)
+  d.orElse(Some(0)).foreach { d =>
+    text = NumberField.df.format(d)
     commitEdit()
   }
 
@@ -39,20 +38,22 @@ class NumberField(d: Option[Double]) extends FormattedTextField(NumberField.df) 
   reactions += {
     case ValueChanged(_) =>
 
-      valid = try {
-        val pp = new ParsePosition(0)
-        valid(NumberField.df.parse(text, pp).doubleValue) && (pp.getIndex == text.length())
-      } catch {
-        case _:Exception => false
+      // REL-2253 For some reason on OSX you get sometimes an extra value change event with an empty text.
+      // This creates a null parsed value and the validation fails
+      // This is not very noticeable as there is a second event with the valid text
+      // However, it means that sometimes you need to press Ok twice
+      if (text.nonEmpty) {
+        valid = try {
+          val pp = new ParsePosition(0)
+          val parsed = NumberField.df.parse(text, pp)
+          (pp.getIndex == text.length()) && valid(parsed.doubleValue)
+        } catch {
+          case _: Exception => false
+        }
+        
+        background = if (valid) white else pink
       }
-
-      background = if (valid) white else pink
-
   }
 
-
-
   focusLostBehavior = FormattedTextField.FocusLostBehavior.Commit // ?
-
-
 }
