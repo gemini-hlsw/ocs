@@ -15,22 +15,11 @@ import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.data.ISPDataObject;
-import edu.gemini.spModel.inst.ArmAdjustment;
-import edu.gemini.spModel.inst.FeatureGeometry$;
-import edu.gemini.spModel.inst.ProbeArmGeometry;
-import edu.gemini.spModel.inst.ScienceAreaGeometry;
 import edu.gemini.spModel.obs.context.ObsContext;
-import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
-import edu.gemini.spModel.telescope.IssPort;
 
-import java.awt.*;
 import java.awt.geom.AffineTransform;
-
-import java.awt.geom.Area;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.util.*;
 import java.util.List;
 
