@@ -145,7 +145,7 @@ object SingleProbeStrategy {
         spTarget =  new SPTarget(HmsDegTarget.fromSkyObject(st.toOldModel))
         analysis <- AgsAnalysis.analysis(ctx, mt, probe, spTarget)
       } yield {
-        val vig = vignetting(ctx, probe, st)
+        val vig = probe.calculateVignetting(ctx, st.coordinates)
         (analysis, vig, entry)
       }
       candidates.reduceOption(order.min).map(_._3)

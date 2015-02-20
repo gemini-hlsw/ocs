@@ -186,9 +186,6 @@ package object impl {
   def brightness(so: SiderealTarget, b: MagnitudeBand): Option[Double] =
     so.magnitudeIn(b).map(_.value)
 
-  def vignetting(ctx: ObsContext, probe: VignettingGuideProbe, so: SiderealTarget): Double =
-    probe.calculateVignetting(ctx, so.coordinates)
-
   def brightest[A](lst: List[A], band: MagnitudeBand)(toSiderealTarget: A => SiderealTarget): Option[A] = {
     lazy val max = new Magnitude(Double.MaxValue, band)
     if (lst.isEmpty) None
