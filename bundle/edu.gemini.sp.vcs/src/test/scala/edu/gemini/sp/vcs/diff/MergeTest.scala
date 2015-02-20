@@ -1,8 +1,9 @@
 package edu.gemini.sp.vcs.diff
 
+import edu.gemini.pot.sp.version.VersionMap
 import edu.gemini.pot.sp.{DataObjectBlob => DOB, _}
 import edu.gemini.shared.util.VersionComparison
-import VersionComparison.Newer
+import edu.gemini.shared.util.VersionComparison.{Same, Newer}
 import edu.gemini.sp.vcs.diff.NodeDetail.Obs
 import edu.gemini.sp.vcs.diff.VcsFailure.VcsException
 import edu.gemini.spModel.data.ISPDataObject
@@ -413,6 +414,23 @@ class MergeTest extends JUnitSuite {
 
           case \/-(matches)          =>
             matches
+        }
+      }
+    ),
+
+    ("merged program version map is newer or equal to both local and remote programs",
+      (start, local, remote, pc) => {
+        def isSameOrNewer(x: VersionMap, y: VersionMap): Boolean =
+          VersionMap.compare(x, y) match {
+            case Same | Newer => true
+            case _            => false
+          }
+
+        pc.updatedLocalProgram.forall { ulp =>
+          val updateVm = ulp.getVersions
+          val localVm  = pc.lp.getVersions
+          val remoteVm = pc.rp.getVersions
+          isSameOrNewer(updateVm, localVm) && isSameOrNewer(updateVm, remoteVm)
         }
       }
     )
