@@ -1,7 +1,7 @@
 package edu.gemini.sp.vcs.diff
 
 import edu.gemini.pot.sp._
-import edu.gemini.pot.sp.version.{VersionMap, NodeVersions, EmptyNodeVersions}
+import edu.gemini.pot.sp.version.{VersionMap, NodeVersions}
 import edu.gemini.sp.vcs.diff.NodeDetail.Obs
 import edu.gemini.sp.vcs.diff.VcsFailure._
 import edu.gemini.spModel.rich.pot.sp._
@@ -28,17 +28,21 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
       }
 
     // Edit the ISPNode, applying the changes in the MergeNode if any.
-    def edit(t: Tree[(MergeNode, ISPNode)]): ISPNode = {
+    def edit(t: Tree[(MergeNode, ISPNode)]): Unit = {
       t.rootLabel match {
 
         case (Modified(_, nv, dob, det), n) =>
+          n.setDataObject(dob)
+
           // If it is an observation, set the observation number.
           (det, n) match {
             case (Obs(num), o: ISPObservation) => o.setObservationNumber(num)
             case _                             => // not an observation
           }
-          // Update the data object and children.
-          n <| (_.setDataObject(dob)) <| (_.children = t.subForest.toList.map(edit))
+
+          // Edit then set the children.
+          t.subForest.foreach(edit)
+          n.children = t.subForest.toList.map(_.rootLabel._2)
 
         case (Unmodified(_), n) =>
           n
