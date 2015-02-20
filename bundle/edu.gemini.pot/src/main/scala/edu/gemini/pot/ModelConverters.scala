@@ -134,5 +134,4 @@ object ModelConverters {
       SiderealTarget(name, coordinates, None, mags, None)
     }
   }
-
 }

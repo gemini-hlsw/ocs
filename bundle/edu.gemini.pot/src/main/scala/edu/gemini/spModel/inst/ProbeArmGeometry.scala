@@ -44,10 +44,8 @@ trait ProbeArmGeometry {
    */
   def armAdjustment(ctx: ObsContext, guideStarCoords: Coordinates, offset: Offset): Option[ArmAdjustment]
 
-  def armAdjustment(ctx: ObsContext, guideStar: SPTarget, offset: Offset): Option[ArmAdjustment] = {
-    import ProbeArmGeometry._
+  def armAdjustment(ctx: ObsContext, guideStar: SPTarget, offset: Offset): Option[ArmAdjustment] =
     armAdjustment(ctx, guideStar.getTarget.getSkycalcCoordinates.toNewModel, offset)
-  }
 
   def armAdjustment(ctx: ObsContext, guideStar: SiderealTarget, offset: Offset): Option[ArmAdjustment] =
     armAdjustment(ctx, guideStar.coordinates, offset)

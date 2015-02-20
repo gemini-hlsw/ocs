@@ -7,7 +7,7 @@ import edu.gemini.catalog.votable.{RemoteBackend, VoTableBackend, CatalogExcepti
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.core.{Coordinates, Angle}
 import edu.gemini.spModel.core.Target.SiderealTarget
-import edu.gemini.spModel.guide.GuideProbe
+import edu.gemini.spModel.guide.{ValidatableGuideProbe, VignettingGuideProbe, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.system.CoordinateParam.Units
 import edu.gemini.spModel.target.system.HmsDegTarget
@@ -26,6 +26,7 @@ import Scalaz._
  * everything except for GeMS).
  */
 case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyParams, backend: VoTableBackend = RemoteBackend) extends AgsStrategy {
+  import SingleProbeStrategy._
 
   override def magnitudes(ctx: ObsContext, mt: MagnitudeTable): List[(GuideProbe, AgsMagnitude.MagnitudeCalc)] =
     params.magnitudeCalc(ctx, mt).toList.map(params.guideProbe -> _)
@@ -76,7 +77,11 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
         case FIXED_180 | PARALLACTIC_ANGLE => selectBounded(List(ctx, ctx180(ctx)), mt, candidates)
         case UNBOUNDED                     => selectUnbounded(ctx, mt, candidates)
       }
-      brightest(results, params.band)(_._2).map {
+
+      (params.guideProbe match {
+        case v: ValidatableGuideProbe with VignettingGuideProbe => brightestByQualityAndVignetting(results, mt, ctx, v)(_._2)
+        case _                                                  => brightest(results, params.band)(_._2)
+      }).map {
         case (angle, st) => AgsStrategy.Selection(angle, List(AgsStrategy.Assignment(params.guideProbe, st)))
       }
     }
@@ -115,5 +120,35 @@ object SingleProbeStrategy {
     val raDiff = ra2 - ra1
     val angle  = atan2(sin(raDiff), cos(dec1) * tan(dec2) - sin(dec1) * cos(raDiff))
     Angle.fromRadians(angle)
+  }
+
+  /**
+   * Given a list of candidates, bin them by quality and then pick the one that vignettes the
+   * science area the least.
+   * @param lst              the list of possible candidates
+   * @param mt               magnitude lookup table
+   * @param ctx              context information
+   * @param probe            the guide probe
+   * @param toSiderealTarget converts candidates to SiderealTargets
+   * @tparam A               the type of the candidates
+   * @return                 Some(guideStar) if a candidate exists that can be used, None otherwise
+   */
+  def brightestByQualityAndVignetting[A](lst: List[A], mt: MagnitudeTable, ctx: ObsContext, probe: ValidatableGuideProbe with VignettingGuideProbe)(toSiderealTarget: A => SiderealTarget): Option[A] = {
+    if (lst.isEmpty) None
+    else {
+      // Create tuples (AgsQuality, vignetting factor, target) and then find the min by
+      // ordering on the first two, returning the corresponding target.
+      val order = scala.math.Ordering[(Int, Double)].on { x: (Int, Double, A) => (x._1, x._2)}
+      val candidates = for {
+        entry    <- lst
+        st       =  toSiderealTarget(entry)
+        spTarget =  new SPTarget(HmsDegTarget.fromSkyObject(st.toOldModel))
+        analysis <- AgsAnalysis.analysis(ctx, mt, probe, spTarget)
+      } yield {
+        val vig = vignetting(ctx, probe, st)
+        (analysis, vig, entry)
+      }
+      candidates.reduceOption(order.min).map(_._3)
+    }
   }
 }

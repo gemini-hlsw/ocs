@@ -8,7 +8,6 @@ import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.guide.VignettingGuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
-import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.GuideProbeTargets
