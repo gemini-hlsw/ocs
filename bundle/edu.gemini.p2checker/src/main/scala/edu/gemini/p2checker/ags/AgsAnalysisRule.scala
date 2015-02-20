@@ -4,9 +4,11 @@ import edu.gemini.ags.api.AgsGuideQuality._
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.ags.api.{AgsAnalysis, AgsRegistrar}
 import edu.gemini.p2checker.api.{P2Problems, IP2Problems, Problem, ObservationElements, IRule}
+import edu.gemini.spModel.gemini.gems.Canopus
+import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw
+import edu.gemini.spModel.guide.GuideProbeGroup
 import edu.gemini.spModel.obs.SPObservation
 import edu.gemini.spModel.rich.shared.immutable._
-
 
 class AgsAnalysisRule(mt: MagnitudeTable) extends IRule {
   override def check(elements: ObservationElements): IP2Problems = {
@@ -25,12 +27,17 @@ class AgsAnalysisRule(mt: MagnitudeTable) extends IRule {
           // Perform the analysis.
           val analysis = AgsRegistrar.currentStrategy(ctx).fold(List.empty[AgsAnalysis])(_.analyze(ctx, mt))
 
-          // All analyses that are not DeliversRequestedIq in quality should lead to a warning or error.
+          // Analyses that are not DeliversRequestedIq in quality should lead to a warning or error.
           // This equates to all analyses with a severity level.
+          // We also omit ODGW and Canopus errors because these are already reported with different P2 messages.
           for {
             h <- analysis
+            if (h match {
+              case AgsAnalysis.NoGuideStarForGroup(group) => !ignoredProbeGroups.contains(group)
+              case _ => true
+            })
             s <- severity(h)
-          } yield problems.append(new Problem(s, Prefix + "StrategyRule", h.message(withProbe = true), targetNode))
+          } problems.append(new Problem(s, Prefix + "StrategyRule", h.message(withProbe = true), targetNode))
         })
       })
     }
@@ -40,6 +47,9 @@ class AgsAnalysisRule(mt: MagnitudeTable) extends IRule {
 
 object AgsAnalysisRule {
   val Prefix = "AgsAnalysisRule_"
+
+  // We want to ignore AgsAnalysis problems for ODGW and Canopus.
+  val ignoredProbeGroups: Set[GuideProbeGroup] = Set(GsaoiOdgw.Group.instance, Canopus.Wfs.Group.instance)
 
   def severity(a: AgsAnalysis): Option[Problem.Type] =
     a.quality match {

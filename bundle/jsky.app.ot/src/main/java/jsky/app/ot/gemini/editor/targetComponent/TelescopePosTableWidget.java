@@ -204,7 +204,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
         static final class UserTargetRow extends NonBaseTargetRow {
             UserTargetRow(int index, SPTarget target, WorldCoords baseCoords) {
-                super(true, String.format("%s (%d)", TargetEnvironment.USER_NAME, index), target, baseCoords);
+                super(true, String.format("%s (%d)", TargetEnvironment.USER_NAME, index+1), target, baseCoords);
             }
         }
 
@@ -241,8 +241,12 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                 @Override public Option<AgsGuideQuality> apply(Tuple2<ObsContext, AgsMagnitude.MagnitudeTable> tup) {
                     if (guideProbe instanceof ValidatableGuideProbe) {
                         final ValidatableGuideProbe vgp = (ValidatableGuideProbe) guideProbe;
-                        final AgsGuideQuality gq = AgsAnalysis$.MODULE$.analysis(tup._1(), tup._2(), vgp, guideStar).quality();
-                        return new Some<>(gq);
+                        return AgsAnalysis$.MODULE$.analysisForJava(tup._1(), tup._2(), vgp, guideStar).map(new MapOp<AgsAnalysis, AgsGuideQuality>() {
+                            @Override
+                            public AgsGuideQuality apply(AgsAnalysis agsAnalysis) {
+                                return agsAnalysis.quality();
+                            }
+                        });
                     } else {
                         return None.instance();
                     }

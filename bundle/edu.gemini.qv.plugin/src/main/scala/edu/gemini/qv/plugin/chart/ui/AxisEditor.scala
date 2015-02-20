@@ -1,14 +1,15 @@
 package edu.gemini.qv.plugin.chart.ui
 
+import java.awt.Color
+import javax.swing.UIManager
+
 import edu.gemini.qv.plugin.chart.Axis
 import edu.gemini.qv.plugin.filter.core._
 import edu.gemini.qv.plugin.filter.ui.CategoriesFilter
 import edu.gemini.qv.plugin.filter.ui.FilterElement.FilterElementChanged2
-import edu.gemini.qv.plugin.{QvContext, QvStore}
 import edu.gemini.qv.plugin.ui.QvGui
-import java.awt.Color
-import javax.swing.UIManager
-import scala.Some
+import edu.gemini.qv.plugin.{QvContext, QvStore}
+
 import scala.swing.GridBagPanel.Fill._
 import scala.swing.Swing._
 import scala.swing._
@@ -24,7 +25,8 @@ object AxisEditor {
  * Editor for axes of charts and categorized tables.
  */
 class AxisEditor(ctx: QvContext, initial: String, panel: AxisEditorPanel) extends
-  ElementEditor("Axis", initial, QvStore.DefaultAxes.map(_.label).toSet, QvStore.axes.map(_.label).toSet, Some(panel)) {
+// TODO: The dynamic on-the-fly axes should become part of the default axes, so we don't need to treat them separately.
+  ElementEditor("Axis", initial, (QvStore.DefaultAxes ++ Axis.Dynamics).map(_.label).toSet, QvStore.axes.map(_.label).toSet, Some(panel)) {
 
   def axis = panel.axis
 
@@ -33,7 +35,7 @@ class AxisEditor(ctx: QvContext, initial: String, panel: AxisEditorPanel) extend
   }
 
   def save() {
-    val newAxis = new Axis(elementName, panel.axis.groups)
+    val newAxis = Axis(elementName, panel.axis.groups)
     QvStore.addAxis(newAxis)
   }
 
@@ -122,7 +124,7 @@ class AxisEditorPanel(ctx: QvContext, var axis: Axis) extends SplitPane(Orientat
     layout(Swing.VGlue)       = new Constraints() {gridx=0; gridy=yPos; weighty=1.0; gridwidth=5; fill=Vertical}
 
     def deleteAll() {
-      axis = new Axis(axis.label, Seq(new EmptyFilter("<<New>>")))
+      axis = Axis(axis.label, Seq(new EmptyFilter("<<New>>")))
       replaceGroupEditor()
       replaceFilterEditor()
     }
@@ -147,7 +149,7 @@ class AxisEditorPanel(ctx: QvContext, var axis: Axis) extends SplitPane(Orientat
     def filter_= (f: Filter): Unit = {
       _filter = f
       groupButton.text = f.name
-      axis = new Axis(axis.label, axis.groups.updated(ix, f))
+      axis = Axis(axis.label, axis.groups.updated(ix, f))
     }
 
     def groupButtonF(filter: Filter) = new Button {
@@ -203,13 +205,13 @@ class AxisEditorPanel(ctx: QvContext, var axis: Axis) extends SplitPane(Orientat
       }
     }
 
-    def swapOnAxis(a: Axis, i: Int, j: Int) = new Axis(a.label, a.groups.updated(i, a.groups(j)).updated(j, a.groups(i)))
+    def swapOnAxis(a: Axis, i: Int, j: Int) = Axis(a.label, a.groups.updated(i, a.groups(j)).updated(j, a.groups(i)))
     def removeFromAxis(a: Axis, ix: Int) = {
       val shortenedGroups = a.groups.zipWithIndex.filter(_._2 != ix).unzip._1
       val newGroups = if (shortenedGroups.isEmpty) Seq(new EmptyFilter("<<New>>")) else shortenedGroups
-      new Axis(a.label, newGroups)
+      Axis(a.label, newGroups)
     }
-    def insertIntoAxis(a: Axis, ix: Int) = new Axis(a.label, (a.groups.slice(0, ix) :+ new EmptyFilter("<<New>>")) ++ a.groups.slice(ix, a.groups.length))
+    def insertIntoAxis(a: Axis, ix: Int) = Axis(a.label, (a.groups.slice(0, ix) :+ new EmptyFilter("<<New>>")) ++ a.groups.slice(ix, a.groups.length))
   }
 
 }

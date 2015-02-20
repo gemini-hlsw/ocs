@@ -124,6 +124,8 @@ case class InfoPlist(meta: ApplicationMeta, version:String, fwJar: File, mainCla
         </array>
         <key>WorkingDirectory</key>
         <string>$APP_ROOT/Contents/Resources</string>
+        <key>NSHighResolutionCapable</key>
+        <true/>
       </dict>
     </plist>
 
