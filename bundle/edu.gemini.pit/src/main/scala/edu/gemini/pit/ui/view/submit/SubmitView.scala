@@ -213,26 +213,26 @@ class SubmitView(ph: ProblemRobot, newShellHandler: (Model,Option[File]) => Unit
       case Reference => s.response.map(_.receipt.id).orNull
       case Contact   => s.response.flatMap(_.receipt.contact).orNull
       case Status => sr(s) match {
-        case Some(SubmitResult.Offline(_))            => "Offline"
-        case Some(SubmitResult.ClientError(_, _))     => "Error"
-        case Some(SubmitResult.ServiceError(_, _, _)) => "Error"
-        case Some(SubmitResult.SubmitException(_, _)) => "Error"
-        case Some(SubmitResult.Success(_, _, _, _))   => "Success"
-        case None if s.response.isDefined             => "Success"
-        case None                                     => "None"
+        case Some(SubmitResult.Offline(_))               => "Offline"
+        case Some(SubmitResult.ClientError(_, _))        => "Error"
+        case Some(SubmitResult.ServiceError(_, _, _, _)) => "Error"
+        case Some(SubmitResult.SubmitException(_, _))    => "Error"
+        case Some(SubmitResult.Success(_, _, _, _))      => "Success"
+        case None if s.response.isDefined                => "Success"
+        case None                                        => "None"
       }
     }
 
     override def tooltip(s:Submission) = {
       case Status => sr(s) match {
-        case Some(SubmitResult.Offline(d))              =>  SubmitStatus.offlineBackend(d)
-        case Some(SubmitResult.ClientError(m, _))       => s"Client error: $m"
-        case Some(SubmitResult.ServiceError(d, 405, m)) => s"Service error (405) ${SubmitStatus.parseServiceError405(d, m)}"
-        case Some(SubmitResult.ServiceError(d, i, m))   => s"Service error ($i) ${SubmitStatus.genericError(d)}"
-        case Some(SubmitResult.SubmitException(d, _))   => s"Internal error: ${SubmitStatus.genericError(d)}"
-        case Some(SubmitResult.Success(_, _, _, _))     =>  "Proposal was submitted successfully."
-        case None if s.response.isDefined               =>  "Proposal was submitted successfully."
-        case None                                       =>  "Proposal has not been submitted."
+        case Some(SubmitResult.Offline(d))                  =>  SubmitStatus.offlineBackend(d)
+        case Some(SubmitResult.ClientError(m, _))           => s"Client error: $m"
+        case Some(SubmitResult.ServiceError(d, pc, 405, m)) => s"Service error (405) ${SubmitStatus.parseServiceError405(d, pc, m)}"
+        case Some(SubmitResult.ServiceError(d, _, i, m))    => s"Service error ($i) ${SubmitStatus.genericError(d)}"
+        case Some(SubmitResult.SubmitException(d, _))       => s"Internal error: ${SubmitStatus.genericError(d)}"
+        case Some(SubmitResult.Success(_, _, _, _))         =>  "Proposal was submitted successfully."
+        case None if s.response.isDefined                   =>  "Proposal was submitted successfully."
+        case None                                           =>  "Proposal has not been submitted."
       }
     }
 
