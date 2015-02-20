@@ -296,7 +296,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean, i
       }
 
       // PM dRA
-      object DeltaRA extends NumberField(sidereal.properMotion.map(_.deltaRA)) {
+      object DeltaRA extends NumberField(sidereal.properMotion.map(_.deltaRA), allowEmpty = true) {
         enabled = sidereal.properMotion.isDefined && canEdit
         PMCheck.reactions += {
           case _ => enabled = PMCheck.selected && canEdit
@@ -304,7 +304,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean, i
       }
 
       // PM dRA
-      object DeltaDec extends NumberField(sidereal.properMotion.map(_.deltaDec)) {
+      object DeltaDec extends NumberField(sidereal.properMotion.map(_.deltaDec), allowEmpty = true) {
         enabled = sidereal.properMotion.isDefined && canEdit
         PMCheck.reactions += {
           case _ => enabled = PMCheck.selected && canEdit
@@ -337,7 +337,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean, i
       }
 
       // The input text
-      val text = new NumberField(mag.map(_.value)) {
+      val text = new NumberField(mag.map(_.value), allowEmpty = true) {
         enabled = mag.isDefined && dialog.canEdit
         check.reactions += {
           case _ if check.selected => enabled = canEdit; requestFocus()

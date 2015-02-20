@@ -493,7 +493,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       }
     }
 
-    lazy val radiusStart, radiusEnd = new NumberField(None) {
+    lazy val radiusStart, radiusEnd = new NumberField(None, allowEmpty = false) {
       reactions += queryButtonEnabling
 
       def updateAngle(angle: Angle): Unit = {
@@ -740,10 +740,10 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
     // Make GUI controls for a Magnitude Constraint
     private def filterControls(mc: MagnitudeConstraints, index: Int): List[MagnitudeFilterControls] = {
-      val faint = new NumberField(mc.faintnessConstraint.brightness.some) {
+      val faint = new NumberField(mc.faintnessConstraint.brightness.some, allowEmpty = false) {
         reactions += queryButtonEnabling
       }
-      val sat = new NumberField(mc.saturationConstraint.map(_.brightness)) {
+      val sat = new NumberField(mc.saturationConstraint.map(_.brightness), allowEmpty = false) {
         reactions += queryButtonEnabling
       }
       bandsBoxes(catalogBox.selection.item, mc.searchBands).map(MagnitudeFilterControls(addMagnitudeRowButton(index), faint, new Label("-"), sat, _, removeMagnitudeRowButton(index)))

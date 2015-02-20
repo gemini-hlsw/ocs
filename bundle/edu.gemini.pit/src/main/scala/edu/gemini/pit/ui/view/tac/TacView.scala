@@ -245,7 +245,7 @@ class TacView(loc: Locale) extends BorderPanel with BoundView[ProposalClass] { v
       val focus:Lens[SubmissionAccept, String] = Lens.lensu((a, b) => a.copy(email = b), _.email)
     }
 
-    object ranking extends NumberField(None) with OptionText[SubmissionAccept] {
+    object ranking extends NumberField(None, allowEmpty = false) with OptionText[SubmissionAccept] {
       val lens = SubmissionResponse.acceptDecision
       override def enabled_=(b:Boolean) {
         super.enabled = b

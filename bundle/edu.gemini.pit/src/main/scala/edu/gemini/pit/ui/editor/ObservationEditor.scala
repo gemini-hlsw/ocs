@@ -65,7 +65,7 @@ class ObservationEditor private (obs:Observation, canEdit:Boolean) extends StdMo
       foreground = Color.GRAY
   }
 
-  object Time extends NumberField(obs.time.map(_.value).orElse(Some(1.0))) {
+  object Time extends NumberField(obs.time.map(_.value).orElse(Some(1.0)), allowEmpty = false) {
     enabled = canEdit
     override def valid(d:Double) = d > 0
   }

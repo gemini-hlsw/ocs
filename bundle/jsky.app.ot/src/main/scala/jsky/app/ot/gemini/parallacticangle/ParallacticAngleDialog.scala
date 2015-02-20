@@ -15,7 +15,7 @@ import jsky.app.ot.util.TimeZonePreference
 
 import scala.swing.Swing._
 import scala.swing._
-import scala.swing.event.{ButtonClicked, FocusLost}
+import scala.swing.event.{FocusGained, ValueChanged, ButtonClicked, FocusLost}
 
 // Dialog to set the settings needed for the parallactic angle computation.
 
@@ -159,12 +159,16 @@ class ParallacticAngleDialog(owner: java.awt.Window, observation: ISPObservation
 
     listenTo(remainingTimeButton, setToButton)
     reactions += {
-      case ButtonClicked(`remainingTimeButton`) => durationField.enabled = false
-      case ButtonClicked(`setToButton`)         => durationField.enabled = true
+      case ButtonClicked(`remainingTimeButton`) =>
+        durationField.enabled = false
+        okButton.enabled = true
+      case ButtonClicked(`setToButton`)         =>
+        durationField.enabled = true
+        okButton.enabled = durationField.valid
     }
 
     // Set the number of minutes of duration, converting from ms.
-    val durationField = new NumberField(Some(duration.getExplicitDuration / 60000.0)) {
+    val durationField = new NumberField(Some(duration.getExplicitDuration / 60000.0), allowEmpty = false) {
       peer.setColumns(5)
       enabled = duration.getParallacticAngleDurationMode == ParallacticAngleDurationMode.EXPLICITLY_SET
     }
@@ -172,7 +176,10 @@ class ParallacticAngleDialog(owner: java.awt.Window, observation: ISPObservation
     // Reset duration to 0.0 if nonsense is typed in and the focus is lost.
     listenTo(durationField)
     reactions += {
-      case FocusLost(`durationField`,_,_) => if (!durationField.valid) durationField.text = "0"
+      case FocusLost(`durationField`,_,_) =>
+        okButton.enabled = durationField.valid
+      case ValueChanged(_) =>
+        okButton.enabled = durationField.valid
     }
 
     layout(durationField) = new Constraints() {
