@@ -27,23 +27,4 @@ class RichProgram(prog:ISPProgram) {
       } yield o :: os
     }
   }
-
-  def copy(fact: ISPFactory): ISPProgram = {
-    val sp = fact.createProgram(prog.getNodeKey, prog.getProgramID)
-
-    def init(src: ISPNode, dest: ISPNode): Unit = {
-      dest.dataObject = src.dataObject
-      dest.children   = src.children.map(copy)
-    }
-
-    def copy(src: ISPNode): ISPNode = {
-      val newNode = NodeFactory.mkNode(fact, sp, src)
-      init(src, newNode)
-      newNode
-    }
-
-    init(prog, sp)
-    sp.setVersions(prog.getVersions)
-    sp
-  }
 }

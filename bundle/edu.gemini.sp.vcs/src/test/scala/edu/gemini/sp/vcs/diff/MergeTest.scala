@@ -84,7 +84,7 @@ class MergeTest extends JUnitSuite {
     val correctedMergePlan = ObsNumberCorrection(mergeContext).apply(mergePlan)
 
     val updatedLocalProgram = {
-      val localCopy = lp.copy(fact)
+      val localCopy = fact.copyWithSameKeys(lp)
       for {
         mp <- correctedMergePlan
         _  <- mp.merge(fact, localCopy)

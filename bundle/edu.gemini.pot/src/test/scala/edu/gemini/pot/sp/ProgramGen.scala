@@ -228,10 +228,33 @@ object ProgramGen {
 
   val genEdits: Gen[List[ProgEdit]] = sized { size => listOfN(size, genEdit) }
 
-  val genEditedProg: Gen[ProgFun[ISPProgram]] =
+  val genEditedProg: Gen[ProgFun[ISPProgram]] = {
+    // This copy is a bit different from ISPFactory.copyWithSameKeys in that it
+    // creates a new LifespanId for the program copy.
+    def copyFrom(fact: ISPFactory, that: ISPProgram): ISPProgram = {
+      val sp = fact.createProgram(that.getNodeKey, that.getProgramID)
+
+      def init(src: ISPNode, dest: ISPNode): Unit = {
+        dest.dataObject = src.dataObject
+        dest.children   = src.children.map(copy)
+      }
+
+      def copy(src: ISPNode): ISPNode = {
+        val newNode = NodeFactory.mkNode(fact, sp, src)
+        init(src, newNode)
+        newNode
+      }
+
+      init(that, sp)
+      sp.setVersions(that.getVersions)
+      sp
+    }
+
+
     genEdits.map { edits => (f: ISPFactory, p: ISPProgram) => {
-      val p2 = p.copy(f)
+      val p2 = copyFrom(f, p)
       edits.sequenceU.apply(f, p2)
       p2
     }}
+  }
 }
