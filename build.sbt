@@ -4,7 +4,7 @@ name := "ocs"
 
 ocsVersion in ThisBuild := OcsVersion("2015A", true, 1, 6, 1)
 
-pitVersion in ThisBuild := OcsVersion("2015B", true, 2, 1, 0)
+pitVersion in ThisBuild := OcsVersion("2015B", false, 2, 1, 0)
 
 // Bundles by default use the ocsVersion; this is overridden in bundles used only by the PIT
 version in ThisBuild := ocsVersion.value.toOsgiVersion
