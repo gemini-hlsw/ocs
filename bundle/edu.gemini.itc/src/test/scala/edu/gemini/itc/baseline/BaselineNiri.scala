@@ -5,33 +5,16 @@ import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.niri.{NiriParameters, NiriRecipe}
 
 /**
- * NIRI baseline test bits and pieces.
+ * NIRI baseline test fixtures.
  */
 object BaselineNiri {
 
-  lazy val Observations =
-    specObs() ++
-    imgObs()
+  lazy val Fixtures = KBandImaging ++ KBandSpectroscopy
 
-  lazy val Environments =
-    for {
-      src <- Environment.NearIRSources
-      ocp <- Environment.ObservingConditions
-      tep <- Environment.TelescopeConfigurations
-      pdp <- Environment.PlottingParameters
-    } yield Environment(src, ocp, tep, pdp)
+  def executeRecipe(f: Fixture[NiriParameters]): Output =
+    cookRecipe(w => new NiriRecipe(f.src, f.odp, f.ocp, f.ins, f.tep, f.alt.get, f.pdp, w))
 
-  def executeRecipe(e: Environment, o: NiriObservation): Output =
-    cookRecipe(w => new NiriRecipe(e.src, o.odp, e.ocp, o.ins, e.tep, o.alt, e.pdp, w))
-
-  // imaging
-  private def imgObs() = for {
-    odp  <- Observation.ImagingObservations
-    alt  <- Environment.AltairConfigurations
-    conf <- imagingConfigs()
-  } yield NiriObservation(odp, conf, alt)
-
-  private def imagingConfigs() = List(
+  private lazy val KBandImaging = Fixture.kBandImgFixtures(List(
     new NiriParameters(
       "J",
       "none",
@@ -39,7 +22,6 @@ object BaselineNiri {
       NiriParameters.HIGH_READ_NOISE,
       NiriParameters.HIGH_WELL_DEPTH,
       NiriParameters.NO_SLIT),
-
     new NiriParameters(
       "K",
       "none",
@@ -47,15 +29,9 @@ object BaselineNiri {
       NiriParameters.HIGH_READ_NOISE,
       NiriParameters.HIGH_WELL_DEPTH,
       NiriParameters.NO_SLIT)
-  )
+  ), alt = Fixture.AltairConfigurations)
 
-  // spectroscopy
-  private def specObs() = for {
-    odp  <- Observation.SpectroscopyObservations
-    conf <- spectroscopyConfigs()
-  } yield NiriObservation(odp, conf, Environment.NoAltair)
-
-  private def spectroscopyConfigs() = List(
+  private lazy val KBandSpectroscopy = Fixture.kBandSpcFixtures(List(
     new NiriParameters(
       "K",
       "K-grism",
@@ -63,6 +39,6 @@ object BaselineNiri {
       NiriParameters.LOW_READ_NOISE,
       NiriParameters.LOW_WELL_DEPTH,
       NiriParameters.SLIT_2_PIX_CENTER)
-  )
+  ), alt = Fixture.NoAltair)
 
 }

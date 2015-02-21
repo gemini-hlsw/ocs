@@ -9,27 +9,15 @@ import edu.gemini.itc.baseline.util._
  */
 object BaselineAcqCam {
 
-  lazy val Observations =
-    for {
-      odp  <- Observation.ImagingObservations
-      conf <- configs()
-    } yield AcqCamObservation(odp, conf)
+  lazy val Fixtures = RBandImaging
 
-  lazy val Environments =
-    for {
-      src <- Environment.PointSources
-      ocp <- Environment.ObservingConditions
-      tep <- Environment.TelescopeConfigurations
-      pdp <- Environment.PlottingParameters
-    } yield Environment(src, ocp, tep, pdp)
+  def executeRecipe(f: Fixture[AcquisitionCamParameters]): Output =
+    cookRecipe(w => new AcqCamRecipe(f.src, f.odp, f.ocp, f.ins, f.tep, w))
 
-  def executeRecipe(e: Environment, o: AcqCamObservation): Output =
-    cookRecipe(w => new AcqCamRecipe(e.src, o.odp, e.ocp, o.ins, e.tep, w))
-
-  private def configs() = List(
+  private lazy val RBandImaging = Fixture.rBandImgFixtures(List(
     new AcquisitionCamParameters(
       "R",
       AcquisitionCamParameters.NDA)
-  )
+  ))
 
 }

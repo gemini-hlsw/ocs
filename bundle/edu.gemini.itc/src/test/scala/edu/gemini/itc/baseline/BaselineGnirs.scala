@@ -5,30 +5,16 @@ import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.gnirs.{GnirsParameters, GnirsRecipe}
 
 /**
- * GNIRS baseline test bits and pieces.
+ * GNIRS baseline test fixtures.
  */
 object BaselineGnirs {
 
-  lazy val Observations =
-    // GNIRS spectroscopy observations
-    for {
-      odp <- Observation.SpectroscopyObservations
-      ins <- spectroscopyParams()
-    } yield GnirsObservation(odp, ins)
+  lazy val Fixtures = KBandSpectroscopy
 
-  lazy val Environments =
-    for {
-      src <- Environment.NearIRSources
-      ocp <- Environment.ObservingConditions
-      tep <- Environment.TelescopeConfigurations
-      pdp <- Environment.PlottingParameters
-    } yield Environment(src, ocp, tep, pdp)
+  def executeRecipe(f: Fixture[GnirsParameters]): Output =
+    cookRecipe(w => new GnirsRecipe(f.src, f.odp, f.ocp, f.ins, f.tep, f.pdp, w))
 
-  def executeRecipe(e: Environment, o: GnirsObservation): Output =
-    cookRecipe(w => new GnirsRecipe(e.src, o.odp, e.ocp, o.ins, e.tep, e.pdp, w))
-
-
-  private def spectroscopyParams() = List(
+  private lazy val KBandSpectroscopy = Fixture.kBandSpcFixtures(List(
     new GnirsParameters(
       GnirsParameters.LONG_CAMERA,
       GnirsParameters.G10,
@@ -65,7 +51,7 @@ object BaselineGnirs {
       "2.6",
       GnirsParameters.SLIT3_0)
 
-  )
+  ))
 
 
 }

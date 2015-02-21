@@ -5,52 +5,29 @@ import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.flamingos2.{Flamingos2Parameters, Flamingos2Recipe}
 
 /**
- * F2 baseline test bits and pieces.
+ * F2 baseline test fixtures.
  */
 object BaselineF2 {
 
-  lazy val Observations =
-    specObs() ++
-    imgObs()
+  lazy val Fixtures = KBandImaging ++ KBandSpectroscopy
 
-  lazy val Environments =
-    for {
-      src <- Environment.NearIRSources
-      ocp <- Environment.ObservingConditions
-      tep <- Environment.TelescopeConfigurations
-      pdp <- Environment.PlottingParameters
-    } yield Environment(src, ocp, tep, pdp)
+  def executeRecipe(f: Fixture[Flamingos2Parameters]): Output =
+    cookRecipe(w => new Flamingos2Recipe(f.src, f.odp, f.ocp, f.ins, f.tep, f.pdp, w))
 
-
-  def executeRecipe(e: Environment, o: F2Observation): Output =
-    cookRecipe(w => new Flamingos2Recipe(e.src, o.odp, e.ocp, o.ins, e.tep, e.pdp, w))
-
-  // F2 imaging observations
-  private def imgObs() = for {
-    odp  <- Observation.ImagingObservations
-    conf <- imagingConfigs()
-  } yield F2Observation(odp, conf)
-
-  private def imagingConfigs() = List(
+  private lazy val KBandImaging = Fixture.kBandImgFixtures(List(
     new Flamingos2Parameters(
       "H_G0803",                          // filter
       Flamingos2Parameters.NOGRISM,       // grism
       "none",                             // FP mask
       "lowNoise")                         // read noise
-  )
+  ))
 
-  // F2 spectroscopy observations
-  private def specObs() = for {
-    odp  <- Observation.SpectroscopyObservations
-    conf <- spectroscopyConfigs()
-  } yield F2Observation(odp, conf)
-
-  private def spectroscopyConfigs() = List(
+  private lazy val KBandSpectroscopy = Fixture.kBandSpcFixtures(List(
     new Flamingos2Parameters(
       "H_G0803",
       "R3K_G5803",
       "1",
       "medNoise")
-  )
+  ))
 
 }

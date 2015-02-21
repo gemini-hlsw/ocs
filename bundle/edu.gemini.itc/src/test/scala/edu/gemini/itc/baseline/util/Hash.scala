@@ -10,9 +10,7 @@ import edu.gemini.itc.gsaoi.GsaoiParameters
 import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.niri.NiriParameters
-import edu.gemini.itc.parameters.SourceDefinitionParameters.Distribution
-import edu.gemini.itc.parameters.SourceDefinitionParameters.Distribution._
-import edu.gemini.itc.parameters.{ObservationDetailsParameters, ObservingConditionParameters, SourceDefinitionParameters, TeleParameters}
+import edu.gemini.itc.parameters._
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
 
@@ -204,6 +202,9 @@ object Hash {
       alt.getAvgStrehl,
       alt.getStrehlBand
     )
+
+  def calc(pdp: PlottingDetailsParameters): Int =
+    hash(pdp.getPlotWaveL, pdp.getPlotWaveU)
 
   private def hash(values: Any*) =
     values.
