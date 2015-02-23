@@ -25,6 +25,7 @@ import edu.gemini.p2checker.rules.phoenix.PhoenixRule;
 import edu.gemini.p2checker.rules.pwfs.PwfsRule;
 import edu.gemini.p2checker.rules.trecs.TrecsRule;
 import edu.gemini.p2checker.rules.flamingos2.Flamingos2Rule;
+import edu.gemini.p2checker.rules.visitor.VisitorRule;
 import edu.gemini.pot.sp.*;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
 import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
@@ -38,6 +39,7 @@ import edu.gemini.spModel.gemini.niri.InstNIRI;
 import edu.gemini.spModel.gemini.phoenix.InstPhoenix;
 import edu.gemini.spModel.gemini.trecs.InstTReCS;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
+import edu.gemini.spModel.gemini.visitor.VisitorInstrument;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 
 
@@ -52,11 +54,11 @@ import java.util.Map;
 public class P2Checker {
     private static P2Checker _instance;
 
-    private Map<SPComponentType, IRule> _ruleMap;
+    private final Map<SPComponentType, IRule> _ruleMap;
 
     private class RuleComposite implements IRule {
 
-        private List<IRule> _compositeRules;
+        private final List<IRule> _compositeRules;
 
         public RuleComposite(IRule rule, AgsMagnitude.MagnitudeTable mt) {
             _compositeRules = new ArrayList<>();
@@ -65,21 +67,22 @@ public class P2Checker {
             _compositeRules.add(new SmartgcalMappingRule());
             _compositeRules.add(new PwfsRule());
             _compositeRules.add(new AgsAnalysisRule(mt));
-            _compositeRules.add(rule);
+            if (rule != null)
+                _compositeRules.add(rule);
         }
 
 
         public IP2Problems check(ObservationElements node) {
-            IP2Problems problems = new P2Problems();
+            final IP2Problems problems = new P2Problems();
 
             //first check the structure of the observation (missing instrument, missing obs.cond, etc)
-            IP2Problems structureProblems = StructureRule.INSTANCE.check(node);
+            final IP2Problems structureProblems = StructureRule.INSTANCE.check(node);
             //stop checking the rest until the structure is fixed.
             if (structureProblems.getProblemCount() > 0) {
                 return structureProblems;
             }
 
-            for (IRule rule : _compositeRules) {
+            for (final IRule rule : _compositeRules) {
                 problems.append(rule.check(node));
             }
             return problems;
@@ -97,7 +100,7 @@ public class P2Checker {
 
     private P2Checker() {
         _ruleMap = new HashMap<>();
-        IRule gmosRule = new GmosRule();
+        final IRule gmosRule = new GmosRule();
         //add the GMOS Rule to all the instruments that supports it
         _ruleMap.put(InstGmosSouth.SP_TYPE, gmosRule);
         _ruleMap.put(InstGmosNorth.SP_TYPE, gmosRule);
@@ -111,12 +114,13 @@ public class P2Checker {
         _ruleMap.put(InstNIRI.SP_TYPE, new NiriRule());
         _ruleMap.put(InstTReCS.SP_TYPE, new TrecsRule());
         _ruleMap.put(InstPhoenix.SP_TYPE, new PhoenixRule());
+        _ruleMap.put(VisitorInstrument.SP_TYPE, new VisitorRule());
     }
 
     private IRule _getRule(ObservationElements elements) {
         if (elements == null) return null;
 
-        SPInstObsComp instrument = elements.getInstrument();
+        final SPInstObsComp instrument = elements.getInstrument();
         if (instrument == null) return null;
 
         return _ruleMap.get(elements.getInstrumentNode().getType());
@@ -143,23 +147,23 @@ public class P2Checker {
             return _checkObservation((ISPObservation) node, mt);
             //groups contain observations, check them individually
         } else if (node instanceof ISPGroup) {
-            ISPGroup group = (ISPGroup) node;
-            IP2Problems problems = new P2Problems();
-            for (ISPObservation obs : group.getObservations()) {
+            final ISPGroup group = (ISPGroup) node;
+            final IP2Problems problems = new P2Problems();
+            for (final ISPObservation obs : group.getObservations()) {
                 problems.append(check(obs, mt));
             }
             return problems;
             //a program has groups and observations. Check them all.
         } else if (node instanceof ISPProgram) {
-            ISPProgram program = (ISPProgram) node;
-            IP2Problems problems = new P2Problems();
+            final ISPProgram program = (ISPProgram) node;
+            final IP2Problems problems = new P2Problems();
 
-            for (ISPObservation obs : program.getObservations()) {
+            for (final ISPObservation obs : program.getObservations()) {
                 problems.append(check(obs, mt));
             }
 
-            for (Object o : program.getGroups()) {
-                ISPGroup group = (ISPGroup) o;
+            for (final Object o : program.getGroups()) {
+                final ISPGroup group = (ISPGroup) o;
                 problems.append(check(group, mt));
             }
 
@@ -171,18 +175,18 @@ public class P2Checker {
         } else if (node instanceof ISPTemplateFolder) {
 
             // Template folder has groups in it
-            IP2Problems problems = new P2Problems();
+            final IP2Problems problems = new P2Problems();
             final ISPTemplateFolder tf = (ISPTemplateFolder) node;
-            for (ISPTemplateGroup tg : tf.getTemplateGroups())
+            for (final ISPTemplateGroup tg : tf.getTemplateGroups())
                 problems.append(check(tg, mt));
             return problems;
 
         } else if (node instanceof ISPTemplateGroup) {
 
             // Template group has obs in it
-            IP2Problems problems = new P2Problems();
+            final IP2Problems problems = new P2Problems();
             final ISPTemplateGroup tg = (ISPTemplateGroup) node;
-            for (ISPObservation o : tg.getAllObservations())
+            for (final ISPObservation o : tg.getAllObservations())
                 problems.append(check(o, mt));
             return problems;
         }
@@ -193,9 +197,9 @@ public class P2Checker {
     //Perform the checking of an observation, the small
     //unit that can be checked individually.
     private IP2Problems _checkObservation(ISPObservation node, AgsMagnitude.MagnitudeTable mt) {
-        ObservationElements elements = new ObservationElements(node);
+        final ObservationElements elements = new ObservationElements(node);
 
-        IRule rule = _getRule(elements);
+        final IRule rule = _getRule(elements);
         if (rule == null) {
             //we don't have rules for this stuff so just check the structure of
             //the observation
@@ -203,7 +207,7 @@ public class P2Checker {
         }
 
         //add the rule
-        RuleComposite rc = new RuleComposite(rule, mt);
+        final RuleComposite rc = new RuleComposite(rule, mt);
 
         //and apply the rule for the entire observation elements
         return rc.check(elements);

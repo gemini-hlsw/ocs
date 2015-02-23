@@ -30,8 +30,8 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   override def magnitudes(ctx: ObsContext, mt: MagnitudeTable): List[(GuideProbe, AgsMagnitude.MagnitudeCalc)] =
     params.magnitudeCalc(ctx, mt).toList.map(params.guideProbe -> _)
 
-  override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] =
-    List(AgsAnalysis.analysis(ctx, mt, params.guideProbe))
+  def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] =
+    AgsAnalysis.analysis(ctx, mt, params.guideProbe).toList
 
   override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]] = {
     val empty = List((params.guideProbe: GuideProbe, List.empty[SiderealTarget]))

@@ -107,7 +107,7 @@ object GemsStrategy extends AgsStrategy {
         case _                      => true
       }
 
-      val probeAnalysis = grp.getMembers.asScala.toList.map { analysis(ctx, mt, _) }
+      val probeAnalysis = grp.getMembers.asScala.toList.map{ analysis(ctx, mt, _) }.flatten
       probeAnalysis.filter(hasGuideStarForProbe) match {
         case Nil => List(NoGuideStarForGroup(grp))
         case lst => lst

@@ -157,7 +157,7 @@ object GuidingFeedback {
     val env = ctx.getTargets
     if (target == env.getBase) baseAnalysis(ctx, mt)
     else guideProbe(env, target).fold(List.empty[Row]) { vgp =>
-      List(guideStarAnalysis(ctx, mt, vgp, target))
+      guideStarAnalysis(ctx, mt, vgp, target).toList
     }
   }
 
@@ -166,7 +166,6 @@ object GuidingFeedback {
   def baseAnalysis(ctx: ObsContext, mt: MagnitudeTable): List[Row] =
     AgsRegistrar.currentStrategy(ctx).fold(List.empty[Row]) { s =>
       s.analyze(ctx, mt).filter {
-        case AgsAnalysis.UnknownError => true
         case NoGuideStarForGroup(_)   => true
         case NoGuideStarForProbe(_)   => true
         case _                        => false
@@ -174,9 +173,9 @@ object GuidingFeedback {
     }
 
   // GuidingFeedback.Row related to the given guide star itself.
-  def guideStarAnalysis(ctx: ObsContext, mt: MagnitudeTable, gp: ValidatableGuideProbe, target: SPTarget): Row = {
-    val analysis = AgsAnalysis.analysis(ctx, mt, gp, target)
-    val plo      = mt(ctx, gp).flatMap(ProbeLimits(ctx, _))
-    new Row(analysis, plo, includeProbeName = false)
-  }
+  def guideStarAnalysis(ctx: ObsContext, mt: MagnitudeTable, gp: ValidatableGuideProbe, target: SPTarget): Option[Row] =
+    AgsAnalysis.analysis(ctx, mt, gp).map { a =>
+      val plo = mt(ctx, gp).flatMap(ProbeLimits(ctx, _))
+      new Row(a, plo, includeProbeName = false)
+    }
 }

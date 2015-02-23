@@ -13,8 +13,6 @@ import edu.gemini.qv.plugin.table.ObservationTableModel.{Column, DecValue, RaVal
 import edu.gemini.qv.plugin.ui.{QvGui, SideBar, SideBarPanel}
 import edu.gemini.qv.plugin.util.Exporter
 import edu.gemini.qv.plugin.{ConstraintsChanged, QvContext, QvTool, ReferenceDateChanged}
-import edu.gemini.skycalc.TimeUtils
-import jsky.coords.{DMS, HMS}
 
 import scala.None
 import scala.collection.mutable
@@ -295,9 +293,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
       setHorizontalAlignment(SwingConstants.RIGHT)
       override def setValue(value: Object) = value match {
         case v: RaValue =>
-          val hms = new HMS(v.ra/15.0)
-          val sign = if (hms.getSign > 0) "" else "-"
-          setText(f"$sign${hms.getHours}:${hms.getMin}%02d:${hms.getSec}%06.3f")
+          setText(v.prettyString)
           setBorder(BorderFactory.createEmptyBorder(0,0,0,6))
       }
     }
@@ -305,9 +301,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
       setHorizontalAlignment(SwingConstants.RIGHT)
       override def setValue(value: Object) = value match {
         case v: DecValue =>
-          val dms = new DMS(v.dec)
-          val sign = if (dms.getSign > 0) "" else "-"
-          setText(f"$sign${dms.getDegrees}:${dms.getMin}%02d:${dms.getSec}%06.3f")
+          setText(v.prettyString)
           setBorder(BorderFactory.createEmptyBorder(0,0,0,6))
       }
     }
@@ -323,7 +317,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
       setHorizontalAlignment(SwingConstants.RIGHT)
       override def setValue(value: Object) = value match {
         case v: TimeValue =>
-          setText(TimeUtils.msToHHMMSS(v.t))
+          setText(v.prettyString)
           setBorder(BorderFactory.createEmptyBorder(0,0,0,5))
       }
     }

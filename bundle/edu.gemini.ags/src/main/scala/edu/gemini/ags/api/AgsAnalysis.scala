@@ -42,10 +42,6 @@ sealed trait AgsAnalysis {
 }
 
 object AgsAnalysis {
-  case object UnknownError extends AgsAnalysis {
-    override def message(withProbe: Boolean): String  = "Unknown error."
-  }
-
   case class NoGuideStarForProbe(guideProbe: GuideProbe) extends AgsAnalysis {
     override def message(withProbe: Boolean): String = {
       val p = if (withProbe) s"${guideProbe.getKey} " else ""
@@ -100,7 +96,6 @@ object AgsAnalysis {
   }
 
   def guideProbe(a: AgsAnalysis): Option[GuideProbe] = a match {
-    case UnknownError                => None
     case NoGuideStarForProbe(p)      => Some(p)
     case NoGuideStarForGroup(_)      => None
     case MagnitudeTooFaint(p, _)     => Some(p)
@@ -114,27 +109,33 @@ object AgsAnalysis {
   /**
    * Analysis of the selected guide star (if any) in the given context.
    */
-  def analysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe): AgsAnalysis = {
+  def analysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe): Option[AgsAnalysis] = {
     def selection(ctx: ObsContext, guideProbe: GuideProbe): Option[SPTarget] =
       for {
         gpt   <- ctx.getTargets.getPrimaryGuideProbeTargets(guideProbe).asScalaOpt
         gStar <- gpt.getPrimary.asScalaOpt
       } yield gStar
 
-    selection(ctx, guideProbe).fold(NoGuideStarForProbe(guideProbe): AgsAnalysis) { guideStar =>
+    selection(ctx, guideProbe).fold(Some(NoGuideStarForProbe(guideProbe)): Option[AgsAnalysis]) { guideStar =>
       AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar)
     }
   }
 
   /**
+   * Analysis for Java.
+   */
+  def analysisForJava(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SPTarget) =
+    analysis(ctx, mt, guideProbe, guideStar).asGeminiOpt
+
+  /**
    * Analysis of the given guide star in the given context, regardless of which
    * guide star is actually selected in the target environment.
    */
-  def analysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SPTarget): AgsAnalysis =
-    if (!guideProbe.validate(guideStar, ctx)) NotReachable(guideProbe, guideStar.toNewModel)
+  def analysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SPTarget): Option[AgsAnalysis] =
+    if (!guideProbe.validate(guideStar, ctx)) Some(NotReachable(guideProbe, guideStar.toNewModel))
     else magnitudeAnalysis(ctx, mt, guideProbe, guideStar.toNewModel)
 
-  private def magnitudeAnalysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): AgsAnalysis = {
+  private def magnitudeAnalysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] = {
     import GuideSpeed._
     import AgsGuideQuality._
 
@@ -177,7 +178,7 @@ object AgsAnalysis {
       Usable(guideProbe, guideStar, guideSpeed, quality)
     }
 
-    val magAnalysis = for {
+    for {
       mc <- mt(ctx, guideProbe)
       probeBand = band(mc)
     } yield {
@@ -185,8 +186,5 @@ object AgsAnalysis {
       val analysisOpt = magOpt.map(mag => fastestGuideSpeed(mc, mag, conds).fold(outsideLimits(mc, mag))(usable))
       analysisOpt.getOrElse(NoMagnitudeForBand(guideProbe, guideStar, probeBand))
     }
-
-    // This should theoretically never happen, but if it does, something has gone wrong with the site or magnitude table.
-    magAnalysis.getOrElse(UnknownError)
   }
 }

@@ -8,8 +8,9 @@ import edu.gemini.qv.plugin.QvContext
 import edu.gemini.qv.plugin.util.SolutionProvider
 import edu.gemini.skycalc.TimeUtils
 import edu.gemini.spModel.`type`.{DisplayableSpType, LoggableSpType}
-import edu.gemini.spModel.core.Affiliate
+import edu.gemini.spModel.core.{Affiliate, Angle}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{ElevationConstraintType, TimingWindow}
+import jsky.coords.DMS
 
 import scala.collection.JavaConverters._
 
@@ -207,10 +208,10 @@ object ObservationTableModel {
       o => SolutionProvider(ctx).remainingNights(ctx, o, thisSemester = true, nextSemester = false),
       visibleAtStart = false
     ),
-    Column[java.lang.Double](
+    Column[TimeValue](
       "Sem. Hrs",
       "Remaining hours from today until the end of current semester.",
-      o => TimeUtils.asHours(SolutionProvider(ctx).remainingTime(ctx, o, thisSemester = true, nextSemester = false)),
+      o => TimeValue(SolutionProvider(ctx).remainingTime(ctx, o, thisSemester = true, nextSemester = false)),
       visibleAtStart = false
     ),
     Column[java.lang.Double](
@@ -225,10 +226,10 @@ object ObservationTableModel {
       o => SolutionProvider(ctx).remainingNights(ctx, o, thisSemester = true, nextSemester = true),
       visibleAtStart = false
     ),
-    Column[java.lang.Double](
+    Column[TimeValue](
       "+Sem. Hrs",
       "Remaining hours from today until the end of next semester.",
-      o => TimeUtils.asHours(SolutionProvider(ctx).remainingTime(ctx, o, thisSemester = true, nextSemester = true)),
+      o => TimeValue(SolutionProvider(ctx).remainingTime(ctx, o, thisSemester = true, nextSemester = true)),
       visibleAtStart = false
     ),
     Column[java.lang.Double](
@@ -367,21 +368,23 @@ object ObservationTableModel {
 
   // ==== Wrapper case classes for some values which allow us to define custom renderers and sorting. ===
   case class RaValue(ra: Double) extends Comparable[RaValue] {
-    def compareTo(other: RaValue): Int = ra - other.ra match {
-      case d if d < 0 => -1
-      case d if d == 0 => 0
-      case d if d > 0 => 1
+    def compareTo(other: RaValue): Int = math.signum(ra - other.ra).toInt
+    val prettyString: String = {
+      val hms = Angle.fromDegrees(ra).toHMS
+      f"${hms.hours}:${hms.minutes}%02d:${hms.seconds}%06.3f"
     }
   }
   case class DecValue(dec: Double) extends Comparable[DecValue] {
-    def compareTo(other: DecValue): Int = dec - other.dec match {
-      case d if d < 0 => -1
-      case d if d == 0 => 0
-      case d if d > 0 => 1
+    def compareTo(other: DecValue): Int = math.signum(dec - other.dec).toInt
+    val prettyString: String = {
+      val dms = new DMS(dec)
+      val sig = if (dms.getSign < 0) "-" else ""
+      f"${sig}${dms.getDegrees}:${dms.getMin}%02d:${dms.getSec}%05.2f"
     }
   }
   case class TimeValue(t: Long) extends Comparable[TimeValue] {
-    def compareTo(other: TimeValue): Int = (t - other.t).toInt
+    def compareTo(other: TimeValue): Int = math.signum(t - other.t).toInt
+    val prettyString: String = TimeUtils.msToHHMMSS(t)
   }
 
 }

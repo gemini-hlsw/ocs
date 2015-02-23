@@ -10,27 +10,22 @@ import scala.xml.Node
 
 object FilterXMLFormatter {
 
-  /** Only store customer made elements, don't store pre defined ones.
+  /** Store everything. */
+  def formatAll: Node = formatSome(QvStore.filters, QvStore.axes, QvStore.histograms, QvStore.tables, QvStore.visCharts)
+
+  /** Store some data.
+    * Only store customer made elements, don't store pre-defined/default ones.
     * This makes sure a fail proof minimal set of axes, charts and tables is always available.
     * @return
     */
-  def formatAll: Node =
+  // TODO: The dynamic on-the-fly axes should become part of the default axes, so we don't need to treat them separately.
+  def formatSome(filters: Seq[FilterSet] = Seq(), axes: Seq[Axis] = Seq(), histograms: Seq[Histogram] = Seq(), tables: Seq[Table] = Seq(), barCharts: Seq[BarChart] = Seq()): Node =
     <qvTool>
-      <filters>{QvStore.filters.filter(!QvStore.DefaultFilters.contains(_)).map(format)}</filters>
-      <axes>{QvStore.axes.filter(!QvStore.DefaultAxes.contains(_)).map(format)}</axes>
-      <charts>{QvStore.histograms.filter(!QvStore.DefaultHistograms.contains(_)).map(_.toXml)}</charts>
-      <tables>{QvStore.tables.filter(!QvStore.DefaultTables.contains(_)).map(_.toXml)}</tables>
-      <visCharts>{QvStore.visCharts.filter(!QvStore.DefaultBarCharts.contains(_)).map(_.toXml)}</visCharts>
-    </qvTool>
-
-
-  def formatSome(filters: Set[FilterSet] = Set(), axes: Set[Axis] = Set(), histograms: Set[Histogram] = Set(), tables: Set[Table] = Set(), barCharts: Set[BarChart] = Set()): Node =
-    <qvTool>
-      <filters>{filters.map(format)}</filters>
-      <axes>{axes.map(format)}</axes>
-      <charts>{histograms.map(_.toXml)}</charts>
-      <tables>{tables.map(_.toXml)}</tables>
-      <visCharts>{barCharts.map(_.toXml)}</visCharts>
+      <filters>{filters.filterNot(QvStore.DefaultFilters.contains(_)).map(format)}</filters>
+      <axes>{axes.filterNot((QvStore.DefaultAxes ++ Axis.Dynamics).contains(_)).map(format)}</axes>
+      <histograms>{histograms.filterNot(QvStore.DefaultHistograms.contains(_)).map(_.toXml)}</histograms>
+      <tables>{tables.filterNot(QvStore.DefaultTables.contains(_)).map(_.toXml)}</tables>
+      <barcharts>{barCharts.filterNot(QvStore.DefaultBarCharts.contains(_)).map(_.toXml)}</barcharts>
     </qvTool>
 
   def format(filterSet: FilterSet): Node = {
@@ -41,7 +36,6 @@ object FilterXMLFormatter {
       </filterset>
     </filter>
   }
-
 
   def format(axis: Axis): Node = {
     <axis>
@@ -70,6 +64,7 @@ object FilterXMLFormatter {
       case HasTimingConstraints(value) => <timingConstraints><boolvalue>{toBoolean(value)}</boolvalue></timingConstraints>
       case HasElevationConstraints(value) => <elevationConstraints><boolvalue>{toBoolean(value)}</boolvalue></elevationConstraints>
       case HasPreImaging(value) => <preImaging><boolvalue>{toBoolean(value)}</boolvalue></preImaging>
+      case HasDummyTarget(value) => <dummyTarget><boolvalue>{toBoolean(value)}</boolvalue></dummyTarget>
 
       case ProgId(value) => <progidfilter><id>{value}</id></progidfilter>
       case ProgPi(value) => <progpifilter><id>{value}</id></progpifilter>
@@ -118,6 +113,9 @@ object FilterXMLFormatter {
       case ConfigurationFilter(_, SPComponentType.INSTRUMENT_GNIRS, "Cross Dispersers", _, selection, _) => <gnirscrossdisp>{makeEnumSetNode(selection)}</gnirscrossdisp>
       case ConfigurationFilter(_, SPComponentType.INSTRUMENT_GNIRS, "Cameras", _, selection, _)          => <gnirscam>{makeEnumSetNode(selection)}</gnirscam>
       case ConfigurationFilter(_, SPComponentType.INSTRUMENT_GNIRS, "Focal Planes", _, selection, _)     => <gnirsfocplane>{makeEnumSetNode(selection)}</gnirsfocplane>
+
+      // GSAOI
+      case ConfigurationFilter(_, SPComponentType.INSTRUMENT_GSAOI, "Filters", _, selection, _)   => <gsaoifilt>{makeEnumSetNode(selection)}</gsaoifilt>
 
       // F2
       case ConfigurationFilter(_, SPComponentType.INSTRUMENT_FLAMINGOS2, "Dispersers", _, selection, _)   => <f2disp>{makeEnumSetNode(selection)}</f2disp>
