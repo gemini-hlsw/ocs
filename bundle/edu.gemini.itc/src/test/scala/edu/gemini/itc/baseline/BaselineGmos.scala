@@ -19,9 +19,6 @@ object BaselineGmos {
     new GmosParameters(
       GmosParameters.I_G0302,
       GmosParameters.NO_DISPERSER,
-      GmosParameters.LOW_READ_NOISE,
-      GmosParameters.LOW_WELL_DEPTH,
-      "4.7",                      // dark current
       "500",                      // wavelength
       GmosParameters.NO_SLIT,
       "1",
@@ -36,9 +33,6 @@ object BaselineGmos {
     new GmosParameters(
       GmosParameters.G_G0301,
       GmosParameters.NO_DISPERSER,
-      GmosParameters.HIGH_READ_NOISE,
-      GmosParameters.HIGH_WELL_DEPTH,
-      "4.7",
       "500",
       GmosParameters.NO_SLIT,
       "1",
@@ -55,9 +49,6 @@ object BaselineGmos {
     new GmosParameters(
       GmosParameters.G_G0301,
       GmosParameters.R150_G5306,
-      GmosParameters.HIGH_READ_NOISE,
-      GmosParameters.HIGH_WELL_DEPTH,
-      "4.7",
       "500",
       GmosParameters.SLIT1_0,
       "1",
@@ -71,9 +62,6 @@ object BaselineGmos {
     new GmosParameters(
       GmosParameters.G_G0301,
       GmosParameters.R400_G5305,
-      GmosParameters.LOW_READ_NOISE,
-      GmosParameters.HIGH_WELL_DEPTH,
-      "4.7",
       "500",
       GmosParameters.IFU,
       "1",
@@ -87,9 +75,6 @@ object BaselineGmos {
     new GmosParameters(
       GmosParameters.G_G0301,
       GmosParameters.R150_G5306,
-      GmosParameters.LOW_READ_NOISE,
-      GmosParameters.HIGH_WELL_DEPTH,
-      "4.7",
       "500",
       GmosParameters.IFU,
       "1",

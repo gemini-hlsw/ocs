@@ -10,15 +10,9 @@ import javax.servlet.http.HttpServletRequest;
  * of an ITC web page.  This object is constructed from a servlet request.
  */
 public final class GmosParameters extends ITCParameters {
-    // ITC web form parameter names.
-    // These constants must be kept in sync with the web page form.
-    // They are used to parse form data.
     public static final String INSTRUMENT_FILTER = "instrumentFilter";
     public static final String INSTRUMENT_GRATING = "instrumentDisperser";
     public static final String INSTRUMENT_CENTRAL_WAVELENGTH = "instrumentCentralWavelength";
-    public static final String READ_NOISE = "readNoise";
-    public static final String DARK_CURRENT = "darkCurrent";
-    public static final String WELL_DEPTH = "wellDepth";
     public static final String FP_MASK = "instrumentFPMask";
     public static final String SPAT_BINNING = "spatBinning";
     public static final String SPEC_BINNING = "specBinning";
@@ -56,10 +50,6 @@ public final class GmosParameters extends ITCParameters {
     public static final String GG455 = "gg455";
     public static final String OG515 = "og515";
     public static final String RG610 = "rg610";
-    public static final String LOW_READ_NOISE = "lowNoise";
-    public static final String HIGH_READ_NOISE = "highNoise";
-    public static final String HIGH_WELL_DEPTH = "highWell";
-    public static final String LOW_WELL_DEPTH = "lowWell";
     public static final String SLIT0_25 = "slit0.25";
     public static final String SLIT0_5 = "slit0.5";
     public static final String SLIT0_75 = "slit0.75";
@@ -76,31 +66,18 @@ public final class GmosParameters extends ITCParameters {
     public static final String GMOS_SOUTH = "gmosSouth";
 
     // Data members
-    private String _Filter;  // filters
-    private String _grating; // Grating or null
-    private String _readNoise;
-    private String _darkCurrent;
-    private String _wellDepth;
+    private final String _Filter;  // filters
+    private final String _grating; // Grating or null
     private String _instrumentCentralWavelength;
-    private String _FP_Mask;
-    private String _spatBinning;
-    private String _specBinning;
+    private final String _FP_Mask;
+    private final String _spatBinning;
+    private final String _specBinning;
     private String _IFUMethod;
     private String _IFUOffset;
     private String _IFUMinOffset;
     private String _IFUMaxOffset;
-    private String _instrumentLocation;
-    private String _CCDtype;
-
-    /**
-     * Constructs a GmosParameters from a servlet request
-     *
-     * @param r Servlet request containing the form data.
-     * @throws Exception if input data is not parsable.
-     */
-    public GmosParameters(HttpServletRequest r)  {
-        parseServletRequest(r);
-    }
+    private final String _instrumentLocation;
+    private final String _CCDtype;
 
     /**
      * Constructs a GmosParameters from a MultipartParser
@@ -110,99 +87,6 @@ public final class GmosParameters extends ITCParameters {
      */
 
     public GmosParameters(ITCMultiPartParser p) {
-        parseMultipartParameters(p);
-    }
-
-    /**
-     * Parse parameters from a servlet request.
-     */
-    public void parseServletRequest(HttpServletRequest r) {
-        // Parse the acquisition camera section of the form.
-
-        // Get filter
-        _Filter = r.getParameter(INSTRUMENT_FILTER);
-        if (_Filter == null) {
-            ITCParameters.notFoundException(INSTRUMENT_FILTER);
-        }
-
-
-        // Get Grating
-        _grating = r.getParameter(INSTRUMENT_GRATING);
-        if (_grating == null) {
-            ITCParameters.notFoundException(INSTRUMENT_GRATING);
-        }
-
-        _spatBinning = r.getParameter(SPAT_BINNING);
-        if (_spatBinning == null) {
-            ITCParameters.notFoundException(SPAT_BINNING);
-        }
-
-        _specBinning = r.getParameter(SPEC_BINNING);
-        if (_specBinning == null) {
-            ITCParameters.notFoundException(SPEC_BINNING);
-        }
-
-        //Get which type of CCD is being used, old or Hamamatsu
-        //System.out.println(_instrumentLocation);
-        _CCDtype = r.getParameter(CCD_TYPE);
-        // }
-        //finally {
-//	}
-        if (_CCDtype == null) {
-            ITCParameters.notFoundException(CCD_TYPE);
-        }
-
-        // Get Instrument Central Wavelength
-        _instrumentCentralWavelength =
-                r.getParameter(INSTRUMENT_CENTRAL_WAVELENGTH);
-        if (_instrumentCentralWavelength == null) {
-            ITCParameters.notFoundException(
-                    INSTRUMENT_CENTRAL_WAVELENGTH);
-        }
-        if (_instrumentCentralWavelength.equals(" ")) {
-            //ITCParameters.notFoundException(
-            //   		"the Spectrum central wavelength.  Please enter a value in the Instrument \n"+
-            //   		"optical Properties section and resubmit the form.");
-            _instrumentCentralWavelength = "0";
-        }
-
-
-        _FP_Mask = r.getParameter(FP_MASK);
-        if (_FP_Mask == null) {
-            ITCParameters.notFoundException(FP_MASK);
-        }
-
-        _IFUMethod = r.getParameter(IFU_METHOD);
-        if (_IFUMethod == null) {
-            if (_FP_Mask.equals(IFU))
-                ITCParameters.notFoundException("a value for " + IFU_METHOD + ".  Please either deselect the\n" +
-                        " IFU or select an IFU Method(Single or Radial). ");
-        } else {
-
-            if (_IFUMethod.equals(SINGLE_IFU)) {
-                _IFUOffset = r.getParameter(IFU_OFFSET);
-                if (_IFUOffset == null) {
-                    ITCParameters.notFoundException(IFU_OFFSET);
-                }
-            } else if (_IFUMethod.equals(RADIAL_IFU)) {
-                _IFUMinOffset = r.getParameter(IFU_MIN_OFFSET);
-                if (_IFUMinOffset == null) {
-                    ITCParameters.notFoundException(IFU_MIN_OFFSET);
-                }
-
-                _IFUMaxOffset = r.getParameter(IFU_MAX_OFFSET);
-                if (_IFUMaxOffset == null) {
-                    ITCParameters.notFoundException(IFU_MAX_OFFSET);
-                }
-
-            } else
-                ITCParameters.notFoundException(" a correct value for the IFU Parameters. ");
-        }
-
-
-    }
-
-    public void parseMultipartParameters(ITCMultiPartParser p) {
         _Filter = p.getParameter(INSTRUMENT_FILTER);
         _grating = p.getParameter(INSTRUMENT_GRATING);
         _spatBinning = p.getParameter(SPAT_BINNING);
@@ -229,28 +113,21 @@ public final class GmosParameters extends ITCParameters {
     /**
      * Constructs a GmosParameters from a test file.
      */
-    public GmosParameters(String Filter,
-                          String grating,
-                          String readNoise,
-                          String wellDepth,
-                          String darkCurrent,
-                          String instrumentCentralWavelength,
-                          String FP_Mask,
-                          String spatBinning,
-                          String specBinning,
-                          String IFUMethod,
-                          String IFUOffset,
-                          String IFUMinOffset,
-                          String IFUMaxOffset,
-                          String ccdType,
-                          String instrumentLocation) {
+    public GmosParameters(final String Filter,
+                          final String grating,
+                          final String instrumentCentralWavelength,
+                          final String FP_Mask,
+                          final String spatBinning,
+                          final String specBinning,
+                          final String IFUMethod,
+                          final String IFUOffset,
+                          final String IFUMinOffset,
+                          final String IFUMaxOffset,
+                          final String ccdType,
+                          final String instrumentLocation) {
         _Filter = Filter;
         _grating = grating;
-        _darkCurrent = darkCurrent;
-        _readNoise = readNoise;
-        _wellDepth = wellDepth;
-        _instrumentCentralWavelength =
-                instrumentCentralWavelength;
+        _instrumentCentralWavelength = instrumentCentralWavelength;
         _FP_Mask = FP_Mask;
         _spatBinning = spatBinning;
         _specBinning = specBinning;
@@ -271,32 +148,20 @@ public final class GmosParameters extends ITCParameters {
         return _grating;
     }
 
-    public String getReadNoise() {
-        return _readNoise;
-    }
-
-    public String getWellDepth() {
-        return _wellDepth;
-    }
-
-    public String getDarkCurrent() {
-        return _darkCurrent;
-    }
-
     public String getFocalPlaneMask() {
         return _FP_Mask;
     }
 
     public double getInstrumentCentralWavelength() {
-        return new Double(_instrumentCentralWavelength).doubleValue();
+        return new Double(_instrumentCentralWavelength);
     }
 
-    public int getSpectralBinning() {//System.out.println(new Integer(_specBinning).intValue());
-        return new Integer(_specBinning).intValue();
+    public int getSpectralBinning() {
+        return new Integer(_specBinning);
     }
 
     public int getSpatialBinning() {//System.out.println(new Integer(_spatBinning).intValue());
-        return new Integer(_spatBinning).intValue();
+        return new Integer(_spatBinning);
     }
 
     public String getCCDtype() {
@@ -347,22 +212,20 @@ public final class GmosParameters extends ITCParameters {
 
     }
 
-    //public boolean usingIFU() { return false;}
-
     public String getIFUMethod() {
         return _IFUMethod;
     }
 
     public double getIFUOffset() {
-        return new Double(_IFUOffset).doubleValue();
+        return new Double(_IFUOffset);
     }
 
     public double getIFUMinOffset() {
-        return new Double(_IFUMinOffset).doubleValue();
+        return new Double(_IFUMinOffset);
     }
 
     public double getIFUMaxOffset() {
-        return new Double(_IFUMaxOffset).doubleValue();
+        return new Double(_IFUMaxOffset);
     }
 
     public String getInstrumentLocation() {
@@ -376,8 +239,7 @@ public final class GmosParameters extends ITCParameters {
         StringBuffer sb = new StringBuffer();
         sb.append("Filter:\t" + getFilter() + "\n");
         sb.append("Grating:\t" + getGrating() + "\n");
-        sb.append("Instrument Central Wavelength:\t" +
-                getInstrumentCentralWavelength() + "\n");
+        sb.append("Instrument Central Wavelength:\t" + getInstrumentCentralWavelength() + "\n");
         sb.append("Focal Plane Mask: \t " + getFPMask() + " arcsec slit \n");
         sb.append("\n");
         return sb.toString();

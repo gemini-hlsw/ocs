@@ -1,12 +1,3 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-//
 package edu.gemini.itc.gmos;
 
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
@@ -38,7 +29,6 @@ public class GmosSouth extends Gmos {
 
     // Detector data files (see REL-478)
     private static final String[] DETECTOR_CCD_FILES = {"ccd_hamamatsu_bb", "ccd_hamamatsu_hsc", "ccd_hamamatsu_sc"};
-//    private static final String[] DETECTOR_CCD_FILES = {"ccd_hamamatsu_bb", "ccd_hamamatsu_blue", "ccd_hamamatsu"};
 
     // Detector display names corresponding to the detectorCcdIndex
     private static final String[] DETECTOR_CCD_NAMES = {"BB", "HSC", "SC"};
@@ -68,20 +58,15 @@ public class GmosSouth extends Gmos {
         _observingEnd = super.getEnd();
         _sampling = super.getSampling();
 
-        _readNoise = gp.getReadNoise();
-        _wellDepth = gp.getWellDepth();
         _focalPlaneMask = gp.getFocalPlaneMask();
-        //_focalPlaneMaskOffset = gp.getFPMaskOffset();
         _stringSlitWidth = gp.getStringSlitWidth();
         _grating = gp.getGrating();
         _filterUsed = gp.getFilter();
         _centralWavelength = gp.getInstrumentCentralWavelength();
-        //_camera = gp.getCamera();
         _mode = odp.getMethod();
         _spectralBinning = gp.getSpectralBinning();
         _spatialBinning = gp.getSpatialBinning();
 
-        //_IFUUsed = gp.usingIFU();
         if (_focalPlaneMask.equals(gp.IFU))
             _IFUUsed = true;
         else _IFUUsed = false;
@@ -92,8 +77,6 @@ public class GmosSouth extends Gmos {
         // the range given in their instrument file.
         if (!(_filterUsed.equals("none"))) {
 
-            //if(!(_grating.equals("none"))){
-            //	throw new Exception("Please select Grism Order Sorting from the filter list."); }
             _Filter = Filter.fromWLFile(getPrefix(), _filterUsed, getDirectory() + "/");
 
             if (_Filter.getStart() >= _observingStart)
@@ -106,7 +89,6 @@ public class GmosSouth extends Gmos {
 
 
         FixedOptics _fixedOptics = new FixedOptics(getDirectory() + "/", getPrefix());
-        //addComponent(new FixedOptics(getDirectory()+"/"));
         addComponent(_fixedOptics);
 
 
@@ -193,19 +175,13 @@ public class GmosSouth extends Gmos {
 
             _gratingOptics = new GmosGratingOptics(getDirectory() + "/" + getPrefix(), _grating, _detector,
                     _centralWavelength,
-                    _detector.getDetectorPixels(),//_spectralBinning,
+                    _detector.getDetectorPixels(),
                     _spectralBinning);
             _sampling = _gratingOptics.getGratingDispersion_nmppix();
-            //if (super.getStart()< _gratingOptics.getStart())
             _observingStart = _gratingOptics.getStart();
-            //   else _observingStart = super.getStart();
-            //if (super.getEnd() > _gratingOptics.getEnd())
             _observingEnd = _gratingOptics.getEnd();
-            //   else _observingEnd = super.getEnd();
 
             if (!(_grating.equals("none")) && !(_filterUsed.equals("none")))
-                //	    if ((_observingStart >= _gratingOptics.getEnd())||
-                //		(_observingEnd <= _gratingOptics.getStart()))
                 if ((_Filter.getStart() >= _gratingOptics.getEnd()) ||
                         (_Filter.getEnd() <= _gratingOptics.getStart()))
 

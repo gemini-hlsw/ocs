@@ -1,12 +1,3 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-//
 package edu.gemini.itc.gmos;
 
 import edu.gemini.itc.shared.*;
@@ -28,18 +19,13 @@ public abstract class Gmos extends Instrument {
      * Related files will start with this prefix
      */
     public static String INSTR_PREFIX;
+
     // Instrument reads its configuration from here.
     protected static double WELL_DEPTH;
-
     protected static double AD_SATURATION;
-
     protected static double HIGH_GAIN;
     protected static double LOW_GAIN;
     protected static int DETECTOR_PIXELS;
-    //private static final double HIGH_BACK_WELL_DEPTH = 280000.0; //updated Feb 13. 2001
-
-    //private static final double READ_NOISE = 13.0;
-    //private static final double HIGH_BACK_READ_NOISE = 50.0;
 
     // Used as a desperate solution when multiple detectors need to be handled differently (See REL-478).
     // For EEV holds the one instance one the Gmos instrument, for Hamamatsu, contains 3 one Gmos instance for
@@ -53,11 +39,7 @@ public abstract class Gmos extends Instrument {
     protected double _sampling;
     protected String _filterUsed;
     protected String _grating;
-    //private String _camera;
-    protected String _readNoise;
-    protected String _wellDepth;
     protected String _focalPlaneMask;
-    //private String _focalPlaneMaskOffset;
     protected String _stringSlitWidth;
     protected CalculationMethod _mode;
     protected double _centralWavelength;
@@ -143,17 +125,8 @@ public abstract class Gmos extends Instrument {
         return _gratingOptics.getGratingResolution();
     }
 
-    //public double getReadNoise() {
-    //if (_readNoise.equals(GmosParameters.LOW_READ_NOISE))
-    //    return LOW_BACK_READ_NOISE;
-    //else return HIGH_BACK_READ_NOISE;
-    //}
     public String getGrating() {
         return _grating;
-    }
-
-    public double getGratingBlaze() {
-        return _gratingOptics.getGratingBlaze();
     }
 
     public double getGratingDispersion_nm() {
@@ -168,12 +141,8 @@ public abstract class Gmos extends Instrument {
     /**
      * Returns the subdirectory where this instrument's data files are.
      */
-    //Changed Oct 19.  If any problem reading in lib files change back...
-    //public String getDirectory() { return ITCConstants.INST_LIB + "/" +
-    //			      INSTR_DIR+"/lib"; }
     public String getDirectory() {
-        return ITCConstants.LIB + "/" +
-                INSTR_DIR;
+        return ITCConstants.LIB + "/" + INSTR_DIR;
     }
 
     public double getObservingStart() {
@@ -247,7 +216,6 @@ public abstract class Gmos extends Instrument {
 
         if (!_focalPlaneMask.equals(GmosParameters.NO_SLIT))
             s += "<LI> Focal Plane Mask: " + _focalPlaneMask + "\n";
-        //s += "Instrument: " +super.getName() + "\n";
         s += "\n";
         if (_mode.isSpectroscopy())
             s += "<L1> Central Wavelength: " + _centralWavelength + " nm" + "\n";

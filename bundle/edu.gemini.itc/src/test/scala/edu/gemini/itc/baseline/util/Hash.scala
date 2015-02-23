@@ -36,7 +36,7 @@ object Hash {
     hash(
       p.getFilter,
       p.getCCDtype,
-      p.getDarkCurrent,
+      "4.7",                                                                      // TODO: remove with next baseline update
       p.getFocalPlaneMask,
       p.getFPMask,
       p.getGrating,
@@ -46,11 +46,11 @@ object Hash {
       p.getIFUOffset,
       p.getInstrumentCentralWavelength,
       p.getInstrumentLocation,
-      p.getReadNoise,
+      if ((p.getFilter.equals("g_G0301") && p.getGrating.equals("none")) || (p.getFilter.equals("g_G0301") && p.getGrating.equals("R150_G5306") && p.getCCDtype.equals("0"))) "highNoise" else "lowNoise",
       p.getSpatialBinning,
       p.getSpectralBinning,
       p.getStringSlitWidth,
-      p.getWellDepth
+      if (p.getFilter.equals(GmosParameters.I_G0302))  "lowWell" else "highWell"  // TODO: remove with next baseline update
     )
 
   def calc(p: GnirsParameters): Int =
