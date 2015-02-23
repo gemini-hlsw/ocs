@@ -14,6 +14,33 @@ import Scalaz._
   */
 case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
 
+  /** "Encode" for serialization. The issue is that `scalaz.Tree` is not
+    * `Serializable` but we need to send `MergePlan`s over `trpc`.
+    */
+  def encode: MergePlan.Transport = {
+    def encodeTree(t: Tree[MergeNode]): MergePlan.TreeTransport =
+      MergePlan.TreeTransport(t.rootLabel, t.subForest.toList.map(encodeTree))
+
+    MergePlan.Transport(encodeTree(update), delete)
+  }
+
+  /** Gets the `VersionMap` of the provided program as it will be after the
+    * updates in this plan have been applied. */
+  def vm(p: ISPProgram): VersionMap = {
+    // Extract the updates to the VersionMap from the MergePlan.
+    val vmUpdates: VersionMap = {
+      val vm0 = update.foldRight(Map.empty[SPNodeKey, NodeVersions]) { (mn, m) =>
+        mn match {
+          case Modified(k, nv, _, _) => m.updated(k, nv)
+          case _                     => m
+        }
+      }
+      (vm0/:delete) { case (vm1, Missing(k, nv)) => vm1.updated(k, nv) }
+    }
+
+    p.getVersions ++ vmUpdates
+  }
+
   /** Accepts a program and edits it according to this merge plan. */
   def merge(f: ISPFactory, p: ISPProgram): TryVcs[Unit] = {
     // Tries to create an ISPNode from the information in the MergeNode.
@@ -56,25 +83,30 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
       nodeMap.get(mn.key).fold(create(mn)) { _.right }.map {n => (mn, n) }
     }.sequenceU
 
-    // Extract the updates to the VersionMap from the MergePlan.
-    val vmUpdates: VersionMap = {
-      val vm0 = update.foldRight(Map.empty[SPNodeKey, NodeVersions]) { (mn, m) =>
-        mn match {
-          case Modified(k, nv, _, _) => m.updated(k, nv)
-          case _                     => m
-        }
-      }
-      (vm0/:delete) { case (vm1, Missing(k, nv)) => vm1.updated(k, nv) }
-    }
 
     // Apply the changes which mutates the program p.  This is a bit awkward
     // but avoids mutating in map.
     \/.fromTryCatch {
       mergeTree.foreach { mt =>
         edit(mt)
-        p.setVersions(p.getVersions ++ vmUpdates)
+        p.setVersions(vm(p))
       }
       mergeTree.map(_ => ())
     }.valueOr(ex => VcsException(ex).left)
+  }
+}
+
+object MergePlan {
+
+  /** A serializable Tree[MergeNode].  Sadly scalaz.Tree is not serializable. */
+  case class TreeTransport(mn: MergeNode, children: List[TreeTransport]) {
+    def decode: Tree[MergeNode] = Tree.node(mn, children.map(_.decode).toStream)
+  }
+
+  /** A serializable MergePlan.  Sadly the Tree[MergeNode] contained in the
+    * MergePlan is not serializable.
+    */
+  case class Transport(update: TreeTransport, delete: Set[Missing]) {
+    def decode: MergePlan = MergePlan(update.decode, delete)
   }
 }
