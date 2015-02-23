@@ -6,43 +6,28 @@ import edu.gemini.itc.gems.GemsParameters
 import edu.gemini.itc.gsaoi.{GsaoiParameters, GsaoiRecipe}
 
 /**
- * GSAOI baseline test bits and pieces.
+ * GSAOI baseline test fixtures.
  */
 object BaselineGsaoi  {
 
-  lazy val Observations =
-    for {
-      odp  <- Observation.SpectroscopyObservations
-      ins  <- config()
-      gems <- gems()
-    } yield GsaoiObservation(odp, ins, gems)
+  lazy val Fixtures = KBandSpectroscopy
 
-  lazy val Environments =
-    for {
-      src <- Environment.NearIRSources
-      ocp <- Environment.ObservingConditions
-      tep <- Environment.TelescopeConfigurations
-      pdp <- Environment.PlottingParameters
-    } yield Environment(src, ocp, tep, pdp)
+  def executeRecipe(f: Fixture[GsaoiParameters]): Output =
+    cookRecipe(w => new GsaoiRecipe(f.src, f.odp, f.ocp, f.ins, f.tep, f.gem.get, w))
 
-  def executeRecipe(e: Environment, o: GsaoiObservation): Output =
-    cookRecipe(w => new GsaoiRecipe(e.src, o.odp, e.ocp, o.ins, e.tep, o.gems, w))
-
-  private def gems() = List(
-    new GemsParameters(
-      0.3,
-      "K"
-    )
-  )
-
-  private def config() = List(
+  private lazy val KBandSpectroscopy = Fixture.kBandSpcFixtures(List(
     new GsaoiParameters(
       "Z_G1101",                                    //String Filter,
       GsaoiParameters.INSTRUMENT_CAMERA,            //String camera,
       GsaoiParameters.BRIGHT_OBJECTS_READ_MODE      //String read mode,
     )
+  ), gem = Gems)
 
+  private lazy val Gems = List(
+    new GemsParameters(
+      0.3,
+      "K"
+    )
   )
-
 
 }

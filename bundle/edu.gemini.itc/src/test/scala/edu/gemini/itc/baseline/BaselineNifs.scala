@@ -5,29 +5,16 @@ import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.nifs.{NifsParameters, NifsRecipe}
 
 /**
- * NIFS baseline test bits and pieces.
+ * NIFS baseline test fixtures.
  */
 object BaselineNifs {
 
-  lazy val Observations =
-    for {
-      odp  <- Observation.SpectroscopyObservations
-      alt  <- Environment.AltairConfigurations
-      conf <- configs()
-    } yield NifsObservation(odp, conf, alt)
+  lazy val Fixtures = KBandSpectroscopy
 
-  lazy val Environments =
-    for {
-      src <- Environment.NearIRSources
-      ocp <- Environment.ObservingConditions
-      tep <- Environment.TelescopeConfigurations
-      pdp <- Environment.PlottingParameters
-    } yield Environment(src, ocp, tep, pdp)
+  def executeRecipe(f: Fixture[NifsParameters]): Output =
+    cookRecipe(w => new NifsRecipe(f.src, f.odp, f.ocp, f.ins, f.tep, f.alt.get, f.pdp, w))
 
-  def executeRecipe(e: Environment, o: NifsObservation): Output =
-    cookRecipe(w => new NifsRecipe(e.src, o.odp, e.ocp, o.ins, e.tep, o.alt, e.pdp, w))
-
-  private def configs() = List(
+  private lazy val KBandSpectroscopy = Fixture.kBandSpcFixtures(List(
     new NifsParameters(
       NifsParameters.HK_G0603,
       NifsParameters.K_G5605,
@@ -60,6 +47,6 @@ object BaselineNifs {
       "0.0",                    // center x
       "0.0"                     // center y
     )
-  )
+  ), alt = Fixture.AltairConfigurations)
 
 }

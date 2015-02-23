@@ -5,33 +5,17 @@ import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.gmos.{GmosParameters, GmosRecipe}
 
 /**
- * GMOS baseline test bits and pieces.
+ * GMOS baseline test fixtures.
  */
 object BaselineGmos {
 
-  // Defines a set of valid observations for GMOS
-  lazy val Observations =
-    specObs() ++
-    imgObs()
 
-  lazy val Environments =
-    for {
-      src <- Environment.GmosSources
-      ocp <- Environment.ObservingConditions
-      tep <- Environment.TelescopeConfigurations
-      pdp <- Environment.PlottingParameters
-    } yield Environment(src, ocp, tep, pdp)
+  lazy val Fixtures = RBandImaging ++ KBandSpectroscopy
 
-  def executeRecipe(e: Environment, o: GmosObservation): Output =
-    cookRecipe(w => new GmosRecipe(e.src, o.odp, e.ocp, o.ins, e.tep, e.pdp, w))
+  def executeRecipe(f: Fixture[GmosParameters]): Output =
+    cookRecipe(w => new GmosRecipe(f.src, f.odp, f.ocp, f.ins, f.tep, f.pdp, w))
 
-  // GMOS imaging observations
-  private def imgObs() = for {
-    odp <- Observation.ImagingObservations
-    ins <- imagingParams()
-  } yield GmosObservation(odp, ins)
-
-  private def imagingParams() = List(
+  private lazy val RBandImaging = Fixture.rBandImgFixtures(List(
     new GmosParameters(
       GmosParameters.I_G0302,
       GmosParameters.NO_DISPERSER,
@@ -65,15 +49,9 @@ object BaselineGmos {
       "0.3",
       "2",                        // HAMAMATSU CCD
       GmosParameters.GMOS_SOUTH)
-  )
+  ))
 
-  // GMOS spectroscopy observations
-  private def specObs() = for {
-    odp <- Observation.SpectroscopyObservations
-    ins <- spectroscopyParams()
-  } yield GmosObservation(odp, ins)
-
-  private def spectroscopyParams() = List(
+  private lazy val KBandSpectroscopy = Fixture.kBandSpcFixtures(List(
     new GmosParameters(
       GmosParameters.G_G0301,
       GmosParameters.R150_G5306,
@@ -122,7 +100,7 @@ object BaselineGmos {
       "0.3",
       "2",                        // HAMAMATSU CCD
       GmosParameters.GMOS_NORTH)
-  )
+  ))
 
 }
 
