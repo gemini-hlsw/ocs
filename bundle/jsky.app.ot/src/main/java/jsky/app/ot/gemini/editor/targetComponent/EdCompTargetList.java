@@ -81,7 +81,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     private static final Logger LOG = Logger.getLogger(EdCompTargetList.class.getName());
     private static final String NON_SIDEREAL_TARGET = "Nonsidereal";
-    private static final String EXTRA_URL_INFO = "/mimetype=full-rec";
     private static final String PROPER_MOTION_COL_ID = "pm1";
     private static final String SIMBAD_CATALOG_SHORTNAME = "simbad";
     private static final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -1198,7 +1197,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                                 for (int i = 0; i < n; i++) {
                                     String urlStr = skycat.getConfigEntry().getURL(i);
                                     originalUrls[i] = urlStr;
-                                    urlStr += EXTRA_URL_INFO;
                                     urls[i] = urlStr;
                                 }
                                 skycat.getConfigEntry().setURLs(urls);

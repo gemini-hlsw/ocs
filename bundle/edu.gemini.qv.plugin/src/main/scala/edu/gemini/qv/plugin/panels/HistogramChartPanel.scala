@@ -85,7 +85,7 @@ class HistogramChartPanel(ctx: QvContext) extends GridBagPanel {
         case RA(fmin, fmax)     if min <= max => fmax > min && fmin < max
         case RA(fmin, fmax)                   => fmin >= 0
       }
-      new Axis(axis.label, limitedGroups)
+      Axis(axis.label, limitedGroups)
     } else axis
   }
 
