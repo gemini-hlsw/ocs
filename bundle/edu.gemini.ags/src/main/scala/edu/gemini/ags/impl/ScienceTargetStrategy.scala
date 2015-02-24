@@ -44,8 +44,6 @@ case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGui
       ml =  AgsMagnitude.manualSearchLimits(mc)
     } yield CatalogQuery(0, ctx.getBaseCoordinates.toNewModel, rc, ml)).toList
 
-  override def queryConstraints(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] = ???
-
   private def radiusConstraints(ctx: ObsContext): Option[RadiusConstraint] =
     RadiusLimitCalc.getAgsQueryRadiusLimits(guideProbe, ctx)
 

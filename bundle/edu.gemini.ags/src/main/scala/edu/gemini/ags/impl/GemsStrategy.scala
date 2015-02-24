@@ -59,12 +59,12 @@ object GemsStrategy extends AgsStrategy {
       OdgwFlexureId    -> GsaoiOdgw.Group.instance
     )
 
-    val adjustedConstraints = queryConstraints(ctx, mt).map { constraint =>
+    val adjustedConstraints = catalogQueries(ctx, mt).map { constraint =>
       // Adjust the magnitude limits for the conditions.
       val adjustedMagConstraints = constraint.magnitudeConstraints.map(c => c.map(m => ctx.getConditions.magAdjustOp().apply(m.toOldModel).toNewModel))
       constraint.copy(magnitudeConstraints = adjustedMagConstraints)
     }
-    
+
     VoTableClient.catalog(adjustedConstraints).flatMap {
       case result if result.exists(_.result.containsError) => Future.failed(CatalogException(result.map(_.result.problems).flatten))
       case result                                          => Future.successful {
@@ -220,7 +220,7 @@ object GemsStrategy extends AgsStrategy {
     }
   }
 
-  def queryConstraints(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] = {
+  def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] = {
     import AgsMagnitude._
     val cond = ctx.getConditions
     val mags = magnitudes(ctx, mt).toMap

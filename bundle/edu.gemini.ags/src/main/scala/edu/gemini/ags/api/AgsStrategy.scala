@@ -29,8 +29,6 @@ trait AgsStrategy {
 
   def select(ctx: ObsContext, mt: MagnitudeTable): Future[Option[AgsStrategy.Selection]]
 
-  def queryConstraints(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery]
-
   def guideProbes: List[GuideProbe]
 }
 

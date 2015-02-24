@@ -94,9 +94,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
       case (angle, st) => new CandidateValidator(params, mt, List(st)).exists(ctx.withPositionAngle(angle.toOldModel))
     }
 
-  override def queryConstraints(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] = Nil
-
-  def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] =
+  private def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] =
     params.catalogQueries(ctx, mt).toList
 
   override val guideProbes: List[GuideProbe] =
