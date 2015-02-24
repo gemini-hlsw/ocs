@@ -137,11 +137,10 @@ object GemsStrategy extends AgsStrategy {
     // a ring (limited by radius limits) around a base position ... confusion
     val posAngles   = (ctx.getPositionAngle.toNewModel :: (0 until 360 by 90).map(Angle.fromDegrees(_)).toList).toSet
     val emptyResult = List.empty[(GuideProbe, List[SiderealTarget])]
-    future {
-      search(GemsGuideStarSearchOptions.DEFAULT_CATALOG,
-        GemsGuideStarSearchOptions.DEFAULT_CATALOG,
-        GemsTipTiltMode.canopus, ctx, posAngles, None)
-    }.map {
+    search(GemsGuideStarSearchOptions.DEFAULT_CATALOG,
+      GemsGuideStarSearchOptions.DEFAULT_CATALOG,
+      GemsTipTiltMode.canopus, ctx, posAngles, None)
+    .map {
       _.fold(emptyResult)(simplifiedResult)
     }
   }
@@ -175,24 +174,26 @@ object GemsStrategy extends AgsStrategy {
     }
   }
 
-  protected [impl] def search(opticalCatalog: String, nirCatalog: String, tipTiltMode: GemsTipTiltMode, ctx: ObsContext, posAngles: Set[Angle], nirBand: Option[MagnitudeBand]): Option[List[GemsCatalogSearchResults]] = {
+  protected [impl] def search(opticalCatalog: String, nirCatalog: String, tipTiltMode: GemsTipTiltMode, ctx: ObsContext, posAngles: Set[Angle], nirBand: Option[MagnitudeBand]): Future[Option[List[GemsCatalogSearchResults]]] = {
     // Get the instrument: F2 or GSAOI?
     val gemsInstrument = {
-      (ctx.getInstrument.getType == SPComponentType.INSTRUMENT_GSAOI)? GemsInstrument.gsaoi | GemsInstrument.flamingos2
+      (ctx.getInstrument.getType == SPComponentType.INSTRUMENT_GSAOI) ? GemsInstrument.gsaoi | GemsInstrument.flamingos2
     }
     val gemsOptions = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog, gemsInstrument, tipTiltMode, posAngles.asJava)
 
     // Perform the catalog search.
-    val results = new GemsCatalog().search(ctx, ctx.getBaseCoordinates.toNewModel, gemsOptions, nirBand, null).asScala.toList
+    val results = GemsVoTableCatalog.search(ctx, ctx.getBaseCoordinates.toNewModel, gemsOptions, nirBand, null)
 
     // Now check that the results are valid: there must be a valid tip-tilt and flexure star each.
-    val checker = results.foldRight(Map[String, Boolean]())((result, resultMap) => {
-      val key = result.criterion.key.group.getKey
-      if (result.results.nonEmpty)       resultMap.updated(key, true)
-      else if (!resultMap.contains(key)) resultMap.updated(key, false)
-      else                               resultMap
-    })
-    checker.values.find(identity).map(_ => results)
+    results.map { r =>
+      val checker = r.foldRight(Map[String, Boolean]())((result, resultMap) => {
+        val key = result.criterion.key.group.getKey
+        if (result.results.nonEmpty) resultMap.updated(key, true)
+        else if (!resultMap.contains(key)) resultMap.updated(key, false)
+        else resultMap
+      })
+      checker.values.find(identity).map(_ => r)
+    }
   }
 
   private def findGuideStars(ctx: ObsContext, posAngles: Set[Angle], results: List[GemsCatalogSearchResults]): Option[GemsGuideStars] = {
@@ -201,20 +202,22 @@ object GemsStrategy extends AgsStrategy {
     gemsResults.headOption
   }
 
-  override def select(ctx: ObsContext, mt: MagnitudeTable): Future[Option[Selection]] = future {
+  override def select(ctx: ObsContext, mt: MagnitudeTable): Future[Option[Selection]] = {
     val posAngles = (ctx.getPositionAngle.toNewModel :: (0 until 360 by 90).map(Angle.fromDegrees(_)).toList).toSet
     val results = search(GemsGuideStarSearchOptions.DEFAULT_CATALOG,
       GemsGuideStarSearchOptions.DEFAULT_CATALOG,
       GemsTipTiltMode.canopus, ctx, posAngles, None)
-    val gemsGuideStars = results.map(x => findGuideStars(ctx, posAngles, x)).flatten
+    results.map { r =>
+      val gemsGuideStars = r.map(x => findGuideStars(ctx, posAngles, x)).flatten
 
-    // Now we must convert from an Option[GemsGuideStars] to a Selection.
-    gemsGuideStars.map { x =>
-      val assignments = x.getGuideGroup.getAll.asScalaList.map(targets => {
-        val guider = targets.getGuider
-        targets.getTargets.asScalaList.map(target => Assignment(guider, target.toNewModel))
-      }).flatten
-      Selection(x.getPa, assignments)
+      // Now we must convert from an Option[GemsGuideStars] to a Selection.
+      gemsGuideStars.map { x =>
+        val assignments = x.getGuideGroup.getAll.asScalaList.map(targets => {
+          val guider = targets.getGuider
+          targets.getTargets.asScalaList.map(target => Assignment(guider, target.toNewModel))
+        }).flatten
+        Selection(x.getPa, assignments)
+      }
     }
   }
 
