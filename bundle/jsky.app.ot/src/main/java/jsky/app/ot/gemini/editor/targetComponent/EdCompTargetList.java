@@ -78,54 +78,40 @@ import static jsky.app.ot.util.OtColor.*;
  */
 public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, TargetObsComp> {
 
-    private static final Logger LOG = Logger.getLogger(EdCompTargetList.class.getName());
-    private static final String NON_SIDEREAL_TARGET = "Nonsidereal";
-    private static final String PROPER_MOTION_COL_ID = "pm1";
-    private static final String SIMBAD_CATALOG_SHORTNAME = "simbad";
-    private static final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+    // Static constants
+    private static final Logger   LOG                      = Logger.getLogger(EdCompTargetList.class.getName());
+    private static final TimeZone UTC                      = TimeZone.getTimeZone("UTC");
+    private static final String   NON_SIDEREAL_TARGET      = "Nonsidereal";
 
-    private static final DateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss");
-    static {
-        timeFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
+    // Global variables \o/
+    private static TargetClipboard clipboard;
 
-    // Table listing telescope positions
-    private final TelescopePosTableWidget _tpTable;
+    // Instance constants
+    private final AgsContextPublisher _agsPub           = new AgsContextPublisher();
+    private final SiderealEditor      _siderealEditor   = new SiderealEditor();
+    private final TrackingEditor      _trackingEditor   = new TrackingEditor();
+    private final MagnitudeEditor     _nonsideMagEditor = new MagnitudeEditor();
+    private final JToggleButton       _trackingButton   = new TrackingButton();
 
-    // The GUI layout panel
+    // More constants, but they need access to `this` so we assign in the ctor
     private final TelescopeForm _w;
-    private final SiderealEditor _siderealEditor;
-    private final TrackingEditor _trackingEditor;
-    private final JToggleButton _trackingButton;
-
-    private final MagnitudeEditor _nonsideMagEditor;
-
-    // Current position being edited
-    private SPTarget _curPos;
-
-    // Current group being edited
-    private GuideGroup _curGroup;
-
-    // Helper class for dealing with NonSidereal targets.
     private final NonSiderealTargetSupport _nonSiderealTargetSup;
+    private final TimeDocument             _timeDocument;
 
-    // If true, ignore change events for the current position
-    private boolean _ignorePosUpdate = false;
+    // Stuff that varies with time
+    private SPTarget   _curPos;
+    private GuideGroup _curGroup;
+    private boolean    _ignorePosUpdate = false;
+    private Option<Catalog> _selectedNameServer = None.instance();
 
-    // Horizons Operations
-    private final HashMap<HorizonsAction.Type, HorizonsAction> _horizonsOperations;
 
-    // allows to control input text to be entered in the _w.calendarTime component
-    // which contains the time (HH:MM:SS) for when an Horizons query should be made
-    private TimeDocument _timeDocument;
-
-    private final AgsContextPublisher _agsPub = new AgsContextPublisher();
-    /**
-     * The constructor initializes the user interface.
-     */
     public EdCompTargetList() {
 
+        // Finish initializing our constants
         _w = new TelescopeForm(this);
+        _nonSiderealTargetSup = new NonSiderealTargetSupport(_w, _curPos);
+        _timeDocument         = new TimeDocument((JTextField) _w.calendarTime.getEditor().getEditorComponent());
+
 
         //Callback for AGS visibiity
         _w.addComponentListener(new ComponentAdapter() {
@@ -135,48 +121,281 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
         });
 
-
-        _siderealEditor = new SiderealEditor();
-        _trackingEditor = new TrackingEditor();
-
-        // Tracking Editor use My Doggy style to match the p2 checker
-        _trackingButton = new JToggleButton("Tracking Details") {{
-            setUI(new RotatedButtonUI(RotatedButtonUI.Orientation.topToBottom));
-            setBackground(VERY_LIGHT_GREY);
-        }};
-
+        // Add the sidereal editor, wrapped to make it less terrible
         _w.extrasFolder.add(_siderealEditor.getComponent(), "sidereal");
+        _w.extrasFolder.add(new JPanel(new GridBagLayout()) {{
+            add(new JLabel("Brightness"), new GridBagConstraints() {{
+                gridx = 0;
+                gridy = 0;
+                anchor = WEST;
+                fill = HORIZONTAL;
+                insets = new Insets(0, 0, 5, 20);
+            }});
+            add(_nonsideMagEditor.getComponent(), new GridBagConstraints() {{
+                gridx = 0;
+                gridy = 1;
+                anchor = WEST;
+                fill = BOTH;
+                weighty = 1.0;
+                insets = new Insets(0, 0, 0, 20);
+            }});
+            add(_w.nonsiderealPW, new GridBagConstraints() {{
+                gridx = 1;
+                gridy = 0;
+                gridheight = 2;
+                fill = BOTH;
+                weightx = 1.0;
+                weighty = 1.0;
+            }});
+        }}, "nonsidereal");
 
-        // TODO: Being a bit lazy here.  Ideally we should strip out all the
-        // TODO: nonsidereal widgets from the TelescopeForm and make them
-        // TODO: into a proper editor like the SiderealEditor.
-        _nonsideMagEditor = new MagnitudeEditor();
-        final JPanel nonsid = wrapNonsidereal(_w.nonsiderealPW, _nonsideMagEditor);
-        _w.extrasFolder.add(nonsid, "nonsidereal");
-
-        //make the planet stuff non-visible
         _w.planetsPanel.setVisible(false);
-        _nonSiderealTargetSup = new NonSiderealTargetSupport(_w, _curPos);
 
-        _initPosEditor();
-        _initWidgets();
-        _initNameServerChoices();
-        _initTargetName();
-        _initGuideGroupName();
-        _initXYAxis();
-        _initSystemChoices();
-        _initConicDetails();
-        _initPlanetsRadioButtons();
+        // Re-wrap the coordinates panel
+        _w.remove(_w.coordinatesPanel);
+        final JPanel contentPanel = new JPanel(new GridBagLayout()) {{
+            final JPanel content = new JPanel(new BorderLayout(10, 0)) {{
+                add(_w.coordinatesPanel, BorderLayout.CENTER);
+            }};
+            add(content, new GridBagConstraints() {{
+                gridx = 0;
+                gridy = 0;
+                weightx = 1.0;
+                weighty = 1.0;
+                fill = BOTH;
+                anchor = NORTHWEST;
+            }});
+            final JPanel buttonsPanel = new JPanel() {{
+                setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+                add(_trackingButton);
+            }};
+            add(buttonsPanel, new GridBagConstraints() {{
+                gridx = 1;
+                gridy = 0;
+                anchor = NORTH;
+                insets = new Insets(0, 1, 0, 0);
+            }});
+            final JPanel panel = new JPanel(new BorderLayout()) {{
+                setBackground(LIGHT_GREY);
+                setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(DARKER_BG_GREY),
+                        BorderFactory.createEmptyBorder(5, 5, 5, 5)
+                ));
+                add(_trackingEditor.getComponent(), BorderLayout.CENTER);
+            }};
+            // When the tracking details button is pressed, show the tracking
+            // details panel to the side of the normal content _w.coordinatesPanel
+            _trackingButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    final JToggleButton tb = (JToggleButton) e.getSource();
+                    if (tb.isSelected()) {
+                        tb.setBackground(LIGHT_ORANGE);
+                        content.add(panel, BorderLayout.EAST);
+                        content.validate();
+                    } else {
+                        tb.setBackground(VERY_LIGHT_GREY);
+                        content.remove(panel);
+                        content.validate();
+                    }
+                }
+            });
 
-        // *** Position Table
-        _tpTable = _w.positionTable;
+        }};
+        _w.coordinatesPanel.setBorder(BorderFactory.createCompoundBorder(
+            new ThinBorder(ThinBorder.RAISED),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
 
-        // I realize this isn't the right way to do these things...
-        _tpTable.addKeyListener(new KeyListener() {
-            public void keyTyped(KeyEvent event) {
+
+        _w.add(contentPanel, new GridBagConstraints() {{
+            gridx = 0;
+            gridy = 1;
+            fill = HORIZONTAL;
+            weightx = 1.0;
+            insets = new Insets(5, 0, 5, 0);
+        }});
+
+
+        // Set up the formatting on the calendar doodad
+        final DateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss");
+        timeFormatter.setTimeZone(UTC);
+        _w.calendarTime.setModel(new DefaultComboBoxModel<>(TimeConfig.values()));
+        _w.calendarTime.setRenderer(new BasicComboBoxRenderer() {
+            public Component getListCellRendererComponent(JList jList, Object
+                    object, int index, boolean isSelected, boolean hasFocus) {
+                final String text;
+                if (object instanceof Date) {
+                    text = timeFormatter.format((Date) object);
+                } else if (object instanceof TimeConfig) {
+                    text = ((TimeConfig) object).displayValue();
+                } else {
+                    text = object.toString();
+                }
+                return super.getListCellRendererComponent(jList, text, index, isSelected, hasFocus);
+            }
+        });
+        _timeDocument.setTime(timeFormatter.format(new Date()));
+        ((JTextField) _w.calendarTime.getEditor().getEditorComponent()).setDocument(_timeDocument);
+        _w.calendarDate.setTimeZone(UTC);
+
+
+
+        setMenuStyling(_w.newMenuBar, _w.newMenu, "eclipse/add_menu.gif");
+
+
+
+        _w.removeButton.addActionListener(removeListener);
+        _w.removeButton.setText("");
+        _w.removeButton.setIcon(Resources.getIcon("eclipse/remove.gif"));
+        ButtonFlattener.flatten(_w.removeButton);
+
+        _w.copyButton.setIcon(Resources.getIcon("eclipse/copy.gif"));
+        _w.copyButton.setText("");
+        _w.copyButton.addActionListener(copyListener);
+        ButtonFlattener.flatten(_w.copyButton);
+
+        _w.pasteButton.setIcon(Resources.getIcon("eclipse/paste.gif"));
+        _w.pasteButton.setText("");
+        _w.pasteButton.addActionListener(pasteListener);
+        ButtonFlattener.flatten(_w.pasteButton);
+
+        _w.duplicateButton.setIcon(Resources.getIcon("eclipse/duplicate.gif"));
+        _w.duplicateButton.setText("");
+        _w.duplicateButton.addActionListener(duplicateListener);
+        ButtonFlattener.flatten(_w.duplicateButton);
+
+        _w.primaryButton.setIcon(Resources.getIcon("eclipse/radiobuttons.gif"));
+        _w.primaryButton.setText("");
+        _w.primaryButton.addActionListener(primaryListener);
+        ButtonFlattener.flatten(_w.primaryButton);
+
+        _w.resolveButton.addActionListener(resolveListener);
+        _w.resolveButton.setText("");
+        _w.resolveButton.setIcon(Resources.getIcon("eclipse/search.gif"));
+        ButtonFlattener.flatten(_w.resolveButton);
+
+
+        _w.autoGuideStarGuiderSelector.addSelectionListener(new AgsSelectorControl.Listener() {
+            public void agsStrategyUpdated(Option<AgsStrategy> strategy) {
+                AgsStrategyUtil.setSelection(getContextObservation(), strategy);
+            }
+        });
+        _w.autoGuideStarButton.addActionListener(autoGuideStarListener);
+        _w.manualGuideStarButton.addActionListener(manualGuideStarListener);
+
+
+        _w.setBaseButton.addActionListener(setBaseListener);
+
+        _w.calendarTime.addActionListener(calendarTimeListener);
+
+        _w.timeRangePlotButton.addActionListener(timeRangePlotListener);
+        _w.updateRaDecButton.addActionListener(updateRaDecListener);
+
+        setMenuStyling(_w.nameServerBar, _w.nameServer, "eclipse/menu-trimmed.gif");
+
+        final SkycatConfigFile cf = SkycatConfigFile.getConfigFile();
+
+        // Create radio button options for each of the name servers.
+        final ButtonGroup grp = new ButtonGroup();
+        final List<Catalog> nameServers = cf.getNameServers();
+        for (final Catalog ns : nameServers) {
+            final JRadioButtonMenuItem mi = new JRadioButtonMenuItem(ns.getName()) {{
+                addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        _selectedNameServer = new Some<>(ns);
+                    }
+                });
+            }};
+            grp.add(mi);
+            _w.nameServer.add(mi);
+        }
+
+        // Set the initial name server options
+        if (nameServers.size() > 0) {
+            _selectedNameServer = new Some<>(nameServers.get(0));
+            grp.setSelected(((JMenuItem) _w.nameServer.getMenuComponent(0)).getModel(), true);
+        }
+
+        _w.targetName.setMinimumSize(_w.targetName.getPreferredSize());
+        _w.targetName.addWatcher(new TextBoxWidgetWatcher() {
+            public void textBoxKeyPress(TextBoxWidget tbwe) {
+                String name = tbwe.getText();
+                if (name != null) name = name.trim();
+                _curPos.deleteWatcher(posWatcher);
+                _curPos.getTarget().setName(name);
+                _curPos.notifyOfGenericUpdate();
+                _curPos.addWatcher(posWatcher);
+                _w.resolveButton.setEnabled(!"".equals(name));
             }
 
-            public void keyPressed(KeyEvent event) {
+            public void textBoxAction(TextBoxWidget tbwe) {
+                resolveName(HorizonsAction.Type.GET_ORBITAL_ELEMENTS, null);
+            }
+        });
+
+        _w.guideGroupName.setMinimumSize(_w.guideGroupName.getPreferredSize());
+        _w.guideGroupName.addWatcher(new TextBoxWidgetWatcher() {
+            public void textBoxKeyPress(TextBoxWidget tbwe) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        final String name = _w.guideGroupName.getText();
+                        final GuideGroup newGroup = _curGroup.setName(name);
+                        final TargetEnvironment env = getDataObject().getTargetEnvironment();
+                        final GuideEnvironment ge = env.getGuideEnvironment();
+                        final ImList<GuideGroup> options = ge.getOptions();
+                        final List<GuideGroup> list = new ArrayList<>(options.size());
+                        for (GuideGroup g : options) {
+                            list.add(g == _curGroup ? newGroup : g);
+                        }
+                        _curGroup = newGroup;
+                        getDataObject().setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(DefaultImList.create(list))));
+                        _w.guideGroupName.requestFocus(); // otherwise focus is lost during event handling
+                    }
+                });
+            }
+
+            public void textBoxAction(TextBoxWidget tbwe) {
+            }
+        });
+
+        _w.xaxis.addWatcher(axisWatcher);
+        _w.yaxis.addWatcher(axisWatcher);
+
+        _w.system.clear();
+        _w.system.addChoice(HmsDegTarget.TAG.tccName);
+        _w.system.addChoice(NON_SIDEREAL_TARGET);
+        _w.system.addWatcher(new DropDownListBoxWidgetWatcher() {
+            public void dropDownListBoxAction(DropDownListBoxWidget dd, int i, String val) {
+                final ITarget.Tag tag;
+                if (_w.system.getStringValue().equals(NON_SIDEREAL_TARGET)) {
+                    tag = ((ITarget.Tag) _w.orbitalElementFormat.getSelectedItem());
+                } else {
+                    tag = ITarget.Tag.SIDEREAL;
+                }
+                _ignorePosUpdate = true;
+                try {
+                    _curPos.setTargetType(tag);
+                } finally {
+                    _ignorePosUpdate = false;
+                }
+                refreshAll();
+                updateGuiding();
+            }
+        });
+
+        _nonSiderealTargetSup.initOrbitalElementFormatChoices();
+        _nonSiderealTargetSup.initListeners(nonsiderealTextBoxWidgetWatcher);
+
+        final JRadioButton[] buttons = _w.planetButtons;
+        for (JRadioButton button : buttons) {
+            button.addActionListener(solarListener);
+        }
+
+        // *** Position Table
+        _w.positionTable.addKeyListener(new KeyAdapter() {
+            @Override public void keyPressed(KeyEvent event) {
                 switch (event.getKeyCode()) {
                     // Make the delete and backspace buttons delete selected
                     // positions.
@@ -186,49 +405,14 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         break;
                 }
             }
-
-            public void keyReleased(KeyEvent event) {
-            }
         });
-
-        //Horizons Operations
-        _horizonsOperations = new HorizonsActionContainer().getActions();
 
         _agsPub.subscribe(new AgsContextSubscriber() {
             @Override public void notify(ISPObservation obs, AgsContext oldOptions, AgsContext newOptions) {
                 updateGuiding();
             }
         });
-    }
 
-    private static JPanel wrapNonsidereal(JPanel nonsiderealPanel, MagnitudeEditor med) {
-        final JPanel pan = new JPanel(new GridBagLayout());
-
-        pan.add(new JLabel("Brightness"), new GridBagConstraints() {{
-            gridx = 0;
-            gridy = 0;
-            anchor = WEST;
-            fill = HORIZONTAL;
-            insets = new Insets(0, 0, 5, 20);
-        }});
-        pan.add(med.getComponent(), new GridBagConstraints() {{
-            gridx = 0;
-            gridy = 1;
-            anchor = WEST;
-            fill = BOTH;
-            weighty = 1.0;
-            insets = new Insets(0, 0, 0, 20);
-        }});
-        pan.add(nonsiderealPanel, new GridBagConstraints() {{
-            gridx = 1;
-            gridy = 0;
-            gridheight = 2;
-            fill = BOTH;
-            weightx = 1.0;
-            weighty = 1.0;
-        }});
-
-        return pan;
     }
 
     /**
@@ -251,176 +435,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         spTarget.notifyOfGenericUpdate();
     }
 
-    // Initialize the widgets involved in editing positions. This includes the
-    // RA/Dec + sidereal or nonsidereal information.  Takes the GUI built by
-    // JFormDesigner in _w.coordinatesPanel and morphs it a bit.  This is all
-    // pretty gross.  Trying to avoid interacting with JFormDesigner as much
-    // as possible.
-    private void _initPosEditor() {
-        // Take out the JFormDesigner panel, to move it inside another panel.
-        _w.remove(_w.coordinatesPanel);
-
-        // Pan will contain and take the place of _w.coordinatesPanel.  It
-        // contains a "content" panel and the "Tracking Details" sideways
-        // button.
-        final JPanel contentPanel = new JPanel(new GridBagLayout());
-
-        // Content will contain the JFormDesigner panel and, when present, the
-        // contents of the Tracking Details widgets.
-        final JPanel content = new JPanel(new BorderLayout(10, 0));
-        contentPanel.add(content, new GridBagConstraints() {{
-            gridx = 0;
-            gridy = 0;
-            weightx = 1.0;
-            weighty = 1.0;
-            fill = BOTH;
-            anchor = NORTHWEST;
-        }});
-        content.add(_w.coordinatesPanel, BorderLayout.CENTER);
-
-        // Add a decorative border to the coordinates panel.
-        _w.coordinatesPanel.setBorder(BorderFactory.createCompoundBorder(
-                new ThinBorder(ThinBorder.RAISED),
-                BorderFactory.createEmptyBorder(10, 10, 10, 10)
-        ));
-
-
-        final JPanel editor = wrapTrackingEditor(_trackingEditor.getComponent());
-        addActivateEditorAction(content, _trackingButton, editor);
-
-        final JPanel buttonsPanel = new JPanel();
-        buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.PAGE_AXIS));
-        buttonsPanel.add(_trackingButton);
-
-        contentPanel.add(buttonsPanel, new GridBagConstraints() {{
-            gridx = 1;
-            gridy = 0;
-            anchor = NORTH;
-            insets = new Insets(0, 1, 0, 0);
-        }});
-
-        // Finish replacing the JFormDesigner _w.coordinatesPanel with our
-        // wrapper
-        _w.add(contentPanel, new GridBagConstraints() {{
-            gridx = 0;
-            gridy = 1;
-            fill = HORIZONTAL;
-            weightx = 1.0;
-            insets = new Insets(5, 0, 5, 0);
-        }});
-    }
-
-    // Wraps the tracking details editor with a border and a lighter background
-    // so that it shows.
-    private static JPanel wrapTrackingEditor(Component component) {
-        final JPanel wrapper = new JPanel(new BorderLayout()) {{
-            setBackground(LIGHT_GREY);
-            setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(DARKER_BG_GREY),
-                    BorderFactory.createEmptyBorder(5, 5, 5, 5)
-            ));
-        }};
-        wrapper.add(component, BorderLayout.CENTER);
-        return wrapper;
-    }
-
-    private void addActivateEditorAction(final JPanel content, final JToggleButton button, final JPanel panel) {
-        // When the tracking details button is pressed, show the tracking
-        // details panel to the side of the normal content _w.coordinatesPanel
-        button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                final JToggleButton tb = (JToggleButton) e.getSource();
-                if (tb.isSelected()) {
-                    tb.setBackground(LIGHT_ORANGE);
-                    content.add(panel, BorderLayout.EAST);
-                    content.validate();
-                } else {
-                    tb.setBackground(VERY_LIGHT_GREY);
-                    content.remove(panel);
-                    content.validate();
-                }
-            }
-        });
-
-    }
-
-    private void _initWidgets() {
-        _initNonSiderealTimeWidgets();
-
-        _initMenuButton(_w.newMenuBar, _w.newMenu, "eclipse/add_menu.gif");
-
-        _w.removeButton.addActionListener(bigListener);
-        _w.removeButton.setText("");
-        _w.removeButton.setIcon(Resources.getIcon("eclipse/remove.gif"));
-        ButtonFlattener.flatten(_w.removeButton);
-
-        _w.copyButton.setIcon(Resources.getIcon("eclipse/copy.gif"));
-        _w.copyButton.setText("");
-        ButtonFlattener.flatten(_w.copyButton);
-        _w.copyButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                copySelectedPosition(getNode(), getDataObject());
-            }
-        });
-
-        _w.pasteButton.setIcon(Resources.getIcon("eclipse/paste.gif"));
-        _w.pasteButton.setText("");
-        ButtonFlattener.flatten(_w.pasteButton);
-        _w.pasteButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (_curPos != null) {
-                    pasteSelectedPosition(getNode(), getDataObject());
-                    _curPos.notifyOfGenericUpdate();
-                } else if (_curGroup != null) {
-                    pasteSelectedPosition(getNode(), getDataObject());
-                }
-            }
-        });
-
-        _w.duplicateButton.setIcon(Resources.getIcon("eclipse/duplicate.gif"));
-        _w.duplicateButton.setText("");
-        ButtonFlattener.flatten(_w.duplicateButton);
-        _w.duplicateButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                _duplicateSelected(getNode(), getDataObject());
-            }
-        });
-
-        _w.primaryButton.setIcon(Resources.getIcon("eclipse/radiobuttons.gif"));
-        _w.primaryButton.setText("");
-        ButtonFlattener.flatten(_w.primaryButton);
-        _w.primaryButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                _w.positionTable.updatePrimaryStar();
-
-            }
-        });
-
-        _w.autoGuideStarGuiderSelector.addSelectionListener(new AgsSelectorControl.Listener() {
-            @Override public void agsStrategyUpdated(Option<AgsStrategy> strategy) {
-                AgsStrategyUtil.setSelection(getContextObservation(), strategy);
-            }
-        });
-        _w.autoGuideStarButton.addActionListener(bigListener);
-        _w.manualGuideStarButton.addActionListener(bigListener);
-
-        _w.resolveButton.addActionListener(bigListener);
-        _w.resolveButton.setText("");
-        _w.resolveButton.setIcon(Resources.getIcon("eclipse/search.gif"));
-        ButtonFlattener.flatten(_w.resolveButton);
-        _w.setBaseButton.addActionListener(bigListener);
-
-        _w.calendarTime.addActionListener(bigListener);
-
-        _w.timeRangePlotButton.addActionListener(bigListener);
-        _w.updateRaDecButton.addActionListener(bigListener);
-
-        _initMenuButton(_w.nameServerBar, _w.nameServer, "eclipse/menu-trimmed.gif");
-    }
-
-    @Override
-    protected void updateEnabledState(boolean enabled) {
+    @Override protected void updateEnabledState(boolean enabled) {
         super.updateEnabledState(enabled);
 
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
@@ -430,147 +445,21 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.newMenu.setEnabled(enabled && inst != null);
     }
 
-    // Initialize a JMenuBar and JMenu to get a decent looking menu button.
-    private void _initMenuButton(JMenuBar bar, final JMenu menu, String iconPath) {
+    private static void setMenuStyling(JMenuBar bar, final JMenu menu, final String iconPath) {
         bar.setBorder(BorderFactory.createEmptyBorder());
         bar.setOpaque(false);
-        final Icon icon = Resources.getIcon(iconPath);
         menu.setIcon(Resources.getIcon(iconPath));
         menu.setText("");
-        ButtonFlattener.flatten(menu);
-
-        // Unfortunately the MenuUI thing ignores the rollover icon.  Watch
-        // for mouse events and handle in manually.
         menu.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
+            final Icon icon = Resources.getIcon(iconPath);
+            @Override public void mouseEntered(MouseEvent e) {
                 menu.setIcon(menu.getRolloverIcon());
             }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
+            @Override public void mouseExited(MouseEvent e) {
                 menu.setIcon(icon);
             }
         });
-    }
-
-    /**
-     * Initialize the calendar and the combo box for specifing a time
-     */
-    private void _initNonSiderealTimeWidgets() {
-        final DefaultComboBoxModel model = new DefaultComboBoxModel<>(TimeConfig.values());
-
-        //Add space for the editable field. We will use a String here
-        //model.insertElementAt(timeFormatter.format(new Date()), 0);
-
-        _w.calendarTime.setModel(model);
-        _w.calendarTime.setRenderer(new BasicComboBoxRenderer() {
-            public Component getListCellRendererComponent(JList jList, Object
-                    object, int index, boolean isSelected, boolean hasFocus) {
-
-                String text = object.toString();
-                if (object instanceof Date) {
-                    text = timeFormatter.format((Date) object);
-                } else if (object instanceof TimeConfig) {
-                    text = ((TimeConfig) object).displayValue();
-                }
-                return super.getListCellRendererComponent(jList, text, index, isSelected, hasFocus);
-            }
-        });
-
-        final ComboBoxEditor editor = _w.calendarTime.getEditor();
-
-        final JTextField tf = (JTextField) editor.getEditorComponent();
-        _timeDocument = new TimeDocument(tf);
-
-        _timeDocument.setTime(timeFormatter.format(new Date()));
-        tf.setDocument(_timeDocument);
-
-        //set the calendar widget to timezone UTC
-        _w.calendarDate.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
-
-    private void _initXYAxis() {
-        _w.xaxis.addWatcher(new TextBoxWidgetWatcher() {
-            public void textBoxKeyPress(TextBoxWidget tbwe) {
-                _setCurPos();
-            }
-
-            public void textBoxAction(TextBoxWidget tbwe) {
-                _setCurPos();
-            }
-        });
-        _w.yaxis.addWatcher(new TextBoxWidgetWatcher() {
-            public void textBoxKeyPress(TextBoxWidget tbwe) {
-                _setCurPos();
-            }
-
-            public void textBoxAction(TextBoxWidget tbwe) {
-                _setCurPos();
-            }
-        });
-    }
-
-    // Add listeners to the entry widgets in the conic target tab
-    private void _initConicDetails() {
-        _nonSiderealTargetSup.initListeners(new TextBoxWidgetWatcher() {
-            public void textBoxKeyPress(TextBoxWidget tbw) {
-                _setConicPos((NumberBoxWidget) tbw);
-            }
-
-            public void textBoxAction(TextBoxWidget tbw) {
-                _setConicPos((NumberBoxWidget) tbw);
-            }
-        });
-    }
-
-    private void _initTargetName() {
-        _w.targetName.addWatcher(new TextBoxWidgetWatcher() {
-            public void textBoxKeyPress(TextBoxWidget tbwe) {
-                String name = tbwe.getText();
-                if (name != null) name = name.trim();
-                _curPos.deleteWatcher(posWatcher);
-                _curPos.getTarget().setName(name);
-                _curPos.notifyOfGenericUpdate();
-                _curPos.addWatcher(posWatcher);
-                _w.resolveButton.setEnabled(!"".equals(name));
-            }
-
-            public void textBoxAction(TextBoxWidget tbwe) {
-                _resolveName(HorizonsAction.Type.GET_ORBITAL_ELEMENTS, null);
-            }
-        });
-        _w.targetName.setMinimumSize(_w.targetName.getPreferredSize());
-    }
-
-    private void _initGuideGroupName() {
-        _w.guideGroupName.addWatcher(new TextBoxWidgetWatcher() {
-            public void textBoxKeyPress(TextBoxWidget tbwe) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        final String name = _w.guideGroupName.getText();
-                        // don't trim, otherwise user can't include space in group name
-//                        if (name != null) name = name.trim();
-                        final GuideGroup newGroup = _curGroup.setName(name);
-                        final TargetEnvironment env = getDataObject().getTargetEnvironment();
-                        final GuideEnvironment ge = env.getGuideEnvironment();
-                        final ImList<GuideGroup> options = ge.getOptions();
-                        final List<GuideGroup> list = new ArrayList<>(options.size());
-                        for (GuideGroup g : options) {
-                            list.add(g == _curGroup ? newGroup : g);
-                        }
-                        _curGroup = newGroup;
-                        getDataObject().setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(DefaultImList.create(list))));
-                        _w.guideGroupName.requestFocus(); // otherwise focus is lost during event handling
-                    }
-                });
-            }
-
-            public void textBoxAction(TextBoxWidget tbwe) {
-            }
-        });
-        _w.guideGroupName.setMinimumSize(_w.guideGroupName.getPreferredSize());
+        ButtonFlattener.flatten(menu);
     }
 
     private interface PositionType {
@@ -609,7 +498,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
     }
 
-    private class GuidePositionType implements PositionType {
+    private static class GuidePositionType implements PositionType {
         private final GuideProbe guider;
         private final boolean available;
 
@@ -683,7 +572,33 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         public void actionPerformed(ActionEvent e) {
             final PositionType pt = (PositionType) _w.tag.getSelectedItem();
             pt.morphTarget(getDataObject(), _curPos);
-            _handleSelectionUpdate(_curPos);
+            if (getDataObject() != null) {
+                final TargetEnvironment env = getDataObject().getTargetEnvironment();
+                if (env.getTargets().contains(_curPos)) {
+
+                    final Option<ObsContext> ctx = getObsContext(env);
+
+                    if (_curPos != null) _curPos.deleteWatcher(posWatcher);
+
+                    // Sidereal
+                    _siderealEditor.edit(ctx, _curPos);
+                    _trackingEditor.edit(ctx, _curPos);
+
+                    // Nonsidereal
+                    _nonSiderealTargetSup.updatePos(_curPos);
+                    _nonsideMagEditor.edit(ctx, _curPos);
+
+                    if (_curPos != null) {
+                        _curPos.addWatcher(posWatcher);
+                        refreshAll();
+
+                        // can't remove base position, so disable button
+                        final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
+                        _w.removeButton.setEnabled(_curPos != env.getBase() && editable);
+                        _w.primaryButton.setEnabled(enablePrimary(_curPos, env) && editable);
+                    }
+                }
+            }
         }
     };
 
@@ -691,11 +606,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      * A renderer of target type options.  Shows a guider type that isn't
      * available in the current context with a warning icon.
      */
-    private static final DefaultListCellRenderer TAG_RENDERER = new DefaultListCellRenderer() {
+    private final DefaultListCellRenderer tagRenderer = new DefaultListCellRenderer() {
         private final Icon errorIcon = Resources.getIcon("eclipse/error.gif");
-
-        @Override
-        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+        @Override public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
             final JLabel lab = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             final PositionType pt = (PositionType) value;
             if (!pt.isAvailable()) {
@@ -705,87 +618,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             return lab;
         }
     };
-
-    // Get a reference to the "Tag" drop down, and initialize its choices
-    private void _initTagChoices() {
-
-        // Get all the legally available guiders in the current context.
-        final Set<GuideProbe> avail = GuideProbeUtil.instance.getAvailableGuiders(getContextObservation());
-        final Set<GuideProbe> guiders = new HashSet<>(avail);
-        final TargetEnvironment env = getDataObject().getTargetEnvironment();
-
-        // Get the set of guiders that are referenced but not legal in this
-        // context, if any.  Any "available" guider is legal, anything left
-        // over is referenced but not really available.
-        final Set<GuideProbe> illegalSet = env.getOrCreatePrimaryGuideGroup().getReferencedGuiders();
-        illegalSet.removeAll(avail);
-
-        // Determine whether the current position is one of these illegal
-        // guiders.  If so, we add the guide probe to the list of choices
-        // so that this target may be selected in order to change its type or
-        // delete it.
-        GuideProbe illegal = null;
-        for (GuideProbe guider : illegalSet) {
-            final Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(guider);
-            if (gtOpt.getValue().getOptions().contains(_curPos)) {
-                illegal = guider;
-                guiders.add(guider);
-            }
-        }
-
-        // Sort the list of guiders.
-        final List<GuideProbe> guidersList = new ArrayList<>(guiders);
-        Collections.sort(guidersList, GuideProbe.KeyComparator.instance);
-
-        // Make a list of PositionTypes that are legal in the current
-        // observation context.
-        final PositionType[] ptA;
-        ptA = new PositionType[2 + guiders.size()];
-
-        int index = 0;
-        ptA[index++] = BasePositionType.instance;
-        for (GuideProbe guider : guidersList) {
-            ptA[index++] = new GuidePositionType(guider, guider != illegal);
-        }
-        ptA[index] = UserPositionType.instance;
-
-        _w.tag.removeActionListener(_tagListener);
-        _w.tag.setModel(new DefaultComboBoxModel(ptA));
-        _w.tag.setEnabled(isEnabled() && (env.getBase() != _curPos));
-        _w.tag.addActionListener(_tagListener);
-
-        _w.tag.setRenderer(TAG_RENDERER);
-    }
-
-    private Option<Catalog> _selectedNameServer = None.instance();
-
-    // Initialize the choices for name servers for resolving the Name field to RA,Dec
-    private void _initNameServerChoices() {
-        final SkycatConfigFile cf = SkycatConfigFile.getConfigFile();
-
-        // Create radio button options for each of the name servers.
-        final ButtonGroup grp = new ButtonGroup();
-        final List<Catalog> nameServers = cf.getNameServers();
-        for (final Catalog ns : nameServers) {
-            final JRadioButtonMenuItem mi = new JRadioButtonMenuItem(ns.getName()) {{
-                addActionListener(new ActionListener() {
-                    // When selected, update the currently selected name server
-                    @Override
-                    public void actionPerformed(ActionEvent actionEvent) {
-                        _selectedNameServer = new Some<>(ns);
-                    }
-                });
-            }};
-            grp.add(mi);
-            _w.nameServer.add(mi);
-        }
-
-        // Set the initial name server options
-        if (nameServers.size() > 0) {
-            _selectedNameServer = new Some<>(nameServers.get(0));
-            grp.setSelected(((JMenuItem) _w.nameServer.getMenuComponent(0)).getModel(), true);
-        }
-    }
 
     private static final class TargetClipboard {
         private ITarget target;
@@ -849,328 +681,313 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
     }
 
-    // Duplicate the selected position or group
-    private void _duplicateSelected(ISPObsComponent obsComponent, TargetObsComp dataObject) {
-        if ((obsComponent == null) || (dataObject == null)) return;
-        final SPTarget target = TargetSelection.get(dataObject.getTargetEnvironment(), obsComponent);
-        if (target != null) {
-            _duplicateSelectedPosition(dataObject, target);
-        } else {
-            final GuideGroup group = TargetSelection.getGuideGroup(dataObject.getTargetEnvironment(), obsComponent);
-            if (group != null) {
-                _duplicateSelectedGroup(dataObject, group);
-            }
-        }
-    }
 
-    // Duplicate the selected position
-    private void _duplicateSelectedPosition(TargetObsComp dataObject, SPTarget target) {
-        // Clone the target.
-        final ParamSet ps = target.getParamSet(new PioXmlFactory());
-        final SPTarget newTarget = new SPTarget();
-        newTarget.setParamSet(ps);
-
-        // Add it to the environment.  First we have to figure out
-        // what it is.
-        TargetEnvironment env = dataObject.getTargetEnvironment();
-
-        // See if it is a guide star and duplicate it in the correct
-        // GuideTargets list.
-        boolean duplicated = false;
-        env.getOrCreatePrimaryGuideGroup();
-        final List<GuideGroup> groups = new ArrayList<>();
-        for (GuideGroup group : env.getGroups()) {
-            for (GuideProbeTargets gt : group) {
-                if (gt.getOptions().contains(target)) {
-                    group = group.put(gt.update(append(newTarget)));
-                    duplicated = true;
-                    break;
-                }
-            }
-            groups.add(group);
-        }
-        if (duplicated) {
-            // Update groups list
-            env = env.setGuideEnvironment(env.getGuideEnvironment().setOptions(DefaultImList.create(groups)));
-        } else {
-            // Add as a user target
-            env = env.setUserTargets(env.getUserTargets().append(newTarget));
-        }
-
-        dataObject.setTargetEnvironment(env);
-    }
-
-    // Duplicate the selected group
-    private void _duplicateSelectedGroup(TargetObsComp dataObject, GuideGroup group) {
-        TargetEnvironment env = dataObject.getTargetEnvironment();
-        final List<GuideGroup> groups = new ArrayList<>();
-        groups.addAll(env.getGroups().toList());
-        groups.add(group.cloneTargets());
-        env = env.setGuideEnvironment(env.getGuideEnvironment().setOptions(DefaultImList.create(groups)));
-        dataObject.setTargetEnvironment(env);
-        // save/restore tree state will leave last group closed, since there is one more, so expand it here
-        _w.positionTable.expandGroup(groups.get(groups.size() - 1));
-    }
-
-
-    private static TargetClipboard clipboard;
-
-    private static void copySelectedPosition(ISPObsComponent obsComponent, TargetObsComp dataObject) {
-        final Option<TargetClipboard> opt = TargetClipboard.copy(dataObject.getTargetEnvironment(), obsComponent);
-        if (opt.isEmpty()) return;
-        clipboard = opt.getValue();
-    }
-
-    private static void pasteSelectedPosition(ISPObsComponent obsComponent, TargetObsComp dataObject) {
-        if (clipboard == null) return;
-        clipboard.paste(obsComponent, dataObject);
-    }
-
-    // Try to resolve the name in the name field to RA,Dec coordinates and insert the result in
-    // the RA,Dec text boxes.
-    private void _resolveName(HorizonsAction.Type operationType, final ResolveNameListener listener) {
-        String name = _w.targetName.getText().trim();
-        //if non-sidereal, then do horizons query...
+    /**
+     * Spark off an asynchronous task to look up the target in Horizons or a catalog, depending on
+     * target type. If it's a nonsidereal target, use the passed operation type and notify when
+     * complete, if listener is non-null. Otherwise do a name lookup and ignore the arguments.
+     */
+    private void resolveName(final HorizonsAction.Type operationType, final ResolveNameListener listener) {
         if (_w.system.getSelectedItem() == NON_SIDEREAL_TARGET) {
-            if (_curPos.getTarget() instanceof NamedTarget) {
-                final NamedTarget target = (NamedTarget) _curPos.getTarget();
-                name = target.getSolarObject().getHorizonsId();
-            }
-
-            if (!name.isEmpty()) {
-                _resolveNonSidereal(name, operationType, listener);
-            }
+            scheduleHorizonsLookup(operationType, listener);
         } else {
-            if (!_selectedNameServer.isEmpty()) {
-                final Catalog nameServer = _selectedNameServer.getValue();
-                if (name.length() != 0) {
-                    final QueryArgs queryArgs = new BasicQueryArgs(nameServer);
-                    queryArgs.setId(name);
-                    _setRaDecFromCatalog(nameServer, queryArgs);
+            scheduleCatalogLookup();
+        }
+    }
+
+    private void scheduleCatalogLookup() {
+        if (!_selectedNameServer.isEmpty()) {
+            final Catalog nameServer = _selectedNameServer.getValue();
+            final String name  = _w.targetName.getText().trim();
+            if (name.length() != 0) {
+                final QueryArgs queryArgs = new BasicQueryArgs(nameServer);
+                queryArgs.setId(name);
+                if (nameServer != null) {
+                    new SwingWorker() {
+                        public Object construct() {
+                            try {
+                                final String simbadCatalogShortName = "simbad";
+                                String originalUrls[] = null;
+                                if (nameServer instanceof SkycatCatalog) {
+                                    final SkycatCatalog skycat = (SkycatCatalog) nameServer;
+                                    if (skycat.getShortName().contains(simbadCatalogShortName)) {
+                                        skycat.addCatalogFilter(FullMimeSimbadCatalogFilter.getFilter());
+                                        final int n = skycat.getConfigEntry().getNumURLs();
+                                        final String[] urls = new String[n];
+                                        originalUrls = new String[n];
+                                        for (int i = 0; i < n; i++) {
+                                            String urlStr = skycat.getConfigEntry().getURL(i);
+                                            originalUrls[i] = urlStr;
+                                            urls[i] = urlStr;
+                                        }
+                                        skycat.getConfigEntry().setURLs(urls);
+                                    }
+                                }
+                                queryArgs.setMaxRows(1);
+                                final QueryResult r = nameServer.query(queryArgs);
+                                //Return the URLs to the previous state
+                                if (nameServer instanceof SkycatCatalog) {
+                                    final SkycatCatalog skycat = (SkycatCatalog) nameServer;
+                                    if (skycat.getShortName().contains(simbadCatalogShortName)) {
+                                        skycat.getConfigEntry().setURLs(originalUrls);
+                                    }
+                                }
+
+                                if (r instanceof TableQueryResult) {
+                                    final TableQueryResult tqr = (TableQueryResult) r;
+                                    if (tqr.getRowCount() > 0) {
+                                        return tqr;
+                                    }
+                                    throw new CatalogException("No objects were found.");
+                                }
+                                throw new CatalogException("Error contacting catalog server");
+                            } catch (Exception e) {
+                                return e;
+                            }
+                        }
+                        public void finished() {
+                            final Object o = getValue();
+                            if (o instanceof TableQueryResult) {
+                                final TableQueryResult tqr = (TableQueryResult) o;
+                                final int pm = tqr.getColumnIndex("pm1");
+                                if (pm >= 0) {
+                                    final Double pm1 = (Double) tqr.getValueAt(0, pm);
+                                    final Double pm2 = (Double) tqr.getValueAt(0, pm + 1);
+                                    setPM(_curPos, pm1, pm2);
+                                } else {
+                                    //SCT-301: If not found, then we reset the value to zero
+                                    setPM(_curPos, 0.0, 0.0);
+                                }
+                                if (tqr.getCoordinates(0) instanceof WorldCoords) {
+                                    final WorldCoords pos = (WorldCoords) tqr.getCoordinates(0);
+                                    _w.xaxis.setText(pos.getRA().toString());
+                                    _w.yaxis.setText(pos.getDec().toString());
+                                    axisWatcher.textBoxAction(_w.yaxis); // pretend the user did this
+                                }
+                            } else if (o instanceof Exception) {
+                                DialogUtil.error(((Exception) o).getMessage());
+                            }
+                        }
+                        private void setPM(SPTarget spt, double ra, double dec) {
+                            final ITarget it = spt.getTarget();
+                            if (it instanceof HmsDegTarget) {
+                                final HmsDegTarget t = (HmsDegTarget) it;
+                                t.setPropMotionRA(ra);
+                                t.setPropMotionDec(dec);
+                            }
+                            spt.notifyOfGenericUpdate();
+                        }
+
+                    }.start();
                 }
             }
         }
     }
 
-    /**
-     * Retrieves a date, that's built based on the information from
-     * the calendar widget and the time widget
-     */
-    private Date _getDate() {
-        //get the appropriate date to perform the query based on the calendar widget and
-        //the time widget
-        final Date date = _w.calendarDate.getDate();
-        //this date is at 00:00:00. Let's add the hours, minutes and sec from the time document
+    private void scheduleHorizonsLookup(final HorizonsAction.Type operationType, final ResolveNameListener listener) {
+        final String name;
+        if (_curPos.getTarget() instanceof NamedTarget) {
+            final NamedTarget target = (NamedTarget) _curPos.getTarget();
+            name = target.getSolarObject().getHorizonsId();
+        } else {
+            name = _w.targetName.getText().trim();
+        }
+        if (!name.isEmpty()) {
+            new AuthSwingWorker<HorizonsReply, Object>() {
+                @Override
+                protected HorizonsReply doInBackgroundWithSubject() {
 
-        calendar.setTimeZone(_w.calendarDate.getTimeZone());
-        calendar.setTime(date);
-        calendar.set(Calendar.HOUR_OF_DAY, _timeDocument.getHoursField());
-        calendar.set(Calendar.MINUTE, _timeDocument.getMinutesField());
-        calendar.set(Calendar.SECOND, _timeDocument.getSecondsField());
+                    //for NamedTargets we don't resolve orbital elements
+                    if (_curPos.getTarget() instanceof NamedTarget &&
+                            operationType == HorizonsAction.Type.GET_ORBITAL_ELEMENTS) {
+                        return null;
+                    }
 
-        return calendar.getTime();
-    }
+                    //ignore events that trigger an Horizon's reply cache reset
+                    _nonSiderealTargetSup.ignoreResetCacheEvents(true);
+                    //If it's a PI, we need to figure out where to set the horizons site
+                    final HorizonsService service = HorizonsService.getInstance();
+                    if (service == null) return null;
+
+                    if (!OTOptions.isStaff(getProgram().getProgramID())) {
+                        SPProgramID id = null;
+                        try {
+                            id = getProgram().getProgramID();
+                        } catch (NullPointerException e) {
+                            //this shouldn't happen
+                        }
+                        service.setSite(id);
+                    }
 
 
-    /**
-     * This is the main method to resolve non sidereal objects name to Orbital elements
-     * and ephemeris. Will analyze the results and performa appropriate operations
-     * based on them.
-     *
-     * @param name          The name of the object to be resolved
-     * @param operationType The operation to be performed with the given <code>HorizonsReply</code>
-     * @param listener      if not null, notified when the background thread completes successfully
-     *                      (not called if there is an error)
-     */
-    private void _resolveNonSidereal(final String name, final HorizonsAction.Type operationType,
-                                     final ResolveNameListener listener) {
-        new AuthSwingWorker<HorizonsReply, Object>() {
-            @Override
-            protected HorizonsReply doInBackgroundWithSubject() {
+                    //Get the Date to start the query
+                    //get the appropriate date to perform the query based on the calendar widget and
+                    //the time widget
+                    final Date date1 = _w.calendarDate.getDate();
+                    //this date is at 00:00:00. Let's add the hours, minutes and sec from the time document
 
-                //for NamedTargets we don't resolve orbital elements
-                if (_curPos.getTarget() instanceof NamedTarget &&
-                        operationType == HorizonsAction.Type.GET_ORBITAL_ELEMENTS) {
-                    return null;
+                    final Calendar calendar = Calendar.getInstance(UTC);
+                    calendar.setTimeZone(_w.calendarDate.getTimeZone());
+                    calendar.setTime(date1);
+                    calendar.set(Calendar.HOUR_OF_DAY, _timeDocument.getHoursField());
+                    calendar.set(Calendar.MINUTE, _timeDocument.getMinutesField());
+                    calendar.set(Calendar.SECOND, _timeDocument.getSecondsField());
+
+                    final Date date = calendar.getTime();
+
+                    //lets see if we can use the existing ephemeris
+                    final HorizonsReply lastReply = service.getLastResult();
+                    if (lastReply != null && name.equals(service.getObjectId())) {
+                        //so, apparently nothing has changed
+                        boolean workable = true;
+                        if (operationType == HorizonsAction.Type.GET_ORBITAL_ELEMENTS) {
+                            if (!lastReply.hasOrbitalElements()) {
+                                //ups. This reply doesn't quite work.
+                                workable = false;
+                            }
+                        }
+
+                        //let's see if we have ephemeris, and with that we are
+                        //okay (the ephemeris is usable for operations that doesn't
+                        //involve updating orbital elements.
+                        if (lastReply.hasEphemeris() && workable) {
+                            final EphemerisEntry firstEntry = lastReply.getEphemeris().get(0);
+                            if (date.equals(firstEntry.getDate())) {
+                                //Same results
+                                return lastReply;
+                            }
+                        }
+
+                    }
+
+                    service.setInitialDate(date);
+                    service.setObjectId(name);
+                    service.setObjectType(null);
+
+                    final ITarget.Tag tag = (ITarget.Tag) _w.orbitalElementFormat.getSelectedItem();
+                    switch (tag) {
+                        case JPL_MINOR_BODY:   service.setObjectType(HorizonsQuery.ObjectType.COMET);      break;
+                        case MPC_MINOR_PLANET: service.setObjectType(HorizonsQuery.ObjectType.MINOR_BODY); break;
+                        case NAMED:            service.setObjectType(HorizonsQuery.ObjectType.MAJOR_BODY); break;
+                    }
+                    _nonSiderealTargetSup.ignoreResetCacheEvents(false);
+
+                    HorizonsReply reply = service.execute();
+
+                    if (reply == null || reply.getReplyType() == HorizonsReply.ReplyType.MAJOR_PLANET) {
+                        if (service.getObjectType() == HorizonsQuery.ObjectType.COMET) {
+                            service.setObjectType(HorizonsQuery.ObjectType.MINOR_BODY);
+                            reply = service.execute();
+                        } else if (service.getObjectType() == HorizonsQuery.ObjectType.MINOR_BODY) {
+                            service.setObjectType(HorizonsQuery.ObjectType.COMET);
+                            reply = service.execute();
+                        }
+                    }
+
+                    return reply;
                 }
 
-                //clear previous values
-                //_clearNonSiderealInformation(operationType);
-
-                //ignore events that trigger an Horizon's reply cache reset
-                _nonSiderealTargetSup.ignoreResetCacheEvents(true);
-                //If it's a PI, we need to figure out where to set the horizons site
-                final HorizonsService service = HorizonsService.getInstance();
-                if (service == null) return null;
-
-                if (!OTOptions.isStaff(getProgram().getProgramID())) {
-                    SPProgramID id = null;
+                @Override
+                public void done() {
+                    final HorizonsReply reply;
                     try {
-                        id = getProgram().getProgramID();
-                    } catch (NullPointerException e) {
-                        //this shouldn't happen
+                        reply = get();
+                    } catch (InterruptedException ex) {
+                        return;
+                    } catch (ExecutionException ex) {
+                        final String message = "An error occurred fetching results for: " + name.toUpperCase();
+                        LOG.log(Level.WARNING, message, ex);
+                        DialogUtil.message(message);
+                        return;
                     }
-                    service.setSite(id);
-                }
+
+                    if ((reply == null) || (reply.getReplyType() == HorizonsReply.ReplyType.NO_RESULTS)) {
+                        DialogUtil.message("No results were found for: " + name.toUpperCase());
+                        return;
+                    }
+
+                    if (reply.getReplyType() == HorizonsReply.ReplyType.MAJOR_PLANET
+                            && !(_curPos.getTarget() instanceof NamedTarget)) {
+                        DialogUtil.message("Can't solve the given ID to any minor body");
+                        return;
+                    }
+
+                    if (reply.getReplyType() == HorizonsReply.ReplyType.SPACECRAFT) {
+                        DialogUtil.message("Horizons suggests this is a spacecraft. Sorry, but OT can't use spacecrafts");
+                        return;
+                    }
+
+                    if (reply.getObjectType() == null) {//it will be null if you press "cancel" in the window with multiple responses
+                        return;
+                    }
+
+                    if ((_curPos.getTarget() instanceof NamedTarget) && ((NamedTarget) _curPos.getTarget()).getSolarObject() == NamedTarget.SolarObject.PLUTO) {
+                        reply.setReplyType(HorizonsReply.ReplyType.MAJOR_PLANET);
+                    }
 
 
-                //Get the Date to start the query
-                final Date date = _getDate();
+                    //ignore events that would reset the Horizons results cache
+                    _nonSiderealTargetSup.ignoreResetCacheEvents(true);
+                    //if a multiple answer was executed, then we need to recover the Id used
+                    final HorizonsService service = HorizonsService.getInstance();
+                    if (service != null) {
+                        final String objectId = service.getObjectId();
+                        _curPos.getTarget().setName(objectId);
+                        _curPos.notifyOfGenericUpdate();
+                    }
 
-                //lets see if we can use the existing ephemeris
-                final HorizonsReply lastReply = service.getLastResult();
-                if (lastReply != null && name.equals(service.getObjectId())) {
-                    //so, apparently nothing has changed
-                    boolean workable = true;
-                    if (operationType == HorizonsAction.Type.GET_ORBITAL_ELEMENTS) {
-                        if (!lastReply.hasOrbitalElements()) {
-                            //ups. This reply doesn't quite work.
-                            workable = false;
+                    final HorizonsAction action = new HorizonsActionContainer().getActions().get(operationType);
+                    try {
+                        action.execute(reply);
+                    } catch (NullPointerException ex) {
+                        final Logger LOG1 = Logger.getLogger(EdCompTargetList.class.getName());
+                        LOG1.log(Level.INFO, "Probable problem parsing the reply from JPL", ex);
+                        return;
+                    }
+                    if (_curPos.getTarget() instanceof NonSiderealTarget) {
+                        final NonSiderealTarget oldTarget = (NonSiderealTarget) _curPos.getTarget();
+                        switch (reply.getObjectType()) {
+                            case COMET: {
+                                final ConicTarget target = getOrCreateTargetWithTag(ITarget.Tag.JPL_MINOR_BODY);
+                                _nonSiderealTargetSup.showNonSiderealTarget(target);
+                                _w.orbitalElementFormat.setValue(ITarget.Tag.JPL_MINOR_BODY);
+                                _curPos.setTarget(target);
+                            }
+                            break;
+                            case MINOR_BODY: {
+                                final ConicTarget target = getOrCreateTargetWithTag(ITarget.Tag.MPC_MINOR_PLANET);
+                                _nonSiderealTargetSup.showNonSiderealTarget(target);
+                                _w.orbitalElementFormat.setValue(ITarget.Tag.MPC_MINOR_PLANET);
+                                _curPos.setTarget(target);
+                            }
+                            break;
+                            case MAJOR_BODY: {
+                                final NamedTarget target = (oldTarget instanceof NamedTarget) ? (NamedTarget) oldTarget : new NamedTarget();
+                                _nonSiderealTargetSup.showNonSiderealTarget(target);
+                                _w.orbitalElementFormat.setValue(ITarget.Tag.NAMED);
+                                _curPos.setTarget(target);
+                            }
+                            break;
                         }
+                        //_nonSiderealTargetSup.showNonSiderealTarget(target, _curPos.getCoordSys().getName());
+
                     }
-
-                    //let's see if we have ephemeris, and with that we are
-                    //okay (the ephemeris is usable for operations that doesn't
-                    //involve updating orbital elements.
-                    if (lastReply.hasEphemeris() && workable) {
-                        final EphemerisEntry firstEntry = lastReply.getEphemeris().get(0);
-                        if (date.equals(firstEntry.getDate())) {
-                            //Same results
-                            return lastReply;
-                        }
-                    }
-
-                }
-
-
-                service.setInitialDate(date);
-
-                service.setObjectId(name);
-
-                service.setObjectType(null);
-
-                final ITarget.Tag tag = (ITarget.Tag) _w.orbitalElementFormat.getSelectedItem();
-                switch (tag) {
-                    case JPL_MINOR_BODY:   service.setObjectType(HorizonsQuery.ObjectType.COMET);      break;
-                    case MPC_MINOR_PLANET: service.setObjectType(HorizonsQuery.ObjectType.MINOR_BODY); break;
-                    case NAMED:            service.setObjectType(HorizonsQuery.ObjectType.MAJOR_BODY); break;
-                }
-                _nonSiderealTargetSup.ignoreResetCacheEvents(false);
-
-                HorizonsReply reply = service.execute();
-
-                if (reply == null || reply.getReplyType() == HorizonsReply.ReplyType.MAJOR_PLANET) {
-                    if (service.getObjectType() == HorizonsQuery.ObjectType.COMET) {
-                        service.setObjectType(HorizonsQuery.ObjectType.MINOR_BODY);
-                        reply = service.execute();
-                    } else if (service.getObjectType() == HorizonsQuery.ObjectType.MINOR_BODY) {
-                        service.setObjectType(HorizonsQuery.ObjectType.COMET);
-                        reply = service.execute();
+                    _nonSiderealTargetSup.ignoreResetCacheEvents(false);
+                    if (listener != null) {
+                        listener.nameResolved();
                     }
                 }
-
-                return reply;
-            }
-
-            @Override
-            public void done() {
-                final HorizonsReply reply;
-                try {
-                    reply = get();
-                } catch (InterruptedException ex) {
-                    return;
-                } catch (ExecutionException ex) {
-                    final String message = "An error occurred fetching results for: " + name.toUpperCase();
-                    LOG.log(Level.WARNING, message, ex);
-                    DialogUtil.message(message);
-                    return;
-                }
-
-                if ((reply == null) || (reply.getReplyType() == HorizonsReply.ReplyType.NO_RESULTS)) {
-                    DialogUtil.message("No results were found for: " + name.toUpperCase());
-                    return;
-                }
-
-                if (reply.getReplyType() == HorizonsReply.ReplyType.MAJOR_PLANET
-                        && !(_curPos.getTarget() instanceof NamedTarget)) {
-                    DialogUtil.message("Can't solve the given ID to any minor body");
-                    return;
-                }
-
-                if (reply.getReplyType() == HorizonsReply.ReplyType.SPACECRAFT) {
-                    DialogUtil.message("Horizons suggests this is a spacecraft. Sorry, but OT can't use spacecrafts");
-                    return;
-                }
-
-                if (reply.getObjectType() == null) {//it will be null if you press "cancel" in the window with multiple responses
-                    return;
-                }
-
-                if ((_curPos.getTarget() instanceof NamedTarget) && ((NamedTarget) _curPos.getTarget()).getSolarObject() == NamedTarget.SolarObject.PLUTO) {
-                    reply.setReplyType(HorizonsReply.ReplyType.MAJOR_PLANET);
-                }
-
-
-                //ignore events that would reset the Horizons results cache
-                _nonSiderealTargetSup.ignoreResetCacheEvents(true);
-                //if a multiple answer was executed, then we need to recover the Id used
-                final HorizonsService service = HorizonsService.getInstance();
-                if (service != null) {
-                    final String objectId = service.getObjectId();
-                    _curPos.getTarget().setName(objectId);
-                    _curPos.notifyOfGenericUpdate();
-                }
-
-
-                final HorizonsAction action = _horizonsOperations.get(operationType);
-                try {
-                    action.execute(reply);
-                } catch (NullPointerException ex) {
-                    final Logger LOG = Logger.getLogger(EdCompTargetList.class.getName());
-                    LOG.log(Level.INFO, "Probable problem parsing the reply from JPL", ex);
-                    return;
-                }
-                if (_curPos.getTarget() instanceof NonSiderealTarget) {
-                    final NonSiderealTarget oldTarget = (NonSiderealTarget) _curPos.getTarget();
-                    switch (reply.getObjectType()) {
-                        case COMET: {
-                            final ConicTarget target = newOrExistingTarget(ITarget.Tag.JPL_MINOR_BODY);
-                            _nonSiderealTargetSup.showNonSiderealTarget(target);
-                            _w.orbitalElementFormat.setValue(ITarget.Tag.JPL_MINOR_BODY);
-                            _curPos.setTarget(target);
-                            }
-                            break;
-                        case MINOR_BODY: {
-                            final ConicTarget target = newOrExistingTarget(ITarget.Tag.MPC_MINOR_PLANET);
-                            _nonSiderealTargetSup.showNonSiderealTarget(target);
-                            _w.orbitalElementFormat.setValue(ITarget.Tag.MPC_MINOR_PLANET);
-                            _curPos.setTarget(target);
-                            }
-                            break;
-                        case MAJOR_BODY: {
-                            final NamedTarget target = (oldTarget instanceof NamedTarget) ? (NamedTarget) oldTarget : new NamedTarget();
-                            _nonSiderealTargetSup.showNonSiderealTarget(target);
-                            _w.orbitalElementFormat.setValue(ITarget.Tag.NAMED);
-                            _curPos.setTarget(target);
-                            }
-                            break;
-                    }
-                    //_nonSiderealTargetSup.showNonSiderealTarget(target, _curPos.getCoordSys().getName());
-
-                }
-                _nonSiderealTargetSup.ignoreResetCacheEvents(false);
-                if (listener != null) {
-                    listener.nameResolved();
-                }
-            }
-        }.execute();
+            }.execute();
+        }
     }
+
+
 
     /**
      * Returns the current target if its system type matches the specified one, otherwise constructs
      * and returns a new conic target of the specified type.
      */
-    private ConicTarget newOrExistingTarget(ITarget.Tag tag) {
+    private ConicTarget getOrCreateTargetWithTag(ITarget.Tag tag) {
         final ITarget old = _curPos.getTarget();
         if (old instanceof ConicTarget && old.getTag() == tag)
             return (ConicTarget) old;
@@ -1178,130 +995,107 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             return (ConicTarget) ITarget.forTag(tag);
     }
 
-    // Query the given catalog using the given arguments and set the current target position
-    // from the results. (XXX some of this should go in a helper class?)
-    private void _setRaDecFromCatalog(final Catalog cat, final QueryArgs queryArgs) {
-        if (cat != null) {
-            new SwingWorker() {
-                public Object construct() {
-                    try {
-                        String originalUrls[] = null;
-                        if (cat instanceof SkycatCatalog) {
-                            final SkycatCatalog skycat = (SkycatCatalog) cat;
-                            if (skycat.getShortName().contains(SIMBAD_CATALOG_SHORTNAME)) {
-                                skycat.addCatalogFilter(FullMimeSimbadCatalogFilter.getFilter());
-                                final int n = skycat.getConfigEntry().getNumURLs();
-                                final String[] urls = new String[n];
-                                originalUrls = new String[n];
-                                for (int i = 0; i < n; i++) {
-                                    String urlStr = skycat.getConfigEntry().getURL(i);
-                                    originalUrls[i] = urlStr;
-                                    urls[i] = urlStr;
-                                }
-                                skycat.getConfigEntry().setURLs(urls);
-                            }
-                        }
-                        queryArgs.setMaxRows(1);
-                        final QueryResult r = cat.query(queryArgs);
-                        //Return the URLs to the previous state
-                        if (cat instanceof SkycatCatalog) {
-                            final SkycatCatalog skycat = (SkycatCatalog) cat;
-                            if (skycat.getShortName().contains(SIMBAD_CATALOG_SHORTNAME)) {
-                                skycat.getConfigEntry().setURLs(originalUrls);
-                            }
-                        }
-
-                        if (r instanceof TableQueryResult) {
-                            final TableQueryResult tqr = (TableQueryResult) r;
-                            if (tqr.getRowCount() > 0) {
-                                return tqr;
-                            }
-                            throw new CatalogException("No objects were found.");
-                        }
-                        throw new CatalogException("Error contacting catalog server");
-                    } catch (Exception e) {
-                        return e;
-                    }
-                }
-
-                public void finished() {
-                    final Object o = getValue();
-                    if (o instanceof TableQueryResult) {
-                        final TableQueryResult tqr = (TableQueryResult) o;
-                        final int pm = tqr.getColumnIndex(PROPER_MOTION_COL_ID);
-                        if (pm >= 0) {
-                            final Double pm1 = (Double) tqr.getValueAt(0, pm);
-                            final Double pm2 = (Double) tqr.getValueAt(0, pm + 1);
-                            setPM(_curPos, pm1, pm2);
-                        } else {
-                            //SCT-301: If not found, then we reset the value to zero
-                            setPM(_curPos, 0.0, 0.0);
-                        }
-                        if (tqr.getCoordinates(0) instanceof WorldCoords) {
-                            final WorldCoords pos = (WorldCoords) tqr.getCoordinates(0);
-                            _w.xaxis.setText(pos.getRA().toString());
-                            _w.yaxis.setText(pos.getDec().toString());
-                            _setCurPos();
-                        }
-                    } else if (o instanceof Exception) {
-                        DialogUtil.error(((Exception) o).getMessage());
-                    }
-                }
-
-                private void setPM(SPTarget spt, double ra, double dec) {
-                    final ITarget it = spt.getTarget();
-                    if (it instanceof HmsDegTarget) {
-                        final HmsDegTarget t = (HmsDegTarget) it;
-                        t.setPropMotionRA(ra);
-                        t.setPropMotionDec(dec);
-                    }
-                    spt.notifyOfGenericUpdate();
-                }
-
-            }.start();
-        }
-    }
-
-
-    // Initialize the target System menu
-    private void _initSystemChoices() {
-        _w.system.clear();
-        _w.system.addChoice(HmsDegTarget.TAG.tccName);
-        _w.system.addChoice(NON_SIDEREAL_TARGET);
-        _w.system.addWatcher(new DropDownListBoxWidgetWatcher() {
-            public void dropDownListBoxAction(DropDownListBoxWidget dd, int i, String val) {
-                _updateCoordSystem();
-            }
-        });
-        _nonSiderealTargetSup.initOrbitalElementFormatChoices();
-    }
-
-    //Initialize the listeners for the radio buttons.
-    private void _initPlanetsRadioButtons() {
-        final JRadioButton[] buttons = _w.planetButtons;
-        for (JRadioButton button : buttons) {
-            button.addActionListener(bigListener);
-        }
-    }
-
-    /**
-     * Return the window containing the editor
-     */
+    // OtItemEditor
     public JPanel getWindow() {
         return _w;
     }
 
-    /**
-     * Initialize the editor with the given science program root
-     * and node.
-     */
+    // OtItemEditor
     public void init() {
-        setTargetObsComp();
+        /* ===== */
+        final ISPObsComponent node = getContextTargetObsComp();
+        TargetSelection.listenTo(node, selectionListener);
+
+        getDataObject().addPropertyChangeListener(TargetObsComp.TARGET_ENV_PROP, primaryButtonUpdater);
+        getDataObject().addPropertyChangeListener(TargetObsComp.TARGET_ENV_PROP, guidingPanelUpdater);
+
+        final TargetEnvironment env = getDataObject().getTargetEnvironment();
+        final SPTarget selTarget = TargetSelection.get(env, node);
+        if (getDataObject() != null) {
+            final TargetEnvironment env2 = getDataObject().getTargetEnvironment();
+            if (env2.getTargets().contains(selTarget)) {
+
+                final Option<ObsContext> ctx = getObsContext(env2);
+
+                if (_curPos != null) _curPos.deleteWatcher(posWatcher);
+
+                _curPos = selTarget;
+
+                // Sidereal
+                _siderealEditor.edit(ctx, selTarget);
+                _trackingEditor.edit(ctx, selTarget);
+
+                // Nonsidereal
+                _nonSiderealTargetSup.updatePos(_curPos);
+                _nonsideMagEditor.edit(ctx, selTarget);
+
+                if (_curPos != null) {
+                    _curPos.addWatcher(posWatcher);
+                    refreshAll();
+
+                    // can't remove base position, so disable button
+                    final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
+                    _w.removeButton.setEnabled(_curPos != env2.getBase() && editable);
+                    _w.primaryButton.setEnabled(enablePrimary(selTarget, env2) && editable);
+                }
+            }
+        }
+
+        final TargetObsComp obsComp = getDataObject();
+        final SPInstObsComp inst = getContextInstrumentDataObject();
+        _w.newMenu.removeAll();
+        if (obsComp == null || inst == null) {
+            _w.newMenu.setEnabled(false);
+        } else {
+            _w.newMenu.setEnabled(true);
+
+            final TargetEnvironment env1 = obsComp.getTargetEnvironment();
+
+            if (inst.hasGuideProbes()) {
+                final List<GuideProbe> guiders = new ArrayList<>(env1.getGuideEnvironment().getActiveGuiders());
+                Collections.sort(guiders, GuideProbe.KeyComparator.instance);
+
+                for (final GuideProbe probe : guiders) {
+                    _w.newMenu.add(new JMenuItem(probe.getKey()) {{
+                        addActionListener(new AddGuideStarAction(obsComp, probe, _w.positionTable));
+                    }});
+                }
+            }
+
+            _w.newMenu.add(new JMenuItem("User") {{
+                addActionListener(new AddUserTargetAction(obsComp));
+            }});
+
+            if (inst.hasGuideProbes()) {
+                _w.newMenu.addSeparator();
+                final JMenuItem guideGroupMenu = _w.newMenu.add(new JMenuItem("Guide Group") {{
+                    addActionListener(new AddGroupAction(obsComp, _w.positionTable));
+                }});
+
+                // OT-34: disable create group menu if no guide stars defined
+                _w.newMenu.addMenuListener(new MenuListener() {
+                    @Override
+                    public void menuSelected(MenuEvent e) {
+                        guideGroupMenu.setEnabled(obsComp.getTargetEnvironment().getGuideEnvironment().getTargets().size() != 0);
+                    }
+
+                    @Override
+                    public void menuDeselected(MenuEvent e) {
+                    }
+
+                    @Override
+                    public void menuCanceled(MenuEvent e) {
+                    }
+                });
+            }
+        }
+        _w.positionTable.reinit(getDataObject());
         _w.manualGuideStarButton.setVisible(GuideStarSupport.supportsManualGuideStarSelection(getNode()));
         updateGuiding();
         _agsPub.watch(getContextObservation());
     }
 
+    // OtItemEditor
     protected void cleanup() {
         _agsPub.watch(null);
         TargetSelection.deafTo(getContextTargetObsComp(), selectionListener);
@@ -1310,9 +1104,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         super.cleanup();
     }
 
-    /**
-     * Toggles the ags related gui elements depending on context.
-     */
     private void toggleAgsGuiElements() {
         final boolean supports = GuideStarSupport.supportsAutoGuideStarSelection(getNode());
         // hide the ags related buttons
@@ -1326,11 +1117,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
     };
 
-    private void updateGuiding() {
-        updateGuiding(getDataObject().getTargetEnvironment());
-    }
-
-    private Option<ObsContext> obsContext(final TargetEnvironment env) {
+    private Option<ObsContext> getObsContext(final TargetEnvironment env) {
         return ObsContext.create(getContextObservation()).map(new Function1<ObsContext, ObsContext>() {
             @Override public ObsContext apply(ObsContext obsContext) {
                 return obsContext.withTargets(env);
@@ -1338,9 +1125,13 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         });
     }
 
+    private void updateGuiding() {
+        updateGuiding(getDataObject().getTargetEnvironment());
+    }
+
     private void updateGuiding(final TargetEnvironment env) {
         toggleAgsGuiElements();
-        final Option<ObsContext> ctx = obsContext(env);
+        final Option<ObsContext> ctx = getObsContext(env);
         _w.guidingControls.update(ctx);
         _siderealEditor.updateGuiding(ctx, _curPos);
     }
@@ -1352,10 +1143,63 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             final TargetEnvironment env = getDataObject().getTargetEnvironment();
             final SPTarget target = TargetSelection.get(env, node);
             if (target != null) {
-                _handleSelectionUpdate(target);
+                if (getDataObject() != null) {
+                    final TargetEnvironment env1 = getDataObject().getTargetEnvironment();
+                    if (env1.getTargets().contains(target)) {
+
+                        final Option<ObsContext> ctx = getObsContext(env1);
+
+                        if (_curPos != null) _curPos.deleteWatcher(posWatcher);
+
+                        _curPos = target;
+
+                        // Sidereal
+                        _siderealEditor.edit(ctx, target);
+                        _trackingEditor.edit(ctx, target);
+
+                        // Nonsidereal
+                        _nonSiderealTargetSup.updatePos(_curPos);
+                        _nonsideMagEditor.edit(ctx, target);
+
+                        if (_curPos != null) {
+                            _curPos.addWatcher(posWatcher);
+                            refreshAll();
+
+                            // can't remove base position, so disable button
+                            final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
+                            _w.removeButton.setEnabled(_curPos != env1.getBase() && editable);
+                            _w.primaryButton.setEnabled(enablePrimary(target, env1) && editable);
+                        }
+                    }
+                }
             } else {
                 final GuideGroup grp = TargetSelection.getGuideGroup(env, node);
-                if (grp != null) _handleSelectionUpdate(grp);
+                if (grp != null) if (getDataObject() != null) {
+                    final TargetEnvironment env1 = getDataObject().getTargetEnvironment();
+                    if (env1.getGroups().contains(grp)) {
+
+                        if (_curPos != null) _curPos.deleteWatcher(posWatcher);
+
+                        _curPos = null;
+                        _curGroup = grp;
+
+                        _w.objectGBW.setVisible(false);
+                        _w.extrasFolder.setVisible(false);
+                        _w.guideGroupPanel.setVisible(true);
+                        if (_trackingButton.isSelected())
+                            _trackingButton.doClick();
+                        _trackingButton.setVisible(false);
+
+                        final String name = _curGroup.getName().getOrElse("");
+                        // don't trim, otherwise user can't include space in group name
+//        if (name != null) name = name.trim();
+                        _w.guideGroupName.setValue(name);
+
+                        final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
+                        _w.removeButton.setEnabled(editable);
+                        _w.primaryButton.setEnabled(editable);
+                    }
+                }
             }
         }
     };
@@ -1375,73 +1219,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             _w.primaryButton.setEnabled(enabled && OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation()));
         }
     };
-
-    private void setTargetObsComp() {
-        /* ===== */
-        final ISPObsComponent node = getContextTargetObsComp();
-        TargetSelection.listenTo(node, selectionListener);
-
-        getDataObject().addPropertyChangeListener(TargetObsComp.TARGET_ENV_PROP, primaryButtonUpdater);
-        getDataObject().addPropertyChangeListener(TargetObsComp.TARGET_ENV_PROP, guidingPanelUpdater);
-
-        final TargetEnvironment env = getDataObject().getTargetEnvironment();
-        _handleSelectionUpdate(TargetSelection.get(env, node));
-
-        _initAddMenu(getDataObject());
-        _tpTable.reinit(getDataObject());
-    }
-
-    // Initializes the menu of items that can be added to the target
-    // environment.
-    private void _initAddMenu(final TargetObsComp obsComp) {
-        final SPInstObsComp inst = getContextInstrumentDataObject();
-        _w.newMenu.removeAll();
-        if (obsComp == null || inst == null) {
-            _w.newMenu.setEnabled(false);
-            return;
-        }
-        _w.newMenu.setEnabled(true);
-
-        final TargetEnvironment env = obsComp.getTargetEnvironment();
-
-        if (inst.hasGuideProbes()) {
-            final List<GuideProbe> guiders = new ArrayList<>(env.getGuideEnvironment().getActiveGuiders());
-            Collections.sort(guiders, GuideProbe.KeyComparator.instance);
-
-            for (final GuideProbe probe : guiders) {
-                _w.newMenu.add(new JMenuItem(probe.getKey()) {{
-                    addActionListener(new AddGuideStarAction(obsComp, probe, _w.positionTable));
-                }});
-            }
-        }
-
-        _w.newMenu.add(new JMenuItem("User") {{
-            addActionListener(new AddUserTargetAction(obsComp));
-        }});
-
-        if (inst.hasGuideProbes()) {
-            _w.newMenu.addSeparator();
-            final JMenuItem guideGroupMenu = _w.newMenu.add(new JMenuItem("Guide Group") {{
-                addActionListener(new AddGroupAction(obsComp, _w.positionTable));
-            }});
-
-            // OT-34: disable create group menu if no guide stars defined
-            _w.newMenu.addMenuListener(new MenuListener() {
-                @Override
-                public void menuSelected(MenuEvent e) {
-                    guideGroupMenu.setEnabled(obsComp.getTargetEnvironment().getGuideEnvironment().getTargets().size() != 0);
-                }
-
-                @Override
-                public void menuDeselected(MenuEvent e) {
-                }
-
-                @Override
-                public void menuCanceled(MenuEvent e) {
-                }
-            });
-        }
-    }
 
     // Action that handles adding a new guide star when a probe is picked from
     // the add menu.
@@ -1489,7 +1266,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    _showTargetTag();
+                    showTargetTag();
                 }
             });
         }
@@ -1547,206 +1324,64 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         return !env.getUserTargets().contains(target);
     }
 
-    private void _handleSelectionUpdate(SPTarget selTarget) {
-        if (getDataObject() == null) return;
-        final TargetEnvironment env = getDataObject().getTargetEnvironment();
-        if (!env.getTargets().contains(selTarget)) return;
+    private void refreshAll() {
 
-        final Option<ObsContext> ctx = obsContext(env);
+        final boolean isNonSidereal = (_curPos.getTarget() instanceof NonSiderealTarget);
 
-        if (_curPos != null) _curPos.deleteWatcher(posWatcher);
-
-        _curPos = selTarget;
-
-        // Sidereal
-        _siderealEditor.edit(ctx, selTarget);
-        _trackingEditor.edit(ctx, selTarget);
-
-        // Nonsidereal
-        _nonSiderealTargetSup.updatePos(_curPos);
-        _nonsideMagEditor.edit(ctx, selTarget);
-
-        if (_curPos != null) {
-            _curPos.addWatcher(posWatcher);
-            _showPos();
-
-            // can't remove base position, so disable button
-            final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
-            _w.removeButton.setEnabled(_curPos != env.getBase() && editable);
-            _w.primaryButton.setEnabled(enablePrimary(selTarget, env) && editable);
-        }
-    }
-
-    private void _handleSelectionUpdate(GuideGroup selGroup) {
-        if (getDataObject() == null) return;
-        final TargetEnvironment env = getDataObject().getTargetEnvironment();
-        if (!env.getGroups().contains(selGroup)) return;
-
-        if (_curPos != null) _curPos.deleteWatcher(posWatcher);
-
-        _curPos = null;
-        _curGroup = selGroup;
-
-        _showGroup();
-
-        final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
-        _w.removeButton.setEnabled(editable);
-        _w.primaryButton.setEnabled(editable);
-    }
-
-    /**
-     * Show the current SPTarget.
-     */
-    private void _showPos() {
         _w.extrasFolder.setVisible(true);
         _w.objectGBW.setVisible(true);
         final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
         _w.objectGBW.setEnabled(editable);
         _w.guideGroupPanel.setVisible(false);
-        _trackingButton.setVisible(!_isNonSidereal());
+        _trackingButton.setVisible(!isNonSidereal);
 
-        _initTagChoices();
-        _showTargetTag();
-        _updateTargetInformationUI();
-
-        String name = _curPos.getTarget().getName();
-        if (name != null) name = name.trim();
-        _w.targetName.setValue(name);
-        _w.resolveButton.setEnabled(editable && !"".equals(name));
-
-        _w.xaxis.setValue(_curPos.getTarget().getRa().toString());
-        _w.yaxis.setValue(_curPos.getTarget().getDec().toString());
-
-        _setCoordSys();
-
-        // update the display in the tabs
-        if (_curPos.getTarget() instanceof NonSiderealTarget) {
-            final NonSiderealTarget nst = (NonSiderealTarget) _curPos.getTarget();
-            _nonSiderealTargetSup.showNonSiderealTarget(nst);
-        }
-    }
-
-    /**
-     * Show/edit the current guide group name.
-     */
-    private void _showGroup() {
-        _w.objectGBW.setVisible(false);
-        _w.extrasFolder.setVisible(false);
-        _w.guideGroupPanel.setVisible(true);
-        if (_trackingButton.isSelected())
-            _trackingButton.doClick();
-        _trackingButton.setVisible(false);
-
-        final String name = _curGroup.getName().getOrElse("");
-        // don't trim, otherwise user can't include space in group name
-//        if (name != null) name = name.trim();
-        _w.guideGroupName.setValue(name);
-    }
-
-
-    private void _showTargetTag() {
+        // Get all the legally available guiders in the current context.
+        final Set<GuideProbe> avail = GuideProbeUtil.instance.getAvailableGuiders(getContextObservation());
+        final Set<GuideProbe> guiders = new HashSet<>(avail);
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
-        for (int i = 0; i < _w.tag.getItemCount(); ++i) {
-            final PositionType pt = (PositionType) _w.tag.getItemAt(i);
-            if (pt.isMember(env, _curPos)) {
-                _w.tag.removeActionListener(_tagListener);
-                _w.tag.setSelectedIndex(i);
-                _w.tag.addActionListener(_tagListener);
-                return;
+
+        // Get the set of guiders that are referenced but not legal in this
+        // context, if any.  Any "available" guider is legal, anything left
+        // over is referenced but not really available.
+        final Set<GuideProbe> illegalSet = env.getOrCreatePrimaryGuideGroup().getReferencedGuiders();
+        illegalSet.removeAll(avail);
+
+        // Determine whether the current position is one of these illegal
+        // guiders.  If so, we add the guide probe to the list of choices
+        // so that this target may be selected in order to change its type or
+        // delete it.
+        GuideProbe illegal = null;
+        for (GuideProbe guider : illegalSet) {
+            final Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(guider);
+            if (gtOpt.getValue().getOptions().contains(_curPos)) {
+                illegal = guider;
+                guiders.add(guider);
             }
         }
-    }
 
-    /**
-     * Called when the user types in one of the text boxes for the x,y coordinates
-     */
-    private void _setCurPos() {
-        String ra = _w.xaxis.getText().trim(), dec = _w.yaxis.getText().trim();
+        // Sort the list of guiders.
+        final List<GuideProbe> guidersList = new ArrayList<>(guiders);
+        Collections.sort(guidersList, GuideProbe.KeyComparator.instance);
 
-        // allow "," instead of "."
-        ra  = ra.replace(",", ".");
-        dec = dec.replace(",", ".");
+        // Make a list of PositionTypes that are legal in the current
+        // observation context.
+        final PositionType[] ptA;
+        ptA = new PositionType[2 + guiders.size()];
 
-        if (!(dec.equals("-") || dec.equals("+"))) {
-            _ignorePosUpdate = true;
-            try {
-                setHmsDms(_curPos, ra, dec);
-            } finally {
-                _ignorePosUpdate = false;
-            }
-            updateGuiding();
+        int index = 0;
+        ptA[index++] = BasePositionType.instance;
+        for (GuideProbe guider : guidersList) {
+            ptA[index++] = new GuidePositionType(guider, guider != illegal);
         }
-    }
+        ptA[index] = UserPositionType.instance;
 
+        _w.tag.removeActionListener(_tagListener);
+        _w.tag.setModel(new DefaultComboBoxModel(ptA));
+        _w.tag.setEnabled(isEnabled() && (env.getBase() != _curPos));
+        _w.tag.addActionListener(_tagListener);
 
-    // Called when the user types a value in one of the entries in the conic
-    // target tab
-    private void _setConicPos(NumberBoxWidget nbw) {
-        final ConicTarget target = (ConicTarget) _curPos.getTarget();
-        _ignorePosUpdate = true;
-        try {
-            _nonSiderealTargetSup.setConicPos(target, nbw);
-        } finally {
-            _ignorePosUpdate = false;
-        }
-        _setCurPos(); // XXX not needed, except that this will cause an event to be fired
-        updateGuiding();
-    }
-
-
-    // Show the coordinate system and update the other widgets based upon it.
-    private void _setCoordSys() {
-        if (_isNonSidereal()) {
-            _w.system.setValue(NON_SIDEREAL_TARGET);
-            _nonSiderealTargetSup.showOrbitalElementFormat();
-        } else {
-            _w.system.setValue(_curPos.getTarget().getTag().tccName);
-        }
-    }
-
-    // Return true if the current position is a ConicTarget or a Planet Target
-    private boolean _isNonSidereal() {
-        return (_curPos.getTarget() instanceof NonSiderealTarget);
-    }
-
-    private final TelescopePosWatcher posWatcher = new TelescopePosWatcher() {
-        public void telescopePosUpdate(WatchablePos tp) {
-            if (_ignorePosUpdate)
-                return;
-
-            if (tp != _curPos) {
-                // This shouldn't happen ...
-                System.out.println(getClass().getName() + ": received a position " +
-                        " update for a position other than the current one: " + tp);
-                return;
-            }
-            _showPos();
-            updateGuiding();
-        }
-    };
-
-    // Update the current target to use the selected coordinate system
-    private void _updateCoordSystem() {
-        final ITarget.Tag tag;
-        if (_w.system.getStringValue().equals(NON_SIDEREAL_TARGET)) {
-            tag = ((ITarget.Tag) _w.orbitalElementFormat.getSelectedItem());
-        } else {
-            tag = ITarget.Tag.SIDEREAL;
-        }
-        _ignorePosUpdate = true;
-        try {
-            _curPos.setTargetType(tag);
-        } finally {
-            _ignorePosUpdate = false;
-        }
-
-        _showPos();
-        updateGuiding();
-    }
-
-    // Update the enabled states of the target tabs based on the selected coordinate system
-    private void _updateTargetInformationUI() {
-        final boolean isNonSidereal = _isNonSidereal();
+        _w.tag.setRenderer(tagRenderer);
+        showTargetTag();
         final CardLayout cl = (CardLayout) _w.extrasFolder.getLayout();
         final String tag = isNonSidereal ? "nonsidereal" : "sidereal";
         cl.show(_w.extrasFolder, tag);
@@ -1762,133 +1397,69 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         //disable the resolve name for Named Targets
         _w.resolveButton.setEnabled(!(_curPos.getTarget() instanceof NamedTarget));
+
+        String name = _curPos.getTarget().getName();
+        if (name != null) name = name.trim();
+        _w.targetName.setValue(name);
+        _w.resolveButton.setEnabled(editable && !"".equals(name));
+
+        _w.xaxis.setValue(_curPos.getTarget().getRa().toString());
+        _w.yaxis.setValue(_curPos.getTarget().getDec().toString());
+
+        if (isNonSidereal) {
+            _w.system.setValue(NON_SIDEREAL_TARGET);
+            _nonSiderealTargetSup.showOrbitalElementFormat();
+        } else {
+            _w.system.setValue(_curPos.getTarget().getTag().tccName);
+        }
+
+        // update the display in the tabs
+        if (_curPos.getTarget() instanceof NonSiderealTarget) {
+            final NonSiderealTarget nst = (NonSiderealTarget) _curPos.getTarget();
+            _nonSiderealTargetSup.showNonSiderealTarget(nst);
+        }
     }
+
+
+    private void showTargetTag() {
+        final TargetEnvironment env = getDataObject().getTargetEnvironment();
+        for (int i = 0; i < _w.tag.getItemCount(); ++i) {
+            final PositionType pt = (PositionType) _w.tag.getItemAt(i);
+            if (pt.isMember(env, _curPos)) {
+                _w.tag.removeActionListener(_tagListener);
+                _w.tag.setSelectedIndex(i);
+                _w.tag.addActionListener(_tagListener);
+                break;
+            }
+        }
+    }
+
+
+//    // Return true if the current position is a ConicTarget or a Planet Target
+//    private boolean _isNonSidereal() {
+//        return (_curPos.getTarget() instanceof NonSiderealTarget);
+//    }
+
+    private final TelescopePosWatcher posWatcher = new TelescopePosWatcher() {
+        public void telescopePosUpdate(WatchablePos tp) {
+            if (_ignorePosUpdate)
+                return;
+
+            if (tp != _curPos) {
+                // This shouldn't happen ...
+                System.out.println(getClass().getName() + ": received a position " +
+                        " update for a position other than the current one: " + tp);
+                return;
+            }
+            refreshAll();
+            updateGuiding();
+        }
+    };
 
     // Used to notify listener when the resolveName() thread is done
     private interface ResolveNameListener {
         void nameResolved();
     }
-
-    private ActionListener bigListener = new ActionListener() {
-        public void actionPerformed(ActionEvent evt) {
-            final Object w = evt.getSource();
-            TargetEnvironment env = getDataObject().getTargetEnvironment();
-
-            if (w == _w.removeButton) {
-                if (env.isBasePosition(_curPos)) {
-                    DialogUtil.error("You can't remove the Base Position.");
-                    return;
-                }
-                if (_curPos != null) {
-                    env = env.removeTarget(_curPos);
-                } else if (_curGroup != null) {
-                    final GuideGroup primary = env.getOrCreatePrimaryGuideGroup();
-                    if (_curGroup == primary) {
-                        DialogUtil.error("You can't remove the primary guide group.");
-                        return;
-                    }
-                    env = env.removeGroup(_curGroup);
-                    _curGroup = primary;
-                }
-                getDataObject().setTargetEnvironment(env);
-                _handleSelectionUpdate(TargetSelection.get(env, getNode()));
-
-            } else if (w == _w.manualGuideStarButton || w == _w.autoGuideStarButton) {
-                try {
-                    final boolean manual = w == _w.manualGuideStarButton;
-                    if (manual || GuideStarSupport.hasGemsComponent(getNode())) {
-                        final TelescopePosEditor tpe = TpeManager.open();
-                        tpe.reset(getNode());
-                        tpe.getImageWidget().guideStarSearch(manual);
-                    } else {
-                        // In general, we don't want to pop open the TPE just to
-                        // pick a guide star.
-                        AgsClient.launch(getNode(), _w);
-                    }
-                } catch (Exception e) {
-                    DialogUtil.error(e);
-                }
-            } else if (w == _w.setBaseButton) {
-                final TelescopePosEditor tpe = TpeManager.get();
-                if (tpe == null) {
-                    DialogUtil.message("The Position Editor must be opened for this feature to work.");
-                    return;
-                }
-                tpe.reset(getNode());
-                final WorldCoords basePos = tpe.getImageCenterLocation();
-                if (basePos == null) {
-                    DialogUtil.message("Couldn't determine the image center.");
-                    return;
-                }
-
-                final SPTarget base = env.getBase();
-                base.getTarget().getRa().setAs(basePos.getRaDeg(), CoordinateParam.Units.DEGREES);
-                base.getTarget().getDec().setAs(basePos.getDecDeg(), CoordinateParam.Units.DEGREES);
-                base.notifyOfGenericUpdate();
-            } else if (w == _w.resolveButton) {
-                // REL-1063 Fix OT nonsidereal Solar System Object Horizons name resolution
-                if (_curPos.getTarget() instanceof NamedTarget) {
-                    // For named objects like Moon, Saturn, etc don't get the orbital elements, just the position
-                    _resolveName(HorizonsAction.Type.UPDATE_POSITION, null);
-                } else {
-                    _resolveName(HorizonsAction.Type.GET_ORBITAL_ELEMENTS, null);
-                }
-            } else if (w == _w.timeRangePlotButton) {
-                _resolveName(HorizonsAction.Type.PLOT_EPHEMERIS, null);
-            } else if (w == _w.updateRaDecButton) {
-                // REL-1063 Fix OT nonsidereal Solar System Object Horizons name resolution
-                if (_curPos.getTarget() instanceof NamedTarget) {
-                    // For named objects like Moon, Saturn, etc don't get the orbital elements, just the position
-                    _resolveName(HorizonsAction.Type.UPDATE_POSITION, null);
-                } else {
-                    // REL-343: Force nonsidereal target name resolution on coordinate updates
-                    _resolveName(HorizonsAction.Type.GET_ORBITAL_ELEMENTS, new ResolveNameListener() {
-                        @Override
-                        public void nameResolved() {
-                            _resolveName(HorizonsAction.Type.UPDATE_POSITION, null);
-                        }
-                    });
-                }
-            } else if (w == _w.calendarTime) {
-                final Object o = _w.calendarTime.getSelectedItem();
-                if (o instanceof TimeConfig) {
-                    final TimeConfig tr = (TimeConfig) o;
-                    final Date d = tr.getDate();
-                    final String time = timeFormatter.format(d);
-                    _timeDocument.setTime(time);
-                    //we have to set the correct day in the calendar when
-                    // shortcuts are used.
-                    //because _w.calendarDate.setDate(d) doesn't work,
-                    // and Shane agreed :) we destroy the calendar a create a  new one with the correct date
-                    // (Shane's words => def uglyWorkaroundAcceptable(appName: String) = appName == "OT")
-                    //todo: figure out why  _w.calendarDate.setDate(d) doesn't work
-
-                    _w.panel1.remove(_w.calendarDate);
-                    _w.calendarDate = new JCalendarPopup(d, TimeZone.getTimeZone("UTC"));
-                    _w.panel1.add(_w.calendarDate, new CellConstraints().xy(5, 1));
-                    _w.calendarDate.revalidate();
-                    _w.calendarDate.repaint();
-
-                    //_w.calendarDate.set
-                } else if (o instanceof String) {
-                    //just update the time document
-                    _timeDocument.setTime((String) o);
-                }
-
-            } else if (w instanceof JRadioButton) {
-                final String cmd = evt.getActionCommand().toUpperCase();
-                if (_curPos.getTarget() instanceof NamedTarget) {
-                    final NamedTarget target = (NamedTarget) _curPos.getTarget();
-                    try {
-                        target.setSolarObject(NamedTarget.SolarObject.valueOf(cmd));
-                        _setCurPos(); //not needed, but used to fire an event
-                    } catch (IllegalArgumentException ex) {
-                        DialogUtil.error("Couldn't find a Planet called " + cmd);
-                    }
-                }
-            }
-        }
-    };
 
     ////////////////////////////////////////////////////////////////////////
     //////////////////////////// Utility Classes  //////////////////////////
@@ -2090,21 +1661,15 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         private class PlotEphemeris implements HorizonsAction {
             public void execute(HorizonsReply reply) {
                 if (reply.hasEphemeris()) {
-                    _drawEphemeris(reply.getEphemeris());
+                    List<EphemerisEntry> ephemeris = reply.getEphemeris();
+                    //first, we need to setup the base position
+                    _processEphemeris(ephemeris);
+                    if (ephemeris != null) {
+                        HorizonsPlotter.plot(getNode(), ephemeris);
+                    }
                 } else {
                     DialogUtil.error("No ephemeris available for object.");
                 }
-            }
-        }
-
-        /**
-         * Draw the given ephemeris in the TPE
-         */
-        private void _drawEphemeris(List<EphemerisEntry> ephemeris) {
-            //first, we need to setup the base position
-            _processEphemeris(ephemeris);
-            if (ephemeris != null) {
-                HorizonsPlotter.plot(getNode(), ephemeris);
             }
         }
 
@@ -2130,16 +1695,347 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         target.setDateForPosition(entry.getDate());
                         updateGuiding();
                     }
-
-                    // TPE REFACTOR -- what is this?
-//                    TelescopePosEditor tpe = TpeManager.get();
-//                    if (tpe != null) {
-//                        SPTarget base = _targetObsComp.getTargetEnvironment().getBase();
-//                        tpe.setBasePosition(base);
-//                    }
                 }
             }
         }
     }
+
+
+    private static final class TrackingButton extends JToggleButton {
+        public TrackingButton() {
+            super("Tracking Details");
+            setUI(new RotatedButtonUI(RotatedButtonUI.Orientation.topToBottom));
+            setBackground(VERY_LIGHT_GREY);
+        }
+    }
+
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private final ActionListener removeListener = new ActionListener() {
+        public void actionPerformed(ActionEvent evt) {
+            TargetEnvironment env = getDataObject().getTargetEnvironment();
+            if (env.isBasePosition(_curPos)) {
+                DialogUtil.error("You can't remove the Base Position.");
+            } else if (_curPos != null) {
+                env.removeTarget(_curPos);
+            } else if (_curGroup != null) {
+                final GuideGroup primary = env.getOrCreatePrimaryGuideGroup();
+                if (_curGroup == primary) {
+                    DialogUtil.error("You can't remove the primary guide group.");
+                } else {
+                    env = env.removeGroup(_curGroup);
+                    _curGroup = primary;
+                    getDataObject().setTargetEnvironment(env);
+                    final SPTarget selTarget = TargetSelection.get(env, getNode());
+                    if (env.getTargets().contains(selTarget)) {
+                        final Option<ObsContext> ctx = getObsContext(env);
+                        if (_curPos != null) _curPos.deleteWatcher(posWatcher);
+                        _curPos = selTarget;
+                        _siderealEditor.edit(ctx, selTarget);
+                        _trackingEditor.edit(ctx, selTarget);
+                        _nonSiderealTargetSup.updatePos(_curPos);
+                        _nonsideMagEditor.edit(ctx, selTarget);
+                        if (_curPos != null) {
+                            _curPos.addWatcher(posWatcher);
+                            refreshAll();
+                            final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
+                            _w.removeButton.setEnabled(_curPos != env.getBase() && editable);
+                            _w.primaryButton.setEnabled(enablePrimary(selTarget, env) && editable);
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private final ActionListener manualGuideStarListener = new ActionListener() {
+        public void actionPerformed(ActionEvent evt) {
+            try {
+                final TelescopePosEditor tpe = TpeManager.open();
+                tpe.reset(getNode());
+                tpe.getImageWidget().guideStarSearch(true);
+            } catch (Exception e) {
+                DialogUtil.error(e);
+            }
+        }
+    };
+
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private final ActionListener autoGuideStarListener = new ActionListener() {
+        public void actionPerformed(ActionEvent evt) {
+            try {
+                if (GuideStarSupport.hasGemsComponent(getNode())) {
+                    final TelescopePosEditor tpe = TpeManager.open();
+                    tpe.reset(getNode());
+                    tpe.getImageWidget().guideStarSearch(false);
+                } else {
+                    // In general, we don't want to pop open the TPE just to
+                    // pick a guide star.
+                    AgsClient.launch(getNode(), _w);
+                }
+            } catch (Exception e) {
+                DialogUtil.error(e);
+            }
+        }
+    };
+
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private final ActionListener setBaseListener = new ActionListener() {
+        public void actionPerformed(ActionEvent evt) {
+            final TargetEnvironment env = getDataObject().getTargetEnvironment();
+            final TelescopePosEditor tpe = TpeManager.get();
+            if (tpe == null) {
+                DialogUtil.message("The Position Editor must be opened for this feature to work.");
+            } else {
+                tpe.reset(getNode());
+                final WorldCoords basePos = tpe.getImageCenterLocation();
+                if (basePos == null) {
+                    DialogUtil.message("Couldn't determine the image center.");
+                } else {
+                    final SPTarget base = env.getBase();
+                    base.getTarget().getRa().setAs(basePos.getRaDeg(), CoordinateParam.Units.DEGREES);
+                    base.getTarget().getDec().setAs(basePos.getDecDeg(), CoordinateParam.Units.DEGREES);
+                    base.notifyOfGenericUpdate();
+                }
+            }
+        }
+    };
+
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private final ActionListener resolveListener = new ActionListener() {
+        public void actionPerformed(ActionEvent evt) {
+            // REL-1063 Fix OT nonsidereal Solar System Object Horizons name resolution
+            if (_curPos.getTarget() instanceof NamedTarget) {
+                // For named objects like Moon, Saturn, etc don't get the orbital elements, just the position
+                resolveName(HorizonsAction.Type.UPDATE_POSITION, null);
+            } else {
+                resolveName(HorizonsAction.Type.GET_ORBITAL_ELEMENTS, null);
+            }
+        }
+    };
+
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private final ActionListener timeRangePlotListener = new ActionListener() {
+        public void actionPerformed(ActionEvent evt) {
+            resolveName(HorizonsAction.Type.PLOT_EPHEMERIS, null);
+        }
+    };
+
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private final ActionListener updateRaDecListener = new ActionListener() {
+        public void actionPerformed(ActionEvent evt) {
+            // REL-1063 Fix OT nonsidereal Solar System Object Horizons name resolution
+            if (_curPos.getTarget() instanceof NamedTarget) {
+                // For named objects like Moon, Saturn, etc don't get the orbital elements, just the position
+                resolveName(HorizonsAction.Type.UPDATE_POSITION, null);
+            } else {
+                // REL-343: Force nonsidereal target name resolution on coordinate updates
+                resolveName(HorizonsAction.Type.GET_ORBITAL_ELEMENTS, new ResolveNameListener() {
+                    public void nameResolved() {
+                        resolveName(HorizonsAction.Type.UPDATE_POSITION, null);
+                    }
+                });
+            }
+        }
+    };
+
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private final ActionListener duplicateListener = new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            final ISPObsComponent obsComponent = getNode();
+            final TargetObsComp dataObject = getDataObject();
+            if ((obsComponent == null) || (dataObject == null)) return;
+            final SPTarget target = TargetSelection.get(dataObject.getTargetEnvironment(), obsComponent);
+            if (target != null) {
+                // Clone the target.
+                final ParamSet ps = target.getParamSet(new PioXmlFactory());
+                final SPTarget newTarget = new SPTarget();
+                newTarget.setParamSet(ps);
+
+                // Add it to the environment.  First we have to figure out
+                // what it is.
+                TargetEnvironment env = dataObject.getTargetEnvironment();
+
+                // See if it is a guide star and duplicate it in the correct
+                // GuideTargets list.
+                boolean duplicated = false;
+                env.getOrCreatePrimaryGuideGroup();
+                final List<GuideGroup> groups = new ArrayList<>();
+                for (GuideGroup group : env.getGroups()) {
+                    for (GuideProbeTargets gt : group) {
+                        if (gt.getOptions().contains(target)) {
+                            group = group.put(gt.update(append(newTarget)));
+                            duplicated = true;
+                            break;
+                        }
+                    }
+                    groups.add(group);
+                }
+                if (duplicated) {
+                    // Update groups list
+                    env = env.setGuideEnvironment(env.getGuideEnvironment().setOptions(DefaultImList.create(groups)));
+                } else {
+                    // Add as a user target
+                    env = env.setUserTargets(env.getUserTargets().append(newTarget));
+                }
+
+                dataObject.setTargetEnvironment(env);
+            } else {
+                final GuideGroup group = TargetSelection.getGuideGroup(dataObject.getTargetEnvironment(), obsComponent);
+                if (group != null) {
+                    TargetEnvironment env = dataObject.getTargetEnvironment();
+                    final List<GuideGroup> groups = new ArrayList<>();
+                    groups.addAll(env.getGroups().toList());
+                    groups.add(group.cloneTargets());
+                    env = env.setGuideEnvironment(env.getGuideEnvironment().setOptions(DefaultImList.create(groups)));
+                    dataObject.setTargetEnvironment(env);
+                    // save/restore tree state will leave last group closed, since there is one more, so expand it here
+                    _w.positionTable.expandGroup(groups.get(groups.size() - 1));
+                }
+            }
+        }
+    };
+
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private final ActionListener calendarTimeListener = new ActionListener() {
+        final DateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss");
+        {
+            timeFormatter.setTimeZone(UTC);
+        }
+        public void actionPerformed(ActionEvent evt) {
+            final Object o = _w.calendarTime.getSelectedItem();
+            if (o instanceof TimeConfig) {
+                final TimeConfig tr = (TimeConfig) o;
+                final Date d = tr.getDate();
+                final String time = timeFormatter.format(d);
+                _timeDocument.setTime(time);
+                //we have to set the correct day in the calendar when
+                // shortcuts are used.
+                //because _w.calendarDate.setDate(d) doesn't work,
+                // and Shane agreed :) we destroy the calendar a create a  new one with the correct date
+                // (Shane's words => def uglyWorkaroundAcceptable(appName: String) = appName == "OT")
+                //todo: figure out why  _w.calendarDate.setDate(d) doesn't work
+
+                _w.panel1.remove(_w.calendarDate);
+                _w.calendarDate = new JCalendarPopup(d, TimeZone.getTimeZone("UTC"));
+                _w.panel1.add(_w.calendarDate, new CellConstraints().xy(5, 1));
+                _w.calendarDate.revalidate();
+                _w.calendarDate.repaint();
+
+                //_w.calendarDate.set
+            } else if (o instanceof String) {
+                //just update the time document
+                _timeDocument.setTime((String) o);
+            }
+        }
+    };
+
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private final ActionListener solarListener = new ActionListener() {
+        public void actionPerformed(ActionEvent evt) {
+            final String cmd = evt.getActionCommand().toUpperCase();
+            if (_curPos.getTarget() instanceof NamedTarget) {
+                final NamedTarget target = (NamedTarget) _curPos.getTarget();
+                try {
+                    target.setSolarObject(NamedTarget.SolarObject.valueOf(cmd));
+                    _curPos.notifyOfGenericUpdate();
+                } catch (IllegalArgumentException ex) {
+                    DialogUtil.error("Couldn't find a Planet called " + cmd);
+                }
+            }
+        }
+    };
+
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private final ActionListener copyListener = new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            final Option<TargetClipboard> opt = TargetClipboard.copy(getDataObject().getTargetEnvironment(), getNode());
+            if (opt.isEmpty()) return;
+            clipboard = opt.getValue();
+        }
+    };
+
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private final ActionListener pasteListener = new ActionListener() {
+        private void pasteSelectedPosition(ISPObsComponent obsComponent, TargetObsComp dataObject) {
+            if (clipboard != null) {
+                clipboard.paste(obsComponent, dataObject);
+            }
+        }
+        public void actionPerformed(ActionEvent e) {
+            if (_curPos != null) {
+                pasteSelectedPosition(getNode(), getDataObject());
+                _curPos.notifyOfGenericUpdate();
+            } else if (_curGroup != null) {
+                pasteSelectedPosition(getNode(), getDataObject());
+            }
+        }
+    };
+
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private final ActionListener primaryListener = new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            _w.positionTable.updatePrimaryStar();
+        }
+    };
+
+
+    private final TextBoxWidgetWatcher axisWatcher = new TextBoxWidgetWatcher() {
+        private void updateTargetCoordinatesFromTextWidgets() {
+            final String dec = _w.yaxis.getText().trim().replace(",", "."); // allow "," instead of "."
+            final String ra  = _w.xaxis.getText().trim().replace(",", ".");
+            if (!(dec.equals("-") || dec.equals("+"))) {
+                _ignorePosUpdate = true;
+                try {
+                    setHmsDms(_curPos, ra, dec);
+                } finally {
+                    _ignorePosUpdate = false;
+                }
+                updateGuiding();
+            }
+        }
+        public void textBoxKeyPress(TextBoxWidget tbwe) {
+            updateTargetCoordinatesFromTextWidgets();
+        }
+        public void textBoxAction(TextBoxWidget tbwe) {
+            updateTargetCoordinatesFromTextWidgets();
+        }
+    };
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private final TextBoxWidgetWatcher nonsiderealTextBoxWidgetWatcher = new TextBoxWidgetWatcher() {
+        private void updateConicTarget(NumberBoxWidget nbw) {
+            final ConicTarget target = (ConicTarget) _curPos.getTarget();
+            _ignorePosUpdate = true;
+            try {
+                _nonSiderealTargetSup.setConicPos(target, nbw);
+            } finally {
+                _ignorePosUpdate = false;
+            }
+            _curPos.notifyOfGenericUpdate();
+            updateGuiding();
+        }
+        public void textBoxKeyPress(TextBoxWidget tbw) {
+            updateConicTarget((NumberBoxWidget) tbw);
+        }
+        public void textBoxAction(TextBoxWidget tbw) {
+            updateConicTarget((NumberBoxWidget) tbw);
+        }
+    };
+
 }
 
