@@ -1,5 +1,6 @@
 package edu.gemini.itc.gmos;
 
+import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.*;
 
 import java.awt.*;
@@ -9,47 +10,43 @@ import java.awt.*;
  */
 public abstract class Gmos extends Instrument {
 
+    //Plate scales for original and Hamamatsu CCD's (temporary)
+    public static final double ORIG_PLATE_SCALE = 0.0727;
+    public static final double HAM_PLATE_SCALE = 0.080778;
+
+    protected String _CCDtype;
+    protected DetectorsTransmissionVisitor _dtv;
+
+    // Colors to use for charts corresponding to the detectorCcdIndex
+    protected static final Color[] DETECTOR_CCD_COLORS = {Color.blue, Color.green, Color.red};
 
     /**
      * Related files will be in this subdir of lib
      */
     public static final String INSTR_DIR = "gmos";
 
-    /**
-     * Related files will start with this prefix
-     */
-    public static String INSTR_PREFIX;
-
     // Instrument reads its configuration from here.
-    protected static double WELL_DEPTH;
-    protected static double AD_SATURATION;
-    protected static double HIGH_GAIN;
-    protected static double LOW_GAIN;
-    protected static int DETECTOR_PIXELS;
+    private static final double WELL_DEPTH = 125000.0;
+    private static final double AD_SATURATION = 56636;
+    private static final double HIGH_GAIN = 4.4;
+    private static final double LOW_GAIN = 2.18;
+    protected static final int DETECTOR_PIXELS = 6218;
 
     // Used as a desperate solution when multiple detectors need to be handled differently (See REL-478).
     // For EEV holds the one instance one the Gmos instrument, for Hamamatsu, contains 3 one Gmos instance for
     // each of the three detectors.
     protected Gmos[] _instruments;
 
+    protected final GmosParameters gp;
+
     // Keep a reference to the color filter to ask for effective wavelength
     protected Filter _Filter;
     protected GmosGratingOptics _gratingOptics;
     protected Detector _detector;
     protected double _sampling;
-    protected String _filterUsed;
-    protected String _grating;
-    protected String _focalPlaneMask;
     protected CalculationMethod _mode;
-    protected double _centralWavelength;
-    protected int _spectralBinning;
-    protected int _spatialBinning;
 
     protected boolean _IFUUsed = false;
-    protected String _IFUMethod;
-    protected double _IFUOffset;
-    protected double _IFUMinOffset;
-    protected double _IFUMaxOffset;
     protected IFUComponent _IFU;
     protected boolean _IFU_IsSingle = false;
 
@@ -59,19 +56,19 @@ public abstract class Gmos extends Instrument {
 
     private int _detectorCcdIndex = 0; // 0, 1, or 2 when there are multiple CCDs in the detector
 
-    public Gmos(String FILENAME, String INSTUMENT_PREFIX, int detectorCcdIndex) throws Exception {
+    public Gmos(GmosParameters gp, String FILENAME, String prefix, int detectorCcdIndex) throws Exception {
         super(INSTR_DIR, FILENAME);
+
+        this.gp = gp;
+
         _detectorCcdIndex = detectorCcdIndex;
 
         // The instrument data file gives a start/end wavelength for
         // the instrument.  But with a filter in place, the filter
         // transmits wavelengths that are a subset of the original range.
-
-        _observingStart = super.getStart();
-        _observingEnd = super.getEnd();
+        _observingStart = getStart();
+        _observingEnd = getEnd();
         _sampling = super.getSampling();
-
-        INSTR_PREFIX = INSTUMENT_PREFIX;
 
     }
 
@@ -115,7 +112,7 @@ public abstract class Gmos extends Instrument {
      * @return Effective wavelength in nm
      */
     public int getEffectiveWavelength() {
-        if (_grating.equals("none")) return (int) _Filter.getEffectiveWavelength();
+        if (gp.getGrating().equals("none")) return (int) _Filter.getEffectiveWavelength();
         else return (int) _gratingOptics.getEffectiveWavelength();
 
     }
@@ -125,7 +122,7 @@ public abstract class Gmos extends Instrument {
     }
 
     public String getGrating() {
-        return _grating;
+        return gp.getGrating();
     }
 
     public double getGratingDispersion_nm() {
@@ -154,7 +151,7 @@ public abstract class Gmos extends Instrument {
 
 
     public double getPixelSize() {
-        return super.getPixelSize() * _spatialBinning;
+        return super.getPixelSize() * gp.getSpatialBinning();
     }
 
 
@@ -171,11 +168,11 @@ public abstract class Gmos extends Instrument {
     }
 
     public int getSpectralBinning() {
-        return _spectralBinning;
+        return gp.getSpectralBinning();
     }
 
     public int getSpatialBinning() {
-        return _spatialBinning;
+        return gp.getSpatialBinning();
     }
 
     public double getADSaturation() {
@@ -198,26 +195,21 @@ public abstract class Gmos extends Instrument {
         return _IFUUsed;
     }
 
-    /**
-     * The prefix on data file names for this instrument.
-     */
-    public static String getPrefix() {
-        return INSTR_PREFIX;
-    }
-
     //Abstract class for Detector Pixel Transmission  (i.e.  Create Detector gaps)
-    public abstract edu.gemini.itc.operation.DetectorsTransmissionVisitor getDetectorTransmision();
+    public DetectorsTransmissionVisitor getDetectorTransmision() {
+        return _dtv;
+    }
 
     public String toString() {
 
         String s = "Instrument configuration: \n";
         s += super.opticalComponentsToString();
 
-        if (!_focalPlaneMask.equals(GmosParameters.NO_SLIT))
-            s += "<LI> Focal Plane Mask: " + _focalPlaneMask + "\n";
+        if (!gp.getFocalPlaneMask().equals(GmosParameters.NO_SLIT))
+            s += "<LI> Focal Plane Mask: " + gp.getFocalPlaneMask() + "\n";
         s += "\n";
         if (_mode.isSpectroscopy())
-            s += "<L1> Central Wavelength: " + _centralWavelength + " nm" + "\n";
+            s += "<L1> Central Wavelength: " + gp.getCentralWavelength() + " nm" + "\n";
         s += "Spatial Binning: " + getSpatialBinning() + "\n";
         if (_mode.isSpectroscopy())
             s += "Spectral Binning: " + getSpectralBinning() + "\n";
@@ -227,9 +219,9 @@ public abstract class Gmos extends Instrument {
         if (IFU_IsUsed()) {
             s += "IFU is selected,";
             if (_IFU_IsSingle)
-                s += "with a single IFU element at " + _IFUOffset + "arcsecs.";
+                s += "with a single IFU element at " + gp.getIFUOffset() + "arcsecs.";
             else
-                s += "with mulitple IFU elements arranged from " + _IFUMinOffset + " to " + _IFUMaxOffset + "arcsecs.";
+                s += "with mulitple IFU elements arranged from " + gp.getIFUMinOffset() + " to " + gp.getIFUMaxOffset() + "arcsecs.";
             s += "\n";
         }
         return s;

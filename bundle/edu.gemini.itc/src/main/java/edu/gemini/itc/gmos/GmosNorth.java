@@ -14,11 +14,6 @@ import java.awt.*;
  */
 public class GmosNorth extends Gmos {
 
-    //Plate scales for original and Hamamatsu CCD's (temporary)
-    public static final double ORIG_PLATE_SCALE = 0.0727;
-    public static final double HAM_PLATE_SCALE = 0.080778;
-
-    protected String _CCDtype;
     /**
      * Related files will start with this prefix
      */
@@ -37,40 +32,12 @@ public class GmosNorth extends Gmos {
     // Detector display names corresponding to the detectorCcdIndex
     private static final String[] DETECTOR_CCD_NAMES = {"BB(B)", "HSC", "BB(R)"};
 
-    // Colors to use for charts corresponding to the detectorCcdIndex
-    private static final Color[] DETECTOR_CCD_COLORS = {Color.blue, Color.green, Color.red};
-
-    private DetectorsTransmissionVisitor _dtv;
-
     public GmosNorth(GmosParameters gp, ObservationDetailsParameters odp, int detectorCcdIndex) throws Exception {
-        super(FILENAME, INSTR_PREFIX, detectorCcdIndex);
-        // The instrument data file gives a start/end wavelength for
-        // the instrument.  But with a filter in place, the filter
-        // transmits wavelengths that are a subset of the original range.
+        super(gp, FILENAME, INSTR_PREFIX, detectorCcdIndex);
 
-
-        WELL_DEPTH = 125000.0;
-
-        AD_SATURATION = 56636;
-
-        HIGH_GAIN = 4.4;
-        LOW_GAIN = 2.18;
-
-        DETECTOR_PIXELS = 6218;
-
-        _observingStart = super.getStart();
-        _observingEnd = super.getEnd();
-        _sampling = super.getSampling();
-
-        _focalPlaneMask = gp.getFocalPlaneMask();
-        _grating = gp.getGrating();
-        _filterUsed = gp.getFilter();
-        _centralWavelength = gp.getInstrumentCentralWavelength();
         _mode = odp.getMethod();
-        _spectralBinning = gp.getSpectralBinning();
-        _spatialBinning = gp.getSpatialBinning();
 
-        if (_focalPlaneMask.equals(gp.IFU))
+        if (gp.getFocalPlaneMask().equals(GmosParameters.IFU))
             _IFUUsed = true;
         else _IFUUsed = false;
 
@@ -78,9 +45,9 @@ public class GmosNorth extends Gmos {
         // Note for designers of other instruments:
         // Other instruments may not have filters and may just use
         // the range given in their instrument file.
-        if (!(_filterUsed.equals("none"))) {
+        if (!(gp.getFilter().equals("none"))) {
 
-            _Filter = Filter.fromWLFile(getPrefix(), _filterUsed, getDirectory() + "/");
+            _Filter = Filter.fromWLFile(getPrefix(), gp.getFilter(), getDirectory() + "/");
             if (_Filter.getStart() >= _observingStart)
                 _observingStart = _Filter.getStart();
             if (_Filter.getEnd() <= _observingEnd)
@@ -91,18 +58,17 @@ public class GmosNorth extends Gmos {
 
 
         FixedOptics _fixedOptics = new FixedOptics(getDirectory() + "/", getPrefix());
-        //addComponent(new FixedOptics(getDirectory()+"/"));
         addComponent(_fixedOptics);
 
 
         //Test to see that all conditions for Spectroscopy are met
         if (_mode.isSpectroscopy()) {
-            if (_grating.equals("none"))
+            if (gp.getGrating().equals("none"))
                 throw new Exception("Spectroscopy calculation method is selected but a grating" +
                         " is not.\nPlease select a grating and a " +
                         "focal plane mask in the Instrument " +
                         "configuration section.");
-            if (_focalPlaneMask.equals(GmosParameters.NO_SLIT))
+            if (gp.getFocalPlaneMask().equals(GmosParameters.NO_SLIT))
                 throw new Exception("Spectroscopy calculation method is selected but a focal" +
                         " plane mask is not.\nPlease select a " +
                         "grating and a " +
@@ -111,15 +77,15 @@ public class GmosNorth extends Gmos {
         }
 
         if (_mode.isImaging()) {
-            if (_filterUsed.equals("none"))
+            if (gp.getFilter().equals("none"))
                 throw new Exception("Imaging calculation method is selected but a filter" +
                         " is not.\n  Please select a filter and resubmit the " +
                         "form to continue.");
-            if (!_grating.equals("none"))
+            if (!gp.getGrating().equals("none"))
                 throw new Exception("Imaging calculation method is selected but a grating" +
                         " is also selected.\nPlease deselect the " +
                         "grating or change the method to spectroscopy.");
-            if (!_focalPlaneMask.equals("none"))
+            if (!gp.getFocalPlaneMask().equals("none"))
                 throw new Exception("Imaging calculation method is selected but a Focal" +
                         " Plane Mask is also selected.\nPlease " +
                         "deselect the Focal Plane Mask" +
@@ -158,45 +124,39 @@ public class GmosNorth extends Gmos {
         }
 
         if (detectorCcdIndex == 0) {
-            _dtv = new DetectorsTransmissionVisitor(_spectralBinning,
+            _dtv = new DetectorsTransmissionVisitor(gp.getSpectralBinning(),
                     getDirectory() + "/" + getPrefix() + "ccdpix_red" + Instrument.getSuffix());
         }
 
         if (_IFUUsed) {
-            _IFUMethod = gp.getIFUMethod();
-
-            if (_IFUMethod.equals(gp.SINGLE_IFU)) {
+            if (gp.getIFUMethod().equals(GmosParameters.SINGLE_IFU)) {
                 _IFU_IsSingle = true;
-                _IFUOffset = gp.getIFUOffset();
-                _IFU = new IFUComponent(_IFUOffset);
+                _IFU = new IFUComponent(getPrefix(), gp.getIFUOffset());
             }
-            if (_IFUMethod.equals(gp.RADIAL_IFU)) {
-                _IFUMinOffset = gp.getIFUMinOffset();
-                _IFUMaxOffset = gp.getIFUMaxOffset();
-
-                _IFU = new IFUComponent(_IFUMinOffset, _IFUMaxOffset);
+            if (gp.getIFUMethod().equals(GmosParameters.RADIAL_IFU)) {
+                _IFU = new IFUComponent(getPrefix(), gp.getIFUMinOffset(), gp.getIFUMaxOffset());
             }
             addComponent(_IFU);
         }
 
 
-        if (!(_grating.equals("none"))) {
+        if (!(gp.getGrating().equals("none"))) {
 
-            _gratingOptics = new GmosGratingOptics(getDirectory() + "/" + getPrefix(), _grating, _detector,
-                    _centralWavelength,
+            _gratingOptics = new GmosGratingOptics(getDirectory() + "/" + getPrefix(), gp.getGrating(), _detector,
+                    gp.getCentralWavelength(),
                     _detector.getDetectorPixels(),
-                    _spectralBinning);
+                    gp.getSpectralBinning());
             _sampling = _gratingOptics.getGratingDispersion_nmppix();
             _observingStart = _gratingOptics.getStart();
             _observingEnd = _gratingOptics.getEnd();
 
-            if (!(_grating.equals("none")) && !(_filterUsed.equals("none")))
+            if (!(gp.getGrating().equals("none")) && !(gp.getFilter().equals("none")))
                 if ((_Filter.getStart() >= _gratingOptics.getEnd()) ||
                         (_Filter.getEnd() <= _gratingOptics.getStart()))
 
                 {
-                    throw new Exception("The " + _filterUsed + " filter" +
-                            " and the " + _grating +
+                    throw new Exception("The " + gp.getFilter() + " filter" +
+                            " and the " + gp.getGrating() +
                             " do not overlap with the requested wavelength.\n" +
                             " Please select a different filter, grating or wavelength." + _Filter.getStart() +
                             " " + _Filter.getEnd() + " " + _gratingOptics.getStart() + " " + _gratingOptics.getEnd());
@@ -215,11 +175,6 @@ public class GmosNorth extends Gmos {
         return INSTR_PREFIX;
     }
 
-    public edu.gemini.itc.operation.DetectorsTransmissionVisitor getDetectorTransmision() {
-        return _dtv;
-    }
-
-
     public double getPixelSize() {
         //Temp method of returning correct GMOS-N pixel size.
         //Cannot change the value directly since pixel_size is a private
@@ -227,9 +182,9 @@ public class GmosNorth extends Gmos {
 
         // REL-477: XXX FIXME
         if (_CCDtype.equals("0") || _CCDtype.equals("1")) {
-            return ORIG_PLATE_SCALE * _spatialBinning;
+            return ORIG_PLATE_SCALE * gp.getSpatialBinning();
         } else {
-            return HAM_PLATE_SCALE * _spatialBinning;
+            return HAM_PLATE_SCALE * gp.getSpatialBinning();
         }
     }
 }

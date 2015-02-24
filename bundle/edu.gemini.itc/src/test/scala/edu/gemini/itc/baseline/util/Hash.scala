@@ -44,7 +44,7 @@ object Hash {
       p.getIFUMethod,
       p.getIFUMinOffset,
       p.getIFUOffset,
-      p.getInstrumentCentralWavelength,
+      p.getCentralWavelength,
       p.getInstrumentLocation,
       if ((p.getFilter.equals("g_G0301") && p.getGrating.equals("none")) || (p.getFilter.equals("g_G0301") && p.getGrating.equals("R150_G5306") && p.getCCDtype.equals("0"))) "highNoise" else "lowNoise",
       p.getSpatialBinning,

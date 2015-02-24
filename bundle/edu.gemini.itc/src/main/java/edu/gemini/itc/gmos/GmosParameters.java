@@ -100,7 +100,7 @@ public final class GmosParameters extends ITCParameters {
         return fpMask;
     }
 
-    public double getInstrumentCentralWavelength() {
+    public double getCentralWavelength() {
         return centralWavelength;
     }
 
@@ -164,7 +164,7 @@ public final class GmosParameters extends ITCParameters {
         StringBuffer sb = new StringBuffer();
         sb.append("Filter:\t" + getFilter() + "\n");
         sb.append("Grating:\t" + getGrating() + "\n");
-        sb.append("Instrument Central Wavelength:\t" + getInstrumentCentralWavelength() + "\n");
+        sb.append("Instrument Central Wavelength:\t" + getCentralWavelength() + "\n");
         sb.append("Focal Plane Mask: \t " + getFPMask() + " arcsec slit \n");
         sb.append("\n");
         return sb.toString();
