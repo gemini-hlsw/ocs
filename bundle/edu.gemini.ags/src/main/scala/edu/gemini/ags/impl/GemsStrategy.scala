@@ -5,7 +5,7 @@ import edu.gemini.ags.api.AgsStrategy.{Assignment, Estimate, Selection}
 import edu.gemini.ags.gems._
 import edu.gemini.ags.gems.mascot.{Strehl, MascotProgress}
 import edu.gemini.catalog.api._
-import edu.gemini.catalog.votable.{CatalogQueryResult, VoTableClient}
+import edu.gemini.catalog.votable.{CatalogException, CatalogQueryResult, VoTableClient}
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.core.Target.SiderealTarget
 
@@ -64,11 +64,14 @@ object GemsStrategy extends AgsStrategy {
       val adjustedMagConstraints = constraint.magnitudeConstraints.map(c => c.map(m => ctx.getConditions.magAdjustOp().apply(m.toOldModel).toNewModel))
       constraint.copy(magnitudeConstraints = adjustedMagConstraints)
     }
-
-    VoTableClient.catalog(adjustedConstraints).map { result =>
-      result.map { r =>
-        val id = r.query.id
-        CatalogResultWithKey(r.query, r.result, GemsCatalogSearchKey(GuideStarTypeMap(id), GuideProbeGroupMap(id)))
+    
+    VoTableClient.catalog(adjustedConstraints).flatMap {
+      case result if result.exists(_.result.containsError) => Future.failed(CatalogException(result.map(_.result.problems).flatten))
+      case result                                          => Future.successful {
+        result.map { r =>
+          val id = r.query.id
+          CatalogResultWithKey(r.query, r.result, GemsCatalogSearchKey(GuideStarTypeMap(id), GuideProbeGroupMap(id)))
+        }
       }
     }
   }

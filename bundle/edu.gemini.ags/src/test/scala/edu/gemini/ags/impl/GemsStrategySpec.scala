@@ -37,8 +37,13 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
 
       val ctx = ObsContext.create(env.setActiveGuiders(guiders.toSet.asJava), inst, new Some(Site.GS), SPSiteQuality.Conditions.BEST, null, null)
 
-      val estimate = GemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())
-      Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
+      try {
+        val estimate = GemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())
+        Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
+      } catch {
+        case e:Exception =>
+          skipped("Catalog may be down")
+      }
     }
   }
 }
