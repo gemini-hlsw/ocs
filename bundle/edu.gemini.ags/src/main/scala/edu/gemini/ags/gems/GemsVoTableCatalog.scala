@@ -69,7 +69,7 @@ object GemsVoTableCatalog {
   private def searchCatalog(basePosition: Coordinates, criterions: List[GemsCatalogSearchCriterion], statusLogger: StatusLogger): Future[List[GemsCatalogSearchResults]] = {
     val queryArgs = for {
       c <- criterions
-      q = CatalogQuery(basePosition, c.criterion.radiusLimits, c.criterion.magLimits.some)
+      q = CatalogQuery(0, basePosition, c.criterion.radiusLimits, c.criterion.magLimits.some)
     } yield (q, c)
 
     val qm = queryArgs.toMap
@@ -94,7 +94,7 @@ object GemsVoTableCatalog {
     val queries = for {
       radiusLimits <- radiusLimitsList
       magLimits <- magLimitsList
-      queryArgs = CatalogQuery(basePosition, radiusLimits, magLimits.some)
+      queryArgs = CatalogQuery(0, basePosition, radiusLimits, magLimits.some)
     } yield queryArgs
 
     VoTableClient.catalog(queries).flatMap {

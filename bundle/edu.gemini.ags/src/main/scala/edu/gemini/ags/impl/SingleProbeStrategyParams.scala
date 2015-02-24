@@ -26,7 +26,7 @@ sealed trait SingleProbeStrategyParams {
       mc <- magnitudeCalc(ctx, mt)
       rc <- radiusConstraint(ctx)
       ml =  AgsMagnitude.manualSearchLimits(mc)
-    } yield CatalogQuery(ctx.getBaseCoordinates.toNewModel, rc, ml)
+    } yield CatalogQuery(0, ctx.getBaseCoordinates.toNewModel, rc, ml)
 
   def radiusConstraint(ctx: ObsContext): Option[RadiusConstraint] =
     RadiusLimitCalc.getAgsQueryRadiusLimits(guideProbe, ctx)

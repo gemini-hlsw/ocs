@@ -43,7 +43,7 @@ case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGui
       mc <- magnitudeCalc(ctx, mt)
       rc <- radiusConstraints(ctx)
       ml =  AgsMagnitude.manualSearchLimits(mc)
-    } yield CatalogQuery(ctx.getBaseCoordinates.toNewModel, rc, ml)).toList
+    } yield CatalogQuery(0, ctx.getBaseCoordinates.toNewModel, rc, ml)).toList
 
   override def queryConstraints(ctx: ObsContext, mt: MagnitudeTable): List[QueryConstraint] = ???
 
