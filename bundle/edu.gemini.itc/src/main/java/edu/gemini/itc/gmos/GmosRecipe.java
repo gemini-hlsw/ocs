@@ -16,8 +16,6 @@ import java.util.List;
  * This class performs the calculations for Gmos used for imaging.
  */
 public final class GmosRecipe extends RecipeBase {
-    // Images will be saved to this session object
-    // private HttpSession _sessionObject = null; // set from servlet request
 
     private final Calendar now = Calendar.getInstance();
     private final String _header = new StringBuffer("# GMOS ITC: " + now.getTime() + "\n").toString();
@@ -51,7 +49,7 @@ public final class GmosRecipe extends RecipeBase {
         _sdParameters = ITCRequest.sourceDefinitionParameters(r);
         _obsDetailParameters = ITCRequest.observationParameters(r);
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
-        _gmosParameters = new GmosParameters(r);
+        _gmosParameters = ITCRequest.gmosParameters(r);
         _teleParameters = ITCRequest.teleParameters(r);
         _plotParameters = ITCRequest.plotParamters(r);
     }

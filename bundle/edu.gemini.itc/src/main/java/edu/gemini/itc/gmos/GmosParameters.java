@@ -1,33 +1,15 @@
 package edu.gemini.itc.gmos;
 
-import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCParameters;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * This class holds the information from the Gmos section
  * of an ITC web page.  This object is constructed from a servlet request.
  */
 public final class GmosParameters extends ITCParameters {
-    public static final String INSTRUMENT_FILTER = "instrumentFilter";
-    public static final String INSTRUMENT_GRATING = "instrumentDisperser";
-    public static final String INSTRUMENT_CENTRAL_WAVELENGTH = "instrumentCentralWavelength";
-    public static final String FP_MASK = "instrumentFPMask";
-    public static final String SPAT_BINNING = "spatBinning";
-    public static final String SPEC_BINNING = "specBinning";
-    public static final String IFU_METHOD = "ifuMethod";
     public static final String SINGLE_IFU = "singleIFU";
     public static final String RADIAL_IFU = "radialIFU";
-    public static final String INSTRUMENT_LOCATION = "instrumentLocation";
 
-    //Temporary selection for either the old or newer Hamamatsu CCD's
-    //Will be removed in semester 2010B
-    public static final String CCD_TYPE = "CCDtype";
-
-    // ITC web form input values.
-    // These constants must be kept in sync with the web page form.
-    // They are used to parse form data.
     public static final String R600_G5304 = "R600_G5304";
     public static final String B1200_G5301 = "B1200_G5301";
     public static final String R150_G5306 = "R150_G5306";
@@ -58,154 +40,119 @@ public final class GmosParameters extends ITCParameters {
     public static final String SLIT2_0 = "slit2.0";
     public static final String SLIT5_0 = "slit5.0";
     public static final String IFU = "ifu";
-    public static final String IFU_OFFSET = "ifuOffset";
-    public static final String IFU_MIN_OFFSET = "ifuMinOffset";
-    public static final String IFU_MAX_OFFSET = "ifuMaxOffset";
     public static final String NO_SLIT = "none";
     public static final String GMOS_NORTH = "gmosNorth";
     public static final String GMOS_SOUTH = "gmosSouth";
 
     // Data members
-    private final String _Filter;  // filters
-    private final String _grating; // Grating or null
-    private String _instrumentCentralWavelength;
-    private final String _FP_Mask;
-    private final String _spatBinning;
-    private final String _specBinning;
-    private String _IFUMethod;
-    private String _IFUOffset;
-    private String _IFUMinOffset;
-    private String _IFUMaxOffset;
-    private final String _instrumentLocation;
-    private final String _CCDtype;
-
-    /**
-     * Constructs a GmosParameters from a MultipartParser
-     *
-     * @param p MutipartParser that has all of the parameters and files Parsed
-     * @throws Exception of cannot parse any of the parameters.
-     */
-
-    public GmosParameters(ITCMultiPartParser p) {
-        _Filter = p.getParameter(INSTRUMENT_FILTER);
-        _grating = p.getParameter(INSTRUMENT_GRATING);
-        _spatBinning = p.getParameter(SPAT_BINNING);
-        _specBinning = p.getParameter(SPEC_BINNING);
-        _CCDtype = p.getParameter(CCD_TYPE);
-        _instrumentCentralWavelength = p.getParameter(INSTRUMENT_CENTRAL_WAVELENGTH);
-        if (_instrumentCentralWavelength.equals(" ")) {
-            _instrumentCentralWavelength = "0";
-        }
-        _FP_Mask = p.getParameter(FP_MASK);
-        if (_FP_Mask.equals(IFU)) {
-            _IFUMethod = p.getParameter(IFU_METHOD);
-            if (_IFUMethod.equals(SINGLE_IFU)) {
-                _IFUOffset = p.getParameter(IFU_OFFSET);
-            } else if (_IFUMethod.equals(RADIAL_IFU)) {
-                _IFUMinOffset = p.getParameter(IFU_MIN_OFFSET);
-                _IFUMaxOffset = p.getParameter(IFU_MAX_OFFSET);
-            } else
-                ITCParameters.notFoundException(" a correct value for the IFU Parameters. ");
-        }
-        _instrumentLocation = p.getParameter(INSTRUMENT_LOCATION);
-    }
+    private final String filter;
+    private final String grating;
+    private final double centralWavelength;
+    private final String fpMask;
+    private final int spatBinning;
+    private final int specBinning;
+    private final String ifuMethod;
+    private final double ifuOffset;
+    private final double ifuMinOffset;
+    private final double ifuMaxOffset;
+    private final String location;
+    private final String ccdType;
 
     /**
      * Constructs a GmosParameters from a test file.
      */
-    public GmosParameters(final String Filter,
+    public GmosParameters(final String filter,
                           final String grating,
-                          final String instrumentCentralWavelength,
-                          final String FP_Mask,
-                          final String spatBinning,
-                          final String specBinning,
-                          final String IFUMethod,
-                          final String IFUOffset,
-                          final String IFUMinOffset,
-                          final String IFUMaxOffset,
+                          final double centralWavelength,
+                          final String fpMask,
+                          final int spatBinning,
+                          final int specBinning,
+                          final String ifuMethod,
+                          final double ifuOffset,
+                          final double ifuMinOffset,
+                          final double ifuMaxOffset,
                           final String ccdType,
-                          final String instrumentLocation) {
-        _Filter = Filter;
-        _grating = grating;
-        _instrumentCentralWavelength = instrumentCentralWavelength;
-        _FP_Mask = FP_Mask;
-        _spatBinning = spatBinning;
-        _specBinning = specBinning;
-        _IFUMethod = IFUMethod;
-        _IFUOffset = IFUOffset;
-        _IFUMinOffset = IFUMinOffset;
-        _IFUMaxOffset = IFUMaxOffset;
-        _CCDtype = ccdType;
-        _instrumentLocation = instrumentLocation;
+                          final String location) {
+        this.filter             = filter;
+        this.grating            = grating;
+        this.centralWavelength  = centralWavelength;
+        this.fpMask             = fpMask;
+        this.spatBinning        = spatBinning;
+        this.specBinning        = specBinning;
+        this.ifuMethod          = ifuMethod;
+        this.ifuOffset          = ifuOffset;
+        this.ifuMinOffset       = ifuMinOffset;
+        this.ifuMaxOffset       = ifuMaxOffset;
+        this.ccdType            = ccdType;
+        this.location           = location;
 
     }
 
     public String getFilter() {
-        return _Filter;
+        return filter;
     }
 
-    public String getGrating() {
-        return _grating;
+    public String  getGrating() {
+        return grating;
     }
 
     public String getFocalPlaneMask() {
-        return _FP_Mask;
+        return fpMask;
     }
 
     public double getInstrumentCentralWavelength() {
-        return new Double(_instrumentCentralWavelength);
+        return centralWavelength;
     }
 
     public int getSpectralBinning() {
-        return new Integer(_specBinning);
+        return specBinning;
     }
 
-    public int getSpatialBinning() {//System.out.println(new Integer(_spatBinning).intValue());
-        return new Integer(_spatBinning);
+    public int getSpatialBinning() {
+        return spatBinning;
     }
 
     public String getCCDtype() {
-        return _CCDtype;
+        return ccdType;
     }
 
     public double getFPMask() {
-        //if (_FP_Mask.equals(NOSLIT)) return null;
-        if (_FP_Mask.equals(SLIT0_25))
+        if (fpMask.equals(SLIT0_25))
             return 0.25;
-        else if (_FP_Mask.equals(SLIT0_5))
+        else if (fpMask.equals(SLIT0_5))
             return 0.5;
-        else if (_FP_Mask.equals(SLIT0_75))
+        else if (fpMask.equals(SLIT0_75))
             return 0.75;
-        else if (_FP_Mask.equals(SLIT1_0))
+        else if (fpMask.equals(SLIT1_0))
             return 1.0;
-        else if (_FP_Mask.equals(SLIT1_5))
+        else if (fpMask.equals(SLIT1_5))
             return 1.5;
-        else if (_FP_Mask.equals(SLIT2_0))
+        else if (fpMask.equals(SLIT2_0))
             return 2.0;
-        else if (_FP_Mask.equals(SLIT5_0))
+        else if (fpMask.equals(SLIT5_0))
             return 5.0;
-        else if (_FP_Mask.equals(IFU))
+        else if (fpMask.equals(IFU))
             return 0.3;
         else
             return -1.0;
     }
 
     public String getStringSlitWidth() {
-        if (_FP_Mask.equals(SLIT0_25))
+        if (fpMask.equals(SLIT0_25))
             return "025";
-        else if (_FP_Mask.equals(SLIT0_5))
+        else if (fpMask.equals(SLIT0_5))
             return "050";
-        else if (_FP_Mask.equals(SLIT0_75))
+        else if (fpMask.equals(SLIT0_75))
             return "075";
-        else if (_FP_Mask.equals(SLIT1_0))
+        else if (fpMask.equals(SLIT1_0))
             return "100";
-        else if (_FP_Mask.equals(SLIT1_5))
+        else if (fpMask.equals(SLIT1_5))
             return "150";
-        else if (_FP_Mask.equals(SLIT2_0))
+        else if (fpMask.equals(SLIT2_0))
             return "200";
-        else if (_FP_Mask.equals(SLIT5_0))
+        else if (fpMask.equals(SLIT5_0))
             return "500";
-        else if (_FP_Mask.equals(IFU))
+        else if (fpMask.equals(IFU))
             return "IFU";
         else
             return "none";
@@ -213,23 +160,23 @@ public final class GmosParameters extends ITCParameters {
     }
 
     public String getIFUMethod() {
-        return _IFUMethod;
+        return ifuMethod;
     }
 
     public double getIFUOffset() {
-        return new Double(_IFUOffset);
+        return ifuOffset;
     }
 
     public double getIFUMinOffset() {
-        return new Double(_IFUMinOffset);
+        return ifuMinOffset;
     }
 
     public double getIFUMaxOffset() {
-        return new Double(_IFUMaxOffset);
+        return ifuMaxOffset;
     }
 
     public String getInstrumentLocation() {
-        return _instrumentLocation;
+        return location;
     }
 
     /**

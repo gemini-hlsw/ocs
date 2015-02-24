@@ -3,14 +3,13 @@ package edu.gemini.itc.web
 import javax.servlet.http.HttpServletRequest
 
 import edu.gemini.itc.altair.AltairParameters
-import edu.gemini.itc.parameters.ObservationDetailsParameters.{AnMethod, CalcMethod}
+import edu.gemini.itc.gmos.GmosParameters
 import edu.gemini.itc.parameters.SourceDefinitionParameters._
 import edu.gemini.itc.parameters._
 import edu.gemini.itc.shared._
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.telescope.IssPort
-import sun.reflect.generics.reflectiveObjects.NotImplementedException
 
 /**
  * ITC requests define a generic mechanism to look up values by their parameter names.
@@ -77,6 +76,33 @@ object ITCRequest {
     new ObservingConditionParameters(iq, cc, wv, sb, airmass)
   }
 
+  def gmosParameters(r: ITCMultiPartParser): GmosParameters = {
+    val pc          = ITCRequest.from(r)
+    val filter      = pc.parameter("instrumentFilter")
+    val grating     = pc.parameter("instrumentDisperser")
+    val spatBinning = pc.intParameter("spatBinning")
+    val specBinning = pc.intParameter("specBinning")
+    val ccdType     = pc.parameter("CCDtype")
+    var centralWavelength = if (pc.parameter("instrumentCentralWavelength").trim.isEmpty) 0.0 else pc.doubleParameter("instrumentCentralWavelength")
+    val fpMask      = pc.parameter("instrumentFPMask")
+    var ifuMethod   = ""
+    var ifuOffset   = 0.0
+    var ifuMinOffset = 0.0
+    var ifuMaxOffset = 0.0
+    if (fpMask.equals("ifu")) {
+      ifuMethod = pc.parameter("ifuMethod")
+      if (ifuMethod.equals("singleIFU")) {
+        ifuOffset = pc.doubleParameter("ifuOffset")
+      } else if (ifuMethod.equals("radialIFU")) {
+        ifuMinOffset = pc.doubleParameter("ifuMinOffset")
+        ifuMaxOffset = pc.doubleParameter("ifuMaxOffset")
+      } else ITCParameters.notFoundException (" a correct value for the IFU Parameters. ")
+    }
+    val location = pc.parameter("instrumentLocation")
+
+    new GmosParameters(filter, grating, centralWavelength, fpMask, spatBinning, specBinning, ifuMethod, ifuOffset, ifuMinOffset, ifuMaxOffset, ccdType, location)
+  }
+
   def plotParamters(r: ITCMultiPartParser): PlottingDetailsParameters = {
     val pc      = ITCRequest.from(r)
     val limits  = pc.enumParameter(classOf[PlottingDetailsParameters.PlotLimits])
@@ -136,7 +162,7 @@ object ITCRequest {
     val pc = ITCRequest.from(r)
 
     // Get the source geometry and type
-    import Profile._
+    import edu.gemini.itc.parameters.SourceDefinitionParameters.Profile._
     val spatialProfile = pc.enumParameter(classOf[Profile]) match {
       case POINT    =>
         val norm  = pc.doubleParameter("psSourceNorm")
@@ -157,7 +183,7 @@ object ITCRequest {
     val normBand = pc.enumParameter(classOf[WavebandDefinition])
 
     // Get Spectrum Resource
-    import Distribution._
+    import edu.gemini.itc.parameters.SourceDefinitionParameters.Distribution._
     val sourceSpec = pc.enumParameter(classOf[Distribution])
     val sourceDefinition = sourceSpec match {
       case LIBRARY_STAR =>
@@ -183,7 +209,7 @@ object ITCRequest {
     }
 
     //Get Redshift
-    import Recession._
+    import edu.gemini.itc.parameters.SourceDefinitionParameters.Recession._
     val recession = pc.enumParameter(classOf[Recession])
     val redshift = recession match {
       case REDSHIFT => pc.doubleParameter("z")

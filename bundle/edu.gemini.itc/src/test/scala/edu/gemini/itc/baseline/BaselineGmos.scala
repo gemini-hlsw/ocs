@@ -19,28 +19,28 @@ object BaselineGmos {
     new GmosParameters(
       GmosParameters.I_G0302,
       GmosParameters.NO_DISPERSER,
-      "500",                      // wavelength
+      500.0,                      // wavelength
       GmosParameters.NO_SLIT,
-      "1",
-      "1",
+      1,
+      1,
       "",                         // IFU method
-      "0",                        // IFU offset
-      "0",
-      "0.3",
+      0.0,                        // IFU offset
+      0.0,
+      0.3,
       "2",                        // HAMAMATSU CCD
       GmosParameters.GMOS_NORTH),
 
     new GmosParameters(
       GmosParameters.G_G0301,
       GmosParameters.NO_DISPERSER,
-      "500",
+      500.0,
       GmosParameters.NO_SLIT,
-      "1",
-      "1",
+      1,
+      1,
       "",
-      "0",
-      "0",
-      "0.3",
+      0.0,
+      0.0,
+      0.3,
       "2",                        // HAMAMATSU CCD
       GmosParameters.GMOS_SOUTH)
   ))
@@ -49,40 +49,40 @@ object BaselineGmos {
     new GmosParameters(
       GmosParameters.G_G0301,
       GmosParameters.R150_G5306,
-      "500",
+      500.0,
       GmosParameters.SLIT1_0,
-      "1",
-      "1",
+      1,
+      1,
       "singleIFU",
-      "0",
-      "0",
-      "0.3",
+      0.0,
+      0.0,
+      0.3,
       "0",                        // EEV ED; still supported?
       GmosParameters.GMOS_NORTH),
     new GmosParameters(
       GmosParameters.G_G0301,
       GmosParameters.R400_G5305,
-      "500",
+      500.0,
       GmosParameters.IFU,
-      "1",
-      "1",
+      1,
+      1,
       GmosParameters.SINGLE_IFU,
-      "0",
-      "0",
-      "0.3",
+      0.0,
+      0.0,
+      0.3,
       "1",                        // EEV legacy; still supported?
       GmosParameters.GMOS_NORTH),
     new GmosParameters(
       GmosParameters.G_G0301,
       GmosParameters.R150_G5306,
-      "500",
+      500.0,
       GmosParameters.IFU,
-      "1",
-      "1",
+      1,
+      1,
       GmosParameters.RADIAL_IFU,
-      "0",
-      "0",
-      "0.3",
+      0.0,
+      0.0,
+      0.3,
       "2",                        // HAMAMATSU CCD
       GmosParameters.GMOS_NORTH)
   ))
