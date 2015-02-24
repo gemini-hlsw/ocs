@@ -175,7 +175,6 @@ object GemsStrategy extends AgsStrategy {
     }
   }
 
-
   protected [impl] def search(opticalCatalog: String, nirCatalog: String, tipTiltMode: GemsTipTiltMode, ctx: ObsContext, posAngles: Set[Angle], nirBand: Option[MagnitudeBand]): Option[List[GemsCatalogSearchResults]] = {
     // Get the instrument: F2 or GSAOI?
     val gemsInstrument = {
@@ -193,7 +192,7 @@ object GemsStrategy extends AgsStrategy {
       else if (!resultMap.contains(key)) resultMap.updated(key, false)
       else                               resultMap
     })
-    checker.values.find(!_).map(_ => results)
+    checker.values.find(identity).map(_ => results)
   }
 
   private def findGuideStars(ctx: ObsContext, posAngles: Set[Angle], results: List[GemsCatalogSearchResults]): Option[GemsGuideStars] = {
