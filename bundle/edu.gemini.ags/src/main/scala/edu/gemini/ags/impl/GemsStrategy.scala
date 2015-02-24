@@ -80,7 +80,6 @@ object GemsStrategy extends AgsStrategy {
   // Convert from catalog results to GeMS-specific results.
   private def toGemsCatalogSearchResults(ctx: ObsContext, futureAgsCatalogResults: Future[List[CatalogResultWithKey]]): Future[List[GemsCatalogSearchResults]] = {
     val anglesToTry = (0 until 360 by 45).map(Angle.fromDegrees(_))
-    val none: Option[Offset] = None
 
     futureAgsCatalogResults.map { agsCatalogResults =>
       for {

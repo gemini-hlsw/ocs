@@ -33,13 +33,15 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] =
     AgsAnalysis.analysis(ctx, mt, params.guideProbe).toList
 
+  private def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): Option[CatalogQuery] =
+    params.catalogQueries(ctx, mt)
+
   override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]] = {
-    val empty = List((params.guideProbe: GuideProbe, List.empty[SiderealTarget]))
-    catalogQueries(ctx, mt).foldLeft(Future.successful(empty)) { (_, qc) =>
-      VoTableClient.catalog(qc).flatMap {
+    val empty = Future.successful(List((params.guideProbe: GuideProbe, List.empty[SiderealTarget])))
+    catalogQueries(ctx, mt).map(VoTableClient.catalog).map(_.flatMap {
         case r if r.result.containsError => Future.failed(CatalogException(r.result.problems))
-        case r                           => Future.successful(List((params.guideProbe, r.result.targets.rows))) }
-    }
+        case r                           => Future.successful(List((params.guideProbe, r.result.targets.rows)))
+    }).getOrElse(empty)
   }
 
   private def catalogResult(ctx: ObsContext, mt: MagnitudeTable): Future[List[SiderealTarget]] =
@@ -93,9 +95,6 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
     candidates.map(so => (SingleProbeStrategy.calculatePositionAngle(ctx.getBaseCoordinates.toNewModel, so), so)).filter {
       case (angle, st) => new CandidateValidator(params, mt, List(st)).exists(ctx.withPositionAngle(angle.toOldModel))
     }
-
-  private def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] =
-    params.catalogQueries(ctx, mt).toList
 
   override val guideProbes: List[GuideProbe] =
     List(params.guideProbe)
