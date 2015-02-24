@@ -137,28 +137,6 @@ public final class GmosParameters extends ITCParameters {
             return -1.0;
     }
 
-    public String getStringSlitWidth() {
-        if (fpMask.equals(SLIT0_25))
-            return "025";
-        else if (fpMask.equals(SLIT0_5))
-            return "050";
-        else if (fpMask.equals(SLIT0_75))
-            return "075";
-        else if (fpMask.equals(SLIT1_0))
-            return "100";
-        else if (fpMask.equals(SLIT1_5))
-            return "150";
-        else if (fpMask.equals(SLIT2_0))
-            return "200";
-        else if (fpMask.equals(SLIT5_0))
-            return "500";
-        else if (fpMask.equals(IFU))
-            return "IFU";
-        else
-            return "none";
-
-    }
-
     public String getIFUMethod() {
         return ifuMethod;
     }

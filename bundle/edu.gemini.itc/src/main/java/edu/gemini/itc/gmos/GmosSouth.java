@@ -59,7 +59,6 @@ public class GmosSouth extends Gmos {
         _sampling = super.getSampling();
 
         _focalPlaneMask = gp.getFocalPlaneMask();
-        _stringSlitWidth = gp.getStringSlitWidth();
         _grating = gp.getGrating();
         _filterUsed = gp.getFilter();
         _centralWavelength = gp.getInstrumentCentralWavelength();

@@ -40,7 +40,6 @@ public abstract class Gmos extends Instrument {
     protected String _filterUsed;
     protected String _grating;
     protected String _focalPlaneMask;
-    protected String _stringSlitWidth;
     protected CalculationMethod _mode;
     protected double _centralWavelength;
     protected int _spectralBinning;
