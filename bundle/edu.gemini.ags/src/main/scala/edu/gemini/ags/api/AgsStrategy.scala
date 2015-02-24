@@ -2,7 +2,7 @@ package edu.gemini.ags.api
 
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.ags.impl._
-import edu.gemini.catalog.api.QueryConstraint
+import edu.gemini.catalog.api.{CatalogQuery, QueryConstraint}
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.core.Angle
 import edu.gemini.spModel.core.Target.SiderealTarget
@@ -29,7 +29,7 @@ trait AgsStrategy {
 
   def select(ctx: ObsContext, mt: MagnitudeTable): Future[Option[AgsStrategy.Selection]]
 
-  def queryConstraints(ctx: ObsContext, mt: MagnitudeTable): List[QueryConstraint]
+  def queryConstraints(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery]
 
   def guideProbes: List[GuideProbe]
 }

@@ -69,7 +69,7 @@ object GemsVoTableCatalog {
   private def searchCatalog(basePosition: Coordinates, criterions: List[GemsCatalogSearchCriterion], statusLogger: StatusLogger): Future[List[GemsCatalogSearchResults]] = {
     val queryArgs = for {
       c <- criterions
-      q = CatalogQuery(0, basePosition, c.criterion.radiusLimits, c.criterion.magLimits.some)
+      q = CatalogQuery(0, basePosition, c.criterion.radiusLimits, c.criterion.magConstraints)
     } yield (q, c)
 
     val qm = queryArgs.toMap
@@ -139,22 +139,30 @@ object GemsVoTableCatalog {
     // Calculate the max faintness per band out of the criteria
     val faintLimitPerBand = for {
         criteria <- criterions
-        m = criteria.criterion.magLimits
-        b = m.band
+        mc = criteria.criterion.magConstraints
+      } yield for {
+        m <- mc
+        b  = m.band
         fl = m.faintnessConstraint
       } yield (b, fl)
 
-    val faintnessMap:Map[MagnitudeBand, FaintnessConstraint] = faintLimitPerBand.groupBy(_._1).map { case (_, v) => v.maxBy(_._2)(FaintnessConstraint.order.toScalaOrdering)}
+    val faintnessMap:Map[MagnitudeBand, FaintnessConstraint] = faintLimitPerBand.collect {
+      case Some((b, f)) => (b, f)
+    }.groupBy(_._1).map { case (_, v) => v.maxBy(_._2)(FaintnessConstraint.order.toScalaOrdering)}
 
     // Calculate the min saturation limit per band out of the criteria
     val saturationLimitPerBand = for {
-        criteria <- criterions
-        m = criteria.criterion.magLimits
+      criteria <- criterions
+      mc = criteria.criterion.magConstraints
+    } yield for {
+        m <- mc
         b = m.band
         sl = m.saturationConstraint.getOrElse(SaturationConstraint(DefaultSaturationMagnitude))
-      } yield (b, sl)
+      } yield  (b, sl)
 
-    val saturationMap = saturationLimitPerBand.groupBy(_._1).map { case (_, v) => v.minBy(_._2)(SaturationConstraint.order.toScalaOrdering)}
+    val saturationMap = saturationLimitPerBand.collect {
+      case Some((b, f)) => (b, f)
+    }.groupBy(_._1).map { case (_, v) => v.minBy(_._2)(SaturationConstraint.order.toScalaOrdering)}
 
     (for {
       b <- faintnessMap

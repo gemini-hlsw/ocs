@@ -5,11 +5,11 @@ import edu.gemini.ags.api.AgsStrategy.{Assignment, Estimate, Selection}
 import edu.gemini.ags.gems._
 import edu.gemini.ags.gems.mascot.{Strehl, MascotProgress}
 import edu.gemini.catalog.api._
+import edu.gemini.catalog.votable.{CatalogQueryResult, VoTableClient}
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.core.Target.SiderealTarget
 
 // TODO port these dependencies
-import edu.gemini.shared.skyobject.coords.HmsDegCoordinates
 import edu.gemini.skycalc.Offset
 
 import edu.gemini.spModel.ags.AgsStrategyKey.GemsKey
@@ -41,12 +41,12 @@ object GemsStrategy extends AgsStrategy {
   private val OdgwFlexureId    = 1
 
   // Catalog results with search keys to avoid having to recompute search key info on the fly.
-  private case class CatalogResultWithKey(catalogResult: CatalogResult, searchKey: GemsCatalogSearchKey)
+  private case class CatalogResultWithKey(query: CatalogQuery, catalogResult: CatalogQueryResult, searchKey: GemsCatalogSearchKey)
 
 
   // Query the catalog for each constraint and compile a list of results with the necessary
   // information for GeMS.
-  private def catalogResult(ctx: ObsContext, mt: MagnitudeTable): Future[List[CatalogResultWithKey]] = future {
+  private def catalogResult(ctx: ObsContext, mt: MagnitudeTable): Future[List[CatalogResultWithKey]] = {
     // Maps for IDs to types needed by GeMS.
     def GuideStarTypeMap = Map[Int, GemsGuideStarType](
       CanopusTipTiltId -> GemsGuideStarType.tiptilt,
@@ -61,15 +61,16 @@ object GemsStrategy extends AgsStrategy {
 
     val adjustedConstraints = queryConstraints(ctx, mt).map { constraint =>
       // Adjust the magnitude limits for the conditions.
-      val adjustedMagLimit = constraint.magnitudeLimits.mapMagnitudes(ctx.getConditions.magAdjustOp())
-      constraint.copy(adjustedMagLimit)
+      val adjustedMagConstraints = constraint.magnitudeConstraints.map(c => c.map(m => ctx.getConditions.magAdjustOp().apply(m.toOldModel).toNewModel))
+      constraint.copy(magnitudeConstraints = adjustedMagConstraints)
     }
 
-    val server = CatalogServerInstances.STANDARD
-    ParallelCatalogQuery.instance.query(server, adjustedConstraints.asImList).asScala.map { result =>
-      val id = result.constraint.id
-      CatalogResultWithKey(result, GemsCatalogSearchKey(GuideStarTypeMap(id), GuideProbeGroupMap(id)))
-    }.toList
+    VoTableClient.catalog(adjustedConstraints).map { result =>
+      result.map { r =>
+        val id = r.query.id
+        CatalogResultWithKey(r.query, r.result, GemsCatalogSearchKey(GuideStarTypeMap(id), GuideProbeGroupMap(id)))
+      }
+    }
   }
 
 
@@ -83,11 +84,11 @@ object GemsStrategy extends AgsStrategy {
         result <- agsCatalogResults
         angle <- anglesToTry
       } yield {
-        val constraint = result.catalogResult.constraint
-        val radiusConstraint = RadiusConstraint.between(constraint.radiusLimits.getMinLimit.toNewModel, constraint.radiusLimits.getMaxLimit.toNewModel)
-        val catalogSearchCriterion = CatalogSearchCriterion("ags", constraint.magnitudeLimits.toMagnitudeConstraints, radiusConstraint, None, angle.some)
+        val constraint = result.query
+        val radiusConstraint = constraint.radiusConstraint
+        val catalogSearchCriterion = CatalogSearchCriterion("ags", constraint.magnitudeConstraints, radiusConstraint, None, angle.some)
         val gemsCatalogSearchCriterion = new GemsCatalogSearchCriterion(result.searchKey, catalogSearchCriterion)
-        new GemsCatalogSearchResults(gemsCatalogSearchCriterion, result.catalogResult.candidates.toList)
+        new GemsCatalogSearchResults(gemsCatalogSearchCriterion, result.catalogResult.targets.rows)
       }
     }
   }
@@ -150,7 +151,6 @@ object GemsStrategy extends AgsStrategy {
     // Create a set of the angles to try.
     val anglesToTry = (0 until 360 by 45).map(Angle.fromDegrees(_)).toSet
 
-
     // A way to terminate the Mascot algorithm immediately in the following cases:
     // 1. A usable 2 or 3-star asterism is found; or
     // 2. If no asterisms were found.
@@ -174,7 +174,7 @@ object GemsStrategy extends AgsStrategy {
   }
 
 
-  private def search(opticalCatalog: String, nirCatalog: String, tipTiltMode: GemsTipTiltMode, ctx: ObsContext, posAngles: Set[Angle], nirBand: Option[MagnitudeBand]): Option[List[GemsCatalogSearchResults]] = {
+  protected [impl] def search(opticalCatalog: String, nirCatalog: String, tipTiltMode: GemsTipTiltMode, ctx: ObsContext, posAngles: Set[Angle], nirBand: Option[MagnitudeBand]): Option[List[GemsCatalogSearchResults]] = {
     // Get the instrument: F2 or GSAOI?
     val gemsInstrument = {
       (ctx.getInstrument.getType == SPComponentType.INSTRUMENT_GSAOI)? GemsInstrument.gsaoi | GemsInstrument.flamingos2
@@ -192,8 +192,6 @@ object GemsStrategy extends AgsStrategy {
       else                               resultMap
     })
     checker.values.find(!_).map(_ => results)
-
-
   }
 
   private def findGuideStars(ctx: ObsContext, posAngles: Set[Angle], results: List[GemsCatalogSearchResults]): Option[GemsGuideStars] = {
@@ -219,7 +217,7 @@ object GemsStrategy extends AgsStrategy {
     }
   }
 
-  def queryConstraints(ctx: ObsContext, mt: MagnitudeTable): List[QueryConstraint] = {
+  def queryConstraints(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] = {
     import AgsMagnitude._
     val cond = ctx.getConditions
     val mags = magnitudes(ctx, mt).toMap
@@ -233,8 +231,8 @@ object GemsStrategy extends AgsStrategy {
       (ml |@| lim(can))(_ union _).flatten
     }
 
-    val canopusConstraint = canMagLimits.map(c => new QueryConstraint(CanopusTipTiltId, ctx.getBaseCoordinates, new RadiusLimits(Canopus.Wfs.Group.instance.getRadiusLimits), c.toMagnitudeLimits))
-    val odgwConstaint     = odgwMagLimits.map(c => new QueryConstraint(OdgwFlexureId,    ctx.getBaseCoordinates, new RadiusLimits(GsaoiOdgw.Group.instance.getRadiusLimits), c.toMagnitudeLimits))
+    val canopusConstraint = canMagLimits.map(c => CatalogQuery(CanopusTipTiltId, ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, Canopus.Wfs.Group.instance.getRadiusLimits.toNewModel), c.some))
+    val odgwConstaint     = odgwMagLimits.map(c => CatalogQuery(OdgwFlexureId,    ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, GsaoiOdgw.Group.instance.getRadiusLimits.toNewModel), c.some))
     List(canopusConstraint, odgwConstaint).flatten
   }
 

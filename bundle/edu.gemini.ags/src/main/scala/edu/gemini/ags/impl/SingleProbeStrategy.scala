@@ -2,14 +2,13 @@ package edu.gemini.ags.impl
 
 import edu.gemini.ags.api._
 import edu.gemini.ags.api.AgsMagnitude._
-import edu.gemini.catalog.api.{CatalogQuery, QueryConstraint}
+import edu.gemini.catalog.api.CatalogQuery
 import edu.gemini.catalog.votable.{CatalogException, VoTableClient}
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.core.{Coordinates, Angle}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
-import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.system.CoordinateParam.Units
 import edu.gemini.spModel.target.system.HmsDegTarget
 import edu.gemini.spModel.telescope.PosAngleConstraint._
@@ -95,7 +94,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
       case (angle, st) => new CandidateValidator(params, mt, List(st)).exists(ctx.withPositionAngle(angle.toOldModel))
     }
 
-  override def queryConstraints(ctx: ObsContext, mt: MagnitudeTable): List[QueryConstraint] = Nil
+  override def queryConstraints(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] = Nil
 
   def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] =
     params.catalogQueries(ctx, mt).toList

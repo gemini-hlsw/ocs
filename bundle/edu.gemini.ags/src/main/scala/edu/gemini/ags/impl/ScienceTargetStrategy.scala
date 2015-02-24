@@ -3,8 +3,7 @@ package edu.gemini.ags.impl
 import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.ags.impl._
 import edu.gemini.ags.api.{AgsMagnitude, AgsAnalysis, AgsStrategy}
-import edu.gemini.catalog.api.{CatalogQuery, RadiusConstraint, QueryConstraint}
-import edu.gemini.shared.skyobject.SkyObject
+import edu.gemini.catalog.api.{CatalogQuery, RadiusConstraint}
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbe}
@@ -45,7 +44,7 @@ case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGui
       ml =  AgsMagnitude.manualSearchLimits(mc)
     } yield CatalogQuery(0, ctx.getBaseCoordinates.toNewModel, rc, ml)).toList
 
-  override def queryConstraints(ctx: ObsContext, mt: MagnitudeTable): List[QueryConstraint] = ???
+  override def queryConstraints(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] = ???
 
   private def radiusConstraints(ctx: ObsContext): Option[RadiusConstraint] =
     RadiusLimitCalc.getAgsQueryRadiusLimits(guideProbe, ctx)

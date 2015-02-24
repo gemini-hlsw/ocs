@@ -19,7 +19,7 @@ class GemsUtils4JavaSpec extends Specification {
     "preserve the radius constraint for a single item without offsets" in {
       val key = new GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance)
       val radiusConstraint = RadiusConstraint.between(Angle.fromArcmin(10.0), Angle.fromArcmin(2.0))
-      val criterion = CatalogSearchCriterion("test", magnitudeConstraints, radiusConstraint, None, None)
+      val criterion = CatalogSearchCriterion("test", magnitudeConstraints.some, radiusConstraint, None, None)
 
       val s = new GemsCatalogSearchCriterion(key, criterion)
       GemsUtils4Java.optimizeRadiusConstraint(List(s).asJava).maxLimit ~= radiusConstraint.maxLimit
@@ -30,7 +30,7 @@ class GemsUtils4JavaSpec extends Specification {
       val radiusConstraint = RadiusConstraint.between(Angle.fromArcmin(10.0), Angle.fromArcmin(2.0))
       val offset = Offset(Angle.fromArcmin(3), Angle.fromArcmin(4)).some
       val posAngle = Angle.fromArcmin(3).some
-      val criterion = CatalogSearchCriterion("test", magnitudeConstraints, radiusConstraint, offset, posAngle)
+      val criterion = CatalogSearchCriterion("test", magnitudeConstraints.some, radiusConstraint, offset, posAngle)
 
       val s = new GemsCatalogSearchCriterion(key, criterion)
       GemsUtils4Java.optimizeRadiusConstraint(List(s).asJava).maxLimit ~= radiusConstraint.maxLimit + Angle.fromArcmin(5)
@@ -40,8 +40,8 @@ class GemsUtils4JavaSpec extends Specification {
       val key = new GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance)
       val radiusConstraint1 = RadiusConstraint.between(Angle.fromArcmin(10.0), Angle.fromArcmin(2.0))
       val radiusConstraint2 = RadiusConstraint.between(Angle.fromArcmin(15.0), Angle.fromArcmin(3.0))
-      val criterion1 = CatalogSearchCriterion("test", magnitudeConstraints, radiusConstraint1, None, None)
-      val criterion2 = CatalogSearchCriterion("test", magnitudeConstraints, radiusConstraint2, None, None)
+      val criterion1 = CatalogSearchCriterion("test", magnitudeConstraints.some, radiusConstraint1, None, None)
+      val criterion2 = CatalogSearchCriterion("test", magnitudeConstraints.some, radiusConstraint2, None, None)
 
       val s1 = new GemsCatalogSearchCriterion(key, criterion1)
       val s2 = new GemsCatalogSearchCriterion(key, criterion2)
@@ -56,8 +56,8 @@ class GemsUtils4JavaSpec extends Specification {
       val offset1 = Offset(Angle.fromArcmin(3), Angle.fromArcmin(4)).some
       val offset2 = Offset(Angle.fromArcmin(5), Angle.fromArcmin(12)).some
       val posAngle = Angle.fromArcmin(3).some
-      val criterion1 = CatalogSearchCriterion("test", magnitudeConstraints, radiusConstraint1, offset1, posAngle)
-      val criterion2 = CatalogSearchCriterion("test", magnitudeConstraints, radiusConstraint2, offset2, posAngle)
+      val criterion1 = CatalogSearchCriterion("test", magnitudeConstraints.some, radiusConstraint1, offset1, posAngle)
+      val criterion2 = CatalogSearchCriterion("test", magnitudeConstraints.some, radiusConstraint2, offset2, posAngle)
 
       val s1 = new GemsCatalogSearchCriterion(key, criterion1)
       val s2 = new GemsCatalogSearchCriterion(key, criterion2)
