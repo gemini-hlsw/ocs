@@ -33,9 +33,7 @@ public class GmosNorth extends Gmos {
     private static final String[] DETECTOR_CCD_NAMES = {"BB(B)", "HSC", "BB(R)"};
 
     public GmosNorth(GmosParameters gp, ObservationDetailsParameters odp, int detectorCcdIndex) throws Exception {
-        super(gp, FILENAME, INSTR_PREFIX, detectorCcdIndex);
-
-        _mode = odp.getMethod();
+        super(gp, odp, FILENAME, INSTR_PREFIX, detectorCcdIndex);
 
         if (gp.getFocalPlaneMask().equals(GmosParameters.IFU))
             _IFUUsed = true;
@@ -62,7 +60,7 @@ public class GmosNorth extends Gmos {
 
 
         //Test to see that all conditions for Spectroscopy are met
-        if (_mode.isSpectroscopy()) {
+        if (odp.getMethod().isSpectroscopy()) {
             if (gp.getGrating().equals("none"))
                 throw new Exception("Spectroscopy calculation method is selected but a grating" +
                         " is not.\nPlease select a grating and a " +
@@ -76,7 +74,7 @@ public class GmosNorth extends Gmos {
                         "configuration section.");
         }
 
-        if (_mode.isImaging()) {
+        if (odp.getMethod().isImaging()) {
             if (gp.getFilter().equals("none"))
                 throw new Exception("Imaging calculation method is selected but a filter" +
                         " is not.\n  Please select a filter and resubmit the " +

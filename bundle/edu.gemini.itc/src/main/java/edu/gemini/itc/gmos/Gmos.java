@@ -1,6 +1,7 @@
 package edu.gemini.itc.gmos;
 
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
+import edu.gemini.itc.parameters.ObservationDetailsParameters;
 import edu.gemini.itc.shared.*;
 
 import java.awt.*;
@@ -38,16 +39,16 @@ public abstract class Gmos extends Instrument {
     protected Gmos[] _instruments;
 
     protected final GmosParameters gp;
+    protected final ObservationDetailsParameters odp;
 
     // Keep a reference to the color filter to ask for effective wavelength
     protected Filter _Filter;
+    protected IFUComponent _IFU;
     protected GmosGratingOptics _gratingOptics;
     protected Detector _detector;
     protected double _sampling;
-    protected CalculationMethod _mode;
 
     protected boolean _IFUUsed = false;
-    protected IFUComponent _IFU;
     protected boolean _IFU_IsSingle = false;
 
     // These are the limits of observable wavelength with this configuration.
@@ -56,10 +57,11 @@ public abstract class Gmos extends Instrument {
 
     private int _detectorCcdIndex = 0; // 0, 1, or 2 when there are multiple CCDs in the detector
 
-    public Gmos(GmosParameters gp, String FILENAME, String prefix, int detectorCcdIndex) throws Exception {
+    public Gmos(GmosParameters gp, ObservationDetailsParameters odp, String FILENAME, String prefix, int detectorCcdIndex) throws Exception {
         super(INSTR_DIR, FILENAME);
 
-        this.gp = gp;
+        this.odp    = odp;
+        this.gp     = gp;
 
         _detectorCcdIndex = detectorCcdIndex;
 
@@ -208,13 +210,13 @@ public abstract class Gmos extends Instrument {
         if (!gp.getFocalPlaneMask().equals(GmosParameters.NO_SLIT))
             s += "<LI> Focal Plane Mask: " + gp.getFocalPlaneMask() + "\n";
         s += "\n";
-        if (_mode.isSpectroscopy())
+        if (odp.getMethod().isSpectroscopy())
             s += "<L1> Central Wavelength: " + gp.getCentralWavelength() + " nm" + "\n";
         s += "Spatial Binning: " + getSpatialBinning() + "\n";
-        if (_mode.isSpectroscopy())
+        if (odp.getMethod().isSpectroscopy())
             s += "Spectral Binning: " + getSpectralBinning() + "\n";
         s += "Pixel Size in Spatial Direction: " + getPixelSize() + "arcsec\n";
-        if (_mode.isSpectroscopy())
+        if (odp.getMethod().isSpectroscopy())
             s += "Pixel Size in Spectral Direction: " + getGratingDispersion_nmppix() + "nm\n";
         if (IFU_IsUsed()) {
             s += "IFU is selected,";
