@@ -36,7 +36,6 @@ object Hash {
     hash(
       p.getFilter,
       p.getCCDtype,
-      "4.7",                                                                      // TODO: remove with next baseline update
       p.getFocalPlaneMask,
       p.getFPMask,
       p.getGrating,
@@ -46,25 +45,9 @@ object Hash {
       p.getIFUOffset,
       p.getCentralWavelength,
       p.getInstrumentLocation,
-      if ((p.getFilter.equals("g_G0301") && p.getGrating.equals("none")) || (p.getFilter.equals("g_G0301") && p.getGrating.equals("R150_G5306") && p.getCCDtype.equals("0"))) "highNoise" else "lowNoise",
       p.getSpatialBinning,
-      p.getSpectralBinning,
-      getStringSlitWidth(p),                                                      // TODO: remove with next baseline update
-      if (p.getFilter.equals(GmosParameters.I_G0302))  "lowWell" else "highWell"  // TODO: remove with next baseline update
+      p.getSpectralBinning
     )
-
-  // TODO REMOVE:
-  def getStringSlitWidth(p: GmosParameters): String = p.getFocalPlaneMask match {
-      case GmosParameters.SLIT0_25  => "025"
-      case GmosParameters.SLIT0_5   => "050"
-      case GmosParameters.SLIT0_75  => "075"
-      case GmosParameters.SLIT1_0   => "100"
-      case GmosParameters.SLIT1_5   => "150"
-      case GmosParameters.SLIT2_0   => "200"
-      case GmosParameters.SLIT5_0   => "500"
-      case GmosParameters.IFU       => "IFU"
-      case _ =>  "none"
-  }
 
   def calc(p: GnirsParameters): Int =
     hash(
