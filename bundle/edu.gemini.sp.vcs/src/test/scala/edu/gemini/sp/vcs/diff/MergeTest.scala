@@ -1,18 +1,25 @@
 package edu.gemini.sp.vcs.diff
 
-import edu.gemini.pot.sp.{DataObjectBlob => DOB, ISPNode, ISPProgram, SPNodeKey}
+import edu.gemini.pot.sp.version.VersionMap
+import edu.gemini.pot.sp.{DataObjectBlob => DOB, _}
 import edu.gemini.shared.util.VersionComparison
-import VersionComparison.Newer
+import edu.gemini.shared.util.VersionComparison.{Same, Newer}
 import edu.gemini.sp.vcs.diff.NodeDetail.Obs
+import edu.gemini.sp.vcs.diff.VcsFailure.VcsException
+import edu.gemini.spModel.data.ISPDataObject
+import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.rich.pot.sp._
+import edu.gemini.spModel.target.obsComp.TargetObsComp
 
 import org.junit.Test
 import org.scalatest.junit.JUnitSuite
 
+import scala.collection.JavaConverters._
+
 import scalaz._
 
 
-class PreliminaryMergePropertyTest extends JUnitSuite {
+class MergeTest extends JUnitSuite {
   import edu.gemini.sp.vcs.diff.MergePropertyTest.NamedProperty
 
   private def keys(l: List[ISPNode]): Set[SPNodeKey] = l.map(_.key).toSet
@@ -48,7 +55,7 @@ class PreliminaryMergePropertyTest extends JUnitSuite {
     val deletedKeys = p.getVersions.keySet &~ nodeMap.keySet
   }
 
-  case class PropContext(sp: ISPProgram, lp: ISPProgram, rp: ISPProgram, diffs: MergePlan, mergePlan: MergePlan) {
+  case class PropContext(fact: ISPFactory, sp: ISPProgram, lp: ISPProgram, rp: ISPProgram, diffs: MergePlan, mergePlan: MergePlan) {
     val startMap = sp.nodeMap
     val startId  = sp.getLifespanId
 
@@ -73,6 +80,16 @@ class PreliminaryMergePropertyTest extends JUnitSuite {
     }.toSet
 
     val deletedKeys = mergePlan.delete.map(_.key).toSet
+
+    val correctedMergePlan = ObsNumberCorrection(mergeContext).apply(mergePlan)
+
+    val updatedLocalProgram = {
+      val localCopy = fact.copyWithSameKeys(lp)
+      for {
+        mp <- correctedMergePlan
+        _  <- mp.merge(fact, localCopy)
+      } yield localCopy
+    }
   }
 
   def mpKeys(mp: MergePlan): Set[SPNodeKey] = {
@@ -290,7 +307,7 @@ class PreliminaryMergePropertyTest extends JUnitSuite {
           val remoteMax = remoteOnly.keySet.max
 
           ObsNumberCorrection(pc.mergeContext).apply(pc.mergePlan) match {
-            case -\/(Unmergeable(msg)) =>
+            case -\/(VcsFailure.Unmergeable(msg)) =>
               // This might start to fail if we update the generator to produce
               // events or datasets in observation exec logs.
               Console.err.println(s"Unmergeable: $msg")
@@ -312,15 +329,119 @@ class PreliminaryMergePropertyTest extends JUnitSuite {
           }
         }
       }
+    ),
+
+    ("merged program matches merge plan",
+      (start, local, remote, pc) => {
+        def dataObjectMatches(nDob: ISPDataObject, tDob: ISPDataObject): Boolean = {
+          // Ugh.  There is a ridiculous "active guider" concept in the target
+          // environment which is updated behind the scenes as changes are made
+          // to the observation.  Ignore it.
+          def wipeOutActiveGuiders(toc: TargetObsComp): Unit =
+            toc.setTargetEnvironment(toc.getTargetEnvironment.setActiveGuiders(Set.empty[GuideProbe].asJava))
+
+          val same = DOB.same(nDob, tDob) || ((nDob, tDob) match {
+            case (nTarget: TargetObsComp, tTarget: TargetObsComp) =>
+              wipeOutActiveGuiders(nTarget)
+              wipeOutActiveGuiders(tTarget)
+              DOB.same(nTarget, tTarget)
+            case _ => false
+          })
+
+          if (!same) {
+            Console.err.println("Data objects don't match: " + nDob.getType + ", " + tDob.getType)
+          }
+
+          same
+        }
+
+        def childrenMatch(n: List[ISPNode], t: Stream[Tree[MergeNode]]): Boolean = {
+          // The order won't be the same because the Tree[MergeNode] doesn't
+          // worry about ordering amongst different types of objects (e.g.,
+          // obs components before the obs log before the sequence node).
+          val nMap = n.map(c => c.key -> c).toMap
+          val tMap = t.map(c => c.key -> c).toMap
+
+          val sameKeys = nMap.keySet == tMap.keySet
+          if (!sameKeys) {
+            Console.err.println("Children don't match: ")
+            Console.err.println("\tn.children = " + n.map(_.key).mkString(", "))
+            Console.err.println("\tt.children = " + t.map(_.key).mkString(", "))
+          }
+
+          sameKeys && nMap.values.forall { nc => matchesMergePlan(nc, tMap(nc.key)) }
+        }
+
+        def obsNumSame(n: ISPNode, det: NodeDetail): Boolean =
+          (n, det) match {
+            case (o: ISPObservation, Obs(num)) => o.getObservationNumber == num
+            case (o: ISPObservation, _       ) => false
+            case (_,                 Obs(num)) => false
+            case _                             => true
+          }
+
+        def matchesMergePlan(n: ISPNode, t: Tree[MergeNode]): Boolean =
+          t.rootLabel match {
+            case Modified(k, _, dob, det) =>
+              lazy val dobSame      = dataObjectMatches(n.getDataObject, dob)
+              lazy val childrenSame = childrenMatch(n.children, t.subForest)
+              k == n.key && dobSame && childrenSame && obsNumSame(n, det)
+            case Unmodified(k)          =>
+              k == n.key
+          }
+
+        val result = for {
+          cmp <- pc.correctedMergePlan
+          ulp <- pc.updatedLocalProgram
+        } yield {
+          val matches = matchesMergePlan(ulp, cmp.update)
+          if (!matches) {
+            Console.err.println("Merge Plan")
+            Console.err.println(MergeNode.draw(cmp.update))
+            Console.err.println("Merged Program")
+            Console.err.println(drawNodeTree(ulp))
+          }
+          matches
+        }
+
+        result match {
+          case -\/(VcsException(ex)) =>
+            true // TODO: ignore for now, missing correction ...
+
+          case -\/(failure)          =>
+            Console.err.println(failure)
+            false
+
+          case \/-(matches)          =>
+            matches
+        }
+      }
+    ),
+
+    ("merged program version map is newer or equal to both local and remote programs",
+      (start, local, remote, pc) => {
+        def isSameOrNewer(x: VersionMap, y: VersionMap): Boolean =
+          VersionMap.compare(x, y) match {
+            case Same | Newer => true
+            case _            => false
+          }
+
+        pc.updatedLocalProgram.forall { ulp =>
+          val updateVm = ulp.getVersions
+          val localVm  = pc.lp.getVersions
+          val remoteVm = pc.rp.getVersions
+          isSameOrNewer(updateVm, localVm) && isSameOrNewer(updateVm, remoteVm)
+        }
+      }
     )
   )
 
   @Test
-  def testAllPreliminaryMergeProperties(): Unit = {
-    def mkPropContext(start: ISPProgram, local: ISPProgram, remote: ISPProgram): PropContext = {
+  def testAllMergeProperties(): Unit = {
+    def mkPropContext(fact: ISPFactory, start: ISPProgram, local: ISPProgram, remote: ISPProgram): PropContext = {
       val diffs = ProgramDiff.compare(remote, local.getVersions, removedKeys(local))
       val mc    = MergeContext(local, diffs)
-      PropContext(start, local, remote, diffs, PreliminaryMerge.merge(mc))
+      PropContext(fact, start, local, remote, diffs, PreliminaryMerge.merge(mc))
     }
 
     new MergePropertyTest(mkPropContext).checkAllProperties(props)

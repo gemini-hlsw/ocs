@@ -1,6 +1,6 @@
 package edu.gemini.sp.vcs.diff
 
-import edu.gemini.pot.sp.{SPNodeKey, ISPProgram}
+import edu.gemini.pot.sp.{ISPFactory, SPNodeKey, ISPProgram}
 import edu.gemini.pot.sp.version._
 import edu.gemini.spModel.rich.pot.sp._
 
@@ -13,7 +13,7 @@ import scalaz._
 import Scalaz._
 
 
-class ProgramDiffPropertyTest extends JUnitSuite {
+class ProgramDiffTest extends JUnitSuite {
   import MergePropertyTest.NamedProperty
 
   val props = List[NamedProperty[MergePlan]] (
@@ -121,7 +121,7 @@ class ProgramDiffPropertyTest extends JUnitSuite {
 
   @Test
   def testAllDiffProperties(): Unit = {
-    def mkDiffs(s: ISPProgram, l: ISPProgram, r: ISPProgram): MergePlan =
+    def mkDiffs(f: ISPFactory, s: ISPProgram, l: ISPProgram, r: ISPProgram): MergePlan =
       ProgramDiff.compare(r, l.getVersions, removedKeys(l))
 
     new MergePropertyTest(mkDiffs).checkAllProperties(props)
