@@ -55,6 +55,8 @@ import jsky.util.gui.SwingWorker;
 import jsky.util.gui.*;
 
 import javax.swing.*;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.Border;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
@@ -203,7 +205,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         }};
         _w.coordinatesPanel.setBorder(BorderFactory.createCompoundBorder(
-            new ThinBorder(ThinBorder.RAISED),
+            BorderFactory.createBevelBorder(BevelBorder.RAISED),
             BorderFactory.createEmptyBorder(10, 10, 10, 10)
         ));
 
@@ -460,112 +462,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
         });
         ButtonFlattener.flatten(menu);
-    }
-
-    private interface PositionType {
-        boolean isAvailable();
-        void morphTarget(TargetObsComp obsComp, SPTarget target);
-        boolean isMember(TargetEnvironment env, SPTarget target);
-    }
-
-    private enum BasePositionType implements PositionType {
-        instance;
-
-        public boolean isAvailable() {
-            return true;
-        }
-
-        public void morphTarget(TargetObsComp obsComp, SPTarget target) {
-            TargetEnvironment env = obsComp.getTargetEnvironment();
-            if (isMember(env, target)) return;
-            env = env.removeTarget(target);
-
-            final SPTarget base = env.getBase();
-
-            final GuideEnvironment genv = env.getGuideEnvironment();
-            final ImList<SPTarget> user = env.getUserTargets().append(base);
-
-            env = TargetEnvironment.create(target, genv, user);
-            obsComp.setTargetEnvironment(env);
-        }
-
-        public boolean isMember(TargetEnvironment env, SPTarget target) {
-            return (env.getBase() == target);
-        }
-
-        public String toString() {
-            return TargetEnvironment.BASE_NAME;
-        }
-    }
-
-    private static class GuidePositionType implements PositionType {
-        private final GuideProbe guider;
-        private final boolean available;
-
-        GuidePositionType(GuideProbe guider, boolean available) {
-            this.guider = guider;
-            this.available = available;
-        }
-
-        public boolean isAvailable() {
-            return available;
-        }
-
-        public void morphTarget(TargetObsComp obsComp, SPTarget target) {
-            TargetEnvironment env = obsComp.getTargetEnvironment();
-            if (isMember(env, target)) return;
-            env = env.removeTarget(target);
-
-            GuideProbeTargets gt;
-            final Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(guider);
-            if (gtOpt.isEmpty()) {
-                gt = GuideProbeTargets.create(guider, ImCollections.singletonList(target));
-            } else {
-                gt = gtOpt.getValue();
-                gt = gt.update(OptionsList.UpdateOps.appendAsPrimary(target));
-            }
-            env = env.putPrimaryGuideProbeTargets(gt);
-            obsComp.setTargetEnvironment(env);
-        }
-
-        public boolean isMember(TargetEnvironment env, SPTarget target) {
-            for (GuideGroup group : env.getGroups()) {
-                final Option<GuideProbeTargets> gtOpt = group.get(guider);
-                if (!gtOpt.isEmpty() && gtOpt.getValue().getOptions().contains(target)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public String toString() {
-            return guider.getKey();
-        }
-    }
-
-    private enum UserPositionType implements PositionType {
-        instance;
-
-        public boolean isAvailable() {
-            return true;
-        }
-
-        public void morphTarget(TargetObsComp obsComp, SPTarget target) {
-            TargetEnvironment env = obsComp.getTargetEnvironment();
-            if (isMember(env, target)) return;
-
-            env = env.removeTarget(target);
-            env = env.setUserTargets(env.getUserTargets().append(target));
-            obsComp.setTargetEnvironment(env);
-        }
-
-        public boolean isMember(TargetEnvironment env, SPTarget target) {
-            return env.getUserTargets().contains(target);
-        }
-
-        public String toString() {
-            return TargetEnvironment.USER_NAME;
-        }
     }
 
     private final ActionListener _tagListener = new ActionListener() {
@@ -1435,11 +1331,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
 
-//    // Return true if the current position is a ConicTarget or a Planet Target
-//    private boolean _isNonSidereal() {
-//        return (_curPos.getTarget() instanceof NonSiderealTarget);
-//    }
-
     private final TelescopePosWatcher posWatcher = new TelescopePosWatcher() {
         public void telescopePosUpdate(WatchablePos tp) {
             if (_ignorePosUpdate)
@@ -2039,3 +1930,111 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
 }
 
+
+
+
+interface PositionType {
+    boolean isAvailable();
+    void morphTarget(TargetObsComp obsComp, SPTarget target);
+    boolean isMember(TargetEnvironment env, SPTarget target);
+}
+
+enum BasePositionType implements PositionType {
+    instance;
+
+    public boolean isAvailable() {
+        return true;
+    }
+
+    public void morphTarget(TargetObsComp obsComp, SPTarget target) {
+        TargetEnvironment env = obsComp.getTargetEnvironment();
+        if (isMember(env, target)) return;
+        env = env.removeTarget(target);
+
+        final SPTarget base = env.getBase();
+
+        final GuideEnvironment genv = env.getGuideEnvironment();
+        final ImList<SPTarget> user = env.getUserTargets().append(base);
+
+        env = TargetEnvironment.create(target, genv, user);
+        obsComp.setTargetEnvironment(env);
+    }
+
+    public boolean isMember(TargetEnvironment env, SPTarget target) {
+        return (env.getBase() == target);
+    }
+
+    public String toString() {
+        return TargetEnvironment.BASE_NAME;
+    }
+}
+
+class GuidePositionType implements PositionType {
+    private final GuideProbe guider;
+    private final boolean available;
+
+    GuidePositionType(GuideProbe guider, boolean available) {
+        this.guider = guider;
+        this.available = available;
+    }
+
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void morphTarget(TargetObsComp obsComp, SPTarget target) {
+        TargetEnvironment env = obsComp.getTargetEnvironment();
+        if (isMember(env, target)) return;
+        env = env.removeTarget(target);
+
+        GuideProbeTargets gt;
+        final Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(guider);
+        if (gtOpt.isEmpty()) {
+            gt = GuideProbeTargets.create(guider, ImCollections.singletonList(target));
+        } else {
+            gt = gtOpt.getValue();
+            gt = gt.update(OptionsList.UpdateOps.appendAsPrimary(target));
+        }
+        env = env.putPrimaryGuideProbeTargets(gt);
+        obsComp.setTargetEnvironment(env);
+    }
+
+    public boolean isMember(TargetEnvironment env, SPTarget target) {
+        for (GuideGroup group : env.getGroups()) {
+            final Option<GuideProbeTargets> gtOpt = group.get(guider);
+            if (!gtOpt.isEmpty() && gtOpt.getValue().getOptions().contains(target)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public String toString() {
+        return guider.getKey();
+    }
+}
+
+enum UserPositionType implements PositionType {
+    instance;
+
+    public boolean isAvailable() {
+        return true;
+    }
+
+    public void morphTarget(TargetObsComp obsComp, SPTarget target) {
+        TargetEnvironment env = obsComp.getTargetEnvironment();
+        if (isMember(env, target)) return;
+
+        env = env.removeTarget(target);
+        env = env.setUserTargets(env.getUserTargets().append(target));
+        obsComp.setTargetEnvironment(env);
+    }
+
+    public boolean isMember(TargetEnvironment env, SPTarget target) {
+        return env.getUserTargets().contains(target);
+    }
+
+    public String toString() {
+        return TargetEnvironment.USER_NAME;
+    }
+}
