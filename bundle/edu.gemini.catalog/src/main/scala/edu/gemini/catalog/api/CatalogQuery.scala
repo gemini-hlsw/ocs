@@ -13,6 +13,8 @@ sealed trait CatalogQuery {
   def filter: SiderealTarget => Boolean = (t) => radiusConstraint.targetsFilter(base)(t) && magnitudeConstraints.map(_.filter(t)).getOrElse(true)
 
   def withMagnitudeConstraints(magnitudeConstraints: Option[MagnitudeConstraints]): CatalogQuery
+
+  def isSuperSetOf(c: CatalogQuery) = base == c.base && radiusConstraint.isSuperSefOf(c.radiusConstraint)
 }
 
 object CatalogQuery {

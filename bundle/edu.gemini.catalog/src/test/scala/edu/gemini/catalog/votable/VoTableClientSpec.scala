@@ -1,14 +1,15 @@
 package edu.gemini.catalog.votable
 
+import java.util.concurrent.atomic.AtomicInteger
+
 import edu.gemini.catalog.api.{FaintnessConstraint, MagnitudeConstraints, RadiusConstraint, CatalogQuery}
 import edu.gemini.spModel.core.{MagnitudeBand, Angle, Coordinates}
 import org.apache.commons.httpclient.NameValuePair
 import org.specs2.mutable.SpecificationWithJUnit
 import org.specs2.time.NoTimeConversions
 
-import scala.concurrent.Await
+import scala.concurrent._
 import scala.concurrent.duration._
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with NoTimeConversions {
