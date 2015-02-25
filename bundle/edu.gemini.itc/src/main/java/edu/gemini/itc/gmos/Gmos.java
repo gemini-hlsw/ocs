@@ -30,7 +30,7 @@ public abstract class Gmos extends Instrument {
     private static final double AD_SATURATION = 56636;
     private static final double HIGH_GAIN = 4.4;
     private static final double LOW_GAIN = 2.18;
-    protected static final int DETECTOR_PIXELS = 6218;
+    private static final int DETECTOR_PIXELS = 6218;
 
     // Used as a desperate solution when multiple detectors need to be handled differently (See REL-478).
     // For EEV holds the one instance one the Gmos instrument, for Hamamatsu, contains 3 one Gmos instance for
@@ -51,15 +51,79 @@ public abstract class Gmos extends Instrument {
 
     private int _detectorCcdIndex = 0; // 0, 1, or 2 when there are multiple CCDs in the detector
 
-    public Gmos(GmosParameters gp, ObservationDetailsParameters odp, String FILENAME, String prefix, int detectorCcdIndex) throws Exception {
+    public Gmos(GmosParameters gp, ObservationDetailsParameters odp, String FILENAME, int detectorCcdIndex) throws Exception {
         super(INSTR_DIR, FILENAME);
 
         this.odp    = odp;
         this.gp     = gp;
+        validate();
 
         _detectorCcdIndex = detectorCcdIndex;
 
         _sampling = super.getSampling();
+
+        if (!(gp.getFilter().equals("none"))) {
+            _Filter = Filter.fromWLFile(getPrefix(), gp.getFilter(), getDirectory() + "/");
+            addFilter(_Filter);
+        }
+
+
+        FixedOptics _fixedOptics = new FixedOptics(getDirectory() + "/", getPrefix());
+        addComponent(_fixedOptics);
+
+
+        //Choose correct CCD QE curve
+        // REL-760, REL-478
+        // The following QE files correspond to each option
+        // 0. gmos_n_E2V4290DDmulti3.dat      => EEV DD array
+        // 1. gmos_n_cdd_red.dat              => EEV legacy
+        // 2. gmos_n_CCD-{R,G,B}.dat          =>  Hamamatsu (R,G,B)
+        if (gp.getCCDtype().equals("0")) {
+            _detector = new Detector(getDirectory() + "/", getPrefix(), "E2V4290DDmulti3", "EEV DD array");
+            _detector.setDetectorPixels(DETECTOR_PIXELS);
+            if (detectorCcdIndex == 0) _instruments = new Gmos[]{this};
+        } else if (gp.getCCDtype().equals("1")) {
+            _detector = new Detector(getDirectory() + "/", getPrefix(), "ccd_red", "EEV legacy array");
+            _detector.setDetectorPixels(DETECTOR_PIXELS);
+            if (detectorCcdIndex == 0) _instruments = new Gmos[]{this};
+        } else if (gp.getCCDtype().equals("2")) {
+            String fileName = getCcdFiles()[detectorCcdIndex];
+            String name = getCcdNames()[detectorCcdIndex];
+            Color color = DETECTOR_CCD_COLORS[detectorCcdIndex];
+            _detector = new Detector(getDirectory() + "/", getPrefix(), fileName, "Hamamatsu array", name, color);
+            _detector.setDetectorPixels(DETECTOR_PIXELS);
+            if (detectorCcdIndex == 0)
+                _instruments = createCcdArray();
+        }
+
+        if (detectorCcdIndex == 0) {
+            _dtv = new DetectorsTransmissionVisitor(gp.getSpectralBinning(),
+                    getDirectory() + "/" + getPrefix() + "ccdpix_red" + Instrument.getSuffix());
+        }
+
+        if (isIfuUsed()) {
+            if (gp.getIFUMethod().equals(GmosParameters.SINGLE_IFU)) {
+                _IFU = new IFUComponent(getPrefix(), gp.getIFUOffset());
+            }
+            if (gp.getIFUMethod().equals(GmosParameters.RADIAL_IFU)) {
+                _IFU = new IFUComponent(getPrefix(), gp.getIFUMinOffset(), gp.getIFUMaxOffset());
+            }
+            addComponent(_IFU);
+        }
+
+
+        if (!(gp.getGrating().equals("none"))) {
+            _gratingOptics = new GmosGratingOptics(getDirectory() + "/" + getPrefix(), gp.getGrating(), _detector,
+                    gp.getCentralWavelength(),
+                    _detector.getDetectorPixels(),
+                    gp.getSpectralBinning());
+            _sampling = _gratingOptics.getGratingDispersion_nmppix();
+            addGrating(_gratingOptics);
+        }
+
+
+        addComponent(_detector);
+
 
     }
 
@@ -133,9 +197,12 @@ public abstract class Gmos extends Instrument {
     }
 
     public double getPixelSize() {
-        return super.getPixelSize() * gp.getSpatialBinning();
+        if (gp.getCCDtype().equals("0") || gp.getCCDtype().equals("1")) {
+            return ORIG_PLATE_SCALE * gp.getSpatialBinning();
+        } else {
+            return HAM_PLATE_SCALE * gp.getSpatialBinning();
+        }
     }
-
 
     public double getSpectralPixelWidth() {
         return _gratingOptics.getPixelWidth();
@@ -207,5 +274,48 @@ public abstract class Gmos extends Instrument {
             s += "\n";
         }
         return s;
+    }
+
+    protected abstract Gmos[] createCcdArray() throws Exception;
+    protected abstract String getPrefix();
+    protected abstract String[] getCcdFiles();
+    protected abstract String[] getCcdNames();
+
+    private void validate() {
+        //Test to see that all conditions for Spectroscopy are met
+        if (odp.getMethod().isSpectroscopy()) {
+            if (gp.getGrating().equals("none"))
+                throw new RuntimeException("Spectroscopy calculation method is selected but a grating" +
+                        " is not.\nPlease select a grating and a " +
+                        "focal plane mask in the Instrument " +
+                        "configuration section.");
+            if (gp.getFocalPlaneMask().equals(GmosParameters.NO_SLIT))
+                throw new RuntimeException("Spectroscopy calculation method is selected but a focal" +
+                        " plane mask is not.\nPlease select a " +
+                        "grating and a " +
+                        "focal plane mask in the Instrument " +
+                        "configuration section.");
+        }
+
+        if (odp.getMethod().isImaging()) {
+            if (gp.getFilter().equals("none"))
+                throw new RuntimeException("Imaging calculation method is selected but a filter" +
+                        " is not.\n  Please select a filter and resubmit the " +
+                        "form to continue.");
+            if (!gp.getGrating().equals("none"))
+                throw new RuntimeException("Imaging calculation method is selected but a grating" +
+                        " is also selected.\nPlease deselect the " +
+                        "grating or change the method to spectroscopy.");
+            if (!gp.getFocalPlaneMask().equals("none"))
+                throw new RuntimeException("Imaging calculation method is selected but a Focal" +
+                        " Plane Mask is also selected.\nPlease " +
+                        "deselect the Focal Plane Mask" +
+                        " or change the method to spectroscopy.");
+            if (isIfuUsed())
+                throw new RuntimeException("Imaging calculation method is selected but an IFU" +
+                        " is also selected.\nPlease deselect the IFU or" +
+                        " change the method to spectroscopy.");
+        }
+
     }
 }
