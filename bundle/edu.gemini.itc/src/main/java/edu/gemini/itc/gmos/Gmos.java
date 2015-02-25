@@ -15,7 +15,6 @@ public abstract class Gmos extends Instrument {
     public static final double ORIG_PLATE_SCALE = 0.0727;
     public static final double HAM_PLATE_SCALE = 0.080778;
 
-    protected String _CCDtype;
     protected DetectorsTransmissionVisitor _dtv;
 
     // Colors to use for charts corresponding to the detectorCcdIndex
@@ -47,9 +46,6 @@ public abstract class Gmos extends Instrument {
     protected GmosGratingOptics _gratingOptics;
     protected Detector _detector;
     protected double _sampling;
-
-    protected boolean _IFUUsed = false;
-    protected boolean _IFU_IsSingle = false;
 
     // These are the limits of observable wavelength with this configuration.
 
@@ -177,8 +173,8 @@ public abstract class Gmos extends Instrument {
         return _IFU;
     }
 
-    public boolean IFU_IsUsed() {
-        return _IFUUsed;
+    public boolean isIfuUsed() {
+        return gp.getFocalPlaneMask().equals(GmosParameters.IFU);
     }
 
     //Abstract class for Detector Pixel Transmission  (i.e.  Create Detector gaps)
@@ -202,9 +198,9 @@ public abstract class Gmos extends Instrument {
         s += "Pixel Size in Spatial Direction: " + getPixelSize() + "arcsec\n";
         if (odp.getMethod().isSpectroscopy())
             s += "Pixel Size in Spectral Direction: " + getGratingDispersion_nmppix() + "nm\n";
-        if (IFU_IsUsed()) {
+        if (isIfuUsed()) {
             s += "IFU is selected,";
-            if (_IFU_IsSingle)
+            if (gp.getIFUMethod().equals(GmosParameters.SINGLE_IFU))
                 s += "with a single IFU element at " + gp.getIFUOffset() + "arcsecs.";
             else
                 s += "with mulitple IFU elements arranged from " + gp.getIFUMinOffset() + " to " + gp.getIFUMaxOffset() + "arcsecs.";

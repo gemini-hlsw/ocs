@@ -32,10 +32,6 @@ public class GmosSouth extends Gmos {
     public GmosSouth(GmosParameters gp, ObservationDetailsParameters odp, int detectorCcdIndex) throws Exception {
         super(gp, odp, FILENAME, INSTR_PREFIX, detectorCcdIndex);
 
-        if (gp.getFocalPlaneMask().equals(GmosParameters.IFU))
-            _IFUUsed = true;
-        else _IFUUsed = false;
-
         if (!(gp.getFilter().equals("none"))) {
             _Filter = Filter.fromWLFile(getPrefix(), gp.getFilter(), getDirectory() + "/");
            addFilter(_Filter);
@@ -75,22 +71,19 @@ public class GmosSouth extends Gmos {
                         " Plane Mask is also selected.\nPlease " +
                         "deselect the Focal Plane Mask" +
                         " or change the method to spectroscopy.");
-            if (_IFUUsed)
+            if (isIfuUsed())
                 throw new Exception("Imaging calculation method is selected but an IFU" +
                         " is also selected.\nPlease deselect the IFU or" +
                         " change the method to spectroscopy.");
         }
 
 
-        //Original vs Hamamatsu CCD's
-        _CCDtype = gp.getCCDtype();
-
         // See REL-478
-        if (_CCDtype.equals("1")) {
+        if (gp.getCCDtype().equals("1")) {
             _detector = new Detector(getDirectory() + "/", getPrefix(), "ccd_red", "EEV legacy array");
             _detector.setDetectorPixels(DETECTOR_PIXELS);
             if (detectorCcdIndex == 0) _instruments = new Gmos[]{this};
-        } else if (_CCDtype.equals("2")) {
+        } else if (gp.getCCDtype().equals("2")) {
             String fileName = DETECTOR_CCD_FILES[detectorCcdIndex];
             String name = DETECTOR_CCD_NAMES[detectorCcdIndex];
             Color color = DETECTOR_CCD_COLORS[detectorCcdIndex];
@@ -105,9 +98,8 @@ public class GmosSouth extends Gmos {
                     getDirectory() + "/" + getPrefix() + "ccdpix_red" + Instrument.getSuffix());
         }
 
-        if (_IFUUsed) {
+        if (isIfuUsed()) {
             if (gp.getIFUMethod().equals(GmosParameters.SINGLE_IFU)) {
-                _IFU_IsSingle = true;
                 _IFU = new IFUComponent(getPrefix(), gp.getIFUOffset());
             }
             if (gp.getIFUMethod().equals(GmosParameters.RADIAL_IFU)) {
@@ -146,7 +138,7 @@ public class GmosSouth extends Gmos {
         //member variable of the superclass Instrument.
 
         // REL-477: XXX FIXME
-        if (_CCDtype.equals("1")) {
+        if (gp.getCCDtype().equals("1")) {
             return ORIG_PLATE_SCALE * gp.getSpatialBinning();
         } else {
             return HAM_PLATE_SCALE * gp.getSpatialBinning();

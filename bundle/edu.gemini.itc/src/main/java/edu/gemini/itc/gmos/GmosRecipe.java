@@ -109,7 +109,7 @@ public final class GmosRecipe extends RecipeBase {
         final ITCChart gmosChart1;
         final ITCChart gmosChart2;
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {
-            final boolean ifuAndNotUniform = mainInstrument.IFU_IsUsed() && !(_sdParameters.isUniform());
+            final boolean ifuAndNotUniform = mainInstrument.isIfuUsed() && !(_sdParameters.isUniform());
             final double ifu_offset = ifuAndNotUniform ? (Double) mainInstrument.getIFU().getApertureOffsetList().iterator().next() : 0.0;
             final String chart1Title = ifuAndNotUniform ? "Signal and Background (IFU element offset: " + device.toString(ifu_offset) + " arcsec)" : "Signal and Background ";
             final String chart2Title = ifuAndNotUniform ? "Intermediate Single Exp and Final S/N (IFU element offset: " + device.toString(ifu_offset) + " arcsec)" : "Intermediate Single Exp and Final S/N";
@@ -307,7 +307,7 @@ public final class GmosRecipe extends RecipeBase {
 
             im_qual = IQcalc.getImageQuality();
 
-            if (!instrument.IFU_IsUsed()) {
+            if (!instrument.isIfuUsed()) {
                 // Calculate the Fraction of source in the aperture
                 SourceFractionCalculatable SFcalc =
                         SourceFractionCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
@@ -383,7 +383,7 @@ public final class GmosRecipe extends RecipeBase {
 
             // ObservationMode Imaging or spectroscopy
             if (_obsDetailParameters.getMethod().isSpectroscopy()) {
-                if (!instrument.IFU_IsUsed()) {
+                if (!instrument.isIfuUsed()) {
                     if (!_obsDetailParameters.isAutoAperture()) {
                         st = new SlitThroughput(im_qual,
                                 _obsDetailParameters.getApertureDiameter(),
@@ -439,7 +439,7 @@ public final class GmosRecipe extends RecipeBase {
                     _print("<HR align=left SIZE=3>");
                 }
 
-                if (!instrument.IFU_IsUsed()) {
+                if (!instrument.isIfuUsed()) {
                     ap_diam = st.getSpatialPix(); // ap_diam really Spec_Npix on
                     // Phil's Mathcad change later
                     spec_source_frac = st.getSlitThroughput();
@@ -454,7 +454,7 @@ public final class GmosRecipe extends RecipeBase {
                 if (_sdParameters.isUniform()) {
                     im_qual = 10000;
 
-                    if (!instrument.IFU_IsUsed()) {
+                    if (!instrument.isIfuUsed()) {
 
                         if (!_obsDetailParameters.isAutoAperture()) {
                             spec_source_frac = _gmosParameters.getFPMask() * ap_diam * pixel_size;
@@ -465,7 +465,7 @@ public final class GmosRecipe extends RecipeBase {
                     }
                 }
 
-                if (instrument.IFU_IsUsed() && !_sdParameters.isUniform()) {
+                if (instrument.isIfuUsed() && !_sdParameters.isUniform()) {
                     Iterator src_frac_it = sf_list.iterator();
                     Iterator ifu_offset_it = ap_offset_list.iterator();
 
