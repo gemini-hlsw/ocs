@@ -176,9 +176,9 @@ object GemsStrategy extends AgsStrategy {
 
   protected [impl] def search(opticalCatalog: String, nirCatalog: String, tipTiltMode: GemsTipTiltMode, ctx: ObsContext, posAngles: Set[Angle], nirBand: Option[MagnitudeBand]): Future[Option[List[GemsCatalogSearchResults]]] = {
     // Get the instrument: F2 or GSAOI?
-    val gemsInstrument = {
+    val gemsInstrument =
       (ctx.getInstrument.getType == SPComponentType.INSTRUMENT_GSAOI) ? GemsInstrument.gsaoi | GemsInstrument.flamingos2
-    }
+    // Search options
     val gemsOptions = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog, gemsInstrument, tipTiltMode, posAngles.asJava)
 
     // Perform the catalog search.
@@ -186,13 +186,9 @@ object GemsStrategy extends AgsStrategy {
 
     // Now check that the results are valid: there must be a valid tip-tilt and flexure star each.
     results.map { r =>
-      val checker = r.foldRight(Map[String, Boolean]())((result, resultMap) => {
-        val key = result.criterion.key.group.getKey
-        if (result.results.nonEmpty) resultMap.updated(key, true)
-        else if (!resultMap.contains(key)) resultMap.updated(key, false)
-        else resultMap
-      })
-      checker.values.find(identity).map(_ => r)
+      val AllKeys:List[GemsGuideProbeGroup] = List(Canopus.Wfs.Group.instance, GsaoiOdgw.Group.instance)
+      val containedKeys = r.map(_.criterion.key.group)
+      containedKeys.forall(AllKeys.contains) option r
     }
   }
 
