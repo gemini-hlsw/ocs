@@ -9,9 +9,6 @@ import edu.gemini.catalog.votable.{CatalogException, CatalogQueryResult, VoTable
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.core.Target.SiderealTarget
 
-// TODO port these dependencies
-import edu.gemini.skycalc.Offset
-
 import edu.gemini.spModel.ags.AgsStrategyKey.GemsKey
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2OiwfsGuideProbe
 import edu.gemini.spModel.gemini.gems.{GemsInstrument, Canopus}
@@ -136,13 +133,9 @@ object GemsStrategy extends AgsStrategy {
     // why do we need multiple position angles?  catalog results are given in
     // a ring (limited by radius limits) around a base position ... confusion
     val posAngles   = (ctx.getPositionAngle.toNewModel :: (0 until 360 by 90).map(Angle.fromDegrees(_)).toList).toSet
-    val emptyResult = List.empty[(GuideProbe, List[SiderealTarget])]
     search(GemsGuideStarSearchOptions.DEFAULT_CATALOG,
       GemsGuideStarSearchOptions.DEFAULT_CATALOG,
-      GemsTipTiltMode.canopus, ctx, posAngles, None)
-    .map {
-      _.fold(emptyResult)(simplifiedResult)
-    }
+      GemsTipTiltMode.canopus, ctx, posAngles, None).map(simplifiedResult)
   }
 
   override def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[Estimate] = {
@@ -174,7 +167,7 @@ object GemsStrategy extends AgsStrategy {
     }
   }
 
-  protected [impl] def search(opticalCatalog: String, nirCatalog: String, tipTiltMode: GemsTipTiltMode, ctx: ObsContext, posAngles: Set[Angle], nirBand: Option[MagnitudeBand]): Future[Option[List[GemsCatalogSearchResults]]] = {
+  protected [impl] def search(opticalCatalog: String, nirCatalog: String, tipTiltMode: GemsTipTiltMode, ctx: ObsContext, posAngles: Set[Angle], nirBand: Option[MagnitudeBand]): Future[List[GemsCatalogSearchResults]] = {
     // Get the instrument: F2 or GSAOI?
     val gemsInstrument =
       (ctx.getInstrument.getType == SPComponentType.INSTRUMENT_GSAOI) ? GemsInstrument.gsaoi | GemsInstrument.flamingos2
@@ -188,7 +181,8 @@ object GemsStrategy extends AgsStrategy {
     results.map { r =>
       val AllKeys:List[GemsGuideProbeGroup] = List(Canopus.Wfs.Group.instance, GsaoiOdgw.Group.instance)
       val containedKeys = r.map(_.criterion.key.group)
-      containedKeys.forall(AllKeys.contains) option r
+      // Return a list only if both guide probes returned a value
+      ~(containedKeys.forall(AllKeys.contains) option r)
     }
   }
 
@@ -204,7 +198,7 @@ object GemsStrategy extends AgsStrategy {
       GemsGuideStarSearchOptions.DEFAULT_CATALOG,
       GemsTipTiltMode.canopus, ctx, posAngles, None)
     results.map { r =>
-      val gemsGuideStars = r.map(x => findGuideStars(ctx, posAngles, x)).flatten
+      val gemsGuideStars = findGuideStars(ctx, posAngles, r)
 
       // Now we must convert from an Option[GemsGuideStars] to a Selection.
       gemsGuideStars.map { x =>

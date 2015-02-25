@@ -79,7 +79,7 @@ case class CatalogSearchCriterion(name: String, magConstraints: Option[Magnitude
     private def matches(magList: List[Magnitude]): Boolean =
       magList.exists(matches)
 
-    private def matches(mag: Magnitude): Boolean = magConstraints.map(_.contains(mag)).getOrElse(false)
+    private def matches(mag: Magnitude): Boolean = magConstraints.exists(_.contains(mag))
   }
 
   /**
