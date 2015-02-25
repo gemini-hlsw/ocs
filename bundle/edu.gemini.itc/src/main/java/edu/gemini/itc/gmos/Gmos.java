@@ -52,8 +52,6 @@ public abstract class Gmos extends Instrument {
     protected boolean _IFU_IsSingle = false;
 
     // These are the limits of observable wavelength with this configuration.
-    protected double _observingStart;
-    protected double _observingEnd;
 
     private int _detectorCcdIndex = 0; // 0, 1, or 2 when there are multiple CCDs in the detector
 
@@ -65,11 +63,6 @@ public abstract class Gmos extends Instrument {
 
         _detectorCcdIndex = detectorCcdIndex;
 
-        // The instrument data file gives a start/end wavelength for
-        // the instrument.  But with a filter in place, the filter
-        // transmits wavelengths that are a subset of the original range.
-        _observingStart = getStart();
-        _observingEnd = getEnd();
         _sampling = super.getSampling();
 
     }
@@ -142,15 +135,6 @@ public abstract class Gmos extends Instrument {
     public String getDirectory() {
         return ITCConstants.LIB + "/" + INSTR_DIR;
     }
-
-    public double getObservingStart() {
-        return _observingStart;
-    }
-
-    public double getObservingEnd() {
-        return _observingEnd;
-    }
-
 
     public double getPixelSize() {
         return super.getPixelSize() * gp.getSpatialBinning();

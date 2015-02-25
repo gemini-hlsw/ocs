@@ -36,20 +36,9 @@ public class GmosSouth extends Gmos {
             _IFUUsed = true;
         else _IFUUsed = false;
 
-        /// !!!!!!!!NEED to Edit all of this !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        // Note for designers of other instruments:
-        // Other instruments may not have filters and may just use
-        // the range given in their instrument file.
         if (!(gp.getFilter().equals("none"))) {
-
             _Filter = Filter.fromWLFile(getPrefix(), gp.getFilter(), getDirectory() + "/");
-
-            if (_Filter.getStart() >= _observingStart)
-                _observingStart = _Filter.getStart();
-            if (_Filter.getEnd() <= _observingEnd)
-                _observingEnd = _Filter.getEnd();
-            addComponent(_Filter);
-
+           addFilter(_Filter);
         }
 
 
@@ -129,26 +118,12 @@ public class GmosSouth extends Gmos {
 
 
         if (!(gp.getGrating().equals("none"))) {
-
             _gratingOptics = new GmosGratingOptics(getDirectory() + "/" + getPrefix(), gp.getGrating(), _detector,
                     gp.getCentralWavelength(),
                     _detector.getDetectorPixels(),
                     gp.getSpectralBinning());
             _sampling = _gratingOptics.getGratingDispersion_nmppix();
-            _observingStart = _gratingOptics.getStart();
-            _observingEnd = _gratingOptics.getEnd();
-
-            if (!(gp.getGrating().equals("none")) && !(gp.getFilter().equals("none")))
-                if ((_Filter.getStart() >= _gratingOptics.getEnd()) ||
-                        (_Filter.getEnd() <= _gratingOptics.getStart()))
-
-                {
-                    throw new Exception("The " + gp.getFilter() + " filter" +
-                            " and the " + gp.getGrating() +
-                            " do not overlap with the requested wavelength.\n" +
-                            " Please select a different filter, grating or wavelength.");
-                }
-            addComponent(_gratingOptics);
+            addGrating(_gratingOptics);
         }
 
 

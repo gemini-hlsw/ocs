@@ -42,18 +42,9 @@ public final class TRecs extends Instrument {
     private final int _spatialBinning;
     private final DetectorsTransmissionVisitor _dtv;
 
-    // These are the limits of observable wavelength with this configuration.
-    private double _observingStart;
-    private double _observingEnd;
-
     public TRecs(final TRecsParameters tp, final ObservationDetailsParameters odp) throws Exception {
         super(INSTR_DIR, FILENAME);
-        // The instrument data file gives a start/end wavelength for
-        // the instrument.  But with a filter in place, the filter
-        // transmits wavelengths that are a subset of the original range.
 
-        _observingStart = super.getStart();
-        _observingEnd = super.getEnd();
         _focalPlaneMask = tp.getFocalPlaneMask();
         _grating = tp.getGrating();
         _centralWavelength = tp.getInstrumentCentralWavelength();
@@ -67,19 +58,9 @@ public final class TRecs extends Instrument {
         addComponent(trecsInstrumentWindow);
 
 
-        /// !!!!!!!!NEED to Edit all of this !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        // Note for designers of other instruments:
-        // Other instruments may not have filters and may just use
-        // the range given in their instrument file.
         if (!(tp.getFilter().equals("none"))) {
             final Filter filter = Filter.fromWLFile(getPrefix(), tp.getFilter(), getDirectory() + "/");
-            if (filter.getStart() >= _observingStart) {
-                _observingStart = filter.getStart();
-            }
-            if (filter.getEnd() <= _observingEnd) {
-                _observingEnd = filter.getEnd();
-            }
-            addComponent(filter);
+            addFilter(filter);
             _filter = Option.apply(filter);
         } else {
             _filter = Option.empty();
@@ -132,29 +113,16 @@ public final class TRecs extends Instrument {
 
             final TrecsGratingOptics gratingOptics = new TrecsGratingOptics(getDirectory() + "/" + TRecs.getPrefix(), _grating,
                     _centralWavelength,
-                    detector.getDetectorPixels(),//_spectralBinning,
+                    detector.getDetectorPixels(),
                     _spectralBinning);
             _sampling = gratingOptics.getGratingDispersion_nmppix();
-            _observingStart = gratingOptics.getStart();
-            _observingEnd = gratingOptics.getEnd();
-
-            if (!(_grating.equals("none")) && _filter.isDefined())
-                if ((_filter.get().getStart() >= gratingOptics.getEnd()) ||
-                        (_filter.get().getEnd() <= gratingOptics.getStart()))
-
-                {
-                    throw new Exception("The " + tp.getFilter() + " filter" +
-                            " and the " + _grating +
-                            " do not overlap with the requested wavelength.\n" +
-                            " Please select a different filter, grating or wavelength.");
-                }
 
             if (getGrating().equals(TRecsParameters.LORES20_G5402) && !(instrumentWindow.equals(TRecsParameters.KRS5))) {
                 throw new Exception("The " + getGrating() + " grating must be " +
                         "used with the " + TRecsParameters.KRS5 + " window. \n" +
                         "Please change the grating or the window cover.");
             }
-            addComponent(gratingOptics);
+            addGrating(gratingOptics);
             _gratingOptics = Option.apply(gratingOptics);
         } else {
             _gratingOptics = Option.empty();
@@ -201,20 +169,8 @@ public final class TRecs extends Instrument {
     /**
      * Returns the subdirectory where this instrument's data files are.
      */
-    //Changed Oct 19.  If any problem reading in lib files change back...
-    //public String getDirectory() { return ITCConstants.INST_LIB + "/" +
-    //			      INSTR_DIR+"/lib"; }
     public String getDirectory() {
-        return ITCConstants.LIB + "/" +
-                INSTR_DIR;
-    }
-
-    public double getObservingStart() {
-        return _observingStart;
-    }
-
-    public double getObservingEnd() {
-        return _observingEnd;
+        return ITCConstants.LIB + "/" + INSTR_DIR;
     }
 
     public double getPixelSize() {

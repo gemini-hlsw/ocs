@@ -62,18 +62,8 @@ public class Michelle extends Instrument {
     private int _spectralBinning;
     private int _spatialBinning;
 
-    // These are the limits of observable wavelength with this configuration.
-    private double _observingStart;
-    private double _observingEnd;
-
     public Michelle(MichelleParameters mp, ObservationDetailsParameters odp) throws Exception {
         super(INSTR_DIR, FILENAME);
-        // The instrument data file gives a start/end wavelength for
-        // the instrument.  But with a filter in place, the filter
-        // transmits wavelengths that are a subset of the original range.
-
-        _observingStart = super.getStart();
-        _observingEnd = super.getEnd();
         _sampling = super.getSampling();
         _focalPlaneMask = mp.getFocalPlaneMask();
         _grating = mp.getGrating();
@@ -97,28 +87,13 @@ public class Michelle extends Instrument {
             addComponent(michelleWireGrid);
         }
 
-        /// !!!!!!!!NEED to Edit all of this !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        // Note for designers of other instruments:
-        // Other instruments may not have filters and may just use
-        // the range given in their instrument file.
         if (!(_filterUsed.equals("none"))) {
-
-            //if(!(_grating.equals("none"))){
-            //	throw new Exception("Please select Grism Order Sorting from the filter list."); }
-
             _Filter = Filter.fromWLFile(getPrefix(), _filterUsed, getDirectory() + "/");
-
-            if (_Filter.getStart() >= _observingStart)
-                _observingStart = _Filter.getStart();
-            if (_Filter.getEnd() <= _observingEnd)
-                _observingEnd = _Filter.getEnd();
-            addComponent(_Filter);
-
+            addFilter(_Filter);
         }
 
 
         FixedOptics _fixedOptics = new FixedOptics(getDirectory() + "/", getPrefix());
-        //addComponent(new FixedOptics(getDirectory()+"/"));
         addComponent(_fixedOptics);
 
 
@@ -167,30 +142,11 @@ public class Michelle extends Instrument {
                 getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
 
         if (!(_grating.equals("none"))) {
-
             _gratingOptics = new MichelleGratingOptics(getDirectory() + "/" + getPrefix(), _grating,
                     _centralWavelength,
-                    _detector.getDetectorPixels(), //_spectralBinning,
+                    _detector.getDetectorPixels(),
                     _spectralBinning);
-            //_sampling = _gratingOptics.getGratingDispersion_nmppix();
-            //if (super.getStart()< _gratingOptics.getStart())
-            _observingStart = _gratingOptics.getStart();
-            //   else _observingStart = super.getStart();
-            //if (super.getEnd() > _gratingOptics.getEnd())
-            _observingEnd = _gratingOptics.getEnd();
-            //   else _observingEnd = super.getEnd();
-
-            if (!(_grating.equals("none")) && !(_filterUsed.equals("none")))
-//	    if ((_observingStart >= _gratingOptics.getEnd())||
-//		(_observingEnd <= _gratingOptics.getStart()))
-                if ((_Filter.getStart() >= _gratingOptics.getEnd()) ||
-                        (_Filter.getEnd() <= _gratingOptics.getStart())) {
-                    throw new Exception("The " + _filterUsed + " filter" +
-                            " and the " + _grating +
-                            " do not overlap with the requested wavelength.\n" +
-                            " Please select a different filter, grating or wavelength.");
-                }
-            addComponent(_gratingOptics);
+            addGrating(_gratingOptics);
         }
 
 
@@ -238,20 +194,8 @@ public class Michelle extends Instrument {
     /**
      * Returns the subdirectory where this instrument's data files are.
      */
-    //Changed Oct 19.  If any problem reading in lib files change back...
-    //public String getDirectory() { return ITCConstants.INST_LIB + "/" +
-    //			      INSTR_DIR+"/lib"; }
     public String getDirectory() {
-        return ITCConstants.LIB + "/" +
-                INSTR_DIR;
-    }
-
-    public double getObservingStart() {
-        return _observingStart;
-    }
-
-    public double getObservingEnd() {
-        return _observingEnd;
+        return ITCConstants.LIB + "/" + INSTR_DIR;
     }
 
     public double getPixelSize() {

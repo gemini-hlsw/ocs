@@ -1,5 +1,9 @@
 package edu.gemini.itc.shared;
 
+import edu.gemini.itc.niri.GrismOptics;
+import scala.Option;
+import scala.Some;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,6 +26,13 @@ public abstract class Instrument {
     // Each Instrument adds its own background.
     private ArraySpectrum background;
 
+    // The filter
+    private Option<Filter> filter;
+    // The grating
+    private Option<GratingOptics> grating;
+    // The grism
+    private Option<GrismOptics> grism;
+
     /**
      * All instruments have data files of the same format.
      * Note that one instrument accesses two files.
@@ -33,9 +44,12 @@ public abstract class Instrument {
     // Automatically loads the background data.
     protected Instrument(String subdir, String filename) {
         final String dir = ITCConstants.LIB + "/" + subdir + "/";
-        params = DatFile.instruments().apply(dir + filename);
-        components = new LinkedList<>();
-        background = new DefaultArraySpectrum(dir + params.backgroundFile());
+        params      = DatFile.instruments().apply(dir + filename);
+        components  = new LinkedList<>();
+        background  = new DefaultArraySpectrum(dir + params.backgroundFile());
+        filter      = Option.empty();
+        grating     = Option.empty();
+        grism       = Option.empty();  // TODO: difference grism vs grating??
     }
 
     /**
@@ -57,8 +71,76 @@ public abstract class Instrument {
         }
     }
 
+    /**
+     * Add a filter to the light path.
+     * Fiters limit the start and/or end value of the observable wavelengths.
+     * @param f
+     */
+    protected void addFilter(Filter f) {
+        if (filter.isDefined()) throw new IllegalStateException(); // TODO: make sure filter is passed into constructor?
+        filter = new Some<>(f);
+        components.add(f);
+        validate();
+    }
+
+    /**
+     * Add a grating to the light path.
+     * Gratings limit the start and/or end value of the observable wavelengths.
+     * @param g
+     */
+    protected void addGrating(GratingOptics g) {
+        if (grating.isDefined()) throw new IllegalStateException(); // TODO: make sure grating is passed into constructor?
+        grating = new Some<>(g);
+        components.add(g);
+        validate();
+    }
+
+    /**
+     * Add a grism to the light path.
+     * Grisms limit the start and/or end value of the observable wavelengths.
+     * @param g
+     */
+    protected void addGrism(GrismOptics g) {
+        if (grism.isDefined()) throw new IllegalStateException(); // TODO: make sure grating is passed into constructor?
+        grism = new Some<>(g);
+        components.add(g);
+        validate();
+    }
+
+
     protected void addComponent(TransmissionElement c) {
         components.add(c);
+    }
+
+    /**
+     * Checks some conditions which must hold true.
+     * Throws an exception if the instrument configuration is invalid
+     * TODO: call this in constructor at some point?
+     */
+    private void validate() {
+        if (grating.isDefined() && filter.isDefined()) {
+            final Filter f = filter.get();
+            final GratingOptics g = grating.get();
+            if ((f.getStart() >= g.getEnd()) || (f.getEnd() <= g.getStart())) {
+                throw new RuntimeException("The " + f + " filter" +
+                        " and the " + g +
+                        " do not overlap with the requested wavelength.\n" +
+                        " Please select a different filter, grating or wavelength." + f.getStart() +
+                        " " + f.getEnd() + " " + g.getStart() + " " + g.getEnd());
+            }
+        }
+        if (grism.isDefined() && filter.isDefined()) { // TODO grism vs grating ??
+            final Filter f = filter.get();
+            final GrismOptics g = grism.get();
+            if ((f.getStart() >= g.getEnd()) || (f.getEnd() <= g.getStart())) {
+                throw new RuntimeException("The " + f + " filter" +
+                        " and the " + g +
+                        " do not overlap.\nTo continue with " +
+                        "Spectroscopy mode " +
+                        "either deselect the filter or choose " +
+                        "one that overlaps with the grism.");
+            }
+        }
     }
 
     // Accessor methods
@@ -74,9 +156,31 @@ public abstract class Instrument {
         return params.end();
     }
 
-    public abstract double getObservingStart();
+    // find max start of all limiting elements
+    // TODO: Verify with science and change as appropriate. Shouldn't we return the max of *all* values?
+    public double getObservingStart() {
+        // From original code (Michelle, TReCS, Nifs and GMOS): grating trumps everything else, is this correct?
+        // Note that F2, Gnirs, Niri and Nifs behave differently again and override this method.
+        if (grating.isDefined()) return grating.get().getStart();
+        double s = getStart();
+        //s = grating.isDefined() ? Math.max(grating.get().getStart(), s) : s;
+        s = grism.isDefined()   ? Math.max(grism.get().getStart(),   s) : s;
+        s = filter.isDefined()  ? Math.max(filter.get().getStart(),  s) : s;
+        return s;
+    }
 
-    public abstract double getObservingEnd();
+    // find min end of all limiting elements
+    // TODO: Verify with science and change as appropriate. Shouldn't we return the min of *all* values?
+    public double getObservingEnd() {
+        // From original code (Michelle, TReCS, Nifs and GMOS): grating trumps everything else, is this correct?
+        // Note that F2, Gnirs, Niri and Nifs behave differently again and override this method.
+        if (grating.isDefined()) return grating.get().getEnd();
+        double e = getEnd();
+        //e = grating.isDefined() ? Math.min(grating.get().getEnd(), e) : e;
+        e = grism.isDefined()   ? Math.min(grism.get().getEnd(),   e) : e;
+        e = filter.isDefined()  ? Math.min(filter.get().getEnd(),  e) : e;
+        return e;
+    }
 
     public double getSampling() {
         return params.sampling();
