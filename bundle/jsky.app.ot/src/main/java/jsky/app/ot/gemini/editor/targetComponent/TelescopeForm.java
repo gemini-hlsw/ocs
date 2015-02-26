@@ -786,7 +786,7 @@ class TelescopeForm extends JPanel {
     JPanel coordinatesPanel;
     JPanel objectGBW;
     JPanel guideGroupPanel;
-    JComboBox tag;
+    JComboBox<PositionType> tag;
     TextBoxWidget targetName;
     TextBoxWidget guideGroupName;
     JButton resolveButton;
@@ -836,7 +836,7 @@ class TelescopeForm extends JPanel {
     DropDownListBoxWidget orbitalElementFormat;
     JPanel planetsPanel;
     JCalendarPopup calendarDate;
-    JComboBox calendarTime;
+    JComboBox<TimeConfig> calendarTime;
     JButton updateRaDecButton;
     JButton timeRangePlotButton;
     JButton setBaseButton;

@@ -17,7 +17,6 @@ import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.shared.gui.ButtonFlattener;
 import edu.gemini.shared.gui.RotatedButtonUI;
-import edu.gemini.shared.gui.ThinBorder;
 import edu.gemini.shared.gui.calendar.JCalendarPopup;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
@@ -56,7 +55,6 @@ import jsky.util.gui.*;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
-import javax.swing.border.Border;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
@@ -223,19 +221,28 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final DateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss");
         timeFormatter.setTimeZone(UTC);
         _w.calendarTime.setModel(new DefaultComboBoxModel<>(TimeConfig.values()));
-        _w.calendarTime.setRenderer(new BasicComboBoxRenderer() {
-            public Component getListCellRendererComponent(JList jList, Object
-                    object, int index, boolean isSelected, boolean hasFocus) {
-                final String text;
-                if (object instanceof Date) {
-                    text = timeFormatter.format((Date) object);
-                } else if (object instanceof TimeConfig) {
-                    text = ((TimeConfig) object).displayValue();
-                } else {
-                    text = object.toString();
+        _w.calendarTime.setRenderer(new ListCellRenderer<TimeConfig>() {
+
+            // This is raw-typed; we use a delegate to avoid the warning
+            BasicComboBoxRenderer delegate = new BasicComboBoxRenderer() {
+                public Component getListCellRendererComponent(JList jList, Object
+                object, int index, boolean isSelected, boolean hasFocus) {
+                    final String text;
+                    if (object instanceof Date) {
+                        text = timeFormatter.format((Date) object);
+                    } else if (object instanceof TimeConfig) {
+                        text = ((TimeConfig) object).displayValue();
+                    } else {
+                        text = object.toString();
+                    }
+                    return super.getListCellRendererComponent(jList, text, index, isSelected, hasFocus);
                 }
-                return super.getListCellRendererComponent(jList, text, index, isSelected, hasFocus);
+            };
+
+            public Component getListCellRendererComponent(JList<? extends TimeConfig> list, TimeConfig value, int index, boolean isSelected, boolean cellHasFocus) {
+                return delegate.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             }
+
         });
         _timeDocument.setTime(timeFormatter.format(new Date()));
         ((JTextField) _w.calendarTime.getEditor().getEditorComponent()).setDocument(_timeDocument);
@@ -422,19 +429,16 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      * Invalid values are replaced with 00:00:00.
      */
     private static void setHmsDms(SPTarget spTarget, final String hms, final String dms) {
-        synchronized (spTarget) {
-            try {
-                spTarget.getTarget().getRa().setValue(hms);
-            } catch (final IllegalArgumentException ex) {
-                spTarget.getTarget().getRa().setValue("00:00:00.0");
-            }
-            try {
-                spTarget.getTarget().getDec().setValue(dms);
-            } catch( final IllegalArgumentException ex) {
-                spTarget.getTarget().getDec().setValue("00:00:00.0");
-            }
+        try {
+            spTarget.getTarget().getRa().setValue(hms);
+        } catch (final IllegalArgumentException ex) {
+            spTarget.getTarget().getRa().setValue("00:00:00.0");
         }
-        spTarget.notifyOfGenericUpdate();
+        try {
+            spTarget.getTarget().getDec().setValue(dms);
+        } catch( final IllegalArgumentException ex) {
+            spTarget.getTarget().getDec().setValue("00:00:00.0");
+        }
     }
 
     @Override protected void updateEnabledState(boolean enabled) {
@@ -1272,7 +1276,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         ptA[index] = UserPositionType.instance;
 
         _w.tag.removeActionListener(_tagListener);
-        _w.tag.setModel(new DefaultComboBoxModel(ptA));
+        _w.tag.setModel(new DefaultComboBoxModel<>(ptA));
         _w.tag.setEnabled(isEnabled() && (env.getBase() != _curPos));
         _w.tag.addActionListener(_tagListener);
 
@@ -1320,7 +1324,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private void showTargetTag() {
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
         for (int i = 0; i < _w.tag.getItemCount(); ++i) {
-            final PositionType pt = (PositionType) _w.tag.getItemAt(i);
+            final PositionType pt = _w.tag.getItemAt(i);
             if (pt.isMember(env, _curPos)) {
                 _w.tag.removeActionListener(_tagListener);
                 _w.tag.setSelectedIndex(i);
@@ -1355,65 +1359,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     ////////////////////////////////////////////////////////////////////////
     //////////////////////////// Utility Classes  //////////////////////////
     ////////////////////////////////////////////////////////////////////////
-
-
-    /**
-     * The time configurations are pre-sets of dates the Horizons query should use to
-     * gets its information.
-     */
-    private enum TimeConfig {
-
-        NOW("Now") {
-            public Date getDate() {
-                return new Date();
-            }
-        },
-        ONE_HOUR("1 Hour") {
-            public Date getDate() {
-                final Date d = new Date();
-                return new Date(d.getTime() + HOUR);
-            }
-        },
-        TWO_HOUR("2 Hours") {
-            public Date getDate() {
-                final Date d = new Date();
-                return new Date(d.getTime() + HOUR * 2);
-            }
-        },
-
-        THREE_HOUR("3 Hours") {
-            public Date getDate() {
-                final Date d = new Date();
-                return new Date(d.getTime() + HOUR * 3);
-            }
-        },
-
-        FIVE_HOUR("5 Hours") {
-            public Date getDate() {
-                final Date d = new Date();
-                return new Date(d.getTime() + HOUR * 5);
-            }
-        },;
-
-        private static final int HOUR = 1000 * 60 * 60;
-        private final String _displayValue;
-
-        private TimeConfig(String displayValue) {
-            _displayValue = displayValue;
-        }
-
-        public String displayValue() {
-            return _displayValue;
-        }
-
-        /**
-         * Return the <code>Date</code>  for the
-         * given configuration
-         *
-         * @return the <code>Date</code> associated to this configuration
-         */
-        public abstract Date getDate();
-    }
 
 
     /**
@@ -2037,4 +1982,63 @@ enum UserPositionType implements PositionType {
     public String toString() {
         return TargetEnvironment.USER_NAME;
     }
+}
+
+
+/**
+ * The time configurations are pre-sets of dates the Horizons query should use to
+ * gets its information.
+ */
+enum TimeConfig {
+
+    NOW("Now") {
+        public Date getDate() {
+            return new Date();
+        }
+    },
+    ONE_HOUR("1 Hour") {
+        public Date getDate() {
+            final Date d = new Date();
+            return new Date(d.getTime() + HOUR);
+        }
+    },
+    TWO_HOUR("2 Hours") {
+        public Date getDate() {
+            final Date d = new Date();
+            return new Date(d.getTime() + HOUR * 2);
+        }
+    },
+
+    THREE_HOUR("3 Hours") {
+        public Date getDate() {
+            final Date d = new Date();
+            return new Date(d.getTime() + HOUR * 3);
+        }
+    },
+
+    FIVE_HOUR("5 Hours") {
+        public Date getDate() {
+            final Date d = new Date();
+            return new Date(d.getTime() + HOUR * 5);
+        }
+    },;
+
+    private static final int HOUR = 1000 * 60 * 60;
+    private final String _displayValue;
+
+    private TimeConfig(String displayValue) {
+        _displayValue = displayValue;
+    }
+
+    public String displayValue() {
+        return _displayValue;
+    }
+
+    /**
+     * Return the <code>Date</code>  for the
+     * given configuration
+     *
+     * @return the <code>Date</code> associated to this configuration
+     */
+    public abstract Date getDate();
 }
