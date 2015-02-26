@@ -27,7 +27,7 @@ public class TableTracker extends ServiceTracker {
 		}
 
 		ITable table = (ITable) context.getService(ref);
-		LOGGER.info("Adding table: " + table.getDisplayName());
+		LOGGER.info("Adding table: " + table.getClass().getName());
 		
 		TableManager.getInstance().put(id, table);
 		return table;
@@ -37,7 +37,7 @@ public class TableTracker extends ServiceTracker {
 	public void removedService(ServiceReference ref, Object service) {
 
 		ITable table = (ITable) service;		
-		LOGGER.info("Removing table: " + table.getDisplayName());
+		LOGGER.info("Removing table: " + table.getClass().getName());
 		final String id = (String) ref.getProperty(ITable.SERVICE_PROP_ID);
 		TableManager.getInstance().remove(id);
 		context.ungetService(ref);

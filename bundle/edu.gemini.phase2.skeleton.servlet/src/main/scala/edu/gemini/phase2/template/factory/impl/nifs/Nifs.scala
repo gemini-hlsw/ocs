@@ -7,12 +7,12 @@ import edu.gemini.spModel.gemini.nifs.NIFSParams
 import NIFSParams._
 import edu.gemini.shared.skyobject.Magnitude.Band
 
-case class Nifs(blueprint:SpNifsBlueprint, exampleTarget:SPTarget) extends NifsBase[SpNifsBlueprint] {
+case class Nifs(blueprint:SpNifsBlueprint, exampleTarget: Option[SPTarget]) extends NifsBase[SpNifsBlueprint] {
   import blueprint._
 
   // N.B. This is the same as NifsAo but without altair or occulting disk
 
-  val tb = Option(exampleTarget.getMagnitude(Band.H).getOrNull).map(_.getBrightness).map(TargetBrightness(_))
+  val tb = exampleTarget.flatMap(t => Option(t.getTarget.getMagnitude(Band.H).getOrNull)).map(_.getBrightness).map(TargetBrightness(_))
 
   // # Select acquisition and science observation
   //    IF target information contains a H magnitude

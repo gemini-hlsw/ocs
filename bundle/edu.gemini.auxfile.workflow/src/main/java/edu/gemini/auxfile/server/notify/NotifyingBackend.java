@@ -122,7 +122,7 @@ public final class NotifyingBackend extends AuxFileServerDecorator {
 
     @Override
     public void setChecked(SPProgramID progId, Collection<String> fileNames, boolean newChecked) throws AuxFileException {
-    	super.setChecked(progId, fileNames, newChecked);
+        super.setChecked(progId, fileNames, newChecked);
 
         Collection<File> files = new ArrayList<File>(fileNames.size());
         for (String fileName : fileNames) {
@@ -130,10 +130,8 @@ public final class NotifyingBackend extends AuxFileServerDecorator {
         }
 
         List<AuxFileListener> listeners = _copyListeners();
-        for (AuxFileListener listener : listeners) {
+        for (AuxFileListener listener : listeners)
             listener.checkedUpdated(progId, newChecked, files);
-        }
-
     }
 
 }

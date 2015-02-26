@@ -15,9 +15,7 @@ import org.osgi.framework.BundleContext;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.util.Collections;
-import java.util.Hashtable;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -31,9 +29,16 @@ public final class Activator implements BundleActivator {
     private HttpTracker _httpTracker;
 
     private final Set<Principal> _user = Collections.<Principal>singleton(StaffPrincipal.Gemini());
+    private final List<BundleActivator> _delegates = new ArrayList<>();
 
-    public void start(BundleContext ctx) throws OsgiConfigException, IOException {
+    public void start(BundleContext ctx) throws Exception {
         LOG.fine("start dataman-app bundle");
+
+        _delegates.add(new edu.gemini.datasetfile.osgi.Activator());
+        _delegates.add(new edu.gemini.dirmon.impl.osgi.Activator());
+        _delegates.add(new edu.gemini.datasetrecord.osgi.Activator());
+        for (BundleActivator ba: _delegates)
+            ba.start(ctx);
 
         _httpTracker = new HttpTracker(ctx);
         _httpTracker.open();
@@ -61,6 +66,11 @@ public final class Activator implements BundleActivator {
 
     public void stop(BundleContext ctx) throws Exception {
         LOG.fine("stop dataman-app bundle");
+
+        for (BundleActivator ba: _delegates)
+            ba.stop(ctx);
+        _delegates.clear();
+
         _wsTracker.stop();
         _wsTracker = null;
 

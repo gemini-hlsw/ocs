@@ -1,0 +1,15 @@
+# Average throughput for the NIFS static optics
+# Columns are (1) wavelength in nm, (2) throughput
+# The the throughput comes from the NIFS grating CDR
+# Author: Brian Walls
+# Created: 23 September 2005
+#
+# lambda transmission
+    700   0.0
+    900   0.592
+   1000   0.592
+   1650   0.643
+   2200   0.626
+   3710   0.626
+   5150   0.626
+   6000   0.0

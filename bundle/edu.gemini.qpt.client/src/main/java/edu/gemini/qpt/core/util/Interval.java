@@ -9,14 +9,14 @@ import edu.gemini.spModel.pio.PioFactory;
  * Pair of longs representing the interval <code>(start .. end]</code>.
  * @author rnorris
  */
-public class Interval implements Comparable<Interval>, PioSerializable {
+public final class Interval implements Comparable<Interval>, IntervalType<Interval>, PioSerializable {
 
-	private final long start, end;
+	private static final String PROP_START = "start";
+	private static final String PROP_END = "end";
 
-	public static final String PROP_START = "start";
-	public static final String PROP_END = "end";
-	
-	/**
+    private final long start, end;
+
+    /**
 	 * Enum representing the different ways in which intervals may overlap.<p>
 	 * BUG: there is no way to represent the inverse of PARTIAL ... hasn't come up yet
 	 * but I should support it.
@@ -73,14 +73,20 @@ public class Interval implements Comparable<Interval>, PioSerializable {
 	public Interval(ParamSet params) {
 		this(Pio.getLongValue(params, PROP_START, 1), Pio.getLongValue(params, PROP_END, 0)); // force IAE on fail
 	}
-	
+
+    /**
+     * Gets the interval.
+     * @return the interval
+     */
+    public Interval getInterval() { return this; }
+
 	/**
 	 * Returns <code>true</code> if the specified value falls within the interval. Note that
 	 * the <code>end</code> value does <i>not</i> fall within the interval.
 	 * @param value
 	 * @return true if <code>value</code> falls within the interval.
 	 */
-	public final boolean contains(long value) {
+	public boolean contains(final long value) {
 		return value >= start && value < end;
 	}
 	
@@ -94,12 +100,12 @@ public class Interval implements Comparable<Interval>, PioSerializable {
 	 * @param overlap the type of Overlap we're looking for
 	 * @return true if this Interval overlaps <code>interval</code> in the specified manner
 	 */
-	public final boolean overlaps(final Interval interval,final  Overlap overlap) {
+	public final boolean overlaps(final IntervalType<?> interval, final  Overlap overlap) {
 		switch (overlap) {
-		case TOTAL : return contains(interval.start) && contains(interval.end - 1);
-		case EITHER : return contains(interval.start) || contains(interval.end - 1);
-		case PARTIAL : return contains(interval.start) ^ contains(interval.end - 1);
-		case NONE: return !(contains(interval.start) || contains(interval.end - 1));
+		case TOTAL : return contains(interval.getStart()) && contains(interval.getEnd() - 1);
+		case EITHER : return contains(interval.getStart()) || contains(interval.getEnd() - 1);
+		case PARTIAL : return contains(interval.getStart()) ^ contains(interval.getEnd() - 1);
+		case NONE: return !(contains(interval.getStart()) || contains(interval.getEnd() - 1));
 		default: throw new Error();
 		}
 	}
@@ -110,8 +116,8 @@ public class Interval implements Comparable<Interval>, PioSerializable {
 	 * @param interval
 	 * @return true if the this Interval is adjacent to <code>interval</code>
 	 */
-	public boolean abuts(Interval interval) {
-		return interval != null && (interval.end == start || interval.start == end);
+	public boolean abuts(final IntervalType<?> interval) {
+		return interval != null && (interval.getEnd() == start || interval.getStart() == end);
 	}
 	
 	/**
@@ -121,8 +127,8 @@ public class Interval implements Comparable<Interval>, PioSerializable {
 	 * @param other
 	 * @return the outer union of this Interval and <code>interval</code>
 	 */
-	public Interval plus(Interval other) {
-		return create(Math.min(start, other.start), Math.max(end, other.end));
+	public Interval plus(final IntervalType<?> other) {
+		return create(Math.min(start, other.getStart()), Math.max(end, other.getEnd()));
 	}
 
 	/**
@@ -134,10 +140,10 @@ public class Interval implements Comparable<Interval>, PioSerializable {
 	 * @see Overlap#PARTIAL
 	 * @return this Interval, clipped by <code>other</code>.
 	 */
-	public Interval minus(Interval other) {
+	public Interval minus(final IntervalType<?> other) {
 		if (!other.overlaps(this, Overlap.PARTIAL)) throw new IllegalArgumentException("Intervals do not overlap partially.");
-		if (other.start > start) return create(start, other.start);
-		return create(other.end, end);
+		if (other.getStart() > start) return create(start, other.getStart());
+		return create(other.getEnd(), end);
 	}
 	
 	/**
@@ -207,7 +213,7 @@ public class Interval implements Comparable<Interval>, PioSerializable {
 	 * probably a way to enforce this using generics but I can't figure it out.
 	 * @return a new Interval of the same type, with the given bounds
 	 */
-	protected Interval create(long start, long end) {
+	public Interval create(long start, long end) {
 		return new Interval(start, end);
 	}
 	

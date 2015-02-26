@@ -18,9 +18,9 @@ public abstract class AbstractTable implements ITable {
 	private final Domain domain;
 	private final String shortDescription;
 
-	public AbstractTable(Domain domain, IColumn[] columns, String displayName, String shortDescription) {
+	public AbstractTable(final Domain domain, final IColumn[] columns, final String displayName, final String shortDescription) {
 		this.domain = domain;
-		this.columns = new TreeSet<IColumn>(Arrays.asList(columns));
+		this.columns = new TreeSet<>(Arrays.asList(columns));
 		this.displayName = displayName;
 		this.shortDescription = shortDescription;
 	}

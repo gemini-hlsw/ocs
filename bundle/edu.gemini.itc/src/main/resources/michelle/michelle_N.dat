@@ -1,0 +1,29 @@
+# trecs_fn.dat
+# Transmission curve for T-ReCS N-band filter
+# Columns are (1) wavelength in nm, (2) transmission.
+#
+# No blocking element needed.
+# Measurement temperature = Ambient
+#
+# Author: Tom Hayward, based on data from C. Packham, UF 
+# Created: 2001 Sep 4
+#
+# Effective wavelength
+10842
+#
+# lambda  filtn
+
+  7000   0.00
+  7955   0.00
+  8005   0.375
+  8055   0.750
+  9000   0.750
+ 10000   0.750
+ 11000   0.750
+ 12000   0.750
+ 13000   0.750
+ 13629   0.750
+ 13679   0.375
+ 13729   0.00
+ 14000   0.00
+

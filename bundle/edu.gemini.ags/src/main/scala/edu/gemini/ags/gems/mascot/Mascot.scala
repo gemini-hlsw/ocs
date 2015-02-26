@@ -1,11 +1,15 @@
 package edu.gemini.ags.gems.mascot
 
-import edu.gemini.ags.gems.mascot.util.AllPairsAndTriples._
+import edu.gemini.ags.gems.mascot.util.AllPairsAndTriples
 import edu.gemini.ags.gems.mascot.util.YUtils._
 
 import MascotUtils._
 import MascotConf._
 import breeze.linalg._
+import edu.gemini.spModel.core.MagnitudeBand
+
+import scalaz._
+import Scalaz._
 
 /**
  */
@@ -21,14 +25,14 @@ object Mascot {
       print(", [%.1f,%.1f]" format (s.stars(i).x, s.stars(i).y))
     }
     println("\nStrehl over %.1f\": avg=%.1f  rms=%.1f  min=%.1f  max=%.1f\n" format (
-      s.halffield * 2, (s.avgstrehl * 100), (s.rmsstrehl * 100), (s.minstrehl * 100), (s.maxstrehl * 100)))
+      s.halffield * 2, s.avgstrehl * 100, s.rmsstrehl * 100, s.minstrehl * 100, s.maxstrehl * 100))
   }
 
   // The default mag bandpass
-  val defaultBandpass = "R"
+  val defaultBandpass:MagnitudeBand = MagnitudeBand.R
 
   // multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
-  val defaultFactor = 1.0;
+  val defaultFactor = 1.0
 
   /**
    * Performs the strehl algorithm on the given 1, 2 or 3 stars (2 and 3 are optional)
@@ -37,20 +41,19 @@ object Mascot {
    * @param n1 the first star to use
    * @param n2 the optional second star to use
    * @param n3 the optional third star to use
-   * @return a Strehl object containing the results of the computations, or null if the positions can't be used
+   * @return a Some(Strehl) object containing the results of the computations, or None if the positions can't be used
    */
-  def computeStrehl(bandpass: String, factor: Double, n1: Star, n2: Star = null, n3: Star = null): Strehl = {
-    if (n2 != null && !doesItFit(n1, n2, n3)) {
-      println("Skipped. Does not fit.")
-      null
-    } else {
-      //          sdata = mascot_compute_strehl();
-      //          grow,sall,sdata;
-      //          window,3;
-      //          disp_strehl_map,sdata;
-
-      val starList = for (s <- List(n1, n2, n3); if (s != null)) yield s
-      Strehl(starList, bandpass, factor)
+  def computeStrehl(bandpass: MagnitudeBand, factor: Double, n1: Star, n2: Option[Star] = None, n3: Option[Star] = None): Option[Strehl] = {
+    n2 match {
+      case Some(v2) if !doesItFit(n1, v2, n3) =>
+        println("Skipped. Does not fit.")
+        None
+      case _                                  =>
+        //          sdata = mascot_compute_strehl();
+        //          grow,sall,sdata;
+        //          window,3;
+        //          disp_strehl_map,sdata;
+        Strehl(List(n1.some, n2, n3).flatten, bandpass, factor).some
     }
   }
 
@@ -64,30 +67,28 @@ object Mascot {
    * @return a tuple: (list of stars actually used, list of asterisms found)
    */
   def findBestAsterism(starList: List[Star],
-                       bandpass: String = defaultBandpass,
+                       bandpass: MagnitudeBand = defaultBandpass,
                        factor: Double = defaultFactor,
                        progress: (Strehl, Int, Int) => Unit = defaultProgress,
                        filter: Star => Boolean = defaultFilter)
   : (List[Star], List[Strehl]) = {
     // sort by selected mag and select
-    val sortedStarList = starList.sortWith((s1,s2) => s1.mag(bandpass) < s2.mag(bandpass))
+    val sortedStarList = starList.sortWith((s1,s2) => s1.target.magnitudeIn(bandpass) < s2.target.magnitudeIn(bandpass))
     val filteredStarList = selectStarsOnMag(sortedStarList, bandpass).filter(filter)
 
     val ns = filteredStarList.length
     var count = 0
-    val trips = allTrips(filteredStarList)
-    val pairs = allPairs(filteredStarList)
+    val trips = AllPairsAndTriples.allTrips(filteredStarList)
+    val pairs = AllPairsAndTriples.allPairs(filteredStarList)
     val total = trips.length + pairs.length + ns
     var result = List[Strehl]()
 
     println("XXX Mascot.findBestAsterism: input stars: " + ns + ", total asterisms: " + total)
 
-
     if (ns >= 3) {
       for ((n1, n2, n3) <- trips) {
         count += 1
-        val s = computeStrehl(bandpass, factor, n1, n2, n3)
-        if (s != null) {
+        computeStrehl(bandpass, factor, n1, n2.some, n3.some).foreach { s =>
           progress(s, count, total)
           result = s :: result
         }
@@ -97,8 +98,7 @@ object Mascot {
     if (ns >= 2) {
       for ((n1, n2) <- pairs) {
         count += 1
-        val s = computeStrehl(bandpass, factor, n1, n2)
-        if (s != null) {
+        computeStrehl(bandpass, factor, n1, n2.some).foreach { s =>
           progress(s, count, total)
           result = s :: result
         }
@@ -108,8 +108,7 @@ object Mascot {
     if (ns >= 1) {
       for (n1 <- filteredStarList) {
         count += 1
-        val s = computeStrehl(bandpass, factor, n1)
-        if (s != null) {
+        computeStrehl(bandpass, factor, n1).foreach { s =>
           progress(s, count, total)
           result = s :: result
         }
@@ -133,9 +132,9 @@ object Mascot {
   //
   //  status = select_stars_not_too_close()
   //}
-  def selectStarsOnMag(starList: List[Star], bandpass: String = defaultBandpass): List[Star] = {
+  def selectStarsOnMag(starList: List[Star], bandpass: MagnitudeBand = defaultBandpass): List[Star] = {
     selectStarsNotTooClose(starList.filter(star => {
-      val mag = star.mag(bandpass)
+      val mag = star.target.magnitudeIn(bandpass).map(_.value)
       mag >= mag_min_threshold && mag <= mag_max_threshold
     }))
   }
@@ -195,18 +194,18 @@ object Mascot {
     do {
       for (i <- 0 until ns - 1) {
         // for each star, look at the distance to next (fainter) stars:
-        val dd = abs(starMat(0, ::).toDenseVector - starMat(0, i), starMat(1, ::).toDenseVector - starMat(1, i));
-        val ok = dd.mapValues(d => if (d >= crowd_rad) 1.0 else 0.0);
-        valid(i + 1 until valid.size) :*= ok(i + 1 until ok.size);
+        val dd = abs(starMat(0, ::).toDenseVector - starMat(0, i), starMat(1, ::).toDenseVector - starMat(1, i))
+        val ok = dd.mapValues(d => if (d >= crowd_rad) 1.0 else 0.0)
+        valid(i + 1 until valid.size) :*= ok(i + 1 until ok.size)
       }
-      crowd_rad += 2;
-    } while (valid.sum > nstar_limit);
-    crowd_rad -= 2;
+      crowd_rad += 2
+    } while (valid.sum > nstar_limit)
+    crowd_rad -= 2
 
     println("Select stars: found optimum crowding radius=%d\"\n" format crowd_rad)
 
     starList.zipWithIndex collect {
-      case (s, i) if (valid(i) != 0.0) => s
+      case (s, i) if valid(i) != 0.0 => s
     }
   }
 
@@ -220,6 +219,5 @@ object Mascot {
     else
       sall.sortWith((s1, s2) => s1.avgstrehl > s2.avgstrehl)
   }
-
 
 }

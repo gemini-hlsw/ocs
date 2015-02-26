@@ -7,11 +7,11 @@ package edu.gemini.spModel.gemini.gmos;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentBroadType;
 import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.shared.util.immutable.DefaultImList;
 import edu.gemini.shared.util.immutable.Function1;
-import edu.gemini.skycalc.Angle;
-import edu.gemini.shared.util.immutable.None;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.config.injector.ConfigInjector;
 import edu.gemini.spModel.config.injector.ConfigInjectorCalc3;
 import edu.gemini.spModel.config2.Config;
@@ -26,10 +26,6 @@ import edu.gemini.spModel.gemini.calunit.calibration.CalDictionary;
 import edu.gemini.spModel.gemini.parallacticangle.ParallacticAngleSupportInst;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
-import edu.gemini.spModel.inst.ParallacticAngleDuration;
-import edu.gemini.spModel.inst.ParallacticAngleSupport;
-import edu.gemini.spModel.inst.PositionAngleMode;
-import edu.gemini.spModel.obs.ObsTargetCalculatorService;
 import edu.gemini.spModel.obs.plannedtime.CommonStepCalculator;
 import edu.gemini.spModel.obs.plannedtime.ExposureCalculator;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTime;
@@ -50,7 +46,6 @@ import edu.gemini.spModel.telescope.IssPort;
 import edu.gemini.spModel.telescope.IssPortProvider;
 import edu.gemini.spModel.telescope.PosAngleConstraint;
 import edu.gemini.spModel.telescope.PosAngleConstraintAware;
-import edu.gemini.util.skycalc.calc.TargetCalculator;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
@@ -795,10 +790,6 @@ public abstract class InstGmosCommon<
         } else if (_fpu != customMaskFPU && _fpuMode == customMaskMode) {
             setFPUnitMode(GmosCommonType.FPUnitMode.BUILTIN);
         }
-
-        if (!isCompatibleWithMeanParallacticAngleMode()) {
-            setPositionAngleMode(PositionAngleMode.EXPLICITLY_SET);
-        }
     }
 
     protected void _setFPUnit(String name) {
@@ -862,7 +853,7 @@ public abstract class InstGmosCommon<
     }
 
     /**
-     * Set the FPUMask label.  Note that this is meaningful only
+     * Get the FPUMask label.  Note that this is meaningful only
      * if the user has placed the <@link FPUMode> to indicate the
      * <code><@link CUSTOM_MASK FPUnitMode.CUSTOM_MASK></code>
      * mode.
@@ -1039,29 +1030,6 @@ public abstract class InstGmosCommon<
         setIssPort(IssPort.getPort(name, oldValue));
     }
 
-    public PosAngleConstraint getPosAngleConstraint() {
-        return (_posAngleConstraint == null) ? PosAngleConstraint.FIXED : _posAngleConstraint;
-    }
-
-    public void setPosAngleConstraint(PosAngleConstraint newValue) {
-        PosAngleConstraint oldValue = getPosAngleConstraint();
-        if (oldValue != newValue) {
-            _posAngleConstraint = newValue;
-            firePropertyChange(POS_ANGLE_CONSTRAINT_PROP.getName(), oldValue, newValue);
-        }
-    }
-
-    private void _setPosAngleConstraint(String name) {
-        PosAngleConstraint oldValue = getPosAngleConstraint();
-        PosAngleConstraint newValue;
-        try {
-            newValue = PosAngleConstraint.valueOf(name);
-        } catch (Exception ex) {
-            newValue = oldValue;
-        }
-        setPosAngleConstraint(newValue);
-    }
-
     protected abstract GmosCommonType.StageModeBridge getStageModeBridge();
 
     /**
@@ -1140,13 +1108,17 @@ public abstract class InstGmosCommon<
         return _customROIs;
     }
 
-    public void setCustomROIs(GmosCommonType.CustomROIList customROIs) {
-        for (GmosCommonType.ROIDescription roi : customROIs.get()) {
+    public boolean validateCustomROIs() {
+        for (GmosCommonType.ROIDescription roi : getCustomROIs().get()) {
             if (!roi.validate(getDetectorManufacturer().getXsize(), getDetectorManufacturer().getYsize())) {
-                throw new IllegalArgumentException("ROI is not within valid ranges: " + roi);
+                return false;
             }
         }
-        GmosCommonType.CustomROIList oldValue = _customROIs;
+        return true;
+    }
+
+    public void setCustomROIs(final GmosCommonType.CustomROIList customROIs) {
+        final GmosCommonType.CustomROIList oldValue = _customROIs;
         if (!customROIs.equals(oldValue)) {
             _customROIs = customROIs;
             firePropertyChange(CUSTOM_ROI_PROP.getName(), oldValue, _customROIs);
@@ -1692,8 +1664,14 @@ public abstract class InstGmosCommon<
         }
         if (v != null) _setPort(v);
 
+        // REL-2090: Special workaround for elimination of former PositionAngleMode, since functionality has been
+        // merged with PosAngleConstraint but we still need legacy code.
         v = Pio.getValue(paramSet, POS_ANGLE_CONSTRAINT_PROP.getName());
-        if (v != null) _setPosAngleConstraint(v);
+        final String pam = Pio.getValue(paramSet, "positionAngleMode");
+        if ("MEAN_PARALLACTIC_ANGLE".equals(pam))
+            _setPosAngleConstraint(PosAngleConstraint.PARALLACTIC_ANGLE);
+        else if (v != null)
+            _setPosAngleConstraint(v);
 
         v = Pio.getValue(paramSet, STAGE_MODE_PROP.getName());
         if (v != null) _setStageMode(v);
@@ -1834,7 +1812,6 @@ public abstract class InstGmosCommon<
         configInfo.add(new InstConfigInfo(DTAX_OFFSET_PROP));
         configInfo.add(new InstConfigInfo(FPU_MASK_PROP, false));
         configInfo.add(new InstConfigInfo(IS_MOS_PREIMAGING_PROP));
-        configInfo.add(new InstConfigInfo(POSITION_ANGLE_MODE_PROP));
 
         return configInfo;
     }
@@ -1949,8 +1926,6 @@ public abstract class InstGmosCommon<
      * more than 2 arcsec from any other. If doing a square dither pattern, for example,
      * the diagonal of the square should be <=2 arcsec.
      * The default should be for no electronic offsets.
-     *
-     * @param inst the instrument corresponding to this list
      * @return a string explaining why electronic offsets are not allowed, or null if they are allowed
      */
     public static UseElectronicOffsettingRuling checkUseElectronicOffsetting(InstGmosCommon inst, OffsetPosList<OffsetPos> p) {
@@ -1985,7 +1960,7 @@ public abstract class InstGmosCommon<
     }
 
     // The reacquisition time, in seconds.
-    private final double REACQUISITION_TIME = 5.0 * 60;
+    private static final double REACQUISITION_TIME = 5.0 * 60;
 
     @Override
     public double getReacquisitionTime(ISPObservation obs) {
@@ -2002,19 +1977,67 @@ public abstract class InstGmosCommon<
 
     @Override
     public boolean isCompatibleWithMeanParallacticAngleMode() {
-        //
         return !(_fpu.isImaging() || _fpuMode == GmosCommonType.FPUnitMode.CUSTOM_MASK);
     }
 
     /**
      * This needs to be overridden to support the PosAngleConstraint.
      */
-    @Override
-    public void setPositionAngleMode(PositionAngleMode newValue) {
-        PositionAngleMode oldValue = getPositionAngleMode();
-        super.setPositionAngleMode(newValue);
-
-        if (!oldValue.equals(newValue) && newValue == PositionAngleMode.MEAN_PARALLACTIC_ANGLE)
-            setPosAngleConstraint(PosAngleConstraint.FIXED_180);
+    public PosAngleConstraint getPosAngleConstraint() {
+        return (_posAngleConstraint == null) ? PosAngleConstraint.FIXED : _posAngleConstraint;
     }
+
+    public void setPosAngleConstraint(PosAngleConstraint newValue) {
+        PosAngleConstraint oldValue = getPosAngleConstraint();
+        if (!oldValue.equals(newValue)) {
+            _posAngleConstraint = newValue;
+            firePropertyChange(POS_ANGLE_CONSTRAINT_PROP.getName(), oldValue, newValue);
+        }
+    }
+
+    private void _setPosAngleConstraint(final String name) {
+        final PosAngleConstraint oldValue = getPosAngleConstraint();
+        try {
+            _posAngleConstraint = PosAngleConstraint.valueOf(name);
+        } catch (Exception ex) {
+            _posAngleConstraint = oldValue;
+        }
+    }
+
+    private void _setPosAngleConstraint(final PosAngleConstraint pac) {
+        _posAngleConstraint = pac;
+    }
+
+    @Override
+    public String getPosAngleConstraintDescriptorKey() {
+        return POS_ANGLE_CONSTRAINT_PROP.getName();
+    }
+
+    @Override
+    public ImList<PosAngleConstraint> getSupportedPosAngleConstraints() {
+        return DefaultImList.create(PosAngleConstraint.FIXED,
+                                    PosAngleConstraint.FIXED_180,
+                                    PosAngleConstraint.UNBOUNDED,
+                                    PosAngleConstraint.PARALLACTIC_ANGLE);
+    }
+
+    @Override
+    public boolean allowUnboundedPositionAngle() {
+        // Note that we disable unbounded position angle as an option for MOS preimaging and FPU Custom Mask.
+        boolean isMos    = isMosPreimaging().equals(YesNoType.YES);
+        boolean isCustom = getFPUnitMode() == GmosCommonType.FPUnitMode.CUSTOM_MASK;
+        boolean isNone   = getFPUnit() == getFPUnitBridge().getNone();
+        return !isMos && !isCustom && !isNone;
+    }
+
+    // REL-814 Preserve the FPU Custom Mask Name
+    @Override
+    public void restoreScienceDetails(final SPInstObsComp oldData) {
+        super.restoreScienceDetails(oldData);
+        if (oldData instanceof InstGmosCommon) {
+            final InstGmosCommon oldGmos = (InstGmosCommon)oldData;
+            setFPUnitCustomMask(oldGmos.getFPUnitCustomMask());
+        }
+    }
+
 }

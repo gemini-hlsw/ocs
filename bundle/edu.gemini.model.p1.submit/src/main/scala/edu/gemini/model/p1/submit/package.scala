@@ -21,10 +21,11 @@ package object submit {
     Ngo(UH)                      -> "http://www.ifa.hawaii.edu/cgi-bin/gemini/xmlbackend.cgi",
     Exchange(KECK)               -> "http://phase1.gemini.edu/cgi-bin/gemini/keck/xmlbackend.cgi",
     Exchange(SUBARU)             -> "http://phase1.gemini.edu/cgi-bin/gemini/subaru/xmlbackend.cgi",
+    Exchange(CFHT)               -> "http://phase1.gemini.edu/cgi-bin/gemini/cfht/xmlbackend.cgi",
     Special(DEMO_SCIENCE)        -> "http://phase1.gemini.edu/cgi-bin/gemini/demo_science/xmlbackend.cgi",
-    Special(POOR_WEATHER)        -> "http://phase1.gemini.edu/cgi-bin/gemini/poor_weather_sv/xmlbackend.cgi",
+    Special(POOR_WEATHER)        -> "http://phase1.gemini.edu/cgi-bin/gemini/poor_weather/xmlbackend.cgi",
     Special(SYSTEM_VERIFICATION) -> "http://phase1.gemini.edu/cgi-bin/gemini/system_verification/xmlbackend.cgi",
-    Special(DIRECTORS_TIME)      -> "http://phase1.gemini.edu/cgi-bin/gemini/directors_time_sv/xmlbackend.cgi",
+    Special(DIRECTORS_TIME)      -> "http://phase1.gemini.edu/cgi-bin/gemini/directors_time/xmlbackend.cgi",
     LargeProgram                 -> "http://phase1.gemini.edu/cgi-bin/gemini/large_program/xmlbackend.cgi",
     FastTurnaroundProgram        -> "http://phase1.gemini.edu/cgi-bin/gemini/fast_turnaround/xmlbackend.cgi"
   )
@@ -32,14 +33,9 @@ package object submit {
   val testSubmissionUrls: Map[SubmitDestination, String] = {
     def url(s:String) = s"http://phase1.cl.gemini.edu/cgi-bin/gemini/test/${s.toLowerCase}/xmlbackend.cgi"
 
-    // REL-1257 It was requested to support simultaneous SV and non SV backends
     val specialProposalsTestUrls = for {
       st      <- SpecialProposalType.values.toSeq
-    } yield if (st == SpecialProposalType.DIRECTORS_TIME || st == SpecialProposalType.POOR_WEATHER) {
-        Special(st) -> url(s"${st.name}_sv")
-      }  else {
-        Special(st) -> url(st.name)
-      }
+    } yield Special(st) -> url(st.name)
 
     NgoPartner.values.map(p => Ngo(p) -> url(p.name)).toMap ++
     ExchangePartner.values.map(p => Exchange(p) -> url(p.name)).toMap ++

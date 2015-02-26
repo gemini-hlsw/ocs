@@ -163,11 +163,7 @@ public abstract class AbstractOffsetPosEditor<P extends OffsetPosBase> {
 
     private List<P> watchedPositions = new ArrayList<P>();
     protected TelescopePosWatcher posWatcher = new TelescopePosWatcher() {
-        public void telescopePosLocationUpdate(WatchablePos tp) {
-            if (opl != null) selectionUpdated(getAllSelectedPos());
-        }
-
-        public void telescopePosGenericUpdate(WatchablePos tp) {
+        public void telescopePosUpdate(WatchablePos tp) {
             if (opl != null) selectionUpdated(getAllSelectedPos());
         }
     };

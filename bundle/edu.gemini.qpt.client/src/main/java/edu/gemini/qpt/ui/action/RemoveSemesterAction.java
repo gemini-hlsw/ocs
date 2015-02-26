@@ -6,8 +6,8 @@ import java.util.SortedSet;
 
 import javax.swing.JOptionPane;
 
+import edu.gemini.ags.api.AgsMagnitude;
 import edu.gemini.qpt.core.Schedule;
-import edu.gemini.qpt.shared.sp.ObsQueryFunctor;
 import edu.gemini.qpt.ui.util.SharedIcons;
 import edu.gemini.spModel.core.Semester;
 import edu.gemini.ui.workspace.IShell;
@@ -16,8 +16,8 @@ import edu.gemini.util.security.auth.keychain.KeyChain;
 @SuppressWarnings("serial")
 public class RemoveSemesterAction extends RefreshAction {
 
-	public RemoveSemesterAction(IShell shell, KeyChain authClient) {
-		super(shell, authClient);
+	public RemoveSemesterAction(IShell shell, KeyChain authClient, AgsMagnitude.MagnitudeTable magTable) {
+		super(shell, authClient, magTable);
 		putValue(NAME, "Remove Semester...");
 		putValue(ACCELERATOR_KEY, null);
 	}
@@ -29,27 +29,27 @@ public class RemoveSemesterAction extends RefreshAction {
         String message =
 			"Select a semester to remove.\n" +
 			current + " and valid rollovers cannot be removed.";
-		
+
 		SortedSet<String> set = sched.getExtraSemesters();
 		if (set.isEmpty()) {
 			JOptionPane.showMessageDialog(shell.getPeer(), "There are no extra semesters to remove.");
 			return;
 		}
-		
-		Object[] options = set.toArray();		
+
+		Object[] options = set.toArray();
 		String extra = (String) JOptionPane.showInputDialog(
-			shell.getPeer(), message, "Remove Semester", JOptionPane.OK_CANCEL_OPTION, 
-			SharedIcons.REMOVE_SEMESTER, options, options[0]); 
-				
+			shell.getPeer(), message, "Remove Semester", JOptionPane.OK_CANCEL_OPTION,
+			SharedIcons.REMOVE_SEMESTER, options, options[0]);
+
 		if (extra != null) {
 			try {
-				sched.removeExtraSemester(extra);				
+				sched.removeExtraSemester(extra);
 				super.asyncActionPerformed(e);
-			} catch (Exception ex) {				
+			} catch (Exception ex) {
 				JOptionPane.showMessageDialog(shell.getPeer(), ex.getMessage());
 			}
 		}
-		
+
 	}
-	
+
 }

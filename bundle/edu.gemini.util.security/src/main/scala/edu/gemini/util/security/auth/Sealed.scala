@@ -13,7 +13,7 @@ case class Sealed[+A](so: SealedObject) {
   import Sealed._
 
   /** Attempts to retrieve the sealed object. */
-  def get(passPhrase: String): Exception \/ A = {
+  lazy val get: String => Exception \/ A = Memo.weakHashMapMemo { passPhrase =>
     val oldLoader = Thread.currentThread.getContextClassLoader
     try {
       Thread.currentThread.setContextClassLoader(getClass.getClassLoader) // TODO: may not be necessary

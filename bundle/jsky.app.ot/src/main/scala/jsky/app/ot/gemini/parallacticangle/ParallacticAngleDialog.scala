@@ -1,21 +1,21 @@
 package jsky.app.ot.gemini.parallacticangle
 
-import edu.gemini.shared.gui.textComponent.{NumberField, SelectOnFocus, TimeOfDayText}
-import edu.gemini.shared.gui.monthview.{DateSelectionMode, MonthView}
-import edu.gemini.shared.gui.monthview.MonthView.Ymd
-import edu.gemini.spModel.core.Site
-import edu.gemini.spModel.obs.{SPObservation, SchedulingBlock}
-
 import java.awt.Color
 import java.util.{Date, TimeZone}
 import javax.swing.BorderFactory
 
-import scala.swing._
-import scala.swing.Swing._
-import scala.swing.event.{FocusLost, ButtonClicked}
-import edu.gemini.spModel.inst.{ParallacticAngleDurationMode, ParallacticAngleDuration}
 import edu.gemini.pot.sp.ISPObservation
+import edu.gemini.shared.gui.monthview.MonthView.Ymd
+import edu.gemini.shared.gui.monthview.{DateSelectionMode, MonthView}
+import edu.gemini.shared.gui.textComponent.{NumberField, SelectOnFocus, TimeOfDayText}
+import edu.gemini.spModel.core.Site
+import edu.gemini.spModel.inst.{ParallacticAngleDuration, ParallacticAngleDurationMode}
+import edu.gemini.spModel.obs.{SPObservation, SchedulingBlock}
 import jsky.app.ot.util.TimeZonePreference
+
+import scala.swing.Swing._
+import scala.swing._
+import scala.swing.event.{ButtonClicked, FocusLost}
 
 // Dialog to set the settings needed for the parallactic angle computation.
 

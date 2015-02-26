@@ -6,29 +6,22 @@ import java.util.Date;
  * An abstract base class for Non Sidereal Targets. Contains mechanisms to operate
  * with RA and Dec at a given time, plus the target name, Epoch and brightness.
  */
-public abstract class NonSiderealTarget extends CoordinateSystem implements INonSiderealTarget, IHorizonsTarget {
+public abstract class NonSiderealTarget extends ITarget {
 
-    public static final String DEFAULT_NAME = "";
+    private static final String DEFAULT_NAME = "";
 
     // XXX temporary, until there is conversion code
     private HMS _ra = new HMS();
     private DMS _dec = new DMS();
     private CoordinateTypes.Epoch _epoch = new CoordinateTypes.Epoch("2000", CoordinateParam.Units.YEARS);
-    private String _brightness = DEFAULT_NAME;
     private String _name = DEFAULT_NAME;
     private Date _date = null; // The date for which the position is valid
 
+    /** PIO keys for the horizons object ID; used in XML serialization. */
+    public static final String PK_HORIZONS_OBJECT_ID = "horizons-object-id";
 
-    /**
-     * Constructs with the system option.
-     *
-     * @throws IllegalArgumentException if the given <code>systemOption</code>
-     *                                  is not permitted
-     */
-    public NonSiderealTarget(TypeBase systemOption) throws IllegalArgumentException {
-        super(systemOption);
-    }
-
+    /** PIO keys for the horizons object type ordinal; used in XML serialization. */
+    public static final String PK_HORIZONS_OBJECT_TYPE_ORDINAL = "horizons-object-type";
 
     /**
      * Gets the optional name for a coordinate.
@@ -50,169 +43,18 @@ public abstract class NonSiderealTarget extends CoordinateSystem implements INon
     }
 
     /**
-     * Gets the optional brightness for a coordinate.
-     * This returns a String description of the brightness.
-     */
-    public String getBrightness() {
-        return _brightness;
-    }
-
-    /**
-     * Sets the optional brightness for the position.
-     */
-    public void setBrightness(String brightness) {
-        // Make sure the name is never set to null
-        if (brightness != null) {
-            _brightness = brightness;
-        }
-    }
-
-    /**
-     * Sets the first coordinate (right ascension) using a String.
-     */
-    public void setRa(String newStringValue) {
-        _ra.setValue(newStringValue);
-    }
-
-    /**
-     * Sets the right ascension and declination using String objects.
-     */
-    public void setRaDec(String newRa, String newDec) {
-        setRa(newRa);
-        setDec(newDec);
-    }
-
-    /**
-     * Sets the second coordinate (declination) using a String.
-     */
-    public void setDec(String newStringValue) {
-        _dec.setValue(newStringValue);
-    }
-
-
-    /**
-     * Sets the right ascension coordinate using an object implementing
-     * the {@link ICoordinate ICoordinate} interface (an HMS object).
-     * The input object is not cloned.  Therefore, the caller can
-     * alter the contents if he is not careful.
-     * <p/>
-     * If newValue is null, the method returns without changing the
-     * internal value.  This ensures that the object always has a
-     * valid <code>ICoordinate</code>(HMS) object.
-     * <p/>
-     * This method throws IllegalArgumentException if the ICoordinate is
-     * not an instance of {@link HMS HMS}.
-     */
-    public void setC1(ICoordinate newValue)
-            throws IllegalArgumentException {
-        if (newValue == null) {
-            newValue = new HMS();
-        }
-        if (!(newValue instanceof HMS)) {
-            throw new IllegalArgumentException();
-        }
-        _ra = (HMS) newValue;
-    }
-
-    /**
-     * Sets the first coordinate (right ascension) using a String.
-     */
-    public void setC1(String c1) {
-        setRa(c1);
-    }
-
-    /**
      * Get the first Coordinate as an ICoordinate.
      */
-    public ICoordinate getC1() {
-        // convert to J2000 and return.
-        return getTargetAsJ2000().getC1();  // allan: changed from null
-    }
-
-    /**
-     * Gets the first coordinate (right ascension) as a String.
-     */
-    public String raToString() {
-        return _ra.toString();
-    }
-
-    /**
-     * Gets the first coordinate (right ascension) as a String.
-     */
-    public String c1ToString() {
-        return raToString();
-    }
-
-    /**
-     * Sets the right ascension coordinate using an object implementing
-     * the {@link ICoordinate ICoordinate} interface (an DMS object).
-     * The input object is not cloned.  Therefore, the caller can
-     * alter the contents if not careful.
-     * <p/>
-     * If newValue is null, the method returns without changing the
-     * internal value.  This ensures the object always has a valid
-     * <code>ICoordinate</code>(DMS) object.
-     * <p/>
-     * This method throws IllegalArgumentException if the ICoordinate is
-     * not an instance of {@link HMS HMS}.
-     */
-    public void setC2(ICoordinate newValue) {
-        if (newValue == null) {
-            newValue = new DMS();
-        }
-        if (!(newValue instanceof DMS)) {
-            throw new IllegalArgumentException();
-        }
-        _dec = (DMS) newValue;
-    }
-
-    /**
-     * Sets the second coordinate (declination) using a String.
-     */
-    public void setC2(String c2) {
-        setDec(c2);
+    public ICoordinate getRa() {
+        return _ra;
     }
 
     /**
      * Get the second Coordinate as an ICoordinate.
      */
-    public ICoordinate getC2() {
-        // convert to J2000 and return.
-        return getTargetAsJ2000().getC2();  // allan: changed from null
+    public ICoordinate getDec() {
+        return _dec;
     }
-
-    /**
-     * Gets the second coordinate (declination) as a String.
-     */
-    public String decToString() {
-        return _dec.toString();
-    }
-
-    /**
-     * Gets the second coordinate (right ascension) as a String.
-     */
-    public String c2ToString() {
-        return decToString();
-    }
-
-    /**
-     * Set the first and second coordinates using appropriate
-     * <code>ICoordinate</code>.
-     */
-    public void setC1C2(ICoordinate c1, ICoordinate c2)
-            throws IllegalArgumentException {
-        setC1(c1);
-        setC2(c2);
-    }
-
-    /**
-     * Sets the first and second coordinates using String objects.
-     */
-    public void setC1C2(String c1, String c2) {
-        setC1(c1);
-        setC2(c2);
-    }
-
 
     /**
      * Gets the epoch of this object.
@@ -234,39 +76,6 @@ public abstract class NonSiderealTarget extends CoordinateSystem implements INon
         _epoch = newValue;
     }
 
-
-    /**
-     * Return a new coordinate system object as J2000.
-     * Part of Interface ICoordinate
-     */
-    public HmsDegTarget getTargetAsJ2000() {
-        HmsDegTarget target = new HmsDegTarget();
-        target.setC1C2(_ra, _dec);
-        return target;
-    }
-
-    /**
-     * Gets the system's name including the selected (sub)option.
-     */
-    public String getSystemName() {
-        return "(" + getSystemOption().getName() + ")";
-    }
-
-    /**
-     * Set the position using a J2000 HmsDegTarget
-     */
-    public void setTargetWithJ2000(HmsDegTarget in)
-            throws IllegalArgumentException {
-
-        // Copy the coordinates in this object
-        _ra = (HMS) ((HMS) in.getC1()).clone();
-        _dec = (DMS) ((DMS) in.getC2()).clone();
-
-        // Copy the object name
-        setName(in.getName());
-    }
-
-
     public Date getDateForPosition() {
         return _date;
     }
@@ -287,7 +96,7 @@ public abstract class NonSiderealTarget extends CoordinateSystem implements INon
      * CoordinateParam}</code> implements hashCode.
      */
     public int hashCode() {
-        long hc = _name.hashCode() ^ _epoch.hashCode() ^ _brightness.hashCode();
+        long hc = _name.hashCode() ^ _epoch.hashCode();
         if (_date != null) hc = hc ^ _date.hashCode();
         return (int) hc ^ (int) (hc >> 32);
     }
@@ -316,16 +125,12 @@ public abstract class NonSiderealTarget extends CoordinateSystem implements INon
     }
 
 
-    public Object clone() {
+    public NonSiderealTarget clone() {
         NonSiderealTarget result = (NonSiderealTarget) super.clone();
         if (_epoch != null) result._epoch = (CoordinateTypes.Epoch) _epoch.clone();
         if (_date != null) result._date = (Date) _date.clone();
-        if (_ra != null) {
-            result._ra = (HMS) _ra.clone();
-        }
-        if (_dec != null) {
-            result._dec = (DMS) _dec.clone();
-        }
+        if (_ra != null) result._ra = (HMS) _ra.clone();
+        if (_dec != null) result._dec = (DMS) _dec.clone();
         result._hObjId = _hObjId; // immutable, so don't need to clone
         result._hObjTypeOrd = _hObjTypeOrd;
         return result;

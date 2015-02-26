@@ -7,7 +7,7 @@
 
 package jsky.app.ot.tpe;
 
-import jsky.app.ot.gemini.editor.targetComponent.AgsStrategySelector;
+import jsky.app.ot.ags.AgsSelectorControl;
 
 import javax.swing.*;
 import java.awt.*;
@@ -43,7 +43,7 @@ public final class TpeToolBar extends JPanel {
     private final JPanel[] _viewPanel = new JPanel[TpeImageFeatureCategory.values().length];
 
     // The ags guider selection panel
-    private final AgsStrategySelector _guiderSelector = new AgsStrategySelector();
+    private final AgsSelectorControl _guiderSelector = new AgsStrategyPanel();
 
 
     /**
@@ -81,7 +81,7 @@ public final class TpeToolBar extends JPanel {
         }
 
         final int yPos = 2+i;
-        JPanel wrappedGuiderSelector = wrapPanel("", _guiderSelector.new Panel());
+        JPanel wrappedGuiderSelector = wrapPanel("", _guiderSelector.getUi());
         add(wrappedGuiderSelector, new GridBagConstraints() {{
             gridx=0; gridy=yPos; anchor=NORTH; fill=HORIZONTAL;
             insets=new Insets(10, 0, 0, 0);
@@ -96,7 +96,7 @@ public final class TpeToolBar extends JPanel {
 
     }
 
-    private JPanel wrapPanel(String label, JPanel panel) {
+    private JPanel wrapPanel(String label, JComponent panel) {
         JPanel res = new JPanel(new GridBagLayout());
 
         JLabel lab = new JLabel(label);
@@ -189,7 +189,7 @@ public final class TpeToolBar extends JPanel {
         for (JPanel pan : _viewPanel) hide(pan);
     }
 
-    public AgsStrategySelector getGuiderSelector() {
+    public AgsSelectorControl getGuiderSelector() {
         return _guiderSelector;
     }
 }

@@ -1,9 +1,10 @@
 package edu.gemini.qpt.core.listeners
 
+import edu.gemini.ags.api.AgsGuideQuality._
+
 import java.beans.PropertyChangeEvent
 
-import edu.gemini.ags.api.{AgsAnalysis, AgsAnalysisWithGuideProbe}
-import edu.gemini.ags.api.AgsGuideQuality.{PossiblyUnusable, IqDegradation, PossibleIqDegradation, DeliversRequestedIq}
+import edu.gemini.ags.api.AgsAnalysis
 import edu.gemini.qpt.core.Marker.Severity
 import edu.gemini.qpt.core.Variant
 import edu.gemini.qpt.core.util.MarkerManager
@@ -22,9 +23,12 @@ class AgsAnalysisListener extends MarkerModelListener[Variant] {
     // Iterate over the observations in the variant and determine if they should generate
     // markers based on the AgsAnalysis.
     for (alloc <- variant.getAllocs.asScala if !alloc.getObs.getAgsAnalysis.isEmpty) {
-      val analysisConcerns = alloc.getObs.getAgsAnalysis.asScala.filterNot(_.qualityOption == Some(DeliversRequestedIq))
-      analysisConcerns.foreach { analysis =>
-        markerManager.addMarker(false, this, analysisSeverity(analysis), analysisMessage(analysis), variant, alloc)
+      // Only analyses with a severity level should generate a marker.
+      for {
+        a <- alloc.getObs.getAgsAnalysis.asScala
+        s <- severity(a)
+      } yield {
+        markerManager.addMarker(false, this, s, a.message(withProbe = true), variant, alloc)
       }
     }
   }
@@ -34,19 +38,13 @@ class AgsAnalysisListener extends MarkerModelListener[Variant] {
   }
 }
 
-
 object AgsAnalysisListener {
-  /**
-   * Note that DeliversRequestedIq is already filtered out by this point, so we simply do not care
-   * what Severity is returned for it since this should never happen.
-   */
-  def analysisSeverity(analysis: AgsAnalysis): Severity = analysis.qualityOption match {
-    case Some(PossibleIqDegradation) | Some(IqDegradation) | Some(PossiblyUnusable) => Severity.Warning
-    case _ => Severity.Error
-  }
-
-  def analysisMessage(analysis: AgsAnalysis): String = (analysis match {
-    case agp: AgsAnalysisWithGuideProbe => s"${agp.guideProbe.getKey}: "
-    case _ => ""
-  }) + analysis.message
+  def severity(a: AgsAnalysis): Option[Severity] =
+    a.quality match {
+      case DeliversRequestedIq   => None
+      case PossibleIqDegradation => Some(Severity.Warning)
+      case IqDegradation         => Some(Severity.Warning)
+      case PossiblyUnusable      => Some(Severity.Warning)
+      case Unusable              => Some(Severity.Error)
+    }
 }

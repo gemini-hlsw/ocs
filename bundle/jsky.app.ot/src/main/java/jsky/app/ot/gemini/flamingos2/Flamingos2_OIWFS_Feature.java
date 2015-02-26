@@ -99,18 +99,19 @@ public class Flamingos2_OIWFS_Feature  extends OIWFS_FeatureBase  {
     protected void _addPatrolField(double xc, double yc, double plateScale) {
         for (ObsContext ctx : _iw.getMinimalObsContext()) {
             // get scaled and offset f2 oiwfs patrol field
-            PatrolField patrolField = Flamingos2OiwfsGuideProbe.instance.getCorrectedPatrolField(ctx);
-            // rotation, scaling and transformation to match screen coordinates
-            Angle rotation = new Angle(-_posAngle, Angle.Unit.RADIANS);
-            Point2D.Double translation = new Point2D.Double(xc, yc);
-            setTransformationToScreen(rotation, _pixelsPerArcsec, translation);
+            for (PatrolField patrolField : Flamingos2OiwfsGuideProbe.instance.getCorrectedPatrolField(ctx)) {
+                // rotation, scaling and transformation to match screen coordinates
+                final Angle rotation = new Angle(-_posAngle, Angle.Unit.RADIANS);
+                final Point2D.Double translation = new Point2D.Double(xc, yc);
+                setTransformationToScreen(rotation, _pixelsPerArcsec, translation);
 
-            // set patrol field for in Range check (this should probably be done using the inRange check provided by the guide probe)
-            _patrolField = patrolField.getArea();
-            _patrolField = transformToScreen(_patrolField);
+                // set patrol field for in Range check (this should probably be done using the inRange check provided by the guide probe)
+                _patrolField = patrolField.getArea();
+                _patrolField = transformToScreen(_patrolField);
 
-            // draw patrol field
-            addPatrolField(patrolField);
+                // draw patrol field
+                addPatrolField(patrolField);
+            }
         }
     }
 
@@ -337,14 +338,15 @@ public class Flamingos2_OIWFS_Feature  extends OIWFS_FeatureBase  {
     private void addOffsetConstrainedPatrolField(double basePosX, double basePosY){
         for (ObsContext ctx : _iw.getMinimalObsContext()) {
             // get flipped and offset and scaled f2 oiwfs patrol field
-            PatrolField patrolField = Flamingos2OiwfsGuideProbe.instance.getCorrectedPatrolField(ctx);
-            // rotation, scaling and transformation to match screen coordinates
-            Angle rotation = new Angle(-_posAngle, Angle.Unit.RADIANS);
-            Point2D.Double translation = new Point2D.Double(basePosX, basePosY);
-            setTransformationToScreen(rotation, _pixelsPerArcsec, translation);
+            for (PatrolField patrolField : Flamingos2OiwfsGuideProbe.instance.getCorrectedPatrolField(ctx)) {
+                // rotation, scaling and transformation to match screen coordinates
+                final Angle rotation = new Angle(-_posAngle, Angle.Unit.RADIANS);
+                final Point2D.Double translation = new Point2D.Double(basePosX, basePosY);
+                setTransformationToScreen(rotation, _pixelsPerArcsec, translation);
 
-            Set<Offset> offsets = getContext().offsets().scienceOffsetsJava();
-            addOffsetConstrainedPatrolField(patrolField, offsets);
+                final Set<Offset> offsets = getContext().offsets().scienceOffsetsJava();
+                addOffsetConstrainedPatrolField(patrolField, offsets);
+            }
         }
     }
 

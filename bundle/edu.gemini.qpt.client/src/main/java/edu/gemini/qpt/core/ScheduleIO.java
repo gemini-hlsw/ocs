@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.concurrent.TimeoutException;
 
+import edu.gemini.ags.api.AgsMagnitude;
 import edu.gemini.qpt.shared.sp.MiniModel;
 import edu.gemini.qpt.core.util.LttsServicesClient;
 import edu.gemini.spModel.core.Peer;
@@ -66,11 +67,11 @@ public class ScheduleIO {
 
 	}
 
-	public static Schedule read(File file, long timeout, KeyChain authClient) throws IOException, TimeoutException {
-		return read(file.toURL(), timeout, authClient);
+	public static Schedule read(File file, long timeout, KeyChain authClient, AgsMagnitude.MagnitudeTable magTable) throws IOException, TimeoutException {
+		return read(file.toURL(), timeout, authClient, magTable);
 	}
 
-	public static Schedule read(URL url, long timeout, KeyChain authClient) throws IOException, TimeoutException {
+	public static Schedule read(URL url, long timeout, KeyChain authClient, AgsMagnitude.MagnitudeTable magTable) throws IOException, TimeoutException {
 
 		try {
 
@@ -111,7 +112,7 @@ public class ScheduleIO {
 			StringSet extraSemesters = Schedule.getExtraSemesters(core);
 
             try {
-			    MiniModel model = MiniModel.newInstance(authClient, peer, intervals.last().getEnd(), extraSemesters);
+			    MiniModel model = MiniModel.newInstance(authClient, peer, intervals.last().getEnd(), extraSemesters, magTable);
                 return new Schedule(model, core, version);
             } finally {
             }

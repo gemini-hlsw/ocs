@@ -100,6 +100,11 @@ public class ImCollections {
         }
 
         @Override
+        public boolean nonEmpty() {
+            return false;
+        }
+
+        @Override
         public int size() {
             return 0;
         }

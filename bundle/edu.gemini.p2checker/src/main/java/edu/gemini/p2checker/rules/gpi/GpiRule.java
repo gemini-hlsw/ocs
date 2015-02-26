@@ -20,7 +20,7 @@ import java.util.*;
  */
 public class GpiRule implements IRule {
     private static final String PREFIX = "GpiRule_";
-    private static final Collection<IConfigRule> GPI_RULES = new ArrayList<IConfigRule>();
+    private static final Collection<IConfigRule> GPI_RULES = new ArrayList<>();
 
     public static final IConfigMatcher ANY_MATCHER = new IConfigMatcher() {
         public boolean matches(Config config, int step, ObservationElements elems) {
@@ -40,7 +40,7 @@ public class GpiRule implements IRule {
                 Gpi inst = (Gpi) elems.getInstrument();
                 if (inst != null) {
                     if (inst.getObservingMode().isEmpty() || !inst.getObservingMode().getValue().isFilterIterable()) {
-                        return new Problem(ERROR, PREFIX+"FILTER_ITER_RULE",
+                        return new Problem(ERROR, PREFIX + "FILTER_ITER_RULE",
                                 MESSAGE, SequenceRule.getInstrumentOrSequenceNode(step, elems, config));
                     }
                 }
@@ -174,8 +174,8 @@ public class GpiRule implements IRule {
                 P2Problems problems = new P2Problems();
                 TargetEnvironment env = obsComp.getTargetEnvironment();
                 SPTarget base = env.getBase();
-                Option<Magnitude> imag = base.getMagnitude(Magnitude.Band.I);
-                Option<Magnitude> hmag = base.getMagnitude(Magnitude.Band.H);
+                Option<Magnitude> imag = base.getTarget().getMagnitude(Magnitude.Band.I);
+                Option<Magnitude> hmag = base.getTarget().getMagnitude(Magnitude.Band.H);
                 // OT-74
                 if (imag.isEmpty() || imag.getValue().getBrightness() == Magnitude.UNDEFINED_MAG) {
                     problems.addError(PREFIX + "MAG_BAND_MESSAGE", MAG_BAND_MESSAGE + "I-band.", elements.getTargetObsComponentNode().getValue());
@@ -190,7 +190,7 @@ public class GpiRule implements IRule {
                     if (!inst.getObservingMode().isEmpty()) {
                         Gpi.ObservingMode obsMode = inst.getObservingMode().getValue();
                         Magnitude.Band band = inst.getFilter().getBand(); // OT-102: obsMode could be NONSTANDARD
-                        Option<Magnitude> mag = base.getMagnitude(band);
+                        Option<Magnitude> mag = base.getTarget().getMagnitude(band);
                         if (mag.isEmpty() || mag.getValue().getBrightness() == Magnitude.UNDEFINED_MAG) {
                             // OT-99
                             problems.addError(PREFIX + "MAG_BAND_MESSAGE", MAG_BAND_MESSAGE + band + "-band",

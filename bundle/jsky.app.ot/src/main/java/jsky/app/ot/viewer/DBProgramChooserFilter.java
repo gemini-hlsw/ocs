@@ -35,6 +35,7 @@ public final class DBProgramChooserFilter implements IDBProgramChooserFilter {
 
     private static final SpidMatcher CLASSICAL = new SpidMatcher.TypeMatcher(ProgramType.Classical$.MODULE$);
     private static final SpidMatcher LP        = new SpidMatcher.TypeMatcher(ProgramType.LargeProgram$.MODULE$);
+    private static final SpidMatcher FT        = new SpidMatcher.TypeMatcher(ProgramType.FastTurnaround$.MODULE$);
     private static final SpidMatcher QUEUE     = new SpidMatcher.TypeMatcher(ProgramType.Queue$.MODULE$);
     private static final SpidMatcher CAL       = new SpidMatcher.TypeMatcher(ProgramType.Calibration$.MODULE$);
     private static final SpidMatcher LIB       = new SpidMatcher.Or(
@@ -43,7 +44,7 @@ public final class DBProgramChooserFilter implements IDBProgramChooserFilter {
                                                  );
     private static final SpidMatcher ENG       = new SpidMatcher.TypeMatcher(ProgramType.Engineering$.MODULE$);
     private static final SpidMatcher OTHER     = new SpidMatcher.Not(
-                                                   new SpidMatcher.Or(CLASSICAL, LP, QUEUE, ENG, CAL, LIB)
+                                                   new SpidMatcher.Or(CLASSICAL, LP, FT, QUEUE, CAL, LIB, ENG)
                                                  );
 
     // Construct a check box with a tooltip
@@ -57,6 +58,7 @@ public final class DBProgramChooserFilter implements IDBProgramChooserFilter {
     private final JCheckBox remote      = mkCheckBox("Remote",    "Include programs from the remote site");
     private final JCheckBox classical   = mkCheckBox("Classical", "Include classical mode programs");
     private final JCheckBox lp          = mkCheckBox("LP",        "Include large programs");
+    private final JCheckBox fastTurn    = mkCheckBox("FT",        "Include fast turnaround programs");
     private final JCheckBox queue       = mkCheckBox("Queue",     "Include queue mode programs");
     private final JCheckBox cal         = mkCheckBox("Cal",       "Include calibration programs");
     private final JCheckBox engineering = mkCheckBox("Eng",       "Include engineering programs");
@@ -107,15 +109,16 @@ public final class DBProgramChooserFilter implements IDBProgramChooserFilter {
         }
         layout.add(classical,       2, 0, 1, 1, 0., 0., NONE, WEST, new Insets(0, pd, 0,  0));
         layout.add(lp,              3, 0, 1, 1, 0., 0., NONE, WEST, new Insets(0,  6, 0,  0));
-        layout.add(queue,           4, 0, 1, 1, 0., 0., NONE, WEST, new Insets(0,  6, 0,  0));
-        layout.add(cal,             5, 0, 1, 1, 0., 0., NONE, WEST, new Insets(0,  6, 0,  0));
-        layout.add(engineering,     6, 0, 1, 1, 0., 0., NONE, WEST, new Insets(0,  6, 0,  0));
-        layout.add(other,           7, 0, 1, 1, 0., 0., NONE, WEST, new Insets(0,  6, 0,  0));
-        layout.add(libs,            8, 0, 1, 1, 0., 0., NONE, WEST, new Insets(0,  6, 0,  0));
-        layout.add(semesterLabel,   9, 0, 1, 1, 1., 0., NONE, EAST, new Insets(0, 11, 0,  0));
-        layout.add(semestersCombo, 10, 0, 1, 1, 0., 0., NONE, WEST, new Insets(0,  6, 0, 11));
-        layout.add(totalProgLabel, 11, 0, 1, 1, 1., 0., NONE, EAST, new Insets(0, 11, 0,  0));
-        layout.add(total,          12, 0, 1, 1, 0., 0., NONE, WEST, new Insets(0,  6, 0,  0));
+        layout.add(fastTurn,        4, 0, 1, 1, 0., 0., NONE, WEST, new Insets(0,  6, 0,  0));
+        layout.add(queue,           5, 0, 1, 1, 0., 0., NONE, WEST, new Insets(0,  6, 0,  0));
+        layout.add(cal,             6, 0, 1, 1, 0., 0., NONE, WEST, new Insets(0,  6, 0,  0));
+        layout.add(engineering,     7, 0, 1, 1, 0., 0., NONE, WEST, new Insets(0,  6, 0,  0));
+        layout.add(other,           8, 0, 1, 1, 0., 0., NONE, WEST, new Insets(0,  6, 0,  0));
+        layout.add(libs,            9, 0, 1, 1, 0., 0., NONE, WEST, new Insets(0,  6, 0,  0));
+        layout.add(semesterLabel,  10, 0, 1, 1, 1., 0., NONE, EAST, new Insets(0, 11, 0,  0));
+        layout.add(semestersCombo, 11, 0, 1, 1, 0., 0., NONE, WEST, new Insets(0,  6, 0, 11));
+        layout.add(totalProgLabel, 12, 0, 1, 1, 1., 0., NONE, EAST, new Insets(0, 11, 0,  0));
+        layout.add(total,          13, 0, 1, 1, 0., 0., NONE, WEST, new Insets(0,  6, 0,  0));
     }
 
     /**
@@ -176,17 +179,21 @@ public final class DBProgramChooserFilter implements IDBProgramChooserFilter {
 
 
     // Get the saved settings from the previous session, if any, and arrange to save the user's choices for later use.
-    private void restoreSettings() {
-        final List<JCheckBox> checks = Arrays.asList(remote, classical, lp, queue, cal, engineering, other, libs);
+    private static void restoreSettings(List<JCheckBox> checks, boolean def) {
         for (final JCheckBox c : checks) {
             final String pref = PREF_KEY + "." + c.getName();
-            c.setSelected(Boolean.valueOf(Preferences.get(pref, "true")));
+            c.setSelected(Preferences.get(pref, def));
             c.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     Preferences.set(pref, Boolean.toString(c.isSelected()));
                 }
             });
         }
+    }
+
+    private void restoreSettings() {
+        restoreSettings(Arrays.asList(remote, classical, lp, fastTurn, queue), true);
+        restoreSettings(Arrays.asList(cal, engineering, other, libs),         false);
     }
 
     // Filters the input list with some glorious UI updating side-effects.
@@ -230,6 +237,9 @@ public final class DBProgramChooserFilter implements IDBProgramChooserFilter {
         if (lp.isSelected()) {
             idMatcher = new SpidMatcher.Or(idMatcher, LP);
         }
+        if (fastTurn.isSelected()) {
+            idMatcher = new SpidMatcher.Or(idMatcher, FT);
+        }
         if (queue.isSelected()) {
             idMatcher = new SpidMatcher.Or(idMatcher, QUEUE);
         }
@@ -256,6 +266,7 @@ public final class DBProgramChooserFilter implements IDBProgramChooserFilter {
         remote.addActionListener(l);
         classical.addActionListener(l);
         lp.addActionListener(l);
+        fastTurn.addActionListener(l);
         queue.addActionListener(l);
         cal.addActionListener(l);
         engineering.addActionListener(l);
@@ -269,6 +280,7 @@ public final class DBProgramChooserFilter implements IDBProgramChooserFilter {
         remote.removeActionListener(l);
         classical.removeActionListener(l);
         lp.removeActionListener(l);
+        fastTurn.removeActionListener(l);
         queue.removeActionListener(l);
         cal.removeActionListener(l);
         engineering.removeActionListener(l);

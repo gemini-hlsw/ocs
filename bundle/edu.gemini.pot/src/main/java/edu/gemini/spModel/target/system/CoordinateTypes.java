@@ -169,44 +169,6 @@ public final class CoordinateTypes {
     }
 
     /**
-     * The Effective Wavelength tracking parameter type.
-     */
-    public static final class EffWavelength extends CoordinateParam {
-        /* A constant to use when the effective wavelength should be elsewhere
-         * determined or it doesn't matter.
-         */
-        public static final Units[] UNITS = {Units.ANGSTROMS, Units.MICRONS};
-
-        public Object clone() {
-            return (EffWavelength) super.clone();
-        }
-
-        public EffWavelength() {
-            super(0.0, UNITS[0]);
-        }
-
-        public EffWavelength(String value) {
-            super(value, UNITS[0]);
-        }
-
-        public EffWavelength(String value, Units units) {
-            super(value, units);
-        }
-
-        public EffWavelength(double value) {
-            super(value, UNITS[0]);
-        }
-
-        public EffWavelength(double value, Units units) {
-            super(value, units);
-        }
-
-        public Units[] getUnitOptions() {
-            return UNITS;
-        }
-    }
-
-    /**
      * The longitude of the ascending node.
      */
     public static final class ANode extends CoordinateParam {

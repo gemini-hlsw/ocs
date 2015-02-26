@@ -16,6 +16,9 @@ import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.pio.PioParseException;
 import edu.gemini.spModel.seqcomp.IObserveSeqComponent;
+import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.obsComp.TargetObsComp;
+import edu.gemini.spModel.target.system.CoordinateParam;
 import edu.gemini.spModel.time.ChargeClass;
 import edu.gemini.spModel.time.ObsTimeCharges;
 import edu.gemini.spModel.time.ObsTimeCorrection;
@@ -25,6 +28,7 @@ import edu.gemini.spModel.too.TooType;
 import edu.gemini.spModel.type.DisplayableSpType;
 import edu.gemini.spModel.type.SpTypeUtil;
 import edu.gemini.spModel.util.ObjectUtil;
+import edu.gemini.spModel.util.SPTreeUtil;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -70,7 +74,7 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
 
     public static final String ORIGINATING_TEMPLATE_PROP = "originatingTemplate";
 
-    public static final String AGS_STRATEGY_PROP = "agsStrategy";
+    public static final String AGS_STRATEGY_PROP = "agsStrategyOverride";
 
     /**
      * Observation user priority.
@@ -144,7 +148,7 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
     // The next scheduling block for the observation. Begin with None.
     private Option<SchedulingBlock> _schedulingBlock = None.instance();
 
-    private Option<AgsStrategyKey> _selectedAgsStrategy = None.instance();
+    private Option<AgsStrategyKey> _agsStrategyOverride = None.instance();
 
     /**
      * Default constructor.
@@ -421,9 +425,28 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
      * @return true if the observation is not a target of opportunity and not a day calibration
      */
     public static boolean needsGuideStar(ISPObservation obs) {
-        return !Too.isToo(obs)
+        return (!Too.isToo(obs) || hasDefinedTarget(obs))
                 && !ObsClassService.lookupObsClass(obs).equals(ObsClass.DAY_CAL)
                 && hasScienceObserve(obs.getSeqComponent());
+    }
+
+    // Determines if the observation has a base position with non zero (i.e.,
+    // default) coordinates.  An observation with a ToO target doesn't need a
+    // guide star obviously but once the ToO is instantiated into a real
+    // observation at a determined location then it does need a guide star.
+    // With today's target model there isn't a good way to do this so I want to
+    // leave this method private and only use it in conjunction with the
+    // needsGuideStar check.  With the good target model to come, we should just
+    // check whether it is a ToO target and get rid of this method altogether.
+    private static boolean hasDefinedTarget(ISPObservation obs) {
+        final ISPObsComponent targetComp = SPTreeUtil.findTargetEnvNode(obs);
+        if (targetComp == null) {
+            return false;
+        } else {
+            final TargetObsComp toc = (TargetObsComp) targetComp.getDataObject();
+            final SPTarget target = toc.getBase();
+            return (target.getTarget().getRa().getAs(CoordinateParam.Units.DEGREES) != 0.0) || (target.getTarget().getDec().getAs(CoordinateParam.Units.DEGREES) != 0.0);
+        }
     }
 
     /**
@@ -534,14 +557,14 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
         return _correctionLog.sumCorrections();
     }
 
-    public Option<AgsStrategyKey> getSelectedAgsStrategy() {
-        return _selectedAgsStrategy;
+    public Option<AgsStrategyKey> getAgsStrategyOverride() {
+        return _agsStrategyOverride;
     }
 
-    public void setSelectedAgsStrategy(Option<AgsStrategyKey> s) {
-        if (!s.equals(_selectedAgsStrategy)) {
-            final Option<AgsStrategyKey> old = _selectedAgsStrategy;
-            _selectedAgsStrategy = s;
+    public void setAgsStrategyOverride(Option<AgsStrategyKey> s) {
+        if (!s.equals(_agsStrategyOverride)) {
+            final Option<AgsStrategyKey> old = _agsStrategyOverride;
+            _agsStrategyOverride = s;
             firePropertyChange(AGS_STRATEGY_PROP, old, s);
         }
     }
@@ -579,8 +602,8 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
             paramSet.addParamSet(_correctionLog.toParamSet(factory));
         }
 
-        if (!_selectedAgsStrategy.isEmpty()) {
-            Pio.addParam(factory, paramSet, AGS_STRATEGY_PROP, _selectedAgsStrategy.getValue().id());
+        if (!_agsStrategyOverride.isEmpty()) {
+            Pio.addParam(factory, paramSet, AGS_STRATEGY_PROP, _agsStrategyOverride.getValue().id());
         }
 
         return paramSet;
@@ -665,9 +688,9 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
 
         v = Pio.getValue(paramSet, AGS_STRATEGY_PROP);
         if (v == null) {
-            _selectedAgsStrategy = None.instance();
+            _agsStrategyOverride = None.instance();
         } else {
-            _selectedAgsStrategy = ImOption.apply(AgsStrategyKey$.MODULE$.fromStringOrNull(v));
+            _agsStrategyOverride = ImOption.apply(AgsStrategyKey$.MODULE$.fromStringOrNull(v));
         }
     }
 }

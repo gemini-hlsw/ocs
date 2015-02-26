@@ -38,7 +38,7 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
               i.visitor must beFalse
           }
 
-          proposal.semester must beEqualTo(Semester(2015, SemesterOption.A))
+          proposal.semester must beEqualTo(Semester(2015, SemesterOption.B))
       }
 
       UpConverter.upConvert(xml) must beSuccessful.like {
@@ -633,14 +633,17 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
           result must \\("queue", "key" -> "604c87d8-9bf8-96a8-0642-f70604c87d89", "tooOption" -> "None")
       }
     }
-    "proposal with Graces blueprints must be removed, REL-1350" in {
+    "proposal with Graces blueprints must be preserved, REL-2200" in {
       val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_graces.xml")))
 
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 4
-          changes must contain("The original proposal contained Graces observations. The instrument is not available and those resources have been removed.")
+          changes must have length 5
+          result \\ "graces" must \\("fiberMode") \> "2 fibers (target+sky, R~40k)"
+          result \\ "graces" must \\("name") \> "Graces 2 fibers (target+sky, R~40k)"
+          result \\ "graces" must \\("fiberMode") \> "1 fiber (target only, R~67.5k)"
+          result \\ "graces" must \\("name") \> "Graces 1 fiber (target only, R~67.5k)"
       }
     }
   }

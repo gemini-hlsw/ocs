@@ -9,11 +9,9 @@ import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.data.property.PropertySupport;
 import edu.gemini.spModel.inst.ParallacticAngleDuration;
 import edu.gemini.spModel.inst.ParallacticAngleSupport;
-import edu.gemini.spModel.inst.PositionAngleMode;
 import edu.gemini.spModel.obs.ObsTargetCalculatorService;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.pio.ParamSet;
-import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.util.skycalc.calc.TargetCalculator;
 
@@ -32,8 +30,7 @@ public abstract class ParallacticAngleSupportInst extends SPInstObsComp implemen
      * Note that PARALLACTIC_ANGLE_DURATION_PROP is not actually used for PIO, but as an umbrella name for property
      * change events, with the actual PIO being delegated to ParallacticAngleDuration.
      */
-    public static final PropertyDescriptor POSITION_ANGLE_MODE_PROP;
-    public static final PropertyDescriptor PARALLACTIC_ANGLE_DURATION_PROP;
+    protected static final PropertyDescriptor PARALLACTIC_ANGLE_DURATION_PROP;
     private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<String, PropertyDescriptor>();
 
     private static PropertyDescriptor initProp(String propName, boolean query, boolean iter) {
@@ -50,16 +47,8 @@ public abstract class ParallacticAngleSupportInst extends SPInstObsComp implemen
         final boolean query_no = false;
         final boolean iter_no = false;
 
-        POSITION_ANGLE_MODE_PROP = initProp("positionAngleMode", query_yes, iter_no);
         PARALLACTIC_ANGLE_DURATION_PROP = initProp("parallacticAngleDuration", query_no, iter_no);
     }
-
-
-    /**
-     * Instance variables managed by this class.
-     */
-    // The position mode angle.
-    private PositionAngleMode _positionAngleMode = PositionAngleMode.EXPLICITLY_SET;
 
     // The parallactic angle duration information.
     private ParallacticAngleDuration _parallacticAngleDuration = ParallacticAngleDuration.getInstance();
@@ -76,7 +65,6 @@ public abstract class ParallacticAngleSupportInst extends SPInstObsComp implemen
      */
     public ParamSet getParamSet(PioFactory factory) {
         ParamSet paramSet = super.getParamSet(factory);
-        Pio.addParam(factory, paramSet, POSITION_ANGLE_MODE_PROP.getName(), getPositionAngleMode().name());
         ParamSet durationParamSet = ParallacticAngleDuration.toParamSet(factory, getParallacticAngleDuration());
         paramSet.addParamSet(durationParamSet);
         return paramSet;
@@ -85,33 +73,10 @@ public abstract class ParallacticAngleSupportInst extends SPInstObsComp implemen
     public void setParamSet(ParamSet paramSet) {
         super.setParamSet(paramSet);
 
-        String v = Pio.getValue(paramSet, POSITION_ANGLE_MODE_PROP.getName());
-        if (v != null)
-            setPositionAngleMode(PositionAngleMode.valueOf(v));
-
         // Null should never happen here, but just in case.
         ParallacticAngleDuration parallacticAngleDuration = ParallacticAngleDuration.fromParamSet(paramSet);
         if (parallacticAngleDuration != null)
             setParallacticAngleDuration(parallacticAngleDuration);
-    }
-
-
-    /**
-     * Accessors for the position mode angle.
-     */
-    @Override
-    public PositionAngleMode getPositionAngleMode() {
-        return _positionAngleMode;
-    }
-
-    @Override
-    public void setPositionAngleMode(PositionAngleMode newValue) {
-        if (newValue == null) newValue = PositionAngleMode.EXPLICITLY_SET;
-        PositionAngleMode oldValue = _positionAngleMode;
-        if (!oldValue.equals(newValue)) {
-            _positionAngleMode = newValue;
-            firePropertyChange(POSITION_ANGLE_MODE_PROP.getName(), oldValue, newValue);
-        }
     }
 
     @Override
@@ -146,7 +111,7 @@ public abstract class ParallacticAngleSupportInst extends SPInstObsComp implemen
                 // Calculate the parallactic angle.
                 final double dAngle = (Double) angleOption.get();
                 final edu.gemini.skycalc.Angle angle = (new edu.gemini.skycalc.Angle(dAngle, edu.gemini.skycalc.Angle.Unit.DEGREES)).toPositive();
-                return new Some<Angle>(angle);
+                return new Some<>(angle);
             } else return None.instance();
         } else return None.instance();
     }

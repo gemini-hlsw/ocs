@@ -63,8 +63,10 @@ public interface SpidMatcher extends Serializable {
         public boolean matches(scala.Option<ProgramId> pid) {
             // Sorry, this is awkward mixing Scala and Java Option and
             // worse still, using it from Java.
-            return semester.isEmpty() ||  // match anything
-                    (!pid.isEmpty() && !pid.get().semester().isEmpty() && pid.get().semester().get().equals(semester.getValue()));
+            return semester.isEmpty() ||
+                        pid.isEmpty() ||
+                        pid.get().semester().isEmpty() ||
+                        pid.get().semester().get().equals(semester.getValue());
         }
     }
 
@@ -75,17 +77,13 @@ public interface SpidMatcher extends Serializable {
         private final IDBDatabaseService db;
 
         LocalMatcher(IDBDatabaseService db) { this.db = db; }
-        private SPProgramID toSpProgramId(scala.Option<ProgramId> pid) {
-            try {
-                return pid.isEmpty() ? null : SPProgramID.toProgramID(pid.get().toString());
-            } catch (Exception ex) {
-                return null;
-            }
-        }
-
         @Override public boolean matches(scala.Option<ProgramId> pid) {
-            final SPProgramID spid = toSpProgramId(pid);
-            return (spid == null) || (db.lookupProgramByID(spid) != null);
+            if (pid.isEmpty()) {
+                return true; // no program id, can't be remote
+            } else {
+                final scala.Option<SPProgramID> spid = pid.get().spOption();
+                return spid.isEmpty() || db.lookupProgramByID(spid.get()) != null;
+            }
         }
     }
 

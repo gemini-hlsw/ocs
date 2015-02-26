@@ -91,7 +91,12 @@ public enum ToContext {
 
     public static final String POS_ANGLE_CONSTRAINT = "pac";
     private static final ParseOp<PosAngleConstraint> POS_ANGLE_CONSTRAINT_OP = new ParseOp<PosAngleConstraint>() {
-        public PosAngleConstraint apply(String s) { return PosAngleConstraint.valueOf(s); }
+        public PosAngleConstraint apply(String s) {
+            // We previously had value UNKNOWN, but eliminated it since it was superseded by UNBOUNDED.
+            if (s.equals("UNKNOWN"))
+                return PosAngleConstraint.UNBOUNDED;
+            return PosAngleConstraint.valueOf(s);
+        }
     };
 
     public static final String CC = "cc";
@@ -171,21 +176,14 @@ public enum ToContext {
 
         SPTarget t;
         switch (tt) {
-            // Here we just need an SPTarget with a contained NonSiderealTarget
-            // instance, which is insanely complex, stupid, and useless.  In
-            // the end, this is just used to determine whether it is a
-            // non-sidereal target or not in order to pick the right guider.
+            // Here we just need an SPTarget with a contained NonSiderealTarget. In the end, this
+            // is just used to determine whether it is a non-sidereal target or not in order to
+            // pick the right guider.
             case nonsidereal:
-                NonSiderealTarget nst = new NonSiderealTarget(HmsDegTarget.SystemType.J2000) {
-                    @Override public String getPosition() { return ""; }
-                    @Override public String getShortSystemName() { return ""; }
-                    @Override public void dump() { }
-                    @Override public TypeBase[] getSystemOptions() {
-                        return new TypeBase[] { HmsDegTarget.SystemType.J2000 };
-                    }
-                };
-                t = new SPTarget(nst);
-                t.setXY(raDeg, decDeg);
+                t = new SPTarget(new ConicTarget());
+                t.getTarget().getRa().setAs(raDeg, CoordinateParam.Units.DEGREES);
+                t.getTarget().getDec().setAs(decDeg, CoordinateParam.Units.DEGREES);
+                t.notifyOfGenericUpdate();
                 break;
             default:
                 t = new SPTarget(raDeg, decDeg);

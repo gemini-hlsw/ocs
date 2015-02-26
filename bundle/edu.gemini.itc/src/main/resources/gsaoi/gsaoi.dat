@@ -1,0 +1,22 @@
+#parameters for GSAOI 
+
+# Author: ??
+# Updated: Rodrigo Carrasco
+# Date: 06 August 2012
+
+#name
+GSAOI
+#Starting wavelength (nm)
+900
+#Ending wavelength (nm)
+2500
+#Sampling (nm)
+0.02
+#Background filename
+gsaoi_background.dat
+#Plate Scale (arcsec/pixels)
+0.02
+#Read Noise (electrons)
+12
+#Dark Current (electrons per seconds per pixel)
+0.01

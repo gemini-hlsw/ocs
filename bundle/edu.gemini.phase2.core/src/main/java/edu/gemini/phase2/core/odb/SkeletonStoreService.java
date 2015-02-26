@@ -9,6 +9,7 @@ import static edu.gemini.phase2.core.odb.TemplateFolderService.TemplateOption;
 import edu.gemini.pot.sp.*;
 import edu.gemini.pot.spdb.DBIDClashException;
 import edu.gemini.pot.spdb.IDBDatabaseService;
+import edu.gemini.spModel.template.TemplateFolder;
 import edu.gemini.spModel.too.Too;
 
 import java.io.Serializable;
@@ -40,12 +41,9 @@ public final class SkeletonStoreService {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            ResultAndProgram that = (ResultAndProgram) o;
-
+            final ResultAndProgram that = (ResultAndProgram) o;
             if (!program.equals(that.program)) return false;
-            if (result != that.result) return false;
-
-            return true;
+            return result == that.result;
         }
 
         @Override
@@ -84,7 +82,7 @@ public final class SkeletonStoreService {
                 tf = odb.getFactory().createTemplateFolder(p, null);
                 p.setTemplateFolder(tf);
             }
-            tf.setDataObject(shell.folder);
+            tf.setDataObject(new TemplateFolder(shell.folder.blueprintMap));
             tf.setTemplateGroups(Collections.<ISPTemplateGroup>emptyList());
 
             if (tfe != null) {
@@ -107,7 +105,7 @@ public final class SkeletonStoreService {
     }
 
     private static ISPProgram create(SkeletonShell shell, TemplateFolderExpansion tfe, IDBDatabaseService odb) throws DBIDClashException {
-        ISPProgram p = odb.getFactory().createProgram(new SPNodeKey(), shell.id);
+        final ISPProgram p = odb.getFactory().createProgram(new SPNodeKey(), shell.id);
         odb.put(p);
         update(shell, tfe, odb, p);
         return p;

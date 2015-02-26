@@ -144,11 +144,7 @@ public abstract class AbstractOffsetPosTableModel<P extends OffsetPosBase> exten
      * A watcher that updates the table whenever a position changes.
      */
     private final TelescopePosWatcher posWatcher = new TelescopePosWatcher() {
-        public void telescopePosLocationUpdate(WatchablePos tp) {
-            telescopePosGenericUpdate(tp);
-        }
-
-        public void telescopePosGenericUpdate(WatchablePos tp) {
+        public void telescopePosUpdate(WatchablePos tp) {
             //noinspection unchecked
             P pos = (P) tp;
             int index = opl.getPositionIndex(pos);

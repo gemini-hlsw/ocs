@@ -77,7 +77,7 @@ class SubmissionRequestEditor[A] private (s:SubmissionRequest, partner:Option[A]
 
     if (partner.isDefined) {
       addRow(new Label("Partner:"), partnerLabel)
-      if (!is.isEmpty)
+      if (is.nonEmpty)
         addRow(new Label("Partner Lead:"), leads)
       addSpacer()
     }
@@ -105,7 +105,9 @@ class SubmissionRequestEditor[A] private (s:SubmissionRequest, partner:Option[A]
   def value = {
     val s0 = timeLens.set(s, editor.time.value)
     val s1 = minTimeLens.set(s0, editor.minTime.value)
-    (s1, editor.leads.selection.item, remove.selected)
+    // REL-2032 Consider a request with 0 times the same as remove
+    val removed = (s1.time == TimeAmount.empty && s1.minTime == TimeAmount.empty) || remove.selected
+    (s1, editor.leads.selection.item, removed)
   }
 
 }

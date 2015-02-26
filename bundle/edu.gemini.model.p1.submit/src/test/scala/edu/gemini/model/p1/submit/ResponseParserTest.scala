@@ -12,7 +12,7 @@ class ResponseParserTest {
 
   private def verifyUnexpected(input: String) {
     parse(input) match {
-      case ServiceError(None, 500, UNEXPECTED_MSG) => // ok
+      case ServiceError(None, _, 500, UNEXPECTED_MSG) => // ok
       case _ => fail()
     }
   }
@@ -52,7 +52,7 @@ class ResponseParserTest {
     ) match {
       case Success("key", time, "x@y.com", "hi") =>
         assertEquals(time, parseTime("2012-01-22T10:59:00Z"))
-      case ServiceError(_, code, message) => fail(message)
+      case ServiceError(_, _, code, message) => fail(message)
       case _ => fail()
     }
   }
@@ -66,7 +66,7 @@ class ResponseParserTest {
         <userMessage>hi</userMessage>
       </body>.toString()
     ) match {
-      case ServiceError(None, 500, NO_PARTNER_REF_MSG) => // ok
+      case ServiceError(None, _, 500, NO_PARTNER_REF_MSG) => // ok
       case _ => fail()
     }
   }
@@ -80,7 +80,7 @@ class ResponseParserTest {
         <userMessage>hi</userMessage>
       </body>.toString()
     ) match {
-      case ServiceError(_, 500, NO_TIMESTAMP_MSG) => // ok
+      case ServiceError(_, _, 500, NO_TIMESTAMP_MSG) => // ok
       case _ => fail()
     }
   }
@@ -95,7 +95,7 @@ class ResponseParserTest {
         <userMessage>hi</userMessage>
       </body>.toString()
     ) match {
-      case ServiceError(_, 500, msg) =>
+      case ServiceError(_, _, 500, msg) =>
         assertEquals(BAD_TIMESTAMP_MSG("2012-01-22 10:59:00Z"), msg)
       case _ => fail()
     }
@@ -107,7 +107,7 @@ class ResponseParserTest {
         <errorCode>401</errorCode>
         <errorText>my error text</errorText>
       </body>.toString()) match {
-      case ServiceError(_, 401, "my error text") => // ok
+      case ServiceError(_, _, 401, "my error text") => // ok
       case _ => fail()
     }
   }

@@ -25,20 +25,29 @@ public final class TargetSelection {
     public static final String KEY  = TargetSelection.class.getName();
     public static final String PROP = SPUtil.getTransientClientDataPropertyName(KEY);
 
-    private static final int NO_SELECTION = -1;
+    // An int wrapper which doesn't define equals/hashCode so that each instance
+    // is distinct. This is done so that storing a new SelectionIndex with the
+    // same int value will still cause the MemAbstractBase PropertyChangeSupport
+    // to trigger a property change event.
+    private static final class Index {
+        final int value;
+        Index(int value) { this.value = value; }
+    }
+
+    private static final Index NO_SELECTION = new Index(-1);
 
     private static boolean isValid(ISPNode node) {
         return (node instanceof ISPObsComponent) && ((ISPObsComponent) node).getType() == SPComponentType.TELESCOPE_TARGETENV;
     }
 
     public static int getIndex(ISPNode node) {
-        if (!isValid(node)) return NO_SELECTION;
+        if (!isValid(node)) return NO_SELECTION.value;
         final Object cd = node.getTransientClientData(KEY);
-        return (cd == null) ? NO_SELECTION : (Integer) cd;
+        return ((cd == null) ? NO_SELECTION : (Index) cd).value;
     }
 
     public static void setIndex(ISPNode node, int index) {
-        if (isValid(node)) node.putTransientClientData(KEY, index);
+        if (isValid(node)) node.putTransientClientData(KEY, new Index(index));
     }
 
     private static final class Selection {
@@ -54,7 +63,7 @@ public final class TargetSelection {
     private static ImList<Selection> toSelections(TargetEnvironment env) {
         if (env == null) return ImCollections.emptyList();
 
-        final List<Selection> res = new ArrayList<Selection>();
+        final List<Selection> res = new ArrayList<>();
         res.add(new Selection(null, env.getBase()));
         for (GuideGroup g : env.getGroups()) {
             res.add(new Selection(g, null));
@@ -73,7 +82,7 @@ public final class TargetSelection {
             @Override public Boolean apply(Tuple2<Selection, Integer> tup) {
                 return tup._1().target == target;
             }
-        }).map(INDEX_OF).getOrElse(NO_SELECTION);
+        }).map(INDEX_OF).getOrElse(NO_SELECTION.value);
     }
 
     public static int indexOf(TargetEnvironment env, final GuideGroup grp) {
@@ -81,7 +90,7 @@ public final class TargetSelection {
             @Override public Boolean apply(Tuple2<Selection, Integer> tup) {
                 return tup._1().guideGroup == grp;
             }
-        }).map(INDEX_OF).getOrElse(NO_SELECTION);
+        }).map(INDEX_OF).getOrElse(NO_SELECTION.value);
     }
 
     private static Selection selectionAt(TargetEnvironment env, int index) {

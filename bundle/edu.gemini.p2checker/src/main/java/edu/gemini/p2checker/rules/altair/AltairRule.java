@@ -11,7 +11,6 @@ import edu.gemini.p2checker.api.P2Problems;
 import edu.gemini.p2checker.util.PositionOffsetChecker;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.ISPProgramNode;
-import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Trio;
@@ -19,9 +18,6 @@ import edu.gemini.shared.util.immutable.Tuple3;
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
-import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
-import edu.gemini.spModel.gemini.nifs.InstNIFS;
-import edu.gemini.spModel.gemini.niri.InstNIRI;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
@@ -268,7 +264,7 @@ public final class AltairRule implements IRule {
             Magnitude.Band[] bands = new Magnitude.Band[]{Magnitude.Band.R, Magnitude.Band.V};
             for (SPTarget spTarget : guideGroup.getTargets()) {
                 for (Magnitude.Band band : bands) {
-                    Magnitude m = spTarget.getMagnitude(band).getOrNull();
+                    Magnitude m = spTarget.getTarget().getMagnitude(band).getOrNull();
                     if (m != null) {
                         double b = m.getBrightness();
                         if (minMag == null || b < minMag) minMag = b;

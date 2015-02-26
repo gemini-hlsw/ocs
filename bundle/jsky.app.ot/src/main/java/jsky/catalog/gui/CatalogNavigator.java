@@ -112,10 +112,10 @@ public abstract class CatalogNavigator extends JPanel
     private EventListenerList _listenerList = new EventListenerList();
 
     // Stack of CatalogHistoryItems, used to go back to a previous panel
-    private Stack<CatalogHistoryItem> _backStack = new Stack<CatalogHistoryItem>();
+    private Stack<CatalogHistoryItem> _backStack = new Stack<>();
 
     // Stack of CatalogHistoryItems, used to go forward to the next panel
-    private Stack<CatalogHistoryItem> _forwStack = new Stack<CatalogHistoryItem>();
+    private Stack<CatalogHistoryItem> _forwStack = new Stack<>();
 
     // Set when the back or forward actions are active to avoid the normal history stack handling
     private boolean _noStack = false;

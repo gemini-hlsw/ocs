@@ -17,14 +17,13 @@ public final class CatalogHeaderTest {
 
     @Test
     public void testBasics() {
-        Tuple2<String, Class> id, ra, dec;
-        id = new Pair<String, Class>("id", String.class);
-        ra = new Pair<String, Class>("ra", Angle.class);
-        dec = new Pair<String, Class>("dec", Angle.class);
+        final Tuple2<String, Class<?>> id = new Pair<String, Class<?>>("id", String.class);
+        final Tuple2<String, Class<?>> ra = new Pair<String, Class<?>>("ra", Angle.class);
+        final Tuple2<String, Class<?>> dec = new Pair<String, Class<?>>("dec", Angle.class);
 
-        ImList<Tuple2<String,Class>> headerList = DefaultImList.create(id, ra, dec);
+        final ImList<Tuple2<String,Class<?>>> headerList = DefaultImList.create(id, ra, dec);
 
-        DefaultCatalogHeader header = new DefaultCatalogHeader(headerList);
+        final DefaultCatalogHeader header = new DefaultCatalogHeader(headerList);
 
         assertEquals(3, header.getColumnCount());
 

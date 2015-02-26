@@ -267,7 +267,7 @@ def project: xml.Elem =
     </component>
 
   private def vcs(bl: BundleLoc): xml.Elem =
-    <mapping directory={projRelativePath(bl.loc)} vcs="svn" />
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
 
   def runConfigurationComponent: xml.Elem =
     <component name="ProjectRunConfigurationManager">

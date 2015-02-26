@@ -53,30 +53,29 @@ public final class TargetConfig extends ParamSet {
      * Note that only the hmsDegTarget is supported at this time.
      */
     public TargetConfig(SPTarget spTarget) throws WdbaGlueException {
-        super(spTarget.getName());
+        super(spTarget.getTarget().getName());
 
-        putParameter(TccNames.OBJNAME, spTarget.getName());
+        putParameter(TccNames.OBJNAME, spTarget.getTarget().getName());
 
-        String systemName = spTarget.getTarget().getShortSystemName();
-        addAttribute(TYPE, systemName);
-
-        putParameter(TccNames.BRIGHTNESS, spTarget.getBrightness());
+        putParameter(TccNames.BRIGHTNESS, ""); // TODO: can we elide this altogether?
         putParameter(TccNames.TAG, ""); // ugh
 
         ITarget target = spTarget.getTarget();
         if (target instanceof HmsDegTarget) {
             // System only appears in HmsDegTarget
-            putParameter(TccNames.SYSTEM, spTarget.getCoordSysAsString());
+            addAttribute(TYPE, "hmsdegTarget");
+            putParameter(TccNames.SYSTEM, spTarget.getTarget().getTag().tccName);
             _buildHmsDegTarget(spTarget);
         } else if (target instanceof ConicTarget) {
+            addAttribute(TYPE, "conicTarget");
             _buildConicTarget(spTarget);
         } else if (target instanceof NamedTarget) {
-            // Temp fix until target code fixed
             addAttribute(TYPE, "namedTarget");
             _buildNamedTarget((NamedTarget) target);
         } else {
-            // In all other caes, report a problem and return
-            _logAbort("Unsupported coordinate system: " + target.getSystemName(), null);
+            // In all other cases, report a problem and return
+            _logAbort("Unsupported target type: " + target.getClass().getName(), null);
+
         }
 
         Option<Element> mags = _createMagnitudes(spTarget);
@@ -96,16 +95,16 @@ public final class TargetConfig extends ParamSet {
     private void _buildHmsDegTarget(SPTarget target) {
 
         HmsDegTarget hmsDeg = (HmsDegTarget) target.getTarget();
-        putParameter(TccNames.C1, hmsDeg.c1ToString());
-        putParameter(TccNames.C2, hmsDeg.c2ToString());
+        putParameter(TccNames.C1, hmsDeg.getRa().toString());
+        putParameter(TccNames.C2, hmsDeg.getDec().toString());
         add(_addProperMotion(hmsDeg));
     }
 
     private void _buildConicTarget(SPTarget spTarget) {
         ConicTarget target = (ConicTarget) spTarget.getTarget();
 
-        TypeBase option = target.getSystemOption();
-        putParameter(TccNames.FORMAT, target.getSystemOption().getName());
+        ITarget.Tag option = target.getTag();
+        putParameter(TccNames.FORMAT, option.tccName);
 
         // All have epoch
         putParameter(TccNames.EPOCHOFEL, target.getEpoch().getStringValue());
@@ -116,48 +115,16 @@ public final class TargetConfig extends ParamSet {
         // All have eccentricity
         putParameter(TccNames.ECCENTRICITY, String.valueOf(target.getE()));
 
-        if (option == ConicTarget.SystemType.ASA_MAJOR_PLANET) {
-            putParameter(TccNames.MEANDIST, target.getAQ().getStringValue());
-            putParameter(TccNames.MEANLONG, target.getLM().getStringValue());
-            putParameter(TccNames.LONGOFPERI, target.getPerihelion().getStringValue());
-            putParameter(TccNames.DAILYMOT, target.getN().getStringValue());
-        }
-
-        if (option == ConicTarget.SystemType.ASA_MINOR_PLANET) {
-            putParameter(TccNames.ARGOFPERI, target.getPerihelion().getStringValue());
-            putParameter(TccNames.MEANDIST, target.getAQ().getStringValue());
-            putParameter(TccNames.MEANANOM, target.getLM().getStringValue());
-        }
-
-        if (option == ConicTarget.SystemType.ASA_COMET) {
+        if (option == ITarget.Tag.JPL_MINOR_BODY) {
             putParameter(TccNames.ARGOFPERI, target.getPerihelion().getStringValue());
             putParameter(TccNames.PERIDIST, target.getAQ().getStringValue());
             putParameter(TccNames.EPOCHOFPERI, target.getEpochOfPeri().getStringValue());
         }
 
-        if (option == ConicTarget.SystemType.JPL_MAJOR_PLANET) {
+        if (option == ITarget.Tag.MPC_MINOR_PLANET) {
             putParameter(TccNames.ARGOFPERI, target.getPerihelion().getStringValue());
             putParameter(TccNames.MEANDIST, target.getAQ().getStringValue());
             putParameter(TccNames.MEANANOM, target.getLM().getStringValue());
-            putParameter(TccNames.DAILYMOT, target.getN().getStringValue());
-        }
-
-        if (option == ConicTarget.SystemType.JPL_MINOR_BODY) {
-            putParameter(TccNames.ARGOFPERI, target.getPerihelion().getStringValue());
-            putParameter(TccNames.PERIDIST, target.getAQ().getStringValue());
-            putParameter(TccNames.EPOCHOFPERI, target.getEpochOfPeri().getStringValue());
-        }
-
-        if (option == ConicTarget.SystemType.MPC_MINOR_PLANET) {
-            putParameter(TccNames.ARGOFPERI, target.getPerihelion().getStringValue());
-            putParameter(TccNames.MEANDIST, target.getAQ().getStringValue());
-            putParameter(TccNames.MEANANOM, target.getLM().getStringValue());
-        }
-
-        if (option == ConicTarget.SystemType.MPC_COMET) {
-            putParameter(TccNames.ARGOFPERI, target.getPerihelion().getStringValue());
-            putParameter(TccNames.PERIDIST, target.getAQ().getStringValue());
-            putParameter(TccNames.EPOCHOFPERI, target.getEpochOfPeri().getStringValue());
         }
 
     }
@@ -180,7 +147,7 @@ public final class TargetConfig extends ParamSet {
     }
 
     private Option<Element> _createMagnitudes(SPTarget target) {
-        ImList<Magnitude> magList = target.getMagnitudes();
+        ImList<Magnitude> magList = target.getTarget().getMagnitudes();
         if (magList.size() == 0) return None.instance();
 
         final ParamSet ps = new ParamSet(TccNames.MAGNITUDES);

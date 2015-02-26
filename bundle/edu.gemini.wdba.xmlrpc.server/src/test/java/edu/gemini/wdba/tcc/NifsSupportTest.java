@@ -5,6 +5,8 @@
 package edu.gemini.wdba.tcc;
 
 import static edu.gemini.spModel.gemini.altair.AltairParams.GuideStarType.*;
+
+import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.nifs.InstNIFS;
 import edu.gemini.spModel.gemini.nifs.NIFSParams;
 import org.junit.Test;
@@ -23,6 +25,11 @@ public class NifsSupportTest extends InstrumentSupportTestBase<InstNIFS> {
 
     @Test public void testLgsPointOrig() throws Exception {
         addAltair(LGS); verifyPointOrig(getSouthResults(), "lgs2nifs");
+    }
+
+    @Test public void testLgsP1PointOrig() throws Exception {
+        addAltair(AltairParams.Mode.LGS_P1);
+        verifyPointOrig(getSouthResults(), "lgs2nifs_p1");
     }
 
     @Test public void testNgsPointOrig() throws Exception {

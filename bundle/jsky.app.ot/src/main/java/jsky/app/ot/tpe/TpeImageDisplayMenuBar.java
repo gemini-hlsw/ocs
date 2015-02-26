@@ -8,11 +8,12 @@
 package jsky.app.ot.tpe;
 
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.*;
 
 import jsky.app.ot.util.BasicPropertyList;
-import jsky.app.ot.util.ChoiceProperty;
 import jsky.app.ot.util.PropertyWatcher;
 import jsky.navigator.NavigatorImageDisplayMenuBar;
 import jsky.navigator.NavigatorImageDisplayToolBar;
@@ -79,17 +80,11 @@ public class TpeImageDisplayMenuBar extends NavigatorImageDisplayMenuBar {
         JMenu menu = new JMenu(name + " Display");
         parentMenu.add(menu);
 
-        String[] propNames = pl.getPropertyNames();
-        for (int i = 0; i < propNames.length; i++) {
-            Object value = pl.getValue(propNames[i]);
-            if (value instanceof Boolean) {
-                menu.add(_createBooleanPropertyMenuItem(propNames[i], pl));
-            } else if (value instanceof ChoiceProperty) {
-                int selectedIndex = ((ChoiceProperty) value).getCurValue();
-                if (selectedIndex < 0)
-                    selectedIndex = 0;
-                menu.add(_createChoicePropertyMenu(propNames[i], pl, selectedIndex));
-            }
+        for (BasicPropertyList.BasicProperty bp : pl.getProperties()) {
+            if (bp instanceof BasicPropertyList.BooleanProperty)
+                menu.add(_createBooleanPropertyMenuItem((BasicPropertyList.BooleanProperty)bp, pl));
+            else if (bp instanceof BasicPropertyList.ChoiceProperty)
+                menu.add(_createChoicePropertyMenu((BasicPropertyList.ChoiceProperty)bp, pl));
         }
     }
 
@@ -97,21 +92,21 @@ public class TpeImageDisplayMenuBar extends NavigatorImageDisplayMenuBar {
     /**
      * Create and return a checkbox menu item for the given name and boolean property.
      */
-    private JCheckBoxMenuItem _createBooleanPropertyMenuItem(final String propertyName, final BasicPropertyList pl) {
-        final JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(propertyName);
-        menuItem.setSelected(pl.getBoolean(propertyName, false));
+    private JCheckBoxMenuItem _createBooleanPropertyMenuItem(final BasicPropertyList.BooleanProperty bp,
+                                                             final BasicPropertyList pl) {
+        final JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(bp.getName());
+        menuItem.setSelected(bp.getValue());
         menuItem.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent e) {
-                pl.setBoolean(propertyName, menuItem.getState());
-                pl.saveSettings();
+                bp.setValue(menuItem.getState());
             }
         });
 
         // keep view and popup menus in sync
         pl.addWatcher(new PropertyWatcher() {
             public void propertyChange(String propName) {
-                if (propName.equals(propertyName)) {
-                    boolean b = pl.getBoolean(propertyName, false);
+                if (propName.equals(bp.getName())) {
+                    boolean b = bp.getValue();
                     if (menuItem.isSelected() != b) {
                         menuItem.setSelected(b);
                     }
@@ -125,39 +120,41 @@ public class TpeImageDisplayMenuBar extends NavigatorImageDisplayMenuBar {
     /**
      * Create and return a menu for the given name and choice propery.
      */
-    private JMenu _createChoicePropertyMenu(final String propertyName, final BasicPropertyList pl,
-                                            int selectedIndex) {
+    private JMenu _createChoicePropertyMenu(final BasicPropertyList.ChoiceProperty cp,
+                                            final BasicPropertyList pl) {
 
-        final JMenu menu = new JMenu(propertyName);
+        final JMenu menu = new JMenu(cp.getName());
+        final List<JRadioButtonMenuItem> menuItems = new ArrayList<>();
+        final ButtonGroup group = new ButtonGroup();
 
-        String[] choices = pl.getChoiceOptions(propertyName);
-        final JRadioButtonMenuItem[] menuItems = new JRadioButtonMenuItem[choices.length];
-        ButtonGroup group = new ButtonGroup();
-        for (int i = 0; i < choices.length; i++) {
-            final JRadioButtonMenuItem b = new JRadioButtonMenuItem(choices[i]);
-            menuItems[i] = b;
-            final int buttonIndex = i;
-            if (i == selectedIndex)
+        for (String choice : cp.getChoices()) {
+            final JRadioButtonMenuItem b = new JRadioButtonMenuItem(choice);
+            // If this is the selected index, mark it as such.
+            if (menuItems.size() == cp.getSelection())
                 b.setSelected(true);
+
+            menuItems.add(b);
             menu.add(b);
             group.add(b);
+
             b.addItemListener(new ItemListener() {
+                @Override
                 public void itemStateChanged(ItemEvent e) {
-                    if (b.isSelected()) {
-                        pl.setChoice(propertyName, buttonIndex);
-                        pl.saveSettings();
-                    }
+                    if (b.isSelected())
+                        cp.setSelection(menuItems.indexOf(b));
                 }
             });
+
         }
 
         // keep view and popup menus in sync
         pl.addWatcher(new PropertyWatcher() {
             public void propertyChange(String propName) {
-                if (propName.equals(propertyName)) {
-                    int index = pl.getChoice(propertyName, 0);
-                    if (!menuItems[index].isSelected()) {
-                        menuItems[index].setSelected(true);
+                if (propName.equals(cp.getName())) {
+                    int index = cp.getSelection();
+                    JRadioButtonMenuItem mi = menuItems.get(index);
+                    if (!mi.isSelected()) {
+                        mi.setSelected(true);
                     }
                 }
             }
@@ -166,7 +163,3 @@ public class TpeImageDisplayMenuBar extends NavigatorImageDisplayMenuBar {
         return menu;
     }
 }
-
-
-
-

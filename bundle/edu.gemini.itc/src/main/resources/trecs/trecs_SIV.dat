@@ -1,0 +1,51 @@
+# trecs_fSIV.dat
+# Transmission curve for T-ReCS SIV 10.5um filter
+# Columns are (1) wavelength in nm, (2) transmission.
+#
+# No blocking element needed.
+# Measurement temperature = 10K
+#
+# Author: James De Buizer, digitized from info from U. Reading
+# Created: 2003 Apr 9
+#
+# Effective wavelength
+10520
+#
+# lambda  filtn
+
+10250    0.0
+10257    0.0000
+10292    0.0037
+10310    0.0150
+10330    0.0337
+10342    0.0675
+10348    0.0975
+10356    0.1519
+10365    0.2270
+10372    0.3114
+10377    0.3902
+10384    0.4596
+10388    0.5309
+10396    0.5816
+10403    0.6322
+10413    0.6604
+10426    0.6810
+10443    0.6904
+10462    0.6941
+10475    0.6923
+10486    0.6810
+10500    0.6510
+10515    0.5759
+10522    0.4953
+10532    0.3996
+10542    0.3114
+10551    0.2101
+10560    0.1332
+10570    0.0825
+10581    0.0450
+10592    0.0262
+10605    0.0112
+10621    0.0056
+10638    0.0018
+10658    0.0000
+10700    0.0

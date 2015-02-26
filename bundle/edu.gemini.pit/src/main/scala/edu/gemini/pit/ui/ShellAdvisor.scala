@@ -291,9 +291,9 @@ class ShellAdvisor(
 
     val shell = context.shell
     shell.isClean || (confirmClose(shell.peer) match {
-      case YES_OPTION => new SaveAction(shell)(); shell.isClean
-      case NO_OPTION => true
-      case _ => false
+      case YES_OPTION => new SaveAction(shell)();shell.isClean
+      case NO_OPTION  => shell.checkpoint();true
+      case _          => false
     })
 
   }

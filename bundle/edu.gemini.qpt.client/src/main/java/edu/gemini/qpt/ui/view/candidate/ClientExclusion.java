@@ -21,6 +21,7 @@ public enum ClientExclusion {
 	HIDDEN_BAND_4("Program is in Band 4.", VIEW_BAND_4),
     HIDDEN_LP("Program is of type " + StructuredProgramID.Type.LP.getDescription(), VIEW_SP_LP),
 	HIDDEN_C("Program is of type " + StructuredProgramID.Type.C.getDescription(), VIEW_SP_C),
+    HIDDEN_FT("Program is of type " + StructuredProgramID.Type.FT.getDescription(), VIEW_SP_FT),
 	HIDDEN_Q("Program is of type " + StructuredProgramID.Type.Q.getDescription(), VIEW_SP_Q),
 	HIDDEN_SV("Program is of type " + StructuredProgramID.Type.SV.getDescription(), VIEW_SP_SV),
 	HIDDEN_DD("Program is of type " + StructuredProgramID.Type.DD.getDescription(), VIEW_SP_DD),
@@ -74,6 +75,7 @@ public enum ClientExclusion {
 		switch (obs.getProg().getStructuredProgramId().getType()) {
         case LP: if (!VIEW_SP_LP.get()) return HIDDEN_LP; break;
 		case C: if (!VIEW_SP_C.get()) return HIDDEN_C; break;
+        case FT: if (!VIEW_SP_FT.get()) return HIDDEN_FT; break;
 		case Q: if (!VIEW_SP_Q.get()) return HIDDEN_Q; break;
 		case SV: if (!VIEW_SP_SV.get()) return HIDDEN_SV; break;
 		case DD: if (!VIEW_SP_DD.get()) return HIDDEN_DD; break;

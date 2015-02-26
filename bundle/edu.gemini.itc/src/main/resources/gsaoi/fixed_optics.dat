@@ -1,0 +1,20 @@
+# Average throughput for the GSAOI optics
+# Columns are (1) wavelength in nm, (2) throughput
+# The throughput cames from the on-sky performance
+# from Peter McGregor (May 2011)
+# Values: J: 0.60, H: 0.63, K: 0.61 (May 2011).
+# Since the values were obtained with dust in AR
+# window, the transmission improved a litte after
+# the AR window replacement. Confirmed by the data
+# obtained in 2012 April 15 and 30. Transmission
+# increased by 5% in all wavelengths.
+# Author: Rodrigo Carrasco
+# Created: 01 August 2012
+#
+# lambda transmission
+    700   0.0
+    900   0.64
+   1000   0.64
+   1650   0.68
+   2200   0.66
+   3000   0.66

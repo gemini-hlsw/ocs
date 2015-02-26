@@ -4,8 +4,6 @@ import breeze.linalg._
 
 import edu.gemini.ags.gems.mascot.util.YUtils._
 
-import scala.math
-
 object Amoeba {
 
   //func amoeba(ftol,funcName,&nCalls,&y,nMax=,p0=,scale=,p=)
@@ -83,11 +81,11 @@ object Amoeba {
     val p = yMultiply(p0, DenseMatrix.ones[Double](ndim, ndim + 1))
     for (i <- 0 until ndim) p(i, i + 1) = p0(i) + scale
 
-    val mpts = ndim + 1; //# of points in simplex
+    val mpts = ndim + 1 //# of points in simplex
 
     val value = funcName(p(::, 0))
-    val y = DenseVector.fill(mpts)(value); //Init Y to proper type
-    for (i <- 1 to ndim) y(i) = funcName(p(::, i)); //Fill in rest of the values
+    val y = DenseVector.fill(mpts)(value) //Init Y to proper type
+    for (i <- 1 to ndim) y(i) = funcName(p(::, i)) //Fill in rest of the values
     var nCalls = 0
     var psumm = rowSum(p)
 
@@ -95,10 +93,10 @@ object Amoeba {
       //Each iteration
       // Porting note: yorick sort returns the indexes of the sorted items!
       val s = sort(y)
-      val ilo = s(0); //Lowest point
+      val ilo = s(0) //Lowest point
       val ihi = s(ndim); //Highest point
-      val inhi = s(ndim - 1); //Next highest point
-      val d = math.abs(y(ihi)) + math.abs(y(ilo)); //Denominator = interval
+      val inhi = s(ndim - 1) //Next highest point
+      val d = math.abs(y(ihi)) + math.abs(y(ilo)) //Denominator = interval
       //Terminate if interval is 0
       val rtol = if (d != 0.0) 2.0 * math.abs(y(ihi) - y(ilo)) / d else ftol / 2.0
 
@@ -110,7 +108,7 @@ object Amoeba {
         val t2 = p(::, ilo).copy
         p(::, ilo) := p(::, 0)
         p(::, 0) := t2
-        return (t2, nCalls, y); //params for fcn min
+        return (t2, nCalls, y) //params for fcn min
       }
       nCalls = nCalls + 2
       var ytry = amotry(p, y, psumm, funcName, ihi, -1.0)

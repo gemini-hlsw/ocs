@@ -1,8 +1,8 @@
 package edu.gemini.ags.gems;
 
-import edu.gemini.skycalc.Angle;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.core.Angle;
 import edu.gemini.spModel.gemini.gems.Canopus;
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw;
 import edu.gemini.spModel.gems.GemsGuideProbeGroup;
@@ -103,8 +103,8 @@ public class GemsGuideStars implements Comparable<GemsGuideStars> {
             return Double.compare(thisStrel, thatStrehl);
         }
 
-        double thisPa = pa.toDegrees().getMagnitude();
-        double thatPa = that.pa.toDegrees().getMagnitude();
+        double thisPa = pa.toDegrees();
+        double thatPa = that.pa.toDegrees();
         double[] cardinalDirections = {0.,90.,180.,270.};
         if (thisPa != thatPa) {
             for (double d : cardinalDirections) {
@@ -147,7 +147,7 @@ public class GemsGuideStars implements Comparable<GemsGuideStars> {
     // Returns the R magnitude, if known, otherwise 99.
     private double getRMag(Option<GuideProbeTargets> g) {
         if (!g.isEmpty() && !g.getValue().getPrimary().isEmpty()) {
-            Option<Magnitude> mag = g.getValue().getPrimary().getValue().getMagnitude(Magnitude.Band.R);
+            Option<Magnitude> mag = g.getValue().getPrimary().getValue().getTarget().getMagnitude(Magnitude.Band.R);
             if (!mag.isEmpty()) {
                 return mag.getValue().getBrightness();
             }
@@ -170,9 +170,9 @@ public class GemsGuideStars implements Comparable<GemsGuideStars> {
             SPTarget target = guideGroup.get(guideProbe).getValue().getPrimary().getValue();
             sb.append(guideProbe);
             sb.append("[");
-            sb.append(target.getC1());
+            sb.append(target.getTarget().getRa());
             sb.append(",");
-            sb.append(target.getC2());
+            sb.append(target.getTarget().getDec());
             sb.append("] ");
         }
         return "GemsGuideStars{" +

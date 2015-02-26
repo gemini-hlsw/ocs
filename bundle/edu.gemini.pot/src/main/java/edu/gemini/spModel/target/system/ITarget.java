@@ -6,200 +6,193 @@
 //
 package edu.gemini.spModel.target.system;
 
+import edu.gemini.shared.skyobject.Magnitude;
+import edu.gemini.shared.util.immutable.ImCollections;
+import edu.gemini.shared.util.immutable.ImList;
+import edu.gemini.shared.util.immutable.MapOp;
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.shared.util.immutable.PredicateOp;
+import edu.gemini.skycalc.Coordinates;
 import edu.gemini.spModel.target.system.CoordinateTypes.Epoch;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * This interface describes methods that must be implemented by
+ * This class describes methods that must be implemented by
  * all coordinate systems.  A coordinate system consists of a
  * set of parameters that describe the position of a celestial object.
  *
  * @author      Kim Gillies
  */
-public interface ITarget extends Serializable {
-    /**
-     * Gets the coordinate's system name as a String.
-     */
-    String getSystemName();
+public abstract class ITarget implements Cloneable, Serializable {
+
+   public enum Tag {
+
+       // N.B. these strings are meaningful to the TCC, catalog, and are used in PIO XML
+       SIDEREAL("J2000"),
+       NAMED("Solar system object"),
+       JPL_MINOR_BODY("JPL minor body"),
+       MPC_MINOR_PLANET("MPC minor planet");
+
+       public final String tccName;
+
+       private Tag(String tccName) {
+           this.tccName = tccName;
+       }
+
+       @Override
+       public String toString() {
+           return tccName;
+       }
+
+    }
+
+    public static ITarget forTag(Tag tag) {
+        switch (tag) {
+            case JPL_MINOR_BODY:   return new ConicTarget(ITarget.Tag.JPL_MINOR_BODY);
+            case MPC_MINOR_PLANET: return new ConicTarget(ITarget.Tag.MPC_MINOR_PLANET);
+            case NAMED:            return new NamedTarget();
+            case SIDEREAL:         return new HmsDegTarget();
+        }
+        throw new Error("unpossible");
+    }
+
+
+    /** Get the name. */
+    public abstract String getName();
+
+    /** Set the name. */
+    public abstract void setName(String name);
+
+    /** Get the RA. */
+    public abstract ICoordinate getRa();
+
+    /** Get the Dec. */
+    public abstract ICoordinate getDec();
+
+    /** Get the Epoch */
+    public abstract Epoch getEpoch();
+
+    /** Set the Epoch */
+    public abstract void setEpoch(Epoch e);
+
+
+    // RCN: pushed across from SPTarget
+
+    private ImList<Magnitude> magnitudes = ImCollections.emptyList();
 
     /**
-     * Returns a short one word name for the coordinate system name.
-     */
-    String getShortSystemName();
-
-    /**
-     * Returns an optional name for the target.
-     */
-    String getName();
-
-    /**
-     * Sets an optional name for the target.
-     */
-    void setName(String name);
-
-    /**
-     * Returns an optional brightness for the target.
-     */
-    String getBrightness();
-
-    /**
-     * Sets an optional brightness for the target.
-     */
-    void setBrightness(String brightness);
-
-    /**
-     * Gets a short description of the position.  For instance, the
-     * {@link HmsDegTarget} might return its RA and Dec in a
-     * formated String such as "RA=12:34:56 Dec=00:11:22".  To actually
-     * use a coordinate system's position, the client will have to use its
-     * particular interface rather than this method.
-     */
-    String getPosition();
-
-    /**
-     * Returns the position as {@link HmsDegTarget} for external use by
-     * client programs.
-     */
-    HmsDegTarget getTargetAsJ2000();
-
-    /**
-     * Set the system as {@link HmsDegTarget}.
-     * <p>
-     * Note that the <code>HmsDegTarget</code> used to set must have
-     * the J2000 system option.
+     * Gets all the {@link Magnitude} information associated with this target,
+     * if any.
      *
-     * @throws IllegalArgumentException This can fail if the target system
-     *     does not allow conversion.
+     * @return (possibly empty) immutable list of {@link Magnitude} values
+     * associated with this target
      */
-    void setTargetWithJ2000(HmsDegTarget system)
-            throws IllegalArgumentException;
+    public ImList<Magnitude> getMagnitudes() {
+        return magnitudes;
+    }
 
     /**
-     * Set the first Coordinate using an appropriate ICoordinate.
+     * Filters {@link Magnitude} values with the same passband.
      *
-     * @throws IllegalArgumentException if the <code>ICoordinate</code> is
-     * not an appropriate type.
-     */
-    void setC1(ICoordinate c1)
-            throws IllegalArgumentException;
-
-    /**
-     * Get the first Coordinate as an {@link ICoordinate}.
-     * This is generally, the internally used <code>ICoordinate</code> and
-     * should be used with care.
-     */
-    ICoordinate getC1();
-
-    /**
-     * Set the second Coordinate using an appropriate {@link ICoordinate}.
+     * @param magList original magnitude list possibly containing values with
+     * duplicate passbands
      *
-     * @throws IllegalArgumentException if the <code>ICoordinate</code> is
-     * not an appropriate type.
+     * @return immutable list of {@link Magnitude} where each value in the
+     * list is guaranteed to have a distinct passband
      */
-    void setC2(ICoordinate c2)
-            throws IllegalArgumentException;
+    private static ImList<Magnitude> filterDuplicates(final ImList<Magnitude> magList) {
+        return magList.filter(new PredicateOp<Magnitude>() {
+            private final Set<Magnitude.Band> bands = new HashSet<>();
+            @Override public Boolean apply(final Magnitude magnitude) {
+                final Magnitude.Band band = magnitude.getBand();
+                if (bands.contains(band)) return false;
+                bands.add(band);
+                return true;
+            }
+        });
+    }
 
     /**
-     * Get the second Coordinate as an {@link ICoordinate}.
-     * This is generally, the internally used <code>ICoordinate</code>
-     * and should be used with care.
-     */
-    ICoordinate getC2();
-
-    /**
-     * Set the first and second coordinates using appropriate
-     * {@link ICoordinate} objects.
-     */
-    void setC1C2(ICoordinate c1, ICoordinate c2)
-            throws IllegalArgumentException;
-
-    /**
-     * Set the first Coordinate using a String.
+     * Assigns the list of magnitudes to associate with this target.  If there
+     * are multiple magnitudes associated with the same bandpass, only one will
+     * be kept.
      *
-     * @throws IllegalArgumentException if the argument can not be parsed
-     * correctly.
+     * @param magnitudes new collection of magnitude information to store with
+     * the target
      */
-    void setC1(String c1)
-            throws IllegalArgumentException;
+    public void setMagnitudes(final ImList<Magnitude> magnitudes) {
+        this.magnitudes = filterDuplicates(magnitudes);
+    }
 
     /**
-     * Gets the first coordinate as a String.
-     */
-    String c1ToString();
-
-    /**
-     * Set the second Coordinate using a String.
+     * Gets the {@link Magnitude} value associated with the given magnitude
+     * passband.
      *
-     * @throws IllegalArgumentException if the argument can not be parsed
-     * correctly.
-     */
-    void setC2(String c2)
-            throws IllegalArgumentException;
-
-    /**
-     * Gets the second coordinate as a String.
-     */
-    String c2ToString();
-
-    /**
-     * Set the first and second coordinates using appropriate String objects.
+     * @param band passband of the {@link Magnitude} value to retrieve
      *
-     * @throws IllegalArgumentException if either of the arguments can not
-     * be parsed correctly.
+     * @return {@link Magnitude} value associated with the given passband,
+     * wrapped in a {@link edu.gemini.shared.util.immutable.Some} object; {@link edu.gemini.shared.util.immutable.None} if none
      */
-    void setC1C2(String c1, String c2)
-            throws IllegalArgumentException;
+    public Option<Magnitude> getMagnitude(final Magnitude.Band band) {
+        return magnitudes.find(new PredicateOp<Magnitude>() {
+            @Override public Boolean apply(final Magnitude magnitude) {
+                return band.equals(magnitude.getBand());
+            }
+        });
+    }
 
     /**
-     * Return the Epoch of this target position.
-     * @throws IllegalArgumentException if the coordinate system does not
-     * support the Epoch concept.
-     */
-    Epoch getEpoch()
-            throws IllegalArgumentException;
-
-    /**
-     * Set the Epoch of this target position.
-     * @throws IllegalArgumentException if the coordinate system does not
-     * support the Epoch concept.
-     */
-    public void setEpoch(Epoch e)
-            throws IllegalArgumentException;
-
-    /**
-     * Gets the available types, or options within the system.  For instance,
-     * the {@link HmsDegTarget} has options for J2000, B1950, apparent, etc.
-     */
-    TypeBase[] getSystemOptions();
-
-    /**
-     * Gets the currently selected option (for instance "J2000").
-     */
-    TypeBase getSystemOption();
-
-    /**
-     * Sets the coordinate system (sub)option.
+     * Gets the set of magnitude bands that have been recorded in this target.
      *
-     * @throws IllegalArgumentException if <code>type</code> is an unknown
-     * type; in other words, if it would not have been returned by the
-     * {@link #getSystemOptions} method.
+     * @returns a Set of {@link Magnitude.Band magnitude bands} for which
+     * we have information in this target
      */
-    void setSystemOption(TypeBase newValue)
-            throws IllegalArgumentException;
+    public Set<Magnitude.Band> getMagnitudeBands() {
+        final ImList<Magnitude.Band> bandList = magnitudes.map(new MapOp<Magnitude, Magnitude.Band>() {
+            @Override public Magnitude.Band apply(final Magnitude magnitude) {
+                return magnitude.getBand();
+            }
+        });
+        return new HashSet<>(bandList.toList());
+    }
 
     /**
-     * Provides clone support, but without Exception.
+     * Adds the given magnitude to the collection of magnitudes associated with
+     * this target, replacing any other magnitude of the same band if any.
+     *
+     * @param mag magnitude information to add to the collection of magnitudes
      */
-    public Object clone();
+    public void putMagnitude(final Magnitude mag) {
+        magnitudes = magnitudes.filter(new PredicateOp<Magnitude>() {
+            @Override public Boolean apply(final Magnitude cur) {
+                return cur.getBand() != mag.getBand();
+            }
+        }).cons(mag);
+    }
 
-    /**
-     * Provides testing of equality of two targets.
-     */
-    public boolean equals(Object obj);
 
-    /**
-     * Diagnostic to print contents of an ITarget.
-     */
-    public void dump();
+    // pushed down from CoordinateSystem
+
+    public ITarget clone() {
+        try {
+            return (ITarget) super.clone();
+        } catch (CloneNotSupportedException cnse) {
+            throw new Error(cnse);
+        }
+    }
+
+    public abstract Tag getTag();
+
+    /** Gets a Skycalc {@link edu.gemini.skycalc.Coordinates} representation. */
+    public synchronized Coordinates getSkycalcCoordinates() {
+        return new Coordinates(getRa().getAs(CoordinateParam.Units.DEGREES), getDec().getAs(CoordinateParam.Units.DEGREES));
+    }
+
+    public final String toString() {
+        return String.format("ITarget(%s, %s)", getTag(), getName());
+    }
+
 }

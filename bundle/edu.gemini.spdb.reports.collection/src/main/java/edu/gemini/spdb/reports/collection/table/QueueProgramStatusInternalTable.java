@@ -78,8 +78,8 @@ public class QueueProgramStatusInternalTable extends AbstractTable {
             final ISPProgram progShell = (ISPProgram) node;
             final SPProgramID id = progShell.getProgramID();
 
-            // Skip anything that's not a Queue program (REL-1658: or large program)
-            if (!TypeCheck.isScienceType(id) && !TypeCheck.is(id, ProgramType.LargeProgram$.MODULE$))
+            // Skip anything that's not a science program
+            if (!TypeCheck.isScienceType(id))
                 return Collections.emptyList();
 
             // Get the semester

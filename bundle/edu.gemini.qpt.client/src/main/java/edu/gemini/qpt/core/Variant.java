@@ -229,7 +229,15 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 		}
 	}
 
-	// Package-protected, called by Alloc::remove()
+    public SortedSet<Interval> getAllocIntervals() {
+        synchronized (allocs) {
+            SortedSet<Interval> ts = new TreeSet<>();
+            for (Alloc a : allocs) ts.add(a.getInterval());
+            return ts;
+        }
+    }
+
+    // Package-protected, called by Alloc::remove()
 	void removeAlloc(Alloc alloc, boolean force) throws AbandonedSuccessorException {
 		SortedSet<Alloc> prev = Collections.unmodifiableSortedSet(new TreeSet<Alloc>(getAllocs()));
 		if (!force) Variants.tryRemove(prev, alloc);
@@ -269,7 +277,7 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 		SortedSet<Alloc> ret = new TreeSet<Alloc>();
 		synchronized (allocs) {
 			for (Alloc a: allocs) {
-				if (b.overlaps(a, olap))
+				if (b.overlaps(a.getInterval(), olap))
 					ret.add(a);
 			}
 		}
@@ -642,7 +650,7 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 				}
 
 				// Insufficient facilities (option - grating, filter, etc)
-				for (Enum option: obs.getOptions()) {
+				for (Enum<?> option: obs.getOptions()) {
 					if (!owner.hasFacility(option)) {
 						facilitiesFlags.add(Flag.CONFIG_UNAVAILABLE);
 						break;
@@ -762,7 +770,7 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 				// us whether the Obs is in fact schedulable in theory.
 				Union<Interval> constrainedUnion = constrainedUnionCache.get(obs);
 				if (constrainedUnion == null) {
-					constrainedUnion = new Union<Interval>(owner.getBlocks());
+					constrainedUnion = new Union<>(owner.getBlockIntervals());
 					constrainedUnion.intersect(visibleUnion);
 					constrainedUnion.intersect(darkUnion);
 					constrainedUnion.intersect(timingUnion);
@@ -808,7 +816,7 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 					// However all such slots may be covered by existing allocs at
 					// this point, so we need to subtract them out and see if
 					// there is enough space remaining.
-					constrainedUnion.remove(getAllocs());
+					constrainedUnion.remove(getAllocIntervals());
 
 					// Find largest interval
 					long maxInterval = -1;
@@ -832,7 +840,7 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 							// Set up constrainedUnionWithoutSetup
 							for (Interval i: new ArrayList<Interval>(constrainedUnionWithoutSetup.getIntervals()))
 								constrainedUnionWithoutSetup.remove(new Interval(i.getStart(), i.getStart() + setupTime));
-							constrainedUnionWithoutSetup.remove(getAllocs());
+							constrainedUnionWithoutSetup.remove(getAllocIntervals());
 
 							// And see if there is time for step 1
 							for (Interval i: constrainedUnionWithoutSetup) {
@@ -988,7 +996,7 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 	}
 
 	@SuppressWarnings("unchecked")
-	private boolean containsAny(Collection a, Collection b) {
+	private boolean containsAny(Collection<?> a, Collection<?> b) {
 		for (Object o: a)
 			if (b.contains(o))
 				return true;
@@ -1017,20 +1025,30 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 
 
 @SuppressWarnings("serial")
-class AllocSet extends TreeSet<Alloc> implements PioSerializable {
+final class AllocSet extends TreeSet<Alloc> implements PioSerializable {
 
-	public static final String PROP_MEMBER = "visit";
+    private static final Logger LOGGER = Logger.getLogger(AllocSet.class.getName());
 
-	public AllocSet() {
+    public static final String PROP_MEMBER = "visit";
+
+    public AllocSet() {}
+
+	public AllocSet(final Variant variant, final ParamSet paramSet) {
+		for (ParamSet allocParams: paramSet.getParamSets(PROP_MEMBER)) {
+            final String obsId = Pio.getValue(allocParams, "obs");
+            final Obs obs = variant.getSchedule().getMiniModel().getObs(obsId);
+            if (obs != null) {
+                add(new Alloc(variant, obs, allocParams));
+            } else {
+                // Silently ignore observations that are not found in the mini model.
+                // This can for example happen when an observation is changed from Active to Inactive etc.
+                LOGGER.fine("No observation found in mini model with id " + obsId + "; ignoring this observation");
+            }
+        }
 	}
 
-	public AllocSet(Variant variant, ParamSet paramSet) {
-		for (ParamSet allocParams: paramSet.getParamSets(PROP_MEMBER))
-			add(new Alloc(variant, allocParams));
-	}
-
-	public ParamSet getParamSet(PioFactory factory, String name) {
-		ParamSet params = factory.createParamSet(name);
+	public ParamSet getParamSet(final PioFactory factory, final String name) {
+		final ParamSet params = factory.createParamSet(name);
 		for (Alloc a: this) {
 			params.addParamSet(a.getParamSet(factory, PROP_MEMBER));
 		}

@@ -63,27 +63,11 @@ public class GmosOffsetPosTableWidget<P extends OffsetPosBase> extends jsky.util
         });
     }
 
-    /**
-     * The current position location has changed.
-     *
-     * @see TelescopePosWatcher
-     * @param tp
-     */
-    public void telescopePosLocationUpdate(WatchablePos tp) {
-        telescopePosGenericUpdate(tp);
-    }
-
-    /**
-     * The current position has changed in some way.
-     *
-     * @see TelescopePosWatcher
-     * @param tp
-     */
-    public void telescopePosGenericUpdate(WatchablePos tp) {
+    public void telescopePosUpdate(WatchablePos tp) {
         if (!(tp instanceof OffsetPosBase)) {
             // This shouldn't happen ...
             System.out.println(getClass().getName() + ": received a position " +
-                               " update for a non-offset position: " + tp);
+                    " update for a non-offset position: " + tp);
             return;
         }
         _updatePos((P) tp);

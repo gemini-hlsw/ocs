@@ -9,7 +9,7 @@ name := "edu.gemini.util.security"
 unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/com-mchange-c3p0_2.10-0.9.5.jar"),
   new File(baseDirectory.value, "../../lib/bundle/scala-slick_2.10-1.0.0.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/org.scala-lang.scala-swing_2.10.1.v20130302-092018-VFINAL-33e32179fd.jar"),
+  new File(baseDirectory.value, "../../lib/bundle/scala-swing_2.10-2.0.0-SNAPSHOT.jar"),
   new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.10-7.0.5.jar"),
   new File(baseDirectory.value, "../../lib/bundle/scalaz-effect_2.10-7.0.5.jar"))
 

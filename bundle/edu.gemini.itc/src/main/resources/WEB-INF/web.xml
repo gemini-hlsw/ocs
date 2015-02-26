@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- This file configures the "itc" web application servlets.  It
+     maps the names used in the URL's to the internal classnames.  
+     Initialization can also be done here.
+-->
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+        xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+        id="WebApp_ID" version="3.0">
+
+    <!-- This maps itc/servlet/acqcam to the acqcam servlet class -->
+    <servlet>
+        <servlet-name>
+            acqcam
+        </servlet-name>
+        <servlet-class>
+            edu.gemini.itc.acqcam.ITCacqCamServlet
+        </servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>acqcam</servlet-name>
+        <url-pattern>/servlet/acqcam</url-pattern>
+    </servlet-mapping>
+
+
+    <!-- This maps /servlet/niri to the niri servlet class -->
+    <servlet>
+        <servlet-name>
+            niri
+        </servlet-name>
+        <servlet-class>
+            edu.gemini.itc.niri.ITCniriServlet
+        </servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>niri</servlet-name>
+        <url-pattern>/servlet/niri</url-pattern>
+    </servlet-mapping>
+
+    <!-- This maps /servlet/gsaoi to the gsaoi servlet class -->
+    <servlet>
+        <servlet-name>
+            gsaoi
+        </servlet-name>
+        <servlet-class>
+            edu.gemini.itc.gsaoi.ITCgsaoiServlet
+        </servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>gsaoi</servlet-name>
+        <url-pattern>/servlet/gsaoi</url-pattern>
+    </servlet-mapping>
+
+    <!-- This maps /servlet/gmos to the gmos servlet class -->
+    <servlet>
+        <servlet-name>
+            gmos
+        </servlet-name>
+        <servlet-class>
+            edu.gemini.itc.gmos.ITCgmosServlet
+        </servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>gmos</servlet-name>
+        <url-pattern>/servlet/gmos</url-pattern>
+    </servlet-mapping>
+
+    <!-- This maps /servlet/gnirs to the gnirs servlet class -->
+    <servlet>
+        <servlet-name>
+            gnirs
+        </servlet-name>
+        <servlet-class>
+            edu.gemini.itc.gnirs.ITCgnirsServlet
+        </servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>gnirs</servlet-name>
+        <url-pattern>/servlet/gnirs</url-pattern>
+    </servlet-mapping>
+
+    <!-- This maps /servlet/trecs to the T-ReCS servlet class -->
+    <servlet>
+        <servlet-name>
+            trecs
+        </servlet-name>
+        <servlet-class>
+            edu.gemini.itc.trecs.ITCTrecsServlet
+        </servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>trecs</servlet-name>
+        <url-pattern>/servlet/trecs</url-pattern>
+    </servlet-mapping>
+
+    <!-- This maps /servlet/trecs to the Michelle servlet class -->
+    <servlet>
+        <servlet-name>
+            michelle
+        </servlet-name>
+        <servlet-class>
+            edu.gemini.itc.michelle.ITCMichelleServlet
+        </servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>michelle</servlet-name>
+        <url-pattern>/servlet/michelle</url-pattern>
+    </servlet-mapping>
+
+    <!-- This maps /servlet/images to the image servlet class -->
+    <servlet>
+        <servlet-name>
+            images
+        </servlet-name>
+        <servlet-class>
+            edu.gemini.itc.shared.ImageServlet
+        </servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>images</servlet-name>
+        <url-pattern>/servlet/images</url-pattern>
+    </servlet-mapping>
+
+    <!-- This maps /servlet/nifs to the NIFS servlet class -->
+    <servlet>
+        <servlet-name>
+          nifs
+        </servlet-name>
+        <servlet-class>
+            edu.gemini.itc.nifs.ITCnifsServlet
+        </servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>nifs</servlet-name>
+        <url-pattern>/servlet/nifs</url-pattern>
+    </servlet-mapping>
+    
+	<!-- This maps /servlet/flamingos2 to the flamingos2 servlet class -->
+    <servlet>
+        <servlet-name>
+          flamingos2
+        </servlet-name>
+        <servlet-class>
+            edu.gemini.itc.flamingos2.ITCflamingos2Servlet
+        </servlet-class>
+    </servlet>
+    
+
+    <servlet-mapping>
+        <servlet-name>flamingos2</servlet-name>
+        <url-pattern>/servlet/flamingos2</url-pattern>
+    </servlet-mapping>
+
+	<!-- Had to add these url mappings to get the servlets to run - mdillman 20080731
+
+    <servlet-mapping>
+        <servlet-name>acqcam</servlet-name>
+        <url-pattern>/servlet/acqcam</url-pattern>
+    </servlet-mapping>
+
+    </servlet-mapping>
+        <servlet-name>gnirs</servlet-name>
+        <url-pattern>/servlet/gnirs</url-pattern>
+    </servlet-mapping>
+
+    </servlet-mapping>
+        <servlet-name>gmos</servlet-name>
+        <url-pattern>/servlet/gmos</url-pattern>
+    </servlet-mapping>
+
+    </servlet-mapping>
+        <servlet-name>niri</servlet-name>
+        <url-pattern>/servlet/niri</url-pattern>
+    </servlet-mapping>
+
+    </servlet-mapping>
+        <servlet-name>michelle</servlet-name>
+        <url-pattern>/servlet/michelle</url-pattern>
+    </servlet-mapping>
+
+
+    </servlet-mapping>
+        <servlet-name>nirialtair</servlet-name>
+        <url-pattern>/servlet/nirialtair</url-pattern>
+
+    </servlet-mapping>
+        <servlet-name>trecs</servlet-name>
+        <url-pattern>/servlet/trecs</url-pattern>
+    </servlet-mapping> -->
+<!--
+
+    </servlet-mapping>
+        <servlet-name>trecs</servlet-name>
+        <url-pattern>/servlet/trecs</url-pattern>
+    <taglib>
+        <taglib-uri>
+	   http://java.apache.org/tomcat/examples-taglib
+        </taglib-uri>
+        <taglib-location>
+           /WEB-INF/jsp/example-taglib.tld
+        </taglib-location>
+    </taglib>
+-->
+</web-app>

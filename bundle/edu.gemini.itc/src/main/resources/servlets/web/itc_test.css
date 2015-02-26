@@ -1,0 +1,35 @@
+/*
+ Styles that match the style as embedded in 
+ http://www.gemini.edu/sciops/instruments/integration-time-calculators/gmosn-itc
+
+*/
+body {
+    font-family: arial,helvetica,clean,sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.22em;
+}
+td, th {
+    padding-bottom: 0.3em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    padding-top: 0.3em;
+    margin-bottom: 0;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    font-size: 14px;
+    text-align: left;
+}
+a:link, a:visited {
+    -moz-text-blink: none;
+    -moz-text-decoration-color: -moz-use-text-color;
+    -moz-text-decoration-line: none;
+    -moz-text-decoration-style: solid;
+    color: #027AC6;
+}
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+

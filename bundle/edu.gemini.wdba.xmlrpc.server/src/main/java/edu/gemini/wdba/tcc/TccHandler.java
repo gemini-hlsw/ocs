@@ -31,7 +31,6 @@ import edu.gemini.wdba.glue.api.WdbaGlueException;
 import edu.gemini.wdba.xmlrpc.ITccXmlRpc;
 import edu.gemini.wdba.xmlrpc.ServiceException;
 
-import java.security.Principal;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -58,8 +57,8 @@ public final class TccHandler implements ITccXmlRpc {
     private static boolean _isGoodSupportInterface(String className, String instrumentName) {
         boolean isSupport = false;
         try {
-            Class cl = Class.forName(className);
-            for (Class itsInterface : cl.getInterfaces()) {
+            Class<?> cl = Class.forName(className);
+            for (Class<?> itsInterface : cl.getInterfaces()) {
                 if (itsInterface == ITccInstrumentSupport.class) {
                     LOG.info("Registering: " + cl.getName() + " for instrument: " + instrumentName);
                     // Now check that it implements a create factory method
@@ -79,7 +78,7 @@ public final class TccHandler implements ITccXmlRpc {
     // This internal method buidls a Map of SPComponentTypes and implementation
     // class names.  Eventually, this will be built from XML files
     private static Map<SPComponentType, String> _initializeSupportList() {
-        Map<SPComponentType,String> supportMap = new HashMap<SPComponentType,String>();
+        Map<SPComponentType,String> supportMap = new HashMap<>();
         // Add NIRI support
         supportMap.put(InstNIRI.SP_TYPE, "edu.gemini.wdba.tcc.NIRISupport");
         // Add GMOS North support
@@ -115,7 +114,7 @@ public final class TccHandler implements ITccXmlRpc {
 
         // Check that they are proper interfaces and remove if not
         // Keep a list of removeables
-        List<SPComponentType> remove = new ArrayList<SPComponentType>();
+        List<SPComponentType> remove = new ArrayList<>();
         try {
         for (SPComponentType key : supportMap.keySet()) {
             String className = supportMap.get(key);

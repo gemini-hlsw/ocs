@@ -1,6 +1,7 @@
 package edu.gemini.ags.servlet
 
-import edu.gemini.ags.api.{DefaultMagnitudeTable, AgsRegistrar, AgsStrategy}
+import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
+import edu.gemini.ags.api.{AgsRegistrar, AgsStrategy}
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.obs.context.ObsContext
 
@@ -18,8 +19,8 @@ object AgsServlet {
 
   type Response = (Int, String)
 
-  def success(est: AgsStrategy.Estimate): Response        = (SC_OK, "%.3f".format(est.probability))
-  def failure(code: Int, ex: Throwable): Response = (code, "ERROR: "+ ex.getMessage)
+  def success(est: AgsStrategy.Estimate): Response = (SC_OK, "%.3f".format(est.probability))
+  def failure(code: Int, ex: Throwable): Response  = (code, "ERROR: "+ ex.getMessage)
 
   val guaranteedSuccess: Response = success(AgsStrategy.Estimate.GuaranteedSuccess)
   val completeFailure: Response   = success(AgsStrategy.Estimate.CompleteFailure)
@@ -45,7 +46,7 @@ object AgsServlet {
 
 import AgsServlet._
 
-class AgsServlet extends HttpServlet {
+class AgsServlet(magTable: MagnitudeTable) extends HttpServlet {
 
   override def doPost(req: HttpServletRequest, res: HttpServletResponse): Unit = estimate(req, res)
   override def doGet(req: HttpServletRequest, res: HttpServletResponse): Unit = estimate(req, res)
@@ -67,7 +68,7 @@ class AgsServlet extends HttpServlet {
     def estimate(ctx: ObsContext, s: AgsStrategy): Either[Response, AgsStrategy.Estimate] = {
       import scala.concurrent.duration._
       Try {
-        Await.result(s.estimate(ctx, DefaultMagnitudeTable(ctx)), 1 minute)
+        Await.result(s.estimate(ctx, magTable), 1 minute)
       } match {
         case Success(e)               => Right(e)
         case Failure(io: IOException) => Left(failure(SC_BAD_GATEWAY, io))

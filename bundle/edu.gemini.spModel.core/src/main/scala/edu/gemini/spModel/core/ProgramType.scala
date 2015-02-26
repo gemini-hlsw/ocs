@@ -6,6 +6,7 @@ sealed trait ProgramType extends Ordered[ProgramType] {
   def name: String
   def abbreviation: String
   override def toString = abbreviation
+  def isScience: Boolean = true
 
   def compare(that : ProgramType): Int = abbreviation.compare(that.abbreviation)
 }
@@ -14,6 +15,7 @@ object ProgramType {
   case object Calibration extends ProgramType {
     val name = "Calibration"
     val abbreviation = "CAL"
+    override val isScience = false
   }
   case object Classical extends ProgramType {
     val name = "Classical"
@@ -30,6 +32,7 @@ object ProgramType {
   case object Engineering extends ProgramType {
     val name = "Engineering"
     val abbreviation = "ENG"
+    override val isScience = false
   }
   case object FastTurnaround extends ProgramType {
     val name = "Fast Turnaround"

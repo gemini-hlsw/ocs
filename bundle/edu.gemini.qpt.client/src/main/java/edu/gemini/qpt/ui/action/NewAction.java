@@ -7,12 +7,14 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.*;
 
+import edu.gemini.ags.api.AgsMagnitude;
 import edu.gemini.qpt.core.Block;
 import edu.gemini.qpt.core.Schedule;
 import edu.gemini.qpt.core.ScheduleIO;
@@ -45,12 +47,19 @@ public class NewAction extends AbstractAsyncAction {
 
 	private final IShell shell;
     private final KeyChain authClient;
+    private final AgsMagnitude.MagnitudeTable magTable;
 
-	public NewAction(IShell shell, KeyChain authClient) {
+	public NewAction(IShell shell, final KeyChain authClient, AgsMagnitude.MagnitudeTable magTable) {
 		super("New Plan...", authClient);
 		this.shell = shell;
         this.authClient = authClient;
+        this.magTable = magTable;
 		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, Platform.MENU_ACTION_MASK));
+        authClient.asJava().addListener(new Runnable() {
+            public void run() {
+                setEnabled(!authClient.asJava().isLocked());
+            }
+        });
 	}
 
 	public void asyncActionPerformed(ActionEvent e) {
@@ -84,9 +93,9 @@ public class NewAction extends AbstractAsyncAction {
 						try {
                             if (templateFile != null) {
                                 pm.setMessage("Reading template...");
-                                template = ScheduleIO.read(templateFile, 1000, authClient);
+                                template = ScheduleIO.read(templateFile, 1000, authClient, magTable);
                             } else {
-                                miniModel = MiniModel.newInstance(authClient, nd.getAuthPeer(), tbn.getEndTime());
+                                miniModel = MiniModel.newInstance(authClient, nd.getAuthPeer(), tbn.getEndTime(), magTable);
                             }
                             if (pm.isCancelled()) return;
                             LttsServicesClient.newInstance(tbn.getStartTime(), nd.getAuthPeer());
@@ -216,7 +225,6 @@ class NewDialog extends JDialog {
 	private File file;
 
 	private final CalendarPanel calendarPanel;
-	private final KeyChain authClient;
 
 	static final int OK_OPTION = JOptionPane.OK_OPTION;
 	static final int CANCEL_OPTION = JOptionPane.CANCEL_OPTION;
@@ -227,19 +235,23 @@ class NewDialog extends JDialog {
 
 	public NewDialog(Frame owner, final KeyChain authClient) {
 		super(owner, "New Plan", true);
-        this.authClient = authClient;
 
         // Peers
-        final Peer[] peers = authClient.asJava().peers().toArray(new Peer[0]);
+        final Set<Peer> peerSet = authClient.asJava().peers();
         peer = null;
 
         // Search the list of peers for the default site. DefaultSite.get() always returns a non-null value.
-        for (Peer p : peers) {
+        for (Peer p : peerSet) {
             if (p.site == DefaultSite.get()) {
                 peer = p;
                 break;
             }
         }
+
+        // It is possible (but should not happen) that the list of peers only has one entry in it and its site
+        // is not the same as that returned by DefaultSite: in this case, simply pick the first peer from the list.
+        if (peer == null && !peerSet.isEmpty())
+            peer = peerSet.iterator().next();
 
 		setBackground(Color.LIGHT_GRAY);
 		setLayout(new BorderLayout());
@@ -252,8 +264,9 @@ class NewDialog extends JDialog {
 
 			add(new JPanel(new BorderLayout(4, 4)) {{
 				add(new JLabel("Select a site:"), BorderLayout.WEST);
-				add(new JComboBox(peers) {{
-					setSelectedItem(peer);
+				add(new JComboBox<Peer>(peerSet.toArray(new Peer[peerSet.size()])) {{
+                    // If no peers are configured, peer will be null.
+					if (peer != null) setSelectedItem(peer);
 					addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
                             peer = (Peer) getSelectedItem();

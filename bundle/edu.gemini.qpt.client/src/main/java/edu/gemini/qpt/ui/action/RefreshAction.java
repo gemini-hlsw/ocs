@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
+import edu.gemini.ags.api.AgsMagnitude;
 import edu.gemini.qpt.core.Alloc;
 import edu.gemini.qpt.core.Schedule;
 import edu.gemini.qpt.shared.sp.MiniModel;
@@ -32,15 +33,22 @@ public class RefreshAction extends AbstractAsyncAction implements PropertyChange
 
 	protected final IShell shell;
     protected final KeyChain authClient;
+    protected final AgsMagnitude.MagnitudeTable magTable;
 
-	public RefreshAction(IShell shell, KeyChain authClient) {
+	public RefreshAction(IShell shell, KeyChain authClient, AgsMagnitude.MagnitudeTable magTable) {
 		super("Refresh", authClient);
         this.authClient = authClient;
 		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0 /* no modifiers */));
 		this.shell = shell;
+        this.magTable = magTable;
 		setEnabled(false);
 		shell.addPropertyChangeListener(this);
-	}
+        authClient.asJava().addListener(new Runnable() {
+            public void run() {
+                updateEnabled();
+            }
+        });
+    }
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -67,7 +75,7 @@ public class RefreshAction extends AbstractAsyncAction implements PropertyChange
 			MiniModel miniModel = null;
 			for (int i = 1; miniModel == null ; i++) {
 				try {
-					miniModel = MiniModel.newInstance(authClient, peer, sched.getEnd(), sched.getExtraSemesters());
+					miniModel = MiniModel.newInstance(authClient, peer, sched.getEnd(), sched.getExtraSemesters(), magTable);
 				} catch (TimeoutException te) {
 					pm.setMessage("Retrying (" + i + ") ...");
 					if (pm.isCancelled())
@@ -141,9 +149,13 @@ public class RefreshAction extends AbstractAsyncAction implements PropertyChange
 	}
 
 	public void propertyChange(PropertyChangeEvent evt) {
-		if (IShell.PROP_MODEL.equals(evt.getPropertyName())) {
-			setEnabled(shell.getModel() != null);
-		}
+        if (IShell.PROP_MODEL.equals(evt.getPropertyName())) {
+            updateEnabled();
+        }
 	}
+
+    private void updateEnabled() {
+        setEnabled(shell.getModel() != null && !authClient.asJava().isLocked());
+    }
 
 }

@@ -1,5 +1,6 @@
 package edu.gemini.spModel.gemini.flamingos2;
 
+import edu.gemini.shared.util.immutable.None;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.Offset;
 import edu.gemini.shared.util.immutable.Option;
@@ -98,7 +99,7 @@ public enum Flamingos2OiwfsGuideProbe implements GuideProbe, ValidatableGuidePro
 
     @Override
     public boolean validate(SPTarget guideStar, ObsContext ctx) {
-        return GuideProbeUtil.instance.validate(guideStar.getSkycalcCoordinates(), getCorrectedPatrolField(ctx), ctx);
+        return GuideProbeUtil.instance.validate(guideStar.getTarget().getSkycalcCoordinates(), this, ctx);
     }
 
     @Override
@@ -139,28 +140,32 @@ public enum Flamingos2OiwfsGuideProbe implements GuideProbe, ValidatableGuidePro
     public PatrolField getPatrolField() {
         return patrolField;
     }
-    @Override public PatrolField getCorrectedPatrolField(ObsContext ctx) {
-        /*
-            Although normally this function only returns flips and offsets, I'm going to do the scaling to the LyotWheel plate scale here
-        */
-       Flamingos2 f2 = (Flamingos2) ctx.getInstrument();
-       final double plateScale = f2.getLyotWheel().getPlateScale();
-       AffineTransform xform = AffineTransform.getScaleInstance(plateScale, plateScale);
 
-       //Flip it for the port?
-       //Validate(ctx.getAoComponent() == null) -> getFlipConfig(false)
-       final boolean flip = f2.getFlipConfig(false);
-       if(flip){
-           //Flip in X only
-           xform.concatenate(AffineTransform.getScaleInstance(-1.0, 1.0));
-       }
+    @Override
+    public Option<PatrolField> getCorrectedPatrolField(ObsContext ctx) {
+        if (ctx.getInstrument() instanceof Flamingos2) {
+            // Although normally this function only returns flips and offsets, I'm going to do the scaling to the LyotWheel plate scale here
+            final Flamingos2 f2 = (Flamingos2) ctx.getInstrument();
+            final double plateScale = f2.getLyotWheel().getPlateScale();
+            final AffineTransform xform = AffineTransform.getScaleInstance(plateScale, plateScale);
 
-       final int sign = flip ? -1 : 1;
-       final double rotationAngleInRadians = f2.getRotationConfig(false).toRadians().getMagnitude();
-       AffineTransform rotateForPortAndFlip = AffineTransform.getRotateInstance(rotationAngleInRadians * sign);
-       xform.concatenate(rotateForPortAndFlip);
+            // Flip it for the port?
+            // Validate(ctx.getAoComponent() == null) -> getFlipConfig(false)
+            final boolean flip = f2.getFlipConfig(false);
+            if (flip) {
+                //Flip in X only
+                xform.concatenate(AffineTransform.getScaleInstance(-1.0, 1.0));
+            }
 
-       //Apply complete transform
-        return new PatrolField(xform.createTransformedShape(getPatrolField().getArea()));
+            final int sign = flip ? -1 : 1;
+            final double rotationAngleInRadians = f2.getRotationConfig(false).toRadians().getMagnitude();
+            final AffineTransform rotateForPortAndFlip = AffineTransform.getRotateInstance(rotationAngleInRadians * sign);
+            xform.concatenate(rotateForPortAndFlip);
+
+            // Apply complete transform
+            return new Some<>(new PatrolField(xform.createTransformedShape(getPatrolField().getArea())));
+        } else {
+            return None.instance();
+        }
     }
 }

@@ -74,7 +74,7 @@ public class UserCatalogSkyObjectFactory implements SkyObjectFactory {
                     if (bandName.endsWith("1")) { // r1mag == Rmag...
                         bandName = bandName.substring(0, bandName.length()-1);
                     }
-                    Magnitude.Band magBand = Magnitude.Band.valueOf(bandName.toUpperCase());
+                    Magnitude.Band magBand = Magnitude.Band.valueOf(bandName);
                     _bands.add(magBand);
                     magColums.add(new MagnitudeDescriptor(magBand, columnName));
                 } catch (IllegalArgumentException ignore) {

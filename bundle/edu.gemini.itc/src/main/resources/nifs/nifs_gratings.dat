@@ -1,0 +1,15 @@
+# Author: Brian Walls
+# Created: 23 September 2005
+#
+# First Guess to get us going.
+#
+#
+# Grating  blaze  R_at_blaze  d_lambda  nm/pixel
+#          [nm]               [nm]
+
+z_G5602        6600   4990         1.323	0.1025
+j_G5603        6600   6040         1.093	0.105
+h_G5604        6600   5280         1.250	0.151
+k_G5605        6600   5300	   1.245	0.2115
+ks_G5606       6600   5300         1.245	0.2115
+kl_G5607       6600   5300         1.245	0.2115

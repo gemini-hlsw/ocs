@@ -87,6 +87,11 @@ public final class None<T> implements Option<T>, Serializable {
     }
 
     @Override
+    public boolean isDefined() {
+        return false;
+    }
+
+    @Override
     public ImList<T> toImList() {
         return ImCollections.emptyList();
     }

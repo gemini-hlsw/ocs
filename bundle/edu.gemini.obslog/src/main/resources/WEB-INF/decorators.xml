@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<decorators defaultdir="/decorators">
+
+    <decorator name="default" page="default.jsp">
+        <pattern>/*</pattern>
+    </decorator>
+
+<!--
+    <decorator name="empty" page="empty.html">
+        <pattern>/updateComment.action</pattern>
+        <pattern>/textExportPlan.action</pattern>
+    </decorator>
+-->
+
+    <excludes>
+        <pattern>/updateComment.action</pattern>
+        <pattern>/textExportPlan.action</pattern>
+    </excludes>
+
+</decorators>

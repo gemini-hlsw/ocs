@@ -1,0 +1,50 @@
+# trecs_fPAH113.dat
+# Transmission curve for T-ReCS PAH 11.3um filter
+# Columns are (1) wavelength in nm, (2) transmission.
+#
+# No blocking element needed.
+# Measurement temperature = 10K
+#
+# Author: James De Buizer, digitized from info from U. Reading
+# Created: 2003 Apr 9
+#
+# Effective wavelength
+11300
+#
+# lambda  filtn
+
+10450    0.0
+10456    0.0000
+10605    0.0075
+10699    0.0187
+10772    0.0413
+10820    0.0751
+10865    0.1221
+10909    0.1992
+10938    0.2875
+10974    0.3834
+11002    0.5112
+11043    0.6184
+11079    0.6973
+11116    0.7537
+11177    0.7913
+11241    0.8157
+11310    0.8289
+11379    0.8308
+11416    0.8139
+11444    0.7838
+11476    0.7330
+11501    0.6672
+11529    0.5883
+11566    0.4962
+11606    0.3740
+11642    0.2706
+11687    0.1766
+11740    0.1090
+11796    0.0620
+11841    0.0394
+11914    0.0206
+11987    0.0093
+12064    0.0018
+12157    0.0000
+12160    0.0

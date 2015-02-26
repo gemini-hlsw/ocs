@@ -7,11 +7,17 @@ import java.util.UUID
 import java.util.zip.{Adler32, Checksum}
 
 import scala.collection.JavaConverters._
+import scalaz.Equal
 
 /**
  *
  */
 package object version {
+
+  // Java Integer seems to be missing from scalaz.Equal object but necessary
+  // for use with NodeVersions (a VersionVector[LifespanId, Integer]).
+  implicit def IntegerEqual: Equal[java.lang.Integer] = Equal.equalA
+
   type NodeVersions = VersionVector[LifespanId, java.lang.Integer]
   val EmptyNodeVersions: NodeVersions = VersionVector.javaInt[LifespanId]()
 
