@@ -34,11 +34,11 @@ object Hash {
 
   def calc(p: GmosParameters): Int =
     hash(
-      p.getFilter.name(),
+      p.getFilter.name,
       p.getCCDtype,
       p.getFocalPlaneMask,
       p.getFPMask,
-      p.getGrating,
+      if (p.getGrating.name.equals("MIRROR")) "none" else p.getGrating.name, // TODO: cleanup with next baseline
       p.getIFUMaxOffset,
       p.getIFUMethod,
       p.getIFUMinOffset,

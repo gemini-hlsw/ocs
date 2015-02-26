@@ -3,6 +3,7 @@ package edu.gemini.itc.gmos;
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.parameters.ObservationDetailsParameters;
 import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 import edu.gemini.spModel.gemini.gmos.GmosSouthType;
 
@@ -114,7 +115,8 @@ public abstract class Gmos extends Instrument {
         }
 
 
-        if (!(gp.getGrating().equals("none"))) {
+        // TODO: grating is not yet defined, need to work with grating from gp, clean this up
+        if (!gp.getGrating().equals(GmosNorthType.DisperserNorth.MIRROR) && !gp.getGrating().equals(GmosSouthType.DisperserSouth.MIRROR)) {
             _gratingOptics = new GmosGratingOptics(getDirectory() + "/" + getPrefix(), gp.getGrating(), _detector,
                     gp.getCentralWavelength(),
                     _detector.getDetectorPixels(),
@@ -172,7 +174,7 @@ public abstract class Gmos extends Instrument {
      * @return Effective wavelength in nm
      */
     public int getEffectiveWavelength() {
-        if (gp.getGrating().equals("none")) return (int) _Filter.getEffectiveWavelength();
+        if (grating.isEmpty()) return (int) _Filter.getEffectiveWavelength();
         else return (int) _gratingOptics.getEffectiveWavelength();
 
     }
@@ -181,7 +183,7 @@ public abstract class Gmos extends Instrument {
         return _gratingOptics.getGratingResolution();
     }
 
-    public String getGrating() {
+    public GmosCommonType.Disperser getGrating() {
         return gp.getGrating();
     }
 

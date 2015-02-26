@@ -8,8 +8,8 @@ import edu.gemini.itc.parameters.SourceDefinitionParameters._
 import edu.gemini.itc.parameters._
 import edu.gemini.itc.shared._
 import edu.gemini.spModel.gemini.altair.AltairParams
-import edu.gemini.spModel.gemini.gmos.GmosNorthType.FilterNorth
-import edu.gemini.spModel.gemini.gmos.GmosSouthType.FilterSouth
+import edu.gemini.spModel.gemini.gmos.GmosNorthType.{DisperserNorth, FilterNorth}
+import edu.gemini.spModel.gemini.gmos.GmosSouthType.{DisperserSouth, FilterSouth}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.telescope.IssPort
 
@@ -81,8 +81,8 @@ object ITCRequest {
   def gmosParameters(r: ITCMultiPartParser): GmosParameters = {
     val pc          = ITCRequest.from(r)
     val location    = pc.parameter("instrumentLocation")
-    val filter      = if (location.equals("gmosNorth")) pc.enumParameter(classOf[FilterNorth], "instrumentFilter") else pc.enumParameter(classOf[FilterSouth], "instrumentFilter")
-    val grating     = pc.parameter("instrumentDisperser")
+    val filter      = if (location.equals("gmosNorth")) pc.enumParameter(classOf[FilterNorth],    "instrumentFilter") else pc.enumParameter(classOf[FilterSouth],       "instrumentFilter")
+    val grating     = if (location.equals("gmosNorth")) pc.enumParameter(classOf[DisperserNorth], "instrumentDisperser") else pc.enumParameter(classOf[DisperserSouth], "instrumentDisperser")
     val spatBinning = pc.intParameter("spatBinning")
     val specBinning = pc.intParameter("specBinning")
     val ccdType     = pc.parameter("CCDtype")

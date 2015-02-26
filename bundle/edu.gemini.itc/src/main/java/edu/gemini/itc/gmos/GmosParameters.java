@@ -11,14 +11,6 @@ public final class GmosParameters extends ITCParameters {
     public static final String SINGLE_IFU = "singleIFU";
     public static final String RADIAL_IFU = "radialIFU";
 
-    public static final String R600_G5304 = "R600_G5304";
-    public static final String B1200_G5301 = "B1200_G5301";
-    public static final String R150_G5306 = "R150_G5306";
-    public static final String B600_G5303 = "B600_G5303";
-    public static final String R400_G5305 = "R400_G5305";
-    public static final String R831_G5302 = "R831_G5302";
-
-    public static final String NO_DISPERSER = "none";
     public static final String SLIT0_25 = "slit0.25";
     public static final String SLIT0_5 = "slit0.5";
     public static final String SLIT0_75 = "slit0.75";
@@ -33,7 +25,7 @@ public final class GmosParameters extends ITCParameters {
 
     // Data members
     private final GmosCommonType.Filter filter;
-    private final String grating;
+    private final GmosCommonType.Disperser grating;
     private final double centralWavelength;
     private final String fpMask;
     private final int spatBinning;
@@ -49,7 +41,7 @@ public final class GmosParameters extends ITCParameters {
      * Constructs a GmosParameters from a test file.
      */
     public GmosParameters(final GmosCommonType.Filter filter,
-                          final String grating,
+                          final GmosCommonType.Disperser grating,
                           final double centralWavelength,
                           final String fpMask,
                           final int spatBinning,
@@ -79,7 +71,7 @@ public final class GmosParameters extends ITCParameters {
         return filter;
     }
 
-    public String  getGrating() {
+    public GmosCommonType.Disperser getGrating() {
         return grating;
     }
 
@@ -150,7 +142,7 @@ public final class GmosParameters extends ITCParameters {
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("Filter:\t" + getFilter() + "\n");
-        sb.append("Grating:\t" + getGrating() + "\n");
+        sb.append("Grating:\t" + getGrating().name() + "\n");
         sb.append("Instrument Central Wavelength:\t" + getCentralWavelength() + "\n");
         sb.append("Focal Plane Mask: \t " + getFPMask() + " arcsec slit \n");
         sb.append("\n");

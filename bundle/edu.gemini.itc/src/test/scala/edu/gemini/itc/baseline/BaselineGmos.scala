@@ -3,8 +3,8 @@ package edu.gemini.itc.baseline
 import edu.gemini.itc.baseline.util.Baseline._
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.gmos.{GmosParameters, GmosRecipe}
-import edu.gemini.spModel.gemini.gmos.GmosNorthType.FilterNorth
-import edu.gemini.spModel.gemini.gmos.GmosSouthType.FilterSouth
+import edu.gemini.spModel.gemini.gmos.GmosNorthType.{DisperserNorth, FilterNorth}
+import edu.gemini.spModel.gemini.gmos.GmosSouthType.{DisperserSouth, FilterSouth}
 
 /**
  * GMOS baseline test fixtures.
@@ -20,7 +20,7 @@ object BaselineGmos {
   private lazy val RBandImaging = Fixture.rBandImgFixtures(List(
     new GmosParameters(
       FilterNorth.i_G0302,
-      GmosParameters.NO_DISPERSER,
+      DisperserNorth.MIRROR,
       500.0,                      // wavelength
       GmosParameters.NO_SLIT,
       1,
@@ -34,7 +34,7 @@ object BaselineGmos {
 
     new GmosParameters(
       FilterSouth.g_G0325,
-      GmosParameters.NO_DISPERSER,
+      DisperserSouth.MIRROR,
       500.0,
       GmosParameters.NO_SLIT,
       1,
@@ -50,7 +50,7 @@ object BaselineGmos {
   private lazy val KBandSpectroscopy = Fixture.kBandSpcFixtures(List(
     new GmosParameters(
       FilterNorth.g_G0301,
-      GmosParameters.R150_G5306,
+      DisperserNorth.R150_G5306,
       500.0,
       GmosParameters.SLIT1_0,
       1,
@@ -63,7 +63,7 @@ object BaselineGmos {
       GmosParameters.GMOS_NORTH),
     new GmosParameters(
       FilterNorth.g_G0301,
-      GmosParameters.R400_G5305,
+      DisperserNorth.R400_G5305,
       500.0,
       GmosParameters.IFU,
       1,
@@ -76,7 +76,7 @@ object BaselineGmos {
       GmosParameters.GMOS_NORTH),
     new GmosParameters(
       FilterNorth.g_G0301,
-      GmosParameters.R150_G5306,
+      DisperserNorth.R150_G5306,
       500.0,
       GmosParameters.IFU,
       1,
