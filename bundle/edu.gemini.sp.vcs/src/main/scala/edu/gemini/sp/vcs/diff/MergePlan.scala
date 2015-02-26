@@ -1,22 +1,32 @@
 package edu.gemini.sp.vcs.diff
 
 import edu.gemini.pot.sp._
-import edu.gemini.pot.sp.version.{VersionMap, NodeVersions}
+import edu.gemini.pot.sp.version._
+import edu.gemini.shared.util._
 import edu.gemini.sp.vcs.diff.NodeDetail.Obs
 import edu.gemini.sp.vcs.diff.VcsFailure._
 import edu.gemini.spModel.rich.pot.sp._
 
 import scalaz._
 import Scalaz._
+import scalaz.concurrent._
 
 /** Describes the modifications required for a local program to complete a
   * merge.
   */
 case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
 
+
+  /** True if the MergePlan contains no updates. */
+  def isEmpty: Boolean = update.rootLabel match {
+    case Unmodified(_) => delete.isEmpty
+    case _             => false
+  }
+
+  def nonEmpty: Boolean = !isEmpty
+
   /** "Encode" for serialization. The issue is that `scalaz.Tree` is not
-    * `Serializable` but we need to send `MergePlan`s over `trpc`.
-    */
+    * `Serializable` but we need to send `MergePlan`s over `trpc`. */
   def encode: MergePlan.Transport = {
     def encodeTree(t: Tree[MergeNode]): MergePlan.TreeTransport =
       MergePlan.TreeTransport(t.rootLabel, t.subForest.toList.map(encodeTree))
@@ -41,10 +51,27 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
     p.getVersions ++ vmUpdates
   }
 
+  /** Compares the version information in this merge plan with the given
+    * version map.  The assumption here is that any unmodified parts of the
+    * program tree have the same version information and do not need to be
+    * considered in the calculation. */
+  def compare(vm: VersionMap): VersionComparison = {
+    val vm0 = vm.withDefaultValue(EmptyNodeVersions)
+    val up  = update.foldMap {
+      case Modified(k, nv, _, _) => VersionComparison.compare(nv, vm0(k))(IntegerIsIntegral)
+      case Unmodified(_)         => VersionComparison.Same
+    }
+    val del = delete.foldMap {
+      case Missing(k, nv) => VersionComparison.compare(nv, vm0(k))(IntegerIsIntegral)
+    }
+    up |+| del
+  }
+
+
   /** Accepts a program and edits it according to this merge plan. */
-  def merge(f: ISPFactory, p: ISPProgram): TryVcs[Unit] = {
+  def merge(f: ISPFactory, p: ISPProgram): VcsAction[Unit] = {
     // Tries to create an ISPNode from the information in the MergeNode.
-    def create(mn: MergeNode): TryVcs[ISPNode] =
+    def create(mn: MergeNode): VcsFailure \/ ISPNode =
       mn match {
         case Modified(k, _, dob, _) =>
           NodeFactory.mkNode(f, p, dob.getType, Some(k)).toRightDisjunction {
@@ -75,24 +102,23 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
       }
     }
 
-    val nodeMap = p.nodeMap
-
     // Pair up MergeNodes with their corresponding ISPNode, creating any missing
     // ISPNodes as necessary.
-    val mergeTree = update.map { mn =>
-      nodeMap.get(mn.key).fold(create(mn)) { _.right }.map {n => (mn, n) }
-    }.sequenceU
+    val mergeTree: VcsAction[Tree[(MergeNode, ISPNode)]] = Task.delay {
+      val nodeMap = p.nodeMap
 
+      update.map { mn =>
+        nodeMap.get(mn.key).fold(create(mn)) { _.right }.map {n => (mn, n) }
+      }.sequenceU
+    }.liftVcs
 
-    // Apply the changes which mutates the program p.  This is a bit awkward
-    // but avoids mutating in map.
-    \/.fromTryCatch {
-      mergeTree.foreach { mt =>
+    def doEdit(mt: Tree[(MergeNode, ISPNode)]): VcsAction[Unit] =
+      \/.fromTryCatch {
         edit(mt)
         p.setVersions(vm(p))
-      }
-      mergeTree.map(_ => ())
-    }.valueOr(ex => VcsException(ex).left)
+      }.leftMap(VcsException).liftVcs
+
+    mergeTree.flatMap(doEdit)
   }
 }
 

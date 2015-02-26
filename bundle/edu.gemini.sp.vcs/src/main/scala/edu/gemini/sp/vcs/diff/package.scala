@@ -3,7 +3,9 @@ package edu.gemini.sp.vcs
 import edu.gemini.pot.sp.{ISPProgram, SPNodeKey, ISPNode}
 import edu.gemini.spModel.rich.pot.sp._
 
-import scalaz.\/
+import scalaz._
+import Scalaz._
+import scalaz.concurrent._
 
 package object diff {
 
@@ -32,4 +34,33 @@ package object diff {
     */
   def removedKeys(p: ISPProgram): Set[SPNodeKey] =
     p.fold(p.getVersions.keySet) { _ - _.key }
+
+  type TryVcs[A] = VcsFailure \/ A
+
+  type VcsAction[+A] = EitherT[Task, VcsFailure, A]
+
+  implicit object VcsActionMonad extends Monad[VcsAction] {
+    def point[A](a: => A): VcsAction[A] = VcsAction(a)
+    def bind[A, B](fa: VcsAction[A])(f: A => VcsAction[B]): VcsAction[B] = fa.flatMap(f)
+  }
+
+  object VcsAction {
+    def apply[A](a: => A): VcsAction[A] = EitherT(Task.delay(a.right))
+    def fail(vf: => VcsFailure): VcsAction[Nothing] = EitherT(Task.delay(vf.left))
+
+    implicit class VcsActionOps[A](a: VcsAction[A]) {
+      /** Execute this action, performing any side-effects. */
+      def unsafeRun: TryVcs[A] = {
+        a.run.attemptRun.fold(ex => VcsFailure.VcsException(ex).left, identity)
+      }
+    }
+  }
+
+  implicit class TaskVcsActionOps[A](val a: Task[TryVcs[A]]) extends AnyVal {
+    def liftVcs: VcsAction[A] = EitherT(a)
+  }
+
+  implicit class VcsEitherOps[A](e: => TryVcs[A]) {
+    def liftVcs: VcsAction[A] = EitherT(Task.delay(e))
+  }
 }

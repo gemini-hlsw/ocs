@@ -124,4 +124,7 @@ object ProgramDiff {
 
     MergePlan(presentDiffs(p), missingDiffs(vmOnlyKeys ++ deletedKeys))
   }
+
+  def compare(p: ISPProgram, vs: DiffState): MergePlan =
+    compare(p, vs.vm, vs.removed)
 }
