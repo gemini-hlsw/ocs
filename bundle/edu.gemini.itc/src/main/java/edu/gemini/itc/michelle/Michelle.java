@@ -37,11 +37,6 @@ public class Michelle extends Instrument {
     private static final double LOW_GAIN = 2.18;
 
     private static final double IMAGING_FRAME_TIME = .020;  //Seconds
-    private static final double SPECTROSCOPY_FRAME_TIME = .1; //Seconds
-    private static final double SPECTROSCOPY_LOWRES_N_FRAME_TIME = .25; //Seconds
-    private static final double SPECTROSCOPY_MED_N1_FRAME_TIME = 1.25; //Seconds
-    private static final double SPECTROSCOPY_MED_N2_FRAME_TIME = 3.0; //Seconds
-    private static final double SPECTROSCOPY_ECHELLE_FRAME_TIME = 30; //Seconds
 
     private static final double SPECTROSCOPY_PIXEL_SIZE = 0.2;
 
@@ -167,7 +162,6 @@ public class Michelle extends Instrument {
             return (int) _Filter.getEffectiveWavelength();
         else
             return (int) _gratingOptics.getEffectiveWavelength();
-
     }
 
     public double getGratingResolution() {
@@ -219,42 +213,7 @@ public class Michelle extends Instrument {
 
     public double getFrameTime() {
         if (_mode.isSpectroscopy()) {
-            String tempGrating = getGrating();
-            double frameTime = 0.1;
-
-            switch (_gratingOptics.getGratingNumber()) {
-                case MichelleParameters.LOWN:
-                    frameTime = SPECTROSCOPY_LOWRES_N_FRAME_TIME;
-                    break;
-                case MichelleParameters.MEDN1:
-                    frameTime = SPECTROSCOPY_MED_N1_FRAME_TIME;
-                    break;
-                case MichelleParameters.MEDN2:
-                    frameTime = SPECTROSCOPY_MED_N2_FRAME_TIME;
-                    break;
-                case MichelleParameters.ECHELLEN:
-                case MichelleParameters.ECHELLEQ:
-                    frameTime = SPECTROSCOPY_ECHELLE_FRAME_TIME;
-                    break;
-                default:
-                    frameTime = SPECTROSCOPY_FRAME_TIME;
-                    break;
-            }
-
-            return frameTime;
-            /*
-            if (tempGrating.equals(MichelleParameters.LOW_N))
-                return SPECTROSCOPY_LOWRES_N_FRAME_TIME;
-            else if (tempGrating.equals(MichelleParameters.MED_N1))
-                return SPECTROSCOPY_MED_N1_FRAME_TIME;
-            else if (tempGrating.equals(MichelleParameters.MED_N2))
-                return SPECTROSCOPY_MED_N2_FRAME_TIME;
-            else if (tempGrating.equals(MichelleParameters.ECHELLE_N)||
-                    tempGrating.equals(MichelleParameters.ECHELLE_Q))
-                return SPECTROSCOPY_ECHELLE_FRAME_TIME;
-            else
-                return SPECTROSCOPY_FRAME_TIME;
-             */
+            return _gratingOptics.getFrameTime();
         } else {
             return IMAGING_FRAME_TIME;
         }

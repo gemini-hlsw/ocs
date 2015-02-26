@@ -22,23 +22,4 @@ public final class GmosGratingOptics extends GratingOptics {
         return detector.toString().contains("EEV") ? "eev_gratings" : "gratings";
     }
 
-    @Override protected int getGratingNumber() {
-        int grating_num = 0;
-
-        if (gratingName.equals(GmosParameters.B1200_G5301)) {
-            grating_num = GmosParameters.B1200;
-        } else if (gratingName.equals(GmosParameters.R831_G5302)) {
-            grating_num = GmosParameters.R831;
-        } else if (gratingName.equals(GmosParameters.B600_G5303)) {
-            grating_num = GmosParameters.B600;
-        } else if (gratingName.equals(GmosParameters.R600_G5304)) {
-            grating_num = GmosParameters.R600;
-        } else if (gratingName.equals(GmosParameters.R400_G5305)) {
-            grating_num = GmosParameters.R400;
-        } else if (gratingName.equals(GmosParameters.R150_G5306)) {
-            grating_num = GmosParameters.R150;
-        }
-        return grating_num;
-    }
-
 }

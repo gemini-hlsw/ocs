@@ -34,10 +34,6 @@ public final class TRecsParameters extends ITCParameters {
     public static final String LORES20_G5402 = "LoRes-20";
     public static final String HIRES10_G5403 = "HiRes-10";
 
-    public static final int LORES10 = 0;
-    public static final int LORES20 = 1;
-    public static final int HIRES10 = 2;
-
     //Filters
     public static final String F_117 = "f117";
     public static final String F_ARIII = "ArIII";

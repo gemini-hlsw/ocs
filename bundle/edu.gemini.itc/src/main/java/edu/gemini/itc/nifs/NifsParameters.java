@@ -39,13 +39,6 @@ public final class NifsParameters extends ITCParameters {
     public static final String K_G5605 = "k_G5605";
     public static final String KS_G5606 = "ks_G5606";
     public static final String KL_G5607 = "kl_G5607";
-    public static final int Z_G5602_N = 0;
-    public static final int J_G5603_N = 1;
-    public static final int H_G5604_N = 2;
-    public static final int K_G5605_N = 3;
-    public static final int KS_G5606_N = 4;
-    public static final int KL_G5607_N = 5;
-
 
     //filters
     public static final String ZJ_G0601 = "ZJ_G0601";

@@ -104,7 +104,7 @@ object DatFile {
       val dispersion     = s.nextDouble()
       l.+=(Grating(name, resolvingPower, blaze, dispersion, resolution))
     }
-    l.toArray
+    l.map(l => l.name -> l).toMap
   }
 
   val instruments = cache { s =>

@@ -7,6 +7,12 @@ import edu.gemini.itc.shared.GratingOptics;
  */
 public final class MichelleGratingOptics extends GratingOptics {
 
+    private static final double SPECTROSCOPY_FRAME_TIME = .1; //Seconds
+    private static final double SPECTROSCOPY_LOWRES_N_FRAME_TIME = .25; //Seconds
+    private static final double SPECTROSCOPY_MED_N1_FRAME_TIME = 1.25; //Seconds
+    private static final double SPECTROSCOPY_MED_N2_FRAME_TIME = 3.0; //Seconds
+    private static final double SPECTROSCOPY_ECHELLE_FRAME_TIME = 30; //Seconds
+
     public MichelleGratingOptics(final String directory,
                                  final String gratingName,
                                  final double centralWavelength,
@@ -16,32 +22,36 @@ public final class MichelleGratingOptics extends GratingOptics {
         super(directory, gratingName, "gratings", centralWavelength, detectorPixels, spectralBinning);
     }
 
-    @Override protected int getGratingNumber() {
-        int grating_num = 0;
-
-        if (gratingName.equals(MichelleParameters.LOW_N)) {
-            grating_num = MichelleParameters.LOWN;
-        } else if (gratingName.equals(MichelleParameters.LOW_Q)) {
-            grating_num = MichelleParameters.LOWQ;
-        } else if (gratingName.equals(MichelleParameters.MED_N1)) {
-            grating_num = MichelleParameters.MEDN1;
-        } else if (gratingName.equals(MichelleParameters.MED_N2)) {
-            grating_num = MichelleParameters.MEDN2;
-        } else if (gratingName.equals(MichelleParameters.ECHELLE_N)) {
-            grating_num = MichelleParameters.ECHELLEN;
-        } else if (gratingName.equals(MichelleParameters.ECHELLE_Q)) {
-            grating_num = MichelleParameters.ECHELLEQ;
+    public double getFrameTime() {
+        final double frameTime;
+        switch (gratingName) {
+            case MichelleParameters.LOW_N:
+                frameTime = SPECTROSCOPY_LOWRES_N_FRAME_TIME;
+                break;
+            case MichelleParameters.MED_N1:
+                frameTime = SPECTROSCOPY_MED_N1_FRAME_TIME;
+                break;
+            case MichelleParameters.MED_N2:
+                frameTime = SPECTROSCOPY_MED_N2_FRAME_TIME;
+                break;
+            case MichelleParameters.ECHELLE_N:
+            case MichelleParameters.ECHELLE_Q:
+                frameTime = SPECTROSCOPY_ECHELLE_FRAME_TIME;
+                break;
+            default:
+                frameTime = SPECTROSCOPY_FRAME_TIME;
+                break;
         }
-        return grating_num;
+
+        return frameTime;
     }
 
-
     @Override public double getStart() {
-        return centralWavelength - (data[getGratingNumber()].dispersion() * detectorPixels / 2) * _spectralBinning;
+        return centralWavelength - (data.apply(gratingName).dispersion() * detectorPixels / 2) * _spectralBinning;
     }
 
     @Override public double getEnd() {
-        return centralWavelength + (data[getGratingNumber()].dispersion() * detectorPixels / 2) * _spectralBinning;
+        return centralWavelength + (data.apply(gratingName).dispersion() * detectorPixels / 2) * _spectralBinning;
     }
 
 }

@@ -18,13 +18,6 @@ public final class GmosParameters extends ITCParameters {
     public static final String R400_G5305 = "R400_G5305";
     public static final String R831_G5302 = "R831_G5302";
 
-    public static final int R600 = 3;
-    public static final int B1200 = 0;
-    public static final int R150 = 5;
-    public static final int B600 = 2;
-    public static final int R400 = 4;
-    public static final int R831 = 1;
-
     public static final String NO_DISPERSER = "none";
     public static final String SLIT0_25 = "slit0.25";
     public static final String SLIT0_5 = "slit0.5";
