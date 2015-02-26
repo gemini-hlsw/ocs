@@ -3,6 +3,8 @@ package edu.gemini.itc.gmos;
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.parameters.ObservationDetailsParameters;
 import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.gemini.gmos.GmosNorthType;
+import edu.gemini.spModel.gemini.gmos.GmosSouthType;
 
 import java.awt.*;
 
@@ -56,14 +58,14 @@ public abstract class Gmos extends Instrument {
 
         this.odp    = odp;
         this.gp     = gp;
-        validate();
 
         _detectorCcdIndex = detectorCcdIndex;
 
         _sampling = super.getSampling();
 
-        if (!(gp.getFilter().equals("none"))) {
-            _Filter = Filter.fromWLFile(getPrefix(), gp.getFilter(), getDirectory() + "/");
+        // TODO: filter is not yet defined, need to work with filter from gp, clean this up
+        if (!gp.getFilter().equals(GmosNorthType.FilterNorth.NONE) && !gp.getFilter().equals(GmosSouthType.FilterSouth.NONE)) {
+            _Filter = Filter.fromWLFile(getPrefix(), gp.getFilter().name(), getDirectory() + "/");
             addFilter(_Filter);
         }
 
@@ -124,6 +126,9 @@ public abstract class Gmos extends Instrument {
 
         addComponent(_detector);
 
+
+        // validate the current configuration
+        validate();
 
     }
 
@@ -284,7 +289,7 @@ public abstract class Gmos extends Instrument {
     private void validate() {
         //Test to see that all conditions for Spectroscopy are met
         if (odp.getMethod().isSpectroscopy()) {
-            if (gp.getGrating().equals("none"))
+            if (grating.isEmpty())
                 throw new RuntimeException("Spectroscopy calculation method is selected but a grating" +
                         " is not.\nPlease select a grating and a " +
                         "focal plane mask in the Instrument " +
@@ -298,11 +303,11 @@ public abstract class Gmos extends Instrument {
         }
 
         if (odp.getMethod().isImaging()) {
-            if (gp.getFilter().equals("none"))
+            if (filter.isEmpty())
                 throw new RuntimeException("Imaging calculation method is selected but a filter" +
                         " is not.\n  Please select a filter and resubmit the " +
                         "form to continue.");
-            if (!gp.getGrating().equals("none"))
+            if (grating.isDefined())
                 throw new RuntimeException("Imaging calculation method is selected but a grating" +
                         " is also selected.\nPlease deselect the " +
                         "grating or change the method to spectroscopy.");

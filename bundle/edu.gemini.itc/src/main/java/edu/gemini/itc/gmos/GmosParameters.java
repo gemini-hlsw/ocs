@@ -1,6 +1,7 @@
 package edu.gemini.itc.gmos;
 
 import edu.gemini.itc.shared.ITCParameters;
+import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 
 /**
  * This class holds the information from the Gmos section
@@ -25,13 +26,6 @@ public final class GmosParameters extends ITCParameters {
     public static final int R831 = 1;
 
     public static final String NO_DISPERSER = "none";
-    public static final String G_G0301 = "g_G0301";
-    public static final String R_G0303 = "r_G0303";
-    public static final String I_G0302 = "i_G0302";
-    public static final String Z_G0304 = "z_G0304";
-    public static final String GG455 = "gg455";
-    public static final String OG515 = "og515";
-    public static final String RG610 = "rg610";
     public static final String SLIT0_25 = "slit0.25";
     public static final String SLIT0_5 = "slit0.5";
     public static final String SLIT0_75 = "slit0.75";
@@ -45,7 +39,7 @@ public final class GmosParameters extends ITCParameters {
     public static final String GMOS_SOUTH = "gmosSouth";
 
     // Data members
-    private final String filter;
+    private final GmosCommonType.Filter filter;
     private final String grating;
     private final double centralWavelength;
     private final String fpMask;
@@ -61,7 +55,7 @@ public final class GmosParameters extends ITCParameters {
     /**
      * Constructs a GmosParameters from a test file.
      */
-    public GmosParameters(final String filter,
+    public GmosParameters(final GmosCommonType.Filter filter,
                           final String grating,
                           final double centralWavelength,
                           final String fpMask,
@@ -88,7 +82,7 @@ public final class GmosParameters extends ITCParameters {
 
     }
 
-    public String getFilter() {
+    public GmosCommonType.Filter getFilter() {
         return filter;
     }
 

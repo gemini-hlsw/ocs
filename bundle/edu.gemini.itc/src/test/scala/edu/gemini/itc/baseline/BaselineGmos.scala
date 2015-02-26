@@ -3,6 +3,8 @@ package edu.gemini.itc.baseline
 import edu.gemini.itc.baseline.util.Baseline._
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.gmos.{GmosParameters, GmosRecipe}
+import edu.gemini.spModel.gemini.gmos.GmosNorthType.FilterNorth
+import edu.gemini.spModel.gemini.gmos.GmosSouthType.FilterSouth
 
 /**
  * GMOS baseline test fixtures.
@@ -17,7 +19,7 @@ object BaselineGmos {
 
   private lazy val RBandImaging = Fixture.rBandImgFixtures(List(
     new GmosParameters(
-      GmosParameters.I_G0302,
+      FilterNorth.i_G0302,
       GmosParameters.NO_DISPERSER,
       500.0,                      // wavelength
       GmosParameters.NO_SLIT,
@@ -31,7 +33,7 @@ object BaselineGmos {
       GmosParameters.GMOS_NORTH),
 
     new GmosParameters(
-      GmosParameters.G_G0301,
+      FilterSouth.g_G0325,
       GmosParameters.NO_DISPERSER,
       500.0,
       GmosParameters.NO_SLIT,
@@ -47,7 +49,7 @@ object BaselineGmos {
 
   private lazy val KBandSpectroscopy = Fixture.kBandSpcFixtures(List(
     new GmosParameters(
-      GmosParameters.G_G0301,
+      FilterNorth.g_G0301,
       GmosParameters.R150_G5306,
       500.0,
       GmosParameters.SLIT1_0,
@@ -60,7 +62,7 @@ object BaselineGmos {
       "0",                        // EEV ED; still supported?
       GmosParameters.GMOS_NORTH),
     new GmosParameters(
-      GmosParameters.G_G0301,
+      FilterNorth.g_G0301,
       GmosParameters.R400_G5305,
       500.0,
       GmosParameters.IFU,
@@ -73,7 +75,7 @@ object BaselineGmos {
       "1",                        // EEV legacy; still supported?
       GmosParameters.GMOS_NORTH),
     new GmosParameters(
-      GmosParameters.G_G0301,
+      FilterNorth.g_G0301,
       GmosParameters.R150_G5306,
       500.0,
       GmosParameters.IFU,

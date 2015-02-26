@@ -8,6 +8,8 @@ import edu.gemini.itc.parameters.SourceDefinitionParameters._
 import edu.gemini.itc.parameters._
 import edu.gemini.itc.shared._
 import edu.gemini.spModel.gemini.altair.AltairParams
+import edu.gemini.spModel.gemini.gmos.GmosNorthType.FilterNorth
+import edu.gemini.spModel.gemini.gmos.GmosSouthType.FilterSouth
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.telescope.IssPort
 
@@ -78,7 +80,8 @@ object ITCRequest {
 
   def gmosParameters(r: ITCMultiPartParser): GmosParameters = {
     val pc          = ITCRequest.from(r)
-    val filter      = pc.parameter("instrumentFilter")
+    val location    = pc.parameter("instrumentLocation")
+    val filter      = if (location.equals("gmosNorth")) pc.enumParameter(classOf[FilterNorth], "instrumentFilter") else pc.enumParameter(classOf[FilterSouth], "instrumentFilter")
     val grating     = pc.parameter("instrumentDisperser")
     val spatBinning = pc.intParameter("spatBinning")
     val specBinning = pc.intParameter("specBinning")
@@ -98,7 +101,6 @@ object ITCRequest {
         ifuMaxOffset = pc.doubleParameter("ifuMaxOffset")
       } else ITCParameters.notFoundException (" a correct value for the IFU Parameters. ")
     }
-    val location = pc.parameter("instrumentLocation")
 
     new GmosParameters(filter, grating, centralWavelength, fpMask, spatBinning, specBinning, ifuMethod, ifuOffset, ifuMinOffset, ifuMaxOffset, ccdType, location)
   }

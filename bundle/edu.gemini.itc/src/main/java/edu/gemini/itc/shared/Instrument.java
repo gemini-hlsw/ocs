@@ -27,11 +27,11 @@ public abstract class Instrument {
     private ArraySpectrum background;
 
     // The filter
-    private Option<Filter> filter;
+    public Option<Filter> filter;
     // The grating
-    private Option<GratingOptics> grating;
+    public Option<GratingOptics> grating;
     // The grism
-    private Option<GrismOptics> grism;
+    public Option<GrismOptics> grism;
 
     /**
      * All instruments have data files of the same format.

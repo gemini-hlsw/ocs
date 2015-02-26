@@ -34,7 +34,7 @@ object Hash {
 
   def calc(p: GmosParameters): Int =
     hash(
-      p.getFilter,
+      p.getFilter.name(),
       p.getCCDtype,
       p.getFocalPlaneMask,
       p.getFPMask,
