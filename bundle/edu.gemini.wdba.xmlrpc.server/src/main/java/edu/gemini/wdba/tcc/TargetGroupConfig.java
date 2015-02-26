@@ -23,7 +23,7 @@ public final class TargetGroupConfig extends ParamSet {
     public static TargetGroupConfig createBaseGroup(TargetEnvironment env) {
         ImList<SPTarget> targets = env.getUserTargets();
         targets = targets.cons(env.getBase());
-        return new TargetGroupConfig(TccNames.BASE, targets, env.getBase().getName());
+        return new TargetGroupConfig(TccNames.BASE, targets, env.getBase().getTarget().getName());
     }
 
     public static TargetGroupConfig createGuideGroup(GuideProbeTargets gt) {
@@ -36,7 +36,7 @@ public final class TargetGroupConfig extends ParamSet {
 //        if ((primary == null) && (targets.size() > 0)) primary = targets.head();
 
         String primaryTargetName = null;
-        if (!primaryOpt.isEmpty()) primaryTargetName = primaryOpt.getValue().getName();
+        if (!primaryOpt.isEmpty()) primaryTargetName = primaryOpt.getValue().getTarget().getName();
 
         String tag = TargetConfig.getTag(guider);
         return new TargetGroupConfig(tag, targets, primaryTargetName);
@@ -53,7 +53,7 @@ public final class TargetGroupConfig extends ParamSet {
 
         List<String> targetNames = new ArrayList<String>(targets.size());
         for (SPTarget target : targets) {
-            targetNames.add(target.getName());
+            targetNames.add(target.getTarget().getName());
         }
 
         putParameter(TccNames.TARGETS, targetNames);

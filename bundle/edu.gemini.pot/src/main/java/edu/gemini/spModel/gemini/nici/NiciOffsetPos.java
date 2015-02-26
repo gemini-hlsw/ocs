@@ -96,7 +96,7 @@ public final class NiciOffsetPos extends OffsetPosBase {
         } else {
             d = 0;
         }
-        super._notifyOfGenericUpdate();
+        super._notifyOfUpdate();
     }
 
     private double getSign(IssPort port) {
@@ -126,7 +126,7 @@ public final class NiciOffsetPos extends OffsetPosBase {
         double q = co.computeQ(d);
 
         super.noNotifySetXY(p, q, port);
-        super._notifyOfLocationUpdate();
+        super._notifyOfUpdate();
     }
 
     /**

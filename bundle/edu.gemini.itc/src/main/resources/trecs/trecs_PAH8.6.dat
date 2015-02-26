@@ -1,0 +1,51 @@
+# trecs_fPAH86.dat
+# Transmission curve for T-ReCS PAH 8.6um filter
+# also used as continuum reference for ARIII
+# Columns are (1) wavelength in nm, (2) transmission.
+#
+# No blocking element needed.
+# Measurement temperature = 10K
+#
+# Author: James De Buizer, digitized from data from U. of Reading
+# Created: 2003 Apr 8
+#
+# Effective wavelength
+8588
+#
+# lambda  filtn
+
+8000    0.0
+8002    0.0000
+8123    0.0056
+8209    0.0168
+8249    0.0392
+8287    0.0710
+8317    0.1271
+8340    0.1962
+8360    0.2859
+8382    0.3887
+8405    0.5140
+8420    0.6242
+8440    0.6878
+8463    0.7308
+8483    0.7514
+8533    0.7551
+8574    0.7626
+8632    0.7626
+8654    0.7495
+8682    0.7177
+8718    0.6672
+8738    0.6093
+8761    0.5401
+8786    0.4523
+8814    0.3738
+8842    0.2766
+8872    0.1775
+8913    0.1102
+8946    0.0728
+8979    0.0448
+9029    0.0224
+9080    0.0130
+9125    0.0074
+9186    0.0000
+9190    0.0

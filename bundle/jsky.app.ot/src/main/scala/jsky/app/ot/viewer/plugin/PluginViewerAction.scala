@@ -1,5 +1,6 @@
 package jsky.app.ot.viewer.plugin
 
+import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.pot.sp.ISPProgramNode
 
 import jsky.app.ot.plugin.{OtContext, OtActionPlugin}
@@ -12,7 +13,7 @@ import javax.swing.{SwingUtilities, Action}
 import edu.gemini.util.security.auth.keychain.KeyChain
 
 // Wraps a OtActionPlugin to adapt it to the AbstractViewerAction
-final class PluginViewerAction(keychain: KeyChain, viewer: SPViewer, plugin: OtActionPlugin) extends AbstractViewerAction(viewer, plugin.name, plugin.icon.orNull) {
+final class PluginViewerAction(keychain: KeyChain, viewer: SPViewer, plugin: OtActionPlugin, magTable: MagnitudeTable) extends AbstractViewerAction(viewer, plugin.name, plugin.icon.orNull) {
   putValue(AbstractViewerAction.SHORT_NAME, plugin.name)
   putValue(Action.SHORT_DESCRIPTION, plugin.toolTip)
   setEnabled(true)
@@ -20,7 +21,7 @@ final class PluginViewerAction(keychain: KeyChain, viewer: SPViewer, plugin: OtA
   private def currentNode: Option[ISPProgramNode] =
     Option(viewer.getNode).collect { case p: ISPProgramNode => p }
 
-  private def otContext = OtContext(currentNode, ObservingPeer.get, keychain)
+  private def otContext = OtContext(currentNode, ObservingPeer.get, keychain, magTable)
 
   override def computeEnabledState: Boolean = plugin.enabledFor(otContext)
 

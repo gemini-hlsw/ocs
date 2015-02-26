@@ -106,6 +106,7 @@ def common(version: Version) = AppConfig(
     BundleSpec("edu.gemini.qpt.shared",                  version),
     BundleSpec("edu.gemini.services.server",             version),
     BundleSpec("edu.gemini.smartgcal.odbinit",           version),
+    BundleSpec("edu.gemini.smartgcal.servlet",           version),
     BundleSpec("edu.gemini.sp.vcs.tui",                  version),
     BundleSpec("edu.gemini.spdb.rollover.servlet",       version),
     BundleSpec("edu.gemini.spdb.shell",                  version),
@@ -123,7 +124,10 @@ def common(version: Version) = AppConfig(
     BundleSpec("org.scalaz.concurrent",                  Version(7, 0, 5)),
     BundleSpec("slf4j.api",                              Version(1, 6, 4)),
     BundleSpec("slf4j.jdk14",                            Version(1, 6, 4)),
-    BundleSpec("org.apache.commons.logging",             Version(1, 1, 0))
+    BundleSpec("org.apache.commons.logging",             Version(1, 1, 0)),
+    BundleSpec("com.cosylab.epics.caj",                  Version(1, 0, 2)),
+    BundleSpec("edu.gemini.shared.ca",                   version),
+    BundleSpec("edu.gemini.spdb.reports.collection",     version)
   )
 ) extending List(common_credentials(version))
 
@@ -235,9 +239,15 @@ def fnussber(version: Version) = AppConfig(
   id = "fnussber",
   distribution = List(TestDistro),
   vmargs = List(
-    "-Xmx3000M",
+    "-Xmx2000M",
     "-XX:MaxPermSize=196M",
-    "-Dedu.gemini.site=north"
+    "-Dedu.gemini.site=north",
+    "-Dcron.*.edu.gemini.dbTools.html.ftpHost=localhost",
+    "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/Users/fnussber/.spdb/sftp",
+    "-Dcron.reports.edu.gemini.spdb.reports.public.host=localhost",
+    "-Dcron.reports.edu.gemini.spdb.reports.public.remotedir=/Users/fnussber/.spdb/cron",
+    "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=localhost",
+    "-Dcron.archive.edu.gemini.dbTools.html.ftpDestDir=/Users/fnussber/.spdb/cron"
   ),
   props = Map(
     "edu.gemini.smartgcal.host"     -> "localhost",
@@ -254,14 +264,16 @@ def fnussber(version: Version) = AppConfig(
 def sraaphorst(version: Version) = AppConfig(
   id = "sraaphorst",
   distribution = List(TestDistro),
-  vmargs = List(
-    "-Xmx1024M",
-    "-XX:MaxPermSize=196M",
-    "-Dedu.gemini.site=north",
-    "-Dcron.*.edu.gemini.dbTools.html.ftpHost=localhost",
-    "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/Users/ftpuser/sftp",
-    "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=localhost",
-    "-Dcron.archive.edu.gemini.dbTools.html.ftpDestDir=/Users/sraaphor/cron"
+   vmargs = List(
+     "-Xmx1024M",
+     "-XX:MaxPermSize=196M",
+     "-Dedu.gemini.site=south",
+     "-Dcron.*.edu.gemini.dbTools.html.ftpHost=localhost",
+     "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/Users/sraaphor/.spdb/sftp",
+     "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=localhost",
+     "-Dcron.archive.edu.gemini.dbTools.html.ftpDestDir=/Users/sraaphor/cron",
+     "-Dcron.reports.edu.gemini.spdb.reports.public.host=localhost",
+     "-Dcron.reports.edu.gemini.spdb.reports.public.remotedir=/Users/sraaphor/cron"
   ),
   props = Map(
     "edu.gemini.smartgcal.host"            -> "localhost",
@@ -399,11 +411,6 @@ def odbproduction(version: Version) = AppConfig(
   props = Map(
     "edu.gemini.smartgcal.host"       -> "gsodb",
     "edu.gemini.smartgcal.svnRootUrl" -> "http://source.gemini.edu/gcal/trunk/calibrations"
-  ),
-  bundles = List(
-    BundleSpec(50, "com.cosylab.epics.caj",              Version(1, 0, 2)),
-    BundleSpec(50, "edu.gemini.shared.ca",               version),
-    BundleSpec(50, "edu.gemini.spdb.reports.collection", version)
   )
 ) extending List(with_remote_gogo(version), odbproduction_credentials(version))
 

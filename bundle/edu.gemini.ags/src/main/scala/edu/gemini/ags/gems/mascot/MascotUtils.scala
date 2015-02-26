@@ -47,16 +47,9 @@ object MascotUtils {
 
 
   // Returns true if the 3 (or at least 2) positions can be used
-  def doesItFit(n1: Star, n2: Star, n3: Star = null): Boolean = {
-    if (n3 == null) {
-      //      d = slist(1:2,1)-slist(1:2,2);
-      //      d = sqrt(sum(d^2.));
-      val d = math.sqrt((DenseVector(n1.y - n2.y, n1.x - n2.x) :^ 2.0).sum)
-      //      if (d<=(120-2*edge_margin)) return 1;
-      //      else return 0;
-      d <= (120 - 2 * edge_margin)
-    } else {
-      //  d = array(0.,[3,300,300,nstars]);
+  def doesItFit(n1: Star, n2: Star, n3: Option[Star] = None): Boolean = {
+    n3.map{ v3 =>
+            //  d = array(0.,[3,300,300,nstars]);
       //  for (ns=1;ns<=3;ns++) {
       //    d(,,ns) = dist(300,xc=150+slist(1,ns),yc=150+slist(2,ns));
       //  }
@@ -67,10 +60,17 @@ object MascotUtils {
       val r = size / 2
       val d1 = dist(size, r + n1.y, r + n1.x)
       val d2 = dist(size, r + n2.y, r + n2.x)
-      val d3 = dist(size, r + n3.y, r + n3.x)
+      val d3 = dist(size, r + v3.y, r + v3.x)
       val dmin = util.YUtils.max(util.YUtils.max(d1, d2), d3).min
 
       dmin < 60 - edge_margin
+    }.getOrElse {
+      //      d = slist(1:2,1)-slist(1:2,2);
+      //      d = sqrt(sum(d^2.));
+      val d = math.sqrt((DenseVector(n1.y - n2.y, n1.x - n2.x) :^ 2.0).sum)
+      //      if (d<=(120-2*edge_margin)) return 1;
+      //      else return 0;
+      d <= (120 - 2 * edge_margin)
     }
   }
 
@@ -451,18 +451,18 @@ object MascotUtils {
     //  return zero_point_fudge*res(2:);
 
 
-    val lambda = DenseVector(3.5, 4, 5, 6, 7, 8, 9, 10, 11) * 1e-7; // meters
-    val qe = DenseVector(0.0, 5, 30, 37, 37, 32, 23, 10, 0.0) * 0.01 * 1.6; // percent
+    val lambda = DenseVector(3.5, 4, 5, 6, 7, 8, 9, 10, 11) * 1e-7 // meters
+    val qe = DenseVector(0.0, 5, 30, 37, 37, 32, 23, 10, 0.0) * 0.01 * 1.6 // percent
     val h = 6.62e-34
     val c = 3e8
 
     // for band u,b,v,r,i
-    val cw = DenseVector(365.0, 440.0, 550.0, 700.0, 900.0) * 1e-9; // central wavelength
-    val dw = DenseVector(68.0, 98.0, 89.0, 22.0, 24.0) * 1e-3; // delta_lambda in microns
+    val cw = DenseVector(365.0, 440.0, 550.0, 700.0, 900.0) * 1e-9 // central wavelength
+    val dw = DenseVector(68.0, 98.0, 89.0, 22.0, 24.0) * 1e-3 // delta_lambda in microns
     val zp = DenseVector(-11.37, -11.18, -11.42, -11.76, -12.08)
 
     // photometric zeropoints in W/cm2/mic
-    val zpv = 21.8; // mag V per square arcsec at darkest
+    val zpv = 21.8 // mag V per square arcsec at darkest
     val msky = Array(
       DenseVector(0.0, 0.8, 0.0, -0.9, -1.9) + zpv, // darkest
       DenseVector(-1.5, 0.2, 0.0, -0.8, -1.6) + (zpv - 0.6), // 50%
@@ -476,16 +476,16 @@ object MascotUtils {
     val res = DenseVector.zeros[Double](4)
 
     for (i <- 0 until 4) {
-      val f1 = YUtils.pow(10.0, msky(i) * -0.4 + zp); // f en W/cm2/mic
-      val f2 = (f1 :/ divide(h * c, cw)) * math.Pi * (math.pow(400.0, 2) - math.pow(50.0, 2)); // f in N_photon/pup_gemini/s/mic
-      val f = f2 * 0.1; //f in N_photon/pup_gemini/s/100nm
+      val f1 = YUtils.pow(10.0, msky(i) * -0.4 + zp) // f en W/cm2/mic
+      val f2 = (f1 :/ divide(h * c, cw)) * math.Pi * (math.pow(400.0, 2) - math.pow(50.0, 2)) // f in N_photon/pup_gemini/s/mic
+      val f = f2 * 0.1 //f in N_photon/pup_gemini/s/100nm
       val tab1 = grow(f, f(f.size - 1))
       val tab2 = grow(cw, 1100e-9)
       val sp = tspline(8, tab1, tab2, lvec)
       res(i) = (sp :* qeapd).sum
     }
 
-    (res * (math.Pi * math.pow(ttwfs_aper_radius, 2.0))) * zero_point_fudge; // for the TT wfs field stop
+    (res * (math.Pi * math.pow(ttwfs_aper_radius, 2.0))) * zero_point_fudge // for the TT wfs field stop
   }
 
 
@@ -524,7 +524,7 @@ object MascotUtils {
     //  tab1   = f; grow,tab1,f(5);
     //  tab2   = cw; grow,tab2,1100e-9;
     //  sp     = tspline(10,tab1,tab2,lvec);
-    val f1 = YUtils.pow(10.0, msky * -0.4 + zp); // f en W/cm2/mic
+    val f1 = YUtils.pow(10.0, msky * -0.4 + zp) // f en W/cm2/mic
     val f2 = (f1 :/ divide(h * c, cw)) * math.Pi * (math.pow(400.0, 2) - math.pow(50.0, 2))
     val f = f2 * 0.1
     val tab1 = grow(f, f(f.size - 1))

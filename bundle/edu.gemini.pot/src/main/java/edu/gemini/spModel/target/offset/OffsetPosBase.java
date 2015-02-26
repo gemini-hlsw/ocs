@@ -128,7 +128,7 @@ public abstract class OffsetPosBase extends WatchablePos {
         if (opt == null) throw new IllegalArgumentException("default guide option cannot be null");
         if (opt == defaultGuideOption) return;
         defaultGuideOption = opt;
-        _notifyOfGenericUpdate();
+        _notifyOfUpdate();
     }
 
     public boolean isActive(GuideProbe guider) {
@@ -169,7 +169,7 @@ public abstract class OffsetPosBase extends WatchablePos {
         m.put(guider, option);
         _linkMap = Collections.unmodifiableMap(m);
 
-        _notifyOfGenericUpdate();
+        _notifyOfUpdate();
     }
 
     /*
@@ -245,7 +245,7 @@ public abstract class OffsetPosBase extends WatchablePos {
             newLinks.remove(probe);
             _linkMap = Collections.unmodifiableMap(newLinks);
         }
-        _notifyOfGenericUpdate();
+        _notifyOfUpdate();
         return res;
     }
 
@@ -256,7 +256,7 @@ public abstract class OffsetPosBase extends WatchablePos {
         if (_linkMap.isEmpty()) return;
 
         _linkMap = Collections.emptyMap();
-        _notifyOfGenericUpdate();
+        _notifyOfUpdate();
     }
 
     /**
@@ -310,12 +310,12 @@ public abstract class OffsetPosBase extends WatchablePos {
 
     public synchronized void setXAxis(double xAxis) {
         _xAxis = xAxis;
-        _notifyOfLocationUpdate();
+        _notifyOfUpdate();
     }
 
     public synchronized void setYAxis(double yAxis) {
         _yAxis = yAxis;
-        _notifyOfLocationUpdate();
+        _notifyOfUpdate();
     }
 
     /**
@@ -333,7 +333,7 @@ public abstract class OffsetPosBase extends WatchablePos {
      */
     public void setXY(double xAxis, double yAxis, IssPort port) {
         noNotifySetXY(xAxis, yAxis, port);
-        _notifyOfLocationUpdate();
+        _notifyOfUpdate();
     }
 
     /**

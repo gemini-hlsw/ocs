@@ -89,6 +89,7 @@ public class GmosNorthType {
         R600_G5304("R600_G5304", "R600"),
         R400_G5305("R400_G5305", "R400"),
         R150_G5306("R150_G5306", "R150"),
+        R150_G5308("R150_G5308", "R150"),
         ;
 
         /** The default Disperser value **/

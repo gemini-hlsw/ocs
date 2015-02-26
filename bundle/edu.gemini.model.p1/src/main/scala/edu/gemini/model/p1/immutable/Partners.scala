@@ -13,10 +13,14 @@ object Partners {
     NgoPartner.KR -> "Korea",
     NgoPartner.US -> "United States",
     NgoPartner.UH -> "University of Hawaii",
+    ExchangePartner.CFHT -> Site.CFHT.name,
     ExchangePartner.KECK -> Site.Keck.name,
     ExchangePartner.SUBARU -> Site.Subaru.name,
     LargeProgramPartner -> "Large Program"
   )
+
+  // REL-2248 Contains a list of partners that are not allowed on joint proposals
+  val jointProposalNotAllowed = List[NgoPartner](NgoPartner.KR)
 
   val ftPartners:Seq[(Option[NgoPartner], String)] = {
     (None -> "None") :: NgoPartner.values.toList.map(p => Some(p) -> Partners.name.getOrElse(p, ""))

@@ -4,7 +4,7 @@ import edu.gemini.phase2.core.model.TemplateFolderExpansion
 import edu.gemini.phase2.template.factory.api.{TemplateFolderExpansionFactory, TemplateFactory}
 import edu.gemini.spModel.pio.ParamSet
 import edu.gemini.spModel.pio.xml.{PioXmlUtil, PioXmlFactory}
-import edu.gemini.spModel.template.TemplateFolder
+import edu.gemini.spModel.template.Phase1Folder
 
 import org.apache.commons.fileupload.FileItem
 import org.apache.commons.fileupload.disk.DiskFileItemFactory
@@ -23,12 +23,10 @@ object TemplateServlet {
   def templateFolderExpansionXml(exp: TemplateFolderExpansion): String =
     PioXmlUtil.toXmlString(exp.toParamSet(new PioXmlFactory))
 
-  def templateFolder(xml: String): Either[Failure, TemplateFolder] =
+  def phase1Folder(xml: String): Either[Failure, Phase1Folder] =
     try {
       val pset = PioXmlUtil.read(xml).asInstanceOf[ParamSet]
-      val fold = new TemplateFolder()
-      fold.setParamSet(pset)
-      Right(fold)
+      Right(Phase1Folder.fromParamSet(pset))
     } catch {
       case ex: Exception =>
         LOG.log(Level.WARNING, "Problem parsing TemplateFolder param set", ex)
@@ -37,7 +35,7 @@ object TemplateServlet {
 }
 
 final class TemplateServlet(templateFactory: TemplateFactory) extends HttpServlet {
-  import TemplateServlet.{LOG, templateFolder, templateFolderExpansionXml}
+  import TemplateServlet.{LOG, phase1Folder, templateFolderExpansionXml}
 
   override def doGet(req: HttpServletRequest, res: HttpServletResponse) {
     send(Left(Failure.badRequest("Post a template folder to obtain the corresponding template groups and baseline calibrations")), res)
@@ -50,8 +48,8 @@ final class TemplateServlet(templateFactory: TemplateFactory) extends HttpServle
   override def doPost(req: HttpServletRequest, res: HttpServletResponse) {
     send(for {
       l <- items(req).right
-      x <- templateFolderXml(l).right
-      f <- templateFolder(x).right
+      x <- phase1FolderXml(l).right
+      f <- phase1Folder(x).right
       p <- expandTemplates(f).right
     } yield p, res)
   }
@@ -73,10 +71,10 @@ final class TemplateServlet(templateFactory: TemplateFactory) extends HttpServle
       }).toRight(Failure.badRequest("Missing '%s' param.".format(paramName))).right
     } yield map(it)
 
-  private def templateFolderXml(items: List[FileItem]): Either[Failure, String] =
+  private def phase1FolderXml(items: List[FileItem]): Either[Failure, String] =
     readItem("folder", items, it => Source.fromInputStream(it.getInputStream, "UTF-8").mkString)
 
-  private def expandTemplates(folder: TemplateFolder): Either[Failure, TemplateFolderExpansion] =
+  private def expandTemplates(folder: Phase1Folder): Either[Failure, TemplateFolderExpansion] =
     TemplateFolderExpansionFactory.expand(folder, templateFactory).left map { msg =>
       Failure.badRequest(msg)
     }

@@ -1,0 +1,29 @@
+# Throughput for the NIFS H grating  Best guess to get going from CDR.
+#
+# Columns are (1) wavelength in nm, (2) throughput
+#
+#
+# Author: Brian Walls
+# Created: 23 September 2005
+#
+
+330.0  0.0
+800.0  0.0
+900.0  0.15
+1000.0 0.35
+1100.0 0.45
+1200.0 0.73
+1300.0 0.84
+1400.0 0.89
+1500.0 0.87
+1600.0 0.83
+1700.0 0.80
+1800.0 0.75
+1900.0 0.78
+2000.0 0.79
+2100.0 0.77
+2200.0 0.70
+2300.0 0.65
+2400.0 0.60
+2410.0 0.55
+6000.0 0.0

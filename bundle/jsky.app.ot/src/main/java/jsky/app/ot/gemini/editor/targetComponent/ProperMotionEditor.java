@@ -5,9 +5,12 @@
 package jsky.app.ot.gemini.editor.targetComponent;
 
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
 import edu.gemini.spModel.target.WatchablePos;
+import edu.gemini.spModel.target.system.HmsDegTarget;
+import edu.gemini.spModel.target.system.ITarget;
 
 import javax.swing.*;
 import javax.swing.text.DefaultFormatter;
@@ -87,8 +90,7 @@ final class ProperMotionEditor implements TelescopePosEditor {
     }
 
     private final TelescopePosWatcher watcher = new TelescopePosWatcher() {
-        @Override public void telescopePosLocationUpdate(WatchablePos tp) { }
-        @Override public void telescopePosGenericUpdate(WatchablePos tp) {
+        @Override public void telescopePosUpdate(WatchablePos tp) {
             reinit();
         }
     };
@@ -98,7 +100,11 @@ final class ProperMotionEditor implements TelescopePosEditor {
             try {
                 Number d = (Number) evt.getNewValue();
                 target.deleteWatcher(watcher);
-                target.setPropMotionRA(d == null ? "0.0" : String.valueOf(d));
+                final ITarget it = target.getTarget();
+                if (it instanceof HmsDegTarget) {
+                    ((HmsDegTarget) it).setPropMotionRA(d == null ? 0.0 : d.doubleValue());
+                }
+                target.notifyOfGenericUpdate(); // someone else may be watching
                 target.addWatcher(watcher);
             } catch (Exception ex) {
                 // do nothing
@@ -111,7 +117,11 @@ final class ProperMotionEditor implements TelescopePosEditor {
             try {
                 Number d = (Number) evt.getNewValue();
                 target.deleteWatcher(watcher);
-                target.setPropMotionDec(d == null ? "0.0" : String.valueOf(d));
+                final ITarget it = target.getTarget();
+                if (it instanceof HmsDegTarget) {
+                    ((HmsDegTarget) it).setPropMotionDec(d == null ? 0 : d.doubleValue());
+                }
+                target.notifyOfGenericUpdate(); // someone else may be watching
                 target.addWatcher(watcher);
             } catch (Exception ex) {
                 // do nothing
@@ -119,7 +129,7 @@ final class ProperMotionEditor implements TelescopePosEditor {
         }
     };
 
-    public void edit(final SPTarget target) {
+    public void edit(final Option<ObsContext> ctx, final SPTarget target) {
         if (this.target == target) return;
         if (this.target != null) this.target.deleteWatcher(watcher);
         if (target != null) target.addWatcher(watcher);
@@ -130,11 +140,17 @@ final class ProperMotionEditor implements TelescopePosEditor {
 
     private void reinit() {
         pmRa.removePropertyChangeListener("value", updatePmRaListener);
-        pmRa.setText(target == null ? "0.0" : target.getPropMotionRA());
-        pmRa.addPropertyChangeListener("value", updatePmRaListener);
-
         pmDec.removePropertyChangeListener("value", updatePmDecListener);
-        pmDec.setText(target == null ? "0.0" : target.getPropMotionDec());
+        final ITarget it = target == null ? null : target.getTarget();
+        if (it instanceof HmsDegTarget) {
+            final HmsDegTarget t = (HmsDegTarget) target.getTarget();
+            pmRa.setText(Double.toString(t.getPropMotionRA()));
+            pmDec.setText(Double.toString(t.getPropMotionDec()));
+        } else {
+            pmRa.setText("0.0");
+            pmDec.setText("0.0");
+        }
+        pmRa.addPropertyChangeListener("value", updatePmRaListener);
         pmDec.addPropertyChangeListener("value", updatePmDecListener);
     }
 }

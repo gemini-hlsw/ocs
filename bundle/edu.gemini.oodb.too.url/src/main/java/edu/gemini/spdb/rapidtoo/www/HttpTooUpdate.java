@@ -45,7 +45,7 @@ public final class HttpTooUpdate implements TooUpdate {
     public HttpTooUpdate(HttpServletRequest req) throws BadRequestException {
         _id     = new HttpTooIdentity(req);
         _target = new HttpTooTarget(req);
-        _guide  = HttpTooGuideTarget.create(req);
+        _guide  = new HttpTooGuideTarget(req);
 
         double posAngle = 0.0;
         String val = req.getParameter(POSITION_ANGLE_PARAM);

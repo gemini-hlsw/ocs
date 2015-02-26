@@ -3,7 +3,7 @@ package edu.gemini.model.p1.immutable
 import org.specs2.mutable._
 import edu.gemini.model.p1.{mutable => M}
 import xml.XML
-import java.io.InputStreamReader
+import java.io.{File, InputStreamReader}
 import org.specs2.scalaz.ValidationMatchers._
 import scala.Some
 
@@ -44,14 +44,14 @@ class ProposalSpec extends SpecificationWithJUnit with SemesterProperties {
       xml must \\("scheduling") \> ""
     }
   }
-  "The Schema XML deserialization version 2014.1.1" should {
+  "The Schema XML deserialization" should {
     "set the semester to current upon saving a new proposal" in {
       val proposal = Proposal.empty
 
       val xml = XML.loadString(ProposalIo.writeToString(proposal))
 
       // verify the exported value is set to the current semester
-      xml must \\("semester", "year" -> "2015", "half" -> "A")
+      xml must \\("semester", "year" -> "2015", "half" -> "B")
     }
     "set the schemaVersion to current upon saving a new proposal" in {
       val proposal = Proposal.empty
@@ -65,6 +65,11 @@ class ProposalSpec extends SpecificationWithJUnit with SemesterProperties {
       val proposal = ProposalIo.read(new InputStreamReader(getClass.getResourceAsStream("proposal_with_latin1_encoding.xml")))
 
       ProposalIo.validate(proposal) must beRight
+    }
+    "be able to scrub non-valid xml chars, REL-2030" in {
+      val proposal = ProposalIo.readAndConvert(new File(getClass.getResource("proposal_with_invalid_character.xml").getFile))
+
+      proposal.isSuccess should beTrue
     }
   }
   "The Schema XML serialization version 1.0.14" should {

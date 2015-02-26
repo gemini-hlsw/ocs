@@ -7,7 +7,6 @@ import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.target.system.NonSiderealTarget;
 import edu.gemini.spModel.template.InstantiationFunctor;
-import edu.gemini.spModel.template.TemplateFolder;
 import edu.gemini.spModel.template.TemplateParameters;
 import jsky.app.ot.OT;
 import jsky.app.ot.util.Resources;
@@ -37,7 +36,7 @@ public class InstantiationDialog extends NodeSelector<Void> {
 
     public InstantiationDialog(ISPContainerNode templateFolder, ISPNode contextNode)  {
         super(templateFolder, contextNode);
-        tree.setCellRenderer(new InstantiationDialogRenderer((TemplateFolder) templateFolder.getDataObject()));
+        tree.setCellRenderer(new InstantiationDialogRenderer());
     }
 
     protected String getCaption() {
@@ -87,10 +86,7 @@ class InstantiationDialogRenderer extends TemplateDialogRenderer {
     private static final Icon ICON_NONSIDEREAL = Resources.getIcon("pit/nonsidereal.png");
     private static final Icon ICON_CONDS = Resources.getIcon("pit/conds.png");
 
-    private final TemplateFolder templateFolder;
-
-    InstantiationDialogRenderer(TemplateFolder templateFolder) {
-        this.templateFolder = templateFolder;
+    InstantiationDialogRenderer() {
     }
 
     protected void decorate(NodeData nd) {
@@ -98,14 +94,14 @@ class InstantiationDialogRenderer extends TemplateDialogRenderer {
         if (nd.getNode() instanceof ISPTemplateParameters) {
             // Icon
             final TemplateParameters tps = (TemplateParameters) nd.getDataObject();
-            final SPTarget spTarget = templateFolder.getTargets().get(tps.getTargetId());
+            final SPTarget spTarget = tps.getTarget();
             final ITarget target = spTarget.getTarget();
             final Icon targetIcon = (target instanceof NonSiderealTarget) ? ICON_NONSIDEREAL : ICON_SIDEREAL;
             setIcon(new DualIcon(targetIcon, ICON_CONDS));
 
             // Text
-            final SPSiteQuality.Conditions conds = templateFolder.getSiteQualities().get(tps.getSiteQualityId()).conditions();
-            setText(spTarget.getName() + " - " + conds);
+            final SPSiteQuality.Conditions conds = tps.getSiteQuality().conditions();
+            setText(spTarget.getTarget().getName() + " - " + conds);
         }
     }
 }

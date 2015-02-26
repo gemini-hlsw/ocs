@@ -7,7 +7,6 @@
 
 package edu.gemini.pot.sp;
 
-
 /**
  * This is the interface for a Science Program Observation Component node.
  */

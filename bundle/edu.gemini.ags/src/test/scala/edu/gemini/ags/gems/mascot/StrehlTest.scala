@@ -1,6 +1,7 @@
 package edu.gemini.ags.gems.mascot
 
-import org.junit.{Test, Ignore}
+import edu.gemini.spModel.core.MagnitudeBand
+import org.junit.Test
 import org.junit.Assert._
 import breeze.linalg._
 import edu.gemini.ags.gems.mascot.util.YUtils._
@@ -9,8 +10,7 @@ import Strehl._
 /**
  * Tests methods in the Strehl class.
  */
-
-@Ignore class StrehlTest {
+class StrehlTest {
 
   //> create_distortion(1,2,3)
   //[1,0]
@@ -315,14 +315,14 @@ import Strehl._
   // Test top level Strehl algorithm with data from the Yorick version
   @Test def testStrehl() {
     val starList = List(
-      Star(1.25168, 0.801961, 11.34, 9.08, 11.09, 12.769, 11.977, 11.298, 2, 49.9505, 41.5119),
-      Star(-32.9534, 43.4231, 14.19, 13.55, 12.63, 11.678, 11.088, 10.979, 2, 49.9632, 41.5238),
-      Star(42.4108, 15.864, 14.71, 14.06, 13.11, 12.677, 12.144, 12.063, 2, 49.9352, 41.5161))
+      MascotTest.star(1.25168, 0.801961, 11.34, 9.08, 11.09, 12.769, 11.977, 11.298, 49.9505, 41.5119),
+      MascotTest.star(-32.9534, 43.4231, 14.19, 13.55, 12.63, 11.678, 11.088, 10.979, 49.9632, 41.5238),
+      MascotTest.star(42.4108, 15.864, 14.71, 14.06, 13.11, 12.677, 12.144, 12.063, 49.9352, 41.5161))
 
-    val s = Strehl(starList, "R")
-    val starmag = (for (star <- s.stars) yield star.rmag).toArray
-    val starra = (for (star <- starList) yield star.ra).toArray
-    val stardec = (for (star <- starList) yield star.dec).toArray
+    val s = Strehl(starList, MagnitudeBand.R)
+    val starmag = (for (star <- s.stars) yield star.target.magnitudeIn(MagnitudeBand.R).get.value).toArray
+    val starra = (for (star <- starList) yield star.target.coordinates.ra.toAngle.toDegrees).toArray
+    val stardec = (for (star <- starList) yield star.target.coordinates.dec.toDegrees).toArray
     val starx = (for (star <- starList) yield star.x).toArray
     val stary = (for (star <- starList) yield star.y).toArray
 

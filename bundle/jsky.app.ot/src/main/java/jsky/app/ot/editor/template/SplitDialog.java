@@ -2,11 +2,9 @@ package jsky.app.ot.editor.template;
 
 import edu.gemini.pot.client.SPDB;
 import edu.gemini.pot.sp.ISPNode;
-import edu.gemini.pot.sp.ISPTemplateFolder;
 import edu.gemini.pot.sp.ISPTemplateGroup;
 import edu.gemini.pot.sp.ISPTemplateParameters;
 import edu.gemini.spModel.template.SplitFunctor;
-import edu.gemini.spModel.template.TemplateFolder;
 import edu.gemini.spModel.util.DBTreeListService;
 import jsky.app.ot.OT;
 import jsky.app.ot.viewer.NodeData;
@@ -14,19 +12,13 @@ import jsky.app.ot.viewer.NodeData;
 import java.awt.Component;
 
 
-public class SplitDialog extends NodeSelector<Void> {
-
+public final class SplitDialog extends NodeSelector<Void> {
     private final ISPTemplateGroup groupNode;
 
     public SplitDialog(ISPTemplateGroup groupNode)  {
         super(groupNode, null);
         this.groupNode = groupNode;
-
-        // TODO: make this faster; it's two remote calls
-        final ISPTemplateFolder templateFolder = (ISPTemplateFolder) groupNode.getParent();
-        final TemplateFolder templateFolderData = (TemplateFolder) templateFolder.getDataObject();
-        tree.setCellRenderer(new InstantiationDialogRenderer(templateFolderData));
-
+        tree.setCellRenderer(new InstantiationDialogRenderer());
     }
 
     public static void open(Component parent, ISPTemplateGroup group) throws Exception {

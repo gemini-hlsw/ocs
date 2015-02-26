@@ -1,0 +1,38 @@
+# T-ReCS LoRes-20 Grating Efficiency
+# T. Hayward, 2003 Apr 11
+#
+# Taken from LR20um_specifygrating spreadsheet
+# Note that this is the _relative_ efficiency, defined to
+# be 1.00 at the blaze wavelength, and is a theoretical curve,
+# not measured from the delivered grating.
+
+# modified 11apr2003 to include arbitary 90% 
+# transmission at blaze - Phil Puxley
+
+# WL    Relative Efficiency
+
+15300   0
+15400   0
+15500   0.528667
+16000   0.561889
+16500   0.588611
+17000   0.609556
+17500   0.626167
+18000   0.637722
+18500   0.645667
+19000   0.649278
+19500   0.65
+20000   0.647833
+20500   0.644222
+21000   0.637722
+21500   0.629778
+22000   0.621111
+22500   0.611
+23000   0.600167
+23500   0.588611
+24000   0.576333
+24500   0.563333
+25000   0.551056
+25500   0.538056
+25600   0
+25700   0

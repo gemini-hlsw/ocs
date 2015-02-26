@@ -1,7 +1,6 @@
 package edu.gemini.spModel.template;
 
 import edu.gemini.pot.sp.SPComponentType;
-import edu.gemini.shared.util.TimeValue;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
@@ -10,11 +9,9 @@ import edu.gemini.spModel.type.DescribableSpType;
 import edu.gemini.spModel.type.DisplayableSpType;
 import edu.gemini.spModel.util.VersionToken;
 
-import java.io.Serializable;
-
 public final class TemplateGroup extends AbstractDataObject {
 
-    public static final String VERSION = "2012B-1";
+    public static final String VERSION = "2015A-1";
     public static final SPComponentType SP_TYPE = SPComponentType.TEMPLATE_GROUP;
 
     // Private PIO parameters
@@ -59,73 +56,6 @@ public final class TemplateGroup extends AbstractDataObject {
 
         public String toString() {
             return displayValue;
-        }
-
-    }
-
-    /**
-     * Immutable, PIO-serializable carrier for parameters that can be applied to a TemplateGroup.
-     */
-    public static final class Args implements Serializable {
-
-        public static final String PARAM_SET_NAME     = "templateArgs";
-        public static final String PARAM_TARGET       = "target";
-        public static final String PARAM_SITE_QUALITY = "siteQuality";
-        public static final String PARAM_TIME         = "time";
-
-        private final String targetId;
-        private final String siteQualityId;
-        private final TimeValue time;
-
-        public Args(String targetId, String siteQualityId, TimeValue time) {
-            this.targetId      = targetId;
-            this.siteQualityId = siteQualityId;
-            this.time          = time;
-        }
-
-        public Args(ParamSet paramSet) {
-            this(Pio.getValue(paramSet, PARAM_TARGET),
-                 Pio.getValue(paramSet, PARAM_SITE_QUALITY),
-                 TimeValue.millisecondsToTimeValue(Pio.getLongValue(paramSet, PARAM_TIME, 0l), TimeValue.Units.hours));
-        }
-
-        public String getTargetId() {
-            return targetId;
-        }
-
-        public String getSiteQualityId() {
-            return siteQualityId;
-        }
-
-        public TimeValue getTime() {
-            return time;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Args that = (Args) o;
-            if (!siteQualityId.equals(that.siteQualityId)) return false;
-            if (!targetId.equals(that.targetId)) return false;
-            if (!time.equals(that.time)) return false;
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = targetId.hashCode();
-            result = 31 * result + siteQualityId.hashCode();
-            result = 31 * result + time.hashCode();
-            return result;
-        }
-
-        public ParamSet getParamSet(PioFactory factory) {
-            final ParamSet ps = factory.createParamSet(PARAM_SET_NAME);
-            Pio.addParam(factory, ps, PARAM_TARGET, targetId);
-            Pio.addParam(factory, ps, PARAM_SITE_QUALITY, siteQualityId);
-            Pio.addLongParam(factory, ps, PARAM_TIME, time.getMilliseconds());
-            return ps;
         }
 
     }

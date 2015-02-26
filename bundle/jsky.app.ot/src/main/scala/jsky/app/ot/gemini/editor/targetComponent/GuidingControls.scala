@@ -1,12 +1,13 @@
 package jsky.app.ot.gemini.editor.targetComponent
 
 import edu.gemini.ags.api._
-import edu.gemini.pot.sp.ISPObservation
+import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
+import jsky.app.ot.OT
 
-import java.awt.event.{ActionEvent, ActionListener, ItemEvent, ItemListener}
+import jsky.app.ot.ags.AgsContext
+
 import scala.swing._
-import edu.gemini.ags.api.DefaultMagnitudeTable
 
 
 class GuidingControls extends GridBagPanel {
@@ -23,27 +24,16 @@ class GuidingControls extends GridBagPanel {
     insets = new Insets(0, 0, 0, 0)
   }
 
-  val autoGuiderSelector          = new AgsStrategySelector
-  val autoGuideStarGuiderSelector = new autoGuiderSelector.ComboBox
+  val autoGuideStarGuiderSelector = new AgsStrategyCombo
 
-  layout(Component.wrap(autoGuideStarGuiderSelector)) = new Constraints {
+  layout(Component.wrap(autoGuideStarGuiderSelector.getUi)) = new Constraints {
     gridx  = 1
     insets = new Insets(0, 5, 0, 10)
   }
 
-  val autoGuideStarButton = new Button {
-    import GuidingControls.{Search, Update}
-    text = Search
-
+  val autoGuideStarButton = new Button("Auto GS") {
     def update(analysis: List[AgsAnalysis]): Unit = {
-      def noGuideStar(a: AgsAnalysis): Boolean = a match {
-        case AgsAnalysis.NoGuideStarForGroup(_) => true
-        case AgsAnalysis.NoGuideStarForProbe(_) => true
-        case _ => false
-      }
-
-      enabled = !analysis.isEmpty // if empty, no strategy so no search
-      text    = if (analysis.exists(noGuideStar)) Search else Update
+      enabled = analysis.nonEmpty // if empty, no strategy so no search
     }
   }
 
@@ -52,51 +42,24 @@ class GuidingControls extends GridBagPanel {
     insets = new Insets(0, 0, 0, 5)
   }
 
-  val manualGuideStarButton = new Button {
-    text = "Plot..."
-
-    def update(analysis: List[AgsAnalysis]): Unit = {
-      enabled = !analysis.isEmpty  // only empty if there is no strategy
-    }
-  }
+  val manualGuideStarButton = new Button("Manual GS")
 
   layout(manualGuideStarButton) = new Constraints {
     gridx  = 3
   }
 
-  def init(obs: ISPObservation): Unit = {
-    autoGuiderSelector.init(obs)
-    update()
-  }
-
-  def resetSelectedAgsStrategy(): Unit =
-    autoGuiderSelector.updateSelectedAgsStrategy(Option.empty[AgsStrategy].asGeminiOpt)
-
-  def update(analysis: List[AgsAnalysis]): Unit = {
-    autoGuideStarButton.update(analysis)
-    manualGuideStarButton.update(analysis)
-  }
-
-  def update(): Unit = {
+  def update(ctxOpt: edu.gemini.shared.util.immutable.Option[ObsContext]): Unit = {
     val analysis = (for {
-      ctx <- Option(autoGuiderSelector.getContext)
-      str <- AgsRegistrar.selectedStrategy(ctx)
-    } yield str.analyze(ctx, DefaultMagnitudeTable(ctx))).getOrElse(List.empty)
-    update(analysis)
+      ctx <- ctxOpt.asScalaOpt
+      str <- AgsRegistrar.currentStrategy(ctx)
+    } yield str.analyze(ctx, OT.getMagnitudeTable)).getOrElse(List.empty)
+    autoGuideStarButton.update(analysis)
+    autoGuideStarGuiderSelector.setAgsOptions(AgsContext.create(ctxOpt))
   }
 
-  def toggleAgsGuiElements(visible: Boolean): Unit =
-    this.visible = visible
-
-  autoGuideStarGuiderSelector.addActionListener(new ActionListener {
-    override def actionPerformed(e: ActionEvent): Unit =
-      update()
-  })
+  def supportsAgs_=(supports: Boolean): Unit = {
+    guiderLabel.visible = supports
+    autoGuideStarGuiderSelector.getUi.setVisible(supports)
+    autoGuideStarButton.visible = supports
+  }
 }
-
-object GuidingControls {
-  private val Search = "Search"
-  private val Update = "Update"
-}
-
-

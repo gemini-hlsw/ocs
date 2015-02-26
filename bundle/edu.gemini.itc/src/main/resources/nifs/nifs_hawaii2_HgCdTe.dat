@@ -1,0 +1,16 @@
+# Average QE for the NIFS HgCdTe HAWAII-2 detector
+# Columns are (1) wavelength in nm, (2) QE
+# The average QE comes from is the first guess from the NIFS team
+# Author: Brian Walls 
+# Created: 23 September 2005
+#
+# lambda   QE
+    300   0.0
+    700   0.0
+   1100   0.58
+   1270  0.62
+   1640   0.70
+   2230   0.78
+   3710   0.78
+   5150   0.78
+   6000   0.0

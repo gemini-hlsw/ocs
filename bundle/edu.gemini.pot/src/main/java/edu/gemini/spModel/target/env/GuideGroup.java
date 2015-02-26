@@ -70,7 +70,7 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
      * @return a named GuideGroup with the given {@link GuideProbeTargets}
      */
     public static GuideGroup create(String name, ImList<GuideProbeTargets> targets) {
-        @SuppressWarnings({"unchecked"}) Option<String> nameOpt = name == null ? None.INSTANCE : new Some<String>(name);
+        final Option<String> nameOpt = name == null ? None.<String>instance() : new Some<>(name);
         return create(nameOpt, targets);
     }
 
@@ -96,7 +96,7 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
     // repeat the same GuideProbe will replace GuideProbeTargets that occur
     // earlier in the provided list of targets.
     private static ImList<GuideProbeTargets> normalize(ImList<GuideProbeTargets> targets) {
-        SortedMap<GuideProbe, GuideProbeTargets> m = new TreeMap<GuideProbe, GuideProbeTargets>(GuideProbe.KeyComparator.instance);
+        final SortedMap<GuideProbe, GuideProbeTargets> m = new TreeMap<>(GuideProbe.KeyComparator.instance);
         for (GuideProbeTargets gpt : targets) m.put(gpt.getGuider(), gpt);
         return DefaultImList.create(m.values());
     }
@@ -145,7 +145,7 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
      * @return new GuideGroup with the indicated name
      */
     public GuideGroup setName(String name) {
-        return setName(name == null ? None.STRING : new Some<String>(name));
+        return setName(name == null ? None.STRING : new Some<>(name));
     }
 
 
@@ -201,7 +201,7 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
      * {@link GuideProbeTargets} entry associated with {@link GuideProbe}
      */
     public GuideGroup remove(GuideProbe guider) {
-        ImList<GuideProbeTargets> lst = guideTargets.remove(GuideProbeTargets.match(guider));
+        final ImList<GuideProbeTargets> lst = guideTargets.remove(GuideProbeTargets.match(guider));
         if (lst.size() == guideTargets.size()) return this;
         return new GuideGroup(name, lst);
     }
@@ -317,7 +317,7 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
     }
 
     private SortedSet<GuideProbe> toSet(ImList<GuideProbe> probeList) {
-        SortedSet<GuideProbe> res = new TreeSet<GuideProbe>(GuideProbe.KeyComparator.instance);
+        final SortedSet<GuideProbe> res = new TreeSet<>(GuideProbe.KeyComparator.instance);
         res.addAll(probeList.toList());
         return res;
     }
@@ -332,6 +332,18 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
      */
     public SortedSet<GuideProbe> getReferencedGuiders() {
         return toSet(getReferencedGuiderList());
+    }
+
+    /**
+     * Gets the subset of referenced guiders that actually have an associated
+     * selected target.
+     */
+    public SortedSet<GuideProbe> getPrimaryReferencedGuiders() {
+        return toSet(guideTargets.filter(new PredicateOp<GuideProbeTargets>() {
+            @Override public Boolean apply(GuideProbeTargets gpt) {
+                return gpt.getPrimary().isDefined();
+            }
+        }).map(GuideProbeTargets.EXTRACT_PROBE));
     }
 
     /**
@@ -441,40 +453,16 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
     public static GuideGroup fromParamSet(ParamSet parent) {
         String name = Pio.getValue(parent, "name"); // may be null
 
-        List<GuideProbeTargets> lst = new ArrayList<GuideProbeTargets>();
+        List<GuideProbeTargets> lst = new ArrayList<>();
         for (ParamSet ps : parent.getParamSets()) {
             lst.add(GuideProbeTargets.fromParamSet(ps));
         }
         return create(name, DefaultImList.create(lst));
     }
 
-    // XXX: Defining equals here causes problems, since new, empty groups appear to be equal.
-    // XXX: Also groups with the same name may appear to be equal.
-//    @Override
-//    public boolean equals(Object o) {
-//        if (this == o) return true;
-//        if (o == null || getClass() != o.getClass()) return false;
-//
-//        GuideGroup that = (GuideGroup) o;
-//
-//        if (!guideTargets.equals(that.guideTargets)) return false;
-//        return name.equals(that.name);
-//    }
-//
-//    @Override
-//    public int hashCode() {
-//        int result = guideTargets.hashCode();
-//        result = 31 * result + name.hashCode();
-//        return result;
-//    }
-
-
     public String mkString(String prefix, String sep, String suffix) {
-        StringBuilder buf = new StringBuilder(prefix);
-        buf.append("name=\"").append(name.isEmpty() ? "" : name.getValue()).append("\"").append(sep);
-        buf.append("entries=").append(guideTargets.mkString(prefix, sep, suffix));
-        buf.append(suffix);
-        return buf.toString();
+        return prefix + "name=\"" + (name.isEmpty() ? "" : name.getValue()) + "\"" + sep +
+                        "entries=" + guideTargets.mkString(prefix, sep, suffix) + suffix;
     }
 
     public String toString() {

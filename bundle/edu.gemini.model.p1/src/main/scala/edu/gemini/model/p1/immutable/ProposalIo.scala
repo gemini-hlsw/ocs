@@ -50,15 +50,24 @@ object ProposalIo {
   def writeToXml(p: Proposal): Node =
     XML.loadString(writeToString(p)) // there is probably a more direct route ...
 
-  //private def tryLatin1(f: File)
-
   private def toProposal(r: ConversionResult): ProposalConversion = ProposalConversion(r.transformed, r.from, r.changes, toProposal(unmarshaller.unmarshal(new StringReader(r.root.toString))))
 
-  def readAndConvert(s: String):Validation[Either[Exception, NonEmptyList[String]], ProposalConversion] = try {
-      UpConverter.upConvert(XML.loadString(s)).fold(Right(_).fail, toProposal(_).success)
+  // Not all UFT-8 characters are valid in XML, strip them if needed
+  // Reference http://www.w3.org/TR/2000/REC-xml-20001006#NT-Char
+  private def stripNonValidXMLCharacters(in: String) = in.filter {
+    case 0x9 | 0xA | 0xD                    => true
+    case c if c >= 0x20 && c <= 0xD7FF      => true
+    case c if c >= 0xE000 && c <= 0xFFFD    => true
+    case c if c >= 0x10000 && c <= 0x10FFFF => true
+    case _                                  => false
+  }
+
+  def readAndConvert(s: String):Validation[Either[Exception, NonEmptyList[String]], ProposalConversion] =
+    try {
+      UpConverter.upConvert(XML.loadString(stripNonValidXMLCharacters(s))).fold(Right(_).fail, toProposal(_).success)
     } catch {
       case ex: UnmarshalException => ex.printStackTrace();Left(ex).fail
-      case ex: Exception => ex.printStackTrace();Left(ex).fail
+      case ex: Exception          => ex.printStackTrace();Left(ex).fail
     }
 
   def readAndConvert(f:File):Validation[Either[Exception, NonEmptyList[String]], ProposalConversion] = try {
@@ -69,7 +78,7 @@ object ProposalIo {
     }
   } catch {
     case ex: UnmarshalException => Left(ex).fail
-    case ex: Exception => tryLatin1AndConvert(f)
+    case ex: Exception          => tryLatin1AndConvert(f)
   }
 
   private def toProposal(a: AnyRef) = Proposal(a.asInstanceOf[M.Proposal])

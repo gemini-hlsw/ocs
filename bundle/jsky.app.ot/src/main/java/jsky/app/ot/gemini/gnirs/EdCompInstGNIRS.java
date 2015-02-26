@@ -16,7 +16,6 @@ import jsky.app.ot.OTOptions;
 import jsky.app.ot.editor.type.SpTypeComboBoxModel;
 import jsky.app.ot.editor.type.SpTypeComboBoxRenderer;
 import jsky.app.ot.gemini.editor.EdCompInstBase;
-import jsky.app.ot.gemini.parallacticangle.ParallacticInstEditor;
 import jsky.util.gui.DropDownListBoxWidget;
 import jsky.util.gui.DropDownListBoxWidgetWatcher;
 import jsky.util.gui.TextBoxWidget;
@@ -41,8 +40,7 @@ import java.util.*;
 /**
  * This is the editor for the GNIRS South instrument component.
  */
-public class EdCompInstGNIRS extends EdCompInstBase<InstGNIRS> implements ActionListener, DropDownListBoxWidgetWatcher,
-        ParallacticInstEditor {
+public class EdCompInstGNIRS extends EdCompInstBase<InstGNIRS> implements ActionListener, DropDownListBoxWidgetWatcher {
 
     // The GUI layout panel
     private final GnirsForm _w;
@@ -67,7 +65,6 @@ public class EdCompInstGNIRS extends EdCompInstBase<InstGNIRS> implements Action
      * Listeners for property changes that affect the parallactic angle components.
      */
     final PropertyChangeListener updateParallacticAnglePCL;
-    final PropertyChangeListener relativeTimeMenuPCL;
 
     /**
      * The constructor initializes the user interface.
@@ -129,13 +126,7 @@ public class EdCompInstGNIRS extends EdCompInstBase<InstGNIRS> implements Action
         updateParallacticAnglePCL = new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
-                _w.parallacticAnglePanel.updateParallacticAngleMode();
-            }
-        };
-        relativeTimeMenuPCL = new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                _w.parallacticAnglePanel.rebuildRelativeTimeMenu();
+                _w.posAnglePanel.updateParallacticControls();
             }
         };
 
@@ -247,7 +238,10 @@ public class EdCompInstGNIRS extends EdCompInstBase<InstGNIRS> implements Action
 
     @Override
     protected void cleanup() {
-        getDataObject().removePropertyChangeListener(xdListener);
+        final InstGNIRS inst = getDataObject();
+        inst.removePropertyChangeListener(xdListener);
+        inst.removePropertyChangeListener(InstGNIRS.SLIT_WIDTH_PROP.getName(), updateParallacticAnglePCL);
+        inst.removePropertyChangeListener(InstGNIRS.DISPERSER_PROP.getName(),  updateParallacticAnglePCL);
     }
 
     /**
@@ -273,16 +267,12 @@ public class EdCompInstGNIRS extends EdCompInstBase<InstGNIRS> implements Action
         _updateEnabledStates();
         _updatePort();
 
-        _w.parallacticAnglePanel.init(this, Site.GN);
+        _w.posAnglePanel.init(this, Site.GN);
 
         // If the position angle mode or FPU mode properties change, force an update on the parallactic angle mode.
-        getDataObject().addPropertyChangeListener(InstGNIRS.POSITION_ANGLE_MODE_PROP.getName(), updateParallacticAnglePCL);
-        getDataObject().addPropertyChangeListener(InstGNIRS.SLIT_WIDTH_PROP.getName(),          updateParallacticAnglePCL);
-
-        // Add a watcher to the data object for the disperser to rebuild the parallactic angle "Set To" menu
-        // when it is changed, as it may trigger changes in setup time for GMOS.
-        // (See subclasses for similiar property change listener for FPU.)
-        getDataObject().addPropertyChangeListener(InstGNIRS.DISPERSER_PROP.getName(), relativeTimeMenuPCL);
+        final InstGNIRS inst = getDataObject();
+        inst.addPropertyChangeListener(InstGNIRS.SLIT_WIDTH_PROP.getName(), updateParallacticAnglePCL);
+        inst.addPropertyChangeListener(InstGNIRS.DISPERSER_PROP.getName(),  updateParallacticAnglePCL);
     }
 
     // Return an array of default wavelength description strings (wavelength (order n))
@@ -340,11 +330,6 @@ public class EdCompInstGNIRS extends EdCompInstBase<InstGNIRS> implements Action
         */
     }
 
-    @Override
-    protected void updateEnabledState(boolean enabled) {
-        super.updateEnabledState(enabled);
-        _w.parallacticAnglePanel.updateEnabledState(enabled);
-    }
 
     // Apply a set of constraints, as specified in the GNIRS specs (see comments below)
     private void _applyConstraints() {
@@ -553,13 +538,6 @@ public class EdCompInstGNIRS extends EdCompInstBase<InstGNIRS> implements Action
         return _w.coadds;
     }
 
-    /**
-     * Return the position angle text box. Also includes implementation for par angle feature.
-     */
-    public TextBoxWidget getPosAngleTextBox() {
-        return _w.posAngle;
-    }
-    @Override public JTextField getPosAngleTextField() { return _w.posAngle; }
 
     /**
      * Return the exposure time text box.

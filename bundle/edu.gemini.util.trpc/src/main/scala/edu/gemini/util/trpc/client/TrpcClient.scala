@@ -26,24 +26,6 @@ object TrpcClient {
   val ConnectTimeout = 20 * 1000
   val ReadTimeout    = 0
 
-  /*
-  private lazy val socketFactory: SSLSocketFactory = {
-    // trust store only contains the public key so the password protection seems
-    // sort of irrelevant anyway
-    def loadTrustStore: KeyStore = {
-      val ks = KeyStore.getInstance(KeyStore.getDefaultType)
-      ks.load(TrpcClient.getClass.getResourceAsStream("gemTrustStore"), "_Curry1!".toCharArray)
-      ks
-    }
-
-    val tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm)
-    tmf.init(loadTrustStore)
-
-    val ctx = SSLContext.getInstance("TLS")
-    ctx.init(null, tmf.getTrustManagers, null)
-    ctx.getSocketFactory
-  }
-*/
   private val hostnameVerifier: HostnameVerifier = new HostnameVerifier {
      def verify(s: String, sslSession: SSLSession) = true
   }
@@ -57,7 +39,10 @@ object TrpcClient {
       withKeys(Set())
 
     def withKeyChain(kc: KeyChain): TrpcClient =
-      withKeys(kc.selection.unsafeRunAndThrow.map(_._2).toSet)
+      withKeys(kc.selection.run.unsafePerformIO.fold({
+        case KeyFailure.KeychainLocked => None
+        case f                         => throw f.toException
+      }, identity).map(_._2).toSet)
 
     def withOptionalKeyChain(okc: Option[KeyChain]): TrpcClient =
       okc.map(withKeyChain).getOrElse(withoutKeys)
@@ -146,18 +131,14 @@ class TrpcClient private (host: String, port: Int, connectTimeout: Int, readTime
           conn.setChunkedStreamingMode(1024 * 16) // 16k blocks (?)
           conn.setDoOutput(true)
           conn.setDoInput(true)
-
           conn.setReadTimeout(readTimeout)
-
-          // val ps: Set[Key] = auth.flatMap(_.selection.unsafeRunAndThrow.map(_._2)).toSet
-          // //auth.map(_.signedPrincipals.fold(throw _, identity)).getOrElse(Set.empty)
 
           if (Log.isLoggable(Level.FINE))
             Log.fine("Sending %d principals:".format(keys.size) + keys.map(p => "\n\t" + p))
 
-          closing(conn.getOutputStream)(_.writeBase64(Version.current, (args, keys))) // note that args may be null
+          closing(conn.getOutputStream)(_.writeRaw(Version.current, (args, keys))) // note that args may be null
           conn.getResponseCode match {
-            case HttpServletResponse.SC_OK => closing(conn.getInputStream)(_.readBase64.next[Try[AnyRef]]) match {
+            case HttpServletResponse.SC_OK => closing(conn.getInputStream)(_.readRaw.next[Try[AnyRef]]) match {
               case \/-(a) => a
               case -\/(e) =>
                 val localFrames = new Exception().getStackTrace.drop(2) // throw away the proxy frames (?)
@@ -176,7 +157,7 @@ class TrpcClient private (host: String, port: Int, connectTimeout: Int, readTime
       }
 
     }
-    //    val contextClassLoader: ClassLoader = Thread.currentThread().getContextClassLoader()
+
     Proxy.newProxyInstance(getClass.getClassLoader, Array(m.erasure), handler).asInstanceOf[A]
   }
 

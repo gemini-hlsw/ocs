@@ -1,0 +1,24 @@
+# this file holds the ratio of FWHM to the pixel_size in the first column
+# and the factionl flux in the peak pixel in the second. These are used to 
+# calculate the if the detector is saturated.
+
+0.0	1.0
+0.5	0.963
+1.0	0.579
+1.5	0.322
+2.0	0.197
+2.5	0.131
+3.0	0.093
+3.5	0.069
+4.0	0.054
+5.0	0.035
+6.0	0.024
+8.0	0.014
+10.0	0.0073
+15.0	0.0039
+20.0	0.0022
+50.0	0.00035
+100.0	0.000088
+250.0	0.000014
+500.0	0.0000035
+1000.0	0.00000088

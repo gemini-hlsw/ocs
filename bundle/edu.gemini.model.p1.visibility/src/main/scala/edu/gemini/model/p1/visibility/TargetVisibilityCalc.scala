@@ -32,6 +32,7 @@ object TargetVisibilityCalc {
     case GS     => GS
     case Keck   => GN
     case Subaru => GN
+    case CFHT   => GN
   }
 
   private def visibility(key: Key, coords: Coordinates): TargetVisibility = {

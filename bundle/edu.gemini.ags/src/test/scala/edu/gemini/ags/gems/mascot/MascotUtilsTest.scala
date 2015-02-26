@@ -21,7 +21,7 @@ import MascotUtils._
  * </pre>
  */
 
-@Ignore class MascotUtilsTest {
+class MascotUtilsTest {
 
   //  /**
   //   * wfs_noise([11.9,12.3,13.2])=[0.00702195,0.00702195,0.00845244,0.00845244,0.0128579,0.0128579]
@@ -51,7 +51,7 @@ import MascotUtils._
   }
 
   @Test def testReadZernikeSpectra() {
-    val m = fitsRead("/resources/edu/gemini/mascot/zernike_spectra.fits")
+    val m = fitsRead("zernike_spectra.fits")
     assertTrue(m.isInstanceOf[Matrix[Double]])
     assertEquals(2000, m.rows)
     assertEquals(6, m.cols)
@@ -67,7 +67,7 @@ import MascotUtils._
     val m = nullModesSpectra()
     assertEquals(4000, m.rows)
     assertEquals(6, m.cols)
-    val mf = fitsRead("/resources/edu/gemini/mascot/null_modes_spectra.fits")
+    val mf = fitsRead("null_modes_spectra.fits")
     assertMatricesEqual(mf, m, 0.0001)
   }
 
@@ -76,7 +76,7 @@ import MascotUtils._
     var m = vibSpectra()
     assertEquals(4000, m.rows)
     assertEquals(6, m.cols)
-    val mf = fitsRead("/resources/edu/gemini/mascot/vib_spectra.fits")
+    val mf = fitsRead("vib_spectra.fits")
 
     if (m(::, 0).max > sampfreq) {
       val tmp = where(m(::, 0), _ < sampfreq)

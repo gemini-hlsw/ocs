@@ -76,21 +76,17 @@ public class SciAreaFeature extends TpeImageFeature
     private GsaoiDetectorArrayFeature _gsaoiFeat;
 
     // properties (items are displayed in the OT View menu)
+    private static final BasicPropertyList _props = new BasicPropertyList(SciAreaFeature.class.getName());
     private static final String PROP_DISPLAY_CHOP_BEAMS = "Display Chop Beams";
     private static final String PROP_SHOW_TAGS = "Show Tags";
     private static final String PROP_SCI_AREA_DISPLAY = "Display Science FOV at";
-
-    private static BasicPropertyList _props;
-
     static {
         // Initialize the properties supported by this feature.
-        _props = new BasicPropertyList("SciAreaFeatureProps");
-        _props.setBoolean(PROP_SHOW_TAGS, true);
-        _props.setBoolean(PROP_DISPLAY_CHOP_BEAMS, true);
-        _props.setChoice(PROP_SCI_AREA_DISPLAY,
-                         new String[]{"Selected Position", "All Positions", "None"},
-                         0);
-        _props.restoreSettings();
+        _props.registerBooleanProperty(PROP_SHOW_TAGS, true);
+        _props.registerBooleanProperty(PROP_DISPLAY_CHOP_BEAMS, true);
+        _props.registerChoiceProperty(PROP_SCI_AREA_DISPLAY,
+                new String[]{"Selected Position", "All Positions", "None"},
+                0);
     }
 
     /**

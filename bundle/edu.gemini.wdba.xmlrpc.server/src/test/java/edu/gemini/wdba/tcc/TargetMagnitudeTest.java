@@ -34,10 +34,10 @@ public final class TargetMagnitudeTest extends TestBase {
         super.setUp();
 
         SPTarget base = new SPTarget();
-        base.setName("Base Pos");
+        base.getTarget().setName("Base Pos");
 
         pwfs1_1 = new SPTarget();
-        pwfs1_1.setName("PWFS1-1");
+        pwfs1_1.getTarget().setName("PWFS1-1");
 
         env = TargetEnvironment.create(base);
         GuideProbeTargets gpt = GuideProbeTargets.create(PwfsGuideProbe.pwfs1, pwfs1_1);
@@ -50,20 +50,20 @@ public final class TargetMagnitudeTest extends TestBase {
     }
 
     public void testOneMagnitude() throws Exception {
-        pwfs1_1.putMagnitude(new Magnitude(Magnitude.Band.J, 10));
+        pwfs1_1.getTarget().putMagnitude(new Magnitude(Magnitude.Band.J, 10));
         testTargetEnvironment(env);
     }
 
     public void testNonSiderealMagnitude() throws Exception {
-        pwfs1_1.putMagnitude(new Magnitude(Magnitude.Band.J, 10));
+        pwfs1_1.getTarget().putMagnitude(new Magnitude(Magnitude.Band.J, 10));
         pwfs1_1.setTarget(new ConicTarget());
-        pwfs1_1.setName("PWFS1-1");
+        pwfs1_1.getTarget().setName("PWFS1-1");
         testTargetEnvironment(env);
     }
 
     public void testTwoMagnitudes() throws Exception {
-        pwfs1_1.putMagnitude(new Magnitude(Magnitude.Band.J, 10));
-        pwfs1_1.putMagnitude(new Magnitude(Magnitude.Band.K, 20));
+        pwfs1_1.getTarget().putMagnitude(new Magnitude(Magnitude.Band.J, 10));
+        pwfs1_1.getTarget().putMagnitude(new Magnitude(Magnitude.Band.K, 20));
         testTargetEnvironment(env);
     }
 
@@ -89,7 +89,7 @@ public final class TargetMagnitudeTest extends TestBase {
 
             Option<SPTarget> target = env.getTargets().find(new PredicateOp<SPTarget>() {
                 public Boolean apply(SPTarget spTarget) {
-                    return name.equals(spTarget.getName());
+                    return name.equals(spTarget.getTarget().getName());
                 }
             });
 
@@ -104,7 +104,7 @@ public final class TargetMagnitudeTest extends TestBase {
 
     private void validateMagnitudes(Element element, SPTarget target) {
         final Element magGroupElement = (Element) element.selectSingleNode(MAG_PATH);
-        ImList<Magnitude> mags = target.getMagnitudes();
+        ImList<Magnitude> mags = target.getTarget().getMagnitudes();
         if (magGroupElement == null) {
             assertEquals(0, mags.size());
             return;

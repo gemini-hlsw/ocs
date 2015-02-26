@@ -76,7 +76,7 @@ public final class ObservationEnvironment {
             String className = supportMap.get(_inst.getType());
             if (className != null) {
                 try {
-                    Class cl = Class.forName(className);
+                    Class<?> cl = Class.forName(className);
                     LOG.info("Map class is:" + className);
                     sup = _create(cl);
                 } catch (ClassNotFoundException ex) {
@@ -92,9 +92,10 @@ public final class ObservationEnvironment {
 
 
     // Create the class instance by calling its create factory method with this OE as an arg
-    private ITccInstrumentSupport _create(Class cl) {
+    @SuppressWarnings("unchecked")
+    private ITccInstrumentSupport _create(Class<?> cl) {
         // Setup the arguments and their types
-        Class[] paramTypes = new Class[]{ObservationEnvironment.class};
+        Class<?>[] paramTypes = new Class<?>[]{ObservationEnvironment.class};
         Object[] args = new Object[]{this};
         ITccInstrumentSupport result = null;
         try {
@@ -124,7 +125,7 @@ public final class ObservationEnvironment {
     }
 
     public String getBasePositionName() {
-        return _targetEnv.getBase().getName();
+        return _targetEnv.getBase().getTarget().getName();
     }
 
     public boolean isNorth() {
@@ -246,7 +247,7 @@ public final class ObservationEnvironment {
     }
 
     public List<SequenceNode> getOffsetNodes() {
-        List<SequenceNode> res = new ArrayList<SequenceNode>();
+        List<SequenceNode> res = new ArrayList<>();
         addOffsetNodes(_obs.getSequence(), res);
         return res;
     }
@@ -263,9 +264,17 @@ public final class ObservationEnvironment {
         }
     }
 
-// private method to log and throw and exception
+    // private method to log and throw and exception
     private void _logAbort(String message, Exception ex) throws WdbaGlueException {
         LOG.severe(message);
         throw new WdbaGlueException(message, (ex != null) ? ex : null);
+    }
+
+    // REL-1596: Check if an instrument is using Altair, and if so and the mode is set to LGS_P1, adjust the origin name
+    // to reflect this by appending a "_p1".
+    public String adjustInstrumentOriginForLGS_P1(String basename) {
+        final InstAltair instAltair = getAltairConfig();
+        if (instAltair == null || !AltairParams.Mode.LGS_P1.equals(instAltair.getMode())) return basename;
+        return basename + "_p1";
     }
 }

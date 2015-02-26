@@ -1,0 +1,22 @@
+# transmission file for the acquisition camera fixed optics
+# i.e. excludes filters and detector
+
+# Design value is 0.76 and approximately independent of
+# wavelength. 
+
+# This has been divided by a factor of sqrt(2) to provide
+# some performance margin: 21-Feb-2001 Phil Puxley 
+
+# columns are (1) wavelength in nm (2) transmission
+
+300   0.00
+350   0.00
+400   0.54
+500   0.54
+600   0.54
+700   0.54
+800   0.54
+900	0.54
+1000  0.00
+1050  0.00
+

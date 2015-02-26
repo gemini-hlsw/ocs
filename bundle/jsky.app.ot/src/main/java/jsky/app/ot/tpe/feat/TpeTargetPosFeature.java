@@ -25,15 +25,10 @@ import java.util.Iterator;
 public class TpeTargetPosFeature extends TpePositionFeature
         implements TpeCreateableFeature, PropertyWatcher {
 
+    private static final BasicPropertyList _props = new BasicPropertyList(TpeTargetPosFeature.class.getName());
     private static final String PROP_SHOW_TAGS = "Show Tags";
-    private static BasicPropertyList _props;
-
     static {
-        // Initialize the properties supported by the TpeGuidePosFeature.
-
-        _props = new BasicPropertyList("TpeTargetPosFeatureProps");
-        _props.setBoolean(PROP_SHOW_TAGS, true);
-        _props.restoreSettings();
+        _props.registerBooleanProperty(PROP_SHOW_TAGS, true);
     }
 
 

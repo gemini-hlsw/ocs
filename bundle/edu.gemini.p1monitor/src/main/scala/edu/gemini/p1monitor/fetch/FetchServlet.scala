@@ -18,11 +18,9 @@ class FetchServlet(val config: P1MonitorConfig) extends HttpServlet {
   protected override def doGet(sreq: HttpServletRequest, sres: HttpServletResponse) {
     val req = try {
       new FetchRequest(sreq)
-    }
-    catch {
-      case ex: FetchException => {
+    } catch {
+      case ex: FetchException =>
         throw new ServletException(ex.getMessage)
-      }
     }
     try {
       sendFile(req, sres)
@@ -53,13 +51,13 @@ class FetchServlet(val config: P1MonitorConfig) extends HttpServlet {
     if (!(res.exists && res.canRead)) {
       throw new FileNotFoundException("Could not find '" + fileName + "'")
     }
-    return res
+    res
   }
 
   private def getExtension(f: File): String = {
     f.getName.indexOf(".") match {
-      case i if (i < 0)  => ""
-      case i => f.getName.substring(i)
+      case i if i < 0  => ""
+      case i           => f.getName.substring(i)
     }
   }
 

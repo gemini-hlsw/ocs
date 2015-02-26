@@ -3,7 +3,7 @@ package edu.gemini.spModel.core
 import scalaz._, Scalaz._
 
 /** An angle, convertible to various representations. */
-sealed trait Angle {
+sealed trait Angle extends java.io.Serializable {
 
   /** 
    * This `Angle` in decimal degrees [0, 360) 
@@ -17,6 +17,13 @@ sealed trait Angle {
    */
   def toRadians: Double = 
     toDegrees.toRadians
+
+  /**
+   * This `Angle` in arcmins
+   * @group Conversions
+   */
+  def toArcmins: Double =
+    toDegrees * 60
 
   /** 
    * This `Angle` as an `HourAngle`. 
@@ -92,7 +99,7 @@ sealed trait Angle {
 
   /** @group Overrides */
   final override def toString = 
-    f"Angle($toDegrees%3.3f°)"
+    s"Angle($toDegrees°)"
 
   /** @group Overrides */
   final override def equals(a: Any) =
@@ -105,6 +112,41 @@ sealed trait Angle {
   final override def hashCode =
     toDegrees.hashCode
 
+  /**
+   * @see [[Angle.formatDegrees]]
+   * @group Formatters 
+   */
+  def formatDegrees: String =
+    Angle.formatDegrees(this)
+
+  /**
+   * @see [[Angle.formatSexigesimal]]
+   * @group Formatters 
+   */
+  def formatSexigesimal: String =
+    Angle.formatSexigesimal(this)
+
+  /**
+   * @see [[Angle.formatDMS]]
+   * @group Formatters 
+   */
+  def formatDMS: String =
+    Angle.formatDMS(this)
+
+ /**
+   * @see [[Angle.formatHourAngle]]
+   * @group Formatters 
+   */
+  def formatHourAngle: String =
+    Angle.formatHourAngle(this)
+
+  /**
+   * @see [[Angle.formatHMS]]
+   * @group Formatters 
+   */
+  def formatHMS: String =
+    Angle.formatHMS(this)
+
 }
 
 object Angle {
@@ -115,8 +157,20 @@ object Angle {
    */
   def fromDegrees(d: Double): Angle =
     new Angle {
-      override val toDegrees = ((d % 360) + 360) % 360 // TODO: normalize to [0, 360)
+      override val toDegrees = ((d % 360) + 360) % 360
     }
+
+  /**
+   * Construct an `Angle` from the given value in arcseconds
+   * @group Constructors
+   */
+  def fromArcsecs(s: Double): Angle = fromDegrees(s / 3600)
+
+  /**
+   * Construct an `Angle` from the given value in arcminutes
+   * @group Constructors
+   */
+  def fromArcmin(m: Double): Angle = fromDegrees(m / 60)
 
   /** 
    * Construct an `Angle` from the given value in radians, which will be normalized to [0, 2π). 
@@ -124,6 +178,13 @@ object Angle {
    */
   def fromRadians(r: Double): Angle =
     fromDegrees(r.toDegrees)
+
+  /**
+   * Construct an `Angle` from the given value in hours, which will be normalized to [0, 24).
+   * @group Constructors
+   */
+  def fromHours(h: Double): Angle =
+    fromDegrees(h * 15.0)
 
   /** 
    * Construct an `Angle` from the given hour angle components if possible; `minutes` and `seconds` 
@@ -148,8 +209,7 @@ object Angle {
    * @group Constructors
    */
   def fromSexigesimal(degrees: Int, minutes: Int, seconds: Double): Option[Angle] =
-    if (minutes < 0 || minutes >= 60 || seconds < 0 || seconds >= 60) None 
-    else if (degrees < 0) fromSexigesimal(degrees + 360, minutes, seconds)
+    if (degrees < 0 || minutes < 0 || minutes >= 60 || seconds < 0 || seconds >= 60) None 
     else Some(fromDegrees(degrees + minutes / 60.0 + seconds / (60.0 * 60.0)))
 
   /** 
@@ -163,7 +223,7 @@ object Angle {
    * The `Angle` of zero degrees/radians. 
    * @group Constructors
    */
-  val zero = fromDegrees(0.0)
+  lazy val zero = fromDegrees(0.0)
 
   /** 
    * Additive monoid for `Angle`. Note that this is not a strictly lawful monoid as no floating
@@ -216,8 +276,8 @@ object Angle {
       case SexigesimalPat(a, b, c, d) => 
         for {
           s <- parseSign(a)
-          a <- fromSexigesimal(s.toInt * b.toInt, c.toInt, d.toDouble)
-        } yield a
+          a <- fromSexigesimal(b.toInt, c.toInt, d.toDouble)
+        } yield (if (s == -1) zero - a else a)
       case _ => None
     } \/> new NumberFormatException(s)
 
@@ -239,8 +299,8 @@ object Angle {
       case SexigesimalPat(a, b, c, d) => 
         for {
           s <- parseSign(a)
-          a <- fromHourAngle(s * b.toInt, c.toInt, d.toDouble)
-        } yield a
+          a <- fromHourAngle(b.toInt, c.toInt, d.toDouble)
+        } yield (if (s == -1) zero - a else a)
       case _ => None
     } \/> new NumberFormatException(s)
 
@@ -252,11 +312,11 @@ object Angle {
     parseHourAngle(s)
 
   // Regex for Sexigesimal
-  private val SexigesimalPat = """([-+])?(\d\d?):(\d\d?):(\d\d?\.?\d*)""".r
+  private val SexigesimalPat = """([-+])?(\d\d?\d?):(\d\d?):(\d\d?\.?\d*)""".r
 
   // Parse a sign
   private def parseSign(s: String): Option[Int] =
-    Some(s.trim) collect { 
+    Option(s).map(_.trim).orElse(Some("")) collect { 
       case "+" | "" =>  1
       case "-"      => -1 
     }
@@ -269,7 +329,7 @@ object Angle {
     def hours: Int
     def minutes: Int
     def seconds: Double
-    override def toString = f"HMS($hours%02d:$minutes%02d:$seconds%06.3f)"
+    override def toString = s"DMS(${format3(hours, minutes, seconds)})"  
   }
 
   /** 
@@ -280,7 +340,7 @@ object Angle {
     def degrees: Int
     def minutes: Int
     def seconds: Double
-    override def toString = f"DMS($degrees%3d:$minutes%02d:$seconds%06.3f)"  
+    override def toString = s"DMS(${format3(degrees, minutes, seconds)})"  
   }
 
   /** @group Type Members */
@@ -288,6 +348,55 @@ object Angle {
 
   /** @group Type Members */
   type DMS = Angle.Sexigesimal
+
+  /**
+   * Format the given `Angle` in decimal degrees with three fractional digits,
+   * followed by the degree sign.
+   * @group Formatters
+   */
+  def formatDegrees(a: Angle): String = 
+    f"${a.toDegrees}%4.03f°"
+
+  /**
+   * Format the given `Angle` in sexigesimal `d:mm:ss` with three fractional digits for
+   * seconds.
+   * @group Formatters
+   */
+  def formatSexigesimal(a: Angle): String = {
+    val dms = a.toSexigesimal
+    format3(dms.degrees, dms.minutes, dms.seconds)
+  }
+
+  /**
+   * Alias for [[Angle.formatSexigesimal]].
+   * @group Formatters
+   */
+  def formatDMS(a: Angle): String = 
+    formatSexigesimal(a)
+
+  /**
+   * Format the given `Angle` in hour angle format `h:mm:ss` with three fractional digits for
+   * seconds.
+   * @group Formatters
+   */
+  def formatHourAngle(a: Angle): String = {
+    val hms = a.toHourAngle
+    format3(hms.hours, hms.minutes, hms.seconds)
+  }
+
+  /**
+   * Alias for [[Angle.formatHourAngle]].
+   * @group Formatters
+   */
+  def formatHMS(a: Angle): String = 
+    formatHourAngle(a)
+
+  // Abstract over HMS/DMS
+  private[core] def format3(a: Int, b: Int, c: Double): String = 
+    if (f"$c%06.03f".startsWith("60")) // grr
+      format3(a, b + 1, 0)
+    else
+      f"$a%d:$b%02d:$c%06.03f"
 
 }
 

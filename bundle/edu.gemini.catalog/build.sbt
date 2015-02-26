@@ -7,7 +7,9 @@ name := "edu.gemini.catalog"
 // version set in ThisBuild
 
 unmanagedJars in Compile ++= Seq(
-  new File(baseDirectory.value, "../../lib/bundle/org-dom4j_2.10-1.5.1.jar")
+  new File(baseDirectory.value, "../../lib/bundle/org-dom4j_2.10-1.5.1.jar"),
+  new File(baseDirectory.value, "../../lib/bundle/org-apache-commons-httpclient_2.10-2.0.0.jar"),
+  new File(baseDirectory.value, "../../lib/bundle/org-apache-commons-logging_2.10-1.1.0.jar")
 )
 
 osgiSettings
@@ -26,6 +28,7 @@ OsgiKeys.privatePackage := Seq(
 OsgiKeys.exportPackage := Seq(
   "edu.gemini.catalog.api",
   "edu.gemini.catalog.impl",
+  "edu.gemini.catalog.votable",
   "edu.gemini.catalog.skycat",
   "edu.gemini.catalog.skycat.binding.adapter",
   "edu.gemini.catalog.skycat.binding.skyobj",
@@ -36,4 +39,4 @@ OsgiKeys.exportPackage := Seq(
   "jsky.catalog.util"
 )
 
-
+initialCommands := "import edu.gemini.spModel.core._,edu.gemini.catalog.api._,edu.gemini.catalog.votable._, scalaz._, Scalaz._"

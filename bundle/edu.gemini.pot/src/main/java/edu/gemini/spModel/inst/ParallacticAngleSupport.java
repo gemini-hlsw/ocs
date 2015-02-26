@@ -12,9 +12,6 @@ import edu.gemini.skycalc.Angle;
  * in ParallacticAngleSupportInst.
  */
 public interface ParallacticAngleSupport {
-    public void setPositionAngleMode(PositionAngleMode positionAngleMode);
-    public PositionAngleMode getPositionAngleMode();
-
     public void setParallacticAngleDuration(ParallacticAngleDuration parallacticAngleDuration);
     public ParallacticAngleDuration getParallacticAngleDuration();
 

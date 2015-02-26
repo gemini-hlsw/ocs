@@ -30,6 +30,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
+import edu.gemini.ags.api.AgsMagnitude;
 import edu.gemini.qpt.core.Schedule;
 import edu.gemini.qpt.core.ScheduleIO;
 import edu.gemini.qpt.core.util.LttsServicesClient;
@@ -59,12 +60,19 @@ public class OpenFromWebAction extends AbstractAsyncAction {
 
 	private final IShell shell;
     private final KeyChain authClient;
+    private final AgsMagnitude.MagnitudeTable magTable;
 
-	public OpenFromWebAction(IShell shell, KeyChain authClient) {
+	public OpenFromWebAction(IShell shell, final KeyChain authClient, AgsMagnitude.MagnitudeTable magTable) {
 		super("Open from Web...", authClient);
 		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, Platform.MENU_ACTION_MASK | KeyEvent.SHIFT_DOWN_MASK));
 		this.shell = shell;
-        this.authClient = authClient;
+    this.authClient = authClient;
+    this.magTable = magTable;
+    authClient.asJava().addListener(new Runnable() {
+    	public void run() {
+    		setEnabled(!authClient.asJava().isLocked());
+    	}
+    });
 	}
 
 	@Override
@@ -98,7 +106,7 @@ public class OpenFromWebAction extends AbstractAsyncAction {
                         LttsServicesClient.clearInstance();
                         for (int i = 0; sched == null ; i++) {
 							try {
-								sched = ScheduleIO.read(url, 1000, authClient);
+								sched = ScheduleIO.read(url, 1000, authClient, magTable);
 							} catch (TimeoutException te) {
 								pm.setMessage("Retrying (" + i + ") ...");
 								if (pm.isCancelled())

@@ -207,7 +207,11 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, O
     @Override
     public GuideProbeTargets cloneTargets() {
         Option<Integer>   primaryIndex = targetOptions.getPrimaryIndex();
-        ImList<SPTarget> clonedTargets = targetOptions.getOptions().map(SPTarget.CLONE_FUNCTION);
+        ImList<SPTarget> clonedTargets = targetOptions.getOptions().map(new Function1<SPTarget, SPTarget>() {
+            public SPTarget apply(final SPTarget target) {
+                return target.clone();
+            }
+        });
         OptionsListImpl<SPTarget> clone = OptionsListImpl.create(primaryIndex, clonedTargets);
         return new GuideProbeTargets(guider, clone);
     }
@@ -317,9 +321,9 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, O
         if (probe == null) return null;
 
         int primaryIndex = Pio.getIntValue(parent, "primary", -1);
-        Option<Integer> primary = (primaryIndex>=0) ? new Some<Integer>(primaryIndex) : None.INTEGER;
+        Option<Integer> primary = (primaryIndex>=0) ? new Some<>(primaryIndex) : None.INTEGER;
 
-        List<SPTarget> lst = new ArrayList<SPTarget>();
+        final List<SPTarget> lst = new ArrayList<>();
         for (ParamSet ps : parent.getParamSets()) {
             SPTarget target = SPTarget.fromParamSet(ps);
             lst.add(target);
@@ -330,11 +334,7 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, O
     }
 
     public String mkString(String prefix, String sep, String suffix) {
-        StringBuilder buf = new StringBuilder(prefix);
-        buf.append("guider=").append(guider).append(sep);
-        buf.append("targets=").append(targetOptions.mkString(prefix, sep, suffix));
-        buf.append(suffix);
-        return buf.toString();
+        return prefix + "guider=" + guider + sep + "targets=" + targetOptions.mkString(prefix, sep, suffix) + suffix;
     }
 
     public String toString() {

@@ -24,9 +24,9 @@ case class FutureSubmission(dest: SubmitDestination, url: String, proposal: Prop
   val timeout = 1 * 60000  // 1 min ?
 
   private val errorAdapter:PartialFunction[SubmitResult, SubmitResult] = {
-    case ServiceError(None, code, msg) => ServiceError(dest.some, code, msg)
-    case Offline(None)                 => Offline(dest.some)
-    case r                             => r
+    case ServiceError(None, _, code, msg) => ServiceError(dest.some, proposal.proposalClass.some, code, msg)
+    case Offline(None)                    => Offline(dest.some)
+    case r                                => r
   }
 
   private def sendSynchronously: SubmitResult =
@@ -58,7 +58,7 @@ case class FutureSubmission(dest: SubmitDestination, url: String, proposal: Prop
       case HTTP_CREATED => parse(read(http.getInputStream))
       case _            =>
         Option(http.getErrorStream).map(s => parse(read(s))).collect(errorAdapter).getOrElse {
-          ServiceError(dest.some, 0, "An unexpected error happened in the submission server.")
+          ServiceError(dest.some, proposal.proposalClass.some, 0, "An unexpected error happened in the submission server.")
         }
     }
   }

@@ -49,16 +49,13 @@ public class OIWFS_Feature extends TpeImageFeature {
     private TpeImageFeature _nifsFeat;
     private TpeImageFeature _flamingos2Feat;
 
+
+    private static final BasicPropertyList _props = new BasicPropertyList(OIWFS_Feature.class.getName());
     static final String PROP_WITH_VIG = "With Vignetting";
     static final String PROP_FILL_OBSCURED = "Fill Obscured Area";
-    static BasicPropertyList _props;
-
     static {
-        // Initialize the properties supported by this feature.
-        _props = new BasicPropertyList("OIWFS_FeatureProps");
-        _props.setBoolean(PROP_WITH_VIG, true);
-        _props.setBoolean(PROP_FILL_OBSCURED, false);
-        _props.restoreSettings();
+        _props.registerBooleanProperty(PROP_WITH_VIG, true);
+        _props.registerBooleanProperty(PROP_FILL_OBSCURED, false);
     }
 
     /**

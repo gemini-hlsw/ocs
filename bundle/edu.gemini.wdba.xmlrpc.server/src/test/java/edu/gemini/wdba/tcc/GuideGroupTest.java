@@ -36,7 +36,8 @@ public final class GuideGroupTest extends TestBase {
         super.setUp();
 
         base = new SPTarget();
-        base.setName("Base Pos");
+        base.getTarget().setName("Base Pos");
+        base.notifyOfGenericUpdate();
     }
 
     private static GuideProbeTargets createGuideTargets(GuideProbe probe) {

@@ -1,12 +1,12 @@
 package edu.gemini.ags.api
 
-import edu.gemini.catalog.api.MagnitudeLimits
-import edu.gemini.shared.skyobject.Magnitude
-import edu.gemini.spModel.core.Site
+import edu.gemini.catalog.api.MagnitudeConstraints
+import edu.gemini.spModel.core.{Magnitude, MagnitudeBand}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions.{BEST, WORST}
 import edu.gemini.spModel.guide.{GuideSpeed, GuideProbe}
 import edu.gemini.spModel.guide.GuideSpeed.{FAST, SLOW}
+import edu.gemini.spModel.obs.context.ObsContext
 
 /**
  * Types and methods for calculating magnitude limits.
@@ -16,11 +16,11 @@ object AgsMagnitude {
 //  type MagnitudeCalc  = (Conditions, GuideSpeed) => MagnitudeLimits
 //  type MagnitudeTable = (Site, GuideProbe) => Option[MagnitudeCalc]
   trait MagnitudeCalc {
-    def apply(c: Conditions, gs: GuideSpeed): MagnitudeLimits
+    def apply(c: Conditions, gs: GuideSpeed): MagnitudeConstraints
   }
 
   trait MagnitudeTable {
-    def apply(s: Site, gp: GuideProbe): Option[MagnitudeCalc]
+    def apply(ctx: ObsContext, gp: GuideProbe): Option[MagnitudeCalc]
   }
 
 
@@ -28,8 +28,10 @@ object AgsMagnitude {
    * Gets the widest possible range limits incorporating the given conditions
    * and speeds.
    */
-  def rangeLimits(mc: MagnitudeCalc, c1: (Conditions, GuideSpeed), c2: (Conditions, GuideSpeed)): MagnitudeLimits =
-    mc(c1._1, c1._2).union(mc(c2._1, c2._2)).getValue
+  def rangeLimits(mc: MagnitudeCalc, c1: (Conditions, GuideSpeed), c2: (Conditions, GuideSpeed)): Option[MagnitudeConstraints] =
+    // TODO In practice this shouldn't produce a None but there is no sensible default
+    // Review if the AGS model could be improved to support it
+    mc(c1._1, c1._2).union(mc(c2._1, c2._2))
 
   /**
    * Manual search limits provide the faintest possible limit for the best
@@ -38,7 +40,7 @@ object AgsMagnitude {
    * to a catalog server to find all possible candidates under any conditions
    * or guide speed.
    */
-  def manualSearchLimits(mc: MagnitudeCalc): MagnitudeLimits =
+  def manualSearchLimits(mc: MagnitudeCalc): Option[MagnitudeConstraints] =
     rangeLimits(mc, (BEST, SLOW), (WORST, FAST))
 
   /**
@@ -47,7 +49,7 @@ object AgsMagnitude {
    * stars which fall within these limits can be automatically assigned to
    * guiders by the AGS system.
    */
-  def autoSearchLimitsCalc(mc: MagnitudeCalc, c: Conditions): MagnitudeLimits =
+  def autoSearchLimitsCalc(mc: MagnitudeCalc, c: Conditions): Option[MagnitudeConstraints] =
     rangeLimits(mc, (c, SLOW), (c, FAST))
 
   /**
@@ -59,5 +61,5 @@ object AgsMagnitude {
       mc(c, gs).contains(m)
     }
 
-  def band(mc: MagnitudeCalc): Magnitude.Band = mc(BEST, FAST).getBand
+  def band(mc: MagnitudeCalc): MagnitudeBand = mc(BEST, FAST).band
 }

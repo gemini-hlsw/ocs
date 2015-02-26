@@ -9,6 +9,8 @@ package edu.gemini.spModel.gemini.gnirs;
 
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.shared.util.immutable.DefaultImList;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.config.ConfigPostProcessor;
@@ -41,13 +43,14 @@ import edu.gemini.spModel.obs.plannedtime.PlannedTime.Category;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.StepCalculator;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
 import edu.gemini.spModel.obscomp.InstConstants;
-import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.seqcomp.SeqConfigNames;
 import edu.gemini.spModel.telescope.IssPort;
 import edu.gemini.spModel.telescope.IssPortProvider;
+import edu.gemini.spModel.telescope.PosAngleConstraint;
+import edu.gemini.spModel.telescope.PosAngleConstraintAware;
 
 import java.beans.PropertyDescriptor;
 
@@ -57,7 +60,8 @@ import java.util.*;
 /**
  * The GNIRS instrument.
  */
-public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyProvider, GuideProbeProvider, IssPortProvider, ConfigPostProcessor, StepCalculator, CalibrationKeyProvider {
+public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyProvider, GuideProbeProvider,
+        IssPortProvider, ConfigPostProcessor, StepCalculator, CalibrationKeyProvider, PosAngleConstraintAware {
 
     // for serialization
     private static final long serialVersionUID = 3L;
@@ -80,6 +84,8 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
     public static final PropertyDescriptor CENTRAL_WAVELENGTH_PROP;
     public static final PropertyDescriptor FILTER_PROP;
     public static final PropertyDescriptor ACQUISITION_MIRROR_PROP;
+    public static final PropertyDescriptor POS_ANGLE_CONSTRAINT_PROP;
+
 
     public static final PropertyDescriptor PORT_PROP;
 
@@ -120,6 +126,7 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         SLIT_WIDTH_PROP.setDisplayName("Focal Plane Unit");
         WELL_DEPTH_PROP = initProp("wellDepth", query_yes, iter_no);
         PORT_PROP = initProp("issPort", query_yes, iter_no);
+        POS_ANGLE_CONSTRAINT_PROP = initProp("posAngleConstraint", query_no, iter_no);
     }
 
     private PixelScale _pixelScale = PixelScale.DEFAULT;
@@ -136,6 +143,8 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
     private WellDepth _wellDepth = WellDepth.DEFAULT;
 
     private IssPort port = IssPort.SIDE_LOOKING;
+
+    private PosAngleConstraint _posAngleConstraint = PosAngleConstraint.FIXED;
 
     private static final String _VERSION = "2014A-1";
 
@@ -691,6 +700,7 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         Pio.addParam(factory, paramSet, CAMERA_PROP, getCamera().name());
         Pio.addParam(factory, paramSet, DECKER_PROP, getDecker().name());
         Pio.addParam(factory, paramSet, FILTER_PROP, getFilter().name());
+        Pio.addParam(factory, paramSet, POS_ANGLE_CONSTRAINT_PROP.getName(), getPosAngleConstraint().name());
 
         Pio.addParam(factory, paramSet, PORT_PROP, port.name());
 
@@ -752,6 +762,15 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         if (v != null) {
             setFilter(Filter.getFilter(v));
         }
+
+        // REL-2090: Special workaround for elimination of former PositionAngleMode, since functionality has been
+        // merged with PosAngleConstraint but we still need legacy code.
+        v = Pio.getValue(paramSet, POS_ANGLE_CONSTRAINT_PROP.getName());
+        final String pam = Pio.getValue(paramSet, "positionAngleMode");
+        if ("MEAN_PARALLACTIC_ANGLE".equals(pam))
+            _setPosAngleConstraint(PosAngleConstraint.PARALLACTIC_ANGLE);
+        else if (v != null)
+            _setPosAngleConstraint(v);
 
         v = Pio.getValue(paramSet, PORT_PROP);
         if (v == null) {
@@ -940,4 +959,52 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
 
     @Override public Angle pwfs1VignettingClearance() { return PWFS1_VIG; }
     @Override public Angle pwfs2VignettingClearance() { return PWFS2_VIG; }
+
+
+    /**
+     * Implementation of methods from PosAngleConstraintAware and support.
+     */
+    @Override
+    public PosAngleConstraint getPosAngleConstraint() {
+        return (_posAngleConstraint == null) ? PosAngleConstraint.FIXED : _posAngleConstraint;
+    }
+
+    @Override
+    public void setPosAngleConstraint(PosAngleConstraint newValue) {
+        PosAngleConstraint oldValue = getPosAngleConstraint();
+        if (oldValue != newValue) {
+            _posAngleConstraint = newValue;
+            firePropertyChange(POS_ANGLE_CONSTRAINT_PROP.getName(), oldValue, newValue);
+        }
+    }
+
+    private void _setPosAngleConstraint(final String name) {
+        final PosAngleConstraint oldValue = getPosAngleConstraint();
+        try {
+            _posAngleConstraint = PosAngleConstraint.valueOf(name);
+        } catch (Exception ex) {
+            _posAngleConstraint = oldValue;
+        }
+    }
+
+    private void _setPosAngleConstraint(final PosAngleConstraint pac) {
+        _posAngleConstraint = pac;
+    }
+
+    @Override
+    public String getPosAngleConstraintDescriptorKey() {
+        return POS_ANGLE_CONSTRAINT_PROP.getName();
+    }
+
+    @Override
+    public ImList<PosAngleConstraint> getSupportedPosAngleConstraints() {
+        return DefaultImList.create(PosAngleConstraint.FIXED,
+                                    PosAngleConstraint.PARALLACTIC_ANGLE);
+    }
+
+    @Override
+    public boolean allowUnboundedPositionAngle() {
+        // Unsupported for GNIRS.
+        return false;
+    }
 }

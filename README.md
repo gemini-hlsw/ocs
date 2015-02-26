@@ -1,5 +1,5 @@
 
-**NOTE**: In anticipation of moving this stuff to github, this doc is written in Markdown format. You can view it locally using https://github.com/joeyespo/grip or paste it into a Gist or just read the source. It will all get sorted out sooner or later.
+**NOTE**: This doc is written in Markdown format. You can view it locally using https://github.com/joeyespo/grip or paste it into a Gist or just read the source.
 
 ## OCS 2.1
 

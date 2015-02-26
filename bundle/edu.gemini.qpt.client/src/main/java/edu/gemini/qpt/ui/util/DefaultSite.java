@@ -9,7 +9,7 @@ public class DefaultSite {
 	private static final String KEY = DefaultSite.class.getSimpleName() + ".name";
 	
 	public static Site get() {
-		Preferences prefs = Preferences.userNodeForPackage(DefaultSite.class);	
+		Preferences prefs = Preferences.userNodeForPackage(DefaultSite.class);
 		String name = prefs.get(KEY, Site.GS.name());
 		try {
 			return Site.valueOf(name);

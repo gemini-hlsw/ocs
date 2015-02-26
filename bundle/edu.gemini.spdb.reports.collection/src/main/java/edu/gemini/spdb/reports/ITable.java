@@ -61,7 +61,7 @@ public interface ITable extends Serializable {
 	 * @return a List of rows, each of which is a Map from IColumn to Object
 	 */
 	List<Map<IColumn, Object>> getRows(Object domainObject);
-	
+
 	/**
 	 * Returns the table's display name, for display purposes. This should
 	 * probably be a service property instead.
@@ -73,5 +73,5 @@ public interface ITable extends Serializable {
 	 * probably be a service property instead.
 	 */
 	String getShortDescription();
-	
+
 }

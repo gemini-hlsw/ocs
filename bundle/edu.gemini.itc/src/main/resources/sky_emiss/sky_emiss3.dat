@@ -1,0 +1,17 @@
+# sky background for ITC
+# 80%-ile conditions (grey)
+# columns are (1) wavelength in nm, (2) sky brightness
+# in UNITS
+# source: broadband filter backgrounds
+# uses Ted von Hippel's model for optical sky variation
+# author: Phil Puxley
+# created 27Aug1999
+
+360   19.67
+440    4.00
+550    1.72
+670    1.03
+1250   7.25
+1650  24.79
+2200  16.72
+ 

@@ -28,6 +28,7 @@ import java.util.Set;
  * A {@link edu.gemini.catalog.skycat.table.SkyObjectFactory} used with the
  * UCAC3 catalog.
  */
+@Deprecated
 public enum Ucac3SkyObjectFactory implements SkyObjectFactory {
     instance;
 

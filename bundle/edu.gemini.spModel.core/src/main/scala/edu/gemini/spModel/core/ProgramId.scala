@@ -7,10 +7,18 @@ sealed trait ProgramId {
   def site: Option[Site]
   def semester: Option[Semester]
   def ptype: Option[ProgramType]
+
+  /**
+   * Convert to an SPProgramID if possible.  It is only not possible if using
+   * a ProgramId.Arbitrary id that was constructed with a character not
+   * supported by SPProgramID.
+   */
+  def spOption: Option[SPProgramID]
 }
 
 sealed trait StandardProgramId extends ProgramId {
   def toSp: SPProgramID
+  def spOption = Some(toSp)
 }
 
 /**
@@ -66,7 +74,9 @@ object ProgramId {
   case class Arbitrary(site: Option[Site], semester: Option[Semester], ptype: Option[ProgramType], idString: String) extends ProgramId {
     // Try to get the corresponding SPProgramID which might fail if the idString
     // has an unsupported character.
-    lazy val toSp: Option[SPProgramID] = Try { SPProgramID.toProgramID(idString) }.toOption
+    val spOption: Option[SPProgramID] = Try { SPProgramID.toProgramID(idString) }.toOption
+
+    override def toString: String = idString
   }
 
   def parse(s: String): ProgramId =

@@ -1,0 +1,17 @@
+# Michelle LowN grating efficiency
+# T. Geballe 2004 Dec 3
+#
+# Values are unknown, so adapted from TRECS LoRes10 spreadsheet
+
+#WL	Efficiency
+16000	0.60
+17000	0.70
+18000	0.80
+19000	0.85
+20000	0.85
+21000	0.85
+22000	0.85
+23000	0.85
+24000	0.80
+25000	0.70
+26000	0.60

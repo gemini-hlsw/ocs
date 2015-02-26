@@ -1,13 +1,12 @@
 package edu.gemini.spModel.inst;
 
 import edu.gemini.pot.sp.ISPObservation;
-import edu.gemini.spModel.obs.ObsTimesService;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
-import edu.gemini.spModel.obs.plannedtime.PlannedTimeSummaryService;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
+
 
 import java.io.Serializable;
 
@@ -98,13 +97,6 @@ public final class ParallacticAngleDuration implements Serializable {
             if (step.executed)
                 executedStepTime += step.totalTime();
         }
-        long calcDuration = totalStepTime - executedStepTime;
-
-        // The old calculation, which was inaccurate.
-        //long totalExecTime   = ObsTimesService.getRawObsTimes(ispObservation).getTotalTime();
-        //long plannedExecTime = PlannedTimeSummaryService.getTotalTime(ispObservation).getExecTime();
-        //long calcDuration    = Math.max(0, plannedExecTime - totalExecTime);
-
-        return calcDuration;
+        return totalStepTime - executedStepTime;
     }
 }

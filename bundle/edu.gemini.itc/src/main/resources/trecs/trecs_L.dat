@@ -1,0 +1,46 @@
+# trecs_fl.dat
+# Transmission curve for T-ReCS L-band filter
+# Columns are (1) wavelength in nm, (2) transmission.
+#
+# No blocking element needed.
+# Measurement temperature = 77K
+#
+# Author: James De Buizer, digitized from OCLI scans 
+# Created: 2003 Apr 8
+#
+# Effective wavelength
+3849
+#
+# lambda  filtn
+
+3300    0.0
+3303    0.0000
+3405    0.0030
+3461    0.0261
+3506    0.1248
+3543    0.3066
+3571    0.6255
+3588    0.8120
+3604    0.9029
+3621    0.9090
+3649    0.8936
+3666    0.8952
+3734    0.9260
+3796    0.9537
+3860    0.9630
+3900    0.9630
+3928    0.9691
+3965    0.9614
+4029    0.9275
+4060    0.9167
+4080    0.9214
+4094    0.9291
+4105    0.9121
+4122    0.7688
+4133    0.5115
+4150    0.2372
+4167    0.1016
+4187    0.0385
+4209    0.0092
+4235    0.0000
+4283    0.0000

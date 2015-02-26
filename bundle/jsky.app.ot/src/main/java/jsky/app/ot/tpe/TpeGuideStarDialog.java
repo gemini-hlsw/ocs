@@ -183,8 +183,8 @@ public class TpeGuideStarDialog extends TpeGuideStarDialogForm
      * If NIFS is selected only PWFS1 and PWFS2 are allowed
      */
     private void _checkInstrumentGuideStar() {
-        String instrument = (String)instComboBox.getSelectedItem();
-        String tag = (String)typeComboBox.getSelectedItem();
+        String instrument = instComboBox.getItemAt(instComboBox.getSelectedIndex());
+        String tag = typeComboBox.getItemAt(typeComboBox.getSelectedIndex());
         boolean problem = false;
 
         if (instrument.equals(NIFS)) {
@@ -249,8 +249,8 @@ public class TpeGuideStarDialog extends TpeGuideStarDialogForm
      */
 
     private void _selectDefaultCatalog(boolean changeOption) {
-        String instrument = (String)instComboBox.getSelectedItem();
-        String tag = (String)typeComboBox.getSelectedItem();
+        String instrument = instComboBox.getItemAt(instComboBox.getSelectedIndex());
+        String tag = typeComboBox.getItemAt(typeComboBox.getSelectedIndex());
         catalogWarning.setForeground(Color.BLUE);
         if (tag.equals(OIWFS)) {
             if (instrument.equals(GNIRS) || instrument.equals(NIRI) || instrument.startsWith(NIFS) || instrument.equals(GSAOI)) {
@@ -262,7 +262,7 @@ public class TpeGuideStarDialog extends TpeGuideStarDialogForm
                     return;
                 }
             } else if (instrument.equals(FLAMINGOS2)) {
-                Catalog c = (Catalog)catalogComboBox.getSelectedItem();
+                Catalog c = catalogComboBox.getItemAt(catalogComboBox.getSelectedIndex());
                 if (c.getName().startsWith(CATALOG_2MASS)) {
                     catalogWarning.setText(c.getName() + " in use");
                     return;
@@ -305,14 +305,14 @@ public class TpeGuideStarDialog extends TpeGuideStarDialogForm
 
     // Refactored from original code, returns true if the caller should return immediately
     private boolean _selectDefaultCatalog(String catalogName, boolean changeOption) {
-        Catalog c = (Catalog) catalogComboBox.getSelectedItem();
+        Catalog c = catalogComboBox.getItemAt(catalogComboBox.getSelectedIndex());
         if (c == null || !c.getName().startsWith(catalogName)) {
             if (changeOption) {
                 catalogWarning.setText(EMPTY_TEXT);
                 //select the given catalog for the user.
                 int n = catalogComboBox.getItemCount();
                 for (int i = 0; i < n; i++) {
-                    c = (Catalog) catalogComboBox.getItemAt(i);
+                    c = catalogComboBox.getItemAt(i);
                     if (c.getName().startsWith(catalogName)) {
                         catalogComboBox.setSelectedItem(c);
                         return true;
@@ -427,13 +427,13 @@ public class TpeGuideStarDialog extends TpeGuideStarDialogForm
             _cancel();
         } else if (src.equals(okButton)) {
             _ok();
-        } else if (src == typeComboBox) {
+        } else if (src.equals(typeComboBox)) {
             _checkInstrumentGuideStar();
             _selectDefaultCatalog(true);
-        } else if (src == instComboBox) {
+        } else if (src.equals(instComboBox)) {
             _checkInstrumentGuideStar();
             _selectDefaultCatalog(true);
-        } else if (src == catalogComboBox) {
+        } else if (src .equals(catalogComboBox)) {
             _selectDefaultCatalog(false);
         }
     }
@@ -515,10 +515,10 @@ public class TpeGuideStarDialog extends TpeGuideStarDialogForm
 
     // Search the given catalog for the best guide star
     private void _findGuideStar() {
-        Catalog cat = (Catalog) catalogComboBox.getSelectedItem();
+        Catalog cat = catalogComboBox.getItemAt(catalogComboBox.getSelectedIndex());
         Preferences.set(_CATALOG_KEY, cat.getName());
 
-        String guideTag = (String) typeComboBox.getSelectedItem();
+        String guideTag = typeComboBox.getItemAt(typeComboBox.getSelectedIndex());
         Preferences.set(_GUIDE_TAG_KEY, guideTag);
 
         SPInstObsComp inst = _getInst(_iw.getContext());

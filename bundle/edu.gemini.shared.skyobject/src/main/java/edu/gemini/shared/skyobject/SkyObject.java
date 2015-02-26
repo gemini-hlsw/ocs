@@ -7,6 +7,7 @@ package edu.gemini.shared.skyobject;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.shared.skyobject.coords.SkyCoordinates;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.skycalc.Coordinates;
 
 import java.io.Serializable;
 import java.util.*;

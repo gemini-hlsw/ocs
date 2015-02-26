@@ -1,0 +1,28 @@
+# trecs_fsi5.dat
+# Transmission curve for T-ReCS Si-5 (11.7) micron filter
+# Columns are (1) wavelength in nm, (2) transmission.
+#
+# Transmission includes Trans = 0.92 BaF2 blocker.
+# Measurement temperature = 77K
+#
+# Author: Tom Hayward, based on data from C. Packham, UF
+# Created: 2001 July 24; updated 2001 Sep 4
+#
+# Effective wavelength
+11658
+#
+# lambda    T  
+
+    7000  0.000
+    8000  0.000
+    9000  0.000
+   10000  0.000
+   11040  0.000
+   11090  0.405
+   11140  0.810
+   12170  0.810
+   12220  0.405
+   12270  0.000
+   13000  0.000
+   14000  0.000
+

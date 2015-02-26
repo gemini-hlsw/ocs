@@ -74,9 +74,12 @@ public interface TimeLineNode extends VetoableChangeListener {
     public static final int RIGHT_HANDLE_SELECTED = 3;
 
     // fonts
+    public static final double LABEL_ROTATION = -Math.PI / 6.0;
+    public static final double LABEL_REVERSE_ROTATION = Math.PI / 6.0;
     public static final Font DEFAULT_FONT = new JLabel().getFont().deriveFont(Font.PLAIN, 10.0F);
-    public static final Font ROTATED_FONT = DEFAULT_FONT.deriveFont(AffineTransform.getRotateInstance(11.0 * Math.PI / 6.0));
-    public static final Font REVERSE_ROTATED_FONT = DEFAULT_FONT.deriveFont(AffineTransform.getRotateInstance(Math.PI / 6.0));
+    public static final Font ROTATED_FONT = DEFAULT_FONT.deriveFont(AffineTransform.getRotateInstance(LABEL_ROTATION));
+    public static final Font REVERSE_ROTATED_FONT = DEFAULT_FONT.deriveFont(AffineTransform.getRotateInstance(
+            LABEL_REVERSE_ROTATION));
 
     // cursors
     public static final Cursor MOVE_CURSOR = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);

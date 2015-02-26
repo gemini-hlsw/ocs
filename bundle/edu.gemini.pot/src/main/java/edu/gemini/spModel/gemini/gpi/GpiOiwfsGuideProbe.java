@@ -1,7 +1,6 @@
 package edu.gemini.spModel.gemini.gpi;
 
-import edu.gemini.shared.util.immutable.None;
-import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.context.ObsContext;
 
@@ -46,7 +45,12 @@ public enum GpiOiwfsGuideProbe implements GuideProbe {
     @Override public PatrolField getPatrolField() {
         return patrolField;
     }
-    @Override public PatrolField getCorrectedPatrolField(ObsContext ctx) {
-        return patrolField;
+
+    @Override public Option<PatrolField> getCorrectedPatrolField(ObsContext ctx) {
+        if (ctx.getInstrument() instanceof Gpi) {
+            return new Some<>(patrolField);
+        } else {
+            return None.instance();
+        }
     }
 }

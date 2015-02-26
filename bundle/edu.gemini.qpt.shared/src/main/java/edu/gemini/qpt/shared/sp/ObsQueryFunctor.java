@@ -11,6 +11,7 @@ import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.core.Semester;
 import edu.gemini.spModel.core.Site;
+import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.data.config.DefaultParameter;
 import edu.gemini.spModel.data.config.IParameter;
 import edu.gemini.spModel.data.config.ISysConfig;
@@ -30,7 +31,6 @@ import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.gemini.texes.InstTexes;
 import edu.gemini.spModel.gemini.trecs.InstTReCS;
 import edu.gemini.spModel.guide.GuideProbe;
-import edu.gemini.spModel.inst.PositionAngleMode;
 import edu.gemini.spModel.obs.ObsClassService;
 import edu.gemini.spModel.obs.ObsTimesService;
 import edu.gemini.spModel.obs.ObservationStatus;
@@ -48,6 +48,8 @@ import edu.gemini.spModel.core.ProgramType;
 import edu.gemini.spModel.seqcomp.SeqConfigComp;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
+import edu.gemini.spModel.telescope.PosAngleConstraint;
+import edu.gemini.spModel.telescope.PosAngleConstraintAware;
 import edu.gemini.spModel.time.ChargeClass;
 import edu.gemini.spModel.time.ObsTimeCharges;
 import edu.gemini.spModel.time.ObsTimes;
@@ -94,6 +96,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
     private final Boolean skipInactivePrograms;    // skips programs that are set to inactive
     private final Boolean skipInvalidObservations; // skips observations that have no conditions, instrument or target
     private final Boolean skipNoStepsObservations; // skips observations that have no remaining steps (QPT does not need those)
+    private final AgsMagnitude.MagnitudeTable magTable;
 
     /**
      * Constructs a functor that will retrieve candidate observations for the given input values.
@@ -105,7 +108,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
      * @param obsClasses
      * @param obsStatuses
      */
-    public ObsQueryFunctor(Site site, Set<Semester> semesters, List<ProgramType> progTypes, Set<ObsClass> obsClasses, Set<ObservationStatus> obsStatuses, boolean skipCompletedPrograms, boolean skipInactivePrograms) {
+    public ObsQueryFunctor(Site site, Set<Semester> semesters, List<ProgramType> progTypes, Set<ObsClass> obsClasses, Set<ObservationStatus> obsStatuses, boolean skipCompletedPrograms, boolean skipInactivePrograms, AgsMagnitude.MagnitudeTable magTable) {
 
         this.site = site;
         this.date = null;
@@ -121,6 +124,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
         // we don't need this and simply skip invalid/incomplete observations.
         this.skipInvalidObservations = true;
         this.skipNoStepsObservations = false; // QV wants those, while QPT is not interested in them
+        this.magTable = magTable;
 
     }
 
@@ -137,7 +141,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
      * @param obsClasses
      * @param obsStatuses
      */
-	public ObsQueryFunctor(Site site, Date date, final Set<Semester> extraSemesters, List<ProgramType> progTypes, Set<ObsClass> obsClasses, Set<ObservationStatus> obsStatuses) {
+	public ObsQueryFunctor(Site site, Date date, final Set<Semester> extraSemesters, List<ProgramType> progTypes, Set<ObsClass> obsClasses, Set<ObservationStatus> obsStatuses, AgsMagnitude.MagnitudeTable magTable) {
 
         this.site = site;
         this.date = Calendar.getInstance(site.timezone());
@@ -161,7 +165,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
         this.skipInvalidObservations = false;
         this.skipInactivePrograms = false;
         this.skipNoStepsObservations = true;
-
+        this.magTable = magTable;
     }
 
 	@SuppressWarnings("unchecked")
@@ -657,11 +661,9 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
      */
     private boolean usesAverageParallacticAngle(ISPObservation obsShell) throws RemoteException {
         for (ISPObsComponent comp : obsShell.getObsComponents()) {
-            if (SPComponentType.INSTRUMENT_GMOS.equals(comp.getType()) || SPComponentType.INSTRUMENT_GMOSSOUTH.equals(comp.getType())) {
-                InstGmosCommon gmos = (InstGmosCommon) comp.getDataObject();
-                if (gmos.getPositionAngleMode() == PositionAngleMode.MEAN_PARALLACTIC_ANGLE)
-                    return true;
-            }
+            final ISPDataObject dObj = comp.getDataObject();
+            if (dObj instanceof PosAngleConstraintAware)
+                return ((PosAngleConstraintAware) dObj).getPosAngleConstraint() == PosAngleConstraint.PARALLACTIC_ANGLE;
         }
         return false;
     }
@@ -861,14 +863,11 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
             if (!ctxOpt.isEmpty()) {
                 ObsContext ctx = ctxOpt.getValue();
 
-                // TODO: This needs to be adjusted when we figure out how to change the magnitude table.
-                AgsMagnitude.MagnitudeTable mt = new DefaultMagnitudeTable(ctx);
-
                 // Perform the analysis.
-                scala.Option<AgsStrategy> strategyOption = AgsRegistrar.selectedStrategy(ctx);
+                scala.Option<AgsStrategy> strategyOption = AgsRegistrar.currentStrategy(ctx);
                 if (strategyOption.isDefined()) {
                     AgsStrategy strategy = strategyOption.get();
-                    analysis.addAll(JavaConversions.asJavaList(strategy.analyze(ctx, mt)));
+                    analysis.addAll(JavaConversions.asJavaList(strategy.analyze(ctx, magTable)));
                 }
             }
         }

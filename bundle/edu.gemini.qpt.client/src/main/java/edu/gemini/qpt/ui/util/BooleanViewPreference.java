@@ -30,6 +30,7 @@ public enum BooleanViewPreference implements PreferenceManager.Key<Boolean> {
 	VIEW_BAND_4(false),
 
     VIEW_SP_LP(true),
+    VIEW_SP_FT(true),
 	VIEW_SP_Q(true),
 	VIEW_SP_C(false),
 	VIEW_SP_SV(false),

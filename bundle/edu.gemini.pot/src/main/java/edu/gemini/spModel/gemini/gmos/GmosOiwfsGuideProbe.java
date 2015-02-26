@@ -4,6 +4,8 @@
 
 package edu.gemini.spModel.gemini.gmos;
 
+import edu.gemini.shared.util.immutable.MapOp;
+import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.Coordinates;
 import edu.gemini.skycalc.Offset;
@@ -68,17 +70,20 @@ public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
     }
 
     public BoundaryPosition checkBoundaries(SPTarget guideStar, ObsContext ctx) {
-        return checkBoundaries(guideStar.getSkycalcCoordinates(), ctx);
+        return checkBoundaries(guideStar.getTarget().getSkycalcCoordinates(), ctx);
     }
 
-    public BoundaryPosition checkBoundaries(Coordinates coords, ObsContext ctx) {
+    public BoundaryPosition checkBoundaries(final Coordinates coords, final ObsContext ctx) {
         final Coordinates baseCoordinates = ctx.getBaseCoordinates();
         final Angle positionAngle = ctx.getPositionAngle();
         final Set<Offset> sciencePositions = ctx.getSciencePositions();
 
         // check positions against corrected patrol field
-        final PatrolField correctedPatrolField = getCorrectedPatrolField(ctx);
-        return correctedPatrolField.checkBoundaries(coords, baseCoordinates, positionAngle, sciencePositions);
+        return getCorrectedPatrolField(ctx).map(new MapOp<PatrolField, BoundaryPosition>() {
+            @Override public BoundaryPosition apply(PatrolField patrolField) {
+                return patrolField.checkBoundaries(coords, baseCoordinates, positionAngle, sciencePositions);
+            }
+        }).getOrElse(BoundaryPosition.outside);
     }
 
     /**
@@ -94,15 +99,15 @@ public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
 
     @Override
     public boolean validate(SPTarget guideStar, ObsContext ctx) {
-        return GuideProbeUtil.instance.validate(guideStar.getSkycalcCoordinates(), getCorrectedPatrolField(ctx), ctx);
+        return GuideProbeUtil.instance.validate(guideStar.getTarget().getSkycalcCoordinates(), this, ctx);
     }
 
     public boolean validate(SkyObject guideStar, ObsContext ctx) {
-        return GuideProbeUtil.instance.validate(guideStar, getCorrectedPatrolField(ctx), ctx);
+        return GuideProbeUtil.instance.validate(guideStar, this, ctx);
     }
 
     public boolean validate(Coordinates guideStar, ObsContext ctx) {
-        return GuideProbeUtil.instance.validate(guideStar, getCorrectedPatrolField(ctx), ctx);
+        return GuideProbeUtil.instance.validate(guideStar, this, ctx);
     }
 
     @Override
@@ -111,11 +116,15 @@ public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
     }
 
     @Override
-    public PatrolField getCorrectedPatrolField(ObsContext ctx) {
-        return getCorrectedPatrolField(ctx, getPatrolField());
+    public Option<PatrolField> getCorrectedPatrolField(ObsContext ctx) {
+        if (ctx.getInstrument() instanceof InstGmosCommon) {
+            return new Some<>(getCorrectedPatrolField(ctx, getPatrolField()));
+        } else {
+            return None.instance();
+        }
     }
 
-    public PatrolField getCorrectedPatrolField(ObsContext ctx, PatrolField patrolField) {
+    private PatrolField getCorrectedPatrolField(ObsContext ctx, PatrolField patrolField) {
         final AffineTransform sideLooking = transformForPort(ctx.getIssPort());
 
         // calculate and apply GMOS specific IFU offsets and flip coordinates

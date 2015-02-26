@@ -4,8 +4,6 @@
 
 package edu.gemini.spModel.guide;
 
-import edu.gemini.spModel.obs.context.ObsContext;
-import edu.gemini.spModel.target.SPTarget;
 
 /**
  * An interface that represents a guider which can validate guide star

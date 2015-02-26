@@ -2,6 +2,7 @@ package edu.gemini.qv.plugin
 
 import java.io.File
 
+import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.qv.plugin.data.{DataChanged, OdbDataSource}
 import edu.gemini.qv.plugin.selector.RefreshDialog
 import edu.gemini.qv.plugin.ui.QvGui
@@ -56,7 +57,7 @@ object QvTool {
           |Please define the peer for the observing site and try again.""".stripMargin
       )
     else
-      startQv(ctx.observingPeer.get)
+      startQv(ctx.observingPeer.get, ctx.mt)
 
   }
 
@@ -80,12 +81,12 @@ object QvTool {
     }
   }
 
-  private def startQv(peer: Peer) {
+  private def startQv(peer: Peer, mt: MagnitudeTable) {
 
     Future {
 
       // -- load defaults, user settings and get a first bunch of data from data source
-      val dataSource = new OdbDataSource(peer)
+      val dataSource = new OdbDataSource(peer, mt)
       val qvCtx = QvContext(peer, dataSource, dataSource)
       QvStore.loadDefaults()
 

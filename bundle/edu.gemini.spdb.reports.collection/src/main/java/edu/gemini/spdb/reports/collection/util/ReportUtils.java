@@ -1,9 +1,8 @@
 package edu.gemini.spdb.reports.collection.util;
 
 import edu.gemini.pot.sp.*;
-import static edu.gemini.pot.sp.SPComponentBroadType.AO;
-import static edu.gemini.pot.sp.SPComponentBroadType.INSTRUMENT;
 import edu.gemini.shared.util.TimeValue;
+import edu.gemini.shared.util.immutable.ApplyOp;
 import edu.gemini.shared.util.immutable.Pair;
 import edu.gemini.shared.util.immutable.Tuple2;
 import edu.gemini.spModel.core.SPProgramID;
@@ -13,25 +12,28 @@ import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.gmos.*;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
-import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.obs.ObsClassService;
 import edu.gemini.spModel.obs.ObsTimesService;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.ProgramNote;
 import edu.gemini.spModel.target.SPTarget;
-import edu.gemini.spModel.template.TemplateFolder;
-import edu.gemini.spModel.template.TemplateGroup;
-import edu.gemini.spModel.time.ChargeClass;
-import edu.gemini.spModel.too.Too;
-import edu.gemini.spModel.too.TooType;
+import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.system.DMS;
 import edu.gemini.spModel.target.system.HMS;
 import edu.gemini.spModel.target.system.HmsDegTarget;
-
+import edu.gemini.spModel.template.TemplateParameters;
+import edu.gemini.spModel.time.ChargeClass;
+import edu.gemini.spModel.too.Too;
+import edu.gemini.spModel.too.TooType;
+import scala.Option;
+import scala.Some;
 
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static edu.gemini.pot.sp.SPComponentBroadType.AO;
+import static edu.gemini.pot.sp.SPComponentBroadType.INSTRUMENT;
 
 @SuppressWarnings("unchecked")
 public class ReportUtils {
@@ -262,18 +264,14 @@ public class ReportUtils {
     }
 
     static List<Tuple2<SPSiteQuality, TimeValue>> getTemplateConditions(ISPProgram progShell) {
-        List<Tuple2<SPSiteQuality, TimeValue>> results = new ArrayList<Tuple2<SPSiteQuality, TimeValue>>();
+        final List<Tuple2<SPSiteQuality, TimeValue>> results = new ArrayList<Tuple2<SPSiteQuality, TimeValue>>();
 
-        ISPTemplateFolder ifolder = progShell.getTemplateFolder();
-        if (ifolder != null) {
-            TemplateFolder folder = (TemplateFolder) ifolder.getDataObject();
-            Map<String, SPSiteQuality> sq = folder.getSiteQualities();
-            for (TemplateFolder.Phase1Group group : folder.getGroups()) {
-                for (TemplateGroup.Args arg : group.argsList) {
-                    results.add(new Pair(sq.get(arg.getSiteQualityId()), arg.getTime()));
-                }
+        final ISPTemplateFolder folder = progShell.getTemplateFolder();
+        TemplateParameters.foreach(folder, new ApplyOp<TemplateParameters>() {
+            @Override public void apply(TemplateParameters tp) {
+                results.add(new Pair(tp.getSiteQuality(), tp.getTime()));
             }
-        }
+        });
         return results;
     }
 
@@ -361,10 +359,10 @@ public class ReportUtils {
         return String.format("%d-%d", hours[gapIndex], hours[gapIndex - 1]);
     }
 
-    private static Set<Integer> getRaHours(ISPProgram progShell)  {
-        Set<Integer> hourSet = new TreeSet<Integer>();
+    private static Set<Integer> getRaHours(final ISPProgram progShell)  {
+        final Set<Integer> hourSet = new TreeSet<>();
         for (ISPObservation obsShell : progShell.getAllObservations()) {
-            ObsClass obsClass = ObsClassService.lookupObsClass(obsShell);
+            final ObsClass obsClass = ObsClassService.lookupObsClass(obsShell);
             if (ObsClass.SCIENCE != obsClass) continue;
 
             // Need to look through all the components to find the target env.
@@ -378,30 +376,29 @@ public class ReportUtils {
             if (targetEnvComp == null) continue;
 
             // Figure out the RA of the base position
-            TargetObsComp targetEnv = (TargetObsComp) targetEnvComp.getDataObject();
-            SPTarget target = targetEnv.getBase();
-
-            try {
-                hourSet.add(getRaHours(target));
-            } catch (Exception ex) {
+            final TargetObsComp targetEnv = (TargetObsComp) targetEnvComp.getDataObject();
+            final SPTarget target = targetEnv.getBase();
+            final Option<Integer> raHours = getRaHours(target);
+            if (raHours.isDefined()) {
+                hourSet.add(raHours.get());
             }
         }
         return hourSet;
 
     }
 
-    private static Set<Integer> getTemplateRaHours(ISPProgram progShell) {
-        Set<Integer> hourSet = new TreeSet<Integer>();
-        ISPTemplateFolder ifolder = progShell.getTemplateFolder();
-        if (ifolder != null) {
-            TemplateFolder folder = (TemplateFolder) ifolder.getDataObject();
-            for (SPTarget target : folder.getTargets().values()) {
-                try {
-                    hourSet.add(getRaHours(target));
-                } catch (Exception ex) {
+    private static Set<Integer> getTemplateRaHours(final ISPProgram progShell) {
+        final Set<Integer> hourSet = new TreeSet<>();
+        final ISPTemplateFolder folder = progShell.getTemplateFolder();
+        TemplateParameters.foreach(folder, new ApplyOp<TemplateParameters>() {
+            @Override
+            public void apply(final TemplateParameters tp) {
+                final Option<Integer> raHours = getRaHours(tp.getTarget());
+                if (raHours.isDefined()) {
+                    hourSet.add(raHours.get());
                 }
             }
-        }
+        });
         return hourSet;
     }
 
@@ -415,16 +412,24 @@ public class ReportUtils {
         return hourArray;
     }
 
-    private static Integer getRaHours(SPTarget target) {
-        if (target == null) throw new IllegalArgumentException();
-        if (!(target.getCoordSys() instanceof HmsDegTarget.SystemType)) throw new IllegalArgumentException();
-        HMS ra = (HMS) target.getC1();
-        DMS dec = (DMS) target.getC2();
-        double raDeg = ra.getValue();
-        double decDeg = dec.getValue();
-        if ((raDeg == 0.0) && (decDeg == 0)) throw new IllegalArgumentException();
+    /** Gets the ra hours value - if the target is not null, has RA/DEC coordinates and is not a "dummy" target. */
+    private static Option<Integer> getRaHours(final SPTarget target) {
+        if (target == null) {
+            return Option.empty();
+        }
+        if (!(target.getTarget() instanceof HmsDegTarget)) {
+            return Option.empty();
+        }
 
-        return (((int) Math.round(raDeg / 15.0)) % 24);
+        // we know it's a ra/dec target, so it's safe to cast here
+        final double r = ((HMS) target.getTarget().getRa()).getValue();
+        final double d = ((DMS) target.getTarget().getDec()).getValue();
+
+        if (r == 0.0 && d == 0.0) {
+            return Option.empty();
+        } else {
+            return new Some<>(((int) Math.round(r / 15.0)) % 24);
+        }
     }
 
     public static Site getSiteDesc(SPProgramID id) {
