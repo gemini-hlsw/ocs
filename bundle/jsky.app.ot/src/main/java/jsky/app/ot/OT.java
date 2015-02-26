@@ -6,6 +6,7 @@
 //
 package jsky.app.ot;
 
+import edu.gemini.ags.api.AgsMagnitude;
 import edu.gemini.pot.client.SPDB;
 import edu.gemini.pot.sp.ISPNode;
 import edu.gemini.pot.sp.ISPProgram;
@@ -73,6 +74,9 @@ public final class OT {
 
     // Our auth client
     private static KeyChain auth = null;
+
+    // Our magnitude table
+    private static AgsMagnitude.MagnitudeTable magTable = null;
 
     // Determine whether this is OS X, 10.5.x or greater.
     private static boolean isMac10_5_Plus() {
@@ -158,7 +162,7 @@ public final class OT {
 //        }
 
 
-        Theme.installGreenTheme();
+        Theme.install();
 
         // [OT-642] Poke around with the keybindings for text fields on the Mac so
         // they respond to Cmd rather than Ctrl. Copied from QPT (Platform.java)
@@ -440,14 +444,25 @@ public final class OT {
         return auth;
     }
 
+
+    private static void initMagnitudeTable(final AgsMagnitude.MagnitudeTable magTable) {
+        if (magTable == null) {
+            throw new IllegalArgumentException("magTable cannot be null");
+        }
+        OT.magTable = magTable;
+    }
+
+    public static AgsMagnitude.MagnitudeTable getMagnitudeTable() {return magTable; }
+
     public static Set<Principal> getUser() {
         return getKeyChain().subject().getPrincipals();
     }
 
-    public static void open(final KeyChain auth, final VcsRegistrar reg, final File storageDir) {
+    public static void open(final KeyChain auth, final AgsMagnitude.MagnitudeTable magTable, final VcsRegistrar reg, final File storageDir) {
 
-        // Init all teh things
+        // Init all the things
         initAuth(auth);
+        initMagnitudeTable(magTable);
         initLogging();
         initLocale();
         initJAI();

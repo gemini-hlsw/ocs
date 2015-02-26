@@ -2,7 +2,7 @@
 <!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
 
 <document>
-  <container kind="program" type="Program" version="2014A-1" subtype="basic" key="4d64921b-5840-4c5f-aeee-69d713eb8292" name="GPI-BP">
+  <container kind="program" type="Program" version="2015A-1" subtype="basic" key="4d64921b-5840-4c5f-aeee-69d713eb8292" name="GPI-BP">
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="GPI PHASE I/II MAPPING BPS"/>
       <param name="programMode" value="QUEUE"/>
@@ -91,7 +91,7 @@
           <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="881bca6a-0b13-442f-9ae5-4b3e214e60b7" name="Observe">
             <paramset name="Observe" kind="dataObj">
               <param name="repeatCount" value="2"/>
-              <param name="class" value="ACQ_CAL"/>
+              <param name="class" value="ACQ"/>
             </paramset>
           </container>
         </container>
@@ -288,6 +288,18 @@
             <param name="useCal" value="true"/>
           </paramset>
         </container>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="a0679449-a204-431b-8a65-929a56ba211e" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="68bb9373-f04c-42c3-8ad0-aec4593a3aa4" name="Observing Log">
           <paramset name="Observing Log" kind="dataObj">
             <paramset name="obsQaRecord"/>
@@ -307,7 +319,7 @@
           <container kind="seqComp" type="Observer" version="2009A-1" subtype="GemFlat" key="97888c13-9f9e-4209-afca-be3a8e4a716a" name="Manual Flat/Arc">
             <paramset name="Manual Flat/Arc" kind="dataObj">
               <param name="repeatCount" value="1"/>
-              <param name="class" value="PROG_CAL"/>
+              <param name="class" value="PARTNER_CAL"/>
               <param name="coadds" value="2"/>
               <param name="exposureTime" value="30.0"/>
               <param name="lamp" value="AR_ARC"/>
@@ -385,7 +397,7 @@
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="53e974e0-7664-4506-84fc-5288c764ecc8" name="Observe">
               <paramset name="Observe" kind="dataObj">
                 <param name="repeatCount" value="2"/>
-                <param name="class" value="ACQ_CAL"/>
+                <param name="class" value="ACQ"/>
               </paramset>
             </container>
           </container>
@@ -720,12 +732,18 @@
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="14"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="a0679449-a204-431b-8a65-929a56ba211e"/>
+      <param name="86f6507c-e2aa-4582-aba5-b7ab67869557" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="519840db-2a5a-454a-8bd6-4c94087800af"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="4d3e7e08-eae6-4509-b216-f56cbfabaeae"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="20"/>
+      <param name="86f6507c-e2aa-4582-aba5-b7ab67869557" value="2"/>
+      <param name="4cbb3a6f-6796-4226-8bae-e41a9e10f9b8" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="33f0ce56-b1b0-4bdd-a408-a1a9025f7d8c"/>
@@ -754,6 +772,10 @@
     <paramset name="node">
       <param name="key" value="49df95c1-f224-46eb-af71-46c0ae4ba89f"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="fc84ca91-78bf-4b18-bb3f-a9ff69b048cd"/>
+      <param name="86f6507c-e2aa-4582-aba5-b7ab67869557" value="5"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="b8d6bdac-5e94-47dc-94ea-30a15586217d"/>
@@ -795,6 +817,7 @@
       <param name="key" value="881bca6a-0b13-442f-9ae5-4b3e214e60b7"/>
       <param name="258cf81e-b917-41b0-9709-837c50650dcf" value="1"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="4"/>
+      <param name="f310e238-d7fe-411f-8ed5-959934de1f89" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="2ecc7853-8188-4b9c-b0f5-09a30ce188cb"/>
@@ -808,6 +831,7 @@
       <param name="key" value="53e974e0-7664-4506-84fc-5288c764ecc8"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="2"/>
       <param name="eb75c3e3-5c07-4418-974b-530d2ea4818d" value="1"/>
+      <param name="f310e238-d7fe-411f-8ed5-959934de1f89" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="a2b0434a-b55e-4075-8f13-207f4d644302"/>
@@ -882,6 +906,7 @@
     <paramset name="node">
       <param name="key" value="97888c13-9f9e-4209-afca-be3a8e4a716a"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="7"/>
+      <param name="86f6507c-e2aa-4582-aba5-b7ab67869557" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="3c58d36a-e103-4c12-892b-dec7f8db2859"/>

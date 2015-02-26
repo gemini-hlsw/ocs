@@ -1,0 +1,17 @@
+# Average throughput for the GNIRS long camera cross-disperser (LXD) in the prism turret
+# Columns are (1) wavelength in nm, (2) throughput
+#
+# Values from Schott catalogue for SF57 glass (35mm thick)
+# 
+# Author: Phil Puxley
+# Created: 23 January 2004
+#
+# lambda transmission
+    700   0.95
+   1060   0.95
+   1530   0.94
+   1970   0.88
+   2325   0.74
+   2500   0.70
+   2600   0.0
+   2700   0.0

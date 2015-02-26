@@ -1,0 +1,43 @@
+# transmission of acq cam Neutral Density (clear) filter
+# columns are (1) wavelength in nm, (2) transmission.
+# data are sampled every 20nm from scanned transmission curve
+# datapoint at 320nm added as 0.00 for extrapolation 
+# author: Phil Puxley
+# created: 20 Jan 2001
+
+320	0.00
+340	0.00
+360	0.05
+380	0.19
+400	0.28
+420	0.59
+440	0.89
+460	0.97
+480	0.98
+500	0.99
+520	0.99
+540	0.99
+560	0.98
+580	0.98
+600	0.97
+620	0.96
+640	0.95
+660	0.94
+680	0.94
+700	0.95
+720	0.95
+740	0.96
+760	0.97
+780	0.97
+800	0.97
+820	0.98
+840	0.98
+860	0.98
+880	0.98
+900	0.98
+920	0.98
+940	0.98
+960	0.97
+980	0.97
+1000	0.97
+

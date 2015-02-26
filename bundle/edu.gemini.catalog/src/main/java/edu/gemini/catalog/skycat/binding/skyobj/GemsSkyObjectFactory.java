@@ -19,6 +19,7 @@ import static edu.gemini.shared.skyobject.Magnitude.Band.*;
 /**
  * A {@link edu.gemini.catalog.skycat.table.SkyObjectFactory} used with the GemsGuideStarSearchDialog class.
  */
+@Deprecated
 public enum GemsSkyObjectFactory implements SkyObjectFactory {
     instance;
 

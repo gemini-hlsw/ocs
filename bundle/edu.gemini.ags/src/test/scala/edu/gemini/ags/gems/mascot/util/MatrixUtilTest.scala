@@ -20,7 +20,7 @@ import org.junit.{Ignore, Test}
  * </pre>
  */
 
-@Ignore class MatrixUtilTest {
+class MatrixUtilTest {
 
 
   /**

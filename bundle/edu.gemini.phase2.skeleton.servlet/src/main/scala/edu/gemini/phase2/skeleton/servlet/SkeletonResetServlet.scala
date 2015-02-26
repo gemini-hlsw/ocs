@@ -11,7 +11,7 @@ import edu.gemini.spModel.obscomp.SPNote
 import edu.gemini.spModel.core.{StandardProgramId, ProgramId}
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.rich.pot.spdb._
-import edu.gemini.spModel.template.TemplateFolder
+import edu.gemini.spModel.template.Phase1Folder
 
 import java.io.{BufferedOutputStream, OutputStreamWriter}
 import java.util.logging.{Logger, Level}
@@ -71,13 +71,13 @@ final class SkeletonResetServlet(odb: IDBDatabaseService, templateFactory: Templ
     try {
       for {
         folderShell <- Option(prog.getTemplateFolder).toRight(Failure.badRequest("Program doesn't have a template folder")).right
-        expansion   <- expandTemplates(folderShell.getDataObject.asInstanceOf[TemplateFolder]).right
+        expansion   <- expandTemplates(Phase1Folder.extract(folderShell)).right
       } yield expansion
     } catch {
       case ex: Exception => Left(Failure.error(ex))
     }
 
-  private def expandTemplates(folder: TemplateFolder): Either[Failure, TemplateFolderExpansion] =
+  private def expandTemplates(folder: Phase1Folder): Either[Failure, TemplateFolderExpansion] =
     TemplateFolderExpansionFactory.expand(folder, templateFactory).left map {
       msg => Failure.badRequest(msg)
     }

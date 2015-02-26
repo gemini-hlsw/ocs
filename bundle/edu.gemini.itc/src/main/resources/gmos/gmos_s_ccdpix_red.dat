@@ -1,0 +1,27 @@
+# GMOS_N Mapping of CCD gaps
+# Columns are (1) pixel number in dispersion direction, (2) "efficiency"
+# The "efficiency" is set to zero in the gaps between the CCDs, otherwise
+# it is one.
+# Each CCD is 2048 pixels in the dispersion direction, the gaps are 37 pixels.
+# The first pixel has number 1.
+# Author: Inger Jorgensen
+# Created: 15 Feb 2001
+#
+# pixel  efficiency
+
+     1    1.
+     2047 1.
+     2048 1.
+     2049 0.
+     2050 0.
+     2084 0.
+     2085 0.
+     2086 1.
+     4132 1.
+     4133 1.
+     4134 0.
+     4135 0.
+     4169 0.
+     4170 0.
+     4171 1.
+     6218 1.

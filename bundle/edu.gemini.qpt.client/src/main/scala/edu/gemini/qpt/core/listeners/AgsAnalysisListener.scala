@@ -1,12 +1,16 @@
 package edu.gemini.qpt.core.listeners
 
+import edu.gemini.ags.api.AgsGuideQuality._
+
 import java.beans.PropertyChangeEvent
 
-import edu.gemini.ags.api.{AgsAnalysis, AgsAnalysisWithGuideProbe}
-import edu.gemini.ags.api.AgsGuideQuality.{PossiblyUnusable, IqDegradation, PossibleIqDegradation, DeliversRequestedIq}
+import edu.gemini.ags.api.AgsAnalysis
 import edu.gemini.qpt.core.Marker.Severity
 import edu.gemini.qpt.core.Variant
 import edu.gemini.qpt.core.util.MarkerManager
+import edu.gemini.spModel.gemini.gems.Canopus
+import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw
+import edu.gemini.spModel.guide.GuideProbeGroup
 
 import scala.collection.JavaConverters._
 
@@ -22,10 +26,15 @@ class AgsAnalysisListener extends MarkerModelListener[Variant] {
     // Iterate over the observations in the variant and determine if they should generate
     // markers based on the AgsAnalysis.
     for (alloc <- variant.getAllocs.asScala if !alloc.getObs.getAgsAnalysis.isEmpty) {
-      val analysisConcerns = alloc.getObs.getAgsAnalysis.asScala.filterNot(_.qualityOption == Some(DeliversRequestedIq))
-      analysisConcerns.foreach { analysis =>
-        markerManager.addMarker(false, this, analysisSeverity(analysis), analysisMessage(analysis), variant, alloc)
-      }
+      // Only analyses with a severity level that are not ODGW and Canopus should generate a marker.
+      for {
+        a <- alloc.getObs.getAgsAnalysis.asScala
+        if (a match {
+          case AgsAnalysis.NoGuideStarForGroup(group) => !ignoredProbeGroups.contains(group)
+          case _ => true
+        })
+        s <- severity(a)
+      } markerManager.addMarker(false, this, s, a.message(withProbe = true), variant, alloc)
     }
   }
 
@@ -34,19 +43,16 @@ class AgsAnalysisListener extends MarkerModelListener[Variant] {
   }
 }
 
-
 object AgsAnalysisListener {
-  /**
-   * Note that DeliversRequestedIq is already filtered out by this point, so we simply do not care
-   * what Severity is returned for it since this should never happen.
-   */
-  def analysisSeverity(analysis: AgsAnalysis): Severity = analysis.qualityOption match {
-    case Some(PossibleIqDegradation) | Some(IqDegradation) | Some(PossiblyUnusable) => Severity.Warning
-    case _ => Severity.Error
-  }
+  // We want to ignore AgsAnalysis problems for ODGW and Canopus.
+  val ignoredProbeGroups: Set[GuideProbeGroup] = Set(GsaoiOdgw.Group.instance, Canopus.Wfs.Group.instance)
 
-  def analysisMessage(analysis: AgsAnalysis): String = (analysis match {
-    case agp: AgsAnalysisWithGuideProbe => s"${agp.guideProbe.getKey}: "
-    case _ => ""
-  }) + analysis.message
+  def severity(a: AgsAnalysis): Option[Severity] =
+    a.quality match {
+      case DeliversRequestedIq   => None
+      case PossibleIqDegradation => Some(Severity.Warning)
+      case IqDegradation         => Some(Severity.Warning)
+      case PossiblyUnusable      => Some(Severity.Warning)
+      case Unusable              => Some(Severity.Error)
+    }
 }

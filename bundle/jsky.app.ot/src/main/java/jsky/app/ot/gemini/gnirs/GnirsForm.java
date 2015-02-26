@@ -1,7 +1,9 @@
 package jsky.app.ot.gemini.gnirs;
 
 import com.jgoodies.forms.factories.DefaultComponentFactory;
-import jsky.app.ot.gemini.parallacticangle.ParallacticAnglePanel;
+import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
+import jsky.app.ot.gemini.parallacticangle.PositionAnglePanel;
 import jsky.util.gui.DropDownListBoxWidget;
 import jsky.util.gui.NumberBoxWidget;
 import jsky.util.gui.SingleSelectComboBox;
@@ -56,9 +58,7 @@ public class GnirsForm extends JPanel {
 		biasLevel = new JLabel();
 
         JComponent goodiesFormsSeparator3 = compFactory.createSeparator("Position Angle");
-        posAngle = new NumberBoxWidget();
-        JLabel posAngleUnitsLabel = new JLabel();
-        parallacticAnglePanel = new ParallacticAnglePanel();
+        posAnglePanel = PositionAnglePanel.apply(SPComponentType.INSTRUMENT_GNIRS);
 
 		tabbedPane = new JTabbedPane();
 		readModeTab = new JPanel();
@@ -281,22 +281,9 @@ public class GnirsForm extends JPanel {
             top1.add(goodiesFormsSeparator3, new GridBagConstraints(0, 10, 6, 1, 0.0, 0.0,
                     GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                     new Insets(10, 0, 0, 0), 0, 0));
-            posAngle.setToolTipText("Set the position angle in degrees east of north");
-            posAngle.setText("");
-            top1.add(posAngle, new GridBagConstraints(0, 11, 1, 1, 0.0, 0.0,
-            	GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-            	new Insets(10, 11, 0, 0), 0, 0));
-
-            //---- posAngleUnitsLabel ----
-            posAngleUnitsLabel.setText("deg E of N");
-            top1.add(posAngleUnitsLabel, new GridBagConstraints(1, 11, 1, 1, 0.0, 0.0,
-            	GridBagConstraints.WEST, GridBagConstraints.NONE,
-            	new Insets(10, 6, 0, 0), 0, 0));
-
-            //---- parallactic angle panel ----
-            top1.add(parallacticAnglePanel, new GridBagConstraints(0, 12, 6, 2, 0.0, 0.0,
-                    GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
-                    new Insets(10, 11, 0, 0), 0, 0));
+            top1.add(posAnglePanel.peer(), new GridBagConstraints(0, 11, 2, 2, 0.0, 0.0,
+                    GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL,
+                    new Insets(0, 5, 0, 0), 0, 0));
 
 		}
 		add(top1, new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0,
@@ -478,7 +465,6 @@ public class GnirsForm extends JPanel {
 	SingleSelectComboBox pixelScale;
 	SingleSelectComboBox disperser;
 	SingleSelectComboBox slitWidth;
-	NumberBoxWidget posAngle;
 	JLabel scienceFOV;
 	JLabel centralWavelengthLabel;
 	DropDownListBoxWidget centralWavelength;
@@ -503,5 +489,5 @@ public class GnirsForm extends JPanel {
 	JPanel portTab;
 	// JFormDesigner - End of variables declaration  //GEN-END:variables
 
-    ParallacticAnglePanel parallacticAnglePanel;
+    PositionAnglePanel<InstGNIRS, EdCompInstGNIRS> posAnglePanel;
 }

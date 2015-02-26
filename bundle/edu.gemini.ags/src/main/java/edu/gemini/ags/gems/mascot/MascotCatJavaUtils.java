@@ -20,10 +20,11 @@ class MascotCatJavaUtils {
      * Creates a CatalogHeader and CatalogRow from the corresponding Collections.
      * (Doing this in Java, since the types are hard to get right from Scala)
      */
+    @SuppressWarnings("varargs")
     static Tuple2<CatalogHeader, CatalogRow> wrap(Collection<String> header, Collection<Object> row) {
-        ImList<Tuple2<String, Class>> colLst = DefaultImList.create();
+        ImList<Tuple2<String, Class<?>>> colLst = DefaultImList.create();
         for (String col : header) {
-            colLst = colLst.append(new Pair<String, Class>(col, String.class));
+            colLst = colLst.append(new Pair<String, Class<?>>(col, String.class));
         }
         return new Pair<CatalogHeader, CatalogRow>(
                 new DefaultCatalogHeader(colLst),

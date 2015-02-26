@@ -1,8 +1,10 @@
 package jsky.app.ot.tpe.gems;
 
+import edu.gemini.ags.gems.GemsUtils4Java;
 import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.ags.gems.GemsGuideStarSearchOptions.*;
 import edu.gemini.ags.gems.GemsGuideStars;
+import edu.gemini.spModel.core.Target;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import jsky.app.ot.tpe.GemsGuideStarWorker;
@@ -718,7 +720,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         _model.setAnalyseChoice((AnalyseChoice) _analyseComboBox.getSelectedItem());
         _model.setAllowPosAngleAdjustments(_allowPosAngleChangesCheckBox.isSelected());
 
-        final List<SkyObject> excludeCandidates = _candidateGuideStarsTable.getTableModel().getCandidates(false);
+        final List<Target.SiderealTarget> excludeCandidates = _candidateGuideStarsTable.getTableModel().getCandidates(false);
 
         new SwingWorker() {
 
@@ -753,7 +755,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
 
     private void analyzeDone() {
         CandidateAsterismsTreeTableModel treeTableModel = new CandidateAsterismsTreeTableModel(
-                _model.getGemsGuideStars(), _candidateAsterismsTreeTable, _model.getBand().getBand());
+                _model.getGemsGuideStars(), _candidateAsterismsTreeTable, GemsUtils4Java.toOldBand(_model.getBand().getBand()));
         _candidateAsterismsTreeTable.setTreeTableModel(treeTableModel);
         _candidateAsterismsTreeTable.expandAll();
         _candidateAsterismsTreeTable.packAll();
@@ -770,7 +772,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         if (list.size() == 0) {
             return "";
         }
-        return "Pos Angle: " + NF.format(list.get(0).getPa().getMagnitude());
+        return "Pos Angle: " + NF.format(list.get(0).getPa().toDegrees());
     }
 
 

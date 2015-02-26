@@ -32,7 +32,6 @@ import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
 import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.inst.ElectronicOffsetProvider;
-import edu.gemini.spModel.inst.PositionAngleMode;
 import edu.gemini.spModel.obs.plannedtime.CommonStepCalculator;
 import edu.gemini.spModel.obs.plannedtime.ExposureCalculator;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;
@@ -593,8 +592,8 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     public static final SPComponentType SP_TYPE =
             SPComponentType.INSTRUMENT_FLAMINGOS2;
 
-    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<String, PropertyDescriptor>();
-    public static final Map<String, PropertyDescriptor> PROPERTY_MAP = Collections.unmodifiableMap(PRIVATE_PROP_MAP);
+    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<>();
+    public  static final Map<String, PropertyDescriptor> PROPERTY_MAP     = Collections.unmodifiableMap(PRIVATE_PROP_MAP);
 
     //Properties
     public static final PropertyDescriptor DISPERSER_PROP;
@@ -720,7 +719,6 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         EXPOSURE_TIME_PROP = initProp("exposureTime", query_no, iter_yes);
         POS_ANGLE_PROP     = initProp("posAngle", query_no, iter_no);
         POS_ANGLE_CONSTRAINT_PROP = initProp("posAngleConstraint", query_no, iter_no);
-//        POS_ANGLE_CONSTRAINT_PROP.setDisplayName("Allow \u00b1 180\u00ba change for guide star selection");
 
         USE_ELECTRONIC_OFFSETTING_PROP = initProp("useElectronicOffsetting", query_no, iter_no);
 //        ELECTRONIC_OFFSET_PROP = initProp("electronicOffset", query_no, iter_no);
@@ -1046,16 +1044,19 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         }
     }
 
-    private void _setPosAngleConstraint(String name) {
-        PosAngleConstraint oldValue = getPosAngleConstraint();
-        PosAngleConstraint newValue;
+    private void _setPosAngleConstraint(final String name) {
+        final PosAngleConstraint oldValue = getPosAngleConstraint();
         try {
-            newValue = PosAngleConstraint.valueOf(name);
+            _posAngleConstraint = PosAngleConstraint.valueOf(name);
         } catch (Exception ex) {
-            newValue = oldValue;
+            _posAngleConstraint = oldValue;
         }
-        setPosAngleConstraint(newValue);
     }
+
+    private void _setPosAngleConstraint(final PosAngleConstraint pac) {
+        _posAngleConstraint = pac;
+    }
+
 
     /**
      * Get the FPUnit.
@@ -1270,8 +1271,14 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         v = Pio.getValue(paramSet, READMODE_PROP);
         if (v != null) setReadMode(ReadMode.valueOf(v));
 
+        // REL-2090: Special workaround for elimination of former PositionAngleMode, since functionality has been
+        // merged with PosAngleConstraint but we still need legacy code.
         v = Pio.getValue(paramSet, POS_ANGLE_CONSTRAINT_PROP.getName());
-        if (v != null) _setPosAngleConstraint(v);
+        final String pam = Pio.getValue(paramSet, "positionAngleMode");
+        if ("MEAN_PARALLACTIC_ANGLE".equals(pam))
+            _setPosAngleConstraint(PosAngleConstraint.PARALLACTIC_ANGLE);
+        else if (v != null)
+            _setPosAngleConstraint(v);
 
         v = Pio.getValue(paramSet, LYOT_WHEEL_PROP);
         if (v != null) setLyotWheel(LyotWheel.valueOf(v));
@@ -1398,19 +1405,37 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
 
     @Override
     public boolean isCompatibleWithMeanParallacticAngleMode() {
-        // FPU_NONE is imaging, analogous to GMOS.
         return !(_fpu == FPUnit.FPU_NONE || _fpu == FPUnit.CUSTOM_MASK);
     }
 
-    /**
-     * This needs to be overridden to support the PosAngleConstraint.
-     */
     @Override
-    public void setPositionAngleMode(PositionAngleMode newValue) {
-        PositionAngleMode oldValue = getPositionAngleMode();
-        super.setPositionAngleMode(newValue);
+    public String getPosAngleConstraintDescriptorKey() {
+        return POS_ANGLE_CONSTRAINT_PROP.getName();
+    }
 
-        if (!oldValue.equals(newValue) && newValue == PositionAngleMode.MEAN_PARALLACTIC_ANGLE)
-            setPosAngleConstraint(PosAngleConstraint.FIXED_180);
+    @Override
+    public ImList<PosAngleConstraint> getSupportedPosAngleConstraints() {
+        return DefaultImList.create(PosAngleConstraint.FIXED,
+                                    PosAngleConstraint.FIXED_180,
+                                    PosAngleConstraint.UNBOUNDED,
+                                    PosAngleConstraint.PARALLACTIC_ANGLE);
+    }
+
+    @Override
+    public boolean allowUnboundedPositionAngle() {
+        // Note that we disable unbounded position angle as an option for MOS preimaging and FPU Custom Mask.
+        boolean isMos        = getMosPreimaging() == YesNoType.YES;
+        boolean isCustomMask = getFpu() == FPUnit.CUSTOM_MASK;
+        return !isMos && !isCustomMask;
+    }
+
+    // REL-814 Preserve the FPU Custom Mask Name
+    @Override
+    public void restoreScienceDetails(final SPInstObsComp oldData) {
+        super.restoreScienceDetails(oldData);
+        if (oldData instanceof Flamingos2) {
+            final Flamingos2 oldF2 = (Flamingos2)oldData;
+            setFpuCustomMask(oldF2.getFpuCustomMask());
+        }
     }
 }

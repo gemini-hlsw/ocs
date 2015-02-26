@@ -1,0 +1,1 @@
+protocol=smtp; type=transport; class=edu.gemini.mail.RetrySMTPTransport; vendor=Gemini 8.1m HLPG;

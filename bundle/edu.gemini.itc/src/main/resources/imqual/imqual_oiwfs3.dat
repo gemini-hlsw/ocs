@@ -1,0 +1,31 @@
+# image quality model for ITC
+
+# 85%-ile conditions, with OIWFS, zenith pointing
+
+# columns are (1) wavelength in nm, (2) 50% encircled energy diameter
+
+# source: advertised tip-tilt models, with 300nm, 10um and
+# 20um points guesses
+
+# author: Phil Puxley
+# created 23Nov1999
+# added guess of 30um point for mid-IR ITC
+
+# modified 29Aug2002 to be 85%-ile distribution
+
+# Replaced on 26Feb2014 (see REL-1684)
+
+ 300 1.20
+ 350 1.20
+ 475 1.10
+ 630 1.05
+ 780 1.05
+1000 0.95
+1250 0.85
+1650 0.85
+2200 0.80
+3780 0.75
+4680 0.70
+11200 0.45
+18300 0.54
+30000 0.80

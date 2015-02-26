@@ -1107,7 +1107,7 @@ public class SkycatCatalog implements PlotableCatalog {
     public void addCatalogFilter(ICatalogFilter filter) {
         if (filter == null) return;
         if (catFilterList == null) {
-            catFilterList = new ArrayList<ICatalogFilter>();
+            catFilterList = new ArrayList<>();
         }
         //avoid duplicate filters
         if (!catFilterList.contains(filter)) {
@@ -1162,8 +1162,7 @@ public class SkycatCatalog implements PlotableCatalog {
             queryArgs.setMaxRows(1);
             if (cat instanceof SkycatCatalog) {
                 SkycatCatalog skycat = (SkycatCatalog) cat;
-                System.out.println(skycat.getShortName());
-                if (skycat.getShortName().indexOf("simbad") >= 0) {
+                if (skycat.getShortName().contains("simbad")) {
                     skycat.addCatalogFilter(FullMimeSimbadCatalogFilter.getFilter());
                     int n = skycat.getConfigEntry().getNumURLs();
                     String[] urls = new String[n];
@@ -1180,7 +1179,7 @@ public class SkycatCatalog implements PlotableCatalog {
             QueryResult r = cat.query(queryArgs);
             if (cat instanceof SkycatCatalog) {
                 SkycatCatalog skycat = (SkycatCatalog) cat;
-                if (skycat.getShortName().indexOf("simbad") >= 0) {
+                if (skycat.getShortName().contains("simbad")) {
                     skycat.getConfigEntry().setURLs(originalUrls);
                 }
             }

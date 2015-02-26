@@ -8,6 +8,8 @@ package jsky.catalog.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -29,14 +31,8 @@ public class TableColumnConfigPanel extends JPanel {
     // The widget displaying the table
     private TableDisplay _tableDisplay;
 
-    // The source table column names
-    private String[] _columnIdentifiers;
-
     // The table displaying the available table columns
     private JTable _table;
-
-    // Column names for _table
-    private Vector _columnNames;
 
 
     /**
@@ -54,9 +50,6 @@ public class TableColumnConfigPanel extends JPanel {
         header.setUpdateTableInRealTime(false);
         header.setFont(header.getFont().deriveFont(Font.BOLD));
 
-        _columnNames = new Vector(2);
-        _columnNames.add(_I18N.getString("colName"));
-        _columnNames.add(_I18N.getString("showQM"));
 
         setModel((DefaultTableModel) _tableDisplay.getTableQueryResult());
 
@@ -67,17 +60,21 @@ public class TableColumnConfigPanel extends JPanel {
 
     /** Set the table model to use for the table displaying the column names and checkboxes. */
     public void setModel(DefaultTableModel model) {
-        _columnIdentifiers = _getColumnIdentifiers(model);
+        final Vector<String> _columnNames = new Vector<>(2);
+        _columnNames.add(_I18N.getString("colName"));
+        _columnNames.add(_I18N.getString("showQM"));
+
+        final String[] _columnIdentifiers = _getColumnIdentifiers(model);
         boolean[] show = _tableDisplay.getShow();
-        Vector data = new Vector(_columnIdentifiers.length);
+        final Vector<Object> data = new Vector<>(_columnIdentifiers.length);
 
         if (show != null && show.length != _columnIdentifiers.length)
             show = null; // table columns might have changed since last session
 
         for (int i = 0; i < _columnIdentifiers.length; i++) {
-            Vector row = new Vector(2);
+            Vector<Object> row = new Vector<>(2);
             row.add(_columnIdentifiers[i]);
-            row.add(show != null ? new Boolean(show[i]) : Boolean.TRUE);
+            row.add(show != null ? Boolean.valueOf(show[i]) : Boolean.TRUE);
             data.add(row);
         }
 
@@ -105,14 +102,15 @@ public class TableColumnConfigPanel extends JPanel {
     }
 
     /** Apply any changes */
+    @SuppressWarnings("unchecked")
     public void apply() {
         DefaultTableModel model = (DefaultTableModel) _table.getModel();
-        Vector data = model.getDataVector();
+        Vector<Vector<Object>> data = model.getDataVector();
         int numCols = data.size();
         boolean[] show = new boolean[numCols];
         for (int i = 0; i < numCols; i++) {
-            Vector row = (Vector) data.get(i);
-            show[i] = ((Boolean) row.get(1)).booleanValue();
+            Vector<Object> row = data.get(i);
+            show[i] = (Boolean)row.get(1);
         }
         _tableDisplay.setShow(show);
     }

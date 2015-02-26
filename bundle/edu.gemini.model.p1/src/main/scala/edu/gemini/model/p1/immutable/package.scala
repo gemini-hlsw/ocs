@@ -58,8 +58,9 @@ package object immutable {
 
   type ExchangePartner = mutable.ExchangePartner
   object ExchangePartner extends EnumObject[mutable.ExchangePartner] {
-    final val KECK = mutable.ExchangePartner.KECK
+    final val KECK   = mutable.ExchangePartner.KECK
     final val SUBARU = mutable.ExchangePartner.SUBARU
+    final val CFHT   = mutable.ExchangePartner.CFHT
   }
 
   // Singleton used to represent a Large Program "Partner"
@@ -226,6 +227,9 @@ package object immutable {
 
   type GracesFiberMode = mutable.GracesFiberMode
   object GracesFiberMode extends EnumObject[mutable.GracesFiberMode]
+
+  type GracesReadMode = mutable.GracesReadMode
+  object GracesReadMode extends EnumObject[mutable.GracesReadMode]
 
   type GpiObservingMode = mutable.GpiObservingMode
   object GpiObservingMode extends EnumObject[mutable.GpiObservingMode] {

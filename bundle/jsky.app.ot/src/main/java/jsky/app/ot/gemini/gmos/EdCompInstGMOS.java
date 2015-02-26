@@ -2,13 +2,11 @@
 // Observatory Control System, Gemini Telescopes Project.
 // See the file COPYRIGHT for complete details.
 //
-// $Id: EdCompInstGMOS.java 46768 2012-07-16 18:58:53Z rnorris $
-//
 package jsky.app.ot.gemini.gmos;
 
 import edu.gemini.mask.ObjectTable;
-import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.ISPNode;
+import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.ISPSeqComponent;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.data.YesNoType;
@@ -29,7 +27,6 @@ import edu.gemini.spModel.target.offset.OffsetPosList;
 import edu.gemini.spModel.target.offset.OffsetPosListWatcher;
 import edu.gemini.spModel.target.offset.OffsetPosSelection;
 import edu.gemini.spModel.telescope.IssPort;
-import edu.gemini.spModel.telescope.PosAngleConstraint;
 import edu.gemini.spModel.type.SpTypeUtil;
 import edu.gemini.spModel.util.SPTreeUtil;
 import jsky.app.ot.OTOptions;
@@ -37,13 +34,14 @@ import jsky.app.ot.StaffBean$;
 import jsky.app.ot.editor.type.SpTypeComboBoxModel;
 import jsky.app.ot.editor.type.SpTypeComboBoxRenderer;
 import jsky.app.ot.gemini.editor.EdCompInstBase;
-import jsky.app.ot.gemini.parallacticangle.ParallacticInstEditor;
 import jsky.app.ot.nsp.SPTreeEditUtil;
 import jsky.app.ot.tpe.TelescopePosEditor;
 import jsky.app.ot.tpe.TpeManager;
 import jsky.catalog.skycat.SkycatCatalog;
 import jsky.navigator.NavigatorManager;
 import jsky.util.gui.*;
+import scala.Option;
+import scala.Some;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -60,8 +58,7 @@ import java.util.List;
  */
 public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompInstBase<T>
         implements DropDownListBoxWidgetWatcher, ActionListener,
-        TelescopePosWatcher, TableWidgetWatcher, ChangeListener, FocusListener,
-        ParallacticInstEditor {
+        TelescopePosWatcher, TableWidgetWatcher, ChangeListener, FocusListener {
 
     // Allowed central wavelength (lambda_cent) range in nanometers
     protected static final int MIN_LAMBDA_CENT = 350;
@@ -73,10 +70,10 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
     private static final String OIWFS = "OIWFS";
 
     /**
-     * Listeners for property changes that affect the parallactic angle components.
+     * Listeners for property changes that affect the parallactic and unbounded angle components.
      */
     final PropertyChangeListener updateParallacticAnglePCL;
-    final PropertyChangeListener relativeTimeMenuPCL;
+    final PropertyChangeListener updateUnboundedAnglePCL;
 
 //    /**
 //     * Value assigned to WFS tags to indicate that the WFS is parked (inactive).
@@ -94,7 +91,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
     }
 
     private void reinitializeNodAndShuffleOffset() {
-        final int drUi    = _w.detectorRows.getIntegerValue(-1);
+        final int drUi = _w.detectorRows.getIntegerValue(-1);
         final int drModel = getDataObject().getNsDetectorRows();
         if (drUi != drModel) {
             _w.detectorRows.deleteWatcher(this);
@@ -102,7 +99,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
             _w.detectorRows.addWatcher(this);
         }
 
-        final String soUi    = _w.shuffleOffset.getValue();
+        final String soUi = _w.shuffleOffset.getValue();
         final String soModel = getDataObject().getShuffleOffsetAsString();
         if (!soUi.equals(soModel)) {
             _w.shuffleOffset.deleteWatcher(this);
@@ -165,7 +162,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
 
 
     // The GUI layout panel
-    protected final GmosForm _w;
+    protected final GmosForm<T> _w;
     private final GmosOffsetPosTableWidget<OffsetPos> _offsetTable;
 
     // Custom ROIs
@@ -209,7 +206,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
      * The constructor initializes the user interface.
      */
     public EdCompInstGMOS() {
-        _w = new GmosForm();
+        _w = new GmosForm<T>();
         _offsetTable = _w.offsetTable;
         _customROITable = _w.customROITable;
 
@@ -224,7 +221,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
 //        }
 
         // add action listeners
-        _w.posAngle180.addActionListener(this);
         _w.focalPlaneBuiltInButton.addActionListener(this);
         _w.focalPlaneMaskButton.addActionListener(this);
         _w.focalPlaneMaskPlotButton.addActionListener(this);
@@ -372,13 +368,13 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         updateParallacticAnglePCL = new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
-                _w.parallacticAnglePanel.updateParallacticAngleMode();
+                _w.posAnglePanel.updateParallacticControls();
             }
         };
-        relativeTimeMenuPCL = new PropertyChangeListener() {
+        updateUnboundedAnglePCL   = new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
-                _w.parallacticAnglePanel.rebuildRelativeTimeMenu();
+                _w.posAnglePanel.updateUnboundedControls();
             }
         };
     }
@@ -458,7 +454,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         _updateFilter();
         _updateExposureTime();
         _updateDisperser();
-        _updatePosAngleConstraint();
         _updateFPU();
         _updateCCD();
         _updateStageDetails();
@@ -473,24 +468,25 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
 
         _updateCustomSlitWidth();
 
+        _w.posAnglePanel.init(this, getSite());
 
-        _w.parallacticAnglePanel.init(this, getSite());
 
         // If the position angle mode or FPU mode properties change, force an update on the parallactic angle mode.
-        getDataObject().addPropertyChangeListener(InstGmosCommon.POSITION_ANGLE_MODE_PROP.getName(), updateParallacticAnglePCL);
-        getDataObject().addPropertyChangeListener(InstGmosCommon.FPU_MODE_PROP.getName(),            updateParallacticAnglePCL);
+        final T inst = getDataObject();
+        inst.addPropertyChangeListener(InstGmosCommon.FPU_MODE_PROP.getName(), updateParallacticAnglePCL);
+        inst.addPropertyChangeListener(InstGmosCommon.DISPERSER_PROP_NAME, updateParallacticAnglePCL);
 
-        // Add a watcher to the data object for the disperser to rebuild the parallactic angle "Set To" menu
-        // when it is changed, as it may trigger changes in setup time for GMOS.
-        // (See subclasses for similiar property change listener for FPU.)
-        getDataObject().addPropertyChangeListener(InstGmosCommon.DISPERSER_PROP_NAME, relativeTimeMenuPCL);
+        // If the MOS preimaging or FPU mode properties change, force an update on the unbounded angle mode.
+        inst.addPropertyChangeListener(InstGmosCommon.IS_MOS_PREIMAGING_PROP.getName(), updateUnboundedAnglePCL);
+        inst.addPropertyChangeListener(InstGmosCommon.FPU_MODE_PROP.getName(),          updateUnboundedAnglePCL);
+    }
 
-        getDataObject().addPropertyChangeListener(InstGmosCommon.POS_ANGLE_CONSTRAINT_PROP.getName(), new PropertyChangeListener() {
-            @Override public void propertyChange(PropertyChangeEvent evt) {
-                final PosAngleConstraint pac = (PosAngleConstraint) evt.getNewValue();
-                _w.posAngle180.setSelected(pac == PosAngleConstraint.FIXED_180);
-            }
-        });
+    @Override protected void cleanup() {
+        super.cleanup();
+
+        final T inst = getDataObject();
+        inst.removePropertyChangeListener(InstGmosCommon.FPU_MODE_PROP.getName(), updateParallacticAnglePCL);
+        inst.removePropertyChangeListener(InstGmosCommon.DISPERSER_PROP_NAME, updateParallacticAnglePCL);
     }
 
     // Initialize controls based on gmos specific information.
@@ -593,6 +589,10 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
             _w.ccd6AmpButton.setSelected(true);
         else if (c == GmosCommonType.AmpCount.TWELVE)
             _w.ccd12AmpButton.setSelected(true);
+
+        // changing the CCD can render ROIs invalid
+        validateROIs();
+
     }
 
     // Display the current translation stage details settings
@@ -625,19 +625,19 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         } else if (roi == BuiltinROI.CUSTOM) {
             _w.customButton.setSelected(true);
         }
-        try {
-            _customROITable.reinit(
-                    getDataObject().getCustomROIs(),
-                    getDataObject().getCcdXBinning(),
-                    getDataObject().getCcdYBinning(),
-                    getDataObject().getDetectorManufacturer());
-        } catch (IllegalArgumentException e) {
-            _setWarning(_w.warningCustomROI, e.getMessage());
-        }
+
+        _customROITable.reinit(
+                getDataObject().getCustomROIs(),
+                getDataObject().getCcdXBinning(),
+                getDataObject().getCcdYBinning());
+
         _w.xMin.setValue(1);
         _w.yMin.setValue(1);
         _w.xRange.setValue(1);
         _w.yRange.setValue(1);
+
+        // changing any of these settings might turn ROIs invalid
+        validateROIs();
     }
 
     // Display the current ISS port settings
@@ -650,14 +650,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         }
     }
 
-    // Display the current position angle settings
-    private void _updatePosAngleConstraint() {
-        final PosAngleConstraint pac = getDataObject().getPosAngleConstraint();
-        final boolean selected = pac == PosAngleConstraint.FIXED_180;
-        _w.posAngle180.removeActionListener(this);
-        _w.posAngle180.setSelected(selected);
-        _w.posAngle180.addActionListener(this);
-    }
 
     // Display the current FPU settings
     private void _updateFPU() {
@@ -725,9 +717,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         _w.builtinComboBox.setEnabled(enabled && !customMask);
         _w.focalPlaneMask.setEnabled(enabled && customMask);
         _w.customSlitWidthComboBox.setEnabled(enabled && customMask);
-
-        _w.parallacticAnglePanel.updateEnabledState(enabled);
-
     }
 
     protected void _updateCustomSlitWidth() {
@@ -822,6 +811,23 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
 
 
     /**
+     * Check if the offsets are all "sufficiently small" to not require a target, i.e. sqrt(p^2+q^2) <= 1.
+     * See REL-1308 for more information.
+     */
+    private boolean _checkOffsetsSmall() {
+        boolean sufficientlySmall = true;
+        for (OffsetPos op : _opl.getAllPositions()) {
+            double p = op.getXaxis();
+            double q = op.getYaxis();
+            if (Math.sqrt(p*p + q*q) > 1) {
+                sufficientlySmall = false;
+                break;
+            }
+        }
+        return sufficientlySmall;
+    }
+
+    /**
      * Check the selected nod & shuffle settings and display a warning if needed.
      */
     private void _checkNSValues() {
@@ -830,13 +836,14 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
 
         String msg = null;
         if (_opl != null) {
+            boolean hasOiwfsGuideStar = primaryOiwfsStarExists();
+
             final InstGmosCommon.UseElectronicOffsettingRuling ruling;
-            if (!primaryOiwfsStarExists()) {
-                msg = "Electronic offsetting requires a GMOS OIWFS to be defined.";
-            } else {
+            if (hasOiwfsGuideStar) {
                 ruling = InstGmosCommon.checkUseElectronicOffsetting(getDataObject(), _opl);
                 if (!ruling.allow) msg = ruling.message;
-            }
+            } else if (!_checkOffsetsSmall())
+                msg = "Electronic offsetting requires a GMOS OIWFS to be defined unless the offsets are sufficiently small.";
         }
         if (getDataObject().isUseElectronicOffsetting()) {
             _w.electronicOffsetCheckBox.setSelected(true);
@@ -898,7 +905,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
      *
      * @see TableWidgetWatcher
      */
-    public void tableRowSelected(TableWidget twe, int rowIndex) {
+    public void tableRowSelected(final TableWidget twe, final int rowIndex) {
         if (twe == _offsetTable) {
             if (_curPos != null)
                 _curPos.deleteWatcher(this);
@@ -907,16 +914,37 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
             showPos(_curPos);
         } else if (twe == _customROITable) {
             showROI(_customROITable.getSelectedROI());
-            _clearWarning(_w.warningCustomROI);
         }
-
     }
 
-    protected void showROI(ROIDescription rDesc) {
+    private void showROI(final ROIDescription rDesc) {
         _w.xMin.setValue(rDesc.getXStart());
         _w.yMin.setValue(rDesc.getYStart());
         _w.xRange.setValue(rDesc.getXSize(getDataObject().getCcdXBinning()));
         _w.yRange.setValue(rDesc.getYSize(getDataObject().getCcdYBinning()));
+    }
+
+    /**
+     * Shows a warning for the first invalid ROI it finds, for too many ROIs or overlapping ROIs.
+     * Clears all warnings if there are none.
+     */
+    private void validateROIs() {
+        final DetectorManufacturer ccd = getDataObject().getDetectorManufacturer();
+        for (ROIDescription rDesc : _customROITable.getCustomROIs().get()) {
+            if (!rDesc.validate(ccd.getXsize(), ccd.getYsize())) {
+                _setWarning(_w.warningCustomROI, "ROI is not within valid ranges: " + rDesc);
+                return;
+            }
+        }
+        if (_customROITable.getCustomROIs().size() > ccd.getMaxROIs()) {
+            _setWarning(_w.warningCustomROI, "There must not be more than " + ccd.getMaxROIs() + " custom ROIs for this detector");
+        } else if (ccd == DetectorManufacturer.E2V && _customROITable.getCustomROIs().rowOverlap()) {
+            _setWarning(_w.warningCustomROI, "The custom ROIs must not overlap");
+        } else if (ccd == DetectorManufacturer.HAMAMATSU && _customROITable.getCustomROIs().pixelOverlap()) {
+            _setWarning(_w.warningCustomROI, "The custom ROIs must not overlap");
+        } else {
+            _clearWarning(_w.warningCustomROI);
+        }
     }
 
     /**
@@ -928,14 +956,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
     public void tableAction(TableWidget twe, int colIndex, int rowIndex) {
     }
 
-
-    /**
-     * Return the position angle text box and implements similar method for parallactic angle feature.
-     */
-    public TextBoxWidget getPosAngleTextBox() {
-        return _w.posAngle;
-    }
-    @Override public JTextField getPosAngleTextField() { return _w.posAngle; }
 
     /**
      * Return the exposure time text box
@@ -958,14 +978,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         final Object w = evt.getSource();
         final boolean enabled = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
 
-        if (w == _w.posAngle180) {
-            if (_w.posAngle180.isSelected()) {
-                getDataObject().setPosAngleConstraint(PosAngleConstraint.FIXED_180);
-            } else {
-                getDataObject().setPosAngleConstraint(PosAngleConstraint.FIXED);
-            }
-            _w.posAngle.setEnabled(enabled);
-        } else if (w == _w.focalPlaneBuiltInButton) {
+        if (w == _w.focalPlaneBuiltInButton) {
             getDataObject().setFPUnitMode(FPUnitMode.BUILTIN);
             _w.builtinComboBox.setEnabled(enabled);
             _w.focalPlaneMask.setEnabled(false);
@@ -1075,6 +1088,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         } else if (w == _w.electronicOffsetCheckBox) {
             final boolean useEO = _w.electronicOffsetCheckBox.isSelected();
             getDataObject().setUseElectronicOffsetting(useEO);
+            _checkNSValues();
         } else if (w == _w.removeAllButton) {
             _opl.removeAllPositions();
         } else if (w == _w.removeButton) {
@@ -1084,34 +1098,31 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
             final boolean isPreimg = _w.preImgCheckButton.isSelected();
             getDataObject().setMosPreimaging(isPreimg ? YesNoType.YES : YesNoType.NO);
         } else if (w == _w.customROINewButton) {
-            if (_customROITable.getCustomROIs().size() >= 5 ||
-                    (!getDataObject().getDetectorManufacturer().equals(GmosCommonType.DetectorManufacturer.HAMAMATSU) &&
-                            _customROITable.getCustomROIs().size() >= 4)) {
+            if (_customROITable.getCustomROIs().size() >= getDataObject().getDetectorManufacturer().getMaxROIs()) {
                 //raise popup and do NOT add a new custom ROI
                 DialogUtil.error("You cannot declare more than 5 custom ROIs for HAMAMATSU CCDs or 4 for E2V CCDs");
             } else {
-                try {
-                    _customROITable.addROI(
-                            _w.xMin.getIntegerValue(1),
-                            _w.yMin.getIntegerValue(1),
-                            _w.xRange.getIntegerValue(1) * getDataObject().getCcdXBinning().getValue(),
-                            _w.yRange.getIntegerValue(1) * getDataObject().getCcdYBinning().getValue());
+                final Option<ROIDescription> r = editedROI();
+                if (r.nonEmpty()) {
+                    _customROITable.addROI(r.get());
                     getDataObject().setCustomROIs(_customROITable.getCustomROIs());
-                } catch (IllegalArgumentException e) {
-                    _setWarning(_w.warningCustomROI, e.getMessage());
+                    validateROIs();
                 }
             }
         } else if (w == _w.customROIPasteButton) {
-            int maxRows = getDataObject().getDetectorManufacturer().equals(GmosCommonType.DetectorManufacturer.HAMAMATSU) ? 5 : 4;
-            if (_customROITable.paste(maxRows)) {
+            final DetectorManufacturer ccd = getDataObject().getDetectorManufacturer();
+            if (_customROITable.paste(ccd)) {
                 getDataObject().setCustomROIs(_customROITable.getCustomROIs());
             }
+            validateROIs();
         } else if (w == _w.customROIRemoveButton) {
             _customROITable.removeSelectedROI();
             getDataObject().setCustomROIs(_customROITable.getCustomROIs());
+            validateROIs();
         } else if (w == _w.customROIRemoveAllButton) {
             _customROITable.removeAllROIs();
             getDataObject().setCustomROIs(_customROITable.getCustomROIs());
+            validateROIs();
         }
     }
 
@@ -1122,8 +1133,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         AbstractAction action = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                int maxRows = getDataObject().getDetectorManufacturer().equals(GmosCommonType.DetectorManufacturer.HAMAMATSU) ? 5 : 4;
-                _customROITable.paste(maxRows);
+                _customROITable.paste(getDataObject().getDetectorManufacturer());
             }
         };
         _customROITable.registerKeyboardAction(action, "Paste", stroke, JComponent.WHEN_FOCUSED);
@@ -1297,27 +1307,42 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         } else if (tbwe == _w.xMin || tbwe == _w.yMin || tbwe == _w.xRange || tbwe == _w.yRange) {
             final int sel = _customROITable.getSelectedRow();
             if (sel >= 0 && sel < _customROITable.getRowCount()) {
-                //only update if valid
-                _customROITable.deleteWatcher(this);
-                try {
-                    Integer.parseInt(_w.xMin.getValue());
-                    Integer.parseInt(_w.yMin.getValue());
-                    Integer.parseInt(_w.xRange.getValue());
-                    Integer.parseInt(_w.yRange.getValue());
-                    _customROITable.updateSelectedROI(_w.xMin.getIntegerValue(0),
-                            _w.yMin.getIntegerValue(0),
-                            _w.xRange.getIntegerValue(0) * getDataObject().getCcdXBinning().getValue(),
-                            _w.yRange.getIntegerValue(0) * getDataObject().getCcdYBinning().getValue());
+                final Option<ROIDescription> newROI = editedROI();
+                if (newROI.nonEmpty()) {
+                    _customROITable.deleteWatcher(this);
+                    _customROITable.updateSelectedROI(newROI.get());
                     getDataObject().setCustomROIs(_customROITable.getCustomROIs());
-                    _clearWarning(_w.warningCustomROI);
-                } catch (NumberFormatException e) {
-                    _setWarning(_w.warningCustomROI, "Cannot parse number, " + e.getMessage());
-                } catch (IllegalArgumentException e) {
-                    _setWarning(_w.warningCustomROI, e.getMessage());
+                    _customROITable.selectRowAt(sel);
+                    _customROITable.addWatcher(this);
+                    validateROIs();
                 }
-                _customROITable.selectRowAt(sel);
-                _customROITable.addWatcher(this);
             }
+        }
+    }
+
+    /**
+     * Gets a new validated ROI based on the values in the text edit components if those values are valid numbers.
+     * @return a new ROI based on the parsed numbers if the ROI is valid for the current configuration, None otherwise
+     */
+    private Option<ROIDescription> editedROI() {
+        try {
+            final int x = Integer.parseInt(_w.xMin.getValue());
+            final int y = Integer.parseInt(_w.yMin.getValue());
+            final int w = Integer.parseInt(_w.xRange.getValue()) * getDataObject().getCcdXBinning().getValue();
+            final int h = Integer.parseInt(_w.yRange.getValue()) * getDataObject().getCcdYBinning().getValue();
+
+            final ROIDescription newROI = new ROIDescription(x, y, w, h);
+            final DetectorManufacturer ccd = getDataObject().getDetectorManufacturer();
+            if (newROI.validate(ccd.getXsize(), ccd.getYsize())) {
+                return new Some<>(newROI);
+            } else {
+                _setWarning(_w.warningCustomROI, "ROI is not within valid ranges: " + newROI);
+                return Option.empty();
+            }
+
+        } catch (NumberFormatException e) {
+            _setWarning(_w.warningCustomROI, "Cannot parse number, " + e.getMessage());
+            return Option.empty();
         }
     }
 
@@ -1330,24 +1355,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
 
     // -- Implement the TelescopePosWatcher interface --
 
-    /**
-     * The current position location has changed.
-     *
-     * @see edu.gemini.spModel.target.TelescopePosWatcher
-     * @param tp
-     */
-    public void telescopePosLocationUpdate(WatchablePos tp) {
-        telescopePosGenericUpdate(tp);
-    }
-
-
-    /**
-     * The current position has been changed in some way.
-     *
-     * @see TelescopePosWatcher
-     * @param tp
-     */
-    public void telescopePosGenericUpdate(WatchablePos tp) {
+    public void telescopePosUpdate(WatchablePos tp) {
         if (tp != _curPos) {
             // This shouldn't happen ...
             System.out.println(getClass().getName() + ": received a position " +

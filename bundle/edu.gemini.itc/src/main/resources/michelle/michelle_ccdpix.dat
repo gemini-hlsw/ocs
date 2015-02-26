@@ -1,0 +1,15 @@
+# T-ReCS Mapping of CCD 
+# Columns are (1) pixel number in dispersion direction, (2) "efficiency"
+# The "efficiency" can be set to zero if there are bad columns, otherwise
+# it is one.
+# TheCCD is 320 pixels in the dispersion direction.
+# The first pixel has number 1.
+# Author: Brian Walls
+# Created: 12apr2003 
+#
+# pixel  efficiency
+
+     1    1.
+     2	  1.
+     319  1.
+     320  1.

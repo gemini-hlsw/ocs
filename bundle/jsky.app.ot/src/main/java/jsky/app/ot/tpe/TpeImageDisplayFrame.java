@@ -94,7 +94,6 @@ public class TpeImageDisplayFrame extends NavigatorImageDisplayFrame {
 
     /** Add a tool bar for OT/TPE specific operations. */
     protected void addTpeToolBar() {
-//        TpeImageWidget imageDisplay = (TpeImageWidget) imageDisplayControl.getImageDisplay();
         tpeToolBar = new TpeToolBar();
         getContentPane().add(tpeToolBar, BorderLayout.WEST);
     }

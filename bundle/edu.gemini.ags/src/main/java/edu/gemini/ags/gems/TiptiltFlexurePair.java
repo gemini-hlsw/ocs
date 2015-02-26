@@ -12,8 +12,8 @@ import java.util.List;
  * The two results must be from different guide probe groups (Canopus, GSAOI, etc).
  */
 public class TiptiltFlexurePair {
-    private GemsCatalogSearchResults tiptiltResults;
-    private GemsCatalogSearchResults flexureResults;
+    private final GemsCatalogSearchResults tiptiltResults;
+    private final GemsCatalogSearchResults flexureResults;
 
     private TiptiltFlexurePair(GemsCatalogSearchResults tiptiltResults, GemsCatalogSearchResults flexureResults) {
         this.tiptiltResults = tiptiltResults;
@@ -29,7 +29,7 @@ public class TiptiltFlexurePair {
     }
 
     // Returns pairs of results that can be used for tiptilt and flexure (from different guide probe groups).
-    public static List<TiptiltFlexurePair> pairs(List<GemsCatalogSearchResults> results) {
+    public static List<TiptiltFlexurePair> pairs(final List<GemsCatalogSearchResults> results) {
         GemsCatalogSearchResults canopusTiptilt = null;
         GemsCatalogSearchResults gsaoiOrFlamingosFlexure = null;
 
@@ -37,19 +37,19 @@ public class TiptiltFlexurePair {
         GemsCatalogSearchResults canopusFlexure = null;
 
         for (GemsCatalogSearchResults searchResults : results) {
-            GemsCatalogSearchCriterion criterion = searchResults.getCriterion();
-            GemsCatalogSearchKey key = criterion.getKey();
-            if (key.getType() == GemsGuideStarType.tiptilt) {
-                GemsGuideProbeGroup tiptiltGroup = key.getGroup();
-                String groupKey = tiptiltGroup.getKey();
+            final GemsCatalogSearchCriterion criterion = searchResults.criterion();
+            final GemsCatalogSearchKey key = criterion.key();
+            if (key.starType() == GemsGuideStarType.tiptilt) {
+                final GemsGuideProbeGroup tiptiltGroup = key.group();
+                final String groupKey = tiptiltGroup.getKey();
                 if ("CWFS".equals(groupKey)) {
                     canopusTiptilt = searchResults;
                 } else if ("ODGW".equals(groupKey)) {
                     gsaoiTiptilt = searchResults;
                 }
             } else {
-                GemsGuideProbeGroup flexureGroup = key.getGroup();
-                String groupKey = flexureGroup.getKey();
+                final GemsGuideProbeGroup flexureGroup = key.group();
+                final String groupKey = flexureGroup.getKey();
                 if ("ODGW".equals(groupKey) || "FII OIWFS".equals(groupKey)) {
                     gsaoiOrFlamingosFlexure = searchResults;
                 } else if ("CWFS".equals(groupKey)) {
@@ -58,7 +58,7 @@ public class TiptiltFlexurePair {
             }
         }
 
-        List<TiptiltFlexurePair> pairs = new ArrayList<TiptiltFlexurePair>();
+        final List<TiptiltFlexurePair> pairs = new ArrayList<>();
         if (canopusTiptilt != null && gsaoiOrFlamingosFlexure != null) {
             pairs.add(new TiptiltFlexurePair(canopusTiptilt, gsaoiOrFlamingosFlexure));
         }

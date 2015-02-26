@@ -2,30 +2,54 @@ package edu.gemini.qv.plugin.chart
 
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.qpt.shared.sp.Band
-import edu.gemini.qv.plugin.filter.core.Filter.{RA, Partner}
-import edu.gemini.qv.plugin.filter.core._
 import edu.gemini.qv.plugin.QvStore.NamedElement
+import edu.gemini.qv.plugin.filter.core.Filter.{HasDummyTarget, Partner, RA}
+import edu.gemini.qv.plugin.filter.core._
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.DisperserNorth
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.DisperserSouth
-import edu.gemini.spModel.gemini.gmos.{GmosSouthType, GmosNorthType}
-import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{SkyBackground, WaterVapor, CloudCover, ImageQuality}
+import edu.gemini.spModel.gemini.gmos.{GmosNorthType, GmosSouthType}
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{CloudCover, ImageQuality, SkyBackground, WaterVapor}
 import edu.gemini.spModel.obs.SPObservation.Priority
 
-case class Axis(label: String, groups: Seq[Filter]) extends NamedElement {
-  // necessary condition: each group must have a unique name, otherwise
-  // JFreeChart is going to collapse the data into one group
-//  require(groups.map(_.name).toSet.size == groups.size, "names for groups must be unique: " + groups.map(_.name).mkString(", "))
+trait Axis extends NamedElement {
+  val groups: Seq[Filter]
 
-  /** True if all categories on this axis represent RAs/times. */
+  /** True if all categories on this axis represent RA bins.
+   *  This must includes dummy target bins for targets with RA=0 and Dec=0.
+   */
   def isTime: Boolean = {
-    !groups.exists(_ match {
-      case RA(_,_) => false
-      case _ => true
+    !groups.exists({
+      case HasDummyTarget(_)  => false
+      case RA(_,_)            => false
+      case _                  => true
     })
   }
+
 }
 
 object Axis {
+
+  /** Creates an axis for a given set of filters, if there are no filters the axis is a stub and non editable. */
+  // TODO: Here we should "require(g.nonEmpty)" but older versions exported the Observations and Programs filter
+  // TODO: stubs to file. On cleaning this up I have to make sure this case is handled properly.
+  def apply(l: String, g: Seq[Filter]) = {
+    new Axis {
+      override val isEditable = g.nonEmpty
+      val label = l
+      val groups = g
+    }
+  }
+
+  /** Creates a non editable axis stub without filters that serves as a placeholder for dynamic
+    * filters which are calculated on-the-fly based on the data that is present.
+    */
+  def apply(l: String) = {
+    new Axis {
+      override val isEditable = false
+      val label = l
+      val groups = Seq()
+    }
+  }
 
   // create a set of default axes
   val Instruments     = forValues[SPComponentType]("Instruments", Filter.Instruments().sortedValues, Filter.Instruments.apply)
@@ -97,7 +121,7 @@ object Axis {
     FilterAnd(Filter.GmosS.FocalPlanes(GmosSouthType.FPUnitSouth.CUSTOM_MASK), Filter.GmosS.Dispersers(GmosSouthType.DisperserSouth.R600_G5324)),
     FilterAnd(Filter.GmosS.FocalPlanes(GmosSouthType.FPUnitSouth.CUSTOM_MASK), Filter.GmosS.Dispersers(GmosSouthType.DisperserSouth.R831_G5322))
   ))
-  val BigSheet        = Axis("Big Sheet", Seq(
+  val BigSheet = Axis("Big Sheet", Seq(
     FilterAnd(Filter.IQs(ImageQuality.PERCENT_20), Filter.CCs(CloudCover.PERCENT_50)),
     FilterAnd(Filter.IQs(ImageQuality.PERCENT_20), Filter.CCs(CloudCover.PERCENT_70)),
     FilterAnd(Filter.IQs(ImageQuality.PERCENT_70), Filter.CCs(CloudCover.PERCENT_50)),
@@ -106,14 +130,20 @@ object Axis {
     FilterAnd(Filter.IQs(ImageQuality.PERCENT_85), Filter.CCs(CloudCover.PERCENT_70))
   ))
 
-  // ra default axes, note:
-  // a) ra values in obd are defined in degrees, not hours
-  // b) negative range is added to contain TOOs with ra=0,dec=0 which is translated into ra=-0,dec=0
-  val RA025       = forRanges("RA 0.25", -0.25, 24, 0.25)
-  val RA05        = forRanges("RA 0.5", -0.5, 24, 0.5)
-  val RA1         = forRanges("RA", -1, 24, 1)
-  val RA2         = forRanges("RA 2", -2, 24, 2)
+  // These axes depend on the actual observations and programs that are available in the data we're looking at.
+  // They are created "on-the-fly" whenever one of these stubs is selected using Program.forPrograms() and
+  // Observation.forObservations() respectively. Note that the axes stubs also need to be used for looking up
+  // axes when loading configurations from disk.
+  // TODO: Make calculated axes part of default axes.
+  val Observations = Axis("Observations")
+  val Programs     = Axis("Programs")
+  val Dynamics     = Seq(Observations, Programs)
 
+  // ra default axes, note: ra values in obd are defined in degrees, not hours
+  val RA025 = Axis("RA 0.25", HasDummyTarget(Some(true)) +: raRanges(0.25))
+  val RA05  = Axis("RA 0.5", HasDummyTarget(Some(true)) +: raRanges(0.5))
+  val RA1   = Axis("RA", HasDummyTarget(Some(true)) +: raRanges(1))
+  val RA2   = Axis("RA 2", HasDummyTarget(Some(true)) +: raRanges(2))
 
   def forValues[A](label: String, v: Seq[A], f: Set[A] => Filter): Axis = {
     val s0 = v.map(Set(_))
@@ -121,12 +151,10 @@ object Axis {
     Axis(label, s1.toList)
   }
 
-  def forRanges[A](label: String, start: Double, end: Double, step: Double): Axis = {
-    val filters = for {
-      a <- start until (end, step)
+  def raRanges[A](step: Double): Seq[RA] =
+    for {
+      a <- RA.MinValue until (RA.MaxValue, step)
     } yield RA(a, a + step)
-    Axis(label, filters)
-  }
 
 }
 

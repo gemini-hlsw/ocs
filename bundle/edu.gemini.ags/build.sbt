@@ -24,7 +24,8 @@ OsgiKeys.dynamicImportPackage := Seq("")
 
 OsgiKeys.exportPackage := Seq(
   "edu.gemini.ags.gems.*",
-  "edu.gemini.ags.api.*")
+  "edu.gemini.ags.api.*",
+  "edu.gemini.ags.conf.*")
 
 OsgiKeys.privatePackage := Seq("edu.gemini.ags.impl.*")
 

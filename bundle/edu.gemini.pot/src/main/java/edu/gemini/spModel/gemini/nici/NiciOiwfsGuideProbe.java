@@ -6,6 +6,7 @@ package edu.gemini.spModel.gemini.nici;
 
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
@@ -55,11 +56,12 @@ public enum NiciOiwfsGuideProbe implements ValidatableGuideProbe {
     @Override public PatrolField getPatrolField() {
         return patrolField;
     }
-    @Override public PatrolField getCorrectedPatrolField(ObsContext ctx) {
-        return getPatrolField();
+
+    @Override public Option<PatrolField> getCorrectedPatrolField(ObsContext ctx) {
+        return (ctx.getInstrument() instanceof InstNICI) ? new Some<>(getPatrolField()) : None.<PatrolField>instance();
     }
     @Override
     public boolean validate(SPTarget guideStar, ObsContext ctx) {
-        return GuideProbeUtil.instance.validate(guideStar.getSkycalcCoordinates(), getCorrectedPatrolField(ctx), ctx);
+        return GuideProbeUtil.instance.validate(guideStar.getTarget().getSkycalcCoordinates(), this, ctx);
     }
 }

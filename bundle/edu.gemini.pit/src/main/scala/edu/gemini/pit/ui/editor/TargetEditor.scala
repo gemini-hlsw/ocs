@@ -177,7 +177,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
       selection.item = initialType // initialize
       renderer = new ListView.Renderer[TargetType] {
         val delegate = renderer
-        def componentFor(list: ListView[_], isSelected: Boolean, focused: Boolean, a: TargetType, index: Int) = {
+        def componentFor(list: ListView[_ <: TargetType], isSelected: Boolean, focused: Boolean, a: TargetType, index: Int) = {
           val c = delegate.componentFor(list, isSelected, focused, a, index)
           c.peer.asInstanceOf[JLabel].setIcon(a match {
             case SiderealType    => SharedIcons.ICON_SIDEREAL

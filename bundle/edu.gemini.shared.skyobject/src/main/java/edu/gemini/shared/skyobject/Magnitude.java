@@ -22,6 +22,14 @@ public final class Magnitude implements Comparable, Serializable {
      * Common wavelength bands.
      */
     public enum Band {
+
+        // OCSADV-203
+        u(350, "UV"),
+        g(475, "green"),
+        r(630, "red"),
+        i(780, "far red"),
+        z(925, "near-infrared"),
+
         U( 365, "ultraviolet"),
         B( 445, "blue"),
         V( 551, "visual"),
@@ -36,23 +44,8 @@ public final class Magnitude implements Comparable, Serializable {
         M(4750),
         N(10000),
         Q(16000),
-// REL-549: Remove "AB" and "Jy" Band enum values from the model since they are actually "system" options.
-//        AB(None.INTEGER, None.STRING),
-//        Jy(None.INTEGER, None.STRING),
+        AP(None.INTEGER, new Some<>("apparent"))
         ;
-
-        /**
-         * A Comparator of magnitude bands based upon the name of the
-         * band.  The default ordering is in terms of increasing wavelength.
-         * This comparator can be used to sort passbands based upon an
-         * alphabetical sorting.
-         */
-        public static final Comparator<Band> NAME_COMPARATOR =
-            new Comparator<Band>() {
-                @Override public int compare(Band b1, Band b2) {
-                    return b1.name().compareTo(b2.name());
-                }
-            };
 
         /**
          * A Comparator of magnitude bands based upon the associated
@@ -81,17 +74,18 @@ public final class Magnitude implements Comparable, Serializable {
         }
 
         Band(int mid, String desc) {
-            this.wavelengthMidPoint = new Some<Integer>(mid);
-            this.description = (desc == null) ? None.STRING : new Some<String>(desc);
+            this.wavelengthMidPoint = new Some<>(mid);
+            this.description = (desc == null) ? None.STRING : new Some<>(desc);
+        }
+
+        public Option<String> getDescription() {
+            return description;
         }
 
         public Option<Integer> getWavelengthMidPoint() {
             return wavelengthMidPoint;
         }
 
-        public Option<String> getDescription() {
-            return description;
-        }
     }
 
     /**
@@ -147,7 +141,7 @@ public final class Magnitude implements Comparable, Serializable {
      * @param error error in measurement
      */
     public Magnitude(Band band, double brightness, double error) {
-        this(band, brightness, new Some<Double>(error), System.DEFAULT);
+        this(band, brightness, new Some<>(error), System.DEFAULT);
     }
 
     /**
@@ -159,7 +153,7 @@ public final class Magnitude implements Comparable, Serializable {
      * @param system mag system
      */
     public Magnitude(Band band, double brightness, double error, System system) {
-        this(band, brightness, new Some<Double>(error), system);
+        this(band, brightness, new Some<>(error), system);
     }
 
     /**

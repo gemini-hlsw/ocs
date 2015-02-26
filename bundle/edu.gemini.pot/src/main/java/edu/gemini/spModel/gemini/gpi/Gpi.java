@@ -41,6 +41,7 @@ import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.seqcomp.SeqConfigNames;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
+import edu.gemini.spModel.target.obsComp.TargetObsCompConstants;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
 import edu.gemini.spModel.type.*;
 
@@ -58,6 +59,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     // for serialization
     private static final long serialVersionUID = 4L;
 
+    private static final String GUIDING_PATH = TargetObsCompConstants.CONFIG_NAME + ":" + TargetObsCompConstants.GUIDE_WITH_OIWFS_PROP;
 
     private static boolean equal(double d1, double d2) {
         return Math.abs(d1 - d2) < 0.00001;
@@ -158,23 +160,23 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         },
 
         // Y_direct
-        DIRECT_Y_BAND("Y direct", Filter.Y, true, Apodizer.CLEAR, FPM.SCIENCE, Lyot.OPEN, 5.5, 8.0) {
+        DIRECT_Y_BAND("Y direct", Filter.Y, true, Apodizer.CLEAR, FPM.SCIENCE, Lyot.OPEN, 5.5, 7.5) {
             @Override public ObservingMode correspondingH() { return DIRECT_H_BAND; }
         },
         // J_direct
-        DIRECT_J_BAND("J direct", Filter.J, true, Apodizer.CLEAR, FPM.SCIENCE, Lyot.OPEN, 5.5, 8.0) {
+        DIRECT_J_BAND("J direct", Filter.J, true, Apodizer.CLEAR, FPM.SCIENCE, Lyot.OPEN, 5.5, 7.5) {
             @Override public ObservingMode correspondingH() { return DIRECT_H_BAND; }
         },
         // H_direct
-        DIRECT_H_BAND("H direct", Filter.H, true, Apodizer.CLEAR, FPM.SCIENCE, Lyot.OPEN, 5.5, 8.0) {
+        DIRECT_H_BAND("H direct", Filter.H, true, Apodizer.CLEAR, FPM.SCIENCE, Lyot.OPEN, 5.5, 7.5) {
             @Override public ObservingMode correspondingH() { return this; }
         },
         // K1_direct
-        DIRECT_K1_BAND("K1 direct", Filter.K1, true, Apodizer.CLEAR, FPM.SCIENCE, Lyot.OPEN, 5.5, 8.0) {
+        DIRECT_K1_BAND("K1 direct", Filter.K1, true, Apodizer.CLEAR, FPM.SCIENCE, Lyot.OPEN, 5.5, 7.5) {
             @Override public ObservingMode correspondingH() { return DIRECT_H_BAND; }
         },
         // K2_direct
-        DIRECT_K2_BAND("K2 direct", Filter.K2, true, Apodizer.CLEAR, FPM.SCIENCE, Lyot.OPEN, 5.5, 8.0) {
+        DIRECT_K2_BAND("K2 direct", Filter.K2, true, Apodizer.CLEAR, FPM.SCIENCE, Lyot.OPEN, 5.5, 7.5) {
             @Override public ObservingMode correspondingH() { return DIRECT_H_BAND; }
         },
 
@@ -201,6 +203,23 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
 
         // Dark mode
         DARK("Dark", Filter.H, false, Apodizer.APOD_H, FPM.FPM_H, Lyot.BLANK, 0.5, 3.0) {
+            @Override public ObservingMode correspondingH() { return this; }
+        },
+
+        // Unblocked Modes
+        UNBLOCKED_Y("Y Unblocked", Filter.Y, false, Apodizer.APOD_Y, FPM.SCIENCE, Lyot.LYOT_080m12_03, 4.0, 6.5) {
+            @Override public ObservingMode correspondingH() { return this; }
+        },
+        UNBLOCKED_J("J Unblocked", Filter.J, false, Apodizer.APOD_J, FPM.SCIENCE, Lyot.LYOT_080m12_04, 4.0, 6.5) {
+            @Override public ObservingMode correspondingH() { return this; }
+        },
+        UNBLOCKED_H("H Unblocked", Filter.H, false, Apodizer.APOD_H, FPM.SCIENCE, Lyot.LYOT_080m12_04, 4.0, 6.5) {
+            @Override public ObservingMode correspondingH() { return this; }
+        },
+        UNBLOCKED_K1("K1 Unblocked", Filter.K1, false, Apodizer.APOD_K1, FPM.SCIENCE, Lyot.LYOT_080m12_06_03, 4.0, 6.5) {
+            @Override public ObservingMode correspondingH() { return this; }
+        },
+        UNBLOCKED_K2("K2 Unblocked", Filter.K2, false, Apodizer.APOD_K1, FPM.SCIENCE, Lyot.LYOT_080m12_07, 4.0, 6.5) {
             @Override public ObservingMode correspondingH() { return this; }
         },
 
@@ -307,7 +326,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
             ObservingMode def = nvalue.isEmpty() ? null : nvalue.getValue();
             ObservingMode val = SpTypeUtil.oldValueOf(ObservingMode.class, name, def);
             None<ObservingMode> none = None.instance();
-            return val == null ? none : new Some<ObservingMode>(val);
+            return val == null ? none : new Some<>(val);
         }
 
         public Filter getFilter() {
@@ -344,7 +363,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
             ObservingMode[] ar = values();
             Option<ObservingMode>[] result = new Option[ar.length];
             for(int i = 0; i < ar.length; i++) {
-                result[i] = new Some<ObservingMode>(ar[i]);
+                result[i] = new Some<>(ar[i]);
             }
             return result;
         }
@@ -354,7 +373,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
             ObservingMode[] ar = values();
             Option<ObservingMode>[] result = new Option[ar.length-1];
             for(int i = 0; i < ar.length-1; i++) {
-                result[i] = new Some<ObservingMode>(ar[i]);
+                result[i] = new Some<>(ar[i]);
             }
             return result;
         }
@@ -438,7 +457,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         public static Option<Filter> byName(String name) {
             for (Filter m: values()) {
                 if (m.displayValue().equals(name)) {
-                    return new Some<Filter>(m);
+                    return new Some<>(m);
                 }
             }
             return None.instance();
@@ -544,7 +563,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
                     int detectorStartY = Integer.valueOf(ar[1]);
                     int detectorEndX = Integer.valueOf(ar[2]);
                     int detectorEndY = Integer.valueOf(ar[3]);
-                    return new Some<ReadoutArea>(new ReadoutArea(detectorStartX, detectorStartY, detectorEndX, detectorEndY));
+                    return new Some<>(new ReadoutArea(detectorStartX, detectorStartY, detectorEndX, detectorEndY));
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                 }
@@ -770,7 +789,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         public static Option<Apodizer> byName(String name) {
             for (Apodizer m: values()) {
                 if (m.displayValue().equals(name)) {
-                    return new Some(m);
+                    return new Some<>(m);
                 }
             }
             return None.instance();
@@ -843,7 +862,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         public static Option<Lyot> byName(String name) {
             for (Lyot m: values()) {
                 if (m.displayValue().equals(name)) {
-                    return new Some(m);
+                    return new Some<>(m);
                 }
             }
             return None.instance();
@@ -993,7 +1012,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         public static Option<FPM> byName(String name) {
             for (FPM m: values()) {
                 if (m.displayValue().equals(name)) {
-                    return new Some(m);
+                    return new Some<>(m);
                 }
             }
             return None.instance();
@@ -1400,13 +1419,26 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         }
     }
 
+    private static double offsetVal(final Config c, final ItemKey key, double cur) {
+        // of course the p and q are stored as strings in the sequence ....
+        return c.containsItem(key) ? Double.parseDouble(c.getItemValue(key).toString()) : cur;
+    }
+
     public ConfigSequence postProcessSequence(ConfigSequence in) {
         final Config[] steps = in.getAllSteps();
         double p = 0;
         double q = 0;
-        ItemKey obsClassKey = new ItemKey(CalDictionary.OBS_KEY, InstConstants.OBS_CLASS_PROP);
-        ItemKey obsTypeKey = new ItemKey(CalDictionary.OBS_KEY, InstConstants.OBSERVE_TYPE_PROP);
+        final ItemKey obsClassKey = new ItemKey(CalDictionary.OBS_KEY, InstConstants.OBS_CLASS_PROP);
+        final ItemKey obsTypeKey  = new ItemKey(CalDictionary.OBS_KEY, InstConstants.OBSERVE_TYPE_PROP);
         for (Config c:steps) {
+            p = offsetVal(c, OffsetPosBase.TEL_P_KEY, p);
+            q = offsetVal(c, OffsetPosBase.TEL_Q_KEY, q);
+            if (p == 0  && q == 0) {
+                c.putItem(new ItemKey(GUIDING_PATH), StandardGuideOptions.instance.getDefaultActive());
+            } else {
+                c.putItem(new ItemKey(GUIDING_PATH), StandardGuideOptions.instance.getDefaultInactive());
+            }
+
             if (c.containsItem(obsClassKey)) {
                 // REL-1736 If the sequence is a calibration acquisition, set the ASU on
                 if (c.getItemValue(obsClassKey).equals("acqCal")) {
@@ -1414,6 +1446,9 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
                     ItemKey scKey = new ItemKey(new ItemKey(InstConstants.INSTRUMENT_NAME_PROP), SUPER_CONTINUUM_LAMP_PROP.getName());
                     c.putItem(asuKey, CALIBRATION_ARTIFICIAL_SOURCE_ATTENUATION);
                     c.putItem(scKey, ArtificialSource.ON);
+
+                    // REL-1743 Set guiding to off if it is an acquisition sequence
+                    c.putItem(new ItemKey(GUIDING_PATH), StandardGuideOptions.instance.getDefaultOff());
                 }
             }
             if (c.containsItem(obsTypeKey)) {
@@ -1424,20 +1459,10 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
                     c.putItem(useAoKey, Boolean.FALSE);
                     ItemKey calAoKey = new ItemKey(new ItemKey(InstConstants.INSTRUMENT_NAME_PROP), USE_CAL_PROP.getName());
                     c.putItem(calAoKey, Boolean.FALSE);
-                }
-            }
 
-            if (c.containsItem(OffsetPosBase.TEL_P_KEY)) {
-                p = Double.parseDouble(c.getItemValue(OffsetPosBase.TEL_P_KEY).toString());
-            }
-            if (c.containsItem(OffsetPosBase.TEL_Q_KEY)) {
-                q = Double.parseDouble(c.getItemValue(OffsetPosBase.TEL_Q_KEY).toString());
-            }
-            String guidingPath = "telescope:guideWithOIWFS";
-            if (p == 0  && q == 0) {
-                c.putItem(new ItemKey(guidingPath), StandardGuideOptions.instance.getDefaultActive());
-            } else {
-                c.putItem(new ItemKey(guidingPath), StandardGuideOptions.instance.getDefaultInactive());
+                    // REL-1743 Set guiding to off if it is a calibration sequence
+                    c.putItem(new ItemKey(GUIDING_PATH), StandardGuideOptions.instance.getDefaultOff());
+                }
             }
         }
 
@@ -1538,7 +1563,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
             _detectorReadoutArea = newValue;
             firePropertyChange(DETECTOR_READOUT_AREA_PROP, oldValue, newValue);
             if (_detectorReadoutArea != DetectorReadoutArea.MANUAL) {
-                setReadoutArea(new Some<ReadoutArea>(_detectorReadoutArea.getReadoutArea()));
+                setReadoutArea(new Some<>(_detectorReadoutArea.getReadoutArea()));
             }
         }
     }
@@ -1580,7 +1605,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         if (_detectorReadoutArea == DetectorReadoutArea.MANUAL) {
             if (_readoutArea.isEmpty() || _readoutArea.getValue().getDetectorStartX() != newValue) {
                 ReadoutArea readoutArea = _readoutArea.isEmpty() ? new ReadoutArea() : _readoutArea.getValue();
-                setReadoutArea(new Some<ReadoutArea>(readoutArea.setDetectorStartX(newValue)));
+                setReadoutArea(new Some<>(readoutArea.setDetectorStartX(newValue)));
             }
         }
     }
@@ -1593,7 +1618,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         if (_detectorReadoutArea == DetectorReadoutArea.MANUAL) {
             if (_readoutArea.isEmpty() || _readoutArea.getValue().getDetectorStartY() != newValue) {
                 ReadoutArea readoutArea = _readoutArea.isEmpty() ? new ReadoutArea() : _readoutArea.getValue();
-                setReadoutArea(new Some<ReadoutArea>(readoutArea.setDetectorStartY(newValue)));
+                setReadoutArea(new Some<>(readoutArea.setDetectorStartY(newValue)));
             }
         }
     }
@@ -1606,7 +1631,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         if (_detectorReadoutArea == DetectorReadoutArea.MANUAL) {
             if (_readoutArea.isEmpty() || _readoutArea.getValue().getDetectorEndX() != newValue) {
                 ReadoutArea readoutArea = _readoutArea.isEmpty() ? new ReadoutArea() : _readoutArea.getValue();
-                setReadoutArea(new Some<ReadoutArea>(readoutArea.setDetectorEndX(newValue)));
+                setReadoutArea(new Some<>(readoutArea.setDetectorEndX(newValue)));
             }
         }
     }
@@ -1619,7 +1644,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         if (_detectorReadoutArea == DetectorReadoutArea.MANUAL) {
             if (_readoutArea.isEmpty() || _readoutArea.getValue().getDetectorEndY() != newValue) {
                 ReadoutArea readoutArea = _readoutArea.isEmpty() ? new ReadoutArea() : _readoutArea.getValue();
-                setReadoutArea(new Some<ReadoutArea>(readoutArea.setDetectorEndY(newValue)));
+                setReadoutArea(new Some<>(readoutArea.setDetectorEndY(newValue)));
             }
         }
     }
@@ -1634,7 +1659,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
             _filter = newValue;
             _observingModeOverride = true;
             firePropertyChange(FILTER_PROP, oldValue, newValue);
-            setObservingMode(new Some<ObservingMode>(ObservingMode.NONSTANDARD));
+            setObservingMode(new Some<>(ObservingMode.NONSTANDARD));
         }
     }
 
@@ -1704,7 +1729,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
             _apodizer = newValue;
             _observingModeOverride = true;
             firePropertyChange(APODIZER_PROP, oldValue, newValue);
-            setObservingMode(new Some<ObservingMode>(ObservingMode.NONSTANDARD));
+            setObservingMode(new Some<>(ObservingMode.NONSTANDARD));
         }
     }
 
@@ -1726,7 +1751,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
             _lyot = newValue;
             _observingModeOverride = true;
             firePropertyChange(LYOT_PROP, oldValue, newValue);
-            setObservingMode(new Some<ObservingMode>(ObservingMode.NONSTANDARD));
+            setObservingMode(new Some<>(ObservingMode.NONSTANDARD));
         }
     }
 
@@ -1830,7 +1855,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
             _fpm = newValue;
             _observingModeOverride = true;
             firePropertyChange(FPM_PROP, oldValue, newValue);
-            setObservingMode(new Some<ObservingMode>(ObservingMode.NONSTANDARD));
+            setObservingMode(new Some<>(ObservingMode.NONSTANDARD));
         }
     }
 
@@ -1853,7 +1878,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
             firePropertyChange(DETECTOR_SAMPLING_MODE_PROP, oldValue, newValue);
             if (newValue == DetectorSamplingMode.MULTIPLE_CDS) {
                 if (_mcdsCount.isEmpty()) {
-                    setMcdsCount(new Some<Integer>(DEFAULT_MCDS_COUNT));
+                    setMcdsCount(new Some<>(DEFAULT_MCDS_COUNT));
                 }
             } else {
                 setMcdsCount(None.<Integer>instance());
@@ -1867,7 +1892,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
 
     public void setMcdsCount(Option<Integer> newValue) {
         if (!newValue.isEmpty() && newValue.getValue() < 1) {
-            newValue = new Some<Integer>(1);
+            newValue = new Some<>(1);
         }
         Option<Integer> oldValue = getMcdsCount();
         if (oldValue != newValue) {
@@ -1992,7 +2017,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         v = Pio.getValue(paramSet, OBSERVING_MODE_PROP.getName());
         if (v != null) {
             if (v.endsWith("_DARK") || v.endsWith("dark")) {
-                setObservingMode(new Some<ObservingMode>(ObservingMode.DARK));
+                setObservingMode(new Some<>(ObservingMode.DARK));
             } else {
                 setObservingMode(ObservingMode.valueOf(v, getObservingMode()));
             }
@@ -2009,7 +2034,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         a = new ReadoutArea(startX, startY, endX, endY);
         setDetectorReadoutArea(DetectorReadoutArea.valueOf(a));
         if (getDetectorReadoutArea() == DetectorReadoutArea.MANUAL) {
-            setReadoutArea(new Some<ReadoutArea>(a));
+            setReadoutArea(new Some<>(a));
         }
 
         v = Pio.getValue(paramSet, FILTER_PROP);
@@ -2057,7 +2082,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         if (getDetectorSamplingMode() == DetectorSamplingMode.MULTIPLE_CDS) {
             v = Pio.getValue(paramSet, MCDS_COUNT_PROP);
             if (v != null) {
-                setMcdsCount(new Some<Integer>(Pio.getIntValue(paramSet,
+                setMcdsCount(new Some<>(Pio.getIntValue(paramSet,
                         MCDS_COUNT_PROP.getName(), 0)));
             }
         }
@@ -2162,7 +2187,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
 
     @Override
     public CategorizedTimeGroup calc(Config cur, Option<Config> prev) {
-        Collection<CategorizedTime> times = new ArrayList<CategorizedTime>();
+        Collection<CategorizedTime> times = new ArrayList<>();
 
         // OT-95: component change times: 30 for 1, 60 for more than 1 change
         int numChanges = 0;

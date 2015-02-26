@@ -208,4 +208,10 @@ public class GpiTest  extends TestCase {
         assertEquals(resultSequence.getItemValue(0, useAoKey), Boolean.FALSE);
         assertEquals(resultSequence.getItemValue(0, useCarKey), Boolean.FALSE);
     }
+
+    public void testUnblockedModes() {
+        Gpi inst = new Gpi();
+        inst.setObservingMode(new Some<Gpi.ObservingMode>(Gpi.ObservingMode.UNBLOCKED_H));
+        assertEquals(inst.getFpm(), Gpi.FPM.SCIENCE);
+    }
 }

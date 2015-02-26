@@ -5,6 +5,7 @@ import edu.gemini.spModel.gemini.obscomp.SPSiteQuality._
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.pot.sp._
+import edu.gemini.spModel.target.system.CoordinateParam.Units
 
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
@@ -46,9 +47,9 @@ object RolloverObservation {
       dataObj    <- Option(targetComp.getDataObject.asInstanceOf[TargetObsComp])
       targetEnv  <- Option(dataObj.getTargetEnvironment)
       science    <- Option(targetEnv.getBase)
-      name       <- Option(science.getName)
-      ra         <- Option(science.getXaxis)
-      dec        <- Option(science.getYaxis)
+      name       <- Option(science.getTarget.getName)
+      ra         <- Option(science.getTarget.getRa.getAs(Units.DEGREES))
+      dec        <- Option(science.getTarget.getDec.getAs(Units.DEGREES))
     } yield RolloverTarget(name, new Angle(ra, Angle.Unit.DEGREES), new Angle(dec, Angle.Unit.DEGREES))
 
   private def conditions(o: ISPObservation): Option[RolloverConditions] =

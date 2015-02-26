@@ -13,7 +13,7 @@ import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.seqcomp.SeqConfigNames;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.pot.sp.ISPProgramNode;
-
+import scala.Option;
 
 import java.util.*;
 import java.beans.PropertyDescriptor;
@@ -50,13 +50,33 @@ public class SequenceRule implements IRule {
     // types are primitives, "double.class", but the class of the object in the
     // sequence is the wrapper, "Double.class".  double.class.isInstance(obj)
     // returns false for objs of type Double.class.
-    private static final Map<Class, Class> PRIMITIVE_MAP = new HashMap<Class, Class>();
+    private static final Map<Class, Class> PRIMITIVE_MAP = new HashMap<>();
+
+    // Matcher for science observations only.
     public static final IConfigMatcher SCIENCE_MATCHER = new IConfigMatcher() {
         public boolean matches(Config config, int step, ObservationElements elems) {
             ObsClass obsClass = getObsClass(config);
             return obsClass == ObsClass.SCIENCE;
         }
     };
+
+    // Matcher for science observations and nighttime calibrations.
+    public static final IConfigMatcher SCIENCE_NIGHTTIME_CAL_MATCHER = new IConfigMatcher() {
+        public boolean matches(Config config, int step, ObservationElements elems) {
+            ObsClass obsClass = getObsClass(config);
+            if (obsClass == null)
+                return false;
+            switch(obsClass) {
+                case SCIENCE:
+                case PARTNER_CAL:
+                case PROG_CAL:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+    };
+
 
     static {
         PRIMITIVE_MAP.put(boolean.class, Boolean.class);
@@ -98,12 +118,16 @@ public class SequenceRule implements IRule {
         return ObsClass.parseType(obsClassStr);
     }
 
-    public static Double getPOffset(Config config) {
-        return _getDoubleValue((String) SequenceRule.getItem(config, String.class, P_OFFSET_KEY));
+    public static Option<Double> getPOffset(final Config config) {
+        return Option.apply(
+                _getDoubleValue((String) SequenceRule.getItem(config, String.class, P_OFFSET_KEY))
+        );
     }
 
-    public static Double getQOffset(Config config) {
-        return _getDoubleValue((String) SequenceRule.getItem(config, String.class, Q_OFFSET_KEY));
+    public static Option<Double> getQOffset(final Config config) {
+        return Option.apply(
+                _getDoubleValue((String) SequenceRule.getItem(config, String.class, Q_OFFSET_KEY))
+        );
     }
 
     public static Integer getStepCount(Config config) {
@@ -124,6 +148,24 @@ public class SequenceRule implements IRule {
         String strVal = (String)getItem(config, String.class, EXPOSURE_TIME_KEY);
         return _getDoubleValue(strVal);
     }
+
+    private static final ItemKey INSTRUMENT_EXPOSURE_TIME_KEY = new ItemKey(INSTRUMENT_PREFIX + "exposureTime");
+    
+    /**
+     * Return the exposure time for the instrument. Will try to
+     * get it both as a Double and String. The result is always a double
+     * and will return null in case nothing can be obtained from the config.
+     */
+    public static Double getInstrumentExposureTime(Config config) {
+        Double val = (Double)getItem(config, Double.class, INSTRUMENT_EXPOSURE_TIME_KEY);
+        if (val != null) {
+            return val;
+        }
+        //attempt to read it as string
+        String strVal = (String)getItem(config, String.class, INSTRUMENT_EXPOSURE_TIME_KEY);
+        return _getDoubleValue(strVal);
+    }
+
     private static final ItemKey COADDS_KEY = new ItemKey("observe:coadds");
 
     public static Integer getCoadds(Config config) {
@@ -182,7 +224,7 @@ public class SequenceRule implements IRule {
     private Object _state;
 
     public SequenceRule(Collection<IConfigRule> instRules, Object state) {
-        _instRules = new HashSet<IConfigRule>(instRules);
+        _instRules = new HashSet<>(instRules);
         _state = state;
     }
 
@@ -196,7 +238,7 @@ public class SequenceRule implements IRule {
         for (Iterator it=seq.iterator(); it.hasNext(); ++step) {
             Config config = (Config) it.next();
 
-            Map<IConfigMatcher, Boolean> valMap = new HashMap<IConfigMatcher, Boolean>();
+            Map<IConfigMatcher, Boolean> valMap = new HashMap<>();
 
             Iterator<IConfigRule> ruleIt = _instRules.iterator();
             while (ruleIt.hasNext()) {
@@ -217,7 +259,7 @@ public class SequenceRule implements IRule {
                    valMap.put(matcher, res);
                 }
                 if (res) {
-                    // rules is appliable, do it
+                    // rules is applicable, do it
                     Problem prob = rule.check(config, step, elements, _state);
                     if (prob != null) {
                         probs.append(prob);

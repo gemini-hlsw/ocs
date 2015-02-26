@@ -1,0 +1,26 @@
+# Average throughput for the GNIRS Order 6 filter
+# Columns are (1) wavelength in nm, (2) throughput
+# Values are by-eye estimates from transmission
+# curve at 93K in GNIRS filter logbook
+#
+# Author: Bernadette Rodgers
+# Created: 30 July 2003
+# 30Sep2003, BR: changed to tophat profile
+# 29 Dec 03, BR: estimated from transmission curve
+#
+# lambda transmission
+    700   0.0
+   1000   0.0
+   1030   0.4
+   1050   0.7
+   1060   0.8
+   1100   0.8
+   1160   0.8
+   1180   0.4
+   1210   0.0
+   1270   0.0
+   1640   0.0
+   2230   0.0
+   3710   0.0
+   5150   0.0
+   6000   0.0

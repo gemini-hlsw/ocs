@@ -1,18 +1,14 @@
 package edu.gemini.ags.gems.mascot
 
 import breeze.linalg._
-import breeze.util._
 
 import MascotUtils._
 import MascotConf._
 import Amoeba._
+import edu.gemini.spModel.core.MagnitudeBand
 import util.Spline._
-import util.MatrixUtil._
 import util.YUtils._
-import scala.math
-import java.util.Date
-import scala.collection.JavaConversions._
-import collection.JavaConversions
+import scala.collection.JavaConverters._
 
 // mascot Strehl compute/optimize using distortion modes
 // instead of quadratic/tt phase (original method).
@@ -49,22 +45,22 @@ import collection.JavaConversions
  * Holds the results of the computations done by the Strehl object below.
  * Usage: val s = Strehl(starList)
  */
-class Strehl(val avgstrehl: Double,
-             val rmsstrehl: Double,
-             val minstrehl: Double,
-             val maxstrehl: Double,
-             val halffield: Double,
-             val strehl_map: DenseMatrix[Double],
-             val strehl_map_halffield: DenseMatrix[Double],
-             val tiperr: DenseMatrix[Double],
-             val tilterr: DenseMatrix[Double],
-             val stars: List[Star]) {
+case class Strehl private (avgstrehl: Double,
+             rmsstrehl: Double,
+             minstrehl: Double,
+             maxstrehl: Double,
+             halffield: Double,
+             strehl_map: DenseMatrix[Double],
+             strehl_map_halffield: DenseMatrix[Double],
+             tiperr: DenseMatrix[Double],
+             tilterr: DenseMatrix[Double],
+             stars: List[Star]) {
 
   def getStars : java.util.List[Star] = {
-    stars.toList
+    stars.asJava
   }
 
-  override def toString() = "Strehl: avgstrehl=" + avgstrehl +
+  override def toString = "Strehl: avgstrehl=" + avgstrehl +
     "\nrmsstrehl = " + rmsstrehl +
     "\nminstrehl = " + minstrehl +
     "\nmaxstrehl = " + maxstrehl +
@@ -117,7 +113,7 @@ object Strehl {
    * @param bandpass determines which magnitudes are used in the calculations: (one of "B", "V", "R", "J", "H", "K")
    * @param factor multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
    */
-  def apply(starList: List[Star], bandpass: String, factor: Double = 1.0): Strehl = {
+  def apply(starList: List[Star], bandpass: MagnitudeBand, factor: Double = 1.0): Strehl = {
     optimize(starList, bandpass, factor)
   }
 
@@ -131,9 +127,9 @@ object Strehl {
    * @param bandpass determines which magnitudes are used in the calculations: (one of "B", "V", "R", "J", "H", "K")
    * @param factor multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
    */
-  def optimize(starList: List[Star], bandpass: String, factor: Double): Strehl = {
+  def optimize(starList: List[Star], bandpass: MagnitudeBand, factor: Double): Strehl = {
     val nstars = starList.size
-    val mag = (for (s <- starList) yield s.mag(bandpass)).toArray
+    val mag = (for (s <- starList) yield s.target.magnitudeIn(bandpass).map(_.value)).flatten.toArray
     val starx = (for (s <- starList) yield s.x).toArray
     val stary = (for (s <- starList) yield s.y).toArray
 
@@ -225,7 +221,7 @@ object Strehl {
     // pre-compute distortion fields:
     val dfields = Array.ofDim[Array[DenseMatrix[Double]]](nmodes)
     for (i <- 0 until nmodes) {
-      dfields(i) = getDistortionVfield(mta(::, i), optim_npt, halffield);
+      dfields(i) = getDistortionVfield(mta(::, i), optim_npt, halffield)
     }
 
     // call minimization routine. This should return the best gains
@@ -237,7 +233,7 @@ object Strehl {
     val nMax = 1000
     val p0 = DenseVector.ones[Double](nmodes_cont) * -0.7
     val scale = 0.2
-    val (bg, nc, fval) = amoeba(ftol, f, nMax, p0, scale);
+    val (bg, nc, fval) = amoeba(ftol, f, nMax, p0, scale)
 
     // now compute the final Strehl map given the gains we just found.
     // pre-compute distortion fields:
@@ -247,7 +243,7 @@ object Strehl {
     //                                          xloc,yloc,offset=gso_off);
 
     for (i <- 0 until nmodes) {
-      dfields(i) = getDistortionVfield(mta(::, i), smap_npt, halffield, gso_off);
+      dfields(i) = getDistortionVfield(mta(::, i), smap_npt, halffield, gso_off)
     }
 
     // get the strehl map:
@@ -260,11 +256,11 @@ object Strehl {
 
     val (ret, smap, tiperr, tilterr) = getStrehlMap(mprop, dfields, nmodes_cont, bg)
 
-    val avgstrehl = avg(smap) * factor;
-    val rmsstrehl = rms(smap);
-    val minstrehl = smap.min * factor;
-    val maxstrehl = smap.max * factor;
-    val strehl_map_halffield = smap;
+    val avgstrehl = avg(smap) * factor
+    val rmsstrehl = rms(smap)
+    val minstrehl = smap.min * factor
+    val maxstrehl = smap.max * factor
+    val strehl_map_halffield = smap
 
     //  write,format="Strehl over %.1f\": avg=%.1f  rms=%.1f  min=%.1f  max=%.1f\n",
     //    halffield*2, sdata.avgstrehl*100, sdata.rmsstrehl*100,
@@ -287,13 +283,13 @@ object Strehl {
     //  sdata.tilterr    = &tilterr;
 
     for (i <- 0 until nmodes) {
-      dfields(i) = getDistortionVfield(mta(::, i), smap_npt, 60.0, gso_off);
+      dfields(i) = getDistortionVfield(mta(::, i), smap_npt, 60.0, gso_off)
     }
 
     // get the strehl map:
     val (ret2, strehl_map, tiperr2, tilterr2) = getStrehlMap(mprop, dfields, nmodes_cont, bg)
 
-    new Strehl(avgstrehl, rmsstrehl, minstrehl, maxstrehl, halffield, strehl_map, strehl_map_halffield,
+    Strehl(avgstrehl, rmsstrehl, minstrehl, maxstrehl, halffield, strehl_map, strehl_map_halffield,
       tiperr2, tilterr2, starList)
   }
 
@@ -329,8 +325,8 @@ object Strehl {
     val turb = DenseVector.zeros[Double](nmodes)
     val nois0 = DenseVector.zeros[Double](nmodes)
     val g = DenseVector.zeros[Double](nmodes)
-    g(0 until nmodes_cont) := util.YUtils.pow(10.0, lgains);
-    val freq = sp(::, 0);
+    g(0 until nmodes_cont) := util.YUtils.pow(10.0, lgains)
+    val freq = sp(::, 0)
 
     // limits upper freq range for spline:
     //  if (max(spv(,1))>sampfreq) {
@@ -393,7 +389,7 @@ object Strehl {
     for (i <- 0 until nmodes) {
       val npt = 512
       val hs = DenseMatrix.zeros[Double](npt + 1, 4)
-      hs(1 until hs.rows, ::) := ftcb(1.0 / sampfreq, 0.3e-3, 2e-3, g(i), npt);
+      hs(1 until hs.rows, ::) := ftcb(1.0 / sampfreq, 0.3e-3, 2e-3, g(i), npt)
       // add missing values for freq=0
       hs(0, ::) := (if (g(i) == 0.0) DenseVector(0.0, 0.0, 1.0, 0.0) else DenseVector(0.0, 0.0, 0.0, 1.0))
       // above these are to be applied on PSD.
@@ -401,24 +397,24 @@ object Strehl {
       // servolag for turb + vibrations
 
       //      val xxx2 = new Date().getTime()
-      val herror = splineMax(hs(::, 2), hs(::, 0), freq, 0.0);
-      turb(i) = ((sp(::, i + 1) * math.pow(rmsmodes(i), 2.0)) :* herror).sum;
+      val herror = splineMax(hs(::, 2), hs(::, 0), freq, 0.0)
+      turb(i) = ((sp(::, i + 1) * math.pow(rmsmodes(i), 2.0)) :* herror).sum
       if (i <= 1) {
         // vibrations + windshake:
         // NO ! we can't be sure 2 first modes are Tip and Tilt.
         // let's add this separately. TO BE DONE.
         // YES. now with re-centered asterism, we have clean
         // TT isolation as modes 1 and 2. DONE.
-        val herror2 = splineMax(hs(::, 2), hs(::, 0), freqv, 0.0);
+        val herror2 = splineMax(hs(::, 2), hs(::, 0), freqv, 0.0)
         if (!novibs) {
-          turb(i) += ((spv(::, i + 1) * math.pow(rmsvib(i), 2.0)) :* herror2).sum;
+          turb(i) += ((spv(::, i + 1) * math.pow(rmsvib(i), 2.0)) :* herror2).sum
         }
       }
       //println("XXX spline: " + ((new Date().getTime() - xxx2)/1000.) + " sec")
 
       // noise
       val hnoise = hs(::, 3) / (npt * 1.0)
-      nois0(i) = hnoise.sum;
+      nois0(i) = hnoise.sum
     }
     val nois = nois0 :* g.mapValues(a => if (a > 0.0) 1.0 else 0.0)
 
@@ -452,8 +448,8 @@ object Strehl {
     for (i <- 0 until nmodes_cont; j <- 0 until nmodes_cont) {
       //      tiperr += yGet4d(dfields, i, 0) :* yGet4d(dfields, j, 0) :* nois_cov(i, j);
       //      tilterr += yGet4d(dfields, i, 1) :* yGet4d(dfields, j, 1) :* nois_cov(i, j);
-      tiperr += dfields(i)(0) :* dfields(j)(0) :* nois_cov(i, j);
-      tilterr += dfields(i)(1) :* dfields(j)(1) :* nois_cov(i, j);
+      tiperr += dfields(i)(0) :* dfields(j)(0) :* nois_cov(i, j)
+      tilterr += dfields(i)(1) :* dfields(j)(1) :* nois_cov(i, j)
     }
 
     //  tiperr  = sqrt(tiperr); // in arcsec
@@ -464,7 +460,7 @@ object Strehl {
 
 
     tiperr = sqrt(tiperr); // in arcsec
-    tilterr = sqrt(tilterr);
+    tilterr = sqrt(tilterr)
 
     val tiperr_rd = tiperr * 4.848e-6 * tel_diam * 2.0 * math.Pi / (lambdaim * 1e-6) / 4.0
     val tilterr_rd = tilterr * 4.848e-6 * tel_diam * 2.0 * math.Pi / (lambdaim * 1e-6) / 4.0
@@ -472,13 +468,13 @@ object Strehl {
     // see strehl_vs_ttrms() below, this is it, fairly good approximation:
     //    strehl = sqrt(1./(1.+2.*tiperr_rd^2.))*sqrt(1./(1.+2.*tilterr_rd^2.));
 
-    val strehl = sqrt(divide(1.0, (tiperr_rd :^ 2.0) * 2.0 + 1.0)) :* sqrt(divide(1.0, (tilterr_rd :^ 2.0) * 2.0 + 1.0));
+    val strehl = sqrt(divide(1.0, (tiperr_rd :^ 2.0) * 2.0 + 1.0)) :* sqrt(divide(1.0, (tilterr_rd :^ 2.0) * 2.0 + 1.0))
 
     //  if (stop) error;
     //
     //  return -log(avg(strehl));
 
-    val ret = -math.log(avg(strehl));
+    val ret = -math.log(avg(strehl))
     //    println("XXX getStrehlMap: " + ((new Date().getTime() - xxx)/1000.) + " sec")
 
     // Porting note: return value includes the output parameters from the yorick version (which only returned ret)
@@ -530,14 +526,12 @@ object Strehl {
       case 1 => Array(x * 0.0 + 1.0, x * 0.0)
       case 2 => Array(x * 0.0, x * 0.0 + 1.0)
       case 3 => Array(x / 100.0, y / 100.0)
-      case 4 => {
+      case 4 =>
         val tmp = (2.0 * math.sqrt(6.0) / 4.0 / math.sqrt(3.0)) / 100.0
         Array(y * tmp, x * tmp)
-      }
-      case 5 => {
+      case 5 =>
         val tmp = (2.0 * math.sqrt(6.0) / 4.0 / math.sqrt(3.0)) / 100.0
         Array(x * tmp, y * -tmp)
-      }
       case _ => throw new IllegalArgumentException("Expected 1 to 5")
     }
   }
@@ -594,24 +588,24 @@ object Strehl {
 
     val xy = indices(npt)
     val tmp = (npt + 1) / 2.0
-    xy(0) -= tmp;
-    xy(1) -= tmp;
+    xy(0) -= tmp
+    xy(1) -= tmp
 
     xy(0) = xy(0) / xy(0).max * halffield - offset(0)
     xy(1) = xy(1) / xy(1).max * halffield - offset(1)
-    val x = xy(0);
-    val y = xy(1);
+    val x = xy(0)
+    val y = xy(1)
 
     // get distortion vector field for first mode.
-    val d = createDistortion(1, x, y);
+    val d = createDistortion(1, x, y)
     d(0) *= mnv(0)
     d(1) *= mnv(0)
 
     // add other modes.
     for (i <- 1 until mnv.size) {
       val dist = createDistortion(i + 1, x, y)
-      d(0) += (dist(0) * mnv(i));
-      d(1) += (dist(1) * mnv(i));
+      d(0) += (dist(0) * mnv(i))
+      d(1) += (dist(1) * mnv(i))
     }
 
     d

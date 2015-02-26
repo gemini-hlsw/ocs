@@ -80,11 +80,21 @@ public abstract class MemAbstractContainer extends MemProgramNodeBase implements
         }
 
         /**
-         * Gets the first child of the given type (if any).
+         * Gets the only child of the given type (if any).
+         *
+         * @return child of specified type, if any. <code>null</code>
+         * otherwise
+         *
+         * @throws SPTreeStateException if there are multiple children of the
+         * specified type
          */
-        public <T extends ISPNode> T getChild(Class<T> type) {
-            List<T> children = getChildren(type);
-            return (children == null) || children.size() == 0 ? null : children.get(0);
+        public <T extends ISPNode> T getOnlyChild(Class<T> type) throws SPTreeStateException {
+            final List<T> children = getChildren(type);
+            switch (children.size()) {
+                case 0: return null;
+                case 1: return children.get(0);
+                default: throw new SPTreeStateException("Cannot support multiple children of type: " + type);
+            }
         }
 
         /**

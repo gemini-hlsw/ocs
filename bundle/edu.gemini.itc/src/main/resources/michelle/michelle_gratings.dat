@@ -1,0 +1,27 @@
+#
+# Author: Tom Geballe
+# Created: 204 December 3
+# Revised
+# Data obtained from observations and otherwise estimated
+# 
+# Note that echelle coverage and resolution roughly scale with wavelength. If
+# the ITC cannot accommodate this it should assume two echelles, as indicated
+# below, one for 7-14um and one for 16-26um
+#
+# Blaze wavelengths are reference wavelengths given below
+#
+# d_lambda is the resolution in nm - constant in wavelength for the gratings
+# d_lambda and R are for 2 pw (0.38") slit for lowN, medN1, medN2, and
+# EchelleN, and 3pw (0.57" for lowQ and EchelleQ
+# nm/pixel is the dispersion for unbinned pixels
+#
+#Grating	 Ref WL	 	R_at_ref	d_lambda	nm/pixel
+#
+lowN		10500		200		48		24
+lowQ		20500		110             186		31
+medN1		 9500		1000		9.5		4.75		
+medN2		 9600		3000		3.2		1.6
+EchelleN	 9600		30000		0.32		0.16
+EchelleQ	19200		20000		0.96		0.32		
+
+

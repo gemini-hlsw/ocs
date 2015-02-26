@@ -214,6 +214,7 @@ public class Flamingos2_SciAreaFeature  extends SciAreaFeatureBase {
         double angle = tii.getCorrectedPosAngleRadians() + _fovRotation;
 
         ScreenMath.rotateRadians(_tickMarkPD, angle, _baseScreenPos.x, _baseScreenPos.y);
+        _updateFigureList();
         return true;
     }
 
@@ -225,7 +226,6 @@ public class Flamingos2_SciAreaFeature  extends SciAreaFeatureBase {
         Graphics2D g2d = (Graphics2D) g;
 
         if (!_calc(tii)) return;
-        _updateFigureList();
 
         g2d.setColor(FOV_COLOR);
 
@@ -259,9 +259,11 @@ public class Flamingos2_SciAreaFeature  extends SciAreaFeatureBase {
      */
     @Override
     public void drawAtOffsetPos(Graphics g, TpeImageInfo tii, double x, double y) {
-        Graphics2D g2d = (Graphics2D) g;
+        if (!_calc(tii)) return;
+
+        final Graphics2D g2d = (Graphics2D) g;
         if (getFlamingos2() != null) {
-            AffineTransform saveAT = g2d.getTransform();
+            final AffineTransform saveAT = g2d.getTransform();
             try {
                 g2d.translate(x - _baseScreenPos.x, y - _baseScreenPos.y);
                 for (Shape shape : _figureList) {

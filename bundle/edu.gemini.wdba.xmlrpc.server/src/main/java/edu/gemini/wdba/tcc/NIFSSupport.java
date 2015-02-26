@@ -85,13 +85,13 @@ public class NIFSSupport implements ITccInstrumentSupport {
      * Support for instrument origins.
      *
      * @return String that is the name of a TCC config file.  See WDBA-5.
-     *         Changed for WDBA-19 to account for  Altair.
+     *         Changed for WDBA-19 to account for Altair.
      */
     public String getTccConfigInstrumentOrigin() {
         // Updated for SCI-0289-a.
         switch (_oe.getAoAspect()) {
             case ngs : return "ngs2nifs";
-            case lgs : return "lgs2nifs";
+            case lgs : return _oe.adjustInstrumentOriginForLGS_P1("lgs2nifs");
             default  : return "nifs";
         }
     }

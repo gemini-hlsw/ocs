@@ -36,7 +36,7 @@ public class AzimuthListener extends MarkerModelListener<Variant> {
 		if (windConstraint != null) {
 			for (Alloc a: variant.getAllocs()) {
 				AzimuthSolver solver = new AzimuthSolver(schedule.getSite(), a.getObs().getCoords(), windConstraint);
-				Union<Interval> windyBits = solver.solve(a);
+				Union<Interval> windyBits = solver.solve(a.getInterval());
 				if (!windyBits.isEmpty()) {
 					long timePointedIntoWind = 0; // ms
 					for (Interval i: windyBits) timePointedIntoWind += i.getLength();

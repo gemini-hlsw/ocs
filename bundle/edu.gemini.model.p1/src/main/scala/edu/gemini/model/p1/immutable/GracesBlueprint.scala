@@ -6,12 +6,12 @@ object GracesBlueprint {
   def apply(m: M.GracesBlueprint): GracesBlueprint = new GracesBlueprint(m)
 }
 
-case class GracesBlueprint(fiberMode: GracesFiberMode) extends GeminiBlueprintBase {
-  def name: String = s"Graces ${fiberMode.value}"
+case class GracesBlueprint(fiberMode: GracesFiberMode, readMode: GracesReadMode) extends GeminiBlueprintBase {
+  def name: String = s"Graces ${fiberMode.value} ${readMode.value}"
   override val visitor = true
 
   def this(m: M.GracesBlueprint) = this(
-    m.getFiberMode
+    m.getFiberMode, m.getReadMode
   )
 
   override def instrument: Instrument = Instrument.Graces
@@ -22,6 +22,7 @@ case class GracesBlueprint(fiberMode: GracesFiberMode) extends GeminiBlueprintBa
     m.setId(n.nameOf(this))
     m.setName(name)
     m.setFiberMode(fiberMode)
+    m.setReadMode(readMode)
     m.setVisitor(visitor)
     m
   }

@@ -5,6 +5,7 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
+import edu.gemini.ags.api.AgsMagnitude;
 import edu.gemini.qpt.core.Schedule;
 import edu.gemini.qpt.ui.util.ConfigErrorDialog;
 import edu.gemini.qpt.ui.util.Platform;
@@ -21,8 +22,8 @@ public class OpenAction extends AbstractOpenAction {
 
 	private static final long serialVersionUID = 1L;
 
-	public OpenAction(IShell shell, KeyChain authClient) {
-		super("Open...", shell, authClient);
+	public OpenAction(IShell shell, KeyChain authClient, AgsMagnitude.MagnitudeTable magTable) {
+		super("Open...", shell, authClient, magTable);
 		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, Platform.MENU_ACTION_MASK));
 	}
 

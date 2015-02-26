@@ -24,15 +24,22 @@
     <blueprints>
         <graces>
             <Graces id="blueprint-0">
-                <name>Graces 2 fibers (target + sky, R~37k) Slow (Gain=1.2e/ADU, Read noise=2.9e)</name>
+                <name>Graces 2 fibers (target + sky, R~30000)</name>
                 <visitor>true</visitor>
-                <fiberMode>2 fibers (target + sky, R~37k)</fiberMode>
-                <readMode>Slow (Gain=1.2e/ADU, Read noise=2.9e)</readMode>
+                <fiberMode>2 fibers (target + sky, R~30000)</fiberMode>
+            </Graces>
+        </graces>
+        <graces>
+            <Graces id="blueprint-1">
+                <name>Graces 1 fiber (target, R~50000)</name>
+                <visitor>true</visitor>
+                <fiberMode>1 fiber (target, R~50000)</fiberMode>
             </Graces>
         </graces>
     </blueprints>
     <observations>
         <observation blueprint="blueprint-0" enabled="true" band="Band 1/2"/>
+        <observation blueprint="blueprint-1" enabled="true" band="Band 1/2"/>
     </observations>
     <proposalClass>
         <queue tooOption="None"/>

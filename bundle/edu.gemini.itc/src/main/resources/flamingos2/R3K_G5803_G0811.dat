@@ -1,0 +1,11 @@
+# R3K with Y filter, central wavelength 1000, order 8
+# Needs to be reviewed.
+820.0	0.09
+840.0	0.21
+860.0	0.35
+880.0	0.44
+900.0	0.47
+920.0	0.44
+940.0	0.40
+960.0	0.33
+980.0	0.22

@@ -1,0 +1,46 @@
+# T-ReCS HiRes-10 Grating Efficiency
+# T. Hayward, 2003 Apr 11
+#
+# Taken from HR10um_specifygrating spreadsheet
+# Note that this is the _relative_ efficiency, defined to
+# be 1.00 at the blaze wavelength, and is a theoretical curve,
+# not measured from the delivered grating.
+
+# modified 11apr2003 to include arbitary 90% 
+# transmission at blaze - Phil Puxley
+
+# WL    Relative Efficiency
+
+7000	0.625
+7500	0.729
+8000	0.806
+8500	0.857
+9000	0.887
+9500	0.899
+10000	0.897
+10500	0.885
+11000	0.863
+11500	0.834
+12000	0.802
+12500	0.766
+13000	0.727
+13500	0.686
+14000	0.644
+
+#original data follows
+#
+#7000	 0.694
+#7500	 0.810
+#8000	 0.895
+#8500	 0.952
+#9000	 0.985
+#9500	 0.999
+#10000 0.997
+#10500 0.983
+#11000 0.959
+#11500 0.927
+#12000 0.891
+#12500 0.851
+#13000 0.808
+#13500 0.762
+#14000 0.716

@@ -1,0 +1,21 @@
+# Average throughput for the GNIRS XD filter for cross-dispersion
+# Columns are (1) wavelength in nm, (2) throughput
+# 
+# Author: Matt Dillman using data from Tom Geballe
+# Created: 22 July 2010
+#
+# lambda transmission
+750               0.00
+850               0.87
+950               0.92
+1000              0.93
+1100              0.94
+1600              0.925
+2000              0.925
+2500              0.920
+2700              0.87
+3000              0.88
+3400              0.96
+3800              0.53
+4000              0.53
+4450              0.00

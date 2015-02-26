@@ -1,0 +1,25 @@
+# trecs_fqa.dat
+# Transmission curve for T-ReCS Qa (18.34 micron) filter
+# Columns are (1) wavelength in nm, (2) transmission.
+#
+# No blocker required
+# Measurement temperature = 25 K
+#
+# Author: Tom Hayward, based on data from C. Packham, UF
+# Created: 2001 Sep 4
+#
+# Effective wavelength
+18328
+#
+# lambda    T  
+
+  7000    0.000
+ 14000    0.000
+ 17558    0.000
+ 17608    0.320
+ 17658    0.640
+ 19058    0.640
+ 19108    0.320
+ 19158    0.000
+ 28000    0.000
+

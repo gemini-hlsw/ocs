@@ -1,0 +1,15 @@
+# transmission of niri L-sorting filter
+# columns are (1) Wavelength in nm, (2) transmission
+# these should be replaced later with scanned transmission curves
+# first and last values are 0 for extrapolation purposes
+# author: Brian Walls
+# created: 20 Feb 2001
+
+2800 0
+2899 0
+2900 0.9
+3575 0.9
+4250 0.9
+4251 0
+4351 0
+

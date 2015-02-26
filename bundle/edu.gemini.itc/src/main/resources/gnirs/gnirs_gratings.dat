@@ -1,0 +1,21 @@
+# Author: Bernadette Rodgers
+# Created: 31 July 2003
+# 30 Sept 2003, BR: renamed file, added data
+#
+# All 3 gratings are blazed for 6.8um (1st order Lithrow) which
+# gives an effective 1st order blaze wavelength of 6.6 (with 27deg 
+# scattering angle).  Resolutions given in Users manual are lam/dlam
+# for 2 pixels, with gratings operated at blaze peak.  This corresponds
+# to 0.3arcsec slit with short camera; R and d_lam have been adjusted
+# to 0.5arcsec slit (3.33 pix); nm/pix is unchanged.  d_lambda is for blaze
+# wavelength.
+#
+# Values are for short camera; multiply by 3 for the long camera.
+#
+# Grating  blaze  R_at_blaze  d_lambda  nm/pixel
+#          [nm]               [nm]
+
+G10        6600    342         19.298     5.789
+G32        6600   1020          6.471     1.941
+G110       6600   3540          1.864     0.5593
+

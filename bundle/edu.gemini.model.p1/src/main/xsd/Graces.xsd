@@ -25,18 +25,30 @@
             <xsd:extension base="BlueprintBase">
                 <xsd:sequence>
                     <xsd:element name="fiberMode" type="GracesFiberMode" maxOccurs="1"/>
+                    <xsd:element name="readMode" type="GracesReadMode" maxOccurs="1"/>
                 </xsd:sequence>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
 
     <!--
-      GRACES Filter options.
+      GRACES Fiber Mode options.
     -->
     <xsd:simpleType name="GracesFiberMode">
         <xsd:restriction base="xsd:token">
-            <xsd:enumeration value="1 fiber (target, R~50000)"/>
-            <xsd:enumeration value="2 fibers (target + sky, R~30000)"/>
+            <xsd:enumeration value="1 fiber (target only, R~67.5k)"/>
+            <xsd:enumeration value="2 fibers (target+sky, R~40k)"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      GRACES Read Mode options.
+    -->
+    <xsd:simpleType name="GracesReadMode">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="Fast (Gain=1.6e/ADU, Read noise=4.7e)"/>
+            <xsd:enumeration value="Normal (Gain=1.3e/ADU, Read noise=4.3e)"/>
+            <xsd:enumeration value="Slow (Gain=1.2e/ADU, Read noise=2.9e)"/>
         </xsd:restriction>
     </xsd:simpleType>
 

@@ -51,4 +51,15 @@ sourceGenerators in Compile += Def.task {
 unmanagedResourceDirectories in Compile += 
   sourceDirectory.value / "main" / "xsd"
 
-
+// > modelDist
+commands += {
+  import scala.sys.process._
+  Command.command("modelDist") { state =>
+    val version = s"${pitVersion.value.semester}.${pitVersion.value.xmlCompatibility}.${pitVersion.value.serialCompatibility}"
+    val schemaName = s"p1-schema-$version"
+    println(s"packaging model $schemaName")
+    val main = sourceDirectory.value / "main"
+    s"tar cvfz $schemaName.tar.gz -s /xsd/$schemaName/ -C $main xsd".!
+    state
+  }
+}

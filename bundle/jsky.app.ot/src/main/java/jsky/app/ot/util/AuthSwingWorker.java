@@ -1,7 +1,6 @@
 package jsky.app.ot.util;
 
-import javax.security.auth.Subject;
-import javax.swing.*;
+import javax.swing.SwingWorker;
 
 /**
  * Do any background work in {@link #doInBackgroundWithSubject()}.

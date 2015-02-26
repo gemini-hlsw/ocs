@@ -1,9 +1,12 @@
 package jsky.app.ot.tpe.gems;
 
+import edu.gemini.ags.gems.GemsUtils4Java;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.spModel.core.MagnitudeBand;
+import edu.gemini.spModel.core.Target;
 import edu.gemini.spModel.gems.GemsTipTiltMode;
 import edu.gemini.ags.gems.GemsCatalogSearchResults;
 import edu.gemini.ags.gems.GemsGuideStarSearchOptions;
@@ -50,7 +53,7 @@ class GemsGuideStarSearchController {
         ObsContext obsContext = _worker.getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
         Set<Angle> posAngles = getPosAngles(obsContext);
 
-        Magnitude.Band band = _model.getBand().getBand();
+        MagnitudeBand band = _model.getBand().getBand();
         final String catName;
         if (_model.getCatalog() == GemsGuideStarSearchOptions.CatalogChoice.USER_CATALOG) {
             catName = _model.getUserCatalogFileName();
@@ -61,7 +64,7 @@ class GemsGuideStarSearchController {
         List<GemsCatalogSearchResults> results;
         try {
             results = _worker.search(catName, catName, tipTiltMode, obsContext, posAngles,
-                    new Some<Magnitude.Band>(band));
+                    new Some<MagnitudeBand>(band));
         } catch(Exception e) {
             DialogUtil.error(_dialog, e);
             results = new ArrayList<GemsCatalogSearchResults>();
@@ -103,7 +106,8 @@ class GemsGuideStarSearchController {
      * Analyzes the search results and saves a list of possible guide star configurations to the model.
      * @param excludeCandidates list of SkyObjects to exclude
      */
-    public void analyze(List<SkyObject> excludeCandidates) throws Exception {
+    // Called from the TPE
+    public void analyze(List<Target.SiderealTarget> excludeCandidates) throws Exception {
         TpeImageWidget tpe = TpeManager.create().getImageWidget();
         WorldCoords basePos = tpe.getBasePos();
         ObsContext obsContext = _worker.getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
@@ -114,15 +118,15 @@ class GemsGuideStarSearchController {
 
     // Returns a list of the given gemsCatalogSearchResults, with any SkyObjects removed that are not
     // in the candidates list.
-    private List<GemsCatalogSearchResults> filter(List<SkyObject> excludeCandidates,
+    private List<GemsCatalogSearchResults> filter(List<Target.SiderealTarget> excludeCandidates,
                                                   List<GemsCatalogSearchResults> gemsCatalogSearchResults) {
-        List<GemsCatalogSearchResults> results = new ArrayList<GemsCatalogSearchResults>();
+        List<GemsCatalogSearchResults> results = new ArrayList<>();
         for (GemsCatalogSearchResults in : gemsCatalogSearchResults) {
-            List<SkyObject> skyObjects = new ArrayList<SkyObject>(in.getResults().size());
-            skyObjects.addAll(in.getResults());
-            skyObjects = removeAll(skyObjects, excludeCandidates);
-            if (!skyObjects.isEmpty()) {
-                GemsCatalogSearchResults out = new GemsCatalogSearchResults(in.getCriterion(), skyObjects);
+            List<Target.SiderealTarget> siderealTargets = new ArrayList<>(in.results().size());
+            siderealTargets.addAll(in.resultsAsJava());
+            siderealTargets = removeAll(siderealTargets, excludeCandidates);
+            if (!siderealTargets.isEmpty()) {
+                GemsCatalogSearchResults out = new GemsCatalogSearchResults(siderealTargets, in.criterion());
                 results.add(out);
             }
         }
@@ -130,22 +134,22 @@ class GemsGuideStarSearchController {
     }
 
     // Removes all the objects in the skyObjects list that are also in the excludeCandidates list by comparing names
-    private List<SkyObject> removeAll(List<SkyObject> skyObjects, List<SkyObject> excludeCandidates) {
-        List<SkyObject> result = new ArrayList<SkyObject>();
-        for(SkyObject skyObject : skyObjects) {
-            if (!contains(excludeCandidates, skyObject)) {
-                result.add(skyObject);
+    private List<Target.SiderealTarget> removeAll(List<Target.SiderealTarget> skyObjects, List<Target.SiderealTarget> excludeCandidates) {
+        List<Target.SiderealTarget> result = new ArrayList<>();
+        for(Target.SiderealTarget siderealTarget : skyObjects) {
+            if (!contains(excludeCandidates, siderealTarget)) {
+                result.add(siderealTarget);
             }
         }
         return result;
     }
 
     // Returns true if a SkyObject with the same name is in the list
-    private boolean contains(List<SkyObject> skyObjects, SkyObject skyObject) {
-        String name = skyObject.getName();
+    private boolean contains(List<Target.SiderealTarget> targets, Target.SiderealTarget target) {
+        String name = target.name();
         if (name != null) {
-            for (SkyObject s : skyObjects) {
-                if (name.equals(s.getName())) return true;
+            for (Target.SiderealTarget s : targets) {
+                if (name.equals(s.name())) return true;
             }
         }
         return false;

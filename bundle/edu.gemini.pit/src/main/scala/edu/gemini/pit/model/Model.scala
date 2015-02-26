@@ -24,6 +24,7 @@ object Model {
   val conversion: Lens[Model, ModelConversion]  = Lens.lensu((a, b) => a.copy(conversion = b), _.conversion)
   val rolled: Lens[Model, Boolean]              = conversion >=> Lens.lensu((a, b) => a.copy(transformed = b), _.transformed)
   val fromSemester: Lens[Model, Semester]       = conversion >=> Lens.lensu((a, b) => a.copy(from = b), _.from)
+  val schemaVersion: Lens[Model, String]        = proposal >=> Lens.lensu((a, b) => a.copy(schemaVersion = b), _.schemaVersion)
 
   // The empty model
   val empty = Model(Proposal.empty, ModelConversion(transformed = false, Semester.current, Nil))

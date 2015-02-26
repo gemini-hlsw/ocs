@@ -54,19 +54,20 @@ public class GNIRS_OIWFS_Feature extends OIWFS_FeatureBase {
         if (inst == null) return;
 
         for (ObsContext ctx : _iw.getMinimalObsContext()) {
-            PatrolField range = GnirsOiwfsGuideProbe.instance.getCorrectedPatrolField(ctx);
-            Angle angle = new Angle(-_posAngle, Angle.Unit.RADIANS);
-            Point2D.Double p1 = new Point2D.Double(offsetPosX + translateX, offsetPosY + translateY);
-            setTransformationToScreen(angle, _pixelsPerArcsec, p1);
+            for (PatrolField range : GnirsOiwfsGuideProbe.instance.getCorrectedPatrolField(ctx)) {
+                final Angle angle = new Angle(-_posAngle, Angle.Unit.RADIANS);
+                final Point2D.Double p1 = new Point2D.Double(offsetPosX + translateX, offsetPosY + translateY);
+                setTransformationToScreen(angle, _pixelsPerArcsec, p1);
 
-            // draw guide probe range
-            Composite composite = getFillObscuredArea() ? BLOCKED : null;
-            addPatrolField(range, OIWFS_COLOR, OIWFS_STROKE, composite);
+                // draw guide probe range
+                final Composite composite = getFillObscuredArea() ? BLOCKED : null;
+                addPatrolField(range, OIWFS_COLOR, OIWFS_STROKE, composite);
 
-            // draw intersection of offset patrol fields
-            Point2D.Double p2 = new Point2D.Double(basePosX, basePosY);
-            setTransformationToScreen(angle, _pixelsPerArcsec, p2);
-            addOffsetConstrainedPatrolField(range, _iw.getContext().offsets().scienceOffsetsJava());
+                // draw intersection of offset patrol fields
+                final Point2D.Double p2 = new Point2D.Double(basePosX, basePosY);
+                setTransformationToScreen(angle, _pixelsPerArcsec, p2);
+                addOffsetConstrainedPatrolField(range, _iw.getContext().offsets().scienceOffsetsJava());
+            }
         }
     }
 }

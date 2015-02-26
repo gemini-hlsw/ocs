@@ -68,12 +68,11 @@ public final class FactorySupportTest {
     private final CatalogHeader header;
 
     public FactorySupportTest() {
-        Tuple2<String, Class> id, ra, dec, j, k;
-        id  = new Pair<String, Class>("ID", String.class);
-        ra  = new Pair<String, Class>("RA", String.class);
-        dec = new Pair<String, Class>("DEC", String.class);
-        j   = new Pair<String, Class>("Jmag", String.class);
-        k   = new Pair<String, Class>("Kmag", String.class);
+        final Tuple2<String, Class<?>> id  = new Pair<String, Class<?>>("ID", String.class);
+        final Tuple2<String, Class<?>> ra  = new Pair<String, Class<?>>("RA", String.class);
+        final Tuple2<String, Class<?>> dec = new Pair<String, Class<?>>("DEC", String.class);
+        final Tuple2<String, Class<?>> j   = new Pair<String, Class<?>>("Jmag", String.class);
+        final Tuple2<String, Class<?>> k   = new Pair<String, Class<?>>("Kmag", String.class);
         header = new DefaultCatalogHeader(DefaultImList.create(id,ra,dec,j,k));
     }
 

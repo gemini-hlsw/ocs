@@ -29,14 +29,13 @@ public final class Gsc2EsoSkyObjectFactoryTest {
     private final CatalogHeader header;
 
     public Gsc2EsoSkyObjectFactoryTest() {
-        Tuple2<String, Class> id, ra, dec, b, i, r, v;
-        id  = new Pair<String, Class>("GSC2ID", String.class);
-        ra  = new Pair<String, Class>("Ra", String.class);
-        dec = new Pair<String, Class>("Dec", String.class);
-        b   = new Pair<String, Class>("Jmag", String.class);
-        i   = new Pair<String, Class>("Nmag", String.class);
-        r   = new Pair<String, Class>("Fmag", String.class);
-        v   = new Pair<String, Class>("Vmag", String.class);
+        final Tuple2<String, Class<?>> id  = new Pair<String, Class<?>>("GSC2ID", String.class);
+        final Tuple2<String, Class<?>> ra  = new Pair<String, Class<?>>("Ra", String.class);
+        final Tuple2<String, Class<?>> dec = new Pair<String, Class<?>>("Dec", String.class);
+        final Tuple2<String, Class<?>> b   = new Pair<String, Class<?>>("Jmag", String.class);
+        final Tuple2<String, Class<?>> i   = new Pair<String, Class<?>>("Nmag", String.class);
+        final Tuple2<String, Class<?>> r   = new Pair<String, Class<?>>("Fmag", String.class);
+        final Tuple2<String, Class<?>> v   = new Pair<String, Class<?>>("Vmag", String.class);
         header = new DefaultCatalogHeader(DefaultImList.create(id,ra,dec,b,i,r,v));
     }
 

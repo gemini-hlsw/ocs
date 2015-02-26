@@ -23,9 +23,6 @@ public final class HmsDegCoordinates implements SkyCoordinates {
          * Common units in which epochs are expressed.
          */
         public enum Type {
-            BESSELIAN() {
-                public String displayName() { return "B"; }
-            },
             JULIAN() {
                 public String displayName() { return "J"; }
             },
@@ -37,7 +34,6 @@ public final class HmsDegCoordinates implements SkyCoordinates {
             public abstract String displayName();
         }
 
-        public static final Epoch B1950 = new Epoch(Type.BESSELIAN, 1950);
         public static final Epoch J2000 = new Epoch(Type.JULIAN,    2000);
 
         private final Type type;

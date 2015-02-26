@@ -1,0 +1,21 @@
+# trecs-elfn.dat
+# 
+# Defines extra "low frequency noise" for
+# T-ReCS detector. Used to scale the source
+# and background shot noise VARIANCE, e.g.:
+#  effective bckgrnd variance = bckgrnd signal * elfn_param
+#  effective source variance = source signal * elfn_param
+#
+# set initial value to 16 (i.e. 4x noise) to provide
+# some performance margin. Pre-ship AT results suggest
+# actual value is closer to 3x
+# Phil Puxley 2003 April 9 
+#
+# updated value based on 2003jun9 and 12 photon
+# transfer curve (on-telscope) which suggests
+# actual value is ~1.5. Adopt 2x for ITC to give
+# some margin.
+# Phil Puxley 2003 June 23
+
+#elfn parameter (NB: scales variance not noise)
+4

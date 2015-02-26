@@ -161,6 +161,11 @@ public final class DefaultImList<T> implements ImList<T>, Serializable {
     }
 
     @Override
+    public boolean nonEmpty() {
+        return !isEmpty();
+    }
+
+    @Override
     public int size() {
         return backingList.size();
     }

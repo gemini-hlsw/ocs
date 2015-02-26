@@ -1,0 +1,20 @@
+#parameters for Acquisition Camera 
+
+# 21-Feb-2001 Phil Puxley
+
+#name
+AcqCam
+#Starting wavelength (nm)
+360
+#Ending wavelength (nm)
+1100
+#Sampling
+0.5
+#Background filename
+background.dat
+#Plate Scale
+0.12
+#Read Noise
+6
+#Dark Current per pixel
+20

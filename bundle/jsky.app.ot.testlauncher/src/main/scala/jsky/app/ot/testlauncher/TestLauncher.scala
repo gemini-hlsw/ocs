@@ -1,5 +1,6 @@
 package jsky.app.ot.testlauncher
 
+import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.qv.plugin.{QvTool, ShowQvToolAction}
 import jsky.app.ot.viewer.plugin.PluginRegistry
 
@@ -46,6 +47,6 @@ object TestLauncher extends App {
     PasswordDialog.unlock(keys, null)
     if (keys.isLocked.unsafeRunAndThrow) System.exit(0)
   }
-  OT.open(keys, reg, new File(dir, "ot-storage"))
+  OT.open(keys, ProbeLimitsTable.loadOrThrow(), reg, new File(dir, "ot-storage"))
 
 }

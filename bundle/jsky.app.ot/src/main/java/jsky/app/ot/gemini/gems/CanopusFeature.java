@@ -52,12 +52,10 @@ public final class CanopusFeature extends TpeImageFeature implements PropertyWat
     private static final Composite BLOCKED = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5F);
 
     // Property used to control drawing of the probe ranges.
-    private static final BasicPropertyList props = new BasicPropertyList("CanopusFeatureProps");
+    private static final BasicPropertyList props = new BasicPropertyList(CanopusFeature.class.getName());
     private static final String PROP_SHOW_RANGES = "Show Probe Ranges";
-
     static {
-        props.setBoolean(PROP_SHOW_RANGES, true);
-        props.restoreSettings();
+        props.registerBooleanProperty(PROP_SHOW_RANGES, true);
     }
 
     private enum RangeDisplayMode {

@@ -1,0 +1,24 @@
+# trecs.dat
+# Parameters for T-ReCS
+# by T. Hayward, 2001 July 24
+# updated by Phil Puxley (i.c.w. Hayward) 2003 April 8 
+
+#name
+T-ReCS
+#Starting wavelength (nm)
+1000
+#Ending wavelength (nm)
+28000
+#Sampling (nm)
+2
+#Background filename
+background.dat
+#Plate Scale
+0.09
+#Read Noise
+#As measured with the T-ReCS science-grade array during pre-ship AT
+3000
+#Dark Current per pixel per second
+#As measured with the T-ReCS science-grade array during pre-ship AT
+#(1e6!)
+50000
