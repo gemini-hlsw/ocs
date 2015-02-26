@@ -18,6 +18,10 @@ import java.beans.PropertyChangeListener;
 /**
  * The base class for all instrument components.  It includes support for
  * a rotation angle text box, something all instruments support.
+ *
+ * NOTE: We do not use the getPosAngleTextBox mechanism any more with instrument editors that support the
+ * parallactic angle feature, because the logic for this is fully contained in PositionAnglePanel.
+ * Thus, this method should return null if a PositionAnglePanel is used.
  */
 public abstract class EdCompInstBase<T extends SPInstObsComp> extends OtItemEditor<ISPObsComponent, T>
         implements PropertyChangeListener, jsky.util.gui.TextBoxWidgetWatcher {
@@ -110,8 +114,13 @@ public abstract class EdCompInstBase<T extends SPInstObsComp> extends OtItemEdit
         }
     }
 
-    /** Return the position angle text box */
-    public abstract TextBoxWidget getPosAngleTextBox();
+    /**
+     * Return the position angle text box
+     * Providing null is a temporary measure that indicates that external code handles the position angle.
+     * This will go away when all position angle handling for editors is done through the PositionAnglePanel.
+     * TODO: Remove this and all references.
+     */
+    public TextBoxWidget getPosAngleTextBox() { return null; }
 
     /** Return the exposure time text box */
     public abstract TextBoxWidget getExposureTimeTextBox();

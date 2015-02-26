@@ -1,0 +1,17 @@
+# Average throughput for the GNIRS Long Red camera
+# Columns are (1) wavelength in nm, (2) throughput
+# Values from J. Elias sensitivity table with zeroes added at 700 and 6000 nm.
+# Table seperates Long vs Short camera at each lambda; here
+#  I have used only the L&M values for the red camera (and 50% for K) as a guess
+# Author: Bernadette Rodgers
+# Created: 30 July 2003
+#
+# lambda transmission
+    700   0.0
+   1100   0.0
+   1270   0.0
+   1640   0.0
+   2230   0.42
+   3710   0.934
+   5150   0.938
+   6000   0.0

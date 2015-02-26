@@ -90,7 +90,7 @@ public class HTMLViewer extends JPanel implements GenericToolBarTarget {
     /**
      * List of HTMLViewerHistoryItem, for previously viewed catalogs or query results.
      */
-    protected LinkedList historyList;
+    protected LinkedList historyList = new LinkedList();
 
     /**
      * Base filename for serialization of the history list

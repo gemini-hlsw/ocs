@@ -1,5 +1,6 @@
 package edu.gemini.ags.gems.mascot
 
+import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.obs.context.ObsContext
 
 /**
@@ -7,7 +8,7 @@ import edu.gemini.spModel.obs.context.ObsContext
  */
 trait GuideStarType {
   /**The default bandpass to use for calculations */
-  def defaultBandpass: String
+  def defaultBandpass: MagnitudeBand
 
   /**
    * Returns true if the star is a valid guide star.

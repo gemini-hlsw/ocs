@@ -9,9 +9,6 @@ name := "edu.gemini.spdb.reports.collection"
 unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/javax-servlet_2.10-2.5.0.jar"),
   new File(baseDirectory.value, "../../lib/bundle/osgi.cmpn-4.3.1.jar"),
-  // new File(baseDirectory.value, "../../lib/bundle/org.apache.felix-4.2.1.jar"),
-  // new File(baseDirectory.value, "../../lib/bundle/org.apache.felix.http.jetty-2.2.0.jar"),
-  // new File(baseDirectory.value, "../../lib/bundle/org.scala-lang.scala-library_2.10.1.v20130302-092018-VFINAL-33e32179fd.jar"),
   new File(baseDirectory.value, "../../lib/bundle/com-cosylab-epics-caj_2.10-1.0.2.jar"),
   new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.10-7.0.5.jar"),
   new File(baseDirectory.value, "../../lib/bundle/scalaz-effect_2.10-7.0.5.jar"),
@@ -23,22 +20,20 @@ osgiSettings
 
 ocsBundleSettings
 
-OsgiKeys.bundleActivator := Some("edu.gemini.spdb.reports.collection.osgi.Activator")
+OsgiKeys.bundleActivator := Some("edu.gemini.spdb.cron.osgi.Activator")
 
 OsgiKeys.bundleSymbolicName := name.value
 
 OsgiKeys.dynamicImportPackage := Seq("")
 
 OsgiKeys.exportPackage := Seq(
-  "edu.gemini.spdb.reports.collection.table",
-  "edu.gemini.spdb.reports.collection.util",
-  "edu.gemini.spdb.reports",
-  "edu.gemini.spdb.reports.util",
-  "edu.gemini.spdb.reports.impl.www",
-  "edu.gemini.spdb.reports.impl.www.vm",
-  "edu.gemini.spdb.cron",
-  "edu.gemini.spdb.cron.util",
-  "edu.gemini.weather",
-  "edu.gemini.epics")
+  "edu.gemini.spdb.reports.*" // needed by velocity
+)
 
-        
+OsgiKeys.privatePackage := Seq(
+  "edu.gemini.spdb.reports.*", 
+  "edu.gemini.spdb.cron.*",
+  "edu.gemini.dbTools.*",
+  "edu.gemini.weather.*",
+  "edu.gemini.epics.*"
+)

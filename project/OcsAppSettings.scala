@@ -16,7 +16,8 @@ trait OcsAppSettings { this: OcsKey =>
     ocsAppInfo := showAppInfo(ocsAppManifest.value, streams.value.log),
     commands ++= Seq(
       mkIdeaCommand(ocsAppManifest.value, target.value),
-      mkDistCommand(ocsAppManifest.value, target.value)
+      mkDistCommand(ocsAppManifest.value, target.value),
+      mkDistAllCommand(ocsAppManifest.value, target.value)
     ).flatten //,
     // incOptions := incOptions.value.withNameHashing(true)
   )
@@ -188,6 +189,17 @@ trait OcsAppSettings { this: OcsKey =>
         s
       }
     }
+
+  def mkDistAllCommand(a: Application, target: File): Option[Command] =
+      Command.command("ocsDistAll") { s => 
+        def now = System.currentTimeMillis
+        val start = now
+        val extracted = Project.extract(s)
+        val dists = a.configs.flatMap(_.distribution).distinct.toSet
+        new AppBuilder(target, resolveConfig(extracted, s), extracted.getOpt(ocsJreDir), dists, s.log, extracted.get(baseDirectory)).build(a)
+        s.log.info(f"Elapsed time: ${(now - start) / 1000f}%3.2f")
+        s
+      }.some
 
 }
 

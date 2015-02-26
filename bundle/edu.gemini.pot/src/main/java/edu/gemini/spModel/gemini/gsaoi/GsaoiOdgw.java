@@ -81,7 +81,7 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
         public TargetEnvironment add(SPTarget guideStar, ObsContext ctx) {
             // Select the appropriate guider, if any.
             TargetEnvironment env = ctx.getTargets();
-            Option<GuideProbe> probeOpt = select(guideStar.getSkycalcCoordinates(), ctx);
+            Option<GuideProbe> probeOpt = select(guideStar.getTarget().getSkycalcCoordinates(), ctx);
             GuideProbe probe;
             if (probeOpt.isEmpty()) {
                 // Just use ODGW1 since we're adding a target that is off the
@@ -133,7 +133,7 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
                 if (gtOpt.isEmpty()) continue;
 
                 for (SPTarget target : gtOpt.getValue().getOptions()) {
-                    Option<GuideProbe> opt = select(target.getSkycalcCoordinates(), ctx);
+                    Option<GuideProbe> opt = select(target.getTarget().getSkycalcCoordinates(), ctx);
                     if (opt.isEmpty()) {
                         // Doesn't fall on the detector, so keep it with
                         // whichever ODGW it was associated with.
@@ -333,7 +333,7 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
     }
 
     public boolean validate(SPTarget guideStar, ObsContext ctx) {
-        Coordinates coords = guideStar.getSkycalcCoordinates();
+        Coordinates coords = guideStar.getTarget().getSkycalcCoordinates();
         // Get the id of the detector in which the guide star lands, if any
         Option<GsaoiDetectorArray.Id> idOpt = GsaoiDetectorArray.instance.getId(coords, ctx);
         if (idOpt.isEmpty()) return false;
@@ -345,7 +345,8 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
     @Override public PatrolField getPatrolField() {
         return patrolField;
     }
-    @Override public PatrolField getCorrectedPatrolField(ObsContext ctx) {
-        return patrolField;
+
+    @Override public Option<PatrolField> getCorrectedPatrolField(ObsContext ctx) {
+        return (ctx.getInstrument() instanceof Gsaoi) ? new Some<>(patrolField) : None.<PatrolField>instance();
     }
 }

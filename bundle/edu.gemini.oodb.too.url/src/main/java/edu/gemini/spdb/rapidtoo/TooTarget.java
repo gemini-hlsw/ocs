@@ -4,6 +4,9 @@
 
 package edu.gemini.spdb.rapidtoo;
 
+import edu.gemini.shared.skyobject.Magnitude;
+import edu.gemini.shared.util.immutable.ImList;
+
 import java.io.Serializable;
 
 /**
@@ -32,4 +35,12 @@ public interface TooTarget extends Serializable {
      * <code>null</code>
      */
     double getDec();
+
+    /**
+     * Gets the list of magnitudes (possibly empty)
+     *
+     * @return magnitude list, possibly empty
+     */
+    ImList<Magnitude> getMagnitudes();
+
 }

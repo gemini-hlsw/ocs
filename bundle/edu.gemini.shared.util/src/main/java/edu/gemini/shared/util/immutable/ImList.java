@@ -166,6 +166,13 @@ public interface ImList<T> extends Iterable<T> {
     boolean isEmpty();
 
     /**
+     * Returns <code>true</code> if this list contains elements.
+     *
+     * @return <code>true</code> if this list contains elements
+     */
+    boolean nonEmpty();
+
+    /**
      * Returns the number of elements in this list.
      * @return the number of elements in this list
      */

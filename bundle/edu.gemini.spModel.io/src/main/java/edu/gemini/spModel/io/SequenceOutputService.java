@@ -78,7 +78,7 @@ public enum SequenceOutputService {
     // telescope:Base:name has to be called telescope:position(Base):name when
     // sent to the seqexec.
     private static final ItemKey REAL_BASE_KEY = new ItemKey("telescope:Base:name");
-    private static final ItemKey SEXQ_BASE_KEY = new ItemKey("telescope:postion(Base):name");
+    private static final ItemKey SEXQ_BASE_KEY = new ItemKey("telescope:position(Base):name");
     private void renameTargetBase(Config c) {
         Object val = c.remove(REAL_BASE_KEY);
         if (val != null) c.putItem(SEXQ_BASE_KEY, val);

@@ -2,9 +2,9 @@ package edu.gemini.phase2.skeleton.factory
 
 
 import edu.gemini.model.p1.immutable._
-import edu.gemini.model.p1.mutable.CoordinatesEpoch._
 import edu.gemini.shared.{skyobject => SO}
 import edu.gemini.shared.util.immutable.DefaultImList
+import edu.gemini.spModel.target.system.CoordinateParam.Units
 import edu.gemini.spModel.{target => SP}
 import edu.gemini.spModel.target.system.CoordinateTypes.{PM1 => SPProperMotionRA}
 import edu.gemini.spModel.target.system.CoordinateTypes.{PM2 => SPProperMotionDec}
@@ -23,7 +23,7 @@ object SpTargetFactory {
 
   private def createTooTarget(too: TooTarget): SP.SPTarget = {
     val sp   = new SP.SPTarget(0.0, 0.0)
-    sp.setName(too.name)
+    sp.getTarget.setName(too.name)
     sp
   }
 
@@ -56,8 +56,13 @@ object SpTargetFactory {
       itarget.setDateForPosition(new java.util.Date(when))
 
       val spTarget = new SP.SPTarget(itarget)
-      spTarget.setName(nsid.name)
-      nsid.magnitude(time) foreach { m => spTarget.setBrightness(m.toString) }
+      spTarget.getTarget.setName(nsid.name)
+
+      // Add apparent magnitude, if any.
+      nsid.magnitude(time)
+        .map(new SO.Magnitude(SO.Magnitude.Band.AP, _))
+        .foreach(spTarget.getTarget.putMagnitude)
+
       spTarget
     }
 
@@ -65,10 +70,9 @@ object SpTargetFactory {
   private def createSiderealTarget(sid: SiderealTarget, time: Long): Either[String, SP.SPTarget] =
     for {
       coords <- siderealCoordinates(sid, time).right
-      system <- siderealSystemType(sid).right
       mags   <- siderealMags(sid).right
     } yield {
-      val itarget  = new SP.system.HmsDegTarget(system)
+      val itarget  = new SP.system.HmsDegTarget()
       setRaDec(itarget, coords)
       sid.properMotion map { pm =>
         val ra  = pm.deltaRA
@@ -78,23 +82,16 @@ object SpTargetFactory {
       }
 
       val spTarget = new SP.SPTarget(itarget)
-      spTarget.setName(sid.name)
-      spTarget.setMagnitudes(DefaultImList.create(mags.asJava))
+      spTarget.getTarget.setName(sid.name)
+      spTarget.getTarget.setMagnitudes(DefaultImList.create(mags.asJava))
       spTarget
     }
 
   private def setRaDec(itarget: SP.system.ITarget, c: Coordinates) {
     val degDeg   = c.toDegDeg
-    itarget.setC1(new SP.system.HMS(degDeg.ra.toDouble))
-    itarget.setC2(new SP.system.DMS(degDeg.dec.toDouble))
+    itarget.getRa.setAs(degDeg.ra.toDouble, Units.DEGREES)
+    itarget.getDec.setAs(degDeg.dec.toDouble, Units.DEGREES)
   }
-
-  private def siderealSystemType(sid: SiderealTarget): Either[String, SP.system.HmsDegTarget.SystemType] =
-    sid.epoch match {
-      case J_2000 => Right(SP.system.HmsDegTarget.SystemType.J2000)
-      case B_1950 => Right(SP.system.HmsDegTarget.SystemType.B1950)
-      case _      => Left("Unexpected epoch %s".format(sid.epoch))
-    }
 
   private def siderealMags(sid: SiderealTarget): Either[String, List[SO.Magnitude]] = {
     val empty: Either[String, List[SO.Magnitude]] = Right(Nil)

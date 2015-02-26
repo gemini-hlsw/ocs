@@ -5,9 +5,11 @@
 package jsky.app.ot.gemini.editor.targetComponent;
 
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
 import edu.gemini.spModel.target.WatchablePos;
+import edu.gemini.spModel.target.system.HmsDegTarget;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -29,8 +31,7 @@ final class TrackingEditor implements TelescopePosEditor {
     private final ImList<Row> rows;
 
     private final TelescopePosWatcher watcher = new TelescopePosWatcher() {
-        @Override public void telescopePosLocationUpdate(WatchablePos tp) { }
-        @Override public void telescopePosGenericUpdate(WatchablePos tp) {
+        @Override public void telescopePosUpdate(WatchablePos tp) {
             reinit();
         }
     };
@@ -62,11 +63,11 @@ final class TrackingEditor implements TelescopePosEditor {
     }
 
     private static interface UpdateFunction {
-        void apply(SPTarget target, Number d);
+        void apply(HmsDegTarget target, Number d);
     }
 
     private static interface InitFunction {
-        void apply(SPTarget target, JFormattedTextField field);
+        void apply(HmsDegTarget target, JFormattedTextField field);
     }
 
     private final class NumberFieldListener implements PropertyChangeListener {
@@ -79,7 +80,10 @@ final class TrackingEditor implements TelescopePosEditor {
         @Override public void propertyChange(PropertyChangeEvent evt) {
             target.deleteWatcher(watcher);
             Number d = (Number) evt.getNewValue();
-            function.apply(target, d);
+            if (target.getTarget() instanceof HmsDegTarget) {
+                function.apply((HmsDegTarget) target.getTarget(), d);
+            }
+            target.notifyOfGenericUpdate(); // someone else may be watching
             target.addWatcher(watcher);
         }
     }
@@ -109,67 +113,10 @@ final class TrackingEditor implements TelescopePosEditor {
 
         public void reinit() {
             field.removePropertyChangeListener("value", listener);
-            init.apply(target, field);
-            field.addPropertyChangeListener("value", listener);
-        }
-    }
-
-    private final class EffectiveWavelength extends AbstractRow {
-        private final JPanel pan;
-        private final JTextField tf;
-        private final JButton btn;
-
-        private final DocumentListener docListener = new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) { changedUpdate(e); }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) { changedUpdate(e); }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                target.deleteWatcher(watcher);
-                String val = tf.getText();
-                try {
-                    target.setTrackingEffectiveWavelength(val);
-                } catch (Exception ex) {
-                    target.setTrackingEffectiveWavelength("auto");
-                }
-                target.addWatcher(watcher);
+            if (target.getTarget() instanceof HmsDegTarget) {
+                init.apply((HmsDegTarget) target.getTarget(), field);
             }
-        };
-
-        EffectiveWavelength() {
-            super("Effective \u03BB", "\u00B5m");
-
-            pan = new JPanel(new GridBagLayout()) {{ setOpaque(false); }};
-
-            tf  = new JTextField(4);
-            tf.setMinimumSize(tf.getPreferredSize());
-            btn = new JButton("Auto") {{
-                addActionListener(new ActionListener() {
-                    @Override public void actionPerformed(ActionEvent e) {
-                        target.setTrackingEffectiveWavelength("auto");
-                    }
-                });
-                setToolTipText("Automatically set the effective wavelength");
-            }};
-
-            pan.add(tf, new GridBagConstraints() {{
-                gridx=0; gridy=0; fill=HORIZONTAL; weightx=1.0;
-            }});
-
-            pan.add(btn, new GridBagConstraints() {{
-                gridx=1; gridy=0; insets=new Insets(0, 5, 0, 0);
-            }});
-        }
-
-        public JComponent getComponent() { return pan; }
-
-        public void reinit() {
-            tf.getDocument().removeDocumentListener(docListener);
-            tf.setText(target.getTrackingEffectiveWavelength());
-            tf.getDocument().addDocumentListener(docListener);
+            field.addPropertyChangeListener("value", listener);
         }
     }
 
@@ -183,36 +130,35 @@ final class TrackingEditor implements TelescopePosEditor {
         rows = DefaultImList.create(
             (Row) new NumberRow("Epoch", "years",
                     new InitFunction() {
-                        @Override public void apply(SPTarget target, JFormattedTextField field) {
-                            field.setText(target.getTrackingEpoch());
+                        @Override public void apply(HmsDegTarget target, JFormattedTextField field) {
+                            field.setText(Double.toString(target.getTrackingEpoch()));
                         }
                     },
                     new UpdateFunction() {
-                        @Override public void apply(SPTarget target, Number d) {
-                            target.setTrackingEpoch(d==null ? "2000.0" : String.valueOf(d));
+                        @Override public void apply(HmsDegTarget target, Number d) {
+                            target.setTrackingEpoch(d == null ? 2000.0 : d.doubleValue());
                         }
                     }),
-            new EffectiveWavelength(),
             new NumberRow("Parallax", "arcsec",
                     new InitFunction() {
-                        @Override public void apply(SPTarget target, JFormattedTextField field) {
-                            field.setText(target.getTrackingParallax());
+                        @Override public void apply(HmsDegTarget target, JFormattedTextField field) {
+                            field.setText(Double.toString(target.getTrackingParallax()));
                         }
                     },
                     new UpdateFunction() {
-                        @Override public void apply(SPTarget target, Number d) {
-                            target.setTrackingParallax(d==null ? "0.0" : String.valueOf(d));
+                        @Override public void apply(HmsDegTarget target, Number d) {
+                            target.setTrackingParallax(d == null ? 0.0 : d.doubleValue());
                         }
                     }),
             new NumberRow("Radial Vel", "km/sec",
                     new InitFunction() {
-                        @Override public void apply(SPTarget target, JFormattedTextField field) {
-                            field.setText(target.getTrackingRadialVelocity());
+                        @Override public void apply(HmsDegTarget target, JFormattedTextField field) {
+                            field.setText(Double.toString(target.getTrackingRadialVelocity()));
                         }
                     },
                     new UpdateFunction() {
-                        @Override public void apply(SPTarget target, Number d) {
-                            target.setTrackingRadialVelocity(d==null ? "0.0" : String.valueOf(d));
+                        @Override public void apply(HmsDegTarget target, Number d) {
+                            target.setTrackingRadialVelocity(d == null ? 0.0 : d.doubleValue());
                         }
                     })
         );
@@ -253,7 +199,7 @@ final class TrackingEditor implements TelescopePosEditor {
     }
 
     @Override
-    public void edit(SPTarget target) {
+    public void edit(final Option<ObsContext> ctx, final SPTarget target) {
         if (this.target == target) return;
         if (this.target != null) this.target.deleteWatcher(watcher);
         if (target != null) target.addWatcher(watcher);

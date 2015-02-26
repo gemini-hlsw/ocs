@@ -4,8 +4,7 @@ import edu.gemini.phase2.core.model.{ObsComponentShell, ObservationShell, GroupS
 import edu.gemini.phase2.template.factory.api.{BlueprintExpansion, TemplateFactory}
 import edu.gemini.spModel.gemini.gmos.blueprint._
 import edu.gemini.spModel.rich.pot.sp._
-import edu.gemini.spModel.template.SpBlueprint
-import edu.gemini.spModel.template.TemplateFolder.Phase1Group
+import edu.gemini.spModel.template.{Phase1Group, SpBlueprint}
 
 import flamingos2.{Flamingos2Mos, Flamingos2Longslit, Flamingos2Imaging}
 import gmos._
@@ -41,15 +40,22 @@ case class TemplateFactoryImpl(db: TemplateDb) extends TemplateFactory {
 
   type TargetId = String
 
-  def expand(blueprint: SpBlueprint, pig: Phase1Group, tMap:Map[TargetId, SPTarget]): Either[String, BlueprintExpansion] =
+  def expand(blueprint: SpBlueprint, pig: Phase1Group): Either[String, BlueprintExpansion] = {
+    // template groups are editable and all arguments can be removed so there
+    // may not be an example target
+    def sampleTarget: Option[SPTarget] =
+      if (pig.argsList.size() == 0) None
+      else Some(pig.argsList.get(0).getTarget)
+
     for {
-      ini <- initializer(blueprint, tMap(pig.argsList.get(0).getTargetId)).right
+      ini <- initializer(blueprint, sampleTarget).right
       grp <- ini.initialize(db).right
     } yield convert(blueprint, pig, grp, ini)
+  }
 
   // Provide a sample target, used in some cases to get the magnitude. It is assumed that the groups are partitioned
   // such that any target is a good example (we use the first one). This happens in TemplateFolderFactory, sadly.
-  private def initializer(blue: SpBlueprint, sampleTarget:SPTarget): Either[String, GroupInitializer[_]] =
+  private def initializer(blue: SpBlueprint, sampleTarget: Option[SPTarget]): Either[String, GroupInitializer[_]] =
     blue match {
 
       // FLAMINGOS-2

@@ -12,6 +12,7 @@ import edu.gemini.spModel.gemini.altair.AltairAowfsGuider;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
+import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
 import edu.gemini.spModel.gemini.michelle.InstMichelle;
 import edu.gemini.spModel.gemini.niri.InstNIRI;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
@@ -139,7 +140,14 @@ public class AbstractRuleTest {
      * @throws edu.gemini.pot.sp.SPNodeNotLocalException
      */
     protected ISPObsComponent addGmosNorth() throws SPUnknownIDException, SPTreeStateException, SPNodeNotLocalException {
-        ISPObsComponent gmosComponent = fact.createObsComponent(prog, InstGmosNorth.SP_TYPE, null);
+        final ISPObsComponent gmosComponent = fact.createObsComponent(prog, InstGmosNorth.SP_TYPE, null);
+        obscomps.add(gmosComponent);
+        obs.setObsComponents(obscomps);
+        return gmosComponent;
+    }
+
+    protected ISPObsComponent addGmosSouth() throws SPUnknownIDException, SPTreeStateException, SPNodeNotLocalException {
+        final ISPObsComponent gmosComponent = fact.createObsComponent(prog, InstGmosSouth.SP_TYPE, null);
         obscomps.add(gmosComponent);
         obs.setObsComponents(obscomps);
         return gmosComponent;
@@ -230,7 +238,8 @@ public class AbstractRuleTest {
     protected void addTargetObsCompAOP1() throws SPUnknownIDException, SPTreeStateException, SPNodeNotLocalException {
         TargetObsComp target = new TargetObsComp();
         SPTarget sptarget = new SPTarget();
-        sptarget.setName("name");
+        sptarget.getTarget().setName("name");
+        sptarget.notifyOfGenericUpdate();
         Set<GuideProbe> guideProbes = new HashSet<GuideProbe>();
         guideProbes.add(AltairAowfsGuider.instance);
         guideProbes.add(PwfsGuideProbe.pwfs1);
@@ -269,7 +278,8 @@ public class AbstractRuleTest {
     protected void addTargetObsCompAO() throws SPUnknownIDException, SPTreeStateException, SPNodeNotLocalException {
         TargetObsComp target = new TargetObsComp();
         SPTarget sptarget = new SPTarget();
-        sptarget.setName("name");
+        sptarget.getTarget().setName("name");
+        sptarget.notifyOfGenericUpdate();
         Set<GuideProbe> guideProbes = new HashSet<GuideProbe>();
         guideProbes.add(AltairAowfsGuider.instance);
 

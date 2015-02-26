@@ -31,7 +31,7 @@ public abstract interface TableQueryResult extends Catalog, TableModel {
      * Returns the Vector of Vectors that contains the table's data values.
      * The vectors contained in the outer vector are each a single row of values.
      */
-    public Vector getDataVector();
+    public Vector<Vector<Object>> getDataVector();
 
     /** Return a description of the ith table column field */
     public FieldDesc getColumnDesc(int i);

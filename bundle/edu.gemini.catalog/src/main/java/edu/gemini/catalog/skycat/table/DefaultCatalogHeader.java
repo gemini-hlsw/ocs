@@ -15,15 +15,15 @@ import java.util.Map;
  * immutable list.
  */
 public class DefaultCatalogHeader implements CatalogHeader {
-    private final ImList<Tuple2<String, Class>> columns;
+    private final ImList<Tuple2<String, Class<?>>> columns;
     private final Map<String, Integer> map;
 
-    public DefaultCatalogHeader(ImList<Tuple2<String, Class>> columns) {
+    public DefaultCatalogHeader(ImList<Tuple2<String, Class<?>>> columns) {
         this.columns = columns;
 
-        Map<String, Integer> tmp = new HashMap<String, Integer>();
+        Map<String, Integer> tmp = new HashMap<>();
         int i = 0;
-        for (Tuple2<String, Class> tup : columns) tmp.put(tup._1(), i++);
+        for (Tuple2<String, Class<?>> tup : columns) tmp.put(tup._1(), i++);
         this.map = Collections.unmodifiableMap(tmp);
     }
 
@@ -36,7 +36,7 @@ public class DefaultCatalogHeader implements CatalogHeader {
     public Option<Integer> columnIndex(String name) {
         Integer res = map.get(name);
         if (res == null) return None.instance();
-        return new Some<Integer>(res);
+        return new Some<>(res);
     }
 
     @Override

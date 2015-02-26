@@ -35,7 +35,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 
 
 /**
@@ -64,7 +66,7 @@ public class TableDisplay extends JPanel
     private boolean[] _show;
 
     /** Used to remember _show settings */
-    private static Hashtable _showTab = new Hashtable();
+    private static Map<String, boolean[]> _showTab = new HashMap<>();
 
     /** Name of file used to remember the _showTab settings between sessions */
     private static String SHOW_TAB_FILE_NAME = "tableDisplayShowTab";
@@ -247,7 +249,7 @@ public class TableDisplay extends JPanel
                 column.setCellRenderer(new SexagesimalTableCellRenderer(false));
                 column.setCellEditor(new SexagesimalTableCellEditor(false));
             } else {
-                Class c = _tableQueryResult.getColumnClass(col);
+                Class<?> c = _tableQueryResult.getColumnClass(col);
                 if (c != null && c.isArray()) {
                     column.setCellRenderer(new ArrayTableCellRenderer(c));
                 } else if (c.equals(String.class) || c.equals(Object.class)) {

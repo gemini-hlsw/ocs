@@ -114,14 +114,18 @@ public class TccFieldConfig extends ParamSet {
     private void addBaseGroup(TargetEnvironment env) throws WdbaGlueException {
         // Add the target itself.
         SPTarget base = env.getBase();
-        if (isEmpty(base.getName())) base.setName(TccNames.BASE);
+        if (isEmpty(base.getTarget().getName())) {
+            base.getTarget().setName(TccNames.BASE);
+            base.notifyOfGenericUpdate();
+        }
         add(new TargetConfig(base));
 
         // Add the user targets.
         int pos = 1;
         for (SPTarget user : env.getUserTargets()) {
-            if (isEmpty(user.getName())) {
-                user.setName(TargetConfig.formatName("User", pos));
+            if (isEmpty(user.getTarget().getName())) {
+                user.getTarget().setName(TargetConfig.formatName("User", pos));
+                user.notifyOfGenericUpdate();
             }
             ++pos;
             add(new TargetConfig(user));
@@ -145,8 +149,9 @@ public class TccFieldConfig extends ParamSet {
 
         int pos = 1;
         for (SPTarget target : targets) {
-            if (isEmpty(target.getName())) {
-                target.setName(TargetConfig.formatName(tag, pos));
+            if (isEmpty(target.getTarget().getName())) {
+                target.getTarget().setName(TargetConfig.formatName(tag, pos));
+                target.notifyOfGenericUpdate();
             }
             add(new TargetConfig(target));
             ++pos;

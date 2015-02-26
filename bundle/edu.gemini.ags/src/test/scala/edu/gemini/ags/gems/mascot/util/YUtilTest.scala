@@ -9,7 +9,7 @@ import org.junit.{Ignore, Test}
  * Tests methods in the YUtil class.
  */
 
-@Ignore class YUtilTest {
+class YUtilTest {
 
   val A =
     Array(

@@ -1,0 +1,17 @@
+# File containing information about the camera window transmassion
+# i.e. the coated AR window on GSAOI. Data from T. Vuscina. Measurements
+# Performed in the new AR window, prior to the installation on February
+# 2012 (replaced the damaged AR window).
+# Created: 2012jul30
+# Updated: 2012aug16
+# Author: R. Carrasco
+# Lambda(nm) Transmission
+800	0.917
+900	0.986
+1000	0.989
+1100	0.990
+1250	0.991
+1650	0.991
+2000    0.991
+2200	0.990
+3000	0.840

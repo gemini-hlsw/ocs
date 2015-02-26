@@ -45,6 +45,7 @@ import jsky.science.Time;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
@@ -582,13 +583,16 @@ public class DefaultTimeLineNode implements TimeLineNode {
 
             graphics.setFont(TimeLineNode.DEFAULT_FONT);
             NodeLabelData nlp = calc(getTimeLineNodeName(), graphics, addHandles);
-            if (nlp.rotate) graphics.setFont(TimeLineNode.ROTATED_FONT);
+            AffineTransform oldTransform = graphics.getTransform();
+            if (nlp.rotate) {
+                graphics.rotate(TimeLineNode.LABEL_ROTATION, nlp.textX, nlp.textY);
+            }
             graphics.setColor(Color.black);
             if (thumbWidth > 14.) // allan: quick fix to avoid overlapping strings
             {
                 graphics.drawString(nlp.label, nlp.textX, nlp.textY);
             }
-            graphics.setFont(origFont);
+            graphics.setTransform(oldTransform);
 
             // draw duration
             graphics.setFont(TimeLineNode.DEFAULT_FONT);
@@ -606,8 +610,8 @@ public class DefaultTimeLineNode implements TimeLineNode {
                 lengthY = fLeftHandle.y + fHandleHeight + (float) (lengthBounds.getHeight() + TimeLineNode.DEFAULT_LABEL_SPACE);
             }
             if (lengthBounds.getWidth() > thumbWidth) {
-                graphics.setFont(TimeLineNode.REVERSE_ROTATED_FONT);
                 lengthX = fThumb.x + thumbWidth / 2f;
+                graphics.rotate(TimeLineNode.LABEL_REVERSE_ROTATION, lengthX, lengthY);
 
             }
             if (thumbWidth > 14.) // allan: quick fix to avoid overlapping strings
@@ -615,6 +619,7 @@ public class DefaultTimeLineNode implements TimeLineNode {
                 graphics.drawString(lengthStr, lengthX, lengthY);
             }
             graphics.setFont(origFont);
+            graphics.setTransform(oldTransform);
         }
     }
 

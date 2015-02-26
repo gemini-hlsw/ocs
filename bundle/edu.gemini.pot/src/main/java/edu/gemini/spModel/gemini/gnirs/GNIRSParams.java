@@ -238,11 +238,23 @@ public class GNIRSParams {
         }
 
         /**
-         * Return a SlitWidth by index
+         * Test to see if we're doing slit spectroscopy.
          */
-//        static public SlitWidth getSlitWidthByIndex(int index) {
-//            return SpTypeUtil.valueOf(SlitWidth.class, index, DEFAULT);
-//        }
+        public boolean isSlitSpectroscopy() {
+            switch (this) {
+                case SW_1:
+                case SW_2:
+                case SW_3:
+                case SW_4:
+                case SW_5:
+                case SW_6:
+                case SW_7:
+                case SW_8:
+                    return true;
+                default:
+                    return false;
+            }
+        }
 
     }
 

@@ -82,13 +82,14 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
     protected void addPatrolField(double xc, double yc) {
         // RCN: this won't work if there's no obs context
         for (ObsContext ctx : _iw.getMinimalObsContext()) {
-            PatrolField patrolField = GmosOiwfsGuideProbe.instance.getCorrectedPatrolField(ctx);
-            // rotation, scaling and transformation to match screen coordinates
-            Angle rotation = new Angle(-_posAngle, Angle.Unit.RADIANS);
-            Point2D.Double translation = new Point2D.Double(xc, yc);
-            setTransformationToScreen(rotation, _pixelsPerArcsec, translation);
+            for (PatrolField patrolField : GmosOiwfsGuideProbe.instance.getCorrectedPatrolField(ctx)) {
+                // rotation, scaling and transformation to match screen coordinates
+                Angle rotation = new Angle(-_posAngle, Angle.Unit.RADIANS);
+                Point2D.Double translation = new Point2D.Double(xc, yc);
+                setTransformationToScreen(rotation, _pixelsPerArcsec, translation);
 
-            addPatrolField(patrolField);
+                addPatrolField(patrolField);
+            }
         }
     }
 
@@ -98,18 +99,19 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
      * @param xc the X screen coordinate for the base position to use
      * @param yc the Y screen coordinate for the base position to use
      */
-    protected void addOffsetConstrainedPatrolField(double xc, double yc) {
-        Set<Offset> offsets = _iw.getContext().offsets().scienceOffsetsJava();
+    protected void addOffsetConstrainedPatrolField(final double xc, final double yc) {
+        final Set<Offset> offsets = _iw.getContext().offsets().scienceOffsetsJava();
 
-        if (_iw.getMinimalObsContext().isEmpty()) return;
-        PatrolField patrolField = GmosOiwfsGuideProbe.instance.getCorrectedPatrolField(_iw.getMinimalObsContext().getValue());
-        offsetConstrainedPatrolFieldIsEmpty =  patrolField.outerLimitOffsetIntersection(offsets).isEmpty() ? true : false;
-        // rotation, scaling and transformation to match screen coordinates
-        Angle rotation = new Angle(-_posAngle, Angle.Unit.RADIANS);
-        Point2D.Double translation = new Point2D.Double(xc, yc);
-        setTransformationToScreen(rotation, _pixelsPerArcsec, translation);
-
-        addOffsetConstrainedPatrolField(patrolField, offsets);
+        for (ObsContext ctx : _iw.getMinimalObsContext()) {
+            for (PatrolField patrolField : GmosOiwfsGuideProbe.instance.getCorrectedPatrolField(ctx)) {
+                offsetConstrainedPatrolFieldIsEmpty = patrolField.outerLimitOffsetIntersection(offsets).isEmpty() ? true : false;
+                // rotation, scaling and transformation to match screen coordinates
+                final Angle rotation = new Angle(-_posAngle, Angle.Unit.RADIANS);
+                final Point2D.Double translation = new Point2D.Double(xc, yc);
+                setTransformationToScreen(rotation, _pixelsPerArcsec, translation);
+                addOffsetConstrainedPatrolField(patrolField, offsets);
+            }
+        }
     }
 
 

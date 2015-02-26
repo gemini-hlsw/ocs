@@ -14,6 +14,7 @@ import edu.gemini.spModel.obs.plannedtime.PlannedTimeSummaryService;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeSummary;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.system.CoordinateParam;
 import edu.gemini.spModel.too.Too;
 import jsky.coords.WorldCoords;
 
@@ -130,8 +131,8 @@ public final class ObsSchedulingReport implements Serializable {
         SPTarget target = env.getBase();
         if (target == null) return null;
 
-        double ra  = target.getXaxis();
-        double dec = target.getYaxis();
+        double ra  = target.getTarget().getRa().getAs(CoordinateParam.Units.DEGREES);
+        double dec = target.getTarget().getDec().getAs(CoordinateParam.Units.DEGREES);
         return new WorldCoords(ra, dec);
     }
 

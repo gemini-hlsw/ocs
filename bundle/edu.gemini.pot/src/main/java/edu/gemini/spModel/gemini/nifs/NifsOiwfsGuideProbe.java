@@ -4,12 +4,9 @@
 
 package edu.gemini.spModel.gemini.nifs;
 
+import edu.gemini.shared.util.immutable.*;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.Offset;
-import edu.gemini.shared.util.immutable.MapOp;
-import edu.gemini.shared.util.immutable.None;
-import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.shared.util.immutable.PredicateOp;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.gemini.altair.InstAltair;
 import static edu.gemini.spModel.gemini.altair.AltairParams.FieldLens.IN;
@@ -60,17 +57,21 @@ public enum NifsOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
     }
 
     @Override
-    public PatrolField getCorrectedPatrolField(ObsContext ctx) {
-        return ctx.getAOComponent().filter(new PredicateOp<AbstractDataObject>() {
-            @Override public Boolean apply(AbstractDataObject dobj) {
-                return (dobj instanceof InstAltair);
-            }
-        }).map(new MapOp<AbstractDataObject, PatrolField>() {
-            @Override public PatrolField apply(AbstractDataObject dobj) {
-                InstAltair altair = (InstAltair) dobj;
-                return (altair.getFieldLens() == IN) ? fieldLensPatrolField : noFieldLensPatrolField;
-            }
-        }).getOrElse(noFieldLensPatrolField);
+    public Option<PatrolField> getCorrectedPatrolField(ObsContext ctx) {
+        if (ctx.getInstrument() instanceof InstNIFS) {
+            return ctx.getAOComponent().flatMap(new MapOp<AbstractDataObject, Option<PatrolField>>() {
+                @Override public Option<PatrolField> apply(AbstractDataObject ado) {
+                    if (ado instanceof InstAltair) {
+                        final InstAltair altair = (InstAltair) ado;
+                        return new Some<>((altair.getFieldLens() == IN) ? fieldLensPatrolField : noFieldLensPatrolField);
+                    } else {
+                        return None.instance();
+                    }
+                }
+            }).orElse(new Some<>(noFieldLensPatrolField));
+        } else {
+            return None.instance();
+        }
     }
 
     @Override
@@ -80,6 +81,6 @@ public enum NifsOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
 
     @Override
     public boolean validate(SPTarget guideStar, ObsContext ctx) {
-        return GuideProbeUtil.instance.validate(guideStar.getSkycalcCoordinates(), getCorrectedPatrolField(ctx), ctx);
+        return GuideProbeUtil.instance.validate(guideStar.getTarget().getSkycalcCoordinates(), this, ctx);
     }
 }

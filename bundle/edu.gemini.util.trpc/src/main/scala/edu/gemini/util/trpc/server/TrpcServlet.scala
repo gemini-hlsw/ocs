@@ -20,7 +20,7 @@ abstract class TrpcServlet(auth: KeyService) extends HttpServlet {
 
   // The idea is that you pass class, method, args and get back a result or a throwable.
   // POST goes to http://server:host/trpc/class/method, where local path /class/method
-  // Request payload is an Array[AnyRef] serialized and Base64-encoded
+  // Request payload is an Array[AnyRef] serialized as a raw bytestream
   override def service(req: HttpServletRequest, res: HttpServletResponse) {
 
     try {
@@ -47,7 +47,7 @@ abstract class TrpcServlet(auth: KeyService) extends HttpServlet {
       } yield r
 
       // Either way, send it back.
-      closing(res.getOutputStream)(_.writeBase64(result))
+      closing(res.getOutputStream)(_.writeRaw(result))
 
     } catch {
       case t: Exception =>

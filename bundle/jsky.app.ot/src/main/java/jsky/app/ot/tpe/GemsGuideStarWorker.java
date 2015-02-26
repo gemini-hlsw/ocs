@@ -1,5 +1,6 @@
 package jsky.app.ot.tpe;
 
+import edu.gemini.ags.gems.*;
 import edu.gemini.ags.gems.mascot.Strehl;
 import edu.gemini.ags.gems.mascot.MascotProgress;
 import edu.gemini.skycalc.Angle;
@@ -9,14 +10,10 @@ import edu.gemini.shared.skyobject.coords.SkyCoordinates;
 import edu.gemini.shared.util.immutable.DefaultImList;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.gemini.gems.GemsInstrument;
 import edu.gemini.spModel.gems.GemsTipTiltMode;
-import edu.gemini.ags.gems.GemsCatalog;
-import edu.gemini.ags.gems.GemsCatalogResults;
-import edu.gemini.ags.gems.GemsCatalogSearchResults;
-import edu.gemini.ags.gems.GemsGuideStarSearchOptions;
-import edu.gemini.ags.gems.GemsGuideStars;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
@@ -32,12 +29,7 @@ import jsky.util.gui.StatusLogger;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CancellationException;
 
 /**
@@ -149,7 +141,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         TpeContext ctx = tpe.getContext();
         SPInstObsComp inst = ctx.instrument().orNull();
         if (inst != null) {
-            inst.setPosAngleDegrees(gemsGuideStars.getPa().toDegrees().getMagnitude());
+            inst.setPosAngleDegrees(gemsGuideStars.getPa().toDegrees());
             ctx.instrument().commit();
         }
 
@@ -173,12 +165,16 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         TargetObsComp targetObsComp = ctx.targets().orNull();
         if (targetObsComp != null) {
             TargetEnvironment env = targetObsComp.getTargetEnvironment();
-            List<GuideGroup> guideGroupList = new ArrayList<GuideGroup>();
+            List<GuideGroup> guideGroupList = new ArrayList<>();
             int i = 0;
             for (GemsGuideStars gemsGuideStars : selectedAsterisms) {
                 if (i++ == 0) {
                     // Set position angle only for first (primary) group
-                    tpe.getInstObsComp().setPosAngleDegrees(gemsGuideStars.getPa().toDegrees().getMagnitude());
+                    final SPInstObsComp inst = ctx.instrument().orNull();
+                    if (inst != null) {
+                        inst.setPosAngle(gemsGuideStars.getPa().toDegrees());
+                        ctx.instrument().commit();
+                    }
                 }
                 guideGroupList.add(gemsGuideStars.getGuideGroup());
             }
@@ -206,7 +202,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
 //        return search(GemsGuideStarSearchOptions.DEFAULT_CATALOG, GemsGuideStarSearchOptions.DEFAULT_CATALOG,
 //                GemsTipTiltMode.both, obsContext, posAngles, None.<Magnitude.Band>instance());
         return search(GemsGuideStarSearchOptions.DEFAULT_CATALOG, GemsGuideStarSearchOptions.DEFAULT_CATALOG,
-                GemsTipTiltMode.canopus, obsContext, posAngles, None.<Magnitude.Band>instance());
+                GemsTipTiltMode.canopus, obsContext, posAngles, None.<MagnitudeBand>instance());
     }
 
     /**
@@ -216,7 +212,12 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
      * @param obsContext used to getthe current pos angle
      */
     private Set<Angle> getPosAngles(ObsContext obsContext) {
-        Set<Angle> posAngles = new HashSet<Angle>();
+        Set<Angle> posAngles = new TreeSet<>(new Comparator<Angle>() {
+            @Override
+            public int compare(Angle a1, Angle a2) {
+                return a1.compareToAngle(a2);
+            }
+        });
         posAngles.add(obsContext.getPositionAngle());
         posAngles.add(new Angle(0., Angle.Unit.DEGREES));
         posAngles.add(new Angle(90., Angle.Unit.DEGREES));
@@ -233,7 +234,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     public List<GemsCatalogSearchResults> search(String opticalCatalog, String nirCatalog,
                                                  GemsTipTiltMode tipTiltMode,
                                                  ObsContext obsContext, Set<Angle> posAngles,
-                                                 Option<Magnitude.Band> nirBand) throws Exception {
+                                                 Option<MagnitudeBand> nirBand) throws Exception {
         try {
             interrupted = false;
             startProgress();
@@ -244,9 +245,14 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
 
             SPInstObsComp inst = obsContext.getInstrument();
 
+            Set<edu.gemini.spModel.core.Angle> angles = new HashSet<>();
+            for (Angle a: posAngles) {
+                angles.add(GemsUtils4Java.toNewAngle(a));
+            }
+
             GemsInstrument instrument = inst instanceof Flamingos2 ? GemsInstrument.flamingos2 : GemsInstrument.gsaoi;
             GemsGuideStarSearchOptions options = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog,
-                    instrument, tipTiltMode, posAngles);
+                    instrument, tipTiltMode, angles);
 
             List<GemsCatalogSearchResults> results = new GemsCatalog().search(obsContext, base, options, nirBand, statusLogger);
             if (interrupted) {
@@ -275,7 +281,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
 //                None.<Magnitude.Band>instance());
         List<GemsCatalogSearchResults> results = search(GemsGuideStarSearchOptions.DEFAULT_CATALOG,
                 GemsGuideStarSearchOptions.DEFAULT_CATALOG, GemsTipTiltMode.canopus, obsContext, posAngles,
-                None.<Magnitude.Band>instance());
+                None.<MagnitudeBand>instance());
         return findGuideStars(obsContext, posAngles, results);
     }
 
@@ -326,8 +332,8 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         if (gemsGuideStarsList.size() == 0) {
             return gemsGuideStarsList;
         }
-        Angle angle = gemsGuideStarsList.get(0).getPa();
-        List<GemsGuideStars> result = new ArrayList<GemsGuideStars>(gemsGuideStarsList.size());
+        Angle angle = Angle.degrees(gemsGuideStarsList.get(0).getPa().toDegrees());
+        List<GemsGuideStars> result = new ArrayList<>(gemsGuideStarsList.size());
         for (GemsGuideStars gemsGuideStars : gemsGuideStarsList) {
             if (angle.equals(gemsGuideStars.getPa())) {
                 result.add(gemsGuideStars);
@@ -339,10 +345,10 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
 
     // Checks that the results are valid: There must be at least 1 valid tiptilt and flexure star each
     private void checkResults(List<GemsCatalogSearchResults> results) {
-        Map<String, Boolean> keyMap = new HashMap<String, Boolean>();
+        Map<String, Boolean> keyMap = new HashMap<>();
         for (GemsCatalogSearchResults searchResults : results) {
-            String key = searchResults.getCriterion().getKey().getGroup().getKey();
-            if (searchResults.getResults().size() != 0) {
+            String key = searchResults.criterion().key().group().getKey();
+            if (searchResults.results().size() != 0) {
                 keyMap.put(key, true);
             } else if (!keyMap.containsKey(key)) {
                 keyMap.put(key, false);

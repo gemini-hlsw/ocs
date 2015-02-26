@@ -3,19 +3,23 @@ package jsky.app.ot.gemini.gmos;
 import com.jgoodies.forms.factories.DefaultComponentFactory;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
-import jsky.app.ot.gemini.parallacticangle.ParallacticAnglePanel;
+import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.spModel.gemini.gmos.InstGmosCommon;
+import jsky.app.ot.gemini.editor.ComponentEditor;
+import jsky.app.ot.gemini.parallacticangle.PositionAnglePanel;
 import jsky.util.gui.DropDownListBoxWidget;
 import jsky.util.gui.NumberBoxWidget;
 import jsky.util.gui.TextBoxWidget;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 
 /*
  * Created by JFormDesigner on Tue Nov 08 20:52:19 CET 2005
  *
  * JFormDesigner use deprecated. Update this file manually, and hopefully one
- * day let's do it in a way that is easy to mantain!!
+ * day let's do it in a way that is easy to maintain!!
  */
 
 
@@ -23,52 +27,60 @@ import java.awt.*;
 /**
  * @author User #1
  */
-public class GmosForm extends JPanel {
+public class GmosForm<T extends InstGmosCommon> extends JPanel {
     public GmosForm() {
         initComponents();
     }
 
+    private final static int leftLabelCol   = 0;
+    private final static int leftWidgetCol  = 1;
+    private final static int centerGapCol   = 2;
+    private final static int extraGapCol    = 3;
+    private final static int rightLabelCol  = 4;
+    private final static int rightWidgetCol = 5;
+    private final static int rightGapCol    = 6;
+    public static final Border PANEL_BORDER = BorderFactory.createEmptyBorder(15, 15, 15, 15);
+
+    private static Insets LABEL_INSETS = new Insets(ComponentEditor.PROPERTY_ROW_GAP, 0, 0, ComponentEditor.LABEL_WIDGET_GAP);
+    private static GridBagConstraints labelGbc(final int row, final int col) {
+        return new GridBagConstraints() {{
+            gridy  = row;
+            gridx  = col;
+            anchor = GridBagConstraints.EAST;
+            insets = LABEL_INSETS;
+        }};
+    }
+
+    private static Insets WIDGET_INSETS = new Insets(ComponentEditor.PROPERTY_ROW_GAP, 0, 0, 0);
+    private static GridBagConstraints widgetGbc(final int row, final int col) {
+        return new GridBagConstraints() {{
+            gridy  = row;
+            gridx  = col;
+            anchor = GridBagConstraints.WEST;
+            fill   = GridBagConstraints.HORIZONTAL;
+            insets = WIDGET_INSETS;
+        }};
+    }
+
+    private static Insets SEPARATOR_INSETS = WIDGET_INSETS;
+    private static GridBagConstraints separatorGbc(final int row, final int col, final int width) {
+        return new GridBagConstraints() {{
+            gridy     = row;
+            gridx     = col;
+            gridwidth = width;
+            weightx   = 1.0;
+            anchor    = GridBagConstraints.WEST;
+            fill      = GridBagConstraints.HORIZONTAL;
+            insets    = SEPARATOR_INSETS;
+        }};
+    }
+
     private void initComponents() {
-        // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        // Generated using JFormDesigner non-commercial license
         DefaultComponentFactory compFactory = DefaultComponentFactory.getInstance();
-        panel3 = new JPanel();
-        label1 = new JLabel();
-        filterComboBox = new JComboBox();
-        label2 = new JLabel();
-        exposureTime = new TextBoxWidget();
-        label3 = new JLabel();
-        disperserComboBox = new JComboBox();
-        centralWavelengthLabel = new JLabel();
-        centralWavelength = new TextBoxWidget();
-        orderLabel = new JLabel();
-        panel1 = new JPanel();
-        orderComboBox = new DropDownListBoxWidget();
-        preImgCheckButton = new JCheckBox();
-        nsCheckButton = new JCheckBox();
-        detectorManufacturerLabel = new JLabel();
-        detectorManufacturerComboBox = new JComboBox();
-        warning1 = new JLabel();
-        goodiesFormsSeparator4 = compFactory.createSeparator("Position Angle");
-        posAngle = new NumberBoxWidget();
-        label4 = new JLabel();
-        posAngle180 = new JCheckBox();
-        goodiesFormsSeparator5 = compFactory.createSeparator("Focal Plane Unit");
-        focalPlaneBuiltInButton = new JRadioButton();
-        builtinComboBox = new DropDownListBoxWidget();
-        focalPlaneMaskButton = new JRadioButton();
-        focalPlaneMask = new TextBoxWidget();
-        focalPlaneMaskPlotButton = new JButton();
-        customSlitWidthComboBox = new DropDownListBoxWidget();
+
         tabbedPane = new JTabbedPane();
-        panel6 = new JPanel();
-        panel12 = new JPanel();
-        label10 = new JLabel();
         xBinComboBox = new DropDownListBoxWidget();
-        label11 = new JLabel();
         yBinComboBox = new DropDownListBoxWidget();
-        goodiesFormsSeparator3 = compFactory.createSeparator("Set the CCD Readout Characteristics");
-        panel7 = new JPanel();
         ccdSlowLowButton = new JRadioButton();
         ccd3AmpButton = new JRadioButton();
         ccdFastLowButton = new JRadioButton();
@@ -76,29 +88,20 @@ public class GmosForm extends JPanel {
         ccd12AmpButton = new JRadioButton();
         ccdFastHighButton = new JRadioButton();
         ccdSlowHighButton = new JRadioButton();
-        panel11 = new JPanel();
-        label12 = new JLabel();
         ccdGainLabel = new JLabel();
-        meanReadNoiseLabelLabel = new JLabel();
         meanReadNoiseLabel = new JLabel();
         ampCountLabel = new JLabel();
-        ampCountLabelLabel = new JLabel();
-        panel14 = new JPanel();
         transFollowXYButton = new JRadioButton();
         transFollowXYZButton = new JRadioButton();
         transFollowZButton = new JRadioButton();
         transNoFollowButton = new JRadioButton();
-        label8 = new JLabel();
         transDtaSpinner = new JSpinner();
         warning3 = new JLabel();
-        panel15 = new JPanel();
         noROIButton = new JRadioButton();
         ccd2Button = new JRadioButton();
         centralSpectrumButton = new JRadioButton();
         centralStampButton = new JRadioButton();
         customButton = new JRadioButton();
-        customROIPanel = new JPanel();
-        scrollPaneROI = new JScrollPane();
         customROITable = new GmosCustomROITableWidget();
         warningCustomROI = new JLabel();
         xMin = new NumberBoxWidget();
@@ -113,224 +116,183 @@ public class GmosForm extends JPanel {
         customROIPasteButton = new JButton();
         customROIRemoveButton = new JButton();
         customROIRemoveAllButton = new JButton();
-        panel16 = new JPanel();
         upLookingButton = new JRadioButton();
         sideLookingButton = new JRadioButton();
         nsPanel = new JPanel();
-        goodiesFormsSeparator1 = compFactory.createSeparator("Nod (arcsec)");
-        scrollPane1 = new JScrollPane();
         offsetTable = new GmosOffsetPosTableWidget();
-        label13 = new JLabel();
         xOffset = new NumberBoxWidget();
-        label14 = new JLabel();
         yOffset = new NumberBoxWidget();
-        label15 = new JLabel();
         oiwfsBox = new DropDownListBoxWidget();
-        panel2 = new JPanel();
         electronicOffsetCheckBox = new JCheckBox();
         newButton = new JButton();
         removeButton = new JButton();
         removeAllButton = new JButton();
-        label16 = new JLabel();
         shuffleOffset = new NumberBoxWidget();
-        label18 = new JLabel();
         detectorRows = new NumberBoxWidget();
-        label17 = new JLabel();
         numNSCycles = new NumberBoxWidget();
-        totalTimeUnitsLabel = new JLabel();
         totalTime = new JTextField();
         warning2 = new JLabel();
         warning4 = new JLabel();
-        CellConstraints cc = new CellConstraints();
 
         //======== this ========
-        setLayout(new FormLayout(
-                ColumnSpec.decodeSpecs("max(min;50dlu):grow"),
-                new RowSpec[] {
-                        FormFactory.PARAGRAPH_GAP_ROWSPEC,
-                        FormFactory.LINE_GAP_ROWSPEC,
-                        FormFactory.DEFAULT_ROWSPEC,
-                        FormFactory.UNRELATED_GAP_ROWSPEC,
-                        new RowSpec(RowSpec.FILL, Sizes.DEFAULT, FormSpec.DEFAULT_GROW)
-                }));
+        setLayout(new GridBagLayout());
+        setBorder(PANEL_BORDER);
 
-        //======== panel3 ========
-        {
-            panel3.setLayout(new FormLayout(
-                    new ColumnSpec[] {
-                            new ColumnSpec(ColumnSpec.RIGHT, Sizes.DEFAULT, FormSpec.NO_GROW),
-                            FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-                            ColumnSpec.decode("max(pref;200dlu)"),  // originally 84, then 150
-                            FormFactory.UNRELATED_GAP_COLSPEC,
-                            ColumnSpec.decode("right:max(pref;70dlu)"), // originally 50
-                            FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-                            ColumnSpec.decode("max(pref;50dlu)"),
-                            FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-                            ColumnSpec.decode("max(pref;50dlu)")
-                    },
-                    new RowSpec[] {
-                            FormFactory.DEFAULT_ROWSPEC,
-                            FormFactory.LINE_GAP_ROWSPEC,
-                            FormFactory.DEFAULT_ROWSPEC,
-                            FormFactory.LINE_GAP_ROWSPEC,
-                            FormFactory.DEFAULT_ROWSPEC,
-                            FormFactory.LINE_GAP_ROWSPEC,
-                            FormFactory.DEFAULT_ROWSPEC,
-                            FormFactory.LINE_GAP_ROWSPEC,
-                            FormFactory.DEFAULT_ROWSPEC,
-                            FormFactory.UNRELATED_GAP_ROWSPEC,
-                            new RowSpec(RowSpec.TOP, Sizes.DEFAULT, FormSpec.NO_GROW),
-                            FormFactory.LINE_GAP_ROWSPEC,
-                            FormFactory.DEFAULT_ROWSPEC,
-                            FormFactory.LINE_GAP_ROWSPEC,
-                            FormFactory.DEFAULT_ROWSPEC,
-                            FormFactory.LINE_GAP_ROWSPEC,
-                            FormFactory.DEFAULT_ROWSPEC
-                    }));
+        // Column gaps.
+        add(new JPanel(), new GridBagConstraints() {{
+            gridx   = centerGapCol;
+            weightx = 1.0;
+            fill    = GridBagConstraints.HORIZONTAL;
+        }});
+        add(new JPanel(), new GridBagConstraints() {{
+            gridx = extraGapCol;
+            ipadx = 10;
+        }});
+        add(new JPanel(), new GridBagConstraints() {{
+            gridx   = rightGapCol;
+            weightx = 1.0;
+            fill    = GridBagConstraints.HORIZONTAL;
+        }});
 
-            //---- label1 ----
-            label1.setText("Filter");
-            panel3.add(label1, cc.xy(1, 1));
-            panel3.add(filterComboBox, cc.xy(3, 1));
+        // Filter
+        final int filterRow = 0;
+        add(new JLabel("Filter"), labelGbc(filterRow, leftLabelCol));
+        filterComboBox = new JComboBox();
+        add(filterComboBox, widgetGbc(filterRow, leftWidgetCol));
 
-            //---- label2 ----
-            label2.setText("Exposure Time (sec)");
-            panel3.add(label2, cc.xy(5, 1));
+        // Exposure time
+        final int exposureTimeRow = 0;
+        add(new JLabel("Exposure Time (sec)"), labelGbc(exposureTimeRow, rightLabelCol));
+        exposureTime = new TextBoxWidget();
+        exposureTime.setToolTipText("Enter the exposure time in seconds");
+        add(exposureTime, widgetGbc(exposureTimeRow, rightWidgetCol));
 
-            //---- exposureTime ----
-            exposureTime.setToolTipText("Enter the exposure time in seconds");
-            panel3.add(exposureTime, cc.xywh(7, 1, 1, 1, CellConstraints.DEFAULT, CellConstraints.FILL));
+        // Disperser
+        final int disperserRow = 1;
+        add(new JLabel("Disperser"), labelGbc(disperserRow, leftLabelCol));
+        disperserComboBox = new JComboBox();
+        add(disperserComboBox, widgetGbc(disperserRow, leftWidgetCol));
 
-            //---- label3 ----
-            label3.setText("Disperser");
-            panel3.add(label3, cc.xy(1, 3));
-            panel3.add(disperserComboBox, cc.xy(3, 3));
+        // Central wavelength
+        final int centralWavelengthRow = 1;
+        centralWavelengthLabel = new JLabel("Central Wavelength (nm)");
+        centralWavelengthLabel.setToolTipText("Grating Central Wavelength in nanometers");
+        add(centralWavelengthLabel, labelGbc(centralWavelengthRow, rightLabelCol));
+        centralWavelength = new TextBoxWidget();
+        centralWavelength.setToolTipText("Set the Grating Central Wavelength in Nanometers");
+        add(centralWavelength, widgetGbc(centralWavelengthRow, rightWidgetCol));
 
-            //---- centralWavelengthLabel ----
-            centralWavelengthLabel.setText("Central Wavelength (nm)");
-            centralWavelengthLabel.setToolTipText("Grating Central Wavelength in nanometers");
-            panel3.add(centralWavelengthLabel, cc.xy(5, 3));
+        // Order and MOS pre-imaging
+        final int orderMOSRow = 2;
+        orderLabel = new JLabel("Order");
+        add(orderLabel, labelGbc(orderMOSRow, leftLabelCol));
+        final JPanel orderMOSPanel = new JPanel(new GridBagLayout());
+        orderComboBox = new DropDownListBoxWidget();
+        orderMOSPanel.add(orderComboBox, new GridBagConstraints() {{
+            anchor = GridBagConstraints.WEST;
+            insets = WIDGET_INSETS;
+        }});
+        orderMOSPanel.add(new JPanel(), new GridBagConstraints() {{
+            gridx   = 1;
+            fill    = GridBagConstraints.HORIZONTAL;
+            weightx = 1.0;
+        }});
+        preImgCheckButton = new JCheckBox("MOS pre-imaging");
+        orderMOSPanel.add(preImgCheckButton, new GridBagConstraints() {{
+            gridx  = 2;
+            anchor = GridBagConstraints.EAST;
+            insets = WIDGET_INSETS;
+        }});
+        add(orderMOSPanel, new GridBagConstraints() {{
+            gridy     = orderMOSRow;
+            gridx     = leftWidgetCol;
+            anchor    = GridBagConstraints.WEST;
+            fill      = GridBagConstraints.HORIZONTAL;
+        }});
 
-            //---- centralWavelength ----
-            centralWavelength.setToolTipText("Set the Grating Central Wavelength in Nanometers");
-            panel3.add(centralWavelength, cc.xy(7, 3));
+        // Nod & Shuffle
+        final int nsRow = 2;
+        nsCheckButton = new JCheckBox("Use Nod & Shuffle");
+        final GridBagConstraints nsCheckButtonGbc = widgetGbc(nsRow, rightLabelCol);
+        nsCheckButtonGbc.gridwidth = 2;
+        add(nsCheckButton, nsCheckButtonGbc);
 
-            //---- orderLabel ----
-            orderLabel.setText("Order");
-            panel3.add(orderLabel, cc.xy(1, 5));
+        // CCD manufacturer
+        final int ccdRow = 3;
+        add(new JLabel("CCD manufacturer"), labelGbc(ccdRow, leftLabelCol));
+        detectorManufacturerComboBox = new JComboBox();
+        add(detectorManufacturerComboBox, widgetGbc(ccdRow, leftWidgetCol));
 
-            //======== panel1 ========
-            {
-                panel1.setLayout(new GridBagLayout());
-                ((GridBagLayout)panel1.getLayout()).columnWidths = new int[] {0, 0, 0};
-                ((GridBagLayout)panel1.getLayout()).rowHeights = new int[] {0, 0};
-                ((GridBagLayout)panel1.getLayout()).columnWeights = new double[] {0.0, 1.0, 1.0E-4};
-                ((GridBagLayout)panel1.getLayout()).rowWeights = new double[] {0.0, 1.0E-4};
-                panel1.add(orderComboBox, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                        new Insets(0, 0, 0, 5), 0, 0));
+        // Wavelength warning
+        final int nsWarningRow = 4;
+        warning1 = new JLabel("Warning");
+        warning1.setForeground(Color.red);
+        add(warning1, new GridBagConstraints() {{
+            gridy     = nsWarningRow;
+            gridx     = leftLabelCol;
+            gridwidth = 3;
+            anchor    = GridBagConstraints.WEST;
+            fill      = GridBagConstraints.HORIZONTAL;
+        }});
 
-                //---- preImgCheckButton ----
-                preImgCheckButton.setText("MOS pre-imaging");
-                panel1.add(preImgCheckButton, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.EAST, GridBagConstraints.VERTICAL,
-                        new Insets(0, 11, 0, 0), 0, 0));
-            }
-            panel3.add(panel1, cc.xy(3, 5));
+        // Position angle
+        final int posAngleRow = 5;
+        final JComponent posAngleSeparator = compFactory.createSeparator("Position Angle");
+        add(posAngleSeparator, separatorGbc(posAngleRow, leftLabelCol, 3));
 
-            //---- nsCheckButton ----
-            nsCheckButton.setText("Use Nod & Shuffle");
-            panel3.add(nsCheckButton, new CellConstraints(5, 5, 1, 1, CellConstraints.RIGHT, CellConstraints.DEFAULT, new Insets( 0, 11, 0, 0)));
+        posAnglePanel = PositionAnglePanel.apply(SPComponentType.INSTRUMENT_GMOS);
+        add(posAnglePanel.peer(), new GridBagConstraints() {{
+            gridy      = posAngleRow+1;
+            gridx      = leftLabelCol;
+            gridwidth  = 3;
+            gridheight = 2;
+            anchor     = GridBagConstraints.WEST;
+            fill       = GridBagConstraints.HORIZONTAL;
+            insets     = WIDGET_INSETS;
+        }});
 
-            //---- detectorManufacturerLabel ----
-            detectorManufacturerLabel.setText("CCD manufacturer");
-            panel3.add(detectorManufacturerLabel, cc.xy(1, 7));
-            panel3.add(detectorManufacturerComboBox, cc.xy(3, 7));
+        // Focal plane unit
+        final int fpuRow = 5;
+        final JComponent fpuSeparator = compFactory.createSeparator("Focal Plane Unit");
+        add(fpuSeparator, separatorGbc(fpuRow, rightLabelCol, 2));
 
-            //---- warning1 ----
-            warning1.setText("Warning");
-            warning1.setForeground(Color.red);
-            panel3.add(warning1, cc.xywh(1, 9, 7, 1));
+        focalPlaneBuiltInButton = new JRadioButton("Built-in");
+        add(focalPlaneBuiltInButton, widgetGbc(fpuRow+1, rightLabelCol));
 
+        builtinComboBox = new DropDownListBoxWidget();
+        add(builtinComboBox, widgetGbc(fpuRow+1, rightWidgetCol));
 
-            // ---- Position Angle ----
-            panel3.add(goodiesFormsSeparator4, cc.xywh(1, 11, 3, 1));
+        focalPlaneMaskButton = new JRadioButton("Custom Mask MDF");
+        add(focalPlaneMaskButton, widgetGbc(fpuRow+2, rightLabelCol));
+        focalPlaneMask = new TextBoxWidget();
+        focalPlaneMask.setToolTipText("Enter the name of the custom mask");
+        add(focalPlaneMask, widgetGbc(fpuRow+2, rightWidgetCol));
 
-            JPanel posAnglePanel = new JPanel(new GridBagLayout());
-            posAngle.setColumns(4);
-            posAngle.setToolTipText("Set the position angle in degrees east of north");
-            posAnglePanel.add(posAngle, new GridBagConstraints() {{
-                gridx      = 0;
-                gridy      = 0;
-                weightx    = 1.0;
-                fill       = HORIZONTAL;
-                insets     = new Insets(0, 11, 0, 0); // 10, 11
-                anchor     = WEST;
-            }});
+        focalPlaneMaskPlotButton = new JButton("Plot...");
+        focalPlaneMaskPlotButton.setToolTipText("Plot a custom mask file in the position editor (FITS format)");
+        final GridBagConstraints focalPlaneMaskPlotButtonGbc = widgetGbc(fpuRow+2, rightGapCol);
+        focalPlaneMaskPlotButtonGbc.fill = GridBagConstraints.NONE;
+        add(focalPlaneMaskPlotButton, focalPlaneMaskPlotButtonGbc);
 
-            label4.setText("deg E of N");
-            label4.setLabelFor(posAngle);
-            posAnglePanel.add(label4, new GridBagConstraints() {{
-                gridx      = 1;
-                gridy      = 0;
-                //weightx    = 1.0;
-                insets     = new Insets(0, 5, 0, 0); // 10, 5
-                anchor     = WEST;
-                //fill       = HORIZONTAL;
-            }});
-            posAngle180.setText("Allow 180\u00ba change for guide star search");
-            posAngle180.setToolTipText("Allow guide star search to adjust pos angle \u00b1180\u00ba");
-            posAnglePanel.add(posAngle180, new GridBagConstraints() {{
-                gridx = 2;
-                gridy = 0;
-                insets = new Insets(0, 20, 0, 0);
-                anchor = EAST;
-            }});
-            panel3.add(posAnglePanel, cc.xywh(1, 13, 3, 1));
-
-            // Create the parallactic angle panel and an empty panel underneath to absorb all vertical space.
-            parallacticAnglePanel = new ParallacticAnglePanel();
-            panel3.add(parallacticAnglePanel, new CellConstraints(1, 15, 3, 3, CellConstraints.LEFT, CellConstraints.DEFAULT, new Insets( 0, 11, 0, 0)));
-
-
-            // ---- Focal Plane Unit ----
-            panel3.add(goodiesFormsSeparator5, cc.xywh(5, 11, 3, 1));
-
-            //---- focalPlaneBuiltInButton ----
-            focalPlaneBuiltInButton.setText("Built-in");
-            panel3.add(focalPlaneBuiltInButton, new CellConstraints(5, 13, 1, 1, CellConstraints.LEFT, CellConstraints.DEFAULT, new Insets( 0, 11, 0, 0)));
-            //panel3.add(focalPlaneBuiltInButton, cc.xy(5, 13));
-            panel3.add(builtinComboBox, cc.xy(7, 13));
-
-            //---- focalPlaneMaskButton ----
-            focalPlaneMaskButton.setText("Custom Mask MDF");
-            panel3.add(focalPlaneMaskButton, new CellConstraints(5, 15, 1, 1, CellConstraints.LEFT, CellConstraints.DEFAULT, new Insets( 0, 11, 0, 0)));
-            //panel3.add(focalPlaneMaskButton, cc.xy(5, 15));
-
-            //---- focalPlaneMask ----
-            focalPlaneMask.setToolTipText("Enter the name of the custom mask");
-            panel3.add(focalPlaneMask, cc.xy(7, 15));
-
-            //---- focalPlaneMaskPlotButton ----
-            focalPlaneMaskPlotButton.setText("Plot...");
-            focalPlaneMaskPlotButton.setToolTipText("Plot a custom mask file in the position editor (FITS format)");
-            panel3.add(focalPlaneMaskPlotButton, new CellConstraints(9, 15, 1, 1, CellConstraints.LEFT, CellConstraints.DEFAULT, new Insets( 0, 11, 0, 0)));
-
-            //---- label4 ----
-            JLabel slitWidthLabel = new JLabel("Slit Width");
-            panel3.add(slitWidthLabel, new CellConstraints(5, 17, 1, 1, CellConstraints.LEFT, CellConstraints.DEFAULT, new Insets( 0, 35, 0, 0)));
-            panel3.add(customSlitWidthComboBox, cc.xy(7, 17));
-        }
-        add(panel3, cc.xy(1, 3));
-
+        final JLabel slitWidthLabel = new JLabel("Slit Width");
+        add(slitWidthLabel, new GridBagConstraints() {{
+            gridy  = fpuRow+3;
+            gridx  = rightLabelCol;
+            anchor = GridBagConstraints.WEST;
+            insets = new Insets(0, 35, 0, 0);
+        }});
+        customSlitWidthComboBox = new DropDownListBoxWidget();
+        add(customSlitWidthComboBox, widgetGbc(fpuRow+3, rightWidgetCol));
 
         //======== tabbedPane ========
         {
+            CellConstraints cc = new CellConstraints();
+
             tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 
             //======== panel6 ========
             {
-                panel6.setLayout(new FormLayout(
+                final JPanel panel6 = new JPanel(new FormLayout(
                         new ColumnSpec[] {
                                 FormFactory.RELATED_GAP_COLSPEC,
                                 FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
@@ -356,7 +318,7 @@ public class GmosForm extends JPanel {
 
                 //======== panel12 ========
                 {
-                    panel12.setLayout(new FormLayout(
+                    final JPanel panel12 = new JPanel(new FormLayout(
                             new ColumnSpec[] {
                                     FormFactory.DEFAULT_COLSPEC,
                                     FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
@@ -371,21 +333,23 @@ public class GmosForm extends JPanel {
                             RowSpec.decodeSpecs("default")));
 
                     //---- label10 ----
-                    label10.setText("X Binning");
+                    final JLabel label10 = new JLabel("X Binning");
                     panel12.add(label10, cc.xy(1, 1));
                     panel12.add(xBinComboBox, cc.xy(3, 1));
 
                     //---- label11 ----
-                    label11.setText("Y Binning");
+                    final JLabel label11 = new JLabel("Y Binning");
                     panel12.add(label11, cc.xy(5, 1));
                     panel12.add(yBinComboBox, cc.xy(7, 1));
+                    panel6.add(panel12, cc.xywh(3, 3, 3, 1));
                 }
-                panel6.add(panel12, cc.xywh(3, 3, 3, 1));
-                panel6.add(goodiesFormsSeparator3, cc.xywh(3, 5, 3, 1));
+
+                final JComponent ccdReadoutSeparator = compFactory.createSeparator("Set the CCD Readout Characteristics");
+                panel6.add(ccdReadoutSeparator, cc.xywh(3, 5, 3, 1));
 
                 //======== panel7 ========
                 {
-                    panel7.setLayout(new FormLayout(
+                    final JPanel panel7 = new JPanel(new FormLayout(
                             new ColumnSpec[] {
                                     new ColumnSpec(ColumnSpec.FILL, Sizes.DEFAULT, 0.1),
                                     new ColumnSpec(ColumnSpec.LEFT, Sizes.DLUX11, FormSpec.NO_GROW),
@@ -432,12 +396,12 @@ public class GmosForm extends JPanel {
                     //---- ccdSlowHighButton ----
                     ccdSlowHighButton.setText("Slow Read/High Gain : Engineering Only");
                     panel7.add(ccdSlowHighButton, cc.xy(1, 7));
+                    panel6.add(panel7, cc.xy(5, 7));
                 }
-                panel6.add(panel7, cc.xy(5, 7));
 
                 //======== panel11 ========
                 {
-                    panel11.setLayout(new FormLayout(
+                    final JPanel panel11 = new JPanel(new FormLayout(
                             new ColumnSpec[] {
                                     FormFactory.DEFAULT_COLSPEC,
                                     FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
@@ -453,7 +417,7 @@ public class GmosForm extends JPanel {
                             }));
 
                     //---- label12 ----
-                    label12.setText("Resulting CCD Gain:");
+                    final JLabel label12 = new JLabel("Resulting CCD Gain:");
                     panel11.add(label12, cc.xy(1, 1));
 
                     //---- ccdGainLabel ----
@@ -461,7 +425,7 @@ public class GmosForm extends JPanel {
                     panel11.add(ccdGainLabel, cc.xy(4, 1));
 
                     //---- meanReadNoiseLabelLabel ----
-                    meanReadNoiseLabelLabel.setText("Mean read noise:");
+                    final JLabel meanReadNoiseLabelLabel = new JLabel("Mean read noise:");
                     panel11.add(meanReadNoiseLabelLabel, cc.xy(1, 3));
 
                     //---- meanReadNoiseLabel ----
@@ -473,19 +437,18 @@ public class GmosForm extends JPanel {
                     panel11.add(ampCountLabel, cc.xy(4, 5));
 
                     //---- ampCountLabelLabel ----
-                    ampCountLabelLabel.setText("Number of amps:");
-                    panel11.add(ampCountLabelLabel, cc.xy(1, 5));
+                    final JLabel ampCountLabel = new JLabel("Number of amps:");
+                    panel11.add(ampCountLabel, cc.xy(1, 5));
+                    panel6.add(panel11, cc.xywh(3, 9, 3, 1));
                 }
-                panel6.add(panel11, cc.xywh(3, 9, 3, 1));
                 warning4.setForeground(Color.red);
                 panel6.add(warning4, cc.xywh(3,11,3,1));
+                tabbedPane.addTab("CCD Readout", panel6);
             }
-            tabbedPane.addTab("CCD Readout", panel6);
-
 
             //======== panel14 ========
             {
-                panel14.setLayout(new FormLayout(
+                final JPanel panel14 = new JPanel(new FormLayout(
                         new ColumnSpec[] {
                                 FormFactory.UNRELATED_GAP_COLSPEC,
                                 FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
@@ -530,7 +493,7 @@ public class GmosForm extends JPanel {
                 panel14.add(transNoFollowButton, cc.xywh(3, 9, 3, 1));
 
                 //---- label8 ----
-                label8.setText("Detector translation assembly (DTA-X) offset:");
+                final JLabel label8 = new JLabel("Detector translation assembly (DTA-X) offset:");
                 panel14.add(label8, cc.xy(3, 11));
 
                 //---- transDtaSpinner ----
@@ -541,13 +504,13 @@ public class GmosForm extends JPanel {
                 warning3.setText("Warning");
                 warning3.setForeground(Color.red);
                 panel14.add(warning3, cc.xywh(3, 13, 5, 1));
+                tabbedPane.addTab("Translation Stage", panel14);
             }
-            tabbedPane.addTab("Translation Stage", panel14);
 
 
             //======== panel15 ========
             {
-                panel15.setLayout(new FormLayout(
+                final JPanel panel15 = new JPanel(new FormLayout(
                         new ColumnSpec[] {
                                 FormFactory.UNRELATED_GAP_COLSPEC,
                                 FormFactory.DEFAULT_COLSPEC,
@@ -593,7 +556,7 @@ public class GmosForm extends JPanel {
                 customButton.setText("Custom ROI");
                 panel15.add(customButton, cc.xy(2, 11));
 
-                customROIPanel.setLayout(new FormLayout(
+                final JPanel customROIPanel = new JPanel(new FormLayout(
                         new ColumnSpec[] {
                                 ColumnSpec.decode("max(min;40dlu):grow"),
                                 ColumnSpec.decode("max(min;40dlu):grow"),
@@ -653,21 +616,19 @@ public class GmosForm extends JPanel {
                 //---- customROIRemoveAllButton ----
                 customROIRemoveAllButton.setText("Remove All");
                 customROIPanel.add(customROIRemoveAllButton, cc.xy(4, 12));
-                //======== scrollPane1 ========
-                {
-                    scrollPaneROI.setViewportView(customROITable);
-                }
+
+                final JScrollPane scrollPaneROI = new JScrollPane();
+                scrollPaneROI.setViewportView(customROITable);
                 customROIPanel.setBorder(BorderFactory.createTitledBorder("Custom ROIs"));
                 customROIPanel.add(scrollPaneROI, cc.xywh(1, 1, 4, 5));
 
                 panel15.add(customROIPanel,cc.xywh(4,3,1,11));
+                tabbedPane.addTab("Regions of Interest", panel15);
             }
-            tabbedPane.addTab("Regions of Interest", panel15);
-
 
             //======== panel16 ========
             {
-                panel16.setLayout(new FormLayout(
+                final JPanel panel16 = new JPanel(new FormLayout(
                         new ColumnSpec[] {
                                 FormFactory.UNRELATED_GAP_COLSPEC,
                                 FormFactory.DEFAULT_COLSPEC
@@ -689,9 +650,8 @@ public class GmosForm extends JPanel {
                 //---- sideLookingButton ----
                 sideLookingButton.setText("Side-looking");
                 panel16.add(sideLookingButton, cc.xy(2, 5));
+                tabbedPane.addTab("ISS Port", panel16);
             }
-            tabbedPane.addTab("ISS Port", panel16);
-
 
             //======== nsPanel ========
             {
@@ -732,16 +692,17 @@ public class GmosForm extends JPanel {
                                 FormFactory.LINE_GAP_ROWSPEC,
                                 FormFactory.DEFAULT_ROWSPEC
                         }));
-                nsPanel.add(goodiesFormsSeparator1, cc.xywh(3, 3, 9, 1));
+
+                final JComponent nodSeparator = compFactory.createSeparator("Nod (arcsec)");
+                nsPanel.add(nodSeparator, cc.xywh(3, 3, 9, 1));
 
                 //======== scrollPane1 ========
-                {
-                    scrollPane1.setViewportView(offsetTable);
-                }
+                final JScrollPane scrollPane1 = new JScrollPane();
+                scrollPane1.setViewportView(offsetTable);
                 nsPanel.add(scrollPane1, cc.xywh(7, 5, 5, 5));
 
                 //---- label13 ----
-                label13.setText("p");
+                final JLabel label13 = new JLabel("p");
                 nsPanel.add(label13, cc.xy(3, 5));
 
                 //---- xOffset ----
@@ -749,7 +710,7 @@ public class GmosForm extends JPanel {
                 nsPanel.add(xOffset, cc.xywh(5, 5, 1, 1, CellConstraints.FILL, CellConstraints.DEFAULT));
 
                 //---- label14 ----
-                label14.setText("q");
+                final JLabel label14 = new JLabel("q");
                 nsPanel.add(label14, cc.xy(3, 7));
 
                 //---- yOffset ----
@@ -757,7 +718,7 @@ public class GmosForm extends JPanel {
                 nsPanel.add(yOffset, cc.xywh(5, 7, 1, 1, CellConstraints.FILL, CellConstraints.DEFAULT));
 
                 //---- label15 ----
-                label15.setText("OIWFS");
+                final JLabel label15 = new JLabel("OIWFS");
                 nsPanel.add(label15, cc.xy(3, 9));
 
                 //---- oiwfsBox ----
@@ -766,7 +727,7 @@ public class GmosForm extends JPanel {
 
                 //======== panel2 ========
                 {
-                    panel2.setLayout(new FormLayout(
+                    final JPanel panel2 = new JPanel(new FormLayout(
                             new ColumnSpec[] {
                                     new ColumnSpec(ColumnSpec.FILL, Sizes.PREFERRED, FormSpec.DEFAULT_GROW),
                                     FormFactory.GLUE_COLSPEC,
@@ -797,11 +758,11 @@ public class GmosForm extends JPanel {
                     removeAllButton.setText("Remove All");
                     removeAllButton.setToolTipText("Remove all nod offset positions");
                     panel2.add(removeAllButton, cc.xy(7, 1));
+                    nsPanel.add(panel2, cc.xywh(1, 11, 11, 1));
                 }
-                nsPanel.add(panel2, cc.xywh(1, 11, 11, 1));
 
                 //---- label16 ----
-                label16.setText("Offset (arcsec)");
+                final JLabel label16 = new JLabel("Offset (arcsec)");
                 nsPanel.add(label16, cc.xywh(3, 13, 3, 1, CellConstraints.RIGHT, CellConstraints.DEFAULT));
 
                 //---- shuffleOffset ----
@@ -809,7 +770,7 @@ public class GmosForm extends JPanel {
                 nsPanel.add(shuffleOffset, cc.xy(7, 13));
 
                 //---- label18 ----
-                label18.setText("Offset (detector rows)");
+                final JLabel label18 = new JLabel("Offset (detector rows)");
                 nsPanel.add(label18, cc.xy(9, 13));
 
                 //---- detectorRows ----
@@ -817,7 +778,7 @@ public class GmosForm extends JPanel {
                 nsPanel.add(detectorRows, cc.xy(11, 13));
 
                 //---- label17 ----
-                label17.setText("Number of N&S Cycles");
+                final JLabel label17 = new JLabel("Number of N&S Cycles");
                 nsPanel.add(label17, cc.xywh(3, 15, 3, 1, CellConstraints.RIGHT, CellConstraints.DEFAULT));
 
                 //---- numNSCycles ----
@@ -825,7 +786,7 @@ public class GmosForm extends JPanel {
                 nsPanel.add(numNSCycles, cc.xy(7, 15));
 
                 //---- totalTimeUnitsLabel ----
-                totalTimeUnitsLabel.setText("Total Observe Time (sec)");
+                final JLabel totalTimeUnitsLabel = new JLabel("Total Observe Time (sec)");
                 nsPanel.add(totalTimeUnitsLabel, cc.xy(9, 15));
 
                 //---- totalTime ----
@@ -839,9 +800,18 @@ public class GmosForm extends JPanel {
                 nsPanel.add(warning2, cc.xywh(3, 17, 9, 1));
             }
             tabbedPane.addTab("Nod & Shuffle", nsPanel);
-
         }
-        add(tabbedPane, cc.xy(1, 5));
+
+        final int tabbedPaneRow = 9;
+        add(tabbedPane, new GridBagConstraints() {{
+            gridx     = 0;
+            gridy     = tabbedPaneRow;
+            gridwidth = rightGapCol+1;
+            anchor    = GridBagConstraints.NORTHWEST;
+            fill      = GridBagConstraints.BOTH;
+            weightx   = 1.0;
+            weighty   = 1.0;
+        }});
 
         //---- fpuGroup ----
         ButtonGroup fpuGroup = new ButtonGroup();
@@ -885,43 +855,26 @@ public class GmosForm extends JPanel {
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     // Generated using JFormDesigner non-commercial license
-    private JPanel panel3;
-    private JLabel label1;
     JComboBox filterComboBox;
-    private JLabel label2;
     TextBoxWidget exposureTime;
-    private JLabel label3;
     JComboBox disperserComboBox;
     JLabel centralWavelengthLabel;
     TextBoxWidget centralWavelength;
     JLabel orderLabel;
-    private JPanel panel1;
     DropDownListBoxWidget orderComboBox;
     JCheckBox preImgCheckButton;
     JCheckBox nsCheckButton;
-    private JLabel detectorManufacturerLabel;
     protected JComboBox detectorManufacturerComboBox;
     JLabel warning1;
-    private JComponent goodiesFormsSeparator4;
-    NumberBoxWidget posAngle;
-    JCheckBox posAngle180;
-    private JComponent goodiesFormsSeparator5;
     JRadioButton focalPlaneBuiltInButton;
     DropDownListBoxWidget builtinComboBox;
     JRadioButton focalPlaneMaskButton;
     TextBoxWidget focalPlaneMask;
     JButton focalPlaneMaskPlotButton;
-    private JLabel label4;
     DropDownListBoxWidget customSlitWidthComboBox;
     JTabbedPane tabbedPane;
-    private JPanel panel6;
-    private JPanel panel12;
-    private JLabel label10;
     DropDownListBoxWidget xBinComboBox;
-    private JLabel label11;
     DropDownListBoxWidget yBinComboBox;
-    private JComponent goodiesFormsSeparator3;
-    private JPanel panel7;
     JRadioButton ccdSlowLowButton;
     JRadioButton ccd3AmpButton;
     JRadioButton ccdFastLowButton;
@@ -929,30 +882,21 @@ public class GmosForm extends JPanel {
     JRadioButton ccd12AmpButton;
     JRadioButton ccdFastHighButton;
     JRadioButton ccdSlowHighButton;
-    private JPanel panel11;
-    private JLabel label12;
     JLabel ccdGainLabel;
-    private JLabel meanReadNoiseLabelLabel;
     JLabel meanReadNoiseLabel;
     JLabel ampCountLabel;
-    private JLabel ampCountLabelLabel;
-    private JPanel panel14;
     JRadioButton transFollowXYButton;
     JRadioButton transFollowXYZButton;
     JRadioButton transFollowZButton;
     JRadioButton transNoFollowButton;
-    private JLabel label8;
     JSpinner transDtaSpinner;
     JLabel warning3;
-    private JPanel panel15;
     JRadioButton noROIButton;
     JRadioButton ccd2Button;
     JRadioButton centralSpectrumButton;
     JRadioButton centralStampButton;
     JRadioButton customButton;
     JLabel warningCustomROI;
-    private JPanel customROIPanel;
-    private JScrollPane scrollPaneROI;
     GmosCustomROITableWidget customROITable;
     NumberBoxWidget xMin;
     NumberBoxWidget yMin;
@@ -962,37 +906,23 @@ public class GmosForm extends JPanel {
     JButton customROIPasteButton;
     JButton customROIRemoveButton;
     JButton customROIRemoveAllButton;
-    private JPanel panel16;
     JRadioButton upLookingButton;
     JRadioButton sideLookingButton;
     JPanel nsPanel;
-    private JComponent goodiesFormsSeparator1;
-    private JScrollPane scrollPane1;
     GmosOffsetPosTableWidget offsetTable;
-    private JLabel label13;
     NumberBoxWidget xOffset;
-    private JLabel label14;
     NumberBoxWidget yOffset;
-    private JLabel label15;
     DropDownListBoxWidget oiwfsBox;
-    private JPanel panel2;
     JCheckBox electronicOffsetCheckBox;
     JButton newButton;
     JButton removeButton;
     JButton removeAllButton;
-    private JLabel label16;
     NumberBoxWidget shuffleOffset;
-    private JLabel label18;
     NumberBoxWidget detectorRows;
-    private JLabel label17;
     NumberBoxWidget numNSCycles;
-    private JLabel totalTimeUnitsLabel;
     JTextField totalTime;
     JLabel warning2;
-    // JFormDesigner - End of variables declaration  //GEN-END:variables
     JLabel warning4;
-    JLabel readNoiseLabelLabel;
-    JLabel readNoiseLabel;
 
-    ParallacticAnglePanel parallacticAnglePanel;
+    PositionAnglePanel<T, EdCompInstGMOS<T> > posAnglePanel;
 }

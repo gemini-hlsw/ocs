@@ -13,18 +13,8 @@ package edu.gemini.spModel.target;
  */
 public interface TelescopePosWatcher {
 
-    /**
-     * The location of the position has changed.
-     * @param tp
-     */
-    public void telescopePosLocationUpdate(WatchablePos tp);
+    public void telescopePosUpdate(WatchablePos tp);
 
-    /**
-     * Some other sort of change has been made, for instance its tag
-     * may have been updated.
-     * @param tp
-     */
-    public void telescopePosGenericUpdate(WatchablePos tp);
 }
 
 

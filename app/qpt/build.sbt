@@ -12,7 +12,7 @@ ocsAppManifest := {
   val v = ocsVersion.value.toBundleVersion
   Application(
     id = "qpt",
-    name = "Queue Planning Tool",
+    name = "QPT",
     version = ocsVersion.value.toString,
     configs = List(
       common(v),
@@ -24,7 +24,8 @@ ocsAppManifest := {
         with_production_dbs(v),
           mac(v),
           linux64(v),
-          windows(v)
+          windows(v),
+          rpm64(v)
       )
     )
 }
@@ -54,11 +55,12 @@ def common(version: Version) = AppConfig(
     BundleSpec("edu.gemini.spModel.smartgcal", version),
     BundleSpec("org.scala-lang.scala-actors",  Version(2, 10, 1)),
     BundleSpec("org.scala-lang.scala-reflect", Version(2, 10, 1)),
-    BundleSpec("org.scala-lang.scala-swing",   Version(2, 10, 1)),
+    BundleSpec("org.scala-lang.scala-swing",   Version(2, 0, 0)),
     BundleSpec("slf4j.api",                    Version(1, 6, 4)),
     BundleSpec("slf4j.jdk14",                  Version(1, 6, 4)),
     BundleSpec("org.apache.commons.logging",   Version(1, 1, 0))
-  )
+  ),
+  spec = Some(file("app/qpt/dist/RPM64/qpt.spec.template"))
 ) extending List(common_credentials(version))
 
 // WITH-TEST-DBS
@@ -83,6 +85,7 @@ def with_production_dbs(version: Version) = AppConfig(
 def mac_test(version: Version) = AppConfig(
   id = "mac-test",
   distribution = List(MacOS),
+  icon = Some(file("app/qpt/dist/MacOS/QPT.icns")),
   log = Some("%h/Library/Logs/edu.gemini.qpt/qpt.%u.%g.log")
 ) extending List(with_test_dbs(version))
 
@@ -90,6 +93,7 @@ def mac_test(version: Version) = AppConfig(
 def mac(version: Version) = AppConfig(
   id = "mac",
   distribution = List(MacOS),
+  icon = Some(file("app/qpt/dist/MacOS/QPT.icns")),
   log = Some("%h/Library/Logs/edu.gemini.qpt/qpt.%u.%g.log")
 ) extending List(with_production_dbs(version))
 
@@ -105,16 +109,25 @@ def linux64(version: Version) = AppConfig(
   distribution = List(Linux64)
 ) extending List(with_production_dbs(version))
 
+// RPM64
+def rpm64(version: Version) = AppConfig(
+  id = "rpm64",
+  distribution = List(RPM64),
+  spec = Some(file("app/qpt/dist/RPM64/qpt.spec.template"))
+) extending List(linux64(version))
+
 // WINDOWS-TEST
 def windows_test(version: Version) = AppConfig(
   id = "windows-test",
-  distribution = List(Windows)
+  distribution = List(Windows),
+  icon = Some(file("app/qpt/dist/Windows/QPT.ico"))
 ) extending List(with_test_dbs(version))
 
 // WINDOWS
 def windows(version: Version) = AppConfig(
   id = "windows",
-  distribution = List(Windows)
+  distribution = List(Windows),
+  icon = Some(file("app/qpt/dist/Windows/QPT.ico"))
 ) extending List(with_production_dbs(version))
 
 // DEVELOPMENT

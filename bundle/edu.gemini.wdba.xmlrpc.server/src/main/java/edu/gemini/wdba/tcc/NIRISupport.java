@@ -1,10 +1,12 @@
 package edu.gemini.wdba.tcc;
 
+import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.niri.InstNIRI;
 import edu.gemini.spModel.gemini.niri.Niri;
 import edu.gemini.spModel.gemini.niri.NiriOiwfsGuideProbe;
 
 import edu.gemini.spModel.gemini.niri.Niri.Camera;
+import edu.gemini.wdba.session.Mode;
 import edu.gemini.wdba.tcc.ObservationEnvironment.AoAspect;
 
 import java.util.Collections;
@@ -135,6 +137,9 @@ public class NIRISupport implements ITccInstrumentSupport {
         private final Camera camera;
         private final AoAspect ao;
 
+        /**
+         * If mode is null, assume all modes should match. Otherwise, must match on a specific mode.
+         */
         PointOrigKey(Camera camera, AoAspect ao) {
             this.camera = camera;
             this.ao     = ao;
@@ -146,7 +151,6 @@ public class NIRISupport implements ITccInstrumentSupport {
             if (o == null || getClass() != o.getClass()) return false;
 
             PointOrigKey that = (PointOrigKey) o;
-
             if (ao != that.ao) return false;
             if (camera != that.camera) return false;
 
@@ -155,8 +159,8 @@ public class NIRISupport implements ITccInstrumentSupport {
 
         @Override
         public int hashCode() {
-            int result = camera.hashCode();
-            result = 31 * result + ao.hashCode();
+            int result = camera != null ? camera.hashCode() : 0;
+            result = 31 * result + (ao != null ? ao.hashCode() : 0);
             return result;
         }
     }
@@ -181,8 +185,10 @@ public class NIRISupport implements ITccInstrumentSupport {
         m.put(new PointOrigKey(c, ao), val);
     }
 
-    private static String lookupPointOrig(Camera c, AoAspect ao) {
+    private static String lookupPointOrig(Camera c, AoAspect ao, AltairParams.Mode mode) {
         String val = POINT_ORIG_MAP.get(new PointOrigKey(c, ao));
+        if (val != null && AltairParams.Mode.LGS_P1.equals(mode))
+            val += "_p1";
         return val == null ? "unknown" : val;
     }
 
@@ -192,10 +198,11 @@ public class NIRISupport implements ITccInstrumentSupport {
      * @return String that is the name of a TCC config file.  See WDBA-5.
      */
     public String getTccConfigInstrumentOrigin() {
-        InstNIRI inst = (InstNIRI) _oe.getInstrument();
-        Camera   c    = inst.getCamera();
-        AoAspect ao   = _oe.getAoAspect();
-        return lookupPointOrig(c, ao);
+        InstNIRI inst          = (InstNIRI) _oe.getInstrument();
+        Camera   c             = inst.getCamera();
+        AoAspect ao            = _oe.getAoAspect();
+        AltairParams.Mode mode = _oe.getAltairConfig() == null ? null : _oe.getAltairConfig().getMode();
+        return lookupPointOrig(c, ao, mode);
     }
 
     /**

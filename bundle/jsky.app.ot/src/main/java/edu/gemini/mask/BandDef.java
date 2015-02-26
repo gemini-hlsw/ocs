@@ -336,7 +336,7 @@ public class BandDef {
          double height = getBandSize();
          int iHt = _imageHeight * _binning;
          double maxY = iHt - height - shuffPx - (EXTRABANDSEP / 2);
-         List bands = new ArrayList();
+         List<Band> bands = new ArrayList<>();
          double yStart = shuffPx + (EXTRABANDSEP / 2) + yOffset;
          double yInc = shuffPx + height + EXTRABANDSEP;
 
@@ -389,7 +389,7 @@ public class BandDef {
 
             // restore the bands array
             int i = 0;
-            ArrayList bandList = new ArrayList();
+            List<Band> bandList = new ArrayList<>();
             do {
                 String key = "BAND" + ++i + "Y";
                 if (!header.containsKey(key)) {

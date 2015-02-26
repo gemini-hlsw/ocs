@@ -7,15 +7,14 @@
 
 package jsky.app.ot.viewer;
 
+import edu.gemini.ags.api.AgsMagnitude;
 import edu.gemini.p2checker.api.IP2Problems;
 import edu.gemini.p2checker.api.Problem;
 import edu.gemini.pot.sp.*;
 import edu.gemini.pot.spdb.IDBDatabaseService;
 import edu.gemini.sp.vcs.reg.VcsRegistrar;
-import edu.gemini.spModel.core.Peer;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.data.ISPDataObject;
-import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.obs.ObsPhase2Status;
 import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
@@ -60,7 +59,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.security.Principal;
 import java.util.*;
 import java.util.List;
 import java.util.logging.Level;
@@ -74,16 +72,16 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
     private static final Logger LOG = Logger.getLogger(SPViewer.class.getName());
 
     // List of SPViewer instances
-    private static final LinkedList<SPViewer> _orderedInstances = new LinkedList<SPViewer>();
+    private static final LinkedList<SPViewer> _orderedInstances = new LinkedList<>();
 
     // Hmm
     private final SPEventManager _eventManager;
 
     // Reference to the current item editor
-    private OtItemEditor _currentEditor;
+    private OtItemEditor<ISPNode, ISPDataObject> _currentEditor;
 
     // Used to cache item editor windows for a given class
-    private final Hashtable<Class, OtItemEditor> _editorTable = new Hashtable<Class, OtItemEditor>();
+    private final Hashtable<Class<?>, OtItemEditor<ISPNode, ISPDataObject>> _editorTable = new Hashtable<>();
 
     // Listens for changes in the editable state (from the OT)
     private final OT.EditableStateListener _editableStateListener;
@@ -115,9 +113,14 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
         }
     };
 
+    private final Map<SPNodeKey, SPTree.StateSnapshot> treeSnapshots = new HashMap<>();
+
     public static List<SPViewer> instances() {
-        return new ArrayList<SPViewer>(_orderedInstances);
+        return new ArrayList<>(_orderedInstances);
     }
+
+    // Zipper for our history
+    private  History _history;
 
     /** Constructor, called by ViewerManager */
     SPViewer(final IDBDatabaseService db) {
@@ -230,7 +233,6 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
                 _showEditor();
                 _updateListeners();
                 OT.updateEditableState(getRoot());
-
             } catch (Exception e) {
                 DialogUtil.error(e);
             }
@@ -370,7 +372,11 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
 
     // True if choices contains status.
     private  boolean _checkObservationStatus(final ObsPhase2Status[] choices, final ObsPhase2Status status) {
-        for (final ObsPhase2Status cur : choices) if (cur == status) return true;
+        for (final ObsPhase2Status cur : choices) {
+            if (cur == status) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -395,6 +401,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
     }
 
     /** Display the item editor for the currently selected node. */
+    @SuppressWarnings("unchecked")
     private void _showEditor()
             throws ClassNotFoundException,
             InstantiationException,
@@ -413,7 +420,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
         final UIInfo uiInfo = viewable.getUIInfo();
         final String className = uiInfo.getUIClassName();
 
-        final Class c = Class.forName(className);
+        final Class<OtItemEditor<ISPNode, ISPDataObject>> c = (Class<OtItemEditor<ISPNode, ISPDataObject>>)Class.forName(className);
         _currentEditor = _getEditor(c);
 
         // Show the engineering component for this editor (if any)
@@ -448,13 +455,15 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
     }
 
     /** Return an editor window for the given class, creating one if necessary */
-    private OtItemEditor _getEditor(final Class c) throws InstantiationException, IllegalAccessException {
-        OtItemEditor ed = _editorTable.get(c);
+    private OtItemEditor<ISPNode, ISPDataObject> _getEditor(final Class<OtItemEditor<ISPNode, ISPDataObject>> c) throws InstantiationException, IllegalAccessException {
+        final OtItemEditor<ISPNode, ISPDataObject> ed = _editorTable.get(c);
         if (ed == null) {
-            ed = (OtItemEditor) c.newInstance();
-            _editorTable.put(c, ed);
+            final OtItemEditor<ISPNode, ISPDataObject> newEditor = c.newInstance();
+            _editorTable.put(c, newEditor);
+            return newEditor;
+        } else {
+            return ed;
         }
-        return ed;
     }
 
     /** Called from notify() whenever a node's data object is modified */
@@ -507,7 +516,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
     }
 
     /** Called from notify() whenever the SP tree structure is modified */
-    private void _treeStructureChanged(final PropagationId propId, final ISPNode modifiedNode, final List oldValue, final List newValue) {
+    private void _treeStructureChanged(final PropagationId propId, final ISPNode modifiedNode, final List<Object> oldValue, final List<Object> newValue) {
 
         BusyWin.showBusy();
 
@@ -518,27 +527,25 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
         final int oldSize = oldValue.size();
         final int newSize = newValue.size();
         // find out which nodes were added or removed
-        final List changedList;
+        final List<Object> changedList;
         boolean added = false;
         boolean moved = false;
         if (newSize > oldSize) {
             // nodes were added
-            changedList = (List) ((ArrayList) newValue).clone();
+            changedList = new ArrayList<>(newValue);
             changedList.removeAll(oldValue);
             added = true;
         } else if (newSize < oldSize) {
             // nodes were removed
-            changedList = (List) ((ArrayList) oldValue).clone();
+            changedList = new ArrayList<>(oldValue);
             changedList.removeAll(newValue);
         } else {
             // nodes were rearranged
-            changedList = (List) ((ArrayList) newValue).clone();
+            changedList = new ArrayList<>(newValue);
             moved = true;
         }
 
-        if (moved) {
-            // do nothing.. ?
-        } else {
+        if (!moved) {
             final boolean expandAndSelect = (changedList.size() == 1);
             for (final Object aChangedList : changedList) {
                 final ISPNode node = (ISPNode) aChangedList;
@@ -550,7 +557,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
                     if (OTOptions.isCheckingEngineEnabled() && (treeNode != null) && (node instanceof ISPProgramNode)) {
                         final NodeData viewable = (NodeData) treeNode.getUserObject();
                         if ((viewable != null) && !viewable.isCheckedForProblems()) {
-                            P2CheckerCowboy.INSTANCE.check(node, getTree());
+                            P2CheckerCowboy.INSTANCE.check(node, getTree(), OT.getMagnitudeTable());
                         }
                     }
 
@@ -578,7 +585,6 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
                         getTree().setSelectedNode(modifiedNode);
                     }
                 }
-
             }
         }
 
@@ -624,7 +630,6 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
                 } else {
                     apply();
                 }
-
             } catch (Exception ex) {
                 DialogUtil.error(ex);
             }
@@ -633,7 +638,6 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
 
     private void _notifyChecker(final ISPNode nodeChanged, final Object dataObj) {
         if (OTOptions.isCheckingEngineEnabled()) {
-
             // Check for changes that don't impact P2 checks. Changes to the obslog
             // and notes don't have to generate p2 checks.  We should probably
             // create a marker interface for these nodes.  IP2CheckInnocuous
@@ -641,11 +645,10 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
             if (dataObj instanceof ObsExecLog) return;
             if (dataObj instanceof SPNote) return;
 
-            P2CheckerCowboy.INSTANCE.check(nodeChanged, getTree()); // REL-337
+            P2CheckerCowboy.INSTANCE.check(nodeChanged, getTree(), OT.getMagnitudeTable()); // REL-337
 
             //update the problem viewer window
             _problemViewer.update();
-
         }
     }
 
@@ -653,17 +656,19 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
      * If the given object is not a List object, return a list containing it, otherwise return the object. If the
      * argument is null, return an empty list.
      */
-    private static List _getList(final Object o) {
+    @SuppressWarnings("unchecked")
+    private static List<Object> _getList(final Object o) {
         if (o == null) {
-            return new ArrayList();
+            return new ArrayList<>();
         }
         if (!(o instanceof List)) {
-            final List l = new ArrayList();
+            final List<Object> l = new ArrayList<>();
             //noinspection unchecked
             l.add(o);
             return l;
+        } else {
+            return (List<Object>) o;
         }
-        return (List) o;
     }
 
     /**
@@ -673,7 +678,6 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
      */
     public void setRootNode(final ISPProgram root) {
         try {
-
             // Reset the TPE to the new root
             final TelescopePosEditor tpe = TpeManager.get();
             if (tpe != null) tpe.reset(root);
@@ -707,7 +711,6 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
             getTree().setRoot(root, ss);
 
             if (root == null) {
-
                 // Clear everything out. TODO: this is pretty terrible
                 treeSnapshots.clear();
                 getTitledBorder().setTitle("No current science program");
@@ -717,17 +720,13 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
                 _conflictPanel.setNode(null);
                 updateConflictToolWindow();
                 repaint();
-
             } else {
-
                 // Watch for changes to the program data object
                 root.addPropertyChangeListener(ISPProgram.DATA_OBJECT_KEY, authListener);
 
                 if (getRoot() != null && OTOptions.isCheckingEngineEnabled()) {
-                    P2CheckerCowboy.INSTANCE.check(getRoot(), getTree());
+                    P2CheckerCowboy.INSTANCE.check(getRoot(), getTree(), OT.getMagnitudeTable());
                 }
-
-
             }
 
             // Finally, update title and actions
@@ -735,7 +734,6 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
             _actions._updateEnabledStates();
 
             // Tree selection (soon!) will cause an editor to be created, and will update our nav history.
-
         } catch (Exception e) {
             DialogUtil.error(e);
         }
@@ -827,15 +825,9 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
     /** Update the title of the frame to include information about the file name. */
     private void _updateFrameTitle() {
         final JFrame parent = getParentFrame();
-        String title = "Science Program Editor";
+        String title = "Gemini OT";
         if (getRoot() != null) {
             title += " - " + getTitle();
-        }
-
-        // Currently selected key
-        final scala.Tuple2<Peer, Principal> pair = OT.getKeyChain().asJava().selection();
-        if (pair != null) {
-            title += " - " + pair._2().getName() + " (" + pair._1().displayName() + ")";
         }
 
         parent.setTitle(title);
@@ -892,14 +884,19 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
 
     /** Closes the window, releases its resources and quits the application if it is the last main window. */
     public void closeWindow() {
-        if (!shouldClose(programs())) return;
-        closeViewer();
+        if (shouldClose(programs())) {
+            closeViewer();
+        }
     }
 
     public void closeProgram() {
         final ISPProgram p = _history.rootOrNull();
-        if ((p != null) && !shouldClose(p)) return;
-        if (p != null) treeSnapshots.remove(p.getNodeKey());
+        if ((p != null) && !shouldClose(p)) {
+            return;
+        }
+        if (p != null){
+            treeSnapshots.remove(p.getNodeKey());
+        }
         tryNavigate(_history.delete());
     }
 
@@ -934,15 +931,18 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
 
     /** Exit the application. */
     public void exit() {
-        if (!shouldClose(allPrograms())) return;
-        for (final SPViewer viewer : new ArrayList<SPViewer>(_orderedInstances))
+        if (!shouldClose(allPrograms())) {
+            return;
+        }
+        for (final SPViewer viewer : new ArrayList<>(_orderedInstances)) {
             viewer.closeViewer();
+        }
         // TODO: Potentially there are still plugins an other parts of the application open.
         System.exit(0);
     }
 
     private List<ISPProgram> programs() {
-        final List<ISPProgram> progs = new ArrayList<ISPProgram>();
+        final List<ISPProgram> progs = new ArrayList<>();
         for (RootEntry re : _history.rootEntriesAsJava()) {
             progs.add(re.root());
         }
@@ -950,8 +950,8 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
     }
 
     private static List<ISPProgram> allPrograms() {
-        final List<ISPProgram> programs = new ArrayList<ISPProgram>();
-        for (final SPViewer viewer : new ArrayList<SPViewer>(_orderedInstances)) {
+        final List<ISPProgram> programs = new ArrayList<>();
+        for (final SPViewer viewer : new ArrayList<>(_orderedInstances)) {
             programs.addAll(viewer.programs());
         }
         return programs;
@@ -969,7 +969,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
             return null;
         }
         final ISPNode[] rnodes = getTree().getSelectedNodes();
-        final Set<ISPObservation> set = new HashSet<ISPObservation>();
+        final Set<ISPObservation> set = new HashSet<>();
         if (rnodes == null) {
             final ISPNode n = getTree().getCurrentNode();
             final ISPObservation obs = (n != null) ? n.getContextObservation() : null;
@@ -1022,7 +1022,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
         final ISPProgram prog = getProgram();
         if (prog != null) {
             try {
-                return progIdStr + ((SPProgram) prog.getDataObject()).getTitle();
+                return progIdStr + prog.getDataObject().getTitle();
             } catch (Exception e) {
                 return "";
             }
@@ -1033,7 +1033,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
     /** Checks the entire program looking for potential problems. */
     public void checkCurrentProgram() {
         if (getRoot() != null) {
-            P2CheckerCowboy.INSTANCE.check(getRoot(), getTree());
+            P2CheckerCowboy.INSTANCE.check(getRoot(), getTree(), OT.getMagnitudeTable());
             getTree().repaint();
             //set the problem viewer to watch the current selected node
             _problemViewer.setNodeData(getTree().getViewable());
@@ -1049,6 +1049,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
         return getTree().getRoot();
     }
 
+    @SuppressWarnings("rawtypes") // This isn't very nice but changing it implies checking the OtItemEditor hierarchy
     public OtItemEditor getCurrentEditor() {
         return _currentEditor;
     }
@@ -1072,11 +1073,6 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
         }
         return false;
     }
-
-    private final Map<SPNodeKey, SPTree.StateSnapshot> treeSnapshots = new HashMap<SPNodeKey, SPTree.StateSnapshot>();
-
-    // Zipper for our history
-    private History _history;
 
     public History getHistory() {
         return _history;

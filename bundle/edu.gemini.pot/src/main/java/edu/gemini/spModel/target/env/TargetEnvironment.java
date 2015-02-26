@@ -325,7 +325,11 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
     public TargetEnvironment cloneTargets() {
         SPTarget clonedBase = (SPTarget) base.clone();
         GuideEnvironment clonedGuide = guide.cloneTargets();
-        ImList<SPTarget> clonedUser  = user.map(SPTarget.CLONE_FUNCTION);
+        ImList<SPTarget> clonedUser  = user.map(new Function1<SPTarget, SPTarget>() {
+            public SPTarget apply(final SPTarget target) {
+                return target.clone();
+            }
+        });
         return new TargetEnvironment(clonedBase, clonedGuide, clonedUser);
     }
 

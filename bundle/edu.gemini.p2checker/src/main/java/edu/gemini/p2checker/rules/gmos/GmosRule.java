@@ -4,13 +4,15 @@
 package edu.gemini.p2checker.rules.gmos;
 
 import edu.gemini.p2checker.api.*;
-import edu.gemini.p2checker.rules.general.GeneralRule;
-import edu.gemini.p2checker.util.MdfConfigRule;
 import edu.gemini.p2checker.rules.altair.AltairRule;
+import edu.gemini.p2checker.rules.general.GeneralRule;
 import edu.gemini.p2checker.util.AbstractConfigRule;
+import edu.gemini.p2checker.util.MdfConfigRule;
+import edu.gemini.p2checker.util.NoPOffsetWithSlitRule;
 import edu.gemini.p2checker.util.SequenceRule;
 import edu.gemini.pot.sp.ISPProgramNode;
-import edu.gemini.shared.util.immutable.PredicateOp;
+import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.skycalc.Offset;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
@@ -21,22 +23,25 @@ import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.offset.OffsetPos;
-import static edu.gemini.spModel.gemini.gmos.GmosCommonType.Binning;
+import scala.Option;
+import scala.runtime.AbstractFunction2;
 
 import java.beans.PropertyDescriptor;
 import java.util.*;
-import scala.Option;
+
+import static edu.gemini.spModel.gemini.gmos.GmosCommonType.Binning;
 
 
 /**
  * GMOS Rule set
  */
-public class GmosRule implements IRule {
+public final class GmosRule implements IRule {
     private static final String PREFIX = "GmosRule_";
     private static Collection<IConfigRule> GMOS_RULES = new ArrayList<IConfigRule>();
 
     //keys to access sequence elements
     private static final ItemKey FPU_KEY = new ItemKey("instrument:fpu");
+    private static final ItemKey FPU_MODE_KEY = new ItemKey("instrument:fpuMode");
     private static final ItemKey DISPERSER_KEY = new ItemKey("instrument:disperser");
     private static final ItemKey FILTER_KEY = new ItemKey("instrument:filter");
     private static final ItemKey DETECTOR_KEY = new ItemKey("instrument:detectorManufacturer");
@@ -101,9 +106,7 @@ public class GmosRule implements IRule {
         public boolean matches(Config config, int step, ObservationElements elems) {
             if (!SequenceRule.SCIENCE_MATCHER.matches(config, step, elems))
                 return false;
-            GmosCommonType.Disperser disperser = getDisperser(config);
-            GmosCommonType.FPUnit fpu = getFPU(config);
-            return !(disperser == null || fpu == null) && disperser.isMirror() && fpu.isImaging();
+            return getDisperser(config).isMirror() && getFPU(config, elems).isImaging();
         }
     };
 
@@ -111,7 +114,7 @@ public class GmosRule implements IRule {
         public boolean matches(Config config, int step, ObservationElements elems) {
             if (!SequenceRule.SCIENCE_MATCHER.matches(config, step, elems))
                 return false;
-            if (!isSpecFPUselected(config)) return false;
+            if (!isSpecFPUnselected(config, elems)) return false;
             GmosCommonType.Disperser disperser = getDisperser(config);
             return !disperser.isMirror();
         }
@@ -133,7 +136,7 @@ public class GmosRule implements IRule {
             if (!SCIENCE_DAYCAL_MATCHER.matches(config, step, elems)) {
                 return false;
             }
-            if (!isSpecFPUselected(config)) {
+            if (!isSpecFPUnselected(config, elems)) {
                 return false;
             }
             GmosCommonType.Disperser disperser = getDisperser(config);
@@ -529,10 +532,10 @@ public class GmosRule implements IRule {
             }
             gsds.ruleInEffect = true;
 
-            Double p = SequenceRule.getPOffset(config);
-            if (p == null) p = 0.0;
-            Double q = SequenceRule.getQOffset(config);
-            if (q == null) q = 0.0;
+            final Option<Double> pOpt = SequenceRule.getPOffset(config);
+            final Option<Double> qOpt = SequenceRule.getQOffset(config);
+            final double p = pOpt.isDefined() ? pOpt.get() : 0.0;
+            final double q = qOpt.isDefined() ? qOpt.get() : 0.0;
 
             if (step == 0) {
                 gsds.p = p;
@@ -540,7 +543,7 @@ public class GmosRule implements IRule {
                 return null;
             }
 
-            if ((p.compareTo(gsds.p) != 0) || (q.compareTo(gsds.q) != 0)) {
+            if (!Offset.areEqual(p, gsds.p) || !Offset.areEqual(q, gsds.q)) {
                 gsds.foundTwoDifferentPositions = true;
             }
             return null;
@@ -626,9 +629,7 @@ public class GmosRule implements IRule {
                 private static final String MESSAGE = "A grating is defined but not a slit, mask or IFU";
 
                 public boolean check(Config config, ObservationElements elems) {
-                    GmosCommonType.Disperser disperser = getDisperser(config);
-                    GmosCommonType.FPUnit fpu = getFPU(config);
-                    return !(disperser == null || fpu == null) && (!disperser.isMirror() && fpu.isImaging());
+                    return !getDisperser(config).isMirror() && getFPU(config, elems).isImaging();
                 }
 
                 public String getMessage() {
@@ -674,7 +675,7 @@ public class GmosRule implements IRule {
 
                 public boolean check(Config config, ObservationElements elems) {
                     GmosCommonType.Disperser disperser = getDisperser(config);
-                    return disperser != null && isSpecFPUselected(config) && disperser.isMirror();
+                    return disperser != null && isSpecFPUnselected(config, elems) && disperser.isMirror();
                 }
 
                 public String getMessage() {
@@ -703,7 +704,7 @@ public class GmosRule implements IRule {
                     InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
                     if (inst == null) return false; //can't check
                     GmosCommonType.UseNS useNs = inst.getUseNS();
-                    return useNs == GmosCommonType.UseNS.TRUE && disperser.isMirror() && !isSpecFPUselected(config);
+                    return useNs == GmosCommonType.UseNS.TRUE && disperser.isMirror() && !isSpecFPUnselected(config, elems);
                 }
 
                 public String getMessage() {
@@ -754,7 +755,7 @@ public class GmosRule implements IRule {
                 private static final String MESSAGE = "In IFU one slit mode it is recommended to use the red slit";
 
                 public boolean check(Config config, ObservationElements elems) {
-                    GmosCommonType.FPUnit fpu = getFPU(config);
+                    final GmosCommonType.FPUnit fpu = getFPU(config, elems);
                     return fpu == GmosNorthType.FPUnitNorth.IFU_2 ||
                             fpu == GmosSouthType.FPUnitSouth.IFU_2;
                 }
@@ -782,7 +783,7 @@ public class GmosRule implements IRule {
 
                     GmosCommonType.Filter filter = getFilter(config);
                     if (!filter.isNone()) return false;
-                    GmosCommonType.FPUnit fpu = getFPU(config);
+                    final GmosCommonType.FPUnit fpu = getFPU(config, elems);
                     return fpu == GmosNorthType.FPUnitNorth.IFU_1 ||
                             fpu == GmosSouthType.FPUnitSouth.IFU_1;
                 }
@@ -908,17 +909,12 @@ public class GmosRule implements IRule {
                 private String _message = MESSAGE_NORTH;
 
                 public boolean check(Config config, ObservationElements elems) {
-                    GmosCommonType.FPUnit fpu = getFPU(config);
-
-                    if (fpu == null) return false;
-
                     if (elems.getInstrument() instanceof InstGmosSouth) {
                         _message = MESSAGE_SOUTH;
                     } else {
                         _message = MESSAGE_NORTH;
                     }
-
-                    return !fpu.isNS();
+                    return !getFPU(config, elems).isNS();
                 }
 
                 public String getMessage() {
@@ -1091,9 +1087,8 @@ public class GmosRule implements IRule {
         // This is a bit poor but it returns null if there is no need to issue
         // a warning. Returns a formatted message otherwise.
         private String getWarningMessage(Config config, ObservationElements elems) {
-            GmosCommonType.FPUnit fpu = getFPU(config);
-            InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
-            if (inst == null || fpu == null) return null;
+            final GmosCommonType.FPUnit fpu = getFPU(config, elems);
+            final InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
             int shuffle_distance = inst.getNsDetectorRows();
             if (fpu.isNSslit()) {
                 GmosCommonType.DetectorManufacturer dm = getDetectorManufacturer(config);
@@ -1474,8 +1469,29 @@ public class GmosRule implements IRule {
      * Auxiliary methods
      */
 
-    private static GmosCommonType.FPUnit getFPU(Config config) {
-        return (GmosCommonType.FPUnit) SequenceRule.getItem(config, GmosCommonType.FPUnit.class, FPU_KEY);
+    // Works around a bug (?) in InstGmosCommon.getSysConfig where the FPU
+    // parameter isn't added unless using a "builtin" FPU option.  Seems like
+    // CUSTOM should be set in this case.
+    private static GmosCommonType.FPUnit getFPU(Config config, ObservationElements elems) {
+        final GmosCommonType.FPUnitMode mode = (GmosCommonType.FPUnitMode) SequenceRule.getItem(config, GmosCommonType.FPUnitMode.class, FPU_MODE_KEY);
+
+        final GmosCommonType.FPUnit fpu;
+        switch (mode) {
+            case BUILTIN:
+                fpu = (GmosCommonType.FPUnit) SequenceRule.getItem(config, GmosCommonType.FPUnit.class, FPU_KEY);
+                break;
+            case CUSTOM_MASK:
+                // Okay custom mask "FPU" but *which* one. :-/
+                final SPComponentType type = elems.getInstrumentNode().getType();
+                fpu = InstGmosNorth.SP_TYPE.equals(type) ? GmosNorthType.FPUnitNorth.CUSTOM_MASK
+                                                         : GmosSouthType.FPUnitSouth.CUSTOM_MASK;
+                break;
+            default:
+                final String msg = String.format("New unaccounted for FPUnitMode type: %s", mode.displayValue());
+                LOG.severe(msg);
+                throw new RuntimeException(msg);
+        }
+        return fpu;
     }
 
     private static GmosCommonType.Disperser getDisperser(Config config) {
@@ -1515,15 +1531,11 @@ public class GmosRule implements IRule {
         }
     }
 
-    private static boolean isSpecFPUselected(Config config) {
-
-        GmosCommonType.FPUnitMode fpuMode =
-                (GmosCommonType.FPUnitMode) SequenceRule.getInstrumentItem(config, InstGmosCommon.FPU_MODE_PROP);
-
+    private static boolean isSpecFPUnselected(Config config, ObservationElements elems) {
+        final GmosCommonType.FPUnitMode fpuMode = (GmosCommonType.FPUnitMode) SequenceRule.getInstrumentItem(config, InstGmosCommon.FPU_MODE_PROP);
         if (fpuMode == GmosCommonType.FPUnitMode.CUSTOM_MASK) return true;
         if (fpuMode != GmosCommonType.FPUnitMode.BUILTIN) return false;
-        GmosCommonType.FPUnit fpu = getFPU(config);
-        return fpu != null && !fpu.isImaging();
+        return !getFPU(config, elems).isImaging();
     }
 
     // From Bryan on SCT-203: I define nod_distance=sqrt((p2-p1)^2 + (q2-q1)^2)
@@ -1539,26 +1551,33 @@ public class GmosRule implements IRule {
         private static final String errMsgE2V = "E2V CCDs support up to 4 custom ROIs";
         private static final String errMsgHamamatsu = "Hamamatsu CCDs support up to 5 custom ROIs";
 
-
         @Override
-        public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+        public Problem check(final Config config, final int step, final ObservationElements elems, final Object state) {
+            final InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
             GmosCommonType.DetectorManufacturer dm = getDetectorManufacturer(config);
-            if (dm == null)
+            if (dm == null) {
                 dm = inst.getDetectorManufacturer();
+            }
 
             GmosCommonType.CustomROIList customROIList = inst.getCustomROIs();
-            if (customROIList != null) {
-                if (dm.equals(GmosCommonType.DetectorManufacturer.HAMAMATSU) && customROIList.size() > 5) {
-                    return new Problem(ERROR, PREFIX + "HAMAMATSU_MAX_ROI_RULE", errMsgHamamatsu,
-                            SequenceRule.getInstrumentOrSequenceNode(step, elems));
-                } else if (dm.equals(GmosCommonType.DetectorManufacturer.E2V) &&
-                        customROIList.size() > 4) {
-                    return new Problem(ERROR, PREFIX + "E2V_MAX_ROI_RULE", errMsgE2V,
-                            SequenceRule.getInstrumentOrSequenceNode(step, elems));
+            if (customROIList != null && customROIList.size() > dm.getMaxROIs()) {
+                final String prefix, msg;
+                switch (dm) {
+                    case HAMAMATSU:
+                        prefix = PREFIX + "HAMAMATSU_MAX_ROI_RULE";
+                        msg = errMsgHamamatsu;
+                        break;
+                    case E2V:
+                        prefix = PREFIX + "E2V_MAX_ROI_RULE";
+                        msg = errMsgE2V;
+                        break;
+                    default:
+                        throw new IllegalArgumentException("unknown detector");
                 }
+                return new Problem(ERROR, prefix, msg, SequenceRule.getInstrumentOrSequenceNode(step, elems));
+            } else {
+                return null;
             }
-            return null;
         }
 
         @Override
@@ -1596,21 +1615,26 @@ public class GmosRule implements IRule {
 
 
         @Override
-        public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
-            GmosCommonType.DetectorManufacturer dm = inst.getDetectorManufacturer();
-            if (dm.equals(GmosCommonType.DetectorManufacturer.E2V)) {
-                if (inst.getCustomROIs().rowOverlap()) {
-                    return new Problem(ERROR, PREFIX + "ROI_OVERLAP_RULE", errMsg,
-                            SequenceRule.getInstrumentOrSequenceNode(step, elems));
-                }
-            } else {//HAMAMATSU
-                if (inst.getCustomROIs().pixelOverlap()) {
-                    return new Problem(ERROR, PREFIX + "ROI_OVERLAP_RULE", errMsg,
-                            SequenceRule.getInstrumentOrSequenceNode(step, elems));
-                }
+        public Problem check(final Config config, final int step, final ObservationElements elems, final Object state) {
+            final InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+            final GmosCommonType.DetectorManufacturer dm = inst.getDetectorManufacturer();
+            final boolean overlaps;
+            switch (dm) {
+                case E2V:
+                    overlaps = inst.getCustomROIs().rowOverlap();
+                    break;
+                case HAMAMATSU:
+                    overlaps = inst.getCustomROIs().pixelOverlap();
+                    break;
+                default:
+                    throw new IllegalArgumentException("unknown detector");
             }
-            return null;
+            if (overlaps) {
+                return new Problem(ERROR, PREFIX + "ROI_OVERLAP_RULE", errMsg,
+                        SequenceRule.getInstrumentOrSequenceNode(step, elems));
+            } else {
+                return null;
+            }
         }
 
         @Override
@@ -1618,6 +1642,55 @@ public class GmosRule implements IRule {
             return IConfigMatcher.ALWAYS;
         }
     };
+
+    /**
+     * REL-2057: It is possible to invalidate custom ROIs by changing the detector. This rule detects ROIs that
+     * have been invalidated by doing so.
+     */
+    private static IConfigRule ROI_INVALID_RULE = new IConfigRule() {
+        private static final String errMsg = "One or several custom ROIs are invalid";
+
+        @Override
+        public Problem check(Config config, int step, ObservationElements elems, Object state) {
+            InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+            if (!inst.validateCustomROIs()) {
+                return new Problem(ERROR, PREFIX + "ROI_INVALID_RULE", errMsg,
+                        SequenceRule.getInstrumentOrSequenceNode(step, elems));
+            } else {
+                return null;
+            }
+        }
+
+        @Override
+        public IConfigMatcher getMatcher() {
+            return IConfigMatcher.ALWAYS;
+        }
+    };
+
+    /**
+     * REL-1811: Warn if there are P-offsets for a slit spectroscopy observation.
+     * Warn for FPUs = (*arcsec or Custom Mask).
+     */
+    private static IConfigRule NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE = new NoPOffsetWithSlitRule(
+        PREFIX,
+        new AbstractFunction2<Config, ObservationElements, Boolean>() {
+            public Boolean apply(Config config, ObservationElements elems) {
+                return isCustomMask(config) || isSlitMask(config, elems);
+            }
+
+            private boolean isCustomMask(final Config config) {
+                final GmosCommonType.FPUnitMode fpuMode =
+                        (GmosCommonType.FPUnitMode) SequenceRule.getInstrumentItem(config, InstGmosCommon.FPU_MODE_PROP);
+                return fpuMode == GmosCommonType.FPUnitMode.CUSTOM_MASK;
+            }
+
+            private boolean isSlitMask(final Config config, final ObservationElements elems) {
+                final GmosCommonType.FPUnit fpu = getFPU(config, elems);
+                return fpu.isSpectroscopic() || fpu.isNSslit();
+            }
+        }
+
+    );
 
     private static IRule UNUSED_CUSTOM_ROI_RULE = new IRule() {
         private static final String warnMsg = "Custom ROIs are declared but not used in any step";
@@ -1670,11 +1743,9 @@ public class GmosRule implements IRule {
 
         @Override
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            if (getFPU(config).isIFU() && !getDisperser(config).isMirror() && getYBinning(config) != Binning.ONE) {
-
+            if (getFPU(config, elems).isIFU() && !getDisperser(config).isMirror() && getYBinning(config) != Binning.ONE) {
                 return new Problem(WARNING, PREFIX + "IFU_NO_SPATIAL_BINNING_RULE", errMsg,
                         SequenceRule.getInstrumentOrSequenceNode(step, elems));
-
             }
 
             return null;
@@ -1725,8 +1796,10 @@ public class GmosRule implements IRule {
         GMOS_RULES.add(NON_ZERO_EXPOSURE_TIME_RULE);
         GMOS_RULES.add(MAX_ROI_RULE);
         GMOS_RULES.add(ROI_OVERLAP_RULE);
+        GMOS_RULES.add(ROI_INVALID_RULE);
         GMOS_RULES.add(CUSTOM_ROI_NOT_DECLARED_RULE);
         GMOS_RULES.add(IFU_NO_SPATIAL_BINNING_RULE);
+        GMOS_RULES.add(NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE);
         GMOS_RULES.add(new MdfMaskNameRule(Problem.Type.ERROR));
         GMOS_RULES.add(new MdfMaskNameRule(Problem.Type.WARNING));
     }

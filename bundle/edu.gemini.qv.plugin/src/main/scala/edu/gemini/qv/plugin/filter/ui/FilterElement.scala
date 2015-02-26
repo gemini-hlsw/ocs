@@ -89,7 +89,7 @@ object FilterElement {
   class Options[A](data: ObservationProvider, init: EnumFilter[A], var showAvailableOnly: Boolean = true, val showCounts: Boolean = true) extends GridBagPanel with FilterUI {
     border = BorderFactory.createEmptyBorder(2, 2, 2, 2) // add some space at top and bottom
     var selection: Set[A] = init.selection.toSet
-    private val buttons = init.sortedValues.map(button(_))
+    private val buttons = init.sortedValues.map(button)
 
     peer.setComponentPopupMenu(createPopup.peer)
 
@@ -289,11 +289,8 @@ object FilterElement {
     }
 
     def doUpdate() {
-      val (a, b) = {
-        val a = init.minFromString(min.text)
-        val b = init.maxFromString(max.text)
-        if (a < b) (a, b) else (a, init.highest)
-      }
+      val a = init.minFromString(min.text)
+      val b = init.maxFromString(max.text)
       filter = init match {
         case f: RA => RA(a, b)
         case f: Dec => Dec(a, b)

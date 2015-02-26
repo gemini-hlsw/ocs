@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 
+import edu.gemini.ags.api.AgsMagnitude;
 import edu.gemini.qpt.core.Schedule;
 import edu.gemini.qpt.shared.util.StructuredProgramID;
 import edu.gemini.qpt.ui.action.*;
@@ -132,14 +133,16 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
 	}
 
     private final PublishAction.Destination internal, pachon;
+    private final AgsMagnitude.MagnitudeTable magTable;
 
-    public ShellAdvisor(String name, String version, String rootURL, KeyChain authClient, PublishAction.Destination internal, PublishAction.Destination pachon) {
+    public ShellAdvisor(String name, String version, String rootURL, KeyChain authClient, PublishAction.Destination internal, PublishAction.Destination pachon, AgsMagnitude.MagnitudeTable magTable) {
 		this.title = name + " " + version;
 		this.rootURL = rootURL;
 		this.version = version;
         this.authClient = authClient;
         this.internal = internal;
         this.pachon = pachon;
+        this.magTable = magTable;
 	}
 
 	@SuppressWarnings("serial")
@@ -165,9 +168,9 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
 
 			Menu.File,
 
-			new NewAction(shell, authClient),
-			new OpenAction(shell, authClient),
-			new OpenFromWebAction(shell, authClient),
+			new NewAction(shell, authClient, magTable),
+			new OpenAction(shell, authClient, magTable),
+			new OpenFromWebAction(shell, authClient, magTable),
 			null,
 			new CloseAction(shell, authClient),
 			new SaveAction(shell, authClient),
@@ -198,11 +201,11 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
 
 				Menu.Plan,
 
-				new AddSemesterAction(shell, authClient),
-				new RemoveSemesterAction(shell, authClient),
+				new AddSemesterAction(shell, authClient, magTable),
+				new RemoveSemesterAction(shell, authClient, magTable),
 				null,
-				new RefreshAction(shell, authClient),
-				new MergeAction(shell, authClient)
+				new RefreshAction(shell, authClient, magTable),
+				new MergeAction(shell, authClient, magTable)
 
 			);
 
@@ -233,6 +236,7 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
 			new BooleanPreferenceAction(VIEW_BAND_4, VIEW_ALL, "Science Band 4", KeyEvent.VK_4),
 			null,
             new BooleanPreferenceAction(VIEW_SP_LP, VIEW_ALL, StructuredProgramID.Type.LP.getDescription()),
+            new BooleanPreferenceAction(VIEW_SP_FT, VIEW_ALL, StructuredProgramID.Type.FT.getDescription()),
 			new BooleanPreferenceAction(VIEW_SP_Q, VIEW_ALL, StructuredProgramID.Type.Q.getDescription()),
 			new BooleanPreferenceAction(VIEW_SP_C, VIEW_ALL, StructuredProgramID.Type.C.getDescription()),
 			new BooleanPreferenceAction(VIEW_SP_SV, VIEW_ALL, StructuredProgramID.Type.SV.getDescription()),
@@ -270,12 +274,12 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
 			new ToggleSetupRequiredAction(shell),
 			new CompactAction(shell),
 			null,
-			new EnumBoxAction<TimePreference>(TimePreference.BOX, TimePreference.LOCAL, "Local Time"),
-			new EnumBoxAction<TimePreference>(TimePreference.BOX, TimePreference.UNIVERSAL, "Universal Time"),
-			new EnumBoxAction<TimePreference>(TimePreference.BOX, TimePreference.SIDEREAL, "Sidereal Time"),
+			new EnumBoxAction<>(TimePreference.BOX, TimePreference.LOCAL, "Local Time"),
+			new EnumBoxAction<>(TimePreference.BOX, TimePreference.UNIVERSAL, "Universal Time"),
+			new EnumBoxAction<>(TimePreference.BOX, TimePreference.SIDEREAL, "Sidereal Time"),
 			null,
-			new EnumBoxAction<ElevationPreference>(ElevationPreference.BOX, ElevationPreference.ELEVATION, "Elevation"),
-			new EnumBoxAction<ElevationPreference>(ElevationPreference.BOX, ElevationPreference.AIRMASS, "Airmass")
+			new EnumBoxAction<>(ElevationPreference.BOX, ElevationPreference.ELEVATION, "Elevation"),
+			new EnumBoxAction<>(ElevationPreference.BOX, ElevationPreference.AIRMASS, "Airmass")
 
 
 		);
@@ -318,14 +322,14 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
 
 		try {
 
-			final Class applicationClass = Class.forName("com.apple.eawt.Application");
-			final Class applicationEventClass = Class.forName("com.apple.eawt.ApplicationEvent");
-			final Class applicationListenerClass = Class.forName("com.apple.eawt.ApplicationListener");
+			final Class<?> applicationClass = Class.forName("com.apple.eawt.Application");
+			final Class<?> applicationEventClass = Class.forName("com.apple.eawt.ApplicationEvent");
+			final Class<?> applicationListenerClass = Class.forName("com.apple.eawt.ApplicationListener");
 
-			Object app = applicationClass.getMethod("getApplication").invoke(null);
+			final Object app = applicationClass.getMethod("getApplication").invoke(null);
 			applicationClass.getMethod("removeAboutMenuItem").invoke(app);
 			applicationClass.getMethod("addApplicationListener", applicationListenerClass).invoke(app,
-				Proxy.newProxyInstance(getClass().getClassLoader(), new Class[] { applicationListenerClass },
+				Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { applicationListenerClass },
 					new InvocationHandler() {
 						public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 							if (method.getName().equals("handleQuit")) {

@@ -10,7 +10,6 @@ import io.Source
 /**
  * Creator object for pdf creation for Phase1 documents.
  */
-
 object P1PDF {
 
   object DEFAULT extends Template(
@@ -129,5 +128,6 @@ object P1PDF {
 
     val ok = Runtime.getRuntime.exec(Array("open", out.getAbsolutePath)).waitFor
     println("Exec returned " + ok)
+    System.exit(0)
   }
 }

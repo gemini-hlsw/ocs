@@ -1,0 +1,37 @@
+# transparency (cloud cover) model for ITC
+# 90%-ile conditions; these conditions are thick cloud
+# columns are (1) wavelength in nm, (2) transparency (0-1)
+# source: assume 1mag (factor 2.5) attenuation
+# and unusable beyond 2.5um
+# made up for now!!
+# author: Phil Puxley
+# created 27Aug1999
+#
+# Modified to 2 mag attenuation (16% transmission) - to be
+# more consistent with web page and experience
+# Phil Puxley: 23Feb2002
+#
+# Modified to 1 mag attenuation (40% transmission)
+# CC90 no longer offered, now CC80
+# Matt Dillman: 27Jan2011
+#
+# Modified by S. Pakzad: 06Nov2013:
+# 2600   0.0 -> 2600  0.40
+# 30000  0.0 -> 30000  0.40
+
+# Old CC90 values
+#     300   0.16
+#    1000   0.16
+#    2500   0.16
+#    2600   0.0
+#   30000   0.0
+
+#300   0.40
+#1000  0.40
+#2500  0.40
+#2600  0.0
+#30000  0.0
+
+  300  0.40
+ 1000  0.40
+30000  0.40

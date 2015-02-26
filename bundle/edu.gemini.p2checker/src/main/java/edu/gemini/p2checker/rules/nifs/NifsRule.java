@@ -8,9 +8,7 @@ import edu.gemini.pot.sp.ISPProgramNode;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.config2.Config;
-import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider;
-import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.nifs.InstNIFS;
 import edu.gemini.spModel.gemini.nifs.NIFSParams;
 import edu.gemini.spModel.gemini.nifs.NifsOiwfsGuideProbe;
@@ -193,14 +191,14 @@ public final class NifsRule implements IRule {
                 if (baseTarget == null || oiTarget.isEmpty() || aoTarget.isEmpty()) return null;
                 //now, let's compare coordinates. If they are the same, raise an error
 
-                double baseC1 = baseTarget.getC1().getAs(CoordinateParam.Units.HMS);
-                double baseC2 = baseTarget.getC2().getAs(CoordinateParam.Units.DEGREES);
+                double baseC1 = baseTarget.getTarget().getRa().getAs(CoordinateParam.Units.HMS);
+                double baseC2 = baseTarget.getTarget().getDec().getAs(CoordinateParam.Units.DEGREES);
 
-                double oiC1 = oiTarget.getValue().getC1().getAs(CoordinateParam.Units.HMS);
-                double oiC2 = oiTarget.getValue().getC2().getAs(CoordinateParam.Units.DEGREES);
+                double oiC1 = oiTarget.getValue().getTarget().getRa().getAs(CoordinateParam.Units.HMS);
+                double oiC2 = oiTarget.getValue().getTarget().getDec().getAs(CoordinateParam.Units.DEGREES);
 
-                double aoC1 = aoTarget.getValue().getC1().getAs(CoordinateParam.Units.HMS);
-                double aoC2 = aoTarget.getValue().getC2().getAs(CoordinateParam.Units.DEGREES);
+                double aoC1 = aoTarget.getValue().getTarget().getRa().getAs(CoordinateParam.Units.HMS);
+                double aoC2 = aoTarget.getValue().getTarget().getDec().getAs(CoordinateParam.Units.DEGREES);
 
 
                 if (Double.compare(baseC1, oiC1) == 0

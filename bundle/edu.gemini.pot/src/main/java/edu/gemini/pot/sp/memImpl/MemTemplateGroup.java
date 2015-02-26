@@ -90,7 +90,7 @@ public final class MemTemplateGroup extends MemAbstractContainer implements ISPT
         getProgramWriteLock();
         try {
             tc.verify(VALID_CHILD_TYPES);
-            setConflictFolder(tc.getChild(MemConflictFolder.class));
+            setConflictFolder(tc.getOnlyChild(MemConflictFolder.class));
             setObservations(tc.getChildren(MemObservation.class));
             setTemplateParameters(tc.getChildren(MemTemplateParameters.class));
             setObsComponents(tc.getChildren(MemObsComponent.class));

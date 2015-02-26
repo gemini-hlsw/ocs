@@ -1,0 +1,19 @@
+# transmission of niri Narrow-band Br(alpha) filter
+# columns are (1) Wavelength in nm, (2) transmission
+# these should be replaced later with scanned transmission curves
+# first and last values are 0 for extrapolation purposes
+# author: Brian Walls
+# created: 29 Aug 1999
+
+3971 0
+3981 0
+4016 0
+4021 0.5
+4022 0.7
+4052 0.7
+4081 0.7
+4082 0.5
+4087 0
+4123 0
+4133 0
+

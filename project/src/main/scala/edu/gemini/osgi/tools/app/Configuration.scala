@@ -4,7 +4,7 @@ import java.io.File
 
 object Configuration {
   object Distribution extends Enumeration {
-    val Test, MacOS, Windows, Linux32, Linux64 /*, Solaris */ = Value
+    val Test, MacOS, Windows, Linux32, Linux64, RPM64 /*, Solaris */ = Value
   }
   type Distribution = this.Distribution.Value
 }
@@ -19,6 +19,7 @@ case class Configuration(
   icon: Option[File] = None,
   log: Option[String] = None,
   script: Option[File] = None,
+  spec: Option[File] = None,
   extending: List[Configuration] = Nil) {
 
   // Default; this can be overridden in instances
@@ -29,6 +30,7 @@ case class Configuration(
       case "org" :: "scala-lang" :: _                    => 10
       case "org" :: "scalaz"     :: _                    => 15
       case "edu" :: "gemini"     :: "model" :: "p1" :: _ => 30
+      case "edu" :: "gemini"     :: "dataman" :: _       => 100
       case "edu" :: "gemini"     :: _                    => 50
       case "org" :: "jsky"       :: _                    => 50
       case _                                             => 40
@@ -40,6 +42,7 @@ case class Configuration(
     bundles = c.bundles ++ bundles,
     props = c.props ++ props,
     log = log.orElse(c.log),
+    spec = spec.orElse(c.spec),
     extending = extending :+ c
   )
 

@@ -280,12 +280,12 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
      * Cloud Cover Options.
      */
     public static enum CloudCover implements DisplayableSpType, ObsoletableSpType, SequenceableSpType, PercentageContainer {
-        PERCENT_20("20%", 20),
-        PERCENT_50("50%/Clear", 50),
-        PERCENT_70("70%/Cirrus", 70) { public Magnitude adjust(Magnitude mag) { return mag.add(-0.3); } },
-        PERCENT_80("80%/Cloudy", 80) { public Magnitude adjust(Magnitude mag) { return mag.add(-1.0); } },
-        PERCENT_90("90%", 90) { public Magnitude adjust(Magnitude mag) { return mag.add(-3.0); } },
-        ANY("Any", 100)       { public Magnitude adjust(Magnitude mag) { return mag.add(-3.0); } },
+        PERCENT_20("20%",        20,  0.0),
+        PERCENT_50("50%/Clear",  50,  0.0),
+        PERCENT_70("70%/Cirrus", 70, -0.3),
+        PERCENT_80("80%/Cloudy", 80, -1.0),
+        PERCENT_90("90%",        90, -3.0),
+        ANY(       "Any",       100, -3.0),
         ;
 
 
@@ -294,11 +294,13 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
 
         private final String _displayValue;
         private final byte _percentage;
+        private final double _magAdjustment;
 
-        private CloudCover(String displayValue, int percentage) {
+        private CloudCover(String displayValue, int percentage, double magAdjustment) {
         	_percentage = (byte) percentage;
             _displayValue = displayValue;
             assert _percentage >= 0 && _percentage <= 100;
+            _magAdjustment = magAdjustment;
         }
 
         public byte getPercentage() {
@@ -314,7 +316,8 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
             return Byte.toString(_percentage);
         }
 
-        public Magnitude adjust(Magnitude mag) { return mag; }
+        public double magAdjustment() { return _magAdjustment; }
+        public Magnitude adjust(Magnitude mag) { return mag.add(_magAdjustment); }
 
         /** Return a CloudCover by name **/
         public static CloudCover getCloudCover(String name) {

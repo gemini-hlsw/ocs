@@ -2,8 +2,7 @@ package edu.gemini.spdb.reports.collection.report;
 
 import edu.gemini.spdb.reports.IFilter;
 
-public class BadWeatherQueueProgramStatusExternalReport extends
-		AbstractQueueProgramStatusExternalReport {
+public final class BadWeatherQueueProgramStatusExternalReport extends AbstractQueueProgramStatusExternalReport {
 
 	public BadWeatherQueueProgramStatusExternalReport() {
 		super("BadWeatherQueueProgramStatusExternalReport.vm");
@@ -14,7 +13,7 @@ public class BadWeatherQueueProgramStatusExternalReport extends
 		return new BandFilter(4);
 	}
 
-	String getFileName(String site, String semester) {
+	String getFileName(final String site, final String semester) {
 		return "badWeatherSchedQueue_" + site + "_" + semester + ".html";
 	}
 

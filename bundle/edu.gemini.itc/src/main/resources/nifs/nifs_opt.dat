@@ -1,0 +1,24 @@
+# Average throughput for the GNIRS static optics
+# Columns are (1) wavelength in nm, (2) throughput
+# Optical elements included: CaF2 window, Pickoff mirror, Entrance fold,
+#  Offner Primary, Secondary and 2nd Primary, Cold Stop, Exit Fold and Collimator
+# Values from J. Elias sensitivity table with zeroes added at 700 and 6000 nm.
+#
+# Author: Bernadette Rodgers
+# Created: 30 July 2003
+# 30 Sept 03, BR: renamed file; divided values by sqrt(2) fudge factor
+#
+# 30 Jan 04; applied another 20% supression to bring overall ITC into
+# agreement with measurements. Total supression is now 1.2*sqrt(2) = 1.70
+# Phil Puxley
+#
+# lambda transmission
+    700   0.0
+    900   0.42
+   1100   0.498
+   1270   0.508
+   1640   0.521
+   2230   0.526
+   3710   0.534
+   5150   0.540
+   6000   0.0

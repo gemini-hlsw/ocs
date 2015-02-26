@@ -5,6 +5,7 @@ import edu.gemini.pot.sp.version.LifespanId;
 import edu.gemini.shared.util.VersionVector;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.data.ISPDataObject;
+import edu.gemini.spModel.util.ReadableNodeName;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -32,7 +33,7 @@ public abstract class MemAbstractBase implements ISPNode, Serializable {
     private final SPNodeKey _nodeKey;
 
     // Holds the client data.
-    private final Map<String, Object> _clientData = new HashMap<String, Object>(4);
+    private final Map<String, Object> _clientData = new HashMap<>(4);
 
     // Holds the transient client data.
     private transient PropertyChangeSupport _transSupport;
@@ -58,7 +59,7 @@ public abstract class MemAbstractBase implements ISPNode, Serializable {
      */
     private void _init() {
         _sendEvents = true; // make sure that events are turned on
-        _transClientData = new TreeMap<String, Object>();
+        _transClientData = new TreeMap<>();
     }
 
     protected void markModified() {
@@ -316,7 +317,7 @@ public abstract class MemAbstractBase implements ISPNode, Serializable {
     }
 
     protected List<ISPEventMonitor> getEventMonitors() {
-        final List<ISPEventMonitor> ems = new ArrayList<ISPEventMonitor>();
+        final List<ISPEventMonitor> ems = new ArrayList<>();
         for (Object cd : getClientData()) {
             if (cd instanceof ISPEventMonitor) ems.add((ISPEventMonitor) cd);
         }
@@ -443,7 +444,7 @@ public abstract class MemAbstractBase implements ISPNode, Serializable {
     synchronized List<Object> getClientData() {
         getProgramReadLock();
         try {
-            return new ArrayList<Object>(_clientData.values());
+            return new ArrayList<>(_clientData.values());
         } finally {
             returnProgramReadLock();
         }
@@ -454,7 +455,7 @@ public abstract class MemAbstractBase implements ISPNode, Serializable {
         try {
             // return a copy since the Set returned by the entrySet() method is
             // backed by the _clientData Map
-            return new HashSet<String>(_clientData.keySet());
+            return new HashSet<>(_clientData.keySet());
         } finally {
             returnProgramReadLock();
         }
@@ -549,7 +550,7 @@ public abstract class MemAbstractBase implements ISPNode, Serializable {
     }
 
     synchronized List<Object> getTransientClientData() {
-        return new ArrayList<Object>(_transClientData.values());
+        return new ArrayList<>(_transClientData.values());
     }
 
     public void putTransientClientData(String key, Object newValue) {
@@ -599,5 +600,21 @@ public abstract class MemAbstractBase implements ISPNode, Serializable {
         } finally {
             returnProgramReadLock();
         }
+    }
+
+    private static String toString(final String indent, final ISPNode n) {
+        final StringBuilder buf = new StringBuilder();
+        buf.append(indent).append(ReadableNodeName.format(n)).append("\n");
+        final String childIndent = "  " + indent;
+        if (n instanceof ISPContainerNode) {
+            for (ISPNode child : ((ISPContainerNode) n).getChildren()) {
+                buf.append(toString(childIndent, child));
+            }
+        }
+        return buf.toString();
+    }
+
+    @Override public String toString() {
+        return toString("", this);
     }
 }

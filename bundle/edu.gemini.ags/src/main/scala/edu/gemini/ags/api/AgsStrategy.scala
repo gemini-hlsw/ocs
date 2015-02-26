@@ -1,15 +1,17 @@
 package edu.gemini.ags.api
 
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
+import edu.gemini.ags.impl._
 import edu.gemini.catalog.api.QueryConstraint
-import edu.gemini.shared.skyobject.SkyObject
-import edu.gemini.skycalc.Angle
 import edu.gemini.spModel.ags.AgsStrategyKey
+import edu.gemini.spModel.core.Angle
+import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.{OptionsList, GuideProbeTargets, TargetEnvironment}
+import edu.gemini.spModel.target.system.HmsDegTarget
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
@@ -21,7 +23,7 @@ trait AgsStrategy {
 
   def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis]
 
-  def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SkyObject])]]
+  def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]]
 
   def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[AgsStrategy.Estimate]
 
@@ -54,7 +56,7 @@ object AgsStrategy {
   /**
    * An assignment of a guide star to a particular guide probe.
    */
-  case class Assignment(guideProbe: GuideProbe, guideStar: SkyObject)
+  case class Assignment(guideProbe: GuideProbe, guideStar: SiderealTarget)
 
   /**
    * Results of running an AGS selection.  The position angle for which the
@@ -68,14 +70,14 @@ object AgsStrategy {
      */
     def applyTo(env: TargetEnvironment): TargetEnvironment = {
       def findMatching(gpt: GuideProbeTargets, target: SPTarget): Option[SPTarget] =
-        Option(target.getName).flatMap { n =>
+        Option(target.getTarget.getName).flatMap { n =>
           gpt.getOptions.toList.asScala.find { t =>
-            Option(t.getName).map(_.trim).exists(_ == n.trim)
+            Option(t.getTarget.getName).map(_.trim).exists(_ == n.trim)
           }
         }
 
-      (env/:assignments) { (curEnv, ass) =>
-        val target = new SPTarget(ass.guideStar)
+      (env /: assignments) { (curEnv, ass) =>
+        val target = new SPTarget(HmsDegTarget.fromSkyObject(ass.guideStar.toOldModel))
         val oldGpt = curEnv.getPrimaryGuideProbeTargets(ass.guideProbe).asScalaOpt
 
         val newGpt = oldGpt.fold(GuideProbeTargets.create(ass.guideProbe, target)) { gpt =>

@@ -39,7 +39,7 @@ public class Pre2010BTargetEnvironmentIoTest {
     // We're not trying to verify the entire SPTarget parsing code.  It's
     // enough to know that the name is what we expected.
     private static void verifyTarget(String name, SPTarget target) throws Exception {
-        assertEquals(name, target.getName());
+        assertEquals(name, target.getTarget().getName());
     }
 
     private enum Case {

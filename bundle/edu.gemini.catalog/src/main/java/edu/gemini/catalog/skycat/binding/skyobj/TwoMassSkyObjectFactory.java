@@ -22,6 +22,7 @@ import java.util.Set;
 /**
  * A {@link SkyObjectFactory} used with the 2MASS catalog.
  */
+@Deprecated
 public enum TwoMassSkyObjectFactory implements SkyObjectFactory {
     instance;
 

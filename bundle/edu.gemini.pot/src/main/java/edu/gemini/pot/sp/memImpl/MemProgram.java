@@ -461,9 +461,9 @@ public final class MemProgram extends MemAbstractContainer implements ISPProgram
     protected void setTypedChildren(MemAbstractContainer.TypedChildren tc)
             throws SPNodeNotLocalException, SPTreeStateException {
         tc.verify(VALID_CHILD_TYPES);
-        setConflictFolder(tc.getChild(MemConflictFolder.class));
+        setConflictFolder(tc.getOnlyChild(MemConflictFolder.class));
         setObsComponents(tc.getChildren(MemObsComponent.class));
-        setTemplateFolder(tc.getChild(MemTemplateFolder.class));
+        setTemplateFolder(tc.getOnlyChild(MemTemplateFolder.class));
         setObservations(tc.getChildren(MemObservation.class));
         setGroups(tc.getChildren(MemGroup.class));
     }

@@ -15,6 +15,7 @@ import edu.gemini.util.security.principal.StaffPrincipal
 class Activator extends BundleActivator {
 
   private var tracker: Option[ServiceTracker[_,_]] = None
+  private var delegateActivator: Option[BundleActivator] = None
 
   // Superuser
   private val user = java.util.Collections.singleton[Principal](StaffPrincipal.Gemini)
@@ -31,12 +32,20 @@ class Activator extends BundleActivator {
     } { _.apply() })
 
     tracker.foreach(_.open())
+
+    delegateActivator = Some(new edu.gemini.too.email.osgi.Activator)
+    delegateActivator.foreach(_.start(ctx))
+
   }
 
   override def stop(ctx: BundleContext) {
     println("Stop edu.gemini.too.window")
+
+    delegateActivator.foreach(_.stop(ctx))
+    delegateActivator = None
+
     tracker.foreach(_.close())
     tracker = None
+
   }
 }
-

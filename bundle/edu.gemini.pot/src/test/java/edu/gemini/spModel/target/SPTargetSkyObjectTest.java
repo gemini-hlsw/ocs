@@ -9,11 +9,11 @@ import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates.Epoch;
-import static edu.gemini.shared.skyobject.coords.HmsDegCoordinates.Epoch.Type.BESSELIAN;
 import static edu.gemini.shared.skyobject.coords.HmsDegCoordinates.Epoch.Type.JULIAN;
 import edu.gemini.shared.util.immutable.ApplyOp;
 import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.DefaultImList;
+import edu.gemini.spModel.target.system.CoordinateParam;
 import edu.gemini.spModel.target.system.CoordinateTypes;
 import edu.gemini.spModel.target.system.HmsDegTarget;
 import static org.junit.Assert.*;
@@ -28,9 +28,7 @@ import java.util.Set;
  */
 public final class SPTargetSkyObjectTest {
     private static final Epoch[] EPOCHS = {
-            Epoch.B1950,
             Epoch.J2000,
-            new Epoch(BESSELIAN, 1950.5),
             new Epoch(JULIAN, 2000.5),
     };
 
@@ -58,40 +56,22 @@ public final class SPTargetSkyObjectTest {
             coords = coords.builder().pmRa(pmRa).pmDec(pmDec).build();
 
             SkyObject   obj = new SkyObject.Builder("xyz", coords).build();
-            SPTarget target = new SPTarget(obj);
+            SPTarget target = new SPTarget(HmsDegTarget.fromSkyObject(obj));
 
-            assertEquals(0, target.getMagnitudes().size());
-            assertEquals(0, target.getMagnitudeBands().size());
+            assertEquals(0, target.getTarget().getMagnitudes().size());
+            assertEquals(0, target.getTarget().getMagnitudeBands().size());
 
             HmsDegTarget hmsDeg = (HmsDegTarget) target.getTarget();
 
-            assertEquals("xyz", target.getName());
-            assertEquals(15.0, target.getXaxis(), 0.000001);
-            assertEquals(20.0, target.getYaxis(), 0.000001);
+            assertEquals("xyz", target.getTarget().getName());
+            assertEquals(15.0, target.getTarget().getRa().getAs(CoordinateParam.Units.DEGREES), 0.000001);
+            assertEquals(20.0, target.getTarget().getDec().getAs(CoordinateParam.Units.DEGREES), 0.000001);
             assertEquals(1.0, hmsDeg.getPM1().getValue(), 0.000001);
             assertEquals(2.0, hmsDeg.getPM2().getValue(), 0.000001);
 
             CoordinateTypes.Epoch spEpoch = hmsDeg.getEpoch();
             assertEquals(e.getYear(), spEpoch.getValue(), 0.000001);
 
-
-            HmsDegTarget.SystemType st = (HmsDegTarget.SystemType) hmsDeg.getSystemOption();
-            switch (st.getTypeCode()) {
-                case HmsDegTarget.SystemType._B1950:
-                    assertEquals(Epoch.B1950, e);
-                    break;
-                case HmsDegTarget.SystemType._BNNNN:
-                    assertEquals(Epoch.Type.BESSELIAN, e.getType());
-                    break;
-                case HmsDegTarget.SystemType._J2000:
-                    assertEquals(Epoch.J2000, e);
-                    break;
-                case HmsDegTarget.SystemType._JNNNN:
-                    assertEquals(Epoch.Type.JULIAN, e.getType());
-                    break;
-                default:
-                    fail();
-            }
         }
     }
 
@@ -102,22 +82,22 @@ public final class SPTargetSkyObjectTest {
 
     private void testSkyObjectConstructorMags(ImList<Magnitude> input, ImList<Magnitude> expected) throws Exception {
         SkyObject obj = createSkyObject(input);
-        final SPTarget target = new SPTarget(obj);
+        final SPTarget target = new SPTarget(HmsDegTarget.fromSkyObject(obj));
 
-        final ImList<Magnitude> mags = target.getMagnitudes();
+        final ImList<Magnitude> mags = target.getTarget().getMagnitudes();
         assertEquals(expected.size(), mags.size());
 
-        final Set<Magnitude.Band> bands = target.getMagnitudeBands();
+        final Set<Magnitude.Band> bands = target.getTarget().getMagnitudeBands();
         assertEquals(expected.size(), bands.size());
         expected.foreach(new ApplyOp<Magnitude>() {
             @Override public void apply(Magnitude magnitude) {
                 assertTrue(bands.contains(magnitude.getBand()));
-                assertEquals(magnitude, target.getMagnitude(magnitude.getBand()).getValue());
+                assertEquals(magnitude, target.getTarget().getMagnitude(magnitude.getBand()).getValue());
             }
         });
 
         // okay don't call this method with "M" in the list of expected or input
-        assertTrue(target.getMagnitude(Magnitude.Band.M).isEmpty());
+        assertTrue(target.getTarget().getMagnitude(Magnitude.Band.M).isEmpty());
     }
 
     @Test
@@ -136,35 +116,35 @@ public final class SPTargetSkyObjectTest {
     @Test
     public void testPutMagnitude() throws Exception {
         SkyObject   obj = createSkyObject(DefaultImList.create(magJ1));
-        SPTarget target = new SPTarget(obj);
+        SPTarget target = new SPTarget(HmsDegTarget.fromSkyObject(obj));
 
         // Put a new magnitude for the K band.
-        target.putMagnitude(magK2);
-        ImList<Magnitude> magList = target.getMagnitudes();
+        target.getTarget().putMagnitude(magK2);
+        ImList<Magnitude> magList = target.getTarget().getMagnitudes();
 
         assertEquals(2, magList.size());
-        assertEquals(magJ1, target.getMagnitude(Magnitude.Band.J).getValue());
-        assertEquals(magK2, target.getMagnitude(Magnitude.Band.K).getValue());
+        assertEquals(magJ1, target.getTarget().getMagnitude(Magnitude.Band.J).getValue());
+        assertEquals(magK2, target.getTarget().getMagnitude(Magnitude.Band.K).getValue());
 
         // Replace the existing J band mag with a new one.
-        target.putMagnitude(magJ3);
-        magList = target.getMagnitudes();
+        target.getTarget().putMagnitude(magJ3);
+        magList = target.getTarget().getMagnitudes();
         assertEquals(2, magList.size());
-        assertEquals(magJ3, target.getMagnitude(Magnitude.Band.J).getValue());
-        assertEquals(magK2, target.getMagnitude(Magnitude.Band.K).getValue());
+        assertEquals(magJ3, target.getTarget().getMagnitude(Magnitude.Band.J).getValue());
+        assertEquals(magK2, target.getTarget().getMagnitude(Magnitude.Band.K).getValue());
     }
 
     @Test
     public void testSetMagnitudes() throws Exception {
         SkyObject   obj = createSkyObject(DefaultImList.create(magJ1));
-        SPTarget target = new SPTarget(obj);
+        SPTarget target = new SPTarget(HmsDegTarget.fromSkyObject(obj));
 
         // Put a new magnitude for the K band.
-        target.setMagnitudes(DefaultImList.create(magJ3, magK2));
-        ImList<Magnitude> magList = target.getMagnitudes();
+        target.getTarget().setMagnitudes(DefaultImList.create(magJ3, magK2));
+        ImList<Magnitude> magList = target.getTarget().getMagnitudes();
 
         assertEquals(2, magList.size());
-        assertEquals(magJ3, target.getMagnitude(Magnitude.Band.J).getValue());
-        assertEquals(magK2, target.getMagnitude(Magnitude.Band.K).getValue());
+        assertEquals(magJ3, target.getTarget().getMagnitude(Magnitude.Band.J).getValue());
+        assertEquals(magK2, target.getTarget().getMagnitude(Magnitude.Band.K).getValue());
     }
 }

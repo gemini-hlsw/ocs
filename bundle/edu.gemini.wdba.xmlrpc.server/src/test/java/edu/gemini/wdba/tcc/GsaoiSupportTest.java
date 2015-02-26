@@ -36,7 +36,8 @@ public final class GsaoiSupportTest extends InstrumentSupportTestBase<Gsaoi> {
         super(Gsaoi.SP_TYPE);
 
         base = new SPTarget();
-        base.setName("Base Pos");
+        base.getTarget().setName("Base Pos");
+        base.notifyOfGenericUpdate();
     }
 
     @Before public void setUp() throws Exception {

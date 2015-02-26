@@ -36,24 +36,16 @@ public final class OffsetPosCase {
 
     class MyPosWatcher implements TelescopePosWatcher {
 
-        int locUpdateCount = 0;
-        int genericUpdateCount = 0;
+        int updateCount = 0;
 
-        public void telescopePosLocationUpdate(WatchablePos tp) {
-            locUpdateCount++;
+        public void telescopePosUpdate(WatchablePos tp) {
+            updateCount += 1;
         }
 
-        public void telescopePosGenericUpdate(WatchablePos tp) {
-            genericUpdateCount++;
+        public int getUpdateCount() {
+            return updateCount;
         }
 
-        public int getLocUpdateCount() {
-            return locUpdateCount;
-        }
-
-        public int getGenericUpdateCount() {
-            return genericUpdateCount;
-        }
     }
 
     static final private double _ERROR = .00001;
@@ -108,8 +100,7 @@ public final class OffsetPosCase {
         off0.addWatcher(w);
 
         off0.setXY(2.0, 3.0, IssPort.DEFAULT);
-        assertEquals(1, w.getLocUpdateCount());
-        assertEquals(0, w.getGenericUpdateCount());
+        assertEquals(1, w.getUpdateCount());
     }
 
     // Test the static creation methods.

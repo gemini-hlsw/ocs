@@ -12,7 +12,6 @@ import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 
-
 import java.security.Principal;
 import java.util.*;
 import java.util.logging.Level;
@@ -33,7 +32,7 @@ public class ReapplicationFunctor extends DBAbstractFunctor {
     private static final Logger LOGGER = Logger.getLogger(ReapplicationFunctor.class.getName());
 
     private final UserRolePrivileges urps;
-    private final Set<ISPObservation> selection = new HashSet<ISPObservation>();
+    private final Set<ISPObservation> selection = new HashSet<>();
 
     public ReapplicationFunctor(UserRolePrivileges urps) {
         this.urps = urps;
@@ -64,18 +63,21 @@ public class ReapplicationFunctor extends DBAbstractFunctor {
         // Get the originating template key, if any
         final SPObservation obsData = (SPObservation) obs.getDataObject();
         final SPNodeKey key = obsData.getOriginatingTemplate();
-        if (key == null)
+        if (key == null) {
             throw new IllegalArgumentException("No originating template found for " + obs.getObservationID());
+        }
 
         // Get the template itself
         final ISPProgram prog = db.lookupProgram(obs.getProgramKey());
         final ISPObservation templateObs = (ISPObservation) lookupNode(key, prog);
-        if (templateObs == null)
+        if (templateObs == null) {
             throw new IllegalArgumentException("Originating template for " + obs.getObservationID() + " no longer exists.");
+        }
 
         // Check state and privileges
-        if (!ReapplicationCheckFunctor.canReapply(db, urps, obs))
+        if (!ReapplicationCheckFunctor.canReapply(db, urps, obs)) {
             throw new IllegalArgumentException("Reapply not allowed for " + obs.getObservationID());
+        }
 
         // Ok, we're good.
         reapply(db, obs, templateObs);
@@ -109,12 +111,12 @@ public class ReapplicationFunctor extends DBAbstractFunctor {
 
         // If it's a science observation, restore the target and position angle
         final ObsClass newObsClass = ObsClassService.lookupObsClass(obs);
-        if (newObsClass == ObsClass.SCIENCE || newObsClass == ObsClass.ACQ)
+        if (newObsClass == ObsClass.SCIENCE || newObsClass == ObsClass.ACQ) {
             restoreScienceDetails(obs, oldTarget, oldConditions, oldInstrument);
-
+        }
     }
 
-    private static void restoreScienceDetails(ISPObservation obs, ISPObsComponent oldTarget, ISPObsComponent oldConditions, ISPObsComponent oldInstrument) throws SPNodeNotLocalException, SPTreeStateException {
+    private static void restoreScienceDetails(final ISPObservation obs, final ISPObsComponent oldTarget, final ISPObsComponent oldConditions, final ISPObsComponent oldInstrument) throws SPNodeNotLocalException, SPTreeStateException {
 
         // Restore old target and conditions if not already present
         addIfNotPresent(obs, oldTarget);
@@ -126,7 +128,8 @@ public class ReapplicationFunctor extends DBAbstractFunctor {
             if (newInstrument != null) {
                 final SPInstObsComp oldData = (SPInstObsComp) oldInstrument.getDataObject();
                 final SPInstObsComp newData = (SPInstObsComp) newInstrument.getDataObject();
-                newData.setPosAngle(oldData.getPosAngle());
+                // REL-814 Delegate to the instrument the decision of what data to restore
+                newData.restoreScienceDetails(oldData);
                 newInstrument.setDataObject(newData);
             }
         }

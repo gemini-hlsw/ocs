@@ -13,7 +13,6 @@ import edu.gemini.wdba.xmlrpc.ServiceException;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Implementation of the OCS Session functionality.
@@ -23,18 +22,18 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public final class SessionXmlRpcHandler implements ISessionXmlRpc {
 
-    // SW: Okay this class has to have an empty argument constructor (thank you
-    // apache XML RPC).  Storing a WdbaContext to use :/
-    private static final AtomicReference<WdbaContext> context = new AtomicReference<WdbaContext>();
-
-    public static void setContext(WdbaContext context) {
-        SessionXmlRpcHandler.context.set(context);
+    // Create the "SessionManagement" instance when we have the WdbaContext.
+    // Unfortunately SessionXmlRpcHandler has to have a no-args constructor so
+    // this has to be set from the activator and then later used by the
+    // SessionXmlRpcHandler that is eventually created.
+    private static SessionManagement sm = null;
+    public static synchronized void setContext(WdbaContext context) {
+        sm = (context == null) ? null : new SessionManagement(context, new ProductionSessionConfiguration(context));
     }
 
-    private synchronized SessionManagement sm() throws ServiceException {
-        final WdbaContext ctx = context.get();
-        if (ctx == null) throw new ServiceException("db not available");
-        return new SessionManagement(ctx, new ProductionSessionConfiguration(ctx));
+    private static synchronized SessionManagement sm() throws ServiceException {
+        if (sm == null) throw new ServiceException("db not available");
+        return sm;
     }
 
     /**
@@ -43,7 +42,7 @@ public final class SessionXmlRpcHandler implements ISessionXmlRpc {
      * @return the id of the new session, which must be used in the other
      *         methods.
      */
-    public synchronized String createSession() throws ServiceException {
+    public String createSession() throws ServiceException {
         return sm().createSession();
     }
 

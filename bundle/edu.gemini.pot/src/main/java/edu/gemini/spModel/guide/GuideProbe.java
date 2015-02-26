@@ -117,5 +117,5 @@ public interface GuideProbe {
      * Gets a represenation of the patrol field which is flipped and offset according to instrument
      * specifics (e.g. IFU offsets for GMOS and the port the instrument is currently mounted on).
      */
-    PatrolField getCorrectedPatrolField(ObsContext ctx);
+    Option<PatrolField> getCorrectedPatrolField(ObsContext ctx);
 }

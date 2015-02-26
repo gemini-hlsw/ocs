@@ -1,0 +1,26 @@
+# optical sky transmission 0.31-0.9um
+# 1.0mm H2O, sec z = 1.5
+#  
+# Derived from the adopted optical extinction
+# no fine-scaled modelling of specific absorption lines
+# no consideration of effect of water vapour
+# 9Feb2001 - Phil Puxley
+#
+#  Wavelength   Transmission
+#  (nm)  
+
+310	0.151
+320	0.322
+340	0.494
+360	0.600
+380	0.661
+400	0.708
+450	0.791
+500	0.836
+550	0.847
+600	0.859
+650	0.859
+700	0.871
+800	0.908
+900	0.933
+1200    0.933

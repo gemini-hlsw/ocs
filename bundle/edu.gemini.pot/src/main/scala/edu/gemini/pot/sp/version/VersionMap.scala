@@ -1,5 +1,7 @@
 package edu.gemini.pot.sp.version
 
+import edu.gemini.shared.util.VersionComparison
+
 /**
  *
  */
@@ -55,4 +57,6 @@ object VersionMap {
   def isNewer(newJvm: Option[VersionMap], oldJvm: Option[VersionMap]): Boolean =
     VersionMap.tryCompare(newJvm, oldJvm).forall(_ > 0)
 
+  def compare(x: VersionMap, y: VersionMap): VersionComparison =
+    VersionComparison(tryCompare(x,y))
 }

@@ -193,7 +193,7 @@ public class MaskEdit extends JFrame {
         TileCache cache = JAI.getDefaultInstance().getTileCache();
         cache.setMemoryCapacity(tilecache * 1024 * 1024);
 
-        Theme.installGreenTheme();
+        Theme.install();
 
         // Set the default catalog config file URL
         SkycatConfigFile.setConfigFile(Resources.getResource("conf/skycat.cfg"));

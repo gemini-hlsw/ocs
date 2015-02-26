@@ -42,9 +42,6 @@ package object vcs {
 
   def conflicts(notes: List[Conflict.Note]*): Conflicts =
     Conflicts.apply(toImList(notes.flatten.toList))
-}
-
-package vcs {
 
   sealed trait OdbPerspective
   case object LocalOdb extends OdbPerspective

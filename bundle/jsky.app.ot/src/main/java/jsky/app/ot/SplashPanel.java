@@ -201,7 +201,7 @@ public final class SplashPanel extends JPanel implements PluginConsumer, ActionL
         public String toString() { return plugin.name(); }
         public void openPlugin() {
             Option<ISPProgramNode> none = Option.apply(null);
-            OtContext otContext = new OtContext(none, ObservingPeer.get(), OT.getKeyChain());
+            OtContext otContext = new OtContext(none, ObservingPeer.get(), OT.getKeyChain(), OT.getMagnitudeTable());
             plugin.apply(otContext, SwingUtilities.getWindowAncestor(getParent()));
         }
     }

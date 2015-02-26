@@ -29,7 +29,7 @@ class SpBlueprintFactoryTest {
 
   @Test
   def buildGraces() {
-    val gracesBlueprint = GracesBlueprint(M.GracesFiberMode.ONE_FIBER)
+    val gracesBlueprint = GracesBlueprint(M.GracesFiberMode.ONE_FIBER, M.GracesReadMode.NORMAL)
     val factory = SpBlueprintFactory.create(gracesBlueprint)
     assertTrue(factory.isRight)
     assertEquals(SPComponentType.INSTRUMENT_VISITOR, factory.right.get.instrumentType())

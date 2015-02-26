@@ -3,21 +3,23 @@ package edu.gemini.p2checker.rules.flamingos2;
 
 import edu.gemini.p2checker.api.*;
 import edu.gemini.p2checker.rules.gems.GemsGuideStarRule;
-import edu.gemini.p2checker.util.MdfConfigRule;
 import edu.gemini.p2checker.util.AbstractConfigRule;
+import edu.gemini.p2checker.util.MdfConfigRule;
+import edu.gemini.p2checker.util.NoPOffsetWithSlitRule;
 import edu.gemini.p2checker.util.SequenceRule;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
+import scala.Option;
+import scala.runtime.AbstractFunction2;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import scala.Option;
 
 /**
  * Flamingos 2 rule.
  */
-public class Flamingos2Rule implements IRule {
+public final class Flamingos2Rule implements IRule {
     private static final Collection<IConfigRule> FLAM2_RULES = new ArrayList<IConfigRule>();
     private static final String PREFIX = "Flamingos2Rule_";
 
@@ -82,12 +84,26 @@ public class Flamingos2Rule implements IRule {
         }
     }
 
+    /**
+     * REL-1811: Warn if there are P-offsets for a slit spectroscopy observation.
+     * Warn for FPU = (*arcsec or Custom Mask)
+     */
+    private static IConfigRule NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE = new NoPOffsetWithSlitRule(
+        PREFIX,
+        new AbstractFunction2<Config, ObservationElements, Boolean>() {
+            public Boolean apply(Config config, ObservationElements elems) {
+                final Flamingos2.FPUnit fpu = (Flamingos2.FPUnit) SequenceRule.getInstrumentItem(config, Flamingos2.FPU_PROP);
+                return fpu.isLongslit() || fpu == Flamingos2.FPUnit.CUSTOM_MASK;
+            }
+        }
+    );
 
     /**
      * Register all the Flamingos 2 rules to apply.
      */
     static {
         FLAM2_RULES.add(EXPOSURE_TIME_RULE);
+        FLAM2_RULES.add(NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE);
         FLAM2_RULES.add(new MdfMaskNameRule(Problem.Type.ERROR));
         FLAM2_RULES.add(new MdfMaskNameRule(Problem.Type.WARNING));
     }

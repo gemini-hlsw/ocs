@@ -52,40 +52,44 @@ def common(version: Version) = AppConfig(
     "-Dnetworkaddress.cache.ttl=60"
   ),
   props = Map(
-    "edu.gemini.auxfile.chunkSize"               -> "32768",
-    "edu.gemini.auxfile.fits.dest"               -> "/please/specify/in/host/specific/property/file",
-    "edu.gemini.auxfile.other.dest"              -> "/please/specify/in/host/specific/property/file",
-    "edu.gemini.auxfile.other.host"              -> "gnconfig.gemini.edu",
-    "edu.gemini.auxfile.server"                  -> "true",
-    "edu.gemini.dataman.dbScanMinutes"           -> "15",
-    "edu.gemini.dataman.gsaCrcUrl"               -> "http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/cadcbin/geminiInfo?file=%FILE%&options=-ufilecrc",
-    "edu.gemini.dataman.xfer.cadcGroup.gsa"      -> "cadcops",
-    "edu.gemini.dataman.xfer.cadcRoot.gsa"       -> "/home/cadcops/installed/mdIngest",
-    "edu.gemini.dataman.xfer.destDir.gsa"        -> "/u1/CADC/dataflow",
-    "edu.gemini.dataman.xfer.mdIngestScript.gsa" -> "/home/cadcops/installed/mdIngest/mdIngest",
-    "edu.gemini.dataman.xfer.tempDir.gsa"        -> "/u1/CADC/dataflow/.xfer",
-    "edu.gemini.dirmon.activeSetPollPeriod"      -> "5000",
-    "edu.gemini.dirmon.activeSetSize"            -> "100",
-    "edu.gemini.dirmon.fullDirPollPeriod"        -> "120000",
-    "edu.gemini.filefilter.excludes"             -> "tmp.*",
-    "edu.gemini.filefilter.excludes.2"           -> ".*b\\.fits",
-    "edu.gemini.filefilter.includes"             -> ".*\\.fits",
-    "edu.gemini.oodb.mail.senderAddr"            -> "no_reply@gemini.edu",
-    "edu.gemini.oodb.mail.senderName"            -> "Gemini ODB",
-    "edu.gemini.oodb.mail.smtpHost"              -> "smtp.cl.gemini.edu",
-    "edu.gemini.smartgcal.host"                  -> "gsodbtest2",
-    "edu.gemini.smartgcal.svnRootUrl"            -> "http://source.gemini.edu/gcal/branches/development/calibrations",
-    "edu.gemini.smartgcal.updateInterval"        -> "7200",
-    "edu.gemini.spdb.mode"                       -> "local",
-    "edu.gemini.too.event.mode"                  -> "service",
-    "edu.gemini.util.security.auth.startServer"  -> "true",
-    "org.ops4j.pax.web.ssl.keystore"             -> "conf/gemKeystore",
-    "org.osgi.framework.bootdelegation"          -> "*",
-    "org.osgi.framework.startlevel.beginning"    -> "99",
-    "org.osgi.framework.storage.clean"           -> "onFirstInit",
-    "org.osgi.service.http.port"                 -> "8442",
-    "org.osgi.service.http.port.secure"          -> "8443",
-    "org.osgi.service.http.secure.enabled"       -> "true"
+    "edu.gemini.auxfile.chunkSize"                     -> "32768",
+    "edu.gemini.auxfile.fits.dest"                     -> "/please/specify/in/host/specific/property/file",
+    "edu.gemini.auxfile.other.dest"                    -> "/please/specify/in/host/specific/property/file",
+    "edu.gemini.auxfile.other.host"                    -> "gnconfig.gemini.edu",
+    "edu.gemini.auxfile.server"                        -> "true",
+    "edu.gemini.dataman.dbScanMinutes"                 -> "15",
+    "edu.gemini.dataman.gsaCrcUrl"                     -> "http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/cadcbin/geminiInfo?file=%FILE%&options=-ufilecrc",
+    "edu.gemini.dataman.xfer.cadcGroup.gsa"            -> "cadcops",
+    "edu.gemini.dataman.xfer.cadcRoot.gsa"             -> "/home/cadcops/installed/mdIngest",
+    "edu.gemini.dataman.xfer.destDir.gsa"              -> "/u1/CADC/dataflow",
+    "edu.gemini.dataman.xfer.mdIngestScript.gsa"       -> "/home/cadcops/installed/mdIngest/mdIngest",
+    "edu.gemini.dataman.xfer.tempDir.gsa"              -> "/u1/CADC/dataflow/.xfer",
+    "edu.gemini.dirmon.activeSetPollPeriod"            -> "5000",
+    "edu.gemini.dirmon.activeSetSize"                  -> "100",
+    "edu.gemini.dirmon.fullDirPollPeriod"              -> "120000",
+    "edu.gemini.filefilter.excludes"                   -> "tmp.*",
+    "edu.gemini.filefilter.excludes.2"                 -> ".*b\\.fits",
+    "edu.gemini.filefilter.includes"                   -> ".*\\.fits",
+    "edu.gemini.oodb.mail.senderAddr"                  -> "no_reply@gemini.edu",
+    "edu.gemini.oodb.mail.senderName"                  -> "Gemini ODB",
+    "edu.gemini.oodb.mail.smtpHost"                    -> "smtp.cl.gemini.edu",
+    "edu.gemini.services.telescope.schedule.id.north"  -> "m882dsr2asoddjcte5250lvn6c@group.calendar.google.com",
+    "edu.gemini.services.telescope.schedule.url.north" -> "https://www.google.com/calendar/embed?src=m882dsr2asoddjcte5250lvn6c%40group.calendar.google.com",
+    "edu.gemini.services.telescope.schedule.id.south"  -> "aiv4b2forl2gaovsu8na39vs5s@group.calendar.google.com",
+    "edu.gemini.services.telescope.schedule.url.south" -> "https://www.google.com/calendar/embed?src=aiv4b2forl2gaovsu8na39vs5s%40group.calendar.google.com",
+    "edu.gemini.smartgcal.host"                        -> "gsodbtest2",
+    "edu.gemini.smartgcal.svnRootUrl"                  -> "http://source.gemini.edu/gcal/branches/development/calibrations",
+    "edu.gemini.smartgcal.updateInterval"              -> "7200",
+    "edu.gemini.spdb.mode"                             -> "local",
+    "edu.gemini.too.event.mode"                        -> "service",
+    "edu.gemini.util.security.auth.startServer"        -> "true",
+    "org.ops4j.pax.web.ssl.keystore"                   -> "conf/gemKeystore",
+    "org.osgi.framework.bootdelegation"                -> "*",
+    "org.osgi.framework.startlevel.beginning"          -> "99",
+    "org.osgi.framework.storage.clean"                 -> "onFirstInit",
+    "org.osgi.service.http.port"                       -> "8442",
+    "org.osgi.service.http.port.secure"                -> "8443",
+    "org.osgi.service.http.secure.enabled"             -> "true"
   ),
   log = Some("log/spdb.%u.%g.log"),
   bundles = List(
@@ -106,6 +110,7 @@ def common(version: Version) = AppConfig(
     BundleSpec("edu.gemini.qpt.shared",                  version),
     BundleSpec("edu.gemini.services.server",             version),
     BundleSpec("edu.gemini.smartgcal.odbinit",           version),
+    BundleSpec("edu.gemini.smartgcal.servlet",           version),
     BundleSpec("edu.gemini.sp.vcs.tui",                  version),
     BundleSpec("edu.gemini.spdb.rollover.servlet",       version),
     BundleSpec("edu.gemini.spdb.shell",                  version),
@@ -123,7 +128,10 @@ def common(version: Version) = AppConfig(
     BundleSpec("org.scalaz.concurrent",                  Version(7, 0, 5)),
     BundleSpec("slf4j.api",                              Version(1, 6, 4)),
     BundleSpec("slf4j.jdk14",                            Version(1, 6, 4)),
-    BundleSpec("org.apache.commons.logging",             Version(1, 1, 0))
+    BundleSpec("org.apache.commons.logging",             Version(1, 1, 0)),
+    BundleSpec("com.cosylab.epics.caj",                  Version(1, 0, 2)),
+    BundleSpec("edu.gemini.shared.ca",                   version),
+    BundleSpec("edu.gemini.spdb.reports.collection",     version)
   )
 ) extending List(common_credentials(version))
 
@@ -235,9 +243,15 @@ def fnussber(version: Version) = AppConfig(
   id = "fnussber",
   distribution = List(TestDistro),
   vmargs = List(
-    "-Xmx3000M",
+    "-Xmx2000M",
     "-XX:MaxPermSize=196M",
-    "-Dedu.gemini.site=north"
+    "-Dedu.gemini.site=north",
+    "-Dcron.*.edu.gemini.dbTools.html.ftpHost=localhost",
+    "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/Users/fnussber/.spdb/sftp",
+    "-Dcron.reports.edu.gemini.spdb.reports.public.host=localhost",
+    "-Dcron.reports.edu.gemini.spdb.reports.public.remotedir=/Users/fnussber/.spdb/cron",
+    "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=localhost",
+    "-Dcron.archive.edu.gemini.dbTools.html.ftpDestDir=/Users/fnussber/.spdb/cron"
   ),
   props = Map(
     "edu.gemini.smartgcal.host"     -> "localhost",
@@ -254,14 +268,16 @@ def fnussber(version: Version) = AppConfig(
 def sraaphorst(version: Version) = AppConfig(
   id = "sraaphorst",
   distribution = List(TestDistro),
-  vmargs = List(
-    "-Xmx1024M",
-    "-XX:MaxPermSize=196M",
-    "-Dedu.gemini.site=north",
-    "-Dcron.*.edu.gemini.dbTools.html.ftpHost=localhost",
-    "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/Users/ftpuser/sftp",
-    "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=localhost",
-    "-Dcron.archive.edu.gemini.dbTools.html.ftpDestDir=/Users/sraaphor/cron"
+   vmargs = List(
+     "-Xmx1024M",
+     "-XX:MaxPermSize=196M",
+     "-Dedu.gemini.site=south",
+     "-Dcron.*.edu.gemini.dbTools.html.ftpHost=localhost",
+     "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/Users/sraaphor/.spdb/sftp",
+     "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=localhost",
+     "-Dcron.archive.edu.gemini.dbTools.html.ftpDestDir=/Users/sraaphor/cron",
+     "-Dcron.reports.edu.gemini.spdb.reports.public.host=localhost",
+     "-Dcron.reports.edu.gemini.spdb.reports.public.remotedir=/Users/sraaphor/cron"
   ),
   props = Map(
     "edu.gemini.smartgcal.host"            -> "localhost",
@@ -397,13 +413,12 @@ def odbproduction(version: Version) = AppConfig(
     "-XX:MaxPermSize=512M"
   ),
   props = Map(
-    "edu.gemini.smartgcal.host"       -> "gsodb",
-    "edu.gemini.smartgcal.svnRootUrl" -> "http://source.gemini.edu/gcal/trunk/calibrations"
-  ),
-  bundles = List(
-    BundleSpec(50, "com.cosylab.epics.caj",              Version(1, 0, 2)),
-    BundleSpec(50, "edu.gemini.shared.ca",               version),
-    BundleSpec(50, "edu.gemini.spdb.reports.collection", version)
+    "edu.gemini.smartgcal.host"                        -> "gsodb",
+    "edu.gemini.smartgcal.svnRootUrl"                  -> "http://source.gemini.edu/gcal/trunk/calibrations",
+    "edu.gemini.services.telescope.schedule.id.north"  -> "00h6i49qldh5qrteote4nfhldo@group.calendar.google.com",
+    "edu.gemini.services.telescope.schedule.id.south"  -> "c4br8ehtv4i8741jfe4ef5saq8@group.calendar.google.com",
+    "edu.gemini.services.telescope.schedule.url.north" -> "https://www.google.com/calendar/embed?src=00h6i49qldh5qrteote4nfhldo%40group.calendar.google.com",
+    "edu.gemini.services.telescope.schedule.url.south" -> "https://www.google.com/calendar/embed?src=c4br8ehtv4i8741jfe4ef5saq8%40group.calendar.google.com"
   )
 ) extending List(with_remote_gogo(version), odbproduction_credentials(version))
 

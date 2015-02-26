@@ -113,6 +113,11 @@ public class OTOptions {
                hasPermission(new VisitorPermission(pid));
     }
 
+    public static boolean isStaff(ISPProgram prog) {
+        final SPProgramID pid = (prog == null) ? null : prog.getProgramID();
+        return (pid != null) && isStaff(pid);
+    }
+
     public static boolean isStaffGlobally() {
         return hasPermission(new StaffPermission()) ||
                hasPermission(new VisitorPermission());

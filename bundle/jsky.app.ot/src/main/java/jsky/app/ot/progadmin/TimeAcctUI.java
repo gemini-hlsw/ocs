@@ -37,6 +37,8 @@ final class TimeAcctUI extends JPanel {
 
             JLabel lab = new JLabel();
             lab.setHorizontalAlignment(JLabel.TRAILING);
+            lab.setPreferredSize(new Dimension(lab.getFontMetrics(lab.getFont()).stringWidth("100%"),
+                    lab.getFontMetrics(lab.getFont()).getHeight()));
             percentLabelMap.put(cat, lab);
         }
 
@@ -124,7 +126,7 @@ final class TimeAcctUI extends JPanel {
             gbc.anchor    = GridBagConstraints.EAST;
             gbc.gridx     = col+2;
             gbc.gridy     = row;
-            gbc.insets    = new Insets(10, 0, 0, (col == 0) ? 15 : 0);
+            gbc.insets    = new Insets(10, 0, 0, (col == 0) ? 30 : 0);
             pan.add(percentLabelMap.get(cat), gbc);
         }
 

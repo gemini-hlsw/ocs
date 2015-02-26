@@ -24,7 +24,7 @@ public class CatalogHistoryList {
     private static final String HISTORY_LIST_NAME = "catalogHistoryList";
 
     // List of CatalogHistoryItem, for previously viewed catalogs or query results.
-    private LinkedList _historyList;
+    private LinkedList<CatalogHistoryItem> _historyList;
 
     // Max number of items in the history list
     private int _maxHistoryItems = 20;
@@ -34,26 +34,19 @@ public class CatalogHistoryList {
      * Constructor
      */
     public CatalogHistoryList() {
-//        _load();
-        _historyList = new LinkedList();
-
-        // arrange to save the history list for the next session on exit
-//        Runtime.getRuntime().addShutdownHook(new Thread() {
-//            public void run() {
-//                _save(true);
-//            }
-//        });
+        _historyList = new LinkedList<>();
     }
 
 
     /**
      * Add the given item to the history stack, removing duplicates.
      */
+    @SuppressWarnings("unchecked")
     public void add(CatalogHistoryItem historyItem) {
         // remove duplicates from history list
-        ListIterator it = ((LinkedList) _historyList.clone()).listIterator(0);
+        final ListIterator<CatalogHistoryItem> it = ((LinkedList<CatalogHistoryItem>) _historyList.clone()).listIterator(0);
         for (int i = 0; it.hasNext(); i++) {
-            CatalogHistoryItem item = (CatalogHistoryItem) it.next();
+            final CatalogHistoryItem item = it.next();
             if (item.getName().equals(historyItem.getName()))
                 _historyList.remove(i);
         }
@@ -80,7 +73,7 @@ public class CatalogHistoryList {
     /**
      * Return an iterator over the history list
      */
-    public Iterator iterator() {
+    public Iterator<CatalogHistoryItem> iterator() {
         return _historyList.iterator();
     }
 
@@ -89,42 +82,43 @@ public class CatalogHistoryList {
      * Make the history list empty
      */
     public void clear() {
-        _historyList = new LinkedList();
+        _historyList = new LinkedList<>();
         _save(false);
     }
 
     // This method is called after the history list is deserialized to remove any
     // items in the list that can't be accessed.
     private void _cleanup() {
-        ListIterator it = _historyList.listIterator(0);
-        CatalogDirectory catDir = CatalogNavigator.getCatalogDirectory();
+        final ListIterator<CatalogHistoryItem> it = _historyList.listIterator(0);
+        final CatalogDirectory catDir = CatalogNavigator.getCatalogDirectory();
         while (it.hasNext()) {
-            CatalogHistoryItem item = (CatalogHistoryItem) it.next();
+            final CatalogHistoryItem item = it.next();
             if (item.getURLStr() == null && catDir.getCatalog(item.getName()) == null)
                 it.remove();
         }
     }
 
     // Try to load the history list from a file, and create an empty list if that fails. */
+    @SuppressWarnings("unchecked")
     private void _load() {
         try {
-            _historyList = (LinkedList) Preferences.getPreferences().deserialize(HISTORY_LIST_NAME);
+            _historyList = (LinkedList<CatalogHistoryItem>) Preferences.getPreferences().deserialize(HISTORY_LIST_NAME);
             _cleanup();
         } catch (Exception e) {
-            _historyList = new LinkedList();
+            _historyList = new LinkedList<>();
         }
     }
 
     // Merge the _historyList with current serialized version (another instance
     // may have written it since we read it last).
-    private LinkedList _merge() {
-        LinkedList savedHistory = _historyList;
+    private LinkedList<CatalogHistoryItem> _merge() {
+        LinkedList<CatalogHistoryItem> savedHistory = _historyList;
         _load();
 
         // Go through the list in reverse, since add() inserts at the start of the list
-        ListIterator it = savedHistory.listIterator(savedHistory.size());
+        ListIterator<CatalogHistoryItem> it = savedHistory.listIterator(savedHistory.size());
         while (it.hasPrevious()) {
-            add((CatalogHistoryItem) it.previous());
+            add(it.previous());
         }
         return _historyList;
     }
@@ -134,7 +128,7 @@ public class CatalogHistoryList {
     // If merge is true, merge the list with the existing list on disk.
     private void _save(boolean merge) {
         try {
-            LinkedList l;
+            LinkedList<CatalogHistoryItem> l;
             if (merge)
                 l = _merge();
             else
