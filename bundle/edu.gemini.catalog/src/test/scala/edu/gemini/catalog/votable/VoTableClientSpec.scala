@@ -15,7 +15,7 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
   val noMagnitudeConstraint = MagnitudeConstraints(MagnitudeBand.J, FaintnessConstraint(100), None)
   "The VoTable client" should {
 
-    val query = CatalogQuery(Coordinates.zero, RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromDegrees(0.2)), noMagnitudeConstraint)
+    val query = CatalogQuery(Coordinates.zero, RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromDegrees(0.2)), Some(noMagnitudeConstraint))
 
     "produce query params" in {
       queryParams(query) should beEqualTo(Array(new NameValuePair("CATALOG", "ucac4"), new NameValuePair("RA", "0.000"), new NameValuePair("DEC", "0.000"), new NameValuePair("SR", "0.200")))
@@ -32,7 +32,7 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
     }
     "make a query (skipped if it fails)" in {
       // We'll skip this one if it fails as it depends on the remote server and the content may change
-      Await.result(VoTableClient.catalog(query), 5.seconds).containsError should beFalse.orSkip("Catalog maybe down")
+      Await.result(VoTableClient.catalog(query), 5.seconds).result.containsError should beFalse.orSkip("Catalog maybe down")
     }
 
   }

@@ -69,6 +69,8 @@ object CatalogQueryResult {
   implicit val monoid = Monoid.instance[CatalogQueryResult]((a, b) => CatalogQueryResult(a.targets |+| b.targets, a.problems |+| b.problems), Zero)
 }
 
+case class QueryResult(query: CatalogQuery, result: CatalogQueryResult)
+
 /** Indicates an issue parsing the targets, e.g. missing values, bad format, etc. */
 sealed trait CatalogProblem
 
@@ -77,3 +79,10 @@ case class GenericError(msg: String) extends CatalogProblem
 case class MissingValues(fields: List[Ucd]) extends CatalogProblem
 case class FieldValueProblem(ucd: Ucd, value: String) extends CatalogProblem
 case class UnmatchedField(ucd: Ucd) extends CatalogProblem
+
+case class CatalogException(problems: List[CatalogProblem]) extends RuntimeException(problems.mkString(", ")) {
+  def firstMessage:String = ~problems.headOption.map {
+    case e: GenericError => e.msg
+    case e               => e.toString
+  }
+}

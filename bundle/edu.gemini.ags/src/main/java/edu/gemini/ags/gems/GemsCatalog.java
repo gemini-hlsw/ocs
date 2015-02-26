@@ -10,7 +10,6 @@ import edu.gemini.catalog.skycat.table.DefaultCatalogHeader;
 import edu.gemini.catalog.skycat.table.DefaultCatalogRow;
 import edu.gemini.catalog.skycat.table.SkyObjectFactory;
 import edu.gemini.shared.skyobject.SkyObject;
-import edu.gemini.shared.skyobject.coords.SkyCoordinates;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.core.Coordinates;
 import edu.gemini.spModel.core.Magnitude;
@@ -50,6 +49,7 @@ import java.util.logging.Logger;
  * The catalog search will provide the inputs to the analysis phase, which actually assigns guide stars to guiders.
  * See OT-26
  */
+@Deprecated
 public class GemsCatalog {
 
     private static final Logger LOG = Logger.getLogger(GemsCatalog.class.getName());
@@ -73,8 +73,9 @@ public class GemsCatalog {
      * @param nirBand      optional NIR magnitude band (default is H)
      * @return list of search results
      */
-    public List<GemsCatalogSearchResults> search(final ObsContext obsContext, final SkyCoordinates basePosition, final GemsGuideStarSearchOptions options,
-                                                 final Option<MagnitudeBand> nirBand, final StatusLogger statusLogger)
+    @Deprecated
+    public List<GemsCatalogSearchResults> search(final ObsContext obsContext, final Coordinates basePosition, final GemsGuideStarSearchOptions options,
+                                                 final scala.Option<MagnitudeBand> nirBand, final StatusLogger statusLogger)
             throws Exception {
         final Map<GemsCatalogSearchCriterion, List<Target.SiderealTarget>> map = new HashMap<>();
         final List<Exception> exceptions = new ArrayList<>();
@@ -127,7 +128,7 @@ public class GemsCatalog {
      * @param searchResultsListener notified when search results are available
      * @return a list of threads used for background catalog searches
      */
-    private List<Thread> search(final SkyCoordinates basePosition, final List<GemsCatalogSearchCriterion> criterList,
+    private List<Thread> search(final Coordinates basePosition, final List<GemsCatalogSearchCriterion> criterList,
                                 final Set<String> catalogs, final SearchResultsListener searchResultsListener,
                                 final StatusLogger statusLogger) {
 
@@ -162,7 +163,7 @@ public class GemsCatalog {
      * @param searchResultsListener notified when search results are available
      * @return a list of threads used for background catalog searches
      */
-    private List<Thread> searchOptimized(final SkyCoordinates basePosition, final List<GemsCatalogSearchCriterion> criterList,
+    private List<Thread> searchOptimized(final Coordinates basePosition, final List<GemsCatalogSearchCriterion> criterList,
                                          final Set<String> catalogs, final GemsInstrument inst, final SearchResultsListener searchResultsListener,
                                          final StatusLogger statusLogger) {
 
@@ -224,7 +225,7 @@ public class GemsCatalog {
 
     // Performs a search in the given catalog in a background thread and calls the given listener with the results.
     // Returns the thread object.
-    private Thread searchCatalog(final Catalog catalog, final SkyObjectFactory factory, final SkyCoordinates basePosition,
+    private Thread searchCatalog(final Catalog catalog, final SkyObjectFactory factory, final Coordinates basePosition,
                                                   final List<GemsCatalogSearchCriterion> criterList,
                                                   final RadiusConstraint radiusLimits, final MagnitudeConstraints magLimits,
                                                   final SearchResultsListener searchResultsListener,
@@ -232,12 +233,11 @@ public class GemsCatalog {
         final Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
-                final Coordinates coordinates = GemsUtils4Java.toCoordinates(basePosition);
                 try {
-                    final QueryArgs queryArgs = getQueryArgs(catalog, factory, coordinates, radiusLimits, magLimits, statusLogger);
+                    final QueryArgs queryArgs = getQueryArgs(catalog, factory, basePosition, radiusLimits, magLimits, statusLogger);
                     final QueryResult queryResult = catalog.query(queryArgs);
                     final TableQueryResult table = (TableQueryResult) queryResult;
-                    searchResultsListener.setResults(filter(coordinates, table, factory, criterList));
+                    searchResultsListener.setResults(filter(basePosition, table, factory, criterList));
                 } catch (Exception e) {
                     searchResultsListener.setException(e);
                 }

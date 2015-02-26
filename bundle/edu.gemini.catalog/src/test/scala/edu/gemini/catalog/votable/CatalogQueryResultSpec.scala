@@ -19,19 +19,19 @@ class CatalogQueryResultSpec extends SpecificationWithJUnit {
 
   "CatalogQueryResultSpec" should {
     "be able to filter targets inside the requested range limit" in {
-      val qc = CatalogQuery(c, RadiusConstraint.between(Angle.zero, coneSearch), noMagnitudeConstraint)
+      val qc = CatalogQuery(c, RadiusConstraint.between(Angle.zero, coneSearch), Some(noMagnitudeConstraint))
       // Filtering on search radius should give all back
       unfiltered.filter(qc).targets.rows should be size 12
     }
     "be able to filter targets to a specific ring" in {
-      val qc = CatalogQuery(c, RadiusConstraint.between(Angle.fromDegrees(0.05), coneSearch), noMagnitudeConstraint)
+      val qc = CatalogQuery(c, RadiusConstraint.between(Angle.fromDegrees(0.05), coneSearch), Some(noMagnitudeConstraint))
       val filtered = unfiltered.filter(qc)
 
       // Filtering on search radius filters out 4 targets
       filtered.targets.rows should be size 8
     }
     "be able to filter by band" in {
-      val qc = CatalogQuery(c, RadiusConstraint.between(Angle.fromDegrees(0.05), coneSearch), noMagnitudeConstraint)
+      val qc = CatalogQuery(c, RadiusConstraint.between(Angle.fromDegrees(0.05), coneSearch), Some(noMagnitudeConstraint))
       val filtered = unfiltered.filter(qc)
 
       // Filtering on search radius filters out 4 targets
@@ -39,7 +39,7 @@ class CatalogQueryResultSpec extends SpecificationWithJUnit {
     }
     "be able to filter by faintness on band j" in {
       val m = MagnitudeConstraints(MagnitudeBand.J, FaintnessConstraint(15.0), None)
-      val qc = CatalogQuery(c, RadiusConstraint.between(Angle.zero, coneSearch), m)
+      val qc = CatalogQuery(c, RadiusConstraint.between(Angle.zero, coneSearch), Some(m))
       val filtered = unfiltered.filter(qc)
 
       // Filtering on magnitude discards 3 targets
@@ -47,7 +47,7 @@ class CatalogQueryResultSpec extends SpecificationWithJUnit {
     }
     "be able to filter by faintness and saturation on band j" in {
       val m = MagnitudeConstraints(MagnitudeBand.J, FaintnessConstraint(15.0), Some(SaturationConstraint(14.0)))
-      val qc = CatalogQuery(c, RadiusConstraint.between(Angle.zero, coneSearch), m)
+      val qc = CatalogQuery(c, RadiusConstraint.between(Angle.zero, coneSearch), Some(m))
       val filtered = unfiltered.filter(qc)
 
       // Filtering on magnitude leaves only 4 targets

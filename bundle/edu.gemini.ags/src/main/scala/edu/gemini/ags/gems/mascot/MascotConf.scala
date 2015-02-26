@@ -101,6 +101,6 @@ object MascotConf {
   val correct_for_poisson = true
 
   // Invalid magnitude value: original source had just the constant
-  val invalidMag = -27
+  val invalidMag:Double = -27.0
 
 }

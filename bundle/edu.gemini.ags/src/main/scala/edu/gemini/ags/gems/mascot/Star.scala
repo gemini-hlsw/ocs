@@ -22,7 +22,7 @@ object Star {
    * centerX, centerY are the WCS coordinates (deg) of the image center/base pos.
    */
   def makeStar(target: SiderealTarget, centerX: Double, centerY: Double): Star = {
-    val (x, y) = calculateXy(target.coordinates.ra.toAngle.toDegrees, target.coordinates.dec.toAngle.toDegrees, centerX, centerY)
+    val (x, y) = calculateXy(target.coordinates.ra.toAngle.toDegrees, target.coordinates.dec.toDegrees, centerX, centerY)
     val (m, rmag2) = calculateM(target.magnitudeIn(MagnitudeBand.B).map(_.value).getOrElse(invalidMag), target.magnitudeIn(MagnitudeBand.V).map(_.value).getOrElse(invalidMag), target.magnitudeIn(MagnitudeBand.R).map(_.value).getOrElse(invalidMag))
     Star(target, x, y, m)
   }

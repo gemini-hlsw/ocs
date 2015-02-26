@@ -1,6 +1,5 @@
 package jsky.app.ot.ags;
 
-import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.ISPObservation;
 
 import javax.swing.*;

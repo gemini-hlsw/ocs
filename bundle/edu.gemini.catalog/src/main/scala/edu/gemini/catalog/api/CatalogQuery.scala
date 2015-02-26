@@ -4,8 +4,8 @@ import edu.gemini.spModel.core.Coordinates
 import edu.gemini.spModel.core.Target.SiderealTarget
 
 // TODO Ensure that it makes sense to default to ucac4
-case class CatalogQuery(base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeConstraints: MagnitudeConstraints, catalog: CatalogName = ucac4) {
-  def filter: SiderealTarget => Boolean = (t) => radiusConstraint.targetsFilter(base)(t) && magnitudeConstraints.filter(t)
+case class CatalogQuery(base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeConstraints: Option[MagnitudeConstraints], catalog: CatalogName = ucac4) {
+  def filter: SiderealTarget => Boolean = (t) => radiusConstraint.targetsFilter(base)(t) && magnitudeConstraints.map(_.filter(t)).getOrElse(true)
 }
 
 sealed abstract class CatalogName(val id: String)

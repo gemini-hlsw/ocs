@@ -165,7 +165,7 @@ object GemsStrategy extends AgsStrategy {
     }
 
     // Iterate over 45 degree position angles if no asterism is found at PA = 0.
-    val gemsCatalogResults = results.map(result => new GemsCatalogResults().analyzeGoodEnough(ctx, anglesToTry.map(_.toOldModel).asJava, result.asJava, progressMeasurer).asScala)
+    val gemsCatalogResults = results.map(result => new GemsCatalogResults().analyzeGoodEnough(ctx, anglesToTry.asJava, result.asJava, progressMeasurer).asScala)
 
     // Filter out the 1-star asterisms. If anything is left, we are good to go; otherwise, no.
     gemsCatalogResults.map { x =>
@@ -181,12 +181,8 @@ object GemsStrategy extends AgsStrategy {
     }
     val gemsOptions = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog, gemsInstrument, tipTiltMode, posAngles.asJava)
 
-    // Create the base position.
-    val baseCoords = ctx.getBaseCoordinates
-    val basePos = new HmsDegCoordinates.Builder(baseCoords.getRa, baseCoords.getDec).build
-
     // Perform the catalog search.
-    val results = new GemsCatalog().search(ctx, basePos, gemsOptions, nirBand.asGeminiOpt, null).asScala.toList
+    val results = new GemsCatalog().search(ctx, ctx.getBaseCoordinates.toNewModel, gemsOptions, nirBand, null).asScala.toList
 
     // Now check that the results are valid: there must be a valid tip-tilt and flexure star each.
     val checker = results.foldRight(Map[String, Boolean]())((result, resultMap) => {
@@ -196,11 +192,13 @@ object GemsStrategy extends AgsStrategy {
       else                               resultMap
     })
     checker.values.find(!_).map(_ => results)
+
+
   }
 
   private def findGuideStars(ctx: ObsContext, posAngles: Set[Angle], results: List[GemsCatalogSearchResults]): Option[GemsGuideStars] = {
     // Passing in null to say we don't want a ProgressMeter.
-    val gemsResults = new GemsCatalogResults().analyze(ctx, posAngles.map(_.toOldModel).asJava, results.asJava, null).asScala
+    val gemsResults = new GemsCatalogResults().analyze(ctx, posAngles.asJava, results.asJava, null).asScala
     gemsResults.headOption
   }
 

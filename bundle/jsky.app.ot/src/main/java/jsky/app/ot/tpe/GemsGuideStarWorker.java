@@ -3,8 +3,8 @@ package jsky.app.ot.tpe;
 import edu.gemini.ags.gems.*;
 import edu.gemini.ags.gems.mascot.Strehl;
 import edu.gemini.ags.gems.mascot.MascotProgress;
+import edu.gemini.catalog.votable.CatalogException;
 import edu.gemini.skycalc.Angle;
-import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.shared.skyobject.coords.SkyCoordinates;
 import edu.gemini.shared.util.immutable.DefaultImList;
@@ -103,6 +103,8 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
             DialogUtil.message("The guide star search was canceled.");
         } else if (o instanceof NoStarsException) {
             DialogUtil.error(((NoStarsException) o).getMessage());
+        } else if (o instanceof CatalogException) {
+            DialogUtil.error(((CatalogException) o).firstMessage());
         } else if (o instanceof Exception) {
             DialogUtil.error((Exception) o);
         } else {
@@ -190,39 +192,24 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     }
 
     /**
-     * Do the catalog part of the search using the default settings and return the results.
-     *
-     * @return catalog search results
-     */
-    public List<GemsCatalogSearchResults> search() throws Exception {
-        WorldCoords basePos = tpe.getBasePos();
-        ObsContext obsContext = getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
-        Set<Angle> posAngles = getPosAngles(obsContext);
-        // REL-1442: only allow CWFS asterisms for now
-//        return search(GemsGuideStarSearchOptions.DEFAULT_CATALOG, GemsGuideStarSearchOptions.DEFAULT_CATALOG,
-//                GemsTipTiltMode.both, obsContext, posAngles, None.<Magnitude.Band>instance());
-        return search(GemsGuideStarSearchOptions.DEFAULT_CATALOG, GemsGuideStarSearchOptions.DEFAULT_CATALOG,
-                GemsTipTiltMode.canopus, obsContext, posAngles, None.<MagnitudeBand>instance());
-    }
-
-    /**
      * Returns a set of position angles to use for the search, including the current one
      * used in the given obsContext.
      *
      * @param obsContext used to getthe current pos angle
      */
-    private Set<Angle> getPosAngles(ObsContext obsContext) {
-        Set<Angle> posAngles = new TreeSet<>(new Comparator<Angle>() {
+    private Set<edu.gemini.spModel.core.Angle> getPosAngles(ObsContext obsContext) {
+        Set<edu.gemini.spModel.core.Angle> posAngles = new TreeSet<>(new Comparator<edu.gemini.spModel.core.Angle>() {
             @Override
-            public int compare(Angle a1, Angle a2) {
-                return a1.compareToAngle(a2);
+            public int compare(edu.gemini.spModel.core.Angle a1, edu.gemini.spModel.core.Angle a2) {
+                return Double.compare(a1.toDegrees(), a2.toDegrees());
             }
         });
-        posAngles.add(obsContext.getPositionAngle());
-        posAngles.add(new Angle(0., Angle.Unit.DEGREES));
-        posAngles.add(new Angle(90., Angle.Unit.DEGREES));
-        posAngles.add(new Angle(180., Angle.Unit.DEGREES));
-        posAngles.add(new Angle(270., Angle.Unit.DEGREES));
+
+        posAngles.add(GemsUtils4Java.toNewAngle(obsContext.getPositionAngle()));
+        posAngles.add(GemsUtils4Java.toNewAngle(new Angle(0., Angle.Unit.DEGREES)));
+        posAngles.add(GemsUtils4Java.toNewAngle(new Angle(90., Angle.Unit.DEGREES)));
+        posAngles.add(GemsUtils4Java.toNewAngle(new Angle(180., Angle.Unit.DEGREES)));
+        posAngles.add(GemsUtils4Java.toNewAngle(new Angle(270., Angle.Unit.DEGREES)));
         return posAngles;
     }
 
@@ -233,8 +220,8 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
      */
     public List<GemsCatalogSearchResults> search(String opticalCatalog, String nirCatalog,
                                                  GemsTipTiltMode tipTiltMode,
-                                                 ObsContext obsContext, Set<Angle> posAngles,
-                                                 Option<MagnitudeBand> nirBand) throws Exception {
+                                                 ObsContext obsContext, Set<edu.gemini.spModel.core.Angle> posAngles,
+                                                 scala.Option<MagnitudeBand> nirBand) throws Exception {
         try {
             interrupted = false;
             startProgress();
@@ -245,16 +232,11 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
 
             SPInstObsComp inst = obsContext.getInstrument();
 
-            Set<edu.gemini.spModel.core.Angle> angles = new HashSet<>();
-            for (Angle a: posAngles) {
-                angles.add(GemsUtils4Java.toNewAngle(a));
-            }
-
             GemsInstrument instrument = inst instanceof Flamingos2 ? GemsInstrument.flamingos2 : GemsInstrument.gsaoi;
             GemsGuideStarSearchOptions options = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog,
-                    instrument, tipTiltMode, angles);
+                    instrument, tipTiltMode, posAngles);
 
-            List<GemsCatalogSearchResults> results = new GemsCatalog().search(obsContext, base, options, nirBand, statusLogger);
+            List<GemsCatalogSearchResults> results = GemsVoTableCatalog.search4Java(obsContext, GemsUtils4Java.toCoordinates(base), options, nirBand, statusLogger, 10);
             if (interrupted) {
                 throw new CancellationException("Canceled");
             }
@@ -274,21 +256,21 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     public GemsGuideStars findGuideStars() throws Exception {
         WorldCoords basePos = tpe.getBasePos();
         ObsContext obsContext = getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
-        Set<Angle> posAngles = getPosAngles(obsContext);
+        Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);
         // REL-1442: only allow CWFS asterisms for now
 //        List<GemsCatalogSearchResults> results = search(GemsGuideStarSearchOptions.DEFAULT_CATALOG,
 //                GemsGuideStarSearchOptions.DEFAULT_CATALOG, GemsTipTiltMode.both, obsContext, posAngles,
 //                None.<Magnitude.Band>instance());
         List<GemsCatalogSearchResults> results = search(GemsGuideStarSearchOptions.DEFAULT_CATALOG,
                 GemsGuideStarSearchOptions.DEFAULT_CATALOG, GemsTipTiltMode.canopus, obsContext, posAngles,
-                None.<MagnitudeBand>instance());
+                scala.Option.<MagnitudeBand>empty());
         return findGuideStars(obsContext, posAngles, results);
     }
 
     /**
      * Returns the set of Gems guide stars with the highest ranking using the given settings
      */
-    public GemsGuideStars findGuideStars(ObsContext obsContext, Set<Angle> posAngles,
+    private GemsGuideStars findGuideStars(ObsContext obsContext, Set<edu.gemini.spModel.core.Angle> posAngles,
                                          List<GemsCatalogSearchResults> results) throws Exception {
 
         interrupted = false;
@@ -310,7 +292,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     /**
      * Returns a list of all possible Gems guide star sets.
      */
-    public List<GemsGuideStars> findAllGuideStars(ObsContext obsContext, Set<Angle> posAngles,
+    public List<GemsGuideStars> findAllGuideStars(ObsContext obsContext, Set<edu.gemini.spModel.core.Angle> posAngles,
                                                   List<GemsCatalogSearchResults> results) throws Exception {
         interrupted = false;
         try {
@@ -332,10 +314,10 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         if (gemsGuideStarsList.size() == 0) {
             return gemsGuideStarsList;
         }
-        Angle angle = Angle.degrees(gemsGuideStarsList.get(0).getPa().toDegrees());
+        edu.gemini.spModel.core.Angle positionAngle = gemsGuideStarsList.get(0).getPa();
         List<GemsGuideStars> result = new ArrayList<>(gemsGuideStarsList.size());
         for (GemsGuideStars gemsGuideStars : gemsGuideStarsList) {
-            if (angle.equals(gemsGuideStars.getPa())) {
+            if (positionAngle.equals(gemsGuideStars.getPa())) {
                 result.add(gemsGuideStars);
             }
         }

@@ -1,5 +1,6 @@
 package edu.gemini.catalog.votable
 
+import java.net.UnknownHostException
 import java.util.concurrent.atomic.AtomicInteger
 
 import edu.gemini.catalog.api.CatalogQuery
@@ -15,12 +16,14 @@ import scalaz._
 import Scalaz._
 
 trait VoTableClient {
+  private val timeout = 30 * 1000 // Max time to wait
+
   private def format(a: Angle)= f"${a.toDegrees}%4.03f"
 
   protected def queryParams(qs: CatalogQuery): Array[NameValuePair] = Array(
     new NameValuePair("CATALOG", qs.catalog.id),
     new NameValuePair("RA", format(qs.base.ra.toAngle)),
-    new NameValuePair("DEC", format(qs.base.dec.toAngle)),
+    new NameValuePair("DEC", f"${qs.base.dec.toDegrees}%4.03f"),
     new NameValuePair("SR", format(qs.radiusConstraint.maxLimit)))
 
   // First success or last failure
@@ -36,16 +39,17 @@ trait VoTableClient {
     p.future
   }
 
-  protected def doQuery(query: CatalogQuery, url: String): Future[CatalogQueryResult] = future {
+  protected def doQuery(query: CatalogQuery, url: String): Future[QueryResult] = future {
     val method = new GetMethod(s"$url/cgi-bin/conesearch.py")
     val qs = queryParams(query)
     method.setQueryString(qs)
 
     val client = new HttpClient
+    client.setConnectionTimeout(timeout)
 
     try {
       client.executeMethod(method)
-      VoTableParser.parse(url, method.getResponseBodyAsStream).fold(p => CatalogQueryResult(TargetsTable.Zero, List(p)), y => CatalogQueryResult(y).filter(query))
+      VoTableParser.parse(url, method.getResponseBodyAsStream).fold(p => QueryResult(query, CatalogQueryResult(TargetsTable.Zero, List(p))), y => QueryResult(query, CatalogQueryResult(y).filter(query)))
     }
     finally {
       method.releaseConnection()
@@ -60,21 +64,22 @@ object VoTableClient extends VoTableClient {
   /**
    * Do a query for targets, it returns a list of targets and possible problems found
    */
-  def catalog(query: CatalogQuery): Future[CatalogQueryResult] = {
+  def catalog(query: CatalogQuery): Future[QueryResult] = {
     val f = for {
       url <- catalogUrls
     } yield doQuery(query, url)
     selectOne(f).recover {
-       case t => CatalogQueryResult(TargetsTable.Zero, List(GenericError(t.getMessage)))
+       case t:UnknownHostException => QueryResult(query, CatalogQueryResult(TargetsTable.Zero, List(GenericError(s"Unreachable host ${t.getMessage}"))))
+       case t                      => QueryResult(query, CatalogQueryResult(TargetsTable.Zero, List(GenericError(t.getMessage))))
     }
   }
 
   /**
    * Do multiple parallel queries, it returns a consolidated list of targets and possible problems found
    */
-  def catalog(queries: List[CatalogQuery]): Future[CatalogQueryResult] = {
+  def catalog(queries: List[CatalogQuery]): Future[List[QueryResult]] = {
     val r = queries.map(catalog)
-    Future.sequence(r).map(_.suml)
+    Future.sequence(r)
   }
 
 }
