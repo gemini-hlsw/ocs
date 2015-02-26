@@ -504,7 +504,7 @@ case class TimeProblems(p: Proposal, s: ShellAdvisor) {
         } yield for {
             p <- subs.filter(s => Partners.jointProposalNotAllowed.contains(s.partner))
           } yield new Problem(Severity.Error, s"${~Partners.name.get(p.partner)} cannot be part of a joint proposal, please update the time request.", SCHEDULING_SECTION,
-              s.inPartnersView(_.editSubmissionTime(p)))
+              s.showPartnersView())
       r.sequence.flatten
     }
 
