@@ -106,7 +106,7 @@ class SubmissionRequestEditor[A] private (s:SubmissionRequest, partner:Option[A]
     val s0 = timeLens.set(s, editor.time.value)
     val s1 = minTimeLens.set(s0, editor.minTime.value)
     // REL-2032 Consider a request with 0 times the same as remove
-    val removed = (s0.time == TimeAmount.empty && s1.time == TimeAmount.empty) || remove.selected
+    val removed = (s1.time == TimeAmount.empty && s1.minTime == TimeAmount.empty) || remove.selected
     (s1, editor.leads.selection.item, removed)
   }
 
