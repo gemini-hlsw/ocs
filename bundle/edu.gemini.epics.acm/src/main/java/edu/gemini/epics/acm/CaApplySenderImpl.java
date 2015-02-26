@@ -19,8 +19,9 @@ import gov.aps.jca.CAException;
 import gov.aps.jca.TimeoutException;
 
 class CaApplySenderImpl implements CaApplySender {
-    
-    private static final Logger LOG = Logger.getLogger(CaApplySenderImpl.class.getName()); 
+
+    private static final Logger LOG = Logger.getLogger(CaApplySenderImpl.class
+            .getName());
 
     private final String name;
     private final String carRecord;
@@ -49,8 +50,8 @@ class CaApplySenderImpl implements CaApplySender {
     private ChannelListener<CarState> carValListener;
     private State currentState;
 
-    public CaApplySenderImpl(String name, String applyRecord, String carRecord, String description,
-            EpicsService epicsService) throws CAException {
+    public CaApplySenderImpl(String name, String applyRecord, String carRecord,
+            String description, EpicsService epicsService) throws CAException {
         super();
         this.name = name;
         this.carRecord = carRecord;
@@ -112,7 +113,7 @@ class CaApplySenderImpl implements CaApplySender {
     }
 
     void unbind() {
-        
+
         try {
             val.unRegisterListener(valListener);
             carCLID.unRegisterListener(carClidListener);
@@ -430,12 +431,13 @@ class CaApplySenderImpl implements CaApplySender {
     private void failCommand(final CaCommandMonitorImpl cm) {
         failCommand(cm, carOMSS);
     }
-    
-    private void failCommand(final CaCommandMonitorImpl cm, final ReadOnlyClientEpicsChannel<String> msgSrc) {
-        // I found that if I try to read OMSS from the same thread that is
-        // processing a channel notifications, the reads fails with a timeout.
-        // But it works if the read is done later from another thread.
-        executor.execute(new Runnable () {
+
+    private void failCommand(final CaCommandMonitorImpl cm,
+            final ReadOnlyClientEpicsChannel<String> msgSrc) {
+        // I found that if I try to read OMSS or MESS from the same thread that
+        // is processing a channel notifications, the reads fails with a
+        // timeout. But it works if the read is done later from another thread.
+        executor.execute(new Runnable() {
             @Override
             public void run() {
                 String msg = null;

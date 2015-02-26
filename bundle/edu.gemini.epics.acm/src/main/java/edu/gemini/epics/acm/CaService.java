@@ -2,7 +2,8 @@ package edu.gemini.epics.acm;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
+
+import com.google.common.collect.ImmutableSet;
 
 import edu.gemini.epics.EpicsService;
 import gov.aps.jca.CAException;
@@ -223,8 +224,17 @@ public class CaService {
      * 
      * @return a set of all the command sender names.
      */
-    public Set<String> getCommandSenderNames() {
-        return commandSenders.keySet();
+    public ImmutableSet<String> getCommandSenderNames() {
+        return ImmutableSet.copyOf(commandSenders.keySet());
+    }
+
+    /**
+     * Retrieves the names of all existing apply senders
+     * 
+     * @return a set of all the command sender names.
+     */
+    public ImmutableSet<String> getApplySenderNames() {
+        return ImmutableSet.copyOf(applySenders.keySet());
     }
 
     /**
@@ -232,8 +242,8 @@ public class CaService {
      * 
      * @return a set of all the status acceptors names.
      */
-    public Set<String> getStatusAcceptorsNames() {
-        return statusAcceptors.keySet();
+    public ImmutableSet<String> getStatusAcceptorsNames() {
+        return ImmutableSet.copyOf(statusAcceptors.keySet());
     }
 
     /**
