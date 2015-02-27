@@ -59,7 +59,7 @@ object GemsStrategy extends AgsStrategy {
     val adjustedConstraints = catalogQueries(ctx, mt).map { constraint =>
       // Adjust the magnitude limits for the conditions.
       val adjustedMagConstraints = constraint.magnitudeConstraints.map(c => c.map(m => ctx.getConditions.magAdjustOp().apply(m.toOldModel).toNewModel))
-      constraint.copy(magnitudeConstraints = adjustedMagConstraints)
+      constraint.withMagnitudeConstraints(adjustedMagConstraints)
     }
 
     VoTableClient.catalog(adjustedConstraints).flatMap {
@@ -67,8 +67,8 @@ object GemsStrategy extends AgsStrategy {
       case result                                          => Future.successful {
         result.map { r =>
           val id = r.query.id
-          CatalogResultWithKey(r.query, r.result, GemsCatalogSearchKey(GuideStarTypeMap(id), GuideProbeGroupMap(id)))
-        }
+          id.map(x => CatalogResultWithKey(r.query, r.result, GemsCatalogSearchKey(GuideStarTypeMap(x), GuideProbeGroupMap(x))))
+        }.flatten
       }
     }
   }
@@ -225,8 +225,8 @@ object GemsStrategy extends AgsStrategy {
       (ml |@| lim(can))(_ union _).flatten
     }
 
-    val canopusConstraint = canMagLimits.map(c => CatalogQuery(CanopusTipTiltId, ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, Canopus.Wfs.Group.instance.getRadiusLimits.toNewModel), c.some))
-    val odgwConstaint     = odgwMagLimits.map(c => CatalogQuery(OdgwFlexureId,    ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, GsaoiOdgw.Group.instance.getRadiusLimits.toNewModel), c.some))
+    val canopusConstraint = canMagLimits.map(c => CatalogQuery.catalogQueryForGems(CanopusTipTiltId, ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, Canopus.Wfs.Group.instance.getRadiusLimits.toNewModel), c.some))
+    val odgwConstaint     = odgwMagLimits.map(c => CatalogQuery.catalogQueryForGems(OdgwFlexureId,    ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, GsaoiOdgw.Group.instance.getRadiusLimits.toNewModel), c.some))
     List(canopusConstraint, odgwConstaint).flatten
   }
 
