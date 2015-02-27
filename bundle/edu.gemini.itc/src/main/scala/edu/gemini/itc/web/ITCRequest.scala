@@ -8,8 +8,8 @@ import edu.gemini.itc.parameters.SourceDefinitionParameters._
 import edu.gemini.itc.parameters._
 import edu.gemini.itc.shared._
 import edu.gemini.spModel.gemini.altair.AltairParams
-import edu.gemini.spModel.gemini.gmos.GmosNorthType.{DisperserNorth, FilterNorth}
-import edu.gemini.spModel.gemini.gmos.GmosSouthType.{DisperserSouth, FilterSouth}
+import edu.gemini.spModel.gemini.gmos.GmosNorthType.{FPUnitNorth, DisperserNorth, FilterNorth}
+import edu.gemini.spModel.gemini.gmos.GmosSouthType.{FPUnitSouth, DisperserSouth, FilterSouth}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.telescope.IssPort
 
@@ -81,18 +81,18 @@ object ITCRequest {
   def gmosParameters(r: ITCMultiPartParser): GmosParameters = {
     val pc          = ITCRequest.from(r)
     val location    = pc.parameter("instrumentLocation")
-    val filter      = if (location.equals("gmosNorth")) pc.enumParameter(classOf[FilterNorth],    "instrumentFilter") else pc.enumParameter(classOf[FilterSouth],       "instrumentFilter")
+    val filter      = if (location.equals("gmosNorth")) pc.enumParameter(classOf[FilterNorth],    "instrumentFilter")    else pc.enumParameter(classOf[FilterSouth],    "instrumentFilter")
     val grating     = if (location.equals("gmosNorth")) pc.enumParameter(classOf[DisperserNorth], "instrumentDisperser") else pc.enumParameter(classOf[DisperserSouth], "instrumentDisperser")
     val spatBinning = pc.intParameter("spatBinning")
     val specBinning = pc.intParameter("specBinning")
     val ccdType     = pc.parameter("CCDtype")
-    var centralWavelength = if (pc.parameter("instrumentCentralWavelength").trim.isEmpty) 0.0 else pc.doubleParameter("instrumentCentralWavelength")
-    val fpMask      = pc.parameter("instrumentFPMask")
+    val centralWavelength = if (pc.parameter("instrumentCentralWavelength").trim.isEmpty) 0.0 else pc.doubleParameter("instrumentCentralWavelength")
+    val fpMask      = if (location.equals("gmosNorth")) pc.enumParameter(classOf[FPUnitNorth],    "instrumentFPMask")   else pc.enumParameter(classOf[FPUnitSouth],      "instrumentFPMask")
     var ifuMethod   = ""
     var ifuOffset   = 0.0
     var ifuMinOffset = 0.0
     var ifuMaxOffset = 0.0
-    if (fpMask.equals("ifu")) {
+    if (fpMask.isIFU) {
       ifuMethod = pc.parameter("ifuMethod")
       if (ifuMethod.equals("singleIFU")) {
         ifuOffset = pc.doubleParameter("ifuOffset")

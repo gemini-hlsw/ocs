@@ -11,15 +11,6 @@ public final class GmosParameters extends ITCParameters {
     public static final String SINGLE_IFU = "singleIFU";
     public static final String RADIAL_IFU = "radialIFU";
 
-    public static final String SLIT0_25 = "slit0.25";
-    public static final String SLIT0_5 = "slit0.5";
-    public static final String SLIT0_75 = "slit0.75";
-    public static final String SLIT1_0 = "slit1.0";
-    public static final String SLIT1_5 = "slit1.5";
-    public static final String SLIT2_0 = "slit2.0";
-    public static final String SLIT5_0 = "slit5.0";
-    public static final String IFU = "ifu";
-    public static final String NO_SLIT = "none";
     public static final String GMOS_NORTH = "gmosNorth";
     public static final String GMOS_SOUTH = "gmosSouth";
 
@@ -27,7 +18,7 @@ public final class GmosParameters extends ITCParameters {
     private final GmosCommonType.Filter filter;
     private final GmosCommonType.Disperser grating;
     private final double centralWavelength;
-    private final String fpMask;
+    private final GmosCommonType.FPUnit fpMask;
     private final int spatBinning;
     private final int specBinning;
     private final String ifuMethod;
@@ -43,7 +34,7 @@ public final class GmosParameters extends ITCParameters {
     public GmosParameters(final GmosCommonType.Filter filter,
                           final GmosCommonType.Disperser grating,
                           final double centralWavelength,
-                          final String fpMask,
+                          final GmosCommonType.FPUnit fpMask,
                           final int spatBinning,
                           final int specBinning,
                           final String ifuMethod,
@@ -75,7 +66,7 @@ public final class GmosParameters extends ITCParameters {
         return grating;
     }
 
-    public String getFocalPlaneMask() {
+    public GmosCommonType.FPUnit getFocalPlaneMask() {
         return fpMask;
     }
 
@@ -96,24 +87,11 @@ public final class GmosParameters extends ITCParameters {
     }
 
     public double getFPMask() {
-        if (fpMask.equals(SLIT0_25))
-            return 0.25;
-        else if (fpMask.equals(SLIT0_5))
-            return 0.5;
-        else if (fpMask.equals(SLIT0_75))
-            return 0.75;
-        else if (fpMask.equals(SLIT1_0))
-            return 1.0;
-        else if (fpMask.equals(SLIT1_5))
-            return 1.5;
-        else if (fpMask.equals(SLIT2_0))
-            return 2.0;
-        else if (fpMask.equals(SLIT5_0))
-            return 5.0;
-        else if (fpMask.equals(IFU))
+        if (fpMask.isIFU()) {
             return 0.3;
-        else
-            return -1.0;
+        } else {
+            return fpMask.getWidth();
+        }
     }
 
     public String getIFUMethod() {

@@ -36,9 +36,8 @@ object Hash {
     hash(
       p.getFilter.name,
       p.getCCDtype,
-      p.getFocalPlaneMask,
-      p.getFPMask,
-      if (p.getGrating.name.equals("MIRROR")) "none" else p.getGrating.name, // TODO: cleanup with next baseline
+      p.getFocalPlaneMask.name,
+      p.getGrating.name,
       p.getIFUMaxOffset,
       p.getIFUMethod,
       p.getIFUMinOffset,

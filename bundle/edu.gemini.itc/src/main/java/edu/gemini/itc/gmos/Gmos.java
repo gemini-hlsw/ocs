@@ -107,9 +107,10 @@ public abstract class Gmos extends Instrument {
         if (isIfuUsed()) {
             if (gp.getIFUMethod().equals(GmosParameters.SINGLE_IFU)) {
                 _IFU = new IFUComponent(getPrefix(), gp.getIFUOffset());
-            }
-            if (gp.getIFUMethod().equals(GmosParameters.RADIAL_IFU)) {
+            } else if (gp.getIFUMethod().equals(GmosParameters.RADIAL_IFU)) {
                 _IFU = new IFUComponent(getPrefix(), gp.getIFUMinOffset(), gp.getIFUMaxOffset());
+            } else {
+                throw new IllegalArgumentException();
             }
             addComponent(_IFU);
         }
@@ -248,7 +249,7 @@ public abstract class Gmos extends Instrument {
     }
 
     public boolean isIfuUsed() {
-        return gp.getFocalPlaneMask().equals(GmosParameters.IFU);
+        return gp.getFocalPlaneMask().isIFU();
     }
 
     //Abstract class for Detector Pixel Transmission  (i.e.  Create Detector gaps)
@@ -261,8 +262,8 @@ public abstract class Gmos extends Instrument {
         String s = "Instrument configuration: \n";
         s += super.opticalComponentsToString();
 
-        if (!gp.getFocalPlaneMask().equals(GmosParameters.NO_SLIT))
-            s += "<LI> Focal Plane Mask: " + gp.getFocalPlaneMask() + "\n";
+        if (!gp.getFocalPlaneMask().equals(GmosNorthType.FPUnitNorth.FPU_NONE) && !gp.getFocalPlaneMask().equals(GmosSouthType.FPUnitSouth.FPU_NONE))
+            s += "<LI> Focal Plane Mask: " + gp.getFocalPlaneMask().displayValue() + "\n";
         s += "\n";
         if (odp.getMethod().isSpectroscopy())
             s += "<L1> Central Wavelength: " + gp.getCentralWavelength() + " nm" + "\n";
@@ -296,7 +297,7 @@ public abstract class Gmos extends Instrument {
                         " is not.\nPlease select a grating and a " +
                         "focal plane mask in the Instrument " +
                         "configuration section.");
-            if (gp.getFocalPlaneMask().equals(GmosParameters.NO_SLIT))
+            if (gp.getFocalPlaneMask().equals(GmosNorthType.FPUnitNorth.FPU_NONE) || gp.getFocalPlaneMask().equals(GmosSouthType.FPUnitSouth.FPU_NONE))
                 throw new RuntimeException("Spectroscopy calculation method is selected but a focal" +
                         " plane mask is not.\nPlease select a " +
                         "grating and a " +
@@ -313,7 +314,7 @@ public abstract class Gmos extends Instrument {
                 throw new RuntimeException("Imaging calculation method is selected but a grating" +
                         " is also selected.\nPlease deselect the " +
                         "grating or change the method to spectroscopy.");
-            if (!gp.getFocalPlaneMask().equals("none"))
+            if (!gp.getFocalPlaneMask().equals(GmosNorthType.FPUnitNorth.FPU_NONE) && !gp.getFocalPlaneMask().equals(GmosSouthType.FPUnitSouth.FPU_NONE))
                 throw new RuntimeException("Imaging calculation method is selected but a Focal" +
                         " Plane Mask is also selected.\nPlease " +
                         "deselect the Focal Plane Mask" +

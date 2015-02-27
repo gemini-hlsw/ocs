@@ -3,8 +3,8 @@ package edu.gemini.itc.baseline
 import edu.gemini.itc.baseline.util.Baseline._
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.gmos.{GmosParameters, GmosRecipe}
-import edu.gemini.spModel.gemini.gmos.GmosNorthType.{DisperserNorth, FilterNorth}
-import edu.gemini.spModel.gemini.gmos.GmosSouthType.{DisperserSouth, FilterSouth}
+import edu.gemini.spModel.gemini.gmos.GmosNorthType.{FPUnitNorth, DisperserNorth, FilterNorth}
+import edu.gemini.spModel.gemini.gmos.GmosSouthType.{FPUnitSouth, DisperserSouth, FilterSouth}
 
 /**
  * GMOS baseline test fixtures.
@@ -22,7 +22,7 @@ object BaselineGmos {
       FilterNorth.i_G0302,
       DisperserNorth.MIRROR,
       500.0,                      // wavelength
-      GmosParameters.NO_SLIT,
+      FPUnitNorth.FPU_NONE,
       1,
       1,
       "",                         // IFU method
@@ -36,7 +36,7 @@ object BaselineGmos {
       FilterSouth.g_G0325,
       DisperserSouth.MIRROR,
       500.0,
-      GmosParameters.NO_SLIT,
+      FPUnitSouth.FPU_NONE,
       1,
       1,
       "",
@@ -52,7 +52,7 @@ object BaselineGmos {
       FilterNorth.g_G0301,
       DisperserNorth.R150_G5306,
       500.0,
-      GmosParameters.SLIT1_0,
+      FPUnitNorth.LONGSLIT_4,
       1,
       1,
       "singleIFU",
@@ -65,7 +65,7 @@ object BaselineGmos {
       FilterNorth.g_G0301,
       DisperserNorth.R400_G5305,
       500.0,
-      GmosParameters.IFU,
+      FPUnitNorth.IFU_1,
       1,
       1,
       GmosParameters.SINGLE_IFU,
@@ -78,7 +78,7 @@ object BaselineGmos {
       FilterNorth.g_G0301,
       DisperserNorth.R150_G5306,
       500.0,
-      GmosParameters.IFU,
+      FPUnitNorth.IFU_1,
       1,
       1,
       GmosParameters.RADIAL_IFU,
