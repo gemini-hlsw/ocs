@@ -1,7 +1,7 @@
 package edu.gemini.ags.gems
 
 import edu.gemini.catalog.api._
-import edu.gemini.catalog.votable.{CatalogException, VoTableClient}
+import edu.gemini.catalog.votable.{VoTableBackend, CatalogException, VoTableClient}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core.{Magnitude, MagnitudeBand, Coordinates}
 import edu.gemini.spModel.gemini.gems.GemsInstrument
@@ -50,7 +50,7 @@ object GemsVoTableCatalog {
    * @param nirBand      optional NIR magnitude band (default is H)
    * @return  Future with a list of search results
    */
-  def search(obsContext: ObsContext, basePosition: Coordinates, options: GemsGuideStarSearchOptions, nirBand: Option[MagnitudeBand], statusLogger: StatusLogger): Future[List[GemsCatalogSearchResults]] = {
+  def search(obsContext: ObsContext, basePosition: Coordinates, options: GemsGuideStarSearchOptions, nirBand: Option[MagnitudeBand], statusLogger: StatusLogger)(implicit backend: VoTableBackend): Future[List[GemsCatalogSearchResults]] = {
     val criterions = options.searchCriteria(obsContext, nirBand).asScala.toList
     val inst = options.getInstrument
 
@@ -66,7 +66,7 @@ object GemsVoTableCatalog {
     }))
   }
 
-  private def searchCatalog(basePosition: Coordinates, criterions: List[GemsCatalogSearchCriterion], statusLogger: StatusLogger): Future[List[GemsCatalogSearchResults]] = {
+  private def searchCatalog(basePosition: Coordinates, criterions: List[GemsCatalogSearchCriterion], statusLogger: StatusLogger)(implicit backend: VoTableBackend): Future[List[GemsCatalogSearchResults]] = {
     val queryArgs = for {
       c <- criterions
       q = CatalogQuery.catalogQuery(basePosition, c.criterion.radiusLimits, c.criterion.magConstraints)
@@ -87,7 +87,7 @@ object GemsVoTableCatalog {
    * @param inst the instrument option for the search
    * @return a list of threads used for background catalog searches
    */
-  private def searchOptimized(basePosition: Coordinates, criterions: List[GemsCatalogSearchCriterion], inst: GemsInstrument, statusLogger: StatusLogger): Future[List[GemsCatalogSearchResults]] = {
+  private def searchOptimized(basePosition: Coordinates, criterions: List[GemsCatalogSearchCriterion], inst: GemsInstrument, statusLogger: StatusLogger)(implicit backend: VoTableBackend): Future[List[GemsCatalogSearchResults]] = {
     val radiusLimitsList = getRadiusLimits(inst, criterions)
     val magLimitsList = optimizeMagnitudeLimits(criterions)
 
