@@ -23,8 +23,8 @@ import Scalaz._
 import scala.concurrent.Await
 import scala.collection.JavaConverters._
 
-class GemsCatalogSpec extends Specification with NoTimeConversions {
-  "GemsCatalog" should {
+class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
+  "GemsVoTableCatalog" should {
     "support executing queries" in {
       val ra = Angle.fromHMS(3, 19, 48.2341).getOrElse(Angle.zero)
       val dec = Angle.fromDMS(41, 30, 42.078).getOrElse(Angle.zero)
