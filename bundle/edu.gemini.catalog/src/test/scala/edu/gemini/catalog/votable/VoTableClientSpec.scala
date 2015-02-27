@@ -18,7 +18,7 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
     val query = CatalogQuery.catalogQuery(Coordinates.zero, RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromDegrees(0.2)), Some(noMagnitudeConstraint))
 
     "produce query params" in {
-      queryParams(query) should beEqualTo(Array(new NameValuePair("CATALOG", "ucac4"), new NameValuePair("RA", "0.000"), new NameValuePair("DEC", "0.000"), new NameValuePair("SR", "0.200")))
+      RemoteBackend.queryParams(query) should beEqualTo(Array(new NameValuePair("CATALOG", "ucac4"), new NameValuePair("RA", "0.000"), new NameValuePair("DEC", "0.000"), new NameValuePair("SR", "0.200")))
     }
     "make a query to a bad site" in {
       Await.result(doQuery(query, "unknown site"), 1.seconds) should throwA[IllegalArgumentException]
