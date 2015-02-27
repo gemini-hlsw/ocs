@@ -138,11 +138,12 @@ object GemsVoTableCatalog {
   protected [gems] def optimizeMagnitudeLimits(criterions: List[GemsCatalogSearchCriterion]): List[MagnitudeConstraints] = {
     val magConstraints = for {
         criteria <- criterions
-      } yield criteria.criterion.magConstraints
+        mc       <- criteria.criterion.magConstraints
+      } yield mc
 
     // Calculate the max faintness per band out of the criteria
     val faintLimitPerBand = for {
-        m <- magConstraints.flatten
+        m <- magConstraints
         b  = m.band
         fl = m.faintnessConstraint
       } yield (b, fl)
@@ -151,7 +152,7 @@ object GemsVoTableCatalog {
 
     // Calculate the min saturation limit per band out of the criteria
     val saturationLimitPerBand = for {
-        m <- magConstraints.flatten
+        m <- magConstraints
         b = m.band
         sl = m.saturationConstraint.getOrElse(SaturationConstraint(DefaultSaturationMagnitude))
       } yield (b, sl)
