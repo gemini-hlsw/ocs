@@ -14,40 +14,17 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.telescope.IssPort
-import jsky.catalog.skycat.SkycatConfigFile
 
 import org.specs2.mutable.Specification
+
+import scalaz._
+import Scalaz._
 
 import scala.concurrent.Await
 import scala.collection.JavaConverters._
 
 class GemsCatalogSpec extends Specification with NoTimeConversions {
   "GemsCatalog" should {
-    "support legacy executing queries" in {
-      val url = getClass.getResource("/edu/gemini/spModel/gemsGuideStar/test.skycat.cfg")
-      SkycatConfigFile.setConfigFile(url)
-
-      val ra = Angle.fromHMS(3, 19, 48.2341).getOrElse(Angle.zero)
-      val dec = Angle.fromDMS(41, 30, 42.078).getOrElse(Angle.zero)
-      val target = new SPTarget(ra.toDegrees, dec.toDegrees)
-      val env = TargetEnvironment.create(target)
-      val inst = new Gsaoi
-      inst.setPosAngle(0.0)
-      inst.setIssPort(IssPort.SIDE_LOOKING)
-      val ctx = ObsContext.create(env, inst, None.instance[Site], SPSiteQuality.Conditions.BEST, null, null)
-      val base = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
-      val opticalCatalog = GemsGuideStarSearchOptions.DEFAULT_CATALOG
-      val nirCatalog = GemsGuideStarSearchOptions.DEFAULT_CATALOG
-      val instrument = GemsInstrument.gsaoi
-      val tipTiltMode = GemsTipTiltMode.instrument
-
-      val posAngles = new java.util.HashSet[Angle]()
-      val options = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog,
-              instrument, tipTiltMode, posAngles)
-
-      val results = new GemsCatalog().search(ctx, base, options, scala.None, null)
-      results.size() should beEqualTo(2)
-    }
     "support executing queries" in {
       val ra = Angle.fromHMS(3, 19, 48.2341).getOrElse(Angle.zero)
       val dec = Angle.fromDMS(41, 30, 42.078).getOrElse(Angle.zero)
@@ -71,8 +48,8 @@ class GemsCatalogSpec extends Specification with NoTimeConversions {
         val results = Await.result(GemsVoTableCatalog.search(ctx, base, options, scala.None, null), 30.seconds)
         results should be size 2
 
-        results(0).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window tiptilt", MagnitudeConstraints(MagnitudeBand.H, FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))), RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), Some(Offset(Angle.fromDegrees(0.0014984027777700248), Angle.fromDegrees(0.0014984027777700248))), scala.None)))
-        results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor flexure", MagnitudeConstraints(MagnitudeBand.R, FaintnessConstraint(16.0), Some(SaturationConstraint(8.5))), RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), Some(Offset(Angle.fromDegrees(0.0014984027777700248), Angle.fromDegrees(0.0014984027777700248))), scala.None)))
+        results(0).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window tiptilt", MagnitudeConstraints(MagnitudeBand.H, FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))).some, RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), Some(Offset(Angle.fromDegrees(0.0014984027777700248), Angle.fromDegrees(0.0014984027777700248))), scala.None)))
+        results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor flexure", MagnitudeConstraints(MagnitudeBand.R, FaintnessConstraint(16.0), Some(SaturationConstraint(8.5))).some, RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), Some(Offset(Angle.fromDegrees(0.0014984027777700248), Angle.fromDegrees(0.0014984027777700248))), scala.None)))
         results(0).results should be size 5
         results(1).results should be size 3
       } catch {

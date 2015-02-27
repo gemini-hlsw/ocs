@@ -69,7 +69,7 @@ object GemsVoTableCatalog {
   private def searchCatalog(basePosition: Coordinates, criterions: List[GemsCatalogSearchCriterion], statusLogger: StatusLogger): Future[List[GemsCatalogSearchResults]] = {
     val queryArgs = for {
       c <- criterions
-      q = CatalogQuery(basePosition, c.criterion.radiusLimits, c.criterion.magLimits.some)
+      q = CatalogQuery.catalogQuery(basePosition, c.criterion.radiusLimits, c.criterion.magConstraints)
     } yield (q, c)
 
     val qm = queryArgs.toMap
@@ -94,7 +94,7 @@ object GemsVoTableCatalog {
     val queries = for {
       radiusLimits <- radiusLimitsList
       magLimits <- magLimitsList
-      queryArgs = CatalogQuery(basePosition, radiusLimits, magLimits.some)
+      queryArgs = CatalogQuery.catalogQuery(basePosition, radiusLimits, magLimits.some)
     } yield queryArgs
 
     VoTableClient.catalog(queries).flatMap {
@@ -136,11 +136,15 @@ object GemsVoTableCatalog {
 
   // Sets the min/max magnitude limits in the given query arguments
   protected [gems] def optimizeMagnitudeLimits(criterions: List[GemsCatalogSearchCriterion]): List[MagnitudeConstraints] = {
+    val magConstraints = for {
+        criteria <- criterions
+        mc       <- criteria.criterion.magConstraints
+      } yield mc
+
     // Calculate the max faintness per band out of the criteria
     val faintLimitPerBand = for {
-        criteria <- criterions
-        m = criteria.criterion.magLimits
-        b = m.band
+        m <- magConstraints
+        b  = m.band
         fl = m.faintnessConstraint
       } yield (b, fl)
 
@@ -148,8 +152,7 @@ object GemsVoTableCatalog {
 
     // Calculate the min saturation limit per band out of the criteria
     val saturationLimitPerBand = for {
-        criteria <- criterions
-        m = criteria.criterion.magLimits
+        m <- magConstraints
         b = m.band
         sl = m.saturationConstraint.getOrElse(SaturationConstraint(DefaultSaturationMagnitude))
       } yield (b, sl)

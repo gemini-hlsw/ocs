@@ -70,7 +70,7 @@ object GemsMagnitudeTable extends MagnitudeTable {
       val radiusConstraint = RadiusConstraint.between(Angle.zero, radiusLimit.toNewModel)
       val searchOffset = instrument.getOffset
       val searchPA = posAngles.asScala.headOption
-      CatalogSearchCriterion(name, magConstraint, radiusConstraint, searchOffset.asScalaOpt.map(_.toNewModel), searchPA)
+      CatalogSearchCriterion(name, magConstraint.some, radiusConstraint, searchOffset.asScalaOpt.map(_.toNewModel), searchPA)
     }
 
   }
