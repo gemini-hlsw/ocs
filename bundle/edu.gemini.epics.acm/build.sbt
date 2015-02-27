@@ -1,8 +1,6 @@
 import OcsKeys._
 
-name := "edu.gemini.epics.epics-acm"
-
-// version := "0.0.1-SNAPSHOT"
+name := "edu.gemini.epics.acm"
 
 sourceGenerators in Compile += Def.task {
   import scala.sys.process._
