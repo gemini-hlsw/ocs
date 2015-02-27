@@ -74,7 +74,7 @@ import static edu.gemini.spModel.target.env.OptionsList.UpdateOps.append;
 import static jsky.app.ot.util.OtColor.*;
 
 /**
- * This is the editor for the target list component.
+ * This is the editor for the target list component. It is terrible.
  */
 public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, TargetObsComp> {
 
