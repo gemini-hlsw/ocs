@@ -30,9 +30,9 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
 
       Await.result(selectOne(List(f1, f2, f3)), 3.seconds) should beEqualTo(42)
     }
-    "make a query (skipped if it fails)" in {
-      // We'll skip this one if it fails as it depends on the remote server and the content may change
-      Await.result(VoTableClient.catalog(query), 5.seconds).result.containsError should beFalse.orSkip("Catalog maybe down")
+    "make a query" in {
+      // This test loads a file. There is not much to test but it exercises the query backend chain
+      Await.result(VoTableClient.catalog(query)(TestVoTableBackend("/votable.xml")), 5.seconds).result.containsError should beFalse
     }
 
   }
