@@ -1,7 +1,7 @@
 package edu.gemini.ags.gems.mascot
 
 import edu.gemini.catalog.api.{ppmxl, RadiusConstraint, CatalogQuery}
-import edu.gemini.catalog.votable.VoTableClient
+import edu.gemini.catalog.votable.{TestVoTableBackend, VoTableClient}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
 import edu.gemini.ags.impl._
@@ -228,7 +228,7 @@ class MascotGuideStarSpec extends Specification {
       val coordinates = Coordinates(RightAscension.fromAngle(Angle.fromHMS(3, 19, 48.2341).getOrElse(Angle.zero)), Declination.fromAngle(Angle.fromDMS(41, 30, 42.078).getOrElse(Angle.zero)).getOrElse(Declination.zero))
 
       val query = CatalogQuery.catalogQuery(coordinates, RadiusConstraint.between(Angle.fromArcmin(MascotCat.defaultMinRadius), Angle.fromArcmin(MascotCat.defaultMaxRadius)), None, ppmxl)
-      val r = VoTableClient.catalog(query).map { t =>
+      val r = VoTableClient.catalog(query)(TestVoTableBackend("/mascotquery.xml")).map { t =>
         val base = new SPTarget(coordinates.ra.toAngle.toDegrees, coordinates.dec.toDegrees)
         val env = TargetEnvironment.create(base)
         val inst = new Gsaoi()
@@ -248,7 +248,7 @@ class MascotGuideStarSpec extends Specification {
       import scala.concurrent.duration._
       import scala.concurrent._
 
-      Await.result(r, new FiniteDuration(30, scala.concurrent.duration.SECONDS)) must beEqualTo(asterism).orSkip("Catalog may be down")
+      Await.result(r, new FiniteDuration(30, scala.concurrent.duration.SECONDS)) must beEqualTo(asterism)
     }
   }
 }
