@@ -146,7 +146,7 @@ object SingleProbeStrategy {
         analysis <- AgsAnalysis.analysis(ctx, mt, probe, spTarget)
       } yield {
         val vig = probe.calculateVignetting(ctx, st.coordinates)
-        (analysis, vig, entry)
+        (AgsGuideQuality.All.indexOf(analysis), vig, entry)
       }
       candidates.reduceOption(order.min).map(_._3)
     }
