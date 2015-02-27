@@ -34,6 +34,19 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
       // We'll skip this one if it fails as it depends on the remote server and the content may change
       Await.result(VoTableClient.catalog(query), 5.seconds).result.containsError should beFalse.orSkip("Catalog maybe down")
     }
+    "make a query several times to hit the cache (skipped if it fails)" in {
+      // This is not a proper test as you cannot go in the cache to check but the results can be verified checking the logs
+      def wait1 = Future { Thread.sleep(2000) }
+      def wait2 = Future { Thread.sleep(3000) }
+      val r = for {
+        _ <- VoTableClient.catalog(query)
+        _ <- wait1
+        _ <- VoTableClient.catalog(query)
+        _ <- wait2
+        k <- VoTableClient.catalog(query)
+      } yield k
+      Await.result(r, 3.minutes).result.containsError should beFalse.orSkip("Catalog maybe down")
+    }
 
   }
 }

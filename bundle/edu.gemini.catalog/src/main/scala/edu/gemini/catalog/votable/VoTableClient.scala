@@ -2,6 +2,7 @@ package edu.gemini.catalog.votable
 
 import java.net.UnknownHostException
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.logging.Logger
 
 import edu.gemini.catalog.api.CatalogQuery
 import edu.gemini.spModel.core.Angle
@@ -16,6 +17,8 @@ import scalaz._
 import Scalaz._
 
 trait VoTableClient {
+  val Log = Logger.getLogger(getClass.getName)
+
   private val timeout = 30 * 1000 // Max time to wait
 
   private def format(a: Angle)= f"${a.toDegrees}%4.03f"
@@ -39,21 +42,31 @@ trait VoTableClient {
     p.future
   }
 
+  // weak hash map should clean itself if we are using too much memory
+  val memo:Memo[(CatalogQuery, String), QueryResult] = Memo.weakHashMapMemo
+
+  // Cache the query not the future so that failed queries are executed again
+  val memoizedQuery = memo {
+    case (query, url) =>
+      val method = new GetMethod(s"$url/cgi-bin/conesearch.py")
+      val qs = queryParams(query)
+      method.setQueryString(qs)
+      Log.info(s"Catalog query to ${method.getURI}")
+
+      val client = new HttpClient
+      client.setConnectionTimeout(timeout)
+
+      try {
+        client.executeMethod(method)
+        VoTableParser.parse(url, method.getResponseBodyAsStream).fold(p => QueryResult(query, CatalogQueryResult(TargetsTable.Zero, List(p))), y => QueryResult(query, CatalogQueryResult(y).filter(query)))
+      }
+      finally {
+        method.releaseConnection()
+      }
+  }
+
   protected def doQuery(query: CatalogQuery, url: String): Future[QueryResult] = future {
-    val method = new GetMethod(s"$url/cgi-bin/conesearch.py")
-    val qs = queryParams(query)
-    method.setQueryString(qs)
-
-    val client = new HttpClient
-    client.setConnectionTimeout(timeout)
-
-    try {
-      client.executeMethod(method)
-      VoTableParser.parse(url, method.getResponseBodyAsStream).fold(p => QueryResult(query, CatalogQueryResult(TargetsTable.Zero, List(p))), y => QueryResult(query, CatalogQueryResult(y).filter(query)))
-    }
-    finally {
-      method.releaseConnection()
-    }
+    memoizedQuery((query, url))
   }
 
 }
