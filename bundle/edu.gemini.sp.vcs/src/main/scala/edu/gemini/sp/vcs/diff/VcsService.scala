@@ -1,5 +1,6 @@
 package edu.gemini.sp.vcs.diff
 
+import edu.gemini.pot.sp.ISPProgram
 import edu.gemini.pot.sp.version.VersionMap
 import edu.gemini.sp.vcs.log.VcsEventSet
 import edu.gemini.spModel.core.SPProgramID
@@ -13,6 +14,12 @@ trait VcsService {
 
   /** Fetches the `VersionMap`. */
   def version(id: SPProgramID): TryVcs[VersionMap]
+
+  /** Add the given program, copying it to the remote database. */
+  def add(p: ISPProgram): TryVcs[Unit]
+
+  /** Checkout the corresponding program, copying it to the local database. */
+  def checkout(id: SPProgramID): TryVcs[ISPProgram]
 
   /** Gets the `VersionMap` and the set of `SPNodeKey` that correspond to
     * deleted nodes. */

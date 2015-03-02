@@ -86,40 +86,42 @@ object Commands {
       (body, System.currentTimeMillis() - start)
     }
 
-    def formatted(msg: String, time: Long): String =
-      s"$msg\n$time ms"
-
-    val pull: VcsOp = (id, peer) => {
-      val (out, time) = timed { vcs.pull(id, peer).unsafeRun }
-      out.map { updated =>
-        formatted(if (updated) "Updated local program." else "Already up to date.", time)
-      }
+    def runAndFormat[A](id: SPProgramID, peer: Peer, f: (SPProgramID, Peer) => VcsAction[A])(showA: A => String): TryVcs[String] = {
+      val (out, time) = timed { f(id, peer).unsafeRun }
+      out.map { a => s"${showA(a)}\n$time ms"}
     }
 
-    val push: VcsOp = (id, peer) => {
-      val (out, time) = timed { vcs.push(id, peer).unsafeRun }
-      out.map { updated =>
-        formatted(if (updated) "Updated remote program." else "Already up to date.", time)
-      }
-    }
+    val add: VcsOp = (id, peer) =>
+      runAndFormat(id, peer, vcs.add) { _ => s"Added $id to $peer" }
 
-    val sync: VcsOp = (id, peer) => {
-      val (out, time) = timed { vcs.sync(id, peer).unsafeRun }
+    val checkout: VcsOp = (id, peer) =>
+      runAndFormat(id, peer, vcs.checkout) { _ => s"Checked out $id from $peer" }
 
-      out.map { updates =>
-        formatted(updates match {
-          case Neither    => "Already up to date."
-          case LocalOnly  => "Updated local program."
-          case RemoteOnly => "Updated remote program."
-          case Both       => "Synchronized."
-        }, time)
+    val pull: VcsOp = (id, peer) =>
+      runAndFormat(id, peer, vcs.pull) { updated =>
+        if (updated) "Updated local program." else "Already up to date."
       }
-    }
+
+    val push: VcsOp = (id, peer) =>
+      runAndFormat(id, peer, vcs.push) { updated =>
+        if (updated) "Updated remote program." else "Already up to date."
+      }
+
+    val sync: VcsOp = (id, peer) =>
+      runAndFormat(id, peer, vcs.sync) {
+        case Neither    => "Already up to date."
+        case LocalOnly  => "Updated local program."
+        case RemoteOnly => "Updated remote program."
+        case Both       => "Synchronized."
+      }
 
     val vcsOps: Map[String, VcsOp] = Map(
-      "pull" -> pull,
-      "push" -> push,
-      "sync" -> sync
+      "add"      -> add,
+      "checkout" -> checkout,
+      "co"       -> checkout,
+      "pull"     -> pull,
+      "push"     -> push,
+      "sync"     -> sync
     )
 
     type VcsCmdHandler = (String, Array[String]) => Option[String]

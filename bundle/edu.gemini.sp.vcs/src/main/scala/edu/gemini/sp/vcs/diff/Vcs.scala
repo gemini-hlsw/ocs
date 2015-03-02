@@ -22,6 +22,22 @@ class Vcs(kc: KeyChain, server: VcsServer) {
 
   private def user: Set[Principal] = kc.subject.getPrincipals.asScala.toSet
 
+  /** Checks-out the indicated program from the remote peer, copying it into
+    * the local database. */
+  def checkout(id: SPProgramID, peer: Peer): VcsAction[ISPProgram] =
+    for {
+      p <- Client(peer).checkout(id)
+      _ <- server.add(p, user)
+    } yield p
+
+  /** Adds the given program to the remote peer, copying it into the remote
+    * database. */
+  def add(id: SPProgramID, peer: Peer): VcsAction[Unit] =
+    for {
+      p <- server.lookup(id)
+      _ <- Client(peer).add(p)
+    } yield ()
+
   // pull0 is shared by `pull` and `sync`, since the first half of a sync is
   // to merge in changes from the remote peer.  The local merge is only
   // performed if the remote peer has something new to offer.
@@ -82,7 +98,7 @@ class Vcs(kc: KeyChain, server: VcsServer) {
       eval <- pull0(id, client)
       s0    = if (eval.localUpdate) LocalOnly else Neither
       res  <- eval match {
-        case MergeEval(_,     l, false) =>
+        case MergeEval(_,     _, false) =>
           VcsAction(s0)
 
         case MergeEval(diffs, _, true)  =>
@@ -107,6 +123,12 @@ class Vcs(kc: KeyChain, server: VcsServer) {
 
     def version(id: SPProgramID): VcsAction[VersionMap] =
       call(_.version(id))
+
+    def add(p: ISPProgram): VcsAction[Unit] =
+      call(_.add(p))
+
+    def checkout(id: SPProgramID): VcsAction[ISPProgram] =
+      call(_.checkout(id))
 
     def diffState(id: SPProgramID): VcsAction[DiffState] =
       call(_.diffState(id))

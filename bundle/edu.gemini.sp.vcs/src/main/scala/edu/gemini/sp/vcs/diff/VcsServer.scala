@@ -26,6 +26,10 @@ class VcsServer(odb: IDBDatabaseService, vcsLog: VcsLog) { vs =>
 
   import SPNodeKeyLocks.instance.{readLock, readUnlock, writeLock, writeUnlock}
 
+  def lookup(id: SPProgramID): VcsAction[ISPProgram] =
+    (Option(odb.lookupProgramByID(id)) \/> NotFound(id)).liftVcs
+
+
   /** Creates an action that reads from a program with a read lock held
     * provided the caller has permission. */
   def read[A](id: SPProgramID, user: Set[Principal])(body: ISPProgram => A): VcsAction[A] =
@@ -59,28 +63,39 @@ class VcsServer(odb: IDBDatabaseService, vcsLog: VcsLog) { vs =>
                user:     Set[Principal],
                evaluate: ISPProgram => VcsAction[A],
                filter:   A => Boolean,
-               update:   (ISPFactory, ISPProgram, A) => VcsAction[Unit]): VcsAction[A] = {
-
-    def storeCopy(copy: ISPProgram, orig: ISPProgram): TryVcs[Unit] = {
-      \/.fromTryCatch(odb.put(copy)).leftMap {
-        case clash: DBIDClashException =>
-          KeyClash(orig.getProgramKey, orig.getProgramID, clash.key, clash.id)
-        case ex =>
-          VcsException(ex)
-      }.map(_ => ())
-    }
-
+               update:   (ISPFactory, ISPProgram, A) => VcsAction[Unit]): VcsAction[A] =
     locking(id, user, writeLock, writeUnlock) { prog =>
       evaluate(prog) >>= { a =>
         if (filter(a)) {
           val cp = odb.getFactory.copyWithSameKeys(prog)
-          update(odb.getFactory, cp, a) >>= { _ => storeCopy(cp, prog).map(_ => a).liftVcs }
+          update(odb.getFactory, cp, a) >>= { _ => putProg(cp).map(_ => a).liftVcs }
         } else {
           VcsAction(a)
         }
       }
     }
-  }
+
+  /** Adds the given program to the database, provided it doesn't share the
+    * same key or id with an existing program in the database and the user has
+    * appropriate keys.
+    */
+  // TODO: seems to work but can probably be clened up a bit
+  def add(p: ISPProgram, user: Set[Principal]): VcsAction[Unit] =
+    Option(p.getProgramID).toRightDisjunction(MissingId).liftVcs >>= { id =>
+      val progKey = p.getProgramKey
+      try {
+        writeLock(progKey)
+        accessControlled(id, user) {
+          Option(odb.lookupProgramByID(id)).fold {
+            Option(odb.lookupProgram(p.getProgramKey)).fold {
+              putProg(p).liftVcs
+            } { _ => VcsAction.fail(KeyAlreadyExists(id, progKey)) }
+          } { _ => VcsAction.fail(IdAlreadyExists(id)) }
+        }
+      } finally {
+        writeUnlock(progKey)
+      }
+    }
 
   /** Server implementation of `VcsService`. */
   final class SecureVcsService(user: Set[Principal]) extends VcsService {
@@ -89,6 +104,12 @@ class VcsServer(odb: IDBDatabaseService, vcsLog: VcsLog) { vs =>
 
     override def version(id: SPProgramID): TryVcs[VersionMap] =
       vs.read(id, user)(_.getVersions).unsafeRun
+
+    override def add(p: ISPProgram): TryVcs[Unit] =
+      vs.add(p, user).unsafeRun
+
+    override def checkout(id: SPProgramID): TryVcs[ISPProgram] =
+      vs.read(id, user)(identity).unsafeRun
 
     override def diffState(id: SPProgramID): TryVcs[DiffState] =
       vs.read(id, user)(DiffState.apply).unsafeRun
@@ -132,8 +153,6 @@ class VcsServer(odb: IDBDatabaseService, vcsLog: VcsLog) { vs =>
       }
     }
 
-  private def lookup(id: SPProgramID): VcsAction[ISPProgram] =
-    (Option(odb.lookupProgramByID(id)) \/> NotFound(id)).liftVcs
 
   private def accessControlled[A](id: SPProgramID, user: Set[Principal])(body: => VcsAction[A]): VcsAction[A] =
     VcsAction(ImplicitPolicy.hasPermission(odb, user, new ProgramPermission.Read(id)).unsafePerformIO()) >>= {
@@ -141,4 +160,10 @@ class VcsServer(odb: IDBDatabaseService, vcsLog: VcsLog) { vs =>
         if (hasPermission) body
         else VcsAction.fail(Forbidden(s"You don't have permission to access program '$id'"))
     }
+
+  private  def putProg(p: ISPProgram): TryVcs[Unit] =
+    \/.fromTryCatch(odb.put(p)).leftMap {
+      case clash: DBIDClashException => IdClash(clash)
+      case ex                        => VcsException(ex)
+    }.map(_ => ())
 }

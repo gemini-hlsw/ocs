@@ -4,6 +4,7 @@ import java.io.IOException
 import java.util.logging.{Level, Logger}
 
 import edu.gemini.pot.sp.SPNodeKey
+import edu.gemini.pot.spdb.DBIDClashException
 import edu.gemini.spModel.core.{VersionException, Peer, SPProgramID}
 
 import scalaz._
@@ -12,8 +13,17 @@ import Scalaz._
 sealed trait VcsFailure
 
 object VcsFailure {
-  /** Two distinct programs share the same program id or key. */
-  case class KeyClash(key0: SPNodeKey, id0: SPProgramID, key1: SPNodeKey, id1: SPProgramID) extends VcsFailure
+  /** Indicates that the program has no program id. */
+  case object MissingId extends VcsFailure
+
+  /** Indicates that the given program already exists in the database. */
+  case class IdAlreadyExists(id: SPProgramID) extends VcsFailure
+
+  /** Indicates that the given program already exists in the database. */
+  case class KeyAlreadyExists(id: SPProgramID, key: SPNodeKey) extends VcsFailure
+
+  /** Two distinct programs share the same program id. */
+  case class IdClash(ex: DBIDClashException) extends VcsFailure
 
   /** The program associated with the given id could not be found. */
   case class NotFound(id: SPProgramID) extends VcsFailure
@@ -47,15 +57,23 @@ object VcsFailure {
 
     val peerName = peer.map { p => s"${p.host}:${p.port}" } | "remote host"
     val msg = f match {
-      case KeyClash(k0,i0,k1,i1) =>
-        if (k0 == k1) s"Internal error.  Another program ($i1) with the same internal key as $i0 already exists in the database."
-        else s"There is another program in the database with ID '$i0'.  Give your program a new ID and try again."
+      case IdClash(ex) =>
+        s"There is another program in the database with ID '${ex.id}'.  Give your program a new ID and try again."
 
       case NotFound(i)           =>
         s"$i is not in the database."
 
       case Forbidden(why)        =>
         s"Denied permission to $op $id: $why"
+
+      case MissingId             =>
+        "Give your program an id and try again."
+
+      case KeyAlreadyExists(i,k) =>
+        s"Program $i cannot be added because a program with the same internal key already exists in the database."
+
+      case IdAlreadyExists(i)    =>
+        s"Program $i cannot be added because a program with the same ID already exists in the database."
 
       case NeedsUpdate           =>
         "You have to update your version of the program before you can commit changes."
@@ -82,6 +100,7 @@ object VcsFailure {
     }
 
     val exOpt = f match {
+      case IdClash(ex)      => Some(ex)
       case VcsException(ex) => Some(ex)
       case _                => None
     }
