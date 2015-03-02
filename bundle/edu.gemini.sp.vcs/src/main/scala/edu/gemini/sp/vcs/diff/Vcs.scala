@@ -5,6 +5,7 @@ import edu.gemini.pot.sp.version._
 import edu.gemini.shared.util.VersionComparison.{Same, Newer}
 import edu.gemini.sp.vcs.diff.ProgramLocation.{LocalOnly, Neither, Remote}
 import edu.gemini.sp.vcs.diff.VcsFailure.{NeedsUpdate, VcsException}
+import edu.gemini.sp.vcs.log.VcsEventSet
 import edu.gemini.spModel.core.{Peer, SPProgramID}
 import edu.gemini.util.security.auth.keychain.KeyChain
 
@@ -92,6 +93,10 @@ class Vcs(kc: KeyChain, server: VcsServer) {
     } yield res
   }
 
+  /** Provides access to (a chunk of) the VCS log. */
+  def log(id: SPProgramID, peer: Peer, offset: Int, length: Int): VcsAction[(List[VcsEventSet], Boolean)] =
+    Client(peer).log(id, offset, length)
+
   case class Client(peer: Peer) {
     import edu.gemini.util.trpc.client.TrpcClient
 
@@ -111,6 +116,9 @@ class Vcs(kc: KeyChain, server: VcsServer) {
 
     def storeDiffs(id: SPProgramID, mp: MergePlan): VcsAction[Boolean] =
       call(_.storeDiffs(id, mp.encode))
+
+    def log(id: SPProgramID, offset: Int, length: Int): VcsAction[(List[VcsEventSet], Boolean)] =
+      call(_.log(id, offset, length))
   }
 }
 

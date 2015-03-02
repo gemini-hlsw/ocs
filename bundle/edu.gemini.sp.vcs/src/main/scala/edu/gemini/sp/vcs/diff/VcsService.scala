@@ -1,6 +1,7 @@
 package edu.gemini.sp.vcs.diff
 
 import edu.gemini.pot.sp.version.VersionMap
+import edu.gemini.sp.vcs.log.VcsEventSet
 import edu.gemini.spModel.core.SPProgramID
 
 
@@ -23,4 +24,7 @@ trait VcsService {
   /** Applies the given `MergePlan` to the remote program, returning `true`
     * if the program is actually updated; `false` otherwise. */
   def storeDiffs(id: SPProgramID, mp: MergePlan.Transport): TryVcs[Boolean]
+
+  /** Fetches a chunk of the vcs log. */
+  def log(p: SPProgramID, offset:Int, length:Int): TryVcs[(List[VcsEventSet], Boolean)]
 }

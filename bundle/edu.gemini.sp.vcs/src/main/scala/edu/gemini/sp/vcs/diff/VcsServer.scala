@@ -6,11 +6,14 @@ import edu.gemini.pot.spdb.{DBIDClashException, IDBDatabaseService}
 import edu.gemini.shared.util.VersionComparison.{Same, Newer}
 import edu.gemini.sp.vcs.diff.VcsAction._
 import edu.gemini.sp.vcs.diff.VcsFailure._
+import edu.gemini.sp.vcs.log.{OpStore, OpFetch, VcsEventSet, VcsLog}
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.util.security.permission.ProgramPermission
 import edu.gemini.util.security.policy.ImplicitPolicy
 
 import java.security.Principal
+
+import edu.gemini.util.security.principal.GeminiPrincipal
 
 import scalaz._
 import Scalaz._
@@ -19,7 +22,7 @@ import Scalaz._
   * actions that read from and write to programs in the database. It also
   * implements the server side of the [[edu.gemini.sp.vcs.diff.VcsService]]
   * interface. */
-class VcsServer(odb: IDBDatabaseService) { vs =>
+class VcsServer(odb: IDBDatabaseService, vcsLog: VcsLog) { vs =>
 
   import SPNodeKeyLocks.instance.{readLock, readUnlock, writeLock, writeUnlock}
 
@@ -81,6 +84,9 @@ class VcsServer(odb: IDBDatabaseService) { vs =>
 
   /** Server implementation of `VcsService`. */
   final class SecureVcsService(user: Set[Principal]) extends VcsService {
+    def geminiPrincipals: Set[GeminiPrincipal] =
+      user.collect { case p: GeminiPrincipal => p }
+
     override def version(id: SPProgramID): TryVcs[VersionMap] =
       vs.read(id, user)(_.getVersions).unsafeRun
 
@@ -88,7 +94,10 @@ class VcsServer(odb: IDBDatabaseService) { vs =>
       vs.read(id, user)(DiffState.apply).unsafeRun
 
     override def fetchDiffs(id: SPProgramID, state: DiffState): TryVcs[MergePlan.Transport] =
-      vs.read(id, user)(ProgramDiff.compare(_, state)).map(_.encode).unsafeRun
+      vs.read(id, user) { p =>
+        vcsLog.log(OpFetch, id, geminiPrincipals)
+        ProgramDiff.compare(p, state)
+      }.map(_.encode).unsafeRun
 
     override def storeDiffs(id: SPProgramID, mpt: MergePlan.Transport): TryVcs[Boolean] = {
       val mp = mpt.decode
@@ -99,9 +108,20 @@ class VcsServer(odb: IDBDatabaseService) { vs =>
           case _     => VcsAction.fail(NeedsUpdate)
         },
         identity,
-        (f, p, _) => mp.merge(f, p)
+        (f, p, _) =>
+          for {
+            _ <- mp.merge(f, p)
+            _ <- VcsAction(vcsLog.log(OpStore, id, geminiPrincipals))
+          } yield ()
       ).unsafeRun
     }
+
+    override def log(id: SPProgramID, offset:Int, length:Int): TryVcs[(List[VcsEventSet], Boolean)] =
+      try {
+        vcsLog.selectByProgram(id, offset, length).right
+      } catch {
+        case ex: Exception => VcsException(ex).left
+      }
   }
 
   private def locking[A](id: SPProgramID, user: Set[Principal], lock: SPNodeKey => Unit, unlock: SPNodeKey => Unit)(body: ISPProgram => VcsAction[A]): VcsAction[A] =

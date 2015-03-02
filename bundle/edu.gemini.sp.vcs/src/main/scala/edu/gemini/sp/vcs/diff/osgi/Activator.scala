@@ -5,6 +5,7 @@ import java.util
 
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.sp.vcs.diff.{Vcs, VcsServer, VcsService}
+import edu.gemini.sp.vcs.log.VcsLog
 import edu.gemini.sp.vcs.reg.VcsRegistrar
 import edu.gemini.util.osgi.SecureServiceFactory
 import edu.gemini.util.security.auth.keychain.KeyChain
@@ -29,9 +30,9 @@ class Activator extends BundleActivator{
     import Activator._
 
     trackers = List(
-      track[IDBDatabaseService, KeyChain, List[ServiceRegistration[_]]](ctx) { (odb, auth) =>
+      track[IDBDatabaseService, KeyChain, VcsLog, List[ServiceRegistration[_]]](ctx) { (odb, auth, log) =>
         // The vcs backend/server implementation itself.
-        val vcsServer = new VcsServer(odb)
+        val vcsServer = new VcsServer(odb, log)
 
         // The public service.
         val props = new util.Hashtable[String, Object]()
