@@ -1,9 +1,6 @@
 // Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
 // Observatory Control System, Gemini Telescopes Project.
 // See the file COPYRIGHT for complete details.
-//
-// $Id: EdCompTargetList.java 13566 2008-09-29 16:03:36Z swalker $
-//
 package jsky.app.ot.gemini.editor.targetComponent;
 
 import com.jgoodies.forms.layout.CellConstraints;
@@ -79,9 +76,9 @@ import static jsky.app.ot.util.OtColor.*;
 public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, TargetObsComp> {
 
     // Static constants
-    private static final Logger   LOG                      = Logger.getLogger(EdCompTargetList.class.getName());
-    private static final TimeZone UTC                      = TimeZone.getTimeZone("UTC");
-    private static final String   NON_SIDEREAL_TARGET      = "Nonsidereal";
+    private static final Logger   LOG                 = Logger.getLogger(EdCompTargetList.class.getName());
+    private static final TimeZone UTC                 = TimeZone.getTimeZone("UTC");
+    private static final String   NON_SIDEREAL_TARGET = "Nonsidereal";
 
     // Global variables \o/
     private static TargetClipboard clipboard;
@@ -94,14 +91,14 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private final JToggleButton       _trackingButton   = new TrackingButton();
 
     // More constants, but they need access to `this` so we assign in the ctor
-    private final TelescopeForm _w;
+    private final TelescopeForm            _w;
     private final NonSiderealTargetSupport _nonSiderealTargetSup;
     private final TimeDocument             _timeDocument;
 
     // Stuff that varies with time
-    private SPTarget   _curPos;
-    private GuideGroup _curGroup;
-    private boolean    _ignorePosUpdate = false;
+    private SPTarget        _curPos;
+    private GuideGroup      _curGroup;
+    private boolean         _ignorePosUpdate    = false;
     private Option<Catalog> _selectedNameServer = None.instance();
 
 
@@ -406,8 +403,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.positionTable.addKeyListener(new KeyAdapter() {
             @Override public void keyPressed(KeyEvent event) {
                 switch (event.getKeyCode()) {
-                    // Make the delete and backspace buttons delete selected
-                    // positions.
+                    // Make the delete and backspace buttons delete selected positions.
                     case KeyEvent.VK_DELETE:
                     case KeyEvent.VK_BACK_SPACE:
                         _w.removeButton.doClick();
@@ -503,8 +499,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     };
 
     /**
-     * A renderer of target type options.  Shows a guider type that isn't
-     * available in the current context with a warning icon.
+     * A renderer of target type options.  Shows a guider type that isn't available in the current
+     * context with a warning icon.
      */
     private final DefaultListCellRenderer tagRenderer = new DefaultListCellRenderer() {
         private final Icon errorIcon = Resources.getIcon("eclipse/error.gif");
@@ -869,7 +865,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                             }
                             break;
                         }
-                        //_nonSiderealTargetSup.showNonSiderealTarget(target, _curPos.getCoordSys().getName());
 
                     }
                     _nonSiderealTargetSup.ignoreResetCacheEvents(false);
@@ -902,7 +897,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     // OtItemEditor
     public void init() {
-        /* ===== */
+
         final ISPObsComponent node = getContextTargetObsComp();
         TargetSelection.listenTo(node, selectionListener);
 
@@ -1006,8 +1001,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     private void toggleAgsGuiElements() {
         final boolean supports = GuideStarSupport.supportsAutoGuideStarSelection(getNode());
-        // hide the ags related buttons
-        _w.guidingControls.supportsAgs_$eq(supports);
+        _w.guidingControls.supportsAgs_$eq(supports); // hide the ags related buttons
     }
 
     // Guider panel property change listener to modify status and magnitude limits.
@@ -1090,9 +1084,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                             _trackingButton.doClick();
                         _trackingButton.setVisible(false);
 
+                        // N.B. don't trim, otherwise user can't include space in group name
                         final String name = _curGroup.getName().getOrElse("");
-                        // don't trim, otherwise user can't include space in group name
-//        if (name != null) name = name.trim();
                         _w.guideGroupName.setValue(name);
 
                         final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
@@ -1104,8 +1097,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
     };
 
-    // Updates the enabled state of the primary guide target button when the
-    // target environment changes.
+    // Updates the enabled state of the primary guide target button when the target environment changes.
     private final PropertyChangeListener primaryButtonUpdater = new PropertyChangeListener() {
         public void propertyChange(PropertyChangeEvent evt) {
             boolean enabled = false;
@@ -1120,8 +1112,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
     };
 
-    // Action that handles adding a new guide star when a probe is picked from
-    // the add menu.
+    // Action that handles adding a new guide star when a probe is picked from the add menu.
     private class AddGuideStarAction implements ActionListener {
         private final TargetObsComp obsComp;
         private final GuideProbe probe;
@@ -1240,16 +1231,14 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final Set<GuideProbe> guiders = new HashSet<>(avail);
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
 
-        // Get the set of guiders that are referenced but not legal in this
-        // context, if any.  Any "available" guider is legal, anything left
-        // over is referenced but not really available.
+        // Get the set of guiders that are referenced but not legal in this context, if any.  Any
+        // "available" guider is legal, anything left over is referenced but not really available.
         final Set<GuideProbe> illegalSet = env.getOrCreatePrimaryGuideGroup().getReferencedGuiders();
         illegalSet.removeAll(avail);
 
-        // Determine whether the current position is one of these illegal
-        // guiders.  If so, we add the guide probe to the list of choices
-        // so that this target may be selected in order to change its type or
-        // delete it.
+        // Determine whether the current position is one of these illegal guiders.  If so, we add
+        // the guide probe to the list of choices so that this target may be selected in order to
+        // change its type or delete it.
         GuideProbe illegal = null;
         for (GuideProbe guider : illegalSet) {
             final Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(guider);
@@ -1263,8 +1252,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final List<GuideProbe> guidersList = new ArrayList<>(guiders);
         Collections.sort(guidersList, GuideProbe.KeyComparator.instance);
 
-        // Make a list of PositionTypes that are legal in the current
-        // observation context.
+        // Make a list of PositionTypes that are legal in the current observation context.
         final PositionType[] ptA;
         ptA = new PositionType[2 + guiders.size()];
 
@@ -1356,14 +1344,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         void nameResolved();
     }
 
-    ////////////////////////////////////////////////////////////////////////
-    //////////////////////////// Utility Classes  //////////////////////////
-    ////////////////////////////////////////////////////////////////////////
-
-
     /**
-     * An Horizon Action encapsulates the operations to be performed
-     * based on the results of an Horizons Query.
+     * An Horizon Action encapsulates the operations to be performed based on the results of an
+     * Horizons Query.
      */
     private interface HorizonsAction {
         public static enum Type {
@@ -1372,22 +1355,19 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             PLOT_EPHEMERIS
         }
 
-        /**
-         * Executes the given operation using the given <code>HorizonsReply</code>
-         */
+        /** Executes the given operation using the given <code>HorizonsReply</code> */
         public void execute(HorizonsReply reply);
     }
 
     /**
-     * A container for all the Horizons Actions that will be performed based on
-     * the results of an query to the Horizons System.
+     * A container for all the Horizons Actions that will be performed based on the results of an
+     * query to the Horizons System.
      * </p>
-     * Would have been great that actions would have been implemented as static
-     * members, so I could have done this as a set of enums with the appropriate operation.
-     * However, the actions operate on non-static member. I think it's possible
-     * to create the appropriate methods to update the relevant objects when the underlying
-     * EdCompTargetList changes, and use static methods anyway... but there is so many other
-     * things to resolve yet that this is what we get.
+     * Would have been great that actions would have been implemented as static members, so I could
+     * have done this as a set of enums with the appropriate operation. However, the actions operate
+     * on non-static member. I think it's possible to create the appropriate methods to update the
+     * relevant objects when the underlying EdCompTargetList changes, and use static methods
+     * anyway... but there is so many other things to resolve yet that this is what we get.
      */
     private class HorizonsActionContainer {
 
@@ -1403,10 +1383,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
 
         /**
-         * Update the Orbital Elements of the NonSidereal object. Will update the
-         * Ra,Dec (and time) with the latest information gotten. Also, it will
-         * update the System Type of the conic target based on the type
-         * of the answer.
+         * Update the Orbital Elements of the NonSidereal object. Will update the Ra,Dec (and time)
+         * with the latest information gotten. Also, it will update the System Type of the conic
+         * target based on the type of the answer.
          */
         private class UpdateOrbitalElements implements HorizonsAction {
 
@@ -1476,9 +1455,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
         }
 
-        /**
-         * Action to update the position of the object
-         */
+        /** Action to update the position of the object */
         private class UpdatePosition implements HorizonsAction {
             public void execute(HorizonsReply reply) {
                 if (reply.hasEphemeris()) {
@@ -1490,10 +1467,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
         }
 
-
-        /**
-         * Action to plot the ephemeris for the given object
-         */
+        /** Action to plot the ephemeris for the given object */
         private class PlotEphemeris implements HorizonsAction {
             public void execute(HorizonsReply reply) {
                 if (reply.hasEphemeris()) {
@@ -1510,9 +1484,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
 
         /**
-         * Analyzes the ephemeris, and set the current position (and date) of the
-         * Object based on that information. If the TPE is available,
-         * will update its base position
+         * Analyzes the ephemeris, and set the current position (and date) of the Object based on
+         * that information. If the TPE is available, will update its base position
          */
         private void _processEphemeris(List<EphemerisEntry> ephemeris) {
             if (ephemeris != null) {
@@ -1536,7 +1509,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
     }
 
-
     private static final class TrackingButton extends JToggleButton {
         public TrackingButton() {
             super("Tracking Details");
@@ -1544,7 +1516,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             setBackground(VERY_LIGHT_GREY);
         }
     }
-
 
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener removeListener = new ActionListener() {
@@ -1585,7 +1556,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     };
 
 
-
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener manualGuideStarListener = new ActionListener() {
         public void actionPerformed(ActionEvent evt) {
@@ -1598,7 +1568,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
         }
     };
-
 
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener autoGuideStarListener = new ActionListener() {
@@ -1618,7 +1587,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
         }
     };
-
 
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener setBaseListener = new ActionListener() {
@@ -1642,7 +1610,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
     };
 
-
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener resolveListener = new ActionListener() {
         public void actionPerformed(ActionEvent evt) {
@@ -1656,14 +1623,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
     };
 
-
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener timeRangePlotListener = new ActionListener() {
         public void actionPerformed(ActionEvent evt) {
             resolveName(HorizonsAction.Type.PLOT_EPHEMERIS, null);
         }
     };
-
 
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener updateRaDecListener = new ActionListener() {
@@ -1683,7 +1648,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
     };
 
-
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener duplicateListener = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -1697,12 +1661,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 final SPTarget newTarget = new SPTarget();
                 newTarget.setParamSet(ps);
 
-                // Add it to the environment.  First we have to figure out
-                // what it is.
+                // Add it to the environment.  First we have to figure out what it is.
                 TargetEnvironment env = dataObject.getTargetEnvironment();
 
-                // See if it is a guide star and duplicate it in the correct
-                // GuideTargets list.
+                // See if it is a guide star and duplicate it in the correct GuideTargets list.
                 boolean duplicated = false;
                 env.getOrCreatePrimaryGuideGroup();
                 final List<GuideGroup> groups = new ArrayList<>();
@@ -1741,7 +1703,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
     };
 
-
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener calendarTimeListener = new ActionListener() {
         final DateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss");
@@ -1755,13 +1716,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 final Date d = tr.getDate();
                 final String time = timeFormatter.format(d);
                 _timeDocument.setTime(time);
-                //we have to set the correct day in the calendar when
-                // shortcuts are used.
-                //because _w.calendarDate.setDate(d) doesn't work,
-                // and Shane agreed :) we destroy the calendar a create a  new one with the correct date
-                // (Shane's words => def uglyWorkaroundAcceptable(appName: String) = appName == "OT")
-                //todo: figure out why  _w.calendarDate.setDate(d) doesn't work
 
+                // We have to set the correct day in the calendar when shortcuts are used. Because
+                // _w.calendarDate.setDate(d) doesn't work.
                 _w.panel1.remove(_w.calendarDate);
                 _w.calendarDate = new JCalendarPopup(d, TimeZone.getTimeZone("UTC"));
                 _w.panel1.add(_w.calendarDate, new CellConstraints().xy(5, 1));
@@ -1775,7 +1732,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
         }
     };
-
 
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener solarListener = new ActionListener() {
@@ -1792,7 +1748,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
         }
     };
-
 
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener copyListener = new ActionListener() {
@@ -1986,8 +1941,8 @@ enum UserPositionType implements PositionType {
 
 
 /**
- * The time configurations are pre-sets of dates the Horizons query should use to
- * gets its information.
+ * The time configurations are pre-sets of dates the Horizons query should use to gets its
+ * information.
  */
 enum TimeConfig {
 
@@ -2035,10 +1990,9 @@ enum TimeConfig {
     }
 
     /**
-     * Return the <code>Date</code>  for the
-     * given configuration
-     *
+     * Return the <code>Date</code>  for the given configuration
      * @return the <code>Date</code> associated to this configuration
      */
     public abstract Date getDate();
+
 }
