@@ -14,6 +14,7 @@ import edu.gemini.itc.parameters._
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
 import edu.gemini.spModel.core.Site
+import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer
 
 // TEMPORARY helper
 // All input objects will become immutable data only objects (probably Scala case classes).
@@ -36,7 +37,10 @@ object Hash {
   def calc(p: GmosParameters): Int =
     hash(
       p.getFilter.name,
-      p.getCCDtype,
+      p.getCCDtype match {
+        case DetectorManufacturer.E2V       =>  if (p.getSite().equals(Site.GN)) "0" else "1"
+        case DetectorManufacturer.HAMAMATSU => "2"
+      },
       p.getFocalPlaneMask.name,
       p.getGrating.name,
       0.3, // TODO: REMOVE WITH NEXT NEW BASELINE

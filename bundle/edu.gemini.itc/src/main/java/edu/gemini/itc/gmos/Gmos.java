@@ -76,27 +76,38 @@ public abstract class Gmos extends Instrument {
 
 
         //Choose correct CCD QE curve
-        // REL-760, REL-478
-        // The following QE files correspond to each option
-        // 0. gmos_n_E2V4290DDmulti3.dat      => EEV DD array
-        // 1. gmos_n_cdd_red.dat              => EEV legacy
-        // 2. gmos_n_CCD-{R,G,B}.dat          =>  Hamamatsu (R,G,B)
-        if (gp.getCCDtype().equals("0")) {
-            _detector = new Detector(getDirectory() + "/", getPrefix(), "E2V4290DDmulti3", "EEV DD array");
-            _detector.setDetectorPixels(DETECTOR_PIXELS);
-            if (detectorCcdIndex == 0) _instruments = new Gmos[]{this};
-        } else if (gp.getCCDtype().equals("1")) {
-            _detector = new Detector(getDirectory() + "/", getPrefix(), "ccd_red", "EEV legacy array");
-            _detector.setDetectorPixels(DETECTOR_PIXELS);
-            if (detectorCcdIndex == 0) _instruments = new Gmos[]{this};
-        } else if (gp.getCCDtype().equals("2")) {
-            String fileName = getCcdFiles()[detectorCcdIndex];
-            String name = getCcdNames()[detectorCcdIndex];
-            Color color = DETECTOR_CCD_COLORS[detectorCcdIndex];
-            _detector = new Detector(getDirectory() + "/", getPrefix(), fileName, "Hamamatsu array", name, color);
-            _detector.setDetectorPixels(DETECTOR_PIXELS);
-            if (detectorCcdIndex == 0)
-                _instruments = createCcdArray();
+        switch (gp.getCCDtype()) {
+            // E2V, site dependent
+            case E2V:
+                switch (gp.getSite()) {
+                    // E2V for GN: gmos_n_E2V4290DDmulti3.dat      => EEV DD array
+                    case GN:
+                        _detector = new Detector(getDirectory() + "/", getPrefix(), "E2V4290DDmulti3", "EEV DD array");
+                        _detector.setDetectorPixels(DETECTOR_PIXELS);
+                        if (detectorCcdIndex == 0) _instruments = new Gmos[]{this};
+                        break;
+                    // E2V for GS: gmos_n_cdd_red.dat              => EEV legacy
+                    case GS:
+                        _detector = new Detector(getDirectory() + "/", getPrefix(), "ccd_red", "EEV legacy array");
+                        _detector.setDetectorPixels(DETECTOR_PIXELS);
+                        if (detectorCcdIndex == 0) _instruments = new Gmos[]{this};
+                        break;
+                    default:
+                        throw new IllegalArgumentException();
+                }
+                break;
+            // Hamamatsu, both sites: gmos_n_CCD-{R,G,B}.dat        =>  Hamamatsu (R,G,B)
+            case HAMAMATSU:
+                String fileName = getCcdFiles()[detectorCcdIndex];
+                String name = getCcdNames()[detectorCcdIndex];
+                Color color = DETECTOR_CCD_COLORS[detectorCcdIndex];
+                _detector = new Detector(getDirectory() + "/", getPrefix(), fileName, "Hamamatsu array", name, color);
+                _detector.setDetectorPixels(DETECTOR_PIXELS);
+                if (detectorCcdIndex == 0)
+                    _instruments = createCcdArray();
+                break;
+            default:
+                throw new IllegalArgumentException();
         }
 
         if (detectorCcdIndex == 0) {
@@ -206,10 +217,10 @@ public abstract class Gmos extends Instrument {
     }
 
     public double getPixelSize() {
-        if (gp.getCCDtype().equals("0") || gp.getCCDtype().equals("1")) {
-            return ORIG_PLATE_SCALE * gp.getSpatialBinning();
-        } else {
-            return HAM_PLATE_SCALE * gp.getSpatialBinning();
+        switch (gp.getCCDtype()) {
+            case E2V:       return ORIG_PLATE_SCALE * gp.getSpatialBinning();
+            case HAMAMATSU: return HAM_PLATE_SCALE * gp.getSpatialBinning();
+            default:        throw new IllegalArgumentException();
         }
     }
 

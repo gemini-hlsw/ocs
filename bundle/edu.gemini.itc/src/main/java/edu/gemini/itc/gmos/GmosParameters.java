@@ -3,7 +3,7 @@ package edu.gemini.itc.gmos;
 import edu.gemini.itc.shared.ITCParameters;
 import edu.gemini.itc.shared.IfuMethod;
 import edu.gemini.spModel.core.Site;
-import edu.gemini.spModel.gemini.gmos.GmosCommonType;
+import edu.gemini.spModel.gemini.gmos.GmosCommonType.*;
 import scala.Option;
 
 /**
@@ -12,27 +12,27 @@ import scala.Option;
  */
 public final class GmosParameters extends ITCParameters {
 
-    private final GmosCommonType.Filter filter;
-    private final GmosCommonType.Disperser grating;
+    private final Site site;
+    private final DetectorManufacturer ccdType;
+    private final Filter filter;
+    private final Disperser grating;
+    private final FPUnit fpMask;
+    private final Option<IfuMethod> ifuMethod;      // only if fpu is IFU
     private final double centralWavelength;
-    private final GmosCommonType.FPUnit fpMask;
     private final int spatBinning;
     private final int specBinning;
-    private final Option<IfuMethod> ifuMethod;
-    private final Site site;
-    private final String ccdType;
 
     /**
      * Constructs a GmosParameters from a test file.
      */
-    public GmosParameters(final GmosCommonType.Filter filter,
-                          final GmosCommonType.Disperser grating,
+    public GmosParameters(final Filter filter,
+                          final Disperser grating,
                           final double centralWavelength,
-                          final GmosCommonType.FPUnit fpMask,
+                          final FPUnit fpMask,
                           final int spatBinning,
                           final int specBinning,
                           final Option<IfuMethod> ifuMethod,
-                          final String ccdType,
+                          final DetectorManufacturer ccdType,
                           final Site site) {
         this.filter             = filter;
         this.grating            = grating;
@@ -46,15 +46,15 @@ public final class GmosParameters extends ITCParameters {
 
     }
 
-    public GmosCommonType.Filter getFilter() {
+    public Filter getFilter() {
         return filter;
     }
 
-    public GmosCommonType.Disperser getGrating() {
+    public Disperser getGrating() {
         return grating;
     }
 
-    public GmosCommonType.FPUnit getFocalPlaneMask() {
+    public FPUnit getFocalPlaneMask() {
         return fpMask;
     }
 
@@ -70,7 +70,7 @@ public final class GmosParameters extends ITCParameters {
         return spatBinning;
     }
 
-    public String getCCDtype() {
+    public DetectorManufacturer getCCDtype() {
         return ccdType;
     }
 
@@ -90,4 +90,19 @@ public final class GmosParameters extends ITCParameters {
         return site;
     }
 
+    /**
+     * Return a human-readable string for debugging
+     */
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Filter:\t");
+        sb.append(getFilter());
+        sb.append("\nGrating:\t");
+        sb.append(getGrating().name());
+        sb.append("\nInstrument Central Wavelength:\t");
+        sb.append(getCentralWavelength());
+        sb.append("\nFocal Plane Mask: \t ");
+        sb.append(getFPMask());
+        sb.append(" arcsec slit \n\n");
+        return sb.toString();
+    }
 }

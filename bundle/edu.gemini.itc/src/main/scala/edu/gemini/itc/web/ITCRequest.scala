@@ -9,6 +9,7 @@ import edu.gemini.itc.parameters._
 import edu.gemini.itc.shared._
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.gemini.altair.AltairParams
+import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.{FPUnitNorth, DisperserNorth, FilterNorth}
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.{FPUnitSouth, DisperserSouth, FilterSouth}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
@@ -86,7 +87,7 @@ object ITCRequest {
     val grating     = if (site.equals(Site.GN)) pc.enumParameter(classOf[DisperserNorth], "instrumentDisperser") else pc.enumParameter(classOf[DisperserSouth], "instrumentDisperser")
     val spatBinning = pc.intParameter("spatBinning")
     val specBinning = pc.intParameter("specBinning")
-    val ccdType     = pc.parameter("CCDtype")
+    val ccdType     = pc.enumParameter(classOf[DetectorManufacturer])
     val centralWavelength = if (pc.parameter("instrumentCentralWavelength").trim.isEmpty) 0.0 else pc.doubleParameter("instrumentCentralWavelength")
     val fpMask      = if (site.equals(Site.GN)) pc.enumParameter(classOf[FPUnitNorth],    "instrumentFPMask")   else pc.enumParameter(classOf[FPUnitSouth],      "instrumentFPMask")
     val ifuMethod: Option[IfuMethod]   = if (fpMask.isIFU) {

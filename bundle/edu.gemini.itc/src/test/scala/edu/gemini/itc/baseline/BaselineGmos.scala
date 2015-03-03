@@ -5,6 +5,7 @@ import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.gmos.{GmosParameters, GmosRecipe}
 import edu.gemini.itc.shared.{IfuRadial, IfuSingle}
 import edu.gemini.spModel.core.Site
+import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.{FPUnitNorth, DisperserNorth, FilterNorth}
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.{FPUnitSouth, DisperserSouth, FilterSouth}
 
@@ -28,7 +29,7 @@ object BaselineGmos {
       1,
       1,
       None,                         // IFU method
-      "2",                        // HAMAMATSU CCD
+      DetectorManufacturer.HAMAMATSU,
       Site.GN),
 
     new GmosParameters(
@@ -39,7 +40,7 @@ object BaselineGmos {
       1,
       1,
       None,
-      "2",                        // HAMAMATSU CCD
+      DetectorManufacturer.HAMAMATSU,                        // HAMAMATSU CCD
       Site.GS)
   ))
 
@@ -52,18 +53,18 @@ object BaselineGmos {
       1,
       1,
       Some(IfuSingle(0.0)),
-      "0",                        // EEV ED; still supported?
+      DetectorManufacturer.E2V,
       Site.GN),
-    new GmosParameters(
-      FilterNorth.g_G0301,
-      DisperserNorth.R400_G5305,
-      500.0,
-      FPUnitNorth.IFU_1,
-      1,
-      1,
-      Some(IfuSingle(0.0)),
-      "1",                        // EEV legacy; still supported?
-      Site.GN),
+//    new GmosParameters(       //TODO active with next baseline, use E2V array, legacy not available for GN
+//      FilterNorth.g_G0301,
+//      DisperserNorth.R400_G5305,
+//      500.0,
+//      FPUnitNorth.IFU_1,
+//      1,
+//      1,
+//      Some(IfuSingle(0.0)),
+//      "1",                        // EEV legacy; still supported?
+//      Site.GN),
     new GmosParameters(
       FilterNorth.g_G0301,
       DisperserNorth.R150_G5306,
@@ -72,7 +73,7 @@ object BaselineGmos {
       1,
       1,
       Some(IfuRadial(0.0, 0.3)),
-      "2",                        // HAMAMATSU CCD
+      DetectorManufacturer.HAMAMATSU,                        // HAMAMATSU CCD
       Site.GN)
   ))
 
