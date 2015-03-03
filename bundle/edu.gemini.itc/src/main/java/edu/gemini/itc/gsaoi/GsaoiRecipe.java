@@ -198,10 +198,6 @@ public final class GsaoiRecipe extends RecipeBase {
         // inputs: SED, AIRMASS, sky emmision file, mirror configuration,
         // output: SED and sky background as they arrive at instruments
 
-        SampledSpectrumVisitor atmos = new AtmosphereVisitor(
-                _obsConditionParameters.getAirmass());
-        // sed.accept(atmos);
-
         SampledSpectrumVisitor clouds = CloudTransmissionVisitor.create(
                 _obsConditionParameters.getSkyTransparencyCloud());
         sed.accept(clouds);
