@@ -105,10 +105,11 @@ public abstract class Gmos extends Instrument {
         }
 
         if (isIfuUsed()) {
-            if (gp.getIFUMethod().equals(GmosParameters.SINGLE_IFU)) {
-                _IFU = new IFUComponent(getPrefix(), gp.getIFUOffset());
-            } else if (gp.getIFUMethod().equals(GmosParameters.RADIAL_IFU)) {
-                _IFU = new IFUComponent(getPrefix(), gp.getIFUMinOffset(), gp.getIFUMaxOffset());
+            if (gp.getIFUMethod().get() instanceof IfuSingle) {
+                _IFU = new IFUComponent(getPrefix(), ((IfuSingle) gp.getIFUMethod().get()).offset());
+            } else if (gp.getIFUMethod().get() instanceof IfuRadial) {
+                final IfuRadial ifu = (IfuRadial) gp.getIFUMethod().get();
+                _IFU = new IFUComponent(getPrefix(), ifu.minOffset(), ifu.maxOffset());
             } else {
                 throw new IllegalArgumentException();
             }
@@ -275,10 +276,15 @@ public abstract class Gmos extends Instrument {
             s += "Pixel Size in Spectral Direction: " + getGratingDispersion_nmppix() + "nm\n";
         if (isIfuUsed()) {
             s += "IFU is selected,";
-            if (gp.getIFUMethod().equals(GmosParameters.SINGLE_IFU))
-                s += "with a single IFU element at " + gp.getIFUOffset() + "arcsecs.";
-            else
-                s += "with mulitple IFU elements arranged from " + gp.getIFUMinOffset() + " to " + gp.getIFUMaxOffset() + "arcsecs.";
+            if        (gp.getIFUMethod().get() instanceof IfuSingle) {
+                final IfuSingle ifu = (IfuSingle) gp.getIFUMethod().get();
+                s += "with a single IFU element at " + ifu.offset() + "arcsecs.";
+            } else if (gp.getIFUMethod().get() instanceof IfuRadial){
+                final IfuRadial ifu = (IfuRadial) gp.getIFUMethod().get();
+                s += "with mulitple IFU elements arranged from " + ifu.minOffset() + " to " + ifu.maxOffset() + "arcsecs.";
+            } else {
+                throw new IllegalArgumentException();
+            }
             s += "\n";
         }
         return s;

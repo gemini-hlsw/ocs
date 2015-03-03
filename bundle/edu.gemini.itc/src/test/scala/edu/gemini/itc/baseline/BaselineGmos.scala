@@ -3,6 +3,7 @@ package edu.gemini.itc.baseline
 import edu.gemini.itc.baseline.util.Baseline._
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.gmos.{GmosParameters, GmosRecipe}
+import edu.gemini.itc.shared.{IfuRadial, IfuSingle}
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.{FPUnitNorth, DisperserNorth, FilterNorth}
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.{FPUnitSouth, DisperserSouth, FilterSouth}
 
@@ -25,10 +26,7 @@ object BaselineGmos {
       FPUnitNorth.FPU_NONE,
       1,
       1,
-      "",                         // IFU method
-      0.0,                        // IFU offset
-      0.0,
-      0.3,
+      None,                         // IFU method
       "2",                        // HAMAMATSU CCD
       GmosParameters.GMOS_NORTH),
 
@@ -39,10 +37,7 @@ object BaselineGmos {
       FPUnitSouth.FPU_NONE,
       1,
       1,
-      "",
-      0.0,
-      0.0,
-      0.3,
+      None,
       "2",                        // HAMAMATSU CCD
       GmosParameters.GMOS_SOUTH)
   ))
@@ -55,10 +50,7 @@ object BaselineGmos {
       FPUnitNorth.LONGSLIT_4,
       1,
       1,
-      "singleIFU",
-      0.0,
-      0.0,
-      0.3,
+      Some(IfuSingle(0.0)),
       "0",                        // EEV ED; still supported?
       GmosParameters.GMOS_NORTH),
     new GmosParameters(
@@ -68,10 +60,7 @@ object BaselineGmos {
       FPUnitNorth.IFU_1,
       1,
       1,
-      GmosParameters.SINGLE_IFU,
-      0.0,
-      0.0,
-      0.3,
+      Some(IfuSingle(0.0)),
       "1",                        // EEV legacy; still supported?
       GmosParameters.GMOS_NORTH),
     new GmosParameters(
@@ -81,10 +70,7 @@ object BaselineGmos {
       FPUnitNorth.IFU_1,
       1,
       1,
-      GmosParameters.RADIAL_IFU,
-      0.0,
-      0.0,
-      0.3,
+      Some(IfuRadial(0.0, 0.3)),
       "2",                        // HAMAMATSU CCD
       GmosParameters.GMOS_NORTH)
   ))

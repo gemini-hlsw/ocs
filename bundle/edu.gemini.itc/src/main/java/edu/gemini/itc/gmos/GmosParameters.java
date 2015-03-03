@@ -1,15 +1,15 @@
 package edu.gemini.itc.gmos;
 
 import edu.gemini.itc.shared.ITCParameters;
+import edu.gemini.itc.shared.IfuMethod;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType;
+import scala.Option;
 
 /**
  * This class holds the information from the Gmos section
  * of an ITC web page.  This object is constructed from a servlet request.
  */
 public final class GmosParameters extends ITCParameters {
-    public static final String SINGLE_IFU = "singleIFU";
-    public static final String RADIAL_IFU = "radialIFU";
 
     public static final String GMOS_NORTH = "gmosNorth";
     public static final String GMOS_SOUTH = "gmosSouth";
@@ -21,10 +21,7 @@ public final class GmosParameters extends ITCParameters {
     private final GmosCommonType.FPUnit fpMask;
     private final int spatBinning;
     private final int specBinning;
-    private final String ifuMethod;
-    private final double ifuOffset;
-    private final double ifuMinOffset;
-    private final double ifuMaxOffset;
+    private final Option<IfuMethod> ifuMethod;
     private final String location;
     private final String ccdType;
 
@@ -37,10 +34,7 @@ public final class GmosParameters extends ITCParameters {
                           final GmosCommonType.FPUnit fpMask,
                           final int spatBinning,
                           final int specBinning,
-                          final String ifuMethod,
-                          final double ifuOffset,
-                          final double ifuMinOffset,
-                          final double ifuMaxOffset,
+                          final Option<IfuMethod> ifuMethod,
                           final String ccdType,
                           final String location) {
         this.filter             = filter;
@@ -50,9 +44,6 @@ public final class GmosParameters extends ITCParameters {
         this.spatBinning        = spatBinning;
         this.specBinning        = specBinning;
         this.ifuMethod          = ifuMethod;
-        this.ifuOffset          = ifuOffset;
-        this.ifuMinOffset       = ifuMinOffset;
-        this.ifuMaxOffset       = ifuMaxOffset;
         this.ccdType            = ccdType;
         this.location           = location;
 
@@ -94,36 +85,24 @@ public final class GmosParameters extends ITCParameters {
         }
     }
 
-    public String getIFUMethod() {
+    public Option<IfuMethod> getIFUMethod() {
         return ifuMethod;
-    }
-
-    public double getIFUOffset() {
-        return ifuOffset;
-    }
-
-    public double getIFUMinOffset() {
-        return ifuMinOffset;
-    }
-
-    public double getIFUMaxOffset() {
-        return ifuMaxOffset;
     }
 
     public String getInstrumentLocation() {
         return location;
     }
 
-    /**
-     * Return a human-readable string for debugging
-     */
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("Filter:\t" + getFilter() + "\n");
-        sb.append("Grating:\t" + getGrating().name() + "\n");
-        sb.append("Instrument Central Wavelength:\t" + getCentralWavelength() + "\n");
-        sb.append("Focal Plane Mask: \t " + getFPMask() + " arcsec slit \n");
-        sb.append("\n");
-        return sb.toString();
-    }
+//    /**
+//     * Return a human-readable string for debugging
+//     */
+//    public String toString() {
+//        StringBuffer sb = new StringBuffer();
+//        sb.append("Filter:\t" + getFilter() + "\n");
+//        sb.append("Grating:\t" + getGrating().name() + "\n");
+//        sb.append("Instrument Central Wavelength:\t" + getCentralWavelength() + "\n");
+//        sb.append("Focal Plane Mask: \t " + getFPMask() + " arcsec slit \n");
+//        sb.append("\n");
+//        return sb.toString();
+//    }
 }

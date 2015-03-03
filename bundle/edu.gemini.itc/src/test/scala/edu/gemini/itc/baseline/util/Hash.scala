@@ -38,10 +38,13 @@ object Hash {
       p.getCCDtype,
       p.getFocalPlaneMask.name,
       p.getGrating.name,
-      p.getIFUMaxOffset,
-      p.getIFUMethod,
-      p.getIFUMinOffset,
-      p.getIFUOffset,
+      0.3, // TODO: REMOVE WITH NEXT NEW BASELINE
+      p.getIFUMethod.fold("") { // TODO: Clenup with next baseline
+        case IfuSingle(_)     => "singleIFU"
+        case IfuRadial(_,_)   => "radialIFU"
+      },
+      0.0, // TODO: REMOVE WITH NEXT NEW BASELINE
+      0.0, // TODO: REMOVE WITH NEXT NEW BASELINE
       p.getCentralWavelength,
       p.getInstrumentLocation,
       p.getSpatialBinning,

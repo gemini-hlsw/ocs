@@ -88,21 +88,16 @@ object ITCRequest {
     val ccdType     = pc.parameter("CCDtype")
     val centralWavelength = if (pc.parameter("instrumentCentralWavelength").trim.isEmpty) 0.0 else pc.doubleParameter("instrumentCentralWavelength")
     val fpMask      = if (location.equals("gmosNorth")) pc.enumParameter(classOf[FPUnitNorth],    "instrumentFPMask")   else pc.enumParameter(classOf[FPUnitSouth],      "instrumentFPMask")
-    var ifuMethod   = ""
-    var ifuOffset   = 0.0
-    var ifuMinOffset = 0.0
-    var ifuMaxOffset = 0.0
-    if (fpMask.isIFU) {
-      ifuMethod = pc.parameter("ifuMethod")
-      if (ifuMethod.equals("singleIFU")) {
-        ifuOffset = pc.doubleParameter("ifuOffset")
-      } else if (ifuMethod.equals("radialIFU")) {
-        ifuMinOffset = pc.doubleParameter("ifuMinOffset")
-        ifuMaxOffset = pc.doubleParameter("ifuMaxOffset")
-      } else ITCParameters.notFoundException (" a correct value for the IFU Parameters. ")
+    val ifuMethod: Option[IfuMethod]   = if (fpMask.isIFU) {
+      pc.parameter("ifuMethod") match {
+        case "singleIFU" => Some(IfuSingle(pc.doubleParameter("ifuOffset")))
+        case "radialIFU" => Some(IfuRadial(pc.doubleParameter("ifuMinOffset"), pc.doubleParameter("ifuMaxOffset")))
+        case _ => throw new IllegalArgumentException()
+      }} else {
+      None
     }
 
-    new GmosParameters(filter, grating, centralWavelength, fpMask, spatBinning, specBinning, ifuMethod, ifuOffset, ifuMinOffset, ifuMaxOffset, ccdType, location)
+    new GmosParameters(filter, grating, centralWavelength, fpMask, spatBinning, specBinning, ifuMethod, ccdType, location)
   }
 
   def plotParamters(r: ITCMultiPartParser): PlottingDetailsParameters = {
