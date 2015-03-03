@@ -31,9 +31,6 @@ public final class GnirsParameters extends ITCParameters {
     public static final String G10 = "G10";
     public static final String G32 = "G32";
     public static final String G110 = "G110";
-    public static final int G10_N = 0;
-    public static final int G32_N = 1;
-    public static final int G110_N = 2;
 
     public static final String LOW_READ_NOISE = "lowNoise";
     public static final String VERY_LOW_READ_NOISE = "verylowNoise";

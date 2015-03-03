@@ -3,14 +3,17 @@ package edu.gemini.itc.web
 import javax.servlet.http.HttpServletRequest
 
 import edu.gemini.itc.altair.AltairParameters
-import edu.gemini.itc.parameters.ObservationDetailsParameters.{AnMethod, CalcMethod}
+import edu.gemini.itc.gmos.GmosParameters
 import edu.gemini.itc.parameters.SourceDefinitionParameters._
 import edu.gemini.itc.parameters._
 import edu.gemini.itc.shared._
+import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.gemini.altair.AltairParams
+import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer
+import edu.gemini.spModel.gemini.gmos.GmosNorthType.{FPUnitNorth, DisperserNorth, FilterNorth}
+import edu.gemini.spModel.gemini.gmos.GmosSouthType.{FPUnitSouth, DisperserSouth, FilterSouth}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.telescope.IssPort
-import sun.reflect.generics.reflectiveObjects.NotImplementedException
 
 /**
  * ITC requests define a generic mechanism to look up values by their parameter names.
@@ -77,6 +80,28 @@ object ITCRequest {
     new ObservingConditionParameters(iq, cc, wv, sb, airmass)
   }
 
+  def gmosParameters(r: ITCMultiPartParser): GmosParameters = {
+    val pc          = ITCRequest.from(r)
+    val site        = pc.enumParameter(classOf[Site])
+    val filter      = if (site.equals(Site.GN)) pc.enumParameter(classOf[FilterNorth],    "instrumentFilter")    else pc.enumParameter(classOf[FilterSouth],    "instrumentFilter")
+    val grating     = if (site.equals(Site.GN)) pc.enumParameter(classOf[DisperserNorth], "instrumentDisperser") else pc.enumParameter(classOf[DisperserSouth], "instrumentDisperser")
+    val spatBinning = pc.intParameter("spatBinning")
+    val specBinning = pc.intParameter("specBinning")
+    val ccdType     = pc.enumParameter(classOf[DetectorManufacturer])
+    val centralWavelength = if (pc.parameter("instrumentCentralWavelength").trim.isEmpty) 0.0 else pc.doubleParameter("instrumentCentralWavelength")
+    val fpMask      = if (site.equals(Site.GN)) pc.enumParameter(classOf[FPUnitNorth],    "instrumentFPMask")   else pc.enumParameter(classOf[FPUnitSouth],      "instrumentFPMask")
+    val ifuMethod: Option[IfuMethod]   = if (fpMask.isIFU) {
+      pc.parameter("ifuMethod") match {
+        case "singleIFU" => Some(IfuSingle(pc.doubleParameter("ifuOffset")))
+        case "radialIFU" => Some(IfuRadial(pc.doubleParameter("ifuMinOffset"), pc.doubleParameter("ifuMaxOffset")))
+        case _ => throw new IllegalArgumentException()
+      }} else {
+      None
+    }
+
+    new GmosParameters(filter, grating, centralWavelength, fpMask, spatBinning, specBinning, ifuMethod, ccdType, site)
+  }
+
   def plotParamters(r: ITCMultiPartParser): PlottingDetailsParameters = {
     val pc      = ITCRequest.from(r)
     val limits  = pc.enumParameter(classOf[PlottingDetailsParameters.PlotLimits])
@@ -136,7 +161,7 @@ object ITCRequest {
     val pc = ITCRequest.from(r)
 
     // Get the source geometry and type
-    import Profile._
+    import edu.gemini.itc.parameters.SourceDefinitionParameters.Profile._
     val spatialProfile = pc.enumParameter(classOf[Profile]) match {
       case POINT    =>
         val norm  = pc.doubleParameter("psSourceNorm")
@@ -157,7 +182,7 @@ object ITCRequest {
     val normBand = pc.enumParameter(classOf[WavebandDefinition])
 
     // Get Spectrum Resource
-    import Distribution._
+    import edu.gemini.itc.parameters.SourceDefinitionParameters.Distribution._
     val sourceSpec = pc.enumParameter(classOf[Distribution])
     val sourceDefinition = sourceSpec match {
       case LIBRARY_STAR =>
@@ -183,7 +208,7 @@ object ITCRequest {
     }
 
     //Get Redshift
-    import Recession._
+    import edu.gemini.itc.parameters.SourceDefinitionParameters.Recession._
     val recession = pc.enumParameter(classOf[Recession])
     val redshift = recession match {
       case REDSHIFT => pc.doubleParameter("z")

@@ -44,35 +44,20 @@ public class Gsaoi extends Instrument {
     private String _camera;
     private String _readMode;
 
-    // These are the limits of observable wavelength with this configuration.
-    private double _observingStart;
-    private double _observingEnd;
-
     /**
      * construct an Gsaoi with specified Broadband filter or Narrowband filter
      * and camera type.
      */
     public Gsaoi(GsaoiParameters np, ObservationDetailsParameters odp) throws Exception {
         super(INSTR_DIR, FILENAME);
-        // The instrument data file gives a start/end wavelength for
-        // the instrument.  But with a filter in place, the filter
-        // transmits wavelengths that are a subset of the original range.
-
-        _observingStart = super.getStart();
-        _observingEnd = super.getEnd();
 
         _readMode = np.getReadMode();
         _filterUsed = np.getFilter();
         _camera = np.getCamera();
 
-        // Note for designers of other instruments:
-        // Other instruments may not have filters and may just use
-        // the range given in their instrument file.
         if (!(_filterUsed.equals("none"))) {
             _filter = Filter.fromFile(getPrefix(), _filterUsed, getDirectory() + "/");
-            _observingStart = _filter.getStart();
-            _observingEnd = _filter.getEnd();
-            addComponent(_filter);
+            addFilter(_filter);
         }
 
         FixedOptics test = new FixedOptics(getDirectory() + "/", getPrefix());
@@ -113,14 +98,6 @@ public class Gsaoi extends Instrument {
      */
     public String getDirectory() {
         return ITCConstants.LIB + "/" + INSTR_DIR;
-    }
-
-    public double getObservingStart() {
-        return _observingStart;
-    }
-
-    public double getObservingEnd() {
-        return _observingEnd;
     }
 
     public double getPixelSize() {

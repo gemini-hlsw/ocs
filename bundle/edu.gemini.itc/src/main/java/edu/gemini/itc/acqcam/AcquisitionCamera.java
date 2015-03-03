@@ -26,37 +26,16 @@ public class AcquisitionCamera extends Instrument {
     // Keep a reference to the color filter to ask for effective wavelength
     private Filter _colorFilter;
 
-    // These are the limits of observable wavelength with this configuration.
-    private double _observingStart;
-    private double _observingEnd;
-
     /**
      * construct an AcquisitionCamera with specified color filter and ND filter.
      */
     public AcquisitionCamera(String filterBand, String ndFilter) {
         super(INSTR_DIR, FILENAME);
-        // The instrument data file gives a start/end wavelength for
-        // the instrument.  But with a filter in place, the filter
-        // transmits wavelengths that are a subset of the original range.
-        // Since this instrument always has a filter, the filter-passed
-        // range is used for _observingStart, _observingEnd.
-        // old way of getting the observing start and end
-        //_observingStart = WavebandDefinition.getStart(filterBand);
-        //_observingEnd = WavebandDefinition.getEnd(filterBand);
-        // Note for designers of other instruments:
-        // Other instruments may not have filters and may just use
-        // the range given in their instrument file.
-        //_colorFilter = new ColorFilter(filterBand, getDirectory()+"/");
         _colorFilter = Filter.fromFile(getPrefix(), "colfilt_" + filterBand, getDirectory() + "/");
-
-        addComponent(_colorFilter);
+        addFilter(_colorFilter);
         addComponent(new NDFilterWheel(ndFilter, getDirectory() + "/"));
         addComponent(new FixedOptics(getDirectory() + "/", getPrefix()));
-        addComponent(new Detector(getDirectory() + "/", getPrefix(), "detector",
-                "1024x1024 CCD47 Chip"));
-        //New way (Directly from the filter.
-        _observingStart = _colorFilter.getStart();
-        _observingEnd = _colorFilter.getEnd();
+        addComponent(new Detector(getDirectory() + "/", getPrefix(), "detector", "1024x1024 CCD47 Chip"));
     }
 
     /**
@@ -75,14 +54,6 @@ public class AcquisitionCamera extends Instrument {
      */
     public String getDirectory() {
         return ITCConstants.LIB + "/" + INSTR_DIR;
-    }
-
-    public double getObservingStart() {
-        return _observingStart;
-    }
-
-    public double getObservingEnd() {
-        return _observingEnd;
     }
 
     /**

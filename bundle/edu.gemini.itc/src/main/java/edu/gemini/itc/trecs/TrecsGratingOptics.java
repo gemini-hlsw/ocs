@@ -16,25 +16,12 @@ public final class TrecsGratingOptics extends GratingOptics {
         super(directory, gratingName, "gratings", centralWavelength, detectorPixels, spectralBinning);
     }
 
-    @Override protected int getGratingNumber() {
-        int grating_num = 0;
-
-        if (gratingName.equals(TRecsParameters.LORES10_G5401)) {
-            grating_num = TRecsParameters.LORES10;
-        } else if (gratingName.equals(TRecsParameters.LORES20_G5402)) {
-            grating_num = TRecsParameters.LORES20;
-        } else if (gratingName.equals(TRecsParameters.HIRES10_G5403)) {
-            grating_num = TRecsParameters.HIRES10;
-        }
-        return grating_num;
-    }
-
     @Override  public double getStart() {
-        return centralWavelength - (data[getGratingNumber()].dispersion() * detectorPixels / 2) * _spectralBinning;
+        return centralWavelength - (data.apply(gratingName).dispersion() * detectorPixels / 2) * _spectralBinning;
     }
 
     @Override  public double getEnd() {
-        return centralWavelength + (data[getGratingNumber()].dispersion() * detectorPixels / 2) * _spectralBinning;
+        return centralWavelength + (data.apply(gratingName).dispersion() * detectorPixels / 2) * _spectralBinning;
     }
 
 }

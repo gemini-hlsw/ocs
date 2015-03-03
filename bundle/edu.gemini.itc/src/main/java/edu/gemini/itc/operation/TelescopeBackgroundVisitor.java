@@ -2,6 +2,7 @@ package edu.gemini.itc.operation;
 
 import edu.gemini.itc.parameters.TeleParameters;
 import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.core.Site;
 
 /**
  * The TelescopeBackgroundVisitor class is designed to adjust the SED for the
@@ -17,12 +18,12 @@ public class TelescopeBackgroundVisitor implements SampledSpectrumVisitor {
      * We will use a different background file for different
      * ports and coatings.
      */
-    public TelescopeBackgroundVisitor(final TeleParameters tp, final String site, final String wavelenRange) {
+    public TelescopeBackgroundVisitor(final TeleParameters tp, final Site site, final String wavelenRange) {
 
         final String _fullBackgroundResource;
         if (!wavelenRange.equals(ITCConstants.VISIBLE)) {
 
-            final String filenameBase = "/HI-Res/" + site + wavelenRange + ITCConstants.TELESCOPE_BACKGROUND_LIB + "/" + ITCConstants.GS_TELESCOPE_BACKGROUND_FILENAME_BASE;
+            final String filenameBase = "/HI-Res/" + abbrForSite(site) + wavelenRange + ITCConstants.TELESCOPE_BACKGROUND_LIB + "/" + ITCConstants.GS_TELESCOPE_BACKGROUND_FILENAME_BASE;
             setup = getFileName(tp);
             _fullBackgroundResource = filenameBase + setup + ITCConstants.DATA_SUFFIX;
 
@@ -79,4 +80,13 @@ public class TelescopeBackgroundVisitor implements SampledSpectrumVisitor {
     public String toString() {
         return "TelescopeBackgroundVisitor using setup " + setup;
     }
+
+    private String abbrForSite(Site site) {
+        switch (site) {
+            case GN: return "mk";
+            case GS: return "cp";
+            default: throw new IllegalArgumentException();
+        }
+    }
+
 }

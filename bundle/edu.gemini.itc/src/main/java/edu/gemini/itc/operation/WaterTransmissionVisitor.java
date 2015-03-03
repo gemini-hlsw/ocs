@@ -3,25 +3,18 @@ package edu.gemini.itc.operation;
 import edu.gemini.itc.shared.ITCConstants;
 import edu.gemini.itc.shared.SampledSpectrumVisitor;
 import edu.gemini.itc.shared.TransmissionElement;
+import edu.gemini.spModel.core.Site;
 
 /**
  * The WaterTransmissionVisitor is designed to adjust the SED for
  * water in the atmosphere.
  */
 public final class WaterTransmissionVisitor {
-    private static final String FILENAME = "water_trans";
 
     private WaterTransmissionVisitor() {
     }
 
-    /**
-     * Constructs transmission visitor for water vapor.
-     */
-    public static SampledSpectrumVisitor create(int skyTransparencyWater) {
-        return new TransmissionElement(ITCConstants.TRANSMISSION_LIB + "/" + FILENAME + skyTransparencyWater + ITCConstants.DATA_SUFFIX);
-    }
-
-    public static SampledSpectrumVisitor create(int skyTransparencyWater, double airMass, String file_name, String site, String wavelenRange) {
+    public static SampledSpectrumVisitor create(final int skyTransparencyWater, final double airMass, final String file_name, final Site site, final String wavelenRange) {
 
         final String name;
 
@@ -120,13 +113,21 @@ public final class WaterTransmissionVisitor {
                     throw new IllegalArgumentException("unknown WV value");
             }
 
-            name = "/HI-Res/" + site + wavelenRange + ITCConstants.TRANSMISSION_LIB + "/"
+            name = "/HI-Res/" + abbrForSite(site) + wavelenRange + ITCConstants.TRANSMISSION_LIB + "/"
                     + file_name + _transmissionCategory + _airmassCategory + ITCConstants.DATA_SUFFIX;
         }
 
         return new TransmissionElement(name);
 
 
+    }
+
+    private static String abbrForSite(Site site) {
+        switch (site) {
+            case GN: return "mk";
+            case GS: return "cp";
+            default: throw new IllegalArgumentException();
+        }
     }
 
 }

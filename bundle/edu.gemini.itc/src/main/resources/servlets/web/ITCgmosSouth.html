@@ -328,8 +328,7 @@
 	</p>
 
 	<table background="http://www.gemini.edu/sciops/instruments/itc/mez-green-bckgrnd.gif" border="0" cellpadding="6" cellspacing="0" width="100%">
-		<input name="instrumentLocation" value="gmosSouth" type="hidden" />
-		<input name="CCDtype" value="1" type="hidden" />
+		<input name="Site" value="GS" type="hidden" />
 		<tbody>
 			<tr>
 				<td colspan="4"><b>Instrument optical properties:</b><i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10273#optical','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>more info</span></a><span>)</span></i></td>
@@ -338,21 +337,21 @@
 			<tr>
 				<td>Grating:</td>
 				<td><select name="instrumentDisperser" size="1">
-				<option value="none" selected="selected">
+				<option value="MIRROR" selected="selected">
 				none (imaging)</option>
-				<option value="R150_G5306">
+				<option value="R150_G5326">
 				R150 grating</option>
 
-				<option value="R400_G5305">
+				<option value="R400_G5325">
 				R400 grating</option>
-				<option value="B600_G5303">
+				<option value="B600_G5323">
 				B600 grating</option>
-				<option value="R600_G5304">
+				<option value="R600_G5324">
 				R600 grating</option>
-				<option value="R831_G5302">
+				<option value="R831_G5322">
 
 				R831 grating</option>
-				<option value="B1200_G5301">
+				<option value="B1200_G5321">
 				B1200 grating</option>
 				</select></td>
 				<td>Spectrum central wavelength: </td>
@@ -362,34 +361,34 @@
 			<tr>
 				<td>Filter:</td>
 				<td><select name="instrumentFilter" size="1">
-				<option value="none">
+				<option value="NONE">
 				none</option>
-				<option value="u_G0308">
+				<option value="u_G0332">
 				u' (350 nm)</option>
 
-				<option selected="selected" value="g_G0301">
+				<option selected="selected" value="g_G0325">
 				g' (475 nm)</option>
-				<option value="r_G0303">
+				<option value="r_G0326">
 				r' (630 nm)</option>
-				<option value="i_G0302">
+				<option value="i_G0327">
 				i' (780 nm)</option>
-				<option value="z_G0304">
+				<option value="z_G0328">
 
 				z' (950 nm)</option>
                 <option value="Z_G0343">
                 Z (876 nm)</option>
                 <option value="Y_G0344">
                 Y (1010 nm)</option>
-				<option value="gg455">
+				<option value="GG455_G0329">
 				GG455</option>
-				<option value="og515">
+				<option value="OG515_G0330">
 				OG515</option>
-				<option value="rg610">
+				<option value="RG610_G0331">
 				RG610</option>
 
-				<option value="rg780">
+				<option value="RG780_G0334">
 				RG780</option>
-				<option value="CaT_G0309">
+				<option value="CaT_G0333">
 				CaT (860nm)</option>
 				<option value="Ha_G0336">
 				Ha (657nm)</option>
@@ -411,25 +410,25 @@
 				<td>Focal plane unit: </td>
 				<td><select name="instrumentFPMask" size="1">
 
-				<option selected="selected" value="none">
+				<option selected="selected" value="FPU_NONE">
 				none</option>
-				<option value="ifu">
+				<option value="IFU_1">
 				IFU</option>
-                <option value="slit0.25">
+                <option value="LONGSLIT_1">
                 0.25 arcsec slit(let)</option>
-				<option value="slit0.5">
+				<option value="LONGSLIT_2">
 				0.5 arcsec slit(let)</option>
-				<option value="slit0.75">
+				<option value="LONGSLIT_3">
 
 				0.75 arcsec slit(let)</option>
-				<option value="slit1.0">
+				<option value="LONGSLIT_4">
 				1.0 arcsec slit(let)</option>
-				<option value="slit1.5">
+				<option value="LONGSLIT_5">
 				1.5 arcsec slit(let)</option>
-				<option value="slit2.0">
+				<option value="LONGSLIT_6">
 				2.0 arcsec slit(let)</option>
 
-				<option value="slit5.0">
+				<option value="LONGSLIT_7">
 				5.0 arcsec slit(let)</option>
 				</select></td>
 			</tr>
@@ -439,8 +438,8 @@
 			</tr>
             <tr>
                 <td colspan="4">CCD type:
-                    <input value="1" name="CCDtype" type="radio" /> EEV legacy array
-                    <input value="2" name="CCDtype" checked="checked" type="radio" /> Hamamatsu array
+                    <input value="E2V" name="DetectorManufacturer" type="radio" /> EEV legacy array
+                    <input value="HAMAMATSU" name="DetectorManufacturer" checked="checked" type="radio" /> Hamamatsu array
                 </td>
             </tr>
 			<tr>

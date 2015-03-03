@@ -4,6 +4,7 @@ import edu.gemini.itc.operation.*;
 import edu.gemini.itc.parameters.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.ITCRequest;
+import edu.gemini.spModel.core.Site;
 
 import java.io.PrintWriter;
 import java.util.Calendar;
@@ -246,12 +247,12 @@ public final class MichelleRecipe extends RecipeBase {
         SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
                 _obsConditionParameters.getSkyTransparencyWater(),
                 _obsConditionParameters.getAirmass(),
-                "midIR_trans_", ITCConstants.MAUNA_KEA, ITCConstants.MID_IR);
+                "midIR_trans_", Site.GN, ITCConstants.MID_IR);
         sed.accept(water);
 
         // Background spectrum is introduced here.
         VisitableSampledSpectrum sky =
-                SEDFactory.getSED("/" + ITCConstants.HI_RES + "/" + ITCConstants.MAUNA_KEA + ITCConstants.MID_IR +
+                SEDFactory.getSED("/" + ITCConstants.HI_RES + "/mk" + ITCConstants.MID_IR +
                                 ITCConstants.SKY_BACKGROUND_LIB + "/" +
                                 ITCConstants.MID_IR_SKY_BACKGROUND_FILENAME_BASE + "_"
                                 + _obsConditionParameters.getSkyTransparencyWaterCategory() +  //Now using same value as SKy trans per Rachels request
@@ -273,7 +274,7 @@ public final class MichelleRecipe extends RecipeBase {
         //_println("Telescope Back ave: " + sky.getAverage());
         //Create and Add background for the telescope.
         SampledSpectrumVisitor tb =
-                new TelescopeBackgroundVisitor(_teleParameters, ITCConstants.MAUNA_KEA, ITCConstants.MID_IR);
+                new TelescopeBackgroundVisitor(_teleParameters, Site.GN, ITCConstants.MID_IR);
         sky.accept(tb);
         //_println("Telescope Back ave: " + sky.getAverage());
 

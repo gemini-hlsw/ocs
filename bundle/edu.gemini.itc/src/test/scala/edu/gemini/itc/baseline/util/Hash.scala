@@ -13,6 +13,8 @@ import edu.gemini.itc.niri.NiriParameters
 import edu.gemini.itc.parameters._
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
+import edu.gemini.spModel.core.Site
+import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer
 
 // TEMPORARY helper
 // All input objects will become immutable data only objects (probably Scala case classes).
@@ -34,23 +36,15 @@ object Hash {
 
   def calc(p: GmosParameters): Int =
     hash(
-      p.getFilter,
-      p.getCCDtype,
-      p.getDarkCurrent,
-      p.getFocalPlaneMask,
-      p.getFPMask,
-      p.getGrating,
-      p.getIFUMaxOffset,
-      p.getIFUMethod,
-      p.getIFUMinOffset,
-      p.getIFUOffset,
-      p.getInstrumentCentralWavelength,
-      p.getInstrumentLocation,
-      p.getReadNoise,
+      p.getFilter.name,
+      p.getCCDtype.name,
+      p.getFocalPlaneMask.name,
+      p.getGrating.name,
+      p.getIFUMethod.toString,
+      p.getCentralWavelength,
+      p.getSite.name,
       p.getSpatialBinning,
-      p.getSpectralBinning,
-      p.getStringSlitWidth,
-      p.getWellDepth
+      p.getSpectralBinning
     )
 
   def calc(p: GnirsParameters): Int =

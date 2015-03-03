@@ -62,8 +62,6 @@ public class NifsNorth extends Nifs {
         DETECTOR_PIXELS = 2048;
 
 
-        _observingStart = super.getStart();
-        _observingEnd = super.getEnd();
         _sampling = super.getSampling();
 
         _readNoise = gp.getReadNoise();
@@ -97,14 +95,8 @@ public class NifsNorth extends Nifs {
         }
 
         if (!(_filterUsed.equals("none"))) {
-
             _Filter = Filter.fromFile(getPrefix(), _filterUsed, getDirectory() + "/");
-
-            if (_Filter.getStart() >= _observingStart)
-                _observingStart = _Filter.getStart();
-            if (_Filter.getEnd() <= _observingEnd)
-                _observingEnd = _Filter.getEnd();
-            addComponent(_Filter);
+            addFilter(_Filter);
         }
 
         //Might use this for creating a ITC for imaging mode of NIFS
@@ -166,15 +158,12 @@ public class NifsNorth extends Nifs {
 
 
         if (!(_grating.equals("none"))) {
-
             _gratingOptics = new NifsGratingOptics(getDirectory() + "/" + getPrefix(), _grating,
                     _centralWavelength,
-                    _detector.getDetectorPixels(),//_spectralBinning,
+                    _detector.getDetectorPixels(),
                     1);
             _sampling = _gratingOptics.getGratingDispersion_nmppix();
-            _observingStart = _gratingOptics.getStart();
-            _observingEnd = _gratingOptics.getEnd();
-            addComponent(_gratingOptics);
+            addGrating(_gratingOptics);
         }
 
 

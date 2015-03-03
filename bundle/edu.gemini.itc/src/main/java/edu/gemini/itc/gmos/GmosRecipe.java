@@ -16,8 +16,6 @@ import java.util.List;
  * This class performs the calculations for Gmos used for imaging.
  */
 public final class GmosRecipe extends RecipeBase {
-    // Images will be saved to this session object
-    // private HttpSession _sessionObject = null; // set from servlet request
 
     private final Calendar now = Calendar.getInstance();
     private final String _header = new StringBuffer("# GMOS ITC: " + now.getTime() + "\n").toString();
@@ -51,7 +49,7 @@ public final class GmosRecipe extends RecipeBase {
         _sdParameters = ITCRequest.sourceDefinitionParameters(r);
         _obsDetailParameters = ITCRequest.observationParameters(r);
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
-        _gmosParameters = new GmosParameters(r);
+        _gmosParameters = ITCRequest.gmosParameters(r);
         _teleParameters = ITCRequest.teleParameters(r);
         _plotParameters = ITCRequest.plotParamters(r);
     }
@@ -97,21 +95,18 @@ public final class GmosRecipe extends RecipeBase {
         // inputs: instrument, SED
         // calculates: redshifted SED
         // output: redshifteed SED
-        Gmos mainInstrument;
-        String site;
-        if (_gmosParameters.getInstrumentLocation().equals(_gmosParameters.GMOS_NORTH)) {
-            mainInstrument = new GmosNorth(_gmosParameters, _obsDetailParameters, 0);
-            site = ITCConstants.MAUNA_KEA;
-        } else {
-            mainInstrument = new GmosSouth(_gmosParameters, _obsDetailParameters, 0);
-            site = ITCConstants.CERRO_PACHON;
+        final Gmos mainInstrument;
+        switch (_gmosParameters.getSite()) {
+            case GN: mainInstrument = new GmosNorth(_gmosParameters, _obsDetailParameters, 0); break;
+            case GS: mainInstrument = new GmosSouth(_gmosParameters, _obsDetailParameters, 0); break;
+            default: throw new IllegalArgumentException();
         }
 
         // Create one chart to use for all 3 CCDS (one for Signal and Background and one for Intermediate Single Exp and Final S/N)
         final ITCChart gmosChart1;
         final ITCChart gmosChart2;
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {
-            final boolean ifuAndNotUniform = mainInstrument.IFU_IsUsed() && !(_sdParameters.isUniform());
+            final boolean ifuAndNotUniform = mainInstrument.isIfuUsed() && !(_sdParameters.isUniform());
             final double ifu_offset = ifuAndNotUniform ? (Double) mainInstrument.getIFU().getApertureOffsetList().iterator().next() : 0.0;
             final String chart1Title = ifuAndNotUniform ? "Signal and Background (IFU element offset: " + device.toString(ifu_offset) + " arcsec)" : "Signal and Background ";
             final String chart2Title = ifuAndNotUniform ? "Intermediate Single Exp and Final S/N (IFU element offset: " + device.toString(ifu_offset) + " arcsec)" : "Intermediate Single Exp and Final S/N";
@@ -229,7 +224,7 @@ public final class GmosRecipe extends RecipeBase {
             SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
                     _obsConditionParameters.getSkyTransparencyWater(),
                     _obsConditionParameters.getAirmass(), "skytrans_",
-                    site, ITCConstants.VISIBLE);
+                    _gmosParameters.getSite(), ITCConstants.VISIBLE);
             sed.accept(water);
 
             // Background spectrum is introduced here.
@@ -250,7 +245,7 @@ public final class GmosRecipe extends RecipeBase {
             sky.accept(t);
 
             // Create and Add background for the telescope.
-            SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, site, ITCConstants.VISIBLE);
+            SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, _gmosParameters.getSite(), ITCConstants.VISIBLE);
             sky.accept(tb);
 
             sky.accept(tel);
@@ -309,7 +304,7 @@ public final class GmosRecipe extends RecipeBase {
 
             im_qual = IQcalc.getImageQuality();
 
-            if (!instrument.IFU_IsUsed()) {
+            if (!instrument.isIfuUsed()) {
                 // Calculate the Fraction of source in the aperture
                 SourceFractionCalculatable SFcalc =
                         SourceFractionCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
@@ -385,7 +380,7 @@ public final class GmosRecipe extends RecipeBase {
 
             // ObservationMode Imaging or spectroscopy
             if (_obsDetailParameters.getMethod().isSpectroscopy()) {
-                if (!instrument.IFU_IsUsed()) {
+                if (!instrument.isIfuUsed()) {
                     if (!_obsDetailParameters.isAutoAperture()) {
                         st = new SlitThroughput(im_qual,
                                 _obsDetailParameters.getApertureDiameter(),
@@ -441,7 +436,7 @@ public final class GmosRecipe extends RecipeBase {
                     _print("<HR align=left SIZE=3>");
                 }
 
-                if (!instrument.IFU_IsUsed()) {
+                if (!instrument.isIfuUsed()) {
                     ap_diam = st.getSpatialPix(); // ap_diam really Spec_Npix on
                     // Phil's Mathcad change later
                     spec_source_frac = st.getSlitThroughput();
@@ -456,7 +451,7 @@ public final class GmosRecipe extends RecipeBase {
                 if (_sdParameters.isUniform()) {
                     im_qual = 10000;
 
-                    if (!instrument.IFU_IsUsed()) {
+                    if (!instrument.isIfuUsed()) {
 
                         if (!_obsDetailParameters.isAutoAperture()) {
                             spec_source_frac = _gmosParameters.getFPMask() * ap_diam * pixel_size;
@@ -467,7 +462,7 @@ public final class GmosRecipe extends RecipeBase {
                     }
                 }
 
-                if (instrument.IFU_IsUsed() && !_sdParameters.isUniform()) {
+                if (instrument.isIfuUsed() && !_sdParameters.isUniform()) {
                     Iterator src_frac_it = sf_list.iterator();
                     Iterator ifu_offset_it = ap_offset_list.iterator();
 

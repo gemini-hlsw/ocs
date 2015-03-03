@@ -8,6 +8,7 @@ import edu.gemini.itc.parameters.SourceDefinitionParameters;
 import edu.gemini.itc.parameters.TeleParameters;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.ITCRequest;
+import edu.gemini.spModel.core.Site;
 
 import java.io.PrintWriter;
 
@@ -197,10 +198,6 @@ public final class GsaoiRecipe extends RecipeBase {
         // inputs: SED, AIRMASS, sky emmision file, mirror configuration,
         // output: SED and sky background as they arrive at instruments
 
-        SampledSpectrumVisitor atmos = new AtmosphereVisitor(
-                _obsConditionParameters.getAirmass());
-        // sed.accept(atmos);
-
         SampledSpectrumVisitor clouds = CloudTransmissionVisitor.create(
                 _obsConditionParameters.getSkyTransparencyCloud());
         sed.accept(clouds);
@@ -208,12 +205,12 @@ public final class GsaoiRecipe extends RecipeBase {
         SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
                 _obsConditionParameters.getSkyTransparencyWater(),
                 _obsConditionParameters.getAirmass(), "nearIR_trans_",
-                ITCConstants.CERRO_PACHON, ITCConstants.NEAR_IR);
+                Site.GS, ITCConstants.NEAR_IR);
         sed.accept(water);
 
         // Background spectrum is introduced here.
         VisitableSampledSpectrum sky = SEDFactory.getSED("/"
-                + ITCConstants.HI_RES + "/" + ITCConstants.CERRO_PACHON
+                + ITCConstants.HI_RES + "/cp"
                 + ITCConstants.NEAR_IR + ITCConstants.SKY_BACKGROUND_LIB + "/"
                 + ITCConstants.NEAR_IR_SKY_BACKGROUND_FILENAME_BASE + "_"
                 + _obsConditionParameters.getSkyTransparencyWaterCategory() + "_"
@@ -226,7 +223,7 @@ public final class GsaoiRecipe extends RecipeBase {
         sky.accept(t);
 
         // Create and Add background for the telescope.
-        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, ITCConstants.CERRO_PACHON, ITCConstants.NEAR_IR);
+        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, Site.GS, ITCConstants.NEAR_IR);
         sky.accept(tb);
 
 

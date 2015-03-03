@@ -41,9 +41,7 @@ public abstract class Nifs extends Instrument {
     protected String _filterUsed;
     protected String _grating;
     protected String _readNoise;
-    protected String _wellDepth;
     protected String _focalPlaneMask;
-    protected String _stringSlitWidth;
     protected CalculationMethod _mode;
     protected double _centralWavelength;
     protected int _spectralBinning = 1;
@@ -62,22 +60,10 @@ public abstract class Nifs extends Instrument {
     protected boolean _IFU_IsSingle = false;
     protected boolean _IFU_IsSummed = false;
 
-    // These are the limits of observable wavelength with this configuration.
-    protected double _observingStart;
-    protected double _observingEnd;
-
     public Nifs(String FILENAME, String INSTUMENT_PREFIX) throws Exception {
         super(INSTR_DIR, FILENAME);
-        // The instrument data file gives a start/end wavelength for
-        // the instrument.  But with a filter in place, the filter
-        // transmits wavelengths that are a subset of the original range.
-
-        _observingStart = super.getStart();
-        _observingEnd = super.getEnd();
         _sampling = super.getSampling();
-
         INSTR_PREFIX = INSTUMENT_PREFIX;
-
     }
 
     /**
@@ -97,20 +83,8 @@ public abstract class Nifs extends Instrument {
     /**
      * Returns the subdirectory where this instrument's data files are.
      */
-    //Changed Oct 19.  If any problem reading in lib files change back...
-    //public String getDirectory() { return ITCConstants.INST_LIB + "/" +
-    //			      INSTR_DIR+"/lib"; }
     public String getDirectory() {
-        return ITCConstants.LIB + "/" +
-                INSTR_DIR;
-    }
-
-    public double getObservingStart() {
-        return _observingStart;
-    }
-
-    public double getObservingEnd() {
-        return _observingEnd;
+        return ITCConstants.LIB + "/" + INSTR_DIR;
     }
 
     public double getPixelSize() {

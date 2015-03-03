@@ -22,12 +22,10 @@ public interface ITCConstants {
     /**
      * Base location of data files relative to classpath
      */
-//   public static final String LIB = "/edu/gemini/itc/lib";
     public static final String LIB = "";
     /**
      * Directory for the instrument Libraries
      */
-//    public static final String INST_LIB = "/edu/gemini/itc";
     public static final String INST_LIB = "";
     /**
      * Base location of source spectra
@@ -40,11 +38,6 @@ public interface ITCConstants {
     public static final String TRANSMISSION_LIB = LIB + "/transmission";
 
     /**
-     * Base name of telescope background files GS
-     */
-    public static final String GS_TELESCOPE_TRANSMISSION_FILENAME_BASE = "telTrans";
-
-    /**
      * Base location of various calculation files
      */
     public static final String CALC_LIB = LIB + "/calc";
@@ -53,11 +46,6 @@ public interface ITCConstants {
      * Location of sky background files
      */
     public static final String SKY_BACKGROUND_LIB = LIB + "/sky_emiss";
-
-    /**
-     * Base name of sky background files (shoulden't be used any more)
-     */
-    public static final String SKY_BACKGROUND_FILENAME_BASE = "sky_emiss";
 
     /**
      * Base name for the optical sky background files
@@ -78,11 +66,6 @@ public interface ITCConstants {
      * Base name of telescope background files GS
      */
     public static final String GS_TELESCOPE_BACKGROUND_FILENAME_BASE = "telEmiss";
-
-    /**
-     * File Name base for the Mid IR telescope files
-     */
-    public static final String MID_IR_TELESCOPE_BACKGROUND_FILENAME_BASE = "midIR_tel";
 
     /**
      * Base name for near ir sky background files
@@ -107,11 +90,6 @@ public interface ITCConstants {
     public static final String IM_QUAL_BASE = "imqual_";
 
     /**
-     * Pwfs name (for image qual)
-     */
-    public static final String PWFS_FILE_NAME = "pwfs";
-
-    /**
      * Data file suffix
      */
     public static final String DATA_SUFFIX = ".dat";
@@ -127,10 +105,6 @@ public interface ITCConstants {
      */
     public static final String SLIT_THROUGHPUT_FILENAME =
             "/slit_throughput";
-
-    public static final String CERRO_PACHON = "cp";
-
-    public static final String MAUNA_KEA = "mk";
 
     public static final String VISIBLE = "03-08";
 

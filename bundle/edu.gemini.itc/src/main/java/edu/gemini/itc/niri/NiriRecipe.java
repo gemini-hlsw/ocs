@@ -5,6 +5,7 @@ import edu.gemini.itc.operation.*;
 import edu.gemini.itc.parameters.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.ITCRequest;
+import edu.gemini.spModel.core.Site;
 
 import java.io.PrintWriter;
 import java.util.Calendar;
@@ -213,10 +214,6 @@ public final class NiriRecipe extends RecipeBase {
         // inputs: SED, AIRMASS, sky emmision file, mirror configuration,
         // output: SED and sky background as they arrive at instruments
 
-        SampledSpectrumVisitor atmos = new AtmosphereVisitor(
-                _obsConditionParameters.getAirmass());
-        // sed.accept(atmos);
-
         SampledSpectrumVisitor clouds = CloudTransmissionVisitor.create(
                 _obsConditionParameters.getSkyTransparencyCloud());
         sed.accept(clouds);
@@ -224,12 +221,12 @@ public final class NiriRecipe extends RecipeBase {
         SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
                 _obsConditionParameters.getSkyTransparencyWater(),
                 _obsConditionParameters.getAirmass(), "nearIR_trans_",
-                ITCConstants.MAUNA_KEA, ITCConstants.NEAR_IR);
+                Site.GN, ITCConstants.NEAR_IR);
         sed.accept(water);
 
         // Background spectrum is introduced here.
         VisitableSampledSpectrum sky = SEDFactory.getSED("/"
-                + ITCConstants.HI_RES + "/" + ITCConstants.MAUNA_KEA
+                + ITCConstants.HI_RES + "/mk"
                 + ITCConstants.NEAR_IR + ITCConstants.SKY_BACKGROUND_LIB + "/"
                 + ITCConstants.NEAR_IR_SKY_BACKGROUND_FILENAME_BASE + "_"
                 + _obsConditionParameters.getSkyTransparencyWaterCategory() + "_"
@@ -254,7 +251,7 @@ public final class NiriRecipe extends RecipeBase {
         sky.accept(t);
 
         // Create and Add background for the telescope.
-        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, ITCConstants.MAUNA_KEA, ITCConstants.NEAR_IR);
+        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, Site.GN, ITCConstants.NEAR_IR);
         sky.accept(tb);
 
         // DEBUGGING GRAPHS

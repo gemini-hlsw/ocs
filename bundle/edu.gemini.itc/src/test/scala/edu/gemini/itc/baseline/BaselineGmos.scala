@@ -3,6 +3,11 @@ package edu.gemini.itc.baseline
 import edu.gemini.itc.baseline.util.Baseline._
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.gmos.{GmosParameters, GmosRecipe}
+import edu.gemini.itc.shared.{IfuRadial, IfuSingle}
+import edu.gemini.spModel.core.Site
+import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer
+import edu.gemini.spModel.gemini.gmos.GmosNorthType.{FPUnitNorth, DisperserNorth, FilterNorth}
+import edu.gemini.spModel.gemini.gmos.GmosSouthType.{FPUnitSouth, DisperserSouth, FilterSouth}
 
 /**
  * GMOS baseline test fixtures.
@@ -15,91 +20,113 @@ object BaselineGmos {
   def executeRecipe(f: Fixture[GmosParameters]): Output =
     cookRecipe(w => new GmosRecipe(f.src, f.odp, f.ocp, f.ins, f.tep, f.pdp, w))
 
-  private lazy val RBandImaging = Fixture.rBandImgFixtures(List(
-    new GmosParameters(
-      GmosParameters.I_G0302,
-      GmosParameters.NO_DISPERSER,
-      GmosParameters.LOW_READ_NOISE,
-      GmosParameters.LOW_WELL_DEPTH,
-      "4.7",                      // dark current
-      "500",                      // wavelength
-      GmosParameters.NO_SLIT,
-      "1",
-      "1",
-      "",                         // IFU method
-      "0",                        // IFU offset
-      "0",
-      "0.3",
-      "2",                        // HAMAMATSU CCD
-      GmosParameters.GMOS_NORTH),
+  // === IMAGING
 
+  private lazy val RBandImaging = Fixture.rBandImgFixtures(List(
+
+    // GMOS-N
     new GmosParameters(
-      GmosParameters.G_G0301,
-      GmosParameters.NO_DISPERSER,
-      GmosParameters.HIGH_READ_NOISE,
-      GmosParameters.HIGH_WELL_DEPTH,
-      "4.7",
-      "500",
-      GmosParameters.NO_SLIT,
-      "1",
-      "1",
-      "",
-      "0",
-      "0",
-      "0.3",
-      "2",                        // HAMAMATSU CCD
-      GmosParameters.GMOS_SOUTH)
+      FilterNorth.i_G0302,
+      DisperserNorth.MIRROR,
+      500.0,                        // central wavelength
+      FPUnitNorth.FPU_NONE,
+      1,
+      1,
+      None,                         // IFU method
+      DetectorManufacturer.E2V,
+      Site.GN),
+    new GmosParameters(
+      FilterNorth.i_G0302,
+      DisperserNorth.MIRROR,
+      500.0,                        // central wavelength
+      FPUnitNorth.FPU_NONE,
+      2,
+      2,
+      None,                         // IFU method
+      DetectorManufacturer.HAMAMATSU,
+      Site.GN),
+
+    // GMOS-S
+    new GmosParameters(
+      FilterSouth.g_G0325,
+      DisperserSouth.MIRROR,
+      500.0,
+      FPUnitSouth.FPU_NONE,
+      2,
+      4,
+      None,
+      DetectorManufacturer.E2V,
+      Site.GS),
+    new GmosParameters(
+      FilterSouth.g_G0325,
+      DisperserSouth.MIRROR,
+      500.0,
+      FPUnitSouth.FPU_NONE,
+      4,
+      4,
+      None,
+      DetectorManufacturer.HAMAMATSU,
+      Site.GS)
+
   ))
 
+  // === SPECTROSCOPY
+
   private lazy val KBandSpectroscopy = Fixture.kBandSpcFixtures(List(
+
+    // GMOS-N
     new GmosParameters(
-      GmosParameters.G_G0301,
-      GmosParameters.R150_G5306,
-      GmosParameters.HIGH_READ_NOISE,
-      GmosParameters.HIGH_WELL_DEPTH,
-      "4.7",
-      "500",
-      GmosParameters.SLIT1_0,
-      "1",
-      "1",
-      "singleIFU",
-      "0",
-      "0",
-      "0.3",
-      "0",                        // EEV ED; still supported?
-      GmosParameters.GMOS_NORTH),
+      FilterNorth.g_G0301,
+      DisperserNorth.R150_G5306,
+      500.0,
+      FPUnitNorth.LONGSLIT_2,
+      1,
+      1,
+      None,
+      DetectorManufacturer.E2V,
+      Site.GN),
     new GmosParameters(
-      GmosParameters.G_G0301,
-      GmosParameters.R400_G5305,
-      GmosParameters.LOW_READ_NOISE,
-      GmosParameters.HIGH_WELL_DEPTH,
-      "4.7",
-      "500",
-      GmosParameters.IFU,
-      "1",
-      "1",
-      GmosParameters.SINGLE_IFU,
-      "0",
-      "0",
-      "0.3",
-      "1",                        // EEV legacy; still supported?
-      GmosParameters.GMOS_NORTH),
+      FilterNorth.g_G0301,
+      DisperserNorth.R400_G5305,
+      500.0,
+      FPUnitNorth.IFU_1,
+      2,
+      2,
+      Some(IfuSingle(0.0)),
+      DetectorManufacturer.HAMAMATSU,
+      Site.GN),
     new GmosParameters(
-      GmosParameters.G_G0301,
-      GmosParameters.R150_G5306,
-      GmosParameters.LOW_READ_NOISE,
-      GmosParameters.HIGH_WELL_DEPTH,
-      "4.7",
-      "500",
-      GmosParameters.IFU,
-      "1",
-      "1",
-      GmosParameters.RADIAL_IFU,
-      "0",
-      "0",
-      "0.3",
-      "2",                        // HAMAMATSU CCD
-      GmosParameters.GMOS_NORTH)
+      FilterNorth.g_G0301,
+      DisperserNorth.R400_G5305,
+      500.0,
+      FPUnitNorth.IFU_1,
+      2,
+      2,
+      Some(IfuSingle(0.3)),
+      DetectorManufacturer.HAMAMATSU,
+      Site.GN),
+
+    // GMOS-S
+    new GmosParameters(
+      FilterSouth.g_G0325,
+      DisperserSouth.R150_G5326,
+      500.0,
+      FPUnitSouth.LONGSLIT_2,
+      2,
+      4,
+      None,
+      DetectorManufacturer.E2V,
+      Site.GS),
+    new GmosParameters(
+      FilterSouth.g_G0325,
+      DisperserSouth.R400_G5325,
+      500.0,
+      FPUnitSouth.IFU_1,
+      4,
+      4,
+      Some(IfuRadial(0.0, 0.3)),
+      DetectorManufacturer.HAMAMATSU,
+      Site.GS)
   ))
 
 }

@@ -328,7 +328,7 @@
 	</p>
 
 	<table background="http://www.gemini.edu/sciops/instruments/itc/mez-green-bckgrnd.gif" border="0" cellpadding="6" cellspacing="0" width="100%">
-		<input name="instrumentLocation" value="gmosNorth" type="hidden" />
+		<input name="Site" value="GN" type="hidden" />
 		<tbody>
 			<tr>
 				<td colspan="4"><b>Instrument optical properties:</b><i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10273#optical','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false"><span>more info</span></a><span>)</span></i></td>
@@ -337,7 +337,7 @@
 
 				<td>Grating:</td>
 				<td><select name="instrumentDisperser" size="1">
-				<option value="none" selected="selected">
+				<option value="MIRROR" selected="selected">
 				none (imaging)</option>
 				<option value="R150_G5306">
 				R150 grating</option>
@@ -361,7 +361,7 @@
 
 				<td>Filter:</td>
 				<td><select name="instrumentFilter" size="1">
-				<option value="none">
+				<option value="NONE">
 				none</option>
 				<option value="u_G0308">
 				u' (350 nm)</option>
@@ -379,12 +379,12 @@
 				Z (876 nm)</option>
 				<option value="Y_G0323">
 				Y (1010 nm)</option>
-				<option value="gg455">
+				<option value="GG455_G0305">
 				GG455</option>
-				<option value="og515">
+				<option value="OG515_G0306">
 
 				OG515</option>
-				<option value="rg610">
+				<option value="RG610_G0307">
 				RG610</option>
 				<option value="HeII_G0320">
 				HeII (468 nm)</option>
@@ -410,25 +410,25 @@
 				</select></td>
 				<td>Focal plane unit: </td>
 				<td><select name="instrumentFPMask" size="1">
-				<option selected="selected" value="none">
+				<option selected="selected" value="FPU_NONE">
 				none</option>
-				<option value="ifu">
+				<option value="IFU_1">
 				IFU</option>
 
-                <option value="slit0.25">
+                <option value="LONGSLIT_1">
                 0.25 arcsec slit(let)</option>
-                <option value="slit0.5">
+                <option value="LONGSLIT_2">
 				0.5 arcsec slit(let)</option>
-				<option value="slit0.75">
+				<option value="LONGSLIT_3">
 				0.75 arcsec slit(let)</option>
-				<option value="slit1.0">
+				<option value="LONGSLIT_4">
 				1.0 arcsec slit(let)</option>
-				<option value="slit1.5">
+				<option value="LONGSLIT_5">
 
 				1.5 arcsec slit(let)</option>
-				<option value="slit2.0">
+				<option value="LONGSLIT_6">
 				2.0 arcsec slit(let)</option>
-				<option value="slit5.0">
+				<option value="LONGSLIT_7">
 				5.0 arcsec slit(let)</option>
 				</select></td>
 			</tr>
@@ -438,9 +438,8 @@
 			</tr>
 			<tr>
 				<td colspan="4">CCD type:
-                    <input value="0" name="CCDtype" checked="checked" type="radio" /> EEV DD array
-                    <input value="1" name="CCDtype" type="radio" /> EEV legacy array
-                    <input value="2" name="CCDtype" type="radio"/> Hamamatsu array <em>(Not yet available)</em>
+                    <input value="E2V" name="DetectorManufacturer" checked="checked" type="radio" /> EEV DD array
+                    <input value="HAMAMATSU" name="DetectorManufacturer" type="radio"/> Hamamatsu array <em>(Not yet available)</em>
                 </td>
 			</tr>
 			<tr>

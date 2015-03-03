@@ -1,0 +1,54 @@
+# GMOS-N efficiency curve for R150_G5306 grating (formerly called grating I')
+# Columns are (1) wavelength in nm, (2) efficiency.
+# Data from summary by Jeremy Allington-Smith, Sept 9, 2000
+# Original data from fax from Richardson Gratings Labs
+# Extrapolations at short and long wavelengths to cover 300-1100nm
+# To correct for difference in mounting, the wavelength given here is
+#  wavelength_GMOS = wavelength_lab * 0.905 
+# Author: Inger Jorgensen
+# Created: 15 Feb 2001
+#
+# Modified 25 Feb 2010 to change extrapolated long wavelength to 1.2 microns
+# Extrapolation determined by linear fit to last 8 points
+# Kathy Roth
+#
+# Table gmos_gratingsITC2001.tab  Thu 13:39:43 15-Feb-2001
+# lambda_gmos   R150
+#
+# NOTE: This is a copy of gmos_n_R150_G5306 for lack of a newer file for 5308.
+
+
+       271.80 0.0000
+       294.45 0.0000
+       317.10 0.0000
+       339.75 0.0310
+       362.40 0.0650
+       385.05 0.1340
+       407.70 0.2190
+       430.35 0.2940
+       453.00 0.3920
+       475.65 0.4880
+       498.30 0.5730
+       520.95 0.6440
+       543.60 0.7000
+       566.25 0.7580
+       588.90 0.8000
+       611.55 0.8050
+       634.20 0.8000
+       656.85 0.8080
+       679.50 0.8130
+       702.15 0.7900
+       724.80 0.7650
+       747.45 0.7390
+       770.10 0.7290
+       792.75 0.7290
+       815.40 0.7230
+       838.05 0.7050
+       860.70 0.6780
+       883.35 0.6680
+       906.00 0.6550
+       928.65 0.6190
+       951.30 0.5790
+       973.95 0.5680
+       996.60 0.5680
+      1200.00 0.3610

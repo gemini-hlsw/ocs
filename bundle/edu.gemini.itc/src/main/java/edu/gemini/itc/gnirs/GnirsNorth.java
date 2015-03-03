@@ -47,8 +47,6 @@ public final class GnirsNorth extends Gnirs {
         SHORT_CAMERA_PIXEL_SCALE = 0.15;
         LONG_CAMERA_PIXEL_SCALE = 0.05;
 
-        _observingStart = super.getStart();
-        _observingEnd = super.getEnd();
         _sampling = super.getSampling();
 
         _readNoise = gp.getReadNoise();
@@ -141,9 +139,6 @@ public final class GnirsNorth extends Gnirs {
                     _centralWavelength,
                     _detector.getDetectorPixels(),
                     1);
-
-            _observingStart = _gratingOptics.getStart();
-            _observingEnd = _gratingOptics.getEnd();
 
             if (_grating.equals(GnirsParameters.G10) && _cameraLength.equals(GnirsParameters.SHORT))
                 throw new Exception("The grating " + _grating + " cannot be used with the " +

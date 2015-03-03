@@ -56,8 +56,6 @@ public final class Flamingos2 extends Instrument {
     private final String _grism;
     private final String _readNoise;
     private final String _focalPlaneMask;
-    private final double _observingStart;
-    private final double _observingEnd;
     private final double _slitSize;
 
     /**
@@ -66,8 +64,6 @@ public final class Flamingos2 extends Instrument {
     public Flamingos2(final Flamingos2Parameters fp) throws Exception {
         super(INSTR_DIR, FILENAME);
 
-        _observingStart = super.getStart();
-        _observingEnd = super.getEnd();
         _filterBand = fp.getColorFilter();
         _readNoise = fp.getReadNoise();
         _focalPlaneMask = fp.getFPMask();
@@ -87,7 +83,7 @@ public final class Flamingos2 extends Instrument {
             return Option.empty();
         } else {
             final Filter filter = Filter.fromFile(getPrefix(), _filterBand, getDirectory() + "/");
-            addComponent(filter);
+            addFilter(filter);
             return Option.apply(filter);
         }
     }
@@ -141,7 +137,7 @@ public final class Flamingos2 extends Instrument {
         if (_colorFilter.isDefined()) {
             return _colorFilter.get().getEnd();
         } else {
-            return _observingEnd;
+            return getEnd();
         }
     }
 
@@ -149,7 +145,7 @@ public final class Flamingos2 extends Instrument {
         if (_colorFilter.isDefined()) {
             return _colorFilter.get().getStart();
         } else {
-            return _observingStart;
+            return getStart();
         }
     }
 

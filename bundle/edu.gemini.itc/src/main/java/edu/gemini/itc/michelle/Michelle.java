@@ -37,11 +37,6 @@ public class Michelle extends Instrument {
     private static final double LOW_GAIN = 2.18;
 
     private static final double IMAGING_FRAME_TIME = .020;  //Seconds
-    private static final double SPECTROSCOPY_FRAME_TIME = .1; //Seconds
-    private static final double SPECTROSCOPY_LOWRES_N_FRAME_TIME = .25; //Seconds
-    private static final double SPECTROSCOPY_MED_N1_FRAME_TIME = 1.25; //Seconds
-    private static final double SPECTROSCOPY_MED_N2_FRAME_TIME = 3.0; //Seconds
-    private static final double SPECTROSCOPY_ECHELLE_FRAME_TIME = 30; //Seconds
 
     private static final double SPECTROSCOPY_PIXEL_SIZE = 0.2;
 
@@ -62,18 +57,8 @@ public class Michelle extends Instrument {
     private int _spectralBinning;
     private int _spatialBinning;
 
-    // These are the limits of observable wavelength with this configuration.
-    private double _observingStart;
-    private double _observingEnd;
-
     public Michelle(MichelleParameters mp, ObservationDetailsParameters odp) throws Exception {
         super(INSTR_DIR, FILENAME);
-        // The instrument data file gives a start/end wavelength for
-        // the instrument.  But with a filter in place, the filter
-        // transmits wavelengths that are a subset of the original range.
-
-        _observingStart = super.getStart();
-        _observingEnd = super.getEnd();
         _sampling = super.getSampling();
         _focalPlaneMask = mp.getFocalPlaneMask();
         _grating = mp.getGrating();
@@ -97,28 +82,13 @@ public class Michelle extends Instrument {
             addComponent(michelleWireGrid);
         }
 
-        /// !!!!!!!!NEED to Edit all of this !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        // Note for designers of other instruments:
-        // Other instruments may not have filters and may just use
-        // the range given in their instrument file.
         if (!(_filterUsed.equals("none"))) {
-
-            //if(!(_grating.equals("none"))){
-            //	throw new Exception("Please select Grism Order Sorting from the filter list."); }
-
             _Filter = Filter.fromWLFile(getPrefix(), _filterUsed, getDirectory() + "/");
-
-            if (_Filter.getStart() >= _observingStart)
-                _observingStart = _Filter.getStart();
-            if (_Filter.getEnd() <= _observingEnd)
-                _observingEnd = _Filter.getEnd();
-            addComponent(_Filter);
-
+            addFilter(_Filter);
         }
 
 
         FixedOptics _fixedOptics = new FixedOptics(getDirectory() + "/", getPrefix());
-        //addComponent(new FixedOptics(getDirectory()+"/"));
         addComponent(_fixedOptics);
 
 
@@ -167,30 +137,11 @@ public class Michelle extends Instrument {
                 getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
 
         if (!(_grating.equals("none"))) {
-
             _gratingOptics = new MichelleGratingOptics(getDirectory() + "/" + getPrefix(), _grating,
                     _centralWavelength,
-                    _detector.getDetectorPixels(), //_spectralBinning,
+                    _detector.getDetectorPixels(),
                     _spectralBinning);
-            //_sampling = _gratingOptics.getGratingDispersion_nmppix();
-            //if (super.getStart()< _gratingOptics.getStart())
-            _observingStart = _gratingOptics.getStart();
-            //   else _observingStart = super.getStart();
-            //if (super.getEnd() > _gratingOptics.getEnd())
-            _observingEnd = _gratingOptics.getEnd();
-            //   else _observingEnd = super.getEnd();
-
-            if (!(_grating.equals("none")) && !(_filterUsed.equals("none")))
-//	    if ((_observingStart >= _gratingOptics.getEnd())||
-//		(_observingEnd <= _gratingOptics.getStart()))
-                if ((_Filter.getStart() >= _gratingOptics.getEnd()) ||
-                        (_Filter.getEnd() <= _gratingOptics.getStart())) {
-                    throw new Exception("The " + _filterUsed + " filter" +
-                            " and the " + _grating +
-                            " do not overlap with the requested wavelength.\n" +
-                            " Please select a different filter, grating or wavelength.");
-                }
-            addComponent(_gratingOptics);
+            addGrating(_gratingOptics);
         }
 
 
@@ -211,7 +162,6 @@ public class Michelle extends Instrument {
             return (int) _Filter.getEffectiveWavelength();
         else
             return (int) _gratingOptics.getEffectiveWavelength();
-
     }
 
     public double getGratingResolution() {
@@ -238,20 +188,8 @@ public class Michelle extends Instrument {
     /**
      * Returns the subdirectory where this instrument's data files are.
      */
-    //Changed Oct 19.  If any problem reading in lib files change back...
-    //public String getDirectory() { return ITCConstants.INST_LIB + "/" +
-    //			      INSTR_DIR+"/lib"; }
     public String getDirectory() {
-        return ITCConstants.LIB + "/" +
-                INSTR_DIR;
-    }
-
-    public double getObservingStart() {
-        return _observingStart;
-    }
-
-    public double getObservingEnd() {
-        return _observingEnd;
+        return ITCConstants.LIB + "/" + INSTR_DIR;
     }
 
     public double getPixelSize() {
@@ -275,42 +213,7 @@ public class Michelle extends Instrument {
 
     public double getFrameTime() {
         if (_mode.isSpectroscopy()) {
-            String tempGrating = getGrating();
-            double frameTime = 0.1;
-
-            switch (_gratingOptics.getGratingNumber()) {
-                case MichelleParameters.LOWN:
-                    frameTime = SPECTROSCOPY_LOWRES_N_FRAME_TIME;
-                    break;
-                case MichelleParameters.MEDN1:
-                    frameTime = SPECTROSCOPY_MED_N1_FRAME_TIME;
-                    break;
-                case MichelleParameters.MEDN2:
-                    frameTime = SPECTROSCOPY_MED_N2_FRAME_TIME;
-                    break;
-                case MichelleParameters.ECHELLEN:
-                case MichelleParameters.ECHELLEQ:
-                    frameTime = SPECTROSCOPY_ECHELLE_FRAME_TIME;
-                    break;
-                default:
-                    frameTime = SPECTROSCOPY_FRAME_TIME;
-                    break;
-            }
-
-            return frameTime;
-            /*
-            if (tempGrating.equals(MichelleParameters.LOW_N))
-                return SPECTROSCOPY_LOWRES_N_FRAME_TIME;
-            else if (tempGrating.equals(MichelleParameters.MED_N1))
-                return SPECTROSCOPY_MED_N1_FRAME_TIME;
-            else if (tempGrating.equals(MichelleParameters.MED_N2))
-                return SPECTROSCOPY_MED_N2_FRAME_TIME;
-            else if (tempGrating.equals(MichelleParameters.ECHELLE_N)||
-                    tempGrating.equals(MichelleParameters.ECHELLE_Q))
-                return SPECTROSCOPY_ECHELLE_FRAME_TIME;
-            else
-                return SPECTROSCOPY_FRAME_TIME;
-             */
+            return _gratingOptics.getFrameTime();
         } else {
             return IMAGING_FRAME_TIME;
         }
