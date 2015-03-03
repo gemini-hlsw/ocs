@@ -2,7 +2,7 @@ package edu.gemini.spModel.io.impl
 
 import edu.gemini.pot.sp.SPNodeKey
 import edu.gemini.pot.sp.version._
-import edu.gemini.shared.util.{IntegerIsIntegral, VersionVector}
+import edu.gemini.shared.util._
 import edu.gemini.spModel.pio._
 
 import scala.collection.JavaConverters._
@@ -71,6 +71,6 @@ object VersionVectorPio {
     def toTuple(ids: Map[String, LifespanId]): (SPNodeKey, NodeVersions) =
       key -> VersionVector(versions map {
         case (idStr, intVal) => ids(idStr) -> intVal
-      }: _*)(IntegerIsIntegral)
+      }: _*)
   }
 }

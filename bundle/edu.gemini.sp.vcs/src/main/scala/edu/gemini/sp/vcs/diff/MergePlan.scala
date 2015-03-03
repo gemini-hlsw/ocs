@@ -58,11 +58,11 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
   def compare(vm: VersionMap): VersionComparison = {
     val vm0 = vm.withDefaultValue(EmptyNodeVersions)
     val up  = update.foldMap {
-      case Modified(k, nv, _, _) => VersionComparison.compare(nv, vm0(k))(IntegerIsIntegral)
+      case Modified(k, nv, _, _) => VersionComparison.compare(nv, vm0(k))
       case Unmodified(_)         => VersionComparison.Same
     }
     val del = delete.foldMap {
-      case Missing(k, nv) => VersionComparison.compare(nv, vm0(k))(IntegerIsIntegral)
+      case Missing(k, nv) => VersionComparison.compare(nv, vm0(k))
     }
     up |+| del
   }
