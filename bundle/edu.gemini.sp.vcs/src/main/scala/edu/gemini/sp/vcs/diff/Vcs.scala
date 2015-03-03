@@ -22,14 +22,16 @@ import scalaz.concurrent.Task
 /** Vcs provides the public API for vcs commands such as push, pull and sync. */
 class Vcs(kc: KeyChain, server: VcsServer) {
 
-  private def user: Set[Principal] = kc.subject.getPrincipals.asScala.toSet
+  private val user: VcsAction[Set[Principal]] =
+    VcsAction(kc.subject.getPrincipals.asScala.toSet)
 
   /** Checks-out the indicated program from the remote peer, copying it into
     * the local database. */
   def checkout(id: SPProgramID, peer: Peer): VcsAction[ISPProgram] =
     for {
       p <- Client(peer).checkout(id)
-      _ <- server.add(p, user)
+      u <- user
+      _ <- server.add(p, u)
     } yield p
 
   /** Adds the given program to the remote peer, copying it into the remote
@@ -58,7 +60,7 @@ class Vcs(kc: KeyChain, server: VcsServer) {
     def update(f: ISPFactory, p: ISPProgram, eval: MergeEval): VcsAction[Unit] =
       eval.plan.merge(f, p)
 
-    server.write[MergeEval](id, user, evaluate, filter, update)
+    user >>= { u => server.write[MergeEval](id, u, evaluate, filter, update) }
   }
 
   /** Provides an action that will pull changes from the indicated remote peer
@@ -79,7 +81,8 @@ class Vcs(kc: KeyChain, server: VcsServer) {
     val client = Client(peer)
     for {
       diffState <- client.diffState(id)
-      diff      <- server.read(id, user) { ProgramDiff.compare(_, diffState) }
+      u         <- user
+      diff      <- server.read(id, u) { ProgramDiff.compare(_, diffState) }
       res       <- diff.compare(diffState.vm) match {
         case Newer => client.storeDiffs(id, diff)
         case Same  => VcsAction(false)
