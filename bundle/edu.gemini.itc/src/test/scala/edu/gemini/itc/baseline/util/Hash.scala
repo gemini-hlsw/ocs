@@ -13,6 +13,7 @@ import edu.gemini.itc.niri.NiriParameters
 import edu.gemini.itc.parameters._
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
+import edu.gemini.spModel.core.Site
 
 // TEMPORARY helper
 // All input objects will become immutable data only objects (probably Scala case classes).
@@ -46,7 +47,10 @@ object Hash {
       0.0, // TODO: REMOVE WITH NEXT NEW BASELINE
       0.0, // TODO: REMOVE WITH NEXT NEW BASELINE
       p.getCentralWavelength,
-      p.getInstrumentLocation,
+      p.getSite match {
+        case Site.GN => "gmosNorth"
+        case Site.GS => "gmosSouth"
+      },
       p.getSpatialBinning,
       p.getSpectralBinning
     )

@@ -2,6 +2,7 @@ package edu.gemini.itc.gmos;
 
 import edu.gemini.itc.shared.ITCParameters;
 import edu.gemini.itc.shared.IfuMethod;
+import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import scala.Option;
 
@@ -11,10 +12,6 @@ import scala.Option;
  */
 public final class GmosParameters extends ITCParameters {
 
-    public static final String GMOS_NORTH = "gmosNorth";
-    public static final String GMOS_SOUTH = "gmosSouth";
-
-    // Data members
     private final GmosCommonType.Filter filter;
     private final GmosCommonType.Disperser grating;
     private final double centralWavelength;
@@ -22,7 +19,7 @@ public final class GmosParameters extends ITCParameters {
     private final int spatBinning;
     private final int specBinning;
     private final Option<IfuMethod> ifuMethod;
-    private final String location;
+    private final Site site;
     private final String ccdType;
 
     /**
@@ -36,7 +33,7 @@ public final class GmosParameters extends ITCParameters {
                           final int specBinning,
                           final Option<IfuMethod> ifuMethod,
                           final String ccdType,
-                          final String location) {
+                          final Site site) {
         this.filter             = filter;
         this.grating            = grating;
         this.centralWavelength  = centralWavelength;
@@ -45,7 +42,7 @@ public final class GmosParameters extends ITCParameters {
         this.specBinning        = specBinning;
         this.ifuMethod          = ifuMethod;
         this.ccdType            = ccdType;
-        this.location           = location;
+        this.site               = site;
 
     }
 
@@ -89,20 +86,8 @@ public final class GmosParameters extends ITCParameters {
         return ifuMethod;
     }
 
-    public String getInstrumentLocation() {
-        return location;
+    public Site getSite() {
+        return site;
     }
 
-//    /**
-//     * Return a human-readable string for debugging
-//     */
-//    public String toString() {
-//        StringBuffer sb = new StringBuffer();
-//        sb.append("Filter:\t" + getFilter() + "\n");
-//        sb.append("Grating:\t" + getGrating().name() + "\n");
-//        sb.append("Instrument Central Wavelength:\t" + getCentralWavelength() + "\n");
-//        sb.append("Focal Plane Mask: \t " + getFPMask() + " arcsec slit \n");
-//        sb.append("\n");
-//        return sb.toString();
-//    }
 }

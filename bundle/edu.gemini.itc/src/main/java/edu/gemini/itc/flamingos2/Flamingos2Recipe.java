@@ -4,6 +4,7 @@ import edu.gemini.itc.operation.*;
 import edu.gemini.itc.parameters.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.ITCRequest;
+import edu.gemini.spModel.core.Site;
 
 import java.io.PrintWriter;
 import java.util.Calendar;
@@ -198,7 +199,7 @@ public final class Flamingos2Recipe extends RecipeBase {
         SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
                 _obsConditionParameters.getSkyTransparencyWater(),
                 _obsConditionParameters.getAirmass(), "nearIR_trans_",
-                ITCConstants.MAUNA_KEA, ITCConstants.NEAR_IR);
+                Site.GN, ITCConstants.NEAR_IR);  // TODO: GN is wrong, fix this and update regression test baseline!
         sed.accept(water);
 
         // Background spectrum is introduced here.
@@ -212,7 +213,7 @@ public final class Flamingos2Recipe extends RecipeBase {
 
         // Create and Add Background for the tele
 
-        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, ITCConstants.CERRO_PACHON, ITCConstants.NEAR_IR);
+        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, Site.GS, ITCConstants.NEAR_IR);
         sky.accept(tb);
 
         // Apply telescope transmission

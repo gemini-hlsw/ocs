@@ -7,6 +7,7 @@ import edu.gemini.itc.gmos.GmosParameters
 import edu.gemini.itc.parameters.SourceDefinitionParameters._
 import edu.gemini.itc.parameters._
 import edu.gemini.itc.shared._
+import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.{FPUnitNorth, DisperserNorth, FilterNorth}
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.{FPUnitSouth, DisperserSouth, FilterSouth}
@@ -80,14 +81,14 @@ object ITCRequest {
 
   def gmosParameters(r: ITCMultiPartParser): GmosParameters = {
     val pc          = ITCRequest.from(r)
-    val location    = pc.parameter("instrumentLocation")
-    val filter      = if (location.equals("gmosNorth")) pc.enumParameter(classOf[FilterNorth],    "instrumentFilter")    else pc.enumParameter(classOf[FilterSouth],    "instrumentFilter")
-    val grating     = if (location.equals("gmosNorth")) pc.enumParameter(classOf[DisperserNorth], "instrumentDisperser") else pc.enumParameter(classOf[DisperserSouth], "instrumentDisperser")
+    val site        = pc.enumParameter(classOf[Site])
+    val filter      = if (site.equals(Site.GN)) pc.enumParameter(classOf[FilterNorth],    "instrumentFilter")    else pc.enumParameter(classOf[FilterSouth],    "instrumentFilter")
+    val grating     = if (site.equals(Site.GN)) pc.enumParameter(classOf[DisperserNorth], "instrumentDisperser") else pc.enumParameter(classOf[DisperserSouth], "instrumentDisperser")
     val spatBinning = pc.intParameter("spatBinning")
     val specBinning = pc.intParameter("specBinning")
     val ccdType     = pc.parameter("CCDtype")
     val centralWavelength = if (pc.parameter("instrumentCentralWavelength").trim.isEmpty) 0.0 else pc.doubleParameter("instrumentCentralWavelength")
-    val fpMask      = if (location.equals("gmosNorth")) pc.enumParameter(classOf[FPUnitNorth],    "instrumentFPMask")   else pc.enumParameter(classOf[FPUnitSouth],      "instrumentFPMask")
+    val fpMask      = if (site.equals(Site.GN)) pc.enumParameter(classOf[FPUnitNorth],    "instrumentFPMask")   else pc.enumParameter(classOf[FPUnitSouth],      "instrumentFPMask")
     val ifuMethod: Option[IfuMethod]   = if (fpMask.isIFU) {
       pc.parameter("ifuMethod") match {
         case "singleIFU" => Some(IfuSingle(pc.doubleParameter("ifuOffset")))
@@ -97,7 +98,7 @@ object ITCRequest {
       None
     }
 
-    new GmosParameters(filter, grating, centralWavelength, fpMask, spatBinning, specBinning, ifuMethod, ccdType, location)
+    new GmosParameters(filter, grating, centralWavelength, fpMask, spatBinning, specBinning, ifuMethod, ccdType, site)
   }
 
   def plotParamters(r: ITCMultiPartParser): PlottingDetailsParameters = {

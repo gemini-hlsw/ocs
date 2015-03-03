@@ -4,6 +4,7 @@ import edu.gemini.itc.baseline.util.Baseline._
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.gmos.{GmosParameters, GmosRecipe}
 import edu.gemini.itc.shared.{IfuRadial, IfuSingle}
+import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.{FPUnitNorth, DisperserNorth, FilterNorth}
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.{FPUnitSouth, DisperserSouth, FilterSouth}
 
@@ -28,7 +29,7 @@ object BaselineGmos {
       1,
       None,                         // IFU method
       "2",                        // HAMAMATSU CCD
-      GmosParameters.GMOS_NORTH),
+      Site.GN),
 
     new GmosParameters(
       FilterSouth.g_G0325,
@@ -39,7 +40,7 @@ object BaselineGmos {
       1,
       None,
       "2",                        // HAMAMATSU CCD
-      GmosParameters.GMOS_SOUTH)
+      Site.GS)
   ))
 
   private lazy val KBandSpectroscopy = Fixture.kBandSpcFixtures(List(
@@ -52,7 +53,7 @@ object BaselineGmos {
       1,
       Some(IfuSingle(0.0)),
       "0",                        // EEV ED; still supported?
-      GmosParameters.GMOS_NORTH),
+      Site.GN),
     new GmosParameters(
       FilterNorth.g_G0301,
       DisperserNorth.R400_G5305,
@@ -62,7 +63,7 @@ object BaselineGmos {
       1,
       Some(IfuSingle(0.0)),
       "1",                        // EEV legacy; still supported?
-      GmosParameters.GMOS_NORTH),
+      Site.GN),
     new GmosParameters(
       FilterNorth.g_G0301,
       DisperserNorth.R150_G5306,
@@ -72,7 +73,7 @@ object BaselineGmos {
       1,
       Some(IfuRadial(0.0, 0.3)),
       "2",                        // HAMAMATSU CCD
-      GmosParameters.GMOS_NORTH)
+      Site.GN)
   ))
 
 }

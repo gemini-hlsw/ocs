@@ -95,14 +95,11 @@ public final class GmosRecipe extends RecipeBase {
         // inputs: instrument, SED
         // calculates: redshifted SED
         // output: redshifteed SED
-        Gmos mainInstrument;
-        String site;
-        if (_gmosParameters.getInstrumentLocation().equals(_gmosParameters.GMOS_NORTH)) {
-            mainInstrument = new GmosNorth(_gmosParameters, _obsDetailParameters, 0);
-            site = ITCConstants.MAUNA_KEA;
-        } else {
-            mainInstrument = new GmosSouth(_gmosParameters, _obsDetailParameters, 0);
-            site = ITCConstants.CERRO_PACHON;
+        final Gmos mainInstrument;
+        switch (_gmosParameters.getSite()) {
+            case GN: mainInstrument = new GmosNorth(_gmosParameters, _obsDetailParameters, 0); break;
+            case GS: mainInstrument = new GmosSouth(_gmosParameters, _obsDetailParameters, 0); break;
+            default: throw new IllegalArgumentException();
         }
 
         // Create one chart to use for all 3 CCDS (one for Signal and Background and one for Intermediate Single Exp and Final S/N)
@@ -227,7 +224,7 @@ public final class GmosRecipe extends RecipeBase {
             SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
                     _obsConditionParameters.getSkyTransparencyWater(),
                     _obsConditionParameters.getAirmass(), "skytrans_",
-                    site, ITCConstants.VISIBLE);
+                    _gmosParameters.getSite(), ITCConstants.VISIBLE);
             sed.accept(water);
 
             // Background spectrum is introduced here.
@@ -248,7 +245,7 @@ public final class GmosRecipe extends RecipeBase {
             sky.accept(t);
 
             // Create and Add background for the telescope.
-            SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, site, ITCConstants.VISIBLE);
+            SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, _gmosParameters.getSite(), ITCConstants.VISIBLE);
             sky.accept(tb);
 
             sky.accept(tel);

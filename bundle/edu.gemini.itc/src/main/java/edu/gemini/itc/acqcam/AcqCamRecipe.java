@@ -7,6 +7,7 @@ import edu.gemini.itc.parameters.SourceDefinitionParameters;
 import edu.gemini.itc.parameters.TeleParameters;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.ITCRequest;
+import edu.gemini.spModel.core.Site;
 
 import java.io.PrintWriter;
 
@@ -184,7 +185,7 @@ public final class AcqCamRecipe extends RecipeBase {
         SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
                 _obsConditionParameters.getSkyTransparencyWater(),
                 _obsConditionParameters.getAirmass(),
-                "skytrans_", ITCConstants.MAUNA_KEA, ITCConstants.VISIBLE);
+                "skytrans_", Site.GN, ITCConstants.VISIBLE);
         sed.accept(water);
 
 
@@ -200,7 +201,7 @@ public final class AcqCamRecipe extends RecipeBase {
 
         //Create and Add Background for the tele
 
-        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, ITCConstants.MAUNA_KEA, ITCConstants.VISIBLE);
+        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, Site.GN, ITCConstants.VISIBLE);
         sky.accept(tb);
 
 
