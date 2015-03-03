@@ -37,24 +37,12 @@ object Hash {
   def calc(p: GmosParameters): Int =
     hash(
       p.getFilter.name,
-      p.getCCDtype match {
-        case DetectorManufacturer.E2V       =>  if (p.getSite().equals(Site.GN)) "0" else "1"
-        case DetectorManufacturer.HAMAMATSU => "2"
-      },
+      p.getCCDtype.name,
       p.getFocalPlaneMask.name,
       p.getGrating.name,
-      0.3, // TODO: REMOVE WITH NEXT NEW BASELINE
-      p.getIFUMethod.fold("") { // TODO: Clenup with next baseline
-        case IfuSingle(_)     => "singleIFU"
-        case IfuRadial(_,_)   => "radialIFU"
-      },
-      0.0, // TODO: REMOVE WITH NEXT NEW BASELINE
-      0.0, // TODO: REMOVE WITH NEXT NEW BASELINE
+      p.getIFUMethod.toString,
       p.getCentralWavelength,
-      p.getSite match {
-        case Site.GN => "gmosNorth"
-        case Site.GS => "gmosSouth"
-      },
+      p.getSite.name,
       p.getSpatialBinning,
       p.getSpectralBinning
     )

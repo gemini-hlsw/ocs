@@ -7,8 +7,7 @@ import edu.gemini.spModel.gemini.gmos.GmosCommonType.*;
 import scala.Option;
 
 /**
- * This class holds the information from the Gmos section
- * of an ITC web page.  This object is constructed from a servlet request.
+ * This class holds the information for GMOS ITC requests.
  */
 public final class GmosParameters extends ITCParameters {
 
@@ -21,6 +20,9 @@ public final class GmosParameters extends ITCParameters {
     private final double centralWavelength;
     private final int spatBinning;
     private final int specBinning;
+
+    // TODO: allow definition of IFU method only if fpu=ifu (?)
+    // TODO: allow GS parameters only for site=GS and same for GN, two parameter types: GmosNorthParameters, GmosSouthParameters?
 
     /**
      * Constructs a GmosParameters from a test file.

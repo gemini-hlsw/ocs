@@ -20,61 +20,113 @@ object BaselineGmos {
   def executeRecipe(f: Fixture[GmosParameters]): Output =
     cookRecipe(w => new GmosRecipe(f.src, f.odp, f.ocp, f.ins, f.tep, f.pdp, w))
 
+  // === IMAGING
+
   private lazy val RBandImaging = Fixture.rBandImgFixtures(List(
+
+    // GMOS-N
     new GmosParameters(
       FilterNorth.i_G0302,
       DisperserNorth.MIRROR,
-      500.0,                      // wavelength
+      500.0,                        // central wavelength
       FPUnitNorth.FPU_NONE,
       1,
       1,
       None,                         // IFU method
+      DetectorManufacturer.E2V,
+      Site.GN),
+    new GmosParameters(
+      FilterNorth.i_G0302,
+      DisperserNorth.MIRROR,
+      500.0,                        // central wavelength
+      FPUnitNorth.FPU_NONE,
+      2,
+      2,
+      None,                         // IFU method
       DetectorManufacturer.HAMAMATSU,
       Site.GN),
 
+    // GMOS-S
     new GmosParameters(
       FilterSouth.g_G0325,
       DisperserSouth.MIRROR,
       500.0,
       FPUnitSouth.FPU_NONE,
+      2,
+      4,
+      None,
+      DetectorManufacturer.E2V,
+      Site.GS),
+    new GmosParameters(
+      FilterSouth.g_G0325,
+      DisperserSouth.MIRROR,
+      500.0,
+      FPUnitSouth.FPU_NONE,
+      4,
+      4,
+      None,
+      DetectorManufacturer.HAMAMATSU,
+      Site.GS)
+
+  ))
+
+  // === SPECTROSCOPY
+
+  private lazy val KBandSpectroscopy = Fixture.kBandSpcFixtures(List(
+
+    // GMOS-N
+    new GmosParameters(
+      FilterNorth.g_G0301,
+      DisperserNorth.R150_G5306,
+      500.0,
+      FPUnitNorth.LONGSLIT_2,
       1,
       1,
       None,
-      DetectorManufacturer.HAMAMATSU,                        // HAMAMATSU CCD
-      Site.GS)
-  ))
-
-  private lazy val KBandSpectroscopy = Fixture.kBandSpcFixtures(List(
-    new GmosParameters(
-      FilterNorth.g_G0301,
-      DisperserNorth.R150_G5306,
-      500.0,
-      FPUnitNorth.LONGSLIT_4,
-      1,
-      1,
-      Some(IfuSingle(0.0)),
       DetectorManufacturer.E2V,
       Site.GN),
-//    new GmosParameters(       //TODO active with next baseline, use E2V array, legacy not available for GN
-//      FilterNorth.g_G0301,
-//      DisperserNorth.R400_G5305,
-//      500.0,
-//      FPUnitNorth.IFU_1,
-//      1,
-//      1,
-//      Some(IfuSingle(0.0)),
-//      "1",                        // EEV legacy; still supported?
-//      Site.GN),
     new GmosParameters(
       FilterNorth.g_G0301,
-      DisperserNorth.R150_G5306,
+      DisperserNorth.R400_G5305,
       500.0,
       FPUnitNorth.IFU_1,
-      1,
-      1,
+      2,
+      2,
+      Some(IfuSingle(0.0)),
+      DetectorManufacturer.HAMAMATSU,
+      Site.GN),
+    new GmosParameters(
+      FilterNorth.g_G0301,
+      DisperserNorth.R400_G5305,
+      500.0,
+      FPUnitNorth.IFU_1,
+      2,
+      2,
+      Some(IfuSingle(0.3)),
+      DetectorManufacturer.HAMAMATSU,
+      Site.GN),
+
+    // GMOS-S
+    new GmosParameters(
+      FilterSouth.g_G0325,
+      DisperserSouth.R150_G5326,
+      500.0,
+      FPUnitSouth.LONGSLIT_2,
+      2,
+      4,
+      None,
+      DetectorManufacturer.E2V,
+      Site.GS),
+    new GmosParameters(
+      FilterSouth.g_G0325,
+      DisperserSouth.R400_G5325,
+      500.0,
+      FPUnitSouth.IFU_1,
+      4,
+      4,
       Some(IfuRadial(0.0, 0.3)),
-      DetectorManufacturer.HAMAMATSU,                        // HAMAMATSU CCD
-      Site.GN)
+      DetectorManufacturer.HAMAMATSU,
+      Site.GS)
   ))
 
 }
