@@ -71,7 +71,7 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
   /** Accepts a program and edits it according to this merge plan. */
   def merge(f: ISPFactory, p: ISPProgram): VcsAction[Unit] = {
     // Tries to create an ISPNode from the information in the MergeNode.
-    def create(mn: MergeNode): VcsFailure \/ ISPNode =
+    def create(mn: MergeNode): TryVcs[ISPNode] =
       mn match {
         case Modified(k, _, dob, _) =>
           NodeFactory.mkNode(f, p, dob.getType, Some(k)).toRightDisjunction {

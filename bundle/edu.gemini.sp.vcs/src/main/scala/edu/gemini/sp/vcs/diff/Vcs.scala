@@ -17,6 +17,8 @@ import Scalaz._
 
 import Vcs._
 
+import scalaz.concurrent.Task
+
 /** Vcs provides the public API for vcs commands such as push, pull and sync. */
 class Vcs(kc: KeyChain, server: VcsServer) {
 
@@ -107,6 +109,20 @@ class Vcs(kc: KeyChain, server: VcsServer) {
           }
       }
     } yield res
+  }
+
+  /** Returns a `VcsAction` that will sync the program with the remote peer,
+    * retrying if it fails because the program was updated remotely while
+    * performing the merge locally.  Retry up to `retryCount` times if
+    * necessary. */
+  def retrySync(id: SPProgramID, peer: Peer, retryCount: Int): VcsAction[Unit] = {
+    def retryIfNeedsUpdate(f: VcsFailure): EitherT[Task, Unit, VcsFailure] = f match {
+      case NeedsUpdate  => if (retryCount <= 0) EitherT.right(Task.delay(NeedsUpdate))
+                           else retrySync(id, peer, retryCount - 1).swap
+      case otherFailure => EitherT.right(Task.delay(otherFailure))
+    }
+
+    (sync(id, peer).as(()).swap >>= retryIfNeedsUpdate).swap
   }
 
   /** Provides access to (a chunk of) the VCS log. */

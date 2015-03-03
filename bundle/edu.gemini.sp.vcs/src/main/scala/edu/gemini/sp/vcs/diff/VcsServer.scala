@@ -88,7 +88,6 @@ class VcsServer(odb: IDBDatabaseService, vcsLog: VcsLog) { vs =>
       (lookupFailure <\/ (())).liftVcs
     }
 
-
     Option(p.getProgramID).toRightDisjunction(MissingId).liftVcs >>= { id =>
       accessControlled(id, user) {
         locked(p.getProgramKey, writeLock, writeUnlock) {
@@ -148,9 +147,7 @@ class VcsServer(odb: IDBDatabaseService, vcsLog: VcsLog) { vs =>
 
   private def managed[A](id: SPProgramID, user: Set[Principal], lock: SPNodeKey => Unit, unlock: SPNodeKey => Unit)(body: ISPProgram => VcsAction[A]): VcsAction[A] =
     accessControlled(id, user) {
-      lookup(id) >>= { p =>
-        locked(p.getProgramKey, lock, unlock)(body(p))
-      }
+      lookup(id) >>= { p => locked(p.getProgramKey, lock, unlock)(body(p)) }
     }
 
   private def accessControlled[A](id: SPProgramID, user: Set[Principal])(body: => VcsAction[A]): VcsAction[A] =
