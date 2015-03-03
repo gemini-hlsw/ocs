@@ -1,6 +1,5 @@
 package edu.gemini.sp.vcs.diff.osgi
 
-import edu.gemini.pot.sp.version._
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.sp.vcs.diff.ProgramLocation.{Both, RemoteOnly, LocalOnly, Neither}
 import edu.gemini.sp.vcs.diff._
@@ -8,6 +7,8 @@ import edu.gemini.sp.vcs.diff.VcsAction._
 import edu.gemini.sp.vcs.reg.VcsRegistrar
 import edu.gemini.spModel.core.{Peer, SPProgramID}
 import edu.gemini.util.security.auth.keychain.KeyChain
+
+import java.io.{PrintWriter, StringWriter}
 
 import scalaz._
 import Scalaz._
@@ -23,7 +24,7 @@ object Commands {
     }.leftMap(_ => s"Sorry, '$s' isn't a valid program id")
 
   def parseLoc(s: String): String \/ Peer =
-    Option(Peer.tryParse(s)).toRightDisjunction(s"Sorry, expecting host:port(:site) not '$s'")
+    Option(Peer.tryParse(s)) \/> s"Sorry, expecting host:port(:site) not '$s'"
 
   def usage(cmd: String): String =
     s"Usage: vcs2 $cmd [[host:port]] program_id]"
@@ -57,7 +58,7 @@ object Commands {
         case 1 => parseId(args(0)).map { id =>
           CmdArgs(locationFor(id), id)
         }
-        case 0 => lastProgId.toRightDisjunction(usage(cmd)).map { id =>
+        case 0 => (lastProgId \/> usage(cmd)).map { id =>
           CmdArgs(locationFor(id), id)
         }
         case _ => usage(cmd).left
@@ -144,17 +145,19 @@ object Commands {
 
     def vcs2(cmd: String, args: Array[String]): String =
       try {
-        exec(cmd, args, handlers) | "Usage: vcs2 host|sync"
+        exec(cmd, args, handlers) | "Usage: vcs2 host | add | checkout | pull | push | sync"
       } catch {
         case e: Exception =>
-          e.printStackTrace()
-          "???"
+          val sw = new StringWriter()
+          e.printStackTrace(new PrintWriter(sw))
+          val msg = Option(e.getMessage) | "<no exception message>"
+          s"Exception while executing command: $msg\n${sw.toString}"
       }
 
     def exec(cmd: String, args: Array[String], handlerList: List[VcsCmdHandler]): Option[String] =
       handlerList match {
         case h :: t => h(cmd, args) orElse exec(cmd, args, t)
-        case _ => None
+        case _      => None
       }
   }
 }

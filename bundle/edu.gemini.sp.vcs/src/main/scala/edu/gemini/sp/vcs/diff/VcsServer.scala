@@ -88,7 +88,7 @@ class VcsServer(odb: IDBDatabaseService, vcsLog: VcsLog) { vs =>
       alreadyExists.fold(VcsAction.unit)(f => VcsAction.fail(f))
     }
 
-    Option(p.getProgramID).toRightDisjunction(MissingId).liftVcs >>= { id =>
+    (Option(p.getProgramID) \/> MissingId).liftVcs >>= { id =>
       accessControlled(id, user) {
         locked(p.getProgramKey, writeLock, writeUnlock) {
           failIfExists(id, p.getProgramKey) >> putProg(p).liftVcs
