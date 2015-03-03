@@ -74,9 +74,8 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
     def create(mn: MergeNode): TryVcs[ISPNode] =
       mn match {
         case Modified(k, _, dob, _) =>
-          NodeFactory.mkNode(f, p, dob.getType, Some(k)).toRightDisjunction {
+          NodeFactory.mkNode(f, p, dob.getType, Some(k)) \/>
             Unexpected("Could not create science program node of type: " + dob.getType)
-          }
         case Unmodified(k)          =>
           Unexpected(s"Unmodified node with key $k not found in program ${p.getProgramID}.").left
       }
@@ -104,12 +103,12 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
 
     // Pair up MergeNodes with their corresponding ISPNode, creating any missing
     // ISPNodes as necessary.
-    val mergeTree: VcsAction[Tree[(MergeNode, ISPNode)]] = Task.delay {
+    val mergeTree: VcsAction[Tree[(MergeNode, ISPNode)]] = {
       val nodeMap = p.nodeMap
 
-      update.map { mn =>
-        nodeMap.get(mn.key).fold(create(mn)) { _.right }.map {n => (mn, n) }
-      }.sequenceU
+      update.traverseU { mn =>
+        nodeMap.get(mn.key).fold(create(mn)) { _.right }.strengthL(mn)
+      }
     }.liftVcs
 
     def doEdit(mt: Tree[(MergeNode, ISPNode)]): VcsAction[Unit] =

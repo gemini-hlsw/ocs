@@ -68,7 +68,7 @@ class VcsServer(odb: IDBDatabaseService, vcsLog: VcsLog) { vs =>
       evaluate(prog) >>= { a =>
         if (filter(a)) {
           val cp = odb.getFactory.copyWithSameKeys(prog)
-          update(odb.getFactory, cp, a) >> putProg(cp).map(_ => a).liftVcs
+          update(odb.getFactory, cp, a) >> putProg(cp).as(a).liftVcs
         } else {
           VcsAction(a)
         }
@@ -81,11 +81,11 @@ class VcsServer(odb: IDBDatabaseService, vcsLog: VcsLog) { vs =>
     */
   def add(p: ISPProgram, user: Set[Principal]): VcsAction[Unit] = {
     def failIfExists(id: SPProgramID, key: SPNodeKey): VcsAction[Unit] = {
-      val lookupFailure = Option(odb.lookupProgramByID(id)).map(_ => IdAlreadyExists(id)).orElse {
-        Option(odb.lookupProgram(key)).map(_ => KeyAlreadyExists(id, key))
+      val alreadyExists = Option(odb.lookupProgramByID(id)).as(IdAlreadyExists(id)).orElse {
+        Option(odb.lookupProgram(key)).as(KeyAlreadyExists(id, key))
       }
 
-      (lookupFailure <\/ (())).liftVcs
+      alreadyExists.fold(VcsAction.unit)(f => VcsAction.fail(f))
     }
 
     Option(p.getProgramID).toRightDisjunction(MissingId).liftVcs >>= { id =>
@@ -164,5 +164,5 @@ class VcsServer(odb: IDBDatabaseService, vcsLog: VcsLog) { vs =>
     \/.fromTryCatch(odb.put(p)).leftMap {
       case clash: DBIDClashException => IdClash(clash)
       case ex                        => VcsException(ex)
-    }.map(_ => ())
+    }.as(())
 }

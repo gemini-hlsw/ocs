@@ -46,6 +46,7 @@ package object diff {
 
   object VcsAction {
     def apply[A](a: => A): VcsAction[A] = EitherT(Task.delay(a.right))
+    def unit: VcsAction[Unit] = apply(())
     def fail(vf: => VcsFailure): VcsAction[Nothing] = EitherT(Task.delay(vf.left))
 
     implicit class VcsActionOps[A](a: VcsAction[A]) {
