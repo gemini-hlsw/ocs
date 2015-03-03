@@ -33,7 +33,7 @@ class VcsServer(odb: IDBDatabaseService, vcsLog: VcsLog) { vs =>
   /** Creates an action that reads from a program with a read lock held
     * provided the caller has permission. */
   def read[A](id: SPProgramID, user: Set[Principal])(body: ISPProgram => A): VcsAction[A] =
-    locking(id, user, readLock, readUnlock)(p => body(p).point[VcsAction])
+    managed(id, user, readLock, readUnlock)(p => body(p).point[VcsAction])
 
   /** Creates an action that potentially writes to a program with a write lock
     * held provided the caller has permission.  Writing is done on a copy of the
@@ -64,11 +64,11 @@ class VcsServer(odb: IDBDatabaseService, vcsLog: VcsLog) { vs =>
                evaluate: ISPProgram => VcsAction[A],
                filter:   A => Boolean,
                update:   (ISPFactory, ISPProgram, A) => VcsAction[Unit]): VcsAction[A] =
-    locking(id, user, writeLock, writeUnlock) { prog =>
+    managed(id, user, writeLock, writeUnlock) { prog =>
       evaluate(prog) >>= { a =>
         if (filter(a)) {
           val cp = odb.getFactory.copyWithSameKeys(prog)
-          update(odb.getFactory, cp, a) >>= { _ => putProg(cp).map(_ => a).liftVcs }
+          update(odb.getFactory, cp, a) >> putProg(cp).map(_ => a).liftVcs
         } else {
           VcsAction(a)
         }
@@ -79,23 +79,24 @@ class VcsServer(odb: IDBDatabaseService, vcsLog: VcsLog) { vs =>
     * same key or id with an existing program in the database and the user has
     * appropriate keys.
     */
-  // TODO: seems to work but can probably be clened up a bit
-  def add(p: ISPProgram, user: Set[Principal]): VcsAction[Unit] =
+  def add(p: ISPProgram, user: Set[Principal]): VcsAction[Unit] = {
+    def failIfExists(id: SPProgramID, key: SPNodeKey): VcsAction[Unit] = {
+      val lookupFailure = Option(odb.lookupProgramByID(id)).map(_ => IdAlreadyExists(id)).orElse {
+        Option(odb.lookupProgram(key)).map(_ => KeyAlreadyExists(id, key))
+      }
+
+      (lookupFailure <\/ (())).liftVcs
+    }
+
+
     Option(p.getProgramID).toRightDisjunction(MissingId).liftVcs >>= { id =>
-      val progKey = p.getProgramKey
-      try {
-        writeLock(progKey)
-        accessControlled(id, user) {
-          Option(odb.lookupProgramByID(id)).fold {
-            Option(odb.lookupProgram(p.getProgramKey)).fold {
-              putProg(p).liftVcs
-            } { _ => VcsAction.fail(KeyAlreadyExists(id, progKey)) }
-          } { _ => VcsAction.fail(IdAlreadyExists(id)) }
+      accessControlled(id, user) {
+        locked(p.getProgramKey, writeLock, writeUnlock) {
+          failIfExists(id, p.getProgramKey) >> putProg(p).liftVcs
         }
-      } finally {
-        writeUnlock(progKey)
       }
     }
+  }
 
   /** Server implementation of `VcsService`. */
   final class SecureVcsService(user: Set[Principal]) extends VcsService {
@@ -145,14 +146,12 @@ class VcsServer(odb: IDBDatabaseService, vcsLog: VcsLog) { vs =>
       }
   }
 
-  private def locking[A](id: SPProgramID, user: Set[Principal], lock: SPNodeKey => Unit, unlock: SPNodeKey => Unit)(body: ISPProgram => VcsAction[A]): VcsAction[A] =
+  private def managed[A](id: SPProgramID, user: Set[Principal], lock: SPNodeKey => Unit, unlock: SPNodeKey => Unit)(body: ISPProgram => VcsAction[A]): VcsAction[A] =
     accessControlled(id, user) {
       lookup(id) >>= { p =>
-        lock(p.getNodeKey)
-        try { body(p) } finally { unlock(p.getNodeKey) }
+        locked(p.getProgramKey, lock, unlock)(body(p))
       }
     }
-
 
   private def accessControlled[A](id: SPProgramID, user: Set[Principal])(body: => VcsAction[A]): VcsAction[A] =
     VcsAction(ImplicitPolicy.hasPermission(odb, user, new ProgramPermission.Read(id)).unsafePerformIO()) >>= {
@@ -160,6 +159,9 @@ class VcsServer(odb: IDBDatabaseService, vcsLog: VcsLog) { vs =>
         if (hasPermission) body
         else VcsAction.fail(Forbidden(s"You don't have permission to access program '$id'"))
     }
+
+  private def locked[A](k: SPNodeKey, lock: SPNodeKey => Unit, unlock: SPNodeKey => Unit)(body: => VcsAction[A]): VcsAction[A] =
+    VcsAction(lock(k)) >> { try { body} finally { unlock(k) } }
 
   private  def putProg(p: ISPProgram): TryVcs[Unit] =
     \/.fromTryCatch(odb.put(p)).leftMap {
