@@ -93,7 +93,7 @@ public abstract class Gmos extends Instrument {
                         if (detectorCcdIndex == 0) _instruments = new Gmos[]{this};
                         break;
                     default:
-                        throw new IllegalArgumentException();
+                        throw new Error("invalid site");
                 }
                 break;
             // Hamamatsu, both sites: gmos_n_CCD-{R,G,B}.dat        =>  Hamamatsu (R,G,B)
@@ -107,7 +107,7 @@ public abstract class Gmos extends Instrument {
                     _instruments = createCcdArray();
                 break;
             default:
-                throw new IllegalArgumentException();
+                throw new Error("invalid ccd type");
         }
 
         if (detectorCcdIndex == 0) {
@@ -122,7 +122,7 @@ public abstract class Gmos extends Instrument {
                 final IfuRadial ifu = (IfuRadial) gp.getIFUMethod().get();
                 _IFU = new IFUComponent(getPrefix(), ifu.minOffset(), ifu.maxOffset());
             } else {
-                throw new IllegalArgumentException();
+                throw new Error("invalid IFU type");
             }
             addComponent(_IFU);
         }
@@ -220,7 +220,7 @@ public abstract class Gmos extends Instrument {
         switch (gp.getCCDtype()) {
             case E2V:       return ORIG_PLATE_SCALE * gp.getSpatialBinning();
             case HAMAMATSU: return HAM_PLATE_SCALE * gp.getSpatialBinning();
-            default:        throw new IllegalArgumentException();
+            default:        throw new Error("invalid ccd type");
         }
     }
 
@@ -294,7 +294,7 @@ public abstract class Gmos extends Instrument {
                 final IfuRadial ifu = (IfuRadial) gp.getIFUMethod().get();
                 s += "with mulitple IFU elements arranged from " + ifu.minOffset() + " to " + ifu.maxOffset() + "arcsecs.";
             } else {
-                throw new IllegalArgumentException();
+                throw new Error("invalid IFU type");
             }
             s += "\n";
         }
