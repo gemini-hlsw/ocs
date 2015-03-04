@@ -3,6 +3,9 @@ package edu.gemini.catalog.api
 import edu.gemini.spModel.core.Coordinates
 import edu.gemini.spModel.core.Target.SiderealTarget
 
+import scalaz._
+import Scalaz._
+
 sealed trait CatalogQuery {
   val id: Option[Int] = None
   val base: Coordinates
@@ -14,7 +17,18 @@ sealed trait CatalogQuery {
 
   def withMagnitudeConstraints(magnitudeConstraints: Option[MagnitudeConstraints]): CatalogQuery
 
-  def isSuperSetOf(c: CatalogQuery) = base == c.base && radiusConstraint.isSuperSefOf(c.radiusConstraint)
+  def isSuperSetOf(c: CatalogQuery) = {
+    // Angular separation, or distance between the two.
+    val distance = Coordinates.difference(base, c.base).distance
+
+    // Add the given query's outer radius limit to the distance to get the
+    // maximum distance from this base position of any potential guide star.
+    val max = distance + c.radiusConstraint.maxLimit
+
+    // See whether the other base position falls out of range of our
+    // radius limits.
+    radiusConstraint.maxLimit > max
+  }
 }
 
 object CatalogQuery {
