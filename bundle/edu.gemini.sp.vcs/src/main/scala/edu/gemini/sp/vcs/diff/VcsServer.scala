@@ -123,17 +123,13 @@ class VcsServer(odb: IDBDatabaseService, vcsLog: VcsLog) { vs =>
     override def storeDiffs(id: SPProgramID, mpt: MergePlan.Transport): TryVcs[Boolean] = {
       val mp = mpt.decode
       vs.write[Boolean](id, user,
-        p => VersionMap.compare(mp.vm(p), p.getVersions) match {
+        p => mp.compare(p.getVersions) match {
           case Newer => VcsAction(true)
           case Same  => VcsAction(false)
           case _     => VcsAction.fail(NeedsUpdate)
         },
         identity,
-        (f, p, _) =>
-          for {
-            _ <- mp.merge(f, p)
-            _ <- VcsAction(vcsLog.log(OpStore, id, geminiPrincipals))
-          } yield ()
+        (f, p, _) => (mp.merge(f, p) >> VcsAction(vcsLog.log(OpStore, id, geminiPrincipals))).as(())
       ).unsafeRun
     }
 

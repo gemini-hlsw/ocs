@@ -117,7 +117,7 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
         p.setVersions(vm(p))
       }.leftMap(VcsException).liftVcs
 
-    mergeTree.flatMap(doEdit)
+    mergeTree >>= doEdit
   }
 }
 
