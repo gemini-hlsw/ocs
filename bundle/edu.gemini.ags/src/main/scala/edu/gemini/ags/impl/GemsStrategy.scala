@@ -5,7 +5,7 @@ import edu.gemini.ags.api.AgsStrategy.{Assignment, Estimate, Selection}
 import edu.gemini.ags.gems._
 import edu.gemini.ags.gems.mascot.{Strehl, MascotProgress}
 import edu.gemini.catalog.api._
-import edu.gemini.catalog.votable.{CatalogException, CatalogQueryResult, VoTableClient}
+import edu.gemini.catalog.votable._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.core.Target.SiderealTarget
 
@@ -27,7 +27,10 @@ import edu.gemini.spModel.core.{Angle, MagnitudeBand}
 import scalaz._
 import Scalaz._
 
-object GemsStrategy extends AgsStrategy {
+trait GemsStrategy extends AgsStrategy {
+  // By default use the remote backend but it can be overriden in tests
+  private [impl] implicit val backend:VoTableBackend = RemoteBackend
+
   override def key = GemsKey
 
   // Since the constraints are run in parallel, we need a way to identify them after
@@ -233,3 +236,5 @@ object GemsStrategy extends AgsStrategy {
   override val guideProbes: List[GuideProbe] =
     Flamingos2OiwfsGuideProbe.instance :: (GsaoiOdgw.values() ++ Canopus.Wfs.values()).toList
 }
+
+object GemsStrategy extends GemsStrategy

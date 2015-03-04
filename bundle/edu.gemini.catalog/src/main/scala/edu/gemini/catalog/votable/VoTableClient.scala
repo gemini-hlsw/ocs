@@ -54,6 +54,7 @@ trait RemoteBackend extends VoTableBackend {
     val method = new GetMethod(s"$url/cgi-bin/conesearch.py")
     val qs = queryParams(query)
     method.setQueryString(qs)
+    Log.info(s"Catalog query to ${method.getURI}")
 
     val client = new HttpClient
     client.setConnectionTimeout(timeout)
