@@ -88,17 +88,26 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
                        offset:    Point2D): Angle = {
     import ProbeArmGeometry._
 
+    val posAngleRot = AffineTransform.getRotateInstance(posAngle)
+
+    println(s"gs=(${guideStar.getX},yg=${guideStar.getY})")
     val offsetAdj = {
-      val posAngleRot = AffineTransform.getRotateInstance(posAngle)
       val ifuOffset = transformPoint(new Point2D.Double(wfsOffset, 0.0), posAngleRot)
+      println(s"ifuOffset=(${ifuOffset.getX},${ifuOffset.getY})")
       transformPoint(offset, AffineTransform.getTranslateInstance(ifuOffset.getX, ifuOffset.getY))
     }
+    println(s"offset=(${offset.getX},${offset.getY})")
 
-    val p  = transformPoint(guideStar, AffineTransform.getTranslateInstance(T.getX - offsetAdj.getX, T.getY - offsetAdj.getY)).toCanonicalArcsec
+    val p  = {
+      val ifuOffset = transformPoint(new Point2D.Double(wfsOffset, 0.0), posAngleRot)
+      val Trot = transformPoint(T, posAngleRot);
+      transformPoint(guideStar, AffineTransform.getTranslateInstance(Trot.getX - offsetAdj.getX, Trot.getY - offsetAdj.getY)).toCanonicalArcsec
+    }
     val r  = math.sqrt(p.getX * p.getX + p.getY * p.getY)
     val r2 = r*r
 
     val alpha = math.atan2(p.getX, p.getY)
+    println(s"x=${p.getX}, y=${p.getY}, r=$r")
     val phi = {
       val acosArg    = (r2 - (BX2 + MX2)) / (2 * BX * MX)
       val acosArgAdj = if (acosArg > 1.0) 1.0 else if (acosArg < -1.0) -1.0 else acosArg
@@ -108,6 +117,7 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
       val thetaP = math.asin((MX / r) * math.sin(phi))
       if (MX2 > (r2 + BX2)) math.Pi - thetaP else thetaP
     }
+    println(s"phi=$phi theta=$theta alpha=$alpha angle=${phi - theta - alpha - math.Pi/2.0}")
     Angle.fromArcsecs(phi - theta - alpha - math.Pi / 2.0)
   }
 
