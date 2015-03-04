@@ -18,7 +18,7 @@ public abstract class GratingOptics extends TransmissionElement {
                          final String gratingsName,
                          final double centralWavelength,
                          final int detectorPixels,
-                         final int spectralBinning) throws Exception {
+                         final int spectralBinning) {
 
         super(directory + gratingName + Instrument.getSuffix());
 

@@ -50,9 +50,9 @@ public final class ITCgmosServlet extends ITCServlet {
     /**
      * Supply the body content for the html document.
      */
-    public void writeOutput(ITCMultiPartParser mpp, PrintWriter out) throws Exception {
+    public void writeOutput(final ITCMultiPartParser mpp, final PrintWriter out) throws Exception {
         out.println("<a href = \"http://www.gemini.edu/sciops/instruments/integration-time-calculators/itc-help\"> Click here for help with the results page.</a>");
-        Recipe recipe = new GmosRecipe(mpp, out);
+        final Recipe recipe = new GmosRecipe(mpp, out);
         recipe.writeOutput();
     }
 }

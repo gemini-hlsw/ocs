@@ -5,7 +5,7 @@ import edu.gemini.itc.parameters.ObservationDetailsParameters;
 /**
  * Gmos specification class
  */
-public class GmosSouth extends Gmos {
+public final class GmosSouth extends Gmos {
 
     /**
      * /** Related files will start with this prefix
@@ -22,11 +22,11 @@ public class GmosSouth extends Gmos {
     private static final String[] DETECTOR_CCD_NAMES = {"BB", "HSC", "SC"};
 
 
-    public GmosSouth(GmosParameters gp, ObservationDetailsParameters odp, int detectorCcdIndex) throws Exception {
+    public GmosSouth(final GmosParameters gp, final ObservationDetailsParameters odp, final int detectorCcdIndex) {
         super(gp, odp, FILENAME, detectorCcdIndex);
     }
 
-    protected Gmos[] createCcdArray() throws Exception {
+    protected Gmos[] createCcdArray() {
         return new Gmos[]{this, new GmosSouth(gp, odp, 1), new GmosSouth(gp, odp, 2)};
     }
 

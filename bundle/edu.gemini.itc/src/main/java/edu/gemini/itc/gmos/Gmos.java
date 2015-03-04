@@ -54,7 +54,7 @@ public abstract class Gmos extends Instrument {
 
     private int _detectorCcdIndex = 0; // 0, 1, or 2 when there are multiple CCDs in the detector
 
-    public Gmos(GmosParameters gp, ObservationDetailsParameters odp, String FILENAME, int detectorCcdIndex) throws Exception {
+    public Gmos(final GmosParameters gp, final ObservationDetailsParameters odp, final String FILENAME, final int detectorCcdIndex) {
         super(INSTR_DIR, FILENAME);
 
         this.odp    = odp;
@@ -301,7 +301,7 @@ public abstract class Gmos extends Instrument {
         return s;
     }
 
-    protected abstract Gmos[] createCcdArray() throws Exception;
+    protected abstract Gmos[] createCcdArray();
     protected abstract String getPrefix();
     protected abstract String[] getCcdFiles();
     protected abstract String[] getCcdNames();

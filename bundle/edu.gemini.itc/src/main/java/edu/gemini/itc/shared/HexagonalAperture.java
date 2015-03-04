@@ -1,11 +1,3 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-
 package edu.gemini.itc.shared;
 
 import java.util.ArrayList;
@@ -18,76 +10,45 @@ import java.util.List;
  * the class to calculate different values of the SourceFraction for different
  * types of Morphologies.
  */
-public class HexagonalAperture extends ApertureComponent {
-    List sourceFraction = new ArrayList();
-    double IFUdiam, IFUposX, IFUposY;
+public final class HexagonalAperture extends ApertureComponent {
+    private final List<Double> sourceFraction = new ArrayList<>();
+    private double ifuDiam;
+    private double ifuPosX;
+    private double ifuPosY;
 
-    public HexagonalAperture(double IFUposX, double IFUposY, double IFUdiam) {
-        this.IFUdiam = IFUdiam;
-        this.IFUposX = IFUposX;
-        this.IFUposY = IFUposY;
+    public HexagonalAperture(final double ifuPosX, final double ifuPosY, final double ifuDiam) {
+        this.ifuDiam = ifuDiam;
+        this.ifuPosX = ifuPosX;
+        this.ifuPosY = ifuPosY;
     }
 
 
     //Methods for visiting a Morphology
-    public void visitGaussian(Morphology3D morphology) {
-        double xLower = IFUposX - IFUdiam / 2;
-        double xUpper = IFUposX + IFUdiam / 2;
-        double yLower = IFUposY - IFUdiam / 2;
-        double yUpper = IFUposY + IFUdiam / 2;
-
-        double fractionOfSourceInAperture;
-
-        fractionOfSourceInAperture = morphology.get2DSquareIntegral(xLower, xUpper, yLower, yUpper);
-
-        sourceFraction.add(new Double(fractionOfSourceInAperture));
-
-
+    public void visitGaussian(final Morphology3D morphology) {
+        final double xLower = ifuPosX - ifuDiam / 2;
+        final double xUpper = ifuPosX + ifuDiam / 2;
+        final double yLower = ifuPosY - ifuDiam / 2;
+        final double yUpper = ifuPosY + ifuDiam / 2;
+        final double fractionOfSourceInAperture = morphology.get2DSquareIntegral(xLower, xUpper, yLower, yUpper);
+        sourceFraction.add(fractionOfSourceInAperture);
     }
 
-    public void visitAO(Morphology3D morphology) {
-        double xLower = IFUposX - IFUdiam / 2;
-        double xUpper = IFUposX + IFUdiam / 2;
-        double yLower = IFUposY - IFUdiam / 2;
-        double yUpper = IFUposY + IFUdiam / 2;
-
-        double fractionOfSourceInAperture;
-
-        fractionOfSourceInAperture = morphology.get2DSquareIntegral(xLower, xUpper, yLower, yUpper);
-
-        sourceFraction.add(new Double(fractionOfSourceInAperture));
-
+    public void visitAO(final Morphology3D morphology) {
+        final double xLower = ifuPosX - ifuDiam / 2;
+        final double xUpper = ifuPosX + ifuDiam / 2;
+        final double yLower = ifuPosY - ifuDiam / 2;
+        final double yUpper = ifuPosY + ifuDiam / 2;
+        final double fractionOfSourceInAperture = morphology.get2DSquareIntegral(xLower, xUpper, yLower, yUpper);
+        sourceFraction.add(fractionOfSourceInAperture);
     }
 
-    public void visitUSB(Morphology3D morphology) {
-
-
-        //double xLower = IFUposX - IFUdiam/2;
-        //double xUpper = IFUposX + IFUdiam/2;
-        //double yLower = IFUposY - IFUdiam/2;
-        //double yUpper = IFUposY + IFUdiam/2;
-
-        //double fractionOfSourceInAperture;
-
-        //fractionOfSourceInAperture = morphology.get2DSquareIntegral(xLower, xUpper, yLower, yUpper);
-
-        //sourceFraction.add(new Double(fractionOfSourceInAperture));
-
-        // Might work, not sure.
-        sourceFraction.add(new Double(IFUdiam * IFUdiam));
-
-    }
-
-    public void visitExponential(Morphology3D morphology) {
-        // not implemented
-    }
-
-    public void visitElliptical(Morphology3D morphology) {
-        // not implemented
+    public void visitUSB(final Morphology3D morphology) {
+        // Original ancient comment: "Might work, not sure."
+        sourceFraction.add(ifuDiam * ifuDiam);
     }
 
     //Method for returning the Sourcefraction for this Aperture
-    public List getFractionOfSourceInAperture() {
+    public List<Double> getFractionOfSourceInAperture() {
         return sourceFraction;
     }
 

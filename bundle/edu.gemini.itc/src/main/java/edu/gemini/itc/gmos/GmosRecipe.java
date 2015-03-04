@@ -18,7 +18,7 @@ import java.util.List;
 public final class GmosRecipe extends RecipeBase {
 
     private final Calendar now = Calendar.getInstance();
-    private final String _header = new StringBuffer("# GMOS ITC: " + now.getTime() + "\n").toString();
+    private final String _header = "# GMOS ITC: " + now.getTime() + "\n";
 
     // Parameters from the web page.
     private final SourceDefinitionParameters _sdParameters;
@@ -35,13 +35,8 @@ public final class GmosRecipe extends RecipeBase {
      * @param out Results will be written to this PrintWriter.
      * @throws Exception on failure to parse parameters.
      */
-    public GmosRecipe(ITCMultiPartParser r, PrintWriter out) throws Exception {
+    public GmosRecipe(final ITCMultiPartParser r, final PrintWriter out) {
         super(out);
-        // Set the Http Session object
-        // _sessionObject = r.getSession(true);
-
-        // System.out.println(" Session is over after"
-        // +_sessionObject.getCreationTime());
 
         System.out.println("ServerName: " + ServerInfo.getServerURL());
 
@@ -57,12 +52,12 @@ public final class GmosRecipe extends RecipeBase {
     /**
      * Constructs a GmosRecipe given the parameters. Useful for testing.
      */
-    public GmosRecipe(SourceDefinitionParameters sdParameters,
-                      ObservationDetailsParameters obsDetailParameters,
-                      ObservingConditionParameters obsConditionParameters,
-                      GmosParameters gmosParameters, TeleParameters teleParameters,
-                      PlottingDetailsParameters plotParameters,
-                      PrintWriter out)
+    public GmosRecipe(final SourceDefinitionParameters sdParameters,
+                      final ObservationDetailsParameters obsDetailParameters,
+                      final ObservingConditionParameters obsConditionParameters,
+                      final GmosParameters gmosParameters, TeleParameters teleParameters,
+                      final PlottingDetailsParameters plotParameters,
+                      final PrintWriter out)
 
     {
         super(out);
@@ -85,7 +80,7 @@ public final class GmosRecipe extends RecipeBase {
         _println("");
 
         // This object is used to format numerical strings.
-        FormatStringWriter device = new FormatStringWriter();
+        final FormatStringWriter device = new FormatStringWriter();
         device.setPrecision(2); // Two decimal places
         device.clear();
 
@@ -107,7 +102,7 @@ public final class GmosRecipe extends RecipeBase {
         final ITCChart gmosChart2;
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {
             final boolean ifuAndNotUniform = mainInstrument.isIfuUsed() && !(_sdParameters.isUniform());
-            final double ifu_offset = ifuAndNotUniform ? (Double) mainInstrument.getIFU().getApertureOffsetList().iterator().next() : 0.0;
+            final double ifu_offset = ifuAndNotUniform ? mainInstrument.getIFU().getApertureOffsetList().iterator().next() : 0.0;
             final String chart1Title = ifuAndNotUniform ? "Signal and Background (IFU element offset: " + device.toString(ifu_offset) + " arcsec)" : "Signal and Background ";
             final String chart2Title = ifuAndNotUniform ? "Intermediate Single Exp and Final S/N (IFU element offset: " + device.toString(ifu_offset) + " arcsec)" : "Intermediate Single Exp and Final S/N";
             gmosChart1 = new ITCChart(chart1Title, "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
@@ -119,19 +114,19 @@ public final class GmosRecipe extends RecipeBase {
         }
 
         String sigSpec = null, backSpec = null, singleS2N = null, finalS2N = null;
-        Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
-        edu.gemini.itc.operation.DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
-        int detectorCount = ccdArray.length;
-        for (Gmos instrument : ccdArray) {
-            int ccdIndex = instrument.getDetectorCcdIndex();
-            String ccdName = instrument.getDetectorCcdName();
-            String forCcdName = ccdName.length() == 0 ? "" : " for " + ccdName;
-            Color ccdColor = instrument.getDetectorCcdColor();
-            Color ccdColorDarker = ccdColor == null ? null : ccdColor.darker().darker();
-            int firstCcdIndex = tv.getDetectorCcdStartIndex(ccdIndex);
-            int lastCcdIndex = tv.getDetectorCcdEndIndex(ccdIndex, detectorCount);
+        final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
+        final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
+        final int detectorCount = ccdArray.length;
+        for (final Gmos instrument : ccdArray) {
+            final int ccdIndex = instrument.getDetectorCcdIndex();
+            final String ccdName = instrument.getDetectorCcdName();
+            final String forCcdName = ccdName.length() == 0 ? "" : " for " + ccdName;
+            final Color ccdColor = instrument.getDetectorCcdColor();
+            final Color ccdColorDarker = ccdColor == null ? null : ccdColor.darker().darker();
+            final int firstCcdIndex = tv.getDetectorCcdStartIndex(ccdIndex);
+            final int lastCcdIndex = tv.getDetectorCcdEndIndex(ccdIndex, detectorCount);
             // REL-478: include the gaps in the text data output
-            int lastCcdIndexWithGap = (ccdIndex < 2 && detectorCount > 1)
+            final int lastCcdIndexWithGap = (ccdIndex < 2 && detectorCount > 1)
                     ? tv.getDetectorCcdStartIndex(ccdIndex + 1)
                     : lastCcdIndex;
 
@@ -147,11 +142,8 @@ public final class GmosRecipe extends RecipeBase {
                                     + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
                 }
 
-            VisitableSampledSpectrum sed;
-
-            sed = SEDFactory.getSED(_sdParameters, instrument);
-            SampledSpectrumVisitor redshift = new RedshiftVisitor(
-                    _sdParameters.getRedshift());
+            final VisitableSampledSpectrum sed = SEDFactory.getSED(_sdParameters, instrument);
+            final SampledSpectrumVisitor redshift = new RedshiftVisitor(_sdParameters.getRedshift());
             sed.accept(redshift);
 
             // Must check to see if the redshift has moved the spectrum beyond
@@ -200,12 +192,7 @@ public final class GmosRecipe extends RecipeBase {
                 sed.accept(norm);
             }
 
-            // Resample the spectra for efficiency
-            SampledSpectrumVisitor resample = new ResampleWithPaddingVisitor(
-                    instrument.getObservingStart(), instrument.getObservingEnd(),
-                    instrument.getSampling(), 0);
-
-            SampledSpectrumVisitor tel = new TelescopeApertureVisitor();
+            final SampledSpectrumVisitor tel = new TelescopeApertureVisitor();
             sed.accept(tel);
 
             // SED is now in units of photons/s/nm
@@ -217,18 +204,17 @@ public final class GmosRecipe extends RecipeBase {
             // inputs: SED, AIRMASS, sky emmision file, mirror configuration,
             // output: SED and sky background as they arrive at instruments
 
-            SampledSpectrumVisitor clouds = CloudTransmissionVisitor.create(
-                    _obsConditionParameters.getSkyTransparencyCloud());
+            final SampledSpectrumVisitor clouds = CloudTransmissionVisitor.create(_obsConditionParameters.getSkyTransparencyCloud());
             sed.accept(clouds);
 
-            SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
+            final SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
                     _obsConditionParameters.getSkyTransparencyWater(),
                     _obsConditionParameters.getAirmass(), "skytrans_",
                     _gmosParameters.getSite(), ITCConstants.VISIBLE);
             sed.accept(water);
 
             // Background spectrum is introduced here.
-            VisitableSampledSpectrum sky = SEDFactory.getSED(
+            final VisitableSampledSpectrum sky = SEDFactory.getSED(
                     ITCConstants.SKY_BACKGROUND_LIB + "/"
                             + ITCConstants.OPTICAL_SKY_BACKGROUND_FILENAME_BASE
                             + "_"
@@ -236,16 +222,13 @@ public final class GmosRecipe extends RecipeBase {
                             + "_" + _obsConditionParameters.getAirmassCategory()
                             + ITCConstants.DATA_SUFFIX, instrument.getSampling());
 
-            // resample sky_background to instrument parameters
-            // sky.accept(resample);
-
             // Apply telescope transmission to both sed and sky
-            SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(_teleParameters);
+            final SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(_teleParameters);
             sed.accept(t);
             sky.accept(t);
 
             // Create and Add background for the telescope.
-            SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, _gmosParameters.getSite(), ITCConstants.VISIBLE);
+            final SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, _gmosParameters.getSite(), ITCConstants.VISIBLE);
             sky.accept(tb);
 
             sky.accept(tel);
@@ -266,8 +249,8 @@ public final class GmosRecipe extends RecipeBase {
             instrument.convolveComponents(sky);
 
             // Get the summed source and sky
-            double sed_integral = sed.getIntegral();
-            double sky_integral = sky.getIntegral();
+            final double sed_integral = sed.getIntegral();
+            final double sky_integral = sky.getIntegral();
 
             // For debugging, print the spectrum integrals.
             // _println("SED integral: "+sed_integral+"\tSKY integral: "+sky_integral);
@@ -285,29 +268,21 @@ public final class GmosRecipe extends RecipeBase {
             //
             // inputs: source morphology specification
 
-            double pixel_size = instrument.getPixelSize();
-            double ap_diam = 0;
-            double ap_pix = 0;
-            double sw_ap = 0;
-            double Npix = 0;
-            double source_fraction = 0;
-            double pix_per_sq_arcsec = 0;
-            double peak_pixel_count = 0;
-            List sf_list = new ArrayList();
-            List ap_offset_list = new ArrayList();
+            final double pixel_size = instrument.getPixelSize();
+            double ap_diam;
+            double Npix;
+            double source_fraction;
+            double peak_pixel_count;
+            List<Double> sf_list = new ArrayList<>();
 
             // Calculate image quality
-            double im_qual = 0.;
-            ImageQualityCalculatable IQcalc =
-                    ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
+            final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
             IQcalc.calculate();
-
-            im_qual = IQcalc.getImageQuality();
+            double im_qual = IQcalc.getImageQuality();
 
             if (!instrument.isIfuUsed()) {
                 // Calculate the Fraction of source in the aperture
-                SourceFractionCalculatable SFcalc =
-                        SourceFractionCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
+                final SourceFractionCalculatable SFcalc = SourceFractionCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
                 SFcalc.setImageQuality(im_qual);
                 SFcalc.calculate();
                 source_fraction = SFcalc.getSourceFraction();
@@ -321,28 +296,26 @@ public final class GmosRecipe extends RecipeBase {
                             + " times the software aperture.\n");
                 }
             } else {
-                VisitableMorphology morph;
+                final VisitableMorphology morph;
                 if (!_sdParameters.isUniform()) {
                     morph = new GaussianMorphology(im_qual);
                 } else {
                     morph = new USBMorphology();
                 }
                 morph.accept(instrument.getIFU().getAperture());
-                ap_diam = instrument.getIFU().IFU_DIAMETER;
+                ap_diam = IFUComponent.IFU_DIAMETER;
                 // for now just a single item from the list
                 sf_list = instrument.getIFU().getFractionOfSourceInAperture();
-                ap_offset_list = instrument.getIFU().getApertureOffsetList();
 
-                source_fraction = ((Double) sf_list.get(0)).doubleValue();
+                source_fraction = sf_list.get(0);
 
-                Npix = (Math.PI / 4.) * (ap_diam / pixel_size)
-                        * (ap_diam / pixel_size);
+                Npix = (Math.PI / 4.) * (ap_diam / pixel_size) * (ap_diam / pixel_size);
                 if (Npix < 9)
                     Npix = 9;
             }
 
             // Calculate the Peak Pixel Flux
-            PeakPixelFluxCalc ppfc;
+            final PeakPixelFluxCalc ppfc;
 
             if (!_sdParameters.isUniform()) {
 
@@ -365,13 +338,13 @@ public final class GmosRecipe extends RecipeBase {
             // In this version we are bypassing morphology modules 3a-5a.
             // i.e. the output morphology is same as the input morphology.
             // Might implement these modules at a later time.
-            int binFactor;
-            double spec_source_frac = 0;
-            int number_exposures = _obsDetailParameters.getNumExposures();
-            double frac_with_source = _obsDetailParameters.getSourceFraction();
-            double dark_current = instrument.getDarkCurrent();
-            double exposure_time = _obsDetailParameters.getExposureTime();
-            double read_noise = instrument.getReadNoise();
+            final int binFactor;
+            double spec_source_frac;
+            final int number_exposures = _obsDetailParameters.getNumExposures();
+            final double frac_with_source = _obsDetailParameters.getSourceFraction();
+            final double dark_current = instrument.getDarkCurrent();
+            final double exposure_time = _obsDetailParameters.getExposureTime();
+            final double read_noise = instrument.getReadNoise();
             if (ccdIndex == 0) {
                 _println("Read noise: " + read_noise);
             }
@@ -463,11 +436,7 @@ public final class GmosRecipe extends RecipeBase {
                 }
 
                 if (instrument.isIfuUsed() && !_sdParameters.isUniform()) {
-                    Iterator src_frac_it = sf_list.iterator();
-                    Iterator ifu_offset_it = ap_offset_list.iterator();
-
-                    while (src_frac_it.hasNext()) {
-                        spec_source_frac = (Double) src_frac_it.next();
+                    for (final double spsf : sf_list) {
                         specS2N = new SpecS2NLargeSlitVisitor(
                                 _gmosParameters.getFPMask(), pixel_size,
                                 instrument.getSpectralPixelWidth(),
@@ -476,7 +445,7 @@ public final class GmosRecipe extends RecipeBase {
                                 instrument.getGratingDispersion_nm(),
                                 instrument.getGratingDispersion_nmppix(),
                                 instrument.getGratingResolution(),
-                                spec_source_frac, im_qual, ap_diam,
+                                spsf, im_qual, ap_diam,
                                 number_exposures, frac_with_source, exposure_time,
                                 dark_current * instrument.getSpatialBinning()
                                         * instrument.getSpectralBinning(),
@@ -562,8 +531,7 @@ public final class GmosRecipe extends RecipeBase {
                     _println("");
                 }
             } else {
-                ImagingS2NCalculatable IS2Ncalc =
-                        ImagingS2NCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
+                final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
                 IS2Ncalc.setSedIntegral(sed_integral);
                 IS2Ncalc.setSkyIntegral(sky_integral);
                 IS2Ncalc.setSkyAperture(_obsDetailParameters
@@ -579,31 +547,24 @@ public final class GmosRecipe extends RecipeBase {
                 _println("");
                 _println(IS2Ncalc.getTextResult(device));
 
-                // _println(IS2Ncalc.getBackgroundLimitResult());
                 device.setPrecision(0); // NO decimal places
                 device.clear();
-                binFactor = instrument.getSpatialBinning()
-                        * instrument.getSpatialBinning();
+                binFactor = instrument.getSpatialBinning() * instrument.getSpatialBinning();
 
                 _println("");
                 _println("The peak pixel signal + background is " + device.toString(peak_pixel_count) + ". ");
-                // This is " +
-                // device.toString(peak_pixel_count/instrument.getWellDepth()*100) +
-                // "% of the full well depth of "+device.toString(instrument.getWellDepth())+".");
 
                 if (peak_pixel_count > (.95 * instrument.getWellDepth() * binFactor))
                     _println("Warning: peak pixel may be saturating the (binned) CCD full well of "
                             + .95 * instrument.getWellDepth() * binFactor);
 
-                if (peak_pixel_count > (.95 * instrument.getADSaturation() * instrument
-                        .getLowGain()))
+                if (peak_pixel_count > (.95 * instrument.getADSaturation() * instrument.getLowGain()))
                     _println("Warning: peak pixel may be saturating the low gain setting of "
                             + .95
                             * instrument.getADSaturation()
                             * instrument.getLowGain());
 
-                if (peak_pixel_count > (.95 * instrument.getADSaturation() * instrument
-                        .getHighGain()))
+                if (peak_pixel_count > (.95 * instrument.getADSaturation() * instrument.getHighGain()))
                     _println("Warning: peak pixel may be saturating the high gain setting "
                             + .95
                             * instrument.getADSaturation()
