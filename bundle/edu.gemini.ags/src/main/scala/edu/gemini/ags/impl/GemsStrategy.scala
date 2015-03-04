@@ -29,7 +29,7 @@ import Scalaz._
 
 trait GemsStrategy extends AgsStrategy {
   // By default use the remote backend but it can be overriden in tests
-  private [impl] implicit val backend:VoTableBackend = RemoteBackend
+  private [impl] val backend:VoTableBackend
 
   override def key = GemsKey
 
@@ -65,7 +65,7 @@ trait GemsStrategy extends AgsStrategy {
       constraint.withMagnitudeConstraints(adjustedMagConstraints)
     }
 
-    VoTableClient.catalog(adjustedConstraints).flatMap {
+    VoTableClient.catalog(adjustedConstraints)(backend).flatMap {
       case result if result.exists(_.result.containsError) => Future.failed(CatalogException(result.map(_.result.problems).flatten))
       case result                                          => Future.successful {
         result.map { r =>
@@ -178,7 +178,7 @@ trait GemsStrategy extends AgsStrategy {
     val gemsOptions = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog, gemsInstrument, tipTiltMode, posAngles.asJava)
 
     // Perform the catalog search.
-    val results = GemsVoTableCatalog.search(ctx, ctx.getBaseCoordinates.toNewModel, gemsOptions, nirBand, null)
+    val results = GemsVoTableCatalog.search(ctx, ctx.getBaseCoordinates.toNewModel, gemsOptions, nirBand, null)(backend)
 
     // Now check that the results are valid: there must be a valid tip-tilt and flexure star each.
     results.map { r =>
@@ -237,4 +237,6 @@ trait GemsStrategy extends AgsStrategy {
     Flamingos2OiwfsGuideProbe.instance :: (GsaoiOdgw.values() ++ Canopus.Wfs.values()).toList
 }
 
-object GemsStrategy extends GemsStrategy
+object GemsStrategy extends GemsStrategy {
+  override private [impl] val backend = RemoteBackend
+}

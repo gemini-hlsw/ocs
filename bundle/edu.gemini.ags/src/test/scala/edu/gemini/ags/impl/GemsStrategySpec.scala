@@ -4,7 +4,7 @@ import edu.gemini.ags.api.AgsStrategy.Estimate
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.ags.gems._
 import edu.gemini.catalog.api.{RadiusConstraint, SaturationConstraint, FaintnessConstraint, MagnitudeConstraints}
-import edu.gemini.catalog.votable.{TestVoTableBackend, RemoteBackend}
+import edu.gemini.catalog.votable.TestVoTableBackend
 import edu.gemini.shared.util.immutable.{None, Some}
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.gems.Canopus.Wfs
@@ -24,10 +24,9 @@ import org.specs2.time.NoTimeConversions
 import scala.collection.JavaConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
 
 object TestGemsStrategy extends GemsStrategy {
-  override implicit val backend = TestVoTableBackend("/gemsstrategyquery.xml")
+  override val backend = TestVoTableBackend("/gemsstrategyquery.xml")
 }
 
 class GemsStrategySpec extends Specification with NoTimeConversions {
