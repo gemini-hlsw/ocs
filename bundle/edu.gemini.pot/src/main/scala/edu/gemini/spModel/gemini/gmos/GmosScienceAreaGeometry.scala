@@ -16,9 +16,8 @@ class GmosScienceAreaGeometry[I  <: InstGmosCommon[D,F,P,SM],
                               SM <: Enum[SM] with GmosCommonType.StageMode] extends ScienceAreaGeometry[I] {
   import GmosScienceAreaGeometry._
 
-  override def geometry(inst: I): List[Shape] = {
-    if (inst == null) Nil
-    else {
+  override def geometry(inst0: I): List[Shape] = {
+    Option(inst0).toList.flatMap { inst =>
       lazy val width   = inst.getScienceArea()(0)
       lazy val isSouth = inst.getSite.contains(Site.GS)
       inst.getFPUnitMode match {

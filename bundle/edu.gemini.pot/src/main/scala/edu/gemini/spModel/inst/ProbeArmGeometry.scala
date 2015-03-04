@@ -67,11 +67,12 @@ trait ProbeArmGeometry {
    * @return       the probe arm adjustments for this data
    */
   def armAdjustment(ctx: ObsContext, offset: Offset): Option[ArmAdjustment] =
-    (for {
+    for {
       c            <- Option(ctx)
       guideTargets <- ctx.getTargets.getPrimaryGuideProbeTargets(guideProbeInstance).asScalaOpt
       guideStar    <- guideTargets.getPrimary.asScalaOpt
-    } yield armAdjustment(ctx, guideStar, offset)).flatten
+      adj          <- armAdjustment(ctx, guideStar, offset)
+    } yield adj
 
   def armAdjustmentAsJava(ctx: ObsContext, offset: Offset): GOption[ArmAdjustment] =
     armAdjustment(ctx, offset).asGeminiOpt
@@ -84,8 +85,8 @@ object ProbeArmGeometry {
    * Convert a value in arcseconds (i.e. in the range [0,maxArcsecs) to its canonical value, i.e.
    * the equivalent value in the range [-maxArcsecs/2,maxArcsecs/2).
    */
-  private implicit class CanonicalValue(val v: Double) extends AnyVal {
-    def toCanonicalValue: Double = {
+  implicit class ArcsecCanonicalValue(val v: Double) extends AnyVal {
+    def toCanonicalArcsec: Double = {
       val v1 = math.IEEEremainder(v, maxArcsecs)
       val v2 = v1 - maxArcsecs
       if (math.abs(v1) <= math.abs(v2)) v1 else v2
@@ -95,9 +96,9 @@ object ProbeArmGeometry {
   /**
    * Convert a point representing coordinates in arcsec to canonical value in both coordinates.
    */
-  implicit class CanonicalPoint(val p: Point2D) extends AnyVal {
-    def toCanonicalForm: Point2D =
-      new Point2D.Double(p.getX.toCanonicalValue, p.getY.toCanonicalValue)
+  implicit class ArcsecCanonicalPoint(val p: Point2D) extends AnyVal {
+    def toCanonicalArcsec: Point2D =
+      new Point2D.Double(p.getX.toCanonicalArcsec, p.getY.toCanonicalArcsec)
   }
 }
 
@@ -106,4 +107,4 @@ object ProbeArmGeometry {
  * @param angle           the angle which will be used by the probe arm
  * @param guideStarCoords the coordinates (in arcsec) where the probe arm will be placed
  */
-case class ArmAdjustment(angle: Double, guideStarCoords: Point2D)
+case class ArmAdjustment(angle: Angle, guideStarCoords: Point2D)

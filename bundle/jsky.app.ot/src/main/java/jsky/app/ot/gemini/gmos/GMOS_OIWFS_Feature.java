@@ -112,30 +112,28 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
     protected void _addProbeArm(double xc, double yc, final double xt, final double yt, final double xb, final double yb, final boolean flip) {
         final ObsContext ctx = _iw.getMinimalObsContext().getOrNull();
         if (ctx != null && GmosOiwfsGuideProbe.instance.inRange(ctx, getProbeArmOffset())) {
-            // We need to find the offset in the ObsContext that corresponds to the TPE offset.
-            final Option<Offset> offsetOpt = FeatureGeometry$.MODULE$.findObsContextOffsetAsJava(ctx, xc, yc, xb, yb, _pixelsPerArcsec);
-            offsetOpt.foreach(new ApplyOp<Offset>() {
-                @Override
-                public void apply(final Offset offset) {
-                    // Translation to move the probe arm to the required position on the screen.
-                    final AffineTransform trans = AffineTransform.getTranslateInstance(xt+xb, yt+yb);
+            // We need to create an Offset that corresponds to the TPE offset.
+            final double ox = (xc - xb) / _pixelsPerArcsec;
+            final double oy = (yc - yb) / _pixelsPerArcsec;
+            Offset offset = new Offset(Angle.arcsecs(ox), Angle.arcsecs(oy));
 
-                    final Option<ArmAdjustment> adj = GmosOiwfsProbeArm.armAdjustmentAsJava(ctx, offset);
-                    adj.foreach(new ApplyOp<ArmAdjustment>() {
+            // Translation to move the probe arm to the required position on the screen.
+            final AffineTransform trans = AffineTransform.getTranslateInstance(xt+xb, yt+yb);
+
+            final Option<ArmAdjustment> adj = GmosOiwfsProbeArm.armAdjustmentAsJava(ctx, offset);
+            adj.foreach(new ApplyOp<ArmAdjustment>() {
+                @Override
+                public void apply(final ArmAdjustment armAdj) {
+                    final edu.gemini.spModel.core.Angle armAngle = armAdj.angle();
+                    final Point2D guideStar                      = armAdj.guideStarCoords();
+                    final ImList<Shape> shapes                   = GmosOiwfsProbeArm.geometryAsJava();
+                    shapes.foreach(new ApplyOp<Shape>() {
                         @Override
-                        public void apply(final ArmAdjustment armAdj) {
-                            final double armAngle      = armAdj.angle();
-                            final Point2D guideStar    = armAdj.guideStarCoords();
-                            final ImList<Shape> shapes = GmosOiwfsProbeArm.geometryAsJava();
-                            shapes.foreach(new ApplyOp<Shape>() {
-                                @Override
-                                public void apply(final Shape s) {
-                                    final Shape s1 = FeatureGeometry$.MODULE$.transformProbeArmForContext(s, armAngle, guideStar);
-                                    final Shape s2 = FeatureGeometry$.MODULE$.transformProbeArmForScreen(s1, _pixelsPerArcsec, flip, _flipRA);
-                                    final Shape s3 = trans.createTransformedShape(s2);
-                                    _figureList.add(new Figure(s3, PROBE_ARM_COLOR, BLOCKED, OIWFS_STROKE));
-                                }
-                            });
+                        public void apply(final Shape s) {
+                            final Shape s1 = FeatureGeometry$.MODULE$.transformProbeArmForContext(s, armAngle, guideStar);
+                            final Shape s2 = FeatureGeometry$.MODULE$.transformProbeArmForScreen(s1, _pixelsPerArcsec, flip, _flipRA);
+                            final Shape s3 = trans.createTransformedShape(s2);
+                            _figureList.add(new Figure(s3, PROBE_ARM_COLOR, BLOCKED, OIWFS_STROKE));
                         }
                     });
                 }

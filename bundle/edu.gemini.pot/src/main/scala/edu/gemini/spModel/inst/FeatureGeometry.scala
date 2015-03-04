@@ -4,10 +4,9 @@ import java.awt.Shape
 import java.awt.geom.{Point2D, AffineTransform}
 
 import edu.gemini.shared.util.immutable.{DefaultImList, ImList}
-import edu.gemini.skycalc.{Offset, Angle}
+import edu.gemini.spModel.core.Angle
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
-
 
 import scala.collection.JavaConverters._
 
@@ -16,9 +15,6 @@ import scala.collection.JavaConverters._
  * guide probe arm.
  */
 object FeatureGeometry {
-  // Precision to use in floating point comparisons.
-  private val precision = 1e-3
-
   /**
    * Convenience method to execute a transformation on a point and return the result.
    * @param p     the point to transform
@@ -91,9 +87,11 @@ object FeatureGeometry {
    * @param guideStar the position of the guide star in arcseconds
    * @return          the transformed shapes
    */
-  def transformProbeArmForContext(shapes: List[Shape], armAngle: Double, guideStar: Point2D): List[Shape] = {
+  def transformProbeArmForContext(shapes: List[Shape], armAngle: Angle, guideStar: Point2D): List[Shape] = {
+    import ProbeArmGeometry._
+
     // For the guide star, we want to use the point closest to zero in terms of arcsec as a normalization.
-    val armTrans = AffineTransform.getRotateInstance(armAngle, guideStar.getX, guideStar.getY)
+    val armTrans = AffineTransform.getRotateInstance(armAngle.toArcsecs.toCanonicalArcsec, guideStar.getX, guideStar.getY)
     armTrans.concatenate(AffineTransform.getTranslateInstance(guideStar.getX, guideStar.getY))
     shapes.map { armTrans.createTransformedShape }
   }
@@ -106,7 +104,7 @@ object FeatureGeometry {
    * @param guideStar the position of the guide star in arcsec
    * @return          the transformed shapes
    */
-  def transformProbeArmForContext(shape: Shape, armAngle: Double, guideStar: Point2D): Shape =
+  def transformProbeArmForContext(shape: Shape, armAngle: Angle, guideStar: Point2D): Shape =
     transformProbeArmForContext(List(shape), armAngle, guideStar).head
 
   /**
@@ -130,32 +128,4 @@ object FeatureGeometry {
    */
   def transformProbeArmForScreen(shape: Shape, pixelsPerArcsec: Double, xFlipArm: Boolean, flipRA: Double): Shape =
     transformProbeArmForScreen(List(shape), pixelsPerArcsec, xFlipArm, flipRA).head
-
-  /**
-   * Given the parameters for a TPE representation of an offset, find the corresponding offset amongst an ObsContext's
-   * science positions.
-   *
-   *
-   */
-  def findObsContextOffset(ctx: ObsContext, ox: Double, oy: Double, bx: Double, by: Double, pixelsPerArcsec: Double): Option[Offset] = {
-    import scala.math.abs
-
-    // Convert from screen coordinates to (p,q) coordinates in arcseconds
-    val pq = List(bx - ox, by - oy).map(_ / pixelsPerArcsec)
-
-    // If the offset is (0,0), which is not included in the ObsContext's science positions, create a new Offset.
-    if (pq.forall(_ < precision))
-      Some(new Offset(Angle.arcsecs(0.0), Angle.arcsecs(0.0)))
-    else
-      Option(ctx).flatMap {
-        _.getSciencePositions.asScala.find { o =>
-          pq.zip(List(o.p, o.q)).forall {
-            case (d, a) => abs(d - a.convertTo(Angle.Unit.ARCSECS).getMagnitude) < precision
-          }
-        }
-      }
-  }
-
-  def findObsContextOffsetAsJava(ctx: ObsContext, ox: Double, oy: Double, bx: Double, by: Double, pixelsPerArcsec: Double): edu.gemini.shared.util.immutable.Option[Offset] =
-    findObsContextOffset(ctx, ox, oy, bx, by, pixelsPerArcsec).asGeminiOpt
 }

@@ -30,6 +30,10 @@ object ModelConverters {
     def toNewModel: Offset = Offset(offset.p().toNewModel, offset.q().toNewModel)
   }
 
+  implicit class NewOffset2Old(val offset: Offset) extends AnyVal {
+    def toOldModel: skycalc.Offset = new skycalc.Offset(offset.p.toOldModel, offset.q.toOldModel)
+  }
+
   implicit class OldCoordinates2New(val c: skycalc.Coordinates) extends AnyVal {
     def toNewModel: Coordinates = Coordinates(RightAscension.fromAngle(c.getRa.toNewModel), Declination.fromAngle(c.getDec.toNewModel).getOrElse(Declination.zero))
   }

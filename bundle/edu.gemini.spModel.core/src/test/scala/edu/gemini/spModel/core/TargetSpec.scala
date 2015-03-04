@@ -14,8 +14,8 @@ object TargetSpec extends Specification with ScalaCheck with Arbitraries with He
 
  "TargetSpec Serialization" should {
 
-    "Support Java Binary" ! 
-      forAll { (t: Target) => 
+    "Support Java Binary" !
+      forAll { (t: Target) =>
         canSerialize(t)
       }
 

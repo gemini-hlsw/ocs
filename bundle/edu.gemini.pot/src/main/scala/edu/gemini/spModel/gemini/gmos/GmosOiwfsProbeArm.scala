@@ -6,7 +6,7 @@ import java.awt.geom.{Point2D, AffineTransform}
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.shared.util.immutable.ImPolygon
 import edu.gemini.skycalc.Offset
-import edu.gemini.spModel.core.Coordinates
+import edu.gemini.spModel.core.{Angle, Coordinates}
 import edu.gemini.spModel.inst.{ArmAdjustment, ProbeArmGeometry}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.telescope.IssPort
@@ -14,7 +14,9 @@ import edu.gemini.spModel.telescope.IssPort
 object GmosOiwfsProbeArm extends ProbeArmGeometry {
   import edu.gemini.spModel.inst.FeatureGeometry.transformPoint
 
+  // For simplified access from Java.
   val instance = this
+
   override protected val guideProbeInstance = GmosOiwfsGuideProbe.instance
 
   override def geometry: List[Shape] =
@@ -45,10 +47,18 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
     ImPolygon(points)
   }
 
-  override def armAdjustment(ctx: ObsContext, guideStarCoords: Coordinates, offset: Offset): Option[ArmAdjustment] = {
-    if (ctx == null || offset == null) None
-    else {
-      import ProbeArmGeometry.CanonicalPoint
+  override def armAdjustment(ctx0: ObsContext, guideStarCoords: Coordinates, offset0: Offset): Option[ArmAdjustment] = {
+    import ProbeArmGeometry._
+
+    for {
+      ctx       <- Option(ctx0)
+      offset    <- Option(offset0)
+      wfsOffset <- ctx.getInstrument match {
+        case gmosn: InstGmosNorth => Some(gmosn.getFPUnit.getWFSOffset)
+        case gmoss: InstGmosSouth => Some(gmoss.getFPUnit.getWFSOffset)
+        case _                    => None
+      }
+    } yield {
       val flip        = if (ctx.getIssPort == IssPort.SIDE_LOOKING) -1.0 else 1.0
       val posAngle    = ctx.getPositionAngle.toRadians.getMagnitude
       val offsetPt    = new Point2D.Double(-offset.p.toArcsecs.getMagnitude, -offset.q.toArcsecs.getMagnitude * flip)
@@ -56,19 +66,11 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
         val baseCoords = ctx.getBaseCoordinates.toNewModel
         val o = Coordinates.difference(baseCoords, guideStarCoords).offset
         val (x,y) = (o.p.toArcsecs, o.q.toArcsecs)
-        new Point2D.Double(-x, -y * flip).toCanonicalForm
+        new Point2D.Double(-x, -y * flip).toCanonicalArcsec
       }
-      val wfsOffset   = {
-        ctx.getInstrument match {
-          case gmosn: InstGmosNorth => Some(gmosn.getFPUnit.getWFSOffset)
-          case gmoss: InstGmosSouth => Some(gmoss.getFPUnit.getWFSOffset)
-          case _                    => None
-        }
-      }
-      wfsOffset.map { w =>
-        val angle = armAngle(w, posAngle, guideStarPt, offsetPt)
-        ArmAdjustment(angle, guideStarPt)
-      }
+
+      val angle = armAngle(wfsOffset, posAngle, guideStarPt, offsetPt)
+      ArmAdjustment(angle, guideStarPt)
     }
   }
 
@@ -83,7 +85,7 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
   private def armAngle(wfsOffset: Double,
                        posAngle:  Double,
                        guideStar: Point2D,
-                       offset:    Point2D): Double = {
+                       offset:    Point2D): Angle = {
     import ProbeArmGeometry._
 
     val offsetAdj = {
@@ -92,16 +94,7 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
       transformPoint(offset, AffineTransform.getTranslateInstance(ifuOffset.getX, ifuOffset.getY))
     }
 
-    val p  = transformPoint(guideStar, AffineTransform.getTranslateInstance(T.getX - offsetAdj.getX, T.getY - offsetAdj.getY)).toCanonicalForm
-//    {
-//      val tp = transformPoint(guideStar, AffineTransform.getTranslateInstance(T.getX - offsetAdj.getX, T.getY - offsetAdj.getY))
-//
-//      // Normalize the point if necessary, as arcsecs should range between 0 and 1296000 = 360 * 60 * 60.
-//      val maxArcsec = 360 * 60 * 60
-//      val nx = tp.getX % maxArcsec
-//      val ny = tp.getY % maxArcsec
-//      new Point2D.Double(nx, ny)
-//    }
+    val p  = transformPoint(guideStar, AffineTransform.getTranslateInstance(T.getX - offsetAdj.getX, T.getY - offsetAdj.getY)).toCanonicalArcsec
     val r  = math.sqrt(p.getX * p.getX + p.getY * p.getY)
     val r2 = r*r
 
@@ -115,8 +108,7 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
       val thetaP = math.asin((MX / r) * math.sin(phi))
       if (MX2 > (r2 + BX2)) math.Pi - thetaP else thetaP
     }
-
-    phi - theta - alpha - math.Pi / 2.0
+    Angle.fromArcsecs(phi - theta - alpha - math.Pi / 2.0)
   }
 
   // Various measurements in arcsec.
