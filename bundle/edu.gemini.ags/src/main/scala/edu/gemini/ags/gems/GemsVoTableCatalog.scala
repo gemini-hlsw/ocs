@@ -22,8 +22,7 @@ import jsky.util.gui.StatusLogger
  * The catalog search will provide the inputs to the analysis phase, which actually assigns guide stars to guiders.
  * See OT-26
  */
-trait GemsVoTableCatalog {
-  private [gems] val backend: VoTableBackend
+case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend) {
   private val DefaultSaturationMagnitude = 0.0
 
   /**
@@ -165,8 +164,4 @@ trait GemsVoTableCatalog {
       mc = if (saturationMap.contains(b._1)) MagnitudeConstraints(b._1, b._2, saturationMap.get(b._1)) else new MagnitudeConstraints(new Magnitude(b._2.brightness, b._1))
     } yield MagnitudeConstraints(b._1, b._2, saturationMap.get(b._1))).toList
   }
-}
-
-object GemsVoTableCatalog extends GemsVoTableCatalog {
-  override private [gems] val backend = RemoteBackend
 }

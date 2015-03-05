@@ -29,7 +29,7 @@ import Scalaz._
 
 trait GemsStrategy extends AgsStrategy {
   // By default use the remote backend but it can be overriden in tests
-  private [impl] val backend:VoTableBackend
+  private [impl] def backend:VoTableBackend
 
   override def key = GemsKey
 
@@ -177,8 +177,8 @@ trait GemsStrategy extends AgsStrategy {
     // Search options
     val gemsOptions = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog, gemsInstrument, tipTiltMode, posAngles.asJava)
 
-    // Perform the catalog search.
-    val results = GemsVoTableCatalog.search(ctx, ctx.getBaseCoordinates.toNewModel, gemsOptions, nirBand, null)
+    // Perform the catalog search, using GemsStrategy's backend
+    val results = GemsVoTableCatalog(backend).search(ctx, ctx.getBaseCoordinates.toNewModel, gemsOptions, nirBand, null)
 
     // Now check that the results are valid: there must be a valid tip-tilt and flexure star each.
     results.map { r =>

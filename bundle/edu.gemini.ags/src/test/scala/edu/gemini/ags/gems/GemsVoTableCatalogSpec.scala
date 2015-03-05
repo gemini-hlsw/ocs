@@ -25,9 +25,6 @@ import scala.concurrent.Await
 import scala.collection.JavaConverters._
 
 class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
-  object TestGemsVoTableCatalog extends GemsVoTableCatalog {
-    override val backend = TestVoTableBackend("/gemsvotablecatalogquery.xml")
-  }
 
   "GemsVoTableCatalog" should {
     "support executing queries" in {
@@ -49,7 +46,7 @@ class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
       val options = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog,
               instrument, tipTiltMode, posAngles)
 
-      val results = Await.result(TestGemsVoTableCatalog.search(ctx, base, options, scala.None, null), 30.seconds)
+      val results = Await.result(GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml")).search(ctx, base, options, scala.None, null), 30.seconds)
       results should be size 2
 
       results(0).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window tiptilt", MagnitudeConstraints(MagnitudeBand.H, FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))).some, RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), Some(Offset(Angle.fromDegrees(0.0014984027777700248), Angle.fromDegrees(0.0014984027777700248))), scala.None)))
@@ -75,7 +72,7 @@ class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
       val options = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog,
               instrument, tipTiltMode, posAngles)
 
-      val results = GemsVoTableCatalog.getRadiusLimits(instrument, options.searchCriteria(ctx, scala.None).asScala.toList)
+      val results = GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml")).getRadiusLimits(instrument, options.searchCriteria(ctx, scala.None).asScala.toList)
       results should be size 1
       results(0) should beEqualTo(RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01878572819686042)))
     }
@@ -97,7 +94,7 @@ class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
       val options = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog,
               instrument, tipTiltMode, posAngles)
 
-      val results = GemsVoTableCatalog.optimizeMagnitudeLimits(options.searchCriteria(ctx, scala.None).asScala.toList)
+      val results = GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml")).optimizeMagnitudeLimits(options.searchCriteria(ctx, scala.None).asScala.toList)
       results should be size 2
       results(0) should beEqualTo(MagnitudeConstraints(MagnitudeBand.R, FaintnessConstraint(16), Some(SaturationConstraint(8.5))))
       results(1) should beEqualTo(MagnitudeConstraints(MagnitudeBand.H, FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))))

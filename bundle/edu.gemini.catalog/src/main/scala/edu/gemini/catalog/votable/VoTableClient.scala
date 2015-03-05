@@ -80,7 +80,7 @@ trait VoTableClient {
     p.future
   }
 
-  protected def doQuery(query: CatalogQuery, url: String, backend: VoTableBackend = RemoteBackend): Future[QueryResult] = {
+  protected def doQuery(query: CatalogQuery, url: String, backend: VoTableBackend): Future[QueryResult] = {
     backend.doQuery(query, url)
   }
 
@@ -95,7 +95,7 @@ object VoTableClient extends VoTableClient {
   def catalog(query: CatalogQuery, backend: VoTableBackend = RemoteBackend): Future[QueryResult] = {
     val f = for {
       url <- catalogUrls
-    } yield doQuery(query, url)
+    } yield doQuery(query, url, backend)
     selectOne(f).recover {
        case t:UnknownHostException => QueryResult(query, CatalogQueryResult(TargetsTable.Zero, List(GenericError(s"Unreachable host ${t.getMessage}"))))
        case t                      => QueryResult(query, CatalogQueryResult(TargetsTable.Zero, List(GenericError(t.getMessage))))
