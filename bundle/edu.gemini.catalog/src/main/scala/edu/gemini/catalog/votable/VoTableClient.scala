@@ -21,9 +21,7 @@ trait VoTableBackend {
   protected [votable] def doQuery(query: CatalogQuery, url: String): Future[QueryResult]
 }
 
-trait RemoteBackend extends VoTableBackend {
-  val Log = Logger.getLogger(getClass.getName)
-
+trait CachedBackend extends VoTableBackend {
   case class SearchKey(query: CatalogQuery, url: String)
 
   case class CacheEntry[K, V](k: K, v: V)
@@ -113,16 +111,6 @@ trait RemoteBackend extends VoTableBackend {
     QueryCache.buildCache(contains)
   }
 
-  private val timeout = 30 * 1000 // Max time to wait
-
-  private def format(a: Angle)= f"${a.toDegrees}%4.03f"
-
-  def queryParams(qs: CatalogQuery): Array[NameValuePair] = Array(
-    new NameValuePair("CATALOG", qs.catalog.id),
-    new NameValuePair("RA", format(qs.base.ra.toAngle)),
-    new NameValuePair("DEC", f"${qs.base.dec.toDegrees}%4.03f"),
-    new NameValuePair("SR", format(qs.radiusConstraint.maxLimit)))
-
   // First success or last failure
   protected def selectOne[A](fs: List[Future[A]]): Future[A] = {
     val p = Promise[A]()
@@ -138,7 +126,31 @@ trait RemoteBackend extends VoTableBackend {
 
 
   // Cache the query not the future so that failed queries are executed again
-  private val cachedQuery = cache { e: SearchKey =>
+  protected val cachedQuery = cache(query)
+
+  protected def query(e: SearchKey): QueryResult
+
+  protected [votable] def doQuery(query: CatalogQuery, url: String): Future[QueryResult] = future {
+    cachedQuery(SearchKey(query, url))
+  }
+
+}
+
+case object RemoteBackend extends CachedBackend {
+  val Log = Logger.getLogger(getClass.getName)
+
+  private val timeout = 30 * 1000 // Max time to wait
+
+  private def format(a: Angle)= f"${a.toDegrees}%4.03f"
+
+  def queryParams(qs: CatalogQuery): Array[NameValuePair] = Array(
+    new NameValuePair("CATALOG", qs.catalog.id),
+    new NameValuePair("RA", format(qs.base.ra.toAngle)),
+    new NameValuePair("DEC", f"${qs.base.dec.toDegrees}%4.03f"),
+    new NameValuePair("SR", format(qs.radiusConstraint.maxLimit)))
+
+  // Cache the query not the future so that failed queries are executed again
+  override protected def query(e: SearchKey): QueryResult = {
     val method = new GetMethod(s"${e.url}/cgi-bin/conesearch.py")
     val qs = queryParams(e.query)
     method.setQueryString(qs)
@@ -155,13 +167,7 @@ trait RemoteBackend extends VoTableBackend {
     }
   }
 
-  protected [votable] def doQuery(query: CatalogQuery, url: String): Future[QueryResult] = future {
-    cachedQuery(SearchKey(query, url))
-  }
-
 }
-
-case object RemoteBackend extends RemoteBackend
 
 trait VoTableClient {
   // First success or last failure
