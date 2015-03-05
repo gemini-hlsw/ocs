@@ -34,9 +34,9 @@ trait CachedBackend extends VoTableBackend {
   }
 
   /**
-   * Cache for CatalogQueries. Key-based caching doesn't fulfill all the needs as we can reuse queries
-   * done for different queries even if the 'key' doesn't match
-   * Instead we need a function that can traverse the cache finding valud matches
+   * Cache for CatalogQueries. Key-based caching as in Memo doesn't fulfill the needs in this case as we can reuse queries
+   * done for different combinations of targets and radius even if the query 'key' doesn't match
+   * Instead we need a function that can traverse the cache finding matches to reuse the result
    */
   object QueryCache {
 
@@ -87,7 +87,7 @@ trait CachedBackend extends VoTableBackend {
     }
 
     /**
-     * Builds a cache with a contains function
+     * Builds a cache with a contains function to find cache hits
      */
     def buildCache[K, V](contains: FindFunction[K, V], maxSize: Int = 100) = lruCache(Vector.empty, contains, maxSize)
     
@@ -95,7 +95,7 @@ trait CachedBackend extends VoTableBackend {
 
   private val cache:Cache[SearchKey, QueryResult] = {
     // Find if a search is already in the cache
-    // Note that this assumes all catalogues give the same result
+    // Note that this assumes all catalogues give the same result for a given query
     def contains(a: QueryCache.CacheContainer[SearchKey, QueryResult], k: SearchKey):Option[(Int, QueryResult)] = {
       @tailrec
       def go(a: QueryCache.CacheContainer[SearchKey, QueryResult], pos: Int):Option[(Int, QueryResult)] = {
@@ -128,8 +128,10 @@ trait CachedBackend extends VoTableBackend {
   // Cache the query not the future so that failed queries are executed again
   protected val cachedQuery = cache(query)
 
+  // Do a query to the appropratie backend
   protected def query(e: SearchKey): QueryResult
 
+  // Cache the query not the future so that failed queries are executed again
   protected [votable] def doQuery(query: CatalogQuery, url: String): Future[QueryResult] = future {
     cachedQuery(SearchKey(query, url))
   }
@@ -149,7 +151,6 @@ case object RemoteBackend extends CachedBackend {
     new NameValuePair("DEC", f"${qs.base.dec.toDegrees}%4.03f"),
     new NameValuePair("SR", format(qs.radiusConstraint.maxLimit)))
 
-  // Cache the query not the future so that failed queries are executed again
   override protected def query(e: SearchKey): QueryResult = {
     val method = new GetMethod(s"${e.url}/cgi-bin/conesearch.py")
     val qs = queryParams(e.query)
