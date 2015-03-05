@@ -45,7 +45,7 @@ class Activator extends BundleActivator{
         // Register the Vcs client and a secure service factory for making the
         // VcsService implementation.
         List(
-          ctx.registerService(classOf[Vcs], new Vcs(auth, vcsServer), null),
+          ctx.registerService(classOf[Vcs], Vcs(auth, vcsServer), null),
           ctx.registerService(classOf[VcsService].getName, factory, props)
         )
       } { _.foreach(_.unregister()) },

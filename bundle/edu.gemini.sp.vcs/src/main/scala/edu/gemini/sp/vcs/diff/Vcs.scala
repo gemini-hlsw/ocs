@@ -3,6 +3,7 @@ package edu.gemini.sp.vcs.diff
 import edu.gemini.pot.sp.{ISPFactory, ISPProgram}
 import edu.gemini.pot.sp.version._
 import edu.gemini.shared.util.VersionComparison.{Same, Newer}
+import edu.gemini.sp.vcs.diff.MergePlan.Transport
 import edu.gemini.sp.vcs.diff.ProgramLocation.{LocalOnly, Neither, Remote}
 import edu.gemini.sp.vcs.diff.VcsFailure.{NeedsUpdate, VcsException}
 import edu.gemini.sp.vcs.log.VcsEventSet
@@ -10,6 +11,8 @@ import edu.gemini.spModel.core.{Peer, SPProgramID}
 import edu.gemini.util.security.auth.keychain.KeyChain
 
 import java.security.Principal
+
+import edu.gemini.util.trpc.client.TrpcClient
 
 import scala.collection.JavaConverters._
 import scalaz._
@@ -20,10 +23,7 @@ import Vcs._
 import scalaz.concurrent.Task
 
 /** Vcs provides the public API for vcs commands such as push, pull and sync. */
-class Vcs(kc: KeyChain, server: VcsServer) {
-
-  private val user: VcsAction[Set[Principal]] =
-    VcsAction(kc.subject.getPrincipals.asScala.toSet)
+class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => VcsService) {
 
   /** Checks-out the indicated program from the remote peer, copying it into
     * the local database. */
@@ -133,37 +133,29 @@ class Vcs(kc: KeyChain, server: VcsServer) {
     Client(peer).log(id, offset, length)
 
   case class Client(peer: Peer) {
-    import edu.gemini.util.trpc.client.TrpcClient
+    val s = service(peer)
 
-    val trpc = TrpcClient(peer).withKeyChain(kc)
-
-    private def call[A](op: VcsService => TryVcs[A]): VcsAction[A] =
-      trpc { remote => op(remote[VcsService]) }.valueOr(ex => VcsException(ex).left).liftVcs
-
-    def version(id: SPProgramID): VcsAction[VersionMap] =
-      call(_.version(id))
-
-    def add(p: ISPProgram): VcsAction[Unit] =
-      call(_.add(p))
-
-    def checkout(id: SPProgramID): VcsAction[ISPProgram] =
-      call(_.checkout(id))
-
-    def diffState(id: SPProgramID): VcsAction[DiffState] =
-      call(_.diffState(id))
+    def version(id: SPProgramID): VcsAction[VersionMap]  = s.version(id).liftVcs
+    def add(p: ISPProgram): VcsAction[Unit]              = s.add(p).liftVcs
+    def checkout(id: SPProgramID): VcsAction[ISPProgram] = s.checkout(id).liftVcs
+    def diffState(id: SPProgramID): VcsAction[DiffState] = s.diffState(id).liftVcs
 
     def fetchDiffs(id: SPProgramID, vs: DiffState): VcsAction[MergePlan] =
-      call(_.fetchDiffs(id, vs)).map(_.decode)
+      s.fetchDiffs(id, vs).map(_.decode).liftVcs
 
     def storeDiffs(id: SPProgramID, mp: MergePlan): VcsAction[Boolean] =
-      call(_.storeDiffs(id, mp.encode))
+      s.storeDiffs(id, mp.encode).liftVcs
 
     def log(id: SPProgramID, offset: Int, length: Int): VcsAction[(List[VcsEventSet], Boolean)] =
-      call(_.log(id, offset, length))
+      s.log(id, offset, length).liftVcs
   }
 }
 
 object Vcs {
+
+  def apply(kc: KeyChain, server: VcsServer): Vcs = {
+    new Vcs(VcsAction(kc.subject.getPrincipals.asScala.toSet), server, VcsService.client(_, kc))
+  }
 
   /** Evaluation of the merge state, which includes whether local and/or remote
     * updates are needed.  We can skip merging locally or remotely if nothing
