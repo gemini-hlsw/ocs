@@ -141,8 +141,20 @@ object ImplicitPolicy {
     private var previousEvent: Option[AWTEvent] = None
     private val cache: collection.mutable.Map[Permission, Boolean] = collection.mutable.Map()
 
+    // EventQueue.getCurrentEvent sometimes throws a NPE, at least in headless
+    // mode, so we'll wrap it here.
+    //
+    // Could also be
+    //    \/.fromTryCatch(Option(EventQueue.getCurrentEvent)).toOption.flatten
+    private def currentEvent: Option[AWTEvent] =
+      try {
+        Option(EventQueue.getCurrentEvent)
+      } catch {
+        case _: Throwable => None
+      }
+
     def check(p: Permission)(a: => Boolean): Boolean =
-      Option(EventQueue.getCurrentEvent) match {
+      currentEvent match {
         case None => a
         case o =>
           if (o != previousEvent) {
@@ -162,11 +174,6 @@ object ImplicitPolicy {
       case Some((peer, key)) => hasPermission(db, Set[Principal](key.get._1), p).liftIO[Action]
       case None =>              hasPermission(db, Set[Principal](),           p).liftIO[Action]
     }
-
-  /** A hasPermission check performed outside of the AWT event loop. Skips the
-    * EventCache check. */
-  def headlessHasPermission(db: IDBDatabaseService, ps: Set[Principal], p: Permission): IO[Boolean] =
-    IO(new ImplicitPolicy(db, ps).implies(p))
 
   val forJava = ImplicitPolicyForJava
 
