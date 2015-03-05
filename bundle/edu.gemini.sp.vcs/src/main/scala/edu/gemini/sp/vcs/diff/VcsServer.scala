@@ -147,7 +147,7 @@ class VcsServer(odb: IDBDatabaseService, vcsLog: VcsLog) { vs =>
     }
 
   private def accessControlled[A](id: SPProgramID, user: Set[Principal])(body: => VcsAction[A]): VcsAction[A] =
-    VcsAction(ImplicitPolicy.hasPermission(odb, user, new ProgramPermission.Read(id)).unsafePerformIO()) >>= {
+    VcsAction(ImplicitPolicy.headlessHasPermission(odb, user, new ProgramPermission.Read(id)).unsafePerformIO()) >>= {
       hasPermission =>
         if (hasPermission) body
         else VcsAction.fail(Forbidden(s"You don't have permission to access program '$id'"))

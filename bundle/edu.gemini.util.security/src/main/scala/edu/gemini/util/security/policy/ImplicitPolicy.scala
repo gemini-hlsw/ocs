@@ -133,7 +133,7 @@ object ImplicitPolicy {
 
   // This is a hack that says "don't check the policy more than once for a given permission during
   // processing of the same AWT event" ... this is not entirely ethical since you might try again
-  // with another set of principles, or the db might have changed. However it is a critical 
+  // with another set of principles, or the db might have changed. However it is a critical
   // optimization in the OT; everything drags if we don't do this.
   // TODO: sort this out
   private object EventCache {
@@ -153,7 +153,7 @@ object ImplicitPolicy {
       }
 
   }
-  
+
   def hasPermission(db: IDBDatabaseService, ps: Set[Principal], p: Permission): IO[Boolean] =
     IO(EventCache.check(p)(new ImplicitPolicy(db, ps).implies(p)))
 
@@ -162,6 +162,11 @@ object ImplicitPolicy {
       case Some((peer, key)) => hasPermission(db, Set[Principal](key.get._1), p).liftIO[Action]
       case None =>              hasPermission(db, Set[Principal](),           p).liftIO[Action]
     }
+
+  /** A hasPermission check performed outside of the AWT event loop. Skips the
+    * EventCache check. */
+  def headlessHasPermission(db: IDBDatabaseService, ps: Set[Principal], p: Permission): IO[Boolean] =
+    IO(new ImplicitPolicy(db, ps).implies(p))
 
   val forJava = ImplicitPolicyForJava
 
@@ -196,7 +201,7 @@ object ImplicitPolicyForJava {
     if (hasPermission(db, kc, p)) () else fail(p)
 
   private def fail(p: Permission): Nothing =
-    throw new AccessControlException("permission denied: " + p, p)  
+    throw new AccessControlException("permission denied: " + p, p)
 
 }
 
