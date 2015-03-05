@@ -1,7 +1,7 @@
 package edu.gemini.ags.gems
 
 import edu.gemini.catalog.api._
-import edu.gemini.catalog.votable.{CatalogException, VoTableClient}
+import edu.gemini.catalog.votable.{RemoteBackend, VoTableBackend, CatalogException, VoTableClient}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core.{Magnitude, MagnitudeBand, Coordinates}
 import edu.gemini.spModel.gemini.gems.GemsInstrument
@@ -22,7 +22,7 @@ import jsky.util.gui.StatusLogger
  * The catalog search will provide the inputs to the analysis phase, which actually assigns guide stars to guiders.
  * See OT-26
  */
-object GemsVoTableCatalog {
+case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend) {
   private val DefaultSaturationMagnitude = 0.0
 
   /**
@@ -73,7 +73,7 @@ object GemsVoTableCatalog {
     } yield (q, c)
 
     val qm = queryArgs.toMap
-    VoTableClient.catalog(queryArgs.map(_._1)).map(l => l.map(k => GemsCatalogSearchResults(qm.get(k.query).get, k.result.targets.rows)))
+    VoTableClient.catalogs(queryArgs.map(_._1), backend).map(l => l.map(k => GemsCatalogSearchResults(qm.get(k.query).get, k.result.targets.rows)))
   }
 
   /**
@@ -97,7 +97,7 @@ object GemsVoTableCatalog {
       queryArgs = CatalogQuery.catalogQuery(basePosition, radiusLimits, magLimits.some)
     } yield queryArgs
 
-    VoTableClient.catalog(queries).flatMap {
+    VoTableClient.catalogs(queries, backend).flatMap {
       case l if l.filter(_.result.containsError).nonEmpty =>
         Future.failed(CatalogException(l.map(_.result.problems).suml))
       case l =>

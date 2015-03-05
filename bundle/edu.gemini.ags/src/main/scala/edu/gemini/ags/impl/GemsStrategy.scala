@@ -5,7 +5,7 @@ import edu.gemini.ags.api.AgsStrategy.{Assignment, Estimate, Selection}
 import edu.gemini.ags.gems._
 import edu.gemini.ags.gems.mascot.{Strehl, MascotProgress}
 import edu.gemini.catalog.api._
-import edu.gemini.catalog.votable.{CatalogException, CatalogQueryResult, VoTableClient}
+import edu.gemini.catalog.votable._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.core.Target.SiderealTarget
 
@@ -27,7 +27,10 @@ import edu.gemini.spModel.core.{Angle, MagnitudeBand}
 import scalaz._
 import Scalaz._
 
-object GemsStrategy extends AgsStrategy {
+trait GemsStrategy extends AgsStrategy {
+  // By default use the remote backend but it can be overriden in tests
+  private [impl] def backend:VoTableBackend
+
   override def key = GemsKey
 
   // Since the constraints are run in parallel, we need a way to identify them after
@@ -62,7 +65,7 @@ object GemsStrategy extends AgsStrategy {
       constraint.withMagnitudeConstraints(adjustedMagConstraints)
     }
 
-    VoTableClient.catalog(adjustedConstraints).flatMap {
+    VoTableClient.catalogs(adjustedConstraints, backend).flatMap {
       case result if result.exists(_.result.containsError) => Future.failed(CatalogException(result.map(_.result.problems).flatten))
       case result                                          => Future.successful {
         result.map { r =>
@@ -174,8 +177,8 @@ object GemsStrategy extends AgsStrategy {
     // Search options
     val gemsOptions = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog, gemsInstrument, tipTiltMode, posAngles.asJava)
 
-    // Perform the catalog search.
-    val results = GemsVoTableCatalog.search(ctx, ctx.getBaseCoordinates.toNewModel, gemsOptions, nirBand, null)
+    // Perform the catalog search, using GemsStrategy's backend
+    val results = GemsVoTableCatalog(backend).search(ctx, ctx.getBaseCoordinates.toNewModel, gemsOptions, nirBand, null)
 
     // Now check that the results are valid: there must be a valid tip-tilt and flexure star each.
     results.map { r =>
@@ -232,4 +235,8 @@ object GemsStrategy extends AgsStrategy {
 
   override val guideProbes: List[GuideProbe] =
     Flamingos2OiwfsGuideProbe.instance :: (GsaoiOdgw.values() ++ Canopus.Wfs.values()).toList
+}
+
+object GemsStrategy extends GemsStrategy {
+  override private [impl] val backend = RemoteBackend
 }

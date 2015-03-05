@@ -1,6 +1,7 @@
 package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.{AgsRegistrar, AgsStrategy}
+import edu.gemini.catalog.votable.RemoteBackend
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.ags.AgsStrategyKey._
@@ -17,6 +18,9 @@ import scala.Function.const
 // Used to implement AgsRegistrar
 object Strategy {
   import SingleProbeStrategyParams._
+
+  // Backend for searching on catalogs
+  val backend = RemoteBackend
 
   val AltairAowfs     = SingleProbeStrategy(AltairAowfsKey,     AltairAowfsParams)
   val Flamingos2Oiwfs = SingleProbeStrategy(Flamingos2OiwfsKey, Flamingos2OiwfsParams)
@@ -96,10 +100,10 @@ object Strategy {
 
   private def guidersAvailable(ctx: ObsContext)(s: AgsStrategy): Boolean = {
     s match {
-      case SingleProbeStrategy(_, params) => ctx.getTargets.isActive(params.guideProbe)
-      case ScienceTargetStrategy(_, gp)   => ctx.getTargets.isActive(gp)
-      case GemsStrategy => ctx.getTargets.isActive(Canopus.Wfs.cwfs3) // any canopus would serve
-      case _ => false
+      case SingleProbeStrategy(_, params, _) => ctx.getTargets.isActive(params.guideProbe)
+      case ScienceTargetStrategy(_, gp)      => ctx.getTargets.isActive(gp)
+      case GemsStrategy                      => ctx.getTargets.isActive(Canopus.Wfs.cwfs3) // any canopus would serve
+      case _                                 => false
     }
   }
 
