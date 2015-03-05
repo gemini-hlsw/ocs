@@ -1,7 +1,7 @@
 package edu.gemini.ags.gems
 
 import edu.gemini.catalog.api._
-import edu.gemini.catalog.votable.{VoTableBackend, CatalogException, VoTableClient}
+import edu.gemini.catalog.votable.{RemoteBackend, VoTableBackend, CatalogException, VoTableClient}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core.{Magnitude, MagnitudeBand, Coordinates}
 import edu.gemini.spModel.gemini.gems.GemsInstrument
@@ -22,7 +22,8 @@ import jsky.util.gui.StatusLogger
  * The catalog search will provide the inputs to the analysis phase, which actually assigns guide stars to guiders.
  * See OT-26
  */
-object GemsVoTableCatalog {
+trait GemsVoTableCatalog {
+  private [gems] val backend: VoTableBackend
   private val DefaultSaturationMagnitude = 0.0
 
   /**
@@ -50,7 +51,7 @@ object GemsVoTableCatalog {
    * @param nirBand      optional NIR magnitude band (default is H)
    * @return  Future with a list of search results
    */
-  def search(obsContext: ObsContext, basePosition: Coordinates, options: GemsGuideStarSearchOptions, nirBand: Option[MagnitudeBand], statusLogger: StatusLogger)(implicit backend: VoTableBackend): Future[List[GemsCatalogSearchResults]] = {
+  def search(obsContext: ObsContext, basePosition: Coordinates, options: GemsGuideStarSearchOptions, nirBand: Option[MagnitudeBand], statusLogger: StatusLogger): Future[List[GemsCatalogSearchResults]] = {
     val criterions = options.searchCriteria(obsContext, nirBand).asScala.toList
     val inst = options.getInstrument
 
@@ -66,14 +67,14 @@ object GemsVoTableCatalog {
     }))
   }
 
-  private def searchCatalog(basePosition: Coordinates, criterions: List[GemsCatalogSearchCriterion], statusLogger: StatusLogger)(implicit backend: VoTableBackend): Future[List[GemsCatalogSearchResults]] = {
+  private def searchCatalog(basePosition: Coordinates, criterions: List[GemsCatalogSearchCriterion], statusLogger: StatusLogger): Future[List[GemsCatalogSearchResults]] = {
     val queryArgs = for {
       c <- criterions
       q = CatalogQuery.catalogQuery(basePosition, c.criterion.radiusLimits, c.criterion.magConstraints)
     } yield (q, c)
 
     val qm = queryArgs.toMap
-    VoTableClient.catalog(queryArgs.map(_._1)).map(l => l.map(k => GemsCatalogSearchResults(qm.get(k.query).get, k.result.targets.rows)))
+    VoTableClient.catalogs(queryArgs.map(_._1), backend).map(l => l.map(k => GemsCatalogSearchResults(qm.get(k.query).get, k.result.targets.rows)))
   }
 
   /**
@@ -87,7 +88,7 @@ object GemsVoTableCatalog {
    * @param inst the instrument option for the search
    * @return a list of threads used for background catalog searches
    */
-  private def searchOptimized(basePosition: Coordinates, criterions: List[GemsCatalogSearchCriterion], inst: GemsInstrument, statusLogger: StatusLogger)(implicit backend: VoTableBackend): Future[List[GemsCatalogSearchResults]] = {
+  private def searchOptimized(basePosition: Coordinates, criterions: List[GemsCatalogSearchCriterion], inst: GemsInstrument, statusLogger: StatusLogger): Future[List[GemsCatalogSearchResults]] = {
     val radiusLimitsList = getRadiusLimits(inst, criterions)
     val magLimitsList = optimizeMagnitudeLimits(criterions)
 
@@ -97,7 +98,7 @@ object GemsVoTableCatalog {
       queryArgs = CatalogQuery.catalogQuery(basePosition, radiusLimits, magLimits.some)
     } yield queryArgs
 
-    VoTableClient.catalog(queries).flatMap {
+    VoTableClient.catalogs(queries, backend).flatMap {
       case l if l.filter(_.result.containsError).nonEmpty =>
         Future.failed(CatalogException(l.map(_.result.problems).suml))
       case l =>
@@ -164,4 +165,8 @@ object GemsVoTableCatalog {
       mc = if (saturationMap.contains(b._1)) MagnitudeConstraints(b._1, b._2, saturationMap.get(b._1)) else new MagnitudeConstraints(new Magnitude(b._2.brightness, b._1))
     } yield MagnitudeConstraints(b._1, b._2, saturationMap.get(b._1))).toList
   }
+}
+
+object GemsVoTableCatalog extends GemsVoTableCatalog {
+  override private [gems] val backend = RemoteBackend
 }

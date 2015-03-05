@@ -32,7 +32,7 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
     }
     "make a query" in {
       // This test loads a file. There is not much to test but it exercises the query backend chain
-      Await.result(VoTableClient.catalog(query)(TestVoTableBackend("/votable.xml")), 5.seconds).result.containsError should beFalse
+      Await.result(VoTableClient.catalog(query, TestVoTableBackend("/votable.xml")), 5.seconds).result.containsError should beFalse
     }
 
   }

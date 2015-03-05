@@ -65,7 +65,7 @@ trait GemsStrategy extends AgsStrategy {
       constraint.withMagnitudeConstraints(adjustedMagConstraints)
     }
 
-    VoTableClient.catalog(adjustedConstraints)(backend).flatMap {
+    VoTableClient.catalogs(adjustedConstraints, backend).flatMap {
       case result if result.exists(_.result.containsError) => Future.failed(CatalogException(result.map(_.result.problems).flatten))
       case result                                          => Future.successful {
         result.map { r =>
@@ -178,7 +178,7 @@ trait GemsStrategy extends AgsStrategy {
     val gemsOptions = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog, gemsInstrument, tipTiltMode, posAngles.asJava)
 
     // Perform the catalog search.
-    val results = GemsVoTableCatalog.search(ctx, ctx.getBaseCoordinates.toNewModel, gemsOptions, nirBand, null)(backend)
+    val results = GemsVoTableCatalog.search(ctx, ctx.getBaseCoordinates.toNewModel, gemsOptions, nirBand, null)
 
     // Now check that the results are valid: there must be a valid tip-tilt and flexure star each.
     results.map { r =>

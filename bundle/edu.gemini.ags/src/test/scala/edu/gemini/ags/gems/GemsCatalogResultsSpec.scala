@@ -29,13 +29,16 @@ import scala.concurrent.duration._
 
 import edu.gemini.ags.impl._
 import org.specs2.mutable.Specification
-import scala.collection.JavaConverters._
 import scala.concurrent.Await
 
 /**
  * See OT-27
  */
 class GemsCatalogResultsSpec extends MascotProgress with Specification with NoTimeConversions {
+  object TestGemsVoTableCatalog extends GemsVoTableCatalog {
+    override val backend = TestVoTableBackend("/gemscatalogresultsquery.xml")
+  }
+
   "GemsCatalogResultsSpec" should {
     "support Gsaoi Search" in {
       val base = new WorldCoords("17:25:17.633", "-48:28:01.47")
@@ -99,7 +102,7 @@ class GemsCatalogResultsSpec extends MascotProgress with Specification with NoTi
     posAngles.add(Angle.zero)
 
     val options = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog, instrument, tipTiltMode, posAngles)
-    val results = Await.result(GemsVoTableCatalog.search(obsContext, base.toNewModel, options, scala.None, null)(TestVoTableBackend("/gemscatalogresultsquery.xml")), 5.seconds)
+    val results = Await.result(TestGemsVoTableCatalog.search(obsContext, base.toNewModel, options, scala.None, null), 5.seconds)
 
     if (options.getTipTiltMode eq GemsTipTiltMode.both) {
       results should have size 4

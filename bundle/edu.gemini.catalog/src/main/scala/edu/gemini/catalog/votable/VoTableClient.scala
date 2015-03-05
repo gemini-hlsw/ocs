@@ -20,11 +20,6 @@ trait VoTableBackend {
   protected [votable] def doQuery(query: CatalogQuery, url: String): Future[QueryResult]
 }
 
-object VoTableBackend {
-  // By default use the remote backend
-  implicit val backend = RemoteBackend
-}
-
 trait RemoteBackend extends VoTableBackend {
   val Log = Logger.getLogger(getClass.getName)
   private val timeout = 30 * 1000 // Max time to wait
@@ -62,8 +57,7 @@ trait RemoteBackend extends VoTableBackend {
     try {
       client.executeMethod(method)
       VoTableParser.parse(url, method.getResponseBodyAsStream).fold(p => QueryResult(query, CatalogQueryResult(TargetsTable.Zero, List(p))), y => QueryResult(query, CatalogQueryResult(y).filter(query)))
-    }
-    finally {
+    } finally {
       method.releaseConnection()
     }
   }
@@ -86,7 +80,7 @@ trait VoTableClient {
     p.future
   }
 
-  protected def doQuery(query: CatalogQuery, url: String)(implicit backend: VoTableBackend): Future[QueryResult] = {
+  protected def doQuery(query: CatalogQuery, url: String, backend: VoTableBackend = RemoteBackend): Future[QueryResult] = {
     backend.doQuery(query, url)
   }
 
@@ -98,7 +92,7 @@ object VoTableClient extends VoTableClient {
   /**
    * Do a query for targets, it returns a list of targets and possible problems found
    */
-  def catalog(query: CatalogQuery)(implicit backend: VoTableBackend): Future[QueryResult] = {
+  def catalog(query: CatalogQuery, backend: VoTableBackend = RemoteBackend): Future[QueryResult] = {
     val f = for {
       url <- catalogUrls
     } yield doQuery(query, url)
@@ -111,8 +105,8 @@ object VoTableClient extends VoTableClient {
   /**
    * Do multiple parallel queries, it returns a consolidated list of targets and possible problems found
    */
-  def catalog(queries: List[CatalogQuery])(implicit backend: VoTableBackend): Future[List[QueryResult]] = {
-    val r = queries.map(catalog)
+  def catalogs(queries: List[CatalogQuery], backend: VoTableBackend = RemoteBackend): Future[List[QueryResult]] = {
+    val r = queries.strengthR(backend).map(Function.tupled(catalog))
     Future.sequence(r)
   }
 

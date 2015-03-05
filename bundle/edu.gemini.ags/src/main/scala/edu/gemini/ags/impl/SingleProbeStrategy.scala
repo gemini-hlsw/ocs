@@ -3,7 +3,7 @@ package edu.gemini.ags.impl
 import edu.gemini.ags.api._
 import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.catalog.api.CatalogQuery
-import edu.gemini.catalog.votable.{CatalogException, VoTableClient}
+import edu.gemini.catalog.votable.{RemoteBackend, VoTableBackend, CatalogException, VoTableClient}
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.core.{Coordinates, Angle}
 import edu.gemini.spModel.core.Target.SiderealTarget
@@ -25,7 +25,7 @@ import Scalaz._
  * The same logic is applied to various single-star guiding scenarios (i.e.,
  * everything except for GeMS).
  */
-case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyParams) extends AgsStrategy {
+case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyParams, backend: VoTableBackend = RemoteBackend) extends AgsStrategy {
 
   override def magnitudes(ctx: ObsContext, mt: MagnitudeTable): List[(GuideProbe, AgsMagnitude.MagnitudeCalc)] =
     params.magnitudeCalc(ctx, mt).toList.map(params.guideProbe -> _)
@@ -38,7 +38,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
 
   override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]] = {
     val empty = Future.successful(List((params.guideProbe: GuideProbe, List.empty[SiderealTarget])))
-    catalogQueries(ctx, mt).map(VoTableClient.catalog).map(_.flatMap {
+    catalogQueries(ctx, mt).strengthR(backend).map(Function.tupled(VoTableClient.catalog)).map(_.flatMap {
         case r if r.result.containsError => Future.failed(CatalogException(r.result.problems))
         case r                           => Future.successful(List((params.guideProbe, r.result.targets.rows)))
     }).getOrElse(empty)
