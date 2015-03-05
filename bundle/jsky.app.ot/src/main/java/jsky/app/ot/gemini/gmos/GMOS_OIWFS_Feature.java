@@ -124,7 +124,8 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
             adj.foreach(new ApplyOp<ArmAdjustment>() {
                 @Override
                 public void apply(final ArmAdjustment armAdj) {
-                    final edu.gemini.spModel.core.Angle armAngle = armAdj.angle();
+                    //final edu.gemini.spModel.core.Angle armAngle = armAdj.angle();
+                    final double armAngle                        = armAdj.angle();
                     final Point2D guideStar                      = armAdj.guideStarCoords();
                     final ImList<Shape> shapes                   = GmosOiwfsProbeArm.geometryAsJava();
                     shapes.foreach(new ApplyOp<Shape>() {

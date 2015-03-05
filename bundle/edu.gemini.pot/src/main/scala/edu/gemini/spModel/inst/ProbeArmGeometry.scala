@@ -107,4 +107,4 @@ object ProbeArmGeometry {
  * @param angle           the angle which will be used by the probe arm
  * @param guideStarCoords the coordinates (in arcsec) where the probe arm will be placed
  */
-case class ArmAdjustment(angle: Angle, guideStarCoords: Point2D)
+case class ArmAdjustment(angle: Double, guideStarCoords: Point2D)

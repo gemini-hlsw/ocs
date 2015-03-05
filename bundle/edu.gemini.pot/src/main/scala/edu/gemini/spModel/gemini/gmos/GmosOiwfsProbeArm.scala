@@ -69,7 +69,7 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
         new Point2D.Double(-x, -y * flip).toCanonicalArcsec
       }
 
-      val angle = armAngle(wfsOffset, posAngle, guideStarPt, offsetPt, flip)
+      val angle = armAngle(wfsOffset, posAngle, guideStarPt, offsetPt)
       ArmAdjustment(angle, guideStarPt)
     }
   }
@@ -85,8 +85,7 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
   private def armAngle(wfsOffset: Double,
                        posAngle:  Double,
                        guideStar: Point2D,
-                       offset:    Point2D,
-                       flip:      Double): Angle = {
+                       offset:    Point2D): Double = {
     import ProbeArmGeometry._
 
     val posAngleRot = AffineTransform.getRotateInstance(posAngle)
@@ -108,7 +107,7 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
     val r2 = r*r
 
     // Here we may need to flip y based on ISSPort?
-    val alpha = math.atan2(p.getX, p.getY * flip)
+    val alpha = math.atan2(p.getX, p.getY)
     println(s"x=${p.getX}, y=${p.getY}, r=$r")
     val phi = {
       val acosArg    = (r2 - (BX2 + MX2)) / (2 * BX * MX)
@@ -120,7 +119,7 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
       if (MX2 > (r2 + BX2)) math.Pi - thetaP else thetaP
     }
     println(s"phi=$phi theta=$theta alpha=$alpha angle=${phi - theta - alpha - math.Pi/2.0}")
-    Angle.fromArcsecs(phi - theta - alpha - math.Pi / 2.0)
+    phi - theta - alpha - math.Pi / 2.0
   }
 
   // Various measurements in arcsec.

@@ -87,11 +87,11 @@ object FeatureGeometry {
    * @param guideStar the position of the guide star in arcseconds
    * @return          the transformed shapes
    */
-  def transformProbeArmForContext(shapes: List[Shape], armAngle: Angle, guideStar: Point2D): List[Shape] = {
+  def transformProbeArmForContext(shapes: List[Shape], armAngle: Double, guideStar: Point2D): List[Shape] = {
     import ProbeArmGeometry._
 
     // For the guide star, we want to use the point closest to zero in terms of arcsec as a normalization.
-    val armTrans = AffineTransform.getRotateInstance(armAngle.toArcsecs.toCanonicalArcsec, guideStar.getX, guideStar.getY)
+    val armTrans = AffineTransform.getRotateInstance(armAngle, guideStar.getX, guideStar.getY)
     armTrans.concatenate(AffineTransform.getTranslateInstance(guideStar.getX, guideStar.getY))
     shapes.map { armTrans.createTransformedShape }
   }
@@ -104,7 +104,7 @@ object FeatureGeometry {
    * @param guideStar the position of the guide star in arcsec
    * @return          the transformed shapes
    */
-  def transformProbeArmForContext(shape: Shape, armAngle: Angle, guideStar: Point2D): Shape =
+  def transformProbeArmForContext(shape: Shape, armAngle: Double, guideStar: Point2D): Shape =
     transformProbeArmForContext(List(shape), armAngle, guideStar).head
 
   /**
