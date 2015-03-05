@@ -102,9 +102,9 @@ trait RemoteBackend extends VoTableBackend {
       @tailrec
       def go(a: QueryCache.CacheContainer[SearchKey, QueryResult], pos: Int):Option[(Int, QueryResult)] = {
         a match {
-          case x if x.isEmpty                            => None
-          case x +: _ if x.k.query.isSuperSetOf(k.query) => Some((pos, x.v))
-          case x +: xs                                   => go(a.tail, pos + 1)
+          case x if x.isEmpty                                                    => None
+          case x +: _ if x.k.query == k.query || x.k.query.isSuperSetOf(k.query) => Some((pos, x.v))
+          case x +: xs                                                           => go(a.tail, pos + 1)
         }
       }
       go(a, 0)
