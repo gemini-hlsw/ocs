@@ -13,7 +13,7 @@ import edu.gemini.spModel.target.env.GuideProbeTargets
 
 import edu.gemini.skycalc
 import edu.gemini.shared.skyobject
-import edu.gemini.spModel.target.system.NonSiderealTarget
+import edu.gemini.spModel.target.system.{HmsDegTarget, NonSiderealTarget}
 
 import scalaz._
 import Scalaz._
@@ -107,7 +107,9 @@ package object impl {
     def toOldModel: skyobject.SkyObject = {
       val ra          = skycalc.Angle.degrees(st.coordinates.ra.toAngle.toDegrees)
       val dec         = skycalc.Angle.degrees(st.coordinates.dec.toAngle.toDegrees)
-      val coordinates = new skyobject.coords.HmsDegCoordinates.Builder(ra, dec).build()
+      val coordinates = st.properMotion.map { pm =>
+            new skyobject.coords.HmsDegCoordinates.Builder(ra, dec).pmRa(skycalc.Angle.arcsecs(pm.deltaRA.toArcsecs)).pmDec(skycalc.Angle.arcsecs(pm.deltaDec.toArcsecs)).build()
+        } |  new skyobject.coords.HmsDegCoordinates.Builder(ra, dec).build()
       val mags        = st.magnitudes.map(_.toOldModel)
       new skyobject.SkyObject.Builder(st.name, coordinates).magnitudes(mags: _*).build()
     }
@@ -121,7 +123,8 @@ package object impl {
       val dec         = Angle.fromDegrees(so.getHmsDegCoordinates.getDec.toDegrees.getMagnitude)
       val coordinates = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
       val mags        = so.getMagnitudes.asScala.map(_.toNewModel)
-      SiderealTarget(so.getName, coordinates, None, mags.toList, None)
+      val pm          = ProperMotion(Angle.fromDegrees(so.getHmsDegCoordinates.getPmRa.getMagnitude), Angle.fromDegrees(so.getHmsDegCoordinates.getPmDec .getMagnitude))
+      SiderealTarget(so.getName, coordinates, Some(pm), mags.toList, None)
     }
   }
 
@@ -133,7 +136,13 @@ package object impl {
       val ra          = Angle.fromDegrees(coords.getRaDeg)
       val dec         = Angle.fromDegrees(coords.getDecDeg)
       val coordinates = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
-      SiderealTarget(name, coordinates, None, mags, None)
+
+      // Only HmsDegTargets have a proper motion and the values are in milli arcsecs/year
+      val pm          = sp.getTarget match {
+        case t:HmsDegTarget => Some(ProperMotion(Angle.fromArcsecs(1000 * t.getPropMotionRA), Angle.fromArcsecs(1000 * t.getPropMotionDec)))
+        case _              => None
+      }
+      SiderealTarget(name, coordinates, pm, mags, None)
     }
   }
 
