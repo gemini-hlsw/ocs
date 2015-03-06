@@ -20,16 +20,6 @@ import scalaz._
 import Scalaz._
 
 case class TestPeer(odb: IDBDatabaseService, server: VcsServer, service: Principal => VcsService) {
-  {
-    // Initialize the database with a test program
-    import TestEnv._
-    val p = odb.getFactory.createProgram(Key, Q1)
-    p.setDataObject {
-      p.getDataObject.asInstanceOf[SPProgram] <| (_.setTitle(Title)) <| (_.setPIInfo(PiInfo))
-    }
-    odb.put(p)
-  }
-
   def vcs(p: Principal): Vcs =
     new Vcs(VcsAction(Set(p)), server, _ => service(p))
 
@@ -42,6 +32,9 @@ case class TestPeer(odb: IDBDatabaseService, server: VcsServer, service: Princip
 
   // Get the current title of the test program
   def progTitle: String = prog.getDataObject.getTitle
+
+  def progTitle_=(t: String): Unit =
+    prog.getDataObject <| (_.setTitle(t)) |> prog.setDataObject
 
   // Create a new program but don't add it to the database
   def newProgram(id: SPProgramID): ISPProgram = {
@@ -96,6 +89,18 @@ trait VcsSpecification extends Specification {
   private def newTestEnv: TestEnv = {
     val localOdb  = DBLocalDatabase.createTransient()
     val remoteOdb = DBLocalDatabase.createTransient()
+
+    // Initialize the remote database with a test program
+    import TestEnv._
+    val rp = remoteOdb.getFactory.createProgram(Key, Q1)
+    rp.setDataObject {
+      rp.getDataObject.asInstanceOf[SPProgram] <| (_.setTitle(Title)) <| (_.setPIInfo(PiInfo))
+    }
+    remoteOdb.put(rp)
+
+    // Copy the test program into the local database
+    val lp = localOdb.getFactory.copyWithSameKeys(rp)
+    localOdb.put(lp)
 
     val localServer  = new VcsServer(localOdb,  MockVcsLog)
     val remoteServer = new VcsServer(remoteOdb, MockVcsLog)
