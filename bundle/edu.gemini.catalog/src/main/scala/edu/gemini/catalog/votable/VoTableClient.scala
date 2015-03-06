@@ -98,14 +98,13 @@ trait CachedBackend extends VoTableBackend {
     // Note that this assumes all catalogues give the same result for a given query
     def contains(a: QueryCache.CacheContainer[SearchKey, QueryResult], k: SearchKey):Option[(Int, QueryResult)] = {
       @tailrec
-      def go(a: QueryCache.CacheContainer[SearchKey, QueryResult], pos: Int):Option[(Int, QueryResult)] = {
-        a match {
-          case x if x.isEmpty                                                    => None
-          case x +: _ if x.k.query == k.query || x.k.query.isSuperSetOf(k.query) => Some((pos, x.v))
-          case x +: xs                                                           => go(a.tail, pos + 1)
+      def go(pos: Int):Option[(Int, QueryResult)] =
+        a.lift(pos) match {
+          case None                                                               => None
+          case Some(x) if x.k.query == k.query || x.k.query.isSuperSetOf(k.query) => Some((pos, x.v))
+          case _                                                                  => go(pos + 1)
         }
-      }
-      go(a, 0)
+      go(0)
     }
 
     QueryCache.buildCache(contains)
