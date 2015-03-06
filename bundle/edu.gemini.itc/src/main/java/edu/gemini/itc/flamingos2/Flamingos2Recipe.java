@@ -279,11 +279,7 @@ public final class Flamingos2Recipe extends RecipeBase {
         im_qual = IQcalc.getImageQuality();
 
         // Calculate Source fraction
-        SourceFractionCalculatable SFcalc =
-                SourceFractionCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
-
-        SFcalc.setImageQuality(im_qual);
-        SFcalc.calculate();
+        final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
         _print(SFcalc.getTextResult(device));
         _println(IQcalc.getTextResult(device));
 

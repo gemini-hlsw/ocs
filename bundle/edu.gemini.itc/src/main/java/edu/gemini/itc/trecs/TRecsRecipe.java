@@ -336,10 +336,7 @@ public final class TRecsRecipe extends RecipeBase {
         final double exp_time = _obsDetailParameters.getExposureTime();
 
         // Calculate the Fraction of source in the aperture
-        SourceFractionCalculatable SFcalc =
-                SourceFractionCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
-        SFcalc.setImageQuality(im_qual);
-        SFcalc.calculate();
+        final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
         if (_obsDetailParameters.getMethod().isImaging()) {
             _print(SFcalc.getTextResult(device));
             _println(IQcalc.getTextResult(device));

@@ -377,8 +377,7 @@ public final class GnirsRecipe extends RecipeBase {
 //        }
 
         // Calculate the Fraction of source in the aperture
-        SourceFractionCalculatable SFcalc =
-                SourceFractionCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
+        final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
 
         // REL-472: Commenting out Altair option for now
 //        // if altair is used we need to calculate both a core and halo
@@ -402,8 +401,6 @@ public final class GnirsRecipe extends RecipeBase {
 //        }
 
         // this will be the core for an altair source; unchanged for non altair.
-        SFcalc.setImageQuality(im_qual);
-        SFcalc.calculate();
         source_fraction = SFcalc.getSourceFraction();
         Npix = SFcalc.getNPix();
         if (_obsDetailParameters.getMethod().isImaging()) {

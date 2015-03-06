@@ -302,11 +302,11 @@ public final class GmosRecipe extends RecipeBase {
 
     }
     private final class GmosImagingResult {
-        public final SourceFractionCalculatable SFcalc;
+        public final SourceFraction SFcalc;
         public final double peak_pixel_count;
         public final ImagingS2NCalculatable IS2Ncalc;
         public final ImageQualityCalculatable IQcalc;
-        public GmosImagingResult(final ImageQualityCalculatable IQcalc, final SourceFractionCalculatable SFcalc, final double peak_pixel_count, final ImagingS2NCalculatable IS2Ncalc) {
+        public GmosImagingResult(final ImageQualityCalculatable IQcalc, final SourceFraction SFcalc, final double peak_pixel_count, final ImagingS2NCalculatable IS2Ncalc) {
             this.IQcalc             = IQcalc;
             this.SFcalc             = SFcalc;
             this.peak_pixel_count   = peak_pixel_count;
@@ -362,19 +362,15 @@ public final class GmosRecipe extends RecipeBase {
         List<Double> sf_list = new ArrayList<>();
 
         // Calculate image quality
-        ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, src.instrument);
+        final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, src.instrument);
         IQcalc.calculate();
         double im_qual = IQcalc.getImageQuality();
 
         if (!src.instrument.isIfuUsed()) {
             // Calculate the Fraction of source in the aperture
-            final SourceFractionCalculatable SFcalc = SourceFractionCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, src.instrument);
-            SFcalc.setImageQuality(im_qual);
-            SFcalc.calculate();
+            final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, src.instrument, im_qual);
             source_fraction = SFcalc.getSourceFraction();
-
         } else {
-
             final VisitableMorphology morph;
             if (!_sdParameters.isUniform()) {
                 morph = new GaussianMorphology(im_qual);
@@ -384,9 +380,7 @@ public final class GmosRecipe extends RecipeBase {
             morph.accept(src.instrument.getIFU().getAperture());
             // for now just a single item from the list
             sf_list = src.instrument.getIFU().getFractionOfSourceInAperture();
-
             source_fraction = sf_list.get(0);
-
         }
 
 
@@ -525,9 +519,7 @@ public final class GmosRecipe extends RecipeBase {
         final double im_qual = IQcalc.getImageQuality();
 
         // Calculate the Fraction of source in the aperture
-        final SourceFractionCalculatable SFcalc = SourceFractionCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, src.instrument);
-        SFcalc.setImageQuality(im_qual);
-        SFcalc.calculate();
+        final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, src.instrument, im_qual);
         final double source_fraction = SFcalc.getSourceFraction();
         final double Npix = SFcalc.getNPix();
 

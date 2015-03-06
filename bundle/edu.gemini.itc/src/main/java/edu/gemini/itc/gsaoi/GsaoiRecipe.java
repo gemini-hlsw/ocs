@@ -347,38 +347,36 @@ public final class GsaoiRecipe extends RecipeBase {
             halo_integral = halo.getIntegral();
         }
 
-        SourceFractionCalculatable SFcalc =
-                SourceFractionCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
-
         // if gems is used we need to calculate both a core and halo
         // source_fraction
         // halo first
+        final SourceFraction SFcalc;
         if (_gemsParameters.gemsIsUsed()) {
-            // If gems is used turn off printing of SF calc
-            SFcalc.setSFPrint(false);
+            final SourceFraction SFcalcHalo;
             if (_obsDetailParameters.isAutoAperture()) {
-                SFcalc.setApType(false);
-                SFcalc.setApDiam(1.18 * im_qual);
+                SFcalcHalo  = SourceFractionFactory.calculate(_sdParameters.isUniform(), false, 1.18 * im_qual, instrument.getPixelSize(), uncorrected_im_qual);
+                SFcalc      = SourceFractionFactory.calculate(_sdParameters.isUniform(), _obsDetailParameters.isAutoAperture(), 1.18 * im_qual, instrument.getPixelSize(), im_qual);
+            } else {
+                SFcalcHalo  = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, uncorrected_im_qual);
+                SFcalc      = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
             }
-            SFcalc.setImageQuality(uncorrected_im_qual);
-            SFcalc.calculate();
-            halo_source_fraction = SFcalc.getSourceFraction();
-            if (_obsDetailParameters.isAutoAperture()) {
-                SFcalc.setApType(true);
-            }
+            halo_source_fraction = SFcalcHalo.getSourceFraction();
+        } else {
+           SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
+
         }
 
-        // this will be the core for an gems source; unchanged for non gems.
-        SFcalc.setImageQuality(im_qual);
-        SFcalc.calculate();
+        // this will be the core for a gems source; unchanged for non gems.
         source_fraction = SFcalc.getSourceFraction();
         Npix = SFcalc.getNPix();
         if (_obsDetailParameters.getMethod().isImaging()) {
-            _print(SFcalc.getTextResult(device));
             if (_gemsParameters.gemsIsUsed()) {
+                // If gems is used turn off printing of SF calc
+                _print(SFcalc.getTextResult(device, false));
                 _println("derived image halo size (FWHM) for a point source = "
                         + device.toString(uncorrected_im_qual) + " arcsec.\n");
             } else {
+                _print(SFcalc.getTextResult(device));
                 _println(IQcalc.getTextResult(device));
             }
         }
