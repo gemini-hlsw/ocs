@@ -49,11 +49,26 @@ public interface ISPFactory {
 
     /**
      * Creates an ISPProgram that is a deep copy of the given <code>program</code>.
-     *
-     * @param program the program to copy
+     * All nodes have identical keys and the program shares the same LifespanId.
+     * This copy is intended for transactional updates.  That is, a duplicate
+     * is made and updated and if successful swapped in for the existing
+     * version of the program.
      */
     ISPProgram copyWithSameKeys(ISPProgram program);
 
+    /**
+     * Creates a duplicate program with the same node keys as for
+     * {@link #copyWithSameKeys}, but assigns a new LifecycleId.  This version
+     * of copy is intended to be used when a program is transported to a new
+     * database.
+     */
+    ISPProgram copyWithNewLifespanId(ISPProgram program);
+
+    /**
+     * Creates a copy of the program that is identical in structure and data to
+     * the given <code>program</code> but with all new node keys and a new
+     * program id.
+     */
     ISPProgram copyWithNewKeys(ISPProgram program, SPProgramID newProgID);
 
     /**

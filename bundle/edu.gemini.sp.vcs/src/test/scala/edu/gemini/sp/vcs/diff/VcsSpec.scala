@@ -8,7 +8,6 @@ import edu.gemini.util.security.principal.ProgramPrincipal
 
 
 import scalaz._
-import Scalaz._
 
 class VcsSpec extends VcsSpecification {
   import TestEnv._
@@ -25,12 +24,14 @@ class VcsSpec extends VcsSpecification {
 
     "transfer a program from the remote database to the local database" in withVcs { env =>
       // make the new program and store it remotely
-      env.remote.addNewProgram(Q2)
+      val remoteQ2 = env.remote.addNewProgram(Q2)
 
       // run checkout on the local peer
       env.local.staffVcs.checkout(Q2, DummyPeer).unsafeRun
 
-      env.local.odb.lookupProgramByID(Q2) must not beNull
+      val localQ2 = env.local.odb.lookupProgramByID(Q2)
+
+      localQ2.getLifespanId must be_!=(remoteQ2.getLifespanId)
     }
   }
 
@@ -46,12 +47,14 @@ class VcsSpec extends VcsSpecification {
 
     "transfer a program from the local database to the remote database" in withVcs { env =>
       // make the new program and store it locally
-      env.local.addNewProgram(Q2)
+      val localQ2 = env.local.addNewProgram(Q2)
 
       // run add to send it to the remote peer
       env.local.staffVcs.add(Q2, DummyPeer).unsafeRun
 
-      env.remote.odb.lookupProgramByID(Q2) must not beNull
+      val remoteQ2 = env.remote.odb.lookupProgramByID(Q2)
+
+      localQ2.getLifespanId must be_!=(remoteQ2.getLifespanId)
     }
   }
 
@@ -141,6 +144,8 @@ class VcsSpec extends VcsSpecification {
         case \/-(true) => ok("")
       } and (env.remote.progTitle must_== "The Myth of Sisyphus")
     }
+
+    // TODO: pending tests with conflicts, which must be rejected
   }
 
   "sync" should {
@@ -187,15 +192,18 @@ class VcsSpec extends VcsSpecification {
     }
 
     "merge local and remote updates if both have been modified" in withVcs { env =>
-      env.local.progTitle = "The Myth of Sisyphus"
+      val group = env.local.odb.getFactory.createGroup(env.local.prog, null)
+      env.local.prog.addGroup(group)
 
       val note = env.remote.odb.getFactory.createObsComponent(env.remote.prog, SPNote.SP_TYPE, null)
       env.remote.prog.addObsComponent(note)
 
       expect(env.local.staffVcs.sync(Q1, DummyPeer)) {
         case \/-(ProgramLocation.Both) => ok("")
-      } and (env.remote.progTitle must_== "The Myth of Sisyphus") and
+      } and (env.remote.prog.getGroups.get(0).getNodeKey must_== group.getNodeKey) and
         (env.local.prog.getObsComponents.get(0).getNodeKey must_== note.getNodeKey)
     }
+
+    // TODO: pending tests with conflicts, which must be rejected
   }
 }

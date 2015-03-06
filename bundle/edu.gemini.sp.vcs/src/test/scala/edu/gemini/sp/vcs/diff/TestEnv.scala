@@ -99,7 +99,7 @@ trait VcsSpecification extends Specification {
     remoteOdb.put(rp)
 
     // Copy the test program into the local database
-    val lp = localOdb.getFactory.copyWithSameKeys(rp)
+    val lp = localOdb.getFactory.copyWithNewLifespanId(rp)
     localOdb.put(lp)
 
     val localServer  = new VcsServer(localOdb,  MockVcsLog)
