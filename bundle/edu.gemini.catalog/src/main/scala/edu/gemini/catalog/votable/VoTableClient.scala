@@ -9,6 +9,7 @@ import edu.gemini.spModel.core.Angle
 import org.apache.commons.httpclient.{NameValuePair, HttpClient}
 import org.apache.commons.httpclient.methods.GetMethod
 
+import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Promise, Future, future}
 import scala.util.{Failure, Success}
@@ -20,17 +21,93 @@ trait VoTableBackend {
   protected [votable] def doQuery(query: CatalogQuery, url: String): Future[QueryResult]
 }
 
-trait RemoteBackend extends VoTableBackend {
-  val Log = Logger.getLogger(getClass.getName)
-  private val timeout = 30 * 1000 // Max time to wait
+trait CachedBackend extends VoTableBackend {
+  case class SearchKey(query: CatalogQuery, url: String)
 
-  private def format(a: Angle)= f"${a.toDegrees}%4.03f"
+  case class CacheEntry[K, V](k: K, v: V)
 
-  def queryParams(qs: CatalogQuery): Array[NameValuePair] = Array(
-    new NameValuePair("CATALOG", qs.catalog.id),
-    new NameValuePair("RA", format(qs.base.ra.toAngle)),
-    new NameValuePair("DEC", f"${qs.base.dec.toDegrees}%4.03f"),
-    new NameValuePair("SR", format(qs.radiusConstraint.maxLimit)))
+  /**
+   * A function memoization strategy closely based on scalaz's Memo
+   */
+  sealed abstract class Cache[K, V] {
+    def apply(z: K => V): K => V
+  }
+
+  /**
+   * Cache for CatalogQueries. Key-based caching as in Memo doesn't fulfill the needs in this case as we can reuse queries
+   * done for different combinations of targets and radius even if the query 'key' doesn't match
+   * Instead we need a function that can traverse the cache finding matches to reuse the result
+   */
+  object QueryCache {
+
+    // Container used internally on the cache, the type definition leaks into the client but that helps performance
+    // Vector was selected as it gives effective constant time for prepend, patch and dropRight
+    type CacheContainer[K, V] = Vector[CacheEntry[K, V]]
+    // Function provided by the caller to check if a value is on the cache
+    type FindFunction[K, V] = (CacheContainer[K, V], K) => Option[(Int, V)]
+
+    // based on scalaz's Memo.memo function
+    private def cache[K, V](f: (K => V) => K => V): Cache[K, V] = new Cache[K, V] {
+      def apply(z: K => V) = f(z)
+    }
+
+    // Build an LRU cache with a function that will traverse the cache finding suitable queries
+    private def lruCache[K, V](a: CacheContainer[K, V], findByKey: FindFunction[K, V], maxSize: Int = 100): Cache[K, V] = {
+      // Access needs to be synchronized
+      var m = a
+
+      cache[K, V](f => k => {
+        val value = a.synchronized {
+          val r = findByKey(m, k)
+          // Put it at the head if found
+          r.foreach {
+            case (pos, x) =>
+              // Remove it from its current position
+              m = m.patch(pos, Nil, 1)
+              // Move it to the front
+              m = CacheEntry(k, x) +: m
+          }
+          r.map(_._2)
+        }
+        value.getOrElse {
+          val r = f(k)
+          // Using smaller locks increases the chances to make multiple calls to f(k) but
+          // calling f(k) inside the lock notably reduces concurrency doing remote queries
+          a.synchronized {
+            // prepend the result at the beginning
+            m = CacheEntry(k, r) +: m
+            // Keep size constrained
+            if (m.size > maxSize) {
+              m = m.dropRight(1)
+            }
+          }
+          r
+        }
+      })
+    }
+
+    /**
+     * Builds a cache with a contains function to find cache hits
+     */
+    def buildCache[K, V](contains: FindFunction[K, V], maxSize: Int = 100) = lruCache(Vector.empty, contains, maxSize)
+    
+  }
+
+  private val cache:Cache[SearchKey, QueryResult] = {
+    // Find if a search is already in the cache
+    // Note that this assumes all catalogues give the same result for a given query
+    def contains(a: QueryCache.CacheContainer[SearchKey, QueryResult], k: SearchKey):Option[(Int, QueryResult)] = {
+      @tailrec
+      def go(pos: Int):Option[(Int, QueryResult)] =
+        a.lift(pos) match {
+          case None    => None
+          case Some(x) => if (x.k.query == k.query || x.k.query.isSuperSetOf(k.query)) Some((pos, x.v)) else go(pos + 1)
+        }
+      go(0)
+    }
+
+    QueryCache.buildCache(contains)
+  }
 
   // First success or last failure
   protected def selectOne[A](fs: List[Future[A]]): Future[A] = {
@@ -45,9 +122,36 @@ trait RemoteBackend extends VoTableBackend {
     p.future
   }
 
+
+  // Cache the query not the future so that failed queries are executed again
+  protected val cachedQuery = cache(query)
+
+  // Do a query to the appropratie backend
+  protected def query(e: SearchKey): QueryResult
+
+  // Cache the query not the future so that failed queries are executed again
   protected [votable] def doQuery(query: CatalogQuery, url: String): Future[QueryResult] = future {
-    val method = new GetMethod(s"$url/cgi-bin/conesearch.py")
-    val qs = queryParams(query)
+    cachedQuery(SearchKey(query, url))
+  }
+
+}
+
+case object RemoteBackend extends CachedBackend {
+  val Log = Logger.getLogger(getClass.getName)
+
+  private val timeout = 30 * 1000 // Max time to wait
+
+  private def format(a: Angle)= f"${a.toDegrees}%4.03f"
+
+  def queryParams(qs: CatalogQuery): Array[NameValuePair] = Array(
+    new NameValuePair("CATALOG", qs.catalog.id),
+    new NameValuePair("RA", format(qs.base.ra.toAngle)),
+    new NameValuePair("DEC", f"${qs.base.dec.toDegrees}%4.03f"),
+    new NameValuePair("SR", format(qs.radiusConstraint.maxLimit)))
+
+  override protected def query(e: SearchKey): QueryResult = {
+    val method = new GetMethod(s"${e.url}/cgi-bin/conesearch.py")
+    val qs = queryParams(e.query)
     method.setQueryString(qs)
     Log.info(s"Catalog query to ${method.getURI}")
 
@@ -56,15 +160,13 @@ trait RemoteBackend extends VoTableBackend {
 
     try {
       client.executeMethod(method)
-      VoTableParser.parse(url, method.getResponseBodyAsStream).fold(p => QueryResult(query, CatalogQueryResult(TargetsTable.Zero, List(p))), y => QueryResult(query, CatalogQueryResult(y).filter(query)))
+      VoTableParser.parse(e.url, method.getResponseBodyAsStream).fold(p => QueryResult(e.query, CatalogQueryResult(TargetsTable.Zero, List(p))), y => QueryResult(e.query, CatalogQueryResult(y).filter(e.query)))
     } finally {
       method.releaseConnection()
     }
   }
 
 }
-
-case object RemoteBackend extends RemoteBackend
 
 trait VoTableClient {
   // First success or last failure

@@ -1,14 +1,15 @@
 package edu.gemini.catalog.votable
 
+import java.util.concurrent.atomic.AtomicInteger
+
 import edu.gemini.catalog.api.{FaintnessConstraint, MagnitudeConstraints, RadiusConstraint, CatalogQuery}
 import edu.gemini.spModel.core.{MagnitudeBand, Angle, Coordinates}
 import org.apache.commons.httpclient.NameValuePair
 import org.specs2.mutable.SpecificationWithJUnit
 import org.specs2.time.NoTimeConversions
 
-import scala.concurrent.Await
+import scala.concurrent._
 import scala.concurrent.duration._
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with NoTimeConversions {
@@ -16,6 +17,13 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
   "The VoTable client" should {
 
     val query = CatalogQuery.catalogQuery(Coordinates.zero, RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromDegrees(0.2)), Some(noMagnitudeConstraint))
+    case class CountingCachedBackend(counter: AtomicInteger, file: String) extends CachedBackend {
+      override protected def query(e: SearchKey) = {
+        counter.incrementAndGet()
+        VoTableParser.parse(e.url, this.getClass.getResourceAsStream(file)).fold(p => QueryResult(e.query, CatalogQueryResult(TargetsTable.Zero, List(p))), y => QueryResult(e.query, CatalogQueryResult(y).filter(e.query)))
+      }
+
+    }
 
     "produce query params" in {
       RemoteBackend.queryParams(query) should beEqualTo(Array(new NameValuePair("CATALOG", "ucac4"), new NameValuePair("RA", "0.000"), new NameValuePair("DEC", "0.000"), new NameValuePair("SR", "0.200")))
@@ -33,6 +41,32 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
     "make a query" in {
       // This test loads a file. There is not much to test but it exercises the query backend chain
       Await.result(VoTableClient.catalog(query, TestVoTableBackend("/votable.xml")), 5.seconds).result.containsError should beFalse
+    }
+    "use the cache to skip queries" in {
+      val counter = new AtomicInteger(0)
+      val countingBackend = CountingCachedBackend(counter, "/votable.xml")
+      // Backend should be hit at most once per url
+      val r = for {
+          f1 <- VoTableClient.catalog(query, countingBackend)
+          f2 <- VoTableClient.catalog(query, countingBackend)
+        } yield f2
+      Await.result(r, 10.seconds)
+      // Depending on timing it could hit all or less than all parallel urls
+      counter.get() should be_<=(VoTableClient.catalogUrls.size)
+    }
+    "use the cache to skip queries that occupy a subset" in {
+      val counter = new AtomicInteger(0)
+      val countingBackend = CountingCachedBackend(counter, "/votable.xml")
+      // query2 has smaller radius
+      val query2 = CatalogQuery.catalogQuery(Coordinates.zero, RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromDegrees(0.1)), Some(noMagnitudeConstraint))
+      // Backend should be hit at most once per url
+      val r = for {
+          f1 <- VoTableClient.catalog(query, countingBackend)
+          f2 <- VoTableClient.catalog(query2, countingBackend)
+        } yield f2
+      Await.result(r, 10.seconds)
+      // Depending on timing it could hit all or less than all parallel urls
+      counter.get() should be_<=(VoTableClient.catalogUrls.size)
     }
 
   }
