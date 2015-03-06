@@ -1,29 +1,27 @@
 package edu.gemini.sp.vcs.diff
 
-import edu.gemini.pot.sp.{ISPFactory, ISPProgram}
+import edu.gemini.pot.sp.{SPNodeKey, ISPFactory, ISPProgram}
 import edu.gemini.pot.sp.version._
 import edu.gemini.shared.util.VersionComparison.{Same, Newer}
-import edu.gemini.sp.vcs.diff.MergePlan.Transport
 import edu.gemini.sp.vcs.diff.ProgramLocation.{LocalOnly, Neither, Remote}
-import edu.gemini.sp.vcs.diff.VcsFailure.{NeedsUpdate, VcsException}
+import edu.gemini.sp.vcs.diff.VcsFailure.{IdClash, NeedsUpdate}
 import edu.gemini.sp.vcs.log.VcsEventSet
 import edu.gemini.spModel.core.{Peer, SPProgramID}
+import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.util.security.auth.keychain.KeyChain
 
 import java.security.Principal
 
-import edu.gemini.util.trpc.client.TrpcClient
-
 import scala.collection.JavaConverters._
 import scalaz._
 import Scalaz._
-
-import Vcs._
-
 import scalaz.concurrent.Task
+
 
 /** Vcs provides the public API for vcs commands such as push, pull and sync. */
 class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => VcsService) {
+
+  import Vcs.MergeEval
 
   /** Checks-out the indicated program from the remote peer, copying it into
     * the local database. */
@@ -46,9 +44,16 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
   // to merge in changes from the remote peer.  The local merge is only
   // performed if the remote peer has something new to offer.
   private def pull0(id: SPProgramID, client: Client): VcsAction[MergeEval] = {
+    def validateProgKey(local: ISPProgram, remote: MergePlan): VcsAction[Unit] = {
+      val lKey = local.getProgramKey
+      val rKey = remote.update.rootLabel.key
+      if (lKey === rKey) VcsAction.unit else VcsAction.fail(IdClash(id, lKey, rKey))
+    }
+
     def evaluate(p: ISPProgram): VcsAction[MergeEval] =
       for {
         diffs <- client.fetchDiffs(id, DiffState(p))
+        _     <- validateProgKey(p, diffs)
         mc     = MergeContext(p, diffs)
         prelim = PreliminaryMerge.merge(mc)
         plan  <- ObsNumberCorrection(mc).apply(prelim).liftVcs
@@ -78,13 +83,19 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
     * newer than the remote version. Otherwise it fails with a `NeedsUpdate`
     * `VcsFailure`. */
   def push(id: SPProgramID, peer: Peer): VcsAction[Boolean] = {
+    def validateProgKey(lKey: SPNodeKey, remote: DiffState): VcsAction[Unit] = {
+      val rKey = remote.progKey
+      if (lKey === rKey) VcsAction.unit else VcsAction.fail(IdClash(id, lKey, rKey))
+    }
+
     val client = Client(peer)
     for {
       diffState <- client.diffState(id)
       u         <- user
-      diff      <- server.read(id, u) { ProgramDiff.compare(_, diffState) }
-      res       <- diff.compare(diffState.vm) match {
-        case Newer => client.storeDiffs(id, diff)
+      keyDiff   <- server.read(id, u) { p => (p.getProgramKey, ProgramDiff.compare(p, diffState)) }
+      _         <- validateProgKey(keyDiff._1, diffState)
+      res       <- keyDiff._2.compare(diffState.vm) match {
+        case Newer => client.storeDiffs(id, keyDiff._2)
         case Same  => VcsAction(false)
         case _     => VcsAction.fail(NeedsUpdate)
       }
@@ -153,9 +164,8 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
 
 object Vcs {
 
-  def apply(kc: KeyChain, server: VcsServer): Vcs = {
+  def apply(kc: KeyChain, server: VcsServer): Vcs =
     new Vcs(VcsAction(kc.subject.getPrincipals.asScala.toSet), server, VcsService.client(_, kc))
-  }
 
   /** Evaluation of the merge state, which includes whether local and/or remote
     * updates are needed.  We can skip merging locally or remotely if nothing

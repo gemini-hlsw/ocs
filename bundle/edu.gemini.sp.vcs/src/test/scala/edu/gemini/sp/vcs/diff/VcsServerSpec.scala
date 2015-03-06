@@ -1,99 +1,42 @@
 package edu.gemini.sp.vcs.diff
 
-import java.io.File
-import java.security.Principal
 
 import edu.gemini.pot.sp.{DataObjectBlob, ISPFactory, ISPProgram, SPNodeKey}
 import edu.gemini.pot.sp.version._
-import edu.gemini.pot.spdb.{IDBDatabaseService, DBLocalDatabase}
+import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.sp.vcs.diff.VcsAction._
 import edu.gemini.sp.vcs.diff.VcsFailure._
-import edu.gemini.sp.vcs.log.{VcsEventSet, VcsEvent, VcsOp, VcsLog}
-import edu.gemini.spModel.core.{Affiliate, SPProgramID}
+import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.gemini.obscomp.SPProgram
-import edu.gemini.spModel.gemini.obscomp.SPProgram.PIInfo
-import edu.gemini.util.security.principal.{ProgramPrincipal, UserPrincipal, StaffPrincipal, GeminiPrincipal}
-import org.specs2.matcher.MatchResult
-import org.specs2.mutable._
+import edu.gemini.util.security.principal.StaffPrincipal
 
-import VcsServerSpec._
+import java.security.Principal
 
 import scalaz._
 import Scalaz._
 
-class VcsServerSpec extends Specification {
+class VcsServerSpec extends VcsSpecification {
 
-  val Key    = new SPNodeKey()
-  val ProgId = SPProgramID.toProgramID("GS-2015B-Q-1")
-  val Title  = "The Stranger"
-  val PiInfo = new PIInfo("Albert", "Camus", "acamus@ualger.dz", "", Affiliate.UNITED_STATES)
+  import TestEnv._
 
   val StaffUser = Set(StaffPrincipal.Gemini): Set[Principal]
-  val PiUser    = Set(UserPrincipal(PiInfo.getEmail)): Set[Principal]
-
-
-  // I think the ForEach context is what I need, but it doesn't seem to exist in
-  // this version of specs2.
-  def withVcs[A](body: (VcsServer, IDBDatabaseService) => A): A = {
-    val odb = DBLocalDatabase.createTransient()
-    try {
-      val p = odb.getFactory.createProgram(Key, ProgId)
-      p.setDataObject {
-        p.getDataObject.asInstanceOf[SPProgram] <| (_.setTitle(Title)) <| (_.setPIInfo(PiInfo))
-      }
-      odb.put(p)
-
-      body(new VcsServer(odb, MockVcsLog), odb)
-    } finally {
-      odb.getDBAdmin.shutdown()
-    }
-  }
-
-  def expect[A](act: VcsAction[A])(pf: PartialFunction[TryVcs[A], MatchResult[_]]): MatchResult[_] = {
-    val t = act.unsafeRun
-    if (pf.isDefinedAt(t))
-      pf(t)
-    else {
-      t match {
-        case -\/(VcsException(ex)) => ex.printStackTrace()
-      }
-      ko("unexpected result: " + t)
-    }
-  }
-
-  def notFound[A](act: VcsAction[A], id: SPProgramID): MatchResult[_] =
-    expect(act) { case -\/(NotFound(x)) => x must_== id }
-
-  def forbidden[A](act: VcsAction[A]): MatchResult[_] =
-    expect(act) { case -\/(Forbidden(m)) => ok(m) }
-
-  def exception[A](act: VcsAction[A], msg: String): MatchResult[_] =
-    expect(act) {
-      case -\/(VcsException(rte: RuntimeException)) => rte.getMessage must_== msg
-    }
-
-  def lookupTitle(odb: IDBDatabaseService): String =
-    odb.lookupProgram(Key).getDataObject |> (_.getTitle)
 
   "read" should {
-    "fail if the program id doesn't exist in the database" in withVcs { (vcs,_) =>
-      val q2  = SPProgramID.toProgramID("GS-2015B-Q-2")
-      notFound(vcs.read(q2, StaffUser) { identity }, q2)
+    "fail if the program id doesn't exist in the database" in withVcs { env =>
+      notFound(env.local.server.read(Q2, StaffUser) { identity }, Q2)
     }
 
-    "fail if the user doesn't have access to the program" in withVcs { (vcs,_) =>
-      val q2   = SPProgramID.toProgramID("GS-2015B-Q-2")
-      val user = Set(ProgramPrincipal(q2)): Set[Principal]
-      forbidden(vcs.read(ProgId, user) { identity })
+    "fail if the user doesn't have access to the program" in withVcs { env =>
+      forbidden(env.local.server.read(Q1, progPrincipal(Q2)) { identity })
     }
 
-    "handle any exceptions that happen" in withVcs { (vcs,_) =>
-      val act = vcs.read(ProgId, StaffUser) { _ => throw new RuntimeException("handle me") }
+    "handle any exceptions that happen" in withVcs { env =>
+      val act = env.local.server.read(Q1, StaffUser) { _ => throw new RuntimeException("handle me") }
       exception(act, "handle me")
     }
 
-    "pass the provided function the program associated with the id" in withVcs { (vcs,_) =>
-      val act = vcs.read(ProgId, StaffUser) { _.getDataObject.getTitle }
+    "pass the provided function the program associated with the id" in withVcs { env =>
+      val act = env.local.server.read(Q1, StaffUser) { _.getDataObject.getTitle }
       act.unsafeRun match {
         case \/-(s) => s must_== Title
         case x      => ko(x.toString)
@@ -102,38 +45,35 @@ class VcsServerSpec extends Specification {
   }
 
   "write" should {
-    def dummyWrite(vcs: VcsServer, pid: SPProgramID, user: Set[Principal]): VcsAction[Boolean] =
-      vcs.write[Boolean](pid, user, _ => VcsAction(true), identity, (_,_,_) => VcsAction(true))
+    def dummyWrite(env: TestEnv, pid: SPProgramID, user: Set[Principal]): VcsAction[Boolean] =
+      env.local.server.write[Boolean](pid, user, _ => VcsAction(true), identity, (_,_,_) => VcsAction(true))
 
-    "fail if the program id doesn't exist in the database" in withVcs { (vcs,_) =>
-      val q2  = SPProgramID.toProgramID("GS-2015B-Q-2")
-      notFound(dummyWrite(vcs, q2, StaffUser), q2)
+    "fail if the program id doesn't exist in the database" in withVcs { env =>
+      notFound(dummyWrite(env, Q2, StaffUser), Q2)
     }
 
-    "fail if the user doesn't have access to the program" in withVcs { (vcs,_) =>
-      val q2   = SPProgramID.toProgramID("GS-2015B-Q-2")
-      val user = Set(ProgramPrincipal(q2)): Set[Principal]
-      forbidden(dummyWrite(vcs, ProgId, user))
+    "fail if the user doesn't have access to the program" in withVcs { env =>
+      forbidden(dummyWrite(env, Q1, progPrincipal(Q2)))
     }
 
-    "handle any exceptions that happen in evaluate" in withVcs { (vcs,_) =>
-      val act = vcs.write[Boolean](ProgId, StaffUser,
+    "handle any exceptions that happen in evaluate" in withVcs { env =>
+      val act = env.local.server.write[Boolean](Q1, StaffUser,
         _ => throw new RuntimeException("handle me"),
         identity,
         (_,_,_) => VcsAction(true))
       exception(act, "handle me")
     }
 
-    "handle any exceptions that happen in filter" in withVcs { (vcs,_) =>
-      val act = vcs.write[Boolean](ProgId, StaffUser,
+    "handle any exceptions that happen in filter" in withVcs { env =>
+      val act = env.local.server.write[Boolean](Q1, StaffUser,
         _ => VcsAction(true),
         _ => throw new RuntimeException("handle me"),
         (_,_,_) => VcsAction(true))
       exception(act, "handle me")
     }
 
-    "handle any exceptions that happen in update" in withVcs { (vcs,_) =>
-      val act = vcs.write[Boolean](ProgId, StaffUser,
+    "handle any exceptions that happen in update" in withVcs { env =>
+      val act = env.local.server.write[Boolean](Q1, StaffUser,
         _ => VcsAction(true),
         identity,
         (_,_,_) => throw new RuntimeException("handle me"))
@@ -150,91 +90,82 @@ class VcsServerSpec extends Specification {
 
     def ihc(odb: IDBDatabaseService): Long = System.identityHashCode(odb.lookupProgram(Key))
 
-    "read from the provided program in evaluate" in withVcs { (vcs, odb) =>
-      val t = vcs.write[String](ProgId, StaffUser, readTitle, titleMatches, updateTitle).unsafeRun
-      (t.isRight must beTrue) and (lookupTitle(odb) must_== "The Myth of Sisyphus")
+    "read from the provided program in evaluate" in withVcs { env =>
+      val t = env.local.server.write[String](Q1, StaffUser, readTitle, titleMatches, updateTitle).unsafeRun
+      (t.isRight must beTrue) and (env.local.progTitle must_== "The Myth of Sisyphus")
     }
 
-    "do nothing if the filter returns false" in withVcs { (vcs,odb) =>
-      val t = vcs.write[String](ProgId, StaffUser, readTitle, Function.const(false), updateTitle).unsafeRun
-      (t.isRight must beTrue) and (lookupTitle(odb) must_== Title)
+    "do nothing if the filter returns false" in withVcs { env =>
+      val t = env.local.server.write[String](Q1, StaffUser, readTitle, Function.const(false), updateTitle).unsafeRun
+      (t.isRight must beTrue) and (env.local.progTitle must_== Title)
     }
 
-    "not replace the program on failure" in withVcs { (vcs,odb) =>
-      val hc = ihc(odb)
-      vcs.write[String](ProgId, StaffUser, readTitle, Function.const(false), updateTitle).unsafeRun
-      hc must_== ihc(odb)
+    "not replace the program on failure" in withVcs { env =>
+      val hc = ihc(env.local.odb)
+      env.local.server.write[String](Q1, StaffUser, readTitle, Function.const(false), updateTitle).unsafeRun
+      hc must_== ihc(env.local.odb)
     }
 
-    "replace the program altogether on success" in withVcs { (vcs,odb) =>
-      val hc = ihc(odb)
-      vcs.write[String](ProgId, StaffUser, readTitle, titleMatches, updateTitle).unsafeRun
-      hc mustNotEqual ihc(odb)
+    "replace the program altogether on success" in withVcs { env =>
+      val hc = ihc(env.local.odb)
+      env.local.server.write[String](Q1, StaffUser, readTitle, titleMatches, updateTitle).unsafeRun
+      hc mustNotEqual ihc(env.local.odb)
     }
   }
 
   "add" should {
-    "fail if the user doesn't have access to the program" in withVcs { (vcs,odb) =>
-      val q3   = SPProgramID.toProgramID("GS-2015B-Q-3")
-      val user = Set(ProgramPrincipal(q3)): Set[Principal]
-
-      val newKey  = new SPNodeKey()
-      val q2      = SPProgramID.toProgramID("GS-2015B-Q-2")
-      val newProg = odb.getFactory.createProgram(newKey, q2)
-
-      forbidden(vcs.add(newProg, user))
+    "fail if the user doesn't have access to the program" in withVcs { env =>
+      val user    = progPrincipal(Q3)
+      val newProg = env.local.newProgram(Q2)
+      forbidden(env.local.server.add(newProg, user))
     }
 
-    "fail if a program with the same key already exists" in withVcs { (vcs,odb) =>
-      val newId   = SPProgramID.toProgramID("GS-2015B-Q-2")
-      val newProg = odb.getFactory.createProgram(Key, newId)
-      val act     = vcs.add(newProg, StaffUser)
+    "fail if a program with the same key already exists" in withVcs { env =>
+      val newProg = env.local.odb.getFactory.createProgram(Key, Q2)
+      val act     = env.local.server.add(newProg, StaffUser)
       expect(act) { case -\/(KeyAlreadyExists(_, _)) => ok("key exists") }
     }
 
-    "fail if a program with the same id already exists" in withVcs { (vcs,odb) =>
+    "fail if a program with the same id already exists" in withVcs { env =>
       val newKey  = new SPNodeKey()
-      val newProg = odb.getFactory.createProgram(newKey, ProgId)
-      val act     = vcs.add(newProg, StaffUser)
+      val newProg = env.local.odb.getFactory.createProgram(newKey, Q1)
+      val act     = env.local.server.add(newProg, StaffUser)
       expect(act) { case -\/(IdAlreadyExists(_)) => ok("id exists") }
     }
 
-    "fail if the new program doesn't have an id" in withVcs { (vcs,odb) =>
+    "fail if the new program doesn't have an id" in withVcs { env =>
       val newKey  = new SPNodeKey()
-      val newProg = odb.getFactory.createProgram(newKey, null)
-      val act     = vcs.add(newProg, StaffUser)
+      val newProg = env.local.odb.getFactory.createProgram(newKey, null)
+      val act     = env.local.server.add(newProg, StaffUser)
       expect(act) { case -\/(MissingId) => ok("missing id") }
     }
 
-    "add a new program to the database" in withVcs { (vcs, odb) =>
-      val newKey  = new SPNodeKey()
-      val newId   = SPProgramID.toProgramID("GS-2015B-Q-2")
-      val newProg = odb.getFactory.createProgram(newKey, newId)
-      val act     = vcs.add(newProg, StaffUser)
+    "add a new program to the database" in withVcs { env =>
+      val newProg = env.local.newProgram(Q2)
+      val act     = env.local.server.add(newProg, StaffUser)
       act.unsafeRun
 
-      odb.lookupProgram(newKey) must not beNull
+      env.local.odb.lookupProgram(newProg.getProgramKey) must not beNull
     }
   }
 
   "fetchDiffs" should {
-    "fetch diffs" in withVcs { (vcs, odb) =>
-      val p         = odb.lookupProgram(Key)
-      val vm        = p.getVersions
+    "fetch diffs" in withVcs { env =>
+      val vm        = env.local.prog.getVersions
       val nv        = vm.getOrElse(Key, EmptyNodeVersions)
       val nv2       = nv.incr(LifespanId.random)
       val vm2       = vm.updated(Key, nv2)
-      val diffState = DiffState(vm2, Set.empty)
+      val diffState = DiffState(Key, vm2, Set.empty)
 
-      val svs = new vcs.SecureVcsService(StaffUser)
-      svs.fetchDiffs(ProgId, diffState) match {
+      val svs = new env.local.server.SecureVcsService(StaffUser)
+      svs.fetchDiffs(Q1, diffState) match {
         case \/-(mpt) =>
           val mp = mpt.decode
           mp.update.rootLabel match {
             case Modified(k, n, dob, NodeDetail.Empty) =>
               (k must_== Key) and
                 (n must_== nv) and
-                (DataObjectBlob.same(dob, p.getDataObject) must beTrue)
+                (DataObjectBlob.same(dob, env.local.prog.getDataObject) must beTrue)
             case _ => ko("expected a Modified root node matching the program")
           }
         case _ => ko("expected a merge plan here")
@@ -243,47 +174,33 @@ class VcsServerSpec extends Specification {
   }
 
   "storeDiffs" should {
-    "do nothing if there are no diffs to store" in withVcs { (vcs, odb) =>
+    "do nothing if there are no diffs to store" in withVcs { env =>
       val update = (Unmodified(Key): MergeNode).node()
       val mp     = MergePlan(update, Set.empty)
-      val svs    = new vcs.SecureVcsService(StaffUser)
-      svs.storeDiffs(ProgId, mp.encode) match {
+      val svs    = new env.local.server.SecureVcsService(StaffUser)
+      svs.storeDiffs(Q1, mp.encode) match {
         case \/-(false) => ok("ok, nothing done")
         case \/-(true)  => ko("updated anyway")
         case x          => ko("didn't expect: " + x)
       }
     }
 
-    "update the program if there are differences" in withVcs { (vcs, odb) =>
-      val p         = odb.lookupProgram(Key)
-      val vm        = p.getVersions
+    "update the program if there are differences" in withVcs { env =>
+      val vm        = env.local.prog.getVersions
       val nv        = vm.getOrElse(Key, EmptyNodeVersions)
       val nv2       = nv.incr(LifespanId.random)
 
       // create a merge plan with an updated title for the program node
-      val dob = new SPProgram <| (_.setTitle("The Myth of Sisyphus"))
+      val dob    = new SPProgram <| (_.setTitle("The Myth of Sisyphus"))
       val update = MergeNode.modified(Key, nv2, dob, NodeDetail.Empty).node()
       val mp     = MergePlan(update, Set.empty)
 
-      val svs = new vcs.SecureVcsService(StaffUser)
-      svs.storeDiffs(ProgId, mp.encode) match {
-        case \/-(true)  => lookupTitle(odb) must_== "The Myth of Sisyphus"
+      val svs = new env.local.server.SecureVcsService(StaffUser)
+      svs.storeDiffs(Q1, mp.encode) match {
+        case \/-(true)  => env.local.progTitle must_== "The Myth of Sisyphus"
         case \/-(false) => ko("update ignored")
         case x          => ko("didn't expect: " + x)
       }
     }
-  }
-}
-
-object VcsServerSpec {
-
-  object MockVcsLog extends VcsLog {
-    override def log(op: VcsOp, pid: SPProgramID, principals: Set[GeminiPrincipal]): VcsEvent =
-      VcsEvent(0, op, 0, pid, principals)
-
-    override def archive(f: File): Unit = ()
-
-    override def selectByProgram(pid: SPProgramID, offset: Int, size: Int): (List[VcsEventSet], Boolean) =
-      (Nil, false)
   }
 }

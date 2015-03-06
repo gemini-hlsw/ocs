@@ -23,7 +23,7 @@ object VcsFailure {
   case class KeyAlreadyExists(id: SPProgramID, key: SPNodeKey) extends VcsFailure
 
   /** Two distinct programs share the same program id. */
-  case class IdClash(ex: DBIDClashException) extends VcsFailure
+  case class IdClash(id: SPProgramID, key0: SPNodeKey, key1: SPNodeKey) extends VcsFailure
 
   /** The program associated with the given id could not be found. */
   case class NotFound(id: SPProgramID) extends VcsFailure
@@ -52,13 +52,15 @@ object VcsFailure {
   /** Exception thrown while performing a vcs operation. */
   case class VcsException(ex: Throwable) extends VcsFailure
 
+  def idClash(ex: DBIDClashException): VcsFailure =
+    IdClash(ex.id, ex.existingKey, ex.newKey)
 
   def explain(f: VcsFailure, id: SPProgramID, op: String, peer: Option[Peer]): String = {
 
     val peerName = peer.map { p => s"${p.host}:${p.port}" } | "remote host"
     val msg = f match {
-      case IdClash(ex) =>
-        s"There is another program in the database with ID '${ex.id}'.  Give your program a new ID and try again."
+      case IdClash(i,_,_)        =>
+        s"There is another program in the database with ID '$i'."
 
       case NotFound(i)           =>
         s"$i is not in the database."
@@ -100,7 +102,6 @@ object VcsFailure {
     }
 
     val exOpt = f match {
-      case IdClash(ex)      => Some(ex)
       case VcsException(ex) => Some(ex)
       case _                => None
     }

@@ -5,8 +5,9 @@ import edu.gemini.pot.sp.version.VersionMap
 
 /** Groups the information required to calculate a
   * [[edu.gemini.sp.vcs.diff.ProgramDiff]]. */
-case class DiffState(vm: VersionMap, removed: Set[SPNodeKey])
+case class DiffState(progKey: SPNodeKey, vm: VersionMap, removed: Set[SPNodeKey])
 
 object DiffState {
-  def apply(p: ISPProgram): DiffState = DiffState(p.getVersions, removedKeys(p))
+  def apply(p: ISPProgram): DiffState =
+    DiffState(p.getProgramKey, p.getVersions, removedKeys(p))
 }
