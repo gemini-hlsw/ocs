@@ -66,6 +66,18 @@ public final class GmosRecipe extends RecipeBase {
         _gmosParameters = gmosParameters;
         _teleParameters = teleParameters;
         _plotParameters = plotParameters;
+
+
+        // TODO: this validation should be done centrally somewhere (several instruments do similar stuff here)
+        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
+            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000))) {
+                throw new RuntimeException(
+                        "Please use a model line width > 1 nm (or "
+                                + (3E5 / (_sdParameters.getELineWavelength() * 1000))
+                                + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
+            }
+        }
+
     }
 
     /**
@@ -76,35 +88,67 @@ public final class GmosRecipe extends RecipeBase {
      *                   files, incorrectly-formatted data files, ...
      */
     public void writeOutput() throws Exception {
-
-        // validation
-        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
-            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000))) {
-                throw new RuntimeException(
-                        "Please use a model line width > 1 nm (or "
-                                + (3E5 / (_sdParameters.getELineWavelength() * 1000))
-                                + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
-            }
-        }
-
-
-        // do the actual calculation..
-        final Gmos mainInstrument;
-        switch (_gmosParameters.getSite()) {
-            case GN: mainInstrument = new GmosNorth(_gmosParameters, _obsDetailParameters, 0); break;
-            case GS: mainInstrument = new GmosSouth(_gmosParameters, _obsDetailParameters, 0); break;
-            default: throw new Error("invalid site");
-        }
-
+        final Gmos mainInstrument = createGmos();
+        final GmosResult[] results = calculate(mainInstrument);
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {
-            writeSpectroscopyOutput(mainInstrument);
+            writeSpectroscopyOutput(mainInstrument, results);
         } else {
-            writeImagingOutput(mainInstrument);
+            writeImagingOutput(mainInstrument, results);
         }
     }
 
+    public GmosResult[] calculate() throws Exception {
+        final Gmos mainInstrument = createGmos();
+        final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
+        final GmosResult[] results = new GmosResult[ccdArray.length];
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
+            for (int i = 0; i < ccdArray.length; i++) {
+                final Gmos instrument = ccdArray[i];
+                final GmosSourceResult calcSrcGmos = invoke(instrument);
+                results[i] = invokeSpectroscopy(calcSrcGmos, mainInstrument, ccdArray.length);
+            }
+        } else {
+            for (int i = 0; i < ccdArray.length; i++) {
+                final Gmos instrument = ccdArray[i];
+                final GmosSourceResult calcSrcGmos = invoke(instrument);
+                results[i] = invokeImaging(calcSrcGmos);
+            }
+        }
 
-    private void writeSpectroscopyOutput(final Gmos mainInstrument) throws Exception {
+        return results;
+    }
+
+    private GmosResult[] calculate(final Gmos mainInstrument) throws Exception {
+
+        final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
+        final GmosResult[] results = new GmosResult[ccdArray.length];
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
+            for (int i = 0; i < ccdArray.length; i++) {
+                final Gmos instrument = ccdArray[i];
+                final GmosSourceResult calcSrcGmos = invoke(instrument);
+                results[i] = invokeSpectroscopy(calcSrcGmos, mainInstrument, ccdArray.length);
+            }
+        } else {
+            for (int i = 0; i < ccdArray.length; i++) {
+                final Gmos instrument = ccdArray[i];
+                final GmosSourceResult calcSrcGmos = invoke(instrument);
+                results[i] = invokeImaging(calcSrcGmos);
+            }
+        }
+
+        return results;
+
+    }
+
+    private Gmos createGmos() {
+        switch (_gmosParameters.getSite()) {
+            case GN: return new GmosNorth(_gmosParameters, _obsDetailParameters, 0);
+            case GS: return new GmosSouth(_gmosParameters, _obsDetailParameters, 0);
+            default: throw new Error("invalid site");
+        }
+    }
+
+    private void writeSpectroscopyOutput(final Gmos mainInstrument, final GmosResult[] results) throws Exception {
         _println("");
 
         // This object is used to format numerical strings.
@@ -140,8 +184,7 @@ public final class GmosRecipe extends RecipeBase {
                     ? tv.getDetectorCcdStartIndex(ccdIndex + 1)
                     : lastCcdIndex;
 
-            final GmosSourceResult calcSrcGmos = invoke(instrument);
-            final GmosSpectroscopyResult calcGmos = invokeSpectroscopy(calcSrcGmos, mainInstrument, detectorCount);
+            final GmosSpectroscopyResult calcGmos = (GmosSpectroscopyResult) results[ccdIndex];
 
             final int number_exposures = _obsDetailParameters.getNumExposures();
             final double frac_with_source = _obsDetailParameters.getSourceFraction();
@@ -209,7 +252,7 @@ public final class GmosRecipe extends RecipeBase {
     }
 
 
-    private void writeImagingOutput(final Gmos mainInstrument) {
+    private void writeImagingOutput(final Gmos mainInstrument, final GmosResult[] results) {
         _println("");
 
         // This object is used to format numerical strings.
@@ -224,8 +267,7 @@ public final class GmosRecipe extends RecipeBase {
             final String ccdName = instrument.getDetectorCcdName();
             final String forCcdName = ccdName.length() == 0 ? "" : " for " + ccdName;
 
-            final GmosSourceResult calcSrcGmos = invoke(instrument);
-            final GmosImagingResult calcGmos = invokeImaging(calcSrcGmos);
+            final GmosImagingResult calcGmos = (GmosImagingResult) results[ccdIndex];
 
             if (ccdIndex == 0) {
                 _print(calcGmos.SFcalc.getTextResult(device));
@@ -301,7 +343,8 @@ public final class GmosRecipe extends RecipeBase {
         }
 
     }
-    private final class GmosImagingResult {
+    interface GmosResult {}
+    private final class GmosImagingResult implements GmosResult {
         public final SourceFraction SFcalc;
         public final double peak_pixel_count;
         public final ImagingS2NCalculatable IS2Ncalc;
@@ -314,7 +357,7 @@ public final class GmosRecipe extends RecipeBase {
         }
 
     }
-    private final class GmosSpectroscopyResult {
+    private final class GmosSpectroscopyResult implements GmosResult {
         public final SpecS2NLargeSlitVisitor[] specS2N;
         public final SlitThroughput st;
         public final ImageQualityCalculatable IQcalc;
