@@ -29,7 +29,7 @@ public final class Flamingos2Recipe extends RecipeBase {
      * @param out Results will be written to this PrintWriter.
      * @throws Exception on failure to parse parameters.
      */
-    public Flamingos2Recipe(ITCMultiPartParser r, PrintWriter out) throws Exception {
+    public Flamingos2Recipe(ITCMultiPartParser r, PrintWriter out) {
         super(out);
 
         // Read parameters from the four main sections of the web page.
@@ -63,17 +63,15 @@ public final class Flamingos2Recipe extends RecipeBase {
 
     /**
      * Check input parameters for consistency
-     *
-     * @throws Exception
      */
-    public void checkInputParameters() throws Exception {
+    public void checkInputParameters() {
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {
             if (_flamingos2Parameters.getGrism().equalsIgnoreCase("none")) {
-                throw new Exception(
+                throw new RuntimeException(
                         "In spectroscopy mode, a grism must be selected");
             }
             if (_flamingos2Parameters.getFPMask().equalsIgnoreCase("none")) {
-                throw new Exception(
+                throw new RuntimeException(
                         "In spectroscopy mode, a FP must must be selected");
             }
         }
@@ -87,7 +85,7 @@ public final class Flamingos2Recipe extends RecipeBase {
      *                   files, incorrectly-formatted data files, ...
      */
     @Override
-    public void writeOutput() throws Exception {
+    public void writeOutput() {
         // This object is used to format numerical strings.
         FormatStringWriter device = new FormatStringWriter();
         device.setPrecision(2); // Two decimal places
@@ -137,7 +135,7 @@ public final class Flamingos2Recipe extends RecipeBase {
                 break;
             default:
                 if (sed.getStart() > start || sed.getEnd() < end) {
-                    throw new Exception(
+                    throw new RuntimeException(
                             "Shifted spectrum lies outside of specified normalisation waveband.");
                 }
         }
@@ -150,7 +148,7 @@ public final class Flamingos2Recipe extends RecipeBase {
             _println(" Sed end " + sed.getEnd() + " < than instrument end "
                     + instrument.getObservingEnd());
 
-            throw new Exception(
+            throw new RuntimeException(
                     "Shifted spectrum lies outside of observed wavelengths");
         }
 

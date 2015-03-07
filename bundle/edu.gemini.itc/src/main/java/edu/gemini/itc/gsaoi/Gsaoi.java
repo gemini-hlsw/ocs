@@ -1,13 +1,3 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-// $Id Gsaoi.java,v 1.2 1999/10/14 16:37:00 cvs-tuc Exp $
-//
 package edu.gemini.itc.gsaoi;
 
 import edu.gemini.itc.parameters.ObservationDetailsParameters;
@@ -48,7 +38,7 @@ public class Gsaoi extends Instrument {
      * construct an Gsaoi with specified Broadband filter or Narrowband filter
      * and camera type.
      */
-    public Gsaoi(GsaoiParameters np, ObservationDetailsParameters odp) throws Exception {
+    public Gsaoi(GsaoiParameters np, ObservationDetailsParameters odp) {
         super(INSTR_DIR, FILENAME);
 
         _readMode = np.getReadMode();

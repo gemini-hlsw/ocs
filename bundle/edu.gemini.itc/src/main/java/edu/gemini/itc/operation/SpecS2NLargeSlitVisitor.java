@@ -1,18 +1,8 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-
 package edu.gemini.itc.operation;
 
 import edu.gemini.itc.shared.SampledSpectrum;
 import edu.gemini.itc.shared.SampledSpectrumVisitor;
 import edu.gemini.itc.shared.VisitableSampledSpectrum;
-
-//import edu.gemini.itc.gmos.DetectorsTransmissionVisitor;
 
 /**
  * The SpecS2NLargeSlitVisitor is used to calculate the s2n of an observation using
@@ -45,8 +35,7 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor {
                                    double spec_Npix, int spec_number_exposures,
                                    double spec_frac_with_source, double spec_exp_time,
                                    double dark_current, double read_noise,
-                                   double skyAper, int spectralBinning)
-            throws Exception {
+                                   double skyAper, int spectralBinning) {
         this.slit_width = slit_width;
         this.pixel_size = pixel_size;
         this.pix_width = pix_width;

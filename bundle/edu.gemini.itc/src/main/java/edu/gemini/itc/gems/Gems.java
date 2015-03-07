@@ -57,7 +57,7 @@ public class Gems {
 
     //Constructor
     public Gems(double wavelength, double telescopeDiameter, double uncorrectedSeeing, double avgStrehl,
-                String strehlBand, double imageQualityPercentile, SourceDefinitionParameters source) throws Exception {
+                String strehlBand, double imageQualityPercentile, SourceDefinitionParameters source) {
         gemsBackground = new GemsBackgroundVisitor();
         gemsTransmission = new GemsTransmissionVisitor();
         this.wavelength = wavelength;

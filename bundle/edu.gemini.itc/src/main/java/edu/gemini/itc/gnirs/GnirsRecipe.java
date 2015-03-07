@@ -46,7 +46,7 @@ public final class GnirsRecipe extends RecipeBase {
      * @param out Results will be written to this PrintWriter.
      * @throws Exception on failure to parse parameters.
      */
-    public GnirsRecipe(ITCMultiPartParser r, PrintWriter out) throws Exception {
+    public GnirsRecipe(ITCMultiPartParser r, PrintWriter out) {
         super(out);
         // Read parameters from the four main sections of the web page.
         _sdParameters = ITCRequest.sourceDefinitionParameters(r);
@@ -85,7 +85,7 @@ public final class GnirsRecipe extends RecipeBase {
      * @throws Exception A recipe calculation can fail in many ways, missing data
      *                   files, incorrectly-formatted data files, ...
      */
-    public void writeOutput() throws Exception {
+    public void writeOutput() {
         _println("");
 
         // This object is used to format numerical strings.
@@ -107,7 +107,7 @@ public final class GnirsRecipe extends RecipeBase {
         if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
             // *25 b/c of increased resolutuion of transmission files
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25))) {
-                throw new Exception(
+                throw new RuntimeException(
                         "Please use a model line width > 0.04 nm (or "
                                 + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25))
                                 + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
@@ -139,7 +139,7 @@ public final class GnirsRecipe extends RecipeBase {
                 break;
             default:
                 if (sed.getStart() > start || sed.getEnd() < end) {
-                    throw new Exception(
+                    throw new RuntimeException(
                             "Shifted spectrum lies outside of specified normalisation waveband.");
                 }
         }
@@ -150,7 +150,7 @@ public final class GnirsRecipe extends RecipeBase {
                     .getObservingStart()) {
                 _println(" The user limits defined for plotting do not overlap with the Spectrum.");
 
-                throw new Exception(
+                throw new RuntimeException(
                         "User limits for plotting do not overlap with filter.");
             }
         }

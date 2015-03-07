@@ -40,7 +40,7 @@ public final class NifsRecipe extends RecipeBase {
      * @param out Results will be written to this PrintWriter.
      * @throws Exception on failure to parse parameters.
      */
-    public NifsRecipe(ITCMultiPartParser r, PrintWriter out) throws Exception {
+    public NifsRecipe(ITCMultiPartParser r, PrintWriter out) {
         super(out);
 
         // Read parameters from the four main sections of the web page.
@@ -77,7 +77,7 @@ public final class NifsRecipe extends RecipeBase {
      * @throws Exception A recipe calculation can fail in many ways,
      *                   missing data files, incorrectly-formatted data files, ...
      */
-    public void writeOutput() throws Exception {
+    public void writeOutput() {
         _println("");
         // This object is used to format numerical strings.
         FormatStringWriter device = new FormatStringWriter();
@@ -95,7 +95,7 @@ public final class NifsRecipe extends RecipeBase {
 
         if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25))) {  // *25 b/c of increased resolutuion of transmission files
-                throw new Exception("Please use a model line width > 0.04 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
+                throw new RuntimeException("Please use a model line width > 0.04 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
 
         VisitableSampledSpectrum sed, halo;
@@ -127,7 +127,7 @@ public final class NifsRecipe extends RecipeBase {
                 break;
             default:
                 if (sed.getStart() > start || sed.getEnd() < end) {
-                    throw new Exception("Shifted spectrum lies outside of specified normalisation waveband.");
+                    throw new RuntimeException("Shifted spectrum lies outside of specified normalisation waveband.");
                 }
         }
 
@@ -138,7 +138,7 @@ public final class NifsRecipe extends RecipeBase {
                     _plotParameters.getPlotWaveU() < instrument.getObservingStart()) {
                 _println(" The user limits defined for plotting do not overlap with the Spectrum.");
 
-                throw new Exception("User limits for plotting do not overlap with filter.");
+                throw new RuntimeException("User limits for plotting do not overlap with filter.");
             }
         }
         // Module 2

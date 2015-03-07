@@ -87,7 +87,7 @@ public final class GmosRecipe extends RecipeBase {
      * @throws Exception A recipe calculation can fail in many ways, missing data
      *                   files, incorrectly-formatted data files, ...
      */
-    public void writeOutput() throws Exception {
+    public void writeOutput() {
         final Gmos mainInstrument = createGmos();
         final GmosResult[] results = calculate(mainInstrument);
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {
@@ -97,7 +97,7 @@ public final class GmosRecipe extends RecipeBase {
         }
     }
 
-    public GmosResult[] calculate() throws Exception {
+    public GmosResult[] calculate() {
         final Gmos mainInstrument = createGmos();
         final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
         final GmosResult[] results = new GmosResult[ccdArray.length];
@@ -118,7 +118,7 @@ public final class GmosRecipe extends RecipeBase {
         return results;
     }
 
-    private GmosResult[] calculate(final Gmos mainInstrument) throws Exception {
+    private GmosResult[] calculate(final Gmos mainInstrument) {
 
         final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
         final GmosResult[] results = new GmosResult[ccdArray.length];
@@ -148,7 +148,7 @@ public final class GmosRecipe extends RecipeBase {
         }
     }
 
-    private void writeSpectroscopyOutput(final Gmos mainInstrument, final GmosResult[] results) throws Exception {
+    private void writeSpectroscopyOutput(final Gmos mainInstrument, final GmosResult[] results) {
         _println("");
 
         // This object is used to format numerical strings.
@@ -371,7 +371,7 @@ public final class GmosRecipe extends RecipeBase {
 
     // ===========  SPECTROSCOPY
 
-    private GmosSpectroscopyResult invokeSpectroscopy(final GmosSourceResult src, final Gmos mainInstrument, final int detectorCount) throws Exception {
+    private GmosSpectroscopyResult invokeSpectroscopy(final GmosSourceResult src, final Gmos mainInstrument, final int detectorCount) {
 
         final SpecS2NLargeSlitVisitor[] specS2N;
         final SlitThroughput st;

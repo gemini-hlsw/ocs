@@ -43,12 +43,12 @@ public final class SlitThroughput {
     private final double slit_ap;
 
     // constructor for the optimum aperture case
-    public SlitThroughput(final double im_qual, final double pixel_size, final double slit_width) throws Exception {
+    public SlitThroughput(final double im_qual, final double pixel_size, final double slit_width) {
         this(im_qual, 1.4 * im_qual, pixel_size, slit_width);
     }
 
     //constructor for the user defined aperture case.
-    public SlitThroughput(final double im_qual, final double user_def_ap, final double pixel_size, final double slit_width) throws Exception {
+    public SlitThroughput(final double im_qual, final double user_def_ap, final double pixel_size, final double slit_width) {
         this.im_qual = im_qual;
         this.slit_ap = user_def_ap;
         this.pixel_size = pixel_size;

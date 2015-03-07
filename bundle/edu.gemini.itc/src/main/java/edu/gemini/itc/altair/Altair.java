@@ -38,7 +38,7 @@ public class Altair {
     private final AltairBackgroundVisitor altairBackground;
     private final AltairTransmissionVisitor altairTransmission;
 
-    public Altair(double wavelength, double telescopeDiameter, double uncorrectedSeeing, AltairParameters altair, double fwhmInst) throws Exception {
+    public Altair(double wavelength, double telescopeDiameter, double uncorrectedSeeing, AltairParameters altair, double fwhmInst) {
         this.altair = altair;
         this.wavelength = wavelength;
         this.telescopeDiameter = telescopeDiameter;

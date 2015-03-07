@@ -1,15 +1,5 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-//
 package edu.gemini.itc.gnirs;
 
-import edu.gemini.itc.parameters.ObservationDetailsParameters;
 import edu.gemini.itc.shared.*;
 
 
@@ -59,7 +49,7 @@ public abstract class Gnirs extends Instrument {
     protected int _spectralBinning = 1;
     protected int _spatialBinning = 1;
 
-    public Gnirs(String FILENAME, String INSTUMENT_PREFIX) throws Exception {
+    public Gnirs(String FILENAME, String INSTUMENT_PREFIX) {
         super(INSTR_DIR, FILENAME);
         _sampling = super.getSampling();
         INSTR_PREFIX = INSTUMENT_PREFIX;
@@ -167,7 +157,7 @@ public abstract class Gnirs extends Instrument {
 
     public abstract int getOrder();
 
-    public abstract TransmissionElement getGratingOrderNTransmission(int order) throws Exception;
+    public abstract TransmissionElement getGratingOrderNTransmission(int order);
 
     public abstract void setCentralWavelength(double centralWavelength);
 

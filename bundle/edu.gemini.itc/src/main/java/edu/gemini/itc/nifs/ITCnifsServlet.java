@@ -50,7 +50,7 @@ public final class ITCnifsServlet extends ITCServlet {
     /**
      * Supply the body content for the html document.
      */
-    public void writeOutput(ITCMultiPartParser mpp, PrintWriter out) throws Exception {
+    public void writeOutput(ITCMultiPartParser mpp, PrintWriter out) {
         out.println("<a href = \"http://www.gemini.edu/sciops/instruments/integration-time-calculators/itc-help\"> Click here for help with the results page.</a>");
         Recipe recipe = new NifsRecipe(mpp, out);
         recipe.writeOutput();

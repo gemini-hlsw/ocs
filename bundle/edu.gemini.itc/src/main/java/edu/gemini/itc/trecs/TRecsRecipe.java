@@ -34,7 +34,7 @@ public final class TRecsRecipe extends RecipeBase {
      * @param out Results will be written to this PrintWriter.
      * @throws Exception on failure to parse parameters.
      */
-    public TRecsRecipe(ITCMultiPartParser r, PrintWriter out) throws Exception {
+    public TRecsRecipe(ITCMultiPartParser r, PrintWriter out) {
         _out = out;
 
         // Read parameters from the four main sections of the web page.
@@ -54,9 +54,7 @@ public final class TRecsRecipe extends RecipeBase {
                        ObservingConditionParameters obsConditionParameters,
                        TRecsParameters trecsParameters, TeleParameters teleParameters,
                        PlottingDetailsParameters plotParameters,
-                       PrintWriter out) throws Exception
-
-    {
+                       PrintWriter out) {
         super(out);
         _sdParameters = sdParameters;
         _obsDetailParameters = correctedObsDetails(trecsParameters, obsDetailParameters);
@@ -66,7 +64,7 @@ public final class TRecsRecipe extends RecipeBase {
         _plotParameters = plotParameters;
     }
 
-    private ObservationDetailsParameters correctedObsDetails(TRecsParameters tp, ObservationDetailsParameters odp) throws Exception {
+    private ObservationDetailsParameters correctedObsDetails(TRecsParameters tp, ObservationDetailsParameters odp) {
         // TODO : These corrections were previously done in random places throughout the recipe. I moved them here
         // TODO : so the ObservationDetailsParameters object can become immutable. Basically this calculates
         // TODO : some missing parameters and/or turns the total exposure time into a single exposure time.
@@ -102,7 +100,7 @@ public final class TRecsRecipe extends RecipeBase {
      * @throws Exception A recipe calculation can fail in many ways, missing data
      *                   files, incorrectly-formatted data files, ...
      */
-    public void writeOutput() throws Exception {
+    public void writeOutput() {
         _println("");
 
         // This object is used to format numerical strings.
@@ -125,7 +123,7 @@ public final class TRecsRecipe extends RecipeBase {
                 // resolution of
                 // transmission
                 // files
-                throw new Exception(
+                throw new RuntimeException(
                         "Please use a model line width > 4 nm (or "
                                 + (3E5 / (_sdParameters.getELineWavelength() * 1000 / 4))
                                 + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
@@ -158,7 +156,7 @@ public final class TRecsRecipe extends RecipeBase {
                 break;
             default:
                 if (sed.getStart() > start || sed.getEnd() < end) {
-                    throw new Exception(
+                    throw new RuntimeException(
                             "Shifted spectrum lies outside of specified normalisation waveband.");
                 }
         }
@@ -180,7 +178,7 @@ public final class TRecsRecipe extends RecipeBase {
                     .getObservingStart()) {
                 _println(" The user limits defined for plotting do not overlap with the Spectrum.");
 
-                throw new Exception(
+                throw new RuntimeException(
                         "User limits for plotting do not overlap with filter.");
             }
         }
@@ -236,7 +234,7 @@ public final class TRecsRecipe extends RecipeBase {
                     + "    Please modify the Observing condition constraints section of the HTML form \n"
                     + "    and recalculate.");
 
-            throw new Exception("");
+            throw new RuntimeException("");
         }
 
         SampledSpectrumVisitor water = WaterTransmissionVisitor.create(

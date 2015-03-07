@@ -12,7 +12,7 @@ public final class GemsTransmissionVisitor extends TransmissionElement {
     /**
      * The GemsTrans constructor
      */
-    public GemsTransmissionVisitor() throws Exception {
+    public GemsTransmissionVisitor() {
 
         super(Gems.GEMS_LIB + "/" +
                 Gems.GEMS_PREFIX +

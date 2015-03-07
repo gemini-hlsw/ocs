@@ -93,7 +93,7 @@ public class AOMorphology extends Morphology3D {
         return this.sigma;
     }
 
-    public void accept(MorphologyVisitor v) throws Exception {
+    public void accept(MorphologyVisitor v) {
         v.visitAO(this);
     }
 

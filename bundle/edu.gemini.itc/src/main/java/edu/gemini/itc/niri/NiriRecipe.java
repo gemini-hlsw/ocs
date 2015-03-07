@@ -35,7 +35,7 @@ public final class NiriRecipe extends RecipeBase {
      * @param out Results will be written to this PrintWriter.
      * @throws Exception on failure to parse parameters.
      */
-    public NiriRecipe(ITCMultiPartParser r, PrintWriter out) throws Exception {
+    public NiriRecipe(ITCMultiPartParser r, PrintWriter out) {
         super(out);
         _sdParameters = ITCRequest.sourceDefinitionParameters(r);
         _obsDetailParameters = ITCRequest.observationParameters(r);
@@ -75,7 +75,7 @@ public final class NiriRecipe extends RecipeBase {
      * @throws Exception A recipe calculation can fail in many ways, missing data
      *                   files, incorrectly-formatted data files, ...
      */
-    public void writeOutput() throws Exception {
+    public void writeOutput() {
         // Create the Chart visitor. After a sed has been created the chart
         // visitor
         // can be used by calling the following commented out code:
@@ -112,7 +112,7 @@ public final class NiriRecipe extends RecipeBase {
                 // resolution of
                 // transmission
                 // files
-                throw new Exception(
+                throw new RuntimeException(
                         "Please use a model line width > 0.04 nm (or "
                                 + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25))
                                 + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
@@ -147,7 +147,7 @@ public final class NiriRecipe extends RecipeBase {
                 break;
             default:
                 if (sed.getStart() > start || sed.getEnd() < end) {
-                    throw new Exception(
+                    throw new RuntimeException(
                             "Shifted spectrum lies outside of specified normalisation waveband.");
                 }
         }
@@ -159,7 +159,7 @@ public final class NiriRecipe extends RecipeBase {
             _println(" Sed END" + sed.getEnd() + "< than instrument end"
                     + instrument.getObservingEnd());
 
-            throw new Exception(
+            throw new RuntimeException(
                     "Shifted spectrum lies outside of observed wavelengths");
         }
 
@@ -169,7 +169,7 @@ public final class NiriRecipe extends RecipeBase {
                     .getObservingStart()) {
                 _println(" The user limits defined for plotting do not overlap with the Spectrum.");
 
-                throw new Exception(
+                throw new RuntimeException(
                         "User limits for plotting do not overlap with filter.");
             }// else {
             // NiriChart.setMinMaxX(_obsDetailParameters.getPlotWaveL(),
@@ -326,7 +326,7 @@ public final class NiriRecipe extends RecipeBase {
         if (_altairParameters.altairIsUsed()) {
 
             if (_obsDetailParameters.getMethod().isSpectroscopy()) {
-                throw new Exception(
+                throw new RuntimeException(
                         "Altair cannot currently be used with Spectroscopy mode in the ITC.  Please deselect either altair or spectroscopy and resubmit the form.");
             }
             Altair altair = new Altair(instrument.getEffectiveWavelength(), _teleParameters.getTelescopeDiameter(), im_qual, _altairParameters, 0.0);
