@@ -30,7 +30,7 @@ public final class AcqCamRecipe extends RecipeBase {
      * @param out Results will be written to this PrintWriter.
      * @throws Exception on failure to parse parameters.
      */
-    public AcqCamRecipe(ITCMultiPartParser r, PrintWriter out) {
+    public AcqCamRecipe(final ITCMultiPartParser r, final PrintWriter out) {
         super(out);
 
         // Read parameters from the four main sections of the web page.
@@ -45,12 +45,12 @@ public final class AcqCamRecipe extends RecipeBase {
      * Constructs an AcqCamRecipe given the parameters.
      * Useful for testing.
      */
-    public AcqCamRecipe(SourceDefinitionParameters sdParameters,
-                        ObservationDetailsParameters obsDetailParameters,
-                        ObservingConditionParameters obsConditionParameters,
-                        AcquisitionCamParameters acqCamParameters,
-                        TeleParameters teleParameters,
-                        PrintWriter out) {
+    public AcqCamRecipe(final SourceDefinitionParameters sdParameters,
+                        final ObservationDetailsParameters obsDetailParameters,
+                        final ObservingConditionParameters obsConditionParameters,
+                        final AcquisitionCamParameters acqCamParameters,
+                        final TeleParameters teleParameters,
+                        final PrintWriter out) {
         super(out);
 
         _sdParameters = sdParameters;
@@ -63,178 +63,35 @@ public final class AcqCamRecipe extends RecipeBase {
     /**
      * Performes recipe calculation and writes results to a cached PrintWriter
      * or to System.out.
-     *
-     * @throws Exception A recipe calculation can fail in many ways,
-     *                   missing data files, incorrectly-formatted data files, ...
      */
     public void writeOutput() {
         // This object is used to format numerical strings.
-        FormatStringWriter device = new FormatStringWriter();
+        final FormatStringWriter device = new FormatStringWriter();
         device.setPrecision(2);  // Two decimal places
         device.clear();
         _println("");
-        // For debugging, to be removed later
-        //_print("<pre>" + _sdParameters.toString() + "</pre>");
-        //_print("<pre>" + _acqCamParameters.toString() + "</pre>");
-        //_print("<pre>" + _obsDetailParameters.toString() + "</pre>");
-        //_print("<pre>" + _obsConditionParameters.toString() + "</pre>");
 
-        // Module 1b
-        // Define the source energy (as function of wavelength).
-        //
-        // inputs: instrument, SED
-        // calculates: redshifted SED
-        // output: redshifteed SED
-        AcquisitionCamera instrument =
-                new AcquisitionCamera(_acqCamParameters.getColorFilter(),
-                        _acqCamParameters.getNDFilter());
+        final AcquisitionCamera instrument = new AcquisitionCamera(_acqCamParameters.getColorFilter(), _acqCamParameters.getNDFilter());
 
-
-        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
+        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000))) {
                 throw new IllegalArgumentException("Please use a model line width > 1 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
-
-        //Get Source spectrum from factory
-        VisitableSampledSpectrum sed =
-                SEDFactory.getSED(_sdParameters,
-                        instrument);
-
-        //Apply redshift if needed 
-        SampledSpectrumVisitor redshift =
-                new RedshiftVisitor(_sdParameters.getRedshift());
-        sed.accept(redshift);
-
-        // Must check to see if the redshift has moved the spectrum beyond
-        // useful range.  The shifted spectrum must completely overlap
-        // both the normalization waveband and the observation waveband
-        // (filter region).
-
-        final WavebandDefinition band = _sdParameters.getNormBand();
-        final double start = band.getStart();
-        final double end = band.getEnd();
-        //System.out.println("WStart:" + start + "SStart:" +sed.getStart());
-        //System.out.println("WEnd:" + end + "SEnd:" +sed.getEnd());
-        //System.out.println("OStart:" + instrument.getObservingStart() + "OEnd:" +instrument.getObservingEnd());
-
-
-        //any sed except BBODY and ELINE have normailization regions
-        switch (_sdParameters.getDistributionType()) {
-            case ELINE:
-            case BBODY:
-                    break;
-            default:
-                if (sed.getStart() > start || sed.getEnd() < end) {
-                    throw new IllegalArgumentException("Shifted spectrum lies outside of specified normalisation waveband.");
-                }
         }
 
-        if (sed.getStart() > instrument.getObservingStart() ||
-                sed.getEnd() < instrument.getObservingEnd()) {
+        // Get the summed source and sky
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.VISIBLE, _sdParameters, _obsConditionParameters, _teleParameters, null);
+        final VisitableSampledSpectrum sed = calcSource.sed;
+        final VisitableSampledSpectrum sky = calcSource.sky;
+        final double sed_integral = sed.getIntegral();
+        final double sky_integral = sky.getIntegral();
+
+        if (sed.getStart() > instrument.getObservingStart() || sed.getEnd() < instrument.getObservingEnd()) {
             _println(" Sed start" + sed.getStart() + "> than instrument start" + instrument.getObservingStart());
             _println(" Sed END" + sed.getEnd() + "< than instrument end" + instrument.getObservingEnd());
-
             throw new IllegalArgumentException("Shifted spectrum lies outside of observed wavelengths");
         }
 
-
-        // Module 2
-        // Convert input into standard internally-used units.
-        //
-        // inputs: instrument,redshifted SED, waveband, normalization flux, units
-        // calculates: normalized SED, resampled SED, SED adjusted for aperture
-        // output: SED in common internal units
-        if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
-            final SampledSpectrumVisitor norm =
-                    new NormalizeVisitor(_sdParameters.getNormBand(),
-                            _sdParameters.getSourceNormalization(),
-                            _sdParameters.getUnits());
-            sed.accept(norm);
-        }
-
-
-        // Resample the spectra for efficiency
-        SampledSpectrumVisitor resample = new ResampleVisitor(
-                instrument.getObservingStart(),
-                instrument.getObservingEnd(),
-                instrument.getSampling());
-        //sed.accept(resample);
-
-        //Create and apply Telescope aperture visitor
-        SampledSpectrumVisitor tel = new TelescopeApertureVisitor();
-        sed.accept(tel);
-
-        // SED is now in units of photons/s/nm
-
-        // Module 3b
-        // The atmosphere and telescope modify the spectrum and
-        // produce a background spectrum.
-        //
-        // inputs: SED, AIRMASS, sky emmision file, mirror configuration,
-        // output: SED and sky background as they arrive at instruments
-
-        SampledSpectrumVisitor clouds = CloudTransmissionVisitor.create(
-                _obsConditionParameters.getSkyTransparencyCloud());
-        sed.accept(clouds);
-
-
-        SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
-                _obsConditionParameters.getSkyTransparencyWater(),
-                _obsConditionParameters.getAirmass(),
-                "skytrans_", Site.GN, ITCConstants.VISIBLE);
-        sed.accept(water);
-
-
-        // Background spectrum is introduced here.
-        VisitableSampledSpectrum sky =
-                SEDFactory.getSED(ITCConstants.SKY_BACKGROUND_LIB + "/" +
-                                ITCConstants.OPTICAL_SKY_BACKGROUND_FILENAME_BASE + "_"
-                                + _obsConditionParameters.getSkyBackgroundCategory() +
-                                "_" + _obsConditionParameters.getAirmassCategory()
-                                + ITCConstants.DATA_SUFFIX,
-                        instrument.getSampling());
-
-
-        //Create and Add Background for the tele
-
-        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, Site.GN, ITCConstants.VISIBLE);
-        sky.accept(tb);
-
-
-        // Apply telescope transmission
-        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(_teleParameters);
-
-        sed.accept(t);
-        sky.accept(t);
-
-
-        sky.accept(tel);
-
-        // Add instrument background to sky background for a total background.
-        // At this point "sky" is not the right name
-
-        instrument.addBackground(sky);
-
-        // Module 4  AO module not implemented
-        // The AO module affects source and background SEDs.
-
-        // Module 5b
-        // The instrument with its detectors modifies the source and
-        // background spectra.
-        // input: instrument, source and background SED
-        // output: total flux of source and background.
-
-
-        instrument.convolveComponents(sed);
-        instrument.convolveComponents(sky);
-
-        //ITCPlot plot2 = new ITCPlot(sky.getDataSource());
-        //plot2.addDataSource(sed.getDataSource());
-        //plot2.disp();
-
-
-        double sed_integral = sed.getIntegral();
-        double sky_integral = sky.getIntegral();
 
         // For debugging, print the spectrum integrals.
         //_println("SED integral: "+sed_integral+"\tSKY integral: "+sky_integral);
@@ -253,24 +110,13 @@ public final class AcqCamRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        double pixel_size = instrument.getPixelSize();
-        double ap_diam = 0;
-        double ap_pix = 0;
-        double sw_ap = 0;
-        double Npix = 0;
-        double source_fraction = 0;
-        double pix_per_sq_arcsec = 0;
-        double peak_pixel_count = 0;
-
+        final double pixel_size = instrument.getPixelSize();
+        final double peak_pixel_count;
 
         // Calculate image quality
-        double im_qual = 0.;
-
-        ImageQualityCalculatable IQcalc =
-                ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
+        final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
         IQcalc.calculate();
-
-        im_qual = IQcalc.getImageQuality();
+        final double im_qual = IQcalc.getImageQuality();
 
 
 //Calculate Source fraction
@@ -279,7 +125,7 @@ public final class AcqCamRecipe extends RecipeBase {
         _println(IQcalc.getTextResult(device));
 
 // Calculate the Peak Pixel Flux
-        PeakPixelFluxCalc ppfc;
+        final PeakPixelFluxCalc ppfc;
 
         if (!_sdParameters.isUniform()) {
 
@@ -309,20 +155,15 @@ public final class AcqCamRecipe extends RecipeBase {
 
         // Observation method
 
-        int number_exposures = _obsDetailParameters.getNumExposures();
-        double frac_with_source = _obsDetailParameters.getSourceFraction();
+        final int number_exposures = _obsDetailParameters.getNumExposures();
+        final double frac_with_source = _obsDetailParameters.getSourceFraction();
 
         // report error if this does not come out to be an integer
         checkSourceFraction(number_exposures, frac_with_source);
 
-        double exposure_time = _obsDetailParameters.getExposureTime();
-        double dark_current = instrument.getDarkCurrent();
-        double read_noise = instrument.getReadNoise();
-
         //Calculate the Signal to Noise
 
-        ImagingS2NCalculatable IS2Ncalc =
-                ImagingS2NCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
+        final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
         IS2Ncalc.setSedIntegral(sed_integral);
         IS2Ncalc.setSkyIntegral(sky_integral);
         IS2Ncalc.setSkyAperture(_obsDetailParameters.getSkyApertureDiameter());
@@ -331,7 +172,6 @@ public final class AcqCamRecipe extends RecipeBase {
         IS2Ncalc.setDarkCurrent(instrument.getDarkCurrent());
         IS2Ncalc.calculate();
         _println(IS2Ncalc.getTextResult(device));
-        //_println(IS2Ncalc.getBackgroundLimitResult());
         device.setPrecision(0);  // NO decimal places
         device.clear();
 

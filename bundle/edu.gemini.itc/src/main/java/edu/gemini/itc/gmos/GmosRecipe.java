@@ -98,24 +98,7 @@ public final class GmosRecipe extends RecipeBase {
     }
 
     public GmosResult[] calculate() {
-        final Gmos mainInstrument = createGmos();
-        final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
-        final GmosResult[] results = new GmosResult[ccdArray.length];
-        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
-            for (int i = 0; i < ccdArray.length; i++) {
-                final Gmos instrument = ccdArray[i];
-                final GmosSourceResult calcSrcGmos = invoke(instrument);
-                results[i] = invokeSpectroscopy(calcSrcGmos, mainInstrument, ccdArray.length);
-            }
-        } else {
-            for (int i = 0; i < ccdArray.length; i++) {
-                final Gmos instrument = ccdArray[i];
-                final GmosSourceResult calcSrcGmos = invoke(instrument);
-                results[i] = invokeImaging(calcSrcGmos);
-            }
-        }
-
-        return results;
+        return calculate(createGmos());
     }
 
     private GmosResult[] calculate(final Gmos mainInstrument) {
@@ -125,14 +108,16 @@ public final class GmosRecipe extends RecipeBase {
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {
             for (int i = 0; i < ccdArray.length; i++) {
                 final Gmos instrument = ccdArray[i];
-                final GmosSourceResult calcSrcGmos = invoke(instrument);
-                results[i] = invokeSpectroscopy(calcSrcGmos, mainInstrument, ccdArray.length);
+                // TODO: do we need to do this per CCD? shouldn't be different for different CCDs??
+                final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _gmosParameters.getSite(), ITCConstants.VISIBLE, _sdParameters, _obsConditionParameters, _teleParameters, _plotParameters);
+                results[i] = invokeSpectroscopy(calcSource, mainInstrument, instrument, ccdArray.length);
             }
         } else {
             for (int i = 0; i < ccdArray.length; i++) {
                 final Gmos instrument = ccdArray[i];
-                final GmosSourceResult calcSrcGmos = invoke(instrument);
-                results[i] = invokeImaging(calcSrcGmos);
+                // TODO: do we need to do this per CCD? shouldn't be different for different CCDs??
+                final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _gmosParameters.getSite(), ITCConstants.VISIBLE, _sdParameters, _obsConditionParameters, _teleParameters, _plotParameters);
+                results[i] = invokeImaging(calcSource, instrument);
             }
         }
 
@@ -332,17 +317,6 @@ public final class GmosRecipe extends RecipeBase {
 
     // Calculation results
     // TEMPORARY, these will probably turn into Scala case classes
-    private final class GmosSourceResult {
-        public final Gmos instrument;
-        public final VisitableSampledSpectrum sed;
-        public final VisitableSampledSpectrum sky;
-        public GmosSourceResult(final Gmos instrument, final VisitableSampledSpectrum sed, final VisitableSampledSpectrum sky) {
-            this.instrument         = instrument;
-            this.sed                = sed;
-            this.sky                = sky;
-        }
-
-    }
     interface GmosResult {}
     private final class GmosImagingResult implements GmosResult {
         public final SourceFraction SFcalc;
@@ -371,19 +345,13 @@ public final class GmosRecipe extends RecipeBase {
 
     // ===========  SPECTROSCOPY
 
-    private GmosSpectroscopyResult invokeSpectroscopy(final GmosSourceResult src, final Gmos mainInstrument, final int detectorCount) {
+    // TODO: bring mainInstrument and instrument together
+    private GmosSpectroscopyResult invokeSpectroscopy(final SEDFactory.SourceResult src, final Gmos mainInstrument, final Gmos instrument, final int detectorCount) {
 
         final SpecS2NLargeSlitVisitor[] specS2N;
         final SlitThroughput st;
 
-        // Module 1b
-        // Define the source energy (as function of wavelength).
-        //
-        // inputs: instrument, SED
-        // calculates: redshifted SED
-        // output: redshifteed SED
-
-        final int ccdIndex = src.instrument.getDetectorCcdIndex();
+        final int ccdIndex = instrument.getDetectorCcdIndex();
         final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
         final int firstCcdIndex = tv.getDetectorCcdStartIndex(ccdIndex);
         final int lastCcdIndex = tv.getDetectorCcdEndIndex(ccdIndex, detectorCount);
@@ -399,19 +367,19 @@ public final class GmosRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        final double pixel_size = src.instrument.getPixelSize();
+        final double pixel_size = instrument.getPixelSize();
         double ap_diam;
         double source_fraction;
         List<Double> sf_list = new ArrayList<>();
 
         // Calculate image quality
-        final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, src.instrument);
+        final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
         IQcalc.calculate();
         double im_qual = IQcalc.getImageQuality();
 
-        if (!src.instrument.isIfuUsed()) {
+        if (!instrument.isIfuUsed()) {
             // Calculate the Fraction of source in the aperture
-            final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, src.instrument, im_qual);
+            final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
             source_fraction = SFcalc.getSourceFraction();
         } else {
             final VisitableMorphology morph;
@@ -420,9 +388,9 @@ public final class GmosRecipe extends RecipeBase {
             } else {
                 morph = new USBMorphology();
             }
-            morph.accept(src.instrument.getIFU().getAperture());
+            morph.accept(instrument.getIFU().getAperture());
             // for now just a single item from the list
-            sf_list = src.instrument.getIFU().getFractionOfSourceInAperture();
+            sf_list = instrument.getIFU().getFractionOfSourceInAperture();
             source_fraction = sf_list.get(0);
         }
 
@@ -433,15 +401,15 @@ public final class GmosRecipe extends RecipeBase {
         double spec_source_frac;
         final int number_exposures = _obsDetailParameters.getNumExposures();
         final double frac_with_source = _obsDetailParameters.getSourceFraction();
-        final double dark_current = src.instrument.getDarkCurrent();
+        final double dark_current = instrument.getDarkCurrent();
         final double exposure_time = _obsDetailParameters.getExposureTime();
-        final double read_noise = src.instrument.getReadNoise();
+        final double read_noise = instrument.getReadNoise();
 
         // report error if this does not come out to be an integer
         checkSourceFraction(number_exposures, frac_with_source);
 
         // ObservationMode Imaging or spectroscopy
-        if (!src.instrument.isIfuUsed()) {
+        if (!instrument.isIfuUsed()) {
             if (!_obsDetailParameters.isAutoAperture()) {
                 st = new SlitThroughput(im_qual, _obsDetailParameters.getApertureDiameter(), pixel_size, _gmosParameters.getFPMask());
             } else {
@@ -452,7 +420,7 @@ public final class GmosRecipe extends RecipeBase {
         } else {
             st = null; // TODO: how to deal with no ST in case of IFU?
             spec_source_frac = source_fraction;
-            ap_diam = 5 / src.instrument.getSpatialBinning();
+            ap_diam = 5 / instrument.getSpatialBinning();
         }
 
         // For the usb case we want the resolution to be determined by the
@@ -460,7 +428,7 @@ public final class GmosRecipe extends RecipeBase {
         if (_sdParameters.isUniform()) {
             im_qual = 10000;
 
-            if (!src.instrument.isIfuUsed()) {
+            if (!instrument.isIfuUsed()) {
 
                 if (!_obsDetailParameters.isAutoAperture()) {
                     spec_source_frac = _gmosParameters.getFPMask() * ap_diam * pixel_size;
@@ -471,29 +439,29 @@ public final class GmosRecipe extends RecipeBase {
             }
         }
 
-        if (src.instrument.isIfuUsed() && !_sdParameters.isUniform()) {
+        if (instrument.isIfuUsed() && !_sdParameters.isUniform()) {
             specS2N = new SpecS2NLargeSlitVisitor[sf_list.size()];
             for (int i = 0; i < sf_list.size(); i++) {
                 final double spsf = sf_list.get(i);
                 specS2N[i] = new SpecS2NLargeSlitVisitor(
                         _gmosParameters.getFPMask(),
                         pixel_size,
-                        src.instrument.getSpectralPixelWidth(),
-                        src.instrument.getObservingStart(),
-                        src.instrument.getObservingEnd(),
-                        src.instrument.getGratingDispersion_nm(),
-                        src.instrument.getGratingDispersion_nmppix(),
-                        src.instrument.getGratingResolution(),
+                        instrument.getSpectralPixelWidth(),
+                        instrument.getObservingStart(),
+                        instrument.getObservingEnd(),
+                        instrument.getGratingDispersion_nm(),
+                        instrument.getGratingDispersion_nmppix(),
+                        instrument.getGratingResolution(),
                         spsf,
                         im_qual,
                         ap_diam,
                         number_exposures,
                         frac_with_source,
                         exposure_time,
-                        dark_current * src.instrument.getSpatialBinning() * src.instrument.getSpectralBinning(),
+                        dark_current * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
                         read_noise,
                         _obsDetailParameters.getSkyApertureDiameter(),
-                        src.instrument.getSpectralBinning());
+                        instrument.getSpectralBinning());
 
                 specS2N[i].setDetectorTransmission(mainInstrument.getDetectorTransmision());
                 specS2N[i].setCcdPixelRange(firstCcdIndex, lastCcdIndex);
@@ -507,22 +475,22 @@ public final class GmosRecipe extends RecipeBase {
             specS2N[0] = new SpecS2NLargeSlitVisitor(
                     _gmosParameters.getFPMask(),
                     pixel_size,
-                    src.instrument.getSpectralPixelWidth(),
-                    src.instrument.getObservingStart(),
-                    src.instrument.getObservingEnd(),
-                    src.instrument.getGratingDispersion_nm(),
-                    src.instrument.getGratingDispersion_nmppix(),
-                    src.instrument.getGratingResolution(),
+                    instrument.getSpectralPixelWidth(),
+                    instrument.getObservingStart(),
+                    instrument.getObservingEnd(),
+                    instrument.getGratingDispersion_nm(),
+                    instrument.getGratingDispersion_nmppix(),
+                    instrument.getGratingResolution(),
                     spec_source_frac,
                     im_qual,
                     ap_diam,
                     number_exposures,
                     frac_with_source,
                     exposure_time,
-                    dark_current * src.instrument.getSpatialBinning() * src.instrument.getSpectralBinning(),
+                    dark_current * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
                     read_noise,
                     _obsDetailParameters.getSkyApertureDiameter(),
-                    src.instrument.getSpectralBinning());
+                    instrument.getSpectralBinning());
 
             specS2N[0].setDetectorTransmission(mainInstrument.getDetectorTransmision());
             specS2N[0].setCcdPixelRange(firstCcdIndex, lastCcdIndex);
@@ -539,7 +507,7 @@ public final class GmosRecipe extends RecipeBase {
 
     // ===========  IMAGING
 
-    private GmosImagingResult invokeImaging(final GmosSourceResult src) {
+    private GmosImagingResult invokeImaging(final SEDFactory.SourceResult src, final Gmos instrument) {
 
         // Start of morphology section of ITC
 
@@ -552,22 +520,22 @@ public final class GmosRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        final double pixel_size = src.instrument.getPixelSize();
+        final double pixel_size = instrument.getPixelSize();
         final double sed_integral = src.sed.getIntegral();
         final double sky_integral = src.sky.getIntegral();
 
         // Calculate image quality
-        final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, src.instrument);
+        final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
         IQcalc.calculate();
         final double im_qual = IQcalc.getImageQuality();
 
         // Calculate the Fraction of source in the aperture
-        final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, src.instrument, im_qual);
+        final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
         final double source_fraction = SFcalc.getSourceFraction();
         final double Npix = SFcalc.getNPix();
 
         // Calculate the Peak Pixel Flux
-        final PeakPixelFluxCalc ppfc  = new PeakPixelFluxCalc(im_qual, pixel_size, _obsDetailParameters.getExposureTime(), sed_integral, sky_integral, src.instrument.getDarkCurrent());
+        final PeakPixelFluxCalc ppfc  = new PeakPixelFluxCalc(im_qual, pixel_size, _obsDetailParameters.getExposureTime(), sed_integral, sky_integral, instrument.getDarkCurrent());
         final double peak_pixel_count;
         if (!_sdParameters.isUniform()) {
             peak_pixel_count = ppfc.getFluxInPeakPixel();
@@ -583,137 +551,17 @@ public final class GmosRecipe extends RecipeBase {
         // report error if this does not come out to be an integer
         checkSourceFraction(number_exposures, frac_with_source);
 
-        final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, src.instrument);
+        final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
         IS2Ncalc.setSedIntegral(sed_integral);
         IS2Ncalc.setSkyIntegral(sky_integral);
         IS2Ncalc.setSkyAperture(_obsDetailParameters.getSkyApertureDiameter());
         IS2Ncalc.setSourceFraction(source_fraction);
         IS2Ncalc.setNpix(Npix);
-        IS2Ncalc.setDarkCurrent(src.instrument.getDarkCurrent() * src.instrument.getSpatialBinning() * src.instrument.getSpatialBinning());
+        IS2Ncalc.setDarkCurrent(instrument.getDarkCurrent() * instrument.getSpatialBinning() * instrument.getSpatialBinning());
         IS2Ncalc.calculate();
 
         return new GmosImagingResult(IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
 
-    }
-
-    // ===========  GENERAL
-    private GmosSourceResult invoke(final Gmos instrument) {
-
-        // Module 1b
-        // Define the source energy (as function of wavelength).
-        //
-        // inputs: instrument, SED
-        // calculates: redshifted SED
-        // output: redshifteed SED
-
-        final VisitableSampledSpectrum sed = SEDFactory.getSED(_sdParameters, instrument);
-        final SampledSpectrumVisitor redshift = new RedshiftVisitor(_sdParameters.getRedshift());
-        sed.accept(redshift);
-
-        // Must check to see if the redshift has moved the spectrum beyond
-        // useful range. The shifted spectrum must completely overlap
-        // both the normalization waveband and the observation waveband
-        // (filter region).
-
-        final WavebandDefinition band = _sdParameters.getNormBand();
-        final double start = band.getStart();
-        final double end = band.getEnd();
-
-        // any sed except BBODY and ELINE have normailization regions
-        switch (_sdParameters.getDistributionType()) {
-            case ELINE:
-            case BBODY:
-                break;
-            default:
-                if (sed.getStart() > start || sed.getEnd() < end) {
-                    throw new RuntimeException("Shifted spectrum lies outside of specified normalisation waveband.");
-                }
-        }
-
-        if (_plotParameters.getPlotLimits().equals(PlottingDetailsParameters.PlotLimits.USER)) {
-            if (_plotParameters.getPlotWaveL() > instrument.getObservingEnd()
-                    || _plotParameters.getPlotWaveU() < instrument
-                    .getObservingStart()) {
-                //_println(" The user limits defined for plotting do not overlap with the Spectrum.");
-
-                throw new RuntimeException("User limits for plotting do not overlap with filter.");
-            }
-        }
-        // Module 2
-        // Convert input into standard internally-used units.
-        //
-        // inputs: instrument,redshifted SED, waveband, normalization flux,
-        // units
-        // calculates: normalized SED, resampled SED, SED adjusted for aperture
-        // output: SED in common internal units
-        if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
-            final SampledSpectrumVisitor norm = new NormalizeVisitor(
-                    _sdParameters.getNormBand(),
-                    _sdParameters.getSourceNormalization(),
-                    _sdParameters.getUnits());
-            sed.accept(norm);
-        }
-
-        final SampledSpectrumVisitor tel = new TelescopeApertureVisitor();
-        sed.accept(tel);
-
-        // SED is now in units of photons/s/nm
-
-        // Module 3b
-        // The atmosphere and telescope modify the spectrum and
-        // produce a background spectrum.
-        //
-        // inputs: SED, AIRMASS, sky emmision file, mirror configuration,
-        // output: SED and sky background as they arrive at instruments
-
-        final SampledSpectrumVisitor clouds = CloudTransmissionVisitor.create(_obsConditionParameters.getSkyTransparencyCloud());
-        sed.accept(clouds);
-
-        final SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
-                _obsConditionParameters.getSkyTransparencyWater(),
-                _obsConditionParameters.getAirmass(), "skytrans_",
-                _gmosParameters.getSite(), ITCConstants.VISIBLE);
-        sed.accept(water);
-
-        // Background spectrum is introduced here.
-        final VisitableSampledSpectrum sky = SEDFactory.getSED(
-                ITCConstants.SKY_BACKGROUND_LIB + "/"
-                        + ITCConstants.OPTICAL_SKY_BACKGROUND_FILENAME_BASE
-                        + "_"
-                        + _obsConditionParameters.getSkyBackgroundCategory()
-                        + "_" + _obsConditionParameters.getAirmassCategory()
-                        + ITCConstants.DATA_SUFFIX, instrument.getSampling());
-
-        // Apply telescope transmission to both sed and sky
-        final SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(_teleParameters);
-        sed.accept(t);
-        sky.accept(t);
-
-        // Create and Add background for the telescope.
-        final SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, _gmosParameters.getSite(), ITCConstants.VISIBLE);
-        sky.accept(tb);
-        sky.accept(tel);
-
-        // Add instrument background to sky background for a total background.
-        // At this point "sky" is not the right name.
-        instrument.addBackground(sky);
-
-        // Module 4 AO module not implemented
-        // The AO module affects source and background SEDs.
-
-        // Module 5b
-        // The instrument with its detectors modifies the source and
-        // background spectra.
-        // input: instrument, source and background SED
-        // output: total flux of source and background.
-        instrument.convolveComponents(sed);
-        instrument.convolveComponents(sky);
-
-        // For debugging, print the spectrum integrals.
-        // _println("SED integral: "+sed_integral+"\tSKY integral: "+sky_integral);
-
-        // End of the Spectral energy distribution portion of the ITC.
-        return new GmosSourceResult(instrument, sed, sky);
     }
 
 }

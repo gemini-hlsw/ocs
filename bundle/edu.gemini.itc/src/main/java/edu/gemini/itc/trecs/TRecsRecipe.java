@@ -129,103 +129,6 @@ public final class TRecsRecipe extends RecipeBase {
                                 + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
 
-        VisitableSampledSpectrum sed;
-
-        sed = SEDFactory.getSED(_sdParameters, instrument);
-        // sed.applyWavelengthCorrection();
-
-        // ITCChart Chart2 = new ITCChart();
-
-        SampledSpectrumVisitor redshift = new RedshiftVisitor(
-                _sdParameters.getRedshift());
-        sed.accept(redshift);
-
-        // Must check to see if the redshift has moved the spectrum beyond
-        // useful range. The shifted spectrum must completely overlap
-        // both the normalization waveband and the observation waveband
-        // (filter region).
-
-        final WavebandDefinition band = _sdParameters.getNormBand();
-        final double start = band.getStart();
-        final double end = band.getEnd();
-
-        // any sed except BBODY and ELINE have normailization regions
-        switch (_sdParameters.getDistributionType()) {
-            case ELINE:
-            case BBODY:
-                break;
-            default:
-                if (sed.getStart() > start || sed.getEnd() < end) {
-                    throw new RuntimeException(
-                            "Shifted spectrum lies outside of specified normalisation waveband.");
-                }
-        }
-
-        // if (sed.getStart() > instrument.getObservingStart() ||
-        // sed.getEnd() < instrument.getObservingEnd()) {
-        // _println(" Sed start" + sed.getStart() + "> than instrument start"+
-        // instrument.getObservingStart());
-        // _println(" Sed END" + sed.getEnd() + "< than instrument end"+
-        // instrument.getObservingEnd());
-
-        // throw new
-        // Exception("Shifted spectrum lies outside of observed wavelengths");
-        // }
-
-        if (_plotParameters.getPlotLimits().equals(PlottingDetailsParameters.PlotLimits.USER)) {
-            if (_plotParameters.getPlotWaveL() > instrument.getObservingEnd()
-                    || _plotParameters.getPlotWaveU() < instrument
-                    .getObservingStart()) {
-                _println(" The user limits defined for plotting do not overlap with the Spectrum.");
-
-                throw new RuntimeException(
-                        "User limits for plotting do not overlap with filter.");
-            }
-        }
-
-        // Module 2
-        // Convert input into standard internally-used units.
-        //
-        // inputs: instrument,redshifted SED, waveband, normalization flux,
-        // units
-        // calculates: normalized SED, resampled SED, SED adjusted for aperture
-        // output: SED in common internal units
-        if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
-            final SampledSpectrumVisitor norm = new NormalizeVisitor(
-                    _sdParameters.getNormBand(),
-                    _sdParameters.getSourceNormalization(),
-                    _sdParameters.getUnits());
-            sed.accept(norm);
-        }
-
-        // Resample the spectra for efficiency
-        SampledSpectrumVisitor resample = new ResampleWithPaddingVisitor(
-                instrument.getObservingStart(), instrument.getObservingEnd(),
-                instrument.getSampling(), 0);
-        // sed.accept(resample);
-
-        // _println("Sed Start: " + sed.getStart());
-        // _println("Sed End:   " + sed.getEnd());
-        // _println("Sampling:  " + sed.getSampling());
-        // _println("Length:    " + sed.getLength());
-        // _println("");
-
-        SampledSpectrumVisitor tel = new TelescopeApertureVisitor();
-        sed.accept(tel);
-
-        // SED is now in units of photons/s/nm
-
-        // Module 3b
-        // The atmosphere and telescope modify the spectrum and
-        // produce a background spectrum.
-        //
-        // inputs: SED, AIRMASS, sky emmision file, mirror configuration,
-        // output: SED and sky background as they arrive at instruments
-
-        SampledSpectrumVisitor clouds = CloudTransmissionVisitor.create(
-                _obsConditionParameters.getSkyTransparencyCloud());
-        sed.accept(clouds);
-
         // For mid-IR observation the watervapor percentile and sky background
         // percentile must be the same
         if (!_obsConditionParameters.getSkyTransparencyWaterCategory().equals(_obsConditionParameters.getSkyBackgroundCategory())) {
@@ -237,72 +140,14 @@ public final class TRecsRecipe extends RecipeBase {
             throw new RuntimeException("");
         }
 
-        SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
-                _obsConditionParameters.getSkyTransparencyWater(),
-                _obsConditionParameters.getAirmass(), "midIR_trans_",
-                Site.GS, ITCConstants.MID_IR);
-        sed.accept(water);
-
-        // Background spectrum is introduced here.
-        VisitableSampledSpectrum sky = SEDFactory.getSED("/"
-                + ITCConstants.HI_RES + "/cp"
-                + ITCConstants.MID_IR + ITCConstants.SKY_BACKGROUND_LIB + "/"
-                + ITCConstants.MID_IR_SKY_BACKGROUND_FILENAME_BASE + "_"
-                + _obsConditionParameters.getSkyBackgroundCategory() + "_"
-                + _obsConditionParameters.getAirmassCategory()
-                + ITCConstants.DATA_SUFFIX, instrument.getSampling());
-
-        // Chart2.addArray(sky.getData(),"Sky");
-        // Chart2.addTitle("Original Sky Spectrum");
-        // _println(Chart2.getBufferedImage(), "OrigSky");
-        // _println("");
-        // Chart2.flush();
-
-        // resample sky_background to instrument parameters
-        // sky.accept(resample);
-
-        // Apply telescope transmission to both sed and sky
-        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(_teleParameters);
-        sed.accept(t);
-        sky.accept(t);
-
-        // _println("Telescope Back ave: " + sky.getAverage());
-        // Create and Add background for the telescope.
-        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, Site.GS, ITCConstants.MID_IR);
-        sky.accept(tb);
-        // _println("Telescope Back ave: " + sky.getAverage());
-
-        sky.accept(tel);
-
-        // Add instrument background to sky background for a total background.
-        // At this point "sky" is not the right name.
-        instrument.addBackground(sky);
-
-        // _println("Telescope Back ave: " + sky.getAverage());
-
-        // Module 4 AO module not implemented
-        // The AO module affects source and background SEDs.
-
-        // Module 5b
-        // The instrument with its detectors modifies the source and
-        // background spectra.
-        // input: instrument, source and background SED
-        // output: total flux of source and background.
-        double before = sky.getAverage();
-        instrument.convolveComponents(sed);
-        instrument.convolveComponents(sky);
-
-        // _println("Telescope Back ave chage: " + sky.getAverage()/before);
 
         // Get the summed source and sky
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GS, ITCConstants.MID_IR, _sdParameters, _obsConditionParameters, _teleParameters, _plotParameters);
+        final VisitableSampledSpectrum sed = calcSource.sed;
+        final VisitableSampledSpectrum sky = calcSource.sky;
         double sed_integral = sed.getIntegral();
         double sky_integral = sky.getIntegral();
 
-        // For debugging, print the spectrum integrals.
-        // _println("SED integral: "+sed_integral+"\tSKY integral: "+sky_integral);
-        // _println(sky.printSpecAsString());
-
-        // End of the Spectral energy distribution portion of the ITC.
 
         // Start of morphology section of ITC
 
@@ -317,17 +162,11 @@ public final class TRecsRecipe extends RecipeBase {
 
         double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
-        double ap_pix = 0;
-        double sw_ap = 0;
-        double Npix = 0;
-        double source_fraction = 0;
-        double pix_per_sq_arcsec = 0;
         double peak_pixel_count = 0;
 
         // Calculate image quality
         double im_qual = 0.;
-        ImageQualityCalculatable IQcalc =
-                ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
+        ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
         IQcalc.calculate();
 
         im_qual = IQcalc.getImageQuality();

@@ -98,144 +98,11 @@ public final class NifsRecipe extends RecipeBase {
                 throw new RuntimeException("Please use a model line width > 0.04 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
 
-        VisitableSampledSpectrum sed, halo;
-
-        sed = SEDFactory.getSED(_sdParameters, instrument);
-
-        halo = (VisitableSampledSpectrum) sed.clone();  //initialize halo
-
-        //_println("Initial Photons.. ");
-        //_println("Total photons/s between 999 - 1001: "+ sed.getIntegral(999.0,1001.0));
-        //_println("Total photons/s between 1649 - 1651: "+ sed.getIntegral(1649.0,1651.0));
-        //_println("Total photons/s between 2199 - 2201: "+ sed.getIntegral(2199.0,2201.0));
-        SampledSpectrumVisitor redshift =
-                new RedshiftVisitor(_sdParameters.getRedshift());
-        sed.accept(redshift);
-        // Must check to see if the redshift has moved the spectrum beyond
-        // useful range.  The shifted spectrum must completely overlap
-        // both the normalization waveband and the observation waveband
-        // (filter region).
-
-        final WavebandDefinition band = _sdParameters.getNormBand();
-        final double start = band.getStart();
-        final double end = band.getEnd();
-
-        //any sed except BBODY and ELINE have normailization regions
-        switch (_sdParameters.getDistributionType()) {
-            case ELINE:
-            case BBODY:
-                break;
-            default:
-                if (sed.getStart() > start || sed.getEnd() < end) {
-                    throw new RuntimeException("Shifted spectrum lies outside of specified normalisation waveband.");
-                }
-        }
-
-        // Check to see if user has defined plot limits; if so check to make sure they are not outside of the
-        // actual data
-        if (_plotParameters.getPlotLimits().equals(PlottingDetailsParameters.PlotLimits.USER)) {
-            if (_plotParameters.getPlotWaveL() > instrument.getObservingEnd() ||
-                    _plotParameters.getPlotWaveU() < instrument.getObservingStart()) {
-                _println(" The user limits defined for plotting do not overlap with the Spectrum.");
-
-                throw new RuntimeException("User limits for plotting do not overlap with filter.");
-            }
-        }
-        // Module 2
-        // Convert input into standard internally-used units.
-        //
-        // inputs: instrument,redshifted SED, waveband, normalization flux, units
-        // calculates: normalized SED, resampled SED, SED adjusted for aperture
-        // output: SED in common internal units
-        if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
-            final SampledSpectrumVisitor norm =
-                    new NormalizeVisitor(_sdParameters.getNormBand(),
-                            _sdParameters.getSourceNormalization(),
-                            _sdParameters.getUnits());
-            sed.accept(norm);
-        }
-
-        SampledSpectrumVisitor tel = new TelescopeApertureVisitor();
-        sed.accept(tel);
-
-        //_println("Initial Photons..(scaled to photons/s/nm)");
-        //_println("Total photons/s between 999 - 1001: "+ sed.getIntegral(999.0,1001.0));
-        //_println("Total photons/s between 1649 - 1651: "+ sed.getIntegral(1649.0,1651.0));
-        //_println("Total photons/s between 2199 - 2201: "+ sed.getIntegral(2199.0,2201.0));
-
-
-        // SED is now in units of photons/s/nm
-
-        // Module 3b
-        // The atmosphere and telescope modify the spectrum and
-        // produce a background spectrum.
-        //
-        // inputs: SED, AIRMASS, sky emmision file, mirror configuration,
-        // output: SED and sky background as they arrive at instruments
-
-        SampledSpectrumVisitor clouds = CloudTransmissionVisitor.create(
-                _obsConditionParameters.getSkyTransparencyCloud());
-        sed.accept(clouds);
-
-
-        SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
-                _obsConditionParameters.getSkyTransparencyWater(),
-                _obsConditionParameters.getAirmass(),
-                "nearIR_trans_", Site.GN, ITCConstants.NEAR_IR);
-        sed.accept(water);
-
-        // Background spectrum is introduced here.
-        VisitableSampledSpectrum sky =
-                SEDFactory.getSED("/" + ITCConstants.HI_RES + "/mk" + ITCConstants.NEAR_IR +
-                                ITCConstants.SKY_BACKGROUND_LIB + "/" +
-                                ITCConstants.NEAR_IR_SKY_BACKGROUND_FILENAME_BASE + "_"
-                                + _obsConditionParameters.getSkyTransparencyWaterCategory() +
-                                "_" + _obsConditionParameters.getAirmassCategory() +
-                                ITCConstants.DATA_SUFFIX,
-                        instrument.getSampling());
-
-        //_println("Total Photons..(After Sky)");
-        //_println("Total photons/s between 999 - 1001: "+ sed.getIntegral(999.0,1001.0));
-        //_println("Total photons/s between 1649 - 1651: "+ sed.getIntegral(1649.0,1651.0));
-        //_println("Total photons/s between 2199 - 2201: "+ sed.getIntegral(2199.0,2201.0));
-
-        // Apply telescope transmission to both sed and sky
-        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(_teleParameters);
-        sed.accept(t);
-        sky.accept(t);
-
-        //_println("Total Photons..(After Telescope Transmission)");
-        //_println("Total photons/s between 999 - 1001: "+ sed.getIntegral(999.0,1001.0));
-        //_println("Total photons/s between 1649 - 1651: "+ sed.getIntegral(1649.0,1651.0));
-        //_println("Total photons/s between 2199 - 2201: "+ sed.getIntegral(2199.0,2201.0));
-
-        //Create and Add background for the telescope.
-        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, Site.GN, ITCConstants.NEAR_IR);
-        sky.accept(tb);
-        sky.accept(tel);
-
-        // Add instrument background to sky background for a total background.
-        // At this point "sky" is not the right name.
-        instrument.addBackground(sky);
-
-        // Module 4  AO module not implemented
-        // The AO module affects source and background SEDs.
-
-        // Module 5b
-        // The instrument with its detectors modifies the source and
-        // background spectra.
-        // input: instrument, source and background SED
-        // output: total flux of source and background.
-        instrument.convolveComponents(sed);
-        instrument.convolveComponents(sky);
-
-        //_println("Total Photons..(After Instrument Transmission)");
-        //_println("Total photons/s between 999 - 1001: "+ sed.getIntegral(999.0,1001.0));
-        // _println("Total photons/s between 1649 - 1651: "+ sed.getIntegral(1649.0,1651.0));
-        // _println("Total photons/s between 2199 - 2201: "+ sed.getIntegral(2199.0,2201.0));
-
 
         // Get the summed source and sky  Uncomment if needed for NIFS imaging ITC
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _teleParameters, _plotParameters);
+        final VisitableSampledSpectrum sed = calcSource.sed;
+        final VisitableSampledSpectrum sky = calcSource.sky;
         double sed_integral = sed.getIntegral();
         double sky_integral = sky.getIntegral();
 
@@ -256,12 +123,7 @@ public final class NifsRecipe extends RecipeBase {
 
         double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
-        double ap_pix = 0;
-        double sw_ap = 0;
         double Npix = 0;
-        double source_fraction = 0;
-        double pix_per_sq_arcsec = 0;
-        double peak_pixel_count = 0;
         List sf_list = new ArrayList();
         List halo_sf_list = new ArrayList();
         List ap_offset_list = new ArrayList();
@@ -290,7 +152,7 @@ public final class NifsRecipe extends RecipeBase {
             sky.accept(altairTransmissionVisitor);
         }
 
-        halo = (VisitableSampledSpectrum) sed.clone();
+        final VisitableSampledSpectrum halo = (VisitableSampledSpectrum) sed.clone();
 
         if (_altairParameters.altairIsUsed()) {
             halo.accept(altairFluxAttenuationVisitorHalo);
