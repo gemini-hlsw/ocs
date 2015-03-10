@@ -4,7 +4,7 @@ import edu.gemini.pot.sp._
 import edu.gemini.pot.sp.version._
 import edu.gemini.pot.sp.validator._
 import edu.gemini.pot.spdb.IDBDatabaseService
-import edu.gemini.sp.vcs.MergePlan.Zipper
+import edu.gemini.sp.vcs.OldMergePlan.Zipper
 
 //
 // Post-process a merge plan (i.e, MergePlan) to handle validity checking and
@@ -26,7 +26,7 @@ case class MergeValidity(prog: ISPProgram, odb: IDBDatabaseService) {
    *         a valid science program (if Right), or else a message describing
    *         why that cannot be done (if Left)
    */
-  def process(mp: MergePlan): Either[String, MergePlan] =
+  def process(mp: OldMergePlan): Either[String, OldMergePlan] =
     Validator.validate(mp.toTypeTree).fold(
       v => fix(mp, v).right.flatMap(process),
       _ => Right(mp)
@@ -37,7 +37,7 @@ case class MergeValidity(prog: ISPProgram, odb: IDBDatabaseService) {
     case CardinalityViolation(_, k, _) => k.toRight("Cardinality violation with unknown key.")
   }
 
-  private def fix(mp: MergePlan, v: Violation): Either[String, MergePlan] =
+  private def fix(mp: OldMergePlan, v: Violation): Either[String, OldMergePlan] =
     for {
       k <- violationKey(v).right
       z <- Zipper(mp).find(_.sp.getNodeKey == k).toRight("Validity constraint violation for node not in merged result: " + k).right
@@ -48,7 +48,7 @@ case class MergeValidity(prog: ISPProgram, odb: IDBDatabaseService) {
     val cf = odb.getFactory.createConflictFolder(prog, null)
     val vv = EmptyNodeVersions.incr(lifespanId)
     val dj = cf.getDataObject
-    z.prependChild(MergePlan(cf, vv, dj, cf.getConflicts, Nil)).down.get
+    z.prependChild(OldMergePlan(cf, vv, dj, cf.getConflicts, Nil)).down.get
   }
 
 //  private def fixWithMerge(zip: Zipper): Either[String, MergePlan] = {
@@ -64,11 +64,11 @@ case class MergeValidity(prog: ISPProgram, odb: IDBDatabaseService) {
 //    } yield z.setDataObj(obj).top.focus
 //  }
 
-  private def fix(zip: Zipper): Either[String, MergePlan] = {
+  private def fix(zip: Zipper): Either[String, OldMergePlan] = {
     // Add a conflict note to the problem node and get the resulting merge plan
     val problemNode = zip.addNote(new Conflict.ConstraintViolation(zip.focus.sp.getNodeKey)).focus
 
-    val isConflictFolder: MergePlan => Boolean = _.sp match {
+    val isConflictFolder: OldMergePlan => Boolean = _.sp match {
       case cf: ISPConflictFolder => true
       case _ => false
     }

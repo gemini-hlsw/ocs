@@ -4,7 +4,7 @@ import edu.gemini.pot.sp.{ISPStaffOnlyFieldProtected, ISPNode, ISPProgram}
 import edu.gemini.pot.sp.version._
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.sp.vcs.VcsLocking.MergeOp
-import edu.gemini.sp.vcs.VcsFailure._
+import edu.gemini.sp.vcs.OldVcsFailure._
 import edu.gemini.spModel.rich.pot.sp._
 
 import scalaz._

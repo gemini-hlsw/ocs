@@ -29,16 +29,16 @@ class TestMergeValidity {
   }
 
 
-  private def node(n: ISPNode): MergePlan.Node =
-    MergePlan.Node(n, EmptyNodeVersions, n.getDataObject, Conflicts.EMPTY)
+  private def node(n: ISPNode): OldMergePlan.Node =
+    OldMergePlan.Node(n, EmptyNodeVersions, n.getDataObject, Conflicts.EMPTY)
 
-  private def mp(n: ISPNode, children: MergePlan*): MergePlan =
-    MergePlan(node(n), children.toList)
+  private def mp(n: ISPNode, children: OldMergePlan*): OldMergePlan =
+    OldMergePlan(node(n), children.toList)
 
   private def tt(nt: NodeType[_ <: ISPNode], children: TypeTree*): TypeTree =
     TypeTree(nt, None, children.toList)
 
-  private def same(expected: TypeTree, prog: ISPProgram, plan: MergePlan) {
+  private def same(expected: TypeTree, prog: ISPProgram, plan: OldMergePlan) {
     assertEquals(expected, MergeValidity(prog, odb).process(plan).right.get.toTypeTree.withoutKeys)
   }
 

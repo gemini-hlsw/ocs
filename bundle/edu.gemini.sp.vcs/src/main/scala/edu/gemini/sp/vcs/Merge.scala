@@ -4,7 +4,7 @@ import edu.gemini.pot.sp._
 import edu.gemini.pot.sp.version._
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.sp.vcs.VcsLocking.MergeOp
-import edu.gemini.sp.vcs.VcsFailure._
+import edu.gemini.sp.vcs.OldVcsFailure._
 import edu.gemini.spModel.rich.pot.sp._
 
 import scalaz._
@@ -34,7 +34,7 @@ private[vcs] object Merge extends MergeOp[ISPProgram] {
     }
 
     // Edit the existing program according to the given known-to-be-valid merge plan.
-    def doEdits(plan: MergePlan): TryVcs[ISPProgram] = {
+    def doEdits(plan: OldMergePlan): TryVcs[ISPProgram] = {
       val vm = addDeletedNodes(plan.apply(EmptyVersionMap))
       existing.renumberObservationsToMatch(input)
       TemplateGroupNumbering.renumber(existing, input)
@@ -151,7 +151,7 @@ private[vcs] object Merge extends MergeOp[ISPProgram] {
      * this method, only a tree of changes to be applied (i.e., instructions)
      * is created.
      */
-    final def plan(mnm: MergeNodeMap, cp: EmptyNodeCopier): MergePlan = {
+    final def plan(mnm: MergeNodeMap, cp: EmptyNodeCopier): OldMergePlan = {
       val childMerger = ChildMerger(this, mnm, cp)
 
       if (ex.status == Deleted) childMerger.useIncoming
@@ -262,19 +262,19 @@ private[vcs] object Merge extends MergeOp[ISPProgram] {
         case (f, lst) => lst.map(f)
       }
 
-    private def replacedRemoteDeleteNotes(lst: List[MergePlan]): List[Conflict.Note] =
+    private def replacedRemoteDeleteNotes(lst: List[OldMergePlan]): List[Conflict.Note] =
       lst collect {
-        case MergePlan(MergePlan.Node(sp, _, _, _, Some(_)), _) => new Conflict.ReplacedRemoteDelete(sp.getNodeKey)
+        case OldMergePlan(OldMergePlan.Node(sp, _, _, _, Some(_)), _) => new Conflict.ReplacedRemoteDelete(sp.getNodeKey)
       }
 
-    private def toMergePlan(children: List[MergeNode]): List[MergePlan] =
-      (children :\ List.empty[MergePlan]) {
+    private def toMergePlan(children: List[MergeNode]): List[OldMergePlan] =
+      (children :\ List.empty[OldMergePlan]) {
         (child, resList) => child.plan(mnm, cp) :: resList
       }
 
     // useExisting when existing node is newer (or no change) or else incoming
     // node is deleted
-    def useExisting: MergePlan = {
+    def useExisting: OldMergePlan = {
       // Take the existing children, but remove any that are in parents where
       // the incoming node prevails.
       val (keep, moved) = exChildren partition {
@@ -291,15 +291,15 @@ private[vcs] object Merge extends MergeOp[ISPProgram] {
       val flicks = if (mn.in.status == Deleted) Conflicts.EMPTY
       else conflicts(conflictNotes(MOVED -> moved, RESURRECTED_LOCAL_DELETE -> deletedButModifiedIn))
 
-      MergePlan(spNode, vv, exDataObject, flicks, children)
+      OldMergePlan(spNode, vv, exDataObject, flicks, children)
     }
 
     // Take the useExisting result but replacing the node with a copy that has
     // unique keys and a starting version vector.
-    def copyExisting: MergePlan = useExisting.replaceWithCopy(cp)
+    def copyExisting: OldMergePlan = useExisting.replaceWithCopy(cp)
 
     // useIncoming when incoming node is newer or else existing is deleted
-    def useIncoming: MergePlan = {
+    def useIncoming: OldMergePlan = {
       // Keep any nodes deleted in the incoming program yet modified locally
       val children = toMergePlan {
         (inChildren /: deletedButModifiedEx) {
@@ -310,12 +310,12 @@ private[vcs] object Merge extends MergeOp[ISPProgram] {
       val flicks = if (mn.ex.status == Deleted) Conflicts.EMPTY
       else conflicts(replacedRemoteDeleteNotes(children))
 
-      MergePlan(spNode, vv, inDataObject, flicks, children)
+      OldMergePlan(spNode, vv, inDataObject, flicks, children)
     }
 
     // conflict when there are changes in both versions and both versions are
     // present (i.e., not deleted)
-    def conflict: MergePlan = {
+    def conflict: OldMergePlan = {
       val children = toMergePlan {
         // Start with the list of incoming children that are present in both
         // the incoming and existing child lists, or new in incoming.
@@ -365,7 +365,7 @@ private[vcs] object Merge extends MergeOp[ISPProgram] {
         else if (flicks0.isEmpty) mergedDataObject.map((_, flicks0)).getOrElse(withDataObjectConflict)
         else withDataObjectConflict
 
-      MergePlan(spNode, vv, dataObject, flicks, children)
+      OldMergePlan(spNode, vv, dataObject, flicks, children)
     }
   }
 

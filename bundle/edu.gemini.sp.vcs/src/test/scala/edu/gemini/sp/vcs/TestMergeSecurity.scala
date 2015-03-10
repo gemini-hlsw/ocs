@@ -2,7 +2,7 @@ package edu.gemini.sp.vcs
 
 import edu.gemini.pot.sp.Conflict.{DeletePermissionFail, CreatePermissionFail, UpdatePermissionFail}
 import edu.gemini.pot.sp.{SPComponentType, ISPObservation, ISPSeqComponent}
-import edu.gemini.sp.vcs.VcsFailure._
+import edu.gemini.sp.vcs.OldVcsFailure._
 import edu.gemini.spModel.config2.DefaultConfig
 import edu.gemini.spModel.dataset._
 import edu.gemini.spModel.obs.{ObservationStatus, SPObservation, ObsPhase2Status}

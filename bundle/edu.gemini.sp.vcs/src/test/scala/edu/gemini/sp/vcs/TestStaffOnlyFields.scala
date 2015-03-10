@@ -5,7 +5,7 @@ import org.junit.Assert._
 import edu.gemini.spModel.gemini.obscomp.SPProgram
 import edu.gemini.spModel.obs.ObsQaState
 import edu.gemini.spModel.obscomp.{SPNote, ProgramNote}
-import edu.gemini.sp.vcs.VcsFailure.NeedsUpdate
+import edu.gemini.sp.vcs.OldVcsFailure.NeedsUpdate
 
 class TestStaffOnlyFields {
 

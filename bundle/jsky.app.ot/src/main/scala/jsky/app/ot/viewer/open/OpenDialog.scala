@@ -7,7 +7,7 @@ import edu.gemini.shared.gui.SizePreference
 import edu.gemini.shared.util.immutable.ApplyOp
 import edu.gemini.sp.vcs.ProgramStatus.{PendingCheckIn, PendingSync}
 import edu.gemini.sp.vcs.reg.VcsRegistrar
-import edu.gemini.sp.vcs.{VcsFailure, VcsServer, VersionControlSystem}
+import edu.gemini.sp.vcs.{OldVcsFailure, VcsServer, VersionControlSystem}
 import edu.gemini.spModel.core.{Peer, SPProgramID}
 import edu.gemini.spModel.util.DBProgramInfo
 import edu.gemini.util.security.auth.keychain.Action._
@@ -63,23 +63,23 @@ object OpenDialog {
   def update(db: IDBDatabaseService, pid: SPProgramID, peer: Peer, parent: Component, vcs: VcsRegistrar): Option[ISPProgram] =
     vcsOp(db, pid, peer, parent, vcs, "update") { _.update(pid, currentUser) }
 
-  private def vcsOp(db: IDBDatabaseService, pid: SPProgramID, peer: Peer, parent: Component, vcs: VcsRegistrar, opName: String)(op: VersionControlSystem => VcsFailure \/ ISPProgram): Option[ISPProgram] = {
-    import edu.gemini.sp.vcs.VcsFailure._
+  private def vcsOp(db: IDBDatabaseService, pid: SPProgramID, peer: Peer, parent: Component, vcs: VcsRegistrar, opName: String)(op: VersionControlSystem => OldVcsFailure \/ ISPProgram): Option[ISPProgram] = {
+    import edu.gemini.sp.vcs.OldVcsFailure._
 
     def success(p: ISPProgram): Option[ISPProgram] = {
       vcs.register(p.getProgramID, peer)
       Some(p)
     }
 
-    def fail(f: VcsFailure): Option[ISPProgram] = {
-      val msg = VcsFailure.explain(f, pid, opName, Some(peer))
+    def fail(f: OldVcsFailure): Option[ISPProgram] = {
+      val msg = OldVcsFailure.explain(f, pid, opName, Some(peer))
       Dialog.showMessage(parent, msg, "Error", Dialog.Message.Error)
       None
     }
 
     TrpcClient(peer).withKeyChain(OT.getKeyChain) { r =>
       op(VersionControlSystem(db, r[VcsServer])).fold(fail, success)
-    }.fold(e => fail(VcsException(e)), identity)
+    }.fold(e => fail(OldVcsException(e)), identity)
   }
 }
 
@@ -257,7 +257,7 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
     //    }
 
     lazy val CheckoutAction = Action("Checkout") {
-      import edu.gemini.sp.vcs.VcsFailure._
+      import edu.gemini.sp.vcs.OldVcsFailure._
 
       def success(loc: Peer)(p: ISPProgram) {
         vcs.register(p.getProgramID, loc)
@@ -266,8 +266,8 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
         updateStorage()
       }
 
-      def fail(info: DBProgramInfo, loc: Peer)(f: VcsFailure) {
-        val msg = VcsFailure.explain(f, info.programID, "checkout", Some(loc))
+      def fail(info: DBProgramInfo, loc: Peer)(f: OldVcsFailure) {
+        val msg = OldVcsFailure.explain(f, info.programID, "checkout", Some(loc))
         Dialog.showMessage(Contents, msg, "Error", Dialog.Message.Error)
       }
 
@@ -276,7 +276,7 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
           TrpcClient(loc.host, loc.port).withKeyChain(OT.getKeyChain) { r =>
             val remote = VersionControlSystem(db, r[VcsServer])
             remote.checkout(info.programID).fold(fail(info, loc), success(loc))
-          }.fold(e => fail(info, loc)(VcsException(e)), identity)
+          }.fold(e => fail(info, loc)(OldVcsException(e)), identity)
       }
 
     }

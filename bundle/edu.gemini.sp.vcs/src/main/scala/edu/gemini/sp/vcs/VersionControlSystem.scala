@@ -4,7 +4,7 @@ import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.pot.sp.ISPProgram
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.pot.spdb.ProgramSummoner.{IdNotFound, LookupOrFail}
-import edu.gemini.sp.vcs.VcsFailure._
+import edu.gemini.sp.vcs.OldVcsFailure._
 import edu.gemini.sp.vcs.log.VcsEventSet
 
 import scalaz._

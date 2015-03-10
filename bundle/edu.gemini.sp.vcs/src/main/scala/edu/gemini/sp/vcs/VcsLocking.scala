@@ -5,7 +5,7 @@ import edu.gemini.pot.spdb.Locking.{commit,discard}
 import edu.gemini.pot.spdb.ProgramSummoner._
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.pot.sp.{ISPNode, ISPProgram}
-import edu.gemini.sp.vcs.VcsFailure._
+import edu.gemini.sp.vcs.OldVcsFailure._
 import edu.gemini.spModel.rich.pot.sp._
 
 import scalaz._
