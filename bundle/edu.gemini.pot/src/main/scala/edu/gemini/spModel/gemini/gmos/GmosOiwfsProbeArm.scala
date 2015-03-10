@@ -2,6 +2,7 @@ package edu.gemini.spModel.gemini.gmos
 
 import java.awt.Shape
 import java.awt.geom.{Point2D, AffineTransform}
+import java.text.DecimalFormat
 
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.shared.util.immutable.ImPolygon
@@ -91,6 +92,10 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
                        guideStar: Point2D,
                        offset:    Point2D,
                        flip:      Int): Double = {
+    val df = new DecimalFormat("#.000")
+    println(s"posAngle=${df.format(posAngle)}")
+    println(s"gs=${df.format(guideStar.getX)},${df.format(guideStar.getY)}")
+
     val p  = {
       val posAngleRot = AffineTransform.getRotateInstance(posAngle)
 
@@ -100,14 +105,22 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
         new Point2D.Double(offset.getX - ifuOffset.getX, offset.getY - ifuOffset.getY)
       }
 
+      println(s"offsetAdj=${df.format(offsetAdj.getX)},${df.format(offsetAdj.getY)}")
+      val delta = new Point2D.Double(guideStar.getX + offsetAdj.getX, guideStar.getY + offsetAdj.getY)
+      println(s"delta=${df.format(delta.getX)},${df.format(delta.getY)}")
+
       // Flip T if necessary and rotate by the position angle.
       val Tp = {
         val Ttrans = transformPoint(T, AffineTransform.getScaleInstance(1, flip))
+        println(s"Ttrans=${df.format(Ttrans.getX)},${df.format(Ttrans.getY)}")
+        println(s"Rotating by $posAngle")
         transformPoint(Ttrans, posAngleRot)
       }
+      println(s"t=${df.format(Tp.getX)},${df.format(Tp.getY)}")
 
       transformPoint(guideStar, AffineTransform.getTranslateInstance(Tp.getX + offsetAdj.getX, Tp.getY + offsetAdj.getY))
     }
+    println(s"xy=${df.format(p.getX)},${df.format(p.getY)}")
 
     val r  = math.sqrt(p.getX * p.getX + p.getY * p.getY)
     val r2 = r*r
