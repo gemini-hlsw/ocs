@@ -1,11 +1,11 @@
 package edu.gemini.sp.vcs.diff
 
 import edu.gemini.pot.sp.SPNodeKey
+import edu.gemini.sp.vcs.diff.MergeCorrection._
 import edu.gemini.sp.vcs.diff.NodeDetail.Obs
 import edu.gemini.sp.vcs.diff.ProgramLocation.{Remote, Local}
 import edu.gemini.sp.vcs.diff.VcsFailure.Unmergeable
 import edu.gemini.spModel.obslog.ObsExecLog
-import edu.gemini.spModel.rich.pot.sp._
 
 import scalaz._
 import Scalaz._
@@ -25,8 +25,8 @@ import Scalaz._
   * remote program versions with an observation number greater than a
   * local-only observation.
   */
-class ObsNumberCorrection(isKnown: (ProgramLocation, SPNodeKey) => Boolean) extends MergeCorrection {
-  def apply(mp: MergePlan): Unmergeable \/ MergePlan =
+class ObsNumberCorrection(isKnown: (ProgramLocation, SPNodeKey) => Boolean) extends CorrectionFunction {
+  def apply(mp: MergePlan): TryCorrect[MergePlan] =
     renumberedObs(mp).map { obsMap =>
       if (obsMap.isEmpty)  // usually empty so we might as well check and save a traversal in that case
         mp
@@ -39,7 +39,7 @@ class ObsNumberCorrection(isKnown: (ProgramLocation, SPNodeKey) => Boolean) exte
 
   // Obtains a Set of pairs of observation node keys that need to be
   // renumbered along with the new observation number they should have.
-  private def renumberedObs(mp: MergePlan): Unmergeable \/ Map[SPNodeKey, Int] = {
+  private def renumberedObs(mp: MergePlan): TryCorrect[Map[SPNodeKey, Int]] = {
 
     /** A pair of the max remote-only observation number and a set of all
       * local-only observation keys with their current observation number.
