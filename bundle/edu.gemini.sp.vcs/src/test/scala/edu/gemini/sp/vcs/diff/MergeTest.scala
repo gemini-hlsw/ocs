@@ -17,6 +17,7 @@ import org.scalatest.junit.JUnitSuite
 import scala.collection.JavaConverters._
 
 import scalaz._
+import Scalaz._
 
 
 class MergeTest extends JUnitSuite {
@@ -81,7 +82,8 @@ class MergeTest extends JUnitSuite {
 
     val deletedKeys = mergePlan.delete.map(_.key).toSet
 
-    val correctedMergePlan = ObsNumberCorrection(mergeContext).apply(mergePlan)
+    val correctedMergePlan =
+      ObsNumberCorrection(mergeContext).apply(mergePlan).liftVcs
 
     val updatedLocalProgram = {
       val localCopy = fact.copyWithSameKeys(lp)
@@ -404,7 +406,9 @@ class MergeTest extends JUnitSuite {
           matches
         }
 
-        result match {
+        import VcsAction._
+
+        result.unsafeRun match {
           case -\/(VcsException(ex)) =>
             true // TODO: ignore for now, missing correction ...
 
@@ -431,7 +435,7 @@ class MergeTest extends JUnitSuite {
           val localVm  = pc.lp.getVersions
           val remoteVm = pc.rp.getVersions
           isSameOrNewer(updateVm, localVm) && isSameOrNewer(updateVm, remoteVm)
-        }
+        }.run
       }
     )
   )

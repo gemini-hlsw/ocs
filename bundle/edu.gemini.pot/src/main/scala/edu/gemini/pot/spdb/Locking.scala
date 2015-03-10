@@ -140,7 +140,7 @@ class Locking(odb: IDBDatabaseService) {
       odb.put(p)
       Right(t)
     } catch {
-      case clash: DBIDClashException => Left(IdClash((p.getProgramKey, p.getProgramID), (clash.key, clash.id)))
+      case clash: DBIDClashException => Left(IdClash((p.getProgramKey, p.getProgramID), (clash.existingKey, clash.id)))
     }
 
   /**

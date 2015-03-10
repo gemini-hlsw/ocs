@@ -8,6 +8,7 @@
 package edu.gemini.pot.sp.memImpl;
 
 import edu.gemini.pot.sp.*;
+import edu.gemini.pot.sp.version.LifespanId;
 import edu.gemini.spModel.core.SPProgramID;
 
 
@@ -55,6 +56,12 @@ public class MemFactory extends SPAbstractFactory {
 
     public ISPProgram copyWithSameKeys(ISPProgram in) {
         final MemProgram dup = MemProgram.copyWithSameKeys(in, uuid, this);
+        dup.setVersions(in.getVersions());
+        return dup;
+    }
+
+    public ISPProgram copyWithNewLifespanId(ISPProgram in) {
+        final MemProgram dup = MemProgram.copyWithNewLifespanId(in, uuid, this);
         dup.setVersions(in.getVersions());
         return dup;
     }

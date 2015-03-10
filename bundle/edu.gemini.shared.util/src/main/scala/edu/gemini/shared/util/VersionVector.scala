@@ -14,8 +14,8 @@ object VersionVector {
     VersionVector(ListMap(elems: _*))
 
 
-  def javaInt[K](): VersionVector[K, java.lang.Integer]  = empty(IntegerIsIntegral)
-  def javaInt[K](m: java.util.Map[K, java.lang.Integer]) = VersionVector(ListMap.empty ++ m.asScala)(IntegerIsIntegral)
+  def javaInt[K](): VersionVector[K, java.lang.Integer]  = empty
+  def javaInt[K](m: java.util.Map[K, java.lang.Integer]) = VersionVector(ListMap.empty ++ m.asScala)
 
   implicit def VvEqual[K : Equal, V : Equal]: Equal[VersionVector[K, V]] = Equal.equalA
 }

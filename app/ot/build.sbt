@@ -52,6 +52,7 @@ def common(version: Version) = AppConfig(
     BundleSpec("org.scala-lang.scala-reflect", Version(2, 10, 1)),
     BundleSpec("edu.gemini.osgi.main",         Version(4, 2, 1)),
     BundleSpec("edu.gemini.util.log.extras",   version),
+    BundleSpec("edu.gemini.sp.vcs.tui",        version),
     BundleSpec("edu.gemini.qpt.shared",        version),
     BundleSpec("edu.gemini.qv.plugin",         version),
     BundleSpec("edu.gemini.services.client",   version),

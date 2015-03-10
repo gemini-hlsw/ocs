@@ -1,6 +1,6 @@
 package jsky.app.ot.vcs
 
-import edu.gemini.shared.util.{IntegerIsIntegral, VersionVector}
+import edu.gemini.shared.util._
 
 import org.junit.Test
 import org.junit.Assert._
@@ -21,13 +21,13 @@ class VcsStatusTest {
 
   @Test def textComp() {
     val m8115 = Map(
-      node_5c1f -> VersionVector(id_cc8 -> new java.lang.Integer(1))(IntegerIsIntegral),
-      node_e77d -> VersionVector(id_cc8 -> new java.lang.Integer(2), id_94e -> new java.lang.Integer(6))(IntegerIsIntegral),
-      node_606f -> VersionVector(id_94e -> new java.lang.Integer(1))(IntegerIsIntegral)
+      node_5c1f -> VersionVector(id_cc8 -> new java.lang.Integer(1)),
+      node_e77d -> VersionVector(id_cc8 -> new java.lang.Integer(2), id_94e -> new java.lang.Integer(6)),
+      node_606f -> VersionVector(id_94e -> new java.lang.Integer(1))
     )
     val m8116 = Map(
-      node_e77d -> VersionVector(id_94e -> new java.lang.Integer(6))(IntegerIsIntegral),
-      node_606f -> VersionVector(id_94e -> new java.lang.Integer(2))(IntegerIsIntegral)
+      node_e77d -> VersionVector(id_94e -> new java.lang.Integer(6)),
+      node_606f -> VersionVector(id_94e -> new java.lang.Integer(2))
     )
 
     assertEquals(PendingSync, ProgramStatus(m8116, m8115))

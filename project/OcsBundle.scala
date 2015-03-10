@@ -293,6 +293,7 @@ trait OcsBundle {
       bundle_edu_gemini_pot % "test->test;compile->compile",
       bundle_edu_gemini_shared_util,
       bundle_edu_gemini_sp_vcs_log,
+      bundle_edu_gemini_sp_vcs_reg,
       bundle_edu_gemini_spModel_core % "test->test;compile->compile",
       bundle_edu_gemini_spModel_pio,
       bundle_edu_gemini_util_security,
