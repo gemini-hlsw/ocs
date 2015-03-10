@@ -97,7 +97,7 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
     println(s"gs=${df.format(guideStar.getX)},${df.format(guideStar.getY)}")
 
     val p  = {
-      val posAngleRot = AffineTransform.getRotateInstance(posAngle)
+      val posAngleRot = AffineTransform.getRotateInstance(-posAngle)
 
       // The final adjusted offset as modified by the offset adjustment required by the IFU / WFS.
       val offsetAdj = {
@@ -112,8 +112,6 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
       // Flip T if necessary and rotate by the position angle.
       val Tp = {
         val Ttrans = transformPoint(T, AffineTransform.getScaleInstance(1, flip))
-        println(s"Ttrans=${df.format(Ttrans.getX)},${df.format(Ttrans.getY)}")
-        println(s"Rotating by $posAngle")
         transformPoint(Ttrans, posAngleRot)
       }
       println(s"t=${df.format(Tp.getX)},${df.format(Tp.getY)}")
