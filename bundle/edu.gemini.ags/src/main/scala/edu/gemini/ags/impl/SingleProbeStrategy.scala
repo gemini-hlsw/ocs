@@ -77,7 +77,6 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
         case FIXED_180 | PARALLACTIC_ANGLE => selectBounded(List(ctx, ctx180(ctx)), mt, candidates)
         case UNBOUNDED                     => selectUnbounded(ctx, mt, candidates)
       }
-      println(s"===resultsSize=${results.size}")
       (params.guideProbe match {
         case v: ValidatableGuideProbe with VignettingGuideProbe => brightestByQualityAndVignetting(results, mt, ctx, v)(_._2)
         case _                                                  => brightest(results, params.band)(_._2)
