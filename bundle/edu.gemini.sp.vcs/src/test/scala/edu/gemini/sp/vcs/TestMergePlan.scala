@@ -6,7 +6,7 @@ import edu.gemini.pot.spdb.DBLocalDatabase
 import org.junit.Assert._
 import org.junit.Test
 import edu.gemini.pot.sp.{SPNodeKey, Conflicts}
-import edu.gemini.sp.vcs.MergePlan.Zipper
+import edu.gemini.sp.vcs.OldMergePlan.Zipper
 import edu.gemini.spModel.data.ISPDataObject
 
 /**
@@ -23,21 +23,21 @@ class TestMergePlan {
     val d = newLeaf("d").copy(children = List(newLeaf("d.0"), newLeaf("d.1"), newLeaf("d.2")))
     val root = newLeaf("root").copy(children = List(a, b, c, d))
 
-    val zip = MergePlan.Zipper(root)
+    val zip = OldMergePlan.Zipper(root)
 
-    def newLeaf(title: String): MergePlan = {
+    def newLeaf(title: String): OldMergePlan = {
       val sp = odb.getFactory.createProgram(new SPNodeKey(), null) // the kind of node is irrelevant here
       val ob = sp.getDataObject.asInstanceOf[ISPDataObject]
       ob.setTitle(title)
       sp.setDataObject(ob)
-      MergePlan(sp, EmptyNodeVersions, ob, Conflicts.EMPTY, Nil)
+      OldMergePlan(sp, EmptyNodeVersions, ob, Conflicts.EMPTY, Nil)
     }
 
-    implicit def testZip(zip: MergePlan.Zipper) = new Object {
-      def isAt(mp: MergePlan): Boolean = mp == zip.focus
+    implicit def testZip(zip: OldMergePlan.Zipper) = new Object {
+      def isAt(mp: OldMergePlan): Boolean = mp == zip.focus
     }
 
-    def arrivesAt(mp: MergePlan, dirs: (Zipper => Option[Zipper])*): Unit = {
+    def arrivesAt(mp: OldMergePlan, dirs: (Zipper => Option[Zipper])*): Unit = {
       assertTrue(zip.seq(dirs: _*).exists(_.isAt(mp)))
     }
 
@@ -48,7 +48,7 @@ class TestMergePlan {
     def childrenTitles(z: Zipper): List[String] =
       z.focus.children.map(_.sp.getDataObject.asInstanceOf[ISPDataObject].getTitle)
 
-    def testAdd(testBlock: MergePlan => (List[String], Zipper)) {
+    def testAdd(testBlock: OldMergePlan => (List[String], Zipper)) {
       val zipChildren = List("a", "b", "c", "d")
       assertEquals(zipChildren, childrenTitles(zip))
       val (expected, zipper) = testBlock(newLeaf("x"))

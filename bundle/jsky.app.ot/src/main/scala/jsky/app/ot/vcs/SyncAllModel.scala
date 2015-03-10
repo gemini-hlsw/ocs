@@ -2,7 +2,7 @@ package jsky.app.ot.vcs
 
 import edu.gemini.pot.sp.ISPProgram
 import edu.gemini.pot.sp.version.VersionMap
-import edu.gemini.sp.vcs.{VcsFailure, ProgramStatus}
+import edu.gemini.sp.vcs.{OldVcsFailure, ProgramStatus}
 import edu.gemini.sp.vcs.ProgramStatus._
 import edu.gemini.spModel.core.SPProgramID
 
@@ -28,7 +28,7 @@ object SyncAllModel {
 
     case class SyncInProgress(ps: ProgramStatus) extends State
 
-    case class SyncFailed(t: Option[VcsFailure]) extends State {
+    case class SyncFailed(t: Option[OldVcsFailure]) extends State {
       override def isTerminal: Boolean = true
     }
 
@@ -98,7 +98,7 @@ case class SyncAllModel(programs: Vector[ProgramSync]) {
       }
     })
 
-  def markSyncFailed(pid: SPProgramID, t: Option[VcsFailure]): SyncAllModel =
+  def markSyncFailed(pid: SPProgramID, t: Option[OldVcsFailure]): SyncAllModel =
     updateState(pid) { _ => State.SyncFailed(t) }
 
   def markSyncConflict(pid: SPProgramID): SyncAllModel =

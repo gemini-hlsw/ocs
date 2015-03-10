@@ -128,11 +128,11 @@ class VcsProgressDialog(id: SPProgramID, viewer: SPViewer, comp: Option[Componen
       val cancelled = isCancelled
 
       lazy val conflictedProg = result.flatMap(_.toEither.left.toOption).collect {
-        case VcsFailure.HasConflict => SPDB.get().lookupProgramByID(id)
+        case OldVcsFailure.HasConflict => SPDB.get().lookupProgramByID(id)
       }
 
       lazy val errorMessage = result.flatMap(_.toEither.left.toOption map { failure =>
-        op.explanation.lift(failure).getOrElse(VcsFailure.explain(failure, id, op.name, VcsGui.peer(id)))
+        op.explanation.lift(failure).getOrElse(OldVcsFailure.explain(failure, id, op.name, VcsGui.peer(id)))
       })
 
       Swing.onEDT {

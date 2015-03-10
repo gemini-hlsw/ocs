@@ -9,7 +9,7 @@ import edu.gemini.sp.vcs.VcsServer
 import java.util.logging.{Level, Logger}
 import edu.gemini.pot.client.SPDB
 import edu.gemini.sp.vcs.log._
-import edu.gemini.sp.vcs.VcsFailure.VcsException
+import edu.gemini.sp.vcs.OldVcsFailure.OldVcsException
 import scala.util.Success
 import edu.gemini.sp.vcs.VersionControlSystem
 import scala.util.Failure
@@ -84,7 +84,7 @@ object EdProgramHelper {
       r =>
         val remote = VersionControlSystem(SPDB.get(), r[VcsServer])
         remote.log(pid, 0, 100).fold({
-          case VcsException(e) => throw e
+          case OldVcsException(e) => throw e
           case f => throw new RuntimeException(f.toString)
         }, identity)
     } onComplete {

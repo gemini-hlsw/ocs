@@ -9,47 +9,47 @@ import java.util.logging.{Level, Logger}
 
 import scalaz._
 
-sealed trait VcsFailure
+sealed trait OldVcsFailure
 
-object VcsFailure {
-  type TryVcs[T] = VcsFailure \/ T
+object OldVcsFailure {
+  type TryVcs[T] = OldVcsFailure \/ T
 
   /**
    * One of several issues occurred while looking up a program in a database.
    */
-  case class SummonFailure(f: ProgramSummoner.Failure) extends VcsFailure
+  case class SummonFailure(f: ProgramSummoner.Failure) extends OldVcsFailure
 
   /**
    * Indicates that the user tried to do something for which he doesn't have
    * permission.
    */
-  case class Forbidden(why: String) extends VcsFailure
+  case class Forbidden(why: String) extends OldVcsFailure
 
   /**
    * Some exception occurred trying to work with the version control system.
    * If it is an IOException, it is likely a network problem or the server is
    * down. Otherwise, it's probably a server error.
    */
-  case class VcsException(ex: Exception) extends VcsFailure
+  case class OldVcsException(ex: Exception) extends OldVcsFailure
 
   /**
    * Indicates that the program you're trying to commit is out of date with
    * respect to the server's version.  Commit only works when the incoming
    * program is strictly newer than the existing version.
    */
-  case object NeedsUpdate extends VcsFailure
+  case object NeedsUpdate extends OldVcsFailure
 
   /**
    * Indicates that the program you're trying to commit has conflicts which
    * must be resolved before committing.
    */
-  case object HasConflict extends VcsFailure
+  case object HasConflict extends OldVcsFailure
 
   /**
    * An unexpected problem performing a Vcs operation.
    * @param why what happened
    */
-  case class Unexpected(why: String) extends VcsFailure
+  case class Unexpected(why: String) extends OldVcsFailure
 
 
   def explain(f: ProgramSummoner.Failure, opName: String): String =
@@ -68,19 +68,19 @@ object VcsFailure {
         else s"Could not $opName $e, a distinct program with the same ID already exists."
     }
 
-  def explain(f: VcsFailure, id: SPProgramID, opName: String, peer: Option[Peer]): String = {
-    val Log = Logger.getLogger(VcsFailure.getClass.getName)
+  def explain(f: OldVcsFailure, id: SPProgramID, opName: String, peer: Option[Peer]): String = {
+    val Log = Logger.getLogger(OldVcsFailure.getClass.getName)
     val peerName = peer.map { p => s"${p.host}:${p.port}" }.getOrElse("remote host")
     val (msg, ex) = f match {
       case SummonFailure(sf)             =>
         (explain(sf, opName), None)
       case Forbidden(why)                =>
         ("Denied permission to %s %s: %s".format(opName, id, why), None)
-      case VcsException(ex: VersionException) =>
+      case OldVcsException(ex: VersionException) =>
         (ex.getLongMessage(peerName), Some(ex))
-      case VcsException(io: IOException) =>
+      case OldVcsException(io: IOException) =>
         ("There was a problem communicating with the server: %s.  Try again later.".format(Option(io.getMessage).getOrElse("unknown network issue")), Some(io))
-      case VcsException(ex)              =>
+      case OldVcsException(ex)              =>
         ("Something went wrong in the database server: %s".format(Option(ex.getMessage).getOrElse("unknown internal server failure")), Some(ex))
       case NeedsUpdate                   =>
         ("You have to update your version of the program before you can commit changes.", None)

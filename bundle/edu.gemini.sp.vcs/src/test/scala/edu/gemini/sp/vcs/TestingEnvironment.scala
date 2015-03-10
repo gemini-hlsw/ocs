@@ -3,7 +3,7 @@ package edu.gemini.sp.vcs
 import edu.gemini.pot.sp._
 import edu.gemini.pot.sp.version._
 import edu.gemini.pot.spdb.{DBLocalDatabase, IDBDatabaseService}
-import edu.gemini.sp.vcs.VcsFailure._
+import edu.gemini.sp.vcs.OldVcsFailure._
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.gemini.init.ObservationNI
 import edu.gemini.spModel.obs.{ObsPhase2Status, SPObservation}
@@ -177,7 +177,7 @@ object TestingEnvironment {
     def version(id: SPProgramID): TryVcs[VersionMap] = prog(id).getVersions.right
     def fetch(id: SPProgramID): TryVcs[ISPProgram] = prog(id).right
     def store(p: ISPProgram): TryVcs[VersionMap] = VcsLocking(odb).merge(LookupOrFail, p, user)(Commit)
-    def log(p: SPProgramID, offset: Int, length: Int): VcsFailure.TryVcs[(List[VcsEventSet], Boolean)] = (Nil, false).right
+    def log(p: SPProgramID, offset: Int, length: Int): OldVcsFailure.TryVcs[(List[VcsEventSet], Boolean)] = (Nil, false).right
   }
 
   def withTestEnv(p: Principal)(block: TestingEnvironment => Unit): Unit = {
@@ -324,7 +324,7 @@ case class TestingEnvironment(user: Set[Principal]) {
   def commit(): Unit =
     assertTrue(cloned.vcs.commit(id).isRight)
 
-  def cantCommit(expected: VcsFailure): Unit =
+  def cantCommit(expected: OldVcsFailure): Unit =
     cloned.vcs.commit(id) match {
       case -\/(actual) => assertEquals(expected, actual)
       case _ => fail("Shouldn't be able to commit, expecting: " + expected)

@@ -2,7 +2,7 @@ package edu.gemini.sp.vcs
 
 import edu.gemini.pot.sp._
 import edu.gemini.pot.sp.Conflict._
-import edu.gemini.sp.vcs.VcsFailure._
+import edu.gemini.sp.vcs.OldVcsFailure._
 import edu.gemini.spModel.gemini.obscomp.SPProgram
 import edu.gemini.spModel.rich.pot.sp._
 

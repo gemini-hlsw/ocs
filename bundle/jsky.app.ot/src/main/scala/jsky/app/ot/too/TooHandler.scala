@@ -4,7 +4,7 @@ import edu.gemini.pot.client.SPDB
 import edu.gemini.pot.sp.{ISPProgram, ISPObservation}
 import edu.gemini.spModel.core.Peer
 import edu.gemini.spModel.obs.ObsSchedulingReport
-import edu.gemini.sp.vcs.{VcsFailure, VersionControlSystem, TrpcVcsServer}
+import edu.gemini.sp.vcs.{OldVcsFailure, VersionControlSystem, TrpcVcsServer}
 import edu.gemini.too.event.api.TooEvent
 
 import jsky.app.ot.userprefs.observer.ObserverPreferences
@@ -51,7 +51,7 @@ final class TooHandler(evt: TooEvent, peer: Peer, parent: JComponent) extends Ru
 
     def update(p: ISPProgram): Either[String, ISPProgram] = {
       val srv = TrpcVcsServer(OT.getKeyChain, peer.host, peer.port)
-      VersionControlSystem.apply(db, srv).update(pid, currentUser).toEither.left.map(failure => VcsFailure.explain(failure, pid, "update", Some(peer)))
+      VersionControlSystem.apply(db, srv).update(pid, currentUser).toEither.left.map(failure => OldVcsFailure.explain(failure, pid, "update", Some(peer)))
     }
 
     // Left means the updated failed, Right(None) means we don't have the

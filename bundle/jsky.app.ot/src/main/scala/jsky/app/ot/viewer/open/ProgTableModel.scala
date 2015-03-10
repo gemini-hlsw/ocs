@@ -5,7 +5,7 @@ import edu.gemini.pot.sp.{ISPProgram, SPNodeKey}
 import edu.gemini.shared.util.immutable.MapOp
 import edu.gemini.sp.vcs._
 import edu.gemini.sp.vcs.ProgramStatus.{PendingCheckIn, PendingUpdate, PendingSync}
-import edu.gemini.sp.vcs.VcsFailure.VcsException
+import edu.gemini.sp.vcs.OldVcsFailure.OldVcsException
 import edu.gemini.sp.vcs.VersionControlSystem
 import edu.gemini.spModel.core.{ProgramId, SPProgramID, Peer, VersionException}
 import edu.gemini.spModel.util.DBProgramInfo
@@ -52,7 +52,7 @@ class ProgTableModel(filter: DBProgramChooserFilter, db: IDBDatabaseService, aut
   private val remotes  = new AtomicReference[Map[Peer, Vector[DBProgramInfo]]](Map())
   private val elems    = new AtomicReference[Vector[Elem]](Vector.empty)
   private val statuses = new AtomicReference[Map[SPNodeKey, ProgramStatus]](Map())
-  private val failures = new AtomicReference[Map[SPNodeKey, VcsFailure]](Map())
+  private val failures = new AtomicReference[Map[SPNodeKey, OldVcsFailure]](Map())
 
   // Initialization
   filter.addActionListener(ActionListener(_ => fireTableDataChanged()))
@@ -104,7 +104,7 @@ class ProgTableModel(filter: DBProgramChooserFilter, db: IDBDatabaseService, aut
     }.map { s =>
       if (p.hasConflicts) s + ", Conflicts" else s
     }.orElse(failures.get.get(p.getNodeKey).map {
-      case VcsException(_: IOException) => "Cannot Connect"
+      case OldVcsException(_: IOException) => "Cannot Connect"
       case _ => "Error" // for now
     }).getOrElse("Pending...")
 
@@ -200,10 +200,10 @@ class ProgTableModel(filter: DBProgramChooserFilter, db: IDBDatabaseService, aut
 
         futureStatus onFailure {
           case e: Exception =>
-            failures.modify(_ + (p.getNodeKey -> VcsException(e)))
+            failures.modify(_ + (p.getNodeKey -> OldVcsException(e)))
             fireTDC()
           case t =>
-            failures.modify(_ + (p.getNodeKey -> VcsException(new RuntimeException(t))))
+            failures.modify(_ + (p.getNodeKey -> OldVcsException(new RuntimeException(t))))
             fireTDC()
         }
 

@@ -17,10 +17,10 @@ import edu.gemini.spModel.data.ISPDataObject
  * to the existing program that will be updated.
  */
 
-object MergePlan {
+object OldMergePlan {
 
-  def apply(sp: ISPNode, vv: NodeVersions, dataObj: ISPDataObject, conflicts: Conflicts, children: List[MergePlan]): MergePlan =
-    MergePlan(Node(sp, vv, dataObj, conflicts), children)
+  def apply(sp: ISPNode, vv: NodeVersions, dataObj: ISPDataObject, conflicts: Conflicts, children: List[OldMergePlan]): OldMergePlan =
+    OldMergePlan(Node(sp, vv, dataObj, conflicts), children)
 
   /**
    * Data for a single node in the MergePlan (minus its children).  The "sp"
@@ -55,30 +55,30 @@ object MergePlan {
     val obj: Lens[Node, ISPDataObject]  = Lens0(_.dataObj,   (node,obj) => node.copy(dataObj = obj))
   }
 
-  val node: Lens[MergePlan, Node]                = Lens0(_.node,     (mp, n) => mp.copy(node = n))
-  val children: Lens[MergePlan, List[MergePlan]] = Lens0(_.children, (mp, c) => mp.copy(children = c))
+  val node: Lens[OldMergePlan, Node]                = Lens0(_.node,     (mp, n) => mp.copy(node = n))
+  val children: Lens[OldMergePlan, List[OldMergePlan]] = Lens0(_.children, (mp, c) => mp.copy(children = c))
 
   // A zipper for easily manipulating a MergePlan after it is created by the
   // Merge
   object Zipper {
-    case class Crumb(parent: Node, prev: List[MergePlan], next: List[MergePlan])
+    case class Crumb(parent: Node, prev: List[OldMergePlan], next: List[OldMergePlan])
 
-    val focus: Lens[Zipper, MergePlan] = Lens0(_.focus, (z, mp) => z.copy(focus = mp))
-    val focusVv        = focus andThen MergePlan.node andThen Node.vv
-    val focusConflicts = focus andThen MergePlan.node andThen Node.conflicts
-    val focusDataObj   = focus andThen MergePlan.node andThen Node.obj
-    val focusChildren  = focus andThen MergePlan.children
+    val focus: Lens[Zipper, OldMergePlan] = Lens0(_.focus, (z, mp) => z.copy(focus = mp))
+    val focusVv        = focus andThen OldMergePlan.node andThen Node.vv
+    val focusConflicts = focus andThen OldMergePlan.node andThen Node.conflicts
+    val focusDataObj   = focus andThen OldMergePlan.node andThen Node.obj
+    val focusChildren  = focus andThen OldMergePlan.children
   }
 
   import Zipper._
 
-  case class Zipper(focus: MergePlan, crumbs: List[Zipper.Crumb] = Nil) {
+  case class Zipper(focus: OldMergePlan, crumbs: List[Zipper.Crumb] = Nil) {
 
     def top: Zipper = up.map(_.top).getOrElse(this)
 
     def up: Option[Zipper] = crumbs match {
       case Crumb(parent, prev, next) :: tl =>
-        Some(Zipper(MergePlan(parent, (focus :: prev).reverse ++ next), tl))
+        Some(Zipper(OldMergePlan(parent, (focus :: prev).reverse ++ next), tl))
       case _                               => None
     }
 
@@ -103,20 +103,20 @@ object MergePlan {
     }
 
     // Find any descendant that matches the predicate.  Does a DFS.
-    def find(f: MergePlan => Boolean): Option[Zipper] = {
+    def find(f: OldMergePlan => Boolean): Option[Zipper] = {
       if (f(focus)) Some(this)
       else down.flatMap(_.find(f)) orElse next.flatMap(_.find(f))
     }
 
-    private def findNext(f: MergePlan => Boolean): Option[Zipper] =
+    private def findNext(f: OldMergePlan => Boolean): Option[Zipper] =
       if (f(focus)) Some(this)
       else next.flatMap(_.findNext(f))
 
     // Find a direct descendant that matches the predicate
-    def findChild(f: MergePlan => Boolean): Option[Zipper] =
+    def findChild(f: OldMergePlan => Boolean): Option[Zipper] =
       down flatMap { _.findNext(f) }
 
-    def set(newFocus: MergePlan): Zipper        = copy(focus = newFocus)
+    def set(newFocus: OldMergePlan): Zipper        = copy(focus = newFocus)
     def incr(id: LifespanId): Zipper            = focusVv.mod(_.incr(id), this)
     def addNote(note: Conflict.Note): Zipper    = focusConflicts.mod(_.withConflictNote(note), this)
     def setDataObj(obj: ISPDataObject): Zipper = focusDataObj.set(this, obj)
@@ -124,23 +124,23 @@ object MergePlan {
     /** Deletes the focus and moves up to its former parent, if any. */
     def delete: Option[Zipper]           = crumbs match {
       case Crumb(parent, prev, next) :: tl               =>
-        Some(Zipper(MergePlan(parent, prev.reverse ++ next), tl))
+        Some(Zipper(OldMergePlan(parent, prev.reverse ++ next), tl))
       case _                                           => None
     }
 
-    private def modFocusChildren(f: List[MergePlan] => List[MergePlan]) =
+    private def modFocusChildren(f: List[OldMergePlan] => List[OldMergePlan]) =
       focusChildren.mod(f, this)
 
-    def prependChild(child: MergePlan): Zipper = modFocusChildren(child :: _)
-    def appendChild(child: MergePlan): Zipper  = modFocusChildren(_ :+ child)
+    def prependChild(child: OldMergePlan): Zipper = modFocusChildren(child :: _)
+    def appendChild(child: OldMergePlan): Zipper  = modFocusChildren(_ :+ child)
 
-    def prepend(mergePlan: MergePlan): Option[Zipper] = crumbs match {
+    def prepend(mergePlan: OldMergePlan): Option[Zipper] = crumbs match {
       case Crumb(parent, prev, next) :: tl =>
         Some(copy(crumbs = Crumb(parent, mergePlan :: prev, next) :: tl))
       case _ => None
     }
 
-    def append(mergePlan: MergePlan): Option[Zipper] = crumbs match {
+    def append(mergePlan: OldMergePlan): Option[Zipper] = crumbs match {
       case Crumb(parent, prev, next) :: tl =>
           Some(copy(crumbs = Crumb(parent, prev, mergePlan :: next) :: tl))
       case _ => None
@@ -151,9 +151,9 @@ object MergePlan {
   }
 }
 
-import MergePlan._
+import OldMergePlan._
 
-case class MergePlan(node: Node, children: List[MergePlan] = Nil) {
+case class OldMergePlan(node: Node, children: List[OldMergePlan] = Nil) {
   def sp        = node.sp
   def vv        = node.vv
   def dataObj   = node.dataObj
@@ -183,7 +183,7 @@ case class MergePlan(node: Node, children: List[MergePlan] = Nil) {
     }
   }
 
-  final def replaceWithCopy(cp: EmptyNodeCopier): MergePlan = copy(node = node.replaceWithCopy(cp))
+  final def replaceWithCopy(cp: EmptyNodeCopier): OldMergePlan = copy(node = node.replaceWithCopy(cp))
 
   def toTypeTree: TypeTree = TypeTree(sp).copy(children = children.map(_.toTypeTree))
 }
