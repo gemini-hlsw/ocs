@@ -71,7 +71,6 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
       }
 
       val angle = armAngle(wfsOffset, posAngle, guideStarPt, offsetPt, flip)
-      println(s"ANGLE=$angle")
       ArmAdjustment(angle, guideStarPt)
     }
   }
@@ -92,10 +91,6 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
                        guideStar: Point2D,
                        offset:    Point2D,
                        flip:      Int): Double = {
-    val df = new DecimalFormat("#.000")
-    println(s"posAngle=${df.format(posAngle)}")
-    println(s"gs=${df.format(guideStar.getX)},${df.format(guideStar.getY)}")
-
     val p  = {
       val posAngleRot = AffineTransform.getRotateInstance(-posAngle)
 
@@ -105,20 +100,14 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
         new Point2D.Double(offset.getX - ifuOffset.getX, offset.getY - ifuOffset.getY)
       }
 
-      println(s"offsetAdj=${df.format(offsetAdj.getX)},${df.format(offsetAdj.getY)}")
-      val delta = new Point2D.Double(guideStar.getX + offsetAdj.getX, guideStar.getY + offsetAdj.getY)
-      println(s"delta=${df.format(delta.getX)},${df.format(delta.getY)}")
-
       // Flip T if necessary and rotate by the position angle.
       val Tp = {
         val Ttrans = transformPoint(T, AffineTransform.getScaleInstance(1, flip))
         transformPoint(Ttrans, posAngleRot)
       }
-      println(s"t=${df.format(Tp.getX)},${df.format(Tp.getY)}")
 
       transformPoint(guideStar, AffineTransform.getTranslateInstance(Tp.getX + offsetAdj.getX, Tp.getY + offsetAdj.getY))
     }
-    println(s"xy=${df.format(p.getX)},${df.format(p.getY)}")
 
     val r  = math.sqrt(p.getX * p.getX + p.getY * p.getY)
     val r2 = r*r
@@ -135,7 +124,6 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
       if (MX2 > (r2 + BX2)) math.Pi - thetaP else thetaP
     }
 
-    println(s"phi=$phi theta=$theta alpha=$alpha")
     phi - theta - alpha - math.Pi / 2.0
   }
 

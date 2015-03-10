@@ -131,9 +131,8 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
                     shapes.foreach(new ApplyOp<Shape>() {
                         @Override
                         public void apply(final Shape s) {
-                            // TODO: We probably want to do the flip in the context and not in the screen!
                             final Shape sContext = FeatureGeometry$.MODULE$.transformProbeArmForContext(s, armAngle, guideStar);
-                            final Shape sScreen  = FeatureGeometry$.MODULE$.transformProbeArmForScreen(sContext, _pixelsPerArcsec, flip, _flipRA, screenPos);
+                            final Shape sScreen  = FeatureGeometry$.MODULE$.transformProbeArmForScreen(sContext, _pixelsPerArcsec, _flipRA, screenPos);
                             _figureList.add(new Figure(sScreen, PROBE_ARM_COLOR, BLOCKED, OIWFS_STROKE));
                         }
                     });

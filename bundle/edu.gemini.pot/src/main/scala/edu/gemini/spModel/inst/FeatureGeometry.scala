@@ -108,16 +108,13 @@ object FeatureGeometry {
    * Given a list of geometry shapes, transform them as needed for display on the screen.
    * @param shapes          the list of shapes to transform
    * @param pixelsPerArcsec the pixel density per arcsec on the current display
-   * @param xFlipArm        true if the arm should be flipped in the x-axis, e.g. if the ISS port is side looking
    * @param flipRA          a scaling in the y-axis: should be either 1.0 or -1.0, and not sure if this is ever -1.0
    * @param screenPos       the final position on the screen where the adjusted guide probe arm should be placed
    * @return                the transformed shape
    */
-  def transformProbeArmForScreen(shapes: List[Shape], pixelsPerArcsec: Double, xFlipArm: Boolean, flipRA: Double, screenPos: Point2D): List[Shape] = {
-    //val xFlipFactor = if (xFlipArm) -1.0 else 1.0
+  def transformProbeArmForScreen(shapes: List[Shape], pixelsPerArcsec: Double, flipRA: Double, screenPos: Point2D): List[Shape] = {
     val trans = AffineTransform.getTranslateInstance(screenPos.getX, screenPos.getY)
     trans.scale(pixelsPerArcsec, pixelsPerArcsec)
-    //trans.scale(flipRA, xFlipFactor)
     shapes.map { trans.createTransformedShape }
   }
 
@@ -125,11 +122,10 @@ object FeatureGeometry {
    * Given a shape, transform it as needed for display on the screen.
    * @param shape           the shape to transform
    * @param pixelsPerArcsec the pixel density per arcsec on the current display
-   * @param xFlipArm        true if the arm should be flipped in the x-axis, e.g. if the ISS port is side looking
    * @param flipRA          a scaling in the y-axis: should be either 1.0 or -1.0, and not sure if this is ever -1.0
    * @param screenPos       the final position on the screen where the adjusted guide probe arm should be placed
    * @return                the transformed shape
    */
-  def transformProbeArmForScreen(shape: Shape, pixelsPerArcsec: Double, xFlipArm: Boolean, flipRA: Double, screenPos: Point2D): Shape =
-    transformProbeArmForScreen(List(shape), pixelsPerArcsec, xFlipArm, flipRA, screenPos).head
+  def transformProbeArmForScreen(shape: Shape, pixelsPerArcsec: Double, flipRA: Double, screenPos: Point2D): Shape =
+    transformProbeArmForScreen(List(shape), pixelsPerArcsec, flipRA, screenPos).head
 }
