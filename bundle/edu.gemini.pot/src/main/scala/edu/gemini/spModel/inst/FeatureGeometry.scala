@@ -78,7 +78,6 @@ object FeatureGeometry {
   def transformScienceAreaForScreen(shape: Shape, pixelsPerArcsec: Double): Shape =
     transformScienceAreaForScreen(List(shape), pixelsPerArcsec).head
 
-
   /**
    * Given a list of shapes representing a guide probe arm, an angle for the probe arm, and the position of the guide
    * star, execute transformations on the shapes to get the adjusted probe arm.
@@ -88,8 +87,6 @@ object FeatureGeometry {
    * @return          the transformed shapes
    */
   def transformProbeArmForContext(shapes: List[Shape], armAngle: Double, guideStar: Point2D): List[Shape] = {
-    import ProbeArmGeometry._
-
     // For the guide star, we want to use the point closest to zero in terms of arcsec as a normalization.
     val armTrans = AffineTransform.getRotateInstance(armAngle, guideStar.getX, guideStar.getY)
     armTrans.concatenate(AffineTransform.getTranslateInstance(guideStar.getX, guideStar.getY))
@@ -111,21 +108,28 @@ object FeatureGeometry {
    * Given a list of geometry shapes, transform them as needed for display on the screen.
    * @param shapes          the list of shapes to transform
    * @param pixelsPerArcsec the pixel density per arcsec on the current display
+   * @param xFlipArm        true if the arm should be flipped in the x-axis, e.g. if the ISS port is side looking
+   * @param flipRA          a scaling in the y-axis: should be either 1.0 or -1.0, and not sure if this is ever -1.0
+   * @param screenPos       the final position on the screen where the adjusted guide probe arm should be placed
    * @return                the transformed shape
    */
-  def transformProbeArmForScreen(shapes: List[Shape], pixelsPerArcsec: Double, xFlipArm: Boolean, flipRA: Double): List[Shape] = {
-    val xFlipFactor = if (xFlipArm) -1.0 else 1.0
-    val scaleTrans = AffineTransform.getScaleInstance(pixelsPerArcsec, pixelsPerArcsec)
-    scaleTrans.scale(flipRA, xFlipFactor)
-    shapes.map { scaleTrans.createTransformedShape }
+  def transformProbeArmForScreen(shapes: List[Shape], pixelsPerArcsec: Double, xFlipArm: Boolean, flipRA: Double, screenPos: Point2D): List[Shape] = {
+    //val xFlipFactor = if (xFlipArm) -1.0 else 1.0
+    val trans = AffineTransform.getTranslateInstance(screenPos.getX, screenPos.getY)
+    trans.scale(pixelsPerArcsec, pixelsPerArcsec)
+    //trans.scale(flipRA, xFlipFactor)
+    shapes.map { trans.createTransformedShape }
   }
 
   /**
    * Given a shape, transform it as needed for display on the screen.
    * @param shape           the shape to transform
    * @param pixelsPerArcsec the pixel density per arcsec on the current display
+   * @param xFlipArm        true if the arm should be flipped in the x-axis, e.g. if the ISS port is side looking
+   * @param flipRA          a scaling in the y-axis: should be either 1.0 or -1.0, and not sure if this is ever -1.0
+   * @param screenPos       the final position on the screen where the adjusted guide probe arm should be placed
    * @return                the transformed shape
    */
-  def transformProbeArmForScreen(shape: Shape, pixelsPerArcsec: Double, xFlipArm: Boolean, flipRA: Double): Shape =
-    transformProbeArmForScreen(List(shape), pixelsPerArcsec, xFlipArm, flipRA).head
+  def transformProbeArmForScreen(shape: Shape, pixelsPerArcsec: Double, xFlipArm: Boolean, flipRA: Double, screenPos: Point2D): Shape =
+    transformProbeArmForScreen(List(shape), pixelsPerArcsec, xFlipArm, flipRA, screenPos).head
 }

@@ -59,17 +59,18 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
         case _                    => None
       }
     } yield {
-      val flip        = if (ctx.getIssPort == IssPort.SIDE_LOOKING) -1.0 else 1.0
+      val flip        = if (ctx.getIssPort == IssPort.SIDE_LOOKING) -1 else 1
       val posAngle    = ctx.getPositionAngle.toRadians.getMagnitude
-      val offsetPt    = new Point2D.Double(-offset.p.toArcsecs.getMagnitude, -offset.q.toArcsecs.getMagnitude * flip)
+      val offsetPt    = new Point2D.Double(-offset.p.toArcsecs.getMagnitude, -offset.q.toArcsecs.getMagnitude)
+
       val guideStarPt = {
-        val baseCoords = ctx.getBaseCoordinates.toNewModel
-        val o = Coordinates.difference(baseCoords, guideStarCoords).offset
-        val (x,y) = (o.p.toArcsecs, o.q.toArcsecs)
-        new Point2D.Double(-x, -y * flip).toCanonicalArcsec
+        val baseCoords      = ctx.getBaseCoordinates.toNewModel
+        val guideStarOffset = Coordinates.difference(baseCoords, guideStarCoords).offset
+        new Point2D.Double((-guideStarOffset.p.toArcsecs).toCanonicalArcsec, (-guideStarOffset.q.toArcsecs).toCanonicalArcsec)
       }
 
-      val angle = armAngle(wfsOffset, posAngle, guideStarPt, offsetPt)
+      val angle = armAngle(wfsOffset, posAngle, guideStarPt, offsetPt, flip)
+      println(s"ANGLE=$angle")
       ArmAdjustment(angle, guideStarPt)
     }
   }
@@ -77,48 +78,53 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
   /**
    * Calculate the probe arm angle at the position angle (radians) for the given guide star location
    * and offset, specified in arcsec.
+   * @param wfsOffset the value of any WFS offset adjustment that may need to be made for the instrument configuration
    * @param posAngle  the position angle in radians
    * @param guideStar the guide star position in arcsec
    * @param offset    the offset in arcsec
+   * @param flip      whether or not things should be flipped in the x-axis, i.e. if the instrument ISS port is
+   *                  side looking
    * @return          the angle of the probe arm in radians
    */
   private def armAngle(wfsOffset: Double,
                        posAngle:  Double,
                        guideStar: Point2D,
-                       offset:    Point2D): Double = {
-    import ProbeArmGeometry._
-
-    val posAngleRot = AffineTransform.getRotateInstance(posAngle)
-
-    println(s"gs=(${guideStar.getX},yg=${guideStar.getY})")
-    val offsetAdj = {
-      val ifuOffset = transformPoint(new Point2D.Double(wfsOffset, 0.0), posAngleRot)
-      println(s"ifuOffset=(${ifuOffset.getX},${ifuOffset.getY})")
-      transformPoint(offset, AffineTransform.getTranslateInstance(ifuOffset.getX, ifuOffset.getY))
-    }
-    println(s"offset=(${offset.getX},${offset.getY})")
-
+                       offset:    Point2D,
+                       flip:      Int): Double = {
     val p  = {
-      val ifuOffset = transformPoint(new Point2D.Double(wfsOffset, 0.0), posAngleRot)
-      val Trot = transformPoint(T, posAngleRot);
-      transformPoint(guideStar, AffineTransform.getTranslateInstance(Trot.getX - offsetAdj.getX, Trot.getY - offsetAdj.getY)).toCanonicalArcsec
+      val posAngleRot = AffineTransform.getRotateInstance(posAngle)
+
+      // The final adjusted offset as modified by the offset adjustment required by the IFU / WFS.
+      val offsetAdj = {
+        val ifuOffset = transformPoint(new Point2D.Double(wfsOffset, 0.0), posAngleRot)
+        new Point2D.Double(offset.getX - ifuOffset.getX, offset.getY - ifuOffset.getY)
+      }
+
+      // Flip T if necessary and rotate by the position angle.
+      val Tp = {
+        val Ttrans = transformPoint(T, AffineTransform.getScaleInstance(1, flip))
+        transformPoint(Ttrans, posAngleRot)
+      }
+
+      transformPoint(guideStar, AffineTransform.getTranslateInstance(Tp.getX + offsetAdj.getX, Tp.getY + offsetAdj.getY))
     }
+
     val r  = math.sqrt(p.getX * p.getX + p.getY * p.getY)
     val r2 = r*r
 
     // Here we may need to flip y based on ISSPort?
     val alpha = math.atan2(p.getX, p.getY)
-    println(s"x=${p.getX}, y=${p.getY}, r=$r")
     val phi = {
       val acosArg    = (r2 - (BX2 + MX2)) / (2 * BX * MX)
       val acosArgAdj = if (acosArg > 1.0) 1.0 else if (acosArg < -1.0) -1.0 else acosArg
-      math.acos(acosArgAdj)
+      math.acos(acosArgAdj) * flip
     }
     val theta = {
       val thetaP = math.asin((MX / r) * math.sin(phi))
       if (MX2 > (r2 + BX2)) math.Pi - thetaP else thetaP
     }
-    println(s"phi=$phi theta=$theta alpha=$alpha angle=${phi - theta - alpha - math.Pi/2.0}")
+
+    println(s"phi=$phi theta=$theta alpha=$alpha")
     phi - theta - alpha - math.Pi / 2.0
   }
 

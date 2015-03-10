@@ -117,8 +117,8 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
             final double oy = (yc - yb) / _pixelsPerArcsec;
             Offset offset = new Offset(Angle.arcsecs(ox), Angle.arcsecs(oy));
 
-            // Translation to move the probe arm to the required position on the screen.
-            final AffineTransform trans = AffineTransform.getTranslateInstance(xt+xb, yt+yb);
+            // Point to move the probe arm to the required position on the screen.
+            final Point2D screenPos = new Point2D.Double(xt+xb, yt+yb);
 
             final Option<ArmAdjustment> adj = GmosOiwfsProbeArm.armAdjustmentAsJava(ctx, offset);
             adj.foreach(new ApplyOp<ArmAdjustment>() {
@@ -131,10 +131,10 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
                     shapes.foreach(new ApplyOp<Shape>() {
                         @Override
                         public void apply(final Shape s) {
-                            final Shape s1 = FeatureGeometry$.MODULE$.transformProbeArmForContext(s, armAngle, guideStar);
-                            final Shape s2 = FeatureGeometry$.MODULE$.transformProbeArmForScreen(s1, _pixelsPerArcsec, flip, _flipRA);
-                            final Shape s3 = trans.createTransformedShape(s2);
-                            _figureList.add(new Figure(s3, PROBE_ARM_COLOR, BLOCKED, OIWFS_STROKE));
+                            // TODO: We probably want to do the flip in the context and not in the screen!
+                            final Shape sContext = FeatureGeometry$.MODULE$.transformProbeArmForContext(s, armAngle, guideStar);
+                            final Shape sScreen  = FeatureGeometry$.MODULE$.transformProbeArmForScreen(sContext, _pixelsPerArcsec, flip, _flipRA, screenPos);
+                            _figureList.add(new Figure(sScreen, PROBE_ARM_COLOR, BLOCKED, OIWFS_STROKE));
                         }
                     });
                 }
