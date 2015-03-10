@@ -132,7 +132,7 @@ object Fixture {
       UniformSource(22.0, BrightnessUnit.MAG_PSA),
       EmissionLine(2.2, 250.0, 5.0e-19, "watts_flux", 1.0e-16, "watts_fd_wavelength"),
       WavebandDefinition.K,
-      0.0
+      0.75
     )
   )
 

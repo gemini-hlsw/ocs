@@ -1,9 +1,13 @@
 package edu.gemini.itc.shared;
 
 import edu.gemini.itc.flamingos2.Flamingos2;
+import edu.gemini.itc.gsaoi.Gsaoi;
+import edu.gemini.itc.nifs.Nifs;
+import edu.gemini.itc.niri.Niri;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.parameters.*;
 import edu.gemini.spModel.core.Site;
+import scala.Option;
 
 /**
  * This class encapsulates the process of creating a Spectral Energy
@@ -165,6 +169,10 @@ public class SEDFactory {
 
     // TODO: site and band could be moved to instrument(?)
     public static SourceResult calculate(final Instrument instrument, final Site site, final String bandStr, final SourceDefinitionParameters sdp, final ObservingConditionParameters odp, final TeleParameters tp, final PlottingDetailsParameters pdp) {
+        return calculate(instrument, site, bandStr, sdp, odp, tp, pdp, Option.apply((AOSystem) null));
+    }
+
+    public static SourceResult calculate(final Instrument instrument, final Site site, final String bandStr, final SourceDefinitionParameters sdp, final ObservingConditionParameters odp, final TeleParameters tp, final PlottingDetailsParameters pdp, final Option<AOSystem> ao) {
         // Module 1b
         // Define the source energy (as function of wavelength).
         //
@@ -184,6 +192,14 @@ public class SEDFactory {
         final WavebandDefinition band = sdp.getNormBand();
         final double start = band.getStart();
         final double end = band.getEnd();
+
+        // TODO: which instruments need this check, why only some and others not? Do all near-ir instruments need it?
+        // TODO: what about Nifs and Gnirs (other near-ir instruments)?
+        if (instrument instanceof Gsaoi || instrument instanceof Niri || instrument instanceof Flamingos2) {
+            if (sed.getStart() > instrument.getObservingStart() || sed.getEnd() < instrument.getObservingEnd()) {
+                throw new IllegalArgumentException("Shifted spectrum lies outside of observed wavelengths");
+            }
+        }
 
         // any sed except BBODY and ELINE have normalization regions
         switch (sdp.getDistributionType()) {
@@ -244,6 +260,7 @@ public class SEDFactory {
 
         // Background spectrum is introduced here.
         final VisitableSampledSpectrum sky = SEDFactory.getSED(getSky(instrument, bandStr, site, odp), instrument.getSampling());
+        Option<VisitableSampledSpectrum> halo = Option.empty();
         if (instrument instanceof Flamingos2) {
             // TODO: F2 differs slightly from GMOS, GNIRS, Michelle, TRecs and Nifs in this (order of operations)
             // TODO: check with science if we can change this and adapt baseline for regression tests accordingly
@@ -253,6 +270,7 @@ public class SEDFactory {
             sed.accept(t);
             sky.accept(t);
             sky.accept(tel);
+            halo = Option.empty();
         } else {
             // Apply telescope transmission to both sed and sky
             final SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(tp);
@@ -261,6 +279,23 @@ public class SEDFactory {
             // Create and Add background for the telescope.
             final SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(tp, site, bandStr);
             sky.accept(tb);
+
+            // FOR GSAOI and NIRI ADD AO STUFF HERE
+            if (instrument instanceof Gsaoi || instrument instanceof Niri) {
+                // Moved section where sky/sed is convolved with instrument below Altair/Gems
+                // section
+                // Module 5b
+                // The instrument with its detectors modifies the source and
+                // background spectra.
+                // input: instrument, source and background SED
+                // output: total flux of source and background.
+                // TODO: for GSAOI and NIRI convolve here, why??
+                instrument.convolveComponents(sed);
+                if (ao.isDefined()) {
+                    halo = Option.apply(SEDFactory.applyAoSystem(ao.get(), sky, sed));
+                }
+            }
+
             sky.accept(tel);
         }
 
@@ -276,11 +311,31 @@ public class SEDFactory {
         // background spectra.
         // input: instrument, source and background SED
         // output: total flux of source and background.
-        instrument.convolveComponents(sed);
+        if (!(instrument instanceof Gsaoi) && !(instrument instanceof Niri)) {
+            // TODO: for any instrument other than GSAOI and NIRI convolve here, why?
+            instrument.convolveComponents(sed);
+        }
         instrument.convolveComponents(sky);
 
+        // TODO: AO (FOR NIFS DONE AT THE VERY END, WHY DIFFERENT FROM GSAOI/NIRI?)
+        if (instrument instanceof Nifs && ao.isDefined()) {
+            halo = Option.apply(SEDFactory.applyAoSystem(ao.get(), sky, sed));
+        }
+
         // End of the Spectral energy distribution portion of the ITC.
-        return new SourceResult(sed, sky);
+        return new SourceResult(sed, sky, halo);
+    }
+
+    public static VisitableSampledSpectrum applyAoSystem(final AOSystem ao, final VisitableSampledSpectrum sky, final VisitableSampledSpectrum sed) {
+        sky.accept(ao.getBackgroundVisitor());
+        sed.accept(ao.getTransmissionVisitor());
+        sky.accept(ao.getTransmissionVisitor());
+
+        final VisitableSampledSpectrum halo = (VisitableSampledSpectrum) sed.clone();
+        halo.accept(ao.getHaloFluxAttenuationVisitor());
+        sed.accept(ao.getFluxAttenuationVisitor());
+
+        return halo;
     }
 
     private static String getWater(final String band) {
@@ -335,9 +390,11 @@ public class SEDFactory {
     public static final class SourceResult {
         public final VisitableSampledSpectrum sed;
         public final VisitableSampledSpectrum sky;
-        public SourceResult(final VisitableSampledSpectrum sed, final VisitableSampledSpectrum sky) {
+        public final Option<VisitableSampledSpectrum> halo;
+        public SourceResult(final VisitableSampledSpectrum sed, final VisitableSampledSpectrum sky, final Option<VisitableSampledSpectrum> halo) {
             this.sed                = sed;
             this.sky                = sky;
+            this.halo               = halo;
         }
     }
 

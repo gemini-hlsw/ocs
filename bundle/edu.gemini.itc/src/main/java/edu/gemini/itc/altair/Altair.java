@@ -1,12 +1,15 @@
 package edu.gemini.itc.altair;
 
+import edu.gemini.itc.gems.GemsFluxAttenuationVisitor;
+import edu.gemini.itc.shared.AOSystem;
 import edu.gemini.itc.shared.FormatStringWriter;
+import edu.gemini.itc.shared.SampledSpectrumVisitor;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 
 /**
  * Altair AO class
  */
-public class Altair {
+public class Altair implements AOSystem {
     /**
      * Related files will be in this subdir of lib
      */
@@ -49,19 +52,23 @@ public class Altair {
     }
 
     //Methods
-    public AltairBackgroundVisitor getBackground() {
+    public SampledSpectrumVisitor getBackgroundVisitor() {
         return altairBackground;
     }
 
-    public AltairTransmissionVisitor getTransmission() {
+    public SampledSpectrumVisitor getTransmissionVisitor() {
         return altairTransmission;
     }
 
-    public double getr0() {
-        //double r0_500 = (500E-9)/(uncorrectedSeeing*4.848E-6);
-        //double r0 = r0_500*Math.pow((wavelengthMeters/500), 1.2);
+    public SampledSpectrumVisitor getFluxAttenuationVisitor() {
+        return new AltairFluxAttenuationVisitor(getFluxAttenuation());
+    }
 
-        //Phil combined and simplified the above two eqations (notice he doesn't use the wavelength in meters anymore).
+    public SampledSpectrumVisitor getHaloFluxAttenuationVisitor() {
+        return new GemsFluxAttenuationVisitor(1 - getStrehl());
+    }
+
+    public double getr0() {
         return (0.1031 / uncorrectedSeeing) * Math.pow(wavelength / 500, 1.2);
     }
 
@@ -120,9 +127,7 @@ public class Altair {
 
     // Function that calculates the strehl from the fit, distance and magnitude
     public double getStrehl() {
-
         return getStrehlFit() * getStrehlNoiseDist() * getStrehlNoiseMag();
-//                * (getAOCorrectedFWHM()/getAOCorrectedFWHMc()); // REL-472
     }
 
     public double getFluxAttenuation() {
@@ -130,13 +135,7 @@ public class Altair {
     }
 
     public double getAOCorrectedFWHM() {
-        //double fwhmAO = Math.sqrt(Math.pow(wavelength/telescopeDiameter/4.848E-6,2)+Math.pow(0.035,2));
-        return Math.sqrt(6.817E-10 * Math.pow(wavelength, 2) + 6.25E-4); //Phil simplified the above equation
-    }
-
-
-    public double getAOCorrectedFWHMc() {
-        double fwhmAO = getAOCorrectedFWHM();
+        double fwhmAO = Math.sqrt(6.817E-10 * Math.pow(wavelength, 2) + 6.25E-4);
         return Math.sqrt(fwhmAO * fwhmAO + fwhmInst * fwhmInst); // REL-472
     }
 
@@ -145,10 +144,12 @@ public class Altair {
     }
 
 
-    public String printSummary(FormatStringWriter device) {
+    public String printSummary() {
+        final FormatStringWriter device = new FormatStringWriter();
+        device.setPrecision(3);
         String s = "r0(" + wavelength + "nm) = " + device.toString(getr0()) + " m\n";
         s += "Strehl = " + device.toString(getStrehl()) + "\n";
-        s += "FWHM of an AO-corrected core = " + device.toString(getAOCorrectedFWHMc()) + " arcsec\n";
+        s += "FWHM of an AO-corrected core = " + device.toString(getAOCorrectedFWHM()) + " arcsec\n";
         return s;
     }
 

@@ -6,6 +6,7 @@ import edu.gemini.itc.parameters.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.ITCRequest;
 import edu.gemini.spModel.core.Site;
+import scala.Option;
 
 import java.io.PrintWriter;
 import java.util.Calendar;
@@ -76,6 +77,14 @@ public final class NiriRecipe extends RecipeBase {
      *                   files, incorrectly-formatted data files, ...
      */
     public void writeOutput() {
+
+        if (_altairParameters.altairIsUsed()) {
+            if (_obsDetailParameters.getMethod().isSpectroscopy()) {
+                throw new IllegalArgumentException(
+                        "Altair cannot currently be used with Spectroscopy mode in the ITC.  Please deselect either altair or spectroscopy and resubmit the form.");
+            }
+        }
+
         // Create the Chart visitor. After a sed has been created the chart
         // visitor
         // can be used by calling the following commented out code:
@@ -87,7 +96,7 @@ public final class NiriRecipe extends RecipeBase {
         // ChartVisitor NiriChart = new ChartVisitor();
 
         // This object is used to format numerical strings.
-        FormatStringWriter device = new FormatStringWriter();
+        final FormatStringWriter device = new FormatStringWriter();
         device.setPrecision(2); // Two decimal places
         device.clear();
 
@@ -103,7 +112,7 @@ public final class NiriRecipe extends RecipeBase {
         // inputs: instrument, SED
         // calculates: redshifted SED
         // output: redshifteed SED
-        Niri instrument = new Niri(_niriParameters, _obsDetailParameters);
+        final Niri instrument = new Niri(_niriParameters, _obsDetailParameters);
 
         if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters
@@ -118,172 +127,22 @@ public final class NiriRecipe extends RecipeBase {
                                 + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
 
-        VisitableSampledSpectrum sed;
-        VisitableSampledSpectrum halo;
 
-        // ITCChart NiriChart2 = new ITCChart();
-        sed = SEDFactory.getSED(_sdParameters, instrument);
+        // Calculate image quality
+        final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
+        IQcalc.calculate();
 
-        // sed.applyWavelengthCorrection();
-        halo = (VisitableSampledSpectrum) sed.clone(); // initialize halo
-
-        SampledSpectrumVisitor redshift = new RedshiftVisitor(
-                _sdParameters.getRedshift());
-        sed.accept(redshift);
-
-        // Must check to see if the redshift has moved the spectrum beyond
-        // useful range. The shifted spectrum must completely overlap
-        // both the normalization waveband and the observation waveband
-        // (filter region).
-
-        final WavebandDefinition band = _sdParameters.getNormBand();
-        final double start = band.getStart();
-        final double end = band.getEnd();
-
-        // any sed except BBODY and ELINE have normailization regions
-        switch (_sdParameters.getDistributionType()) {
-            case ELINE:
-            case BBODY:
-                break;
-            default:
-                if (sed.getStart() > start || sed.getEnd() < end) {
-                    throw new RuntimeException(
-                            "Shifted spectrum lies outside of specified normalisation waveband.");
-                }
+        // Altair specific section
+        final Option<AOSystem> altair;
+        if (_altairParameters.altairIsUsed()) {
+            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _teleParameters.getTelescopeDiameter(), IQcalc.getImageQuality(), _altairParameters, 0.0);
+            _println(ao.printSummary());
+            altair = Option.apply((AOSystem) ao);
+        } else {
+            altair = Option.empty();
         }
 
-        if (sed.getStart() > instrument.getObservingStart()
-                || sed.getEnd() < instrument.getObservingEnd()) {
-            _println(" Sed start" + sed.getStart() + "> than instrument start"
-                    + instrument.getObservingStart());
-            _println(" Sed END" + sed.getEnd() + "< than instrument end"
-                    + instrument.getObservingEnd());
-
-            throw new RuntimeException(
-                    "Shifted spectrum lies outside of observed wavelengths");
-        }
-
-        if (_plotParameters.getPlotLimits().equals(PlottingDetailsParameters.PlotLimits.USER)) {
-            if (_plotParameters.getPlotWaveL() > instrument.getObservingEnd()
-                    || _plotParameters.getPlotWaveU() < instrument
-                    .getObservingStart()) {
-                _println(" The user limits defined for plotting do not overlap with the Spectrum.");
-
-                throw new RuntimeException(
-                        "User limits for plotting do not overlap with filter.");
-            }// else {
-            // NiriChart.setMinMaxX(_obsDetailParameters.getPlotWaveL(),
-            // _obsDetailParameters.getPlotWaveU());
-            // System.out.println(" L " +
-            // _obsDetailParameters.getPlotWaveL() + " U " +
-            // _obsDetailParameters.getPlotWaveU());
-            // }
-        }
-
-        // Module 2
-        // Convert input into standard internally-used units.
-        //
-        // inputs: instrument,redshifted SED, waveband, normalization flux,
-        // units
-        // calculates: normalized SED, resampled SED, SED adjusted for aperture
-        // output: SED in common internal units
-        if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
-            final SampledSpectrumVisitor norm = new NormalizeVisitor(
-                    _sdParameters.getNormBand(),
-                    _sdParameters.getSourceNormalization(),
-                    _sdParameters.getUnits());
-            sed.accept(norm);
-        }
-
-        // Resample the spectra for efficiency
-
-        SampledSpectrumVisitor resample = new ResampleVisitor(
-                instrument.getObservingStart(), instrument.getObservingEnd(),
-                instrument.getSampling());
-        // sed.accept(resample);
-
-        SampledSpectrumVisitor tel = new TelescopeApertureVisitor();
-        sed.accept(tel);
-
-        // SED is now in units of photons/s/nm
-
-        // Module 3b
-        // The atmosphere and telescope modify the spectrum and
-        // produce a background spectrum.
-        //
-        // inputs: SED, AIRMASS, sky emmision file, mirror configuration,
-        // output: SED and sky background as they arrive at instruments
-
-        SampledSpectrumVisitor clouds = CloudTransmissionVisitor.create(
-                _obsConditionParameters.getSkyTransparencyCloud());
-        sed.accept(clouds);
-
-        SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
-                _obsConditionParameters.getSkyTransparencyWater(),
-                _obsConditionParameters.getAirmass(), "nearIR_trans_",
-                Site.GN, ITCConstants.NEAR_IR);
-        sed.accept(water);
-
-        // Background spectrum is introduced here.
-        VisitableSampledSpectrum sky = SEDFactory.getSED("/"
-                + ITCConstants.HI_RES + "/mk"
-                + ITCConstants.NEAR_IR + ITCConstants.SKY_BACKGROUND_LIB + "/"
-                + ITCConstants.NEAR_IR_SKY_BACKGROUND_FILENAME_BASE + "_"
-                + _obsConditionParameters.getSkyTransparencyWaterCategory() + "_"
-                + _obsConditionParameters.getAirmassCategory()
-                + ITCConstants.DATA_SUFFIX, instrument.getSampling());
-
-        // /NiriChart2.addArray(sky.getData(),"Sky");
-        // NiriChart2.addTitle("Original Sky Spectrum");
-        // _println(NiriChart2.getBufferedImage(), "OrigSky");
-        // _println("");
-        // NiriChart2.flush();
-
-        // resample sky_background to instrument parameters
-        // sky.accept(resample);
-
-        // System.out.println("Average: " + sky.getAverage());
-
-        // System.out.println("Average: " + sky.getAverage());
-        // Apply telescope transmission
-        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(_teleParameters);
-        sed.accept(t);
-        sky.accept(t);
-
-        // Create and Add background for the telescope.
-        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, Site.GN, ITCConstants.NEAR_IR);
-        sky.accept(tb);
-
-        // DEBUGGING GRAPHS
-        // ITCChart DebugChart = new ITCChart();
-
-        // DebugChart.setDomainMinMax(3750, 5750);
-        // DebugChart.setRangeMinMax(0, 1000000);
-        // DebugChart.addArray(sed.getData(), "Full SED");
-        // GnirsChart.addArray(specS2N.getBackgroundSpectrum().getData(),
-        // "SQRT(Background)  ");
-
-        // DebugChart.addTitle("DEBUG: SED after atmos and telescope");
-        // DebugChart.addxAxisLabel("Wavelength (nm)");
-        // DebugChart.addyAxisLabel("e- per exposure per spectral pixel");
-
-        // _println(DebugChart.getBufferedImage(), "DEBUG");
-        // _println("");
-
-        // Add instrument background to sky background for a total background.
-        // At this point "sky" is not the right name.
-
-        // Moved section where sky/sed is convolved with instrument below Altair
-        // section
-        // Module 5b
-        // The instrument with its detectors modifies the source and
-        // background spectra.
-        // input: instrument, source and background SED
-        // output: total flux of source and background.
-        instrument.convolveComponents(sed);
-
-        // For debugging, print the spectrum integrals.
-        // _println("SED integral: "+sed_integral+"\tSKY integral: "+sky_integral);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _teleParameters, _plotParameters, altair);
 
         // End of the Spectral energy distribution portion of the ITC.
 
@@ -298,102 +157,18 @@ public final class NiriRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        double pixel_size = instrument.getPixelSize();
+        final double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
-        double ap_pix = 0;
-        double sw_ap = 0;
-        double Npix = 0;
         double source_fraction = 0;
         double halo_source_fraction = 0;
-        double pix_per_sq_arcsec = 0;
         double peak_pixel_count = 0;
 
-        // Calculate image quality
-        double im_qual = 0.;
-        double uncorrected_im_qual = 0.;
-
-        // /!!!!!!!!!!!!!!!new Calc Object Checked out!!!!!!!!!!!!!!!!!!
-        ImageQualityCalculatable IQcalc =
-                ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
-        IQcalc.calculate();
-
-        im_qual = IQcalc.getImageQuality();
-
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-        // Altair specific section
-
-        if (_altairParameters.altairIsUsed()) {
-
-            if (_obsDetailParameters.getMethod().isSpectroscopy()) {
-                throw new RuntimeException(
-                        "Altair cannot currently be used with Spectroscopy mode in the ITC.  Please deselect either altair or spectroscopy and resubmit the form.");
-            }
-            Altair altair = new Altair(instrument.getEffectiveWavelength(), _teleParameters.getTelescopeDiameter(), im_qual, _altairParameters, 0.0);
-            AltairBackgroundVisitor altairBackgroundVisitor = new AltairBackgroundVisitor();
-            AltairTransmissionVisitor altairTransmissionVisitor = new AltairTransmissionVisitor();
-            AltairFluxAttenuationVisitor altairFluxAttenuationVisitor = new AltairFluxAttenuationVisitor(
-                    altair.getFluxAttenuation());
-            AltairFluxAttenuationVisitor altairFluxAttenuationVisitorHalo = new AltairFluxAttenuationVisitor(
-                    (1 - altair.getStrehl()));
-            sky.accept(altairBackgroundVisitor);
-
-            sed.accept(altairTransmissionVisitor);
-            sky.accept(altairTransmissionVisitor);
-
-            // Moved Background visitor here so Altair background isn't affected
-            // by Altair's own transmission. Correct? - MD 20090723
-            // Moved back for now. The instrument background is done the other
-            // way (background is affected by instrument transmission)
-
-            // sky.accept(altairBackgroundVisitor);
-
-            halo = (VisitableSampledSpectrum) sed.clone();
-            halo.accept(altairFluxAttenuationVisitorHalo);
-            sed.accept(altairFluxAttenuationVisitor);
-
-            uncorrected_im_qual = im_qual; // Save uncorrected value for the
-            // image quality for later use
-
-            im_qual = altair.getAOCorrectedFWHMc();
-
-            int previousPrecision = device.getPrecision();
-            device.setPrecision(3); // Two decimal places
-            device.clear();
-            _println(altair.printSummary(device));
-            // _println(altair.toString());
-            device.setPrecision(previousPrecision); // Two decimal places
-            device.clear();
-
-        }
-
-        // Instrument background should not be affected by Altair transmission
-        // (Altair is above it)
-        // This is a change from original code - MD 20090722
-
-        sky.accept(tel);
-        instrument.addBackground(sky);
-        // sky.accept(tel);
-
-        // Module 4 AO module not implemented
-        // The AO module affects source and background SEDs.
-
-        // Must do this here so that Altair background is convolved with
-        // instrument ?
-        // Does not seem to be set up this way in currently working code on
-        // phase1
-        // but that code produces incorrect results on my machine. Very
-        // confusing - MD 20090722
-        instrument.convolveComponents(sky);
-
-        // End of altair specific section.
-
-        double sed_integral = sed.getIntegral();
-        double sky_integral = sky.getIntegral();
+        final double sed_integral = calcSource.sed.getIntegral();
+        final double sky_integral = calcSource.sky.getIntegral();
 
         double halo_integral = 0;
         if (_altairParameters.altairIsUsed()) {
-            halo_integral = halo.getIntegral();
+            halo_integral = calcSource.halo.get().getIntegral();
         }
 
 
@@ -404,50 +179,35 @@ public final class NiriRecipe extends RecipeBase {
         if (_altairParameters.altairIsUsed()) {
             // If altair is used turn off printing of SF calc
             final SourceFraction SFcalcHalo;
+            final double im_qual = altair.get().getAOCorrectedFWHM();
             if (_obsDetailParameters.isAutoAperture()) {
-                SFcalcHalo = SourceFractionFactory.calculate(_sdParameters.isUniform(), false, 1.18 * im_qual, instrument.getPixelSize(), uncorrected_im_qual);
+                SFcalcHalo = SourceFractionFactory.calculate(_sdParameters.isUniform(), false, 1.18 * im_qual, instrument.getPixelSize(), IQcalc.getImageQuality());
                 SFcalc = SourceFractionFactory.calculate(_sdParameters.isUniform(), _obsDetailParameters.isAutoAperture(), 1.18 * im_qual, instrument.getPixelSize(), im_qual);
             } else {
-                SFcalcHalo = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, uncorrected_im_qual);
+                SFcalcHalo = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, IQcalc.getImageQuality());
                 SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
             }
             halo_source_fraction = SFcalcHalo.getSourceFraction();
         } else {
             // this will be the core for an altair source; unchanged for non altair.
-            SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
+            SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, IQcalc.getImageQuality());
         }
         source_fraction = SFcalc.getSourceFraction();
-        Npix = SFcalc.getNPix();
+        final double Npix = SFcalc.getNPix();
         if (_obsDetailParameters.getMethod().isImaging()) {
             if (_altairParameters.altairIsUsed()) {
                 _print(SFcalc.getTextResult(device, false));
                 _println("derived image halo size (FWHM) for a point source = "
-                        + device.toString(uncorrected_im_qual) + " arcsec.\n");
+                        + device.toString(IQcalc.getImageQuality()) + " arcsec.\n");
             } else {
                 _print(SFcalc.getTextResult(device));
                 _println(IQcalc.getTextResult(device));
             }
         }
 
-        // if (_altairParameters.altairIsUsed()) {
-        // _println("Sky integral per exposure: " +
-        // sky_integral*_obsDetailParameters.getExposureTime());
-        // _println("Core integral per exposure: " +
-        // sed_integral*_obsDetailParameters.getExposureTime());
-        // _println("Core source_fraction: " + source_fraction);
-        // _println("Halo integral per exposure: " +
-        // halo_integral*_obsDetailParameters.getExposureTime());
-        // _println("Halo source_fraction: " + halo_source_fraction);
-        // _println("");
-        // }
-        PeakPixelFluxCalc ppfc;
-
+        final PeakPixelFluxCalc ppfc;
+        final double im_qual = altair.isDefined() ? altair.get().getAOCorrectedFWHM() : IQcalc.getImageQuality();
         if (!_sdParameters.isUniform()) {
-
-            // calculation of image quaility was in here if the current setup
-            // does not work copy it back in here from above, and uncomment
-            // the section of code below for the uniform surface brightness.
-            // the present way should work.
 
             ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
                     _obsDetailParameters.getExposureTime(), sed_integral,
@@ -457,16 +217,11 @@ public final class NiriRecipe extends RecipeBase {
 
             if (_altairParameters.altairIsUsed()) {
                 PeakPixelFluxCalc ppfc_halo = new PeakPixelFluxCalc(
-                        uncorrected_im_qual, pixel_size,
+                        IQcalc.getImageQuality(), pixel_size,
                         _obsDetailParameters.getExposureTime(), halo_integral,
                         sky_integral, instrument.getDarkCurrent());
-                // _println("Peak pixel in halo: " +
-                // ppfc_halo.getFluxInPeakPixel());
-                // _println("Peak pixel in core: " + peak_pixel_count + "\n");
                 peak_pixel_count = peak_pixel_count
                         + ppfc_halo.getFluxInPeakPixel();
-                // _println("Total peak pixel count: " + peak_pixel_count +
-                // " \n");
 
             }
 
@@ -483,11 +238,12 @@ public final class NiriRecipe extends RecipeBase {
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
-        int number_exposures = _obsDetailParameters.getNumExposures();
-        double frac_with_source = _obsDetailParameters.getSourceFraction();
-        double dark_current = instrument.getDarkCurrent();
-        double exposure_time = _obsDetailParameters.getExposureTime();
-        double read_noise = instrument.getReadNoise();
+        final int number_exposures = _obsDetailParameters.getNumExposures();
+        final double frac_with_source = _obsDetailParameters.getSourceFraction();
+        final double dark_current = instrument.getDarkCurrent();
+        final double exposure_time = _obsDetailParameters.getExposureTime();
+        final double read_noise = instrument.getReadNoise();
+
         // report error if this does not come out to be an integer
         checkSourceFraction(number_exposures, frac_with_source);
 
@@ -495,15 +251,14 @@ public final class NiriRecipe extends RecipeBase {
 
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {
 
-            SlitThroughput st;// = new SlitThroughput(im_qual,pixel_size,
-            // _niriParameters.getFPMask());
-            SlitThroughput st_halo;
+            final SlitThroughput st;
+            final SlitThroughput st_halo;
 
             if (!_obsDetailParameters.isAutoAperture()) {
                 st = new SlitThroughput(im_qual,
                         _obsDetailParameters.getApertureDiameter(), pixel_size,
                         _niriParameters.getFPMask());
-                st_halo = new SlitThroughput(uncorrected_im_qual,
+                st_halo = new SlitThroughput(IQcalc.getImageQuality(),
                         _obsDetailParameters.getApertureDiameter(), pixel_size,
                         _niriParameters.getFPMask());
 
@@ -514,7 +269,7 @@ public final class NiriRecipe extends RecipeBase {
                 st = new SlitThroughput(im_qual, pixel_size,
                         _niriParameters.getFPMask());
 
-                st_halo = new SlitThroughput(uncorrected_im_qual, pixel_size,
+                st_halo = new SlitThroughput(IQcalc.getImageQuality(), pixel_size,
                         _niriParameters.getFPMask());
 
                 switch (_sdParameters.getProfileType()) {
@@ -545,7 +300,7 @@ public final class NiriRecipe extends RecipeBase {
                     * frac_with_source) + " secs is on source.");
 
             _print("<HR align=left SIZE=3>");
-            // System.out.println(" im_qual: " + im_qual + " " + pixel_size);
+
             ap_diam = st.getSpatialPix();
             double spec_source_frac = st.getSlitThroughput();
             double halo_spec_source_frac = st_halo.getSlitThroughput();
@@ -556,7 +311,7 @@ public final class NiriRecipe extends RecipeBase {
                     ap_diam = new Double(1 / (_niriParameters.getFPMask() * pixel_size) + 0.5).intValue();
                     spec_source_frac = 1;
                 } else {
-                    spec_source_frac = _niriParameters.getFPMask() * ap_diam * pixel_size; // ap_diam = Spec_NPix
+                    spec_source_frac = _niriParameters.getFPMask() * ap_diam * pixel_size;
                 }
             }
 
@@ -567,75 +322,16 @@ public final class NiriRecipe extends RecipeBase {
                     instrument.getGrismResolution(), spec_source_frac, im_qual,
                     ap_diam, number_exposures, frac_with_source, exposure_time,
                     dark_current, read_noise);
-            specS2N.setSourceSpectrum(sed);
-            specS2N.setBackgroundSpectrum(sky);
-            specS2N.setHaloImageQuality(uncorrected_im_qual);
+            specS2N.setSourceSpectrum(calcSource.sed);
+            specS2N.setBackgroundSpectrum(calcSource.sky);
+            specS2N.setHaloImageQuality(IQcalc.getImageQuality());
             if (_altairParameters.altairIsUsed())
                 specS2N.setSpecHaloSourceFraction(halo_spec_source_frac);
             else
                 specS2N.setSpecHaloSourceFraction(0.0);
 
-            sed.accept(specS2N);
+            calcSource.sed.accept(specS2N);
             _println("<p style=\"page-break-inside: never\">");
-            /*
-             * NiriChart.setSeriesName("Signal  ");
-			 * NiriChart.setName("Signal and Background ");
-			 * //NiriChart.setName("");
-			 * NiriChart.setYaxisTitle("e- per exposure per spectral pixel");
-			 * NiriChart.setSpectrum(specS2N.getSignalSpectrum());
-			 *
-			 * NiriChart.setSeriesName("SQRT(Background)  ");
-			 * NiriChart.addSpectrum(specS2N.getBackgroundSpectrum());
-			 * specS2N.getBackgroundSpectrum().accept(NiriChart);
-			 * //_println(NiriChart.getTag()); _println(NiriChart.getImage(),
-			 * "SigAndBack"); _println("");
-			 *
-			 * sigSpec = _printSpecTag("ASCII signal spectrum"); backSpec =
-			 * _printSpecTag("ASCII background spectrum");
-			 *
-			 *
-			 *
-			 * NiriChart.setSeriesName("Single Exp S/N  ");
-			 * NiriChart.setName("Intermediate Single Exp and Final S/N");
-			 * NiriChart.setYaxisTitle("Signal / Noise per spectral pixel");
-			 *
-			 * NiriChart.setSpectrum(specS2N.getExpS2NSpectrum());
-			 *
-			 * NiriChart.setSeriesName("Final S/N  ");
-			 * NiriChart.addSpectrum(specS2N.getFinalS2NSpectrum());
-			 * specS2N.getFinalS2NSpectrum().accept(NiriChart);
-			 * //_println(NiriChart.getTag()); _println(NiriChart.getImage(),
-			 * "SigAndBack"); _println("");
-			 *
-			 * singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
-			 * finalS2N = _printSpecTag("Final S/N ASCII data");
-			 */
-
-			/*
-			 * SATURATION LEVEL
-			 *
-			 * NiriChart.addArray(SEDCombination.combine(specS2N.getSignalSpectrum
-			 * (
-			 * ),specS2N.getBackgroundSpectrum_wo_sqrt(),SEDCombination.ADD).getData
-			 * (), "Signal + Background");
-			 * NiriChart.addTitle("Total Signal + background");
-			 *
-			 * NiriChart.addxAxisLabel("Wavelength (nm)");
-			 * NiriChart.addyAxisLabel("e- per exposure per spectral pixel");
-			 *
-			 * NiriChart.addHorizontalLine(instrument.getWellDepth()*.8,
-			 * java.awt.Color.BLACK, "80% full well");
-			 * NiriChart.addHorizontalLine(instrument.getWellDepth(),
-			 * java.awt.Color.BLACK, "Saturation Level");
-			 *
-			 * _println(NiriChart.getBufferedImage(), "SigPlusBack");
-			 * _println("");
-			 *
-			 * //sigSpec =
-			 * _printSpecTag("ASCII signal plus Background spectrum");
-			 *
-			 * NiriChart.flush();
-			 */
             final ITCChart chart1 = new ITCChart("Signal and SQRT(Background) in software aperture of " + ap_diam + " pixels", "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
             final ITCChart chart2 = new ITCChart("Intermediate Single Exp and Final S/N", "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
 
@@ -656,243 +352,7 @@ public final class NiriRecipe extends RecipeBase {
             finalS2N = _printSpecTag("Final S/N ASCII data");
 
         } else {
-
-			/*
-			 * // Observation method //Get all vars that Both will use
-			 * 
-			 * 
-			 * 
-			 * //*****************************************!!!!!! //This is where
-			 * we will use the if statement to decide wether to calculate // S/N
-			 * given a time or time given a S/N.
-			 * //*****************************************!!!!!!
-			 * 
-			 * // if (_obsDetailParameters.getCalculationMethod().equals( //
-			 * ObservationDetailsParameters.S2N)) // {
-			 * 
-			 * 
-			 * // Calculate contributions to noise from different components per
-			 * exposure. // The parameters calculated are actually the square of
-			 * the noise. // Add contributions in quadrature.
-			 * 
-			 * // Shot noise on source flux in aperture double var_source =
-			 * sed_integral * source_fraction * exposure_time;
-			 * 
-			 * // Shot noise on background flux in aperture double
-			 * var_background = sky_integral * exposure_time * pixel_size *
-			 * pixel_size * Npix;
-			 * 
-			 * // Shot noise on dark current flux in aperture
-			 * 
-			 * double var_dark = dark_current * Npix * exposure_time;
-			 * 
-			 * // Readout noise in aperture
-			 * 
-			 * double var_readout = read_noise * read_noise * Npix;
-			 * 
-			 * _println(""); _println(
-			 * "Contributions to total noise (e-) in aperture (per exposure):");
-			 * _println("Source noise = " +
-			 * device.toString(Math.sqrt(var_source)));
-			 * _println("Background noise = " +
-			 * device.toString(Math.sqrt(var_background)));
-			 * _println("Dark current noise = " +
-			 * device.toString(Math.sqrt(var_dark)));
-			 * _println("Readout noise = " +
-			 * device.toString(Math.sqrt(var_readout))); _println(""); if
-			 * (Math.sqrt(var_source + var_dark +var_readout)
-			 * >Math.sqrt(var_background))
-			 * _println("Warning: observation is NOT background noise limited");
-			 * else _println("Observation is background noise limited.");
-			 * 
-			 * 
-			 * 
-			 * device.setPrecision(0); // NO decimal places device.clear();
-			 * 
-			 * _println("");
-			 * //_println("The Well depth, "+device.toString(instrument
-			 * .getWellDepth())+", is " + //
-			 * device.toString(peak_pixel_count/instrument.getWellDepth()*100) +
-			 * //
-			 * "% full in the peak pixel, "+device.toString(peak_pixel_count)+
-			 * ".");
-			 * _println("The peak pixel signal + background is "+device.toString
-			 * (peak_pixel_count)+". This is " +
-			 * device.toString(peak_pixel_count/instrument.getWellDepth()*100) +
-			 * "% of the full well depth of "
-			 * +device.toString(instrument.getWellDepth())+".");
-			 * 
-			 * 
-			 * if (peak_pixel_count > (.8*instrument.getWellDepth())) _println(
-			 * "Warning: peak pixel exceeds 80% of the well depth and may be saturated"
-			 * );
-			 * 
-			 * device.setPrecision(2); // TWO decimal places device.clear();
-			 * 
-			 * 
-			 * double noise = Math.sqrt(var_source + var_background + var_dark +
-			 * var_readout);
-			 * 
-			 * double sourceless_noise = Math.sqrt(var_background + var_dark +
-			 * var_readout);
-			 * 
-			 * // total source flux in aperture is double signal = sed_integral
-			 * * source_fraction * exposure_time;
-			 * 
-			 * _println(""); _println("Total noise per exposure = " +
-			 * device.toString(noise)); _println("Total signal per exposure = "
-			 * + device.toString(signal));
-			 * 
-			 * // S/N ratio is double exp_s2n = signal / noise;
-			 * 
-			 * 
-			 * double final_s2n = Math.sqrt(number_source_exposures) * signal /
-			 * Math.sqrt(signal + 2 * sourceless_noise * sourceless_noise);
-			 * 
-			 * // Calculate the final S/N ratio for Uniform Surface Brightness.
-			 * double usb_final_s2n=0; //if
-			 * (_sdParameters.getSourceGeometry().equals( //
-			 * SourceDefinitionParameters.EXTENDED_SOURCE)) //{ // if
-			 * (_sdParameters.getExtendedSourceType(). //
-			 * equals(SourceDefinitionParameters.UNIFORM)) // { // final_s2n =
-			 * final_s2n*Math.sqrt(pix_per_sq_arcsec); // exp_s2n =
-			 * exp_s2n*Math.sqrt(pix_per_sq_arcsec); // } //}
-			 * 
-			 * if (_obsDetailParameters.getCalculationMethod().equals(
-			 * ObservationDetailsParameters.S2N)) {
-			 * 
-			 * _println(""); _println("S/N per exposure = " +
-			 * device.toString(exp_s2n)); _println("");
-			 * _println("S/N for the whole observation = " +
-			 * device.toString(final_s2n)+ " (including sky subtraction)");
-			 * 
-			 * _println(""); _println("Requested total integration time = " +
-			 * device.toString(exposure_time* number_exposures) +
-			 * " secs, of which " + device.toString(exposure_time*
-			 * number_exposures* frac_with_source) + " secs is on source." );
-			 * 
-			 * 
-			 * }
-			 * 
-			 * if (_obsDetailParameters.getCalculationMethod().equals(
-			 * ObservationDetailsParameters.INTTIME)) {
-			 * 
-			 * double req_s2n = _obsDetailParameters.getSNRatio(); int
-			 * int_req_source_exposures; double req_number_exposures,
-			 * effective_s2n,req_source_exposures;
-			 * 
-			 * if (_sdParameters.getSourceGeometry().equals(
-			 * SourceDefinitionParameters.EXTENDED_SOURCE)) { if
-			 * (_sdParameters.getExtendedSourceType().
-			 * equals(SourceDefinitionParameters.UNIFORM)) { req_s2n =
-			 * req_s2n/Math.sqrt(pix_per_sq_arcsec); } }
-			 * 
-			 * req_source_exposures = (req_s2n/signal)*(req_s2n/signal)* (signal
-			 * + 2*sourceless_noise*sourceless_noise); //
-			 * _println("req_source_exposures: " +
-			 * device.toString(req_source_exposures));
-			 * 
-			 * int_req_source_exposures = new
-			 * Double(Math.ceil(req_source_exposures)).intValue();
-			 * 
-			 * req_number_exposures = int_req_source_exposures/frac_with_source;
-			 * 
-			 * effective_s2n = (Math.sqrt(int_req_source_exposures)*signal)/
-			 * Math.sqrt(signal +2*sourceless_noise*sourceless_noise);
-			 * 
-			 * if (_sdParameters.getSourceGeometry().equals(
-			 * SourceDefinitionParameters.EXTENDED_SOURCE)) { if
-			 * (_sdParameters.getExtendedSourceType().
-			 * equals(SourceDefinitionParameters.UNIFORM)) {
-			 * 
-			 * effective_s2n = ((Math.sqrt(int_req_source_exposures)* signal)/
-			 * Math.sqrt(signal+2*sourceless_noise*sourceless_noise))
-			 * Math.sqrt(pix_per_sq_arcsec); } } _println("");
-			 * device.setPrecision(0); // NO decimal places device.clear();
-			 * 
-			 * _print("Derived number of exposures = " +
-			 * device.toString(req_number_exposures) + " , of which " +
-			 * device.toString(req_number_exposuresfrac_with_source) ); if
-			 * (req_number_exposures == 1) _println (" is on source."); else
-			 * _println(" are on source.");
-			 * 
-			 * 
-			 * _print("Taking " +
-			 * device.toString(Math.ceil(req_number_exposures)));
-			 * if(Math.ceil(req_number_exposures)==1) _print(" exposure"); else
-			 * _print(" exposures"); _print(", the effective S/N for the whole"
-			 * + " observation is " ); device.setPrecision(2); // TWO decimal
-			 * places device.clear();
-			 * 
-			 * _println(device.toString(effective_s2n)+
-			 * " (including sky subtraction)");
-			 * 
-			 * 
-			 * _println(""); _println("Required total integration time is " +
-			 * device.toString(req_number_exposures* exposure_time) +
-			 * " secs, of which " + device.toString(req_number_exposures*
-			 * exposure_time* frac_with_source) + " secs is on source.");
-			 * 
-			 * 
-			 * } } //****************THIS IS NOW METHOD C.. MAY BE USED IN THE
-			 * FUTURE****** //else perform calculation of inttime given S/N //
-			 * }else { // // define variables that will be used. the rest were
-			 * defined above. // double
-			 * req_s2n=_obsDetailParameters.getSNRatio(); // double
-			 * partial_equation; // double derived_exposure_time; // double
-			 * derived_int_time; // double read_noise =
-			 * instrument.getReadNoise(); // double dark_current =
-			 * instrument.getDarkCurrent(); // double
-			 * summed_source=sed_integral; // double
-			 * summed_background=sky_integral;
-			 * 
-			 * // if (_sdParameters.getSourceGeometry().equals( //
-			 * SourceDefinitionParameters.EXTENDED_SOURCE)) // { // if
-			 * (_sdParameters.getExtendedSourceType(). //
-			 * equals(SourceDefinitionParameters.UNIFORM)) // { // req_s2n =
-			 * req_s2n/Math.sqrt(pix_per_sq_arcsec); // } // }
-			 * 
-			 * // //equation directly from math cad. // partial_equation
-			 * =(req_s2n*source_fraction*summed_source+ //
-			 * (2*req_s2n*summed_background*Math.pow(pixel_size,2)* //
-			 * Npix+2*req_s2n*dark_current*Npix)+Math.sqrt(Math.pow(req_s2n,2)*
-			 * // Math.pow(source_fraction,2)*Math.pow(summed_source,2)+ //
-			 * 4*Math.pow(req_s2n,2)*source_fraction*summed_source* //
-			 * summed_background*Math.pow(pixel_size,2)*Npix+ //
-			 * 4*Math.pow(req_s2n,2)*source_fraction*summed_source* //
-			 * dark_current*Npix+4*Math.pow(req_s2n,2)* //
-			 * Math.pow(summed_background,2)*Math.pow(pixel_size,4)* //
-			 * Math.pow(Npix,2)+8*Math.pow(req_s2n,2)*summed_background* //
-			 * Math.pow(pixel_size,2)*Math.pow(Npix,2)*dark_current+4* //
-			 * Math.pow(req_s2n,2)*Math.pow(dark_current,2)* //
-			 * Math.pow(Npix,2)+8*Math.pow(source_fraction,2)* //
-			 * Math.pow(summed_source,2)*number_source_exposures* //
-			 * Math.pow(read_noise,2)*Npix));
-			 * 
-			 * // derived_exposure_time=req_s2n*partial_equation/(2* //
-			 * Math.pow(source_fraction,2)* // Math.pow(summed_source,2)* //
-			 * number_source_exposures);
-			 * 
-			 * // derived_int_time = number_exposures*derived_exposure_time;
-			 * 
-			 * // _println(""); // _println("Derived Exposure time = " + //
-			 * device.toString(derived_exposure_time)); // _println(""); //
-			 * _println("Derived Integration time = " + //
-			 * device.toString(derived_int_time));
-			 * 
-			 * 
-			 * // }
-			 */
-            // for testing
-			/*
-			 * if (_sdParameters.getSourceGeometry().
-			 * equals(SourceDefinitionParameters.UNIFORM)) {
-			 * _println("Final Uniform Surface Brightness S2N: " +
-			 * usb_final_s2n); }
-			 */
-
-            ImagingS2NCalculatable IS2Ncalc =
-                    ImagingS2NCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
+            final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
             IS2Ncalc.setSedIntegral(sed_integral);
             if (_altairParameters.altairIsUsed()) {
                 IS2Ncalc.setSecondaryIntegral(halo_integral);
@@ -926,10 +386,7 @@ public final class NiriRecipe extends RecipeBase {
 
         }
 
-        // _println("");
         _print("<HR align=left SIZE=3>");
-        // _println("");
-
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + instrument.getName() + "\n");
         _println(_sdParameters.printParameterSummary());
@@ -951,8 +408,6 @@ public final class NiriRecipe extends RecipeBase {
             _println(specS2N.getFinalS2NSpectrum(), _header.toString(), finalS2N);
         }
 
-        sed = null;
-        sky = null;
     }
 
 }

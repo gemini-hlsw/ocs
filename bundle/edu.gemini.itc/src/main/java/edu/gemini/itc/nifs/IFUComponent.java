@@ -1,11 +1,3 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-
 package edu.gemini.itc.nifs;
 
 import edu.gemini.itc.shared.*;
@@ -29,15 +21,11 @@ public class IFUComponent extends TransmissionElement {
      */
     public static final double IFU_LEN_Y = 0.042;
     /**
-     * Diameter of the IFU
-     */
-    public static final double IFU_DIAMETER = Math.sqrt(IFU_LEN_X * IFU_LEN_Y);  //effective area
-    /**
      * Spacing between IFU elements
      */
     public static final double IFU_SPACING = 0.0;
     private ApertureComposite IFUApertures;
-    private List IFUOffsets;
+    private List<Double> IFUOffsets;
 
 
     /**
@@ -55,7 +43,7 @@ public class IFUComponent extends TransmissionElement {
         int Napps;
 
         IFUApertures = new ApertureComposite();
-        IFUOffsets = new ArrayList();
+        IFUOffsets = new ArrayList<>();
 
 
         Napps = new Double((IFURadialMax - IFURadialMin) / (IFU_LEN_X + IFU_SPACING) + 1).intValue();
@@ -67,7 +55,7 @@ public class IFUComponent extends TransmissionElement {
             double Xpos = IFURadialMin + (IFU_LEN_X + IFU_SPACING) * i;
 
             IFUApertures.addAperture(new RectangularAperture(IFU_LEN_X, IFU_LEN_Y, Xpos, 0));
-            IFUOffsets.add(new Double(Xpos));
+            IFUOffsets.add(Xpos);
         }
     }
 
@@ -85,20 +73,14 @@ public class IFUComponent extends TransmissionElement {
 
         super(ITCConstants.LIB + "/" + Nifs.INSTR_DIR + "/" + Nifs.INSTR_PREFIX + "ifu_trans" + Instrument.DATA_SUFFIX);
 
-        double xStart, xEnd;            //starting/ending positions in arcsecs for apertures
-        double yStart, yEnd;            //starting/ending positions in arcsecs for apertures
-        int Napps = numX * numY;            //Total number of apertures
+        double xStart;            //starting/ending positions in arcsecs for apertures
+        double yStart;            //starting/ending positions in arcsecs for apertures
 
         IFUApertures = new ApertureComposite();
-        IFUOffsets = new ArrayList();
-
-        if (Napps == 0) Napps = 1;
+        IFUOffsets = new ArrayList<>();
 
         xStart = centerX - Math.floor(numX / 2) * (IFU_LEN_X + IFU_SPACING);
-        xEnd = centerX + Math.floor(numX / 2) * (IFU_LEN_X + IFU_SPACING);
-
         yStart = centerY - Math.floor(numY / 2) * (IFU_LEN_Y + IFU_SPACING);
-        yEnd = centerY + Math.floor(numY / 2) * (IFU_LEN_Y + IFU_SPACING);
 
         for (int i = 0; i < numY; i++) {
             double yPos = yStart + (IFU_LEN_Y + IFU_SPACING) * i;
@@ -106,8 +88,8 @@ public class IFUComponent extends TransmissionElement {
                 double xPos = xStart + (IFU_LEN_X + IFU_SPACING) * j;
 
                 IFUApertures.addAperture(new RectangularAperture(IFU_LEN_X, IFU_LEN_Y, xPos, yPos));
-                IFUOffsets.add(new Double(xPos));
-                IFUOffsets.add(new Double(yPos));
+                IFUOffsets.add(xPos);
+                IFUOffsets.add(yPos);
             }
         }
 
@@ -124,10 +106,10 @@ public class IFUComponent extends TransmissionElement {
     public IFUComponent(double IFUOffsetX, double pixel_size) {
         super(ITCConstants.LIB + "/" + Nifs.INSTR_DIR + "/" + Nifs.INSTR_PREFIX + "ifu_trans" + Instrument.DATA_SUFFIX);
         IFUApertures = new ApertureComposite();
-        IFUOffsets = new ArrayList();
+        IFUOffsets = new ArrayList<>();
 
         IFUApertures.addAperture(new RectangularAperture(IFU_LEN_X, IFU_LEN_Y, IFUOffsetX, 0));
-        IFUOffsets.add(new Double(IFUOffsetX));
+        IFUOffsets.add(IFUOffsetX);
     }
 
 
@@ -146,7 +128,7 @@ public class IFUComponent extends TransmissionElement {
      *
      * @return List of source fractions
      */
-    public List getFractionOfSourceInAperture() {
+    public List<Double> getFractionOfSourceInAperture() {
         return IFUApertures.getFractionOfSourceInAperture();
     }
 
@@ -164,7 +146,7 @@ public class IFUComponent extends TransmissionElement {
      * will be one offset per aperture.  If it is summed there will be two.. one for
      * X and one for Y.
      */
-    public List getApertureOffsetList() {
+    public List<Double> getApertureOffsetList() {
         return IFUOffsets;
     }
 

@@ -105,12 +105,6 @@ public final class Flamingos2Recipe extends RecipeBase {
         final double sed_integral = sed.getIntegral();
         final double sky_integral = sky.getIntegral();
 
-        if (sed.getStart() > instrument.getObservingStart() || sed.getEnd() < instrument.getObservingEnd()) {
-            _println(" Sed start " + sed.getStart() + " > than instrument start " + instrument.getObservingStart());
-            _println(" Sed end " + sed.getEnd() + " < than instrument end " + instrument.getObservingEnd());
-            throw new IllegalArgumentException("Shifted spectrum lies outside of observed wavelengths");
-        }
-
         // Start of morphology section of ITC
 
         // Module 1a
