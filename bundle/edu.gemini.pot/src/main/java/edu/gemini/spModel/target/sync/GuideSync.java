@@ -126,12 +126,18 @@ public enum GuideSync implements ISPEventMonitor {
     public void propertyChanged(SPCompositeChange change) {
         if (!SPUtil.getDataObjectPropertyName().equals(change.getPropertyName())) return;
 
-        ISPNode node = change.getModifiedNode();
+        final ISPNode node = change.getModifiedNode();
         // Ignore updates to objects that aren't to the target obs component
         // or (REL-542) Altair ... Should be done through a marker interface ...
-        Object dataObj = node.getDataObject();
+        final Object dataObj = node.getDataObject();
         if (!(dataObj instanceof TargetObsComp) && !(dataObj instanceof InstAltair)) return;
-        update((ISPObservation) node.getParent());
+
+        // Ignore updates to objects that aren't in an observation.  This can
+        // happen for example if the component is in a conflict folder.
+        final ISPNode parent = node.getParent();
+        if (parent instanceof ISPObservation) {
+            update((ISPObservation) parent);
+        }
     }
 
     /**
