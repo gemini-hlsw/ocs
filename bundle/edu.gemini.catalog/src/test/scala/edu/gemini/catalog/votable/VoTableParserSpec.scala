@@ -307,20 +307,20 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
                 TableRowItem(FieldDescriptor("dej2000", "dej2000", Ucd("pos.eq.dec;meta.main")), "0.209323681906") ::
                 TableRowItem(FieldDescriptor("raj2000", "raj2000", Ucd("pos.eq.ra;meta.main")), "359.745951955") :: Nil
               )
-      tableRow2Target(validRow) should beEqualTo(\/-(SiderealTarget("123456", Coordinates(RightAscension.fromAngle(Angle.parseDegrees("359.745951955").getOrElse(Angle.zero)), Declination.fromAngle(Angle.parseDegrees("0.209323681906").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, Nil, None)))
+      tableRow2Target(Nil)(validRow) should beEqualTo(\/-(SiderealTarget("123456", Coordinates(RightAscension.fromAngle(Angle.parseDegrees("359.745951955").getOrElse(Angle.zero)), Declination.fromAngle(Angle.parseDegrees("0.209323681906").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, Nil, None)))
 
       val rowWithMissingId = TableRow(
                 TableRowItem(FieldDescriptor("dej2000", "dej2000", Ucd("pos.eq.dec;meta.main")), "0.209323681906") ::
                 TableRowItem(FieldDescriptor("raj2000", "raj2000", Ucd("pos.eq.ra;meta.main")), "359.745951955") :: Nil
               )
-      tableRow2Target(rowWithMissingId) should beEqualTo(-\/(MissingValues(List(VoTableParser.UCD_OBJID))))
+      tableRow2Target(Nil)(rowWithMissingId) should beEqualTo(-\/(MissingValues(List(VoTableParser.UCD_OBJID))))
 
       val rowWithBadRa = TableRow(
                 TableRowItem(FieldDescriptor("objid", "objid", Ucd("meta.id;meta.main")), "123456") ::
                 TableRowItem(FieldDescriptor("dej2000", "dej2000", Ucd("pos.eq.dec;meta.main")), "0.209323681906") ::
                 TableRowItem(FieldDescriptor("raj2000", "raj2000", Ucd("pos.eq.ra;meta.main")), "ABC") :: Nil
             )
-      tableRow2Target(rowWithBadRa) should beEqualTo(-\/(FieldValueProblem(VoTableParser.UCD_RA, "ABC")))
+      tableRow2Target(Nil)(rowWithBadRa) should beEqualTo(-\/(FieldValueProblem(VoTableParser.UCD_RA, "ABC")))
     }
     "be able to parse magnitudes' band" in {
       val iMagField = Ucd("phot.mag;em.opt.i")
@@ -392,6 +392,16 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       val xmlFile = "votable-ucac4.xml"
       VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
       VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables should be size 1
+    }
+    "be able to filter out bad magnitudes" in {
+      val xmlFile = "fmag.xml"
+      VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
+      // The sample has only one row
+      val result = VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.map(_.rows.headOption).flatten.get
+
+      val mags = result.map(_.magnitudeIn(MagnitudeBand.R))
+      // Does not contain R as it is filtered out being magnitude 20 and error 99
+      mags should beEqualTo(\/.right(None))
     }
   }
 }

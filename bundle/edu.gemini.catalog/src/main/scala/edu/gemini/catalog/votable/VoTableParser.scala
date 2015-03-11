@@ -112,14 +112,17 @@ trait VoTableParser {
       table <- xml \\ "TABLE"
       fields = parseFields(table)
       tr = parseTableRows(fields, table)
-    } yield ParsedTable(tr.map(tableRow2Target).toList)
+    } yield ParsedTable(tr.map(tableRow2Target(fields)).toList)
     ParsedVoResource(tables.toList)
   }
 
   /**
    * Convert a table row to a sidereal target or CatalogProblem
    */
-  protected def tableRow2Target(row: TableRow): CatalogProblem \/ SiderealTarget = {
+  protected def tableRow2Target(fields: List[FieldDescriptor])(row: TableRow): CatalogProblem \/ SiderealTarget = {
+    val isUCAC4 = fields.exists(_.name === "ucac4")
+    val ucac4BadMagnitude = 20.0
+    val ucac4BadMagnitudeError = 0.98999999999999999.some
     val entries = row.itemsMap
 
     def missing = REQUIRED.filterNot(entries.contains)
@@ -127,6 +130,7 @@ trait VoTableParser {
     def containsMagnitude(v: (Ucd, String)) = v._1.includes(VoTableParser.UCD_MAG) && v._1.matches(magRegex)
     def magnitudeField(v: (Ucd, String)) = containsMagnitude(v) && !v._1.includes(VoTableParser.STAT_ERR)
     def magnitudeErrorField(v: (Ucd, String)) = containsMagnitude(v) && v._1.includes(VoTableParser.STAT_ERR)
+    def nonValidMagnitude(m: Magnitude) = isUCAC4 && m.value === ucac4BadMagnitude && m.error === ucac4BadMagnitudeError
 
     def parseProperMotion(pm: (Option[String], Option[String])): CatalogProblem \/ Option[ProperMotion] = {
       val k = for {
@@ -140,7 +144,8 @@ trait VoTableParser {
       k.sequenceU
     }
 
-    def combineWithErrors(m: List[Magnitude], e: Map[MagnitudeBand, Double]) = m.map(i => i.copy(error = e.get(i.band)))
+    def combineWithErrorsAndFilter(m: List[Magnitude], e: Map[MagnitudeBand, Double]): List[Magnitude] =
+      m.map(i => i.copy(error = e.get(i.band))).filterNot(nonValidMagnitude)
 
     def toSiderealTarget(id: String, ra: String, dec: String, mags: Map[Ucd, String], magErrs: Map[Ucd, String], pm: (Option[String], Option[String])): \/[CatalogProblem, SiderealTarget] =
       for {
@@ -151,7 +156,7 @@ trait VoTableParser {
         magnitudes    <- mags.map(parseBands).toList.sequenceU
         properMotion  <- parseProperMotion(pm)
         coordinates    = Coordinates(RightAscension.fromAngle(r), declination)
-      } yield SiderealTarget(id, coordinates, properMotion, combineWithErrors(magnitudes.map {case (b, v) => new Magnitude(v, b)}, magnitudeErrs.toMap).sorted, None)
+      } yield SiderealTarget(id, coordinates, properMotion, combineWithErrorsAndFilter(magnitudes.map {case (b, v) => new Magnitude(v, b)}, magnitudeErrs.toMap).sorted, None)
 
     val result = for {
         id            <- entries.get(VoTableParser.UCD_OBJID)
