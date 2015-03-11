@@ -23,6 +23,12 @@ trait Arbitraries {
   implicit val arbDec: Arbitrary[Declination] =
     Arbitrary(arbitrary[Angle].map(Declination.zero.offset(_)._1))
 
+  implicit val arbRAVelocity: Arbitrary[RightAscensionAngularVelocity] =
+    Arbitrary(arbitrary[Double].map(RightAscensionAngularVelocity.fromMilliArcSecondsPerYear))
+
+  implicit val arbDecVelocity: Arbitrary[DeclinationAngularVelocity] =
+    Arbitrary(arbitrary[Double].map(DeclinationAngularVelocity.fromMilliArcSecondsPerYear))
+
   implicit val arbCoords: Arbitrary[Coordinates] =
     Arbitrary { 
       for { 
