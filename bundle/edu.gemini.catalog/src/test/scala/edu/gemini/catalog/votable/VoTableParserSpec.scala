@@ -403,5 +403,15 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       // Does not contain R as it is filtered out being magnitude 20 and error 99
       mags should beEqualTo(\/.right(None))
     }
+    "convert fmag to UC" in {
+      val xmlFile = "fmag.xml"
+      VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
+      // The sample has only one row
+      val result = VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.map(_.rows.headOption).flatten.get
+
+      val mags = result.map(_.magnitudeIn(MagnitudeBand.UC))
+      // Fmag gets converted to UC
+      mags should beEqualTo(\/.right(Some(Magnitude(5.9, MagnitudeBand.UC, 0.39.some, MagnitudeSystem.VEGA))))
+    }
   }
 }

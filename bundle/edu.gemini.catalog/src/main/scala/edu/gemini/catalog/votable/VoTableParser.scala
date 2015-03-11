@@ -52,7 +52,7 @@ trait VoTableParser {
 
   import scala.xml.Node
 
-  private val magRegex = """(?i)em.(opt|IR).(\w)""".r
+  private val magRegex = """(?i)em.(opt|IR)(\.\w)?""".r
   private val REQUIRED = List(VoTableParser.UCD_OBJID, VoTableParser.UCD_RA, VoTableParser.UCD_DEC)
 
   protected def parseFieldDescriptor(xml: Node): Option[FieldDescriptor] = xml match {
@@ -92,11 +92,16 @@ trait VoTableParser {
   protected def parseBands(p: (Ucd, String)): CatalogProblem \/ (MagnitudeBand, Double) = {
     val (ucd: Ucd, value: String) = p
 
+    def parseBandToken(token: String):Option[String] = token match {
+      case magRegex(_, null) => "UC".some
+      case magRegex(_, b)    => b.replace(".", "").toUpperCase.some
+      case _                 => none
+    }
+    
     val band = for {
       t <- ucd.tokens
-      m <- magRegex.findFirstMatchIn(t.token)
-      l  = m.group(2).toUpperCase
-    } yield MagnitudeBand.all.find(_.name == l)
+      b <- parseBandToken(t.token)
+    } yield MagnitudeBand.all.find(_.name == b)
 
     for {
       b <- band.headOption.flatten \/> UnmatchedField(ucd)
