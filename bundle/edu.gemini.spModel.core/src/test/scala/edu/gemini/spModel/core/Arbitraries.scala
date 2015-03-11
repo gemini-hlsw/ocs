@@ -62,8 +62,8 @@ trait Arbitraries {
   implicit val arbProperMotion: Arbitrary[ProperMotion] =
     Arbitrary {
       for {
-        deltaRA  <- arbitrary[Angle]
-        deltaDec <- arbitrary[Angle]
+        deltaRA  <- arbitrary[RightAscensionAngularVelocity]
+        deltaDec <- arbitrary[DeclinationAngularVelocity]
         epoch    <- arbitrary[Epoch]
         parallax <- arbitrary[Option[Angle]]
         rv       <- arbitrary[Option[Double]]

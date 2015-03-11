@@ -4,19 +4,19 @@ package edu.gemini.spModel.core
 
 /**
  * Specification of proper motion.
- * @param deltaRA velocity in right ascension per year
- * @param deltaDec velocity in right ascension per year
+ * @param deltaRA angular velocity in right ascension per year
+ * @param deltaDec angular velocity in declination per year
  * @param parallax parallax, if known
  * @param rv radial velocity, if known, in km/sec
  */
 case class ProperMotion(
-  deltaRA: Angle,
-  deltaDec: Angle,
+  deltaRA: RightAscensionAngularVelocity,
+  deltaDec: DeclinationAngularVelocity,
   epoch: Epoch = Epoch.J2000,
   parallax: Option[Angle] = None,
   rv: Option[Double] = None)
 
 object ProperMotion {
-  val zero = ProperMotion(Angle.zero, Angle.zero, Epoch.J2000, None, None)
+  val zero = ProperMotion(RightAscensionAngularVelocity.Zero, DeclinationAngularVelocity.Zero, Epoch.J2000, None, None)
 }
 

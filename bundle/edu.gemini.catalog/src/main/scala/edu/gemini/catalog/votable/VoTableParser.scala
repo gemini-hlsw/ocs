@@ -128,18 +128,14 @@ trait VoTableParser {
     def magnitudeField(v: (Ucd, String)) = containsMagnitude(v) && !v._1.includes(VoTableParser.STAT_ERR)
     def magnitudeErrorField(v: (Ucd, String)) = containsMagnitude(v) && v._1.includes(VoTableParser.STAT_ERR)
 
-    // TODO: remove this, use method on Angle companion
-    def fromMilliarcseconds(d: Double): Angle =
-      Angle.fromDegrees(d / (60 * 60 * 1000))
-
     def parseProperMotion(pm: (Option[String], Option[String])): CatalogProblem \/ Option[ProperMotion] = {
       val k = for {
         pmra <- pm._1
         pmdec <- pm._2
       } yield for {
-          pmrav <- parseDoubleValue(VoTableParser.UCD_PMRA, pmra).map(fromMilliarcseconds)
-          pmdecv <- parseDoubleValue(VoTableParser.UCD_PMDEC, pmdec).map(fromMilliarcseconds)
-        } yield ProperMotion(pmrav, pmdecv)
+          pmrav <- parseDoubleValue(VoTableParser.UCD_PMRA, pmra)
+          pmdecv <- parseDoubleValue(VoTableParser.UCD_PMDEC, pmdec)
+        } yield ProperMotion(RightAscensionAngularVelocity.fromMilliArcSecondsPerYear(pmrav), DeclinationAngularVelocity.fromMilliArcSecondsPerYear(pmdecv))
 
       k.sequenceU
     }
