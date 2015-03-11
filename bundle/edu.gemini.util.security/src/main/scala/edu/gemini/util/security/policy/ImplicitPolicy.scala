@@ -11,6 +11,7 @@ import java.security.{AccessControlException, Principal, Permission}
 import javax.security.auth.Subject
 import java.util.logging.{Level, Logger}
 
+import scala.util.Try
 import scalaz._
 import Scalaz._
 import edu.gemini.spModel.core.SPProgramID
@@ -143,18 +144,9 @@ object ImplicitPolicy {
 
     // EventQueue.getCurrentEvent sometimes throws a NPE, at least in headless
     // mode, so we'll wrap it here.
-    //
-    // Could also be
-    //    \/.fromTryCatch(Option(EventQueue.getCurrentEvent)).toOption.flatten
-    private def currentEvent: Option[AWTEvent] =
-      try {
-        Option(EventQueue.getCurrentEvent)
-      } catch {
-        case _: Throwable => None
-      }
 
     def check(p: Permission)(a: => Boolean): Boolean =
-      currentEvent match {
+      Option(Try(EventQueue.getCurrentEvent).toOption.orNull) match {
         case None => a
         case o =>
           if (o != previousEvent) {
