@@ -33,10 +33,6 @@ object AngularVelocity {
     scala.Ordering.by(_.masPerYear)
 
   /** @group Typeclass Instances */
-  implicit val equal: Equal[AngularVelocity] =
-    Equal.equalA[AngularVelocity]
-  
-  /** @group Typeclass Instances */
   implicit val monoid: Monoid[AngularVelocity] =
     Monoid.instance((a, b) => AngularVelocity(a.masPerYear + b.masPerYear), Zero)
 
@@ -59,10 +55,6 @@ object RightAscensionAngularVelocity {
     scala.Ordering.by(_.velocity.masPerYear)
 
   /** @group Typeclass Instances */
-  implicit val equal: Equal[RightAscensionAngularVelocity] =
-    Equal.equalA[RightAscensionAngularVelocity]
-
-  /** @group Typeclass Instances */
   implicit val monoid: Monoid[RightAscensionAngularVelocity] =
     Monoid.instance((a, b) => RightAscensionAngularVelocity(a.velocity |+| b.velocity), Zero)
 
@@ -83,10 +75,6 @@ object DeclinationAngularVelocity {
   /** @group Typeclass Instances */
   implicit val ordering: scala.Ordering[DeclinationAngularVelocity] =
     scala.Ordering.by(_.velocity.masPerYear)
-
-  /** @group Typeclass Instances */
-  implicit val equal: Equal[DeclinationAngularVelocity] =
-    Equal.equalA[DeclinationAngularVelocity]
 
   /** @group Typeclass Instances */
   implicit val monoid: Monoid[DeclinationAngularVelocity] =
