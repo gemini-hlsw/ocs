@@ -24,10 +24,12 @@ trait Arbitraries {
     Arbitrary(arbitrary[Angle].map(Declination.zero.offset(_)._1))
 
   implicit val arbRAVelocity: Arbitrary[RightAscensionAngularVelocity] =
-    Arbitrary(arbitrary[Double].map(RightAscensionAngularVelocity.fromMilliArcSecondsPerYear))
+    // Velocity can be any number but it makes sense to restrict to work with the legacy model
+    Arbitrary(arbitrary[Double].map(v => RightAscensionAngularVelocity.fromMilliArcSecondsPerYear(v % AngularVelocity.MilliArcSecsInADegree)))
 
   implicit val arbDecVelocity: Arbitrary[DeclinationAngularVelocity] =
-    Arbitrary(arbitrary[Double].map(DeclinationAngularVelocity.fromMilliArcSecondsPerYear))
+    // Velocity can be any number but it makes sense to restrict to work with the legacy model
+    Arbitrary(arbitrary[Double].map(v => DeclinationAngularVelocity.fromMilliArcSecondsPerYear(v % AngularVelocity.MilliArcSecsInADegree)))
 
   implicit val arbCoords: Arbitrary[Coordinates] =
     Arbitrary { 
