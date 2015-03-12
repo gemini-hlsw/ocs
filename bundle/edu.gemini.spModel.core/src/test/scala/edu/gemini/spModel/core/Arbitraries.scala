@@ -23,6 +23,14 @@ trait Arbitraries {
   implicit val arbDec: Arbitrary[Declination] =
     Arbitrary(arbitrary[Angle].map(Declination.zero.offset(_)._1))
 
+  implicit val arbRAVelocity: Arbitrary[RightAscensionAngularVelocity] =
+    // Velocity can be any number but it makes sense to restrict to work with the legacy model
+    Arbitrary(arbitrary[Double].map(v => RightAscensionAngularVelocity(AngularVelocity(v % AngularVelocity.MilliArcSecsInADegree))))
+
+  implicit val arbDecVelocity: Arbitrary[DeclinationAngularVelocity] =
+    // Velocity can be any number but it makes sense to restrict to work with the legacy model
+    Arbitrary(arbitrary[Double].map(v => DeclinationAngularVelocity(AngularVelocity(v % AngularVelocity.MilliArcSecsInADegree))))
+
   implicit val arbCoords: Arbitrary[Coordinates] =
     Arbitrary { 
       for { 
@@ -56,8 +64,8 @@ trait Arbitraries {
   implicit val arbProperMotion: Arbitrary[ProperMotion] =
     Arbitrary {
       for {
-        deltaRA  <- arbitrary[Angle]
-        deltaDec <- arbitrary[Angle]
+        deltaRA  <- arbitrary[RightAscensionAngularVelocity]
+        deltaDec <- arbitrary[DeclinationAngularVelocity]
         epoch    <- arbitrary[Epoch]
         parallax <- arbitrary[Option[Angle]]
         rv       <- arbitrary[Option[Double]]
