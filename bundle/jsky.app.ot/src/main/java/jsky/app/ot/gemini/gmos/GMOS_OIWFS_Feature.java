@@ -22,7 +22,6 @@ import jsky.app.ot.tpe.TpeImageInfo;
 import jsky.app.ot.tpe.TpeMessage;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.util.Collection;
 import java.util.Collections;

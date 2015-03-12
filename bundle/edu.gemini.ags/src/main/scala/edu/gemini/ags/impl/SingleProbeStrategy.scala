@@ -9,6 +9,7 @@ import edu.gemini.spModel.core.{Coordinates, Angle}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, VignettingGuideProbe, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.system.CoordinateParam.Units
 import edu.gemini.spModel.target.system.HmsDegTarget
 import edu.gemini.spModel.telescope.PosAngleConstraint._
@@ -72,18 +73,51 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   def select(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SiderealTarget]): Option[AgsStrategy.Selection] = {
     if (candidates.size == 0) None
     else {
-      val results = ctx.getPosAngleConstraint match {
-        case FIXED                         => selectBounded(List(ctx), mt, candidates)
-        case FIXED_180 | PARALLACTIC_ANGLE => selectBounded(List(ctx, ctx180(ctx)), mt, candidates)
-        case UNBOUNDED                     => selectUnbounded(ctx, mt, candidates)
-      }
-      (params.guideProbe match {
-        case v: ValidatableGuideProbe with VignettingGuideProbe => brightestByQualityAndVignetting(results, mt, ctx, v)(_._2)
-        case _                                                  => brightest(results, params.band)(_._2)
-      }).map {
-        case (angle, st) => AgsStrategy.Selection(angle, List(AgsStrategy.Assignment(params.guideProbe, st)))
+      params.guideProbe match {
+        // If vignetting, filter according to the pos angle constraint, and then for each obs context, pick the best quality with
+        // the least vignetting. Then pick the best quality with the least vignetting of the final result.
+        case v: ValidatableGuideProbe with VignettingGuideProbe =>
+          val results = ctx.getPosAngleConstraint match {
+            case FIXED                         => filterBounded(List(ctx), mt, candidates)
+            case FIXED_180 | PARALLACTIC_ANGLE => filterBounded(List(ctx, ctx180(ctx)), mt, candidates)
+            case UNBOUNDED                     => filterUnbounded(ctx, mt, candidates)
+          }
+          val bestPerCtx = for {
+            (c, soList) <- results
+            rating      <- brightestByQualityAndVignetting(soList, mt, c, v)
+          } yield (c, rating)
+          bestPerCtx.reduceOption(vignettingCtxOrder.min).map {
+            case (c, (_, _, st)) => AgsStrategy.Selection(c.getPositionAngle.toNewModel, List(AgsStrategy.Assignment(params.guideProbe, st)))
+          }
+
+        // Otherwise proceed as normal.
+        case _ =>
+          val results = ctx.getPosAngleConstraint match {
+            case FIXED                         => selectBounded(List(ctx), mt, candidates)
+            case FIXED_180 | PARALLACTIC_ANGLE => selectBounded(List(ctx, ctx180(ctx)), mt, candidates)
+            case UNBOUNDED                     => selectUnbounded(ctx, mt, candidates)
+          }
+          brightest(results, params.band)(_._2).map {
+            case (angle, st) => AgsStrategy.Selection(angle, List(AgsStrategy.Assignment(params.guideProbe, st)))
+          }
       }
     }
+  }
+
+  private def filterBounded(alternatives: List[ObsContext], mt: MagnitudeTable, candidates: List[SiderealTarget]): List[(ObsContext, List[SiderealTarget])] = {
+    val cv = new CandidateValidator(params, mt, candidates)
+    alternatives.map(c => (c, cv.filter(c))).filter {
+      case (c, cand) => cand.nonEmpty
+    }
+  }
+
+  private def filterUnbounded(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SiderealTarget]): List[(ObsContext, List[SiderealTarget])] = {
+    for {
+      so <- candidates
+      pa = SingleProbeStrategy.calculatePositionAngle(ctx.getBaseCoordinates.toNewModel, so)
+      ctxSo = ctx.withPositionAngle(pa.toOldModel)
+      if new CandidateValidator(params, mt, List(so)).exists(ctxSo)
+    } yield (ctxSo, List(so))
   }
 
   // List of candidates and their angles for the case where the pos angle constraint is not unbounded.
@@ -121,6 +155,11 @@ object SingleProbeStrategy {
     Angle.fromRadians(angle)
   }
 
+  lazy val vignettingOrder = scala.math.Ordering[(Int, Double)].on { x: (AgsGuideQuality, Double, SiderealTarget) =>
+    (AgsGuideQuality.All.indexOf(x._1), x._2)
+  }
+  lazy val vignettingCtxOrder = vignettingOrder.on { x0: (ObsContext, (AgsGuideQuality, Double, SiderealTarget)) => x0._2 }
+
   /**
    * Given a list of candidates, bin them by quality and then pick the one that vignettes the
    * science area the least.
@@ -128,23 +167,20 @@ object SingleProbeStrategy {
    * @param mt               magnitude lookup table
    * @param ctx              context information
    * @param probe            the guide probe
-   * @param toSiderealTarget converts candidates to SiderealTargets
-   * @tparam A               the type of the candidates
-   * @return                 Some(guideStar) if a candidate exists that can be used, None otherwise
+   * @return                 Some((quality, vignetting factor, guideStar) if a candidate exists that can be used, None otherwise
    */
-  def brightestByQualityAndVignetting[A](lst: List[A], mt: MagnitudeTable, ctx: ObsContext, probe: ValidatableGuideProbe with VignettingGuideProbe)(toSiderealTarget: A => SiderealTarget): Option[A] = {
+  def brightestByQualityAndVignetting(lst: List[SiderealTarget], mt: MagnitudeTable, ctx: ObsContext,
+                                         probe: ValidatableGuideProbe with VignettingGuideProbe): Option[(AgsGuideQuality, Double, SiderealTarget)] = {
     // Create tuples (AgsQuality, vignetting factor, target) and then find the min by
     // ordering on the first two, returning the corresponding target.
-    val order = scala.math.Ordering[(Int, Double)].on { x: (Int, Double, A) => (x._1, x._2)}
     val candidates = for {
-      entry    <- lst
-      st       =  toSiderealTarget(entry)
+      st       <- lst
       spTarget =  new SPTarget(HmsDegTarget.fromSkyObject(st.toOldModel))
       analysis <- AgsAnalysis.analysis(ctx, mt, probe, spTarget)
     } yield {
       val vig = probe.calculateVignetting(ctx, st.coordinates)
-      (AgsGuideQuality.All.indexOf(analysis), vig, entry)
+      (analysis.quality, vig, st)
     }
-    candidates.reduceOption(order.min).map(_._3)
+    candidates.reduceOption(vignettingOrder.min)
   }
 }

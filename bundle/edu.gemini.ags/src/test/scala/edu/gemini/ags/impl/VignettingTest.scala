@@ -1,0 +1,153 @@
+package edu.gemini.ags.impl
+
+import edu.gemini.ags.api.AgsRegistrar
+import edu.gemini.ags.conf.ProbeLimitsTable
+import edu.gemini.pot.ModelConverters._
+import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.skycalc.{DDMMSS, HHMMSS}
+import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.core._
+import edu.gemini.spModel.gemini.gmos.{GmosOiwfsGuideProbe, InstGmosSouth}
+import edu.gemini.spModel.gemini.inst.InstRegistry
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions._
+import edu.gemini.spModel.guide.{VignettingGuideProbe, ValidatableGuideProbe}
+import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.spModel.obscomp.SPInstObsComp
+import edu.gemini.spModel.rich.shared.immutable._
+import edu.gemini.spModel.target.SPTarget
+import edu.gemini.spModel.target.env.TargetEnvironment
+import edu.gemini.spModel.telescope.{IssPortProvider, IssPort}
+
+import org.junit.Assert._
+import org.junit.{Ignore, Test}
+
+import scala.collection.JavaConverters._
+
+/**
+ * Right now, we only test for GMOS. In the future, this will be expanded to include other guide probes.
+ */
+class VignettingTest {
+  sealed trait VignettingConfiguration {
+    def inst: SPInstObsComp
+    def probe: ValidatableGuideProbe with VignettingGuideProbe
+    def site: Site
+  }
+
+  case class VignettingConfigurationWithISSPort(spType: SPComponentType, probe: ValidatableGuideProbe with VignettingGuideProbe,
+    site: Site, port: IssPort) extends VignettingConfiguration {
+    lazy val inst = InstRegistry.instance.prototype(spType.narrowType).getValue
+    inst.asInstanceOf[IssPortProvider].setIssPort(port)
+  }
+
+  val GMOSSouthSideLookingWithOI = VignettingConfigurationWithISSPort(InstGmosSouth.SP_TYPE, GmosOiwfsGuideProbe.instance, Site.GS, IssPort.SIDE_LOOKING)
+  val GMOSSouthUpLookingWithOI   = VignettingConfigurationWithISSPort(InstGmosSouth.SP_TYPE, GmosOiwfsGuideProbe.instance, Site.GS, IssPort.UP_LOOKING)
+
+  val GS1  = siderealTarget("GS1",  "23:59:58.187 -00:00:10.20", 10.0)
+  val GS2  = siderealTarget("GS2",  "23:59:55.693  00:00:49.30", 15.0)
+  val GS3  = siderealTarget("GS3",  "23:59:49.687  00:01:02.90", 14.0)
+  val GS4  = siderealTarget("GS4",  "23:59:48.440  00:03:03.60", 16.0)
+  val GS5  = siderealTarget("GS5",  "23:59:45.380 -00:00:20.40",  9.0)
+  val GS6  = siderealTarget("GS6",  "00:00:03.060  00:01:09.70",  9.0)
+  val GS7  = siderealTarget("GS7",  "00:00:12.353  00:03:05.30", 12.0)
+  val GS8  = siderealTarget("GS8",  "00:00:04.307 -00:00:59.50", 15.0)
+  val GS9  = siderealTarget("GS9",  "00:00:12.240 -00:02:55.10", 16.0)
+  val GS10 = siderealTarget("GS10", "00:00:10.200 -00:01:35.20", 15.5)
+  val All = List(GS1, GS2, GS3, GS4, GS5, GS6, GS7, GS8, GS9, GS10)
+
+  // Load the magnitude table and create the base position.
+  val mt   = ProbeLimitsTable.loadOrThrow()
+  val base = new SPTarget(0.0, 0.0)
+
+  // Convert a string and magnitude to a SiderealTarget.
+  def siderealTarget(name: String, raDecStr: String, rMag: Double): SiderealTarget = {
+    val (raStr, decStr) = raDecStr.span(_ != ' ')
+    val ra  = Angle.fromDegrees(HHMMSS.parse(raStr).toDegrees.getMagnitude)
+    val dec = Angle.fromDegrees(DDMMSS.parse(decStr.trim).toDegrees.getMagnitude)
+    val sc  = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
+    SiderealTarget(name, sc, None, List(new Magnitude(rMag, MagnitudeBand.R)), None)
+  }
+
+  /**
+   * Perform an AGS selection test with vignetting taken into account using the instrument and guide probe as specified
+   * in the info, using the offsets provided, and with the list of candidates. The expected list lists the candidates
+   * in the order that they should be selected, e.g. expected[0] should be the first candidate selected, expected[1]
+   * should be the candidate selected if expected[0] is thrown away, etc. Note that, of course, if a candidate is not
+   * a valid choice, it should not appear in expected.
+   *
+   * @param config     the instrument and guide probe to test
+   * @param posAngle   the position angle to use in degrees
+   * @param offsets    the offsets to use
+   * @param candidates the list of candidates to pass to AGS
+   * @param expected   the order in which the candidates should be selected
+   */
+  def executeTest(config: VignettingConfiguration, posAngle: Double, offsets: List[Offset], candidates: List[SiderealTarget], expected: List[SiderealTarget]): Unit = {
+    config.inst.setPosAngleDegrees(posAngle)
+    val targetEnv = TargetEnvironment.create(base).addActive(config.probe)
+    val offsetSet = offsets.map(_.toOldModel).toSet.asJava
+    val ctx       = ObsContext.create(targetEnv, config.inst, Some(config.site).asGeminiOpt, BEST, offsetSet, null)
+    val strategy  = AgsRegistrar.currentStrategy(ctx).get.asInstanceOf[SingleProbeStrategy]
+
+    def nextCandidate(candidates: List[SiderealTarget], expected: List[SiderealTarget]): Unit = {
+      expected match {
+        case next :: remain =>
+          val selectionOpt = strategy.select(ctx, mt, candidates)
+          assertTrue(selectionOpt.isDefined)
+
+          val selection = selectionOpt.get
+          assertEquals(selection.assignments.size, 1)
+
+          val assignment = selection.assignments.head
+          assertEquals(next, assignment.guideStar)
+
+          nextCandidate(candidates.diff(List(next)), expected.drop(1))
+
+        case Nil =>
+          val selectionOpt = strategy.select(ctx, mt, candidates)
+          assertTrue(selectionOpt.isEmpty)
+      }
+    }
+    nextCandidate(candidates, expected)
+  }
+
+  @Ignore @Test def testSideLookingBasePosAngle0() = {
+    val expected   = List(GS3, GS2, GS1, GS4)
+    executeTest(GMOSSouthSideLookingWithOI, 0.0, Nil, All, expected)
+  }
+
+  @Ignore @Test def testSideLookingBasePosAngle90() = {
+    val expected = List(GS7, GS6, GS1)
+    executeTest(GMOSSouthSideLookingWithOI, 90.0, Nil, All, expected)
+  }
+
+  @Ignore @Test def testSideLookingBasePosAngle180() = {
+    val expected = List(GS8, GS10, GS9)
+    executeTest(GMOSSouthSideLookingWithOI, 180.0, Nil, All, expected)
+  }
+
+  @Ignore @Test def testUpLookingBasePosAngle0() = {
+    val expected = List(GS1)
+    executeTest(GMOSSouthUpLookingWithOI, 0.0, Nil, All, expected)
+  }
+
+  @Ignore @Test def testUpLookingBasePosAngle90() = {
+    val expected = List(GS3, GS2, GS1, GS4)
+    executeTest(GMOSSouthUpLookingWithOI, 90.0, Nil, All, expected)
+  }
+
+  @Ignore @Test def testUpLookingBasePosAngle180() = {
+    val expected = List(GS7, GS6)
+    executeTest(GMOSSouthUpLookingWithOI, 180.0, Nil, All, expected)
+  }
+
+  @Test def testSideLookingOneOffsetPosAngle0() = {
+    val expected   = List(GS2, GS6)
+    executeTest(GMOSSouthSideLookingWithOI, 0.0, List(Offset(Angle.fromArcsecs(50.0), Angle.fromArcsecs(50.0))), All, expected)
+  }
+
+  @Test def testSideLookingOneOffset2PosAngle0() = {
+    // The vignetting exclusively on the offset would result in GS6 and then GS7, but the vignetting averaged across
+    // the base position and the offset would result in GS7 and then GS6.
+    val expected   = List(GS7, GS6)
+    executeTest(GMOSSouthSideLookingWithOI, 0.0, List(Offset(Angle.fromArcsecs(200.0), Angle.fromArcsecs(50.0))), All, expected)
+  }
+}
