@@ -21,11 +21,12 @@ object Ucd {
 }
 
 /** Describes a field */
-case class FieldDescriptor(id: String, name: String, ucd: Ucd)
+case class FieldId(id: String, ucd: Ucd)
+case class FieldDescriptor(id: FieldId, name: String)
 
 case class TableRowItem(field: FieldDescriptor, data: String)
 case class TableRow(items: List[TableRowItem]) {
-  def itemsMap:Map[Ucd, String] = items.map(i => i.field.ucd -> i.data)(collection.breakOut)
+  def itemsMap:Map[FieldId, String] = items.map(i => i.field.id -> i.data)(collection.breakOut)
 }
 
 /** ParsedTable and ParsedResources contains a list of problems */

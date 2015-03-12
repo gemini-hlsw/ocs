@@ -243,7 +243,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
     }
     "be able to parse a field definition" in {
       val fieldXml = <FIELD ID="gmag_err" datatype="double" name="gmag_err" ucd="stat.error;phot.mag;em.opt.g"/>
-      parseFieldDescriptor(fieldXml) should beSome(FieldDescriptor("gmag_err", "gmag_err", Ucd("stat.error;phot.mag;em.opt.g")))
+      parseFieldDescriptor(fieldXml) should beSome(FieldDescriptor(FieldId("gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "gmag_err"))
       // Empty field
       parseFieldDescriptor(<FIELD/>) should beNone
       // non field xml
@@ -253,9 +253,9 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
     }
     "be able to parse a list of fields" in {
       val result =
-        FieldDescriptor("gmag_err", "gmag_err", Ucd("stat.error;phot.mag;em.opt.g")) ::
-        FieldDescriptor("rmag_err", "rmag_err", Ucd("stat.error;phot.mag;em.opt.r")) ::
-        FieldDescriptor("flags1", "flags1", Ucd("meta.code")) :: Nil
+        FieldDescriptor(FieldId("gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "gmag_err") ::
+        FieldDescriptor(FieldId("rmag_err", Ucd("stat.error;phot.mag;em.opt.r")), "rmag_err") ::
+        FieldDescriptor(FieldId("flags1", Ucd("meta.code")), "flags1") :: Nil
 
       parseFields(fieldsNode) should beEqualTo(result)
     }
@@ -263,9 +263,9 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       val fields = parseFields(fieldsNode)
 
       val result = TableRow(
-        TableRowItem(FieldDescriptor("gmag_err", "gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "0.0960165") ::
-        TableRowItem(FieldDescriptor("rmag_err", "rmag_err", Ucd("stat.error;phot.mag;em.opt.r")), "0.0503736") ::
-        TableRowItem(FieldDescriptor("flags1", "flags1", Ucd("meta.code")), "268435728") :: Nil
+        TableRowItem(FieldDescriptor(FieldId("gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "gmag_err"), "0.0960165") ::
+        TableRowItem(FieldDescriptor(FieldId("rmag_err", Ucd("stat.error;phot.mag;em.opt.r")), "rmag_err"), "0.0503736") ::
+        TableRowItem(FieldDescriptor(FieldId("flags1", Ucd("meta.code")), "flags1"), "268435728") :: Nil
       )
       parseTableRow(fields, tableRow) should beEqualTo(result)
     }
@@ -274,14 +274,14 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
 
       val result = List(
         TableRow(
-          TableRowItem(FieldDescriptor("gmag_err", "gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "0.0960165") ::
-          TableRowItem(FieldDescriptor("rmag_err", "rmag_err", Ucd("stat.error;phot.mag;em.opt.r")), "0.0503736") ::
-          TableRowItem(FieldDescriptor("flags1", "flags1", Ucd("meta.code")), "268435728") :: Nil
+          TableRowItem(FieldDescriptor(FieldId("gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "gmag_err"), "0.0960165") ::
+          TableRowItem(FieldDescriptor(FieldId("rmag_err", Ucd("stat.error;phot.mag;em.opt.r")), "rmag_err"), "0.0503736") ::
+          TableRowItem(FieldDescriptor(FieldId("flags1", Ucd("meta.code")), "flags1"), "268435728") :: Nil
         ),
         TableRow(
-          TableRowItem(FieldDescriptor("gmag_err", "gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "0.51784") ::
-          TableRowItem(FieldDescriptor("rmag_err", "rmag_err", Ucd("stat.error;phot.mag;em.opt.r")), "0.252201") ::
-          TableRowItem(FieldDescriptor("flags1", "flags1", Ucd("meta.code")), "536871168") :: Nil
+          TableRowItem(FieldDescriptor(FieldId("gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "gmag_err"), "0.51784") ::
+          TableRowItem(FieldDescriptor(FieldId("rmag_err", Ucd("stat.error;phot.mag;em.opt.r")), "rmag_err"), "0.252201") ::
+          TableRowItem(FieldDescriptor(FieldId("flags1", Ucd("meta.code")), "flags1"), "536871168") :: Nil
         ))
       parseTableRows(fields, dataNode) should beEqualTo(result)
     }
@@ -290,61 +290,61 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
 
       val result = List(
         TableRow(
-          TableRowItem(FieldDescriptor("gmag_err", "gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "0.0960165") ::
-          TableRowItem(FieldDescriptor("rmag_err", "rmag_err", Ucd("stat.error;phot.mag;em.opt.r")), "0.0503736") ::
-          TableRowItem(FieldDescriptor("flags1", "flags1", Ucd("meta.code")), "268435728") :: Nil
+          TableRowItem(FieldDescriptor(FieldId("gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "gmag_err"), "0.0960165") ::
+          TableRowItem(FieldDescriptor(FieldId("rmag_err", Ucd("stat.error;phot.mag;em.opt.r")), "rmag_err"), "0.0503736") ::
+          TableRowItem(FieldDescriptor(FieldId("flags1", Ucd("meta.code")), "flags1"), "268435728") :: Nil
         ),
         TableRow(
-          TableRowItem(FieldDescriptor("gmag_err", "gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "0.51784") ::
-          TableRowItem(FieldDescriptor("rmag_err", "rmag_err", Ucd("stat.error;phot.mag;em.opt.r")), "0.252201") ::
-          TableRowItem(FieldDescriptor("flags1", "flags1", Ucd("meta.code")), "536871168") :: Nil
+          TableRowItem(FieldDescriptor(FieldId("gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "gmag_err"), "0.51784") ::
+          TableRowItem(FieldDescriptor(FieldId("rmag_err", Ucd("stat.error;phot.mag;em.opt.r")), "rmag_err"), "0.252201") ::
+          TableRowItem(FieldDescriptor(FieldId("flags1", Ucd("meta.code")), "flags1"), "536871168") :: Nil
         ))
       parseTableRows(fields, dataNode) should beEqualTo(result)
     }
     "be able to convert a TableRow into a SiderealTarget" in {
       val validRow = TableRow(
-                TableRowItem(FieldDescriptor("objid", "objid", Ucd("meta.id;meta.main")), "123456") ::
-                TableRowItem(FieldDescriptor("dej2000", "dej2000", Ucd("pos.eq.dec;meta.main")), "0.209323681906") ::
-                TableRowItem(FieldDescriptor("raj2000", "raj2000", Ucd("pos.eq.ra;meta.main")), "359.745951955") :: Nil
+                TableRowItem(FieldDescriptor(FieldId("objid", Ucd("meta.id;meta.main")), "objid"), "123456") ::
+                TableRowItem(FieldDescriptor(FieldId("dej2000", Ucd("pos.eq.dec;meta.main")),"dej2000"), "0.209323681906") ::
+                TableRowItem(FieldDescriptor(FieldId("raj2000", Ucd("pos.eq.ra;meta.main")), "raj2000"), "359.745951955") :: Nil
               )
       tableRow2Target(Nil)(validRow) should beEqualTo(\/-(SiderealTarget("123456", Coordinates(RightAscension.fromAngle(Angle.parseDegrees("359.745951955").getOrElse(Angle.zero)), Declination.fromAngle(Angle.parseDegrees("0.209323681906").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, Nil, None)))
 
       val rowWithMissingId = TableRow(
-                TableRowItem(FieldDescriptor("dej2000", "dej2000", Ucd("pos.eq.dec;meta.main")), "0.209323681906") ::
-                TableRowItem(FieldDescriptor("raj2000", "raj2000", Ucd("pos.eq.ra;meta.main")), "359.745951955") :: Nil
+                TableRowItem(FieldDescriptor(FieldId("dej2000", Ucd("pos.eq.dec;meta.main")), "dej2000"), "0.209323681906") ::
+                TableRowItem(FieldDescriptor(FieldId("raj2000", Ucd("pos.eq.ra;meta.main")), "raj2000"), "359.745951955") :: Nil
               )
       tableRow2Target(Nil)(rowWithMissingId) should beEqualTo(-\/(MissingValues(List(VoTableParser.UCD_OBJID))))
 
       val rowWithBadRa = TableRow(
-                TableRowItem(FieldDescriptor("objid", "objid", Ucd("meta.id;meta.main")), "123456") ::
-                TableRowItem(FieldDescriptor("dej2000", "dej2000", Ucd("pos.eq.dec;meta.main")), "0.209323681906") ::
-                TableRowItem(FieldDescriptor("raj2000", "raj2000", Ucd("pos.eq.ra;meta.main")), "ABC") :: Nil
+                TableRowItem(FieldDescriptor(FieldId("objid", Ucd("meta.id;meta.main")), "objid"), "123456") ::
+                TableRowItem(FieldDescriptor(FieldId("dej2000", Ucd("pos.eq.dec;meta.main")), "dej2000"), "0.209323681906") ::
+                TableRowItem(FieldDescriptor(FieldId("raj2000", Ucd("pos.eq.ra;meta.main")), "raj2000"), "ABC") :: Nil
             )
       tableRow2Target(Nil)(rowWithBadRa) should beEqualTo(-\/(FieldValueProblem(VoTableParser.UCD_RA, "ABC")))
     }
     "be able to parse magnitudes' band" in {
       val iMagField = Ucd("phot.mag;em.opt.i")
       // Optical band
-      parseBands((iMagField, "20.3051")) should beEqualTo(\/-((MagnitudeBand.I, 20.3051)))
+      parseBands((FieldId("id", iMagField), "20.3051")) should beEqualTo(\/-((MagnitudeBand.I, 20.3051)))
 
       val jIRMagField = Ucd("phot.mag;em.IR.J")
       // IR band
-      parseBands((jIRMagField, "13.2349")) should beEqualTo(\/-((MagnitudeBand.J, 13.2349)))
+      parseBands((FieldId("id", jIRMagField), "13.2349")) should beEqualTo(\/-((MagnitudeBand.J, 13.2349)))
 
       val jIRErrMagField = Ucd("stat.error;phot.mag;em.IR.J")
       // IR Error
-      parseBands((jIRErrMagField, "0.02")) should beEqualTo(\/-((MagnitudeBand.J, 0.02)))
+      parseBands((FieldId("id", jIRErrMagField), "0.02")) should beEqualTo(\/-((MagnitudeBand.J, 0.02)))
 
       // No magnitude field
       val badField = Ucd("meta.name")
-      parseBands((badField, "id")) should beEqualTo(-\/(UnmatchedField(badField)))
+      parseBands((FieldId("id", badField), "id")) should beEqualTo(-\/(UnmatchedField(badField)))
 
       // Bad value
-      parseBands((iMagField, "stringValue")) should beEqualTo(-\/(FieldValueProblem(iMagField, "stringValue")))
+      parseBands((FieldId("id", iMagField), "stringValue")) should beEqualTo(-\/(FieldValueProblem(iMagField, "stringValue")))
 
       // Unknown magnitude
       val noBandField = Ucd("phot.mag;em.opt.p")
-      parseBands((noBandField, "stringValue")) should beEqualTo(-\/(UnmatchedField(noBandField)))
+      parseBands((FieldId("id", noBandField), "stringValue")) should beEqualTo(-\/(UnmatchedField(noBandField)))
     }
     "be able to parse an xml into a list of SiderealTargets list of rows with a list of fields" in {
       val magsTarget1 = List(new Magnitude(22.082, MagnitudeBand.G), new Magnitude(20.3051, MagnitudeBand.I), new Magnitude(20.88, MagnitudeBand.R), new Magnitude(23.0888, MagnitudeBand.U), new Magnitude(19.8812, MagnitudeBand.Z))
