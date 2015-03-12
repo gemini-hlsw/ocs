@@ -22,6 +22,8 @@ case class DeclinationAngularVelocity(velocity: AngularVelocity)
 object AngularVelocity {
   val MilliArcSecsInADegree:Double = 1296000000
 
+  val Zero = AngularVelocity(0.0)
+
   /** @group Typeclass Instances */
   implicit val order: Order[AngularVelocity] =
     Order.orderBy(_.masPerYear)
@@ -29,6 +31,14 @@ object AngularVelocity {
   /** @group Typeclass Instances */
   implicit val ordering: scala.Ordering[AngularVelocity] =
     scala.Ordering.by(_.masPerYear)
+
+  /** @group Typeclass Instances */
+  implicit val equal: Equal[AngularVelocity] =
+    Equal.equalA[AngularVelocity]
+  
+  /** @group Typeclass Instances */
+  implicit val monoid: Monoid[AngularVelocity] =
+    Monoid.instance((a, b) => AngularVelocity(a.masPerYear + b.masPerYear), Zero)
 
 }
 
@@ -43,6 +53,7 @@ object RightAscensionAngularVelocity {
 }
 
 object DeclinationAngularVelocity {
+
   /** 
    * The `DeclinationAngularVelocity` of zero miliarcsecs/year.
    * @group Constructors
