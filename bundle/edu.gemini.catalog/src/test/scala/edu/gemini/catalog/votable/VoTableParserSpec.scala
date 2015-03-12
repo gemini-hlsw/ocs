@@ -371,8 +371,8 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
     "be able to parse an xml into a list of SiderealTargets including proper motion" in {
       val magsTarget1 = List(new Magnitude(14.76, MagnitudeBand.R))
       val magsTarget2 = List(new Magnitude(12.983, MagnitudeBand.R))
-      val pm1 = ProperMotion(RightAscensionAngularVelocity.fromMilliArcSecondsPerYear(-10.199999999999999), DeclinationAngularVelocity.fromMilliArcSecondsPerYear(-4.9000000000000004)).some
-      val pm2 = ProperMotion(RightAscensionAngularVelocity.fromMilliArcSecondsPerYear(-7), DeclinationAngularVelocity.fromMilliArcSecondsPerYear(-13.9)).some
+      val pm1 = ProperMotion(RightAscensionAngularVelocity(AngularVelocity(-10.199999999999999)), DeclinationAngularVelocity(AngularVelocity(-4.9000000000000004))).some
+      val pm2 = ProperMotion(RightAscensionAngularVelocity(AngularVelocity(-7)), DeclinationAngularVelocity(AngularVelocity(-13.9))).some
 
       val result = ParsedTable(List(
         \/-(SiderealTarget("550-001323", Coordinates(RightAscension.fromDegrees(9.897141944444456), Declination.fromAngle(Angle.parseDegrees("19.98878944444442").getOrElse(Angle.zero)).getOrElse(Declination.zero)), pm1, magsTarget1, None)),

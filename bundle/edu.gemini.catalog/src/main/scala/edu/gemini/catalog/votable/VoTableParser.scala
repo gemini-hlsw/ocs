@@ -135,7 +135,7 @@ trait VoTableParser {
       } yield for {
           pmrav <- parseDoubleValue(VoTableParser.UCD_PMRA, pmra)
           pmdecv <- parseDoubleValue(VoTableParser.UCD_PMDEC, pmdec)
-        } yield ProperMotion(RightAscensionAngularVelocity.fromMilliArcSecondsPerYear(pmrav), DeclinationAngularVelocity.fromMilliArcSecondsPerYear(pmdecv))
+        } yield ProperMotion(RightAscensionAngularVelocity(AngularVelocity(pmrav)), DeclinationAngularVelocity(AngularVelocity(pmdecv)))
 
       k.sequenceU
     }

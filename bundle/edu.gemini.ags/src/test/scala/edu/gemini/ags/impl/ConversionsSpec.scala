@@ -65,8 +65,8 @@ class ConversionsSpec extends Specification with ScalaCheck with Arbitraries {
         so.getCoordinates.toHmsDeg(0).getRa.toDegrees.getMagnitude should beCloseTo(c.coordinates.ra.toAngle.toDegrees, 0.001)
         so.getCoordinates.toHmsDeg(0).getDec.toDegrees.getMagnitude should beCloseTo(c.coordinates.dec.toAngle.toDegrees, 0.001)
         c.properMotion.map { pm =>
-          so.getHmsDegCoordinates.getPmDec.toMilliarcsecs.getMagnitude should beCloseTo(pm.deltaDec.toMilliArcSecondsPerYear, 0.001)
-          so.getHmsDegCoordinates.getPmRa.toMilliarcsecs.getMagnitude should beCloseTo(pm.deltaRA.toMilliArcSecondsPerYear, 0.001)
+          so.getHmsDegCoordinates.getPmDec.toMilliarcsecs.getMagnitude should beCloseTo(pm.deltaDec.velocity.masPerYear, 0.001)
+          so.getHmsDegCoordinates.getPmRa.toMilliarcsecs.getMagnitude should beCloseTo(pm.deltaRA.velocity.masPerYear, 0.001)
         }
         so.getMagnitudes.size() should beEqualTo(c.magnitudes.size)
       }
@@ -74,7 +74,7 @@ class ConversionsSpec extends Specification with ScalaCheck with Arbitraries {
     "convert SkyObject to SiderealTarget" in {
       forAll { (c: Coordinates, mag: Magnitude, properMotion: Option[ProperMotion]) =>
         (mag.band != MagnitudeBand.G && mag.band != MagnitudeBand.Z) ==> {
-          val coord = properMotion.map { pm => new skyobject.coords.HmsDegCoordinates.Builder(c.ra.toAngle.toOldModel, c.dec.toAngle.toOldModel).pmDec(skycalc.Angle.milliarcsecs(pm.deltaDec.toMilliArcSecondsPerYear)).pmRa(skycalc.Angle.milliarcsecs(pm.deltaRA.toMilliArcSecondsPerYear)).build() }
+          val coord = properMotion.map { pm => new skyobject.coords.HmsDegCoordinates.Builder(c.ra.toAngle.toOldModel, c.dec.toAngle.toOldModel).pmDec(skycalc.Angle.milliarcsecs(pm.deltaDec.velocity.masPerYear)).pmRa(skycalc.Angle.milliarcsecs(pm.deltaRA.velocity.masPerYear)).build() }
             .getOrElse(new skyobject.coords.HmsDegCoordinates.Builder(c.ra.toAngle.toOldModel, c.dec.toAngle.toOldModel).build())
           val so = new skyobject.SkyObject.Builder("name", coord).magnitudes(mag.toOldModel).build()
           val t = so.toNewModel
@@ -88,7 +88,7 @@ class ConversionsSpec extends Specification with ScalaCheck with Arbitraries {
     "convert SPTarget to SiderealTarget" in {
       forAll { (c: Coordinates, mag: Magnitude, properMotion: Option[ProperMotion]) =>
         (mag.band != MagnitudeBand.G && mag.band != MagnitudeBand.Z) ==> {
-          val coord = properMotion.map { pm => new skyobject.coords.HmsDegCoordinates.Builder(c.ra.toAngle.toOldModel, c.dec.toAngle.toOldModel).pmDec(skycalc.Angle.milliarcsecs(pm.deltaDec.toMilliArcSecondsPerYear)).pmRa(skycalc.Angle.milliarcsecs(pm.deltaRA.toMilliArcSecondsPerYear)).build() }
+          val coord = properMotion.map { pm => new skyobject.coords.HmsDegCoordinates.Builder(c.ra.toAngle.toOldModel, c.dec.toAngle.toOldModel).pmDec(skycalc.Angle.milliarcsecs(pm.deltaDec.velocity.masPerYear)).pmRa(skycalc.Angle.milliarcsecs(pm.deltaRA.velocity.masPerYear)).build() }
             .getOrElse(new skyobject.coords.HmsDegCoordinates.Builder(c.ra.toAngle.toOldModel, c.dec.toAngle.toOldModel).build())
           val so = new skyobject.SkyObject.Builder("name", coord).magnitudes(mag.toOldModel).build()
           val target = new SPTarget(HmsDegTarget.fromSkyObject(so))

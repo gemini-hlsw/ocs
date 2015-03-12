@@ -108,7 +108,7 @@ package object impl {
       val ra          = skycalc.Angle.degrees(st.coordinates.ra.toAngle.toDegrees)
       val dec         = skycalc.Angle.degrees(st.coordinates.dec.toAngle.toDegrees)
       val coordinates = st.properMotion.map { pm =>
-            new skyobject.coords.HmsDegCoordinates.Builder(ra, dec).pmRa(skycalc.Angle.milliarcsecs(pm.deltaRA.toMilliArcSecondsPerYear)).pmDec(skycalc.Angle.milliarcsecs(pm.deltaDec.toMilliArcSecondsPerYear)).build()
+            new skyobject.coords.HmsDegCoordinates.Builder(ra, dec).pmRa(skycalc.Angle.milliarcsecs(pm.deltaRA.velocity.masPerYear)).pmDec(skycalc.Angle.milliarcsecs(pm.deltaDec.velocity.masPerYear)).build()
         } |  new skyobject.coords.HmsDegCoordinates.Builder(ra, dec).build()
       val mags        = st.magnitudes.map(_.toOldModel)
       new skyobject.SkyObject.Builder(st.name, coordinates).magnitudes(mags: _*).build()
@@ -123,8 +123,8 @@ package object impl {
       val dec         = Angle.fromDegrees(so.getHmsDegCoordinates.getDec.toDegrees.getMagnitude)
       val coordinates = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
       val mags        = so.getMagnitudes.asScala.map(_.toNewModel)
-      val pmRa        = RightAscensionAngularVelocity.fromMilliArcSecondsPerYear(so.getHmsDegCoordinates.getPmRa.toMilliarcsecs.getMagnitude)
-      val pmDec       = DeclinationAngularVelocity.fromMilliArcSecondsPerYear(so.getHmsDegCoordinates.getPmDec.toMilliarcsecs.getMagnitude)
+      val pmRa        = RightAscensionAngularVelocity(AngularVelocity(so.getHmsDegCoordinates.getPmRa.toMilliarcsecs.getMagnitude))
+      val pmDec       = DeclinationAngularVelocity(AngularVelocity(so.getHmsDegCoordinates.getPmDec.toMilliarcsecs.getMagnitude))
       val pm          = ProperMotion(pmRa, pmDec)
       SiderealTarget(so.getName, coordinates, Some(pm), mags.toList, None)
     }
@@ -141,7 +141,7 @@ package object impl {
 
       // Only HmsDegTargets have a proper motion and the values are in milli arcsecs/year
       val pm          = sp.getTarget match {
-        case t:HmsDegTarget => Some(ProperMotion(RightAscensionAngularVelocity.fromMilliArcSecondsPerYear(t.getPropMotionRA), DeclinationAngularVelocity.fromMilliArcSecondsPerYear(t.getPropMotionDec)))
+        case t:HmsDegTarget => Some(ProperMotion(RightAscensionAngularVelocity(AngularVelocity(t.getPropMotionRA)), DeclinationAngularVelocity(AngularVelocity(t.getPropMotionDec))))
         case _              => None
       }
       SiderealTarget(name, coordinates, pm, mags, None)
