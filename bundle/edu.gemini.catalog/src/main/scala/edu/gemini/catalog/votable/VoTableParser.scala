@@ -127,7 +127,7 @@ trait VoTableParser {
   protected def tableRow2Target(fields: List[FieldDescriptor])(row: TableRow): CatalogProblem \/ SiderealTarget = {
     val isUCAC4 = fields.exists(_.name === "ucac4")
     val ucac4BadMagnitude = 20.0
-    val ucac4BadMagnitudeError = 0.98999999999999999.some
+    val ucac4BadMagnitudeError = 0.9.some
     val entries = row.itemsMap
     val entriesByUcd = entries.map(x => x._1.ucd -> x._2)
 
@@ -136,7 +136,7 @@ trait VoTableParser {
     def containsMagnitude(v: FieldId) = v.ucd.includes(VoTableParser.UCD_MAG) && v.ucd.matches(magRegex)
     def magnitudeField(v: (FieldId, String)) = containsMagnitude(v._1) && !v._1.ucd.includes(VoTableParser.STAT_ERR)
     def magnitudeErrorField(v: (FieldId, String)) = containsMagnitude(v._1) && v._1.ucd.includes(VoTableParser.STAT_ERR)
-    def nonValidMagnitude(m: Magnitude) = isUCAC4 && m.value === ucac4BadMagnitude && m.error === ucac4BadMagnitudeError
+    def nonValidMagnitude(m: Magnitude) = isUCAC4 && m.value === ucac4BadMagnitude && m.error.map(math.abs) > ucac4BadMagnitudeError
 
     def parseProperMotion(pm: (Option[String], Option[String])): CatalogProblem \/ Option[ProperMotion] = {
       val k = for {
