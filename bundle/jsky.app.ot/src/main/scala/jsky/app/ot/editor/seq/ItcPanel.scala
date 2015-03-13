@@ -90,6 +90,7 @@ class ItcSpectroscopyPanel(val owner: EdIteratorFolder, val table: ItcSpectrosco
     case SPComponentType.INSTRUMENT_FLAMINGOS2  => true
     case SPComponentType.INSTRUMENT_GMOS        => true
     case SPComponentType.INSTRUMENT_GMOSSOUTH   => true
+    case SPComponentType.INSTRUMENT_GNIRS       => true
     case SPComponentType.INSTRUMENT_MICHELLE    => true
     case SPComponentType.INSTRUMENT_NIFS        => true
     case SPComponentType.INSTRUMENT_NIRI        => true
