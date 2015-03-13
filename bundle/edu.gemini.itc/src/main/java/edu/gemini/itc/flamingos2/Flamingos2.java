@@ -61,7 +61,7 @@ public final class Flamingos2 extends Instrument {
     /**
      * construct a Flamingos2 object with specified color filter and ND filter.
      */
-    public Flamingos2(final Flamingos2Parameters fp) throws Exception {
+    public Flamingos2(final Flamingos2Parameters fp) {
         super(INSTR_DIR, FILENAME);
 
         _filterBand = fp.getColorFilter();

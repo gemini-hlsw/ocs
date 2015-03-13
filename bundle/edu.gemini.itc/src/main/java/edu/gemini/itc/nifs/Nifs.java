@@ -60,7 +60,7 @@ public abstract class Nifs extends Instrument {
     protected boolean _IFU_IsSingle = false;
     protected boolean _IFU_IsSummed = false;
 
-    public Nifs(String FILENAME, String INSTUMENT_PREFIX) throws Exception {
+    public Nifs(String FILENAME, String INSTUMENT_PREFIX) {
         super(INSTR_DIR, FILENAME);
         _sampling = super.getSampling();
         INSTR_PREFIX = INSTUMENT_PREFIX;

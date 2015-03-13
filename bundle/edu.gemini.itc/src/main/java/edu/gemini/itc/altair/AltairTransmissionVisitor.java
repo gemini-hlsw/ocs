@@ -12,7 +12,7 @@ public final class AltairTransmissionVisitor extends TransmissionElement {
     /**
      * The AltairTrans constructor
      */
-    public AltairTransmissionVisitor() throws Exception {
+    public AltairTransmissionVisitor() {
 
         super(Altair.ALTAIR_LIB + "/" +
                 Altair.ALTAIR_PREFIX +

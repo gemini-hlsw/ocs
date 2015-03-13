@@ -21,7 +21,7 @@ public final class GnirsNorth extends Gnirs {
     private final double _wellDepth;
     private final double _readNoiseValue;
 
-    public GnirsNorth(GnirsParameters gp, ObservationDetailsParameters odp) throws Exception {
+    public GnirsNorth(GnirsParameters gp, ObservationDetailsParameters odp) {
         super(FILENAME, INSTR_PREFIX);
         // The instrument data file gives a start/end wavelength for
         // the instrument.  But with a filter in place, the filter
@@ -58,7 +58,7 @@ public final class GnirsNorth extends Gnirs {
         _XDisp = gp.isXDispUsed();
 
         if (_centralWavelength < 1030 || _centralWavelength > 6000) {
-            throw new Exception("Central wavelength must be between 1.03um and 6.0um.");
+            throw new RuntimeException("Central wavelength must be between 1.03um and 6.0um.");
         }
 
         //set read noise by exporsure time
@@ -113,12 +113,12 @@ public final class GnirsNorth extends Gnirs {
         //Test to see that all conditions for Spectroscopy are met
         if (_mode.isSpectroscopy()) {
             if (_grating.equals("none"))
-                throw new Exception("Spectroscopy calculation method is selected but a grating" +
+                throw new RuntimeException("Spectroscopy calculation method is selected but a grating" +
                         " is not.\nPlease select a grating and a " +
                         "focal plane mask in the Instrument " +
                         "configuration section.");
             if (_focalPlaneMask.equals(GnirsParameters.NO_SLIT))
-                throw new Exception("Spectroscopy calculation method is selected but a focal" +
+                throw new RuntimeException("Spectroscopy calculation method is selected but a focal" +
                         " plane mask is not.\nPlease select a " +
                         "grating and a " +
                         "focal plane mask in the Instrument " +
@@ -141,14 +141,14 @@ public final class GnirsNorth extends Gnirs {
                     1);
 
             if (_grating.equals(GnirsParameters.G10) && _cameraLength.equals(GnirsParameters.SHORT))
-                throw new Exception("The grating " + _grating + " cannot be used with the " +
+                throw new RuntimeException("The grating " + _grating + " cannot be used with the " +
                         GnirsParameters.SHORT_CAMERA + " arcsec/pix (Short) camera.\n" +
                         "  Please either change the camera or the grating.");
 
             if (!(_grating.equals("none")) && !(_filterUsed.equals("none")))
                 if ((_Filter.getStart() >= _gratingOptics.getEnd()) ||
                         (_Filter.getEnd() <= _gratingOptics.getStart())) {
-                    throw new Exception("The " + _filterUsed + " filter" +
+                    throw new RuntimeException("The " + _filterUsed + " filter" +
                             " and the " + _grating +
                             " do not overlap with the requested wavelength.\n" +
                             " Please select a different filter, grating or wavelength.");
@@ -250,7 +250,7 @@ public final class GnirsNorth extends Gnirs {
         }
     }
 
-    public TransmissionElement getGratingOrderNTransmission(int order) throws Exception {
+    public TransmissionElement getGratingOrderNTransmission(int order) {
         return GnirsGratingsTransmission.getOrderNTransmission(_grating, order);
     }
 

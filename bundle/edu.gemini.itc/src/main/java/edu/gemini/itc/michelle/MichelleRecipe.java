@@ -36,7 +36,7 @@ public final class MichelleRecipe extends RecipeBase {
      * @param out Results will be written to this PrintWriter.
      * @throws Exception on failure to parse parameters.
      */
-    public MichelleRecipe(ITCMultiPartParser r, PrintWriter out) throws Exception {
+    public MichelleRecipe(ITCMultiPartParser r, PrintWriter out) {
         super(out);
         // Set the Http Session object
         //_sessionObject = r.getSession(true);
@@ -63,7 +63,7 @@ public final class MichelleRecipe extends RecipeBase {
                           MichelleParameters michelleParameters,
                           TeleParameters teleParameters,
                           PlottingDetailsParameters plotParameters,
-                          PrintWriter out) throws Exception {
+                          PrintWriter out) {
         super(out);
         _sdParameters = sdParameters;
         _obsDetailParameters = correctedObsDetails(michelleParameters, obsDetailParameters);
@@ -73,7 +73,7 @@ public final class MichelleRecipe extends RecipeBase {
         _plotParameters = plotParameters;
     }
 
-    private ObservationDetailsParameters correctedObsDetails(MichelleParameters mp, ObservationDetailsParameters odp) throws Exception {
+    private ObservationDetailsParameters correctedObsDetails(MichelleParameters mp, ObservationDetailsParameters odp) {
         // TODO : These corrections were previously done in random places throughout the recipe. I moved them here
         // TODO : so the ObservationDetailsParameters object can become immutable. Basically this calculates
         // TODO : some missing parameters and/or turns the total exposure time into a single exposure time.
@@ -117,7 +117,7 @@ public final class MichelleRecipe extends RecipeBase {
      * @throws Exception A recipe calculation can fail in many ways,
      *                   missing data files, incorrectly-formatted data files, ...
      */
-    public void writeOutput() throws Exception {
+    public void writeOutput() {
         _println("");
 
         // This object is used to format numerical strings.
@@ -125,183 +125,21 @@ public final class MichelleRecipe extends RecipeBase {
         device.setPrecision(2);  // Two decimal places
         device.clear();
 
-        // Module 1b
-        // Define the source energy (as function of wavelength).
-        //
-        // inputs: instrument, SED
-        // calculates: redshifted SED
-        // output: redshifteed SED
         Michelle instrument = new Michelle(_michelleParameters, _obsDetailParameters);
 
 
         if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000 * 5))) {  //*5 b/c of increased resolution of transmission files
-                throw new Exception("Please use a model line width > 0.2 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 5)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
+                throw new RuntimeException("Please use a model line width > 0.2 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 5)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
-
-        VisitableSampledSpectrum sed;
-
-        sed = SEDFactory.getSED(_sdParameters, instrument);
-        //sed.applyWavelengthCorrection();
-
-
-        SampledSpectrumVisitor redshift =
-                new RedshiftVisitor(_sdParameters.getRedshift());
-        sed.accept(redshift);
-
-        // Must check to see if the redshift has moved the spectrum beyond
-        // useful range.  The shifted spectrum must completely overlap
-        // both the normalization waveband and the observation waveband
-        // (filter region).
-
-        final WavebandDefinition band = _sdParameters.getNormBand();
-        final double start = band.getStart();
-        final double end = band.getEnd();
-
-        //any sed except BBODY and ELINE have normailization regions
-        switch (_sdParameters.getDistributionType()) {
-            case ELINE:
-            case BBODY:
-                break;
-            default:
-                if (sed.getStart() > start || sed.getEnd() < end) {
-                    throw new Exception("Shifted spectrum lies outside of specified normalisation waveband.");
-                }
-        }
-
-        //if (sed.getStart() > instrument.getObservingStart() ||
-        //    sed.getEnd() < instrument.getObservingEnd()) {
-        //   _println(" Sed start" + sed.getStart() + "> than instrument start"+ instrument.getObservingStart());
-        //   _println(" Sed END" + sed.getEnd() + "< than instrument end"+ instrument.getObservingEnd());
-
-        //   throw new Exception("Shifted spectrum lies outside of observed wavelengths");
-        //}
-
-
-        if (_plotParameters.getPlotLimits().equals(PlottingDetailsParameters.PlotLimits.USER)) {
-            if (_plotParameters.getPlotWaveL() > instrument.getObservingEnd() ||
-                    _plotParameters.getPlotWaveU() < instrument.getObservingStart()) {
-                _println(" The user limits defined for plotting do not overlap with the Spectrum.");
-
-                throw new Exception("User limits for plotting do not overlap with filter.");
-            }
-        }
-
-        // Module 2
-        // Convert input into standard internally-used units.
-        //
-        // inputs: instrument,redshifted SED, waveband, normalization flux, units
-        // calculates: normalized SED, resampled SED, SED adjusted for aperture
-        // output: SED in common internal units
-        if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
-            final SampledSpectrumVisitor norm =
-                    new NormalizeVisitor(_sdParameters.getNormBand(),
-                            _sdParameters.getSourceNormalization(),
-                            _sdParameters.getUnits());
-            sed.accept(norm);
-        }
-
-
-        // Resample the spectra for efficiency
-        SampledSpectrumVisitor resample = new ResampleWithPaddingVisitor(
-                instrument.getObservingStart(),
-                instrument.getObservingEnd(),
-                instrument.getSampling(),
-                0);
-        //sed.accept(resample);
-
-        //_println("Sed Start: " + sed.getStart());
-        //_println("Sed End:   " + sed.getEnd());
-        //_println("Sampling:  " + sed.getSampling());
-        //_println("Length:    " + sed.getLength());
-        //_println("");
-
-        SampledSpectrumVisitor tel = new TelescopeApertureVisitor();
-        sed.accept(tel);
-
-        // SED is now in units of photons/s/nm
-
-        // Module 3b
-        // The atmosphere and telescope modify the spectrum and
-        // produce a background spectrum.
-        //
-        // inputs: SED, AIRMASS, sky emmision file, mirror configuration,
-        // output: SED and sky background as they arrive at instruments
-
-        SampledSpectrumVisitor clouds = CloudTransmissionVisitor.create(
-                _obsConditionParameters.getSkyTransparencyCloud());
-        sed.accept(clouds);
-
-        //For mid-IR observation the watervapor percentile and sky background
-        //   percentile must be the same
-        //if (_obsConditionParameters.getSkyTransparencyWaterCategory()
-        //        != _obsConditionParameters.getSkyBackgroundCategory()) {
-        //    _println("");
-        //    _println("Sky background percentile must be equal to sky transparency(water vapor): \n " +
-        //             "    Please modify the Observing condition constraints section of the HTML form \n" +
-        //             "    and recalculate.");
-
-        //    throw new Exception("");
-        //}
-
-        SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
-                _obsConditionParameters.getSkyTransparencyWater(),
-                _obsConditionParameters.getAirmass(),
-                "midIR_trans_", Site.GN, ITCConstants.MID_IR);
-        sed.accept(water);
-
-        // Background spectrum is introduced here.
-        VisitableSampledSpectrum sky =
-                SEDFactory.getSED("/" + ITCConstants.HI_RES + "/mk" + ITCConstants.MID_IR +
-                                ITCConstants.SKY_BACKGROUND_LIB + "/" +
-                                ITCConstants.MID_IR_SKY_BACKGROUND_FILENAME_BASE + "_"
-                                + _obsConditionParameters.getSkyTransparencyWaterCategory() +  //Now using same value as SKy trans per Rachels request
-                                "_" + _obsConditionParameters.getAirmassCategory() +
-                                ITCConstants.DATA_SUFFIX,
-                        instrument.getSampling());
-
-
-        //resample sky_background to instrument parameters
-        //sky.accept(resample);
-
-
-        // Apply telescope transmission to both sed and sky
-        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(_teleParameters);
-        sed.accept(t);
-        sky.accept(t);
-
-        //_println("after telescope:  "+ sed.getAverage());
-        //_println("Telescope Back ave: " + sky.getAverage());
-        //Create and Add background for the telescope.
-        SampledSpectrumVisitor tb =
-                new TelescopeBackgroundVisitor(_teleParameters, Site.GN, ITCConstants.MID_IR);
-        sky.accept(tb);
-        //_println("Telescope Back ave: " + sky.getAverage());
-
-
-        sky.accept(tel);
-
-        // Add instrument background to sky background for a total background.
-        // At this point "sky" is not the right name.
-        instrument.addBackground(sky);
-        //_println("Telescope Back ave: " + sky.getAverage());
-
-        // Module 4  AO module not implemented
-        // The AO module affects source and background SEDs.
-
-        // Module 5b
-        // The instrument with its detectors modifies the source and
-        // background spectra.
-        // input: instrument, source and background SED
-        // output: total flux of source and background.
-        double before = sky.getAverage();
-        instrument.convolveComponents(sed);
-        instrument.convolveComponents(sky);
-        //_println("Telescope Back ave chage: " + sky.getAverage()/before);
 
         // Get the summed source and sky
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.MID_IR, _sdParameters, _obsConditionParameters, _teleParameters, _plotParameters);
+        final VisitableSampledSpectrum sed = calcSource.sed;
+        final VisitableSampledSpectrum sky = calcSource.sky;
         double sed_integral = sed.getIntegral();
         double sky_integral = sky.getIntegral();
+
 
         // For debugging, print the spectrum integrals.
         //_println("SED integral: "+sed_integral+"\tSKY integral: "+sky_integral);
@@ -322,17 +160,11 @@ public final class MichelleRecipe extends RecipeBase {
 
         double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
-        double ap_pix = 0;
-        double sw_ap = 0;
-        double Npix = 0;
-        double source_fraction = 0;
-        double pix_per_sq_arcsec = 0;
         double peak_pixel_count = 0;
 
         // Calculate image quality
         double im_qual = 0.;
-        ImageQualityCalculatable IQcalc =
-                ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
+        ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
         IQcalc.calculate();
 
         im_qual = IQcalc.getImageQuality();
@@ -340,10 +172,7 @@ public final class MichelleRecipe extends RecipeBase {
 
 
         // Calculate the Fraction of source in the aperture
-        SourceFractionCalculatable SFcalc =
-                SourceFractionCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
-        SFcalc.setImageQuality(im_qual);
-        SFcalc.calculate();
+        final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
         if (_obsDetailParameters.getMethod().isImaging()) {
             _print(SFcalc.getTextResult(device));
             _println(IQcalc.getTextResult(device));

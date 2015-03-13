@@ -17,7 +17,7 @@ public final class MichelleGratingOptics extends GratingOptics {
                                  final String gratingName,
                                  final double centralWavelength,
                                  final int detectorPixels,
-                                 final int spectralBinning) throws Exception {
+                                 final int spectralBinning) {
 
         super(directory, gratingName, "gratings", centralWavelength, detectorPixels, spectralBinning);
     }

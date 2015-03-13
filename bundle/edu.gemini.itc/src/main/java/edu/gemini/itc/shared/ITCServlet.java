@@ -42,7 +42,7 @@ public abstract class ITCServlet extends HttpServlet {
     /**
      * Subclasses supply the body content for the html document.
      */
-    public abstract void writeOutput(ITCMultiPartParser mpp, PrintWriter out) throws Exception;
+    public abstract void writeOutput(ITCMultiPartParser mpp, PrintWriter out);
 
     /**
      * Called by server when form is submitted.

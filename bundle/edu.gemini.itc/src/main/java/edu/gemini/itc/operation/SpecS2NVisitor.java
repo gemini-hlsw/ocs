@@ -31,8 +31,7 @@ public class SpecS2NVisitor implements SampledSpectrumVisitor {
                           double spec_source_fraction, double im_qual,
                           double spec_Npix, int spec_number_exposures,
                           double spec_frac_with_source, double spec_exp_time,
-                          double dark_current, double read_noise)
-            throws Exception {
+                          double dark_current, double read_noise) {
         this.slit_width = slit_width;
         this.pixel_size = pixel_size;
         this.pix_width = pix_width;

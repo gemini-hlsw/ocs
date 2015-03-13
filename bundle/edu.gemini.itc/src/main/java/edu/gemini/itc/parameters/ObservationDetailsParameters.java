@@ -8,17 +8,6 @@ import edu.gemini.itc.shared.*;
  */
 public final class ObservationDetailsParameters extends ITCParameters {
 
-    public static enum CalcMethod {
-        IMAGING_SN,
-        IMAGING_SN_TOTAL,
-        IMAGING_INT,
-        SPECTROSCOPY
-    }
-    public static enum AnMethod {
-        AUTO_APERTURE,
-        USER_APERTURE
-    }
-
     private final CalculationMethod calculationMethod;
     private final AnalysisMethod analysisMethod;
 

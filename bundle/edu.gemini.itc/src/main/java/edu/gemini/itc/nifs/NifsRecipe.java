@@ -1,14 +1,16 @@
 package edu.gemini.itc.nifs;
 
 import edu.gemini.itc.altair.*;
-import edu.gemini.itc.operation.*;
+import edu.gemini.itc.operation.ImageQualityCalculatable;
+import edu.gemini.itc.operation.ImageQualityCalculationFactory;
+import edu.gemini.itc.operation.SpecS2NLargeSlitVisitor;
 import edu.gemini.itc.parameters.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.ITCRequest;
 import edu.gemini.spModel.core.Site;
+import scala.Option;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
@@ -19,7 +21,7 @@ import java.util.List;
  */
 public final class NifsRecipe extends RecipeBase {
     private Calendar now = Calendar.getInstance();
-    private String _header = new StringBuffer("# NIFS ITC: " + now.getTime() + "\n").toString();
+    private String _header = "# NIFS ITC: " + now.getTime() + "\n";
 
     private String sigSpec, backSpec, singleS2N, finalS2N;
     private SpecS2NLargeSlitVisitor specS2N;
@@ -40,7 +42,7 @@ public final class NifsRecipe extends RecipeBase {
      * @param out Results will be written to this PrintWriter.
      * @throws Exception on failure to parse parameters.
      */
-    public NifsRecipe(ITCMultiPartParser r, PrintWriter out) throws Exception {
+    public NifsRecipe(final ITCMultiPartParser r, final PrintWriter out) {
         super(out);
 
         // Read parameters from the four main sections of the web page.
@@ -57,10 +59,18 @@ public final class NifsRecipe extends RecipeBase {
      * Constructs a NifsRecipe given the parameters.
      * Useful for testing.
      */
-    public NifsRecipe(SourceDefinitionParameters sdParameters, ObservationDetailsParameters obsDetailParameters, ObservingConditionParameters obsConditionParameters, NifsParameters nifsParameters, TeleParameters teleParameters, AltairParameters altairParameters, PlottingDetailsParameters plotParameters, PrintWriter out)
+    public NifsRecipe(final SourceDefinitionParameters sdParameters,
+                      final ObservationDetailsParameters obsDetailParameters,
+                      final ObservingConditionParameters obsConditionParameters,
+                      final NifsParameters nifsParameters,
+                      final TeleParameters teleParameters,
+                      final AltairParameters altairParameters,
+                      final PlottingDetailsParameters plotParameters,
+                      final PrintWriter out)
 
     {
         super(out);
+
         _sdParameters = sdParameters;
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;
@@ -73,14 +83,11 @@ public final class NifsRecipe extends RecipeBase {
     /**
      * Performes recipe calculation and writes results to a cached PrintWriter
      * or to System.out.
-     *
-     * @throws Exception A recipe calculation can fail in many ways,
-     *                   missing data files, incorrectly-formatted data files, ...
      */
-    public void writeOutput() throws Exception {
+    public void writeOutput() {
         _println("");
         // This object is used to format numerical strings.
-        FormatStringWriter device = new FormatStringWriter();
+        final FormatStringWriter device = new FormatStringWriter();
         device.setPrecision(2);  // Two decimal places
         device.clear();
 
@@ -90,157 +97,41 @@ public final class NifsRecipe extends RecipeBase {
         // inputs: instrument, SED
         // calculates: redshifted SED
         // output: redshifteed SED
-        Nifs instrument;
-        instrument = new NifsNorth(_nifsParameters, _obsDetailParameters);
+        final Nifs instrument = new NifsNorth(_nifsParameters, _obsDetailParameters);
 
-        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
+        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25))) {  // *25 b/c of increased resolutuion of transmission files
-                throw new Exception("Please use a model line width > 0.04 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
-            }
-
-        VisitableSampledSpectrum sed, halo;
-
-        sed = SEDFactory.getSED(_sdParameters, instrument);
-
-        halo = (VisitableSampledSpectrum) sed.clone();  //initialize halo
-
-        //_println("Initial Photons.. ");
-        //_println("Total photons/s between 999 - 1001: "+ sed.getIntegral(999.0,1001.0));
-        //_println("Total photons/s between 1649 - 1651: "+ sed.getIntegral(1649.0,1651.0));
-        //_println("Total photons/s between 2199 - 2201: "+ sed.getIntegral(2199.0,2201.0));
-        SampledSpectrumVisitor redshift =
-                new RedshiftVisitor(_sdParameters.getRedshift());
-        sed.accept(redshift);
-        // Must check to see if the redshift has moved the spectrum beyond
-        // useful range.  The shifted spectrum must completely overlap
-        // both the normalization waveband and the observation waveband
-        // (filter region).
-
-        final WavebandDefinition band = _sdParameters.getNormBand();
-        final double start = band.getStart();
-        final double end = band.getEnd();
-
-        //any sed except BBODY and ELINE have normailization regions
-        switch (_sdParameters.getDistributionType()) {
-            case ELINE:
-            case BBODY:
-                break;
-            default:
-                if (sed.getStart() > start || sed.getEnd() < end) {
-                    throw new Exception("Shifted spectrum lies outside of specified normalisation waveband.");
-                }
-        }
-
-        // Check to see if user has defined plot limits; if so check to make sure they are not outside of the
-        // actual data
-        if (_plotParameters.getPlotLimits().equals(PlottingDetailsParameters.PlotLimits.USER)) {
-            if (_plotParameters.getPlotWaveL() > instrument.getObservingEnd() ||
-                    _plotParameters.getPlotWaveU() < instrument.getObservingStart()) {
-                _println(" The user limits defined for plotting do not overlap with the Spectrum.");
-
-                throw new Exception("User limits for plotting do not overlap with filter.");
+                throw new RuntimeException("Please use a model line width > 0.04 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
         }
-        // Module 2
-        // Convert input into standard internally-used units.
-        //
-        // inputs: instrument,redshifted SED, waveband, normalization flux, units
-        // calculates: normalized SED, resampled SED, SED adjusted for aperture
-        // output: SED in common internal units
-        if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
-            final SampledSpectrumVisitor norm =
-                    new NormalizeVisitor(_sdParameters.getNormBand(),
-                            _sdParameters.getSourceNormalization(),
-                            _sdParameters.getUnits());
-            sed.accept(norm);
+
+        // TODO : THIS IS PURELY FOR REGRESSION TEST ONLY, REMOVE ASAP
+        // Get the summed source and sky
+        final SEDFactory.SourceResult calcSource0 = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _teleParameters, _plotParameters);
+        final VisitableSampledSpectrum sed0 = calcSource0.sed;
+        final VisitableSampledSpectrum sky0 = calcSource0.sky;
+        final double sed_integral0 = sed0.getIntegral();
+        final double sky_integral0 = sky0.getIntegral();
+        // Update this in (or remove from) regression test baseline:
+        _println("SED Int: " + sed_integral0 + " Sky Int: " + sky_integral0);
+        // TODO : THIS IS PURELY FOR REGRESSION TEST ONLY, REMOVE ASAP
+
+
+
+        // Calculate image quality
+        final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
+        IQcalc.calculate();
+
+        final Option<AOSystem> altair;
+        if (_altairParameters.altairIsUsed()) {
+            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _teleParameters.getTelescopeDiameter(), IQcalc.getImageQuality(), _altairParameters, 0.0);
+            altair = Option.apply((AOSystem) ao);
+            _println(ao.printSummary());
+        } else {
+            altair = Option.empty();
         }
 
-        SampledSpectrumVisitor tel = new TelescopeApertureVisitor();
-        sed.accept(tel);
-
-        //_println("Initial Photons..(scaled to photons/s/nm)");
-        //_println("Total photons/s between 999 - 1001: "+ sed.getIntegral(999.0,1001.0));
-        //_println("Total photons/s between 1649 - 1651: "+ sed.getIntegral(1649.0,1651.0));
-        //_println("Total photons/s between 2199 - 2201: "+ sed.getIntegral(2199.0,2201.0));
-
-
-        // SED is now in units of photons/s/nm
-
-        // Module 3b
-        // The atmosphere and telescope modify the spectrum and
-        // produce a background spectrum.
-        //
-        // inputs: SED, AIRMASS, sky emmision file, mirror configuration,
-        // output: SED and sky background as they arrive at instruments
-
-        SampledSpectrumVisitor clouds = CloudTransmissionVisitor.create(
-                _obsConditionParameters.getSkyTransparencyCloud());
-        sed.accept(clouds);
-
-
-        SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
-                _obsConditionParameters.getSkyTransparencyWater(),
-                _obsConditionParameters.getAirmass(),
-                "nearIR_trans_", Site.GN, ITCConstants.NEAR_IR);
-        sed.accept(water);
-
-        // Background spectrum is introduced here.
-        VisitableSampledSpectrum sky =
-                SEDFactory.getSED("/" + ITCConstants.HI_RES + "/mk" + ITCConstants.NEAR_IR +
-                                ITCConstants.SKY_BACKGROUND_LIB + "/" +
-                                ITCConstants.NEAR_IR_SKY_BACKGROUND_FILENAME_BASE + "_"
-                                + _obsConditionParameters.getSkyTransparencyWaterCategory() +
-                                "_" + _obsConditionParameters.getAirmassCategory() +
-                                ITCConstants.DATA_SUFFIX,
-                        instrument.getSampling());
-
-        //_println("Total Photons..(After Sky)");
-        //_println("Total photons/s between 999 - 1001: "+ sed.getIntegral(999.0,1001.0));
-        //_println("Total photons/s between 1649 - 1651: "+ sed.getIntegral(1649.0,1651.0));
-        //_println("Total photons/s between 2199 - 2201: "+ sed.getIntegral(2199.0,2201.0));
-
-        // Apply telescope transmission to both sed and sky
-        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(_teleParameters);
-        sed.accept(t);
-        sky.accept(t);
-
-        //_println("Total Photons..(After Telescope Transmission)");
-        //_println("Total photons/s between 999 - 1001: "+ sed.getIntegral(999.0,1001.0));
-        //_println("Total photons/s between 1649 - 1651: "+ sed.getIntegral(1649.0,1651.0));
-        //_println("Total photons/s between 2199 - 2201: "+ sed.getIntegral(2199.0,2201.0));
-
-        //Create and Add background for the telescope.
-        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, Site.GN, ITCConstants.NEAR_IR);
-        sky.accept(tb);
-        sky.accept(tel);
-
-        // Add instrument background to sky background for a total background.
-        // At this point "sky" is not the right name.
-        instrument.addBackground(sky);
-
-        // Module 4  AO module not implemented
-        // The AO module affects source and background SEDs.
-
-        // Module 5b
-        // The instrument with its detectors modifies the source and
-        // background spectra.
-        // input: instrument, source and background SED
-        // output: total flux of source and background.
-        instrument.convolveComponents(sed);
-        instrument.convolveComponents(sky);
-
-        //_println("Total Photons..(After Instrument Transmission)");
-        //_println("Total photons/s between 999 - 1001: "+ sed.getIntegral(999.0,1001.0));
-        // _println("Total photons/s between 1649 - 1651: "+ sed.getIntegral(1649.0,1651.0));
-        // _println("Total photons/s between 2199 - 2201: "+ sed.getIntegral(2199.0,2201.0));
-
-
-        // Get the summed source and sky  Uncomment if needed for NIFS imaging ITC
-        double sed_integral = sed.getIntegral();
-        double sky_integral = sky.getIntegral();
-
-        //Debugging
-        _println("SED Int: " + sed_integral + " Sky Int: " + sky_integral);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _teleParameters, _plotParameters, altair);
 
         // End of the Spectral energy distribution portion of the ITC.
 
@@ -254,75 +145,22 @@ public final class NifsRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        double pixel_size = instrument.getPixelSize();
-        double ap_diam = 0;
-        double ap_pix = 0;
-        double sw_ap = 0;
-        double Npix = 0;
-        double source_fraction = 0;
-        double pix_per_sq_arcsec = 0;
-        double peak_pixel_count = 0;
-        List sf_list = new ArrayList();
-        List halo_sf_list = new ArrayList();
-        List ap_offset_list = new ArrayList();
-
-        // Calculate image quality
-        double im_qual = 0.;
-        double uncorrected_im_qual = 0.;
-
-        ImageQualityCalculatable IQcalc =
-                ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
-        IQcalc.calculate();
-
-        im_qual = IQcalc.getImageQuality();
-
-        //Altair Section
-        Altair altair = new Altair(instrument.getEffectiveWavelength(), _teleParameters.getTelescopeDiameter(), im_qual, _altairParameters, 0);
-        AltairBackgroundVisitor altairBackgroundVisitor = new AltairBackgroundVisitor();
-        AltairTransmissionVisitor altairTransmissionVisitor = new AltairTransmissionVisitor();
-        AltairFluxAttenuationVisitor altairFluxAttenuationVisitor = new AltairFluxAttenuationVisitor(altair.getFluxAttenuation());
-        AltairFluxAttenuationVisitor altairFluxAttenuationVisitorHalo = new AltairFluxAttenuationVisitor((1 - altair.getStrehl()));
-
-        if (_altairParameters.altairIsUsed()) {
-            sky.accept(altairBackgroundVisitor);
-
-            sed.accept(altairTransmissionVisitor);
-            sky.accept(altairTransmissionVisitor);
-        }
-
-        halo = (VisitableSampledSpectrum) sed.clone();
-
-        if (_altairParameters.altairIsUsed()) {
-            halo.accept(altairFluxAttenuationVisitorHalo);
-            sed.accept(altairFluxAttenuationVisitor);
-        }
-
-        uncorrected_im_qual = im_qual;  //Save uncorrected value for the image quality for later use
-
-        if (_altairParameters.altairIsUsed())
-            im_qual = altair.getAOCorrectedFWHMc();
-
-        int previousPrecision = device.getPrecision();
-        device.setPrecision(3);  // Two decimal places
-        device.clear();
-        if (_altairParameters.altairIsUsed())
-            _println(altair.printSummary(device));
-        //_println(altair.toString());
-        device.setPrecision(previousPrecision);  // Two decimal places
-        device.clear();
-        //End of Altair Section
-
+        final double pixel_size = instrument.getPixelSize();
+        final List<Double> sf_list;
+        final List<Double> halo_sf_list;
+        final List<Double> ap_offset_list;
 
         //IFU morphology section
-        VisitableMorphology morph, haloMorphology;
+        final double im_qual = altair.isDefined() ? altair.get().getAOCorrectedFWHM() : IQcalc.getImageQuality();
+        final VisitableMorphology morph, haloMorphology;
         switch (_sdParameters.getProfileType()) {
             case POINT:
                 morph = new AOMorphology(im_qual);
-                haloMorphology = new AOMorphology(uncorrected_im_qual);
+                haloMorphology = new AOMorphology(IQcalc.getImageQuality());
                 break;
             case GAUSSIAN:
                 morph = new GaussianMorphology(im_qual);
-                haloMorphology = new GaussianMorphology(uncorrected_im_qual);
+                haloMorphology = new GaussianMorphology(IQcalc.getImageQuality());
                 break;
             case UNIFORM:
                 morph = new USBMorphology();
@@ -333,8 +171,6 @@ public final class NifsRecipe extends RecipeBase {
         }
         morph.accept(instrument.getIFU().getAperture());
 
-        ap_diam = instrument.getIFU().IFU_DIAMETER;
-
         //for now just a single item from the list
         sf_list = instrument.getIFU().getFractionOfSourceInAperture();  //extract corrected source fraction list
 
@@ -343,40 +179,26 @@ public final class NifsRecipe extends RecipeBase {
 
 
         halo_sf_list = instrument.getIFU().getFractionOfSourceInAperture();  //extract uncorrected halo source fraction list
-        //_println("halo:" + halo_sf_list.size() + " corrected: "+sf_list.size());
 
         ap_offset_list = instrument.getIFU().getApertureOffsetList();
 
-        //source_fraction = ((Double)sf_list.get(0)).doubleValue();
-
-        Npix = (Math.PI / 4.) * (ap_diam / pixel_size) * (ap_diam / pixel_size);
-        if (Npix < 9) Npix = 9;
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
-        int binFactor;
         double spec_source_frac = 0;
         double halo_spec_source_frac = 0;
-        int number_exposures = _obsDetailParameters.getNumExposures();
-        double frac_with_source = _obsDetailParameters.getSourceFraction();
-        double dark_current = instrument.getDarkCurrent();
-        double exposure_time = _obsDetailParameters.getExposureTime();
-        double read_noise = instrument.getReadNoise();
+        final int number_exposures = _obsDetailParameters.getNumExposures();
+        final double frac_with_source = _obsDetailParameters.getSourceFraction();
+        final double dark_current = instrument.getDarkCurrent();
+        final double exposure_time = _obsDetailParameters.getExposureTime();
+        final double read_noise = instrument.getReadNoise();
         // report error if this does not come out to be an integer
         checkSourceFraction(number_exposures, frac_with_source);
 
         //ObservationMode Imaging or spectroscopy
-
-
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {
 
-            _println("derived image halo size (FWHM) for a point source = " + device.toString(uncorrected_im_qual) + "arcsec\n");
-
-            //_println("Sky subtraction aperture = " +
-            //        _obsDetailParameters.getSkyApertureDiameter()
-            //        +" times the software aperture.");
-
-            //_println("");
+            _println("derived image halo size (FWHM) for a point source = " + device.toString(IQcalc.getImageQuality()) + "arcsec\n");
             _println("Requested total integration time = " +
                     device.toString(exposure_time * number_exposures) +
                     " secs, of which " + device.toString(exposure_time *
@@ -386,35 +208,29 @@ public final class NifsRecipe extends RecipeBase {
 
             _print("<HR align=left SIZE=3>");
 
-            if (instrument.IFU_IsUsed()) {//&&
-                //!(_sdParameters.getSourceGeometry().equals(SourceDefinitionParameters.EXTENDED_SOURCE)
-                //&&_sdParameters.getExtendedSourceType().equals(SourceDefinitionParameters.UNIFORM))) {
-                ap_diam = 1 / instrument.getSpatialBinning();
-                Iterator src_frac_it = sf_list.iterator();
-                Iterator halo_src_frac_it = halo_sf_list.iterator();
-                Iterator ifu_offset_it = ap_offset_list.iterator();
+            if (instrument.IFU_IsUsed()) {
+                final Iterator<Double> src_frac_it = sf_list.iterator();
+                final Iterator<Double> halo_src_frac_it = halo_sf_list.iterator();
+                final Iterator<Double> ifu_offset_it = ap_offset_list.iterator();
 
                 while (src_frac_it.hasNext()) {
-                    double ifu_offset = ((Double) ifu_offset_it.next()).doubleValue();
-                    double ifu_offset_Y = 0.0;
-                    if (_nifsParameters.getIFUMethod().equals(_nifsParameters.SUMMED_APERTURE_IFU))
-                        ifu_offset_Y = ((Double) ifu_offset_it.next()).doubleValue();
+                    double ap_diam = 1 / instrument.getSpatialBinning();
+                    final double ifu_offset = ifu_offset_it.next();
 
-                    if (_nifsParameters.getIFUMethod().equals(_nifsParameters.SUMMED_APERTURE_IFU)) {
+                    if (_nifsParameters.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU)) {
                         while (src_frac_it.hasNext()) {
-                            spec_source_frac = spec_source_frac + ((Double) src_frac_it.next()).doubleValue();
-                            halo_spec_source_frac = halo_spec_source_frac + ((Double) halo_src_frac_it.next()).doubleValue();
+                            spec_source_frac = spec_source_frac + src_frac_it.next();
+                            halo_spec_source_frac = halo_spec_source_frac + halo_src_frac_it.next();
                             ap_diam = (ap_offset_list.size() / 2) / instrument.getSpatialBinning();
                         }
                     } else {
-                        spec_source_frac = ((Double) src_frac_it.next()).doubleValue();
-                        halo_spec_source_frac = ((Double) halo_src_frac_it.next()).doubleValue();
+                        spec_source_frac = src_frac_it.next();
+                        halo_spec_source_frac = halo_src_frac_it.next();
                         ap_diam = 1 / instrument.getSpatialBinning();
                     }
 
 
-                    specS2N =
-                            new SpecS2NLargeSlitVisitor(_nifsParameters.getFPMask(), pixel_size,
+                    specS2N = new SpecS2NLargeSlitVisitor(_nifsParameters.getFPMask(), pixel_size,
                                     instrument.getSpectralPixelWidth(),
                                     instrument.getObservingStart(),
                                     instrument.getObservingEnd(),
@@ -430,22 +246,22 @@ public final class NifsRecipe extends RecipeBase {
                                     instrument.getSpectralBinning());
 
                     specS2N.setDetectorTransmission(instrument.getDetectorTransmision());
-                    specS2N.setSourceSpectrum(sed);
-                    specS2N.setBackgroundSpectrum(sky);
-                    specS2N.setHaloSpectrum(halo);
-                    specS2N.setHaloImageQuality(uncorrected_im_qual);
+                    specS2N.setSourceSpectrum(calcSource.sed);
+                    specS2N.setBackgroundSpectrum(calcSource.sky);
+                    specS2N.setHaloSpectrum(altair.isDefined() ? calcSource.halo.get() : (VisitableSampledSpectrum) calcSource.sed.clone());
+                    specS2N.setHaloImageQuality(IQcalc.getImageQuality());
                     if (_altairParameters.altairIsUsed())
                         specS2N.setSpecHaloSourceFraction(halo_spec_source_frac);
                     else
                         specS2N.setSpecHaloSourceFraction(0.0);
 
-                    sed.accept(specS2N);
+                    calcSource.sed.accept(specS2N);
                     _println("<p style=\"page-break-inside: never\">");
                     device.setPrecision(3);  // NO decimal places
                     device.clear();
 
                     final String chart1Title =
-                            _nifsParameters.getIFUMethod().equals(_nifsParameters.SUMMED_APERTURE_IFU) ?
+                            _nifsParameters.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU) ?
                                     "Signal and Background (IFU summed apertures: " +
                                             device.toString(_nifsParameters.getIFUNumX()) + "x" + device.toString(_nifsParameters.getIFUNumY()) +
                                             ", " + device.toString(_nifsParameters.getIFUNumX() * instrument.getIFU().IFU_LEN_X) + "\"x" +
@@ -463,7 +279,7 @@ public final class NifsRecipe extends RecipeBase {
                     backSpec = _printSpecTag("ASCII background spectrum");
 
                     final String chart2Title =
-                            _nifsParameters.getIFUMethod().equals(_nifsParameters.SUMMED_APERTURE_IFU) ?
+                            _nifsParameters.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU) ?
                                     "Intermediate Single Exp and Final S/N \n(IFU apertures:" +
                                             device.toString(_nifsParameters.getIFUNumX()) + "x" + device.toString(_nifsParameters.getIFUNumY()) +
                                             ", " + device.toString(_nifsParameters.getIFUNumX() * instrument.getIFU().IFU_LEN_X) + "\"x" +
@@ -480,10 +296,6 @@ public final class NifsRecipe extends RecipeBase {
                     finalS2N = _printSpecTag("Final S/N ASCII data");
                 }
             }
-
-            binFactor = instrument.getSpatialBinning() *
-                    instrument.getSpectralBinning();
-
 
         }
         _println("");

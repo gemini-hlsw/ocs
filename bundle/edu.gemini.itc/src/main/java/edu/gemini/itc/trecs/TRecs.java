@@ -42,7 +42,7 @@ public final class TRecs extends Instrument {
     private final int _spatialBinning;
     private final DetectorsTransmissionVisitor _dtv;
 
-    public TRecs(final TRecsParameters tp, final ObservationDetailsParameters odp) throws Exception {
+    public TRecs(final TRecsParameters tp, final ObservationDetailsParameters odp) {
         super(INSTR_DIR, FILENAME);
 
         _focalPlaneMask = tp.getFocalPlaneMask();
@@ -74,12 +74,12 @@ public final class TRecs extends Instrument {
         //Test to see that all conditions for Spectroscopy are met
         if (_mode.isSpectroscopy()) {
             if (_grating.equals("none"))
-                throw new Exception("Spectroscopy calculation method is selected but a grating" +
+                throw new RuntimeException("Spectroscopy calculation method is selected but a grating" +
                         " is not.\nPlease select a grating and a " +
                         "focal plane mask in the Instrument " +
                         "configuration section.");
             if (_focalPlaneMask.equals(TRecsParameters.NO_SLIT))
-                throw new Exception("Spectroscopy calculation method is selected but a focal" +
+                throw new RuntimeException("Spectroscopy calculation method is selected but a focal" +
                         " plane mask is not.\nPlease select a " +
                         "grating and a " +
                         "focal plane mask in the Instrument " +
@@ -88,15 +88,15 @@ public final class TRecs extends Instrument {
 
         if (_mode.isImaging()) {
             if (tp.getFilter().equals("none"))
-                throw new Exception("Imaging calculation method is selected but a filter" +
+                throw new RuntimeException("Imaging calculation method is selected but a filter" +
                         " is not.\n  Please select a filter and resubmit the " +
                         "form to continue.");
             if (!_grating.equals("none"))
-                throw new Exception("Imaging calculation method is selected but a grating" +
+                throw new RuntimeException("Imaging calculation method is selected but a grating" +
                         " is also selected.\nPlease deselect the " +
                         "grating or change the method to spectroscopy.");
             if (!_focalPlaneMask.equals("none"))
-                throw new Exception("Imaging calculation method is selected but a Focal" +
+                throw new RuntimeException("Imaging calculation method is selected but a Focal" +
                         " Plane Mask is also selected.\nPlease " +
                         "deselect the Focal Plane Mask" +
                         " or change the method to spectroscopy.");
@@ -118,7 +118,7 @@ public final class TRecs extends Instrument {
             _sampling = gratingOptics.getGratingDispersion_nmppix();
 
             if (getGrating().equals(TRecsParameters.LORES20_G5402) && !(instrumentWindow.equals(TRecsParameters.KRS5))) {
-                throw new Exception("The " + getGrating() + " grating must be " +
+                throw new RuntimeException("The " + getGrating() + " grating must be " +
                         "used with the " + TRecsParameters.KRS5 + " window. \n" +
                         "Please change the grating or the window cover.");
             }

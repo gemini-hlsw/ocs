@@ -57,7 +57,7 @@ public class Michelle extends Instrument {
     private int _spectralBinning;
     private int _spatialBinning;
 
-    public Michelle(MichelleParameters mp, ObservationDetailsParameters odp) throws Exception {
+    public Michelle(MichelleParameters mp, ObservationDetailsParameters odp) {
         super(INSTR_DIR, FILENAME);
         _sampling = super.getSampling();
         _focalPlaneMask = mp.getFocalPlaneMask();
@@ -95,18 +95,18 @@ public class Michelle extends Instrument {
         //Test to see that all conditions for Spectroscopy are met
         if (_mode.isSpectroscopy()) {
             if (_grating.equals("none"))
-                throw new Exception("Spectroscopy mode is selected but a grating" +
+                throw new RuntimeException("Spectroscopy mode is selected but a grating" +
                         " is not.\nPlease select a grating and a " +
                         "focal plane mask in the Instrument " +
                         "configuration section.");
             if (_focalPlaneMask.equals(MichelleParameters.NO_SLIT))
-                throw new Exception("Spectroscopy mode is selected but a focal" +
+                throw new RuntimeException("Spectroscopy mode is selected but a focal" +
                         " plane mask is not.\nPlease select a " +
                         "grating and a " +
                         "focal plane mask in the Instrument " +
                         "configuration section.");
             if (mp.polarimetryIsUsed()) {
-                throw new Exception("Spectroscopy mode cannot be used with the " +
+                throw new RuntimeException("Spectroscopy mode cannot be used with the " +
                         "Polarimeter in.\n Please either deselect the " +
                         "Polarimeter, or change the mode to Imaging.");
             }
@@ -114,15 +114,15 @@ public class Michelle extends Instrument {
 
         if (_mode.isImaging()) {
             if (_filterUsed.equals("none"))
-                throw new Exception("Imaging mode is selected but a filter" +
+                throw new RuntimeException("Imaging mode is selected but a filter" +
                         " is not.\n  Please select a filter and resubmit the " +
                         "form to continue.");
             if (!_grating.equals("none"))
-                throw new Exception("Imaging mode is selected but a grating" +
+                throw new RuntimeException("Imaging mode is selected but a grating" +
                         " is also selected.\nPlease deselect the " +
                         "grating or change the mode to spectroscopy.");
             if (!_focalPlaneMask.equals("none"))
-                throw new Exception("Imaging mode is selected but a Focal" +
+                throw new RuntimeException("Imaging mode is selected but a Focal" +
                         " Plane Mask is also selected.\nPlease " +
                         "deselect the Focal Plane Mask" +
                         " or change the mode to spectroscopy.");

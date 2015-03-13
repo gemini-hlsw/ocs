@@ -241,13 +241,13 @@ public final class GnirsParameters extends ITCParameters {
 
     }
 
-    public String getCameraLength() throws Exception {
+    public String getCameraLength() {
         if (_camera.equals(LONG_CAMERA)) {
             _cameraLength = LONG;
         } else if (_camera.equals(SHORT_CAMERA)) {
             _cameraLength = SHORT;
         } else {
-            throw new Exception("Error Camera Not Selected");
+            throw new RuntimeException("Error Camera Not Selected");
         }
         return _cameraLength;
     }

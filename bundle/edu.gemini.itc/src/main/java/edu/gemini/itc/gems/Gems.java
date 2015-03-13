@@ -1,22 +1,14 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-//
-//
-//
 package edu.gemini.itc.gems;
 
 import edu.gemini.itc.parameters.SourceDefinitionParameters;
+import edu.gemini.itc.shared.AOSystem;
 import edu.gemini.itc.shared.FormatStringWriter;
+import edu.gemini.itc.shared.SampledSpectrumVisitor;
 
 /**
  * Gems AO class
  */
-public class Gems {
+public class Gems implements AOSystem {
     /**
      * Related files will be in this subdir of lib
      */
@@ -57,7 +49,7 @@ public class Gems {
 
     //Constructor
     public Gems(double wavelength, double telescopeDiameter, double uncorrectedSeeing, double avgStrehl,
-                String strehlBand, double imageQualityPercentile, SourceDefinitionParameters source) throws Exception {
+                String strehlBand, double imageQualityPercentile, SourceDefinitionParameters source) {
         gemsBackground = new GemsBackgroundVisitor();
         gemsTransmission = new GemsTransmissionVisitor();
         this.wavelength = wavelength;
@@ -71,18 +63,24 @@ public class Gems {
     }
 
     //Methods
-    public GemsBackgroundVisitor getBackground() {
+    public SampledSpectrumVisitor getBackgroundVisitor() {
         return gemsBackground;
     }
 
-    public GemsTransmissionVisitor getTransmission() {
+    public SampledSpectrumVisitor getTransmissionVisitor() {
         return gemsTransmission;
     }
 
-    public double getr0() {
-        double r0 = (0.1031 / uncorrectedSeeing) * Math.pow(wavelength / 500, 1.2);
+    public SampledSpectrumVisitor getFluxAttenuationVisitor() {
+        return new GemsFluxAttenuationVisitor(getFluxAttenuation());
+    }
 
-        return r0;
+    public SampledSpectrumVisitor getHaloFluxAttenuationVisitor() {
+        return new GemsFluxAttenuationVisitor(1 - getAvgStrehl());
+    }
+
+    public double getr0() {
+        return (0.1031 / uncorrectedSeeing) * Math.pow(wavelength / 500, 1.2);
     }
 
     // Function that calculates the strehl from the fit, distance and magnitude
@@ -95,8 +93,7 @@ public class Gems {
     }
 
     public double getAOCorrectedFWHM_oldVersion() {
-        double fwhmAO = Math.sqrt(6.817E-10 * Math.pow(wavelength, 2) + 6.25E-4); //Phil simplified the above equation
-        return fwhmAO;
+        return Math.sqrt(6.817E-10 * Math.pow(wavelength, 2) + 6.25E-4); //Phil simplified the above equation
     }
 
     // See REL-1352:
@@ -120,6 +117,11 @@ public class Gems {
     //
     // Note: The IQ table should only be applied to the Point Source mode,
     public double getAOCorrectedFWHM() {
+        return getAOCorrectedFWHM(false);
+    }
+
+    // TODO: passing a boolean is a temporary workaround in order to deal with caller that expects this method to throw an exception
+    public double getAOCorrectedFWHM(boolean doThrow) {
         switch (source.getProfileType()) {
             case POINT:
                 // point source
@@ -168,16 +170,23 @@ public class Gems {
         }
 
         // The web page always selects one of J, H or K, so if we get here, the IQ must be wrong
-        throw new IllegalArgumentException("GeMS cannot be used in IQ=Any conditions");
+        if (doThrow) {
+            // TODO: this is needed for error reporting in the html output, move this away from here!
+            throw new IllegalArgumentException("GeMS cannot be used in IQ=Any conditions");
+        } else {
+            return getAOCorrectedFWHM_oldVersion();
+        }
     }
 
 
-    public String printSummary(FormatStringWriter device) {
+    public String printSummary() {
+        final FormatStringWriter device = new FormatStringWriter();
+        device.setPrecision(3);
         String s = "r0(" + wavelength + "nm) = " + device.toString(getr0()) + " m\n";
         s += "Average Strehl = " + device.toString(getAvgStrehl() * 100) + "%\n";
         s += "FWHM of an AO-corrected core = ";
         try {
-            s += device.toString(getAOCorrectedFWHM()) + " arcsec\n";
+            s += device.toString(getAOCorrectedFWHM(true)) + " arcsec\n";
         } catch (IllegalArgumentException ex) {
             s += "<span style=\"color:red; font-style:italic;\">Error: " + ex.getMessage() + "</span>\n";
         }

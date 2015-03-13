@@ -31,11 +31,11 @@ public final class GemsParameters extends ITCParameters {
      * @param r Servlet request containing the form data.
      * @throws Exception if input data is not parsable.
      */
-    public GemsParameters(HttpServletRequest r) throws Exception {
+    public GemsParameters(HttpServletRequest r) {
         parseServletRequest(r);
     }
 
-    public GemsParameters(ITCMultiPartParser p) throws Exception {
+    public GemsParameters(ITCMultiPartParser p) {
         parseMultipartParameters(p);
     }
 

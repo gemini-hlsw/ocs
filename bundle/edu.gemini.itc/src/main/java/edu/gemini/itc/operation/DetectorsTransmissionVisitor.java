@@ -15,7 +15,7 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
     private VisitableSampledSpectrum detectorsTransmissionValues;
     private List<Integer> detectorCcdIndexes;
 
-    public DetectorsTransmissionVisitor(int spectralBinning, String filename) throws Exception {
+    public DetectorsTransmissionVisitor(int spectralBinning, String filename) {
         this.spectralBinning = spectralBinning;
         final double[][] data = DatFile.arrays().apply(filename);
         initialize(data);

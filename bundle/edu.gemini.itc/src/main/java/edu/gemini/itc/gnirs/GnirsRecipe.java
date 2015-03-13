@@ -46,7 +46,7 @@ public final class GnirsRecipe extends RecipeBase {
      * @param out Results will be written to this PrintWriter.
      * @throws Exception on failure to parse parameters.
      */
-    public GnirsRecipe(ITCMultiPartParser r, PrintWriter out) throws Exception {
+    public GnirsRecipe(ITCMultiPartParser r, PrintWriter out) {
         super(out);
         // Read parameters from the four main sections of the web page.
         _sdParameters = ITCRequest.sourceDefinitionParameters(r);
@@ -85,7 +85,7 @@ public final class GnirsRecipe extends RecipeBase {
      * @throws Exception A recipe calculation can fail in many ways, missing data
      *                   files, incorrectly-formatted data files, ...
      */
-    public void writeOutput() throws Exception {
+    public void writeOutput() {
         _println("");
 
         // This object is used to format numerical strings.
@@ -107,303 +107,38 @@ public final class GnirsRecipe extends RecipeBase {
         if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
             // *25 b/c of increased resolutuion of transmission files
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25))) {
-                throw new Exception(
+                throw new RuntimeException(
                         "Please use a model line width > 0.04 nm (or "
                                 + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25))
                                 + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
 
-        VisitableSampledSpectrum sed;
-        VisitableSampledSpectrum halo;
-
-        sed = SEDFactory.getSED(_sdParameters, instrument);
-        halo = (VisitableSampledSpectrum) sed.clone(); // initialize halo
-
-        SampledSpectrumVisitor redshift = new RedshiftVisitor(
-                _sdParameters.getRedshift());
-        sed.accept(redshift);
-
-        // Must check to see if the redshift has moved the spectrum beyond
-        // useful range. The shifted spectrum must completely overlap
-        // both the normalization waveband and the observation waveband
-        // (filter region).
-
-        final WavebandDefinition band = _sdParameters.getNormBand();
-        final double start = band.getStart();
-        final double end = band.getEnd();
-
-        // any sed except BBODY and ELINE have normailization regions
-        switch (_sdParameters.getDistributionType()) {
-            case ELINE:
-            case BBODY:
-                break;
-            default:
-                if (sed.getStart() > start || sed.getEnd() < end) {
-                    throw new Exception(
-                            "Shifted spectrum lies outside of specified normalisation waveband.");
-                }
-        }
-
-        if (_plotParameters.getPlotLimits().equals(PlottingDetailsParameters.PlotLimits.USER)) {
-            if (_plotParameters.getPlotWaveL() > instrument.getObservingEnd()
-                    || _plotParameters.getPlotWaveU() < instrument
-                    .getObservingStart()) {
-                _println(" The user limits defined for plotting do not overlap with the Spectrum.");
-
-                throw new Exception(
-                        "User limits for plotting do not overlap with filter.");
-            }
-        }
-        // Module 2
-        // Convert input into standard internally-used units.
-        //
-        // inputs: instrument,redshifted SED, waveband, normalization flux,
-        // units
-        // calculates: normalized SED, resampled SED, SED adjusted for aperture
-        // output: SED in common internal units
-        if (!_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
-            final SampledSpectrumVisitor norm = new NormalizeVisitor(
-                    _sdParameters.getNormBand(),
-                    _sdParameters.getSourceNormalization(),
-                    _sdParameters.getUnits());
-            sed.accept(norm);
-        }
-
-        // Resample the spectra for efficiency
-        SampledSpectrumVisitor resample = new ResampleWithPaddingVisitor(
-                instrument.getObservingStart(), instrument.getObservingEnd(),
-                instrument.getSampling(), 0);
-
-        SampledSpectrumVisitor tel = new TelescopeApertureVisitor();
-        sed.accept(tel);
-
-        // SED is now in units of photons/s/nm
-
-        // Module 3b
-        // The atmosphere and telescope modify the spectrum and
-        // produce a background spectrum.
-        //
-        // inputs: SED, AIRMASS, sky emmision file, mirror configuration,
-        // output: SED and sky background as they arrive at instruments
-
-        SampledSpectrumVisitor clouds = CloudTransmissionVisitor.create(
-                _obsConditionParameters.getSkyTransparencyCloud());
-        sed.accept(clouds);
-
-        SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
-                _obsConditionParameters.getSkyTransparencyWater(),
-                _obsConditionParameters.getAirmass(), "nearIR_trans_",
-                Site.GN, ITCConstants.NEAR_IR);
-        sed.accept(water);
-
-        // Background spectrum is introduced here.
-        VisitableSampledSpectrum sky = SEDFactory.getSED("/"
-                + ITCConstants.HI_RES + "/mk"
-                + ITCConstants.NEAR_IR + ITCConstants.SKY_BACKGROUND_LIB + "/"
-                + ITCConstants.NEAR_IR_SKY_BACKGROUND_FILENAME_BASE + "_"
-                + _obsConditionParameters.getSkyTransparencyWaterCategory() + "_"
-                + _obsConditionParameters.getAirmassCategory()
-                + ITCConstants.DATA_SUFFIX, instrument.getSampling());
-
-        // resample sky_background to instrument parameters
-        // sky.accept(resample);
-
-        // Apply telescope transmission to both sed and sky
-        SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(_teleParameters);
-        sed.accept(t);
-        sky.accept(t);
-
-        // Create and Add background for the telescope.
-        SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(_teleParameters, Site.GN, ITCConstants.NEAR_IR);
-        sky.accept(tb);
-
-        // DEBUGGING GRAPHS
-        // ITCChart DebugChart = new ITCChart();
-
-        // DebugChart.setDomainMinMax(3000, 4000);
-        // DebugChart.setRangeMinMax(0, 1000000);
-        // DebugChart.addArray(sed.getData(), "Full SED");
-        // GnirsChart.addArray(specS2N.getBackgroundSpectrum().getData(),
-        // "SQRT(Background)  ");
-
-        // DebugChart.addTitle("DEBUG: SED after atmos and telescope");
-        // DebugChart.addxAxisLabel("Wavelength (nm)");
-        // DebugChart.addyAxisLabel("e- per exposure per spectral pixel");
-
-        // _println(DebugChart.getBufferedImage(), "DEBUG");
-        // _println("");
-
-        // Add instrument background to sky background for a total background.
-        // At this point "sky" is not the right name.
-
-        // Moved section where sky/sed is convolved with instrument below Altair
-        // section
-        // Module 5b
-        // The instrument with its detectors modifies the source and
-        // background spectra.
-        // input: instrument, source and background SED
-        // output: total flux of source and background.
-        instrument.convolveComponents(sed);
-
-        // For debugging, print the spectrum integrals.
-        // _println("SED integral: "+sed_integral+"\tSKY integral: "+sky_integral);
-
-        // End of the Spectral energy distribution portion of the ITC.
-
-        // Start of morphology section of ITC
-
-        // Module 1a
-        // The purpose of this section is to calculate the fraction of the
-        // source flux which is contained within an aperture which we adopt
-        // to derive the signal to noise ratio. There are several cases
-        // depending on the source morphology.
-        // Define the source morphology
-        //
-        // inputs: source morphology specification
-
         double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
-        double ap_pix = 0;
-        double sw_ap = 0;
         double Npix = 0;
         double source_fraction = 0;
-        double halo_source_fraction = 0;
-        double pix_per_sq_arcsec = 0;
         double peak_pixel_count = 0;
-        List sf_list = new ArrayList();
-        List ap_offset_list = new ArrayList();
 
         // Calculate image quality
-        double im_qual = 0.;
+        double im_qual;
         double uncorrected_im_qual = 0.;
 
-        ImageQualityCalculatable IQcalc =
-                ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
+        final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
         IQcalc.calculate();
-
         im_qual = IQcalc.getImageQuality();
 
 
-        // REL-472: Commenting out Altair option for now
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-        // Altair specific section
-
-//        if (_altairParameters.altairIsUsed()) {
-//
-//            Altair altair = new Altair(instrument.getEffectiveWavelength(),
-//                    _teleParameters.getTelescopeDiameter(), im_qual,
-//                    _altairParameters.getGuideStarSeperation(),
-//                    _altairParameters.getGuideStarMagnitude(),
-//                    _altairParameters.getWFSMode(),
-//                    _altairParameters.fieldLensIsUsed(),
-//                    0.0); // See REL-472 (was 0.1)
-//            AltairBackgroundVisitor altairBackgroundVisitor = new AltairBackgroundVisitor();
-//            AltairTransmissionVisitor altairTransmissionVisitor = new AltairTransmissionVisitor();
-//            AltairFluxAttenuationVisitor altairFluxAttenuationVisitor = new AltairFluxAttenuationVisitor(
-//                    altair.getFluxAttenuation());
-//            AltairFluxAttenuationVisitor altairFluxAttenuationVisitorHalo = new AltairFluxAttenuationVisitor(
-//                    (1 - altair.getStrehl()));
-//            sky.accept(altairBackgroundVisitor);
-//
-//            sed.accept(altairTransmissionVisitor);
-//            sky.accept(altairTransmissionVisitor);
-//
-//            // Moved Background visitor here so Altair background isn't affected
-//            // by Altair's own transmission. Correct? - MD 20090723
-//            // Moved back for now. The instrument background is done the other
-//            // way (background is affected by instrument transmission)
-//
-//            // sky.accept(altairBackgroundVisitor);
-//
-//            halo = (VisitableSampledSpectrum) sed.clone();
-//            halo.accept(altairFluxAttenuationVisitorHalo);
-//            sed.accept(altairFluxAttenuationVisitor);
-//
-//            uncorrected_im_qual = im_qual; // Save uncorrected value for the
-//            // image quality for later use
-//
-//            im_qual = altair.getAOCorrectedFWHMc();
-//
-//
-////            // XXX REL-472: Not sure about this
-////            VisitableMorphology morph = new GaussianMorphology(im_qual);
-////         	morph.accept(new HexagonalAperture(0, 0, 0.10));
-//
-//
-//            int previousPrecision = device.getPrecision();
-//            device.setPrecision(3); // Two decimal places
-//            device.clear();
-//            _println(altair.printSummary(device));
-//            // _println(altair.toString());
-//            device.setPrecision(previousPrecision); // Two decimal places
-//            device.clear();
-//
-//        }
-
-
-        // Instrument background should not be affected by Altair transmission
-        // (Altair is above it)
-        // This is a change from original code - MD 20090722
-
-        sky.accept(tel);
-        instrument.addBackground(sky);
-
-        // Module 4 AO module not implemented
-        // The AO module affects source and background SEDs.
-
-        // Module 5b
-        // The instrument with its detectors modifies the source and
-        // background spectra.
-        // input: instrument, source and background SED
-        // output: total flux of source and background.
-
-//        instrument.convolveComponents(sed);
-        instrument.convolveComponents(sky);
-
-        // _println("Total photons/s between 1205 - 1215: "+
-        // sed.getIntegral(1205.0,1215.0));
-        // sed.accept(resample);
-        // sky.accept(resample);
-
         // Get the summed source and sky
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _teleParameters, _plotParameters);
+        final VisitableSampledSpectrum sed = calcSource.sed;
+        final VisitableSampledSpectrum sky = calcSource.sky;
         double sed_integral = sed.getIntegral();
         double sky_integral = sky.getIntegral();
 
-        double halo_integral = 0;
-        // REL-472: Commenting out Altair option for now
-//        if (_altairParameters.altairIsUsed()) {
-//            halo_integral = halo.getIntegral();
-//        }
-
         // Calculate the Fraction of source in the aperture
-        SourceFractionCalculatable SFcalc =
-                SourceFractionCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
-
-        // REL-472: Commenting out Altair option for now
-//        // if altair is used we need to calculate both a core and halo
-//        // source_fraction
-//        // halo first
-//        if (_altairParameters.altairIsUsed()) {
-//            // If altair is used turn off printing of SF calc
-//            SFcalc.setSFPrint(false);
-//            if (_obsDetailParameters.getApertureType().equals(
-//                    _obsDetailParameters.AUTO_APER)) {
-//                SFcalc.setApType(_obsDetailParameters.USER_APER);
-//                SFcalc.setApDiam(1.18 * im_qual);
-//            }
-//            SFcalc.setImageQuality(uncorrected_im_qual);
-//            SFcalc.calculate();
-//            halo_source_fraction = SFcalc.getSourceFraction();
-//            if (_obsDetailParameters.getApertureType().equals(
-//                    _obsDetailParameters.AUTO_APER)) {
-//                SFcalc.setApType(_obsDetailParameters.AUTO_APER);
-//            }
-//        }
+        final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
 
         // this will be the core for an altair source; unchanged for non altair.
-        SFcalc.setImageQuality(im_qual);
-        SFcalc.calculate();
         source_fraction = SFcalc.getSourceFraction();
         Npix = SFcalc.getNPix();
         if (_obsDetailParameters.getMethod().isImaging()) {
@@ -412,14 +147,7 @@ public final class GnirsRecipe extends RecipeBase {
             _println("Sky subtraction aperture = "
                     + _obsDetailParameters.getSkyApertureDiameter()
                     + " times the software aperture.\n");
-
-//            // REL-472: Commenting out Altair option for now
-//            if (_altairParameters.altairIsUsed()) {
-//                _println("derived image halo size (FWHM) for a point source = "
-//                        + device.toString(uncorrected_im_qual) + " arcsec.\n");
-//            } else {
             _println(IQcalc.getTextResult(device));
-//            }
         }
 
         // Calculate the Peak Pixel Flux

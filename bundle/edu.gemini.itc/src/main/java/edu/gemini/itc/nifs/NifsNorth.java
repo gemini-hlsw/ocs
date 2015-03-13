@@ -34,7 +34,7 @@ public class NifsNorth extends Nifs {
     private double _readNoiseValue;
 
 
-    public NifsNorth(NifsParameters gp, ObservationDetailsParameters odp) throws Exception {
+    public NifsNorth(NifsParameters gp, ObservationDetailsParameters odp) {
         super(FILENAME, INSTR_PREFIX);
         // The instrument data file gives a start/end wavelength for
         // the instrument.  But with a filter in place, the filter
@@ -72,7 +72,7 @@ public class NifsNorth extends Nifs {
         _mode = odp.getMethod();
 
         if (_centralWavelength < 1000 || _centralWavelength > 6000) {
-            throw new Exception("Central wavelength must be between 1.00um and 6.0um.");
+            throw new RuntimeException("Central wavelength must be between 1.00um and 6.0um.");
         }
 
         if (_focalPlaneMask.equals(gp.IFU))
@@ -109,12 +109,12 @@ public class NifsNorth extends Nifs {
         //Test to see that all conditions for Spectroscopy are met
         if (_mode.isSpectroscopy()) {
             if (_grating.equals("none"))
-                throw new Exception("Spectroscopy calculation method is selected but a grating" +
+                throw new RuntimeException("Spectroscopy calculation method is selected but a grating" +
                         " is not.\nPlease select a grating and a " +
                         "focal plane mask in the Instrument " +
                         "configuration section.");
             if (_focalPlaneMask.equals(NifsParameters.NO_SLIT))
-                throw new Exception("Spectroscopy calculation method is selected but a focal" +
+                throw new RuntimeException("Spectroscopy calculation method is selected but a focal" +
                         " plane mask is not.\nPlease select a " +
                         "grating and a " +
                         "focal plane mask in the Instrument " +

@@ -70,7 +70,7 @@ public final class GrismOptics extends TransmissionElement {
                        final String grismName,
                        final String cameraName,
                        final String focalPlaneMaskOffset,
-                       final String stringSlitWidth) throws Exception {
+                       final String stringSlitWidth) {
 
         super(directory + Niri.getPrefix() + grismName + "_" + cameraName + Instrument.getSuffix());
 

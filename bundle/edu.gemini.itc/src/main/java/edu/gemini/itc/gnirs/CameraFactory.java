@@ -22,7 +22,7 @@ public class CameraFactory {
     /**
      * Creates a new instance of CameraFactory
      */
-    public CameraFactory(String cameraLength, String cameraColor, String directory) throws Exception {
+    public CameraFactory(String cameraLength, String cameraColor, String directory) {
         if (cameraLength.equals(GnirsParameters.LONG) && cameraColor.equals(GnirsParameters.BLUE)) {
             _camera = new LongCameraBlueOptics(directory);
         }

@@ -61,7 +61,7 @@ public class Niri extends Instrument {
     //       String focalPlaneMask, String focalPlaneMaskOffset,
     //       String stringSlitWidth)
     //   throws Exception
-    public Niri(NiriParameters np, ObservationDetailsParameters odp) throws Exception {
+    public Niri(NiriParameters np, ObservationDetailsParameters odp) {
         super(INSTR_DIR, FILENAME);
 
         _readNoise = np.getReadNoise();
@@ -98,12 +98,12 @@ public class Niri extends Instrument {
         //Test to see that all conditions for Spectroscopy are met
         if (_mode.isSpectroscopy()) {
             if (_grism.equals("none"))
-                throw new Exception("Spectroscopy calculation method is selected but a grism" +
+                throw new RuntimeException("Spectroscopy calculation method is selected but a grism" +
                         " is not.\nPlease select a grism and a " +
                         "focal plane mask in the Instrument " +
                         "configuration section.");
             if (_focalPlaneMask.equals(NiriParameters.NO_SLIT))
-                throw new Exception("Spectroscopy calculation method is selected but a focal" +
+                throw new RuntimeException("Spectroscopy calculation method is selected but a focal" +
                         " plane mask is not.\nPlease select a " +
                         "grism and a " +
                         "focal plane mask in the Instrument " +
@@ -112,11 +112,11 @@ public class Niri extends Instrument {
 
         if (_mode.isImaging()) {
             if (!_grism.equals("none"))
-                throw new Exception("Imaging calculation method is selected but a grism" +
+                throw new RuntimeException("Imaging calculation method is selected but a grism" +
                         " is also selected.\nPlease deselect the " +
                         "grism or change the method to spectroscopy.");
             if (!_focalPlaneMask.equals("none"))
-                throw new Exception("Imaging calculation method is selected but a Focal" +
+                throw new RuntimeException("Imaging calculation method is selected but a Focal" +
                         " Plane Mask is also selected.\nPlease " +
                         "deselect the Focal Plane Mask" +
                         " or change the method to spectroscopy.");
@@ -125,25 +125,25 @@ public class Niri extends Instrument {
 
         if (!(_grism.equals("none"))) {
             if (_camera.equals("F14") || _camera.equals("F32"))
-                throw new Exception("The " + _camera + " camera cannot be used in Spectroscopy" +
+                throw new RuntimeException("The " + _camera + " camera cannot be used in Spectroscopy" +
                         " mode.  \nPlease select the F6 camera and resubmit.");
 
 
             if (_camera.equals("F32") && (_grism.equals(NiriParameters.MGRISM) || _grism.equals(NiriParameters.LGRISM)))//||_camera.equals("F32"))
-                throw new Exception("The " + _camera + " camera cannot be used with L or M Band Spectroscopy" +
+                throw new RuntimeException("The " + _camera + " camera cannot be used with L or M Band Spectroscopy" +
                         " mode.  \nPlease select a different band and resubmit.");
 
 
             if (_camera.equals("F32") && !_focalPlaneMaskOffset.equals("center"))
-                throw new Exception("The " + _camera + " camera must be used with the center slit.\n " +
+                throw new RuntimeException("The " + _camera + " camera must be used with the center slit.\n " +
                         "Please select a center slit and resubmit.");
 
             if (_camera.equals("F32") && !(_focalPlaneMask.equals(NiriParameters.F32_SLIT_4_PIX_CENTER) || _focalPlaneMask.equals(NiriParameters.F32_SLIT_7_PIX_CENTER) || _focalPlaneMask.equals(NiriParameters.F32_SLIT_10_PIX_CENTER)))
-                throw new Exception("The " + _focalPlaneMask + " slit cannot be used with the f/32 camera.\n " +
+                throw new RuntimeException("The " + _focalPlaneMask + " slit cannot be used with the f/32 camera.\n " +
                         "Please select a f/32 compatable slit and resubmit.");
 
             if (!_camera.equals("F32") && (_focalPlaneMask.equals(NiriParameters.F32_SLIT_4_PIX_CENTER) || _focalPlaneMask.equals(NiriParameters.F32_SLIT_7_PIX_CENTER) || _focalPlaneMask.equals(NiriParameters.F32_SLIT_10_PIX_CENTER)))
-                throw new Exception("The " + _focalPlaneMask + " slit must be used with the f/32 camera.\n " +
+                throw new RuntimeException("The " + _focalPlaneMask + " slit must be used with the f/32 camera.\n " +
                         "Please select the f/32 camera and resubmit.");
 
 
