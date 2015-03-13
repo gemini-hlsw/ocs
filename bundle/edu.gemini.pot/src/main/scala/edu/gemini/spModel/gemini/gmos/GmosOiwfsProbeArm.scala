@@ -90,7 +90,7 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
                        posAngle:  Double,
                        guideStar: Point2D,
                        offset:    Point2D,
-                       flip:      Int): Double = {
+                       flip:      Int): Angle = {
     val p  = {
       val posAngleRot = AffineTransform.getRotateInstance(-posAngle)
 
@@ -124,7 +124,7 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
       if (MX2 > (r2 + BX2)) math.Pi - thetaP else thetaP
     }
 
-    phi - theta - alpha - math.Pi / 2.0
+    Angle.fromRadians(phi - theta - alpha - math.Pi / 2.0)
   }
 
   // Various measurements in arcsec.

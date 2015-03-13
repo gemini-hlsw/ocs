@@ -32,7 +32,7 @@ object ScalaGuideProbeUtil {
         case (currentSum,offset) =>
           // Find the probe arm adjustment, which consists of the arm angle and guide star location in arcsec.
           // If an adjustment exists, calculate the vignetting for this offset.
-          val vignetting = probeArmGeometry.armAdjustment(ctx, coordinates, offset).map { adj =>
+          val vignetting = probeArmGeometry.armAdjustment(ctx, coordinates, offset).map { armAdjustment =>
             // Adjust the science area for the current offset.
             val x = -offset.p.toArcsecs.getMagnitude
             val y = -offset.q.toArcsecs.getMagnitude * flip
@@ -41,7 +41,7 @@ object ScalaGuideProbeUtil {
 
             val probeArmArea = probeArmShapes.foldLeft(new Area){
               case (area,s) =>
-                val sp = FeatureGeometry.transformProbeArmForContext(s, adj.angle, adj.guideStarCoords)
+                val sp = FeatureGeometry.transformProbeArmForContext(s, armAdjustment)
                 area.add(new Area(sp))
                 area
             }
