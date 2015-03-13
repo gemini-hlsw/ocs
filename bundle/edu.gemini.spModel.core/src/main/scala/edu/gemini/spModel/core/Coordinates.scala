@@ -95,7 +95,6 @@ object Coordinates extends ((RightAscension, Declination) => Coordinates) {
       } else {
         0
       }
-
     Difference(Angle.fromDegrees(phi * radian), Angle.fromDegrees(dist * radian))
   }
 }

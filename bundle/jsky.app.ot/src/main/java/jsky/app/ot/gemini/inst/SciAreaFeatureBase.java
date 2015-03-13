@@ -59,6 +59,10 @@ public abstract class SciAreaFeatureBase extends TpeImageFeature
     // The base telescope position
     protected Point2D.Double _baseScreenPos;
 
+    // The corrected position angle.
+    protected double _posAngle;
+
+    // TODO: We can probably get rid of this.
     // Used to rotate figures by the position angle
     protected AffineTransform _posAngleTrans = new AffineTransform();
 
@@ -89,9 +93,9 @@ public abstract class SciAreaFeatureBase extends TpeImageFeature
         _baseScreenPos = tii.getBaseScreenPos();
         _sciAreaPD = _sciArea.getPolygonDAt(_baseScreenPos.x, _baseScreenPos.y);
         _pixelsPerArcsec = tii.getPixelsPerArcsec();
-        double posAngle = tii.getCorrectedPosAngleRadians();
+        _posAngle = tii.getCorrectedPosAngleRadians();
         _posAngleTrans.setToIdentity();
-        _posAngleTrans.rotate(-posAngle, _baseScreenPos.x, _baseScreenPos.y);
+        _posAngleTrans.rotate(-_posAngle, _baseScreenPos.x, _baseScreenPos.y);
 
         // Init the _tickMarkPD
         if (_tickMarkPD == null) {

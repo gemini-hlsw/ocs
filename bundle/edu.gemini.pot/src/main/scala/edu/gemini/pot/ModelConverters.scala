@@ -1,25 +1,22 @@
-package edu.gemini.ags
+package edu.gemini.pot
 
-import edu.gemini.catalog.api.{SaturationConstraint, FaintnessConstraint, MagnitudeConstraints, MagnitudeLimits}
-import edu.gemini.catalog.api.MagnitudeLimits.{FaintnessLimit, SaturationLimit}
-import edu.gemini.shared.util.immutable.PredicateOp
-import edu.gemini.shared.util.immutable.ScalaConverters.ScalaOptionOps
-import edu.gemini.spModel.core._
+import edu.gemini.shared.skyobject
+import edu.gemini.skycalc
 import edu.gemini.spModel.core.Target.SiderealTarget
-import edu.gemini.spModel.guide.VignettingGuideProbe
-import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.spModel.core._
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.env.GuideProbeTargets
 
-import edu.gemini.skycalc
-import edu.gemini.shared.skyobject
-import edu.gemini.spModel.target.system.{HmsDegTarget, NonSiderealTarget}
-
-import scalaz._
-import Scalaz._
-
-package object impl {
+/**
+ * This code is a conglomeration of some methods from the edu.gemini.ags package's impl/package.scala file
+ * and edu.gemini.ags.gems.GemsUtils4Java. Eventually, as this code may be useful in other places, the
+ * original files should be removed and these converters used instead.
+ */
+object ModelConverters {
+  def toCoordinates(coords: skyobject.coords.SkyCoordinates): Coordinates = {
+    val c = coords.toHmsDeg(0L)
+    Coordinates(RightAscension.fromAngle(c.getRa.toNewModel), Declination.fromAngle(c.getDec.toNewModel).getOrElse(Declination.zero))
+  }
 
   implicit class OldAngle2New(val angle: skycalc.Angle) extends AnyVal{
     def toNewModel: Angle = Angle.fromDegrees(angle.toDegrees.getMagnitude)
@@ -31,6 +28,10 @@ package object impl {
 
   implicit class OldOffset2New(val offset: skycalc.Offset) extends AnyVal {
     def toNewModel: Offset = Offset(offset.p().toNewModel, offset.q().toNewModel)
+  }
+
+  implicit class NewOffset2Old(val offset: Offset) extends AnyVal {
+    def toOldModel: skycalc.Offset = new skycalc.Offset(offset.p.toOldModel, offset.q.toOldModel)
   }
 
   implicit class OldCoordinates2New(val c: skycalc.Coordinates) extends AnyVal {
@@ -108,9 +109,7 @@ package object impl {
     def toOldModel: skyobject.SkyObject = {
       val ra          = skycalc.Angle.degrees(st.coordinates.ra.toAngle.toDegrees)
       val dec         = skycalc.Angle.degrees(st.coordinates.dec.toAngle.toDegrees)
-      val coordinates = st.properMotion.map { pm =>
-            new skyobject.coords.HmsDegCoordinates.Builder(ra, dec).pmRa(skycalc.Angle.milliarcsecs(pm.deltaRA.velocity.masPerYear)).pmDec(skycalc.Angle.milliarcsecs(pm.deltaDec.velocity.masPerYear)).build()
-        } |  new skyobject.coords.HmsDegCoordinates.Builder(ra, dec).build()
+      val coordinates = new skyobject.coords.HmsDegCoordinates.Builder(ra, dec).build()
       val mags        = st.magnitudes.map(_.toOldModel)
       new skyobject.SkyObject.Builder(st.name, coordinates).magnitudes(mags: _*).build()
     }
@@ -124,10 +123,7 @@ package object impl {
       val dec         = Angle.fromDegrees(so.getHmsDegCoordinates.getDec.toDegrees.getMagnitude)
       val coordinates = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
       val mags        = so.getMagnitudes.asScala.map(_.toNewModel)
-      val pmRa        = RightAscensionAngularVelocity(AngularVelocity(so.getHmsDegCoordinates.getPmRa.toMilliarcsecs.getMagnitude))
-      val pmDec       = DeclinationAngularVelocity(AngularVelocity(so.getHmsDegCoordinates.getPmDec.toMilliarcsecs.getMagnitude))
-      val pm          = ProperMotion(pmRa, pmDec)
-      SiderealTarget(so.getName, coordinates, Some(pm), mags.toList, None)
+      SiderealTarget(so.getName, coordinates, None, mags.toList, None)
     }
   }
 
@@ -139,57 +135,7 @@ package object impl {
       val ra          = Angle.fromDegrees(coords.getRaDeg)
       val dec         = Angle.fromDegrees(coords.getDecDeg)
       val coordinates = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
-
-      // Only HmsDegTargets have a proper motion and the values are in milli arcsecs/year
-      val pm          = sp.getTarget match {
-        case t:HmsDegTarget => Some(ProperMotion(RightAscensionAngularVelocity(AngularVelocity(t.getPropMotionRA)), DeclinationAngularVelocity(AngularVelocity(t.getPropMotionDec))))
-        case _              => None
-      }
-      SiderealTarget(name, coordinates, pm, mags, None)
+      SiderealTarget(name, coordinates, None, mags, None)
     }
   }
-
-  // REMOVE When AGS is fully ported
-  @Deprecated
-  implicit class MagnitudeConstraints2MagnitudeLimits(val mc: MagnitudeConstraints) extends AnyVal {
-
-    def toMagnitudeLimits = {
-      val saturation: Option[SaturationLimit] = mc.saturationConstraint.map(s => new SaturationLimit(s.brightness))
-      new MagnitudeLimits(mc.band.toOldModel, new FaintnessLimit(mc.faintnessConstraint.brightness), new ScalaOptionOps(saturation).asGeminiOpt)
-    }
-  }
-
-  @Deprecated
-  implicit class MagnitudeLimits2MagnitudeConstraints(val ml: MagnitudeLimits) extends AnyVal {
-
-    def toMagnitudeConstraints = {
-      MagnitudeConstraints(ml.getBand.toNewModel, FaintnessConstraint(ml.getFaintnessLimit.getBrightness), ml.getSaturationLimit.asScalaOpt.map(s => SaturationConstraint(s.getBrightness)))
-    }
-  }
-
-  def find(gpt: GuideProbeTargets, targetName: String): Option[SPTarget] =
-    Option(targetName).map(_.trim).flatMap { tn =>
-      gpt.getOptions.find(new PredicateOp[SPTarget] {
-        def apply(spt: SPTarget): java.lang.Boolean =
-          Option(spt.getTarget.getName).map(_.trim).exists(_ == tn)
-      }).asScalaOpt
-    }
-
-  def isSidereal(ctx: ObsContext): Boolean =
-    !ctx.getTargets.getBase.getTarget.isInstanceOf[NonSiderealTarget]
-
-  def isAo(ctx: ObsContext): Boolean = !ctx.getAOComponent.isEmpty
-
-  def ctx180(c: ObsContext): ObsContext =
-    c.withPositionAngle(c.getPositionAngle.add(180.0, skycalc.Angle.Unit.DEGREES))
-
-  def brightness(so: SiderealTarget, b: MagnitudeBand): Option[Double] =
-    so.magnitudeIn(b).map(_.value)
-
-  def brightest[A](lst: List[A], band: MagnitudeBand)(toSiderealTarget: A => SiderealTarget): Option[A] = {
-    lazy val max = new Magnitude(Double.MaxValue, band)
-    if (lst.isEmpty) None
-    else Some(lst.minBy(toSiderealTarget(_).magnitudeIn(band).getOrElse(max)))
-  }
-
 }
