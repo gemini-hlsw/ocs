@@ -102,10 +102,10 @@ object UniqueConfig {
   // Note, this is done backwards, so we can always prepend the newest element.
   private def findSpans(ns: Seq[Int]): Seq[Seq[Int]] = {
     val e: Seq[Seq[Int]] = Seq()
-    ns.reverse.foldLeft(e) {
-      case (a, i) if a.isEmpty           => Seq(Seq(i))
-      case (a, i) if a.head.head == i+1  => (i +: a.head) +: a.tail
-      case (a, i)                        => Seq(i) +: a
+    ns.foldRight(e) {
+      case (i, a) if a.isEmpty           => Seq(Seq(i))
+      case (i, a) if a.head.head == i+1  => (i +: a.head) +: a.tail
+      case (i, a)                        => Seq(i) +: a
     }
   }
 
