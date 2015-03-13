@@ -35,6 +35,7 @@ import jsky.app.ot.ags.*;
 import jsky.app.ot.editor.OtItemEditor;
 import jsky.app.ot.gemini.editor.horizons.HorizonsPlotter;
 import jsky.app.ot.gemini.editor.horizons.HorizonsService;
+import jsky.app.ot.gemini.editor.targetComponent.detail.TargetDetailPanel;
 import jsky.app.ot.tpe.AgsClient;
 import jsky.app.ot.tpe.GuideStarSupport;
 import jsky.app.ot.tpe.TelescopePosEditor;
@@ -89,6 +90,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private final TrackingEditor      _trackingEditor   = new TrackingEditor();
     private final MagnitudeEditor     _nonsideMagEditor = new MagnitudeEditor();
     private final JToggleButton       _trackingButton   = new TrackingButton();
+    private final TargetDetailPanel _detailEditor     = new TargetDetailPanel();
 
     // More constants, but they need access to `this` so we assign in the ctor
     private final TelescopeForm            _w;
@@ -145,6 +147,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 weighty = 1.0;
             }});
         }}, "nonsidereal");
+
+        _w.extrasFolder.setBorder(BorderFactory.createLineBorder(Color.GREEN));
 
         _w.planetsPanel.setVisible(false);
 
@@ -205,6 +209,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         ));
 
 
+        contentPanel.setBorder(BorderFactory.createLineBorder(Color.RED));
+
         _w.add(contentPanel, new GridBagConstraints() {{
             gridx = 0;
             gridy = 1;
@@ -213,6 +219,14 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             insets = new Insets(5, 0, 5, 0);
         }});
 
+        _w.add(_detailEditor, new GridBagConstraints() {{
+            gridx = 0;
+            gridy = 2;
+            fill = HORIZONTAL;
+            weightx = 1.0;
+            insets = new Insets(5, 0, 5, 0);
+            weighty = 2;
+        }});
 
         // Set up the formatting on the calendar doodad
         final DateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss");
@@ -1306,6 +1320,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             final NonSiderealTarget nst = (NonSiderealTarget) _curPos.getTarget();
             _nonSiderealTargetSup.showNonSiderealTarget(nst);
         }
+
+        // Update target details
+        _detailEditor.edit(getObsContext(env), _curPos);
+
+
     }
 
 

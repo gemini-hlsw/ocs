@@ -22,7 +22,7 @@ import java.text.NumberFormat;
 /**
  * An editor for proper motion.
  */
-final class ProperMotionEditor implements TelescopePosEditor {
+public final class ProperMotionEditor implements TelescopePosEditor {
     private final JPanel pan;
 
     private final JFormattedTextField pmRa;
@@ -30,7 +30,7 @@ final class ProperMotionEditor implements TelescopePosEditor {
 
     private SPTarget target;
 
-    ProperMotionEditor() {
+    public ProperMotionEditor() {
         pan = new JPanel(new GridBagLayout()) {{
             setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         }};

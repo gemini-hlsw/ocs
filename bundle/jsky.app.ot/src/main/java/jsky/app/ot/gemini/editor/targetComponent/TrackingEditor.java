@@ -21,7 +21,7 @@ import java.text.NumberFormat;
 /**
  * Telescope editor for sidereal target tracking details.
  */
-final class TrackingEditor implements TelescopePosEditor {
+public final class TrackingEditor implements TelescopePosEditor {
 
     private final JPanel pan;
     private final ImList<Row> rows;
@@ -113,7 +113,7 @@ final class TrackingEditor implements TelescopePosEditor {
 
     private SPTarget target;
 
-    TrackingEditor() {
+    public TrackingEditor() {
         pan = new JPanel(new GridBagLayout()) {{
             setOpaque(false);
         }};

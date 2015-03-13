@@ -11,7 +11,7 @@ import java.awt.*;
 /**
  * Displays the guiding feedback associated with a target, if any.
  */
-final class GuidingFeedbackEditor implements TelescopePosEditor {
+public final class GuidingFeedbackEditor implements TelescopePosEditor {
     private final GuidingFeedback.Table tab = new GuidingFeedback.Table();
 
     public Component getComponent() { return tab.peer(); }

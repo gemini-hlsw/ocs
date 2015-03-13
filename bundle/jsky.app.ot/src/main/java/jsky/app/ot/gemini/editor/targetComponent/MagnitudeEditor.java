@@ -28,7 +28,7 @@ import java.util.List;
  * Component holding magnitude information for a target position.  Provides
  * controls for editing the magnitude values.
  */
-final class MagnitudeEditor implements TelescopePosEditor {
+public final class MagnitudeEditor implements TelescopePosEditor {
 
     private static final DecimalFormat MAG_FORMAT = new DecimalFormat("0.0##");
 
@@ -331,7 +331,7 @@ final class MagnitudeEditor implements TelescopePosEditor {
 
     private SPTarget target = null;
 
-    MagnitudeEditor() {
+    public MagnitudeEditor() {
         pan = new JPanel(new GridBagLayout());
 
         // Create the panel that will hold the magnitude editing widgets.
