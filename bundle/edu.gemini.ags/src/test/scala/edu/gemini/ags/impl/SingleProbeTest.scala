@@ -123,10 +123,11 @@ class SingleProbeTest {
     F2Pwfs1,
     F2Pwfs2,
 
-    GmosNorth,
+    // GMOS OI now uses vignetting in AGS, so tests expecting to pick the brightest guide star are no longer relevant.
+    //GmosNorth,
     GmosNorthPwfs1,
     GmosNorthPwfs2,
-    GmosSouth,
+    //GmosSouth,
     GmosSouthPwfs1,
     GmosSouthPwfs2,
 
