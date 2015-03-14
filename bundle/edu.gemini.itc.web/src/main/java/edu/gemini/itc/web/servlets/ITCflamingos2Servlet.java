@@ -1,7 +1,7 @@
-package edu.gemini.itc.flamingos2;
+package edu.gemini.itc.web.servlets;
 
+import edu.gemini.itc.flamingos2.Flamingos2Recipe;
 import edu.gemini.itc.shared.ITCMultiPartParser;
-import edu.gemini.itc.shared.ITCServlet;
 import edu.gemini.itc.shared.Recipe;
 
 import java.io.PrintWriter;

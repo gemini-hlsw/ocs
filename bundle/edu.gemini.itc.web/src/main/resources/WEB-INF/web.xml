@@ -14,7 +14,7 @@
             acqcam
         </servlet-name>
         <servlet-class>
-            edu.gemini.itc.acqcam.ITCacqCamServlet
+            edu.gemini.itc.web.servlets.ITCacqCamServlet
         </servlet-class>
     </servlet>
 
@@ -30,7 +30,7 @@
             niri
         </servlet-name>
         <servlet-class>
-            edu.gemini.itc.niri.ITCniriServlet
+            edu.gemini.itc.web.servlets.ITCniriServlet
         </servlet-class>
     </servlet>
 
@@ -45,7 +45,7 @@
             gsaoi
         </servlet-name>
         <servlet-class>
-            edu.gemini.itc.gsaoi.ITCgsaoiServlet
+            edu.gemini.itc.web.servlets.ITCgsaoiServlet
         </servlet-class>
     </servlet>
 
@@ -60,7 +60,7 @@
             gmos
         </servlet-name>
         <servlet-class>
-            edu.gemini.itc.gmos.ITCgmosServlet
+            edu.gemini.itc.web.servlets.ITCgmosServlet
         </servlet-class>
     </servlet>
 
@@ -75,7 +75,7 @@
             gnirs
         </servlet-name>
         <servlet-class>
-            edu.gemini.itc.gnirs.ITCgnirsServlet
+            edu.gemini.itc.web.servlets.ITCgnirsServlet
         </servlet-class>
     </servlet>
 
@@ -90,7 +90,7 @@
             trecs
         </servlet-name>
         <servlet-class>
-            edu.gemini.itc.trecs.ITCTrecsServlet
+            edu.gemini.itc.web.servlets.ITCTrecsServlet
         </servlet-class>
     </servlet>
 
@@ -105,7 +105,7 @@
             michelle
         </servlet-name>
         <servlet-class>
-            edu.gemini.itc.michelle.ITCMichelleServlet
+            edu.gemini.itc.web.servlets.ITCMichelleServlet
         </servlet-class>
     </servlet>
 
@@ -120,7 +120,7 @@
             images
         </servlet-name>
         <servlet-class>
-            edu.gemini.itc.shared.ImageServlet
+            edu.gemini.itc.web.servlets.ImageServlet
         </servlet-class>
     </servlet>
 
@@ -135,7 +135,7 @@
           nifs
         </servlet-name>
         <servlet-class>
-            edu.gemini.itc.nifs.ITCnifsServlet
+            edu.gemini.itc.web.servlets.ITCnifsServlet
         </servlet-class>
     </servlet>
 
@@ -150,64 +150,13 @@
           flamingos2
         </servlet-name>
         <servlet-class>
-            edu.gemini.itc.flamingos2.ITCflamingos2Servlet
+            edu.gemini.itc.web.servlets.ITCflamingos2Servlet
         </servlet-class>
     </servlet>
-    
 
     <servlet-mapping>
         <servlet-name>flamingos2</servlet-name>
         <url-pattern>/servlet/flamingos2</url-pattern>
     </servlet-mapping>
 
-	<!-- Had to add these url mappings to get the servlets to run - mdillman 20080731
-
-    <servlet-mapping>
-        <servlet-name>acqcam</servlet-name>
-        <url-pattern>/servlet/acqcam</url-pattern>
-    </servlet-mapping>
-
-    </servlet-mapping>
-        <servlet-name>gnirs</servlet-name>
-        <url-pattern>/servlet/gnirs</url-pattern>
-    </servlet-mapping>
-
-    </servlet-mapping>
-        <servlet-name>gmos</servlet-name>
-        <url-pattern>/servlet/gmos</url-pattern>
-    </servlet-mapping>
-
-    </servlet-mapping>
-        <servlet-name>niri</servlet-name>
-        <url-pattern>/servlet/niri</url-pattern>
-    </servlet-mapping>
-
-    </servlet-mapping>
-        <servlet-name>michelle</servlet-name>
-        <url-pattern>/servlet/michelle</url-pattern>
-    </servlet-mapping>
-
-
-    </servlet-mapping>
-        <servlet-name>nirialtair</servlet-name>
-        <url-pattern>/servlet/nirialtair</url-pattern>
-
-    </servlet-mapping>
-        <servlet-name>trecs</servlet-name>
-        <url-pattern>/servlet/trecs</url-pattern>
-    </servlet-mapping> -->
-<!--
-
-    </servlet-mapping>
-        <servlet-name>trecs</servlet-name>
-        <url-pattern>/servlet/trecs</url-pattern>
-    <taglib>
-        <taglib-uri>
-	   http://java.apache.org/tomcat/examples-taglib
-        </taglib-uri>
-        <taglib-location>
-           /WEB-INF/jsp/example-taglib.tld
-        </taglib-location>
-    </taglib>
--->
 </web-app>

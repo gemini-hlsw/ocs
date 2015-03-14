@@ -1,21 +1,21 @@
-package edu.gemini.itc.trecs;
+package edu.gemini.itc.web.servlets;
 
+import edu.gemini.itc.acqcam.AcqCamRecipe;
 import edu.gemini.itc.shared.ITCMultiPartParser;
-import edu.gemini.itc.shared.ITCServlet;
 import edu.gemini.itc.shared.Recipe;
 
 import java.io.PrintWriter;
 
 /**
- * ITC TRecs servlet.
+ * ITC Acq Cam servlet.
  */
-public final class ITCTrecsServlet extends ITCServlet {
-
+public final class ITCacqCamServlet
+        extends ITCServlet {
     public static final String VERSION = "4.0";
     public static final String TITLE = "Gemini Integration Time Calculator";
-    public static final String INSTRUMENT = "T-ReCS";
+    public static final String INSTRUMENT = "Acquisition Camera";
 
-    public ITCTrecsServlet() {
+    public ITCacqCamServlet() {
         super();
     }
 
@@ -34,7 +34,7 @@ public final class ITCTrecsServlet extends ITCServlet {
     }
 
     /**
-     * Returns the Instrument name
+     * Returns the instrument name
      */
     public String getInst() {
         return INSTRUMENT;
@@ -45,7 +45,7 @@ public final class ITCTrecsServlet extends ITCServlet {
      * Used by Java Web Server Administration Tool.
      */
     public String getServletInfo() {
-        return getTitle() + " " + getVersion() + " - ITCTrecsServlet accepts form data and performs ITC calculation for T-Recs.";
+        return getTitle() + " " + getVersion() + " - ITCacqCamServlet accepts form data and performs ITC calculation for the Acquisition Camera.";
     }
 
     /**
@@ -53,7 +53,7 @@ public final class ITCTrecsServlet extends ITCServlet {
      */
     public void writeOutput(ITCMultiPartParser mpp, PrintWriter out) {
         out.println("<a href = \"http://www.gemini.edu/sciops/instruments/integration-time-calculators/itc-help\"> Click here for help with the results page.</a>");
-        Recipe recipe = new TRecsRecipe(mpp, out);
+        Recipe recipe = new AcqCamRecipe(mpp, out);
         recipe.writeOutput();
     }
 }

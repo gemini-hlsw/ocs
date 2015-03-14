@@ -1,20 +1,21 @@
-package edu.gemini.itc.nifs;
+package edu.gemini.itc.web.servlets;
 
 import edu.gemini.itc.shared.ITCMultiPartParser;
-import edu.gemini.itc.shared.ITCServlet;
 import edu.gemini.itc.shared.Recipe;
+import edu.gemini.itc.trecs.TRecsRecipe;
 
 import java.io.PrintWriter;
 
 /**
- * ITC NIFS servlet.
+ * ITC TRecs servlet.
  */
-public final class ITCnifsServlet extends ITCServlet {
-    public static final String VERSION = "4.2";
-    public static final String TITLE = "Gemini Integration Time Calculator";
-    public static final String INSTRUMENT = "NIFS";
+public final class ITCTrecsServlet extends ITCServlet {
 
-    public ITCnifsServlet() {
+    public static final String VERSION = "4.0";
+    public static final String TITLE = "Gemini Integration Time Calculator";
+    public static final String INSTRUMENT = "T-ReCS";
+
+    public ITCTrecsServlet() {
         super();
     }
 
@@ -44,7 +45,7 @@ public final class ITCnifsServlet extends ITCServlet {
      * Used by Java Web Server Administration Tool.
      */
     public String getServletInfo() {
-        return getTitle() + " " + getVersion() + " - ITCnifsServlet accepts form data and performs ITC calculation for NIFS.";
+        return getTitle() + " " + getVersion() + " - ITCTrecsServlet accepts form data and performs ITC calculation for T-Recs.";
     }
 
     /**
@@ -52,7 +53,7 @@ public final class ITCnifsServlet extends ITCServlet {
      */
     public void writeOutput(ITCMultiPartParser mpp, PrintWriter out) {
         out.println("<a href = \"http://www.gemini.edu/sciops/instruments/integration-time-calculators/itc-help\"> Click here for help with the results page.</a>");
-        Recipe recipe = new NifsRecipe(mpp, out);
+        Recipe recipe = new TRecsRecipe(mpp, out);
         recipe.writeOutput();
     }
 }

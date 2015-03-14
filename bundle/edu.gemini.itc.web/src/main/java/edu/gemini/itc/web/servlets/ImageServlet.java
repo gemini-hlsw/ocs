@@ -1,4 +1,6 @@
-package edu.gemini.itc.shared;
+package edu.gemini.itc.web.servlets;
+
+import edu.gemini.itc.shared.ITCImageFileIO;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;

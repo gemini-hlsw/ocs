@@ -1,20 +1,20 @@
-package edu.gemini.itc.gnirs;
+package edu.gemini.itc.web.servlets;
 
+import edu.gemini.itc.gsaoi.GsaoiRecipe;
 import edu.gemini.itc.shared.ITCMultiPartParser;
-import edu.gemini.itc.shared.ITCServlet;
 import edu.gemini.itc.shared.Recipe;
 
 import java.io.PrintWriter;
 
 /**
- * ITC GNIRS servlet.
+ * ITC GSAOI servlet.
  */
-public final class ITCgnirsServlet extends ITCServlet {
-    public static final String VERSION = "4.0";
+public final class ITCgsaoiServlet extends ITCServlet {
+    public static final String VERSION = "4.2";
     public static final String TITLE = "Gemini Integration Time Calculator";
-    public static final String INSTRUMENT = "GNIRS";
+    public static final String INSTRUMENT = "GSAOI";
 
-    public ITCgnirsServlet() {
+    public ITCgsaoiServlet() {
         super();
     }
 
@@ -44,7 +44,7 @@ public final class ITCgnirsServlet extends ITCServlet {
      * Used by Java Web Server Administration Tool.
      */
     public String getServletInfo() {
-        return getTitle() + " " + getVersion() + " - ITCgnirsServlet accepts form data and performs ITC calculation for GNIRS.";
+        return getTitle() + " " + getVersion() + " - ITCGsaoiServlet accepts form data and performs ITC calculation for Gsaoi.";
     }
 
     /**
@@ -52,7 +52,7 @@ public final class ITCgnirsServlet extends ITCServlet {
      */
     public void writeOutput(ITCMultiPartParser mpp, PrintWriter out) {
         out.println("<a href = \"http://www.gemini.edu/sciops/instruments/integration-time-calculators/itc-help\"> Click here for help with the results page.</a>");
-        Recipe recipe = new GnirsRecipe(mpp, out);
+        Recipe recipe = new GsaoiRecipe(mpp, out); // parses form data
         recipe.writeOutput();
     }
 }
