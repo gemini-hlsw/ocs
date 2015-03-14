@@ -2,6 +2,7 @@ package edu.gemini.spModel.rich.pot
 
 import edu.gemini.pot.sp._
 import edu.gemini.spModel.core.{RichSpProgramId, SPProgramID}
+import edu.gemini.spModel.data.ISPDataObject
 
 import scalaz._
 import Scalaz._
@@ -41,4 +42,8 @@ package object sp {
   }
 
   implicit def SpNodeKeyEqual: Equal[SPNodeKey] = Equal.equalA
+
+  implicit class RichDataObject[A <: ISPDataObject](dob: A) {
+    def copy: A = dob.clone(dob)
+  }
 }

@@ -7,6 +7,7 @@
 //
 package edu.gemini.spModel.data;
 
+import edu.gemini.pot.sp.ISPCloneable;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
@@ -32,7 +33,7 @@ import java.io.Serializable;
  * (and other formats).  A property list is expected upon export and
  * passed to a constructor when creating the data object.
  */
-public interface ISPDataObject extends Serializable {
+public interface ISPDataObject extends ISPCloneable, Serializable {
 
     /**
      * Names the version property of all data objects.
@@ -137,4 +138,11 @@ public interface ISPDataObject extends Serializable {
      * type is mapped one-to-one with its own object.
      */
     SPComponentType getType();
+
+    /**
+     * A clone method that is callable from Scala and that hides the cast to the
+     * desired type.
+     * https://issues.scala-lang.org/browse/SI-6760
+     */
+    <A extends ISPDataObject> A clone(A a);
 }

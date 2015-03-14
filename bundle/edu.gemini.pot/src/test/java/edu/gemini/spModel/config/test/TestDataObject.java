@@ -19,13 +19,26 @@ import java.beans.PropertyChangeListener;
 import java.io.Serializable;
 
 
-
 public class TestDataObject implements Serializable, IConfigProvider, ISPDataObject {
 
     private ISysConfig _sysConfig;
 
 
     public TestDataObject() {
+    }
+
+    public Object clone() {
+        try {
+            return super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new InternalError();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <A extends ISPDataObject> A clone(A a) {
+        return (A) a.clone();
     }
 
     public ISysConfig getSysConfig() {
