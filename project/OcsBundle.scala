@@ -57,8 +57,24 @@ trait OcsBundle {
       bundle_jsky_coords
     )
 
+  lazy val bundle_edu_gemini_itc_shared = 
+    project.in(file("bundle/edu.gemini.itc.shared")).dependsOn(
+      bundle_edu_gemini_util_osgi,
+      bundle_edu_gemini_shared_util,
+      bundle_edu_gemini_pot
+    )
+
   lazy val bundle_edu_gemini_itc = 
     project.in(file("bundle/edu.gemini.itc")).dependsOn(
+      bundle_edu_gemini_itc_shared,
+      bundle_edu_gemini_util_osgi,
+      bundle_edu_gemini_shared_util,
+      bundle_edu_gemini_pot
+    )
+
+  lazy val bundle_edu_gemini_itc_web = 
+    project.in(file("bundle/edu.gemini.itc.web")).dependsOn(
+      bundle_edu_gemini_itc_shared,
       bundle_edu_gemini_util_osgi,
       bundle_edu_gemini_shared_util,
       bundle_edu_gemini_pot
