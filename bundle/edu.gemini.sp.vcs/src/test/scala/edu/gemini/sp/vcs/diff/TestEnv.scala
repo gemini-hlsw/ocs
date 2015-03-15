@@ -2,20 +2,22 @@ package edu.gemini.sp.vcs.diff
 
 import java.io.File
 
-import edu.gemini.pot.sp.{ISPProgram, SPNodeKey}
+import edu.gemini.pot.sp.{ISPObservation, ISPProgram, SPNodeKey}
 import edu.gemini.pot.spdb.{DBLocalDatabase, IDBDatabaseService}
 import edu.gemini.sp.vcs.diff.VcsFailure.{IdClash, Forbidden, NotFound, VcsException}
 import edu.gemini.sp.vcs.log.{VcsEventSet, VcsEvent, VcsOp, VcsLog}
 import edu.gemini.spModel.core.{Peer, Affiliate, SPProgramID}
 import edu.gemini.spModel.gemini.obscomp.SPProgram
 import edu.gemini.spModel.gemini.obscomp.SPProgram.PIInfo
-import edu.gemini.util.security.principal.{ProgramPrincipal, GeminiPrincipal, StaffPrincipal}
+import edu.gemini.spModel.obs.{SPObservation, ObsQaState}
+import edu.gemini.util.security.principal.{UserPrincipal, GeminiPrincipal, StaffPrincipal}
 
 import java.security.Principal
 
 import org.specs2.matcher.MatchResult
 import org.specs2.mutable.Specification
 
+import scala.collection.JavaConverters._
 import scalaz._
 import Scalaz._
 
@@ -23,18 +25,34 @@ case class TestPeer(odb: IDBDatabaseService, server: VcsServer, service: Princip
   def vcs(p: Principal): Vcs =
     new Vcs(VcsAction(Set(p)), server, _ => service(p))
 
-  val staffVcs: Vcs = vcs(StaffPrincipal.Gemini)
+  val superStaffVcs: Vcs = vcs(StaffPrincipal.Gemini)
 
   def shutdown(): Unit = odb.getDBAdmin.shutdown()
+
+  def spDataObject: SPProgram = prog.getDataObject.asInstanceOf[SPProgram]
 
   // Lookup the test program
   def prog: ISPProgram = odb.lookupProgram(TestEnv.Key)
 
+  def set(update: SPProgram => Unit): Unit =
+    spDataObject <| update |> prog.setDataObject
+
+  // Get the rollover status of the test program (a staff-protected field)
+  def rollover: Boolean = spDataObject.getRolloverStatus
+
+  // Set the rollover status of the test program (a staff-protected field)
+  def rollover_=(roll: Boolean): Unit = set(_.setRolloverStatus(roll))
+
+  // Get the staff contact
+  def contact: String = spDataObject.getContactPerson
+
+  // Set the contact person
+  def contact_=(c: String): Unit = set(_.setContactPerson(c))
+
   // Get the current title of the test program
   def progTitle: String = prog.getDataObject.getTitle
 
-  def progTitle_=(t: String): Unit =
-    prog.getDataObject <| (_.setTitle(t)) |> prog.setDataObject
+  def progTitle_=(t: String): Unit = set(_.setTitle(t))
 
   // Create a new program but don't add it to the database
   def newProgram(id: SPProgramID): ISPProgram = {
@@ -49,6 +67,30 @@ case class TestPeer(odb: IDBDatabaseService, server: VcsServer, service: Princip
   // Create and add a new program to the database
   def addNewProgram(id: SPProgramID): ISPProgram =
     newProgram(id) <| addProgram
+
+  def addObservation(): SPNodeKey = {
+    val obs = odb.getFactory.createObservation(prog, null)
+    prog.addObservation(obs)
+    obs.getNodeKey
+  }
+
+  def getObsDataObject(k: SPNodeKey): SPObservation =
+    obs(k).getDataObject.asInstanceOf[SPObservation]
+
+  def setObsDataObject(k: SPNodeKey, update: SPObservation => Unit): Unit =
+    getObsDataObject(k) <| update |> obs(k).setDataObject
+
+  def getQaState(k: SPNodeKey): ObsQaState =
+    getObsDataObject(k).getOverriddenObsQaState
+
+  def setQaState(k: SPNodeKey, qa: ObsQaState): Unit =
+    setObsDataObject(k, _.setOverriddenObsQaState(qa))
+
+  def obs(k: SPNodeKey): ISPObservation = {
+    // this is a test method. we're asserting that the observation with this key
+    // exists.  if not the test case fails, which is what should happen.
+    prog.getAllObservations.asScala.find(_.getNodeKey == k).get
+  }
 }
 
 case class TestEnv(local: TestPeer, remote: TestPeer) {
@@ -59,18 +101,21 @@ case class TestEnv(local: TestPeer, remote: TestPeer) {
 }
 
 object TestEnv {
-  val Key       = new SPNodeKey()
-  val Q1        = SPProgramID.toProgramID("GS-2015B-Q-1")
-  val Title     = "The Stranger"
-  val PiInfo    = new PIInfo("Albert", "Camus", "acamus@ualger.dz", "", Affiliate.UNITED_STATES)
-
   val DummyPeer = new Peer("foo", 1234)
 
+  val Key       = new SPNodeKey()
+  val ObsKey    = new SPNodeKey()
+  val Q1        = SPProgramID.toProgramID("GS-2015B-Q-1")
   val Q2        = SPProgramID.toProgramID("GS-2015B-Q-2")
   val Q3        = SPProgramID.toProgramID("GS-2015B-Q-3")
 
-  def progPrincipal(id: SPProgramID): Set[Principal] =
-    Set(ProgramPrincipal(id))
+  val Title     = "The Stranger"
+  val PiEmail   = "acamus@ualger.dz"
+  val PiInfo    = new PIInfo("Albert", "Camus", PiEmail, "", Affiliate.UNITED_STATES)
+
+  val PiUserPrincipal    = UserPrincipal(PiEmail)
+  val StaffEmail         = "joe_astro@gemini.edu"
+  val StaffUserPrincipal = UserPrincipal(StaffEmail)
 }
 
 object MockVcsLog extends VcsLog {
@@ -94,8 +139,12 @@ trait VcsSpecification extends Specification {
     import TestEnv._
     val rp = remoteOdb.getFactory.createProgram(Key, Q1)
     rp.setDataObject {
-      rp.getDataObject.asInstanceOf[SPProgram] <| (_.setTitle(Title)) <| (_.setPIInfo(PiInfo))
+      rp.getDataObject.asInstanceOf[SPProgram] <|
+        (_.setTitle(Title))                    <|
+        (_.setPIInfo(PiInfo))                  <|
+        (_.setContactPerson(StaffEmail))
     }
+    rp.addObservation(remoteOdb.getFactory.createObservation(rp, ObsKey))
     remoteOdb.put(rp)
 
     // Copy the test program into the local database

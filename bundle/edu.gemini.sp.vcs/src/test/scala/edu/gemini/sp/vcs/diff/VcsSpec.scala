@@ -16,7 +16,7 @@ class VcsSpec extends VcsSpecification {
 
   "checkout" should {
     "fail if the indicated program doesn't exist remotely" in withVcs { env =>
-      notFound(env.local.staffVcs.checkout(Q2, DummyPeer), Q2)
+      notFound(env.local.superStaffVcs.checkout(Q2, DummyPeer), Q2)
     }
 
     "fail if the user doesn't have access to the program" in withVcs { env =>
@@ -29,7 +29,7 @@ class VcsSpec extends VcsSpecification {
       val remoteQ2 = env.remote.addNewProgram(Q2)
 
       // run checkout on the local peer
-      env.local.staffVcs.checkout(Q2, DummyPeer).unsafeRun
+      env.local.superStaffVcs.checkout(Q2, DummyPeer).unsafeRun
 
       val localQ2 = env.local.odb.lookupProgramByID(Q2)
 
@@ -39,7 +39,7 @@ class VcsSpec extends VcsSpecification {
 
   "add" should {
     "fail if the indicated program doesn't exist locally" in withVcs { env =>
-      notFound(env.local.staffVcs.add(Q2, DummyPeer), Q2)
+      notFound(env.local.superStaffVcs.add(Q2, DummyPeer), Q2)
     }
 
     "fail if the user doesn't have access to the program" in withVcs { env =>
@@ -52,7 +52,7 @@ class VcsSpec extends VcsSpecification {
       val localQ2 = env.local.addNewProgram(Q2)
 
       // run add to send it to the remote peer
-      env.local.staffVcs.add(Q2, DummyPeer).unsafeRun
+      env.local.superStaffVcs.add(Q2, DummyPeer).unsafeRun
 
       val remoteQ2 = env.remote.odb.lookupProgramByID(Q2)
 
@@ -63,12 +63,12 @@ class VcsSpec extends VcsSpecification {
   "pull" should {
     "fail if the indicated program doesn't exist locally" in withVcs { env =>
       env.remote.addNewProgram(Q2)
-      notFound(env.local.staffVcs.pull(Q2, DummyPeer), Q2)
+      notFound(env.local.superStaffVcs.pull(Q2, DummyPeer), Q2)
     }
 
     "fail if the indicated program doesn't exist remotely" in withVcs { env =>
       env.local.addNewProgram(Q2)
-      notFound(env.local.staffVcs.pull(Q2, DummyPeer), Q2)
+      notFound(env.local.superStaffVcs.pull(Q2, DummyPeer), Q2)
     }
 
     "fail if the user doesn't have access to the program" in withVcs { env =>
@@ -78,11 +78,11 @@ class VcsSpec extends VcsSpecification {
     "fail if the indicated program has different keys locally vs remotely" in withVcs { env =>
       env.local.addNewProgram(Q2)
       env.remote.addNewProgram(Q2)
-      idClash(env.local.staffVcs.pull(Q2, DummyPeer), Q2)
+      idClash(env.local.superStaffVcs.pull(Q2, DummyPeer), Q2)
     }
 
     "do nothing if the local version is the same" in withVcs { env =>
-      expect(env.local.staffVcs.pull(Q1, DummyPeer)) {
+      expect(env.local.superStaffVcs.pull(Q1, DummyPeer)) {
         case \/-(false) => ok("")
       }
     }
@@ -90,7 +90,7 @@ class VcsSpec extends VcsSpecification {
     "do nothing if the local version is newer" in withVcs { env =>
       env.local.progTitle = "The Myth of Sisyphus"
 
-      expect(env.local.staffVcs.pull(Q1, DummyPeer)) {
+      expect(env.local.superStaffVcs.pull(Q1, DummyPeer)) {
         case \/-(false) => ok("")
       } and (env.local.progTitle must_== "The Myth of Sisyphus")
     }
@@ -98,7 +98,7 @@ class VcsSpec extends VcsSpecification {
     "merge the updates if the remote version is newer" in withVcs { env =>
       env.remote.progTitle = "The Myth of Sisyphus"
 
-      expect(env.local.staffVcs.pull(Q1, DummyPeer)) {
+      expect(env.local.superStaffVcs.pull(Q1, DummyPeer)) {
         case \/-(true) => ok("")
       } and (env.local.progTitle must_== "The Myth of Sisyphus")
     }
@@ -107,12 +107,12 @@ class VcsSpec extends VcsSpecification {
   "push" should {
     "fail if the indicated program doesn't exist locally" in withVcs { env =>
       env.remote.addNewProgram(Q2)
-      notFound(env.local.staffVcs.push(Q2, DummyPeer), Q2)
+      notFound(env.local.superStaffVcs.push(Q2, DummyPeer), Q2)
     }
 
     "fail if the indicated program doesn't exist remotely" in withVcs { env =>
       env.local.addNewProgram(Q2)
-      notFound(env.local.staffVcs.push(Q2, DummyPeer), Q2)
+      notFound(env.local.superStaffVcs.push(Q2, DummyPeer), Q2)
     }
 
     "fail if the user doesn't have access to the program" in withVcs { env =>
@@ -122,11 +122,11 @@ class VcsSpec extends VcsSpecification {
     "fail if the indicated program has different keys locally vs remotely" in withVcs { env =>
       env.local.addNewProgram(Q2)
       env.remote.addNewProgram(Q2)
-      idClash(env.local.staffVcs.push(Q2, DummyPeer), Q2)
+      idClash(env.local.superStaffVcs.push(Q2, DummyPeer), Q2)
     }
 
     "do nothing if the local version is the same" in withVcs { env =>
-      expect(env.local.staffVcs.push(Q1, DummyPeer)) {
+      expect(env.local.superStaffVcs.push(Q1, DummyPeer)) {
         case \/-(false) => ok("")
       }
     }
@@ -134,7 +134,7 @@ class VcsSpec extends VcsSpecification {
     "fail with NeedsUpdate if the local version is older" in withVcs { env =>
       env.remote.progTitle = "The Myth of Sisyphus"
 
-      expect(env.local.staffVcs.push(Q1, DummyPeer)) {
+      expect(env.local.superStaffVcs.push(Q1, DummyPeer)) {
         case -\/(NeedsUpdate) => ok("")
       } and (env.local.progTitle must_== Title)
     }
@@ -142,7 +142,7 @@ class VcsSpec extends VcsSpecification {
     "merge the updates if the local version is newer" in withVcs { env =>
       env.local.progTitle = "The Myth of Sisyphus"
 
-      expect(env.local.staffVcs.push(Q1, DummyPeer)) {
+      expect(env.local.superStaffVcs.push(Q1, DummyPeer)) {
         case \/-(true) => ok("")
       } and (env.remote.progTitle must_== "The Myth of Sisyphus")
     }
@@ -154,12 +154,12 @@ class VcsSpec extends VcsSpecification {
     name should {
       "fail if the indicated program doesn't exist locally" in withVcs { env =>
         env.remote.addNewProgram(Q2)
-        notFound(syncMethod(env.local.staffVcs, Q2), Q2)
+        notFound(syncMethod(env.local.superStaffVcs, Q2), Q2)
       }
 
       "fail if the indicated program doesn't exist remotely" in withVcs { env =>
         env.local.addNewProgram(Q2)
-        notFound(syncMethod(env.local.staffVcs, Q2), Q2)
+        notFound(syncMethod(env.local.superStaffVcs, Q2), Q2)
       }
 
       "fail if the user doesn't have access to the program" in withVcs { env =>
@@ -169,11 +169,11 @@ class VcsSpec extends VcsSpecification {
       "fail if the indicated program has different keys locally vs remotely" in withVcs { env =>
         env.local.addNewProgram(Q2)
         env.remote.addNewProgram(Q2)
-        idClash(syncMethod(env.local.staffVcs, Q2), Q2)
+        idClash(syncMethod(env.local.superStaffVcs, Q2), Q2)
       }
 
       "do nothing if both versions are the same" in withVcs { env =>
-        expect(syncMethod(env.local.staffVcs, Q1)) {
+        expect(syncMethod(env.local.superStaffVcs, Q1)) {
           case \/-(ProgramLocation.Neither) => ok("")
         }
       }
@@ -181,7 +181,7 @@ class VcsSpec extends VcsSpecification {
       "merge the remote updates if the remote version is newer" in withVcs { env =>
         env.remote.progTitle = "The Myth of Sisyphus"
 
-        expect(syncMethod(env.local.staffVcs, Q1)) {
+        expect(syncMethod(env.local.superStaffVcs, Q1)) {
           case \/-(ProgramLocation.LocalOnly) => ok("")
         } and (env.local.progTitle must_== "The Myth of Sisyphus")
       }
@@ -189,7 +189,7 @@ class VcsSpec extends VcsSpecification {
       "send the local updates if the local version is newer" in withVcs { env =>
         env.local.progTitle = "The Myth of Sisyphus"
 
-        expect(syncMethod(env.local.staffVcs, Q1)) {
+        expect(syncMethod(env.local.superStaffVcs, Q1)) {
           case \/-(ProgramLocation.RemoteOnly) => ok("")
         } and (env.remote.progTitle must_== "The Myth of Sisyphus")
       }
@@ -201,7 +201,7 @@ class VcsSpec extends VcsSpecification {
         val note = env.remote.odb.getFactory.createObsComponent(env.remote.prog, SPNote.SP_TYPE, null)
         env.remote.prog.addObsComponent(note)
 
-        expect(syncMethod(env.local.staffVcs, Q1)) {
+        expect(syncMethod(env.local.superStaffVcs, Q1)) {
           case \/-(ProgramLocation.Both) => ok("")
         } and (env.remote.prog.getGroups.get(0).getNodeKey must_== group.getNodeKey) and
           (env.local.prog.getObsComponents.get(0).getNodeKey must_== note.getNodeKey)
