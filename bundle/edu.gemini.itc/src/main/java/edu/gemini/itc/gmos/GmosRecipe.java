@@ -3,6 +3,7 @@ package edu.gemini.itc.gmos;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.parameters.*;
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.web.HtmlPrinter;
 import edu.gemini.itc.web.ITCRequest;
 
 import java.awt.*;
@@ -304,15 +305,15 @@ public final class GmosRecipe extends RecipeBase {
 
         _print("<HR align=left SIZE=3>");
 
-        _println(_plotParameters.printParameterSummary());
+        _println(HtmlPrinter.printParameterSummary(_plotParameters));
 
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + mainInstrument.getName() + "\n");
-        _println(_sdParameters.printParameterSummary());
+        _println(HtmlPrinter.printParameterSummary(_sdParameters));
         _println(mainInstrument.toString());
-        _println(_teleParameters.printParameterSummary());
-        _println(_obsConditionParameters.printParameterSummary());
-        _println(_obsDetailParameters.printParameterSummary());
+        _println(HtmlPrinter.printParameterSummary(_teleParameters));
+        _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));
+        _println(HtmlPrinter.printParameterSummary(_obsDetailParameters));
     }
 
     // Calculation results

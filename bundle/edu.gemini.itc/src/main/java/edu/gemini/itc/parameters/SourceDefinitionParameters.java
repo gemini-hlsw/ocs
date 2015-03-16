@@ -7,7 +7,7 @@ import edu.gemini.spModel.type.DisplayableSpType;
  * This class holds the information from the Source Definition section
  * of an ITC web page.  This object is constructed from a servlet request.
  */
-public final class SourceDefinitionParameters extends ITCParameters {
+public final class SourceDefinitionParameters {
 
     public static enum BrightnessUnit implements DisplayableSpType {
         // TODO: The "displayable" units are pretty ugly, but we have to keep them for
@@ -185,54 +185,6 @@ public final class SourceDefinitionParameters extends ITCParameters {
 
     public String getUserDefinedSpectrum() {
         return ((UserDefined) distribution).spectrum();
-    }
-
-    public String printParameterSummary() {
-        StringBuffer sb = new StringBuffer();
-
-        // This object is used to format numerical strings.
-        FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(4);  // four decimal places
-        device.clear();
-
-        sb.append("Source spatial profile, brightness, and spectral distribution: \n");
-        sb.append("  The z = ");
-        sb.append(getRedshift());
-        sb.append(" ");
-        sb.append(getSourceGeometryStr());
-        sb.append(" is a");
-        switch (getDistributionType()) {
-            case ELINE:
-                sb.append("n emission line, at a wavelength of " + device.toString(getELineWavelength()));
-                device.setPrecision(2);
-                device.clear();
-                sb.append(" microns, and with a width of " + device.toString(getELineWidth()) + " km/s.\n  It's total flux is " +
-                        device.toString(getELineFlux()) + " " + getELineFluxUnits() + " on a flat continuum of flux density " +
-                        device.toString(getELineContinuumFlux()) + " " + getELineContinuumFluxUnits() + ".");
-                break;
-            case BBODY:
-                sb.append(" " + getBBTemp() + "K Blackbody, at " + getSourceNormalization() +
-                        " " + profile.units().displayValue() + " in the " + getNormBand().name + " band.");
-                break;
-            case LIBRARY_STAR:
-                sb.append(" " + getSourceNormalization() + " " + profile.units().displayValue() + " " + getSpecType() +
-                        " star in the " + getNormBand().name + " band.");
-                break;
-            case LIBRARY_NON_STAR:
-                sb.append(" " + getSourceNormalization() + " " + profile.units().displayValue() + " " + getSpecType() +
-                        " in the " + getNormBand().name + " band.");
-                break;
-            case USER_DEFINED:
-                sb.append(" a user defined spectrum with the name: " + getSpectrumResource());
-                break;
-            case PLAW:
-                sb.append(" Power Law Spectrum, with an index of " + getPowerLawIndex()
-                        + " and " + getSourceNormalization() + " mag in the " + getNormBand().name + " band.");
-                break;
-        }
-        sb.append("\n");
-        return sb.toString();
-
     }
 
 }

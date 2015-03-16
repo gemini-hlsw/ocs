@@ -7,6 +7,7 @@ import edu.gemini.itc.parameters.ObservingConditionParameters;
 import edu.gemini.itc.parameters.SourceDefinitionParameters;
 import edu.gemini.itc.parameters.TeleParameters;
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.web.HtmlPrinter;
 import edu.gemini.itc.web.ITCRequest;
 import edu.gemini.spModel.core.Site;
 import scala.Option;
@@ -267,7 +268,7 @@ public final class GsaoiRecipe extends RecipeBase {
 
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + instrument.getName() + "\n");
-        _println(_sdParameters.printParameterSummary());
+        _println(HtmlPrinter.printParameterSummary(_sdParameters));
         _println(instrument.toString());
         if (_gemsParameters.gemsIsUsed()) {
             _println(printTeleParametersSummary("gems"));
@@ -275,8 +276,8 @@ public final class GsaoiRecipe extends RecipeBase {
         } else {
             _println(printTeleParametersSummary());
         }
-        _println(_obsConditionParameters.printParameterSummary());
-        _println(_obsDetailParameters.printParameterSummary());
+        _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));
+        _println(HtmlPrinter.printParameterSummary(_obsDetailParameters));
 
     }
 

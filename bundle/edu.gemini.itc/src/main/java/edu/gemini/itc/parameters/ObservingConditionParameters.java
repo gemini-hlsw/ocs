@@ -1,7 +1,5 @@
 package edu.gemini.itc.parameters;
 
-import edu.gemini.itc.shared.FormatStringWriter;
-import edu.gemini.itc.shared.ITCParameters;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.CloudCover;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.ImageQuality;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.SkyBackground;
@@ -11,7 +9,7 @@ import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.WaterVapor;
  * This class holds the information from the Observing Condition section
  * of an ITC web page.  This object is constructed from a servlet request.
  */
-public final class ObservingConditionParameters extends ITCParameters {
+public final class ObservingConditionParameters {
 
     private final ImageQuality  iq;
     private final CloudCover    cc;
@@ -122,34 +120,5 @@ public final class ObservingConditionParameters extends ITCParameters {
         sb.append("\n");
         return sb.toString();
     }
-
-    public String printParameterSummary() {
-        StringBuffer sb = new StringBuffer();
-
-        // This object is used to format numerical strings.
-        FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2);  // Two decimal places
-        device.clear();
-
-
-        sb.append("Observing Conditions:");
-        sb.append("<LI> Image Quality: " + device.toString(getImageQualityPercentile() * 100) + "%");
-        sb.append("<LI> Sky Transparency (cloud cover): " + device.toString(getSkyTransparencyCloudPercentile() * 100) + "%");
-        sb.append("<LI> Sky transparency (water vapour): " + device.toString(getSkyTransparencyWaterPercentile() * 100) + "%");
-        sb.append("<LI> Sky background: " + device.toString(getSkyBackgroundPercentile() * 100) + "%");
-        sb.append("<LI> Airmass: " + device.toString(getAirmass()));
-        sb.append("<BR>");
-
-        sb.append("Frequency of occurrence of these conditions: " +
-                        device.toString(getImageQualityPercentile() *
-                                getSkyTransparencyCloudPercentile() *
-                                getSkyTransparencyWaterPercentile() *
-                                getSkyBackgroundPercentile() * 100)
-                        + "%<BR>"
-        );
-
-        return sb.toString();
-    }
-
 
 }

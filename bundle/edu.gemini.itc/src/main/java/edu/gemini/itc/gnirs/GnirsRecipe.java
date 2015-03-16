@@ -3,6 +3,7 @@ package edu.gemini.itc.gnirs;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.parameters.*;
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.web.HtmlPrinter;
 import edu.gemini.itc.web.ITCRequest;
 import edu.gemini.spModel.core.Site;
 import org.jfree.chart.ChartColor;
@@ -872,7 +873,7 @@ public final class GnirsRecipe extends RecipeBase {
 
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + instrument.getName() + "\n");
-        _println(_sdParameters.printParameterSummary());
+        _println(HtmlPrinter.printParameterSummary(_sdParameters));
         _println(instrument.toString());
 
 //        // REL-472: Commenting out Altair option for now
@@ -880,17 +881,17 @@ public final class GnirsRecipe extends RecipeBase {
 //            _teleParameters.setWFS("altair");
 //        }
 
-        _println(_teleParameters.printParameterSummary());
+        _println(HtmlPrinter.printParameterSummary(_teleParameters));
 
 //        // REL-472: Commenting out Altair option for now
 //        if (_altairParameters.altairIsUsed()) {
 //            _println(_altairParameters.printParameterSummary());
 //        }
 
-        _println(_obsConditionParameters.printParameterSummary());
-        _println(_obsDetailParameters.printParameterSummary());
+        _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));
+        _println(HtmlPrinter.printParameterSummary(_obsDetailParameters));
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {
-            _println(_plotParameters.printParameterSummary());
+            _println(HtmlPrinter.printParameterSummary(_plotParameters));
         }
 
         if (_obsDetailParameters.getMethod().isSpectroscopy()) { // 49 ms

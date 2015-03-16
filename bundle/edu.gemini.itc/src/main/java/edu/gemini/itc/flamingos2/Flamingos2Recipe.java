@@ -3,6 +3,7 @@ package edu.gemini.itc.flamingos2;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.parameters.*;
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.web.HtmlPrinter;
 import edu.gemini.itc.web.ITCRequest;
 import edu.gemini.spModel.core.Site;
 
@@ -319,15 +320,15 @@ public final class Flamingos2Recipe extends RecipeBase {
         _print("<HR align=left SIZE=3>");
         _println("<b>Input Parameters:</b>");
         _println("Instrument: Flamingos 2\n"); // TODO: move names of instrument to instrument classes?
-        _println(_sdParameters.printParameterSummary());
+        _println(HtmlPrinter.printParameterSummary(_sdParameters));
         _println(instrument.toString());
 
-        _println(_teleParameters.printParameterSummary());
-        _println(_obsConditionParameters.printParameterSummary());
-        _println(_obsDetailParameters.printParameterSummary());
+        _println(HtmlPrinter.printParameterSummary(_teleParameters));
+        _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));
+        _println(HtmlPrinter.printParameterSummary(_obsDetailParameters));
 
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {
-            _println(_plotParameters.printParameterSummary());
+            _println(HtmlPrinter.printParameterSummary(_plotParameters));
         }
     }
 }

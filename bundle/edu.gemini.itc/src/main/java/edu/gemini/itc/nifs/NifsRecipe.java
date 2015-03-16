@@ -6,6 +6,7 @@ import edu.gemini.itc.operation.ImageQualityCalculationFactory;
 import edu.gemini.itc.operation.SpecS2NLargeSlitVisitor;
 import edu.gemini.itc.parameters.*;
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.web.HtmlPrinter;
 import edu.gemini.itc.web.ITCRequest;
 import edu.gemini.spModel.core.Site;
 import scala.Option;
@@ -306,15 +307,15 @@ public final class NifsRecipe extends RecipeBase {
 
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + instrument.getName() + "\n");
-        _println(_sdParameters.printParameterSummary());
+        _println(HtmlPrinter.printParameterSummary(_sdParameters));
         _println(instrument.toString());
         if (_altairParameters.altairIsUsed())
             _println(_altairParameters.printParameterSummary());
-        _println(_teleParameters.printParameterSummary());
-        _println(_obsConditionParameters.printParameterSummary());
-        _println(_obsDetailParameters.printParameterSummary());
+        _println(HtmlPrinter.printParameterSummary(_teleParameters));
+        _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));
+        _println(HtmlPrinter.printParameterSummary(_obsDetailParameters));
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {
-            _println(_plotParameters.printParameterSummary());
+            _println(HtmlPrinter.printParameterSummary(_plotParameters));
             _println(specS2N.getSignalSpectrum(), _header, sigSpec);
             _println(specS2N.getBackgroundSpectrum(), _header, backSpec);
             _println(specS2N.getExpS2NSpectrum(), _header, singleS2N);

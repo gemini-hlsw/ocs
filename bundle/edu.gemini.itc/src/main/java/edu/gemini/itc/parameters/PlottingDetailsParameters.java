@@ -1,13 +1,10 @@
 package edu.gemini.itc.parameters;
 
-import edu.gemini.itc.shared.FormatStringWriter;
-import edu.gemini.itc.shared.ITCParameters;
-
 /**
  * This class holds the information from the Plotting Details section
  * of an ITC web page.  This object is constructed from a servlet request.
  */
-public final class PlottingDetailsParameters extends ITCParameters {
+public final class PlottingDetailsParameters {
 
     public static enum PlotLimits {
         AUTO,
@@ -54,23 +51,6 @@ public final class PlottingDetailsParameters extends ITCParameters {
         sb.append("PlotMethod:\t" + getPlotLimits() + "\n");
         sb.append("PlotLowerLimit:\t" + getPlotWaveL() + "\n");
         sb.append("PlotUpperLimit:\t" + getPlotWaveU() + "\n");
-        sb.append("\n");
-        return sb.toString();
-    }
-
-    public String printParameterSummary() {
-        StringBuffer sb = new StringBuffer();
-
-        // This object is used to format numerical strings.
-        FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2);  // Two decimal places
-        device.clear();
-
-        sb.append("Output:\n<LI>Spectra ");
-        switch (plotLimits) {
-            case AUTO: sb.append("autoscaled."); break;
-            default:   sb.append("plotted over range " + plotWaveL + " - " + plotWaveU);
-        }
         sb.append("\n");
         return sb.toString();
     }

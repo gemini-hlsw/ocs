@@ -6,7 +6,7 @@ import edu.gemini.itc.shared.*;
  * This class holds the information from the Observation Details section
  * of an ITC web page.  This object is constructed from a servlet request.
  */
-public final class ObservationDetailsParameters extends ITCParameters {
+public final class ObservationDetailsParameters {
 
     private final CalculationMethod calculationMethod;
     private final AnalysisMethod analysisMethod;
@@ -78,35 +78,5 @@ public final class ObservationDetailsParameters extends ITCParameters {
         sb.append("\n");
         return sb.toString();
     }
-
-    public String printParameterSummary() {
-        StringBuffer sb = new StringBuffer();
-
-        // This object is used to format numerical strings.
-        FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2);  // Two decimal places
-        device.clear();
-
-        sb.append("Calculation and analysis methods:\n");
-        sb.append("<LI>mode: " + (calculationMethod.isImaging() ? "imaging" : "spectroscopy") + "\n");
-        sb.append("<LI>Calculation of ");
-        if (getMethod().isS2N()) {
-            sb.append("S/N ratio with " + getNumExposures() + " exposures of " + device.toString(getExposureTime()) + " secs,");
-            sb.append(" and " + device.toString(getSourceFraction() * 100) + " % of them were on source.\n");
-        } else {
-            sb.append("integration time from a S/N ratio of " + device.toString(getSNRatio()) + " for exposures of");
-            sb.append(" " + device.toString(getExposureTime()) + " with " + device.toString(getSourceFraction() * 100) + " % of them were on source.\n");
-        }
-        sb.append("<LI>Analysis performed for aperture ");
-        if (isAutoAperture()) {
-            sb.append("that gives 'optimum' S/N ");
-        } else {
-            sb.append("of diameter " + device.toString(getApertureDiameter()) + " ");
-        }
-        sb.append("and a sky aperture that is " + device.toString(getSkyApertureDiameter()) + " times the target aperture.\n");
-
-        return sb.toString();
-    }
-
 
 }
