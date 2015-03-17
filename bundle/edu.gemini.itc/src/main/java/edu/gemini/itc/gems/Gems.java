@@ -1,6 +1,6 @@
 package edu.gemini.itc.gems;
 
-import edu.gemini.itc.parameters.SourceDefinitionParameters;
+import edu.gemini.itc.service.SourceDefinition;
 import edu.gemini.itc.shared.AOSystem;
 import edu.gemini.itc.shared.FormatStringWriter;
 import edu.gemini.itc.shared.SampledSpectrumVisitor;
@@ -45,11 +45,11 @@ public class Gems implements AOSystem {
     private double imageQualityPercentile;
 
     // Point source or extended source
-    private final SourceDefinitionParameters source;
+    private final SourceDefinition source;
 
     //Constructor
     public Gems(double wavelength, double telescopeDiameter, double uncorrectedSeeing, double avgStrehl,
-                String strehlBand, double imageQualityPercentile, SourceDefinitionParameters source) {
+                String strehlBand, double imageQualityPercentile, SourceDefinition source) {
         gemsBackground = new GemsBackgroundVisitor();
         gemsTransmission = new GemsTransmissionVisitor();
         this.wavelength = wavelength;

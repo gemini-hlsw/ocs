@@ -2,10 +2,10 @@ package edu.gemini.itc.gsaoi;
 
 import edu.gemini.itc.gems.*;
 import edu.gemini.itc.operation.*;
-import edu.gemini.itc.parameters.ObservationDetailsParameters;
-import edu.gemini.itc.parameters.ObservingConditionParameters;
-import edu.gemini.itc.parameters.SourceDefinitionParameters;
-import edu.gemini.itc.parameters.TeleParameters;
+import edu.gemini.itc.service.ObservationDetails;
+import edu.gemini.itc.service.ObservingConditions;
+import edu.gemini.itc.service.SourceDefinition;
+import edu.gemini.itc.service.TelescopeDetails;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.HtmlPrinter;
 import edu.gemini.itc.web.ITCRequest;
@@ -21,10 +21,10 @@ public final class GsaoiRecipe extends RecipeBase {
 
     private final GemsParameters _gemsParameters;
     private final GsaoiParameters _gsaoiParameters;
-    private final ObservingConditionParameters _obsConditionParameters;
-    private final ObservationDetailsParameters _obsDetailParameters;
-    private final SourceDefinitionParameters _sdParameters;
-    private final TeleParameters _teleParameters;
+    private final ObservingConditions _obsConditionParameters;
+    private final ObservationDetails _obsDetailParameters;
+    private final SourceDefinition _sdParameters;
+    private final TelescopeDetails _telescope;
 
     /**
      * Constructs a GsaoiRecipe by parsing a Multipart servlet request.
@@ -40,17 +40,17 @@ public final class GsaoiRecipe extends RecipeBase {
         _obsDetailParameters = ITCRequest.observationParameters(r);
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _gsaoiParameters = new GsaoiParameters(r);
-        _teleParameters = ITCRequest.teleParameters(r);
+        _telescope = ITCRequest.teleParameters(r);
         _gemsParameters = new GemsParameters(r);
     }
 
     /**
      * Constructs a GsaoiRecipe given the parameters. Useful for testing.
      */
-    public GsaoiRecipe(SourceDefinitionParameters sdParameters,
-                       ObservationDetailsParameters obsDetailParameters,
-                       ObservingConditionParameters obsConditionParameters,
-                       GsaoiParameters gsaoiParameters, TeleParameters teleParameters,
+    public GsaoiRecipe(SourceDefinition sdParameters,
+                       ObservationDetails obsDetailParameters,
+                       ObservingConditions obsConditionParameters,
+                       GsaoiParameters gsaoiParameters, TelescopeDetails telescope,
                        GemsParameters gemsParameters,
                        PrintWriter out)
 
@@ -60,7 +60,7 @@ public final class GsaoiRecipe extends RecipeBase {
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;
         _gsaoiParameters = gsaoiParameters;
-        _teleParameters = teleParameters;
+        _telescope = telescope;
         _gemsParameters = gemsParameters;
     }
 
@@ -91,7 +91,7 @@ public final class GsaoiRecipe extends RecipeBase {
         // output: redshifteed SED
         Gsaoi instrument = new Gsaoi(_gsaoiParameters, _obsDetailParameters);
 
-        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
+        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE))
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters
                     .getELineWavelength() * 1000 * 25))) { // *25 b/c of
                 // increased
@@ -106,14 +106,14 @@ public final class GsaoiRecipe extends RecipeBase {
 
 
         // Calculate image quality
-        final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
+        final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
         IQcalc.calculate();
 
         // Altair specific section
         final Option<AOSystem> gems;
         if (_gemsParameters.gemsIsUsed()) {
             final Gems ao = new Gems(instrument.getEffectiveWavelength(),
-                    _teleParameters.getTelescopeDiameter(), IQcalc.getImageQuality(),
+                    _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(),
                     _gemsParameters.getAvgStrehl(), _gemsParameters.getStrehlBand(),
                     _obsConditionParameters.getImageQualityPercentile(),
                     _sdParameters);
@@ -123,7 +123,7 @@ public final class GsaoiRecipe extends RecipeBase {
             gems = Option.empty();
         }
 
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GS, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _teleParameters, null, gems);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GS, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, null, gems);
 
 
         // End of the Spectral energy distribution portion of the ITC.
@@ -282,13 +282,13 @@ public final class GsaoiRecipe extends RecipeBase {
     }
 
     public String printTeleParametersSummary() {
-        return printTeleParametersSummary(_teleParameters.getWFS().displayValue());
+        return printTeleParametersSummary(_telescope.getWFS().displayValue());
     }
 
     public String printTeleParametersSummary(String wfs) {
         StringBuffer sb = new StringBuffer();
         sb.append("Telescope configuration: \n");
-        sb.append("<LI>" + _teleParameters.getMirrorCoating().displayValue() + " mirror coating.\n");
+        sb.append("<LI>" + _telescope.getMirrorCoating().displayValue() + " mirror coating.\n");
         sb.append("<LI>wavefront sensor: " + wfs + "\n");
         return sb.toString();
     }

@@ -1,7 +1,7 @@
 package edu.gemini.itc.michelle;
 
 import edu.gemini.itc.operation.*;
-import edu.gemini.itc.parameters.*;
+import edu.gemini.itc.service.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.HtmlPrinter;
 import edu.gemini.itc.web.ITCRequest;
@@ -17,12 +17,12 @@ import java.util.Calendar;
 public final class MichelleRecipe extends RecipeBase {
 
     // Parameters from the web page.
-    private final SourceDefinitionParameters _sdParameters;
-    private final ObservationDetailsParameters _obsDetailParameters;
-    private final ObservingConditionParameters _obsConditionParameters;
+    private final SourceDefinition _sdParameters;
+    private final ObservationDetails _obsDetailParameters;
+    private final ObservingConditions _obsConditionParameters;
     private final MichelleParameters _michelleParameters;
-    private final TeleParameters _teleParameters;
-    private final PlottingDetailsParameters _plotParameters;
+    private final TelescopeDetails _telescope;
+    private final PlottingDetails _plotParameters;
 
     private SpecS2NLargeSlitVisitor specS2N;
     private String sigSpec, backSpec, singleS2N, finalS2N;
@@ -50,7 +50,7 @@ public final class MichelleRecipe extends RecipeBase {
         _michelleParameters = new MichelleParameters(r);
         _obsDetailParameters = correctedObsDetails(_michelleParameters, ITCRequest.observationParameters(r));
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
-        _teleParameters = ITCRequest.teleParameters(r);
+        _telescope = ITCRequest.teleParameters(r);
         _plotParameters = ITCRequest.plotParamters(r);
     }
 
@@ -58,23 +58,23 @@ public final class MichelleRecipe extends RecipeBase {
      * Constructs a MichelleRecipe given the parameters.
      * Useful for testing.
      */
-    public MichelleRecipe(SourceDefinitionParameters sdParameters,
-                          ObservationDetailsParameters obsDetailParameters,
-                          ObservingConditionParameters obsConditionParameters,
+    public MichelleRecipe(SourceDefinition sdParameters,
+                          ObservationDetails obsDetailParameters,
+                          ObservingConditions obsConditionParameters,
                           MichelleParameters michelleParameters,
-                          TeleParameters teleParameters,
-                          PlottingDetailsParameters plotParameters,
+                          TelescopeDetails telescope,
+                          PlottingDetails plotParameters,
                           PrintWriter out) {
         super(out);
         _sdParameters = sdParameters;
         _obsDetailParameters = correctedObsDetails(michelleParameters, obsDetailParameters);
         _obsConditionParameters = obsConditionParameters;
         _michelleParameters = michelleParameters;
-        _teleParameters = teleParameters;
+        _telescope = telescope;
         _plotParameters = plotParameters;
     }
 
-    private ObservationDetailsParameters correctedObsDetails(MichelleParameters mp, ObservationDetailsParameters odp) {
+    private ObservationDetails correctedObsDetails(MichelleParameters mp, ObservationDetails odp) {
         // TODO : These corrections were previously done in random places throughout the recipe. I moved them here
         // TODO : so the ObservationDetailsParameters object can become immutable. Basically this calculates
         // TODO : some missing parameters and/or turns the total exposure time into a single exposure time.
@@ -91,17 +91,17 @@ public final class MichelleRecipe extends RecipeBase {
         final double correctedExposureTime = instrument.getFrameTime();
         final int correctedNumExposures = new Double(correctedTotalObservationTime / instrument.getFrameTime() + 0.5).intValue();
         if (odp.getMethod() instanceof ImagingInt) {
-            return new ObservationDetailsParameters(
+            return new ObservationDetails(
                     new ImagingInt(odp.getSNRatio(), correctedExposureTime, odp.getSourceFraction()),
                     odp.getAnalysis()
             );
         } else if (odp.getMethod() instanceof ImagingSN) {
-            return new ObservationDetailsParameters(
+            return new ObservationDetails(
                     new ImagingSN(correctedNumExposures, correctedExposureTime, odp.getSourceFraction()),
                     odp.getAnalysis()
             );
         } else if (odp.getMethod() instanceof SpectroscopySN) {
-            return new ObservationDetailsParameters(
+            return new ObservationDetails(
                     new SpectroscopySN(correctedNumExposures, correctedExposureTime, odp.getSourceFraction()),
                     odp.getAnalysis()
             );
@@ -129,13 +129,13 @@ public final class MichelleRecipe extends RecipeBase {
         Michelle instrument = new Michelle(_michelleParameters, _obsDetailParameters);
 
 
-        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
+        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE))
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000 * 5))) {  //*5 b/c of increased resolution of transmission files
                 throw new RuntimeException("Please use a model line width > 0.2 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 5)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
 
         // Get the summed source and sky
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.MID_IR, _sdParameters, _obsConditionParameters, _teleParameters, _plotParameters);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.MID_IR, _sdParameters, _obsConditionParameters, _telescope, _plotParameters);
         final VisitableSampledSpectrum sed = calcSource.sed;
         final VisitableSampledSpectrum sky = calcSource.sky;
         double sed_integral = sed.getIntegral();
@@ -165,7 +165,7 @@ public final class MichelleRecipe extends RecipeBase {
 
         // Calculate image quality
         double im_qual = 0.;
-        ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
+        ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
         IQcalc.calculate();
 
         im_qual = IQcalc.getImageQuality();
@@ -604,7 +604,7 @@ public final class MichelleRecipe extends RecipeBase {
         _println("Instrument: " + instrument.getName() + "\n");
         _println(HtmlPrinter.printParameterSummary(_sdParameters));
         _println(instrument.toString());
-        _println(HtmlPrinter.printParameterSummary(_teleParameters));
+        _println(HtmlPrinter.printParameterSummary(_telescope));
         _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));
 
         // Michelle polarimetry calculations include a x4 overhead of observing into the calculation

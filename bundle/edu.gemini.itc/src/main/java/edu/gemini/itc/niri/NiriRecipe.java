@@ -2,7 +2,7 @@ package edu.gemini.itc.niri;
 
 import edu.gemini.itc.altair.*;
 import edu.gemini.itc.operation.*;
-import edu.gemini.itc.parameters.*;
+import edu.gemini.itc.service.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.HtmlPrinter;
 import edu.gemini.itc.web.ITCRequest;
@@ -21,11 +21,11 @@ public final class NiriRecipe extends RecipeBase {
     private final StringBuffer _header = new StringBuffer("# NIRI ITC: " + Calendar.getInstance().getTime() + "\n");
 
     private final NiriParameters _niriParameters;
-    private final ObservingConditionParameters _obsConditionParameters;
-    private final ObservationDetailsParameters _obsDetailParameters;
-    private final PlottingDetailsParameters _plotParameters;
-    private final SourceDefinitionParameters _sdParameters;
-    private final TeleParameters _teleParameters;
+    private final ObservingConditions _obsConditionParameters;
+    private final ObservationDetails _obsDetailParameters;
+    private final PlottingDetails _plotParameters;
+    private final SourceDefinition _sdParameters;
+    private final TelescopeDetails _telescope;
 
     private String sigSpec, backSpec, singleS2N, finalS2N;
     private SpecS2NVisitor specS2N;
@@ -43,7 +43,7 @@ public final class NiriRecipe extends RecipeBase {
         _obsDetailParameters = ITCRequest.observationParameters(r);
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _niriParameters = new NiriParameters(r);
-        _teleParameters = ITCRequest.teleParameters(r);
+        _telescope = ITCRequest.teleParameters(r);
         _altairParameters = ITCRequest.altairParameters(r);
         _plotParameters = ITCRequest.plotParamters(r);
     }
@@ -51,12 +51,12 @@ public final class NiriRecipe extends RecipeBase {
     /**
      * Constructs a NiriRecipe given the parameters. Useful for testing.
      */
-    public NiriRecipe(SourceDefinitionParameters sdParameters,
-                      ObservationDetailsParameters obsDetailParameters,
-                      ObservingConditionParameters obsConditionParameters,
-                      NiriParameters niriParameters, TeleParameters teleParameters,
+    public NiriRecipe(SourceDefinition sdParameters,
+                      ObservationDetails obsDetailParameters,
+                      ObservingConditions obsConditionParameters,
+                      NiriParameters niriParameters, TelescopeDetails telescope,
                       AltairParameters altairParameters,
-                      PlottingDetailsParameters plotParameters,
+                      PlottingDetails plotParameters,
                       PrintWriter out)
 
     {
@@ -65,7 +65,7 @@ public final class NiriRecipe extends RecipeBase {
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;
         _niriParameters = niriParameters;
-        _teleParameters = teleParameters;
+        _telescope = telescope;
         _altairParameters = altairParameters;
         _plotParameters = plotParameters;
     }
@@ -115,7 +115,7 @@ public final class NiriRecipe extends RecipeBase {
         // output: redshifteed SED
         final Niri instrument = new Niri(_niriParameters, _obsDetailParameters);
 
-        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
+        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE))
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters
                     .getELineWavelength() * 1000 * 25))) { // *25 b/c of
                 // increased
@@ -130,20 +130,20 @@ public final class NiriRecipe extends RecipeBase {
 
 
         // Calculate image quality
-        final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
+        final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
         IQcalc.calculate();
 
         // Altair specific section
         final Option<AOSystem> altair;
         if (_altairParameters.altairIsUsed()) {
-            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _teleParameters.getTelescopeDiameter(), IQcalc.getImageQuality(), _altairParameters, 0.0);
+            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _altairParameters, 0.0);
             _println(ao.printSummary());
             altair = Option.apply((AOSystem) ao);
         } else {
             altair = Option.empty();
         }
 
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _teleParameters, _plotParameters, altair);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, _plotParameters, altair);
 
         // End of the Spectral energy distribution portion of the ITC.
 
@@ -393,10 +393,10 @@ public final class NiriRecipe extends RecipeBase {
         _println(HtmlPrinter.printParameterSummary(_sdParameters));
         _println(instrument.toString());
         if (_altairParameters.altairIsUsed()) {
-            _println(HtmlPrinter.printParameterSummary(_teleParameters, "altair"));
+            _println(HtmlPrinter.printParameterSummary(_telescope, "altair"));
             _println(_altairParameters.printParameterSummary());
         } else {
-            _println(HtmlPrinter.printParameterSummary(_teleParameters));
+            _println(HtmlPrinter.printParameterSummary(_telescope));
         }
 
         _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));

@@ -1,7 +1,7 @@
 package edu.gemini.itc.gmos;
 
 import edu.gemini.itc.shared.ITCParameters;
-import edu.gemini.itc.shared.IfuMethod;
+import edu.gemini.itc.service.IfuMethod;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.*;
 import scala.Option;

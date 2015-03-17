@@ -1,6 +1,6 @@
 package edu.gemini.itc.gsaoi;
 
-import edu.gemini.itc.parameters.ObservationDetailsParameters;
+import edu.gemini.itc.service.ObservationDetails;
 import edu.gemini.itc.shared.*;
 
 /**
@@ -38,7 +38,7 @@ public class Gsaoi extends Instrument {
      * construct an Gsaoi with specified Broadband filter or Narrowband filter
      * and camera type.
      */
-    public Gsaoi(GsaoiParameters np, ObservationDetailsParameters odp) {
+    public Gsaoi(GsaoiParameters np, ObservationDetails odp) {
         super(INSTR_DIR, FILENAME);
 
         _readMode = np.getReadMode();

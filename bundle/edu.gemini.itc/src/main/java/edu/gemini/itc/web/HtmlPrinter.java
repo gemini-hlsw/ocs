@@ -1,11 +1,12 @@
 package edu.gemini.itc.web;
 
-import edu.gemini.itc.parameters.ObservationDetailsParameters;
-import edu.gemini.itc.parameters.ObservingConditionParameters;
-import edu.gemini.itc.parameters.PlottingDetailsParameters;
-import edu.gemini.itc.parameters.TeleParameters;
-import edu.gemini.itc.parameters.SourceDefinitionParameters;
+import edu.gemini.itc.service.ObservationDetails;
+import edu.gemini.itc.service.ObservingConditions;
+import edu.gemini.itc.service.PlottingDetails;
+import edu.gemini.itc.service.TelescopeDetails;
+import edu.gemini.itc.service.SourceDefinition;
 import edu.gemini.itc.shared.FormatStringWriter;
+import edu.gemini.itc.service.Library;
 import edu.gemini.spModel.telescope.IssPort;
 
 /**
@@ -17,7 +18,7 @@ public final class HtmlPrinter {
 
     private HtmlPrinter() {}
 
-    public static String printParameterSummary(final SourceDefinitionParameters sdp) {
+    public static String printParameterSummary(final SourceDefinition sdp) {
         StringBuffer sb = new StringBuffer();
 
         // This object is used to format numerical strings.
@@ -45,11 +46,11 @@ public final class HtmlPrinter {
                         " " + sdp.profile.units().displayValue() + " in the " + sdp.getNormBand().name + " band.");
                 break;
             case LIBRARY_STAR:
-                sb.append(" " + sdp.getSourceNormalization() + " " + sdp.profile.units().displayValue() + " " + sdp.getSpecType() +
+                sb.append(" " + sdp.getSourceNormalization() + " " + sdp.profile.units().displayValue() + " " + ((Library) sdp.distribution).sedSpectrum() +
                         " star in the " + sdp.getNormBand().name + " band.");
                 break;
             case LIBRARY_NON_STAR:
-                sb.append(" " + sdp.getSourceNormalization() + " " + sdp.profile.units().displayValue() + " " + sdp.getSpecType() +
+                sb.append(" " + sdp.getSourceNormalization() + " " + sdp.profile.units().displayValue() + " " + ((Library) sdp.distribution).sedSpectrum() +
                         " in the " + sdp.getNormBand().name + " band.");
                 break;
             case USER_DEFINED:
@@ -65,7 +66,7 @@ public final class HtmlPrinter {
 
     }
 
-    public static String printParameterSummary(final ObservingConditionParameters ocp) {
+    public static String printParameterSummary(final ObservingConditions ocp) {
         StringBuffer sb = new StringBuffer();
 
         // This object is used to format numerical strings.
@@ -93,7 +94,7 @@ public final class HtmlPrinter {
         return sb.toString();
     }
 
-    public static String printParameterSummary(final ObservationDetailsParameters odp) {
+    public static String printParameterSummary(final ObservationDetails odp) {
         StringBuffer sb = new StringBuffer();
 
         // This object is used to format numerical strings.
@@ -122,7 +123,7 @@ public final class HtmlPrinter {
         return sb.toString();
     }
 
-    public static String printParameterSummary(final PlottingDetailsParameters pdp) {
+    public static String printParameterSummary(final PlottingDetails pdp) {
         StringBuffer sb = new StringBuffer();
 
         // This object is used to format numerical strings.
@@ -139,11 +140,11 @@ public final class HtmlPrinter {
         return sb.toString();
     }
 
-    public static String printParameterSummary(final TeleParameters pdp) {
+    public static String printParameterSummary(final TelescopeDetails pdp) {
         return printParameterSummary(pdp, pdp.getWFS().displayValue());
     }
 
-    public static String printParameterSummary(final TeleParameters pdp, final String wfs) {
+    public static String printParameterSummary(final TelescopeDetails pdp, final String wfs) {
         StringBuffer sb = new StringBuffer();
         sb.append("Telescope configuration: \n");
         sb.append("<LI>" + pdp.getMirrorCoating().displayValue() + " mirror coating.\n");

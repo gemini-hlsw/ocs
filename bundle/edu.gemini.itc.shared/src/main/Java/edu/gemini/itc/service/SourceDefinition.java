@@ -1,13 +1,11 @@
-package edu.gemini.itc.parameters;
+package edu.gemini.itc.service;
 
-import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.type.DisplayableSpType;
 
 /**
- * This class holds the information from the Source Definition section
- * of an ITC web page.  This object is constructed from a servlet request.
+ * Container for source definition parameters.
  */
-public final class SourceDefinitionParameters {
+public final class SourceDefinition {
 
     public static enum BrightnessUnit implements DisplayableSpType {
         // TODO: The "displayable" units are pretty ugly, but we have to keep them for
@@ -55,14 +53,6 @@ public final class SourceDefinitionParameters {
     public static final String WATTS_FLUX = "watts_flux";
     public static final String ERGS_FLUX = "ergs_flux";
 
-    public static final String SED_FILE_EXTENSION = ".nm";
-
-    /**
-     * Location of SED data files
-     */
-    public static final String STELLAR_LIB = ITCConstants.SED_LIB + "/stellar";
-    public static final String NON_STELLAR_LIB = ITCConstants.SED_LIB + "/non_stellar";
-
     public final SpatialProfile profile;
     public final SpectralDistribution distribution;
     public final WavebandDefinition normBand;
@@ -74,10 +64,10 @@ public final class SourceDefinitionParameters {
     /**
      * Constructs a SourceDefinitionParameters
      */
-    public SourceDefinitionParameters(final SpatialProfile profile,
-                                      final SpectralDistribution distribution,
-                                      final WavebandDefinition normBand,
-                                      final double redshift) {
+    public SourceDefinition(final SpatialProfile profile,
+                            final SpectralDistribution distribution,
+                            final WavebandDefinition normBand,
+                            final double redshift) {
         this.profile        = profile;
         this.distribution   = distribution;
         this.normBand       = normBand;
@@ -139,14 +129,6 @@ public final class SourceDefinitionParameters {
         return distributionType;
     }
 
-    public String getSpecType() {
-        return ((Library) distribution).specType();
-    }
-
-    public String getSpectrumResource() {
-        return ((Library) distribution).sedSpectrum();
-    }
-
     public double getBBTemp() {
         return ((BlackBody) distribution).temperature();
     }
@@ -177,10 +159,6 @@ public final class SourceDefinitionParameters {
 
     public double getPowerLawIndex() {
         return ((PowerLaw) distribution).index();
-    }
-
-    public boolean isSedUserDefined() {
-        return distributionType.equals(Distribution.USER_DEFINED);
     }
 
     public String getUserDefinedSpectrum() {

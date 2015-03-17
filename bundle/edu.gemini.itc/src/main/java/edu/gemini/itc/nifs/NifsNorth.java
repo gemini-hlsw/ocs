@@ -1,15 +1,7 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-
 package edu.gemini.itc.nifs;
 
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
-import edu.gemini.itc.parameters.ObservationDetailsParameters;
+import edu.gemini.itc.service.ObservationDetails;
 import edu.gemini.itc.shared.*;
 
 /**
@@ -34,7 +26,7 @@ public class NifsNorth extends Nifs {
     private double _readNoiseValue;
 
 
-    public NifsNorth(NifsParameters gp, ObservationDetailsParameters odp) {
+    public NifsNorth(NifsParameters gp, ObservationDetails odp) {
         super(FILENAME, INSTR_PREFIX);
         // The instrument data file gives a start/end wavelength for
         // the instrument.  But with a filter in place, the filter

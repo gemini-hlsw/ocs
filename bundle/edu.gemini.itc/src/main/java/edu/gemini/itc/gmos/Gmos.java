@@ -1,7 +1,9 @@
 package edu.gemini.itc.gmos;
 
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
-import edu.gemini.itc.parameters.ObservationDetailsParameters;
+import edu.gemini.itc.service.ObservationDetails;
+import edu.gemini.itc.service.IfuRadial;
+import edu.gemini.itc.service.IfuSingle;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType;
@@ -41,7 +43,7 @@ public abstract class Gmos extends Instrument {
     protected Gmos[] _instruments;
 
     protected final GmosParameters gp;
-    protected final ObservationDetailsParameters odp;
+    protected final ObservationDetails odp;
 
     // Keep a reference to the color filter to ask for effective wavelength
     protected Filter _Filter;
@@ -54,7 +56,7 @@ public abstract class Gmos extends Instrument {
 
     private int _detectorCcdIndex = 0; // 0, 1, or 2 when there are multiple CCDs in the detector
 
-    public Gmos(final GmosParameters gp, final ObservationDetailsParameters odp, final String FILENAME, final int detectorCcdIndex) {
+    public Gmos(final GmosParameters gp, final ObservationDetails odp, final String FILENAME, final int detectorCcdIndex) {
         super(INSTR_DIR, FILENAME);
 
         this.odp    = odp;

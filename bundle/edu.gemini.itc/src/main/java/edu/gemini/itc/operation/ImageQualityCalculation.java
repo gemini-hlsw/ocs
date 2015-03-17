@@ -1,6 +1,6 @@
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.parameters.TeleParameters;
+import edu.gemini.itc.service.TelescopeDetails;
 import edu.gemini.itc.shared.ArraySpectrum;
 import edu.gemini.itc.shared.DefaultArraySpectrum;
 import edu.gemini.itc.shared.FormatStringWriter;
@@ -11,7 +11,7 @@ public class ImageQualityCalculation implements ImageQualityCalculatable {
     String im_qual_model_file;
     double airmass, effectiveWavelength, im_qual;
 
-    public ImageQualityCalculation(TeleParameters.Wfs wfs,
+    public ImageQualityCalculation(TelescopeDetails.Wfs wfs,
                                    int imageQuality,
                                    double airmass,
                                    int effectiveWavelength) {

@@ -1,6 +1,6 @@
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.parameters.TeleParameters;
+import edu.gemini.itc.service.TelescopeDetails;
 import edu.gemini.itc.shared.ITCConstants;
 import edu.gemini.itc.shared.TransmissionElement;
 
@@ -19,7 +19,7 @@ public final class TelescopeTransmissionVisitor {
      * type of coating is used, and the other detailing how many mirrors
      * should be used.
      */
-    public static TransmissionElement create(final TeleParameters tp) {
+    public static TransmissionElement create(final TelescopeDetails tp) {
 
         final String coating;
         switch (tp.getMirrorCoating()) {

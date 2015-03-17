@@ -1,13 +1,12 @@
-package edu.gemini.itc.parameters;
+package edu.gemini.itc.service;
 
 import edu.gemini.spModel.telescope.IssPort;
 import edu.gemini.spModel.type.DisplayableSpType;
 
 /**
- * This class holds the information from the Telescope section
- * of an ITC web page.  This object is constructed from a servlet request.
+ * Container for telescope parameters.
  */
-public final class TeleParameters {
+public final class TelescopeDetails {
 
     public static enum Coating implements DisplayableSpType {
         ALUMINIUM("aluminium"),
@@ -43,7 +42,7 @@ public final class TeleParameters {
     private final IssPort _instrumentPort; // up or side
     private final Wfs     _wfs;
 
-    public TeleParameters(final Coating mirrorCoating, final IssPort instrumentPort, final Wfs wfs) {
+    public TelescopeDetails(final Coating mirrorCoating, final IssPort instrumentPort, final Wfs wfs) {
         _mirrorCoating  = mirrorCoating;
         _instrumentPort = instrumentPort;
         _wfs            = wfs;

@@ -1,6 +1,6 @@
 package edu.gemini.itc.gmos;
 
-import edu.gemini.itc.parameters.ObservationDetailsParameters;
+import edu.gemini.itc.service.ObservationDetails;
 
 /**
  * Gmos specification class
@@ -22,7 +22,7 @@ public final class GmosSouth extends Gmos {
     private static final String[] DETECTOR_CCD_NAMES = {"BB", "HSC", "SC"};
 
 
-    public GmosSouth(final GmosParameters gp, final ObservationDetailsParameters odp, final int detectorCcdIndex) {
+    public GmosSouth(final GmosParameters gp, final ObservationDetails odp, final int detectorCcdIndex) {
         super(gp, odp, FILENAME, detectorCcdIndex);
     }
 

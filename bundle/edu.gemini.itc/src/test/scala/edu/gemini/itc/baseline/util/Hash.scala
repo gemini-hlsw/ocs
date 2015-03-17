@@ -10,11 +10,9 @@ import edu.gemini.itc.gsaoi.GsaoiParameters
 import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.niri.NiriParameters
-import edu.gemini.itc.parameters._
+import edu.gemini.itc.service._
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
-import edu.gemini.spModel.core.Site
-import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer
 
 // TEMPORARY helper
 // All input objects will become immutable data only objects (probably Scala case classes).
@@ -143,7 +141,7 @@ object Hash {
       p.getSlitSize
     )
 
-  def calc(odp: ObservationDetailsParameters): Int =
+  def calc(odp: ObservationDetails): Int =
     hash(
       odp.isAutoAperture,
       odp.getMethod.isS2N,
@@ -156,7 +154,7 @@ object Hash {
       odp.getSourceFraction
     )
 
-  def calc(src: SourceDefinitionParameters): Int =
+  def calc(src: SourceDefinition): Int =
     hash(
       src.getProfileType.name,
       src.profile.norm,
@@ -166,14 +164,14 @@ object Hash {
       src.redshift
     )
 
-  def calc(tp: TeleParameters): Int =
+  def calc(tp: TelescopeDetails): Int =
     hash(
       tp.getInstrumentPort.displayValue,
       tp.getMirrorCoating.displayValue,
       tp.getWFS.displayValue
     )
 
-  def calc(ocp: ObservingConditionParameters): Int =
+  def calc(ocp: ObservingConditions): Int =
     hash(
       ocp.getAirmass,
       ocp.getImageQuality,
@@ -197,7 +195,7 @@ object Hash {
       alt.getStrehlBand
     )
 
-  def calc(pdp: PlottingDetailsParameters): Int =
+  def calc(pdp: PlottingDetails): Int =
     hash(pdp.getPlotWaveL, pdp.getPlotWaveU)
 
   private def hash(values: Any*) =

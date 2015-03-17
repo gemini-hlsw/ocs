@@ -1,7 +1,7 @@
 package edu.gemini.itc.flamingos2;
 
 import edu.gemini.itc.operation.*;
-import edu.gemini.itc.parameters.*;
+import edu.gemini.itc.service.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.HtmlPrinter;
 import edu.gemini.itc.web.ITCRequest;
@@ -17,11 +17,11 @@ public final class Flamingos2Recipe extends RecipeBase {
 
     private final Flamingos2Parameters _flamingos2Parameters;
     private final String _header = "# Flamingos-2 ITC: " + Calendar.getInstance().getTime() + "\n";
-    private final ObservingConditionParameters _obsConditionParameters;
-    private final ObservationDetailsParameters _obsDetailParameters;
-    private final PlottingDetailsParameters _plotParameters;
-    private final SourceDefinitionParameters _sdParameters;
-    private final TeleParameters _teleParameters;
+    private final ObservingConditions _obsConditionParameters;
+    private final ObservationDetails _obsDetailParameters;
+    private final PlottingDetails _plotParameters;
+    private final SourceDefinition _sdParameters;
+    private final TelescopeDetails _telescope;
 
     /**
      * Constructs an Flamingos 2 object by parsing a Multi part servlet request.
@@ -37,7 +37,7 @@ public final class Flamingos2Recipe extends RecipeBase {
         _obsDetailParameters = ITCRequest.observationParameters(r);
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _flamingos2Parameters = new Flamingos2Parameters(r);
-        _teleParameters = ITCRequest.teleParameters(r);
+        _telescope = ITCRequest.teleParameters(r);
         _plotParameters = ITCRequest.plotParamters(r);
     }
 
@@ -45,12 +45,12 @@ public final class Flamingos2Recipe extends RecipeBase {
      * Constructs an Flamingos 2 object given the parameters. Useful for
      * testing.
      */
-    public Flamingos2Recipe(final SourceDefinitionParameters sdParameters,
-                            final ObservationDetailsParameters obsDetailParameters,
-                            final ObservingConditionParameters obsConditionParameters,
+    public Flamingos2Recipe(final SourceDefinition sdParameters,
+                            final ObservationDetails obsDetailParameters,
+                            final ObservingConditions obsConditionParameters,
                             final Flamingos2Parameters flamingos2Parameters,
-                            final TeleParameters teleParameters,
-                            final PlottingDetailsParameters plotParameters,
+                            final TelescopeDetails telescope,
+                            final PlottingDetails plotParameters,
                             final PrintWriter out) {
         super(out);
 
@@ -58,7 +58,7 @@ public final class Flamingos2Recipe extends RecipeBase {
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;
         _flamingos2Parameters = flamingos2Parameters;
-        _teleParameters = teleParameters;
+        _telescope = telescope;
         _plotParameters = plotParameters;
     }
 
@@ -100,7 +100,7 @@ public final class Flamingos2Recipe extends RecipeBase {
         final Flamingos2 instrument = new Flamingos2(_flamingos2Parameters);
 
         // Get the summed source and sky
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GS, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _teleParameters, _plotParameters);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GS, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, _plotParameters);
         final VisitableSampledSpectrum sed = calcSource.sed;
         final VisitableSampledSpectrum sky = calcSource.sky;
         final double sed_integral = sed.getIntegral();
@@ -122,7 +122,7 @@ public final class Flamingos2Recipe extends RecipeBase {
         final double peak_pixel_count;
 
         // Calculate image quality
-        final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
+        final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
         IQcalc.calculate();
         final double im_qual = IQcalc.getImageQuality();
 
@@ -323,7 +323,7 @@ public final class Flamingos2Recipe extends RecipeBase {
         _println(HtmlPrinter.printParameterSummary(_sdParameters));
         _println(instrument.toString());
 
-        _println(HtmlPrinter.printParameterSummary(_teleParameters));
+        _println(HtmlPrinter.printParameterSummary(_telescope));
         _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));
         _println(HtmlPrinter.printParameterSummary(_obsDetailParameters));
 

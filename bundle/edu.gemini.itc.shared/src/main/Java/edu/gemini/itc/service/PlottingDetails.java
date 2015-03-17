@@ -1,10 +1,9 @@
-package edu.gemini.itc.parameters;
+package edu.gemini.itc.service;
 
 /**
- * This class holds the information from the Plotting Details section
- * of an ITC web page.  This object is constructed from a servlet request.
+ * Container for plotting detail parameters.
  */
-public final class PlottingDetailsParameters {
+public final class PlottingDetails {
 
     public static enum PlotLimits {
         AUTO,
@@ -20,7 +19,7 @@ public final class PlottingDetailsParameters {
      * Constructs a ObservationDetailsParameters from a servlet request
      * @throws Exception if input data is not parsable.
      */
-    public PlottingDetailsParameters(final PlotLimits plotLimits, final double plotWaveL, final double plotWaveU) {
+    public PlottingDetails(final PlotLimits plotLimits, final double plotWaveL, final double plotWaveU) {
         this.plotLimits = plotLimits;
         this.plotWaveU = plotWaveU;
         this.plotWaveL = plotWaveL;

@@ -1,9 +1,9 @@
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.parameters.SourceDefinitionParameters;
+import edu.gemini.itc.service.SourceDefinition;
 import edu.gemini.itc.shared.SampledSpectrum;
 import edu.gemini.itc.shared.SampledSpectrumVisitor;
-import edu.gemini.itc.shared.WavebandDefinition;
+import edu.gemini.itc.service.WavebandDefinition;
 import edu.gemini.itc.shared.ZeroMagnitudeStar;
 
 /**
@@ -15,7 +15,7 @@ import edu.gemini.itc.shared.ZeroMagnitudeStar;
 public class NormalizeVisitor implements SampledSpectrumVisitor {
     private final WavebandDefinition _band; // String description of waveband (A, B, R, etc.)
     private final double _user_norm; // Brightness of the object (flux) as an average
-    private final SourceDefinitionParameters.BrightnessUnit _units;  // mag, abmag, ...
+    private final SourceDefinition.BrightnessUnit _units;  // mag, abmag, ...
 
     /**
      * Constructs a Normalizer
@@ -24,7 +24,7 @@ public class NormalizeVisitor implements SampledSpectrumVisitor {
      * @param user_norm The average flux in the waveband
      * @param units     The code for the units chosen by user
      */
-    public NormalizeVisitor(final WavebandDefinition waveband, final double user_norm, final SourceDefinitionParameters.BrightnessUnit units) {
+    public NormalizeVisitor(final WavebandDefinition waveband, final double user_norm, final SourceDefinition.BrightnessUnit units) {
         _band = waveband;
         _user_norm = user_norm;
         _units = units;

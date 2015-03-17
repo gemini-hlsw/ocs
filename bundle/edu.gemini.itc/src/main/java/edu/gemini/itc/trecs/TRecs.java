@@ -1,7 +1,8 @@
 package edu.gemini.itc.trecs;
 
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
-import edu.gemini.itc.parameters.ObservationDetailsParameters;
+import edu.gemini.itc.service.ObservationDetails;
+import edu.gemini.itc.service.CalculationMethod;
 import edu.gemini.itc.shared.*;
 import scala.Option;
 
@@ -42,7 +43,7 @@ public final class TRecs extends Instrument {
     private final int _spatialBinning;
     private final DetectorsTransmissionVisitor _dtv;
 
-    public TRecs(final TRecsParameters tp, final ObservationDetailsParameters odp) {
+    public TRecs(final TRecsParameters tp, final ObservationDetails odp) {
         super(INSTR_DIR, FILENAME);
 
         _focalPlaneMask = tp.getFocalPlaneMask();

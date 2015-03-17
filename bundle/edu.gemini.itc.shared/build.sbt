@@ -20,7 +20,9 @@ OsgiKeys.bundleActivator := Some("edu.gemini.itc.shared.osgi.Activator")
 
 OsgiKeys.bundleSymbolicName := name.value
 
-OsgiKeys.exportPackage := Seq()
+OsgiKeys.exportPackage := Seq(
+  "edu.gemini.itc.service"
+)
 
 OsgiKeys.importPackage := Seq(
   "!com.google.inject.cglib.asm.util.*",

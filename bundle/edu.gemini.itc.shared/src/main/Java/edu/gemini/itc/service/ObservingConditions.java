@@ -1,4 +1,4 @@
-package edu.gemini.itc.parameters;
+package edu.gemini.itc.service;
 
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.CloudCover;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.ImageQuality;
@@ -6,10 +6,9 @@ import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.SkyBackground;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.WaterVapor;
 
 /**
- * This class holds the information from the Observing Condition section
- * of an ITC web page.  This object is constructed from a servlet request.
+ * Container for observing condition parameters.
  */
-public final class ObservingConditionParameters {
+public final class ObservingConditions {
 
     private final ImageQuality  iq;
     private final CloudCover    cc;
@@ -23,7 +22,7 @@ public final class ObservingConditionParameters {
      * @param r Servlet request containing the form data.
      * @throws Exception if input data is not parsable.
      */
-    public ObservingConditionParameters(
+    public ObservingConditions(
             final ImageQuality iq,
             final CloudCover cc,
             final WaterVapor wv,

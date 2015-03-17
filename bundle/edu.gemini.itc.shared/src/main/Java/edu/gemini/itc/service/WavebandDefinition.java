@@ -1,4 +1,4 @@
-package edu.gemini.itc.shared;
+package edu.gemini.itc.service;
 
 /**
  * This class represents the definition of standard "wavebands",

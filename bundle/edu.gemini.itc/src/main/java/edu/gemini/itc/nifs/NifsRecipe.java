@@ -4,7 +4,7 @@ import edu.gemini.itc.altair.*;
 import edu.gemini.itc.operation.ImageQualityCalculatable;
 import edu.gemini.itc.operation.ImageQualityCalculationFactory;
 import edu.gemini.itc.operation.SpecS2NLargeSlitVisitor;
-import edu.gemini.itc.parameters.*;
+import edu.gemini.itc.service.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.HtmlPrinter;
 import edu.gemini.itc.web.ITCRequest;
@@ -28,13 +28,13 @@ public final class NifsRecipe extends RecipeBase {
     private SpecS2NLargeSlitVisitor specS2N;
 
     // Parameters from the web page.
-    private final SourceDefinitionParameters _sdParameters;
-    private final ObservationDetailsParameters _obsDetailParameters;
-    private final ObservingConditionParameters _obsConditionParameters;
+    private final SourceDefinition _sdParameters;
+    private final ObservationDetails _obsDetailParameters;
+    private final ObservingConditions _obsConditionParameters;
     private final NifsParameters _nifsParameters;
-    private final TeleParameters _teleParameters;
+    private final TelescopeDetails _telescope;
     private final AltairParameters _altairParameters;
-    private final PlottingDetailsParameters _plotParameters;
+    private final PlottingDetails _plotParameters;
 
     /**
      * Constructs a NifsRecipe by parsing a Multipart servlet request.
@@ -51,7 +51,7 @@ public final class NifsRecipe extends RecipeBase {
         _obsDetailParameters = ITCRequest.observationParameters(r);
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _nifsParameters = new NifsParameters(r);
-        _teleParameters = ITCRequest.teleParameters(r);
+        _telescope = ITCRequest.teleParameters(r);
         _altairParameters = ITCRequest.altairParameters(r);
         _plotParameters = ITCRequest.plotParamters(r);
     }
@@ -60,13 +60,13 @@ public final class NifsRecipe extends RecipeBase {
      * Constructs a NifsRecipe given the parameters.
      * Useful for testing.
      */
-    public NifsRecipe(final SourceDefinitionParameters sdParameters,
-                      final ObservationDetailsParameters obsDetailParameters,
-                      final ObservingConditionParameters obsConditionParameters,
+    public NifsRecipe(final SourceDefinition sdParameters,
+                      final ObservationDetails obsDetailParameters,
+                      final ObservingConditions obsConditionParameters,
                       final NifsParameters nifsParameters,
-                      final TeleParameters teleParameters,
+                      final TelescopeDetails telescope,
                       final AltairParameters altairParameters,
-                      final PlottingDetailsParameters plotParameters,
+                      final PlottingDetails plotParameters,
                       final PrintWriter out)
 
     {
@@ -76,7 +76,7 @@ public final class NifsRecipe extends RecipeBase {
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;
         _nifsParameters = nifsParameters;
-        _teleParameters = teleParameters;
+        _telescope = telescope;
         _altairParameters = altairParameters;
         _plotParameters = plotParameters;
     }
@@ -100,7 +100,7 @@ public final class NifsRecipe extends RecipeBase {
         // output: redshifteed SED
         final Nifs instrument = new NifsNorth(_nifsParameters, _obsDetailParameters);
 
-        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
+        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE)) {
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25))) {  // *25 b/c of increased resolutuion of transmission files
                 throw new RuntimeException("Please use a model line width > 0.04 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
@@ -108,7 +108,7 @@ public final class NifsRecipe extends RecipeBase {
 
         // TODO : THIS IS PURELY FOR REGRESSION TEST ONLY, REMOVE ASAP
         // Get the summed source and sky
-        final SEDFactory.SourceResult calcSource0 = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _teleParameters, _plotParameters);
+        final SEDFactory.SourceResult calcSource0 = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, _plotParameters);
         final VisitableSampledSpectrum sed0 = calcSource0.sed;
         final VisitableSampledSpectrum sky0 = calcSource0.sky;
         final double sed_integral0 = sed0.getIntegral();
@@ -120,19 +120,19 @@ public final class NifsRecipe extends RecipeBase {
 
 
         // Calculate image quality
-        final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
+        final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
         IQcalc.calculate();
 
         final Option<AOSystem> altair;
         if (_altairParameters.altairIsUsed()) {
-            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _teleParameters.getTelescopeDiameter(), IQcalc.getImageQuality(), _altairParameters, 0.0);
+            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _altairParameters, 0.0);
             altair = Option.apply((AOSystem) ao);
             _println(ao.printSummary());
         } else {
             altair = Option.empty();
         }
 
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _teleParameters, _plotParameters, altair);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, _plotParameters, altair);
 
         // End of the Spectral energy distribution portion of the ITC.
 
@@ -311,7 +311,7 @@ public final class NifsRecipe extends RecipeBase {
         _println(instrument.toString());
         if (_altairParameters.altairIsUsed())
             _println(_altairParameters.printParameterSummary());
-        _println(HtmlPrinter.printParameterSummary(_teleParameters));
+        _println(HtmlPrinter.printParameterSummary(_telescope));
         _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));
         _println(HtmlPrinter.printParameterSummary(_obsDetailParameters));
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {

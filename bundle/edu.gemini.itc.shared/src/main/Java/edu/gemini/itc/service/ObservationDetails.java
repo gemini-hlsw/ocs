@@ -1,17 +1,14 @@
-package edu.gemini.itc.parameters;
-
-import edu.gemini.itc.shared.*;
+package edu.gemini.itc.service;
 
 /**
- * This class holds the information from the Observation Details section
- * of an ITC web page.  This object is constructed from a servlet request.
+ * Container for observation detail parameters.
  */
-public final class ObservationDetailsParameters {
+public final class ObservationDetails {
 
     private final CalculationMethod calculationMethod;
     private final AnalysisMethod analysisMethod;
 
-    public ObservationDetailsParameters(final CalculationMethod calculationMethod, final AnalysisMethod analysisMethod) {
+    public ObservationDetails(final CalculationMethod calculationMethod, final AnalysisMethod analysisMethod) {
         this.calculationMethod = calculationMethod;
         this.analysisMethod = analysisMethod;
     }
