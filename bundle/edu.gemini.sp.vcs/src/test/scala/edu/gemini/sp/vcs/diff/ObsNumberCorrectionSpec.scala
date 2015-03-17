@@ -3,6 +3,7 @@ package edu.gemini.sp.vcs.diff
 import edu.gemini.pot.sp.{SPObservationID, SPNodeKey}
 import edu.gemini.sp.vcs.diff.NodeDetail.Obs
 import edu.gemini.sp.vcs.diff.ProgramLocation.{Remote, Local}
+import edu.gemini.sp.vcs.diff.VcsFailure.Unmergeable
 import edu.gemini.spModel.event.SlewEvent
 import edu.gemini.spModel.gemini.obscomp.SPProgram
 import edu.gemini.spModel.obslog.ObsExecLog
@@ -31,7 +32,7 @@ class ObsNumberCorrectionSpec extends MergeCorrectionSpec {
       }).toList
 
     val plan = MergePlan(mergeTree, Set.empty)
-    val onc  = new ObsNumberCorrection(Function.untupled(known.contains))
+    val onc  = new ObsNumberCorrection(lifespanId, Function.untupled(known.contains))
 
     onc(plan).map(mp => obsNumbers(mp.update)) shouldEqual \/-(expected)
   }
@@ -127,10 +128,37 @@ class ObsNumberCorrectionSpec extends MergeCorrectionSpec {
         (Local,  localObs.key),
         (Remote, remoteObs.key)
       )
-      val onc  = new ObsNumberCorrection(Function.untupled(known.contains))
+      val onc  = new ObsNumberCorrection(lifespanId, Function.untupled(known.contains))
 
       onc(plan) shouldEqual ObsNumberCorrection.unmergeable(List(1)).left[MergePlan]
     }
 
+    "when renumbering, increment the version information" in {
+      val p        = prog
+      val oLocal  = obs(1)
+      val oRemote = obs(1)
+
+      println("oLocal  = " + oLocal.key)
+      println("oRemote = " + oRemote.key)
+
+      val onc = new ObsNumberCorrection(lifespanId, (loc: ProgramLocation, key: SPNodeKey) => {
+        (loc == ProgramLocation.Local && key == oLocal.key) ||
+          (loc == ProgramLocation.Remote && key == oRemote.key)
+      })
+
+      val mergeTree = p.node(oLocal.leaf, oRemote.leaf)
+      val plan      = MergePlan(mergeTree, Set.empty)
+
+      val renumberedLocal = incr(oLocal match {
+        case m: Modified => m.copy(detail = NodeDetail.Obs(2))
+        case _           => oLocal
+      })
+      val expected  = p.node(renumberedLocal.leaf, oRemote.leaf)
+
+      onc(plan) match {
+        case -\/(Unmergeable(msg)) => failure(msg)
+        case \/-(mp)               => mp.update must correspondTo(expected)
+      }
+    }
   }
 }

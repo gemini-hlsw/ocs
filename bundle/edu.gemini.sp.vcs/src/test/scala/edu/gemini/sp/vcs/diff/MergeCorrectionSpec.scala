@@ -21,6 +21,8 @@ import Scalaz._
 class MergeCorrectionSpec extends Specification {
   import NodeDetail._
 
+  val lifespanId: LifespanId = LifespanId.random
+
   def mergeNode(dob: ISPDataObject, obsNum: Option[Int]): MergeNode = Modified(
     new SPNodeKey(),
     EmptyNodeVersions,
@@ -37,6 +39,12 @@ class MergeCorrectionSpec extends Specification {
   def templateFolder: MergeNode = nonObs(new TemplateFolder)
 
   def obs(num: Int): MergeNode = mergeNode(new SPObservation, Some(num))
+
+  def incr(mn: MergeNode): MergeNode =
+    mn match {
+      case m: Modified => m.copy(nv = m.nv.incr(lifespanId))
+      case _           => failure("trying to increment unmodified node")
+    }
 
   def obsTree(num: Int): Tree[MergeNode] =
     obs(num).node(

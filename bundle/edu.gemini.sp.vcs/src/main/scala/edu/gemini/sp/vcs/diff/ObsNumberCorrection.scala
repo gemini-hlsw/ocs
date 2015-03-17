@@ -1,6 +1,7 @@
 package edu.gemini.sp.vcs.diff
 
 import edu.gemini.pot.sp.SPNodeKey
+import edu.gemini.pot.sp.version.LifespanId
 import edu.gemini.sp.vcs.diff.MergeCorrection._
 import edu.gemini.sp.vcs.diff.NodeDetail.Obs
 import edu.gemini.sp.vcs.diff.ProgramLocation.{Remote, Local}
@@ -25,15 +26,16 @@ import Scalaz._
   * remote program versions with an observation number greater than a
   * local-only observation.
   */
-class ObsNumberCorrection(isKnown: (ProgramLocation, SPNodeKey) => Boolean) extends CorrectionFunction {
+class ObsNumberCorrection(lifespanId: LifespanId, isKnown: (ProgramLocation, SPNodeKey) => Boolean) extends CorrectionFunction {
   def apply(mp: MergePlan): TryCorrect[MergePlan] =
     renumberedObs(mp).map { obsMap =>
-      if (obsMap.isEmpty)  // usually empty so we might as well check and save a traversal in that case
-        mp
+      if (obsMap.isEmpty) mp // usually empty so we might as well check and save a traversal in that case
       else
         mp.copy(update = mp.update.map {
-          case Modified(k, nv, dob, Obs(n)) => Modified(k, nv, dob, Obs(obsMap.getOrElse(k, n)))
-          case lab                          => lab
+          case m@Modified(k, nv, dob, Obs(n)) =>
+            val newNum = obsMap.getOrElse(k, n)
+            if (newNum == n) m else m.copy(k, nv.incr(lifespanId), dob, Obs(newNum))
+          case lab => lab
         })
     }
 
@@ -91,7 +93,7 @@ object ObsNumberCorrection {
       case (Remote, key) => mc.remote.isKnown(key)
     }
 
-    new ObsNumberCorrection(isKnown)
+    new ObsNumberCorrection(mc.local.prog.getLifespanId, isKnown)
   }
 
   def unmergeable(obsNum: List[Int]): Unmergeable = {
