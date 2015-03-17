@@ -160,7 +160,6 @@ public final class NiriRecipe extends RecipeBase {
 
         final double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
-        double source_fraction = 0;
         double halo_source_fraction = 0;
         double peak_pixel_count = 0;
 
@@ -193,7 +192,6 @@ public final class NiriRecipe extends RecipeBase {
             // this will be the core for an altair source; unchanged for non altair.
             SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, IQcalc.getImageQuality());
         }
-        source_fraction = SFcalc.getSourceFraction();
         if (_obsDetailParameters.getMethod().isImaging()) {
             if (_altairParameters.altairIsUsed()) {
                 _print(SFcalc.getTextResult(device, false));
@@ -231,7 +229,7 @@ public final class NiriRecipe extends RecipeBase {
                     _obsDetailParameters.getExposureTime(), sed_integral,
                     sky_integral, instrument.getDarkCurrent());
 
-            peak_pixel_count = ppfc.getFluxInPeakPixelUSB(source_fraction, SFcalc.getNPix());
+            peak_pixel_count = ppfc.getFluxInPeakPixelUSB(SFcalc.getSourceFraction(), SFcalc.getNPix());
         }
 
         // In this version we are bypassing morphology modules 3a-5a.
@@ -351,15 +349,13 @@ public final class NiriRecipe extends RecipeBase {
             finalS2N = _printSpecTag("Final S/N ASCII data");
 
         } else {
-            final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument);
+            final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc);
             IS2Ncalc.setSedIntegral(sed_integral);
             if (_altairParameters.altairIsUsed()) {
                 IS2Ncalc.setSecondaryIntegral(halo_integral);
                 IS2Ncalc.setSecondarySourceFraction(halo_source_fraction);
             }
             IS2Ncalc.setSkyIntegral(sky_integral);
-            IS2Ncalc.setSourceFraction(source_fraction);
-            IS2Ncalc.setNpix(SFcalc.getNPix());
             IS2Ncalc.setDarkCurrent(instrument.getDarkCurrent());
             IS2Ncalc.calculate();
             _println(IS2Ncalc.getTextResult(device));

@@ -10,8 +10,9 @@ public final class ImagingS2NMethodACalculation extends ImagingS2NCalculation {
     double frac_with_source, exp_s2n, final_s2n;
 
     public ImagingS2NMethodACalculation(final ObservationDetails obs,
-                                        final Instrument instrument) {
-
+                                        final Instrument instrument,
+                                        final SourceFraction srcFrac) {
+        super(srcFrac);
         this.number_exposures = obs.getNumExposures();
         this.frac_with_source = obs.getSourceFraction();
         this.exposure_time = obs.getExposureTime();

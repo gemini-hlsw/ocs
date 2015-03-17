@@ -140,7 +140,6 @@ public final class GsaoiRecipe extends RecipeBase {
         // inputs: source morphology specification
 
         final double pixel_size = instrument.getPixelSize();
-        double source_fraction = 0;
         double halo_source_fraction = 0;
         double peak_pixel_count = 0;
 
@@ -173,7 +172,6 @@ public final class GsaoiRecipe extends RecipeBase {
         }
 
         // this will be the core for a gems source; unchanged for non gems.
-        source_fraction = SFcalc.getSourceFraction();
         if (_obsDetailParameters.getMethod().isImaging()) {
             if (_gemsParameters.gemsIsUsed()) {
                 // If gems is used turn off printing of SF calc
@@ -216,8 +214,7 @@ public final class GsaoiRecipe extends RecipeBase {
                     _obsDetailParameters.getExposureTime(), sed_integral,
                     sky_integral, instrument.getDarkCurrent());
 
-            peak_pixel_count = ppfc
-                    .getFluxInPeakPixelUSB(source_fraction, SFcalc.getNPix());
+            peak_pixel_count = ppfc.getFluxInPeakPixelUSB(SFcalc.getSourceFraction(), SFcalc.getNPix());
         }
 
         // In this version we are bypassing morphology modules 3a-5a.
@@ -231,15 +228,13 @@ public final class GsaoiRecipe extends RecipeBase {
 
         // ObservationMode Imaging
 
-        final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument);
+        final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc);
         IS2Ncalc.setSedIntegral(sed_integral);
         if (_gemsParameters.gemsIsUsed()) {
             IS2Ncalc.setSecondaryIntegral(halo_integral);
             IS2Ncalc.setSecondarySourceFraction(halo_source_fraction);
         }
         IS2Ncalc.setSkyIntegral(sky_integral);
-        IS2Ncalc.setSourceFraction(source_fraction);
-        IS2Ncalc.setNpix(SFcalc.getNPix());
         IS2Ncalc.setDarkCurrent(instrument.getDarkCurrent());
         IS2Ncalc.calculate();
         _println(IS2Ncalc.getTextResult(device));

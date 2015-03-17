@@ -281,12 +281,10 @@ public final class Flamingos2Recipe extends RecipeBase {
 
             // Calculate the Signal to Noise
 
-            final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument);
+            final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc);
             IS2Ncalc.setSedIntegral(sed_integral);
             IS2Ncalc.setSkyIntegral(sky_integral);
             IS2Ncalc.setSkyAperture(_obsDetailParameters.getSkyApertureDiameter());
-            IS2Ncalc.setSourceFraction(SFcalc.getSourceFraction());
-            IS2Ncalc.setNpix(SFcalc.getNPix());
             IS2Ncalc.setDarkCurrent(instrument.getDarkCurrent());
             IS2Ncalc.calculate();
             _println(IS2Ncalc.getTextResult(device));

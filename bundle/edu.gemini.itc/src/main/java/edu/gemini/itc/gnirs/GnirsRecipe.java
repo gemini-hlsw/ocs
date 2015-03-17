@@ -114,7 +114,6 @@ public final class GnirsRecipe extends RecipeBase {
 
         double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
-        double source_fraction = 0;
         double peak_pixel_count = 0;
 
         // Calculate image quality
@@ -137,7 +136,6 @@ public final class GnirsRecipe extends RecipeBase {
         final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
 
         // this will be the core for an altair source; unchanged for non altair.
-        source_fraction = SFcalc.getSourceFraction();
         if (_obsDetailParameters.getMethod().isImaging()) {
             _print(SFcalc.getTextResult(device));
             _println(IQcalc.getTextResult(device));
@@ -164,8 +162,7 @@ public final class GnirsRecipe extends RecipeBase {
                     _obsDetailParameters.getExposureTime(), sed_integral,
                     sky_integral, instrument.getDarkCurrent());
 
-            peak_pixel_count = ppfc
-                    .getFluxInPeakPixelUSB(source_fraction, SFcalc.getNPix());
+            peak_pixel_count = ppfc.getFluxInPeakPixelUSB(SFcalc.getSourceFraction(), SFcalc.getNPix());
         }
 
         // In this version we are bypassing morphology modules 3a-5a.
@@ -794,39 +791,15 @@ public final class GnirsRecipe extends RecipeBase {
                 finalS2N = _printSpecTag("Final S/N ASCII data");
             }
 
-            // THis was used for TED to output the data might be useful later.
-            /**
-             * double [][] temp = specS2N.getSignalSpectrum().getData(); for
-             * (int i=0; i< specS2N.getSignalSpectrum().getLength()-2; i++) {
-             * System.out.print(" " +temp[0][i]+ "  ");
-             * System.out.println(temp[1][i]); } System.out.println("END");
-             * double [][] temp2 = specS2N.getFinalS2NSpectrum().getData(); for
-             * (int i=0; i< specS2N.getFinalS2NSpectrum().getLength()-2; i++) {
-             * System.out.print(" " +temp2[0][i]+ "  ");
-             * System.out.println(temp2[1][i]); } System.out.println("END");
-             *
-             **/
-
         } else {
 
-            ImagingS2NCalculatable IS2Ncalc =
-                    ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument);
+            ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc);
             IS2Ncalc.setSedIntegral(sed_integral);
-
-//            // REL-472: Commenting out Altair option for now
-//            if (_altairParameters.altairIsUsed()) {
-//                IS2Ncalc.setSecondaryIntegral(halo_integral);
-//                IS2Ncalc.setSecondarySourceFraction(halo_source_fraction);
-//            }
-
             IS2Ncalc.setSkyIntegral(sky_integral);
             IS2Ncalc.setSkyAperture(_obsDetailParameters.getSkyApertureDiameter());
-            IS2Ncalc.setSourceFraction(source_fraction);
-            IS2Ncalc.setNpix(SFcalc.getNPix());
             IS2Ncalc.setDarkCurrent(instrument.getDarkCurrent() * instrument.getSpatialBinning() * instrument.getSpatialBinning());
             IS2Ncalc.calculate();
             _println(IS2Ncalc.getTextResult(device));
-            // _println(IS2Ncalc.getBackgroundLimitResult());
             device.setPrecision(0); // NO decimal places
             device.clear();
             binFactor = instrument.getSpatialBinning()
@@ -867,19 +840,7 @@ public final class GnirsRecipe extends RecipeBase {
         _println("Instrument: " + instrument.getName() + "\n");
         _println(HtmlPrinter.printParameterSummary(_sdParameters));
         _println(instrument.toString());
-
-//        // REL-472: Commenting out Altair option for now
-//        if (_altairParameters.altairIsUsed()) {
-//            _teleParameters.setWFS("altair");
-//        }
-
         _println(HtmlPrinter.printParameterSummary(_telescope));
-
-//        // REL-472: Commenting out Altair option for now
-//        if (_altairParameters.altairIsUsed()) {
-//            _println(_altairParameters.printParameterSummary());
-//        }
-
         _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));
         _println(HtmlPrinter.printParameterSummary(_obsDetailParameters));
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {
