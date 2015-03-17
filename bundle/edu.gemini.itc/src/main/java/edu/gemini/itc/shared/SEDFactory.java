@@ -5,7 +5,7 @@ import edu.gemini.itc.gsaoi.Gsaoi;
 import edu.gemini.itc.nifs.Nifs;
 import edu.gemini.itc.niri.Niri;
 import edu.gemini.itc.operation.*;
-import edu.gemini.itc.parameters.*;
+import edu.gemini.itc.service.*;
 import edu.gemini.spModel.core.Site;
 import scala.Option;
 
@@ -24,11 +24,20 @@ import scala.Option;
  * we could directly create a SED.
  * Maybe this is for future support of data files in different units.
  */
-public class SEDFactory {
+public final class SEDFactory {
+
+    /**
+     * Location of SED data files
+     */
+    private static final String STELLAR_LIB = ITCConstants.SED_LIB + "/stellar";
+    private static final String NON_STELLAR_LIB = ITCConstants.SED_LIB + "/non_stellar";
+    private static final String SED_FILE_EXTENSION = ".nm";
+
+
     /**
      * Returns a SED constructed with specified values.
      */
-    public static VisitableSampledSpectrum getSED(double[] flux, double wavelengthStart, double wavelengthInterval) {
+    public static VisitableSampledSpectrum getSED(final double[] flux, final double wavelengthStart, final double wavelengthInterval) {
         return new DefaultSampledSpectrum(flux, wavelengthStart, wavelengthInterval);
     }
 
@@ -45,9 +54,7 @@ public class SEDFactory {
      *  ...
      * </pre>
      */
-    public static VisitableSampledSpectrum getSED(String fileName, double wavelengthInterval) {
-        // values <= 0 used to trigger different behavior in an older version but seems not be used anymore
-        assert wavelengthInterval > 0.0;
+    private static VisitableSampledSpectrum getSED(final String fileName, final double wavelengthInterval) {
         final DefaultArraySpectrum as = new DefaultArraySpectrum(fileName);
         return new DefaultSampledSpectrum(as, wavelengthInterval);
     }
@@ -70,16 +77,14 @@ public class SEDFactory {
      *  ...
      * </pre>
      */
-    public static VisitableSampledSpectrum getSED(String fileName, String userSED, double wavelengthInterval) {
-        // values <= 0 used to trigger different behavior in an older version but seems not be used anymore
-        assert wavelengthInterval > 0.0;
+    private static VisitableSampledSpectrum getUserSED(final String userSED, final double wavelengthInterval) {
         final DefaultArraySpectrum as = DefaultArraySpectrum.fromUserSpectrum(userSED);
         return new DefaultSampledSpectrum(as, wavelengthInterval);
     }
 
+    public static VisitableSampledSpectrum getSED(final SourceDefinition sdp, final Instrument instrument) {
 
-    public static VisitableSampledSpectrum getSED(SourceDefinitionParameters sdp, Instrument instrument) {
-
+        final VisitableSampledSpectrum temp;
         switch (sdp.getDistributionType()) {
             case BBODY:
                 return new BlackBodySpectrum(sdp.getBBTemp(),
@@ -106,73 +111,37 @@ public class SEDFactory {
                         instrument.getSampling(),
                         sdp.getRedshift());
 
-            default:
-                final VisitableSampledSpectrum temp;
-                if (sdp.isSedUserDefined()) {
-                    temp = getSED(sdp.getSpectrumResource(),
-                            sdp.getUserDefinedSpectrum(),
-                            instrument.getSampling());
-                } else {
-                    temp = getSED(sdp.getSpectrumResource(),
-                            instrument.getSampling());
-                }
+            case USER_DEFINED:
+                temp = getUserSED(sdp.getUserDefinedSpectrum(), instrument.getSampling());
                 temp.applyWavelengthCorrection();
-
                 return temp;
+
+            case LIBRARY_STAR:
+                temp = getSED(getLibraryResource(STELLAR_LIB, sdp).toLowerCase(), instrument.getSampling());
+                temp.applyWavelengthCorrection();
+                return temp;
+
+            case LIBRARY_NON_STAR:
+                temp = getSED(getLibraryResource(NON_STELLAR_LIB, sdp), instrument.getSampling());
+                temp.applyWavelengthCorrection();
+                return temp;
+
+            default:
+                throw new Error("invalid distribution type");
         }
     }
 
-
-    //Added to allow creation of an SED spanning more than one filter for NICI
-    public static VisitableSampledSpectrum getSED(SourceDefinitionParameters sdp, double sampling, double observingStart, double observingEnd) {
-
-        switch (sdp.getDistributionType()) {
-            case BBODY:
-                return new BlackBodySpectrum(sdp.getBBTemp(),
-                        sampling,
-                        sdp.getSourceNormalization(),
-                        sdp.getUnits(),
-                        sdp.getNormBand(),
-                        sdp.getRedshift());
-
-            case ELINE:
-                return new EmissionLineSpectrum(sdp.getELineWavelength(),
-                        sdp.getELineWidth(),
-                        sdp.getELineFlux(),
-                        sdp.getELineContinuumFlux(),
-                        sdp.getELineFluxUnits(),
-                        sdp.getELineContinuumFluxUnits(),
-                        sdp.getRedshift(),
-                        sampling);
-
-            case PLAW:
-                return new PowerLawSpectrum(sdp.getPowerLawIndex(),
-                        observingStart,
-                        observingEnd,
-                        sampling,
-                        sdp.getRedshift());
-
-            default:
-                final VisitableSampledSpectrum temp;
-                if (sdp.getDistributionType() == SourceDefinitionParameters.Distribution.USER_DEFINED) {
-                    temp = getSED(sdp.getSpectrumResource(),
-                            sdp.getUserDefinedSpectrum(),
-                            sampling);
-                } else {
-                    temp = getSED(sdp.getSpectrumResource(),
-                            sampling);
-                }
-                temp.applyWavelengthCorrection();
-                return temp;
-        }
+    private static String getLibraryResource(final String prefix, final SourceDefinition sdp) {
+        return prefix + "/" + ((Library) sdp.distribution).sedSpectrum() + SED_FILE_EXTENSION;
     }
+
 
     // TODO: site and band could be moved to instrument(?)
-    public static SourceResult calculate(final Instrument instrument, final Site site, final String bandStr, final SourceDefinitionParameters sdp, final ObservingConditionParameters odp, final TeleParameters tp, final PlottingDetailsParameters pdp) {
+    public static SourceResult calculate(final Instrument instrument, final Site site, final String bandStr, final SourceDefinition sdp, final ObservingConditions odp, final TelescopeDetails tp, final PlottingDetails pdp) {
         return calculate(instrument, site, bandStr, sdp, odp, tp, pdp, Option.apply((AOSystem) null));
     }
 
-    public static SourceResult calculate(final Instrument instrument, final Site site, final String bandStr, final SourceDefinitionParameters sdp, final ObservingConditionParameters odp, final TeleParameters tp, final PlottingDetailsParameters pdp, final Option<AOSystem> ao) {
+    public static SourceResult calculate(final Instrument instrument, final Site site, final String bandStr, final SourceDefinition sdp, final ObservingConditions odp, final TelescopeDetails tp, final PlottingDetails pdp, final Option<AOSystem> ao) {
         // Module 1b
         // Define the source energy (as function of wavelength).
         //
@@ -213,7 +182,7 @@ public class SEDFactory {
         }
 
 // TODO: This is only relevant for writeOutput() need to factor this out somehow!!
-        if (pdp != null && pdp.getPlotLimits().equals(PlottingDetailsParameters.PlotLimits.USER)) {
+        if (pdp != null && pdp.getPlotLimits().equals(PlottingDetails.PlotLimits.USER)) {
             if (pdp.getPlotWaveL() > instrument.getObservingEnd() || pdp.getPlotWaveU() < instrument.getObservingStart()) {
                 throw new IllegalArgumentException("User limits for plotting do not overlap with filter.");
             }
@@ -227,7 +196,7 @@ public class SEDFactory {
         // units
         // calculates: normalized SED, resampled SED, SED adjusted for aperture
         // output: SED in common internal units
-        if (!sdp.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
+        if (!sdp.getDistributionType().equals(SourceDefinition.Distribution.ELINE)) {
             final SampledSpectrumVisitor norm = new NormalizeVisitor(
                     sdp.getNormBand(),
                     sdp.getSourceNormalization(),
@@ -347,7 +316,7 @@ public class SEDFactory {
         }
     }
 
-    private static String getSky(final Instrument instrument, final String band, final Site site, final ObservingConditionParameters ocp) {
+    private static String getSky(final Instrument instrument, final String band, final Site site, final ObservingConditions ocp) {
         // TODO: F2 uses a peculiar path (?), fix this and update regression test baseline!
         if (instrument instanceof Flamingos2) {
             return ITCConstants.SKY_BACKGROUND_LIB + "/"

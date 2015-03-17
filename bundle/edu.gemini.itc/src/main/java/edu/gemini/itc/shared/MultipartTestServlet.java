@@ -1,10 +1,10 @@
 package edu.gemini.itc.shared;
 
 import edu.gemini.itc.acqcam.AcquisitionCamParameters;
-import edu.gemini.itc.parameters.ObservationDetailsParameters;
-import edu.gemini.itc.parameters.ObservingConditionParameters;
-import edu.gemini.itc.parameters.SourceDefinitionParameters;
-import edu.gemini.itc.parameters.TeleParameters;
+import edu.gemini.itc.service.ObservationDetails;
+import edu.gemini.itc.service.ObservingConditions;
+import edu.gemini.itc.service.SourceDefinition;
+import edu.gemini.itc.service.TelescopeDetails;
 import edu.gemini.itc.web.ITCRequest;
 
 import javax.servlet.ServletConfig;
@@ -60,10 +60,10 @@ public class MultipartTestServlet extends HttpServlet {
             try {
                 ITCMultiPartParser parser = new ITCMultiPartParser(request, MAX_CONTENT_LENGTH);
 
-                ObservationDetailsParameters odp = ITCRequest.observationParameters(parser);
-                ObservingConditionParameters ocp = ITCRequest.obsConditionParameters(parser);
-                SourceDefinitionParameters sdp = ITCRequest.sourceDefinitionParameters(parser);
-                TeleParameters tp = ITCRequest.teleParameters(parser);
+                ObservationDetails odp = ITCRequest.observationParameters(parser);
+                ObservingConditions ocp = ITCRequest.obsConditionParameters(parser);
+                SourceDefinition sdp = ITCRequest.sourceDefinitionParameters(parser);
+                TelescopeDetails tp = ITCRequest.teleParameters(parser);
                 AcquisitionCamParameters acp = new AcquisitionCamParameters(parser);
 
                 out.println(odp.toString());

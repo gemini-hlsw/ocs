@@ -2,12 +2,12 @@ package edu.gemini.itc.baseline
 
 import edu.gemini.itc.baseline.util.Baseline._
 import edu.gemini.itc.baseline.util._
-import edu.gemini.itc.gmos.{GmosParameters, GmosRecipe}
-import edu.gemini.itc.shared.{IfuRadial, IfuSingle}
+import edu.gemini.itc.gmos.GmosRecipe
+import edu.gemini.itc.service.{GmosParameters, IfuRadial, IfuSingle}
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer
-import edu.gemini.spModel.gemini.gmos.GmosNorthType.{FPUnitNorth, DisperserNorth, FilterNorth}
-import edu.gemini.spModel.gemini.gmos.GmosSouthType.{FPUnitSouth, DisperserSouth, FilterSouth}
+import edu.gemini.spModel.gemini.gmos.GmosNorthType.{DisperserNorth, FPUnitNorth, FilterNorth}
+import edu.gemini.spModel.gemini.gmos.GmosSouthType.{DisperserSouth, FPUnitSouth, FilterSouth}
 
 /**
  * GMOS baseline test fixtures.
@@ -25,7 +25,7 @@ object BaselineGmos {
   private lazy val RBandImaging = Fixture.rBandImgFixtures(List(
 
     // GMOS-N
-    new GmosParameters(
+    GmosParameters(
       FilterNorth.i_G0302,
       DisperserNorth.MIRROR,
       500.0,                        // central wavelength
@@ -35,7 +35,7 @@ object BaselineGmos {
       None,                         // IFU method
       DetectorManufacturer.E2V,
       Site.GN),
-    new GmosParameters(
+    GmosParameters(
       FilterNorth.i_G0302,
       DisperserNorth.MIRROR,
       500.0,                        // central wavelength
@@ -47,7 +47,7 @@ object BaselineGmos {
       Site.GN),
 
     // GMOS-S
-    new GmosParameters(
+    GmosParameters(
       FilterSouth.g_G0325,
       DisperserSouth.MIRROR,
       500.0,
@@ -57,7 +57,7 @@ object BaselineGmos {
       None,
       DetectorManufacturer.E2V,
       Site.GS),
-    new GmosParameters(
+    GmosParameters(
       FilterSouth.g_G0325,
       DisperserSouth.MIRROR,
       500.0,
@@ -75,7 +75,7 @@ object BaselineGmos {
   private lazy val KBandSpectroscopy = Fixture.kBandSpcFixtures(List(
 
     // GMOS-N
-    new GmosParameters(
+    GmosParameters(
       FilterNorth.g_G0301,
       DisperserNorth.R150_G5306,
       500.0,
@@ -85,7 +85,7 @@ object BaselineGmos {
       None,
       DetectorManufacturer.E2V,
       Site.GN),
-    new GmosParameters(
+    GmosParameters(
       FilterNorth.g_G0301,
       DisperserNorth.R400_G5305,
       500.0,
@@ -95,7 +95,7 @@ object BaselineGmos {
       Some(IfuSingle(0.0)),
       DetectorManufacturer.HAMAMATSU,
       Site.GN),
-    new GmosParameters(
+    GmosParameters(
       FilterNorth.g_G0301,
       DisperserNorth.R400_G5305,
       500.0,
@@ -107,7 +107,7 @@ object BaselineGmos {
       Site.GN),
 
     // GMOS-S
-    new GmosParameters(
+    GmosParameters(
       FilterSouth.g_G0325,
       DisperserSouth.R150_G5326,
       500.0,
@@ -117,7 +117,7 @@ object BaselineGmos {
       None,
       DetectorManufacturer.E2V,
       Site.GS),
-    new GmosParameters(
+    GmosParameters(
       FilterSouth.g_G0325,
       DisperserSouth.R400_G5325,
       500.0,

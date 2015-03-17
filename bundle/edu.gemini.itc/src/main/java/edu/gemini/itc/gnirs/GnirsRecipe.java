@@ -1,16 +1,15 @@
 package edu.gemini.itc.gnirs;
 
 import edu.gemini.itc.operation.*;
-import edu.gemini.itc.parameters.*;
+import edu.gemini.itc.service.*;
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.web.HtmlPrinter;
 import edu.gemini.itc.web.ITCRequest;
 import edu.gemini.spModel.core.Site;
 import org.jfree.chart.ChartColor;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 /**
  * This class performs the calculations for Gnirs used for imaging.
@@ -24,12 +23,12 @@ public final class GnirsRecipe extends RecipeBase {
     private SpecS2NLargeSlitVisitor specS2N;
 
     // Parameters from the web page.
-    private final SourceDefinitionParameters _sdParameters;
-    private final ObservationDetailsParameters _obsDetailParameters;
-    private final ObservingConditionParameters _obsConditionParameters;
+    private final SourceDefinition _sdParameters;
+    private final ObservationDetails _obsDetailParameters;
+    private final ObservingConditions _obsConditionParameters;
     private final GnirsParameters _gnirsParameters;
-    private final TeleParameters _teleParameters;
-    private final PlottingDetailsParameters _plotParameters;
+    private final TelescopeDetails _telescope;
+    private final PlottingDetails _plotParameters;
 
     private VisitableSampledSpectrum signalOrder3, signalOrder4, signalOrder5,
             signalOrder6, signalOrder7, signalOrder8;
@@ -53,18 +52,18 @@ public final class GnirsRecipe extends RecipeBase {
         _obsDetailParameters = ITCRequest.observationParameters(r);
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _gnirsParameters = new GnirsParameters(r);
-        _teleParameters = ITCRequest.teleParameters(r);
+        _telescope = ITCRequest.teleParameters(r);
         _plotParameters = ITCRequest.plotParamters(r);
     }
 
     /**
      * Constructs a GnirsRecipe given the parameters. Useful for testing.
      */
-    public GnirsRecipe(SourceDefinitionParameters sdParameters,
-                       ObservationDetailsParameters obsDetailParameters,
-                       ObservingConditionParameters obsConditionParameters,
-                       GnirsParameters gnirsParameters, TeleParameters teleParameters,
-                       PlottingDetailsParameters plotParameters,
+    public GnirsRecipe(SourceDefinition sdParameters,
+                       ObservationDetails obsDetailParameters,
+                       ObservingConditions obsConditionParameters,
+                       GnirsParameters gnirsParameters, TelescopeDetails telescope,
+                       PlottingDetails plotParameters,
                        PrintWriter out)
 
     {
@@ -73,7 +72,7 @@ public final class GnirsRecipe extends RecipeBase {
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;
         _gnirsParameters = gnirsParameters;
-        _teleParameters = teleParameters;
+        _telescope = telescope;
 //        _altairParameters = altairParameters;// REL-472: Commenting out Altair option for now
         _plotParameters = plotParameters;
     }
@@ -104,7 +103,7 @@ public final class GnirsRecipe extends RecipeBase {
         //instrument = new GnirsSouth(_gnirsParameters, _obsDetailParameters);
         instrument = new GnirsNorth(_gnirsParameters, _obsDetailParameters);   // Added on 2/27/2014 (see REL-480)
 
-        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
+        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE))
             // *25 b/c of increased resolutuion of transmission files
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25))) {
                 throw new RuntimeException(
@@ -123,13 +122,13 @@ public final class GnirsRecipe extends RecipeBase {
         double im_qual;
         double uncorrected_im_qual = 0.;
 
-        final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
+        final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
         IQcalc.calculate();
         im_qual = IQcalc.getImageQuality();
 
 
         // Get the summed source and sky
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _teleParameters, _plotParameters);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, _plotParameters);
         final VisitableSampledSpectrum sed = calcSource.sed;
         final VisitableSampledSpectrum sky = calcSource.sky;
         double sed_integral = sed.getIntegral();
@@ -286,7 +285,6 @@ public final class GnirsRecipe extends RecipeBase {
             // _println("RESOLUTION DEBUGGING");
             // _println("gratingDispersion_nm: " +
             // instrument.getGratingDispersion_nm());
-            // _println("slit_width: " + _gnirsParameters.getFPMask());
             // _println("source sampling: " + sed.getSampling());
 
             _println("<p style=\"page-break-inside: never\">");
@@ -872,7 +870,7 @@ public final class GnirsRecipe extends RecipeBase {
 
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + instrument.getName() + "\n");
-        _println(_sdParameters.printParameterSummary());
+        _println(HtmlPrinter.printParameterSummary(_sdParameters));
         _println(instrument.toString());
 
 //        // REL-472: Commenting out Altair option for now
@@ -880,17 +878,17 @@ public final class GnirsRecipe extends RecipeBase {
 //            _teleParameters.setWFS("altair");
 //        }
 
-        _println(_teleParameters.printParameterSummary());
+        _println(HtmlPrinter.printParameterSummary(_telescope));
 
 //        // REL-472: Commenting out Altair option for now
 //        if (_altairParameters.altairIsUsed()) {
 //            _println(_altairParameters.printParameterSummary());
 //        }
 
-        _println(_obsConditionParameters.printParameterSummary());
-        _println(_obsDetailParameters.printParameterSummary());
+        _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));
+        _println(HtmlPrinter.printParameterSummary(_obsDetailParameters));
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {
-            _println(_plotParameters.printParameterSummary());
+            _println(HtmlPrinter.printParameterSummary(_plotParameters));
         }
 
         if (_obsDetailParameters.getMethod().isSpectroscopy()) { // 49 ms

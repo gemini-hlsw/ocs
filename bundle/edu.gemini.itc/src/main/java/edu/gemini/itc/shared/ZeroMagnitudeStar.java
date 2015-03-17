@@ -1,5 +1,7 @@
 package edu.gemini.itc.shared;
 
+import edu.gemini.itc.service.WavebandDefinition;
+
 /**
  * This class encapsulates the photon flux density (in photons/s/m^2/nm)
  * for a zero-magnitude star.

@@ -1,6 +1,7 @@
 package edu.gemini.itc.shared;
 
-import edu.gemini.itc.parameters.SourceDefinitionParameters;
+import edu.gemini.itc.service.SourceDefinition;
+import edu.gemini.itc.service.WavebandDefinition;
 
 /**
  * This class creates a black body spectrum over the interval defined by the
@@ -16,7 +17,7 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
         _spectrum = spectrum;
     }
 
-    public BlackBodySpectrum(double temp, double interval, double flux, SourceDefinitionParameters.BrightnessUnit units, WavebandDefinition band, double z) {
+    public BlackBodySpectrum(double temp, double interval, double flux, SourceDefinition.BrightnessUnit units, WavebandDefinition band, double z) {
 
         //rescale the start and end depending on the redshift
         final double start = 300 / (1 + z);
@@ -68,7 +69,7 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
     }
 
 
-    private double _convertToMag(final double flux, final SourceDefinitionParameters.BrightnessUnit units, final WavebandDefinition band) {
+    private double _convertToMag(final double flux, final SourceDefinition.BrightnessUnit units, final WavebandDefinition band) {
         //THis method should convert the flux into units of magnitude.
         //same code as in NormalizeVisitor.java.  Eventually should come out
         // into a genral purpose conversion class if needs to be used again.

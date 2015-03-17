@@ -31,49 +31,6 @@ public abstract class ITCParameters {
      * Try to parse given string, throw exception on failure
      * Exception will mention the description
      */
-    public static int parseInt(String string,
-                               String description) {
-        if (string == null) {
-            throw new IllegalArgumentException(description + " - null input");
-        }
-        string = string.trim();
-        if (string.equals("")) {
-            throw new IllegalArgumentException(description + " - empty input");
-        }
-        int i;
-        try {
-            i = parseInt(string);
-        } catch (Exception e) {
-            throw new IllegalArgumentException(description +
-                    " - can't parse into integer: " + string);
-        }
-        return i;
-    }
-
-    /**
-     * Try to parse given string, throw informative exception on failure
-     */
-    public static int parseInt(String string) {
-        if (string == null) {
-            throw new IllegalArgumentException("null input");
-        }
-        string = string.trim();
-        if (string.equals("")) {
-            throw new IllegalArgumentException("empty input");
-        }
-        int i;
-        try {
-            i = Integer.parseInt(string);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Can't parse into integer: " + string);
-        }
-        return i;
-    }
-
-    /**
-     * Try to parse given string, throw exception on failure
-     * Exception will mention the description
-     */
     public static double parseDouble(String string,
                                      String description) {
         if (string == null) {

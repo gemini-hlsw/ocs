@@ -4,24 +4,20 @@ import edu.gemini.itc.acqcam.AcquisitionCamParameters
 import edu.gemini.itc.altair.AltairParameters
 import edu.gemini.itc.flamingos2.Flamingos2Parameters
 import edu.gemini.itc.gems.GemsParameters
-import edu.gemini.itc.gmos.GmosParameters
 import edu.gemini.itc.gnirs.GnirsParameters
 import edu.gemini.itc.gsaoi.GsaoiParameters
 import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.niri.NiriParameters
-import edu.gemini.itc.parameters._
-import edu.gemini.itc.shared._
+import edu.gemini.itc.service._
 import edu.gemini.itc.trecs.TRecsParameters
-import edu.gemini.spModel.core.Site
-import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer
 
 // TEMPORARY helper
 // All input objects will become immutable data only objects (probably Scala case classes).
 // For now we need a workaround for missing hash functions on the existing Java objects.
 object Hash {
 
-  def calc(ip: ITCParameters): Int = ip match {
+  def calc(ip: InstrumentDetails): Int = ip match {
     case p: AcquisitionCamParameters  => calc(p)
     case p: Flamingos2Parameters      => calc(p)
     case p: GmosParameters            => calc(p)
@@ -36,15 +32,15 @@ object Hash {
 
   def calc(p: GmosParameters): Int =
     hash(
-      p.getFilter.name,
-      p.getCCDtype.name,
-      p.getFocalPlaneMask.name,
-      p.getGrating.name,
-      p.getIFUMethod.toString,
-      p.getCentralWavelength,
-      p.getSite.name,
-      p.getSpatialBinning,
-      p.getSpectralBinning
+      p.filter.name,
+      p.ccdType.name,
+      p.fpMask.name,
+      p.grating.name,
+      p.ifuMethod.toString,
+      p.centralWavelength,
+      p.site.name,
+      p.spatialBinning,
+      p.spectralBinning
     )
 
   def calc(p: GnirsParameters): Int =
@@ -107,7 +103,6 @@ object Hash {
       p.getCamera,
       p.getFilter,
       p.getFocalPlaneMask,
-//      p.getFPMask,
 //      p.getFPMaskOffset,
       p.getGrism,
       p.getReadNoise,
@@ -143,7 +138,7 @@ object Hash {
       p.getSlitSize
     )
 
-  def calc(odp: ObservationDetailsParameters): Int =
+  def calc(odp: ObservationDetails): Int =
     hash(
       odp.isAutoAperture,
       odp.getMethod.isS2N,
@@ -156,7 +151,7 @@ object Hash {
       odp.getSourceFraction
     )
 
-  def calc(src: SourceDefinitionParameters): Int =
+  def calc(src: SourceDefinition): Int =
     hash(
       src.getProfileType.name,
       src.profile.norm,
@@ -166,14 +161,14 @@ object Hash {
       src.redshift
     )
 
-  def calc(tp: TeleParameters): Int =
+  def calc(tp: TelescopeDetails): Int =
     hash(
       tp.getInstrumentPort.displayValue,
       tp.getMirrorCoating.displayValue,
       tp.getWFS.displayValue
     )
 
-  def calc(ocp: ObservingConditionParameters): Int =
+  def calc(ocp: ObservingConditions): Int =
     hash(
       ocp.getAirmass,
       ocp.getImageQuality,
@@ -197,7 +192,7 @@ object Hash {
       alt.getStrehlBand
     )
 
-  def calc(pdp: PlottingDetailsParameters): Int =
+  def calc(pdp: PlottingDetails): Int =
     hash(pdp.getPlotWaveL, pdp.getPlotWaveU)
 
   private def hash(values: Any*) =

@@ -1,5 +1,6 @@
 package edu.gemini.itc.niri;
 
+import edu.gemini.itc.service.InstrumentDetails;
 import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCParameters;
 
@@ -9,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
  * This class holds the information from the Niri section
  * of an ITC web page.  This object is constructed from a servlet request.
  */
-public final class NiriParameters extends ITCParameters {
+public final class NiriParameters implements InstrumentDetails {
     // ITC web form parameter names.
     // These constants must be kept in sync with the web page form.
     // They are used to parse form data.

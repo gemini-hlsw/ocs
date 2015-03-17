@@ -1,6 +1,6 @@
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.parameters.TeleParameters;
+import edu.gemini.itc.service.TelescopeDetails;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
 
@@ -18,7 +18,7 @@ public class TelescopeBackgroundVisitor implements SampledSpectrumVisitor {
      * We will use a different background file for different
      * ports and coatings.
      */
-    public TelescopeBackgroundVisitor(final TeleParameters tp, final Site site, final String wavelenRange) {
+    public TelescopeBackgroundVisitor(final TelescopeDetails tp, final Site site, final String wavelenRange) {
 
         final String _fullBackgroundResource;
         if (!wavelenRange.equals(ITCConstants.VISIBLE)) {
@@ -40,7 +40,7 @@ public class TelescopeBackgroundVisitor implements SampledSpectrumVisitor {
     }
 
     /** Gets the file name for the given port and mirror coating. */
-    private String getFileName(final TeleParameters tp) {
+    private String getFileName(final TelescopeDetails tp) {
         switch (tp.getInstrumentPort()) {
 
             case UP_LOOKING:

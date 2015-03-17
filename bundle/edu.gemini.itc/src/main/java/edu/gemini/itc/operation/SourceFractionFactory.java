@@ -1,7 +1,7 @@
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.parameters.ObservationDetailsParameters;
-import edu.gemini.itc.parameters.SourceDefinitionParameters;
+import edu.gemini.itc.service.ObservationDetails;
+import edu.gemini.itc.service.SourceDefinition;
 import edu.gemini.itc.shared.Instrument;
 
 public final class SourceFractionFactory {
@@ -9,8 +9,8 @@ public final class SourceFractionFactory {
     private SourceFractionFactory() {}
 
     public static SourceFraction calculate(
-            final SourceDefinitionParameters sdp,
-            final ObservationDetailsParameters odp,
+            final SourceDefinition sdp,
+            final ObservationDetails odp,
             final Instrument instrument,
             final double im_qual) {
 

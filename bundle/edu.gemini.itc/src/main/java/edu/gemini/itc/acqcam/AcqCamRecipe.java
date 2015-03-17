@@ -1,11 +1,12 @@
 package edu.gemini.itc.acqcam;
 
 import edu.gemini.itc.operation.*;
-import edu.gemini.itc.parameters.ObservationDetailsParameters;
-import edu.gemini.itc.parameters.ObservingConditionParameters;
-import edu.gemini.itc.parameters.SourceDefinitionParameters;
-import edu.gemini.itc.parameters.TeleParameters;
+import edu.gemini.itc.service.ObservationDetails;
+import edu.gemini.itc.service.ObservingConditions;
+import edu.gemini.itc.service.SourceDefinition;
+import edu.gemini.itc.service.TelescopeDetails;
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.web.HtmlPrinter;
 import edu.gemini.itc.web.ITCRequest;
 import edu.gemini.spModel.core.Site;
 
@@ -17,11 +18,11 @@ import java.io.PrintWriter;
  */
 public final class AcqCamRecipe extends RecipeBase {
     // Parameters from the web page.
-    private final SourceDefinitionParameters _sdParameters;
-    private final ObservationDetailsParameters _obsDetailParameters;
-    private final ObservingConditionParameters _obsConditionParameters;
+    private final SourceDefinition _sdParameters;
+    private final ObservationDetails _obsDetailParameters;
+    private final ObservingConditions _obsConditionParameters;
     private final AcquisitionCamParameters _acqCamParameters;
-    private final TeleParameters _teleParameters;
+    private final TelescopeDetails _telescope;
 
     /**
      * Constructs an AcqCamRecipe by parsing a Multi part servlet request.
@@ -38,18 +39,18 @@ public final class AcqCamRecipe extends RecipeBase {
         _obsDetailParameters = ITCRequest.observationParameters(r);
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _acqCamParameters = new AcquisitionCamParameters(r);
-        _teleParameters = ITCRequest.teleParameters(r);
+        _telescope = ITCRequest.teleParameters(r);
     }
 
     /**
      * Constructs an AcqCamRecipe given the parameters.
      * Useful for testing.
      */
-    public AcqCamRecipe(final SourceDefinitionParameters sdParameters,
-                        final ObservationDetailsParameters obsDetailParameters,
-                        final ObservingConditionParameters obsConditionParameters,
+    public AcqCamRecipe(final SourceDefinition sdParameters,
+                        final ObservationDetails obsDetailParameters,
+                        final ObservingConditions obsConditionParameters,
                         final AcquisitionCamParameters acqCamParameters,
-                        final TeleParameters teleParameters,
+                        final TelescopeDetails telescope,
                         final PrintWriter out) {
         super(out);
 
@@ -57,7 +58,7 @@ public final class AcqCamRecipe extends RecipeBase {
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;
         _acqCamParameters = acqCamParameters;
-        _teleParameters = teleParameters;
+        _telescope = telescope;
     }
 
     /**
@@ -73,14 +74,14 @@ public final class AcqCamRecipe extends RecipeBase {
 
         final AcquisitionCamera instrument = new AcquisitionCamera(_acqCamParameters.getColorFilter(), _acqCamParameters.getNDFilter());
 
-        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE)) {
+        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE)) {
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000))) {
                 throw new IllegalArgumentException("Please use a model line width > 1 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
         }
 
         // Get the summed source and sky
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.VISIBLE, _sdParameters, _obsConditionParameters, _teleParameters, null);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.VISIBLE, _sdParameters, _obsConditionParameters, _telescope, null);
         final VisitableSampledSpectrum sed = calcSource.sed;
         final VisitableSampledSpectrum sky = calcSource.sky;
         final double sed_integral = sed.getIntegral();
@@ -114,7 +115,7 @@ public final class AcqCamRecipe extends RecipeBase {
         final double peak_pixel_count;
 
         // Calculate image quality
-        final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
+        final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
         IQcalc.calculate();
         final double im_qual = IQcalc.getImageQuality();
 
@@ -194,11 +195,11 @@ public final class AcqCamRecipe extends RecipeBase {
         _print("<HR align=left SIZE=3>");
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + instrument.getName() + "\n");
-        _println(_sdParameters.printParameterSummary());
+        _println(HtmlPrinter.printParameterSummary(_sdParameters));
         _println(instrument.toString());
-        _println(_teleParameters.printParameterSummary());
-        _println(_obsConditionParameters.printParameterSummary());
-        _println(_obsDetailParameters.printParameterSummary());
+        _println(HtmlPrinter.printParameterSummary(_telescope));
+        _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));
+        _println(HtmlPrinter.printParameterSummary(_obsDetailParameters));
 
     }
 }

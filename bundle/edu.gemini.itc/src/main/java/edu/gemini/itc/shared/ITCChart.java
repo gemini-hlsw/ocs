@@ -1,6 +1,6 @@
 package edu.gemini.itc.shared;
 
-import edu.gemini.itc.parameters.PlottingDetailsParameters;
+import edu.gemini.itc.service.PlottingDetails;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
@@ -17,11 +17,11 @@ public final class ITCChart {
     private final XYSeriesCollection seriesData = new XYSeriesCollection();
     private final JFreeChart chart;
 
-    public ITCChart(final String chartTitle, final String xAxisLabel, final String yAxisLabel, final PlottingDetailsParameters plotParams) {
+    public ITCChart(final String chartTitle, final String xAxisLabel, final String yAxisLabel, final PlottingDetails plotParams) {
         chart = ChartFactory.createXYLineChart(chartTitle, xAxisLabel, yAxisLabel, this.seriesData, PlotOrientation.VERTICAL, true, false, false);
         chart.getLegend().setPosition(RectangleEdge.TOP);
         chart.setBackgroundPaint(java.awt.Color.white);
-        if (plotParams.getPlotLimits().equals(PlottingDetailsParameters.PlotLimits.USER)) {
+        if (plotParams.getPlotLimits().equals(PlottingDetails.PlotLimits.USER)) {
             setDomainMinMax(plotParams.getPlotWaveL(), plotParams.getPlotWaveU());
         } else {
             autoscale();

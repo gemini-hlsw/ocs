@@ -3,15 +3,14 @@ package edu.gemini.itc.web
 import javax.servlet.http.HttpServletRequest
 
 import edu.gemini.itc.altair.AltairParameters
-import edu.gemini.itc.gmos.GmosParameters
-import edu.gemini.itc.parameters.SourceDefinitionParameters._
-import edu.gemini.itc.parameters._
+import edu.gemini.itc.service.SourceDefinition._
+import edu.gemini.itc.service._
 import edu.gemini.itc.shared._
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer
-import edu.gemini.spModel.gemini.gmos.GmosNorthType.{FPUnitNorth, DisperserNorth, FilterNorth}
-import edu.gemini.spModel.gemini.gmos.GmosSouthType.{FPUnitSouth, DisperserSouth, FilterSouth}
+import edu.gemini.spModel.gemini.gmos.GmosNorthType.{DisperserNorth, FPUnitNorth, FilterNorth}
+import edu.gemini.spModel.gemini.gmos.GmosSouthType.{DisperserSouth, FPUnitSouth, FilterSouth}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.telescope.IssPort
 
@@ -62,22 +61,22 @@ object ITCRequest {
     override def userSpectrumName(): Option[String] = Some(request.getRemoteFileName("specUserDef"))
   }
 
-  def teleParameters(r: ITCMultiPartParser): TeleParameters = {
+  def teleParameters(r: ITCMultiPartParser): TelescopeDetails = {
     val pc      = ITCRequest.from(r)
-    val coating = pc.enumParameter(classOf[TeleParameters.Coating])
+    val coating = pc.enumParameter(classOf[TelescopeDetails.Coating])
     val port    = pc.enumParameter(classOf[IssPort])
-    val wfs     = pc.enumParameter(classOf[TeleParameters.Wfs])
-    new TeleParameters(coating, port, wfs)
+    val wfs     = pc.enumParameter(classOf[TelescopeDetails.Wfs])
+    new TelescopeDetails(coating, port, wfs)
   }
 
-  def obsConditionParameters(r: ITCMultiPartParser): ObservingConditionParameters = {
+  def obsConditionParameters(r: ITCMultiPartParser): ObservingConditions = {
     val pc      = ITCRequest.from(r)
     val iq      = pc.enumParameter(classOf[SPSiteQuality.ImageQuality])
     val cc      = pc.enumParameter(classOf[SPSiteQuality.CloudCover])
     val wv      = pc.enumParameter(classOf[SPSiteQuality.WaterVapor])
     val sb      = pc.enumParameter(classOf[SPSiteQuality.SkyBackground])
     val airmass = pc.doubleParameter("Airmass")
-    new ObservingConditionParameters(iq, cc, wv, sb, airmass)
+    new ObservingConditions(iq, cc, wv, sb, airmass)
   }
 
   def gmosParameters(r: ITCMultiPartParser): GmosParameters = {
@@ -102,12 +101,12 @@ object ITCRequest {
     new GmosParameters(filter, grating, centralWavelength, fpMask, spatBinning, specBinning, ifuMethod, ccdType, site)
   }
 
-  def plotParamters(r: ITCMultiPartParser): PlottingDetailsParameters = {
+  def plotParamters(r: ITCMultiPartParser): PlottingDetails = {
     val pc      = ITCRequest.from(r)
-    val limits  = pc.enumParameter(classOf[PlottingDetailsParameters.PlotLimits])
+    val limits  = pc.enumParameter(classOf[PlottingDetails.PlotLimits])
     val lower   = pc.doubleParameter("plotWavelengthL")
     val upper   = pc.doubleParameter("plotWavelengthU")
-    new PlottingDetailsParameters(limits, lower, upper)
+    new PlottingDetails(limits, lower, upper)
   }
 
   def altairParameters(r: ITCMultiPartParser): AltairParameters = {
@@ -116,12 +115,12 @@ object ITCRequest {
     val guideStarMagnitude   = pc.doubleParameter("guideMag")
     val fieldLens            = pc.enumParameter(classOf[AltairParams.FieldLens])
     val wfsMode              = pc.enumParameter(classOf[AltairParams.GuideStarType])
-    val wfs                  = pc.enumParameter(classOf[TeleParameters.Wfs])
-    val altairUsed           = wfs eq TeleParameters.Wfs.AOWFS
+    val wfs                  = pc.enumParameter(classOf[TelescopeDetails.Wfs])
+    val altairUsed           = wfs eq TelescopeDetails.Wfs.AOWFS
     new AltairParameters(guideStarSeperation, guideStarMagnitude, fieldLens, wfsMode, altairUsed)
   }
 
-  def observationParameters(r: ITCMultiPartParser): ObservationDetailsParameters = {
+  def observationParameters(r: ITCMultiPartParser): ObservationDetails = {
     val pc = ITCRequest.from(r)
 
     val calcMode   = pc.parameter("calcMode")
@@ -153,15 +152,15 @@ object ITCRequest {
       case "userAper" => UserAperture(pc.doubleParameter("userAperDiam"), pc.doubleParameter("userSkyAper"))
     }
 
-    new ObservationDetailsParameters(calculationMethod, analysisMethod)
+    new ObservationDetails(calculationMethod, analysisMethod)
 
   }
 
-  def sourceDefinitionParameters(r: ITCMultiPartParser): SourceDefinitionParameters = {
+  def sourceDefinitionParameters(r: ITCMultiPartParser): SourceDefinition = {
     val pc = ITCRequest.from(r)
 
     // Get the source geometry and type
-    import edu.gemini.itc.parameters.SourceDefinitionParameters.Profile._
+    import edu.gemini.itc.service.SourceDefinition.Profile._
     val spatialProfile = pc.enumParameter(classOf[Profile]) match {
       case POINT    =>
         val norm  = pc.doubleParameter("psSourceNorm")
@@ -182,15 +181,14 @@ object ITCRequest {
     val normBand = pc.enumParameter(classOf[WavebandDefinition])
 
     // Get Spectrum Resource
-    import edu.gemini.itc.parameters.SourceDefinitionParameters.Distribution._
+    import edu.gemini.itc.service.SourceDefinition.Distribution._
     val sourceSpec = pc.enumParameter(classOf[Distribution])
     val sourceDefinition = sourceSpec match {
-      case LIBRARY_STAR =>
-        val st = pc.parameter("stSpectrumType")
-        LibraryStar(st, STELLAR_LIB + "/" + st.toLowerCase + SED_FILE_EXTENSION)
-      case LIBRARY_NON_STAR =>
-        val st = pc.parameter("nsSpectrumType")
-        LibraryNonStar(st, NON_STELLAR_LIB + "/" + st + SED_FILE_EXTENSION)
+      case BBODY =>             BlackBody(pc.doubleParameter("BBTemp"))
+      case PLAW =>              PowerLaw(pc.doubleParameter("powerIndex"))
+      case USER_DEFINED =>      UserDefined(pc.userSpectrumName().get, pc.userSpectrum().get)
+      case LIBRARY_STAR =>      LibraryStar(pc.parameter("stSpectrumType"))
+      case LIBRARY_NON_STAR =>  LibraryNonStar(pc.parameter("nsSpectrumType"))
       case ELINE =>
         EmissionLine(
           pc.doubleParameter("lineWavelength"),
@@ -199,16 +197,10 @@ object ITCRequest {
           pc.parameter("lineFluxUnits"),
           pc.doubleParameter("lineContinuum"),
           pc.parameter("lineContinuumUnits"))
-      case BBODY =>
-        BlackBody(pc.doubleParameter("BBTemp"))
-      case PLAW =>
-        PowerLaw(pc.doubleParameter("powerIndex"))
-      case USER_DEFINED =>
-        UserDefined(pc.userSpectrumName().get, pc.userSpectrum().get)
     }
 
     //Get Redshift
-    import edu.gemini.itc.parameters.SourceDefinitionParameters.Recession._
+    import edu.gemini.itc.service.SourceDefinition.Recession._
     val recession = pc.enumParameter(classOf[Recession])
     val redshift = recession match {
       case REDSHIFT => pc.doubleParameter("z")
@@ -216,7 +208,7 @@ object ITCRequest {
     }
 
     // WOW, finally we've got everything in place..
-    new SourceDefinitionParameters(spatialProfile, sourceDefinition, normBand, redshift)
+    new SourceDefinition(spatialProfile, sourceDefinition, normBand, redshift)
   }
 
 

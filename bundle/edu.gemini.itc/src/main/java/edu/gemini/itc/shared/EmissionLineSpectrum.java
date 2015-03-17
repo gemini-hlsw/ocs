@@ -1,6 +1,6 @@
 package edu.gemini.itc.shared;
 
-import edu.gemini.itc.parameters.SourceDefinitionParameters;
+import edu.gemini.itc.service.SourceDefinition;
 
 /**
  * This class creates a EmissionLine spectrum over the interval defined by the
@@ -37,11 +37,11 @@ public class EmissionLineSpectrum implements VisitableSampledSpectrum {
         double[] fluxArray = new double[n];
 //System.out.println("Array: " + (n+40) + " sample "+ _sampling);
         // convert the Units into internal units
-        if (lineFluxUnits.equals(SourceDefinitionParameters.WATTS_FLUX))
+        if (lineFluxUnits.equals(SourceDefinition.WATTS_FLUX))
             flux = flux * _wavelength / 1.988e-16;
         else flux = flux * _wavelength / 1.988e-13;
 
-        if (continuumFluxUnits.equals(SourceDefinitionParameters.WATTS))
+        if (continuumFluxUnits.equals(SourceDefinition.WATTS))
             continuumFlux = continuumFlux * _wavelength / 1.988e-13;
         else continuumFlux = continuumFlux * _wavelength / 1.988e-14;
 

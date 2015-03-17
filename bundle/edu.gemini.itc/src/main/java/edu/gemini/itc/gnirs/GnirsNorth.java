@@ -1,7 +1,7 @@
 package edu.gemini.itc.gnirs;
 
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
-import edu.gemini.itc.parameters.ObservationDetailsParameters;
+import edu.gemini.itc.service.ObservationDetails;
 import edu.gemini.itc.shared.*;
 
 public final class GnirsNorth extends Gnirs {
@@ -21,7 +21,7 @@ public final class GnirsNorth extends Gnirs {
     private final double _wellDepth;
     private final double _readNoiseValue;
 
-    public GnirsNorth(GnirsParameters gp, ObservationDetailsParameters odp) {
+    public GnirsNorth(GnirsParameters gp, ObservationDetails odp) {
         super(FILENAME, INSTR_PREFIX);
         // The instrument data file gives a start/end wavelength for
         // the instrument.  But with a filter in place, the filter

@@ -1,7 +1,10 @@
 package edu.gemini.itc.gmos;
 
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
-import edu.gemini.itc.parameters.ObservationDetailsParameters;
+import edu.gemini.itc.service.GmosParameters;
+import edu.gemini.itc.service.IfuRadial;
+import edu.gemini.itc.service.IfuSingle;
+import edu.gemini.itc.service.ObservationDetails;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType;
@@ -41,7 +44,7 @@ public abstract class Gmos extends Instrument {
     protected Gmos[] _instruments;
 
     protected final GmosParameters gp;
-    protected final ObservationDetailsParameters odp;
+    protected final ObservationDetails odp;
 
     // Keep a reference to the color filter to ask for effective wavelength
     protected Filter _Filter;
@@ -54,7 +57,7 @@ public abstract class Gmos extends Instrument {
 
     private int _detectorCcdIndex = 0; // 0, 1, or 2 when there are multiple CCDs in the detector
 
-    public Gmos(final GmosParameters gp, final ObservationDetailsParameters odp, final String FILENAME, final int detectorCcdIndex) {
+    public Gmos(final GmosParameters gp, final ObservationDetails odp, final String FILENAME, final int detectorCcdIndex) {
         super(INSTR_DIR, FILENAME);
 
         this.odp    = odp;
@@ -65,8 +68,8 @@ public abstract class Gmos extends Instrument {
         _sampling = super.getSampling();
 
         // TODO: filter is not yet defined, need to work with filter from gp, clean this up
-        if (!gp.getFilter().equals(GmosNorthType.FilterNorth.NONE) && !gp.getFilter().equals(GmosSouthType.FilterSouth.NONE)) {
-            _Filter = Filter.fromWLFile(getPrefix(), gp.getFilter().name(), getDirectory() + "/");
+        if (!gp.filter().equals(GmosNorthType.FilterNorth.NONE) && !gp.filter().equals(GmosSouthType.FilterSouth.NONE)) {
+            _Filter = Filter.fromWLFile(getPrefix(), gp.filter().name(), getDirectory() + "/");
             addFilter(_Filter);
         }
 
@@ -76,10 +79,10 @@ public abstract class Gmos extends Instrument {
 
 
         //Choose correct CCD QE curve
-        switch (gp.getCCDtype()) {
+        switch (gp.ccdType()) {
             // E2V, site dependent
             case E2V:
-                switch (gp.getSite()) {
+                switch (gp.site()) {
                     // E2V for GN: gmos_n_E2V4290DDmulti3.dat      => EEV DD array
                     case GN:
                         _detector = new Detector(getDirectory() + "/", getPrefix(), "E2V4290DDmulti3", "EEV DD array");
@@ -111,15 +114,15 @@ public abstract class Gmos extends Instrument {
         }
 
         if (detectorCcdIndex == 0) {
-            _dtv = new DetectorsTransmissionVisitor(gp.getSpectralBinning(),
+            _dtv = new DetectorsTransmissionVisitor(gp.spectralBinning(),
                     getDirectory() + "/" + getPrefix() + "ccdpix_red" + Instrument.getSuffix());
         }
 
         if (isIfuUsed()) {
-            if (gp.getIFUMethod().get() instanceof IfuSingle) {
-                _IFU = new IFUComponent(getPrefix(), ((IfuSingle) gp.getIFUMethod().get()).offset());
-            } else if (gp.getIFUMethod().get() instanceof IfuRadial) {
-                final IfuRadial ifu = (IfuRadial) gp.getIFUMethod().get();
+            if (gp.ifuMethod().get() instanceof IfuSingle) {
+                _IFU = new IFUComponent(getPrefix(), ((IfuSingle) gp.ifuMethod().get()).offset());
+            } else if (gp.ifuMethod().get() instanceof IfuRadial) {
+                final IfuRadial ifu = (IfuRadial) gp.ifuMethod().get();
                 _IFU = new IFUComponent(getPrefix(), ifu.minOffset(), ifu.maxOffset());
             } else {
                 throw new Error("invalid IFU type");
@@ -129,11 +132,11 @@ public abstract class Gmos extends Instrument {
 
 
         // TODO: grating is not yet defined, need to work with grating from gp, clean this up
-        if (!gp.getGrating().equals(GmosNorthType.DisperserNorth.MIRROR) && !gp.getGrating().equals(GmosSouthType.DisperserSouth.MIRROR)) {
-            _gratingOptics = new GmosGratingOptics(getDirectory() + "/" + getPrefix(), gp.getGrating(), _detector,
-                    gp.getCentralWavelength(),
+        if (!gp.grating().equals(GmosNorthType.DisperserNorth.MIRROR) && !gp.grating().equals(GmosSouthType.DisperserSouth.MIRROR)) {
+            _gratingOptics = new GmosGratingOptics(getDirectory() + "/" + getPrefix(), gp.grating(), _detector,
+                    gp.centralWavelength(),
                     _detector.getDetectorPixels(),
-                    gp.getSpectralBinning());
+                    gp.spectralBinning());
             _sampling = _gratingOptics.getGratingDispersion_nmppix();
             addGrating(_gratingOptics);
         }
@@ -197,7 +200,7 @@ public abstract class Gmos extends Instrument {
     }
 
     public GmosCommonType.Disperser getGrating() {
-        return gp.getGrating();
+        return gp.grating();
     }
 
     public double getGratingDispersion_nm() {
@@ -217,9 +220,9 @@ public abstract class Gmos extends Instrument {
     }
 
     public double getPixelSize() {
-        switch (gp.getCCDtype()) {
-            case E2V:       return ORIG_PLATE_SCALE * gp.getSpatialBinning();
-            case HAMAMATSU: return HAM_PLATE_SCALE * gp.getSpatialBinning();
+        switch (gp.ccdType()) {
+            case E2V:       return ORIG_PLATE_SCALE * gp.spatialBinning();
+            case HAMAMATSU: return HAM_PLATE_SCALE * gp.spatialBinning();
             default:        throw new Error("invalid ccd type");
         }
     }
@@ -237,11 +240,11 @@ public abstract class Gmos extends Instrument {
     }
 
     public int getSpectralBinning() {
-        return gp.getSpectralBinning();
+        return gp.spectralBinning();
     }
 
     public int getSpatialBinning() {
-        return gp.getSpatialBinning();
+        return gp.spatialBinning();
     }
 
     public double getADSaturation() {
@@ -261,7 +264,7 @@ public abstract class Gmos extends Instrument {
     }
 
     public boolean isIfuUsed() {
-        return gp.getFocalPlaneMask().isIFU();
+        return gp.fpMask().isIFU();
     }
 
     //Abstract class for Detector Pixel Transmission  (i.e.  Create Detector gaps)
@@ -274,11 +277,11 @@ public abstract class Gmos extends Instrument {
         String s = "Instrument configuration: \n";
         s += super.opticalComponentsToString();
 
-        if (!gp.getFocalPlaneMask().equals(GmosNorthType.FPUnitNorth.FPU_NONE) && !gp.getFocalPlaneMask().equals(GmosSouthType.FPUnitSouth.FPU_NONE))
-            s += "<LI> Focal Plane Mask: " + gp.getFocalPlaneMask().displayValue() + "\n";
+        if (!gp.fpMask().equals(GmosNorthType.FPUnitNorth.FPU_NONE) && !gp.fpMask().equals(GmosSouthType.FPUnitSouth.FPU_NONE))
+            s += "<LI> Focal Plane Mask: " + gp.fpMask().displayValue() + "\n";
         s += "\n";
         if (odp.getMethod().isSpectroscopy())
-            s += "<L1> Central Wavelength: " + gp.getCentralWavelength() + " nm" + "\n";
+            s += "<L1> Central Wavelength: " + gp.centralWavelength() + " nm" + "\n";
         s += "Spatial Binning: " + getSpatialBinning() + "\n";
         if (odp.getMethod().isSpectroscopy())
             s += "Spectral Binning: " + getSpectralBinning() + "\n";
@@ -287,11 +290,11 @@ public abstract class Gmos extends Instrument {
             s += "Pixel Size in Spectral Direction: " + getGratingDispersion_nmppix() + "nm\n";
         if (isIfuUsed()) {
             s += "IFU is selected,";
-            if        (gp.getIFUMethod().get() instanceof IfuSingle) {
-                final IfuSingle ifu = (IfuSingle) gp.getIFUMethod().get();
+            if        (gp.ifuMethod().get() instanceof IfuSingle) {
+                final IfuSingle ifu = (IfuSingle) gp.ifuMethod().get();
                 s += "with a single IFU element at " + ifu.offset() + "arcsecs.";
-            } else if (gp.getIFUMethod().get() instanceof IfuRadial){
-                final IfuRadial ifu = (IfuRadial) gp.getIFUMethod().get();
+            } else if (gp.ifuMethod().get() instanceof IfuRadial){
+                final IfuRadial ifu = (IfuRadial) gp.ifuMethod().get();
                 s += "with mulitple IFU elements arranged from " + ifu.minOffset() + " to " + ifu.maxOffset() + "arcsecs.";
             } else {
                 throw new Error("invalid IFU type");
@@ -314,7 +317,7 @@ public abstract class Gmos extends Instrument {
                         " is not.\nPlease select a grating and a " +
                         "focal plane mask in the Instrument " +
                         "configuration section.");
-            if (gp.getFocalPlaneMask().equals(GmosNorthType.FPUnitNorth.FPU_NONE) || gp.getFocalPlaneMask().equals(GmosSouthType.FPUnitSouth.FPU_NONE))
+            if (gp.fpMask().equals(GmosNorthType.FPUnitNorth.FPU_NONE) || gp.fpMask().equals(GmosSouthType.FPUnitSouth.FPU_NONE))
                 throw new RuntimeException("Spectroscopy calculation method is selected but a focal" +
                         " plane mask is not.\nPlease select a " +
                         "grating and a " +
@@ -331,7 +334,7 @@ public abstract class Gmos extends Instrument {
                 throw new RuntimeException("Imaging calculation method is selected but a grating" +
                         " is also selected.\nPlease deselect the " +
                         "grating or change the method to spectroscopy.");
-            if (!gp.getFocalPlaneMask().equals(GmosNorthType.FPUnitNorth.FPU_NONE) && !gp.getFocalPlaneMask().equals(GmosSouthType.FPUnitSouth.FPU_NONE))
+            if (!gp.fpMask().equals(GmosNorthType.FPUnitNorth.FPU_NONE) && !gp.fpMask().equals(GmosSouthType.FPUnitSouth.FPU_NONE))
                 throw new RuntimeException("Imaging calculation method is selected but a Focal" +
                         " Plane Mask is also selected.\nPlease " +
                         "deselect the Focal Plane Mask" +

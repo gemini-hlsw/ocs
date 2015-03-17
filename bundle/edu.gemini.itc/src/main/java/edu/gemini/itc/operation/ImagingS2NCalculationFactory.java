@@ -1,7 +1,7 @@
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.parameters.ObservationDetailsParameters;
-import edu.gemini.itc.parameters.SourceDefinitionParameters;
+import edu.gemini.itc.service.ObservationDetails;
+import edu.gemini.itc.service.SourceDefinition;
 import edu.gemini.itc.shared.Instrument;
 
 public final class ImagingS2NCalculationFactory {
@@ -9,8 +9,8 @@ public final class ImagingS2NCalculationFactory {
     private ImagingS2NCalculationFactory() {}
 
     public static ImagingS2NCalculatable getCalculationInstance(
-            final SourceDefinitionParameters sdp,
-            final ObservationDetailsParameters odp,
+            final SourceDefinition sdp,
+            final ObservationDetails odp,
             final Instrument instrument) {
 
 

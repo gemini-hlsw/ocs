@@ -1,8 +1,9 @@
 package edu.gemini.itc.baseline.util
 
-import java.io.{File, ByteArrayOutputStream, PrintWriter}
+import java.io.{ByteArrayOutputStream, File, PrintWriter}
 
-import edu.gemini.itc.shared.{ITCParameters, ITCImageFileIO, Recipe}
+import edu.gemini.itc.service.InstrumentDetails
+import edu.gemini.itc.shared.{ITCImageFileIO, Recipe}
 
 import scala.io.Source
 
@@ -58,7 +59,7 @@ object Baseline {
     w.close()
   }
 
-  def from[T <: ITCParameters](f: Fixture[T], out: Output): Baseline = Baseline(f.hash, out.hash)
+  def from[T <: InstrumentDetails](f: Fixture[T], out: Output): Baseline = Baseline(f.hash, out.hash)
 
   def cookRecipe(f: PrintWriter => Recipe): Output = {
     val o = new ByteArrayOutputStream(5000)

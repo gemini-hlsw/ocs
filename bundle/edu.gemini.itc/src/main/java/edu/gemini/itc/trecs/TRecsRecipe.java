@@ -1,8 +1,9 @@
 package edu.gemini.itc.trecs;
 
 import edu.gemini.itc.operation.*;
-import edu.gemini.itc.parameters.*;
+import edu.gemini.itc.service.*;
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.web.HtmlPrinter;
 import edu.gemini.itc.web.ITCRequest;
 import edu.gemini.spModel.core.Site;
 
@@ -14,12 +15,12 @@ import java.util.Calendar;
  */
 public final class TRecsRecipe extends RecipeBase {
     // Parameters from the web page.
-    private SourceDefinitionParameters _sdParameters;
-    private ObservationDetailsParameters _obsDetailParameters;
-    private ObservingConditionParameters _obsConditionParameters;
+    private SourceDefinition _sdParameters;
+    private ObservationDetails _obsDetailParameters;
+    private ObservingConditions _obsConditionParameters;
     private TRecsParameters _trecsParameters;
-    private TeleParameters _teleParameters;
-    private PlottingDetailsParameters _plotParameters;
+    private TelescopeDetails _telescope;
+    private PlottingDetails _plotParameters;
 
     private String sigSpec, backSpec, singleS2N, finalS2N;
     private SpecS2NLargeSlitVisitor specS2N;
@@ -42,29 +43,29 @@ public final class TRecsRecipe extends RecipeBase {
         _sdParameters = ITCRequest.sourceDefinitionParameters(r);
         _obsDetailParameters = correctedObsDetails(_trecsParameters, ITCRequest.observationParameters(r));
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
-        _teleParameters = ITCRequest.teleParameters(r);
+        _telescope = ITCRequest.teleParameters(r);
         _plotParameters = ITCRequest.plotParamters(r);
     }
 
     /**
      * Constructs a TRecsRecipe given the parameters. Useful for testing.
      */
-    public TRecsRecipe(SourceDefinitionParameters sdParameters,
-                       ObservationDetailsParameters obsDetailParameters,
-                       ObservingConditionParameters obsConditionParameters,
-                       TRecsParameters trecsParameters, TeleParameters teleParameters,
-                       PlottingDetailsParameters plotParameters,
+    public TRecsRecipe(SourceDefinition sdParameters,
+                       ObservationDetails obsDetailParameters,
+                       ObservingConditions obsConditionParameters,
+                       TRecsParameters trecsParameters, TelescopeDetails telescope,
+                       PlottingDetails plotParameters,
                        PrintWriter out) {
         super(out);
         _sdParameters = sdParameters;
         _obsDetailParameters = correctedObsDetails(trecsParameters, obsDetailParameters);
         _obsConditionParameters = obsConditionParameters;
         _trecsParameters = trecsParameters;
-        _teleParameters = teleParameters;
+        _telescope = telescope;
         _plotParameters = plotParameters;
     }
 
-    private ObservationDetailsParameters correctedObsDetails(TRecsParameters tp, ObservationDetailsParameters odp) {
+    private ObservationDetails correctedObsDetails(TRecsParameters tp, ObservationDetails odp) {
         // TODO : These corrections were previously done in random places throughout the recipe. I moved them here
         // TODO : so the ObservationDetailsParameters object can become immutable. Basically this calculates
         // TODO : some missing parameters and/or turns the total exposure time into a single exposure time.
@@ -74,17 +75,17 @@ public final class TRecsRecipe extends RecipeBase {
         final double correctedExposureTime = instrument.getFrameTime();
         final int correctedNumExposures = new Double(odp.getExposureTime() / instrument.getFrameTime() + 0.5).intValue();
         if (odp.getMethod() instanceof ImagingInt) {
-            return new ObservationDetailsParameters(
+            return new ObservationDetails(
                     new ImagingInt(odp.getSNRatio(), correctedExposureTime, odp.getSourceFraction()),
                     odp.getAnalysis()
             );
         } else if (odp.getMethod() instanceof ImagingSN) {
-            return new ObservationDetailsParameters(
+            return new ObservationDetails(
                     new ImagingSN(correctedNumExposures, correctedExposureTime, odp.getSourceFraction()),
                     odp.getAnalysis()
             );
         } else if (odp.getMethod() instanceof SpectroscopySN) {
-            return new ObservationDetailsParameters(
+            return new ObservationDetails(
                     new SpectroscopySN(correctedNumExposures, correctedExposureTime, odp.getSourceFraction()),
                     odp.getAnalysis()
             );
@@ -117,7 +118,7 @@ public final class TRecsRecipe extends RecipeBase {
 
         TRecs instrument = new TRecs(_trecsParameters, _obsDetailParameters);
 
-        if (_sdParameters.getDistributionType().equals(SourceDefinitionParameters.Distribution.ELINE))
+        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE))
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters
                     .getELineWavelength() * 1000 / 4))) { // /4 b/c of increased
                 // resolution of
@@ -142,7 +143,7 @@ public final class TRecsRecipe extends RecipeBase {
 
 
         // Get the summed source and sky
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GS, ITCConstants.MID_IR, _sdParameters, _obsConditionParameters, _teleParameters, _plotParameters);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GS, ITCConstants.MID_IR, _sdParameters, _obsConditionParameters, _telescope, _plotParameters);
         final VisitableSampledSpectrum sed = calcSource.sed;
         final VisitableSampledSpectrum sky = calcSource.sky;
         double sed_integral = sed.getIntegral();
@@ -166,7 +167,7 @@ public final class TRecsRecipe extends RecipeBase {
 
         // Calculate image quality
         double im_qual = 0.;
-        ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _teleParameters, instrument);
+        ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
         IQcalc.calculate();
 
         im_qual = IQcalc.getImageQuality();
@@ -219,15 +220,6 @@ public final class TRecsRecipe extends RecipeBase {
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {
 
             SlitThroughput st;
-
-            // DetectorsTransmissionVisitor dtv =
-            // new
-            // DetectorsTransmissionVisitor(instrument.getSpectralBinning());
-
-            // sed.accept(dtv);
-            // sky.accept(dtv);
-
-            // ChartVisitor TRecsChart = new ChartVisitor();
             if (!_obsDetailParameters.isAutoAperture()) {
                 st = new SlitThroughput(im_qual,
                         _obsDetailParameters.getApertureDiameter(), pixel_size,
@@ -394,13 +386,13 @@ public final class TRecsRecipe extends RecipeBase {
 
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + instrument.getName() + "\n");
-        _println(_sdParameters.printParameterSummary());
+        _println(HtmlPrinter.printParameterSummary(_sdParameters));
         _println(instrument.toString());
-        _println(_teleParameters.printParameterSummary());
-        _println(_obsConditionParameters.printParameterSummary());
-        _println(_obsDetailParameters.printParameterSummary());
+        _println(HtmlPrinter.printParameterSummary(_telescope));
+        _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));
+        _println(HtmlPrinter.printParameterSummary(_obsDetailParameters));
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {
-            _println(_plotParameters.printParameterSummary());
+            _println(HtmlPrinter.printParameterSummary(_plotParameters));
             _println(specS2N.getSignalSpectrum(), _header, sigSpec);
             _println(specS2N.getBackgroundSpectrum(), _header, backSpec);
             _println(specS2N.getExpS2NSpectrum(), _header, singleS2N);
