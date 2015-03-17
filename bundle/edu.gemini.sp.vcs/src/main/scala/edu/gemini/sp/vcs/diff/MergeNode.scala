@@ -10,11 +10,11 @@ import scalaz._
 
 
 /** MergeNodes form a tree with potential links into an existing science
-  * program.  There are two types of MergeNode, [[Modified]] and
-  * [[Unmodified]]s.  `Modified` describes a potential update to an
-  * existing science program node (or the definition of a node missing locally).
-  * `Unmodified` is just a `MergeNode` wrapper for an existing science program
-  * node.
+  * program.  There are two types of MergeNode, [[edu.gemini.sp.vcs.diff.Modified]]
+  * and [[edu.gemini.sp.vcs.diff.Unmodified]]s.  `Modified` describes a
+  * potential update to an existing science program node (or the definition of a
+  * node missing locally). `Unmodified` is just a `MergeNode` wrapper for an
+  * existing science program node.
   */
 sealed trait MergeNode {
   def key: SPNodeKey
@@ -77,6 +77,21 @@ object MergeNode {
         }
 
       go(List(t), z)
+    }
+  }
+
+  implicit class TreeLocOps[A](tl: TreeLoc[A]) {
+    /** Deletes the current node and selects the parent.  Unlike the
+      * `TreeLoc.delete` function, this function will always select the parent
+      * node. */
+    def deleteNodeFocusParent: Option[TreeLoc[A]] = {
+      def combine(ls: Stream[Tree[A]], rs: Stream[Tree[A]]) =
+        ls.foldLeft(rs)((a, b) => b #:: a)
+
+      tl.parents match {
+        case (pls, v, prs) #:: ps => Some(TreeLoc.loc(Tree.node(v, combine(tl.lefts, tl.rights)), pls, prs, ps))
+        case Stream.Empty         => None
+      }
     }
   }
 

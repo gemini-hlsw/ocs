@@ -1,5 +1,6 @@
 package edu.gemini.sp.vcs.diff
 
+import edu.gemini.pot.sp.validator.Validator
 import edu.gemini.pot.sp.version.VersionMap
 import edu.gemini.pot.sp.{DataObjectBlob => DOB, _}
 import edu.gemini.shared.util.VersionComparison
@@ -17,7 +18,6 @@ import org.scalatest.junit.JUnitSuite
 import scala.collection.JavaConverters._
 
 import scalaz._
-import Scalaz._
 
 
 class MergeTest extends JUnitSuite {
@@ -83,12 +83,12 @@ class MergeTest extends JUnitSuite {
     val deletedKeys = mergePlan.delete.map(_.key).toSet
 
     val correctedMergePlan =
-      ObsNumberCorrection(mergeContext).apply(mergePlan).liftVcs
+      MergeCorrection(mergeContext)(mergePlan)
 
     val updatedLocalProgram = {
       val localCopy = fact.copyWithSameKeys(lp)
       for {
-        mp <- correctedMergePlan
+        mp <- correctedMergePlan.liftVcs
         _  <- mp.merge(fact, localCopy)
       } yield localCopy
     }
@@ -393,7 +393,7 @@ class MergeTest extends JUnitSuite {
           }
 
         val result = for {
-          cmp <- pc.correctedMergePlan
+          cmp <- pc.correctedMergePlan.liftVcs
           ulp <- pc.updatedLocalProgram
         } yield {
           val matches = matchesMergePlan(ulp, cmp.update)
@@ -409,9 +409,6 @@ class MergeTest extends JUnitSuite {
         import VcsAction._
 
         result.unsafeRun match {
-          case -\/(VcsException(ex)) =>
-            true // TODO: ignore for now, missing correction ...
-
           case -\/(failure)          =>
             Console.err.println(failure)
             false
@@ -430,12 +427,37 @@ class MergeTest extends JUnitSuite {
             case _            => false
           }
 
-        pc.updatedLocalProgram.forall { ulp =>
+        pc.updatedLocalProgram.exists { ulp =>
           val updateVm = ulp.getVersions
           val localVm  = pc.lp.getVersions
           val remoteVm = pc.rp.getVersions
           isSameOrNewer(updateVm, localVm) && isSameOrNewer(updateVm, remoteVm)
         }.run
+      }
+    ),
+
+    ("merged program passes validity checks",
+      (start, local, remote, pc) => {
+        import VcsAction._
+        pc.updatedLocalProgram.unsafeRun match {
+          case -\/(VcsException(ex)) =>
+            Console.err.println("Unexpected error creating merged program")
+            ex.printStackTrace()
+            false
+
+          case -\/(f) =>
+            Console.err.println(s"Could not merge programs: $f")
+            false
+
+          case \/-(p) =>
+            Validator.validate(p) match {
+              case Left(v) =>
+                Console.err.println(s"Merged program not valid: $v")
+                false
+              case Right(_) =>
+                true
+            }
+        }
       }
     )
   )

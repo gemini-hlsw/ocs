@@ -56,7 +56,7 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
         _     <- validateProgKey(p, diffs)
         mc     = MergeContext(p, diffs)
         prelim = PreliminaryMerge.merge(mc)
-        plan  <- ObsNumberCorrection(mc).apply(prelim).liftVcs
+        plan  <- MergeCorrection(mc)(prelim).liftVcs
       } yield MergeEval(plan, p, mc.remote.vm)
 
     // Only do the merge if the merge plan has something new to offer.

@@ -3,13 +3,15 @@ package edu.gemini.pot.sp.validator
 import edu.gemini.pot.sp.{SPNodeKey, ISPNode, ISPProgram, ISPContainerNode}
 import java.awt.{AWTEvent, EventQueue}
 
+import scala.util.Try
+
 object EventCache {
 
   private var previousEvent: Option[AWTEvent] = None
   private val cache: collection.mutable.Map[(ISPContainerNode, Option[SPNodeKey]), TypeTree] = collection.mutable.Map()
 
   def tree(prog: ISPContainerNode, contextKey: Option[SPNodeKey])(a: => TypeTree): TypeTree =
-    Option(EventQueue.getCurrentEvent) match {
+    Option(Try(EventQueue.getCurrentEvent).toOption.orNull) match {
       case None => a
       case o =>
         if (o != previousEvent) {
@@ -107,7 +109,7 @@ object Validator {
 
   private def validate(c: Constraint, tree: TypeTree): Either[Violation, Constraint] = {
     lazy val a = validate1(c, tree)
-    Option(EventQueue.getCurrentEvent) match {
+    Option(Try(EventQueue.getCurrentEvent).toOption.orNull) match {
       case None => a
       case o =>
         if (o != previousEvent) {
