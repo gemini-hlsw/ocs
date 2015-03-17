@@ -456,15 +456,13 @@ public final class MichelleRecipe extends RecipeBase {
              */
 
             ImagingS2NCalculatable IS2Ncalc =
-                    ImagingS2NCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
+                    ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument);
             IS2Ncalc.setSedIntegral(sed_integral);
             IS2Ncalc.setSkyIntegral(sky_integral);
             IS2Ncalc.setSkyAperture(_obsDetailParameters.getSkyApertureDiameter());
             IS2Ncalc.setSourceFraction(SFcalc.getSourceFraction());
             IS2Ncalc.setNpix(SFcalc.getNPix());
-            IS2Ncalc.setDarkCurrent(instrument.getDarkCurrent() *
-                    instrument.getSpatialBinning() *
-                    instrument.getSpatialBinning());
+            IS2Ncalc.setDarkCurrent(instrument.getDarkCurrent() * instrument.getSpatialBinning() * instrument.getSpatialBinning());
             IS2Ncalc.calculate();
 
             // Michelle polarimetry calculations include a x4 overhead of observing into the calculation

@@ -1,30 +1,22 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-
 package edu.gemini.itc.operation;
 
+import edu.gemini.itc.service.ObservationDetails;
 import edu.gemini.itc.shared.FormatStringWriter;
+import edu.gemini.itc.shared.Instrument;
 
-public class ImagingS2NMethodACalculation extends ImagingS2NCalculation {
+public final class ImagingS2NMethodACalculation extends ImagingS2NCalculation {
 
     int number_exposures;
-    double frac_with_source, exp_s2n, final_s2n, number_source_exposures;
+    double frac_with_source, exp_s2n, final_s2n;
 
-    public ImagingS2NMethodACalculation(int number_exposures,
-                                        double frac_with_source,
-                                        double exposure_time, double read_noise,
-                                        double pixel_size) {
+    public ImagingS2NMethodACalculation(final ObservationDetails obs,
+                                        final Instrument instrument) {
 
-        this.number_exposures = number_exposures;
-        this.frac_with_source = frac_with_source;
-        this.exposure_time = exposure_time;
-        this.read_noise = read_noise;
-        this.pixel_size = pixel_size;
+        this.number_exposures = obs.getNumExposures();
+        this.frac_with_source = obs.getSourceFraction();
+        this.exposure_time = obs.getExposureTime();
+        this.read_noise = instrument.getReadNoise();
+        this.pixel_size = instrument.getPixelSize();
     }
 
     public void calculate() {

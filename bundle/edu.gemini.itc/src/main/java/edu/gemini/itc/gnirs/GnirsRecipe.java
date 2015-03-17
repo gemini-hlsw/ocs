@@ -114,7 +114,6 @@ public final class GnirsRecipe extends RecipeBase {
 
         double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
-        double Npix = 0;
         double source_fraction = 0;
         double peak_pixel_count = 0;
 
@@ -139,7 +138,6 @@ public final class GnirsRecipe extends RecipeBase {
 
         // this will be the core for an altair source; unchanged for non altair.
         source_fraction = SFcalc.getSourceFraction();
-        Npix = SFcalc.getNPix();
         if (_obsDetailParameters.getMethod().isImaging()) {
             _print(SFcalc.getTextResult(device));
             _println(IQcalc.getTextResult(device));
@@ -167,7 +165,7 @@ public final class GnirsRecipe extends RecipeBase {
                     sky_integral, instrument.getDarkCurrent());
 
             peak_pixel_count = ppfc
-                    .getFluxInPeakPixelUSB(source_fraction, Npix);
+                    .getFluxInPeakPixelUSB(source_fraction, SFcalc.getNPix());
         }
 
         // In this version we are bypassing morphology modules 3a-5a.
@@ -812,7 +810,7 @@ public final class GnirsRecipe extends RecipeBase {
         } else {
 
             ImagingS2NCalculatable IS2Ncalc =
-                    ImagingS2NCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
+                    ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument);
             IS2Ncalc.setSedIntegral(sed_integral);
 
 //            // REL-472: Commenting out Altair option for now
@@ -822,13 +820,10 @@ public final class GnirsRecipe extends RecipeBase {
 //            }
 
             IS2Ncalc.setSkyIntegral(sky_integral);
-            IS2Ncalc.setSkyAperture(_obsDetailParameters
-                    .getSkyApertureDiameter());
+            IS2Ncalc.setSkyAperture(_obsDetailParameters.getSkyApertureDiameter());
             IS2Ncalc.setSourceFraction(source_fraction);
-            IS2Ncalc.setNpix(Npix);
-            IS2Ncalc.setDarkCurrent(instrument.getDarkCurrent()
-                    * instrument.getSpatialBinning()
-                    * instrument.getSpatialBinning());
+            IS2Ncalc.setNpix(SFcalc.getNPix());
+            IS2Ncalc.setDarkCurrent(instrument.getDarkCurrent() * instrument.getSpatialBinning() * instrument.getSpatialBinning());
             IS2Ncalc.calculate();
             _println(IS2Ncalc.getTextResult(device));
             // _println(IS2Ncalc.getBackgroundLimitResult());

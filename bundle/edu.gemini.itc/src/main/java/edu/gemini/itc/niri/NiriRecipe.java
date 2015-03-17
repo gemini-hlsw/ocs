@@ -194,7 +194,6 @@ public final class NiriRecipe extends RecipeBase {
             SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, IQcalc.getImageQuality());
         }
         source_fraction = SFcalc.getSourceFraction();
-        final double Npix = SFcalc.getNPix();
         if (_obsDetailParameters.getMethod().isImaging()) {
             if (_altairParameters.altairIsUsed()) {
                 _print(SFcalc.getTextResult(device, false));
@@ -232,8 +231,7 @@ public final class NiriRecipe extends RecipeBase {
                     _obsDetailParameters.getExposureTime(), sed_integral,
                     sky_integral, instrument.getDarkCurrent());
 
-            peak_pixel_count = ppfc
-                    .getFluxInPeakPixelUSB(source_fraction, Npix);
+            peak_pixel_count = ppfc.getFluxInPeakPixelUSB(source_fraction, SFcalc.getNPix());
         }
 
         // In this version we are bypassing morphology modules 3a-5a.
@@ -353,7 +351,7 @@ public final class NiriRecipe extends RecipeBase {
             finalS2N = _printSpecTag("Final S/N ASCII data");
 
         } else {
-            final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
+            final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument);
             IS2Ncalc.setSedIntegral(sed_integral);
             if (_altairParameters.altairIsUsed()) {
                 IS2Ncalc.setSecondaryIntegral(halo_integral);
@@ -361,7 +359,7 @@ public final class NiriRecipe extends RecipeBase {
             }
             IS2Ncalc.setSkyIntegral(sky_integral);
             IS2Ncalc.setSourceFraction(source_fraction);
-            IS2Ncalc.setNpix(Npix);
+            IS2Ncalc.setNpix(SFcalc.getNPix());
             IS2Ncalc.setDarkCurrent(instrument.getDarkCurrent());
             IS2Ncalc.calculate();
             _println(IS2Ncalc.getTextResult(device));
