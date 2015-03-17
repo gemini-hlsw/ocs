@@ -34,10 +34,11 @@ object FeatureGeometry {
    * @return       the transformed shapes
    */
   def transformScienceAreaForContext(shapes: List[Shape], ctx: ObsContext): List[Shape] = {
+    import edu.gemini.pot.ModelConverters._
     val posAngle = ctx.getPositionAngle.toRadians.getMagnitude
     val basePoint = {
-      val coords = ctx.getBaseCoordinates
-      new Point2D.Double(coords.getDec.getMagnitude, coords.getRa.getMagnitude)
+      val coords = ctx.getBaseCoordinates.toNewModel
+      new Point2D.Double(coords.ra.toAngle.toNormalizedArcseconds, coords.dec.toAngle.toNormalizedArcseconds)
     }
     val trans = AffineTransform.getRotateInstance(-posAngle, basePoint.getX, basePoint.getY)
     trans.translate(basePoint.getX, basePoint.getY)
@@ -64,9 +65,13 @@ object FeatureGeometry {
    * @param pixelsPerArcsec the pixel density
    * @return                the shapes scaled for the display
    */
-  def transformScienceAreaForScreen(shapes: List[Shape], pixelsPerArcsec: Double): List[Shape] = {
-    val scaleTrans = AffineTransform.getScaleInstance(pixelsPerArcsec, pixelsPerArcsec)
-    shapes.map {scaleTrans.createTransformedShape }
+  def transformScienceAreaForScreen(shapes: List[Shape], pixelsPerArcsec: Double, ctx: ObsContext, screenPos: Point2D): List[Shape] = {
+    import edu.gemini.pot.ModelConverters._
+    val trans = AffineTransform.getScaleInstance(pixelsPerArcsec, pixelsPerArcsec)
+    val x = screenPos.getX / pixelsPerArcsec - ctx.getBaseCoordinates.toNewModel.ra.toAngle.toNormalizedArcseconds
+    val y = screenPos.getY / pixelsPerArcsec - ctx.getBaseCoordinates.toNewModel.dec.toAngle.toNormalizedArcseconds
+    trans.translate(x, y)
+    shapes.map { trans.createTransformedShape }
   }
 
   /**
@@ -75,8 +80,8 @@ object FeatureGeometry {
    * @param pixelsPerArcsec the pixel density
    * @return                the shape scaled for the display
    */
-  def transformScienceAreaForScreen(shape: Shape, pixelsPerArcsec: Double): Shape =
-    transformScienceAreaForScreen(List(shape), pixelsPerArcsec).head
+  def transformScienceAreaForScreen(shape: Shape, pixelsPerArcsec: Double, ctx: ObsContext, screenPos: Point2D): Shape =
+    transformScienceAreaForScreen(List(shape), pixelsPerArcsec, ctx, screenPos).head
 
   /**
    * Given a list of shapes representing a guide probe arm, an angle for the probe arm, and the position of the guide

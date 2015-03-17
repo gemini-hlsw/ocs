@@ -26,6 +26,25 @@ object ModelConverters {
     def toOldModel: skycalc.Angle = skycalc.Angle.degrees(angle.toDegrees)
   }
 
+  // We need a way to convert angles from [0,maxValOfUnit) to [-maxValOfUnit/2,maxValOfUnit/2) for a number of purposes.
+  private val maxRadians = 2 * math.Pi
+  private val maxDegrees = 360
+  private val maxArcmins = 60 * maxDegrees
+  private val maxArcsecs = 60 * maxArcmins
+  implicit class AngleNormalizer(val angle: Angle) extends AnyVal {
+    private def normalize(value: Double, maxValue: Double): Double = {
+      val half = maxValue / 2.0
+      val pos = value % maxValue
+      val neg = pos - maxValue
+      if (math.abs(pos) < math.abs(neg)) pos else neg
+    }
+
+    def toNormalizedRadians:    Double = normalize(angle.toRadians, maxRadians)
+    def toNormalizedDegrees:    Double = normalize(angle.toDegrees, maxDegrees)
+    def toNormalizedArcmins:    Double = normalize(angle.toArcmins, maxArcmins)
+    def toNormalizedArcseconds: Double = normalize(angle.toArcsecs, maxArcsecs)
+  }
+
   implicit class OldOffset2New(val offset: skycalc.Offset) extends AnyVal {
     def toNewModel: Offset = Offset(offset.p().toNewModel, offset.q().toNewModel)
   }

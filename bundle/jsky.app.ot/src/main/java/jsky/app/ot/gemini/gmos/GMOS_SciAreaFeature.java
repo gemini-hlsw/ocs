@@ -99,16 +99,13 @@ public class GMOS_SciAreaFeature extends SciAreaFeatureBase {
         if (instGMOS != null) {
             final ObsContext ctx = _iw.getMinimalObsContext().getOrNull();
             if (ctx != null) {
-                final AffineTransform trans = AffineTransform.getTranslateInstance(_baseScreenPos.getX(), _baseScreenPos.getY());
-
                 final ImList<Shape> shape = new GmosScienceAreaGeometry().geometryAsJava(instGMOS);
                 shape.foreach(new ApplyOp<Shape>() {
                     @Override
                     public void apply(final Shape s) {
                         final Shape s2 = FeatureGeometry$.MODULE$.transformScienceAreaForContext(s, ctx);
-                        final Shape s3 = FeatureGeometry$.MODULE$.transformScienceAreaForScreen(s2, _pixelsPerArcsec);
-                        final Shape s4 = trans.createTransformedShape(s3);
-                        _figureList.add(s4);
+                        final Shape s3 = FeatureGeometry$.MODULE$.transformScienceAreaForScreen(s2, _pixelsPerArcsec, ctx, _baseScreenPos);
+                        _figureList.add(s3);
                     }
                 });
 
