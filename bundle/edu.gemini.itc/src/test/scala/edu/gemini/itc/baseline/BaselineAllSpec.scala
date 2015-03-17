@@ -4,12 +4,12 @@ import edu.gemini.itc.acqcam.AcquisitionCamParameters
 import edu.gemini.itc.baseline.util.Baseline._
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.flamingos2.Flamingos2Parameters
-import edu.gemini.itc.gmos.GmosParameters
 import edu.gemini.itc.gnirs.GnirsParameters
 import edu.gemini.itc.gsaoi.GsaoiParameters
 import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.niri.NiriParameters
+import edu.gemini.itc.service.GmosParameters
 import edu.gemini.itc.trecs.TRecsParameters
 import org.scalacheck.{Arbitrary, Gen}
 import org.specs2.ScalaCheck

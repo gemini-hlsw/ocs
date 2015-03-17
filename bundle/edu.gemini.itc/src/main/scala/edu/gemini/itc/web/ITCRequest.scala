@@ -3,7 +3,6 @@ package edu.gemini.itc.web
 import javax.servlet.http.HttpServletRequest
 
 import edu.gemini.itc.altair.AltairParameters
-import edu.gemini.itc.gmos.GmosParameters
 import edu.gemini.itc.service.SourceDefinition._
 import edu.gemini.itc.service._
 import edu.gemini.itc.shared._

@@ -110,14 +110,14 @@ public final class GmosRecipe extends RecipeBase {
             for (int i = 0; i < ccdArray.length; i++) {
                 final Gmos instrument = ccdArray[i];
                 // TODO: do we need to do this per CCD? shouldn't be different for different CCDs??
-                final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _gmosParameters.getSite(), ITCConstants.VISIBLE, _sdParameters, _obsConditionParameters, _telescope, _plotParameters);
+                final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _gmosParameters.site(), ITCConstants.VISIBLE, _sdParameters, _obsConditionParameters, _telescope, _plotParameters);
                 results[i] = invokeSpectroscopy(calcSource, mainInstrument, instrument, ccdArray.length);
             }
         } else {
             for (int i = 0; i < ccdArray.length; i++) {
                 final Gmos instrument = ccdArray[i];
                 // TODO: do we need to do this per CCD? shouldn't be different for different CCDs??
-                final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _gmosParameters.getSite(), ITCConstants.VISIBLE, _sdParameters, _obsConditionParameters, _telescope, _plotParameters);
+                final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _gmosParameters.site(), ITCConstants.VISIBLE, _sdParameters, _obsConditionParameters, _telescope, _plotParameters);
                 results[i] = invokeImaging(calcSource, instrument);
             }
         }
@@ -127,7 +127,7 @@ public final class GmosRecipe extends RecipeBase {
     }
 
     private Gmos createGmos() {
-        switch (_gmosParameters.getSite()) {
+        switch (_gmosParameters.site()) {
             case GN: return new GmosNorth(_gmosParameters, _obsDetailParameters, 0);
             case GS: return new GmosSouth(_gmosParameters, _obsDetailParameters, 0);
             default: throw new Error("invalid site");
@@ -184,7 +184,7 @@ public final class GmosRecipe extends RecipeBase {
                     } else {
                         switch (_sdParameters.getProfileType()) {
                             case UNIFORM:
-                                _println("software aperture extent along slit = " + device.toString(1 / _gmosParameters.getFPMask()) + " arcsec");
+                                _println("software aperture extent along slit = " + device.toString(1 / _gmosParameters.slitWidth()) + " arcsec");
                                 break;
                             case POINT:
                                 _println("software aperture extent along slit = " + device.toString(1.4 * calcGmos.IQcalc.getImageQuality()) + " arcsec");
@@ -412,9 +412,9 @@ public final class GmosRecipe extends RecipeBase {
         // ObservationMode Imaging or spectroscopy
         if (!instrument.isIfuUsed()) {
             if (!_obsDetailParameters.isAutoAperture()) {
-                st = new SlitThroughput(im_qual, _obsDetailParameters.getApertureDiameter(), pixel_size, _gmosParameters.getFPMask());
+                st = new SlitThroughput(im_qual, _obsDetailParameters.getApertureDiameter(), pixel_size, _gmosParameters.slitWidth());
             } else {
-                st = new SlitThroughput(im_qual, pixel_size, _gmosParameters.getFPMask());
+                st = new SlitThroughput(im_qual, pixel_size, _gmosParameters.slitWidth());
             }
             ap_diam = st.getSpatialPix();
             spec_source_frac = st.getSlitThroughput();
@@ -432,9 +432,9 @@ public final class GmosRecipe extends RecipeBase {
             if (!instrument.isIfuUsed()) {
 
                 if (!_obsDetailParameters.isAutoAperture()) {
-                    spec_source_frac = _gmosParameters.getFPMask() * ap_diam * pixel_size;
+                    spec_source_frac = _gmosParameters.slitWidth() * ap_diam * pixel_size;
                 } else {
-                    ap_diam = new Double(1 / (_gmosParameters.getFPMask() * pixel_size) + 0.5).intValue();
+                    ap_diam = new Double(1 / (_gmosParameters.slitWidth() * pixel_size) + 0.5).intValue();
                     spec_source_frac = 1;
                 }
             }
@@ -445,7 +445,7 @@ public final class GmosRecipe extends RecipeBase {
             for (int i = 0; i < sf_list.size(); i++) {
                 final double spsf = sf_list.get(i);
                 specS2N[i] = new SpecS2NLargeSlitVisitor(
-                        _gmosParameters.getFPMask(),
+                        _gmosParameters.slitWidth(),
                         pixel_size,
                         instrument.getSpectralPixelWidth(),
                         instrument.getObservingStart(),
@@ -474,7 +474,7 @@ public final class GmosRecipe extends RecipeBase {
         } else {
             specS2N = new SpecS2NLargeSlitVisitor[1];
             specS2N[0] = new SpecS2NLargeSlitVisitor(
-                    _gmosParameters.getFPMask(),
+                    _gmosParameters.slitWidth(),
                     pixel_size,
                     instrument.getSpectralPixelWidth(),
                     instrument.getObservingStart(),

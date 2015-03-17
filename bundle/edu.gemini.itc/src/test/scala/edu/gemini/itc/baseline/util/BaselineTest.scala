@@ -1,7 +1,7 @@
 package edu.gemini.itc.baseline.util
 
 import edu.gemini.itc.baseline._
-import edu.gemini.itc.shared.ITCParameters
+import edu.gemini.itc.service.InstrumentDetails
 import org.junit.Assert._
 import org.junit.{Ignore, Test}
 
@@ -51,7 +51,7 @@ class BaselineTest {
     executeAll(BaselineNiri.Fixtures,      BaselineNiri.executeRecipe)          ++
     executeAll(BaselineTRecs.Fixtures,     BaselineTRecs.executeRecipe)
 
-  private def executeAll[T <: ITCParameters](fs: Seq[Fixture[T]], recipe: (Fixture[T]) => Output): Seq[Baseline] = {
+  private def executeAll[T <: InstrumentDetails](fs: Seq[Fixture[T]], recipe: (Fixture[T]) => Output): Seq[Baseline] = {
        require(fs.size > 10, "Not enough fixtures " + fs.size) // make sure there's a good number of fixtures
       fs.par.map(f => Baseline.from(f, recipe(f))).seq
   }

@@ -1,5 +1,6 @@
 package edu.gemini.itc.acqcam;
 
+import edu.gemini.itc.service.InstrumentDetails;
 import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCParameters;
 
@@ -10,7 +11,7 @@ import javax.servlet.http.HttpServletRequest;
  * This class holds the information from the Acquisition Camera section
  * of an ITC web page.  This object is constructed from a servlet request.
  */
-public final class AcquisitionCamParameters extends ITCParameters {
+public final class AcquisitionCamParameters implements InstrumentDetails {
     // ITC web form parameter names.
     // These constants must be kept in sync with the web page form.
     // They are used to parse form data.

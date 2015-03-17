@@ -2,7 +2,6 @@ package edu.gemini.itc.service
 
 import edu.gemini.itc.service.SourceDefinition.BrightnessUnit
 
-
 // ==== Source spatial profile
 
 sealed trait SpatialProfile {

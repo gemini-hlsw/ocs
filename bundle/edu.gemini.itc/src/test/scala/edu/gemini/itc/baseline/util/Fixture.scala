@@ -13,7 +13,7 @@ import edu.gemini.spModel.telescope.IssPort
  * Definition of test fixtures which hold all input parameters needed to execute different ITC recipes.
  * TODO: Altair and gems configuration should probably become a part of the instrument configuration(?).
  */
-case class Fixture[T <: ITCParameters](
+case class Fixture[T <: InstrumentDetails](
                     ins: T,
                     src: SourceDefinition,
                     odp: ObservationDetails,
@@ -30,20 +30,20 @@ object Fixture {
 
   // ==== Create fixtures by putting together matching sources, modes and configurations and mixing in conditions and telescope configurations
 
-  def rBandImgFixtures[T <: ITCParameters](configs: List[T], conds: List[ObservingConditions] = ObservingConditions, alt: List[AltairParameters] = List(), gem: List[GemsParameters] = List()) = fixtures(RBandSources, ImagingModes,      configs, conds, alt, gem)
+  def rBandImgFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions, alt: List[AltairParameters] = List(), gem: List[GemsParameters] = List()) = fixtures(RBandSources, ImagingModes,      configs, conds, alt, gem)
 
-  def kBandSpcFixtures[T <: ITCParameters](configs: List[T], conds: List[ObservingConditions] = ObservingConditions, alt: List[AltairParameters] = List(), gem: List[GemsParameters] = List()) = fixtures(KBandSources, SpectroscopyModes, configs, conds, alt, gem)
+  def kBandSpcFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions, alt: List[AltairParameters] = List(), gem: List[GemsParameters] = List()) = fixtures(KBandSources, SpectroscopyModes, configs, conds, alt, gem)
 
-  def kBandImgFixtures[T <: ITCParameters](configs: List[T], conds: List[ObservingConditions] = ObservingConditions, alt: List[AltairParameters] = List(), gem: List[GemsParameters] = List()) = fixtures(KBandSources, ImagingModes,      configs, conds, alt, gem)
+  def kBandImgFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions, alt: List[AltairParameters] = List(), gem: List[GemsParameters] = List()) = fixtures(KBandSources, ImagingModes,      configs, conds, alt, gem)
 
-  def nBandSpcFixtures[T <: ITCParameters](configs: List[T], conds: List[ObservingConditions] = ObservingConditions, alt: List[AltairParameters] = List(), gem: List[GemsParameters] = List()) = fixtures(NBandSources, SpectroscopyModes, configs, conds, alt, gem)
+  def nBandSpcFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions, alt: List[AltairParameters] = List(), gem: List[GemsParameters] = List()) = fixtures(NBandSources, SpectroscopyModes, configs, conds, alt, gem)
 
-  def nBandImgFixtures[T <: ITCParameters](configs: List[T], conds: List[ObservingConditions] = ObservingConditions, alt: List[AltairParameters] = List(), gem: List[GemsParameters] = List()) = fixtures(NBandSources, ImagingModes,      configs, conds, alt, gem)
+  def nBandImgFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions, alt: List[AltairParameters] = List(), gem: List[GemsParameters] = List()) = fixtures(NBandSources, ImagingModes,      configs, conds, alt, gem)
 
-  def qBandSpcFixtures[T <: ITCParameters](configs: List[T], conds: List[ObservingConditions] = ObservingConditions, alt: List[AltairParameters] = List(), gem: List[GemsParameters] = List()) = fixtures(QBandSources, SpectroscopyModes, configs, conds, alt, gem)
+  def qBandSpcFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions, alt: List[AltairParameters] = List(), gem: List[GemsParameters] = List()) = fixtures(QBandSources, SpectroscopyModes, configs, conds, alt, gem)
 
   // create fixtures from combinations of given input values
-  private def fixtures[T <: ITCParameters](sources: List[SourceDefinition], modes: List[ObservationDetails], configs: List[T], conds: List[ObservingConditions], alt: List[AltairParameters], gem: List[GemsParameters]) = for {
+  private def fixtures[T <: InstrumentDetails](sources: List[SourceDefinition], modes: List[ObservationDetails], configs: List[T], conds: List[ObservingConditions], alt: List[AltairParameters], gem: List[GemsParameters]) = for {
       src   <- sources
       odp   <- modes
       ins   <- configs

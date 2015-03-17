@@ -285,7 +285,6 @@ public final class GnirsRecipe extends RecipeBase {
             // _println("RESOLUTION DEBUGGING");
             // _println("gratingDispersion_nm: " +
             // instrument.getGratingDispersion_nm());
-            // _println("slit_width: " + _gnirsParameters.getFPMask());
             // _println("source sampling: " + sed.getSampling());
 
             _println("<p style=\"page-break-inside: never\">");

@@ -220,15 +220,6 @@ public final class TRecsRecipe extends RecipeBase {
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {
 
             SlitThroughput st;
-
-            // DetectorsTransmissionVisitor dtv =
-            // new
-            // DetectorsTransmissionVisitor(instrument.getSpectralBinning());
-
-            // sed.accept(dtv);
-            // sky.accept(dtv);
-
-            // ChartVisitor TRecsChart = new ChartVisitor();
             if (!_obsDetailParameters.isAutoAperture()) {
                 st = new SlitThroughput(im_qual,
                         _obsDetailParameters.getApertureDiameter(), pixel_size,

@@ -1,5 +1,6 @@
 package edu.gemini.itc.gmos;
 
+import edu.gemini.itc.service.GmosParameters;
 import edu.gemini.itc.service.ObservationDetails;
 
 /**

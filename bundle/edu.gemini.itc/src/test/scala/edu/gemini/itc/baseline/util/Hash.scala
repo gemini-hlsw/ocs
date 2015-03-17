@@ -4,14 +4,12 @@ import edu.gemini.itc.acqcam.AcquisitionCamParameters
 import edu.gemini.itc.altair.AltairParameters
 import edu.gemini.itc.flamingos2.Flamingos2Parameters
 import edu.gemini.itc.gems.GemsParameters
-import edu.gemini.itc.gmos.GmosParameters
 import edu.gemini.itc.gnirs.GnirsParameters
 import edu.gemini.itc.gsaoi.GsaoiParameters
 import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.niri.NiriParameters
 import edu.gemini.itc.service._
-import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
 
 // TEMPORARY helper
@@ -19,7 +17,7 @@ import edu.gemini.itc.trecs.TRecsParameters
 // For now we need a workaround for missing hash functions on the existing Java objects.
 object Hash {
 
-  def calc(ip: ITCParameters): Int = ip match {
+  def calc(ip: InstrumentDetails): Int = ip match {
     case p: AcquisitionCamParameters  => calc(p)
     case p: Flamingos2Parameters      => calc(p)
     case p: GmosParameters            => calc(p)
@@ -34,15 +32,15 @@ object Hash {
 
   def calc(p: GmosParameters): Int =
     hash(
-      p.getFilter.name,
-      p.getCCDtype.name,
-      p.getFocalPlaneMask.name,
-      p.getGrating.name,
-      p.getIFUMethod.toString,
-      p.getCentralWavelength,
-      p.getSite.name,
-      p.getSpatialBinning,
-      p.getSpectralBinning
+      p.filter.name,
+      p.ccdType.name,
+      p.fpMask.name,
+      p.grating.name,
+      p.ifuMethod.toString,
+      p.centralWavelength,
+      p.site.name,
+      p.spatialBinning,
+      p.spectralBinning
     )
 
   def calc(p: GnirsParameters): Int =
@@ -105,7 +103,6 @@ object Hash {
       p.getCamera,
       p.getFilter,
       p.getFocalPlaneMask,
-//      p.getFPMask,
 //      p.getFPMaskOffset,
       p.getGrism,
       p.getReadNoise,
