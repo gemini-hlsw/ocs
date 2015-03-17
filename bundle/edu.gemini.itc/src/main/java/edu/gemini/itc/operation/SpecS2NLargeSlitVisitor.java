@@ -15,7 +15,7 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor {
             sqrt_spec_var_background, spec_exp_s2n, spec_final_s2n;
     private double slit_width, pixel_size, spec_source_fraction, spec_halo_source_fraction, pix_width, spec_Npix, spec_frac_with_source, spec_exp_time, im_qual, uncorrected_im_qual, dark_current, read_noise, obs_wave, obs_wave_low, obs_wave_high, grating_res,
             gratingDispersion_nm, gratingDispersion_nmppix, skyAper;
-    private int spec_number_exposures, spectralBinning;
+    private int spec_number_exposures;
     private boolean haloIsUsed = false;
 
     private edu.gemini.itc.operation.DetectorsTransmissionVisitor _dtv;
@@ -35,7 +35,7 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor {
                                    double spec_Npix, int spec_number_exposures,
                                    double spec_frac_with_source, double spec_exp_time,
                                    double dark_current, double read_noise,
-                                   double skyAper, int spectralBinning) {
+                                   double skyAper) {
         this.slit_width = slit_width;
         this.pixel_size = pixel_size;
         this.pix_width = pix_width;
@@ -53,7 +53,6 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor {
         this.read_noise = read_noise;
         this.spec_number_exposures = spec_number_exposures;
         this.skyAper = skyAper;
-        this.spectralBinning = spectralBinning;
 
     }
 
@@ -150,12 +149,6 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor {
 
         source_flux.accept(source_resample);
         background_flux.accept(background_resample);
-
-        //System.out.println("sam: " + pix_width);
-
-        //Apply the detectorts transmission.  This will create the detector gaps
-        //DetectorsTransmissionVisitor dtv =
-        //	 			new DetectorsTransmissionVisitor(spectralBinning);
 
         source_flux.accept(_dtv);
         background_flux.accept(_dtv);

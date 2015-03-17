@@ -271,10 +271,9 @@ public final class GnirsRecipe extends RecipeBase {
                     number_exposures,
                     frac_with_source,
                     exposure_time,
-                    dark_current * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
+                    dark_current,
                     read_noise,
-                    _obsDetailParameters.getSkyApertureDiameter(),
-                    instrument.getSpectralBinning());
+                    _obsDetailParameters.getSkyApertureDiameter());
 
             // DEBUG
             // _println("RESOLUTION DEBUGGING");
@@ -797,21 +796,19 @@ public final class GnirsRecipe extends RecipeBase {
             IS2Ncalc.setSedIntegral(sed_integral);
             IS2Ncalc.setSkyIntegral(sky_integral);
             IS2Ncalc.setSkyAperture(_obsDetailParameters.getSkyApertureDiameter());
-            IS2Ncalc.setDarkCurrent(instrument.getDarkCurrent() * instrument.getSpatialBinning() * instrument.getSpatialBinning());
+            IS2Ncalc.setDarkCurrent(instrument.getDarkCurrent());
             IS2Ncalc.calculate();
             _println(IS2Ncalc.getTextResult(device));
             device.setPrecision(0); // NO decimal places
             device.clear();
-            binFactor = instrument.getSpatialBinning()
-                    * instrument.getSpatialBinning();
 
             _println("");
             _println("The peak pixel signal + background is "
                     + device.toString(peak_pixel_count) + ". ");
 
-            if (peak_pixel_count > (.95 * instrument.getWellDepth() * binFactor))
+            if (peak_pixel_count > (.95 * instrument.getWellDepth()))
                 _println("Warning: peak pixel may be saturating the (binned) CCD full well of "
-                        + .95 * instrument.getWellDepth() * binFactor);
+                        + .95 * instrument.getWellDepth());
 
             if (peak_pixel_count > (.95 * instrument.getADSaturation() * instrument
                     .getLowGain()))

@@ -37,8 +37,6 @@ public abstract class Nifs extends Instrument {
     protected String _focalPlaneMask;
     protected CalculationMethod _mode;
     protected double _centralWavelength;
-    protected int _spectralBinning = 1;
-    protected int _spatialBinning = 1;
 
     protected boolean _IFUUsed = false;
     protected String _IFUMethod;
@@ -81,7 +79,7 @@ public abstract class Nifs extends Instrument {
     }
 
     public double getPixelSize() {
-        return super.getPixelSize() * _spatialBinning;
+        return super.getPixelSize();
     }
 
     public double getSpectralPixelWidth() {
@@ -94,14 +92,6 @@ public abstract class Nifs extends Instrument {
 
     public double getSampling() {
         return _sampling;
-    }
-
-    public int getSpectralBinning() {
-        return _spectralBinning;
-    }
-
-    public int getSpatialBinning() {
-        return _spatialBinning;
     }
 
     public double getADSaturation() {

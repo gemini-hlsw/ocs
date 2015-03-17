@@ -24,9 +24,7 @@ object BaselineTRecs {
       "KBr",                              //String cryostat window
       "HiRes-10",                         //String grating, ("none") for imaging
       "12",                               //String instrumentCentralWavelength,
-      TRecsParameters.SLIT0_21,           //String FP_Mask,
-      "1",                                //String spatBinning,
-      "1"                                 //String specBinning
+      TRecsParameters.SLIT0_21            //String FP_Mask,
     )
   ), TRecsObservingConditions)
 

@@ -1,5 +1,6 @@
 package edu.gemini.itc.michelle;
 
+import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.service.ObservationDetails;
 import edu.gemini.itc.service.CalculationMethod;
 import edu.gemini.itc.shared.*;
@@ -46,8 +47,6 @@ public class Michelle extends Instrument {
     private String _focalPlaneMask;
     private CalculationMethod _mode;
     private double _centralWavelength;
-    private int _spectralBinning;
-    private int _spatialBinning;
 
     public Michelle(MichelleParameters mp, ObservationDetails odp) {
         super(INSTR_DIR, FILENAME);
@@ -58,9 +57,6 @@ public class Michelle extends Instrument {
         _centralWavelength = mp.getInstrumentCentralWavelength();
 
         _mode = odp.getMethod();
-        _spectralBinning = mp.getSpectralBinning();
-        _spatialBinning = mp.getSpatialBinning();
-
 
         InstrumentWindow michelleInstrumentWindow =
                 new InstrumentWindow(getDirectory() + "/" + getPrefix() +
@@ -125,14 +121,12 @@ public class Michelle extends Instrument {
                 "320x240 pixel Si:As IBC array");
         _detector.setDetectorPixels(DETECTOR_PIXELS);
 
-        _dtv = new edu.gemini.itc.operation.DetectorsTransmissionVisitor(_spectralBinning,
-                getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
+        _dtv = new DetectorsTransmissionVisitor(1, getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
 
         if (!(_grating.equals("none"))) {
             _gratingOptics = new MichelleGratingOptics(getDirectory() + "/" + getPrefix(), _grating,
                     _centralWavelength,
-                    _detector.getDetectorPixels(),
-                    _spectralBinning);
+                    _detector.getDetectorPixels());
             addGrating(_gratingOptics);
         }
 
@@ -186,9 +180,9 @@ public class Michelle extends Instrument {
 
     public double getPixelSize() {
         if (_mode.isSpectroscopy()) {
-            return SPECTROSCOPY_PIXEL_SIZE * _spatialBinning;
+            return SPECTROSCOPY_PIXEL_SIZE;
         } else
-            return super.getPixelSize() * _spatialBinning;
+            return super.getPixelSize();
     }
 
     public double getSpectralPixelWidth() {
@@ -209,14 +203,6 @@ public class Michelle extends Instrument {
         } else {
             return IMAGING_FRAME_TIME;
         }
-    }
-
-    public int getSpectralBinning() {
-        return _spectralBinning;
-    }
-
-    public int getSpatialBinning() {
-        return _spatialBinning;
     }
 
     public double getADSaturation() {
@@ -254,10 +240,9 @@ public class Michelle extends Instrument {
         s += "\n";
         if (_mode.isSpectroscopy())
             s += "<L1> Central Wavelength: " + _centralWavelength + " nm" + "\n";
-        //s += "Instrument: " +super.getName() + "\n";
-        s += "Spatial Binning: " + getSpatialBinning() + "\n";
+        s += "Spatial Binning: 1\n";
         if (_mode.isSpectroscopy())
-            s += "Spectral Binning: " + getSpectralBinning() + "\n";
+            s += "Spectral Binning: 1\n";
         s += "Pixel Size in Spatial Direction: " + getPixelSize() + "arcsec\n";
         if (_mode.isSpectroscopy())
             s += "Pixel Size in Spectral Direction: " + getGratingDispersion_nmppix() + "nm\n";

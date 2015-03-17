@@ -461,8 +461,7 @@ public final class GmosRecipe extends RecipeBase {
                         exposure_time,
                         dark_current * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
                         read_noise,
-                        _obsDetailParameters.getSkyApertureDiameter(),
-                        instrument.getSpectralBinning());
+                        _obsDetailParameters.getSkyApertureDiameter());
 
                 specS2N[i].setDetectorTransmission(mainInstrument.getDetectorTransmision());
                 specS2N[i].setCcdPixelRange(firstCcdIndex, lastCcdIndex);
@@ -490,8 +489,7 @@ public final class GmosRecipe extends RecipeBase {
                     exposure_time,
                     dark_current * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
                     read_noise,
-                    _obsDetailParameters.getSkyApertureDiameter(),
-                    instrument.getSpectralBinning());
+                    _obsDetailParameters.getSkyApertureDiameter());
 
             specS2N[0].setDetectorTransmission(mainInstrument.getDetectorTransmision());
             specS2N[0].setCcdPixelRange(firstCcdIndex, lastCcdIndex);

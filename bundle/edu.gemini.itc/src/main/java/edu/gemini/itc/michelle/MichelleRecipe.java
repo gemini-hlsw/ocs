@@ -213,7 +213,6 @@ public final class MichelleRecipe extends RecipeBase {
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
-        int binFactor;
         int number_exposures = _obsDetailParameters.getNumExposures();
         double spec_source_frac = 0;
         double frac_with_source = _obsDetailParameters.getSourceFraction();
@@ -313,10 +312,8 @@ public final class MichelleRecipe extends RecipeBase {
                             spec_source_frac, im_qual,
                             ap_diam, number_exposures,
                             frac_with_source, exposure_time,
-                            dark_current * instrument.getSpatialBinning() *
-                                    instrument.getSpectralBinning(), read_noise,
-                            _obsDetailParameters.getSkyApertureDiameter(),
-                            instrument.getSpectralBinning());
+                            dark_current, read_noise,
+                            _obsDetailParameters.getSkyApertureDiameter());
             specS2N.setDetectorTransmission(instrument.getDetectorTransmision());
             specS2N.setSourceSpectrum(sed);
             specS2N.setBackgroundSpectrum(sky);
@@ -364,9 +361,6 @@ public final class MichelleRecipe extends RecipeBase {
 
             singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
             finalS2N = _printSpecTag("Final S/N ASCII data");
-
-            binFactor = instrument.getSpatialBinning() *
-                    instrument.getSpectralBinning();
 
             //THis was used for TED to output the data might be useful later.
             /**  double [][] temp = specS2N.getSignalSpectrum().getData();
@@ -459,7 +453,7 @@ public final class MichelleRecipe extends RecipeBase {
             IS2Ncalc.setSedIntegral(sed_integral);
             IS2Ncalc.setSkyIntegral(sky_integral);
             IS2Ncalc.setSkyAperture(_obsDetailParameters.getSkyApertureDiameter());
-            IS2Ncalc.setDarkCurrent(instrument.getDarkCurrent() * instrument.getSpatialBinning() * instrument.getSpatialBinning());
+            IS2Ncalc.setDarkCurrent(instrument.getDarkCurrent());
             IS2Ncalc.calculate();
 
             // Michelle polarimetry calculations include a x4 overhead of observing into the calculation
@@ -490,17 +484,10 @@ public final class MichelleRecipe extends RecipeBase {
             //_println(IS2Ncalc.getBackgroundLimitResult());
             device.setPrecision(0);  // NO decimal places
             device.clear();
-            binFactor = instrument.getSpatialBinning() *
-                    instrument.getSpatialBinning();
-
             _println("");
             _println("The peak pixel signal + background is " + device.toString(peak_pixel_count) + ". ");//This is " +
             //	device.toString(peak_pixel_count/instrument.getWellDepth()*100) +
             //	"% of the full well depth of "+device.toString(instrument.getWellDepth())+".");
-
-//	if (peak_pixel_count > (.95*instrument.getWellDepth()*binFactor))
-//	       	_println("Warning: peak pixel may be saturating the (binned) CCD full well of "+
-//	       					.95*instrument.getWellDepth()*binFactor);
 
             if (peak_pixel_count > (instrument.getWellDepth()))
                 _println("Warning: peak pixel may be saturating the imaging deep well setting of " +

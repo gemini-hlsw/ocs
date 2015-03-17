@@ -237,7 +237,7 @@ public final class Flamingos2Recipe extends RecipeBase {
                     instrument.getGrismResolution(), spec_source_frac, im_qual,
                     ap_diam, number_exposures, frac_with_source, exposure_time,
                     dark_current, read_noise,
-                    _obsDetailParameters.getSkyApertureDiameter(), 1);
+                    _obsDetailParameters.getSkyApertureDiameter());
 
             specS2N.setDetectorTransmission(instrument.getDetectorTransmision());
             specS2N.setSourceSpectrum(sed);

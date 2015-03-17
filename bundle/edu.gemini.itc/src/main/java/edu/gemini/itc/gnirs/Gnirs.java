@@ -47,8 +47,6 @@ public abstract class Gnirs extends Instrument {
     protected String _stringSlitWidth;
     protected CalculationMethod _mode;
     protected double _centralWavelength;
-    protected int _spectralBinning = 1;
-    protected int _spatialBinning = 1;
 
     public Gnirs(String FILENAME, String INSTUMENT_PREFIX) {
         super(INSTR_DIR, FILENAME);
@@ -78,7 +76,7 @@ public abstract class Gnirs extends Instrument {
     }
 
     public double getPixelSize() {
-        return super.getPixelSize() * _spatialBinning;
+        return super.getPixelSize();
     }
 
     public double getSpectralPixelWidth() {
@@ -91,14 +89,6 @@ public abstract class Gnirs extends Instrument {
 
     public double getSampling() {
         return _sampling;
-    }
-
-    public int getSpectralBinning() {
-        return _spectralBinning;
-    }
-
-    public int getSpatialBinning() {
-        return _spatialBinning;
     }
 
     public double getADSaturation() {

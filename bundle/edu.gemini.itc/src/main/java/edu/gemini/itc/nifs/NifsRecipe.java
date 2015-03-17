@@ -215,19 +215,19 @@ public final class NifsRecipe extends RecipeBase {
                 final Iterator<Double> ifu_offset_it = ap_offset_list.iterator();
 
                 while (src_frac_it.hasNext()) {
-                    double ap_diam = 1 / instrument.getSpatialBinning();
+                    double ap_diam = 1;
                     final double ifu_offset = ifu_offset_it.next();
 
                     if (_nifsParameters.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU)) {
                         while (src_frac_it.hasNext()) {
                             spec_source_frac = spec_source_frac + src_frac_it.next();
                             halo_spec_source_frac = halo_spec_source_frac + halo_src_frac_it.next();
-                            ap_diam = (ap_offset_list.size() / 2) / instrument.getSpatialBinning();
+                            ap_diam = (ap_offset_list.size() / 2);
                         }
                     } else {
                         spec_source_frac = src_frac_it.next();
                         halo_spec_source_frac = halo_src_frac_it.next();
-                        ap_diam = 1 / instrument.getSpatialBinning();
+                        ap_diam = 1;
                     }
 
 
@@ -241,10 +241,8 @@ public final class NifsRecipe extends RecipeBase {
                                     spec_source_frac, im_qual,
                                     ap_diam, number_exposures,
                                     frac_with_source, exposure_time,
-                                    dark_current * instrument.getSpatialBinning() *
-                                            instrument.getSpectralBinning(), read_noise,
-                                    _obsDetailParameters.getSkyApertureDiameter(),
-                                    instrument.getSpectralBinning());
+                                    dark_current, read_noise,
+                                    _obsDetailParameters.getSkyApertureDiameter());
 
                     specS2N.setDetectorTransmission(instrument.getDetectorTransmision());
                     specS2N.setSourceSpectrum(calcSource.sed);
