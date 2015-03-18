@@ -161,7 +161,6 @@ public final class NiriRecipe extends RecipeBase {
         final double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
         double halo_source_fraction = 0;
-        double peak_pixel_count = 0;
 
         final double sed_integral = calcSource.sed.getIntegral();
         final double sky_integral = calcSource.sky.getIntegral();
@@ -203,34 +202,11 @@ public final class NiriRecipe extends RecipeBase {
             }
         }
 
-        final PeakPixelFluxCalc ppfc;
+        // Calculate peak pixel flux
         final double im_qual = altair.isDefined() ? altair.get().getAOCorrectedFWHM() : IQcalc.getImageQuality();
-        if (!_sdParameters.isUniform()) {
-
-            ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
-                    _obsDetailParameters.getExposureTime(), sed_integral,
-                    sky_integral, instrument.getDarkCurrent());
-
-            peak_pixel_count = ppfc.getFluxInPeakPixel();
-
-            if (_altairParameters.altairIsUsed()) {
-                PeakPixelFluxCalc ppfc_halo = new PeakPixelFluxCalc(
-                        IQcalc.getImageQuality(), pixel_size,
-                        _obsDetailParameters.getExposureTime(), halo_integral,
-                        sky_integral, instrument.getDarkCurrent());
-                peak_pixel_count = peak_pixel_count
-                        + ppfc_halo.getFluxInPeakPixel();
-
-            }
-
-        } else {
-
-            ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
-                    _obsDetailParameters.getExposureTime(), sed_integral,
-                    sky_integral, instrument.getDarkCurrent());
-
-            peak_pixel_count = ppfc.getFluxInPeakPixelUSB(SFcalc.getSourceFraction(), SFcalc.getNPix());
-        }
+        final double peak_pixel_count = altair.isDefined() ?
+                PeakPixelFlux.calculateWithHalo(instrument, _sdParameters, _obsDetailParameters, SFcalc, im_qual, IQcalc.getImageQuality(), halo_integral, sed_integral, sky_integral) :
+                PeakPixelFlux.calculate(instrument, _sdParameters, _obsDetailParameters, SFcalc, im_qual, sed_integral, sky_integral);
 
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.

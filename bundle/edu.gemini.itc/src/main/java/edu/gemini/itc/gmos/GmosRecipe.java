@@ -319,7 +319,7 @@ public final class GmosRecipe extends RecipeBase {
     // Calculation results
     // TEMPORARY, these will probably turn into Scala case classes
     interface GmosResult {}
-    private final class GmosImagingResult implements GmosResult {
+    public static final class GmosImagingResult implements GmosResult {
         public final SourceFraction SFcalc;
         public final double peak_pixel_count;
         public final ImagingS2NCalculatable IS2Ncalc;
@@ -332,7 +332,7 @@ public final class GmosRecipe extends RecipeBase {
         }
 
     }
-    private final class GmosSpectroscopyResult implements GmosResult {
+    public static final class GmosSpectroscopyResult implements GmosResult {
         public final SpecS2NLargeSlitVisitor[] specS2N;
         public final SlitThroughput st;
         public final ImageQualityCalculatable IQcalc;
@@ -519,7 +519,6 @@ public final class GmosRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        final double pixel_size = instrument.getPixelSize();
         final double sed_integral = src.sed.getIntegral();
         final double sky_integral = src.sky.getIntegral();
 
@@ -532,13 +531,7 @@ public final class GmosRecipe extends RecipeBase {
         final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
 
         // Calculate the Peak Pixel Flux
-        final PeakPixelFluxCalc ppfc  = new PeakPixelFluxCalc(im_qual, pixel_size, _obsDetailParameters.getExposureTime(), sed_integral, sky_integral, instrument.getDarkCurrent());
-        final double peak_pixel_count;
-        if (!_sdParameters.isUniform()) {
-            peak_pixel_count = ppfc.getFluxInPeakPixel();
-        } else {
-            peak_pixel_count = ppfc.getFluxInPeakPixelUSB(SFcalc.getSourceFraction(), SFcalc.getNPix());
-        }
+        final double peak_pixel_count = PeakPixelFlux.calculate(instrument, _sdParameters, _obsDetailParameters, SFcalc, im_qual, sed_integral, sky_integral);
 
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.

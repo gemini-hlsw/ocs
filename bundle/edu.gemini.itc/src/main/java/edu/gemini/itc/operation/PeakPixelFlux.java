@@ -1,9 +1,12 @@
 package edu.gemini.itc.operation;
 
+import edu.gemini.itc.service.ObservationDetails;
+import edu.gemini.itc.service.SourceDefinition;
 import edu.gemini.itc.shared.DatFile;
 import edu.gemini.itc.shared.ITCConstants;
+import edu.gemini.itc.shared.Instrument;
 
-public final class PeakPixelFluxCalc {
+public final class PeakPixelFlux {
 
     private final double im_qual;
     private final double pixel_size;
@@ -13,12 +16,48 @@ public final class PeakPixelFluxCalc {
     private final double dark_current;
     private final double[][] data;
 
-    public PeakPixelFluxCalc(final double im_qual,
-                             final double pixel_size,
-                             final double exp_time,
-                             final double summed_source,
-                             final double summed_background,
-                             final double dark_current) {
+    public static double calculate(final Instrument instrument,
+                                   final SourceDefinition  _sdParameters,
+                                   final ObservationDetails _obsDetailParameters,
+                                   final SourceFraction SFcalc,
+                                   final double im_qual,
+                                   final double sed_integral,
+                                   final double sky_integral) {
+        final PeakPixelFlux ppfc  = new PeakPixelFlux(im_qual, instrument.getPixelSize(), _obsDetailParameters.getExposureTime(), sed_integral, sky_integral, instrument.getDarkCurrent());
+        if (!_sdParameters.isUniform()) {
+            return ppfc.getFluxInPeakPixel();
+        } else {
+            return ppfc.getFluxInPeakPixelUSB(SFcalc.getSourceFraction(), SFcalc.getNPix());
+        }
+    }
+
+    public static double calculateWithHalo(final Instrument instrument,
+                                           final SourceDefinition  _sdParameters,
+                                           final ObservationDetails _obsDetailParameters,
+                                           final SourceFraction SFcalc,
+                                           final double im_qual,
+                                           final double orig_im_qual,
+                                           final double halo_integral,
+                                           final double sed_integral,
+                                           final double sky_integral) {
+        final PeakPixelFlux ppfc = new PeakPixelFlux(im_qual, instrument.getPixelSize(), _obsDetailParameters.getExposureTime(), sed_integral, sky_integral, instrument.getDarkCurrent());
+        if (!_sdParameters.isUniform()) {
+
+            final double peak_pixel_count = ppfc.getFluxInPeakPixel();
+            final PeakPixelFlux ppfc_halo = new PeakPixelFlux(orig_im_qual, instrument.getPixelSize(), _obsDetailParameters.getExposureTime(), halo_integral, sky_integral, instrument.getDarkCurrent());
+            return peak_pixel_count + ppfc_halo.getFluxInPeakPixel();
+
+        } else  {
+            return ppfc.getFluxInPeakPixelUSB(SFcalc.getSourceFraction(), SFcalc.getNPix());
+        }
+    }
+
+    private PeakPixelFlux(final double im_qual,
+                         final double pixel_size,
+                         final double exp_time,
+                         final double summed_source,
+                         final double summed_background,
+                         final double dark_current) {
 
         final String fileName = ITCConstants.CALC_LIB + ITCConstants.FLUX_IN_PEAK_PIXEL_FILENAME + ITCConstants.DATA_SUFFIX;
         this.im_qual = im_qual;
@@ -30,7 +69,7 @@ public final class PeakPixelFluxCalc {
         this.data = DatFile.arrays().apply(fileName);
     }
 
-    public double getFluxInPeakPixel() {
+    private double getFluxInPeakPixel() {
         final double im_qual_in_pix = im_qual / pixel_size;
         final double frac_in_peak = getY(im_qual_in_pix);
         final double source_fraction_in_peak;
@@ -44,7 +83,7 @@ public final class PeakPixelFluxCalc {
         return source_in_peak + background_in_peak + dark_current * exp_time;
     }
 
-    public double getFluxInPeakPixelUSB(final double source_fraction, final double enclosedPixels) {
+    private double getFluxInPeakPixelUSB(final double source_fraction, final double enclosedPixels) {
         final double source_in_peak = summed_source * source_fraction * exp_time / enclosedPixels;
         final double background_in_peak = summed_background * exp_time * pixel_size * pixel_size;
         return source_in_peak + background_in_peak + dark_current * exp_time;
@@ -54,7 +93,7 @@ public final class PeakPixelFluxCalc {
      * @return y value at specified x using linear interpolation.
      * Silently returns zero if x is out of spectrum range.
      */
-    public double getY(final double x) {
+    private double getY(final double x) {
         if (x < getStart() || x > getEnd()) return 0;
         final int low_index = getLowerIndex(x);
         final int high_index = low_index + 1;
@@ -69,28 +108,28 @@ public final class PeakPixelFluxCalc {
     /**
      * @return starting x value
      */
-    public double getStart() {
+    private double getStart() {
         return data[0][0];
     }
 
     /**
      * @return ending x value
      */
-    public double getEnd() {
+    private double getEnd() {
         return data[0][data[0].length - 1];
     }
 
     /**
      * Returns x value of specified data point.
      */
-    public double getX(final int index) {
+    private double getX(final int index) {
         return data[0][index];
     }
 
     /**
      * Returns y value of specified data point.
      */
-    public double getY(final int index) {
+    private double getY(final int index) {
         return data[1][index];
     }
 
@@ -98,7 +137,7 @@ public final class PeakPixelFluxCalc {
     /**
      * Returns the index of the data point with largest x value less than x
      */
-    public int getLowerIndex(final double x) {
+    private int getLowerIndex(final double x) {
         // In a general spectrum we don't have an idea which bin a particular
         // x value is in.  The only solution is to search for it.
         // Could just walk through, but do a binary search for it.

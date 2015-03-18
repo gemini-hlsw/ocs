@@ -163,7 +163,6 @@ public final class TRecsRecipe extends RecipeBase {
 
         double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
-        double peak_pixel_count = 0;
 
         // Calculate image quality
         double im_qual = 0.;
@@ -184,24 +183,7 @@ public final class TRecsRecipe extends RecipeBase {
         }
 
         // Calculate the Peak Pixel Flux
-        PeakPixelFluxCalc ppfc;
-
-        if (!_sdParameters.isUniform()) {
-
-            ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
-                    exp_time, sed_integral, sky_integral,
-                    instrument.getDarkCurrent());
-
-            peak_pixel_count = ppfc.getFluxInPeakPixel();
-
-        } else {
-
-            ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
-                    exp_time, sed_integral, sky_integral,
-                    instrument.getDarkCurrent());
-
-            peak_pixel_count = ppfc.getFluxInPeakPixelUSB(SFcalc.getSourceFraction(), SFcalc.getNPix());
-        }
+        final double peak_pixel_count = PeakPixelFlux.calculate(instrument, _sdParameters, _obsDetailParameters, SFcalc, im_qual, sed_integral, sky_integral);
 
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
