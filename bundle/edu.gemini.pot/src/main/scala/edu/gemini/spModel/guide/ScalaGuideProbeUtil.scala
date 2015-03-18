@@ -2,6 +2,7 @@ package edu.gemini.spModel.guide
 
 import java.awt.geom.{AffineTransform, Area}
 
+import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core.Coordinates
 import edu.gemini.spModel.inst.{FeatureGeometry, ProbeArmGeometry, ScienceAreaGeometry}
 import edu.gemini.spModel.obs.context.ObsContext
@@ -34,8 +35,10 @@ object ScalaGuideProbeUtil {
           // If an adjustment exists, calculate the vignetting for this offset.
           val vignetting = probeArmGeometry.armAdjustment(ctx, coordinates, offset).map { armAdjustment =>
             // Adjust the science area for the current offset.
-            val x = -offset.p.toArcsecs.getMagnitude
-            val y = -offset.q.toArcsecs.getMagnitude * flip
+//            val x = -offset.p.toArcsecs.getMagnitude
+//            val y = -offset.q.toArcsecs.getMagnitude * flip
+            val x = -(offset.p.toNewModel.toNormalizedArcseconds)
+            val y = -(offset.q.toNewModel.toNormalizedArcseconds * flip)
             val trans = AffineTransform.getTranslateInstance(x, y)
             val adjScienceArea = scienceArea.transform(trans)
 

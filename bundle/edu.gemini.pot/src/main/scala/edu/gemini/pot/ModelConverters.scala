@@ -33,10 +33,8 @@ object ModelConverters {
   private val maxArcsecs = 60 * maxArcmins
   implicit class AngleNormalizer(val angle: Angle) extends AnyVal {
     private def normalize(value: Double, maxValue: Double): Double = {
-      val half = maxValue / 2.0
-      val pos = value % maxValue
-      val neg = pos - maxValue
-      if (math.abs(pos) < math.abs(neg)) pos else neg
+      val neg = value - maxValue
+      if (value < math.abs(neg)) value else neg
     }
 
     def toNormalizedRadians:    Double = normalize(angle.toRadians, maxRadians)

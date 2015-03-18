@@ -150,4 +150,9 @@ class VignettingTest {
     val expected   = List(GS7, GS6)
     executeTest(GMOSSouthSideLookingWithOI, 0.0, List(Offset(Angle.fromArcsecs(200.0), Angle.fromArcsecs(50.0))), All, expected)
   }
+
+  @Test def testSideLookingOneNegOffset2PosAngle0() = {
+    val expected   = List(GS5, GS3, GS2)
+    executeTest(GMOSSouthSideLookingWithOI, 0.0, List(Offset(Angle.fromArcsecs(-50.0), Angle.fromArcsecs(-50.0))), All, expected)
+  }
 }
