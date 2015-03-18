@@ -109,32 +109,32 @@ class VignettingTest {
     nextCandidate(candidates, expected)
   }
 
-  @Ignore @Test def testSideLookingBasePosAngle0() = {
+  @Test def testSideLookingBasePosAngle0() = {
     val expected   = List(GS3, GS2, GS1, GS4)
     executeTest(GMOSSouthSideLookingWithOI, 0.0, Nil, All, expected)
   }
 
-  @Ignore @Test def testSideLookingBasePosAngle90() = {
+  @Test def testSideLookingBasePosAngle90() = {
     val expected = List(GS7, GS6, GS1)
     executeTest(GMOSSouthSideLookingWithOI, 90.0, Nil, All, expected)
   }
 
-  @Ignore @Test def testSideLookingBasePosAngle180() = {
+  @Test def testSideLookingBasePosAngle180() = {
     val expected = List(GS8, GS10, GS9)
     executeTest(GMOSSouthSideLookingWithOI, 180.0, Nil, All, expected)
   }
 
-  @Ignore @Test def testUpLookingBasePosAngle0() = {
+  @Test def testUpLookingBasePosAngle0() = {
     val expected = List(GS1)
     executeTest(GMOSSouthUpLookingWithOI, 0.0, Nil, All, expected)
   }
 
-  @Ignore @Test def testUpLookingBasePosAngle90() = {
+  @Test def testUpLookingBasePosAngle90() = {
     val expected = List(GS3, GS2, GS1, GS4)
     executeTest(GMOSSouthUpLookingWithOI, 90.0, Nil, All, expected)
   }
 
-  @Ignore @Test def testUpLookingBasePosAngle180() = {
+  @Test def testUpLookingBasePosAngle180() = {
     val expected = List(GS7, GS6)
     executeTest(GMOSSouthUpLookingWithOI, 180.0, Nil, All, expected)
   }
@@ -149,5 +149,10 @@ class VignettingTest {
     // the base position and the offset would result in GS7 and then GS6.
     val expected   = List(GS7, GS6)
     executeTest(GMOSSouthSideLookingWithOI, 0.0, List(Offset(Angle.fromArcsecs(200.0), Angle.fromArcsecs(50.0))), All, expected)
+  }
+
+  @Test def testSideLookingOneNegOffset2PosAngle0() = {
+    val expected   = List(GS5, GS3, GS2)
+    executeTest(GMOSSouthSideLookingWithOI, 0.0, List(Offset(Angle.fromArcsecs(-50.0), Angle.fromArcsecs(-50.0))), All, expected)
   }
 }

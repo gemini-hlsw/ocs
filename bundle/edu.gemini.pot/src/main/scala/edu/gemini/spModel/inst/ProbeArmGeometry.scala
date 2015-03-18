@@ -101,10 +101,3 @@ object ProbeArmGeometry {
       new Point2D.Double(p.getX.toCanonicalArcsec, p.getY.toCanonicalArcsec)
   }
 }
-
-/**
- * A representation of the adjustment made to the default list of shapes when using a specified guide star.
- * @param angle           the angle which will be used by the probe arm
- * @param guideStarCoords the coordinates (in arcsec) where the probe arm will be placed
- */
-case class ArmAdjustment(angle: Double, guideStarCoords: Point2D)

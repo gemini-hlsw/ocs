@@ -34,10 +34,11 @@ object FeatureGeometry {
    * @return       the transformed shapes
    */
   def transformScienceAreaForContext(shapes: List[Shape], ctx: ObsContext): List[Shape] = {
+    import edu.gemini.pot.ModelConverters._
     val posAngle = ctx.getPositionAngle.toRadians.getMagnitude
     val basePoint = {
-      val coords = ctx.getBaseCoordinates
-      new Point2D.Double(coords.getDec.getMagnitude, coords.getRa.getMagnitude)
+      val coords = ctx.getBaseCoordinates.toNewModel
+      new Point2D.Double(coords.ra.toAngle.toNormalizedArcseconds, coords.dec.toAngle.toNormalizedArcseconds)
     }
     val trans = AffineTransform.getRotateInstance(-posAngle, basePoint.getX, basePoint.getY)
     trans.translate(basePoint.getX, basePoint.getY)
@@ -64,9 +65,13 @@ object FeatureGeometry {
    * @param pixelsPerArcsec the pixel density
    * @return                the shapes scaled for the display
    */
-  def transformScienceAreaForScreen(shapes: List[Shape], pixelsPerArcsec: Double): List[Shape] = {
-    val scaleTrans = AffineTransform.getScaleInstance(pixelsPerArcsec, pixelsPerArcsec)
-    shapes.map {scaleTrans.createTransformedShape }
+  def transformScienceAreaForScreen(shapes: List[Shape], pixelsPerArcsec: Double, ctx: ObsContext, screenPos: Point2D): List[Shape] = {
+    import edu.gemini.pot.ModelConverters._
+    val trans = AffineTransform.getScaleInstance(pixelsPerArcsec, pixelsPerArcsec)
+    val x = screenPos.getX / pixelsPerArcsec - ctx.getBaseCoordinates.toNewModel.ra.toAngle.toNormalizedArcseconds
+    val y = screenPos.getY / pixelsPerArcsec - ctx.getBaseCoordinates.toNewModel.dec.toAngle.toNormalizedArcseconds
+    trans.translate(x, y)
+    shapes.map { trans.createTransformedShape }
   }
 
   /**
@@ -75,20 +80,21 @@ object FeatureGeometry {
    * @param pixelsPerArcsec the pixel density
    * @return                the shape scaled for the display
    */
-  def transformScienceAreaForScreen(shape: Shape, pixelsPerArcsec: Double): Shape =
-    transformScienceAreaForScreen(List(shape), pixelsPerArcsec).head
+  def transformScienceAreaForScreen(shape: Shape, pixelsPerArcsec: Double, ctx: ObsContext, screenPos: Point2D): Shape =
+    transformScienceAreaForScreen(List(shape), pixelsPerArcsec, ctx, screenPos).head
 
   /**
    * Given a list of shapes representing a guide probe arm, an angle for the probe arm, and the position of the guide
    * star, execute transformations on the shapes to get the adjusted probe arm.
-   * @param shapes    the list of shapes to transform
-   * @param armAngle  the angle at which the probe arm will be situated
-   * @param guideStar the position of the guide star in arcseconds
-   * @return          the transformed shapes
+   * @param shapes         the list of shapes to transform
+   * @param armAdjustment  the adjustment information for the probe arm, consisting of an angle and guide star location
+   * @return               the transformed shapes
    */
-  def transformProbeArmForContext(shapes: List[Shape], armAngle: Double, guideStar: Point2D): List[Shape] = {
+  def transformProbeArmForContext(shapes: List[Shape], armAdjustment: ArmAdjustment): List[Shape] = {
     // For the guide star, we want to use the point closest to zero in terms of arcsec as a normalization.
-    val armTrans = AffineTransform.getRotateInstance(armAngle, guideStar.getX, guideStar.getY)
+    val armAngle  = armAdjustment.angle
+    val guideStar = armAdjustment.guideStarCoords
+    val armTrans  = AffineTransform.getRotateInstance(armAngle.toRadians, guideStar.getX, guideStar.getY)
     armTrans.concatenate(AffineTransform.getTranslateInstance(guideStar.getX, guideStar.getY))
     shapes.map { armTrans.createTransformedShape }
   }
@@ -96,13 +102,12 @@ object FeatureGeometry {
   /**
    * Given a shape representing a guide probe arm or segment, an angle for the probe arm, and the position of the guide
    * star, execute transformations on the shape to get the adjusted probe arm.
-   * @param shape     the shape to transform
-   * @param armAngle  the angle at which the probe arm will be situated
-   * @param guideStar the position of the guide star in arcsec
-   * @return          the transformed shapes
+   * @param shape          the shape to transform
+   * @param armAdjustment  the adjustment information for the probe arm, consisting of an angle and guide star location
+   * @return               the transformed shapes
    */
-  def transformProbeArmForContext(shape: Shape, armAngle: Double, guideStar: Point2D): Shape =
-    transformProbeArmForContext(List(shape), armAngle, guideStar).head
+  def transformProbeArmForContext(shape: Shape, armAdjustment: ArmAdjustment): Shape =
+    transformProbeArmForContext(List(shape), armAdjustment).head
 
   /**
    * Given a list of geometry shapes, transform them as needed for display on the screen.
@@ -129,3 +134,10 @@ object FeatureGeometry {
   def transformProbeArmForScreen(shape: Shape, pixelsPerArcsec: Double, flipRA: Double, screenPos: Point2D): Shape =
     transformProbeArmForScreen(List(shape), pixelsPerArcsec, flipRA, screenPos).head
 }
+
+/**
+ * A representation of the adjustment made to the default list of shapes when using a specified guide star.
+ * @param angle           the angle which will be used by the probe arm
+ * @param guideStarCoords the coordinates (in arcsec) where the probe arm will be placed
+ */
+case class ArmAdjustment(angle: Angle, guideStarCoords: Point2D)

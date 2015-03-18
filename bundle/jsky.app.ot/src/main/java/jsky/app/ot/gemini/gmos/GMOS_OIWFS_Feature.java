@@ -122,15 +122,12 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
             final Option<ArmAdjustment> adj = GmosOiwfsProbeArm.armAdjustmentAsJava(ctx, offset);
             adj.foreach(new ApplyOp<ArmAdjustment>() {
                 @Override
-                public void apply(final ArmAdjustment armAdj) {
-                    //final edu.gemini.spModel.core.Angle armAngle = armAdj.angle();
-                    final double armAngle                        = armAdj.angle();
-                    final Point2D guideStar                      = armAdj.guideStarCoords();
+                public void apply(final ArmAdjustment armAdjustment) {
                     final ImList<Shape> shapes                   = GmosOiwfsProbeArm.geometryAsJava();
                     shapes.foreach(new ApplyOp<Shape>() {
                         @Override
                         public void apply(final Shape s) {
-                            final Shape sContext = FeatureGeometry$.MODULE$.transformProbeArmForContext(s, armAngle, guideStar);
+                            final Shape sContext = FeatureGeometry$.MODULE$.transformProbeArmForContext(s, armAdjustment);
                             final Shape sScreen  = FeatureGeometry$.MODULE$.transformProbeArmForScreen(sContext, _pixelsPerArcsec, _flipRA, screenPos);
                             _figureList.add(new Figure(sScreen, PROBE_ARM_COLOR, BLOCKED, OIWFS_STROKE));
                         }
