@@ -1,7 +1,7 @@
 package edu.gemini.spModel.gemini.gmos
 
 import java.awt.Shape
-import java.awt.geom.{Point2D, AffineTransform}
+import java.awt.geom.{Rectangle2D, Point2D, AffineTransform}
 import java.text.DecimalFormat
 
 import edu.gemini.pot.ModelConverters._
@@ -39,13 +39,8 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
   }
 
   private lazy val pickoffMirror: Shape = {
-    val (x0, y0) = (-PickoffMirrorSize / 2.0, -PickoffMirrorSize / 2.0)
-    val (x1, y1) = (x0 + PickoffMirrorSize,   y0)
-    val (x2, y2) = (x1,                       y1 + PickoffMirrorSize)
-    val (x3, y3) = (x0,                       y2)
-
-    val points = List((x0,y0), (x1,y1), (x2,y2), (x3,y3))
-    ImPolygon(points)
+    val xy = -PickoffMirrorSize / 2.0
+    new Rectangle2D.Double(xy, xy, PickoffMirrorSize, PickoffMirrorSize)
   }
 
   override def armAdjustment(ctx0: ObsContext, guideStarCoords: Coordinates, offset0: Offset): Option[ArmAdjustment] = {

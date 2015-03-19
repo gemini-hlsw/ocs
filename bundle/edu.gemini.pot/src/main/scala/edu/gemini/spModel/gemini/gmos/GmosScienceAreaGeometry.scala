@@ -43,7 +43,7 @@ class GmosScienceAreaGeometry[I  <: InstGmosCommon[D,F,P,SM],
         (ImagingFOVSize, width)
       else
         (ImagingFOVSize, ImagingFOVSize)
-    }.getOrElse(0.0, 0.0)
+    }.getOrElse((0.0, 0.0))
   }
 
   /**

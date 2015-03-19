@@ -49,7 +49,7 @@ class F2ScienceAreaGeometry(inst0: Flamingos2) extends ScienceAreaGeometry[Flami
             (0.0, 0.0)
         }
       } else (0.0, 0.0)
-    }.getOrElse(0.0, 0.0)
+    }.getOrElse((0.0, 0.0))
   }
 
   /**
