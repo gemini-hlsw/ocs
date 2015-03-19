@@ -20,8 +20,6 @@ import edu.gemini.spModel.gemini.gmos.GmosNorthType.DisperserNorth;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.FilterNorth;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeUtil;
-import edu.gemini.spModel.inst.ScienceAreaGeometry;
-import edu.gemini.spModel.inst.VignettableScienceAreaInstrument;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
 
 import java.beans.IntrospectionException;
