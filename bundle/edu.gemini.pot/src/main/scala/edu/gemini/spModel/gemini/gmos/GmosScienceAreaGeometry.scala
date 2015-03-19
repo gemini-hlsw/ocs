@@ -1,7 +1,7 @@
 package edu.gemini.spModel.gemini.gmos
 
 import java.awt.Shape
-import java.awt.geom.{Area, Rectangle2D}
+import java.awt.geom.{Rectangle2D, Area}
 
 import edu.gemini.shared.util.immutable.{DefaultImList, ImPolygon}
 import edu.gemini.spModel.inst.ScienceAreaGeometry
@@ -13,11 +13,11 @@ class GmosScienceAreaGeometry[I  <: InstGmosCommon[D,F,P,SM],
                               D  <: Enum[D]  with GmosCommonType.Disperser,
                               F  <: Enum[F]  with GmosCommonType.Filter,
                               P  <: Enum[P]  with GmosCommonType.FPUnit,
-                              SM <: Enum[SM] with GmosCommonType.StageMode] extends ScienceAreaGeometry[I] {
+                              SM <: Enum[SM] with GmosCommonType.StageMode](inst: I) extends ScienceAreaGeometry[I] {
   import GmosScienceAreaGeometry._
 
-  override def geometry(inst0: I): List[Shape] = {
-    Option(inst0).toList.flatMap { inst =>
+  override def geometry: List[Shape] = {
+    Option(inst).toList.flatMap { inst =>
       lazy val width   = inst.getScienceArea()(0)
       lazy val isSouth = inst.getSite.contains(Site.GS)
       inst.getFPUnitMode match {
@@ -33,13 +33,21 @@ class GmosScienceAreaGeometry[I  <: InstGmosCommon[D,F,P,SM],
 
   // We need to override this due to the subtypes of InstGmosCommon. Otherwise, the supermethod fails to properly
   // be called and an exception is thrown.
-  override def geometryAsJava(inst: I): edu.gemini.shared.util.immutable.ImList[Shape] =
-    DefaultImList.create(geometry(inst).asJava)
+  override def geometryAsJava: edu.gemini.shared.util.immutable.ImList[Shape] =
+    DefaultImList.create(geometry.asJava)
+
+  override def scienceAreaDimensions: (Double, Double) = {
+    val width = inst.getFPUnit.getWidth
+    if (width != -1)
+      (ImagingFOVSize, width)
+    else
+      (ImagingFOVSize, ImagingFOVSize)
+  }
 
   /**
-   * Return a field of view for the specified size and the pixel density.
-   * Note that this needs to be offset by the base screen position and rotated by the position angle to
-   * represent the final field of view.
+   * Return a field of view for the specified size.
+   * Note that this needs to be offset by the base screen position, rotated by the position angle, and
+   * scaled by the pixels per arcsecond to represent the final field of view in the TPE.
    * @param size            the basic size of a square, in arcsec, centred at the base pos
    * @param innerSize       the length of a side after cutting off the corners, in arcsec
    * @return                the shape matching the specifications
@@ -78,7 +86,8 @@ class GmosScienceAreaGeometry[I  <: InstGmosCommon[D,F,P,SM],
     val s = new Area
     (-1 to 1).foreach { i =>
       val y = - (slitHeight / 2) + (i * d)
-      s.add(new Area(createSlit(x, y, slitWidth, slitHeight)))
+      val slit = new Rectangle2D.Double(x, y, slitWidth, slitHeight)
+      s.add(new Area(slit))
     }
     s
   }
@@ -90,10 +99,9 @@ class GmosScienceAreaGeometry[I  <: InstGmosCommon[D,F,P,SM],
    */
   private def nsFOV(slitWidth: Double): Shape = {
     val slitHeight = LongSlitFOVHeight
-
     val x = -slitWidth  / 2
     val y = -slitHeight / 2
-    createSlit(x, y, slitWidth, slitHeight)
+    new Rectangle2D.Double(x, y, slitWidth, slitHeight)
   }
 
   /**
@@ -150,21 +158,9 @@ class GmosScienceAreaGeometry[I  <: InstGmosCommon[D,F,P,SM],
         }
       }
       y = rect.getY - height0
-    } area.add(new Area(createSlit(x, y, width, height)))
+      slit = new Rectangle2D.Double(x, y, width, height)
+    } area.add(new Area(slit))
     area
-  }
-
-  /**
-   * Generic method for creating a slit beginning at (x0, y0) with the specified width and height.
-   * @param x0         initial x-coordinate
-   * @param y0         initial y-coordinate
-   * @param slitWidth  width of the slit
-   * @param slitHeight height of the slit
-   * @return           a slit of the specified size as a generic shape
-   */
-  private def createSlit(x0: Double, y0: Double, slitWidth: Double, slitHeight: Double): Shape = {
-    val points = List((x0, y0), (x0 + slitWidth, y0), (x0 + slitWidth, y0 + slitHeight), (x0, y0 + slitHeight))
-    ImPolygon(points)
   }
 }
 

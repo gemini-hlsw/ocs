@@ -20,6 +20,8 @@ import edu.gemini.spModel.gemini.gmos.GmosNorthType.DisperserNorth;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.FilterNorth;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeUtil;
+import edu.gemini.spModel.inst.ScienceAreaGeometry;
+import edu.gemini.spModel.inst.VignettableScienceAreaInstrument;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
 
 import java.beans.IntrospectionException;
@@ -34,7 +36,8 @@ public class InstGmosNorth extends
         InstGmosCommon<GmosNorthType.DisperserNorth,
                 GmosNorthType.FilterNorth,
                 GmosNorthType.FPUnitNorth,
-                GmosNorthType.StageModeNorth> implements PropertyProvider, CalibrationKeyProvider {
+                GmosNorthType.StageModeNorth>
+        implements PropertyProvider, CalibrationKeyProvider {
     private static final Logger LOG = Logger.getLogger(InstGmosCommon.class.getName());
 
     public static final SPComponentType SP_TYPE =

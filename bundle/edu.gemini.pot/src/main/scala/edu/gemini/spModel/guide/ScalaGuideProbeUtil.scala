@@ -4,7 +4,7 @@ import java.awt.geom.{AffineTransform, Area}
 
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core.Coordinates
-import edu.gemini.spModel.inst.{FeatureGeometry, ProbeArmGeometry, ScienceAreaGeometry}
+import edu.gemini.spModel.inst.{VignettableScienceAreaInstrument, FeatureGeometry, ProbeArmGeometry, ScienceAreaGeometry}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.telescope.IssPort
@@ -12,19 +12,22 @@ import edu.gemini.spModel.telescope.IssPort
 import scala.collection.JavaConversions._
 
 object ScalaGuideProbeUtil {
-  def calculateVignetting[I <: SPInstObsComp](ctx: ObsContext,
-                                              coordinates: Coordinates,
-                                              scienceAreaGeometry: ScienceAreaGeometry[I],
-                                              probeArmGeometry: ProbeArmGeometry): Double = {
-    if (ctx == null || scienceAreaGeometry == null || probeArmGeometry == null) 0.0
-    else {
+  def calculateVignetting[I <: SPInstObsComp with VignettableScienceAreaInstrument[I]](ctx0: ObsContext,
+                                                                                       coordinates: Coordinates,
+                                                                                       probeArmGeometry0: ProbeArmGeometry): Double = {
+    for {
+      ctx                 <- Option(ctx0)
+      probeArmGeometry    <- Option(probeArmGeometry0)
+      inst                =  ctx.getInstrument.asInstanceOf[I]
+      scienceAreaGeometry <- Option(inst.getVignettableScienceArea)
+    } yield {
       val flip = if (ctx.getIssPort == IssPort.SIDE_LOOKING) -1.0 else 1.0
       val inst = ctx.getInstrument.asInstanceOf[I]
 
       val probeArmShapes = probeArmGeometry.geometry
 
       // Combine all the science areas together as we are only interested in the total final shape.
-      val scienceArea = FeatureGeometry.transformScienceAreaForContext(scienceAreaGeometry.geometry(inst), ctx).foldLeft(new Area) {
+      val scienceArea = FeatureGeometry.transformScienceAreaForContext(scienceAreaGeometry.geometry, ctx).foldLeft(new Area) {
         case (area,s) =>
           area.add(new Area(s))
           area
@@ -73,5 +76,5 @@ object ScalaGuideProbeUtil {
       // Now average out the vignetting across all the science positions.
       if (ctx.getSciencePositions.isEmpty) 0.0 else vignettingSum / ctx.getSciencePositions.size()
     }
-  }
+  }.getOrElse(0.0)
 }
