@@ -56,7 +56,7 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
     def evaluate(p: ISPProgram): VcsAction[MergeEval] =
       for {
         diffs <- client.fetchDiffs(id, DiffState(p))
-        _     <- validateProgKey(p, diffs)
+        _     <- validateProgKey(p, diffs.plan)
         mc     = MergeContext(p, diffs)
         prelim = PreliminaryMerge.merge(mc)
         plan  <- MergeCorrection(mc)(prelim, hasPermission)
@@ -97,8 +97,8 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
       u         <- user
       keyDiff   <- server.read(id, u) { p => (p.getProgramKey, ProgramDiff.compare(p, diffState)) }
       _         <- validateProgKey(keyDiff._1, diffState)
-      res       <- keyDiff._2.compare(diffState.vm) match {
-        case Newer => client.storeDiffs(id, keyDiff._2)
+      res       <- keyDiff._2.plan.compare(diffState.vm) match {
+        case Newer => client.storeDiffs(id, keyDiff._2.plan)
         case Same  => VcsAction(false)
         case _     => VcsAction.fail(NeedsUpdate)
       }
@@ -154,7 +154,7 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
     def checkout(id: SPProgramID): VcsAction[ISPProgram] = s.checkout(id).liftVcs
     def diffState(id: SPProgramID): VcsAction[DiffState] = s.diffState(id).liftVcs
 
-    def fetchDiffs(id: SPProgramID, vs: DiffState): VcsAction[MergePlan] =
+    def fetchDiffs(id: SPProgramID, vs: DiffState): VcsAction[ProgramDiff] =
       s.fetchDiffs(id, vs).map(_.decode).liftVcs
 
     def storeDiffs(id: SPProgramID, mp: MergePlan): VcsAction[Boolean] =

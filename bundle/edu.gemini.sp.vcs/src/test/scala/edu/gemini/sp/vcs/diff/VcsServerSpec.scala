@@ -12,6 +12,7 @@ import edu.gemini.util.security.principal.{ProgramPrincipal, StaffPrincipal}
 
 import java.security.Principal
 
+import scala.language.postfixOps
 import scalaz._
 import Scalaz._
 
@@ -159,8 +160,8 @@ class VcsServerSpec extends VcsSpecification {
 
       val svs = new env.local.server.SecureVcsService(StaffUser)
       svs.fetchDiffs(Q1, diffState) match {
-        case \/-(mpt) =>
-          val mp = mpt.decode
+        case \/-(pdt) =>
+          val mp = pdt.decode.plan
           mp.update.rootLabel match {
             case Modified(k, n, dob, NodeDetail.Empty) =>
               (k must_== Key) and

@@ -59,7 +59,7 @@ class MergeTest extends JUnitSuite {
     val deletedKeys = p.getVersions.keySet &~ nodeMap.keySet
   }
 
-  case class PropContext(fact: ISPFactory, sp: ISPProgram, lp: ISPProgram, rp: ISPProgram, diffs: MergePlan, mergePlan: MergePlan) {
+  case class PropContext(fact: ISPFactory, sp: ISPProgram, lp: ISPProgram, rp: ISPProgram, diffs: ProgramDiff, mergePlan: MergePlan) {
     val startMap = sp.nodeMap
     val startId  = sp.getLifespanId
 
@@ -83,7 +83,7 @@ class MergeTest extends JUnitSuite {
       case Unmodified(k) => k
     }.toSet
 
-    val deletedKeys = mergePlan.delete.map(_.key).toSet
+    val deletedKeys = mergePlan.delete.map(_.key)
 
     val correctedMergePlan =
       MergeCorrection(mergeContext)(mergePlan, (_: Permission) => VcsAction(true))
@@ -114,7 +114,7 @@ class MergeTest extends JUnitSuite {
   val props = List[NamedProperty[PropContext]] (
     ("all diffs are accounted for in the MergePlan",
       (start, local, remote, pc) => {
-        val diffKeys  = mpKeys(pc.diffs)
+        val diffKeys  = mpKeys(pc.diffs.plan)
         val mergeKeys = mpKeys(pc.mergePlan)
 
         val result = (diffKeys & mergeKeys) == diffKeys
@@ -126,8 +126,8 @@ class MergeTest extends JUnitSuite {
           val badKeys = (diffKeys &~ mergeKeys) ++ (mergeKeys &~ diffKeys)
           badKeys.foreach { k =>
             Console.err.println("# " + k)
-            Console.err.println("\tin diff deleted?  " + pc.diffs.delete.exists(m => m.key == k))
-            Console.err.println("\tin diff update?   " + pc.diffs.update.flatten.exists(mn => mn.key == k))
+            Console.err.println("\tin diff deleted?  " + pc.diffs.plan.delete.exists(m => m.key == k))
+            Console.err.println("\tin diff update?   " + pc.diffs.plan.update.flatten.exists(mn => mn.key == k))
             Console.err.println("\tin merge deleted? " + pc.mergePlan.delete.exists(m => m.key == k))
             Console.err.println("\tin merge update?  " + pc.mergePlan.update.flatten.exists(mn => mn.key == k))
           }
@@ -159,7 +159,7 @@ class MergeTest extends JUnitSuite {
 
     ("any node present in both edited versions must be present in the merged result",
       (start, local, remote, pc) => {
-        val commonKeys = pc.local.nodeMap.keySet & pc.diffs.update.sFoldRight(Set.empty[SPNodeKey]) { (mn, s) => s + mn.key }
+        val commonKeys = pc.local.nodeMap.keySet & pc.diffs.plan.update.sFoldRight(Set.empty[SPNodeKey]) { (mn, s) => s + mn.key }
         val mergeKeys  = pc.mergePlan.update.flatten.map(_.key).toSet
         val result = (commonKeys & mergeKeys) == commonKeys
 
@@ -169,8 +169,8 @@ class MergeTest extends JUnitSuite {
           val badKeys = (commonKeys &~ mergeKeys) ++ (mergeKeys &~ commonKeys)
           badKeys.foreach { k =>
             Console.err.println("# " + k)
-            Console.err.println("\tin diff deleted?  " + pc.diffs.delete.exists(m => m.key == k))
-            Console.err.println("\tin diff update?   " + pc.diffs.update.flatten.exists(mn => mn.key == k))
+            Console.err.println("\tin diff deleted?  " + pc.diffs.plan.delete.exists(m => m.key == k))
+            Console.err.println("\tin diff update?   " + pc.diffs.plan.update.flatten.exists(mn => mn.key == k))
             Console.err.println("\tin local nodeMap? " + pc.local.nodeMap.contains(k))
             Console.err.println("\tin merge deleted? " + pc.mergePlan.delete.exists(m => m.key == k))
             Console.err.println("\tin merge update?  " + pc.mergePlan.update.flatten.exists(mn => mn.key == k))
@@ -183,7 +183,7 @@ class MergeTest extends JUnitSuite {
 
     ("any node missing in both edited versions must be missing in the merged result",
       (start, local, remote, pc) => {
-        val commonKeys = pc.local.deletedKeys & pc.diffs.delete.map(_.key)
+        val commonKeys = pc.local.deletedKeys & pc.diffs.plan.delete.map(_.key)
         emptySet(pc, commonKeys &~ pc.deletedKeys)
       }
     ),

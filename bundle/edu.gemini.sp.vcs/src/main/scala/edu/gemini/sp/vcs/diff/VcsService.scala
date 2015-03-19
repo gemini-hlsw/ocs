@@ -31,7 +31,7 @@ trait VcsService {
   def diffState(id: SPProgramID): TryVcs[DiffState]
 
   /** Obtains remote differences based on the provided local diff state. */
-  def fetchDiffs(id: SPProgramID, ds: DiffState): TryVcs[MergePlan.Transport]
+  def fetchDiffs(id: SPProgramID, ds: DiffState): TryVcs[ProgramDiff.Transport]
 
   /** Applies the given `MergePlan` to the remote program, returning `true`
     * if the program is actually updated; `false` otherwise. */
