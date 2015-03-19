@@ -6,8 +6,9 @@ import edu.gemini.itc.shared.Instrument;
 
 public final class ImagingS2NMethodACalculation extends ImagingS2NCalculation {
 
-    int number_exposures;
-    double frac_with_source, exp_s2n, final_s2n;
+    private final int number_exposures;
+    private final double frac_with_source;
+    private double exp_s2n, final_s2n;
 
     public ImagingS2NMethodACalculation(final ObservationDetails obs,
                                         final Instrument instrument,
@@ -40,6 +41,14 @@ public final class ImagingS2NMethodACalculation extends ImagingS2NCalculation {
                 Math.sqrt(signal + noiseFactor * sourceless_noise *
                         sourceless_noise);
 
+    }
+
+    public double singleSNRatio() {
+        return exp_s2n;
+    }
+
+    public double totalSNRatio() {
+        return final_s2n;
     }
 
     public String getTextResult(FormatStringWriter device) {
