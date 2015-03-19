@@ -13,11 +13,11 @@ class GmosScienceAreaGeometry[I  <: InstGmosCommon[D,F,P,SM],
                               D  <: Enum[D]  with GmosCommonType.Disperser,
                               F  <: Enum[F]  with GmosCommonType.Filter,
                               P  <: Enum[P]  with GmosCommonType.FPUnit,
-                              SM <: Enum[SM] with GmosCommonType.StageMode](inst: I) extends ScienceAreaGeometry[I] {
+                              SM <: Enum[SM] with GmosCommonType.StageMode](inst0: I) extends ScienceAreaGeometry[I] {
   import GmosScienceAreaGeometry._
 
   override def geometry: List[Shape] = {
-    Option(inst).toList.flatMap { inst =>
+    Option(inst0).toList.flatMap { inst =>
       lazy val width   = inst.getScienceArea()(0)
       lazy val isSouth = inst.getSite.contains(Site.GS)
       inst.getFPUnitMode match {
@@ -37,11 +37,13 @@ class GmosScienceAreaGeometry[I  <: InstGmosCommon[D,F,P,SM],
     DefaultImList.create(geometry.asJava)
 
   override def scienceAreaDimensions: (Double, Double) = {
-    val width = inst.getFPUnit.getWidth
-    if (width != -1)
-      (ImagingFOVSize, width)
-    else
-      (ImagingFOVSize, ImagingFOVSize)
+    Option(inst0).map { inst =>
+      val width = inst.getFPUnit.getWidth
+      if (width != -1)
+        (ImagingFOVSize, width)
+      else
+        (ImagingFOVSize, ImagingFOVSize)
+    }.getOrElse(0.0, 0.0)
   }
 
   /**
