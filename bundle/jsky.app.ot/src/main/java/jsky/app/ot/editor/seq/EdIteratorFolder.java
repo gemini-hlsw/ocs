@@ -96,10 +96,10 @@ public final class EdIteratorFolder
 
         // show/hide ITC result panels depending on instrument
         final ISPObsComponent instrument = getContextInstrument();
+        _w.tabbedPane.remove(itcImagingPanel.peer());
+        _w.tabbedPane.remove(itcSpectroscopyPanel.peer());
         if (instrument != null) {
             final SPComponentType type = instrument.getType();
-            _w.tabbedPane.remove(itcImagingPanel.peer());
-            _w.tabbedPane.remove(itcSpectroscopyPanel.peer());
             if (itcImagingPanel.visibleFor(type))      _w.tabbedPane.add("ITC Imaging",      itcImagingPanel.peer());
             if (itcSpectroscopyPanel.visibleFor(type)) _w.tabbedPane.add("ITC Spectroscopy", itcSpectroscopyPanel.peer());
         }
