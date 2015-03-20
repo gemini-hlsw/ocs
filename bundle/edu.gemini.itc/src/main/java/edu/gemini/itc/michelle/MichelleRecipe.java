@@ -426,9 +426,7 @@ public final class MichelleRecipe extends RecipeBase {
             }
              */
 
-            final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc);
-            IS2Ncalc.setSedIntegral(sed_integral);
-            IS2Ncalc.setSkyIntegral(sky_integral);
+            final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
             IS2Ncalc.setSkyAperture(_obsDetailParameters.getSkyApertureDiameter());
             IS2Ncalc.calculate();
 

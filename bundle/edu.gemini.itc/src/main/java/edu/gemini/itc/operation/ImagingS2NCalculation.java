@@ -9,10 +9,12 @@ public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
     final double Npix;
     final double source_fraction;
     final double dark_current;
+    final double sed_integral;
+    final double sky_integral;
 
     double var_source, var_background, var_dark, var_readout,
-            noise, sourceless_noise, signal, sed_integral,
-            sky_integral, read_noise, pixel_size,
+            noise, sourceless_noise, signal,
+            read_noise, pixel_size,
             exposure_time, noiseFactor;
 
     double secondary_integral = 0;
@@ -23,7 +25,9 @@ public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
     //Extra Low frequency noise.  Default:  Has no effect.
     int elfinParam = 1;
 
-    public ImagingS2NCalculation(final Instrument instrument, final SourceFraction sourceFrac) {
+    public ImagingS2NCalculation(final Instrument instrument, final SourceFraction sourceFrac, final double sed_integral, final double sky_integral) {
+        this.sed_integral    = sed_integral;
+        this.sky_integral    = sky_integral;
         this.source_fraction = sourceFrac.getSourceFraction();
         this.Npix            = sourceFrac.getNPix();
         this.dark_current    = (instrument instanceof BinningProvider) ?
@@ -53,10 +57,6 @@ public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
                 secondary_integral * secondary_source_fraction * exposure_time;
     }
 
-    public void setSedIntegral(double sed_integral) {
-        this.sed_integral = sed_integral;
-    }
-
     public void setSecondaryIntegral(double secondary_integral) {
         this.secondary_integral = secondary_integral;
     }
@@ -67,10 +67,6 @@ public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
 
     public void setSkyAperture(double skyAper) {
         this.skyAper = skyAper;
-    }
-
-    public void setSkyIntegral(double sky_integral) {
-        this.sky_integral = sky_integral;
     }
 
     //method to set the extra low freq noise.

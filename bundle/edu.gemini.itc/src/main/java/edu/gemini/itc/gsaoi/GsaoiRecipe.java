@@ -198,13 +198,11 @@ public final class GsaoiRecipe extends RecipeBase {
 
         // ObservationMode Imaging
 
-        final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc);
-        IS2Ncalc.setSedIntegral(sed_integral);
+        final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
         if (_gemsParameters.gemsIsUsed()) {
             IS2Ncalc.setSecondaryIntegral(halo_integral);
             IS2Ncalc.setSecondarySourceFraction(halo_source_fraction);
         }
-        IS2Ncalc.setSkyIntegral(sky_integral);
         IS2Ncalc.calculate();
         _println(IS2Ncalc.getTextResult(device));
         _println(IS2Ncalc.getBackgroundLimitResult());

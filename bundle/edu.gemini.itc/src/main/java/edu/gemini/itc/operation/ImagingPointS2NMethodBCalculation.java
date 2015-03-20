@@ -12,8 +12,10 @@ public final class ImagingPointS2NMethodBCalculation extends ImagingS2NCalculati
 
     public ImagingPointS2NMethodBCalculation(final ObservationDetails obs,
                                              final Instrument instrument,
-                                             final SourceFraction srcFrac) {
-        super(instrument, srcFrac);
+                                             final SourceFraction srcFrac,
+                                             final double sed_integral,
+                                             final double sky_integral) {
+        super(instrument, srcFrac, sed_integral, sky_integral);
         this.number_exposures = obs.getNumExposures();
         this.frac_with_source = obs.getSourceFraction();
         this.exposure_time = obs.getExposureTime();
