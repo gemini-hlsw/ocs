@@ -58,7 +58,6 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       inst.setPosAngle(0.0)
       inst.setIssPort(IssPort.SIDE_LOOKING)
       val ctx = ObsContext.create(env, inst, None.instance[Site], SPSiteQuality.Conditions.BEST, null, null)
-      val base = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
       val opticalCatalog = GemsGuideStarSearchOptions.DEFAULT_CATALOG
       val nirCatalog = GemsGuideStarSearchOptions.DEFAULT_CATALOG
       val tipTiltMode = GemsTipTiltMode.instrument

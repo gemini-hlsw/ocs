@@ -325,26 +325,39 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
     "be able to parse magnitudes' band" in {
       val iMagField = Ucd("phot.mag;em.opt.i")
       // Optical band
-      parseBands((FieldId("id", iMagField), "20.3051")) should beEqualTo(\/-((MagnitudeBand.I, 20.3051)))
+      parseBands(DefaultFilter)((FieldId("id", iMagField), "20.3051")) should beEqualTo(\/-((MagnitudeBand.I, 20.3051)))
 
       val jIRMagField = Ucd("phot.mag;em.IR.J")
       // IR band
-      parseBands((FieldId("id", jIRMagField), "13.2349")) should beEqualTo(\/-((MagnitudeBand.J, 13.2349)))
+      parseBands(DefaultFilter)((FieldId("id", jIRMagField), "13.2349")) should beEqualTo(\/-((MagnitudeBand.J, 13.2349)))
 
       val jIRErrMagField = Ucd("stat.error;phot.mag;em.IR.J")
       // IR Error
-      parseBands((FieldId("id", jIRErrMagField), "0.02")) should beEqualTo(\/-((MagnitudeBand.J, 0.02)))
+      parseBands(DefaultFilter)((FieldId("id", jIRErrMagField), "0.02")) should beEqualTo(\/-((MagnitudeBand.J, 0.02)))
 
       // No magnitude field
       val badField = Ucd("meta.name")
-      parseBands((FieldId("id", badField), "id")) should beEqualTo(-\/(UnmatchedField(badField)))
+      parseBands(DefaultFilter)((FieldId("id", badField), "id")) should beEqualTo(-\/(UnmatchedField(badField)))
 
       // Bad value
-      parseBands((FieldId("id", iMagField), "stringValue")) should beEqualTo(-\/(FieldValueProblem(iMagField, "stringValue")))
+      parseBands(DefaultFilter)((FieldId("id", iMagField), "stringValue")) should beEqualTo(-\/(FieldValueProblem(iMagField, "stringValue")))
 
       // Unknown magnitude
       val noBandField = Ucd("phot.mag;em.opt.p")
-      parseBands((FieldId("id", noBandField), "stringValue")) should beEqualTo(-\/(UnmatchedField(noBandField)))
+      parseBands(DefaultFilter)((FieldId("id", noBandField), "stringValue")) should beEqualTo(-\/(UnmatchedField(noBandField)))
+    }
+    "be able to map sloan magnitudes in UCAC4, OCSADV-245" in {
+      val gMagField = Ucd("phot.mag;em.opt.R")
+      // gmag maps to g'
+      parseBands(UCAC4Filter)((FieldId("gmag", gMagField), "20.3051")) should beEqualTo(\/-((MagnitudeBand._g, 20.3051)))
+
+      val rMagField = Ucd("phot.mag;em.opt.R")
+      // rmag maps to r'
+      parseBands(UCAC4Filter)((FieldId("rmag", rMagField), "20.3051")) should beEqualTo(\/-((MagnitudeBand._r, 20.3051)))
+
+      val iMagField = Ucd("phot.mag;em.opt.I")
+      // imag maps to r'
+      parseBands(UCAC4Filter)((FieldId("imag", iMagField), "20.3051")) should beEqualTo(\/-((MagnitudeBand._i, 20.3051)))
     }
     "be able to parse an xml into a list of SiderealTargets list of rows with a list of fields" in {
       val magsTarget1 = List(new Magnitude(22.082, MagnitudeBand.G), new Magnitude(20.3051, MagnitudeBand.I), new Magnitude(20.88, MagnitudeBand.R), new Magnitude(23.0888, MagnitudeBand.U), new Magnitude(19.8812, MagnitudeBand.Z))
@@ -369,8 +382,8 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       parse(voTableWithErrors).tables(0) should beEqualTo(result)
     }
     "be able to parse an xml into a list of SiderealTargets including proper motion" in {
-      val magsTarget1 = List(new Magnitude(14.76, MagnitudeBand.R))
-      val magsTarget2 = List(new Magnitude(12.983, MagnitudeBand.R))
+      val magsTarget1 = List(new Magnitude(14.76, MagnitudeBand._r))
+      val magsTarget2 = List(new Magnitude(12.983, MagnitudeBand._r))
       val pm1 = ProperMotion(RightAscensionAngularVelocity(AngularVelocity(-10.199999999999999)), DeclinationAngularVelocity(AngularVelocity(-4.9000000000000004))).some
       val pm2 = ProperMotion(RightAscensionAngularVelocity(AngularVelocity(-7)), DeclinationAngularVelocity(AngularVelocity(-13.9))).some
 
@@ -411,7 +424,22 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
 
       val mags = result.map(_.magnitudeIn(MagnitudeBand.UC))
       // Fmag gets converted to UC
-      mags should beEqualTo(\/.right(Some(Magnitude(5.9, MagnitudeBand.UC, 0.39.some, MagnitudeSystem.VEGA))))
+      mags should beEqualTo(\/.right(Some(Magnitude(5.9, MagnitudeBand.UC, None, MagnitudeSystem.VEGA))))
+    }
+    "extract Sloan's band" in {
+      val xmlFile = "sloan.xml"
+      // The sample has only one row
+      val result = VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.map(_.rows.headOption).flatten.get
+
+      val gmag = result.map(_.magnitudeIn(MagnitudeBand._g))
+      // gmag gets converted to g'
+      gmag should beEqualTo(\/.right(Some(Magnitude(15.0, MagnitudeBand._g, 0.39.some, MagnitudeSystem.VEGA))))
+      val rmag = result.map(_.magnitudeIn(MagnitudeBand._r))
+      // rmag gets converted to r'
+      rmag should beEqualTo(\/.right(Some(Magnitude(13.2, MagnitudeBand._r, 0.5.some, MagnitudeSystem.VEGA))))
+      val imag = result.map(_.magnitudeIn(MagnitudeBand._i))
+      // rmag gets converted to r'
+      imag should beEqualTo(\/.right(Some(Magnitude(5, MagnitudeBand._i, 0.34.some, MagnitudeSystem.VEGA))))
     }
   }
 }
