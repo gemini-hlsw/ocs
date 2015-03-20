@@ -67,9 +67,9 @@ class ItcImagingTable(val owner: EdIteratorFolder) extends ItcTable {
   def tableModel(keys: Seq[ItemKey], seq: ConfigSequence): ItcImagingTableModel =
     Option(owner.getContextInstrument).fold(emptyTable) {
     _.getType match {
-      case SPComponentType.INSTRUMENT_GMOS        => new ItcGmosImagingTableModel(keys, UniqueConfig.imagingConfigs(seq))
-      case SPComponentType.INSTRUMENT_GMOSSOUTH   => new ItcGmosImagingTableModel(keys, UniqueConfig.imagingConfigs(seq))
-      case _                                      => new ItcGenericImagingTableModel(keys, UniqueConfig.imagingConfigs(seq))
+      case SPComponentType.INSTRUMENT_GMOS        => new ItcGmosImagingTableModel(keys, ItcUniqueConfig.imagingConfigs(seq))
+      case SPComponentType.INSTRUMENT_GMOSSOUTH   => new ItcGmosImagingTableModel(keys, ItcUniqueConfig.imagingConfigs(seq))
+      case _                                      => new ItcGenericImagingTableModel(keys, ItcUniqueConfig.imagingConfigs(seq))
     }
   }
 }
@@ -77,7 +77,7 @@ class ItcImagingTable(val owner: EdIteratorFolder) extends ItcTable {
 class ItcSpectroscopyTable(val owner: EdIteratorFolder) extends ItcTable {
 
   /** Creates a new table model for the current context and config sequence. */
-  def tableModel(keys: Seq[ItemKey], seq: ConfigSequence) = new ItcGenericSpectroscopyTableModel(keys, UniqueConfig.spectroscopyConfigs(seq))
+  def tableModel(keys: Seq[ItemKey], seq: ConfigSequence) = new ItcGenericSpectroscopyTableModel(keys, ItcUniqueConfig.spectroscopyConfigs(seq))
 
 }
 

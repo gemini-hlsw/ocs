@@ -10,45 +10,47 @@ import edu.gemini.spModel.gemini.michelle.{InstMichelle, MichelleParams}
 import edu.gemini.spModel.gemini.nifs.InstNIFS
 import edu.gemini.spModel.gemini.niri.{InstNIRI, Niri}
 import edu.gemini.spModel.gemini.trecs.{InstTReCS, TReCSParams}
+import edu.gemini.spModel.obscomp.InstConstants
 import jsky.app.ot.editor.seq.Keys._
 
+import scalaz.Scalaz._
 
 /**
  * Unique configurations represent sets of observes in a sequence which are done with the same
  * instrument configuration and exposure times.
  */
-case class UniqueConfig(count: Int, labels: String, config: Config) {
+case class ItcUniqueConfig(count: Int, labels: String, config: Config) {
 
   /** Single exposure time is either the given exposure time or the time on source divided by the number of images. */
-  def singleExposureTime: Double = singleTime.getOrElse(totalTime.getOrElse(0.0) / count)
+  def singleExposureTime: Double = singleTime.getOrElse(totalTime.orZero / count)
 
   /** Total exposure time is either total time on source (TReCS/Michelle) or the single exposure time times the number of images. */
-  def totalExposureTime: Double = totalTime.getOrElse(singleTime.getOrElse(0.0) * count)
+  def totalExposureTime: Double = totalTime.getOrElse(singleTime.orZero * count)
 
   /** TReCS and Michelle have an optional total time on source. */
-  private val totalTime = Option(config.getItemValue(INST_TIME_ON_SRC_KEY)).map(_.toString.toDouble)
+  private val totalTime = Option(config.getItemValue(INST_TIME_ON_SRC_KEY)).map(_.asInstanceOf[Double])
 
   /** Instruments other than TReCS and Michelle have a defined exposure time per image. */
-  private val singleTime = Option(config.getItemValue(INST_EXP_TIME_KEY)).map(_.toString.toDouble)
+  private val singleTime = Option(config.getItemValue(INST_EXP_TIME_KEY)).map(_.asInstanceOf[Double])
 
 }
 
 /**
  * Utility functions to get unique configurations from ConfigurationSequence objects.
  */
-object UniqueConfig {
+object ItcUniqueConfig {
 
   /** Gets all unique science imaging configurations from the given sequence. */
-  def imagingConfigs(seq: ConfigSequence): Seq[UniqueConfig] =
+  def imagingConfigs(seq: ConfigSequence): Seq[ItcUniqueConfig] =
     uniqueConfigs(seq, c => isScience(c) && isImaging(c))
 
   /** Gets all unique spectroscopy configurations from the given sequence. */
-  def spectroscopyConfigs(seq: ConfigSequence): Seq[UniqueConfig] =
+  def spectroscopyConfigs(seq: ConfigSequence): Seq[ItcUniqueConfig] =
     uniqueConfigs(seq, c => isScience(c) && isSpectroscopy(c))
 
   // Checks if a config is science or not; only science observations are relevant for ITC
   private def isScience(c: Config): Boolean =
-    Option(c.getItemValue(OBS_TYPE_KEY)).fold(false)(!_.equals("CAL"))
+    Option(c.getItemValue(OBS_TYPE_KEY)).fold(false)(_.equals(InstConstants.SCIENCE_OBSERVE_TYPE))
 
   // Decides if a configuration is for spectroscopy or not.
   private def isSpectroscopy(c: Config): Boolean = !isImaging(c)
@@ -69,10 +71,10 @@ object UniqueConfig {
 
   // Gets all "unique configs" (i.e. configs that are relevant for ITC) from the given sequence. The predicate
   // defines which steps have to be taken into account, i.e. spectroscopy vs imaging and no calibrations.
-  private def uniqueConfigs(seq: ConfigSequence, predicate: Config => Boolean): Seq[UniqueConfig] = {
+  private def uniqueConfigs(seq: ConfigSequence, predicate: Config => Boolean): Seq[ItcUniqueConfig] = {
     val steps        = seq.getAllSteps.toSeq.filter(predicate)
     val groupedSteps = steps.groupBy(hash).toSeq
-    val mappedSteps  = groupedSteps.map{case (h, cs) => UniqueConfig(cs.size, labels(cs), cs.head)}.toSeq
+    val mappedSteps  = groupedSteps.map{case (h, cs) => ItcUniqueConfig(cs.size, labels(cs), cs.head)}.toSeq
     mappedSteps.sortBy(_.config.getItemValue(DATALABEL_KEY).toString)
   }
 
@@ -90,7 +92,7 @@ object UniqueConfig {
   // Creates a text label based on the spans of steps covered by the steps.
   // E.g. ((1,2,3),(10,11),(15)) is turned into "001-003, 010-011, 015"
   private def labels(cs: Seq[Config]): String = {
-    val ls = cs.map(_.getItemValue(DATALABEL_KEY).toString.toInt).sorted
+    val ls = cs.map(_.getItemValue(DATALABEL_KEY).asInstanceOf[String].toInt).sorted
     findSpans(ls).map {
       case i :: Nil => i.toString
       case i :: is => f"$i%03d-${is.last}%03d"

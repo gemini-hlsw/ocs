@@ -6,7 +6,7 @@ import edu.gemini.shared.util.StringUtil
 import edu.gemini.spModel.config2.ItemKey
 
 /** Columns in the table are defined by their header label and a function on the unique config of the row. */
-case class Column(label: String, value: UniqueConfig => Object)
+case class Column(label: String, value: ItcUniqueConfig => Object)
 
 object ItcTableModel {
   /** Defines a set of header columns for all tables. */
@@ -28,7 +28,7 @@ sealed trait ItcTableModel extends AbstractTableModel {
   val headers: Seq[Column]
   val keys:    Seq[ItemKey]
   val results: Seq[Column]
-  val uniqueSteps: Seq[UniqueConfig]
+  val uniqueSteps: Seq[ItcUniqueConfig]
 
   def getRowCount: Int = uniqueSteps.size
 
@@ -61,7 +61,7 @@ sealed trait ItcTableModel extends AbstractTableModel {
 /** Generic ITC imaging tables model. */
 sealed trait ItcImagingTableModel extends ItcTableModel
 
-class ItcGenericImagingTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[UniqueConfig]) extends ItcImagingTableModel {
+class ItcGenericImagingTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[ItcUniqueConfig]) extends ItcImagingTableModel {
   val headers = ItcTableModel.headers
   val results = Seq(
     Column("PPF",             c => ""),
@@ -72,7 +72,7 @@ class ItcGenericImagingTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[U
 }
 
 /** GMOS specific ITC imaging table model. */
-class ItcGmosImagingTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[UniqueConfig]) extends ItcImagingTableModel {
+class ItcGmosImagingTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[ItcUniqueConfig]) extends ItcImagingTableModel {
   val headers = ItcTableModel.headers
   val results = Seq(
     Column("CCD1 PPF",        c => ""),
@@ -92,7 +92,7 @@ class ItcGmosImagingTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[Uniq
 /** Generic ITC spectroscopy table model. */
 sealed trait ItcSpectroscopyTableModel extends ItcTableModel
 
-class ItcGenericSpectroscopyTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[UniqueConfig]) extends ItcSpectroscopyTableModel {
+class ItcGenericSpectroscopyTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[ItcUniqueConfig]) extends ItcSpectroscopyTableModel {
   val headers = ItcTableModel.headers
   val results = Seq(
     Column("Messages",        c => "OK")
