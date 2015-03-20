@@ -139,11 +139,7 @@ public final class GsaoiRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        final double pixel_size = instrument.getPixelSize();
-        double source_fraction = 0;
         double halo_source_fraction = 0;
-        double peak_pixel_count = 0;
-
         final double sed_integral = calcSource.sed.getIntegral();
         final double sky_integral = calcSource.sky.getIntegral();
 
@@ -173,8 +169,6 @@ public final class GsaoiRecipe extends RecipeBase {
         }
 
         // this will be the core for a gems source; unchanged for non gems.
-        source_fraction = SFcalc.getSourceFraction();
-        final double Npix = SFcalc.getNPix();
         if (_obsDetailParameters.getMethod().isImaging()) {
             if (_gemsParameters.gemsIsUsed()) {
                 // If gems is used turn off printing of SF calc
@@ -187,39 +181,11 @@ public final class GsaoiRecipe extends RecipeBase {
             }
         }
 
-        final PeakPixelFluxCalc ppfc;
+        // Calculate peak pixel flux
         final double im_qual = gems.isDefined() ? gems.get().getAOCorrectedFWHM() : IQcalc.getImageQuality();
-        if (!_sdParameters.isUniform()) {
-
-            // calculation of image quaility was in here if the current setup
-            // does not work copy it back in here from above, and uncomment
-            // the section of code below for the uniform surface brightness.
-            // the present way should work.
-
-            ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
-                    _obsDetailParameters.getExposureTime(), sed_integral,
-                    sky_integral, instrument.getDarkCurrent());
-
-            peak_pixel_count = ppfc.getFluxInPeakPixel();
-
-            if (_gemsParameters.gemsIsUsed()) {
-                PeakPixelFluxCalc ppfc_halo = new PeakPixelFluxCalc(
-                        IQcalc.getImageQuality(), pixel_size,
-                        _obsDetailParameters.getExposureTime(), halo_integral,
-                        sky_integral, instrument.getDarkCurrent());
-                peak_pixel_count = peak_pixel_count + ppfc_halo.getFluxInPeakPixel();
-
-            }
-
-        } else  {
-
-            ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
-                    _obsDetailParameters.getExposureTime(), sed_integral,
-                    sky_integral, instrument.getDarkCurrent());
-
-            peak_pixel_count = ppfc
-                    .getFluxInPeakPixelUSB(source_fraction, Npix);
-        }
+        final double peak_pixel_count = gems.isDefined() ?
+                PeakPixelFlux.calculateWithHalo(instrument, _sdParameters, _obsDetailParameters, SFcalc, im_qual, IQcalc.getImageQuality(), halo_integral, sed_integral, sky_integral) :
+                PeakPixelFlux.calculate(instrument, _sdParameters, _obsDetailParameters, SFcalc, im_qual, sed_integral, sky_integral);
 
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
@@ -232,16 +198,11 @@ public final class GsaoiRecipe extends RecipeBase {
 
         // ObservationMode Imaging
 
-        final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
-        IS2Ncalc.setSedIntegral(sed_integral);
+        final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
         if (_gemsParameters.gemsIsUsed()) {
             IS2Ncalc.setSecondaryIntegral(halo_integral);
             IS2Ncalc.setSecondarySourceFraction(halo_source_fraction);
         }
-        IS2Ncalc.setSkyIntegral(sky_integral);
-        IS2Ncalc.setSourceFraction(source_fraction);
-        IS2Ncalc.setNpix(Npix);
-        IS2Ncalc.setDarkCurrent(instrument.getDarkCurrent());
         IS2Ncalc.calculate();
         _println(IS2Ncalc.getTextResult(device));
         _println(IS2Ncalc.getBackgroundLimitResult());

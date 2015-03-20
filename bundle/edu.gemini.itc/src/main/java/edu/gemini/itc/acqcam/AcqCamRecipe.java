@@ -111,43 +111,19 @@ public final class AcqCamRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        final double pixel_size = instrument.getPixelSize();
-        final double peak_pixel_count;
-
         // Calculate image quality
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
         IQcalc.calculate();
         final double im_qual = IQcalc.getImageQuality();
 
 
-//Calculate Source fraction
+        //Calculate Source fraction
         final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
         _print(SFcalc.getTextResult(device));
         _println(IQcalc.getTextResult(device));
 
-// Calculate the Peak Pixel Flux
-        final PeakPixelFluxCalc ppfc;
-
-        if (!_sdParameters.isUniform()) {
-
-            ppfc = new
-                    PeakPixelFluxCalc(im_qual, pixel_size,
-                    _obsDetailParameters.getExposureTime(),
-                    sed_integral, sky_integral,
-                    instrument.getDarkCurrent());
-
-            peak_pixel_count = ppfc.getFluxInPeakPixel();
-
-        } else {
-
-            ppfc = new
-                    PeakPixelFluxCalc(im_qual, pixel_size,
-                    _obsDetailParameters.getExposureTime(),
-                    sed_integral, sky_integral,
-                    instrument.getDarkCurrent());
-            peak_pixel_count = ppfc.getFluxInPeakPixelUSB(SFcalc.getSourceFraction(), SFcalc.getNPix());
-
-        }
+        // Calculate the Peak Pixel Flux
+        final double peak_pixel_count = PeakPixelFlux.calculate(instrument, _sdParameters, _obsDetailParameters, SFcalc, im_qual, sed_integral, sky_integral);
 
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
@@ -164,13 +140,7 @@ public final class AcqCamRecipe extends RecipeBase {
 
         //Calculate the Signal to Noise
 
-        final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
-        IS2Ncalc.setSedIntegral(sed_integral);
-        IS2Ncalc.setSkyIntegral(sky_integral);
-        IS2Ncalc.setSkyAperture(_obsDetailParameters.getSkyApertureDiameter());
-        IS2Ncalc.setSourceFraction(SFcalc.getSourceFraction());
-        IS2Ncalc.setNpix(SFcalc.getNPix());
-        IS2Ncalc.setDarkCurrent(instrument.getDarkCurrent());
+        final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
         IS2Ncalc.calculate();
         _println(IS2Ncalc.getTextResult(device));
         device.setPrecision(0);  // NO decimal places

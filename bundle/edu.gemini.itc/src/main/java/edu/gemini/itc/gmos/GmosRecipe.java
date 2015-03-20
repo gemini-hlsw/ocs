@@ -319,7 +319,7 @@ public final class GmosRecipe extends RecipeBase {
     // Calculation results
     // TEMPORARY, these will probably turn into Scala case classes
     interface GmosResult {}
-    private final class GmosImagingResult implements GmosResult {
+    public static final class GmosImagingResult implements GmosResult {
         public final SourceFraction SFcalc;
         public final double peak_pixel_count;
         public final ImagingS2NCalculatable IS2Ncalc;
@@ -332,7 +332,7 @@ public final class GmosRecipe extends RecipeBase {
         }
 
     }
-    private final class GmosSpectroscopyResult implements GmosResult {
+    public static final class GmosSpectroscopyResult implements GmosResult {
         public final SpecS2NLargeSlitVisitor[] specS2N;
         public final SlitThroughput st;
         public final ImageQualityCalculatable IQcalc;
@@ -461,8 +461,7 @@ public final class GmosRecipe extends RecipeBase {
                         exposure_time,
                         dark_current * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
                         read_noise,
-                        _obsDetailParameters.getSkyApertureDiameter(),
-                        instrument.getSpectralBinning());
+                        _obsDetailParameters.getSkyApertureDiameter());
 
                 specS2N[i].setDetectorTransmission(mainInstrument.getDetectorTransmision());
                 specS2N[i].setCcdPixelRange(firstCcdIndex, lastCcdIndex);
@@ -490,8 +489,7 @@ public final class GmosRecipe extends RecipeBase {
                     exposure_time,
                     dark_current * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
                     read_noise,
-                    _obsDetailParameters.getSkyApertureDiameter(),
-                    instrument.getSpectralBinning());
+                    _obsDetailParameters.getSkyApertureDiameter());
 
             specS2N[0].setDetectorTransmission(mainInstrument.getDetectorTransmision());
             specS2N[0].setCcdPixelRange(firstCcdIndex, lastCcdIndex);
@@ -521,7 +519,6 @@ public final class GmosRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        final double pixel_size = instrument.getPixelSize();
         final double sed_integral = src.sed.getIntegral();
         final double sky_integral = src.sky.getIntegral();
 
@@ -532,17 +529,9 @@ public final class GmosRecipe extends RecipeBase {
 
         // Calculate the Fraction of source in the aperture
         final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
-        final double source_fraction = SFcalc.getSourceFraction();
-        final double Npix = SFcalc.getNPix();
 
         // Calculate the Peak Pixel Flux
-        final PeakPixelFluxCalc ppfc  = new PeakPixelFluxCalc(im_qual, pixel_size, _obsDetailParameters.getExposureTime(), sed_integral, sky_integral, instrument.getDarkCurrent());
-        final double peak_pixel_count;
-        if (!_sdParameters.isUniform()) {
-            peak_pixel_count = ppfc.getFluxInPeakPixel();
-        } else {
-            peak_pixel_count = ppfc.getFluxInPeakPixelUSB(source_fraction, Npix);
-        }
+        final double peak_pixel_count = PeakPixelFlux.calculate(instrument, _sdParameters, _obsDetailParameters, SFcalc, im_qual, sed_integral, sky_integral);
 
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
@@ -552,13 +541,7 @@ public final class GmosRecipe extends RecipeBase {
         // report error if this does not come out to be an integer
         checkSourceFraction(number_exposures, frac_with_source);
 
-        final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
-        IS2Ncalc.setSedIntegral(sed_integral);
-        IS2Ncalc.setSkyIntegral(sky_integral);
-        IS2Ncalc.setSkyAperture(_obsDetailParameters.getSkyApertureDiameter());
-        IS2Ncalc.setSourceFraction(source_fraction);
-        IS2Ncalc.setNpix(Npix);
-        IS2Ncalc.setDarkCurrent(instrument.getDarkCurrent() * instrument.getSpatialBinning() * instrument.getSpatialBinning());
+        final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
         IS2Ncalc.calculate();
 
         return new GmosImagingResult(IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);

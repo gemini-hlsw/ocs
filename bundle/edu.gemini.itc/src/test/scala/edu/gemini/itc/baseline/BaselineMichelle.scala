@@ -21,8 +21,6 @@ object BaselineMichelle {
       "none",                             //String grating,
       "12",                               //String instrumentCentralWavelength,
       "none",                             //String FP_Mask,
-      "1",                                //String spatBinning, // TODO: always 1 can we remove this?
-      "1",                                //String specBinning  // TODO: always 1 can we remove this?
       MichelleParameters.ENABLED         //String polarimetry (enabled only allowed if imaging)
     )
   ))
@@ -33,8 +31,6 @@ object BaselineMichelle {
       "medN2",                            //String grating,
       "11",                               //String instrumentCentralWavelength,
       "slit0.38",                         //String FP_Mask,
-      "1",                                //String spatBinning, // TODO: always 1 can we remove this?
-      "1",                                //String specBinning  // TODO: always 1 can we remove this?
       MichelleParameters.DISABLED         //String polarimetry (enabled only allowed if imaging)
     )
   ))
@@ -45,8 +41,6 @@ object BaselineMichelle {
       "lowQ",                             //String grating,
       "18.2",                             //String instrumentCentralWavelength,
       "slit0.76",                         //String FP_Mask,
-      "1",                                //String spatBinning, // TODO: always 1 can we remove this?
-      "1",                                //String specBinning  // TODO: always 1 can we remove this?
       MichelleParameters.DISABLED         //String polarimetry (enabled only allowed if imaging)
     )
   ))

@@ -114,9 +114,6 @@ public final class GnirsRecipe extends RecipeBase {
 
         double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
-        double Npix = 0;
-        double source_fraction = 0;
-        double peak_pixel_count = 0;
 
         // Calculate image quality
         double im_qual;
@@ -138,8 +135,6 @@ public final class GnirsRecipe extends RecipeBase {
         final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
 
         // this will be the core for an altair source; unchanged for non altair.
-        source_fraction = SFcalc.getSourceFraction();
-        Npix = SFcalc.getNPix();
         if (_obsDetailParameters.getMethod().isImaging()) {
             _print(SFcalc.getTextResult(device));
             _println(IQcalc.getTextResult(device));
@@ -150,30 +145,11 @@ public final class GnirsRecipe extends RecipeBase {
         }
 
         // Calculate the Peak Pixel Flux
-        PeakPixelFluxCalc ppfc;
-
-        if (!_sdParameters.isUniform()) {
-
-            ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
-                    _obsDetailParameters.getExposureTime(), sed_integral,
-                    sky_integral, instrument.getDarkCurrent());
-
-            peak_pixel_count = ppfc.getFluxInPeakPixel();
-
-        } else {
-
-            ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
-                    _obsDetailParameters.getExposureTime(), sed_integral,
-                    sky_integral, instrument.getDarkCurrent());
-
-            peak_pixel_count = ppfc
-                    .getFluxInPeakPixelUSB(source_fraction, Npix);
-        }
+        final double peak_pixel_count = PeakPixelFlux.calculate(instrument, _sdParameters, _obsDetailParameters, SFcalc, im_qual, sed_integral, sky_integral);
 
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
-        int binFactor;
         int number_exposures = _obsDetailParameters.getNumExposures();
         double frac_with_source = _obsDetailParameters.getSourceFraction();
         double dark_current = instrument.getDarkCurrent();
@@ -276,10 +252,9 @@ public final class GnirsRecipe extends RecipeBase {
                     number_exposures,
                     frac_with_source,
                     exposure_time,
-                    dark_current * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
+                    dark_current,
                     read_noise,
-                    _obsDetailParameters.getSkyApertureDiameter(),
-                    instrument.getSpectralBinning());
+                    _obsDetailParameters.getSkyApertureDiameter());
 
             // DEBUG
             // _println("RESOLUTION DEBUGGING");
@@ -796,54 +771,21 @@ public final class GnirsRecipe extends RecipeBase {
                 finalS2N = _printSpecTag("Final S/N ASCII data");
             }
 
-            // THis was used for TED to output the data might be useful later.
-            /**
-             * double [][] temp = specS2N.getSignalSpectrum().getData(); for
-             * (int i=0; i< specS2N.getSignalSpectrum().getLength()-2; i++) {
-             * System.out.print(" " +temp[0][i]+ "  ");
-             * System.out.println(temp[1][i]); } System.out.println("END");
-             * double [][] temp2 = specS2N.getFinalS2NSpectrum().getData(); for
-             * (int i=0; i< specS2N.getFinalS2NSpectrum().getLength()-2; i++) {
-             * System.out.print(" " +temp2[0][i]+ "  ");
-             * System.out.println(temp2[1][i]); } System.out.println("END");
-             *
-             **/
-
         } else {
 
-            ImagingS2NCalculatable IS2Ncalc =
-                    ImagingS2NCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
-            IS2Ncalc.setSedIntegral(sed_integral);
-
-//            // REL-472: Commenting out Altair option for now
-//            if (_altairParameters.altairIsUsed()) {
-//                IS2Ncalc.setSecondaryIntegral(halo_integral);
-//                IS2Ncalc.setSecondarySourceFraction(halo_source_fraction);
-//            }
-
-            IS2Ncalc.setSkyIntegral(sky_integral);
-            IS2Ncalc.setSkyAperture(_obsDetailParameters
-                    .getSkyApertureDiameter());
-            IS2Ncalc.setSourceFraction(source_fraction);
-            IS2Ncalc.setNpix(Npix);
-            IS2Ncalc.setDarkCurrent(instrument.getDarkCurrent()
-                    * instrument.getSpatialBinning()
-                    * instrument.getSpatialBinning());
+            final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
             IS2Ncalc.calculate();
             _println(IS2Ncalc.getTextResult(device));
-            // _println(IS2Ncalc.getBackgroundLimitResult());
             device.setPrecision(0); // NO decimal places
             device.clear();
-            binFactor = instrument.getSpatialBinning()
-                    * instrument.getSpatialBinning();
 
             _println("");
             _println("The peak pixel signal + background is "
                     + device.toString(peak_pixel_count) + ". ");
 
-            if (peak_pixel_count > (.95 * instrument.getWellDepth() * binFactor))
+            if (peak_pixel_count > (.95 * instrument.getWellDepth()))
                 _println("Warning: peak pixel may be saturating the (binned) CCD full well of "
-                        + .95 * instrument.getWellDepth() * binFactor);
+                        + .95 * instrument.getWellDepth());
 
             if (peak_pixel_count > (.95 * instrument.getADSaturation() * instrument
                     .getLowGain()))
@@ -872,19 +814,7 @@ public final class GnirsRecipe extends RecipeBase {
         _println("Instrument: " + instrument.getName() + "\n");
         _println(HtmlPrinter.printParameterSummary(_sdParameters));
         _println(instrument.toString());
-
-//        // REL-472: Commenting out Altair option for now
-//        if (_altairParameters.altairIsUsed()) {
-//            _teleParameters.setWFS("altair");
-//        }
-
         _println(HtmlPrinter.printParameterSummary(_telescope));
-
-//        // REL-472: Commenting out Altair option for now
-//        if (_altairParameters.altairIsUsed()) {
-//            _println(_altairParameters.printParameterSummary());
-//        }
-
         _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));
         _println(HtmlPrinter.printParameterSummary(_obsDetailParameters));
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {

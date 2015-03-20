@@ -1,20 +1,45 @@
 package edu.gemini.itc.operation;
 
+import edu.gemini.itc.gsaoi.Gsaoi;
+import edu.gemini.itc.niri.Niri;
+import edu.gemini.itc.service.ObservationDetails;
+import edu.gemini.itc.shared.BinningProvider;
 import edu.gemini.itc.shared.FormatStringWriter;
+import edu.gemini.itc.shared.Instrument;
+import edu.gemini.itc.trecs.TRecs;
 
 public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
+
+    final double Npix;
+    final double source_fraction;
+    final double dark_current;
+    final double sed_integral;
+    final double sky_integral;
+    final double skyAper;
+    final int    elfinParam;
+
     double var_source, var_background, var_dark, var_readout,
-            noise, sourceless_noise, signal, sed_integral, source_fraction,
-            Npix, sky_integral, read_noise, dark_current, pixel_size,
+            noise, sourceless_noise, signal,
+            read_noise, pixel_size,
             exposure_time, noiseFactor;
 
     double secondary_integral = 0;
     double secondary_source_fraction = 0;
 
-    double skyAper = 1;
-
-    //Extra Low frequency noise.  Default:  Has no effect.
-    int elfinParam = 1;
+    public ImagingS2NCalculation( final ObservationDetails obs, final Instrument instrument,final SourceFraction sourceFrac, final double sed_integral, final double sky_integral) {
+        this.sed_integral    = sed_integral;
+        this.sky_integral    = sky_integral;
+        this.source_fraction = sourceFrac.getSourceFraction();
+        this.Npix            = sourceFrac.getNPix();
+        this.dark_current    = (instrument instanceof BinningProvider) ?
+                instrument.getDarkCurrent() * ((BinningProvider) instrument).getSpatialBinning() * ((BinningProvider) instrument).getSpectralBinning() :
+                instrument.getDarkCurrent();
+        // TODO: Why 1 for NIRI/GSAOI?? Is this a bug or is there a reason why in the original code those instruments did not
+        // TODO: set the aperture and used a (default) value of 1?
+        this.skyAper         = (instrument instanceof Niri || instrument instanceof Gsaoi) ? 1 : obs.getSkyApertureDiameter();
+        // TODO: marker interface like for binning?
+        this.elfinParam      = (instrument instanceof TRecs) ? ((TRecs) instrument).getExtraLowFreqNoise() : 1; // default 1 will have no effect
+    }
 
     public void calculate() {
         noiseFactor = 1 + (1 / skyAper);
@@ -38,41 +63,12 @@ public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
                 secondary_integral * secondary_source_fraction * exposure_time;
     }
 
-    public void setSedIntegral(double sed_integral) {
-        this.sed_integral = sed_integral;
-    }
-
     public void setSecondaryIntegral(double secondary_integral) {
         this.secondary_integral = secondary_integral;
     }
 
     public void setSecondarySourceFraction(double secondary_source_fraction) {
         this.secondary_source_fraction = secondary_source_fraction;
-    }
-
-    public void setSourceFraction(double source_fraction) {
-        this.source_fraction = source_fraction;
-    }
-
-    public void setDarkCurrent(double dark_current) {
-        this.dark_current = dark_current;
-    }
-
-    public void setNpix(double Npix) {
-        this.Npix = Npix;
-    }
-
-    public void setSkyAperture(double skyAper) {
-        this.skyAper = skyAper;
-    }
-
-    public void setSkyIntegral(double sky_integral) {
-        this.sky_integral = sky_integral;
-    }
-
-    //method to set the extra low freq noise.
-    public void setExtraLowFreqNoise(int extraLowFreqNoise) {
-        this.elfinParam = extraLowFreqNoise;
     }
 
     public String getTextResult(FormatStringWriter device) {

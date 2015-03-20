@@ -19,8 +19,6 @@ public final class MichelleParameters implements InstrumentDetails {
     public static final String INSTRUMENT_CENTRAL_WAVELENGTH = "instrumentCentralWavelength";
     public static final String WELL_DEPTH = "wellDepth";
     public static final String FP_MASK = "instrumentFPMask";
-    public static final String SPAT_BINNING = "spatBinning";
-    public static final String SPEC_BINNING = "specBinning";
 
     // ITC web form input values.
     // These constants must be kept in sync with the web page form.
@@ -65,8 +63,6 @@ public final class MichelleParameters implements InstrumentDetails {
     private String _grating; // Grating or null
     private String _instrumentCentralWavelength;
     private String _FP_Mask;
-    private String _spatBinning;
-    private String _specBinning;
     private String _polarimetry;
 
     /**
@@ -108,16 +104,6 @@ public final class MichelleParameters implements InstrumentDetails {
             ITCParameters.notFoundException(INSTRUMENT_GRATING);
         }
 
-        _spatBinning = r.getParameter(SPAT_BINNING);
-        if (_spatBinning == null) {
-            ITCParameters.notFoundException(SPAT_BINNING);
-        }
-
-        _specBinning = r.getParameter(SPEC_BINNING);
-        if (_specBinning == null) {
-            ITCParameters.notFoundException(SPEC_BINNING);
-        }
-
         // Get Instrument Central Wavelength
         _instrumentCentralWavelength =
                 r.getParameter(INSTRUMENT_CENTRAL_WAVELENGTH);
@@ -142,8 +128,6 @@ public final class MichelleParameters implements InstrumentDetails {
     public void parseMultipartParameters(ITCMultiPartParser p) {
         _Filter = p.getParameter(INSTRUMENT_FILTER);
         _grating = p.getParameter(INSTRUMENT_GRATING);
-        _spatBinning = p.getParameter(SPAT_BINNING);
-        _specBinning = p.getParameter(SPEC_BINNING);
         _instrumentCentralWavelength = p.getParameter(INSTRUMENT_CENTRAL_WAVELENGTH);
         if (_instrumentCentralWavelength.equals(" ")) {
             _instrumentCentralWavelength = "0";
@@ -162,15 +146,11 @@ public final class MichelleParameters implements InstrumentDetails {
                               String grating,
                               String instrumentCentralWavelength,
                               String FP_Mask,
-                              String spatBinning,
-                              String specBinning,
                               String polarimetry) {
         _Filter = Filter;
         _grating = grating;
         _instrumentCentralWavelength = instrumentCentralWavelength;
         _FP_Mask = FP_Mask;
-        _spatBinning = spatBinning;
-        _specBinning = specBinning;
         _polarimetry = polarimetry;
 
     }
@@ -189,14 +169,6 @@ public final class MichelleParameters implements InstrumentDetails {
 
     public double getInstrumentCentralWavelength() {
         return (new Double(_instrumentCentralWavelength)) * 1000;
-    }
-
-    public int getSpectralBinning() {//System.out.println(new Integer(_specBinning).intValue());
-        return new Integer(_specBinning);
-    }
-
-    public int getSpatialBinning() {//System.out.println(new Integer(_spatBinning).intValue());
-        return new Integer(_spatBinning);
     }
 
     public double getFPMask() {

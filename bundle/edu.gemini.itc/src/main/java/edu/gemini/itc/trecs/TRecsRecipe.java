@@ -163,7 +163,6 @@ public final class TRecsRecipe extends RecipeBase {
 
         double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
-        double peak_pixel_count = 0;
 
         // Calculate image quality
         double im_qual = 0.;
@@ -184,29 +183,11 @@ public final class TRecsRecipe extends RecipeBase {
         }
 
         // Calculate the Peak Pixel Flux
-        PeakPixelFluxCalc ppfc;
-
-        if (!_sdParameters.isUniform()) {
-
-            ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
-                    exp_time, sed_integral, sky_integral,
-                    instrument.getDarkCurrent());
-
-            peak_pixel_count = ppfc.getFluxInPeakPixel();
-
-        } else {
-
-            ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
-                    exp_time, sed_integral, sky_integral,
-                    instrument.getDarkCurrent());
-
-            peak_pixel_count = ppfc.getFluxInPeakPixelUSB(SFcalc.getSourceFraction(), SFcalc.getNPix());
-        }
+        final double peak_pixel_count = PeakPixelFlux.calculate(instrument, _sdParameters, _obsDetailParameters, SFcalc, im_qual, sed_integral, sky_integral);
 
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
-        int binFactor;
         final int number_exposures = _obsDetailParameters.getNumExposures();
         double spec_source_frac = 0;
         double frac_with_source = _obsDetailParameters.getSourceFraction();
@@ -290,11 +271,8 @@ public final class TRecsRecipe extends RecipeBase {
                     instrument.getGratingDispersion_nmppix(),
                     instrument.getGratingResolution(), spec_source_frac,
                     im_qual, ap_diam, number_exposures, frac_with_source,
-                    exp_time, dark_current
-                    * instrument.getSpatialBinning()
-                    * instrument.getSpectralBinning(), read_noise,
-                    _obsDetailParameters.getSkyApertureDiameter(),
-                    instrument.getSpectralBinning());
+                    exp_time, dark_current, read_noise,
+                    _obsDetailParameters.getSkyApertureDiameter());
             specS2N.setDetectorTransmission(instrument.getDetectorTransmision());
             specS2N.setSourceSpectrum(sed);
             specS2N.setBackgroundSpectrum(sky);
@@ -321,9 +299,6 @@ public final class TRecsRecipe extends RecipeBase {
             singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
             finalS2N = _printSpecTag("Final S/N ASCII data");
 
-            binFactor = instrument.getSpatialBinning()
-                    * instrument.getSpectralBinning();
-
             // THis was used for TED to output the data might be useful later.
             /**
              * double [][] temp = specS2N.getSignalSpectrum().getData(); for
@@ -339,36 +314,15 @@ public final class TRecsRecipe extends RecipeBase {
 
         } else {
 
-            ImagingS2NCalculatable IS2Ncalc =
-                    ImagingS2NCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
-            IS2Ncalc.setSedIntegral(sed_integral);
-            IS2Ncalc.setSkyIntegral(sky_integral);
-            IS2Ncalc.setSkyAperture(_obsDetailParameters
-                    .getSkyApertureDiameter());
-            IS2Ncalc.setSourceFraction(SFcalc.getSourceFraction());
-            IS2Ncalc.setNpix(SFcalc.getNPix());
-            IS2Ncalc.setDarkCurrent(instrument.getDarkCurrent()
-                    * instrument.getSpatialBinning()
-                    * instrument.getSpatialBinning());
-
-            IS2Ncalc.setExtraLowFreqNoise(instrument.getExtraLowFreqNoise());
+            final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
             IS2Ncalc.calculate();
             _println(IS2Ncalc.getTextResult(device));
-            // _println(IS2Ncalc.getBackgroundLimitResult());
             device.setPrecision(0); // NO decimal places
             device.clear();
-            binFactor = instrument.getSpatialBinning()
-                    * instrument.getSpatialBinning();
 
             _println("");
             _println("The peak pixel signal + background is "
                     + device.toString(peak_pixel_count) + ". ");// This is " +
-            // device.toString(peak_pixel_count/instrument.getWellDepth()*100) +
-            // "% of the full well depth of "+device.toString(instrument.getWellDepth())+".");
-
-            // if (peak_pixel_count > (.95*instrument.getWellDepth()*binFactor))
-            // _println("Warning: peak pixel may be saturating the (binned) CCD full well of "+
-            // .95*instrument.getWellDepth()*binFactor);
 
             if (peak_pixel_count > (instrument.getWellDepth()))
                 _println("Warning: peak pixel may be saturating the imaging deep well setting of "

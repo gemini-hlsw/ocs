@@ -39,8 +39,6 @@ public final class TRecs extends Instrument {
     private final String _focalPlaneMask;
     private final CalculationMethod _mode;
     private final double _centralWavelength;
-    private final int _spectralBinning;
-    private final int _spatialBinning;
     private final DetectorsTransmissionVisitor _dtv;
 
     public TRecs(final TRecsParameters tp, final ObservationDetails odp) {
@@ -50,8 +48,6 @@ public final class TRecs extends Instrument {
         _grating = tp.getGrating();
         _centralWavelength = tp.getInstrumentCentralWavelength();
         _mode = odp.getMethod();
-        _spectralBinning = tp.getSpectralBinning();
-        _spatialBinning = tp.getSpatialBinning();
 
         final String instrumentWindow = tp.getInstrumentWindow();
         final String file = getDirectory() + "/" + getPrefix() + instrumentWindow + Instrument.getSuffix();
@@ -107,15 +103,13 @@ public final class TRecs extends Instrument {
         final Detector detector = new Detector(getDirectory() + "/", getPrefix(), "det", "320x240 pixel Si:As IBC array");
         detector.setDetectorPixels(DETECTOR_PIXELS);
 
-        _dtv = new edu.gemini.itc.operation.DetectorsTransmissionVisitor(_spectralBinning,
-                getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
+        _dtv = new DetectorsTransmissionVisitor(1, getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
 
         if (!(_grating.equals("none"))) {
 
             final TrecsGratingOptics gratingOptics = new TrecsGratingOptics(getDirectory() + "/" + TRecs.getPrefix(), _grating,
                     _centralWavelength,
-                    detector.getDetectorPixels(),
-                    _spectralBinning);
+                    detector.getDetectorPixels());
             _sampling = gratingOptics.getGratingDispersion_nmppix();
 
             if (getGrating().equals(TRecsParameters.LORES20_G5402) && !(instrumentWindow.equals(TRecsParameters.KRS5))) {
@@ -175,7 +169,7 @@ public final class TRecs extends Instrument {
     }
 
     public double getPixelSize() {
-        return super.getPixelSize() * _spatialBinning;
+        return super.getPixelSize();
     }
 
     public double getSpectralPixelWidth() {
@@ -200,14 +194,6 @@ public final class TRecs extends Instrument {
         } else {
             return IMAGING_FRAME_TIME;
         }
-    }
-
-    public int getSpectralBinning() {
-        return _spectralBinning;
-    }
-
-    public int getSpatialBinning() {
-        return _spatialBinning;
     }
 
     public int getExtraLowFreqNoise() {
@@ -238,9 +224,9 @@ public final class TRecs extends Instrument {
         s += "\n";
         if (_mode.isSpectroscopy())
             s += "<L1> Central Wavelength: " + _centralWavelength + " nm" + "\n";
-        s += "Spatial Binning: " + getSpatialBinning() + "\n";
+        s += "Spatial Binning: 1\n";
         if (_mode.isSpectroscopy())
-            s += "Spectral Binning: " + getSpectralBinning() + "\n";
+            s += "Spectral Binning: 1\n";
         s += "Pixel Size in Spatial Direction: " + getPixelSize() + "arcsec\n";
         if (_mode.isSpectroscopy())
             s += "Pixel Size in Spectral Direction: " + getGratingDispersion_nmppix() + "nm\n";

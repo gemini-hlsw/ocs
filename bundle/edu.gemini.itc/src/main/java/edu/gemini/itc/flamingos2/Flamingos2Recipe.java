@@ -119,7 +119,6 @@ public final class Flamingos2Recipe extends RecipeBase {
 
         final double pixel_size = instrument.getPixelSize();
         double ap_diam;
-        final double peak_pixel_count;
 
         // Calculate image quality
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
@@ -132,25 +131,7 @@ public final class Flamingos2Recipe extends RecipeBase {
         _println(IQcalc.getTextResult(device));
 
         // Calculate the Peak Pixel Flux
-        final PeakPixelFluxCalc ppfc;
-
-        if (!_sdParameters.isUniform()) {
-
-            ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
-                    _obsDetailParameters.getExposureTime(), sed_integral,
-                    sky_integral, instrument.getDarkCurrent());
-
-            peak_pixel_count = ppfc.getFluxInPeakPixel();
-
-        } else {
-
-
-            ppfc = new PeakPixelFluxCalc(im_qual, pixel_size,
-                    _obsDetailParameters.getExposureTime(), sed_integral,
-                    sky_integral, instrument.getDarkCurrent());
-            peak_pixel_count = ppfc.getFluxInPeakPixelUSB(
-                    SFcalc.getSourceFraction(), SFcalc.getNPix());
-        }
+        final double peak_pixel_count = PeakPixelFlux.calculate(instrument, _sdParameters, _obsDetailParameters, SFcalc, im_qual, sed_integral, sky_integral);
 
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
@@ -237,7 +218,7 @@ public final class Flamingos2Recipe extends RecipeBase {
                     instrument.getGrismResolution(), spec_source_frac, im_qual,
                     ap_diam, number_exposures, frac_with_source, exposure_time,
                     dark_current, read_noise,
-                    _obsDetailParameters.getSkyApertureDiameter(), 1);
+                    _obsDetailParameters.getSkyApertureDiameter());
 
             specS2N.setDetectorTransmission(instrument.getDetectorTransmision());
             specS2N.setSourceSpectrum(sed);
@@ -281,13 +262,7 @@ public final class Flamingos2Recipe extends RecipeBase {
 
             // Calculate the Signal to Noise
 
-            final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument);
-            IS2Ncalc.setSedIntegral(sed_integral);
-            IS2Ncalc.setSkyIntegral(sky_integral);
-            IS2Ncalc.setSkyAperture(_obsDetailParameters.getSkyApertureDiameter());
-            IS2Ncalc.setSourceFraction(SFcalc.getSourceFraction());
-            IS2Ncalc.setNpix(SFcalc.getNPix());
-            IS2Ncalc.setDarkCurrent(instrument.getDarkCurrent());
+            final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
             IS2Ncalc.calculate();
             _println(IS2Ncalc.getTextResult(device));
             device.setPrecision(0); // NO decimal places

@@ -16,10 +16,9 @@ public final class MichelleGratingOptics extends GratingOptics {
     public MichelleGratingOptics(final String directory,
                                  final String gratingName,
                                  final double centralWavelength,
-                                 final int detectorPixels,
-                                 final int spectralBinning) {
+                                 final int detectorPixels) {
 
-        super(directory, gratingName, "gratings", centralWavelength, detectorPixels, spectralBinning);
+        super(directory, gratingName, "gratings", centralWavelength, detectorPixels, 1);
     }
 
     public double getFrameTime() {

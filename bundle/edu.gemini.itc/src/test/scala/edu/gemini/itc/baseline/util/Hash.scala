@@ -71,8 +71,6 @@ object Hash {
       p.getFPMask,
       p.getGrating,
       p.getInstrumentCentralWavelength,
-      p.getSpatialBinning,
-      p.getSpectralBinning,
       p.getStringSlitWidth,
       p.polarimetryIsUsed()
     )
@@ -118,8 +116,6 @@ object Hash {
       p.getGrating,
       p.getInstrumentCentralWavelength,
       p.getInstrumentWindow,
-      p.getSpatialBinning,
-      p.getSpectralBinning,
       p.getStringSlitWidth
     )
 

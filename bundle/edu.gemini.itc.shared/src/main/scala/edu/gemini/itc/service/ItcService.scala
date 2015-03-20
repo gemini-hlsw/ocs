@@ -1,0 +1,56 @@
+package edu.gemini.itc.service
+
+import scalaz.{Failure, Success, Validation}
+
+/**
+ * ITC calculation result for a single CCD.
+ * Depending on the observation type (imaging vs. spectroscopy) and calculation method different results are returned.
+ */
+sealed trait ItcCalcResult
+final case class ItcImagingResult(singleSNRatio: Double, totalSNRatio: Double, peakPixelFlux: Double) extends ItcCalcResult
+final case class ItcSpectroscopyResult(/*TODO*/) extends ItcCalcResult
+
+/**
+ * ITC results.
+ * Note that GMOS ITC recipes provide a separate result for each of the three CCDs while all other instruments only
+ * return one result (either because they don't have more than one CCD or because all different CCDs are assumed to
+ * have the same characteristics).
+ */
+sealed trait ItcResult {
+  /** Returns the results for all CCDs. */
+  def ccds: Array[ItcCalcResult]
+
+  /** Returns the result for the first (and in most cases only) CCD. */
+  def ccd = ccds(0)
+}
+
+object ItcResult {
+
+  import ItcService._
+
+  /** Creates an ITC result in case of an error. */
+  def forException(e: Throwable): Result = Failure(List(e.getMessage))
+
+  /** Creates an ITC result for a single CCD. */
+  def forCcd(result: ItcCalcResult): Result = Success(new ItcResult { val ccds = Array(result) })
+
+  /** Creates an ITC result for an array of CCDs. */
+  def forCcds(results: Array[ItcCalcResult]): Result = Success(new ItcResult { val ccds = results })
+}
+
+/**
+ * Service interface for ITC calculations.
+ */
+trait ItcService {
+
+  import ItcService._
+
+  def calculate(source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: InstrumentDetails): Result
+
+}
+
+object ItcService {
+
+  type Result = Validation[List[String], ItcResult]
+
+}
