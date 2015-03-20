@@ -6,8 +6,6 @@ public interface ImagingS2NCalculatable extends Calculatable {
 
     public void setSecondarySourceFraction(double secondary_source_fraction);
 
-    public void setSkyAperture(double skyAper);
-
     public void setExtraLowFreqNoise(int elfnParam);
 
     public String getBackgroundLimitResult();

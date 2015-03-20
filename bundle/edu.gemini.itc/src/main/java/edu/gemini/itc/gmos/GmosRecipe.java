@@ -542,7 +542,6 @@ public final class GmosRecipe extends RecipeBase {
         checkSourceFraction(number_exposures, frac_with_source);
 
         final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
-        IS2Ncalc.setSkyAperture(_obsDetailParameters.getSkyApertureDiameter());
         IS2Ncalc.calculate();
 
         return new GmosImagingResult(IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);

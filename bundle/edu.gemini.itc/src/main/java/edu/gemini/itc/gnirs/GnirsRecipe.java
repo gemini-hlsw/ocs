@@ -774,7 +774,6 @@ public final class GnirsRecipe extends RecipeBase {
         } else {
 
             final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
-            IS2Ncalc.setSkyAperture(_obsDetailParameters.getSkyApertureDiameter());
             IS2Ncalc.calculate();
             _println(IS2Ncalc.getTextResult(device));
             device.setPrecision(0); // NO decimal places
