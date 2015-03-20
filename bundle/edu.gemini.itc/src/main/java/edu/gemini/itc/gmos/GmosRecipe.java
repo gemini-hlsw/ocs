@@ -545,7 +545,6 @@ public final class GmosRecipe extends RecipeBase {
         IS2Ncalc.setSedIntegral(sed_integral);
         IS2Ncalc.setSkyIntegral(sky_integral);
         IS2Ncalc.setSkyAperture(_obsDetailParameters.getSkyApertureDiameter());
-        IS2Ncalc.setDarkCurrent(instrument.getDarkCurrent() * instrument.getSpatialBinning() * instrument.getSpatialBinning());
         IS2Ncalc.calculate();
 
         return new GmosImagingResult(IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);

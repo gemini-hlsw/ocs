@@ -15,7 +15,7 @@ import java.awt.*;
 /**
  * Gmos specification class
  */
-public abstract class Gmos extends Instrument {
+public abstract class Gmos extends Instrument implements BinningProvider {
 
     //Plate scales for original and Hamamatsu CCD's (temporary)
     public static final double ORIG_PLATE_SCALE = 0.0727;

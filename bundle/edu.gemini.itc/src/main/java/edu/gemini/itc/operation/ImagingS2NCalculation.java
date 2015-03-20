@@ -1,15 +1,18 @@
 package edu.gemini.itc.operation;
 
+import edu.gemini.itc.shared.BinningProvider;
 import edu.gemini.itc.shared.FormatStringWriter;
+import edu.gemini.itc.shared.Instrument;
 
 public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
 
     final double Npix;
     final double source_fraction;
+    final double dark_current;
 
     double var_source, var_background, var_dark, var_readout,
             noise, sourceless_noise, signal, sed_integral,
-            sky_integral, read_noise, dark_current, pixel_size,
+            sky_integral, read_noise, pixel_size,
             exposure_time, noiseFactor;
 
     double secondary_integral = 0;
@@ -20,9 +23,12 @@ public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
     //Extra Low frequency noise.  Default:  Has no effect.
     int elfinParam = 1;
 
-    public ImagingS2NCalculation(final SourceFraction sourceFrac) {
+    public ImagingS2NCalculation(final Instrument instrument, final SourceFraction sourceFrac) {
         this.source_fraction = sourceFrac.getSourceFraction();
         this.Npix            = sourceFrac.getNPix();
+        this.dark_current    = (instrument instanceof BinningProvider) ?
+                instrument.getDarkCurrent() * ((BinningProvider) instrument).getSpatialBinning() * ((BinningProvider) instrument).getSpectralBinning() :
+                instrument.getDarkCurrent();
     }
 
     public void calculate() {
@@ -57,10 +63,6 @@ public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
 
     public void setSecondarySourceFraction(double secondary_source_fraction) {
         this.secondary_source_fraction = secondary_source_fraction;
-    }
-
-    public void setDarkCurrent(double dark_current) {
-        this.dark_current = dark_current;
     }
 
     public void setSkyAperture(double skyAper) {

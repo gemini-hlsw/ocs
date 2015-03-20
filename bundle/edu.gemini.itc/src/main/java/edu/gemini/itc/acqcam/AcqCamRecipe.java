@@ -144,7 +144,6 @@ public final class AcqCamRecipe extends RecipeBase {
         IS2Ncalc.setSedIntegral(sed_integral);
         IS2Ncalc.setSkyIntegral(sky_integral);
         IS2Ncalc.setSkyAperture(_obsDetailParameters.getSkyApertureDiameter());
-        IS2Ncalc.setDarkCurrent(instrument.getDarkCurrent());
         IS2Ncalc.calculate();
         _println(IS2Ncalc.getTextResult(device));
         device.setPrecision(0);  // NO decimal places

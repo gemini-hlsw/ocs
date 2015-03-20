@@ -205,7 +205,6 @@ public final class GsaoiRecipe extends RecipeBase {
             IS2Ncalc.setSecondarySourceFraction(halo_source_fraction);
         }
         IS2Ncalc.setSkyIntegral(sky_integral);
-        IS2Ncalc.setDarkCurrent(instrument.getDarkCurrent());
         IS2Ncalc.calculate();
         _println(IS2Ncalc.getTextResult(device));
         _println(IS2Ncalc.getBackgroundLimitResult());

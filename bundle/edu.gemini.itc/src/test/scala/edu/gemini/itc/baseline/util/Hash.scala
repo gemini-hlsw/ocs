@@ -71,8 +71,6 @@ object Hash {
       p.getFPMask,
       p.getGrating,
       p.getInstrumentCentralWavelength,
-      1,                            // TODO: remove with next udpate of baseline, was: spectralBinnning
-      1,                            // TODO: remove with next udpate of baseline, was: spatialBinnning
       p.getStringSlitWidth,
       p.polarimetryIsUsed()
     )
@@ -118,8 +116,6 @@ object Hash {
       p.getGrating,
       p.getInstrumentCentralWavelength,
       p.getInstrumentWindow,
-      1,                            // TODO: remove with next udpate of baseline, was: spectralBinnning
-      1,                            // TODO: remove with next udpate of baseline, was: spatialBinnning
       p.getStringSlitWidth
     )
 

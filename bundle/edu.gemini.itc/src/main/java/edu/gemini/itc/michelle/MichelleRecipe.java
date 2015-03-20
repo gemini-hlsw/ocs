@@ -430,7 +430,6 @@ public final class MichelleRecipe extends RecipeBase {
             IS2Ncalc.setSedIntegral(sed_integral);
             IS2Ncalc.setSkyIntegral(sky_integral);
             IS2Ncalc.setSkyAperture(_obsDetailParameters.getSkyApertureDiameter());
-            IS2Ncalc.setDarkCurrent(instrument.getDarkCurrent());
             IS2Ncalc.calculate();
 
             // Michelle polarimetry calculations include a x4 overhead of observing into the calculation
