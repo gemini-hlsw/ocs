@@ -3,7 +3,7 @@ package edu.gemini.epics.acm;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class CaCommandMonitorImpl implements CaCommandMonitor {
+public final class CaCommandMonitorImpl implements CaCommandMonitor {
 
     private State currentState;
     private Exception cause;

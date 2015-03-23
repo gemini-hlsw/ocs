@@ -7,7 +7,7 @@ import edu.gemini.epics.ReadWriteClientEpicsChannel;
 import gov.aps.jca.CAException;
 import gov.aps.jca.TimeoutException;
 
-class CaParameterImpl<T> implements CaParameter<T> {
+final class CaParameterImpl<T> implements CaParameter<T> {
     
     private static final Logger LOG = Logger.getLogger(CaParameterImpl.class.getName()); 
 

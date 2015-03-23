@@ -50,7 +50,7 @@ import edu.gemini.epics.acm.generated.TopType;
  * @author jluhrs
  *
  */
-public class CaConfigFileConverter {
+public final class CaConfigFileConverter {
     
     private static final Logger LOG = Logger.getLogger(CaConfigFileConverter.class.getName()); 
 
@@ -61,7 +61,7 @@ public class CaConfigFileConverter {
     private static final String DIR_PARAM = "DIR";
     private static final String DUMMY_PARAM = "dummy";
 
-    private static class ApplyDef {
+    private static final class ApplyDef {
         public final String name;
         public final String applyRecord;
         public final String carRecord;
@@ -76,7 +76,7 @@ public class CaConfigFileConverter {
         }
     }
 
-    private static class ParamDef {
+    private static final class ParamDef {
         public final String name;
         public final String channel;
         public final String description;
@@ -89,7 +89,7 @@ public class CaConfigFileConverter {
         }
     }
 
-    private static class CommandDef {
+    private static final class CommandDef {
         public final String name;
         public final String apply;
         public final String description;
@@ -105,7 +105,7 @@ public class CaConfigFileConverter {
         }
     }
 
-    private static class AttribDef {
+    private static final class AttribDef {
         public final String name;
         public final String channel;
         public final String description;
@@ -118,7 +118,7 @@ public class CaConfigFileConverter {
         }
     }
 
-    private static class StatusDef {
+    private static final class StatusDef {
         public final String name;
         public final String description;
         public final Set<AttribDef> attribs;

@@ -8,7 +8,7 @@ package edu.gemini.epics.acm;
  * @author jluhrs
  *
  */
-public class CaCommandPostError extends Exception {
+public final class CaCommandPostError extends Exception {
 
     public CaCommandPostError() {
     }

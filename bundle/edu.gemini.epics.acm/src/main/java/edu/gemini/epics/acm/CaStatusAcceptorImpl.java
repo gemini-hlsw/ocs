@@ -11,7 +11,7 @@ import edu.gemini.epics.EpicsReader;
 import edu.gemini.epics.impl.EpicsReaderImpl;
 import gov.aps.jca.CAException;
 
-class CaStatusAcceptorImpl implements CaStatusAcceptor {
+final class CaStatusAcceptorImpl implements CaStatusAcceptor {
 
     private static final Logger LOG = Logger.getLogger(CaStatusAcceptorImpl.class.getName()); 
 

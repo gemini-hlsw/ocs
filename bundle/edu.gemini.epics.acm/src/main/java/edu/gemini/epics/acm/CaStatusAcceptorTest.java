@@ -5,7 +5,7 @@ import gov.aps.jca.CAException;
 import java.util.List;
 import java.util.logging.Logger;
 
-class CaStatusAcceptorTest {
+final class CaStatusAcceptorTest {
     
     private static final Logger LOG = Logger.getLogger(CaStatusAcceptorTest.class.getName()); 
 

@@ -17,7 +17,7 @@ import org.w3c.dom.Node;
 
 import edu.gemini.epics.acm.CaConfigFileConverter;
 
-public class CaConfigFileConverterTest extends XMLTestCase {
+public final class CaConfigFileConverterTest extends XMLTestCase {
 
     private static final String CONFIG_FILE = "/TestConfig.ca";
     private static final String CONTROL_FILE = "/TestConfig.xml";

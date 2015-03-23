@@ -16,7 +16,7 @@ import edu.gemini.gmp.top.TopImpl;
 import gov.aps.jca.CAException;
 import gov.aps.jca.TimeoutException;
 
-public class TestSimulator {
+public final class TestSimulator {
 
     private static final Logger LOG = Logger.getLogger(TestSimulator.class.getName()); 
 

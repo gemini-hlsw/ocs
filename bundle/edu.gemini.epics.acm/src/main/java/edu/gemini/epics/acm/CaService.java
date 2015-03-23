@@ -28,7 +28,7 @@ import gov.aps.jca.CAException;
  * @author jluhrs
  *
  */
-public class CaService {
+public final class CaService {
 
     private static final String EPICS_CA_ADDR_LIST = "EPICS_CA_ADDR_LIST";
     private EpicsService epicsService;

@@ -13,7 +13,7 @@ import edu.gemini.epics.impl.EpicsWriterImpl;
 import gov.aps.jca.CAException;
 import gov.aps.jca.TimeoutException;
 
-class CaCommandSenderImpl implements CaCommandSender {
+final class CaCommandSenderImpl implements CaCommandSender {
     
     private static final Logger LOG = Logger.getLogger(CaCommandSenderImpl.class.getName()); 
 
@@ -254,14 +254,10 @@ class CaCommandSenderImpl implements CaCommandSender {
     }
 
     private boolean alreadyExist(String name) {
-        if (doubleParameters.containsKey(name)
+        return doubleParameters.containsKey(name)
                 || floatParameters.containsKey(name)
                 || integerParameters.containsKey(name)
-                || stringParameters.containsKey(name)) {
-            return true;
-        } else {
-            return false;
-        }
+                || stringParameters.containsKey(name);
     }
 
     @Override

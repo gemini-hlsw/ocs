@@ -11,7 +11,7 @@ import edu.gemini.epics.ReadOnlyClientEpicsChannel;
 import edu.gemini.epics.api.ChannelListener;
 import gov.aps.jca.CAException;
 
-class CaAttributeImpl<T> implements CaAttribute<T> {
+final class CaAttributeImpl<T> implements CaAttribute<T> {
 
     private EpicsReader epicsReader;
     private ChannelListener<T> channelListener;
@@ -105,7 +105,7 @@ class CaAttributeImpl<T> implements CaAttribute<T> {
         }
     }
 
-    private class Notifier {
+    private final class Notifier {
         private List<CaAttributeListener<T>> listeners = new LinkedList<CaAttributeListener<T>>();
 
         synchronized public void addListener(CaAttributeListener<T> listener) {

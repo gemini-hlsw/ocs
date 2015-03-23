@@ -6,7 +6,7 @@ package edu.gemini.epics.acm;
  * @author jluhrs
  *
  */
-public class CaException extends Exception {
+public final class CaException extends Exception {
 
     /**
 	 * 

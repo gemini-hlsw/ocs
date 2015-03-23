@@ -33,7 +33,7 @@ import gov.aps.jca.CAException;
  * @author jluhrs
  *
  */
-public class XMLBuilder {
+public final class XMLBuilder {
     
     private static final Logger LOG = Logger.getLogger(XMLBuilder.class.getName()); 
 

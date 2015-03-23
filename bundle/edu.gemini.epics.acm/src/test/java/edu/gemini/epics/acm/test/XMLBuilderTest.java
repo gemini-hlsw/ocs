@@ -14,7 +14,7 @@ import edu.gemini.epics.acm.CaService;
 import edu.gemini.epics.acm.CaStatusAcceptor;
 import edu.gemini.epics.acm.XMLBuilder;
 
-public class XMLBuilderTest {
+public final class XMLBuilderTest {
 
     private static final String CA_ADDR_LIST = "127.0.0.1";
     private static final String TOP1 = "test";

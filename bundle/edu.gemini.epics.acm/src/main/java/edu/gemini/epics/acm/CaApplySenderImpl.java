@@ -7,40 +7,22 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import edu.gemini.epics.EpicsReader;
 import edu.gemini.epics.EpicsService;
-import edu.gemini.epics.EpicsWriter;
-import edu.gemini.epics.ReadOnlyClientEpicsChannel;
-import edu.gemini.epics.ReadWriteClientEpicsChannel;
 import edu.gemini.epics.api.ChannelListener;
-import edu.gemini.epics.impl.EpicsReaderImpl;
-import edu.gemini.epics.impl.EpicsWriterImpl;
 import gov.aps.jca.CAException;
 import gov.aps.jca.TimeoutException;
 
-class CaApplySenderImpl implements CaApplySender {
+final class CaApplySenderImpl implements CaApplySender {
 
     private static final Logger LOG = Logger.getLogger(CaApplySenderImpl.class
             .getName());
 
     private final String name;
-    private final String carRecord;
-    private final String applyRecord;
     private final String description;
-    private EpicsReader epicsReader;
-    private EpicsWriter epicsWriter;
-    private ReadWriteClientEpicsChannel<CadDirective> dirChannel;
-    private ReadOnlyClientEpicsChannel<Integer> val;
-    private ReadOnlyClientEpicsChannel<Integer> carCLID;
-    private ReadOnlyClientEpicsChannel<CarState> carVAL;
-    private ReadOnlyClientEpicsChannel<String> carOMSS;
-    private ReadOnlyClientEpicsChannel<String> mess;
-    private static final String DIR_SUFFIX = ".DIR";
-    private static final String VAL_SUFFIX = ".VAL";
-    private static final String MSG_SUFFIX = ".MESS";
-    private static final String CAR_VAL_SUFFIX = ".VAL";
-    private static final String CAR_CLID_SUFFIX = ".CLID";
-    private static final String CAR_OMSS_SUFFIX = ".OMSS";
+    
+    private final CaApplyRecord apply;
+    private final CaCarRecord car;
+    
     private long timeout;
     private TimeUnit timeoutUnit;
     private ScheduledExecutorService executor;
@@ -54,22 +36,10 @@ class CaApplySenderImpl implements CaApplySender {
             String description, EpicsService epicsService) throws CAException {
         super();
         this.name = name;
-        this.carRecord = carRecord;
-        this.applyRecord = applyRecord;
         this.description = description;
 
-        epicsReader = new EpicsReaderImpl(epicsService);
-        epicsWriter = new EpicsWriterImpl(epicsService);
-        dirChannel = epicsWriter.getEnumChannel(applyRecord + DIR_SUFFIX,
-                CadDirective.class);
-        val = epicsReader.getIntegerChannel(applyRecord + VAL_SUFFIX);
-        carCLID = epicsReader.getIntegerChannel(carRecord + CAR_CLID_SUFFIX);
-        carVAL = epicsReader.getEnumChannel(carRecord + CAR_VAL_SUFFIX,
-                CarState.class);
-        carOMSS = epicsReader.getStringChannel(carRecord + CAR_OMSS_SUFFIX);
-        mess = epicsReader.getStringChannel(applyRecord + MSG_SUFFIX);
-
-        val.registerListener(valListener = new ChannelListener<Integer>() {
+        apply = new CaApplyRecord(applyRecord, epicsService);
+        apply.registerValListener(valListener = new ChannelListener<Integer>() {
             @Override
             public void valueChanged(String arg0, List<Integer> newVals) {
                 if (newVals != null && !newVals.isEmpty()) {
@@ -77,7 +47,9 @@ class CaApplySenderImpl implements CaApplySender {
                 }
             }
         });
-        carCLID.registerListener(carClidListener = new ChannelListener<Integer>() {
+        
+        car = new CaCarRecord(carRecord, epicsService);
+        car.registerClidListener(carClidListener = new ChannelListener<Integer>() {
             @Override
             public void valueChanged(String arg0, List<Integer> newVals) {
                 if (newVals != null && !newVals.isEmpty()) {
@@ -85,7 +57,7 @@ class CaApplySenderImpl implements CaApplySender {
                 }
             }
         });
-        carVAL.registerListener(carValListener = new ChannelListener<CarState>() {
+        car.registerValListener(carValListener = new ChannelListener<CarState>() {
             @Override
             public void valueChanged(String arg0, List<CarState> newVals) {
                 if (newVals != null && !newVals.isEmpty()) {
@@ -104,68 +76,36 @@ class CaApplySenderImpl implements CaApplySender {
 
     @Override
     public String getApply() {
-        return applyRecord;
+        return apply.getEpicsName();
     }
 
     @Override
     public String getCAR() {
-        return carRecord;
+        return car.getEpicsName();
     }
 
     void unbind() {
+        
+        executor.shutdown();
 
         try {
-            val.unRegisterListener(valListener);
-            carCLID.unRegisterListener(carClidListener);
-            carVAL.unRegisterListener(carValListener);
+            apply.unregisterValListener(valListener);
         } catch (CAException e) {
             LOG.warning(e.getMessage());
         }
-
         try {
-            epicsWriter.destroyChannel(dirChannel);
+            car.unregisterClidListener(carClidListener);
         } catch (CAException e) {
             LOG.warning(e.getMessage());
         }
-        dirChannel = null;
-
         try {
-            epicsReader.destroyChannel(val);
+            car.unregisterValListener(carValListener);
         } catch (CAException e) {
             LOG.warning(e.getMessage());
         }
-        val = null;
-
-        try {
-            epicsReader.destroyChannel(carCLID);
-        } catch (CAException e) {
-            LOG.warning(e.getMessage());
-        }
-        carCLID = null;
-
-        try {
-            epicsReader.destroyChannel(carVAL);
-        } catch (CAException e) {
-            LOG.warning(e.getMessage());
-        }
-        carVAL = null;
-
-        try {
-            epicsReader.destroyChannel(carOMSS);
-        } catch (CAException e) {
-            LOG.warning(e.getMessage());
-        }
-        carOMSS = null;
-
-        try {
-            epicsReader.destroyChannel(mess);
-        } catch (CAException e) {
-            LOG.warning(e.getMessage());
-        }
-        mess = null;
-
-        epicsWriter = null;
-        epicsReader = null;
+        
+        apply.unbind();
+        car.unbind();
     }
 
     @Override
@@ -177,7 +117,7 @@ class CaApplySenderImpl implements CaApplySender {
             currentState = new WaitPreset(cm);
 
             try {
-                dirChannel.setValue(CadDirective.START);
+                apply.setDir(CadDirective.START);
             } catch (CAException e) {
                 cm.completeFailure(e);
             } catch (TimeoutException e) {
@@ -221,7 +161,7 @@ class CaApplySenderImpl implements CaApplySender {
         public State onTimeout();
     }
 
-    private class WaitPreset implements State {
+    private final class WaitPreset implements State {
         CaCommandMonitorImpl cm;
         CarState carVal;
         Integer carClid;
@@ -235,7 +175,7 @@ class CaApplySenderImpl implements CaApplySender {
             if (val > 0) {
                 if (carClid != null && carClid.equals(val)) {
                     if (carVal == CarState.ERROR) {
-                        failCommand(cm);
+                        failCommandWithCarError(cm);
                         return null;
                     } else if (carVal == CarState.BUSY) {
                         return new WaitCompletion(cm, val);
@@ -243,7 +183,7 @@ class CaApplySenderImpl implements CaApplySender {
                 }
                 return new WaitStart(cm, val, carVal, carClid);
             } else {
-                failCommand(cm, mess);
+                failCommandWithApplyError(cm);
                 return null;
             }
         }
@@ -267,7 +207,7 @@ class CaApplySenderImpl implements CaApplySender {
         }
     }
 
-    private class WaitStart implements State {
+    private final class WaitStart implements State {
         CaCommandMonitorImpl cm;
         int clid;
         Integer carClid;
@@ -288,7 +228,7 @@ class CaApplySenderImpl implements CaApplySender {
             } else {
                 cm.completeFailure(new CaCommandPostError(
                         "Another command was triggered in apply record "
-                                + applyRecord));
+                                + apply.getEpicsName()));
                 return null;
             }
         }
@@ -314,7 +254,7 @@ class CaApplySenderImpl implements CaApplySender {
         private State checkOutConditions() {
             if (carClid != null && carClid.intValue() == clid) {
                 if (carState == CarState.ERROR) {
-                    failCommand(cm);
+                    failCommandWithCarError(cm);
                     return null;
                 }
                 if (carState == CarState.BUSY) {
@@ -326,7 +266,7 @@ class CaApplySenderImpl implements CaApplySender {
 
     }
 
-    private class WaitCompletion implements State {
+    private final class WaitCompletion implements State {
         CaCommandMonitorImpl cm;
         int clid;
 
@@ -342,7 +282,7 @@ class CaApplySenderImpl implements CaApplySender {
             } else {
                 cm.completeFailure(new CaCommandPostError(
                         "Another command was triggered in apply record "
-                                + applyRecord));
+                                + apply.getEpicsName()));
                 return null;
             }
         }
@@ -350,7 +290,7 @@ class CaApplySenderImpl implements CaApplySender {
         @Override
         public State onCarValChange(CarState val) {
             if (val == CarState.ERROR) {
-                failCommand(cm);
+                failCommandWithCarError(cm);
                 return null;
             }
             if (val == CarState.IDLE) {
@@ -367,7 +307,7 @@ class CaApplySenderImpl implements CaApplySender {
             } else {
                 cm.completeFailure(new CaCommandPostError(
                         "Another command was triggered in apply record "
-                                + applyRecord));
+                                + apply.getEpicsName()));
                 return null;
             }
         }
@@ -428,12 +368,8 @@ class CaApplySenderImpl implements CaApplySender {
         this.timeoutUnit = timeUnit;
     }
 
-    private void failCommand(final CaCommandMonitorImpl cm) {
-        failCommand(cm, carOMSS);
-    }
 
-    private void failCommand(final CaCommandMonitorImpl cm,
-            final ReadOnlyClientEpicsChannel<String> msgSrc) {
+    private void failCommandWithApplyError(final CaCommandMonitorImpl cm) {
         // I found that if I try to read OMSS or MESS from the same thread that
         // is processing a channel notifications, the reads fails with a
         // timeout. But it works if the read is done later from another thread.
@@ -442,7 +378,27 @@ class CaApplySenderImpl implements CaApplySender {
             public void run() {
                 String msg = null;
                 try {
-                    msg = msgSrc.getFirst();
+                    msg = apply.getMessValue();
+                } catch (CAException e) {
+                    LOG.warning(e.getMessage());
+                } catch (TimeoutException e) {
+                    LOG.warning(e.getMessage());
+                }
+                cm.completeFailure(new CaCommandError(msg));
+            }
+        });
+    }
+
+    private void failCommandWithCarError(final CaCommandMonitorImpl cm) {
+        // I found that if I try to read OMSS or MESS from the same thread that
+        // is processing a channel notifications, the reads fails with a
+        // timeout. But it works if the read is done later from another thread.
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                String msg = null;
+                try {
+                    msg = car.getOmssValue();
                 } catch (CAException e) {
                     LOG.warning(e.getMessage());
                 } catch (TimeoutException e) {
@@ -460,9 +416,9 @@ class CaApplySenderImpl implements CaApplySender {
 
     @Override
     public void clear() throws TimeoutException {
-        if (dirChannel != null) {
+        if (apply != null) {
             try {
-                dirChannel.setValue(CadDirective.CLEAR);
+                apply.setDir(CadDirective.CLEAR);
             } catch (CAException e) {
                 LOG.warning(e.getMessage());
             }

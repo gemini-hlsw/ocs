@@ -23,7 +23,7 @@ import edu.gemini.epics.acm.CaStatusAcceptor;
 import gov.aps.jca.CAException;
 import gov.aps.jca.TimeoutException;
 
-public class CaCommandSenderTest {
+public final class CaCommandSenderTest {
 
     private static final Logger LOG = Logger.getLogger(CaCommandSenderTest.class.getName()); 
 

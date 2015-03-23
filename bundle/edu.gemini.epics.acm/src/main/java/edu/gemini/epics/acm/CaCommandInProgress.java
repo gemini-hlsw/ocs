@@ -7,7 +7,7 @@ package edu.gemini.epics.acm;
  * @author jluhrs
  *
  */
-public class CaCommandInProgress extends Exception {
+public final class CaCommandInProgress extends Exception {
 
     public CaCommandInProgress() {
     }
