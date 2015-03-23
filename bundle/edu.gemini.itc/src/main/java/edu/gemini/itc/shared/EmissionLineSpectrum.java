@@ -1,7 +1,5 @@
 package edu.gemini.itc.shared;
 
-import edu.gemini.itc.service.SourceDefinition;
-
 /**
  * This class creates a EmissionLine spectrum over the interval defined by the
  * blocking filter.  The code comes from PPuxley's Mathcad Demo

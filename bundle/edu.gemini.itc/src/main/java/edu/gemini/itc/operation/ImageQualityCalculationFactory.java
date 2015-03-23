@@ -1,8 +1,8 @@
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.service.ObservingConditions;
-import edu.gemini.itc.service.SourceDefinition;
-import edu.gemini.itc.service.TelescopeDetails;
+import edu.gemini.itc.shared.ObservingConditions;
+import edu.gemini.itc.shared.SourceDefinition;
+import edu.gemini.itc.shared.TelescopeDetails;
 import edu.gemini.itc.shared.Instrument;
 
 public final class ImageQualityCalculationFactory {

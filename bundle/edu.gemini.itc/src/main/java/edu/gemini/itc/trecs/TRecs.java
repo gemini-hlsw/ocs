@@ -1,8 +1,8 @@
 package edu.gemini.itc.trecs;
 
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
-import edu.gemini.itc.service.ObservationDetails;
-import edu.gemini.itc.service.CalculationMethod;
+import edu.gemini.itc.shared.ObservationDetails;
+import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.*;
 import scala.Option;
 

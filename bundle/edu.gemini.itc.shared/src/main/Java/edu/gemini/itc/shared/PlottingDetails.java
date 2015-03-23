@@ -1,9 +1,11 @@
-package edu.gemini.itc.service;
+package edu.gemini.itc.shared;
+
+import java.io.Serializable;
 
 /**
  * Container for plotting detail parameters.
  */
-public final class PlottingDetails {
+public final class PlottingDetails implements Serializable {
 
     public static enum PlotLimits {
         AUTO,

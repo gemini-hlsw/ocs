@@ -3,7 +3,7 @@ package edu.gemini.itc.baseline
 import edu.gemini.itc.baseline.util.Baseline._
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.gmos.GmosRecipe
-import edu.gemini.itc.service.{GmosParameters, IfuRadial, IfuSingle}
+import edu.gemini.itc.shared.{GmosParameters, IfuRadial, IfuSingle}
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.{DisperserNorth, FPUnitNorth, FilterNorth}

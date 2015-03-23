@@ -1,7 +1,6 @@
 package edu.gemini.itc.michelle;
 
 import edu.gemini.itc.operation.*;
-import edu.gemini.itc.service.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.HtmlPrinter;
 import edu.gemini.itc.web.ITCRequest;

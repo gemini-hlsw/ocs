@@ -2,10 +2,10 @@ package edu.gemini.itc.gsaoi;
 
 import edu.gemini.itc.gems.*;
 import edu.gemini.itc.operation.*;
-import edu.gemini.itc.service.ObservationDetails;
-import edu.gemini.itc.service.ObservingConditions;
-import edu.gemini.itc.service.SourceDefinition;
-import edu.gemini.itc.service.TelescopeDetails;
+import edu.gemini.itc.shared.ObservationDetails;
+import edu.gemini.itc.shared.ObservingConditions;
+import edu.gemini.itc.shared.SourceDefinition;
+import edu.gemini.itc.shared.TelescopeDetails;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.HtmlPrinter;
 import edu.gemini.itc.web.ITCRequest;

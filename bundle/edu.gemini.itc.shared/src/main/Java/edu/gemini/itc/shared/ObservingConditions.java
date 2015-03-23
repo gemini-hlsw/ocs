@@ -1,14 +1,16 @@
-package edu.gemini.itc.service;
+package edu.gemini.itc.shared;
 
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.CloudCover;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.ImageQuality;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.SkyBackground;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.WaterVapor;
 
+import java.io.Serializable;
+
 /**
  * Container for observing condition parameters.
  */
-public final class ObservingConditions {
+public final class ObservingConditions implements Serializable {
 
     private final ImageQuality  iq;
     private final CloudCover    cc;

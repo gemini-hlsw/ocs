@@ -1,6 +1,6 @@
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.service.TelescopeDetails;
+import edu.gemini.itc.shared.TelescopeDetails;
 import edu.gemini.itc.shared.ITCConstants;
 import edu.gemini.itc.shared.TransmissionElement;
 

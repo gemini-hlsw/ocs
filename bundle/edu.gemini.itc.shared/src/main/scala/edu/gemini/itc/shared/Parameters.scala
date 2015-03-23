@@ -1,6 +1,4 @@
-package edu.gemini.itc.service
-
-import edu.gemini.itc.service.SourceDefinition.BrightnessUnit
+package edu.gemini.itc.shared
 
 // ==== Source spatial profile
 

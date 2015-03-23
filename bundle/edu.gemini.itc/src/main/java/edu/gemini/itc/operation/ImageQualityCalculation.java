@@ -1,6 +1,6 @@
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.service.TelescopeDetails;
+import edu.gemini.itc.shared.TelescopeDetails;
 import edu.gemini.itc.shared.ArraySpectrum;
 import edu.gemini.itc.shared.DefaultArraySpectrum;
 import edu.gemini.itc.shared.FormatStringWriter;

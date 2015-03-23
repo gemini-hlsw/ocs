@@ -1,7 +1,7 @@
 package edu.gemini.itc.baseline.util
 
 import edu.gemini.itc.baseline._
-import edu.gemini.itc.service.InstrumentDetails
+import edu.gemini.itc.shared.InstrumentDetails
 import org.junit.Assert._
 import org.junit.{Ignore, Test}
 

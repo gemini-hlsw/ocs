@@ -2,6 +2,7 @@ package edu.gemini.itc.service
 
 import edu.gemini.itc.gmos.GmosRecipe
 import edu.gemini.itc.operation.ImagingS2NMethodACalculation
+import edu.gemini.itc.shared._
 
 /**
  * The ITC service implementation.
@@ -21,7 +22,9 @@ class ItcServiceImpl extends ItcService {
     }
   } catch {
     // TODO: for now in most cases where a validation problem should be reported to the user the ITC code throws an exception instead
-    case e: Throwable => ItcResult.forException(e)
+    case e: Throwable =>
+      e.printStackTrace()
+      ItcResult.forException(e)
   }
 
   private def calculateGmos(source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: GmosParameters): Result = {

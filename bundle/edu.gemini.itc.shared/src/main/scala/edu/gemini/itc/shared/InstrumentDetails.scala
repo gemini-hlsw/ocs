@@ -1,4 +1,4 @@
-package edu.gemini.itc.service
+package edu.gemini.itc.shared
 
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.{DetectorManufacturer, FPUnit, Disperser, Filter}

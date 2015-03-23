@@ -1,6 +1,6 @@
 package edu.gemini.itc.gnirs;
 
-import edu.gemini.itc.service.InstrumentDetails;
+import edu.gemini.itc.shared.InstrumentDetails;
 import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCParameters;
 

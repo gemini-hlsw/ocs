@@ -1,7 +1,7 @@
 package edu.gemini.itc.gmos;
 
-import edu.gemini.itc.service.GmosParameters;
-import edu.gemini.itc.service.ObservationDetails;
+import edu.gemini.itc.shared.GmosParameters;
+import edu.gemini.itc.shared.ObservationDetails;
 
 /**
  * Gmos specification class

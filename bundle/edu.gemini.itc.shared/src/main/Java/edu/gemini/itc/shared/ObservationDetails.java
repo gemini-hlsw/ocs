@@ -1,9 +1,13 @@
-package edu.gemini.itc.service;
+package edu.gemini.itc.shared;
+
+import edu.gemini.itc.shared.*;
+
+import java.io.Serializable;
 
 /**
  * Container for observation detail parameters.
  */
-public final class ObservationDetails {
+public final class ObservationDetails implements Serializable {
 
     private final CalculationMethod calculationMethod;
     private final AnalysisMethod analysisMethod;

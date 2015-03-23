@@ -1,6 +1,6 @@
 package edu.gemini.itc.gems;
 
-import edu.gemini.itc.service.SourceDefinition;
+import edu.gemini.itc.shared.SourceDefinition;
 import edu.gemini.itc.shared.AOSystem;
 import edu.gemini.itc.shared.FormatStringWriter;
 import edu.gemini.itc.shared.SampledSpectrumVisitor;

@@ -1,7 +1,7 @@
 package edu.gemini.itc.gnirs;
 
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
-import edu.gemini.itc.service.ObservationDetails;
+import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.itc.shared.*;
 
 public final class GnirsNorth extends Gnirs {

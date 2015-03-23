@@ -1,6 +1,6 @@
 package edu.gemini.itc.gsaoi;
 
-import edu.gemini.itc.service.ObservationDetails;
+import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.itc.shared.*;
 
 /**

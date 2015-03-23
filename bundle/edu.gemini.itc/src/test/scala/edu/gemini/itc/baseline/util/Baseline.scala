@@ -1,9 +1,7 @@
 package edu.gemini.itc.baseline.util
 
 import java.io.{ByteArrayOutputStream, File, PrintWriter}
-
-import edu.gemini.itc.service.InstrumentDetails
-import edu.gemini.itc.shared.{ITCImageFileIO, Recipe}
+import edu.gemini.itc.shared.{InstrumentDetails, ITCImageFileIO, Recipe}
 
 import scala.io.Source
 
