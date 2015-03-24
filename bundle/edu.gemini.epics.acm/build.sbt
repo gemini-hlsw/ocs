@@ -23,11 +23,7 @@ sourceGenerators in Compile += Def.task {
   out.listFiles.toSeq
 }.taskValue
 
-resolvers += "Gemini SWG Repository" at "http://build.cl.gemini.edu:8081/artifactory/libs-releases"
-
 libraryDependencies ++= Seq(
-  "edu.gemini.epics" % "epics-service" % "0.12-SNAPSHOT",
-  "edu.gemini.gmp" % "gmp-commands-records" % "0.6.0-SNAPSHOT",
   "xmlunit" % "xmlunit" % "1.5"
 )
 
