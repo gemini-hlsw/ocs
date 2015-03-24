@@ -7,7 +7,9 @@ import edu.gemini.shared.util.StringUtil
 import edu.gemini.spModel.config2.ItemKey
 
 import scala.concurrent.Future
-import scala.util.Failure
+import scala.util.{Success, Failure}
+
+import scalaz.Scalaz._
 
 /** Columns in the table are defined by their header label and a function on the unique config of the row. */
 case class Column(label: String, value: (ItcUniqueConfig, Future[ItcService.Result]) => Object)
@@ -36,25 +38,26 @@ sealed trait ItcTableModel extends AbstractTableModel {
   val uniqueSteps: Seq[ItcUniqueConfig]
   val res: Seq[Future[ItcService.Result]]
 
-  def getRowCount: Int = uniqueSteps.size
+  override def getRowCount: Int = uniqueSteps.size
 
-  def getColumnCount: Int = headers.size + keys.size + results.size
+  override def getColumnCount: Int = headers.size + keys.size + results.size
 
-  def getKeyAt(col: Int): Option[ItemKey] = col match {
-    case c if c >= headers.size && c < headers.size + keys.size => Some(key(col))
-    case _ => None
-  }
-
-  def getValueAt(row: Int, col: Int): Object = col match {
-    case c if c < headers.size => header(col).value(uniqueSteps(row), res(row))
+  override def getValueAt(row: Int, col: Int): Object = col match {
+    case c if c <  headers.size             => header(col).value(uniqueSteps(row), res(row))
     case c if c >= headers.size + keys.size => result(col).value(uniqueSteps(row), res(row))
-    case c => uniqueSteps(row).config.getItemValue(key(col))
+    case c                                  => uniqueSteps(row).config.getItemValue(key(col))
   }
 
   override def getColumnName(col: Int): String = col match {
-    case c if c < headers.size => header(col).label
+    case c if c <  headers.size             => header(col).label
     case c if c >= headers.size + keys.size => result(col).label
-    case c => StringUtil.toDisplayName(key(col).getName)
+    case c                                  => StringUtil.toDisplayName(key(col).getName)
+  }
+
+  // Gets the ItemKey of a column (if any), this is used by the table to color code the columns.
+  def getKeyAt(col: Int): Option[ItemKey] = col match {
+    case c if c >= headers.size && c < headers.size + keys.size => Some(key(col))
+    case _                                                      => None
   }
 
   // Translate overall column index into the corresponding header, column or key value.
@@ -64,67 +67,78 @@ sealed trait ItcTableModel extends AbstractTableModel {
 
   private def result(col: Int) = results(col - headers.size - keys.size)
 
-  // Gets the imaging result from the service result future (if present)
-  protected def imagingResult(f: Future[ItcService.Result]): Option[ItcImagingResult] =
+  // Gets the result from the service result future (if present)
+  protected def imagingCalcResult(f: Future[ItcService.Result]): Option[ItcResult] =
+    for {
+      futureResult  <- f.value                // unwrap future
+      serviceResult <- futureResult.toOption  // unwrap try
+      calcResult    <- serviceResult.toOption // unwrap validation
+    } yield calcResult
+
+  // TODO: display errors/validation messages in an appropriate way in the UI, for now also print them to console
+  protected def messages(f: Future[ItcService.Result]): String =
+    f.value.fold("Calculating...") {
+      case Failure(t) => t <| (_.printStackTrace()) |> (_.getMessage)  // "Look mummy, there's a spaceship up in the sky!"
+      case Success(s) => s match {
+        case scalaz.Failure(errs) => errs.mkString(", ") <| System.out.println
+        case scalaz.Success(_)    => "OK"
+      }
+    }
+}
+
+
+/** Generic ITC imaging tables model. */
+sealed trait ItcImagingTableModel extends ItcTableModel {
+
+  // Gets the imaging result from the service result future (if present).
+  // Note that in most cases (except for GMOS) there is only one CCD in the result, but for GMOS there can be
+  // 1 or 3 CCDs depending on the selected CCD manufacturer.
+  protected def imagingResult(f: Future[ItcService.Result], n: Int = 0): Option[ItcImagingResult] =
     imagingCalcResult(f).flatMap { r =>
-      r.ccd match {
+      // For GMOS ITC returns 1 or 3 different CCD results depending on the manufacturer, the simplest way to deal
+      // with this is by just using n % #CCDs here, which means that if there is only one result it is repeated three
+      // times, and if there are 3 results, they are shown individually as expected. All instruments other than GMOS
+      // use this method with ccd index = 0.
+      r.ccds(n % r.ccds.length) match {
         case img: ItcImagingResult => Some(img)
         case _                     => None
       }
     }
 
-  // Gets the result from the service result future (if present)
-  protected def imagingCalcResult(f: Future[ItcService.Result]): Option[ItcResult] =
-    for {
-      futureResult  <- f.value                // unwrap future
-      serviceResult <- futureResult.toOption  // unwrap try (as option)
-      calcResult    <- serviceResult.toOption // unwrap validation (as option)
-    } yield calcResult
+  protected def peakPixelFlux(f: Future[ItcService.Result], n: Int = 0) = prettyPrint(f, n, r => r.peakPixelFlux)
 
-  // TODO: display errors/validation messages in an appropriate way in the UI, for now just print them
-  protected def messages(f: Future[ItcService.Result]): String =
-    if (!f.isCompleted) "Calculating..."
-    else if (f.value.get.isFailure) {
-      val msg = "Error Service Call: " + (f.value.get match { case Failure(t) => t.printStackTrace(); t.getMessage})
-      System.out.println(msg)
-      msg
-    }
-    else if (f.value.get.get.isFailure) {
-      f.value.get.get match {case scalaz.Failure(s) => s.foreach(msg => System.out.println("Validation failed: " + msg))}
-      "Error Validation"
-    }
-    else "OK"
+  protected def singleSNRatio(f: Future[ItcService.Result], n: Int = 0) = prettyPrint(f, n, r => r.singleSNRatio)
+
+  protected def totalSNRatio (f: Future[ItcService.Result], n: Int = 0) = prettyPrint(f, n, r => r.totalSNRatio)
+
+  private def prettyPrint(f: Future[ItcService.Result], n: Int, v: ItcImagingResult => Double) =
+    imagingResult(f, n).fold("")(x => f"${v(x)}%.2f")
+
 }
-
-
-/** Generic ITC imaging tables model. */
-sealed trait ItcImagingTableModel extends ItcTableModel
 
 class ItcGenericImagingTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[ItcUniqueConfig], val res: Seq[Future[ItcService.Result]]) extends ItcImagingTableModel {
   val headers = ItcTableModel.headers
   val results = Seq(
-    Column("PPF",             (c, r) => imagingResult(r).fold("")(_.peakPixelFlux.toString)),
-    Column("S/N Single",      (c, r) => imagingResult(r).fold("")(_.singleSNRatio.toString)),
-    Column("S/N Total",       (c, r) => imagingResult(r).fold("")(_.totalSNRatio.toString)),
+    Column("PPF",             (c, r) => peakPixelFlux(r)),
+    Column("S/N Single",      (c, r) => singleSNRatio(r)),
+    Column("S/N Total",       (c, r) => totalSNRatio (r)),
     Column("Messages",        (c, r) => messages(r))
   )
-
-
 }
 
 /** GMOS specific ITC imaging table model. */
 class ItcGmosImagingTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[ItcUniqueConfig], val res: Seq[Future[ItcService.Result]]) extends ItcImagingTableModel {
   val headers = ItcTableModel.headers
   val results = Seq(
-    Column("CCD1 PPF",        (c, r) => imagingResult(r).fold("")(x => f"${x.peakPixelFlux}%.2f")),
-    Column("CCD1 S/N Single", (c, r) => imagingResult(r).fold("")(x => f"${x.singleSNRatio}%.2f")),
-    Column("CCD1 S/N Total",  (c, r) => imagingResult(r).fold("")(x => f"${x.totalSNRatio}%.2f")),
-    Column("CCD2 PPF",        (c, r) => ""),
-    Column("CCD2 S/N Single", (c, r) => ""),
-    Column("CCD2 S/N Total",  (c, r) => ""),
-    Column("CCD3 PPF",        (c, r) => ""),
-    Column("CCD3 S/N Single", (c, r) => ""),
-    Column("CCD3 S/N Total",  (c, r) => ""),
+    Column("CCD1 PPF",        (c, r) => peakPixelFlux(r, 0)),
+    Column("CCD1 S/N Single", (c, r) => singleSNRatio(r, 0)),
+    Column("CCD1 S/N Total",  (c, r) => totalSNRatio (r, 0)),
+    Column("CCD2 PPF",        (c, r) => peakPixelFlux(r, 1)),
+    Column("CCD2 S/N Single", (c, r) => singleSNRatio(r, 1)),
+    Column("CCD2 S/N Total",  (c, r) => totalSNRatio (r, 1)),
+    Column("CCD3 PPF",        (c, r) => peakPixelFlux(r, 2)),
+    Column("CCD3 S/N Single", (c, r) => singleSNRatio(r, 2)),
+    Column("CCD3 S/N Total",  (c, r) => totalSNRatio (r, 2)),
     Column("Messages",        (c, r) => messages(r))
   )
 }
