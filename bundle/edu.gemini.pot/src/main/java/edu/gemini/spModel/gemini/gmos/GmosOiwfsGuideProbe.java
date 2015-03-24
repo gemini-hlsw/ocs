@@ -131,8 +131,7 @@ public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
     public double calculateVignetting(final ObsContext ctx,
                                       final edu.gemini.spModel.core.Coordinates guideStarCoordinates) {
         final ProbeArmGeometry probeArmGeometry       = GmosOiwfsProbeArm.instance();
-        final ScienceAreaGeometry scienceAreaGeometry = new GmosScienceAreaGeometry();
-        return ScalaGuideProbeUtil.calculateVignetting(ctx, guideStarCoordinates, scienceAreaGeometry, probeArmGeometry);
+        return ScalaGuideProbeUtil.calculateVignetting(ctx, guideStarCoordinates, probeArmGeometry);
     }
 
     private PatrolField getCorrectedPatrolField(final ObsContext ctx, final PatrolField patrolField) {

@@ -99,7 +99,7 @@ public class GMOS_SciAreaFeature extends SciAreaFeatureBase {
         if (instGMOS != null) {
             final ObsContext ctx = _iw.getMinimalObsContext().getOrNull();
             if (ctx != null) {
-                final ImList<Shape> shape = new GmosScienceAreaGeometry().geometryAsJava(instGMOS);
+                final ImList<Shape> shape = instGMOS.getVignettableScienceArea().geometryAsJava();
                 shape.foreach(new ApplyOp<Shape>() {
                     @Override
                     public void apply(final Shape s) {
