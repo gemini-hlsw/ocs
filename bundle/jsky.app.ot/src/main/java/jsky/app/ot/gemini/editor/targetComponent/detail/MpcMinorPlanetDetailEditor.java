@@ -14,6 +14,7 @@ final class MpcMinorPlanetDetailEditor extends TargetDetailEditor {
 
     MpcMinorPlanetDetailEditor() {
         super(ITarget.Tag.MPC_MINOR_PLANET);
+        setLayout(new BorderLayout());
         add(label, BorderLayout.CENTER);
     }
 

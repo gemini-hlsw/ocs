@@ -4,22 +4,17 @@ import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.system.ITarget;
-import jsky.app.ot.gemini.editor.targetComponent.MagnitudeEditor;
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor;
 
 import javax.swing.*;
-import java.awt.*;
+import javax.swing.border.Border;
 
 abstract class TargetDetailEditor extends JPanel implements TelescopePosEditor {
 
-    // Constant Fields
     private final ITarget.Tag tag;
-    private final MagnitudeEditor magnitudeEditor = new MagnitudeEditor();
 
     protected TargetDetailEditor(ITarget.Tag tag) {
         this.tag = tag;
-        setLayout(new BorderLayout());
-        add(magnitudeEditor.getComponent(), BorderLayout.WEST);
     }
 
     public void edit(final Option<ObsContext> obsContext, final SPTarget spTarget) {
@@ -30,9 +25,6 @@ abstract class TargetDetailEditor extends JPanel implements TelescopePosEditor {
         final ITarget.Tag tag = spTarget.getTarget().getTag();
         if (tag != this.tag)
             throw new IllegalArgumentException("Expected " + this.tag + ", received " + tag);
-
-        // Done with bookkeeping. Forward `edit` to the contained editors.
-        magnitudeEditor.edit(obsContext, spTarget);
 
     }
 
@@ -48,6 +40,12 @@ abstract class TargetDetailEditor extends JPanel implements TelescopePosEditor {
             case SIDEREAL:         return new SiderealDetailEditor();
             default: throw new Error("Unpossible");
         }
+    }
+
+    protected static Border titleBorder(String title) {
+        final Border empty  = BorderFactory.createEmptyBorder(2,2,2,2);
+        final Border titled = BorderFactory.createTitledBorder(title);
+        return BorderFactory.createCompoundBorder(empty, BorderFactory.createCompoundBorder(titled, empty));
     }
 
 }

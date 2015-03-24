@@ -18,6 +18,7 @@ final class SiderealDetailEditor extends TargetDetailEditor {
 
     SiderealDetailEditor() {
         super(ITarget.Tag.SIDEREAL);
+        setLayout(new BorderLayout());
         add(ped.getComponent(), BorderLayout.CENTER);
         add(te .getComponent(), BorderLayout.EAST);
         add(gfe.getComponent(), BorderLayout.SOUTH);

@@ -14,6 +14,7 @@ final class NamedDetailEditor extends TargetDetailEditor {
 
     NamedDetailEditor() {
         super(ITarget.Tag.NAMED);
+        setLayout(new BorderLayout());
         add(label, BorderLayout.CENTER);
     }
 

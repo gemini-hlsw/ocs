@@ -216,16 +216,17 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             gridy = 1;
             fill = HORIZONTAL;
             weightx = 1.0;
+            weighty = 2.0;
             insets = new Insets(5, 0, 5, 0);
         }});
 
         _w.add(_detailEditor, new GridBagConstraints() {{
             gridx = 0;
             gridy = 2;
-            fill = HORIZONTAL;
+            fill = BOTH;
             weightx = 1.0;
+            weighty = 2.0;
             insets = new Insets(5, 0, 5, 0);
-            weighty = 2;
         }});
 
         // Set up the formatting on the calendar doodad
@@ -497,6 +498,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     // Nonsidereal
                     _nonSiderealTargetSup.updatePos(_curPos);
                     _nonsideMagEditor.edit(ctx, _curPos);
+
+                    // Detail
+                    _detailEditor.edit(ctx, _curPos);
 
                     if (_curPos != null) {
                         _curPos.addWatcher(posWatcher);
@@ -1230,7 +1234,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
     private void refreshAll() {
-
         final boolean isNonSidereal = (_curPos.getTarget() instanceof NonSiderealTarget);
 
         _w.extrasFolder.setVisible(true);
@@ -1833,11 +1836,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             _ignorePosUpdate = true;
             try {
                 _nonSiderealTargetSup.setConicPos(target, nbw);
+                _curPos.notifyOfGenericUpdate();
+                updateGuiding();
             } finally {
                 _ignorePosUpdate = false;
             }
-            _curPos.notifyOfGenericUpdate();
-            updateGuiding();
         }
         public void textBoxKeyPress(TextBoxWidget tbw) {
             updateConicTarget((NumberBoxWidget) tbw);
