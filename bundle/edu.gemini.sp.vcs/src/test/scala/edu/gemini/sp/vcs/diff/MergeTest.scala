@@ -1,5 +1,7 @@
 package edu.gemini.sp.vcs.diff
 
+import java.security.Permission
+
 import edu.gemini.pot.sp.validator.Validator
 import edu.gemini.pot.sp.version.VersionMap
 import edu.gemini.pot.sp.{DataObjectBlob => DOB, _}
@@ -18,6 +20,7 @@ import org.scalatest.junit.JUnitSuite
 import scala.collection.JavaConverters._
 
 import scalaz._
+import scalaz.syntax.functor._
 
 
 class MergeTest extends JUnitSuite {
@@ -83,12 +86,12 @@ class MergeTest extends JUnitSuite {
     val deletedKeys = mergePlan.delete.map(_.key).toSet
 
     val correctedMergePlan =
-      MergeCorrection(mergeContext)(mergePlan)
+      MergeCorrection(mergeContext)(mergePlan, (_: Permission) => VcsAction(true))
 
     val updatedLocalProgram = {
       val localCopy = fact.copyWithSameKeys(lp)
       for {
-        mp <- correctedMergePlan.liftVcs
+        mp <- correctedMergePlan
         _  <- mp.merge(fact, localCopy)
       } yield localCopy
     }
@@ -392,9 +395,17 @@ class MergeTest extends JUnitSuite {
               k == n.key
           }
 
+        // This is like pc.updatedLocalProgram but it doesn't rerun the
+        // correctedMergePlan action.  If you rerun the action, you will get
+        // distinct keys for any conflict folders.
+        def updatedLocalProgram(corrections: MergePlan): VcsAction[ISPProgram] = {
+          val localCopy = pc.fact.copyWithSameKeys(pc.lp)
+          corrections.merge(pc.fact, localCopy).as(localCopy)
+        }
+
         val result = for {
-          cmp <- pc.correctedMergePlan.liftVcs
-          ulp <- pc.updatedLocalProgram
+          cmp <- pc.correctedMergePlan
+          ulp <- updatedLocalProgram(cmp)
         } yield {
           val matches = matchesMergePlan(ulp, cmp.update)
           if (!matches) {

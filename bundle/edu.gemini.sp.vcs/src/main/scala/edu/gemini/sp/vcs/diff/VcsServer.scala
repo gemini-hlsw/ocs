@@ -11,7 +11,7 @@ import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.util.security.permission.ProgramPermission
 import edu.gemini.util.security.policy.ImplicitPolicy
 
-import java.security.Principal
+import java.security.{Permission, Principal}
 
 import edu.gemini.util.security.principal.GeminiPrincipal
 
@@ -25,6 +25,9 @@ import Scalaz._
 class VcsServer(odb: IDBDatabaseService, vcsLog: VcsLog) { vs =>
 
   import SPNodeKeyLocks.instance.{readLock, readUnlock, writeLock, writeUnlock}
+
+  def hasPermission(p: Permission, user: Set[Principal]): VcsAction[Boolean] =
+    VcsAction(ImplicitPolicy.hasPermission(odb, user, p).unsafePerformIO())
 
   def lookup(id: SPProgramID): VcsAction[ISPProgram] =
     (Option(odb.lookupProgramByID(id)) \/> NotFound(id)).liftVcs
@@ -147,10 +150,9 @@ class VcsServer(odb: IDBDatabaseService, vcsLog: VcsLog) { vs =>
     }
 
   private def accessControlled[A](id: SPProgramID, user: Set[Principal])(body: => VcsAction[A]): VcsAction[A] =
-    VcsAction(ImplicitPolicy.hasPermission(odb, user, new ProgramPermission.Read(id)).unsafePerformIO()) >>= {
-      hasPermission =>
-        if (hasPermission) body
-        else VcsAction.fail(Forbidden(s"You don't have permission to access program '$id'"))
+    hasPermission(new ProgramPermission.Read(id), user) >>= { hp =>
+      if (hp) body
+      else VcsAction.fail(Forbidden(s"You don't have permission to access program '$id'"))
     }
 
   private def locked[A](k: SPNodeKey, lock: SPNodeKey => Unit, unlock: SPNodeKey => Unit)(body: => VcsAction[A]): VcsAction[A] =

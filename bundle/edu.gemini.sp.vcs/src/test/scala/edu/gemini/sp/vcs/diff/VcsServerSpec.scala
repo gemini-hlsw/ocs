@@ -8,7 +8,7 @@ import edu.gemini.sp.vcs.diff.VcsAction._
 import edu.gemini.sp.vcs.diff.VcsFailure._
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.gemini.obscomp.SPProgram
-import edu.gemini.util.security.principal.StaffPrincipal
+import edu.gemini.util.security.principal.{ProgramPrincipal, StaffPrincipal}
 
 import java.security.Principal
 
@@ -27,7 +27,7 @@ class VcsServerSpec extends VcsSpecification {
     }
 
     "fail if the user doesn't have access to the program" in withVcs { env =>
-      forbidden(env.local.server.read(Q1, progPrincipal(Q2)) { identity })
+      forbidden(env.local.server.read(Q1, Set(ProgramPrincipal(Q2))) { identity })
     }
 
     "handle any exceptions that happen" in withVcs { env =>
@@ -53,7 +53,7 @@ class VcsServerSpec extends VcsSpecification {
     }
 
     "fail if the user doesn't have access to the program" in withVcs { env =>
-      forbidden(dummyWrite(env, Q1, progPrincipal(Q2)))
+      forbidden(dummyWrite(env, Q1, Set(ProgramPrincipal(Q2))))
     }
 
     "handle any exceptions that happen in evaluate" in withVcs { env =>
@@ -115,7 +115,7 @@ class VcsServerSpec extends VcsSpecification {
 
   "add" should {
     "fail if the user doesn't have access to the program" in withVcs { env =>
-      val user    = progPrincipal(Q3)
+      val user    = Set(ProgramPrincipal(Q3): Principal)
       val newProg = env.local.newProgram(Q2)
       forbidden(env.local.server.add(newProg, user))
     }

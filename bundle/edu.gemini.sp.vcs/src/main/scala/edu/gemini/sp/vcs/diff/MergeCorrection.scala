@@ -1,5 +1,7 @@
 package edu.gemini.sp.vcs.diff
 
+import java.security.Permission
+
 import edu.gemini.sp.vcs.diff.VcsFailure.Unmergeable
 
 import scalaz._
@@ -20,12 +22,15 @@ object MergeCorrection {
    */
   type CorrectionFunction = MergePlan => TryCorrect[MergePlan]
 
-  def all(mc: MergeContext): List[CorrectionFunction] =
-    List(
-      ObsNumberCorrection(mc),
-      ValidityCorrection(mc)
-    )
+  type PermissionCheck    = Permission => VcsAction[Boolean]
 
-  def apply(mc: MergeContext): CorrectionFunction = (mp: MergePlan) =>
-    (mp.right[Unmergeable]/:all(mc)) { _.flatMap(_) }
+  type CorrectionAction   = (MergePlan, PermissionCheck) => VcsAction[MergePlan]
+
+  def apply(mc: MergeContext): CorrectionAction =
+    (mp: MergePlan, hasPermission: PermissionCheck) =>
+      for {
+        on  <- ObsNumberCorrection(mc)(mp).liftVcs
+        v   <- ValidityCorrection(mc)(on).liftVcs
+        sof <- StaffOnlyFieldCorrection(mc)(v, hasPermission)
+      } yield sof
 }

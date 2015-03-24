@@ -10,7 +10,7 @@ import edu.gemini.spModel.core.{Peer, SPProgramID}
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.util.security.auth.keychain.KeyChain
 
-import java.security.Principal
+import java.security.{Permission, Principal}
 
 import scala.collection.JavaConverters._
 import scalaz._
@@ -22,6 +22,9 @@ import scalaz.concurrent.Task
 class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => VcsService) {
 
   import Vcs.MergeEval
+
+  def hasPermission(p: Permission): VcsAction[Boolean] =
+    user >>= { u => server.hasPermission(p, u) }
 
   /** Checks-out the indicated program from the remote peer, copying it into
     * the local database. */
@@ -56,7 +59,7 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
         _     <- validateProgKey(p, diffs)
         mc     = MergeContext(p, diffs)
         prelim = PreliminaryMerge.merge(mc)
-        plan  <- MergeCorrection(mc)(prelim).liftVcs
+        plan  <- MergeCorrection(mc)(prelim, hasPermission)
       } yield MergeEval(plan, p, mc.remote.vm)
 
     // Only do the merge if the merge plan has something new to offer.

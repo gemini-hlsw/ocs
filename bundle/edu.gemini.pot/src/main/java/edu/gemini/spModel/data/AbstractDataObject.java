@@ -95,6 +95,12 @@ public class AbstractDataObject implements ISPCloneable, ISPDataObject, Serializ
         return result;
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public <A extends ISPDataObject> A clone(A a) {
+        return (A) a.clone();
+    }
+
     /**
      * Get the item's type.  SpType is like an enumerated type in C++.  Each
      * type is mapped one-to-one with its own object.
