@@ -8,12 +8,14 @@ import edu.gemini.spModel.gemini.flamingos2.Flamingos2.{FPUnit, LyotWheel}
 import edu.gemini.spModel.inst.ScienceAreaGeometry
 
 import scala.collection.JavaConverters._
+import scalaz.Scalaz._
+import scalaz._
 
 class F2ScienceAreaGeometry(inst0: Flamingos2) extends ScienceAreaGeometry[Flamingos2] {
   import F2ScienceAreaGeometry._
 
   override def geometry: List[Shape] = {
-    Option(inst0).toList.flatMap { inst =>
+    Option(inst0).fold(List[Shape]()) { inst =>
       lazy val plateScale = inst.getLyotWheel.getPlateScale
       lazy val scienceAreaWidth = {
         val scienceAreaArray = inst.getScienceArea
@@ -33,23 +35,22 @@ class F2ScienceAreaGeometry(inst0: Flamingos2) extends ScienceAreaGeometry[Flami
     DefaultImList.create(geometry.asJava)
 
   def scienceAreaDimensions: (Double, Double) = {
-    Option(inst0).map { inst =>
-      val lyotWheel = inst.getLyotWheel
-      if (Set(LyotWheel.OPEN, LyotWheel.HIGH, LyotWheel.LOW).contains(lyotWheel)) {
-        lazy val plateScale = lyotWheel.getPlateScale
+    import LyotWheel._
+    Option(inst0).map { inst => inst.getLyotWheel match {
+      case OPEN | HIGH | LOW =>
+        import FPUnit._
+        lazy val plateScale = inst.getLyotWheel.getPlateScale
         inst.getFpu match {
-          case FPUnit.FPU_NONE =>
+          case FPU_NONE =>
             val size = ImagingFOVSize * plateScale
             (size, size)
-          case FPUnit.CUSTOM_MASK =>
+          case CUSTOM_MASK =>
             (MOSFOVWidth * plateScale, ImagingFOVSize * plateScale)
           case fpu if fpu.isLongslit =>
-            (fpu.getSlitWidth * lyotWheel.getPixelScale, LongSlitFOVHeight * plateScale)
-          case _ =>
-            (0.0, 0.0)
+            (fpu.getSlitWidth * inst.getLyotWheel.getPixelScale, LongSlitFOVHeight * plateScale)
         }
-      } else (0.0, 0.0)
-    }.getOrElse((0.0, 0.0))
+      case _ => (0.0, 0.0)
+    }}.getOrElse((0.0, 0.0))
   }
 
   /**
@@ -76,10 +77,7 @@ class F2ScienceAreaGeometry(inst0: Flamingos2) extends ScienceAreaGeometry[Flami
     // The FOV is the intersection of a rectangle and a circle.
     val circle = new Ellipse2D.Double(-radius, -radius, height, height)
     val rectangle = new Rectangle2D.Double(-width/2.0, -radius, width, height)
-
-    val area = new Area(circle)
-    area.intersect(new Area(rectangle))
-    area
+    new Area(circle) <| (_.intersect(new Area(rectangle)))
   }
 
   /**

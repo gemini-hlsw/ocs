@@ -17,7 +17,7 @@ class GmosScienceAreaGeometry[I  <: InstGmosCommon[D,F,P,SM],
   import GmosScienceAreaGeometry._
 
   override def geometry: List[Shape] = {
-    Option(inst0).toList.flatMap { inst =>
+    Option(inst0).fold(List[Shape]()) { inst =>
       lazy val width   = inst.getScienceArea()(0)
       lazy val isSouth = inst.getSite.contains(Site.GS)
       inst.getFPUnitMode match {
