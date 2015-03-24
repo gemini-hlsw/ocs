@@ -5,7 +5,7 @@ import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.catalog.api.CatalogQuery
 import edu.gemini.catalog.votable.{RemoteBackend, VoTableBackend, CatalogException, VoTableClient}
 import edu.gemini.spModel.ags.AgsStrategyKey
-import edu.gemini.spModel.core.{Coordinates, Angle}
+import edu.gemini.spModel.core.{Magnitude, MagnitudeBand, Coordinates, Angle}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, VignettingGuideProbe, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
@@ -84,10 +84,10 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
           }
           val bestPerCtx = for {
             (c, soList) <- results
-            rating      <- brightestByQualityAndVignetting(soList, mt, c, v)
+            rating      <- brightestByQualityAndVignetting(soList, mt, c, v, params.band)
           } yield (c, rating)
           bestPerCtx.reduceOption(vignettingCtxOrder.min).map {
-            case (c, (_, _, st)) => AgsStrategy.Selection(c.getPositionAngle.toNewModel, List(AgsStrategy.Assignment(params.guideProbe, st)))
+            case (c, (_, _, _, st)) => AgsStrategy.Selection(c.getPositionAngle.toNewModel, List(AgsStrategy.Assignment(params.guideProbe, st)))
           }
 
         // Otherwise proceed as normal.
@@ -155,14 +155,15 @@ object SingleProbeStrategy {
     Angle.fromRadians(angle)
   }
 
-  lazy val vignettingOrder = scala.math.Ordering[(Int, Double)].on { x: (AgsGuideQuality, Double, SiderealTarget) =>
-    (AgsGuideQuality.All.indexOf(x._1), x._2)
+  lazy val vignettingOrder = implicitly[scala.math.Ordering[(Int, Double, Option[Magnitude])]].on { x: (AgsGuideQuality, Double, Option[Magnitude], SiderealTarget) =>
+    (AgsGuideQuality.All.indexOf(x._1), x._2, x._3)
   }
-  lazy val vignettingCtxOrder = vignettingOrder.on { x0: (ObsContext, (AgsGuideQuality, Double, SiderealTarget)) => x0._2 }
+
+  lazy val vignettingCtxOrder = vignettingOrder.on { x0: (ObsContext, (AgsGuideQuality, Double, Option[Magnitude], SiderealTarget)) => x0._2 }
 
   /**
    * Given a list of candidates, bin them by quality and then pick the one that vignettes the
-   * science area the least.
+   * science area the least and is the brightest.
    * @param lst              the list of possible candidates
    * @param mt               magnitude lookup table
    * @param ctx              context information
@@ -170,16 +171,17 @@ object SingleProbeStrategy {
    * @return                 Some((quality, vignetting factor, guideStar) if a candidate exists that can be used, None otherwise
    */
   def brightestByQualityAndVignetting(lst: List[SiderealTarget], mt: MagnitudeTable, ctx: ObsContext,
-                                         probe: ValidatableGuideProbe with VignettingGuideProbe): Option[(AgsGuideQuality, Double, SiderealTarget)] = {
+                                      probe: ValidatableGuideProbe with VignettingGuideProbe,
+                                      band: MagnitudeBand): Option[(AgsGuideQuality, Double, Option[Magnitude], SiderealTarget)] = {
     // Create tuples (AgsQuality, vignetting factor, target) and then find the min by
     // ordering on the first two, returning the corresponding target.
     val candidates = for {
-      st       <- lst
-      spTarget =  new SPTarget(HmsDegTarget.fromSkyObject(st.toOldModel))
+      st <- lst
+      spTarget = new SPTarget(HmsDegTarget.fromSkyObject(st.toOldModel))
       analysis <- AgsAnalysis.analysis(ctx, mt, probe, spTarget)
     } yield {
       val vig = probe.calculateVignetting(ctx, st.coordinates)
-      (analysis.quality, vig, st)
+      (analysis.quality, vig, st.magnitudeIn(band), st)
     }
     candidates.reduceOption(vignettingOrder.min)
   }
