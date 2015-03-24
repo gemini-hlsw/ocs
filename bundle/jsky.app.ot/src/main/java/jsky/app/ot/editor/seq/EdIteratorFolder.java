@@ -6,10 +6,7 @@
 //
 package jsky.app.ot.editor.seq;
 
-import edu.gemini.pot.sp.ISPObsExecLog;
-import edu.gemini.pot.sp.ISPObservation;
-import edu.gemini.pot.sp.ISPSeqComponent;
-import edu.gemini.pot.sp.SPUtil;
+import edu.gemini.pot.sp.*;
 import edu.gemini.spModel.seqcomp.SeqBase;
 import jsky.app.ot.editor.OtItemEditor;
 import jsky.util.gui.TextBoxWidget;
@@ -18,18 +15,22 @@ import jsky.util.gui.TextBoxWidgetWatcher;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 
 /**
- * This is the editor for the "iterator folder" or "Sequence" item.
- * It displays two tabs:
+ * This is the editor for the "iterator folder" or "Sequence" item. It displays the following tabs:
  * <p>
  *  Sequence: a table into which the iteration sequence of contained
  * iterators is written, and
  * <p>
  * Timeline: which shows the sequence as a timeline.
+ * <p>
+ * ITC Imaging: All unique imaging configurations and their ITC calculation results (if applicable).
+ * <p>
+ * ITC Spectroscopy: All unique spectroscopy configurations and their ITC calculation results (if applicable).
  */
 public final class EdIteratorFolder
         extends OtItemEditor<ISPSeqComponent, SeqBase>
@@ -37,6 +38,10 @@ public final class EdIteratorFolder
 
     /** the GUI layout panel */
     private final IterFolderForm _w;
+
+    /** ITC result panels */
+    private final ItcImagingPanel itcImagingPanel;
+    private final ItcSpectroscopyPanel itcSpectroscopyPanel;
 
     /** The data for the note */
     private final SequenceTab _sequenceTab;
@@ -60,6 +65,10 @@ public final class EdIteratorFolder
         _origSequenceTab = new OrigSequenceTab(_w, this);
 
         _w.tabbedPane.addChangeListener(this);
+
+        itcImagingPanel      = ItcPanel$.MODULE$.forImaging(this);
+        itcSpectroscopyPanel = ItcPanel$.MODULE$.forSpectroscopy(this);
+
     }
 
     /** Return the window containing the editor */
@@ -80,11 +89,21 @@ public final class EdIteratorFolder
     /** Set the data object corresponding to this editor. */
     @Override public void init() {
         final ISPObservation obs = getContextObservation();
-        // No context observation if this sequence component is in a conflict
-        // folder!
+        // No context observation if this sequence component is in a conflict folder!
         if (obs != null) {
             obs.addCompositeChangeListener(obslogUpdater);
         }
+
+        // show/hide ITC result panels depending on instrument
+        final ISPObsComponent instrument = getContextInstrument();
+        _w.tabbedPane.remove(itcImagingPanel.peer());
+        _w.tabbedPane.remove(itcSpectroscopyPanel.peer());
+        if (instrument != null) {
+            final SPComponentType type = instrument.getType();
+            if (itcImagingPanel.visibleFor(type))      _w.tabbedPane.add("ITC Imaging",      itcImagingPanel.peer());
+            if (itcSpectroscopyPanel.visibleFor(type)) _w.tabbedPane.add("ITC Spectroscopy", itcSpectroscopyPanel.peer());
+        }
+
 
         _origSequenceTab.init(this);
 
@@ -122,6 +141,11 @@ public final class EdIteratorFolder
             case 1:
                 _origSequenceTab.update();
                 break;
+            default:
+                // itc panels can be at different indices depending on instrument
+                final Component c = _w.tabbedPane.getComponentAt(index);
+                if (c == itcImagingPanel.peer())      itcImagingPanel.update();
+                if (c == itcSpectroscopyPanel.peer()) itcSpectroscopyPanel.update();
         }
     }
 

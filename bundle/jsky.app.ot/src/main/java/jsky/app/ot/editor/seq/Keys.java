@@ -27,9 +27,12 @@ final class Keys {
     static final ItemKey TEL_Q_KEY       = new ItemKey("telescope:q");
     static final ItemKey TEL_VERSION_KEY = new ItemKey("telescope:version");
 
-    static final ItemKey INST_EXP_TIME_KEY = new ItemKey("instrument:exposureTime");
-    static final ItemKey INST_COADDS_KEY   = new ItemKey("instrument:coadds");
-    static final ItemKey INST_VERSION_KEY  = new ItemKey("instrument:version");
+    static final ItemKey INST_EXP_TIME_KEY   = new ItemKey("instrument:exposureTime");
+    static final ItemKey INST_TIME_ON_SRC_KEY= new ItemKey("instrument:timeOnSource");
+    static final ItemKey INST_COADDS_KEY     = new ItemKey("instrument:coadds");
+    static final ItemKey INST_VERSION_KEY    = new ItemKey("instrument:version");
+    static final ItemKey INST_INSTRUMENT_KEY = new ItemKey("instrument:instrument");
+    static final ItemKey INST_DISPERSER_KEY  = new ItemKey("instrument:disperser");
 
     static final ItemKey SP_NODE_KEY = new ItemKey(MetaDataConfig.NAME + ":" + MetaDataConfig.SP_NODE);
 }
