@@ -1,7 +1,8 @@
 package edu.gemini.sp.vcs.diff
 
 import edu.gemini.pot.sp.{ISPObservation, ISPNode, SPNodeKey}
-import edu.gemini.pot.sp.version.NodeVersions
+import edu.gemini.pot.sp.version.{EmptyVersionMap, VersionMap, NodeVersions}
+import edu.gemini.shared.util.VersionComparison
 import edu.gemini.sp.vcs.diff.NodeDetail.Obs
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.rich.pot.sp._
@@ -113,6 +114,23 @@ object MergeNode {
 
       go(List(t), z)
     }
+
+    def vm: VersionMap = {
+      def go(rem: Stream[Tree[MergeNode]], res: VersionMap): VersionMap =
+        if (rem.isEmpty) res
+        else {
+          val t   = rem.head
+          val vm0 = t.rootLabel match {
+            case Modified(k, nv, _, _) => res + (k -> nv)
+            case _                     => res
+          }
+          go(t.subForest ++ rem.tail, vm0)
+        }
+
+      go(Stream(t), EmptyVersionMap)
+    }
+
+    def compare(that: Tree[MergeNode]): VersionComparison = VersionMap.compare(vm, that.vm)
   }
 
   implicit val ShowNode = Show.shows[MergeNode] {
