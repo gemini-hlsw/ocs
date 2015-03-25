@@ -93,6 +93,10 @@ public final class NiriRecipe extends RecipeBase {
                                 + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25))
                                 + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
+
+        // report error if this does not come out to be an integer
+        checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
+
     }
 
     /**
@@ -103,26 +107,12 @@ public final class NiriRecipe extends RecipeBase {
      *                   files, incorrectly-formatted data files, ...
      */
     public void writeOutput() {
-        // Create the Chart visitor. After a sed has been created the chart
-        // visitor
-        // can be used by calling the following commented out code:
-
-        // NiriChart.setName("Original SED");
-        // sed.accept(NiriChart);
-        // _println(NiriChart.getTag());
         _println("");
-        // ChartVisitor NiriChart = new ChartVisitor();
 
         // This object is used to format numerical strings.
         final FormatStringWriter device = new FormatStringWriter();
         device.setPrecision(2); // Two decimal places
         device.clear();
-
-        // For debugging, to be removed later
-        // _print("<pre>" + _sdParameters.toString() + "</pre>");
-        // _print("<pre>" + _niriParameters.toString() + "</pre>");
-        // _print("<pre>" + _obsDetailParameters.toString() + "</pre>");
-        // _print("<pre>" + _obsConditionParameters.toString() + "</pre>");
 
         // Module 1b
         // Define the source energy (as function of wavelength).
@@ -161,75 +151,36 @@ public final class NiriRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        final double pixel_size = instrument.getPixelSize();
-        double ap_diam = 0;
-        double halo_source_fraction = 0;
-
-        final double sed_integral = calcSource.sed.getIntegral();
-        final double sky_integral = calcSource.sky.getIntegral();
-
-        double halo_integral = 0;
-        if (_altairParameters.altairIsUsed()) {
-            halo_integral = calcSource.halo.get().getIntegral();
-        }
-
-
         // if altair is used we need to calculate both a core and halo
         // source_fraction
         // halo first
         final SourceFraction SFcalc;
         if (_altairParameters.altairIsUsed()) {
-            // If altair is used turn off printing of SF calc
-            final SourceFraction SFcalcHalo;
-            final double im_qual = altair.get().getAOCorrectedFWHM();
+            final double aoCorrImgQual = altair.get().getAOCorrectedFWHM();
             if (_obsDetailParameters.isAutoAperture()) {
-                SFcalcHalo = SourceFractionFactory.calculate(_sdParameters.isUniform(), false, 1.18 * im_qual, instrument.getPixelSize(), IQcalc.getImageQuality());
-                SFcalc = SourceFractionFactory.calculate(_sdParameters.isUniform(), _obsDetailParameters.isAutoAperture(), 1.18 * im_qual, instrument.getPixelSize(), im_qual);
+                SFcalc = SourceFractionFactory.calculate(_sdParameters.isUniform(), _obsDetailParameters.isAutoAperture(), 1.18 * aoCorrImgQual, instrument.getPixelSize(), aoCorrImgQual);
             } else {
-                SFcalcHalo = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, IQcalc.getImageQuality());
-                SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
+                SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, aoCorrImgQual);
             }
-            halo_source_fraction = SFcalcHalo.getSourceFraction();
         } else {
             // this will be the core for an altair source; unchanged for non altair.
             SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, IQcalc.getImageQuality());
         }
-        if (_obsDetailParameters.getMethod().isImaging()) {
-            if (_altairParameters.altairIsUsed()) {
-                _print(SFcalc.getTextResult(device, false));
-                _println("derived image halo size (FWHM) for a point source = "
-                        + device.toString(IQcalc.getImageQuality()) + " arcsec.\n");
-            } else {
-                _print(SFcalc.getTextResult(device));
-                _println(IQcalc.getTextResult(device));
-            }
-        }
 
-        // Calculate peak pixel flux
         final double im_qual = altair.isDefined() ? altair.get().getAOCorrectedFWHM() : IQcalc.getImageQuality();
-        final double peak_pixel_count = altair.isDefined() ?
-                PeakPixelFlux.calculateWithHalo(instrument, _sdParameters, _obsDetailParameters, SFcalc, im_qual, IQcalc.getImageQuality(), halo_integral, sed_integral, sky_integral) :
-                PeakPixelFlux.calculate(instrument, _sdParameters, _obsDetailParameters, SFcalc, im_qual, sed_integral, sky_integral);
 
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
-        final int number_exposures = _obsDetailParameters.getNumExposures();
-        final double frac_with_source = _obsDetailParameters.getSourceFraction();
-        final double dark_current = instrument.getDarkCurrent();
-        final double exposure_time = _obsDetailParameters.getExposureTime();
-        final double read_noise = instrument.getReadNoise();
-
-        // report error if this does not come out to be an integer
-        checkSourceFraction(number_exposures, frac_with_source);
 
         // ObservationMode Imaging or spectroscopy
 
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {
 
+            final double pixel_size = instrument.getPixelSize();
+
             final SlitThroughput st;
             final SlitThroughput st_halo;
-
             if (!_obsDetailParameters.isAutoAperture()) {
                 st = new SlitThroughput(im_qual,
                         _obsDetailParameters.getApertureDiameter(), pixel_size,
@@ -270,14 +221,14 @@ public final class NiriRecipe extends RecipeBase {
 
             _println("");
             _println("Requested total integration time = "
-                    + device.toString(exposure_time * number_exposures)
+                    + device.toString(_obsDetailParameters.getExposureTime() * _obsDetailParameters.getNumExposures())
                     + " secs, of which "
-                    + device.toString(exposure_time * number_exposures
-                    * frac_with_source) + " secs is on source.");
+                    + device.toString(_obsDetailParameters.getExposureTime() * _obsDetailParameters.getNumExposures()
+                    * _obsDetailParameters.getSourceFraction()) + " secs is on source.");
 
             _print("<HR align=left SIZE=3>");
 
-            ap_diam = st.getSpatialPix();
+            double ap_diam = st.getSpatialPix();
             double spec_source_frac = st.getSlitThroughput();
             double halo_spec_source_frac = st_halo.getSlitThroughput();
 
@@ -296,8 +247,12 @@ public final class NiriRecipe extends RecipeBase {
                     instrument.getObservingStart(),
                     instrument.getObservingEnd(),
                     instrument.getGrismResolution(), spec_source_frac, im_qual,
-                    ap_diam, number_exposures, frac_with_source, exposure_time,
-                    dark_current, read_noise);
+                    ap_diam,
+                    _obsDetailParameters.getNumExposures(),
+                    _obsDetailParameters.getSourceFraction(),
+                    _obsDetailParameters.getExposureTime(),
+                    instrument.getDarkCurrent(),
+                    instrument.getReadNoise());
             specS2N.setSourceSpectrum(calcSource.sed);
             specS2N.setBackgroundSpectrum(calcSource.sky);
             specS2N.setHaloImageQuality(IQcalc.getImageQuality());
@@ -328,10 +283,36 @@ public final class NiriRecipe extends RecipeBase {
             finalS2N = _printSpecTag("Final S/N ASCII data");
 
         } else {
+
+            if (_altairParameters.altairIsUsed()) {
+                _print(SFcalc.getTextResult(device, false));
+                _println("derived image halo size (FWHM) for a point source = "
+                        + device.toString(IQcalc.getImageQuality()) + " arcsec.\n");
+            } else {
+                _print(SFcalc.getTextResult(device));
+                _println(IQcalc.getTextResult(device));
+            }
+
+            final double sed_integral = calcSource.sed.getIntegral();
+            final double sky_integral = calcSource.sky.getIntegral();
+            final double halo_integral = _altairParameters.altairIsUsed() ? calcSource.halo.get().getIntegral() : 0.0;
+
+            // Calculate peak pixel flux
+            final double peak_pixel_count = altair.isDefined() ?
+                    PeakPixelFlux.calculateWithHalo(instrument, _sdParameters, _obsDetailParameters, SFcalc, im_qual, IQcalc.getImageQuality(), halo_integral, sed_integral, sky_integral) :
+                    PeakPixelFlux.calculate(instrument, _sdParameters, _obsDetailParameters, SFcalc, im_qual, sed_integral, sky_integral);
+
             final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
             if (_altairParameters.altairIsUsed()) {
+                final SourceFraction SFcalcHalo;
+                final double aoCorrImgQual = altair.get().getAOCorrectedFWHM();
+                if (_obsDetailParameters.isAutoAperture()) {
+                    SFcalcHalo = SourceFractionFactory.calculate(_sdParameters.isUniform(), false, 1.18 * aoCorrImgQual, instrument.getPixelSize(), IQcalc.getImageQuality());
+                } else {
+                    SFcalcHalo = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, IQcalc.getImageQuality());
+                }
                 IS2Ncalc.setSecondaryIntegral(halo_integral);
-                IS2Ncalc.setSecondarySourceFraction(halo_source_fraction);
+                IS2Ncalc.setSecondarySourceFraction(SFcalcHalo.getSourceFraction());
             }
             IS2Ncalc.calculate();
             _println(IS2Ncalc.getTextResult(device));
