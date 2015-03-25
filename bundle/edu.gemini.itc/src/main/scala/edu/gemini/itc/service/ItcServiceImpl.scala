@@ -2,6 +2,7 @@ package edu.gemini.itc.service
 
 import edu.gemini.itc.gmos.GmosRecipe
 import edu.gemini.itc.operation.ImagingS2NMethodACalculation
+import edu.gemini.itc.shared.RecipeBase.{SpectroscopyResult, ImagingResult}
 import edu.gemini.itc.shared._
 
 /**
@@ -31,7 +32,7 @@ class ItcServiceImpl extends ItcService {
     val recipe = new GmosRecipe(source, obs, cond, ins, tele, dummyPlotParams, null)
     // TODO: we can simplify this once all recipes have a calculate method (instead of writeOutput())
     val results: Array[ItcCalcResult] = recipe.calculate().map {
-      case r: GmosRecipe.GmosImagingResult => r.IS2Ncalc match {
+      case r: ImagingResult => r.IS2Ncalc match {
 
         case i: ImagingS2NMethodACalculation =>
           // Repack the result in an immutable and simplified Scala case class
@@ -44,7 +45,7 @@ class ItcServiceImpl extends ItcService {
           throw new NotImplementedError
 
       }
-      case r: GmosRecipe.GmosSpectroscopyResult => ItcSpectroscopyResult()
+      case r: SpectroscopyResult => ItcSpectroscopyResult()
     }
     ItcResult.forCcds(results)
   }

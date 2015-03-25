@@ -76,34 +76,112 @@ public final class Flamingos2Recipe extends RecipeBase {
     }
 
     /**
-     * Performes recipe calculation and writes results to a cached PrintWriter
-     * or to System.out.
-     *
-     * @throws Exception A recipe calculation can fail in many ways, missing data
-     *                   files, incorrectly-formatted data files, ...
+     * Performs recipe calculation and writes results to a cached PrintWriter or to System.out.
      */
     @Override
     public void writeOutput() {
-        // This object is used to format numerical strings.
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2); // Two decimal places
-        device.clear();
-        _println("");
-
-        // Module 1b
-        // Define the source energy (as function of wavelength).
-        //
-
         checkInputParameters();
-
         final Flamingos2 instrument = new Flamingos2(_flamingos2Parameters);
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
+            final SpectroscopyResult result = calculateSpectroscopy(instrument);
+            writeSpectroscopyOutput(instrument, result);
+        } else {
+            final ImagingResult result = calculateImaging(instrument);
+            writeImagingOutput(instrument, result);
+        }
+    }
 
-        // Get the summed source and sky
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GS, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, _plotParameters);
-        final VisitableSampledSpectrum sed = calcSource.sed;
-        final VisitableSampledSpectrum sky = calcSource.sky;
-        final double sed_integral = sed.getIntegral();
-        final double sky_integral = sky.getIntegral();
+    public SpectroscopyResult calculateSpectroscopy() {
+        final Flamingos2 instrument = new Flamingos2(_flamingos2Parameters);
+        return calculateSpectroscopy(instrument);
+    }
+
+    public ImagingResult calculateImaging() {
+        final Flamingos2 instrument = new Flamingos2(_flamingos2Parameters);
+        return calculateImaging(instrument);
+    }
+
+    private SpectroscopyResult calculateSpectroscopy(final Flamingos2 instrument) {
+        // Start of morphology section of ITC
+
+        // Module 1a
+        // The purpose of this section is to calculate the fraction of the
+        // source flux which is contained within an aperture which we adopt
+        // to derive the signal to noise ratio. There are several cases
+        // depending on the source morphology.
+        // Define the source morphology
+        //
+        // inputs: source morphology specification
+        final SEDFactory.SourceResult src = SEDFactory.calculate(instrument, Site.GS, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, _plotParameters);
+
+        // Calculate image quality
+        final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
+        IQcalc.calculate();
+        final double im_qual = IQcalc.getImageQuality();
+
+        // Calculate Source fraction
+        final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
+
+        // In this version we are bypassing morphology modules 3a-5a.
+        // i.e. the output morphology is same as the input morphology.
+        // Might implement these modules at a later time.
+
+        // report error if this does not come out to be an integer
+        checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
+
+        final double pixel_size = instrument.getPixelSize();
+        final SpecS2NLargeSlitVisitor specS2N;
+        final SlitThroughput st;
+
+        if (!_obsDetailParameters.isAutoAperture()) {
+            st = new SlitThroughput(im_qual, _obsDetailParameters.getApertureDiameter(), pixel_size, _flamingos2Parameters.getSlitSize() * pixel_size);
+        } else {
+            st = new SlitThroughput(im_qual, pixel_size, _flamingos2Parameters.getSlitSize() * pixel_size);
+        }
+
+        double ap_diam = st.getSpatialPix();
+        double spec_source_frac = st.getSlitThroughput();
+
+        if (_sdParameters.isUniform()) {
+            if (_obsDetailParameters.isAutoAperture()) {
+                ap_diam = new Double(1 / (_flamingos2Parameters.getSlitSize() * pixel_size) + 0.5).intValue();
+                spec_source_frac = 1;
+            } else {
+                spec_source_frac = _flamingos2Parameters.getSlitSize() * pixel_size * ap_diam * pixel_size;
+            }
+        }
+
+        final double gratDispersion_nmppix = instrument.getSpectralPixelWidth();
+        final double gratDispersion_nm = 0.5 / pixel_size * gratDispersion_nmppix;
+
+        specS2N = new SpecS2NLargeSlitVisitor(_flamingos2Parameters.getSlitSize() * pixel_size,
+                pixel_size, instrument.getSpectralPixelWidth(),
+                instrument.getObservingStart(),
+                instrument.getObservingEnd(),
+                gratDispersion_nm,
+                gratDispersion_nmppix,
+                instrument.getGrismResolution(), spec_source_frac, im_qual,
+                ap_diam,
+                _obsDetailParameters.getNumExposures(),
+                _obsDetailParameters.getSourceFraction(),
+                _obsDetailParameters.getExposureTime(),
+                instrument.getDarkCurrent(),
+                instrument.getReadNoise(),
+                _obsDetailParameters.getSkyApertureDiameter());
+
+        specS2N.setDetectorTransmission(instrument.getDetectorTransmision());
+        specS2N.setSourceSpectrum(src.sed);
+        specS2N.setBackgroundSpectrum(src.sky);
+        specS2N.setSpecHaloSourceFraction(0.0);
+        src.sed.accept(specS2N);
+
+        final SpecS2NLargeSlitVisitor[] specS2Narr = new SpecS2NLargeSlitVisitor[1];
+        specS2Narr[0] = specS2N;
+
+        return new SpectroscopyResult(SFcalc, IQcalc, specS2Narr, st);
+    }
+
+    private ImagingResult calculateImaging(final Flamingos2 instrument) {
 
         // Start of morphology section of ITC
 
@@ -115,9 +193,7 @@ public final class Flamingos2Recipe extends RecipeBase {
         // Define the source morphology
         //
         // inputs: source morphology specification
-
-        final double pixel_size = instrument.getPixelSize();
-        double ap_diam;
+        final SEDFactory.SourceResult src = SEDFactory.calculate(instrument, Site.GS, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, _plotParameters);
 
         // Calculate image quality
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
@@ -126,171 +202,146 @@ public final class Flamingos2Recipe extends RecipeBase {
 
         // Calculate Source fraction
         final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
-        _print(SFcalc.getTextResult(device));
-        _println(IQcalc.getTextResult(device));
-
-        // Calculate the Peak Pixel Flux
-        final double peak_pixel_count = PeakPixelFlux.calculate(instrument, _sdParameters, _obsDetailParameters, SFcalc, im_qual, sed_integral, sky_integral);
 
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
 
-        final int number_exposures = _obsDetailParameters.getNumExposures();
-        final double frac_with_source = _obsDetailParameters.getSourceFraction();
-
         // report error if this does not come out to be an integer
-        checkSourceFraction(number_exposures, frac_with_source);
+        checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
+        // Get the summed source and sky
+        final VisitableSampledSpectrum sed = src.sed;
+        final VisitableSampledSpectrum sky = src.sky;
+        final double sed_integral = sed.getIntegral();
+        final double sky_integral = sky.getIntegral();
 
-        final double exposure_time = _obsDetailParameters.getExposureTime();
-        final double dark_current = instrument.getDarkCurrent();
-        final double read_noise = instrument.getReadNoise();
+        // Calculate the Peak Pixel Flux
+        final double peak_pixel_count = PeakPixelFlux.calculate(instrument, _sdParameters, _obsDetailParameters, SFcalc, im_qual, sed_integral, sky_integral);
 
-        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
+        // Calculate the Signal to Noise
+        final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
+        IS2Ncalc.calculate();
 
-            final String sigSpec, backSpec, singleS2N, finalS2N;
-            final SpecS2NLargeSlitVisitor specS2N;
-            final SlitThroughput st;
+        return new ImagingResult(IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
+    }
 
-            if (!_obsDetailParameters.isAutoAperture()) {
-                st = new SlitThroughput(im_qual,
-                        _obsDetailParameters.getApertureDiameter(), pixel_size,
-                        _flamingos2Parameters.getSlitSize() * pixel_size);
 
-                _println("software aperture extent along slit = "
-                        + device.toString(_obsDetailParameters
-                        .getApertureDiameter()) + " arcsec");
-            } else {
-                st = new SlitThroughput(im_qual, pixel_size,
-                        _flamingos2Parameters.getSlitSize() * pixel_size);
+    // ===================================================================================================================
+    // TODO: OUTPUT METHODS
+    // TODO: These need to be simplified/cleaned/shared and then go to the web module.. and then be deleted and forgotten.
+    // ===================================================================================================================
 
-                switch (_sdParameters.getProfileType()) {
-                    case UNIFORM:
-                        _println("software aperture extent along slit = "
-                                + device.toString(1 / _flamingos2Parameters
-                                .getSlitSize() * pixel_size) + " arcsec");
-                        break;
-                    case POINT:
-                    _println("software aperture extent along slit = "
-                            + device.toString(1.4 * im_qual) + " arcsec");
-                        break;
-                }
-            }
 
-            if (!_sdParameters.isUniform()) {
-                _println("fraction of source flux in aperture = "
-                        + device.toString(st.getSlitThroughput()));
-            }
+    private void writeSpectroscopyOutput(final Flamingos2 instrument, final SpectroscopyResult result) {
+        final FormatStringWriter device = new FormatStringWriter();
+        device.setPrecision(2); // Two decimal places
+        device.clear();
+        _println("");
 
-            _println("derived image size(FWHM) for a point source = "
-                    + device.toString(im_qual) + " arcsec");
+        _print(result.SFcalc.getTextResult(device));
+        _println(result.IQcalc.getTextResult(device));
 
-            _println("");
-            _println("Requested total integration time = "
-                    + device.toString(exposure_time * number_exposures)
-                    + " secs, of which "
-                    + device.toString(exposure_time * number_exposures
-                    * frac_with_source) + " secs is on source.");
-
-            _print("<HR align=left SIZE=3>");
-            ap_diam = st.getSpatialPix();
-            double spec_source_frac = st.getSlitThroughput();
-
-            if (_sdParameters.isUniform()) {
-               if (_obsDetailParameters.isAutoAperture()) {
-                    ap_diam = new Double(1 / (_flamingos2Parameters.getSlitSize() * pixel_size) + 0.5).intValue();
-                    spec_source_frac = 1;
-                } else {
-                    spec_source_frac = _flamingos2Parameters.getSlitSize() * pixel_size * ap_diam * pixel_size; // ap_diam = Spec_NPix
-                }
-            }
-
-            final double gratDispersion_nmppix = instrument.getSpectralPixelWidth();
-            final double gratDispersion_nm = 0.5 / pixel_size * gratDispersion_nmppix;
-
-            specS2N = new SpecS2NLargeSlitVisitor(_flamingos2Parameters.getSlitSize() * pixel_size,
-                    pixel_size, instrument.getSpectralPixelWidth(),
-                    instrument.getObservingStart(),
-                    instrument.getObservingEnd(),
-                    gratDispersion_nm,
-                    gratDispersion_nmppix,
-                    instrument.getGrismResolution(), spec_source_frac, im_qual,
-                    ap_diam, number_exposures, frac_with_source, exposure_time,
-                    dark_current, read_noise,
-                    _obsDetailParameters.getSkyApertureDiameter());
-
-            specS2N.setDetectorTransmission(instrument.getDetectorTransmision());
-            specS2N.setSourceSpectrum(sed);
-            specS2N.setBackgroundSpectrum(sky);
-            specS2N.setSpecHaloSourceFraction(0.0);
-
-            final ITCChart chart1 = new ITCChart(
-                    "Signal and SQRT(Background) in software aperture of " + ap_diam + " pixels",
-                    "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
-            final ITCChart chart2 = new ITCChart(
-                    "Intermediate Single Exp and Final S/N",
-                    "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
-
-            sed.accept(specS2N);
-            _println("<p style=\"page-break-inside: never\">");
-            chart1.addArray(specS2N.getSignalSpectrum().getData(), "Signal ");
-            chart1.addArray(specS2N.getBackgroundSpectrum().getData(), "SQRT(Background)  ");
-
-            _println(chart1.getBufferedImage(), "SigAndBack");
-            _println("");
-
-            sigSpec = _printSpecTag("ASCII signal spectrum");
-            backSpec = _printSpecTag("ASCII background spectrum");
-
-            chart2.addArray(specS2N.getExpS2NSpectrum().getData(), "Single Exp S/N");
-            chart2.addArray(specS2N.getFinalS2NSpectrum().getData(), "Final S/N  ");
-
-            _println(chart2.getBufferedImage(), "Sig2N");
-            _println("");
-
-            singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
-            finalS2N = _printSpecTag("Final S/N ASCII data");
-
-            _println(specS2N.getSignalSpectrum(), _header, sigSpec);
-            _println(specS2N.getBackgroundSpectrum(), _header, backSpec);
-            _println(specS2N.getExpS2NSpectrum(), _header, singleS2N);
-            _println(specS2N.getFinalS2NSpectrum(), _header, finalS2N);
-
+        if (!_obsDetailParameters.isAutoAperture()) {
+            _println("software aperture extent along slit = "
+                    + device.toString(_obsDetailParameters
+                    .getApertureDiameter()) + " arcsec");
         } else {
-            // Observing mode: Imaging
-
-            // Calculate the Signal to Noise
-
-            final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
-            IS2Ncalc.calculate();
-            _println(IS2Ncalc.getTextResult(device));
-            device.setPrecision(0); // NO decimal places
-            device.clear();
-
-            _println("");
-            _println("The peak pixel signal + background is "
-                    + device.toString(peak_pixel_count)
-                    + ". This is "
-                    + device.toString(peak_pixel_count
-                    / instrument.getWellDepth() * 100)
-                    + "% of the full well depth of "
-                    + device.toString(instrument.getWellDepth()) + ".");
-
-            if (peak_pixel_count > (.8 * instrument.getWellDepth()))
-                _println("Warning: peak pixel exceeds 80% of the well depth and may be saturated");
-
-            _println("");
-            device.setPrecision(2); // TWO decimal places
-            device.clear();
+            switch (_sdParameters.getProfileType()) {
+                case UNIFORM:
+                    _println("software aperture extent along slit = "
+                            + device.toString(1 / _flamingos2Parameters
+                            .getSlitSize() * instrument.getPixelSize()) + " arcsec");
+                    break;
+                case POINT:
+                    _println("software aperture extent along slit = "
+                            + device.toString(1.4 * result.IQcalc.getImageQuality()) + " arcsec");
+                    break;
+            }
         }
 
-		/*
-         * Here end
-		 */
+        if (!_sdParameters.isUniform()) {
+            _println("fraction of source flux in aperture = " + device.toString(result.st.getSlitThroughput()));
+        }
 
-        // /////////////////////////////////////////////
-        // ////////Print Config////////////////////////
+        _println("derived image size(FWHM) for a point source = " + device.toString(result.IQcalc.getImageQuality()) + " arcsec");
 
+        _println("");
+        _println("Requested total integration time = "
+                + device.toString(_obsDetailParameters.getExposureTime() * _obsDetailParameters.getNumExposures())
+                + " secs, of which "
+                + device.toString(_obsDetailParameters.getExposureTime() * _obsDetailParameters.getNumExposures()
+                * result.specS2N[0].getSpecFracWithSource()) + " secs is on source.");
+
+        _print("<HR align=left SIZE=3>");
+
+        final ITCChart chart1 = new ITCChart(
+                "Signal and SQRT(Background) in software aperture of " + result.specS2N[0].getSpecNpix() + " pixels",
+                "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
+        final ITCChart chart2 = new ITCChart(
+                "Intermediate Single Exp and Final S/N",
+                "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
+
+        _println("<p style=\"page-break-inside: never\">");
+        chart1.addArray(result.specS2N[0].getSignalSpectrum().getData(), "Signal ");
+        chart1.addArray(result.specS2N[0].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
+
+        _println(chart1.getBufferedImage(), "SigAndBack");
+        _println("");
+
+        final String sigSpec = _printSpecTag("ASCII signal spectrum");
+        final String backSpec = _printSpecTag("ASCII background spectrum");
+
+        chart2.addArray(result.specS2N[0].getExpS2NSpectrum().getData(), "Single Exp S/N");
+        chart2.addArray(result.specS2N[0].getFinalS2NSpectrum().getData(), "Final S/N  ");
+
+        _println(chart2.getBufferedImage(), "Sig2N");
+        _println("");
+
+        final String singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
+        final String finalS2N = _printSpecTag("Final S/N ASCII data");
+
+        _println(result.specS2N[0].getSignalSpectrum(), _header, sigSpec);
+        _println(result.specS2N[0].getBackgroundSpectrum(), _header, backSpec);
+        _println(result.specS2N[0].getExpS2NSpectrum(), _header, singleS2N);
+        _println(result.specS2N[0].getFinalS2NSpectrum(), _header, finalS2N);
+
+        printConfiguration(instrument);
+    }
+
+
+    private void writeImagingOutput(final Flamingos2 instrument, final ImagingResult result) {
+        final FormatStringWriter device = new FormatStringWriter();
+        device.setPrecision(2); // Two decimal places
+        device.clear();
+        _println("");
+
+        _print(result.SFcalc.getTextResult(device));
+        _println(result.IQcalc.getTextResult(device));
+
+        _println(result.IS2Ncalc.getTextResult(device));
+        device.setPrecision(0); // NO decimal places
+        device.clear();
+
+        _println("");
+        _println("The peak pixel signal + background is "
+                + device.toString(result.peak_pixel_count)
+                + ". This is "
+                + device.toString(result.peak_pixel_count
+                / instrument.getWellDepth() * 100)
+                + "% of the full well depth of "
+                + device.toString(instrument.getWellDepth()) + ".");
+
+        if (result.peak_pixel_count > (.8 * instrument.getWellDepth()))
+            _println("Warning: peak pixel exceeds 80% of the well depth and may be saturated");
+
+        _println("");
+        device.setPrecision(2); // TWO decimal places
+        device.clear();
+
+        printConfiguration(instrument);
+    }
+
+    private void printConfiguration(final Flamingos2 instrument) {
         _print("<HR align=left SIZE=3>");
         _println("<b>Input Parameters:</b>");
         _println("Instrument: Flamingos 2\n"); // TODO: move names of instrument to instrument classes?
@@ -305,4 +356,5 @@ public final class Flamingos2Recipe extends RecipeBase {
             _println(HtmlPrinter.printParameterSummary(_plotParameters));
         }
     }
+
 }

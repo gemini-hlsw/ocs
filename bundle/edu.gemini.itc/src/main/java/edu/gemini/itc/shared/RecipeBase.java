@@ -1,9 +1,40 @@
 package edu.gemini.itc.shared;
 
+import edu.gemini.itc.operation.*;
+
 import java.awt.image.BufferedImage;
 import java.io.PrintWriter;
 
 public abstract class RecipeBase implements Recipe {
+
+    // Intermediate alculation results
+    public interface IntermediateResult {}
+    public static final class ImagingResult implements IntermediateResult {
+        public final SourceFraction SFcalc;
+        public final double peak_pixel_count;
+        public final ImagingS2NCalculatable IS2Ncalc;
+        public final ImageQualityCalculatable IQcalc;
+        public ImagingResult(final ImageQualityCalculatable IQcalc, final SourceFraction SFcalc, final double peak_pixel_count, final ImagingS2NCalculatable IS2Ncalc) {
+            this.IQcalc             = IQcalc;
+            this.SFcalc             = SFcalc;
+            this.peak_pixel_count   = peak_pixel_count;
+            this.IS2Ncalc           = IS2Ncalc;
+        }
+
+    }
+    public static final class SpectroscopyResult implements IntermediateResult {
+        public final SourceFraction SFcalc;
+        public final SpecS2NLargeSlitVisitor[] specS2N;
+        public final SlitThroughput st;
+        public final ImageQualityCalculatable IQcalc;
+        public SpectroscopyResult(final SourceFraction SFcalc, final ImageQualityCalculatable IQcalc, final SpecS2NLargeSlitVisitor[] specS2N, final SlitThroughput st) {
+            this.SFcalc             = SFcalc;
+            this.IQcalc             = IQcalc;
+            this.specS2N            = specS2N;
+            this.st                 = st;
+        }
+    }
+
     // Results will be written to this PrintWriter if it is set.
     protected PrintWriter _out = null; // set from servlet request
 

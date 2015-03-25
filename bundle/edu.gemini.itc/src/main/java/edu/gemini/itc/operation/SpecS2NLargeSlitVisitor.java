@@ -9,11 +9,14 @@ import edu.gemini.itc.shared.VisitableSampledSpectrum;
  * a larger slit set.
  */
 public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor {
-    // private ArraySpectrum _telescopeBack = null;
+
+    final private double spec_Npix;
+    final private double spec_frac_with_source;
+
     private VisitableSampledSpectrum source_flux, halo_flux, background_flux, spec_noise,
             spec_sourceless_noise, spec_signal, spec_var_source, spec_var_background,
             sqrt_spec_var_background, spec_exp_s2n, spec_final_s2n;
-    private double slit_width, pixel_size, spec_source_fraction, spec_halo_source_fraction, pix_width, spec_Npix, spec_frac_with_source, spec_exp_time, im_qual, uncorrected_im_qual, dark_current, read_noise, obs_wave, obs_wave_low, obs_wave_high, grating_res,
+    private double slit_width, pixel_size, spec_source_fraction, spec_halo_source_fraction, pix_width, spec_exp_time, im_qual, uncorrected_im_qual, dark_current, read_noise, obs_wave_low, obs_wave_high,
             gratingDispersion_nm, gratingDispersion_nmppix, skyAper;
     private int spec_number_exposures;
     private boolean haloIsUsed = false;
@@ -47,7 +50,6 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor {
         this.obs_wave_high = obs_wave_high;
         this.gratingDispersion_nm = gratingDispersion_nm;
         this.gratingDispersion_nmppix = gratingDispersion_nmppix;
-        this.grating_res = grating_res;
         this.im_qual = im_qual;
         this.dark_current = dark_current;
         this.read_noise = read_noise;
@@ -60,6 +62,14 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor {
     private int lastCcdPixel(int n) {
         if (_lastCcdPixel == -1 || _lastCcdPixel >= n) return n - 1;
         return _lastCcdPixel;
+    }
+
+    public double getSpecNpix() {
+        return spec_Npix;
+    }
+
+    public double getSpecFracWithSource() {
+        return spec_frac_with_source;
     }
 
     /**
