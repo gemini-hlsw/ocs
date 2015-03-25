@@ -79,6 +79,9 @@ public final class GmosRecipe extends RecipeBase {
                                 + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
         }
+
+        // report error if this does not come out to be an integer
+        checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
     }
 
     /**
@@ -186,9 +189,6 @@ public final class GmosRecipe extends RecipeBase {
         final double dark_current = instrument.getDarkCurrent();
         final double exposure_time = _obsDetailParameters.getExposureTime();
         final double read_noise = instrument.getReadNoise();
-
-        // report error if this does not come out to be an integer
-        checkSourceFraction(number_exposures, frac_with_source);
 
         // ObservationMode Imaging or spectroscopy
         if (!instrument.isIfuUsed()) {

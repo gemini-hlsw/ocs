@@ -90,6 +90,9 @@ public final class NifsRecipe extends RecipeBase {
                 throw new RuntimeException("Please use a model line width > 0.04 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
         }
+
+        // report error if this does not come out to be an integer
+        checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
     }
 
     /**
@@ -198,8 +201,6 @@ public final class NifsRecipe extends RecipeBase {
         final double dark_current = instrument.getDarkCurrent();
         final double exposure_time = _obsDetailParameters.getExposureTime();
         final double read_noise = instrument.getReadNoise();
-        // report error if this does not come out to be an integer
-        checkSourceFraction(number_exposures, frac_with_source);
 
         //ObservationMode Imaging or spectroscopy
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {

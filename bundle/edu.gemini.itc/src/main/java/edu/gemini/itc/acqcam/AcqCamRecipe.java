@@ -71,6 +71,9 @@ public final class AcqCamRecipe extends RecipeBase {
                 throw new IllegalArgumentException("Please use a model line width > 1 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
         }
+
+        // report error if this does not come out to be an integer
+        checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
     }
 
     /**
@@ -137,12 +140,6 @@ public final class AcqCamRecipe extends RecipeBase {
 
 
         // Observation method
-
-        final int number_exposures = _obsDetailParameters.getNumExposures();
-        final double frac_with_source = _obsDetailParameters.getSourceFraction();
-
-        // report error if this does not come out to be an integer
-        checkSourceFraction(number_exposures, frac_with_source);
 
         //Calculate the Signal to Noise
 

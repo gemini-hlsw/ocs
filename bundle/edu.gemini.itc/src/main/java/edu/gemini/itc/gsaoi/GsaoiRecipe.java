@@ -42,6 +42,8 @@ public final class GsaoiRecipe extends RecipeBase {
         _gsaoiParameters = new GsaoiParameters(r);
         _telescope = ITCRequest.teleParameters(r);
         _gemsParameters = new GemsParameters(r);
+
+        validateInputParameters();
     }
 
     /**
@@ -62,6 +64,26 @@ public final class GsaoiRecipe extends RecipeBase {
         _gsaoiParameters = gsaoiParameters;
         _telescope = telescope;
         _gemsParameters = gemsParameters;
+
+        validateInputParameters();
+    }
+
+    private void validateInputParameters() {
+        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE))
+            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters
+                    .getELineWavelength() * 1000 * 25))) { // *25 b/c of
+                // increased
+                // resolution of
+                // transmission
+                // files
+                throw new RuntimeException(
+                        "Please use a model line width > 0.04 nm (or "
+                                + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25))
+                                + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
+            }
+
+        // report error if this does not come out to be an integer
+        checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
     }
 
     /**
@@ -90,20 +112,6 @@ public final class GsaoiRecipe extends RecipeBase {
         // calculates: redshifted SED
         // output: redshifteed SED
         Gsaoi instrument = new Gsaoi(_gsaoiParameters, _obsDetailParameters);
-
-        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE))
-            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters
-                    .getELineWavelength() * 1000 * 25))) { // *25 b/c of
-                // increased
-                // resolution of
-                // transmission
-                // files
-                throw new RuntimeException(
-                        "Please use a model line width > 0.04 nm (or "
-                                + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25))
-                                + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
-            }
-
 
         // Calculate image quality
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
@@ -190,14 +198,8 @@ public final class GsaoiRecipe extends RecipeBase {
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
-        final int number_exposures = _obsDetailParameters.getNumExposures();
-        final double frac_with_source = _obsDetailParameters.getSourceFraction();
-
-        // report error if this does not come out to be an integer
-        checkSourceFraction(number_exposures, frac_with_source);
 
         // ObservationMode Imaging
-
         final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
         if (_gemsParameters.gemsIsUsed()) {
             IS2Ncalc.setSecondaryIntegral(halo_integral);

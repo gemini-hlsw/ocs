@@ -77,6 +77,9 @@ public final class Flamingos2Recipe extends RecipeBase {
                 throw new IllegalArgumentException("In spectroscopy mode, a FP must must be selected");
             }
         }
+
+        // report error if this does not come out to be an integer
+        checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
     }
 
     /**
@@ -128,9 +131,6 @@ public final class Flamingos2Recipe extends RecipeBase {
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
-
-        // report error if this does not come out to be an integer
-        checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
 
         final double pixel_size = instrument.getPixelSize();
         final SpecS2NLargeSlitVisitor specS2N;
@@ -210,8 +210,6 @@ public final class Flamingos2Recipe extends RecipeBase {
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
 
-        // report error if this does not come out to be an integer
-        checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
         // Get the summed source and sky
         final VisitableSampledSpectrum sed = src.sed;
         final VisitableSampledSpectrum sky = src.sky;

@@ -91,6 +91,9 @@ public final class TRecsRecipe extends RecipeBase {
 
             throw new RuntimeException("");
         }
+
+        // report error if this does not come out to be an integer
+        checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
     }
 
     private ObservationDetails correctedObsDetails(TRecsParameters tp, ObservationDetails odp) {
@@ -198,8 +201,6 @@ public final class TRecsRecipe extends RecipeBase {
         double frac_with_source = _obsDetailParameters.getSourceFraction();
         double dark_current = instrument.getDarkCurrent();
         double read_noise = instrument.getReadNoise();
-        // report error if this does not come out to be an integer
-        checkSourceFraction(number_exposures, frac_with_source);
 
         // ObservationMode Imaging or spectroscopy
 
