@@ -1,7 +1,6 @@
 package edu.gemini.sp.vcs.diff
 
 import edu.gemini.pot.sp.SPNodeKey
-import edu.gemini.pot.sp.version.LifespanId
 import edu.gemini.pot.spdb.DBLocalDatabase
 import edu.gemini.sp.vcs.diff.VcsFailure.Unmergeable
 import org.specs2.matcher.MatchResult
@@ -10,14 +9,7 @@ import scalaz._
 import Scalaz._
 
 class ValidityCorrectionSpec extends MergeCorrectionSpec {
-  val lifespanId         = LifespanId.random
   val validityCorrection = new ValidityCorrection(lifespanId, Map.empty)
-
-  def incr(mn: MergeNode): MergeNode =
-    mn match {
-      case m: Modified => m.copy(nv = m.nv.incr(lifespanId))
-      case _           => failure("trying to increment unmodified node")
-    }
 
   private def test(start: Tree[MergeNode], expected: Tree[MergeNode], vc: ValidityCorrection = validityCorrection): MatchResult[Tree[MergeNode]] =
     vc.apply(plan(start)) match {
