@@ -51,6 +51,8 @@ public final class MichelleRecipe extends RecipeBase {
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _telescope = ITCRequest.teleParameters(r);
         _plotParameters = ITCRequest.plotParamters(r);
+
+        validateInputParameters();
     }
 
     /**
@@ -71,6 +73,16 @@ public final class MichelleRecipe extends RecipeBase {
         _michelleParameters = michelleParameters;
         _telescope = telescope;
         _plotParameters = plotParameters;
+
+        validateInputParameters();
+    }
+
+    private void validateInputParameters() {
+
+        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE))
+            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000 * 5))) {  //*5 b/c of increased resolution of transmission files
+                throw new RuntimeException("Please use a model line width > 0.2 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 5)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
+            }
     }
 
     private ObservationDetails correctedObsDetails(MichelleParameters mp, ObservationDetails odp) {
@@ -126,12 +138,6 @@ public final class MichelleRecipe extends RecipeBase {
         device.clear();
 
         Michelle instrument = new Michelle(_michelleParameters, _obsDetailParameters);
-
-
-        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE))
-            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000 * 5))) {  //*5 b/c of increased resolution of transmission files
-                throw new RuntimeException("Please use a model line width > 0.2 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 5)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
-            }
 
         // Get the summed source and sky
         final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.MID_IR, _sdParameters, _obsConditionParameters, _telescope, _plotParameters);

@@ -53,6 +53,8 @@ public final class GnirsRecipe extends RecipeBase {
         _gnirsParameters = new GnirsParameters(r);
         _telescope = ITCRequest.teleParameters(r);
         _plotParameters = ITCRequest.plotParamters(r);
+
+        validateInputParameters();
     }
 
     /**
@@ -72,8 +74,20 @@ public final class GnirsRecipe extends RecipeBase {
         _obsConditionParameters = obsConditionParameters;
         _gnirsParameters = gnirsParameters;
         _telescope = telescope;
-//        _altairParameters = altairParameters;// REL-472: Commenting out Altair option for now
         _plotParameters = plotParameters;
+
+        validateInputParameters();
+    }
+
+    private void validateInputParameters() {
+        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE))
+            // *25 b/c of increased resolutuion of transmission files
+            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25))) {
+                throw new RuntimeException(
+                        "Please use a model line width > 0.04 nm (or "
+                                + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25))
+                                + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
+            }
     }
 
     /**
@@ -102,14 +116,6 @@ public final class GnirsRecipe extends RecipeBase {
         //instrument = new GnirsSouth(_gnirsParameters, _obsDetailParameters);
         instrument = new GnirsNorth(_gnirsParameters, _obsDetailParameters);   // Added on 2/27/2014 (see REL-480)
 
-        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE))
-            // *25 b/c of increased resolutuion of transmission files
-            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25))) {
-                throw new RuntimeException(
-                        "Please use a model line width > 0.04 nm (or "
-                                + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25))
-                                + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
-            }
 
         double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;

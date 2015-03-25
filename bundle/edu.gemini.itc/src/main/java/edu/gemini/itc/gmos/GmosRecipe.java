@@ -37,8 +37,6 @@ public final class GmosRecipe extends RecipeBase {
     public GmosRecipe(final ITCMultiPartParser r, final PrintWriter out) {
         super(out);
 
-        System.out.println("ServerName: " + ServerInfo.getServerURL());
-
         // Read parameters from the four main sections of the web page.
         _sdParameters = ITCRequest.sourceDefinitionParameters(r);
         _obsDetailParameters = ITCRequest.observationParameters(r);
@@ -46,6 +44,8 @@ public final class GmosRecipe extends RecipeBase {
         _gmosParameters = ITCRequest.gmosParameters(r);
         _telescope = ITCRequest.teleParameters(r);
         _plotParameters = ITCRequest.plotParamters(r);
+
+        validateInputParamters();
     }
 
     /**
@@ -67,8 +67,10 @@ public final class GmosRecipe extends RecipeBase {
         _telescope = telescope;
         _plotParameters = plotParameters;
 
+        validateInputParamters();
+    }
 
-        // TODO: this validation should be done centrally somewhere (several instruments do similar stuff here)
+    private void validateInputParamters() {
         if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE)) {
             if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000))) {
                 throw new RuntimeException(
@@ -77,7 +79,6 @@ public final class GmosRecipe extends RecipeBase {
                                 + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
         }
-
     }
 
     /**

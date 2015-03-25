@@ -38,6 +38,8 @@ public final class Flamingos2Recipe extends RecipeBase {
         _flamingos2Parameters = new Flamingos2Parameters(r);
         _telescope = ITCRequest.teleParameters(r);
         _plotParameters = ITCRequest.plotParamters(r);
+
+        validateInputParameters();
     }
 
     /**
@@ -59,12 +61,14 @@ public final class Flamingos2Recipe extends RecipeBase {
         _flamingos2Parameters = flamingos2Parameters;
         _telescope = telescope;
         _plotParameters = plotParameters;
+
+        validateInputParameters();
     }
 
     /**
      * Check input parameters for consistency
      */
-    public void checkInputParameters() {
+    private void validateInputParameters() {
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {
             if (_flamingos2Parameters.getGrism().equalsIgnoreCase("none")) {
                 throw new IllegalArgumentException("In spectroscopy mode, a grism must be selected");
@@ -80,7 +84,6 @@ public final class Flamingos2Recipe extends RecipeBase {
      */
     @Override
     public void writeOutput() {
-        checkInputParameters();
         final Flamingos2 instrument = new Flamingos2(_flamingos2Parameters);
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {
             final SpectroscopyResult result = calculateSpectroscopy(instrument);

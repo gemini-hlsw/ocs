@@ -45,6 +45,8 @@ public final class NiriRecipe extends RecipeBase {
         _telescope = ITCRequest.teleParameters(r);
         _altairParameters = ITCRequest.altairParameters(r);
         _plotParameters = ITCRequest.plotParamters(r);
+
+        validateInputParameters();
     }
 
     /**
@@ -67,6 +69,30 @@ public final class NiriRecipe extends RecipeBase {
         _telescope = telescope;
         _altairParameters = altairParameters;
         _plotParameters = plotParameters;
+
+        validateInputParameters();
+    }
+
+    private void validateInputParameters() {
+        if (_altairParameters.altairIsUsed()) {
+            if (_obsDetailParameters.getMethod().isSpectroscopy()) {
+                throw new IllegalArgumentException(
+                        "Altair cannot currently be used with Spectroscopy mode in the ITC.  Please deselect either altair or spectroscopy and resubmit the form.");
+            }
+        }
+
+        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE))
+            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters
+                    .getELineWavelength() * 1000 * 25))) { // *25 b/c of
+                // increased
+                // resolution of
+                // transmission
+                // files
+                throw new RuntimeException(
+                        "Please use a model line width > 0.04 nm (or "
+                                + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25))
+                                + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
+            }
     }
 
     /**
@@ -77,14 +103,6 @@ public final class NiriRecipe extends RecipeBase {
      *                   files, incorrectly-formatted data files, ...
      */
     public void writeOutput() {
-
-        if (_altairParameters.altairIsUsed()) {
-            if (_obsDetailParameters.getMethod().isSpectroscopy()) {
-                throw new IllegalArgumentException(
-                        "Altair cannot currently be used with Spectroscopy mode in the ITC.  Please deselect either altair or spectroscopy and resubmit the form.");
-            }
-        }
-
         // Create the Chart visitor. After a sed has been created the chart
         // visitor
         // can be used by calling the following commented out code:
@@ -113,20 +131,6 @@ public final class NiriRecipe extends RecipeBase {
         // calculates: redshifted SED
         // output: redshifteed SED
         final Niri instrument = new Niri(_niriParameters, _obsDetailParameters);
-
-        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE))
-            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters
-                    .getELineWavelength() * 1000 * 25))) { // *25 b/c of
-                // increased
-                // resolution of
-                // transmission
-                // files
-                throw new RuntimeException(
-                        "Please use a model line width > 0.04 nm (or "
-                                + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25))
-                                + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
-            }
-
 
         // Calculate image quality
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);

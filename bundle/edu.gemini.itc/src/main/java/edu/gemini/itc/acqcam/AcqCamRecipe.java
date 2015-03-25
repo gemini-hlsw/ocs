@@ -40,6 +40,8 @@ public final class AcqCamRecipe extends RecipeBase {
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _acqCamParameters = new AcquisitionCamParameters(r);
         _telescope = ITCRequest.teleParameters(r);
+
+        validateInputParameters();
     }
 
     /**
@@ -59,6 +61,16 @@ public final class AcqCamRecipe extends RecipeBase {
         _obsConditionParameters = obsConditionParameters;
         _acqCamParameters = acqCamParameters;
         _telescope = telescope;
+
+        validateInputParameters();
+    }
+
+    private void validateInputParameters() {
+        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE)) {
+            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000))) {
+                throw new IllegalArgumentException("Please use a model line width > 1 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
+            }
+        }
     }
 
     /**
@@ -73,12 +85,6 @@ public final class AcqCamRecipe extends RecipeBase {
         _println("");
 
         final AcquisitionCamera instrument = new AcquisitionCamera(_acqCamParameters.getColorFilter(), _acqCamParameters.getNDFilter());
-
-        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE)) {
-            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000))) {
-                throw new IllegalArgumentException("Please use a model line width > 1 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
-            }
-        }
 
         // Get the summed source and sky
         final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.VISIBLE, _sdParameters, _obsConditionParameters, _telescope, null);

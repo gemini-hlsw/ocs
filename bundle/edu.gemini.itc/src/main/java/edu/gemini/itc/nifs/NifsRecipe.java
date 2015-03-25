@@ -53,6 +53,8 @@ public final class NifsRecipe extends RecipeBase {
         _telescope = ITCRequest.teleParameters(r);
         _altairParameters = ITCRequest.altairParameters(r);
         _plotParameters = ITCRequest.plotParamters(r);
+
+        validateInputParameters();
     }
 
     /**
@@ -78,6 +80,16 @@ public final class NifsRecipe extends RecipeBase {
         _telescope = telescope;
         _altairParameters = altairParameters;
         _plotParameters = plotParameters;
+
+        validateInputParameters();
+    }
+
+    private void validateInputParameters() {
+        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE)) {
+            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25))) {  // *25 b/c of increased resolutuion of transmission files
+                throw new RuntimeException("Please use a model line width > 0.04 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
+            }
+        }
     }
 
     /**
@@ -98,12 +110,6 @@ public final class NifsRecipe extends RecipeBase {
         // calculates: redshifted SED
         // output: redshifteed SED
         final Nifs instrument = new NifsNorth(_nifsParameters, _obsDetailParameters);
-
-        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE)) {
-            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25))) {  // *25 b/c of increased resolutuion of transmission files
-                throw new RuntimeException("Please use a model line width > 0.04 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
-            }
-        }
 
         // TODO : THIS IS PURELY FOR REGRESSION TEST ONLY, REMOVE ASAP
         // Get the summed source and sky

@@ -44,6 +44,8 @@ public final class TRecsRecipe extends RecipeBase {
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _telescope = ITCRequest.teleParameters(r);
         _plotParameters = ITCRequest.plotParamters(r);
+
+        validateInputParameters();
     }
 
     /**
@@ -62,6 +64,33 @@ public final class TRecsRecipe extends RecipeBase {
         _trecsParameters = trecsParameters;
         _telescope = telescope;
         _plotParameters = plotParameters;
+
+        validateInputParameters();
+    }
+
+    private void validateInputParameters() {
+        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE))
+            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters
+                    .getELineWavelength() * 1000 / 4))) { // /4 b/c of increased
+                // resolution of
+                // transmission
+                // files
+                throw new RuntimeException(
+                        "Please use a model line width > 4 nm (or "
+                                + (3E5 / (_sdParameters.getELineWavelength() * 1000 / 4))
+                                + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
+            }
+
+        // For mid-IR observation the watervapor percentile and sky background
+        // percentile must be the same
+        if (!_obsConditionParameters.getSkyTransparencyWaterCategory().equals(_obsConditionParameters.getSkyBackgroundCategory())) {
+            _println("");
+            _println("Sky background percentile must be equal to sky transparency(water vapor): \n "
+                    + "    Please modify the Observing condition constraints section of the HTML form \n"
+                    + "    and recalculate.");
+
+            throw new RuntimeException("");
+        }
     }
 
     private ObservationDetails correctedObsDetails(TRecsParameters tp, ObservationDetails odp) {
@@ -116,29 +145,6 @@ public final class TRecsRecipe extends RecipeBase {
         // output: redshifteed SED
 
         TRecs instrument = new TRecs(_trecsParameters, _obsDetailParameters);
-
-        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE))
-            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters
-                    .getELineWavelength() * 1000 / 4))) { // /4 b/c of increased
-                // resolution of
-                // transmission
-                // files
-                throw new RuntimeException(
-                        "Please use a model line width > 4 nm (or "
-                                + (3E5 / (_sdParameters.getELineWavelength() * 1000 / 4))
-                                + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
-            }
-
-        // For mid-IR observation the watervapor percentile and sky background
-        // percentile must be the same
-        if (!_obsConditionParameters.getSkyTransparencyWaterCategory().equals(_obsConditionParameters.getSkyBackgroundCategory())) {
-            _println("");
-            _println("Sky background percentile must be equal to sky transparency(water vapor): \n "
-                    + "    Please modify the Observing condition constraints section of the HTML form \n"
-                    + "    and recalculate.");
-
-            throw new RuntimeException("");
-        }
 
 
         // Get the summed source and sky
