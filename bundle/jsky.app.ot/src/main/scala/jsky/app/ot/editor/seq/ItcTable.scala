@@ -6,6 +6,7 @@ import javax.swing.table.AbstractTableModel
 import edu.gemini.itc.shared.TelescopeDetails.Wfs
 import edu.gemini.itc.shared._
 import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.spModel.config.ConfigBridge
 import edu.gemini.spModel.config.map.ConfigValMapInstances
 import edu.gemini.spModel.config2.{ConfigSequence, ItemKey}
@@ -66,12 +67,18 @@ trait ItcTable extends Table {
     ConfigBridge.extractSequence(_, null, ConfigValMapInstances.IDENTITY_MAP, true)
   }
 
-  protected def calculateSpectroscopy(c: ItcUniqueConfig, peer: Peer): Future[ItcService.Result] =
+  protected def calculateSpectroscopy(peer: Peer, c: ItcUniqueConfig): Future[ItcService.Result] =
     Future {
       List("Not Implemented Yet").fail
     }
 
-  protected def calculateImaging(c: ItcUniqueConfig, peer: Peer): Future[ItcService.Result] = {
+  protected def calculateImaging(peer: Peer, ins: SPComponentType, c: ItcUniqueConfig): Future[ItcService.Result] =
+    ins match {
+      case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH => calculateImagingGmos(peer, ins, c)
+      case _                                      => Future { List("Not Implemented Yet").fail }
+    }
+
+  protected def calculateImagingGmos(peer: Peer, ins: SPComponentType, c: ItcUniqueConfig): Future[ItcService.Result] = {
     val port = owner.getContextIssPort
     //val wfs  = ??? TODO
     val src  = new SourceDefinition(PointSource(20.0, BrightnessUnit.MAG), LibraryStar("A0V"), WavebandDefinition.R, 0.0)
@@ -110,13 +117,13 @@ class ItcImagingTable(val owner: EdIteratorFolder) extends ItcTable {
     * Note that GMOS has a different table model with separate columns for its three CCDs. */
   def tableModel(keys: Seq[ItemKey], seq: ConfigSequence): ItcImagingTableModel = {
     ObservingPeer.getOrPrompt.fold(emptyTable) { peer =>
-      val uniqConfigs = ItcUniqueConfig.imagingConfigs(seq)
-      val results     = uniqConfigs.map(calculateImaging(_, peer))
-      Option(owner.getContextInstrument).map(_.getType) match {
-        case None                                       => emptyTable // just in case; context instrument should always be present (?)
-        case Some(SPComponentType.INSTRUMENT_GMOS)      => new ItcGmosImagingTableModel(keys, uniqConfigs, results)
-        case Some(SPComponentType.INSTRUMENT_GMOSSOUTH) => new ItcGmosImagingTableModel(keys, uniqConfigs, results)
-        case _                                          => new ItcGenericImagingTableModel(keys, uniqConfigs, results)
+      Option(owner.getContextInstrument).map(_.getType).fold(emptyTable) { ins =>
+        val uniqConfigs = ItcUniqueConfig.imagingConfigs(seq)
+        val results     = uniqConfigs.map(calculateImaging(peer, ins, _))
+        ins match {
+          case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH => new ItcGmosImagingTableModel(keys, uniqConfigs, results)
+          case _                                      => new ItcGenericImagingTableModel(keys, uniqConfigs, results)
+        }
       }
     }
   }
@@ -129,7 +136,7 @@ class ItcSpectroscopyTable(val owner: EdIteratorFolder) extends ItcTable {
   def tableModel(keys: Seq[ItemKey], seq: ConfigSequence) =
     ObservingPeer.getOrPrompt.fold(emptyTable) { peer =>
       val uniqueConfigs = ItcUniqueConfig.spectroscopyConfigs(seq)
-      val results       = uniqueConfigs.map(calculateSpectroscopy(_, peer))
+      val results       = uniqueConfigs.map(calculateSpectroscopy(peer, _))
       new ItcGenericSpectroscopyTableModel(keys, uniqueConfigs, results)
   }
 
