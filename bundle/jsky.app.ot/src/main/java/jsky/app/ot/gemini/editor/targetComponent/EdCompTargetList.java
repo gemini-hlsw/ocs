@@ -35,7 +35,7 @@ import jsky.app.ot.ags.*;
 import jsky.app.ot.editor.OtItemEditor;
 import jsky.app.ot.gemini.editor.horizons.HorizonsPlotter;
 import jsky.app.ot.gemini.editor.horizons.HorizonsService;
-import jsky.app.ot.gemini.editor.targetComponent.detail.TargetDetailPanel;
+import jsky.app.ot.gemini.editor.targetComponent.details.TargetDetailPanel;
 import jsky.app.ot.tpe.AgsClient;
 import jsky.app.ot.tpe.GuideStarSupport;
 import jsky.app.ot.tpe.TelescopePosEditor;
@@ -90,7 +90,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private final TrackingEditor      _trackingEditor   = new TrackingEditor();
     private final MagnitudeEditor     _nonsideMagEditor = new MagnitudeEditor();
     private final JToggleButton       _trackingButton   = new TrackingButton();
-    private final TargetDetailPanel _detailEditor     = new TargetDetailPanel();
+    private final TargetDetailPanel   _detailEditor     = new TargetDetailPanel();
 
     // More constants, but they need access to `this` so we assign in the ctor
     private final TelescopeForm            _w;

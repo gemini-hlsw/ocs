@@ -28,7 +28,7 @@ import java.util.List;
  * Component holding magnitude information for a target position.  Provides
  * controls for editing the magnitude values.
  */
-public final class MagnitudeEditor implements TelescopePosEditor {
+public class MagnitudeEditor implements TelescopePosEditor {
 
     private static final DecimalFormat MAG_FORMAT = new DecimalFormat("0.0##");
 
