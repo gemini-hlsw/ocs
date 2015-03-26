@@ -16,7 +16,7 @@ import jsky.util.gui.TextBoxWidgetWatcher
 
 import scalaz.syntax.id._
 
-final class JplMinorBodyDetailEditor extends TargetDetailEditor(Tag.JPL_MINOR_BODY) {
+final class JplMinorBodyDetailEditor extends TargetDetailEditor(Tag.JPL_MINOR_BODY) with ReentrancyHack {
 
   val param_epoch = new ParamPanel.ParamInfo("EPOCH", "Orbital Element Epoch (JD)")
   val param_in    = new ParamPanel.ParamInfo("IN",    "Inclination (deg)")
@@ -70,7 +70,7 @@ final class JplMinorBodyDetailEditor extends TargetDetailEditor(Tag.JPL_MINOR_BO
 
     // Local updates
     this.target = spTarget;
-    if (!updating) {
+    nonreentrant {
       val ct = spTarget.getTarget.asInstanceOf[ConicTarget]
       param_epoch.widget.setValue(ct.getEpoch.getValue)
       param_in.widget   .setValue(ct.getInclination.getValue)
@@ -88,22 +88,17 @@ final class JplMinorBodyDetailEditor extends TargetDetailEditor(Tag.JPL_MINOR_BO
     pi.widget.addWatcher(new LocalPropSetter(f))
 
   private class LocalPropSetter(f: (ConicTarget, Double) => Unit) extends TextBoxWidgetWatcher {
-    def textBoxKeyPress(tbwe: TextBoxWidget): Unit = {
-      textBoxAction(tbwe)
-    }
-    def textBoxAction(tbwe: TextBoxWidget): Unit = {
-      try {
-        updating = true
-        f(target.getTarget.asInstanceOf[ConicTarget], tbwe.getValue.toDouble)
-        target.notifyOfGenericUpdate();
-      } catch {
-        case nfe: NumberFormatException => // ignore
-      } finally {
-        updating = false;
+    def textBoxKeyPress(tbwe: TextBoxWidget): Unit = textBoxAction(tbwe)
+    def textBoxAction(tbwe: TextBoxWidget): Unit =
+      nonreentrant {
+        try {
+          f(target.getTarget.asInstanceOf[ConicTarget], tbwe.getValue.toDouble)
+          target.notifyOfGenericUpdate();
+        } catch {
+          case nfe: NumberFormatException => // ignore
+        }
       }
-    }
   }
-
 
 }
 

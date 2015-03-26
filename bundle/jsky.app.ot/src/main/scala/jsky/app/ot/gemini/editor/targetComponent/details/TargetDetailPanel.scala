@@ -11,7 +11,7 @@ import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 import jsky.util.gui.{DropDownListBoxWidgetWatcher, DropDownListBoxWidget}
 import scalaz.syntax.id._
 
-final class TargetDetailPanel extends JPanel with TelescopePosEditor {
+final class TargetDetailPanel extends JPanel with TelescopePosEditor with ReentrancyHack {
 
   // This doodad will ensure that any change event coming from the SPTarget will get turned into
   // a call to `edit`, so we don't have to worry about that case everywhere. Everything from here
@@ -22,9 +22,10 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor {
   val targetType = new DropDownListBoxWidget {
     setChoices(ITarget.Tag.values.asInstanceOf[Array[AnyRef]])
     addWatcher(new DropDownListBoxWidgetWatcher {
-      def dropDownListBoxAction(w: DropDownListBoxWidget, index: Int, value: String) {
-        spt.setTargetType(w.getSelectedItem.asInstanceOf[ITarget.Tag])
-      }
+      def dropDownListBoxAction(w: DropDownListBoxWidget, index: Int, value: String): Unit =
+        nonreentrant {
+          spt.setTargetType(w.getSelectedItem.asInstanceOf[ITarget.Tag])
+        }
     })
   }
 
@@ -67,7 +68,9 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor {
   
     // Local updates
     spt = spTarget
-    targetType.setSelectedItem(spt.getTarget.getTag)
+    nonreentrant {
+      targetType.setSelectedItem(spt.getTarget.getTag)
+    }
 
   }
 

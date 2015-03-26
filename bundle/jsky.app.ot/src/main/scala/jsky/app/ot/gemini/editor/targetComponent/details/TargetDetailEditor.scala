@@ -8,7 +8,6 @@ import edu.gemini.spModel.target.system.ITarget.Tag
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 
 object TargetDetailEditor {
-
   def forTag(t: Tag): TargetDetailEditor =
     t match {
       case Tag.JPL_MINOR_BODY   => new JplMinorBodyDetailEditor
@@ -16,19 +15,13 @@ object TargetDetailEditor {
       case Tag.NAMED            => new NamedDetailEditor
       case Tag.SIDEREAL         => new SiderealDetailEditor
     }
-
 }
 
 abstract class TargetDetailEditor(val getTag: Tag) extends JPanel with TelescopePosEditor {
-
   def edit(ctx: GOption[ObsContext], spTarget: SPTarget): Unit = {
-
-    // Verify that our target has the correct tag. Note that we're racing here but there's not
-    // much we can do about it. We just have to assume that nobody is replacing the ITarget
-    // right now. If this turns out to be wrong then there will be problems down the line.
+    require(ctx      != null, "obsContext should never be null")
+    require(spTarget != null, "spTarget should never be null")
     val tag = spTarget.getTarget().getTag()
-    require(tag == getTag, "Expected " + getTag + ", received " + tag)
-
+    require(tag == getTag, "target tag should always be " + getTag + ", received " + tag)
   }
-
 }

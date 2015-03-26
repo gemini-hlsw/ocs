@@ -10,27 +10,26 @@ import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 final class ForwardingTelescopePosWatcher(tpe: TelescopePosEditor)
   extends TelescopePosEditor with TelescopePosWatcher {
 
-  private[this] var ot: Option[SPTarget] = None
+  private[this] var spt: SPTarget = new SPTarget
   private[this] var ctx: GOption[ObsContext] = GNone.instance[ObsContext]
 
-  def edit(obsContext: GOption[ObsContext], spTarget: SPTarget ) {
+  def edit(obsContext: GOption[ObsContext], spTarget: SPTarget): Unit = {
     require(obsContext != null, "obsContext should never be null")
     require(spTarget   != null, "spTarget should never be null")
 
     // If this is a new target, switch our watchers
-    if (ot != Some(spTarget)) {
-      ot.foreach(_.deleteWatcher(this))
+    if (spt != spTarget) {
+      spt.deleteWatcher(this)
       spTarget.addWatcher(this)
     }
 
     // Remember the context and target so `telescopePosUpdate` can call `edit`
     ctx = obsContext
-    ot  = Option(spTarget)
+    spt = spTarget
 
   }
 
-  def telescopePosUpdate(tp: WatchablePos) {
-    ot.foreach(tpe.edit(ctx, _))
-  }
+  def telescopePosUpdate(tp: WatchablePos): Unit =
+    tpe.edit(ctx, spt)
 
 }
