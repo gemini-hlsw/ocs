@@ -231,8 +231,8 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
     val (inTmp, outList) = areaCandidates(a)
     val inList = if (a.isEmpty) Nil else inTmp
 
-    val out = ((if (!allUsable) outList else Nil) ++ (if (allUnusable)  inList else Nil)).toList
-    val in  = ((if (allUsable)  outList else Nil) ++ (if (!allUnusable) inList else Nil)).toList
+    val out = (if (!allUsable) outList else Nil) ++ (if (allUnusable)  inList else Nil)
+    val in  = (if (allUsable)  outList else Nil) ++ (if (!allUnusable) inList else Nil)
 
     val mc = magTable.apply(ctx, guideProbe).get
 
@@ -302,7 +302,6 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
 
   // Take a test case and produce 12, one with each 30 deg position angle
   private def allRotations(): List[AgsTest] =
-    //(0 until 360 by 90).toList.map(_.toDouble).map(rotated)
     List(0.0, 270.0).map(rotated)
 
   // Take a test case and produce 36, one with each predefined condition and 30 deg position angle.
@@ -312,7 +311,6 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
   // Convenience function to calculate the proper rotation.
   private def rotation: AffineTransform =
     AffineTransform.getRotateInstance(-ctx.getPositionAngle.toRadians.getMagnitude)
-
 
   def testBase(): Unit =
     allConditions().foreach(_.testXform())
@@ -432,14 +430,14 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
             equalPosAngles(ctx.getPositionAngle.toNewModel, posAngle)
           case Some(AgsStrategy.Selection(_,        asn)) =>
               fail("Expected nothing but got: " + asn.map { a =>
-                "(" + a.guideStar.toString + ", " + a.guideProbe + ")"
+                s"(${a.guideStar.toString}, ${a.guideProbe})"
               }.mkString("[", ", ", "]"))
         }
 
       def expectSingleAssignment(expStar: SiderealTarget, expSpeed: GuideSpeed): Unit = {
         res match {
           case None      =>
-            fail("Expected: (" + expStar + ", " + expSpeed + "), but nothing selected")
+            fail(s"Expected: ($expStar, $expSpeed), but nothing selected")
           case Some(AgsStrategy.Selection(posAngle, asn)) =>
             equalPosAngles(ctx.getPositionAngle.toNewModel, posAngle)
             asn match {
