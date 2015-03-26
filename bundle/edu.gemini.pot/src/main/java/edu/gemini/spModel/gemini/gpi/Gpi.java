@@ -19,10 +19,6 @@ import edu.gemini.spModel.data.config.StringParameter;
 import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
 import edu.gemini.spModel.gemini.calunit.calibration.CalDictionary;
-import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationKey;
-import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationKeyProvider;
-import edu.gemini.spModel.gemini.calunit.smartgcal.keys.CalibrationKeyImpl;
-import edu.gemini.spModel.gemini.calunit.smartgcal.keys.ConfigKeyGpi;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeConsumer;
 import edu.gemini.spModel.guide.GuideProbeUtil;
@@ -55,7 +51,7 @@ import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
  * GPI - Gemini Planet Imager.
  * See OT tasks starting with OT-45.
  */
-public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeConsumer, PlannedTime.StepCalculator, ConfigPostProcessor, CalibrationKeyProvider {
+public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeConsumer, PlannedTime.StepCalculator, ConfigPostProcessor {
     // for serialization
     private static final long serialVersionUID = 4L;
 
@@ -2226,17 +2222,6 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     @Override public double[] getScienceArea() {
         // See OT-129
         return new double[]{SCIENCE_AREA_ARCSEC, SCIENCE_AREA_ARCSEC};
-    }
-
-    /** {@inheritDoc} */
-    @Override public CalibrationKey extractKey(ISysConfig instrument) {
-        // get all values relevant for calibration
-        ObservingMode mode  = (ObservingMode) get(instrument, Gpi.OBSERVING_MODE_PROP);
-        Disperser disperser = (Disperser) get(instrument, Gpi.DISPERSER_PROP);
-
-        // create a key representing this instrument configuration
-        ConfigKeyGpi config = new ConfigKeyGpi(mode, disperser);
-        return new CalibrationKeyImpl(config);
     }
 
     private static final Angle PWFS1_VIG = Angle.arcmins(5.3);
