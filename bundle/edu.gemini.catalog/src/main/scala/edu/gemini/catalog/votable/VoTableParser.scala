@@ -52,7 +52,7 @@ object VoTableParser extends VoTableParser {
 sealed trait MagnitudesFilter {
   // Indicates if a field should be ignored
   def ignoredMagnitudeField(v: FieldId): Boolean = false
-  def nonValidMagnitude(m: Magnitude): Boolean = false
+  def validMagnitude(m: Magnitude): Boolean = true
   def findBand(id: FieldId, band: String): Option[MagnitudeBand] = None
 }
 
@@ -63,7 +63,7 @@ case object UCAC4Filter extends MagnitudesFilter {
   // UCAC4 ignores A-mags
   override def ignoredMagnitudeField(v: FieldId) = v.id === "amag" || v.id === "e_amag"
   // Magnitudes with value 20 and error over 0.9 are invalid
-  override def nonValidMagnitude(m: Magnitude) = m.value === ucac4BadMagnitude && m.error.map(math.abs) > ucac4BadMagnitudeError
+  override def validMagnitude(m: Magnitude) = m.value =/= ucac4BadMagnitude || m.error.map(math.abs) < ucac4BadMagnitudeError
 
   override def findBand(id: FieldId, band: String): Option[MagnitudeBand] = (id.id, id.ucd) match {
     case ("gmag" | "e_gmag", ucd) if ucd.includes(UcdWord("em.opt.r")) => Some(MagnitudeBand._g)
@@ -179,7 +179,7 @@ trait VoTableParser {
     }
 
     def combineWithErrorsAndFilter(m: List[Magnitude], e: Map[MagnitudeBand, Double]): List[Magnitude] =
-      m.map(i => i.copy(error = e.get(i.band))).filterNot(magnitudesFilter.nonValidMagnitude)
+      m.map(i => i.copy(error = e.get(i.band))).filter(magnitudesFilter.validMagnitude)
 
     def toSiderealTarget(id: String, ra: String, dec: String, mags: Map[FieldId, String], magErrs: Map[FieldId, String], pm: (Option[String], Option[String])): \/[CatalogProblem, SiderealTarget] =
       for {
