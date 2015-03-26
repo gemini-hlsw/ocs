@@ -8,7 +8,7 @@ import edu.gemini.itc.shared.VisitableSampledSpectrum;
  * The SpecS2NLargeSlitVisitor is used to calculate the s2n of an observation using
  * a larger slit set.
  */
-public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor {
+public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
     final private double spec_Npix;
     final private double spec_frac_with_source;
@@ -62,6 +62,10 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor {
     private int lastCcdPixel(int n) {
         if (_lastCcdPixel == -1 || _lastCcdPixel >= n) return n - 1;
         return _lastCcdPixel;
+    }
+
+    public double getImageQuality() {
+        return im_qual;
     }
 
     public double getSpecNpix() {

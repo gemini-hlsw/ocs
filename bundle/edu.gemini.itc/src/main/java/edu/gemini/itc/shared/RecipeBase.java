@@ -24,10 +24,10 @@ public abstract class RecipeBase implements Recipe {
     }
     public static final class SpectroscopyResult implements IntermediateResult {
         public final SourceFraction SFcalc;
-        public final SpecS2NLargeSlitVisitor[] specS2N;
+        public final SpecS2N[] specS2N;
         public final SlitThroughput st;
         public final ImageQualityCalculatable IQcalc;
-        public SpectroscopyResult(final SourceFraction SFcalc, final ImageQualityCalculatable IQcalc, final SpecS2NLargeSlitVisitor[] specS2N, final SlitThroughput st) {
+        public SpectroscopyResult(final SourceFraction SFcalc, final ImageQualityCalculatable IQcalc, final SpecS2N[] specS2N, final SlitThroughput st) {
             this.SFcalc             = SFcalc;
             this.IQcalc             = IQcalc;
             this.specS2N            = specS2N;
