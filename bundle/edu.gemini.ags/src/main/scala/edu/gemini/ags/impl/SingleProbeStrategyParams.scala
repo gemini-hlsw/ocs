@@ -44,11 +44,7 @@ sealed trait SingleProbeStrategyParams {
     }
 
   // For a given target return a magnitude value that can be used to select a target
-  def referenceMagnitude(st: SiderealTarget):Option[Magnitude] = referenceBand match {
-    case MagnitudeBand.R => List(st.magnitudeIn(MagnitudeBand._r), st.magnitudeIn(MagnitudeBand.R), st.magnitudeIn(MagnitudeBand.UC)).flatten.headOption
-    case _               => st.magnitudeIn(referenceBand)
-  }
-
+  def referenceMagnitude(st: SiderealTarget):Option[Magnitude] = probeBands.map(st.magnitudeIn).flatten.headOption // Picks the first available magnitude on the target
 
   def brightest[A](lst: List[A])(toSiderealTarget: A => SiderealTarget):Option[A] = {
     def magnitude(t: SiderealTarget):Option[Double] = {
