@@ -37,12 +37,14 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
   setBorder(BorderFactory.createLineBorder(Color.RED))
   setLayout(new GridBagLayout)
   add(new JLabel("Target Type"), new GridBagConstraints <| { c =>
-    c.gridx = 0; c.gridy = 0
+    c.gridx = 0
+    c.gridy = 0
     c.fill = GridBagConstraints.HORIZONTAL
     c.insets = new Insets(0, 0, 0, 5)
   })
   add(targetType, new GridBagConstraints <| { c =>
-    c.gridx = 1; c.gridy = 0
+    c.gridx = 1
+    c.gridy = 0
     c.insets = new Insets(0, 5, 0, 0)
     c.fill = GridBagConstraints.HORIZONTAL
   })
@@ -50,12 +52,13 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
   def edit(obsContext: GOption[ObsContext], spTarget: SPTarget): Unit = {
 
     // Create or replace the existing detail editor, if needed
-    val tag = spTarget.getTarget().getTag()
+    val tag = spTarget.getTarget.getTag
     if (tde.getTag != tag) {
       remove(tde)
       tde = TargetDetailEditor.forTag(tag)
       add(tde, new GridBagConstraints() <| { c =>
-        c.gridx = 0; c.gridy = 1;
+        c.gridx = 0
+        c.gridy = 1
         c.gridwidth = 2
         c.insets = new Insets(15, 0, 0, 0)
         c.fill = GridBagConstraints.BOTH
