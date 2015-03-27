@@ -64,7 +64,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     /**
      * ADC: See OT-48
      */
-    public static enum Adc implements DisplayableSpType, SequenceableSpType, LoggableSpType {
+    public enum Adc implements DisplayableSpType, SequenceableSpType, LoggableSpType {
         IN("In"),
         OUT("Out"),
         ;
@@ -74,7 +74,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
 
         private String _displayValue;
 
-        private Adc(String name) {
+        Adc(String name) {
             _displayValue = name;
         }
 
@@ -123,7 +123,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
      * OT-102: Added Non-standard item
      * </p>
      */
-    public static enum ObservingMode implements DisplayableSpType, LoggableSpType, SequenceableSpType {
+    public enum ObservingMode implements DisplayableSpType, LoggableSpType, SequenceableSpType {
 
         // Y_coron
         CORON_Y_BAND("Coronograph Y-band", Filter.Y, false, Apodizer.APOD_Y, FPM.FPM_Y, Lyot.LYOT_080m12_03, 0.5, 3.0) {
@@ -268,12 +268,12 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         private double _brightLimitWollaston;
 
         // Only for NONSTANDARD
-        private ObservingMode(String name) {
+        ObservingMode(String name) {
             _displayValue = name;
             _logValue = name;
         }
 
-        private ObservingMode(String name, Filter filter, boolean filterIterable, Apodizer apodizer,
+        ObservingMode(String name, Filter filter, boolean filterIterable, Apodizer apodizer,
                               FPM fpm, Lyot lyot, double brightLimitPrism, double brightLimitWollaston) {
             _logValue = name;
             _displayValue = name;
@@ -292,7 +292,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
          */
         public abstract ObservingMode correspondingH();
 
-        private ObservingMode(String name, Filter filter, boolean filterIterable, Apodizer apodizer,
+        ObservingMode(String name, Filter filter, boolean filterIterable, Apodizer apodizer,
                               FPM fpm, Lyot lyot) {
             this(name, filter, filterIterable, apodizer, fpm, lyot, Magnitude.UNDEFINED_MAG, Magnitude.UNDEFINED_MAG);
         }
@@ -355,7 +355,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         }
 
         /** returns all values (OT-102) */
-        private static final Option<ObservingMode>[] engineeringValues() {
+        private static Option<ObservingMode>[] engineeringValues() {
             ObservingMode[] ar = values();
             Option<ObservingMode>[] result = new Option[ar.length];
             for(int i = 0; i < ar.length; i++) {
@@ -409,7 +409,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     /**
      * Filter: see OT-62
      */
-    public static enum Filter implements DisplayableSpType, SequenceableSpType, LoggableSpType {
+    public enum Filter implements DisplayableSpType, SequenceableSpType, LoggableSpType {
         Y(Magnitude.Band.Y),
         J(Magnitude.Band.J),
         H(Magnitude.Band.H),
@@ -424,7 +424,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         // The related mag band
         private Magnitude.Band _band;
 
-        private Filter(Magnitude.Band band) {
+        Filter(Magnitude.Band band) {
             _band = band;
 
         }
@@ -465,7 +465,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     /**
      * Disperser: see OT-50
      */
-    public static enum Disperser implements DisplayableSpType, SequenceableSpType, PartiallyEngineeringSpType, LoggableSpType {
+    public enum Disperser implements DisplayableSpType, SequenceableSpType, PartiallyEngineeringSpType, LoggableSpType {
         PRISM("Prism") {
             @Override
             public boolean isEngineering() {
@@ -485,7 +485,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
 
         private final String _displayName;
 
-        private Disperser(String name) {
+        Disperser(String name) {
             _displayName = name;
         }
 
@@ -640,7 +640,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     /**
      * DetectorReadoutArea: see OT-52.
      */
-    public static enum DetectorReadoutArea implements DisplayableSpType {
+    public enum DetectorReadoutArea implements DisplayableSpType {
         FULL("Full (2048x2048)", new ReadoutArea(0, 0, 2047, 2047)),
         CENTRAL_1024("Central (1024x1024)", new ReadoutArea(512, 512, 1535, 1535)),
         CENTRAL_512("Central (512x512)", new ReadoutArea(768, 768, 1279, 1279)),
@@ -652,7 +652,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         private final String _displayName;
         private final ReadoutArea _readoutArea;
 
-        private DetectorReadoutArea(String name, ReadoutArea readoutArea) {
+        DetectorReadoutArea(String name, ReadoutArea readoutArea) {
             _displayName = name;
             _readoutArea = readoutArea;
         }
@@ -689,7 +689,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     /**
      * Shutter (Used for different shutters)
      */
-    public static enum Shutter implements DisplayableSpType, SequenceableSpType {
+    public enum Shutter implements DisplayableSpType, SequenceableSpType {
         OPEN("Open"),
         CLOSE("Close"),
         ;
@@ -698,7 +698,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
 
         private String _displayValue;
 
-        private Shutter(String name) {
+        Shutter(String name) {
             _displayValue = name;
         }
 
@@ -739,7 +739,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
      * <p/>
      * And the default is CLEAR      *
      */
-    public static enum Apodizer implements DisplayableSpType, SequenceableSpType, LoggableSpType {
+    public enum Apodizer implements DisplayableSpType, SequenceableSpType, LoggableSpType {
         CLEAR("Clear"),
         CLEARGP("CLEAR GP"),
         APOD_Y("APOD_Y_56"),
@@ -756,7 +756,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
 
         private String _displayValue;
 
-        private Apodizer(String name) {
+        Apodizer(String name) {
             _displayValue = name;
         }
 
@@ -811,7 +811,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
      080m12_10    080m12_10
      Open         Open
      */
-    public static enum Lyot implements DisplayableSpType, SequenceableSpType, LoggableSpType {
+    public enum Lyot implements DisplayableSpType, SequenceableSpType, LoggableSpType {
 
         BLANK            ("Blank"),
         LYOT_080m12_03   ("080m12_03"),
@@ -829,7 +829,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
 
         private String _displayValue;
 
-        private Lyot(String name) {
+        Lyot(String name) {
             _displayValue = name;
         }
 
@@ -869,7 +869,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     /**
      * Artificial Source: See OT-69
      */
-    public static enum ArtificialSource implements DisplayableSpType, SequenceableSpType {
+    public enum ArtificialSource implements DisplayableSpType, SequenceableSpType {
         ON("On") {
             public boolean toBoolean() {
                 return true;
@@ -886,7 +886,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
 
         private String _displayValue;
 
-        private ArtificialSource(String name) {
+        ArtificialSource(String name) {
             _displayValue = name;
         }
 
@@ -917,7 +917,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     /**
      * PupilCamera: See OT-70
      */
-    public static enum PupilCamera implements DisplayableSpType, SequenceableSpType {
+    public enum PupilCamera implements DisplayableSpType, SequenceableSpType {
         IN("In"),
         OUT("Out"),
         ;
@@ -926,7 +926,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
 
         private String _displayValue;
 
-        private PupilCamera(String name) {
+        PupilCamera(String name) {
             _displayValue = name;
         }
 
@@ -963,7 +963,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
      * FPM_J FPM_J
      * FPM_Y FPM_Y
      */
-    public static enum FPM implements DisplayableSpType, SequenceableSpType, LoggableSpType {
+    public enum FPM implements DisplayableSpType, SequenceableSpType, LoggableSpType {
 
         OPEN("Open"),
         F50umPIN("50umPIN"),
@@ -979,7 +979,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
 
         private String _displayValue;
 
-        private FPM(String name) {
+        FPM(String name) {
             _displayValue = name;
         }
 
@@ -1018,7 +1018,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     /**
      * Detector Sampling Mode: OT-91
      */
-    public static enum DetectorSamplingMode implements DisplayableSpType, SequenceableSpType {
+    public enum DetectorSamplingMode implements DisplayableSpType, SequenceableSpType {
         FAST("Fast"),
         SINGLE_CDS("Single CDS"),
         MULTIPLE_CDS("Multiple CDS"),
@@ -1029,7 +1029,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
 
         private String _displayValue;
 
-        private DetectorSamplingMode(String name) {
+        DetectorSamplingMode(String name) {
             _displayValue = name;
         }
 
@@ -1055,7 +1055,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     /**
      * Cassegrain (PositionAngle): see OT-84.
      */
-    public static enum Cassegrain implements DisplayableSpType, SequenceableSpType {
+    public enum Cassegrain implements DisplayableSpType, SequenceableSpType {
         A0(0),
         A180(180),
         ;
@@ -1064,7 +1064,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         private final String _displayName;
         private final int _angle;
 
-        private Cassegrain(int angle) {
+        Cassegrain(int angle) {
             _angle = angle;
             _displayName = angle + " deg E of N";
         }
