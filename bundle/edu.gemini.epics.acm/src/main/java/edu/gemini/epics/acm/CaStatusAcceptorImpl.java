@@ -17,10 +17,10 @@ final class CaStatusAcceptorImpl implements CaStatusAcceptor {
 
     private final String name;
     private final String description;
-    private Map<String, CaAttributeImpl<String>> stringAttributes;
-    private Map<String, CaAttributeImpl<Double>> doubleAttributes;
-    private Map<String, CaAttributeImpl<Float>> floatAttributes;
-    private Map<String, CaAttributeImpl<Integer>> integerAttributes;
+    private final Map<String, CaAttributeImpl<String>> stringAttributes;
+    private final Map<String, CaAttributeImpl<Double>> doubleAttributes;
+    private final Map<String, CaAttributeImpl<Float>> floatAttributes;
+    private final Map<String, CaAttributeImpl<Integer>> integerAttributes;
     private EpicsReader epicsReader;
 
     public CaStatusAcceptorImpl(String name, String description,
@@ -28,10 +28,10 @@ final class CaStatusAcceptorImpl implements CaStatusAcceptor {
         super();
         this.name = name;
         this.description = description;
-        stringAttributes = new HashMap<String, CaAttributeImpl<String>>();
-        doubleAttributes = new HashMap<String, CaAttributeImpl<Double>>();
-        floatAttributes = new HashMap<String, CaAttributeImpl<Float>>();
-        integerAttributes = new HashMap<String, CaAttributeImpl<Integer>>();
+        stringAttributes = new HashMap<>();
+        doubleAttributes = new HashMap<>();
+        floatAttributes = new HashMap<>();
+        integerAttributes = new HashMap<>();
         epicsReader = new EpicsReaderImpl(epicsService);
     }
 
@@ -148,14 +148,10 @@ final class CaStatusAcceptorImpl implements CaStatusAcceptor {
     }
 
     private boolean alreadyExist(String name) {
-        if (doubleAttributes.containsKey(name)
+         return doubleAttributes.containsKey(name)
                 || floatAttributes.containsKey(name)
                 || integerAttributes.containsKey(name)
-                || stringAttributes.containsKey(name)) {
-            return true;
-        } else {
-            return false;
-        }
+                || stringAttributes.containsKey(name);
     }
 
     @Override
@@ -173,7 +169,7 @@ final class CaStatusAcceptorImpl implements CaStatusAcceptor {
 
     @Override
     public Set<String> getInfo() {
-        Set<String> set = new HashSet<String>(doubleAttributes.keySet());
+        Set<String> set = new HashSet<>(doubleAttributes.keySet());
         set.addAll(floatAttributes.keySet());
         set.addAll(integerAttributes.keySet());
         set.addAll(stringAttributes.keySet());

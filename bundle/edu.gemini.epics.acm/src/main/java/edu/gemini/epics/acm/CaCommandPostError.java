@@ -10,10 +10,10 @@ package edu.gemini.epics.acm;
  */
 public final class CaCommandPostError extends Exception {
 
-    public CaCommandPostError() {
+    CaCommandPostError() {
     }
 
-    public CaCommandPostError(String message) {
+    CaCommandPostError(String message) {
         super(message);
     }
 }

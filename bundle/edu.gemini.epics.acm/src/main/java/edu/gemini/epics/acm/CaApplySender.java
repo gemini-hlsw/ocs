@@ -18,7 +18,7 @@ public interface CaApplySender {
      * 
      * @return the name of this Apply Sender.
      */
-    public String getName();
+    String getName();
 
     /**
      * Retrieves the name of the EPICS apply record associated with this apply
@@ -26,7 +26,7 @@ public interface CaApplySender {
      * 
      * @return the name of the EPICS apply record.
      */
-    public String getApply();
+    String getApply();
 
     /**
      * Retrieves the name of the EPICS CAR record associated with this apply
@@ -34,14 +34,14 @@ public interface CaApplySender {
      * 
      * @return the name of the EPICS CAR record.
      */
-    public String getCAR();
+    String getCAR();
 
     /**
      * Retrieves the description for this Apply Sender
      * 
      * @return the description of this Apply Sender
      */
-    public String getDescription();
+    String getDescription();
 
     /**
      * Set the command execution timeout. If a command execution takes longer
@@ -52,7 +52,7 @@ public interface CaApplySender {
      * @param timeUnit
      *            the time units for the time interval
      */
-    public void setTimeout(long timeout, TimeUnit timeUnit);
+    void setTimeout(long timeout, TimeUnit timeUnit);
 
     /**
      * Trigger the EPICS apply record. The command return immediately.
@@ -89,11 +89,11 @@ public interface CaApplySender {
      * 
      * @return true if a command is being executed, false otherwise.
      */
-    public boolean isActive();
+    boolean isActive();
     
     /**
      * Clears the MARK flag on all the CADs.
      */
-    public void clear() throws TimeoutException;
+    void clear() throws TimeoutException;
 
 }

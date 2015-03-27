@@ -19,21 +19,21 @@ public interface CaParameter<T> {
      * 
      * @return the name of this parameter.
      */
-    public String name();
+    String name();
 
     /**
      * Retreives the name of the EPICS channel associated to this parameter.
      * 
      * @return the name of the EPICS channel.
      */
-    public String channel();
+    String channel();
     
     /**
      * Retrieves the description for this parameter
      * 
      * @return the description of this parameter
      */
-    public String description();
+    String description();
 
     /**
      * Retrieves the value of the parameter. This is the last value assigned to
@@ -42,7 +42,7 @@ public interface CaParameter<T> {
      * @return the value of the parameter, <code>null</code> if no value has
      *         been assigned.
      */
-    public T value();
+    T value();
 
-    public void set(T value) throws CAException, TimeoutException;
+    void set(T value) throws CAException, TimeoutException;
 }

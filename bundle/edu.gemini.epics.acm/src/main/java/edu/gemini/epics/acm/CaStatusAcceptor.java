@@ -17,14 +17,14 @@ public interface CaStatusAcceptor {
      * 
      * @return name of this status acceptor.
      */
-    public String getName();
+    String getName();
 
     /**
      * Retrieves the description for this Status Acceptor
      * 
      * @return the description of this Status Acceptor
      */
-    public String getDescription();
+    String getDescription();
 
 
     /**
@@ -32,7 +32,7 @@ public interface CaStatusAcceptor {
      * 
      * @return set of attribute names.
      */
-    public Set<String> getInfo();
+    Set<String> getInfo();
 
     /**
      * Adds an attribute of type <code>Double</code> to this status acceptor. If
@@ -50,9 +50,9 @@ public interface CaStatusAcceptor {
      * @throws CaException
      * @throws CAException
      */
-    public CaAttribute<Double> addDouble(String name, String channel)
+    CaAttribute<Double> addDouble(String name, String channel, String description)
             throws CaException, CAException;
-    public CaAttribute<Double> addDouble(String name, String channel, String description)
+    CaAttribute<Double> addDouble(String name, String channel)
             throws CaException, CAException;
 
     /**
@@ -71,9 +71,9 @@ public interface CaStatusAcceptor {
      * @throws CaException
      * @throws CAException
      */
-    public CaAttribute<Float> addFloat(String name, String channel)
+    CaAttribute<Float> addFloat(String name, String channel, String description)
             throws CaException, CAException;
-    public CaAttribute<Float> addFloat(String name, String channel, String description)
+    CaAttribute<Float> addFloat(String name, String channel)
             throws CaException, CAException;
 
     /**
@@ -92,9 +92,9 @@ public interface CaStatusAcceptor {
      * @throws CaException
      * @throws CAException
      */
-    public CaAttribute<Integer> addInteger(String name, String channel)
+    CaAttribute<Integer> addInteger(String name, String channel, String description)
             throws CaException, CAException;
-    public CaAttribute<Integer> addInteger(String name, String channel, String description)
+    CaAttribute<Integer> addInteger(String name, String channel)
             throws CaException, CAException;
 
     /**
@@ -113,9 +113,9 @@ public interface CaStatusAcceptor {
      * @throws CaException
      * @throws CAException
      */
-    public CaAttribute<String> addString(String name, String channel)
+    CaAttribute<String> addString(String name, String channel, String description)
             throws CaException, CAException;
-    public CaAttribute<String> addString(String name, String channel, String description)
+    CaAttribute<String> addString(String name, String channel)
             throws CaException, CAException;
 
     /**
@@ -124,7 +124,7 @@ public interface CaStatusAcceptor {
      * @param name
      *            the name of the attribute to be removed.
      */
-    public void remove(String name);
+    void remove(String name);
 
     /**
      * Retrieves an existing attribute of type <code>Double</code>.
@@ -134,7 +134,7 @@ public interface CaStatusAcceptor {
      * @return the attribute, or <code>null</code> if it does not exist or is of
      *         a different type.
      */
-    public CaAttribute<Double> getDoubleAttribute(String name);
+    CaAttribute<Double> getDoubleAttribute(String name);
 
     /**
      * Retrieves an existing attribute of type <code>Float</code>.
@@ -144,7 +144,7 @@ public interface CaStatusAcceptor {
      * @return the attribute, or <code>null</code> if it does not exist or is of
      *         a different type.
      */
-    public CaAttribute<Float> getFloatAttribute(String name);
+    CaAttribute<Float> getFloatAttribute(String name);
 
     /**
      * Retrieves an existing attribute of type <code>Integer</code>.
@@ -154,7 +154,7 @@ public interface CaStatusAcceptor {
      * @return the attribute, or <code>null</code> if it does not exist or is of
      *         a different type.
      */
-    public CaAttribute<Integer> getIntegerAttribute(String name);
+    CaAttribute<Integer> getIntegerAttribute(String name);
 
     /**
      * Retrieves an existing attribute of type <code>String</code>.
@@ -164,5 +164,5 @@ public interface CaStatusAcceptor {
      * @return the attribute, or <code>null</code> if it does not exist or is of
      *         a different type.
      */
-    public CaAttribute<String> getStringAttribute(String name);
+    CaAttribute<String> getStringAttribute(String name);
 }

@@ -29,7 +29,7 @@ public final class XMLBuilderTest {
     private static CaService caService;
 
     @BeforeClass
-    public static void setUp() throws Exception {
+    public static void setUp() {
         simulator = new TestSimulator(TOP1);
         simulator.start();
         CaService.setAddressList(CA_ADDR_LIST);
@@ -37,7 +37,7 @@ public final class XMLBuilderTest {
     }
 
     @AfterClass
-    public static void tearDown() throws Exception {
+    public static void tearDown() {
         if (simulator != null) {
             simulator.stop();
             simulator = null;

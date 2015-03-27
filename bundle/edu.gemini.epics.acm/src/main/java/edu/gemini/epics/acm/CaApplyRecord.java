@@ -13,7 +13,7 @@ import edu.gemini.epics.impl.EpicsWriterImpl;
 import gov.aps.jca.CAException;
 import gov.aps.jca.TimeoutException;
 
-public final class CaApplyRecord {
+final class CaApplyRecord {
 
     private static final Logger LOG = Logger.getLogger(CaApplyRecord.class
             .getName());

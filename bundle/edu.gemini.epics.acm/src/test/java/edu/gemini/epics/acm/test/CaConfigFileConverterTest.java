@@ -10,14 +10,15 @@ import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.Difference;
 import org.custommonkey.xmlunit.DifferenceListener;
 import org.custommonkey.xmlunit.ElementNameAndAttributeQualifier;
-import org.custommonkey.xmlunit.XMLTestCase;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Test;
 import org.w3c.dom.Node;
 
+import static org.junit.Assert.*;
+
 import edu.gemini.epics.acm.CaConfigFileConverter;
 
-public final class CaConfigFileConverterTest extends XMLTestCase {
+public final class CaConfigFileConverterTest {
 
     private static final String CONFIG_FILE = "/TestConfig.ca";
     private static final String CONTROL_FILE = "/TestConfig.xml";

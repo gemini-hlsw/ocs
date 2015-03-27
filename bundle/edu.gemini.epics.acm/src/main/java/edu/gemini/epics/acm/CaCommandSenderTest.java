@@ -22,8 +22,8 @@ public final class CaCommandSenderTest {
             CaParameter<String> parCoord1 = cs.addString("theta1", "tc1:sourceA.C");
             CaParameter<String> parCoord2 = cs.addString("theta2", "tc1:sourceA.D");
             parSystem.set("AzEl");
-            parCoord1.set(new Double(Math.random()*360.0).toString());
-            parCoord2.set(new Double(Math.random()*50.0 + 30.0).toString());
+            parCoord1.set(Double.toString(Math.random() * 360.0));
+            parCoord2.set(Double.toString(Math.random() * 50.0 + 30.0));
             CaCommandMonitor cm = cs.postCallback(new CaCommandListener() {
                 
                 @Override
@@ -39,26 +39,12 @@ public final class CaCommandSenderTest {
                 }
             });
             cm.waitDone();
-        } catch (CaException e) {
-            // TODO Auto-generated catch block
-            LOG.warning(e.getMessage());
-        } catch (CAException e) {
-            // TODO Auto-generated catch block
-            LOG.warning(e.getMessage());
-        } catch (TimeoutException e) {
-            // TODO Auto-generated catch block
-            LOG.warning(e.getMessage());
-        } catch (InterruptedException e) {
+        } catch (CaException | CAException | TimeoutException | InterruptedException e) {
             // TODO Auto-generated catch block
             LOG.warning(e.getMessage());
         }
 
-        try {
-            service.unbind();
-        } catch (CAException e) {
-            // TODO Auto-generated catch block
-            LOG.warning(e.getMessage());
-        }
+        service.unbind();
     }
 
 }

@@ -11,10 +11,10 @@ public interface CaCommandListener {
     /**
      * Called when the command completes successfully.
      */
-    public void onSuccess();
+    void onSuccess();
 
     /**
      * Called when the command completes with an error.
      */
-    public void onFailure(Exception cause);
+    void onFailure(Exception cause);
 }

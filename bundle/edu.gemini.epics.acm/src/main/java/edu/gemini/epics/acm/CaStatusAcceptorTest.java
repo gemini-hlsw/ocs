@@ -15,9 +15,7 @@ final class CaStatusAcceptorTest {
         CaStatusAcceptor sa = service.createStatusAcceptor("tcs::sad");
         try {
             sa.addString("LST", "tcs:LST.VAL");
-        } catch (CaException e) {
-            LOG.warning(e.getMessage());
-        } catch (CAException e) {
+        } catch (CaException | CAException e) {
             LOG.warning(e.getMessage());
         }
         CaAttribute<String> lst = sa.getStringAttribute("LST");
@@ -54,13 +52,7 @@ final class CaStatusAcceptorTest {
             LOG.warning(e.getMessage());
         }
 
-        try {
-            service.unbind();
-        } catch (CAException e) {
-            LOG.warning(e.getMessage());
-        }
-        service = null;
-
+        service.unbind();
     }
 
 }

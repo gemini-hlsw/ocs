@@ -12,7 +12,7 @@ import java.util.concurrent.TimeoutException;
  *
  */
 public interface CaCommandMonitor {
-    public enum State {
+    enum State {
         BUSY, IDLE, ERROR
     }
 
@@ -23,14 +23,14 @@ public interface CaCommandMonitor {
      *         completion, or <code>null</code> if the command has not completed
      *         or completed without an error.
      */
-    public Exception error();
+    Exception error();
 
     /**
      * Asks if the command is running.
      * 
      * @return true if the command is running.
      */
-    public boolean isDone();
+    boolean isDone();
 
     /**
      * Blocks the current thread until the command completes.
@@ -39,17 +39,17 @@ public interface CaCommandMonitor {
      *            time to wait for the command completion, in seconds.
      * @throws TimeoutException
      */
-    public void waitDone(long timeout, TimeUnit unit) throws TimeoutException,
+    void waitDone(long timeout, TimeUnit unit) throws TimeoutException,
             InterruptedException;
 
-    public void waitDone() throws InterruptedException;
+    void waitDone() throws InterruptedException;
 
     /**
      * Retrieves the current execution state of the command.
      * 
      * @return the execution state of the command.
      */
-    public State state();
+    State state();
 
     /**
      * Sets a listener that will be called when the command completes.
@@ -57,6 +57,6 @@ public interface CaCommandMonitor {
      * @param cb
      *            the command listener.
      */
-    public void setCallback(CaCommandListener cb);
+    void setCallback(CaCommandListener cb);
 
 }

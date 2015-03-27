@@ -18,8 +18,8 @@ final class CaParameterImpl<T> implements CaParameter<T> {
     private ReadWriteClientEpicsChannel<String> rwChannel;
     private T value;
 
-    protected CaParameterImpl(String name, String channel, String description,
-            EpicsWriter epicsWriter) {
+    private CaParameterImpl(String name, String channel, String description,
+                            EpicsWriter epicsWriter) {
         this.name = name;
         this.channel = channel;
         this.description = description;
@@ -63,24 +63,24 @@ final class CaParameterImpl<T> implements CaParameter<T> {
         rwChannel.setValue(value.toString());
     }
 
-    static public final CaParameterImpl<Double> createDoubleParameter(
+    static public CaParameterImpl<Double> createDoubleParameter(
             String name, String channel, String description, EpicsWriter epicsWriter) {
-        return new CaParameterImpl<Double>(name, channel, description, epicsWriter);
+        return new CaParameterImpl<>(name, channel, description, epicsWriter);
     }
 
-    static public final CaParameterImpl<Integer> createIntegerParameter(
+    static public CaParameterImpl<Integer> createIntegerParameter(
             String name, String channel, String description, EpicsWriter epicsWriter) {
-        return new CaParameterImpl<Integer>(name, channel, description, epicsWriter);
+        return new CaParameterImpl<>(name, channel, description, epicsWriter);
     }
 
-    static public final CaParameterImpl<Float> createFloatParameter(
+    static public CaParameterImpl<Float> createFloatParameter(
             String name, String channel, String description, EpicsWriter epicsWriter) {
-        return new CaParameterImpl<Float>(name, channel, description, epicsWriter);
+        return new CaParameterImpl<>(name, channel, description, epicsWriter);
     }
 
-    static public final CaParameterImpl<String> createStringParameter(
+    static public CaParameterImpl<String> createStringParameter(
             String name, String channel, String description, EpicsWriter epicsWriter) {
-        return new CaParameterImpl<String>(name, channel, description, epicsWriter);
+        return new CaParameterImpl<>(name, channel, description, epicsWriter);
     }
 
     @Override

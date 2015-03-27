@@ -23,21 +23,21 @@ public interface CaAttribute<T> {
      * 
      * @return the name of this attribute.
      */
-    public String name();
+    String name();
 
     /**
      * Retrieves the name of the channel to which this attribute is connected.
      * 
      * @return the name of the EPICS channel.
      */
-    public String channel();
+    String channel();
 
     /**
      * Retrieves the description of this attribute
      * 
      * @return the description of this attribute
      */
-    public String description();
+    String description();
 
     /**
      * Retrieves the most recent value read from the EPICS channel, or
@@ -47,7 +47,7 @@ public interface CaAttribute<T> {
      * 
      * @return the EPICS channel value.
      */
-    public T value();
+    T value();
 
     /**
      * Retrieves the most recent value read from the EPICS channel, as a list,
@@ -56,14 +56,14 @@ public interface CaAttribute<T> {
      * 
      * @return the EPICS channel value.
      */
-    public List<T> values();
+    List<T> values();
 
     /**
      * Shows if this attribute's value is valid.
      * 
      * @return the validity flag.
      */
-    public boolean valid();
+    boolean valid();
 
     /**
      * Register a listener to monitor this attribute.
@@ -71,7 +71,7 @@ public interface CaAttribute<T> {
      * @param listener
      *            the listener that will receive the update notifications.
      */
-    public void addListener(CaAttributeListener<T> listener);
+    void addListener(CaAttributeListener<T> listener);
 
     /**
      * Unregister a listener (optional operation)
@@ -79,5 +79,5 @@ public interface CaAttribute<T> {
      * @param listener
      *            the listener that will be unregistered.
      */
-    public void removeListener(CaAttributeListener<T> listener);
+    void removeListener(CaAttributeListener<T> listener);
 }

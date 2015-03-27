@@ -27,16 +27,38 @@ final class CaApplySenderImpl implements CaApplySender {
     private TimeUnit timeoutUnit;
     private ScheduledExecutorService executor;
     private ScheduledFuture<?> timeoutFuture;
-    private ChannelListener<Integer> valListener;
+    private final ChannelListener<Integer> valListener;
     private ChannelListener<Integer> carClidListener;
     private ChannelListener<CarState> carValListener;
     private State currentState;
+    private static final State IdleState = new State() {
+        @Override
+        public State onApplyValChange(Integer val) {
+            return this;
+        }
+
+        @Override
+        public State onCarValChange(CarState carState) {
+            return this;
+        }
+
+        @Override
+        public State onCarClidChange(Integer val) {
+            return this;
+        }
+
+        @Override
+        public State onTimeout() {
+            return this;
+        }
+    };
 
     public CaApplySenderImpl(String name, String applyRecord, String carRecord,
             String description, EpicsService epicsService) throws CAException {
         super();
         this.name = name;
         this.description = description;
+        this.currentState = IdleState;
 
         apply = new CaApplyRecord(applyRecord, epicsService);
         apply.registerValListener(valListener = new ChannelListener<Integer>() {
@@ -111,17 +133,15 @@ final class CaApplySenderImpl implements CaApplySender {
     @Override
     public synchronized CaCommandMonitor post() {
         CaCommandMonitorImpl cm = new CaCommandMonitorImpl();
-        if (currentState != null) {
-            cm.completeFailure(new CaCommandInProgress());
+        if (currentState != IdleState) {
+            failCommand(cm, new CaCommandInProgress());
         } else {
             currentState = new WaitPreset(cm);
 
             try {
                 apply.setDir(CadDirective.START);
-            } catch (CAException e) {
-                cm.completeFailure(e);
-            } catch (TimeoutException e) {
-                cm.completeFailure(e);
+            } catch (CAException | TimeoutException e) {
+                failCommand(cm, e);
             }
 
             if (timeout > 0) {
@@ -152,22 +172,30 @@ final class CaApplySenderImpl implements CaApplySender {
     }
 
     private interface State {
-        public State onApplyValChange(Integer val);
+        State onApplyValChange(Integer val);
 
-        public State onCarValChange(CarState carState);
+        State onCarValChange(CarState carState);
 
-        public State onCarClidChange(Integer val);
+        State onCarClidChange(Integer val);
 
-        public State onTimeout();
+        State onTimeout();
     }
 
     private final class WaitPreset implements State {
-        CaCommandMonitorImpl cm;
-        CarState carVal;
-        Integer carClid;
+        final CaCommandMonitorImpl cm;
+        final CarState carVal;
+        final Integer carClid;
 
         WaitPreset(CaCommandMonitorImpl cm) {
             this.cm = cm;
+            this.carVal = null;
+            this.carClid = null;
+        }
+
+        private WaitPreset(CaCommandMonitorImpl cm, CarState carVal, Integer carClid) {
+            this.cm = cm;
+            this.carVal = carVal;
+            this.carClid = carClid;
         }
 
         @Override
@@ -176,7 +204,7 @@ final class CaApplySenderImpl implements CaApplySender {
                 if (carClid != null && carClid.equals(val)) {
                     if (carVal == CarState.ERROR) {
                         failCommandWithCarError(cm);
-                        return null;
+                        return IdleState;
                     } else if (carVal == CarState.BUSY) {
                         return new WaitCompletion(cm, val);
                     }
@@ -184,34 +212,32 @@ final class CaApplySenderImpl implements CaApplySender {
                 return new WaitStart(cm, val, carVal, carClid);
             } else {
                 failCommandWithApplyError(cm);
-                return null;
+                return IdleState;
             }
         }
 
         @Override
         public State onCarValChange(CarState val) {
-            carVal = val;
-            return this;
+            return new WaitPreset(cm, val, carClid);
         }
 
         @Override
         public State onCarClidChange(Integer val) {
-            carClid = val;
-            return this;
+            return new WaitPreset(cm, carVal, val);
         }
 
         @Override
         public State onTimeout() {
-            cm.completeFailure(new TimeoutException());
-            return null;
+            failCommand(cm, new TimeoutException());
+            return IdleState;
         }
     }
 
     private final class WaitStart implements State {
-        CaCommandMonitorImpl cm;
-        int clid;
-        Integer carClid;
-        CarState carState;
+        final CaCommandMonitorImpl cm;
+        final int clid;
+        final Integer carClid;
+        final CarState carState;
 
         WaitStart(CaCommandMonitorImpl cm, int clid, CarState carState,
                 Integer carClid) {
@@ -226,49 +252,48 @@ final class CaApplySenderImpl implements CaApplySender {
             if (val == clid) {
                 return this;
             } else {
-                cm.completeFailure(new CaCommandPostError(
+                failCommand(cm, new CaCommandPostError(
                         "Another command was triggered in apply record "
                                 + apply.getEpicsName()));
-                return null;
+                return IdleState;
             }
         }
 
         @Override
         public State onCarValChange(CarState val) {
-            carState = val;
-            return checkOutConditions();
+            return checkOutConditions(val, carClid);
         }
 
         @Override
         public State onCarClidChange(Integer val) {
-            carClid = val;
-            return checkOutConditions();
+            return checkOutConditions(carState, val);
         }
 
         @Override
         public State onTimeout() {
-            cm.completeFailure(new TimeoutException());
-            return null;
+            failCommand(cm, new TimeoutException());
+            return IdleState;
         }
 
-        private State checkOutConditions() {
-            if (carClid != null && carClid.intValue() == clid) {
+        private State checkOutConditions(CarState carState,
+                Integer carClid) {
+            if (carClid != null && carClid == clid) {
                 if (carState == CarState.ERROR) {
                     failCommandWithCarError(cm);
-                    return null;
+                    return IdleState;
                 }
                 if (carState == CarState.BUSY) {
                     return new WaitCompletion(cm, clid);
                 }
             }
-            return this;
+            return new WaitStart(cm, clid, carState, carClid);
         }
 
     }
 
     private final class WaitCompletion implements State {
-        CaCommandMonitorImpl cm;
-        int clid;
+        final CaCommandMonitorImpl cm;
+        final int clid;
 
         WaitCompletion(CaCommandMonitorImpl cm, int clid) {
             this.cm = cm;
@@ -280,10 +305,10 @@ final class CaApplySenderImpl implements CaApplySender {
             if (val == clid) {
                 return this;
             } else {
-                cm.completeFailure(new CaCommandPostError(
+                failCommand(cm, new CaCommandPostError(
                         "Another command was triggered in apply record "
                                 + apply.getEpicsName()));
-                return null;
+                return IdleState;
             }
         }
 
@@ -291,11 +316,11 @@ final class CaApplySenderImpl implements CaApplySender {
         public State onCarValChange(CarState val) {
             if (val == CarState.ERROR) {
                 failCommandWithCarError(cm);
-                return null;
+                return IdleState;
             }
             if (val == CarState.IDLE) {
-                cm.completeSuccess();
-                return null;
+                succedCommand(cm);
+                return IdleState;
             }
             return this;
         }
@@ -305,61 +330,53 @@ final class CaApplySenderImpl implements CaApplySender {
             if (val == clid) {
                 return this;
             } else {
-                cm.completeFailure(new CaCommandPostError(
+                failCommand(cm, new CaCommandPostError(
                         "Another command was triggered in apply record "
                                 + apply.getEpicsName()));
-                return null;
+                return IdleState;
             }
         }
 
         @Override
         public State onTimeout() {
-            cm.completeFailure(new TimeoutException());
-            return null;
+            failCommand(cm, new TimeoutException());
+            return IdleState;
         }
 
     }
 
     private synchronized void onApplyValChange(Integer val) {
-        if (currentState != null) {
-            currentState = currentState.onApplyValChange(val);
-            if (currentState == null && timeoutFuture != null) {
-                timeoutFuture.cancel(true);
-                timeoutFuture = null;
-            }
+        currentState = currentState.onApplyValChange(val);
+        if (currentState == IdleState && timeoutFuture != null) {
+            timeoutFuture.cancel(true);
+            timeoutFuture = null;
         }
     }
 
     private synchronized void onCarClidChange(Integer val) {
-        if (currentState != null) {
             currentState = currentState.onCarClidChange(val);
-            if (currentState == null && timeoutFuture != null) {
+            if (currentState == IdleState && timeoutFuture != null) {
                 timeoutFuture.cancel(true);
                 timeoutFuture = null;
             }
-        }
     }
 
     private synchronized void onCarValChange(CarState carState) {
-        if (currentState != null) {
             currentState = currentState.onCarValChange(carState);
-            if (currentState == null && timeoutFuture != null) {
+            if (currentState == IdleState && timeoutFuture != null) {
                 timeoutFuture.cancel(true);
                 timeoutFuture = null;
             }
-        }
     }
 
     private synchronized void onTimeout() {
-        if (currentState != null) {
             timeoutFuture = null;
             currentState = currentState.onTimeout();
-        }
     }
 
     @Override
     public synchronized boolean isActive() {
-        return currentState != null;
+        return currentState != IdleState;
     }
 
     @Override
@@ -368,6 +385,23 @@ final class CaApplySenderImpl implements CaApplySender {
         this.timeoutUnit = timeUnit;
     }
 
+    private void succedCommand(final CaCommandMonitorImpl cm) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                cm.completeSuccess();
+            }
+        });
+    }
+
+    private void failCommand(final CaCommandMonitorImpl cm, final Exception ex) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                cm.completeFailure(ex);
+            }
+        });
+    }
 
     private void failCommandWithApplyError(final CaCommandMonitorImpl cm) {
         // I found that if I try to read OMSS or MESS from the same thread that
@@ -379,9 +413,7 @@ final class CaApplySenderImpl implements CaApplySender {
                 String msg = null;
                 try {
                     msg = apply.getMessValue();
-                } catch (CAException e) {
-                    LOG.warning(e.getMessage());
-                } catch (TimeoutException e) {
+                } catch (CAException | TimeoutException e) {
                     LOG.warning(e.getMessage());
                 }
                 cm.completeFailure(new CaCommandError(msg));
@@ -399,9 +431,7 @@ final class CaApplySenderImpl implements CaApplySender {
                 String msg = null;
                 try {
                     msg = car.getOmssValue();
-                } catch (CAException e) {
-                    LOG.warning(e.getMessage());
-                } catch (TimeoutException e) {
+                } catch (CAException | TimeoutException e) {
                     LOG.warning(e.getMessage());
                 }
                 cm.completeFailure(new CaCommandError(msg));
@@ -416,12 +446,10 @@ final class CaApplySenderImpl implements CaApplySender {
 
     @Override
     public void clear() throws TimeoutException {
-        if (apply != null) {
-            try {
-                apply.setDir(CadDirective.CLEAR);
-            } catch (CAException e) {
-                LOG.warning(e.getMessage());
-            }
+        try {
+            apply.setDir(CadDirective.CLEAR);
+        } catch (CAException e) {
+            LOG.warning(e.getMessage());
         }
     }
 

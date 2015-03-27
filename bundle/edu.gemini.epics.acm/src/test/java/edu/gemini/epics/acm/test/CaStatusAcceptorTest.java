@@ -35,6 +35,13 @@ public final class CaStatusAcceptorTest {
     private static final String ATTR2_NAME = "status2";
     private static final String ATTR2_CHANNEL = TOP + ":"
             + TestSimulator.STRING_STATUS;
+    private static final String ATTR3_NAME = "status3";
+    private static final String ATTR3_CHANNEL = TOP + ":"
+            + TestSimulator.DOUBLE_STATUS;
+    private static final String ATTR4_NAME = "status4";
+    private static final String ATTR4_CHANNEL = TOP + ":"
+            + TestSimulator.FLOAT_STATUS;
+
     private static final long SLEEP_TIME = 2000;
 
     private static TestSimulator simulator;
@@ -42,7 +49,7 @@ public final class CaStatusAcceptorTest {
     private boolean updated;
 
     @BeforeClass
-    public static void setUp() throws Exception {
+    public static void setUp() {
         simulator = new TestSimulator(TOP);
         simulator.start();
         CaService.setAddressList(CA_ADDR_LIST);
@@ -50,7 +57,7 @@ public final class CaStatusAcceptorTest {
     }
 
     @AfterClass
-    public static void tearDown() throws Exception {
+    public static void tearDown() {
         if (caService != null) {
             caService.unbind();
             caService = null;
@@ -83,9 +90,39 @@ public final class CaStatusAcceptorTest {
     }
 
     @Test
-    public void testCreateAttribute() throws CaException, CAException {
+    public void testCreateIntegerAttribute() throws CaException, CAException {
         CaStatusAcceptor sa = caService.createStatusAcceptor(SA_NAME);
         CaAttribute<Integer> attr = sa.addInteger(ATTR1_NAME, ATTR1_CHANNEL);
+
+        assertNotNull("Unable to create status acceptor attribute.", attr);
+
+        caService.destroyStatusAcceptor(SA_NAME);
+    }
+
+    @Test
+    public void testCreateStringAttribute() throws CaException, CAException {
+        CaStatusAcceptor sa = caService.createStatusAcceptor(SA_NAME);
+        CaAttribute<String> attr = sa.addString(ATTR2_NAME, ATTR2_CHANNEL);
+
+        assertNotNull("Unable to create status acceptor attribute.", attr);
+
+        caService.destroyStatusAcceptor(SA_NAME);
+    }
+
+    @Test
+    public void testCreateFloatAttribute() throws CaException, CAException {
+        CaStatusAcceptor sa = caService.createStatusAcceptor(SA_NAME);
+        CaAttribute<Float> attr = sa.addFloat(ATTR4_NAME, ATTR4_CHANNEL);
+
+        assertNotNull("Unable to create status acceptor attribute.", attr);
+
+        caService.destroyStatusAcceptor(SA_NAME);
+    }
+
+    @Test
+    public void testCreateDoubleAttribute() throws CaException, CAException {
+        CaStatusAcceptor sa = caService.createStatusAcceptor(SA_NAME);
+        CaAttribute<Double> attr = sa.addDouble(ATTR3_NAME, ATTR3_CHANNEL);
 
         assertNotNull("Unable to create status acceptor attribute.", attr);
 
@@ -141,7 +178,7 @@ public final class CaStatusAcceptorTest {
 
         assertNotNull("Unable to retrieve attribute list.", attrSet);
 
-        Set<String> testSet = new HashSet<String>();
+        Set<String> testSet = new HashSet<>();
         testSet.add(ATTR1_NAME);
         testSet.add(ATTR2_NAME);
 

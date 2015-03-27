@@ -9,10 +9,10 @@ package edu.gemini.epics.acm;
  */
 public final class CaCommandInProgress extends Exception {
 
-    public CaCommandInProgress() {
+    CaCommandInProgress() {
     }
 
-    public CaCommandInProgress(String message) {
+    CaCommandInProgress(String message) {
         super(message);
     }
 }

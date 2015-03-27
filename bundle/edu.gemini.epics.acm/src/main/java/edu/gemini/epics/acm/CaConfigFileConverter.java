@@ -1,58 +1,34 @@
 package edu.gemini.epics.acm;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
+import edu.gemini.epics.acm.generated.*;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
-
+import java.io.*;
+import java.util.*;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
-
-import edu.gemini.epics.acm.generated.CommandType;
-import edu.gemini.epics.acm.generated.ApplyType;
-import edu.gemini.epics.acm.generated.DataType;
-import edu.gemini.epics.acm.generated.Records;
-import edu.gemini.epics.acm.generated.StatusType;
-import edu.gemini.epics.acm.generated.TopType;
+import java.util.regex.Pattern;
 
 /**
- * This class converts the old channel access configuration files used by
- * <b>ocswish</b> into the new XML based format. It can be used as a stand-alone
- * program.
- * <p>
- * It imposes some restriction on the old format. It can process only one file
- * at a time: include directives are ignored. Command parameters must have the
- * same common prefix as the associated apply record.
- * <p>
- * The conversion tries to figure out when a parameter exist only to mark the
- * CAD, and excludes them, using the channel name to configure the command
- * sender instead.
- * <p>
+ * This class converts the old channel access configuration files used by <b>ocswish</b> into the new XML based format.
+ * It can be used as a stand-alone program.
+ * <p/>
+ * It imposes some restriction on the old format. It can process only one file at a time: include directives are
+ * ignored. Command parameters must have the same common prefix as the associated apply record.
+ * <p/>
+ * The conversion tries to figure out when a parameter exist only to mark the CAD, and excludes them, using the channel
+ * name to configure the command sender instead.
+ * <p/>
  * All command parameters and status attributes are assigned the type STRING.
- * 
- * @author jluhrs
  *
+ * @author jluhrs
  */
 public final class CaConfigFileConverter {
-    
-    private static final Logger LOG = Logger.getLogger(CaConfigFileConverter.class.getName()); 
+
+    private static final Logger LOG = Logger.getLogger(CaConfigFileConverter.class.getName());
 
     private static final String USAGE = "Usage: java edu.gemini.epics.acm.CaConfigFileConverter [-f outFile] [inFiles]";
 
@@ -61,149 +37,71 @@ public final class CaConfigFileConverter {
     private static final String DIR_PARAM = "DIR";
     private static final String DUMMY_PARAM = "dummy";
 
-    private static final class ApplyDef {
-        public final String name;
-        public final String applyRecord;
-        public final String carRecord;
-        public final String description;
-
-        public ApplyDef(String name, String applyRecord, String carRecord,
-                String description) {
-            this.name = name;
-            this.applyRecord = applyRecord;
-            this.carRecord = carRecord;
-            this.description = description;
-        }
-    }
-
-    private static final class ParamDef {
-        public final String name;
-        public final String channel;
-        public final String description;
-
-        public ParamDef(String name, String channel, String description) {
-            super();
-            this.name = name;
-            this.channel = channel;
-            this.description = description;
-        }
-    }
-
-    private static final class CommandDef {
-        public final String name;
-        public final String apply;
-        public final String description;
-        public final Set<ParamDef> params;
-
-        public CommandDef(String name, String apply, String description,
-                Set<ParamDef> params) {
-            super();
-            this.name = name;
-            this.apply = apply;
-            this.description = description;
-            this.params = params;
-        }
-    }
-
-    private static final class AttribDef {
-        public final String name;
-        public final String channel;
-        public final String description;
-
-        public AttribDef(String name, String channel, String description) {
-            super();
-            this.name = name;
-            this.channel = channel;
-            this.description = description;
-        }
-    }
-
-    private static final class StatusDef {
-        public final String name;
-        public final String description;
-        public final Set<AttribDef> attribs;
-
-        public StatusDef(String name, String description, Set<AttribDef> attribs) {
-            super();
-            this.name = name;
-            this.description = description;
-            this.attribs = attribs;
-        }
-
-    }
-    
     public static void convert(BufferedReader in, Writer out)
             throws IOException {
-        List<BufferedReader> inputList = new ArrayList<BufferedReader>();
+        List<BufferedReader> inputList = new ArrayList<>();
         inputList.add(in);
         convert(inputList, out);
     }
-    public static void convert(List<BufferedReader> inputList, Writer out)
+
+    private static void convert(List<BufferedReader> inputList, Writer out)
             throws IOException {
 
         Records records = new Records();
-        Set<ApplyDef> applies = new HashSet<ApplyDef>();
-        Set<CommandDef> commands = new HashSet<CommandDef>();
-        Set<StatusDef> statuses = new HashSet<StatusDef>();
+        Set<ApplyDef> applies = new HashSet<>();
+        Set<CommandDef> commands = new HashSet<>();
+        Set<StatusDef> statuses = new HashSet<>();
 
         String line;
-        
-        for(BufferedReader in: inputList) {
+
+        for (BufferedReader in : inputList) {
             while ((line = readLine(in)) != null) {
-                if (readApply(line, in, applies))
+                if (readApply(line, applies)) {
                     continue;
-                if (readCommand(line, in, commands))
+                }
+                if (readCommand(line, in, commands)) {
                     continue;
-                if (readStatus(line, in, statuses))
-                    continue;
+                }
+                readStatus(line, in, statuses);
             }
         }
 
         // This set collects the tops discovered while building the records.
-        Set<String> tops = new HashSet<String>();
+        Set<String> tops = new HashSet<>();
 
         // Build the status acceptors.
-        for (StatusDef statusDef : statuses) {
-            String top = null;
-            StatusType status = new StatusType();
-            status.setName(statusDef.name);
-            status.setDescription(statusDef.description);
-            for (AttribDef attrDef : statusDef.attribs) {
-                String attrTop = null;
-                String channel = null;
-                if (attrDef.channel.split(":").length > 0) {
-                    attrTop = attrDef.channel.split(":")[0];
-                    channel = attrDef.channel.substring(attrTop.length() + 1);
-                } else {
-                    channel = attrDef.channel;
-                }
-                StatusType.Attribute attr = new StatusType.Attribute();
-                attr.setName(attrDef.name);
-                attr.setChannel(channel);
-                attr.setType(DataType.STRING);
-                attr.setDescription(attrDef.description);
-                if (top == null && attrTop != null) {
-                    top = attrTop;
-                    tops.add(top);
-                    status.setTop(top);
-                } else {
-                    if (!top.equals(attrTop)) {
-                        if (attrTop != null) {
-                            tops.add(attrTop);
-                            attr.setTop(attrTop);
-                        } else {
-                            attr.setTop("");
-                        }
-                    }
-                }
-                status.getAttribute().add(attr);
-            }
-            records.getStatus().add(status);
-        }
+        buildStatusAcceptors(records, statuses, tops);
 
         // Build the apply and command senders
+        buildAppliesAndCommands(records, applies, commands, tops);
+
+        // Finally, fill in the Top definitions.
+        for (String topDef : tops) {
+            TopType top = new TopType();
+            top.setName(topDef);
+            top.setValue(topDef);
+            records.getTop().add(top);
+        }
+
+        try {
+            JAXBContext jc = JAXBContext.newInstance(Records.class);
+            Marshaller marshaller = jc.createMarshaller();
+            SchemaFactory factory = SchemaFactory.newInstance(XMLSCHEMA_URL);
+            Schema schema;
+            schema = factory.newSchema(CaConfigFileConverter.class.getResource(CONFIG_SCHEMA_FILE));
+            marshaller.setSchema(schema);
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            marshaller.marshal(records, out);
+        } catch (Exception e) {
+            LOG.warning(e.getMessage());
+        }
+
+    }
+
+    private static void buildAppliesAndCommands(Records records, Set<ApplyDef> applies, Set<CommandDef> commands,
+                                                Set<String> tops) {
         // First, collect the commands for each apply
-        Map<String, HashSet<CommandDef>> commandMap = new HashMap<String, HashSet<CommandDef>>();
+        Map<String, HashSet<CommandDef>> commandMap = new HashMap<>();
         for (CommandDef commandDef : commands) {
             if (!commandMap.containsKey(commandDef.apply)) {
                 commandMap.put(commandDef.apply, new HashSet<CommandDef>());
@@ -215,9 +113,9 @@ public final class CaConfigFileConverter {
             // Ignore applies that don't have commands
             if (commandMap.containsKey(applyDef.name)) {
                 String applyTop = null;
-                String carTop = null;
-                String applyRecord = null;
-                String carRecord = null;
+                String carTop;
+                String applyRecord;
+                String carRecord;
                 if (applyDef.applyRecord.split(":").length > 0) {
                     applyTop = applyDef.applyRecord.split(":")[0];
                     applyRecord = applyDef.applyRecord.substring(applyTop
@@ -258,7 +156,7 @@ public final class CaConfigFileConverter {
 
                         for (ParamDef paramDef : commandDef.params) {
                             String paramTop = null;
-                            String paramRecord = null;
+                            String paramRecord;
                             String recordParam = null;
                             if (paramDef.channel.split(":").length > 0) {
                                 paramTop = paramDef.channel.split(":")[0];
@@ -298,7 +196,7 @@ public final class CaConfigFileConverter {
                                             0,
                                             paramRecord.length()
                                                     - (recordParam != null ? (recordParam
-                                                            .length() + 1) : 0)));
+                                                    .length() + 1) : 0)));
                                 }
                                 continue;
                             }
@@ -327,33 +225,52 @@ public final class CaConfigFileConverter {
                 }
             }
         }
+    }
 
-        // Finally, fill in the Top definitions.
-        for (String topDef : tops) {
-            TopType top = new TopType();
-            top.setName(topDef);
-            top.setValue(topDef);
-            records.getTop().add(top);
+    private static void buildStatusAcceptors(Records records, Set<StatusDef> statuses, Set<String> tops) {
+        for (StatusDef statusDef : statuses) {
+            String top = null;
+            StatusType status = new StatusType();
+            status.setName(statusDef.name);
+            status.setDescription(statusDef.description);
+            for (AttribDef attrDef : statusDef.attribs) {
+                String attrTop = null;
+                String channel;
+                if (attrDef.channel.split(":").length > 0) {
+                    attrTop = attrDef.channel.split(":")[0];
+                    channel = attrDef.channel.substring(attrTop.length() + 1);
+                } else {
+                    channel = attrDef.channel;
+                }
+                StatusType.Attribute attr = new StatusType.Attribute();
+                attr.setName(attrDef.name);
+                attr.setChannel(channel);
+                attr.setType(DataType.STRING);
+                attr.setDescription(attrDef.description);
+                if (top == null) {
+                    if (attrTop != null) {
+                        top = attrTop;
+                        tops.add(top);
+                        status.setTop(top);
+                    }
+                } else {
+                    if (!top.equals(attrTop)) {
+                        if (attrTop != null) {
+                            tops.add(attrTop);
+                            attr.setTop(attrTop);
+                        } else {
+                            attr.setTop("");
+                        }
+                    }
+                }
+                status.getAttribute().add(attr);
+            }
+            records.getStatus().add(status);
         }
-
-        try {
-            JAXBContext jc = JAXBContext.newInstance(Records.class);
-            Marshaller marshaller = jc.createMarshaller();
-            SchemaFactory factory = SchemaFactory.newInstance(XMLSCHEMA_URL);
-            Schema schema;
-            schema = factory.newSchema(CaConfigFileConverter.class
-                    .getResource(CONFIG_SCHEMA_FILE));
-            marshaller.setSchema(schema);
-            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-            marshaller.marshal(records, out);
-        } catch (Exception e) {
-            LOG.warning(e.getMessage());
-        }
-
     }
 
     private static boolean readStatus(String line, BufferedReader in,
-            Set<StatusDef> statuses) throws IOException {
+                                      Set<StatusDef> statuses) throws IOException {
         final String statusPatternStr = "^\\s*status\\s*(?<name>[\\w_]+[\\w.:_]*)\\s*(?<description>\\w.*)?\\s*$";
         final String startBlockPatternStr = "^\\s*\\{\\s*$";
         final String endBlockPatternStr = "^\\s*\\}\\s*$";
@@ -368,18 +285,17 @@ public final class CaConfigFileConverter {
             // First, search for block start
             if ((line = readLine(in)) != null
                     && startBlockPattern.matcher(line).matches()) {
-                Set<AttribDef> attribs = new HashSet<AttribDef>();
+                Set<AttribDef> attribs = new HashSet<>();
                 while ((line = readLine(in)) != null) {
                     Matcher attrMatcher = attrPattern.matcher(line);
                     if (attrMatcher.matches()) {
                         attribs.add(new AttribDef(attrMatcher.group("name"),
                                 attrMatcher.group("channel"), attrMatcher
-                                        .group("description")));
+                                .group("description")));
                     } else {
                         statuses.add(new StatusDef(statusMatcher.group("name"),
                                 statusMatcher.group("description"), attribs));
-                        if (line != null
-                                && endBlockPattern.matcher(line).matches()) {
+                        if (endBlockPattern.matcher(line).matches()) {
                             return true;
                         }
                     }
@@ -393,7 +309,7 @@ public final class CaConfigFileConverter {
     }
 
     private static boolean readCommand(String line, BufferedReader in,
-            Set<CommandDef> commands) throws IOException {
+                                       Set<CommandDef> commands) throws IOException {
         final String commandPatternStr = "^\\s*command\\s*(?<name>[\\w_]+[\\w.:_]*)\\s*(?<apply>[\\w_]+[\\w.:_]*)\\s*(?<description>\\w.*)?\\s*$";
         final String startBlockPatternStr = "^\\s*\\{\\s*$";
         final String endBlockPatternStr = "^\\s*\\}\\s*$";
@@ -408,19 +324,18 @@ public final class CaConfigFileConverter {
             // First, search for block start
             if ((line = readLine(in)) != null
                     && startBlockPattern.matcher(line).matches()) {
-                Set<ParamDef> params = new HashSet<ParamDef>();
+                Set<ParamDef> params = new HashSet<>();
                 while ((line = readLine(in)) != null) {
                     Matcher paramMatcher = paramPattern.matcher(line);
                     if (paramMatcher.matches()) {
                         params.add(new ParamDef(paramMatcher.group("name"),
                                 paramMatcher.group("channel"), paramMatcher
-                                        .group("description")));
+                                .group("description")));
                     } else {
                         commands.add(new CommandDef(commandMatcher
                                 .group("name"), commandMatcher.group("apply"),
                                 commandMatcher.group("description"), params));
-                        if (line != null
-                                && endBlockPattern.matcher(line).matches()) {
+                        if (endBlockPattern.matcher(line).matches()) {
                             return true;
                         }
                     }
@@ -433,8 +348,8 @@ public final class CaConfigFileConverter {
         }
     }
 
-    private static boolean readApply(String line, BufferedReader in,
-            Set<ApplyDef> applies) {
+    private static boolean readApply(String line,
+                                     Set<ApplyDef> applies) {
 
         final String applyPatternStr = "^\\s*apply\\s*(?<name>[\\w_]+[\\w.:_]*)\\s*(?<apply>[\\w.:_]+)\\s*(?<car>[\\w.:_]+)\\s*(?<description>\\w.*)?\\s*$";
         Pattern applyPattern = Pattern.compile(applyPatternStr);
@@ -466,32 +381,36 @@ public final class CaConfigFileConverter {
     }
 
     public static void main(String[] args) {
-        List<BufferedReader> input = new ArrayList<BufferedReader>();
+        List<BufferedReader> input = new ArrayList<>();
         Writer output = null;
 
         for (int i = 0; i < args.length; i++) {
-            if (args[i].equals("--help") || args[i].equals("-h")) {
-                System.out.println(USAGE);
-                System.exit(0);
-            } else if (args[i].equals("-f")) {
-                i++;
-                if (i >= args.length) {
+            switch (args[i]) {
+                case "--help":
+                case "-h":
                     System.out.println(USAGE);
-                    System.exit(-1);
-                }
-                try {
-                    output = new BufferedWriter(new FileWriter(args[i]));
-                } catch (IOException e) {
-                    LOG.warning(e.getMessage());
-                    System.exit(-1);
-                }
-            } else {
-                try {
-                    input.add(new BufferedReader(new FileReader(args[i])));
-                } catch (FileNotFoundException e) {
-                    LOG.warning(e.getMessage());
-                    System.exit(-1);
-                }
+                    System.exit(0);
+                case "-f":
+                    i++;
+                    if (i >= args.length) {
+                        System.out.println(USAGE);
+                        System.exit(-1);
+                    }
+                    try {
+                        output = new BufferedWriter(new FileWriter(args[i]));
+                    } catch (IOException e) {
+                        LOG.warning(e.getMessage());
+                        System.exit(-1);
+                    }
+                    break;
+                default:
+                    try {
+                        input.add(new BufferedReader(new FileReader(args[i])));
+                    } catch (FileNotFoundException e) {
+                        LOG.warning(e.getMessage());
+                        System.exit(-1);
+                    }
+                    break;
             }
         }
 
@@ -507,6 +426,77 @@ public final class CaConfigFileConverter {
         } catch (IOException e) {
             LOG.warning(e.getMessage());
             System.exit(-1);
+        }
+
+    }
+
+    private static final class ApplyDef {
+        public final String name;
+        public final String applyRecord;
+        public final String carRecord;
+        public final String description;
+
+        public ApplyDef(String name, String applyRecord, String carRecord,
+                        String description) {
+            this.name = name;
+            this.applyRecord = applyRecord;
+            this.carRecord = carRecord;
+            this.description = description;
+        }
+    }
+
+    private static final class ParamDef {
+        public final String name;
+        public final String channel;
+        public final String description;
+
+        public ParamDef(String name, String channel, String description) {
+            super();
+            this.name = name;
+            this.channel = channel;
+            this.description = description;
+        }
+    }
+
+    private static final class CommandDef {
+        public final String name;
+        public final String apply;
+        public final String description;
+        public final Set<ParamDef> params;
+
+        public CommandDef(String name, String apply, String description,
+                          Set<ParamDef> params) {
+            super();
+            this.name = name;
+            this.apply = apply;
+            this.description = description;
+            this.params = params;
+        }
+    }
+
+    private static final class AttribDef {
+        public final String name;
+        public final String channel;
+        public final String description;
+
+        public AttribDef(String name, String channel, String description) {
+            super();
+            this.name = name;
+            this.channel = channel;
+            this.description = description;
+        }
+    }
+
+    private static final class StatusDef {
+        public final String name;
+        public final String description;
+        public final Set<AttribDef> attribs;
+
+        public StatusDef(String name, String description, Set<AttribDef> attribs) {
+            super();
+            this.name = name;
+            this.description = description;
+            this.attribs = attribs;
         }
 
     }

@@ -16,16 +16,16 @@ import edu.gemini.gmp.top.TopImpl;
 import gov.aps.jca.CAException;
 import gov.aps.jca.TimeoutException;
 
-public final class TestSimulator {
+final class TestSimulator {
 
     private static final Logger LOG = Logger.getLogger(TestSimulator.class.getName()); 
 
-    public static final String INTEGER_STATUS = "intVal";
-    public static final String STRING_STATUS = "strVal";
-    public static final String DOUBLE_STATUS = "dblVal";
-    public static final String FLOAT_STATUS = "fltVal";
+    static final String INTEGER_STATUS = "intVal";
+    static final String STRING_STATUS = "strVal";
+    static final String DOUBLE_STATUS = "dblVal";
+    static final String FLOAT_STATUS = "fltVal";
     
-    public static final String ERROR_MSG = "Test Error";
+    static final String ERROR_MSG = "Test Error";
 
     private static final String CONFIG_FILE = "/TestSim.xml";
 
@@ -37,7 +37,7 @@ public final class TestSimulator {
     private Channel<Double> dblChannel;
     private Channel<Float> fltChannel;
     private ScheduledFuture<?> ticker;
-    private String epicsTop;
+    private final String epicsTop;
 
     public TestSimulator(String epicsTop) {
         this.epicsTop = epicsTop;
@@ -123,12 +123,10 @@ public final class TestSimulator {
                 count++;
                 try {
                     intChannel.setValue(count);
-                    strChannel.setValue(new Integer(count).toString());
+                    strChannel.setValue(Integer.toString(count));
                     dblChannel.setValue((double) count);
                     fltChannel.setValue((float) count);
-                } catch (CAException e) {
-                    LOG.warning(e.getMessage());
-                } catch (TimeoutException e) {
+                } catch (CAException | TimeoutException e) {
                     LOG.warning(e.getMessage());
                 }
             }

@@ -48,7 +48,7 @@ public final class CaCommandSenderTest {
     private static TestSimulator simulator;
 
     @BeforeClass
-    public static void setUpClass() throws Exception {
+    public static void setUpClass() {
         simulator = new TestSimulator(TOP);
         simulator.start();
         CaService.setAddressList(CA_ADDR_LIST);
@@ -56,7 +56,7 @@ public final class CaCommandSenderTest {
     }
 
     @AfterClass
-    public static void tearDownClass() throws Exception {
+    public static void tearDownClass() {
         if (caService != null) {
             caService.unbind();
             caService = null;
@@ -192,7 +192,7 @@ public final class CaCommandSenderTest {
 
         assertNotNull("Unable to retrieve attribute list.", paramSet);
 
-        Set<String> testSet = new HashSet<String>();
+        Set<String> testSet = new HashSet<>();
         testSet.add(PARAM1_NAME);
         testSet.add(PARAM2_NAME);
 
@@ -330,6 +330,7 @@ public final class CaCommandSenderTest {
         } catch (InterruptedException e) {
             LOG.warning(e.getMessage());
         }
+        //noinspection ThrowableResultOfMethodCallIgnored
         assertTrue("Command did not report execution error.", cm.isDone()
                 && cm.state().equals(CaCommandMonitor.State.ERROR)
                 && cm.error().getMessage().equals(TestSimulator.ERROR_MSG));
@@ -356,6 +357,7 @@ public final class CaCommandSenderTest {
         } catch (InterruptedException e) {
             LOG.warning(e.getMessage());
         }
+        //noinspection ThrowableResultOfMethodCallIgnored
         assertTrue("Command did not report execution timeout (" + cm.isDone() + ", " + cm.state() + ", " + cm.error() + ")",
                 cm.isDone() && cm.state().equals(CaCommandMonitor.State.ERROR)
                         && cm.error() instanceof TimeoutException);

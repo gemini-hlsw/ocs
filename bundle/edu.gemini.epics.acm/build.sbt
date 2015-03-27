@@ -13,7 +13,7 @@ sourceGenerators in Compile += Def.task {
     "-d", gen.getAbsolutePath,
     "-p", pkg,
     xsd.getAbsolutePath)
-  val mod = (xsd.getParentFile.listFiles).map(_.lastModified).max
+  val mod = xsd.getParentFile.listFiles.map(_.lastModified).max
   val cur = if (out.exists && out.listFiles.nonEmpty) out.listFiles.map(_.lastModified).min else Int.MaxValue
   if (mod > cur) {
     out.mkdirs

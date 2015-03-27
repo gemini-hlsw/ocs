@@ -20,16 +20,16 @@ final class CaCommandSenderImpl implements CaCommandSender {
     private static final String DIR_SUFFIX = ".DIR";
     private final String name;
     private final String description;
-    private Map<String, CaParameterImpl<String>> stringParameters;
-    private Map<String, CaParameterImpl<Double>> doubleParameters;
-    private Map<String, CaParameterImpl<Float>> floatParameters;
-    private Map<String, CaParameterImpl<Integer>> integerParameters;
-    private CaApplySender apply;
+    private final Map<String, CaParameterImpl<String>> stringParameters;
+    private final Map<String, CaParameterImpl<Double>> doubleParameters;
+    private final Map<String, CaParameterImpl<Float>> floatParameters;
+    private final Map<String, CaParameterImpl<Integer>> integerParameters;
+    private final CaApplySender apply;
     private EpicsWriter epicsWriter;
     private ReadWriteClientEpicsChannel<CadDirective> dirChannel;
 
-    public CaCommandSenderImpl(String name, CaApplySender apply,
-            String description, EpicsService epicsService) {
+    private CaCommandSenderImpl(String name, CaApplySender apply,
+                                String description, EpicsService epicsService) {
         this(name, apply, description, epicsService, null);
     }
 
@@ -45,10 +45,10 @@ final class CaCommandSenderImpl implements CaCommandSender {
                     CadDirective.class);
         }
 
-        stringParameters = new HashMap<String, CaParameterImpl<String>>();
-        doubleParameters = new HashMap<String, CaParameterImpl<Double>>();
-        floatParameters = new HashMap<String, CaParameterImpl<Float>>();
-        integerParameters = new HashMap<String, CaParameterImpl<Integer>>();
+        stringParameters = new HashMap<>();
+        doubleParameters = new HashMap<>();
+        floatParameters = new HashMap<>();
+        integerParameters = new HashMap<>();
     }
 
     @Override
@@ -58,7 +58,7 @@ final class CaCommandSenderImpl implements CaCommandSender {
 
     @Override
     public Set<String> getInfo() {
-        Set<String> set = new HashSet<String>(doubleParameters.keySet());
+        Set<String> set = new HashSet<>(doubleParameters.keySet());
         set.addAll(floatParameters.keySet());
         set.addAll(integerParameters.keySet());
         set.addAll(stringParameters.keySet());

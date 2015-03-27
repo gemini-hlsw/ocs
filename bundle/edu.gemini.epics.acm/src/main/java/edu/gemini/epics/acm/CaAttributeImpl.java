@@ -23,7 +23,7 @@ final class CaAttributeImpl<T> implements CaAttribute<T> {
     private final Class<T> type;
     private final String description;
 
-    protected CaAttributeImpl(String name, String channel, Class<T> type,
+    private CaAttributeImpl(String name, String channel, Class<T> type,
             String description, EpicsReader epicsReader) {
 
         super();
@@ -34,7 +34,7 @@ final class CaAttributeImpl<T> implements CaAttribute<T> {
         this.epicsReader = epicsReader;
     }
 
-    protected void bind(ReadOnlyClientEpicsChannel<T> epicsChannel)
+    void bind(ReadOnlyClientEpicsChannel<T> epicsChannel)
             throws CAException {
         this.epicsChannel = epicsChannel;
         channelListener = new ChannelListener<T>() {
@@ -47,7 +47,7 @@ final class CaAttributeImpl<T> implements CaAttribute<T> {
                         setValidity(true);
                     } else {
                         if (CaAttributeImpl.this.type.isInstance(arg1.get(0))) {
-                            List<T> vals = new ArrayList<T>();
+                            List<T> vals = new ArrayList<>();
                             for (T v : arg1) {
                                 vals.add(v);
                             }
@@ -106,7 +106,7 @@ final class CaAttributeImpl<T> implements CaAttribute<T> {
     }
 
     private final class Notifier {
-        private List<CaAttributeListener<T>> listeners = new LinkedList<CaAttributeListener<T>>();
+        private final List<CaAttributeListener<T>> listeners = new LinkedList<>();
 
         synchronized public void addListener(CaAttributeListener<T> listener) {
             if (!listeners.contains(listener)) {
@@ -131,7 +131,7 @@ final class CaAttributeImpl<T> implements CaAttribute<T> {
         }
     }
 
-    private Notifier notifier = new Notifier();
+    private final Notifier notifier = new Notifier();
 
     @Override
     public void addListener(CaAttributeListener<T> listener) {
@@ -154,46 +154,46 @@ final class CaAttributeImpl<T> implements CaAttribute<T> {
         epicsReader = null;
     }
 
-    static final CaAttributeImpl<Double> createDoubleAttribute(
+    static CaAttributeImpl<Double> createDoubleAttribute(
             String name, String channel, String description, EpicsReader epicsReader)
             throws CAException {
-        CaAttributeImpl<Double> attr = new CaAttributeImpl<Double>(name,
+        CaAttributeImpl<Double> attr = new CaAttributeImpl<>(name,
                 channel, Double.class, description, epicsReader);
         attr.bind(epicsReader.getDoubleChannel(channel));
         return attr;
     }
 
-    static public final CaAttributeImpl<Float> createFloatAttribute(
+    static public CaAttributeImpl<Float> createFloatAttribute(
             String name, String channel, String description, EpicsReader epicsReader)
             throws CAException {
-        CaAttributeImpl<Float> attr = new CaAttributeImpl<Float>(name, channel,
+        CaAttributeImpl<Float> attr = new CaAttributeImpl<>(name, channel,
                 Float.class, description, epicsReader);
         attr.bind(epicsReader.getFloatChannel(channel));
         return attr;
     }
 
-    static public final CaAttributeImpl<Integer> createIntegerAttribute(
+    static public CaAttributeImpl<Integer> createIntegerAttribute(
             String name, String channel, String description, EpicsReader epicsReader)
             throws CAException {
-        CaAttributeImpl<Integer> attr = new CaAttributeImpl<Integer>(name,
+        CaAttributeImpl<Integer> attr = new CaAttributeImpl<>(name,
                 channel, Integer.class, description, epicsReader);
         attr.bind(epicsReader.getIntegerChannel(channel));
         return attr;
     }
 
-    static public final CaAttributeImpl<String> createStringAttribute(
+    static public CaAttributeImpl<String> createStringAttribute(
             String name, String channel, String description, EpicsReader epicsReader)
             throws CAException {
-        CaAttributeImpl<String> attr = new CaAttributeImpl<String>(name,
+        CaAttributeImpl<String> attr = new CaAttributeImpl<>(name,
                 channel, String.class, description, epicsReader);
         attr.bind(epicsReader.getStringChannel(channel));
         return attr;
     }
 
-    static public final <T extends Enum<T>> CaAttributeImpl<T> createEnumAttribute(
+    static public <T extends Enum<T>> CaAttributeImpl<T> createEnumAttribute(
             String name, String channel, String description, Class<T> enumType,
             EpicsReader epicsReader) throws CAException {
-        CaAttributeImpl<T> attr = new CaAttributeImpl<T>(name, channel,
+        CaAttributeImpl<T> attr = new CaAttributeImpl<>(name, channel,
                 enumType, description, epicsReader);
         attr.bind(epicsReader.getEnumChannel(channel, enumType));
         return attr;

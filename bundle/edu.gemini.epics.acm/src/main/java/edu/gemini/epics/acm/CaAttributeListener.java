@@ -18,7 +18,7 @@ public interface CaAttributeListener<T> {
      * @param newVals
      *            the attributes's new value. It can be <code>null</code>.
      */
-    public void onValueChange(List<T> newVals);
+    void onValueChange(List<T> newVals);
 
     /**
      * Called when the validity state of the attribute's value changes
@@ -26,5 +26,5 @@ public interface CaAttributeListener<T> {
      * @param newValidity
      *            the new validity state.
      */
-    public void onValidityChange(boolean newValidity);
+    void onValidityChange(boolean newValidity);
 }

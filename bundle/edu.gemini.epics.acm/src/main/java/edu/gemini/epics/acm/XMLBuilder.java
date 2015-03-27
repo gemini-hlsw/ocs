@@ -41,7 +41,7 @@ public final class XMLBuilder {
     private static final String XMLSCHEMA_URL = "http://www.w3.org/2001/XMLSchema";
 
     public XMLBuilder() {
-        tops = new HashMap<String, String>();
+        tops = new HashMap<>();
         service = CaService.getInstance();
     }
 
@@ -161,6 +161,7 @@ public final class XMLBuilder {
                 try {
                     buildCommand(commandDef, apply, tops.get(applyDef.getTop()));
                 } catch (Exception e) {
+                    LOG.warning(e.getMessage());
                 }
             }
         }
@@ -168,12 +169,13 @@ public final class XMLBuilder {
             try {
                 buildStatus(statusDef);
             } catch (Exception e) {
+                LOG.warning(e.getMessage());
             }
         }
     }
 
     private Records records;
-    private Map<String, String> tops;
+    private final Map<String, String> tops;
     private CaService service;
 
     private CaApplySender getOrBuildApply(ApplyType applyDef) {

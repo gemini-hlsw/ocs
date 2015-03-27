@@ -32,16 +32,16 @@ public final class CaService {
 
     private static final String EPICS_CA_ADDR_LIST = "EPICS_CA_ADDR_LIST";
     private EpicsService epicsService;
-    private Map<String, CaStatusAcceptorImpl> statusAcceptors;
-    private Map<String, CaApplySenderImpl> applySenders;
-    private Map<String, CaCommandSenderImpl> commandSenders;
+    private final Map<String, CaStatusAcceptorImpl> statusAcceptors;
+    private final Map<String, CaApplySenderImpl> applySenders;
+    private final Map<String, CaCommandSenderImpl> commandSenders;
     static private String addrList;
     static private CaService theInstance;
 
     private CaService(String addrList) {
-        statusAcceptors = new HashMap<String, CaStatusAcceptorImpl>();
-        applySenders = new HashMap<String, CaApplySenderImpl>();
-        commandSenders = new HashMap<String, CaCommandSenderImpl>();
+        statusAcceptors = new HashMap<>();
+        applySenders = new HashMap<>();
+        commandSenders = new HashMap<>();
         epicsService = new EpicsService(addrList);
 
         epicsService.startService();
@@ -81,10 +81,8 @@ public final class CaService {
 
     /**
      * Free resources and stop the underlying EPICS service.
-     * 
-     * @throws CAException
      */
-    public void unbind() throws CAException {
+    public void unbind() {
         assert (epicsService != null);
         for (CaStatusAcceptorImpl sa : statusAcceptors.values()) {
             sa.unbind();
@@ -110,10 +108,6 @@ public final class CaService {
      *            optional description for the status acceptor
      * @return the status acceptor.
      */
-    public CaStatusAcceptor createStatusAcceptor(String name) {
-        return createStatusAcceptor(name, null);
-    }
-
     public CaStatusAcceptor createStatusAcceptor(String name, String description) {
         CaStatusAcceptorImpl sa = statusAcceptors.get(name);
         if (sa == null) {
@@ -122,6 +116,10 @@ public final class CaService {
         }
 
         return sa;
+    }
+
+    public CaStatusAcceptor createStatusAcceptor(String name) {
+        return createStatusAcceptor(name, null);
     }
 
     /**
@@ -151,11 +149,6 @@ public final class CaService {
      * @throws CAException
      */
     public CaApplySender createApplySender(String name, String applyRecord,
-            String carRecord) throws CAException {
-        return createApplySender(name, applyRecord, carRecord, null);
-    }
-
-    public CaApplySender createApplySender(String name, String applyRecord,
             String carRecord, String description) throws CAException {
         CaApplySenderImpl apply = applySenders.get(name);
         if (apply == null) {
@@ -164,6 +157,11 @@ public final class CaService {
             applySenders.put(name, apply);
         }
         return apply;
+    }
+
+    public CaApplySender createApplySender(String name, String applyRecord,
+            String carRecord) throws CAException {
+        return createApplySender(name, applyRecord, carRecord, null);
     }
 
     /**
@@ -193,11 +191,6 @@ public final class CaService {
      * @return the command sender.
      */
     public CaCommandSender createCommandSender(String name,
-            CaApplySender apply, String cadName) {
-        return createCommandSender(name, apply, cadName, null);
-    }
-
-    public CaCommandSender createCommandSender(String name,
             CaApplySender apply, String cadName, String description) {
         CaCommandSenderImpl cs = commandSenders.get(name);
         if (cs == null) {
@@ -206,6 +199,11 @@ public final class CaService {
             commandSenders.put(name, cs);
         }
         return cs;
+    }
+
+    public CaCommandSender createCommandSender(String name,
+            CaApplySender apply, String cadName) {
+        return createCommandSender(name, apply, cadName, null);
     }
 
     /**

@@ -14,31 +14,31 @@ public interface CaCommandSender {
      * 
      * @return name of this command sender.
      */
-    public String getName();
+    String getName();
 
     /**
      * Retrieves the description for this Command Sender
      * 
      * @return the description of this Command Sender
      */
-    public String getDescription();
+    String getDescription();
 
     /**
      * Retrieves the names of the parameters of this command sender.
      * 
      * @return set of parameter names.
      */
-    public Set<String> getInfo();
+    Set<String> getInfo();
 
     /**
      * Marks this command for execution. Useful for commands without parameters.
      */
-    public void mark() throws TimeoutException;
+    void mark() throws TimeoutException;
 
     /**
      * Clears the MARK flag for this command for execution.
      */
-    public void clear() throws TimeoutException;
+    void clear() throws TimeoutException;
 
     /**
      * Trigger the EPICS apply record. The command return immediately.
@@ -47,7 +47,7 @@ public interface CaCommandSender {
      *         can be used to monitor the command execution and retrieve its
      *         result.
      */
-    public CaCommandMonitor post();
+    CaCommandMonitor post();
 
     /**
      * Trigger the EPICS apply record and waits until the command processing
@@ -57,7 +57,7 @@ public interface CaCommandSender {
      *         can be used to monitor the command execution and retrieve its
      *         result.
      */
-    public CaCommandMonitor postWait() throws InterruptedException;
+    CaCommandMonitor postWait() throws InterruptedException;
 
     /**
      * Trigger the EPICS apply record. The command return immediately.
@@ -72,7 +72,7 @@ public interface CaCommandSender {
      *         can be used to monitor the command execution and retrieve its
      *         result.
      */
-    public CaCommandMonitor postCallback(CaCommandListener callback);
+    CaCommandMonitor postCallback(CaCommandListener callback);
 
     /**
      * Adds a parameter of type <code>Integer</code> to this command sender. If
@@ -89,11 +89,11 @@ public interface CaCommandSender {
      * @return the parameter
      * @throws CaException
      */
-    public CaParameter<Integer> addInteger(String name, String channel)
-            throws CaException;
+    CaParameter<Integer> addInteger(String name, String channel,
+                                    String description) throws CaException;
 
-    public CaParameter<Integer> addInteger(String name, String channel,
-            String description) throws CaException;
+    CaParameter<Integer> addInteger(String name, String channel)
+            throws CaException;
 
     /**
      * Adds a parameter of type <code>Double</code> to this command sender. If
@@ -110,11 +110,11 @@ public interface CaCommandSender {
      * @return the parameter
      * @throws CaException
      */
-    public CaParameter<Double> addDouble(String name, String channel)
-            throws CaException;
+    CaParameter<Double> addDouble(String name, String channel,
+                                  String description) throws CaException;
 
-    public CaParameter<Double> addDouble(String name, String channel,
-            String description) throws CaException;
+    CaParameter<Double> addDouble(String name, String channel)
+            throws CaException;
 
     /**
      * Adds a parameter of type <code>Float</code> to this command sender. If
@@ -131,11 +131,11 @@ public interface CaCommandSender {
      * @return the parameter
      * @throws CaException
      */
-    public CaParameter<Float> addFloat(String name, String channel)
-            throws CaException;
+    CaParameter<Float> addFloat(String name, String channel,
+                                String description) throws CaException;
 
-    public CaParameter<Float> addFloat(String name, String channel,
-            String description) throws CaException;
+    CaParameter<Float> addFloat(String name, String channel)
+            throws CaException;
 
     /**
      * Adds a parameter of type <code>String</code> to this command sender. If
@@ -152,11 +152,11 @@ public interface CaCommandSender {
      * @return the parameter
      * @throws CaException
      */
-    public CaParameter<String> addString(String name, String channel)
-            throws CaException;
+    CaParameter<String> addString(String name, String channel,
+                                  String description) throws CaException;
 
-    public CaParameter<String> addString(String name, String channel,
-            String description) throws CaException;
+    CaParameter<String> addString(String name, String channel)
+            throws CaException;
 
     /**
      * Removes a parameter from this command sender (optional operation).
@@ -164,7 +164,7 @@ public interface CaCommandSender {
      * @param name
      *            the name of the parameter to remove.
      */
-    public void remove(String name);
+    void remove(String name);
 
     /**
      * Retrieves an existing parameter of type <code>Integer</code>.
@@ -174,7 +174,7 @@ public interface CaCommandSender {
      * @return the parameter, or <code>null</code> if it does not exist or is of
      *         a different type.
      */
-    public CaParameter<Integer> getInteger(String name);
+    CaParameter<Integer> getInteger(String name);
 
     /**
      * Retrieves an existing parameter of type <code>Double</code>.
@@ -184,7 +184,7 @@ public interface CaCommandSender {
      * @return the parameter, or <code>null</code> if it does not exist or is of
      *         a different type.
      */
-    public CaParameter<Double> getDouble(String name);
+    CaParameter<Double> getDouble(String name);
 
     /**
      * Retrieves an existing parameter of type <code>Float</code>.
@@ -194,7 +194,7 @@ public interface CaCommandSender {
      * @return the parameter, or <code>null</code> if it does not exist or is of
      *         a different type.
      */
-    public CaParameter<Float> getFloat(String name);
+    CaParameter<Float> getFloat(String name);
 
     /**
      * Retrieves an existing parameter of type <code>String</code>.
@@ -204,6 +204,6 @@ public interface CaCommandSender {
      * @return the parameter, or <code>null</code> if it does not exist or is of
      *         a different type.
      */
-    public CaParameter<String> getString(String name);
+    CaParameter<String> getString(String name);
 
 }

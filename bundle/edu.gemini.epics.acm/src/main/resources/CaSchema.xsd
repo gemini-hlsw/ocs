@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
 	targetNamespace="http://www.gemini.edu/CaSchema" xmlns:tns="http://www.gemini.edu/CaSchema"
-	elementFormDefault="qualified" xmlns:Q1="http://www.example.org/CaSchema">
+	elementFormDefault="qualified">
 
 
 	<xs:element name="Records">
@@ -48,11 +48,11 @@
 						<xs:element name="top" type="xs:string" maxOccurs="1"
 							minOccurs="0" />
 					</xs:sequence>
-					<xs:attribute name="name" type="xs:string"></xs:attribute>
+					<xs:attribute name="name" type="xs:string"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:sequence>
-		<xs:attribute name="name" type="xs:string"></xs:attribute>
+		<xs:attribute name="name" type="xs:string"/>
 	</xs:complexType>
 
 	<xs:complexType name="ApplyType">
@@ -64,7 +64,7 @@
 			<xs:element name="command" type="tns:CommandType"
 				minOccurs="1" maxOccurs="unbounded" />
 		</xs:sequence>
-		<xs:attribute name="name" type="xs:string"></xs:attribute>
+		<xs:attribute name="name" type="xs:string"/>
 	</xs:complexType>
 
 	<xs:complexType name="CommandType">
@@ -80,11 +80,11 @@
 						<xs:element name="description" type="xs:string"
 							minOccurs="0" />
 					</xs:sequence>
-					<xs:attribute name="name" type="xs:string"></xs:attribute>
+					<xs:attribute name="name" type="xs:string"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:sequence>
-		<xs:attribute name="name" type="xs:string"></xs:attribute>
+		<xs:attribute name="name" type="xs:string"/>
 	</xs:complexType>
 
 </xs:schema>
