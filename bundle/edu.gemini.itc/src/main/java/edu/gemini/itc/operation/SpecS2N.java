@@ -3,7 +3,7 @@ package edu.gemini.itc.operation;
 import edu.gemini.itc.shared.VisitableSampledSpectrum;
 
 /**
- * A set of common values that are needed by the SpectroscopyResult objects.
+ * A set of common values that are accessed by service users through the SpectroscopyResult object.
  */
 public interface SpecS2N {
 

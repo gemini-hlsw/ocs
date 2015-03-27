@@ -76,18 +76,21 @@ public final class AcqCamRecipe extends RecipeBase {
         checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
     }
 
-    /**
-     * Performes recipe calculation and writes results to a cached PrintWriter
-     * or to System.out.
-     */
     public void writeOutput() {
-        // This object is used to format numerical strings.
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2);  // Two decimal places
-        device.clear();
-        _println("");
-
         final AcquisitionCamera instrument = new AcquisitionCamera(_acqCamParameters.getColorFilter(), _acqCamParameters.getNDFilter());
+        final ImagingResult result = calculateImaging(instrument);
+        writeImagingOutput(instrument, result);
+    }
+
+    public ImagingResult calculateImaging() {
+        final AcquisitionCamera instrument = new AcquisitionCamera(_acqCamParameters.getColorFilter(), _acqCamParameters.getNDFilter());
+        return calculateImaging(instrument);
+    }
+
+    /**
+     * Performes recipe calculation .
+     */
+    private ImagingResult calculateImaging(final AcquisitionCamera instrument) {
 
         // Get the summed source and sky
         final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.VISIBLE, _sdParameters, _obsConditionParameters, _telescope, null);
@@ -97,17 +100,10 @@ public final class AcqCamRecipe extends RecipeBase {
         final double sky_integral = sky.getIntegral();
 
         if (sed.getStart() > instrument.getObservingStart() || sed.getEnd() < instrument.getObservingEnd()) {
-            _println(" Sed start" + sed.getStart() + "> than instrument start" + instrument.getObservingStart());
-            _println(" Sed END" + sed.getEnd() + "< than instrument end" + instrument.getObservingEnd());
             throw new IllegalArgumentException("Shifted spectrum lies outside of observed wavelengths");
         }
 
-
-        // For debugging, print the spectrum integrals.
-        //_println("SED integral: "+sed_integral+"\tSKY integral: "+sky_integral);
-
         // End of the Spectral energy distribution portion of the ITC.
-
 
         // Start of morphology section of ITC
 
@@ -128,8 +124,6 @@ public final class AcqCamRecipe extends RecipeBase {
 
         //Calculate Source fraction
         final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
-        _print(SFcalc.getTextResult(device));
-        _println(IQcalc.getTextResult(device));
 
         // Calculate the Peak Pixel Flux
         final double peak_pixel_count = PeakPixelFlux.calculate(instrument, _sdParameters, _obsDetailParameters, SFcalc, im_qual, sed_integral, sky_integral);
@@ -138,33 +132,54 @@ public final class AcqCamRecipe extends RecipeBase {
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
 
-
         // Observation method
 
         //Calculate the Signal to Noise
 
         final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
         IS2Ncalc.calculate();
-        _println(IS2Ncalc.getTextResult(device));
+
+        return new ImagingResult(IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
+
+    }
+
+    // ===================================================================================================================
+    // TODO: OUTPUT METHODS
+    // TODO: These need to be simplified/cleaned/shared and then go to the web module.. and then be deleted and forgotten.
+    // ===================================================================================================================
+
+    public void writeImagingOutput(final AcquisitionCamera instrument, final ImagingResult result) {
+        // This object is used to format numerical strings.
+        final FormatStringWriter device = new FormatStringWriter();
+        device.setPrecision(2);  // Two decimal places
+        device.clear();
+        _println("");
+
+        _print(result.SFcalc.getTextResult(device));
+        _println(result.IQcalc.getTextResult(device));
+
+        _println(result.IS2Ncalc.getTextResult(device));
         device.setPrecision(0);  // NO decimal places
         device.clear();
 
         _println("");
-        _println("The peak pixel signal + background is " + device.toString(peak_pixel_count) + ". This is " +
-                device.toString(peak_pixel_count / instrument.getWellDepth() * 100) +
+        _println("The peak pixel signal + background is " + device.toString(result.peak_pixel_count) + ". This is " +
+                device.toString(result.peak_pixel_count / instrument.getWellDepth() * 100) +
                 "% of the full well depth of " + device.toString(instrument.getWellDepth()) + ".");
 
-        if (peak_pixel_count > (.8 * instrument.getWellDepth()))
+        if (result.peak_pixel_count > (.8 * instrument.getWellDepth()))
             _println("Warning: peak pixel exceeds 80% of the well depth and may be saturated");
 
         _println("");
         device.setPrecision(2);  // TWO decimal places
         device.clear();
 
+        printConfiguration(instrument);
 
-        ///////////////////////////////////////////////
-        //////////Print Config////////////////////////
+    }
 
+
+    private void printConfiguration(final AcquisitionCamera instrument) {
         _print("<HR align=left SIZE=3>");
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + instrument.getName() + "\n");
