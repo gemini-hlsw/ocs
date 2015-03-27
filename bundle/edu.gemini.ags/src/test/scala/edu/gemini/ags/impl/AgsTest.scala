@@ -2,6 +2,7 @@ package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.{AgsMagnitude, AgsRegistrar, AgsStrategy}
 import edu.gemini.ags.conf.ProbeLimitsTable
+import edu.gemini.ags.gems.GemsUtils4Java
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.skycalc.{Offset, DDMMSS, HHMMSS}
 import edu.gemini.spModel.core._
@@ -227,7 +228,6 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
   private def genCandidates(a: Area, allUsable: Boolean = false, allUnusable: Boolean = false): AgsTest = {
     assertTrue(!(allUsable && allUnusable))
 
-    //val (inTmp, outList) = boundingBoxCandidates(a)
     val (inTmp, outList) = areaCandidates(a)
     val inList = if (a.isEmpty) Nil else inTmp
 
@@ -239,7 +239,8 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
     def mags = {
       val m    = GuideSpeed.values.toList.map { gs => gs -> mc.apply(ctx.getConditions, gs) }.toMap
       val fast = m(FAST)
-      val band = fast.band
+      // Randomly pick one of the allowed bands
+      val band = strategy.probeBands(scala.util.Random.nextInt(strategy.probeBands.size))
 
       def magList(base: Double)(adjs: (Double, Option[GuideSpeed])*): List[(Magnitude, Option[GuideSpeed])] =
         adjs.toList.map { case (adj, gs) => (new Magnitude(base + adj, band), gs) }
@@ -408,13 +409,12 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
 
   def test(): Unit = {
     val mc   = magTable.apply(ctx, guideProbe).get
-    val band = mc.apply(ctx.getConditions, GuideSpeed.FAST).band
-    val maxMag = new Magnitude(Double.MaxValue, band)
+    val band = MagnitudeBand.R
 
     def go(winners: List[(SiderealTarget, GuideSpeed)]): Unit = {
-      val best = winners match {
+      val best:Option[(SiderealTarget, GuideSpeed)] = winners match {
         case Nil => None
-        case lst => Some(lst.minBy(_._1.magnitudeIn(band).getOrElse(maxMag)))
+        case lst => brightest(lst, strategy.params)(_._1 ).headOption
       }
 
       val all = winners.map(_._1) ++ unusable
@@ -444,8 +444,8 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
               case List(AgsStrategy.Assignment(actProbe, actStar)) =>
                 assertEquals(guideProbe, actProbe)
                 assertEqualTarget(expStar, actStar)
-                actStar.magnitudeIn(band).foreach { mag =>
-                  val actSpeed = AgsMagnitude.fastestGuideSpeed(mc, mag, ctx.getConditions)
+                strategy.params.referenceMagnitude(actStar).foreach { mag =>
+                  val actSpeed = AgsMagnitude.fastestGuideSpeed(mc, mag.value, ctx.getConditions)
                   assertTrue(s"Expected: $expSpeed , actual: $actSpeed", actSpeed.exists(_ == expSpeed))
                 }
               case Nil => fail(s"Expected: ($expStar, $expSpeed), but nothing selected")

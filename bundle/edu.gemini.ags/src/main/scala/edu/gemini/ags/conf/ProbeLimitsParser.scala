@@ -44,7 +44,7 @@ object ProbeLimitsParser {
       }
 
     def incompleteTables: ValidationNel[String, Unit] = {
-      val errors = cm.map { case (MagLimitsId(name), ProbeLimitsCalc(_, _, fm)) =>
+      val errors = cm.map { case (MagLimitsId(name), ProbeLimitsCalc(_, fm)) =>
         name -> (AllFaintnessKeys &~ fm.keySet)
       }.filterNot(_._2.isEmpty).map { case (name, keys) =>
         s"$name is missing entries: ${keys.mkString(", ")}"
@@ -100,7 +100,7 @@ final class ProbeLimitsParser extends JavaTokenParsers {
 
   val calcEntry: Parser[(MagLimitsId, ProbeLimitsCalc)] =
     chaff~>calcDef~limitsMap ^^ { case (id0, band0, adj)~tab =>
-        id0 -> ProbeLimitsCalc(band0, adj, tab)
+        id0 -> ProbeLimitsCalc(adj, tab)
     }
 
   val calcMap: Parser[CalcMap] =

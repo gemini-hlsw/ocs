@@ -4,20 +4,21 @@ import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.ags.impl._
 import edu.gemini.ags.api.{AgsAnalysis, AgsStrategy}
 import edu.gemini.spModel.ags.AgsStrategyKey
+import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 
 import scala.concurrent.Future
 
-case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGuideProbe) extends AgsStrategy {
+case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGuideProbe, override val probeBands: List[MagnitudeBand]) extends AgsStrategy {
 
   // Since the science target is the used as the guide star, success is always guaranteed.
   override def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[AgsStrategy.Estimate] =
     Future.successful(AgsStrategy.Estimate.GuaranteedSuccess)
 
   override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] =
-    AgsAnalysis.analysis(ctx, mt, guideProbe).toList
+    AgsAnalysis.analysis(ctx, mt, guideProbe, probeBands).toList
 
   override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]] = {
     val so = ctx.getTargets.getBase.toNewModel
@@ -37,4 +38,5 @@ case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGui
     mt(ctx, guideProbe).toList.map((guideProbe, _))
 
   override val guideProbes: List[GuideProbe] = List(guideProbe)
+
 }

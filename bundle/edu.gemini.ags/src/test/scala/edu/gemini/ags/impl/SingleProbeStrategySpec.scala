@@ -37,7 +37,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
       val ctx = ObsContext.create(env, inst, new Some(Site.GN), SPSiteQuality.Conditions.BEST, null, aoComp)
 
       Await.result(strategy.select(ctx, magTable), 20.seconds) should beSome
-    }.pendingUntilFixed
+    }
     "find a target for NIRI+LGS, OCSADV-245" in {
       // Pal 12 target
       val ra = Angle.fromHMS(21, 46, 38.840).getOrElse(Angle.zero)
@@ -55,6 +55,6 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
       val ctx = ObsContext.create(env, inst, new Some(Site.GN), SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY), null, aoComp)
 
       Await.result(strategy.select(ctx, magTable), 20.seconds) should beSome
-    }.pendingUntilFixed
+    }
   }
 }

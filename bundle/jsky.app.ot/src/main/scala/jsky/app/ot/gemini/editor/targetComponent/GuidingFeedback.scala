@@ -32,7 +32,7 @@ object GuidingFeedback {
       def faint(gs: GuideSpeed) = mc.apply(cnds, gs).faintnessConstraint.brightness
 
       fast.saturationConstraint.map { sat =>
-        ProbeLimits(fast.band, sat.brightness, faint(FAST), faint(MEDIUM), faint(SLOW))
+        ProbeLimits(sat.brightness, faint(FAST), faint(MEDIUM), faint(SLOW))
       }
     }
 
@@ -40,11 +40,12 @@ object GuidingFeedback {
     def lim(d: Double): String = f"$d%.1f"
   }
 
-  case class ProbeLimits(band: MagnitudeBand, sat: Double, fast: Double, medium: Double, slow: Double) {
+  case class ProbeLimits(sat: Double, fast: Double, medium: Double, slow: Double) {
     import ProbeLimits.{le, lim}
 
     def searchRange: String =
-      s"${lim(sat)} $le $band $le ${lim(slow)}"
+      // FIXME, it used to show the band
+      s"${lim(sat)} $le BAND $le ${lim(slow)}"
 
     def detailRange: String =
       s"${lim(sat)} $le FAST $le ${lim(fast)} < MEDIUM $le ${lim(medium)} < SLOW $le ${lim(slow)}"
@@ -174,7 +175,8 @@ object GuidingFeedback {
 
   // GuidingFeedback.Row related to the given guide star itself.
   def guideStarAnalysis(ctx: ObsContext, mt: MagnitudeTable, gp: ValidatableGuideProbe, target: SPTarget): Option[Row] =
-    AgsAnalysis.analysis(ctx, mt, gp).map { a =>
+    // FIXME, bands cannot be Nil
+    AgsAnalysis.analysis(ctx, mt, gp, Nil).map { a =>
       val plo = mt(ctx, gp).flatMap(ProbeLimits(ctx, _))
       new Row(a, plo, includeProbeName = false)
     }

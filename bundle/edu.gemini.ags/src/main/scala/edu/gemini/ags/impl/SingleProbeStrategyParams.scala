@@ -3,7 +3,8 @@ package edu.gemini.ags.impl
 import edu.gemini.ags.api.AgsMagnitude
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.catalog.api.{CatalogQuery, RadiusConstraint}
-import edu.gemini.spModel.core.{MagnitudeBand, Angle, Site}
+import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.core.{Magnitude, MagnitudeBand, Angle, Site}
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2OiwfsGuideProbe
 import edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe
@@ -16,17 +17,18 @@ import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
 
 sealed trait SingleProbeStrategyParams {
   def site: Site
-  def band: MagnitudeBand = MagnitudeBand.R
   def guideProbe: ValidatableGuideProbe
   def stepSize: Angle            = Angle.fromDegrees(10)
   def minDistance: Option[Angle] = Some(Angle.fromArcsecs(20))
+  // Different instruments have a different reference band to decide what magnitude to use
+  protected def referenceBand: MagnitudeBand = MagnitudeBand.R
 
   final def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): Option[CatalogQuery] =
     for {
       mc <- magnitudeCalc(ctx, mt)
       rc <- radiusConstraint(ctx)
       ml =  AgsMagnitude.manualSearchLimits(mc)
-    } yield CatalogQuery.catalogQuery(ctx.getBaseCoordinates.toNewModel, rc, ml)
+    } yield CatalogQuery.catalogQueryWithoutBand(ctx.getBaseCoordinates.toNewModel, rc, Some(ml))
 
   def radiusConstraint(ctx: ObsContext): Option[RadiusConstraint] =
     RadiusLimitCalc.getAgsQueryRadiusLimits(guideProbe, ctx)
@@ -35,6 +37,17 @@ sealed trait SingleProbeStrategyParams {
     mt(ctx, guideProbe)
 
   def validator(ctx: ObsContext): GuideStarValidator = guideProbe
+
+  def probeBands: List[MagnitudeBand] = referenceBand match {
+      case MagnitudeBand.R => List(MagnitudeBand._r, MagnitudeBand.R, MagnitudeBand.UC)
+      case _               => List(referenceBand)
+    }
+
+  // For a given target return a magnitude value that can be used to select a target
+  def referenceMagnitude(st: SiderealTarget):Option[Magnitude] = referenceBand match {
+    case MagnitudeBand.R => List(st.magnitudeIn(MagnitudeBand._r), st.magnitudeIn(MagnitudeBand.R), st.magnitudeIn(MagnitudeBand.UC)).flatten.headOption
+    case _               => st.magnitudeIn(referenceBand)
+  }
 }
 
 object SingleProbeStrategyParams {
@@ -49,14 +62,6 @@ object SingleProbeStrategyParams {
     val guideProbe        = Flamingos2OiwfsGuideProbe.instance
     val site              = Site.GS
     override def stepSize = Angle.fromDegrees(90)
-
-    // Note, for single probe strategy it is always OIWFS....
-//    override def radiusLimits(ctx: ObsContext): Option[RadiusLimits] = {
-//      def flexureLimits: Option[RadiusLimits] =
-//        RadiusLimitCalc.getAgsQueryRadiusLimits(PatrolField.fromRadiusLimits(new Angle(0.33, Angle.Unit.ARCMINS), new Angle(Canopus.RADIUS_ARCSEC, Angle.Unit.ARCSECS)), ctx).asScalaOpt
-//      if (!ctx.getAOComponent.isEmpty) flexureLimits
-//      else super.radiusLimits(ctx)
-//    }
   }
 
   case class GmosOiwfsParams(site: Site) extends SingleProbeStrategyParams {
@@ -66,20 +71,20 @@ object SingleProbeStrategyParams {
   case object GnirsOiwfsParams extends SingleProbeStrategyParams {
     val guideProbe    = GnirsOiwfsGuideProbe.instance
     val site          = Site.GN
-    override val band = MagnitudeBand.K
+    override val referenceBand = MagnitudeBand.K
   }
 
   case object NifsOiwfsParams extends SingleProbeStrategyParams {
     val guideProbe    = NifsOiwfsGuideProbe.instance
     val site          = Site.GN
-    override val band = MagnitudeBand.K
+    override val referenceBand = MagnitudeBand.K
 
   }
 
   case object NiriOiwfsParams extends SingleProbeStrategyParams {
     val guideProbe    = NiriOiwfsGuideProbe.instance
     val site          = Site.GN
-    override val band = MagnitudeBand.K
+    override val referenceBand = MagnitudeBand.K
   }
 
 case class PwfsParams(site: Site, guideProbe: PwfsGuideProbe) extends SingleProbeStrategyParams {

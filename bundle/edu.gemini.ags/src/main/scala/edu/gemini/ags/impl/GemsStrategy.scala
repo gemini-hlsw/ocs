@@ -110,7 +110,7 @@ trait GemsStrategy extends AgsStrategy {
         case _                      => true
       }
 
-      val probeAnalysis = grp.getMembers.asScala.toList.map{ analysis(ctx, mt, _) }.flatten
+      val probeAnalysis = grp.getMembers.asScala.toList.map{ analysis(ctx, mt, _, probeBands) }.flatten
       probeAnalysis.filter(hasGuideStarForProbe) match {
         case Nil => List(NoGuideStarForGroup(grp))
         case lst => lst
@@ -218,8 +218,11 @@ trait GemsStrategy extends AgsStrategy {
     import AgsMagnitude._
     val cond = ctx.getConditions
     val mags = magnitudes(ctx, mt).toMap
-    def lim(gp: GuideProbe): Option[MagnitudeConstraints] =
-      autoSearchLimitsCalc(mags(gp), cond)
+    def lim(gp: GuideProbe): Option[MagnitudeConstraints] = {
+        val r = autoSearchLimitsCalc(mags(gp), cond)
+        // FIXME, this should use MagnitudeRange
+        Some(MagnitudeConstraints(MagnitudeBand.R, r.faintnessConstraint, r.saturationConstraint))
+      }
 
     val odgwMagLimits = (lim(GsaoiOdgw.odgw1) /: GsaoiOdgw.values().drop(1)) { (ml, odgw) =>
       (ml |@| lim(odgw))(_ union _).flatten
@@ -232,6 +235,8 @@ trait GemsStrategy extends AgsStrategy {
     val odgwConstaint     = odgwMagLimits.map(c => CatalogQuery.catalogQueryForGems(OdgwFlexureId,    ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, GsaoiOdgw.Group.instance.getRadiusLimits.toNewModel), c.some))
     List(canopusConstraint, odgwConstaint).flatten
   }
+
+  override val probeBands: List[MagnitudeBand] = List(MagnitudeBand.R)
 
   override val guideProbes: List[GuideProbe] =
     Flamingos2OiwfsGuideProbe.instance :: (GsaoiOdgw.values() ++ Canopus.Wfs.values()).toList

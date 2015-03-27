@@ -109,7 +109,7 @@ object AgsAnalysis {
   /**
    * Analysis of the selected guide star (if any) in the given context.
    */
-  def analysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe): Option[AgsAnalysis] = {
+  def analysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, bands: List[MagnitudeBand]): Option[AgsAnalysis] = {
     def selection(ctx: ObsContext, guideProbe: GuideProbe): Option[SPTarget] =
       for {
         gpt   <- ctx.getTargets.getPrimaryGuideProbeTargets(guideProbe).asScalaOpt
@@ -117,7 +117,7 @@ object AgsAnalysis {
       } yield gStar
 
     selection(ctx, guideProbe).fold(Some(NoGuideStarForProbe(guideProbe)): Option[AgsAnalysis]) { guideStar =>
-      AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar)
+      AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar, bands)
     }
   }
 
@@ -125,17 +125,18 @@ object AgsAnalysis {
    * Analysis for Java.
    */
   def analysisForJava(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SPTarget) =
-    analysis(ctx, mt, guideProbe, guideStar).asGeminiOpt
+    // FIXME bands cannot be Nil
+    analysis(ctx, mt, guideProbe, guideStar, Nil).asGeminiOpt
 
   /**
    * Analysis of the given guide star in the given context, regardless of which
    * guide star is actually selected in the target environment.
    */
-  def analysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SPTarget): Option[AgsAnalysis] =
+  def analysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SPTarget, bands: List[MagnitudeBand]): Option[AgsAnalysis] =
     if (!guideProbe.validate(guideStar, ctx)) Some(NotReachable(guideProbe, guideStar.toNewModel))
-    else magnitudeAnalysis(ctx, mt, guideProbe, guideStar.toNewModel)
+    else magnitudeAnalysis(ctx, mt, guideProbe, guideStar.toNewModel, bands)
 
-  private def magnitudeAnalysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] = {
+  private def magnitudeAnalysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget, b: List[MagnitudeBand]): Option[AgsAnalysis] = {
     import GuideSpeed._
     import AgsGuideQuality._
 
@@ -144,14 +145,14 @@ object AgsAnalysis {
     // Handles the case where the magnitude falls outside of the acceptable ranges for any guide speed.
     // This handles Andy's 0.5 rule where we might possibly be able to guide if the star is only 0.5 too dim, and
     // otherwise returns the appropriate analysis indicating too dim or too bright.
-    def outsideLimits(magCalc: MagnitudeCalc, mag: Magnitude): AgsAnalysis = {
+    def outsideLimits(magCalc: MagnitudeCalc, mag: Double): AgsAnalysis = {
       val adj             = 0.5
       val saturationLimit = magCalc(conds, FAST).saturationConstraint
       val faintnessLimit  = magCalc(conds, SLOW).faintnessConstraint.brightness
-      val saturated       = saturationLimit.exists(_.brightness > mag.value)
+      val saturated       = saturationLimit.exists(_.brightness > mag)
 
-      def almostTooFaint: Boolean = !saturated && mag.value <= faintnessLimit + adj
-      def tooFaint:       Boolean = mag.value > faintnessLimit + adj
+      def almostTooFaint: Boolean = !saturated && mag <= faintnessLimit + adj
+      def tooFaint:       Boolean = mag > faintnessLimit + adj
 
       if (almostTooFaint) Usable(guideProbe, guideStar, SLOW, PossiblyUnusable)
       else if (tooFaint)  MagnitudeTooFaint(guideProbe, guideStar)
@@ -178,13 +179,15 @@ object AgsAnalysis {
       Usable(guideProbe, guideStar, guideSpeed, quality)
     }
 
+    // Find the first band in the guide star that is on the list of possible bands
+    def usableMagnitude:Option[Magnitude] = b.find(guideStar.magnitudeIn(_).isDefined).map(guideStar.magnitudeIn).flatten
+
     for {
-      mc <- mt(ctx, guideProbe)
-      probeBand = band(mc)
+      mc  <- mt(ctx, guideProbe)
+      mag = usableMagnitude
     } yield {
-      val magOpt      = guideStar.magnitudeIn(probeBand)
-      val analysisOpt = magOpt.map(mag => fastestGuideSpeed(mc, mag, conds).fold(outsideLimits(mc, mag))(usable))
-      analysisOpt.getOrElse(NoMagnitudeForBand(guideProbe, guideStar, probeBand))
+      val analysisOpt = mag.map(m => fastestGuideSpeed(mc, m.value, conds).fold(outsideLimits(mc, m.value))(usable))
+      analysisOpt.getOrElse(NoMagnitudeForBand(guideProbe, guideStar, b.head))
     }
   }
 }

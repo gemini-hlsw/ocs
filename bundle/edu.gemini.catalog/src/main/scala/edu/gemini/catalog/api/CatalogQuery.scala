@@ -1,6 +1,6 @@
 package edu.gemini.catalog.api
 
-import edu.gemini.spModel.core.Coordinates
+import edu.gemini.spModel.core.{Magnitude, Coordinates}
 import edu.gemini.spModel.core.Target.SiderealTarget
 
 import scalaz._
@@ -11,9 +11,11 @@ sealed trait CatalogQuery {
   val base: Coordinates
   val radiusConstraint: RadiusConstraint
   val magnitudeConstraints: Option[MagnitudeConstraints]
+  val magnitudeRange: Option[MagnitudeRange]
   val catalog: CatalogName
 
   def filter: SiderealTarget => Boolean = (t) => radiusConstraint.targetsFilter(base)(t) && magnitudeConstraints.map(_.filter(t)).getOrElse(true)
+  def filterOnMagnitude: (SiderealTarget, Magnitude) => Boolean = (t, m) => radiusConstraint.targetsFilter(base)(t) && magnitudeConstraints.map(_.filter(t)).getOrElse(true) && magnitudeRange.map(_.filter(t, m)).getOrElse(true)
 
   def withMagnitudeConstraints(magnitudeConstraints: Option[MagnitudeConstraints]): CatalogQuery
 
@@ -32,17 +34,28 @@ sealed trait CatalogQuery {
 }
 
 object CatalogQuery {
-  private case class RegularCatalogQuery(base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeConstraints: Option[MagnitudeConstraints], catalog: CatalogName) extends CatalogQuery {
+  private case class BandConstrainedCatalogQuery(base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeConstraints: Option[MagnitudeConstraints], catalog: CatalogName) extends CatalogQuery {
+    override val magnitudeRange: Option[MagnitudeRange] = None
     def withMagnitudeConstraints(magnitudeConstraints: Option[MagnitudeConstraints]): CatalogQuery = copy(magnitudeConstraints = magnitudeConstraints)
   }
 
+  private case class RangeConstrainedCatalogQuery(base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeRange: Option[MagnitudeRange], catalog: CatalogName) extends CatalogQuery {
+    override val magnitudeConstraints = None
+    def withMagnitudeConstraints(magnitudeConstraints: Option[MagnitudeConstraints]): CatalogQuery = this
+  }
+
   private case class GemsCatalogQuery(override val id: Option[Int], base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeConstraints: Option[MagnitudeConstraints], catalog: CatalogName) extends CatalogQuery {
+    // FIXME Likely Gems should use a Magnitude Range rather than Magnitude Constraints
+    override val magnitudeRange: Option[MagnitudeRange] = None
     def withMagnitudeConstraints(magnitudeConstraints: Option[MagnitudeConstraints]): CatalogQuery = copy(magnitudeConstraints = magnitudeConstraints)
   }
 
   // TODO Ensure that it makes sense to default to ucac4
   def catalogQuery(base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeConstraints: Option[MagnitudeConstraints], catalog: CatalogName = ucac4): CatalogQuery
-    = RegularCatalogQuery(base, radiusConstraint, magnitudeConstraints, catalog)
+    = BandConstrainedCatalogQuery(base, radiusConstraint, magnitudeConstraints, catalog)
+
+  def catalogQueryWithoutBand(base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeRange: Option[MagnitudeRange], catalog: CatalogName = ucac4): CatalogQuery
+    = RangeConstrainedCatalogQuery(base, radiusConstraint, magnitudeRange, catalog)
 
   def catalogQueryForGems(id: Int, base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeConstraints: Option[MagnitudeConstraints], catalog: CatalogName = ucac4): CatalogQuery
     = GemsCatalogQuery(Some(id), base, radiusConstraint, magnitudeConstraints, catalog)
