@@ -48,6 +48,17 @@ sealed trait SingleProbeStrategyParams {
     case MagnitudeBand.R => List(st.magnitudeIn(MagnitudeBand._r), st.magnitudeIn(MagnitudeBand.R), st.magnitudeIn(MagnitudeBand.UC)).flatten.headOption
     case _               => st.magnitudeIn(referenceBand)
   }
+
+
+  def brightest[A](lst: List[A])(toSiderealTarget: A => SiderealTarget):Option[A] = {
+    def magnitude(t: SiderealTarget):Option[Double] = {
+      val m = referenceMagnitude(t)
+      m.map(_.value)
+    }
+    if (lst.isEmpty) None
+    else Some(lst.minBy(t => magnitude(toSiderealTarget(t))))
+  }
+
 }
 
 object SingleProbeStrategyParams {

@@ -49,5 +49,5 @@ class CandidateValidator(params: SingleProbeStrategyParams, mt: MagnitudeTable, 
 
   def exists(ctx: ObsContext): Boolean                = candidates.exists(isValid(ctx))
 
-  def select(ctx: ObsContext): Option[SiderealTarget] = brightest(filter(ctx), params)(identity)
+  def select(ctx: ObsContext): Option[SiderealTarget] = params.brightest(filter(ctx))(identity)
 }

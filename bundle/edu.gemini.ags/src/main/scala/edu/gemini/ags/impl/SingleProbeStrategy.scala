@@ -102,7 +102,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
             case FIXED_180 | PARALLACTIC_ANGLE => selectBounded(List(ctx, ctx180(ctx)), mt, candidates)
             case UNBOUNDED                     => selectUnbounded(ctx, mt, candidates)
           }
-          brightest(results, params)(_._2).map {
+          params.brightest(results)(_._2).map {
             case (angle, st) => AgsStrategy.Selection(angle, List(AgsStrategy.Assignment(params.guideProbe, st)))
           }
       }

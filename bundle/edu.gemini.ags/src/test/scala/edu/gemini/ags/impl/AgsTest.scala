@@ -2,7 +2,6 @@ package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.{AgsMagnitude, AgsRegistrar, AgsStrategy}
 import edu.gemini.ags.conf.ProbeLimitsTable
-import edu.gemini.ags.gems.GemsUtils4Java
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.skycalc.{Offset, DDMMSS, HHMMSS}
 import edu.gemini.spModel.core._
@@ -414,7 +413,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
     def go(winners: List[(SiderealTarget, GuideSpeed)]): Unit = {
       val best:Option[(SiderealTarget, GuideSpeed)] = winners match {
         case Nil => None
-        case lst => brightest(lst, strategy.params)(_._1 ).headOption
+        case lst => strategy.params.brightest(lst)(_._1).headOption
       }
 
       val all = winners.map(_._1) ++ unusable

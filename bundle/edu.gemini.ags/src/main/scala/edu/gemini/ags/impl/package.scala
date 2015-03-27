@@ -183,13 +183,4 @@ package object impl {
   def ctx180(c: ObsContext): ObsContext =
     c.withPositionAngle(c.getPositionAngle.add(180.0, skycalc.Angle.Unit.DEGREES))
 
-  def brightest[A](lst: List[A], params: SingleProbeStrategyParams)(toSiderealTarget: A => SiderealTarget):Option[A] = {
-    def magnitude(t: SiderealTarget):Option[Double] = {
-      val m = params.referenceMagnitude(t)
-      m.map(_.value)
-    }
-    if (lst.isEmpty) None
-    else Some(lst.minBy(t => magnitude(toSiderealTarget(t))))
-  }
-
 }
