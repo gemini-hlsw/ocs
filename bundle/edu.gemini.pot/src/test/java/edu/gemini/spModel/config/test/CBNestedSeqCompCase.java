@@ -68,6 +68,7 @@ public class CBNestedSeqCompCase extends CBSeqCompTestBase {
 
         TestDataObject dataObj = (TestDataObject) testSeqComp.getDataObject();
         dataObj.setSysConfig(sc);
+        testSeqComp.setDataObject(dataObj);
 
 
         // Create the one expected configuration.
@@ -106,6 +107,7 @@ public class CBNestedSeqCompCase extends CBSeqCompTestBase {
 
         TestDataObject dataObj = (TestDataObject) testSeqComp.getDataObject();
         dataObj.setSysConfig(sc);
+        testSeqComp.setDataObject(dataObj);
 
 
         // Create the one expected configurations.
@@ -174,7 +176,7 @@ public class CBNestedSeqCompCase extends CBSeqCompTestBase {
 
         TestDataObject dataObj = (TestDataObject) testSeqComp.getDataObject();
         dataObj.setSysConfig(sc);
-
+        testSeqComp.setDataObject(dataObj);
 
 
         // Create the one expected configurations.

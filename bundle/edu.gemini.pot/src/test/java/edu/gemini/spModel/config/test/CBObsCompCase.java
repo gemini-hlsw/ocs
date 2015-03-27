@@ -72,6 +72,7 @@ public class CBObsCompCase extends CBTestBase {
 
         TestDataObject dataObj = (TestDataObject) testObsComp.getDataObject();
         dataObj.setSysConfig(sc);
+        testObsComp.setDataObject(dataObj);
 
         IConfig expected = new DefaultConfig();
         _putConfigParameterValue(expected, "set0", "param0", "value0");
@@ -91,6 +92,7 @@ public class CBObsCompCase extends CBTestBase {
 
         TestDataObject dataObj = (TestDataObject) testObsComp.getDataObject();
         dataObj.setSysConfig(sc);
+        testObsComp.setDataObject(dataObj);
 
         IConfig expected = new DefaultConfig();
         _putConfigParameterValue(expected, "set0", "param0", "value0");
@@ -116,6 +118,7 @@ public class CBObsCompCase extends CBTestBase {
 
         TestDataObject dataObj = (TestDataObject) testObsComp.getDataObject();
         dataObj.setSysConfig(sc);
+        testObsComp.setDataObject(dataObj);
 
         IConfig expected = new DefaultConfig();
         _putConfigParameterValue(expected, "set0", "param0", "value0");
