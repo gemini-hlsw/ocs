@@ -27,9 +27,6 @@ public final class GnirsRecipe extends RecipeBase {
     private final Calendar now = Calendar.getInstance();
     private final String _header = "# GNIRS ITC: " + now.getTime() + "\n";
 
-    private String sigSpec, backSpec, singleS2N, finalS2N;
-    private SpecS2NLargeSlitVisitor specS2N;
-
     // Parameters from the web page.
     private final SourceDefinition _sdParameters;
     private final ObservationDetails _obsDetailParameters;
@@ -38,6 +35,7 @@ public final class GnirsRecipe extends RecipeBase {
     private final TelescopeDetails _telescope;
     private final PlottingDetails _plotParameters;
 
+    // TODO: these values are needed for the web output, add them to SpectroscopyResult?
     private VisitableSampledSpectrum[] signalOrder;
     private VisitableSampledSpectrum[] backGroundOrder;
     private VisitableSampledSpectrum[] finalS2NOrder;
@@ -49,7 +47,7 @@ public final class GnirsRecipe extends RecipeBase {
      * @param out Results will be written to this PrintWriter.
      * @throws Exception on failure to parse parameters.
      */
-    public GnirsRecipe(ITCMultiPartParser r, PrintWriter out) {
+    public GnirsRecipe(final ITCMultiPartParser r, final PrintWriter out) {
         super(out);
         // Read parameters from the four main sections of the web page.
         _sdParameters = ITCRequest.sourceDefinitionParameters(r);
@@ -69,12 +67,12 @@ public final class GnirsRecipe extends RecipeBase {
     /**
      * Constructs a GnirsRecipe given the parameters. Useful for testing.
      */
-    public GnirsRecipe(SourceDefinition sdParameters,
-                       ObservationDetails obsDetailParameters,
-                       ObservingConditions obsConditionParameters,
-                       GnirsParameters gnirsParameters, TelescopeDetails telescope,
-                       PlottingDetails plotParameters,
-                       PrintWriter out)
+    public GnirsRecipe(final SourceDefinition sdParameters,
+                       final ObservationDetails obsDetailParameters,
+                       final ObservingConditions obsConditionParameters,
+                       final GnirsParameters gnirsParameters, TelescopeDetails telescope,
+                       final PlottingDetails plotParameters,
+                       final PrintWriter out)
 
     {
         super(out);
@@ -114,45 +112,39 @@ public final class GnirsRecipe extends RecipeBase {
      *                   files, incorrectly-formatted data files, ...
      */
     public void writeOutput() {
-        _println("");
+        final Gnirs instrument = new GnirsNorth(_gnirsParameters, _obsDetailParameters);
+        final SpectroscopyResult result = calculateSpectroscopy(instrument);
+        writeSpectroscopyOutput(instrument, result);
+    }
 
-        // This object is used to format numerical strings.
-        FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2); // Two decimal places
-        device.clear();
+    public SpectroscopyResult calculateSpectroscopy() {
+        final Gnirs instrument = new GnirsNorth(_gnirsParameters, _obsDetailParameters);
+        return calculateSpectroscopy(instrument);
+    }
 
+    private SpectroscopyResult calculateSpectroscopy(final Gnirs instrument) {
         // Module 1b
         // Define the source energy (as function of wavelength).
         //
         // inputs: instrument, SED
         // calculates: redshifted SED
         // output: redshifteed SED
-        final Gnirs instrument = new GnirsNorth(_gnirsParameters, _obsDetailParameters);   // Added on 2/27/2014 (see REL-480)
 
         final double pixel_size = instrument.getPixelSize();
         double ap_diam = 0;
 
         // Calculate image quality
-        double im_qual;
-        double uncorrected_im_qual = 0.;
-
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
         IQcalc.calculate();
-        im_qual = IQcalc.getImageQuality();
 
 
         // Get the summed source and sky
         final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, _plotParameters);
         final VisitableSampledSpectrum sed = calcSource.sed;
         final VisitableSampledSpectrum sky = calcSource.sky;
-        double sed_integral = sed.getIntegral();
-        double sky_integral = sky.getIntegral();
 
         // Calculate the Fraction of source in the aperture
-        final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
-
-        // Calculate the Peak Pixel Flux
-        final double peak_pixel_count = PeakPixelFlux.calculate(instrument, _sdParameters, _obsDetailParameters, SFcalc, im_qual, sed_integral, sky_integral);
+        final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, IQcalc.getImageQuality());
 
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
@@ -160,50 +152,12 @@ public final class GnirsRecipe extends RecipeBase {
 
         final SlitThroughput st;
         if (!_obsDetailParameters.isAutoAperture()) {
-            st = new SlitThroughput(im_qual,
+            st = new SlitThroughput(IQcalc.getImageQuality(),
                     _obsDetailParameters.getApertureDiameter(),
                     pixel_size, _gnirsParameters.getFPMask());
-            _println("software aperture extent along slit = "
-                    + device.toString(_obsDetailParameters
-                    .getApertureDiameter()) + " arcsec");
         } else {
-            st = new SlitThroughput(im_qual, pixel_size, _gnirsParameters.getFPMask());
-
-            switch (_sdParameters.getProfileType()) {
-                case UNIFORM:
-                    _println("software aperture extent along slit = "
-                            + device.toString(1 / _gnirsParameters
-                            .getFPMask()) + " arcsec");
-                    break;
-                case POINT:
-                    _println("software aperture extent along slit = "
-                            + device.toString(1.4 * im_qual) + " arcsec");
-                    break;
-            }
-
+            st = new SlitThroughput(IQcalc.getImageQuality(), pixel_size, _gnirsParameters.getFPMask());
         }
-
-        if (!_sdParameters.isUniform()) {
-            _println("fraction of source flux in aperture = "
-                    + device.toString(st.getSlitThroughput()));
-        }
-
-
-        _println("derived image size(FWHM) for a point source = "
-                + device.toString(im_qual) + "arcsec\n");
-
-        _println("Sky subtraction aperture = "
-                + _obsDetailParameters.getSkyApertureDiameter()
-                + " times the software aperture.");
-
-        _println("");
-        _println("Requested total integration time = "
-                + device.toString(_obsDetailParameters.getExposureTime() * _obsDetailParameters.getNumExposures())
-                + " secs, of which "
-                + device.toString(_obsDetailParameters.getExposureTime() * _obsDetailParameters.getNumExposures()
-                * _obsDetailParameters.getSourceFraction()) + " secs is on source.");
-
-        _print("<HR align=left SIZE=3>");
 
         ap_diam = st.getSpatialPix(); // ap_diam really Spec_Npix on
 
@@ -211,6 +165,7 @@ public final class GnirsRecipe extends RecipeBase {
 
         // For the usb case we want the resolution to be determined by the
         // slit width and not the image quality for a point source.
+        final double im_qual;
         if (_sdParameters.isUniform()) {
             im_qual = 10000;
             if (_obsDetailParameters.isAutoAperture()) {
@@ -219,9 +174,11 @@ public final class GnirsRecipe extends RecipeBase {
             } else {
                 spec_source_frac = _gnirsParameters.getFPMask() * ap_diam * pixel_size;
             }
+        } else {
+            im_qual = IQcalc.getImageQuality();
         }
 
-        specS2N = new SpecS2NLargeSlitVisitor(
+        final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(
                 _gnirsParameters.getFPMask(), pixel_size,
                 instrument.getSpectralPixelWidth() / instrument.getOrder(),
                 instrument.getObservingStart(),
@@ -237,8 +194,6 @@ public final class GnirsRecipe extends RecipeBase {
                 instrument.getDarkCurrent(),
                 instrument.getReadNoise(),
                 _obsDetailParameters.getSkyApertureDiameter());
-
-        _println("<p style=\"page-break-inside: never\">");
 
         specS2N.setDetectorTransmission(instrument.getDetectorTransmision());
 
@@ -291,17 +246,6 @@ public final class GnirsRecipe extends RecipeBase {
                 backGroundOrder[i] = (VisitableSampledSpectrum) specS2N.getBackgroundSpectrum().clone();
             }
 
-            final ITCChart chart1 = new ITCChart("Signal and Background in software aperture of " + ap_diam + " pixels", "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
-            for (int i = 0; i < ORDERS; i++) {
-                chart1.addArray(signalOrder[i].getData(), "Signal Order "+(i+3), ORDER_COLORS[i]);
-                chart1.addArray(backGroundOrder[i].getData(), "SQRT(Background) Order "+(i+3), ORDER_BG_COLORS[i]);
-            }
-            _println(chart1.getBufferedImage(), "SigAndBack");
-            _println("");
-
-            sigSpec = _printSpecTag("ASCII signal spectrum");
-            backSpec = _printSpecTag("ASCII background spectrum");
-
             for (int i = 0; i < ORDERS; i++) {
                 final int order = i + 3;
                 specS2N.setSourceSpectrum(sedOrder[i]);
@@ -319,6 +263,94 @@ public final class GnirsRecipe extends RecipeBase {
                 finalS2NOrder[i] = (VisitableSampledSpectrum) specS2N.getFinalS2NSpectrum().clone();
             }
 
+        } else {
+
+            sed.accept(instrument.getGratingOrderNTransmission(instrument.getOrder()));
+
+            specS2N.setSourceSpectrum(sed);
+            specS2N.setBackgroundSpectrum(sky);
+            specS2N.setHaloImageQuality(0.0);
+            specS2N.setSpecHaloSourceFraction(0.0);
+
+            sed.accept(specS2N);
+
+        }
+
+        final SpecS2N[] specS2Narr = new SpecS2N[] {specS2N};
+        return new SpectroscopyResult(SFcalc, IQcalc, specS2Narr, st);
+
+    }
+
+
+    // ===================================================================================================================
+    // TODO: OUTPUT METHODS
+    // TODO: These need to be simplified/cleaned/shared and then go to the web module.. and then be deleted and forgotten.
+    // ===================================================================================================================
+
+
+    private void writeSpectroscopyOutput(final Gnirs instrument, final SpectroscopyResult result) {
+        _println("");
+
+        // This object is used to format numerical strings.
+        final FormatStringWriter device = new FormatStringWriter();
+        device.setPrecision(2); // Two decimal places
+        device.clear();
+
+        if (!_obsDetailParameters.isAutoAperture()) {
+            _println("software aperture extent along slit = "
+                    + device.toString(_obsDetailParameters
+                    .getApertureDiameter()) + " arcsec");
+        } else {
+            switch (_sdParameters.getProfileType()) {
+                case UNIFORM:
+                    _println("software aperture extent along slit = "
+                            + device.toString(1 / _gnirsParameters
+                            .getFPMask()) + " arcsec");
+                    break;
+                case POINT:
+                    _println("software aperture extent along slit = "
+                            + device.toString(1.4 * result.IQcalc.getImageQuality()) + " arcsec");
+                    break;
+            }
+        }
+
+        if (!_sdParameters.isUniform()) {
+            _println("fraction of source flux in aperture = "
+                    + device.toString(result.st.getSlitThroughput()));
+        }
+
+        _println("derived image size(FWHM) for a point source = "
+                + device.toString(result.IQcalc.getImageQuality()) + "arcsec\n");
+
+        _println("Sky subtraction aperture = "
+                + _obsDetailParameters.getSkyApertureDiameter()
+                + " times the software aperture.");
+
+        _println("");
+        _println("Requested total integration time = "
+                + device.toString(_obsDetailParameters.getExposureTime() * _obsDetailParameters.getNumExposures())
+                + " secs, of which "
+                + device.toString(_obsDetailParameters.getExposureTime() * _obsDetailParameters.getNumExposures()
+                * _obsDetailParameters.getSourceFraction()) + " secs is on source.");
+
+        _print("<HR align=left SIZE=3>");
+
+        _println("<p style=\"page-break-inside: never\">");
+
+        final String sigSpec, singleS2N, backSpec, finalS2N;
+        if (instrument.XDisp_IsUsed()) {
+
+            final ITCChart chart1 = new ITCChart("Signal and Background in software aperture of " + result.specS2N[0].getSpecNpix() + " pixels", "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
+            for (int i = 0; i < ORDERS; i++) {
+                chart1.addArray(signalOrder[i].getData(), "Signal Order "+(i+3), ORDER_COLORS[i]);
+                chart1.addArray(backGroundOrder[i].getData(), "SQRT(Background) Order "+(i+3), ORDER_BG_COLORS[i]);
+            }
+            _println(chart1.getBufferedImage(), "SigAndBack");
+            _println("");
+
+            sigSpec = _printSpecTag("ASCII signal spectrum");
+            backSpec = _printSpecTag("ASCII background spectrum");
+
             final ITCChart chart2 = new ITCChart("Final S/N", "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
             for (int i = 0; i < ORDERS; i++) {
                 chart2.addArray(finalS2NOrder[i].getData(), "Final S/N Order "+(i+3), ORDER_COLORS[i]);
@@ -326,23 +358,14 @@ public final class GnirsRecipe extends RecipeBase {
             _println(chart2.getBufferedImage(), "Sig2N");
             _println("");
 
+            singleS2N = "";
             finalS2N = _printSpecTag("Final S/N ASCII data");
-
 
         } else {
 
-            sed.accept(instrument.getGratingOrderNTransmission(instrument.getOrder()));
-
-            specS2N.setSourceSpectrum(sed);
-            specS2N.setBackgroundSpectrum(sky);
-            specS2N.setHaloImageQuality(uncorrected_im_qual);
-            specS2N.setSpecHaloSourceFraction(0.0);
-
-            sed.accept(specS2N);
-
-            final ITCChart chart1 = new ITCChart("Signal and Background in software aperture of " + ap_diam + " pixels", "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
-            chart1.addArray(specS2N.getSignalSpectrum().getData(), "Signal ");
-            chart1.addArray(specS2N.getBackgroundSpectrum().getData(), "SQRT(Background)  ");
+            final ITCChart chart1 = new ITCChart("Signal and Background in software aperture of " + result.specS2N[0].getSpecNpix() + " pixels", "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
+            chart1.addArray(result.specS2N[0].getSignalSpectrum().getData(), "Signal ");
+            chart1.addArray(result.specS2N[0].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
             _println(chart1.getBufferedImage(), "SigAndBack");
             _println("");
 
@@ -350,8 +373,8 @@ public final class GnirsRecipe extends RecipeBase {
             backSpec = _printSpecTag("ASCII background spectrum");
 
             final ITCChart chart2 = new ITCChart("Intermediate Single Exp and Final S/N", "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
-            chart2.addArray(specS2N.getExpS2NSpectrum().getData(), "Single Exp S/N");
-            chart2.addArray(specS2N.getFinalS2NSpectrum().getData(), "Final S/N  ");
+            chart2.addArray(result.specS2N[0].getExpS2NSpectrum().getData(), "Single Exp S/N");
+            chart2.addArray(result.specS2N[0].getFinalS2NSpectrum().getData(), "Final S/N  ");
             _println(chart2.getBufferedImage(), "Sig2N");
             _println("");
 
@@ -363,7 +386,6 @@ public final class GnirsRecipe extends RecipeBase {
         device.setPrecision(2); // TWO decimal places
         device.clear();
 
-        // _println("");
         _print("<HR align=left SIZE=3>");
 
         _println("<b>Input Parameters:</b>");
@@ -373,27 +395,23 @@ public final class GnirsRecipe extends RecipeBase {
         _println(HtmlPrinter.printParameterSummary(_telescope));
         _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));
         _println(HtmlPrinter.printParameterSummary(_obsDetailParameters));
-        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
-            _println(HtmlPrinter.printParameterSummary(_plotParameters));
-        }
+        _println(HtmlPrinter.printParameterSummary(_plotParameters));
 
-        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
-            if (instrument.XDisp_IsUsed()) {
-                for (int i = 0; i < ORDERS; i++) {
-                    _println(signalOrder[i], _header, sigSpec);
-                }
-                for (int i = 0; i < ORDERS; i++) {
-                    _println(backGroundOrder[i], _header, backSpec);
-                }
-                for (int i = 0; i < ORDERS; i++) {
-                    _println(finalS2NOrder[i], _header, finalS2N);
-                }
-            } else {
-                _println(specS2N.getSignalSpectrum(), _header, sigSpec);
-                _println(specS2N.getBackgroundSpectrum(), _header, backSpec);
-                _println(specS2N.getExpS2NSpectrum(), _header, singleS2N);
-                _println(specS2N.getFinalS2NSpectrum(), _header, finalS2N);
+        if (instrument.XDisp_IsUsed()) {
+            for (int i = 0; i < ORDERS; i++) {
+                _println(signalOrder[i], _header, sigSpec);
             }
+            for (int i = 0; i < ORDERS; i++) {
+                _println(backGroundOrder[i], _header, backSpec);
+            }
+            for (int i = 0; i < ORDERS; i++) {
+                _println(finalS2NOrder[i], _header, finalS2N);
+            }
+        } else {
+            _println(result.specS2N[0].getSignalSpectrum(), _header, sigSpec);
+            _println(result.specS2N[0].getBackgroundSpectrum(), _header, backSpec);
+            _println(result.specS2N[0].getExpS2NSpectrum(), _header, singleS2N);
+            _println(result.specS2N[0].getFinalS2NSpectrum(), _header, finalS2N);
         }
     }
 }
