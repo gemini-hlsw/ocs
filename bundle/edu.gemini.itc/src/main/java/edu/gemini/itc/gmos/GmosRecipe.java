@@ -85,42 +85,45 @@ public final class GmosRecipe extends RecipeBase {
     }
 
     /**
-     * Performes recipe calculation and writes results to a cached PrintWriter
-     * or to System.out.
-     *
-     * @throws Exception A recipe calculation can fail in many ways, missing data
-     *                   files, incorrectly-formatted data files, ...
+     * Performes recipe calculation and writes results to a cached PrintWriter or to System.out.
      */
     public void writeOutput() {
         final Gmos mainInstrument = createGmos();
-        final IntermediateResult[] results = calculate(mainInstrument);
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {
+            final SpectroscopyResult[] results = calculateSpectroscopy(mainInstrument);
             writeSpectroscopyOutput(mainInstrument, results);
         } else {
+            final ImagingResult[] results = calculateImaging(mainInstrument);
             writeImagingOutput(mainInstrument, results);
         }
     }
 
-    public RecipeBase.IntermediateResult[] calculate() {
-        return calculate(createGmos());
+    public SpectroscopyResult[] calculateSpectroscopy() {
+        return calculateSpectroscopy(createGmos());
     }
 
-    private IntermediateResult[] calculate(final Gmos mainInstrument) {
+    public ImagingResult[] calculateImaging() {
+        return calculateImaging(createGmos());
+    }
 
+    private SpectroscopyResult[] calculateSpectroscopy(final Gmos mainInstrument) {
         final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
-        final IntermediateResult[] results = new IntermediateResult[ccdArray.length];
+        final SpectroscopyResult[] results = new SpectroscopyResult[ccdArray.length];
         for (int i = 0; i < ccdArray.length; i++) {
             final Gmos instrument = ccdArray[i];
-            final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _gmosParameters.site(), ITCConstants.VISIBLE, _sdParameters, _obsConditionParameters, _telescope, _plotParameters);
-            if (_obsDetailParameters.getMethod().isSpectroscopy()) {
-                results[i] = calculateSpectroscopy(calcSource, mainInstrument, instrument, ccdArray.length);
-            } else {
-                results[i] = calculateImaging(calcSource, instrument);
-            }
+            results[i] = calculateSpectroscopy(mainInstrument, instrument, ccdArray.length);
         }
-
         return results;
+    }
 
+    private ImagingResult[] calculateImaging(final Gmos mainInstrument) {
+        final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
+        final ImagingResult[] results = new ImagingResult[ccdArray.length];
+        for (int i = 0; i < ccdArray.length; i++) {
+            final Gmos instrument = ccdArray[i];
+            results[i] = calculateImagingDo(instrument);
+        }
+        return results;
     }
 
     private Gmos createGmos() {
@@ -132,11 +135,12 @@ public final class GmosRecipe extends RecipeBase {
     }
 
     // TODO: bring mainInstrument and instrument together
-    private SpectroscopyResult calculateSpectroscopy(final SEDFactory.SourceResult src, final Gmos mainInstrument, final Gmos instrument, final int detectorCount) {
+    private SpectroscopyResult calculateSpectroscopy(final Gmos mainInstrument, final Gmos instrument, final int detectorCount) {
 
         final SpecS2NLargeSlitVisitor[] specS2N;
         final SlitThroughput st;
 
+        final SEDFactory.SourceResult src = SEDFactory.calculate(instrument, _gmosParameters.site(), ITCConstants.VISIBLE, _sdParameters, _obsConditionParameters, _telescope, _plotParameters);
         final int ccdIndex = instrument.getDetectorCcdIndex();
         final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
         final int firstCcdIndex = tv.getDetectorCcdStartIndex(ccdIndex);
@@ -284,7 +288,7 @@ public final class GmosRecipe extends RecipeBase {
 
     }
 
-    private ImagingResult calculateImaging(final SEDFactory.SourceResult src, final Gmos instrument) {
+    private ImagingResult calculateImagingDo(final Gmos instrument) {
 
         // Start of morphology section of ITC
 
@@ -297,6 +301,7 @@ public final class GmosRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
+        final SEDFactory.SourceResult src = SEDFactory.calculate(instrument, _gmosParameters.site(), ITCConstants.VISIBLE, _sdParameters, _obsConditionParameters, _telescope, _plotParameters);
         final double sed_integral = src.sed.getIntegral();
         final double sky_integral = src.sky.getIntegral();
 
@@ -332,7 +337,7 @@ public final class GmosRecipe extends RecipeBase {
     // ===================================================================================================================
 
 
-    private void writeSpectroscopyOutput(final Gmos mainInstrument, final IntermediateResult[] results) {
+    private void writeSpectroscopyOutput(final Gmos mainInstrument, final SpectroscopyResult[] results) {
         _println("");
 
         // This object is used to format numerical strings.
@@ -368,7 +373,7 @@ public final class GmosRecipe extends RecipeBase {
                     ? tv.getDetectorCcdStartIndex(ccdIndex + 1)
                     : lastCcdIndex;
 
-            final SpectroscopyResult calcGmos = (SpectroscopyResult) results[ccdIndex];
+            final SpectroscopyResult calcGmos = results[ccdIndex];
 
             final int number_exposures = _obsDetailParameters.getNumExposures();
             final double frac_with_source = _obsDetailParameters.getSourceFraction();
@@ -436,7 +441,7 @@ public final class GmosRecipe extends RecipeBase {
     }
 
 
-    private void writeImagingOutput(final Gmos mainInstrument, final IntermediateResult[] results) {
+    private void writeImagingOutput(final Gmos mainInstrument, final ImagingResult[] results) {
         _println("");
 
         // This object is used to format numerical strings.
@@ -451,7 +456,7 @@ public final class GmosRecipe extends RecipeBase {
             final String ccdName = instrument.getDetectorCcdName();
             final String forCcdName = ccdName.length() == 0 ? "" : " for " + ccdName;
 
-            final ImagingResult calcGmos = (ImagingResult) results[ccdIndex];
+            final ImagingResult calcGmos = results[ccdIndex];
 
             if (ccdIndex == 0) {
                 _print(calcGmos.SFcalc.getTextResult(device));

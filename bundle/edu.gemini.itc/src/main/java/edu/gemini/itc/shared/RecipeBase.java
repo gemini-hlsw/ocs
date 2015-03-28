@@ -8,8 +8,7 @@ import java.io.PrintWriter;
 public abstract class RecipeBase implements Recipe {
 
     // Intermediate alculation results
-    public interface IntermediateResult {}
-    public static final class ImagingResult implements IntermediateResult {
+    public static final class ImagingResult {
         public final SourceFraction SFcalc;
         public final double peak_pixel_count;
         public final ImagingS2NCalculatable IS2Ncalc;
@@ -22,7 +21,7 @@ public abstract class RecipeBase implements Recipe {
         }
 
     }
-    public static final class SpectroscopyResult implements IntermediateResult {
+    public static final class SpectroscopyResult {
         public final SourceFraction SFcalc;
         public final SpecS2N[] specS2N;
         public final SlitThroughput st;

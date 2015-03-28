@@ -31,21 +31,20 @@ class ItcServiceImpl extends ItcService {
     // TODO: plot params and output will go away from recipe!
     val recipe = new GmosRecipe(source, obs, cond, ins, tele, dummyPlotParams, null)
     // TODO: we can simplify this once all recipes have a calculate method (instead of writeOutput())
-    val results: Array[ItcCalcResult] = recipe.calculate().map {
-      case r: ImagingResult => r.IS2Ncalc match {
-
-        case i: ImagingS2NMethodACalculation =>
+    val results: Array[ItcCalcResult] = obs.getMethod match {
+      case m: Imaging =>
           // Repack the result in an immutable and simplified Scala case class
           // (We don't want to leak out any of the internal ITC craziness here and it is also a good way
           // to keep the service independent from the actual implementation.)
-          ItcImagingResult(i.singleSNRatio(), i.totalSNRatio(), r.peak_pixel_count)
+          recipe.calculateImaging().map {
+            case r: ImagingResult => r.IS2Ncalc match {
+              case i: ImagingS2NMethodACalculation  => ItcImagingResult(i.singleSNRatio(), i.totalSNRatio(), r.peak_pixel_count)
+              case _                                => throw new NotImplementedError()
+            }
+          }
 
-        case _ =>
-          // TODO: no other cases are implemented yet
-          throw new NotImplementedError
-
-      }
-      case r: SpectroscopyResult => ItcSpectroscopyResult()
+      case s: Spectroscopy =>
+        throw new NotImplementedError()
     }
     ItcResult.forCcds(results)
   }
