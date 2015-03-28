@@ -119,17 +119,13 @@ public final class GsaoiRecipe extends RecipeBase {
 
         // Altair specific section
         final Option<AOSystem> gems;
-        if (_gemsParameters.gemsIsUsed()) {
-            final Gems ao = new Gems(instrument.getEffectiveWavelength(),
-                    _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(),
-                    _gemsParameters.getAvgStrehl(), _gemsParameters.getStrehlBand(),
-                    _obsConditionParameters.getImageQualityPercentile(),
-                    _sdParameters);
-            _println(ao.printSummary());
-            gems = Option.apply((AOSystem) ao);
-        } else {
-            gems = Option.empty();
-        }
+        final Gems ao = new Gems(instrument.getEffectiveWavelength(),
+                _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(),
+                _gemsParameters.getAvgStrehl(), _gemsParameters.getStrehlBand(),
+                _obsConditionParameters.getImageQualityPercentile(),
+                _sdParameters);
+        _println(ao.printSummary());
+        gems = Option.apply((AOSystem) ao);
 
         final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GS, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, null, gems);
 
@@ -147,50 +143,31 @@ public final class GsaoiRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        double halo_source_fraction = 0;
         final double sed_integral = calcSource.sed.getIntegral();
         final double sky_integral = calcSource.sky.getIntegral();
-
-        double halo_integral = 0;
-        if (_gemsParameters.gemsIsUsed()) {
-            halo_integral = calcSource.halo.get().getIntegral();
-        }
+        final double halo_integral = calcSource.halo.get().getIntegral();
 
         // if gems is used we need to calculate both a core and halo
         // source_fraction
         // halo first
         final SourceFraction SFcalc;
-        if (_gemsParameters.gemsIsUsed()) {
-            final SourceFraction SFcalcHalo;
-            final double im_qual = gems.get().getAOCorrectedFWHM();
-            if (_obsDetailParameters.isAutoAperture()) {
-                SFcalcHalo  = SourceFractionFactory.calculate(_sdParameters.isUniform(), false, 1.18 * im_qual, instrument.getPixelSize(), IQcalc.getImageQuality());
-                SFcalc      = SourceFractionFactory.calculate(_sdParameters.isUniform(), _obsDetailParameters.isAutoAperture(), 1.18 * im_qual, instrument.getPixelSize(), im_qual);
-            } else {
-                SFcalcHalo  = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, IQcalc.getImageQuality());
-                SFcalc      = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
-            }
-            halo_source_fraction = SFcalcHalo.getSourceFraction();
+        final SourceFraction SFcalcHalo;
+        final double im_qual = gems.get().getAOCorrectedFWHM();
+        if (_obsDetailParameters.isAutoAperture()) {
+            SFcalcHalo  = SourceFractionFactory.calculate(_sdParameters.isUniform(), false, 1.18 * im_qual, instrument.getPixelSize(), IQcalc.getImageQuality());
+            SFcalc      = SourceFractionFactory.calculate(_sdParameters.isUniform(), _obsDetailParameters.isAutoAperture(), 1.18 * im_qual, instrument.getPixelSize(), im_qual);
         } else {
-           SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, IQcalc.getImageQuality());
-
+            SFcalcHalo  = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, IQcalc.getImageQuality());
+            SFcalc      = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
         }
+        final double halo_source_fraction = SFcalcHalo.getSourceFraction();
 
-        // this will be the core for a gems source; unchanged for non gems.
-        if (_obsDetailParameters.getMethod().isImaging()) {
-            if (_gemsParameters.gemsIsUsed()) {
-                // If gems is used turn off printing of SF calc
-                _print(SFcalc.getTextResult(device, false));
-                _println("derived image halo size (FWHM) for a point source = "
-                        + device.toString(IQcalc.getImageQuality()) + " arcsec.\n");
-            } else {
-                _print(SFcalc.getTextResult(device));
-                _println(IQcalc.getTextResult(device));
-            }
-        }
+        // If gems is used turn off printing of SF calc
+        _print(SFcalc.getTextResult(device, false));
+        _println("derived image halo size (FWHM) for a point source = "
+                + device.toString(IQcalc.getImageQuality()) + " arcsec.\n");
 
         // Calculate peak pixel flux
-        final double im_qual = gems.isDefined() ? gems.get().getAOCorrectedFWHM() : IQcalc.getImageQuality();
         final double peak_pixel_count = gems.isDefined() ?
                 PeakPixelFlux.calculateWithHalo(instrument, _sdParameters, _obsDetailParameters, SFcalc, im_qual, IQcalc.getImageQuality(), halo_integral, sed_integral, sky_integral) :
                 PeakPixelFlux.calculate(instrument, _sdParameters, _obsDetailParameters, SFcalc, im_qual, sed_integral, sky_integral);
@@ -201,10 +178,8 @@ public final class GsaoiRecipe extends RecipeBase {
 
         // ObservationMode Imaging
         final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
-        if (_gemsParameters.gemsIsUsed()) {
-            IS2Ncalc.setSecondaryIntegral(halo_integral);
-            IS2Ncalc.setSecondarySourceFraction(halo_source_fraction);
-        }
+        IS2Ncalc.setSecondaryIntegral(halo_integral);
+        IS2Ncalc.setSecondarySourceFraction(halo_source_fraction);
         IS2Ncalc.calculate();
         _println(IS2Ncalc.getTextResult(device));
         _println(IS2Ncalc.getBackgroundLimitResult());
@@ -233,19 +208,11 @@ public final class GsaoiRecipe extends RecipeBase {
         _println("Instrument: " + instrument.getName() + "\n");
         _println(HtmlPrinter.printParameterSummary(_sdParameters));
         _println(instrument.toString());
-        if (_gemsParameters.gemsIsUsed()) {
-            _println(printTeleParametersSummary("gems"));
-            _println(_gemsParameters.printParameterSummary());
-        } else {
-            _println(printTeleParametersSummary());
-        }
+        _println(printTeleParametersSummary("gems"));
+        _println(_gemsParameters.printParameterSummary());
         _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));
         _println(HtmlPrinter.printParameterSummary(_obsDetailParameters));
 
-    }
-
-    public String printTeleParametersSummary() {
-        return printTeleParametersSummary(_telescope.getWFS().displayValue());
     }
 
     public String printTeleParametersSummary(String wfs) {

@@ -60,7 +60,6 @@ object Hash {
 
   def calc(p: GsaoiParameters): Int =
     hash(
-      p.getCamera,
       p.getFilter,
       p.getReadMode
     )
@@ -184,7 +183,6 @@ object Hash {
 
   def calc(alt: GemsParameters): Int =
     hash(
-      alt.gemsIsUsed,
       alt.getAvgStrehl,
       alt.getStrehlBand
     )

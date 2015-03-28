@@ -31,7 +31,6 @@ public class Gsaoi extends Instrument {
 
     private Filter _filter;
     private String _filterUsed;
-    private String _camera;
     private String _readMode;
 
     /**
@@ -43,7 +42,6 @@ public class Gsaoi extends Instrument {
 
         _readMode = np.getReadMode();
         _filterUsed = np.getFilter();
-        _camera = np.getCamera();
 
         if (!(_filterUsed.equals("none"))) {
             _filter = Filter.fromFile(getPrefix(), _filterUsed, getDirectory() + "/");
@@ -77,10 +75,6 @@ public class Gsaoi extends Instrument {
         else if (_readMode.equals(GsaoiParameters.FAINT_OBJECTS_READ_MODE))
             return FAINT_OBJECTS_READ_NOISE;
         else return VERY_FAINT_OBJECTS_READ_NOISE;
-    }
-
-    public String getCamera() {
-        return _camera;
     }
 
     /**

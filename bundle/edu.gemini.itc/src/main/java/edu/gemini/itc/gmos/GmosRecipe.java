@@ -102,7 +102,7 @@ public final class GmosRecipe extends RecipeBase {
         return calculateSpectroscopy(createGmos());
     }
 
-    public ImagingResult[] calculateImaging() {
+    public RecipeBase.ImagingResult[] calculateImaging() {
         return calculateImaging(createGmos());
     }
 

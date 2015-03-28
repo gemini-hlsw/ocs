@@ -57,10 +57,6 @@ public final class GemsParameters extends ITCParameters {
         _strehlBand = p.getParameter(STREHL_BAND);
     }
 
-    public boolean gemsIsUsed() {
-        return true;
-    }
-
     public double getAvgStrehl() {
         return _avgStrehl;
     }
