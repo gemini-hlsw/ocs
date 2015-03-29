@@ -19,7 +19,7 @@ class ValidityCorrection(lifespanId: LifespanId, nodeMap: Map[SPNodeKey, ISPNode
   // into a conflict folder.  The Validator finds one issue at a time so we
   // find and fix an issue and then start over with the updated MergePlan until
   // there are no more issues.
-  def apply(mp: MergePlan): TryCorrect[MergePlan] =
+  def apply(mp: MergePlan): TryVcs[MergePlan] =
     toTypeTree(mp.update).flatMap { tt =>
       Validator.validate(tt) match {
         case Left(v)  => fix(mp, v).flatMap(apply)
@@ -27,25 +27,25 @@ class ValidityCorrection(lifespanId: LifespanId, nodeMap: Map[SPNodeKey, ISPNode
       }
     }
 
-  private def toTypeTree(t: Tree[MergeNode]): TryCorrect[TypeTree] =
+  private def toTypeTree(t: Tree[MergeNode]): TryVcs[TypeTree] =
     t.rootLabel match {
       case Unmodified(k)          =>
         // We need the types of the immediate children of a node, even if not
         // modified.
-        nodeMap.get(k).toTryCorrect(s"Could not find unmodified node: $k").map { n =>
+        nodeMap.get(k).toTryVcs(s"Could not find unmodified node: $k").map { n =>
           TypeTree(NodeType.forNode(n), Some(k), Nil)
         }
 
       case Modified(k, _, dob, _) =>
-        NodeType.forComponentType(dob.getType).toTryCorrect(s"Unusable node type: ${dob.getType}").flatMap { nt =>
+        NodeType.forComponentType(dob.getType).toTryVcs(s"Unusable node type: ${dob.getType}").flatMap { nt =>
           t.subForest.traverseU(toTypeTree).map { cs =>
             TypeTree(nt, Some(k), cs.toList)
           }
         }
     }
 
-  private def fix(mp: MergePlan, v: Violation): TryCorrect[MergePlan] = {
-    def key(v: Violation): TryCorrect[SPNodeKey] =
+  private def fix(mp: MergePlan, v: Violation): TryVcs[MergePlan] = {
+    def key(v: Violation): TryVcs[SPNodeKey] =
       v match {
         case CardinalityViolation(nt, Some(k), _) => k.right
 
@@ -56,8 +56,8 @@ class ValidityCorrection(lifespanId: LifespanId, nodeMap: Map[SPNodeKey, ISPNode
           Unmergeable(s"Duplicate program node key found: $k").left
       }
 
-    def zip(k: SPNodeKey): TryCorrect[TreeLoc[MergeNode]] =
-      mp.update.loc.find(_.getLabel.key === k).toTryCorrect(s"Couldn't find node involved in validate constraint violation: $k")
+    def zip(k: SPNodeKey): TryVcs[TreeLoc[MergeNode]] =
+      mp.update.loc.find(_.getLabel.key === k).toTryVcs(s"Couldn't find node involved in validate constraint violation: $k")
 
     for {
       k <- key(v)
@@ -68,9 +68,9 @@ class ValidityCorrection(lifespanId: LifespanId, nodeMap: Map[SPNodeKey, ISPNode
 
   // Moves the tree at the focus of the given zipper into a conflict folder of
   // the parent node.
-  private def fix(mp: MergePlan, z: TreeLoc[MergeNode]): TryCorrect[MergePlan] = {
+  private def fix(mp: MergePlan, z: TreeLoc[MergeNode]): TryVcs[MergePlan] = {
 
-    def incr(z: TreeLoc[MergeNode]): TryCorrect[TreeLoc[MergeNode]] =
+    def incr(z: TreeLoc[MergeNode]): TryVcs[TreeLoc[MergeNode]] =
       z.getLabel match {
         case m: Modified => \/-(z.modifyLabel(_ => m.copy(nv = m.nv.incr(lifespanId))))
         case _           => -\/(Unmergeable("Could not increment version of unmodified node"))
@@ -106,7 +106,7 @@ class ValidityCorrection(lifespanId: LifespanId, nodeMap: Map[SPNodeKey, ISPNode
     }
 
     for {
-      p0  <- z.deleteNodeFocusParent.toTryCorrect("Validity constraint violation for root node")
+      p0  <- z.deleteNodeFocusParent.toTryVcs("Validity constraint violation for root node")
       p1  <- incr(p0)
       cf0  = p1.findChild(isConflictFolder).fold(addConflictFolder(p1))(asModified)
       cf1 <- incr(cf0)

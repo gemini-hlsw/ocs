@@ -27,7 +27,7 @@ import Scalaz._
   * local-only observation.
   */
 class ObsNumberCorrection(lifespanId: LifespanId, isKnown: (ProgramLocation, SPNodeKey) => Boolean) extends CorrectionFunction {
-  def apply(mp: MergePlan): TryCorrect[MergePlan] =
+  def apply(mp: MergePlan): TryVcs[MergePlan] =
     renumberedObs(mp).map { obsMap =>
       if (obsMap.isEmpty) mp // usually empty so we might as well check and save a traversal in that case
       else
@@ -41,7 +41,7 @@ class ObsNumberCorrection(lifespanId: LifespanId, isKnown: (ProgramLocation, SPN
 
   // Obtains a Set of pairs of observation node keys that need to be
   // renumbered along with the new observation number they should have.
-  private def renumberedObs(mp: MergePlan): TryCorrect[Map[SPNodeKey, Int]] = {
+  private def renumberedObs(mp: MergePlan): TryVcs[Map[SPNodeKey, Int]] = {
 
     /** A pair of the max remote-only observation number and a set of all
       * local-only observation keys with their current observation number.

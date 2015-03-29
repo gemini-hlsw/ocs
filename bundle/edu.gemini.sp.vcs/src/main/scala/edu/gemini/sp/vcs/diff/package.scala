@@ -1,6 +1,7 @@
 package edu.gemini.sp.vcs
 
 import edu.gemini.pot.sp.{ISPProgram, SPNodeKey, ISPNode}
+import edu.gemini.sp.vcs.diff.VcsFailure.{VcsException, Unmergeable}
 import edu.gemini.spModel.rich.pot.sp._
 
 import scalaz._
@@ -30,6 +31,20 @@ package object diff {
     p.fold(p.getVersions.keySet) { _ - _.key }
 
   type TryVcs[A] = VcsFailure \/ A
+
+  implicit class OptionOps[A](o: Option[A]) {
+    def toTryVcs(msg: => String): TryVcs[A] =
+      o.toRightDisjunction(Unmergeable(msg))
+  }
+
+  /**
+   * Safe access to screwy science program model.  Handles exceptions and null
+   * elements as VcsFailures.
+   */
+  def safeGet[A](a: => A, failureMessage: => String): TryVcs[A] =
+    \/.fromTryCatch(a).leftMap { t =>
+      VcsException(t): VcsFailure
+    }.flatMap { Option(_).toTryVcs(failureMessage) }
 
   type VcsAction[+A] = EitherT[Task, VcsFailure, A]
 

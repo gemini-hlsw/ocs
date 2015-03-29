@@ -9,18 +9,11 @@ import Scalaz._
 
 object MergeCorrection {
 
-  type TryCorrect[A] = Unmergeable \/ A
-
-  implicit class OptionOps[A](o: Option[A]) {
-    def toTryCorrect(msg: => String): TryCorrect[A] =
-      o.toRightDisjunction(Unmergeable(msg))
-  }
-
   /**
    * A `CorrectionFunction` is just a function that modifies an `MergePlan` to
    * correct some aspect of the merge.
    */
-  type CorrectionFunction = MergePlan => TryCorrect[MergePlan]
+  type CorrectionFunction = MergePlan => TryVcs[MergePlan]
 
   type PermissionCheck    = Permission => VcsAction[Boolean]
 
