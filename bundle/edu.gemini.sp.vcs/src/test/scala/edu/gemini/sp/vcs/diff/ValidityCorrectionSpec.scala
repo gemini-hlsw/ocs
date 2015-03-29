@@ -29,8 +29,8 @@ class ValidityCorrectionSpec extends MergeCorrectionSpec {
       val tf2 = templateFolder
 
       val start    = p.node(tf1.leaf, tf2.leaf)
-      val expected = incr(p).node(
-        incr(conflictFolder).node(tf2.leaf),
+      val expected = incr(incr(p)).node(
+        incr(incr(conflictFolder)).node(tf2.leaf),
         tf1.leaf
       )
 
@@ -52,8 +52,8 @@ class ValidityCorrectionSpec extends MergeCorrectionSpec {
         val p   = prog
 
         val start    = p.node(un.leaf, tf2.leaf)
-        val expected = incr(p).node(
-          incr(conflictFolder).node(tf2.leaf),
+        val expected = incr(incr(p)).node(
+          incr(incr(conflictFolder)).node(tf2.leaf),
           un.leaf
         )
 
@@ -70,8 +70,8 @@ class ValidityCorrectionSpec extends MergeCorrectionSpec {
       val tf3 = templateFolder
 
       val start    = p.node(tf1.leaf, tf2.leaf, tf3.leaf)
-      val expected = incr(incr(p)).node(
-        incr(incr(conflictFolder)).node(tf2.leaf, tf3.leaf),
+      val expected = incr(incr(incr(p))).node(
+        incr(incr(incr(conflictFolder))).node(tf2.leaf, tf3.leaf),
         tf1.leaf
       )
 

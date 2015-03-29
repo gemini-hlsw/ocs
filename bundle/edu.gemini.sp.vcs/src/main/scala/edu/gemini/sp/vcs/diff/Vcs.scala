@@ -2,7 +2,7 @@ package edu.gemini.sp.vcs.diff
 
 import edu.gemini.pot.sp.{SPNodeKey, ISPFactory, ISPProgram}
 import edu.gemini.pot.sp.version._
-import edu.gemini.shared.util.VersionComparison.{Same, Newer}
+import edu.gemini.shared.util.VersionComparison.{Conflicting, Same, Newer}
 import edu.gemini.sp.vcs.diff.ProgramLocation.{LocalOnly, Neither, Remote}
 import edu.gemini.sp.vcs.diff.VcsFailure.{IdClash, NeedsUpdate}
 import edu.gemini.sp.vcs.log.VcsEventSet
@@ -176,8 +176,16 @@ object Vcs {
   private case class MergeEval(plan: MergePlan, localUpdate: Boolean, remoteUpdate: Boolean)
 
   private object MergeEval {
-    def apply(plan: MergePlan, p: ISPProgram, remoteVm: VersionMap): MergeEval =
-      MergeEval(plan, plan.compare(p.getVersions) === Newer,
-                      plan.compare(remoteVm)      === Newer)
+    def apply(plan: MergePlan, p: ISPProgram, remoteVm: VersionMap): MergeEval = {
+      // ObsPermissionCorrection will reset inappropriately edited observations
+      // which can cause Conflicting comparisons.
+      val local = plan.compare(p.getVersions) match {
+        case Newer | Conflicting => true
+        case _                   => false
+      }
+      val remote = plan.compare(remoteVm) === Newer
+
+      MergeEval(plan, local, remote)
+    }
   }
 }

@@ -72,7 +72,7 @@ class ObsNumberCorrection(lifespanId: LifespanId, isKnown: (ProgramLocation, SPN
     val executedLocalOnly = or.localOnly.collect { case (_, num, true) => num }
 
     if (executedLocalOnly.nonEmpty)
-      ObsNumberCorrection.unmergeable(executedLocalOnly).left
+      ObsNumberCorrection.unmergeable(executedLocalOnly)
     else {
       val localOnly = or.localOnly.map { case (key, num, _) => (key, num) }
       or.maxRemote.foldMap { max =>
@@ -96,13 +96,13 @@ object ObsNumberCorrection {
     new ObsNumberCorrection(mc.local.prog.getLifespanId, isKnown)
   }
 
-  def unmergeable(obsNum: List[Int]): Unmergeable = {
+  def unmergeable[A](obsNum: List[Int]): TryVcs[A] = {
     val msg = if (obsNum.size > 1)
       s"Found executed observations (numbers ${obsNum.sorted.mkString(",")}) that were created outside of the observing database."
     else
       s"Found an executed observation (number ${obsNum.mkString}) that was created outside of the observing database."
 
-    Unmergeable(msg)
+    (Unmergeable(msg): VcsFailure).left[A]
   }
 
 

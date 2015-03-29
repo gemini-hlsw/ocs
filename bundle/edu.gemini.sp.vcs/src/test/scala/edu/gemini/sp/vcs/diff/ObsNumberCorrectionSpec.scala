@@ -130,7 +130,7 @@ class ObsNumberCorrectionSpec extends MergeCorrectionSpec {
       )
       val onc  = new ObsNumberCorrection(lifespanId, Function.untupled(known.contains))
 
-      onc(plan) shouldEqual ObsNumberCorrection.unmergeable(List(1)).left[MergePlan]
+      onc(plan) shouldEqual ObsNumberCorrection.unmergeable(List(1))
     }
 
     "when renumbering, increment the version information" in {

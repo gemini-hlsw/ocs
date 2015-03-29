@@ -17,7 +17,8 @@ object MergeCorrection {
   def apply(mc: MergeContext): CorrectionAction =
     (mp: MergePlan, hasPermission: PermissionCheck) =>
       for {
-        on  <- ObsNumberCorrection(mc)(mp).liftVcs
+        prm <- ObsPermissionCorrection(mc)(mp, hasPermission)
+        on  <- ObsNumberCorrection(mc)(prm).liftVcs
         v   <- ValidityCorrection(mc)(on).liftVcs
         sof <- StaffOnlyFieldCorrection(mc)(v, hasPermission)
       } yield sof

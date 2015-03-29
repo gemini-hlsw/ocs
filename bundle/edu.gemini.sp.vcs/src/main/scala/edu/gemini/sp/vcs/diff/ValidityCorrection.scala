@@ -4,7 +4,6 @@ import edu.gemini.pot.sp.{ISPNode, SPNodeKey}
 import edu.gemini.pot.sp.validator._
 import edu.gemini.pot.sp.version.LifespanId
 import edu.gemini.sp.vcs.diff.MergeCorrection._
-import edu.gemini.sp.vcs.diff.VcsFailure.Unmergeable
 
 import scalaz._
 import Scalaz._
@@ -50,21 +49,19 @@ class ValidityCorrection(lifespanId: LifespanId, nodeMap: Map[SPNodeKey, ISPNode
         case CardinalityViolation(nt, Some(k), _) => k.right
 
         case cv@CardinalityViolation(_, None, _)  =>
-          Unmergeable(s"Cardinality violation with missing node key: $cv").left
+          TryVcs.fail(s"Cardinality violation with missing node key: $cv")
 
         case DuplicateKeyViolation(k)             =>
-          Unmergeable(s"Duplicate program node key found: $k").left
+          TryVcs.fail(s"Duplicate program node key found: $k")
       }
-
-    val z = new MergeZipper(lifespanId, nodeMap)
 
     for {
       k   <- key(v)
-      l   <- z.focus(mp.update, k)
+      l   <- mp.update.focus(k)
       p0  <- l.deleteNodeFocusParent.toTryVcs("Validity constraint violation for root node")
-      p1  <- z.incr(p0)
-      cf0  = z.conflictFolder(p1)
-      cf1 <- z.incr(cf0)
+      p1  <- p0.incr(lifespanId)
+      cf0 <- p1.getOrCreateConflictFolder(lifespanId, nodeMap)
+      cf1 <- cf0.incr(lifespanId)
     } yield mp.copy(update = cf1.insertDownLast(l.tree).toTree)
   }
 

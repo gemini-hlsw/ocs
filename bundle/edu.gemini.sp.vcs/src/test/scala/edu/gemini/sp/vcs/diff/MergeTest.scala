@@ -3,9 +3,9 @@ package edu.gemini.sp.vcs.diff
 import java.security.Permission
 
 import edu.gemini.pot.sp.validator.Validator
-import edu.gemini.pot.sp.version.VersionMap
+import edu.gemini.pot.sp.version.{EmptyNodeVersions, VersionMap}
 import edu.gemini.pot.sp.{DataObjectBlob => DOB, _}
-import edu.gemini.shared.util.VersionComparison
+import edu.gemini.shared.util.{IntegerIsIntegral, VersionComparison}
 import edu.gemini.shared.util.VersionComparison.{Conflicting, Same, Newer}
 import edu.gemini.sp.vcs.diff.NodeDetail.Obs
 import edu.gemini.sp.vcs.diff.ObsEdit.{ObsUpdate, ObsDelete, ObsCreate}
@@ -455,8 +455,12 @@ class MergeTest extends JUnitSuite {
       }
     ),
 
-    ("merged program version map is newer or equal to both local and remote programs",
+    ("merged program version map is newer or equal to the remote program",
       (start, local, remote, pc) => {
+        // Note, because the ObsPermissionCorrection will *reset* a locally
+        // updated observation that the user does not have permission to edit,
+        // the merge plan might not be strictly newer than the local program.
+
         def isSameOrNewer(x: VersionMap, y: VersionMap): Boolean =
           VersionMap.compare(x, y) match {
             case Same | Newer => true
@@ -465,9 +469,8 @@ class MergeTest extends JUnitSuite {
 
         pc.updatedLocalProgram.exists { ulp =>
           val updateVm = ulp.getVersions
-          val localVm  = pc.lp.getVersions
           val remoteVm = pc.rp.getVersions
-          isSameOrNewer(updateVm, localVm) && isSameOrNewer(updateVm, remoteVm)
+          isSameOrNewer(updateVm, remoteVm)
         }.run
       }
     ),
@@ -500,7 +503,6 @@ class MergeTest extends JUnitSuite {
     ("ObsEdit produces entries for all new local observations",
       (start, local, remote, pc) => {
         val localKeys    = pc.local.editedObservationKeys
-        val remoteKeys   = pc.remote.editedObservationKeys
 
         val newLocalKeys = localKeys.filterNot { k =>
           pc.remote.deletedKeys.contains(k) || pc.remote.nodeMap.contains(k)

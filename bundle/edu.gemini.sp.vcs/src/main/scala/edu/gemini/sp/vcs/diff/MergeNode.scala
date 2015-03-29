@@ -1,13 +1,15 @@
 package edu.gemini.sp.vcs.diff
 
-import edu.gemini.pot.sp.{ISPObservation, ISPNode, SPNodeKey}
-import edu.gemini.pot.sp.version.{EmptyVersionMap, VersionMap, NodeVersions}
+import edu.gemini.pot.sp.{SPComponentType, ISPObservation, ISPNode, SPNodeKey}
+import edu.gemini.pot.sp.version.{LifespanId, EmptyNodeVersions, EmptyVersionMap, VersionMap, NodeVersions}
 import edu.gemini.shared.util.VersionComparison
 import edu.gemini.sp.vcs.diff.NodeDetail.Obs
+import edu.gemini.spModel.conflict.ConflictFolder
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.rich.pot.sp._
 
 import scalaz._
+import Scalaz._
 
 
 /** MergeNodes form a tree with potential links into an existing science
@@ -85,6 +87,7 @@ object MergeNode {
     /** Deletes the current node and selects the parent.  Unlike the
       * `TreeLoc.delete` function, this function will always select the parent
       * node. */
+    //noinspection MutatorLikeMethodIsParameterless
     def deleteNodeFocusParent: Option[TreeLoc[A]] = {
       def combine(ls: Stream[Tree[A]], rs: Stream[Tree[A]]) =
         ls.foldLeft(rs)((a, b) => b #:: a)
@@ -98,6 +101,9 @@ object MergeNode {
 
   implicit class MergeTreeOps(t: Tree[MergeNode]) {
     def key: SPNodeKey = t.rootLabel.key
+
+    def keySet: Set[SPNodeKey] =
+      t.sFoldRight(Set.empty[SPNodeKey]) { (n, s) => s + n.key }
 
     /** A fold over observations contained in this tree node (if any).
       * Doesn't descend into the observation itself.
@@ -115,27 +121,92 @@ object MergeNode {
       go(List(t), z)
     }
 
-    def vm: VersionMap = {
-      def go(rem: Stream[Tree[MergeNode]], res: VersionMap): VersionMap =
-        if (rem.isEmpty) res
-        else {
-          val t   = rem.head
-          val vm0 = t.rootLabel match {
-            case Modified(k, nv, _, _) => res + (k -> nv)
-            case _                     => res
-          }
-          go(t.subForest ++ rem.tail, vm0)
+    def vm: VersionMap =
+      t.sFoldRight(EmptyVersionMap) { (n, vm) =>
+        n match {
+          case Modified(k, nv, _, _) => vm + (k -> nv)
+          case _                     => vm
         }
-
-      go(Stream(t), EmptyVersionMap)
-    }
+      }
 
     def compare(that: Tree[MergeNode]): VersionComparison = VersionMap.compare(vm, that.vm)
+
+    def focus(k: SPNodeKey): TryVcs[TreeLoc[MergeNode]] = t.loc.findNode(k)
   }
 
+  implicit class MergeZipperOps(z: TreeLoc[MergeNode]) {
+    def key: SPNodeKey = z.getLabel.key
+
+    def findNode(k: SPNodeKey): TryVcs[TreeLoc[MergeNode]] =
+      z.find(_.key === k).toTryVcs(s"Could not find descendant $k")
+
+    def incr(lifespanId: LifespanId): TryVcs[TreeLoc[MergeNode]] =
+      z.getLabel match {
+        case m: Modified => \/-(z.modifyLabel(_ => m.copy(nv = m.nv.incr(lifespanId))))
+        case _           => TryVcs.fail("Could not increment version of unmodified node")
+      }
+
+    // Determine the index of the focused node in its parent, if any.
+    def childIndex: TryVcs[Int] =
+      z.parent.map { _.tree.subForest.indexWhere(_.key === key) }.filter(_ >= 0).toTryVcs(s"Could not find child index of $key")
+
+    // Ensure that the node at the focus is a `Modified` node, converting an
+    // `Unmodified` node to `Modified` if necessary.  It should be the case that
+    // all `Unmodified` nodes appear in the `nodeMap`.  If not, the conversion
+    // will fail with a left.
+    def asModified(nodeMap: Map[SPNodeKey, ISPNode]): TryVcs[TreeLoc[MergeNode]] =
+      mapAsModified(nodeMap)(identity)
+
+    // Update the given node, converting it to a Modified node if necessary.
+    // Sorry, this is a bit awkward.
+    def mapAsModified(nodeMap: Map[SPNodeKey, ISPNode])(f: Modified => Modified): TryVcs[TreeLoc[MergeNode]] =
+      z.getLabel match {
+        case m: Modified   =>
+          TryVcs(z.modifyLabel(_ => f(m)))
+
+        case Unmodified(k) =>
+          nodeMap.get(k).toTryVcs(s"Unmodified node $k not found in node map.").map { n =>
+            z.modifyTree { _ =>
+              val mod = f(Modified(n.key, n.getVersion, n.getDataObject, NodeDetail(n)))
+              Tree.node(mod, n.children.map(c => unmodified(c).leaf).toStream)
+            }
+          }
+      }
+
+    def getOrCreateConflictFolder(lifespanId: LifespanId, nodeMap: Map[SPNodeKey, ISPNode]): TryVcs[TreeLoc[MergeNode]] = {
+      def isConflictFolder(t: Tree[MergeNode]): Boolean =
+        t.rootLabel match {
+          case Modified(_,_, _: ConflictFolder, _) => true
+          case Unmodified(k)                       => nodeMap.get(k).exists { n =>
+            n.getDataObject.getType == SPComponentType.CONFLICT_FOLDER
+          }
+          case _                                   => false
+        }
+
+      //noinspection MutatorLikeMethodIsParameterless
+      def addConflictFolder: TryVcs[TreeLoc[MergeNode]] = {
+        val m = modified(new SPNodeKey, EmptyNodeVersions.incr(lifespanId), new ConflictFolder, NodeDetail.Empty)
+        incr(lifespanId).map(_.insertDownFirst(m.leaf))
+      }
+
+      z.findChild(isConflictFolder).fold(addConflictFolder)(_.asModified(nodeMap))
+    }
+  }
+
+  private def showNodeVersions(nv: NodeVersions): String =
+    nv.clocks.keySet.toList.sortBy(_.toString).map { k =>
+      s"${k.toString.take(4)} -> ${nv(k)}"
+    }.mkString("{", ", ", "}")
+
+  private def showDetail(nd: NodeDetail): String =
+    nd match {
+      case NodeDetail.Empty  => ""
+      case NodeDetail.Obs(n) => s"Obs($n)"
+    }
+
   implicit val ShowNode = Show.shows[MergeNode] {
-    case Modified(k, _, dob, _) => s"m $k (${dob.getType})"
-    case Unmodified(k)          => s"u $k"
+    case Modified(k, nv, dob, det) => s"m $k (${dob.getType}) ${showNodeVersions(nv)} ${showDetail(det)}"
+    case Unmodified(k)             => s"u $k"
   }
 
   def draw(t: Tree[MergeNode]): String =

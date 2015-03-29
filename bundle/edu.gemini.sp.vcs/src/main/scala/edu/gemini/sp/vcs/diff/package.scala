@@ -1,7 +1,7 @@
 package edu.gemini.sp.vcs
 
 import edu.gemini.pot.sp.{ISPProgram, SPNodeKey, ISPNode}
-import edu.gemini.sp.vcs.diff.VcsFailure.{VcsException, Unmergeable}
+import edu.gemini.sp.vcs.diff.VcsFailure.{Unexpected, VcsException}
 import edu.gemini.spModel.rich.pot.sp._
 
 import scalaz._
@@ -32,9 +32,14 @@ package object diff {
 
   type TryVcs[A] = VcsFailure \/ A
 
+  object TryVcs {
+    def apply[A](a: A): TryVcs[A] = a.right[VcsFailure]
+    def fail[A](msg: String): TryVcs[A] = (Unexpected(msg): VcsFailure).left[A]
+  }
+
   implicit class OptionOps[A](o: Option[A]) {
     def toTryVcs(msg: => String): TryVcs[A] =
-      o.toRightDisjunction(Unmergeable(msg))
+      o.toRightDisjunction(Unexpected(msg))
   }
 
   /**

@@ -4,7 +4,6 @@ import edu.gemini.pot.sp._
 import edu.gemini.pot.sp.version._
 import edu.gemini.shared.util.VersionComparison
 import edu.gemini.shared.util.VersionComparison.{Newer, Conflicting}
-import edu.gemini.sp.vcs.diff.VcsFailure.Unmergeable
 import edu.gemini.spModel.obs.ObservationStatus
 import edu.gemini.spModel.rich.pot.sp._
 
@@ -35,6 +34,22 @@ object ObsEdit {
   case class ObsUpdate(key: SPNodeKey, local: Obs, remote: Option[Obs], comparison: Comparison) extends ObsEdit
   case class ObsDelete(key: SPNodeKey, remote: Obs) extends ObsEdit
 
+  implicit val ObsEditShow = Show.shows[ObsEdit] {
+    case ObsCreate(_, Obs(status, t))                 =>
+      s"ObsCreate ($status)\n${t.drawTree}"
+
+    case ObsDelete(_, Obs(status, t))                 =>
+      s"ObsDelete ($status)\n${t.drawTree}"
+
+    case ObsUpdate(_, Obs(lStatus, lt), remote, comp) =>
+      s"""ObsUpdate: local obs is ${comp.obsOnly}, log is ${comp.logOnly}
+      #
+      #* Local ($lStatus)
+      #${lt.drawTree}
+      #* Remote ${remote.fold("deleted")(r => s"(${r.status})\n${r.tree.drawTree}")}
+      """.stripMargin('#')
+  }
+
   /**
    * Extracts all the observation edits that have been made to observations in
    * the local program.
@@ -57,7 +72,7 @@ object ObsEdit {
       Obs(s, remoteObsMap(k))
 
     def mapRemoteStatus(k: SPNodeKey)(f: ObservationStatus => ObsEdit): TryVcs[ObsEdit] =
-      remoteStatus(k).fold((Unmergeable(s"Missing remote status for observation $k"): VcsFailure).left[ObsEdit]) { stat =>
+      remoteStatus(k).fold(TryVcs.fail[ObsEdit](s"Missing remote status for observation $k")) { stat =>
         f(stat).right
       }
 
