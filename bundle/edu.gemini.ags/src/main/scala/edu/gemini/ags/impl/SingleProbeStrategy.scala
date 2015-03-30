@@ -5,6 +5,7 @@ import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.catalog.api.CatalogQuery
 import edu.gemini.catalog.votable.{RemoteBackend, VoTableBackend, CatalogException, VoTableClient}
 import edu.gemini.pot.ModelConverters._
+import edu.gemini.skycalc
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.core.{Magnitude, MagnitudeBand, Coordinates, Angle}
 import edu.gemini.spModel.core.Target.SiderealTarget
@@ -138,6 +139,9 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
     candidates.map(so => (SingleProbeStrategy.calculatePositionAngle(ctx.getBaseCoordinates.toNewModel, so), so)).filter {
       case (angle, st) => CandidateValidator(params, mt, List(st)).exists(ctx.withPositionAngle(angle.toOldModel))
     }
+
+  private def ctx180(c: ObsContext): ObsContext =
+    c.withPositionAngle(c.getPositionAngle.add(180.0, skycalc.Angle.Unit.DEGREES))
 
   override val guideProbes: List[GuideProbe] =
     List(params.guideProbe)

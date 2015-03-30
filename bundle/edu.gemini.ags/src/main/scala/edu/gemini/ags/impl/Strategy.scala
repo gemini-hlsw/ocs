@@ -12,6 +12,7 @@ import edu.gemini.spModel.gemini.nici.NiciOiwfsGuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
+import edu.gemini.spModel.target.system.NonSiderealTarget
 
 import scala.Function.const
 
@@ -62,6 +63,9 @@ object Strategy {
 
   private def itemListIfSiderealElseNil(ctx: ObsContext, strategy: AgsStrategy): List[AgsStrategy] =
     if (isSidereal(ctx)) List(strategy) else Nil
+
+  def isSidereal(ctx: ObsContext): Boolean =
+    !ctx.getTargets.getBase.getTarget.isInstanceOf[NonSiderealTarget]
 
   val InstMap = Map[SPComponentType, ObsContext => List[AgsStrategy]](
     SPComponentType.INSTRUMENT_ACQCAM     -> const(List(Pwfs1North, Pwfs2North, Pwfs1South, Pwfs2South)),
