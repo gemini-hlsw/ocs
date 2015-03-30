@@ -305,7 +305,7 @@ public final class NiriRecipe extends RecipeBase {
         }
         IS2Ncalc.calculate();
 
-        return new ImagingResult(IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
+        return ImagingResult.create(IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
 
     }
 

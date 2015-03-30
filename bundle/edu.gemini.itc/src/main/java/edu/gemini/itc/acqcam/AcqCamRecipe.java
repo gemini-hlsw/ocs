@@ -139,7 +139,7 @@ public final class AcqCamRecipe extends RecipeBase {
         final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
         IS2Ncalc.calculate();
 
-        return new ImagingResult(IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
+        return ImagingResult.create(IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
 
     }
 

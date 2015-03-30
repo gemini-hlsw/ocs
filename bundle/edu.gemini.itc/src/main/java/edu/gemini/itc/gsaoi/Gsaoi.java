@@ -6,7 +6,7 @@ import edu.gemini.itc.shared.*;
 /**
  * Gsaoi specification class
  */
-public class Gsaoi extends Instrument {
+public final class Gsaoi extends Instrument {
     /**
      * Related files will be in this subdir of lib
      */

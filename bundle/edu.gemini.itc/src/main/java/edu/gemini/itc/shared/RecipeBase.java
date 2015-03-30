@@ -1,6 +1,8 @@
 package edu.gemini.itc.shared;
 
 import edu.gemini.itc.operation.*;
+import scala.Option;
+import scala.Some;
 
 import java.awt.image.BufferedImage;
 import java.io.PrintWriter;
@@ -13,13 +15,23 @@ public abstract class RecipeBase implements Recipe {
         public final double peak_pixel_count;
         public final ImagingS2NCalculatable IS2Ncalc;
         public final ImageQualityCalculatable IQcalc;
-        public ImagingResult(final ImageQualityCalculatable IQcalc, final SourceFraction SFcalc, final double peak_pixel_count, final ImagingS2NCalculatable IS2Ncalc) {
+        public final Option<AOSystem> aoSystem;
+        public ImagingResult(final ImageQualityCalculatable IQcalc, final SourceFraction SFcalc, final double peak_pixel_count, final ImagingS2NCalculatable IS2Ncalc, final Option<AOSystem> aoSystem) {
             this.IQcalc             = IQcalc;
             this.SFcalc             = SFcalc;
             this.peak_pixel_count   = peak_pixel_count;
             this.IS2Ncalc           = IS2Ncalc;
+            this.aoSystem           = aoSystem;
         }
 
+        public static ImagingResult create(final ImageQualityCalculatable IQcalc, final SourceFraction SFcalc, final double peak_pixel_count, final ImagingS2NCalculatable IS2Ncalc) {
+            final Option<AOSystem> aoSystem = Option.empty();
+            return new ImagingResult(IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, aoSystem);
+        }
+
+        public static ImagingResult create(final ImageQualityCalculatable IQcalc, final SourceFraction SFcalc, final double peak_pixel_count, final ImagingS2NCalculatable IS2Ncalc, final AOSystem aoSystem) {
+            return new ImagingResult(IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, new Some<>(aoSystem));
+        }
     }
     public static final class SpectroscopyResult {
         public final SourceFraction SFcalc;
