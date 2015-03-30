@@ -4,10 +4,8 @@ import edu.gemini.catalog.api.{SaturationConstraint, FaintnessConstraint, Magnit
 import edu.gemini.catalog.api.MagnitudeLimits.{FaintnessLimit, SaturationLimit}
 import edu.gemini.shared.util.immutable.PredicateOp
 import edu.gemini.shared.util.immutable.ScalaConverters.ScalaOptionOps
+import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core._
-import edu.gemini.spModel.core.AngleSyntax._
-import edu.gemini.spModel.core.Target.SiderealTarget
-import edu.gemini.spModel.guide.VignettingGuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
@@ -15,7 +13,7 @@ import edu.gemini.spModel.target.env.GuideProbeTargets
 
 import edu.gemini.skycalc
 import edu.gemini.shared.skyobject
-import edu.gemini.spModel.target.system.{HmsDegTarget, NonSiderealTarget}
+import edu.gemini.spModel.target.system.NonSiderealTarget
 
 import scalaz._
 import Scalaz._
@@ -31,68 +29,11 @@ package object impl {
   }
 
   implicit class OldOffset2New(val offset: skycalc.Offset) extends AnyVal {
-    def toNewModel: Offset =
-      Offset(offset.p().toDegrees.getMagnitude.degrees[OffsetP],
-             offset.q().toDegrees.getMagnitude.degrees[OffsetQ])
+    def toNewModel: Offset = Offset(offset.p().toNewModel, offset.q().toNewModel)
   }
 
   implicit class OldCoordinates2New(val c: skycalc.Coordinates) extends AnyVal {
     def toNewModel: Coordinates = Coordinates(RightAscension.fromAngle(c.getRa.toNewModel), Declination.fromAngle(c.getDec.toNewModel).getOrElse(Declination.zero))
-  }
-
-  implicit class OldMagnitudeBand2New(val band: skyobject.Magnitude.Band) extends AnyVal {
-    def toNewModel: MagnitudeBand = band match {
-      case edu.gemini.shared.skyobject.Magnitude.Band.u  => MagnitudeBand._u
-      case edu.gemini.shared.skyobject.Magnitude.Band.g  => MagnitudeBand._g
-      case edu.gemini.shared.skyobject.Magnitude.Band.r  => MagnitudeBand._r
-      case edu.gemini.shared.skyobject.Magnitude.Band.i  => MagnitudeBand._i
-      case edu.gemini.shared.skyobject.Magnitude.Band.z  => MagnitudeBand._z
-
-      case edu.gemini.shared.skyobject.Magnitude.Band.U  => MagnitudeBand.U
-      case edu.gemini.shared.skyobject.Magnitude.Band.B  => MagnitudeBand.B
-      case edu.gemini.shared.skyobject.Magnitude.Band.V  => MagnitudeBand.V
-      case edu.gemini.shared.skyobject.Magnitude.Band.UC => MagnitudeBand.UC
-      case edu.gemini.shared.skyobject.Magnitude.Band.R  => MagnitudeBand.R
-      case edu.gemini.shared.skyobject.Magnitude.Band.I  => MagnitudeBand.I
-      case edu.gemini.shared.skyobject.Magnitude.Band.Y  => MagnitudeBand.Y
-      case edu.gemini.shared.skyobject.Magnitude.Band.J  => MagnitudeBand.J
-      case edu.gemini.shared.skyobject.Magnitude.Band.H  => MagnitudeBand.H
-      case edu.gemini.shared.skyobject.Magnitude.Band.K  => MagnitudeBand.K
-      case edu.gemini.shared.skyobject.Magnitude.Band.L  => MagnitudeBand.L
-      case edu.gemini.shared.skyobject.Magnitude.Band.M  => MagnitudeBand.M
-      case edu.gemini.shared.skyobject.Magnitude.Band.N  => MagnitudeBand.N
-      case edu.gemini.shared.skyobject.Magnitude.Band.Q  => MagnitudeBand.Q
-      case edu.gemini.shared.skyobject.Magnitude.Band.AP => MagnitudeBand.AP
-    }
-  }
-
-  implicit class NewMagnitudeBand2Old(val band: MagnitudeBand) {
-    def toOldModel: skyobject.Magnitude.Band = band match {
-      case MagnitudeBand._u => edu.gemini.shared.skyobject.Magnitude.Band.u
-      case MagnitudeBand._g => edu.gemini.shared.skyobject.Magnitude.Band.g
-      case MagnitudeBand._r => edu.gemini.shared.skyobject.Magnitude.Band.r
-      case MagnitudeBand._i => edu.gemini.shared.skyobject.Magnitude.Band.i
-      case MagnitudeBand._z => edu.gemini.shared.skyobject.Magnitude.Band.z
-
-      case MagnitudeBand.U  => edu.gemini.shared.skyobject.Magnitude.Band.U
-      case MagnitudeBand.B  => edu.gemini.shared.skyobject.Magnitude.Band.B
-      case MagnitudeBand.G  => edu.gemini.shared.skyobject.Magnitude.Band.g
-      case MagnitudeBand.V  => edu.gemini.shared.skyobject.Magnitude.Band.V
-      case MagnitudeBand.UC => edu.gemini.shared.skyobject.Magnitude.Band.UC
-      case MagnitudeBand.R  => edu.gemini.shared.skyobject.Magnitude.Band.R
-      case MagnitudeBand.I  => edu.gemini.shared.skyobject.Magnitude.Band.I
-      case MagnitudeBand.Z  => edu.gemini.shared.skyobject.Magnitude.Band.z
-      case MagnitudeBand.Y  => edu.gemini.shared.skyobject.Magnitude.Band.Y
-      case MagnitudeBand.J  => edu.gemini.shared.skyobject.Magnitude.Band.J
-      case MagnitudeBand.H  => edu.gemini.shared.skyobject.Magnitude.Band.H
-      case MagnitudeBand.K  => edu.gemini.shared.skyobject.Magnitude.Band.K
-      case MagnitudeBand.L  => edu.gemini.shared.skyobject.Magnitude.Band.L
-      case MagnitudeBand.M  => edu.gemini.shared.skyobject.Magnitude.Band.M
-      case MagnitudeBand.N  => edu.gemini.shared.skyobject.Magnitude.Band.N
-      case MagnitudeBand.Q  => edu.gemini.shared.skyobject.Magnitude.Band.Q
-
-      case MagnitudeBand.AP => edu.gemini.shared.skyobject.Magnitude.Band.AP
-    }
   }
 
   implicit class OldMagnitude2New(val m: skyobject.Magnitude) extends AnyVal {

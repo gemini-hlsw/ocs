@@ -15,7 +15,7 @@ import AlmostEqual.AlmostEqualOps
 import scalaz._
 import Scalaz._
 
-class ConversionsSpec extends Specification with ScalaCheck with Arbitraries {
+class ModelConversionsSpec extends Specification with ScalaCheck with Arbitraries {
   "implicit conversions of model classes" should {
     "convert new bands to old bands" in {
       forAll { (b: MagnitudeBand) =>
