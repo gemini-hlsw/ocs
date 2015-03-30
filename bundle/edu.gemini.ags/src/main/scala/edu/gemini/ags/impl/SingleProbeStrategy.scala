@@ -65,7 +65,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   def estimate(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SiderealTarget]): AgsStrategy.Estimate = {
     // If we are unbounded and there are any candidates, we are guaranteed success.
     val pac   = ctx.getPosAngleConstraint(UNBOUNDED)
-    val cv    = new CandidateValidator(params, mt, candidates)
+    val cv    = CandidateValidator(params, mt, candidates)
     val steps = pac.steps(ctx.getPositionAngle, params.stepSize.toOldModel).toList.asScala
     val anglesWithResults  = steps.filter { angle => cv.exists(ctx.withPositionAngle(angle)) }
     val successProbability = anglesWithResults.size.toDouble / steps.size.toDouble
@@ -110,7 +110,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   }
 
   private def filterBounded(alternatives: List[ObsContext], mt: MagnitudeTable, candidates: List[SiderealTarget]): List[(ObsContext, List[SiderealTarget])] = {
-    val cv = new CandidateValidator(params, mt, candidates)
+    val cv = CandidateValidator(params, mt, candidates)
     alternatives.map(c => (c, cv.filter(c))).filter {
       case (c, cand) => cand.nonEmpty
     }
@@ -121,13 +121,13 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
       so <- candidates
       pa = SingleProbeStrategy.calculatePositionAngle(ctx.getBaseCoordinates.toNewModel, so)
       ctxSo = ctx.withPositionAngle(pa.toOldModel)
-      if new CandidateValidator(params, mt, List(so)).exists(ctxSo)
+      if CandidateValidator(params, mt, List(so)).exists(ctxSo)
     } yield (ctxSo, List(so))
   }
 
   // List of candidates and their angles for the case where the pos angle constraint is not unbounded.
   private def selectBounded(alternatives: List[ObsContext], mt: MagnitudeTable, candidates: List[SiderealTarget]): List[(Angle, SiderealTarget)] = {
-    val cv = new CandidateValidator(params, mt, candidates)
+    val cv = CandidateValidator(params, mt, candidates)
     alternatives.map(a => (a, cv.select(a))).collect {
       case (c, Some(st)) => (Angle.fromDegrees(c.getPositionAngle.toDegrees.getMagnitude), st)
     }
@@ -136,7 +136,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   // List of candidates and their angles for the case where the pos angle constraint is unbounded.
   private def selectUnbounded(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SiderealTarget]): List[(Angle, SiderealTarget)] =
     candidates.map(so => (SingleProbeStrategy.calculatePositionAngle(ctx.getBaseCoordinates.toNewModel, so), so)).filter {
-      case (angle, st) => new CandidateValidator(params, mt, List(st)).exists(ctx.withPositionAngle(angle.toOldModel))
+      case (angle, st) => CandidateValidator(params, mt, List(st)).exists(ctx.withPositionAngle(angle.toOldModel))
     }
 
   override val guideProbes: List[GuideProbe] =

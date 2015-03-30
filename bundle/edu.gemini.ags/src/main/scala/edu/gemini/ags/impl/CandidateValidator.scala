@@ -17,7 +17,7 @@ import Scalaz._
  * that one set of candidates and constraints can be applied to differing
  * observation contexts (different position angles, guide speeds, etc.)
  */
-class CandidateValidator(params: SingleProbeStrategyParams, mt: MagnitudeTable, candidates: List[SiderealTarget]) {
+protected case class CandidateValidator(params: SingleProbeStrategyParams, mt: MagnitudeTable, candidates: List[SiderealTarget]) {
   /**
    * Produces a predicate for testing whether a candidate is valid in an
    * established context.
