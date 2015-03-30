@@ -106,13 +106,13 @@ trait GemsStrategy extends AgsStrategy {
 
     def mapGroup(grp: GuideProbeGroup): List[AgsAnalysis] = {
       def hasGuideStarForProbe(a: AgsAnalysis): Boolean = a match {
-        case NoGuideStarForProbe(_) => false
-        case _                      => true
+        case NoGuideStarForProbe(_, _) => false
+        case _                         => true
       }
 
       val probeAnalysis = grp.getMembers.asScala.toList.map{ analysis(ctx, mt, _, probeBands) }.flatten
       probeAnalysis.filter(hasGuideStarForProbe) match {
-        case Nil => List(NoGuideStarForGroup(grp))
+        case Nil => List(NoGuideStarForGroup(grp, probeBands))
         case lst => lst
       }
     }

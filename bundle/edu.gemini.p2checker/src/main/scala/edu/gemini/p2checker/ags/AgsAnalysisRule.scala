@@ -33,7 +33,7 @@ class AgsAnalysisRule(mt: MagnitudeTable) extends IRule {
           for {
             h <- analysis
             if (h match {
-              case AgsAnalysis.NoGuideStarForGroup(group) => !ignoredProbeGroups.contains(group)
+              case AgsAnalysis.NoGuideStarForGroup(group, _) => !ignoredProbeGroups.contains(group)
               case _ => true
             })
             s <- severity(h)
