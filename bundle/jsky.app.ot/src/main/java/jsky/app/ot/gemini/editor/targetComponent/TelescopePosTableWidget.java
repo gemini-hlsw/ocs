@@ -252,7 +252,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                                     return None.instance();
                                 }
                             }
-                        }).getValue();
+                        }).getOrElse(None.<AgsGuideQuality>instance());
                     } else {
                         return None.instance();
                     }
