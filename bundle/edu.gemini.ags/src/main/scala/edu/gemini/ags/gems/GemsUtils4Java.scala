@@ -35,19 +35,6 @@ object GemsUtils4Java {
     new java.util.ArrayList(list.asScala.map(_.results).flatten.groupBy(_.name).map(_._2.head)(breakOut).asJava)
   }
 
-  // Set of conversors of new model to old model and vice versa for use in Java, they should disappear in time
-  def toCoordinates(coords: skyobject.coords.SkyCoordinates): Coordinates = {
-    val c = coords.toHmsDeg(0L)
-    Coordinates(RightAscension.fromAngle(c.getRa.toNewModel), Declination.fromAngle(c.getDec.toNewModel).getOrElse(Declination.zero))
-  }
-
-  def toCoordinates(coords: skycalc.Coordinates): Coordinates =
-    Coordinates(RightAscension.fromAngle(Angle.fromDegrees(coords.getRaDeg)), Declination.fromAngle(Angle.fromDegrees(coords.getDecDeg)).getOrElse(Declination.zero))
-
-  def toSiderealTarget(skyObject: skyobject.SkyObject): SiderealTarget = skyObject.toNewModel
-
-  def translateBands(bands: java.util.Set[skyobject.Magnitude.Band]): java.util.Set[MagnitudeBand] = bands.asScala.map(_.toNewModel).asJava
-
   def toOldBand(band: MagnitudeBand): skyobject.Magnitude.Band = band.toOldModel
 
   def toNewBand(band: skyobject.Magnitude.Band): MagnitudeBand = band.toNewModel

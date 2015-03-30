@@ -14,10 +14,9 @@ import edu.gemini.spModel.target.SPTarget
  * original files should be removed and these converters used instead.
  */
 object ModelConverters {
-  def toCoordinates(coords: skyobject.coords.SkyCoordinates): Coordinates = {
-    val c = coords.toHmsDeg(0L)
-    Coordinates(RightAscension.fromAngle(c.getRa.toNewModel), Declination.fromAngle(c.getDec.toNewModel).getOrElse(Declination.zero))
-  }
+  def toCoordinates(coords: skyobject.coords.SkyCoordinates): Coordinates = coords.toHmsDeg(0L).toNewModel
+
+  def toCoordinates(coords: skycalc.Coordinates): Coordinates = coords.toNewModel
 
   implicit class OldAngle2New(val angle: skycalc.Angle) extends AnyVal{
     def toNewModel: Angle = Angle.fromDegrees(angle.toDegrees.getMagnitude)

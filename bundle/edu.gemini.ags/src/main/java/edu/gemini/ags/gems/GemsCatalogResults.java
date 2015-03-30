@@ -4,6 +4,7 @@ import edu.gemini.ags.gems.mascot.Star;
 import edu.gemini.ags.gems.mascot.Strehl;
 import edu.gemini.ags.gems.mascot.MascotCat;
 import edu.gemini.ags.gems.mascot.MascotProgress;
+import edu.gemini.pot.ModelConverters;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.core.Angle;
@@ -49,7 +50,7 @@ public class GemsCatalogResults {
     public List<GemsGuideStars> analyze(final ObsContext obsContext, final Set<edu.gemini.spModel.core.Angle> posAngles,
                                         final List<GemsCatalogSearchResults> results, final MascotProgress progress) {
 
-        final Coordinates base = GemsUtils4Java.toCoordinates(obsContext.getBaseCoordinates());
+        final Coordinates base = ModelConverters.toCoordinates(obsContext.getBaseCoordinates());
         final List<GemsGuideStars> result = new ArrayList<>();
 
         for (TiptiltFlexurePair pair : TiptiltFlexurePair.pairs(results)) {
@@ -93,7 +94,7 @@ public class GemsCatalogResults {
     public List<GemsGuideStars> analyzeGoodEnough(final ObsContext obsContext, final Set<Angle> posAngles,
                                         final List<GemsCatalogSearchResults> results, final MascotProgress progress) {
 
-        final Coordinates base = GemsUtils4Java.toCoordinates(obsContext.getBaseCoordinates());
+        final Coordinates base = ModelConverters.toCoordinates(obsContext.getBaseCoordinates());
         final List<GemsGuideStars> result = new ArrayList<>();
 
         for (TiptiltFlexurePair pair : TiptiltFlexurePair.pairs(results)) {
