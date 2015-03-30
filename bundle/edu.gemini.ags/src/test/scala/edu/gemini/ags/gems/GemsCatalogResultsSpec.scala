@@ -9,6 +9,7 @@ import edu.gemini.shared.util.immutable.None
 import edu.gemini.shared.util.immutable.Some
 import edu.gemini.skycalc.Coordinates
 import edu.gemini.skycalc.Offset
+import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core.{Angle, Site}
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gems.Canopus
@@ -27,7 +28,6 @@ import org.specs2.time.NoTimeConversions
 
 import scala.concurrent.duration._
 
-import edu.gemini.ags.impl._
 import org.specs2.mutable.Specification
 import scala.concurrent.Await
 

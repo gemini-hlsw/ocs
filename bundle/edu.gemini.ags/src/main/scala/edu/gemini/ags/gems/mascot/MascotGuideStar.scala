@@ -5,7 +5,7 @@ import java.util.logging.Logger
 import edu.gemini.spModel.core.{Coordinates, MagnitudeBand}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.obs.context.ObsContext
-import edu.gemini.ags.impl._
+import edu.gemini.pot.ModelConverters._
 
 /**
  * Provides methods to find the best ODGW or CWFS guide stars using the Mascot Strehl algorithm
