@@ -18,8 +18,8 @@ import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
 sealed trait SingleProbeStrategyParams {
   def site: Site
   def guideProbe: ValidatableGuideProbe
-  def stepSize: Angle            = Angle.fromDegrees(10)
-  def minDistance: Option[Angle] = Some(Angle.fromArcsecs(20))
+  def stepSize: Angle                        = Angle.fromDegrees(10)
+  def minDistance: Option[Angle]             = Some(Angle.fromArcsecs(20))
   // Different instruments have a different reference band to decide what magnitude to use
   protected def referenceBand: MagnitudeBand = MagnitudeBand.R
 
@@ -76,21 +76,21 @@ object SingleProbeStrategyParams {
   }
 
   case object GnirsOiwfsParams extends SingleProbeStrategyParams {
-    val guideProbe    = GnirsOiwfsGuideProbe.instance
-    val site          = Site.GN
+    val guideProbe             = GnirsOiwfsGuideProbe.instance
+    val site                   = Site.GN
     override val referenceBand = MagnitudeBand.K
   }
 
   case object NifsOiwfsParams extends SingleProbeStrategyParams {
-    val guideProbe    = NifsOiwfsGuideProbe.instance
-    val site          = Site.GN
+    val guideProbe             = NifsOiwfsGuideProbe.instance
+    val site                   = Site.GN
     override val referenceBand = MagnitudeBand.K
 
   }
 
   case object NiriOiwfsParams extends SingleProbeStrategyParams {
-    val guideProbe    = NiriOiwfsGuideProbe.instance
-    val site          = Site.GN
+    val guideProbe             = NiriOiwfsGuideProbe.instance
+    val site                   = Site.GN
     override val referenceBand = MagnitudeBand.K
   }
 

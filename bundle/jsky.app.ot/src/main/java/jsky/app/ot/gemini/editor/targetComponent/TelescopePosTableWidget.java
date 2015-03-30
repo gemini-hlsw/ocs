@@ -1167,9 +1167,8 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             final SortedSet<GuideProbe> oldGuideProbes = oldPrimary.getReferencedGuiders();
             final SortedSet<GuideProbe> newGuideProbes = newPrimary.getReferencedGuiders();
             final Set<String> warnSet = new TreeSet<>();
-            for (OffsetPosList posList : posLists) {
-                for (Object o : posList.getAllPositions()) {
-                    final OffsetPos offsetPos = (OffsetPos) o;
+            for (OffsetPosList<OffsetPosBase> posList : posLists) {
+                for (OffsetPosBase offsetPos : posList.getAllPositions()) {
                     for (GuideProbe guideProbe : oldGuideProbes) {
                         final GuideOption guideOption = offsetPos.getLink(guideProbe);
                         final GuideOptions options = guideProbe.getGuideOptions();

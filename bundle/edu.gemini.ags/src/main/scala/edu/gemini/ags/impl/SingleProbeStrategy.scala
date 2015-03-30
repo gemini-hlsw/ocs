@@ -43,21 +43,20 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
     def filterOnMagnitude(q: CatalogQuery, t: SiderealTarget): Boolean = {
       params.referenceMagnitude(t).exists(q.filterOnMagnitude(t, _))
     }
-
+    // We cannot let VoTableClient to filter targets as usual, instead we provide an empty magnitude constraint and filter locally
     catalogQueries(ctx, mt).strengthR(backend).map(Function.tupled(VoTableClient.catalog)).map(_.flatMap {
         case r if r.result.containsError => Future.failed(CatalogException(r.result.problems))
         case r                           => Future.successful(List((params.guideProbe, r.result.targets.rows.filter(t => filterOnMagnitude(r.query, t)))))
     }).getOrElse(empty)
   }
 
-  private def catalogResult(ctx: ObsContext, mt: MagnitudeTable): Future[List[SiderealTarget]] = {
+  private def catalogResult(ctx: ObsContext, mt: MagnitudeTable): Future[List[SiderealTarget]] =
     // call candidates and extract the one and only tuple for this strategy,
     // throw away the guide probe (which we know anyway), and obtain just the
     // list of guide stars
     candidates(ctx, mt).map { lst =>
       lst.headOption.foldMap(_._2)
     }
-  }
 
   override def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[AgsStrategy.Estimate] =
     catalogResult(ctx, mt).map(estimate(ctx, mt, _))

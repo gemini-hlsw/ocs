@@ -407,8 +407,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
   }
 
   def test(): Unit = {
-    val mc   = magTable.apply(ctx, guideProbe).get
-    val band = MagnitudeBand.R
+    val mc = magTable.apply(ctx, guideProbe).get
 
     def go(winners: List[(SiderealTarget, GuideSpeed)]): Unit = {
       val best:Option[(SiderealTarget, GuideSpeed)] = winners match {

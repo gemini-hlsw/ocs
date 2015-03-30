@@ -178,7 +178,7 @@ object AgsAnalysis {
     }
 
     // Find the first band in the guide star that is on the list of possible bands
-    def usableMagnitude:Option[Magnitude] = bands.find(guideStar.magnitudeIn(_).isDefined).map(guideStar.magnitudeIn).flatten
+    def usableMagnitude:Option[Magnitude] = bands.map(guideStar.magnitudeIn).find(_.isDefined).flatten
 
     for {
       mc  <- mt(ctx, guideProbe)
