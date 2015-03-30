@@ -1,10 +1,8 @@
 package edu.gemini.sp.vcs.diff
 
-import edu.gemini.pot.sp.{SPComponentType, ISPNode, SPNodeKey}
+import edu.gemini.pot.sp.{ISPNode, SPNodeKey}
 import edu.gemini.pot.sp.validator._
-import edu.gemini.pot.sp.version.{EmptyNodeVersions, LifespanId}
-import edu.gemini.spModel.conflict.ConflictFolder
-import edu.gemini.spModel.rich.pot.sp._
+import edu.gemini.pot.sp.version.LifespanId
 import edu.gemini.sp.vcs.diff.MergeCorrection._
 import edu.gemini.sp.vcs.diff.VcsFailure.Unmergeable
 
@@ -22,7 +20,7 @@ class ValidityCorrection(lifespanId: LifespanId, nodeMap: Map[SPNodeKey, ISPNode
   def apply(mp: MergePlan): TryVcs[MergePlan] =
     toTypeTree(mp.update).flatMap { tt =>
       Validator.validate(tt) match {
-        case Left(v)  => fix(mp, v).flatMap(apply)
+        case Left(v)  => correct(mp, v).flatMap(apply)
         case Right(_) => mp.right
       }
     }
@@ -44,7 +42,9 @@ class ValidityCorrection(lifespanId: LifespanId, nodeMap: Map[SPNodeKey, ISPNode
         }
     }
 
-  private def fix(mp: MergePlan, v: Violation): TryVcs[MergePlan] = {
+  // Moves the sub-tree rooted at the key associated with the violation into a
+  // conflict folder of the parent node.
+  private def correct(mp: MergePlan, v: Violation): TryVcs[MergePlan] = {
     def key(v: Violation): TryVcs[SPNodeKey] =
       v match {
         case CardinalityViolation(nt, Some(k), _) => k.right
@@ -56,62 +56,18 @@ class ValidityCorrection(lifespanId: LifespanId, nodeMap: Map[SPNodeKey, ISPNode
           Unmergeable(s"Duplicate program node key found: $k").left
       }
 
-    def zip(k: SPNodeKey): TryVcs[TreeLoc[MergeNode]] =
-      mp.update.loc.find(_.getLabel.key === k).toTryVcs(s"Couldn't find node involved in validate constraint violation: $k")
+    val z = new MergeZipper(lifespanId, nodeMap)
 
     for {
-      k <- key(v)
-      z <- zip(k)
-      f <- fix(mp, z)
-    } yield f
+      k   <- key(v)
+      l   <- z.focus(mp.update, k)
+      p0  <- l.deleteNodeFocusParent.toTryVcs("Validity constraint violation for root node")
+      p1  <- z.incr(p0)
+      cf0  = z.conflictFolder(p1)
+      cf1 <- z.incr(cf0)
+    } yield mp.copy(update = cf1.insertDownLast(l.tree).toTree)
   }
 
-  // Moves the tree at the focus of the given zipper into a conflict folder of
-  // the parent node.
-  private def fix(mp: MergePlan, z: TreeLoc[MergeNode]): TryVcs[MergePlan] = {
-
-    def incr(z: TreeLoc[MergeNode]): TryVcs[TreeLoc[MergeNode]] =
-      z.getLabel match {
-        case m: Modified => \/-(z.modifyLabel(_ => m.copy(nv = m.nv.incr(lifespanId))))
-        case _           => -\/(Unmergeable("Could not increment version of unmodified node"))
-      }
-
-    def isConflictFolder(t: Tree[MergeNode]): Boolean =
-      t.rootLabel match {
-        case Modified(_, _, _: ConflictFolder, _) => true
-        case Unmodified(k)                        => nodeMap.get(k).exists { n =>
-          n.getDataObject.getType == SPComponentType.CONFLICT_FOLDER
-        }
-        case _                                    => false
-      }
-
-    // Guarantee that the focus refers to a Modified merge node, converting
-    // an Unmodified node to Modified if necessary.
-    def asModified(t: TreeLoc[MergeNode]): TreeLoc[MergeNode] =
-      t.getLabel match {
-        case m: Modified => t
-        case _           => t.modifyTree { mn =>
-          val spNode   = nodeMap(mn.key)
-          val conflict = MergeNode.modified(spNode)
-          conflict.node(spNode.children.map(c => MergeNode.unmodified(c).leaf): _*)
-        }
-      }
-
-    def addConflictFolder(t: TreeLoc[MergeNode]): TreeLoc[MergeNode] = {
-      val k   = new SPNodeKey()
-      val nv  = EmptyNodeVersions
-      val dob = new ConflictFolder()
-      val mn  = MergeNode.modified(k, nv, dob, NodeDetail.Empty)
-      t.insertDownFirst(mn.leaf)
-    }
-
-    for {
-      p0  <- z.deleteNodeFocusParent.toTryVcs("Validity constraint violation for root node")
-      p1  <- incr(p0)
-      cf0  = p1.findChild(isConflictFolder).fold(addConflictFolder(p1))(asModified)
-      cf1 <- incr(cf0)
-    } yield mp.copy(update = cf1.insertDownLast(z.tree).toTree)
-  }
 }
 
 object ValidityCorrection {

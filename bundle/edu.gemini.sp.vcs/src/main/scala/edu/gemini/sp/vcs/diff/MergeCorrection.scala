@@ -2,11 +2,6 @@ package edu.gemini.sp.vcs.diff
 
 import java.security.Permission
 
-import edu.gemini.sp.vcs.diff.VcsFailure.Unmergeable
-
-import scalaz._
-import Scalaz._
-
 object MergeCorrection {
 
   /**
