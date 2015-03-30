@@ -2,7 +2,7 @@ package edu.gemini.ags.api
 
 import edu.gemini.ags.api.AgsGuideQuality.Unusable
 import edu.gemini.ags.api.AgsMagnitude._
-import edu.gemini.ags.impl._
+import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core.{Magnitude, MagnitudeBand}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.ImageQuality

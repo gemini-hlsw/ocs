@@ -107,51 +107,6 @@ package object impl {
     def toNewModel: Coordinates = Coordinates(RightAscension.fromAngle(c.getRa.toNewModel), Declination.fromAngle(c.getDec.toNewModel).getOrElse(Declination.zero))
   }
 
-  implicit class SiderealTarget2SkyObject(val st:SiderealTarget) extends AnyVal {
-    def toOldModel: skyobject.SkyObject = {
-      val ra          = skycalc.Angle.degrees(st.coordinates.ra.toAngle.toDegrees)
-      val dec         = skycalc.Angle.degrees(st.coordinates.dec.toAngle.toDegrees)
-      val coordinates = st.properMotion.map { pm =>
-            new skyobject.coords.HmsDegCoordinates.Builder(ra, dec).pmRa(skycalc.Angle.milliarcsecs(pm.deltaRA.velocity.masPerYear)).pmDec(skycalc.Angle.milliarcsecs(pm.deltaDec.velocity.masPerYear)).build()
-        } |  new skyobject.coords.HmsDegCoordinates.Builder(ra, dec).build()
-      val mags        = st.magnitudes.map(_.toOldModel)
-      new skyobject.SkyObject.Builder(st.name, coordinates).magnitudes(mags: _*).build()
-    }
-  }
-
-  implicit class SkyObject2SiderealTarget(val so:skyobject.SkyObject) extends AnyVal {
-    def toNewModel:SiderealTarget = {
-      import scala.collection.JavaConverters._
-
-      val ra          = Angle.fromDegrees(so.getHmsDegCoordinates.getRa.toDegrees.getMagnitude)
-      val dec         = Angle.fromDegrees(so.getHmsDegCoordinates.getDec.toDegrees.getMagnitude)
-      val coordinates = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
-      val mags        = so.getMagnitudes.asScala.map(_.toNewModel)
-      val pmRa        = RightAscensionAngularVelocity(AngularVelocity(so.getHmsDegCoordinates.getPmRa.toMilliarcsecs.getMagnitude))
-      val pmDec       = DeclinationAngularVelocity(AngularVelocity(so.getHmsDegCoordinates.getPmDec.toMilliarcsecs.getMagnitude))
-      val pm          = ProperMotion(pmRa, pmDec)
-      SiderealTarget(so.getName, coordinates, Some(pm), mags.toList, None)
-    }
-  }
-
-  implicit class SPTarget2SiderealTarget(val sp:SPTarget) extends AnyVal {
-    def toNewModel:SiderealTarget = {
-      val name        = sp.getTarget.getName
-      val coords      = sp.getTarget.getSkycalcCoordinates
-      val mags        = sp.getTarget.getMagnitudes.asScalaList.map(_.toNewModel)
-      val ra          = Angle.fromDegrees(coords.getRaDeg)
-      val dec         = Angle.fromDegrees(coords.getDecDeg)
-      val coordinates = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
-
-      // Only HmsDegTargets have a proper motion and the values are in milli arcsecs/year
-      val pm          = sp.getTarget match {
-        case t:HmsDegTarget => Some(ProperMotion(RightAscensionAngularVelocity(AngularVelocity(t.getPropMotionRA)), DeclinationAngularVelocity(AngularVelocity(t.getPropMotionDec))))
-        case _              => None
-      }
-      SiderealTarget(name, coordinates, pm, mags, None)
-    }
-  }
-
   // REMOVE When AGS is fully ported
   @Deprecated
   implicit class MagnitudeConstraints2MagnitudeLimits(val mc: MagnitudeConstraints) extends AnyVal {

@@ -1,5 +1,6 @@
-package edu.gemini.ags.impl
+package edu.gemini.pot
 
+import edu.gemini.pot.ModelConverters._
 import edu.gemini.shared.skyobject
 import edu.gemini.skycalc
 import edu.gemini.spModel.core.Target.SiderealTarget

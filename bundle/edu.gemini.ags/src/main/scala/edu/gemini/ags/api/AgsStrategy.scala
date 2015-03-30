@@ -2,7 +2,7 @@ package edu.gemini.ags.api
 
 import edu.gemini.ags.api.AgsAnalysis.NotReachable
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
-import edu.gemini.ags.impl._
+import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.core.{MagnitudeBand, Angle}
 import edu.gemini.spModel.core.Target.SiderealTarget

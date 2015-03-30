@@ -6,7 +6,8 @@ import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.ags.api.AgsMagnitude
-import edu.gemini.catalog.api.{MagnitudeRange, MagnitudeConstraints}
+import edu.gemini.catalog.api.MagnitudeRange
+import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.target.system.HmsDegTarget
 
 import scalaz._

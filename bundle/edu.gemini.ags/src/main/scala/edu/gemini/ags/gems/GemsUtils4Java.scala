@@ -1,7 +1,7 @@
 package edu.gemini.ags.gems
 
 import edu.gemini.catalog.api.MagnitudeConstraints
-import edu.gemini.ags.impl._
+import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.target.SPTarget

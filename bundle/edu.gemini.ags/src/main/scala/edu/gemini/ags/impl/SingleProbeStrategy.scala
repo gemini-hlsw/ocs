@@ -4,6 +4,7 @@ import edu.gemini.ags.api._
 import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.catalog.api.CatalogQuery
 import edu.gemini.catalog.votable.{RemoteBackend, VoTableBackend, CatalogException, VoTableClient}
+import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.core.{Magnitude, MagnitudeBand, Coordinates, Angle}
 import edu.gemini.spModel.core.Target.SiderealTarget
