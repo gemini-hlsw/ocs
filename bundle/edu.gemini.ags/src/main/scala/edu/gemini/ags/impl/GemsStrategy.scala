@@ -85,11 +85,13 @@ trait GemsStrategy extends AgsStrategy {
     futureAgsCatalogResults.map { agsCatalogResults =>
       for {
         result <- agsCatalogResults
-        angle <- anglesToTry
+        angle  <- anglesToTry
       } yield {
         val constraint = result.query
         val radiusConstraint = constraint.radiusConstraint
-        val catalogSearchCriterion = CatalogSearchCriterion("ags", constraint.magnitudeConstraints, radiusConstraint, None, angle.some)
+        val band = constraint.magnitudeConstraints.map(_.band)
+        val mr = constraint.magnitudeConstraints.map(mc => MagnitudeRange(mc.faintnessConstraint, mc.saturationConstraint))
+        val catalogSearchCriterion = CatalogSearchCriterion("ags", band.orNull, mr.orNull, radiusConstraint, None, angle.some)
         val gemsCatalogSearchCriterion = new GemsCatalogSearchCriterion(result.searchKey, catalogSearchCriterion)
         new GemsCatalogSearchResults(gemsCatalogSearchCriterion, result.catalogResult.targets.rows)
       }

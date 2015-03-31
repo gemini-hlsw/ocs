@@ -3,7 +3,7 @@ package edu.gemini.ags.impl
 import edu.gemini.ags.api.AgsStrategy.Estimate
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.ags.gems._
-import edu.gemini.catalog.api.{RadiusConstraint, SaturationConstraint, FaintnessConstraint, MagnitudeConstraints}
+import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable.TestVoTableBackend
 import edu.gemini.shared.util.immutable.{None, Some}
 import edu.gemini.spModel.core._
@@ -66,10 +66,10 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val results = Await.result(TestGemsStrategy.search(tipTiltMode, ctx, posAngles, scala.None), 20.seconds)
       results should be size 2
 
-      results(0).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window tiptilt", scala.Option(MagnitudeConstraints(MagnitudeBand.H, FaintnessConstraint(14.5), scala.Option(SaturationConstraint(7.3)))), RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), scala.Option(Offset((0.0014984027777700248).degrees[OffsetP], (0.0014984027777700248).degrees[OffsetQ])), scala.None)))
-      results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor flexure", scala.Option(MagnitudeConstraints(MagnitudeBand.R, FaintnessConstraint(16.0), scala.Option(SaturationConstraint(8.5)))), RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), scala.Option(Offset((0.0014984027777700248).degrees[OffsetP], (0.0014984027777700248).degrees[OffsetQ])), scala.None)))
+      results(0).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window tiptilt", MagnitudeBand.H, MagnitudeRange(FaintnessConstraint(14.5), scala.Option(SaturationConstraint(7.3))), RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), scala.Option(Offset(Angle.fromDegrees(0.0014984027777700248), Angle.fromDegrees(0.0014984027777700248))), scala.None)))
+      results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor flexure", MagnitudeBand.R, MagnitudeRange(FaintnessConstraint(16.0), scala.Option(SaturationConstraint(8.5))), RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), scala.Option(Offset(Angle.fromDegrees(0.0014984027777700248), Angle.fromDegrees(0.0014984027777700248))), scala.None)))
       results(0).results should be size 5
-      results(1).results should be size 3
-    }.pendingUntilFixed
+      results(1).results should be size 5
+    }
   }
 }
