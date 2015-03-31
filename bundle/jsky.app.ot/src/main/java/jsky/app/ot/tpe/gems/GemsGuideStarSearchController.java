@@ -52,16 +52,11 @@ class GemsGuideStarSearchController {
         Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);
 
         MagnitudeBand band = _model.getBand().getBand();
-        final String catName;
-        if (_model.getCatalog() == GemsGuideStarSearchOptions.CatalogChoice.USER_CATALOG) {
-            catName = _model.getUserCatalogFileName();
-        } else {
-            catName = _model.getCatalog().catalogName();
-        }
+
         GemsTipTiltMode tipTiltMode = _model.getAnalyseChoice().getGemsTipTiltMode();
         List<GemsCatalogSearchResults> results;
         try {
-            results = _worker.search(catName, catName, tipTiltMode, obsContext, posAngles,
+            results = _worker.search(tipTiltMode, obsContext, posAngles,
                     new scala.Some<>(band));
         } catch(Exception e) {
             DialogUtil.error(_dialog, e);

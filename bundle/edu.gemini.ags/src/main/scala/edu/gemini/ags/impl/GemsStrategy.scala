@@ -137,9 +137,7 @@ trait GemsStrategy extends AgsStrategy {
     // why do we need multiple position angles?  catalog results are given in
     // a ring (limited by radius limits) around a base position ... confusion
     val posAngles   = (ctx.getPositionAngle.toNewModel :: (0 until 360 by 90).map(Angle.fromDegrees(_)).toList).toSet
-    search(GemsGuideStarSearchOptions.DEFAULT_CATALOG,
-      GemsGuideStarSearchOptions.DEFAULT_CATALOG,
-      GemsTipTiltMode.canopus, ctx, posAngles, None).map(simplifiedResult)
+    search(GemsTipTiltMode.canopus, ctx, posAngles, None).map(simplifiedResult)
   }
 
   override def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[Estimate] = {
@@ -171,12 +169,12 @@ trait GemsStrategy extends AgsStrategy {
     }
   }
 
-  protected [impl] def search(opticalCatalog: String, nirCatalog: String, tipTiltMode: GemsTipTiltMode, ctx: ObsContext, posAngles: Set[Angle], nirBand: Option[MagnitudeBand]): Future[List[GemsCatalogSearchResults]] = {
+  protected [impl] def search(tipTiltMode: GemsTipTiltMode, ctx: ObsContext, posAngles: Set[Angle], nirBand: Option[MagnitudeBand]): Future[List[GemsCatalogSearchResults]] = {
     // Get the instrument: F2 or GSAOI?
     val gemsInstrument =
       (ctx.getInstrument.getType == SPComponentType.INSTRUMENT_GSAOI) ? GemsInstrument.gsaoi | GemsInstrument.flamingos2
     // Search options
-    val gemsOptions = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog, gemsInstrument, tipTiltMode, posAngles.asJava)
+    val gemsOptions = new GemsGuideStarSearchOptions(gemsInstrument, tipTiltMode, posAngles.asJava)
 
     // Perform the catalog search, using GemsStrategy's backend
     val results = GemsVoTableCatalog(backend).search(ctx, ctx.getBaseCoordinates.toNewModel, gemsOptions, nirBand, null)
@@ -198,9 +196,7 @@ trait GemsStrategy extends AgsStrategy {
 
   override def select(ctx: ObsContext, mt: MagnitudeTable): Future[Option[Selection]] = {
     val posAngles = (ctx.getPositionAngle.toNewModel :: (0 until 360 by 90).map(Angle.fromDegrees(_)).toList).toSet
-    val results = search(GemsGuideStarSearchOptions.DEFAULT_CATALOG,
-      GemsGuideStarSearchOptions.DEFAULT_CATALOG,
-      GemsTipTiltMode.canopus, ctx, posAngles, None)
+    val results = search(GemsTipTiltMode.canopus, ctx, posAngles, None)
     results.map { r =>
       val gemsGuideStars = findGuideStars(ctx, posAngles, r)
 

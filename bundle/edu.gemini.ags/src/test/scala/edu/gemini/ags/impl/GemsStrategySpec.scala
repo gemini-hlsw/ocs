@@ -59,13 +59,11 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       inst.setPosAngle(0.0)
       inst.setIssPort(IssPort.SIDE_LOOKING)
       val ctx = ObsContext.create(env, inst, None.instance[Site], SPSiteQuality.Conditions.BEST, null, null)
-      val opticalCatalog = GemsGuideStarSearchOptions.DEFAULT_CATALOG
-      val nirCatalog = GemsGuideStarSearchOptions.DEFAULT_CATALOG
       val tipTiltMode = GemsTipTiltMode.instrument
 
       val posAngles = Set.empty[Angle]
 
-      val results = Await.result(TestGemsStrategy.search(opticalCatalog, nirCatalog, tipTiltMode, ctx, posAngles, scala.None), 20.seconds)
+      val results = Await.result(TestGemsStrategy.search(tipTiltMode, ctx, posAngles, scala.None), 20.seconds)
       results should be size 2
 
       results(0).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window tiptilt", scala.Option(MagnitudeConstraints(MagnitudeBand.H, FaintnessConstraint(14.5), scala.Option(SaturationConstraint(7.3)))), RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), scala.Option(Offset((0.0014984027777700248).degrees[OffsetP], (0.0014984027777700248).degrees[OffsetQ])), scala.None)))

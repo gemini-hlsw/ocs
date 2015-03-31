@@ -112,19 +112,12 @@ public class GemsGuideStarSearchOptions {
         }
     }
 
+    private final GemsInstrument instrument;
+    private final GemsTipTiltMode tipTiltMode;
+    private final Set<Angle> posAngles;
 
-    public static final String DEFAULT_CATALOG = CatalogChoice.DEFAULT.catalogName();
-
-    private String opticalCatalog = DEFAULT_CATALOG;
-    private String nirCatalog = DEFAULT_CATALOG;
-    private GemsInstrument instrument;
-    private GemsTipTiltMode tipTiltMode;
-    private Set<Angle> posAngles = new HashSet<>();
-
-    public GemsGuideStarSearchOptions(final String opticalCatalog, final String nirCatalog, final GemsInstrument instrument,
+    public GemsGuideStarSearchOptions(final GemsInstrument instrument,
                                       final GemsTipTiltMode tipTiltMode, final Set<Angle> posAngles) {
-        this.opticalCatalog = opticalCatalog;
-        this.nirCatalog = nirCatalog;
         this.instrument = instrument;
         if (instrument == GemsInstrument.flamingos2) {
             // Flamingos 2 OIWFS can only ever be used for the flexure star.
@@ -141,25 +134,6 @@ public class GemsGuideStarSearchOptions {
 
     public GemsTipTiltMode getTipTiltMode() {
         return tipTiltMode;
-    }
-
-    /**
-     * @return a copy of this instance
-     */
-    public GemsGuideStarSearchOptions copy() {
-        return new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog, instrument,
-                                      tipTiltMode, posAngles);
-    }
-
-    /**
-     *
-     * @param instrument
-     * @return a copy of this instance with the given instrument
-     */
-    public GemsGuideStarSearchOptions setInstrument(final GemsInstrument instrument) {
-        GemsGuideStarSearchOptions o = copy();
-        o.instrument = instrument;
-        return o;
     }
 
     /**
@@ -210,10 +184,4 @@ public class GemsGuideStarSearchOptions {
         return new GemsCatalogSearchCriterion(key, criterion);
     }
 
-    public Set<String> getCatalogs() {
-        Set<String> catalogs = new HashSet<>(4);
-        catalogs.add(nirCatalog);
-        catalogs.add(opticalCatalog);
-        return catalogs;
-    }
 }

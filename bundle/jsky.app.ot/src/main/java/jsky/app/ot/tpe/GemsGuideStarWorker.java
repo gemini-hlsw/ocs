@@ -219,8 +219,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
      *
      * @return catalog search results
      */
-    public List<GemsCatalogSearchResults> search(String opticalCatalog, String nirCatalog,
-                                                 GemsTipTiltMode tipTiltMode,
+    public List<GemsCatalogSearchResults> search(GemsTipTiltMode tipTiltMode,
                                                  ObsContext obsContext, Set<edu.gemini.spModel.core.Angle> posAngles,
                                                  scala.Option<MagnitudeBand> nirBand) throws Exception {
         try {
@@ -234,8 +233,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
             SPInstObsComp inst = obsContext.getInstrument();
 
             GemsInstrument instrument = inst instanceof Flamingos2 ? GemsInstrument.flamingos2 : GemsInstrument.gsaoi;
-            GemsGuideStarSearchOptions options = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog,
-                    instrument, tipTiltMode, posAngles);
+            GemsGuideStarSearchOptions options = new GemsGuideStarSearchOptions(instrument, tipTiltMode, posAngles);
 
             List<GemsCatalogSearchResults> results = new GemsVoTableCatalog(RemoteBackend$.MODULE$).search4Java(obsContext, ModelConverters.toCoordinates(base), options, nirBand, statusLogger, 10);
             if (interrupted) {
@@ -262,8 +260,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
 //        List<GemsCatalogSearchResults> results = search(GemsGuideStarSearchOptions.DEFAULT_CATALOG,
 //                GemsGuideStarSearchOptions.DEFAULT_CATALOG, GemsTipTiltMode.both, obsContext, posAngles,
 //                None.<Magnitude.Band>instance());
-        List<GemsCatalogSearchResults> results = search(GemsGuideStarSearchOptions.DEFAULT_CATALOG,
-                GemsGuideStarSearchOptions.DEFAULT_CATALOG, GemsTipTiltMode.canopus, obsContext, posAngles,
+        List<GemsCatalogSearchResults> results = search(GemsTipTiltMode.canopus, obsContext, posAngles,
                 scala.Option.<MagnitudeBand>empty());
         return findGuideStars(obsContext, posAngles, results);
     }
