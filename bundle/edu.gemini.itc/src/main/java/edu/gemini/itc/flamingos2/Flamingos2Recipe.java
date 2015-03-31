@@ -181,7 +181,7 @@ public final class Flamingos2Recipe extends RecipeBase {
         final SpecS2NLargeSlitVisitor[] specS2Narr = new SpecS2NLargeSlitVisitor[1];
         specS2Narr[0] = specS2N;
 
-        return new SpectroscopyResult(SFcalc, IQcalc, specS2Narr, st);
+        return SpectroscopyResult.create(SFcalc, IQcalc, specS2Narr, st);
     }
 
     private ImagingResult calculateImaging(final Flamingos2 instrument) {

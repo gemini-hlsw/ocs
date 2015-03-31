@@ -277,7 +277,7 @@ public final class GnirsRecipe extends RecipeBase {
         }
 
         final SpecS2N[] specS2Narr = new SpecS2N[] {specS2N};
-        return new SpectroscopyResult(SFcalc, IQcalc, specS2Narr, st);
+        return SpectroscopyResult.create(SFcalc, IQcalc, specS2Narr, st);
 
     }
 

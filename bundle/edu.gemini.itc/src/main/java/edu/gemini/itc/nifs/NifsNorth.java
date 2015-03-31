@@ -17,21 +17,17 @@ public class NifsNorth extends Nifs {
     // Instrument reads its configuration from here.
     private static final String FILENAME = "nifs" + getSuffix();
 
-    //private static edu.gemini.itc.operation.DetectorsTransmissionVisitor _dtv;
-    private edu.gemini.itc.operation.DetectorsTransmissionVisitor _dtv;
+    private DetectorsTransmissionVisitor _dtv;
 
-    private TransmissionElement _selectableTrans;
-    private NifsParameters _gp;
     private double _wellDepth;
     private double _readNoiseValue;
 
 
-    public NifsNorth(NifsParameters gp, ObservationDetails odp) {
+    public NifsNorth(final NifsParameters gp, final ObservationDetails odp) {
         super(FILENAME, INSTR_PREFIX);
         // The instrument data file gives a start/end wavelength for
         // the instrument.  But with a filter in place, the filter
         // transmits wavelengths that are a subset of the original range.
-        _gp = gp;
 
         WELL_DEPTH = 90000.0;
 
@@ -57,7 +53,6 @@ public class NifsNorth extends Nifs {
         _sampling = super.getSampling();
 
         _readNoise = gp.getReadNoise();
-        _focalPlaneMask = gp.getFocalPlaneMask();
         _grating = gp.getGrating();
         _centralWavelength = gp.getInstrumentCentralWavelength();
         _filterUsed = gp.getFilter();
@@ -67,21 +62,17 @@ public class NifsNorth extends Nifs {
             throw new RuntimeException("Central wavelength must be between 1.00um and 6.0um.");
         }
 
-        if (_focalPlaneMask.equals(gp.IFU))
-            _IFUUsed = true;
-        else _IFUUsed = false;
-
         //Set read noise and Well depth values by obsevation type
-        if (_readNoise.equals(gp.HIGH_READ_NOISE)) {
+        if (_readNoise.equals(NifsParameters.HIGH_READ_NOISE)) {
             _readNoiseValue = HIGH_READ_NOISE_VALUE;
             _wellDepth = DEEP_WELL;
-        } else if (_readNoise.equals(gp.MED_READ_NOISE)) {
+        } else if (_readNoise.equals(NifsParameters.MED_READ_NOISE)) {
             _readNoiseValue = MEDIUM_READ_NOISE_VALUE;
             _wellDepth = SHALLOW_WELL;
-        } else if (_readNoise.equals(gp.LOW_READ_NOISE)) {
+        } else if (_readNoise.equals(NifsParameters.LOW_READ_NOISE)) {
             _readNoiseValue = LOW_READ_NOISE_VALUE;
             _wellDepth = SHALLOW_WELL;
-        } else if (_readNoise.equals(gp.VERY_LOW_READ_NOISE)) {
+        } else if (_readNoise.equals(NifsParameters.VERY_LOW_READ_NOISE)) {
             _readNoiseValue = VERY_LOW_READ_NOISE_VALUE;
             _wellDepth = SHALLOW_WELL;
         }
@@ -105,12 +96,6 @@ public class NifsNorth extends Nifs {
                         " is not.\nPlease select a grating and a " +
                         "focal plane mask in the Instrument " +
                         "configuration section.");
-            if (_focalPlaneMask.equals(NifsParameters.NO_SLIT))
-                throw new RuntimeException("Spectroscopy calculation method is selected but a focal" +
-                        " plane mask is not.\nPlease select a " +
-                        "grating and a " +
-                        "focal plane mask in the Instrument " +
-                        "configuration section.");
         }
 
         _detector = new Detector(getDirectory() + "/", getPrefix(),
@@ -120,33 +105,29 @@ public class NifsNorth extends Nifs {
         _dtv = new DetectorsTransmissionVisitor(1,
                 getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
 
-        if (_IFUUsed) {
-            _IFUMethod = gp.getIFUMethod();
-
-            if (_IFUMethod.equals(gp.SINGLE_IFU)) {
-                _IFU_IsSingle = true;
-                _IFUOffset = gp.getIFUOffset();
-                _IFU = new IFUComponent(_IFUOffset, getPixelSize());
-            }
-            if (_IFUMethod.equals(gp.RADIAL_IFU)) {
-                _IFUMinOffset = gp.getIFUMinOffset();
-                _IFUMaxOffset = gp.getIFUMaxOffset();
-
-                _IFU = new IFUComponent(_IFUMinOffset, _IFUMaxOffset, getPixelSize());
-            }
-            if (_IFUMethod.equals(gp.SUMMED_APERTURE_IFU)) {
-                _IFU_IsSummed = true;
-                _IFUNumX = gp.getIFUNumX();
-                _IFUNumY = gp.getIFUNumY();
-                _IFUCenterX = gp.getIFUCenterX();
-                _IFUCenterY = gp.getIFUCenterY();
-
-                _IFU = new IFUComponent(_IFUNumX, _IFUNumY, _IFUCenterX, _IFUCenterY, getPixelSize());
-            }
-            addComponent(_IFU);
-
-
+        _IFUMethod = gp.getIFUMethod();
+        if (_IFUMethod.equals(gp.SINGLE_IFU)) {
+            _IFU_IsSingle = true;
+            _IFUOffset = gp.getIFUOffset();
+            _IFU = new IFUComponent(_IFUOffset, getPixelSize());
         }
+        if (_IFUMethod.equals(gp.RADIAL_IFU)) {
+            _IFUMinOffset = gp.getIFUMinOffset();
+            _IFUMaxOffset = gp.getIFUMaxOffset();
+
+            _IFU = new IFUComponent(_IFUMinOffset, _IFUMaxOffset, getPixelSize());
+        }
+        if (_IFUMethod.equals(gp.SUMMED_APERTURE_IFU)) {
+            _IFU_IsSummed = true;
+            _IFUNumX = gp.getIFUNumX();
+            _IFUNumY = gp.getIFUNumY();
+            _IFUCenterX = gp.getIFUCenterX();
+            _IFUCenterY = gp.getIFUCenterY();
+
+            _IFU = new IFUComponent(_IFUNumX, _IFUNumY, _IFUCenterX, _IFUCenterY, getPixelSize());
+        }
+        addComponent(_IFU);
+
 
 
         if (!(_grating.equals("none"))) {

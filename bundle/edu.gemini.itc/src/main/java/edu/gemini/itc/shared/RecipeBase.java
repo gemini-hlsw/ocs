@@ -38,11 +38,22 @@ public abstract class RecipeBase implements Recipe {
         public final SpecS2N[] specS2N;
         public final SlitThroughput st;
         public final ImageQualityCalculatable IQcalc;
-        public SpectroscopyResult(final SourceFraction SFcalc, final ImageQualityCalculatable IQcalc, final SpecS2N[] specS2N, final SlitThroughput st) {
+        public final Option<AOSystem> aoSystem;
+        public SpectroscopyResult(final SourceFraction SFcalc, final ImageQualityCalculatable IQcalc, final SpecS2N[] specS2N, final SlitThroughput st, final Option<AOSystem> aoSystem) {
             this.SFcalc             = SFcalc;
             this.IQcalc             = IQcalc;
             this.specS2N            = specS2N;
             this.st                 = st;
+            this.aoSystem           = aoSystem;
+        }
+
+        public static SpectroscopyResult create(final SourceFraction SFcalc, final ImageQualityCalculatable IQcalc, final SpecS2N[] specS2N, final SlitThroughput st) {
+            final Option<AOSystem> aoSystem = Option.empty();
+            return new SpectroscopyResult(SFcalc, IQcalc, specS2N, st, aoSystem);
+        }
+
+        public static SpectroscopyResult create(final SourceFraction SFcalc, final ImageQualityCalculatable IQcalc, final SpecS2N[] specS2N, final SlitThroughput st, final Option<AOSystem> aoSystem) {
+            return new SpectroscopyResult(SFcalc, IQcalc, specS2N, st, aoSystem);
         }
     }
 

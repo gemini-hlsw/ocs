@@ -79,7 +79,7 @@ object Hash {
     hash(
       p.getDarkCurrent,
       p.getFilter,
-      p.getFocalPlaneMask,
+      "ifu",                      // TODO: remove with next baseline udpate
       p.getFPMask,
       p.getGrating,
 //      p.getIFUCenterX,          // TODO: results in NPE if not set..
@@ -92,7 +92,7 @@ object Hash {
       p.getIFUOffset,
       p.getInstrumentCentralWavelength,
       p.getReadNoise,
-      p.getStringSlitWidth,
+      "IFU",                      // TODO: remove with next baseline udpate
       p.getUnXDispCentralWavelength
     )
 

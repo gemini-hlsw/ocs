@@ -284,7 +284,7 @@ public final class GmosRecipe extends RecipeBase {
 
         }
 
-        return new SpectroscopyResult(SFcalc, IQcalc, specS2N, st);
+        return SpectroscopyResult.create(SFcalc, IQcalc, specS2N, st);
 
     }
 

@@ -34,11 +34,9 @@ public abstract class Nifs extends Instrument {
     protected String _filterUsed;
     protected String _grating;
     protected String _readNoise;
-    protected String _focalPlaneMask;
     protected CalculationMethod _mode;
     protected double _centralWavelength;
 
-    protected boolean _IFUUsed = false;
     protected String _IFUMethod;
     protected double _IFUOffset;
     protected double _IFUMinOffset;
@@ -110,11 +108,6 @@ public abstract class Nifs extends Instrument {
         return _IFU;
     }
 
-    public boolean IFU_IsUsed() {
-        return _IFUUsed;
-    }
-
-
     /**
      * The prefix on data file names for this instrument.
      */
@@ -156,10 +149,7 @@ public abstract class Nifs extends Instrument {
 
         String s = "Instrument configuration: \n";
         s += super.opticalComponentsToString();
-
-        if (!_focalPlaneMask.equals(NifsParameters.NO_SLIT))
-            s += "<LI>Focal Plane Mask: " + _focalPlaneMask + "\n";
-
+        s += "<LI>Focal Plane Mask: ifu\n";
         s += "<LI>Read Noise: " + getReadNoise() + "\n";
         s += "<LI>Well Depth: " + getWellDepth() + "\n";
         s += "\n";
@@ -169,18 +159,17 @@ public abstract class Nifs extends Instrument {
 
         s += "Pixel Size in Spectral Direction: " + device.toString(getGratingDispersion_nmppix()) + "nm\n";
 
-        if (IFU_IsUsed()) {
-            s += "IFU is selected,";
-            if (_IFU_IsSingle)
-                s += "with a single IFU element at " + _IFUOffset + "arcsecs.";
-            else if (_IFU_IsSummed)
-                s += "with multiple summed IFU elements arranged in a " + _IFUNumX + "x" + _IFUNumY +
-                        " (" + device.toString(_IFUNumX * getIFU().IFU_LEN_X) + "\"x" +
-                        device.toString(_IFUNumY * getIFU().IFU_LEN_Y) + "\") grid.";
-            else
-                s += "with mulitple IFU elements arranged from " + _IFUMinOffset + " to " + _IFUMaxOffset + "arcsecs.";
-            s += "\n";
-        }
+        s += "IFU is selected,";
+        if (_IFU_IsSingle)
+            s += "with a single IFU element at " + _IFUOffset + "arcsecs.";
+        else if (_IFU_IsSummed)
+            s += "with multiple summed IFU elements arranged in a " + _IFUNumX + "x" + _IFUNumY +
+                    " (" + device.toString(_IFUNumX * getIFU().IFU_LEN_X) + "\"x" +
+                    device.toString(_IFUNumY * getIFU().IFU_LEN_Y) + "\") grid.";
+        else
+            s += "with mulitple IFU elements arranged from " + _IFUMinOffset + " to " + _IFUMaxOffset + "arcsecs.";
+        s += "\n";
+
         return s;
     }
 }

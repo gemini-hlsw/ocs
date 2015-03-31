@@ -21,7 +21,6 @@ object BaselineNifs {
       NifsParameters.LOW_READ_NOISE,
       "2.1",
       "2.1",
-      NifsParameters.IFU,       // FP Mask
       NifsParameters.SINGLE_IFU,// IFU method
       "0",                      // offset
       "0.0",                    // min offset
@@ -37,7 +36,6 @@ object BaselineNifs {
       NifsParameters.LOW_READ_NOISE,
       "2.2",                    // dark current: TODO: unused, remove
       "2.2",                    // central wavelength
-      NifsParameters.IFU,       // FP Mask
       NifsParameters.SUMMED_APERTURE_IFU, // IFU method
       "0",                      // offset
       "0.0",                    // min offset
