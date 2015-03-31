@@ -177,49 +177,54 @@ public final class NifsRecipe extends RecipeBase {
         final Iterator<Double> src_frac_it = sf_list.iterator();
         final Iterator<Double> halo_src_frac_it = halo_sf_list.iterator();
 
-        double ap_diam = 1;
+        int i = 0;
+        final SpecS2N[] specS2Narr = new SpecS2N[_nifsParameters.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU) ? 1 : sf_list.size()];
 
-        if (_nifsParameters.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU)) {
-            while (src_frac_it.hasNext()) {
-                spec_source_frac = spec_source_frac + src_frac_it.next();
-                halo_spec_source_frac = halo_spec_source_frac + halo_src_frac_it.next();
-                ap_diam = (ap_offset_list.size() / 2);
+        while (src_frac_it.hasNext()) {
+            double ap_diam = 1;
+
+            if (_nifsParameters.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU)) {
+                while (src_frac_it.hasNext()) {
+                    spec_source_frac = spec_source_frac + src_frac_it.next();
+                    halo_spec_source_frac = halo_spec_source_frac + halo_src_frac_it.next();
+                    ap_diam = (ap_offset_list.size() / 2);
+                }
+            } else {
+                spec_source_frac = src_frac_it.next();
+                halo_spec_source_frac = halo_src_frac_it.next();
+                ap_diam = 1;
             }
-        } else {
-            spec_source_frac = src_frac_it.next();
-            halo_spec_source_frac = halo_src_frac_it.next();
-            ap_diam = 1;
+
+
+            final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(_nifsParameters.getFPMask(), pixel_size,
+                    instrument.getSpectralPixelWidth(),
+                    instrument.getObservingStart(),
+                    instrument.getObservingEnd(),
+                    instrument.getGratingDispersion_nm(),
+                    instrument.getGratingDispersion_nmppix(),
+                    instrument.getGratingResolution(),
+                    spec_source_frac, im_qual,
+                    ap_diam, number_exposures,
+                    frac_with_source, exposure_time,
+                    instrument.getDarkCurrent(),
+                    instrument.getReadNoise(),
+                    _obsDetailParameters.getSkyApertureDiameter());
+
+            specS2N.setDetectorTransmission(instrument.getDetectorTransmision());
+            specS2N.setSourceSpectrum(calcSource.sed);
+            specS2N.setBackgroundSpectrum(calcSource.sky);
+            specS2N.setHaloSpectrum(altair.isDefined() ? calcSource.halo.get() : (VisitableSampledSpectrum) calcSource.sed.clone());
+            specS2N.setHaloImageQuality(IQcalc.getImageQuality());
+            if (_altairParameters.altairIsUsed())
+                specS2N.setSpecHaloSourceFraction(halo_spec_source_frac);
+            else
+                specS2N.setSpecHaloSourceFraction(0.0);
+
+            calcSource.sed.accept(specS2N);
+
+            specS2Narr[i++] = specS2N;
         }
 
-
-        final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(_nifsParameters.getFPMask(), pixel_size,
-                        instrument.getSpectralPixelWidth(),
-                        instrument.getObservingStart(),
-                        instrument.getObservingEnd(),
-                        instrument.getGratingDispersion_nm(),
-                        instrument.getGratingDispersion_nmppix(),
-                        instrument.getGratingResolution(),
-                        spec_source_frac, im_qual,
-                        ap_diam, number_exposures,
-                        frac_with_source, exposure_time,
-                        instrument.getDarkCurrent(),
-                        instrument.getReadNoise(),
-                        _obsDetailParameters.getSkyApertureDiameter());
-
-        specS2N.setDetectorTransmission(instrument.getDetectorTransmision());
-        specS2N.setSourceSpectrum(calcSource.sed);
-        specS2N.setBackgroundSpectrum(calcSource.sky);
-        specS2N.setHaloSpectrum(altair.isDefined() ? calcSource.halo.get() : (VisitableSampledSpectrum) calcSource.sed.clone());
-        specS2N.setHaloImageQuality(IQcalc.getImageQuality());
-        if (_altairParameters.altairIsUsed())
-            specS2N.setSpecHaloSourceFraction(halo_spec_source_frac);
-        else
-            specS2N.setSpecHaloSourceFraction(0.0);
-
-        calcSource.sed.accept(specS2N);
-
-        final SpecS2N[] specS2Narr = new SpecS2N[1];
-        specS2Narr[0] = specS2N;
         return SpectroscopyResult.create(null, IQcalc, specS2Narr, null, altair); // TODO no SFCalc and ST for Nifs
     }
 
@@ -266,48 +271,52 @@ public final class NifsRecipe extends RecipeBase {
 
         _print("<HR align=left SIZE=3>");
 
-        _println("<p style=\"page-break-inside: never\">");
-        device.setPrecision(3);  // NO decimal places
-        device.clear();
+        String sigSpec = null, backSpec = null, singleS2N = null, finalS2N = null;
 
         final List<Double> ap_offset_list = instrument.getIFU().getApertureOffsetList();
         final Iterator<Double> ifu_offset_it = ap_offset_list.iterator();
-        final double ifu_offset = ifu_offset_it.next();
+        for (int i = 0; i < result.specS2N.length; i++) {
+            _println("<p style=\"page-break-inside: never\">");
+            device.setPrecision(3);  // NO decimal places
+            device.clear();
 
-        final String chart1Title =
-                _nifsParameters.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU) ?
-                        "Signal and Background (IFU summed apertures: " +
-                                device.toString(_nifsParameters.getIFUNumX()) + "x" + device.toString(_nifsParameters.getIFUNumY()) +
-                                ", " + device.toString(_nifsParameters.getIFUNumX() * instrument.getIFU().IFU_LEN_X) + "\"x" +
-                                device.toString(_nifsParameters.getIFUNumY() * instrument.getIFU().IFU_LEN_Y) + "\")" :
-                        "Signal and Background (IFU element offset: " + device.toString(ifu_offset) + " arcsec)";
+            final double ifu_offset = ifu_offset_it.next();
 
-        final ITCChart chart1 = new ITCChart(chart1Title, "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
-        chart1.addArray(result.specS2N[0].getSignalSpectrum().getData(), "Signal ");
-        chart1.addArray(result.specS2N[0].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
-        _println(chart1.getBufferedImage(), "SigAndBack");
-        _println("");
+            final String chart1Title =
+                    _nifsParameters.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU) ?
+                            "Signal and Background (IFU summed apertures: " +
+                                    device.toString(_nifsParameters.getIFUNumX()) + "x" + device.toString(_nifsParameters.getIFUNumY()) +
+                                    ", " + device.toString(_nifsParameters.getIFUNumX() * instrument.getIFU().IFU_LEN_X) + "\"x" +
+                                    device.toString(_nifsParameters.getIFUNumY() * instrument.getIFU().IFU_LEN_Y) + "\")" :
+                            "Signal and Background (IFU element offset: " + device.toString(ifu_offset) + " arcsec)";
+
+            final ITCChart chart1 = new ITCChart(chart1Title, "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
+            chart1.addArray(result.specS2N[i].getSignalSpectrum().getData(), "Signal ");
+            chart1.addArray(result.specS2N[i].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
+            _println(chart1.getBufferedImage(), "SigAndBack");
+            _println("");
 
 
-        final String sigSpec = _printSpecTag("ASCII signal spectrum");
-        final String backSpec = _printSpecTag("ASCII background spectrum");
+            sigSpec = _printSpecTag("ASCII signal spectrum");
+            backSpec = _printSpecTag("ASCII background spectrum");
 
-        final String chart2Title =
-                _nifsParameters.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU) ?
-                        "Intermediate Single Exp and Final S/N \n(IFU apertures:" +
-                                device.toString(_nifsParameters.getIFUNumX()) + "x" + device.toString(_nifsParameters.getIFUNumY()) +
-                                ", " + device.toString(_nifsParameters.getIFUNumX() * instrument.getIFU().IFU_LEN_X) + "\"x" +
-                                device.toString(_nifsParameters.getIFUNumY() * instrument.getIFU().IFU_LEN_Y) + "\")" :
-                        "Intermediate Single Exp and Final S/N (IFU element offset: " + device.toString(ifu_offset) + " arcsec)";
+            final String chart2Title =
+                    _nifsParameters.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU) ?
+                            "Intermediate Single Exp and Final S/N \n(IFU apertures:" +
+                                    device.toString(_nifsParameters.getIFUNumX()) + "x" + device.toString(_nifsParameters.getIFUNumY()) +
+                                    ", " + device.toString(_nifsParameters.getIFUNumX() * instrument.getIFU().IFU_LEN_X) + "\"x" +
+                                    device.toString(_nifsParameters.getIFUNumY() * instrument.getIFU().IFU_LEN_Y) + "\")" :
+                            "Intermediate Single Exp and Final S/N (IFU element offset: " + device.toString(ifu_offset) + " arcsec)";
 
-        final ITCChart chart2 = new ITCChart(chart2Title, "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
-        chart2.addArray(result.specS2N[0].getExpS2NSpectrum().getData(), "Single Exp S/N");
-        chart2.addArray(result.specS2N[0].getFinalS2NSpectrum().getData(), "Final S/N  ");
-        _println(chart2.getBufferedImage(), "Sig2N");
-        _println("");
+            final ITCChart chart2 = new ITCChart(chart2Title, "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
+            chart2.addArray(result.specS2N[i].getExpS2NSpectrum().getData(), "Single Exp S/N");
+            chart2.addArray(result.specS2N[i].getFinalS2NSpectrum().getData(), "Final S/N  ");
+            _println(chart2.getBufferedImage(), "Sig2N");
+            _println("");
 
-        final String singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
-        final String finalS2N = _printSpecTag("Final S/N ASCII data");
+            singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
+            finalS2N = _printSpecTag("Final S/N ASCII data");
+        }
 
         _println("");
         device.setPrecision(2);  // TWO decimal places
@@ -326,10 +335,10 @@ public final class NifsRecipe extends RecipeBase {
         _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));
         _println(HtmlPrinter.printParameterSummary(_obsDetailParameters));
         _println(HtmlPrinter.printParameterSummary(_plotParameters));
-        _println(result.specS2N[0].getSignalSpectrum(), _header, sigSpec);
-        _println(result.specS2N[0].getBackgroundSpectrum(), _header, backSpec);
-        _println(result.specS2N[0].getExpS2NSpectrum(), _header, singleS2N);
-        _println(result.specS2N[0].getFinalS2NSpectrum(), _header, finalS2N);
+        _println(result.specS2N[result.specS2N.length-1].getSignalSpectrum(), _header, sigSpec);
+        _println(result.specS2N[result.specS2N.length-1].getBackgroundSpectrum(), _header, backSpec);
+        _println(result.specS2N[result.specS2N.length-1].getExpS2NSpectrum(), _header, singleS2N);
+        _println(result.specS2N[result.specS2N.length-1].getFinalS2NSpectrum(), _header, finalS2N);
     }
 
 }
