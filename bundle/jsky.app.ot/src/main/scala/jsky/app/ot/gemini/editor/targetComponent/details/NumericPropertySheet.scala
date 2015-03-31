@@ -14,6 +14,7 @@ import scalaz.std.list._
 import scalaz.syntax.id._
 import scalaz.syntax.functor._
 
+// An editor for a list of doubles, with a titled border
 case class NumericPropertySheet[A](title: String, f: SPTarget => A, props: NumericPropertySheet.Prop[A]*)
   extends JPanel with TelescopePosEditor with ReentrancyHack {
 

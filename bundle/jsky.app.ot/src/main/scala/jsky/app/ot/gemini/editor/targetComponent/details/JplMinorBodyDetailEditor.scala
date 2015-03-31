@@ -1,7 +1,7 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
-import java.awt.{ GridBagConstraints, GridBagLayout}
-import javax.swing.JComponent
+import java.awt.{Insets, GridBagConstraints, GridBagLayout}
+import javax.swing.{JLabel, JPanel, JComponent}
 
 import edu.gemini.shared.util.immutable.{ Option => GOption }
 import edu.gemini.spModel.obs.context.ObsContext
@@ -16,6 +16,10 @@ import scalaz.syntax.id._
 final class JplMinorBodyDetailEditor extends TargetDetailEditor(Tag.JPL_MINOR_BODY) {
   import NumericPropertySheet.Prop
 
+  // Editors
+
+  val kind = new TargetTypeEditor
+
   val props = NumericPropertySheet[ConicTarget]("Orbital Elements", _.getTarget.asInstanceOf[ConicTarget],
     Prop("EPOCH", "Orbital Element Epoch (JD)",        _.getEpoch),
     Prop("IN",    "Inclination (deg)",                 _.getInclination),
@@ -26,30 +30,76 @@ final class JplMinorBodyDetailEditor extends TargetDetailEditor(Tag.JPL_MINOR_BO
     Prop("TP",    "Time of Perihelion Passage (JD)",   _.getEpochOfPeri)
   )
 
-  val magnitudeEditor = new MagnitudeEditor {
+  val mags = new MagnitudeEditor {
     getComponent.asInstanceOf[JComponent].setBorder(titleBorder("Magnitudes"))
   }
 
-  // Initialization
+  // Layout
+
   setLayout(new GridBagLayout)
 
-  // Add the magnitude editor
-  add(magnitudeEditor.getComponent, new GridBagConstraints <| { c =>
+  val general = new JPanel <| { p =>
+    p.setLayout(new GridBagLayout)
+    p.setBorder(titleBorder("General"))
+
+    p.add(new JLabel("Target Type"), new GridBagConstraints <| { c =>
+      c.gridx = 0
+      c.gridy = 0
+      c.fill = GridBagConstraints.HORIZONTAL
+      c.insets = new Insets(0, 2, 0, 5)
+    })
+
+    p.add(kind, new GridBagConstraints <| { c =>
+      c.gridx = 1
+      c.gridy = 0
+      c.fill = GridBagConstraints.HORIZONTAL
+      c.insets = new Insets(0, 5, 0, 2)
+      c.weightx = 2
+    })
+
+//    p.add(new JLabel("Target Name"), new GridBagConstraints <| { c =>
+//      c.gridx = 0
+//      c.gridy = 1
+//      c.fill = GridBagConstraints.HORIZONTAL
+//      c.insets = new Insets(10, 2, 0, 5)
+//    })
+//
+//    p.add(name, new GridBagConstraints <| { c =>
+//      c.gridx = 1
+//      c.gridy = 1
+//      c.fill = GridBagConstraints.HORIZONTAL
+//      c.insets = new Insets(10, 5, 0, 2)
+//      c.weightx = 2
+//    })
+
+  }
+
+  add(general, new GridBagConstraints <| { c =>
     c.gridx = 0
     c.gridy = 0
-    c.fill = GridBagConstraints.BOTH
-  })
-
-  // Add the param panel
-  add(props, new GridBagConstraints <| { c =>
-    c.gridx = 1
-    c.gridy = 0
+    c.gridwidth = 2
     c.fill = GridBagConstraints.HORIZONTAL
   })
 
+
+  add(mags.getComponent, new GridBagConstraints <| { c =>
+    c.gridx = 0
+    c.gridy = 1
+    c.fill = GridBagConstraints.BOTH
+  })
+
+  add(props, new GridBagConstraints <| { c =>
+    c.gridx = 1
+    c.gridy = 1
+    c.fill = GridBagConstraints.HORIZONTAL
+  })
+
+  // Implementation
+
   override def edit(obsContext: GOption[ObsContext], spTarget: SPTarget): Unit = {
     super.edit(obsContext, spTarget)
-    magnitudeEditor.edit(obsContext, spTarget)
+    kind .edit(obsContext, spTarget)
+    mags .edit(obsContext, spTarget)
     props.edit(obsContext, spTarget)
   }
 
