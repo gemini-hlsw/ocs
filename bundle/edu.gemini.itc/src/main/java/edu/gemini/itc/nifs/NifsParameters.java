@@ -17,7 +17,6 @@ public final class NifsParameters implements InstrumentDetails {
     public static final String INSTRUMENT_CAMERA = "instrumentCamera";
     public static final String INSTRUMENT_CENTRAL_WAVELENGTH = "instrumentCentralWavelength";
     public static final String READ_NOISE = "readNoise";
-    public static final String DARK_CURRENT = "darkCurrent";
     public static final String IFU_METHOD = "ifuMethod";
     public static final String SINGLE_IFU = "singleIFU";
     public static final String RADIAL_IFU = "radialIFU";
@@ -60,7 +59,6 @@ public final class NifsParameters implements InstrumentDetails {
     private String _Filter;
     private String _grating; // Grating or null
     private String _readNoise;
-    private String _darkCurrent;
     private String _instrumentCentralWavelength;
     private String _IFUMethod;
     private String _IFUOffset;
@@ -107,11 +105,10 @@ public final class NifsParameters implements InstrumentDetails {
     /**
      * Constructs a NifsParameters from a test file.
      */
-    public NifsParameters(String Filter, String grating, String readNoise, String darkCurrent, String instrumentCentralWavelength, String IFUMethod, String IFUOffset, String IFUMinOffset, String IFUMaxOffset, String IFUNumX, String IFUNumY, String IFUCenterX, String IFUCenterY) {
+    public NifsParameters(String Filter, String grating, String readNoise, String instrumentCentralWavelength, String IFUMethod, String IFUOffset, String IFUMinOffset, String IFUMaxOffset, String IFUNumX, String IFUNumY, String IFUCenterX, String IFUCenterY) {
 
         _Filter = Filter;
         _grating = grating;
-        _darkCurrent = darkCurrent;
         _readNoise = readNoise;
         _instrumentCentralWavelength = instrumentCentralWavelength;
         _IFUMethod = IFUMethod;
@@ -134,10 +131,6 @@ public final class NifsParameters implements InstrumentDetails {
 
     public String getReadNoise() {
         return _readNoise;
-    }
-
-    public String getDarkCurrent() {
-        return _darkCurrent;
     }
 
     public double getInstrumentCentralWavelength() {

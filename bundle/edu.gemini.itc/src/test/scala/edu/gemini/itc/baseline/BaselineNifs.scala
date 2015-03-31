@@ -20,7 +20,6 @@ object BaselineNifs {
       NifsParameters.K_G5605,
       NifsParameters.LOW_READ_NOISE,
       "2.1",
-      "2.1",
       NifsParameters.SINGLE_IFU,// IFU method
       "0",                      // offset
       "0.0",                    // min offset
@@ -34,7 +33,6 @@ object BaselineNifs {
       NifsParameters.HK_G0603,
       NifsParameters.H_G5604,
       NifsParameters.LOW_READ_NOISE,
-      "2.2",                    // dark current: TODO: unused, remove
       "2.2",                    // central wavelength
       NifsParameters.SUMMED_APERTURE_IFU, // IFU method
       "0",                      // offset
@@ -44,6 +42,20 @@ object BaselineNifs {
       "5",                      // num Y
       "0.0",                    // center x
       "0.0"                     // center y
+    ),
+    new NifsParameters(
+      NifsParameters.HK_G0603,
+      NifsParameters.H_G5604,
+      NifsParameters.LOW_READ_NOISE,
+      "2.2",                    // central wavelength
+      NifsParameters.RADIAL_IFU,// IFU method
+      "0",                      // offset
+      "0.0",                    // min offset
+      "0.0",                    // max offset
+      "0",                      // num X
+      "0",                      // num Y
+      "0.0",                    // center x
+      "1.0"                     // center y
     )
   ), alt = Fixture.AltairConfigurations)
 

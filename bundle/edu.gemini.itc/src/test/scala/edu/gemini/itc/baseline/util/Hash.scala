@@ -77,9 +77,7 @@ object Hash {
 
   def calc(p: NifsParameters): Int =
     hash(
-      p.getDarkCurrent,
       p.getFilter,
-      "ifu",                      // TODO: remove with next baseline udpate
       p.getFPMask,
       p.getGrating,
 //      p.getIFUCenterX,          // TODO: results in NPE if not set..
@@ -92,7 +90,6 @@ object Hash {
       p.getIFUOffset,
       p.getInstrumentCentralWavelength,
       p.getReadNoise,
-      "IFU",                      // TODO: remove with next baseline udpate
       p.getUnXDispCentralWavelength
     )
 
