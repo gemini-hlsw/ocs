@@ -21,11 +21,8 @@ public final class TRecsRecipe extends RecipeBase {
     private TelescopeDetails _telescope;
     private PlottingDetails _plotParameters;
 
-    private String sigSpec, backSpec, singleS2N, finalS2N;
-    private SpecS2NLargeSlitVisitor specS2N;
-
-    private Calendar now = Calendar.getInstance();
-    private String _header = new StringBuffer("# T-ReCS ITC: " + now.getTime() + "\n").toString();
+    private final Calendar now = Calendar.getInstance();
+    private final String _header = "# T-ReCS ITC: " + now.getTime() + "\n";
 
     /**
      * Constructs a TRecsRecipe by parsing a Multipart servlet request.
@@ -34,7 +31,7 @@ public final class TRecsRecipe extends RecipeBase {
      * @param out Results will be written to this PrintWriter.
      * @throws Exception on failure to parse parameters.
      */
-    public TRecsRecipe(ITCMultiPartParser r, PrintWriter out) {
+    public TRecsRecipe(final ITCMultiPartParser r, final PrintWriter out) {
         _out = out;
 
         // Read parameters from the four main sections of the web page.
@@ -51,12 +48,12 @@ public final class TRecsRecipe extends RecipeBase {
     /**
      * Constructs a TRecsRecipe given the parameters. Useful for testing.
      */
-    public TRecsRecipe(SourceDefinition sdParameters,
-                       ObservationDetails obsDetailParameters,
-                       ObservingConditions obsConditionParameters,
-                       TRecsParameters trecsParameters, TelescopeDetails telescope,
-                       PlottingDetails plotParameters,
-                       PrintWriter out) {
+    public TRecsRecipe(final SourceDefinition sdParameters,
+                       final ObservationDetails obsDetailParameters,
+                       final ObservingConditions obsConditionParameters,
+                       final TRecsParameters trecsParameters, TelescopeDetails telescope,
+                       final PlottingDetails plotParameters,
+                       final PrintWriter out) {
         super(out);
         _sdParameters = sdParameters;
         _obsDetailParameters = correctedObsDetails(trecsParameters, obsDetailParameters);
@@ -96,7 +93,7 @@ public final class TRecsRecipe extends RecipeBase {
         checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
     }
 
-    private ObservationDetails correctedObsDetails(TRecsParameters tp, ObservationDetails odp) {
+    private ObservationDetails correctedObsDetails(final TRecsParameters tp, final ObservationDetails odp) {
         // TODO : These corrections were previously done in random places throughout the recipe. I moved them here
         // TODO : so the ObservationDetailsParameters object can become immutable. Basically this calculates
         // TODO : some missing parameters and/or turns the total exposure time into a single exposure time.
@@ -133,22 +130,106 @@ public final class TRecsRecipe extends RecipeBase {
      *                   files, incorrectly-formatted data files, ...
      */
     public void writeOutput() {
-        _println("");
+        final TRecs instrument = new TRecs(_trecsParameters, _obsDetailParameters);
+        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
+            final SpectroscopyResult result = calculateSpectroscopy(instrument);
+            writeSpectroscopyOutput(instrument, result);
+        } else {
+            final ImagingResult result = calculateImaging(instrument);
+            writeImagingOutput(instrument, result);
+        }
+    }
 
-        // This object is used to format numerical strings.
-        FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2); // Two decimal places
-        device.clear();
+    private SpectroscopyResult calculateSpectroscopy(final TRecs instrument) {
 
+        // Get the summed source and sky
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GS, ITCConstants.MID_IR, _sdParameters, _obsConditionParameters, _telescope, _plotParameters);
+        final VisitableSampledSpectrum sed = calcSource.sed;
+        final VisitableSampledSpectrum sky = calcSource.sky;
+
+        // Start of morphology section of ITC
+
+        // Module 1a
+        // The purpose of this section is to calculate the fraction of the
+        // source flux which is contained within an aperture which we adopt
+        // to derive the signal to noise ratio. There are several cases
+        // depending on the source morphology.
+        // Define the source morphology
+        //
+        // inputs: source morphology specification
+
+        double pixel_size = instrument.getPixelSize();
+        double ap_diam = 0;
+
+        // Calculate image quality
+        final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
+        IQcalc.calculate();
+
+        // In this version we are bypassing morphology modules 3a-5a.
+        // i.e. the output morphology is same as the input morphology.
+        // Might implement these modules at a later time.
+        final double exp_time = _obsDetailParameters.getExposureTime();
+        final int number_exposures = _obsDetailParameters.getNumExposures();
+        final double frac_with_source = _obsDetailParameters.getSourceFraction();
+        double spec_source_frac = 0;
+
+        final SlitThroughput st;
+        if (!_obsDetailParameters.isAutoAperture()) {
+            st = new SlitThroughput(IQcalc.getImageQuality(),
+                    _obsDetailParameters.getApertureDiameter(), pixel_size,
+                    _trecsParameters.getFPMask());
+        } else {
+            st = new SlitThroughput(IQcalc.getImageQuality(), pixel_size, _trecsParameters.getFPMask());
+        }
+
+
+        ap_diam = st.getSpatialPix();
+        spec_source_frac = st.getSlitThroughput();
+
+        // For the usb case we want the resolution to be determined by the
+        // slit width and not the image quality for a point source.
+        final double im_qual;
+        if (_sdParameters.isUniform()) {
+            im_qual = 10000;
+            if (_obsDetailParameters.isAutoAperture()) {
+                ap_diam = new Double(1 / (_trecsParameters.getFPMask() * pixel_size) + 0.5).intValue();
+                spec_source_frac = 1;
+            } else {
+                spec_source_frac = _trecsParameters.getFPMask() * ap_diam * pixel_size; // ap_diam = Spec_NPix
+            }
+        } else {
+            im_qual = IQcalc.getImageQuality();
+        }
+
+        final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(_trecsParameters.getFPMask(),
+                pixel_size, instrument.getSpectralPixelWidth(),
+                instrument.getObservingStart(),
+                instrument.getObservingEnd(),
+                instrument.getGratingDispersion_nm(),
+                instrument.getGratingDispersion_nmppix(),
+                instrument.getGratingResolution(), spec_source_frac,
+                im_qual, ap_diam, number_exposures, frac_with_source,
+                exp_time,
+                instrument.getDarkCurrent(),
+                instrument.getReadNoise(),
+                _obsDetailParameters.getSkyApertureDiameter());
+        specS2N.setDetectorTransmission(instrument.getDetectorTransmision());
+        specS2N.setSourceSpectrum(sed);
+        specS2N.setBackgroundSpectrum(sky);
+        sed.accept(specS2N);
+
+        final SpecS2NLargeSlitVisitor[] specS2Narr = new SpecS2NLargeSlitVisitor[1];
+        specS2Narr[0] = specS2N;
+        return SpectroscopyResult.create(null, IQcalc, specS2Narr, st); // TODO SFCalc not needed!
+    }
+
+    private ImagingResult calculateImaging(final TRecs instrument) {
         // Module 1b
         // Define the source energy (as function of wavelength).
         //
         // inputs: instrument, SED
         // calculates: redshifted SED
         // output: redshifteed SED
-
-        TRecs instrument = new TRecs(_trecsParameters, _obsDetailParameters);
-
 
         // Get the summed source and sky
         final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GS, ITCConstants.MID_IR, _sdParameters, _obsConditionParameters, _telescope, _plotParameters);
@@ -169,181 +250,106 @@ public final class TRecsRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        double pixel_size = instrument.getPixelSize();
-        double ap_diam = 0;
-
         // Calculate image quality
-        double im_qual = 0.;
-        ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
+        final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
         IQcalc.calculate();
 
-        im_qual = IQcalc.getImageQuality();
-        final double exp_time = _obsDetailParameters.getExposureTime();
-
         // Calculate the Fraction of source in the aperture
-        final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
-        if (_obsDetailParameters.getMethod().isImaging()) {
-            _print(SFcalc.getTextResult(device));
-            _println(IQcalc.getTextResult(device));
-            _println("Sky subtraction aperture = "
-                    + _obsDetailParameters.getSkyApertureDiameter()
-                    + " times the software aperture.\n");
-        }
+        final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, IQcalc.getImageQuality());
 
         // Calculate the Peak Pixel Flux
-        final double peak_pixel_count = PeakPixelFlux.calculate(instrument, _sdParameters, _obsDetailParameters, SFcalc, im_qual, sed_integral, sky_integral);
+        final double peak_pixel_count = PeakPixelFlux.calculate(instrument, _sdParameters, _obsDetailParameters, SFcalc, IQcalc.getImageQuality(), sed_integral, sky_integral);
 
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
-        final int number_exposures = _obsDetailParameters.getNumExposures();
-        double spec_source_frac = 0;
-        double frac_with_source = _obsDetailParameters.getSourceFraction();
-        double dark_current = instrument.getDarkCurrent();
-        double read_noise = instrument.getReadNoise();
 
-        // ObservationMode Imaging or spectroscopy
+        final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
+        IS2Ncalc.calculate();
 
-        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
+        return ImagingResult.create(IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
 
-            SlitThroughput st;
-            if (!_obsDetailParameters.isAutoAperture()) {
-                st = new SlitThroughput(im_qual,
-                        _obsDetailParameters.getApertureDiameter(), pixel_size,
-                        _trecsParameters.getFPMask());
-                _println("software aperture extent along slit = "
-                        + device.toString(_obsDetailParameters
-                        .getApertureDiameter()) + " arcsec");
-            } else {
-                st = new SlitThroughput(im_qual, pixel_size, _trecsParameters.getFPMask());
-                switch (_sdParameters.getProfileType()) {
-                    case UNIFORM:
-                        _println("software aperture extent along slit = " + device.toString(1 / _trecsParameters.getFPMask()) + " arcsec");
-                        break;
-                    case POINT:
-                        _println("software aperture extent along slit = " + device.toString(1.4 * im_qual) + " arcsec");
-                        break;
-                }
-            }
-
-            if (!_sdParameters.isUniform()) {
-                _println("fraction of source flux in aperture = "
-                        + device.toString(st.getSlitThroughput()));
-            }
-
-            _println("derived image size(FWHM) for a point source = "
-                    + device.toString(im_qual) + "arcsec\n");
-
-            _println("Sky subtraction aperture = "
-                    + _obsDetailParameters.getSkyApertureDiameter()
-                    + " times the software aperture.");
-
-            _println("");
-            _println("Requested total integration time = "
-                    + device.toString(exp_time * number_exposures)
-                    + " secs, of which "
-                    + device.toString(exp_time * number_exposures
-                    * frac_with_source) + " secs is on source.");
-
-            _print("<HR align=left SIZE=3>");
-
-            ap_diam = st.getSpatialPix(); // ap_diam really Spec_Npix on Phil's
-            // Mathcad change later
-            spec_source_frac = st.getSlitThroughput();
-
-            // _println("Spec_source_frac: " + st.getSlitThroughput()+
-            // "  Spec_npix: "+ ap_diam);
-
-            // For the usb case we want the resolution to be determined by the
-            // slit width and not the image quality for a point source.
-            if (_sdParameters.isUniform()) {
-                im_qual = 10000;
-                if (_obsDetailParameters.isAutoAperture()) {
-                    ap_diam = new Double(1 / (_trecsParameters.getFPMask() * pixel_size) + 0.5).intValue();
-                    spec_source_frac = 1;
-                } else {
-                    spec_source_frac = _trecsParameters.getFPMask() * ap_diam * pixel_size; // ap_diam = Spec_NPix
-                }
-            }
-            // _println("Spec_source_frac: " + spec_source_frac+
-            // "  Spec_npix: "+ ap_diam);
-            // sed.trim(instrument.g);
-            // sky.trim();
-            specS2N = new SpecS2NLargeSlitVisitor(_trecsParameters.getFPMask(),
-                    pixel_size, instrument.getSpectralPixelWidth(),
-                    instrument.getObservingStart(),
-                    instrument.getObservingEnd(),
-                    instrument.getGratingDispersion_nm(),
-                    instrument.getGratingDispersion_nmppix(),
-                    instrument.getGratingResolution(), spec_source_frac,
-                    im_qual, ap_diam, number_exposures, frac_with_source,
-                    exp_time, dark_current, read_noise,
-                    _obsDetailParameters.getSkyApertureDiameter());
-            specS2N.setDetectorTransmission(instrument.getDetectorTransmision());
-            specS2N.setSourceSpectrum(sed);
-            specS2N.setBackgroundSpectrum(sky);
-            sed.accept(specS2N);
-            _println("<p style=\"page-break-inside: never\">");
+    }
 
 
-            final ITCChart chart1 = new ITCChart("Signal and Background", "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
-            final ITCChart chart2 = new ITCChart("Intermediate Single Exp and Final S/N", "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
 
-            chart1.addArray(specS2N.getSignalSpectrum().getData(), "Signal ");
-            chart1.addArray(specS2N.getBackgroundSpectrum().getData(), "SQRT(Background)  ");
-            _println(chart1.getBufferedImage(), "SigAndBack");
-            _println("");
+    // ===================================================================================================================
+    // TODO: OUTPUT METHODS
+    // TODO: These need to be simplified/cleaned/shared and then go to the web module.. and then be deleted and forgotten.
+    // ===================================================================================================================
 
-            sigSpec = _printSpecTag("ASCII signal spectrum");
-            backSpec = _printSpecTag("ASCII background spectrum");
+    private void writeSpectroscopyOutput(final TRecs instrument, final SpectroscopyResult result) {
+        _println("");
 
-            chart2.addArray(specS2N.getExpS2NSpectrum().getData(), "Single Exp S/N");
-            chart2.addArray(specS2N.getFinalS2NSpectrum().getData(), "Final S/N  ");
-            _println(chart2.getBufferedImage(), "Sig2N");
-            _println("");
+        // This object is used to format numerical strings.
+        final FormatStringWriter device = new FormatStringWriter();
+        device.setPrecision(2); // Two decimal places
+        device.clear();
 
-            singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
-            finalS2N = _printSpecTag("Final S/N ASCII data");
-
-            // THis was used for TED to output the data might be useful later.
-            /**
-             * double [][] temp = specS2N.getSignalSpectrum().getData(); for
-             * (int i=0; i< specS2N.getSignalSpectrum().getLength()-2; i++) {
-             * System.out.print(" " +temp[0][i]+ "  ");
-             * System.out.println(temp[1][i]); } System.out.println("END");
-             * double [][] temp2 = specS2N.getFinalS2NSpectrum().getData(); for
-             * (int i=0; i< specS2N.getFinalS2NSpectrum().getLength()-2; i++) {
-             * System.out.print(" " +temp2[0][i]+ "  ");
-             * System.out.println(temp2[1][i]); } System.out.println("END");
-             *
-             **/
-
+        if (!_obsDetailParameters.isAutoAperture()) {
+            _println("software aperture extent along slit = " + device.toString(_obsDetailParameters.getApertureDiameter()) + " arcsec");
         } else {
-
-            final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
-            IS2Ncalc.calculate();
-            _println(IS2Ncalc.getTextResult(device));
-            device.setPrecision(0); // NO decimal places
-            device.clear();
-
-            _println("");
-            _println("The peak pixel signal + background is "
-                    + device.toString(peak_pixel_count) + ". ");// This is " +
-
-            if (peak_pixel_count > (instrument.getWellDepth()))
-                _println("Warning: peak pixel may be saturating the imaging deep well setting of "
-                        + instrument.getWellDepth());
-
+            switch (_sdParameters.getProfileType()) {
+                case UNIFORM:
+                    _println("software aperture extent along slit = " + device.toString(1 / _trecsParameters.getFPMask()) + " arcsec");
+                    break;
+                case POINT:
+                    _println("software aperture extent along slit = " + device.toString(1.4 * result.IQcalc.getImageQuality()) + " arcsec");
+                    break;
+            }
         }
+
+        if (!_sdParameters.isUniform()) {
+            _println("fraction of source flux in aperture = " + device.toString(result.st.getSlitThroughput()));
+        }
+
+        _println("derived image size(FWHM) for a point source = " + device.toString(result.IQcalc.getImageQuality()) + "arcsec\n");
+
+        _println("Sky subtraction aperture = "
+                + _obsDetailParameters.getSkyApertureDiameter()
+                + " times the software aperture.");
+
+        _println("");
+
+        final double exp_time = _obsDetailParameters.getExposureTime();
+        final int number_exposures = _obsDetailParameters.getNumExposures();
+        final double frac_with_source = _obsDetailParameters.getSourceFraction();
+
+        _println("Requested total integration time = "
+                + device.toString(exp_time * number_exposures)
+                + " secs, of which "
+                + device.toString(exp_time * number_exposures
+                * frac_with_source) + " secs is on source.");
+
+        _print("<HR align=left SIZE=3>");
+
+        _println("<p style=\"page-break-inside: never\">");
+
+
+        final ITCChart chart1 = new ITCChart("Signal and Background", "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
+        final ITCChart chart2 = new ITCChart("Intermediate Single Exp and Final S/N", "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
+
+        chart1.addArray(result.specS2N[0].getSignalSpectrum().getData(), "Signal ");
+        chart1.addArray(result.specS2N[0].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
+        _println(chart1.getBufferedImage(), "SigAndBack");
+        _println("");
+
+        final String sigSpec = _printSpecTag("ASCII signal spectrum");
+        final String backSpec = _printSpecTag("ASCII background spectrum");
+
+        chart2.addArray(result.specS2N[0].getExpS2NSpectrum().getData(), "Single Exp S/N");
+        chart2.addArray(result.specS2N[0].getFinalS2NSpectrum().getData(), "Final S/N  ");
+        _println(chart2.getBufferedImage(), "Sig2N");
+        _println("");
+
+        final String singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
+        final String finalS2N = _printSpecTag("Final S/N ASCII data");
 
         _println("");
         device.setPrecision(2); // TWO decimal places
         device.clear();
 
-        // _println("");
         _print("<HR align=left SIZE=3>");
-        // _println("");
-
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + instrument.getName() + "\n");
         _println(HtmlPrinter.printParameterSummary(_sdParameters));
@@ -351,12 +357,53 @@ public final class TRecsRecipe extends RecipeBase {
         _println(HtmlPrinter.printParameterSummary(_telescope));
         _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));
         _println(HtmlPrinter.printParameterSummary(_obsDetailParameters));
-        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
-            _println(HtmlPrinter.printParameterSummary(_plotParameters));
-            _println(specS2N.getSignalSpectrum(), _header, sigSpec);
-            _println(specS2N.getBackgroundSpectrum(), _header, backSpec);
-            _println(specS2N.getExpS2NSpectrum(), _header, singleS2N);
-            _println(specS2N.getFinalS2NSpectrum(), _header, finalS2N);
-        }
+        _println(HtmlPrinter.printParameterSummary(_plotParameters));
+        _println(result.specS2N[0].getSignalSpectrum(), _header, sigSpec);
+        _println(result.specS2N[0].getBackgroundSpectrum(), _header, backSpec);
+        _println(result.specS2N[0].getExpS2NSpectrum(), _header, singleS2N);
+        _println(result.specS2N[0].getFinalS2NSpectrum(), _header, finalS2N);
     }
+
+    private void writeImagingOutput(final TRecs instrument, final ImagingResult result) {
+        _println("");
+
+        // This object is used to format numerical strings.
+        FormatStringWriter device = new FormatStringWriter();
+        device.setPrecision(2); // Two decimal places
+        device.clear();
+
+
+        _print(result.SFcalc.getTextResult(device));
+        _println(result.IQcalc.getTextResult(device));
+        _println("Sky subtraction aperture = "
+                + _obsDetailParameters.getSkyApertureDiameter()
+                + " times the software aperture.\n");
+
+        _println(result.IS2Ncalc.getTextResult(device));
+        device.setPrecision(0); // NO decimal places
+        device.clear();
+
+        _println("");
+        _println("The peak pixel signal + background is "
+                + device.toString(result.peak_pixel_count) + ". ");
+
+        if (result.peak_pixel_count > (instrument.getWellDepth()))
+            _println("Warning: peak pixel may be saturating the imaging deep well setting of "
+                    + instrument.getWellDepth());
+
+        _println("");
+        device.setPrecision(2); // TWO decimal places
+        device.clear();
+
+        _print("<HR align=left SIZE=3>");
+        _println("<b>Input Parameters:</b>");
+        _println("Instrument: " + instrument.getName() + "\n");
+        _println(HtmlPrinter.printParameterSummary(_sdParameters));
+        _println(instrument.toString());
+        _println(HtmlPrinter.printParameterSummary(_telescope));
+        _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));
+        _println(HtmlPrinter.printParameterSummary(_obsDetailParameters));
+    }
+
+
 }
