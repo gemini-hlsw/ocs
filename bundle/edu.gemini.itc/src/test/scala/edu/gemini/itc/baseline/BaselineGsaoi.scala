@@ -1,9 +1,8 @@
 package edu.gemini.itc.baseline
 
-import edu.gemini.itc.baseline.util.Baseline._
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.gems.GemsParameters
-import edu.gemini.itc.gsaoi.{GsaoiParameters, GsaoiRecipe}
+import edu.gemini.itc.gsaoi.GsaoiParameters
 
 /**
  * GSAOI baseline test fixtures.
@@ -11,9 +10,6 @@ import edu.gemini.itc.gsaoi.{GsaoiParameters, GsaoiRecipe}
 object BaselineGsaoi  {
 
   lazy val Fixtures = KBandImaging ++ RBandImaging
-
-  def executeRecipe(f: Fixture[GsaoiParameters]): Output =
-    cookRecipe(w => new GsaoiRecipe(f.src, f.odp, f.ocp, f.ins, f.tep, f.gem.get, w))
 
   private lazy val KBandImaging = Fixture.kBandImgFixtures(List(
     new GsaoiParameters(

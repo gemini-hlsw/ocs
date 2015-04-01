@@ -1,18 +1,15 @@
 package edu.gemini.itc.baseline
 
-import edu.gemini.itc.baseline.util.Baseline._
 import edu.gemini.itc.baseline.util._
-import edu.gemini.itc.nifs.{NifsParameters, NifsRecipe}
+import edu.gemini.itc.nifs.NifsParameters
 
 /**
  * NIFS baseline test fixtures.
+ *
  */
 object BaselineNifs {
 
   lazy val Fixtures = KBandSpectroscopy
-
-  def executeRecipe(f: Fixture[NifsParameters]): Output =
-    cookRecipe(w => new NifsRecipe(f.src, f.odp, f.ocp, f.ins, f.tep, f.alt.get, f.pdp, w))
 
   private lazy val KBandSpectroscopy = Fixture.kBandSpcFixtures(List(
     new NifsParameters(

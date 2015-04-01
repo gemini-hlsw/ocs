@@ -1,6 +1,7 @@
 package edu.gemini.itc.niri;
 
-import edu.gemini.itc.altair.*;
+import edu.gemini.itc.altair.Altair;
+import edu.gemini.itc.altair.AltairParameters;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.HtmlPrinter;
@@ -17,7 +18,7 @@ import java.util.Calendar;
 public final class NiriRecipe extends RecipeBase {
 
     private final AltairParameters _altairParameters;
-    private final StringBuffer _header = new StringBuffer("# NIRI ITC: " + Calendar.getInstance().getTime() + "\n");
+    private final String _header = "# NIRI ITC: " + Calendar.getInstance().getTime() + "\n";
 
     private final NiriParameters _niriParameters;
     private final ObservingConditions _obsConditionParameters;
@@ -92,7 +93,7 @@ public final class NiriRecipe extends RecipeBase {
             }
 
         // report error if this does not come out to be an integer
-        checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
+        Validation.checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
 
     }
 
@@ -220,8 +221,7 @@ public final class NiriRecipe extends RecipeBase {
 
         final SpecS2N[] specS2Narr = new SpecS2N[1];
         specS2Narr[0] = specS2N;
-
-        return SpectroscopyResult.create(SFcalc, IQcalc, specS2Narr, st);
+        return SpectroscopyResult.apply(SFcalc, IQcalc, specS2Narr, st);
     }
 
     private ImagingResult calculateImaging(final Niri instrument) {
@@ -305,7 +305,8 @@ public final class NiriRecipe extends RecipeBase {
         }
         IS2Ncalc.calculate();
 
-        return ImagingResult.create(IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
+        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
+        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
 
     }
 
@@ -325,7 +326,7 @@ public final class NiriRecipe extends RecipeBase {
 
         // Altair specific section
         if (_altairParameters.altairIsUsed()) {
-            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), result.IQcalc.getImageQuality(), _altairParameters, 0.0);
+            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), result.iqCalc().getImageQuality(), _altairParameters, 0.0);
             _println(ao.printSummary());
         }
 
@@ -339,18 +340,18 @@ public final class NiriRecipe extends RecipeBase {
                     _println("software aperture extent along slit = " + device.toString(1 / _niriParameters.getFPMask()) + " arcsec");
                     break;
                 case POINT:
-                    _println("software aperture extent along slit = " + device.toString(1.4 * result.specS2N[0].getImageQuality()) + " arcsec");
+                    _println("software aperture extent along slit = " + device.toString(1.4 * result.specS2N()[0].getImageQuality()) + " arcsec");
                     break;
             }
         }
 
         if (!_sdParameters.isUniform()) {
             _println("fraction of source flux in aperture = "
-                    + device.toString(result.st.getSlitThroughput()));
+                    + device.toString(result.st().getSlitThroughput()));
         }
 
         _println("derived image size(FWHM) for a point source = "
-                + device.toString(result.specS2N[0].getImageQuality()) + " arcsec");
+                + device.toString(result.specS2N()[0].getImageQuality()) + " arcsec");
 
         _println("");
         _println("Requested total integration time = "
@@ -362,19 +363,19 @@ public final class NiriRecipe extends RecipeBase {
         _print("<HR align=left SIZE=3>");
 
         _println("<p style=\"page-break-inside: never\">");
-        final ITCChart chart1 = new ITCChart("Signal and SQRT(Background) in software aperture of " + result.specS2N[0].getSpecNpix() + " pixels", "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
+        final ITCChart chart1 = new ITCChart("Signal and SQRT(Background) in software aperture of " + result.specS2N()[0].getSpecNpix() + " pixels", "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
         final ITCChart chart2 = new ITCChart("Intermediate Single Exp and Final S/N", "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
 
-        chart1.addArray(result.specS2N[0].getSignalSpectrum().getData(), "Signal ");
-        chart1.addArray(result.specS2N[0].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
+        chart1.addArray(result.specS2N()[0].getSignalSpectrum().getData(), "Signal ");
+        chart1.addArray(result.specS2N()[0].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
         _println(chart1.getBufferedImage(), "SigAndBack");
         _println("");
 
         final String sigSpec = _printSpecTag("ASCII signal spectrum");
         final String backSpec = _printSpecTag("ASCII background spectrum");
 
-        chart2.addArray(result.specS2N[0].getExpS2NSpectrum().getData(), "Single Exp S/N");
-        chart2.addArray(result.specS2N[0].getFinalS2NSpectrum().getData(), "Final S/N  ");
+        chart2.addArray(result.specS2N()[0].getExpS2NSpectrum().getData(), "Single Exp S/N");
+        chart2.addArray(result.specS2N()[0].getFinalS2NSpectrum().getData(), "Final S/N  ");
         _println(chart2.getBufferedImage(), "Sig2N");
         _println("");
 
@@ -384,10 +385,10 @@ public final class NiriRecipe extends RecipeBase {
         printConfiguration(instrument);
 
         _println(HtmlPrinter.printParameterSummary(_plotParameters));
-        _println(result.specS2N[0].getSignalSpectrum(), _header.toString(), sigSpec);
-        _println(result.specS2N[0].getBackgroundSpectrum(), _header.toString(), backSpec);
-        _println(result.specS2N[0].getExpS2NSpectrum(), _header.toString(), singleS2N);
-        _println(result.specS2N[0].getFinalS2NSpectrum(), _header.toString(), finalS2N);
+        _println(result.specS2N()[0].getSignalSpectrum(), _header, sigSpec);
+        _println(result.specS2N()[0].getBackgroundSpectrum(), _header, backSpec);
+        _println(result.specS2N()[0].getExpS2NSpectrum(), _header, singleS2N);
+        _println(result.specS2N()[0].getFinalS2NSpectrum(), _header, finalS2N);
 
     }
 
@@ -401,31 +402,31 @@ public final class NiriRecipe extends RecipeBase {
 
         // Altair specific section
         if (_altairParameters.altairIsUsed()) {
-            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), result.IQcalc.getImageQuality(), _altairParameters, 0.0);
+            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), result.iqCalc().getImageQuality(), _altairParameters, 0.0);
             _println(ao.printSummary());
-            _print(result.SFcalc.getTextResult(device, false));
+            _print(result.sfCalc().getTextResult(device, false));
             _println("derived image halo size (FWHM) for a point source = "
-                    + device.toString(result.IQcalc.getImageQuality()) + " arcsec.\n");
+                    + device.toString(result.iqCalc().getImageQuality()) + " arcsec.\n");
         } else {
-            _print(result.SFcalc.getTextResult(device));
-            _println(result.IQcalc.getTextResult(device));
+            _print(result.sfCalc().getTextResult(device));
+            _println(result.iqCalc().getTextResult(device));
         }
 
-        _println(result.IS2Ncalc.getTextResult(device));
-        _println(result.IS2Ncalc.getBackgroundLimitResult());
+        _println(result.is2nCalc().getTextResult(device));
+        _println(result.is2nCalc().getBackgroundLimitResult());
         device.setPrecision(0); // NO decimal places
         device.clear();
 
         _println("");
         _println("The peak pixel signal + background is "
-                + device.toString(result.peak_pixel_count)
+                + device.toString(result.peakPixelCount())
                 + ". This is "
-                + device.toString(result.peak_pixel_count
+                + device.toString(result.peakPixelCount()
                 / instrument.getWellDepth() * 100)
                 + "% of the full well depth of "
                 + device.toString(instrument.getWellDepth()) + ".");
 
-        if (result.peak_pixel_count > (.8 * instrument.getWellDepth()))
+        if (result.peakPixelCount() > (.8 * instrument.getWellDepth()))
             _println("Warning: peak pixel exceeds 80% of the well depth and may be saturated");
 
         _println("");

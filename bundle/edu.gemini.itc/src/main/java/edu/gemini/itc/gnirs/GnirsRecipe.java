@@ -101,7 +101,7 @@ public final class GnirsRecipe extends RecipeBase {
             }
 
         // report error if this does not come out to be an integer
-        checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
+        Validation.checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
     }
 
     /**
@@ -277,7 +277,7 @@ public final class GnirsRecipe extends RecipeBase {
         }
 
         final SpecS2N[] specS2Narr = new SpecS2N[] {specS2N};
-        return SpectroscopyResult.create(SFcalc, IQcalc, specS2Narr, st);
+        return SpectroscopyResult.apply(SFcalc, IQcalc, specS2Narr, st);
 
     }
 
@@ -309,18 +309,18 @@ public final class GnirsRecipe extends RecipeBase {
                     break;
                 case POINT:
                     _println("software aperture extent along slit = "
-                            + device.toString(1.4 * result.IQcalc.getImageQuality()) + " arcsec");
+                            + device.toString(1.4 * result.iqCalc().getImageQuality()) + " arcsec");
                     break;
             }
         }
 
         if (!_sdParameters.isUniform()) {
             _println("fraction of source flux in aperture = "
-                    + device.toString(result.st.getSlitThroughput()));
+                    + device.toString(result.st().getSlitThroughput()));
         }
 
         _println("derived image size(FWHM) for a point source = "
-                + device.toString(result.IQcalc.getImageQuality()) + "arcsec\n");
+                + device.toString(result.iqCalc().getImageQuality()) + "arcsec\n");
 
         _println("Sky subtraction aperture = "
                 + _obsDetailParameters.getSkyApertureDiameter()
@@ -340,7 +340,7 @@ public final class GnirsRecipe extends RecipeBase {
         final String sigSpec, singleS2N, backSpec, finalS2N;
         if (instrument.XDisp_IsUsed()) {
 
-            final ITCChart chart1 = new ITCChart("Signal and Background in software aperture of " + result.specS2N[0].getSpecNpix() + " pixels", "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
+            final ITCChart chart1 = new ITCChart("Signal and Background in software aperture of " + result.specS2N()[0].getSpecNpix() + " pixels", "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
             for (int i = 0; i < ORDERS; i++) {
                 chart1.addArray(signalOrder[i].getData(), "Signal Order "+(i+3), ORDER_COLORS[i]);
                 chart1.addArray(backGroundOrder[i].getData(), "SQRT(Background) Order "+(i+3), ORDER_BG_COLORS[i]);
@@ -363,9 +363,9 @@ public final class GnirsRecipe extends RecipeBase {
 
         } else {
 
-            final ITCChart chart1 = new ITCChart("Signal and Background in software aperture of " + result.specS2N[0].getSpecNpix() + " pixels", "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
-            chart1.addArray(result.specS2N[0].getSignalSpectrum().getData(), "Signal ");
-            chart1.addArray(result.specS2N[0].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
+            final ITCChart chart1 = new ITCChart("Signal and Background in software aperture of " + result.specS2N()[0].getSpecNpix() + " pixels", "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
+            chart1.addArray(result.specS2N()[0].getSignalSpectrum().getData(), "Signal ");
+            chart1.addArray(result.specS2N()[0].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
             _println(chart1.getBufferedImage(), "SigAndBack");
             _println("");
 
@@ -373,8 +373,8 @@ public final class GnirsRecipe extends RecipeBase {
             backSpec = _printSpecTag("ASCII background spectrum");
 
             final ITCChart chart2 = new ITCChart("Intermediate Single Exp and Final S/N", "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
-            chart2.addArray(result.specS2N[0].getExpS2NSpectrum().getData(), "Single Exp S/N");
-            chart2.addArray(result.specS2N[0].getFinalS2NSpectrum().getData(), "Final S/N  ");
+            chart2.addArray(result.specS2N()[0].getExpS2NSpectrum().getData(), "Single Exp S/N");
+            chart2.addArray(result.specS2N()[0].getFinalS2NSpectrum().getData(), "Final S/N  ");
             _println(chart2.getBufferedImage(), "Sig2N");
             _println("");
 
@@ -408,10 +408,10 @@ public final class GnirsRecipe extends RecipeBase {
                 _println(finalS2NOrder[i], _header, finalS2N);
             }
         } else {
-            _println(result.specS2N[0].getSignalSpectrum(), _header, sigSpec);
-            _println(result.specS2N[0].getBackgroundSpectrum(), _header, backSpec);
-            _println(result.specS2N[0].getExpS2NSpectrum(), _header, singleS2N);
-            _println(result.specS2N[0].getFinalS2NSpectrum(), _header, finalS2N);
+            _println(result.specS2N()[0].getSignalSpectrum(), _header, sigSpec);
+            _println(result.specS2N()[0].getBackgroundSpectrum(), _header, backSpec);
+            _println(result.specS2N()[0].getExpS2NSpectrum(), _header, singleS2N);
+            _println(result.specS2N()[0].getFinalS2NSpectrum(), _header, finalS2N);
         }
     }
 }

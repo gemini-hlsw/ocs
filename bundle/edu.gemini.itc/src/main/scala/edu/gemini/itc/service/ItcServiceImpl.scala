@@ -2,7 +2,6 @@ package edu.gemini.itc.service
 
 import edu.gemini.itc.gmos.GmosRecipe
 import edu.gemini.itc.operation.ImagingS2NMethodACalculation
-import edu.gemini.itc.shared.RecipeBase.{SpectroscopyResult, ImagingResult}
 import edu.gemini.itc.shared._
 
 /**
@@ -37,8 +36,8 @@ class ItcServiceImpl extends ItcService {
           // (We don't want to leak out any of the internal ITC craziness here and it is also a good way
           // to keep the service independent from the actual implementation.)
           recipe.calculateImaging().map {
-            case r: ImagingResult => r.IS2Ncalc match {
-              case i: ImagingS2NMethodACalculation  => ItcImagingResult(i.singleSNRatio(), i.totalSNRatio(), r.peak_pixel_count)
+            case r: ImagingResult => r.is2nCalc match {
+              case i: ImagingS2NMethodACalculation  => ItcImagingResult(i.singleSNRatio(), i.totalSNRatio(), r.peakPixelCount)
               case _                                => throw new NotImplementedError()
             }
           }

@@ -3,9 +3,7 @@ package edu.gemini.itc.web
 import javax.servlet.http.HttpServletRequest
 
 import edu.gemini.itc.altair.AltairParameters
-import edu.gemini.itc.shared._
-import SourceDefinition._
-import edu.gemini.itc.service._
+import edu.gemini.itc.shared.SourceDefinition._
 import edu.gemini.itc.shared._
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.gemini.altair.AltairParams
@@ -210,6 +208,15 @@ object ITCRequest {
 
     // WOW, finally we've got everything in place..
     new SourceDefinition(spatialProfile, sourceDefinition, normBand, redshift)
+  }
+
+
+  def parameters(r: ITCMultiPartParser): Parameters = {
+    val source        = ITCRequest.sourceDefinitionParameters(r)
+    val observation   = ITCRequest.observationParameters(r)
+    val conditions    = ITCRequest.obsConditionParameters(r)
+    val telescope     = ITCRequest.teleParameters(r)
+    Parameters(source, observation, conditions, telescope)
   }
 
 

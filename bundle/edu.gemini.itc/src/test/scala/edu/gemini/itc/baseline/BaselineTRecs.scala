@@ -1,8 +1,7 @@
 package edu.gemini.itc.baseline
 
-import edu.gemini.itc.baseline.util.Baseline._
 import edu.gemini.itc.baseline.util._
-import edu.gemini.itc.trecs.{TRecsParameters, TRecsRecipe}
+import edu.gemini.itc.trecs.TRecsParameters
 
 /**
  * TRecs baseline test fixtures.
@@ -11,9 +10,6 @@ import edu.gemini.itc.trecs.{TRecsParameters, TRecsRecipe}
 object BaselineTRecs {
 
   lazy val Fixtures = NBandSpectroscopy
-
-  def executeRecipe(f: Fixture[TRecsParameters]): Output =
-    cookRecipe(w => new TRecsRecipe(f.src, f.odp, f.ocp, f.ins, f.tep, f.pdp, w))
 
   // NOTE: For TRecs sky background value must be equal to water vapor value.
   private lazy val TRecsObservingConditions = Fixture.ObservingConditions.filter(o => o.getSkyBackground == o.getSkyTransparencyWater)

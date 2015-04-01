@@ -76,7 +76,7 @@ trait OcsBundle {
 
   lazy val bundle_edu_gemini_itc_web = 
     project.in(file("bundle/edu.gemini.itc.web")).dependsOn(
-      bundle_edu_gemini_itc,
+      bundle_edu_gemini_itc % "test->test;compile->compile",
       bundle_edu_gemini_itc_shared,
       bundle_edu_gemini_util_osgi,
       bundle_edu_gemini_shared_util,

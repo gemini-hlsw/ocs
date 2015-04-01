@@ -1,8 +1,7 @@
 package edu.gemini.itc.baseline
 
-import edu.gemini.itc.baseline.util.Baseline._
 import edu.gemini.itc.baseline.util._
-import edu.gemini.itc.gnirs.{GnirsParameters, GnirsRecipe}
+import edu.gemini.itc.gnirs.GnirsParameters
 
 /**
  * GNIRS baseline test fixtures.
@@ -10,9 +9,6 @@ import edu.gemini.itc.gnirs.{GnirsParameters, GnirsRecipe}
 object BaselineGnirs {
 
   lazy val Fixtures = KBandSpectroscopy
-
-  def executeRecipe(f: Fixture[GnirsParameters]): Output =
-    cookRecipe(w => new GnirsRecipe(f.src, f.odp, f.ocp, f.ins, f.tep, f.pdp, w))
 
   private lazy val KBandSpectroscopy = Fixture.kBandSpcFixtures(List(
     new GnirsParameters(

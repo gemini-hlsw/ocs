@@ -80,7 +80,7 @@ public final class GsaoiRecipe extends RecipeBase {
             }
 
         // report error if this does not come out to be an integer
-        checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
+        Validation.checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
     }
 
     /**
@@ -165,7 +165,8 @@ public final class GsaoiRecipe extends RecipeBase {
         IS2Ncalc.setSecondarySourceFraction(halo_source_fraction);
         IS2Ncalc.calculate();
 
-        return ImagingResult.create(IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, gems);
+        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
+        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, gems);
 
     }
 
@@ -176,22 +177,22 @@ public final class GsaoiRecipe extends RecipeBase {
         device.setPrecision(2); // Two decimal places
         device.clear();
 
-        _println(((Gems)result.aoSystem.get()).printSummary());
+        _println(((Gems)result.aoSystem().get()).printSummary());
 
-        _print(result.SFcalc.getTextResult(device, false));
+        _print(result.sfCalc().getTextResult(device, false));
         _println("derived image halo size (FWHM) for a point source = "
-                + device.toString(result.IQcalc.getImageQuality()) + " arcsec.\n");
+                + device.toString(result.iqCalc().getImageQuality()) + " arcsec.\n");
 
-        _println(result.IS2Ncalc.getTextResult(device));
-        _println(result.IS2Ncalc.getBackgroundLimitResult());
+        _println(result.is2nCalc().getTextResult(device));
+        _println(result.is2nCalc().getBackgroundLimitResult());
         device.setPrecision(0); // NO decimal places
         device.clear();
 
         _println("");
-        _println("The peak pixel signal + background is " + device.toString(result.peak_pixel_count));
+        _println("The peak pixel signal + background is " + device.toString(result.peakPixelCount()));
 
         // REL-1353
-        final int peak_pixel_percent = (int) (100 * result.peak_pixel_count / 126000);
+        final int peak_pixel_percent = (int) (100 * result.peakPixelCount() / 126000);
         _println("This is " + peak_pixel_percent + "% of the full well depth of 126000 electrons");
         if (peak_pixel_percent > 65 && peak_pixel_percent <= 85) {
             _error("Warning: the peak pixel + background level exceeds 65% of the well depth and will cause deviations from linearity of more than 5%.");

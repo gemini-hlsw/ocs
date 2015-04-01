@@ -81,7 +81,7 @@ public final class GmosRecipe extends RecipeBase {
         }
 
         // report error if this does not come out to be an integer
-        checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
+        Validation.checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
     }
 
     /**
@@ -102,7 +102,7 @@ public final class GmosRecipe extends RecipeBase {
         return calculateSpectroscopy(createGmos());
     }
 
-    public RecipeBase.ImagingResult[] calculateImaging() {
+    public ImagingResult[] calculateImaging() {
         return calculateImaging(createGmos());
     }
 
@@ -284,7 +284,7 @@ public final class GmosRecipe extends RecipeBase {
 
         }
 
-        return SpectroscopyResult.create(SFcalc, IQcalc, specS2N, st);
+        return SpectroscopyResult.apply(SFcalc, IQcalc, specS2N, st);
 
     }
 
@@ -322,12 +322,13 @@ public final class GmosRecipe extends RecipeBase {
         final int number_exposures = _obsDetailParameters.getNumExposures();
         final double frac_with_source = _obsDetailParameters.getSourceFraction();
         // report error if this does not come out to be an integer
-        checkSourceFraction(number_exposures, frac_with_source);
+        Validation.checkSourceFraction(number_exposures, frac_with_source);
 
         final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
         IS2Ncalc.calculate();
 
-        return ImagingResult.create(IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
+        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
+        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
 
     }
 
@@ -390,16 +391,16 @@ public final class GmosRecipe extends RecipeBase {
                                 _println("software aperture extent along slit = " + device.toString(1 / _gmosParameters.slitWidth()) + " arcsec");
                                 break;
                             case POINT:
-                                _println("software aperture extent along slit = " + device.toString(1.4 * calcGmos.IQcalc.getImageQuality()) + " arcsec");
+                                _println("software aperture extent along slit = " + device.toString(1.4 * calcGmos.iqCalc().getImageQuality()) + " arcsec");
                                 break;
                         }
                     }
 
                     if (!_sdParameters.isUniform()) {
-                        _println("fraction of source flux in aperture = " + device.toString(calcGmos.st.getSlitThroughput()));
+                        _println("fraction of source flux in aperture = " + device.toString(calcGmos.st().getSlitThroughput()));
                     }
                 }
-                _println("derived image size(FWHM) for a point source = " + device.toString(calcGmos.IQcalc.getImageQuality()) + "arcsec\n");
+                _println("derived image size(FWHM) for a point source = " + device.toString(calcGmos.iqCalc().getImageQuality()) + "arcsec\n");
                 _println("Sky subtraction aperture = " + _obsDetailParameters.getSkyApertureDiameter() + " times the software aperture.");
                 _println("");
                 _println("Requested total integration time = " + device.toString(exposure_time * number_exposures) + " secs, of which " + device.toString(exposure_time * number_exposures * frac_with_source) + " secs is on source.");
@@ -407,13 +408,13 @@ public final class GmosRecipe extends RecipeBase {
             }
 
             // For IFUs we can have more than one S2N result.
-            for (int i = 0; i < calcGmos.specS2N.length; i++) {
+            for (int i = 0; i < calcGmos.specS2N().length; i++) {
 
-                gmosChart1.addArray(calcGmos.specS2N[i].getSignalSpectrum().getData(firstCcdIndex, lastCcdIndex), "Signal " + ccdName, ccdColor);
-                gmosChart1.addArray(calcGmos.specS2N[i].getBackgroundSpectrum().getData(firstCcdIndex, lastCcdIndex), "SQRT(Background) " + ccdName, ccdColorDarker);
+                gmosChart1.addArray(calcGmos.specS2N()[i].getSignalSpectrum().getData(firstCcdIndex, lastCcdIndex), "Signal " + ccdName, ccdColor);
+                gmosChart1.addArray(calcGmos.specS2N()[i].getBackgroundSpectrum().getData(firstCcdIndex, lastCcdIndex), "SQRT(Background) " + ccdName, ccdColorDarker);
 
-                gmosChart2.addArray(calcGmos.specS2N[i].getExpS2NSpectrum().getData(firstCcdIndex, lastCcdIndex), "Single Exp S/N " + ccdName, ccdColor);
-                gmosChart2.addArray(calcGmos.specS2N[i].getFinalS2NSpectrum().getData(firstCcdIndex, lastCcdIndex), "Final S/N " + ccdName, ccdColorDarker);
+                gmosChart2.addArray(calcGmos.specS2N()[i].getExpS2NSpectrum().getData(firstCcdIndex, lastCcdIndex), "Single Exp S/N " + ccdName, ccdColor);
+                gmosChart2.addArray(calcGmos.specS2N()[i].getFinalS2NSpectrum().getData(firstCcdIndex, lastCcdIndex), "Final S/N " + ccdName, ccdColorDarker);
 
                 if (ccdIndex == 0) {
                     _println("<p style=\"page-break-inside: never\">");
@@ -425,10 +426,10 @@ public final class GmosRecipe extends RecipeBase {
                 _println("");
             }
 
-            _println(calcGmos.specS2N[calcGmos.specS2N.length-1].getSignalSpectrum(), _header, sigSpec, firstCcdIndex, lastCcdIndexWithGap);
-            _println(calcGmos.specS2N[calcGmos.specS2N.length-1].getBackgroundSpectrum(), _header, backSpec, firstCcdIndex, lastCcdIndexWithGap);
-            _println(calcGmos.specS2N[calcGmos.specS2N.length-1].getExpS2NSpectrum(), _header, singleS2N, firstCcdIndex, lastCcdIndexWithGap);
-            _println(calcGmos.specS2N[calcGmos.specS2N.length-1].getFinalS2NSpectrum(), _header, finalS2N, firstCcdIndex, lastCcdIndexWithGap);
+            _println(calcGmos.specS2N()[calcGmos.specS2N().length-1].getSignalSpectrum(), _header, sigSpec, firstCcdIndex, lastCcdIndexWithGap);
+            _println(calcGmos.specS2N()[calcGmos.specS2N().length-1].getBackgroundSpectrum(), _header, backSpec, firstCcdIndex, lastCcdIndexWithGap);
+            _println(calcGmos.specS2N()[calcGmos.specS2N().length-1].getExpS2NSpectrum(), _header, singleS2N, firstCcdIndex, lastCcdIndexWithGap);
+            _println(calcGmos.specS2N()[calcGmos.specS2N().length-1].getFinalS2NSpectrum(), _header, finalS2N, firstCcdIndex, lastCcdIndexWithGap);
 
         }
 
@@ -459,8 +460,8 @@ public final class GmosRecipe extends RecipeBase {
             final ImagingResult calcGmos = results[ccdIndex];
 
             if (ccdIndex == 0) {
-                _print(calcGmos.SFcalc.getTextResult(device));
-                _println(calcGmos.IQcalc.getTextResult(device));
+                _print(calcGmos.sfCalc().getTextResult(device));
+                _println(calcGmos.iqCalc().getTextResult(device));
                 _println("Sky subtraction aperture = "
                         + _obsDetailParameters.getSkyApertureDiameter()
                         + " times the software aperture.\n");
@@ -469,26 +470,26 @@ public final class GmosRecipe extends RecipeBase {
             _println("");
             _println("<b>S/N" + forCcdName + ":</b>");
             _println("");
-            _println(calcGmos.IS2Ncalc.getTextResult(device));
+            _println(calcGmos.is2nCalc().getTextResult(device));
 
             device.setPrecision(0); // NO decimal places
             device.clear();
             final int binFactor = instrument.getSpatialBinning() * instrument.getSpatialBinning();
 
             _println("");
-            _println("The peak pixel signal + background is " + device.toString(calcGmos.peak_pixel_count) + ". ");
+            _println("The peak pixel signal + background is " + device.toString(calcGmos.peakPixelCount()) + ". ");
 
-            if (calcGmos.peak_pixel_count > (.95 * instrument.getWellDepth() * binFactor))
+            if (calcGmos.peakPixelCount() > (.95 * instrument.getWellDepth() * binFactor))
                 _println("Warning: peak pixel may be saturating the (binned) CCD full well of "
                         + .95 * instrument.getWellDepth() * binFactor);
 
-            if (calcGmos.peak_pixel_count > (.95 * instrument.getADSaturation() * instrument.getLowGain()))
+            if (calcGmos.peakPixelCount() > (.95 * instrument.getADSaturation() * instrument.getLowGain()))
                 _println("Warning: peak pixel may be saturating the low gain setting of "
                         + .95
                         * instrument.getADSaturation()
                         * instrument.getLowGain());
 
-            if (calcGmos.peak_pixel_count > (.95 * instrument.getADSaturation() * instrument.getHighGain()))
+            if (calcGmos.peakPixelCount() > (.95 * instrument.getADSaturation() * instrument.getHighGain()))
                 _println("Warning: peak pixel may be saturating the high gain setting "
                         + .95
                         * instrument.getADSaturation()

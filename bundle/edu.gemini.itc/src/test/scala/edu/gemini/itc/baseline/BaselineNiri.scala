@@ -1,8 +1,7 @@
 package edu.gemini.itc.baseline
 
-import edu.gemini.itc.baseline.util.Baseline._
 import edu.gemini.itc.baseline.util._
-import edu.gemini.itc.niri.{NiriParameters, NiriRecipe}
+import edu.gemini.itc.niri.NiriParameters
 
 /**
  * NIRI baseline test fixtures.
@@ -10,9 +9,6 @@ import edu.gemini.itc.niri.{NiriParameters, NiriRecipe}
 object BaselineNiri {
 
   lazy val Fixtures = KBandImaging ++ KBandSpectroscopy
-
-  def executeRecipe(f: Fixture[NiriParameters]): Output =
-    cookRecipe(w => new NiriRecipe(f.src, f.odp, f.ocp, f.ins, f.tep, f.alt.get, f.pdp, w))
 
   private lazy val KBandImaging = Fixture.kBandImgFixtures(List(
     new NiriParameters(

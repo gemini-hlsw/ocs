@@ -90,7 +90,7 @@ public final class TRecsRecipe extends RecipeBase {
         }
 
         // report error if this does not come out to be an integer
-        checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
+        Validation.checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
     }
 
     private ObservationDetails correctedObsDetails(final TRecsParameters tp, final ObservationDetails odp) {
@@ -220,7 +220,7 @@ public final class TRecsRecipe extends RecipeBase {
 
         final SpecS2NLargeSlitVisitor[] specS2Narr = new SpecS2NLargeSlitVisitor[1];
         specS2Narr[0] = specS2N;
-        return SpectroscopyResult.create(null, IQcalc, specS2Narr, st); // TODO SFCalc not needed!
+        return SpectroscopyResult.apply(null, IQcalc, specS2Narr, st); // TODO SFCalc not needed!
     }
 
     private ImagingResult calculateImaging(final TRecs instrument) {
@@ -267,7 +267,8 @@ public final class TRecsRecipe extends RecipeBase {
         final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
         IS2Ncalc.calculate();
 
-        return ImagingResult.create(IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
+        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
+        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
 
     }
 
@@ -294,16 +295,16 @@ public final class TRecsRecipe extends RecipeBase {
                     _println("software aperture extent along slit = " + device.toString(1 / _trecsParameters.getFPMask()) + " arcsec");
                     break;
                 case POINT:
-                    _println("software aperture extent along slit = " + device.toString(1.4 * result.IQcalc.getImageQuality()) + " arcsec");
+                    _println("software aperture extent along slit = " + device.toString(1.4 * result.iqCalc().getImageQuality()) + " arcsec");
                     break;
             }
         }
 
         if (!_sdParameters.isUniform()) {
-            _println("fraction of source flux in aperture = " + device.toString(result.st.getSlitThroughput()));
+            _println("fraction of source flux in aperture = " + device.toString(result.st().getSlitThroughput()));
         }
 
-        _println("derived image size(FWHM) for a point source = " + device.toString(result.IQcalc.getImageQuality()) + "arcsec\n");
+        _println("derived image size(FWHM) for a point source = " + device.toString(result.iqCalc().getImageQuality()) + "arcsec\n");
 
         _println("Sky subtraction aperture = "
                 + _obsDetailParameters.getSkyApertureDiameter()
@@ -329,16 +330,16 @@ public final class TRecsRecipe extends RecipeBase {
         final ITCChart chart1 = new ITCChart("Signal and Background", "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
         final ITCChart chart2 = new ITCChart("Intermediate Single Exp and Final S/N", "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
 
-        chart1.addArray(result.specS2N[0].getSignalSpectrum().getData(), "Signal ");
-        chart1.addArray(result.specS2N[0].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
+        chart1.addArray(result.specS2N()[0].getSignalSpectrum().getData(), "Signal ");
+        chart1.addArray(result.specS2N()[0].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
         _println(chart1.getBufferedImage(), "SigAndBack");
         _println("");
 
         final String sigSpec = _printSpecTag("ASCII signal spectrum");
         final String backSpec = _printSpecTag("ASCII background spectrum");
 
-        chart2.addArray(result.specS2N[0].getExpS2NSpectrum().getData(), "Single Exp S/N");
-        chart2.addArray(result.specS2N[0].getFinalS2NSpectrum().getData(), "Final S/N  ");
+        chart2.addArray(result.specS2N()[0].getExpS2NSpectrum().getData(), "Single Exp S/N");
+        chart2.addArray(result.specS2N()[0].getFinalS2NSpectrum().getData(), "Final S/N  ");
         _println(chart2.getBufferedImage(), "Sig2N");
         _println("");
 
@@ -358,10 +359,10 @@ public final class TRecsRecipe extends RecipeBase {
         _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));
         _println(HtmlPrinter.printParameterSummary(_obsDetailParameters));
         _println(HtmlPrinter.printParameterSummary(_plotParameters));
-        _println(result.specS2N[0].getSignalSpectrum(), _header, sigSpec);
-        _println(result.specS2N[0].getBackgroundSpectrum(), _header, backSpec);
-        _println(result.specS2N[0].getExpS2NSpectrum(), _header, singleS2N);
-        _println(result.specS2N[0].getFinalS2NSpectrum(), _header, finalS2N);
+        _println(result.specS2N()[0].getSignalSpectrum(), _header, sigSpec);
+        _println(result.specS2N()[0].getBackgroundSpectrum(), _header, backSpec);
+        _println(result.specS2N()[0].getExpS2NSpectrum(), _header, singleS2N);
+        _println(result.specS2N()[0].getFinalS2NSpectrum(), _header, finalS2N);
     }
 
     private void writeImagingOutput(final TRecs instrument, final ImagingResult result) {
@@ -373,21 +374,21 @@ public final class TRecsRecipe extends RecipeBase {
         device.clear();
 
 
-        _print(result.SFcalc.getTextResult(device));
-        _println(result.IQcalc.getTextResult(device));
+        _print(result.sfCalc().getTextResult(device));
+        _println(result.iqCalc().getTextResult(device));
         _println("Sky subtraction aperture = "
                 + _obsDetailParameters.getSkyApertureDiameter()
                 + " times the software aperture.\n");
 
-        _println(result.IS2Ncalc.getTextResult(device));
+        _println(result.is2nCalc().getTextResult(device));
         device.setPrecision(0); // NO decimal places
         device.clear();
 
         _println("");
         _println("The peak pixel signal + background is "
-                + device.toString(result.peak_pixel_count) + ". ");
+                + device.toString(result.peakPixelCount()) + ". ");
 
-        if (result.peak_pixel_count > (instrument.getWellDepth()))
+        if (result.peakPixelCount() > (instrument.getWellDepth()))
             _println("Warning: peak pixel may be saturating the imaging deep well setting of "
                     + instrument.getWellDepth());
 

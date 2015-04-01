@@ -79,7 +79,7 @@ public final class Flamingos2Recipe extends RecipeBase {
         }
 
         // report error if this does not come out to be an integer
-        checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
+        Validation.checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
     }
 
     /**
@@ -181,7 +181,7 @@ public final class Flamingos2Recipe extends RecipeBase {
         final SpecS2NLargeSlitVisitor[] specS2Narr = new SpecS2NLargeSlitVisitor[1];
         specS2Narr[0] = specS2N;
 
-        return SpectroscopyResult.create(SFcalc, IQcalc, specS2Narr, st);
+        return SpectroscopyResult.apply(SFcalc, IQcalc, specS2Narr, st);
     }
 
     private ImagingResult calculateImaging(final Flamingos2 instrument) {
@@ -223,7 +223,8 @@ public final class Flamingos2Recipe extends RecipeBase {
         final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
         IS2Ncalc.calculate();
 
-        return ImagingResult.create(IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
+        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
+        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
     }
 
 
@@ -239,8 +240,8 @@ public final class Flamingos2Recipe extends RecipeBase {
         device.clear();
         _println("");
 
-        _print(result.SFcalc.getTextResult(device));
-        _println(result.IQcalc.getTextResult(device));
+        _print(result.sfCalc().getTextResult(device));
+        _println(result.iqCalc().getTextResult(device));
 
         if (!_obsDetailParameters.isAutoAperture()) {
             _println("software aperture extent along slit = "
@@ -255,36 +256,36 @@ public final class Flamingos2Recipe extends RecipeBase {
                     break;
                 case POINT:
                     _println("software aperture extent along slit = "
-                            + device.toString(1.4 * result.IQcalc.getImageQuality()) + " arcsec");
+                            + device.toString(1.4 * result.iqCalc().getImageQuality()) + " arcsec");
                     break;
             }
         }
 
         if (!_sdParameters.isUniform()) {
-            _println("fraction of source flux in aperture = " + device.toString(result.st.getSlitThroughput()));
+            _println("fraction of source flux in aperture = " + device.toString(result.st().getSlitThroughput()));
         }
 
-        _println("derived image size(FWHM) for a point source = " + device.toString(result.IQcalc.getImageQuality()) + " arcsec");
+        _println("derived image size(FWHM) for a point source = " + device.toString(result.iqCalc().getImageQuality()) + " arcsec");
 
         _println("");
         _println("Requested total integration time = "
                 + device.toString(_obsDetailParameters.getExposureTime() * _obsDetailParameters.getNumExposures())
                 + " secs, of which "
                 + device.toString(_obsDetailParameters.getExposureTime() * _obsDetailParameters.getNumExposures()
-                * result.specS2N[0].getSpecFracWithSource()) + " secs is on source.");
+                * result.specS2N()[0].getSpecFracWithSource()) + " secs is on source.");
 
         _print("<HR align=left SIZE=3>");
 
         final ITCChart chart1 = new ITCChart(
-                "Signal and SQRT(Background) in software aperture of " + result.specS2N[0].getSpecNpix() + " pixels",
+                "Signal and SQRT(Background) in software aperture of " + result.specS2N()[0].getSpecNpix() + " pixels",
                 "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
         final ITCChart chart2 = new ITCChart(
                 "Intermediate Single Exp and Final S/N",
                 "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
 
         _println("<p style=\"page-break-inside: never\">");
-        chart1.addArray(result.specS2N[0].getSignalSpectrum().getData(), "Signal ");
-        chart1.addArray(result.specS2N[0].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
+        chart1.addArray(result.specS2N()[0].getSignalSpectrum().getData(), "Signal ");
+        chart1.addArray(result.specS2N()[0].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
 
         _println(chart1.getBufferedImage(), "SigAndBack");
         _println("");
@@ -292,8 +293,8 @@ public final class Flamingos2Recipe extends RecipeBase {
         final String sigSpec = _printSpecTag("ASCII signal spectrum");
         final String backSpec = _printSpecTag("ASCII background spectrum");
 
-        chart2.addArray(result.specS2N[0].getExpS2NSpectrum().getData(), "Single Exp S/N");
-        chart2.addArray(result.specS2N[0].getFinalS2NSpectrum().getData(), "Final S/N  ");
+        chart2.addArray(result.specS2N()[0].getExpS2NSpectrum().getData(), "Single Exp S/N");
+        chart2.addArray(result.specS2N()[0].getFinalS2NSpectrum().getData(), "Final S/N  ");
 
         _println(chart2.getBufferedImage(), "Sig2N");
         _println("");
@@ -301,10 +302,10 @@ public final class Flamingos2Recipe extends RecipeBase {
         final String singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
         final String finalS2N = _printSpecTag("Final S/N ASCII data");
 
-        _println(result.specS2N[0].getSignalSpectrum(), _header, sigSpec);
-        _println(result.specS2N[0].getBackgroundSpectrum(), _header, backSpec);
-        _println(result.specS2N[0].getExpS2NSpectrum(), _header, singleS2N);
-        _println(result.specS2N[0].getFinalS2NSpectrum(), _header, finalS2N);
+        _println(result.specS2N()[0].getSignalSpectrum(), _header, sigSpec);
+        _println(result.specS2N()[0].getBackgroundSpectrum(), _header, backSpec);
+        _println(result.specS2N()[0].getExpS2NSpectrum(), _header, singleS2N);
+        _println(result.specS2N()[0].getFinalS2NSpectrum(), _header, finalS2N);
 
         printConfiguration(instrument);
     }
@@ -316,23 +317,23 @@ public final class Flamingos2Recipe extends RecipeBase {
         device.clear();
         _println("");
 
-        _print(result.SFcalc.getTextResult(device));
-        _println(result.IQcalc.getTextResult(device));
+        _print(result.sfCalc().getTextResult(device));
+        _println(result.iqCalc().getTextResult(device));
 
-        _println(result.IS2Ncalc.getTextResult(device));
+        _println(result.is2nCalc().getTextResult(device));
         device.setPrecision(0); // NO decimal places
         device.clear();
 
         _println("");
         _println("The peak pixel signal + background is "
-                + device.toString(result.peak_pixel_count)
+                + device.toString(result.peakPixelCount())
                 + ". This is "
-                + device.toString(result.peak_pixel_count
+                + device.toString(result.peakPixelCount()
                 / instrument.getWellDepth() * 100)
                 + "% of the full well depth of "
                 + device.toString(instrument.getWellDepth()) + ".");
 
-        if (result.peak_pixel_count > (.8 * instrument.getWellDepth()))
+        if (result.peakPixelCount() > (.8 * instrument.getWellDepth()))
             _println("Warning: peak pixel exceeds 80% of the well depth and may be saturated");
 
         _println("");

@@ -1,8 +1,6 @@
 package edu.gemini.itc.baseline
 
-import edu.gemini.itc.baseline.util.Baseline._
 import edu.gemini.itc.baseline.util._
-import edu.gemini.itc.gmos.GmosRecipe
 import edu.gemini.itc.shared.{GmosParameters, IfuRadial, IfuSingle}
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer
@@ -16,9 +14,6 @@ object BaselineGmos {
 
 
   lazy val Fixtures = RBandImaging ++ KBandSpectroscopy
-
-  def executeRecipe(f: Fixture[GmosParameters]): Output =
-    cookRecipe(w => new GmosRecipe(f.src, f.odp, f.ocp, f.ins, f.tep, f.pdp, w))
 
   // === IMAGING
 

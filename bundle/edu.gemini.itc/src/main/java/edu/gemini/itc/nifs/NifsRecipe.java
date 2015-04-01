@@ -1,10 +1,7 @@
 package edu.gemini.itc.nifs;
 
 import edu.gemini.itc.altair.*;
-import edu.gemini.itc.operation.ImageQualityCalculatable;
-import edu.gemini.itc.operation.ImageQualityCalculationFactory;
-import edu.gemini.itc.operation.SpecS2N;
-import edu.gemini.itc.operation.SpecS2NLargeSlitVisitor;
+import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.HtmlPrinter;
 import edu.gemini.itc.web.ITCRequest;
@@ -90,7 +87,7 @@ public final class NifsRecipe extends RecipeBase {
         }
 
         // report error if this does not come out to be an integer
-        checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
+        Validation.checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
     }
 
     /**
@@ -225,7 +222,7 @@ public final class NifsRecipe extends RecipeBase {
             specS2Narr[i++] = specS2N;
         }
 
-        return SpectroscopyResult.create(null, IQcalc, specS2Narr, null, altair); // TODO no SFCalc and ST for Nifs
+        return new SpectroscopyResult((SourceFraction) null, IQcalc, specS2Narr, (SlitThroughput) null, altair); // TODO no SFCalc and ST for Nifs
     }
 
 
@@ -254,14 +251,14 @@ public final class NifsRecipe extends RecipeBase {
         // TODO : THIS IS PURELY FOR REGRESSION TEST ONLY, REMOVE ASAP
 
         if (_altairParameters.altairIsUsed()) {
-            _println(((Altair) result.aoSystem.get()).printSummary());
+            _println(((Altair) result.aoSystem().get()).printSummary());
         }
 
         final int number_exposures = _obsDetailParameters.getNumExposures();
         final double frac_with_source = _obsDetailParameters.getSourceFraction();
         final double exposure_time = _obsDetailParameters.getExposureTime();
 
-        _println("derived image halo size (FWHM) for a point source = " + device.toString(result.IQcalc.getImageQuality()) + "arcsec\n");
+        _println("derived image halo size (FWHM) for a point source = " + device.toString(result.iqCalc().getImageQuality()) + "arcsec\n");
         _println("Requested total integration time = " +
                 device.toString(exposure_time * number_exposures) +
                 " secs, of which " + device.toString(exposure_time *
@@ -275,7 +272,7 @@ public final class NifsRecipe extends RecipeBase {
 
         final List<Double> ap_offset_list = instrument.getIFU().getApertureOffsetList();
         final Iterator<Double> ifu_offset_it = ap_offset_list.iterator();
-        for (int i = 0; i < result.specS2N.length; i++) {
+        for (int i = 0; i < result.specS2N().length; i++) {
             _println("<p style=\"page-break-inside: never\">");
             device.setPrecision(3);  // NO decimal places
             device.clear();
@@ -291,8 +288,8 @@ public final class NifsRecipe extends RecipeBase {
                             "Signal and Background (IFU element offset: " + device.toString(ifu_offset) + " arcsec)";
 
             final ITCChart chart1 = new ITCChart(chart1Title, "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
-            chart1.addArray(result.specS2N[i].getSignalSpectrum().getData(), "Signal ");
-            chart1.addArray(result.specS2N[i].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
+            chart1.addArray(result.specS2N()[i].getSignalSpectrum().getData(), "Signal ");
+            chart1.addArray(result.specS2N()[i].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
             _println(chart1.getBufferedImage(), "SigAndBack");
             _println("");
 
@@ -309,8 +306,8 @@ public final class NifsRecipe extends RecipeBase {
                             "Intermediate Single Exp and Final S/N (IFU element offset: " + device.toString(ifu_offset) + " arcsec)";
 
             final ITCChart chart2 = new ITCChart(chart2Title, "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
-            chart2.addArray(result.specS2N[i].getExpS2NSpectrum().getData(), "Single Exp S/N");
-            chart2.addArray(result.specS2N[i].getFinalS2NSpectrum().getData(), "Final S/N  ");
+            chart2.addArray(result.specS2N()[i].getExpS2NSpectrum().getData(), "Single Exp S/N");
+            chart2.addArray(result.specS2N()[i].getFinalS2NSpectrum().getData(), "Final S/N  ");
             _println(chart2.getBufferedImage(), "Sig2N");
             _println("");
 
@@ -335,10 +332,10 @@ public final class NifsRecipe extends RecipeBase {
         _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));
         _println(HtmlPrinter.printParameterSummary(_obsDetailParameters));
         _println(HtmlPrinter.printParameterSummary(_plotParameters));
-        _println(result.specS2N[result.specS2N.length-1].getSignalSpectrum(), _header, sigSpec);
-        _println(result.specS2N[result.specS2N.length-1].getBackgroundSpectrum(), _header, backSpec);
-        _println(result.specS2N[result.specS2N.length-1].getExpS2NSpectrum(), _header, singleS2N);
-        _println(result.specS2N[result.specS2N.length-1].getFinalS2NSpectrum(), _header, finalS2N);
+        _println(result.specS2N()[result.specS2N().length-1].getSignalSpectrum(), _header, sigSpec);
+        _println(result.specS2N()[result.specS2N().length-1].getBackgroundSpectrum(), _header, backSpec);
+        _println(result.specS2N()[result.specS2N().length-1].getExpS2NSpectrum(), _header, singleS2N);
+        _println(result.specS2N()[result.specS2N().length-1].getFinalS2NSpectrum(), _header, finalS2N);
     }
 
 }

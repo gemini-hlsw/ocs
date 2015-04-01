@@ -1,7 +1,7 @@
-package edu.gemini.itc.baseline
+package edu.gemini.itc.web.baseline
 
 import edu.gemini.itc.acqcam.AcquisitionCamParameters
-import edu.gemini.itc.baseline.util.Baseline._
+import edu.gemini.itc.baseline._
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.flamingos2.Flamingos2Parameters
 import edu.gemini.itc.gnirs.GnirsParameters
@@ -11,6 +11,7 @@ import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.niri.NiriParameters
 import edu.gemini.itc.shared.GmosParameters
 import edu.gemini.itc.trecs.TRecsParameters
+import edu.gemini.itc.web.baseline.Baseline._
 import org.scalacheck.{Arbitrary, Gen}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
@@ -34,7 +35,7 @@ object BaselineAllSpec extends Specification with ScalaCheck {
     "Acquisition Camera calculations" should {
       "match latest baseline" !
         prop { f: Fixture[AcquisitionCamParameters] =>
-          checkAgainstBaseline(Baseline.from(f, BaselineAcqCam.executeRecipe(f)))
+          checkAgainstBaseline(Baseline.from(f, executeAcqCamRecipe(f)))
         }.set((minTestsOk, minTestsCnt))
     }
   }
@@ -46,7 +47,7 @@ object BaselineAllSpec extends Specification with ScalaCheck {
     "Flamingos2 calculations" should {
       "match latest baseline" !
         prop { f: Fixture[Flamingos2Parameters] =>
-          checkAgainstBaseline(Baseline.from(f, BaselineF2.executeRecipe(f)))
+          checkAgainstBaseline(Baseline.from(f, executeF2Recipe(f)))
         }.set((minTestsOk, minTestsCnt))
     }
   }
@@ -58,7 +59,7 @@ object BaselineAllSpec extends Specification with ScalaCheck {
     "GMOS calculations" should {
       "match latest baseline" !
         prop { f: Fixture[GmosParameters] =>
-          checkAgainstBaseline(Baseline.from(f, BaselineGmos.executeRecipe(f)))
+          checkAgainstBaseline(Baseline.from(f, executeGmosRecipe(f)))
         }.set((minTestsOk, minTestsCnt))
     }
   }
@@ -70,7 +71,7 @@ object BaselineAllSpec extends Specification with ScalaCheck {
     "GNIRS calculations" should {
       "match latest baseline" !
         prop { f: Fixture[GnirsParameters] =>
-          checkAgainstBaseline(Baseline.from(f, BaselineGnirs.executeRecipe(f)))
+          checkAgainstBaseline(Baseline.from(f, executeGnirsRecipe(f)))
         }.set((minTestsOk, minTestsCnt))
     }
   }
@@ -82,7 +83,7 @@ object BaselineAllSpec extends Specification with ScalaCheck {
     "GSAOI calculations" should {
       "match latest baseline" !
         prop { f: Fixture[GsaoiParameters] =>
-          checkAgainstBaseline(Baseline.from(f, BaselineGsaoi.executeRecipe(f)))
+          checkAgainstBaseline(Baseline.from(f, executeGsaoiRecipe(f)))
         }.set((minTestsOk, minTestsCnt))
     }
   }
@@ -94,7 +95,7 @@ object BaselineAllSpec extends Specification with ScalaCheck {
     "Michelle calculations" should {
       "match latest baseline" !
         prop { f: Fixture[MichelleParameters] =>
-          checkAgainstBaseline(Baseline.from(f, BaselineMichelle.executeRecipe(f)))
+          checkAgainstBaseline(Baseline.from(f, executeMichelleRecipe(f)))
         }.set((minTestsOk, minTestsCnt))
     }
   }
@@ -106,7 +107,7 @@ object BaselineAllSpec extends Specification with ScalaCheck {
     "NIFS calculations" should {
       "match latest baseline" !
         prop { f: Fixture[NifsParameters] =>
-          checkAgainstBaseline(Baseline.from(f, BaselineNifs.executeRecipe(f)))
+          checkAgainstBaseline(Baseline.from(f, executeNifsRecipe(f)))
         }.set((minTestsOk, minTestsCnt))
     }
   }
@@ -118,7 +119,7 @@ object BaselineAllSpec extends Specification with ScalaCheck {
     "NIRI calculations" should {
       "match latest baseline" !
         prop { f: Fixture[NiriParameters] =>
-          checkAgainstBaseline(Baseline.from(f, BaselineNiri.executeRecipe(f)))
+          checkAgainstBaseline(Baseline.from(f, executeNiriRecipe(f)))
         }.set((minTestsOk, minTestsCnt))
     }
   }
@@ -130,7 +131,7 @@ object BaselineAllSpec extends Specification with ScalaCheck {
     "TRecs calculations" should {
       "match latest baseline" !
         prop { f: Fixture[TRecsParameters] =>
-          checkAgainstBaseline(Baseline.from(f, BaselineTRecs.executeRecipe(f)))
+          checkAgainstBaseline(Baseline.from(f, executeTrecsRecipe(f)))
         }.set((minTestsOk, minTestsCnt))
     }
   }

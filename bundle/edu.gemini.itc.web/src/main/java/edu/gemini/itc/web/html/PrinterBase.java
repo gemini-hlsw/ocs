@@ -1,29 +1,22 @@
-package edu.gemini.itc.shared;
+package edu.gemini.itc.web.html;
 
-import edu.gemini.itc.operation.*;
-import scala.Option;
-import scala.Some;
+import edu.gemini.itc.shared.ITCImageFileIO;
+import edu.gemini.itc.shared.ServerInfo;
+import edu.gemini.itc.shared.VisitableSampledSpectrum;
 
 import java.awt.image.BufferedImage;
 import java.io.PrintWriter;
 
-public abstract class RecipeBase implements Recipe {
+public abstract class PrinterBase {
 
-    // Results will be written to this PrintWriter if it is set.
-    protected PrintWriter _out = null; // set from servlet request
+    public abstract void writeOutput();
 
-    protected RecipeBase() {
-    }
+    private final PrintWriter _out;
 
-    protected RecipeBase(PrintWriter pr) {
+    protected PrinterBase(final PrintWriter pr) {
         _out = pr;
     }
 
-    // Prints string to implied destination. If _out is null, prints to
-    // System.out otherwise prints to _out PrintWriter with html line breaks.
-
-    // Prints string to implied destination. If _out is null, prints to
-    // System.out otherwise prints to _out PrintWriter.
     protected void _print(String s) {
         if (_out == null) {
             s = s.replaceAll("<br>", "\n");
@@ -36,7 +29,7 @@ public abstract class RecipeBase implements Recipe {
         }
     }
 
-    protected void _println(BufferedImage image, String imageName) {
+    protected void _println(final BufferedImage image, final String imageName) {
         try {
             final String fileName = ITCImageFileIO.saveCharttoDisk(image);
             _print("<IMG alt=\"" + fileName
@@ -50,7 +43,7 @@ public abstract class RecipeBase implements Recipe {
         }
     }
 
-    protected void _println(String s) {
+    protected void _println(final String s) {
         _print(s);
         if (_out == null)
             System.out.println();
@@ -59,11 +52,11 @@ public abstract class RecipeBase implements Recipe {
     }
 
     // Display an error text
-    protected void _error(String s) {
+    protected void _error(final String s) {
         _println("<span style=\"color:red; font-style:italic;\">" + s + "</span>");
     }
 
-    protected String _printSpecTag(String spectrumName) {
+    protected String _printSpecTag(final String spectrumName) {
         String Filename = "";
 
         try {
@@ -81,7 +74,7 @@ public abstract class RecipeBase implements Recipe {
         return Filename;
     }
 
-    protected void _println(VisitableSampledSpectrum sed, String header, String spectrumName) {
+    protected void _println(final VisitableSampledSpectrum sed, final String header, final String spectrumName) {
         // this will print out the VisitableSampled Spectrum as a text file to
         // be taken by the user
 
@@ -93,7 +86,7 @@ public abstract class RecipeBase implements Recipe {
         }
     }
 
-    protected void _println(VisitableSampledSpectrum sed, String header, String spectrumName, int firstIndex, int lastIndex) {
+    protected void _println(final VisitableSampledSpectrum sed, final String header, final String spectrumName, final int firstIndex, final int lastIndex) {
         // this will print out the VisitableSampled Spectrum as a text file to
         // be taken by the user
 
@@ -104,5 +97,6 @@ public abstract class RecipeBase implements Recipe {
             ex.printStackTrace();
         }
     }
+
 
 }
