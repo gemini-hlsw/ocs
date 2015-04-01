@@ -59,5 +59,6 @@ public final class ITCMichelleServlet extends ITCServlet {
         final MichelleParameters ip = new MichelleParameters(mpp);
         final PlottingDetails pdp = ITCRequest.plotParameters(mpp);
         final MichellePrinter printer = new MichellePrinter(p, ip, pdp, out);
-        printer.writeOutput();    }
+        printer.writeOutput();
+    }
 }

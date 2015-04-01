@@ -203,6 +203,18 @@ public final class TRecs extends Instrument {
             return elfn_param;
     }
 
+    public double getFPMask() {
+        //if (_FP_Mask.equals(NOSLIT)) return null;
+        if (_focalPlaneMask.equals(TRecsParameters.SLIT0_21)) return 0.21;
+        else if (_focalPlaneMask.equals(TRecsParameters.SLIT0_26)) return 0.26;
+        else if (_focalPlaneMask.equals(TRecsParameters.SLIT0_31)) return 0.31;
+        else if (_focalPlaneMask.equals(TRecsParameters.SLIT0_36)) return 0.36;
+        else if (_focalPlaneMask.equals(TRecsParameters.SLIT0_66)) return 0.66;
+        else if (_focalPlaneMask.equals(TRecsParameters.SLIT0_72)) return 0.72;
+        else if (_focalPlaneMask.equals(TRecsParameters.SLIT1_32)) return 1.32;
+        else return -1.0;
+    }
+
     /**
      * The prefix on data file names for this instrument.
      */

@@ -1,8 +1,11 @@
 package edu.gemini.itc.web.servlets;
 
 import edu.gemini.itc.shared.ITCMultiPartParser;
-import edu.gemini.itc.shared.Recipe;
-import edu.gemini.itc.trecs.TRecsRecipe;
+import edu.gemini.itc.shared.Parameters;
+import edu.gemini.itc.shared.PlottingDetails;
+import edu.gemini.itc.trecs.TRecsParameters;
+import edu.gemini.itc.web.ITCRequest;
+import edu.gemini.itc.web.html.TRecsPrinter;
 
 import java.io.PrintWriter;
 
@@ -53,7 +56,10 @@ public final class ITCTrecsServlet extends ITCServlet {
      */
     public void writeOutput(ITCMultiPartParser mpp, PrintWriter out) {
         out.println("<a href = \"http://www.gemini.edu/sciops/instruments/integration-time-calculators/itc-help\"> Click here for help with the results page.</a>");
-        Recipe recipe = new TRecsRecipe(mpp, out);
-        recipe.writeOutput();
+        final Parameters p  = ITCRequest.parameters(mpp);
+        final TRecsParameters ip = new TRecsParameters(mpp);
+        final PlottingDetails pdp = ITCRequest.plotParameters(mpp);
+        final TRecsPrinter printer = new TRecsPrinter(p, ip, pdp, out);
+        printer.writeOutput();
     }
 }

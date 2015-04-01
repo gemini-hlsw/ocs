@@ -141,12 +141,36 @@ object Hash {
     hash(
       p.getFilter,
       p.getFocalPlaneMask,
-      p.getFPMask,
+      getFPMask(p),                 // TODO: remove with next update of baseline
       p.getGrating,
       p.getInstrumentCentralWavelength,
       p.getInstrumentWindow,
-      p.getStringSlitWidth
+      getStringSlitWidth(p)         // TODO: remove with next update of baseline
     )
+
+  // TODO: remove with next update of baseline
+  def getFPMask(p: TRecsParameters): Double = p.getFocalPlaneMask match {
+    case TRecsParameters.SLIT0_21 => 0.21
+    case TRecsParameters.SLIT0_26 => 0.26
+    case TRecsParameters.SLIT0_31 => 0.31
+    case TRecsParameters.SLIT0_36 => 0.36
+    case TRecsParameters.SLIT0_66 => 0.66
+    case TRecsParameters.SLIT0_72 => 0.72
+    case TRecsParameters.SLIT1_32 => 1.32
+    case _ => -1.0
+  }
+
+  // TODO: remove with next update of baseline
+  def getStringSlitWidth(p: TRecsParameters): String = p.getFocalPlaneMask match {
+    case TRecsParameters.SLIT0_21 => "021"
+    case TRecsParameters.SLIT0_26 => "026"
+    case TRecsParameters.SLIT0_31 => "031"
+    case TRecsParameters.SLIT0_26 => "036"
+    case TRecsParameters.SLIT0_66 => "066"
+    case TRecsParameters.SLIT0_72 => "072"
+    case TRecsParameters.SLIT1_32 => "132"
+    case _ => "none"
+  }
 
   def calc(p: AcquisitionCamParameters): Int =
     hash(

@@ -190,31 +190,6 @@ public final class TRecsParameters implements InstrumentDetails {
         return (new Double(_instrumentCentralWavelength)) * 1000; //Convert um to nm
     }
 
-    public double getFPMask() {
-        //if (_FP_Mask.equals(NOSLIT)) return null;
-        if (_FP_Mask.equals(SLIT0_21)) return 0.21;
-        else if (_FP_Mask.equals(SLIT0_26)) return 0.26;
-        else if (_FP_Mask.equals(SLIT0_31)) return 0.31;
-        else if (_FP_Mask.equals(SLIT0_36)) return 0.36;
-        else if (_FP_Mask.equals(SLIT0_66)) return 0.66;
-        else if (_FP_Mask.equals(SLIT0_72)) return 0.72;
-        else if (_FP_Mask.equals(SLIT1_32)) return 1.32;
-        else return -1.0;
-    }
-
-    public String getStringSlitWidth() {
-        if (_FP_Mask.equals(SLIT0_21)) return "021";
-        else if (_FP_Mask.equals(SLIT0_26)) return "026";
-        else if (_FP_Mask.equals(SLIT0_31)) return "031";
-        else if (_FP_Mask.equals(SLIT0_26)) return "036";
-        else if (_FP_Mask.equals(SLIT0_66)) return "066";
-        else if (_FP_Mask.equals(SLIT0_72)) return "072";
-        else if (_FP_Mask.equals(SLIT1_32)) return "132";
-        else return "none";
-
-    }
-
-
     /**
      * Return a human-readable string for debugging
      */
@@ -224,7 +199,7 @@ public final class TRecsParameters implements InstrumentDetails {
         sb.append("Grating:\t" + getGrating() + "\n");
         sb.append("Instrument Central Wavelength:\t" +
                 getInstrumentCentralWavelength() + "\n");
-        sb.append("Focal Plane Mask: \t " + getFPMask() + " arcsec slit \n");
+        sb.append("Focal Plane Mask: \t " + _FP_Mask + " arcsec slit \n");
         sb.append("\n");
         return sb.toString();
     }

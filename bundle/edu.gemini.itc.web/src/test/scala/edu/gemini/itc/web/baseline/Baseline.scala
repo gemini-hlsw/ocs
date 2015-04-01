@@ -128,6 +128,6 @@ object Baseline {
     simmerRecipe(w => new NiriPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.alt.get, f.pdp, w))
 
   def executeTrecsRecipe(f: Fixture[TRecsParameters]): Output =
-    cookRecipe(w => new TRecsRecipe(f.src, f.odp, f.ocp, f.ins, f.tep, f.pdp, w))
+    simmerRecipe(w => new TRecsPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
 
 }

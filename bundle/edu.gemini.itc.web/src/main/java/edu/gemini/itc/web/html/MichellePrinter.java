@@ -10,8 +10,7 @@ import java.io.PrintWriter;
 import java.util.Calendar;
 
 /**
- * This class performs the calculations for Michelle
- * used for imaging.
+ * Helper class for printing Michelle calculation results to an output stream.
  */
 public final class MichellePrinter extends PrinterBase {
 
@@ -19,10 +18,6 @@ public final class MichellePrinter extends PrinterBase {
     private final PlottingDetails pdp;
     private final boolean isImaging;
 
-    /**
-     * Constructs a MichelleRecipe given the parameters.
-     * Useful for testing.
-     */
     public MichellePrinter(final Parameters p, final MichelleParameters ip, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
         this.recipe    = new MichelleRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
