@@ -18,7 +18,12 @@ final case class ImagingResult(
                       sfCalc: SourceFraction,
                       peakPixelCount: Double,
                       is2nCalc: ImagingS2NCalculatable,
-                      aoSystem: Option[AOSystem])
+                      aoSystem: Option[AOSystem]) {
+  val source      = parameters.source
+  val observation = parameters.observation
+  val telescope   = parameters.telescope
+  val conditions  = parameters.conditions
+}
 
 object ImagingResult {
 
@@ -38,11 +43,33 @@ final case class SpectroscopyResult(
                        iqCalc: ImageQualityCalculatable,
                        specS2N: Array[SpecS2N],
                        st: SlitThroughput,
-                       aoSystem: Option[AOSystem])
+                       aoSystem: Option[AOSystem]) {
+  val source      = parameters.source
+  val observation = parameters.observation
+  val telescope   = parameters.telescope
+  val conditions  = parameters.conditions
+}
 
 object SpectroscopyResult {
 
   def apply(parameters: Parameters, instrument: Instrument, sfCalc: SourceFraction, iqCalc: ImageQualityCalculatable, specS2N: Array[SpecS2N], st: SlitThroughput) =
     new SpectroscopyResult(parameters, instrument, sfCalc, iqCalc, specS2N, st, None)
 
+}
+
+/* Internal object for spectroscopy results. */
+final case class GnirsSpectroscopyResult(
+                                     parameters: Parameters,
+                                     instrument: Instrument,
+                                     sfCalc: SourceFraction,
+                                     iqCalc: ImageQualityCalculatable,
+                                     specS2N: Array[SpecS2N],
+                                     st: SlitThroughput,
+                                     signalOrder: Array[VisitableSampledSpectrum],
+                                     backGroundOrder: Array[VisitableSampledSpectrum],
+                                     finalS2NOrder: Array[VisitableSampledSpectrum]) {
+  val source      = parameters.source
+  val observation = parameters.observation
+  val telescope   = parameters.telescope
+  val conditions  = parameters.conditions
 }

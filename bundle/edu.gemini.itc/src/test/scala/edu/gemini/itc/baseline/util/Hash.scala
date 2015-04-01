@@ -9,7 +9,6 @@ import edu.gemini.itc.gsaoi.GsaoiParameters
 import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.niri.NiriParameters
-import edu.gemini.itc.service._
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
 
@@ -50,13 +49,26 @@ object Hash {
       p.getCameraLength,
       p.getDarkCurrent,
       p.getFocalPlaneMask,
-      p.getFPMask,
+      gnirsFpMask(p),
       p.getGrating,
       p.getInstrumentCentralWavelength,
       p.getReadNoise,
       p.getStringSlitWidth,
       p.getUnXDispCentralWavelength
     )
+
+  // TODO: get rid of with next update
+  private def gnirsFpMask(p: GnirsParameters) = p.getFocalPlaneMask match {
+    case GnirsParameters.SLIT0_1        => 0.1
+    case GnirsParameters.SLIT0_15       => 0.15
+    case GnirsParameters.SLIT0_2        => 0.2
+    case GnirsParameters.SLIT0_3        => 0.3
+    case GnirsParameters.SLIT0_45       => 0.45
+    case GnirsParameters.SLIT0_675      => 0.675
+    case GnirsParameters.SLIT1_0        => 1.0
+    case GnirsParameters.SLIT3_0        => 3.0
+    case _                              => -1.0
+  }
 
   def calc(p: GsaoiParameters): Int =
     hash(

@@ -54,6 +54,28 @@ public abstract class Gnirs extends Instrument {
         INSTR_PREFIX = INSTUMENT_PREFIX;
     }
 
+    public double getFPMask() {
+        //if (_FP_Mask.equals(NOSLIT)) return null;
+        if (_focalPlaneMask.equals(GnirsParameters.SLIT0_1))
+            return 0.1;
+        else if (_focalPlaneMask.equals(GnirsParameters.SLIT0_15))
+            return 0.15;
+        else if (_focalPlaneMask.equals(GnirsParameters.SLIT0_2))
+            return 0.2;
+        else if (_focalPlaneMask.equals(GnirsParameters.SLIT0_3))
+            return 0.3;
+        else if (_focalPlaneMask.equals(GnirsParameters.SLIT0_45))
+            return 0.45;
+        else if (_focalPlaneMask.equals(GnirsParameters.SLIT0_675))
+            return 0.675;
+        else if (_focalPlaneMask.equals(GnirsParameters.SLIT1_0))
+            return 1.0;
+        else if (_focalPlaneMask.equals(GnirsParameters.SLIT3_0))
+            return 3.0;
+        else
+            return -1.0;
+    }
+
     /**
      * Returns the effective observing wavelength.
      * This is properly calculated as a flux-weighted averate of
@@ -66,7 +88,6 @@ public abstract class Gnirs extends Instrument {
         else return (int) _gratingOptics.getEffectiveWavelength();
 
     }
-
 
     /**
      * Returns the subdirectory where this instrument's data files are.

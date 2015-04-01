@@ -14,7 +14,6 @@ import java.util.Calendar;
  */
 public final class Flamingos2Printer extends PrinterBase {
 
-    private final String _header = "# Flamingos-2 ITC: " + Calendar.getInstance().getTime() + "\n";
     private final PlottingDetails pdp;
     private final Flamingos2Recipe recipe;
     private final boolean isImaging;
@@ -109,10 +108,11 @@ public final class Flamingos2Printer extends PrinterBase {
         final String singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
         final String finalS2N = _printSpecTag("Final S/N ASCII data");
 
-        _println(result.specS2N()[0].getSignalSpectrum(), _header, sigSpec);
-        _println(result.specS2N()[0].getBackgroundSpectrum(), _header, backSpec);
-        _println(result.specS2N()[0].getExpS2NSpectrum(), _header, singleS2N);
-        _println(result.specS2N()[0].getFinalS2NSpectrum(), _header, finalS2N);
+        final String header = "# Flamingos-2 ITC: " + Calendar.getInstance().getTime() + "\n";
+        _println(result.specS2N()[0].getSignalSpectrum(), header, sigSpec);
+        _println(result.specS2N()[0].getBackgroundSpectrum(), header, backSpec);
+        _println(result.specS2N()[0].getExpS2NSpectrum(), header, singleS2N);
+        _println(result.specS2N()[0].getFinalS2NSpectrum(), header, finalS2N);
 
         printConfiguration(result.instrument(), result.parameters());
 

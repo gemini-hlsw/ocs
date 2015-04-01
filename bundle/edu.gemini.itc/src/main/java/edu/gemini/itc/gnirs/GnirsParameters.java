@@ -1,8 +1,8 @@
 package edu.gemini.itc.gnirs;
 
-import edu.gemini.itc.shared.InstrumentDetails;
 import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCParameters;
+import edu.gemini.itc.shared.InstrumentDetails;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -188,36 +188,14 @@ public final class GnirsParameters implements InstrumentDetails {
 
     public double getInstrumentCentralWavelength() {
         if (!isXDispUsed()) {
-            return new Double(_instrumentCentralWavelength).doubleValue() * 1000;
+            return new Double(_instrumentCentralWavelength) * 1000;
         } else {
             return XDISP_CENTRAL_WAVELENGTH;
         }
     }
 
     public double getUnXDispCentralWavelength() {
-        return new Double(_instrumentCentralWavelength).doubleValue() * 1000;
-    }
-
-    public double getFPMask() {
-        //if (_FP_Mask.equals(NOSLIT)) return null;
-        if (_FP_Mask.equals(SLIT0_1))
-            return 0.1;
-        else if (_FP_Mask.equals(SLIT0_15))
-            return 0.15;
-        else if (_FP_Mask.equals(SLIT0_2))
-            return 0.2;
-        else if (_FP_Mask.equals(SLIT0_3))
-            return 0.3;
-        else if (_FP_Mask.equals(SLIT0_45))
-            return 0.45;
-        else if (_FP_Mask.equals(SLIT0_675))
-            return 0.675;
-        else if (_FP_Mask.equals(SLIT1_0))
-            return 1.0;
-        else if (_FP_Mask.equals(SLIT3_0))
-            return 3.0;
-        else
-            return -1.0;
+        return new Double(_instrumentCentralWavelength) * 1000;
     }
 
     public String getStringSlitWidth() {
@@ -293,9 +271,8 @@ public final class GnirsParameters implements InstrumentDetails {
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("Grating:\t" + getGrating() + "\n");
-        sb.append("Instrument Central Wavelength:\t" +
-                getInstrumentCentralWavelength() + "\n");
-        sb.append("Focal Plane Mask: \t " + getFPMask() + " arcsec slit \n");
+        sb.append("Instrument Central Wavelength:\t" + getInstrumentCentralWavelength() + "\n");
+        sb.append("Focal Plane Mask: \t " + _FP_Mask + " arcsec slit \n");
         sb.append("\n");
         return sb.toString();
     }
