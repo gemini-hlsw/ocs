@@ -116,7 +116,7 @@ public final class GsaoiRecipe extends RecipeBase {
                 _obsConditionParameters.getImageQualityPercentile(),
                 _sdParameters);
 
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GS, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, null, new Some<AOSystem>(gems));
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GS, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, new Some<AOSystem>(gems));
 
 
         // End of the Spectral energy distribution portion of the ITC.

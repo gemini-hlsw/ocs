@@ -92,13 +92,6 @@ public final class Flamingos2Parameters implements InstrumentDetails {
             ITCParameters.notFoundException(FP_MASK);
         }
 
-        // Flamingos 2 has no ND filter
-        /*
-        _ndFilter = r.getParameter(INSTRUMENT_ND_FILTER);
-        if (_ndFilter == null) {
-            ITCParameters.notFoundException(INSTRUMENT_ND_FILTER);
-        }
-        */
     }
 
     /**
@@ -106,8 +99,6 @@ public final class Flamingos2Parameters implements InstrumentDetails {
      */
     public void parseMultipartParameters(ITCMultiPartParser p) {
         _colorFilter = p.getParameter(INSTRUMENT_FILTER);
-        //_ndFilter = p.getParameter(INSTRUMENT_ND_FILTER);
-
         _grism = p.getParameter(INSTRUMENT_GRISM);
         //Get High or low read noise
         _readNoise = p.getParameter(READ_NOISE);
@@ -143,13 +134,6 @@ public final class Flamingos2Parameters implements InstrumentDetails {
 
     public String getFPMask() {
         return _fpMask;
-    }
-
-    public double getSlitSize() {
-        if (_fpMask.equalsIgnoreCase("none")) {
-            return 1;
-        }
-        return Double.parseDouble(_fpMask);
     }
 
     public String getReadNoise() {

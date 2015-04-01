@@ -100,7 +100,7 @@ object ITCRequest {
     new GmosParameters(filter, grating, centralWavelength, fpMask, spatBinning, specBinning, ifuMethod, ccdType, site)
   }
 
-  def plotParamters(r: ITCMultiPartParser): PlottingDetails = {
+  def plotParameters(r: ITCMultiPartParser): PlottingDetails = {
     val pc      = ITCRequest.from(r)
     val limits  = pc.enumParameter(classOf[PlottingDetails.PlotLimits])
     val lower   = pc.doubleParameter("plotWavelengthL")

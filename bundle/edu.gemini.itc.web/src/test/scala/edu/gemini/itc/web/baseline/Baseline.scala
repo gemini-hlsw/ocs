@@ -2,9 +2,9 @@ package edu.gemini.itc.web.baseline
 
 import java.io.{ByteArrayOutputStream, File, PrintWriter}
 
-import edu.gemini.itc.acqcam.{AcqCamRecipe, AcquisitionCamParameters}
+import edu.gemini.itc.acqcam.AcquisitionCamParameters
 import edu.gemini.itc.baseline.util.Fixture
-import edu.gemini.itc.flamingos2.{Flamingos2Parameters, Flamingos2Recipe}
+import edu.gemini.itc.flamingos2.Flamingos2Parameters
 import edu.gemini.itc.gmos.GmosRecipe
 import edu.gemini.itc.gnirs.{GnirsParameters, GnirsRecipe}
 import edu.gemini.itc.gsaoi.{GsaoiParameters, GsaoiRecipe}
@@ -13,7 +13,7 @@ import edu.gemini.itc.nifs.{NifsParameters, NifsRecipe}
 import edu.gemini.itc.niri.{NiriParameters, NiriRecipe}
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.{TRecsParameters, TRecsRecipe}
-import edu.gemini.itc.web.html.{AcqCamPrinter, PrinterBase}
+import edu.gemini.itc.web.html.{AcqCamPrinter, Flamingos2Printer, PrinterBase}
 
 import scala.io.Source
 
@@ -110,7 +110,7 @@ object Baseline {
     simmerRecipe(w => new AcqCamPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, w))
 
   def executeF2Recipe(f: Fixture[Flamingos2Parameters]): Output =
-    cookRecipe(w => new Flamingos2Recipe(f.src, f.odp, f.ocp, f.ins, f.tep, f.pdp, w))
+    simmerRecipe(w => new Flamingos2Printer(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
 
   def executeGmosRecipe(f: Fixture[GmosParameters]): Output =
     cookRecipe(w => new GmosRecipe(f.src, f.odp, f.ocp, f.ins, f.tep, f.pdp, w))

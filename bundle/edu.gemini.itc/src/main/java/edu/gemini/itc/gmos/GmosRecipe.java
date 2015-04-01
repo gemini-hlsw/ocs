@@ -43,7 +43,7 @@ public final class GmosRecipe extends RecipeBase {
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _gmosParameters = ITCRequest.gmosParameters(r);
         _telescope = ITCRequest.teleParameters(r);
-        _plotParameters = ITCRequest.plotParamters(r);
+        _plotParameters = ITCRequest.plotParameters(r);
 
         validateInputParamters();
     }
@@ -140,7 +140,7 @@ public final class GmosRecipe extends RecipeBase {
         final SpecS2NLargeSlitVisitor[] specS2N;
         final SlitThroughput st;
 
-        final SEDFactory.SourceResult src = SEDFactory.calculate(instrument, _gmosParameters.site(), ITCConstants.VISIBLE, _sdParameters, _obsConditionParameters, _telescope, _plotParameters);
+        final SEDFactory.SourceResult src = SEDFactory.calculate(instrument, _gmosParameters.site(), ITCConstants.VISIBLE, _sdParameters, _obsConditionParameters, _telescope);
         final int ccdIndex = instrument.getDetectorCcdIndex();
         final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
         final int firstCcdIndex = tv.getDetectorCcdStartIndex(ccdIndex);
@@ -284,7 +284,8 @@ public final class GmosRecipe extends RecipeBase {
 
         }
 
-        return SpectroscopyResult.apply(SFcalc, IQcalc, specS2N, st);
+        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
+        return SpectroscopyResult.apply(p, instrument, SFcalc, IQcalc, specS2N, st);
 
     }
 
@@ -301,7 +302,7 @@ public final class GmosRecipe extends RecipeBase {
         //
         // inputs: source morphology specification
 
-        final SEDFactory.SourceResult src = SEDFactory.calculate(instrument, _gmosParameters.site(), ITCConstants.VISIBLE, _sdParameters, _obsConditionParameters, _telescope, _plotParameters);
+        final SEDFactory.SourceResult src = SEDFactory.calculate(instrument, _gmosParameters.site(), ITCConstants.VISIBLE, _sdParameters, _obsConditionParameters, _telescope);
         final double sed_integral = src.sed.getIntegral();
         final double sky_integral = src.sky.getIntegral();
 

@@ -128,7 +128,7 @@ object Hash {
       p.getFPMask,
       p.getGrism,
       p.getReadNoise,
-      p.getSlitSize
+      if (p.getFPMask.equalsIgnoreCase("none")) 1.0 else p.getFPMask.toDouble // TODO: remove with next update
     )
 
   def calc(odp: ObservationDetails): Int =

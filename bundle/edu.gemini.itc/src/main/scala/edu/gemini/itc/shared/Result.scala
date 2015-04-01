@@ -32,6 +32,8 @@ object ImagingResult {
 
 /* Internal object for spectroscopy results. */
 final case class SpectroscopyResult(
+                       parameters: Parameters,
+                       instrument: Instrument,
                        sfCalc: SourceFraction,
                        iqCalc: ImageQualityCalculatable,
                        specS2N: Array[SpecS2N],
@@ -40,7 +42,7 @@ final case class SpectroscopyResult(
 
 object SpectroscopyResult {
 
-  def apply(sfCalc: SourceFraction, iqCalc: ImageQualityCalculatable, specS2N: Array[SpecS2N], st: SlitThroughput) =
-    new SpectroscopyResult(sfCalc, iqCalc, specS2N, st, None)
+  def apply(parameters: Parameters, instrument: Instrument, sfCalc: SourceFraction, iqCalc: ImageQualityCalculatable, specS2N: Array[SpecS2N], st: SlitThroughput) =
+    new SpectroscopyResult(parameters, instrument, sfCalc, iqCalc, specS2N, st, None)
 
 }

@@ -1,8 +1,6 @@
 package edu.gemini.itc.web.html;
 
-import edu.gemini.itc.shared.ITCImageFileIO;
-import edu.gemini.itc.shared.ServerInfo;
-import edu.gemini.itc.shared.VisitableSampledSpectrum;
+import edu.gemini.itc.shared.*;
 
 import java.awt.image.BufferedImage;
 import java.io.PrintWriter;
@@ -15,6 +13,15 @@ public abstract class PrinterBase {
 
     protected PrinterBase(final PrintWriter pr) {
         _out = pr;
+    }
+
+    /* TODO: this needs to be validated for spectroscopy for all instruments, find a better place to do this */
+    protected void validatePlottingDetails(final PlottingDetails pdp, final Instrument instrument) {
+        if (pdp != null && pdp.getPlotLimits().equals(PlottingDetails.PlotLimits.USER)) {
+            if (pdp.getPlotWaveL() > instrument.getObservingEnd() || pdp.getPlotWaveU() < instrument.getObservingStart()) {
+                throw new IllegalArgumentException("User limits for plotting do not overlap with filter.");
+            }
+        }
     }
 
     protected void _print(String s) {

@@ -47,7 +47,7 @@ public final class NifsRecipe extends RecipeBase {
         _nifsParameters = new NifsParameters(r);
         _telescope = ITCRequest.teleParameters(r);
         _altairParameters = ITCRequest.altairParameters(r);
-        _plotParameters = ITCRequest.plotParamters(r);
+        _plotParameters = ITCRequest.plotParameters(r);
 
         validateInputParameters();
     }
@@ -114,7 +114,7 @@ public final class NifsRecipe extends RecipeBase {
             altair = Option.empty();
         }
 
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, _plotParameters, altair);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, altair);
 
         // End of the Spectral energy distribution portion of the ITC.
 
@@ -222,7 +222,8 @@ public final class NifsRecipe extends RecipeBase {
             specS2Narr[i++] = specS2N;
         }
 
-        return new SpectroscopyResult((SourceFraction) null, IQcalc, specS2Narr, (SlitThroughput) null, altair); // TODO no SFCalc and ST for Nifs
+        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
+        return new SpectroscopyResult(p, instrument, (SourceFraction) null, IQcalc, specS2Narr, (SlitThroughput) null, altair); // TODO no SFCalc and ST for Nifs
     }
 
 
@@ -241,7 +242,7 @@ public final class NifsRecipe extends RecipeBase {
 
         // TODO : THIS IS PURELY FOR REGRESSION TEST ONLY, REMOVE ASAP
         // Get the summed source and sky
-        final SEDFactory.SourceResult calcSource0 = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, _plotParameters);
+        final SEDFactory.SourceResult calcSource0 = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope);
         final VisitableSampledSpectrum sed0 = calcSource0.sed;
         final VisitableSampledSpectrum sky0 = calcSource0.sky;
         final double sed_integral0 = sed0.getIntegral();

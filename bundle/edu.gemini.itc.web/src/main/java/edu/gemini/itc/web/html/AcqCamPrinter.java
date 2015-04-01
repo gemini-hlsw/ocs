@@ -11,12 +11,11 @@ import edu.gemini.itc.web.HtmlPrinter;
 import java.io.PrintWriter;
 
 /**
- * Helper class to print acq cam calculation results to a output stream.
+ * Helper class for printing Acquisition Camera calculation results to an output stream.
  */
 public final class AcqCamPrinter extends PrinterBase {
 
-    final private AcqCamRecipe  recipe;
-
+    private final AcqCamRecipe  recipe;
 
     public AcqCamPrinter(final Parameters p, final AcquisitionCamParameters ip, final PrintWriter out) {
         super(out);

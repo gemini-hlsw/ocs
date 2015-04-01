@@ -68,7 +68,7 @@ public final class Flamingos2 extends Instrument {
         _readNoise = fp.getReadNoise();
         _focalPlaneMask = fp.getFPMask();
         _grism = fp.getGrism();
-        _slitSize = fp.getSlitSize() * getPixelSize();
+        _slitSize = getSlitSize() * getPixelSize();
         _colorFilter = addColorFilter(_filterBand);
         _dtv = new DetectorsTransmissionVisitor(1, getDirectory() + "/" + getPrefix2() + "ccdpix" + Instrument.getSuffix());
 
@@ -101,6 +101,13 @@ public final class Flamingos2 extends Instrument {
             addComponent(grismOptics);
             return Option.apply(grismOptics);
         }
+    }
+
+    public double getSlitSize() {
+        if (_focalPlaneMask.equalsIgnoreCase("none")) {
+            return 1;
+        }
+        return Double.parseDouble(_focalPlaneMask);
     }
 
     /**

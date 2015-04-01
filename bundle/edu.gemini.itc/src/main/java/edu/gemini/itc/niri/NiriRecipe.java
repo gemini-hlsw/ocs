@@ -42,7 +42,7 @@ public final class NiriRecipe extends RecipeBase {
         _niriParameters = new NiriParameters(r);
         _telescope = ITCRequest.teleParameters(r);
         _altairParameters = ITCRequest.altairParameters(r);
-        _plotParameters = ITCRequest.plotParamters(r);
+        _plotParameters = ITCRequest.plotParameters(r);
 
         validateInputParameters();
     }
@@ -129,7 +129,7 @@ public final class NiriRecipe extends RecipeBase {
             altair = Option.empty();
         }
 
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, _plotParameters, altair);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, altair);
 
         // End of the Spectral energy distribution portion of the ITC.
 
@@ -219,9 +219,10 @@ public final class NiriRecipe extends RecipeBase {
 
         calcSource.sed.accept(specS2N);
 
+        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         final SpecS2N[] specS2Narr = new SpecS2N[1];
         specS2Narr[0] = specS2N;
-        return SpectroscopyResult.apply(SFcalc, IQcalc, specS2Narr, st);
+        return SpectroscopyResult.apply(p, instrument, SFcalc, IQcalc, specS2Narr, st);
     }
 
     private ImagingResult calculateImaging(final Niri instrument) {
@@ -245,7 +246,7 @@ public final class NiriRecipe extends RecipeBase {
             altair = Option.empty();
         }
 
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, _plotParameters, altair);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, altair);
 
         // End of the Spectral energy distribution portion of the ITC.
 

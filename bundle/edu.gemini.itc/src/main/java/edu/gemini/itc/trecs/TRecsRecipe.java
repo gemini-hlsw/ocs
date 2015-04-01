@@ -40,7 +40,7 @@ public final class TRecsRecipe extends RecipeBase {
         _obsDetailParameters = correctedObsDetails(_trecsParameters, ITCRequest.observationParameters(r));
         _obsConditionParameters = ITCRequest.obsConditionParameters(r);
         _telescope = ITCRequest.teleParameters(r);
-        _plotParameters = ITCRequest.plotParamters(r);
+        _plotParameters = ITCRequest.plotParameters(r);
 
         validateInputParameters();
     }
@@ -143,7 +143,7 @@ public final class TRecsRecipe extends RecipeBase {
     private SpectroscopyResult calculateSpectroscopy(final TRecs instrument) {
 
         // Get the summed source and sky
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GS, ITCConstants.MID_IR, _sdParameters, _obsConditionParameters, _telescope, _plotParameters);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GS, ITCConstants.MID_IR, _sdParameters, _obsConditionParameters, _telescope);
         final VisitableSampledSpectrum sed = calcSource.sed;
         final VisitableSampledSpectrum sky = calcSource.sky;
 
@@ -218,9 +218,10 @@ public final class TRecsRecipe extends RecipeBase {
         specS2N.setBackgroundSpectrum(sky);
         sed.accept(specS2N);
 
+        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         final SpecS2NLargeSlitVisitor[] specS2Narr = new SpecS2NLargeSlitVisitor[1];
         specS2Narr[0] = specS2N;
-        return SpectroscopyResult.apply(null, IQcalc, specS2Narr, st); // TODO SFCalc not needed!
+        return SpectroscopyResult.apply(p, instrument, null, IQcalc, specS2Narr, st); // TODO SFCalc not needed!
     }
 
     private ImagingResult calculateImaging(final TRecs instrument) {
@@ -232,7 +233,7 @@ public final class TRecsRecipe extends RecipeBase {
         // output: redshifteed SED
 
         // Get the summed source and sky
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GS, ITCConstants.MID_IR, _sdParameters, _obsConditionParameters, _telescope, _plotParameters);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GS, ITCConstants.MID_IR, _sdParameters, _obsConditionParameters, _telescope);
         final VisitableSampledSpectrum sed = calcSource.sed;
         final VisitableSampledSpectrum sky = calcSource.sky;
         double sed_integral = sed.getIntegral();

@@ -57,7 +57,7 @@ public final class AcqCamRecipe {
     private ImagingResult calculateImaging(final AcquisitionCamera instrument) {
 
         // Get the summed source and sky
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.VISIBLE, _sdParameters, _obsConditionParameters, _telescope, null);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.VISIBLE, _sdParameters, _obsConditionParameters, _telescope);
         final VisitableSampledSpectrum sed = calcSource.sed;
         final VisitableSampledSpectrum sky = calcSource.sky;
         final double sed_integral = sed.getIntegral();
