@@ -2,7 +2,6 @@ package edu.gemini.spModel.gemini.gmos
 
 import java.awt.Shape
 import java.awt.geom.{Rectangle2D, Point2D, AffineTransform}
-import java.text.DecimalFormat
 
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.shared.util.immutable.ImPolygon
@@ -43,7 +42,10 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
     new Rectangle2D.Double(xy, xy, PickoffMirrorSize, PickoffMirrorSize)
   }
 
-  override def armAdjustment(ctx0: ObsContext, guideStarCoords: Coordinates, offset0: Offset): Option[ArmAdjustment] = {
+  override def armAdjustment(ctx0: ObsContext,
+                             guideStarCoords: Coordinates,
+                             offset0: Offset,
+                             T: Point2D): Option[ArmAdjustment] = {
     import ProbeArmGeometry._
 
     for {
@@ -58,14 +60,8 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
       val flip        = if (ctx.getIssPort == IssPort.SIDE_LOOKING) -1 else 1
       val posAngle    = ctx.getPositionAngle.toRadians.getMagnitude
       val offsetPt    = new Point2D.Double(-offset.p.toArcsecs.getMagnitude, -offset.q.toArcsecs.getMagnitude)
-
-      val guideStarPt = {
-        val baseCoords      = ctx.getBaseCoordinates.toNewModel
-        val guideStarOffset = Coordinates.difference(baseCoords, guideStarCoords).offset
-        new Point2D.Double((-guideStarOffset.p.toArcsecs).toCanonicalArcsec, (-guideStarOffset.q.toArcsecs).toCanonicalArcsec)
-      }
-
-      val angle = armAngle(wfsOffset, posAngle, guideStarPt, offsetPt, flip)
+      val guideStarPt = guideStarPoint(ctx, guideStarCoords)
+      val angle       = armAngle(wfsOffset, posAngle, guideStarPt, offsetPt, flip)
       ArmAdjustment(angle, guideStarPt)
     }
   }

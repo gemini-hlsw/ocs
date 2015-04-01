@@ -142,6 +142,15 @@ public abstract class SciAreaFeatureBase extends TpeImageFeature
 
 
     /**
+     * Get the transformation required to adjust the science area if the position angle transformation is not the
+     * same as the position angle.
+     */
+    protected AffineTransform getPosAngleTransformModifier() {
+        final double actualPosAngle = _iw.getMinimalObsContext().getOrNull().getPositionAngle().toRadians().getMagnitude();
+        return AffineTransform.getRotateInstance(-_posAngle + actualPosAngle, _baseScreenPos.getX(), _baseScreenPos.getY());
+    }
+
+    /**
      * Draw the science area.
      */
     public void draw(Graphics g, TpeImageInfo tii) {

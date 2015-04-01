@@ -41,6 +41,9 @@ protected case class CandidateValidator(params: SingleProbeStrategyParams, mt: M
       // Only keep those that are in range of the guide probe.
       def inProbeRange = params.validator(ctx).validate(new SPTarget(HmsDegTarget.fromSkyObject(st.toOldModel)), ctx)
 
+      val fe = farEnough
+      val bo = brightnessOk
+      val rg = inProbeRange
       farEnough && brightnessOk && inProbeRange
     }
   }

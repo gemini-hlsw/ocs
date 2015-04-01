@@ -18,7 +18,7 @@ class GmosScienceAreaGeometry[I  <: InstGmosCommon[D,F,P,SM],
 
   override def geometry: List[Shape] = {
     Option(inst0).fold(List[Shape]()) { inst =>
-      lazy val width   = inst.getScienceArea()(0)
+      lazy val width   = inst.getScienceArea()(1)
       lazy val isSouth = inst.getSite.contains(Site.GS)
       inst.getFPUnitMode match {
         case GmosCommonType.FPUnitMode.BUILTIN if inst.isImaging       => List(fov(ImagingFOVSize, ImagingFOVInnerSize))
