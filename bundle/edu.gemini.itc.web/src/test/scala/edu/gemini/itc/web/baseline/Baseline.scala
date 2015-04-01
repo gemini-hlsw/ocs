@@ -116,7 +116,7 @@ object Baseline {
     simmerRecipe(w => new GnirsPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
 
   def executeGsaoiRecipe(f: Fixture[GsaoiParameters]): Output =
-    cookRecipe(w => new GsaoiRecipe(f.src, f.odp, f.ocp, f.ins, f.tep, f.gem.get, w))
+    simmerRecipe(w => new GsaoiPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.gem.get, w))
 
   def executeMichelleRecipe(f: Fixture[MichelleParameters]): Output =
     cookRecipe(w => new MichelleRecipe(f.src, f.odp, f.ocp, f.ins, f.tep, f.pdp, w))

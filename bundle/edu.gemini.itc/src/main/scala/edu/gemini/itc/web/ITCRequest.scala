@@ -3,6 +3,7 @@ package edu.gemini.itc.web
 import javax.servlet.http.HttpServletRequest
 
 import edu.gemini.itc.altair.AltairParameters
+import edu.gemini.itc.gems.GemsParameters
 import edu.gemini.itc.shared.SourceDefinition._
 import edu.gemini.itc.shared._
 import edu.gemini.spModel.core.Site
@@ -117,6 +118,13 @@ object ITCRequest {
     val wfs                  = pc.enumParameter(classOf[TelescopeDetails.Wfs])
     val altairUsed           = wfs eq TelescopeDetails.Wfs.AOWFS
     new AltairParameters(guideStarSeperation, guideStarMagnitude, fieldLens, wfsMode, altairUsed)
+  }
+
+  def gemsParameters(r: ITCMultiPartParser): GemsParameters = {
+    val pc         = ITCRequest.from(r)
+    val avgStrehl  = pc.doubleParameter("avgStrehl") / 100.0
+    val strehlBand = pc.parameter("strehlBand")
+    new GemsParameters(avgStrehl, strehlBand)
   }
 
   def observationParameters(r: ITCMultiPartParser): ObservationDetails = {

@@ -4,17 +4,13 @@ import edu.gemini.itc.gems.Gems;
 import edu.gemini.itc.gems.GemsParameters;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
-import edu.gemini.itc.web.HtmlPrinter;
-import edu.gemini.itc.web.ITCRequest;
 import edu.gemini.spModel.core.Site;
 import scala.Some;
-
-import java.io.PrintWriter;
 
 /**
  * This class performs the calculations for Gsaoi used for imaging.
  */
-public final class GsaoiRecipe extends RecipeBase {
+public final class GsaoiRecipe {
 
     private final GemsParameters _gemsParameters;
     private final GsaoiParameters _gsaoiParameters;
@@ -24,37 +20,16 @@ public final class GsaoiRecipe extends RecipeBase {
     private final TelescopeDetails _telescope;
 
     /**
-     * Constructs a GsaoiRecipe by parsing a Multipart servlet request.
-     *
-     * @param r   Servlet request containing form data from ITC web page.
-     * @param out Results will be written to this PrintWriter.
-     * @throws Exception on failure to parse parameters.
-     */
-    public GsaoiRecipe(final ITCMultiPartParser r, final PrintWriter out) {
-        super(out);
-
-        _sdParameters = ITCRequest.sourceDefinitionParameters(r);
-        _obsDetailParameters = ITCRequest.observationParameters(r);
-        _obsConditionParameters = ITCRequest.obsConditionParameters(r);
-        _gsaoiParameters = new GsaoiParameters(r);
-        _telescope = ITCRequest.teleParameters(r);
-        _gemsParameters = new GemsParameters(r);
-
-        validateInputParameters();
-    }
-
-    /**
      * Constructs a GsaoiRecipe given the parameters. Useful for testing.
      */
     public GsaoiRecipe(final SourceDefinition sdParameters,
                        final ObservationDetails obsDetailParameters,
                        final ObservingConditions obsConditionParameters,
-                       final GsaoiParameters gsaoiParameters, TelescopeDetails telescope,
-                       final GemsParameters gemsParameters,
-                       final PrintWriter out)
+                       final GsaoiParameters gsaoiParameters,
+                       final TelescopeDetails telescope,
+                       final GemsParameters gemsParameters)
 
     {
-        super(out);
         _sdParameters = sdParameters;
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;
@@ -81,15 +56,6 @@ public final class GsaoiRecipe extends RecipeBase {
 
         // report error if this does not come out to be an integer
         Validation.checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
-    }
-
-    /**
-     * Performes recipe calculation and writes results to a cached PrintWriter or to System.out.
-     */
-    public void writeOutput() {
-        final Gsaoi instrument = new Gsaoi(_gsaoiParameters, _obsDetailParameters);
-        final ImagingResult result = calculateImaging(instrument);
-        writeImagingOutput(instrument, result);
     }
 
     public ImagingResult calculateImaging() {
@@ -170,59 +136,4 @@ public final class GsaoiRecipe extends RecipeBase {
 
     }
 
-    private void writeImagingOutput(final Gsaoi instrument, final ImagingResult result) {
-        _println("");
-
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2); // Two decimal places
-        device.clear();
-
-        _println(((Gems)result.aoSystem().get()).printSummary());
-
-        _print(result.sfCalc().getTextResult(device, false));
-        _println("derived image halo size (FWHM) for a point source = "
-                + device.toString(result.iqCalc().getImageQuality()) + " arcsec.\n");
-
-        _println(result.is2nCalc().getTextResult(device));
-        _println(result.is2nCalc().getBackgroundLimitResult());
-        device.setPrecision(0); // NO decimal places
-        device.clear();
-
-        _println("");
-        _println("The peak pixel signal + background is " + device.toString(result.peakPixelCount()));
-
-        // REL-1353
-        final int peak_pixel_percent = (int) (100 * result.peakPixelCount() / 126000);
-        _println("This is " + peak_pixel_percent + "% of the full well depth of 126000 electrons");
-        if (peak_pixel_percent > 65 && peak_pixel_percent <= 85) {
-            _error("Warning: the peak pixel + background level exceeds 65% of the well depth and will cause deviations from linearity of more than 5%.");
-        } else if (peak_pixel_percent > 85) {
-            _error("Warning: the peak pixel + background level exceeds 85% of the well depth and may cause saturation.");
-        }
-
-        _println("");
-        device.setPrecision(2); // TWO decimal places
-        device.clear();
-
-        _print("<HR align=left SIZE=3>");
-
-        _println("<b>Input Parameters:</b>");
-        _println("Instrument: " + instrument.getName() + "\n");
-        _println(HtmlPrinter.printParameterSummary(_sdParameters));
-        _println(instrument.toString());
-        _println(printTeleParametersSummary("gems"));
-        _println(_gemsParameters.printParameterSummary());
-        _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));
-        _println(HtmlPrinter.printParameterSummary(_obsDetailParameters));
-
-    }
-
-
-    public String printTeleParametersSummary(String wfs) {
-        StringBuffer sb = new StringBuffer();
-        sb.append("Telescope configuration: \n");
-        sb.append("<LI>" + _telescope.getMirrorCoating().displayValue() + " mirror coating.\n");
-        sb.append("<LI>wavefront sensor: " + wfs + "\n");
-        return sb.toString();
-    }
 }

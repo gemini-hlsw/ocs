@@ -1,6 +1,7 @@
 package edu.gemini.itc.web;
 
 import edu.gemini.itc.altair.Altair;
+import edu.gemini.itc.gems.Gems;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.telescope.IssPort;
@@ -168,6 +169,37 @@ public final class HtmlPrinter {
         }
 
         sb.append("<BR>");
+        return sb.toString();
+    }
+
+    public static String printSummary(final Gems gems) {
+        final FormatStringWriter device = new FormatStringWriter();
+        device.setPrecision(3);
+        String s = "r0(" + gems.getWavelength() + "nm) = " + device.toString(gems.getr0()) + " m\n";
+        s += "Average Strehl = " + device.toString(gems.getAvgStrehl() * 100) + "%\n";
+        s += "FWHM of an AO-corrected core = ";
+        try {
+            s += device.toString(gems.getAOCorrectedFWHM(true)) + " arcsec\n";
+        } catch (IllegalArgumentException ex) {
+            s += "<span style=\"color:red; font-style:italic;\">Error: " + ex.getMessage() + "</span>\n";
+        }
+
+        return s;
+    }
+
+    public static String printParameterSummary(final Gems gems) {
+        StringBuffer sb = new StringBuffer();
+
+        // This object is used to format numerical strings.
+        FormatStringWriter device = new FormatStringWriter();
+        device.setPrecision(2);  // Two decimal places
+
+        sb.append("Average Strehl:\t" + gems.getAvgStrehl() + "\n");
+        sb.append("Strehl Band:\t" + gems.getStrehlBand() + "\n");
+        sb.append("\n");
+
+        device.clear();
+
         return sb.toString();
     }
 
