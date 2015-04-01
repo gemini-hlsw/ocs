@@ -2,18 +2,13 @@ package edu.gemini.itc.michelle;
 
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
-import edu.gemini.itc.web.HtmlPrinter;
-import edu.gemini.itc.web.ITCRequest;
 import edu.gemini.spModel.core.Site;
-
-import java.io.PrintWriter;
-import java.util.Calendar;
 
 /**
  * This class performs the calculations for Michelle
  * used for imaging.
  */
-public final class MichelleRecipe extends RecipeBase {
+public final class MichelleRecipe {
 
     // Parameters from the web page.
     private final SourceDefinition _sdParameters;
@@ -21,31 +16,6 @@ public final class MichelleRecipe extends RecipeBase {
     private final ObservingConditions _obsConditionParameters;
     private final MichelleParameters _michelleParameters;
     private final TelescopeDetails _telescope;
-    private final PlottingDetails _plotParameters;
-
-    private final Calendar now = Calendar.getInstance();
-    private final String _header = "# Michelle ITC: " + now.getTime() + "\n";
-
-    /**
-     * Constructs a MichelleRecipe by parsing  a Multipart servlet request.
-     *
-     * @param r   Servlet request containing form data from ITC web page.
-     * @param out Results will be written to this PrintWriter.
-     * @throws Exception on failure to parse parameters.
-     */
-    public MichelleRecipe(final ITCMultiPartParser r, final PrintWriter out) {
-        super(out);
-
-        // Read parameters from the four main sections of the web page.
-        _sdParameters = ITCRequest.sourceDefinitionParameters(r);
-        _michelleParameters = new MichelleParameters(r);
-        _obsDetailParameters = correctedObsDetails(_michelleParameters, ITCRequest.observationParameters(r));
-        _obsConditionParameters = ITCRequest.obsConditionParameters(r);
-        _telescope = ITCRequest.teleParameters(r);
-        _plotParameters = ITCRequest.plotParameters(r);
-
-        validateInputParameters();
-    }
 
     /**
      * Constructs a MichelleRecipe given the parameters.
@@ -55,16 +25,12 @@ public final class MichelleRecipe extends RecipeBase {
                           final ObservationDetails obsDetailParameters,
                           final ObservingConditions obsConditionParameters,
                           final MichelleParameters michelleParameters,
-                          final TelescopeDetails telescope,
-                          final PlottingDetails plotParameters,
-                          final PrintWriter out) {
-        super(out);
+                          final TelescopeDetails telescope) {
         _sdParameters = sdParameters;
         _obsDetailParameters = correctedObsDetails(michelleParameters, obsDetailParameters);
         _obsConditionParameters = obsConditionParameters;
         _michelleParameters = michelleParameters;
         _telescope = telescope;
-        _plotParameters = plotParameters;
 
         validateInputParameters();
     }
@@ -116,18 +82,14 @@ public final class MichelleRecipe extends RecipeBase {
 
     }
 
-    /**
-     * Performes recipe calculation and writes results to a cached PrintWriter or to System.out.
-     */
-    public void writeOutput() {
+    public SpectroscopyResult calculateSpectroscopy() {
         final Michelle instrument = new Michelle(_michelleParameters, _obsDetailParameters);
-        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
-            final SpectroscopyResult result = calculateSpectroscopy(instrument);
-            writeSpectroscopyOutput(instrument, result);
-        } else {
-            final ImagingResult result = calculateImaging(instrument);
-            writeImagingOutput(instrument, result);
-        }
+        return calculateSpectroscopy(instrument);
+    }
+
+    public ImagingResult calculateImaging() {
+        final Michelle instrument = new Michelle(_michelleParameters, _obsDetailParameters);
+        return calculateImaging(instrument);
     }
 
     private SpectroscopyResult calculateSpectroscopy(final Michelle instrument) {
@@ -172,9 +134,9 @@ public final class MichelleRecipe extends RecipeBase {
         if (!_obsDetailParameters.isAutoAperture()) {
             st = new SlitThroughput(IQcalc.getImageQuality(),
                     _obsDetailParameters.getApertureDiameter(),
-                    pixel_size, _michelleParameters.getFPMask());
+                    pixel_size, instrument.getFPMask());
         } else {
-            st = new SlitThroughput(IQcalc.getImageQuality(), pixel_size, _michelleParameters.getFPMask());
+            st = new SlitThroughput(IQcalc.getImageQuality(), pixel_size, instrument.getFPMask());
         }
 
         double ap_diam = st.getSpatialPix();
@@ -186,16 +148,16 @@ public final class MichelleRecipe extends RecipeBase {
         if (_sdParameters.isUniform()) {
             im_qual = 10000;
             if (_obsDetailParameters.isAutoAperture()) {
-                ap_diam = new Double(1 / (_michelleParameters.getFPMask() * pixel_size) + 0.5).intValue();
+                ap_diam = new Double(1 / (instrument.getFPMask() * pixel_size) + 0.5).intValue();
                 spec_source_frac = 1;
             } else {
-                spec_source_frac = _michelleParameters.getFPMask() * ap_diam * pixel_size;
+                spec_source_frac = instrument.getFPMask() * ap_diam * pixel_size;
             }
         } else {
             im_qual = IQcalc.getImageQuality();
         }
 
-        final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(_michelleParameters.getFPMask(), pixel_size,
+        final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(instrument.getFPMask(), pixel_size,
                         instrument.getSpectralPixelWidth(),
                         instrument.getObservingStart(),
                         instrument.getObservingEnd(),
@@ -263,183 +225,5 @@ public final class MichelleRecipe extends RecipeBase {
         return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
 
     }
-
-
-    // ===================================================================================================================
-    // TODO: OUTPUT METHODS
-    // TODO: These need to be simplified/cleaned/shared and then go to the web module.. and then be deleted and forgotten.
-    // ===================================================================================================================
-
-    private void writeSpectroscopyOutput(final Michelle instrument, final SpectroscopyResult result) {
-        _println("");
-
-        // This object is used to format numerical strings.
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2);  // Two decimal places
-        device.clear();
-
-        if (!_obsDetailParameters.isAutoAperture()) {
-            _println("software aperture extent along slit = " + device.toString(_obsDetailParameters.getApertureDiameter()) + " arcsec");
-        } else {
-            switch (_sdParameters.getProfileType()) {
-                case UNIFORM:
-                    _println("software aperture extent along slit = " + device.toString(1 / _michelleParameters.getFPMask()) + " arcsec");
-                    break;
-                case POINT:
-                    _println("software aperture extent along slit = " + device.toString(1.4 * result.iqCalc().getImageQuality()) + " arcsec");
-                    break;
-            }
-        }
-
-        if (!_sdParameters.isUniform()) {
-            _println("fraction of source flux in aperture = " + device.toString(result.st().getSlitThroughput()));
-        }
-
-        _println("derived image size(FWHM) for a point source = " + device.toString(result.iqCalc().getImageQuality()) + "arcsec\n");
-
-        _println("Sky subtraction aperture = " + _obsDetailParameters.getSkyApertureDiameter() + " times the software aperture.");
-
-        _println("");
-
-        final int number_exposures = _obsDetailParameters.getNumExposures();
-        final double frac_with_source = _obsDetailParameters.getSourceFraction();
-        final double exposure_time = _obsDetailParameters.getExposureTime();
-        if (_michelleParameters.polarimetryIsUsed()) {
-            //Michelle polarimetry uses 4 waveplate positions so a single observation takes 4 times as long.
-            //To the user it should appear as though the time used by the ITC matches thier requested time.
-            //hence the x4 factor
-            _println("Requested total integration time = " +
-                    device.toString(exposure_time * 4 * number_exposures) +
-                    " secs, of which " + device.toString(exposure_time * 4 *
-                    number_exposures *
-                    frac_with_source) +
-                    " secs is on source.");
-        } else {
-            _println("Requested total integration time = " +
-                    device.toString(exposure_time * number_exposures) +
-                    " secs, of which " + device.toString(exposure_time *
-                    number_exposures *
-                    frac_with_source) +
-                    " secs is on source.");
-        }
-
-        _print("<HR align=left SIZE=3>");
-
-        _println("<p style=\"page-break-inside: never\">");
-
-        final ITCChart chart1 = new ITCChart("Signal and Background ", "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
-        chart1.addArray(result.specS2N()[0].getSignalSpectrum().getData(), "Signal ");
-        chart1.addArray(result.specS2N()[0].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
-        _println(chart1.getBufferedImage(), "SigAndBack");
-        _println("");
-
-        final String sigSpec = _printSpecTag("ASCII signal spectrum");
-        final String backSpec = _printSpecTag("ASCII background spectrum");
-
-        final ITCChart chart2 = new ITCChart("Intermediate Single Exp and Final S/N", "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
-        chart2.addArray(result.specS2N()[0].getExpS2NSpectrum().getData(), "Single Exp S/N");
-        chart2.addArray(result.specS2N()[0].getFinalS2NSpectrum().getData(), "Final S/N  ");
-        _println(chart2.getBufferedImage(), "Sig2N");
-        _println("");
-
-        final String singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
-        final String finalS2N = _printSpecTag("Final S/N ASCII data");
-
-        _println("");
-        device.setPrecision(2);  // TWO decimal places
-        device.clear();
-
-        _print("<HR align=left SIZE=3>");
-        _println("<b>Input Parameters:</b>");
-        _println("Instrument: " + instrument.getName() + "\n");
-        _println(HtmlPrinter.printParameterSummary(_sdParameters));
-        _println(instrument.toString());
-        _println(HtmlPrinter.printParameterSummary(_telescope));
-        _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));
-        _println(HtmlPrinter.printParameterSummary(_obsDetailParameters));
-        _println(HtmlPrinter.printParameterSummary(_plotParameters));
-        _println(result.specS2N()[0].getSignalSpectrum(), _header, sigSpec);
-        _println(result.specS2N()[0].getBackgroundSpectrum(), _header, backSpec);
-        _println(result.specS2N()[0].getExpS2NSpectrum(), _header, singleS2N);
-        _println(result.specS2N()[0].getFinalS2NSpectrum(), _header, finalS2N);
-
-    }
-
-    private void writeImagingOutput(final Michelle instrument, final ImagingResult result) {
-        _println("");
-
-        // This object is used to format numerical strings.
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2);  // Two decimal places
-        device.clear();
-
-        _print(result.sfCalc().getTextResult(device));
-        _println(result.iqCalc().getTextResult(device));
-        _println("Sky subtraction aperture = " + _obsDetailParameters.getSkyApertureDiameter() + " times the software aperture.\n");
-
-        if (!_michelleParameters.polarimetryIsUsed()) {
-            _println(result.is2nCalc().getTextResult(device));
-        } else {
-            _println("Polarimetry mode enabled.\n");
-            final String result2 = result.is2nCalc().getTextResult(device);
-            final String delims = "[ ]+";
-            final String[] tokens = result2.split(delims);
-            for (int i = 0; i < tokens.length; i++) {
-                if (tokens[i].contains("Derived")) {
-                    tokens[i + 5] = device.toString((new Double(tokens[i + 5]) * 4));
-                    tokens[i + 9] = device.toString((new Double(tokens[i + 9]) * 4));
-                }
-                if (tokens[i].contains("Taking")) {
-                    tokens[i + 1] = device.toString((new Double(tokens[i + 1]) * 4));
-                }
-                if (tokens[i].contains("Requested") || tokens[i].contains("Required")) {
-                    tokens[i + 5] = device.toString((new Double(tokens[i + 5]) * 4));
-                    tokens[i + 9] = device.toString((new Double(tokens[i + 9]) * 4));
-                }
-                _print(tokens[i] + " ");
-            }
-        }
-
-        device.setPrecision(0);  // NO decimal places
-        device.clear();
-        _println("");
-        _println("The peak pixel signal + background is " + device.toString(result.peakPixelCount()) + ". ");
-
-        if (result.peakPixelCount() > (instrument.getWellDepth()))
-            _println("Warning: peak pixel may be saturating the imaging deep well setting of " +
-                    instrument.getWellDepth());
-
-
-        _println("");
-        device.setPrecision(2);  // TWO decimal places
-        device.clear();
-
-        _print("<HR align=left SIZE=3>");
-        _println("<b>Input Parameters:</b>");
-        _println("Instrument: " + instrument.getName() + "\n");
-        _println(HtmlPrinter.printParameterSummary(_sdParameters));
-        _println(instrument.toString());
-        _println(HtmlPrinter.printParameterSummary(_telescope));
-        _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));
-
-        // Michelle polarimetry calculations include a x4 overhead of observing into the calculation
-        // the following code applies this factor to all the needed values
-        if (!_michelleParameters.polarimetryIsUsed()) {
-            _println(HtmlPrinter.printParameterSummary(_obsDetailParameters));
-        } else {
-            final String result2 = HtmlPrinter.printParameterSummary(_obsDetailParameters);
-            final String delims = "[ ]+";
-            final String[] tokens = result2.split(delims);
-            for (int i = 0; i < tokens.length; i++) {
-                if (tokens[i].contains("<LI>Calculation") && tokens[i + 2].contains("S/N")) {
-                    tokens[i + 5] = device.toString((new Double(tokens[i + 5]) * 4));
-                }
-                _print(tokens[i] + " ");
-
-            }
-        }
-
-    }
-
 
 }

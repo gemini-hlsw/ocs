@@ -80,12 +80,32 @@ object Hash {
     hash(
       p.getFilter,
       p.getFocalPlaneMask,
-      p.getFPMask,
+      getFPMask(p),               // TODO: get rid of with next update
       p.getGrating,
       p.getInstrumentCentralWavelength,
-      p.getStringSlitWidth,
+      getStringSlitWidth(p),      // TODO: get rid of with next update
       p.polarimetryIsUsed()
     )
+
+  // TODO: get rid of with next update
+  def getFPMask(p: MichelleParameters): Double = p.getFocalPlaneMask match {
+    case MichelleParameters.SLIT0_19 => 0.19
+    case MichelleParameters.SLIT0_38 => 0.38
+    case MichelleParameters.SLIT0_57 => 0.57
+    case MichelleParameters.SLIT0_76 => 0.76
+    case MichelleParameters.SLIT1_52 => 1.52
+    case _                           => -1.0
+  }
+
+  // TODO: get rid of with next update
+  def getStringSlitWidth(p: MichelleParameters): String = p.getFocalPlaneMask match {
+    case MichelleParameters.SLIT0_19 => "019"
+    case MichelleParameters.SLIT0_38 => "038"
+    case MichelleParameters.SLIT0_57 => "057"
+    case MichelleParameters.SLIT0_76 => "076"
+    case MichelleParameters.SLIT1_52 => "152"
+    case _                           => "none"
+  }
 
   def calc(p: NifsParameters): Int =
     hash(

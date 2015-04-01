@@ -119,7 +119,7 @@ object Baseline {
     simmerRecipe(w => new GsaoiPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.gem.get, w))
 
   def executeMichelleRecipe(f: Fixture[MichelleParameters]): Output =
-    cookRecipe(w => new MichelleRecipe(f.src, f.odp, f.ocp, f.ins, f.tep, f.pdp, w))
+    simmerRecipe(w => new MichellePrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
 
   def executeNifsRecipe(f: Fixture[NifsParameters]): Output =
     simmerRecipe(w => new NifsPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.alt.get, f.pdp, w))

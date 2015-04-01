@@ -41,12 +41,13 @@ public class Michelle extends Instrument {
     private Filter _Filter;
     private MichelleGratingOptics _gratingOptics;
     private Detector _detector;
-    private double _sampling;
-    private String _filterUsed;
-    private String _grating;
+    private final double _sampling;
+    private final String _filterUsed;
+    private final String _grating;
     private String _focalPlaneMask;
     private CalculationMethod _mode;
     private double _centralWavelength;
+    private final boolean _usesPolarimetry;
 
     public Michelle(MichelleParameters mp, ObservationDetails odp) {
         super(INSTR_DIR, FILENAME);
@@ -55,6 +56,7 @@ public class Michelle extends Instrument {
         _grating = mp.getGrating();
         _filterUsed = mp.getFilter();
         _centralWavelength = mp.getInstrumentCentralWavelength();
+        _usesPolarimetry = mp.polarimetryIsUsed();
 
         _mode = odp.getMethod();
 
@@ -216,6 +218,27 @@ public class Michelle extends Instrument {
     public double getLowGain() {
         return LOW_GAIN;
     }
+
+    public double getFPMask() {
+        //if (_FP_Mask.equals(NOSLIT)) return null;
+        if (_focalPlaneMask.equals(MichelleParameters.SLIT0_19))
+            return 0.19;
+        else if (_focalPlaneMask.equals(MichelleParameters.SLIT0_38))
+            return 0.38;
+        else if (_focalPlaneMask.equals(MichelleParameters.SLIT0_57))
+            return 0.57;
+        else if (_focalPlaneMask.equals(MichelleParameters.SLIT0_76))
+            return 0.76;
+        else if (_focalPlaneMask.equals(MichelleParameters.SLIT1_52))
+            return 1.52;
+        else
+            return -1.0;
+    }
+
+    public boolean polarimetryIsUsed() {
+        return _usesPolarimetry;
+    }
+
 
     /**
      * The prefix on data file names for this instrument.

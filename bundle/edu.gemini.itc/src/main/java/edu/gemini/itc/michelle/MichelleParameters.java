@@ -171,38 +171,6 @@ public final class MichelleParameters implements InstrumentDetails {
         return (new Double(_instrumentCentralWavelength)) * 1000;
     }
 
-    public double getFPMask() {
-        //if (_FP_Mask.equals(NOSLIT)) return null;
-        if (_FP_Mask.equals(SLIT0_19))
-            return 0.19;
-        else if (_FP_Mask.equals(SLIT0_38))
-            return 0.38;
-        else if (_FP_Mask.equals(SLIT0_57))
-            return 0.57;
-        else if (_FP_Mask.equals(SLIT0_76))
-            return 0.76;
-        else if (_FP_Mask.equals(SLIT1_52))
-            return 1.52;
-        else
-            return -1.0;
-    }
-
-    public String getStringSlitWidth() {
-        if (_FP_Mask.equals(SLIT0_19))
-            return "019";
-        else if (_FP_Mask.equals(SLIT0_38))
-            return "038";
-        else if (_FP_Mask.equals(SLIT0_57))
-            return "057";
-        else if (_FP_Mask.equals(SLIT0_76))
-            return "076";
-        else if (_FP_Mask.equals(SLIT1_52))
-            return "152";
-        else
-            return "none";
-
-    }
-
     public boolean polarimetryIsUsed() {
         return _polarimetry.equals(ENABLED);
     }
@@ -217,7 +185,7 @@ public final class MichelleParameters implements InstrumentDetails {
         sb.append("Grating:\t" + getGrating() + "\n");
         sb.append("Instrument Central Wavelength:\t" +
                 getInstrumentCentralWavelength() + "\n");
-        sb.append("Focal Plane Mask: \t " + getFPMask() + " arcsec slit \n");
+        sb.append("Focal Plane Mask: \t " + _FP_Mask + " arcsec slit \n");
         sb.append("\n");
         return sb.toString();
     }
