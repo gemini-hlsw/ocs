@@ -150,6 +150,10 @@ public abstract class Gmos extends Instrument implements BinningProvider {
 
     }
 
+    public double getSlitWidth() {
+        return gp.fpMask().isIFU() ? 0.3 : gp.fpMask().getWidth();
+    }
+
     /**
      * Returns an array containing this instrument, or, if there are multiple detector CCDs,
      * an array containing instances of this instrument with the CCD set differently

@@ -13,8 +13,6 @@ class ItcServiceImpl extends ItcService {
 
   import ItcService._
 
-  private val dummyPlotParams = new PlottingDetails(PlottingDetails.PlotLimits.AUTO, 0, 1)
-
   def calculate(source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: InstrumentDetails): Result = try {
     ins match {
       case i: GmosParameters  => calculateGmos(source, obs, cond, tele, i)
@@ -27,8 +25,7 @@ class ItcServiceImpl extends ItcService {
   }
 
   private def calculateGmos(source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: GmosParameters): Result = {
-    // TODO: plot params and output will go away from recipe!
-    val recipe = new GmosRecipe(source, obs, cond, ins, tele, dummyPlotParams, null)
+    val recipe = new GmosRecipe(source, obs, cond, ins, tele)
     // TODO: we can simplify this once all recipes have a calculate method (instead of writeOutput())
     val results: Array[ItcCalcResult] = obs.getMethod match {
       case m: Imaging =>

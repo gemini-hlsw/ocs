@@ -2,51 +2,20 @@ package edu.gemini.itc.gmos;
 
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
-import edu.gemini.itc.web.HtmlPrinter;
-import edu.gemini.itc.web.ITCRequest;
 
-import java.awt.*;
-import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 /**
  * This class performs the calculations for Gmos used for imaging.
  */
-public final class GmosRecipe extends RecipeBase {
+public final class GmosRecipe {
 
-    private final Calendar now = Calendar.getInstance();
-    private final String _header = "# GMOS ITC: " + now.getTime() + "\n";
-
-    // Parameters from the web page.
     private final SourceDefinition _sdParameters;
     private final ObservationDetails _obsDetailParameters;
     private final ObservingConditions _obsConditionParameters;
     private final GmosParameters _gmosParameters;
     private final TelescopeDetails _telescope;
-    private final PlottingDetails _plotParameters;
-
-    /**
-     * Constructs a GmosRecipe by parsing a Multipart servlet request.
-     *
-     * @param r   Servlet request containing form data from ITC web page.
-     * @param out Results will be written to this PrintWriter.
-     * @throws Exception on failure to parse parameters.
-     */
-    public GmosRecipe(final ITCMultiPartParser r, final PrintWriter out) {
-        super(out);
-
-        // Read parameters from the four main sections of the web page.
-        _sdParameters = ITCRequest.sourceDefinitionParameters(r);
-        _obsDetailParameters = ITCRequest.observationParameters(r);
-        _obsConditionParameters = ITCRequest.obsConditionParameters(r);
-        _gmosParameters = ITCRequest.gmosParameters(r);
-        _telescope = ITCRequest.teleParameters(r);
-        _plotParameters = ITCRequest.plotParameters(r);
-
-        validateInputParamters();
-    }
 
     /**
      * Constructs a GmosRecipe given the parameters. Useful for testing.
@@ -54,18 +23,15 @@ public final class GmosRecipe extends RecipeBase {
     public GmosRecipe(final SourceDefinition sdParameters,
                       final ObservationDetails obsDetailParameters,
                       final ObservingConditions obsConditionParameters,
-                      final GmosParameters gmosParameters, TelescopeDetails telescope,
-                      final PlottingDetails plotParameters,
-                      final PrintWriter out)
+                      final GmosParameters gmosParameters,
+                      final TelescopeDetails telescope)
 
     {
-        super(out);
         _sdParameters = sdParameters;
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;
         _gmosParameters = gmosParameters;
         _telescope = telescope;
-        _plotParameters = plotParameters;
 
         validateInputParamters();
     }
@@ -82,20 +48,6 @@ public final class GmosRecipe extends RecipeBase {
 
         // report error if this does not come out to be an integer
         Validation.checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
-    }
-
-    /**
-     * Performes recipe calculation and writes results to a cached PrintWriter or to System.out.
-     */
-    public void writeOutput() {
-        final Gmos mainInstrument = createGmos();
-        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
-            final SpectroscopyResult[] results = calculateSpectroscopy(mainInstrument);
-            writeSpectroscopyOutput(mainInstrument, results);
-        } else {
-            final ImagingResult[] results = calculateImaging(mainInstrument);
-            writeImagingOutput(mainInstrument, results);
-        }
     }
 
     public SpectroscopyResult[] calculateSpectroscopy() {
@@ -197,9 +149,9 @@ public final class GmosRecipe extends RecipeBase {
         // ObservationMode Imaging or spectroscopy
         if (!instrument.isIfuUsed()) {
             if (!_obsDetailParameters.isAutoAperture()) {
-                st = new SlitThroughput(im_qual, _obsDetailParameters.getApertureDiameter(), pixel_size, _gmosParameters.slitWidth());
+                st = new SlitThroughput(im_qual, _obsDetailParameters.getApertureDiameter(), pixel_size, instrument.getSlitWidth());
             } else {
-                st = new SlitThroughput(im_qual, pixel_size, _gmosParameters.slitWidth());
+                st = new SlitThroughput(im_qual, pixel_size, instrument.getSlitWidth());
             }
             ap_diam = st.getSpatialPix();
             spec_source_frac = st.getSlitThroughput();
@@ -217,9 +169,9 @@ public final class GmosRecipe extends RecipeBase {
             if (!instrument.isIfuUsed()) {
 
                 if (!_obsDetailParameters.isAutoAperture()) {
-                    spec_source_frac = _gmosParameters.slitWidth() * ap_diam * pixel_size;
+                    spec_source_frac = instrument.getSlitWidth() * ap_diam * pixel_size;
                 } else {
-                    ap_diam = new Double(1 / (_gmosParameters.slitWidth() * pixel_size) + 0.5).intValue();
+                    ap_diam = new Double(1 / (instrument.getSlitWidth() * pixel_size) + 0.5).intValue();
                     spec_source_frac = 1;
                 }
             }
@@ -230,7 +182,7 @@ public final class GmosRecipe extends RecipeBase {
             for (int i = 0; i < sf_list.size(); i++) {
                 final double spsf = sf_list.get(i);
                 specS2N[i] = new SpecS2NLargeSlitVisitor(
-                        _gmosParameters.slitWidth(),
+                        instrument.getSlitWidth(),
                         pixel_size,
                         instrument.getSpectralPixelWidth(),
                         instrument.getObservingStart(),
@@ -258,7 +210,7 @@ public final class GmosRecipe extends RecipeBase {
         } else {
             specS2N = new SpecS2NLargeSlitVisitor[1];
             specS2N[0] = new SpecS2NLargeSlitVisitor(
-                    _gmosParameters.slitWidth(),
+                    instrument.getSlitWidth(),
                     pixel_size,
                     instrument.getSpectralPixelWidth(),
                     instrument.getObservingStart(),
@@ -332,194 +284,5 @@ public final class GmosRecipe extends RecipeBase {
         return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
 
     }
-
-    // ===================================================================================================================
-    // TODO: OUTPUT METHODS
-    // TODO: These need to be simplified/cleaned/shared and then go to the web module.. and then be deleted and forgotten.
-    // ===================================================================================================================
-
-
-    private void writeSpectroscopyOutput(final Gmos mainInstrument, final SpectroscopyResult[] results) {
-        _println("");
-
-        // This object is used to format numerical strings.
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2); // Two decimal places
-        device.clear();
-
-        // Create one chart to use for all 3 CCDS (one for Signal and Background and one for Intermediate Single Exp and Final S/N)
-        final ITCChart gmosChart1;
-        final ITCChart gmosChart2;
-        final boolean ifuAndNotUniform = mainInstrument.isIfuUsed() && !(_sdParameters.isUniform());
-        final double ifu_offset = ifuAndNotUniform ? mainInstrument.getIFU().getApertureOffsetList().iterator().next() : 0.0;
-        final String chart1Title = ifuAndNotUniform ? "Signal and Background (IFU element offset: " + device.toString(ifu_offset) + " arcsec)" : "Signal and Background ";
-        final String chart2Title = ifuAndNotUniform ? "Intermediate Single Exp and Final S/N (IFU element offset: " + device.toString(ifu_offset) + " arcsec)" : "Intermediate Single Exp and Final S/N";
-        gmosChart1 = new ITCChart(chart1Title, "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
-        gmosChart2 = new ITCChart(chart2Title, "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
-
-        String sigSpec = null, backSpec = null, singleS2N = null, finalS2N = null;
-        final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
-        final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
-        final int detectorCount = ccdArray.length;
-
-        for (final Gmos instrument : ccdArray) {
-
-            final int ccdIndex = instrument.getDetectorCcdIndex();
-            final String ccdName = instrument.getDetectorCcdName();
-            final Color ccdColor = instrument.getDetectorCcdColor();
-            final Color ccdColorDarker = ccdColor == null ? null : ccdColor.darker().darker();
-            final int firstCcdIndex = tv.getDetectorCcdStartIndex(ccdIndex);
-            final int lastCcdIndex = tv.getDetectorCcdEndIndex(ccdIndex, detectorCount);
-            // REL-478: include the gaps in the text data output
-            final int lastCcdIndexWithGap = (ccdIndex < 2 && detectorCount > 1)
-                    ? tv.getDetectorCcdStartIndex(ccdIndex + 1)
-                    : lastCcdIndex;
-
-            final SpectroscopyResult calcGmos = results[ccdIndex];
-
-            final int number_exposures = _obsDetailParameters.getNumExposures();
-            final double frac_with_source = _obsDetailParameters.getSourceFraction();
-            final double exposure_time = _obsDetailParameters.getExposureTime();
-
-            if (ccdIndex == 0) {
-                _println("Read noise: " + instrument.getReadNoise());
-                if (!instrument.isIfuUsed()) {
-                    if (!_obsDetailParameters.isAutoAperture()) {
-                        _println("software aperture extent along slit = " + device.toString(_obsDetailParameters.getApertureDiameter()) + " arcsec");
-                    } else {
-                        switch (_sdParameters.getProfileType()) {
-                            case UNIFORM:
-                                _println("software aperture extent along slit = " + device.toString(1 / _gmosParameters.slitWidth()) + " arcsec");
-                                break;
-                            case POINT:
-                                _println("software aperture extent along slit = " + device.toString(1.4 * calcGmos.iqCalc().getImageQuality()) + " arcsec");
-                                break;
-                        }
-                    }
-
-                    if (!_sdParameters.isUniform()) {
-                        _println("fraction of source flux in aperture = " + device.toString(calcGmos.st().getSlitThroughput()));
-                    }
-                }
-                _println("derived image size(FWHM) for a point source = " + device.toString(calcGmos.iqCalc().getImageQuality()) + "arcsec\n");
-                _println("Sky subtraction aperture = " + _obsDetailParameters.getSkyApertureDiameter() + " times the software aperture.");
-                _println("");
-                _println("Requested total integration time = " + device.toString(exposure_time * number_exposures) + " secs, of which " + device.toString(exposure_time * number_exposures * frac_with_source) + " secs is on source.");
-                _print("<HR align=left SIZE=3>");
-            }
-
-            // For IFUs we can have more than one S2N result.
-            for (int i = 0; i < calcGmos.specS2N().length; i++) {
-
-                gmosChart1.addArray(calcGmos.specS2N()[i].getSignalSpectrum().getData(firstCcdIndex, lastCcdIndex), "Signal " + ccdName, ccdColor);
-                gmosChart1.addArray(calcGmos.specS2N()[i].getBackgroundSpectrum().getData(firstCcdIndex, lastCcdIndex), "SQRT(Background) " + ccdName, ccdColorDarker);
-
-                gmosChart2.addArray(calcGmos.specS2N()[i].getExpS2NSpectrum().getData(firstCcdIndex, lastCcdIndex), "Single Exp S/N " + ccdName, ccdColor);
-                gmosChart2.addArray(calcGmos.specS2N()[i].getFinalS2NSpectrum().getData(firstCcdIndex, lastCcdIndex), "Final S/N " + ccdName, ccdColorDarker);
-
-                if (ccdIndex == 0) {
-                    _println("<p style=\"page-break-inside: never\">");
-                    sigSpec = _printSpecTag("ASCII signal spectrum");
-                    backSpec = _printSpecTag("ASCII background spectrum");
-                    singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
-                    finalS2N = _printSpecTag("Final S/N ASCII data");
-                }
-                _println("");
-            }
-
-            _println(calcGmos.specS2N()[calcGmos.specS2N().length-1].getSignalSpectrum(), _header, sigSpec, firstCcdIndex, lastCcdIndexWithGap);
-            _println(calcGmos.specS2N()[calcGmos.specS2N().length-1].getBackgroundSpectrum(), _header, backSpec, firstCcdIndex, lastCcdIndexWithGap);
-            _println(calcGmos.specS2N()[calcGmos.specS2N().length-1].getExpS2NSpectrum(), _header, singleS2N, firstCcdIndex, lastCcdIndexWithGap);
-            _println(calcGmos.specS2N()[calcGmos.specS2N().length-1].getFinalS2NSpectrum(), _header, finalS2N, firstCcdIndex, lastCcdIndexWithGap);
-
-        }
-
-        _println(gmosChart1.getBufferedImage(), "SigAndBack");
-        _println("");
-        _println(gmosChart2.getBufferedImage(), "Sig2N");
-        _println("");
-
-        printConfiguration(mainInstrument);
-    }
-
-
-    private void writeImagingOutput(final Gmos mainInstrument, final ImagingResult[] results) {
-        _println("");
-
-        // This object is used to format numerical strings.
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2); // Two decimal places
-        device.clear();
-
-
-        final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
-        for (final Gmos instrument : ccdArray) {
-            final int ccdIndex = instrument.getDetectorCcdIndex();
-            final String ccdName = instrument.getDetectorCcdName();
-            final String forCcdName = ccdName.length() == 0 ? "" : " for " + ccdName;
-
-            final ImagingResult calcGmos = results[ccdIndex];
-
-            if (ccdIndex == 0) {
-                _print(calcGmos.sfCalc().getTextResult(device));
-                _println(calcGmos.iqCalc().getTextResult(device));
-                _println("Sky subtraction aperture = "
-                        + _obsDetailParameters.getSkyApertureDiameter()
-                        + " times the software aperture.\n");
-                _println("Read noise: " + instrument.getReadNoise());
-            }
-            _println("");
-            _println("<b>S/N" + forCcdName + ":</b>");
-            _println("");
-            _println(calcGmos.is2nCalc().getTextResult(device));
-
-            device.setPrecision(0); // NO decimal places
-            device.clear();
-            final int binFactor = instrument.getSpatialBinning() * instrument.getSpatialBinning();
-
-            _println("");
-            _println("The peak pixel signal + background is " + device.toString(calcGmos.peakPixelCount()) + ". ");
-
-            if (calcGmos.peakPixelCount() > (.95 * instrument.getWellDepth() * binFactor))
-                _println("Warning: peak pixel may be saturating the (binned) CCD full well of "
-                        + .95 * instrument.getWellDepth() * binFactor);
-
-            if (calcGmos.peakPixelCount() > (.95 * instrument.getADSaturation() * instrument.getLowGain()))
-                _println("Warning: peak pixel may be saturating the low gain setting of "
-                        + .95
-                        * instrument.getADSaturation()
-                        * instrument.getLowGain());
-
-            if (calcGmos.peakPixelCount() > (.95 * instrument.getADSaturation() * instrument.getHighGain()))
-                _println("Warning: peak pixel may be saturating the high gain setting "
-                        + .95
-                        * instrument.getADSaturation()
-                        * instrument.getHighGain());
-
-        }
-
-        printConfiguration(mainInstrument);
-    }
-
-    private void printConfiguration(final Gmos mainInstrument) {
-        _println("");
-
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2); // TWO decimal places
-        device.clear();
-
-        _print("<HR align=left SIZE=3>");
-
-        _println(HtmlPrinter.printParameterSummary(_plotParameters));
-
-        _println("<b>Input Parameters:</b>");
-        _println("Instrument: " + mainInstrument.getName() + "\n");
-        _println(HtmlPrinter.printParameterSummary(_sdParameters));
-        _println(mainInstrument.toString());
-        _println(HtmlPrinter.printParameterSummary(_telescope));
-        _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));
-        _println(HtmlPrinter.printParameterSummary(_obsDetailParameters));
-    }
-
 
 }

@@ -71,17 +71,7 @@ object Baseline {
 
   def from[T <: InstrumentDetails](f: Fixture[T], out: Output): Baseline = Baseline(f.hash, out.hash)
 
-  /* OLD: use recipe to do printing TODO: remove asap */
-  def cookRecipe(f: PrintWriter => Recipe): Output = {
-    val o = new ByteArrayOutputStream(5000)
-    val w = new PrintWriter(o)
-    f(w).writeOutput()
-    w.flush()
-    Output(o.toString)
-  }
-
-  /* NEW: use printer object to do write output */
-  def simmerRecipe(f: PrintWriter => PrinterBase): Output = {
+  def cookRecipe(f: PrintWriter => PrinterBase): Output = {
     val o = new ByteArrayOutputStream(5000)
     val w = new PrintWriter(o)
     f(w).writeOutput()
@@ -104,30 +94,30 @@ object Baseline {
   // ====
 
   def executeAcqCamRecipe(f: Fixture[AcquisitionCamParameters]): Output =
-    simmerRecipe(w => new AcqCamPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, w))
+    cookRecipe(w => new AcqCamPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, w))
 
   def executeF2Recipe(f: Fixture[Flamingos2Parameters]): Output =
-    simmerRecipe(w => new Flamingos2Printer(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
+    cookRecipe(w => new Flamingos2Printer(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
 
   def executeGmosRecipe(f: Fixture[GmosParameters]): Output =
-    cookRecipe(w => new GmosRecipe(f.src, f.odp, f.ocp, f.ins, f.tep, f.pdp, w))
+    cookRecipe(w => new GmosPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
 
   def executeGnirsRecipe(f: Fixture[GnirsParameters]): Output =
-    simmerRecipe(w => new GnirsPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
+    cookRecipe(w => new GnirsPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
 
   def executeGsaoiRecipe(f: Fixture[GsaoiParameters]): Output =
-    simmerRecipe(w => new GsaoiPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.gem.get, w))
+    cookRecipe(w => new GsaoiPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.gem.get, w))
 
   def executeMichelleRecipe(f: Fixture[MichelleParameters]): Output =
-    simmerRecipe(w => new MichellePrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
+    cookRecipe(w => new MichellePrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
 
   def executeNifsRecipe(f: Fixture[NifsParameters]): Output =
-    simmerRecipe(w => new NifsPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.alt.get, f.pdp, w))
+    cookRecipe(w => new NifsPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.alt.get, f.pdp, w))
 
   def executeNiriRecipe(f: Fixture[NiriParameters]): Output =
-    simmerRecipe(w => new NiriPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.alt.get, f.pdp, w))
+    cookRecipe(w => new NiriPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.alt.get, f.pdp, w))
 
   def executeTrecsRecipe(f: Fixture[TRecsParameters]): Output =
-    simmerRecipe(w => new TRecsPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
+    cookRecipe(w => new TRecsPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
 
 }
