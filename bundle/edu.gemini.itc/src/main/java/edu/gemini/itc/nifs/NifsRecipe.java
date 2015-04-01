@@ -1,15 +1,12 @@
 package edu.gemini.itc.nifs;
 
-import edu.gemini.itc.altair.*;
+import edu.gemini.itc.altair.Altair;
+import edu.gemini.itc.altair.AltairParameters;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
-import edu.gemini.itc.web.HtmlPrinter;
-import edu.gemini.itc.web.ITCRequest;
 import edu.gemini.spModel.core.Site;
 import scala.Option;
 
-import java.io.PrintWriter;
-import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 
@@ -17,40 +14,14 @@ import java.util.List;
  * This class performs the calculations for Nifs
  * used for imaging.
  */
-public final class NifsRecipe extends RecipeBase {
-    private Calendar now = Calendar.getInstance();
-    private String _header = "# NIFS ITC: " + now.getTime() + "\n";
+public final class NifsRecipe  {
 
-    // Parameters from the web page.
     private final SourceDefinition _sdParameters;
     private final ObservationDetails _obsDetailParameters;
     private final ObservingConditions _obsConditionParameters;
     private final NifsParameters _nifsParameters;
     private final TelescopeDetails _telescope;
     private final AltairParameters _altairParameters;
-    private final PlottingDetails _plotParameters;
-
-    /**
-     * Constructs a NifsRecipe by parsing a Multipart servlet request.
-     *
-     * @param r   Servlet request containing form data from ITC web page.
-     * @param out Results will be written to this PrintWriter.
-     * @throws Exception on failure to parse parameters.
-     */
-    public NifsRecipe(final ITCMultiPartParser r, final PrintWriter out) {
-        super(out);
-
-        // Read parameters from the four main sections of the web page.
-        _sdParameters = ITCRequest.sourceDefinitionParameters(r);
-        _obsDetailParameters = ITCRequest.observationParameters(r);
-        _obsConditionParameters = ITCRequest.obsConditionParameters(r);
-        _nifsParameters = new NifsParameters(r);
-        _telescope = ITCRequest.teleParameters(r);
-        _altairParameters = ITCRequest.altairParameters(r);
-        _plotParameters = ITCRequest.plotParameters(r);
-
-        validateInputParameters();
-    }
 
     /**
      * Constructs a NifsRecipe given the parameters.
@@ -61,20 +32,15 @@ public final class NifsRecipe extends RecipeBase {
                       final ObservingConditions obsConditionParameters,
                       final NifsParameters nifsParameters,
                       final TelescopeDetails telescope,
-                      final AltairParameters altairParameters,
-                      final PlottingDetails plotParameters,
-                      final PrintWriter out)
+                      final AltairParameters altairParameters)
 
     {
-        super(out);
-
         _sdParameters = sdParameters;
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;
         _nifsParameters = nifsParameters;
         _telescope = telescope;
         _altairParameters = altairParameters;
-        _plotParameters = plotParameters;
 
         validateInputParameters();
     }
@@ -93,10 +59,9 @@ public final class NifsRecipe extends RecipeBase {
     /**
      * Performes recipe calculation.
      */
-    public void writeOutput() {
+    public SpectroscopyResult calculateSpectroscopy() {
         final Nifs instrument = new NifsNorth(_nifsParameters, _obsDetailParameters);
-        final SpectroscopyResult result = calculateSpectroscopy(instrument);
-        writeSpectroscopyOutput(instrument, result);
+        return calculateSpectroscopy(instrument);
     }
 
 
@@ -224,119 +189,6 @@ public final class NifsRecipe extends RecipeBase {
 
         final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         return new SpectroscopyResult(p, instrument, (SourceFraction) null, IQcalc, specS2Narr, (SlitThroughput) null, altair); // TODO no SFCalc and ST for Nifs
-    }
-
-
-    // ===================================================================================================================
-    // TODO: OUTPUT METHODS
-    // TODO: These need to be simplified/cleaned/shared and then go to the web module.. and then be deleted and forgotten.
-    // ===================================================================================================================
-
-
-    public void writeSpectroscopyOutput(final Nifs instrument, final SpectroscopyResult result) {
-        _println("");
-        // This object is used to format numerical strings.
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2);  // Two decimal places
-        device.clear();
-
-        // TODO : THIS IS PURELY FOR REGRESSION TEST ONLY, REMOVE ASAP
-        // Get the summed source and sky
-        final SEDFactory.SourceResult calcSource0 = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope);
-        final VisitableSampledSpectrum sed0 = calcSource0.sed;
-        final VisitableSampledSpectrum sky0 = calcSource0.sky;
-        final double sed_integral0 = sed0.getIntegral();
-        final double sky_integral0 = sky0.getIntegral();
-        // Update this in (or remove from) regression test baseline:
-        _println("SED Int: " + sed_integral0 + " Sky Int: " + sky_integral0);
-        // TODO : THIS IS PURELY FOR REGRESSION TEST ONLY, REMOVE ASAP
-
-        if (_altairParameters.altairIsUsed()) {
-            _println(((Altair) result.aoSystem().get()).printSummary());
-        }
-
-        final int number_exposures = _obsDetailParameters.getNumExposures();
-        final double frac_with_source = _obsDetailParameters.getSourceFraction();
-        final double exposure_time = _obsDetailParameters.getExposureTime();
-
-        _println("derived image halo size (FWHM) for a point source = " + device.toString(result.iqCalc().getImageQuality()) + "arcsec\n");
-        _println("Requested total integration time = " +
-                device.toString(exposure_time * number_exposures) +
-                " secs, of which " + device.toString(exposure_time *
-                number_exposures *
-                frac_with_source) +
-                " secs is on source.");
-
-        _print("<HR align=left SIZE=3>");
-
-        String sigSpec = null, backSpec = null, singleS2N = null, finalS2N = null;
-
-        final List<Double> ap_offset_list = instrument.getIFU().getApertureOffsetList();
-        final Iterator<Double> ifu_offset_it = ap_offset_list.iterator();
-        for (int i = 0; i < result.specS2N().length; i++) {
-            _println("<p style=\"page-break-inside: never\">");
-            device.setPrecision(3);  // NO decimal places
-            device.clear();
-
-            final double ifu_offset = ifu_offset_it.next();
-
-            final String chart1Title =
-                    _nifsParameters.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU) ?
-                            "Signal and Background (IFU summed apertures: " +
-                                    device.toString(_nifsParameters.getIFUNumX()) + "x" + device.toString(_nifsParameters.getIFUNumY()) +
-                                    ", " + device.toString(_nifsParameters.getIFUNumX() * instrument.getIFU().IFU_LEN_X) + "\"x" +
-                                    device.toString(_nifsParameters.getIFUNumY() * instrument.getIFU().IFU_LEN_Y) + "\")" :
-                            "Signal and Background (IFU element offset: " + device.toString(ifu_offset) + " arcsec)";
-
-            final ITCChart chart1 = new ITCChart(chart1Title, "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
-            chart1.addArray(result.specS2N()[i].getSignalSpectrum().getData(), "Signal ");
-            chart1.addArray(result.specS2N()[i].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
-            _println(chart1.getBufferedImage(), "SigAndBack");
-            _println("");
-
-
-            sigSpec = _printSpecTag("ASCII signal spectrum");
-            backSpec = _printSpecTag("ASCII background spectrum");
-
-            final String chart2Title =
-                    _nifsParameters.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU) ?
-                            "Intermediate Single Exp and Final S/N \n(IFU apertures:" +
-                                    device.toString(_nifsParameters.getIFUNumX()) + "x" + device.toString(_nifsParameters.getIFUNumY()) +
-                                    ", " + device.toString(_nifsParameters.getIFUNumX() * instrument.getIFU().IFU_LEN_X) + "\"x" +
-                                    device.toString(_nifsParameters.getIFUNumY() * instrument.getIFU().IFU_LEN_Y) + "\")" :
-                            "Intermediate Single Exp and Final S/N (IFU element offset: " + device.toString(ifu_offset) + " arcsec)";
-
-            final ITCChart chart2 = new ITCChart(chart2Title, "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
-            chart2.addArray(result.specS2N()[i].getExpS2NSpectrum().getData(), "Single Exp S/N");
-            chart2.addArray(result.specS2N()[i].getFinalS2NSpectrum().getData(), "Final S/N  ");
-            _println(chart2.getBufferedImage(), "Sig2N");
-            _println("");
-
-            singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
-            finalS2N = _printSpecTag("Final S/N ASCII data");
-        }
-
-        _println("");
-        device.setPrecision(2);  // TWO decimal places
-        device.clear();
-
-        _print("<HR align=left SIZE=3>");
-
-        _println("<b>Input Parameters:</b>");
-        _println("Instrument: " + instrument.getName() + "\n");
-        _println(HtmlPrinter.printParameterSummary(_sdParameters));
-        _println(instrument.toString());
-        if (_altairParameters.altairIsUsed()) {
-            _println(_altairParameters.printParameterSummary());
-        }
-        _println(HtmlPrinter.printParameterSummary(_telescope));
-        _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));
-        _println(HtmlPrinter.printParameterSummary(_obsDetailParameters));
-        _println(HtmlPrinter.printParameterSummary(_plotParameters));
-        _println(result.specS2N()[result.specS2N().length-1].getSignalSpectrum(), _header, sigSpec);
-        _println(result.specS2N()[result.specS2N().length-1].getBackgroundSpectrum(), _header, backSpec);
-        _println(result.specS2N()[result.specS2N().length-1].getExpS2NSpectrum(), _header, singleS2N);
-        _println(result.specS2N()[result.specS2N().length-1].getFinalS2NSpectrum(), _header, finalS2N);
     }
 
 }

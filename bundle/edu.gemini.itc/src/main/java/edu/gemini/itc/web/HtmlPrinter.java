@@ -1,12 +1,8 @@
 package edu.gemini.itc.web;
 
-import edu.gemini.itc.shared.ObservationDetails;
-import edu.gemini.itc.shared.ObservingConditions;
-import edu.gemini.itc.shared.PlottingDetails;
-import edu.gemini.itc.shared.TelescopeDetails;
-import edu.gemini.itc.shared.SourceDefinition;
-import edu.gemini.itc.shared.FormatStringWriter;
-import edu.gemini.itc.shared.Library;
+import edu.gemini.itc.altair.Altair;
+import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.telescope.IssPort;
 
 /**
@@ -152,6 +148,29 @@ public final class HtmlPrinter {
         sb.append("<LI>wavefront sensor: " + wfs + "\n");
         return sb.toString();
     }
+
+    public static String printParameterSummary(final Altair altair) {
+        StringBuffer sb = new StringBuffer();
+
+        // This object is used to format numerical strings.
+        FormatStringWriter device = new FormatStringWriter();
+        device.setPrecision(2);  // Two decimal places
+        device.clear();
+
+        sb.append("Altair Guide Star properties:");
+        if (altair.getWFSMode().equals(AltairParams.GuideStarType.LGS)) {
+            sb.append("<LI>Laser Guide Star Mode");
+
+        } else {
+            sb.append("<LI>Natural Guide Star Mode");
+            sb.append("<LI>Guide Star Seperation " + altair.getGuideStarSeparation());
+            sb.append("<LI>Guide Star Magnitude " + altair.getGuideStarMagnitude());
+        }
+
+        sb.append("<BR>");
+        return sb.toString();
+    }
+
 
     // compatibility for regression testing, can go away after regression tests have passed
     private static String portToString(final IssPort port) {

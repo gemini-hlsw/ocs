@@ -222,7 +222,7 @@ public final class NiriRecipe extends RecipeBase {
         final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         final SpecS2N[] specS2Narr = new SpecS2N[1];
         specS2Narr[0] = specS2N;
-        return SpectroscopyResult.apply(p, instrument, SFcalc, IQcalc, specS2Narr, st);
+        return new SpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, altair);
     }
 
     private ImagingResult calculateImaging(final Niri instrument) {
@@ -307,7 +307,7 @@ public final class NiriRecipe extends RecipeBase {
         IS2Ncalc.calculate();
 
         final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
-        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
+        return new ImagingResult(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, altair);
 
     }
 
@@ -383,7 +383,7 @@ public final class NiriRecipe extends RecipeBase {
         final String singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
         final String finalS2N = _printSpecTag("Final S/N ASCII data");
 
-        printConfiguration(instrument);
+        printConfiguration(instrument, result.aoSystem());
 
         _println(HtmlPrinter.printParameterSummary(_plotParameters));
         _println(result.specS2N()[0].getSignalSpectrum(), _header, sigSpec);
@@ -432,19 +432,19 @@ public final class NiriRecipe extends RecipeBase {
 
         _println("");
 
-        printConfiguration(instrument);
+        printConfiguration(instrument, result.aoSystem());
 
     }
 
-    private void printConfiguration(final Niri instrument) {
+    private void printConfiguration(final Niri instrument, final Option<AOSystem> ao) {
         _print("<HR align=left SIZE=3>");
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + instrument.getName() + "\n");
         _println(HtmlPrinter.printParameterSummary(_sdParameters));
         _println(instrument.toString());
-        if (_altairParameters.altairIsUsed()) {
+        if (ao.isDefined()) {
             _println(HtmlPrinter.printParameterSummary(_telescope, "altair"));
-            _println(_altairParameters.printParameterSummary());
+            _println(HtmlPrinter.printParameterSummary((Altair) ao.get()));
         } else {
             _println(HtmlPrinter.printParameterSummary(_telescope));
         }

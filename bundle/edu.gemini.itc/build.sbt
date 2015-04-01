@@ -38,7 +38,9 @@ OsgiKeys.exportPackage := Seq(
   "edu.gemini.itc.operation",
   "edu.gemini.itc.parameters",
   "edu.gemini.itc.shared",
-  "edu.gemini.itc.trecs"
+  "edu.gemini.itc.trecs",
+  "org.jfree",
+  "org.jfree.chart"
 )
 
 OsgiKeys.importPackage := Seq(

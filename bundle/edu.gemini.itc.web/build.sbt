@@ -12,8 +12,7 @@ unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/org.osgi.enterprise-5.0.0.jar"),
   new File(baseDirectory.value, "../../lib/bundle/javax-servlet_2.10-2.5.0.jar"),
   new File(baseDirectory.value, "../../lib/bundle/pax-web-jetty-bundle-1.1.13.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/pax-web-jsp-1.1.13.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/org-jfree_2.10-1.0.14.jar")
+  new File(baseDirectory.value, "../../lib/bundle/pax-web-jsp-1.1.13.jar")
 )
 
 osgiSettings

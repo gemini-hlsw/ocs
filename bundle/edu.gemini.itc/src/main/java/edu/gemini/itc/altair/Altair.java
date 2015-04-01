@@ -52,6 +52,18 @@ public class Altair implements AOSystem {
     }
 
     //Methods
+    public AltairParams.GuideStarType getWFSMode() {
+        return altair.getWFSMode();
+    }
+
+    public double getGuideStarSeparation() {
+        return altair.getGuideStarSeperation();
+    }
+
+    public double getGuideStarMagnitude() {
+        return altair.getGuideStarMagnitude();
+    }
+
     public SampledSpectrumVisitor getBackgroundVisitor() {
         return altairBackground;
     }

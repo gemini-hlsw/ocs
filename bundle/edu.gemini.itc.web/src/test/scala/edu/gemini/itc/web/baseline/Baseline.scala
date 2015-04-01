@@ -13,7 +13,7 @@ import edu.gemini.itc.nifs.{NifsParameters, NifsRecipe}
 import edu.gemini.itc.niri.{NiriParameters, NiriRecipe}
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.{TRecsParameters, TRecsRecipe}
-import edu.gemini.itc.web.html.{AcqCamPrinter, Flamingos2Printer, GnirsPrinter, PrinterBase}
+import edu.gemini.itc.web.html._
 
 import scala.io.Source
 
@@ -122,7 +122,7 @@ object Baseline {
     cookRecipe(w => new MichelleRecipe(f.src, f.odp, f.ocp, f.ins, f.tep, f.pdp, w))
 
   def executeNifsRecipe(f: Fixture[NifsParameters]): Output =
-    cookRecipe(w => new NifsRecipe(f.src, f.odp, f.ocp, f.ins, f.tep, f.alt.get, f.pdp, w))
+    simmerRecipe(w => new NifsPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.alt.get, f.pdp, w))
 
   def executeNiriRecipe(f: Fixture[NiriParameters]): Output =
     cookRecipe(w => new NiriRecipe(f.src, f.odp, f.ocp, f.ins, f.tep, f.alt.get, f.pdp, w))

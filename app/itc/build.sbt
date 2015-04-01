@@ -46,6 +46,7 @@ def common(version: Version) = AppConfig(
   log = Some("log/spdb.%u.%g.log"),
   bundles = List(
     BundleSpec("com.jgoodies.looks",                     Version(2, 4, 1)),
+    BundleSpec("com.mchange.c3p0",                       Version(0, 9, 5)),
     BundleSpec("edu.gemini.util.osgi",                   version),
     BundleSpec("edu.gemini.osgi.main",                   Version(4, 2, 1)),
     BundleSpec("edu.gemini.util.log.extras",             version),
@@ -53,6 +54,7 @@ def common(version: Version) = AppConfig(
     BundleSpec("edu.gemini.itc.shared",                  version),
     BundleSpec("edu.gemini.itc.web",                     version),
     BundleSpec("org.apache.commons.io",                  Version(2, 0, 1)),
+    BundleSpec("org.h2",                                 Version(1, 3, 170)),
     BundleSpec("org.ops4j.pax.web.pax-web-extender-war", Version(1, 1, 13)),
     BundleSpec("org.ops4j.pax.web.pax-web-jetty-bundle", Version(1, 1, 13)),
     BundleSpec("org.ops4j.pax.web.pax-web-jsp",          Version(1, 1, 13)),

@@ -84,26 +84,4 @@ public final class AltairParameters extends ITCParameters {
         return sb.toString();
     }
 
-    public String printParameterSummary() {
-        StringBuffer sb = new StringBuffer();
-
-        // This object is used to format numerical strings.
-        FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2);  // Two decimal places
-        device.clear();
-
-        sb.append("Altair Guide Star properties:");
-        if (_wfsMode.equals(AltairParams.GuideStarType.LGS)) {
-            sb.append("<LI>Laser Guide Star Mode");
-
-        } else {
-            sb.append("<LI>Natural Guide Star Mode");
-            sb.append("<LI>Guide Star Seperation " + getGuideStarSeperation());
-            sb.append("<LI>Guide Star Magnitude " + getGuideStarMagnitude());
-        }
-
-        sb.append("<BR>");
-        return sb.toString();
-    }
-
 }

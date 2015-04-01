@@ -163,6 +163,18 @@ public class NifsNorth extends Nifs {
         return end;
     }
 
+    public double getIFUNumX() {
+        return _IFUNumX;
+    }
+
+    public double getIFUNumY() {
+        return _IFUNumY;
+    }
+
+    public String getIFUMethod() {
+        return _IFUMethod;
+    }
+
 
     public void setCentralWavelength(double centralWavelength) {
         _centralWavelength = centralWavelength;
