@@ -1,8 +1,8 @@
 package edu.gemini.itc.niri;
 
-import edu.gemini.itc.shared.InstrumentDetails;
 import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.ITCParameters;
+import edu.gemini.itc.shared.InstrumentDetails;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -202,35 +202,6 @@ public final class NiriParameters implements InstrumentDetails {
         return _FP_Mask;
     }
 
-    public double getFPMask() {
-        //if (_FP_Mask.equals(NOSLIT)) return null;
-        if (_FP_Mask.equals(SLIT0_70_CENTER) ||
-                _FP_Mask.equals(SLIT_6_PIX_CENTER))
-            return 0.75; //old value 0.68;
-        else if (_FP_Mask.equals(SLIT0_70_BLUE) ||
-                _FP_Mask.equals(SLIT_6_PIX_BLUE))
-            return 0.7;
-        else if (_FP_Mask.equals(SLIT0_23_CENTER) ||
-                _FP_Mask.equals(SLIT0_23_BLUE) ||
-                _FP_Mask.equals(SLIT_2_PIX_CENTER) ||
-                _FP_Mask.equals(SLIT_2_PIX_BLUE))
-            return 0.23;
-        else if (_FP_Mask.equals(SLIT0_46_CENTER) ||
-                _FP_Mask.equals(SLIT_4_PIX_CENTER))
-            return 0.47;
-        else if (_FP_Mask.equals(SLIT0_46_BLUE) ||
-                _FP_Mask.equals(SLIT_4_PIX_BLUE))
-            return 0.46;
-        else if (_FP_Mask.equals(F32_SLIT_10_PIX_CENTER))
-            return 0.22;
-        else if (_FP_Mask.equals(F32_SLIT_7_PIX_CENTER))
-            return 0.144;
-        else if (_FP_Mask.equals(F32_SLIT_4_PIX_CENTER))
-            return 0.09;
-        else
-            return -1.0;
-    }
-
     public String getFPMaskOffset() {
         if (_FP_Mask.equals(SLIT0_70_CENTER) ||
                 _FP_Mask.equals(SLIT0_23_CENTER) ||
@@ -288,7 +259,7 @@ public final class NiriParameters implements InstrumentDetails {
         sb.append("Filter:\t" + getFilter() + "\n");
         sb.append("Grism:\t" + getGrism() + "\n");
         sb.append("Camera:\t" + getCamera() + "\n");
-        sb.append("Focal Plane Mask: \t " + getFPMask() + " arcsec slit \n");
+        sb.append("Focal Plane Mask: \t " + _FP_Mask + " arcsec slit \n");
         sb.append("\n");
         return sb.toString();
     }

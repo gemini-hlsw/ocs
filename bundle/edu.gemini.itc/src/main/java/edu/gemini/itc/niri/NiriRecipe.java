@@ -15,58 +15,31 @@ import java.util.Calendar;
 /**
  * This class performs the calculations for Niri used for imaging.
  */
-public final class NiriRecipe extends RecipeBase {
+public final class NiriRecipe {
 
     private final AltairParameters _altairParameters;
-    private final String _header = "# NIRI ITC: " + Calendar.getInstance().getTime() + "\n";
-
     private final NiriParameters _niriParameters;
     private final ObservingConditions _obsConditionParameters;
     private final ObservationDetails _obsDetailParameters;
-    private final PlottingDetails _plotParameters;
     private final SourceDefinition _sdParameters;
     private final TelescopeDetails _telescope;
 
     /**
-     * Constructs a NiriRecipe by parsing a Multipart servlet request.
-     *
-     * @param r   Servlet request containing form data from ITC web page.
-     * @param out Results will be written to this PrintWriter.
-     * @throws Exception on failure to parse parameters.
-     */
-    public NiriRecipe(ITCMultiPartParser r, PrintWriter out) {
-        super(out);
-        _sdParameters = ITCRequest.sourceDefinitionParameters(r);
-        _obsDetailParameters = ITCRequest.observationParameters(r);
-        _obsConditionParameters = ITCRequest.obsConditionParameters(r);
-        _niriParameters = new NiriParameters(r);
-        _telescope = ITCRequest.teleParameters(r);
-        _altairParameters = ITCRequest.altairParameters(r);
-        _plotParameters = ITCRequest.plotParameters(r);
-
-        validateInputParameters();
-    }
-
-    /**
-     * Constructs a NiriRecipe given the parameters. Useful for testing.
+     * Constructs a NiriRecipe given the parameters.
      */
     public NiriRecipe(SourceDefinition sdParameters,
                       ObservationDetails obsDetailParameters,
                       ObservingConditions obsConditionParameters,
                       NiriParameters niriParameters, TelescopeDetails telescope,
-                      AltairParameters altairParameters,
-                      PlottingDetails plotParameters,
-                      PrintWriter out)
+                      AltairParameters altairParameters)
 
     {
-        super(out);
         _sdParameters = sdParameters;
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;
         _niriParameters = niriParameters;
         _telescope = telescope;
         _altairParameters = altairParameters;
-        _plotParameters = plotParameters;
 
         validateInputParameters();
     }
@@ -97,15 +70,14 @@ public final class NiriRecipe extends RecipeBase {
 
     }
 
-    public void writeOutput() {
+    public ImagingResult calculateImaging() {
         final Niri instrument = new Niri(_niriParameters, _obsDetailParameters);
-        if (_obsDetailParameters.getMethod().isImaging()) {
-            final ImagingResult result = calculateImaging(instrument);
-            writeImagingOutput(instrument, result);
-        } else {
-            final SpectroscopyResult result = calculateSpectroscopy(instrument);
-            writeSpectroscopyOutput(instrument, result);
-        }
+        return calculateImaging(instrument);
+    }
+
+    public SpectroscopyResult calculateSpectroscopy() {
+        final Niri instrument = new Niri(_niriParameters, _obsDetailParameters);
+        return calculateSpectroscopy(instrument);
     }
 
     private SpectroscopyResult calculateSpectroscopy(final Niri instrument) {
@@ -173,16 +145,16 @@ public final class NiriRecipe extends RecipeBase {
         if (!_obsDetailParameters.isAutoAperture()) {
             st = new SlitThroughput(im_qual,
                     _obsDetailParameters.getApertureDiameter(), pixel_size,
-                    _niriParameters.getFPMask());
+                    instrument.getFPMask());
             st_halo = new SlitThroughput(IQcalc.getImageQuality(),
                     _obsDetailParameters.getApertureDiameter(), pixel_size,
-                    _niriParameters.getFPMask());
+                    instrument.getFPMask());
         } else {
             st = new SlitThroughput(im_qual, pixel_size,
-                    _niriParameters.getFPMask());
+                    instrument.getFPMask());
 
             st_halo = new SlitThroughput(IQcalc.getImageQuality(), pixel_size,
-                    _niriParameters.getFPMask());
+                    instrument.getFPMask());
         }
 
         double ap_diam = st.getSpatialPix();
@@ -192,14 +164,14 @@ public final class NiriRecipe extends RecipeBase {
         if (_sdParameters.isUniform()) {
 
             if (_obsDetailParameters.isAutoAperture()) {
-                ap_diam = new Double(1 / (_niriParameters.getFPMask() * pixel_size) + 0.5).intValue();
+                ap_diam = new Double(1 / (instrument.getFPMask() * pixel_size) + 0.5).intValue();
                 spec_source_frac = 1;
             } else {
-                spec_source_frac = _niriParameters.getFPMask() * ap_diam * pixel_size;
+                spec_source_frac = instrument.getFPMask() * ap_diam * pixel_size;
             }
         }
 
-        final SpecS2NVisitor specS2N = new SpecS2NVisitor(_niriParameters.getFPMask(),
+        final SpecS2NVisitor specS2N = new SpecS2NVisitor(instrument.getFPMask(),
                 pixel_size, instrument.getSpectralPixelWidth(),
                 instrument.getObservingStart(),
                 instrument.getObservingEnd(),
@@ -309,148 +281,6 @@ public final class NiriRecipe extends RecipeBase {
         final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         return new ImagingResult(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, altair);
 
-    }
-
-
-    // ===================================================================================================================
-    // TODO: OUTPUT METHODS
-    // TODO: These need to be simplified/cleaned/shared and then go to the web module.. and then be deleted and forgotten.
-    // ===================================================================================================================
-
-    private void writeSpectroscopyOutput(final Niri instrument, final SpectroscopyResult result) {
-        _println("");
-
-        // This object is used to format numerical strings.
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2); // Two decimal places
-        device.clear();
-
-        // Altair specific section
-        if (_altairParameters.altairIsUsed()) {
-            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), result.iqCalc().getImageQuality(), _altairParameters, 0.0);
-            _println(ao.printSummary());
-        }
-
-        if (!_obsDetailParameters.isAutoAperture()) {
-            _println("software aperture extent along slit = "
-                    + device.toString(_obsDetailParameters
-                    .getApertureDiameter()) + " arcsec");
-        } else {
-            switch (_sdParameters.getProfileType()) {
-                case UNIFORM:
-                    _println("software aperture extent along slit = " + device.toString(1 / _niriParameters.getFPMask()) + " arcsec");
-                    break;
-                case POINT:
-                    _println("software aperture extent along slit = " + device.toString(1.4 * result.specS2N()[0].getImageQuality()) + " arcsec");
-                    break;
-            }
-        }
-
-        if (!_sdParameters.isUniform()) {
-            _println("fraction of source flux in aperture = "
-                    + device.toString(result.st().getSlitThroughput()));
-        }
-
-        _println("derived image size(FWHM) for a point source = "
-                + device.toString(result.specS2N()[0].getImageQuality()) + " arcsec");
-
-        _println("");
-        _println("Requested total integration time = "
-                + device.toString(_obsDetailParameters.getExposureTime() * _obsDetailParameters.getNumExposures())
-                + " secs, of which "
-                + device.toString(_obsDetailParameters.getExposureTime() * _obsDetailParameters.getNumExposures()
-                * _obsDetailParameters.getSourceFraction()) + " secs is on source.");
-
-        _print("<HR align=left SIZE=3>");
-
-        _println("<p style=\"page-break-inside: never\">");
-        final ITCChart chart1 = new ITCChart("Signal and SQRT(Background) in software aperture of " + result.specS2N()[0].getSpecNpix() + " pixels", "Wavelength (nm)", "e- per exposure per spectral pixel", _plotParameters);
-        final ITCChart chart2 = new ITCChart("Intermediate Single Exp and Final S/N", "Wavelength (nm)", "Signal / Noise per spectral pixel", _plotParameters);
-
-        chart1.addArray(result.specS2N()[0].getSignalSpectrum().getData(), "Signal ");
-        chart1.addArray(result.specS2N()[0].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
-        _println(chart1.getBufferedImage(), "SigAndBack");
-        _println("");
-
-        final String sigSpec = _printSpecTag("ASCII signal spectrum");
-        final String backSpec = _printSpecTag("ASCII background spectrum");
-
-        chart2.addArray(result.specS2N()[0].getExpS2NSpectrum().getData(), "Single Exp S/N");
-        chart2.addArray(result.specS2N()[0].getFinalS2NSpectrum().getData(), "Final S/N  ");
-        _println(chart2.getBufferedImage(), "Sig2N");
-        _println("");
-
-        final String singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
-        final String finalS2N = _printSpecTag("Final S/N ASCII data");
-
-        printConfiguration(instrument, result.aoSystem());
-
-        _println(HtmlPrinter.printParameterSummary(_plotParameters));
-        _println(result.specS2N()[0].getSignalSpectrum(), _header, sigSpec);
-        _println(result.specS2N()[0].getBackgroundSpectrum(), _header, backSpec);
-        _println(result.specS2N()[0].getExpS2NSpectrum(), _header, singleS2N);
-        _println(result.specS2N()[0].getFinalS2NSpectrum(), _header, finalS2N);
-
-    }
-
-    private void writeImagingOutput(final Niri instrument, final ImagingResult result) {
-        _println("");
-
-        // This object is used to format numerical strings.
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2); // Two decimal places
-        device.clear();
-
-        // Altair specific section
-        if (_altairParameters.altairIsUsed()) {
-            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), result.iqCalc().getImageQuality(), _altairParameters, 0.0);
-            _println(ao.printSummary());
-            _print(result.sfCalc().getTextResult(device, false));
-            _println("derived image halo size (FWHM) for a point source = "
-                    + device.toString(result.iqCalc().getImageQuality()) + " arcsec.\n");
-        } else {
-            _print(result.sfCalc().getTextResult(device));
-            _println(result.iqCalc().getTextResult(device));
-        }
-
-        _println(result.is2nCalc().getTextResult(device));
-        _println(result.is2nCalc().getBackgroundLimitResult());
-        device.setPrecision(0); // NO decimal places
-        device.clear();
-
-        _println("");
-        _println("The peak pixel signal + background is "
-                + device.toString(result.peakPixelCount())
-                + ". This is "
-                + device.toString(result.peakPixelCount()
-                / instrument.getWellDepth() * 100)
-                + "% of the full well depth of "
-                + device.toString(instrument.getWellDepth()) + ".");
-
-        if (result.peakPixelCount() > (.8 * instrument.getWellDepth()))
-            _println("Warning: peak pixel exceeds 80% of the well depth and may be saturated");
-
-        _println("");
-
-        printConfiguration(instrument, result.aoSystem());
-
-    }
-
-    private void printConfiguration(final Niri instrument, final Option<AOSystem> ao) {
-        _print("<HR align=left SIZE=3>");
-        _println("<b>Input Parameters:</b>");
-        _println("Instrument: " + instrument.getName() + "\n");
-        _println(HtmlPrinter.printParameterSummary(_sdParameters));
-        _println(instrument.toString());
-        if (ao.isDefined()) {
-            _println(HtmlPrinter.printParameterSummary(_telescope, "altair"));
-            _println(HtmlPrinter.printParameterSummary((Altair) ao.get()));
-        } else {
-            _println(HtmlPrinter.printParameterSummary(_telescope));
-        }
-
-        _println(HtmlPrinter.printParameterSummary(_obsConditionParameters));
-        _println(HtmlPrinter.printParameterSummary(_obsDetailParameters));
     }
 
 }

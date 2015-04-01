@@ -41,6 +41,7 @@ public class Niri extends Instrument {
     private String _focalPlaneMask;
     private String _focalPlaneMaskOffset;
     private String _stringSlitWidth;
+    private final String _FP_Mask;
     private CalculationMethod _mode;
 
     /**
@@ -64,6 +65,7 @@ public class Niri extends Instrument {
         _grism = np.getGrism();
         _camera = np.getCamera();
         _mode = odp.getMethod();
+        _FP_Mask = np.getFocalPlaneMask();
 
 
         if (!(_filterUsed.equals("none"))) {
@@ -247,6 +249,34 @@ public class Niri extends Instrument {
         else return HIGH_BACK_WELL_DEPTH;
     }
 
+    public double getFPMask() {
+        //if (_FP_Mask.equals(NOSLIT)) return null;
+        if (_FP_Mask.equals(NiriParameters.SLIT0_70_CENTER) ||
+                _FP_Mask.equals(NiriParameters.SLIT_6_PIX_CENTER))
+            return 0.75; //old value 0.68;
+        else if (_FP_Mask.equals(NiriParameters.SLIT0_70_BLUE) ||
+                _FP_Mask.equals(NiriParameters.SLIT_6_PIX_BLUE))
+            return 0.7;
+        else if (_FP_Mask.equals(NiriParameters.SLIT0_23_CENTER) ||
+                _FP_Mask.equals(NiriParameters.SLIT0_23_BLUE) ||
+                _FP_Mask.equals(NiriParameters.SLIT_2_PIX_CENTER) ||
+                _FP_Mask.equals(NiriParameters.SLIT_2_PIX_BLUE))
+            return 0.23;
+        else if (_FP_Mask.equals(NiriParameters.SLIT0_46_CENTER) ||
+                _FP_Mask.equals(NiriParameters.SLIT_4_PIX_CENTER))
+            return 0.47;
+        else if (_FP_Mask.equals(NiriParameters.SLIT0_46_BLUE) ||
+                _FP_Mask.equals(NiriParameters.SLIT_4_PIX_BLUE))
+            return 0.46;
+        else if (_FP_Mask.equals(NiriParameters.F32_SLIT_10_PIX_CENTER))
+            return 0.22;
+        else if (_FP_Mask.equals(NiriParameters.F32_SLIT_7_PIX_CENTER))
+            return 0.144;
+        else if (_FP_Mask.equals(NiriParameters.F32_SLIT_4_PIX_CENTER))
+            return 0.09;
+        else
+            return -1.0;
+    }
 
     /**
      * The prefix on data file names for this instrument.
