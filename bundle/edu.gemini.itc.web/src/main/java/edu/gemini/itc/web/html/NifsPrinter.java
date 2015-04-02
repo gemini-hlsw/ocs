@@ -2,17 +2,11 @@ package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.altair.Altair;
 import edu.gemini.itc.altair.AltairParameters;
-import edu.gemini.itc.nifs.Nifs;
 import edu.gemini.itc.nifs.NifsNorth;
 import edu.gemini.itc.nifs.NifsParameters;
 import edu.gemini.itc.nifs.NifsRecipe;
-import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
-import edu.gemini.itc.web.HtmlPrinter;
-import edu.gemini.itc.web.ITCRequest;
 import edu.gemini.spModel.core.Site;
-import org.jfree.chart.plot.Plot;
-import scala.Option;
 
 import java.io.PrintWriter;
 import java.util.Calendar;

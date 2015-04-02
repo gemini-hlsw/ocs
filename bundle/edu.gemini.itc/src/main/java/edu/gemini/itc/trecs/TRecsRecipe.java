@@ -2,12 +2,7 @@ package edu.gemini.itc.trecs;
 
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
-import edu.gemini.itc.web.HtmlPrinter;
-import edu.gemini.itc.web.ITCRequest;
 import edu.gemini.spModel.core.Site;
-
-import java.io.PrintWriter;
-import java.util.Calendar;
 
 /**
  * This class performs the calculations for T-Recs used for imaging.

@@ -4,7 +4,6 @@ import edu.gemini.itc.gmos.Gmos;
 import edu.gemini.itc.gmos.GmosRecipe;
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.*;
-import edu.gemini.itc.web.HtmlPrinter;
 
 import java.awt.*;
 import java.io.PrintWriter;

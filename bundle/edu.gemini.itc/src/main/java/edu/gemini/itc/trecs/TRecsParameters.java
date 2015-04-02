@@ -1,25 +1,12 @@
 package edu.gemini.itc.trecs;
 
 import edu.gemini.itc.shared.InstrumentDetails;
-import edu.gemini.itc.shared.ITCMultiPartParser;
-import edu.gemini.itc.shared.ITCParameters;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * This class holds the information from the Trecs section
  * of an ITC web page.  This object is constructed from a servlet request.
  */
 public final class TRecsParameters implements InstrumentDetails {
-    // ITC web form parameter names.
-    // These constants must be kept in sync with the web page form.
-    // They are used to parse form data.
-    public static final String INSTRUMENT_FILTER = "instrumentFilter";
-    public static final String INSTRUMENT_WINDOW = "instrumentWindow";
-    public static final String INSTRUMENT_GRATING = "instrumentDisperser";
-    public static final String INSTRUMENT_CENTRAL_WAVELENGTH = "instrumentCentralWavelength";
-    public static final String WELL_DEPTH = "wellDepth";
-    public static final String FP_MASK = "instrumentFPMask";
 
     // ITC web form input values.
     // These constants must be kept in sync with the web page form.
@@ -72,97 +59,20 @@ public final class TRecsParameters implements InstrumentDetails {
     public static final String NO_SLIT = "none";
 
     // Data members
-    private String _Filter;  // filters
-    private String _InstrumentWindow;
-    private String _grating; // Grating or null
-    private String _instrumentCentralWavelength;
-    private String _FP_Mask;
-
-    /**
-     * Constructs a TrecsParameters from a servlet request
-     *
-     * @param r Servlet request containing the form data.
-     * @throws Exception if input data is not parsable.
-     */
-    public TRecsParameters(HttpServletRequest r) {
-        parseServletRequest(r);
-    }
-
-    /**
-     * Constructs a TRecsParameters from a MultipartParser
-     *
-     * @param p MutipartParser that has all of the parameters and files Parsed
-     * @throws Exception of cannot parse any of the parameters.
-     */
-
-    public TRecsParameters(ITCMultiPartParser p) {
-        parseMultipartParameters(p);
-    }
-
-    /**
-     * Parse parameters from a servlet request.
-     */
-    public void parseServletRequest(HttpServletRequest r) {
-        // Parse the acquisition camera section of the form.
-
-        // Get filter
-        _Filter = r.getParameter(INSTRUMENT_FILTER);
-        if (_Filter == null) {
-            ITCParameters.notFoundException(INSTRUMENT_FILTER);
-        }
-
-        // Get instrument Window
-        _InstrumentWindow = r.getParameter(INSTRUMENT_WINDOW);
-        if (_InstrumentWindow == null) {
-            ITCParameters.notFoundException(INSTRUMENT_WINDOW);
-        }
-
-        // Get Grating
-        _grating = r.getParameter(INSTRUMENT_GRATING);
-        if (_grating == null) {
-            ITCParameters.notFoundException(INSTRUMENT_GRATING);
-        }
-
-        // Get Instrument Central Wavelength
-        _instrumentCentralWavelength =
-                r.getParameter(INSTRUMENT_CENTRAL_WAVELENGTH);
-        if (_instrumentCentralWavelength == null) {
-            ITCParameters.notFoundException(
-                    INSTRUMENT_CENTRAL_WAVELENGTH);
-        }
-        if (_instrumentCentralWavelength.equals(" ")) {
-            _instrumentCentralWavelength = "0";
-        }
-
-        _FP_Mask = r.getParameter(FP_MASK);
-        if (_FP_Mask == null) {
-            ITCParameters.notFoundException(FP_MASK);
-        }
-
-    }
-
-    public void parseMultipartParameters(ITCMultiPartParser p) {
-        _Filter = p.getParameter(INSTRUMENT_FILTER);
-        _InstrumentWindow = p.getParameter(INSTRUMENT_WINDOW);
-        _grating = p.getParameter(INSTRUMENT_GRATING);
-        _instrumentCentralWavelength = p.getParameter(INSTRUMENT_CENTRAL_WAVELENGTH);
-        if (_instrumentCentralWavelength.equals(" ")) {
-            _instrumentCentralWavelength = "0";
-        }
-        _FP_Mask = p.getParameter(FP_MASK);
-    }
+    private final String _Filter;  // filters
+    private final String _InstrumentWindow;
+    private final String _grating; // Grating or null
+    private final String _instrumentCentralWavelength;
+    private final String _FP_Mask;
 
     /**
      * Constructs a TRecsParameters from a servlet request
-     *
-     * @param r Servlet request containing the form data.
-     * @throws Exception if input data is not parsable.
      */
-    public TRecsParameters(String Filter,
-                           String instrumentWindow,
-                           String grating,
-                           String instrumentCentralWavelength,
-                           String FP_Mask) {
+    public TRecsParameters(final String Filter,
+                           final String instrumentWindow,
+                           final String grating,
+                           final String instrumentCentralWavelength,
+                           final String FP_Mask) {
         _Filter = Filter;
         _InstrumentWindow = instrumentWindow;
         _grating = grating;

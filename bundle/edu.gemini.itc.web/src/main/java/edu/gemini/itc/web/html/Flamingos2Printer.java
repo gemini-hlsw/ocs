@@ -4,7 +4,6 @@ import edu.gemini.itc.flamingos2.Flamingos2;
 import edu.gemini.itc.flamingos2.Flamingos2Parameters;
 import edu.gemini.itc.flamingos2.Flamingos2Recipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.itc.web.HtmlPrinter;
 
 import java.io.PrintWriter;
 import java.util.Calendar;

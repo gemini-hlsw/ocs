@@ -1,25 +1,12 @@
 package edu.gemini.itc.niri;
 
-import edu.gemini.itc.shared.ITCMultiPartParser;
-import edu.gemini.itc.shared.ITCParameters;
 import edu.gemini.itc.shared.InstrumentDetails;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * This class holds the information from the Niri section
  * of an ITC web page.  This object is constructed from a servlet request.
  */
 public final class NiriParameters implements InstrumentDetails {
-    // ITC web form parameter names.
-    // These constants must be kept in sync with the web page form.
-    // They are used to parse form data.
-    public static final String INSTRUMENT_FILTER = "instrumentFilter";
-    public static final String INSTRUMENT_GRISM = "instrumentDisperser";
-    public static final String INSTRUMENT_CAMERA = "instrumentCamera";
-    public static final String READ_NOISE = "readNoise";
-    public static final String WELL_DEPTH = "wellDepth";
-    public static final String FP_MASK = "instrumentFPMask";
 
     // ITC web form input values.
     // These constants must be kept in sync with the web page form.
@@ -69,106 +56,22 @@ public final class NiriParameters implements InstrumentDetails {
     public static final String NO_SLIT = "none";
 
     // Data members
-    private String _Filter;  // filters
-    private String _grism; // Grism or null
-    private String _camera; // camera F6, F14, or F32
-    private String _readNoise;
-    private String _wellDepth;
-    private String _FP_Mask;
+    private final String _Filter;  // filters
+    private final String _grism; // Grism or null
+    private final String _camera; // camera F6, F14, or F32
+    private final String _readNoise;
+    private final String _wellDepth;
+    private final String _FP_Mask;
 
     /**
      * Constructs a AcquisitionCamParameters from a servlet request
-     *
-     * @param r Servlet request containing the form data.
-     * @throws Exception if input data is not parsable.
      */
-    public NiriParameters(HttpServletRequest r) {
-        parseServletRequest(r);
-    }
-
-    /**
-     * Constructs a NiriParameters from a MultipartParser
-     *
-     * @param p MutipartParser that has all of the parameters and files Parsed
-     * @throws Exception of cannot parse any of the parameters.
-     */
-
-    public NiriParameters(ITCMultiPartParser p) {
-        parseMultipartParameters(p);
-    }
-
-    /**
-     * Parse parameters from a servlet request.
-     */
-    public void parseServletRequest(HttpServletRequest r) {
-        // Parse the acquisition camera section of the form.
-
-        // Get Broad Band filter
-        _Filter = r.getParameter(INSTRUMENT_FILTER);
-        if (_Filter == null) {
-            ITCParameters.notFoundException(INSTRUMENT_FILTER);
-        }
-
-
-        // Get Grism
-        _grism = r.getParameter(INSTRUMENT_GRISM);
-        if (_grism == null) {
-            ITCParameters.notFoundException(INSTRUMENT_GRISM);
-        }
-
-        if (_Filter.equals("none") && _grism.equals("none")) {
-            throw new IllegalArgumentException("Must specify a filter or a grism");
-        }
-
-        // Get Camera Used
-        _camera = r.getParameter(INSTRUMENT_CAMERA);
-        if (_camera == null) {
-            ITCParameters.notFoundException(INSTRUMENT_CAMERA);
-        }
-
-        //Get High or low read noise
-        _readNoise = r.getParameter(READ_NOISE);
-        if (_readNoise == null) {
-            ITCParameters.notFoundException(READ_NOISE);
-        }
-
-        //Get High or low read noise
-        _wellDepth = r.getParameter(WELL_DEPTH);
-        if (_wellDepth == null) {
-            ITCParameters.notFoundException(WELL_DEPTH);
-        }
-
-        _FP_Mask = r.getParameter(FP_MASK);
-        if (_FP_Mask == null) {
-            ITCParameters.notFoundException(FP_MASK);
-        }
-
-    }
-
-    public void parseMultipartParameters(ITCMultiPartParser p) {
-        _Filter = p.getParameter(INSTRUMENT_FILTER);
-        _grism = p.getParameter(INSTRUMENT_GRISM);
-        if (_Filter.equals("none") && _grism.equals("none")) {
-            throw new IllegalArgumentException("Must specify a filter or a grism");
-        }
-        _camera = p.getParameter(INSTRUMENT_CAMERA);
-        _readNoise = p.getParameter(READ_NOISE);
-        _wellDepth = p.getParameter(WELL_DEPTH);
-        _FP_Mask = p.getParameter(FP_MASK);
-    }
-
-    /**
-     * Constructs a AcquisitionCamParameters from a servlet request
-     *
-     * @param r Servlet request containing the form data.
-     * @throws Exception if input data is not parsable.
-     */
-    public NiriParameters(String Filter,
-                          String grism,
-                          String camera,
-                          String readNoise,
-                          String wellDepth,
-                          String FP_Mask) {
+    public NiriParameters(final String Filter,
+                          final String grism,
+                          final String camera,
+                          final String readNoise,
+                          final String wellDepth,
+                          final String FP_Mask) {
         _Filter = Filter;
         _grism = grism;
         _camera = camera;
@@ -176,6 +79,9 @@ public final class NiriParameters implements InstrumentDetails {
         _wellDepth = wellDepth;
         _FP_Mask = FP_Mask;
 
+        if (_Filter.equals("none") && _grism.equals("none")) {
+            throw new IllegalArgumentException("Must specify a filter or a grism");
+        }
     }
 
     public String getFilter() {

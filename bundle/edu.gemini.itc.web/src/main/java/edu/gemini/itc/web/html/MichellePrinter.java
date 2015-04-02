@@ -4,7 +4,6 @@ import edu.gemini.itc.michelle.Michelle;
 import edu.gemini.itc.michelle.MichelleParameters;
 import edu.gemini.itc.michelle.MichelleRecipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.itc.web.HtmlPrinter;
 
 import java.io.PrintWriter;
 import java.util.Calendar;

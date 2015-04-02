@@ -1,7 +1,7 @@
 package edu.gemini.itc.web.servlets;
 
 import edu.gemini.itc.shared.GmosParameters;
-import edu.gemini.itc.shared.ITCMultiPartParser;
+import edu.gemini.itc.web.ITCMultiPartParser;
 import edu.gemini.itc.shared.Parameters;
 import edu.gemini.itc.shared.PlottingDetails;
 import edu.gemini.itc.web.ITCRequest;

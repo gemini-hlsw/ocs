@@ -4,7 +4,6 @@ import edu.gemini.itc.shared.*;
 import edu.gemini.itc.trecs.TRecs;
 import edu.gemini.itc.trecs.TRecsParameters;
 import edu.gemini.itc.trecs.TRecsRecipe;
-import edu.gemini.itc.web.HtmlPrinter;
 
 import java.io.PrintWriter;
 import java.util.Calendar;

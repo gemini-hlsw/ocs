@@ -4,13 +4,8 @@ import edu.gemini.itc.altair.Altair;
 import edu.gemini.itc.altair.AltairParameters;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
-import edu.gemini.itc.web.HtmlPrinter;
-import edu.gemini.itc.web.ITCRequest;
 import edu.gemini.spModel.core.Site;
 import scala.Option;
-
-import java.io.PrintWriter;
-import java.util.Calendar;
 
 /**
  * This class performs the calculations for Niri used for imaging.

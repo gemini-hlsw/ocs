@@ -4,7 +4,6 @@ import edu.gemini.itc.gnirs.Gnirs;
 import edu.gemini.itc.gnirs.GnirsParameters;
 import edu.gemini.itc.gnirs.GnirsRecipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.itc.web.HtmlPrinter;
 import org.jfree.chart.ChartColor;
 
 import java.awt.*;

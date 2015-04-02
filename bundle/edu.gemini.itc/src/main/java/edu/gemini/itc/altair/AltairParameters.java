@@ -1,15 +1,12 @@
 package edu.gemini.itc.altair;
 
-import edu.gemini.itc.shared.FormatStringWriter;
-import edu.gemini.itc.shared.ITCParameters;
 import edu.gemini.spModel.gemini.altair.AltairParams;
-
 
 /**
  * This class holds the information from the Altair section
  * of an ITC web page.  This object is constructed from a servlet request.
  */
-public final class AltairParameters extends ITCParameters {
+public final class AltairParameters {
 
     private final boolean _altairUsed;
     private final AltairParams.GuideStarType _wfsMode;

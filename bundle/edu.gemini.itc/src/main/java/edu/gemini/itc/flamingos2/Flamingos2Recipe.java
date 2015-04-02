@@ -2,12 +2,7 @@ package edu.gemini.itc.flamingos2;
 
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
-import edu.gemini.itc.web.HtmlPrinter;
-import edu.gemini.itc.web.ITCRequest;
 import edu.gemini.spModel.core.Site;
-
-import java.io.PrintWriter;
-import java.util.Calendar;
 
 /**
  * This class performs the calculations for Flamingos 2 used for imaging.

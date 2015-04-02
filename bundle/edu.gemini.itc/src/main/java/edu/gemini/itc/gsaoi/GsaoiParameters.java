@@ -1,6 +1,5 @@
 package edu.gemini.itc.gsaoi;
 
-import edu.gemini.itc.shared.ITCMultiPartParser;
 import edu.gemini.itc.shared.InstrumentDetails;
 
 /**
@@ -8,11 +7,6 @@ import edu.gemini.itc.shared.InstrumentDetails;
  * of an ITC web page.  This object is constructed from a servlet request.
  */
 public final class GsaoiParameters implements InstrumentDetails {
-    // ITC web form parameter names.
-    // These constants must be kept in sync with the web page form.
-    // They are used to parse form data.
-    public static final String INSTRUMENT_FILTER = "instrumentFilter";
-    public static final String READ_MODE = "readMode";
 
     public static final String BRIGHT_OBJECTS_READ_MODE = "bright";
     public static final String FAINT_OBJECTS_READ_MODE = "faint";
@@ -31,24 +25,13 @@ public final class GsaoiParameters implements InstrumentDetails {
     private final String _filter;  // filters
     private final String _readMode;
 
-    /**
-     * Constructs a GsaoiParameters from a MultipartParser
-     *
-     * @param p MutipartParser that has all of the parameters and files Parsed
-     * @throws Exception of cannot parse any of the parameters.
-     */
-    public GsaoiParameters(final ITCMultiPartParser p) {
-        _filter = p.getParameter(INSTRUMENT_FILTER);
+    public GsaoiParameters(final String filter, final String readMode) {
+        _filter = filter;
+        _readMode = readMode;
+
         if (_filter.equals("none")) {
             throw new IllegalArgumentException("Must specify a filter or a grism");
         }
-        _readMode = p.getParameter(READ_MODE);
-    }
-
-    public GsaoiParameters(final String filter,
-                           final String readMode) {
-        _filter = filter;
-        _readMode = readMode;
     }
 
     public String getFilter() {

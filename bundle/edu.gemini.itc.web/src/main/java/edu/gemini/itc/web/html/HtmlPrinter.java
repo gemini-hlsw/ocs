@@ -1,4 +1,4 @@
-package edu.gemini.itc.web;
+package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.altair.Altair;
 import edu.gemini.itc.gems.Gems;

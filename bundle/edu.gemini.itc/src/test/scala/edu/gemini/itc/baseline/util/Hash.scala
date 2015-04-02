@@ -47,7 +47,7 @@ object Hash {
     hash(
       p.getCameraColor,
       p.getCameraLength,
-      p.getDarkCurrent,
+      "4.7",                // TODO: obsolete, remove with next update
       p.getFocalPlaneMask,
       gnirsFpMask(p),
       p.getGrating,

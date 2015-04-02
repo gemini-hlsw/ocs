@@ -1,10 +1,8 @@
 package edu.gemini.itc.web.servlets;
 
-import edu.gemini.itc.acqcam.AcqCamRecipe;
 import edu.gemini.itc.acqcam.AcquisitionCamParameters;
-import edu.gemini.itc.shared.ITCMultiPartParser;
+import edu.gemini.itc.web.ITCMultiPartParser;
 import edu.gemini.itc.shared.Parameters;
-import edu.gemini.itc.shared.Recipe;
 import edu.gemini.itc.web.ITCRequest;
 import edu.gemini.itc.web.html.AcqCamPrinter;
 
@@ -58,7 +56,7 @@ public final class ITCacqCamServlet
     public void writeOutput(ITCMultiPartParser mpp, PrintWriter out) {
         out.println("<a href = \"http://www.gemini.edu/sciops/instruments/integration-time-calculators/itc-help\"> Click here for help with the results page.</a>");
         final Parameters p  = ITCRequest.parameters(mpp);
-        final AcquisitionCamParameters ip = new AcquisitionCamParameters(mpp);
+        final AcquisitionCamParameters ip = ITCRequest.acqCamParameters(mpp);
         final AcqCamPrinter printer = new AcqCamPrinter(p, ip, out);
         printer.writeOutput();
     }

@@ -6,7 +6,6 @@ import edu.gemini.itc.niri.Niri;
 import edu.gemini.itc.niri.NiriParameters;
 import edu.gemini.itc.niri.NiriRecipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.itc.web.HtmlPrinter;
 import scala.Option;
 
 import java.io.PrintWriter;

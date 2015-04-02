@@ -2,11 +2,9 @@ package edu.gemini.itc.web.servlets;
 
 import edu.gemini.itc.altair.AltairParameters;
 import edu.gemini.itc.niri.NiriParameters;
-import edu.gemini.itc.niri.NiriRecipe;
-import edu.gemini.itc.shared.ITCMultiPartParser;
+import edu.gemini.itc.web.ITCMultiPartParser;
 import edu.gemini.itc.shared.Parameters;
 import edu.gemini.itc.shared.PlottingDetails;
-import edu.gemini.itc.shared.Recipe;
 import edu.gemini.itc.web.ITCRequest;
 import edu.gemini.itc.web.html.NiriPrinter;
 
@@ -59,7 +57,7 @@ public final class ITCniriServlet extends ITCServlet {
     public void writeOutput(ITCMultiPartParser mpp, PrintWriter out) {
         out.println("<a href = \"http://www.gemini.edu/sciops/instruments/integration-time-calculators/itc-help\"> Click here for help with the results page.</a>");
         final Parameters p  = ITCRequest.parameters(mpp);
-        final NiriParameters ip = new NiriParameters(mpp);
+        final NiriParameters ip = ITCRequest.niriParameters(mpp);
         final AltairParameters altair = ITCRequest.altairParameters(mpp);
         final PlottingDetails pdp = ITCRequest.plotParameters(mpp);
         final NiriPrinter printer = new NiriPrinter(p, ip, altair, pdp, out);

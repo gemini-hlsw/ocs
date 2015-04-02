@@ -1,4 +1,4 @@
-package edu.gemini.itc.shared;
+package edu.gemini.itc.web;
 
 import org.apache.commons.fileupload.DiskFileUpload;
 import org.apache.commons.fileupload.FileItem;

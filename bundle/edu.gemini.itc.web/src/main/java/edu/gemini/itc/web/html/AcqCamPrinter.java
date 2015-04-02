@@ -6,7 +6,6 @@ import edu.gemini.itc.acqcam.AcquisitionCamera;
 import edu.gemini.itc.shared.FormatStringWriter;
 import edu.gemini.itc.shared.ImagingResult;
 import edu.gemini.itc.shared.Parameters;
-import edu.gemini.itc.web.HtmlPrinter;
 
 import java.io.PrintWriter;
 

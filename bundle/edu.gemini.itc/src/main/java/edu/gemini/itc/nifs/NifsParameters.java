@@ -1,27 +1,16 @@
 package edu.gemini.itc.nifs;
 
 import edu.gemini.itc.shared.InstrumentDetails;
-import edu.gemini.itc.shared.ITCMultiPartParser;
-import edu.gemini.itc.shared.ITCParameters;
 
 /**
  * This class holds the information from the Nifs section
  * of an ITC web page.  This object is constructed from a servlet request.
  */
 public final class NifsParameters implements InstrumentDetails {
-    // ITC web form parameter names.
-    // These constants must be kept in sync with the web page form.
-    // They are used to parse form data.
-    public static final String INSTRUMENT_FILTER = "instrumentFilter";
-    public static final String INSTRUMENT_GRATING = "instrumentDisperser";
-    public static final String INSTRUMENT_CAMERA = "instrumentCamera";
-    public static final String INSTRUMENT_CENTRAL_WAVELENGTH = "instrumentCentralWavelength";
-    public static final String READ_NOISE = "readNoise";
-    public static final String IFU_METHOD = "ifuMethod";
+
     public static final String SINGLE_IFU = "singleIFU";
     public static final String RADIAL_IFU = "radialIFU";
     public static final String SUMMED_APERTURE_IFU = "summedApertureIFU";
-    public static final String INSTRUMENT_LOCATION = "instrumentLocation";
 
 
     // ITC web form input values.
@@ -45,67 +34,38 @@ public final class NifsParameters implements InstrumentDetails {
     public static final String VERY_LOW_READ_NOISE = "verylowNoise";
     public static final String HIGH_READ_NOISE = "highNoise";
     public static final String MED_READ_NOISE = "medNoise";
-    public static final String IFU_OFFSET = "ifuOffset";
-    public static final String IFU_MIN_OFFSET = "ifuMinOffset";
-    public static final String IFU_MAX_OFFSET = "ifuMaxOffset";
-    public static final String IFU_NUM_X = "ifuNumX";
-    public static final String IFU_NUM_Y = "ifuNumY";
-    public static final String IFU_CENTER_X = "ifuCenterX";
-    public static final String IFU_CENTER_Y = "ifuCenterY";
     public static final String NO_SLIT = "none";
     public static final String NIFS = "nifs";
 
     // Data members
-    private String _Filter;
-    private String _grating; // Grating or null
-    private String _readNoise;
-    private String _instrumentCentralWavelength;
-    private String _IFUMethod;
-    private String _IFUOffset;
-    private String _IFUMinOffset;
-    private String _IFUMaxOffset;
-    private String _IFUnumX;
-    private String _IFUnumY;
-    private String _IFUcenterX;
-    private String _IFUcenterY;
-
-    private String _instrumentLocation;
-
-    /**
-     * Constructs a NifsParameters from a MultipartParser
-     *
-     * @param p MutipartParser that has all of the parameters and files Parsed
-     * @throws Exception of cannot parse any of the parameters.
-     */
-
-    public NifsParameters(ITCMultiPartParser p) {
-        _Filter = p.getParameter(INSTRUMENT_FILTER);
-        _grating = p.getParameter(INSTRUMENT_GRATING);
-        _readNoise = p.getParameter(READ_NOISE);
-        _instrumentCentralWavelength = p.getParameter(INSTRUMENT_CENTRAL_WAVELENGTH);
-        if (_instrumentCentralWavelength.equals(" ")) {
-            _instrumentCentralWavelength = "0";
-        }
-
-        _IFUMethod = p.getParameter(IFU_METHOD);
-        if (_IFUMethod.equals(SINGLE_IFU)) {
-            _IFUOffset = p.getParameter(IFU_OFFSET);
-        } else if (_IFUMethod.equals(RADIAL_IFU)) {
-            _IFUMinOffset = p.getParameter(IFU_MIN_OFFSET);
-            _IFUMaxOffset = p.getParameter(IFU_MAX_OFFSET);
-        } else if (_IFUMethod.equals(SUMMED_APERTURE_IFU)) {
-            _IFUnumX = p.getParameter(IFU_NUM_X);
-            _IFUnumY = p.getParameter(IFU_NUM_Y);
-            _IFUcenterX = p.getParameter(IFU_CENTER_X);
-            _IFUcenterY = p.getParameter(IFU_CENTER_Y);
-        } else
-            ITCParameters.notFoundException(" a correct value for the IFU Parameters. ");
-    }
+    private final String _Filter;
+    private final String _grating; // Grating or null
+    private final String _readNoise;
+    private final String _instrumentCentralWavelength;
+    private final String _IFUMethod;
+    private final String _IFUOffset;
+    private final String _IFUMinOffset;
+    private final String _IFUMaxOffset;
+    private final String _IFUnumX;
+    private final String _IFUnumY;
+    private final String _IFUcenterX;
+    private final String _IFUcenterY;
 
     /**
      * Constructs a NifsParameters from a test file.
      */
-    public NifsParameters(String Filter, String grating, String readNoise, String instrumentCentralWavelength, String IFUMethod, String IFUOffset, String IFUMinOffset, String IFUMaxOffset, String IFUNumX, String IFUNumY, String IFUCenterX, String IFUCenterY) {
+    public NifsParameters(final String Filter,
+                          final String grating,
+                          final String readNoise,
+                          final String instrumentCentralWavelength,
+                          final String IFUMethod,
+                          final String IFUOffset,
+                          final String IFUMinOffset,
+                          final String IFUMaxOffset,
+                          final String IFUNumX,
+                          final String IFUNumY,
+                          final String IFUCenterX,
+                          final String IFUCenterY) {
 
         _Filter = Filter;
         _grating = grating;

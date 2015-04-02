@@ -6,12 +6,10 @@ name := "edu.gemini.itc"
 
 // version set in ThisBuild
 
-// TODO: once everything is split properly the dependency on javax-servlet can go away
 unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/osgi.core-4.3.1.jar"),
   new File(baseDirectory.value, "../../lib/bundle/osgi.cmpn-4.3.1.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/org.osgi.enterprise-5.0.0.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/javax-servlet_2.10-2.5.0.jar")
+  new File(baseDirectory.value, "../../lib/bundle/org.osgi.enterprise-5.0.0.jar")
 )
 
 osgiSettings
