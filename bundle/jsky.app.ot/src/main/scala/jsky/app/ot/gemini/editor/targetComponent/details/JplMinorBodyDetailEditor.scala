@@ -57,21 +57,6 @@ final class JplMinorBodyDetailEditor extends TargetDetailEditor(Tag.JPL_MINOR_BO
       c.weightx = 2
     })
 
-//    p.add(new JLabel("Target Name"), new GridBagConstraints <| { c =>
-//      c.gridx = 0
-//      c.gridy = 1
-//      c.fill = GridBagConstraints.HORIZONTAL
-//      c.insets = new Insets(10, 2, 0, 5)
-//    })
-//
-//    p.add(name, new GridBagConstraints <| { c =>
-//      c.gridx = 1
-//      c.gridy = 1
-//      c.fill = GridBagConstraints.HORIZONTAL
-//      c.insets = new Insets(10, 5, 0, 2)
-//      c.weightx = 2
-//    })
-
   }
 
   add(general, new GridBagConstraints <| { c =>

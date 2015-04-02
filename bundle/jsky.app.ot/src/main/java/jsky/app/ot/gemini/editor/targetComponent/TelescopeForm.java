@@ -34,10 +34,10 @@ class TelescopeForm extends JPanel {
         initComponents();
     }
     JPanel panel1;
+    final JPanel buttonPanel = new JPanel();
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         final JPanel targetListPanel = new JPanel();
-        final JPanel buttonPanel = new JPanel();
         newMenuBar = new JMenuBar();
         newMenu = new JMenu();
         removeButton = new JButton();

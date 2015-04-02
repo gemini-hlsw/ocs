@@ -111,6 +111,19 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _nonSiderealTargetSup = new NonSiderealTargetSupport(_w, _curPos);
         _timeDocument         = new TimeDocument((JTextField) _w.calendarTime.getEditor().getEditorComponent());
 
+        // Move the tag menu up onto the menu bar, with a label
+        _w.tag.getParent().remove(_w.tag);
+        _w.buttonPanel.add(new JPanel() {{
+            setOpaque(false);
+            setLayout(new FlowLayout() {{
+                setVgap(0);
+            }});
+            add(new JLabel("Type Tag: ") {{
+                setOpaque(false);
+                setVerticalAlignment(SwingConstants.CENTER);
+            }});
+            add(_w.tag);
+        }}, 6); // index is the offset from the left
 
         //Callback for AGS visibiity
         _w.addComponentListener(new ComponentAdapter() {
@@ -224,7 +237,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             gridx = 0;
             gridy = 2;
             fill = BOTH;
-            weightx = 1.0;
+            weightx = 2.0;
             weighty = 2.0;
             insets = new Insets(5, 0, 5, 0);
         }});

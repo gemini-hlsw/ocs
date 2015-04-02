@@ -7,6 +7,7 @@ import edu.gemini.shared.util.immutable.{ Option => GOption }
 import edu.gemini.catalog.skycat.CatalogException
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
+import edu.gemini.spModel.target.system.CoordinateParam.Units
 import edu.gemini.spModel.target.system.HmsDegTarget
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 import jsky.catalog.skycat.{SkycatConfigFile, FullMimeSimbadCatalogFilter, SkycatCatalog}
@@ -119,8 +120,17 @@ final class SiderealNameEditor extends JPanel with TelescopePosEditor with Reent
     // Set the coordinates, if any
     tqr.getCoordinates(0) match {
       case pos: WorldCoords =>
-        t.getRa.setValue(pos.getRA.toString)
-        t.getDec.setValue(pos.getDec.toString)
+        try {
+          t.getRa.setValue(pos.getRA.toString)
+          t.getDec.setValue(pos.getDec.toString)
+        } catch {
+
+          // N.B. the old target editor handled this case, so we do too. May never happen.
+          case _: IllegalArgumentException =>
+            t.getRa.setAs(0, Units.DEGREES)
+            t.getDec.setAs(0, Units.DEGREES)
+
+        }
       case _ => // ???
     }
 
