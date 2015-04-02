@@ -84,6 +84,10 @@ public class Altair implements AOSystem {
         return (0.1031 / uncorrectedSeeing) * Math.pow(wavelength / 500, 1.2);
     }
 
+    public double getWavelength() {
+        return wavelength;
+    }
+
     // Calculates StrehlFit which is used to calc the strehl
     public double getStrehlFit() {
         double r0power, corr;
@@ -153,16 +157,6 @@ public class Altair implements AOSystem {
 
     private boolean fieldLensIsIn() {
         return altair.getFieldLens().equals(AltairParams.FieldLens.IN);
-    }
-
-
-    public String printSummary() {
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(3);
-        String s = "r0(" + wavelength + "nm) = " + device.toString(getr0()) + " m\n";
-        s += "Strehl = " + device.toString(getStrehl()) + "\n";
-        s += "FWHM of an AO-corrected core = " + device.toString(getAOCorrectedFWHM()) + " arcsec\n";
-        return s;
     }
 
 }

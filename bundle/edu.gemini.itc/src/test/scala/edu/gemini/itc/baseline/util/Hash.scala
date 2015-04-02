@@ -47,28 +47,13 @@ object Hash {
     hash(
       p.getCameraColor,
       p.getCameraLength,
-      "4.7",                // TODO: obsolete, remove with next update
       p.getFocalPlaneMask,
-      gnirsFpMask(p),
       p.getGrating,
       p.getInstrumentCentralWavelength,
       p.getReadNoise,
       p.getStringSlitWidth,
       p.getUnXDispCentralWavelength
     )
-
-  // TODO: get rid of with next update
-  private def gnirsFpMask(p: GnirsParameters) = p.getFocalPlaneMask match {
-    case GnirsParameters.SLIT0_1        => 0.1
-    case GnirsParameters.SLIT0_15       => 0.15
-    case GnirsParameters.SLIT0_2        => 0.2
-    case GnirsParameters.SLIT0_3        => 0.3
-    case GnirsParameters.SLIT0_45       => 0.45
-    case GnirsParameters.SLIT0_675      => 0.675
-    case GnirsParameters.SLIT1_0        => 1.0
-    case GnirsParameters.SLIT3_0        => 3.0
-    case _                              => -1.0
-  }
 
   def calc(p: GsaoiParameters): Int =
     hash(
@@ -80,32 +65,10 @@ object Hash {
     hash(
       p.getFilter,
       p.getFocalPlaneMask,
-      getFPMask(p),               // TODO: get rid of with next update
       p.getGrating,
       p.getInstrumentCentralWavelength,
-      getStringSlitWidth(p),      // TODO: get rid of with next update
       p.polarimetryIsUsed()
     )
-
-  // TODO: get rid of with next update
-  def getFPMask(p: MichelleParameters): Double = p.getFocalPlaneMask match {
-    case MichelleParameters.SLIT0_19 => 0.19
-    case MichelleParameters.SLIT0_38 => 0.38
-    case MichelleParameters.SLIT0_57 => 0.57
-    case MichelleParameters.SLIT0_76 => 0.76
-    case MichelleParameters.SLIT1_52 => 1.52
-    case _                           => -1.0
-  }
-
-  // TODO: get rid of with next update
-  def getStringSlitWidth(p: MichelleParameters): String = p.getFocalPlaneMask match {
-    case MichelleParameters.SLIT0_19 => "019"
-    case MichelleParameters.SLIT0_38 => "038"
-    case MichelleParameters.SLIT0_57 => "057"
-    case MichelleParameters.SLIT0_76 => "076"
-    case MichelleParameters.SLIT1_52 => "152"
-    case _                           => "none"
-  }
 
   def calc(p: NifsParameters): Int =
     hash(
@@ -141,36 +104,10 @@ object Hash {
     hash(
       p.getFilter,
       p.getFocalPlaneMask,
-      getFPMask(p),                 // TODO: remove with next update of baseline
       p.getGrating,
       p.getInstrumentCentralWavelength,
-      p.getInstrumentWindow,
-      getStringSlitWidth(p)         // TODO: remove with next update of baseline
+      p.getInstrumentWindow
     )
-
-  // TODO: remove with next update of baseline
-  def getFPMask(p: TRecsParameters): Double = p.getFocalPlaneMask match {
-    case TRecsParameters.SLIT0_21 => 0.21
-    case TRecsParameters.SLIT0_26 => 0.26
-    case TRecsParameters.SLIT0_31 => 0.31
-    case TRecsParameters.SLIT0_36 => 0.36
-    case TRecsParameters.SLIT0_66 => 0.66
-    case TRecsParameters.SLIT0_72 => 0.72
-    case TRecsParameters.SLIT1_32 => 1.32
-    case _ => -1.0
-  }
-
-  // TODO: remove with next update of baseline
-  def getStringSlitWidth(p: TRecsParameters): String = p.getFocalPlaneMask match {
-    case TRecsParameters.SLIT0_21 => "021"
-    case TRecsParameters.SLIT0_26 => "026"
-    case TRecsParameters.SLIT0_31 => "031"
-    case TRecsParameters.SLIT0_26 => "036"
-    case TRecsParameters.SLIT0_66 => "066"
-    case TRecsParameters.SLIT0_72 => "072"
-    case TRecsParameters.SLIT1_32 => "132"
-    case _ => "none"
-  }
 
   def calc(p: AcquisitionCamParameters): Int =
     hash(
@@ -183,8 +120,7 @@ object Hash {
       p.getColorFilter,
       p.getFPMask,
       p.getGrism,
-      p.getReadNoise,
-      if (p.getFPMask.equalsIgnoreCase("none")) 1.0 else p.getFPMask.toDouble // TODO: remove with next update
+      p.getReadNoise
     )
 
   def calc(odp: ObservationDetails): Int =

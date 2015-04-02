@@ -53,7 +53,7 @@ public final class NiriPrinter extends PrinterBase {
 
         // Altair specific section
         if (result.aoSystem().isDefined()) {
-            _println(((Altair) result.aoSystem().get()).printSummary());
+            _println(HtmlPrinter.printSummary((Altair) result.aoSystem().get()));
         }
 
         if (!result.observation().isAutoAperture()) {
@@ -131,7 +131,7 @@ public final class NiriPrinter extends PrinterBase {
 
         // Altair specific section
         if (result.aoSystem().isDefined()) {
-            _println(((Altair) result.aoSystem().get()).printSummary());
+            _println(HtmlPrinter.printSummary((Altair) result.aoSystem().get()));
             _print(result.sfCalc().getTextResult(device, false));
             _println("derived image halo size (FWHM) for a point source = "
                     + device.toString(result.iqCalc().getImageQuality()) + " arcsec.\n");

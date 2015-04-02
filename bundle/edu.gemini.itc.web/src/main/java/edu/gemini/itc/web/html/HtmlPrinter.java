@@ -150,6 +150,15 @@ public final class HtmlPrinter {
         return sb.toString();
     }
 
+    public static String printSummary(final Altair altair) {
+        final FormatStringWriter device = new FormatStringWriter();
+        device.setPrecision(3);
+        String s = "r0(" + altair.getWavelength() + "nm) = " + device.toString(altair.getr0()) + " m\n";
+        s += "Strehl = " + device.toString(altair.getStrehl()) + "\n";
+        s += "FWHM of an AO-corrected core = " + device.toString(altair.getAOCorrectedFWHM()) + " arcsec\n";
+        return s;
+    }
+
     public static String printParameterSummary(final Altair altair) {
         StringBuffer sb = new StringBuffer();
 

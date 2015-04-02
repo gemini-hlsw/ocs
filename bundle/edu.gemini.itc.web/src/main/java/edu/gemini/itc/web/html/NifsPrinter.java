@@ -54,7 +54,7 @@ public final class NifsPrinter extends PrinterBase {
         // TODO : THIS IS PURELY FOR REGRESSION TEST ONLY, REMOVE ASAP
 
         if (result.aoSystem().isDefined()) {
-            _println(((Altair) result.aoSystem().get()).printSummary());
+            _println(HtmlPrinter.printSummary((Altair) result.aoSystem().get()));
         }
 
         final int number_exposures = result.observation().getNumExposures();
