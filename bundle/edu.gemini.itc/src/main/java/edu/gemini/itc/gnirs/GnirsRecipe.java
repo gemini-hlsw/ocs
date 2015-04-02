@@ -60,7 +60,7 @@ public final class GnirsRecipe {
     }
 
    public GnirsSpectroscopyResult calculateSpectroscopy() {
-        final Gnirs instrument = new GnirsNorth(_gnirsParameters, _obsDetailParameters);
+        final Gnirs instrument = new Gnirs(_gnirsParameters, _obsDetailParameters);
         return calculateSpectroscopy(instrument);
     }
 
