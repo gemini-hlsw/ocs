@@ -3,9 +3,9 @@ package edu.gemini.sp.vcs.diff
 import java.security.Permission
 
 import edu.gemini.pot.sp.validator.Validator
-import edu.gemini.pot.sp.version.{EmptyNodeVersions, VersionMap}
+import edu.gemini.pot.sp.version.VersionMap
 import edu.gemini.pot.sp.{DataObjectBlob => DOB, _}
-import edu.gemini.shared.util.{IntegerIsIntegral, VersionComparison}
+import edu.gemini.shared.util.VersionComparison
 import edu.gemini.shared.util.VersionComparison.{Conflicting, Same, Newer}
 import edu.gemini.sp.vcs.diff.NodeDetail.Obs
 import edu.gemini.sp.vcs.diff.ObsEdit.{ObsUpdate, ObsDelete, ObsCreate}

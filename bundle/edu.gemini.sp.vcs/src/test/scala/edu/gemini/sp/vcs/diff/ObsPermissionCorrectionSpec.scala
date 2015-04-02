@@ -218,6 +218,29 @@ class ObsPermissionCorrectionSpec extends VcsSpecification {
           (newNote.getDataObject.getTitle must_== "foo")
       }
     }
+
+    "renumber duplicated observations" in withVcs { env =>
+      val newObsKey = env.remote.addObservation() // observation 2
+      unsafeSync(env)
+
+      // edit observation 1 locally
+      env.local.setObsDataObject(ObsKey){ _.setTitle("abc") }
+
+      // set observation 1 to ready remotely
+      env.remote.setObsPhase2Status(ObsKey, PHASE_2_COMPLETE)
+
+      // now the remote version of the node is restored with its remote version
+      // and should still be observation 1.  a copy of the locally edited
+      // observation must be added to the conflict folder with observation
+      // number 3
+      afterSync(env, PiUserPrincipal) {
+        val obs3 = env.local.prog.findDescendant(_.getDataObject.getTitle == "abc").get.asInstanceOf[ISPObservation]
+        (env.local.obs(ObsKey).getObservationNumber must_== 1) and
+          (env.local.obs(newObsKey).getObservationNumber must_== 2) and
+          (obs3.getObservationNumber must_== 3)
+      }
+    }
+
   }
 
 }

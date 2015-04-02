@@ -6,6 +6,8 @@ import edu.gemini.sp.vcs.diff.MergeNode._
 import edu.gemini.spModel.obs.ObservationStatus
 import edu.gemini.spModel.rich.pot.sp._
 
+import scala.collection.JavaConverters._
+
 import scalaz._
 import Scalaz._
 
@@ -19,8 +21,8 @@ import ProgramDiff._
   * @param obsStatus the status of all differing observations, which is needed
   *                  for permission checking
   */
-case class ProgramDiff(plan: MergePlan, obsStatus: List[ObsStatusPair]) {
-  def encode: ProgramDiff.Transport = ProgramDiff.Transport(plan.encode, obsStatus)
+case class ProgramDiff(plan: MergePlan, obsStatus: List[ObsStatusPair], maxObsNumber: Option[Int]) {
+  def encode: ProgramDiff.Transport = ProgramDiff.Transport(plan.encode, obsStatus, maxObsNumber)
 }
 
 object ProgramDiff {
@@ -150,7 +152,11 @@ object ProgramDiff {
 
     val (update, pairs) = presentDiffs(p, Nil)
     val plan            = MergePlan(update, missingDiffs(vmOnlyKeys ++ deletedKeys))
-    ProgramDiff(plan, pairs)
+
+    val allObs          = p.getAllObservations.asScala
+    val maxObs          = if (allObs.isEmpty) none else some(allObs.maxBy(_.getObservationNumber).getObservationNumber)
+
+    ProgramDiff(plan, pairs, maxObs)
   }
 
   def compare(p: ISPProgram, vs: DiffState): ProgramDiff =
@@ -158,7 +164,7 @@ object ProgramDiff {
 
   /** A serializable ProgramDiff.  Required because MergePlan is not serializalbe
     * because scalaz.Tree is not serializable. */
-  case class Transport(plan: MergePlan.Transport, obsStatus: List[ObsStatusPair]) {
-    def decode: ProgramDiff = ProgramDiff(plan.decode, obsStatus)
+  case class Transport(plan: MergePlan.Transport, obsStatus: List[ObsStatusPair], maxObs: Option[Int]) {
+    def decode: ProgramDiff = ProgramDiff(plan.decode, obsStatus, maxObs)
   }
 }

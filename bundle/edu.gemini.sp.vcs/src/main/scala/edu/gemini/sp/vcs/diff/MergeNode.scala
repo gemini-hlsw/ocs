@@ -132,6 +132,18 @@ object MergeNode {
     def compare(that: Tree[MergeNode]): VersionComparison = VersionMap.compare(vm, that.vm)
 
     def focus(k: SPNodeKey): TryVcs[TreeLoc[MergeNode]] = t.loc.findNode(k)
+
+    def mRootLabel: TryVcs[Modified] =
+      t.rootLabel match {
+        case m: Modified => m.right
+        case l           => TryVcs.fail(s"Expected Modified label for ${l.key}")
+      }
+
+    def mModifyLabel(f: Modified => Modified): TryVcs[Tree[MergeNode]] =
+      t.rootLabel match {
+        case m: Modified => Tree.node(f(m): MergeNode, t.subForest).right
+        case _           => TryVcs.fail(s"Expected Modified label for $key")
+      }
   }
 
   implicit class MergeZipperOps(z: TreeLoc[MergeNode]) {
@@ -141,10 +153,7 @@ object MergeNode {
       z.find(_.key === k).toTryVcs(s"Could not find descendant $k")
 
     def incr(lifespanId: LifespanId): TryVcs[TreeLoc[MergeNode]] =
-      z.getLabel match {
-        case m: Modified => \/-(z.modifyLabel(_ => m.copy(nv = m.nv.incr(lifespanId))))
-        case _           => TryVcs.fail("Could not increment version of unmodified node")
-      }
+      mModifyLabel(m => m.copy(nv = m.nv.incr(lifespanId)))
 
     // Determine the index of the focused node in its parent, if any.
     def childIndex: TryVcs[Int] =
@@ -172,6 +181,9 @@ object MergeNode {
             }
           }
       }
+
+    def mModifyLabel(f: Modified => Modified): TryVcs[TreeLoc[MergeNode]] =
+      z.tree.mModifyLabel(f).map { t => z.modifyTree(_ => t) }
 
     def getOrCreateConflictFolder(lifespanId: LifespanId, nodeMap: Map[SPNodeKey, ISPNode]): TryVcs[TreeLoc[MergeNode]] = {
       def isConflictFolder(t: Tree[MergeNode]): Boolean =

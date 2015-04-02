@@ -104,9 +104,13 @@ class ObsPermissionCorrection(
     } yield MergePlan(obs.toTree, mp.delete.filterNot(m => resurrectedKeys.contains(m.key)))
   }
 
-  private def correctUpdate(mp: MergePlan, k: SPNodeKey, localObs: Tree[MergeNode], remoteObs: Tree[MergeNode]): TryVcs[MergePlan] =
+  private def correctUpdate(mp: MergePlan, k: SPNodeKey, localObs: Tree[MergeNode], remoteObs: Tree[MergeNode]): TryVcs[MergePlan] = {
+    val maxLocal  = mp.update.foldObservations(none[Int]) { (_, i, _, n) => some(n.fold(i)(_ max i)) }
+    val maxRemote = remoteDiffs.maxObsNumber
+    val obsNumber = (0 :: maxLocal.toList ++ maxRemote.toList).max + 1
+
     for {
-      // Find the observation that was updated and get its index
+    // Find the observation that was updated and get its index
       l    <- mp.update.focus(k)
       i    <- l.childIndex
 
@@ -123,9 +127,10 @@ class ObsPermissionCorrection(
       // corrections are complete.
       cf0  <- p2.getOrCreateConflictFolder(lifespanId, nodeMap)
       cf1  <- cf0.incr(lifespanId)
-      lobs <- restoreLocal(cf1, localObs, remoteDiffs.plan.vm(local))
+      lobs <- restoreLocal(cf1, localObs, remoteDiffs.plan.vm(local), obsNumber)
       resurrectedKeys = robs.tree.keySet ++ lobs.tree.keySet
     } yield MergePlan(lobs.toTree, mp.delete.filterNot(m => resurrectedKeys.contains(m.key)))
+  }
 
   private def resetStatus(obs: TreeLoc[MergeNode]): TryVcs[TreeLoc[MergeNode]] =
     (obs.getLabel match {
@@ -144,7 +149,7 @@ class ObsPermissionCorrection(
   // the children is updated.  Regardless, we sync the observation's node's
   // version vectors with the versions in the remote program's version map to
   // mark that all changes have been accounted for.
-  private def restoreLocal(parent: TreeLoc[MergeNode], localObs: Tree[MergeNode], vm: VersionMap): TryVcs[TreeLoc[MergeNode]] = {
+  private def restoreLocal(parent: TreeLoc[MergeNode], localObs: Tree[MergeNode], vm: VersionMap, obsNumber: Int): TryVcs[TreeLoc[MergeNode]] = {
     val dups = parent.root.toTree.keySet & localObs.keySet
     val upd  = localObs.cobind { t =>
       val isDuplicate = dups.contains(t.rootLabel.key)
@@ -167,7 +172,12 @@ class ObsPermissionCorrection(
       }
     }.sequenceU
 
-    upd.flatMap { obs => resetStatus(parent.insertDownLast(obs)) }
+    upd.flatMap { obs =>
+      for {
+        obs0 <- obs.mModifyLabel { _.copy(detail = NodeDetail.Obs(obsNumber)) }
+        obs1 <- resetStatus(parent.insertDownLast(obs0))
+      } yield obs1
+    }
   }
 
   // Restores a remote observation as it is in the remote program without any
