@@ -218,14 +218,6 @@ public class FormatStringWriter {
         return write(sWholePart + sDecimal + sFractionPart);
     }
 
-    public FormatStringWriter write(boolean b) {
-        return write(b ? "true" : "false");
-    }
-
-    public FormatStringWriter write(char c) {
-        return write(c + "");
-    }
-
     public FormatStringWriter clear() {
         _sStringWriter = null;  // Hint to gc
         _sStringWriter = new StringWriter();
@@ -234,10 +226,6 @@ public class FormatStringWriter {
 
     public FormatStringWriter println() {
         return println(System.out);
-    }
-
-    public FormatStringWriter print() {
-        return print(System.out);
     }
 
     public FormatStringWriter println(PrintStream out) {

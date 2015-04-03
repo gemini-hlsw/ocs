@@ -112,7 +112,7 @@ public final class TRecsPrinter extends PrinterBase {
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + instrument.getName() + "\n");
         _println(HtmlPrinter.printParameterSummary(result.source()));
-        _println(instrument.toString());
+        _println(trecsToString(instrument, result.parameters()));
         _println(HtmlPrinter.printParameterSummary(result.telescope()));
         _println(HtmlPrinter.printParameterSummary(result.conditions()));
         _println(HtmlPrinter.printParameterSummary(result.observation()));
@@ -163,11 +163,29 @@ public final class TRecsPrinter extends PrinterBase {
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + instrument.getName() + "\n");
         _println(HtmlPrinter.printParameterSummary(result.source()));
-        _println(instrument.toString());
+        _println(trecsToString(instrument, result.parameters()));
         _println(HtmlPrinter.printParameterSummary(result.telescope()));
         _println(HtmlPrinter.printParameterSummary(result.conditions()));
         _println(HtmlPrinter.printParameterSummary(result.observation()));
     }
 
+    private String trecsToString(final TRecs instrument, final Parameters p) {
+
+        String s = "Instrument configuration: \n";
+        s += HtmlPrinter.opticalComponentsToString(instrument);
+
+        if (!instrument.getFocalPlaneMask().equals(TRecsParameters.NO_SLIT))
+            s += "<LI> Focal Plane Mask: " + instrument.getFocalPlaneMask() + "\n";
+        s += "\n";
+        if (p.observation().getMethod().isSpectroscopy())
+            s += "<L1> Central Wavelength: " + instrument.getCentralWavelength() + " nm" + "\n";
+        s += "Spatial Binning: 1\n";
+        if (p.observation().getMethod().isSpectroscopy())
+            s += "Spectral Binning: 1\n";
+        s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + "arcsec\n";
+        if (p.observation().getMethod().isSpectroscopy())
+            s += "Pixel Size in Spectral Direction: " + instrument.getGratingDispersion_nmppix() + "nm\n";
+        return s;
+    }
 
 }

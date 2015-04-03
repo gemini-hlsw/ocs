@@ -1,12 +1,13 @@
 package edu.gemini.itc.nifs;
 
+import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.*;
 
 /**
  * Nifs specification class
  */
-public abstract class Nifs extends Instrument {
+public final class Nifs extends Instrument {
     /**
      * Related files will be in this subdir of lib
      */
@@ -15,15 +16,27 @@ public abstract class Nifs extends Instrument {
     /**
      * Related files will start with this prefix
      */
-    public static String INSTR_PREFIX;
+    public static final String INSTR_PREFIX = "nifs_";
+
     // Instrument reads its configuration from here.
-    protected static double WELL_DEPTH;
+    private static final String FILENAME = "nifs" + getSuffix();
 
-    protected static double AD_SATURATION;
+    private static final double AD_SATURATION = 56636;
 
-    protected static double HIGH_GAIN;
-    protected static double LOW_GAIN;
-    public static int DETECTOR_PIXELS;
+    private static final double HIGH_GAIN = 4.4;
+    private static final double LOW_GAIN = 2.18;
+    public static final int DETECTOR_PIXELS = 2048;
+
+    private static final double SHALLOW_WELL = 90000.0;
+    private static final double DEEP_WELL = 180000.0;
+
+    private static final double HIGH_READ_NOISE_VALUE = 145;  //Not used
+
+    // REL-481: Update NIFS read noise estimates
+    private static final double MEDIUM_READ_NOISE_VALUE = 15.4;
+    private static final double LOW_READ_NOISE_VALUE = 8.1;
+    private static final double VERY_LOW_READ_NOISE_VALUE = 4.6;
+
 
 
     // Keep a reference to the color filter to ask for effective wavelength
@@ -49,10 +62,113 @@ public abstract class Nifs extends Instrument {
     protected boolean _IFU_IsSingle = false;
     protected boolean _IFU_IsSummed = false;
 
-    public Nifs(String FILENAME, String INSTUMENT_PREFIX) {
+    protected DetectorsTransmissionVisitor _dtv;
+    protected double _wellDepth;
+    protected double _readNoiseValue;
+
+
+
+    public Nifs(final NifsParameters gp, final ObservationDetails odp) {
         super(INSTR_DIR, FILENAME);
+
+        // The instrument data file gives a start/end wavelength for
+        // the instrument.  But with a filter in place, the filter
+        // transmits wavelengths that are a subset of the original range.
+
         _sampling = super.getSampling();
-        INSTR_PREFIX = INSTUMENT_PREFIX;
+
+        _readNoise = gp.getReadNoise();
+        _grating = gp.getGrating();
+        _centralWavelength = gp.getInstrumentCentralWavelength();
+        _filterUsed = gp.getFilter();
+        _mode = odp.getMethod();
+
+        if (_centralWavelength < 1000 || _centralWavelength > 6000) {
+            throw new RuntimeException("Central wavelength must be between 1.00um and 6.0um.");
+        }
+
+        //Set read noise and Well depth values by obsevation type
+        if (_readNoise.equals(NifsParameters.HIGH_READ_NOISE)) {
+            _readNoiseValue = HIGH_READ_NOISE_VALUE;
+            _wellDepth = DEEP_WELL;
+        } else if (_readNoise.equals(NifsParameters.MED_READ_NOISE)) {
+            _readNoiseValue = MEDIUM_READ_NOISE_VALUE;
+            _wellDepth = SHALLOW_WELL;
+        } else if (_readNoise.equals(NifsParameters.LOW_READ_NOISE)) {
+            _readNoiseValue = LOW_READ_NOISE_VALUE;
+            _wellDepth = SHALLOW_WELL;
+        } else if (_readNoise.equals(NifsParameters.VERY_LOW_READ_NOISE)) {
+            _readNoiseValue = VERY_LOW_READ_NOISE_VALUE;
+            _wellDepth = SHALLOW_WELL;
+        }
+
+        if (!(_filterUsed.equals("none"))) {
+            _Filter = Filter.fromFile(getPrefix(), _filterUsed, getDirectory() + "/");
+            addFilter(_Filter);
+        }
+
+        //Might use this for creating a ITC for imaging mode of NIFS
+        //_selectableTrans = new NifsPickoffMirror(getDirectory(), "mirror");
+        //addComponent(_selectableTrans);
+
+        FixedOptics _fixedOptics = new FixedOptics(getDirectory() + "/", getPrefix());
+        addComponent(_fixedOptics);
+
+        //Test to see that all conditions for Spectroscopy are met
+        if (_mode.isSpectroscopy()) {
+            if (_grating.equals("none"))
+                throw new RuntimeException("Spectroscopy calculation method is selected but a grating" +
+                        " is not.\nPlease select a grating and a " +
+                        "focal plane mask in the Instrument " +
+                        "configuration section.");
+        }
+
+        _detector = new Detector(getDirectory() + "/", getPrefix(),
+                "hawaii2_HgCdTe", "2K x 2K HgCdTe HAWAII-2 CCD");
+        _detector.setDetectorPixels(DETECTOR_PIXELS);
+
+        _dtv = new DetectorsTransmissionVisitor(1,
+                getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
+
+        _IFUMethod = gp.getIFUMethod();
+        if (_IFUMethod.equals(gp.SINGLE_IFU)) {
+            _IFU_IsSingle = true;
+            _IFUOffset = gp.getIFUOffset();
+            _IFU = new IFUComponent(_IFUOffset, getPixelSize());
+        }
+        if (_IFUMethod.equals(gp.RADIAL_IFU)) {
+            _IFUMinOffset = gp.getIFUMinOffset();
+            _IFUMaxOffset = gp.getIFUMaxOffset();
+
+            _IFU = new IFUComponent(_IFUMinOffset, _IFUMaxOffset, getPixelSize());
+        }
+        if (_IFUMethod.equals(gp.SUMMED_APERTURE_IFU)) {
+            _IFU_IsSummed = true;
+            _IFUNumX = gp.getIFUNumX();
+            _IFUNumY = gp.getIFUNumY();
+            _IFUCenterX = gp.getIFUCenterX();
+            _IFUCenterY = gp.getIFUCenterY();
+
+            _IFU = new IFUComponent(_IFUNumX, _IFUNumY, _IFUCenterX, _IFUCenterY, getPixelSize());
+        }
+        addComponent(_IFU);
+
+
+
+        if (!(_grating.equals("none"))) {
+            _gratingOptics = new NifsGratingOptics(getDirectory() + "/" + getPrefix(), _grating,
+                    _centralWavelength,
+                    _detector.getDetectorPixels(),
+                    1);
+            _sampling = _gratingOptics.getGratingDispersion_nmppix();
+            addGrating(_gratingOptics);
+        }
+
+
+        addComponent(_detector);
+
+
+
     }
 
     /**
@@ -82,10 +198,6 @@ public abstract class Nifs extends Instrument {
 
     public double getSpectralPixelWidth() {
         return _gratingOptics.getPixelWidth();
-    }
-
-    public double getWellDepth() {
-        return WELL_DEPTH;
     }
 
     public double getSampling() {
@@ -135,41 +247,88 @@ public abstract class Nifs extends Instrument {
         return _gratingOptics.getGratingDispersion_nmppix();
     }
 
-    //Abstract class for Detector Pixel Transmission  (i.e.  Create Detector gaps)
-    public abstract edu.gemini.itc.operation.DetectorsTransmissionVisitor getDetectorTransmision();
-
-    public abstract void setCentralWavelength(double centralWavelength);
-
-    public String toString() {
-        //Used to format the strings
-        FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(3);  // Two decimal places
-        device.clear();
-
-
-        String s = "Instrument configuration: \n";
-        s += super.opticalComponentsToString();
-        s += "<LI>Focal Plane Mask: ifu\n";
-        s += "<LI>Read Noise: " + getReadNoise() + "\n";
-        s += "<LI>Well Depth: " + getWellDepth() + "\n";
-        s += "\n";
-
-        s += "<L1> Central Wavelength: " + _centralWavelength + " nm" + "\n";
-        s += "Pixel Size in Spatial Direction: " + getPixelSize() + "arcsec\n";
-
-        s += "Pixel Size in Spectral Direction: " + device.toString(getGratingDispersion_nmppix()) + "nm\n";
-
-        s += "IFU is selected,";
-        if (_IFU_IsSingle)
-            s += "with a single IFU element at " + _IFUOffset + "arcsecs.";
-        else if (_IFU_IsSummed)
-            s += "with multiple summed IFU elements arranged in a " + _IFUNumX + "x" + _IFUNumY +
-                    " (" + device.toString(_IFUNumX * getIFU().IFU_LEN_X) + "\"x" +
-                    device.toString(_IFUNumY * getIFU().IFU_LEN_Y) + "\") grid.";
-        else
-            s += "with mulitple IFU elements arranged from " + _IFUMinOffset + " to " + _IFUMaxOffset + "arcsecs.";
-        s += "\n";
-
-        return s;
+    public DetectorsTransmissionVisitor getDetectorTransmision() {
+        return _dtv;
     }
+
+    public double getObservingStart() {
+        double start = _centralWavelength - (getGratingDispersion_nmppix() * _detector.getDetectorPixels() / 2);
+        return start;
+    }
+
+    public double getObservingEnd() {
+        double end = _centralWavelength + (getGratingDispersion_nmppix() * _detector.getDetectorPixels() / 2);
+        return end;
+    }
+
+    public double getIFUOffset() {
+        return _IFUOffset;
+    }
+
+    public double getIFUMinOffset() {
+        return _IFUMinOffset;
+    }
+
+    public double getIFUMaxOffset() {
+        return _IFUMaxOffset;
+    }
+
+    public int getIFUNumX() {
+        return _IFUNumX;
+    }
+
+    public int getIFUNumY() {
+        return _IFUNumY;
+    }
+
+    public String getIFUMethod() {
+        return _IFUMethod;
+    }
+
+
+    public double getCentralWavelength() {
+        return _centralWavelength;
+    }
+
+    public double getWellDepth() {
+        return _wellDepth;
+    }
+
+    public double getReadNoise() {
+        return _readNoiseValue;
+    }
+
+//    public String toString() {
+//        //Used to format the strings
+//        final FormatStringWriter device = new FormatStringWriter();
+//        device.setPrecision(3);  // Two decimal places
+//        device.clear();
+//
+//
+//        String s = "Instrument configuration: \n";
+//        s += InstrumentPrinter.opticalComponentsToString(this);
+//        s += "<LI>Focal Plane Mask: ifu\n";
+//        s += "<LI>Read Noise: " + getReadNoise() + "\n";
+//        s += "<LI>Well Depth: " + getWellDepth() + "\n";
+//        s += "\n";
+//
+//        s += "<L1> Central Wavelength: " + getCentralWavelength() + " nm" + "\n";
+//        s += "Pixel Size in Spatial Direction: " + getPixelSize() + "arcsec\n";
+//
+//        s += "Pixel Size in Spectral Direction: " + device.toString(getGratingDispersion_nmppix()) + "nm\n";
+//
+//        s += "IFU is selected,";
+//        if (_IFU_IsSingle)
+//            s += "with a single IFU element at " + getIFUOffset() + "arcsecs.";
+//        else if (_IFU_IsSummed)
+//            s += "with multiple summed IFU elements arranged in a " + getIFUNumX() + "x" + getIFUNumY() +
+//                    " (" + device.toString(getIFUNumX() * getIFU().IFU_LEN_X) + "\"x" +
+//                    device.toString(getIFUNumY() * getIFU().IFU_LEN_Y) + "\") grid.";
+//        else
+//            s += "with mulitple IFU elements arranged from " + getIFUMinOffset() + " to " + getIFUMaxOffset() + "arcsecs.";
+//        s += "\n";
+//
+//        return s;
+//    }
+
 }

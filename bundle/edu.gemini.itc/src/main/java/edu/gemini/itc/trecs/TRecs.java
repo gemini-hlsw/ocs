@@ -215,6 +215,14 @@ public final class TRecs extends Instrument {
         else return -1.0;
     }
 
+    public String getFocalPlaneMask() {
+        return _focalPlaneMask;
+    }
+
+    public double getCentralWavelength() {
+        return _centralWavelength;
+    }
+
     /**
      * The prefix on data file names for this instrument.
      */
@@ -222,26 +230,8 @@ public final class TRecs extends Instrument {
         return INSTR_PREFIX;
     }
 
-    public edu.gemini.itc.operation.DetectorsTransmissionVisitor getDetectorTransmision() {
+    public DetectorsTransmissionVisitor getDetectorTransmision() {
         return _dtv;
     }
 
-    public String toString() {
-
-        String s = "Instrument configuration: \n";
-        s += super.opticalComponentsToString();
-
-        if (!_focalPlaneMask.equals(TRecsParameters.NO_SLIT))
-            s += "<LI> Focal Plane Mask: " + _focalPlaneMask + "\n";
-        s += "\n";
-        if (_mode.isSpectroscopy())
-            s += "<L1> Central Wavelength: " + _centralWavelength + " nm" + "\n";
-        s += "Spatial Binning: 1\n";
-        if (_mode.isSpectroscopy())
-            s += "Spectral Binning: 1\n";
-        s += "Pixel Size in Spatial Direction: " + getPixelSize() + "arcsec\n";
-        if (_mode.isSpectroscopy())
-            s += "Pixel Size in Spectral Direction: " + getGratingDispersion_nmppix() + "nm\n";
-        return s;
-    }
 }

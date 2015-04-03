@@ -185,6 +185,14 @@ public class Niri extends Instrument {
         else return HIGH_BACK_READ_NOISE;
     }
 
+    public String getReadNoiseString() {
+        return _readNoise;
+    }
+
+    public String getFocalPlaneMask() {
+        return _focalPlaneMask;
+    }
+
     public String getGrism() {
         return _grism;
     }
@@ -249,6 +257,10 @@ public class Niri extends Instrument {
         else return HIGH_BACK_WELL_DEPTH;
     }
 
+    public String getWellDepthString() {
+        return _wellDepth;
+    }
+
     public double getFPMask() {
         //if (_FP_Mask.equals(NOSLIT)) return null;
         if (_FP_Mask.equals(NiriParameters.SLIT0_70_CENTER) ||
@@ -285,19 +297,4 @@ public class Niri extends Instrument {
         return INSTR_PREFIX;
     }
 
-    public String toString() {
-        String s = "Instrument configuration: \n";
-        s += "Optical Components: <BR>";
-        for (Iterator itr = getComponents().iterator(); itr.hasNext(); ) {
-            s += "<LI>" + itr.next().toString() + "<BR>";
-        }
-        if (!_focalPlaneMask.equals(NiriParameters.NO_SLIT))
-            s += "<LI>Focal Plane Mask: " + _focalPlaneMask + "\n";
-        s += "<LI>Read Mode: " + _readNoise + "\n";
-        s += "<LI>Detector Bias: " + _wellDepth + "\n";
-
-        s += "<BR>Pixel Size: " + getPixelSize() + "<BR>";
-
-        return s;
-    }
 }

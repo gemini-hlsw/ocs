@@ -247,28 +247,15 @@ public class Michelle extends Instrument {
         return INSTR_PREFIX;
     }
 
-    public edu.gemini.itc.operation.DetectorsTransmissionVisitor getDetectorTransmision() {
+    public DetectorsTransmissionVisitor getDetectorTransmision() {
         return _dtv;
     }
 
+    public String getFocalPlaneMask() {
+        return _focalPlaneMask;
+    }
 
-    public String toString() {
-
-        String s = "Instrument configuration: \n";
-        s += super.opticalComponentsToString();
-
-        if (!_focalPlaneMask.equals(MichelleParameters.NO_SLIT))
-            s += "<LI> Focal Plane Mask: " + _focalPlaneMask;
-        s += "\n";
-        s += "\n";
-        if (_mode.isSpectroscopy())
-            s += "<L1> Central Wavelength: " + _centralWavelength + " nm" + "\n";
-        s += "Spatial Binning: 1\n";
-        if (_mode.isSpectroscopy())
-            s += "Spectral Binning: 1\n";
-        s += "Pixel Size in Spatial Direction: " + getPixelSize() + "arcsec\n";
-        if (_mode.isSpectroscopy())
-            s += "Pixel Size in Spectral Direction: " + getGratingDispersion_nmppix() + "nm\n";
-        return s;
+    public double getCentralWavelength() {
+        return _centralWavelength;
     }
 }

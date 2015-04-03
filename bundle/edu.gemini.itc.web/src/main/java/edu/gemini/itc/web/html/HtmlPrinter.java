@@ -212,6 +212,13 @@ public final class HtmlPrinter {
         return sb.toString();
     }
 
+    public static String opticalComponentsToString(final Instrument instrument) {
+        String s = "Optical Components: <BR>";
+        for (final TransmissionElement te : instrument.getComponents()) {
+            s += "<LI>" + te.toString() + "<BR>";
+        }
+        return s;
+    }
 
     // compatibility for regression testing, can go away after regression tests have passed
     private static String portToString(final IssPort port) {

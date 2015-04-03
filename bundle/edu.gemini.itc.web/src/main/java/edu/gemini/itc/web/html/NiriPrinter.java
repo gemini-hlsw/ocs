@@ -10,6 +10,7 @@ import scala.Option;
 
 import java.io.PrintWriter;
 import java.util.Calendar;
+import java.util.Iterator;
 
 /**
  * Helper class for printing NIRI calculation results to an output stream.
@@ -168,7 +169,7 @@ public final class NiriPrinter extends PrinterBase {
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + instrument.getName() + "\n");
         _println(HtmlPrinter.printParameterSummary(p.source()));
-        _println(instrument.toString());
+        _println(niriToString(instrument));
         if (ao.isDefined()) {
             _println(HtmlPrinter.printParameterSummary(p.telescope(), "altair"));
             _println(HtmlPrinter.printParameterSummary((Altair) ao.get()));
@@ -179,5 +180,22 @@ public final class NiriPrinter extends PrinterBase {
         _println(HtmlPrinter.printParameterSummary(p.conditions()));
         _println(HtmlPrinter.printParameterSummary(p.observation()));
     }
+
+    private String niriToString(final Niri instrument) {
+        String s = "Instrument configuration: \n";
+        s += "Optical Components: <BR>";
+        for (Iterator itr = instrument.getComponents().iterator(); itr.hasNext(); ) {
+            s += "<LI>" + itr.next().toString() + "<BR>";
+        }
+        if (!instrument.getFocalPlaneMask().equals(NiriParameters.NO_SLIT))
+            s += "<LI>Focal Plane Mask: " + instrument.getFocalPlaneMask() + "\n";
+        s += "<LI>Read Mode: " + instrument.getReadNoiseString() + "\n";
+        s += "<LI>Detector Bias: " + instrument.getWellDepthString() + "\n";
+
+        s += "<BR>Pixel Size: " + instrument.getPixelSize() + "<BR>";
+
+        return s;
+    }
+
 
 }

@@ -177,19 +177,11 @@ public final class Flamingos2 extends Instrument {
         return WELL_DEPTH;
     }
 
-    public String toString() {
-        String s = "Instrument configuration: \n";
-        s += "Optical Components: <BR>";
-        for (final TransmissionElement te : getComponents()) {
-            s += "<LI>" + te.toString() + "<BR>";
-        }
-        s += "<LI>Read Noise: " + _readNoise + "\n";
+    public String getFocalPlaneMask() {
+        return _focalPlaneMask;
+    }
 
-        if (!_focalPlaneMask.equals("none"))
-            s += "<LI>Focal Plane Mask: " + _focalPlaneMask + " pix slit\n";
-
-        s += "<BR>Pixel Size: " + getPixelSize() + "<BR>";
-
-        return s;
+    public String getReadNoiseString() {
+        return _readNoise;
     }
 }

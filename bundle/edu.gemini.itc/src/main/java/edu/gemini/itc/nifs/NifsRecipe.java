@@ -57,10 +57,10 @@ public final class NifsRecipe  {
     }
 
     /**
-     * Performes recipe calculation.
+     * Performs recipe calculation.
      */
     public SpectroscopyResult calculateSpectroscopy() {
-        final Nifs instrument = new NifsNorth(_nifsParameters, _obsDetailParameters);
+        final Nifs instrument = new Nifs(_nifsParameters, _obsDetailParameters);
         return calculateSpectroscopy(instrument);
     }
 

@@ -95,18 +95,4 @@ public final class Gsaoi extends Instrument {
         return INSTR_PREFIX;
     }
 
-    public String toString() {
-        String s = "Instrument configuration: \n";
-        s += "Optical Components: <BR>";
-        for (Object o : getComponents()) {
-            if (!(o instanceof Camera)) {
-                s += "<LI>" + o.toString() + "<BR>";
-            }
-        }
-        s += "<BR>";
-        s += "Pixel Size: " + getPixelSize() + "<BR>";
-
-        return s;
-    }
-
 }

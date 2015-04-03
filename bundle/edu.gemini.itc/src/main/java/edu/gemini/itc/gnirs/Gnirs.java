@@ -19,7 +19,8 @@ public final class Gnirs extends Instrument {
     private static final String FILENAME = "gnirs" + getSuffix();
 
     // Instrument reads its configuration from here.
-    private static final double WELL_DEPTH = 90000.0;
+    private static final double SHALLOW_WELL = 90000.0;
+    private static final double DEEP_WELL = 180000.0;
 
     private static final double AD_SATURATION = 56636;
 
@@ -65,14 +66,6 @@ public final class Gnirs extends Instrument {
         // The instrument data file gives a start/end wavelength for
         // the instrument.  But with a filter in place, the filter
         // transmits wavelengths that are a subset of the original range.
-
-        final double SHALLOW_WELL = 90000.0;
-        final double DEEP_WELL = 180000.0;
-
-        final double HIGH_BACK_READ_NOISE = 155;   // Old value: 160 (changed 2/27/2014)
-        final double MEDIUM_BACK_READ_NOISE = 30;  // Old value: 35 (changed 2/27/2014)
-        final double LOW_BACK_READ_NOISE = 10;     // Old value: 11 (changed 2/27/2014)
-        final double VERY_LOW_BACK_READ_NOISE = 7; // Old value: 9 (changed 2/27/2014)
 
         _sampling = super.getSampling();
 
@@ -355,43 +348,16 @@ public final class Gnirs extends Instrument {
         }
     }
 
+    public String getFocalPlaneMask() {
+        return _focalPlaneMask;
+    }
+
+    public double getCentralWavelength() {
+        return _centralWavelength;
+    }
+
     public TransmissionElement getGratingOrderNTransmission(int order) {
         return GnirsGratingsTransmission.getOrderNTransmission(_grating, order);
     }
 
-    public String toString() {
-        //Used to format the strings
-        FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(3);  // Two decimal places
-        device.clear();
-
-
-        String s = "Instrument configuration: \n";
-        s += super.opticalComponentsToString();
-
-        if (!_focalPlaneMask.equals(GnirsParameters.NO_SLIT))
-            s += "<LI>Focal Plane Mask: " + _focalPlaneMask + "\n";
-
-        s += "<LI>Grating: " + _grating + "\n"; // REL-469
-
-        s += "<LI>Read Noise: " + getReadNoise() + "\n";
-        s += "<LI>Well Depth: " + getWellDepth() + "\n";
-        s += "\n";
-
-        s += "<L1> Central Wavelength: " + _centralWavelength + " nm" + " \n";
-        s += "Pixel Size in Spatial Direction: " + getPixelSize() + "arcsec\n";
-        if (_mode.isSpectroscopy()) {
-            if (XDisp_IsUsed()) {
-                s += "Pixel Size in Spectral Direction(Order 3): " + device.toString(getGratingDispersion_nmppix() / 3) + "nm\n";
-                s += "Pixel Size in Spectral Direction(Order 4): " + device.toString(getGratingDispersion_nmppix() / 4) + "nm\n";
-                s += "Pixel Size in Spectral Direction(Order 5): " + device.toString(getGratingDispersion_nmppix() / 5) + "nm\n";
-                s += "Pixel Size in Spectral Direction(Order 6): " + device.toString(getGratingDispersion_nmppix() / 6) + "nm\n";
-                s += "Pixel Size in Spectral Direction(Order 7): " + device.toString(getGratingDispersion_nmppix() / 7) + "nm\n";
-                s += "Pixel Size in Spectral Direction(Order 8): " + device.toString(getGratingDispersion_nmppix() / 8) + "nm\n";
-            } else {
-                s += "Pixel Size in Spectral Direction: " + device.toString(getGratingDispersion_nmppix()) + "nm\n";
-            }
-        }
-        return s;
-    }
 }

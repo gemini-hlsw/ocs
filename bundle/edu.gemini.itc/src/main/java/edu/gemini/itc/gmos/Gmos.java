@@ -9,6 +9,7 @@ import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 import edu.gemini.spModel.gemini.gmos.GmosSouthType;
+import scala.Option;
 
 import java.awt.*;
 
@@ -271,41 +272,21 @@ public abstract class Gmos extends Instrument implements BinningProvider {
         return gp.fpMask().isIFU();
     }
 
+    public Option<IfuMethod> getIfuMethod() {
+        return gp.ifuMethod();
+    }
+
+    public GmosCommonType.FPUnit getFpMask() {
+        return gp.fpMask();
+    }
+
+    public double getCentralWavelength() {
+        return gp.centralWavelength();
+    }
+
     //Abstract class for Detector Pixel Transmission  (i.e.  Create Detector gaps)
     public DetectorsTransmissionVisitor getDetectorTransmision() {
         return _dtv;
-    }
-
-    public String toString() {
-
-        String s = "Instrument configuration: \n";
-        s += super.opticalComponentsToString();
-
-        if (!gp.fpMask().equals(GmosNorthType.FPUnitNorth.FPU_NONE) && !gp.fpMask().equals(GmosSouthType.FPUnitSouth.FPU_NONE))
-            s += "<LI> Focal Plane Mask: " + gp.fpMask().displayValue() + "\n";
-        s += "\n";
-        if (odp.getMethod().isSpectroscopy())
-            s += "<L1> Central Wavelength: " + gp.centralWavelength() + " nm" + "\n";
-        s += "Spatial Binning: " + getSpatialBinning() + "\n";
-        if (odp.getMethod().isSpectroscopy())
-            s += "Spectral Binning: " + getSpectralBinning() + "\n";
-        s += "Pixel Size in Spatial Direction: " + getPixelSize() + "arcsec\n";
-        if (odp.getMethod().isSpectroscopy())
-            s += "Pixel Size in Spectral Direction: " + getGratingDispersion_nmppix() + "nm\n";
-        if (isIfuUsed()) {
-            s += "IFU is selected,";
-            if        (gp.ifuMethod().get() instanceof IfuSingle) {
-                final IfuSingle ifu = (IfuSingle) gp.ifuMethod().get();
-                s += "with a single IFU element at " + ifu.offset() + "arcsecs.";
-            } else if (gp.ifuMethod().get() instanceof IfuRadial){
-                final IfuRadial ifu = (IfuRadial) gp.ifuMethod().get();
-                s += "with mulitple IFU elements arranged from " + ifu.minOffset() + " to " + ifu.maxOffset() + "arcsecs.";
-            } else {
-                throw new Error("invalid IFU type");
-            }
-            s += "\n";
-        }
-        return s;
     }
 
     protected abstract Gmos[] createCcdArray();

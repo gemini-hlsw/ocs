@@ -2,7 +2,7 @@ package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.altair.Altair;
 import edu.gemini.itc.altair.AltairParameters;
-import edu.gemini.itc.nifs.NifsNorth;
+import edu.gemini.itc.nifs.Nifs;
 import edu.gemini.itc.nifs.NifsParameters;
 import edu.gemini.itc.nifs.NifsRecipe;
 import edu.gemini.itc.shared.*;
@@ -34,7 +34,7 @@ public final class NifsPrinter extends PrinterBase {
 
     private void writeSpectroscopyOutput(final SpectroscopyResult result) {
 
-        final NifsNorth instrument = (NifsNorth) result.instrument();
+        final Nifs instrument = (Nifs) result.instrument();
 
         _println("");
         // This object is used to format numerical strings.
@@ -127,7 +127,7 @@ public final class NifsPrinter extends PrinterBase {
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + instrument.getName() + "\n");
         _println(HtmlPrinter.printParameterSummary(result.source()));
-        _println(instrument.toString());
+        _println(nifsToString(instrument));
         if (result.aoSystem().isDefined()) {
             _println(HtmlPrinter.printParameterSummary((Altair) result.aoSystem().get()));
         }
@@ -141,6 +141,39 @@ public final class NifsPrinter extends PrinterBase {
         _println(result.specS2N()[result.specS2N().length-1].getBackgroundSpectrum(), header, backSpec);
         _println(result.specS2N()[result.specS2N().length-1].getExpS2NSpectrum(), header, singleS2N);
         _println(result.specS2N()[result.specS2N().length-1].getFinalS2NSpectrum(), header, finalS2N);
+    }
+
+    private String nifsToString(final Nifs instrument) {
+        //Used to format the strings
+        final FormatStringWriter device = new FormatStringWriter();
+        device.setPrecision(3);  // Two decimal places
+        device.clear();
+
+
+        String s = "Instrument configuration: \n";
+        s += HtmlPrinter.opticalComponentsToString(instrument);
+        s += "<LI>Focal Plane Mask: ifu\n";
+        s += "<LI>Read Noise: " + instrument.getReadNoise() + "\n";
+        s += "<LI>Well Depth: " + instrument.getWellDepth() + "\n";
+        s += "\n";
+
+        s += "<L1> Central Wavelength: " + instrument.getCentralWavelength() + " nm" + "\n";
+        s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + "arcsec\n";
+
+        s += "Pixel Size in Spectral Direction: " + device.toString(instrument.getGratingDispersion_nmppix()) + "nm\n";
+
+        s += "IFU is selected,";
+        if (instrument.getIFUMethod().equals(NifsParameters.SINGLE_IFU))
+            s += "with a single IFU element at " + instrument.getIFUOffset() + "arcsecs.";
+        else if (instrument.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU))
+            s += "with multiple summed IFU elements arranged in a " + instrument.getIFUNumX() + "x" + instrument.getIFUNumY() +
+                    " (" + device.toString(instrument.getIFUNumX() * instrument.getIFU().IFU_LEN_X) + "\"x" +
+                    device.toString(instrument.getIFUNumY() * instrument.getIFU().IFU_LEN_Y) + "\") grid.";
+        else
+            s += "with mulitple IFU elements arranged from " + instrument.getIFUMinOffset() + " to " + instrument.getIFUMaxOffset() + "arcsecs.";
+        s += "\n";
+
+        return s;
     }
 
 }

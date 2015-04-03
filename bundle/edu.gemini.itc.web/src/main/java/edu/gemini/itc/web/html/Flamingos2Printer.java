@@ -113,7 +113,7 @@ public final class Flamingos2Printer extends PrinterBase {
         _println(result.specS2N()[0].getExpS2NSpectrum(), header, singleS2N);
         _println(result.specS2N()[0].getFinalS2NSpectrum(), header, finalS2N);
 
-        printConfiguration(result.instrument(), result.parameters());
+        printConfiguration((Flamingos2) result.instrument(), result.parameters());
 
         _println(HtmlPrinter.printParameterSummary(pdp));
 
@@ -153,19 +153,35 @@ public final class Flamingos2Printer extends PrinterBase {
         device.setPrecision(2); // TWO decimal places
         device.clear();
 
-        printConfiguration(result.instrument(), result.parameters());
+        printConfiguration((Flamingos2) result.instrument(), result.parameters());
     }
 
-    private void printConfiguration(final Instrument instrument, final Parameters p) {
+    private void printConfiguration(final Flamingos2 instrument, final Parameters p) {
         _print("<HR align=left SIZE=3>");
         _println("<b>Input Parameters:</b>");
         _println("Instrument: Flamingos 2\n"); // TODO: move names of instrument to instrument classes?
         _println(HtmlPrinter.printParameterSummary(p.source()));
-        _println(instrument.toString());
-
+        _println(flamingos2ToString(instrument));
         _println(HtmlPrinter.printParameterSummary(p.telescope()));
         _println(HtmlPrinter.printParameterSummary(p.conditions()));
         _println(HtmlPrinter.printParameterSummary(p.observation()));
     }
+
+    private String flamingos2ToString(final Flamingos2 instrument) {
+        String s = "Instrument configuration: \n";
+        s += "Optical Components: <BR>";
+        for (final TransmissionElement te : instrument.getComponents()) {
+            s += "<LI>" + te.toString() + "<BR>";
+        }
+        s += "<LI>Read Noise: " + instrument.getReadNoiseString() + "\n";
+
+        if (!instrument.getFocalPlaneMask().equals("none"))
+            s += "<LI>Focal Plane Mask: " + instrument.getFocalPlaneMask() + " pix slit\n";
+
+        s += "<BR>Pixel Size: " + instrument.getPixelSize() + "<BR>";
+
+        return s;
+    }
+
 
 }

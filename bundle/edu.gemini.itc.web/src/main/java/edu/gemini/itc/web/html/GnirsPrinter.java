@@ -142,7 +142,7 @@ public final class GnirsPrinter extends PrinterBase {
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + instrument.getName() + "\n");
         _println(HtmlPrinter.printParameterSummary(result.source()));
-        _println(instrument.toString());
+        _println(gnirsToString(instrument, result.parameters()));
         _println(HtmlPrinter.printParameterSummary(result.telescope()));
         _println(HtmlPrinter.printParameterSummary(result.conditions()));
         _println(HtmlPrinter.printParameterSummary(result.observation()));
@@ -166,4 +166,41 @@ public final class GnirsPrinter extends PrinterBase {
             _println(result.specS2N()[0].getFinalS2NSpectrum(), header, finalS2N);
         }
     }
+
+    private String gnirsToString(final Gnirs instrument, final Parameters p) {
+        //Used to format the strings
+        final FormatStringWriter device = new FormatStringWriter();
+        device.setPrecision(3);  // Two decimal places
+        device.clear();
+
+
+        String s = "Instrument configuration: \n";
+        s += HtmlPrinter.opticalComponentsToString(instrument);
+
+        if (!instrument.getFocalPlaneMask().equals(GnirsParameters.NO_SLIT))
+            s += "<LI>Focal Plane Mask: " + instrument.getFocalPlaneMask() + "\n";
+
+        s += "<LI>Grating: " + instrument.getGrating() + "\n"; // REL-469
+
+        s += "<LI>Read Noise: " + instrument.getReadNoise() + "\n";
+        s += "<LI>Well Depth: " + instrument.getWellDepth() + "\n";
+        s += "\n";
+
+        s += "<L1> Central Wavelength: " + instrument.getCentralWavelength() + " nm" + " \n";
+        s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + "arcsec\n";
+        if (p.observation().getMethod().isSpectroscopy()) {
+            if (instrument.XDisp_IsUsed()) {
+                s += "Pixel Size in Spectral Direction(Order 3): " + device.toString(instrument.getGratingDispersion_nmppix() / 3) + "nm\n";
+                s += "Pixel Size in Spectral Direction(Order 4): " + device.toString(instrument.getGratingDispersion_nmppix() / 4) + "nm\n";
+                s += "Pixel Size in Spectral Direction(Order 5): " + device.toString(instrument.getGratingDispersion_nmppix() / 5) + "nm\n";
+                s += "Pixel Size in Spectral Direction(Order 6): " + device.toString(instrument.getGratingDispersion_nmppix() / 6) + "nm\n";
+                s += "Pixel Size in Spectral Direction(Order 7): " + device.toString(instrument.getGratingDispersion_nmppix() / 7) + "nm\n";
+                s += "Pixel Size in Spectral Direction(Order 8): " + device.toString(instrument.getGratingDispersion_nmppix() / 8) + "nm\n";
+            } else {
+                s += "Pixel Size in Spectral Direction: " + device.toString(instrument.getGratingDispersion_nmppix()) + "nm\n";
+            }
+        }
+        return s;
+    }
+
 }

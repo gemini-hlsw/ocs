@@ -2,6 +2,7 @@ package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.gems.Gems;
 import edu.gemini.itc.gems.GemsParameters;
+import edu.gemini.itc.gsaoi.Camera;
 import edu.gemini.itc.gsaoi.Gsaoi;
 import edu.gemini.itc.gsaoi.GsaoiParameters;
 import edu.gemini.itc.gsaoi.GsaoiRecipe;
@@ -73,7 +74,7 @@ public final class GsaoiPrinter extends PrinterBase {
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + instrument.getName() + "\n");
         _println(HtmlPrinter.printParameterSummary(result.source()));
-        _println(instrument.toString());
+        _println(gsaoiToString(instrument));
         _println(printTeleParametersSummary(result));
         _println(HtmlPrinter.printParameterSummary((Gems) result.aoSystem().get()));
         _println(HtmlPrinter.printParameterSummary(result.conditions()));
@@ -81,12 +82,26 @@ public final class GsaoiPrinter extends PrinterBase {
 
     }
 
-
-    public String printTeleParametersSummary(final ImagingResult result) {
+    private String printTeleParametersSummary(final ImagingResult result) {
         StringBuffer sb = new StringBuffer();
         sb.append("Telescope configuration: \n");
         sb.append("<LI>" + result.telescope().getMirrorCoating().displayValue() + " mirror coating.\n");
         sb.append("<LI>wavefront sensor: gems\n");
         return sb.toString();
     }
+
+    private String gsaoiToString(final Gsaoi instrument) {
+        String s = "Instrument configuration: \n";
+        s += "Optical Components: <BR>";
+        for (Object o : instrument.getComponents()) {
+            if (!(o instanceof Camera)) {
+                s += "<LI>" + o.toString() + "<BR>";
+            }
+        }
+        s += "<BR>";
+        s += "Pixel Size: " + instrument.getPixelSize() + "<BR>";
+
+        return s;
+    }
+
 }

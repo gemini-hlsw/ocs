@@ -4,6 +4,8 @@ import edu.gemini.itc.gmos.Gmos;
 import edu.gemini.itc.gmos.GmosRecipe;
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.gemini.gmos.GmosNorthType;
+import edu.gemini.spModel.gemini.gmos.GmosSouthType;
 
 import java.awt.*;
 import java.io.PrintWriter;
@@ -20,12 +22,12 @@ public final class GmosPrinter extends PrinterBase {
 
     public GmosPrinter(final Parameters p, final GmosParameters ip, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
-        this.recipe    = new GmosRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
-        this.pdp       = pdp;
+        this.recipe = new GmosRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
+        this.pdp = pdp;
         this.isImaging = p.observation().getMethod().isImaging();
     }
 
-     /**
+    /**
      * Performes recipe calculation and writes results to a cached PrintWriter or to System.out.
      */
     public void writeOutput() {
@@ -130,10 +132,10 @@ public final class GmosPrinter extends PrinterBase {
                 _println("");
             }
 
-            _println(calcGmos.specS2N()[calcGmos.specS2N().length-1].getSignalSpectrum(), header, sigSpec, firstCcdIndex, lastCcdIndexWithGap);
-            _println(calcGmos.specS2N()[calcGmos.specS2N().length-1].getBackgroundSpectrum(), header, backSpec, firstCcdIndex, lastCcdIndexWithGap);
-            _println(calcGmos.specS2N()[calcGmos.specS2N().length-1].getExpS2NSpectrum(), header, singleS2N, firstCcdIndex, lastCcdIndexWithGap);
-            _println(calcGmos.specS2N()[calcGmos.specS2N().length-1].getFinalS2NSpectrum(), header, finalS2N, firstCcdIndex, lastCcdIndexWithGap);
+            _println(calcGmos.specS2N()[calcGmos.specS2N().length - 1].getSignalSpectrum(), header, sigSpec, firstCcdIndex, lastCcdIndexWithGap);
+            _println(calcGmos.specS2N()[calcGmos.specS2N().length - 1].getBackgroundSpectrum(), header, backSpec, firstCcdIndex, lastCcdIndexWithGap);
+            _println(calcGmos.specS2N()[calcGmos.specS2N().length - 1].getExpS2NSpectrum(), header, singleS2N, firstCcdIndex, lastCcdIndexWithGap);
+            _println(calcGmos.specS2N()[calcGmos.specS2N().length - 1].getFinalS2NSpectrum(), header, finalS2N, firstCcdIndex, lastCcdIndexWithGap);
 
         }
 
@@ -221,11 +223,42 @@ public final class GmosPrinter extends PrinterBase {
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + mainInstrument.getName() + "\n");
         _println(HtmlPrinter.printParameterSummary(p.source()));
-        _println(mainInstrument.toString());
+        _println(gmosToString(mainInstrument, p));
         _println(HtmlPrinter.printParameterSummary(p.telescope()));
         _println(HtmlPrinter.printParameterSummary(p.conditions()));
         _println(HtmlPrinter.printParameterSummary(p.observation()));
     }
 
+    private String gmosToString(final Gmos instrument, final Parameters p) {
+
+        String s = "Instrument configuration: \n";
+        s += HtmlPrinter.opticalComponentsToString(instrument);
+
+        if (!instrument.getFpMask().equals(GmosNorthType.FPUnitNorth.FPU_NONE) && !instrument.getFpMask().equals(GmosSouthType.FPUnitSouth.FPU_NONE))
+            s += "<LI> Focal Plane Mask: " + instrument.getFpMask().displayValue() + "\n";
+        s += "\n";
+        if (p.observation().getMethod().isSpectroscopy())
+            s += "<L1> Central Wavelength: " + instrument.getCentralWavelength() + " nm" + "\n";
+        s += "Spatial Binning: " + instrument.getSpatialBinning() + "\n";
+        if (p.observation().getMethod().isSpectroscopy())
+            s += "Spectral Binning: " + instrument.getSpectralBinning() + "\n";
+        s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + "arcsec\n";
+        if (p.observation().getMethod().isSpectroscopy())
+            s += "Pixel Size in Spectral Direction: " + instrument.getGratingDispersion_nmppix() + "nm\n";
+        if (instrument.isIfuUsed()) {
+            s += "IFU is selected,";
+            if (instrument.getIfuMethod().get() instanceof IfuSingle) {
+                final IfuSingle ifu = (IfuSingle) instrument.getIfuMethod().get();
+                s += "with a single IFU element at " + ifu.offset() + "arcsecs.";
+            } else if (instrument.getIfuMethod().get() instanceof IfuRadial) {
+                final IfuRadial ifu = (IfuRadial) instrument.getIfuMethod().get();
+                s += "with mulitple IFU elements arranged from " + ifu.minOffset() + " to " + ifu.maxOffset() + "arcsecs.";
+            } else {
+                throw new Error("invalid IFU type");
+            }
+            s += "\n";
+        }
+        return s;
+    }
 
 }
