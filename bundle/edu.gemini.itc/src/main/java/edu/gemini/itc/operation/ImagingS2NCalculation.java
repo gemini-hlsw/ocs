@@ -77,12 +77,4 @@ public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
     public double getNoise() { return noise; }
     public double getSignal() { return signal; }
 
-    public String getBackgroundLimitResult() {
-        return "";
-//        if (Math.sqrt(getVarSource() + getVarDark() + getVarReadout()) > Math.sqrt(getVarBackground()))
-//            return "Warning: observation is NOT background noise limited";
-//        else return "Observation is background noise limited.";
-    }
-
-
 }

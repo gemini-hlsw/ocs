@@ -106,7 +106,7 @@ public final class CalculatablePrinter {
     }
 
 
-    public static String getTextResult(final ImagingS2NCalculation s2n, final FormatStringWriter device) {
+    private static String getTextResult(final ImagingS2NCalculation s2n, final FormatStringWriter device) {
         StringBuffer sb = new StringBuffer();
         sb.append("Contributions to total noise (e-) in aperture (per exposure):\n");
         sb.append("Source noise = " + device.toString(Math.sqrt(s2n.getVarSource())) + "\n");
