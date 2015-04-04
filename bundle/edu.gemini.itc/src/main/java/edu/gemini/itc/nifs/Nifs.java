@@ -1,7 +1,6 @@
 package edu.gemini.itc.nifs;
 
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
-import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.*;
 
 /**
@@ -297,38 +296,5 @@ public final class Nifs extends Instrument {
     public double getReadNoise() {
         return _readNoiseValue;
     }
-
-//    public String toString() {
-//        //Used to format the strings
-//        final FormatStringWriter device = new FormatStringWriter();
-//        device.setPrecision(3);  // Two decimal places
-//        device.clear();
-//
-//
-//        String s = "Instrument configuration: \n";
-//        s += InstrumentPrinter.opticalComponentsToString(this);
-//        s += "<LI>Focal Plane Mask: ifu\n";
-//        s += "<LI>Read Noise: " + getReadNoise() + "\n";
-//        s += "<LI>Well Depth: " + getWellDepth() + "\n";
-//        s += "\n";
-//
-//        s += "<L1> Central Wavelength: " + getCentralWavelength() + " nm" + "\n";
-//        s += "Pixel Size in Spatial Direction: " + getPixelSize() + "arcsec\n";
-//
-//        s += "Pixel Size in Spectral Direction: " + device.toString(getGratingDispersion_nmppix()) + "nm\n";
-//
-//        s += "IFU is selected,";
-//        if (_IFU_IsSingle)
-//            s += "with a single IFU element at " + getIFUOffset() + "arcsecs.";
-//        else if (_IFU_IsSummed)
-//            s += "with multiple summed IFU elements arranged in a " + getIFUNumX() + "x" + getIFUNumY() +
-//                    " (" + device.toString(getIFUNumX() * getIFU().IFU_LEN_X) + "\"x" +
-//                    device.toString(getIFUNumY() * getIFU().IFU_LEN_Y) + "\") grid.";
-//        else
-//            s += "with mulitple IFU elements arranged from " + getIFUMinOffset() + " to " + getIFUMaxOffset() + "arcsecs.";
-//        s += "\n";
-//
-//        return s;
-//    }
 
 }

@@ -48,8 +48,8 @@ public final class Flamingos2Printer extends PrinterBase {
         device.clear();
         _println("");
 
-        _print(result.sfCalc().getTextResult(device));
-        _println(result.iqCalc().getTextResult(device));
+        _print(CalculatablePrinter.getTextResult(result.sfCalc(), device));
+        _println(CalculatablePrinter.getTextResult(result.iqCalc(), device));
 
         if (!result.parameters().observation().isAutoAperture()) {
             _println("software aperture extent along slit = " + device.toString(result.parameters().observation().getApertureDiameter()) + " arcsec");
@@ -130,10 +130,10 @@ public final class Flamingos2Printer extends PrinterBase {
         device.clear();
         _println("");
 
-        _print(result.sfCalc().getTextResult(device));
-        _println(result.iqCalc().getTextResult(device));
+        _print(CalculatablePrinter.getTextResult(result.sfCalc(), device));
+        _println(CalculatablePrinter.getTextResult(result.iqCalc(), device));
+        _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation(), device));
 
-        _println(result.is2nCalc().getTextResult(device));
         device.setPrecision(0); // NO decimal places
         device.clear();
 

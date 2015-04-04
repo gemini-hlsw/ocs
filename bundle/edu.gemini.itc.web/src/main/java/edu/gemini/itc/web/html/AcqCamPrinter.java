@@ -3,7 +3,6 @@ package edu.gemini.itc.web.html;
 import edu.gemini.itc.acqcam.AcqCamRecipe;
 import edu.gemini.itc.acqcam.AcquisitionCamParameters;
 import edu.gemini.itc.acqcam.AcquisitionCamera;
-import edu.gemini.itc.shared.FormatStringWriter;
 import edu.gemini.itc.shared.ImagingResult;
 import edu.gemini.itc.shared.Parameters;
 
@@ -38,10 +37,10 @@ public final class AcqCamPrinter extends PrinterBase {
         device.clear();
         _println("");
 
-        _print(result.sfCalc().getTextResult(device));
-        _println(result.iqCalc().getTextResult(device));
+        _print(CalculatablePrinter.getTextResult(result.sfCalc(), device));
+        _println(CalculatablePrinter.getTextResult(result.iqCalc(), device));
+        _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation(), device));
 
-        _println(result.is2nCalc().getTextResult(device));
         device.setPrecision(0);  // NO decimal places
         device.clear();
 

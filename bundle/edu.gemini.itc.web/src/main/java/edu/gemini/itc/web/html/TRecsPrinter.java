@@ -137,13 +137,13 @@ public final class TRecsPrinter extends PrinterBase {
         device.clear();
 
 
-        _print(result.sfCalc().getTextResult(device));
-        _println(result.iqCalc().getTextResult(device));
+        _print(CalculatablePrinter.getTextResult(result.sfCalc(), device));
+        _println(CalculatablePrinter.getTextResult(result.iqCalc(), device));
         _println("Sky subtraction aperture = "
                 + result.observation().getSkyApertureDiameter()
                 + " times the software aperture.\n");
 
-        _println(result.is2nCalc().getTextResult(device));
+        _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation(), device));
         device.setPrecision(0); // NO decimal places
         device.clear();
 

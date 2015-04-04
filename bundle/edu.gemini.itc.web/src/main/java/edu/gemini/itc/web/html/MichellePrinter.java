@@ -146,15 +146,15 @@ public final class MichellePrinter extends PrinterBase {
         device.setPrecision(2);  // Two decimal places
         device.clear();
 
-        _print(result.sfCalc().getTextResult(device));
-        _println(result.iqCalc().getTextResult(device));
+        _print(CalculatablePrinter.getTextResult(result.sfCalc(), device));
+        _println(CalculatablePrinter.getTextResult(result.iqCalc(), device));
         _println("Sky subtraction aperture = " + result.observation().getSkyApertureDiameter() + " times the software aperture.\n");
 
         if (!instrument.polarimetryIsUsed()) {
-            _println(result.is2nCalc().getTextResult(device));
+            _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation(), device));
         } else {
             _println("Polarimetry mode enabled.\n");
-            final String result2 = result.is2nCalc().getTextResult(device);
+            final String result2 = CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation(), device);
             final String delims = "[ ]+";
             final String[] tokens = result2.split(delims);
             for (int i = 0; i < tokens.length; i++) {

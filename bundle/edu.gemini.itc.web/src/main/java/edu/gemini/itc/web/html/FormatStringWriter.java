@@ -1,4 +1,4 @@
-package edu.gemini.itc.shared;
+package edu.gemini.itc.web.html;
 
 import java.io.PrintStream;
 import java.io.StringWriter;

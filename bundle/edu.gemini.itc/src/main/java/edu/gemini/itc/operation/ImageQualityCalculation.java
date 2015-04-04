@@ -1,20 +1,19 @@
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.shared.TelescopeDetails;
 import edu.gemini.itc.shared.ArraySpectrum;
 import edu.gemini.itc.shared.DefaultArraySpectrum;
-import edu.gemini.itc.shared.FormatStringWriter;
 import edu.gemini.itc.shared.ITCConstants;
+import edu.gemini.itc.shared.TelescopeDetails;
 
 public class ImageQualityCalculation implements ImageQualityCalculatable {
 
-    String im_qual_model_file;
-    double airmass, effectiveWavelength, im_qual;
+    private String im_qual_model_file;
+    private double airmass, effectiveWavelength, im_qual;
 
-    public ImageQualityCalculation(TelescopeDetails.Wfs wfs,
-                                   int imageQuality,
-                                   double airmass,
-                                   int effectiveWavelength) {
+    public ImageQualityCalculation(final TelescopeDetails.Wfs wfs,
+                                   final int imageQuality,
+                                   final double airmass,
+                                   final int effectiveWavelength) {
 
         im_qual_model_file = ITCConstants.IM_QUAL_LIB + "/" + ITCConstants.IM_QUAL_BASE + wfs.displayValue() + imageQuality + ITCConstants.DATA_SUFFIX;
 
@@ -25,10 +24,6 @@ public class ImageQualityCalculation implements ImageQualityCalculatable {
     public void calculate() {
         ArraySpectrum im_qual_model = new DefaultArraySpectrum(im_qual_model_file);
         im_qual = im_qual_model.getY(effectiveWavelength) * (Math.pow(airmass, 0.6));
-    }
-
-    public String getTextResult(FormatStringWriter device) {
-        return "derived image size (FWHM) for a point source = " + device.toString(im_qual) + " arcsec.\n";
     }
 
     public double getImageQuality() {

@@ -79,7 +79,7 @@ public final class GmosPrinter extends PrinterBase {
                     ? tv.getDetectorCcdStartIndex(ccdIndex + 1)
                     : lastCcdIndex;
 
-            final SpectroscopyResult calcGmos = results[ccdIndex];
+            final SpectroscopyResult result = results[ccdIndex];
 
             final int number_exposures = results[0].observation().getNumExposures();
             final double frac_with_source = results[0].observation().getSourceFraction();
@@ -96,16 +96,16 @@ public final class GmosPrinter extends PrinterBase {
                                 _println("software aperture extent along slit = " + device.toString(1 / instrument.getSlitWidth()) + " arcsec");
                                 break;
                             case POINT:
-                                _println("software aperture extent along slit = " + device.toString(1.4 * calcGmos.iqCalc().getImageQuality()) + " arcsec");
+                                _println("software aperture extent along slit = " + device.toString(1.4 * result.iqCalc().getImageQuality()) + " arcsec");
                                 break;
                         }
                     }
 
                     if (!results[0].source().isUniform()) {
-                        _println("fraction of source flux in aperture = " + device.toString(calcGmos.st().getSlitThroughput()));
+                        _println("fraction of source flux in aperture = " + device.toString(result.st().getSlitThroughput()));
                     }
                 }
-                _println("derived image size(FWHM) for a point source = " + device.toString(calcGmos.iqCalc().getImageQuality()) + "arcsec\n");
+                _println("derived image size(FWHM) for a point source = " + device.toString(result.iqCalc().getImageQuality()) + "arcsec\n");
                 _println("Sky subtraction aperture = " + results[0].observation().getSkyApertureDiameter() + " times the software aperture.");
                 _println("");
                 _println("Requested total integration time = " + device.toString(exposure_time * number_exposures) + " secs, of which " + device.toString(exposure_time * number_exposures * frac_with_source) + " secs is on source.");
@@ -114,13 +114,13 @@ public final class GmosPrinter extends PrinterBase {
 
             // For IFUs we can have more than one S2N result.
             final String header = "# GMOS ITC: " + Calendar.getInstance().getTime() + "\n";
-            for (int i = 0; i < calcGmos.specS2N().length; i++) {
+            for (int i = 0; i < result.specS2N().length; i++) {
 
-                gmosChart1.addArray(calcGmos.specS2N()[i].getSignalSpectrum().getData(firstCcdIndex, lastCcdIndex), "Signal " + ccdName, ccdColor);
-                gmosChart1.addArray(calcGmos.specS2N()[i].getBackgroundSpectrum().getData(firstCcdIndex, lastCcdIndex), "SQRT(Background) " + ccdName, ccdColorDarker);
+                gmosChart1.addArray(result.specS2N()[i].getSignalSpectrum().getData(firstCcdIndex, lastCcdIndex), "Signal " + ccdName, ccdColor);
+                gmosChart1.addArray(result.specS2N()[i].getBackgroundSpectrum().getData(firstCcdIndex, lastCcdIndex), "SQRT(Background) " + ccdName, ccdColorDarker);
 
-                gmosChart2.addArray(calcGmos.specS2N()[i].getExpS2NSpectrum().getData(firstCcdIndex, lastCcdIndex), "Single Exp S/N " + ccdName, ccdColor);
-                gmosChart2.addArray(calcGmos.specS2N()[i].getFinalS2NSpectrum().getData(firstCcdIndex, lastCcdIndex), "Final S/N " + ccdName, ccdColorDarker);
+                gmosChart2.addArray(result.specS2N()[i].getExpS2NSpectrum().getData(firstCcdIndex, lastCcdIndex), "Single Exp S/N " + ccdName, ccdColor);
+                gmosChart2.addArray(result.specS2N()[i].getFinalS2NSpectrum().getData(firstCcdIndex, lastCcdIndex), "Final S/N " + ccdName, ccdColorDarker);
 
                 if (ccdIndex == 0) {
                     _println("<p style=\"page-break-inside: never\">");
@@ -132,10 +132,10 @@ public final class GmosPrinter extends PrinterBase {
                 _println("");
             }
 
-            _println(calcGmos.specS2N()[calcGmos.specS2N().length - 1].getSignalSpectrum(), header, sigSpec, firstCcdIndex, lastCcdIndexWithGap);
-            _println(calcGmos.specS2N()[calcGmos.specS2N().length - 1].getBackgroundSpectrum(), header, backSpec, firstCcdIndex, lastCcdIndexWithGap);
-            _println(calcGmos.specS2N()[calcGmos.specS2N().length - 1].getExpS2NSpectrum(), header, singleS2N, firstCcdIndex, lastCcdIndexWithGap);
-            _println(calcGmos.specS2N()[calcGmos.specS2N().length - 1].getFinalS2NSpectrum(), header, finalS2N, firstCcdIndex, lastCcdIndexWithGap);
+            _println(result.specS2N()[result.specS2N().length - 1].getSignalSpectrum(), header, sigSpec, firstCcdIndex, lastCcdIndexWithGap);
+            _println(result.specS2N()[result.specS2N().length - 1].getBackgroundSpectrum(), header, backSpec, firstCcdIndex, lastCcdIndexWithGap);
+            _println(result.specS2N()[result.specS2N().length - 1].getExpS2NSpectrum(), header, singleS2N, firstCcdIndex, lastCcdIndexWithGap);
+            _println(result.specS2N()[result.specS2N().length - 1].getFinalS2NSpectrum(), header, finalS2N, firstCcdIndex, lastCcdIndexWithGap);
 
         }
 
@@ -166,11 +166,11 @@ public final class GmosPrinter extends PrinterBase {
             final String ccdName = instrument.getDetectorCcdName();
             final String forCcdName = ccdName.length() == 0 ? "" : " for " + ccdName;
 
-            final ImagingResult calcGmos = results[ccdIndex];
+            final ImagingResult result = results[ccdIndex];
 
             if (ccdIndex == 0) {
-                _print(calcGmos.sfCalc().getTextResult(device));
-                _println(calcGmos.iqCalc().getTextResult(device));
+                _print(CalculatablePrinter.getTextResult(result.sfCalc(), device));
+                _println(CalculatablePrinter.getTextResult(result.iqCalc(), device));
                 _println("Sky subtraction aperture = "
                         + results[0].observation().getSkyApertureDiameter()
                         + " times the software aperture.\n");
@@ -179,26 +179,26 @@ public final class GmosPrinter extends PrinterBase {
             _println("");
             _println("<b>S/N" + forCcdName + ":</b>");
             _println("");
-            _println(calcGmos.is2nCalc().getTextResult(device));
+            _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation(), device));
 
             device.setPrecision(0); // NO decimal places
             device.clear();
             final int binFactor = instrument.getSpatialBinning() * instrument.getSpatialBinning();
 
             _println("");
-            _println("The peak pixel signal + background is " + device.toString(calcGmos.peakPixelCount()) + ". ");
+            _println("The peak pixel signal + background is " + device.toString(result.peakPixelCount()) + ". ");
 
-            if (calcGmos.peakPixelCount() > (.95 * instrument.getWellDepth() * binFactor))
+            if (result.peakPixelCount() > (.95 * instrument.getWellDepth() * binFactor))
                 _println("Warning: peak pixel may be saturating the (binned) CCD full well of "
                         + .95 * instrument.getWellDepth() * binFactor);
 
-            if (calcGmos.peakPixelCount() > (.95 * instrument.getADSaturation() * instrument.getLowGain()))
+            if (result.peakPixelCount() > (.95 * instrument.getADSaturation() * instrument.getLowGain()))
                 _println("Warning: peak pixel may be saturating the low gain setting of "
                         + .95
                         * instrument.getADSaturation()
                         * instrument.getLowGain());
 
-            if (calcGmos.peakPixelCount() > (.95 * instrument.getADSaturation() * instrument.getHighGain()))
+            if (result.peakPixelCount() > (.95 * instrument.getADSaturation() * instrument.getHighGain()))
                 _println("Warning: peak pixel may be saturating the high gain setting "
                         + .95
                         * instrument.getADSaturation()

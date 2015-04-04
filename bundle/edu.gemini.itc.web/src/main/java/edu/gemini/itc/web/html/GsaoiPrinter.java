@@ -6,7 +6,6 @@ import edu.gemini.itc.gsaoi.Camera;
 import edu.gemini.itc.gsaoi.Gsaoi;
 import edu.gemini.itc.gsaoi.GsaoiParameters;
 import edu.gemini.itc.gsaoi.GsaoiRecipe;
-import edu.gemini.itc.shared.FormatStringWriter;
 import edu.gemini.itc.shared.ImagingResult;
 import edu.gemini.itc.shared.Parameters;
 
@@ -44,12 +43,11 @@ public final class GsaoiPrinter extends PrinterBase {
 
         _println((HtmlPrinter.printSummary((Gems) result.aoSystem().get())));
 
-        _print(result.sfCalc().getTextResult(device, false));
+        _print(CalculatablePrinter.getTextResult(result.sfCalc(), device, false));
         _println("derived image halo size (FWHM) for a point source = "
                 + device.toString(result.iqCalc().getImageQuality()) + " arcsec.\n");
-
-        _println(result.is2nCalc().getTextResult(device));
-        _println(result.is2nCalc().getBackgroundLimitResult());
+        _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation(), device));
+        _println(CalculatablePrinter.getBackgroundLimitResult(result.is2nCalc()));
         device.setPrecision(0); // NO decimal places
         device.clear();
 

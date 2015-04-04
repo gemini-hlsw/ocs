@@ -1,8 +1,7 @@
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.shared.ObservationDetails;
-import edu.gemini.itc.shared.FormatStringWriter;
 import edu.gemini.itc.shared.Instrument;
+import edu.gemini.itc.shared.ObservationDetails;
 
 public final class ImagingS2NMethodACalculation extends ImagingS2NCalculation {
 
@@ -52,24 +51,6 @@ public final class ImagingS2NMethodACalculation extends ImagingS2NCalculation {
     public double totalSNRatio() {
         return final_s2n;
     }
-
-    public String getTextResult(FormatStringWriter device) {
-        StringBuffer sb = new StringBuffer(super.getTextResult(device));
-        sb.append("Intermediate S/N for one exposure = " +
-                device.toString(exp_s2n) + "\n\n");
-        sb.append("S/N for the whole observation = "
-                + device.toString(final_s2n) +
-                " (including sky subtraction)\n\n");
-
-        sb.append("Requested total integration time = " +
-                device.toString(exposure_time * number_exposures) +
-                " secs, of which " + device.toString(exposure_time *
-                number_exposures *
-                frac_with_source) +
-                " secs is on source.\n");
-        return sb.toString();
-    }
-
 
 }
 

@@ -1,7 +1,5 @@
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.shared.FormatStringWriter;
-
 public final class USBSourceFraction implements SourceFraction {
 
     private final double sw_ap;
@@ -30,25 +28,16 @@ public final class USBSourceFraction implements SourceFraction {
 
     }
 
-    public String getTextResult(final FormatStringWriter device) {
-        return getTextResult(device, true);
-    }
-
-    public String getTextResult(final FormatStringWriter device, final boolean sfPrint) {
-        StringBuffer sb = new StringBuffer();
-        sb.append("software aperture diameter = " +
-                device.toString(sw_ap) + " arcsec\n");
-        sb.append("enclosed pixels = " +
-                device.toString(Npix) + "\n");
-        return sb.toString();
-    }
-
     public double getSourceFraction() {
         return source_fraction;
     }
 
     public double getNPix() {
         return Npix;
+    }
+
+    public double getSoftwareAperture() {
+        return sw_ap;
     }
 
 }
