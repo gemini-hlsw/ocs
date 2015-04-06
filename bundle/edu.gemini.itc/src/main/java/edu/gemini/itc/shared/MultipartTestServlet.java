@@ -1,10 +1,6 @@
 package edu.gemini.itc.shared;
 
 import edu.gemini.itc.acqcam.AcquisitionCamParameters;
-import edu.gemini.itc.service.ObservationDetails;
-import edu.gemini.itc.service.ObservingConditions;
-import edu.gemini.itc.service.SourceDefinition;
-import edu.gemini.itc.service.TelescopeDetails;
 import edu.gemini.itc.web.ITCRequest;
 
 import javax.servlet.ServletConfig;

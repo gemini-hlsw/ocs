@@ -9,7 +9,7 @@ import edu.gemini.itc.gsaoi.GsaoiParameters
 import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.niri.NiriParameters
-import edu.gemini.itc.service.GmosParameters
+import edu.gemini.itc.shared.GmosParameters
 import edu.gemini.itc.trecs.TRecsParameters
 import org.scalacheck.{Arbitrary, Gen}
 import org.specs2.ScalaCheck

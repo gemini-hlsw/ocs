@@ -2,7 +2,6 @@ package edu.gemini.itc.niri;
 
 import edu.gemini.itc.altair.*;
 import edu.gemini.itc.operation.*;
-import edu.gemini.itc.service.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.HtmlPrinter;
 import edu.gemini.itc.web.ITCRequest;

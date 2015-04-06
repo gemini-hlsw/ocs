@@ -10,6 +10,7 @@ import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.niri.NiriParameters
 import edu.gemini.itc.service._
+import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
 
 // TEMPORARY helper

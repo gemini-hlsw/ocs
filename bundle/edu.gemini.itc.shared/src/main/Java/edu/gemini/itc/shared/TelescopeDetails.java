@@ -1,12 +1,14 @@
-package edu.gemini.itc.service;
+package edu.gemini.itc.shared;
 
 import edu.gemini.spModel.telescope.IssPort;
 import edu.gemini.spModel.type.DisplayableSpType;
 
+import java.io.Serializable;
+
 /**
  * Container for telescope parameters.
  */
-public final class TelescopeDetails {
+public final class TelescopeDetails implements Serializable {
 
     public static enum Coating implements DisplayableSpType {
         ALUMINIUM("aluminium"),

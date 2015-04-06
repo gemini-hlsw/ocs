@@ -1,7 +1,7 @@
 package edu.gemini.itc.niri;
 
-import edu.gemini.itc.service.ObservationDetails;
-import edu.gemini.itc.service.CalculationMethod;
+import edu.gemini.itc.shared.ObservationDetails;
+import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.*;
 
 import java.util.Iterator;

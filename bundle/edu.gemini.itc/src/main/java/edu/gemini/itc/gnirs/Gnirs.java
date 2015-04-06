@@ -1,6 +1,6 @@
 package edu.gemini.itc.gnirs;
 
-import edu.gemini.itc.service.CalculationMethod;
+import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.*;
 
 

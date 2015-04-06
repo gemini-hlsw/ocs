@@ -1,6 +1,5 @@
 package edu.gemini.itc.shared;
 
-import edu.gemini.itc.service.PlottingDetails;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;

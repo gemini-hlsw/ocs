@@ -1,5 +1,11 @@
-package edu.gemini.itc.service
+package edu.gemini.itc.shared
 
+import edu.gemini.spModel.core.Peer
+import edu.gemini.util.security.auth.keychain.KeyChain
+import edu.gemini.util.trpc.client.TrpcClient
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scalaz.{Failure, Success, Validation}
 
 /**
@@ -16,7 +22,7 @@ final case class ItcSpectroscopyResult(/*TODO*/) extends ItcCalcResult
  * return one result (either because they don't have more than one CCD or because all different CCDs are assumed to
  * have the same characteristics).
  */
-sealed trait ItcResult {
+sealed trait ItcResult extends Serializable {
   /** Returns the results for all CCDs. */
   def ccds: Array[ItcCalcResult]
 
@@ -26,7 +32,7 @@ sealed trait ItcResult {
 
 object ItcResult {
 
-  import ItcService._
+  import edu.gemini.itc.shared.ItcService._
 
   /** Creates an ITC result in case of an error. */
   def forException(e: Throwable): Result = Failure(List(e.getMessage))
@@ -43,7 +49,7 @@ object ItcResult {
  */
 trait ItcService {
 
-  import ItcService._
+  import edu.gemini.itc.shared.ItcService._
 
   def calculate(source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: InstrumentDetails): Result
 
@@ -52,5 +58,11 @@ trait ItcService {
 object ItcService {
 
   type Result = Validation[List[String], ItcResult]
+
+  /** Performs an ITC call on the given host. */
+  def calculate(peer: Peer, source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: InstrumentDetails): Future[Result] =
+    TrpcClient(peer).withoutKeys future { r =>
+      r[ItcService].calculate(source, obs, cond, tele, ins)
+    }
 
 }

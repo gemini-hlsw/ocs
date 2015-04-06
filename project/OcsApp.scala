@@ -68,7 +68,8 @@ trait OcsApp { this: OcsBundle =>
     bundle_edu_gemini_wdba_xmlrpc_server,
     bundle_edu_gemini_obslog,
     bundle_edu_gemini_services_server,
-    bundle_edu_gemini_smartgcal_servlet
+    bundle_edu_gemini_smartgcal_servlet,
+    bundle_edu_gemini_itc
   )
 
   lazy val app_weather = project.in(file("app/weather")).dependsOn(

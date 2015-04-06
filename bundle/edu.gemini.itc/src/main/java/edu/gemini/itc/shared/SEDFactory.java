@@ -5,7 +5,6 @@ import edu.gemini.itc.gsaoi.Gsaoi;
 import edu.gemini.itc.nifs.Nifs;
 import edu.gemini.itc.niri.Niri;
 import edu.gemini.itc.operation.*;
-import edu.gemini.itc.service.*;
 import edu.gemini.spModel.core.Site;
 import scala.Option;
 

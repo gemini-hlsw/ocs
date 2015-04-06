@@ -59,9 +59,11 @@ trait OcsBundle {
 
   lazy val bundle_edu_gemini_itc_shared = 
     project.in(file("bundle/edu.gemini.itc.shared")).dependsOn(
-      bundle_edu_gemini_util_osgi,
+      bundle_edu_gemini_pot,
       bundle_edu_gemini_shared_util,
-      bundle_edu_gemini_pot
+      bundle_edu_gemini_util_osgi,
+      bundle_edu_gemini_util_security,
+      bundle_edu_gemini_util_trpc
     )
 
   lazy val bundle_edu_gemini_itc = 
@@ -540,6 +542,7 @@ trait OcsBundle {
       bundle_edu_gemini_shared_skyobject,
       bundle_edu_gemini_ags,
       bundle_edu_gemini_horizons_api,
+      bundle_edu_gemini_itc_shared,
       bundle_edu_gemini_p2checker,
       bundle_edu_gemini_phase2_core,
       bundle_edu_gemini_pot,

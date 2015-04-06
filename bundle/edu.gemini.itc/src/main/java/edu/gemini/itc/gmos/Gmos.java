@@ -1,10 +1,10 @@
 package edu.gemini.itc.gmos;
 
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
-import edu.gemini.itc.service.GmosParameters;
-import edu.gemini.itc.service.IfuRadial;
-import edu.gemini.itc.service.IfuSingle;
-import edu.gemini.itc.service.ObservationDetails;
+import edu.gemini.itc.shared.GmosParameters;
+import edu.gemini.itc.shared.IfuRadial;
+import edu.gemini.itc.shared.IfuSingle;
+import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType;

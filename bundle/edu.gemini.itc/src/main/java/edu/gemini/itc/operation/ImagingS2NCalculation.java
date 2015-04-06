@@ -2,7 +2,7 @@ package edu.gemini.itc.operation;
 
 import edu.gemini.itc.gsaoi.Gsaoi;
 import edu.gemini.itc.niri.Niri;
-import edu.gemini.itc.service.ObservationDetails;
+import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.itc.shared.BinningProvider;
 import edu.gemini.itc.shared.FormatStringWriter;
 import edu.gemini.itc.shared.Instrument;

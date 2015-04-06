@@ -1,7 +1,6 @@
 package edu.gemini.itc.gmos;
 
 import edu.gemini.itc.operation.*;
-import edu.gemini.itc.service.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.HtmlPrinter;
 import edu.gemini.itc.web.ITCRequest;
@@ -318,7 +317,7 @@ public final class GmosRecipe extends RecipeBase {
 
     // Calculation results
     // TEMPORARY, these will probably turn into Scala case classes
-    interface GmosResult {}
+    public interface GmosResult {}
     public static final class GmosImagingResult implements GmosResult {
         public final SourceFraction SFcalc;
         public final double peak_pixel_count;

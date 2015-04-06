@@ -54,6 +54,7 @@ def common(version: Version) = AppConfig(
     BundleSpec("edu.gemini.util.log.extras",   version),
     BundleSpec("edu.gemini.sp.vcs.tui",        version),
     BundleSpec("edu.gemini.qpt.shared",        version),
+    BundleSpec("edu.gemini.itc.shared",        version),
     BundleSpec("edu.gemini.qv.plugin",         version),
     BundleSpec("edu.gemini.services.client",   version),
     BundleSpec("slf4j.api",                    Version(1, 6, 4)),

@@ -3,7 +3,8 @@ package edu.gemini.itc.web
 import javax.servlet.http.HttpServletRequest
 
 import edu.gemini.itc.altair.AltairParameters
-import edu.gemini.itc.service.SourceDefinition._
+import edu.gemini.itc.shared._
+import SourceDefinition._
 import edu.gemini.itc.service._
 import edu.gemini.itc.shared._
 import edu.gemini.spModel.core.Site
@@ -160,7 +161,7 @@ object ITCRequest {
     val pc = ITCRequest.from(r)
 
     // Get the source geometry and type
-    import edu.gemini.itc.service.SourceDefinition.Profile._
+    import SourceDefinition.Profile._
     val spatialProfile = pc.enumParameter(classOf[Profile]) match {
       case POINT    =>
         val norm  = pc.doubleParameter("psSourceNorm")
@@ -181,7 +182,7 @@ object ITCRequest {
     val normBand = pc.enumParameter(classOf[WavebandDefinition])
 
     // Get Spectrum Resource
-    import edu.gemini.itc.service.SourceDefinition.Distribution._
+    import SourceDefinition.Distribution._
     val sourceSpec = pc.enumParameter(classOf[Distribution])
     val sourceDefinition = sourceSpec match {
       case BBODY =>             BlackBody(pc.doubleParameter("BBTemp"))
@@ -200,7 +201,7 @@ object ITCRequest {
     }
 
     //Get Redshift
-    import edu.gemini.itc.service.SourceDefinition.Recession._
+    import SourceDefinition.Recession._
     val recession = pc.enumParameter(classOf[Recession])
     val redshift = recession match {
       case REDSHIFT => pc.doubleParameter("z")

@@ -1,12 +1,12 @@
 package edu.gemini.itc.web;
 
-import edu.gemini.itc.service.ObservationDetails;
-import edu.gemini.itc.service.ObservingConditions;
-import edu.gemini.itc.service.PlottingDetails;
-import edu.gemini.itc.service.TelescopeDetails;
-import edu.gemini.itc.service.SourceDefinition;
+import edu.gemini.itc.shared.ObservationDetails;
+import edu.gemini.itc.shared.ObservingConditions;
+import edu.gemini.itc.shared.PlottingDetails;
+import edu.gemini.itc.shared.TelescopeDetails;
+import edu.gemini.itc.shared.SourceDefinition;
 import edu.gemini.itc.shared.FormatStringWriter;
-import edu.gemini.itc.service.Library;
+import edu.gemini.itc.shared.Library;
 import edu.gemini.spModel.telescope.IssPort;
 
 /**

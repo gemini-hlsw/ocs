@@ -21,7 +21,8 @@ OsgiKeys.bundleActivator := Some("edu.gemini.itc.shared.osgi.Activator")
 OsgiKeys.bundleSymbolicName := name.value
 
 OsgiKeys.exportPackage := Seq(
-  "edu.gemini.itc.service"
+  "edu.gemini.itc.service",
+  "edu.gemini.itc.shared"
 )
 
 OsgiKeys.importPackage := Seq(

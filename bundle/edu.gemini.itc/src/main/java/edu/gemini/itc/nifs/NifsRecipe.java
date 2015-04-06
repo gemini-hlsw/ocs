@@ -4,7 +4,6 @@ import edu.gemini.itc.altair.*;
 import edu.gemini.itc.operation.ImageQualityCalculatable;
 import edu.gemini.itc.operation.ImageQualityCalculationFactory;
 import edu.gemini.itc.operation.SpecS2NLargeSlitVisitor;
-import edu.gemini.itc.service.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.HtmlPrinter;
 import edu.gemini.itc.web.ITCRequest;

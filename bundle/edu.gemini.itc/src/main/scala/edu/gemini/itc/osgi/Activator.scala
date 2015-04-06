@@ -4,7 +4,8 @@ import java.util.logging.Level._
 import java.util.logging.Logger
 
 import edu.gemini.itc.osgi.Activator._
-import edu.gemini.itc.service.{ItcService, ItcServiceImpl}
+import edu.gemini.itc.service.ItcServiceImpl
+import edu.gemini.itc.shared.ItcService
 import org.osgi.framework.{BundleActivator, BundleContext, ServiceRegistration}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -29,7 +30,8 @@ class Activator extends BundleActivator {
     // register the services..
     Future {
 
-      val properties = new java.util.Hashtable[String, Object]() {{ put("trpc", "")}}
+     val properties = new java.util.Hashtable[String, Object]()
+      properties.put("trpc", "")
       val service    = new ItcServiceImpl()
       ctx.registerService(classOf[ItcService], service, properties)
 

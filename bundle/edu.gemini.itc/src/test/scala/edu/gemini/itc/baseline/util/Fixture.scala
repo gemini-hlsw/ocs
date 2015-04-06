@@ -2,9 +2,7 @@ package edu.gemini.itc.baseline.util
 
 import edu.gemini.itc.altair.AltairParameters
 import edu.gemini.itc.gems.GemsParameters
-import edu.gemini.itc.service.SourceDefinition.BrightnessUnit
-import edu.gemini.itc.service.TelescopeDetails.{Coating, Wfs}
-import edu.gemini.itc.service._
+import edu.gemini.itc.shared.TelescopeDetails.{Coating, Wfs}
 import edu.gemini.itc.shared._
 import edu.gemini.spModel.gemini.altair.AltairParams.{FieldLens, GuideStarType}
 import edu.gemini.spModel.telescope.IssPort
