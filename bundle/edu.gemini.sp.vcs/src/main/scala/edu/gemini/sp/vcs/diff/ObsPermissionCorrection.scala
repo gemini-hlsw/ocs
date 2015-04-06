@@ -123,8 +123,7 @@ class ObsPermissionCorrection(
 
       // Add a conflict folder and place the local version of the obs there.
       // This observation will have the same number as the remote version so we
-      // need ObsNumberCorrection to fix this once all the permission
-      // corrections are complete.
+      // reset it with `obsNumber`.
       cf0  <- p2.getOrCreateConflictFolder(lifespanId, nodeMap)
       cf1  <- cf0.incr(lifespanId)
       lobs <- restoreLocal(cf1, localObs, remoteDiffs.plan.vm(local), obsNumber)
@@ -141,7 +140,7 @@ class ObsPermissionCorrection(
         TryVcs.fail(s"Expected a modified observation but got $mn")
     }).map { mod => obs.modifyLabel(_ => mod) }.flatMap(loc => loc.incr(lifespanId))
 
-  // We're going to add the tree `localObs` to `root` so it cannot contain any
+  // We're going to add the tree `localObs` to `parent` so it cannot contain any
   // keys that are currently in use in the program. We'll have to replace any
   // duplicate keys that we find with new nodes that have new keys.
   //
@@ -186,24 +185,23 @@ class ObsPermissionCorrection(
   // such components and replace them with new, freshly minted copies that have
   // new node keys and an initial node version map.
   private def restoreRemote(parent: TreeLoc[MergeNode], remoteObs: Tree[MergeNode], index: Option[Int]): TryVcs[TreeLoc[MergeNode]] = {
-    def replaceOne(loc: TreeLoc[MergeNode]): TryVcs[TreeLoc[MergeNode]] =
+    def modifiedCopy(loc: TreeLoc[MergeNode]): TryVcs[TreeLoc[MergeNode]] =
       loc.mapAsModified(nodeMap) {
         case Modified(_, nv, dob, detail) => Modified(new SPNodeKey, EmptyNodeVersions, dob, detail)
       }
 
-    def replaceAll(dups: Set[SPNodeKey]): TryVcs[TreeLoc[MergeNode]] = {
-      val upd = (TryVcs(parent.root)/:dups) { (tryLoc, dup) =>
-        for {
-          loc <- tryLoc
-          dn  <- loc.findNode(dup)
-          rn0 <- replaceOne(dn)
-          rn1 <- rn0.incr(lifespanId)
-          p0  <- rn1.parent.toTryVcs(s"Missing parent: ${rn1.key}")
-          p1  <- p0.incr(lifespanId)
-        } yield p1.root
-      }
-      upd.flatMap { _.findNode(parent.key) }
-    }
+    def replaceOne(tryRoot: TryVcs[TreeLoc[MergeNode]], dup: SPNodeKey): TryVcs[TreeLoc[MergeNode]] =
+      for {
+        loc <- tryRoot
+        dn  <- loc.findNode(dup)
+        rn0 <- modifiedCopy(dn)
+        rn1 <- rn0.incr(lifespanId)
+        p0  <- rn1.parent.toTryVcs(s"Missing parent: ${rn1.key}")
+        p1  <- p0.incr(lifespanId)
+      } yield p1.root
+
+    def replaceAll(dups: Set[SPNodeKey]): TryVcs[TreeLoc[MergeNode]] =
+      (TryVcs(parent.root)/:dups) { replaceOne }.flatMap { _.findNode(parent.key) }
 
     val dups = parent.root.tree.keySet & remoteObs.keySet
     val upd  = if (dups.isEmpty) TryVcs(parent) else replaceAll(dups)

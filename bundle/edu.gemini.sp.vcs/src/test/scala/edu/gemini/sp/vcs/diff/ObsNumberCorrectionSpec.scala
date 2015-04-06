@@ -140,9 +140,6 @@ class ObsNumberCorrectionSpec extends MergeCorrectionSpec {
       val oLocal  = obs(1)
       val oRemote = obs(1)
 
-      println("oLocal  = " + oLocal.key)
-      println("oRemote = " + oRemote.key)
-
       val onc = new ObsNumberCorrection(lifespanId, (loc: ProgramLocation, key: SPNodeKey) => {
         (loc == ProgramLocation.Local && key == oLocal.key) ||
           (loc == ProgramLocation.Remote && key == oRemote.key)

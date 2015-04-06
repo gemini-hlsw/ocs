@@ -15,11 +15,13 @@ import ProgramDiff._
 
 /** Pairs a `MergePlan` describing the differences between two versions of a
   * program with a `List` of pairs of observation node key and
-  * `ObservationStatus`.
+  * `ObservationStatus`.  Includes the maximum observation number in use by
+  * the program (if any).
   *
   * @param plan describes the differences between two versions of a program
   * @param obsStatus the status of all differing observations, which is needed
   *                  for permission checking
+  * @param maxObsNumber the maximum observation number in use in the program
   */
 case class ProgramDiff(plan: MergePlan, obsStatus: List[ObsStatusPair], maxObsNumber: Option[Int]) {
   def encode: ProgramDiff.Transport = ProgramDiff.Transport(plan.encode, obsStatus, maxObsNumber)

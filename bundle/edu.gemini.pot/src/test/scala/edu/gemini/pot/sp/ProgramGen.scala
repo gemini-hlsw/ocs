@@ -28,7 +28,7 @@ object ProgramGen {
   private def decorativeTitle(n: ISPNode, s: String): String = s"$s (${n.key})"
 
   private def setObsPhase2Status(o: ISPObservation, status: ObsPhase2Status): Unit =
-    o.setDataObject(o.getDataObject.asInstanceOf[SPObservation] <| (_.setPhase2Status(status)))
+    o.getDataObject.asInstanceOf[SPObservation] <| (_.setPhase2Status(status)) |> (dob => o.setDataObject(dob))
 
   def genNode[N <: ISPNode](f: (ISPFactory, ISPProgram) => N): Gen[(ISPFactory, ISPProgram) => N] =
     genTitle.map { title => (fact, p) =>

@@ -26,6 +26,14 @@ sealed trait ObsEdit {
 object ObsEdit {
   case class Obs(status: ObservationStatus, tree: Tree[MergeNode])
 
+  /**
+   * VersionComparison for the local version of an observation vs it remote
+   * version.  Non-log nodes are considered apart from the observing log nodes
+   * because edits have different security check implications.
+   *
+   * @param obsOnly comparison of all parts of the observation except the log
+   * @param logOnly comparison of just the observing log
+   */
   case class Comparison(obsOnly: VersionComparison, logOnly: VersionComparison) {
     def combined: VersionComparison = obsOnly |+| logOnly
   }
