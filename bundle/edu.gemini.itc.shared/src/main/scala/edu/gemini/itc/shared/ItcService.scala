@@ -60,8 +60,8 @@ object ItcService {
   type Result = Validation[List[String], ItcResult]
 
   /** Performs an ITC call on the given host. */
-  def calculate(kc: KeyChain, peer: Peer, source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: InstrumentDetails): Future[Result] =
-    TrpcClient(peer).withKeyChain(kc) future { r =>
+  def calculate(peer: Peer, source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: InstrumentDetails): Future[Result] =
+    TrpcClient(peer).withoutKeys future { r =>
       r[ItcService].calculate(source, obs, cond, tele, ins)
     }
 

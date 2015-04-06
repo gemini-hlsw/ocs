@@ -23,7 +23,6 @@ class ItcServiceImpl extends ItcService {
   } catch {
     // TODO: for now in most cases where a validation problem should be reported to the user the ITC code throws an exception instead
     case e: Throwable =>
-      e.printStackTrace()
       ItcResult.forException(e)
   }
 

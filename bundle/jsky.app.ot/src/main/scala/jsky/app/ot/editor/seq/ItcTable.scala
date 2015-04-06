@@ -101,7 +101,7 @@ trait ItcTable extends Table {
     val ins       = GmosParameters(filter, grating, wavelen, fpmask, spatBin.getValue, specBin.getValue, ifuMethod, ccdType, site)
 
     // Do the service call
-    ItcService.calculate(OT.getKeyChain, peer, src, obs, cond, tele, ins).
+    ItcService.calculate(peer, src, obs, cond, tele, ins).
     // whenever service call is finished notify table to update its contents
     andThen {
       case _ => Swing.onEDT(this.peer.getModel.asInstanceOf[AbstractTableModel].fireTableDataChanged())

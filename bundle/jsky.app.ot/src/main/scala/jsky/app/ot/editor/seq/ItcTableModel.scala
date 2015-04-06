@@ -45,13 +45,13 @@ sealed trait ItcTableModel extends AbstractTableModel {
   override def getValueAt(row: Int, col: Int): Object = col match {
     case c if c <  headers.size             => header(col).value(uniqueSteps(row), res(row))
     case c if c >= headers.size + keys.size => result(col).value(uniqueSteps(row), res(row))
-    case c                                  => uniqueSteps(row).config.getItemValue(key(col))
+    case _                                  => uniqueSteps(row).config.getItemValue(key(col))
   }
 
   override def getColumnName(col: Int): String = col match {
     case c if c <  headers.size             => header(col).label
     case c if c >= headers.size + keys.size => result(col).label
-    case c                                  => StringUtil.toDisplayName(key(col).getName)
+    case _                                  => StringUtil.toDisplayName(key(col).getName)
   }
 
   // Gets the ItemKey of a column (if any), this is used by the table to color code the columns.
