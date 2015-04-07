@@ -21,7 +21,7 @@ import java.util.*;
  */
 public class GemsGuideStarSearchOptions {
 
-    public static enum CatalogChoice {
+    public enum CatalogChoice {
         PPMXL_CDS("PPMXL@CDS", "PPMXL at CDS"),
         PPMXL_CADC("PPMXL@CADC", "PPMXL at CADC"),
         UCAC3_CDS("UCAC3@CDS", "UCAC3 at CDS"),
@@ -36,7 +36,7 @@ public class GemsGuideStarSearchOptions {
         private String _displayValue;
         private String _catalogName;
 
-        private CatalogChoice(String catalogName, String displayValue) {
+        CatalogChoice(String catalogName, String displayValue) {
             _displayValue = displayValue;
             _catalogName = catalogName;
         }
@@ -55,7 +55,7 @@ public class GemsGuideStarSearchOptions {
     }
 
 
-    public static enum NirBandChoice {
+    public enum NirBandChoice {
         J(GemsUtils4Java.toNewBand(edu.gemini.shared.skyobject.Magnitude.Band.J)),
         H(GemsUtils4Java.toNewBand(edu.gemini.shared.skyobject.Magnitude.Band.H)),
         K(GemsUtils4Java.toNewBand(edu.gemini.shared.skyobject.Magnitude.Band.K)),
@@ -65,7 +65,7 @@ public class GemsGuideStarSearchOptions {
 
         private MagnitudeBand _band;
 
-        private NirBandChoice(MagnitudeBand band) {
+        NirBandChoice(MagnitudeBand band) {
             _band = band;
         }
 
@@ -83,7 +83,7 @@ public class GemsGuideStarSearchOptions {
     }
 
 
-    public static enum AnalyseChoice {
+    public enum AnalyseChoice {
         BOTH("Canopus and GSAOI", GemsTipTiltMode.both),
         CANOPUS("Canopus", GemsTipTiltMode.canopus),
         GSAOI("GSAOI", GemsTipTiltMode.instrument),
@@ -94,7 +94,7 @@ public class GemsGuideStarSearchOptions {
         private String _displayValue;
         private GemsTipTiltMode _gemsTipTiltMode;
 
-        private AnalyseChoice(String name, GemsTipTiltMode gemsTipTiltMode) {
+        AnalyseChoice(String name, GemsTipTiltMode gemsTipTiltMode) {
             _displayValue = name;
             _gemsTipTiltMode = gemsTipTiltMode;
         }

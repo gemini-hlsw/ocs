@@ -116,7 +116,7 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend) {
           val targets = l.map {k =>
             val referenceBand = queriesMap.get(k.query).map(_.band)
             referenceBand.map { b =>
-              k.result.targets.rows.filter(t => k.query.filterOnMagnitude2(t, referenceMagnitude(b, t)))
+              k.result.targets.rows.filter(t => k.query.filterOnMagnitude(t, referenceMagnitude(b, t)))
             }.getOrElse(k.result.targets.rows)
           }.suml
           assignToCriterion(basePosition, criterions, targets)
