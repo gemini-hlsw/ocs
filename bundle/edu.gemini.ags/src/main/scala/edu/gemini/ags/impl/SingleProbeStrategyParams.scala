@@ -1,11 +1,11 @@
 package edu.gemini.ags.impl
 
-import edu.gemini.ags.api.AgsMagnitude
+import edu.gemini.ags.api.{MagnitudeExtractor, AgsMagnitude, defaultProbeBands, magnitudeExtractor}
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.catalog.api.{CatalogQuery, RadiusConstraint}
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core.Target.SiderealTarget
-import edu.gemini.spModel.core.{Magnitude, MagnitudeBand, Angle, Site}
+import edu.gemini.spModel.core.{MagnitudeBand, Angle, Site}
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2OiwfsGuideProbe
 import edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe
@@ -39,13 +39,10 @@ sealed trait SingleProbeStrategyParams {
 
   def validator(ctx: ObsContext): GuideStarValidator = guideProbe
 
-  def probeBands: List[MagnitudeBand] = referenceBand match {
-      case MagnitudeBand.R => List(MagnitudeBand._r, MagnitudeBand.R, MagnitudeBand.UC)
-      case _               => List(referenceBand)
-    }
+  def probeBands = defaultProbeBands(referenceBand)
 
   // For a given target return a magnitude value that can be used to select a target
-  def referenceMagnitude(st: SiderealTarget):Option[Magnitude] = probeBands.map(st.magnitudeIn).flatten.headOption // Picks the first available magnitude on the target
+  def referenceMagnitude: MagnitudeExtractor = (st: SiderealTarget) => magnitudeExtractor(probeBands)(st)
 
   def brightest[A](lst: List[A])(toSiderealTarget: A => SiderealTarget):Option[A] = {
     def magnitude(t: SiderealTarget):Option[Double] = {
