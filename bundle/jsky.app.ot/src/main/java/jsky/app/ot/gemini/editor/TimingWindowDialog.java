@@ -68,9 +68,9 @@ public class TimingWindowDialog extends JDialog  {
     }
 
 	JFormattedTextField window = new JFormattedTextField(UTC);
-    JFormattedTextField period = new JFormattedTextField(HourMinuteFormat.getInstance());    
+    JFormattedTextField period = new JFormattedTextField(HourMinuteFormat.HH_MM_SS);
     JFormattedTextField times = new JFormattedTextField();    
-    JFormattedTextField duration = new JFormattedTextField(HourMinuteFormat.getInstance());
+    JFormattedTextField duration = new JFormattedTextField(HourMinuteFormat.HH_MM);
 
 	JFormattedTextField[] fields = { window, duration, times, period };
 		
@@ -89,9 +89,9 @@ public class TimingWindowDialog extends JDialog  {
 		};
 
 		window.setValue(new Date());
-		duration.setValue(MS_PER_HOUR * 123 + MS_PER_MINUTE * 45);
+		duration.setValue(MS_PER_HOUR * 24);
 		times.setValue(1000);
-		period.setValue(MS_PER_HOUR * 123 + MS_PER_MINUTE * 45);
+		period.setValue(MS_PER_HOUR * 48);
 	
 
 		for (JFormattedTextField tf: fields) {
@@ -258,7 +258,7 @@ public class TimingWindowDialog extends JDialog  {
 			add(durationFixed, gbc(3, 1, 1));
 			
 			add(duration, gbc(4, 1, 1));
-			add(new JLabel(" ."), gbc(5, 1, 1));
+			add(new JLabel(" (hh:mm)."), gbc(5, 1, 1));
 			
 			add(durationForever, gbc(3, 2, 3));
 			
@@ -270,7 +270,7 @@ public class TimingWindowDialog extends JDialog  {
 			add(labels[1] = new JLabel(" times"), gbc(2, 5, 2));
 			add(labels[2] = new JLabel("with a period of ", SwingConstants.RIGHT), gbc(1, 6, 2));
 			add(period, gbc(3, 6, 1));
-			add(labels[3] = new JLabel(" ."), gbc(4, 6, 1));
+			add(labels[3] = new JLabel(" (hhh:mm:ss)."), gbc(4, 6, 1));
 			add(new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0)) {{
 				setBorder(
 					BorderFactory.createCompoundBorder(
@@ -383,46 +383,53 @@ class HourMinuteFormat extends Format {
 
 	private static final long MS_PER_MINUTE = 1000 * 60;
 	private static final long MS_PER_HOUR = MS_PER_MINUTE * 60;
-	private static final Pattern PAT = Pattern.compile("^(\\d+):(\\d{2})$");
-	
-	private static final HourMinuteFormat INSTANCE = new HourMinuteFormat();
-	
-	public static HourMinuteFormat getInstance() {
-		return INSTANCE;
-	}
-	
-	private HourMinuteFormat() {		
+	private static final Pattern HH_MM_PAT = Pattern.compile("^(\\d+):(\\d{2})$");
+	private static final Pattern HH_MM_SS_PAT = Pattern.compile("^(\\d+):(\\d{2}):(\\d{2})$");
+
+	public static final HourMinuteFormat HH_MM    = new HourMinuteFormat(false);
+	public static final HourMinuteFormat HH_MM_SS = new HourMinuteFormat(true);
+
+	private final boolean showSeconds;
+
+	private HourMinuteFormat(final boolean showSeconds) {
+		this.showSeconds = showSeconds;
 	}
 	
 	@Override
-	public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
+	public StringBuffer format(final Object obj, final StringBuffer toAppendTo, final FieldPosition pos) {
 
-		long ms = (Long) obj;
-		long hh = ms / MS_PER_HOUR;
-		long mm = (ms % MS_PER_HOUR) / MS_PER_MINUTE;
-		
-		toAppendTo.append(hh).append(":");
-		if (mm < 10) toAppendTo.append(0);
-		toAppendTo.append(mm);
-		return toAppendTo;
+		final long ms = (Long) obj;
+		final long hh = ms / MS_PER_HOUR;
+		final long mm = (ms % MS_PER_HOUR) / MS_PER_MINUTE;
+
+		final String s;
+		if (showSeconds) {
+			final long ss = (ms % MS_PER_MINUTE) / 1000;
+			s = String.format("%d:%02d:%02d", hh, mm, ss);
+		} else {
+			s = String.format("%d:%02d", hh, mm);
+		}
+
+		return toAppendTo.append(s);
 		
 	}
 
 	@Override
-	public Object parseObject(String source, ParsePosition pos) {
-		
-		Matcher m = PAT.matcher(source);
+	public Object parseObject(final String source, final ParsePosition pos) {
+
+		final Pattern p = showSeconds ? HH_MM_SS_PAT : HH_MM_PAT;
+		final Matcher m = p.matcher(source);
 		if (!m.matches()) {			
 			pos.setIndex(0);
 			pos.setErrorIndex(0);
 			return null;
 		}
 		
-		long hh = Long.parseLong(m.group(1));
-		long mm = Long.parseLong(m.group(2));
-		
+		final long hh = Long.parseLong(m.group(1));
+		final long mm = Long.parseLong(m.group(2));
+		final long ss = showSeconds ? Long.parseLong(m.group(3)) : 0;
 		pos.setIndex(m.end());
-		return hh * MS_PER_HOUR + mm * MS_PER_MINUTE;
+		return hh * MS_PER_HOUR + mm * MS_PER_MINUTE + ss * 1000;
 		
 	}
 	

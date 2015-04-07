@@ -391,11 +391,14 @@ class TimingWindowTableModel extends DefaultTableModel implements PropertyChange
 		return String.format("%d:%02d", ms / MS_PER_HOUR, (ms % MS_PER_HOUR) / MS_PER_MINUTE);
 	}
 
-	private static String formatPeriod(TimingWindow tw) {
+	private static String formatPeriod(final TimingWindow tw) {
 		if (tw.getDuration() == TimingWindow.WINDOW_REMAINS_OPEN_FOREVER) return null;
 		if (tw.getRepeat() == TimingWindow.REPEAT_NEVER) return null;
-		long ms = tw.getPeriod();
-		return String.format("%d:%02d", ms / MS_PER_HOUR, (ms % MS_PER_HOUR) / MS_PER_MINUTE);
+		final long ms = tw.getPeriod();
+		final long hh = ms / MS_PER_HOUR;
+		final long mm = (ms % MS_PER_HOUR) / MS_PER_MINUTE;
+		final long ss = (ms % MS_PER_MINUTE) / MS_PER_SECOND;
+		return String.format("%d:%02d:%02d", hh, mm, ss);
 	}
 
 	private static String formatRepeat(TimingWindow tw) {
