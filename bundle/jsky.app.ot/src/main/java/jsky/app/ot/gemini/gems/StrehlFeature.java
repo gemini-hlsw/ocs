@@ -383,7 +383,7 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
         Star[] starList = targetListToStarList(targetList);
 
         double factor = GemsCatalogResults.getStrehlFactor(this.getContext().obsContextJava());
-        return Mascot.computeStrehl(getBandpass(type), factor, starList[0], scala.Option.apply(starList[1]), scala.Option.apply(starList[2]));
+        return Mascot.computeStrehl4Java(getBandpass(type), factor, starList[0], scala.Option.apply(starList[1]), scala.Option.apply(starList[2]));
     }
 
 

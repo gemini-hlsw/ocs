@@ -2,6 +2,7 @@ package edu.gemini.ags.gems.mascot
 
 import java.util.logging.Logger
 
+import edu.gemini.ags.api.{MagnitudeExtractor, magnitudeExtractor, defaultProbeBands}
 import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.core.Target.SiderealTarget
 import scala.collection.JavaConverters._
@@ -39,7 +40,7 @@ object MascotCat {
    * @param list the list of SiderealTargets to use
    * @param centerRA the base position RA coordinate
    * @param centerDec the base position Dec coordinate
-   * @param bandpass determines which magnitudes are used in the calculations: (one of "B", "V", "R", "J", "H", "K")
+   * @param magnitudeExtractor extracts the magnitude used in the calculations: (one of "B", "V", "R", "J", "H", "K")
    * @param factor multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
    * @param progress a function(strehl, count, total) called for each asterism as it is calculated
    * @param filter a filter function that returns false if the Star should be excluded
@@ -47,13 +48,13 @@ object MascotCat {
    */
   def findBestAsterismInTargetsList(list: List[SiderealTarget],
                        centerRA: Double, centerDec: Double,
-                       bandpass: MagnitudeBand = Mascot.defaultBandpass,
+                       magnitudeExtractor: MagnitudeExtractor = Mascot.defaultMagnitudeExtractor,
                        factor: Double = Mascot.defaultFactor,
                        progress: (Strehl, Int, Int) => Unit = defaultProgress,
                        filter: Star => Boolean = Mascot.defaultFilter)
   : (List[Star], List[Strehl]) = {
     val starList = list.map(Star.makeStar(_, centerRA, centerDec))
-    Mascot.findBestAsterism(starList.toList, bandpass, factor, progress, filter)
+    Mascot.findBestAsterism(starList.toList, magnitudeExtractor, factor, progress, filter)
   }
 
   case class StrehlResults(starList: java.util.List[Star], strehlList: java.util.List[Strehl])
@@ -64,14 +65,14 @@ object MascotCat {
    * @param javaList the list of SiderealTargets to use
    * @param centerRA the base position RA coordinate
    * @param centerDec the base position Dec coordinate
-   * @param bandpass determines which magnitudes are used in the calculations: (one of "B", "V", "R", "J", "H", "K")
+   * @param band determines which magnitudes are used in the calculations: (one of "B", "V", "R", "J", "H", "K")
    * @param mascotProgress optional, called for each asterism as it is calculated, can cancel the calculations by returning false
    * @return a tuple: (list of stars actually used, list of asterisms found)
    */
   def javaFindBestAsterismInTargetsList(javaList: java.util.List[SiderealTarget],
-                       centerRA: Double, centerDec: Double,
-                       bandpass: MagnitudeBand, factor: Double,
-                       mascotProgress: MascotProgress): StrehlResults = {
+                                        centerRA: Double, centerDec: Double,
+                                        band: MagnitudeBand = Mascot.defaultBandpass, factor: Double,
+                                        mascotProgress: MascotProgress): StrehlResults = {
 
     val progress = (s: Strehl, count: Int, total: Int) => {
       defaultProgress(s, count, total)
@@ -79,7 +80,8 @@ object MascotCat {
         throw new CancellationException("Canceled")
       }
     }
-    val (starList, strehlList) = findBestAsterismInTargetsList(javaList.asScala.toList, centerRA, centerDec, bandpass, factor, progress, Mascot.defaultFilter)
+
+    val (starList, strehlList) = findBestAsterismInTargetsList(javaList.asScala.toList, centerRA, centerDec, magnitudeExtractor(defaultProbeBands(band)), factor, progress, Mascot.defaultFilter)
     StrehlResults(starList.asJava, strehlList.asJava)
   }
 
