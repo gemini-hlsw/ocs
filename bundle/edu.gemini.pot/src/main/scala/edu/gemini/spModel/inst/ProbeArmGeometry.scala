@@ -127,6 +127,6 @@ object ProbeArmGeometry {
   def guideStarPoint(ctx: ObsContext, guideStarCoords: Coordinates): Point2D = {
     val baseCoords      = ctx.getBaseCoordinates.toNewModel
     val guideStarOffset = Coordinates.difference(baseCoords, guideStarCoords).offset
-    new Point2D.Double((-guideStarOffset.p.toArcsecs).toCanonicalArcsec, (-guideStarOffset.q.toArcsecs).toCanonicalArcsec)
+    new Point2D.Double(-guideStarOffset.p.toArcsecs, -guideStarOffset.q.toArcsecs).toCanonicalArcsec
   }
 }
