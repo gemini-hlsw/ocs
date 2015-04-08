@@ -13,7 +13,7 @@ scalaVersion in ThisBuild := "2.10.4"
 
 // Note that this is not a standard setting; it's used for building IDEA modules.
 javaVersion in ThisBuild := {
-  val expected = "1.7" 
+  val expected = "1.8" 
   val actual   = sys.props("java.version")
   if (!actual.startsWith(expected))
     println(s"""
@@ -48,8 +48,8 @@ scalacOptions in ThisBuild ++= Seq(
 )
 
 javacOptions in ThisBuild ++= Seq(
-  "-source", "1.7",
-  "-target", "1.7",
+  "-source", "1.8",
+  "-target", "1.8",
   "-Xlint:all,-serial,-path,-deprecation,-unchecked,-fallthrough" // TOOD: turn all on except maybe -serial and -path
 )
 
@@ -77,6 +77,7 @@ commands += {
   import complete.DefaultParsers._
   val stuff = Seq(("-6", "java6",  "Java SE6"),
                   ("-7", "java7",  "Java SE7"),
+		  ("-8", "java8",  "Java SE8"),
                   ("-s", "scala",  "Scala"),
                   ("-z", "scalaz", "scalaz"))
   val option = stuff.map { case (o, d, _) => o ^^^ d } .reduceLeft(_ | _)
