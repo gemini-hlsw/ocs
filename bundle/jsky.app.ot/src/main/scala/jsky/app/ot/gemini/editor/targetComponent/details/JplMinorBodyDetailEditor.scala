@@ -18,7 +18,10 @@ final class JplMinorBodyDetailEditor extends TargetDetailEditor(Tag.JPL_MINOR_BO
 
   // Editors
 
-  val kind = new TargetTypeEditor
+  val kind   = new TargetTypeEditor
+  val name   = new ConicNameEditor
+  val coords = new CoordinateEditor
+  val valid  = new ValidAtEditor
 
   val props = NumericPropertySheet[ConicTarget]("Orbital Elements", _.getTarget.asInstanceOf[ConicTarget],
     Prop("EPOCH", "Orbital Element Epoch (JD)",        _.getEpoch),
@@ -57,6 +60,48 @@ final class JplMinorBodyDetailEditor extends TargetDetailEditor(Tag.JPL_MINOR_BO
       c.weightx = 2
     })
 
+    p.add(new JLabel("Name"), new GridBagConstraints <| { c =>
+      c.gridx = 0
+      c.gridy = 1
+      c.fill = GridBagConstraints.HORIZONTAL
+      c.insets = new Insets(2, 2, 0, 5)
+    })
+
+    p.add(name, new GridBagConstraints <| { c =>
+      c.gridx = 1
+      c.gridy = 1
+      c.insets = new Insets(2, 5, 0, 2)
+      c.anchor = GridBagConstraints.WEST
+    })
+
+    p.add(new JLabel("Coordinates"), new GridBagConstraints <| { c =>
+      c.gridx = 0
+      c.gridy = 2
+      c.fill = GridBagConstraints.HORIZONTAL
+      c.insets = new Insets(2, 2, 0, 5)
+    })
+
+    p.add(coords, new GridBagConstraints <| { c =>
+      c.gridx = 1
+      c.gridy = 2
+      c.insets = new Insets(2, 5, 0, 2)
+      c.anchor = GridBagConstraints.WEST
+    })
+
+    p.add(new JLabel("Valid At"), new GridBagConstraints <| { c =>
+      c.gridx = 0
+      c.gridy = 3
+      c.fill = GridBagConstraints.HORIZONTAL
+      c.insets = new Insets(2, 2, 0, 5)
+    })
+
+    p.add(valid, new GridBagConstraints <| { c =>
+      c.gridx = 1
+      c.gridy = 3
+      c.insets = new Insets(2, 5, 0, 2)
+      c.anchor = GridBagConstraints.WEST
+    })
+
   }
 
   add(general, new GridBagConstraints <| { c =>
@@ -82,10 +127,12 @@ final class JplMinorBodyDetailEditor extends TargetDetailEditor(Tag.JPL_MINOR_BO
   // Implementation
 
   override def edit(obsContext: GOption[ObsContext], spTarget: SPTarget): Unit = {
-    super.edit(obsContext, spTarget)
-    kind .edit(obsContext, spTarget)
-    mags .edit(obsContext, spTarget)
-    props.edit(obsContext, spTarget)
+    super .edit(obsContext, spTarget)
+    kind  .edit(obsContext, spTarget)
+    name  .edit(obsContext, spTarget)
+    coords.edit(obsContext, spTarget)
+    mags  .edit(obsContext, spTarget)
+    props .edit(obsContext, spTarget)
   }
 
 }

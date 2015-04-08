@@ -24,7 +24,7 @@ final class SiderealDetailEditor extends TargetDetailEditor(ITarget.Tag.SIDEREAL
     e.getComponent.asInstanceOf[JComponent].setBorder(titleBorder("Magnitudes"))
   }
 
-  val props = NumericPropertySheet[HmsDegTarget]("Proper Motion", _.getTarget.asInstanceOf[HmsDegTarget],
+  val props = NumericPropertySheet[HmsDegTarget]("Motion", _.getTarget.asInstanceOf[HmsDegTarget],
     Prop("∆ RA",     "mas/year", _.getPM1),
     Prop("∆ Dec",    "mas/year", _.getPM2),
     Prop("Epoch",    "JD",       _.getEpoch),
@@ -62,14 +62,14 @@ final class SiderealDetailEditor extends TargetDetailEditor(ITarget.Tag.SIDEREAL
       c.gridx = 0
       c.gridy = 1
       c.fill = GridBagConstraints.HORIZONTAL
-      c.insets = new Insets(10, 2, 0, 5)
+      c.insets = new Insets(2, 2, 0, 5)
     })
 
     p.add(name, new GridBagConstraints <| { c =>
       c.gridx = 1
       c.gridy = 1
       c.fill = GridBagConstraints.HORIZONTAL
-      c.insets = new Insets(10, 5, 0, 2)
+      c.insets = new Insets(2, 5, 0, 2)
       c.weightx = 2
     })
 

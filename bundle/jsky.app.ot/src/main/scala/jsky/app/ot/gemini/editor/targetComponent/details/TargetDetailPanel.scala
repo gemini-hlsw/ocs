@@ -5,7 +5,6 @@ import edu.gemini.spModel.target.SPTarget
 import edu.gemini.shared.util.immutable.{ Option => GOption }
 import java.awt.{ GridBagConstraints, GridBagLayout, Color}
 import javax.swing.{BorderFactory, JPanel }
-import edu.gemini.spModel.target.system.ITarget.Tag
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 import scalaz.syntax.id._
 
@@ -16,8 +15,8 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
   // on down only needs to care about implementing `edit`.
   val tpw = new ForwardingTelescopePosWatcher(this)
 
-  // Fields, never null
-  private[this] var tde: TargetDetailEditor = TargetDetailEditor.forTag(Tag.SIDEREAL)
+  // Fields
+  private[this] var tde: TargetDetailEditor = null;
 
   // Put it all together
   setBorder(BorderFactory.createLineBorder(Color.RED))
@@ -27,8 +26,8 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
 
     // Create or replace the existing detail editor, if needed
     val tag = spTarget.getTarget.getTag
-    if (tde.getTag != tag) {
-      remove(tde)
+    if (tde == null || tde.getTag != tag) {
+      if (tde != null) remove(tde)
       tde = TargetDetailEditor.forTag(tag)
       add(tde, new GridBagConstraints() <| { c =>
         c.gridx = 0
