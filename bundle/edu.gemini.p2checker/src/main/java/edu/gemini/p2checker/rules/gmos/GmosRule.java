@@ -281,38 +281,6 @@ public final class GmosRule implements IRule {
         }
     };
 
-    // See REL-1194
-//    /**
-//     * WARN if (amplifiers != 3)
-//     */
-//    private static ScienceRule AMPLIFIER_SCIENCE_RULE = new ScienceRule(
-//            new ScienceRule.IScienceChecker() {
-//                private static final String MESSAGE = "3 Amp mode is recommended for science observations";
-//
-//                public boolean check(Config config, ObservationElements elems) {
-//                    Object amp = SequenceRule.getInstrumentItem(config, InstGmosSouth.AMP_COUNT_PROP);
-//                    if (amp == null) {
-//                        amp = SequenceRule.getInstrumentItem(config, InstGmosNorth.AMP_COUNT_PROP);
-//                    }
-//                    Object detectorManufacturer = SequenceRule.getInstrumentItem(config, InstGmosSouth.DETECTOR_MANUFACTURER_PROP);
-//                    if (detectorManufacturer == null) {
-//                        detectorManufacturer = SequenceRule.getInstrumentItem(config, InstGmosNorth.DETECTOR_MANUFACTURER_PROP);
-//                    }
-//                    // REL-231 - don't warn for GMOSN
-//                    return (amp != AmpCount.THREE) && (detectorManufacturer == DetectorManufacturer.E2V);
-//                }
-//
-//                public String getMessage() {
-//                    return MESSAGE;
-//                }
-//
-//                public String getId() {
-//                    return PREFIX + "AMPLIFIER_SCIENCE_RULE";
-//                }
-//            }
-//            , SequenceRule.SCIENCE_MATCHER
-//    );
-
 
     /**
      * WARN if (gain != 'low' && !HAMAMATSU)
@@ -1260,12 +1228,10 @@ public final class GmosRule implements IRule {
 
     private static final class MultiKey {
         final Filter filter;
-        final AmpGain gain;
         final SkyBackground sb;
 
-        private MultiKey(Filter filter, AmpGain gain, SkyBackground sb) {
+        private MultiKey(Filter filter, SkyBackground sb) {
             this.filter = filter;
-            this.gain = gain;
             this.sb = sb;
         }
 
@@ -1276,18 +1242,15 @@ public final class GmosRule implements IRule {
 
             final MultiKey multiKey = (MultiKey) o;
 
-            if (filter != null ? !filter.equals(multiKey.filter) : multiKey.filter != null)
+            if (filter != multiKey.filter)
                 return false;
-            if (gain != multiKey.gain) return false;
-            if (sb != multiKey.sb) return false;
 
-            return true;
+            return sb == multiKey.sb;
         }
 
         @Override
         public int hashCode() {
             int result = (filter != null ? filter.hashCode() : 0);
-            result = 31 * result + (gain != null ? gain.hashCode() : 0);
             result = 31 * result + (sb != null ? sb.hashCode() : 0);
             return result;
         }
@@ -1297,9 +1260,15 @@ public final class GmosRule implements IRule {
     private static final Map<MultiKey, Double> HAM_EXPOSURE_LIMITS = new HashMap<>();
 
     private static Double getLimit(final DetectorManufacturer dm, final Filter filter, final AmpGain gain, final SkyBackground sb, final Binning binning) {
-        final MultiKey key = new MultiKey(filter, gain, sb);
+        // Currently we only apply these rules for AmpGain.LOW. Note that the amp gain was originally part of
+        // the MultiKey but as long as only one values is relevant it seems overkill to have it there.
+        if (gain != AmpGain.LOW) return Double.MAX_VALUE;
+
+        // check if we have a max value defined
+        final MultiKey key = new MultiKey(filter, sb);
         final Double storedLimit = getLimits(dm).get(key);
         if (storedLimit == null) return Double.MAX_VALUE;
+
         switch (binning) {
             case ONE:
                 return E2V_EXPOSURE_LIMITS.get(key);
@@ -1330,55 +1299,55 @@ public final class GmosRule implements IRule {
 // BG50: 1.83 hours (longer than the maximum exposure time due to cosmic rays)
 // BG80: 32.5 minutes
 // BGAny: 4.5 minutes
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, AmpGain.LOW, SkyBackground.PERCENT_20), 4.35 * 60 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, AmpGain.LOW, SkyBackground.PERCENT_50), 1.83 * 60 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, AmpGain.LOW, SkyBackground.PERCENT_80), 32.5 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, AmpGain.LOW, SkyBackground.ANY), 4.5 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.PERCENT_20), 4.35 * 60 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.PERCENT_50), 1.83 * 60 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.PERCENT_80), 32.5 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.ANY), 4.5 * 60);
 // GMOS-N r-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
 // BG20: 1.83 hours (longer than the maximum exposure time due to cosmic rays)
 // BG50: 1.02 hours (longer than the maximum exposure time due to cosmic rays)
 // BG80: 25 minutes
 // BGAny: 4.3 minutes
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, AmpGain.LOW, SkyBackground.PERCENT_20), 1.83 * 60 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, AmpGain.LOW, SkyBackground.PERCENT_50), 1.02 * 60 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, AmpGain.LOW, SkyBackground.PERCENT_80), 25.0 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, AmpGain.LOW, SkyBackground.ANY), 4.3 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, SkyBackground.PERCENT_20), 1.83 * 60 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, SkyBackground.PERCENT_50), 1.02 * 60 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, SkyBackground.PERCENT_80), 25.0 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, SkyBackground.ANY), 4.3 * 60);
 // GMOS-N i-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
 // BG20: 1.05 hours (longer than the maximum exposure time due to cosmic rays)
 // BG50: 41 minutes (may end up being longer than the maximum exposure time due to cosmic rays)
 // BG80: 22.3 minutes
 // BGAny: 5.5 minutes
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, AmpGain.LOW, SkyBackground.PERCENT_20), 1.05 * 60 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, AmpGain.LOW, SkyBackground.PERCENT_50), 41.0 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, AmpGain.LOW, SkyBackground.PERCENT_80), 22.3 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, AmpGain.LOW, SkyBackground.ANY), 5.5 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, SkyBackground.PERCENT_20), 1.05 * 60 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, SkyBackground.PERCENT_50), 41.0 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, SkyBackground.PERCENT_80), 22.3 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, SkyBackground.ANY), 5.5 * 60);
 // GMOS-N z-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
 // BG20: 12.3 minutes
 // BG50: 12 minutes
 // BG80: 11.5 minutes
 // BGAny: 8.7 minutes
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, AmpGain.LOW, SkyBackground.PERCENT_20), 12.3 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, AmpGain.LOW, SkyBackground.PERCENT_50), 12.0 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, AmpGain.LOW, SkyBackground.PERCENT_80), 11.5 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, AmpGain.LOW, SkyBackground.ANY), 8.7 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, SkyBackground.PERCENT_20), 12.3 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, SkyBackground.PERCENT_50), 12.0 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, SkyBackground.PERCENT_80), 11.5 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, SkyBackground.ANY), 8.7 * 60);
 // GMOS-N Z-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
 // BG20: 35 minutes (may end up being longer than the maximum exposure time due to cosmic rays)
 // BG50: 31.1 minutes (may end up being longer than the maximum exposure time due to cosmic rays)
 // BG80: 25.8 minutes
 // BGAny: 13.3 minutes
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, AmpGain.LOW, SkyBackground.PERCENT_20), 35.0 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, AmpGain.LOW, SkyBackground.PERCENT_50), 31.1 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, AmpGain.LOW, SkyBackground.PERCENT_80), 25.8 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, AmpGain.LOW, SkyBackground.ANY), 13.3 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, SkyBackground.PERCENT_20), 35.0 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, SkyBackground.PERCENT_50), 31.1 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, SkyBackground.PERCENT_80), 25.8 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, SkyBackground.ANY), 13.3 * 60);
 // GMOS-N Y-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
 // BG20: 52.6 minutes (may end up being longer than the maximum exposure time due to cosmic rays)
 // BG50: 52.7 minutes (clearly there is something not quite right with the ITC...)
 // BG80: 52.8 minutes (clearly there is something not quite right with the ITC...)
 // BGAny: 52.8 minutes (I suggest we call all of these 53 minutes, we already know there is an approximation with the ITC because it has no dependence of background counts on sky background in the nearIR)
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, AmpGain.LOW, SkyBackground.PERCENT_20), 52.6 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, AmpGain.LOW, SkyBackground.PERCENT_50), 52.7 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, AmpGain.LOW, SkyBackground.PERCENT_80), 52.8 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, AmpGain.LOW, SkyBackground.ANY), 52.8 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.PERCENT_20), 52.6 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.PERCENT_50), 52.7 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.PERCENT_80), 52.8 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.ANY), 52.8 * 60);
 
         //HAMAMATSU GMOS-S
 
@@ -1387,115 +1356,115 @@ public final class GmosRule implements IRule {
 // BG50: 1.83 hours (longer than the maximum exposure time due to cosmic rays)
 // BG80: 32.5 minutes
 // BGAny: 4.5 minutes
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.g_G0325, AmpGain.LOW, SkyBackground.PERCENT_20), 4.35 * 60 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.g_G0325, AmpGain.LOW, SkyBackground.PERCENT_50), 1.83 * 60 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.g_G0325, AmpGain.LOW, SkyBackground.PERCENT_80), 32.5 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.g_G0325, AmpGain.LOW, SkyBackground.ANY), 4.5 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.g_G0325, SkyBackground.PERCENT_20), 4.35 * 60 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.g_G0325, SkyBackground.PERCENT_50), 1.83 * 60 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.g_G0325, SkyBackground.PERCENT_80), 32.5 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.g_G0325, SkyBackground.ANY), 4.5 * 60);
 // GMOS-S r-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
 // BG20: 1.83 hours (longer than the maximum exposure time due to cosmic rays)
 // BG50: 1.02 hours (longer than the maximum exposure time due to cosmic rays)
 // BG80: 25 minutes
 // BGAny: 4.3 minutes
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.r_G0326, AmpGain.LOW, SkyBackground.PERCENT_20), 1.83 * 60 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.r_G0326, AmpGain.LOW, SkyBackground.PERCENT_50), 1.02 * 60 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.r_G0326, AmpGain.LOW, SkyBackground.PERCENT_80), 25.0 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.r_G0326, AmpGain.LOW, SkyBackground.ANY), 4.3 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.r_G0326, SkyBackground.PERCENT_20), 1.83 * 60 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.r_G0326, SkyBackground.PERCENT_50), 1.02 * 60 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.r_G0326, SkyBackground.PERCENT_80), 25.0 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.r_G0326, SkyBackground.ANY), 4.3 * 60);
 // GMOS-S i-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
 // BG20: 1.05 hours (longer than the maximum exposure time due to cosmic rays)
 // BG50: 41 minutes (may end up being longer than the maximum exposure time due to cosmic rays)
 // BG80: 22.3 minutes
 // BGAny: 5.5 minutes
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.i_G0327, AmpGain.LOW, SkyBackground.PERCENT_20), 1.05 * 60 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.i_G0327, AmpGain.LOW, SkyBackground.PERCENT_50), 41.0 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.i_G0327, AmpGain.LOW, SkyBackground.PERCENT_80), 22.3 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.i_G0327, AmpGain.LOW, SkyBackground.ANY), 5.5 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.i_G0327, SkyBackground.PERCENT_20), 1.05 * 60 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.i_G0327, SkyBackground.PERCENT_50), 41.0 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.i_G0327, SkyBackground.PERCENT_80), 22.3 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.i_G0327, SkyBackground.ANY), 5.5 * 60);
 // GMOS-S z-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
 // BG20: 12.3 minutes
 // BG50: 12 minutes
 // BG80: 11.5 minutes
 // BGAny: 8.7 minutes
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.z_G0328, AmpGain.LOW, SkyBackground.PERCENT_20), 12.3 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.z_G0328, AmpGain.LOW, SkyBackground.PERCENT_50), 12.0 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.z_G0328, AmpGain.LOW, SkyBackground.PERCENT_80), 11.5 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.z_G0328, AmpGain.LOW, SkyBackground.ANY), 8.7 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.z_G0328, SkyBackground.PERCENT_20), 12.3 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.z_G0328, SkyBackground.PERCENT_50), 12.0 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.z_G0328, SkyBackground.PERCENT_80), 11.5 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.z_G0328, SkyBackground.ANY), 8.7 * 60);
 // GMOS-S Z-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
 // BG20: 35 minutes (may end up being longer than the maximum exposure time due to cosmic rays)
 // BG50: 31.1 minutes (may end up being longer than the maximum exposure time due to cosmic rays)
 // BG80: 25.8 minutes
 // BGAny: 13.3 minutes
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.Z_G0343, AmpGain.LOW, SkyBackground.PERCENT_20), 35.0 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.Z_G0343, AmpGain.LOW, SkyBackground.PERCENT_50), 31.1 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.Z_G0343, AmpGain.LOW, SkyBackground.PERCENT_80), 25.8 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.Z_G0343, AmpGain.LOW, SkyBackground.ANY), 13.3 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.Z_G0343, SkyBackground.PERCENT_20), 35.0 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.Z_G0343, SkyBackground.PERCENT_50), 31.1 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.Z_G0343, SkyBackground.PERCENT_80), 25.8 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.Z_G0343, SkyBackground.ANY), 13.3 * 60);
 // GMOS-S Y-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
 // BG20: 52.6 minutes (may end up being longer than the maximum exposure time due to cosmic rays)
 // BG50: 52.7 minutes (clearly there is something not quite right with the ITC...)
 // BG80: 52.8 minutes (clearly there is something not quite right with the ITC...)
 // BGAny: 52.8 minutes (I suggest we call all of these 53 minutes, we already know there is an approximation with the ITC because it has no dependence of background counts on sky background in the nearIR)
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.Y_G0344, AmpGain.LOW, SkyBackground.PERCENT_20), 52.6 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.Y_G0344, AmpGain.LOW, SkyBackground.PERCENT_50), 52.7 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.Y_G0344, AmpGain.LOW, SkyBackground.PERCENT_80), 52.8 * 60);
-        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.Y_G0344, AmpGain.LOW, SkyBackground.ANY), 52.8 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.Y_G0344, SkyBackground.PERCENT_20), 52.6 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.Y_G0344, SkyBackground.PERCENT_50), 52.7 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.Y_G0344, SkyBackground.PERCENT_80), 52.8 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.Y_G0344, SkyBackground.ANY), 52.8 * 60);
 
         // ==================
         //E2V GMOS-N
 
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, AmpGain.LOW, SkyBackground.PERCENT_20), 4.35 * 60 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, AmpGain.LOW, SkyBackground.PERCENT_50), 1.83 * 60 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, AmpGain.LOW, SkyBackground.PERCENT_80), 32.5 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, AmpGain.LOW, SkyBackground.ANY), 4.5 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.PERCENT_20), 4.35 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.PERCENT_50), 1.83 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.PERCENT_80), 32.5 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.ANY), 4.5 * 60);
 
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, AmpGain.LOW, SkyBackground.PERCENT_20), 1.83 * 60 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, AmpGain.LOW, SkyBackground.PERCENT_50), 1.02 * 60 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, AmpGain.LOW, SkyBackground.PERCENT_80), 25.0 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, AmpGain.LOW, SkyBackground.ANY), 4.3 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, SkyBackground.PERCENT_20), 1.83 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, SkyBackground.PERCENT_50), 1.02 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, SkyBackground.PERCENT_80), 25.0 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, SkyBackground.ANY), 4.3 * 60);
 
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, AmpGain.LOW, SkyBackground.PERCENT_20), 1.05 * 60 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, AmpGain.LOW, SkyBackground.PERCENT_50), 41.0 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, AmpGain.LOW, SkyBackground.PERCENT_80), 22.3 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, AmpGain.LOW, SkyBackground.ANY), 5.5 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, SkyBackground.PERCENT_20), 1.05 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, SkyBackground.PERCENT_50), 41.0 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, SkyBackground.PERCENT_80), 22.3 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, SkyBackground.ANY), 5.5 * 60);
 
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, AmpGain.LOW, SkyBackground.PERCENT_20), 12.3 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, AmpGain.LOW, SkyBackground.PERCENT_50), 12.0 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, AmpGain.LOW, SkyBackground.PERCENT_80), 11.5 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, AmpGain.LOW, SkyBackground.ANY), 8.7 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, SkyBackground.PERCENT_20), 12.3 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, SkyBackground.PERCENT_50), 12.0 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, SkyBackground.PERCENT_80), 11.5 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, SkyBackground.ANY), 8.7 * 60);
 
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, AmpGain.LOW, SkyBackground.PERCENT_20), 35.0 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, AmpGain.LOW, SkyBackground.PERCENT_50), 31.1 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, AmpGain.LOW, SkyBackground.PERCENT_80), 25.8 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, AmpGain.LOW, SkyBackground.ANY), 13.3 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, SkyBackground.PERCENT_20), 35.0 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, SkyBackground.PERCENT_50), 31.1 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, SkyBackground.PERCENT_80), 25.8 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, SkyBackground.ANY), 13.3 * 60);
 
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, AmpGain.LOW, SkyBackground.PERCENT_20), 52.6 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, AmpGain.LOW, SkyBackground.PERCENT_50), 52.7 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, AmpGain.LOW, SkyBackground.PERCENT_80), 52.8 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, AmpGain.LOW, SkyBackground.ANY), 52.8 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.PERCENT_20), 52.6 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.PERCENT_50), 52.7 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.PERCENT_80), 52.8 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.ANY), 52.8 * 60);
 
         //E2V GMOS-S
 
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.u_G0332, AmpGain.LOW, SkyBackground.PERCENT_20), 48.6 * 60 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.u_G0332, AmpGain.LOW, SkyBackground.PERCENT_50), 21.1 * 60 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.u_G0332, AmpGain.LOW, SkyBackground.PERCENT_80), 5.78 * 60 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.u_G0332, AmpGain.LOW, SkyBackground.ANY), 45.0 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.u_G0332, SkyBackground.PERCENT_20), 48.6 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.u_G0332, SkyBackground.PERCENT_50), 21.1 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.u_G0332, SkyBackground.PERCENT_80), 5.78 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.u_G0332, SkyBackground.ANY), 45.0 * 60);
 
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.g_G0325, AmpGain.LOW, SkyBackground.PERCENT_20), 4.35 * 60 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.g_G0325, AmpGain.LOW, SkyBackground.PERCENT_50), 1.83 * 60 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.g_G0325, AmpGain.LOW, SkyBackground.PERCENT_80), 32.5 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.g_G0325, AmpGain.LOW, SkyBackground.ANY), 4.5 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.g_G0325, SkyBackground.PERCENT_20), 4.35 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.g_G0325, SkyBackground.PERCENT_50), 1.83 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.g_G0325, SkyBackground.PERCENT_80), 32.5 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.g_G0325, SkyBackground.ANY), 4.5 * 60);
 
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.r_G0326, AmpGain.LOW, SkyBackground.PERCENT_20), 2.56 * 60 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.r_G0326, AmpGain.LOW, SkyBackground.PERCENT_50), 1.43 * 60 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.r_G0326, AmpGain.LOW, SkyBackground.PERCENT_80), 34.0 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.r_G0326, AmpGain.LOW, SkyBackground.ANY), 5.9 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.r_G0326, SkyBackground.PERCENT_20), 2.56 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.r_G0326, SkyBackground.PERCENT_50), 1.43 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.r_G0326, SkyBackground.PERCENT_80), 34.0 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.r_G0326, SkyBackground.ANY), 5.9 * 60);
 
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.i_G0327, AmpGain.LOW, SkyBackground.PERCENT_20), 2.13 * 60 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.i_G0327, AmpGain.LOW, SkyBackground.PERCENT_50), 1.37 * 60 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.i_G0327, AmpGain.LOW, SkyBackground.PERCENT_80), 43.6 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.i_G0327, AmpGain.LOW, SkyBackground.ANY), 10.4 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.i_G0327, SkyBackground.PERCENT_20), 2.13 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.i_G0327, SkyBackground.PERCENT_50), 1.37 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.i_G0327, SkyBackground.PERCENT_80), 43.6 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.i_G0327, SkyBackground.ANY), 10.4 * 60);
 
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.z_G0328, AmpGain.LOW, SkyBackground.PERCENT_20), 1.06 * 60 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.z_G0328, AmpGain.LOW, SkyBackground.PERCENT_50), 1.0 * 60 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.z_G0328, AmpGain.LOW, SkyBackground.PERCENT_80), 55.0 * 60);
-        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.z_G0328, AmpGain.LOW, SkyBackground.ANY), 35.8 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.z_G0328, SkyBackground.PERCENT_20), 1.06 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.z_G0328, SkyBackground.PERCENT_50), 1.0 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.z_G0328, SkyBackground.PERCENT_80), 55.0 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.z_G0328, SkyBackground.ANY), 35.8 * 60);
 
     }
 
