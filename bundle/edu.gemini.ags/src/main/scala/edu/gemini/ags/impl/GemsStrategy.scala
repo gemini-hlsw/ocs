@@ -217,17 +217,13 @@ trait GemsStrategy extends AgsStrategy {
     import AgsMagnitude._
     val cond = ctx.getConditions
     val mags = magnitudes(ctx, mt).toMap
-    def lim(gp: GuideProbe): Option[MagnitudeConstraints] = {
-        val r = autoSearchLimitsCalc(mags(gp), cond)
-        // FIXME, this should use MagnitudeRange
-        Some(MagnitudeConstraints(MagnitudeBand.R, r.faintnessConstraint, r.saturationConstraint))
-      }
+    def lim(gp: GuideProbe): Option[MagnitudeRange] = autoSearchLimitsCalc(mags(gp), cond).some
 
     val odgwMagLimits = (lim(GsaoiOdgw.odgw1) /: GsaoiOdgw.values().drop(1)) { (ml, odgw) =>
-      (ml |@| lim(odgw))(_ union _).flatten
+      (ml |@| lim(odgw))(_ union _)
     }
     val canMagLimits = (lim(Canopus.Wfs.cwfs1) /: Canopus.Wfs.values().drop(1)) { (ml, can) =>
-      (ml |@| lim(can))(_ union _).flatten
+      (ml |@| lim(can))(_ union _)
     }
 
     val canopusConstraint = canMagLimits.map(c => CatalogQuery.catalogQueryForGems(CanopusTipTiltId, ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, Canopus.Wfs.Group.instance.getRadiusLimits.toNewModel), c.some))

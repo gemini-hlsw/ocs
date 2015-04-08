@@ -49,7 +49,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
 
       val estimate = TestGemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())
       Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
-    }.pendingUntilFixed
+    }
     "support search" in {
       val ra = Angle.fromHMS(3, 19, 48.2341).getOrElse(Angle.zero)
       val dec = Angle.fromDMS(41, 30, 42.078).getOrElse(Angle.zero)
