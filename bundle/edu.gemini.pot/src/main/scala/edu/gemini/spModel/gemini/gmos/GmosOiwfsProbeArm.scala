@@ -5,16 +5,7 @@ import java.awt.geom.{Rectangle2D, Point2D, AffineTransform}
 
 import edu.gemini.shared.util.immutable.ImPolygon
 import edu.gemini.skycalc.Offset
-<<<<<<< HEAD
-<<<<<<< HEAD
 import edu.gemini.spModel.core.{Angle, Coordinates}
-import edu.gemini.spModel.core.AngleSyntax._
-=======
-import edu.gemini.spModel.core.{Site, Angle, Coordinates}
->>>>>>> OCSADV-256: Moving along for F2 OI vignetting support, and major refactor.
-=======
-import edu.gemini.spModel.core.{Angle, Coordinates}
->>>>>>> OCSADV-256: Extracted the F2 OI probe from the TPE into the model.
 import edu.gemini.spModel.inst.{ArmAdjustment, ProbeArmGeometry}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.telescope.IssPort
@@ -68,11 +59,11 @@ class GmosOiwfsProbeArm[D  <: Enum[D]  with GmosCommonType.Disperser,
         case _ => None
       }
     } yield {
-      val flip        = if (ctx.getIssPort == IssPort.SIDE_LOOKING) -1 else 1
-      val posAngle    = ctx.getPositionAngle.toRadians.getMagnitude
-      val offsetPt    = new Point2D.Double(-offset.p.toArcsecs.getMagnitude, -offset.q.toArcsecs.getMagnitude)
+      val flip = if (ctx.getIssPort == IssPort.SIDE_LOOKING) -1 else 1
+      val posAngle = ctx.getPositionAngle.toRadians.getMagnitude
+      val offsetPt = new Point2D.Double(-offset.p.toArcsecs.getMagnitude, -offset.q.toArcsecs.getMagnitude)
       val guideStarPt = guideStarPoint(ctx, guideStarCoords)
-      val angle       = armAngle(wfsOffset, posAngle, guideStarPt, offsetPt, flip)
+      val angle = armAngle(wfsOffset, posAngle, guideStarPt, offsetPt, flip)
       ArmAdjustment(angle, guideStarPt)
     }
   }
