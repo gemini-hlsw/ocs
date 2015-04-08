@@ -15,6 +15,7 @@ import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Trio;
 import edu.gemini.shared.util.immutable.Tuple3;
+import edu.gemini.skycalc.Coordinates;
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
@@ -39,7 +40,7 @@ public final class AltairRule implements IRule {
     private static final String CASSEGRAIN_FIXED = "The Cassegrain Rotator is fixed so the field orientation will rotate on the sky";
     private static final String ND_FILTER_NGS_FAINT = "The ND filter is not necessary for stars fainter than R=6.5";
     private static final String ND_FILTER_NGS_BRIGHT = "The ND filter must be used for stars brighter than R=5.5";
-    private static final String NO_FIELD_LENS = "The Altair field lens is recommended for most observations";
+    private static final String NO_FIELD_LENS = "The Altair field lens is recommended for off-axis targets";
     private static final String LGS_NO_FIELD_LENS = "Fieldlens should be used in the LGS mode";
 //    private static final String NO_ND_FILTER_LGS_BRIGHT = "Altair ND filter should be used for LGS stars brighter than R=10.5";
     private static final String ND_FILTER_LGS_BRIGHT = "Altair LGS cannot be used for LGS stars brighter than R=2.5 even with the ND filter";
@@ -171,8 +172,9 @@ public final class AltairRule implements IRule {
                     boolean isPwfs  = (altair.getMode() == AltairParams.Mode.LGS_P1);
                     boolean isAowfs = (altair.getMode() == AltairParams.Mode.LGS);
                     if (altair.getGuideStarType() == AltairParams.GuideStarType.NGS) {
-                        if (altair.getFieldLens() == AltairParams.FieldLens.OUT) {
-                            //Altair NGS without Field Lens (Warning: The Altair field lens is recommended for most observations.)
+                        final boolean offAxis = altairOffAxisGuiding(target.getTargetEnvironment());
+                        if (offAxis && altair.getFieldLens() == AltairParams.FieldLens.OUT) {
+                            //Altair NGS without Field Lens (Warning: The Altair field lens is recommended for off-axis targets.)
                             problems.addWarning(PREFIX + "NO_FIELD_LENS", NO_FIELD_LENS, aoNode);
                         }
                         if (!isPwfs && minMag != null) {
@@ -277,5 +279,19 @@ public final class AltairRule implements IRule {
                 return new Trio<Double, Double, Boolean>(minMag, maxMag, inRange);
         }
         return null;
+    }
+
+    // Check if the primary guide target for Altair is off-axis (i.e. has different coordinates from base target).
+    private static boolean altairOffAxisGuiding(final TargetEnvironment targets) {
+        final Option<GuideProbeTargets> altairTargets = targets.getPrimaryGuideProbeTargets(AltairAowfsGuider.instance);
+        if (altairTargets.isDefined()) {
+            final Option<SPTarget> primaryAltairTarget = altairTargets.getValue().getPrimary();
+            if (primaryAltairTarget.isDefined()) {
+                final Coordinates science = targets.getBase().getTarget().getSkycalcCoordinates();
+                final Coordinates altair  = primaryAltairTarget.getValue().getTarget().getSkycalcCoordinates();
+                return !science.equals(altair);
+            }
+        }
+        return false;
     }
 }
