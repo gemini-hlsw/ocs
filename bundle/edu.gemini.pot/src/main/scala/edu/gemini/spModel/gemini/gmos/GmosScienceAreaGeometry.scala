@@ -13,7 +13,7 @@ class GmosScienceAreaGeometry[I  <: InstGmosCommon[D,F,P,SM],
                               D  <: Enum[D]  with GmosCommonType.Disperser,
                               F  <: Enum[F]  with GmosCommonType.Filter,
                               P  <: Enum[P]  with GmosCommonType.FPUnit,
-                              SM <: Enum[SM] with GmosCommonType.StageMode](inst0: I) extends ScienceAreaGeometry[I] {
+                              SM <: Enum[SM] with GmosCommonType.StageMode](inst0: I) extends ScienceAreaGeometry {
   import GmosScienceAreaGeometry._
 
   override def geometry: List[Shape] = {

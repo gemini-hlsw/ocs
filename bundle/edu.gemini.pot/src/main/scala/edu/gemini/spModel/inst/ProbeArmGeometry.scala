@@ -10,6 +10,7 @@ import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
 
@@ -18,17 +19,17 @@ import scala.collection.JavaConverters._
 /**
  * Geometry (represented by a list of shapes) for a guide probe arm.
  */
-trait ProbeArmGeometry {
+trait ProbeArmGeometry[I <: SPInstObsComp] {
   private lazy val PZ = new Point2D.Double(0.0, 0.0)
 
   /**
    * Create a list of Shape representing the probe arm and all its components (e.g. pickoff mirror).
    * @return the list of shapes
    */
-  def geometry: List[Shape]
+  def geometry(inst: I): List[Shape]
 
-  def geometryAsJava: ImList[Shape] =
-    DefaultImList.create(geometry.asJava)
+  def geometryAsJava(inst: I): ImList[Shape] =
+    DefaultImList.create(geometry(inst).asJava)
 
   /**
    * An instance of the probe being represented by this class.
@@ -125,8 +126,9 @@ object ProbeArmGeometry {
   }
 
   def guideStarPoint(ctx: ObsContext, guideStarCoords: Coordinates): Point2D = {
+    import edu.gemini.spModel.core.AngleSyntax._
     val baseCoords      = ctx.getBaseCoordinates.toNewModel
     val guideStarOffset = Coordinates.difference(baseCoords, guideStarCoords).offset
-    new Point2D.Double(-guideStarOffset.p.toArcsecs, -guideStarOffset.q.toArcsecs).toCanonicalArcsec
+    new Point2D.Double(-guideStarOffset.p.arcsecs, -guideStarOffset.q.arcsecs).toCanonicalArcsec
   }
 }

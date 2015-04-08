@@ -11,7 +11,7 @@ import scala.collection.JavaConverters._
 import scalaz.Scalaz._
 import scalaz._
 
-class F2ScienceAreaGeometry(inst0: Flamingos2) extends ScienceAreaGeometry[Flamingos2] {
+class F2ScienceAreaGeometry(inst0: Flamingos2) extends ScienceAreaGeometry {
   import F2ScienceAreaGeometry._
 
   override def geometry: List[Shape] = {

@@ -10,7 +10,7 @@ import scala.collection.JavaConverters._
 /**
  * Geometry (represented by a single Shape) for a science area.
  */
-trait ScienceAreaGeometry[I <: SPInstObsComp] {
+trait ScienceAreaGeometry {
   /**
    * Create the shapes for the science area based on the instrument configuration.
    * @return a list representing the shapes, or an empty list if no such shape exists

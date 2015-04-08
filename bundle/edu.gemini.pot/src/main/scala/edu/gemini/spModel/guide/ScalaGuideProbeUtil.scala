@@ -12,9 +12,9 @@ import edu.gemini.spModel.telescope.IssPort
 import scala.collection.JavaConversions._
 
 object ScalaGuideProbeUtil {
-  def calculateVignetting[I <: SPInstObsComp with VignettableScienceAreaInstrument[I]](ctx0: ObsContext,
-                                                                                       coordinates: Coordinates,
-                                                                                       probeArmGeometry0: ProbeArmGeometry): Double = {
+  def calculateVignetting[I <: SPInstObsComp with VignettableScienceAreaInstrument](ctx0: ObsContext,
+                                                                                    coordinates: Coordinates,
+                                                                                    probeArmGeometry0: ProbeArmGeometry[I]): Double = {
     for {
       ctx                 <- Option(ctx0)
       probeArmGeometry    <- Option(probeArmGeometry0)
@@ -22,9 +22,7 @@ object ScalaGuideProbeUtil {
       scienceAreaGeometry <- Option(inst.getVignettableScienceArea)
     } yield {
       val flip = if (ctx.getIssPort == IssPort.SIDE_LOOKING) -1.0 else 1.0
-      val inst = ctx.getInstrument.asInstanceOf[I]
-
-      val probeArmShapes = probeArmGeometry.geometry
+      val probeArmShapes = probeArmGeometry.geometry(inst)
 
       // Combine all the science areas together as we are only interested in the total final shape.
       val scienceArea = FeatureGeometry.transformScienceAreaForContext(scienceAreaGeometry.geometry, ctx).foldLeft(new Area) {
@@ -38,8 +36,6 @@ object ScalaGuideProbeUtil {
           // If an adjustment exists, calculate the vignetting for this offset.
           val vignetting = probeArmGeometry.armAdjustment(ctx, coordinates, offset).map { armAdjustment =>
             // Adjust the science area for the current offset.
-//            val x = -offset.p.toArcsecs.getMagnitude
-//            val y = -offset.q.toArcsecs.getMagnitude * flip
             val x = -(offset.p.toNewModel.toNormalizedArcseconds)
             val y = -(offset.q.toNewModel.toNormalizedArcseconds * flip)
             val trans = AffineTransform.getTranslateInstance(x, y)
