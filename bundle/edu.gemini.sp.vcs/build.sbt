@@ -25,6 +25,5 @@ OsgiKeys.bundleSymbolicName := name.value
 OsgiKeys.dynamicImportPackage := Seq("")
 
 OsgiKeys.exportPackage := Seq(
-  "edu.gemini.sp.vcs.*;-noimport:=true",
-  "edu.gemini.sp.vcs.diff",
-  "edu.gemini.sp.vcs.diff.osgi")
+  "edu.gemini.sp.vcs;-noimport:=true",
+  "edu.gemini.sp.vcs.diff")
