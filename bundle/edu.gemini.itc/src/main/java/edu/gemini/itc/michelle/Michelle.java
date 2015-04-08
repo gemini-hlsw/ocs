@@ -41,12 +41,13 @@ public class Michelle extends Instrument {
     private Filter _Filter;
     private MichelleGratingOptics _gratingOptics;
     private Detector _detector;
-    private double _sampling;
-    private String _filterUsed;
-    private String _grating;
+    private final double _sampling;
+    private final String _filterUsed;
+    private final String _grating;
     private String _focalPlaneMask;
     private CalculationMethod _mode;
     private double _centralWavelength;
+    private final boolean _usesPolarimetry;
 
     public Michelle(MichelleParameters mp, ObservationDetails odp) {
         super(INSTR_DIR, FILENAME);
@@ -55,6 +56,7 @@ public class Michelle extends Instrument {
         _grating = mp.getGrating();
         _filterUsed = mp.getFilter();
         _centralWavelength = mp.getInstrumentCentralWavelength();
+        _usesPolarimetry = mp.polarimetryIsUsed();
 
         _mode = odp.getMethod();
 
@@ -217,6 +219,27 @@ public class Michelle extends Instrument {
         return LOW_GAIN;
     }
 
+    public double getFPMask() {
+        //if (_FP_Mask.equals(NOSLIT)) return null;
+        if (_focalPlaneMask.equals(MichelleParameters.SLIT0_19))
+            return 0.19;
+        else if (_focalPlaneMask.equals(MichelleParameters.SLIT0_38))
+            return 0.38;
+        else if (_focalPlaneMask.equals(MichelleParameters.SLIT0_57))
+            return 0.57;
+        else if (_focalPlaneMask.equals(MichelleParameters.SLIT0_76))
+            return 0.76;
+        else if (_focalPlaneMask.equals(MichelleParameters.SLIT1_52))
+            return 1.52;
+        else
+            return -1.0;
+    }
+
+    public boolean polarimetryIsUsed() {
+        return _usesPolarimetry;
+    }
+
+
     /**
      * The prefix on data file names for this instrument.
      */
@@ -224,28 +247,15 @@ public class Michelle extends Instrument {
         return INSTR_PREFIX;
     }
 
-    public edu.gemini.itc.operation.DetectorsTransmissionVisitor getDetectorTransmision() {
+    public DetectorsTransmissionVisitor getDetectorTransmision() {
         return _dtv;
     }
 
+    public String getFocalPlaneMask() {
+        return _focalPlaneMask;
+    }
 
-    public String toString() {
-
-        String s = "Instrument configuration: \n";
-        s += super.opticalComponentsToString();
-
-        if (!_focalPlaneMask.equals(MichelleParameters.NO_SLIT))
-            s += "<LI> Focal Plane Mask: " + _focalPlaneMask;
-        s += "\n";
-        s += "\n";
-        if (_mode.isSpectroscopy())
-            s += "<L1> Central Wavelength: " + _centralWavelength + " nm" + "\n";
-        s += "Spatial Binning: 1\n";
-        if (_mode.isSpectroscopy())
-            s += "Spectral Binning: 1\n";
-        s += "Pixel Size in Spatial Direction: " + getPixelSize() + "arcsec\n";
-        if (_mode.isSpectroscopy())
-            s += "Pixel Size in Spectral Direction: " + getGratingDispersion_nmppix() + "nm\n";
-        return s;
+    public double getCentralWavelength() {
+        return _centralWavelength;
     }
 }

@@ -1,6 +1,6 @@
 package edu.gemini.itc.web.servlets;
 
-import edu.gemini.itc.shared.ITCMultiPartParser;
+import edu.gemini.itc.web.ITCMultiPartParser;
 import edu.gemini.itc.shared.ServerInfo;
 
 import javax.servlet.ServletException;

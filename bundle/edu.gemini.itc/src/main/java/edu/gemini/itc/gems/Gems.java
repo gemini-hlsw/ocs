@@ -1,9 +1,8 @@
 package edu.gemini.itc.gems;
 
-import edu.gemini.itc.shared.SourceDefinition;
 import edu.gemini.itc.shared.AOSystem;
-import edu.gemini.itc.shared.FormatStringWriter;
 import edu.gemini.itc.shared.SampledSpectrumVisitor;
+import edu.gemini.itc.shared.SourceDefinition;
 
 /**
  * Gems AO class
@@ -81,6 +80,14 @@ public class Gems implements AOSystem {
 
     public double getr0() {
         return (0.1031 / uncorrectedSeeing) * Math.pow(wavelength / 500, 1.2);
+    }
+
+    public double getWavelength() {
+        return wavelength;
+    }
+
+    public String getStrehlBand() {
+        return strehlBand;
     }
 
     // Function that calculates the strehl from the fit, distance and magnitude
@@ -178,21 +185,6 @@ public class Gems implements AOSystem {
         }
     }
 
-
-    public String printSummary() {
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(3);
-        String s = "r0(" + wavelength + "nm) = " + device.toString(getr0()) + " m\n";
-        s += "Average Strehl = " + device.toString(getAvgStrehl() * 100) + "%\n";
-        s += "FWHM of an AO-corrected core = ";
-        try {
-            s += device.toString(getAOCorrectedFWHM(true)) + " arcsec\n";
-        } catch (IllegalArgumentException ex) {
-            s += "<span style=\"color:red; font-style:italic;\">Error: " + ex.getMessage() + "</span>\n";
-        }
-
-        return s;
-    }
 
     //Used for debugging
     public String toString() {

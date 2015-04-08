@@ -8,13 +8,16 @@ import edu.gemini.itc.shared.VisitableSampledSpectrum;
  * The SpecS2NVisitor is used to calculate the s2n of an observation using
  * the niri grism set.
  */
-public class SpecS2NVisitor implements SampledSpectrumVisitor {
-    // private ArraySpectrum _telescopeBack = null;
+public class SpecS2NVisitor implements SampledSpectrumVisitor, SpecS2N {
+
+    private final double spec_Npix;
+    private final double spec_frac_with_source;
+
     private VisitableSampledSpectrum source_flux, halo_flux, background_flux, spec_noise,
             spec_sourceless_noise, spec_signal, spec_var_source, spec_var_background,
             sqrt_spec_var_background, spec_exp_s2n, spec_final_s2n;
     private double slit_width, pixel_size, spec_source_fraction, spec_halo_source_fraction,
-            pix_width, spec_Npix, spec_frac_with_source, spec_exp_time, im_qual, uncorrected_im_qual,
+            pix_width, spec_exp_time, im_qual,
             dark_current, read_noise, obs_wave, obs_wave_low, obs_wave_high, grism_res;
     private int spec_number_exposures;
     private boolean haloIsUsed = false;
@@ -47,6 +50,18 @@ public class SpecS2NVisitor implements SampledSpectrumVisitor {
         this.read_noise = read_noise;
         this.spec_number_exposures = spec_number_exposures;
 
+    }
+
+    public double getImageQuality() {
+        return im_qual;
+    }
+
+    public double getSpecNpix() {
+        return spec_Npix;
+    }
+
+    public double getSpecFracWithSource() {
+        return spec_frac_with_source;
     }
 
     /**
@@ -89,9 +104,6 @@ public class SpecS2NVisitor implements SampledSpectrumVisitor {
         background_flux.smoothY(background_smoothing_element);
 
         if (haloIsUsed) {
-            //if (uncorrected_im_qual<slit_width)
-            //	width = uncorrected_im_qual;
-            //else width = slit_width;
             //calc the width of a spectral resolution element in nm
             res_element = obs_wave / grism_res;
             //and the data size in the spectral domain
@@ -210,19 +222,9 @@ public class SpecS2NVisitor implements SampledSpectrumVisitor {
         source_flux = sed;
     }
 
-    public void setHaloSpectrum(VisitableSampledSpectrum sed) {
-        halo_flux = sed;
-        haloIsUsed = true;
-    }
-
     public void setSpecHaloSourceFraction(double spec_halo_source_fraction) {
         this.spec_halo_source_fraction = spec_halo_source_fraction;
     }
-
-    public void setHaloImageQuality(double uncorrected_im_qual) {
-        this.uncorrected_im_qual = uncorrected_im_qual;
-    }
-
 
     public void setBackgroundSpectrum(VisitableSampledSpectrum sed) {
         background_flux = sed;
@@ -234,10 +236,6 @@ public class SpecS2NVisitor implements SampledSpectrumVisitor {
 
     public VisitableSampledSpectrum getBackgroundSpectrum() {
         return sqrt_spec_var_background;
-    }
-
-    public VisitableSampledSpectrum getBackgroundSpectrum_wo_sqrt() {
-        return spec_var_background;
     }
 
     public VisitableSampledSpectrum getExpS2NSpectrum() {

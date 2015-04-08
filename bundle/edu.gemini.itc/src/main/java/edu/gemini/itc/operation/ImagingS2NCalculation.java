@@ -2,21 +2,20 @@ package edu.gemini.itc.operation;
 
 import edu.gemini.itc.gsaoi.Gsaoi;
 import edu.gemini.itc.niri.Niri;
-import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.itc.shared.BinningProvider;
-import edu.gemini.itc.shared.FormatStringWriter;
 import edu.gemini.itc.shared.Instrument;
+import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.itc.trecs.TRecs;
 
 public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
 
-    final double Npix;
-    final double source_fraction;
-    final double dark_current;
-    final double sed_integral;
-    final double sky_integral;
-    final double skyAper;
-    final int    elfinParam;
+    private final double Npix;
+    private final double source_fraction;
+    private final double dark_current;
+    private final double sed_integral;
+    private final double sky_integral;
+    private final double skyAper;
+    private final int    elfinParam;
 
     double var_source, var_background, var_dark, var_readout,
             noise, sourceless_noise, signal,
@@ -71,32 +70,11 @@ public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
         this.secondary_source_fraction = secondary_source_fraction;
     }
 
-    public String getTextResult(FormatStringWriter device) {
-        StringBuffer sb = new StringBuffer();
-        sb.append("Contributions to total noise (e-) in aperture (per exposure):\n");
-        sb.append("Source noise = " +
-                device.toString(Math.sqrt(var_source)) + "\n");
-        sb.append("Background noise = " +
-                device.toString(Math.sqrt(var_background)) + "\n");
-        sb.append("Dark current noise = " +
-                device.toString(Math.sqrt(var_dark)) + "\n");
-        sb.append("Readout noise = " +
-                device.toString(Math.sqrt(var_readout)) + "\n\n");
-
-
-        sb.append("Total noise per exposure = " +
-                device.toString(noise) + "\n");
-        sb.append("Total signal per exposure = " +
-                device.toString(signal) + "\n\n");
-
-        return sb.toString();
-    }
-
-    public String getBackgroundLimitResult() {
-        if (Math.sqrt(var_source + var_dark + var_readout) > Math.sqrt(var_background))
-            return "Warning: observation is NOT background noise limited";
-        else return "Observation is background noise limited.";
-    }
-
+    public double getVarSource() { return var_source; }
+    public double getVarBackground() { return var_background; }
+    public double getVarDark() { return var_dark; }
+    public double getVarReadout() { return var_readout; }
+    public double getNoise() { return noise; }
+    public double getSignal() { return signal; }
 
 }

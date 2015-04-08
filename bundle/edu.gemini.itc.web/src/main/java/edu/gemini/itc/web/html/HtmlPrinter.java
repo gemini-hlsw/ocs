@@ -1,12 +1,9 @@
-package edu.gemini.itc.web;
+package edu.gemini.itc.web.html;
 
-import edu.gemini.itc.shared.ObservationDetails;
-import edu.gemini.itc.shared.ObservingConditions;
-import edu.gemini.itc.shared.PlottingDetails;
-import edu.gemini.itc.shared.TelescopeDetails;
-import edu.gemini.itc.shared.SourceDefinition;
-import edu.gemini.itc.shared.FormatStringWriter;
-import edu.gemini.itc.shared.Library;
+import edu.gemini.itc.altair.Altair;
+import edu.gemini.itc.gems.Gems;
+import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.telescope.IssPort;
 
 /**
@@ -151,6 +148,76 @@ public final class HtmlPrinter {
         sb.append("<LI>" + portToString(pdp.getInstrumentPort()) + " looking port.\n");
         sb.append("<LI>wavefront sensor: " + wfs + "\n");
         return sb.toString();
+    }
+
+    public static String printSummary(final Altair altair) {
+        final FormatStringWriter device = new FormatStringWriter();
+        device.setPrecision(3);
+        String s = "r0(" + altair.getWavelength() + "nm) = " + device.toString(altair.getr0()) + " m\n";
+        s += "Strehl = " + device.toString(altair.getStrehl()) + "\n";
+        s += "FWHM of an AO-corrected core = " + device.toString(altair.getAOCorrectedFWHM()) + " arcsec\n";
+        return s;
+    }
+
+    public static String printParameterSummary(final Altair altair) {
+        StringBuffer sb = new StringBuffer();
+
+        // This object is used to format numerical strings.
+        FormatStringWriter device = new FormatStringWriter();
+        device.setPrecision(2);  // Two decimal places
+        device.clear();
+
+        sb.append("Altair Guide Star properties:");
+        if (altair.getWFSMode().equals(AltairParams.GuideStarType.LGS)) {
+            sb.append("<LI>Laser Guide Star Mode");
+
+        } else {
+            sb.append("<LI>Natural Guide Star Mode");
+            sb.append("<LI>Guide Star Seperation " + altair.getGuideStarSeparation());
+            sb.append("<LI>Guide Star Magnitude " + altair.getGuideStarMagnitude());
+        }
+
+        sb.append("<BR>");
+        return sb.toString();
+    }
+
+    public static String printSummary(final Gems gems) {
+        final FormatStringWriter device = new FormatStringWriter();
+        device.setPrecision(3);
+        String s = "r0(" + gems.getWavelength() + "nm) = " + device.toString(gems.getr0()) + " m\n";
+        s += "Average Strehl = " + device.toString(gems.getAvgStrehl() * 100) + "%\n";
+        s += "FWHM of an AO-corrected core = ";
+        try {
+            s += device.toString(gems.getAOCorrectedFWHM(true)) + " arcsec\n";
+        } catch (IllegalArgumentException ex) {
+            s += "<span style=\"color:red; font-style:italic;\">Error: " + ex.getMessage() + "</span>\n";
+        }
+
+        return s;
+    }
+
+    public static String printParameterSummary(final Gems gems) {
+        StringBuffer sb = new StringBuffer();
+
+        // This object is used to format numerical strings.
+        FormatStringWriter device = new FormatStringWriter();
+        device.setPrecision(2);  // Two decimal places
+
+        sb.append("Average Strehl:\t" + gems.getAvgStrehl() + "\n");
+        sb.append("Strehl Band:\t" + gems.getStrehlBand() + "\n");
+        sb.append("\n");
+
+        device.clear();
+
+        return sb.toString();
+    }
+
+    public static String opticalComponentsToString(final Instrument instrument) {
+        String s = "Optical Components: <BR>";
+        for (final TransmissionElement te : instrument.getComponents()) {
+            s += "<LI>" + te.toString() + "<BR>";
+        }
+        return s;
     }
 
     // compatibility for regression testing, can go away after regression tests have passed

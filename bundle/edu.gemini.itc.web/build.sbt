@@ -27,6 +27,7 @@ OsgiKeys.exportPackage := Seq()
 
 OsgiKeys.importPackage := Seq(
   "!com.google.inject.cglib.asm.util.*",
+  "!com.keypoint.*",
   "!com.lowagie.text.*",
   "!com.opensymphony.*",
   "!javax.portlet.*",

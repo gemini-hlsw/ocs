@@ -2,11 +2,18 @@ package edu.gemini.itc.web
 
 import javax.servlet.http.HttpServletRequest
 
+import edu.gemini.itc.acqcam.AcquisitionCamParameters
 import edu.gemini.itc.altair.AltairParameters
+import edu.gemini.itc.flamingos2.Flamingos2Parameters
+import edu.gemini.itc.gems.GemsParameters
+import edu.gemini.itc.gnirs.GnirsParameters
+import edu.gemini.itc.gsaoi.GsaoiParameters
+import edu.gemini.itc.michelle.MichelleParameters
+import edu.gemini.itc.nifs.NifsParameters
+import edu.gemini.itc.niri.NiriParameters
+import edu.gemini.itc.shared.SourceDefinition._
 import edu.gemini.itc.shared._
-import SourceDefinition._
-import edu.gemini.itc.service._
-import edu.gemini.itc.shared._
+import edu.gemini.itc.trecs.TRecsParameters
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer
@@ -80,6 +87,23 @@ object ITCRequest {
     new ObservingConditions(iq, cc, wv, sb, airmass)
   }
 
+  def acqCamParameters(r: ITCMultiPartParser): AcquisitionCamParameters = {
+    val pc          = ITCRequest.from(r)
+    val colorFilter = pc.parameter("instrumentFilter")
+    val ndFilter    = pc.parameter("instrumentNDFilter")
+
+    new AcquisitionCamParameters(colorFilter, ndFilter)
+  }
+
+  def flamingos2Parameters(r: ITCMultiPartParser): Flamingos2Parameters = {
+    val pc          = ITCRequest.from(r)
+    val colorFilter = pc.parameter("instrumentFilter")
+    val grism       = pc.parameter("instrumentDisperser")
+    val readNoise   = pc.parameter("readNoise")
+    val fpMask      = pc.parameter("instrumentFPMask")
+    new Flamingos2Parameters(colorFilter, grism, fpMask, readNoise)
+  }
+
   def gmosParameters(r: ITCMultiPartParser): GmosParameters = {
     val pc          = ITCRequest.from(r)
     val site        = pc.enumParameter(classOf[Site])
@@ -102,7 +126,85 @@ object ITCRequest {
     new GmosParameters(filter, grating, centralWavelength, fpMask, spatBinning, specBinning, ifuMethod, ccdType, site)
   }
 
-  def plotParamters(r: ITCMultiPartParser): PlottingDetails = {
+  def gnirsParameters(r: ITCMultiPartParser): GnirsParameters = {
+    val p           = ITCRequest.from(r)
+    val grating     = p.parameter("instrumentDisperser")
+    val camera      = p.parameter("instrumentCamera")
+    val xDisp       = p.parameter("xdisp")
+    val readNoise   = p.parameter("readNoise")
+    val centralWl0  = p.parameter("instrumentCentralWavelength")
+    val centralWl   = if (centralWl0.trim().isEmpty) "0" else centralWl0
+    val fpMask     = p.parameter("instrumentFPMask")
+    new GnirsParameters(camera, grating, readNoise, xDisp, centralWl, fpMask)
+  }
+
+  def gsaoiParameters(r: ITCMultiPartParser): GsaoiParameters = {
+    val p           = ITCRequest.from(r)
+    val filter      = p.parameter("instrumentFilter")
+    val readMode    = p.parameter("readMode")
+    new GsaoiParameters(filter, readMode)
+  }
+
+  def michelleParameters(r: ITCMultiPartParser): MichelleParameters = {
+    val p           = ITCRequest.from(r)
+    val filter      = p.parameter("instrumentFilter")
+    val grating     = p.parameter("instrumentDisperser")
+    val centralWl0  = p.parameter("instrumentCentralWavelength")
+    val centralWl   = if (centralWl0.trim().isEmpty) "0" else centralWl0
+    val fpMask      = p.parameter("instrumentFPMask")
+    val polarimetry = p.parameter("polarimetry")
+    new MichelleParameters(filter, grating, centralWl, fpMask, polarimetry)
+  }
+
+  def niriParameters(r: ITCMultiPartParser): NiriParameters = {
+    val p           = ITCRequest.from(r)
+    val filter      = p.parameter("instrumentFilter")
+    val grism       = p.parameter("instrumentDisperser")
+    val camera      = p.parameter("instrumentCamera")
+    val readNoise   = p.parameter("readNoise")
+    val wellDepth   = p.parameter("wellDepth")
+    val fpMask      = p.parameter("instrumentFPMask")
+    new NiriParameters(filter, grism, camera, readNoise, wellDepth, fpMask)
+  }
+
+  def nifsParameters(r: ITCMultiPartParser): NifsParameters = {
+    val p           = ITCRequest.from(r)
+    val filter      = p.parameter("instrumentFilter")
+    val grating     = p.parameter("instrumentDisperser")
+    val readNoise   = p.parameter("readNoise")
+    val centralWl0  = p.parameter("instrumentCentralWavelength")
+    val centralWl   = if (centralWl0.trim().isEmpty) "0" else centralWl0
+    val ifuMethod   = p.parameter("ifuMethod")
+    val (offset, min, max, numX, numY, centerX, centerY) = ifuMethod match {
+      case "singleIFU"  =>
+        val offset = p.parameter("ifuOffset")
+        (offset, "", "", "", "", "", "")
+      case "radialIFU"  =>
+        val min = p.parameter("ifuMinOffset")
+        val max = p.parameter("ifuMaxOffset")
+        ("", min, max, "", "", "", "")
+      case "summedApertureIFU" =>
+        val numX = p.parameter("ifuNumX")
+        val numY = p.parameter("ifuNumY")
+        val cenX = p.parameter("ifuCenterX")
+        val cenY = p.parameter("ifuCenterY")
+        ("", "", "", numX, numY, cenX, cenY)
+    }
+    new NifsParameters(filter, grating, readNoise, centralWl, ifuMethod, offset, min, max, numX, numY, centerX, centerY)
+   }
+
+  def trecsParameters(r: ITCMultiPartParser): TRecsParameters = {
+    val p           = ITCRequest.from(r)
+    val filter      = p.parameter("instrumentFilter")
+    val window      = p.parameter("instrumentWindow")
+    val grating     = p.parameter("instrumentDisperser")
+    val centralWl0  = p.parameter("instrumentCentralWavelength")
+    val centralWl   = if (centralWl0.trim().isEmpty) "0" else centralWl0
+    val fpMask      = p.parameter("instrumentFPMask")
+    new TRecsParameters(filter, window, grating, centralWl, fpMask)
+  }
+
+  def plotParameters(r: ITCMultiPartParser): PlottingDetails = {
     val pc      = ITCRequest.from(r)
     val limits  = pc.enumParameter(classOf[PlottingDetails.PlotLimits])
     val lower   = pc.doubleParameter("plotWavelengthL")
@@ -119,6 +221,13 @@ object ITCRequest {
     val wfs                  = pc.enumParameter(classOf[TelescopeDetails.Wfs])
     val altairUsed           = wfs eq TelescopeDetails.Wfs.AOWFS
     new AltairParameters(guideStarSeperation, guideStarMagnitude, fieldLens, wfsMode, altairUsed)
+  }
+
+  def gemsParameters(r: ITCMultiPartParser): GemsParameters = {
+    val pc         = ITCRequest.from(r)
+    val avgStrehl  = pc.doubleParameter("avgStrehl") / 100.0
+    val strehlBand = pc.parameter("strehlBand")
+    new GemsParameters(avgStrehl, strehlBand)
   }
 
   def observationParameters(r: ITCMultiPartParser): ObservationDetails = {
@@ -210,6 +319,15 @@ object ITCRequest {
 
     // WOW, finally we've got everything in place..
     new SourceDefinition(spatialProfile, sourceDefinition, normBand, redshift)
+  }
+
+
+  def parameters(r: ITCMultiPartParser): Parameters = {
+    val source        = ITCRequest.sourceDefinitionParameters(r)
+    val observation   = ITCRequest.observationParameters(r)
+    val conditions    = ITCRequest.obsConditionParameters(r)
+    val telescope     = ITCRequest.teleParameters(r)
+    Parameters(source, observation, conditions, telescope)
   }
 
 

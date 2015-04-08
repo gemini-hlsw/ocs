@@ -2,7 +2,6 @@ package edu.gemini.itc.altair;
 
 import edu.gemini.itc.gems.GemsFluxAttenuationVisitor;
 import edu.gemini.itc.shared.AOSystem;
-import edu.gemini.itc.shared.FormatStringWriter;
 import edu.gemini.itc.shared.SampledSpectrumVisitor;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 
@@ -52,6 +51,18 @@ public class Altair implements AOSystem {
     }
 
     //Methods
+    public AltairParams.GuideStarType getWFSMode() {
+        return altair.getWFSMode();
+    }
+
+    public double getGuideStarSeparation() {
+        return altair.getGuideStarSeperation();
+    }
+
+    public double getGuideStarMagnitude() {
+        return altair.getGuideStarMagnitude();
+    }
+
     public SampledSpectrumVisitor getBackgroundVisitor() {
         return altairBackground;
     }
@@ -70,6 +81,10 @@ public class Altair implements AOSystem {
 
     public double getr0() {
         return (0.1031 / uncorrectedSeeing) * Math.pow(wavelength / 500, 1.2);
+    }
+
+    public double getWavelength() {
+        return wavelength;
     }
 
     // Calculates StrehlFit which is used to calc the strehl
@@ -141,16 +156,6 @@ public class Altair implements AOSystem {
 
     private boolean fieldLensIsIn() {
         return altair.getFieldLens().equals(AltairParams.FieldLens.IN);
-    }
-
-
-    public String printSummary() {
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(3);
-        String s = "r0(" + wavelength + "nm) = " + device.toString(getr0()) + " m\n";
-        s += "Strehl = " + device.toString(getStrehl()) + "\n";
-        s += "FWHM of an AO-corrected core = " + device.toString(getAOCorrectedFWHM()) + " arcsec\n";
-        return s;
     }
 
 }

@@ -1,12 +1,4 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-
-package edu.gemini.itc.shared;
+package edu.gemini.itc.web.html;
 
 import java.io.PrintStream;
 import java.io.StringWriter;
@@ -73,11 +65,6 @@ public class FormatStringWriter {
         return this;
     }
 
-    public FormatStringWriter setFill(char c) {
-        _cFillChar = c;
-        return this;
-    }
-
     public FormatStringWriter setWidth(int iWidth) {
         // negative number set width to zero
         _jFieldWidth = (iWidth > 0) ? (short) iWidth : 0;
@@ -87,10 +74,6 @@ public class FormatStringWriter {
     public FormatStringWriter setPrecision(int iPrecision) {
         _jPrecision = (iPrecision >= 0) ? (short) iPrecision : 6;
         return this;
-    }
-
-    public int getPrecision() {
-        return _jPrecision;
     }
 
     public FormatStringWriter write(String sString) {
@@ -164,19 +147,6 @@ public class FormatStringWriter {
         _jFieldWidth = _jDEFAULT_FIELD_WIDTH;
     }
 
-    // All integers are treated the same
-    public FormatStringWriter write(byte b) {
-        return write((long) b);
-    }
-
-    public FormatStringWriter write(short j) {
-        return write((long) j);
-    }
-
-    public FormatStringWriter write(int i) {
-        return write((long) i);
-    }
-
     public FormatStringWriter write(long l) {
         // This routine is ultimately used for all integer types.
         // Branch on base.
@@ -191,17 +161,12 @@ public class FormatStringWriter {
         }
     }
 
-    // All floats are treated the same
-    public FormatStringWriter write(float f) {
-        return _writeDoubleString(new Float(f).toString().trim());
-    }
-
     public FormatStringWriter write(double d) {
-        return _writeDoubleString(new Double(d).toString().trim());
+        return _writeDoubleString(Double.toString(d).trim());
     }
 
     private FormatStringWriter _writeDoubleString(String sDouble) {
-        if (sDouble.indexOf("E") >= 0) {
+        if (sDouble.contains("E")) {
             write(sDouble);
             return this;
         }
@@ -253,14 +218,6 @@ public class FormatStringWriter {
         return write(sWholePart + sDecimal + sFractionPart);
     }
 
-    public FormatStringWriter write(boolean b) {
-        return write(b ? "true" : "false");
-    }
-
-    public FormatStringWriter write(char c) {
-        return write(c + "");
-    }
-
     public FormatStringWriter clear() {
         _sStringWriter = null;  // Hint to gc
         _sStringWriter = new StringWriter();
@@ -269,10 +226,6 @@ public class FormatStringWriter {
 
     public FormatStringWriter println() {
         return println(System.out);
-    }
-
-    public FormatStringWriter print() {
-        return print(System.out);
     }
 
     public FormatStringWriter println(PrintStream out) {
@@ -316,138 +269,4 @@ public class FormatStringWriter {
         return s;
     }
 
-    private String _zeroAsDouble() {
-        String s = "0.";
-        for (int i = 0; i < getPrecision(); ++i) {
-            s += 0;
-        }
-        return s;
-    }
-
-    private String _zeroAsInt(int digits) {
-        String s = new String();
-        for (int i = 0; i < digits; ++i) {
-            s += "0";
-        }
-        return s;
-    }
-
-    private double _log10(double z) {
-        return (Math.log(z) / Math.log(10));
-    }
-
-    private static void pause() {
-        // Pause until user hits <Enter>.
-        try {
-            System.out.print("Press <Enter>..");
-            System.out.flush();
-            System.in.read();
-            System.in.skip(System.in.available());
-        } catch (java.io.IOException e) {
-        }
-    }
-
-    public static void main(String args[]) {
-        FormatStringWriter device = new FormatStringWriter();
-
-        device.setPrecision(2);
-        System.out.println("testing " + device.toString(123.456));
-
-        int ii = 123456789;
-        device.write(ii).println();
-        double dd = 123456789;
-        device.write(dd).println();
-
-        // Test type 'byte'
-        byte b = 111;
-        device.
-                setBase("junk").
-                setWidth(-5).
-                setJustification("junk").
-                write(b).
-                write("\n");
-        System.out.println(device.toString());
-
-        // Test type 'short'
-        short s = 222;
-        device.
-                clear().
-                setBase(OCT).
-                setFill('*').
-                setWidth(5).
-                setJustification(LEFT).
-                write(s).
-                write("\n");
-        System.out.println(device.toString());
-
-        // Test type 'int'
-        int i = 333;
-        device.
-                clear().
-                setBase(HEX).
-                setJustification(RIGHT).
-                write(i).
-                write("\n");
-        System.out.println(device.toString());
-
-        // Test type 'long'
-        long el = 444L;
-        device.
-                clear().
-                setBase(DEC).
-                setFill('#').
-                setWidth(15).
-                write(el).
-                write("\n");
-        System.out.println(device.toString());
-
-        // Test type 'boolean'
-        boolean bool = true;
-        device.
-                clear().
-                write(bool).
-                write("\n");
-        System.out.println(device.toString());
-
-        // Test type 'char'
-        char c = 'A';
-        device.
-                clear().
-                write(c).
-                write('\n');
-        System.out.println(device.toString());
-
-        // Test type 'float'
-        float f = 98.765F;
-        device.
-                clear().
-                setPrecision(-5).
-                write(f).
-                write("\n");
-        System.out.println(device.toString());
-
-        // Test type 'double'
-        double d = 123.456;
-        for (int z = 0; z < 10; ++z) {
-            device.
-                    clear().
-                    setPrecision(z).
-                    write(d).
-                    write("\n");
-            System.out.println(device.toString());
-        }
-
-        // Test type 'double'
-        d = 123;
-        for (int z = 0; z < 10; ++z) {
-            device.
-                    clear().
-                    setPrecision(z).
-                    write(d).
-                    write("\n");
-            System.out.println(device.toString());
-        }
-
-        pause();
-    }
 }

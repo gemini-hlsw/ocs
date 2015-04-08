@@ -1,7 +1,9 @@
-package edu.gemini.itc.baseline.util
+package edu.gemini.itc.web.baseline
 
 import edu.gemini.itc.baseline._
+import edu.gemini.itc.baseline.util.Fixture
 import edu.gemini.itc.shared.InstrumentDetails
+import edu.gemini.itc.web.baseline.Baseline._
 import org.junit.Assert._
 import org.junit.{Ignore, Test}
 
@@ -29,7 +31,7 @@ class BaselineTest {
     // make sure we don't run into the case where two baselines have identical keys
     // (having the hash functions be equal is highly unlikely, but this checks also
     // if our hash values are sound)
-    require (baseSeq.size == baseMap.size, "There are baselines with identical keys!")
+    require(baseSeq.size == baseMap.size, "There are baselines with identical keys!")
     // --
     System.out.println(s"Writing new baseline with ${baseSeq.size} entries")
     Baseline.write(baseSeq)
@@ -38,22 +40,22 @@ class BaselineTest {
   @Ignore
   @Test
   def checkAll(): Unit =
-    baselines().foreach { b => assertTrue(Baseline.checkAgainstBaseline(b))}
+    baselines().foreach { b => assertTrue(Baseline.checkAgainstBaseline(b)) }
 
   private def baselines(): Seq[Baseline] =
-    executeAll(BaselineAcqCam.Fixtures,    BaselineAcqCam.executeRecipe)        ++
-    executeAll(BaselineF2.Fixtures,        BaselineF2.executeRecipe)            ++
-    executeAll(BaselineGmos.Fixtures,      BaselineGmos.executeRecipe)          ++
-    executeAll(BaselineGnirs.Fixtures,     BaselineGnirs.executeRecipe)         ++
-    executeAll(BaselineGsaoi.Fixtures,     BaselineGsaoi.executeRecipe)         ++
-    executeAll(BaselineMichelle.Fixtures,  BaselineMichelle.executeRecipe)      ++
-    executeAll(BaselineNifs.Fixtures,      BaselineNifs.executeRecipe)          ++
-    executeAll(BaselineNiri.Fixtures,      BaselineNiri.executeRecipe)          ++
-    executeAll(BaselineTRecs.Fixtures,     BaselineTRecs.executeRecipe)
+    executeAll(BaselineAcqCam.Fixtures, executeAcqCamRecipe) ++
+      executeAll(BaselineF2.Fixtures, executeF2Recipe) ++
+      executeAll(BaselineGmos.Fixtures, executeGmosRecipe) ++
+      executeAll(BaselineGnirs.Fixtures, executeGnirsRecipe) ++
+      executeAll(BaselineGsaoi.Fixtures, executeGsaoiRecipe) ++
+      executeAll(BaselineMichelle.Fixtures, executeMichelleRecipe) ++
+      executeAll(BaselineNifs.Fixtures, executeNifsRecipe) ++
+      executeAll(BaselineNiri.Fixtures, executeNiriRecipe) ++
+      executeAll(BaselineTRecs.Fixtures, executeTrecsRecipe)
 
   private def executeAll[T <: InstrumentDetails](fs: Seq[Fixture[T]], recipe: (Fixture[T]) => Output): Seq[Baseline] = {
-       require(fs.size > 10, "Not enough fixtures " + fs.size) // make sure there's a good number of fixtures
-      fs.par.map(f => Baseline.from(f, recipe(f))).seq
+    require(fs.size > 10, "Not enough fixtures " + fs.size) // make sure there's a good number of fixtures
+    fs.par.map(f => Baseline.from(f, recipe(f))).seq
   }
 
 }

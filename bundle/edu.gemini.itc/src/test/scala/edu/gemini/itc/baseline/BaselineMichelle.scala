@@ -1,8 +1,7 @@
 package edu.gemini.itc.baseline
 
-import edu.gemini.itc.baseline.util.Baseline._
 import edu.gemini.itc.baseline.util._
-import edu.gemini.itc.michelle.{MichelleParameters, MichelleRecipe}
+import edu.gemini.itc.michelle.MichelleParameters
 
 /**
  * Michelle baseline test fixtures.
@@ -12,16 +11,13 @@ object BaselineMichelle {
 
   lazy val Fixtures: List[Fixture[MichelleParameters]] = NBandImaging ++ NBandSpectroscopy ++ QBandSpectroscopy
 
-  def executeRecipe(f: Fixture[MichelleParameters]): Output =
-    cookRecipe(w => new MichelleRecipe(f.src, f.odp, f.ocp, f.ins, f.tep, f.pdp, w))
-
   private lazy val NBandImaging = Fixture.nBandImgFixtures(List(
     new MichelleParameters(
       "Nprime",                           //String Filter,
       "none",                             //String grating,
       "12",                               //String instrumentCentralWavelength,
       "none",                             //String FP_Mask,
-      MichelleParameters.ENABLED         //String polarimetry (enabled only allowed if imaging)
+      MichelleParameters.ENABLED          //String polarimetry (enabled only allowed if imaging)
     )
   ))
 

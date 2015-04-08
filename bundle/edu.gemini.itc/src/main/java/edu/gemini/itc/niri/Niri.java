@@ -41,6 +41,7 @@ public class Niri extends Instrument {
     private String _focalPlaneMask;
     private String _focalPlaneMaskOffset;
     private String _stringSlitWidth;
+    private final String _FP_Mask;
     private CalculationMethod _mode;
 
     /**
@@ -64,6 +65,7 @@ public class Niri extends Instrument {
         _grism = np.getGrism();
         _camera = np.getCamera();
         _mode = odp.getMethod();
+        _FP_Mask = np.getFocalPlaneMask();
 
 
         if (!(_filterUsed.equals("none"))) {
@@ -183,6 +185,14 @@ public class Niri extends Instrument {
         else return HIGH_BACK_READ_NOISE;
     }
 
+    public String getReadNoiseString() {
+        return _readNoise;
+    }
+
+    public String getFocalPlaneMask() {
+        return _focalPlaneMask;
+    }
+
     public String getGrism() {
         return _grism;
     }
@@ -247,6 +257,38 @@ public class Niri extends Instrument {
         else return HIGH_BACK_WELL_DEPTH;
     }
 
+    public String getWellDepthString() {
+        return _wellDepth;
+    }
+
+    public double getFPMask() {
+        //if (_FP_Mask.equals(NOSLIT)) return null;
+        if (_FP_Mask.equals(NiriParameters.SLIT0_70_CENTER) ||
+                _FP_Mask.equals(NiriParameters.SLIT_6_PIX_CENTER))
+            return 0.75; //old value 0.68;
+        else if (_FP_Mask.equals(NiriParameters.SLIT0_70_BLUE) ||
+                _FP_Mask.equals(NiriParameters.SLIT_6_PIX_BLUE))
+            return 0.7;
+        else if (_FP_Mask.equals(NiriParameters.SLIT0_23_CENTER) ||
+                _FP_Mask.equals(NiriParameters.SLIT0_23_BLUE) ||
+                _FP_Mask.equals(NiriParameters.SLIT_2_PIX_CENTER) ||
+                _FP_Mask.equals(NiriParameters.SLIT_2_PIX_BLUE))
+            return 0.23;
+        else if (_FP_Mask.equals(NiriParameters.SLIT0_46_CENTER) ||
+                _FP_Mask.equals(NiriParameters.SLIT_4_PIX_CENTER))
+            return 0.47;
+        else if (_FP_Mask.equals(NiriParameters.SLIT0_46_BLUE) ||
+                _FP_Mask.equals(NiriParameters.SLIT_4_PIX_BLUE))
+            return 0.46;
+        else if (_FP_Mask.equals(NiriParameters.F32_SLIT_10_PIX_CENTER))
+            return 0.22;
+        else if (_FP_Mask.equals(NiriParameters.F32_SLIT_7_PIX_CENTER))
+            return 0.144;
+        else if (_FP_Mask.equals(NiriParameters.F32_SLIT_4_PIX_CENTER))
+            return 0.09;
+        else
+            return -1.0;
+    }
 
     /**
      * The prefix on data file names for this instrument.
@@ -255,19 +297,4 @@ public class Niri extends Instrument {
         return INSTR_PREFIX;
     }
 
-    public String toString() {
-        String s = "Instrument configuration: \n";
-        s += "Optical Components: <BR>";
-        for (Iterator itr = getComponents().iterator(); itr.hasNext(); ) {
-            s += "<LI>" + itr.next().toString() + "<BR>";
-        }
-        if (!_focalPlaneMask.equals(NiriParameters.NO_SLIT))
-            s += "<LI>Focal Plane Mask: " + _focalPlaneMask + "\n";
-        s += "<LI>Read Mode: " + _readNoise + "\n";
-        s += "<LI>Detector Bias: " + _wellDepth + "\n";
-
-        s += "<BR>Pixel Size: " + getPixelSize() + "<BR>";
-
-        return s;
-    }
 }

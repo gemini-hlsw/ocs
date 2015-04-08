@@ -1,6 +1,7 @@
-package edu.gemini.itc.shared;
+package edu.gemini.itc.web;
 
 import edu.gemini.itc.acqcam.AcquisitionCamParameters;
+import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.ITCRequest;
 
 import javax.servlet.ServletConfig;
@@ -60,7 +61,7 @@ public class MultipartTestServlet extends HttpServlet {
                 ObservingConditions ocp = ITCRequest.obsConditionParameters(parser);
                 SourceDefinition sdp = ITCRequest.sourceDefinitionParameters(parser);
                 TelescopeDetails tp = ITCRequest.teleParameters(parser);
-                AcquisitionCamParameters acp = new AcquisitionCamParameters(parser);
+                AcquisitionCamParameters acp = ITCRequest.acqCamParameters(parser);
 
                 out.println(odp.toString());
                 out.println("<br>");

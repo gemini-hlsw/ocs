@@ -1,5 +1,6 @@
 package edu.gemini.itc.gnirs;
 
+import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.*;
 
@@ -7,27 +8,28 @@ import edu.gemini.itc.shared.*;
 /**
  * Gnirs specification class
  */
-public abstract class Gnirs extends Instrument {
+public final class Gnirs extends Instrument {
     /**
      * Related files will be in this subdir of lib
      */
     public static final String INSTR_DIR = "gnirs";
 
-    /**
-     * Related files will start with this prefix
-     */
-    public static String INSTR_PREFIX;
+    public static final String INSTR_PREFIX = "gnirs_";
+
+    private static final String FILENAME = "gnirs" + getSuffix();
+
     // Instrument reads its configuration from here.
-    protected static double WELL_DEPTH;
+    private static final double SHALLOW_WELL = 90000.0;
+    private static final double DEEP_WELL = 180000.0;
 
-    protected static double AD_SATURATION;
+    private static final double AD_SATURATION = 56636;
 
-    protected static double HIGH_GAIN;
-    protected static double LOW_GAIN;
-    public static int DETECTOR_PIXELS;
+    private static final double HIGH_GAIN = 4.4;
+    private static final double LOW_GAIN = 2.18;
+    public static final int DETECTOR_PIXELS = 1024;
 
-    public static double SHORT_CAMERA_PIXEL_SCALE;
-    public static double LONG_CAMERA_PIXEL_SCALE;
+    public static final double SHORT_CAMERA_PIXEL_SCALE = 0.15;
+    public static final double LONG_CAMERA_PIXEL_SCALE = 0.05;
 
     private static final double HIGH_BACK_READ_NOISE = 155;    // Old value: 160 (changed 2/27/2014)
     private static final double MEDIUM_BACK_READ_NOISE = 30;   // Old value: 35 (changed 2/27/2014)
@@ -48,10 +50,157 @@ public abstract class Gnirs extends Instrument {
     protected CalculationMethod _mode;
     protected double _centralWavelength;
 
-    public Gnirs(String FILENAME, String INSTUMENT_PREFIX) {
+    protected final DetectorsTransmissionVisitor _dtv;
+    protected final CameraOptics _camera;
+    protected final boolean _XDisp;
+    protected final String _cameraLength;
+    protected final double _wellDepth;
+    protected final double _readNoiseValue;
+
+
+    public Gnirs(GnirsParameters gp, ObservationDetails odp) {
         super(INSTR_DIR, FILENAME);
         _sampling = super.getSampling();
-        INSTR_PREFIX = INSTUMENT_PREFIX;
+
+        ///
+        // The instrument data file gives a start/end wavelength for
+        // the instrument.  But with a filter in place, the filter
+        // transmits wavelengths that are a subset of the original range.
+
+        _sampling = super.getSampling();
+
+        _readNoise = gp.getReadNoise();
+        _focalPlaneMask = gp.getFocalPlaneMask();
+        _stringSlitWidth = gp.getStringSlitWidth();
+        _grating = gp.getGrating();
+        _centralWavelength = gp.getInstrumentCentralWavelength();
+        _mode = odp.getMethod();
+        _XDisp = gp.isXDispUsed();
+
+        if (_centralWavelength < 1030 || _centralWavelength > 6000) {
+            throw new RuntimeException("Central wavelength must be between 1.03um and 6.0um.");
+        }
+
+        //set read noise by exporsure time
+        if (odp.getExposureTime() <= 1.0) {
+            _wellDepth = DEEP_WELL;
+        } else if (odp.getExposureTime() <= 20.0) {
+            _wellDepth = SHALLOW_WELL;
+        } else if (odp.getExposureTime() <= 60.0) {
+            _wellDepth = SHALLOW_WELL;
+        } else {
+            _wellDepth = SHALLOW_WELL;
+        }
+        if (_readNoise.equals(GnirsParameters.VERY_LOW_READ_NOISE)) {
+            _readNoiseValue = VERY_LOW_BACK_READ_NOISE;  // Added 2/24/2014 by SLP
+        } else if (_readNoise.equals(GnirsParameters.LOW_READ_NOISE)) {
+            _readNoiseValue = LOW_BACK_READ_NOISE;  // Added 2/24/2014 by SLP
+        } else if (_readNoise.equals(GnirsParameters.MED_READ_NOISE)) {
+            _readNoiseValue = MEDIUM_BACK_READ_NOISE;  // Added 2/24/2014 by SLP
+        } else {
+            _readNoiseValue = HIGH_BACK_READ_NOISE;  // Added 2/24/2014 by SLP
+        }
+
+        //Select filter depending on if Cross dispersion is used.
+        if (_XDisp) {
+            _filterUsed = "XD";
+            _Filter = Filter.fromFile(getPrefix(), _filterUsed, getDirectory() + "/");
+        } else {
+            //Use GnirsOrderSelecter to decide which filter to put in
+            _filterUsed = "order";
+            _Filter = Filter.fromFile(getPrefix(), _filterUsed + GnirsOrderSelector.getOrder(_centralWavelength), getDirectory() + "/");
+        }
+        addComponent(_Filter);
+
+        //Select Transmission Element depending on if Cross dispersion is used.
+        final TransmissionElement selectableTrans;
+        if (_XDisp) {
+            selectableTrans = new XDispersingPrism(getDirectory(), gp.getCameraLength() + "XD");
+        } else {
+            selectableTrans = new GnirsPickoffMirror(getDirectory(), "mirror");
+        }
+        addComponent(selectableTrans);
+
+        final FixedOptics _fixedOptics = new FixedOptics(getDirectory() + "/", getPrefix());
+        addComponent(_fixedOptics);
+
+        final CameraFactory cf = new CameraFactory(gp.getCameraLength(), gp.getCameraColor(), getDirectory());
+        _camera = cf.getCamera();
+        addComponent((edu.gemini.itc.shared.TransmissionElement) _camera);
+
+        _cameraLength = gp.getCameraLength();
+
+        //Test to see that all conditions for Spectroscopy are met
+        if (_mode.isSpectroscopy()) {
+            if (_grating.equals("none"))
+                throw new RuntimeException("Spectroscopy calculation method is selected but a grating" +
+                        " is not.\nPlease select a grating and a " +
+                        "focal plane mask in the Instrument " +
+                        "configuration section.");
+            if (_focalPlaneMask.equals(GnirsParameters.NO_SLIT))
+                throw new RuntimeException("Spectroscopy calculation method is selected but a focal" +
+                        " plane mask is not.\nPlease select a " +
+                        "grating and a " +
+                        "focal plane mask in the Instrument " +
+                        "configuration section.");
+        }
+
+
+        _detector = new Detector(getDirectory() + "/", getPrefix(),
+                "aladdin", "1K x 1K ALADDIN III InSb CCD");
+        _detector.setDetectorPixels(DETECTOR_PIXELS);
+
+        _dtv = new DetectorsTransmissionVisitor(1,
+                getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
+
+        if (!(_grating.equals("none"))) {
+
+            _gratingOptics = new GnirsGratingOptics(getDirectory() + "/" + getPrefix(), _grating,
+                    _centralWavelength,
+                    _detector.getDetectorPixels(),
+                    1);
+
+            if (_grating.equals(GnirsParameters.G10) && _cameraLength.equals(GnirsParameters.SHORT))
+                throw new RuntimeException("The grating " + _grating + " cannot be used with the " +
+                        GnirsParameters.SHORT_CAMERA + " arcsec/pix (Short) camera.\n" +
+                        "  Please either change the camera or the grating.");
+
+            if (!(_grating.equals("none")) && !(_filterUsed.equals("none")))
+                if ((_Filter.getStart() >= _gratingOptics.getEnd()) ||
+                        (_Filter.getEnd() <= _gratingOptics.getStart())) {
+                    throw new RuntimeException("The " + _filterUsed + " filter" +
+                            " and the " + _grating +
+                            " do not overlap with the requested wavelength.\n" +
+                            " Please select a different filter, grating or wavelength.");
+                }
+        }
+
+
+        addComponent(_detector);
+
+
+    }
+
+    public double getFPMask() {
+        //if (_FP_Mask.equals(NOSLIT)) return null;
+        if (_focalPlaneMask.equals(GnirsParameters.SLIT0_1))
+            return 0.1;
+        else if (_focalPlaneMask.equals(GnirsParameters.SLIT0_15))
+            return 0.15;
+        else if (_focalPlaneMask.equals(GnirsParameters.SLIT0_2))
+            return 0.2;
+        else if (_focalPlaneMask.equals(GnirsParameters.SLIT0_3))
+            return 0.3;
+        else if (_focalPlaneMask.equals(GnirsParameters.SLIT0_45))
+            return 0.45;
+        else if (_focalPlaneMask.equals(GnirsParameters.SLIT0_675))
+            return 0.675;
+        else if (_focalPlaneMask.equals(GnirsParameters.SLIT1_0))
+            return 1.0;
+        else if (_focalPlaneMask.equals(GnirsParameters.SLIT3_0))
+            return 3.0;
+        else
+            return -1.0;
     }
 
     /**
@@ -67,7 +216,6 @@ public abstract class Gnirs extends Instrument {
 
     }
 
-
     /**
      * Returns the subdirectory where this instrument's data files are.
      */
@@ -76,15 +224,19 @@ public abstract class Gnirs extends Instrument {
     }
 
     public double getPixelSize() {
-        return super.getPixelSize();
+        return _camera.getPixelScale();
     }
 
     public double getSpectralPixelWidth() {
-        return _gratingOptics.getPixelWidth();
+        if (_cameraLength.equals(GnirsParameters.LONG)) {
+            return _gratingOptics.getPixelWidth() / 3.0;
+        } else {
+            return _gratingOptics.getPixelWidth();
+        }
     }
 
     public double getWellDepth() {
-        return WELL_DEPTH;
+        return _wellDepth;
     }
 
     public double getSampling() {
@@ -111,7 +263,11 @@ public abstract class Gnirs extends Instrument {
     }
 
     public double getGratingResolution() {
-        return _gratingOptics.getGratingResolution();
+        if (_cameraLength.equals(GnirsParameters.LONG)) {
+            return _gratingOptics.getGratingResolution() * GnirsParameters.LONG_CAMERA_SCALE_FACTOR;
+        } else {
+            return _gratingOptics.getGratingResolution();
+        }
     }
 
     public String getGrating() {
@@ -123,68 +279,85 @@ public abstract class Gnirs extends Instrument {
     }
 
     public double getGratingDispersion_nm() {
-        return _gratingOptics.getGratingDispersion_nm();
+        try {
+            if (!XDisp_IsUsed()) {
+                if (_cameraLength.equals(GnirsParameters.LONG)) {
+                    return _gratingOptics.getGratingDispersion_nm() / GnirsParameters.LONG_CAMERA_SCALE_FACTOR / GnirsOrderSelector.getOrder(_centralWavelength);
+                } else {
+                    return _gratingOptics.getGratingDispersion_nm() / GnirsOrderSelector.getOrder(_centralWavelength);
+                }
+            } else {
+                if (_cameraLength.equals(GnirsParameters.LONG)) {
+                    return _gratingOptics.getGratingDispersion_nm() / GnirsParameters.LONG_CAMERA_SCALE_FACTOR;
+                } else {
+                    return _gratingOptics.getGratingDispersion_nm();
+                }
+            }
+        } catch (Exception e) {
+            return _gratingOptics.getGratingDispersion_nm();
+        }
     }
 
     public double getGratingDispersion_nmppix() {
-        return _gratingOptics.getGratingDispersion_nmppix();
+        try {
+            if (!XDisp_IsUsed()) {
+                if (_cameraLength.equals(GnirsParameters.LONG)) {
+                    return _gratingOptics.getGratingDispersion_nmppix() / GnirsParameters.LONG_CAMERA_SCALE_FACTOR / GnirsOrderSelector.getOrder(_centralWavelength);
+                } else {
+                    return _gratingOptics.getGratingDispersion_nmppix() / GnirsOrderSelector.getOrder(_centralWavelength);
+                }
+            } else {
+                if (_cameraLength.equals(GnirsParameters.LONG)) {
+                    return _gratingOptics.getGratingDispersion_nmppix() / GnirsParameters.LONG_CAMERA_SCALE_FACTOR;
+                } else {
+                    return _gratingOptics.getGratingDispersion_nmppix();
+                }
+            }
+
+        } catch (Exception e) {
+            return _gratingOptics.getGratingDispersion_nmppix();
+        }
     }
 
     public double getReadNoise() {
-
-        if (_readNoise.equals(GnirsParameters.VERY_LOW_READ_NOISE))
-            return VERY_LOW_BACK_READ_NOISE;
-        else if (_readNoise.equals(GnirsParameters.LOW_READ_NOISE))
-            return LOW_BACK_READ_NOISE;
-        else if (_readNoise.equals(GnirsParameters.MED_READ_NOISE))
-            return MEDIUM_BACK_READ_NOISE;
-        else return HIGH_BACK_READ_NOISE;
+        return _readNoiseValue;
     }
 
-    //Abstract class for Detector Pixel Transmission  (i.e.  Create Detector gaps)
-    public abstract edu.gemini.itc.operation.DetectorsTransmissionVisitor getDetectorTransmision();
+    public double getObservingStart() {
+        return _centralWavelength - (getGratingDispersion_nmppix() * _detector.getDetectorPixels() / 2);
+    }
 
-    public abstract boolean XDisp_IsUsed();
+    public double getObservingEnd() {
+        return _centralWavelength + (getGratingDispersion_nmppix() * _detector.getDetectorPixels() / 2);
+    }
 
-    public abstract int getOrder();
+    public DetectorsTransmissionVisitor getDetectorTransmision() {
+        return _dtv;
+    }
 
-    public abstract TransmissionElement getGratingOrderNTransmission(int order);
+    public boolean XDisp_IsUsed() {
+        return _XDisp;
+    }
 
-    public abstract void setCentralWavelength(double centralWavelength);
-
-    public String toString() {
-        //Used to format the strings
-        FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(3);  // Two decimal places
-        device.clear();
-
-
-        String s = "Instrument configuration: \n";
-        s += super.opticalComponentsToString();
-
-        if (!_focalPlaneMask.equals(GnirsParameters.NO_SLIT))
-            s += "<LI>Focal Plane Mask: " + _focalPlaneMask + "\n";
-
-        s += "<LI>Grating: " + _grating + "\n"; // REL-469
-
-        s += "<LI>Read Noise: " + getReadNoise() + "\n";
-        s += "<LI>Well Depth: " + getWellDepth() + "\n";
-        s += "\n";
-
-        s += "<L1> Central Wavelength: " + _centralWavelength + " nm" + " \n";
-        s += "Pixel Size in Spatial Direction: " + getPixelSize() + "arcsec\n";
-        if (_mode.isSpectroscopy()) {
-            if (XDisp_IsUsed()) {
-                s += "Pixel Size in Spectral Direction(Order 3): " + device.toString(getGratingDispersion_nmppix() / 3) + "nm\n";
-                s += "Pixel Size in Spectral Direction(Order 4): " + device.toString(getGratingDispersion_nmppix() / 4) + "nm\n";
-                s += "Pixel Size in Spectral Direction(Order 5): " + device.toString(getGratingDispersion_nmppix() / 5) + "nm\n";
-                s += "Pixel Size in Spectral Direction(Order 6): " + device.toString(getGratingDispersion_nmppix() / 6) + "nm\n";
-                s += "Pixel Size in Spectral Direction(Order 7): " + device.toString(getGratingDispersion_nmppix() / 7) + "nm\n";
-                s += "Pixel Size in Spectral Direction(Order 8): " + device.toString(getGratingDispersion_nmppix() / 8) + "nm\n";
-            } else {
-                s += "Pixel Size in Spectral Direction: " + device.toString(getGratingDispersion_nmppix()) + "nm\n";
-            }
+    public int getOrder() {
+        try {
+            return GnirsOrderSelector.getOrder(_centralWavelength);
+        } catch (Exception e) {
+            System.out.println("Cannot find Order setting to 1.");
+            return 1;
         }
-        return s;
     }
+
+    public String getFocalPlaneMask() {
+        return _focalPlaneMask;
+    }
+
+    public double getCentralWavelength() {
+        return _centralWavelength;
+    }
+
+    public TransmissionElement getGratingOrderNTransmission(int order) {
+        return GnirsGratingsTransmission.getOrderNTransmission(_grating, order);
+    }
+
 }

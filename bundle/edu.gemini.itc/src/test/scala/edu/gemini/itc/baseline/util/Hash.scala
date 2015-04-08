@@ -9,7 +9,6 @@ import edu.gemini.itc.gsaoi.GsaoiParameters
 import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.niri.NiriParameters
-import edu.gemini.itc.service._
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
 
@@ -48,9 +47,7 @@ object Hash {
     hash(
       p.getCameraColor,
       p.getCameraLength,
-      p.getDarkCurrent,
       p.getFocalPlaneMask,
-      p.getFPMask,
       p.getGrating,
       p.getInstrumentCentralWavelength,
       p.getReadNoise,
@@ -60,7 +57,6 @@ object Hash {
 
   def calc(p: GsaoiParameters): Int =
     hash(
-      p.getCamera,
       p.getFilter,
       p.getReadMode
     )
@@ -69,18 +65,14 @@ object Hash {
     hash(
       p.getFilter,
       p.getFocalPlaneMask,
-      p.getFPMask,
       p.getGrating,
       p.getInstrumentCentralWavelength,
-      p.getStringSlitWidth,
       p.polarimetryIsUsed()
     )
 
   def calc(p: NifsParameters): Int =
     hash(
-      p.getDarkCurrent,
       p.getFilter,
-      p.getFocalPlaneMask,
       p.getFPMask,
       p.getGrating,
 //      p.getIFUCenterX,          // TODO: results in NPE if not set..
@@ -93,7 +85,6 @@ object Hash {
       p.getIFUOffset,
       p.getInstrumentCentralWavelength,
       p.getReadNoise,
-      p.getStringSlitWidth,
       p.getUnXDispCentralWavelength
     )
 
@@ -113,11 +104,9 @@ object Hash {
     hash(
       p.getFilter,
       p.getFocalPlaneMask,
-      p.getFPMask,
       p.getGrating,
       p.getInstrumentCentralWavelength,
-      p.getInstrumentWindow,
-      p.getStringSlitWidth
+      p.getInstrumentWindow
     )
 
   def calc(p: AcquisitionCamParameters): Int =
@@ -131,8 +120,7 @@ object Hash {
       p.getColorFilter,
       p.getFPMask,
       p.getGrism,
-      p.getReadNoise,
-      p.getSlitSize
+      p.getReadNoise
     )
 
   def calc(odp: ObservationDetails): Int =
@@ -184,7 +172,6 @@ object Hash {
 
   def calc(alt: GemsParameters): Int =
     hash(
-      alt.gemsIsUsed,
       alt.getAvgStrehl,
       alt.getStrehlBand
     )

@@ -1,15 +1,12 @@
 package edu.gemini.itc.altair;
 
-import edu.gemini.itc.shared.FormatStringWriter;
-import edu.gemini.itc.shared.ITCParameters;
 import edu.gemini.spModel.gemini.altair.AltairParams;
-
 
 /**
  * This class holds the information from the Altair section
  * of an ITC web page.  This object is constructed from a servlet request.
  */
-public final class AltairParameters extends ITCParameters {
+public final class AltairParameters {
 
     private final boolean _altairUsed;
     private final AltairParams.GuideStarType _wfsMode;
@@ -81,28 +78,6 @@ public final class AltairParameters extends ITCParameters {
             sb.append("Altair Mode:\t Laser guide star");
 
         sb.append("\n");
-        return sb.toString();
-    }
-
-    public String printParameterSummary() {
-        StringBuffer sb = new StringBuffer();
-
-        // This object is used to format numerical strings.
-        FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2);  // Two decimal places
-        device.clear();
-
-        sb.append("Altair Guide Star properties:");
-        if (_wfsMode.equals(AltairParams.GuideStarType.LGS)) {
-            sb.append("<LI>Laser Guide Star Mode");
-
-        } else {
-            sb.append("<LI>Natural Guide Star Mode");
-            sb.append("<LI>Guide Star Seperation " + getGuideStarSeperation());
-            sb.append("<LI>Guide Star Magnitude " + getGuideStarMagnitude());
-        }
-
-        sb.append("<BR>");
         return sb.toString();
     }
 

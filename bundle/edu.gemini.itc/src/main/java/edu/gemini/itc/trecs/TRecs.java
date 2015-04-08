@@ -203,6 +203,26 @@ public final class TRecs extends Instrument {
             return elfn_param;
     }
 
+    public double getFPMask() {
+        //if (_FP_Mask.equals(NOSLIT)) return null;
+        if (_focalPlaneMask.equals(TRecsParameters.SLIT0_21)) return 0.21;
+        else if (_focalPlaneMask.equals(TRecsParameters.SLIT0_26)) return 0.26;
+        else if (_focalPlaneMask.equals(TRecsParameters.SLIT0_31)) return 0.31;
+        else if (_focalPlaneMask.equals(TRecsParameters.SLIT0_36)) return 0.36;
+        else if (_focalPlaneMask.equals(TRecsParameters.SLIT0_66)) return 0.66;
+        else if (_focalPlaneMask.equals(TRecsParameters.SLIT0_72)) return 0.72;
+        else if (_focalPlaneMask.equals(TRecsParameters.SLIT1_32)) return 1.32;
+        else return -1.0;
+    }
+
+    public String getFocalPlaneMask() {
+        return _focalPlaneMask;
+    }
+
+    public double getCentralWavelength() {
+        return _centralWavelength;
+    }
+
     /**
      * The prefix on data file names for this instrument.
      */
@@ -210,26 +230,8 @@ public final class TRecs extends Instrument {
         return INSTR_PREFIX;
     }
 
-    public edu.gemini.itc.operation.DetectorsTransmissionVisitor getDetectorTransmision() {
+    public DetectorsTransmissionVisitor getDetectorTransmision() {
         return _dtv;
     }
 
-    public String toString() {
-
-        String s = "Instrument configuration: \n";
-        s += super.opticalComponentsToString();
-
-        if (!_focalPlaneMask.equals(TRecsParameters.NO_SLIT))
-            s += "<LI> Focal Plane Mask: " + _focalPlaneMask + "\n";
-        s += "\n";
-        if (_mode.isSpectroscopy())
-            s += "<L1> Central Wavelength: " + _centralWavelength + " nm" + "\n";
-        s += "Spatial Binning: 1\n";
-        if (_mode.isSpectroscopy())
-            s += "Spectral Binning: 1\n";
-        s += "Pixel Size in Spatial Direction: " + getPixelSize() + "arcsec\n";
-        if (_mode.isSpectroscopy())
-            s += "Pixel Size in Spectral Direction: " + getGratingDispersion_nmppix() + "nm\n";
-        return s;
-    }
 }

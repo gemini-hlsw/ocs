@@ -224,18 +224,10 @@ public abstract class Instrument {
         return DATA_SUFFIX;
     }
 
-    public String opticalComponentsToString() {
-        String s = "Optical Components: <BR>";
-        for (final TransmissionElement te : components) {
-            s += "<LI>" + te.toString() + "<BR>";
-        }
-        return s;
-    }
-
     public String toString() {
         String s = "Instrument configuration: \n";
         s += "Optical Components: <BR>";
-        for (final TransmissionElement te : components) {
+        for (final TransmissionElement te : getComponents()) {
             s += "<LI>" + te.toString() + "<BR>";
         }
         s += "<BR>";
@@ -244,7 +236,7 @@ public abstract class Instrument {
         return s;
     }
 
-    protected List<TransmissionElement> getComponents() {
+    public List<TransmissionElement> getComponents() {
         return new ArrayList<>(components);
     }
 }

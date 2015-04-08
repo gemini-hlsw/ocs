@@ -68,7 +68,7 @@ public final class Flamingos2 extends Instrument {
         _readNoise = fp.getReadNoise();
         _focalPlaneMask = fp.getFPMask();
         _grism = fp.getGrism();
-        _slitSize = fp.getSlitSize() * getPixelSize();
+        _slitSize = getSlitSize() * getPixelSize();
         _colorFilter = addColorFilter(_filterBand);
         _dtv = new DetectorsTransmissionVisitor(1, getDirectory() + "/" + getPrefix2() + "ccdpix" + Instrument.getSuffix());
 
@@ -101,6 +101,13 @@ public final class Flamingos2 extends Instrument {
             addComponent(grismOptics);
             return Option.apply(grismOptics);
         }
+    }
+
+    public double getSlitSize() {
+        if (_focalPlaneMask.equalsIgnoreCase("none")) {
+            return 1;
+        }
+        return Double.parseDouble(_focalPlaneMask);
     }
 
     /**
@@ -170,19 +177,11 @@ public final class Flamingos2 extends Instrument {
         return WELL_DEPTH;
     }
 
-    public String toString() {
-        String s = "Instrument configuration: \n";
-        s += "Optical Components: <BR>";
-        for (final TransmissionElement te : getComponents()) {
-            s += "<LI>" + te.toString() + "<BR>";
-        }
-        s += "<LI>Read Noise: " + _readNoise + "\n";
+    public String getFocalPlaneMask() {
+        return _focalPlaneMask;
+    }
 
-        if (!_focalPlaneMask.equals("none"))
-            s += "<LI>Focal Plane Mask: " + _focalPlaneMask + " pix slit\n";
-
-        s += "<BR>Pixel Size: " + getPixelSize() + "<BR>";
-
-        return s;
+    public String getReadNoiseString() {
+        return _readNoise;
     }
 }

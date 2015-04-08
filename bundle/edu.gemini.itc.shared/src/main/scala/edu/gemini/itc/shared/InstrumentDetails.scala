@@ -14,11 +14,7 @@ final case class GmosParameters(
                      spectralBinning: Int,
                      ifuMethod: Option[IfuMethod],
                      ccdType: DetectorManufacturer,
-                     site: Site) extends InstrumentDetails {
-
-  val slitWidth: Double = if (fpMask.isIFU) 0.3 else fpMask.getWidth
-
-}
+                     site: Site) extends InstrumentDetails
 
 object InstrumentDetails {
 

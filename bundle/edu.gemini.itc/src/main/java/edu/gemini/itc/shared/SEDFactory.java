@@ -136,11 +136,11 @@ public final class SEDFactory {
 
 
     // TODO: site and band could be moved to instrument(?)
-    public static SourceResult calculate(final Instrument instrument, final Site site, final String bandStr, final SourceDefinition sdp, final ObservingConditions odp, final TelescopeDetails tp, final PlottingDetails pdp) {
-        return calculate(instrument, site, bandStr, sdp, odp, tp, pdp, Option.apply((AOSystem) null));
+    public static SourceResult calculate(final Instrument instrument, final Site site, final String bandStr, final SourceDefinition sdp, final ObservingConditions odp, final TelescopeDetails tp) {
+        return calculate(instrument, site, bandStr, sdp, odp, tp, Option.apply((AOSystem) null));
     }
 
-    public static SourceResult calculate(final Instrument instrument, final Site site, final String bandStr, final SourceDefinition sdp, final ObservingConditions odp, final TelescopeDetails tp, final PlottingDetails pdp, final Option<AOSystem> ao) {
+    public static SourceResult calculate(final Instrument instrument, final Site site, final String bandStr, final SourceDefinition sdp, final ObservingConditions odp, final TelescopeDetails tp, final Option<AOSystem> ao) {
         // Module 1b
         // Define the source energy (as function of wavelength).
         //
@@ -179,14 +179,6 @@ public final class SEDFactory {
                     throw new IllegalArgumentException("Shifted spectrum lies outside of specified normalisation waveband.");
                 }
         }
-
-// TODO: This is only relevant for writeOutput() need to factor this out somehow!!
-        if (pdp != null && pdp.getPlotLimits().equals(PlottingDetails.PlotLimits.USER)) {
-            if (pdp.getPlotWaveL() > instrument.getObservingEnd() || pdp.getPlotWaveU() < instrument.getObservingStart()) {
-                throw new IllegalArgumentException("User limits for plotting do not overlap with filter.");
-            }
-        }
-// TODO: END
 
         // Module 2
         // Convert input into standard internally-used units.

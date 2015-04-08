@@ -1,8 +1,11 @@
 package edu.gemini.itc.web.servlets;
 
-import edu.gemini.itc.flamingos2.Flamingos2Recipe;
-import edu.gemini.itc.shared.ITCMultiPartParser;
-import edu.gemini.itc.shared.Recipe;
+import edu.gemini.itc.flamingos2.Flamingos2Parameters;
+import edu.gemini.itc.web.ITCMultiPartParser;
+import edu.gemini.itc.shared.Parameters;
+import edu.gemini.itc.shared.PlottingDetails;
+import edu.gemini.itc.web.ITCRequest;
+import edu.gemini.itc.web.html.Flamingos2Printer;
 
 import java.io.PrintWriter;
 
@@ -50,9 +53,12 @@ public final class ITCflamingos2Servlet extends ITCServlet {
     /**
      * Supply the body content for the html document.
      */
-    public void writeOutput(ITCMultiPartParser mpp, PrintWriter out) {
+    public void writeOutput(final ITCMultiPartParser mpp, final PrintWriter out) {
         out.println("<a href = \"http://www.gemini.edu/sciops/instruments/integration-time-calculators/itc-help\"> Click here for help with the results page.</a>");
-        Recipe recipe = new Flamingos2Recipe(mpp, out);
-        recipe.writeOutput();
+        final Parameters p  = ITCRequest.parameters(mpp);
+        final PlottingDetails pdp = ITCRequest.plotParameters(mpp);
+        final Flamingos2Parameters ip = ITCRequest.flamingos2Parameters(mpp);
+        final Flamingos2Printer printer = new Flamingos2Printer(p, ip, pdp, out);
+        printer.writeOutput();
     }
 }

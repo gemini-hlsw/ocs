@@ -13,8 +13,6 @@ class ItcServiceImpl extends ItcService {
 
   import ItcService._
 
-  private val dummyPlotParams = new PlottingDetails(PlottingDetails.PlotLimits.AUTO, 0, 1)
-
   def calculate(source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: InstrumentDetails): Result = try {
     ins match {
       case i: GmosParameters  => calculateGmos(source, obs, cond, tele, i)
@@ -27,24 +25,22 @@ class ItcServiceImpl extends ItcService {
   }
 
   private def calculateGmos(source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: GmosParameters): Result = {
-    // TODO: plot params and output will go away from recipe!
-    val recipe = new GmosRecipe(source, obs, cond, ins, tele, dummyPlotParams, null)
+    val recipe = new GmosRecipe(source, obs, cond, ins, tele)
     // TODO: we can simplify this once all recipes have a calculate method (instead of writeOutput())
-    val results: Array[ItcCalcResult] = recipe.calculate().map {
-      case r: GmosRecipe.GmosImagingResult => r.IS2Ncalc match {
-
-        case i: ImagingS2NMethodACalculation =>
+    val results: Array[ItcCalcResult] = obs.getMethod match {
+      case m: Imaging =>
           // Repack the result in an immutable and simplified Scala case class
           // (We don't want to leak out any of the internal ITC craziness here and it is also a good way
           // to keep the service independent from the actual implementation.)
-          ItcImagingResult(i.singleSNRatio(), i.totalSNRatio(), r.peak_pixel_count)
+          recipe.calculateImaging().map {
+            case r: ImagingResult => r.is2nCalc match {
+              case i: ImagingS2NMethodACalculation  => ItcImagingResult(i.singleSNRatio(), i.totalSNRatio(), r.peakPixelCount)
+              case _                                => throw new NotImplementedError()
+            }
+          }
 
-        case _ =>
-          // TODO: no other cases are implemented yet
-          throw new NotImplementedError
-
-      }
-      case r: GmosRecipe.GmosSpectroscopyResult => ItcSpectroscopyResult()
+      case s: Spectroscopy =>
+        throw new NotImplementedError()
     }
     ItcResult.forCcds(results)
   }

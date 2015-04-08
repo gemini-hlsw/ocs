@@ -6,7 +6,7 @@ import edu.gemini.itc.shared.*;
 /**
  * Gsaoi specification class
  */
-public class Gsaoi extends Instrument {
+public final class Gsaoi extends Instrument {
     /**
      * Related files will be in this subdir of lib
      */
@@ -31,7 +31,6 @@ public class Gsaoi extends Instrument {
 
     private Filter _filter;
     private String _filterUsed;
-    private String _camera;
     private String _readMode;
 
     /**
@@ -43,7 +42,6 @@ public class Gsaoi extends Instrument {
 
         _readMode = np.getReadMode();
         _filterUsed = np.getFilter();
-        _camera = np.getCamera();
 
         if (!(_filterUsed.equals("none"))) {
             _filter = Filter.fromFile(getPrefix(), _filterUsed, getDirectory() + "/");
@@ -79,10 +77,6 @@ public class Gsaoi extends Instrument {
         else return VERY_FAINT_OBJECTS_READ_NOISE;
     }
 
-    public String getCamera() {
-        return _camera;
-    }
-
     /**
      * Returns the subdirectory where this instrument's data files are.
      */
@@ -99,20 +93,6 @@ public class Gsaoi extends Instrument {
      */
     public static String getPrefix() {
         return INSTR_PREFIX;
-    }
-
-    public String toString() {
-        String s = "Instrument configuration: \n";
-        s += "Optical Components: <BR>";
-        for (Object o : getComponents()) {
-            if (!(o instanceof Camera)) {
-                s += "<LI>" + o.toString() + "<BR>";
-            }
-        }
-        s += "<BR>";
-        s += "Pixel Size: " + getPixelSize() + "<BR>";
-
-        return s;
     }
 
 }
