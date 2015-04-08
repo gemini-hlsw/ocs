@@ -9,6 +9,7 @@ package jsky.app.ot.gemini.gmos;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.Offset;
+import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.gmos.*;
 import edu.gemini.spModel.guide.PatrolField;
 import edu.gemini.spModel.inst.*;
@@ -68,18 +69,18 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
     /**
      * Add the OIWFS patrol field to the list of figures to display.
      *
-     * @param xc the X screen coordinate for the base position to use
-     * @param yc the Y screen coordinate for the base position to use
+     * @param basePosX the X screen coordinate for the base position to use
+     * @param basePosY the Y screen coordinate for the base position to use
      */
-    protected void addOffsetConstrainedPatrolField(final double xc, final double yc) {
-        final Set<Offset> offsets = _iw.getContext().offsets().scienceOffsetsJava();
+    protected void addOffsetConstrainedPatrolField(final double basePosX, final double basePosY) {
+        final Set<Offset> offsets = getContext().offsets().scienceOffsetsJava();
 
         for (final ObsContext ctx : _iw.getMinimalObsContext()) {
             for (final PatrolField patrolField : GmosOiwfsGuideProbe.instance.getCorrectedPatrolField(ctx)) {
                 offsetConstrainedPatrolFieldIsEmpty = patrolField.outerLimitOffsetIntersection(offsets).isEmpty();
                 // rotation, scaling and transformation to match screen coordinates
                 final Angle rotation = new Angle(-_posAngle, Angle.Unit.RADIANS);
-                final Point2D.Double translation = new Point2D.Double(xc, yc);
+                final Point2D.Double translation = new Point2D.Double(basePosX, basePosY);
                 setTransformationToScreen(rotation, _pixelsPerArcsec, translation);
                 addOffsetConstrainedPatrolField(patrolField, offsets);
             }
@@ -118,12 +119,13 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
 
             // Point to move the probe arm to the required position on the screen.
             final Point2D screenPos = new Point2D.Double(xt+xb, yt+yb);
-
-            final Option<ArmAdjustment> adj = GmosOiwfsProbeArm.armAdjustmentAsJava(ctx, offset);
+            final InstGmosCommon inst = (InstGmosCommon) ctx.getInstrument();
+            final GmosOiwfsProbeArm probeArm = probeArm(ctx);
+            final Option<ArmAdjustment> adj = probeArm.armAdjustmentAsJava(ctx, offset);
             adj.foreach(new ApplyOp<ArmAdjustment>() {
                 @Override
                 public void apply(final ArmAdjustment armAdjustment) {
-                    final ImList<Shape> shapes                   = GmosOiwfsProbeArm.geometryAsJava();
+                    final ImList<Shape> shapes = probeArm.geometryAsJava(inst);
                     shapes.foreach(new ApplyOp<Shape>() {
                         @Override
                         public void apply(final Shape s) {
@@ -165,6 +167,12 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
             _addProbeArm(offsetPosX, offsetPosY, translateX, translateY, basePosX, basePosY, flip);
     }
 
+
+    protected GmosOiwfsProbeArm probeArm(final ObsContext ctx) {
+        if (Site.GN.equals(ctx.getSite().getOrNull()))
+            return GmosNorthOiwfsProbeArm$.MODULE$;
+        return GmosSouthOiwfsProbeArm$.MODULE$;
+    }
 
     /**
      * Return true if the display needs to be updated because values changed.
