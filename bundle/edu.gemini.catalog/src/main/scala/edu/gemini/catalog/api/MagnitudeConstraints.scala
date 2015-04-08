@@ -126,4 +126,10 @@ case class MagnitudeRange(faintnessConstraint: FaintnessConstraint, saturationCo
     MagnitudeRange(faintness, saturation)
   }
 
+  def adjust(f: Double => Double): MagnitudeRange = {
+    val fl = f(faintnessConstraint.brightness)
+    val sl = saturationConstraint.map(_.brightness).map(f)
+    MagnitudeRange(FaintnessConstraint(fl), sl.map(SaturationConstraint.apply))
+  }
+
 }

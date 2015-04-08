@@ -6,6 +6,7 @@ import edu.gemini.catalog.votable.{RemoteBackend, VoTableBackend, CatalogExcepti
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core.{Angle, Magnitude, MagnitudeBand, Coordinates}
 import edu.gemini.spModel.gemini.gems.GemsInstrument
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.pot.ModelConverters._
 
@@ -59,7 +60,7 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend) {
 
     val resultSequence = inst match {
       case GemsInstrument.flamingos2 => searchCatalog(basePosition, criterions, statusLogger)
-      case i                         => searchOptimized(basePosition, criterions, i, statusLogger)
+      case i                         => searchOptimized(basePosition, obsContext.getConditions, criterions, i, statusLogger)
     }
 
     // sort on criteria order
@@ -90,7 +91,7 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend) {
    * @param inst the instrument option for the search
    * @return a list of threads used for background catalog searches
    */
-  private def searchOptimized(basePosition: Coordinates, criterions: List[GemsCatalogSearchCriterion], inst: GemsInstrument, statusLogger: StatusLogger): Future[List[GemsCatalogSearchResults]] = {
+  private def searchOptimized(basePosition: Coordinates, conditions: Conditions, criterions: List[GemsCatalogSearchCriterion], inst: GemsInstrument, statusLogger: StatusLogger): Future[List[GemsCatalogSearchResults]] = {
     val radiusLimitsList = getRadiusLimits(inst, criterions)
     val magLimitsList = optimizeMagnitudeLimits(criterions)
 
@@ -110,8 +111,13 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend) {
         Future.successful {
           val targets = l.map {k =>
             val referenceBand = queriesMap.get(k.query).map(_.band)
+
             referenceBand.map { b =>
-              k.result.targets.rows.filter(t => k.query.filterOnMagnitude(t, magnitudeExtractor(defaultProbeBands(b))(t)))
+              val rangeAdjustmentForConditions = (mr: Option[MagnitudeRange], mag: Magnitude) => mr.map { m =>
+                m.adjust(m => conditions.magAdjustOp().apply(mag.toOldModel).toNewModel.value)
+              }
+
+              k.result.targets.rows.filter(t => k.query.filterOnMagnitude(t, magnitudeExtractor(defaultProbeBands(b))(t), rangeAdjustmentForConditions))
             }.getOrElse(k.result.targets.rows)
           }.suml
           assignToCriterion(basePosition, criterions, targets)

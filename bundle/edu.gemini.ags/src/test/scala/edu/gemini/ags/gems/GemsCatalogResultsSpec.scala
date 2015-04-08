@@ -82,7 +82,7 @@ class GemsCatalogResultsSpec extends MascotProgress with Specification with NoTi
       val cwfs1x = Coordinates.create("17:25:16.940", "-48:27:29.77")
       val cwfs2x = Coordinates.create("17:25:20.314", "-48:28:08.69")
       val cwfs3x = Coordinates.create("17:25:20.057", "-48:27:39.99")
-      val odgw3x = cwfs1
+      val odgw3x = Coordinates.create("17:25:13.703", "-48:27:39.48")
 
       (Angle.fromDegrees(cwfs1x.getRaDeg) ~= Angle.fromDegrees(cwfs1.getRaDeg)) should beTrue
       (Angle.fromDegrees(cwfs1x.getDecDeg) ~= Angle.fromDegrees(cwfs1.getDecDeg)) should beTrue

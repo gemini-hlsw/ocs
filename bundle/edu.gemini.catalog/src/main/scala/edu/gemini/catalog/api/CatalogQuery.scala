@@ -15,8 +15,14 @@ sealed trait CatalogQuery {
   val catalog: CatalogName
 
   def filter: SiderealTarget => Boolean = (t) => radiusConstraint.targetsFilter(base)(t) && magnitudeConstraints.map(_.filter(t)).getOrElse(true)
+  // TODO Move these filters out of CatalogQuery
   def filterOnMagnitude(t: SiderealTarget, m:Magnitude): Boolean = radiusConstraint.targetsFilter(base)(t) && magnitudeConstraints.map(_.filter(t)).getOrElse(true) && magnitudeRange.map(_.filter(t, m)).getOrElse(true)
-  def filterOnMagnitude(t: SiderealTarget, m: Option[Magnitude]): Boolean = radiusConstraint.targetsFilter(base)(t) && magnitudeConstraints.map(_.filter(t)).getOrElse(true) && m.isDefined && magnitudeRange.map(_.filter(t, m.get)).getOrElse(true)
+  def filterOnMagnitude(t: SiderealTarget, m:Option[Magnitude]): Boolean =
+    radiusConstraint.targetsFilter(base)(t) && magnitudeConstraints.map(_.filter(t)).getOrElse(true) &&
+          m.isDefined && magnitudeRange.map(_.filter(t, m.get)).getOrElse(true)
+  def filterOnMagnitude(t: SiderealTarget, m:Option[Magnitude], rangeAdjustment: (Option[MagnitudeRange], Magnitude) => Option[MagnitudeRange]): Boolean =
+    radiusConstraint.targetsFilter(base)(t) && magnitudeConstraints.map(_.filter(t)).getOrElse(true) &&
+      m.isDefined && rangeAdjustment(magnitudeRange, m.get).map(_.filter(t, m.get)).getOrElse(true)
 
   def withMagnitudeConstraints(magnitudeConstraints: Option[MagnitudeConstraints]): CatalogQuery
 
