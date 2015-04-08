@@ -1,11 +1,13 @@
 package edu.gemini.ags.gems
 
 import edu.gemini.catalog.api._
+import edu.gemini.ags.api.{defaultProbeBands, magnitudeExtractor}
 import edu.gemini.catalog.votable.{RemoteBackend, VoTableBackend, CatalogException, VoTableClient}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core.{Angle, Magnitude, MagnitudeBand, Coordinates}
 import edu.gemini.spModel.gemini.gems.GemsInstrument
 import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.pot.ModelConverters._
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -101,13 +103,6 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend) {
 
     val queriesMap = queries.toMap
 
-    def probeBands(b: MagnitudeBand) = b match {
-      case MagnitudeBand.R => List(MagnitudeBand._r, MagnitudeBand.R, MagnitudeBand.UC)
-      case _               => List(b)
-    }
-
-    def referenceMagnitude(b: MagnitudeBand, t: SiderealTarget): Option[Magnitude] = probeBands(b).map(t.magnitudeIn).flatten.headOption
-
     VoTableClient.catalogs(queries.map(_._1), backend).flatMap {
       case l if l.filter(_.result.containsError).nonEmpty =>
         Future.failed(CatalogException(l.map(_.result.problems).suml))
@@ -116,7 +111,7 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend) {
           val targets = l.map {k =>
             val referenceBand = queriesMap.get(k.query).map(_.band)
             referenceBand.map { b =>
-              k.result.targets.rows.filter(t => k.query.filterOnMagnitude(t, referenceMagnitude(b, t)))
+              k.result.targets.rows.filter(t => k.query.filterOnMagnitude(t, magnitudeExtractor(defaultProbeBands(b))(t)))
             }.getOrElse(k.result.targets.rows)
           }.suml
           assignToCriterion(basePosition, criterions, targets)
