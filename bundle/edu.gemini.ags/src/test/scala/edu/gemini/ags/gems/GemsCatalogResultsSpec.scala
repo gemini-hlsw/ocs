@@ -122,7 +122,7 @@ class GemsCatalogResultsSpec extends MascotProgress with Specification with NoTi
 
       val group = result.getGuideGroup
       val set = group.getReferencedGuiders
-      // Fonud a star on CWFS1, CWFS2, CWFS3 and ODWG2
+      // Found a star on CWFS1, CWFS2, CWFS3 and ODWG2
       set.contains(Canopus.Wfs.cwfs1) should beTrue
       set.contains(Canopus.Wfs.cwfs2) should beTrue
       set.contains(Canopus.Wfs.cwfs3) should beTrue
@@ -131,23 +131,28 @@ class GemsCatalogResultsSpec extends MascotProgress with Specification with NoTi
       set.contains(GsaoiOdgw.odgw3) should beFalse
       set.contains(GsaoiOdgw.odgw4) should beFalse
 
-      val cwfs1 = group.get(Canopus.Wfs.cwfs1).getValue.getPrimary.getValue.getTarget.getSkycalcCoordinates
-      val cwfs2 = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue.getTarget.getSkycalcCoordinates
-      val cwfs3 = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue.getTarget.getSkycalcCoordinates
-      val odgw2 = group.get(GsaoiOdgw.odgw2).getValue.getPrimary.getValue.getTarget.getSkycalcCoordinates
+      val cwfs1 = group.get(Canopus.Wfs.cwfs1).getValue.getPrimary.getValue.getTarget
+      val cwfs2 = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue.getTarget
+      val cwfs3 = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue.getTarget
+      val odgw2 = group.get(GsaoiOdgw.odgw2).getValue.getPrimary.getValue.getTarget
+      cwfs1.getName must beEqualTo("104-014547")
+      cwfs2.getName must beEqualTo("104-014564")
+      cwfs3.getName must beEqualTo("104-014608")
+      odgw2.getName must beEqualTo("104-014556")
+
       val cwfs1x = Coordinates.create("05:35:18.423", "-69:16:30.67")
       val cwfs2x = Coordinates.create("05:35:24.994", "-69:16:04.77")
       val cwfs3x = Coordinates.create("05:35:36.409", "-69:16:24.17")
       val odgw2x = Coordinates.create("05:35:23.887", "-69:16:18.20")
 
-      (Angle.fromDegrees(cwfs1x.getRaDeg) ~= Angle.fromDegrees(cwfs1.getRaDeg)) should beTrue
-      (Angle.fromDegrees(cwfs1x.getDecDeg) ~= Angle.fromDegrees(cwfs1.getDecDeg)) should beTrue
-      (Angle.fromDegrees(cwfs2x.getRaDeg) ~= Angle.fromDegrees(cwfs2.getRaDeg)) should beTrue
-      (Angle.fromDegrees(cwfs2x.getDecDeg) ~= Angle.fromDegrees(cwfs2.getDecDeg)) should beTrue
-      (Angle.fromDegrees(cwfs3x.getRaDeg) ~= Angle.fromDegrees(cwfs3.getRaDeg)) should beTrue
-      (Angle.fromDegrees(cwfs3x.getDecDeg) ~= Angle.fromDegrees(cwfs3.getDecDeg)) should beTrue
-      (Angle.fromDegrees(odgw2x.getRaDeg) ~= Angle.fromDegrees(odgw2.getRaDeg)) should beTrue
-      (Angle.fromDegrees(odgw2x.getDecDeg) ~= Angle.fromDegrees(odgw2.getDecDeg)) should beTrue
+      (Angle.fromDegrees(cwfs1x.getRaDeg) ~= Angle.fromDegrees(cwfs1.getSkycalcCoordinates.getRaDeg)) should beTrue
+      (Angle.fromDegrees(cwfs1x.getDecDeg) ~= Angle.fromDegrees(cwfs1.getSkycalcCoordinates.getDecDeg)) should beTrue
+      (Angle.fromDegrees(cwfs2x.getRaDeg) ~= Angle.fromDegrees(cwfs2.getSkycalcCoordinates.getRaDeg)) should beTrue
+      (Angle.fromDegrees(cwfs2x.getDecDeg) ~= Angle.fromDegrees(cwfs2.getSkycalcCoordinates.getDecDeg)) should beTrue
+      (Angle.fromDegrees(cwfs3x.getRaDeg) ~= Angle.fromDegrees(cwfs3.getSkycalcCoordinates.getRaDeg)) should beTrue
+      (Angle.fromDegrees(cwfs3x.getDecDeg) ~= Angle.fromDegrees(cwfs3.getSkycalcCoordinates.getDecDeg)) should beTrue
+      (Angle.fromDegrees(odgw2x.getRaDeg) ~= Angle.fromDegrees(odgw2.getSkycalcCoordinates.getRaDeg)) should beTrue
+      (Angle.fromDegrees(odgw2x.getDecDeg) ~= Angle.fromDegrees(odgw2.getSkycalcCoordinates.getDecDeg)) should beTrue
 
       val cwfs1Mag = group.get(Canopus.Wfs.cwfs1).getValue.getPrimary.getValue.getTarget.getMagnitude(Magnitude.Band.r).getValue.getBrightness
       val cwfs2Mag = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue.getTarget.getMagnitude(Magnitude.Band.UC).getValue.getBrightness

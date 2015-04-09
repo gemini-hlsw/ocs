@@ -197,7 +197,7 @@ trait GemsStrategy extends AgsStrategy {
   }
 
   override def select(ctx: ObsContext, mt: MagnitudeTable): Future[Option[Selection]] = {
-    val posAngles = (ctx.getPositionAngle.toNewModel :: (0 until 360 by 90).map(Angle.fromDegrees(_)).toList).toSet
+    val posAngles = Set(ctx.getPositionAngle.toNewModel)
     val results = search(GemsTipTiltMode.canopus, ctx, posAngles, None)
     results.map { r =>
       val gemsGuideStars = findGuideStars(ctx, posAngles, r)
