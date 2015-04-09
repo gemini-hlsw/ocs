@@ -2,6 +2,7 @@
 #define COMMANDUTIL_H_
 
 #include <string>
+#include <cstdarg>
 
 #include <giapi/giapi.h>
 #include <giapi/giapiexcept.h>

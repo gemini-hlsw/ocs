@@ -5,7 +5,7 @@
 #ifndef ABSTRACTSTATUSSENDER_H_
 #define ABSTRACTSTATUSSENDER_H_
 
-
+#include <cstdarg>
 #include <log4cxx/logger.h>
 
 #include <giapi/giapiexcept.h>

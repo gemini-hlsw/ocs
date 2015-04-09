@@ -1,6 +1,7 @@
 #ifndef LOGSTATUSSENDER_H_
 #define LOGSTATUSSENDER_H_
 
+#include <cstdarg>
 #include <log4cxx/logger.h>
 #include <giapi/giapiexcept.h>
 

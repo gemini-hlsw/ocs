@@ -1,5 +1,6 @@
 #include "PropertiesUtil.h"
 #include "StringUtil.h"
+#include <cstdlib>
 #include <log4cxx/helpers/exception.h>
 #include <log4cxx/helpers/fileinputstream.h>
 

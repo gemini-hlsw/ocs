@@ -1,4 +1,5 @@
 #include "GeminiUtilImpl.h"
+#include <cstdio>
 #include <gemini/epics/jms/JmsEpicsManager.h>
 #include <gemini/pcs/jms/JmsPcsUpdater.h>
 #include <gemini/tcs/jms/JmsTcsFetcher.h>

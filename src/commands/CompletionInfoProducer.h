@@ -1,6 +1,8 @@
 #ifndef COMPLETIONINFOPRODUCER_H_
 #define COMPLETIONINFOPRODUCER_H_
 
+#include <cstdarg>
+
 #include <giapi/giapi.h>
 #include <giapi/HandlerResponse.h>
 #include <giapi/giapiexcept.h>

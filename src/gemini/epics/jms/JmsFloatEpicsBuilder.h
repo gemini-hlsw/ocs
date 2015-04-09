@@ -1,6 +1,7 @@
 #ifndef JMSFLOATEPICSBUILDER_H_
 #define JMSFLOATEPICSBUILDER_H_
 
+#include <string.h>
 #include "JmsEpicsBuilder.h"
 
 namespace giapi {

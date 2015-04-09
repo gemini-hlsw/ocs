@@ -1,4 +1,5 @@
 #include "TimeUtil.h"
+#include <time.h>
 #include <sys/time.h>
 
 namespace giapi {

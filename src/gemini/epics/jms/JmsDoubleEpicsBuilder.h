@@ -3,6 +3,7 @@
 #define JMSDOUBLEEPICSBUILDER_H_
 
 #include "JmsEpicsBuilder.h"
+#include <string.h>
 
 namespace giapi {
 

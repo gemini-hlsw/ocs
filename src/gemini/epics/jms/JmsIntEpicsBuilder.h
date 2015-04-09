@@ -1,6 +1,7 @@
 #ifndef JMSINTEPICSBUILDER_H_
 #define JMSINTEPICSBUILDER_H_
 
+#include <string.h>
 #include "JmsEpicsBuilder.h"
 
 namespace giapi {

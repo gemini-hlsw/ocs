@@ -5,6 +5,7 @@
 #ifndef JMSLOGPRODUCER_H_
 #define JMSLOGPRODUCER_H_
 
+#include <cstdarg>
 #include <giapi/giapi.h>
 #include <giapi/giapiexcept.h>
 #include <util/jms/JmsProducer.h>

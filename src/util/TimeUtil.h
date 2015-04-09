@@ -2,6 +2,7 @@
 #ifndef TIMEUTIL_H_
 #define TIMEUTIL_H_
 #include <stdexcept>
+#include <sys/time.h>
 
 namespace giapi {
 

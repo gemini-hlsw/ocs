@@ -8,6 +8,8 @@
 #ifndef REQUESTPRODUCER_H_
 #define REQUESTPRODUCER_H_
 
+#include <cstdarg>
+
 #include <giapi/giapiexcept.h>
 
 #include <util/JmsSmartPointers.h>

@@ -1,5 +1,6 @@
 #ifndef STATUSSENDER_H_
 #define STATUSSENDER_H_
+#include <cstdarg>
 #include <giapi/giapiexcept.h>
 #include <tr1/memory>
 

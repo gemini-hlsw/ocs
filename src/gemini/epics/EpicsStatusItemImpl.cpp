@@ -7,6 +7,7 @@
 
 #include "EpicsStatusItemImpl.h"
 #include <stdlib.h>
+#include <string.h>
 #include <iostream>
 namespace giapi {
 

@@ -3,6 +3,7 @@
  */
 
 #include <iostream>
+#include <stdio.h>
 #include <signal.h>
 
 #include <decaf/util/concurrent/CountDownLatch.h>

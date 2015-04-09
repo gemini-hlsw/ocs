@@ -1,6 +1,7 @@
 #ifndef JMSCOMMANDUTIL_H_
 #define JMSCOMMANDUTIL_H_
 
+#include <cstdarg>
 #include <tr1/memory>
 #include <log4cxx/logger.h>
 

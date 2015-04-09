@@ -1,6 +1,8 @@
 #ifndef JMSSTRINGEPICSBUILDER_H_
 #define JMSSTRINGEPICSBUILDER_H_
 
+#include <string.h>
+#include <cstdlib>
 #include "JmsEpicsBuilder.h"
 
 namespace giapi {

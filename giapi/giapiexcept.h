@@ -2,6 +2,7 @@
 #define GIAPIEXCEPTION_H_
 
 #include <stdexcept>
+#include <cstdarg>
 #include <string>
 /**
  * This file contains definition of exceptions in the GIAPI

@@ -1,4 +1,5 @@
 #include "AlarmStatusItem.h"
+#include <cstdarg>
 #include <string.h>
 #include <giapi/giapiexcept.h>
 

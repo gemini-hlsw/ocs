@@ -1,6 +1,7 @@
 #ifndef STATUSDATABASE_H_
 #define STATUSDATABASE_H_
 #include <ext/hash_map>
+#include <cstdarg>
 #include <vector>
 #include <memory>
 
