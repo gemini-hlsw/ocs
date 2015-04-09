@@ -12,7 +12,20 @@ version in ThisBuild := ocsVersion.value.toOsgiVersion
 scalaVersion in ThisBuild := "2.10.4"
 
 // Note that this is not a standard setting; it's used for building IDEA modules.
-javaVersion in ThisBuild := "1.7" 
+javaVersion in ThisBuild := {
+  val expected = "1.7" 
+  val actual   = sys.props("java.version")
+  if (!actual.startsWith(expected))
+    println(s"""
+      |***
+      |***                   INCORRECT JAVA RUNTIME VERSION 
+      |***
+      |***  The build expects version $expected, but you are running $actual.
+      |***  Change the VM you're using to run sbt to avoid confusion and strange behavior.
+      |***
+    """.stripMargin)
+  expected
+}
 
 scalacOptions in ThisBuild ++= Seq(
   // "-deprecation",
