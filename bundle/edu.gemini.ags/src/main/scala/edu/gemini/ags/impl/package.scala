@@ -183,13 +183,4 @@ package object impl {
   def ctx180(c: ObsContext): ObsContext =
     c.withPositionAngle(c.getPositionAngle.add(180.0, skycalc.Angle.Unit.DEGREES))
 
-  def brightness(so: SiderealTarget, b: MagnitudeBand): Option[Double] =
-    so.magnitudeIn(b).map(_.value)
-
-  def brightest[A](lst: List[A], band: MagnitudeBand)(toSiderealTarget: A => SiderealTarget): Option[A] = {
-    lazy val max = new Magnitude(Double.MaxValue, band)
-    if (lst.isEmpty) None
-    else Some(lst.minBy(toSiderealTarget(_).magnitudeIn(band).getOrElse(max)))
-  }
-
 }

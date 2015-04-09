@@ -1,12 +1,12 @@
 package edu.gemini.ags.api
 
+import edu.gemini.ags.api.AgsAnalysis.NotReachable
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.ags.impl._
-import edu.gemini.catalog.api.{CatalogQuery, QueryConstraint}
 import edu.gemini.spModel.ags.AgsStrategyKey
-import edu.gemini.spModel.core.Angle
+import edu.gemini.spModel.core.{MagnitudeBand, Angle}
 import edu.gemini.spModel.core.Target.SiderealTarget
-import edu.gemini.spModel.guide.GuideProbe
+import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
@@ -23,6 +23,12 @@ trait AgsStrategy {
 
   def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis]
 
+  def analyzeForJava(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SPTarget): java.util.List[AgsAnalysis] = {
+    import scala.collection.JavaConverters._
+    if (!guideProbe.validate(guideStar, ctx)) List[AgsAnalysis](NotReachable(guideProbe, guideStar.toNewModel, probeBands)).asJava
+    else analyze(ctx, mt).asJava
+  }
+
   def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]]
 
   def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[AgsStrategy.Estimate]
@@ -30,6 +36,9 @@ trait AgsStrategy {
   def select(ctx: ObsContext, mt: MagnitudeTable): Future[Option[AgsStrategy.Selection]]
 
   def guideProbes: List[GuideProbe]
+
+  // Return the bands used by the strategy in order
+  def probeBands: List[MagnitudeBand]
 }
 
 object AgsStrategy {

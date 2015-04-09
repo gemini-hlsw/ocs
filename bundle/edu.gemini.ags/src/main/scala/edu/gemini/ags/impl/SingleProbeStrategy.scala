@@ -33,16 +33,20 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
     params.magnitudeCalc(ctx, mt).toList.map(params.guideProbe -> _)
 
   def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] =
-    AgsAnalysis.analysis(ctx, mt, params.guideProbe).toList
+    AgsAnalysis.analysis(ctx, mt, params.guideProbe, probeBands).toList
 
   private def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): Option[CatalogQuery] =
     params.catalogQueries(ctx, mt)
 
   override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]] = {
     val empty = Future.successful(List((params.guideProbe: GuideProbe, List.empty[SiderealTarget])))
+    def filterOnMagnitude(q: CatalogQuery, t: SiderealTarget): Boolean = {
+      params.referenceMagnitude(t).exists(q.filterOnMagnitude(t, _))
+    }
+    // We cannot let VoTableClient to filter targets as usual, instead we provide an empty magnitude constraint and filter locally
     catalogQueries(ctx, mt).strengthR(backend).map(Function.tupled(VoTableClient.catalog)).map(_.flatMap {
         case r if r.result.containsError => Future.failed(CatalogException(r.result.problems))
-        case r                           => Future.successful(List((params.guideProbe, r.result.targets.rows)))
+        case r                           => Future.successful(List((params.guideProbe, r.result.targets.rows.filter(t => filterOnMagnitude(r.query, t)))))
     }).getOrElse(empty)
   }
 
@@ -60,7 +64,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   def estimate(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SiderealTarget]): AgsStrategy.Estimate = {
     // If we are unbounded and there are any candidates, we are guaranteed success.
     val pac   = ctx.getPosAngleConstraint(UNBOUNDED)
-    val cv    = new CandidateValidator(params, mt, candidates)
+    val cv    = CandidateValidator(params, mt, candidates)
     val steps = pac.steps(ctx.getPositionAngle, params.stepSize.toOldModel).toList.asScala
     val anglesWithResults  = steps.filter { angle => cv.exists(ctx.withPositionAngle(angle)) }
     val successProbability = anglesWithResults.size.toDouble / steps.size.toDouble
@@ -84,7 +88,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
           }
           val bestPerCtx = for {
             (c, soList) <- results
-            rating      <- brightestByQualityAndVignetting(soList, mt, c, v, params.band)
+            rating      <- brightestByQualityAndVignetting(soList, mt, c, v, params)
           } yield (c, rating)
           bestPerCtx.reduceOption(vignettingCtxOrder.min).map {
             case (c, (_, _, _, st)) => AgsStrategy.Selection(c.getPositionAngle.toNewModel, List(AgsStrategy.Assignment(params.guideProbe, st)))
@@ -97,7 +101,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
             case FIXED_180 | PARALLACTIC_ANGLE => selectBounded(List(ctx, ctx180(ctx)), mt, candidates)
             case UNBOUNDED                     => selectUnbounded(ctx, mt, candidates)
           }
-          brightest(results, params.band)(_._2).map {
+          params.brightest(results)(_._2).map {
             case (angle, st) => AgsStrategy.Selection(angle, List(AgsStrategy.Assignment(params.guideProbe, st)))
           }
       }
@@ -105,7 +109,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   }
 
   private def filterBounded(alternatives: List[ObsContext], mt: MagnitudeTable, candidates: List[SiderealTarget]): List[(ObsContext, List[SiderealTarget])] = {
-    val cv = new CandidateValidator(params, mt, candidates)
+    val cv = CandidateValidator(params, mt, candidates)
     alternatives.map(c => (c, cv.filter(c))).filter {
       case (c, cand) => cand.nonEmpty
     }
@@ -116,13 +120,13 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
       so <- candidates
       pa = SingleProbeStrategy.calculatePositionAngle(ctx.getBaseCoordinates.toNewModel, so)
       ctxSo = ctx.withPositionAngle(pa.toOldModel)
-      if new CandidateValidator(params, mt, List(so)).exists(ctxSo)
+      if CandidateValidator(params, mt, List(so)).exists(ctxSo)
     } yield (ctxSo, List(so))
   }
 
   // List of candidates and their angles for the case where the pos angle constraint is not unbounded.
   private def selectBounded(alternatives: List[ObsContext], mt: MagnitudeTable, candidates: List[SiderealTarget]): List[(Angle, SiderealTarget)] = {
-    val cv = new CandidateValidator(params, mt, candidates)
+    val cv = CandidateValidator(params, mt, candidates)
     alternatives.map(a => (a, cv.select(a))).collect {
       case (c, Some(st)) => (Angle.fromDegrees(c.getPositionAngle.toDegrees.getMagnitude), st)
     }
@@ -131,11 +135,13 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   // List of candidates and their angles for the case where the pos angle constraint is unbounded.
   private def selectUnbounded(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SiderealTarget]): List[(Angle, SiderealTarget)] =
     candidates.map(so => (SingleProbeStrategy.calculatePositionAngle(ctx.getBaseCoordinates.toNewModel, so), so)).filter {
-      case (angle, st) => new CandidateValidator(params, mt, List(st)).exists(ctx.withPositionAngle(angle.toOldModel))
+      case (angle, st) => CandidateValidator(params, mt, List(st)).exists(ctx.withPositionAngle(angle.toOldModel))
     }
 
   override val guideProbes: List[GuideProbe] =
     List(params.guideProbe)
+
+  override val probeBands: List[MagnitudeBand] = params.probeBands
 }
 
 object SingleProbeStrategy {
@@ -172,16 +178,16 @@ object SingleProbeStrategy {
    */
   def brightestByQualityAndVignetting(lst: List[SiderealTarget], mt: MagnitudeTable, ctx: ObsContext,
                                       probe: ValidatableGuideProbe with VignettingGuideProbe,
-                                      band: MagnitudeBand): Option[(AgsGuideQuality, Double, Option[Magnitude], SiderealTarget)] = {
+                                      params: SingleProbeStrategyParams): Option[(AgsGuideQuality, Double, Option[Magnitude], SiderealTarget)] = {
     // Create tuples (AgsQuality, vignetting factor, target) and then find the min by
     // ordering on the first two, returning the corresponding target.
     val candidates = for {
       st <- lst
       spTarget = new SPTarget(HmsDegTarget.fromSkyObject(st.toOldModel))
-      analysis <- AgsAnalysis.analysis(ctx, mt, probe, spTarget)
+      analysis <- AgsAnalysis.analysis(ctx, mt, probe, spTarget, params.probeBands)
     } yield {
       val vig = probe.calculateVignetting(ctx, st.coordinates)
-      (analysis.quality, vig, st.magnitudeIn(band), st)
+      (analysis.quality, vig, params.referenceMagnitude(st), st)
     }
     candidates.reduceOption(vignettingOrder.min)
   }

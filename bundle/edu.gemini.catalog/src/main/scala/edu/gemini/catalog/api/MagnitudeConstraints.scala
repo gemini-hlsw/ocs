@@ -11,7 +11,7 @@ import Scalaz._
  */
 sealed trait MagConstraint {
   val brightness: Double
-  def contains(m: Magnitude): Boolean
+  def contains(v: Double): Boolean
 
   /**
    * Constructs a magnitude out of the band parameter
@@ -23,7 +23,7 @@ sealed trait MagConstraint {
  * Constrain a target's if a magnitude is fainter than a threshold
  */
 case class FaintnessConstraint(brightness: Double) extends MagConstraint {
-  override def contains(m: Magnitude) = m.value <= brightness
+  override def contains(v: Double) = v <= brightness
 }
 
 object FaintnessConstraint {
@@ -36,7 +36,7 @@ object FaintnessConstraint {
  * Constrain a target's if a magnitude is brighter than a threshold
  */
 case class SaturationConstraint(brightness: Double) extends MagConstraint {
-  override def contains(m: Magnitude) = m.value >= brightness
+  override def contains(v: Double) = v >= brightness
 }
 
 object SaturationConstraint {
@@ -72,10 +72,12 @@ case class MagnitudeConstraints(band: MagnitudeBand, faintnessConstraint: Faintn
    * Determines whether the magnitude limits include the given magnitude
    * value.
    */
-  def contains(m: Magnitude) = m.band === band && faintnessConstraint.contains(m) && saturationConstraint.forall(_.contains(m))
+  def contains(m: Magnitude) = m.band === band && faintnessConstraint.contains(m.value) && saturationConstraint.forall(_.contains(m.value))
+
+  def contains(v: Double) = faintnessConstraint.contains(v) && saturationConstraint.forall(_.contains(v))
 
   /**
-   * Returns a combination of two MagnitudeLimits (this and that) such that
+   * Returns a combination of two MagnitudeConstraints(this and that) such that
    * the faintness limit is the faintest of the two and the saturation limit
    * is the brightest of the two.  In other words, the widest possible range
    * of magnitude bands.
@@ -94,5 +96,34 @@ case class MagnitudeConstraints(band: MagnitudeBand, faintnessConstraint: Faintn
 object MagnitudeConstraints {
   def empty(band: MagnitudeBand): MagnitudeConstraints =
     MagnitudeConstraints(band, FaintnessConstraint(0.0), SaturationConstraint(0.0).some)
+
+  def empty(): MagnitudeConstraints =
+    MagnitudeConstraints(MagnitudeBand.R, FaintnessConstraint(0.0), SaturationConstraint(0.0).some)
+
+}
+
+case class MagnitudeRange(faintnessConstraint: FaintnessConstraint, saturationConstraint: Option[SaturationConstraint]) {
+
+  def filter: (SiderealTarget, Magnitude) => Boolean = (t, m) => t.magnitudeIn(m.band).forall(m => contains(m.value))
+
+  /**
+   * Determines whether the magnitude value is in the given range
+   */
+  def contains(v: Double) = faintnessConstraint.contains(v) && saturationConstraint.forall(_.contains(v))
+
+  /**
+   * Returns a combination of two MagnitudeRange (this and that) such that
+   * the faintness limit is the faintest of the two and the saturation limit
+   * is the brightest of the two.  In other words, the widest possible range
+   * of magnitude bands.
+   */
+  def union(that: MagnitudeRange): MagnitudeRange = {
+    val faintness = faintnessConstraint.max(that.faintnessConstraint)
+
+    // Calculate the min saturation limit if both are defined
+    val saturation = (saturationConstraint |@| that.saturationConstraint)(_ min _)
+
+    MagnitudeRange(faintness, saturation)
+  }
 
 }

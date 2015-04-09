@@ -38,52 +38,57 @@ object AgsGuideQuality {
 
 sealed trait AgsAnalysis {
   def quality: AgsGuideQuality = Unusable
+  def probeBands: List[MagnitudeBand]
   def message(withProbe: Boolean): String
 }
 
 object AgsAnalysis {
-  case class NoGuideStarForProbe(guideProbe: GuideProbe) extends AgsAnalysis {
+  case class NoGuideStarForProbe(guideProbe: GuideProbe, probeBands: List[MagnitudeBand]) extends AgsAnalysis {
     override def message(withProbe: Boolean): String = {
       val p = if (withProbe) s"${guideProbe.getKey} " else ""
       s"No ${p}guide star selected."
     }
   }
 
-  case class NoGuideStarForGroup(guideGroup: GuideProbeGroup) extends AgsAnalysis {
+  case class NoGuideStarForGroup(guideGroup: GuideProbeGroup, probeBands: List[MagnitudeBand]) extends AgsAnalysis {
     override def message(withProbe: Boolean): String =
       s"No ${guideGroup.getKey} guide star selected."
   }
 
-  case class MagnitudeTooFaint(guideProbe: GuideProbe, target: SiderealTarget) extends AgsAnalysis {
+  case class MagnitudeTooFaint(guideProbe: GuideProbe, target: SiderealTarget, probeBands: List[MagnitudeBand]) extends AgsAnalysis {
     override def message(withProbe: Boolean): String = {
       val p = if (withProbe) s"use ${guideProbe.getKey}" else "guide"
       s"Cannot $p with the star in these conditions, even using the slowest guide speed."
     }
   }
 
-  case class MagnitudeTooBright(guideProbe: GuideProbe, target: SiderealTarget) extends AgsAnalysis {
+  case class MagnitudeTooBright(guideProbe: GuideProbe, target: SiderealTarget, probeBands: List[MagnitudeBand]) extends AgsAnalysis {
     override def message(withProbe: Boolean): String = {
       val p = if (withProbe) s"${guideProbe.getKey} g" else "G"
       s"${p}uide star is too bright to guide."
     }
   }
 
-  case class NotReachable(guideProbe: GuideProbe, target: SiderealTarget) extends AgsAnalysis {
+  case class NotReachable(guideProbe: GuideProbe, target: SiderealTarget, probeBands: List[MagnitudeBand]) extends AgsAnalysis {
     override def message(withProbe: Boolean): String = {
       val p = if (withProbe) s"with ${guideProbe.getKey} " else ""
       s"The star is not reachable ${p}at all positions."
     }
   }
 
-  case class NoMagnitudeForBand(guideProbe: GuideProbe, target: SiderealTarget, band: MagnitudeBand) extends AgsAnalysis {
+  case class NoMagnitudeForBand(guideProbe: GuideProbe, target: SiderealTarget, probeBands: List[MagnitudeBand]) extends AgsAnalysis {
     override def message(withProbe: Boolean): String = {
       val p = if (withProbe) s"${guideProbe.getKey} g" else "G"
-      s"${p}uide star ${band.name}-band magnitude is missing. Cannot determine guiding performance."
+      if (probeBands.length == 1) {
+        s"${p}uide star ${probeBands.head}-band magnitude is missing. Cannot determine guiding performance."
+      } else {
+        s"${p}uide star ${probeBands.map(_.name).mkString(", ")}-band magnitudes are missing. Cannot determine guiding performance."
+      }
     }
     override val quality = AgsGuideQuality.PossiblyUnusable
   }
 
-  case class Usable(guideProbe: GuideProbe, target: SiderealTarget, guideSpeed: GuideSpeed, override val quality: AgsGuideQuality) extends AgsAnalysis {
+  case class Usable(guideProbe: GuideProbe, target: SiderealTarget, guideSpeed: GuideSpeed, override val quality: AgsGuideQuality, probeBands: List[MagnitudeBand]) extends AgsAnalysis {
     override def message(withProbe: Boolean): String = {
       val qualityMessage = quality match {
         case AgsGuideQuality.DeliversRequestedIq => ""
@@ -96,46 +101,40 @@ object AgsAnalysis {
   }
 
   def guideProbe(a: AgsAnalysis): Option[GuideProbe] = a match {
-    case NoGuideStarForProbe(p)      => Some(p)
-    case NoGuideStarForGroup(_)      => None
-    case MagnitudeTooFaint(p, _)     => Some(p)
-    case MagnitudeTooBright(p, _)    => Some(p)
-    case NotReachable(p, _)          => Some(p)
+    case NoGuideStarForProbe(p, _)   => Some(p)
+    case NoGuideStarForGroup(_, _)   => None
+    case MagnitudeTooFaint(p, _, _)  => Some(p)
+    case MagnitudeTooBright(p, _, _) => Some(p)
+    case NotReachable(p, _, _)       => Some(p)
     case NoMagnitudeForBand(p, _, _) => Some(p)
-    case Usable(p, _, _, _)          => Some(p)
+    case Usable(p, _, _, _, _)       => Some(p)
   }
 
 
   /**
    * Analysis of the selected guide star (if any) in the given context.
    */
-  def analysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe): Option[AgsAnalysis] = {
+  protected [ags] def analysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, bands: List[MagnitudeBand]): Option[AgsAnalysis] = {
     def selection(ctx: ObsContext, guideProbe: GuideProbe): Option[SPTarget] =
       for {
         gpt   <- ctx.getTargets.getPrimaryGuideProbeTargets(guideProbe).asScalaOpt
         gStar <- gpt.getPrimary.asScalaOpt
       } yield gStar
 
-    selection(ctx, guideProbe).fold(Some(NoGuideStarForProbe(guideProbe)): Option[AgsAnalysis]) { guideStar =>
-      AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar)
+    selection(ctx, guideProbe).fold(Some(NoGuideStarForProbe(guideProbe, bands)): Option[AgsAnalysis]) { guideStar =>
+      AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar, bands)
     }
   }
-
-  /**
-   * Analysis for Java.
-   */
-  def analysisForJava(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SPTarget) =
-    analysis(ctx, mt, guideProbe, guideStar).asGeminiOpt
 
   /**
    * Analysis of the given guide star in the given context, regardless of which
    * guide star is actually selected in the target environment.
    */
-  def analysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SPTarget): Option[AgsAnalysis] =
-    if (!guideProbe.validate(guideStar, ctx)) Some(NotReachable(guideProbe, guideStar.toNewModel))
-    else magnitudeAnalysis(ctx, mt, guideProbe, guideStar.toNewModel)
+  protected [ags] def analysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SPTarget, bands: List[MagnitudeBand]): Option[AgsAnalysis] =
+    if (!guideProbe.validate(guideStar, ctx)) Some(NotReachable(guideProbe, guideStar.toNewModel, bands))
+    else magnitudeAnalysis(ctx, mt, guideProbe, guideStar.toNewModel, bands)
 
-  private def magnitudeAnalysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] = {
+  private def magnitudeAnalysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget, bands: List[MagnitudeBand]): Option[AgsAnalysis] = {
     import GuideSpeed._
     import AgsGuideQuality._
 
@@ -144,18 +143,18 @@ object AgsAnalysis {
     // Handles the case where the magnitude falls outside of the acceptable ranges for any guide speed.
     // This handles Andy's 0.5 rule where we might possibly be able to guide if the star is only 0.5 too dim, and
     // otherwise returns the appropriate analysis indicating too dim or too bright.
-    def outsideLimits(magCalc: MagnitudeCalc, mag: Magnitude): AgsAnalysis = {
+    def outsideLimits(magCalc: MagnitudeCalc, mag: Double): AgsAnalysis = {
       val adj             = 0.5
       val saturationLimit = magCalc(conds, FAST).saturationConstraint
       val faintnessLimit  = magCalc(conds, SLOW).faintnessConstraint.brightness
-      val saturated       = saturationLimit.exists(_.brightness > mag.value)
+      val saturated       = saturationLimit.exists(_.brightness > mag)
 
-      def almostTooFaint: Boolean = !saturated && mag.value <= faintnessLimit + adj
-      def tooFaint:       Boolean = mag.value > faintnessLimit + adj
+      def almostTooFaint: Boolean = !saturated && mag <= faintnessLimit + adj
+      def tooFaint:       Boolean = mag > faintnessLimit + adj
 
-      if (almostTooFaint) Usable(guideProbe, guideStar, SLOW, PossiblyUnusable)
-      else if (tooFaint)  MagnitudeTooFaint(guideProbe, guideStar)
-      else                MagnitudeTooBright(guideProbe, guideStar)
+      if (almostTooFaint) Usable(guideProbe, guideStar, SLOW, PossiblyUnusable, bands)
+      else if (tooFaint)  MagnitudeTooFaint(guideProbe, guideStar, bands)
+      else                MagnitudeTooBright(guideProbe, guideStar, bands)
     }
 
     // Called when we know that a valid guide speed can be chosen for the given guide star.
@@ -175,16 +174,18 @@ object AgsAnalysis {
           else IqDegradation
       }
 
-      Usable(guideProbe, guideStar, guideSpeed, quality)
+      Usable(guideProbe, guideStar, guideSpeed, quality, bands)
     }
 
+    // Find the first band in the guide star that is on the list of possible bands
+    def usableMagnitude:Option[Magnitude] = bands.map(guideStar.magnitudeIn).find(_.isDefined).flatten
+
     for {
-      mc <- mt(ctx, guideProbe)
-      probeBand = band(mc)
+      mc  <- mt(ctx, guideProbe)
+      mag = usableMagnitude
     } yield {
-      val magOpt      = guideStar.magnitudeIn(probeBand)
-      val analysisOpt = magOpt.map(mag => fastestGuideSpeed(mc, mag, conds).fold(outsideLimits(mc, mag))(usable))
-      analysisOpt.getOrElse(NoMagnitudeForBand(guideProbe, guideStar, probeBand))
+      val analysisOpt = mag.map(m => fastestGuideSpeed(mc, m.value, conds).fold(outsideLimits(mc, m.value))(usable))
+      analysisOpt.getOrElse(NoMagnitudeForBand(guideProbe, guideStar, bands))
     }
   }
 }

@@ -238,16 +238,21 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
         private static Option<AgsGuideQuality> guideQuality(Option<Tuple2<ObsContext, AgsMagnitude.MagnitudeTable>> ags, final GuideProbe guideProbe, final SPTarget guideStar) {
             return ags.flatMap(new MapOp<Tuple2<ObsContext, AgsMagnitude.MagnitudeTable>, Option<AgsGuideQuality>>() {
-                @Override public Option<AgsGuideQuality> apply(Tuple2<ObsContext, AgsMagnitude.MagnitudeTable> tup) {
+                @Override public Option<AgsGuideQuality> apply(final Tuple2<ObsContext, AgsMagnitude.MagnitudeTable> tup) {
                     if (guideProbe instanceof ValidatableGuideProbe) {
                         final ValidatableGuideProbe vgp = (ValidatableGuideProbe) guideProbe;
 
-                        return AgsAnalysis$.MODULE$.analysisForJava(tup._1(), tup._2(), vgp, guideStar).map(new MapOp<AgsAnalysis, AgsGuideQuality>() {
+                        return AgsRegistrar$.MODULE$.currentStrategyForJava(tup._1()).map(new Function1<AgsStrategy, Option<AgsGuideQuality>>() {
                             @Override
-                            public AgsGuideQuality apply(AgsAnalysis agsAnalysis) {
-                                return agsAnalysis.quality();
+                            public Option<AgsGuideQuality> apply(AgsStrategy strategy) {
+                                final List<AgsAnalysis> agsAnalysises = strategy.analyzeForJava(tup._1(), tup._2(), vgp, guideStar);
+                                if (!agsAnalysises.isEmpty()) {
+                                    return new Some<>(agsAnalysises.get(0).quality());
+                                } else {
+                                    return None.instance();
+                                }
                             }
-                        });
+                        }).getOrElse(None.<AgsGuideQuality>instance());
                     } else {
                         return None.instance();
                     }
@@ -1162,9 +1167,8 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             final SortedSet<GuideProbe> oldGuideProbes = oldPrimary.getReferencedGuiders();
             final SortedSet<GuideProbe> newGuideProbes = newPrimary.getReferencedGuiders();
             final Set<String> warnSet = new TreeSet<>();
-            for (OffsetPosList posList : posLists) {
-                for (Object o : posList.getAllPositions()) {
-                    final OffsetPos offsetPos = (OffsetPos) o;
+            for (OffsetPosList<OffsetPosBase> posList : posLists) {
+                for (OffsetPosBase offsetPos : posList.getAllPositions()) {
                     for (GuideProbe guideProbe : oldGuideProbes) {
                         final GuideOption guideOption = offsetPos.getLink(guideProbe);
                         final GuideOptions options = guideProbe.getGuideOptions();
