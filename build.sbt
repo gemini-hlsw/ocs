@@ -20,7 +20,7 @@ javaVersion in ThisBuild := {
       |***
       |***                   INCORRECT JAVA RUNTIME VERSION 
       |***
-      |***  The build expexts version $expected, but you are running $actual.
+      |***  The build expects version $expected, but you are running $actual.
       |***  Change the VM you're using to run sbt to avoid confusion and strange behavior.
       |***
     """.stripMargin)
