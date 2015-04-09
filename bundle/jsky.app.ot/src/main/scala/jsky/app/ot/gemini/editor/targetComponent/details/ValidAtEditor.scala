@@ -1,34 +1,28 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
 import java.awt._
-import java.awt.event.{ItemEvent, ItemListener}
+import java.awt.event.{ActionEvent, ActionListener, ItemEvent, ItemListener}
 import java.text.SimpleDateFormat
 import java.util.{Date, TimeZone}
 import javax.swing._
 import javax.swing.event.DocumentEvent
 
-import edu.gemini.horizons.api.{HorizonsQuery, HorizonsReply}
+import edu.gemini.horizons.api.HorizonsQuery.ObjectType
 import edu.gemini.shared.gui.calendar.JCalendarPopup
 import edu.gemini.shared.gui.text.AbstractDocumentListener
 import edu.gemini.shared.util.immutable.{ Option => GOption }
-import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.system.ITarget.Tag
-import edu.gemini.spModel.target.system.{ITarget, NamedTarget, ConicTarget}
-import jsky.app.ot.OTOptions
-import jsky.app.ot.gemini.editor.horizons.HorizonsService
+import edu.gemini.spModel.target.system.{ITarget, ConicTarget}
 import jsky.app.ot.gemini.editor.targetComponent.{TimeConfig, TelescopePosEditor}
 import jsky.app.ot.ui.util.TimeDocument
-import jsky.util.gui.DialogUtil
 
 import scalaz._, Scalaz._
-import scalaz.concurrent.Task
 
 // [DATE] at [TIME] UTC [Go] [Plot]
 class ValidAtEditor extends JPanel with TelescopePosEditor with ReentrancyHack {
 
-  private[this] var ct = new ConicTarget
+  private[this] var spt: SPTarget = new SPTarget(new ConicTarget)
 
   val UTC = TimeZone.getTimeZone("UTC")
 
@@ -73,7 +67,17 @@ class ValidAtEditor extends JPanel with TelescopePosEditor with ReentrancyHack {
 
   }
 
-  val go = new JButton("Go")
+  val go = new JButton("Go") <| { b =>
+    b.addActionListener(new ActionListener {
+      override def actionPerformed(e: ActionEvent): Unit =
+        goAction.run.runAsync { e =>
+          e.leftMap[Horizons.HorizonsFailure](Horizons.UnknownError).join match {
+            case -\/(e)      => println(e)
+            case _ => // done
+          }
+        }
+    })
+  }
 
   val plot = new JButton("Plot")
 
@@ -112,8 +116,57 @@ class ValidAtEditor extends JPanel with TelescopePosEditor with ReentrancyHack {
   })
 
   override def edit(ctx: GOption[ObsContext], target: SPTarget): Unit = {
-    ct = target.getTarget.asInstanceOf[ConicTarget]
+    spt = target
   }
+
+  def objectTypeForTag(tag: ITarget.Tag): ObjectType =
+    tag match {
+      case ITarget.Tag.JPL_MINOR_BODY   => ObjectType.COMET
+      case ITarget.Tag.MPC_MINOR_PLANET => ObjectType.MINOR_BODY
+    }
+
+  /** A program that returns the editor's current date and time. */
+  def dateTime: Horizons.HorizonsIO[Date] =
+    Horizons.HorizonsIO.delay(new Date) // TODO: get from controls
+
+  /** A program that returns the editor's current conic target. */
+  val conicTarget: Horizons.HorizonsIO[ConicTarget] =
+    Horizons.HorizonsIO.delay(spt.getTarget.asInstanceOf[ConicTarget])
+
+  /**
+   * Construct a program that looks up a new conic target with the same horizons information as the
+   * editor's current target, if available, else the current target's name and type; and the date
+   * and time indicated by the controls in the editor.
+   */
+  def lookupAction: Horizons.HorizonsIO[(ConicTarget, Horizons.Ephemeris)] =
+    (conicTarget |@| dateTime).tupled >>= { case (ct, date) =>
+      if (ct.isHorizonsDataPopulated) {
+        Horizons.lookupConicTargetById(
+          ct.getHorizonsObjectId.toString,
+          ct.getHorizonsObjectTypeOrdinal,
+          date)
+      } else {
+        Horizons.lookupConicTargetByName(
+          ct.getName,
+          objectTypeForTag(ct.getTag),
+          date)
+      }
+    }
+
+  /**
+   * Constructs a program that replaces the current conic target. Note that this may result in this
+   * editor being replaced entirely. This is ok!
+   */
+  def updateSPTarget(t: ConicTarget): Horizons.HorizonsIO[Unit] =
+    Horizons.HorizonsIO.delay(spt.setTarget(t))
+
+  /**
+   * Program that implements the "go" button behavior: it looks up a conic target in Horizons based
+   * on the current target's properties and the values in the time/date controls in the editor, and
+   * replaces the current target if successful.
+   */
+  val goAction: Horizons.HorizonsIO[Unit] =
+    lookupAction >>= { case (target, ephemeris) => updateSPTarget(target) }
 
 }
 

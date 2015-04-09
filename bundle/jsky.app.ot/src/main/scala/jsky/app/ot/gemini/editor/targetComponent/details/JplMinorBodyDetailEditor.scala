@@ -133,6 +133,7 @@ final class JplMinorBodyDetailEditor extends TargetDetailEditor(Tag.JPL_MINOR_BO
     coords.edit(obsContext, spTarget)
     mags  .edit(obsContext, spTarget)
     props .edit(obsContext, spTarget)
+    valid .edit(obsContext, spTarget)
   }
 
 }
