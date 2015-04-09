@@ -10,11 +10,15 @@ trait ToDegrees[A] {
 
   def toDegrees(a: A): Double
 
-  def toAngle(a: A): Angle    = Angle.fromDegrees(toDegrees(a))
+  def toArcmins(a: A): Double   = toDegrees(a) *      60.0
 
-  def toArcsecs(a: A): Double = toDegrees(a) * 3600.0
+  def toArcsecs(a: A): Double   = toDegrees(a) *    3600.0
 
-  def toArcmins(a: A): Double = toDegrees(a) * 60.0
+  def toMas(a: A): Double       = toDegrees(a) * 3600000.0
 
-  // etc. etc. ....
+  def toHourAngle(a: A): Double = toDegrees(a) /      15.0
+
+  def toAngle(a: A): Angle      = Angle.fromDegrees(toDegrees(a))
+
+  def toRadians(a: A): Double   = toDegrees(a).toRadians
 }
