@@ -5,38 +5,13 @@ import edu.gemini.itc.shared.*;
 import scala.Option;
 
 import java.io.File;
-import java.util.Hashtable;
-import java.util.Scanner;
 
 /**
  * Flamingos 2 specification class
  */
 public final class Flamingos2 extends Instrument {
 
-    private static final class ReadNoiseEntry {
-        public final String _name;
-        public final double _readNoise;
-        ReadNoiseEntry(String name, double readNoise) {
-            _name = name;
-            _readNoise = readNoise;
-        }
-    }
-
-    private static Hashtable<String, ReadNoiseEntry> _readNoiseLevels = new Hashtable<>(3);
-    static {
-        final String file = File.separator + Flamingos2.INSTR_DIR + File.separator + Flamingos2.getPrefix() + "readnoise" + Instrument.getSuffix();
-        try (final Scanner scan = DatFile.scanFile(file)) {
-            while (scan.hasNext()) {
-                final String name = scan.next();
-                final double rn = scan.nextDouble();
-                final ReadNoiseEntry re = new ReadNoiseEntry(name, rn);
-                _readNoiseLevels.put(name, re);
-            }
-        }
-    }
-
     private static final String FILENAME = "flamingos2" + getSuffix();
-    private static final String HIGHNOISE = "highNoise";
     public static final String INSTR_DIR = "flamingos2";
     public static final String INSTR_PREFIX = "";
     public static final String INSTR_PREFIX_2 = "flamingos2_";
@@ -52,10 +27,7 @@ public final class Flamingos2 extends Instrument {
     private final DetectorsTransmissionVisitor _dtv;
     private final Option<Filter> _colorFilter;
     private final Option<GrismOptics> _grismOptics;
-    private final String _filterBand;
-    private final String _grism;
-    private final String _readNoise;
-    private final String _focalPlaneMask;
+    private final Flamingos2Parameters params;
     private final double _slitSize;
 
     /**
@@ -64,50 +36,49 @@ public final class Flamingos2 extends Instrument {
     public Flamingos2(final Flamingos2Parameters fp) {
         super(INSTR_DIR, FILENAME);
 
-        _filterBand = fp.getColorFilter();
-        _readNoise = fp.getReadNoise();
-        _focalPlaneMask = fp.getFPMask();
-        _grism = fp.getGrism();
+        params = fp;
         _slitSize = getSlitSize() * getPixelSize();
-        _colorFilter = addColorFilter(_filterBand);
+        _colorFilter = addColorFilter(fp);
         _dtv = new DetectorsTransmissionVisitor(1, getDirectory() + "/" + getPrefix2() + "ccdpix" + Instrument.getSuffix());
 
         addComponent(new FixedOptics(getDirectory() + File.separator, getPrefix()));
         addComponent(new Detector(getDirectory() + File.separator, getPrefix(), "detector", "2048x2048 Hawaii-II (HgCdTe)"));
 
-        _grismOptics = addGrism(_filterBand);
+        _grismOptics = addGrism(fp);
     }
 
-    private Option<Filter> addColorFilter(final String filterBand) {
-        if (filterBand.equalsIgnoreCase(Flamingos2Parameters.CLEAR)) {
-            return Option.empty();
-        } else {
-            final Filter filter = Filter.fromFile(getPrefix(), _filterBand, getDirectory() + "/");
-            addFilter(filter);
-            return Option.apply(filter);
+    private Option<Filter> addColorFilter(final Flamingos2Parameters fp) {
+        switch (fp.getFilter()) {
+            case OPEN:
+                return Option.empty();
+            default:
+                final Filter filter = Filter.fromFile(getPrefix(), fp.getFilter().name(), getDirectory() + "/");
+                addFilter(filter);
+                return Option.apply(filter);
         }
     }
 
-    private Option<GrismOptics> addGrism(final String filterBand) {
-        if (_grism.equalsIgnoreCase(Flamingos2Parameters.NOGRISM)) {
-            return Option.empty();
-        } else {
-            final GrismOptics grismOptics;
-            try {
-                grismOptics = new GrismOptics(getDirectory() + File.separator, _grism, _slitSize * getPixelSize(), filterBand);
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Grism/filter " + _grism + "+" + filterBand + " combination is not supported.");
-            }
-            addComponent(grismOptics);
-            return Option.apply(grismOptics);
+    private Option<GrismOptics> addGrism(final Flamingos2Parameters fp) {
+        switch (fp.getGrism()) {
+            case NONE:
+                return Option.empty();
+            default:
+                final GrismOptics grismOptics;
+                try {
+                    grismOptics = new GrismOptics(getDirectory() + File.separator, fp.getGrism().name(), _slitSize * getPixelSize(), fp.getFilter().name());
+                } catch (Exception e) {
+                    throw new IllegalArgumentException("Grism/filter " + fp.getGrism() + "+" + fp.getFilter().name() + " combination is not supported.");
+                }
+                addComponent(grismOptics);
+                return Option.apply(grismOptics);
         }
     }
 
     public double getSlitSize() {
-        if (_focalPlaneMask.equalsIgnoreCase("none")) {
-            return 1;
+        switch (params.getFPMask()) {
+            case FPU_NONE: return 1;
+            default: return params.getFPMask().getSlitWidth();
         }
-        return Double.parseDouble(_focalPlaneMask);
     }
 
     /**
@@ -162,10 +133,7 @@ public final class Flamingos2 extends Instrument {
 
     @Override
     public double getReadNoise() {
-        ReadNoiseEntry re = _readNoiseLevels.get(_readNoise);
-        if (re == null)
-            re = _readNoiseLevels.get(Flamingos2.HIGHNOISE);
-        return re._readNoise;
+        return params.getReadNoise();
     }
 
     public double getSpectralPixelWidth() {
@@ -177,11 +145,17 @@ public final class Flamingos2 extends Instrument {
         return WELL_DEPTH;
     }
 
-    public String getFocalPlaneMask() {
-        return _focalPlaneMask;
+    public edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit getFocalPlaneMask() {
+        return params.getFPMask();
     }
 
     public String getReadNoiseString() {
-        return _readNoise;
+        switch (params.getReadMode()) {
+            case BRIGHT_OBJECT_SPEC: return "highNoise";
+            case MEDIUM_OBJECT_SPEC: return "medNoise";
+            case FAINT_OBJECT_SPEC:  return "lowNoise";
+            default:                 throw new Error();
+        }
+
     }
 }

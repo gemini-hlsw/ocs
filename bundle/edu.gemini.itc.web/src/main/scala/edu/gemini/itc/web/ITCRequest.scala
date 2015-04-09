@@ -16,6 +16,7 @@ import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.gemini.altair.AltairParams
+import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.{DisperserNorth, FPUnitNorth, FilterNorth}
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.{DisperserSouth, FPUnitSouth, FilterSouth}
@@ -97,11 +98,11 @@ object ITCRequest {
 
   def flamingos2Parameters(r: ITCMultiPartParser): Flamingos2Parameters = {
     val pc          = ITCRequest.from(r)
-    val colorFilter = pc.parameter("instrumentFilter")
-    val grism       = pc.parameter("instrumentDisperser")
-    val readNoise   = pc.parameter("readNoise")
-    val fpMask      = pc.parameter("instrumentFPMask")
-    new Flamingos2Parameters(colorFilter, grism, fpMask, readNoise)
+    val filter      = pc.enumParameter(classOf[Flamingos2.Filter])
+    val grism       = pc.enumParameter(classOf[Flamingos2.Disperser])
+    val readMode    = pc.enumParameter(classOf[Flamingos2.ReadMode])
+    val fpMask      = pc.enumParameter(classOf[Flamingos2.FPUnit])
+    new Flamingos2Parameters(filter, grism, fpMask, readMode)
   }
 
   def gmosParameters(r: ITCMultiPartParser): GmosParameters = {

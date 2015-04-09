@@ -331,56 +331,40 @@
 				<td>0.18 arcsec/pix</td>
 				
 				<td>Disperser:</td>
-				<td><select name="instrumentDisperser" size="1">
-				<option value="None" selected>
-				none</option>
-				<option value="JH_G5801">
-				JH (R=1200)</option>
-				<option value="HK_G5802">
-				HK (R=1200)</option>
-				<option value="R3K_G5803">
-				R3K (R=3000)</option>				
-				</select></td>
+				<td>
+					<select name="Disperser" size="1">
+						<option value="NONE" selected>none</option>
+						<option value="R1200JH">JH (R=1200)</option>
+						<option value="R1200HK">HK (R=1200)</option>
+						<option value="R3000">R3K (R=3000)</option>
+					</select>
+				</td>
 			</tr>
 			<tr>
 				<td>Filter:</td>
 
-				<td><select name="instrumentFilter" size="1">
-				<option value="Open">
-				Open</option>
-				<option value="Y_G0811">
-				Y (1.02 um)</option>
-				<option value="Jlow_G0801">
-				J-low (1.15 um)</option>
-				<option value="J_G0802">
-				J (1.25 um)</option>
-				<option value="H_G0803">
-				H (1.65 um)</option>
-				<option value="Ks_G0804" selected>
-				Ks (2.15 um)</option>
-				<option value="JH_G0809">
-				JH</option>
-				<option value="HK_G0806">
-				HK</option>
+				<td>
+				<select name="Filter" size="1">
+					<option value="OPEN">Open</option>
+					<option value="Y">Y (1.02 um)</option>
+					<option value="J_LOW">J-low (1.15 um)</option>
+					<option value="J">J (1.25 um)</option>
+					<option value="H">H (1.65 um)</option>
+					<option value="K_SHORT" selected> Ks (2.15 um)</option>
+					<option value="JH">JH</option>
+					<option value="HK">HK</option>
 				</select>
 				</td>
 				<td>Focal Plane Mask:</td>
 				<td>
-				<select name="instrumentFPMask" size="1">
-				<option selected="selected" value="none">
-				none</option>
-				<option value="1">
-				1 pix slit</option>
-				<option value="2">
-				2 pix slit</option>
-				<option value="3">
-				3 pix slit</option>
-				<option value="4">
-				4 pix slit</option>
-				<option value="6">
-				6 pix slit</option>
-				<option value="8">
-				8 pix slit</option>
+				<select name="FPUnit" size="1">
+					<option selected="selected" value="FPU_NONE">none</option>
+					<option value="LONGSLIT_1">1 pix slit</option>
+					<option value="LONGSLIT_2">2 pix slit</option>
+					<option value="LONGSLIT_3">3 pix slit</option>
+					<option value="LONGSLIT_4">4 pix slit</option>
+					<option value="LONGSLIT_6">6 pix slit</option>
+					<option value="LONGSLIT_8">8 pix slit</option>
 				</select>
 				</td>
 			</tr>
@@ -397,13 +381,13 @@
 			</td>
 			<tr>
 				<td colspan="4" style="padding-left:30">
-				<input value="highNoise" name="readNoise" type="radio"/> 
+				<input value="BRIGHT_OBJECT_SPEC" name="ReadMode" type="radio"/>
 				Bright object: CDS and readnoise = 12 e-
 				<br>
-				<input value="medNoise" name="readNoise" checked="checked" type="radio"/> 
+				<input value="MEDIUM_OBJECT_SPEC" name="ReadMode" checked="checked" type="radio"/>
 				Medium object: 4 reads and readnoise = 6 e-
 				<br>
-				<input value="lowNoise" name="readNoise" type="radio"/> 
+				<input value="FAINT_OBJECT_SPEC" name="ReadMode" type="radio"/>
 				Faint object: 8 reads and readnoise < 5 e-				
 
 			</tr>

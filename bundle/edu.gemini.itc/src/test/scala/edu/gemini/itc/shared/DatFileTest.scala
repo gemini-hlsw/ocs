@@ -170,7 +170,7 @@ class DatFileTest {
 
   @Test
   def parseFile2(): Unit = {
-    val data = DatFile.arrays("/flamingos2/HK_G0806.dat")
+    val data = DatFile.arrays("/flamingos2/HK.dat")
     assert(data.size == 2)
     assert(data(1).size == 2900)
     assert(data(0).size == 2900)

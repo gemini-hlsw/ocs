@@ -11,6 +11,7 @@ import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.niri.NiriParameters
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
+import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 
 // TEMPORARY helper
 // All input objects will become immutable data only objects (probably Scala case classes).
@@ -117,11 +118,28 @@ object Hash {
 
   def calc(p: Flamingos2Parameters): Int =
     hash(
-      p.getColorFilter,
-      p.getFPMask,
-      p.getGrism,
-      p.getReadNoise
+      f2FilterToName(p.getFilter),                                                                        // TODO: cleanup with next baseline update
+      if (p.getFPMask.equals(Flamingos2.FPUnit.FPU_NONE)) "none" else p.getFPMask.getSlitWidth.toString,  // TODO: cleanup with next baseline update
+      f2DisperserToName(p.getGrism),                                                                      // TODO: cleanup with next baseline update
+      p.getReadMode match {                                                                               // TODO: cleanup with next baseline update
+        case Flamingos2.ReadMode.BRIGHT_OBJECT_SPEC   => "highNoise"
+        case Flamingos2.ReadMode.MEDIUM_OBJECT_SPEC   => "medNoise"
+        case Flamingos2.ReadMode.FAINT_OBJECT_SPEC    => "lowNoise"
+      }
     )
+
+  private def f2FilterToName(filter: Flamingos2.Filter): String = filter match {
+    case Flamingos2.Filter.OPEN         => "Open"
+    case Flamingos2.Filter.H            => "H_G0803"
+    case Flamingos2.Filter.J_LOW        => "Jlow_G0801"
+    case _                              => filter.name()
+  }
+  private def f2DisperserToName(filter: Flamingos2.Disperser): String = filter match {
+    case Flamingos2.Disperser.NONE      => "None"
+    case Flamingos2.Disperser.R1200HK   => "HK_G5802"
+    case Flamingos2.Disperser.R1200JH   => "JH_G5801"
+    case Flamingos2.Disperser.R3000     => "R3K_G5803"
+  }
 
   def calc(odp: ObservationDetails): Int =
     hash(

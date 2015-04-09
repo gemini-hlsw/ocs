@@ -2,6 +2,7 @@ package edu.gemini.itc.baseline
 
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.flamingos2.Flamingos2Parameters
+import edu.gemini.spModel.gemini.flamingos2.Flamingos2._
 
 /**
  * F2 baseline test fixtures.
@@ -12,38 +13,38 @@ object BaselineF2 {
 
   private lazy val KBandImaging = Fixture.kBandImgFixtures(List(
     new Flamingos2Parameters(
-      "Open",                             // filter
-      Flamingos2Parameters.NOGRISM,       // grism
-      "none",                             // FP mask
-      "lowNoise"),                        // read noise
+      Filter.OPEN,                        // filter
+      Disperser.NONE,                     // grism
+      FPUnit.FPU_NONE,                    // FP mask
+      ReadMode.FAINT_OBJECT_SPEC),        // read mode
     new Flamingos2Parameters(
-      "H_G0803",                          // filter
-      Flamingos2Parameters.NOGRISM,       // grism
-      "none",                             // FP mask
-      "medNoise"),                        // read noise
+      Filter.H,                           // filter
+      Disperser.NONE,                     // grism
+      FPUnit.FPU_NONE,                    // FP mask
+      ReadMode.MEDIUM_OBJECT_SPEC),       // read mode
     new Flamingos2Parameters(
-      "Jlow_G0801",                       // filter
-      Flamingos2Parameters.NOGRISM,       // grism
-      "none",                             // FP mask
-      "highNoise")                        // read noise
+      Filter.J_LOW,                       // filter
+      Disperser.NONE,                     // grism
+      FPUnit.FPU_NONE,                    // FP mask
+      ReadMode.BRIGHT_OBJECT_SPEC)        // read mode
   ))
 
   private lazy val KBandSpectroscopy = Fixture.kBandSpcFixtures(List(
     new Flamingos2Parameters(
-      "Jlow_G0801",
-      "JH_G5801",
-      "1",
-      "lowNoise"),
+      Filter.J_LOW,
+      Disperser.R1200JH,
+      FPUnit.LONGSLIT_1,
+      ReadMode.FAINT_OBJECT_SPEC),
     new Flamingos2Parameters(
-      "H_G0803",
-      "HK_G5802",
-      "4",
-      "medNoise"),
+      Filter.H,
+      Disperser.R1200HK,
+      FPUnit.LONGSLIT_4,
+      ReadMode.MEDIUM_OBJECT_SPEC),
     new Flamingos2Parameters(
-      "H_G0803",
-      "R3K_G5803",
-      "8",
-      "highNoise")
+      Filter.H,
+      Disperser.R3000,
+      FPUnit.LONGSLIT_8,
+      ReadMode.BRIGHT_OBJECT_SPEC)
   ))
 
 }

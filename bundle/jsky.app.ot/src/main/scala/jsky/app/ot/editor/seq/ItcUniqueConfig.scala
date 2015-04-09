@@ -74,7 +74,7 @@ object ItcUniqueConfig {
   private def uniqueConfigs(seq: ConfigSequence, predicate: Config => Boolean): Seq[ItcUniqueConfig] = {
     val steps        = seq.getAllSteps.toSeq.filter(predicate)
     val groupedSteps = steps.groupBy(hash).toSeq
-    val mappedSteps  = groupedSteps.map{case (h, cs) => ItcUniqueConfig(cs.size, labels(cs), cs.head)}.toSeq
+    val mappedSteps  = groupedSteps.map{case (h, cs) => ItcUniqueConfig(cs.size, labels(cs), cs.head)}
     mappedSteps.sortBy(_.config.getItemValue(DATALABEL_KEY).toString)
   }
 

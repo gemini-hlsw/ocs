@@ -38,11 +38,11 @@ public final class Flamingos2Recipe {
      */
     private void validateInputParameters() {
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {
-            if (_flamingos2Parameters.getGrism().equalsIgnoreCase("none")) {
-                throw new IllegalArgumentException("In spectroscopy mode, a grism must be selected");
+            switch (_flamingos2Parameters.getGrism()) {
+                case NONE: throw new IllegalArgumentException("In spectroscopy mode, a grism must be selected");
             }
-            if (_flamingos2Parameters.getFPMask().equalsIgnoreCase("none")) {
-                throw new IllegalArgumentException("In spectroscopy mode, a FP must must be selected");
+            switch (_flamingos2Parameters.getFPMask()) {
+                case FPU_NONE: throw new IllegalArgumentException("In spectroscopy mode, a FP must must be selected");
             }
         }
 
