@@ -135,14 +135,14 @@ public final class DMSFormatCase {
         _doBothTest("-20:10:3.5", "-20:10:03.50", DMSFormat.DEFAULT_PRECISION);
         _doBothTest("-20:10:3.52", "-20:10:03.52", DMSFormat.DEFAULT_PRECISION);
         // Note that this rounds differently than positive?
-        _doBothTest("-20:10:3.555", "-20:10:03.56", DMSFormat.DEFAULT_PRECISION);
-        _doBothTest("20:10:3.555", "20:10:03.56", DMSFormat.DEFAULT_PRECISION);
+        _doBothTest("-20:10:3.555", "-20:10:03.55", DMSFormat.DEFAULT_PRECISION);
+        _doBothTest("20:10:3.555", "20:10:03.55", DMSFormat.DEFAULT_PRECISION);
         _doBothTest("10:01:0", "10:01:00.0", 1);
         _doBothTest("10:01:02.0", "10:01:02.00", 2);
         _doBothTest("10:01:02.345678", "10:01:02.35", 2);
         _doBothTest("10:01:02.345678", "10:01:02.3457", 4);
         _doBothTest("10:11:12.3440", "10:11:12.3440", 4);
-        _doBothTest("10:60:60.345", "11:01:00.34", 2);
+        _doBothTest("10:60:60.345", "11:01:00.35", 2);
         _doBothTest("-00:00:00.0", "00:00:00.0", 1);
         _doBothTest("-0:01:02", "-00:01:02.0", 1);
         _doBothTest("-10:60:60.345", "-11:01:00.345", 3);

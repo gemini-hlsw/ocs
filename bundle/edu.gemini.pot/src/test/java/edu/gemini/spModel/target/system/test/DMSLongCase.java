@@ -100,7 +100,7 @@ public final class DMSLongCase {
         _doStringTest2("10:60:60.346", "11:01:00.35", 2);
         _doStringTest2("-00:00:00.0", "00:00:00.0", 1);
         _doStringTest2("-0:01:02", "359:58:58.0", 1);
-        _doStringTest2("-10:60:60.345", "348:58:59.66", 2);
+        _doStringTest2("-10:60:60.345", "348:58:59.65", 2);
         _doStringTest2("10:60:60.345", "11:01:00.345", 3);
 
     }
