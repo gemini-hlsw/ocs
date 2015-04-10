@@ -1,19 +1,15 @@
 package jsky.app.ot.gemini.inst
 
-import java.awt.geom.{AffineTransform, Point2D}
+import java.awt.geom.{Point2D}
 import java.awt.{AlphaComposite, Color}
-import java.text.DecimalFormat
 
-import edu.gemini.skycalc.{Coordinates, Angle, Offset}
-import edu.gemini.spModel.gemini.flamingos2.{Flamingos2, F2OiwfsProbeArm$, F2OiwfsProbeArm, Flamingos2OiwfsGuideProbe}
-import edu.gemini.spModel.gemini.gmos.{GmosSouthOiwfsProbeArm, GmosNorthOiwfsProbeArm, GmosOiwfsGuideProbe, GmosOiwfsProbeArm}
-import edu.gemini.spModel.guide.{OffsetValidatingGuideProbe, PatrolField, GuideProbe}
+import edu.gemini.skycalc.{Angle, Offset}
+import edu.gemini.spModel.gemini.flamingos2.{F2OiwfsProbeArm, Flamingos2OiwfsGuideProbe}
+import edu.gemini.spModel.gemini.gmos.{GmosSouthOiwfsProbeArm, GmosNorthOiwfsProbeArm, GmosOiwfsGuideProbe}
+import edu.gemini.spModel.guide.{OffsetValidatingGuideProbe, PatrolField}
 import edu.gemini.spModel.inst.{FeatureGeometry, ProbeArmGeometry}
-import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.rich.shared.immutable._
-import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.env.GuideProbeTargets
 import jsky.app.ot.tpe.TpeImageFeature.Figure
 import jsky.app.ot.tpe.{TpeImageInfo, TpeMessage}
 
@@ -184,119 +180,6 @@ case object OIWFSVignettingFeature {
 
 
 // Concrete instances.
-object Flamingos2OIWFSFeature extends OIWFSVignettingFeature(Flamingos2OiwfsGuideProbe.instance, F2OiwfsProbeArm, "Flamingos2 OIWFS") {
-  val f: DecimalFormat = new DecimalFormat("0.###")
-
-  private def printCoords(name: String, x: Double, y: Double, reduce: Boolean) {
-    System.out.print("* " + name + " = (" + f.format(x) + "," + f.format(y) + ")")
-    if (reduce) System.out.print(" = (" + f.format(x / _pixelsPerArcsec) + "," + f.format(y / _pixelsPerArcsec) + ")")
-    System.out.println
-  }
-
-  private def printCoords(name: String, P: Point2D, reduce: Boolean) {
-    printCoords(name, P.getX, P.getY, reduce)
-  }
-
-  private def printValue(name: String, value: Double, reduce: Boolean) {
-    System.out.print("* " + name + " = " + f.format(value))
-    if (reduce) System.out.print(" = " + f.format(value / _pixelsPerArcsec))
-    System.out.println
-  }
-
-  val MAXARCSECS: Double = 360 * 60 * 60
-
-  private def normalize(value: Double): Double = {
-    return if ((value > MAXARCSECS / 2.0)) value - MAXARCSECS else value
-  }
-  private def _addProbeArm2 (xc: Double, yc: Double, xg: Double, yg: Double, xt: Double, yt: Double) {
-    val inst: Flamingos2 = _iw.getInstObsComp.asInstanceOf[Flamingos2]
-    val plateScale = inst.getLyotWheel.getPlateScale
-    val sign: Int = if (inst.getFlipConfig(false)) -1 else 1
-    val f: DecimalFormat = new DecimalFormat("0.###")
-    System.out.println
-    System.out.println("sign=" + sign + ", flipRA=" + _flipRA)
-    printCoords("C", xc, yc, true)
-    printCoords("G", xg, yg, true)
-    printCoords("T", xt, yt, true)
-    val tp: Point2D.Double = new Point2D.Double(xg, yg)
-    val tpOff: Point2D.Double = new Point2D.Double(xg + xt, yg + yt)
-
-    val scale: Double = _pixelsPerArcsec * plateScale
-    val length_base: Double = F2OiwfsProbeArm.ProbeBaseArmLength * scale
-    val length_pickoff: Double = F2OiwfsProbeArm.ProbePickoffArmLength * scale
-    val base_arm_axis: Double = F2OiwfsProbeArm.ProbeArmOffset * scale
-    val pa: Double = -_posAngle - inst.getRotationConfig(false).toRadians.getMagnitude
-    val x0: Double = xc + base_arm_axis * _flipRA * sign * Math.cos(pa)
-    val y0: Double = yc + base_arm_axis * _flipRA * sign * Math.sin(pa)
-    val x1: Double = xg + xt
-    val y1: Double = yg + yt
-    val distance: Double = Math.min(Math.sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0)), length_base + length_pickoff)
-    val a: Double = (length_base * length_base - length_pickoff * length_pickoff + distance * distance) / (2 * distance)
-    val h: Double = sign * Math.sqrt(length_base * length_base - a * a)
-    val x2: Double = x0 + a * (x1 - x0) / distance
-    val y2: Double = y0 + a * (y1 - y0) / distance
-    var y3: Double = y2 - h * (x1 - x0) / distance
-    var x3: Double = x2 + h * (y1 - y0) / distance
-    if (_flipRA < 0) {
-      if ((x3 * xc * _flipRA + y3 * yc) < 0 || (x3 * xc + y3 * yc * _flipRA) < 0) {
-        y3 = y2 + h * (x1 - x0) / distance
-        x3 = x2 - h * (y1 - y0) / distance
-      }
-    }
-    val angle: Double = Math.atan2(y3 - y1, x3 - x1)
-
-    val ctx: ObsContext = _iw.getMinimalObsContext.getOrNull
-    val cb: Coordinates = ctx.getBaseCoordinates
-    val cbx: Double = normalize(cb.getRa.convertTo(Angle.Unit.ARCSECS).getMagnitude)
-    val cby: Double = normalize(cb.getDec.convertTo(Angle.Unit.ARCSECS).getMagnitude)
-    val ox: Double = (xc - _baseScreenPos.getX) / _pixelsPerArcsec
-    val oy: Double = (yc - _baseScreenPos.getY) / _pixelsPerArcsec
-    System.out.println
-    val scaledPAO: Double = F2OiwfsProbeArm.ProbeArmOffset * plateScale
-    val P: Point2D = new Point2D.Double(scaledPAO * sign * Math.cos(pa), scaledPAO * sign * Math.sin(pa))
-    val gpt: GuideProbeTargets = ctx.getTargets.getPrimaryGuideProbeTargets(Flamingos2OiwfsGuideProbe.instance).getOrNull
-    if (gpt != null) {
-      val guideStar: SPTarget = gpt.getPrimary.getOrNull
-      if (guideStar != null) {
-        val gx: Double = normalize(guideStar.getTarget.getSkycalcCoordinates.getRa.toArcsecs.getMagnitude)
-        val gy: Double = normalize(guideStar.getTarget.getSkycalcCoordinates.getDec.toArcsecs.getMagnitude)
-        val GS: Point2D = new Point2D.Double(gx, gy)
-        printCoords("GS", gx, gy, false)
-        printCoords("gs", (xc - xg), (yc - yg), true)
-        printCoords("MX", P, false)
-        printCoords("mx", x0 - xc, y0 - yc, true)
-        val T: Point2D = new Point2D.Double(xt * _flipRA / _pixelsPerArcsec, yt * _flipRA / _pixelsPerArcsec)
-        val D: Point2D = new Point2D.Double(-GS.getX + T.getX - P.getX, -GS.getY + T.getY - P.getY)
-        val scaledPBAL: Double = F2OiwfsProbeArm.ProbeBaseArmLength * plateScale
-        val scaledPPAL: Double = F2OiwfsProbeArm.ProbePickoffArmLength * plateScale
-        val mdistance: Double = Math.min(Math.sqrt(D.getX * D.getX + D.getY * D.getY), scaledPBAL + scaledPPAL)
-        printValue("mdistance", mdistance, false)
-        printValue(" distance", distance, true)
-        val ma: Double = (scaledPBAL * scaledPBAL - scaledPPAL * scaledPPAL + mdistance * mdistance) / (2 * mdistance)
-        printValue("ma", ma, false)
-        printValue(" a", a, true)
-        val mh: Double = sign * Math.sqrt(scaledPBAL * scaledPBAL - ma * ma)
-        printValue("mh", mh, false)
-        printValue(" h", h, true)
-        val Q: Point2D = new Point2D.Double(GS.getX - T.getX + P.getX + (ma * D.getX + mh * D.getY) / mdistance, GS.getY - T.getY + P.getY + (ma * D.getY - mh * D.getX) / mdistance)
-        printCoords("Q", Q, false)
-        printCoords("q", (x3 - x1) * _flipRA, (y3 - y1) * _flipRA, true)
-        val mangle: Double = Math.atan2(Q.getY, Q.getX)
-        printValue("mangle", mangle, false)
-        printValue(" angle", angle, false)
-      }
-    }
-  }
-
-  override def _updateFigureList(guidePosX:  Double, guidePosY:  Double,
-                                 offsetPosX: Double, offsetPosY: Double,
-                                 translateX: Double, translateY: Double,
-                                 basePosX:   Double, basePosY:   Double,
-                                 oiwfsDefined: Boolean): Unit = {
-    _addProbeArm2(offsetPosX, offsetPosY, guidePosX, guidePosY, translateX, translateY)
-    super._updateFigureList(guidePosX, guidePosY, offsetPosX, offsetPosY, translateX, translateY, basePosX, basePosY, oiwfsDefined)
-  }
-}
-
+object Flamingos2OIWFSFeature extends OIWFSVignettingFeature(Flamingos2OiwfsGuideProbe.instance, F2OiwfsProbeArm, "Flamingos2 OIWFS")
 object GmosNorthOIWFSFeature  extends OIWFSVignettingFeature(GmosOiwfsGuideProbe.instance, GmosNorthOiwfsProbeArm, "GMOS OIWFS")
 object GmosSouthOIWFSFeature  extends OIWFSVignettingFeature(GmosOiwfsGuideProbe.instance, GmosSouthOiwfsProbeArm, "GMOS OIWFS")

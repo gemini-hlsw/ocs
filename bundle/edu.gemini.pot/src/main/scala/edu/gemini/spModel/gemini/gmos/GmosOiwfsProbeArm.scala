@@ -5,7 +5,7 @@ import java.awt.geom.{Rectangle2D, Point2D, AffineTransform}
 
 import edu.gemini.shared.util.immutable.ImPolygon
 import edu.gemini.skycalc.Offset
-import edu.gemini.spModel.core.{Site, Angle, Coordinates}
+import edu.gemini.spModel.core.{Angle, Coordinates}
 import edu.gemini.spModel.inst.{ArmAdjustment, ProbeArmGeometry}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.telescope.IssPort

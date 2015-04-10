@@ -80,7 +80,7 @@ object F2OiwfsProbeArm extends ProbeArmGeometry[Flamingos2] {
       val angle     = -posAngle - fovRotation
       new Point2D.Double(scaledPAO * flip * math.cos(angle), scaledPAO * flip * math.sin(angle))
     }
-    val D = new Point2D.Double(-guideStar.getX + T.getX - P.getX, -guideStar.getY + T.getY - P.getY)
+    val D = new Point2D.Double(guideStar.getX + T.getX - P.getX, guideStar.getY + T.getY - P.getY)
 
     val Q = {
       val scaledPBAL = ProbeBaseArmLength * plateScale
@@ -90,8 +90,8 @@ object F2OiwfsProbeArm extends ProbeArmGeometry[Flamingos2] {
       val a = (scaledPBAL * scaledPBAL - scaledPPAL * scaledPPAL + distance * distance) / (2 * distance)
       val h = flip * math.sqrt(scaledPBAL * scaledPBAL - a * a)
 
-      new Point2D.Double(guideStar.getX - T.getX + P.getX + (a * D.getX + h * D.getY) / distance,
-                         guideStar.getY - T.getY + P.getY + (a * D.getY - h * D.getX) / distance)
+      new Point2D.Double(-guideStar.getX - T.getX + P.getX + (a * D.getX + h * D.getY) / distance,
+                         -guideStar.getY - T.getY + P.getY + (a * D.getY - h * D.getX) / distance)
     }
 
     val angle = Angle.fromRadians(math.atan2(Q.getY, Q.getX))
