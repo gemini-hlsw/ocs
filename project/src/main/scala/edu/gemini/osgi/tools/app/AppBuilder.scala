@@ -9,12 +9,12 @@ import java.util.jar.{Manifest, JarFile}
 object AppBuilder {
 
   val Instances = Map(
-    MacOS   -> MacDistHandler(Some("osx/JRE1.7"), "jre1.7.0"),
+    MacOS   -> MacDistHandler(Some("osx/JRE1.8"), "jre1.8.0"),
     Test    -> TestDistHandler,
     Windows -> WinDistHandler,
-    Linux32 -> new GenericUnixDistHandler(true, Some("linux/JRE32_1.7")),
-    Linux64 -> new GenericUnixDistHandler(true, Some("linux/JRE64_1.7")),
-    RPM64   -> new RPMDistHandler(Some("linux/JRE64_1.7"))
+    Linux32 -> new GenericUnixDistHandler(true, Some("linux/JRE32_1.8")),
+    Linux64 -> new GenericUnixDistHandler(true, Some("linux/JRE64_1.8")),
+    RPM64   -> new RPMDistHandler(Some("linux/JRE64_1.8"))
   )
 
   val LoggingPatternProp = "java.util.logging.FileHandler.pattern"

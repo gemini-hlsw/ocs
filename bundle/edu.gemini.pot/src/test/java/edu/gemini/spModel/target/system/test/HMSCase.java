@@ -63,7 +63,7 @@ public final class HMSCase {
         // this is correct.
         _doStringTest("10:01:02.3467", "10:01:02.347");  // Okay
         _doStringTest("10:01:59.3451", "10:01:59.345"); // Okay
-        _doStringTest("10:01:59.3445", "10:01:59.344");  // Okay?  59.35?
+        _doStringTest("10:01:59.3445", "10:01:59.345");  // Okay?  59.35?
         _doStringTest("10:01:60.346", "10:02:00.346");
         _doStringTest("10:60:60.345", "11:01:00.345");
         _doStringTest("10:11:12.3440", "10:11:12.344");
@@ -90,7 +90,7 @@ public final class HMSCase {
         _doStringTest2("10:60:60.346", "11:01:00.35", 2);
         _doStringTest2("-00:00:00.0", "00:00:00.0", 1);
         _doStringTest2("-0:01:02", "23:58:58.0", 1);
-        _doStringTest2("-10:60:60.345", "12:58:59.66", 2);
+        _doStringTest2("-10:60:60.345", "12:58:59.65", 2); // was 66
         _doStringTest2("10:60:60.345", "11:01:00.345", 3);
 
     }
