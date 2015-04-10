@@ -10,14 +10,12 @@ import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.gemini.bhros.InstBHROS;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
-import edu.gemini.spModel.gemini.gmos.InstGmosCommon;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
 import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
 import edu.gemini.spModel.gemini.nifs.InstNIFS;
 import edu.gemini.spModel.gemini.niri.InstNIRI;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
-import jsky.app.ot.gemini.bhros.BHROS_OIWFS_Feature;
 import jsky.app.ot.gemini.gnirs.GNIRS_OIWFS_Feature;
 import jsky.app.ot.gemini.nifs.NIFS_OIWFS_Feature;
 import jsky.app.ot.gemini.niri.NIRI_OIWFS_Feature;
@@ -43,7 +41,6 @@ public class OIWFS_Feature extends TpeImageFeature {
     private TpeImageFeature _niriFeat;
     private TpeImageFeature _gmosNFeat;
     private TpeImageFeature _gmosSFeat;
-    private TpeImageFeature _bhrosFeat;
     private TpeImageFeature _gnirsFeat;
     private TpeImageFeature _nifsFeat;
     private TpeImageFeature _flamingos2Feat;
@@ -78,6 +75,7 @@ public class OIWFS_Feature extends TpeImageFeature {
         // If this is not the case, the TPE View menu will need to be updated
         // whenever the instrument changes, since getProperties() is called
         // once only the first time the TPE is displayed.
+        // Note that BHROS is simply a filter for GMOS-S, so we use GMOS-S for this.
         _feat = null;
         if (inst instanceof InstNIRI) {
             if (_niriFeat == null) _niriFeat = new NIRI_OIWFS_Feature();
@@ -85,12 +83,9 @@ public class OIWFS_Feature extends TpeImageFeature {
         } else if (inst instanceof InstGmosNorth) {
             if (_gmosNFeat == null) _gmosNFeat = GmosNorthOIWFSFeature$.MODULE$;
             _feat = _gmosNFeat;
-        } else if (inst instanceof InstGmosSouth) {
+        } else if (inst instanceof InstGmosSouth || inst instanceof InstBHROS) {
             if (_gmosSFeat == null) _gmosSFeat = GmosSouthOIWFSFeature$.MODULE$;
             _feat = _gmosSFeat;
-        } else if (inst instanceof InstBHROS) {
-            if (_bhrosFeat == null) _bhrosFeat = new BHROS_OIWFS_Feature();
-            _feat = _bhrosFeat;
         } else if (inst instanceof InstGNIRS) {
             if (_gnirsFeat == null) _gnirsFeat = new GNIRS_OIWFS_Feature();
             _feat = _gnirsFeat;
