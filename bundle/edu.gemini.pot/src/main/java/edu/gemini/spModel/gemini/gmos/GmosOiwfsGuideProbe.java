@@ -4,7 +4,6 @@
 
 package edu.gemini.spModel.gemini.gmos;
 
-import edu.gemini.model.p1.dtree.inst.GmosSouth;
 import edu.gemini.shared.util.immutable.MapOp;
 import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.skycalc.Angle;
@@ -16,8 +15,6 @@ import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.guide.ScalaGuideProbeUtil;
 import edu.gemini.spModel.guide.*;
-import edu.gemini.spModel.inst.ProbeArmGeometry;
-import edu.gemini.spModel.inst.ScienceAreaGeometry;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.telescope.IssPort;
