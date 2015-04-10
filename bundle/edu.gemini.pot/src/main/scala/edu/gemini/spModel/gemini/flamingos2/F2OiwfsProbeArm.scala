@@ -95,7 +95,6 @@ object F2OiwfsProbeArm extends ProbeArmGeometry[Flamingos2] {
     }
 
     val angle = Angle.fromRadians(math.atan2(Q.getY, Q.getX))
-    println(s"*** angle=$angle")
     angle
   }
 
