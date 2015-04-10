@@ -2,6 +2,7 @@ package edu.gemini.spModel.core
 
 import org.specs2.matcher.Matcher
 import org.specs2.mutable.Specification
+import AngleSyntax._
 
 import scala.math._
 
@@ -13,8 +14,8 @@ class CoordinatesDifferenceSpec extends Specification {
   def beCloseDifference(cd: Coordinates.Difference, d: Double): Matcher[Coordinates.Difference] =
      beCloseTo(cd.distance.toDegrees +/- d) ^^ ((c:Coordinates.Difference) => c.distance.toDegrees) and beCloseTo(cd.posAngle.toDegrees +/- d) ^^ ((c:Coordinates.Difference) => c.posAngle.toDegrees)
 
-  def beCloseOffset(p: Angle, q: Angle, d: Double): Matcher[Offset] =
-     beCloseTo(p.toDegrees +/- d) ^^ ((o:Offset) => o.p.toDegrees) and beCloseTo(q.toDegrees +/- d) ^^ ((o:Offset) => o.q.toDegrees)
+  def beCloseOffset(p: OffsetP, q: OffsetQ, d: Double): Matcher[Offset] =
+     beCloseTo(p.degrees +/- d) ^^ ((o:Offset) => o.p.degrees) and beCloseTo(q.degrees +/- d) ^^ ((o:Offset) => o.q.degrees)
 
   def beCloseToEquator(c: Coordinates, a: Angle, delta:Double): Matcher[Coordinates.Difference] = {
     def normalize(a: Angle): Angle = if (a.toDegrees > 180) Angle.zero - a else a
@@ -54,7 +55,7 @@ class CoordinatesDifferenceSpec extends Specification {
         a      = Angle.fromDegrees(45.0 * i)
         c      = Coordinates(RightAscension.fromAngle(a), dec)
         offset = Coordinates.difference(base, c).offset
-      } yield offset should beCloseOffset(Angle.fromDegrees(r._1 / 3600), Angle.fromDegrees(r._2 / 3600), errorDelta)
+      } yield offset should beCloseOffset((r._1).arcsecs[OffsetP], (r._2).arcsecs[OffsetQ], errorDelta)
 
     }
     "calculate difference close to the equator" in {
@@ -86,16 +87,16 @@ class CoordinatesDifferenceSpec extends Specification {
 
       def offsetsTest(ra: Angle, dec: Angle) = {
         val q0 = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
-        Coordinates.difference(base, q0).offset should beCloseOffset(ra, dec, errorDelta)
+        Coordinates.difference(base, q0).offset should beCloseOffset(ra.toDegrees.degrees[OffsetP], dec.toDegrees.degrees[OffsetQ], errorDelta)
 
         val q1 = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(Angle.zero - dec).getOrElse(Declination.zero))
-        Coordinates.difference(base, q1).offset should beCloseOffset(ra, dec * -1, errorDelta)
+        Coordinates.difference(base, q1).offset should beCloseOffset(ra.toDegrees.degrees[OffsetP], (dec * -1).toDegrees.degrees[OffsetQ], errorDelta)
 
         val q2 = Coordinates(RightAscension.fromAngle(Angle.zero - ra), Declination.fromAngle(Angle.zero - dec).getOrElse(Declination.zero))
-        Coordinates.difference(base, q2).offset should beCloseOffset(ra * -1, dec * -1, errorDelta)
+        Coordinates.difference(base, q2).offset should beCloseOffset((ra * -1).toDegrees.degrees[OffsetP], (dec * -1).toDegrees.degrees[OffsetQ], errorDelta)
 
         val q3 = Coordinates(RightAscension.fromAngle(Angle.zero - ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
-        Coordinates.difference(base, q3).offset should beCloseOffset(ra * -1, dec, errorDelta)
+        Coordinates.difference(base, q3).offset should beCloseOffset((ra * -1).toDegrees.degrees[OffsetP], dec.toDegrees.degrees[OffsetQ], errorDelta)
       }
 
       offsetsTest(Angle.fromDegrees(10.0 / 3600), Angle.fromDegrees(10.0 / 3600))

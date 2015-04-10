@@ -5,6 +5,7 @@ import edu.gemini.catalog.api.MagnitudeLimits.{FaintnessLimit, SaturationLimit}
 import edu.gemini.shared.util.immutable.PredicateOp
 import edu.gemini.shared.util.immutable.ScalaConverters.ScalaOptionOps
 import edu.gemini.spModel.core._
+import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.guide.VignettingGuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
@@ -30,7 +31,9 @@ package object impl {
   }
 
   implicit class OldOffset2New(val offset: skycalc.Offset) extends AnyVal {
-    def toNewModel: Offset = Offset(offset.p().toNewModel, offset.q().toNewModel)
+    def toNewModel: Offset =
+      Offset(offset.p().toDegrees.getMagnitude.degrees[OffsetP],
+             offset.q().toDegrees.getMagnitude.degrees[OffsetQ])
   }
 
   implicit class OldCoordinates2New(val c: skycalc.Coordinates) extends AnyVal {

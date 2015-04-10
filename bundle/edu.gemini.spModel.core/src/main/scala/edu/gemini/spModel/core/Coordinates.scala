@@ -6,7 +6,7 @@ import scalaz._, Scalaz._
 /** A point in the sky, given right ascension and declination. */
 final case class Coordinates(ra: RightAscension, dec: Declination) {
 
-  /** 
+  /**
    * Offset this `Coordinates` by the given deltas, flipping the RA by 180° if the Declination
    * overflows.
    * @group Operations
@@ -17,7 +17,7 @@ final case class Coordinates(ra: RightAscension, dec: Declination) {
     Coordinates(ra0, dec0)
   }
 
-  /** 
+  /**
    * Compute the offset require to transform this `Coordinates` to the given one, such that
    * c1 offset (c1 diff c2) == c2.
    * @group Operations
@@ -33,7 +33,7 @@ object Coordinates extends ((RightAscension, Declination) => Coordinates) {
   val dec: Coordinates @> Declination    = Lens(c => Store(d => c.copy(dec = d), c.dec))
 
   /**
-   * The origin, at RA = Dec = 0. 
+   * The origin, at RA = Dec = 0.
    * @group Constructors
    */
   val zero = Coordinates(RightAscension.zero, Declination.zero)
@@ -49,10 +49,11 @@ object Coordinates extends ((RightAscension, Declination) => Coordinates) {
     def offset: Offset = {
       val phi = posAngle.toRadians
       val h = distance.toDegrees
-      // Position angle is east of north, or relative to 90 degrees.
+      // Position angle is east of north, or relative to 90 degrees.c
       // Swapping sin and cos here to compensate.
-      val p = Angle.fromDegrees(h * sin(phi))
-      val q = Angle.fromDegrees(h * cos(phi))
+      import AngleSyntax._
+      val p = (h * sin(phi)).degrees[OffsetP]
+      val q = (h * cos(phi)).degrees[OffsetQ]
       Offset(p, q)
     }
 

@@ -10,22 +10,28 @@ object AlmostEqual {
     def ~=(b: A): Boolean = A.almostEqual(a, b)
   }
 
+  implicit val DoubleAlmostEqual =
+    new AlmostEqual[Double] {
+      def almostEqual(a: Double, b: Double) =
+        (a - b).abs < 0.00001
+    }
+
   implicit val AngleAlmostEqual =
     new AlmostEqual[Angle] {
       def almostEqual(a: Angle, b: Angle) =
-        (a.toDegrees - b.toDegrees).abs < 0.00001
+        a.toDegrees ~= b.toDegrees
     }
 
   implicit val RightAscensionAngularVelocityAlmostEqual =
     new AlmostEqual[RightAscensionAngularVelocity] {
       def almostEqual(a: RightAscensionAngularVelocity, b: RightAscensionAngularVelocity) =
-        (a.velocity.masPerYear - b.velocity.masPerYear).abs < 0.00001
+        a.velocity.masPerYear ~= b.velocity.masPerYear
     }
 
   implicit val DeclinationAngularVelocityAlmostEqual =
     new AlmostEqual[DeclinationAngularVelocity] {
       def almostEqual(a: DeclinationAngularVelocity, b: DeclinationAngularVelocity) =
-        (a.velocity.masPerYear - b.velocity.masPerYear).abs < 0.00001
+        a.velocity.masPerYear ~= b.velocity.masPerYear
     }
 
   implicit val ProperMotionAlmostEqual =

@@ -4,6 +4,7 @@ import edu.gemini.catalog.api.{MagnitudeConstraints, RadiusConstraint}
 import edu.gemini.ags.impl._
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core.{Magnitude, Coordinates, Offset, Angle}
+import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.shared.skyobject
 import edu.gemini.spModel.gems.{GemsGuideProbeGroup, GemsGuideStarType}
 import scala.collection.JavaConverters._
@@ -28,8 +29,8 @@ case class CatalogSearchCriterion(name: String, magConstraints: Option[Magnitude
     (offset |@| posAngle) { (off, a) =>
       val pa = a.toRadians
       (pa != 0.0) option {
-        val p = off.p.toDegrees
-        val q = off.q.toDegrees
+        val p = off.p.degrees
+        val q = off.q.degrees
         val cosa = Math.cos(pa)
         val sina = Math.sin(pa)
         val ra = p * cosa + q * sina

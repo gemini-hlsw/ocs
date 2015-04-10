@@ -6,7 +6,7 @@ import scala.math._
  * Offset coordinates expressed as angular separations between two points, a
  * base position and a second position.
  */
-case class Offset(p: Angle, q: Angle) {
+case class Offset(p: OffsetP, q: OffsetQ) {
   /**
    * Calculates the absolute distance between this Offset position and the
    * given position
@@ -17,8 +17,9 @@ case class Offset(p: Angle, q: Angle) {
    *         this offset and the given <code>other</code> offset
    */
   def distance(other: Offset): Angle = {
-    val pd = p.toDegrees - other.p.toDegrees
-    val qd = q.toDegrees - other.q.toDegrees
+    import AngleSyntax._
+    val pd = p.degrees - other.p.degrees
+    val qd = q.degrees - other.q.degrees
     val d = sqrt(pd*pd + qd*qd)
 
     Angle.fromDegrees(d)
@@ -34,7 +35,7 @@ case class Offset(p: Angle, q: Angle) {
 }
 
 object Offset {
-  val zero = Offset(Angle.zero, Angle.zero)
+  val zero = Offset(OffsetP.Zero, OffsetQ.Zero)
 
   /** @group Typeclass Instances */
   implicit val equals = scalaz.Equal.equalA[Offset]

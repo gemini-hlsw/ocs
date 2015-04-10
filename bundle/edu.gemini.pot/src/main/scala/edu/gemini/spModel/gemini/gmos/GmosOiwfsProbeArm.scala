@@ -8,6 +8,7 @@ import edu.gemini.pot.ModelConverters._
 import edu.gemini.shared.util.immutable.ImPolygon
 import edu.gemini.skycalc.Offset
 import edu.gemini.spModel.core.{Angle, Coordinates}
+import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.spModel.inst.{ArmAdjustment, ProbeArmGeometry}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.telescope.IssPort
@@ -62,7 +63,7 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
       val guideStarPt = {
         val baseCoords      = ctx.getBaseCoordinates.toNewModel
         val guideStarOffset = Coordinates.difference(baseCoords, guideStarCoords).offset
-        new Point2D.Double((-guideStarOffset.p.toArcsecs).toCanonicalArcsec, (-guideStarOffset.q.toArcsecs).toCanonicalArcsec)
+        new Point2D.Double((-guideStarOffset.p.arcsecs).toCanonicalArcsec, (-guideStarOffset.q.arcsecs).toCanonicalArcsec)
       }
 
       val angle = armAngle(wfsOffset, posAngle, guideStarPt, offsetPt, flip)
