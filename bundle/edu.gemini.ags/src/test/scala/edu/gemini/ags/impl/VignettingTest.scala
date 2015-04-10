@@ -181,7 +181,7 @@ class VignettingTest {
     executeTest(expected, candidates = AllNV)
   }
 
-  @Test def testBadCase() = {
+  @Ignore @Test def testBadCase() = {
     val BGS1 = siderealTarget("BGS1", "05:24:31.028 -24:21:38.56", 11.882)
     val BGS2 = siderealTarget("BGS2", "05:24:38.738 -24:19:58.79", 12.746)
     val candidates = List(BGS1, BGS2)
