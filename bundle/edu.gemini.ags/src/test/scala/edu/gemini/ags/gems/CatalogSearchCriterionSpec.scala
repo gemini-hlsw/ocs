@@ -3,6 +3,7 @@ package edu.gemini.ags.gems
 import edu.gemini.catalog.api._
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
+import edu.gemini.spModel.core.AngleSyntax._
 
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
@@ -53,7 +54,7 @@ class CatalogSearchCriterionSpec extends Specification with Arbitraries with Sca
     }
     "support search with offset" in {
       val radiusLimits = RadiusConstraint.between(Angle.fromArcmin(1.0), Angle.fromArcmin(10.0))
-      val offset = Offset(Angle.fromArcmin(1.0), Angle.fromArcmin(1.0)).some
+      val offset = Offset(1.arcmins[OffsetP], 1.arcmins[OffsetQ]).some
       val criterion = CatalogSearchCriterion("test", magLimits.some, radiusLimits, offset, None)
       val baseRA = Angle.fromDegrees(10.0)
       val baseDec = Angle.fromDegrees(15.0)
@@ -73,7 +74,7 @@ class CatalogSearchCriterionSpec extends Specification with Arbitraries with Sca
     }
     "support search with offset and pos angle" in {
       val radiusLimits = RadiusConstraint.between(Angle.fromArcmin(10.0), Angle.fromArcmin(2.0))
-      val offset = Some(Offset(Angle.fromArcmin(1.0), Angle.fromArcmin(1)))
+      val offset = Some(Offset(1.arcmins[OffsetP], 1.arcmins[OffsetQ]))
       val posAngle = Angle.fromDegrees(90.0).some
       val criterion = CatalogSearchCriterion("test", magLimits.some, radiusLimits, offset, posAngle)
       val baseRA = Angle.fromDegrees(10.0)

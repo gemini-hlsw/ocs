@@ -4,6 +4,7 @@ import edu.gemini.shared.skyobject
 import edu.gemini.skycalc
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
+import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
 
@@ -44,11 +45,15 @@ object ModelConverters {
   }
 
   implicit class OldOffset2New(val offset: skycalc.Offset) extends AnyVal {
-    def toNewModel: Offset = Offset(offset.p().toNewModel, offset.q().toNewModel)
+    def toNewModel: Offset =
+      Offset(offset.p().toDegrees.getMagnitude.degrees[OffsetP],
+             offset.q().toDegrees.getMagnitude.degrees[OffsetQ])
   }
 
   implicit class NewOffset2Old(val offset: Offset) extends AnyVal {
-    def toOldModel: skycalc.Offset = new skycalc.Offset(offset.p.toOldModel, offset.q.toOldModel)
+    def toOldModel: skycalc.Offset =
+      new skycalc.Offset(skycalc.Angle.degrees(offset.p.degrees),
+                         skycalc.Angle.degrees(offset.q.degrees))
   }
 
   implicit class OldCoordinates2New(val c: skycalc.Coordinates) extends AnyVal {

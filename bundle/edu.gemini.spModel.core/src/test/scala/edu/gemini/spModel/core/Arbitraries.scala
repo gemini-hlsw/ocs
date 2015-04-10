@@ -9,11 +9,14 @@ trait Arbitraries {
   implicit val arbAngle: Arbitrary[Angle] =
     Arbitrary(arbitrary[Short].map(n => n / 10.0).map(Angle.fromDegrees))
 
+  implicit val arbP: Arbitrary[OffsetP] = Arbitrary { arbitrary[Angle].map(OffsetP(_)) }
+  implicit val arbQ: Arbitrary[OffsetQ] = Arbitrary { arbitrary[Angle].map(OffsetQ(_)) }
+
   implicit val arbOffset: Arbitrary[Offset] =
     Arbitrary {
       for {
-        p <- arbitrary[Angle]
-        q <- arbitrary[Angle]
+        p <- arbitrary[OffsetP]
+        q <- arbitrary[OffsetQ]
       } yield Offset(p, q)
     }
 
@@ -32,8 +35,8 @@ trait Arbitraries {
     Arbitrary(arbitrary[Double].map(v => DeclinationAngularVelocity(AngularVelocity(v % AngularVelocity.MilliArcSecsInADegree))))
 
   implicit val arbCoords: Arbitrary[Coordinates] =
-    Arbitrary { 
-      for { 
+    Arbitrary {
+      for {
         ra  <- arbitrary[RightAscension]
         dec <- arbitrary[Declination]
       } yield Coordinates(ra, dec)
@@ -123,8 +126,8 @@ trait Arbitraries {
 
   implicit val arbTarget: Arbitrary[Target] =
     Arbitrary(oneOf(
-      arbitrary[Target.TooTarget], 
-      arbitrary[Target.SiderealTarget], 
+      arbitrary[Target.TooTarget],
+      arbitrary[Target.SiderealTarget],
       arbitrary[Target.NonSiderealTarget],
       arbitrary[Target.NamedTarget]))
 

@@ -7,6 +7,7 @@ import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.skycalc.{DDMMSS, HHMMSS}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
+import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.spModel.gemini.gmos.{GmosOiwfsGuideProbe, InstGmosSouth}
 import edu.gemini.spModel.gemini.inst.InstRegistry
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions._
@@ -19,7 +20,7 @@ import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.telescope.{IssPortProvider, IssPort}
 
 import org.junit.Assert._
-import org.junit.{Ignore, Test}
+import org.junit.Test
 
 import scala.collection.JavaConverters._
 import scala.util.Random
@@ -153,20 +154,19 @@ class VignettingTest {
 
   @Test def testSideLookingOneOffsetPosAngle0() = {
     val expected = List(GS2, GS6)
-    executeTest(GMOSSouthSideLookingWithOI, 0.0, List(Offset(Angle.fromArcsecs(50.0), Angle.fromArcsecs(50.0))), All, expected)
+    executeTest(GMOSSouthSideLookingWithOI, 0.0, List(Offset(50.arcsecs[OffsetP], 50.arcsecs[OffsetQ])), All, expected)
   }
 
   @Test def testSideLookingOneOffset2PosAngle0() = {
     // The vignetting exclusively on the offset would result in GS6 and then GS7, but the vignetting averaged across
     // the base position and the offset would result in GS7 and then GS6.
     val expected = List(GS7, GS6)
-    executeTest(GMOSSouthSideLookingWithOI, 0.0, List(Offset(Angle.fromArcsecs(200.0), Angle.fromArcsecs(50.0))), All, expected)
+    executeTest(GMOSSouthSideLookingWithOI, 0.0, List(Offset(200.arcsecs[OffsetP], 50.arcsecs[OffsetQ])), All, expected)
   }
 
-  // Negative offsets currently do not work.
-  @Ignore @Test def testSideLookingOneNegOffset2PosAngle0() = {
+  @Test def testSideLookingOneNegOffset2PosAngle0() = {
     val expected = List(GS5, GS3, GS2)
-    executeTest(GMOSSouthSideLookingWithOI, 0.0, List(Offset(Angle.fromArcsecs(-50.0), Angle.fromArcsecs(-50.0))), All, expected)
+    executeTest(GMOSSouthSideLookingWithOI, 0.0, List(Offset(-50.arcsecs[OffsetP], -50.arcsecs[OffsetQ])), All, expected)
   }
 
   @Test def testAllNoVignetting() = {
