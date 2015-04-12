@@ -2,6 +2,7 @@ package edu.gemini.itc.baseline
 
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.niri.NiriParameters
+import edu.gemini.spModel.gemini.niri.Niri._
 
 /**
  * NIRI baseline test fixtures.
@@ -12,14 +13,14 @@ object BaselineNiri {
 
   private lazy val KBandImaging = Fixture.kBandImgFixtures(List(
     new NiriParameters(
-      "J",
+      Filter.BBF_J,
       "none",
       NiriParameters.F14,
       NiriParameters.HIGH_READ_NOISE,
       NiriParameters.HIGH_WELL_DEPTH,
       NiriParameters.NO_SLIT),
     new NiriParameters(
-      "K",
+      Filter.BBF_K,
       "none",
       NiriParameters.F32,
       NiriParameters.HIGH_READ_NOISE,
@@ -29,7 +30,7 @@ object BaselineNiri {
 
   private lazy val KBandSpectroscopy = Fixture.kBandSpcFixtures(List(
     new NiriParameters(
-      "K",
+      Filter.BBF_K,
       "K-grism",
       NiriParameters.F6,                      // only F6 is supported in spectroscopy mode
       NiriParameters.LOW_READ_NOISE,

@@ -30,10 +30,11 @@ public class Niri extends Instrument {
     private static final double MED_BACK_READ_NOISE = 35.0;
     private static final double HIGH_BACK_READ_NOISE = 70.0;
 
+    private final NiriParameters params;
+
     // _Filter2 is used only in the case that the PK50 filter is required
     private Filter _Filter, _Filter2;
     private GrismOptics _grismOptics;
-    private String _filterUsed;
     private String _camera;
     private String _grism;
     private String _readNoise;
@@ -48,41 +49,34 @@ public class Niri extends Instrument {
      * construct an Niri with specified Broadband filter or Narrowband filter.
      * grism, and camera type.
      */
-    //public Niri(String FilterUsed, String grism, String camera,
-    //       String readNoise, String wellDepth, String mode,
-    //       String focalPlaneMask, String focalPlaneMaskOffset,
-    //       String stringSlitWidth)
-    //   throws Exception
-    public Niri(NiriParameters np, ObservationDetails odp) {
+    public Niri(final NiriParameters np, final ObservationDetails odp) {
         super(INSTR_DIR, FILENAME);
+
+        this.params = np;
 
         _readNoise = np.getReadNoise();
         _wellDepth = np.getWellDepth();
         _focalPlaneMask = np.getFocalPlaneMask();
         _focalPlaneMaskOffset = np.getFPMaskOffset();
         _stringSlitWidth = np.getStringSlitWidth();
-        _filterUsed = np.getFilter();
         _grism = np.getGrism();
         _camera = np.getCamera();
         _mode = odp.getMethod();
         _FP_Mask = np.getFocalPlaneMask();
 
 
-        if (!(_filterUsed.equals("none"))) {
-            _Filter = Filter.fromFile(getPrefix(), _filterUsed, getDirectory() + "/");
-            addFilter(_Filter);
+        _Filter = Filter.fromFile(getPrefix(), np.getFilter().name(), getDirectory() + "/");
+        addFilter(_Filter);
 
-            //The PK50 filter is used with many NIRI narrow-band filters but has
-            //not been included until now (20100105).  Most of NIRI's filter curves don't
-            //extend far enough for it to matter.
-            //To do this right we should have full transmission curves for all filters
-            //that are used with the PK50 and include them all.
-            if (_filterUsed.equals("Y-G0241")) {
+        switch (np.getFilter()) {
+            case BBF_Y:
+                //The PK50 filter is used with many NIRI narrow-band filters but has
+                //not been included until now (20100105).  Most of NIRI's filter curves don't
+                //extend far enough for it to matter.
+                //To do this right we should have full transmission curves for all filters
+                //that are used with the PK50 and include them all.
                 _Filter2 = Filter.fromFile(getPrefix(), "PK50-fake", getDirectory() + "/");
-
                 addComponent(_Filter2); // TODO: SHOULD THIS ONE LIMIT WAVELENGTHS, TOO?????
-            }
-
         }
 
         FixedOptics test = new FixedOptics(getDirectory() + "/", getPrefix());
@@ -208,33 +202,25 @@ public class Niri extends Instrument {
         return ITCConstants.LIB + "/" + INSTR_DIR;
     }
 
-    // TODO: This mimics the result of the original convoluted code. (And is probably wrong?)
-    // TODO: Verify with science and use unified getObservingStart() method from the base class.
+    // TODO: This mimics the result of the original convoluted code.
+    // TODO: Verify with science and use unified getObservingStart() method from the base class?
     // TODO: Left as is for now to keep regression tests working.
     public double getObservingStart() {
-        if (!(_grism.equals("none")) && !(_filterUsed.equals("none"))) {
+        if (!(_grism.equals("none"))) {
             return Math.max(_Filter.getStart(), _grismOptics.getStart());
-        } else if (!(_grism.equals("none"))) {
-            return Math.max(getStart(), _grismOptics.getStart());
-        } else if (!(_filterUsed.equals("none"))) {
-            return _Filter.getStart();
         } else {
-            return getStart();
+            return _Filter.getStart();
         }
     }
 
-    // TODO: This mimics the result of the original convoluted code. (And is probably wrong?)
-    // TODO: Verify with science and use unified getObservingStart() method from the base class.
+    // TODO: This mimics the result of the original convoluted code.
+    // TODO: Verify with science and use unified getObservingStart() method from the base class?
     // TODO: Left as is for now to keep regression tests working.
     public double getObservingEnd() {
-        if (!(_grism.equals("none")) && !(_filterUsed.equals("none"))) {
+        if (!(_grism.equals("none"))) {
             return Math.min(_Filter.getEnd(), _grismOptics.getEnd());
-        } else if (!(_grism.equals("none"))) {
-            return Math.max(getEnd(), _grismOptics.getEnd());
-        } else if (!(_filterUsed.equals("none"))) {
+        } else  {
             return _Filter.getEnd();
-        } else {
-            return getEnd();
         }
     }
 

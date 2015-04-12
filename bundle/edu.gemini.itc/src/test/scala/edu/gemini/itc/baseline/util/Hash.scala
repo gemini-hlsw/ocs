@@ -12,6 +12,7 @@ import edu.gemini.itc.niri.NiriParameters
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
+import edu.gemini.spModel.gemini.niri.Niri
 
 // TEMPORARY helper
 // All input objects will become immutable data only objects (probably Scala case classes).
@@ -92,12 +93,15 @@ object Hash {
   def calc(p: NiriParameters): Int =
     hash(
       p.getCamera,
-      p.getFilter,
+      p.getFilter match {                     // TODO: cleanup with next baseline update
+        case Niri.Filter.BBF_J  => "J"
+        case Niri.Filter.BBF_K  => "K"
+        case Niri.Filter.BBF_H  => "H"
+        case f                  => f.name()
+      },
       p.getFocalPlaneMask,
-//      p.getFPMaskOffset,
       p.getGrism,
       p.getReadNoise,
-//      p.getStringSlitWidth,
       p.getWellDepth
     )
 

@@ -20,6 +20,7 @@ import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.{DisperserNorth, FPUnitNorth, FilterNorth}
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.{DisperserSouth, FPUnitSouth, FilterSouth}
+import edu.gemini.spModel.gemini.niri.Niri
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.telescope.IssPort
 
@@ -159,7 +160,7 @@ object ITCRequest {
 
   def niriParameters(r: ITCMultiPartParser): NiriParameters = {
     val p           = ITCRequest.from(r)
-    val filter      = p.parameter("instrumentFilter")
+    val filter      = p.enumParameter(classOf[Niri.Filter])
     val grism       = p.parameter("instrumentDisperser")
     val camera      = p.parameter("instrumentCamera")
     val readNoise   = p.parameter("readNoise")

@@ -1,6 +1,7 @@
 package edu.gemini.itc.niri;
 
 import edu.gemini.itc.shared.InstrumentDetails;
+import edu.gemini.spModel.gemini.niri.Niri.Filter;
 
 /**
  * This class holds the information from the Niri section
@@ -56,7 +57,7 @@ public final class NiriParameters implements InstrumentDetails {
     public static final String NO_SLIT = "none";
 
     // Data members
-    private final String _Filter;  // filters
+    private final Filter _Filter;  // filters
     private final String _grism; // Grism or null
     private final String _camera; // camera F6, F14, or F32
     private final String _readNoise;
@@ -66,7 +67,7 @@ public final class NiriParameters implements InstrumentDetails {
     /**
      * Constructs a AcquisitionCamParameters from a servlet request
      */
-    public NiriParameters(final String Filter,
+    public NiriParameters(final Filter Filter,
                           final String grism,
                           final String camera,
                           final String readNoise,
@@ -84,7 +85,7 @@ public final class NiriParameters implements InstrumentDetails {
         }
     }
 
-    public String getFilter() {
+    public Filter getFilter() {
         return _Filter;
     }
 

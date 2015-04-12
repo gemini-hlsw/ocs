@@ -184,8 +184,17 @@ public final class NiriPrinter extends PrinterBase {
     private String niriToString(final Niri instrument) {
         String s = "Instrument configuration: \n";
         s += "Optical Components: <BR>";
-        for (Iterator itr = instrument.getComponents().iterator(); itr.hasNext(); ) {
-            s += "<LI>" + itr.next().toString() + "<BR>";
+        for (final TransmissionElement te : instrument.getComponents()) {
+            // TODO: regression test compatibility remove asap
+            final String n;
+            if (te instanceof Filter) {
+                if (te.toString().contains("BBF_J")) n = "Filter: J";
+                else if (te.toString().contains("BBF_K")) n = "Filter: K";
+                else n = te.toString();
+            } else {
+                n = te.toString();
+            }
+            s += "<LI>" + n + "<BR>";
         }
         if (!instrument.getFocalPlaneMask().equals(NiriParameters.NO_SLIT))
             s += "<LI>Focal Plane Mask: " + instrument.getFocalPlaneMask() + "\n";
