@@ -116,7 +116,7 @@ class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
       val catalog = GemsVoTableCatalog(TestVoTableBackend(""))
       val key = new GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance)
       val radiusConstraint = RadiusConstraint.between(Angle.fromArcmin(10.0), Angle.fromArcmin(2.0))
-      val offset = Offset(Angle.fromArcmin(3), Angle.fromArcmin(4)).some
+      val offset = Offset(3.arcmins[OffsetP], 4.arcmins[OffsetQ]).some
       val posAngle = Angle.fromArcmin(3).some
       val criterion = CatalogSearchCriterion("test", magnitudeConstraints.some, radiusConstraint, offset, posAngle)
 
@@ -143,8 +143,8 @@ class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
       val radiusConstraint1 = RadiusConstraint.between(Angle.fromArcmin(10.0), Angle.fromArcmin(2.0))
       val radiusConstraint2 = RadiusConstraint.between(Angle.fromArcmin(15.0), Angle.fromArcmin(3.0))
 
-      val offset1 = Offset(Angle.fromArcmin(3), Angle.fromArcmin(4)).some
-      val offset2 = Offset(Angle.fromArcmin(5), Angle.fromArcmin(12)).some
+      val offset1 = Offset(3.arcmins[OffsetP], 4.arcmins[OffsetQ]).some
+      val offset2 = Offset(5.arcmins[OffsetP], 12.arcmins[OffsetQ]).some
       val posAngle = Angle.fromArcmin(3).some
       val criterion1 = CatalogSearchCriterion("test", magnitudeConstraints.some, radiusConstraint1, offset1, posAngle)
       val criterion2 = CatalogSearchCriterion("test", magnitudeConstraints.some, radiusConstraint2, offset2, posAngle)
