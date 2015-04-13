@@ -5,15 +5,20 @@
 package jsky.app.ot.gemini.flamingos2;
 
 import diva.util.java2d.Polygon2D;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.skycalc.Angle;
+import edu.gemini.skycalc.Coordinates;
 import edu.gemini.skycalc.Offset;
 import edu.gemini.spModel.data.AbstractDataObject;
+import edu.gemini.spModel.gemini.flamingos2.F2OiwfsProbeArm$;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2OiwfsGuideProbe;
 import edu.gemini.spModel.gemini.gems.Gems;
 import edu.gemini.spModel.guide.PatrolField;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
+import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.telescope.IssPort;
 import jsky.app.ot.gemini.inst.OIWFS_FeatureBase;
 import jsky.app.ot.tpe.TpeImageInfo;
@@ -22,6 +27,7 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
+import java.text.DecimalFormat;
 import java.util.Set;
 
 
@@ -115,6 +121,27 @@ public class Flamingos2_OIWFS_Feature  extends OIWFS_FeatureBase  {
         }
     }
 
+    final DecimalFormat f = new DecimalFormat("0.###");
+    private void printCoords(final String name, final double x, final double y, boolean reduce) {
+        System.out.print("* " + name + " = (" + f.format(x) + "," + f.format(y) + ")");
+        if (reduce)
+            System.out.print(" = (" + f.format(x/_pixelsPerArcsec) + "," + f.format(y/_pixelsPerArcsec) + ")");
+        System.out.println();
+    }
+    private void printCoords(final String name, final Point2D P, boolean reduce) {
+        printCoords(name, P.getX(), P.getY(), reduce);
+    }
+    private void printValue(final String name, final double value, boolean reduce) {
+        System.out.print("* " + name + " = " + f.format(value));
+        if (reduce)
+            System.out.print(" = " + f.format(value/_pixelsPerArcsec));
+        System.out.println();
+    }
+
+    static final double MAXARCSECS = 360 * 60 * 60;
+    private double normalize(final double value) {
+        return (value > MAXARCSECS / 2.0) ? value - MAXARCSECS : value;
+    }
 
     /**
      * Add the OIWFS probe arm (without the pickoff mirror) to the display list.
@@ -133,6 +160,13 @@ public class Flamingos2_OIWFS_Feature  extends OIWFS_FeatureBase  {
     private void _addProbeArm(double xc, double yc, double xg, double yg, double xt, double yt, double plateScale) {
         int sign = _flip ?  -1 : 1;
 
+        final DecimalFormat f = new DecimalFormat("0.###");
+        System.out.println();
+        System.out.println("sign=" + sign + ", flipRA=" + _flipRA);
+        printCoords("C", xc, yc, true);
+        printCoords("G", xg, yg, true);
+        printCoords("T", xt, yt, true);
+
         Point2D.Double tp = new Point2D.Double(xg, yg);
         Point2D.Double tpOff = new Point2D.Double(xg + xt, yg + yt);
         //Point2D.Double tpOff = new Point2D.Double(xc + xt, yc + yt);
@@ -150,30 +184,26 @@ public class Flamingos2_OIWFS_Feature  extends OIWFS_FeatureBase  {
             //http://local.wasp.uwa.edu.au/~pbourke/geometry/2circle/
 
             // position of the base arm, translated based on the position angle
-            double pa = -_posAngle - _fovRotation;
-            double x0 = xc + base_arm_axis * _flipRA * sign * Math.cos(pa);
-            double y0 = yc + base_arm_axis * _flipRA * sign * Math.sin(pa);
+            final double pa = -_posAngle - _fovRotation;
+            final double x0 = xc + base_arm_axis * _flipRA * sign * Math.cos(pa);
+            final double y0 = yc + base_arm_axis * _flipRA * sign * Math.sin(pa);
 
             //The position of the OIWFS. Rotation of the PA doesn't affect this.
-            double x1 = xg + xt; // xt already takes _flipRA into account
-            double y1 = yg + yt;
+            final double x1 = xg + xt; // xt already takes _flipRA into account
+            final double y1 = yg + yt;
 
             //Distance between OIWFS and the position of the base arm (the center of the 2 circles)
-            double distance = Math.sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0));
-
-            if (distance > length_base + length_pickoff) {
-                distance = length_base + length_pickoff;
-            }
+            final double distance = Math.min(Math.sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0)), length_base + length_pickoff);
 
             //a is the adjacent side of the rectangle triangle formed by the OIWFS position, the interesection of
             //the 2 circles and the imaginary line that connects the OIWFS and the position of the base arm
-            double a = (length_base * length_base - length_pickoff * length_pickoff + distance * distance) / (2 * distance);
+            final double a = (length_base * length_base - length_pickoff * length_pickoff + distance * distance) / (2 * distance);
             //h is the distance from a to the intersection point
             //Note: OT-38: fix was to multiply by sign below to handle both orientations correctly.
-            double h = sign * Math.sqrt(length_base * length_base - a * a);
+            final double h = sign * Math.sqrt(length_base * length_base - a * a);
             //(x2,y2) are the coordinates of the point located "a" from the OIWFS
-            double x2 = x0 + a * (x1 - x0) / distance;
-            double y2 = y0 + a * (y1 - y0) / distance;
+            final double x2 = x0 + a * (x1 - x0) / distance;
+            final double y2 = y0 + a * (y1 - y0) / distance;
 
             //decide what solution to choose. Since we always want a /\ form, we should pick the one
             //whose y is smaller than the other one
@@ -200,7 +230,91 @@ public class Flamingos2_OIWFS_Feature  extends OIWFS_FeatureBase  {
 
 
             //Get the rotation angle of the probe.
-            double angle = Math.atan2(y3 - y1, x3 - x1);
+            final double angle = Math.atan2(y3 - y1, x3 - x1);
+
+            // **** MY ANGLE CALCULATION ****
+            // We still need to take _flipRA into account. I think that we can factor it out.
+            {
+                final ObsContext ctx = _iw.getMinimalObsContext().getOrNull();
+                final Coordinates cb = ctx.getBaseCoordinates();
+                final double cbx = normalize(cb.getRa().convertTo(Angle.Unit.ARCSECS).getMagnitude());
+                final double cby = normalize(cb.getDec().convertTo(Angle.Unit.ARCSECS).getMagnitude());
+                final double ox = (xc - _baseScreenPos.getX()) / _pixelsPerArcsec;
+                final double oy = (yc - _baseScreenPos.getY()) / _pixelsPerArcsec;
+
+                System.out.println();
+//                printCoords("CB", cbx, cby, false);
+//                printCoords("O", ox, oy, false);
+
+                // P = (x0 - xc, y0 - yc).
+//                final double mx0 = F2OiwfsProbeArm$.MODULE$.ProbeArmOffset() * plateScale * _flipRA * sign * Math.cos(pa);
+//                final double my0 = F2OiwfsProbeArm$.MODULE$.ProbeArmOffset() * plateScale * _flipRA * sign * Math.sin(pa);
+                final double scaledPAO = F2OiwfsProbeArm$.MODULE$.ProbeArmOffset() * plateScale;
+                final Point2D P = new Point2D.Double(scaledPAO * sign * Math.cos(pa), scaledPAO * sign * Math.sin(pa));
+
+                final GuideProbeTargets gpt = ctx.getTargets().getPrimaryGuideProbeTargets(Flamingos2OiwfsGuideProbe.instance).getOrNull();
+                if (gpt != null) {
+                    final SPTarget guideStar = gpt.getPrimary().getOrNull();
+                    if (guideStar != null) {
+                        final double gx = normalize(guideStar.getTarget().getSkycalcCoordinates().getRa().toArcsecs().getMagnitude());
+                        final double gy = normalize(guideStar.getTarget().getSkycalcCoordinates().getDec().toArcsecs().getMagnitude());
+                        final Point2D GS = new Point2D.Double(gx, gy);
+
+                        // Compare the guide star coords from the ObsContext to the guide star coords from the TPE calculation.
+                        printCoords("GS", gx, gy, false);
+                        printCoords("gs", (xc-xg), (yc-yg), true);
+
+                        // Compare P0 and the adjusted x0-xc, y0-yc for correctness.
+                        printCoords("MX", P, false);
+                        printCoords("mx", x0-xc, y0-yc, true);
+
+                        // Negate gx and gy because in x1 - x0, we get (xg - xc) instead of (xc - xg).
+                        // We can multiply by _flipRA to factor it out, since it is self-inverting.
+                        // We need to pass T = (xt * _flipRA / ppa, yt * _flipRA / ppa) to the armAdjustment.
+                        // For vignetting code, we will just pass T = (0,0) in for this, since we only calculate
+                        // vignetting for science areas, and T only has a value when the offset is frozen, i.e. not
+                        // a science area.
+
+                        // NOTE: This is exactly the T we need to pass into armAdjustment!
+                        final Point2D T = new Point2D.Double(xt * _flipRA / _pixelsPerArcsec, yt * _flipRA / _pixelsPerArcsec);
+
+                        // D = _flipRA * (x1 - x0, y1 - y0)/ppa, i.e. D is the delta with _flipRA and ppa factored out.
+//                        final double dx = -GS.getX() + xt/_pixelsPerArcsec - mx0;
+//                        final double dy = -GS.getY() + yt/_pixelsPerArcsec - my0;
+                        final Point2D D = new Point2D.Double(-GS.getX() + T.getX() - P.getX(), -GS.getY() + T.getY() - P.getY());
+
+                        // _flipRA is irrelevant for distance, because due to the squaring and _flipRA being
+                        // self-inverting, it cancels itself out in each term.
+                        final double scaledPBAL = F2OiwfsProbeArm$.MODULE$.ProbeBaseArmLength() * plateScale;
+                        final double scaledPPAL = F2OiwfsProbeArm$.MODULE$.ProbePickoffArmLength() * plateScale;
+                        final double mdistance = Math.min(Math.sqrt(D.getX() * D.getX() + D.getY() * D.getY()), scaledPBAL + scaledPPAL);
+                        printValue("mdistance", mdistance, false);
+                        printValue(" distance", distance, true);
+
+                        // Calculate a and h and compare.
+                        final double ma = (scaledPBAL * scaledPBAL - scaledPPAL * scaledPPAL + mdistance * mdistance) / (2 * mdistance);
+                        printValue("ma", ma, false);
+                        printValue(" a", a, true);
+                        final double mh = sign * Math.sqrt(scaledPBAL * scaledPBAL - ma * ma);
+                        printValue("mh", mh, false);
+                        printValue(" h", h, true);
+
+                        // Calculate Q = _flipRA * (x3 - x1, y3 - y1) / ppa.
+                        // We can then take the atan of Q.y / Q.x, since the ppa and _flipRA will cancel out.
+                        final Point2D Q = new Point2D.Double(GS.getX() - T.getX() + P.getX() + (ma * D.getX() + mh * D.getY()) / mdistance,
+                                                             GS.getY() - T.getY() + P.getY() + (ma * D.getY() - mh * D.getX()) / mdistance);
+                        printCoords("Q", Q, false);
+                        printCoords("q", (x3-x1) * _flipRA, (y3-y1) * _flipRA, true);
+
+                        // Calculate the angle.
+                        final double mangle = Math.atan2(Q.getY(), Q.getX());
+                        printValue("mangle", mangle, false);
+                        printValue(" angle", angle, false);
+                    }
+                }
+
+            }
+            // ******************************
 
             //and build the transformation to apply to the arm and pickoff mirror
             AffineTransform armTrans = new AffineTransform();
