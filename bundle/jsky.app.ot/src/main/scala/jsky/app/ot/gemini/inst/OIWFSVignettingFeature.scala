@@ -179,7 +179,7 @@ case object OIWFSVignettingFeature {
 
 
 
-// Concrete instances.
+// Concrete instances. instance member for simplified Java access.
 object Flamingos2OIWFSFeature extends OIWFSVignettingFeature(Flamingos2OiwfsGuideProbe.instance, F2OiwfsProbeArm, "Flamingos2 OIWFS") {
   val instance = this
 }

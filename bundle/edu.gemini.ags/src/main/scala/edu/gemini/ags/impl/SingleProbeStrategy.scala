@@ -1,5 +1,6 @@
 package edu.gemini.ags.impl
 
+import edu.gemini.ags.api.AgsAnalysis.Usable
 import edu.gemini.ags.api._
 import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.catalog.api.CatalogQuery
@@ -15,6 +16,8 @@ import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.system.CoordinateParam.Units
 import edu.gemini.spModel.target.system.HmsDegTarget
 import edu.gemini.spModel.telescope.PosAngleConstraint._
+
+import java.text.DecimalFormat
 
 import scala.collection.JavaConverters._
 import scala.concurrent._
@@ -186,14 +189,31 @@ object SingleProbeStrategy {
                                       params: SingleProbeStrategyParams): Option[(AgsGuideQuality, Double, Option[Magnitude], SiderealTarget)] = {
     // Create tuples (AgsQuality, vignetting factor, target) and then find the min by
     // ordering on the first two, returning the corresponding target.
+    // TODO: Temporary code to help Andy with debugging. Remove.
+    println("*** Vignetting analysis ****")
+    val df = new DecimalFormat("0.####")
+
     val candidates = for {
       st <- lst
       spTarget = new SPTarget(HmsDegTarget.fromSkyObject(st.toOldModel))
       analysis <- AgsAnalysis.analysis(ctx, mt, probe, spTarget, params.probeBands)
     } yield {
+      // TODO: Temporary code to help Andy with debugging. Remove.
+      val speed = analysis match {
+        case Usable(_, _, speed, _, _) => speed.name()
+        case _ => "unknown"
+      }
+
       val vig = probe.calculateVignetting(ctx, st.coordinates)
+
+      // TODO: Temporary code to help Andy with debugging. Remove.
+      println(s"name=${st.name}, guideSpeed=$speed, vignetting=${df.format(vig)}")
+
       (analysis.quality, vig, params.referenceMagnitude(st), st)
     }
+    // TODO: Temporary code to help Andy with debugging. Remove.
+    println("--- Analysis complete ---")
+
     candidates.reduceOption(vignettingOrder.min)
   }
 }
