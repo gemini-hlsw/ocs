@@ -109,8 +109,8 @@ class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
       val criterion = CatalogSearchCriterion("test", magnitudeConstraints.some, radiusConstraint, None, None)
 
       val s = new GemsCatalogSearchCriterion(key, criterion)
-      catalog.optimizeRadiusConstraint(List(s).asJava).maxLimit ~= radiusConstraint.maxLimit
-      catalog.optimizeRadiusConstraint(List(s).asJava).minLimit ~= radiusConstraint.minLimit
+      (~catalog.optimizeRadiusConstraint(List(s)).map(_.maxLimit) ~= radiusConstraint.maxLimit) should beTrue
+      (~catalog.optimizeRadiusConstraint(List(s)).map(_.minLimit) ~= radiusConstraint.minLimit) should beTrue
     }
     "offset the radius constraint for a single item with offsets" in {
       val catalog = GemsVoTableCatalog(TestVoTableBackend(""))
@@ -121,8 +121,8 @@ class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
       val criterion = CatalogSearchCriterion("test", magnitudeConstraints.some, radiusConstraint, offset, posAngle)
 
       val s = new GemsCatalogSearchCriterion(key, criterion)
-      catalog.optimizeRadiusConstraint(List(s).asJava).maxLimit ~= radiusConstraint.maxLimit + Angle.fromArcmin(5)
-      catalog.optimizeRadiusConstraint(List(s).asJava).minLimit ~= radiusConstraint.minLimit
+      (~catalog.optimizeRadiusConstraint(List(s)).map(_.maxLimit) ~= radiusConstraint.maxLimit + Angle.fromArcmin(5)) should beTrue
+      (~catalog.optimizeRadiusConstraint(List(s)).map(_.minLimit) ~= radiusConstraint.minLimit) should beTrue
     }
     "find the max and min for a list of radius constraint without offsets" in {
       val catalog = GemsVoTableCatalog(TestVoTableBackend(""))
@@ -134,8 +134,8 @@ class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
 
       val s1 = new GemsCatalogSearchCriterion(key, criterion1)
       val s2 = new GemsCatalogSearchCriterion(key, criterion2)
-      catalog.optimizeRadiusConstraint(List(s1, s2).asJava).maxLimit ~= Angle.fromArcmin(15.0)
-      catalog.optimizeRadiusConstraint(List(s1, s2).asJava).minLimit ~= Angle.fromArcmin(2.0)
+      (~catalog.optimizeRadiusConstraint(List(s1, s2)).map(_.maxLimit) ~= Angle.fromArcmin(15.0)) should beTrue
+      (~catalog.optimizeRadiusConstraint(List(s1, s2)).map(_.minLimit) ~= Angle.fromArcmin(2.0)) should beTrue
     }
     "find the max and min for a list of radius constraints with offsets" in {
       val catalog = GemsVoTableCatalog(TestVoTableBackend(""))
@@ -152,8 +152,8 @@ class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
       val s1 = new GemsCatalogSearchCriterion(key, criterion1)
       val s2 = new GemsCatalogSearchCriterion(key, criterion2)
       // Gets the offset from the largest offset distance (offset2 in this case)
-      catalog.optimizeRadiusConstraint(List(s1, s2).asJava).maxLimit ~= (Angle.fromArcmin(15.0) + Angle.fromArcmin(13))
-      catalog.optimizeRadiusConstraint(List(s1, s2).asJava).minLimit ~= Angle.fromArcmin(2.0)
+      (~catalog.optimizeRadiusConstraint(List(s1, s2)).map(_.maxLimit) ~= (Angle.fromArcmin(15.0) + Angle.fromArcmin(13))) should beTrue
+        (~catalog.optimizeRadiusConstraint(List(s1, s2)).map(_.minLimit) ~= Angle.fromArcmin(2.0)) should beTrue
     }
   }
 }

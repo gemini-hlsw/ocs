@@ -61,7 +61,7 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend) {
     }
 
     // sort on criteria order
-    resultSequence.map(_.toList.sortWith({
+    resultSequence.map(_.sortWith({
       case (x, y) =>
         criterions.indexOf(x.criterion) < criterions.indexOf(y.criterion)
     }))
@@ -131,25 +131,27 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend) {
   protected [gems] def getRadiusLimits(inst: GemsInstrument, criterions: List[GemsCatalogSearchCriterion]): List[RadiusConstraint] = {
     inst match {
       case GemsInstrument.flamingos2 => criterions.map(_.criterion.adjustedLimits)
-      case _                         => List(optimizeRadiusConstraint(criterions.asJava))
+      case _                         => optimizeRadiusConstraint(criterions).toList
     }
   }
 
   // Combines multiple radius limits into one
-  protected [gems] def optimizeRadiusConstraint(criterList: java.util.List[GemsCatalogSearchCriterion]): RadiusConstraint = {
-    val result = criterList.asScala.foldLeft((Double.MinValue, Double.MaxValue)) { (prev, current) =>
-      val c = current.criterion
-      val radiusConstraint = c.adjustedLimits
-      val maxLimit = radiusConstraint.maxLimit
-      val correctedMax = (c.offset |@| c.posAngle) { (o, _) =>
+  protected [gems] def optimizeRadiusConstraint(criterList: List[GemsCatalogSearchCriterion]): Option[RadiusConstraint] = {
+    criterList.nonEmpty option {
+      val result = criterList.foldLeft((Double.MinValue, Double.MaxValue)) { (prev, current) =>
+        val c = current.criterion
+        val radiusConstraint = c.adjustedLimits
+        val maxLimit = radiusConstraint.maxLimit
+        val correctedMax = (c.offset |@| c.posAngle) { (o, _) =>
           // If an offset and pos angle were defined, normally an adjusted base position
           // would be used, however since we are merging queries here, use the original
           // base position and adjust the radius limits
           maxLimit + o.distance
         } | maxLimit
-      (max(correctedMax.toDegrees, prev._1), min(radiusConstraint.minLimit.toDegrees, prev._2))
+        (max(correctedMax.toDegrees, prev._1), min(radiusConstraint.minLimit.toDegrees, prev._2))
+      }
+      RadiusConstraint.between(Angle.fromDegrees(result._1), Angle.fromDegrees(result._2))
     }
-    RadiusConstraint.between(Angle.fromDegrees(result._1), Angle.fromDegrees(result._2))
   }
 
   // Sets the min/max magnitude limits in the given query arguments
