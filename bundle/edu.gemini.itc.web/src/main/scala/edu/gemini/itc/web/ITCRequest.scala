@@ -161,11 +161,11 @@ object ITCRequest {
   def niriParameters(r: ITCMultiPartParser): NiriParameters = {
     val p           = ITCRequest.from(r)
     val filter      = p.enumParameter(classOf[Niri.Filter])
-    val grism       = p.parameter("instrumentDisperser")
-    val camera      = p.parameter("instrumentCamera")
+    val grism       = p.enumParameter(classOf[Niri.Disperser])
+    val camera      = p.enumParameter(classOf[Niri.Camera])
     val readNoise   = p.parameter("readNoise")
     val wellDepth   = p.parameter("wellDepth")
-    val fpMask      = p.parameter("instrumentFPMask")
+    val fpMask      = p.enumParameter(classOf[Niri.Mask])
     new NiriParameters(filter, grism, camera, readNoise, wellDepth, fpMask)
   }
 

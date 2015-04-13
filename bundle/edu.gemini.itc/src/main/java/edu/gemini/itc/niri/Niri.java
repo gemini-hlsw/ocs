@@ -35,14 +35,8 @@ public class Niri extends Instrument {
     // _Filter2 is used only in the case that the PK50 filter is required
     private Filter _Filter, _Filter2;
     private GrismOptics _grismOptics;
-    private String _camera;
-    private String _grism;
     private String _readNoise;
     private String _wellDepth;
-    private String _focalPlaneMask;
-    private String _focalPlaneMaskOffset;
-    private String _stringSlitWidth;
-    private final String _FP_Mask;
     private CalculationMethod _mode;
 
     /**
@@ -56,13 +50,7 @@ public class Niri extends Instrument {
 
         _readNoise = np.getReadNoise();
         _wellDepth = np.getWellDepth();
-        _focalPlaneMask = np.getFocalPlaneMask();
-        _focalPlaneMaskOffset = np.getFPMaskOffset();
-        _stringSlitWidth = np.getStringSlitWidth();
-        _grism = np.getGrism();
-        _camera = np.getCamera();
         _mode = odp.getMethod();
-        _FP_Mask = np.getFocalPlaneMask();
 
 
         _Filter = Filter.fromFile(getPrefix(), np.getFilter().name(), getDirectory() + "/");
@@ -82,27 +70,50 @@ public class Niri extends Instrument {
         FixedOptics test = new FixedOptics(getDirectory() + "/", getPrefix());
         addComponent(test);
 
+        // F32_PV is only meant to be used for engineering, not supported in ITC
+        switch (np.getCamera()) {
+            case F32_PV:
+                throw new RuntimeException("ITC does not support the " + np.getCamera().displayValue() + " camera.");
+        }
+
+
         //Test to see that all conditions for Spectroscopy are met
         if (_mode.isSpectroscopy()) {
-            if (_grism.equals("none"))
+            if (np.getGrism() == edu.gemini.spModel.gemini.niri.Niri.Disperser.NONE)
                 throw new RuntimeException("Spectroscopy calculation method is selected but a grism" +
                         " is not.\nPlease select a grism and a " +
                         "focal plane mask in the Instrument " +
                         "configuration section.");
-            if (_focalPlaneMask.equals(NiriParameters.NO_SLIT))
+
+            if (np.getFocalPlaneMask() == edu.gemini.spModel.gemini.niri.Niri.Mask.MASK_IMAGING)
                 throw new RuntimeException("Spectroscopy calculation method is selected but a focal" +
                         " plane mask is not.\nPlease select a " +
                         "grism and a " +
                         "focal plane mask in the Instrument " +
                         "configuration section.");
+
+            switch (np.getCamera()) {
+                case F14:
+                    throw new RuntimeException("The " + np.getCamera().displayValue() + " camera cannot be used in Spectroscopy");
+                case F32:
+                    throw new RuntimeException("ITC does currently not support the " + np.getCamera().displayValue() + " camera in Spectroscopy.");
+            }
+
+
+            _grismOptics = new GrismOptics(getDirectory() + "/", np.getGrism().name()+"-grism", np.getCamera().name(),
+                    np.getFPMaskOffset(),
+                    np.getStringSlitWidth());
+
+            resetBackGround(INSTR_DIR, "spec_");  //Niri has spectroscopic scattering from grisms
+            addGrism(_grismOptics);
         }
 
         if (_mode.isImaging()) {
-            if (!_grism.equals("none"))
+            if (np.getGrism() != edu.gemini.spModel.gemini.niri.Niri.Disperser.NONE)
                 throw new RuntimeException("Imaging calculation method is selected but a grism" +
                         " is also selected.\nPlease deselect the " +
                         "grism or change the method to spectroscopy.");
-            if (!_focalPlaneMask.equals("none"))
+            if (np.getFocalPlaneMask() != edu.gemini.spModel.gemini.niri.Niri.Mask.MASK_IMAGING)
                 throw new RuntimeException("Imaging calculation method is selected but a Focal" +
                         " Plane Mask is also selected.\nPlease " +
                         "deselect the Focal Plane Mask" +
@@ -110,47 +121,15 @@ public class Niri extends Instrument {
         }
 
 
-        if (!(_grism.equals("none"))) {
-            if (_camera.equals("F14") || _camera.equals("F32"))
-                throw new RuntimeException("The " + _camera + " camera cannot be used in Spectroscopy" +
-                        " mode.  \nPlease select the F6 camera and resubmit.");
-
-
-            if (_camera.equals("F32") && (_grism.equals(NiriParameters.MGRISM) || _grism.equals(NiriParameters.LGRISM)))//||_camera.equals("F32"))
-                throw new RuntimeException("The " + _camera + " camera cannot be used with L or M Band Spectroscopy" +
-                        " mode.  \nPlease select a different band and resubmit.");
-
-
-            if (_camera.equals("F32") && !_focalPlaneMaskOffset.equals("center"))
-                throw new RuntimeException("The " + _camera + " camera must be used with the center slit.\n " +
-                        "Please select a center slit and resubmit.");
-
-            if (_camera.equals("F32") && !(_focalPlaneMask.equals(NiriParameters.F32_SLIT_4_PIX_CENTER) || _focalPlaneMask.equals(NiriParameters.F32_SLIT_7_PIX_CENTER) || _focalPlaneMask.equals(NiriParameters.F32_SLIT_10_PIX_CENTER)))
-                throw new RuntimeException("The " + _focalPlaneMask + " slit cannot be used with the f/32 camera.\n " +
-                        "Please select a f/32 compatable slit and resubmit.");
-
-            if (!_camera.equals("F32") && (_focalPlaneMask.equals(NiriParameters.F32_SLIT_4_PIX_CENTER) || _focalPlaneMask.equals(NiriParameters.F32_SLIT_7_PIX_CENTER) || _focalPlaneMask.equals(NiriParameters.F32_SLIT_10_PIX_CENTER)))
-                throw new RuntimeException("The " + _focalPlaneMask + " slit must be used with the f/32 camera.\n " +
-                        "Please select the f/32 camera and resubmit.");
-
-
-            _grismOptics = new GrismOptics(getDirectory() + "/", _grism, _camera,
-                    _focalPlaneMaskOffset,
-                    _stringSlitWidth);
-
-            resetBackGround(INSTR_DIR, "spec_");  //Niri has spectroscopic scattering from grisms and needs
-            addGrism(_grismOptics);
+        switch (np.getCamera()) {
+            case F6:    addComponent(new F6Optics(getDirectory() + "/"));  break;
+            case F14:   addComponent(new F14Optics(getDirectory() + "/")); break;
+            case F32:   addComponent(new F32Optics(getDirectory() + "/")); break;
+            default: throw new Error();
         }
 
-        if (_camera.equals("F6"))
-            addComponent(new F6Optics(getDirectory() + "/"));
-        else if (_camera.equals("F14"))
-            addComponent(new F14Optics(getDirectory() + "/"));
-        else if (_camera.equals("F32"))
-            addComponent(new F32Optics(getDirectory() + "/"));
 
-        addComponent(new Detector(getDirectory() + "/", getPrefix(), "detector",
-                "1024x1024-pixel ALADDIN InSb array"));
+        addComponent(new Detector(getDirectory() + "/", getPrefix(), "detector", "1024x1024-pixel ALADDIN InSb array"));
 
     }
 
@@ -162,9 +141,10 @@ public class Niri extends Instrument {
      * @return Effective wavelength in nm
      */
     public int getEffectiveWavelength() {
-        if (_grism.equals("none")) return (int) _Filter.getEffectiveWavelength();
-        else return (int) _grismOptics.getEffectiveWavelength();
-
+        switch (params.getGrism()) {
+            case NONE:   return (int) _Filter.getEffectiveWavelength();
+            default:     return (int) _grismOptics.getEffectiveWavelength();
+        }
     }
 
     public double getGrismResolution() {
@@ -183,16 +163,19 @@ public class Niri extends Instrument {
         return _readNoise;
     }
 
+    // TODO: This is for regression tests only, get rid of with next update
     public String getFocalPlaneMask() {
-        return _focalPlaneMask;
-    }
-
-    public String getGrism() {
-        return _grism;
-    }
-
-    public String getCamera() {
-        return _camera;
+        switch (params.getFocalPlaneMask()) {
+            case MASK_IMAGING:  return NiriParameters.NO_SLIT;                  // no mask / imaging
+            case MASK_1:        return NiriParameters.SLIT_2_PIX_CENTER;        // f6 2pix center
+            case MASK_4:        return NiriParameters.SLIT_2_PIX_BLUE;          // f6 2pix blue
+            case MASK_2:        return NiriParameters.SLIT_4_PIX_CENTER;        // f6 4pix center
+            case MASK_5:        return NiriParameters.SLIT_4_PIX_BLUE;          // f6 4pix blue
+            case MASK_3:        return NiriParameters.SLIT_6_PIX_CENTER;        // f6 6pix center
+            case MASK_6:        return NiriParameters.SLIT_6_PIX_BLUE;          // f6 6pix blue
+            default:
+                throw new Error();
+        }
     }
 
     /**
@@ -206,10 +189,9 @@ public class Niri extends Instrument {
     // TODO: Verify with science and use unified getObservingStart() method from the base class?
     // TODO: Left as is for now to keep regression tests working.
     public double getObservingStart() {
-        if (!(_grism.equals("none"))) {
-            return Math.max(_Filter.getStart(), _grismOptics.getStart());
-        } else {
-            return _Filter.getStart();
+        switch (params.getGrism()) {
+            case NONE:  return _Filter.getStart();
+            default:    return Math.max(_Filter.getStart(), _grismOptics.getStart());
         }
     }
 
@@ -217,20 +199,20 @@ public class Niri extends Instrument {
     // TODO: Verify with science and use unified getObservingStart() method from the base class?
     // TODO: Left as is for now to keep regression tests working.
     public double getObservingEnd() {
-        if (!(_grism.equals("none"))) {
-            return Math.min(_Filter.getEnd(), _grismOptics.getEnd());
-        } else  {
-            return _Filter.getEnd();
+        switch (params.getGrism()) {
+            case NONE:  return _Filter.getEnd();
+            default:    return Math.min(_Filter.getEnd(), _grismOptics.getEnd());
         }
     }
 
     public double getPixelSize() {
         double F6pixelsize = super.getPixelSize();
-        //double bin= super.getXBinning();
-        if (_camera.equals("F6")) return F6pixelsize;
-        else if (_camera.equals("F14")) return 0.05; //*bin
-        else if (_camera.equals("F32")) return 0.022; //*bin
-        else return F6pixelsize;
+        switch (params.getCamera()) {
+            case F6:  return F6pixelsize;
+            case F14: return 0.05;
+            case F32: return 0.022;
+            default:  throw new Error();
+        }
     }
 
     public double getSpectralPixelWidth() {
@@ -248,32 +230,48 @@ public class Niri extends Instrument {
     }
 
     public double getFPMask() {
-        //if (_FP_Mask.equals(NOSLIT)) return null;
-        if (_FP_Mask.equals(NiriParameters.SLIT0_70_CENTER) ||
-                _FP_Mask.equals(NiriParameters.SLIT_6_PIX_CENTER))
-            return 0.75; //old value 0.68;
-        else if (_FP_Mask.equals(NiriParameters.SLIT0_70_BLUE) ||
-                _FP_Mask.equals(NiriParameters.SLIT_6_PIX_BLUE))
-            return 0.7;
-        else if (_FP_Mask.equals(NiriParameters.SLIT0_23_CENTER) ||
-                _FP_Mask.equals(NiriParameters.SLIT0_23_BLUE) ||
-                _FP_Mask.equals(NiriParameters.SLIT_2_PIX_CENTER) ||
-                _FP_Mask.equals(NiriParameters.SLIT_2_PIX_BLUE))
-            return 0.23;
-        else if (_FP_Mask.equals(NiriParameters.SLIT0_46_CENTER) ||
-                _FP_Mask.equals(NiriParameters.SLIT_4_PIX_CENTER))
-            return 0.47;
-        else if (_FP_Mask.equals(NiriParameters.SLIT0_46_BLUE) ||
-                _FP_Mask.equals(NiriParameters.SLIT_4_PIX_BLUE))
-            return 0.46;
-        else if (_FP_Mask.equals(NiriParameters.F32_SLIT_10_PIX_CENTER))
-            return 0.22;
-        else if (_FP_Mask.equals(NiriParameters.F32_SLIT_7_PIX_CENTER))
-            return 0.144;
-        else if (_FP_Mask.equals(NiriParameters.F32_SLIT_4_PIX_CENTER))
-            return 0.09;
-        else
-            return -1.0;
+        // TODO: use size values provided by masks, this will make an update of baseline necessary
+        switch (params.getFocalPlaneMask()) {
+            case MASK_1:        // f6 2pix center
+            case MASK_4:        // f6 2pix blue
+                return 0.23;
+            case MASK_2:        // f6 4pix center
+                return 0.47;
+            case MASK_5:        // f6 4pix blue
+                return 0.46;
+            case MASK_3:        // f6 6pix center
+                return 0.75;
+            case MASK_6:        // f6 6pix blue
+                return 0.7;
+            default:
+                throw new Error();
+        }
+//        //if (_FP_Mask.equals(NOSLIT)) return null;
+//        if (_FP_Mask.equals(NiriParameters.SLIT0_70_CENTER) ||
+//                _FP_Mask.equals(NiriParameters.SLIT_6_PIX_CENTER))
+//            return 0.75; //old value 0.68;
+//        else if (_FP_Mask.equals(NiriParameters.SLIT0_70_BLUE) ||
+//                _FP_Mask.equals(NiriParameters.SLIT_6_PIX_BLUE))
+//            return 0.7;
+//        else if (_FP_Mask.equals(NiriParameters.SLIT0_23_CENTER) ||
+//                _FP_Mask.equals(NiriParameters.SLIT0_23_BLUE) ||
+//                _FP_Mask.equals(NiriParameters.SLIT_2_PIX_CENTER) ||
+//                _FP_Mask.equals(NiriParameters.SLIT_2_PIX_BLUE))
+//            return 0.23;
+//        else if (_FP_Mask.equals(NiriParameters.SLIT0_46_CENTER) ||
+//                _FP_Mask.equals(NiriParameters.SLIT_4_PIX_CENTER))
+//            return 0.47;
+//        else if (_FP_Mask.equals(NiriParameters.SLIT0_46_BLUE) ||
+//                _FP_Mask.equals(NiriParameters.SLIT_4_PIX_BLUE))
+//            return 0.46;
+//        else if (_FP_Mask.equals(NiriParameters.F32_SLIT_10_PIX_CENTER))
+//            return 0.22;
+//        else if (_FP_Mask.equals(NiriParameters.F32_SLIT_7_PIX_CENTER))
+//            return 0.144;
+//        else if (_FP_Mask.equals(NiriParameters.F32_SLIT_4_PIX_CENTER))
+//            return 0.09;
+//        else
+//            return -1.0;
     }
 
     /**

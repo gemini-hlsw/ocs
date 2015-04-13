@@ -92,15 +92,22 @@ object Hash {
 
   def calc(p: NiriParameters): Int =
     hash(
-      p.getCamera,
+      p.getCamera.name(),
       p.getFilter match {                     // TODO: cleanup with next baseline update
         case Niri.Filter.BBF_J  => "J"
         case Niri.Filter.BBF_K  => "K"
         case Niri.Filter.BBF_H  => "H"
         case f                  => f.name()
       },
-      p.getFocalPlaneMask,
-      p.getGrism,
+      p.getFocalPlaneMask match {             // TODO: cleanup with next baseline update
+        case Niri.Mask.MASK_IMAGING =>  "none"
+        case Niri.Mask.MASK_1       =>  "2-pix-center"
+        case m                      => m.name()
+      },
+      p.getGrism match {                      // TODO: cleanup with next baseline update
+        case Niri.Disperser.NONE  => "none"
+        case g                    => g.name()+"-grism"
+      },
       p.getReadNoise,
       p.getWellDepth
     )

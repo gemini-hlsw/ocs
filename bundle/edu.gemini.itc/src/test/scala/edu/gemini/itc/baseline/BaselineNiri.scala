@@ -14,28 +14,28 @@ object BaselineNiri {
   private lazy val KBandImaging = Fixture.kBandImgFixtures(List(
     new NiriParameters(
       Filter.BBF_J,
-      "none",
-      NiriParameters.F14,
+      Disperser.NONE,
+      Camera.F14,
       NiriParameters.HIGH_READ_NOISE,
       NiriParameters.HIGH_WELL_DEPTH,
-      NiriParameters.NO_SLIT),
+      Mask.MASK_IMAGING),
     new NiriParameters(
       Filter.BBF_K,
-      "none",
-      NiriParameters.F32,
+      Disperser.NONE,
+      Camera.F32,
       NiriParameters.HIGH_READ_NOISE,
       NiriParameters.HIGH_WELL_DEPTH,
-      NiriParameters.NO_SLIT)
+      Mask.MASK_IMAGING)
   ), alt = Fixture.AltairConfigurations)
 
   private lazy val KBandSpectroscopy = Fixture.kBandSpcFixtures(List(
     new NiriParameters(
       Filter.BBF_K,
-      "K-grism",
-      NiriParameters.F6,                      // only F6 is supported in spectroscopy mode
+      Disperser.K,
+      Camera.F6,                        // ITC supports only F6 in spectroscopy mode
       NiriParameters.LOW_READ_NOISE,
       NiriParameters.LOW_WELL_DEPTH,
-      NiriParameters.SLIT_2_PIX_CENTER)
+      Mask.MASK_1)
   ), alt = Fixture.NoAltair)
 
 }
