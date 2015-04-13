@@ -100,12 +100,14 @@ public class GMOS_SciAreaFeature extends SciAreaFeatureBase {
             final ObsContext ctx = _iw.getMinimalObsContext().getOrNull();
             if (ctx != null) {
                 final ImList<Shape> shape = instGMOS.getVignettableScienceArea().geometryAsJava();
+                final AffineTransform ptm = getPosAngleTransformModifier();
                 shape.foreach(new ApplyOp<Shape>() {
                     @Override
                     public void apply(final Shape s) {
                         final Shape s2 = FeatureGeometry$.MODULE$.transformScienceAreaForContext(s, ctx);
                         final Shape s3 = FeatureGeometry$.MODULE$.transformScienceAreaForScreen(s2, _pixelsPerArcsec, ctx, _baseScreenPos);
-                        _figureList.add(s3);
+                        final Shape s4 = ptm.createTransformedShape(s3);
+                        _figureList.add(s4);
                     }
                 });
 
@@ -137,6 +139,7 @@ public class GMOS_SciAreaFeature extends SciAreaFeatureBase {
         // draw the FOV
         for (final Shape s: _figureList)
             g2d.draw(s);
+
         if (_gaps != null)
             _gaps.draw(g2d);
 

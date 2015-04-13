@@ -67,7 +67,7 @@ public abstract class InstGmosCommon<
         P extends Enum<P> & GmosCommonType.FPUnit,
         SM extends Enum<SM> & GmosCommonType.StageMode>
         extends ParallacticAngleSupportInst implements IOffsetPosListProvider<OffsetPos>, GuideProbeProvider,
-            IssPortProvider, PosAngleConstraintAware, StepCalculator, VignettableScienceAreaInstrument<InstGmosCommon> {
+            IssPortProvider, PosAngleConstraintAware, StepCalculator, VignettableScienceAreaInstrument {
 
     private static final Logger LOG = Logger.getLogger(InstGmosCommon.class.getName());
 
@@ -2036,7 +2036,7 @@ public abstract class InstGmosCommon<
     }
 
     @Override
-    public ScienceAreaGeometry<InstGmosCommon> getVignettableScienceArea() {
+    public ScienceAreaGeometry getVignettableScienceArea() {
         return new GmosScienceAreaGeometry(this);
     }
 }

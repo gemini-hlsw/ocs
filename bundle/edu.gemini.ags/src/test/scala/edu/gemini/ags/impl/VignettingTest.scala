@@ -10,6 +10,7 @@ import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.spModel.gemini.gmos.{GmosOiwfsGuideProbe, InstGmosSouth}
 import edu.gemini.spModel.gemini.inst.InstRegistry
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality._
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions._
 import edu.gemini.spModel.guide.{VignettingGuideProbe, ValidatableGuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
@@ -87,13 +88,19 @@ class VignettingTest {
    * should be the candidate selected if expected[0] is thrown away, etc. Note that, of course, if a candidate is not
    * a valid choice, it should not appear in expected.
    *
+   * @param expected   the order in which the candidates should be selected
+   * @param candidates the list of candidates to pass to AGS
    * @param config     the instrument and guide probe to test
    * @param posAngle   the position angle to use in degrees
    * @param offsets    the offsets to use
-   * @param candidates the list of candidates to pass to AGS
-   * @param expected   the order in which the candidates should be selected
+   * @param conditions the conditions required
    */
-  def executeTest(config: VignettingConfiguration, posAngle: Double, offsets: List[Offset], candidates: List[SiderealTarget], expected: List[SiderealTarget]): Unit = {
+  def executeTest(expected: List[SiderealTarget],
+                  candidates: List[SiderealTarget] = All,
+                  config: VignettingConfiguration = GMOSSouthSideLookingWithOI,
+                  posAngle: Double = 0.0,
+                  offsets: List[Offset] = Nil,
+                  conditions: Conditions = BEST): Unit = {
     config.inst.setPosAngleDegrees(posAngle)
     val targetEnv = TargetEnvironment.create(base).addActive(config.probe)
     val offsetSet = offsets.map(_.toOldModel).toSet.asJava
@@ -124,53 +131,62 @@ class VignettingTest {
 
   @Test def testSideLookingBasePosAngle0() = {
     val expected   = List(GS3, GS2, GS1, GS4)
-    executeTest(GMOSSouthSideLookingWithOI, 0.0, Nil, All, expected)
+    executeTest(expected)
   }
 
   @Test def testSideLookingBasePosAngle90() = {
     val expected = List(GS7, GS6, GS1)
-    executeTest(GMOSSouthSideLookingWithOI, 90.0, Nil, All, expected)
+    executeTest(expected, posAngle = 90.0)
   }
 
   @Test def testSideLookingBasePosAngle180() = {
     val expected = List(GS8, GS10, GS9)
-    executeTest(GMOSSouthSideLookingWithOI, 180.0, Nil, All, expected)
+    executeTest(expected, posAngle = 180.0)
   }
 
   @Test def testUpLookingBasePosAngle0() = {
     val expected = List(GS1)
-    executeTest(GMOSSouthUpLookingWithOI, 0.0, Nil, All, expected)
+    executeTest(expected, config = GMOSSouthUpLookingWithOI)
   }
 
   @Test def testUpLookingBasePosAngle90() = {
     val expected = List(GS3, GS2, GS1, GS4)
-    executeTest(GMOSSouthUpLookingWithOI, 90.0, Nil, All, expected)
+    executeTest(expected, config = GMOSSouthUpLookingWithOI, posAngle = 90.0)
   }
 
   @Test def testUpLookingBasePosAngle180() = {
     val expected = List(GS7, GS6)
-    executeTest(GMOSSouthUpLookingWithOI, 180.0, Nil, All, expected)
+    executeTest(expected, config = GMOSSouthUpLookingWithOI, posAngle = 180.0)
   }
 
   @Test def testSideLookingOneOffsetPosAngle0() = {
     val expected = List(GS2, GS6)
-    executeTest(GMOSSouthSideLookingWithOI, 0.0, List(Offset(50.arcsecs[OffsetP], 50.arcsecs[OffsetQ])), All, expected)
+    executeTest(expected, offsets = List(Offset(50.arcsecs[OffsetP], 50.arcsecs[OffsetQ])))
   }
 
   @Test def testSideLookingOneOffset2PosAngle0() = {
     // The vignetting exclusively on the offset would result in GS6 and then GS7, but the vignetting averaged across
     // the base position and the offset would result in GS7 and then GS6.
     val expected = List(GS7, GS6)
-    executeTest(GMOSSouthSideLookingWithOI, 0.0, List(Offset(200.arcsecs[OffsetP], 50.arcsecs[OffsetQ])), All, expected)
+    executeTest(expected, offsets = List(Offset(200.arcsecs[OffsetP], 50.arcsecs[OffsetQ])))
   }
 
   @Test def testSideLookingOneNegOffset2PosAngle0() = {
     val expected = List(GS5, GS3, GS2)
-    executeTest(GMOSSouthSideLookingWithOI, 0.0, List(Offset(-50.arcsecs[OffsetP], -50.arcsecs[OffsetQ])), All, expected)
+    executeTest(expected, offsets = List(Offset(-50.arcsecs[OffsetP], -50.arcsecs[OffsetQ])))
   }
 
   @Test def testAllNoVignetting() = {
     val expected = List(NVGS2, NVGS3, NVGS1, NVGS4, NVGS6, NVGS5, NVGS7)
-    executeTest(GMOSSouthSideLookingWithOI, 0.0, Nil, AllNV, expected)
+    executeTest(expected, candidates = AllNV)
+  }
+
+  @Test def testBadCase() = {
+    val BGS1 = siderealTarget("BGS1", "05:24:31.028 -24:21:38.56", 11.882)
+    val BGS2 = siderealTarget("BGS2", "05:24:38.738 -24:19:58.79", 12.746)
+    val candidates = List(BGS1, BGS2)
+    val expected   = List(BGS2, BGS1)
+    val conditions = new Conditions(CloudCover.PERCENT_70, ImageQuality.PERCENT_70, SkyBackground.ANY, WaterVapor.ANY)
+    executeTest(expected, candidates = candidates, conditions = conditions)
   }
 }

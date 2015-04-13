@@ -139,6 +139,8 @@ final class AllOffsetListContext(obs: Option[ISPObservation], node: Option[ISPNo
   def allPosListsJava: java.util.List[OffsetPosList[OffsetPosBase]] =
     allPosLists.asJava
 
+  def scienceOffsets: Set[Offset] = scienceOffsetsJava.asScala.toSet
+
   def scienceOffsetsJava: java.util.Set[Offset] = OffsetUtil.getSciencePositions2(allPosLists.toArray)
 
   val selected: Option[SingleOffsetListContext] =

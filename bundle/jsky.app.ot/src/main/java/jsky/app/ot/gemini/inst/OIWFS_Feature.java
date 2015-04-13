@@ -10,14 +10,12 @@ import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.gemini.bhros.InstBHROS;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
-import edu.gemini.spModel.gemini.gmos.InstGmosCommon;
+import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
+import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
 import edu.gemini.spModel.gemini.nifs.InstNIFS;
 import edu.gemini.spModel.gemini.niri.InstNIRI;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
-import jsky.app.ot.gemini.bhros.BHROS_OIWFS_Feature;
-import jsky.app.ot.gemini.flamingos2.Flamingos2_OIWFS_Feature;
-import jsky.app.ot.gemini.gmos.GMOS_OIWFS_Feature;
 import jsky.app.ot.gemini.gnirs.GNIRS_OIWFS_Feature;
 import jsky.app.ot.gemini.nifs.NIFS_OIWFS_Feature;
 import jsky.app.ot.gemini.niri.NIRI_OIWFS_Feature;
@@ -31,9 +29,7 @@ import java.util.Collection;
 /**
  * Draws the OIWFS.
  * <p>
- * This class is a wrapper for one of the instrument specific classes:
- * {@link NIRI_OIWFS_Feature}, {@link GMOS_OIWFS_Feature}, {@link GNIRS_OIWFS_Feature},
- * {@link NIFS_OIWFS_Feature}.
+ * This class is a wrapper for one of the instrument specific classes.
  * The class used depends on the instrument being used.
  */
 public class OIWFS_Feature extends TpeImageFeature {
@@ -43,11 +39,8 @@ public class OIWFS_Feature extends TpeImageFeature {
 
     // The instrument specific subclasses
     private TpeImageFeature _niriFeat;
-    private TpeImageFeature _gmosFeat;
-    private TpeImageFeature _bhrosFeat;
     private TpeImageFeature _gnirsFeat;
     private TpeImageFeature _nifsFeat;
-    private TpeImageFeature _flamingos2Feat;
 
 
     private static final BasicPropertyList _props = new BasicPropertyList(OIWFS_Feature.class.getName());
@@ -71,51 +64,34 @@ public class OIWFS_Feature extends TpeImageFeature {
     public void reinit(TpeImageWidget iw, TpeImageInfo tii) {
         super.reinit(iw, tii);
 
-        TpeContext ctx = iw.getContext();
+        final TpeContext ctx = iw.getContext();
         if (ctx.instrument().isEmpty()) return;
-        SPInstObsComp inst = ctx.instrument().get();
+        final SPInstObsComp inst = ctx.instrument().get();
 
-        // XXX For now, assume instruments have same properties.
-        // XXX If this is not the case, the TPE View menu will need to be updated
-        // XXX whenever the instrument changes, since getProperties() is called
-        // XXX once only the first time the TPE is displayed.
+        // For now, assume instruments have same properties.
+        // If this is not the case, the TPE View menu will need to be updated
+        // whenever the instrument changes, since getProperties() is called
+        // once only the first time the TPE is displayed.
+        // Note that BHROS is simply a filter for GMOS-S, so we use GMOS-S for this.
+        _feat = null;
         if (inst instanceof InstNIRI) {
-            if (_niriFeat == null) {
-                _niriFeat = new NIRI_OIWFS_Feature();
-            }
+            if (_niriFeat == null) _niriFeat = new NIRI_OIWFS_Feature();
             _feat = _niriFeat;
-           } else if (inst instanceof InstGmosCommon) {
-                if (_gmosFeat == null) {
-                    _gmosFeat = new GMOS_OIWFS_Feature();
-                }
-                _feat = _gmosFeat;
-           } else if (inst instanceof InstBHROS) {
-                if (_bhrosFeat == null) {
-                    _bhrosFeat = new BHROS_OIWFS_Feature();
-                }
-                _feat = _bhrosFeat;
-        } else if (inst instanceof InstGNIRS) {
-            if (_gnirsFeat == null) {
-                _gnirsFeat = new GNIRS_OIWFS_Feature();
-            }
+        } else if (inst instanceof InstGmosNorth)
+            _feat = GmosNorthOIWFSFeature.instance();
+        else if (inst instanceof InstGmosSouth || inst instanceof InstBHROS)
+            _feat = GmosSouthOIWFSFeature.instance();
+        else if (inst instanceof InstGNIRS) {
+            if (_gnirsFeat == null) _gnirsFeat = new GNIRS_OIWFS_Feature();
             _feat = _gnirsFeat;
         } else if (inst instanceof InstNIFS) {
-            if (_nifsFeat == null) {
-                _nifsFeat = new NIFS_OIWFS_Feature();
-            }
+            if (_nifsFeat == null) _nifsFeat = new NIFS_OIWFS_Feature();
             _feat = _nifsFeat;
-        } else if (inst instanceof Flamingos2) {
-            if (_flamingos2Feat == null) {
-                _flamingos2Feat = new Flamingos2_OIWFS_Feature();
-            }
-            _feat = _flamingos2Feat;
-        } else {
-            _feat = null;
-        }
+        } else if (inst instanceof Flamingos2)
+            _feat = Flamingos2OIWFSFeature.instance();
 
-        if (_feat != null) {
+        if (_feat != null)
             _feat.reinit(iw, tii);
-        }
     }
 
 
@@ -162,7 +138,7 @@ public class OIWFS_Feature extends TpeImageFeature {
 
     @Override
     public Option<Collection<TpeMessage>> getMessages() {
-        if(_feat==null) return None.instance();
+        if (_feat==null) return None.instance();
         return _feat.getMessages();
     }
 }

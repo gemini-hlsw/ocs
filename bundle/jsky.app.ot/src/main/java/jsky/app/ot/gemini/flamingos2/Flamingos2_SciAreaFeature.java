@@ -62,12 +62,14 @@ public class Flamingos2_SciAreaFeature  extends SciAreaFeatureBase {
         if (inst != null) {
             final ObsContext ctx = _iw.getMinimalObsContext().getOrNull();
             final ImList<Shape> shape = inst.getVignettableScienceArea().geometryAsJava();
+            final AffineTransform ptm = getPosAngleTransformModifier();
             shape.foreach(new ApplyOp<Shape>() {
                 @Override
                 public void apply(final Shape s) {
                     final Shape s2 = FeatureGeometry$.MODULE$.transformScienceAreaForContext(s, ctx);
                     final Shape s3 = FeatureGeometry$.MODULE$.transformScienceAreaForScreen(s2, _pixelsPerArcsec, ctx, _baseScreenPos);
-                    _figureList.add(s3);
+                    final Shape s4 = ptm.createTransformedShape(s3);
+                    _figureList.add(s4);
                 }
             });
         }

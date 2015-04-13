@@ -65,7 +65,7 @@ import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
 
 public final class Flamingos2 extends ParallacticAngleSupportInst
         implements PropertyProvider, GuideProbeProvider, IssPortProvider, ElectronicOffsetProvider,
-        PlannedTime.StepCalculator, PosAngleConstraintAware, CalibrationKeyProvider, VignettableScienceAreaInstrument<Flamingos2> {
+        PlannedTime.StepCalculator, PosAngleConstraintAware, CalibrationKeyProvider, VignettableScienceAreaInstrument {
 
     // for serialization
     private static final long serialVersionUID = 3L;
@@ -1410,7 +1410,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     }
 
     @Override
-    public ScienceAreaGeometry<Flamingos2> getVignettableScienceArea() {
+    public ScienceAreaGeometry getVignettableScienceArea() {
         return new F2ScienceAreaGeometry(this);
     }
 }
