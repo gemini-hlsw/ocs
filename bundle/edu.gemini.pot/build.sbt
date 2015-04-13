@@ -21,6 +21,7 @@ OsgiKeys.bundleSymbolicName := name.value
 OsgiKeys.dynamicImportPackage := Seq("")
 
 OsgiKeys.exportPackage := Seq(
+  "edu.gemini.pot",
   "edu.gemini.pot.client",
   "edu.gemini.pot.locking",
   "edu.gemini.pot.sp",
