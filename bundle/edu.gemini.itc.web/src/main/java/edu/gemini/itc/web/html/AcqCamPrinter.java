@@ -3,8 +3,8 @@ package edu.gemini.itc.web.html;
 import edu.gemini.itc.acqcam.AcqCamRecipe;
 import edu.gemini.itc.acqcam.AcquisitionCamParameters;
 import edu.gemini.itc.acqcam.AcquisitionCamera;
-import edu.gemini.itc.shared.ImagingResult;
-import edu.gemini.itc.shared.Parameters;
+import edu.gemini.itc.acqcam.NDFilterWheel;
+import edu.gemini.itc.shared.*;
 
 import java.io.PrintWriter;
 
@@ -66,9 +66,21 @@ public final class AcqCamPrinter extends PrinterBase {
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + result.instrument().getName() + "\n");
         _println(HtmlPrinter.printParameterSummary(result.parameters().source()));
-        _println(result.instrument().toString());
+        _println(acqCamToString(result.instrument()));
         _println(HtmlPrinter.printParameterSummary(result.parameters().telescope()));
         _println(HtmlPrinter.printParameterSummary(result.parameters().conditions()));
         _println(HtmlPrinter.printParameterSummary(result.parameters().observation()));
+    }
+
+    private String acqCamToString(final Instrument instrument) {
+        String s = "Instrument configuration: \n";
+        s += "Optical Components: <BR>";
+        for (final TransmissionElement te : instrument.getComponents()) {
+            s += "<LI>" + te.toString() + "<BR>";
+        }
+        s += "<BR>";
+        s += "Pixel Size: " + instrument.getPixelSize() + "<BR>" + "<BR>";
+
+        return s;
     }
 }

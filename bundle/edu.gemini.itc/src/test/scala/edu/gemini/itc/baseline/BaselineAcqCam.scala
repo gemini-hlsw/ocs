@@ -2,6 +2,7 @@ package edu.gemini.itc.baseline
 
 import edu.gemini.itc.acqcam.AcquisitionCamParameters
 import edu.gemini.itc.baseline.util._
+import edu.gemini.spModel.gemini.acqcam.AcqCamParams._
 
 /**
  * Acquisition camera baseline test bits and pieces.
@@ -12,8 +13,8 @@ object BaselineAcqCam {
 
   private lazy val RBandImaging = Fixture.rBandImgFixtures(List(
     new AcquisitionCamParameters(
-      "R",
-      AcquisitionCamParameters.NDA)
+      ColorFilter.R_G0154,
+      NDFilter.NEUTRAL)
   ))
 
 }

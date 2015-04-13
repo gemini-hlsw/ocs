@@ -111,8 +111,8 @@ object Hash {
 
   def calc(p: AcquisitionCamParameters): Int =
     hash(
-      p.getColorFilter,
-      p.getNDFilter
+      p.getColorFilter.name,
+      p.getNDFilter.name
     )
 
   def calc(p: Flamingos2Parameters): Int =

@@ -31,7 +31,7 @@ public final class AcqCamRecipe {
         _telescope = telescope;
 
         // create instrument
-        instrument = new AcquisitionCamera(acqCamParameters.getColorFilter(), acqCamParameters.getNDFilter());
+        instrument = new AcquisitionCamera(acqCamParameters);
 
         validateInputParameters();
     }

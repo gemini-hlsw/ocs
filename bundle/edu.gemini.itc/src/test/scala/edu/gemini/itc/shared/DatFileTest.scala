@@ -162,7 +162,7 @@ class DatFileTest {
 
   @Test
   def parseFile1(): Unit = {
-    val data = DatFile.arrays("/acqcam/colfilt_B.dat")
+    val data = DatFile.arrays("/acqcam/colfilt_B_G0152.dat")
     assert(data.size == 2)
     assert(data(1).size == 35)
     assert(data(0).size == 35)

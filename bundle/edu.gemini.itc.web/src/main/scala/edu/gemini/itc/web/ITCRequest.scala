@@ -15,6 +15,7 @@ import edu.gemini.itc.shared.SourceDefinition._
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
 import edu.gemini.spModel.core.Site
+import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer
@@ -91,8 +92,8 @@ object ITCRequest {
 
   def acqCamParameters(r: ITCMultiPartParser): AcquisitionCamParameters = {
     val pc          = ITCRequest.from(r)
-    val colorFilter = pc.parameter("instrumentFilter")
-    val ndFilter    = pc.parameter("instrumentNDFilter")
+    val colorFilter = pc.enumParameter(classOf[AcqCamParams.ColorFilter])
+    val ndFilter    = pc.enumParameter(classOf[AcqCamParams.NDFilter])
 
     new AcquisitionCamParameters(colorFilter, ndFilter)
   }
