@@ -180,6 +180,12 @@ case object OIWFSVignettingFeature {
 
 
 // Concrete instances.
-object Flamingos2OIWFSFeature extends OIWFSVignettingFeature(Flamingos2OiwfsGuideProbe.instance, F2OiwfsProbeArm, "Flamingos2 OIWFS")
-object GmosNorthOIWFSFeature  extends OIWFSVignettingFeature(GmosOiwfsGuideProbe.instance, GmosNorthOiwfsProbeArm, "GMOS OIWFS")
-object GmosSouthOIWFSFeature  extends OIWFSVignettingFeature(GmosOiwfsGuideProbe.instance, GmosSouthOiwfsProbeArm, "GMOS OIWFS")
+object Flamingos2OIWFSFeature extends OIWFSVignettingFeature(Flamingos2OiwfsGuideProbe.instance, F2OiwfsProbeArm, "Flamingos2 OIWFS") {
+  val instance = this
+}
+object GmosNorthOIWFSFeature  extends OIWFSVignettingFeature(GmosOiwfsGuideProbe.instance, GmosNorthOiwfsProbeArm, "GMOS OIWFS") {
+  val instance = this
+}
+object GmosSouthOIWFSFeature  extends OIWFSVignettingFeature(GmosOiwfsGuideProbe.instance, GmosSouthOiwfsProbeArm, "GMOS OIWFS") {
+  val instance = this
+}

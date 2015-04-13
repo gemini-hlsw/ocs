@@ -39,11 +39,8 @@ public class OIWFS_Feature extends TpeImageFeature {
 
     // The instrument specific subclasses
     private TpeImageFeature _niriFeat;
-    private TpeImageFeature _gmosNFeat;
-    private TpeImageFeature _gmosSFeat;
     private TpeImageFeature _gnirsFeat;
     private TpeImageFeature _nifsFeat;
-    private TpeImageFeature _flamingos2Feat;
 
 
     private static final BasicPropertyList _props = new BasicPropertyList(OIWFS_Feature.class.getName());
@@ -80,26 +77,21 @@ public class OIWFS_Feature extends TpeImageFeature {
         if (inst instanceof InstNIRI) {
             if (_niriFeat == null) _niriFeat = new NIRI_OIWFS_Feature();
             _feat = _niriFeat;
-        } else if (inst instanceof InstGmosNorth) {
-            if (_gmosNFeat == null) _gmosNFeat = GmosNorthOIWFSFeature$.MODULE$;
-            _feat = _gmosNFeat;
-        } else if (inst instanceof InstGmosSouth || inst instanceof InstBHROS) {
-            if (_gmosSFeat == null) _gmosSFeat = GmosSouthOIWFSFeature$.MODULE$;
-            _feat = _gmosSFeat;
-        } else if (inst instanceof InstGNIRS) {
+        } else if (inst instanceof InstGmosNorth)
+            _feat = GmosNorthOIWFSFeature.instance();
+        else if (inst instanceof InstGmosSouth || inst instanceof InstBHROS)
+            _feat = GmosSouthOIWFSFeature.instance();
+        else if (inst instanceof InstGNIRS) {
             if (_gnirsFeat == null) _gnirsFeat = new GNIRS_OIWFS_Feature();
             _feat = _gnirsFeat;
         } else if (inst instanceof InstNIFS) {
             if (_nifsFeat == null) _nifsFeat = new NIFS_OIWFS_Feature();
             _feat = _nifsFeat;
-        } else if (inst instanceof Flamingos2) {
-            if (_flamingos2Feat == null) _flamingos2Feat = Flamingos2OIWFSFeature$.MODULE$;
-            _feat = _flamingos2Feat;
-        }
+        } else if (inst instanceof Flamingos2)
+            _feat = Flamingos2OIWFSFeature.instance();
 
-        if (_feat != null) {
+        if (_feat != null)
             _feat.reinit(iw, tii);
-        }
     }
 
 

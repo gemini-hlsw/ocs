@@ -54,11 +54,12 @@ object F2OiwfsProbeArm extends ProbeArmGeometry[Flamingos2] {
     for {
       ctx      <- Option(ctx0)
       offset   <- Option(offset0)
-      gemsFlag = ctx.getAOComponent.asScalaOpt.fold(false){ ao =>
+    } yield {
+      val gemsFlag = ctx.getAOComponent.asScalaOpt.fold(false){ ao =>
         val aoNarrowType = ao.getNarrowType
         aoNarrowType.equals(Gems.SP_TYPE.narrowType)
       }
-    } yield {
+
       val flamingos2  = ctx.getInstrument.asInstanceOf[Flamingos2]
       val flip        = if (flamingos2.getFlipConfig(gemsFlag)) -1 else 1
       val posAngle    = ctx.getPositionAngle.toRadians.getMagnitude
@@ -94,8 +95,7 @@ object F2OiwfsProbeArm extends ProbeArmGeometry[Flamingos2] {
                          -guideStar.getY - T.getY + P.getY + (a * D.getY - h * D.getX) / distance)
     }
 
-    val angle = Angle.fromRadians(math.atan2(Q.getY, Q.getX))
-    angle
+    Angle.fromRadians(math.atan2(Q.getY, Q.getX))
   }
 
   // Size of probe arm components in mm.
