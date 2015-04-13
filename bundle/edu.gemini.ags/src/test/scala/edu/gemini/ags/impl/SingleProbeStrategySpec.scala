@@ -8,7 +8,8 @@ import edu.gemini.spModel.core.{Declination, Site, Angle}
 import edu.gemini.shared.util.immutable.Some
 import edu.gemini.spModel.gemini.altair.{AltairAowfsGuider, AltairParams, InstAltair}
 import edu.gemini.spModel.gemini.flamingos2.{Flamingos2, Flamingos2OiwfsGuideProbe}
-import edu.gemini.spModel.gemini.gmos.{GmosOiwfsGuideProbe, InstGmosNorth}
+import edu.gemini.spModel.gemini.gmos.{InstGmosSouth, GmosOiwfsGuideProbe, InstGmosNorth}
+import edu.gemini.spModel.gemini.gnirs.{GnirsOiwfsGuideProbe, InstGNIRS}
 import edu.gemini.spModel.gemini.niri.{NiriOiwfsGuideProbe, InstNIRI}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.guide.GuideProbe
@@ -274,5 +275,114 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
       analyzedSelection should be size 1
       analyzedSelection.headOption.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
     }
+    "find a guide star for GMOS-S+OIWFS, OCSADV-255" in {
+      // LMC 1 target
+      val ra = Angle.fromHMS(5, 25, 1.110).getOrElse(Angle.zero)
+      val dec = Declination.fromAngle(Angle.zero - Angle.fromDMS(62, 28, 48.90).getOrElse(Angle.zero)).getOrElse(Declination.zero)
+      val target = new SPTarget(ra.toDegrees, dec.toDegrees)
+      val guiders = Set[GuideProbe](GmosOiwfsGuideProbe.instance, PwfsGuideProbe.pwfs1, PwfsGuideProbe.pwfs2)
+      val env = TargetEnvironment.create(target) |> {_.setActiveGuiders(guiders.asJava)}
+      val inst = new InstGmosSouth <| {_.setPosAngle(0.0)}
+
+      val strategy = SingleProbeStrategy(GmosSouthOiwfsKey, SingleProbeStrategyParams.GmosOiwfsParams(Site.GS), TestVoTableBackend("/gmoss_oiwfs.xml"))
+
+      val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
+      val ctx = ObsContext.create(env, inst, new Some(Site.GS), conditions, null, null)
+
+      val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
+
+      // One guide star found
+      selection.map(_.assignments.size) should beSome(1)
+      selection.map(_.assignments.headOption.map(_.guideProbe)).flatten should beSome(GmosOiwfsGuideProbe.instance)
+      val guideStar = selection.map(_.assignments.headOption.map(_.guideStar)).flatten
+      guideStar.map(_.name) should beSome("138-005574")
+      // Add GS to targets
+      val newCtx = selection.map(applySelection(ctx, _))
+      val analyzedSelection = ~newCtx.map(strategy.analyze(_, magTable))
+      analyzedSelection should be size 1
+      analyzedSelection.headOption.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
+    }
+    "find a guide star for GMOS-S+PWFS2, OCSADV-255" in {
+      // Blanco 1 target
+      val ra = Angle.fromHMS(0, 4, 7).getOrElse(Angle.zero)
+      val dec = Declination.fromAngle(Angle.zero - Angle.fromDMS(29, 50, 0).getOrElse(Angle.zero)).getOrElse(Declination.zero)
+      val target = new SPTarget(ra.toDegrees, dec.toDegrees)
+      val guiders = Set[GuideProbe](GmosOiwfsGuideProbe.instance, PwfsGuideProbe.pwfs1, PwfsGuideProbe.pwfs2)
+      val env = TargetEnvironment.create(target) |> {_.setActiveGuiders(guiders.asJava)}
+      val inst = new InstGmosSouth <| {_.setPosAngle(0.0)}
+
+      val strategy = SingleProbeStrategy(Pwfs2SouthKey, SingleProbeStrategyParams.PwfsParams(Site.GS, PwfsGuideProbe.pwfs2), TestVoTableBackend("/gmoss_pwfs2.xml"))
+
+      val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
+      val ctx = ObsContext.create(env, inst, new Some(Site.GS), conditions, null, null)
+
+      val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
+
+      // One guide star found
+      selection.map(_.assignments.size) should beSome(1)
+      selection.map(_.assignments.headOption.map(_.guideProbe)).flatten should beSome(PwfsGuideProbe.pwfs2)
+      val guideStar = selection.map(_.assignments.headOption.map(_.guideStar)).flatten
+      guideStar.map(_.name) should beSome("302-000084")
+      // Add GS to targets
+      val newCtx = selection.map(applySelection(ctx, _))
+      val analyzedSelection = ~newCtx.map(strategy.analyze(_, magTable))
+      analyzedSelection should be size 1
+      analyzedSelection.headOption.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
+    }
+    "find a guide star for GNIRS, OCSADV-255" in {
+      // Pleiades target
+      val ra = Angle.fromHMS(3, 47, 0).getOrElse(Angle.zero)
+      val dec = Declination.fromAngle(Angle.fromDMS(24, 7, 0).getOrElse(Angle.zero)).getOrElse(Declination.zero)
+      val target = new SPTarget(ra.toDegrees, dec.toDegrees)
+      val guiders = Set[GuideProbe](GnirsOiwfsGuideProbe.instance, PwfsGuideProbe.pwfs1, PwfsGuideProbe.pwfs2)
+      val env = TargetEnvironment.create(target) |> {_.setActiveGuiders(guiders.asJava)}
+      val inst = new InstGNIRS <| {_.setPosAngle(0.0)}
+
+      val strategy = SingleProbeStrategy(Pwfs2NorthKey, SingleProbeStrategyParams.PwfsParams(Site.GN, PwfsGuideProbe.pwfs2), TestVoTableBackend("/gnirs_1.xml"))
+
+      val conditions = SPSiteQuality.Conditions.NOMINAL.cc(SPSiteQuality.CloudCover.PERCENT_70).sb(SPSiteQuality.SkyBackground.ANY)
+      val ctx = ObsContext.create(env, inst, new Some(Site.GN), conditions, null, null)
+
+      val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
+
+      // One guide star found
+      selection.map(_.assignments.size) should beSome(1)
+      selection.map(_.assignments.headOption.map(_.guideProbe)).flatten should beSome(PwfsGuideProbe.pwfs2)
+      val guideStar = selection.map(_.assignments.headOption.map(_.guideStar)).flatten
+      guideStar.map(_.name) should beSome("571-008701")
+      // Add GS to targets
+      val newCtx = selection.map(applySelection(ctx, _))
+      val analyzedSelection = ~newCtx.map(strategy.analyze(_, magTable))
+      analyzedSelection should be size 1
+      analyzedSelection.headOption.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
+    }
+    "find a guide star for GNIRS Part II, OCSADV-255" in {
+      // Orion target
+      val ra = Angle.fromHMS(5, 35, 17.3).getOrElse(Angle.zero)
+      val dec = Declination.fromAngle(Angle.zero - Angle.fromDMS(5, 23, 28).getOrElse(Angle.zero)).getOrElse(Declination.zero)
+      val target = new SPTarget(ra.toDegrees, dec.toDegrees)
+      val guiders = Set[GuideProbe](GnirsOiwfsGuideProbe.instance, PwfsGuideProbe.pwfs1, PwfsGuideProbe.pwfs2)
+      val env = TargetEnvironment.create(target) |> {_.setActiveGuiders(guiders.asJava)}
+      val inst = new InstGNIRS <| {_.setPosAngle(0.0)}
+
+      val strategy = SingleProbeStrategy(Pwfs2NorthKey, SingleProbeStrategyParams.PwfsParams(Site.GN, PwfsGuideProbe.pwfs2), TestVoTableBackend("/gnirs_2.xml"))
+
+      val conditions = SPSiteQuality.Conditions.NOMINAL.cc(SPSiteQuality.CloudCover.PERCENT_70).sb(SPSiteQuality.SkyBackground.ANY)
+      val ctx = ObsContext.create(env, inst, new Some(Site.GN), conditions, null, null)
+
+      val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
+
+      // One guide star found
+      selection.map(_.assignments.size) should beSome(1)
+      selection.map(_.assignments.headOption.map(_.guideProbe)).flatten should beSome(PwfsGuideProbe.pwfs2)
+      val guideStar = selection.map(_.assignments.headOption.map(_.guideStar)).flatten
+      guideStar.map(_.name) should beSome("424-010170")
+      // Add GS to targets
+      val newCtx = selection.map(applySelection(ctx, _))
+      val analyzedSelection = ~newCtx.map(strategy.analyze(_, magTable))
+      analyzedSelection should be size 1
+      analyzedSelection.headOption.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
+    }
+
   }
 }

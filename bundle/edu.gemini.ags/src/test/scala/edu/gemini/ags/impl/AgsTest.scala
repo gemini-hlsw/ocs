@@ -3,6 +3,7 @@ package edu.gemini.ags.impl
 import edu.gemini.ags.api.{AgsMagnitude, AgsRegistrar, AgsStrategy}
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.pot.ModelConverters._
 import edu.gemini.skycalc.{Offset, DDMMSS, HHMMSS}
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.Target.SiderealTarget

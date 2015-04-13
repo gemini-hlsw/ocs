@@ -7,6 +7,7 @@ import edu.gemini.ags.gems.mascot.{Strehl, MascotProgress}
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable._
 import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core.Target.SiderealTarget
 
 import edu.gemini.spModel.ags.AgsStrategyKey.GemsKey
