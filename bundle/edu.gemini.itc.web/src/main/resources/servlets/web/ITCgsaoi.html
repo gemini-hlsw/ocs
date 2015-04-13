@@ -336,29 +336,29 @@
                     </tr>
                     <tr>
                         <td>Filter:</td>
-                            <td colspan="3"><select name="instrumentFilter" size="1">
-                                <option value="Z_G1101">Z (1.015 um)</option>
-                                <option value="J_G1102">J (1.250 um)</option>
-                                <option value="H_G1103">H (1.650 um)</option>
-                                <option value="Kprime_G1104">K(prime) (2.120 um)</option>
-                                <option value="Kshort_G1105">K(short) (2.150 um)</option>
-                                <option value="K_G1106">K (2.200 um)</option>
-                                <option value="Jcont_G1107">J-continuum(1.207 um)</option>
-                                <option value="Hcont_G1108">H-continuum(1.570 um)</option>
-                                <option value="CH4short_G1109">CH4(short) (1.580 um)</option>
-                                <option value="CH4long_G1110">CH4(long) (1.690 um)</option>
-                                <option value="Kshort_cont_G1111">Ks-continuum (2.093 um)</option>
-                                <option value="Klong_cont_G1112">Kl-continuum (2.270 um)</option>
-                                <option value="HeI1083_G1115">HeI(1.083 um)</option>
-                                <option value="PaGamma_G1116">Pa(gamma)(1.094 um)</option>
-                                <option value="PaBeta_G1117">Pa(beta)(1.282 um)</option>
-                                <option value="FeII_G1118">[FeII] (1.644 um)</option>
-                                <option value="H2O_G1119">H2O ice (2.000 um)</option>
-                                <option value="HeI2p2s_G1120">HeI (2p2s) (2.058 um)</option>
-                                <option value="H2_1_0_G1121">H2 1-0 S(1) (2.122 um)</option>
-                                <option value="BrG_G1122">Br(gamma) (2.166 um)</option>
-                                <option value="H2_2_1_G1123">H2 2-1 S(1) (2.248 um)</option>
-                                <option value="CO_G1124">CO (2.360 um)</OPTION>
+                            <td colspan="3"><select name="Filter" size="1">
+                                <option value="Z">Z (1.015 um)</option>
+                                <option value="J">J (1.250 um)</option>
+                                <option value="H">H (1.650 um)</option>
+                                <option value="K_PRIME">K(prime) (2.120 um)</option>
+                                <option value="K_SHORT">K(short) (2.150 um)</option>
+                                <option value="K">K (2.200 um)</option>
+                                <option value="J_CONTINUUM">J-continuum(1.207 um)</option>
+                                <option value="H_CONTINUUM">H-continuum(1.570 um)</option>
+                                <option value="CH4_SHORT">CH4(short) (1.580 um)</option>
+                                <option value="CH4_LONG">CH4(long) (1.690 um)</option>
+                                <option value="K_CONTINUUM1">Ks-continuum (2.093 um)</option>
+                                <option value="K_CONTINUUM2">Kl-continuum (2.270 um)</option>
+                                <option value="HEI">HeI(1.083 um)</option>
+                                <option value="PA_GAMMA">Pa(gamma)(1.094 um)</option>
+                                <option value="PA_BETA">Pa(beta)(1.282 um)</option>
+                                <option value="FE_II">[FeII] (1.644 um)</option>
+                                <option value="H20_ICE">H2O ice (2.000 um)</option>
+                                <option value="HEI_2P2S">HeI (2p2s) (2.058 um)</option>
+                                <option value="H2_1_0_S_1">H2 1-0 S(1) (2.122 um)</option>
+                                <option value="BR_GAMMA">Br(gamma) (2.166 um)</option>
+                                <option value="H2_2_1_S_1">H2 2-1 S(1) (2.248 um)</option>
+                                <option value="CO">CO (2.360 um)</OPTION>
                         </select></td>
                     </tr>
                     </tbody>
@@ -374,16 +374,16 @@
 
             </tr>
             <tr>
-                <td colspan="4" align="right" height="21"><input value="bright" name="readMode" checked="checked" type="radio" />
+                <td colspan="4" align="right" height="21"><input value="BRIGHT" name="ReadMode" checked="checked" type="radio" />
                 Bright Objects (Low Noise Read=2, readnoise=28e-) </td>
             </tr>
             <tr>
-                <td colspan="4" align="right" height="21"><input value="faint" name="readMode" type="radio" />
+                <td colspan="4" align="right" height="21"><input value="FAINT" name="ReadMode" type="radio" />
 
                 Faint Objects / Broad band imaging (Low Noise Read=8, readnoise=13e-) </td>
             </tr>
             <tr>
-                <td colspan="4" align="right" height="21"><input value="veryFaint" name="readMode" type="radio" />
+                <td colspan="4" align="right" height="21"><input value="VERY_FAINT" name="ReadMode" type="radio" />
                 Very Faint Objects / Narrow Band imaging (Low Noise Read = 16, readnoise=10e-) </td>
             </tr>
             

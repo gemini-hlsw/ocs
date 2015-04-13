@@ -11,8 +11,6 @@ import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.niri.NiriParameters
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
-import edu.gemini.spModel.gemini.flamingos2.Flamingos2
-import edu.gemini.spModel.gemini.niri.Niri
 
 // TEMPORARY helper
 // All input objects will become immutable data only objects (probably Scala case classes).
@@ -59,8 +57,8 @@ object Hash {
 
   def calc(p: GsaoiParameters): Int =
     hash(
-      p.getFilter,
-      p.getReadMode
+      p.getFilter.name,
+      p.getReadMode.name
     )
 
   def calc(p: MichelleParameters): Int =

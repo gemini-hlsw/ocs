@@ -29,24 +29,19 @@ public final class Gsaoi extends Instrument {
     private static final double FAINT_OBJECTS_READ_NOISE = 13.0;
     private static final double VERY_FAINT_OBJECTS_READ_NOISE = 10.0;
 
-    private Filter _filter;
-    private String _filterUsed;
-    private String _readMode;
+    private final Filter _filter;
+    private final GsaoiParameters params;
 
     /**
      * construct an Gsaoi with specified Broadband filter or Narrowband filter
      * and camera type.
      */
-    public Gsaoi(GsaoiParameters np, ObservationDetails odp) {
+    public Gsaoi(final GsaoiParameters np, final ObservationDetails odp) {
         super(INSTR_DIR, FILENAME);
 
-        _readMode = np.getReadMode();
-        _filterUsed = np.getFilter();
-
-        if (!(_filterUsed.equals("none"))) {
-            _filter = Filter.fromFile(getPrefix(), _filterUsed, getDirectory() + "/");
-            addFilter(_filter);
-        }
+        this.params = np;
+        _filter = Filter.fromFile(getPrefix(), np.getFilter().name(), getDirectory() + "/");
+        addFilter(_filter);
 
         FixedOptics test = new FixedOptics(getDirectory() + "/", getPrefix());
         addComponent(test);
@@ -70,11 +65,12 @@ public final class Gsaoi extends Instrument {
     }
 
     public double getReadNoise() {
-        if (_readMode.equals(GsaoiParameters.BRIGHT_OBJECTS_READ_MODE))
-            return BRIGHT_OBJECTS__READ_NOISE;
-        else if (_readMode.equals(GsaoiParameters.FAINT_OBJECTS_READ_MODE))
-            return FAINT_OBJECTS_READ_NOISE;
-        else return VERY_FAINT_OBJECTS_READ_NOISE;
+        switch (params.getReadMode()) {
+            case BRIGHT:        return BRIGHT_OBJECTS__READ_NOISE;
+            case FAINT:         return FAINT_OBJECTS_READ_NOISE;
+            case VERY_FAINT:    return VERY_FAINT_OBJECTS_READ_NOISE;
+            default:            throw new Error();
+        }
     }
 
     /**
@@ -85,7 +81,7 @@ public final class Gsaoi extends Instrument {
     }
 
     public double getPixelSize() {
-        return 0.02; //*bin
+        return 0.02;
     }
 
     /**
