@@ -3,6 +3,10 @@ package edu.gemini.itc.niri;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.gemini.niri.Niri.ReadMode;
+import edu.gemini.spModel.gemini.niri.Niri.Mask;
+import edu.gemini.spModel.gemini.niri.Niri.WellDepth;
+import edu.gemini.spModel.gemini.niri.Niri.Disperser;
 
 /**
  * Niri specification class
@@ -73,13 +77,13 @@ public class Niri extends Instrument {
 
         //Test to see that all conditions for Spectroscopy are met
         if (_mode.isSpectroscopy()) {
-            if (np.getGrism() == edu.gemini.spModel.gemini.niri.Niri.Disperser.NONE)
+            if (np.getGrism() == Disperser.NONE)
                 throw new RuntimeException("Spectroscopy calculation method is selected but a grism" +
                         " is not.\nPlease select a grism and a " +
                         "focal plane mask in the Instrument " +
                         "configuration section.");
 
-            if (np.getFocalPlaneMask() == edu.gemini.spModel.gemini.niri.Niri.Mask.MASK_IMAGING)
+            if (np.getFocalPlaneMask() == Mask.MASK_IMAGING)
                 throw new RuntimeException("Spectroscopy calculation method is selected but a focal" +
                         " plane mask is not.\nPlease select a " +
                         "grism and a " +
@@ -103,11 +107,11 @@ public class Niri extends Instrument {
         }
 
         if (_mode.isImaging()) {
-            if (np.getGrism() != edu.gemini.spModel.gemini.niri.Niri.Disperser.NONE)
+            if (np.getGrism() != Disperser.NONE)
                 throw new RuntimeException("Imaging calculation method is selected but a grism" +
                         " is also selected.\nPlease deselect the " +
                         "grism or change the method to spectroscopy.");
-            if (np.getFocalPlaneMask() != edu.gemini.spModel.gemini.niri.Niri.Mask.MASK_IMAGING)
+            if (np.getFocalPlaneMask() != Mask.MASK_IMAGING)
                 throw new RuntimeException("Imaging calculation method is selected but a Focal" +
                         " Plane Mask is also selected.\nPlease " +
                         "deselect the Focal Plane Mask" +
@@ -154,28 +158,12 @@ public class Niri extends Instrument {
         }
     }
 
-    // TODO: This is for regression tests only, get rid of with next update
-    public String getReadNoiseString() {
-        switch (params.getReadMode()) {
-            case IMAG_SPEC_NB:      return "lowNoise";
-            case IMAG_1TO25:        return "medNoise";
-            case IMAG_SPEC_3TO5:    return "highNoise";
-            default:                throw new Error();
-        }
+    public ReadMode getReadMode() {
+        return params.getReadMode();
     }
 
-    // TODO: This is for regression tests only, get rid of with next update
-    public String getFocalPlaneMask() {
-        switch (params.getFocalPlaneMask()) {
-            case MASK_IMAGING:      return "none";                // no mask / imaging
-            case MASK_1:            return "2-pix-center";        // f6 2pix center
-            case MASK_4:            return "2-pix-blue";          // f6 2pix blue
-            case MASK_2:            return "4-pix-center";        // f6 4pix center
-            case MASK_5:            return "4-pix-blue";          // f6 4pix blue
-            case MASK_3:            return "6-pix-center";        // f6 6pix center
-            case MASK_6:            return "6-pix-blue";          // f6 6pix blue
-            default:                throw new Error();
-        }
+    public Mask getFocalPlaneMask() {
+        return params.getFocalPlaneMask();
     }
 
     /**
@@ -218,7 +206,7 @@ public class Niri extends Instrument {
         return _grismOptics.getPixelWidth();
     }
 
-    public double getWellDepth() {
+    public double getWellDepthValue() {
         switch (params.getWellDepth()) {
             case SHALLOW:   return LOW_BACK_WELL_DEPTH;
             case DEEP:      return HIGH_BACK_WELL_DEPTH;
@@ -226,13 +214,8 @@ public class Niri extends Instrument {
         }
     }
 
-    public String getWellDepthString() {
-        // TODO: This is for regression tests only, get rid of with next update
-        switch (params.getWellDepth()) {
-            case SHALLOW:   return "lowWell";
-            case DEEP:      return "highWell";
-            default:        throw new Error();
-        }
+    public WellDepth getWellDepth() {
+        return params.getWellDepth();
     }
 
     public double getFPMask() {

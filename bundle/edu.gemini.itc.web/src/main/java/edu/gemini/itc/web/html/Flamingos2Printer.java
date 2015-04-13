@@ -160,7 +160,7 @@ public final class Flamingos2Printer extends PrinterBase {
     private void printConfiguration(final Flamingos2 instrument, final Parameters p) {
         _print("<HR align=left SIZE=3>");
         _println("<b>Input Parameters:</b>");
-        _println("Instrument: Flamingos 2\n"); // TODO: move names of instrument to instrument classes?
+        _println("Instrument: Flamingos 2\n");
         _println(HtmlPrinter.printParameterSummary(p.source()));
         _println(flamingos2ToString(instrument));
         _println(HtmlPrinter.printParameterSummary(p.telescope()));
@@ -172,24 +172,7 @@ public final class Flamingos2Printer extends PrinterBase {
         String s = "Instrument configuration: \n";
         s += "Optical Components: <BR>";
         for (final TransmissionElement te : instrument.getComponents()) {
-            // TODO: remove with next update of baseline
-            if (te instanceof Filter) {
-                final String n;
-                if (te.toString().contains("Open")) n = "Open";
-                else if (te.toString().contains("J")) n = "Jlow_G0801";
-                else if (te.toString().contains("H")) n = "H_G0803";
-                else n = te.toString();
-                s += "<LI>Filter: " + n + "<BR>";
-            } else if (te instanceof GrismOptics) {
-                final String n;
-                if (te.toString().contains("JH")) n = "JH_G5801";
-                else if (te.toString().contains("HK")) n = "HK_G5802";
-                else if (te.toString().contains("R3")) n = "R3K_G5803";
-                else n = te.toString();
-                s += "<LI>Grism Optics: " + n + "<BR>";
-            } else {
-                s += "<LI>" + te.toString() + "<BR>";
-            }
+            s += "<LI>" + te.toString() + "<BR>";
         }
         s += "<LI>Read Noise: " + instrument.getReadNoiseString() + "\n";
 

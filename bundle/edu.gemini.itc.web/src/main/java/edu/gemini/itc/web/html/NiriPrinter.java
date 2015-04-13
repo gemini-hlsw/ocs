@@ -10,7 +10,6 @@ import scala.Option;
 
 import java.io.PrintWriter;
 import java.util.Calendar;
-import java.util.Iterator;
 
 /**
  * Helper class for printing NIRI calculation results to an output stream.
@@ -151,11 +150,11 @@ public final class NiriPrinter extends PrinterBase {
                 + device.toString(result.peakPixelCount())
                 + ". This is "
                 + device.toString(result.peakPixelCount()
-                / instrument.getWellDepth() * 100)
+                / instrument.getWellDepthValue() * 100)
                 + "% of the full well depth of "
-                + device.toString(instrument.getWellDepth()) + ".");
+                + device.toString(instrument.getWellDepthValue()) + ".");
 
-        if (result.peakPixelCount() > (.8 * instrument.getWellDepth()))
+        if (result.peakPixelCount() > (.8 * instrument.getWellDepthValue()))
             _println("Warning: peak pixel exceeds 80% of the well depth and may be saturated");
 
         _println("");
@@ -185,21 +184,12 @@ public final class NiriPrinter extends PrinterBase {
         String s = "Instrument configuration: \n";
         s += "Optical Components: <BR>";
         for (final TransmissionElement te : instrument.getComponents()) {
-            // TODO: regression test compatibility remove asap
-            final String n;
-            if (te instanceof Filter) {
-                if (te.toString().contains("BBF_J")) n = "Filter: J";
-                else if (te.toString().contains("BBF_K")) n = "Filter: K";
-                else n = te.toString();
-            } else {
-                n = te.toString();
-            }
-            s += "<LI>" + n + "<BR>";
+            s += "<LI>" + te.toString() + "<BR>";
         }
-        if (!instrument.getFocalPlaneMask().equals("none"))
-            s += "<LI>Focal Plane Mask: " + instrument.getFocalPlaneMask() + "\n";
-        s += "<LI>Read Mode: " + instrument.getReadNoiseString() + "\n";
-        s += "<LI>Detector Bias: " + instrument.getWellDepthString() + "\n";
+        if (instrument.getFocalPlaneMask() != edu.gemini.spModel.gemini.niri.Niri.Mask.MASK_IMAGING)
+            s += "<LI>Focal Plane Mask: " + instrument.getFocalPlaneMask().displayValue() + "\n";
+        s += "<LI>Read Mode: " + instrument.getReadMode().displayValue() + "\n";
+        s += "<LI>Detector Bias: " + instrument.getWellDepth().displayValue() + "\n";
 
         s += "<BR>Pixel Size: " + instrument.getPixelSize() + "<BR>";
 

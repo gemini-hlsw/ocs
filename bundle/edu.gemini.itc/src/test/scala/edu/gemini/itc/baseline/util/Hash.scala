@@ -92,31 +92,12 @@ object Hash {
 
   def calc(p: NiriParameters): Int =
     hash(
-      p.getCamera.name(),
-      p.getFilter match {                     // TODO: cleanup with next baseline update
-        case Niri.Filter.BBF_J  => "J"
-        case Niri.Filter.BBF_K  => "K"
-        case Niri.Filter.BBF_H  => "H"
-        case f                  => f.name()
-      },
-      p.getFocalPlaneMask match {             // TODO: cleanup with next baseline update
-        case Niri.Mask.MASK_IMAGING =>  "none"
-        case Niri.Mask.MASK_1       =>  "2-pix-center"
-        case m                      => m.name()
-      },
-      p.getGrism match {                      // TODO: cleanup with next baseline update
-        case Niri.Disperser.NONE  => "none"
-        case g                    => g.name()+"-grism"
-      },
-      p.getReadMode match {
-        case Niri.ReadMode.IMAG_SPEC_NB => "lowNoise"
-        case Niri.ReadMode.IMAG_1TO25   => "medNoise"
-        case Niri.ReadMode.IMAG_SPEC_3TO5 => "highNoise"
-      },
-      p.getWellDepth match {                  // TODO: cleanup with next baseline update
-        case Niri.WellDepth.DEEP    => "highWell"
-        case Niri.WellDepth.SHALLOW => "lowWell"
-      }
+      p.getCamera.name,
+      p.getFilter.name,
+      p.getFocalPlaneMask.name,
+      p.getGrism.name,
+      p.getReadMode.name,
+      p.getWellDepth.name
     )
 
   def calc(p: TRecsParameters): Int =
@@ -136,28 +117,11 @@ object Hash {
 
   def calc(p: Flamingos2Parameters): Int =
     hash(
-      f2FilterToName(p.getFilter),                                                                        // TODO: cleanup with next baseline update
-      if (p.getFPMask.equals(Flamingos2.FPUnit.FPU_NONE)) "none" else p.getFPMask.getSlitWidth.toString,  // TODO: cleanup with next baseline update
-      f2DisperserToName(p.getGrism),                                                                      // TODO: cleanup with next baseline update
-      p.getReadMode match {                                                                               // TODO: cleanup with next baseline update
-        case Flamingos2.ReadMode.BRIGHT_OBJECT_SPEC   => "highNoise"
-        case Flamingos2.ReadMode.MEDIUM_OBJECT_SPEC   => "medNoise"
-        case Flamingos2.ReadMode.FAINT_OBJECT_SPEC    => "lowNoise"
-      }
+      p.getFilter.name,
+      p.getFPMask.name,
+      p.getGrism.name,
+      p.getReadMode.name
     )
-
-  private def f2FilterToName(filter: Flamingos2.Filter): String = filter match {
-    case Flamingos2.Filter.OPEN         => "Open"
-    case Flamingos2.Filter.H            => "H_G0803"
-    case Flamingos2.Filter.J_LOW        => "Jlow_G0801"
-    case _                              => filter.name()
-  }
-  private def f2DisperserToName(filter: Flamingos2.Disperser): String = filter match {
-    case Flamingos2.Disperser.NONE      => "None"
-    case Flamingos2.Disperser.R1200HK   => "HK_G5802"
-    case Flamingos2.Disperser.R1200JH   => "JH_G5801"
-    case Flamingos2.Disperser.R3000     => "R3K_G5803"
-  }
 
   def calc(odp: ObservationDetails): Int =
     hash(

@@ -44,36 +44,36 @@ object BaselineAllSpec extends Specification with ScalaCheck {
   {
     implicit val arbFixture: Arbitrary[Fixture[Flamingos2Parameters]] = Arbitrary { Gen.oneOf(BaselineF2.Fixtures) }
 
-//    "Flamingos2 calculations" should {
-//      "match latest baseline" !
-//        prop { f: Fixture[Flamingos2Parameters] =>
-//          checkAgainstBaseline(Baseline.from(f, executeF2Recipe(f)))
-//        }.set((minTestsOk, minTestsCnt))
-//    }
+    "Flamingos2 calculations" should {
+      "match latest baseline" !
+        prop { f: Fixture[Flamingos2Parameters] =>
+          checkAgainstBaseline(Baseline.from(f, executeF2Recipe(f)))
+        }.set((minTestsOk, minTestsCnt))
+    }
   }
 
   // === GMOS
   {
     implicit val arbFixture: Arbitrary[Fixture[GmosParameters]] = Arbitrary { Gen.oneOf(BaselineGmos.Fixtures) }
 
-//    "GMOS calculations" should {
-//      "match latest baseline" !
-//        prop { f: Fixture[GmosParameters] =>
-//          checkAgainstBaseline(Baseline.from(f, executeGmosRecipe(f)))
-//        }.set((minTestsOk, minTestsCnt))
-//    }
+    "GMOS calculations" should {
+      "match latest baseline" !
+        prop { f: Fixture[GmosParameters] =>
+          checkAgainstBaseline(Baseline.from(f, executeGmosRecipe(f)))
+        }.set((minTestsOk, minTestsCnt))
+    }
   }
 
   // === GNIRS
   {
     implicit val arbFixture: Arbitrary[Fixture[GnirsParameters]] = Arbitrary { Gen.oneOf(BaselineGnirs.Fixtures) }
 
-//    "GNIRS calculations" should {
-//      "match latest baseline" !
-//        prop { f: Fixture[GnirsParameters] =>
-//          checkAgainstBaseline(Baseline.from(f, executeGnirsRecipe(f)))
-//        }.set((minTestsOk, minTestsCnt))
-//    }
+    "GNIRS calculations" should {
+      "match latest baseline" !
+        prop { f: Fixture[GnirsParameters] =>
+          checkAgainstBaseline(Baseline.from(f, executeGnirsRecipe(f)))
+        }.set((minTestsOk, minTestsCnt))
+    }
   }
 
   // === GSAOI
@@ -104,12 +104,12 @@ object BaselineAllSpec extends Specification with ScalaCheck {
   {
     implicit val arbFixture: Arbitrary[Fixture[NifsParameters]] = Arbitrary { Gen.oneOf(BaselineNifs.Fixtures) }
 
-//    "NIFS calculations" should {
-//      "match latest baseline" !
-//        prop { f: Fixture[NifsParameters] =>
-//          checkAgainstBaseline(Baseline.from(f, executeNifsRecipe(f)))
-//        }.set((minTestsOk, minTestsCnt))
-//    }
+    "NIFS calculations" should {
+      "match latest baseline" !
+        prop { f: Fixture[NifsParameters] =>
+          checkAgainstBaseline(Baseline.from(f, executeNifsRecipe(f)))
+        }.set((minTestsOk, minTestsCnt))
+    }
   }
 
   // === NIRI
