@@ -4,8 +4,6 @@ import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.*;
 
-import java.util.Iterator;
-
 /**
  * Niri specification class
  */
@@ -35,8 +33,6 @@ public class Niri extends Instrument {
     // _Filter2 is used only in the case that the PK50 filter is required
     private Filter _Filter, _Filter2;
     private GrismOptics _grismOptics;
-    private String _readNoise;
-    private String _wellDepth;
     private CalculationMethod _mode;
 
     /**
@@ -48,8 +44,6 @@ public class Niri extends Instrument {
 
         this.params = np;
 
-        _readNoise = np.getReadNoise();
-        _wellDepth = np.getWellDepth();
         _mode = odp.getMethod();
 
 
@@ -101,8 +95,8 @@ public class Niri extends Instrument {
 
 
             _grismOptics = new GrismOptics(getDirectory() + "/", np.getGrism().name()+"-grism", np.getCamera().name(),
-                    np.getFPMaskOffset(),
-                    np.getStringSlitWidth());
+                    getFPMaskOffset(),
+                    getStringSlitWidth());
 
             resetBackGround(INSTR_DIR, "spec_");  //Niri has spectroscopic scattering from grisms
             addGrism(_grismOptics);
@@ -152,29 +146,35 @@ public class Niri extends Instrument {
     }
 
     public double getReadNoise() {
-        if (_readNoise.equals(NiriParameters.LOW_READ_NOISE))
-            return LOW_BACK_READ_NOISE;
-        else if (_readNoise.equals(NiriParameters.MED_READ_NOISE))
-            return MED_BACK_READ_NOISE;
-        else return HIGH_BACK_READ_NOISE;
+        switch (params.getReadMode()) {
+            case IMAG_SPEC_NB:      return LOW_BACK_READ_NOISE;
+            case IMAG_1TO25:        return MED_BACK_READ_NOISE;
+            case IMAG_SPEC_3TO5:    return HIGH_BACK_READ_NOISE;
+            default:                throw new Error();
+        }
     }
 
+    // TODO: This is for regression tests only, get rid of with next update
     public String getReadNoiseString() {
-        return _readNoise;
+        switch (params.getReadMode()) {
+            case IMAG_SPEC_NB:      return "lowNoise";
+            case IMAG_1TO25:        return "medNoise";
+            case IMAG_SPEC_3TO5:    return "highNoise";
+            default:                throw new Error();
+        }
     }
 
     // TODO: This is for regression tests only, get rid of with next update
     public String getFocalPlaneMask() {
         switch (params.getFocalPlaneMask()) {
-            case MASK_IMAGING:  return NiriParameters.NO_SLIT;                  // no mask / imaging
-            case MASK_1:        return NiriParameters.SLIT_2_PIX_CENTER;        // f6 2pix center
-            case MASK_4:        return NiriParameters.SLIT_2_PIX_BLUE;          // f6 2pix blue
-            case MASK_2:        return NiriParameters.SLIT_4_PIX_CENTER;        // f6 4pix center
-            case MASK_5:        return NiriParameters.SLIT_4_PIX_BLUE;          // f6 4pix blue
-            case MASK_3:        return NiriParameters.SLIT_6_PIX_CENTER;        // f6 6pix center
-            case MASK_6:        return NiriParameters.SLIT_6_PIX_BLUE;          // f6 6pix blue
-            default:
-                throw new Error();
+            case MASK_IMAGING:      return "none";                // no mask / imaging
+            case MASK_1:            return "2-pix-center";        // f6 2pix center
+            case MASK_4:            return "2-pix-blue";          // f6 2pix blue
+            case MASK_2:            return "4-pix-center";        // f6 4pix center
+            case MASK_5:            return "4-pix-blue";          // f6 4pix blue
+            case MASK_3:            return "6-pix-center";        // f6 6pix center
+            case MASK_6:            return "6-pix-blue";          // f6 6pix blue
+            default:                throw new Error();
         }
     }
 
@@ -206,9 +206,8 @@ public class Niri extends Instrument {
     }
 
     public double getPixelSize() {
-        double F6pixelsize = super.getPixelSize();
         switch (params.getCamera()) {
-            case F6:  return F6pixelsize;
+            case F6:  return super.getPixelSize();
             case F14: return 0.05;
             case F32: return 0.022;
             default:  throw new Error();
@@ -220,13 +219,20 @@ public class Niri extends Instrument {
     }
 
     public double getWellDepth() {
-        if (_wellDepth.equals(NiriParameters.LOW_WELL_DEPTH))
-            return LOW_BACK_WELL_DEPTH;
-        else return HIGH_BACK_WELL_DEPTH;
+        switch (params.getWellDepth()) {
+            case SHALLOW:   return LOW_BACK_WELL_DEPTH;
+            case DEEP:      return HIGH_BACK_WELL_DEPTH;
+            default:        throw new Error();
+        }
     }
 
     public String getWellDepthString() {
-        return _wellDepth;
+        // TODO: This is for regression tests only, get rid of with next update
+        switch (params.getWellDepth()) {
+            case SHALLOW:   return "lowWell";
+            case DEEP:      return "highWell";
+            default:        throw new Error();
+        }
     }
 
     public double getFPMask() {
@@ -246,32 +252,39 @@ public class Niri extends Instrument {
             default:
                 throw new Error();
         }
-//        //if (_FP_Mask.equals(NOSLIT)) return null;
-//        if (_FP_Mask.equals(NiriParameters.SLIT0_70_CENTER) ||
-//                _FP_Mask.equals(NiriParameters.SLIT_6_PIX_CENTER))
-//            return 0.75; //old value 0.68;
-//        else if (_FP_Mask.equals(NiriParameters.SLIT0_70_BLUE) ||
-//                _FP_Mask.equals(NiriParameters.SLIT_6_PIX_BLUE))
-//            return 0.7;
-//        else if (_FP_Mask.equals(NiriParameters.SLIT0_23_CENTER) ||
-//                _FP_Mask.equals(NiriParameters.SLIT0_23_BLUE) ||
-//                _FP_Mask.equals(NiriParameters.SLIT_2_PIX_CENTER) ||
-//                _FP_Mask.equals(NiriParameters.SLIT_2_PIX_BLUE))
-//            return 0.23;
-//        else if (_FP_Mask.equals(NiriParameters.SLIT0_46_CENTER) ||
-//                _FP_Mask.equals(NiriParameters.SLIT_4_PIX_CENTER))
-//            return 0.47;
-//        else if (_FP_Mask.equals(NiriParameters.SLIT0_46_BLUE) ||
-//                _FP_Mask.equals(NiriParameters.SLIT_4_PIX_BLUE))
-//            return 0.46;
-//        else if (_FP_Mask.equals(NiriParameters.F32_SLIT_10_PIX_CENTER))
-//            return 0.22;
-//        else if (_FP_Mask.equals(NiriParameters.F32_SLIT_7_PIX_CENTER))
-//            return 0.144;
-//        else if (_FP_Mask.equals(NiriParameters.F32_SLIT_4_PIX_CENTER))
-//            return 0.09;
-//        else
-//            return -1.0;
+
+    }
+
+    private String getFPMaskOffset() {
+        switch (params.getFocalPlaneMask()) {
+            case MASK_1:
+            case MASK_2:
+            case MASK_3:
+                return "center";
+            case MASK_4:
+            case MASK_5:
+            case MASK_6:
+                return "blue";
+            default:
+                throw new Error();
+        }
+    }
+
+    private String getStringSlitWidth() {
+        // TODO: use size values provided by masks, this will make an update of baseline necessary
+        switch (params.getFocalPlaneMask()) {
+            case MASK_1:        // f6 2pix center
+            case MASK_4:        // f6 2pix blue
+                return "023";
+            case MASK_2:        // f6 4pix center
+            case MASK_5:        // f6 4pix blue
+                return "046";
+            case MASK_3:        // f6 6pix center
+            case MASK_6:        // f6 6pix blue
+                return "070";
+            default:
+                throw new Error();
+        }
     }
 
     /**

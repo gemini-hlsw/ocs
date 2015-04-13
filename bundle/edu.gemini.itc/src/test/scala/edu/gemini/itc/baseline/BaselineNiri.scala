@@ -16,15 +16,15 @@ object BaselineNiri {
       Filter.BBF_J,
       Disperser.NONE,
       Camera.F14,
-      NiriParameters.HIGH_READ_NOISE,
-      NiriParameters.HIGH_WELL_DEPTH,
+      ReadMode.IMAG_SPEC_3TO5,
+      WellDepth.DEEP,
       Mask.MASK_IMAGING),
     new NiriParameters(
       Filter.BBF_K,
       Disperser.NONE,
       Camera.F32,
-      NiriParameters.HIGH_READ_NOISE,
-      NiriParameters.HIGH_WELL_DEPTH,
+      ReadMode.IMAG_SPEC_3TO5,
+      WellDepth.DEEP,
       Mask.MASK_IMAGING)
   ), alt = Fixture.AltairConfigurations)
 
@@ -33,8 +33,8 @@ object BaselineNiri {
       Filter.BBF_K,
       Disperser.K,
       Camera.F6,                        // ITC supports only F6 in spectroscopy mode
-      NiriParameters.LOW_READ_NOISE,
-      NiriParameters.LOW_WELL_DEPTH,
+      ReadMode.IMAG_SPEC_NB,
+      WellDepth.SHALLOW,
       Mask.MASK_1)
   ), alt = Fixture.NoAltair)
 

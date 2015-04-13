@@ -108,8 +108,15 @@ object Hash {
         case Niri.Disperser.NONE  => "none"
         case g                    => g.name()+"-grism"
       },
-      p.getReadNoise,
-      p.getWellDepth
+      p.getReadMode match {
+        case Niri.ReadMode.IMAG_SPEC_NB => "lowNoise"
+        case Niri.ReadMode.IMAG_1TO25   => "medNoise"
+        case Niri.ReadMode.IMAG_SPEC_3TO5 => "highNoise"
+      },
+      p.getWellDepth match {                  // TODO: cleanup with next baseline update
+        case Niri.WellDepth.DEEP    => "highWell"
+        case Niri.WellDepth.SHALLOW => "lowWell"
+      }
     )
 
   def calc(p: TRecsParameters): Int =

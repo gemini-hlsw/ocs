@@ -163,8 +163,8 @@ object ITCRequest {
     val filter      = p.enumParameter(classOf[Niri.Filter])
     val grism       = p.enumParameter(classOf[Niri.Disperser])
     val camera      = p.enumParameter(classOf[Niri.Camera])
-    val readNoise   = p.parameter("readNoise")
-    val wellDepth   = p.parameter("wellDepth")
+    val readNoise   = p.enumParameter(classOf[Niri.ReadMode])
+    val wellDepth   = p.enumParameter(classOf[Niri.WellDepth])
     val fpMask      = p.enumParameter(classOf[Niri.Mask])
     new NiriParameters(filter, grism, camera, readNoise, wellDepth, fpMask)
   }

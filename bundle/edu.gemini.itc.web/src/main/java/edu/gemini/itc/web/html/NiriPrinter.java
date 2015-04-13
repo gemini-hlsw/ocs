@@ -196,7 +196,7 @@ public final class NiriPrinter extends PrinterBase {
             }
             s += "<LI>" + n + "<BR>";
         }
-        if (!instrument.getFocalPlaneMask().equals(NiriParameters.NO_SLIT))
+        if (!instrument.getFocalPlaneMask().equals("none"))
             s += "<LI>Focal Plane Mask: " + instrument.getFocalPlaneMask() + "\n";
         s += "<LI>Read Mode: " + instrument.getReadNoiseString() + "\n";
         s += "<LI>Detector Bias: " + instrument.getWellDepthString() + "\n";
