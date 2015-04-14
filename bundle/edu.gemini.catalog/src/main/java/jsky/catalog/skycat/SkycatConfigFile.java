@@ -147,7 +147,7 @@ public class SkycatConfigFile extends AbstractCatalogDirectory {
                 _load(connection.getInputStream());
             }
         } catch (IOException e) {
-	  _load(getName());
+            _load(getName());
         } finally {
             if (_progressPanel != null)
                 _progressPanel.stop();
@@ -161,14 +161,14 @@ public class SkycatConfigFile extends AbstractCatalogDirectory {
      * @param name the of name the config file
      */
     private void _load(String name) {
-	InputStream is = null;
-	try {
-	    is = Thread.currentThread().getContextClassLoader().getResourceAsStream(name);
-	} catch (Exception e) {
-	    e.printStackTrace();
-	    throw new RuntimeException("I/O error reading catalog config file: " + e);
-	}
-	_load(is);
+        InputStream is;
+        try {
+            is = Thread.currentThread().getContextClassLoader().getResourceAsStream(name);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("I/O error reading catalog config file: " + e);
+        }
+        _load(is);
     }
 
 
@@ -181,7 +181,7 @@ public class SkycatConfigFile extends AbstractCatalogDirectory {
         String line;
         int lineNumber = 0;
         Properties properties = null;
-        List catalogs = new Vector();
+        List<Catalog> catalogs = new Vector<>();
 
         if (_progressPanel != null)
             _progressPanel.setText("Reading catalog config file...");
@@ -358,8 +358,7 @@ public class SkycatConfigFile extends AbstractCatalogDirectory {
     public CatalogDirectory loadSubDir(URL url) {
         String filename = url.getFile();
         if (filename.endsWith(".cfg")) {
-            SkycatConfigFile cf = new SkycatConfigFile(url, getHTMLQueryResultHandler());
-            return cf;
+            return new SkycatConfigFile(url, getHTMLQueryResultHandler());
         }
         throw new RuntimeException("Expected a Skycat style .cfg file, or an AstroCat XML file");
     }

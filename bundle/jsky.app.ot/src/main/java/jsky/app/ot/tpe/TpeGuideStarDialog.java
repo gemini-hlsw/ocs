@@ -40,7 +40,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-
 /**
  * A dialog to choose a method for selecting a guide star. The choices
  * are to use a guide star catalog to get the best choice based on the
@@ -386,7 +385,7 @@ public class TpeGuideStarDialog extends TpeGuideStarDialogForm
     }
 
 
-    private void _setSelectedIndex(JComboBox cb, int i) {
+    private void _setSelectedIndex(JComboBox<?> cb, int i) {
         if (i != cb.getSelectedIndex()) {
             cb.setSelectedIndex(i);
         } else {

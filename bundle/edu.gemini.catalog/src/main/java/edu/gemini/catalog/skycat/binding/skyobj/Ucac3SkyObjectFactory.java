@@ -54,7 +54,7 @@ public enum Ucac3SkyObjectFactory implements SkyObjectFactory {
                     pmRa(PM_RA).pmDec(PM_DEC).add(J_MAG, K_MAG, H_MAG, B_MAG, R_MAG, I_MAG).build();
 
     public static final Set<Magnitude.Band> BANDS = Collections.unmodifiableSet(
-            new HashSet<Magnitude.Band>(Arrays.asList(J, K, H, B, R, I)));
+            new HashSet<>(Arrays.asList(J, K, H, B, R, I)));
 
     @Override
     public Set<Magnitude.Band> bands() { return BANDS; }
