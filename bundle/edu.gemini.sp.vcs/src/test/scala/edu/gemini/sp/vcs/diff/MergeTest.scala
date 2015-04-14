@@ -14,6 +14,7 @@ import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.target.obsComp.TargetObsComp
+import edu.gemini.spModel.template.TemplateGroup
 
 import org.junit.Test
 import org.scalatest.junit.JUnitSuite
@@ -606,6 +607,18 @@ class MergeTest extends JUnitSuite {
             }
           case _ => true
         }
+      }
+    ),
+
+    ("All template groups have unique version tokens",
+      (start, local, remote, pc) => {
+        pc.updatedLocalProgram.exists { ulp =>
+          val tgs = Option(ulp.getTemplateFolder).toList.flatMap { tf =>
+            tf.getTemplateGroups.asScala.toList
+          }
+          val vts = tgs.map(_.getDataObject.asInstanceOf[TemplateGroup].getVersionToken)
+          vts.size == vts.toSet.size
+        }.run
       }
     )
   )

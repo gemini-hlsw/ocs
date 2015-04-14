@@ -99,7 +99,7 @@ object ProgramGen {
       val tf  = ftf(f, p)
       val tgs = ftg.sequenceU.apply(f, p).zipWithIndex.map { case (tg, i) =>
         val dob = tg.getDataObject.asInstanceOf[TemplateGroup]
-        dob.setVersionToken(VersionToken.apply(Array(i), 1))
+        dob.setVersionToken(VersionToken.apply(Array(i+1), 1))
         tg.setDataObject(dob)
         tg
       }
