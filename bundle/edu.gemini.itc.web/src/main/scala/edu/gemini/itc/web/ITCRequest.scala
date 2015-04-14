@@ -46,7 +46,10 @@ sealed abstract class ITCRequest {
   def intParameter(name: String): Int = parameter(name).toInt
 
   /** Gets the named value as a double. */
-  def doubleParameter(name: String): Double = parameter(name).toDouble
+  def doubleParameter(name: String): Double = parameter(name).trim() match {
+    case ""   => 0.0
+    case s    => s.toDouble
+  }
 
   /** Gets the user SED text file from the request.
     * Only multipart HTTP requests will support this. */
@@ -56,6 +59,7 @@ sealed abstract class ITCRequest {
     * Only multipart HTTP requests will support this. */
   // TODO: Can we get rid of this method?
    def userSpectrumName(): Option[String]
+
 }
 
 /**
@@ -110,25 +114,25 @@ object ITCRequest {
   }
 
   def gmosParameters(r: ITCMultiPartParser): GmosParameters = {
-    val pc          = ITCRequest.from(r)
-    val site        = pc.enumParameter(classOf[Site])
-    val filter      = if (site.equals(Site.GN)) pc.enumParameter(classOf[FilterNorth],    "instrumentFilter")    else pc.enumParameter(classOf[FilterSouth],    "instrumentFilter")
-    val grating     = if (site.equals(Site.GN)) pc.enumParameter(classOf[DisperserNorth], "instrumentDisperser") else pc.enumParameter(classOf[DisperserSouth], "instrumentDisperser")
-    val spatBinning = pc.intParameter("spatBinning")
-    val specBinning = pc.intParameter("specBinning")
-    val ccdType     = pc.enumParameter(classOf[DetectorManufacturer])
-    val centralWavelength = if (pc.parameter("instrumentCentralWavelength").trim.isEmpty) 0.0 else pc.doubleParameter("instrumentCentralWavelength")
-    val fpMask      = if (site.equals(Site.GN)) pc.enumParameter(classOf[FPUnitNorth],    "instrumentFPMask")   else pc.enumParameter(classOf[FPUnitSouth],      "instrumentFPMask")
+    val p           = ITCRequest.from(r)
+    val site        = p.enumParameter(classOf[Site])
+    val filter      = if (site.equals(Site.GN)) p.enumParameter(classOf[FilterNorth],    "instrumentFilter")    else p.enumParameter(classOf[FilterSouth],    "instrumentFilter")
+    val grating     = if (site.equals(Site.GN)) p.enumParameter(classOf[DisperserNorth], "instrumentDisperser") else p.enumParameter(classOf[DisperserSouth], "instrumentDisperser")
+    val spatBinning = p.intParameter("spatBinning")
+    val specBinning = p.intParameter("specBinning")
+    val ccdType     = p.enumParameter(classOf[DetectorManufacturer])
+    val centralWl   = p.doubleParameter("instrumentCentralWavelength")
+    val fpMask      = if (site.equals(Site.GN)) p.enumParameter(classOf[FPUnitNorth],    "instrumentFPMask")   else p.enumParameter(classOf[FPUnitSouth],      "instrumentFPMask")
     val ifuMethod: Option[IfuMethod]   = if (fpMask.isIFU) {
-      pc.parameter("ifuMethod") match {
-        case "singleIFU" => Some(IfuSingle(pc.doubleParameter("ifuOffset")))
-        case "radialIFU" => Some(IfuRadial(pc.doubleParameter("ifuMinOffset"), pc.doubleParameter("ifuMaxOffset")))
+      p.parameter("ifuMethod") match {
+        case "singleIFU" => Some(IfuSingle(p.doubleParameter("ifuOffset")))
+        case "radialIFU" => Some(IfuRadial(p.doubleParameter("ifuMinOffset"), p.doubleParameter("ifuMaxOffset")))
         case _ => throw new IllegalArgumentException()
       }} else {
       None
     }
 
-    new GmosParameters(filter, grating, centralWavelength, fpMask, spatBinning, specBinning, ifuMethod, ccdType, site)
+    new GmosParameters(filter, grating, centralWl, fpMask, spatBinning, specBinning, ifuMethod, ccdType, site)
   }
 
   def gnirsParameters(r: ITCMultiPartParser): GnirsParameters = {
@@ -137,8 +141,7 @@ object ITCRequest {
     val camera      = p.parameter("instrumentCamera")
     val xDisp       = p.parameter("xdisp")
     val readNoise   = p.parameter("readNoise")
-    val centralWl0  = p.parameter("instrumentCentralWavelength")
-    val centralWl   = if (centralWl0.trim().isEmpty) "0" else centralWl0
+    val centralWl   = p.doubleParameter("instrumentCentralWavelength")
     val fpMask     = p.parameter("instrumentFPMask")
     new GnirsParameters(camera, grating, readNoise, xDisp, centralWl, fpMask)
   }
@@ -154,8 +157,7 @@ object ITCRequest {
     val p           = ITCRequest.from(r)
     val filter      = p.parameter("instrumentFilter")
     val grating     = p.parameter("instrumentDisperser")
-    val centralWl0  = p.parameter("instrumentCentralWavelength")
-    val centralWl   = if (centralWl0.trim().isEmpty) "0" else centralWl0
+    val centralWl   = p.doubleParameter("instrumentCentralWavelength")
     val fpMask      = p.enumParameter(classOf[MichelleParams.Mask])
     val polarimetry = p.parameter("polarimetry")
     new MichelleParameters(filter, grating, centralWl, fpMask, polarimetry)
@@ -177,8 +179,7 @@ object ITCRequest {
     val filter      = p.parameter("instrumentFilter")
     val grating     = p.parameter("instrumentDisperser")
     val readNoise   = p.parameter("readNoise")
-    val centralWl0  = p.parameter("instrumentCentralWavelength")
-    val centralWl   = if (centralWl0.trim().isEmpty) "0" else centralWl0
+    val centralWl   = p.doubleParameter("instrumentCentralWavelength")
     val ifuMethod   = p.parameter("ifuMethod")
     val (offset, min, max, numX, numY, centerX, centerY) = ifuMethod match {
       case "singleIFU"  =>
@@ -203,8 +204,7 @@ object ITCRequest {
     val filter      = p.parameter("instrumentFilter")
     val window      = p.parameter("instrumentWindow")
     val grating     = p.parameter("instrumentDisperser")
-    val centralWl0  = p.parameter("instrumentCentralWavelength")
-    val centralWl   = if (centralWl0.trim().isEmpty) "0" else centralWl0
+    val centralWl   = p.doubleParameter("instrumentCentralWavelength")
     val fpMask      = p.parameter("instrumentFPMask")
     new TRecsParameters(filter, window, grating, centralWl, fpMask)
   }

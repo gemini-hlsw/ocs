@@ -3,8 +3,8 @@ package edu.gemini.itc.web.html;
 import edu.gemini.itc.flamingos2.Flamingos2;
 import edu.gemini.itc.flamingos2.Flamingos2Parameters;
 import edu.gemini.itc.flamingos2.Flamingos2Recipe;
-import edu.gemini.itc.flamingos2.GrismOptics;
 import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit;
 
 import java.io.PrintWriter;
 import java.util.Calendar;
@@ -176,7 +176,7 @@ public final class Flamingos2Printer extends PrinterBase {
         }
         s += "<LI>Read Noise: " + instrument.getReadNoiseString() + "\n";
 
-        if (instrument.getFocalPlaneMask() != edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit.FPU_NONE)
+        if (instrument.getFocalPlaneMask() != FPUnit.FPU_NONE)
             s += "<LI>Focal Plane Mask: " + instrument.getFocalPlaneMask().getSlitWidth() + " pix slit\n";
 
         s += "<BR>Pixel Size: " + instrument.getPixelSize() + "<BR>";

@@ -16,7 +16,7 @@ object BaselineMichelle {
     new MichelleParameters(
       "Nprime",                           //String Filter,
       "none",                             //String grating,
-      "12",                               //String instrumentCentralWavelength,
+      12,                                 //instrumentCentralWavelength,
       Mask.MASK_IMAGING,                  //FP_Mask,
       MichelleParameters.ENABLED          //String polarimetry (enabled only allowed if imaging)
     )
@@ -26,7 +26,7 @@ object BaselineMichelle {
     new MichelleParameters(
       "Nprime",                           //String Filter,
       "medN2",                            //String grating,
-      "11",                               //String instrumentCentralWavelength,
+      11,                                 //instrumentCentralWavelength,
       Mask.MASK_2,                        //FP_Mask,
       MichelleParameters.DISABLED         //String polarimetry (enabled only allowed if imaging)
     )
@@ -36,7 +36,7 @@ object BaselineMichelle {
     new MichelleParameters(
       "Qa",                               //String Filter,
       "lowQ",                             //String grating,
-      "18.2",                             //String instrumentCentralWavelength,
+      18.2,                               //instrumentCentralWavelength,
       Mask.MASK_4,                        //FP_Mask,
       MichelleParameters.DISABLED         //String polarimetry (enabled only allowed if imaging)
     )

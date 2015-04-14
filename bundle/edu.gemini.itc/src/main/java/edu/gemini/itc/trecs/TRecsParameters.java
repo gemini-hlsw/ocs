@@ -62,7 +62,7 @@ public final class TRecsParameters implements InstrumentDetails {
     private final String _Filter;  // filters
     private final String _InstrumentWindow;
     private final String _grating; // Grating or null
-    private final String _instrumentCentralWavelength;
+    private final double _instrumentCentralWavelength;
     private final String _FP_Mask;
 
     /**
@@ -71,12 +71,12 @@ public final class TRecsParameters implements InstrumentDetails {
     public TRecsParameters(final String Filter,
                            final String instrumentWindow,
                            final String grating,
-                           final String instrumentCentralWavelength,
+                           final double instrumentCentralWavelength,
                            final String FP_Mask) {
         _Filter = Filter;
         _InstrumentWindow = instrumentWindow;
         _grating = grating;
-        _instrumentCentralWavelength = instrumentCentralWavelength;
+        _instrumentCentralWavelength = instrumentCentralWavelength * 1000; // convert to [nm]
         _FP_Mask = FP_Mask;
     }
 
@@ -97,20 +97,7 @@ public final class TRecsParameters implements InstrumentDetails {
     }
 
     public double getInstrumentCentralWavelength() {
-        return (new Double(_instrumentCentralWavelength)) * 1000; //Convert um to nm
+        return _instrumentCentralWavelength;
     }
 
-    /**
-     * Return a human-readable string for debugging
-     */
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("Filter:\t" + getFilter() + "\n");
-        sb.append("Grating:\t" + getGrating() + "\n");
-        sb.append("Instrument Central Wavelength:\t" +
-                getInstrumentCentralWavelength() + "\n");
-        sb.append("Focal Plane Mask: \t " + _FP_Mask + " arcsec slit \n");
-        sb.append("\n");
-        return sb.toString();
-    }
 }

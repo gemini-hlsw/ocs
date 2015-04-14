@@ -204,18 +204,6 @@ public final class Michelle extends Instrument {
             case MASK_8:    return 1.52;
             default:        throw new Error();
         }
-//        if (params.getFocalPlaneMask().equals(MichelleParameters.SLIT0_19))
-//            return 0.19;
-//        else if (params.getFocalPlaneMask().equals(MichelleParameters.SLIT0_38))
-//            return 0.38;
-//        else if (params.getFocalPlaneMask().equals(MichelleParameters.SLIT0_57))
-//            return 0.57;
-//        else if (params.getFocalPlaneMask().equals(MichelleParameters.SLIT0_76))
-//            return 0.76;
-//        else if (params.getFocalPlaneMask().equals(MichelleParameters.SLIT1_52))
-//            return 1.52;
-//        else
-//            return -1.0;
     }
 
     public boolean polarimetryIsUsed() {

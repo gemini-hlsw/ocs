@@ -45,15 +45,15 @@ public final class GnirsParameters implements InstrumentDetails {
 
     public static final double LONG_CAMERA_SCALE_FACTOR = 3.0;
 
-    private static double XDISP_CENTRAL_WAVELENGTH = 1616.85;
+    private static final double XDISP_CENTRAL_WAVELENGTH = 1616.85;
 
     // Data members
-    private final String _grating; // Grating or null
-    private final String _camera;
-    private final String _readNoise;
-    private final String _instrumentCentralWavelength;
-    private final String _FP_Mask;
-    private final String _xDisp;
+    private final String grating; // Grating or null
+    private final String camera;
+    private final String readNoise;
+    private final double instrumentCentralWavelength;
+    private final String mask;
+    private final String xDisp;
 
     /**
      * Constructs a GnirsParameters.
@@ -62,70 +62,59 @@ public final class GnirsParameters implements InstrumentDetails {
                            final String grating,
                            final String readNoise,
                            final String xDisp,
-                           final String instrumentCentralWavelength,
-                           final String FP_Mask) {
-        _grating = grating;
-        _camera = camera;
-        _xDisp = xDisp;
-        _readNoise = readNoise;
-        _instrumentCentralWavelength = instrumentCentralWavelength;
-        _FP_Mask = FP_Mask;
+                           final double instrumentCentralWavelength,
+                           final String mask) {
+        this.grating = grating;
+        this.camera = camera;
+        this.xDisp = xDisp;
+        this.readNoise = readNoise;
+        this.instrumentCentralWavelength = instrumentCentralWavelength * 1000;
+        this.mask = mask;
     }
 
     public String getGrating() {
-        return _grating;
+        return grating;
     }
 
-    //  Uncommented following section on 2/27/2014 (see REL-480)
     public String getReadNoise() {
-        return _readNoise;
+        return readNoise;
     }
 
     public String getFocalPlaneMask() {
-        return _FP_Mask;
+        return mask;
     }
 
     public double getInstrumentCentralWavelength() {
         if (!isXDispUsed()) {
-            return new Double(_instrumentCentralWavelength) * 1000;
+            return instrumentCentralWavelength;
         } else {
             return XDISP_CENTRAL_WAVELENGTH;
         }
     }
 
     public double getUnXDispCentralWavelength() {
-        return new Double(_instrumentCentralWavelength) * 1000;
+        return instrumentCentralWavelength;
     }
 
     public String getStringSlitWidth() {
-        if (_FP_Mask.equals(SLIT0_1))
-            return "010";
-        else if (_FP_Mask.equals(SLIT0_15))
-            return "015";
-        else if (_FP_Mask.equals(SLIT0_2))
-            return "020";
-        else if (_FP_Mask.equals(SLIT0_3))
-            return "030";
-        else if (_FP_Mask.equals(SLIT0_45))
-            return "045";
-        else if (_FP_Mask.equals(SLIT0_675))
-            return "0675";
-        else if (_FP_Mask.equals(SLIT1_0))
-            return "100";
-        else if (_FP_Mask.equals(SLIT3_0))
-            return "300";
-        else
-            return "none";
-
+        switch (mask) {
+            case SLIT0_1:   return "010";
+            case SLIT0_15:  return "015";
+            case SLIT0_2:   return "020";
+            case SLIT0_3:   return "030";
+            case SLIT0_45:  return "045";
+            case SLIT0_675: return "0675";
+            case SLIT1_0:   return "100";
+            case SLIT3_0:   return "300";
+            default:        return "none";
+        }
     }
 
     public String getCameraLength() {
-        if (_camera.equals(LONG_CAMERA)) {
-            return LONG;
-        } else if (_camera.equals(SHORT_CAMERA)) {
-            return SHORT;
-        } else {
-            throw new RuntimeException("Error Camera Not Selected");
+        switch (camera) {
+            case LONG_CAMERA:   return LONG;
+            case SHORT_CAMERA:  return SHORT;
+            default:            throw new Error();
         }
     }
 
@@ -138,11 +127,7 @@ public final class GnirsParameters implements InstrumentDetails {
     }
 
     public boolean isXDispUsed() {
-        if (_xDisp.equals(X_DISP_ON)) {
-            return true;
-        } else {
-            return false;
-        }
+        return xDisp.equals(X_DISP_ON);
     }
 
     public static String getLongCameraName() {
@@ -161,16 +146,4 @@ public final class GnirsParameters implements InstrumentDetails {
         return RED;
     }
 
-
-    /**
-     * Return a human-readable string for debugging
-     */
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("Grating:\t" + getGrating() + "\n");
-        sb.append("Instrument Central Wavelength:\t" + getInstrumentCentralWavelength() + "\n");
-        sb.append("Focal Plane Mask: \t " + _FP_Mask + " arcsec slit \n");
-        sb.append("\n");
-        return sb.toString();
-    }
 }

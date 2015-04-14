@@ -57,16 +57,4 @@ public final class NiriParameters implements InstrumentDetails {
         return fpMask;
     }
 
-    /**
-     * Return a human-readable string for debugging
-     */
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("Filter:\t" + getFilter() + "\n");
-        sb.append("Grism:\t" + getGrism() + "\n");
-        sb.append("Camera:\t" + getCamera() + "\n");
-        sb.append("Focal Plane Mask: \t " + fpMask + " arcsec slit \n");
-        sb.append("\n");
-        return sb.toString();
-    }
 }

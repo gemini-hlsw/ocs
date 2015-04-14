@@ -2,6 +2,7 @@ package edu.gemini.itc.flamingos2;
 
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit;
 import scala.Option;
 
 import java.io.File;
@@ -145,7 +146,7 @@ public final class Flamingos2 extends Instrument {
         return WELL_DEPTH;
     }
 
-    public edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit getFocalPlaneMask() {
+    public FPUnit getFocalPlaneMask() {
         return params.getFPMask();
     }
 

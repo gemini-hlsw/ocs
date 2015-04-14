@@ -25,9 +25,9 @@ public final class MichelleParameters implements InstrumentDetails {
     public static final String DISABLED = "disabled";
 
     private final Mask mask;
-    private final String filter;  // filters
-    private final String grating; // Grating or null
-    private final String centralWavelength;
+    private final String filter;
+    private final String grating;
+    private final double centralWavelength;
     private final String polarimetry;
 
     /**
@@ -35,12 +35,12 @@ public final class MichelleParameters implements InstrumentDetails {
      */
     public MichelleParameters(final String filter,
                               final String grating,
-                              final String instrumentCentralWavelength,
+                              final double instrumentCentralWavelength,
                               final Mask mask,
                               final String polarimetry) {
         this.filter = filter;
         this.grating = grating;
-        this.centralWavelength = instrumentCentralWavelength;
+        this.centralWavelength = instrumentCentralWavelength * 1000;
         this.mask = mask;
         this.polarimetry = polarimetry;
 
@@ -59,7 +59,7 @@ public final class MichelleParameters implements InstrumentDetails {
     }
 
     public double getInstrumentCentralWavelength() {
-        return (new Double(centralWavelength)) * 1000;
+        return centralWavelength;
     }
 
     public boolean polarimetryIsUsed() {

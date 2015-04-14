@@ -6,6 +6,7 @@ import edu.gemini.itc.niri.Niri;
 import edu.gemini.itc.niri.NiriParameters;
 import edu.gemini.itc.niri.NiriRecipe;
 import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.gemini.niri.Niri.*;
 import scala.Option;
 
 import java.io.PrintWriter;
@@ -186,7 +187,7 @@ public final class NiriPrinter extends PrinterBase {
         for (final TransmissionElement te : instrument.getComponents()) {
             s += "<LI>" + te.toString() + "<BR>";
         }
-        if (instrument.getFocalPlaneMask() != edu.gemini.spModel.gemini.niri.Niri.Mask.MASK_IMAGING)
+        if (instrument.getFocalPlaneMask() != Mask.MASK_IMAGING)
             s += "<LI>Focal Plane Mask: " + instrument.getFocalPlaneMask().displayValue() + "\n";
         s += "<LI>Read Mode: " + instrument.getReadMode().displayValue() + "\n";
         s += "<LI>Detector Bias: " + instrument.getWellDepth().displayValue() + "\n";

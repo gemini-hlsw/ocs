@@ -19,7 +19,7 @@ object BaselineTRecs {
       "N",                                //String Filter,
       "KBr",                              //String cryostat window
       "HiRes-10",                         //String grating, ("none") for imaging
-      "12",                               //String instrumentCentralWavelength,
+      12,                                 //instrumentCentralWavelength
       TRecsParameters.SLIT0_21            //String FP_Mask,
     )
   ), TRecsObservingConditions)
