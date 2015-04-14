@@ -3,7 +3,7 @@ package edu.gemini.ags.gems
 import edu.gemini.catalog.api.{MagnitudeRange, RadiusConstraint}
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core.Target.SiderealTarget
-import edu.gemini.spModel.core.{Magnitude, Coordinates, Offset, Angle}
+import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.shared.skyobject
 import edu.gemini.spModel.gems.{GemsGuideProbeGroup, GemsGuideStarType}

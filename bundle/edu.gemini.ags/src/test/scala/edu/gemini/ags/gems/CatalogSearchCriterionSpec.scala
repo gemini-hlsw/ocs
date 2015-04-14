@@ -55,7 +55,7 @@ class CatalogSearchCriterionSpec extends Specification with Arbitraries with Sca
     "support search with offset" in {
       val radiusLimits = RadiusConstraint.between(Angle.fromArcmin(1.0), Angle.fromArcmin(10.0))
       val offset = Offset(1.arcmins[OffsetP], 1.arcmins[OffsetQ]).some
-      val criterion = CatalogSearchCriterion("test", magLimits.some, radiusLimits, offset, None)
+      val criterion = CatalogSearchCriterion("test", MagnitudeBand.J, magLimits, radiusLimits, offset, None)
       val baseRA = Angle.fromDegrees(10.0)
       val baseDec = Angle.fromDegrees(15.0)
       val base = Coordinates(RightAscension.fromAngle(baseRA), Declination.fromAngle(baseDec).getOrElse(Declination.zero))
