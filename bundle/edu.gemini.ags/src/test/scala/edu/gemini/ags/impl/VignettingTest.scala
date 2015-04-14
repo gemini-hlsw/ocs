@@ -7,7 +7,6 @@ import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.skycalc.{DDMMSS, HHMMSS}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
-import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.spModel.gemini.gmos.{GmosOiwfsGuideProbe, InstGmosSouth}
 import edu.gemini.spModel.gemini.inst.InstRegistry
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality._
@@ -22,7 +21,6 @@ import edu.gemini.spModel.telescope.{IssPortProvider, IssPort}
 
 import org.junit.Assert._
 import org.junit.Test
-import org.scalatest.Ignore
 
 import scala.collection.JavaConverters._
 import scala.util.Random
@@ -180,14 +178,5 @@ class VignettingTest {
   @Test def testAllNoVignetting() = {
     val expected = List(NVGS2, NVGS3, NVGS1, NVGS4, NVGS6, NVGS5, NVGS7)
     executeTest(expected, candidates = AllNV)
-  }
-
-  @Ignore @Test def testBadCase() = {
-    val BGS1 = siderealTarget("BGS1", "05:24:31.028 -24:21:38.56", 11.882)
-    val BGS2 = siderealTarget("BGS2", "05:24:38.738 -24:19:58.79", 12.746)
-    val candidates = List(BGS1, BGS2)
-    val expected   = List(BGS2, BGS1)
-    val conditions = new Conditions(CloudCover.PERCENT_70, ImageQuality.PERCENT_70, SkyBackground.ANY, WaterVapor.ANY)
-    executeTest(expected, candidates = candidates, conditions = conditions)
   }
 }
