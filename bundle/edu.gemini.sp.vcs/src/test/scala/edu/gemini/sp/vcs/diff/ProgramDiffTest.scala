@@ -1,6 +1,6 @@
 package edu.gemini.sp.vcs.diff
 
-import edu.gemini.pot.sp.{ISPFactory, SPNodeKey, ISPProgram}
+import edu.gemini.pot.sp.{ObservationIterator, ISPFactory, SPNodeKey, ISPProgram}
 import edu.gemini.pot.sp.version._
 import edu.gemini.sp.vcs.diff.NodeDetail.Obs
 import edu.gemini.spModel.obs.ObservationStatus
@@ -42,7 +42,7 @@ class ProgramDiffTest extends JUnitSuite {
     ("if a node in an observation appears in the diff list, the entire observation appears",
       (start, local, remote, pd) => {
         val modKeys    = modifiedKeys(pd.plan)
-        val allObsKeys = remote.getAllObservations.asScala.map(o => o.fold(Set.empty[SPNodeKey])(_ + _.key))
+        val allObsKeys = new ObservationIterator(remote).asScala.map(o => o.fold(Set.empty[SPNodeKey])(_ + _.key))
 
         allObsKeys.forall { obsKeys =>
           val sd = obsKeys &~ modKeys
@@ -121,7 +121,7 @@ class ProgramDiffTest extends JUnitSuite {
 
     ("obs status list should correspond to remote program",
       (start, local, remote, pd) => {
-        val remoteMap = (Map.empty[SPNodeKey, ObservationStatus]/:remote.getAllObservations.asScala) { (m,o) =>
+        val remoteMap = (Map.empty[SPNodeKey, ObservationStatus]/:new ObservationIterator(remote).asScala) { (m,o) =>
           m + (o.key -> ObservationStatus.computeFor(o))
         }
 

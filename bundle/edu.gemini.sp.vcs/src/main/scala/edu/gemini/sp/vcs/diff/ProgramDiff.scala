@@ -1,7 +1,7 @@
 package edu.gemini.sp.vcs.diff
 
 import edu.gemini.pot.sp.version._
-import edu.gemini.pot.sp.{ISPNode, ISPObservation, ISPProgram, SPNodeKey}
+import edu.gemini.pot.sp._
 import edu.gemini.sp.vcs.diff.MergeNode._
 import edu.gemini.spModel.obs.ObservationStatus
 import edu.gemini.spModel.rich.pot.sp._
@@ -155,7 +155,7 @@ object ProgramDiff {
     val (update, pairs) = presentDiffs(p, Nil)
     val plan            = MergePlan(update, missingDiffs(vmOnlyKeys ++ deletedKeys))
 
-    val allObs          = p.getAllObservations.asScala
+    val allObs          = new ObservationIterator(p).asScala
     val maxObs          = if (allObs.isEmpty) none else some(allObs.maxBy(_.getObservationNumber).getObservationNumber)
 
     ProgramDiff(plan, pairs, maxObs)
