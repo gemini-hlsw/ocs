@@ -15,6 +15,9 @@ import edu.gemini.spModel.rich.shared.immutable._
 // The geometry is dependent on the plate scale determined by the choice of Lyot wheel,
 // and thus we must use a class instead of an object.
 object F2OiwfsProbeArm extends ProbeArmGeometry[Flamingos2] {
+  // Simplified Java access.
+  val instance = this
+
   override protected val guideProbeInstance = Flamingos2OiwfsGuideProbe.instance
 
   override def geometry(flamingos2: Flamingos2): List[Shape] = {

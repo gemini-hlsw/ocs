@@ -144,6 +144,10 @@ object GmosOiwfsProbeArm {
   private val MX2 = MX * MX
 }
 
-
-object GmosNorthOiwfsProbeArm extends GmosOiwfsProbeArm[GmosNorthType.DisperserNorth, GmosNorthType.FilterNorth, GmosNorthType.FPUnitNorth, GmosNorthType.StageModeNorth]
-object GmosSouthOiwfsProbeArm extends GmosOiwfsProbeArm[GmosSouthType.DisperserSouth, GmosSouthType.FilterSouth, GmosSouthType.FPUnitSouth, GmosSouthType.StageModeSouth]
+// Instances for concrete GMOS implementations. instance member for simplified Java access.
+object GmosNorthOiwfsProbeArm extends GmosOiwfsProbeArm[GmosNorthType.DisperserNorth, GmosNorthType.FilterNorth, GmosNorthType.FPUnitNorth, GmosNorthType.StageModeNorth] {
+  val instance = this;
+}
+object GmosSouthOiwfsProbeArm extends GmosOiwfsProbeArm[GmosSouthType.DisperserSouth, GmosSouthType.FilterSouth, GmosSouthType.FPUnitSouth, GmosSouthType.StageModeSouth] {
+  val instance = this;
+}
