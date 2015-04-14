@@ -2,6 +2,7 @@ package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.{AgsAnalysis, AgsMagnitude, AgsStrategy}
 import edu.gemini.ags.api.AgsStrategy.{Assignment, Estimate, Selection}
+import edu.gemini.ags.api.defaultProbeBands
 import edu.gemini.ags.gems._
 import edu.gemini.ags.gems.mascot.{Strehl, MascotProgress}
 import edu.gemini.catalog.api._
@@ -231,7 +232,7 @@ trait GemsStrategy extends AgsStrategy {
     List(canopusConstraint, odgwConstaint).flatten
   }
 
-  override val probeBands: List[MagnitudeBand] = List(MagnitudeBand.R)
+  override val probeBands: List[MagnitudeBand] = defaultProbeBands(MagnitudeBand.R)
 
   override val guideProbes: List[GuideProbe] =
     Flamingos2OiwfsGuideProbe.instance :: (GsaoiOdgw.values() ++ Canopus.Wfs.values()).toList

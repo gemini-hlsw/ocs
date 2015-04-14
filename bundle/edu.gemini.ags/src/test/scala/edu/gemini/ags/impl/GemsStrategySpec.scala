@@ -1,11 +1,12 @@
 package edu.gemini.ags.impl
 
+import edu.gemini.ags.api.AgsStrategy
 import edu.gemini.ags.api.AgsStrategy.Estimate
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.ags.gems._
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable.TestVoTableBackend
-import edu.gemini.shared.util.immutable.{None, Some}
+import edu.gemini.shared.util.immutable.{None => JNone, Some => JSome}
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.spModel.gemini.gems.Canopus.Wfs
@@ -35,21 +36,25 @@ case class TestGemsStrategy(file: String) extends GemsStrategy {
 }
 
 class GemsStrategySpec extends Specification with NoTimeConversions {
+
+  private def applySelection(ctx: ObsContext, sel: AgsStrategy.Selection): ObsContext = {
+    // Make a new TargetEnvironment with the guide probe assignments.
+    sel.applyTo(ctx.getTargets) |> {ctx.withTargets}
+  }
+
   "GemsStrategy" should {
     "support estimate" in {
       val ra = Angle.fromHMS(3, 19, 48.2341).getOrElse(Angle.zero)
       val dec = Angle.fromDMS(41, 30, 42.078).getOrElse(Angle.zero)
       val target = new SPTarget(ra.toDegrees, dec.toDegrees)
       val env = TargetEnvironment.create(target)
-      val inst = new Gsaoi
-      inst.setPosAngle(0.0)
-      inst.setIssPort(IssPort.SIDE_LOOKING)
+      val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
       val gsaoi = GsaoiOdgw.values().toList
       val canopus = Canopus.Wfs.values().toList
       val pwfs1 = List(PwfsGuideProbe.pwfs1)
       val guiders:List[GuideProbe] = gsaoi ::: canopus ::: pwfs1
 
-      val ctx = ObsContext.create(env.setActiveGuiders(guiders.toSet.asJava), inst, new Some(Site.GS), SPSiteQuality.Conditions.BEST, null, null)
+      val ctx = ObsContext.create(env.setActiveGuiders(guiders.toSet.asJava), inst, new JSome(Site.GS), SPSiteQuality.Conditions.BEST, null, new Gems)
 
       val estimate = TestGemsStrategy("/gemsstrategyquery.xml").estimate(ctx, ProbeLimitsTable.loadOrThrow())
       Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
@@ -59,11 +64,9 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val dec = Angle.fromDMS(41, 30, 42.078).getOrElse(Angle.zero)
       val target = new SPTarget(ra.toDegrees, dec.toDegrees)
       val env = TargetEnvironment.create(target)
-      val inst = new Gsaoi
-      inst.setPosAngle(0.0)
-      inst.setIssPort(IssPort.UP_LOOKING)
+      val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
-      val ctx = ObsContext.create(env, inst, None.instance[Site], conditions , null, null)
+      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions , null, new Gems)
       val tipTiltMode = GemsTipTiltMode.instrument
 
       val posAngles = Set.empty[Angle]
@@ -81,11 +84,9 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val dec = Angle.zero - Angle.fromDMS(69, 16, 11.07).getOrElse(Angle.zero)
       val target = new SPTarget(ra.toDegrees, dec.toDegrees)
       val env = TargetEnvironment.create(target)
-      val inst = new Gsaoi
-      inst.setPosAngle(0.0)
-      inst.setIssPort(IssPort.UP_LOOKING)
+      val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
-      val ctx = ObsContext.create(env, inst, None.instance[Site], conditions, null, new Gems)
+      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems)
       val tipTiltMode = GemsTipTiltMode.canopus
 
       val posAngles = Set(GemsUtils4Java.toNewAngle(ctx.getPositionAngle), Angle.zero)
@@ -126,6 +127,11 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       cwfs3.map(_.coordinates ~= cwfs3x) should beSome(true)
       val odgw2x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(5, 35, 23.887).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(69, 16, 18.20).getOrElse(Angle.zero)).getOrElse(Declination.zero))
       odgw2.map(_.coordinates ~= odgw2x) should beSome(true)
+
+      val newCtx = selection.map(applySelection(ctx, _)).getOrElse(ctx)
+      println(TestGemsStrategy("/gems_sn1987A.xml").magnitudes(newCtx, ProbeLimitsTable.loadOrThrow()))
+     // TestGemsStrategy("/gems_sn1987A.xml").analyze(newCtx, ProbeLimitsTable.loadOrThrow()).forall(a => a, _.quality == )
+
     }
   }
 }

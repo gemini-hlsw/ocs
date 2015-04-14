@@ -177,7 +177,7 @@ public class GemsGuideStarSearchOptions {
         final String name = String.format("%s %s", gGroup.getDisplayName(), gType.name());
 
         // Adjust the mag limits for the worst conditions (as is done in the ags servlet)
-        final MagnitudeConstraints magConstraints = calculator.adjustGemsMagnitudeLimitsForJava(gType, nirBand, obsContext.getConditions());
+        final MagnitudeConstraints magConstraints = calculator.adjustGemsMagnitudeRangeForJava(gType, nirBand, obsContext.getConditions());
 
         final CatalogSearchCriterion criterion = calculator.searchCriterionBuilder(name, gGroup.getRadiusLimits(), instrument, magConstraints, posAngles);
         final GemsCatalogSearchKey key = new GemsCatalogSearchKey(gType, gGroup);
