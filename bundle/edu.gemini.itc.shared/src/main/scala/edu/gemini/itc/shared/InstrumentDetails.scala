@@ -1,21 +1,29 @@
 package edu.gemini.itc.shared
 
 import edu.gemini.spModel.core.Site
-import edu.gemini.spModel.gemini.gmos.GmosCommonType.{DetectorManufacturer, FPUnit, Disperser, Filter}
+import edu.gemini.spModel.gemini.flamingos2.Flamingos2
+import edu.gemini.spModel.gemini.gmos.GmosCommonType
 
-trait InstrumentDetails
+/*
+ * A collection of objects that define subsets of instrument configuration parameters
+ * which are needed for ITC calculations of the corresponding instruments.
+ */
+
+sealed trait InstrumentDetails
 
 final case class GmosParameters(
-                     filter: Filter,
-                     grating: Disperser,
+                     filter:            GmosCommonType.Filter,
+                     grating:           GmosCommonType.Disperser,
                      centralWavelength: Double,
-                     fpMask: FPUnit,
-                     spatialBinning: Int,
-                     spectralBinning: Int,
-                     ifuMethod: Option[IfuMethod],
-                     ccdType: DetectorManufacturer,
-                     site: Site) extends InstrumentDetails
+                     fpMask:            GmosCommonType.FPUnit,
+                     spatialBinning:    Int,
+                     spectralBinning:   Int,
+                     ifuMethod:         Option[IfuMethod],
+                     ccdType:           GmosCommonType.DetectorManufacturer,
+                     site:              Site) extends InstrumentDetails
 
-object InstrumentDetails {
-
-}
+final case class Flamingos2Parameters(
+                     filter:            Flamingos2.Filter,
+                     grism:             Flamingos2.Disperser,
+                     mask:              Flamingos2.FPUnit,
+                     readMode:          Flamingos2.ReadMode) extends InstrumentDetails

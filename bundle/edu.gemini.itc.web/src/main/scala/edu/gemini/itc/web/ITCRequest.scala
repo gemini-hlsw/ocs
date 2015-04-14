@@ -4,7 +4,6 @@ import javax.servlet.http.HttpServletRequest
 
 import edu.gemini.itc.acqcam.AcquisitionCamParameters
 import edu.gemini.itc.altair.AltairParameters
-import edu.gemini.itc.flamingos2.Flamingos2Parameters
 import edu.gemini.itc.gems.GemsParameters
 import edu.gemini.itc.gnirs.GnirsParameters
 import edu.gemini.itc.gsaoi.GsaoiParameters

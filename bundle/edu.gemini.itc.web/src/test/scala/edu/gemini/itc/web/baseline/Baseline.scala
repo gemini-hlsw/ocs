@@ -4,15 +4,13 @@ import java.io.{ByteArrayOutputStream, File, PrintWriter}
 
 import edu.gemini.itc.acqcam.AcquisitionCamParameters
 import edu.gemini.itc.baseline.util.Fixture
-import edu.gemini.itc.flamingos2.Flamingos2Parameters
-import edu.gemini.itc.gmos.GmosRecipe
 import edu.gemini.itc.gnirs.GnirsParameters
-import edu.gemini.itc.gsaoi.{GsaoiParameters, GsaoiRecipe}
-import edu.gemini.itc.michelle.{MichelleParameters, MichelleRecipe}
-import edu.gemini.itc.nifs.{NifsParameters, NifsRecipe}
-import edu.gemini.itc.niri.{NiriParameters, NiriRecipe}
+import edu.gemini.itc.gsaoi.GsaoiParameters
+import edu.gemini.itc.michelle.MichelleParameters
+import edu.gemini.itc.nifs.NifsParameters
+import edu.gemini.itc.niri.NiriParameters
 import edu.gemini.itc.shared._
-import edu.gemini.itc.trecs.{TRecsParameters, TRecsRecipe}
+import edu.gemini.itc.trecs.TRecsParameters
 import edu.gemini.itc.web.html._
 
 import scala.io.Source

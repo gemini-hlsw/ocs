@@ -9,18 +9,17 @@ import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.spModel.config.ConfigBridge
 import edu.gemini.spModel.config.map.ConfigValMapInstances
-import edu.gemini.spModel.config2.{ConfigSequence, ItemKey}
-import edu.gemini.spModel.core.{Peer, Site}
-import edu.gemini.spModel.gemini.gmos.GmosCommonType
-import jsky.app.ot.OT
+import edu.gemini.spModel.config2.{Config, ConfigSequence, ItemKey}
+import edu.gemini.spModel.core.Peer
 import jsky.app.ot.userprefs.observer.ObservingPeer
 import jsky.app.ot.util.OtColor
+import sun.reflect.generics.reflectiveObjects.NotImplementedException
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.swing.{Swing, Table}
-
 import scalaz.Scalaz._
+import scalaz._
 
 /**
  * A table to display ITC calculation results to users.
@@ -72,13 +71,29 @@ trait ItcTable extends Table {
       List("Not Implemented Yet").fail
     }
 
-  protected def calculateImaging(peer: Peer, ins: SPComponentType, c: ItcUniqueConfig): Future[ItcService.Result] =
-    ins match {
-      case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH => calculateImagingGmos(peer, ins, c)
-      case _                                      => Future { List("Not Implemented Yet").fail }
+  protected def calculateImaging(peer: Peer, instrument: SPComponentType, c: ItcUniqueConfig): Future[ItcService.Result] = {
+    val s = for {
+      ins <- extractInstrumentDetails(instrument, c.config)
+    } yield {
+      calculateImaging(peer, c, ins)
     }
 
-  protected def calculateImagingGmos(peer: Peer, ins: SPComponentType, c: ItcUniqueConfig): Future[ItcService.Result] = {
+    s match {
+      case -\/(l) => Future { List(s"Internal error: ${l.getMessage}").fail }
+      case \/-(r) => r
+    }
+
+  }
+
+  protected def extractInstrumentDetails(instrument: SPComponentType, c: Config): \/[Throwable, InstrumentDetails] =
+    instrument match {
+      case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH => ConfigExtractor.extractGmos(c)
+      case INSTRUMENT_FLAMINGOS2                  => ConfigExtractor.extractF2(c)
+      case _                                      => new NotImplementedException().left
+    }
+
+
+  protected def calculateImaging(peer: Peer, c: ItcUniqueConfig, ins: InstrumentDetails): Future[ItcService.Result] = {
     val port = owner.getContextIssPort
     //val wfs  = ??? TODO
     val src  = new SourceDefinition(PointSource(20.0, BrightnessUnit.MAG), LibraryStar("A0V"), WavebandDefinition.R, 0.0)
@@ -88,24 +103,14 @@ trait ItcTable extends Table {
     val qual = owner.getContextSiteQuality
     val cond = new ObservingConditions(qual.getImageQuality, qual.getCloudCover, qual.getWaterVapor, qual.getSkyBackground, 1.5)
 
-    // get the instrument configuration
-    val filter    = c.config.getItemValue(new ItemKey("instrument:filter")).asInstanceOf[GmosCommonType.Filter]
-    val grating   = c.config.getItemValue(new ItemKey("instrument:disperser")).asInstanceOf[GmosCommonType.Disperser]
-    val wavelen   = 500.0 // ??? TODO
-    val fpmask    = c.config.getItemValue(new ItemKey("instrument:fpu")).asInstanceOf[GmosCommonType.FPUnit]
-    val spatBin   = c.config.getItemValue(new ItemKey("instrument:ccdXBinning")).asInstanceOf[GmosCommonType.Binning]
-    val specBin   = c.config.getItemValue(new ItemKey("instrument:ccdYBinning")).asInstanceOf[GmosCommonType.Binning]
-    val ccdType   = c.config.getItemValue(new ItemKey("instrument:detectorManufacturer")).asInstanceOf[GmosCommonType.DetectorManufacturer]
-    val ifuMethod = None
-    val site      = if (c.config.getItemValue(new ItemKey("instrument:instrument")).equals("GMOS-N")) Site.GN else Site.GS
-    val ins       = GmosParameters(filter, grating, wavelen, fpmask, spatBin.getValue, specBin.getValue, ifuMethod, ccdType, site)
-
     // Do the service call
     ItcService.calculate(peer, src, obs, cond, tele, ins).
+
     // whenever service call is finished notify table to update its contents
     andThen {
       case _ => Swing.onEDT(this.peer.getModel.asInstanceOf[AbstractTableModel].fireTableDataChanged())
     }
+
   }
 
 }

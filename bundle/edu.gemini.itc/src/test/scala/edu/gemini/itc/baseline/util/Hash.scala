@@ -2,7 +2,6 @@ package edu.gemini.itc.baseline.util
 
 import edu.gemini.itc.acqcam.AcquisitionCamParameters
 import edu.gemini.itc.altair.AltairParameters
-import edu.gemini.itc.flamingos2.Flamingos2Parameters
 import edu.gemini.itc.gems.GemsParameters
 import edu.gemini.itc.gnirs.GnirsParameters
 import edu.gemini.itc.gsaoi.GsaoiParameters
@@ -115,10 +114,10 @@ object Hash {
 
   def calc(p: Flamingos2Parameters): Int =
     hash(
-      p.getFilter.name,
-      p.getFPMask.name,
-      p.getGrism.name,
-      p.getReadMode.name
+      p.filter.name,
+      p.mask.name,
+      p.grism.name,
+      p.readMode.name
     )
 
   def calc(odp: ObservationDetails): Int =
