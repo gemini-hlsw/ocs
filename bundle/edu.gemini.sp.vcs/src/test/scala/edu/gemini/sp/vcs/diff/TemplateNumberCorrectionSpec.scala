@@ -74,6 +74,14 @@ class TemplateNumberCorrectionSpec extends MergeCorrectionSpec {
       )
     }
 
+    "renumber sub-groups with the same number as remote groups" in {
+      test(List(vt1(1,2), vt1(1,1), vt(1)(3)),
+        (vt1(1, 1), LocalOnly),
+        (vt1(1, 1), RemoteOnly),
+        (vt(1)(2),  Both)
+      )
+    }
+
     // Here 1, 1.1, and 1.2 clash with the remote group 1 so we renumber them
     // to 2, 2.1, and 2.2.
     "renumber all derived local groups with the same base number as a remote group" in {
