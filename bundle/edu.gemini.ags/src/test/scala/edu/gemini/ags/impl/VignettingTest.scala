@@ -7,6 +7,7 @@ import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.skycalc.{DDMMSS, HHMMSS}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
+import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.spModel.gemini.gmos.{GmosOiwfsGuideProbe, InstGmosSouth}
 import edu.gemini.spModel.gemini.inst.InstRegistry
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality._
