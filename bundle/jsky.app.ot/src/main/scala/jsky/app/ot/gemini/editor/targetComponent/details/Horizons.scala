@@ -12,6 +12,7 @@ import jsky.app.ot.gemini.editor.horizons.HorizonsService
 import scalaz.{ Tag => _, _ }, Scalaz._
 import scalaz.concurrent.Task
 
+/** Pure functional interface to Horizons. */
 object Horizons {
 
   /** The type of failures produced by HorizonsIO programs. */
@@ -32,6 +33,18 @@ object Horizons {
     def delay[A](a: => A): HorizonsIO[A] = either(a.right)
   }
 
+  /** Syntax for HorizonsIO */
+  implicit class HorizonsIOOps[A](hio: HorizonsIO[A]) {
+    def runAsyncAndReportErrors: Unit =
+      hio.run.runAsync { e =>
+        e.leftMap[Horizons.HorizonsFailure](Horizons.UnknownError).join match {
+          case -\/(CancelOrError) => // do nothing
+          case -\/(e)      => println(e) // TODO
+          case _ => // done
+        }
+      }
+  }
+
   /** Alias for underlying Ephemeris representation. */
   type Ephemeris = java.util.List[EphemerisEntry]
   object Ephemeris {
@@ -39,31 +52,35 @@ object Horizons {
   }
 
   /**
-   * Construct a program to look up and construct a conic target, given the Horizons object id and
-   * ordinal of the object type.
+   * The most general form of lookupConicTarget; construct a program to look up and construct a
+   * conic target, given the name to assign, the Horizons object id to search for, an object type
+   * hint, and a cache directive.
    */
-  def lookupConicTargetById(hObjId: String, hObjTypeOrdinl: Int, date: Date): HorizonsIO[(ConicTarget, Ephemeris)] =
-    lookupConicTargetById(hObjId, ObjectType.values()(hObjTypeOrdinl), date)
-
-  /**
-   * Construct a program to look up and construct a conic target, given the Horizons object id and
-   * object type.
-   */
-  def lookupConicTargetById(hObjId: String, hObjType: ObjectType, date: Date): HorizonsIO[(ConicTarget, Ephemeris)] =
+  def lookupConicTargetById(
+    name:     String,
+    hObjId:   String,
+    hObjType: ObjectType,
+    date:     Date,
+    useCache: Boolean
+  ): HorizonsIO[(ConicTarget, Ephemeris)] =
     for {
       _ <- validateName(hObjId)
       s <- getService
-      r <- lookup(s, hObjId, hObjType, date)
-      t <- extractConicTarget(r, s.getObjectId)
+      r <- lookup(s, hObjId, hObjType, date, useCache)
+      t <- extractConicTarget(r, name)
       e <- extractEphemeris(r)
     } yield (t, e)
 
   /**
-   * Construct a program to look up and construct a new conic target, given a name and expected
-   * Horizons type.
+   * Construct a program to look up and construct a new conic target, given a name and an object
+   * type hint.
    */
-  def lookupConicTargetByName(name: String, hObjTypeHint: ObjectType, date: Date): HorizonsIO[(ConicTarget, Ephemeris)] =
-    lookupConicTargetById(name, hObjTypeHint, date) // N.B. same operation for now
+  def lookupConicTargetByName(
+    name: String,
+    hObjTypeHint: ObjectType,
+    date: Date
+  ): HorizonsIO[(ConicTarget, Ephemeris)] =
+    lookupConicTargetById(name, name, hObjTypeHint, date, false) // use name as id
 
   /**
    * Construct a program to look up and construct the requested solar object.
@@ -150,12 +167,13 @@ object Horizons {
     service: HorizonsService,
     hObjId: String,
     hObjType: ObjectType,
-    date: Date
+    date: Date,
+    useCache: Boolean
   ): HorizonsIO[HorizonsReply] =
     HorizonsIO.either {
 
       // Use the cached result if possible
-      getCachedResult(service, hObjId, hObjType, date).map(_.right).getOrElse {
+      getCachedResult(service, hObjId, hObjType, date).map(_.right).filter(_ => useCache).getOrElse {
 
         // New query
         service.setInitialDate(date)

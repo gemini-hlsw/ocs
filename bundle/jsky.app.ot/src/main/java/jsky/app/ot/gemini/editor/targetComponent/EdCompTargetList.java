@@ -505,15 +505,15 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     if (_curPos != null) _curPos.deleteWatcher(posWatcher);
 
                     // Sidereal
-                    _siderealEditor.edit(ctx, _curPos);
-                    _trackingEditor.edit(ctx, _curPos);
+                    _siderealEditor.edit(ctx, _curPos, getNode());
+                    _trackingEditor.edit(ctx, _curPos, getNode());
 
                     // Nonsidereal
                     _nonSiderealTargetSup.updatePos(_curPos);
-                    _nonsideMagEditor.edit(ctx, _curPos);
+                    _nonsideMagEditor.edit(ctx, _curPos, getNode());
 
                     // Detail
-                    _detailEditor.edit(ctx, _curPos);
+                    _detailEditor.edit(ctx, _curPos, getNode());
 
                     if (_curPos != null) {
                         _curPos.addWatcher(posWatcher);
@@ -948,12 +948,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 _curPos = selTarget;
 
                 // Sidereal
-                _siderealEditor.edit(ctx, selTarget);
-                _trackingEditor.edit(ctx, selTarget);
+                _siderealEditor.edit(ctx, selTarget, getNode());
+                _trackingEditor.edit(ctx, selTarget, getNode());
 
                 // Nonsidereal
                 _nonSiderealTargetSup.updatePos(_curPos);
-                _nonsideMagEditor.edit(ctx, selTarget);
+                _nonsideMagEditor.edit(ctx, selTarget, getNode());
 
                 if (_curPos != null) {
                     _curPos.addWatcher(posWatcher);
@@ -1058,7 +1058,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         toggleAgsGuiElements();
         final Option<ObsContext> ctx = getObsContext(env);
         _w.guidingControls.update(ctx);
-        _siderealEditor.updateGuiding(ctx, _curPos);
+        _siderealEditor.updateGuiding(ctx, _curPos, getNode());
     }
 
     private final PropertyChangeListener selectionListener = new PropertyChangeListener() {
@@ -1079,12 +1079,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         _curPos = target;
 
                         // Sidereal
-                        _siderealEditor.edit(ctx, target);
-                        _trackingEditor.edit(ctx, target);
+                        _siderealEditor.edit(ctx, target, getNode());
+                        _trackingEditor.edit(ctx, target, getNode());
 
                         // Nonsidereal
                         _nonSiderealTargetSup.updatePos(_curPos);
-                        _nonsideMagEditor.edit(ctx, target);
+                        _nonsideMagEditor.edit(ctx, target, getNode());
 
                         if (_curPos != null) {
                             _curPos.addWatcher(posWatcher);
@@ -1338,7 +1338,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
 
         // Update target details
-        _detailEditor.edit(getObsContext(env), _curPos);
+        _detailEditor.edit(getObsContext(env), _curPos, getNode());
 
     }
 
@@ -1572,10 +1572,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         final Option<ObsContext> ctx = getObsContext(env);
                         if (_curPos != null) _curPos.deleteWatcher(posWatcher);
                         _curPos = selTarget;
-                        _siderealEditor.edit(ctx, selTarget);
-                        _trackingEditor.edit(ctx, selTarget);
+                        _siderealEditor.edit(ctx, selTarget, getNode());
+                        _trackingEditor.edit(ctx, selTarget, getNode());
                         _nonSiderealTargetSup.updatePos(_curPos);
-                        _nonsideMagEditor.edit(ctx, selTarget);
+                        _nonsideMagEditor.edit(ctx, selTarget, getNode());
                         if (_curPos != null) {
                             _curPos.addWatcher(posWatcher);
                             refreshAll();

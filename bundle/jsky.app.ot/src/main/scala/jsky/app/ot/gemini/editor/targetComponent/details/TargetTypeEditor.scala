@@ -1,5 +1,6 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
+import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.{ Option => GOption }
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
@@ -20,7 +21,7 @@ final class TargetTypeEditor extends DropDownListBoxWidget with TelescopePosEdit
       }
   })
 
-  def edit(obsContext: GOption[ObsContext], spTarget: SPTarget): Unit = {
+  def edit(obsContext: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit = {
     spt = spTarget
     nonreentrant {
       setSelectedItem(spt.getTarget.getTag)

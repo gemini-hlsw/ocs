@@ -1,5 +1,6 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
+import edu.gemini.pot.sp.ISPNode
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.shared.util.immutable.{ Option => GOption }
@@ -22,7 +23,7 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
   setBorder(BorderFactory.createLineBorder(Color.RED))
   setLayout(new GridBagLayout)
 
-  def edit(obsContext: GOption[ObsContext], spTarget: SPTarget): Unit = {
+  def edit(obsContext: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit = {
 
     // Create or replace the existing detail editor, if needed
     val tag = spTarget.getTarget.getTag
@@ -37,8 +38,8 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
     }
   
     // Forward the `edit` call.
-    tpw.edit(obsContext, spTarget)
-    tde.edit(obsContext, spTarget)
+    tpw.edit(obsContext, spTarget, node)
+    tde.edit(obsContext, spTarget, node)
 
   }
 

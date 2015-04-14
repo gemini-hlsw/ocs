@@ -4,6 +4,7 @@
 
 package jsky.app.ot.gemini.editor.targetComponent;
 
+import edu.gemini.pot.sp.ISPNode;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.obs.context.ObsContext;
@@ -408,7 +409,7 @@ public class MagnitudeEditor implements TelescopePosEditor {
         return pan;
     }
 
-    public void edit(final Option<ObsContext> ctx, final SPTarget target) {
+    public void edit(final Option<ObsContext> ctx, final SPTarget target, ISPNode node) {
         if (this.target == target) return;
         if (this.target != null) this.target.deleteWatcher(watcher);
         if (target != null) target.addWatcher(watcher);

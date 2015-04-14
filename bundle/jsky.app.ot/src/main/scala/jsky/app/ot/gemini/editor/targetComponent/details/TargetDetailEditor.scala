@@ -1,6 +1,7 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
 import javax.swing.JPanel
+import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.{ Option => GOption }
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
@@ -18,7 +19,7 @@ object TargetDetailEditor {
 }
 
 abstract class TargetDetailEditor(val getTag: Tag) extends JPanel with TelescopePosEditor {
-  def edit(ctx: GOption[ObsContext], spTarget: SPTarget): Unit = {
+  def edit(ctx: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit = {
     require(ctx      != null, "obsContext should never be null")
     require(spTarget != null, "spTarget should never be null")
     val tag = spTarget.getTarget().getTag()

@@ -3,6 +3,7 @@ package jsky.app.ot.gemini.editor.targetComponent.details
 import java.awt.{Insets, GridBagConstraints, GridBagLayout}
 import javax.swing.{JLabel, JPanel}
 
+import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.Option
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
@@ -23,7 +24,7 @@ case class NumericPropertySheet[A](title: String, f: SPTarget => A, props: Numer
   val pairs: List[(NumericPropertySheet.Prop[A], NumberBoxWidget)] =
     props.toList.fproduct { p =>
       new NumberBoxWidget {
-        setColumns(10)
+        setColumns(15)
         setMinimumSize(getPreferredSize())
         addWatcher(new TextBoxWidgetWatcher {
           def textBoxKeyPress(tbwe: TextBoxWidget): Unit = textBoxAction(tbwe)
@@ -62,7 +63,7 @@ case class NumericPropertySheet[A](title: String, f: SPTarget => A, props: Numer
   }
 
 
-  def edit(ctx: Option[ObsContext], target: SPTarget): Unit =
+  def edit(ctx: Option[ObsContext], target: SPTarget, node: ISPNode): Unit =
     nonreentrant {
       spt = target
       pairs.foreach { case (p, w) => w.setValue(p.f(f(target))) }

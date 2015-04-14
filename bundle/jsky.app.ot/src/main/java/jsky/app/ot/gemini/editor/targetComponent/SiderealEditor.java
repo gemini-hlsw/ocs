@@ -4,6 +4,7 @@
 
 package jsky.app.ot.gemini.editor.targetComponent;
 
+import edu.gemini.pot.sp.ISPNode;
 import edu.gemini.shared.util.immutable.ApplyOp;
 import edu.gemini.shared.util.immutable.DefaultImList;
 import edu.gemini.shared.util.immutable.ImList;
@@ -76,15 +77,15 @@ final class SiderealEditor implements TelescopePosEditor {
     public Component getComponent() { return pan; }
 
     @Override
-    public void edit(final Option<ObsContext> ctx, final SPTarget target) {
+    public void edit(final Option<ObsContext> ctx, final SPTarget target, final ISPNode node) {
         posEditors.foreach(new ApplyOp<TelescopePosEditor>() {
             @Override public void apply(TelescopePosEditor ed) {
-                ed.edit(ctx, target);
+                ed.edit(ctx, target, node);
             }
         });
     }
 
-    public void updateGuiding(final Option<ObsContext> ctx, final SPTarget target) {
-        guiding.edit(ctx, target);
+    public void updateGuiding(final Option<ObsContext> ctx, final SPTarget target, ISPNode node) {
+        guiding.edit(ctx, target, node);
     }
 }

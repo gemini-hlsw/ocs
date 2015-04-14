@@ -3,6 +3,7 @@ package jsky.app.ot.gemini.editor.targetComponent.details
 import java.awt.{Insets, GridBagConstraints, GridBagLayout}
 import javax.swing.JPanel
 
+import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.{ Option => GOption }
 import edu.gemini.catalog.skycat.CatalogException
 import edu.gemini.spModel.obs.context.ObsContext
@@ -63,7 +64,7 @@ final class SiderealNameEditor extends JPanel with TelescopePosEditor with Reent
     c.insets = new Insets(0, 2, 0, 0)
   })
 
-  def edit(ctx: GOption[ObsContext], target: SPTarget): Unit = {
+  def edit(ctx: GOption[ObsContext], target: SPTarget, node: ISPNode): Unit = {
     this.spt = target
     nonreentrant {
       name.setText(spt.getTarget.getName)

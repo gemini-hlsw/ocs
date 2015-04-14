@@ -3,6 +3,7 @@ package jsky.app.ot.gemini.editor.targetComponent.details
 import java.awt.{Insets, GridBagConstraints, GridBagLayout}
 import javax.swing.{JLabel, JPanel}
 
+import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.{ Option => GOption }
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
@@ -78,7 +79,7 @@ class CoordinateEditor extends JPanel with TelescopePosEditor with ReentrancyHac
     }
   })
 
-  def edit(ctx: GOption[ObsContext], target0: SPTarget): Unit = {
+  def edit(ctx: GOption[ObsContext], target0: SPTarget, node: ISPNode): Unit = {
     spt = target0
     nonreentrant {
       ra.setText(target.getRa.toString)
