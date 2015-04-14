@@ -5,7 +5,7 @@ import edu.gemini.pot.sp.validator.{Validator, NodeCardinality, NodeType}
 import edu.gemini.spModel.core.ProgramIdGen
 import edu.gemini.spModel.obs.{SPObservation, ObsPhase2Status}
 import edu.gemini.spModel.rich.pot.sp._
-import edu.gemini.spModel.template.{TemplateGroup, TemplateParameters}
+import edu.gemini.spModel.template.{SplitFunctor, TemplateGroup, TemplateParameters}
 import edu.gemini.spModel.util.VersionToken
 
 import org.scalacheck._
@@ -139,7 +139,12 @@ object ProgramGen {
   val pickNode: Gen[ISPProgram => ISPNode] = pickOne(_.nel)
 
   val maybePickObservation: Gen[ISPProgram => Option[ISPObservation]] =
-    maybePickOne(_.getProgram.getAllObservations.asScala)
+    maybePickOne(n => new ObservationIterator(n.getProgram).asScala.toList)
+
+  val maybePickTemplateGroup: Gen[ISPProgram => Option[ISPTemplateGroup]] =
+    maybePickOne(n => Option(n.getProgram.getTemplateFolder).toList.flatMap { tf =>
+      tf.getTemplateGroups.asScala.toList
+    })
 
   def collectOne[T](pf: PartialFunction[ISPNode, T]): Gen[ISPProgram => Option[T]] =
     maybePickOne(_.toStream.collect(pf))
@@ -159,6 +164,17 @@ object ProgramGen {
     } yield { (_: ISPFactory, p: ISPProgram) =>
       val n = fn(p)
       n.title = decorativeTitle(n, title)
+    }
+
+  val genEditSplitTemplateGroup: Gen[ProgEdit] =
+    for {
+      tgf <- maybePickTemplateGroup
+    } yield { (f: ISPFactory, p: ISPProgram) =>
+      tgf(p).foreach { tg =>
+        val sf    = new SplitFunctor(tg)
+        val newTg = sf.split(f)
+        tg.getParent.asInstanceOf[ISPTemplateFolder].addTemplateGroup(newTg)
+      }
     }
 
   val genEditObsPhase2Status: Gen[ProgEdit] =
@@ -260,7 +276,7 @@ object ProgramGen {
 
   val genEdit: Gen[ProgEdit] =
     oneOf(
-      frequency(7 -> genEditDataObject, 3 -> genEditObsPhase2Status),
+      frequency(6 -> genEditDataObject, 3 -> genEditObsPhase2Status, 1 -> genEditSplitTemplateGroup),
       genEditReorderChildren,
       genEditAddChild,
       genEditDeleteChild,
