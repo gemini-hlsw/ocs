@@ -3,12 +3,32 @@ package edu.gemini.sp.vcs.diff
 import edu.gemini.pot.sp.version._
 import edu.gemini.pot.sp.{ISPNode, ISPObservation, ISPProgram, SPNodeKey}
 import edu.gemini.sp.vcs.diff.MergeNode._
+import edu.gemini.spModel.obs.ObservationStatus
 import edu.gemini.spModel.rich.pot.sp._
+
+import scala.collection.JavaConverters._
 
 import scalaz._
 import Scalaz._
 
+import ProgramDiff._
+
+/** Pairs a `MergePlan` describing the differences between two versions of a
+  * program with a `List` of pairs of observation node key and
+  * `ObservationStatus`.  Includes the maximum observation number in use by
+  * the program (if any).
+  *
+  * @param plan describes the differences between two versions of a program
+  * @param obsStatus the status of all differing observations, which is needed
+  *                  for permission checking
+  * @param maxObsNumber the maximum observation number in use in the program
+  */
+case class ProgramDiff(plan: MergePlan, obsStatus: List[ObsStatusPair], maxObsNumber: Option[Int]) {
+  def encode: ProgramDiff.Transport = ProgramDiff.Transport(plan.encode, obsStatus, maxObsNumber)
+}
+
 object ProgramDiff {
+  type ObsStatusPair = (SPNodeKey, ObservationStatus)
 
   /** Returns a (super-set) of differences between two programs.
     *
@@ -66,6 +86,9 @@ object ProgramDiff {
     * differences whatsoever a single `Unmodified` node corresponding to the
     * root is still returned.
     *
+    * For all modified observations, the `ObservatonStatus` is returned as well
+    * for status-based permission checking.
+    *
     * @param p program from which differences are to be extracted
     *
     * @param vm `VersionMap` of the other instance of the program
@@ -73,10 +96,10 @@ object ProgramDiff {
     * @param removed `Set` of all node keys that are not present in the
     *                other instance of the program
     *
-    * @return `MergePlan` describing differences between the two program
+    * @return `ProgramDiff` describing differences between the two program
     *         instances
     */
-  def compare(p: ISPProgram, vm: VersionMap, removed: Set[SPNodeKey]): MergePlan = {
+  def compare(p: ISPProgram, vm: VersionMap, removed: Set[SPNodeKey]): ProgramDiff = {
     def versionDiffers(k: SPNodeKey): Boolean =
       vm.get(k).forall(_ =/= p.getVersions(k))
 
@@ -91,22 +114,29 @@ object ProgramDiff {
     def nodeDiffers(n: ISPNode): Boolean = presentDiffers(n.key)
 
     // Present differences in in-use nodes rooted at r.
-    def presentDiffs(r: ISPNode): Tree[MergeNode] =
+    def presentDiffs(r: ISPNode, in: List[ObsStatusPair]): (Tree[MergeNode], List[ObsStatusPair]) =
       r match {
         case o: ISPObservation =>
           // Observations are atomic.  If anything differs at all in either
           // version copy the entire observation.
-          if (o.exists(nodeDiffers)) modifiedTree(o) else unmodified(o).leaf
+          if (o.exists(nodeDiffers))
+            (modifiedTree(o), (o.key -> ObservationStatus.computeFor(o)) :: in)
+          else
+            (unmodified(o).leaf, in)
 
         case _                 =>
-          val children = r.children.map(presentDiffs)
+          val (children, pairs) = (r.children:\(List.empty[Tree[MergeNode]], in)) {
+            case (child, (childTrees, pairs0)) =>
+              val (childTree, pairs1) = presentDiffs(child, pairs0)
+              (childTree :: childTrees, pairs1)
+          }
 
           // If there is even one descendant that differs, include this node
           // in the results.  Otherwise, only include it if it differs.
           if (nodeDiffers(r) || children.exists(_.rootLabel.isModified))
-            Tree.node(modified(r), children.toStream)
+            (Tree.node(modified(r), children.toStream), pairs)
           else
-            unmodified(r).leaf
+            (unmodified(r).leaf, in)
       }
 
     def missingDiffs(keys: Set[SPNodeKey]): Set[Missing] =
@@ -122,9 +152,21 @@ object ProgramDiff {
     // deleted remotely.
     val deletedKeys = removedKeys(p).filter { missingDiffers }
 
-    MergePlan(presentDiffs(p), missingDiffs(vmOnlyKeys ++ deletedKeys))
+    val (update, pairs) = presentDiffs(p, Nil)
+    val plan            = MergePlan(update, missingDiffs(vmOnlyKeys ++ deletedKeys))
+
+    val allObs          = p.getAllObservations.asScala
+    val maxObs          = if (allObs.isEmpty) none else some(allObs.maxBy(_.getObservationNumber).getObservationNumber)
+
+    ProgramDiff(plan, pairs, maxObs)
   }
 
-  def compare(p: ISPProgram, vs: DiffState): MergePlan =
+  def compare(p: ISPProgram, vs: DiffState): ProgramDiff =
     compare(p, vs.vm, vs.removed)
+
+  /** A serializable ProgramDiff.  Required because MergePlan is not serializalbe
+    * because scalaz.Tree is not serializable. */
+  case class Transport(plan: MergePlan.Transport, obsStatus: List[ObsStatusPair], maxObs: Option[Int]) {
+    def decode: ProgramDiff = ProgramDiff(plan.decode, obsStatus, maxObs)
+  }
 }

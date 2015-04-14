@@ -49,10 +49,11 @@ object ProgContext {
     def isPresent(k: SPNodeKey): Boolean = nodeMap.contains(k)
   }
 
-  final case class Remote(diffs: MergePlan, remoteVm: VersionMap) extends ProgContext {
+  final case class Remote(diff: ProgramDiff, remoteVm: VersionMap) extends ProgContext {
+    val plan = diff.plan
 
     val diffMap: Map[SPNodeKey, Tree[MergeNode]] =
-      diffs.update.foldTree(Map.empty[SPNodeKey, Tree[MergeNode]]) { (t,m) =>
+      plan.update.foldTree(Map.empty[SPNodeKey, Tree[MergeNode]]) { (t,m) =>
         m + (t.rootLabel.key -> t)
       }
 
@@ -64,7 +65,7 @@ object ProgContext {
     def parent(k: SPNodeKey): Option[SPNodeKey] = remoteParents.get(k)
 
     private val remoteParents: Map[SPNodeKey, SPNodeKey] =
-      diffs.update.foldTree(Map.empty[SPNodeKey, SPNodeKey]) { (t, m) =>
+      plan.update.foldTree(Map.empty[SPNodeKey, SPNodeKey]) { (t, m) =>
         val parentKey = t.rootLabel.key
         (m/:t.subForest) { (m2, c) => m2 + (c.rootLabel.key -> parentKey) }
       }
@@ -79,22 +80,22 @@ final case class MergeContext(local: ProgContext.Local, remote: ProgContext.Remo
 }
 
 object MergeContext {
-  def apply(prog: ISPProgram, plan: MergePlan): MergeContext = {
+  def apply(prog: ISPProgram, diff: ProgramDiff): MergeContext = {
     val localVm  = prog.getVersions
 
     // Start with the local version map and apply the differences.
-    val remoteVm0 = plan.update.sFoldRight(localVm) { (mn,vm) =>
+    val remoteVm0 = diff.plan.update.sFoldRight(localVm) { (mn,vm) =>
       mn match {
         case m: Modified => vm.updated(mn.key, m.nv)
         case _           => vm
       }
     }
 
-    val remoteVm = (remoteVm0/:plan.delete) { (vm, miss) =>
+    val remoteVm = (remoteVm0/:diff.plan.delete) { (vm, miss) =>
       if (miss.nv === EmptyNodeVersions) vm - miss.key
       else vm.updated(miss.key, miss.nv)
     }
 
-    MergeContext(ProgContext.Local(prog), ProgContext.Remote(plan, remoteVm))
+    MergeContext(ProgContext.Local(prog), ProgContext.Remote(diff, remoteVm))
   }
 }

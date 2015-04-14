@@ -3,6 +3,7 @@ package edu.gemini.pot.sp
 import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.pot.sp.validator.{Validator, NodeCardinality, NodeType}
 import edu.gemini.spModel.core.ProgramIdGen
+import edu.gemini.spModel.obs.{SPObservation, ObsPhase2Status}
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.template.TemplateParameters
 
@@ -25,6 +26,9 @@ object ProgramGen {
   val genTitle: Gen[String] = listOfN(5, Gen.alphaChar).map(_.mkString)
 
   private def decorativeTitle(n: ISPNode, s: String): String = s"$s (${n.key})"
+
+  private def setObsPhase2Status(o: ISPObservation, status: ObsPhase2Status): Unit =
+    o.getDataObject.asInstanceOf[SPObservation] <| (_.setPhase2Status(status)) |> (dob => o.setDataObject(dob))
 
   def genNode[N <: ISPNode](f: (ISPFactory, ISPProgram) => N): Gen[(ISPFactory, ISPProgram) => N] =
     genTitle.map { title => (fact, p) =>
@@ -57,11 +61,13 @@ object ProgramGen {
 
   val genObs: Gen[ProgFun[ISPObservation]] =
     for {
+      st  <- oneOf(ObsPhase2Status.values().toSeq)
       fo  <- genNode(_.createObservation(_, null))
       fi  <- genInstrument
       fns <- genNotes
     } yield { (f: ISPFactory, p: ISPProgram) =>
       val o    = fo(f, p)
+      setObsPhase2Status(o, st)
       val inst = fi(f, p)
       o.children = fns.sequenceU.apply(f, p) ++ List(inst) ++ o.children
       o
@@ -128,6 +134,15 @@ object ProgramGen {
     } yield { (_: ISPFactory, p: ISPProgram) =>
       val n = fn(p)
       n.title = decorativeTitle(n, title)
+    }
+
+  val genEditObsPhase2Status: Gen[ProgEdit] =
+    for {
+      st <- oneOf(ObsPhase2Status.values().toSeq)
+      fn <- maybePickObservation
+    } yield { (_: ISPFactory, p: ISPProgram) =>
+      val obs = fn(p)
+      obs.foreach { setObsPhase2Status(_, st) }
     }
 
   val genEditReorderChildren: Gen[ProgEdit] =
@@ -220,7 +235,7 @@ object ProgramGen {
 
   val genEdit: Gen[ProgEdit] =
     oneOf(
-      genEditDataObject,
+      frequency(7 -> genEditDataObject, 3 -> genEditObsPhase2Status),
       genEditReorderChildren,
       genEditAddChild,
       genEditDeleteChild,

@@ -84,7 +84,7 @@ object VcsFailure {
         "You have to resolve all conflicts in your program before you can commit changes."
 
       case Unmergeable(m)        =>
-        s"Internal error. You program could not be merged: $m"
+        s"Your program could not be merged: $m"
 
       case Unexpected(m)         =>
         s"Internal error. The changes in the database could not be merged with your version of the program: $m"

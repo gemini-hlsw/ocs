@@ -6,8 +6,9 @@ import edu.gemini.pot.sp.validator.Validator
 import edu.gemini.pot.sp.version.VersionMap
 import edu.gemini.pot.sp.{DataObjectBlob => DOB, _}
 import edu.gemini.shared.util.VersionComparison
-import edu.gemini.shared.util.VersionComparison.{Same, Newer}
+import edu.gemini.shared.util.VersionComparison.{Conflicting, Same, Newer}
 import edu.gemini.sp.vcs.diff.NodeDetail.Obs
+import edu.gemini.sp.vcs.diff.ObsEdit.{ObsUpdate, ObsDelete, ObsCreate}
 import edu.gemini.sp.vcs.diff.VcsFailure.VcsException
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.guide.GuideProbe
@@ -36,6 +37,14 @@ class MergeTest extends JUnitSuite {
     }
     val editedKeys  = keys(editedNodes)
 
+    val editedObservationKeys = (Set.empty[SPNodeKey]/:editedNodes) { (s,n) =>
+        val o = (n +: n.ancestors).find {
+          case o: ISPObservation => true
+          case _                 => false
+        }
+        o.fold(s) { s + _.key }
+    }
+
     def isEdited(n: ISPNode): Boolean = editedKeys.contains(n.key)
 
     def isParentEdited(n: ISPNode): Boolean = Option(n.getParent).exists(isEdited)
@@ -59,7 +68,7 @@ class MergeTest extends JUnitSuite {
     val deletedKeys = p.getVersions.keySet &~ nodeMap.keySet
   }
 
-  case class PropContext(fact: ISPFactory, sp: ISPProgram, lp: ISPProgram, rp: ISPProgram, diffs: MergePlan, mergePlan: MergePlan) {
+  case class PropContext(fact: ISPFactory, sp: ISPProgram, lp: ISPProgram, rp: ISPProgram, diffs: ProgramDiff, mergePlan: MergePlan) {
     val startMap = sp.nodeMap
     val startId  = sp.getLifespanId
 
@@ -83,7 +92,13 @@ class MergeTest extends JUnitSuite {
       case Unmodified(k) => k
     }.toSet
 
-    val deletedKeys = mergePlan.delete.map(_.key).toSet
+    val deletedKeys = mergePlan.delete.map(_.key)
+
+    val obsEditsTry = ObsEdit.all(lp, diffs)
+    val obsEdits    = obsEditsTry match {
+      case \/-(edits) => edits
+      case -\/(f)     => sys.error(s"could not extract edits: ${VcsFailure.explain(f, sp.getProgramID, "", None)}")
+    }
 
     val correctedMergePlan =
       MergeCorrection(mergeContext)(mergePlan, (_: Permission) => VcsAction(true))
@@ -111,10 +126,20 @@ class MergeTest extends JUnitSuite {
     s.isEmpty
   }
 
+  def keysMatch(n1: String, ks1: Iterable[SPNodeKey], n2: String, ks2: Iterable[SPNodeKey]): Boolean = {
+    val result = ks1.toSet == ks2.toSet
+    if (!result) {
+      Console.err.println("Keys don't match:")
+      Console.err.println(f"\t$n1%20s: ${ks1.toList.sorted.mkString(", ")}")
+      Console.err.println(f"\t$n2%20s: ${ks2.toList.sorted.mkString(", ")}")
+    }
+    result
+  }
+
   val props = List[NamedProperty[PropContext]] (
     ("all diffs are accounted for in the MergePlan",
       (start, local, remote, pc) => {
-        val diffKeys  = mpKeys(pc.diffs)
+        val diffKeys  = mpKeys(pc.diffs.plan)
         val mergeKeys = mpKeys(pc.mergePlan)
 
         val result = (diffKeys & mergeKeys) == diffKeys
@@ -126,8 +151,8 @@ class MergeTest extends JUnitSuite {
           val badKeys = (diffKeys &~ mergeKeys) ++ (mergeKeys &~ diffKeys)
           badKeys.foreach { k =>
             Console.err.println("# " + k)
-            Console.err.println("\tin diff deleted?  " + pc.diffs.delete.exists(m => m.key == k))
-            Console.err.println("\tin diff update?   " + pc.diffs.update.flatten.exists(mn => mn.key == k))
+            Console.err.println("\tin diff deleted?  " + pc.diffs.plan.delete.exists(m => m.key == k))
+            Console.err.println("\tin diff update?   " + pc.diffs.plan.update.flatten.exists(mn => mn.key == k))
             Console.err.println("\tin merge deleted? " + pc.mergePlan.delete.exists(m => m.key == k))
             Console.err.println("\tin merge update?  " + pc.mergePlan.update.flatten.exists(mn => mn.key == k))
           }
@@ -159,7 +184,7 @@ class MergeTest extends JUnitSuite {
 
     ("any node present in both edited versions must be present in the merged result",
       (start, local, remote, pc) => {
-        val commonKeys = pc.local.nodeMap.keySet & pc.diffs.update.sFoldRight(Set.empty[SPNodeKey]) { (mn, s) => s + mn.key }
+        val commonKeys = pc.local.nodeMap.keySet & pc.diffs.plan.update.sFoldRight(Set.empty[SPNodeKey]) { (mn, s) => s + mn.key }
         val mergeKeys  = pc.mergePlan.update.flatten.map(_.key).toSet
         val result = (commonKeys & mergeKeys) == commonKeys
 
@@ -169,8 +194,8 @@ class MergeTest extends JUnitSuite {
           val badKeys = (commonKeys &~ mergeKeys) ++ (mergeKeys &~ commonKeys)
           badKeys.foreach { k =>
             Console.err.println("# " + k)
-            Console.err.println("\tin diff deleted?  " + pc.diffs.delete.exists(m => m.key == k))
-            Console.err.println("\tin diff update?   " + pc.diffs.update.flatten.exists(mn => mn.key == k))
+            Console.err.println("\tin diff deleted?  " + pc.diffs.plan.delete.exists(m => m.key == k))
+            Console.err.println("\tin diff update?   " + pc.diffs.plan.update.flatten.exists(mn => mn.key == k))
             Console.err.println("\tin local nodeMap? " + pc.local.nodeMap.contains(k))
             Console.err.println("\tin merge deleted? " + pc.mergePlan.delete.exists(m => m.key == k))
             Console.err.println("\tin merge update?  " + pc.mergePlan.update.flatten.exists(mn => mn.key == k))
@@ -183,7 +208,7 @@ class MergeTest extends JUnitSuite {
 
     ("any node missing in both edited versions must be missing in the merged result",
       (start, local, remote, pc) => {
-        val commonKeys = pc.local.deletedKeys & pc.diffs.delete.map(_.key)
+        val commonKeys = pc.local.deletedKeys & pc.diffs.plan.delete.map(_.key)
         emptySet(pc, commonKeys &~ pc.deletedKeys)
       }
     ),
@@ -430,8 +455,12 @@ class MergeTest extends JUnitSuite {
       }
     ),
 
-    ("merged program version map is newer or equal to both local and remote programs",
+    ("merged program version map is newer or equal to the remote program",
       (start, local, remote, pc) => {
+        // Note, because the ObsPermissionCorrection will *reset* a locally
+        // updated observation that the user does not have permission to edit,
+        // the merge plan might not be strictly newer than the local program.
+
         def isSameOrNewer(x: VersionMap, y: VersionMap): Boolean =
           VersionMap.compare(x, y) match {
             case Same | Newer => true
@@ -440,9 +469,8 @@ class MergeTest extends JUnitSuite {
 
         pc.updatedLocalProgram.exists { ulp =>
           val updateVm = ulp.getVersions
-          val localVm  = pc.lp.getVersions
           val remoteVm = pc.rp.getVersions
-          isSameOrNewer(updateVm, localVm) && isSameOrNewer(updateVm, remoteVm)
+          isSameOrNewer(updateVm, remoteVm)
         }.run
       }
     ),
@@ -468,6 +496,115 @@ class MergeTest extends JUnitSuite {
               case Right(_) =>
                 true
             }
+        }
+      }
+    ),
+
+    ("ObsEdit produces entries for all new local observations",
+      (start, local, remote, pc) => {
+        val localKeys    = pc.local.editedObservationKeys
+
+        val newLocalKeys = localKeys.filterNot { k =>
+          pc.remote.deletedKeys.contains(k) || pc.remote.nodeMap.contains(k)
+        }
+
+        val createKeys   = pc.obsEdits.collect {
+          case ObsCreate(k, _) => k
+        }
+
+        keysMatch("newLocal", newLocalKeys, "create", createKeys)
+      }
+    ),
+
+    ("ObsEdit produces entries for all deleted local observations",
+      (start, local, remote, pc) => {
+        val remoteKeys   =
+          remote.fold(Set.empty[SPNodeKey]) { (s, n) =>
+            n match {
+              case _: ISPObservation => s + n.key
+              case _                 => s
+
+            }
+          }
+
+        val deletedLocalKeys = remoteKeys.filter(pc.local.deletedKeys.contains)
+
+        val obsDeleteKeys   = pc.obsEdits.collect {
+          case ObsDelete(k, _) => k
+        }
+
+        keysMatch("deletedLocal", deletedLocalKeys, "delete", obsDeleteKeys)
+      }
+    ),
+
+    ("ObsEdit produces entries for all locally edited but remotely deleted nodes",
+      (start, local, remote, pc) => {
+        val localKeys = pc.local.editedObservationKeys
+
+        val localEditRemoteDeleteKeys = localKeys.filter(pc.remote.deletedKeys.contains)
+
+        val obsUpdateKeys = pc.obsEdits.collect {
+          case ObsUpdate(k, _, None, _) => k
+        }
+
+        keysMatch("localEditRemDelete", localEditRemoteDeleteKeys, "update", obsUpdateKeys)
+      }
+    ),
+
+    ("ObsEdit produces entries for all locally edited and remotely available nodes",
+      (start, local, remote, pc) => {
+        val localKeys = pc.local.editedObservationKeys
+
+        val localEditKeys = localKeys.filter(pc.remote.nodeMap.contains)
+
+        val obsUpdateKeys = pc.obsEdits.collect {
+          case ObsUpdate(k, _, Some(_), _) => k
+        }
+
+        keysMatch("localEdit", localEditKeys, "update", obsUpdateKeys)
+      }
+    ),
+
+    ("ObsEdit has no entries for only remote edited observations",
+      (start, local, remote, pc) => {
+        val localKeys  = pc.local.editedObservationKeys
+        val remoteKeys = pc.remote.editedObservationKeys
+
+        val remoteOnlyEditKeys = remoteKeys.filterNot { k =>
+          localKeys.contains(k) || pc.local.deletedKeys.contains(k)
+        }
+
+        val keys = pc.obsEdits.collect {
+          case e if remoteOnlyEditKeys.contains(e.key) => e.key
+        }
+        emptySet(pc, keys.toSet)
+      }
+    ),
+
+    ("ObsEdit has no entries for new remote observations",
+      (start, local, remote, pc) => {
+        val remoteKeys = pc.remote.editedObservationKeys
+
+        val newRemoteKeys = remoteKeys.filterNot { k =>
+          pc.local.nodeMap.contains(k) || pc.local.deletedKeys.contains(k)
+        }
+
+        val keys = pc.obsEdits.collect {
+          case e if newRemoteKeys.contains(e.key) => e.key
+        }
+        emptySet(pc, keys.toSet)
+      }
+    ),
+
+    ("ObsEdit updates are all newer or conflicting",
+      (start, local, remote, pc) => {
+        pc.obsEdits.forall {
+          case ObsUpdate(_, _, _, c) =>
+            c.combined match {
+              case Newer | Conflicting => true
+              case _                   => false
+            }
+          case _ => true
         }
       }
     )

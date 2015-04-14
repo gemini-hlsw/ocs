@@ -32,7 +32,9 @@ class ObsNumberCorrectionSpec extends MergeCorrectionSpec {
       }).toList
 
     val plan = MergePlan(mergeTree, Set.empty)
-    val onc  = new ObsNumberCorrection(lifespanId, Function.untupled(known.contains))
+    val rem  = merged.collect { case (i, s) if s.contains(Remote) => i }
+    val max  = if (rem.isEmpty) None else Some(rem.max)
+    val onc  = new ObsNumberCorrection(lifespanId, Function.untupled(known.contains), max)
 
     onc(plan).map(mp => obsNumbers(mp.update)) shouldEqual \/-(expected)
   }
@@ -128,9 +130,9 @@ class ObsNumberCorrectionSpec extends MergeCorrectionSpec {
         (Local,  localObs.key),
         (Remote, remoteObs.key)
       )
-      val onc  = new ObsNumberCorrection(lifespanId, Function.untupled(known.contains))
+      val onc  = new ObsNumberCorrection(lifespanId, Function.untupled(known.contains), Some(1))
 
-      onc(plan) shouldEqual ObsNumberCorrection.unmergeable(List(1)).left[MergePlan]
+      onc(plan) shouldEqual ObsNumberCorrection.unmergeable(List(1))
     }
 
     "when renumbering, increment the version information" in {
@@ -138,13 +140,10 @@ class ObsNumberCorrectionSpec extends MergeCorrectionSpec {
       val oLocal  = obs(1)
       val oRemote = obs(1)
 
-      println("oLocal  = " + oLocal.key)
-      println("oRemote = " + oRemote.key)
-
       val onc = new ObsNumberCorrection(lifespanId, (loc: ProgramLocation, key: SPNodeKey) => {
         (loc == ProgramLocation.Local && key == oLocal.key) ||
           (loc == ProgramLocation.Remote && key == oRemote.key)
-      })
+      }, Some(1))
 
       val mergeTree = p.node(oLocal.leaf, oRemote.leaf)
       val plan      = MergePlan(mergeTree, Set.empty)

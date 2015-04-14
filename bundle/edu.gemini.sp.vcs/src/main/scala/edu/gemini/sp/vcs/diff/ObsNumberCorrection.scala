@@ -26,8 +26,8 @@ import Scalaz._
   * remote program versions with an observation number greater than a
   * local-only observation.
   */
-class ObsNumberCorrection(lifespanId: LifespanId, isKnown: (ProgramLocation, SPNodeKey) => Boolean) extends CorrectionFunction {
-  def apply(mp: MergePlan): TryCorrect[MergePlan] =
+class ObsNumberCorrection(lifespanId: LifespanId, isKnown: (ProgramLocation, SPNodeKey) => Boolean, maxRemote: Option[Int]) extends CorrectionFunction {
+  def apply(mp: MergePlan): TryVcs[MergePlan] =
     renumberedObs(mp).map { obsMap =>
       if (obsMap.isEmpty) mp // usually empty so we might as well check and save a traversal in that case
       else
@@ -41,41 +41,28 @@ class ObsNumberCorrection(lifespanId: LifespanId, isKnown: (ProgramLocation, SPN
 
   // Obtains a Set of pairs of observation node keys that need to be
   // renumbered along with the new observation number they should have.
-  private def renumberedObs(mp: MergePlan): TryCorrect[Map[SPNodeKey, Int]] = {
-
-    /** A pair of the max remote-only observation number and a set of all
-      * local-only observation keys with their current observation number.
-      */
-    case class ObsRenum(maxRemote: Option[Int], localOnly: List[(SPNodeKey, Int, Boolean)]) {
-      def addRemote(num: Int): ObsRenum =
-        if (maxRemote.forall(_ < num)) ObsRenum(Some(num), localOnly) else this
-
-      def addLocal(k: SPNodeKey, num: Int, executed: Boolean): ObsRenum =
-        ObsRenum(maxRemote, (k, num, executed) :: localOnly)
-    }
-
+  private def renumberedObs(mp: MergePlan): TryVcs[Map[SPNodeKey, Int]] = {
     def isExecuted(children: Stream[Tree[MergeNode]]): Boolean =
       children.toList.exists { _.rootLabel match {
         case Modified(_, _, log: ObsExecLog, _) => !log.isEmpty
         case _                                  => false
       }}
 
-    val or = mp.update.foldObservations(ObsRenum(None, List.empty)) { (mod, i, children, or) =>
+    val localOnly0 = mp.update.foldObservations(List.empty[(SPNodeKey, Int, Boolean)]) { (mod, i, children, lst) =>
       val k = mod.key
       (isKnown(Local, k), isKnown(Remote, k)) match {
-        case (false, true) => or.addRemote(i)
-        case (true, false) => or.addLocal(k, i, isExecuted(children))
-        case _             => or
+        case (true, false) => (k, i, isExecuted(children)) :: lst
+        case _             => lst
       }
     }
 
-    val executedLocalOnly = or.localOnly.collect { case (_, num, true) => num }
+    val executedLocalOnly = localOnly0.collect { case (_, num, true) => num }
 
     if (executedLocalOnly.nonEmpty)
-      ObsNumberCorrection.unmergeable(executedLocalOnly).left
+      ObsNumberCorrection.unmergeable(executedLocalOnly)
     else {
-      val localOnly = or.localOnly.map { case (key, num, _) => (key, num) }
-      or.maxRemote.foldMap { max =>
+      val localOnly = localOnly0.map { case (key, num, _) => (key, num) }
+      maxRemote.foldMap { max =>
         val sortedPairs = localOnly.sortBy(_._2) match {
           case (_, i) :: _ if i > max => Nil
           case obsList                => obsList
@@ -93,16 +80,16 @@ object ObsNumberCorrection {
       case (Remote, key) => mc.remote.isKnown(key)
     }
 
-    new ObsNumberCorrection(mc.local.prog.getLifespanId, isKnown)
+    new ObsNumberCorrection(mc.local.prog.getLifespanId, isKnown, mc.remote.diff.maxObsNumber)
   }
 
-  def unmergeable(obsNum: List[Int]): Unmergeable = {
+  def unmergeable[A](obsNum: List[Int]): TryVcs[A] = {
     val msg = if (obsNum.size > 1)
       s"Found executed observations (numbers ${obsNum.sorted.mkString(",")}) that were created outside of the observing database."
     else
       s"Found an executed observation (number ${obsNum.mkString}) that was created outside of the observing database."
 
-    Unmergeable(msg)
+    (Unmergeable(msg): VcsFailure).left[A]
   }
 
 

@@ -12,12 +12,6 @@ class StaffOnlyFieldCorrectionSpec extends VcsSpecification {
 
   import TestEnv._
 
-  def afterSync(env: TestEnv, p: Principal)(mr: => MatchResult[Any]): MatchResult[_] = {
-    expect(env.local.vcs(p).sync(Q1, DummyPeer)) {
-      case \/-(_) => mr
-    }
-  }
-
   "staff only field correction" should {
     "allow super-staff to change rollover status" in withVcs { env =>
       env.local.rollover = true

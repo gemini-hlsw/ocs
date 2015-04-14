@@ -117,7 +117,7 @@ class VcsServer(odb: IDBDatabaseService, vcsLog: VcsLog) { vs =>
     override def diffState(id: SPProgramID): TryVcs[DiffState] =
       vs.read(id, user)(DiffState.apply).unsafeRun
 
-    override def fetchDiffs(id: SPProgramID, state: DiffState): TryVcs[MergePlan.Transport] =
+    override def fetchDiffs(id: SPProgramID, state: DiffState): TryVcs[ProgramDiff.Transport] =
       vs.read(id, user) { p =>
         vcsLog.log(OpFetch, id, geminiPrincipals)
         ProgramDiff.compare(p, state)
