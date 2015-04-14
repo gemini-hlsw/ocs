@@ -64,7 +64,7 @@ object Hash {
   def calc(p: MichelleParameters): Int =
     hash(
       p.getFilter,
-      p.getFocalPlaneMask,
+      p.getFocalPlaneMask.name,
       p.getGrating,
       p.getInstrumentCentralWavelength,
       p.polarimetryIsUsed()

@@ -22,6 +22,7 @@ import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.{DisperserNorth, FPUnitNorth, FilterNorth}
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.{DisperserSouth, FPUnitSouth, FilterSouth}
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
+import edu.gemini.spModel.gemini.michelle.MichelleParams
 import edu.gemini.spModel.gemini.niri.Niri
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.telescope.IssPort
@@ -155,7 +156,7 @@ object ITCRequest {
     val grating     = p.parameter("instrumentDisperser")
     val centralWl0  = p.parameter("instrumentCentralWavelength")
     val centralWl   = if (centralWl0.trim().isEmpty) "0" else centralWl0
-    val fpMask      = p.parameter("instrumentFPMask")
+    val fpMask      = p.enumParameter(classOf[MichelleParams.Mask])
     val polarimetry = p.parameter("polarimetry")
     new MichelleParameters(filter, grating, centralWl, fpMask, polarimetry)
   }

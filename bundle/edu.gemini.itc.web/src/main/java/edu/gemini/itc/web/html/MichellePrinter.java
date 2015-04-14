@@ -4,6 +4,7 @@ import edu.gemini.itc.michelle.Michelle;
 import edu.gemini.itc.michelle.MichelleParameters;
 import edu.gemini.itc.michelle.MichelleRecipe;
 import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.gemini.michelle.MichelleParams;
 
 import java.io.PrintWriter;
 import java.util.Calendar;
@@ -219,8 +220,9 @@ public final class MichellePrinter extends PrinterBase {
         String s = "Instrument configuration: \n";
         s += HtmlPrinter.opticalComponentsToString(instrument);
 
-        if (!instrument.getFocalPlaneMask().equals(MichelleParameters.NO_SLIT))
-            s += "<LI> Focal Plane Mask: " + instrument.getFocalPlaneMask();
+        if (instrument.getFocalPlaneMask() != MichelleParams.Mask.MASK_IMAGING) {
+            s += "<LI> Focal Plane Mask: " + instrument.getFocalPlaneMask().displayValue();
+        }
         s += "\n";
         s += "\n";
         if (p.observation().getMethod().isSpectroscopy())
