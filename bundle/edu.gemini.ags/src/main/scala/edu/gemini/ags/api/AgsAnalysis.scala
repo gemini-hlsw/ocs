@@ -122,7 +122,7 @@ object AgsAnalysis {
       } yield gStar
 
     selection(ctx, guideProbe).fold(Some(NoGuideStarForProbe(guideProbe, bands)): Option[AgsAnalysis]) { guideStar =>
-      AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar, bands)
+      AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar.toNewModel, bands)
     }
   }
 
@@ -130,9 +130,11 @@ object AgsAnalysis {
    * Analysis of the given guide star in the given context, regardless of which
    * guide star is actually selected in the target environment.
    */
-  protected [ags] def analysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SPTarget, bands: List[MagnitudeBand]): Option[AgsAnalysis] =
-    if (!guideProbe.validate(guideStar, ctx)) Some(NotReachable(guideProbe, guideStar.toNewModel, bands))
-    else magnitudeAnalysis(ctx, mt, guideProbe, guideStar.toNewModel, bands)
+  protected [ags] def analysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget, bands: List[MagnitudeBand]): Option[AgsAnalysis] = {
+    val spTarget = new SPTarget(guideStar.coordinates.ra.toAngle.toDegrees, guideStar.coordinates.dec.toDegrees)
+    if (!guideProbe.validate(spTarget, ctx)) Some(NotReachable(guideProbe, guideStar, bands))
+    else magnitudeAnalysis(ctx, mt, guideProbe, guideStar, bands)
+  }
 
   private def magnitudeAnalysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget, bands: List[MagnitudeBand]): Option[AgsAnalysis] = {
     import GuideSpeed._

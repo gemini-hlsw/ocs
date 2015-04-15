@@ -18,7 +18,6 @@ import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw
 import edu.gemini.spModel.gems.{GemsTipTiltMode, GemsGuideProbeGroup, GemsGuideStarType}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
-import edu.gemini.spModel.target.SPTarget
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.JavaConverters._
@@ -107,7 +106,7 @@ trait GemsStrategy extends AgsStrategy {
   }
 
   // TODO Implement for GEMS
-  override protected def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SPTarget): Option[AgsAnalysis] = None
+  override protected [ags] def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] = None
 
   override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] = {
     import AgsAnalysis._

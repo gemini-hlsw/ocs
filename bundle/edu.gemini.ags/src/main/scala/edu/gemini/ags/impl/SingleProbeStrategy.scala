@@ -12,7 +12,6 @@ import edu.gemini.spModel.core.{Magnitude, MagnitudeBand, Coordinates, Angle}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, VignettingGuideProbe, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
-import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.system.CoordinateParam.Units
 import edu.gemini.spModel.target.system.HmsDegTarget
 import edu.gemini.spModel.telescope.PosAngleConstraint._
@@ -40,7 +39,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] =
     AgsAnalysis.analysis(ctx, mt, params.guideProbe, probeBands).toList
 
-  override protected def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SPTarget): Option[AgsAnalysis] =
+  override protected [ags] def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] =
     AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar, probeBands)
 
   private def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): Option[CatalogQuery] =
@@ -198,8 +197,7 @@ object SingleProbeStrategy {
 
     val candidates = for {
       st <- lst
-      spTarget = new SPTarget(HmsDegTarget.fromSkyObject(st.toOldModel))
-      analysis <- AgsAnalysis.analysis(ctx, mt, probe, spTarget, params.probeBands)
+      analysis <- AgsAnalysis.analysis(ctx, mt, probe, st, params.probeBands)
     } yield {
       val vig = probe.calculateVignetting(ctx, st.coordinates)
 

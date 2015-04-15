@@ -24,10 +24,11 @@ trait AgsStrategy {
 
   def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis]
 
-  protected def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SPTarget): Option[AgsAnalysis]
+  protected [ags] def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis]
 
-  def analyzeForJava(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SPTarget): JOption[AgsAnalysis] = {
-    if (!guideProbe.validate(guideStar, ctx)) new JSome(NotReachable(guideProbe, guideStar.toNewModel, probeBands))
+  def analyzeForJava(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): JOption[AgsAnalysis] = {
+    val spTarget = new SPTarget(guideStar.coordinates.ra.toAngle.toDegrees, guideStar.coordinates.dec.toDegrees)
+    if (!guideProbe.validate(spTarget, ctx)) new JSome(NotReachable(guideProbe, guideStar, probeBands))
     else analyze(ctx, mt, guideProbe, guideStar).asGeminiOpt
   }
 

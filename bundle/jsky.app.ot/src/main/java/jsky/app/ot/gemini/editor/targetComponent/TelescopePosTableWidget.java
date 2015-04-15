@@ -7,6 +7,7 @@
 package jsky.app.ot.gemini.editor.targetComponent;
 
 import edu.gemini.ags.api.*;
+import edu.gemini.pot.ModelConverters;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
@@ -240,7 +241,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                 if (guideProbe instanceof ValidatableGuideProbe) {
                     final ValidatableGuideProbe vgp = (ValidatableGuideProbe) guideProbe;
                     return AgsRegistrar$.MODULE$.currentStrategyForJava(tup._1()).map(strategy -> {
-                        final Option<AgsAnalysis> agsAnalysis = strategy.analyzeForJava(tup._1(), tup._2(), vgp, guideStar);
+                        final Option<AgsAnalysis> agsAnalysis = strategy.analyzeForJava(tup._1(), tup._2(), vgp, ModelConverters.toSideralTarget(guideStar));
                         return agsAnalysis.map(AgsAnalysis::quality);
                     }).getOrElse(None.<AgsGuideQuality>instance());
                 } else {
