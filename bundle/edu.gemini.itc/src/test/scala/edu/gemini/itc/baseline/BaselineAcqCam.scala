@@ -1,7 +1,7 @@
 package edu.gemini.itc.baseline
 
-import edu.gemini.itc.acqcam.AcquisitionCamParameters
 import edu.gemini.itc.baseline.util._
+import edu.gemini.itc.shared.AcquisitionCamParameters
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams._
 
 /**

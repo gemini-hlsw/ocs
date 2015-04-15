@@ -3,6 +3,7 @@ package edu.gemini.itc.shared
 import edu.gemini.spModel.config2.{Config, ItemKey}
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
+import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.gmos.GmosCommonType
 
 import scala.reflect.ClassTag
@@ -16,12 +17,22 @@ object ConfigExtractor {
 
   private val InstrumentKey       = new ItemKey("instrument:instrument")
   private val FilterKey           = new ItemKey("instrument:filter")
+  private val ColorFilterKey      = new ItemKey("instrument:colorFilter")
+  private val NdFilterKey         = new ItemKey("instrument:ndFilter")
   private val FpuKey              = new ItemKey("instrument:fpu")
   private val DisperserKey        = new ItemKey("instrument:disperser")
   private val CcdXBinKey          = new ItemKey("instrument:ccdXBinning")
   private val CcdYBinKey          = new ItemKey("instrument:ccdYBinning")
   private val ReadModeKey         = new ItemKey("instrument:readMode")
   private val CcdManufacturerKey  = new ItemKey("instrument:detectorManufacturer")
+
+  def extractAcqCam(config: Config): \/[Throwable, AcquisitionCamParameters] = {
+    import AcqCamParams._
+    for {
+      colorFilter <- extract[ColorFilter] (config, ColorFilterKey)
+      ndFilter    <- extract[NDFilter]    (config, NdFilterKey)
+    } yield AcquisitionCamParameters(colorFilter, ndFilter)
+  }
 
   def extractF2(config: Config): \/[Throwable, Flamingos2Parameters] = {
     import Flamingos2._
@@ -30,9 +41,7 @@ object ConfigExtractor {
       grism       <- extract[Disperser] (config, DisperserKey)
       mask        <- extract[FPUnit]    (config, FpuKey)
       readMode    <- extract[ReadMode]  (config, ReadModeKey)
-    } yield {
-      Flamingos2Parameters(filter, grism, mask, readMode)
-    }
+    } yield Flamingos2Parameters(filter, grism, mask, readMode)
   }
 
   def extractGmos(config: Config): \/[Throwable, GmosParameters] = {

@@ -2,7 +2,6 @@ package edu.gemini.itc.web.baseline
 
 import java.io.{ByteArrayOutputStream, File, PrintWriter}
 
-import edu.gemini.itc.acqcam.AcquisitionCamParameters
 import edu.gemini.itc.baseline.util.Fixture
 import edu.gemini.itc.gnirs.GnirsParameters
 import edu.gemini.itc.gsaoi.GsaoiParameters

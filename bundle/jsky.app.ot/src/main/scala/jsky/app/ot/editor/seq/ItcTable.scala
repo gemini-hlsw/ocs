@@ -87,8 +87,9 @@ trait ItcTable extends Table {
 
   protected def extractInstrumentDetails(instrument: SPComponentType, c: Config): \/[Throwable, InstrumentDetails] =
     instrument match {
-      case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH => ConfigExtractor.extractGmos(c)
+      case INSTRUMENT_ACQCAM                      => ConfigExtractor.extractAcqCam(c)
       case INSTRUMENT_FLAMINGOS2                  => ConfigExtractor.extractF2(c)
+      case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH => ConfigExtractor.extractGmos(c)
       case _                                      => new NotImplementedException().left
     }
 

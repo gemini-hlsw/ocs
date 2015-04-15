@@ -1,6 +1,5 @@
 package edu.gemini.itc.web.baseline
 
-import edu.gemini.itc.acqcam.AcquisitionCamParameters
 import edu.gemini.itc.baseline._
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.gnirs.GnirsParameters
@@ -8,7 +7,7 @@ import edu.gemini.itc.gsaoi.GsaoiParameters
 import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.niri.NiriParameters
-import edu.gemini.itc.shared.{Flamingos2Parameters, GmosParameters}
+import edu.gemini.itc.shared.{AcquisitionCamParameters, Flamingos2Parameters, GmosParameters}
 import edu.gemini.itc.trecs.TRecsParameters
 import edu.gemini.itc.web.baseline.Baseline._
 import org.scalacheck.{Arbitrary, Gen}

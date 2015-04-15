@@ -1,6 +1,5 @@
 package edu.gemini.itc.baseline.util
 
-import edu.gemini.itc.acqcam.AcquisitionCamParameters
 import edu.gemini.itc.altair.AltairParameters
 import edu.gemini.itc.gems.GemsParameters
 import edu.gemini.itc.gnirs.GnirsParameters
@@ -108,8 +107,8 @@ object Hash {
 
   def calc(p: AcquisitionCamParameters): Int =
     hash(
-      p.getColorFilter.name,
-      p.getNDFilter.name
+      p.colorFilter.name,
+      p.ndFilter.name
     )
 
   def calc(p: Flamingos2Parameters): Int =

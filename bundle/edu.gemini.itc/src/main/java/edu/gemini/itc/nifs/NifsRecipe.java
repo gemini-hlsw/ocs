@@ -14,7 +14,7 @@ import java.util.List;
  * This class performs the calculations for Nifs
  * used for imaging.
  */
-public final class NifsRecipe  {
+public final class NifsRecipe implements SpectroscopyRecipe {
 
     private final SourceDefinition _sdParameters;
     private final ObservationDetails _obsDetailParameters;

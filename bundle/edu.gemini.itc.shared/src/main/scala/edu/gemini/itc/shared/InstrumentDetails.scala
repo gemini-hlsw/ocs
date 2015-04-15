@@ -1,6 +1,7 @@
 package edu.gemini.itc.shared
 
 import edu.gemini.spModel.core.Site
+import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.GmosCommonType
 
@@ -10,6 +11,16 @@ import edu.gemini.spModel.gemini.gmos.GmosCommonType
  */
 
 sealed trait InstrumentDetails
+
+final case class AcquisitionCamParameters(
+                     colorFilter:       AcqCamParams.ColorFilter,
+                     ndFilter:          AcqCamParams.NDFilter) extends InstrumentDetails
+
+final case class Flamingos2Parameters(
+                     filter:            Flamingos2.Filter,
+                     grism:             Flamingos2.Disperser,
+                     mask:              Flamingos2.FPUnit,
+                     readMode:          Flamingos2.ReadMode) extends InstrumentDetails
 
 final case class GmosParameters(
                      filter:            GmosCommonType.Filter,
@@ -22,8 +33,3 @@ final case class GmosParameters(
                      ccdType:           GmosCommonType.DetectorManufacturer,
                      site:              Site) extends InstrumentDetails
 
-final case class Flamingos2Parameters(
-                     filter:            Flamingos2.Filter,
-                     grism:             Flamingos2.Disperser,
-                     mask:              Flamingos2.FPUnit,
-                     readMode:          Flamingos2.ReadMode) extends InstrumentDetails

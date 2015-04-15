@@ -10,7 +10,7 @@ import scala.Some;
 /**
  * This class performs the calculations for Gsaoi used for imaging.
  */
-public final class GsaoiRecipe {
+public final class GsaoiRecipe implements ImagingRecipe {
 
     private final GsaoiParameters _gsaoiParameters;
     private final ObservingConditions _obsConditionParameters;
