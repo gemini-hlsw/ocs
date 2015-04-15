@@ -4,12 +4,10 @@ import edu.gemini.ags.api.AgsAnalysis.{NoGuideStarForProbe, NoGuideStarForGroup}
 import edu.gemini.ags.api._
 import edu.gemini.ags.api.AgsGuideQuality._
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
-import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideSpeed, GuideProbe}
 import edu.gemini.spModel.guide.GuideSpeed._
 import edu.gemini.spModel.obs.context.ObsContext
-import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.TargetEnvironment
 import jsky.app.ot.util.OtColor

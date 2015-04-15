@@ -241,16 +241,12 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                 @Override public Option<AgsGuideQuality> apply(final Tuple2<ObsContext, AgsMagnitude.MagnitudeTable> tup) {
                     if (guideProbe instanceof ValidatableGuideProbe) {
                         final ValidatableGuideProbe vgp = (ValidatableGuideProbe) guideProbe;
-
                         return AgsRegistrar$.MODULE$.currentStrategyForJava(tup._1()).map(new Function1<AgsStrategy, Option<AgsGuideQuality>>() {
                             @Override
                             public Option<AgsGuideQuality> apply(AgsStrategy strategy) {
-                                final List<AgsAnalysis> agsAnalysises = strategy.analyzeForJava(tup._1(), tup._2(), vgp, guideStar);
-                                if (!agsAnalysises.isEmpty()) {
-                                    return new Some<>(agsAnalysises.get(0).quality());
-                                } else {
-                                    return None.instance();
-                                }
+
+                                final Option<AgsAnalysis> agsAnalysis = strategy.analyzeForJava(tup._1(), tup._2(), vgp, guideStar);
+                                return agsAnalysis.map(g -> g.quality());
                             }
                         }).getOrElse(None.<AgsGuideQuality>instance());
                     } else {

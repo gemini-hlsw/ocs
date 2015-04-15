@@ -37,8 +37,11 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   override def magnitudes(ctx: ObsContext, mt: MagnitudeTable): List[(GuideProbe, AgsMagnitude.MagnitudeCalc)] =
     params.magnitudeCalc(ctx, mt).toList.map(params.guideProbe -> _)
 
-  def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] =
+  override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] =
     AgsAnalysis.analysis(ctx, mt, params.guideProbe, probeBands).toList
+
+  override protected def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SPTarget): Option[AgsAnalysis] =
+    AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar, probeBands)
 
   private def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): Option[CatalogQuery] =
     params.catalogQueries(ctx, mt)

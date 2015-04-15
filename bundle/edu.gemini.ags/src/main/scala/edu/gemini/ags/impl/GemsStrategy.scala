@@ -18,12 +18,13 @@ import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw
 import edu.gemini.spModel.gems.{GemsTipTiltMode, GemsGuideProbeGroup, GemsGuideStarType}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
+import edu.gemini.spModel.target.SPTarget
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.JavaConverters._
 import scala.concurrent._
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
-import edu.gemini.spModel.guide.{GuideProbeGroup, GuideProbe}
+import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbeGroup, GuideProbe}
 import edu.gemini.spModel.core.{Angle, MagnitudeBand}
 
 import scalaz._
@@ -104,6 +105,9 @@ trait GemsStrategy extends AgsStrategy {
     val odgw = GsaoiOdgw.values().map { odgw => mt(ctx, odgw).map(odgw -> _) }.toList.flatten
     cans ++ odgw
   }
+
+  // TODO Implement for GEMS
+  override protected def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SPTarget): Option[AgsAnalysis] = None
 
   override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] = {
     import AgsAnalysis._

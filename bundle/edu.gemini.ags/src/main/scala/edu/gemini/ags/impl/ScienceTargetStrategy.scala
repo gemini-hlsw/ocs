@@ -8,6 +8,7 @@ import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.spModel.target.SPTarget
 
 import scala.concurrent.Future
 
@@ -16,6 +17,9 @@ case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGui
   // Since the science target is the used as the guide star, success is always guaranteed.
   override def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[AgsStrategy.Estimate] =
     Future.successful(AgsStrategy.Estimate.GuaranteedSuccess)
+
+  override protected def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SPTarget): Option[AgsAnalysis] =
+    AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar, probeBands)
 
   override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] =
     AgsAnalysis.analysis(ctx, mt, guideProbe, probeBands).toList
