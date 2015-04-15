@@ -1,7 +1,6 @@
 package edu.gemini.itc.gsaoi;
 
 import edu.gemini.itc.gems.Gems;
-import edu.gemini.itc.gems.GemsParameters;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
@@ -75,7 +74,7 @@ public final class GsaoiRecipe implements ImagingRecipe {
         // Gems specific section
         final Gems gems = new Gems(instrument.getEffectiveWavelength(),
                 _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(),
-                _gsaoiParameters.getGems().getAvgStrehl(), _gsaoiParameters.getGems().getStrehlBand(),
+                _gsaoiParameters.gems().avgStrehl(), _gsaoiParameters.gems().strehlBand(),
                 _obsConditionParameters.getImageQualityPercentile(),
                 _sdParameters);
 

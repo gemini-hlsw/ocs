@@ -5,6 +5,7 @@ import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.gmos.GmosCommonType
+import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.niri.Niri
 
 import scala.reflect.ClassTag
@@ -65,6 +66,17 @@ object ConfigExtractor {
       GmosParameters(filter, grating, wavelen, fpmask, spatBin.getValue, specBin.getValue, ifuMethod, ccdType, site)
     }
 
+  }
+
+  def extractGsaoi(config: Config): \/[Throwable, GsaoiParameters] = {
+    import Gsaoi._
+    for {
+      filter      <- extract[Filter]    (config, FilterKey)
+      readMode    <- extract[ReadMode]  (config, ReadModeKey)
+    } yield {
+      val gems = GemsParameters(0.3, "K") // TODO: gems
+      GsaoiParameters(filter, readMode, gems)
+    }
   }
 
   def extractNiri(config: Config): \/[Throwable, NiriParameters] = {

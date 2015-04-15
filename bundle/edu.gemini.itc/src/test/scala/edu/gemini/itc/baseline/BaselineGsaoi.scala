@@ -1,8 +1,7 @@
 package edu.gemini.itc.baseline
 
 import edu.gemini.itc.baseline.util._
-import edu.gemini.itc.gems.GemsParameters
-import edu.gemini.itc.gsaoi.GsaoiParameters
+import edu.gemini.itc.shared.{GsaoiParameters, GemsParameters}
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 
 /**

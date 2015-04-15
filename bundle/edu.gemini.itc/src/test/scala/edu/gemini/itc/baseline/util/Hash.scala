@@ -1,8 +1,6 @@
 package edu.gemini.itc.baseline.util
 
-import edu.gemini.itc.gems.GemsParameters
 import edu.gemini.itc.gnirs.GnirsParameters
-import edu.gemini.itc.gsaoi.GsaoiParameters
 import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.shared._
@@ -53,8 +51,8 @@ object Hash {
 
   def calc(p: GsaoiParameters): Int =
     hash(
-      p.getFilter.name,
-      p.getReadMode.name
+      p.filter.name,
+      p.readMode.name
     )
 
   def calc(p: MichelleParameters): Int =
@@ -166,8 +164,8 @@ object Hash {
 
   def calc(alt: GemsParameters): Int =
     hash(
-      alt.getAvgStrehl,
-      alt.getStrehlBand
+      alt.avgStrehl,
+      alt.strehlBand
     )
 
   def calc(pdp: PlottingDetails): Int =

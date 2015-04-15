@@ -90,6 +90,7 @@ trait ItcTable extends Table {
       case INSTRUMENT_ACQCAM                      => ConfigExtractor.extractAcqCam(c)
       case INSTRUMENT_FLAMINGOS2                  => ConfigExtractor.extractF2(c)
       case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH => ConfigExtractor.extractGmos(c)
+      case INSTRUMENT_GSAOI                       => ConfigExtractor.extractGsaoi(c)
       case INSTRUMENT_NIRI                        => ConfigExtractor.extractNiri(c)
       case _                                      => new NotImplementedException().left
     }

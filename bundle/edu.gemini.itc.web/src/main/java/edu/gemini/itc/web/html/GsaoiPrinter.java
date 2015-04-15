@@ -1,11 +1,10 @@
 package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.gems.Gems;
-import edu.gemini.itc.gems.GemsParameters;
 import edu.gemini.itc.gsaoi.Camera;
 import edu.gemini.itc.gsaoi.Gsaoi;
-import edu.gemini.itc.gsaoi.GsaoiParameters;
 import edu.gemini.itc.gsaoi.GsaoiRecipe;
+import edu.gemini.itc.shared.GsaoiParameters;
 import edu.gemini.itc.shared.ImagingResult;
 import edu.gemini.itc.shared.Parameters;
 

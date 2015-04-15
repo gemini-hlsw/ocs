@@ -4,7 +4,6 @@ import java.io.{ByteArrayOutputStream, File, PrintWriter}
 
 import edu.gemini.itc.baseline.util.Fixture
 import edu.gemini.itc.gnirs.GnirsParameters
-import edu.gemini.itc.gsaoi.GsaoiParameters
 import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.shared._

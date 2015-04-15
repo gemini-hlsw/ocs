@@ -1,6 +1,5 @@
 package edu.gemini.itc.baseline.util
 
-import edu.gemini.itc.gsaoi.GsaoiParameters
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.shared.TelescopeDetails.{Coating, Wfs}
 import edu.gemini.itc.shared._
@@ -35,7 +34,7 @@ object Fixture {
     case Some(a) => Hash.calc(a)
   }
   def gemsHash(ins: InstrumentDetails): Int = ins match {
-    case i: GsaoiParameters => Hash.calc(i.getGems)
+    case i: GsaoiParameters => Hash.calc(i.gems)
     case _                 => 0
   }
   // ===

@@ -3,6 +3,7 @@ package edu.gemini.itc.service
 import edu.gemini.itc.acqcam.AcqCamRecipe
 import edu.gemini.itc.flamingos2.Flamingos2Recipe
 import edu.gemini.itc.gmos.GmosRecipe
+import edu.gemini.itc.gsaoi.GsaoiRecipe
 import edu.gemini.itc.niri.NiriRecipe
 import edu.gemini.itc.operation.ImagingS2NMethodACalculation
 import edu.gemini.itc.shared._
@@ -31,41 +32,33 @@ class ItcServiceImpl extends ItcService {
 
   // === Imaging
 
-  private def calculateImaging(source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: InstrumentDetails): Result = {
+  private def calculateImaging(source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: InstrumentDetails): Result =
     ins match {
       case i: AcquisitionCamParameters  => imagingResult(new AcqCamRecipe(source, obs, cond, tele, i))
       case i: Flamingos2Parameters      => imagingResult(new Flamingos2Recipe(source, obs, cond, i, tele))
       case i: GmosParameters            => imagingArrayResult(new GmosRecipe(source, obs, cond, i, tele))
+      case i: GsaoiParameters           => imagingResult(new GsaoiRecipe(source, obs, cond, i, tele))
       case i: NiriParameters            => imagingResult(new NiriRecipe(source, obs, cond, i, tele))
       case _                            => throw new NotImplementedError
     }
-  }
 
-  private def imagingResult(recipe: ImagingRecipe): Result = {
+  private def imagingResult(recipe: ImagingRecipe): Result =
     ItcResult.forCcd(imgResult(recipe.calculateImaging()))
-  }
 
-  private def imagingArrayResult(recipe: ImagingArrayRecipe): Result = {
+  private def imagingArrayResult(recipe: ImagingArrayRecipe): Result =
     ItcResult.forCcds(recipe.calculateImaging().map(imgResult))
-  }
 
-  private def imgResult(result: ImagingResult): ItcCalcResult = {
-    result.is2nCalc match {
-        case i: ImagingS2NMethodACalculation  => ItcImagingResult(i.singleSNRatio(), i.totalSNRatio(), result.peakPixelCount)
-        case _                                => throw new NotImplementedError
-    }
+  private def imgResult(result: ImagingResult): ItcCalcResult = result.is2nCalc match {
+    case i: ImagingS2NMethodACalculation  => ItcImagingResult(i.singleSNRatio(), i.totalSNRatio(), result.peakPixelCount)
+    case _                                => throw new NotImplementedError
   }
 
   // === Spectroscopy
 
-  private def calculateSpectroscopy(source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: InstrumentDetails): Result = {
+  private def calculateSpectroscopy(source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: InstrumentDetails): Result =
     throw new NotImplementedError() // TODO
-  }
 
-  private def spcResult(recipe: SpectroscopyRecipe): ItcCalcResult = {
+  private def spcResult(recipe: SpectroscopyRecipe): ItcCalcResult =
     throw new NotImplementedError() // TODO
-  }
-
-
 
 }

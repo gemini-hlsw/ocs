@@ -5,6 +5,7 @@ import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.GmosCommonType
+import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.niri.Niri
 
 /*
@@ -35,6 +36,11 @@ final case class GmosParameters(
                      ccdType:           GmosCommonType.DetectorManufacturer,
                      site:              Site) extends InstrumentDetails
 
+final case class GsaoiParameters(
+                      filter:           Gsaoi.Filter,
+                      readMode:         Gsaoi.ReadMode,
+                      gems:             GemsParameters) extends InstrumentDetails
+
 final case class NiriParameters(
                      filter:            Niri.Filter,
                      grism:             Niri.Disperser,
@@ -52,4 +58,8 @@ final case class AltairParameters(
                      guideStarMagnitude:  Double,
                      fieldLens:           AltairParams.FieldLens,
                      wfsMode:             AltairParams.GuideStarType)
+
+final case class GemsParameters(
+                     avgStrehl:           Double,
+                     strehlBand:          String)
 

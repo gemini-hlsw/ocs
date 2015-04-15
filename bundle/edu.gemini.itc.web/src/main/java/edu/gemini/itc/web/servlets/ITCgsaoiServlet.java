@@ -1,7 +1,6 @@
 package edu.gemini.itc.web.servlets;
 
-import edu.gemini.itc.gems.GemsParameters;
-import edu.gemini.itc.gsaoi.GsaoiParameters;
+import edu.gemini.itc.shared.GsaoiParameters;
 import edu.gemini.itc.shared.Parameters;
 import edu.gemini.itc.web.ITCRequest;
 import edu.gemini.itc.web.html.GsaoiPrinter;

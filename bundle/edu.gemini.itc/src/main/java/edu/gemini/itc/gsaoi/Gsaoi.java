@@ -40,7 +40,7 @@ public final class Gsaoi extends Instrument {
         super(INSTR_DIR, FILENAME);
 
         this.params = np;
-        _filter = Filter.fromFile(getPrefix(), np.getFilter().name(), getDirectory() + "/");
+        _filter = Filter.fromFile(getPrefix(), np.filter().name(), getDirectory() + "/");
         addFilter(_filter);
 
         FixedOptics test = new FixedOptics(getDirectory() + "/", getPrefix());
@@ -65,7 +65,7 @@ public final class Gsaoi extends Instrument {
     }
 
     public double getReadNoise() {
-        switch (params.getReadMode()) {
+        switch (params.readMode()) {
             case BRIGHT:        return BRIGHT_OBJECTS__READ_NOISE;
             case FAINT:         return FAINT_OBJECTS_READ_NOISE;
             case VERY_FAINT:    return VERY_FAINT_OBJECTS_READ_NOISE;
