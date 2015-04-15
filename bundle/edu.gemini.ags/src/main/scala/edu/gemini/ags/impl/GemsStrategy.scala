@@ -69,12 +69,12 @@ trait GemsStrategy extends AgsStrategy {
     }
 
     VoTableClient.catalogs(adjustedConstraints, backend).flatMap {
-      case result if result.exists(_.result.containsError) => Future.failed(CatalogException(result.map(_.result.problems).flatten))
+      case result if result.exists(_.result.containsError) => Future.failed(CatalogException(result.flatMap(_.result.problems)))
       case result                                          => Future.successful {
-        result.map { r =>
+        result.flatMap { r =>
           val id = r.query.id
           id.map(x => CatalogResultWithKey(r.query, r.result, GemsCatalogSearchKey(GuideStarTypeMap(x), GuideProbeGroupMap(x))))
-        }.flatten
+        }
       }
     }
   }
@@ -118,7 +118,7 @@ trait GemsStrategy extends AgsStrategy {
         case _                         => true
       }
 
-      val probeAnalysis = grp.getMembers.asScala.toList.map{ analysis(ctx, mt, _, probeBands) }.flatten
+      val probeAnalysis = grp.getMembers.asScala.toList.flatMap { analysis(ctx, mt, _, probeBands) }
       probeAnalysis.filter(hasGuideStarForProbe) match {
         case Nil => List(NoGuideStarForGroup(grp, probeBands))
         case lst => lst
@@ -209,10 +209,10 @@ trait GemsStrategy extends AgsStrategy {
 
       // Now we must convert from an Option[GemsGuideStars] to a Selection.
       gemsGuideStars.map { x =>
-        val assignments = x.getGuideGroup.getAll.asScalaList.map(targets => {
+        val assignments = x.getGuideGroup.getAll.asScalaList.flatMap(targets => {
           val guider = targets.getGuider
           targets.getTargets.asScalaList.map(target => Assignment(guider, target.toNewModel))
-        }).flatten
+        })
         Selection(x.getPa, assignments)
       }
     }

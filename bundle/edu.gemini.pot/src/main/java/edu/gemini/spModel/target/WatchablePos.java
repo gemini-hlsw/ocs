@@ -9,7 +9,7 @@ public class WatchablePos implements Cloneable, Serializable {
 
     public final synchronized void addWatcher(final TelescopePosWatcher tpw) {
         if (_watchers == null) {
-            _watchers = new Vector<TelescopePosWatcher>();
+            _watchers = new Vector<>();
         } else if (_watchers.contains(tpw)) {
             return;
         }

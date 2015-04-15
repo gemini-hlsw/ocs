@@ -48,7 +48,7 @@ object GuidingFeedback {
       s"${lim(sat)} $le FAST $le ${lim(fast)} < MEDIUM $le ${lim(medium)} < SLOW $le ${lim(slow)}"
   }
 
-  class Row(analysis: AgsAnalysis, probeLimits: Option[ProbeLimits], includeProbeName: Boolean) extends GridBagPanel {
+  case class Row(analysis: AgsAnalysis, probeLimits: Option[ProbeLimits], includeProbeName: Boolean) extends GridBagPanel {
     val bg = analysis.quality match {
       case DeliversRequestedIq   => HONEY_DEW
       case PossibleIqDegradation => BANANA
@@ -136,7 +136,7 @@ object GuidingFeedback {
         gp <- AgsAnalysis.guideProbe(a)
         pl <- probeLimitsMap.get(gp).flatten
       } yield pl
-      new Row(a, plo, includeProbeName = true)
+      Row(a, plo, includeProbeName = true)
     }
   }
 
@@ -167,13 +167,13 @@ object GuidingFeedback {
         case NoGuideStarForGroup(_, _) => true
         case NoGuideStarForProbe(_, _) => true
         case _                         => false
-      }.map { a => new Row(a, None, includeProbeName = true) }
+      }.map { a => Row(a, None, includeProbeName = true) }
     }
 
   // GuidingFeedback.Row related to the given guide star itself.
   def guideStarAnalysis(ctx: ObsContext, mt: MagnitudeTable, gp: ValidatableGuideProbe, target: SPTarget): Option[Row] =
-    AgsRegistrar.currentStrategy(ctx).map(_.analyze(ctx, mt).headOption.map { a =>
+    AgsRegistrar.currentStrategy(ctx).flatMap(_.analyze(ctx, mt).headOption.map { a =>
       val plo = mt(ctx, gp).flatMap(ProbeLimits(a.probeBands, ctx, _))
-      new Row(a, plo, includeProbeName = false)
-    }).flatten
+      Row(a, plo, includeProbeName = false)
+    })
 }
