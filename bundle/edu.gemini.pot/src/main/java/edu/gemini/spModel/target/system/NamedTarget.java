@@ -17,24 +17,30 @@ public final class NamedTarget extends NonSiderealTarget {
      * Solar System Objects
      */
     public static enum SolarObject {
-        MOON("Moon", "301"),
-        MERCURY("Mercury", "199"),
-        VENUS("Venus", "299"),
-        MARS("Mars", "499"),
-        JUPITER("Jupiter", "599"),
-        SATURN("Saturn", "699"),
-        URANUS("Uranus", "799"),
-        NEPTUNE("Neptune", "899"),
-        PLUTO("Pluto", "999");
+        MOON   ("Moon",    301),
+        MERCURY("Mercury", 199, 1),
+        VENUS  ("Venus",   299, 2),
+        MARS   ("Mars",    499, 4),
+        JUPITER("Jupiter", 599),
+        SATURN ("Saturn",  699),
+        URANUS ("Uranus",  799),
+        NEPTUNE("Neptune", 899),
+        PLUTO  ("Pluto",   999);
 
         private final String _displayValue;
-        private final String _horizonsId;
+        public final int queryId; // search for this
+        public final int expectId; // expect to get back this
 
         public static final NamedTarget.SolarObject DEFAULT_SOLAR_OBJECT = MOON;
 
-        SolarObject(String displayValue, String horizonsId) {
+        SolarObject(String displayValue, int horizonsId) {
+            this(displayValue, horizonsId, horizonsId);
+        }
+
+        SolarObject(String displayValue, int horizonsId, int responseId) {
             _displayValue = displayValue;
-            _horizonsId = horizonsId;
+            queryId = horizonsId;
+            expectId = responseId;
         }
 
         public String getDisplayValue() {
@@ -46,7 +52,7 @@ public final class NamedTarget extends NonSiderealTarget {
         }
 
         public String getHorizonsId() {
-            return _horizonsId;
+            return Integer.toString(queryId);
         }
     }
 

@@ -4,7 +4,7 @@ import javax.swing.BorderFactory._
 import javax.swing.border.Border
 
 import edu.gemini.horizons.api.HorizonsQuery.ObjectType
-import edu.gemini.spModel.target.system.NonSiderealTarget
+import edu.gemini.spModel.target.system.{NamedTarget, NonSiderealTarget}
 import edu.gemini.spModel.target.system.ITarget.Tag
 import jsky.util.gui.{TextBoxWidget, TextBoxWidgetWatcher}
 
@@ -38,5 +38,13 @@ package object details {
     def unsafeToHorizonsObjectType: ObjectType =
       toHorizonsObjectType.getOrElse(throw new NoSuchElementException("No Horizons object type for target tag " + tag))
   }
+
+  implicit class SolarObjectOps(obj: NamedTarget.SolarObject) {
+    def objectType = obj match {
+      case NamedTarget.SolarObject.PLUTO => ObjectType.MINOR_BODY
+      case _ => ObjectType.MAJOR_BODY
+    }
+  }
+
 
 }

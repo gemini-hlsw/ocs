@@ -1,32 +1,143 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
-import java.awt.BorderLayout
+import java.awt.{Insets, GridBagConstraints, GridBagLayout, BorderLayout}
+import javax.swing.{JLabel, JPanel, JComponent}
 
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.{ Option => GOption }
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.system.NamedTarget
+import edu.gemini.spModel.target.system.{ConicTarget, NamedTarget}
 import edu.gemini.spModel.target.system.ITarget.Tag
+import jsky.app.ot.gemini.editor.targetComponent.MagnitudeEditor
 import jsky.util.gui.{DropDownListBoxWidgetWatcher, DropDownListBoxWidget}
 
-final class NamedDetailEditor extends TargetDetailEditor(Tag.NAMED) {
+import scalaz._, Scalaz._
+
+final class NamedDetailEditor extends TargetDetailEditor(Tag.NAMED) with ReentrancyHack {
+
+  private[this] var spt = new SPTarget // never null
+
+  // Editors
+
+  val kind   = new TargetTypeEditor
+  val valid  = new NamedValidAtEditor
+  val coords = new CoordinateEditor
+
 
   val solarObject = new DropDownListBoxWidget {
     setChoices(NamedTarget.SolarObject.values.asInstanceOf[Array[AnyRef]])
     addWatcher(new DropDownListBoxWidgetWatcher {
       def dropDownListBoxAction(w: DropDownListBoxWidget, index: Int, value: String) {
-        // TODO
+        nonreentrant {
+          val o = w.getValue.asInstanceOf[NamedTarget.SolarObject]
+          spt.getTarget.asInstanceOf[NamedTarget].setSolarObject(o)
+          spt.notifyOfGenericUpdate()
+        }
       }
     })
   }
 
+  val mags = new MagnitudeEditor {
+    getComponent.asInstanceOf[JComponent].setBorder(titleBorder("Magnitudes"))
+  }
 
-  setLayout(new BorderLayout())
-  add(solarObject, BorderLayout.CENTER)
+  // Layout
 
-  override def edit(ctx: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit = {
-    super.edit(ctx, spTarget, node)
+  setLayout(new GridBagLayout)
+
+  val general = new JPanel <| { p =>
+    p.setLayout(new GridBagLayout)
+    p.setBorder(titleBorder("General"))
+
+    p.add(new JLabel("Target Type"), new GridBagConstraints <| { c =>
+      c.gridx = 0
+      c.gridy = 0
+      c.fill = GridBagConstraints.HORIZONTAL
+      c.insets = new Insets(0, 2, 0, 5)
+    })
+
+    p.add(kind, new GridBagConstraints <| { c =>
+      c.gridx = 1
+      c.gridy = 0
+      c.fill = GridBagConstraints.HORIZONTAL
+      c.insets = new Insets(0, 5, 0, 2)
+      c.weightx = 2
+    })
+
+    p.add(new JLabel("Object"), new GridBagConstraints <| { c =>
+      c.gridx = 0
+      c.gridy = 1
+      c.fill = GridBagConstraints.HORIZONTAL
+      c.insets = new Insets(2, 2, 0, 5)
+    })
+
+    p.add(solarObject, new GridBagConstraints <| { c =>
+      c.gridx = 1
+      c.gridy = 1
+      c.insets = new Insets(2, 5, 0, 2)
+      c.anchor = GridBagConstraints.WEST
+      c.weightx = 2
+    })
+
+    p.add(new JLabel("Coordinates"), new GridBagConstraints <| { c =>
+      c.gridx = 0
+      c.gridy = 2
+      c.fill = GridBagConstraints.HORIZONTAL
+      c.insets = new Insets(2, 2, 0, 5)
+    })
+
+    p.add(coords, new GridBagConstraints <| { c =>
+      c.gridx = 1
+      c.gridy = 2
+      c.insets = new Insets(2, 5, 0, 2)
+      c.anchor = GridBagConstraints.WEST
+    })
+
+    p.add(new JLabel("Valid At"), new GridBagConstraints <| { c =>
+      c.gridx = 0
+      c.gridy = 3
+      c.fill = GridBagConstraints.HORIZONTAL
+      c.insets = new Insets(2, 2, 0, 5)
+    })
+
+    p.add(valid, new GridBagConstraints <| { c =>
+      c.gridx = 1
+      c.gridy = 3
+      c.insets = new Insets(2, 5, 0, 2)
+      c.anchor = GridBagConstraints.WEST
+    })
+
+  }
+
+  add(general, new GridBagConstraints <| { c =>
+    c.gridx = 0
+    c.gridy = 0
+    c.gridwidth = 2
+    c.fill = GridBagConstraints.HORIZONTAL
+  })
+
+
+  add(mags.getComponent, new GridBagConstraints <| { c =>
+    c.gridx = 0
+    c.gridy = 1
+    c.fill = GridBagConstraints.BOTH
+  })
+
+  // Implementation
+
+  override def edit(obsContext: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit = {
+    super .edit(obsContext, spTarget, node)
+    kind  .edit(obsContext, spTarget, node)
+    coords.edit(obsContext, spTarget, node)
+    mags  .edit(obsContext, spTarget, node)
+    valid .edit(obsContext, spTarget, node)
+
+    this.spt = spTarget
+    nonreentrant {
+      solarObject.setValue(spt.getTarget.asInstanceOf[NamedTarget].getSolarObject)
+    }
+
   }
 
 }

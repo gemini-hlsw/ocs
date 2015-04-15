@@ -18,7 +18,7 @@ abstract class ConicDetailEditor(tag: ITarget.Tag) extends TargetDetailEditor(ta
   // Editors
 
   val kind = new TargetTypeEditor
-  val valid  = new ValidAtEditor
+  val valid  = new ConicValidAtEditor
   val name   = new ConicNameEditor(valid.dateTime)
   val coords = new CoordinateEditor
 

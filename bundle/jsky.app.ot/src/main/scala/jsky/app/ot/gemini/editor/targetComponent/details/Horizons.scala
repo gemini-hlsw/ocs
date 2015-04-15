@@ -85,8 +85,45 @@ object Horizons {
   /**
    * Construct a program to look up and construct the requested solar object.
    */
-  def lookupSolarObject(obj: NamedTarget.SolarObject, date: Date): HorizonsIO[(NamedTarget, Ephemeris)] =
-    ???
+  def lookupSolarObject(name: String, obj: NamedTarget.SolarObject, date: Date): HorizonsIO[(NamedTarget, Ephemeris)] =
+    for {
+      s <- getService
+      r <- lookup(s, obj.getHorizonsId, obj.objectType, date, true)
+      t <- extractNamedTarget(name, r, obj)
+      e <- extractEphemeris(r)
+    } yield (t, e)
+
+  /**
+   * Constuct a program that extracts a named target from the given reply, with the supplied solar
+   * object.
+   */
+  def extractNamedTarget(name: String, r: HorizonsReply, obj: NamedTarget.SolarObject): Horizons.HorizonsIO[NamedTarget] =
+    HorizonsIO.either {
+
+      // Should have the exact ID and obj
+      if (r.hasObjectIdAndType &&
+          r.getObjectId   == obj.expectId &&
+          r.getObjectType == obj.objectType &&
+          r.hasEphemeris) {
+
+        val e = r.getEphemeris.get(0)
+        val nt = new NamedTarget
+
+        nt.setSolarObject(obj)
+        nt.setName(name)
+        nt.getRa .setAs(e.getRATrack,  Units.DEGREES)
+        nt.getDec.setAs(e.getDecTrack, Units.DEGREES)
+        nt.setDateForPosition(e.getDate)
+        nt.right
+
+      } else {
+
+        // We did not get back what we asked for
+        UnknownError(new Exception("hmm " + r)).left
+
+      }
+
+    }
 
   /**
    * Constuct a program that extracts a conic target from the given reply, with the supplied name.

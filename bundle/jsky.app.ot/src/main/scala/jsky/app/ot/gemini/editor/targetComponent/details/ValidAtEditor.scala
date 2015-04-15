@@ -14,17 +14,18 @@ import edu.gemini.shared.gui.text.AbstractDocumentListener
 import edu.gemini.shared.util.immutable.{ Option => GOption }
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.system.{ITarget, ConicTarget}
+import edu.gemini.spModel.target.system.{NamedTarget, ITarget, ConicTarget}
 import jsky.app.ot.gemini.editor.horizons.HorizonsPlotter
 import jsky.app.ot.gemini.editor.targetComponent.{TimeConfig, TelescopePosEditor}
 import jsky.app.ot.ui.util.TimeDocument
 
 import scalaz._, Scalaz._
+import Horizons._
 
 // [DATE] at [TIME] UTC [Go] [Plot]
-class ValidAtEditor extends JPanel with TelescopePosEditor with ReentrancyHack {
+abstract class ValidAtEditor[A <: ITarget](empty: A) extends JPanel with TelescopePosEditor with ReentrancyHack {
 
-  private[this] var spt: SPTarget = new SPTarget(new ConicTarget)
+  private[this] var spt: SPTarget = new SPTarget(empty)
   private[this] var node: ISPNode = null
 
   val UTC = TimeZone.getTimeZone("UTC")
@@ -137,43 +138,26 @@ class ValidAtEditor extends JPanel with TelescopePosEditor with ReentrancyHack {
   /// HORIZONS
   ///
 
-  import Horizons._
-
   /** A program that returns the editor's current date and time. */
   def dateTime: HorizonsIO[Date] =
     HorizonsIO.delay(new Date) // TODO: get from controls
 
-  /** A program that returns the editor's current conic target. */
-  val conicTarget: HorizonsIO[ConicTarget] =
-    HorizonsIO.delay(spt.getTarget.asInstanceOf[ConicTarget])
+  /** A program that returns the editor's current target. */
+  val target: HorizonsIO[A] =
+    HorizonsIO.delay(spt.getTarget.asInstanceOf[A])
 
   /**
-   * A program that looks up a new conic target with the same horizons information as the editor's
+   * A program that looks up a new target with the same horizons information as the editor's
    * current target, if available, else the current target's name and type; and the date and time
    * indicated by the controls in the editor.
    */
-  def lookupAction(useCache: Boolean): HorizonsIO[(ConicTarget, Ephemeris)] =
-    (conicTarget |@| dateTime).tupled >>= { case (ct, date) =>
-      if (ct.isHorizonsDataPopulated) {
-        lookupConicTargetById(
-          ct.getName,
-          ct.getHorizonsObjectId.toString,
-          ct.getHorizonsObjectType,
-          date,
-          useCache)
-      } else {
-        lookupConicTargetByName(
-          ct.getName,
-          objectTypeForTag(ct.getTag),
-          date)
-      }
-    }
+  def lookupAction(useCache: Boolean): HorizonsIO[(A, Ephemeris)]
 
   /**
    * Constructs a program that replaces the current conic target. Note that this may result in this
    * editor being replaced entirely. This is ok!
    */
-  def updateSPTarget(t: ConicTarget): HorizonsIO[Unit] =
+  def updateSPTarget(t: ITarget): HorizonsIO[Unit] =
     HorizonsIO.delay(spt.setTarget(t))
 
   /**
@@ -194,3 +178,31 @@ class ValidAtEditor extends JPanel with TelescopePosEditor with ReentrancyHack {
 
 }
 
+class ConicValidAtEditor extends ValidAtEditor[ConicTarget](new ConicTarget) {
+
+  def lookupAction(useCache: Boolean): HorizonsIO[(ConicTarget, Ephemeris)] =
+    (target |@| dateTime).tupled >>= { case (ct, date) =>
+      if (ct.isHorizonsDataPopulated) {
+        lookupConicTargetById(
+          ct.getName,
+          ct.getHorizonsObjectId.toString,
+          ct.getHorizonsObjectType,
+          date,
+          useCache)
+      } else {
+        lookupConicTargetByName(
+          ct.getName,
+          objectTypeForTag(ct.getTag),
+          date)
+      }
+    }
+
+}
+
+class NamedValidAtEditor extends ValidAtEditor[NamedTarget](new NamedTarget) {
+
+  def lookupAction(useCache: Boolean): HorizonsIO[(NamedTarget, Ephemeris)] =
+    (target |@| dateTime).tupled >>= { case (nt, date) =>
+      lookupSolarObject(nt.getName, nt.getSolarObject, date)
+    }
+}
