@@ -324,150 +324,84 @@
 			</tr>
 			<tr>
 				<td>Camera: </td>
-				<td><select name="instrumentCamera" size="1">
-				<option value="F6" selected="selected">
-				f/6</option>
-				<option value="F14">
-				f/14</option>
-
-				<option value="F32">
-				f/32</option>
+				<td><select name="Camera" size="1">
+				<option value="F6" selected="selected">f/6</option>
+				<option value="F14">f/14</option>
+				<option value="F32">f/32</option>
 				</select></td>
+
 				<td>Disperser:</td>
-				<td><select name="instrumentDisperser" size="1">
-				<option value="none">
-				none</option>
-
-				<option value="J-grism">
-				J grism</option>
-				<option value="H-grism">
-				H grism</option>
-				<option value="K-grism">
-				K grism</option>
-				<option value="L-grism">
-
-				L grism</option>
-				<option value="M-grism">
-				M grism</option>
+				<td><select name="Disperser" size="1">
+				<option value="NONE">none</option>
+				<option value="J">J grism</option>
+				<option value="H">H grism</option>
+				<option value="K">K grism</option>
+				<option value="L">L grism</option>
+				<option value="M">M grism</option>
 				</select></td>
+
 			</tr>
 			<tr>
 				<td>Filter:</td>
 
-				<td><select name="instrumentFilter" size="1">
-				<option value="none">
-				Broad band...</option>
-				<option value="Y-G0241">
-				Y (1.02 um)</option>
-				<option value="J">
-				J (1.25 um)</option>
+				<td><select name="Filter" size="1">
+				<option value="none" disabled>Broad band...</option>
 
-				<option value="H">
-				H (1.65 um)</option>
-				<option value="HKnotch">
-				HK Notch (1.875 um)</option>
-				<option value="Kprime">
-				K' (2.12 um)</option>
-				<option value="Kshort">
+				<option value="BBF_Y">Y (1.02 um)</option>
+				<option value="BBF_J">J (1.25 um)</option>
+				<option value="BBF_H">H (1.65 um)</option>
+				<option value="BBF_KPRIME">K' (2.12 um)</option>
+				<option value="BBF_KSHORT">K(short) (2.15 um)</option>
+				<option value="BBF_K" selected="selected">K (2.20 um)</option>
+				<option value="BBF_LPRIME">L' (3.78 um)</option>
+				<option value="BBF_MPRIME">M' (4.68 um)</option>
 
-				K(short) (2.15 um)</option>
-				<option value="K" selected="selected">
-				K (2.20 um)</option>
-				<option value="Lprime">
-				L' (3.78 um)</option>
-				<option value="Mprime">
-				M' (4.68 um)</option>
+				<option value="none" disabled></option>
+				<option value="none" disabled>Grism order sorting...</option>
 
-				<option value="none">
-				</option>
-				<option value="none">
-				grism order sorting...</option>
-				<option value="Jsort">
-				J sorting</option>
-				<option value="Hsort">
-				H sorting</option>
+				<option value="BBF_J_ORDER_SORT">J sorting</option>
+				<option value="BBF_H_ORDER_SORT">H sorting</option>
+				<option value="BBF_K_ORDER_SORT">K sorting</option>
+				<option value="BBF_L_ORDER_SORT">L sorting</option>
+				<option value="BBF_M_ORDER_SORT">M sorting</option>
 
-				<option value="Ksort">
-				K sorting</option>
-				<option value="Lsort">
-				L sorting</option>
-				<option value="Msort">
-				M sorting</option>
-				<option value="none">
+				<option value="none" disabled></option>
+				<option value="none" disabled>Narrow band...</option>
 
-				</option>
-				<option value="none">
-				Narrow band...</option>
-				<option value="HeItriplet">
-				HeI (2p2s triplet) (1.083 um)</option>
-				<option value="Pagamma">
-				Pa-gamma (1.094 um)</option>
-
-				<option value="Jcont">
-				J-continuum (1.207 um)</option>
-				<option value="Pabeta">
-				Pa-beta (1.282 um)</option>
-				<option value="CH4short">
-				CH4(short) (1.580 um)</option>
-				<option value="CH4long">
-
-				CH4(long) (1.690 um)</option>
-				<option value="Hcont">
-				H-continuum (1.570 um)</option>
-				<option value="FeII">
-				[FeII] (1.644 um)</option>
-				<option value="H2Oice2045_G0242">
-				H20 ice (2.045 um)</option>
-
-				<option value="HeIsinglet">
-				HeI (2p2s singlet) (2.059 um)</option>
-				<option value="Kcont2">
-				K-continuum (2.090 um)</option>
-				<option value="H210S1">
-				H2 1-0S(1) (2.122 um)</option>
-				<option value="Bragamma">
-
-				Br-gamma (2.166 um)</option>
-				<option value="H221S1">
-				H2 2-1S(1) (2.248 um)</option>
-				<option value="Kcont">
-				K-continuum (2.270 um)</option>
-				<option value="CH4ice2275_G0243">
-				CH4 ice (2.275 um)</option>
-
-				<option value="CO20">
-				CO 2-0(bh) (2.294 um)</option>
-				<option value="CO31">
-				CO 3-1(bh) (2.323 um)</option>
-				<option value="H2O">
-				H2O ice (3.050 um)</option>
-				<option value="hydrocarbon">
-
-				hydrocarbon (3.295 um)</option>
-				<option value="Bracont">
-				Br-alpha continuum (3.990 um)</option>
-				<option value="Bralpha">
-				Br-alpha (4.052 um)</option>
+				<option value="NBF_HEI">HeI (2p2s triplet) (1.083 um)</option>
+				<option value="NBF_PAGAMMA">Pa-gamma (1.094 um)</option>
+				<option value="NBF_H">J-continuum (1.207 um)</option>
+				<option value="NBF_PABETA">Pa-beta (1.282 um)</option>
+				<option value="NBF_CH4SHORT">CH4(short) (1.580 um)</option>
+				<option value="NBF_CH4LONG">CH4(long) (1.690 um)</option>
+				<option value="NBF_HCONT">H-continuum (1.570 um)</option>
+				<option value="NBF_FEII">[FeII] (1.644 um)</option>
+				<option value="NBF_H2O_2045">H20 ice (2.045 um)</option>
+				<option value="NBF_HE12P2S">HeI (2p2s singlet) (2.059 um)</option>
+				<option value="NBF_KCONT1">K-continuum (2.090 um)</option>
+				<option value="NBF_H210">H2 1-0S(1) (2.122 um)</option>
+				<option value="NBF_BRGAMMA">Br-gamma (2.166 um)</option>
+				<option value="NBF_H221">H2 2-1S(1) (2.248 um)</option>
+				<option value="NBF_KCONT2">K-continuum (2.270 um)</option>
+				<option value="NBF_CH4ICE">CH4 ice (2.275 um)</option>
+				<option value="NBF_CO20">CO 2-0(bh) (2.294 um)</option>
+				<option value="NBF_CO31">CO 3-1(bh) (2.323 um)</option>
+				<option value="NBF_H2O">H2O ice (3.050 um)</option>
+				<option value="NBF_HC">hydrocarbon (3.295 um)</option>
+				<option value="NBF_BRACONT">Br-alpha continuum (3.990 um)</option>
+				<option value="NBF_BRA">Br-alpha (4.052 um)</option>
 				</select></td>
+
 				<td>Focal plane mask:</td>
 
-				<td><select name="instrumentFPMask" size="1">
-				<option value="none">
-				none</option>
-				<option value="2-pix-center">
-				2-pix slit center</option>
-				<option value="4-pix-center">
-				4-pix slit center</option>
-
-				<option value="6-pix-center">
-				6-pix slit center</option>
-				<option value="2-pix-blue">
-				2-pix slit blue</option>
-				<option value="4-pix-blue">
-				4-pix slit blue</option>
-				<option value="6-pix-blue">
-
-				6-pix slit blue</option>
+				<td><select name="Mask" size="1">
+				<option value="MASK_IMAGING">none</option>
+				<option value="MASK_1">2-pix slit center</option>
+				<option value="MASK_2">4-pix slit center</option>
+				<option value="MASK_3">6-pix slit center</option>
+				<option value="MASK_4">2-pix slit blue</option>
+				<option value="MASK_5">4-pix slit blue</option>
+				<option value="MASK_6">6-pix slit blue</option>
 				</select></td>
 			</tr>
 			<tr>
@@ -475,10 +409,10 @@
 
 			</tr>
 			<tr>
-				<td colspan="4">Detector bias (i.e. well depth) set for <input value="lowWell" name="wellDepth" checked="checked" type="radio" /> low or <input value="highWell" name="wellDepth" type="radio" />high flux mode (typically &lt;2.5um and &gt;2.5um respectively) </td>
+				<td colspan="4">Detector bias (i.e. well depth) set for <input value="SHALLOW" name="WellDepth" checked="checked" type="radio" /> low or <input value="DEEP" name="WellDepth" type="radio" />high flux mode (typically &lt;2.5um and &gt;2.5um respectively) </td>
 			</tr>
 			<tr>
-				<td colspan="4">Read noise set for <input value="lowNoise" name="readNoise" checked="checked" type="radio" /> low noise, <input value="medNoise" name="readNoise" type="radio" />medium noise, or <input value="highNoise" name="readNoise" type="radio" />high noise
+				<td colspan="4">Read noise set for <input value="IMAG_SPEC_NB" name="ReadMode" checked="checked" type="radio" /> low noise, <input value="IMAG_1TO25" name="ReadMode" type="radio" />medium noise, or <input value="IMAG_SPEC_3TO5" name="ReadMode" type="radio" />high noise
 				mode (typically narrow band faint object 1-2.5um imaging/spectroscopy, JHK imaging and bright object 1-2.5um spectroscopy, and 3-5um imaging and spectroscopy, respectively) </td>
 
 			</tr>

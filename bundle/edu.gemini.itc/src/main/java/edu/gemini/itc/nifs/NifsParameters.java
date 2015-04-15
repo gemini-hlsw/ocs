@@ -41,7 +41,7 @@ public final class NifsParameters implements InstrumentDetails {
     private final String _Filter;
     private final String _grating; // Grating or null
     private final String _readNoise;
-    private final String _instrumentCentralWavelength;
+    private final double _instrumentCentralWavelength;
     private final String _IFUMethod;
     private final String _IFUOffset;
     private final String _IFUMinOffset;
@@ -57,7 +57,7 @@ public final class NifsParameters implements InstrumentDetails {
     public NifsParameters(final String Filter,
                           final String grating,
                           final String readNoise,
-                          final String instrumentCentralWavelength,
+                          final double instrumentCentralWavelength,
                           final String IFUMethod,
                           final String IFUOffset,
                           final String IFUMinOffset,
@@ -70,7 +70,7 @@ public final class NifsParameters implements InstrumentDetails {
         _Filter = Filter;
         _grating = grating;
         _readNoise = readNoise;
-        _instrumentCentralWavelength = instrumentCentralWavelength;
+        _instrumentCentralWavelength = instrumentCentralWavelength * 1000; // convert to [nm]
         _IFUMethod = IFUMethod;
         _IFUOffset = IFUOffset;
         _IFUMinOffset = IFUMinOffset;
@@ -94,11 +94,11 @@ public final class NifsParameters implements InstrumentDetails {
     }
 
     public double getInstrumentCentralWavelength() {
-        return new Double(_instrumentCentralWavelength) * 1000;
+        return _instrumentCentralWavelength;
     }
 
     public double getUnXDispCentralWavelength() {
-        return new Double(_instrumentCentralWavelength) * 1000;
+        return _instrumentCentralWavelength;
     }
 
 
@@ -139,15 +139,4 @@ public final class NifsParameters implements InstrumentDetails {
         return 0.15;
     }
 
-     /**
-     * Return a human-readable string for debugging
-     */
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("Grating:\t" + getGrating() + "\n");
-        sb.append("Instrument Central Wavelength:\t" +
-                getInstrumentCentralWavelength() + "\n");
-        sb.append("\n");
-        return sb.toString();
-    }
 }

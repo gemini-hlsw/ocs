@@ -57,14 +57,14 @@ object Hash {
 
   def calc(p: GsaoiParameters): Int =
     hash(
-      p.getFilter,
-      p.getReadMode
+      p.getFilter.name,
+      p.getReadMode.name
     )
 
   def calc(p: MichelleParameters): Int =
     hash(
       p.getFilter,
-      p.getFocalPlaneMask,
+      p.getFocalPlaneMask.name,
       p.getGrating,
       p.getInstrumentCentralWavelength,
       p.polarimetryIsUsed()
@@ -90,14 +90,12 @@ object Hash {
 
   def calc(p: NiriParameters): Int =
     hash(
-      p.getCamera,
-      p.getFilter,
-      p.getFocalPlaneMask,
-//      p.getFPMaskOffset,
-      p.getGrism,
-      p.getReadNoise,
-//      p.getStringSlitWidth,
-      p.getWellDepth
+      p.getCamera.name,
+      p.getFilter.name,
+      p.getFocalPlaneMask.name,
+      p.getGrism.name,
+      p.getReadMode.name,
+      p.getWellDepth.name
     )
 
   def calc(p: TRecsParameters): Int =
@@ -111,16 +109,16 @@ object Hash {
 
   def calc(p: AcquisitionCamParameters): Int =
     hash(
-      p.getColorFilter,
-      p.getNDFilter
+      p.getColorFilter.name,
+      p.getNDFilter.name
     )
 
   def calc(p: Flamingos2Parameters): Int =
     hash(
-      p.getColorFilter,
-      p.getFPMask,
-      p.getGrism,
-      p.getReadNoise
+      p.getFilter.name,
+      p.getFPMask.name,
+      p.getGrism.name,
+      p.getReadMode.name
     )
 
   def calc(odp: ObservationDetails): Int =

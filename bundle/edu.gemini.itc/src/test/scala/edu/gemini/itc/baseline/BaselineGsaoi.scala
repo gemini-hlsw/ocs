@@ -3,6 +3,7 @@ package edu.gemini.itc.baseline
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.gems.GemsParameters
 import edu.gemini.itc.gsaoi.GsaoiParameters
+import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 
 /**
  * GSAOI baseline test fixtures.
@@ -13,15 +14,15 @@ object BaselineGsaoi  {
 
   private lazy val KBandImaging = Fixture.kBandImgFixtures(List(
     new GsaoiParameters(
-      "Z_G1101",                                    //String Filter,
-      GsaoiParameters.BRIGHT_OBJECTS_READ_MODE      //String read mode,
+      Gsaoi.Filter.Z,
+      Gsaoi.ReadMode.BRIGHT
     )
   ), gem = Gems)
 
   private lazy val RBandImaging = Fixture.rBandImgFixtures(List(
     new GsaoiParameters(
-      "J_G1102",                                    //String Filter,
-      GsaoiParameters.FAINT_OBJECTS_READ_MODE       //String read mode,
+      Gsaoi.Filter.J,
+      Gsaoi.ReadMode.FAINT
     )
   ), gem = Gems)
 

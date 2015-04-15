@@ -187,7 +187,7 @@ public abstract class Instrument {
     }
 
     public double getPixelSize() {
-        return params.plateScale(); // pixelSize = plateScale * binning
+        return params.plateScale();
     }
 
     public double getReadNoise() {
@@ -222,18 +222,6 @@ public abstract class Instrument {
      */
     public static String getSuffix() {
         return DATA_SUFFIX;
-    }
-
-    public String toString() {
-        String s = "Instrument configuration: \n";
-        s += "Optical Components: <BR>";
-        for (final TransmissionElement te : getComponents()) {
-            s += "<LI>" + te.toString() + "<BR>";
-        }
-        s += "<BR>";
-        s += "Pixel Size: " + getPixelSize() + "<BR>" + "<BR>";
-
-        return s;
     }
 
     public List<TransmissionElement> getComponents() {

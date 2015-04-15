@@ -1,7 +1,5 @@
 package edu.gemini.itc.shared
 
-import java.util.Scanner
-
 import org.junit.Test
 
 /**
@@ -9,6 +7,10 @@ import org.junit.Test
  */
 class DatFileTest {
 
+  /**
+   * NOTE - The following test cases check the parser/combinator version of the DatFile implementation which
+   * for performance reasons is currently not in use.
+   */
 //  @Test
 //  def wlParseStringSimple(): Unit = {
 //    val r = new WLSpectrumParser().
@@ -162,7 +164,7 @@ class DatFileTest {
 
   @Test
   def parseFile1(): Unit = {
-    val data = DatFile.arrays("/acqcam/colfilt_B.dat")
+    val data = DatFile.arrays("/acqcam/colfilt_B_G0152.dat")
     assert(data.size == 2)
     assert(data(1).size == 35)
     assert(data(0).size == 35)
@@ -170,7 +172,7 @@ class DatFileTest {
 
   @Test
   def parseFile2(): Unit = {
-    val data = DatFile.arrays("/flamingos2/HK_G0806.dat")
+    val data = DatFile.arrays("/flamingos2/HK.dat")
     assert(data.size == 2)
     assert(data(1).size == 2900)
     assert(data(0).size == 2900)
@@ -187,11 +189,11 @@ class DatFileTest {
 
   @Test
   def parseFile4(): Unit = {
-    val filter = DatFile.filters("/michelle/michelle_Q.dat")
-    assert(filter.wavelength == 20789)
+    val filter = DatFile.filters("/michelle/michelle_Si-1.dat")
+    assert(filter.wavelength == 7734)
     assert(filter.data.size == 2)
-    assert(filter.data(0).size == 278)
-    assert(filter.data(1).size == 278)
+    assert(filter.data(0).size == 13)
+    assert(filter.data(1).size == 13)
   }
 
   @Test
@@ -200,30 +202,4 @@ class DatFileTest {
     assert(data(1).size == 25)
   }
 
-
-  @Test
-  def readnoise(): Unit = {
-    try {
-      // TODO run this test from some string including corner cases like no ending \n etc
-      val scan: Scanner = DatFile.scanFile("/flamingos2/readnoise.dat")
-      try {
-        assert(scan.next() == "lowNoise")
-        assert(scan.next() == "5")
-        assert(scan.next() == "medNoise")
-        assert(scan.next() == "6")
-        assert(scan.next() == "highNoise")
-        assert(scan.next() == "12")
-      } finally {
-        if (scan != null) scan.close()
-      }
-    }
-  }
-
-  // TODO: make this work
-//  @Test
-//  def scanMissingFile(): Unit = {
-//    intercept[IllegalArgumentException] {
-//      SpectrumParser.scan("DOES NOT EXIST")
-//    }
-//  }
 }

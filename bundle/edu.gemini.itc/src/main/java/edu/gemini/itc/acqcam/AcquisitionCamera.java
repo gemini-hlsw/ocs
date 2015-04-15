@@ -29,11 +29,11 @@ public class AcquisitionCamera extends Instrument {
     /**
      * construct an AcquisitionCamera with specified color filter and ND filter.
      */
-    public AcquisitionCamera(String filterBand, String ndFilter) {
+    public AcquisitionCamera(final AcquisitionCamParameters params) {
         super(INSTR_DIR, FILENAME);
-        _colorFilter = Filter.fromFile(getPrefix(), "colfilt_" + filterBand, getDirectory() + "/");
+        _colorFilter = Filter.fromFile(getPrefix(), "colfilt_" + params.getColorFilter().name(), getDirectory() + "/");
         addFilter(_colorFilter);
-        addComponent(new NDFilterWheel(ndFilter, getDirectory() + "/"));
+        addComponent(new NDFilterWheel(params.getNDFilter(), getDirectory() + "/"));
         addComponent(new FixedOptics(getDirectory() + "/", getPrefix()));
         addComponent(new Detector(getDirectory() + "/", getPrefix(), "detector", "1024x1024 CCD47 Chip"));
     }

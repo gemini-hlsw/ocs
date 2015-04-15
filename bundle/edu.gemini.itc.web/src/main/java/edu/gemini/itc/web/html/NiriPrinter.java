@@ -6,11 +6,11 @@ import edu.gemini.itc.niri.Niri;
 import edu.gemini.itc.niri.NiriParameters;
 import edu.gemini.itc.niri.NiriRecipe;
 import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.gemini.niri.Niri.*;
 import scala.Option;
 
 import java.io.PrintWriter;
 import java.util.Calendar;
-import java.util.Iterator;
 
 /**
  * Helper class for printing NIRI calculation results to an output stream.
@@ -151,11 +151,11 @@ public final class NiriPrinter extends PrinterBase {
                 + device.toString(result.peakPixelCount())
                 + ". This is "
                 + device.toString(result.peakPixelCount()
-                / instrument.getWellDepth() * 100)
+                / instrument.getWellDepthValue() * 100)
                 + "% of the full well depth of "
-                + device.toString(instrument.getWellDepth()) + ".");
+                + device.toString(instrument.getWellDepthValue()) + ".");
 
-        if (result.peakPixelCount() > (.8 * instrument.getWellDepth()))
+        if (result.peakPixelCount() > (.8 * instrument.getWellDepthValue()))
             _println("Warning: peak pixel exceeds 80% of the well depth and may be saturated");
 
         _println("");
@@ -184,13 +184,13 @@ public final class NiriPrinter extends PrinterBase {
     private String niriToString(final Niri instrument) {
         String s = "Instrument configuration: \n";
         s += "Optical Components: <BR>";
-        for (Iterator itr = instrument.getComponents().iterator(); itr.hasNext(); ) {
-            s += "<LI>" + itr.next().toString() + "<BR>";
+        for (final TransmissionElement te : instrument.getComponents()) {
+            s += "<LI>" + te.toString() + "<BR>";
         }
-        if (!instrument.getFocalPlaneMask().equals(NiriParameters.NO_SLIT))
-            s += "<LI>Focal Plane Mask: " + instrument.getFocalPlaneMask() + "\n";
-        s += "<LI>Read Mode: " + instrument.getReadNoiseString() + "\n";
-        s += "<LI>Detector Bias: " + instrument.getWellDepthString() + "\n";
+        if (instrument.getFocalPlaneMask() != Mask.MASK_IMAGING)
+            s += "<LI>Focal Plane Mask: " + instrument.getFocalPlaneMask().displayValue() + "\n";
+        s += "<LI>Read Mode: " + instrument.getReadMode().displayValue() + "\n";
+        s += "<LI>Detector Bias: " + instrument.getWellDepth().displayValue() + "\n";
 
         s += "<BR>Pixel Size: " + instrument.getPixelSize() + "<BR>";
 

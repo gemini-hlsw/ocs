@@ -249,67 +249,41 @@
 			<tr>
 				<td>Filter:</td>
 				<td><select name="instrumentFilter" size="1">
-
-				<option value="Nprime">
-				N' (10.1um - 12.5um)</option>
-				<option value="Qa">
-				Qa (18.1um)</option>
-				<option value="Si-1">
-				Si-1 (7.9um)</option>
-				<option value="Si-2">
-
-				Si-2 (8.7um)</option>
-				<option value="Si-3">
-				Si-3 (9.7um)</option>
-				<option value="Si-4">
-				Si-4 (10.4um)</option>
-				<option value="Si-5">
-				Si-5 (11.7um)</option>
-
-				<option value="Si-6">
-				Si-6 (12.3um)</option>
-				<option value="none">
-				No Filter(LowN LowQ Spectroscopy)</option>
+				<option value="Nprime">N' (10.1um - 12.5um)</option>
+				<option value="Qa">Qa (18.1um)</option>
+				<option value="Si-1">Si-1 (7.9um)</option>
+				<option value="Si-2">Si-2 (8.7um)</option>
+				<option value="Si-3">Si-3 (9.7um)</option>
+				<option value="Si-4">Si-4 (10.4um)</option>
+				<option value="Si-5">Si-5 (11.7um)</option>
+				<option value="Si-6">Si-6 (12.3um)</option>
+				<option value="none">No Filter(LowN LowQ Spectroscopy)</option>
 				</select></td>
+
 				<td>Focal plane unit: </td>
-				<td><select name="instrumentFPMask" size="1">
-
-				<option value="none">
-				none</option>
-				<option value="slit0.19">
-				0.19 arcsec slit</option>
-				<option value="slit0.38">
-				0.38 arcsec slit</option>
-				<option value="slit0.57">
-
-				0.57 arcsec slit</option>
-				<option value="slit0.76">
-				0.76 arcsec slit</option>
-				<option value="slit1.52">
-				1.52 arcsec slit</option>
+				<td><select name="Mask" size="1">
+				<option value="MASK_IMAGING">Imaging</option>
+				<option value="MASK_1">1 pixel (0.201")</option>
+				<option value="MASK_2">2 pixel (0.402")</option>
+				<option value="MASK_3">3 pixel (0.603")</option>
+				<option value="MASK_4">4 pixel (0.804")</option>
+				<option value="MASK_6">6 pixel (1.21")</option>
+				<option value="MASK_8">8 pixel (1.61")</option>
 				</select></td>
 			</tr>
 
 			<tr>
 				<td>Grating:</td>
 				<td><select name="instrumentDisperser" size="1">
-				<option value="none">
-				none (imaging)</option>
-				<option value="lowN">
-				LowN</option>
-
-				<option value="medN1">
-				MedN1</option>
-				<option value="medN2">
-				MedN2</option>
-				<option value="lowQ">
-				LowQ</option>
-				<option value="EchelleN">
-
-				EchelleN</option>
-				<option value="EchelleQ">
-				EchelleQ</option>
+				<option value="none">none (imaging)</option>
+				<option value="lowN">LowN</option>
+				<option value="medN1">MedN1</option>
+				<option value="medN2">MedN2</option>
+				<option value="lowQ">LowQ</option>
+				<option value="EchelleN">EchelleN</option>
+				<option value="EchelleQ">EchelleQ</option>
 				</select></td>
+
 				<td>Spectrum central wavelength: </td>
 				<td><input name="instrumentCentralWavelength" size="8" value=" " type="text" /> um</td>
 

@@ -1,15 +1,14 @@
 package edu.gemini.itc.web.servlets;
 
-import edu.gemini.itc.web.ITCMultiPartParser;
 import edu.gemini.itc.shared.ServerInfo;
+import edu.gemini.itc.web.ITCMultiPartParser;
+import edu.gemini.itc.web.ITCRequest;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.Calendar;
 
@@ -45,7 +44,7 @@ public abstract class ITCServlet extends HttpServlet {
     /**
      * Subclasses supply the body content for the html document.
      */
-    public abstract void writeOutput(ITCMultiPartParser mpp, PrintWriter out);
+    public abstract void writeOutput(ITCRequest mpp, PrintWriter out);
 
     /**
      * Called by server when form is submitted.
@@ -63,59 +62,44 @@ public abstract class ITCServlet extends HttpServlet {
         ServerInfo.setServerPort(request.getServerPort());
         response.setContentType("text/html");
 
-        long start = System.currentTimeMillis();
+        final long start = System.currentTimeMillis();
 
-        Calendar now = Calendar.getInstance();
+        final Calendar now = Calendar.getInstance();
         log("USER: " + request.getRemoteHost() + " DATE: " + now.getTime() + " SIZE: " + request.getContentLength());
         log("HTML: " + request.getHeader("Referer"));
-        PrintWriter out = response.getWriter();
 
+        final PrintWriter out = response.getWriter();
         openDocument(out);  // Write start of html document
 
         try {
-            //System.out.println("content: " + request.getContentLength());
             if (request.getContentLength() > MAX_CONTENT_LENGTH) {
                 log("MAXFILE: " + request.getRemoteHost() + " BYTES: " + request.getContentLength() + " DATE: " + now.getTime());
-                BufferedReader in = new BufferedReader(new InputStreamReader(request.getInputStream()));
-                try {
-                    in.skip(request.getContentLength());
-                } catch (java.io.IOException e) {
-                }
-
                 throw new Exception("File upload exceeds server limit of " + MAX_CONTENT_LENGTH / 1000000 + " MB. Resubmit with a smaller size. ");
             }
 
-            // TODO: this is going to be the future version:
-//            final String contentType = request.getContentType();
-//            final ParameterContainer c;
-//            switch (contentType) {
-//                case "multipart/form-data":
-//                    c = ParameterContainer$.MODULE$.from(new ITCMultiPartParser(request, MAX_CONTENT_LENGTH));
-//                    break;
-//                default:
-//                    c = ParameterContainer$.MODULE$.from(request);
-//            }
-//            writeOutput(c, out);
+            final String contentType = request.getContentType();
+            final ITCRequest c;
+            if (contentType != null && contentType.contains("multipart/form-data")) {
+                c = ITCRequest.from(new ITCMultiPartParser(request, MAX_CONTENT_LENGTH));
+            } else {
+                c = ITCRequest.from(request);
+            }
 
-            // TODO: for now we only support multipart requests; ALL forms in the current web app are multipart!:
-            final ITCMultiPartParser mpp = new ITCMultiPartParser(request, MAX_CONTENT_LENGTH);
-            writeOutput(mpp, out);
+            writeOutput(c, out);
+            closeDocument(out); // Write close of html document
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log("", e);
             closeDocument(out, e);  // close and show exception message
-            System.gc();
-            return;
+
+        } finally {
+            out.close();
         }
 
-        closeDocument(out); // Write close of html document
 
-        out.close();
-
-        long end = System.currentTimeMillis();
+        final long end = System.currentTimeMillis();
 
         log("CALCTIME: " + (end - start));
-        System.gc();
     }
 
     /**
@@ -126,9 +110,7 @@ public abstract class ITCServlet extends HttpServlet {
         out.println(getTitle() + " " + getVersion());
         out.println("</TITLE></HEAD>");
         out.println("<BODY text='#000000' bgcolor='#ffffff'>");
-        out.println("<H2>" + getTitle() +
-                //" (DEVELOPMENT SERVER)" +
-                "<br>" + getInst() + " version " + getVersion() + "</H2>");
+        out.println("<H2>" + getTitle() + "<br>" + getInst() + " version " + getVersion() + "</H2>");
     }
 
     /**
@@ -140,19 +122,11 @@ public abstract class ITCServlet extends HttpServlet {
 
     /**
      * This is called when there is an exception in the middle of parsing
-     * form data.  It prints diagnostic message and closes out the
-     * html document.
+     * form data.
      */
     protected void closeDocument(PrintWriter out, Exception e) {
         out.println("<pre>");
         out.println(e.getMessage() + "<br>");
-
-        // temporary for debugging
-        //out.println("<p><hr>Debugging<br>");
-        log("Exception!!: " + e.getMessage() + e.getCause());
-        //e.printStackTrace(out);
-
-        // close out html docuemnt
         out.println("</pre>");
         out.println("</BODY></HTML>");
         out.close();

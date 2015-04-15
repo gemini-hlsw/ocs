@@ -11,6 +11,13 @@ import java.util.*;
  */
 public final class GrismOptics extends TransmissionElement {
 
+    private static final String JGRISM = "J-grism";
+    private static final String HGRISM = "H-grism";
+    private static final String KGRISM = "K-grism";
+    private static final String LGRISM = "L-grism";
+    private static final String MGRISM = "M-grism";
+
+
     // === static code for caching of coverage and resolution data files
     private static final class Coverage {
         final double start;
@@ -99,20 +106,14 @@ public final class GrismOptics extends TransmissionElement {
     }
 
     public int getGrismNumber() {
-        int grism_num = 0;
-
-        if (grismName.equals(NiriParameters.JGRISM)) {
-            grism_num = NiriParameters.J;
-        } else if (grismName.equals(NiriParameters.HGRISM)) {
-            grism_num = NiriParameters.H;
-        } else if (grismName.equals(NiriParameters.KGRISM)) {
-            grism_num = NiriParameters.K;
-        } else if (grismName.equals(NiriParameters.LGRISM)) {
-            grism_num = NiriParameters.L;
-        } else if (grismName.equals(NiriParameters.MGRISM)) {
-            grism_num = NiriParameters.M;
+        switch (grismName) {
+            case JGRISM:    return 0;
+            case HGRISM:    return 1;
+            case KGRISM:    return 2;
+            case LGRISM:    return 3;
+            case MGRISM:    return 4;
+            default:        throw new Error();
         }
-        return grism_num;
     }
 
     public double getGrismResolution() {

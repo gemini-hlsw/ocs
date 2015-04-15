@@ -2,7 +2,6 @@ package edu.gemini.itc.web.servlets;
 
 import edu.gemini.itc.gems.GemsParameters;
 import edu.gemini.itc.gsaoi.GsaoiParameters;
-import edu.gemini.itc.web.ITCMultiPartParser;
 import edu.gemini.itc.shared.Parameters;
 import edu.gemini.itc.web.ITCRequest;
 import edu.gemini.itc.web.html.GsaoiPrinter;
@@ -53,11 +52,11 @@ public final class ITCgsaoiServlet extends ITCServlet {
     /**
      * Supply the body content for the html document.
      */
-    public void writeOutput(ITCMultiPartParser mpp, PrintWriter out) {
+    public void writeOutput(final ITCRequest r, final PrintWriter out) {
         out.println("<a href = \"http://www.gemini.edu/sciops/instruments/integration-time-calculators/itc-help\"> Click here for help with the results page.</a>");
-        final Parameters p  = ITCRequest.parameters(mpp);
-        final GsaoiParameters ip = ITCRequest.gsaoiParameters(mpp);
-        final GemsParameters altair = ITCRequest.gemsParameters(mpp);
+        final Parameters p  = ITCRequest.parameters(r);
+        final GsaoiParameters ip = ITCRequest.gsaoiParameters(r);
+        final GemsParameters altair = ITCRequest.gemsParameters(r);
         final GsaoiPrinter printer = new GsaoiPrinter(p, ip, altair, out);
         printer.writeOutput();
     }

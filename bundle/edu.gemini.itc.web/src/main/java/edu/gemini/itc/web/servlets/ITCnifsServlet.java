@@ -2,7 +2,6 @@ package edu.gemini.itc.web.servlets;
 
 import edu.gemini.itc.altair.AltairParameters;
 import edu.gemini.itc.nifs.NifsParameters;
-import edu.gemini.itc.web.ITCMultiPartParser;
 import edu.gemini.itc.shared.Parameters;
 import edu.gemini.itc.shared.PlottingDetails;
 import edu.gemini.itc.web.ITCRequest;
@@ -54,12 +53,12 @@ public final class ITCnifsServlet extends ITCServlet {
     /**
      * Supply the body content for the html document.
      */
-    public void writeOutput(ITCMultiPartParser mpp, PrintWriter out) {
+    public void writeOutput(final ITCRequest r, final PrintWriter out) {
         out.println("<a href = \"http://www.gemini.edu/sciops/instruments/integration-time-calculators/itc-help\"> Click here for help with the results page.</a>");
-        final Parameters p  = ITCRequest.parameters(mpp);
-        final NifsParameters ip = ITCRequest.nifsParameters(mpp);
-        final AltairParameters altair = ITCRequest.altairParameters(mpp);
-        final PlottingDetails pdp = ITCRequest.plotParameters(mpp);
+        final Parameters p  = ITCRequest.parameters(r);
+        final NifsParameters ip = ITCRequest.nifsParameters(r);
+        final AltairParameters altair = ITCRequest.altairParameters(r);
+        final PlottingDetails pdp = ITCRequest.plotParameters(r);
         final NifsPrinter printer = new NifsPrinter(p, ip, altair, pdp, out);
         printer.writeOutput();
     }

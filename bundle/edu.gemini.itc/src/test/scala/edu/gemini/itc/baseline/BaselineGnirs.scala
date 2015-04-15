@@ -16,7 +16,7 @@ object BaselineGnirs {
       GnirsParameters.G10,
       GnirsParameters.LOW_READ_NOISE,
       GnirsParameters.X_DISP_ON,
-      "2.4",
+      2.4,
       GnirsParameters.SLIT0_1),
 
     new GnirsParameters(
@@ -24,7 +24,7 @@ object BaselineGnirs {
       GnirsParameters.G110,
       GnirsParameters.HIGH_READ_NOISE,
       GnirsParameters.X_DISP_OFF,
-      "2.4",
+      2.4,
       GnirsParameters.SLIT0_2),
 
     new GnirsParameters(
@@ -32,7 +32,7 @@ object BaselineGnirs {
       GnirsParameters.G32,
       GnirsParameters.LOW_READ_NOISE,
       GnirsParameters.X_DISP_ON,
-      "2.6",
+      2.6,
       GnirsParameters.SLIT0_675),
 
     new GnirsParameters(
@@ -40,7 +40,7 @@ object BaselineGnirs {
       GnirsParameters.G32,
       GnirsParameters.HIGH_READ_NOISE,
       GnirsParameters.X_DISP_OFF,
-      "2.6",
+      2.6,
       GnirsParameters.SLIT3_0)
 
   ))

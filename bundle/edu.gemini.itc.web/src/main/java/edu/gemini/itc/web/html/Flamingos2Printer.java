@@ -4,6 +4,7 @@ import edu.gemini.itc.flamingos2.Flamingos2;
 import edu.gemini.itc.flamingos2.Flamingos2Parameters;
 import edu.gemini.itc.flamingos2.Flamingos2Recipe;
 import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit;
 
 import java.io.PrintWriter;
 import java.util.Calendar;
@@ -159,7 +160,7 @@ public final class Flamingos2Printer extends PrinterBase {
     private void printConfiguration(final Flamingos2 instrument, final Parameters p) {
         _print("<HR align=left SIZE=3>");
         _println("<b>Input Parameters:</b>");
-        _println("Instrument: Flamingos 2\n"); // TODO: move names of instrument to instrument classes?
+        _println("Instrument: Flamingos 2\n");
         _println(HtmlPrinter.printParameterSummary(p.source()));
         _println(flamingos2ToString(instrument));
         _println(HtmlPrinter.printParameterSummary(p.telescope()));
@@ -175,8 +176,8 @@ public final class Flamingos2Printer extends PrinterBase {
         }
         s += "<LI>Read Noise: " + instrument.getReadNoiseString() + "\n";
 
-        if (!instrument.getFocalPlaneMask().equals("none"))
-            s += "<LI>Focal Plane Mask: " + instrument.getFocalPlaneMask() + " pix slit\n";
+        if (instrument.getFocalPlaneMask() != FPUnit.FPU_NONE)
+            s += "<LI>Focal Plane Mask: " + instrument.getFocalPlaneMask().getSlitWidth() + " pix slit\n";
 
         s += "<BR>Pixel Size: " + instrument.getPixelSize() + "<BR>";
 
