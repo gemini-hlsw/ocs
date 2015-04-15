@@ -1,7 +1,7 @@
 package edu.gemini.itc.baseline
 
 import edu.gemini.itc.baseline.util._
-import edu.gemini.itc.niri.NiriParameters
+import edu.gemini.itc.shared.NiriParameters
 import edu.gemini.spModel.gemini.niri.Niri._
 
 /**

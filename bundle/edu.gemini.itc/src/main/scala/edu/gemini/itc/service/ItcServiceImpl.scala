@@ -3,7 +3,7 @@ package edu.gemini.itc.service
 import edu.gemini.itc.acqcam.AcqCamRecipe
 import edu.gemini.itc.flamingos2.Flamingos2Recipe
 import edu.gemini.itc.gmos.GmosRecipe
-import edu.gemini.itc.niri.{NiriParameters, NiriRecipe}
+import edu.gemini.itc.niri.NiriRecipe
 import edu.gemini.itc.operation.ImagingS2NMethodACalculation
 import edu.gemini.itc.shared._
 

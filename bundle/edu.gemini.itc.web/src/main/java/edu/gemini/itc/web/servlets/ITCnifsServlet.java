@@ -1,6 +1,5 @@
 package edu.gemini.itc.web.servlets;
 
-import edu.gemini.itc.altair.AltairParameters;
 import edu.gemini.itc.nifs.NifsParameters;
 import edu.gemini.itc.shared.Parameters;
 import edu.gemini.itc.shared.PlottingDetails;

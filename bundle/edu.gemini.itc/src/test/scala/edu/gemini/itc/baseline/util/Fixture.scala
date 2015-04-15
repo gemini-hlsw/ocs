@@ -1,10 +1,7 @@
 package edu.gemini.itc.baseline.util
 
-import edu.gemini.itc.altair.AltairParameters
-import edu.gemini.itc.gems.GemsParameters
 import edu.gemini.itc.gsaoi.GsaoiParameters
 import edu.gemini.itc.nifs.NifsParameters
-import edu.gemini.itc.niri.NiriParameters
 import edu.gemini.itc.shared.TelescopeDetails.{Coating, Wfs}
 import edu.gemini.itc.shared._
 import edu.gemini.spModel.gemini.altair.AltairParams.{FieldLens, GuideStarType}
@@ -29,7 +26,7 @@ object Fixture {
 
   // ===  TODO: this is temporary only to mimic old behavior
   def altairHash(ins: InstrumentDetails): Int = ins match {
-    case i: NiriParameters => altairHash(i.getAltair)
+    case i: NiriParameters => altairHash(i.altair)
     case i: NifsParameters => altairHash(i.getAltair)
     case _                 => 0
   }

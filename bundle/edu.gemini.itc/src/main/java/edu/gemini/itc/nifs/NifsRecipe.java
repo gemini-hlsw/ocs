@@ -1,7 +1,6 @@
 package edu.gemini.itc.nifs;
 
 import edu.gemini.itc.altair.Altair;
-import edu.gemini.itc.altair.AltairParameters;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;

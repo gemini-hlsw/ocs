@@ -1,12 +1,10 @@
 package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.altair.Altair;
-import edu.gemini.itc.altair.AltairParameters;
 import edu.gemini.itc.niri.Niri;
-import edu.gemini.itc.niri.NiriParameters;
 import edu.gemini.itc.niri.NiriRecipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.gemini.niri.Niri.*;
+import edu.gemini.spModel.gemini.niri.Niri.Mask;
 import scala.Option;
 
 import java.io.PrintWriter;

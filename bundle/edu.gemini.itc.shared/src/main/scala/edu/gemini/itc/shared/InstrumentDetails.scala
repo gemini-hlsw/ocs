@@ -2,8 +2,10 @@ package edu.gemini.itc.shared
 
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
+import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.GmosCommonType
+import edu.gemini.spModel.gemini.niri.Niri
 
 /*
  * A collection of objects that define subsets of instrument configuration parameters
@@ -32,4 +34,22 @@ final case class GmosParameters(
                      ifuMethod:         Option[IfuMethod],
                      ccdType:           GmosCommonType.DetectorManufacturer,
                      site:              Site) extends InstrumentDetails
+
+final case class NiriParameters(
+                     filter:            Niri.Filter,
+                     grism:             Niri.Disperser,
+                     camera:            Niri.Camera,
+                     readMode:          Niri.ReadMode,
+                     wellDepth:         Niri.WellDepth,
+                     mask:              Niri.Mask,
+                     altair:            Option[AltairParameters]) extends InstrumentDetails
+
+
+// == AO
+
+final case class AltairParameters(
+                     guideStarSeparation: Double,
+                     guideStarMagnitude:  Double,
+                     fieldLens:           AltairParams.FieldLens,
+                     wfsMode:             AltairParams.GuideStarType)
 

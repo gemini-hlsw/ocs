@@ -6,8 +6,7 @@ import edu.gemini.itc.gnirs.GnirsParameters
 import edu.gemini.itc.gsaoi.GsaoiParameters
 import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nifs.NifsParameters
-import edu.gemini.itc.niri.NiriParameters
-import edu.gemini.itc.shared.{AcquisitionCamParameters, Flamingos2Parameters, GmosParameters}
+import edu.gemini.itc.shared.{AcquisitionCamParameters, Flamingos2Parameters, GmosParameters, NiriParameters}
 import edu.gemini.itc.trecs.TRecsParameters
 import edu.gemini.itc.web.baseline.Baseline._
 import org.scalacheck.{Arbitrary, Gen}

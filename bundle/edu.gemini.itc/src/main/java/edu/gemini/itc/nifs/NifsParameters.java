@@ -1,6 +1,6 @@
 package edu.gemini.itc.nifs;
 
-import edu.gemini.itc.altair.AltairParameters;
+import edu.gemini.itc.shared.AltairParameters;
 import edu.gemini.itc.shared.InstrumentDetails;
 import scala.Option;
 

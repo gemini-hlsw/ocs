@@ -5,6 +5,7 @@ import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.gmos.GmosCommonType
+import edu.gemini.spModel.gemini.niri.Niri
 
 import scala.reflect.ClassTag
 import scalaz.Scalaz._
@@ -25,6 +26,9 @@ object ConfigExtractor {
   private val CcdYBinKey          = new ItemKey("instrument:ccdYBinning")
   private val ReadModeKey         = new ItemKey("instrument:readMode")
   private val CcdManufacturerKey  = new ItemKey("instrument:detectorManufacturer")
+  private val CameraKey           = new ItemKey("instrument:camera")
+  private val WellDepthKey        = new ItemKey("instrument:wellDepth")
+  private val MaskKey             = new ItemKey("instrument:mask")
 
   def extractAcqCam(config: Config): \/[Throwable, AcquisitionCamParameters] = {
     import AcqCamParams._
@@ -61,6 +65,18 @@ object ConfigExtractor {
       GmosParameters(filter, grating, wavelen, fpmask, spatBin.getValue, specBin.getValue, ifuMethod, ccdType, site)
     }
 
+  }
+
+  def extractNiri(config: Config): \/[Throwable, NiriParameters] = {
+    import Niri._
+    for {
+      filter      <- extract[Filter]    (config, FilterKey)
+      grism       <- extract[Disperser] (config, DisperserKey)
+      camera      <- extract[Camera]    (config, CameraKey)
+      readMode    <- extract[ReadMode]  (config, ReadModeKey)
+      wellDepth   <- extract[WellDepth] (config, WellDepthKey)
+      mask        <- extract[Mask]      (config, MaskKey)
+    } yield NiriParameters(filter, grism, camera, readMode, wellDepth, mask, None) // TODO: altair
   }
 
   // Helper method that enforces that whatever we get from the config

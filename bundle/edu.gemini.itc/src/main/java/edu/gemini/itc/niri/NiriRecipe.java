@@ -1,7 +1,6 @@
 package edu.gemini.itc.niri;
 
 import edu.gemini.itc.altair.Altair;
-import edu.gemini.itc.altair.AltairParameters;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
@@ -38,7 +37,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
     }
 
     private void validateInputParameters() {
-        if (_niriParameters.getAltair().isDefined()) {
+        if (_niriParameters.altair().isDefined()) {
             if (_obsDetailParameters.getMethod().isSpectroscopy()) {
                 throw new IllegalArgumentException(
                         "Altair cannot currently be used with Spectroscopy mode in the ITC.  Please deselect either altair or spectroscopy and resubmit the form.");
@@ -87,8 +86,8 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
         // Altair specific section
         final Option<AOSystem> altair;
-        if (_niriParameters.getAltair().isDefined()) {
-            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _niriParameters.getAltair().get(), 0.0);
+        if (_niriParameters.altair().isDefined()) {
+            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _niriParameters.altair().get(), 0.0);
             altair = Option.apply((AOSystem) ao);
         } else {
             altair = Option.empty();
@@ -204,8 +203,8 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
         // Altair specific section
         final Option<AOSystem> altair;
-        if (_niriParameters.getAltair().isDefined()) {
-            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _niriParameters.getAltair().get(), 0.0);
+        if (_niriParameters.altair().isDefined()) {
+            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _niriParameters.altair().get(), 0.0);
             altair = Option.apply((AOSystem) ao);
         } else {
             altair = Option.empty();

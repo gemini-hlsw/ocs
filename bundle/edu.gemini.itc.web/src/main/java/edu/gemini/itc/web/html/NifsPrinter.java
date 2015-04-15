@@ -1,7 +1,6 @@
 package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.altair.Altair;
-import edu.gemini.itc.altair.AltairParameters;
 import edu.gemini.itc.nifs.Nifs;
 import edu.gemini.itc.nifs.NifsParameters;
 import edu.gemini.itc.nifs.NifsRecipe;

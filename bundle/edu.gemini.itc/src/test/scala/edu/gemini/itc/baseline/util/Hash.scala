@@ -1,12 +1,10 @@
 package edu.gemini.itc.baseline.util
 
-import edu.gemini.itc.altair.AltairParameters
 import edu.gemini.itc.gems.GemsParameters
 import edu.gemini.itc.gnirs.GnirsParameters
 import edu.gemini.itc.gsaoi.GsaoiParameters
 import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nifs.NifsParameters
-import edu.gemini.itc.niri.NiriParameters
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
 
@@ -88,12 +86,12 @@ object Hash {
 
   def calc(p: NiriParameters): Int =
     hash(
-      p.getCamera.name,
-      p.getFilter.name,
-      p.getFocalPlaneMask.name,
-      p.getGrism.name,
-      p.getReadMode.name,
-      p.getWellDepth.name
+      p.camera.name,
+      p.filter.name,
+      p.mask.name,
+      p.grism.name,
+      p.readMode.name,
+      p.wellDepth.name
     )
 
   def calc(p: TRecsParameters): Int =
@@ -160,10 +158,10 @@ object Hash {
 
   def calc(alt: AltairParameters): Int =
     hash(
-      alt.getGuideStarMagnitude,
-      alt.getGuideStarSeperation,
-      alt.getFieldLens.displayValue,
-      alt.getWFSMode.displayValue
+      alt.guideStarMagnitude,
+      alt.guideStarSeparation,
+      alt.fieldLens.displayValue,
+      alt.wfsMode.displayValue
     )
 
   def calc(alt: GemsParameters): Int =
