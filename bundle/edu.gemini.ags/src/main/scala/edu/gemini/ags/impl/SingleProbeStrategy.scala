@@ -198,16 +198,14 @@ object SingleProbeStrategy {
       spTarget = new SPTarget(HmsDegTarget.fromSkyObject(st.toOldModel))
       analysis <- AgsAnalysis.analysis(ctx, mt, probe, spTarget, params.probeBands)
     } yield {
-      // TODO: Temporary code to help Andy with debugging. Remove.
-      val speed = analysis match {
-        case Usable(_, _, speed, _, _) => speed.name()
-        case _ => "unknown"
-      }
-
       val vig = probe.calculateVignetting(ctx, st.coordinates)
 
       // TODO: Temporary code to help Andy with debugging. Remove.
-      println(s"name=${st.name}, guideSpeed=$speed, vignetting=${df.format(vig)}")
+      val magStr = params.referenceMagnitude(st) match {
+        case Some(m) => s"${m.band.name}=${m.value}"
+        case None    => "None"
+      }
+      println(s"name=${st.name}, quality=${analysis.quality.getClass.getSimpleName.reverse.dropWhile(_ == '$').reverse}, vignetting=${df.format(vig)}, mag=$magStr")
 
       (analysis.quality, vig, params.referenceMagnitude(st), st)
     }
