@@ -329,12 +329,14 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
         int aowfsCount = 0;
         for (GuideProbe gp : group.getReferencedGuiders()) {
             GuideProbe.Type t = gp.getType();
-            if (t == GuideProbe.Type.OIWFS || t == GuideProbe.Type.AOWFS) {
-                if (t == GuideProbe.Type.OIWFS) {
+            switch (t) {
+                case OIWFS:
                     oiwfsCount++;
-                } else {
+                    break;
+                case AOWFS:
                     aowfsCount++;
-                }
+                    break;
+                default:
             }
         }
         if ("Flamingos2".equals(ctx.getInstrument().getNarrowType())) {

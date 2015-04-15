@@ -192,6 +192,18 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         return None.instance();
     }
 
+    private static Magnitude adjustIf(Magnitude.Band band, Magnitude mag, double amount) {
+        return (mag.getBand() == band) ? mag.add(amount) : mag;
+    }
+
+    /**
+     * Adjust the R magnitude or r` or UC if present
+     * Note that this method is called always with a Magnitude containing a single band
+     */
+    private static Magnitude adjustRLikeMagnitude(Magnitude mag, Double adjustment) {
+        return adjustIf(r, adjustIf(R, adjustIf(UC, mag, adjustment), adjustment), adjustment);
+    }
+
     /**
      * Sky Background Options.
      */
@@ -203,13 +215,14 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
             private double adjustment = -0.3;
             @Override
             public Magnitude adjust(Magnitude mag) {
-                return adjustIf(r, adjustIf(R, adjustIf(UC, mag, adjustment), adjustment), adjustment);
+                return adjustRLikeMagnitude(mag, adjustment);
             }
+
         },
         ANY("Any/Bright", 100, 0)         {
             private double adjustment = -0.5;
             public Magnitude adjust(Magnitude mag) {
-                return adjustIf(r, adjustIf(R, adjustIf(UC, mag, adjustment), adjustment), adjustment);
+                return adjustRLikeMagnitude(mag, adjustment);
             }
         };
 
@@ -345,7 +358,7 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
             private double adjustment = 0.5;
             @Override
             public Magnitude adjust(Magnitude mag) {
-                return adjustIf(r, adjustIf(R, adjustIf(UC, mag, adjustment), adjustment), adjustment);
+                return adjustRLikeMagnitude(mag, adjustment);
             }
         },
         PERCENT_70("70%/Good", 70),
@@ -353,14 +366,14 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
             private double adjustment = -0.5;
             @Override
             public Magnitude adjust(Magnitude mag) {
-                return adjustIf(r, adjustIf(R, adjustIf(UC, mag, adjustment), adjustment), adjustment);
+                return adjustRLikeMagnitude(mag, adjustment);
             }
         },
         ANY("Any", 100)       {
             private double adjustment = -1.0;
             @Override
             public Magnitude adjust(Magnitude mag) {
-                return adjustIf(r, adjustIf(R, adjustIf(UC, mag, adjustment), adjustment), adjustment);
+                return adjustRLikeMagnitude(mag, adjustment);
             }
         },
         ;
@@ -523,10 +536,6 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
             }
         }
 
-    }
-
-    private static Magnitude adjustIf(Magnitude.Band band, Magnitude mag, double amount) {
-        return (mag.getBand() == band) ? mag.add(amount) : mag;
     }
 
     public static final class Conditions implements Serializable {
